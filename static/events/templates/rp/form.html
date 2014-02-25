@@ -1,0 +1,54 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block title %}Upload Tutorial{% endblock %}
+{% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
+{% if alert_success or alert_danger %}
+	{% block alert %}
+		{% if alert_success %}
+			<div class="alert alert-success alert-dismissable">
+				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+				{{ alert_success }}
+			</div>
+		{% endif %}
+		{% if alert_danger %}
+			<div class="alert alert-danger alert-dismissable">
+				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+				{{ alert_danger }}
+			</div>
+		{% endif %}
+	{% endblock %}
+{% endif %}
+{% block content %}
+	<form action="{{ action }}" method="post">{% csrf_token %}
+	{% if form.non_field_errors %}
+	<ul>
+	  {% for error in form.non_field_errors %}
+		<li>{{ error }}</li>
+	  {% endfor %}
+	</ul>
+	{% endif %}
+	{% if edit %}
+		<h3 class="form-signin-heading">Edit Academic Center</h3>
+	{% else %}
+		<h3 class="form-signin-heading">Add Academic Center</h3>
+	{% endif %}
+	
+	<div class="form-group">
+		<label for="rp_user">User</label>
+		{% render_field form.user class+="form-control chosen user" tabindex="1" data-placeholder="Choose User" %}
+		{{ form.user.errors }}
+	</div>
+	<div class="form-group">
+		<label for="pr_state">State</label>
+		{% render_field form.state class+="form-control chosen state" tabindex="1" data-placeholder="Choose State" %}
+		{{ form.state.errors }}
+	</div>
+	<div class="form-group">
+		<label for="pr_status">Status</label>
+		{% render_field form.status class+="form-control status" tabindex="1" %}
+		{{ form.status.errors }}
+	</div>
+	<input class="btn btn-primary" type="submit" value="Submit" />
+</form>
+{% endblock %}

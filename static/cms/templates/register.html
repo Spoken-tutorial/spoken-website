@@ -1,0 +1,73 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block title %}Upload Tutorial{% endblock %}
+{% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
+{% if alert_success or alert_danger %}
+	{% block alert %}
+		{% if alert_success %}
+			<div class="alert alert-success alert-dismissable">
+				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+				{{ alert_success }}
+			</div>
+		{% endif %}
+		{% if alert_danger %}
+			<div class="alert alert-danger alert-dismissable">
+				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+				{{ alert_danger }}
+			</div>
+		{% endif %}
+	{% endblock %}
+{% endif %}
+{% block content %}
+	<form class="form-signin" role="form" id="login_form" method="post">{% csrf_token %}
+		{{ form.non_field_errors }}
+		<div class="form-group">
+			<label for="id_username">Username</label>
+			{% render_field form.username class+="form-control username" tabindex="1" data-placeholder="Pick a Username" %}
+			{{ form.username.errors }}
+		</div>
+		<div class="form-group">
+			<label for="id_email">Email</label>
+			{% render_field form.email class+="form-control email" tabindex="1" data-placeholder="Your Email" %}
+			{{ form.email.errors }}
+		</div>
+		<div class="form-group">
+			<label for="id_password">Password</label>
+			{% render_field form.password class+="form-control password" tabindex="1" data-placeholder="Enter password" %}
+			{{ form.password.errors }}
+		</div>
+		<div class="form-group">
+			<label for="id_password_confirm">Confirm Password</label>
+			{% render_field form.password_confirm class+="form-control password_confirm" tabindex="1" data-placeholder="Enter confirm password" %}
+			{{ form.password_confirm.errors }}
+		</div>
+		<div class="form-group">
+			{% render_field form.captcha %}
+			<a href="#void" class="captcha-refresh">Refresh</a>
+			{{ form.captcha.errors }}
+		</div>
+		<input class="btn btn-primary" type="submit" value="Register" />
+	</form>
+{% endblock %}
+{% block jsblock %}
+	<script>
+	$(function() {
+	// Add refresh button after field (this can be done in the template as well)
+
+		// Click-handler for the refresh-link
+		$('.captcha-refresh').click(function(){
+			var $form = $(this).parents('form');
+			var url = location.protocol + "//" + window.location.hostname + ":"+ location.port + "/captcha/refresh/";
+
+			// Make the AJAX-call
+			$.getJSON(url, {}, function(json) {
+				$form.find('input[name="captcha_0"]').val(json.key);
+				$form.find('img.captcha').attr('src', json.image_url);
+			});
+
+			return false;
+		});
+	});
+	</script>
+{% endblock %}

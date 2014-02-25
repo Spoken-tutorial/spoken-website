@@ -1,0 +1,96 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block title %}Upload Tutorial{% endblock %}
+{% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
+{% if alert_success or alert_danger %}
+	{% block alert %}
+		{% if alert_success %}
+			<div class="alert alert-success alert-dismissable">
+				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+				{{ alert_success }}
+			</div>
+		{% endif %}
+		{% if alert_danger %}
+			<div class="alert alert-danger alert-dismissable">
+				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+				{{ alert_danger }}
+			</div>
+		{% endif %}
+	{% endblock %}
+{% endif %}
+{% block content %}
+	<form role="form" method="post" enctype="multipart/form-data" action="">
+		{% csrf_token %}
+		<div class="form-group">
+			<label for="id_foss_category">FOSS Category:</label>
+			{% render_field form.foss_category class+="form-control foss_category" tabindex="1" data-placeholder="Choose FOSS Category" %}
+			{{ form.foss_category.errors }}
+		</div>
+		<div class="form-group">
+			<label for="id_tutorial_name">Tutorial Name:</label>
+			{% render_field form.tutorial_name class+="form-control tutorial_name" tabindex="2" data-placeholder="Choose Tutorial Name" %}
+			{{ form.tutorial_name.errors }}
+		</div>
+		<div class="form-group">
+			<label for="id_language">Language:</label>
+			{% render_field form.language class+="form-control language" tabindex="3" data-placeholder="Choose Language" %}
+			{{ form.language.errors }}
+		</div>
+		<input type="submit" class="btn btn-primary" value="Save"  tabindex="4" />
+	</form>
+{% endblock %}
+{% block jsblock %}
+	<script src="{% static 'spoken/js/chosen.jquery.min.js' %}"></script>
+	<script type="text/javascript">
+		$(".foss_category").chosen({width: "100%"});
+		$(".tutorial_name").chosen({width: "100%"});
+		$(".language").chosen({width: "100%"});
+	</script>
+	<script type="text/javascript">
+		$(document).ready(function(){
+			tutname = $(".tutorial_name");
+			lang = $(".language");
+			lang.chosen();
+			$('.foss_category').on("change", function(){
+				var foss = $(this).val();
+				if(foss == '') {
+					$('.tutorial_name').html('<option value="" selected="selected">---------</option>');
+					$('.tutorial_name').attr("disabled", "disabled");
+					$('.language').html('<option value="" selected="selected">---------</option>');
+					$('.language').attr("disabled", "disabled");
+				} else {
+					$.ajax({
+						url: "/creation/ajax_upload_foss/",
+						type: "POST",
+						data: {
+							foss: foss
+						},
+						success: function(data) {
+							// loading tutorial names
+							if(data[0]){
+								$('.tutorial_name').html(data[0]);
+								$('.tutorial_name').removeAttr('disabled');
+								tutname.trigger("chosen:updated");
+							} else {
+								$('.tutorial_name').html('<option value="" selected="selected"></option>');
+								$('.tutorial_name').attr("disabled", "disabled");
+								tutname.trigger("chosen:updated");
+							}
+							// loading languages
+							if(data[1]) {
+								$('.language').html(data[1]);
+								$('.language').removeAttr('disabled');
+								lang.trigger("chosen:updated");
+							} else {
+								$('.language').html('<option value="" selected="selected"></option>');
+								$('.language').attr("disabled", "disabled");
+								lang.trigger("chosen:updated");
+							}
+						}
+					})
+				}
+			});
+		});
+	</script>
+{% endblock %}

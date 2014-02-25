@@ -1,0 +1,19 @@
+.navbar > .container .navbar-brand {
+	margin-left: 5px;
+	padding: 0px;
+	padding-top: 3px;
+}
+
+.navbar > .container .navbar-brand img#logo {
+	width: 42px;
+	height: 43px;
+	margin-right: 5px;
+}
+
+h4.page-title {
+	font-weight: bold;
+}
+
+#content-wrapper #content-inner div.container {
+	padding-left: 25px;
+}

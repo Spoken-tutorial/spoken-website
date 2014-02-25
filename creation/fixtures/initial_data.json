@@ -1,0 +1,23 @@
+[
+	{
+		"model": "creation.level",
+		"pk": 1,
+		"fields": {
+			"level": "Basic"
+		}
+	},
+	{
+		"model": "creation.level",
+		"pk": 2,
+		"fields": {
+			"level": "Intermediate"
+		}
+	},
+	{
+		"model": "creation.level",
+		"pk": 3,
+		"fields": {
+			"level": "Advanced"
+		}
+	}
+]

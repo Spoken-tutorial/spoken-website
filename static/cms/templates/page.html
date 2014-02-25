@@ -1,0 +1,16 @@
+{% extends 'spoken/templates/base.html' %}
+{% load static %}
+
+{% block title %}
+	{{ page.title }}
+{% endblock %}
+
+{% block heading %}
+	{{ page.title }}
+{% endblock %}
+
+{% block alert %}{% endblock %}
+
+{% block content %}
+	{{ page.body|safe }}
+{% endblock %}
