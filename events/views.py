@@ -419,6 +419,11 @@ def is_event_manager(user):
 	"""Check if the user is having event manger  rights"""
 	if user.groups.filter(name='event_manager').count() == 1:
 		return True
+		
+def is_organiser(user):
+	"""Check if the user is having event manger  rights"""
+	if user.groups.filter(name='Organiser').count() == 1:
+		return True
 
 def state(request):
 	""" State index page """
@@ -617,8 +622,77 @@ def ac(request):
 	return render_to_response('events/templates/ac/index.html', context)
 	return HttpResponse('RP!')
 	
+#organiser
+def organiser_request(request, username):
+	if username == request.user.username:
+		user = User.objects.get(username=username)
+		if request.method == 'POST':
+			form = OrganiserForm(request.POST)
+			if form.is_valid():
+				user.groups.add(Group.objects.get(name='Organiser'))
+				organiser = Organiser()
+				organiser.user_id=request.user.id
+				organiser.academic_id=request.POST['college']
+				organiser.save()
+				return HttpResponseRedirect("/events/organiser/"+user.username+"/")
+			context = {'form':form}
+			return render_to_response('events/templates/organiser/form.html', context, context_instance = RequestContext(request))
+		else:
+			try:
+				organiser = Organiser.objects.get(user=user)
+				#todo: send status message
+				if organiser.status:
+					print "you have already organiser role !!"
+					return HttpResponseRedirect("/events/organiser/"+user.username+"/")
+				else:
+					print "Organiser not yet approve !!"
+					return HttpResponseRedirect("/events/organiser/"+user.username+"/")
+			except:
+				context = {}
+				context.update(csrf(request))
+				context['form'] = OrganiserForm()
+				return render_to_response('events/templates/organiser/form.html', context)
+	else:
+		raise Http404('Permission denied !!')
 
-	
+def organiser_view(request, username):
+	if username == request.user.username:
+		user = User.objects.get(username=username)
+		context = {}
+		organiser = Organiser.objects.get(user=user)
+		context['record'] = organiser
+		try:
+			profile = organiser.user.profile_set.get()
+		except:
+			profile = ''
+		context['profile'] = profile
+		return render_to_response('events/templates/organiser/view.html', context)
+	else:
+		raise Http404('Permission denied !!')
+
+def organiser_edit(request, username):
+	if username == request.user.username:
+		user = User.objects.get(username=username)
+		if request.method == 'POST':
+			form = OrganiserForm(request.POST)
+			if form.is_valid():
+				organiser = Organiser.objects.get(user=user)
+				organiser.user_id=request.user.id
+				organiser.academic_id=request.POST['college']
+				organiser.save()
+				return HttpResponseRedirect("/events/organiser/"+user.username+"/")
+			context = {'form':form}
+			return render_to_response('events/templates/organiser/form.html', context, context_instance = RequestContext(request))
+		else:
+				#todo : if any workshop and test under this organiser disable the edit
+				record = Organiser.objects.get(user=user)
+				context = {}
+				context['form'] = OrganiserForm(instance = record)
+				context.update(csrf(request))
+				return render_to_response('events/templates/organiser/form.html', context)
+	else:
+		raise Http404('Permission denied !!')
+
 #Ajax Request and Responces
 @csrf_exempt
 def ajax_ac_state(request):
@@ -674,3 +748,13 @@ def ajax_ac_pincode(request):
 		location = request.POST.get('location')
 		location = Location.objects.get(pk=location)
 		return HttpResponse(json.dumps(location.pincode), mimetype='application/json')
+
+@csrf_exempt
+def ajax_district_collage(request):
+	if request.method == 'POST':
+		district = request.POST.get('district')
+		collages = Academic_center.objects.filter(district=district)
+		tmp = '<option value = None> -- None -- </option>'
+		for i in collages:
+			tmp +='<option value='+str(i.id)+'>'+i.institution_name+'</option>'
+		return HttpResponse(json.dumps(tmp), mimetype='application/json')

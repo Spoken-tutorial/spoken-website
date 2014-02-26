@@ -123,9 +123,10 @@ class Academic_center(models.Model):
 		unique_together = (("institution_name","district"), ("institution_name","university"))
 
 class Organiser(models.Model):
-	user = models.OneToOneField(User, primary_key=True)
-	appoved_by = models.ForeignKey(User, related_name = 'organiser_approved_by')
-	academic = models.ForeignKey(Academic_center)
+	user = models.OneToOneField(User)
+	appoved_by = models.ForeignKey(User, related_name = 'organiser_approved_by', blank=True, null=True)
+	academic = models.ForeignKey(Academic_center, blank=True, null=True)
+	status = models.PositiveSmallIntegerField(default=0)
 	created = models.DateTimeField(auto_now_add = True)
 	updated = models.DateTimeField(auto_now = True)
 
