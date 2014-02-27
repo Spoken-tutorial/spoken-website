@@ -1,5 +1,9 @@
 from django.db import models
+from django.conf import settings
 from django.contrib.auth.models import User
+
+class Photo( models.Model ):
+    file = models.FileField( upload_to = settings.STATIC_URL + '/creation/uploads/' )
 
 class Language(models.Model):
 	name = models.CharField(max_length = 255, unique = True)
