@@ -131,9 +131,10 @@ class Organiser(models.Model):
 	updated = models.DateTimeField(auto_now = True)
 
 class Invigilator(models.Model):
-	user = models.ForeignKey(User)
-	appoved_by = models.ForeignKey(User, related_name = 'invigilator_approved_by')
+	user = models.OneToOneField(User)
+	appoved_by = models.ForeignKey(User, related_name = 'invigilator_approved_by', blank=True, null=True)
 	academic = models.ForeignKey(Academic_center)
+	status = models.PositiveSmallIntegerField(default=0)
 	created = models.DateTimeField(auto_now_add = True)
 	updated = models.DateTimeField(auto_now = True)
 

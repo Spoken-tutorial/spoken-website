@@ -693,9 +693,82 @@ def organiser_edit(request, username):
 	else:
 		raise Http404('Permission denied !!')
 
+#invigilator
+#invigilator
+def invigilator_request(request, username):
+	if username == request.user.username:
+		user = User.objects.get(username=username)
+		if request.method == 'POST':
+			form = InvigilatorForm(request.POST)
+			if form.is_valid():
+				user.groups.add(Group.objects.get(name='invigilator'))
+				invigilator = Invigilator()
+				invigilator.user_id=request.user.id
+				invigilator.academic_id=request.POST['college']
+				invigilator.save()
+				return HttpResponseRedirect("/events/invigilator/"+user.username+"/")
+			context = {'form':form}
+			return render_to_response('events/templates/invigilator/form.html', context, context_instance = RequestContext(request))
+		else:
+			try:
+				invigilator = Invigilator.objects.get(user=user)
+				#todo: send status message
+				if invigilator.status:
+					print "you have already invigilator role !!"
+					return HttpResponseRedirect("/events/invigilator/"+user.username+"/")
+				else:
+					print "invigilator not yet approve !!"
+					return HttpResponseRedirect("/events/invigilator/"+user.username+"/")
+			except:
+				context = {}
+				context.update(csrf(request))
+				context['form'] = InvigilatorForm()
+				return render_to_response('events/templates/invigilator/form.html', context)
+	else:
+		raise Http404('Permission denied !!')
+
+def invigilator_view(request, username):
+	if username == request.user.username:
+		user = User.objects.get(username=username)
+		context = {}
+		invigilator = Invigilator.objects.get(user=user)
+		context['record'] = invigilator
+		try:
+			profile = invigilator.user.profile_set.get()
+		except:
+			profile = ''
+		context['profile'] = profile
+		return render_to_response('events/templates/invigilator/view.html', context)
+	else:
+		raise Http404('Permission denied !!')
+
+def invigilator_edit(request, username):
+	if username == request.user.username:
+		user = User.objects.get(username=username)
+		if request.method == 'POST':
+			form = InvigilatorForm(request.POST)
+			if form.is_valid():
+				invigilator = Invigilator.objects.get(user=user)
+				invigilator.user_id=request.user.id
+				invigilator.academic_id=request.POST['college']
+				invigilator.save()
+				return HttpResponseRedirect("/events/invigilator/"+user.username+"/")
+			context = {'form':form}
+			return render_to_response('events/templates/invigilator/form.html', context, context_instance = RequestContext(request))
+		else:
+				#todo : if any workshop and test under this invigilator disable the edit
+				record = Invigilator.objects.get(user=user)
+				context = {}
+				context['form'] = InvigilatorForm(instance = record)
+				context.update(csrf(request))
+				return render_to_response('events/templates/invigilator/form.html', context)
+	else:
+		raise Http404('Permission denied !!')
+
 #Ajax Request and Responces
 @csrf_exempt
 def ajax_ac_state(request):
+	""" Ajax: Get University, District, City based State selected """
 	if request.method == 'POST':
 		state = request.POST.get('state')
 		university = University.objects.filter(state=state)
@@ -734,6 +807,7 @@ def ajax_ac_state(request):
 		
 @csrf_exempt
 def ajax_ac_location(request):
+	""" Ajax: Get the location based on district selected """
 	if request.method == 'POST':
 		district = request.POST.get('district')
 		location = Location.objects.filter(district=district)
@@ -744,6 +818,7 @@ def ajax_ac_location(request):
 
 @csrf_exempt
 def ajax_ac_pincode(request):
+	""" Ajax: Get the pincode based on location selected """
 	if request.method == 'POST':
 		location = request.POST.get('location')
 		location = Location.objects.get(pk=location)
@@ -751,6 +826,7 @@ def ajax_ac_pincode(request):
 
 @csrf_exempt
 def ajax_district_collage(request):
+	""" Ajax: Get the Colleges (Academic) based on District selected """
 	if request.method == 'POST':
 		district = request.POST.get('district')
 		collages = Academic_center.objects.filter(district=district)

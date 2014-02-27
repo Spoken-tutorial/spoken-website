@@ -21,6 +21,11 @@ urlpatterns = patterns('',
     url(r'organiser/request/(?P<username>\w+)/$', views.organiser_request, name='organiser_request'),
     url(r'organiser/(?P<username>\w+)/edit/$', views.organiser_edit, name='organiser_edit'),
     url(r'organiser/(?P<username>\w+)/$', views.organiser_view, name='organiser_view'),
+    
+    url(r'invigilator/request/(?P<username>\w+)/$', views.invigilator_request, name='invigilator_request'),
+    url(r'invigilator/(?P<username>\w+)/edit/$', views.invigilator_edit, name='invigilator_edit'),
+    url(r'invigilator/(?P<username>\w+)/$', views.invigilator_view, name='invigilator_view'),
+    
     #Ajax 
     url(r'ajax-ac-state/$', views.ajax_ac_state, name='ajax_ac_state'),
     url(r'ajax-ac-location/$', views.ajax_ac_location, name='ajax_ac_location'),
