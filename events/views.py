@@ -420,6 +420,11 @@ def is_event_manager(user):
 	if user.groups.filter(name='event_manager').count() == 1:
 		return True
 		
+def is_resource_person(user):
+	"""Check if the user is having event manger  rights"""
+	if user.groups.filter(name='Resource Person').count() == 1:
+		return True
+		
 def is_organiser(user):
 	"""Check if the user is having event manger  rights"""
 	if user.groups.filter(name='Organiser').count() == 1:
@@ -636,7 +641,7 @@ def organiser_request(request, username):
 				organiser.save()
 				return HttpResponseRedirect("/events/organiser/"+user.username+"/")
 			context = {'form':form}
-			return render_to_response('events/templates/organiser/form.html', context, context_instance = RequestContext(request))
+			return render(request, 'events/templates/organiser/form.html', context)
 		else:
 			try:
 				organiser = Organiser.objects.get(user=user)
@@ -651,12 +656,12 @@ def organiser_request(request, username):
 				context = {}
 				context.update(csrf(request))
 				context['form'] = OrganiserForm()
-				return render_to_response('events/templates/organiser/form.html', context)
+				return render(request, 'events/templates/organiser/form.html', context)
 	else:
 		raise Http404('Permission denied !!')
 
 def organiser_view(request, username):
-	if username == request.user.username:
+	if username == request.user.username or is_resource_person(request.user):
 		user = User.objects.get(username=username)
 		context = {}
 		organiser = Organiser.objects.get(user=user)
@@ -666,7 +671,7 @@ def organiser_view(request, username):
 		except:
 			profile = ''
 		context['profile'] = profile
-		return render_to_response('events/templates/organiser/view.html', context)
+		return render(request, 'events/templates/organiser/view.html', context)
 	else:
 		raise Http404('Permission denied !!')
 
@@ -682,16 +687,73 @@ def organiser_edit(request, username):
 				organiser.save()
 				return HttpResponseRedirect("/events/organiser/"+user.username+"/")
 			context = {'form':form}
-			return render_to_response('events/templates/organiser/form.html', context, context_instance = RequestContext(request))
+			return render(request, 'events/templates/organiser/form.html', context)
 		else:
 				#todo : if any workshop and test under this organiser disable the edit
 				record = Organiser.objects.get(user=user)
 				context = {}
 				context['form'] = OrganiserForm(instance = record)
 				context.update(csrf(request))
-				return render_to_response('events/templates/organiser/form.html', context)
+				return render(request, 'events/templates/organiser/form.html', context)
 	else:
 		raise Http404('Permission denied !!')
+
+def rp_organiser_inactive(request):
+	""" Resource person: List all inactive organiser under resource person states """
+	#todo: check resource person role
+	#todo: filter to diaplay block and active user
+	user = User.objects.get(pk=request.user.id)
+	try:
+		organiser = Organiser.objects.filter(academic=Academic_center.objects.filter(state=State.objects.filter(resource_person__user_id=user)), status=0)
+	except:
+		organiser = {}
+	context = {}
+	context['collection'] = organiser
+	context['active'] = False
+	return render(request, 'events/templates/rp/organiser.html', context)
+	
+def rp_organiser_confirm(request, code, userid):
+	""" Resource person: active organiser """
+	try:
+		if User.objects.get(pk=userid).profile_set.get().confirmation_code == code:
+			organiser = Organiser.objects.get(user_id = userid)
+			organiser.appoved_by_id = request.user.id
+			organiser.status = 1
+			organiser.save()
+			return HttpResponseRedirect('/events/organiser/active/')
+		else:
+			raise Http404('Page not found !!')
+	except:
+		raise Http404('Permission denied !!')
+	
+def rp_organiser_block(request, code, userid):
+	""" Resource person: block organiser """
+	#todo: if user block, again he trying to register, display message your accout blocked by rp contact rp
+	try:
+		if User.objects.get(pk=userid).profile_set.get().confirmation_code == code:
+			organiser = Organiser.objects.get(user_id = userid)
+			organiser.appoved_by_id = request.user.id
+			organiser.status = 2
+			organiser.save()
+			return HttpResponseRedirect('/events/organiser/active/')
+		else:
+			raise Http404('Page not found !!')
+	except:
+		raise Http404('Permission denied !!')
+
+def rp_organiser_active(request):
+	""" Resource person: List all active organiser under resource person states """
+	#todo: check resource person role
+	#todo: filter and pagination
+	user = User.objects.get(pk=request.user.id)
+	try:
+		organiser = Organiser.objects.filter(academic=Academic_center.objects.filter(state=State.objects.filter(resource_person__user_id=user)), status=1)
+	except:
+		organiser = {}
+	context = {}
+	context['collection'] = organiser
+	context['active'] = True
+	return render(request, 'events/templates/rp/organiser.html', context)
 
 #invigilator
 #invigilator
@@ -708,7 +770,7 @@ def invigilator_request(request, username):
 				invigilator.save()
 				return HttpResponseRedirect("/events/invigilator/"+user.username+"/")
 			context = {'form':form}
-			return render_to_response('events/templates/invigilator/form.html', context, context_instance = RequestContext(request))
+			return render(request, 'events/templates/invigilator/form.html', context)
 		else:
 			try:
 				invigilator = Invigilator.objects.get(user=user)
@@ -723,12 +785,13 @@ def invigilator_request(request, username):
 				context = {}
 				context.update(csrf(request))
 				context['form'] = InvigilatorForm()
-				return render_to_response('events/templates/invigilator/form.html', context)
+				return render(request, 'events/templates/invigilator/form.html', context)
 	else:
 		raise Http404('Permission denied !!')
 
 def invigilator_view(request, username):
-	if username == request.user.username:
+	#todo: rp can see. add one more condition is_resource person
+	if username == request.user.username or is_resource_person(request.user):
 		user = User.objects.get(username=username)
 		context = {}
 		invigilator = Invigilator.objects.get(user=user)
@@ -738,7 +801,7 @@ def invigilator_view(request, username):
 		except:
 			profile = ''
 		context['profile'] = profile
-		return render_to_response('events/templates/invigilator/view.html', context)
+		return render(request, 'events/templates/invigilator/view.html', context)
 	else:
 		raise Http404('Permission denied !!')
 
@@ -754,14 +817,14 @@ def invigilator_edit(request, username):
 				invigilator.save()
 				return HttpResponseRedirect("/events/invigilator/"+user.username+"/")
 			context = {'form':form}
-			return render_to_response('events/templates/invigilator/form.html', context, context_instance = RequestContext(request))
+			return render(request, 'events/templates/invigilator/form.html', context)
 		else:
 				#todo : if any workshop and test under this invigilator disable the edit
 				record = Invigilator.objects.get(user=user)
 				context = {}
 				context['form'] = InvigilatorForm(instance = record)
 				context.update(csrf(request))
-				return render_to_response('events/templates/invigilator/form.html', context)
+				return render(request, 'events/templates/invigilator/form.html', context)
 	else:
 		raise Http404('Permission denied !!')
 

@@ -21,7 +21,7 @@
 {% endif %}
 {% block content %}
 	<h3 class="form-signin-heading">Organiser details</h3>
-	<p>If you want to change the Academic details click <a href="{% url events:organiser_edit record.user %}">here</a>. If you want to change the profile click <a href="{% url cms:profile record.user %}">here</a></p>
+	<p>If you want to change the Academic details click <a href="{% url 'events:organiser_edit' record.user %}">here</a>. If you want to change the profile click <a href="{% url 'cms:profile' record.user %}">here</a></p>
 	<table class="table table-striped table-hover">
 		<tr>
 			<th>Organiser name</td>

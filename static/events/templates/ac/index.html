@@ -20,7 +20,7 @@
 	{% endblock %}
 {% endif %}
 {% block content %}
-	<a class="btn btn-primary" href="{% url events:new_ac %}">Add</a>
+	<a class="btn btn-primary" href="{% url 'events:new_ac' %}">Add</a>
 	<table class="table table-striped table-hover">
 		<tr>
 			<th>State</th>
@@ -47,7 +47,7 @@
             <td>{{ record.street }}</td>
             <td>{{ record.pincode }}</td>
             <td>{{ record.updated|date:"D d M Y" }}</td>
-            <td><a href="{% url events:edit_ac record.id %}">Edit</a></td>
+            <td><a href="{% url 'events:edit_ac' record.id %}">Edit</a></td>
         </tr>
 {% endfor %}
 </table>
