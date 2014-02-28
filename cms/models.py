@@ -4,9 +4,6 @@ from django.contrib.auth.models import User
 class Profile(models.Model):
 	user = models.ForeignKey(User)
 	confirmation_code = models.CharField(max_length=255)
-	title = models.CharField(max_length=255, blank=True, null=True)
-	first_name = models.CharField(max_length=255, blank=True, null=True)
-	last_name = models.CharField(max_length=255, blank=True, null=True)
 	street = models.CharField(max_length=255, blank=True, null=True)
 	location = models.CharField(max_length=255, blank=True, null=True)
 	district = models.CharField(max_length=255, blank=True, null=True)

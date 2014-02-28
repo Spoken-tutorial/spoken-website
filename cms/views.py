@@ -93,23 +93,38 @@ def account_logout(request):
 	return HttpResponseRedirect('/')
 
 def account_profile(request, username):
+	#todo: validation
+	#todo: store location, state and etc.. ids
 	if request.method == 'POST':
 		user = User.objects.get(username=username)
-		form = ProfileForm(request.POST, instance = Profile.objects.get(user = user))
+		form = ProfileForm(request.POST, user = request.user, instance = Profile.objects.get(user = user))
 		if form.is_valid():
-			form.save()
+			user.first_name = request.POST['first_name']
+			user.last_name = request.POST['last_name']
+			user.save()
+			
+			profile = Profile.objects.get(user=user)
+			profile.street = request.POST['street']
+			profile.location = request.POST['location']
+			profile.district = request.POST['district']
+			profile.city = request.POST['city']
+			profile.state = request.POST['state']
+			profile.country = request.POST['country']
+			profile.pincode = request.POST['pincode']
+			profile.phone = request.POST['phone']
+			profile.save()
 			return HttpResponseRedirect("/accounts/profile/"+username+"/")
 		
 		context = {'form':form}
 		return render_to_response('cms/templates/profile.html', context, context_instance = RequestContext(request))
-	if username:
-		try:
-			user = User.objects.get(username=username)
-			context = {}
-			context['form'] = ProfileForm(instance = Profile.objects.get(user = user))
-			context.update(csrf(request))
-			return render(request, 'cms/templates/profile.html', context)
-		except:
-			raise Http404('Page not found')
-	else:
-		raise Http404('Page not found')
+	#if username:
+	#	try:
+	user = User.objects.get(username=username)
+	context = {}
+	context['form'] = ProfileForm(user = request.user, instance = Profile.objects.get(user = user))
+	context.update(csrf(request))
+	return render(request, 'cms/templates/profile.html', context)
+	#	except:
+	#		raise Http404('Page not found')
+	#else:
+	#	raise Http404('Page not found')

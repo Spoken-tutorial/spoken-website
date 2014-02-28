@@ -66,7 +66,34 @@ class RegisterForm(forms.Form):
 			raise forms.ValidationError("Passwords don't match")
 		return self.cleaned_data
 
-class ProfileForm(forms.ModelForm):
-	class Meta:
-		model = Profile
-		fields = ['first_name', 'last_name', 'street', 'location', 'district', 'city', 'state', 'country', 'pincode', 'phone']
+class ProfileForm(forms.Form):
+	first_name = forms.CharField()
+	last_name = forms.CharField()
+	street = forms.CharField()
+	location = forms.CharField()
+	district = forms.CharField()
+	city = forms.CharField()
+	state = forms.CharField()
+	country = forms.CharField()
+	pincode = forms.CharField()
+	phone = forms.CharField()
+	def __init__(self, *args, **kwargs):
+		initial = ''
+		if 'instance' in kwargs:
+			initial = kwargs["instance"]
+			del kwargs["instance"]
+		if 'user' in kwargs:
+			user = kwargs["user"]
+			del kwargs["user"]
+			
+		super(ProfileForm, self).__init__(*args, **kwargs)
+		self.fields['first_name'].initial = user.first_name
+		self.fields['last_name'].initial = user.last_name
+		self.fields['street'].initial = initial.street
+		self.fields['location'].initial = initial.location
+		self.fields['district'].initial = initial.district
+		self.fields['city'].initial = initial.city
+		self.fields['state'].initial = initial.state
+		self.fields['country'].initial = initial.country
+		self.fields['pincode'].initial = initial.pincode
+		self.fields['phone'].initial = initial.phone
