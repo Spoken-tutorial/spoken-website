@@ -1,0 +1,5 @@
+<form role="form" method="post" enctype="multipart/form-data" action="">
+	{% csrf_token %}
+	{{ form.as_p }}
+	<input type="submit" class="btn btn-primary" value="Upload"  tabindex="4" />
+</form>

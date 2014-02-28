@@ -5,6 +5,8 @@ cms/fixtures/*
 cms/templates/*
 events/fixtures/*
 events/templates/*
+media/*
+!media/README
 *.py[cod]
 
 # C extensions

@@ -1,6 +1,11 @@
 import os
 import json
 from django.conf import settings
+from django.core.urlresolvers import reverse
+from django.views import generic
+from django.views.decorators.http import require_POST
+from jfu.http import upload_receive, UploadResponse, JFUResponse
+
 from django.http import HttpResponse, HttpResponseRedirect
 from django.core.context_processors import csrf
 from django.template import RequestContext
@@ -18,24 +23,31 @@ def contributor_roles(request):
 	context = {
 		'form': form
 	}
+	context.update(csrf(request))
 	return render_to_response('creation/templates/testingvis.html', context)
 
 def testingvis(request):
-	form = UploadTutorialFormFactory(user=request.user)
 	context = {
-		'form': form,
 		'user': request.user
 	}
+	context.update(csrf(request))
 	return render_to_response('creation/templates/testingvis.html', context)
 
-def upload_tutorial(request):
+def creationhome(request):
+	context = {
+		'user': request.user
+	}
+	context.update(csrf(request))
+	return render_to_response('creation/templates/creationhome.html', context)
+
+@login_required
+def upload_tutorial_index(request):
 	if request.method == 'POST':
 		form = UploadTutorialForm(request.user, request.POST)
 		if form.is_valid():
 			common_content = Tutorial_Common_Content()
 			if Tutorial_Common_Content.objects.filter(tutorial_detail_id = request.POST['tutorial_name']).count():
 				common_content = Tutorial_Common_Content.objects.get(tutorial_detail_id = request.POST['tutorial_name'])
-				print 'if part'
 			else:
 				tutorial_resource = Tutorial_Resource()
 				common_content.tutorial_detail = Tutorial_Detail.objects.get(pk = request.POST['tutorial_name'])
@@ -66,7 +78,8 @@ def upload_tutorial(request):
 				tutorial_resource.version = 0
 				tutorial_resource.hit_count = 0
 				tutorial_resource.save()
-			form = UploadTutorialForm(user=request.user)
+
+			return HttpResponseRedirect('/creation/upload_tutorial/' + str(common_content.id) + '/' + str(tutorial_resource.id) + '/')
 	else:
 		form = UploadTutorialForm(user=request.user)
 
@@ -75,7 +88,7 @@ def upload_tutorial(request):
 		'user': request.user
 	}
 	context.update(csrf(request))
-	return render_to_response('creation/templates/upload_tutorial.html', context)
+	return render_to_response('creation/templates/upload_tutorial_index.html', context)
 
 @csrf_exempt
 def ajax_upload_foss(request):
@@ -100,3 +113,34 @@ def ajax_upload_foss(request):
 			data.append(tmp)
 
 	return HttpResponse(json.dumps(data), mimetype='application/json')
+
+@login_required
+def upload_tutorial(request, common_content_id, tutorial_resource_id):
+	context = {
+		'user': request.user,
+		'trid': tutorial_resource_id
+	}
+	context.update(csrf(request))
+	return render_to_response('creation/templates/upload_tutorial.html', context)
+
+def upload_component(request, recid, component):
+	if request.method == 'POST':
+		form = ComponentForm(request.POST, request.FILES)
+		if form.is_valid():
+			file_path = settings.MEDIA_ROOT + request.FILES['comp'].name
+			fout = open(file_path, 'wb+')
+			f = request.FILES['comp']
+			# Iterate through the chunks.
+			for chunk in f.chunks():
+				fout.write(chunk)
+			fout.close()
+			form = ComponentForm()
+		
+	else:
+		form = ComponentForm()
+	context = {
+		'user': request.user,
+		'form': form
+	}
+	context.update(csrf(request))
+	return render_to_response('creation/templates/upload_component.html', context)

@@ -48,7 +48,9 @@ class TutorialDetailAdmin(admin.ModelAdmin):
 		obj.user = request.user
 		obj.save()
 		try:
-			foss_dir = settings.BASE_DIR + '/static/creation/uploads/' + str(obj.id)
+			foss_dir = settings.MEDIA_ROOT + '/videos/' + str(obj.foss_id)
+			os.mkdir(foss_dir)
+			foss_dir += '/' + str(obj.id)
 			os.mkdir(foss_dir)
 			os.mkdir(foss_dir + '/resources')
 		except:
@@ -57,7 +59,7 @@ class TutorialDetailAdmin(admin.ModelAdmin):
 class ContributorRoleAdmin(admin.ModelAdmin):
 	form = ContributorRoleForm
 	list_display = ('user', 'foss_category', 'language', 'status', 'created', 'updated')
-	#exclude = ('created', 'updated')
+	exclude = ('created', 'updated')
 
 	def mark_contributor_disabled(self, request, queryset):
 		rows_updated = queryset.update(status=0)
@@ -81,7 +83,7 @@ class ContributorRoleAdmin(admin.ModelAdmin):
 class DomainReviewerRoleAdmin(admin.ModelAdmin):
 	form = DomainReviewerRoleForm
 	list_display = ('user', 'foss_category', 'language', 'status', 'created', 'updated')
-	#exclude = ('created', 'updated')
+	exclude = ('created', 'updated')
 
 	def mark_domain_reviewer_disabled(self, request, queryset):
 		rows_updated = queryset.update(status=0)
@@ -105,7 +107,7 @@ class DomainReviewerRoleAdmin(admin.ModelAdmin):
 class QualityReviewerRoleAdmin(admin.ModelAdmin):
 	form = QualityReviewerRoleForm
 	list_display = ('user', 'foss_category', 'language', 'status', 'created', 'updated')
-	#exclude = ('created', 'updated')
+	exclude = ('created', 'updated')
 
 	def mark_quality_reviewer_disabled(self, request, queryset):
 		rows_updated = queryset.update(status=0)
