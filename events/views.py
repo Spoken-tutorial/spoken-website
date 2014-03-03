@@ -417,26 +417,35 @@ def update_location(request):
 #user roles
 def is_event_manager(user):
 	"""Check if the user is having event manger  rights"""
-	if user.groups.filter(name='event_manager').count() == 1:
+	if user.groups.filter(name='Event Manager').count() == 1:
 		return True
 		
 def is_resource_person(user):
-	"""Check if the user is having event manger  rights"""
+	"""Check if the user is having resource person  rights"""
 	if user.groups.filter(name='Resource Person').count() == 1:
 		return True
 		
 def is_organiser(user):
-	"""Check if the user is having event manger  rights"""
+	"""Check if the user is having organiser rights"""
 	if user.groups.filter(name='Organiser').count() == 1:
 		return True
 
+def is_invigilator(user):
+	"""Check if the user is having invigilator rights"""
+	if user.groups.filter(name='Invigilator').count() == 1:
+		return True
+
+@login_required
 def state(request):
 	""" State index page """
+	user = request.user
+	#if not user.is_authenticated() or not is_event_manager(user):
+	#	raise Http404('You are not allowed to view this page!')
 	context = {}
 	context['collection'] = State.objects.all
 	context['model'] = "state"
 	context.update(csrf(request))
-	return render_to_response('events/templates/states/index.html', context)
+	return render(request, 'events/templates/states/index.html', context)
 
 @login_required
 def new_state(request):
@@ -452,15 +461,20 @@ def new_state(request):
 			return HttpResponseRedirect("/events/states/")
 		
 		context = {'form':form}
-		return render_to_response('events/templates/states/form.html', context, context_instance = RequestContext(request))
+		return render(request, 'events/templates/states/form.html', context)
 	else:
 		context = {}
 		context.update(csrf(request))
 		context['form'] = StateForm()
-		return render_to_response('events/templates/states/form.html', context)
-		
+		return render(request, 'events/templates/states/form.html', context)
+
+@login_required
 def edit_state(request, rid = None):
 	""" Edit states """
+	user = request.user
+	#if not user.is_authenticated() or not is_event_manager(user):
+	#	raise Http404('You are not allowed to view this page!')
+		
 	if request.method == 'POST':
 		contact = State.objects.get(id = rid)
 		form = StateForm(request.POST, instance=contact)
@@ -468,17 +482,17 @@ def edit_state(request, rid = None):
 			form.save()
 			return HttpResponseRedirect("/events/states")
 		context = {'form':form}
-		return render_to_response('events/templates/states/form.html', context, context_instance = RequestContext(request))
+		return render(request, 'events/templates/states/form.html', context)
 	else:
 		author = State.objects.get(id = rid)
 		context = {}
 		context['form'] = StateForm(instance=author)
 		context['edit'] = rid
 		context.update(csrf(request))
-		return render_to_response('events/templates/states/form.html', context)
+		return render(request, 'events/templates/states/form.html', context)
 
 """ User roles Roles """
-
+@login_required
 def new_roles_rp(request):
 	""" Assign a new state """
 	user = request.user
@@ -494,16 +508,21 @@ def new_roles_rp(request):
 			return HttpResponseRedirect("/events/roles/rp")
 		
 		context = {'form':form}
-		return render_to_response('events/templates/rp/form.html', context, context_instance = RequestContext(request))
+		return render(request, 'events/templates/rp/form.html', context)
 	else:
 		context = {}
 		context.update(csrf(request))
 		context['form'] = RpForm()
-		return render_to_response('events/templates/rp/form.html', context)
+		return render(request, 'events/templates/rp/form.html', context)
 	return HttpResponse('RP!')
 
+@login_required
 def edit_roles_rp(request, rid = None):
 	""" Edit Resource_person """
+	user = request.user
+	#if not user.is_authenticated() or not is_event_manager(user):
+	#	raise Http404('You are not allowed to view this page!')
+		
 	if request.method == 'POST':
 		contact = Resource_person.objects.get(id = rid)
 		form = RpForm(request.POST, instance=contact)
@@ -511,7 +530,7 @@ def edit_roles_rp(request, rid = None):
 			if form.save():
 				return HttpResponseRedirect("/events/roles/rp")
 		context = {'form':form}
-		return render_to_response('events/templates/rp/form.html', context, context_instance = RequestContext(request))
+		return render(request, 'events/templates/rp/form.html', context)
 	else:
 		try:
 			record = Resource_person.objects.get(id = rid)
@@ -519,26 +538,32 @@ def edit_roles_rp(request, rid = None):
 			context['form'] = RpForm(instance = record)
 			context['edit'] = rid
 			context.update(csrf(request))
-			return render_to_response('events/templates/rp/form.html', context)
+			return render(request, 'events/templates/rp/form.html', context)
 		except:
 			raise Http404('Page not found')
-			
+
+@login_required
 def roles_rp(request):
 	""" Resource_person index page """
+	user = request.user
+	#if not user.is_authenticated() or not is_event_manager(user):
+	#	raise Http404('You are not allowed to view this page!')
+		
 	context = {}
 	context['collection'] = Resource_person.objects.order_by('state')
 	context['model'] = "state"
 	context.update(csrf(request))
-	return render_to_response('events/templates/rp/index.html', context)
+	return render(request, 'events/templates/rp/index.html', context)
 
+@login_required
 def new_ac(request):
-	""" Create new academic center a new state """
+	""" Create new academic center. Academic code generate by autimatic.
+		if any code missing in between first assign that code then continue the serial
+	"""
 	user = request.user
-	#if not user.is_authenticated() or not is_event_manager(user):
+	#if not user.is_authenticated() or not is_event_manager(user) or not is_resource_person(user):
 	#	raise Http404('You are not allowed to view this page!')
-	#print "**************"
-	#print request.POST
-	#print "**************"
+		
 	if request.method == 'POST':
 		form = AcademicForm(user, request.POST)
 		if form.is_valid():
@@ -592,14 +617,20 @@ def new_ac(request):
 			return HttpResponseRedirect("/events/ac/")
 		
 		context = {'form':form}
-		return render_to_response('events/templates/ac/form.html', context, context_instance = RequestContext(request))
+		return render(request, 'events/templates/ac/form.html', context)
 	else:
 		context = {}
 		context.update(csrf(request))
 		context['form'] = AcademicForm(user=request.user)
-		return render_to_response('events/templates/ac/form.html', context)
-		
+		return render(request, 'events/templates/ac/form.html', context)
+
+@login_required
 def edit_ac(request, rid = None):
+	""" Edit academic center """
+	user = request.user
+	#if not user.is_authenticated() or not is_event_manager(user) or not is_resource_person(user):
+	#	raise Http404('You are not allowed to view this page!')
+		
 	if request.method == 'POST':
 		contact = Academic_center.objects.get(id = rid)
 		form = AcademicForm(request.user, request.POST, instance=contact)
@@ -607,7 +638,7 @@ def edit_ac(request, rid = None):
 			if form.save():
 				return HttpResponseRedirect("/events/ac/")
 		context = {'form':form}
-		return render_to_response('events/templates/ac/form.html', context, context_instance = RequestContext(request))
+		return render(request, 'events/templates/ac/form.html', context)
 	else:
 		try:
 			record = Academic_center.objects.get(id = rid)
@@ -615,20 +646,31 @@ def edit_ac(request, rid = None):
 			context['form'] = AcademicForm(user=request.user, instance = record)
 			context['edit'] = rid
 			context.update(csrf(request))
-			return render_to_response('events/templates/ac/form.html', context)
+			return render(request, 'events/templates/ac/form.html', context)
 		except:
 			raise Http404('Page not found')
+
+@login_required
 def ac(request):
 	""" Academic index page """
+	user = request.user
+	#if not user.is_authenticated() or not is_event_manager(user) or not is_resource_person(user):
+	#	raise Http404('You are not allowed to view this page!')
+		
 	context = {}
 	context['collection'] = Academic_center.objects.all
 	context['model'] = "Academic Center"
 	context.update(csrf(request))
-	return render_to_response('events/templates/ac/index.html', context)
+	return render(request, 'events/templates/ac/index.html', context)
 	return HttpResponse('RP!')
 	
-#organiser
+@login_required
 def organiser_request(request, username):
+	""" request to bacome a new organiser """
+	user = request.user
+	#if not user.is_authenticated():
+	#	raise Http404('You are not allowed to view this page!')
+		
 	if username == request.user.username:
 		user = User.objects.get(username=username)
 		if request.method == 'POST':
@@ -658,9 +700,15 @@ def organiser_request(request, username):
 				context['form'] = OrganiserForm()
 				return render(request, 'events/templates/organiser/form.html', context)
 	else:
-		raise Http404('Permission denied !!')
+		raise Http404('You are not allowed to view this page!')
 
+@login_required
 def organiser_view(request, username):
+	""" view organiser details """
+	user = request.user
+	#if not user.is_authenticated() or not is_organiser(user) or not is_event_manager(user) or not is_resource_person(user):
+	#	raise Http404('You are not allowed to view this page!')
+		
 	if username == request.user.username or is_resource_person(request.user):
 		user = User.objects.get(username=username)
 		context = {}
@@ -673,9 +721,16 @@ def organiser_view(request, username):
 		context['profile'] = profile
 		return render(request, 'events/templates/organiser/view.html', context)
 	else:
-		raise Http404('Permission denied !!')
+		raise Http404('You are not allowed to view this page!')
 
+@login_required
 def organiser_edit(request, username):
+	""" view organiser details """
+	#todo: confirm event_manager and resource_center can edit organiser details
+	user = request.user
+	#if not user.is_authenticated() or not is_organiser(user) or not is_event_manager(user) or not is_resource_person(user):
+	#	raise Http404('You are not allowed to view this page!')
+		
 	if username == request.user.username:
 		user = User.objects.get(username=username)
 		if request.method == 'POST':
@@ -696,13 +751,17 @@ def organiser_edit(request, username):
 				context.update(csrf(request))
 				return render(request, 'events/templates/organiser/form.html', context)
 	else:
-		raise Http404('Permission denied !!')
+		raise Http404('You are not allowed to view this page!')
 
+@login_required
 def rp_organiser_inactive(request):
 	""" Resource person: List all inactive organiser under resource person states """
-	#todo: check resource person role
 	#todo: filter to diaplay block and active user
-	user = User.objects.get(pk=request.user.id)
+	user = request.user
+	#if not user.is_authenticated() or not is_event_manager(user) or not is_resource_person(user):
+	#	raise Http404('You are not allowed to view this page!')
+		
+	user = User.objects.get(pk=user.id)
 	try:
 		organiser = Organiser.objects.filter(academic=Academic_center.objects.filter(state=State.objects.filter(resource_person__user_id=user)), status=0)
 	except:
@@ -711,9 +770,14 @@ def rp_organiser_inactive(request):
 	context['collection'] = organiser
 	context['active'] = False
 	return render(request, 'events/templates/rp/organiser.html', context)
-	
+
+@login_required
 def rp_organiser_confirm(request, code, userid):
 	""" Resource person: active organiser """
+	user = request.user
+	#if not user.is_authenticated() or not is_event_manager(user) or not is_resource_person(user):
+	#	raise Http404('You are not allowed to view this page!')
+
 	try:
 		if User.objects.get(pk=userid).profile_set.get().confirmation_code == code:
 			organiser = Organiser.objects.get(user_id = userid)
@@ -724,11 +788,16 @@ def rp_organiser_confirm(request, code, userid):
 		else:
 			raise Http404('Page not found !!')
 	except:
-		raise Http404('Permission denied !!')
-	
+		raise Http404('You are not allowed to view this page!')
+
+@login_required
 def rp_organiser_block(request, code, userid):
 	""" Resource person: block organiser """
 	#todo: if user block, again he trying to register, display message your accout blocked by rp contact rp
+	user = request.user
+	#if not user.is_authenticated() or not is_event_manager(user) or not is_resource_person(user):
+	#	raise Http404('You are not allowed to view this page!')
+
 	try:
 		if User.objects.get(pk=userid).profile_set.get().confirmation_code == code:
 			organiser = Organiser.objects.get(user_id = userid)
@@ -739,13 +808,17 @@ def rp_organiser_block(request, code, userid):
 		else:
 			raise Http404('Page not found !!')
 	except:
-		raise Http404('Permission denied !!')
+		raise Http404('You are not allowed to view this page!')
 
+@login_required
 def rp_organiser_active(request):
 	""" Resource person: List all active organiser under resource person states """
-	#todo: check resource person role
 	#todo: filter and pagination
-	user = User.objects.get(pk=request.user.id)
+	user = request.user
+	#if not user.is_authenticated() or not is_event_manager(user) or not is_resource_person(user):
+	#	raise Http404('You are not allowed to view this page!')
+
+	user = User.objects.get(pk=user.id)
 	try:
 		organiser = Organiser.objects.filter(academic=Academic_center.objects.filter(state=State.objects.filter(resource_person__user_id=user)), status=1)
 	except:
@@ -755,10 +828,14 @@ def rp_organiser_active(request):
 	context['active'] = True
 	return render(request, 'events/templates/rp/organiser.html', context)
 
-#invigilator
-#invigilator
+@login_required
 def invigilator_request(request, username):
-	if username == request.user.username:
+	""" Request to bacome a invigilator """
+	user = request.user
+	#if not user.is_authenticated():
+	#	raise Http404('You are not allowed to view this page!')
+
+	if username == user.username:
 		user = User.objects.get(username=username)
 		if request.method == 'POST':
 			form = InvigilatorForm(request.POST)
@@ -787,10 +864,15 @@ def invigilator_request(request, username):
 				context['form'] = InvigilatorForm()
 				return render(request, 'events/templates/invigilator/form.html', context)
 	else:
-		raise Http404('Permission denied !!')
+		raise Http404('You are not allowed to view this page!')
 
+@login_required
 def invigilator_view(request, username):
-	#todo: rp can see. add one more condition is_resource person
+	""" Invigilator view page """
+	user = request.user
+	#if not user.is_authenticated() or not is_invigilator(user) or not is_event_manager(user) or not is_resource_person(user):
+	#	raise Http404('You are not allowed to view this page!')
+		
 	if username == request.user.username or is_resource_person(request.user):
 		user = User.objects.get(username=username)
 		context = {}
@@ -803,10 +885,16 @@ def invigilator_view(request, username):
 		context['profile'] = profile
 		return render(request, 'events/templates/invigilator/view.html', context)
 	else:
-		raise Http404('Permission denied !!')
+		raise Http404('You are not allowed to view this page!')
 
+@login_required
 def invigilator_edit(request, username):
-	if username == request.user.username:
+	""" Invigilator edit page """
+	user = request.user
+	#if not user.is_authenticated() or not is_invigilator(user) or not is_event_manager(user) or not is_resource_person(user):
+	#	raise Http404('You are not allowed to view this page!')
+		
+	if username == user.username:
 		user = User.objects.get(username=username)
 		if request.method == 'POST':
 			form = InvigilatorForm(request.POST)
@@ -826,7 +914,7 @@ def invigilator_edit(request, username):
 				context.update(csrf(request))
 				return render(request, 'events/templates/invigilator/form.html', context)
 	else:
-		raise Http404('Permission denied !!')
+		raise Http404('You are not allowed to view this page!')
 
 #Ajax Request and Responces
 @csrf_exempt

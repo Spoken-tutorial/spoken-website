@@ -77,6 +77,8 @@ def account_login(request):
 			if user is not None:
 				if user.is_active:
 					login(request, user)
+					if request.GET and request.GET['next']:
+						return HttpResponseRedirect(request.GET['next'])
 					return HttpResponseRedirect('/')
 				else:
 					context['info'] = 'Your account is disabled.'
