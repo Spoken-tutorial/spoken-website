@@ -152,3 +152,7 @@ class InvigilatorForm(forms.Form):
 			#initial data
 			self.fields['district'].initial = initial.academic.district_id
 			self.fields['college'].initial = initial.academic_id
+
+class DepartmentForm(forms.ModelForm):
+	class Meta:
+		model = Department

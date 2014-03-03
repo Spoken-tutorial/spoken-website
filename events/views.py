@@ -964,6 +964,64 @@ def rp_invigilator_block(request, code, userid):
 	except:
 		raise PermissionDenied('You are not allowed to view this page!')
 
+@login_required
+def new_dept(request):
+	''' department add '''
+	user = request.user
+	if not user.is_authenticated():
+		raise Http404('You are not allowed to view this page!')
+	
+	if request.method == 'POST':
+		form = DepartmentForm(request.POST)
+		if form.is_valid():
+			form.save()
+			return HttpResponseRedirect("/events/dept/")
+		
+		context = {'form':form}
+		return render(request, 'events/templates/dept/form.html', context)
+	else:
+		context = {}
+		context.update(csrf(request))
+		context['form'] = DepartmentForm()
+		return render(request, 'events/templates/dept/form.html', context)
+
+@login_required
+def edit_dept(request, rid):
+	''' department edit '''
+	user = request.user
+	if not user.is_authenticated() or not is_event_manager(user):
+		raise Http404('You are not allowed to view this page!')
+	
+	if request.method == 'POST':
+		record = Department.objects.get(id = rid)
+		form = DepartmentForm(request.POST, instance = record)
+		if form.is_valid():
+			form.save()
+			return HttpResponseRedirect("/events/dept/")
+		
+		context = {'form':form}
+		return render(request, 'events/templates/dept/form.html', context)
+	else:
+		context = {}
+		context.update(csrf(request))
+		record = Department.objects.get(id = rid)
+		context['form'] = DepartmentForm(instance = record)
+		return render(request, 'events/templates/dept/form.html', context)
+
+def dept(request):
+	""" Department index page """
+	user = request.user
+	if not user.is_authenticated() or not is_event_manager(user):
+		raise Http404('You are not allowed to view this page!')
+	context = {}
+	context['collection'] = Department.objects.all
+	context['model'] = "state"
+	context.update(csrf(request))
+	return render(request, 'events/templates/dept/index.html', context)
+	
+def workshop_request(request):
+	return HttpResponse('workshop')
+	
 #Ajax Request and Responces
 @csrf_exempt
 def ajax_ac_state(request):

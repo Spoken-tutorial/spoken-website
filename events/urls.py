@@ -34,6 +34,12 @@ urlpatterns = patterns('',
     url(r'invigilator/(?P<username>\w+)/edit/$', views.invigilator_edit, name='invigilator_edit'),
     url(r'invigilator/view/(?P<username>\w+)/$', views.invigilator_view, name='invigilator_view'),
     
+    url(r'dept/$', views.dept, name='dept'),
+    url(r'dept/new/$', views.new_dept, name='new_dept'),
+	url(r'dept/(\d+)/edit/$', views.edit_dept, name='edit_dept'),
+	
+    url(r'workshop/request/$', views.workshop_request, name='workshop_request'),
+    
     #Ajax 
     url(r'ajax-ac-state/$', views.ajax_ac_state, name='ajax_ac_state'),
     url(r'ajax-ac-location/$', views.ajax_ac_location, name='ajax_ac_location'),

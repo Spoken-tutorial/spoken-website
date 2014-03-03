@@ -166,7 +166,14 @@ class Test(models.Model):
 	created = models.DateTimeField(auto_now_add = True)
 	updated = models.DateTimeField(auto_now = True)
 	
+class Department(models.Model):
+	name = models.CharField(max_length=200)
+	created = models.DateTimeField(auto_now_add = True)
+	updated = models.DateTimeField(auto_now = True)
 	
+	def __unicode__(self):
+		return self.name
+		
 #need to delete
 class Error(models.Model):
 	name = models.CharField(max_length=200)
