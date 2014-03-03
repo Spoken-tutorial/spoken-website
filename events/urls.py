@@ -19,6 +19,7 @@ urlpatterns = patterns('',
     url(r'ac/(\d+)/edit/$', views.edit_ac, name='edit_ac'),
     
     url(r'organiser/active/$', views.rp_organiser_active, name='rp_organiser_active'),
+    url(r'organiser/block/$', views.organiser_block_index, name='organiser_block_index'),
     url(r'organiser/active/(?P<code>\w+)/(?P<userid>\d+)/$', views.rp_organiser_confirm, name='rp_organiser_confirm'),
     url(r'organiser/block/(?P<code>\w+)/(?P<userid>\d+)/$', views.rp_organiser_block, name='rp_organiser_block'),
     url(r'organiser/inactive/$', views.rp_organiser_inactive, name='rp_organiser_inactive'),

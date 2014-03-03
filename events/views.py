@@ -768,7 +768,7 @@ def rp_organiser_inactive(request):
 		organiser = {}
 	context = {}
 	context['collection'] = organiser
-	context['active'] = False
+	context['active'] = 0
 	return render(request, 'events/templates/rp/organiser.html', context)
 
 @login_required
@@ -825,7 +825,25 @@ def rp_organiser_active(request):
 		organiser = {}
 	context = {}
 	context['collection'] = organiser
-	context['active'] = True
+	context['active'] = 1
+	return render(request, 'events/templates/rp/organiser.html', context)
+
+@login_required
+def organiser_block_index(request):
+	""" Resource person: List all blocked organiser under resource person states """
+	#todo: filter and pagination
+	user = request.user
+	#if not user.is_authenticated() or not is_event_manager(user) or not is_resource_person(user):
+	#	raise Http404('You are not allowed to view this page!')
+
+	user = User.objects.get(pk=user.id)
+	try:
+		organiser = Organiser.objects.filter(academic=Academic_center.objects.filter(state=State.objects.filter(resource_person__user_id=user)), status=2)
+	except:
+		organiser = {}
+	context = {}
+	context['collection'] = organiser
+	context['active'] = 2
 	return render(request, 'events/templates/rp/organiser.html', context)
 
 @login_required

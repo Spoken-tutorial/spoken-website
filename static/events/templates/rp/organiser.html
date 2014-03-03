@@ -34,10 +34,12 @@
 		        <td>{{ record.academic.institution_name }}</td>
 		        <td>{{ record.user }}</td>
 		        <td>{{ record.updated|date:"D d M Y" }}</td>
-		        {% if active %}
+		        {% if active == 0 %}
+		        	<td><a href="{% url 'events:organiser_view' record.user %}">View</a> | <a href="{% url 'events:rp_organiser_confirm' record.user.profile_set.get.confirmation_code record.user_id %}">Activate</a> | <a href="{% url 'events:rp_organiser_block' record.user.profile_set.get.confirmation_code record.user_id %}">Block</a></td>
+		        {% elif active == 1 %}
 		        	<td><a href="{% url 'events:organiser_view' record.user %}">View</a> | <a href="{% url 'events:rp_organiser_block' record.user.profile_set.get.confirmation_code record.user_id %}">Block</a></td>
 		        {% else %}
-		        	<td><a href="{% url 'events:organiser_view' record.user %}">View</a> | <a href="{% url 'events:rp_organiser_confirm' record.user.profile_set.get.confirmation_code record.user_id %}">Activate</a> | <a href="{% url 'events:rp_organiser_block' record.user.profile_set.get.confirmation_code record.user_id %}">Block</a></td>
+		        	<td><a href="{% url 'events:organiser_view' record.user %}">View</a> | <a href="{% url 'events:rp_organiser_confirm' record.user.profile_set.get.confirmation_code record.user_id %}">Activate</a>
 		        {% endif %}
 		    </tr>
 			{% endfor %}
