@@ -30,7 +30,7 @@
 		{% for record in collection %}
         <tr class="{% cycle 'odd' 'even' %}">
             <td>{{ record.name }}</td>
-            <td>{{ record.updated }}</td>
+            <td>{{ record.updated|date:"D d M Y" }}</td>
             <td><a href="{% url 'events:edit_dept' record.id %}">Edit</a></td>
         </tr>
 {% endfor %}

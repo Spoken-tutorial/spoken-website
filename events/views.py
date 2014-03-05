@@ -1020,7 +1020,33 @@ def dept(request):
 	return render(request, 'events/templates/dept/index.html', context)
 	
 def workshop_request(request):
-	return HttpResponse('workshop')
+	''' Workshop request by organiser '''
+	user = request.user
+	if not user.is_authenticated() or not is_organiser:
+		raise Http404('You are not allowed to view this page!')
+	
+	if request.method == 'POST':
+		form = WorkshopForm(request.POST, user = request.user)
+		if form.is_valid():
+			dateTime = request.POST['wdate'].split(' ')
+			w = Workshop()
+			w.organiser_id = user.id
+			w.academic_center_id = request.POST['academic']
+			w.language_id = request.POST['language']
+			w.foss_id = request.POST['foss']
+			w.wdate = dateTime[0]
+			w.wtime = dateTime[1]
+			w.skype = request.POST['skype']
+			w.save()
+			return HttpResponseRedirect("/events/dept/")
+		
+		context = {'form':form, }
+		return render(request, 'events/templates/workshop/form.html', context)
+	else:
+		context = {}
+		context.update(csrf(request))
+		context['form'] = WorkshopForm(user = request.user)
+		return render(request, 'events/templates/workshop/form.html', context)
 	
 #Ajax Request and Responces
 @csrf_exempt

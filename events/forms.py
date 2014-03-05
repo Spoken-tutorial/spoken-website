@@ -156,3 +156,33 @@ class InvigilatorForm(forms.Form):
 class DepartmentForm(forms.ModelForm):
 	class Meta:
 		model = Department
+
+class WorkshopForm(forms.Form):
+	#state_list = list(State.objects.exclude(name='uncategorized').values_list('id', 'name'))
+	#state_list.insert(0, ('', '-- None --'))
+	#state = forms.ChoiceField(choices = state_list, widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'State field is required.'})
+	district = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'district field is required.'})
+	academic = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'College Name field is required.'})
+	dept_list = list(Department.objects.exclude(name='uncategorized').values_list('id', 'name'))
+	dept_list.insert(0, ('', '-- None --'))
+	department = forms.ChoiceField(choices = dept_list, widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'Department Name field is required.'})
+	wdate = forms.DateTimeField(required = True, error_messages = {'required':'Date field is required.'})
+	foss_list = list(Foss_Category.objects.all().values_list('id', 'foss'))
+	foss_list.insert(0, ('', '-- None --'))
+	foss = forms.ChoiceField(choices = foss_list, widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'Foss field is required.'})
+	lang_list = list(Language.objects.all().values_list('id', 'name'))
+	lang_list.insert(0, ('', '-- None --'))
+	language = forms.ChoiceField(choices = lang_list, widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'Language field is required.'})
+	skype = forms.ChoiceField(widget=forms.RadioSelect, choices=[(0, 'No'),(1, 'Yes')], required = True)
+	def __init__(self, *args, **kwargs):
+		user = ''
+		if 'user' in kwargs:
+			user = kwargs["user"]
+			del kwargs["user"]
+		super(WorkshopForm, self).__init__(*args, **kwargs)
+		if user:
+			#self.fields['state'].initial = user.organiser.academic.state.id
+			self.fields['district'].choices = District.objects.filter(state =user.organiser.academic.state).values_list('id', 'name')
+			self.fields['district'].initial = user.organiser.academic.district.id
+			self.fields['academic'].choices = Academic_center.objects.filter(district =user.organiser.academic.district).values_list('id', 'institution_name')
+			self.fields['academic'].initial = user.organiser.academic.id
