@@ -121,7 +121,10 @@ class Academic_center(models.Model):
 	class Meta:
 		verbose_name = "Academic Center"
 		unique_together = (("institution_name","district"), ("institution_name","university"))
-
+		
+	def __unicode__(self):
+		return self.institution_name
+		
 class Organiser(models.Model):
 	user = models.OneToOneField(User)
 	appoved_by = models.ForeignKey(User, related_name = 'organiser_approved_by', blank=True, null=True)
@@ -138,10 +141,19 @@ class Invigilator(models.Model):
 	created = models.DateTimeField(auto_now_add = True)
 	updated = models.DateTimeField(auto_now = True)
 
+class Department(models.Model):
+	name = models.CharField(max_length=200)
+	created = models.DateTimeField(auto_now_add = True)
+	updated = models.DateTimeField(auto_now = True)
+	
+	def __unicode__(self):
+		return self.name
+		
 class Workshop(models.Model):
 	organiser = models.ForeignKey(User)
 	appoved_by = models.ForeignKey(User, related_name = 'workshop_approved_by', null=True)
-	academic_center = models.ForeignKey(Academic_center)
+	academic = models.ForeignKey(Academic_center)
+	department = models.ManyToManyField(Department)
 	language = models.ForeignKey(Language)
 	foss = models.ForeignKey(Foss_Category)
 	workshop_code = models.CharField(max_length=100, null=True)
@@ -157,7 +169,7 @@ class Test(models.Model):
 	organiser = models.ForeignKey(User, related_name = 'origaniser')
 	appoved_by = models.ForeignKey(User, related_name = 'test_approved_by')
 	invigilator = models.ForeignKey(User)
-	academic_center = models.ForeignKey(Academic_center)
+	academic = models.ForeignKey(Academic_center)
 	workshop = models.ForeignKey(Workshop)
 	foss = models.ForeignKey(Foss_Category)
 	test_code = models.CharField(max_length=100)
@@ -168,13 +180,6 @@ class Test(models.Model):
 	created = models.DateTimeField(auto_now_add = True)
 	updated = models.DateTimeField(auto_now = True)
 	
-class Department(models.Model):
-	name = models.CharField(max_length=200)
-	created = models.DateTimeField(auto_now_add = True)
-	updated = models.DateTimeField(auto_now = True)
-	
-	def __unicode__(self):
-		return self.name
 		
 #need to delete
 class Error(models.Model):

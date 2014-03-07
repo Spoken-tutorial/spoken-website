@@ -163,9 +163,7 @@ class WorkshopForm(forms.Form):
 	#state = forms.ChoiceField(choices = state_list, widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'State field is required.'})
 	district = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'district field is required.'})
 	academic = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'College Name field is required.'})
-	dept_list = list(Department.objects.exclude(name='uncategorized').values_list('id', 'name'))
-	dept_list.insert(0, ('', '-- None --'))
-	department = forms.ChoiceField(choices = dept_list, widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'Department Name field is required.'})
+	department = forms.MultipleChoiceField(choices = Department.objects.exclude(name='uncategorized').values_list('id', 'name'), widget=forms.SelectMultiple(attrs = {}), required = True, error_messages = {'required':'Department Name field is required.'})
 	wdate = forms.DateTimeField(required = True, error_messages = {'required':'Date field is required.'})
 	foss_list = list(Foss_Category.objects.all().values_list('id', 'foss'))
 	foss_list.insert(0, ('', '-- None --'))
@@ -179,6 +177,10 @@ class WorkshopForm(forms.Form):
 		if 'user' in kwargs:
 			user = kwargs["user"]
 			del kwargs["user"]
+		instance = ''
+		if 'instance' in kwargs:
+			instance = kwargs["instance"]
+			del kwargs["instance"]
 		super(WorkshopForm, self).__init__(*args, **kwargs)
 		if user:
 			#self.fields['state'].initial = user.organiser.academic.state.id
@@ -186,3 +188,11 @@ class WorkshopForm(forms.Form):
 			self.fields['district'].initial = user.organiser.academic.district.id
 			self.fields['academic'].choices = Academic_center.objects.filter(district =user.organiser.academic.district).values_list('id', 'institution_name')
 			self.fields['academic'].initial = user.organiser.academic.id
+		if instance:
+			#self.fields['state'].initial = user.organiser.academic.state.id
+			self.fields['district'].choices = District.objects.filter(state =instance.academic.state).values_list('id', 'name')
+			self.fields['district'].initial = instance.academic.district.id
+			self.fields['academic'].choices = Academic_center.objects.filter(district =instance.academic.district).values_list('id', 'institution_name')
+			self.fields['academic'].initial = instance.academic
+			#print instance.department.all().values_list('id'))
+			#self.fields['department'].initial = instance.department.first().id

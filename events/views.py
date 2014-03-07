@@ -1031,14 +1031,18 @@ def workshop_request(request):
 			dateTime = request.POST['wdate'].split(' ')
 			w = Workshop()
 			w.organiser_id = user.id
-			w.academic_center_id = request.POST['academic']
+			w.academic_id = request.POST['academic']
 			w.language_id = request.POST['language']
 			w.foss_id = request.POST['foss']
 			w.wdate = dateTime[0]
 			w.wtime = dateTime[1]
 			w.skype = request.POST['skype']
 			w.save()
-			return HttpResponseRedirect("/events/dept/")
+			#M2M saving department
+			for dept in form.cleaned_data.get('department'):
+				w.department.add(dept)
+			w.save()
+			return HttpResponseRedirect("/events/organiser/workshop/pending/")
 		
 		context = {'form':form, }
 		return render(request, 'events/templates/workshop/form.html', context)
@@ -1047,7 +1051,53 @@ def workshop_request(request):
 		context.update(csrf(request))
 		context['form'] = WorkshopForm(user = request.user)
 		return render(request, 'events/templates/workshop/form.html', context)
+
+def workshop_edit(request, rid):
+	''' Workshop edit by organiser or resource person '''
+	user = request.user
+	if not user.is_authenticated() or not is_organiser:
+		raise Http404('You are not allowed to view this page!')
 	
+	if request.method == 'POST':
+		form = WorkshopForm(request.POST, user = request.user)
+		if form.is_valid():
+			dateTime = request.POST['wdate'].split(' ')
+			w = Workshop()
+			w.organiser_id = user.id
+			w.academic_id = request.POST['academic']
+			w.language_id = request.POST['language']
+			w.foss_id = request.POST['foss']
+			w.wdate = dateTime[0]
+			w.wtime = dateTime[1]
+			w.skype = request.POST['skype']
+			w.save()
+			return HttpResponseRedirect("/events/organiser/workshop/pending/")
+		
+		context = {'form':form, }
+		return render(request, 'events/templates/workshop/form.html', context)
+	else:
+		context = {}
+		record = Workshop.objects.get(id = rid)
+		context.update(csrf(request))
+		context['form'] = WorkshopForm(instance = record)
+		return render(request, 'events/templates/workshop/form.html', context)
+
+def organiser_workshop(request, status):
+	""" Organiser index page """
+	user = request.user
+	if not user.is_authenticated() or not is_organiser:
+		raise Http404('You are not allowed to view this page!')
+		
+	status_dict = {'pending': 0, 'approved' : 1, 'completed' : 2}
+	if status in status_dict:
+		context = {}
+		context['collection'] = Workshop.objects.filter(organiser_id=user, status = status_dict[status])
+		context['status'] = status
+		context.update(csrf(request))
+		return render(request, 'events/templates/organiser/index.html', context)
+	else:
+		raise Http404('Page not found !!')
+
 #Ajax Request and Responces
 @csrf_exempt
 def ajax_ac_state(request):

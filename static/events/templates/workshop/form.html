@@ -73,8 +73,8 @@
 	-->
 	<div class="form-group">
 		<label for="id_foss">Foss</label>
-		{% render_field form.foss class+="form-control time" tabindex="1" data-placeholder="Enter foss" %}
-		{{ form.time.foss }}
+		{% render_field form.foss class+="form-control foss" tabindex="1" data-placeholder="Enter foss" %}
+		{{ form.foss.errors }}
 	</div>
 	<div class="form-group">
 		<label for="id_language">language</label>

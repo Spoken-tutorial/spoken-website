@@ -18,6 +18,7 @@ urlpatterns = patterns('',
     url(r'ac/new/$', views.new_ac, name='new_ac'),
     url(r'ac/(\d+)/edit/$', views.edit_ac, name='edit_ac'),
     
+    url(r'organiser/workshop/(?P<status>\w+)/$', views.organiser_workshop, name='organiser_workshop'),
     url(r'organiser/(?P<status>\w+)/$', views.rp_organiser, name='rp_organiser'),
     url(r'organiser/active/(?P<code>\w+)/(?P<userid>\d+)/$', views.rp_organiser_confirm, name='rp_organiser_confirm'),
     url(r'organiser/block/(?P<code>\w+)/(?P<userid>\d+)/$', views.rp_organiser_block, name='rp_organiser_block'),
@@ -39,6 +40,7 @@ urlpatterns = patterns('',
 	url(r'dept/(\d+)/edit/$', views.edit_dept, name='edit_dept'),
 	
     url(r'workshop/request/$', views.workshop_request, name='workshop_request'),
+    url(r'workshop/(\d+)/edit/$', views.workshop_edit, name='workshop_edit'),
     
     #Ajax 
     url(r'ajax-ac-state/$', views.ajax_ac_state, name='ajax_ac_state'),

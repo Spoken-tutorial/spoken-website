@@ -126,3 +126,7 @@ STATICFILES_DIRS = (
 	# Don't forget to use absolute paths, not relative paths.
 	BASE_DIR + '/static/',
 )
+
+#debugging 
+INSTALLED_APPS = INSTALLED_APPS + ('debug_toolbar',)
+INTERNAL_IPS = ('127.0.0.1',)
