@@ -80,9 +80,7 @@ class AcademicForm(forms.ModelForm):
 		exclude = ['user', 'academic_code']
 
 class OrganiserForm(forms.Form):
-	state_list = list(State.objects.exclude(name='uncategorized').values_list('id', 'name'))
-	state_list.insert(0, ('', '-- None --'))
-	state = forms.ChoiceField(choices = state_list, widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'State field is required.'})
+	state = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'State field is required.'})
 	district = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'district field is required.'})
 	college = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'College Name field is required.'})
 	
@@ -93,6 +91,10 @@ class OrganiserForm(forms.Form):
 			del kwargs["instance"]
 			
 		super(OrganiserForm, self).__init__(*args, **kwargs)
+		#load the choices
+		state_list = list(State.objects.exclude(name='uncategorized').values_list('id', 'name'))
+		state_list.insert(0, ('', '-- None --'))
+		self.fields['state'].choices = state_list
 		if args:
 			if 'state' in args[0]:
 				if args[0]['state'] and args[0]['state'] != '' and args[0]['state'] != 'None':
@@ -117,12 +119,9 @@ class OrganiserForm(forms.Form):
 			self.fields['college'].initial = initial.academic_id
 
 class InvigilatorForm(forms.Form):
-	state_list = list(State.objects.exclude(name='uncategorized').values_list('id', 'name'))
-	state_list.insert(0, ('', '-- None --'))
-	state = forms.ChoiceField(choices = state_list, widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'State field is required.'})
+	state = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'State field is required.'})
 	district = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'district field is required.'})
 	college = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'College Name field is required.'})
-	
 	def __init__(self, *args, **kwargs):
 		initial = ''
 		if 'instance' in kwargs:
@@ -130,6 +129,10 @@ class InvigilatorForm(forms.Form):
 			del kwargs["instance"]
 			
 		super(InvigilatorForm, self).__init__(*args, **kwargs)
+		#load the choices
+		state_list = list(State.objects.exclude(name='uncategorized').values_list('id', 'name'))
+		state_list.insert(0, ('', '-- None --'))
+		self.fields['state'].choices = state_list
 		if args:
 			if 'state' in args[0]:
 				if args[0]['state'] and args[0]['state'] != '' and args[0]['state'] != 'None':
@@ -163,14 +166,10 @@ class WorkshopForm(forms.Form):
 	#state = forms.ChoiceField(choices = state_list, widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'State field is required.'})
 	district = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'district field is required.'})
 	academic = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'College Name field is required.'})
-	department = forms.MultipleChoiceField(choices = Department.objects.exclude(name='uncategorized').values_list('id', 'name'), widget=forms.SelectMultiple(attrs = {}), required = True, error_messages = {'required':'Department Name field is required.'})
+	department = forms.MultipleChoiceField(choices = [('', '-- None --'),], widget=forms.SelectMultiple(attrs = {}), required = True, error_messages = {'required':'Department Name field is required.'})
 	wdate = forms.DateTimeField(required = True, error_messages = {'required':'Date field is required.'})
-	foss_list = list(Foss_Category.objects.all().values_list('id', 'foss'))
-	foss_list.insert(0, ('', '-- None --'))
-	foss = forms.ChoiceField(choices = foss_list, widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'Foss field is required.'})
-	lang_list = list(Language.objects.all().values_list('id', 'name'))
-	lang_list.insert(0, ('', '-- None --'))
-	language = forms.ChoiceField(choices = lang_list, widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'Language field is required.'})
+	foss = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'Foss field is required.'})
+	language = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'Language field is required.'})
 	skype = forms.ChoiceField(widget=forms.RadioSelect, choices=[(0, 'No'),(1, 'Yes')], required = True)
 	def __init__(self, *args, **kwargs):
 		user = ''
@@ -182,17 +181,35 @@ class WorkshopForm(forms.Form):
 			instance = kwargs["instance"]
 			del kwargs["instance"]
 		super(WorkshopForm, self).__init__(*args, **kwargs)
+		#choices data 
+		self.fields['department'].choices = Department.objects.exclude(name='uncategorized').values_list('id', 'name')
+
+		foss_list = list(Foss_Category.objects.all().values_list('id', 'foss'))
+		foss_list.insert(0, ('', '-- None --'))
+		lang_list = list(Language.objects.all().values_list('id', 'name'))
+		lang_list.insert(0, ('', '-- None --'))
+		self.fields['foss'].choices = foss_list
+		self.fields['language'].choices = lang_list
 		if user:
 			#self.fields['state'].initial = user.organiser.academic.state.id
 			self.fields['district'].choices = District.objects.filter(state =user.organiser.academic.state).values_list('id', 'name')
 			self.fields['district'].initial = user.organiser.academic.district.id
-			self.fields['academic'].choices = Academic_center.objects.filter(district =user.organiser.academic.district).values_list('id', 'institution_name')
-			self.fields['academic'].initial = user.organiser.academic.id
+			if args and 'district' in args[0]:
+					choices = Academic_center.objects.filter(district =args[0]['district']).values_list('id', 'institution_name')
+			else:
+				choices = Academic_center.objects.filter(district =user.organiser.academic.district).values_list('id', 'institution_name')
+				
+			self.fields['academic'].choices = choices
+			#self.fields['academic'].initial = user.organiser.academic.id
 		if instance:
 			#self.fields['state'].initial = user.organiser.academic.state.id
 			self.fields['district'].choices = District.objects.filter(state =instance.academic.state).values_list('id', 'name')
 			self.fields['district'].initial = instance.academic.district.id
 			self.fields['academic'].choices = Academic_center.objects.filter(district =instance.academic.district).values_list('id', 'institution_name')
-			self.fields['academic'].initial = instance.academic
-			#print instance.department.all().values_list('id'))
-			#self.fields['department'].initial = instance.department.first().id
+			self.fields['academic'].initial = instance.academic_id
+			self.fields['department'].initial = instance.department.all().values_list('id', flat=True)
+			self.fields['wdate'].initial = str(instance.wdate) + " " + str(instance.wtime)[0:5]
+			self.fields['foss'].initial = instance.foss_id
+			self.fields['language'].initial = instance.language_id
+			self.fields['skype'].initial = instance.status
+			

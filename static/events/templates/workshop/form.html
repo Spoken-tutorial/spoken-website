@@ -109,5 +109,26 @@
 			minTime:'08:00',
 			maxTime:'18:00',
 		});
+		
+		$college = $('#id_academic');
+		$('#id_district').change(function() {
+			var district = $(this).val();
+			$.ajax({
+				url: "/events/ajax-district-collage/",
+				type: "POST",
+				data: {
+					district : district
+				},
+				success: function(data) {
+					if(data){
+						$college.html(data);
+						$college.removeAttr("disabled");
+					} else{
+						$college.attr("disabled", "disabled");
+						alert('No college found for this district!!');
+					}
+				}
+			});
+		});
 	</script>
 {% endblock %}

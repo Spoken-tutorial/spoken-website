@@ -3,7 +3,7 @@ from django.shortcuts import render, render_to_response, get_object_or_404
 from django.core.context_processors import csrf
 from django.template import RequestContext
 from django.contrib.auth import authenticate, login, logout
-from django.core.mail import send_mail
+from django.core.mail import EmailMultiAlternatives
 from django.utils import timezone
 from django.http import Http404
 from cms.models import *
@@ -49,7 +49,8 @@ def send_registration_confirmation(user):
 	p = Profile.objects.get(user=user)
 	title = "CMS account confirmation"
 	content = "http://www.sample.com/confirm/" + str(p.confirmation_code) + "/" + user.username
-	send_mail(title, content, 'no-reply@sample.com', [user.email], fail_silently=False)
+	#send_mail(title, content, 'no-reply@sample.com', [user.email], fail_silently=False)
+	
 
 def confirm(request, confirmation_code, username):
 	try:

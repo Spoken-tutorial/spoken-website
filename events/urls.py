@@ -2,6 +2,7 @@ from django.conf.urls import patterns, url
 from events import views
 urlpatterns = patterns('',
 	#url(r'^$', views.state, name='state'),
+	url(r'test/$', views.test, name='test'),
 	url(r'states/$', views.state, name='states'),
 	url(r'states/new/$', views.new_state, name='new_state'),
 	url(r'states/(\d+)/edit/$', views.edit_state, name='edit_state'),
@@ -18,13 +19,12 @@ urlpatterns = patterns('',
     url(r'ac/new/$', views.new_ac, name='new_ac'),
     url(r'ac/(\d+)/edit/$', views.edit_ac, name='edit_ac'),
     
-    url(r'organiser/workshop/(?P<status>\w+)/$', views.organiser_workshop, name='organiser_workshop'),
     url(r'organiser/(?P<status>\w+)/$', views.rp_organiser, name='rp_organiser'),
     url(r'organiser/active/(?P<code>\w+)/(?P<userid>\d+)/$', views.rp_organiser_confirm, name='rp_organiser_confirm'),
     url(r'organiser/block/(?P<code>\w+)/(?P<userid>\d+)/$', views.rp_organiser_block, name='rp_organiser_block'),
     
     url(r'organiser/request/(?P<username>\w+)/$', views.organiser_request, name='organiser_request'),
-    url(r'organiser/(?P<username>\w+)/edit/$', views.organiser_edit, name='organiser_edit'),
+    url(r'^organiser/(?P<username>\w+)/edit/$', views.organiser_edit, name='organiser_edit'),
     url(r'organiser/view/(?P<username>\w+)/$', views.organiser_view, name='organiser_view'),
     
     url(r'invigilator/(?P<status>\w+)/$', views.rp_invigilator, name='rp_invigilator'),
@@ -40,6 +40,8 @@ urlpatterns = patterns('',
 	url(r'dept/(\d+)/edit/$', views.edit_dept, name='edit_dept'),
 	
     url(r'workshop/request/$', views.workshop_request, name='workshop_request'),
+	url(r'workshop/(\d+)/approvel/$', views.workshop_approvel, name='workshop_approvel'),
+    url(r'^workshop/(?P<status>\w+)/$', views.workshop_list, name='workshop_list'),
     url(r'workshop/(\d+)/edit/$', views.workshop_edit, name='workshop_edit'),
     
     #Ajax 

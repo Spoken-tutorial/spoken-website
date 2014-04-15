@@ -38,6 +38,7 @@ INSTALLED_APPS = (
 	'django.contrib.sessions',
 	'django.contrib.messages',
 	'django.contrib.staticfiles',
+	'django_extensions',
 	'widget_tweaks',
 	'captcha',
 	'cms',
@@ -130,3 +131,6 @@ STATICFILES_DIRS = (
 #debugging 
 INSTALLED_APPS = INSTALLED_APPS + ('debug_toolbar',)
 INTERNAL_IPS = ('127.0.0.1',)
+
+#Global variable
+BASE_PATH = "http://localhost:8000/"

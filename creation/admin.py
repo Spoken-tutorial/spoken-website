@@ -59,7 +59,7 @@ class TutorialDetailAdmin(admin.ModelAdmin):
 class ContributorRoleAdmin(admin.ModelAdmin):
 	form = ContributorRoleForm
 	list_display = ('user', 'foss_category', 'language', 'status', 'created', 'updated')
-	exclude = ('created', 'updated')
+	#exclude = ('created', 'updated')
 
 	def mark_contributor_disabled(self, request, queryset):
 		rows_updated = queryset.update(status=0)
@@ -83,7 +83,7 @@ class ContributorRoleAdmin(admin.ModelAdmin):
 class DomainReviewerRoleAdmin(admin.ModelAdmin):
 	form = DomainReviewerRoleForm
 	list_display = ('user', 'foss_category', 'language', 'status', 'created', 'updated')
-	exclude = ('created', 'updated')
+	#exclude = ('created', 'updated')
 
 	def mark_domain_reviewer_disabled(self, request, queryset):
 		rows_updated = queryset.update(status=0)
@@ -107,7 +107,7 @@ class DomainReviewerRoleAdmin(admin.ModelAdmin):
 class QualityReviewerRoleAdmin(admin.ModelAdmin):
 	form = QualityReviewerRoleForm
 	list_display = ('user', 'foss_category', 'language', 'status', 'created', 'updated')
-	exclude = ('created', 'updated')
+	#exclude = ('created', 'updated')
 
 	def mark_quality_reviewer_disabled(self, request, queryset):
 		rows_updated = queryset.update(status=0)
