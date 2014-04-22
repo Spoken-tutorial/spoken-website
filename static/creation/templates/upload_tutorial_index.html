@@ -28,14 +28,14 @@
 			{{ form.foss_category.errors }}
 		</div>
 		<div class="form-group">
-			<label for="id_tutorial_name">Tutorial Name:</label>
-			{% render_field form.tutorial_name class+="form-control tutorial_name" tabindex="2" data-placeholder="Choose Tutorial Name" %}
-			{{ form.tutorial_name.errors }}
-		</div>
-		<div class="form-group">
 			<label for="id_language">Language:</label>
 			{% render_field form.language class+="form-control language" tabindex="3" data-placeholder="Choose Language" %}
 			{{ form.language.errors }}
+		</div>
+		<div class="form-group">
+			<label for="id_tutorial_name">Tutorial Name:</label>
+			{% render_field form.tutorial_name class+="form-control tutorial_name" tabindex="2" data-placeholder="Choose Tutorial Name" %}
+			{{ form.tutorial_name.errors }}
 		</div>
 		<input type="submit" class="btn btn-primary" value="Next"  tabindex="4" />
 	</form>
@@ -55,37 +55,60 @@
 			$('.foss_category').on("change", function(){
 				var foss = $(this).val();
 				if(foss == '') {
-					$('.tutorial_name').html('<option value="" selected="selected">---------</option>');
+					$('.tutorial_name').html('<option value="" selected="selected"></option>');
 					$('.tutorial_name').attr("disabled", "disabled");
-					$('.language').html('<option value="" selected="selected">---------</option>');
+					tutname.trigger("chosen:updated");
+					$('.language').html('<option value="" selected="selected"></option>');
 					$('.language').attr("disabled", "disabled");
+					lang.trigger("chosen:updated");
 				} else {
+					$('.tutorial_name').html('<option value="" selected="selected"></option>');
+					$('.tutorial_name').attr("disabled", "disabled");
+					tutname.trigger("chosen:updated");
+					$('.language').html('<option value="" selected="selected"></option>');
+					$('.language').attr("disabled", "disabled");
+					lang.trigger("chosen:updated");
 					$.ajax({
-						url: "/creation/ajax_upload_foss/",
+						url: "/creation/ajax-upload-foss/",
 						type: "POST",
 						data: {
 							foss: foss
 						},
 						success: function(data) {
-							// loading tutorial names
-							if(data[0]){
-								$('.tutorial_name').html(data[0]);
-								$('.tutorial_name').removeAttr('disabled');
-								tutname.trigger("chosen:updated");
-							} else {
-								$('.tutorial_name').html('<option value="" selected="selected"></option>');
-								$('.tutorial_name').attr("disabled", "disabled");
-								tutname.trigger("chosen:updated");
-							}
 							// loading languages
-							if(data[1]) {
-								$('.language').html(data[1]);
+							if(data) {
+								$('.language').html(data);
 								$('.language').removeAttr('disabled');
 								lang.trigger("chosen:updated");
-							} else {
-								$('.language').html('<option value="" selected="selected"></option>');
-								$('.language').attr("disabled", "disabled");
-								lang.trigger("chosen:updated");
+							}
+						}
+					})
+				}
+			});
+			$('.language').on("change", function(){
+				var foss = $('.foss_category').val();
+				var lang = $(this).val();
+				if(foss == '') {
+					$('.tutorial_name').html('<option value="" selected="selected"></option>');
+					$('.tutorial_name').attr("disabled", "disabled");
+					tutname.trigger("chosen:updated");
+				} else {
+					$('.tutorial_name').html('<option value="" selected="selected"></option>');
+					$('.tutorial_name').attr("disabled", "disabled");
+					tutname.trigger("chosen:updated");
+					$.ajax({
+						url: "/creation/ajax-upload-foss/",
+						type: "POST",
+						data: {
+							foss: foss,
+							lang: lang
+						},
+						success: function(data) {
+							// loading tutorial names
+							if(data){
+								$('.tutorial_name').html(data);
+								$('.tutorial_name').removeAttr('disabled');
+								tutname.trigger("chosen:updated");
 							}
 						}
 					})

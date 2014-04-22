@@ -2,7 +2,7 @@
 {% load widget_tweaks %}
 {% load static %}
 {% load creationdata %}
-{% block title %}Upload Tutorial{% endblock %}
+{% block title %}Domain Review Tutorial{% endblock %}
 {% block cssblock %}
 	<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />
 	<link rel="stylesheet" href="{% static 'spoken/css/jquery.fancybox.css' %}" type="text/css" media="screen" charset="utf-8" />
@@ -23,7 +23,7 @@
 		{% endif %}
 	{% endblock %}
 {% endif %}
-{% block heading %}Upload Tutorial{% endblock %}
+{% block heading %}Domain Review Tutorial{% endblock %}
 {% block content %}
 	<form role="form" method="post" enctype="multipart/form-data" action="">
 		{% csrf_token %}
@@ -31,26 +31,27 @@
 			<table class="table table-bordered table-hover">
 				<tr>
 					<th>Foss</th>
-					<td>{{ tr.tutorial_detail.foss.foss }}</td>
+					<td>{{tr.tutorial_detail.foss.foss}}</td>
 				</tr>
 				<tr>
 					<th>Level</th>
-					<td>{{ tr.tutorial_detail.level.level }}</td>
+					<td>{{tr.tutorial_detail.level.level}}</td>
 				</tr>
 				<tr>
 					<th>Tutorial Name</th>
-					<td>{{ tr.tutorial_detail.tutorial }}</td>
+					<td>{{tr.tutorial_detail.tutorial}}</td>
 				</tr>
 				<tr>
 					<th>Language</th>
-					<td>{{ tr.language.name }}</td>
+					<td>{{tr.language.name}}</td>
 				</tr>
 				<tr>
 					<th>Duration</th>
-					<td>{{ tr.created }} to {{ tr.updated }}</td>
+					<td>{{ tr.created }} <b>to</b> {{ tr.updated }}</td>
 				</tr>
 			</table>
 		</div>
+		<a class="btn btn-primary" href="/creation/accept-all/domain/{{ tr.id }}">Accept All</a>
 		<div class="table-responsive">
 			<table class="table table-bordered table-condensed table-hover">
 				<tr>
@@ -70,14 +71,15 @@
 						<td class="col-center">-</td>
 					{% endif %}
 					<td>
-						{% if tr.outline_status <= 2 or tr.outline_status == 5 %}
-							<a class="btn btn-primary fancybox-outline fancybox.iframe" href="/creation/upload-outline/{{ tr.id }}/" title="Upload Outline">
-								<span title="" data-original-title="" class="fa fa-upload fa-2"></span>
-							</a>
-						{% endif %}
 						{% if tr.outline_status %}
 							<a class="btn btn-primary fancybox-outline fancybox.iframe" href="/creation/view-outline/{{ tr.id }}" title="View Outline">
 								<span title="" data-original-title="" class="fa fa-globe fa-2"></span>
+							</a>
+						{% endif %}
+						{% if tr.outline_status == 2 %}
+							<a class="twin-button btn btn-primary fancybox-script fancybox.iframe" href="/creation/domain-review-component/{{ tr.id }}/outline" title="Accept / Reject Outline">
+								<span title="" data-original-title="" class="fa fa-check fa-2">/</span>
+								<span title="" data-original-title="" class="fa fa-times fa-2"></span>
 							</a>
 						{% endif %}
 					</td>
@@ -92,14 +94,15 @@
 						<td class="col-center">-</td>
 					{% endif %}
 					<td>
-					{% if tr.script_status <= 2 or tr.script_status == 5 %}
-						<a class="btn btn-primary fancybox-script fancybox.iframe" href="/creation/upload-script/{{ tr.id }}/" title="Upload Script">
-							<span title="" data-original-title="" class="fa fa-upload fa-2"></span>
-						</a>
-					{% endif %}
 					{% if tr.script_status %}
 						<a class="btn btn-primary fancybox-script fancybox.iframe" href="{{script_base}}{{tr.script}}" title="View Script">
 							<span title="" data-original-title="" class="fa fa-globe fa-2"></span>
+						</a>
+					{% endif %}
+					{% if tr.script_status == 2 %}
+						<a class="twin-button btn btn-primary fancybox-script fancybox.iframe" href="/creation/domain-review-component/{{ tr.id }}/script" title="Accept / Reject Script">
+							<span title="" data-original-title="" class="fa fa-check fa-2">/</span>
+							<span title="" data-original-title="" class="fa fa-times fa-2"></span>
 						</a>
 					{% endif %}
 					</td>
@@ -115,14 +118,15 @@
 						<td class="col-center">-</td>
 					{% endif %}
 					<td>
-					{% if tr.slide_status <= 2 or tr.slide_status == 5 %}
-						<a class="btn btn-primary fancybox fancybox.iframe" href="/creation/upload-component/{{ tr.id }}/slide/" title="Upload Slides">
-							<span title="" data-original-title="" class="fa fa-upload fa-2"></span>
-						</a>
-					{% endif %}
 					{% if tr.common_content.slide_status %}
 						<a class="btn btn-primary" href="/media/videos/{{ tr.tutorial_detail.foss_id }}/{{ tr.tutorial_detail_id }}/resources/{{ tr.common_content.slide }}" title="Download Slides" target="_blank">
 							<span title="" data-original-title="" class="fa fa-archive fa-2"></span>
+						</a>
+					{% endif %}
+					{% if tr.common_content.slide_status == 2 %}
+						<a class="twin-button btn btn-primary fancybox-script fancybox.iframe" href="/creation/domain-review-component/{{ tr.id }}/slide" title="Accept / Reject Slides">
+							<span title="" data-original-title="" class="fa fa-check fa-2">/</span>
+							<span title="" data-original-title="" class="fa fa-times fa-2"></span>
 						</a>
 					{% endif %}
 					</td>
@@ -142,16 +146,17 @@
 						<td class="col-center">-</td>
 					{% endif %}
 					<td>
-					{% if tr.video_status <= 1 or tr.video_status == 5 %}
-						<a class="btn btn-primary fancybox fancybox.iframe" href="/creation/upload-component/{{ tr.id }}/video/" title="Upload Video">
-							<span title="" data-original-title="" class="fa fa-upload fa-2"></span>
+					{% if tr.video_status %}
+						<a class="btn btn-primary fancybox-outline fancybox.iframe" href="/creation/view-video/{{ tr.id }}" title="View/Download video">
+							<span title="" data-original-title="" class="fa fa-film fa-2"></span>
 						</a>
 					{% endif %}
-					{% if tr.video_status %}
-							<a class="btn btn-primary fancybox-outline fancybox.iframe" href="/creation/view-video/{{ tr.id }}" title="View/Download video">
-								<span title="" data-original-title="" class="fa fa-film fa-2"></span>
-							</a>
-						{% endif %}
+					{% if tr.video_status == 2 %}
+						<a class="twin-button btn btn-primary fancybox-script fancybox.iframe" href="/creation/domain-review-component/{{ tr.id }}/video" title="Accept / Reject Video">
+							<span title="" data-original-title="" class="fa fa-check fa-2">/</span>
+							<span title="" data-original-title="" class="fa fa-times fa-2"></span>
+						</a>
+					{% endif %}
 					</td>
 				</tr>
 			{% if tr.language.name == 'English' %}
@@ -165,14 +170,15 @@
 						<td class="col-center">-</td>
 					{% endif %}
 					<td>
-					{% if tr.common_content.code_status <= 2 or tr.common_content.code_status == 5 %}
-						<a class="btn btn-primary fancybox fancybox.iframe" href="/creation/upload-component/{{ tr.id }}/code/" title="Upload Code Files">
-							<span title="" data-original-title="" class="fa fa-upload fa-2"></span>
-						</a>
-					{% endif %}
 					{% if tr.common_content.code_status %}
 						<a class="btn btn-primary" href="/media/videos/{{ tr.tutorial_detail.foss_id }}/{{ tr.tutorial_detail_id }}/resources/{{ tr.common_content.code }}" title="Download Code Files" target="_blank">
 							<span title="" data-original-title="" class="fa fa-archive fa-2"></span>
+						</a>
+					{% endif %}
+					{% if tr.common_content.code_status == 2 %}
+						<a class="twin-button btn btn-primary fancybox-script fancybox.iframe" href="/creation/domain-review-component/{{ tr.id }}/code" title="Accept / Reject Codefiles">
+							<span title="" data-original-title="" class="fa fa-check fa-2">/</span>
+							<span title="" data-original-title="" class="fa fa-times fa-2"></span>
 						</a>
 					{% endif %}
 					</td>
@@ -189,14 +195,15 @@
 						<td class="col-center">-</td>
 					{% endif %}
 					<td>
-					{% if tr.common_content.assignment_status <= 2 or tr.common_content.assignment_status == 5 %}
-						<a class="btn btn-primary fancybox fancybox.iframe" href="/creation/upload-component/{{ tr.id }}/assignment/" title="Upload Assignment">
-							<span title="" data-original-title="" class="fa fa-upload fa-2"></span>
-						</a>
-					{% endif %}
 					{% if tr.common_content.assignment_status %}
 						<a class="btn btn-primary" href="/media/videos/{{ tr.tutorial_detail.foss_id }}/{{ tr.tutorial_detail_id }}/resources/{{ tr.common_content.assignment }}" title="Download Assignment" target="_blank">
 							<span title="" data-original-title="" class="fa fa-file-text-o fa-2"></span>
+						</a>
+					{% endif %}
+					{% if tr.common_content.assignment_status == 2 %}
+						<a class="twin-button btn btn-primary fancybox-script fancybox.iframe" href="/creation/domain-review-component/{{ tr.id }}/assignment" title="Accept / Reject Assignment">
+							<span title="" data-original-title="" class="fa fa-check fa-2">/</span>
+							<span title="" data-original-title="" class="fa fa-times fa-2"></span>
 						</a>
 					{% endif %}
 					</td>
@@ -204,7 +211,7 @@
 			{% endif %}
 			</table>
 		</div>
-	{% if review_log %}
+	{% if review_log != None and review_log|length != 0 %}
 		<h4 class="page-title">Reviewer's Feedback</h4>
 		<div class="reviewers-feedback">
 			{% for log_rec in review_log %}
@@ -225,7 +232,30 @@
 			{% endfor %}
 		</div>
 	{% endif %}
-	{% if contrib_log != None %}
+	{% if review_history != None and review_history|length != 0 %}
+		<h4 class="page-title">Domain Reviews History</h4>
+		<div class="table-responsive">
+			<table class="table table-bordered table-condensed table-hover">
+				<tr class="active">
+					<th>S.No</th>
+					<th>Component</th>
+					<th>User</th>
+					<th>Status</th>
+					<th>Date &amp; Time</th>
+				</tr>
+			{% for log_rec in review_history %}
+				<tr>
+					<td>{{ forloop.counter }}</td>
+					<td>{{ log_rec.component|title }}</td>
+					<td>{{ log_rec.user.username }}</td>
+					<td>{{ log_rec.status|get_review_status_list }}</td>
+					<td>{{ log_rec.created }}</td>
+				</tr>
+			{% endfor %}
+			</table>
+		</div>
+	{% endif %}
+	{% if contrib_log != None and contrib_log|length != 0 %}
 		<h4 class="page-title">Uploads History</h4>
 		<div class="table-responsive">
 			<table class="table table-bordered table-condensed table-hover">
@@ -239,9 +269,9 @@
 			{% for log_rec in contrib_log %}
 				<tr>
 					<td>{{ forloop.counter }}</td>
-					<td>{{ log_rec.component | title }}</td>
+					<td>{{ log_rec.component|title }}</td>
 					<td>{{ log_rec.user.username }}</td>
-					<td>{{ log_rec.status | get_review_status_list }}</td>
+					<td>{{ log_rec.status|get_review_status_list }}</td>
 					<td>{{ log_rec.created }}</td>
 				</tr>
 			{% endfor %}

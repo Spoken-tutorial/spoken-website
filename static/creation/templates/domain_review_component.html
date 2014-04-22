@@ -1,0 +1,59 @@
+{% extends 'spoken/templates/popup-base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block heading %}
+	Domain Review - {{ component }}
+{% endblock %}
+{% if alert_success or alert_danger %}
+	{% block alert %}
+		{% if alert_success %}
+			<div class="alert alert-success alert-dismissable">
+				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+				{{ alert_success }}
+			</div>
+		{% endif %}
+		{% if alert_danger %}
+			<div class="alert alert-danger alert-dismissable">
+				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+				{{ alert_danger }}
+			</div>
+		{% endif %}
+	{% endblock %}
+{% endif %}
+{% block content %}
+	<form role="form" method="post" enctype="multipart/form-data" action="">
+		{% csrf_token %}
+		<div class="form-group">
+			<label for="id_component_status">Status:</label>
+			{% render_field form.component_status class+="form-control" %}
+			{{ form.component_status.errors }}
+		</div>
+		<div class="form-group remarks-parent">
+			<label for="id_feedback">Remarks:</label>
+			{% render_field form.feedback class+="form-control" %}
+			<ul class="cerrorlist"></ul>
+		</div>
+		<input type="submit" class="btn btn-primary review-submit" value="Submit"  tabindex="4" />
+	</form>
+{% endblock %}
+{% block jsblock %}
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$('.remarks-parent').hide();
+			$('#id_component_status').change(function() {
+				if($('#id_component_status').val() == 5)
+					$('.remarks-parent').show();
+				else
+					$('.remarks-parent').hide();
+			});
+			$( "form" ).submit(function( event ) {
+				var compStatus = $('#id_component_status').val();
+				var remarks = $('#id_feedback').val();
+				if(compStatus == 5 && remarks == '') {
+					$('.cerrorlist').html('<li>Please fill the remarks field</li>');
+					event.preventDefault();
+				}
+			});
+		});
+	</script>
+{% endblock %}

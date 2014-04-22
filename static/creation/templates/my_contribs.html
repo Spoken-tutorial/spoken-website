@@ -1,8 +1,8 @@
-{% extends 'spoken/templates/popup-base.html' %}
+{% extends 'spoken/templates/base.html' %}
 {% load widget_tweaks %}
-{% block heading %}
-	Upload {{ title }} file
-{% endblock %}
+{% load static %}
+{% load creationdata %}
+{% block title %}Tutorials Contributed{% endblock %}
 {% if alert_success or alert_danger %}
 	{% block alert %}
 		{% if alert_success %}
@@ -19,14 +19,6 @@
 		{% endif %}
 	{% endblock %}
 {% endif %}
+{% block heading %}Tutorials Contributed{% endblock %}
 {% block content %}
-	<form role="form" method="post" enctype="multipart/form-data" action="">
-		{% csrf_token %}
-		<div class="form-group">
-			{% render_field form.comp class+="form-control" %}
-			{{ form.comp.errors }}
-		</div>
-		{% render_field form.comptype %}
-		<input type="submit" class="btn btn-primary" value="Upload"  tabindex="4" />
-	</form>
 {% endblock %}

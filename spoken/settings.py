@@ -13,8 +13,8 @@ from os.path import *
 from config import *
 import os
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-print BASE_DIR
 
+SCRIPT_URL = 'http://script.spoken-tutorial.org/index.php/'
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.6/howto/deployment/checklist/
 
@@ -101,7 +101,7 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/var/www/example.com/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/') # Absolute path to the media.
-print MEDIA_ROOT
+
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
 # Examples: "http://example.com/media/", "http://media.example.com/"
@@ -131,6 +131,3 @@ STATICFILES_DIRS = (
 #debugging 
 INSTALLED_APPS = INSTALLED_APPS + ('debug_toolbar',)
 INTERNAL_IPS = ('127.0.0.1',)
-
-#Global variable
-BASE_PATH = "http://localhost:8000/"

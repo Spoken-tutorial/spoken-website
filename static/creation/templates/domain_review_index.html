@@ -1,0 +1,119 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load creationdata %}
+{% block title %}Domain review{% endblock %}
+{% if alert_success or alert_danger %}
+	{% block alert %}
+		{% if alert_success %}
+			<div class="alert alert-success alert-dismissable">
+				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+				{{ alert_success }}
+			</div>
+		{% endif %}
+		{% if alert_danger %}
+			<div class="alert alert-danger alert-dismissable">
+				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+				{{ alert_danger }}
+			</div>
+		{% endif %}
+	{% endblock %}
+{% endif %}
+{% block heading %}<i class="fa fa-list-ul"></i> Tutorials waiting for Domain review{% endblock %}
+{% block content %}
+	<div class="table-responsive">
+		<table class="table table-bordered table-hover">
+			<tr class="active">
+				<th>S.No</th>
+				<th>Foss</th>
+				<th>Tutorial Name</th>
+				<th>Language</th>
+				<th>Outline</th>
+				<th>Script</th>
+				<th>Slide</th>
+				<th>Video</th>
+				<th>Code Files</th>
+				<th>Assignment</th>
+				<th class="col-center"><span title="" data-original-title="" class="fa fa-cogs fa-2"></span></th>
+			</tr>
+		{% if tr_recs == None %}
+			<tr>
+				<td colspan="5" class="col-center">List is empty</td>
+			</tr>
+		{% else %}
+			{% for tr_rec in tr_recs %}
+				{% if tr_rec.outline_status == 2 or tr_rec.script_status == 2 or tr_rec.video_status == 2 %}
+					<tr>
+						<td>{{ forloop.counter }}</td>
+						<td>{{ tr_rec.tutorial_detail.foss.foss }}</td>
+						<td>{{ tr_rec.tutorial_detail.tutorial }}</td>
+						<td>{{ tr_rec.language.name }}</td>
+						<td class="col-center" title="{{ tr_rec.outline_status | get_review_status_list }}">
+							<span class="{{ tr_rec.outline_status | get_review_status_symbol }}"></span>
+						</td>
+						<td class="col-center" title="{{ tr_rec.script_status | get_review_status_list }}">
+							<span class="{{ tr_rec.script_status | get_review_status_symbol }}"></span>
+						</td>
+						<td class="col-center" title="{{ tr_rec.common_content.slide_status | get_review_status_list }}">
+							<span class="{{ tr_rec.common_content.slide_status | get_review_status_symbol }}"></span>
+						</td>
+						<td class="col-center" title="{{ tr_rec.video_status | get_review_status_list }}">
+							<span class="{{ tr_rec.video_status | get_review_status_symbol }}"></span>
+						</td>
+						<td class="col-center" title="{{ tr_rec.common_content.code_status | get_review_status_list }}">
+							<span class="{{ tr_rec.common_content.code_status | get_review_status_symbol }}"></span>
+						</td>
+						<td class="col-center" title="{{ tr_rec.common_content.assignment_status | get_review_status_list }}">
+							<span class="{{ tr_rec.common_content.assignment_status | get_review_status_symbol }}"></span>
+						</td>
+						<td class="col-center"><a href="/creation/domain-review-tutorial/{{ tr_rec.id }}" class="review-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Review</a></td>
+					</tr>
+				{% elif tr_rec.language.name == 'English' and tr_rec.common_content.slide_status == 2 or tr_rec.common_content.code_status == 2 or tr_rec.common_content.assignment_status == 2 %}
+					<tr>
+						<td>{{ forloop.counter }}</td>
+						<td>{{ tr_rec.tutorial_detail.foss.foss }}</td>
+						<td>{{ tr_rec.tutorial_detail.tutorial }}</td>
+						<td>{{ tr_rec.language.name }}</td>
+						<td class="col-center" title="{{ tr_rec.outline_status | get_review_status_list }}">
+							<span class="{{ tr_rec.outline_status | get_review_status_symbol }}"></span>
+						</td>
+						<td class="col-center" title="{{ tr_rec.script_status | get_review_status_list }}">
+							<span class="{{ tr_rec.script_status | get_review_status_symbol }}"></span>
+						</td>
+						<td class="col-center" title="{{ tr_rec.common_content.slide_status | get_review_status_list }}">
+							<span class="{{ tr_rec.common_content.slide_status | get_review_status_symbol }}"></span>
+						</td>
+						<td class="col-center" title="{{ tr_rec.video_status | get_review_status_list }}">
+							<span class="{{ tr_rec.video_status | get_review_status_symbol }}"></span>
+						</td>
+						<td class="col-center" title="{{ tr_rec.common_content.code_status | get_review_status_list }}">
+							<span class="{{ tr_rec.common_content.code_status | get_review_status_symbol }}"></span>
+						</td>
+						<td class="col-center" title="{{ tr_rec.common_content.assignment_status | get_review_status_list }}">
+							<span class="{{ tr_rec.common_content.assignment_status | get_review_status_symbol }}"></span>
+						</td>
+						<td class="col-center"><a href="/creation/domain-review-tutorial/{{ tr_rec.id }}" class="review-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Review</a></td>
+					</tr>
+				{% endif %}
+			{% endfor %}
+		{% endif %}
+		</table>
+	</div>
+{% endblock %}
+{% block jsblock %}
+	<script src="{% static 'spoken/js/chosen.jquery.min.js' %}"></script>
+	<script src="{% static 'spoken/js/jquery.fancybox.pack.js' %}"></script>
+	<script src="{% static 'spoken/js/jquery.mousewheel-3.0.6.pack.js' %}"></script>
+	<script type="text/javascript">
+		$(document).ready(function(){
+			$(".review-btn").hover(
+				function () {
+					$(this).children(0).addClass("fa-spin");
+				},
+				function () {
+					$(this).children(0).removeClass("fa-spin");
+				}
+			);
+		});
+	</script>
+{% endblock %}

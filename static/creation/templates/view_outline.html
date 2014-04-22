@@ -1,7 +1,8 @@
-{% extends 'spoken/templates/base.html' %}
+{% extends 'spoken/templates/popup-base.html' %}
 {% load widget_tweaks %}
-{% load static %}
-{% block title %}Add new FOSS category{% endblock %}
+{% block heading %}
+	Outline
+{% endblock %}
 {% if alert_success or alert_danger %}
 	{% block alert %}
 		{% if alert_success %}
@@ -22,20 +23,7 @@
 	<form role="form" method="post" enctype="multipart/form-data" action="">
 		{% csrf_token %}
 		<div class="form-group">
-			<label for="id_foss">FOSS:</label>
-			{% render_field form.foss class+="form-control" %}
-			{{ form.foss.errors }}
+			<pre>{{ tr.outline }}</pre>
 		</div>
-		<div class="form-group">
-			<label for="id_description">Description:</label>
-			{% render_field form.description class+="form-control" %}
-			{{ form.description.errors }}
-		</div>
-		<div class="form-group">
-			<label for="id_status">Status:</label>
-			{% render_field form.status class+="form-control" %}
-			{{ form.status.errors }}
-		</div>
-		<input type="submit" class="btn btn-primary" value="Save">
 	</form>
 {% endblock %}
