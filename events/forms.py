@@ -8,25 +8,12 @@ from django.forms import ModelForm
 from events.models import *
 from django.contrib.auth.models import User, Group
 
-class StateForm(forms.ModelForm):
-	latitude = forms.CharField(required=False)
-	longtitude = forms.CharField(required=False)
-	img_map_area = forms.CharField(widget=forms.Textarea, required=False)
-	class Meta:
-		model = State
-		fields = ['code', 'name', 'latitude', 'longtitude', 'img_map_area']
-	def clean_latitude(self):
-		if self.cleaned_data['latitude'] < 10:
-			raise forms.ValidationError("exceding")
-		# Always return the cleaned data
-		return self.cleaned_data['latitude']
-
 class RpForm(forms.ModelForm):
 	user = forms.ModelChoiceField(queryset = User.objects.filter(groups__name='Resource Person'))
 	state = forms.ModelChoiceField(queryset = State.objects.all())
 	status = forms.BooleanField(required=False)
 	class Meta:
-		model = Resource_person
+		model = ResourcePerson
 		exclude = ['assigned_by']
 
 class AcademicForm(forms.ModelForm):
@@ -34,7 +21,7 @@ class AcademicForm(forms.ModelForm):
 	
 	university = forms.ModelChoiceField(label='University', cache_choices=True, widget = forms.Select(attrs = {'class' : 'ac-university'}), queryset = University.objects.none(), empty_label = "--- None ---", help_text = "", error_messages = {'required':'University field required.'})
 	
-	institution_type = forms.ModelChoiceField(label='Institute Type', cache_choices=True, widget = forms.Select(attrs = {'class' : 'ac-institution_type'}), queryset = Institute_type.objects.order_by('name'), empty_label = "--- None ---", help_text = "", error_messages = {'required':'Institute Type field required.'})
+	institution_type = forms.ModelChoiceField(label='Institute Type', cache_choices=True, widget = forms.Select(attrs = {'class' : 'ac-institution_type'}), queryset = InstituteType.objects.all(), empty_label = "--- None ---", help_text = "", error_messages = {'required':'Institute Type field required.'})
 	
 	district = forms.ModelChoiceField(label='Dist', cache_choices=True, widget = forms.Select(attrs = {'class' : 'ac-district'}), queryset = District.objects.none(), empty_label = "--- None ---", help_text = "", error_messages = {'required':'Institute Type field required.'})
 	
@@ -56,7 +43,7 @@ class AcademicForm(forms.ModelForm):
 			
 		super(AcademicForm, self).__init__(*args, **kwargs)
 		#initial
-		self.fields["state"].queryset = State.objects.filter(resource_person__user_id=user).filter(resource_person__status=1)
+		self.fields["state"].queryset = State.objects.filter(resourceperson__user_id=user).filter(resourceperson__status=1)
 		#prevent ajax loaded data
 		if args:
 			if 'district' in args[0]:
@@ -76,7 +63,7 @@ class AcademicForm(forms.ModelForm):
 			self.fields["city"].queryset = City.objects.filter(state__id=initial.state_id)
 			
 	class Meta:
-		model = Academic_center
+		model = AcademicCenter
 		exclude = ['user', 'academic_code']
 
 class OrganiserForm(forms.Form):
@@ -105,7 +92,7 @@ class OrganiserForm(forms.Form):
 					self.fields['district'].initial = args[0]['district']
 			if 'district' in args[0]:
 				if args[0]['district'] and args[0]['district'] != '' and args[0]['district'] != 'None':
-					choices = list(Academic_center.objects.filter(district_id = args[0]['district']).values_list('id', 'institution_name'))
+					choices = list(AcademicCenter.objects.filter(district_id = args[0]['district']).values_list('id', 'institution_name'))
 					choices.insert(0, ('', '-- None --'))
 					self.fields['college'].choices = choices
 					self.fields['college'].widget.attrs = {}
@@ -113,7 +100,7 @@ class OrganiserForm(forms.Form):
 		if initial:
 			self.fields['state'].initial = initial.academic.state_id
 			self.fields['district'].choices = District.objects.filter(state_id =initial.academic.state_id).values_list('id', 'name')
-			self.fields['college'].choices = Academic_center.objects.filter(district_id =initial.academic.district_id).values_list('id', 'institution_name')
+			self.fields['college'].choices = AcademicCenter.objects.filter(district_id =initial.academic.district_id).values_list('id', 'institution_name')
 			#initial data
 			self.fields['district'].initial = initial.academic.district_id
 			self.fields['college'].initial = initial.academic_id
@@ -143,7 +130,7 @@ class InvigilatorForm(forms.Form):
 					self.fields['district'].initial = args[0]['district']
 			if 'district' in args[0]:
 				if args[0]['district'] and args[0]['district'] != '' and args[0]['district'] != 'None':
-					choices = list(Academic_center.objects.filter(district_id = args[0]['district']).values_list('id', 'institution_name'))
+					choices = list(AcademicCenter.objects.filter(district_id = args[0]['district']).values_list('id', 'institution_name'))
 					choices.insert(0, ('', '-- None --'))
 					self.fields['college'].choices = choices
 					self.fields['college'].widget.attrs = {}
@@ -151,7 +138,7 @@ class InvigilatorForm(forms.Form):
 		if initial:
 			self.fields['state'].initial = initial.academic.state_id
 			self.fields['district'].choices = District.objects.filter(state_id =initial.academic.state_id).values_list('id', 'name')
-			self.fields['college'].choices = Academic_center.objects.filter(district_id =initial.academic.district_id).values_list('id', 'institution_name')
+			self.fields['college'].choices = AcademicCenter.objects.filter(district_id =initial.academic.district_id).values_list('id', 'institution_name')
 			#initial data
 			self.fields['district'].initial = initial.academic.district_id
 			self.fields['college'].initial = initial.academic_id
@@ -195,9 +182,9 @@ class WorkshopForm(forms.Form):
 			self.fields['district'].choices = District.objects.filter(state =user.organiser.academic.state).values_list('id', 'name')
 			self.fields['district'].initial = user.organiser.academic.district.id
 			if args and 'district' in args[0]:
-					choices = Academic_center.objects.filter(district =args[0]['district']).values_list('id', 'institution_name')
+					choices = AcademicCenter.objects.filter(district =args[0]['district']).values_list('id', 'institution_name')
 			else:
-				choices = Academic_center.objects.filter(district =user.organiser.academic.district).values_list('id', 'institution_name')
+				choices = AcademicCenter.objects.filter(district =user.organiser.academic.district).values_list('id', 'institution_name')
 				
 			self.fields['academic'].choices = choices
 			#self.fields['academic'].initial = user.organiser.academic.id
@@ -205,11 +192,54 @@ class WorkshopForm(forms.Form):
 			#self.fields['state'].initial = user.organiser.academic.state.id
 			self.fields['district'].choices = District.objects.filter(state =instance.academic.state).values_list('id', 'name')
 			self.fields['district'].initial = instance.academic.district.id
-			self.fields['academic'].choices = Academic_center.objects.filter(district =instance.academic.district).values_list('id', 'institution_name')
+			self.fields['academic'].choices = AcademicCenter.objects.filter(district =instance.academic.district).values_list('id', 'institution_name')
 			self.fields['academic'].initial = instance.academic_id
 			self.fields['department'].initial = instance.department.all().values_list('id', flat=True)
 			self.fields['wdate'].initial = str(instance.wdate) + " " + str(instance.wtime)[0:5]
 			self.fields['foss'].initial = instance.foss_id
 			self.fields['language'].initial = instance.language_id
 			self.fields['skype'].initial = instance.status
-			
+
+class WorkshopPermissionForm(forms.Form):
+	permission_choices = list(PermissionType.objects.all().values_list('id', 'name'))
+	permission_choices.insert(0, ('', '-- None --'))
+	permissiontype = forms.ChoiceField(choices = permission_choices, widget=forms.Select(attrs = {}), required = True)
+	
+	user_list = list(User.objects.filter(groups__name='Workshop Permission').values_list('id', 'username'))
+	user_list.insert(0, ('', '-- None --'))
+	user = forms.ChoiceField(choices = user_list, widget=forms.Select(attrs = {}), required = True)
+	
+	state_list = list(State.objects.exclude(name='uncategorized').values_list('id', 'name'))
+	state_list.insert(0, ('', '-- None --'))
+	state = forms.ChoiceField(choices = state_list, widget=forms.Select(attrs = {}), required = True)
+	
+	district = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = False, error_messages = {'required':'district field is required.'})
+	
+	university =  forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = False)
+	
+	institution_type = list(InstituteType.objects.order_by('name').values_list('id', 'name'))
+	institution_type.insert(0, ('', '-- None --'))
+	institutiontype = forms.ChoiceField(choices = institution_type, widget=forms.Select(attrs = {}), required = False)
+	
+	institute = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = False)
+
+	def __init__(self, *args, **kwargs):
+		super(WorkshopPermissionForm, self).__init__(*args, **kwargs)
+		if args:
+			if 'state' in args[0] and 'district' in args[0]:
+				if args[0]['state'] and args[0]['state'] != '' and args[0]['state'] != 'None':
+					choices = list(District.objects.filter(state_id = args[0]['state']).values_list('id', 'name'))
+					choices.insert(0, ('', '-- None --'))
+					self.fields['district'].choices = choices
+					
+			if 'state' in args[0] and 'university' in args[0]:
+				if args[0]['state'] and args[0]['state'] != '' and args[0]['state'] != 'None':
+					choices = list(University.objects.filter(state_id = args[0]['state']).values_list('id', 'name'))
+					choices.insert(0, ('', '-- None --'))
+					self.fields['university'].choices = choices
+					
+			if 'district' in args[0] and 'institute' in args[0]:
+				if args[0]['district'] and args[0]['district'] != '' and args[0]['district'] != 'None':
+					choices = list(AcademicCenter.objects.filter(district_id = args[0]['district']).values_list('id', 'institution_name'))
+					choices.insert(0, ('', '-- None --'))
+					self.fields['institute'].choices = choices

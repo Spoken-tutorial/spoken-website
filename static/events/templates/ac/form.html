@@ -22,6 +22,7 @@
 {% block content %}
 
 <form action="{{ action }}" method="post">{% csrf_token %}
+{% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
     {% if form.non_field_errors %}
     <ul>
       {% for error in form.non_field_errors %}
@@ -104,121 +105,20 @@
 		{{ form.status.errors }}
 	</div>
 	<input class="btn btn-primary" type="submit" value="Submit" />
+{% endwith %}
 </form>
 
 
 {% endblock %}
 {% block jsblock %}
 	<script src="{% static 'spoken/js/chosen.jquery.min.js' %}"></script>
-	<script type="text/javascript">
-		$(".chosen").chosen({width: "100%"});
-		$(".tutorial_name").chosen({width: "100%"});
-		$(".language").chosen({width: "100%"});
-	</script>
+	<script src="{% static 'spoken/js/events.js' %}"></script>
 	<script>
-		$(document).ready(function(){
-			$acstate = $('.ac-state');
-			$ac_university = $(".ac-university");
-			$ac_district = $(".ac-district");
-			$ac_city = $(".ac-city");
-			$ac_location = $(".ac-location");
-			$ac_pincode = $(".pincode");
-			$acstate.attr("disabled");
-			$acstate.change(function() {
-				$("#similar-link").hide();
-				var state = $(this).val();
-				/* see thread-user.js */
-				//$("#question-details-ok").show();
-				$.ajax({
-					url: "/events/ajax-ac-state/",
-					type: "POST",
-					data: {
-						state: state
-					},
-					success: function(data) {
-						if(data[0]){
-							$ac_university.html(data[0]);
-							$ac_university.removeAttr("disabled");
-							$ac_university.trigger("chosen:updated");
-						}else{
-							$ac_university.html('<option>-- None -- </option>')
-							$ac_university.attr("disabled", "disabled");
-							$ac_university.trigger("chosen:updated");
-							alert('No University found for this State!!');
-						}
-						if(data[1]){
-							$ac_district.html(data[1]);
-							$ac_district.trigger("chosen:updated");
-							$ac_district.removeAttr("disabled");
-						}else{
-							$ac_district.html('<option>-- None -- </option>')
-							$ac_district.trigger("chosen:updated");
-							$ac_district.attr("disabled", "disabled");
-							alert('No District found for this State!!');
-						}
-						if(data[2]){
-							$ac_city.html(data[2]);
-							$ac_city.trigger("chosen:updated");
-							$ac_city.removeAttr("disabled");
-						}else{
-							$ac_city.html('<option>-- None -- </option>')
-							$ac_city.trigger("chosen:updated");
-							$ac_city.attr("disabled", "disabled");
-							alert('No City found for this State!!');
-						}
-						//console.log("University = " + data[0]);
-						//console.log("District = " + data[1]);
-						//console.log("City = " + data[2]);
-					}
-				});
-			});
-			
-			$ac_district.change(function(){
-				var district = $(this).val();
-				/* see thread-user.js */
-				$.ajax({
-					url: "/events/ajax-ac-location/",
-					type: "POST",
-					data: {
-						district: district
-					},
-					success: function(data) {
-						if(data){
-							$ac_location.html(data);
-							$ac_location.trigger("chosen:updated");
-							$ac_location.removeAttr("disabled");
-						}else{
-							$ac_location.html('<option>-- None -- </option>')
-							$ac_location.trigger("chosen:updated");
-							$ac_location.attr("disabled", "disabled");
-							alert('No Location found for this District!!');
-						}
-						//console.log(data);
-					}
-				});
-			});
-			
-			$ac_location.change(function(){
-				var location = $(this).val();
-				/* see thread-user.js */
-				$.ajax({
-					url: "/events/ajax-ac-pincode/",
-					type: "POST",
-					data: {
-						location: location
-					},
-					success: function(data) {
-						if(data){
-							$ac_pincode.val(data);
-							$ac_pincode.removeAttr("disabled");
-						}else{
-							//$ac_pincode.attr("disabled", "disabled");
-							alert('No pincode found for this Location!!');
-						}
-						//console.log(data);
-					}
-				});
-			});
+		$("#id_state").change(function(){
+			ajaxStrateFillDatas('district', 'city', 'university');
+		});
+		$('.district').change(function(){
+			ajaxDistrictFillDatas('location', '', $(this).val());
 		});
 	</script>
 {% endblock %}

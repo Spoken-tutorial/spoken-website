@@ -21,34 +21,38 @@
 {% endif %}
 {% block content %}
 	<a class="btn btn-primary" href="{% url 'events:new_ac' %}">Add</a>
-	<table class="table table-striped table-hover">
-		<tr>
-			<th>State</th>
-			<th>University</th>
-			<th>Institute Name</th>
-			<th>Institute Type</th>
-			<th>District</th>
-			<th>Location</th>
-			<th>City</th>
-			<th>Street</th>
-			<th>Pincode</th>
-			<th>Update</th>
-			<th>Action</th>
-		</tr>
-{% for record in collection %}
-        <tr class="{% cycle 'odd' 'even' %}">
-            <td>{{ record.state }}</td>
-            <td>{{ record.university }}</td>
-            <td>{{ record.institution_name }}</td>
-            <td>{{ record.institution_type }}</td>
-            <td>{{ record.district }}</td>
-            <td>{{ record.location }}</td>
-            <td>{{ record.city }}</td>
-            <td>{{ record.street }}</td>
-            <td>{{ record.pincode }}</td>
-            <td>{{ record.updated|date:"D d M Y" }}</td>
-            <td><a href="{% url 'events:edit_ac' record.id %}">Edit</a></td>
-        </tr>
-{% endfor %}
-</table>
+	<div class='table-responsive'>
+		{% if collection %}
+			<table class="table table-bordered table-hover table-striped">
+				<tr>
+					<th>State</th>
+					<th>University</th>
+					<th>Institute Name</th>
+					<th>Institute Type</th>
+					<th>District</th>
+					<th>Location</th>
+					<th>City</th>
+					<th>Street</th>
+					<th>Pincode</th>
+					<th>Update</th>
+					<th>Action</th>
+				</tr>
+				{% for record in collection %}
+					<tr class="{% cycle 'odd' 'even' %}">
+						<td>{{ record.state }}</td>
+						<td>{{ record.university }}</td>
+						<td>{{ record.institution_name }}</td>
+						<td>{{ record.institution_type }}</td>
+						<td>{{ record.district }}</td>
+						<td>{{ record.location }}</td>
+						<td>{{ record.city }}</td>
+						<td>{{ record.street }}</td>
+						<td>{{ record.pincode }}</td>
+						<td>{{ record.updated|date:"D d M Y" }}</td>
+						<td><a href="{% url 'events:edit_ac' record.id %}">Edit</a></td>
+					</tr>
+				{% endfor %}
+			</table>
+		{% endif %}
+	</div>
 {% endblock %}

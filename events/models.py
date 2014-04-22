@@ -11,7 +11,7 @@ from django.core.exceptions import ValidationError
 
 # Create your models here.
 class State(models.Model):
-	users = models.ManyToManyField(User, through='Resource_person')
+	users = models.ManyToManyField(User, related_name="resource_person", through='ResourcePerson')
 	code = models.CharField(max_length=2)
 	name = models.CharField(max_length=50)
 	latitude = models.DecimalField(null=True, max_digits=10, decimal_places=4, blank=True)
@@ -66,7 +66,7 @@ class Location(models.Model):
 		unique_together = (("name","district","pincode"),)
 	
 
-class Resource_person(models.Model):
+class ResourcePerson(models.Model):
 	user = models.ForeignKey(User)
 	state = models.ForeignKey(State)
 	assigned_by = models.PositiveIntegerField()
@@ -90,7 +90,7 @@ class University(models.Model):
 	class Meta:
 		unique_together = (("name","state"),)
 		
-class Institute_type(models.Model):
+class InstituteType(models.Model):
 	name = models.CharField(max_length=200)
 	created = models.DateTimeField(auto_now_add = True)
 	updated = models.DateTimeField(auto_now = True)
@@ -98,12 +98,12 @@ class Institute_type(models.Model):
 	def __unicode__(self):
 		return self.name
 
-class Academic_center(models.Model):
+class AcademicCenter(models.Model):
 	user = models.ForeignKey(User)
 	state = models.ForeignKey(State)
 	university = models.ForeignKey(University)
 	academic_code = models.CharField(max_length=100, unique = True)
-	institution_type = models.ForeignKey(Institute_type)
+	institution_type = models.ForeignKey(InstituteType)
 	institution_name = models.CharField(max_length=200, unique = True)
 	district = models.ForeignKey(District)
 	location = models.ForeignKey(Location)
@@ -126,9 +126,9 @@ class Academic_center(models.Model):
 		return self.institution_name
 		
 class Organiser(models.Model):
-	user = models.OneToOneField(User)
+	user = models.OneToOneField(User, related_name = 'organiser')
 	appoved_by = models.ForeignKey(User, related_name = 'organiser_approved_by', blank=True, null=True)
-	academic = models.ForeignKey(Academic_center, blank=True, null=True)
+	academic = models.ForeignKey(AcademicCenter, blank=True, null=True)
 	status = models.PositiveSmallIntegerField(default=0)
 	created = models.DateTimeField(auto_now_add = True)
 	updated = models.DateTimeField(auto_now = True)
@@ -136,7 +136,7 @@ class Organiser(models.Model):
 class Invigilator(models.Model):
 	user = models.OneToOneField(User)
 	appoved_by = models.ForeignKey(User, related_name = 'invigilator_approved_by', blank=True, null=True)
-	academic = models.ForeignKey(Academic_center)
+	academic = models.ForeignKey(AcademicCenter)
 	status = models.PositiveSmallIntegerField(default=0)
 	created = models.DateTimeField(auto_now_add = True)
 	updated = models.DateTimeField(auto_now = True)
@@ -152,7 +152,7 @@ class Department(models.Model):
 class Workshop(models.Model):
 	organiser = models.ForeignKey(User)
 	appoved_by = models.ForeignKey(User, related_name = 'workshop_approved_by', null=True)
-	academic = models.ForeignKey(Academic_center)
+	academic = models.ForeignKey(AcademicCenter)
 	department = models.ManyToManyField(Department)
 	language = models.ForeignKey(Language)
 	foss = models.ForeignKey(Foss_Category)
@@ -166,10 +166,10 @@ class Workshop(models.Model):
 	updated = models.DateTimeField(auto_now = True)
 
 class Test(models.Model):
-	organiser = models.ForeignKey(User, related_name = 'origaniser')
+	organiser = models.ForeignKey(User, related_name = 'test_organiser')
 	appoved_by = models.ForeignKey(User, related_name = 'test_approved_by')
 	invigilator = models.ForeignKey(User)
-	academic = models.ForeignKey(Academic_center)
+	academic = models.ForeignKey(AcademicCenter)
 	workshop = models.ForeignKey(Workshop)
 	foss = models.ForeignKey(Foss_Category)
 	test_code = models.CharField(max_length=100)
@@ -180,10 +180,21 @@ class Test(models.Model):
 	created = models.DateTimeField(auto_now_add = True)
 	updated = models.DateTimeField(auto_now = True)
 	
-		
-#need to delete
-class Error(models.Model):
+class PermissionType(models.Model):
 	name = models.CharField(max_length=200)
 	created = models.DateTimeField(auto_now_add = True)
 	updated = models.DateTimeField(auto_now = True)
-
+	def __unicode__(self):
+		return self.name
+		
+class Permission(models.Model):
+	permissiontype = models.ForeignKey(PermissionType)
+	user = models.ForeignKey(User, related_name = 'permission_user')
+	state = models.ForeignKey(State, related_name = 'permission_state')
+	district = models.ForeignKey(District, related_name = 'permission_district', null=True)
+	university = models.ForeignKey(University, related_name = 'permission_iniversity', null=True)
+	institute_type = models.ForeignKey(InstituteType, related_name = 'permission_institution_type', null=True)
+	institute = models.ForeignKey(AcademicCenter, related_name = 'permission_district', null=True)
+	assigned_by = models.ForeignKey(User, related_name = 'permission_assigned_by')
+	created = models.DateTimeField(auto_now_add = True)
+	updated = models.DateTimeField(auto_now = True)

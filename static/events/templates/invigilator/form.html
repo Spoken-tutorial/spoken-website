@@ -21,6 +21,7 @@
 {% endif %}
 {% block content %}
 	<form action="{{ action }}" method="post">{% csrf_token %}
+	{% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
 	{% if form.non_field_errors %}
 	<ul>
 	  {% for error in form.non_field_errors %}
@@ -51,6 +52,7 @@
 	</div>
 	
 	<input class="btn btn-primary" type="submit" value="Submit" />
+	{% endwith %}
 </form>
 {% endblock %}
 

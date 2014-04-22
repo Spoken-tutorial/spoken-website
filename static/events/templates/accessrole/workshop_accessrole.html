@@ -21,57 +21,39 @@
 {% endif %}
 {% block content %}
 	<!-- Nav tabs -->
-	<ul class="tabs">
-		<li><a href="/events/workshop/request/">New</a></li>
+	<!--<ul class="tabs">
 		<li {% if status == 'pending' %}{{ 'class="active"'}}{% endif %}><a href="/events/workshop/pending/">Pending</a></li>
 		<li {% if status == 'approved' %}{{ 'class="active"'}}{% endif %}><a href="/events/workshop/approved/">Approved</a></li>
 		<li {% if status == 'completed' %}{{ 'class="active"'}}{% endif %}><a href="/events/workshop/completed/">Completed</a></li>
 		<li {% if status == 'reschedule' %}{{ 'class="active"'}}{% endif %}><a href="/events/workshop/reschedule/">Reschedule</a></li>
 		<li {% if status == 'rejected' %}{{ 'class="active"'}}{% endif %}><a href="/events/workshop/rejected/">Rejected</a></li>
-	</ul>
+	</ul>->
 	<!-- Tab panes -->
 	<div class="tab-content">
 		<div class="tab-pane" id="new">
 			<iframe width = "100%" src="/events/workshop/request/"></iframe> -->
 		</div>
-		<div class="tab-pane active" id="pending">
-			<table class="table table-striped table-hover">
-				<tr>
-					<th>Academic Name</th>
-					<th>FOSS</th>
-					<th>Language</th>
-					<th>Date </th>
-					<th>Action</th>
-				</tr>
-				{% for record in collection %}
+		{% if collection %}
+			<div class="tab-pane active" id="pending">
+				<table class="table table-bordered table-hover table-striped">
 					<tr>
-						<td>{{ record.academic }}</td>
-						<td>{{ record.foss }}</td>
-						<td>{{ record.language }}</td>
-						<td>{{ record.wdate|date:"d M Y" }} {{	record.wtime }}</td>
-						<!-- actions based on roles -->
-						<td>
-						{% if status == 'pending' %}
-							<a href="{% url 'events:workshop_edit' record.id %}">Edit</a>
-						{% endif %}
-						{% if status == 'reschedule' %}
-							<a href="{% url 'events:workshop_edit' record.id %}">Edit</a>
-						{% endif %}
-						{% if can_manage and status == 'approved' %}
-							<a href="{% url 'events:workshop_approvel' record.id %}?status=reject">Reject</a>
-						{% endif %}
-						{% if can_manage and status == 'pending' %}
-							<a href="{% url 'events:workshop_approvel' record.id %}?status=accept">Accept</a>
-							<a href="{% url 'events:workshop_approvel' record.id %}?status=reject">Reject</a>
-						{% endif %}
-						{% if can_manage and status == 'rejected' %}
-							<a href="{% url 'events:workshop_approvel' record.id %}?status=accept">Accept</a>
-						{% endif %}
-						</td>
-	
+						<th>Academic Name</th>
+						<th>FOSS</th>
+						<th>Language</th>
+						<th>Date </th>
 					</tr>
-				{% endfor %}
-			</table>
-		</div>
+					{% for record in collection %}
+						<tr>
+							<td>{{ record.academic }}</td>
+							<td>{{ record.foss }}</td>
+							<td>{{ record.language }}</td>
+							<td>{{ record.wdate|date:"d M Y" }} {{	record.wtime }}</td>
+						</tr>
+					{% endfor %}
+				</table>
+			</div>
+		{% else %}
+			<p>No record found!</p>
+		{% endif %}
 	</div>
 {% endblock %}
