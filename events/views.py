@@ -18,6 +18,8 @@ from urlparse import urlparse
 
 from BeautifulSoup import BeautifulSoup
 
+import xml.etree.cElementTree as etree
+
 import json
 import urllib,urllib2
 
@@ -627,6 +629,29 @@ def accessrole(request):
 	workshops = Workshop.objects.filter(academic__in = all_academic_ids)
 	context = {'collection':workshops}
 	return render(request, 'events/templates/accessrole/workshop_accessrole.html', context)
+
+def xmlparse(request):
+	#path = "{0}/app_name/book.xml".format(
+	#	settings.PROJECT_ROOT)
+	path = "/home/deer/test.xml";
+	xmlDoc = open(path, 'r')
+	xmlDocData = xmlDoc.read()
+	xmlDocTree = etree.XML(xmlDocData)
+
+	for studentDetails in xmlDocTree.iter('detail'):
+		firstname = studentDetails[0].text
+		lastname = studentDetails[1].text
+		gender =  studentDetails[2].text
+		age = studentDetails[3].text
+		email = studentDetails[4].text
+		permanent_address = studentDetails[5].text
+		city = studentDetails[6].text
+		country = studentDetails[7].text
+		department = studentDetails[8].text
+
+	return HttpResponse('XML file read Done!')
+	
+
 
 #Ajax Request and Responces
 @csrf_exempt

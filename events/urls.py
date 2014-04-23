@@ -8,6 +8,8 @@ urlpatterns = patterns('',
 	url(r'^ac/new/$', views.new_ac, name='new_ac'),
 	url(r'^ac/(\d+)/edit/$', views.edit_ac, name='edit_ac'),
 	
+	url(r'^xmlparse/$', views.xmlparse, name='xmlparse'),
+	
 	url(r'^organiser/(?P<status>\w+)/$', views.rp_organiser, name='rp_organiser'),
 	url(r'^organiser/active/(?P<code>\w+)/(?P<userid>\d+)/$', views.rp_organiser_confirm, name='rp_organiser_confirm'),
 	url(r'^organiser/block/(?P<code>\w+)/(?P<userid>\d+)/$', views.rp_organiser_block, name='rp_organiser_block'),
