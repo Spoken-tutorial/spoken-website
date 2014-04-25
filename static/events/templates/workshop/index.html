@@ -58,6 +58,7 @@
 							<a href="{% url 'events:workshop_edit' record.id %}">Edit</a>
 						{% endif %}
 						{% if can_manage and status == 'approved' %}
+							<a href="{% url 'mdldjango:mdl_offline_workshop_details' %}">Upload data</a>
 							<a href="{% url 'events:workshop_approvel' record.id %}?status=reject">Reject</a>
 						{% endif %}
 						{% if can_manage and status == 'pending' %}
@@ -67,8 +68,10 @@
 						{% if can_manage and status == 'rejected' %}
 							<a href="{% url 'events:workshop_approvel' record.id %}?status=accept">Accept</a>
 						{% endif %}
+						{% if status == 'completed' %}
+							<a href="{% url 'events:workshop_participant' record.id %}">View Participants</a>
+						{% endif %}
 						</td>
-	
 					</tr>
 				{% endfor %}
 			</table>

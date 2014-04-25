@@ -575,15 +575,19 @@ def workshop_approvel(request, rid):
 			status = 1
 		if request.GET['status'] == 'reject':
 			status = 3
+		if request.GET['status'] == 'completed':
+			status = 2
 	except:
 		raise Http404('Page not found !!')
-
-	if not (user.is_authenticated() and w.academic.state in State.objects.filter(resourceperson__user_id=user) and ( is_event_manager(user) or is_resource_person(user))):
-		raise PermissionDenied('You are not allowed to view this page!')
+	if status != 2:
+		if not (user.is_authenticated() and w.academic.state in State.objects.filter(resourceperson__user_id=user) and ( is_event_manager(user) or is_resource_person(user))):
+			raise PermissionDenied('You are not allowed to view this page!')
 	
 	w.status = status
 	w.appoved_by_id = user.id
 	#todo: add workshop code
+	if w.status == 1:
+		w.workshop_code = "WC-"+str(w.id)
 	w.save()
 	return HttpResponseRedirect('/events/workshop/approved/')
 
@@ -630,27 +634,21 @@ def accessrole(request):
 	context = {'collection':workshops}
 	return render(request, 'events/templates/accessrole/workshop_accessrole.html', context)
 
-def xmlparse(request):
-	#path = "{0}/app_name/book.xml".format(
-	#	settings.PROJECT_ROOT)
-	path = "/home/deer/test.xml";
-	xmlDoc = open(path, 'r')
-	xmlDocData = xmlDoc.read()
-	xmlDocTree = etree.XML(xmlDocData)
-
-	for studentDetails in xmlDocTree.iter('detail'):
-		firstname = studentDetails[0].text
-		lastname = studentDetails[1].text
-		gender =  studentDetails[2].text
-		age = studentDetails[3].text
-		email = studentDetails[4].text
-		permanent_address = studentDetails[5].text
-		city = studentDetails[6].text
-		country = studentDetails[7].text
-		department = studentDetails[8].text
-
-	return HttpResponse('XML file read Done!')
-	
+def workshop_participant(request, wid=None):
+	if wid:
+		try:
+			wc = Workshop.objects.get(id=wid)
+		except:
+			raise Http404('Page not found')
+			
+		workshop_mdlusers = WorkshopAttendance.objects.using('default').filter(workshop_id=wid).values_list('mdluser_id')
+		ids = []
+		for wp in workshop_mdlusers:
+			ids.append(wp[0])
+			
+		wp = MdlUser.objects.using('moodle').filter(id__in=ids)
+		context = {'collection' : wp, 'wc' : wc}
+		return render(request, 'events/templates/workshop/workshop_participant.html', context)
 
 
 #Ajax Request and Responces

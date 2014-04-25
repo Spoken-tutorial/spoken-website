@@ -5,6 +5,8 @@ from django.contrib.auth.models import User
 
 #creation app models
 from creation.models import Foss_Category, Language
+from mdldjango.models import MdlUser
+
 
 #validation
 from django.core.exceptions import ValidationError
@@ -198,3 +200,15 @@ class Permission(models.Model):
 	assigned_by = models.ForeignKey(User, related_name = 'permission_assigned_by')
 	created = models.DateTimeField(auto_now_add = True)
 	updated = models.DateTimeField(auto_now = True)
+	
+class WorkshopAttendance(models.Model):
+	workshop = models.ForeignKey(Workshop)
+	mdluser_id = models.PositiveIntegerField()
+	#mdluser = models.ForeignKey(MdlUser)
+	status = models.PositiveSmallIntegerField()
+	created = models.DateTimeField(auto_now_add = True)
+	updated = models.DateTimeField(auto_now = True)
+	class Meta:
+		verbose_name = "Workshop Attendance "
+		#unique_together = (("workshop", "mdluser_id"))
+		#unique_together = (("workshop", "mdluser"))

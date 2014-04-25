@@ -43,16 +43,17 @@ INSTALLED_APPS = (
 	'captcha',
 	'cms',
 	'creation',
-	'events'
+	'events',
+	'mdldjango'
 )
 
 MIDDLEWARE_CLASSES = (
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+	'django.contrib.sessions.middleware.SessionMiddleware',
+	'django.middleware.common.CommonMiddleware',
+	'django.middleware.csrf.CsrfViewMiddleware',
+	'django.contrib.auth.middleware.AuthenticationMiddleware',
+	'django.contrib.messages.middleware.MessageMiddleware',
+	'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
 ROOT_URLCONF = 'spoken.urls'
@@ -71,8 +72,17 @@ DATABASES = {
 		# The following settings are not used with sqlite3:
 		'USER': DB_USER,
 		'PASSWORD': DB_PASS,
-		'HOST': '',								# Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
-		'PORT': '',								# Set to empty string for default.
+		'HOST': '',							# Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+		'PORT': '',							# Set to empty string for default.
+	},
+	'moodle': {
+		'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+		'NAME': MDB,					  # Or path to database file if using sqlite3.
+		# The following settings are not used with sqlite3:
+		'USER': MDB_USER,
+		'PASSWORD': MDB_PASS,
+		'HOST': '',				  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+		'PORT': '',				  # Set to empty string for default.
 	}
 }
 
@@ -131,3 +141,8 @@ STATICFILES_DIRS = (
 #debugging 
 INSTALLED_APPS = INSTALLED_APPS + ('debug_toolbar',)
 INTERNAL_IPS = ('127.0.0.1',)
+
+#Moodle Auth
+#AUTH_USER_MODEL = 'mdldjango.Users'
+DATABASE_ROUTERS = ['mdldjango.router.MdlRouter']
+#AUTHENTICATION_BACKENDS = ( 'mdldjango.backend.MdlBackend', )
