@@ -21,20 +21,21 @@
 {% endif %}
 {% block content %}
 	<div class="" id="pending">
-		{% if wc.status == 1 %}
-			<p>If you want reupload the student list click <a href="{% url 'mdldjango:mdl_offline_workshop_details' %}">here</a>. 
-			If you want close the workshop click <a href="{% url 'events:workshop_approvel' wc.id %}?status=completed">here</a></p>
+		{% if wc.status == 2 %}
+			{% if can_download_certificate %}<p>If you want reupload the students list click <a href="{% url 'mdldjango:mdl_offline_workshop_details' %}">here</a>.</p>{% endif %}
 		{% endif %}
 		{% if collection %}
 		<table class="table table-striped table-hover">
 			<tr>
 				<th>First Name</th>
 				<th>Last Name</th>
+				<th>Action</th>
 			</tr>
 			{% for record in collection %}
 				<tr>
 					<td>{{ record.firstname }}</td>
 					<td>{{ record.lastname }}</td>
+					<td>{% if can_download_certificate %}<a href="{% url 'events:workshop_participant_ceritificate' wc.id record.id %}">Certificate</a>{% endif %}</td>
 				</tr>
 			{% endfor %}
 		</table>

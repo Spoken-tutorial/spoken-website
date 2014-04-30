@@ -69,12 +69,13 @@ def index(request):
 def offline_details(request):
 	user = request.user
 	form = OfflineDataForm(user = request.user)
+	wid = 0
 	if request.method == 'POST':
 		form = OfflineDataForm(user, request.POST, request.FILES)
 		if form.is_valid():
 			xmlDocData = form.cleaned_data['xml_file'].read()
 			xmlDocTree = etree.XML(xmlDocData)
-
+			wid = form.cleaned_data['workshop_code']
 			for studentDetails in xmlDocTree.iter('detail'):
 				firstname = studentDetails[0].text
 				lastname = studentDetails[1].text
@@ -104,12 +105,11 @@ def offline_details(request):
 					wa = WorkshopAttendance.objects.get(workshop_id = form.cleaned_data['workshop_code'], mdluser_id = mdluser.id)
 				except Exception, e:
 					wa = WorkshopAttendance()
-					wa.workshop_id = form.cleaned_data['workshop_code']
+					wa.workshop_id = wid
 					wa.status = 1
 					wa.mdluser_id = mdluser.id
 					wa.save()
-
-	#return HttpResponse('XML file read Done!')
+			return HttpResponseRedirect('/events/workshop/'+str(wid)+'/approvel/?status=completed')
 	messages = {}
 	context = {
 		'form': form,

@@ -9,6 +9,7 @@ urlpatterns = patterns('',
 	url(r'^ac/(\d+)/edit/$', views.edit_ac, name='edit_ac'),
 	
 	#url(r'^xmlparse/$', views.xmlparse, name='xmlparse'),
+	#url(r'^pdf/$', views.pdf, name='pdf'),
 	
 	url(r'^organiser/(?P<status>\w+)/$', views.rp_organiser, name='rp_organiser'),
 	url(r'^organiser/active/(?P<code>\w+)/(?P<userid>\d+)/$', views.rp_organiser_confirm, name='rp_organiser_confirm'),
@@ -29,6 +30,7 @@ urlpatterns = patterns('',
 	url(r'^invigilator/view/(?P<username>\w+)/$', views.invigilator_view, name='invigilator_view'),
 	
 	url(r'^workshop/(\d+)/participant/$', views.workshop_participant, name='workshop_participant'),
+	url(r'^workshop/participant/certificate/(\d+)/(\d+)/$', views.workshop_participant_ceritificate, name='workshop_participant_ceritificate'),
 	url(r'^workshop/permission/$', views.workshop_permission, name='workshop_permission'),
 	url(r'^workshop/accessrole/$', views.accessrole, name='workshop_accessrole'),
 	url(r'^workshop/request/$', views.workshop_request, name='workshop_request'),
