@@ -76,6 +76,11 @@ def offline_details(request):
 			xmlDocData = form.cleaned_data['xml_file'].read()
 			xmlDocTree = etree.XML(xmlDocData)
 			wid = form.cleaned_data['workshop_code']
+			try:
+				w = Workshop.objects.get(id = wid)
+			except:
+				print "Error"
+				
 			for studentDetails in xmlDocTree.iter('detail'):
 				firstname = studentDetails[0].text
 				lastname = studentDetails[1].text
@@ -97,6 +102,7 @@ def offline_details(request):
 					mdluser.username = firstname
 					mdluser.lastname = lastname
 					mdluser.password = password
+					mdluser.institution = w.academic_id
 					mdluser.email = email
 					mdluser.save()
 					mdluser = MdlUser.objects.filter(email = email, firstname= firstname, username=firstname, password=password).first()
