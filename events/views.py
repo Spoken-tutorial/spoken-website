@@ -27,7 +27,7 @@ from events.models import *
 from cms.models import Profile
 
 from forms import *
-from datetime import datetime
+import datetime
 from django.utils import formats
 
 #pdf generate
@@ -773,7 +773,342 @@ def workshop_participant_ceritificate(request, wid, participant_id):
 
     return response
     
+def test_request(request):
+    ''' Test request by organiser '''
+    user = request.user
+    if not user.is_authenticated() or not is_organiser(user):
+        raise Http404('You are not allowed to view this page!')
     
+    if request.method == 'POST':
+        form = TestForm(request.POST, user = request.user)
+        if form.is_valid():
+            dateTime = request.POST['tdate'].split(' ')
+            t = Test()
+            t.organiser_id = user.id
+            t.invigilator_id = user.id
+            t.academic_id = form.cleaned_data['academic']
+            t.workshop_id = form.cleaned_data['workshop']
+            t.tdate = dateTime[0]
+            t.ttime = dateTime[1]
+            t.foss_id = form.cleaned_data['foss']
+            t.save()
+            #M2M saving department
+            for dept in form.cleaned_data.get('department'):
+                t.department.add(dept)
+            t.save()
+            return HttpResponseRedirect("/events/test/pending/")
+        
+        context = {'form':form, }
+        return render(request, 'events/templates/test/form.html', context)
+    else:
+        context = {}
+        context.update(csrf(request))
+        context['form'] = TestForm(user = request.user)
+        return render(request, 'events/templates/test/form.html', context)
+
+def test_list(request, role, status):
+    """ Organiser test index page """
+    user = request.user
+    if not (user.is_authenticated() and ( is_organiser(user) or is_invigilator(user) or is_resource_person(user) or is_event_manager(user))):
+        raise Http404('You are not allowed to view this page!')
+        
+    status_dict = {'pending': 0, 'waitingforinvigilator': 1, 'approved' : 2, 'ongoing': 3, 'completed' : 4, 'rejected' : 5, 'reschedule' : 1}
+    if status in status_dict:
+        context = {}
+        test = None
+        todaytest = None
+        if is_event_manager(user) and role == 'em':
+            if status == 'ongoing':
+                test = Test.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status], tdate = datetime.datetime.now().strftime("%Y-%m-%d"))
+            else:
+                test = Test.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status])
+        elif is_resource_person(user) and role == 'rp':
+            if status == 'ongoing':
+                test = Test.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status], tdate = datetime.datetime.now().strftime("%Y-%m-%d"))
+            else:
+                test = Test.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status])
+        elif is_organiser(user) and role == 'organiser':
+            if status == 'ongoing': 
+                test = Test.objects.filter(organiser_id=user, status = status_dict[status], tdate = datetime.datetime.now().strftime("%Y-%m-%d"))
+            else:
+                test = Test.objects.filter(organiser_id=user, status = status_dict[status])
+        elif is_invigilator(user) and role == 'invigilator':
+            if status == 'ongoing':
+                test = Test.objects.filter(invigilator_id=user, status = status_dict[status], tdate = datetime.datetime.now().strftime("%Y-%m-%d"))
+            else:
+                todaytest = datetime.datetime.now().strftime("%Y-%m-%d")
+                test = Test.objects.filter(invigilator_id=user, status = status_dict[status])
+        
+        if test == None:
+            raise Http404('You are not allowed to view this page!')
+            
+        context['collection'] = test
+        context['status'] = status
+        context['role'] = role
+        context['todaytest'] = todaytest
+        context['can_manage'] = user.groups.filter(Q(name="Event Manager") |  Q(name="Resource Person"))
+        context.update(csrf(request))
+        return render(request, 'events/templates/test/index.html', context)
+    else:
+        raise Http404('Page not found !!')
+
+def test_edit(request, rid):
+    ''' Workshop edit by organiser or resource person '''
+    user = request.user
+    if not user.is_authenticated() or not is_organiser:
+        raise Http404('You are not allowed to view this page!')
+    
+    if request.method == 'POST':
+        form = TestForm(request.POST, user = request.user)
+        if form.is_valid():
+            print form.cleaned_data
+            dateTime = request.POST['tdate'].split(' ')
+            t = Test.objects.get(pk=rid)
+            #check if date time chenged or not
+            if t.status == 1 and (str(t.tdate) != dateTime[0] or str(t.ttime)[0:5] != dateTime[1]):
+                t.status = 4
+            t.organiser_id = user.id
+            t.invigilator_id = form.cleaned_data['invigilator']
+            t.academic_id = form.cleaned_data['academic']
+            t.workshop_id = form.cleaned_data['workshop']
+            t.tdate = dateTime[0]
+            t.ttime = dateTime[1]
+            t.foss_id = form.cleaned_data['foss']
+            t.save()
+            return HttpResponseRedirect("/events/test/pending/")
+        
+        context = {'form':form, }
+        return render(request, 'events/templates/test/form.html', context)
+    else:
+        context = {}
+        record = Test.objects.get(id = rid)
+        context.update(csrf(request))
+        context['form'] = TestForm(instance = record, user = user)
+        context['instance'] = record
+        return render(request, 'events/templates/test/form.html', context)
+
+@login_required
+@csrf_exempt
+def test_approvel(request, rid):
+    """ Resource person: confirm or reject workshop """
+    user = request.user
+    status = 0
+    print "EEEEEEEEEEEEEEEEEEEEE"
+    try:
+        w = Test.objects.get(pk=rid)
+        if request.GET['status'] == 'accept':
+            status = 1
+        if request.GET['status'] == 'invigilatoraccept':
+            status = 2
+        if request.GET['status'] == 'ongoing':
+            status = 3
+        if request.GET['status'] == 'completed':
+            status = 4
+        if request.GET['status'] == 'rejected':
+            status = 5
+        if request.GET['status'] == 'invigilatorreject':
+            status = 6
+        print status
+        print w
+    except:
+        raise Http404('Page not found !!')
+        
+    #if status != 2:
+    #    if not (user.is_authenticated() and w.academic.state in State.objects.filter(resourceperson__user_id=user) and ( is_event_manager(user) or is_resource_person(user))):
+    #        raise PermissionDenied('You are not allowed to view this page!')
+    w.status = status
+    if w.status == 1:
+        w.appoved_by_id = user.id
+        w.workshop_code = "TC-"+str(w.id)
+    
+    if w.status == 4:
+        w.participant_count = TestAttendance.objects.filter(test_id=1).count()
+    
+    w.save()
+    
+    if request.GET['status'] == 'completed':
+        return HttpResponseRedirect('/events/test/completed/')
+    return HttpResponseRedirect('/events/test/approved/')
+
+def test_attendance(request, tid):
+    user = request.user
+    try:
+        test = Test.objects.get(pk=tid)
+        test.status = 3
+        test.save()
+    except:
+        raise Http404('Page not found !!')
+        
+    if request.method == 'POST':
+        users = request.POST
+        if users:
+            #set all record to 0 if status = 1
+            TestAttendance.objects.filter(test_id = tid, status = 1).update(status = 0)
+            for u in users:
+                if u != 'csrfmiddlewaretoken':
+                    try:
+                        ta = TestAttendance.objects.get(mdluser_id = users[u], test_id = tid)
+                        print ta.id, " => Exits"
+                    except:
+                        ta = TestAttendance()
+                        ta.test_id = test.id
+                        ta.mdluser_id = users[u]
+                        ta.mdlcourse_id = 0
+                        ta.mdlquiz_id = 0
+                        ta.mdlattempt_id = 0
+                        ta.status = 0
+                        ta.save()
+                        print ta.id, " => Inserted"
+                    if ta:
+                        #todo: if the status = 2 check in moodle if he completed the test set status = 3 (completed)
+                        t = TestAttendance.objects.get(mdluser_id = ta.mdluser_id, test_id = tid)
+                        t.status = 1
+                        t.save()
+        
+    participant_ids = list(WorkshopAttendance.objects.filter(workshop_id = test.workshop_id).values_list('mdluser_id'))
+    mdlids = []
+    for k in participant_ids:
+        mdlids.append(k[0])
+    if mdlids:
+        wp = MdlUser.objects.filter(id__in = mdlids)
+    context = {}
+    context['collection'] = wp
+    context['test'] = test
+    context.update(csrf(request))
+    return render(request, 'events/templates/test/attendance.html', context)
+
+@login_required
+def test_participant(request, tid=None):
+    user = request.user
+    can_download_certificate = 0
+    if tid:
+        try:
+            wc = Test.objects.get(id=tid)
+        except:
+            raise Http404('Page not found')
+            
+        workshop_mdlusers = WorkshopAttendance.objects.using('default').filter(workshop_id=tid).values_list('mdluser_id')
+        ids = []
+        for wp in workshop_mdlusers:
+            ids.append(wp[0])
+            
+        wp = MdlUser.objects.using('moodle').filter(id__in=ids)
+        if user == wc.organiser:
+            can_download_certificate = 1
+        context = {'collection' : wp, 'wc' : wc, 'can_download_certificate':can_download_certificate}
+        return render(request, 'events/templates/test/test_participant.html', context)
+
+def test_participant_ceritificate(request, wid, participant_id):
+    #response = HttpResponse(content_type='application/pdf')
+    #response['Content-Disposition'] = 'attachment; filename="somefilename.pdf"'
+
+    # Create the PDF object, using the response object as its "file."
+    #p = canvas.Canvas(response)
+
+    # Draw things on the PDF. Here's where the PDF generation happens.
+    # See the ReportLab documentation for the full list of functionality.
+    #p.drawString(200, 500, "Hello world.")
+
+    # Close the PDF object cleanly, and we're done.
+    #p.showPage()
+    #p.save()
+    #return response
+    # Using ReportLab to insert image into PDF
+    
+    #store Certificate details
+    
+    certificate_pass = ''
+    if wid and participant_id:
+        try:
+            w = Test.objects.get(id = wid)
+            mdluser = MdlUser.objects.get(id = participant_id)
+            certificate_pass = str(mdluser.id)+id_generator(10-len(str(mdluser.id)))
+        except:
+            raise Http404('Page not found')
+    try:
+        TestCertificate.objects.create(test_id = wid, mdluser_id = participant_id, password = certificate_pass)
+    except Exception, e:
+        print e
+        pass
+        
+    response = HttpResponse(mimetype='application/pdf')
+    filename = (mdluser.firstname+'-'+w.foss.foss+"-Participant-Certificate").replace(" ", "-");
+    
+    response['Content-Disposition'] = 'attachment; filename='+filename+'.pdf'
+    imgTemp = StringIO()
+    imgDoc = canvas.Canvas(imgTemp)
+
+    # Title 
+    imgDoc.setFont('Helvetica', 40, leading=None)
+    imgDoc.drawCentredString(415, 480, "Certificate of Test")
+    
+    #password
+    imgDoc.setFillColorRGB(211, 211, 211)
+    imgDoc.setFont('Helvetica', 10, leading=None)
+    imgDoc.drawString(10, 6, certificate_pass)
+    #imgDoc.drawString(100, 100, 'transparent')
+    
+
+    # Draw image on Canvas and save PDF in buffer
+    imgPath = "/home/deer/sign.jpg"
+    imgDoc.drawImage(imgPath, 600, 100, 150, 76)    ## at (399,760) with size 160x160
+
+    #paragraphe
+    text = "This is to certify that <b>"+mdluser.firstname +" "+mdluser.lastname+"</b> participated in the <b>"+w.foss.foss+"</b> test at <b>"+w.academic.institution_name+"</b> organized by <b>"+w.organiser.username+"</b> on <b>"+custom_strftime('%B {S} %Y', w.tdate)+"</b>.  This workshop was conducted with the instructional material created by the Spoken Tutorial Project, IIT Bombay, funded by the National Mission on Education through ICT, MHRD, Govt., of India."
+    
+    centered = ParagraphStyle(name = 'centered',
+        fontSize = 16,  
+        leading = 30,  
+        alignment = 0,  
+        spaceAfter = 20)
+
+    p = Paragraph(text, centered)
+    p.wrap(650, 200)
+    p.drawOn(imgDoc, 4.2 * cm, 9 * cm)
+
+    imgDoc.save()
+
+    # Use PyPDF to merge the image-PDF into the template
+    page = PdfFileReader(file("/home/deer/Blank-Certificate.pdf","rb")).getPage(0)
+    overlay = PdfFileReader(StringIO(imgTemp.getvalue())).getPage(0)
+    page.mergePage(overlay)
+
+    #Save the result
+    output = PdfFileWriter()
+    output.addPage(page)
+    
+    #stream to browser
+    outputStream = response
+    output.write(response)
+    outputStream.close()
+
+    return response
+
+def student_subscribe(request, events, eventid = None, mdluser_id = None):
+    print "*******************"
+    print request
+    print "*******************"
+    print eventid
+    print "*******************"
+    print mdluser_id
+    print "*******************"
+    if events == 'test':
+        try:
+            TestAttendance.objects.create(test_id=eventid, mdluser_id = mdluser_id)
+        except Exception, e:
+            print e
+            pass
+    elif events == 'workshop':
+        try:
+            WorkshopAttendance.objects.create(workshop_id=eventid, mdluser_id = mdluser_id)
+        except Exception, e:
+            print e
+            pass
+    else:
+        raise Http404('Page not found')
+    
+    return HttpResponseRedirect('/moodle/index/')
+
 #Ajax Request and Responces
 @csrf_exempt
 def ajax_ac_state(request):
@@ -871,5 +1206,29 @@ def ajax_district_collage(request):
         return HttpResponse(json.dumps(tmp), mimetype='application/json')
 
 @csrf_exempt
+def ajax_dept_foss(request):
+    """ Ajax: Get the dept and foss based on workshop selected """
+    data = {}
+    if request.method == 'POST':
+        tmp = ''
+        workshop = request.POST.get('workshop')
+        print request.POST.get('fields[foss]')
+        print "************"
+        if request.POST.get('fields[dept]'):
+            dept = Department.objects.filter(workshop__id = workshop)
+            for i in dept:
+                tmp +='<option value='+str(i.id)+'>'+i.name+'</option>'
+            data['dept'] = tmp
+        
+        if request.POST.get('fields[foss]'):
+            workshop = Workshop.objects.filter(pk=workshop)
+            tmp = '<option value = None> -- None -- </option>'
+            if workshop:
+                tmp +='<option value='+str(workshop[0].foss.id)+'>'+workshop[0].foss.foss+'</option>'
+            data['foss'] = tmp
+        
+    return HttpResponse(json.dumps(data), mimetype='application/json')
+
+@csrf_exempt
 def test(request):
-    print "test"
+    return render_to_response('events/templates/test/test.html', { 'foo': 123, 'bar': 456 })

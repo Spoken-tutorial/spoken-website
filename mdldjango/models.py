@@ -3,11 +3,11 @@ from django.db import models
 class MdlUser(models.Model):
     id = models.BigIntegerField(primary_key=True)
     auth = models.CharField(max_length=60)
-    #confirmed = models.IntegerField()
+    confirmed = models.IntegerField()
     #policyagreed = models.IntegerField()
     #deleted = models.IntegerField()
     #suspended = models.IntegerField()
-    #mnethostid = models.BigIntegerField(unique=True)
+    mnethostid = models.BigIntegerField(unique=True)
     username = models.CharField(unique=True, max_length=255)
     password = models.CharField(max_length=96)
     idnumber = models.CharField(max_length=765)
