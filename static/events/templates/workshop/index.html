@@ -21,7 +21,7 @@
 {% endif %}
 {% block content %}
 	<!-- Nav tabs -->
-	<ul class="tabs">
+	<ul class="tabs nav nav-tabs">
 		<li><a href="/events/workshop/request/">New</a></li>
 		<li {% if status == 'pending' %}{{ 'class="active"'}}{% endif %}><a href="/events/workshop/pending/">Pending</a></li>
 		<li {% if status == 'approved' %}{{ 'class="active"'}}{% endif %}><a href="/events/workshop/approved/">Approved</a></li>

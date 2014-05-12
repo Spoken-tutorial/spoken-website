@@ -1098,12 +1098,14 @@ def student_subscribe(request, events, eventid = None, mdluser_id = None):
         except Exception, e:
             print e
             pass
+        return HttpResponseRedirect('/moodle/index/#Upcoming-Test')
     elif events == 'workshop':
         try:
             WorkshopAttendance.objects.create(workshop_id=eventid, mdluser_id = mdluser_id)
         except Exception, e:
             print e
             pass
+        return HttpResponseRedirect('/moodle/index/#Upcoming-Workshop')
     else:
         raise Http404('Page not found')
     

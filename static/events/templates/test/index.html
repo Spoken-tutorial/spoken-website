@@ -22,7 +22,7 @@
 {% endif %}
 {% block content %}
 	<!-- Nav tabs -->
-	<ul class="tabs">
+	<ul class="tabs nav nav-tabs">
 		<li><a href="/events/test/request/">New</a></li>
 		<li {% if status == 'pending' %}{{ 'class="active"'}}{% endif %}><a href="/events/test/{{role}}/pending/">Pending</a></li>
 		<li {% if status == 'waitingforinvigilator' %}{{ 'class="active"'}}{% endif %}><a href="/events/test/{{role}}/waitingforinvigilator/">Waiting for Invigilator</a></li>

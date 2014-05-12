@@ -26,7 +26,6 @@ def authenticate(username = None, password = None):
         pwd_valid =  (pwd == p)
         print pwd
         #print "------------"
-        print p.hexdigest()
         if user and pwd_valid:
             return user
     except Exception, e:

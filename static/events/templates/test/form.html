@@ -6,6 +6,7 @@
 	<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />
 	<link rel="stylesheet" href="{% static 'spoken/css/jquery.datetimepicker.css' %}" type="text/css" media="screen" charset="utf-8" />
 {% endblock %}
+
 {% if alert_success or alert_danger %}
 	{% block alert %}
 		{% if alert_success %}
@@ -23,6 +24,7 @@
 	{% endblock %}
 {% endif %}
 {% block content %}
+    
 	<form action="{{ action }}" method="post">{% csrf_token %}
 	{% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
 	{% if form.non_field_errors %}
