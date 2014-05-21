@@ -1,7 +1,7 @@
 from django import template
 from django.contrib.auth.models import User
 from events.models import *
-
+import datetime
 register = template.Library()
 
 def get_participant_status(key, testcode):
@@ -32,7 +32,20 @@ def can_close_test(testcode):
 	except:
 		return True
 	return False
-	
+def can_upload_workshop_data(wcode):
+    try:
+        w = Workshop.objects.get(pk=wcode)
+        today_date = datetime.datetime.now().strftime("%Y-%m-%d")
+        wdate = w.wdate.strftime("%Y-%m-%d")
+        if wdate <= today_date:
+            return True
+        return False
+    except Exception, e:
+        print e
+        return False
+    
+
 register.filter('get_status', get_status)
 register.filter('can_close_test', can_close_test)
 register.filter('get_participant_status', get_participant_status)
+register.filter('can_upload_workshop_data', can_upload_workshop_data)
