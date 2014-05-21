@@ -2,7 +2,7 @@
 {% load widget_tweaks %}
 {% load static %}
 {% load creationdata %}
-{% block title %}Domain Review Tutorial{% endblock %}
+{% block title %}Quality Review Tutorial{% endblock %}
 {% block cssblock %}
 	<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />
 	<link rel="stylesheet" href="{% static 'spoken/css/jquery.fancybox.css' %}" type="text/css" media="screen" charset="utf-8" />
@@ -23,11 +23,11 @@
 		{% endif %}
 	{% endblock %}
 {% endif %}
-{% block heading %}Domain Review Tutorial{% endblock %}
+{% block heading %}Quality Review Tutorial{% endblock %}
 {% block content %}
 	<form role="form" method="post" enctype="multipart/form-data" action="">
 		{% csrf_token %}
-		<p style="text-align:right;"><a href="/creation/domain-review/">&lt;&lt; Back</a></p>
+		<p style="text-align:right;"><a href="/creation/quality-review/">&lt;&lt; Back</a></p>
 		<div class="table-responsive">
 			<table class="table table-bordered table-hover">
 				<tr>
@@ -52,7 +52,7 @@
 				</tr>
 			</table>
 		</div>
-		<a class="btn btn-primary" href="/creation/accept-all/domain/{{ tr.id }}">Accept All</a>
+		<a class="btn btn-primary" href="/creation/accept-all/quality/{{ tr.id }}">Accept All</a>
 		<div class="table-responsive">
 			<table class="table table-bordered table-condensed table-hover">
 				<tr>
@@ -77,8 +77,8 @@
 								<span title="" data-original-title="" class="fa fa-globe fa-2"></span>
 							</a>
 						{% endif %}
-						{% if tr.outline_status == 2 %}
-							<a class="twin-button btn btn-primary fancybox-script fancybox.iframe" href="/creation/domain-review-component/{{ tr.id }}/outline" title="Accept / Reject Outline">
+						{% if tr.outline_status == 3 %}
+							<a class="twin-button btn btn-primary fancybox-script fancybox.iframe" href="/creation/quality-review-component/{{ tr.id }}/outline" title="Accept / Reject Outline">
 								<span title="" data-original-title="" class="fa fa-check fa-2">/</span>
 								<span title="" data-original-title="" class="fa fa-times fa-2"></span>
 							</a>
@@ -100,8 +100,8 @@
 							<span title="" data-original-title="" class="fa fa-globe fa-2"></span>
 						</a>
 					{% endif %}
-					{% if tr.script_status == 2 %}
-						<a class="twin-button btn btn-primary fancybox-script fancybox.iframe" href="/creation/domain-review-component/{{ tr.id }}/script" title="Accept / Reject Script">
+					{% if tr.script_status == 3 %}
+						<a class="twin-button btn btn-primary fancybox-script fancybox.iframe" href="/creation/quality-review-component/{{ tr.id }}/script" title="Accept / Reject Script">
 							<span title="" data-original-title="" class="fa fa-check fa-2">/</span>
 							<span title="" data-original-title="" class="fa fa-times fa-2"></span>
 						</a>
@@ -124,8 +124,8 @@
 							<span title="" data-original-title="" class="fa fa-archive fa-2"></span>
 						</a>
 					{% endif %}
-					{% if tr.common_content.slide_status == 2 %}
-						<a class="twin-button btn btn-primary fancybox-script fancybox.iframe" href="/creation/domain-review-component/{{ tr.id }}/slide" title="Accept / Reject Slides">
+					{% if tr.common_content.slide_status == 3 %}
+						<a class="twin-button btn btn-primary fancybox-script fancybox.iframe" href="/creation/quality-review-component/{{ tr.id }}/slide" title="Accept / Reject Slides">
 							<span title="" data-original-title="" class="fa fa-check fa-2">/</span>
 							<span title="" data-original-title="" class="fa fa-times fa-2"></span>
 						</a>
@@ -152,8 +152,8 @@
 							<span title="" data-original-title="" class="fa fa-film fa-2"></span>
 						</a>
 					{% endif %}
-					{% if tr.video_status == 2 %}
-						<a class="twin-button btn btn-primary fancybox-script fancybox.iframe" href="/creation/domain-review-component/{{ tr.id }}/video" title="Accept / Reject Video">
+					{% if tr.video_status == 3 %}
+						<a class="twin-button btn btn-primary fancybox-script fancybox.iframe" href="/creation/quality-review-component/{{ tr.id }}/video" title="Accept / Reject Video">
 							<span title="" data-original-title="" class="fa fa-check fa-2">/</span>
 							<span title="" data-original-title="" class="fa fa-times fa-2"></span>
 						</a>
@@ -176,8 +176,8 @@
 							<span title="" data-original-title="" class="fa fa-archive fa-2"></span>
 						</a>
 					{% endif %}
-					{% if tr.common_content.code_status == 2 %}
-						<a class="twin-button btn btn-primary fancybox-script fancybox.iframe" href="/creation/domain-review-component/{{ tr.id }}/code" title="Accept / Reject Codefiles">
+					{% if tr.common_content.code_status == 3 %}
+						<a class="twin-button btn btn-primary fancybox-script fancybox.iframe" href="/creation/quality-review-component/{{ tr.id }}/code" title="Accept / Reject Codefiles">
 							<span title="" data-original-title="" class="fa fa-check fa-2">/</span>
 							<span title="" data-original-title="" class="fa fa-times fa-2"></span>
 						</a>
@@ -201,8 +201,8 @@
 							<span title="" data-original-title="" class="fa fa-file-text-o fa-2"></span>
 						</a>
 					{% endif %}
-					{% if tr.common_content.assignment_status == 2 %}
-						<a class="twin-button btn btn-primary fancybox-script fancybox.iframe" href="/creation/domain-review-component/{{ tr.id }}/assignment" title="Accept / Reject Assignment">
+					{% if tr.common_content.assignment_status == 3 %}
+						<a class="twin-button btn btn-primary fancybox-script fancybox.iframe" href="/creation/quality-review-component/{{ tr.id }}/assignment" title="Accept / Reject Assignment">
 							<span title="" data-original-title="" class="fa fa-check fa-2">/</span>
 							<span title="" data-original-title="" class="fa fa-times fa-2"></span>
 						</a>
@@ -234,7 +234,7 @@
 		</div>
 	{% endif %}
 	{% if review_history != None and review_history|length != 0 %}
-		<h4 class="page-title">Domain Reviews History</h4>
+		<h4 class="page-title">Quality Reviews History</h4>
 		<div class="table-responsive">
 			<table class="table table-bordered table-condensed table-hover">
 				<tr class="active">
@@ -314,7 +314,7 @@
             					  }
 			});
 			$(".fancybox-script").fancybox({
-				maxWidth	: 1024,
+				maxWidth	: 700,
 				maxHeight	: 700,
 				fitToView	: true,
 				autoSize	: false,

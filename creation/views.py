@@ -1,21 +1,23 @@
 import os
+import re
 import json
+import subprocess
+from decimal import Decimal
 from urllib2 import urlopen
 from django.conf import settings
-from django.core.urlresolvers import reverse
 from django.views import generic
+from django.core.urlresolvers import reverse
 from django.views.decorators.http import require_POST
-from jfu.http import upload_receive, UploadResponse, JFUResponse
 
-from django.http import HttpResponse, HttpResponseRedirect
+from django import forms
+from django.template import RequestContext
 from django.core.context_processors import csrf
 from django.core.exceptions import PermissionDenied
-from django.template import RequestContext
-from django.shortcuts import render, render_to_response
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
-from django import forms
+from django.shortcuts import render, render_to_response
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse, HttpResponseRedirect
+from django.contrib.auth import authenticate, login, logout
 
 from creation.forms import *
 from creation.models import *
@@ -43,6 +45,38 @@ def is_videoreviewer(user):
     if user.groups.filter(name='Video-Reviewer').count() == 1:
         return True
     return False
+
+def get_video_info(path):
+    """Uses ffmpeg to determine information about a video."""
+ 
+    process = subprocess.Popen(['/usr/bin/ffmpeg', '-i', path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    stdout, stderr = process.communicate()
+    duration_m = re.search(r"Duration:\s{1}(?P<hours>\d+?):(?P<minutes>\d+?):(?P<seconds>\d+\.\d+?)", stdout, re.DOTALL).groupdict()
+    info_m = re.search(r": Video: (?P<codec>.*?), (?P<profile>.*?), (?P<width>.*?)x(?P<height>.*?), (?P<fps>\d+?) fps, ", stdout, re.DOTALL).groupdict()
+
+    hours = Decimal(duration_m['hours'])
+    minutes = Decimal(duration_m['minutes'])
+    seconds = Decimal(duration_m['seconds'])
+
+    total = 0
+    total += 60 * 60 * hours
+    total += 60 * minutes
+    total += seconds
+
+    info_m['hours'] = hours
+    info_m['minutes'] = minutes
+    info_m['seconds'] = seconds
+    tmp_seconds = str(int(seconds))
+    if seconds < 10:
+        tmp_seconds = "0" + tmp_seconds
+    info_m['duration'] = duration_m['hours'] + ':' + duration_m['minutes'] + ":" + tmp_seconds
+    info_m['total'] = int(total)
+    info_m['width'] = int(info_m['width'])
+    info_m['height'] = int(info_m['height'])
+    return info_m
+
+def get_filesize(path):
+    filesize_bytes = os.path.getsize(path)
 
 def contributor_roles(request):
     form = ContributorRoleForm()
@@ -427,15 +461,18 @@ def view_outline(request, trid):
         raise PermissionDenied()
 
 def view_video(request, trid):
-    tr_rec = None
+    tr = None
     try:
-        tr_rec = Tutorial_Resource.objects.get(pk = trid)
+        tr = Tutorial_Resource.objects.get(pk = trid)
     except Exception, e:
         print e
         raise PermissionDenied()
-    if tr_rec.video:
+    if tr.video:
+        video_path = settings.MEDIA_ROOT + "videos/" + str(tr.tutorial_detail.foss_id) + "/" + str(tr.tutorial_detail_id) + "/" + tr.video
+        video_info = get_video_info(video_path)
         context = {
-            'tr': tr_rec,
+            'tr': tr,
+            'video_info': video_info,
             'media_url': settings.MEDIA_URL
         }
         context.update(csrf(request))
@@ -515,17 +552,20 @@ def review_video(request, trid):
                     error_msg = 'Something went wrong, please try again later.'
     else:
         form = ReviewVideoForm()
+    video_path = settings.MEDIA_ROOT + "videos/" + str(tr.tutorial_detail.foss_id) + "/" + str(tr.tutorial_detail_id) + "/" + tr.video
+    video_info = get_video_info(video_path)
     context = {
         'tr': tr,
         'form': form,
         'media_url': settings.MEDIA_URL,
+        'video_info': video_info,
         'alert_success': response_msg,
         'alert_danger': error_msg
     }
     context.update(csrf(request))
     return render(request, 'creation/templates/review_video.html', context)
 
-def domain_review_index(request, key = 0):
+def domain_review_index(request):
     if not is_domainreviewer(request.user):
         raise PermissionDenied()
     tmp_recs = []
@@ -557,6 +597,7 @@ def domain_review_tutorial(request, trid):
         'tr': tr_rec,
         'contrib_log': contrib_log,
         'review_log': review_log,
+        'script_base': settings.SCRIPT_URL,
         'review_history': review_history
     }
     return render(request, 'creation/templates/domain_review_tutorial.html', context)
@@ -639,7 +680,131 @@ def domain_review_component(request, trid, component):
     return render(request, 'creation/templates/domain_review_component.html', context)
 
 def quality_review_index(request):
-    return HttpResponse('test')
+    if not is_qualityreviewer(request.user):
+        raise PermissionDenied()
+    tmp_recs = []
+    com_recs = []
+    qr_roles =  Quality_Reviewer_Role.objects.filter(user_id = request.user.id, status = 1)
+    for rec in qr_roles:
+        tr_recs = Tutorial_Resource.objects.select_related().filter(tutorial_detail_id__in = Tutorial_Detail.objects.filter(foss_id = rec.foss_category_id).values_list('id'), language_id = rec.language_id, status = 0).order_by('updated')
+        for tr_rec in tr_recs:
+            if tr_rec.outline_status == 3 or tr_rec.script_status == 3 or tr_rec.video_status == 3:
+                tmp_recs.append(tr_rec)
+            elif tr_rec.language.name == 'English' and tr_rec.common_content.slide_status == 3 or tr_rec.common_content.code_status == 3 or tr_rec.common_content.assignment_status == 3:
+                tmp_recs.append(tr_rec)
+            else:
+                flag = 0
+                if tr_rec.language.name == 'English':
+                    if tr_rec.common_content.slide_status == 4 and (tr_rec.common_content.code_status == 4 or tr_rec.common_content.code_status == 6) and (tr_rec.common_content.assignment_status == 4 or tr_rec.common_content.assignment_status == 6):
+                        flag = 1
+                else:
+                    flag = 1
+                if flag and tr_rec.outline_status == 4 or tr_rec.script_status == 4 or tr_rec.video_status == 4:
+                    com_recs.append(tr_rec)
+    context = {
+        'tr_recs': sorted(tmp_recs, key=lambda tutorial_resource: tutorial_resource.updated),
+        'com_recs': sorted(com_recs, key=lambda tutorial_resource: tutorial_resource.updated)
+    }
+    return render(request, 'creation/templates/quality_review_index.html', context)
+
+def quality_review_tutorial(request, trid):
+    if not is_qualityreviewer(request.user):
+        raise PermissionDenied()
+    tr_rec = Tutorial_Resource.objects.select_related().get(pk = trid)
+    if Quality_Reviewer_Role.objects.filter(user_id = request.user.id, foss_category_id = tr_rec.tutorial_detail.foss_id, language_id = tr_rec.language_id, status = 1).count() == 0:
+        raise PermissionDenied()
+    try:
+        contrib_log = Contributor_Log.objects.filter(tutorial_resource_id = tr_rec.id).order_by('-created')
+        review_log = Need_Improvement_Log.objects.filter(tutorial_resource_id = tr_rec.id).order_by('-created')
+        review_history = Quality_Review_Log.objects.filter(tutorial_resource_id = tr_rec.id).order_by('-created')
+    except:
+        contrib_log = None
+        review_log = None
+        review_history = None
+    context = {
+        'tr': tr_rec,
+        'contrib_log': contrib_log,
+        'review_log': review_log,
+        'review_history': review_history
+    }
+    return render(request, 'creation/templates/quality_review_tutorial.html', context)
+
+def quality_review_component(request, trid, component):
+    if not is_qualityreviewer(request.user):
+        raise PermissionDenied()
+    tr = Tutorial_Resource.objects.select_related().get(pk = trid)
+    if Quality_Reviewer_Role.objects.filter(user_id = request.user.id, foss_category_id = tr.tutorial_detail.foss_id, language_id = tr.language_id).count() == 0:
+        raise PermissionDenied()
+    response_msg = ''
+    error_msg = ''
+    if request.method == 'POST':
+        form = QualityReviewComponentForm(request.POST)
+        if form.is_valid():
+            if request.POST['component_status'] == '4':
+                try:
+                    execFlag = 0
+                    if component == 'outline' or component == 'script' or component == 'video':
+                        setattr(tr, component + '_status', 4)
+                        tr.save()
+                        execFlag = 1
+                    else:
+                        if tr.language.name == 'English':
+                            setattr(tr.common_content, component + '_status', 4)
+                            tr.common_content.save()
+                            execFlag = 1
+                    if execFlag:
+                        dr_log = Quality_Review_Log()
+                        dr_log.status = 4
+                        dr_log.component = component
+                        dr_log.user = request.user
+                        dr_log.tutorial_resource = tr
+                        dr_log.save()
+                        response_msg = 'Review status updated successfully!'
+                    else:
+                        error_msg = 'Something went wrong, please try again later.'
+                except Exception, e:
+                    print e
+                    error_msg = 'Something went wrong, please try again later.'
+            elif request.POST['component_status'] == '5':
+                try:
+                    prev_state = 0
+                    if component == 'outline' or component == 'script' or component == 'video':
+                        prev_state = getattr(tr, component + '_status')
+                        setattr(tr, component + '_status', 5)
+                        tr.save()
+                    else:
+                        prev_state = getattr(tr.common_content, component + '_status')
+                        setattr(tr.common_content, component + '_status', 5)
+                        tr.common_content.save()
+                    ni_log = Need_Improvement_Log()
+                    ni_log.user = request.user
+                    ni_log.tutorial_resource = tr
+                    ni_log.review_state = prev_state
+                    ni_log.component = component
+                    ni_log.comment = request.POST['feedback']
+                    ni_log.flag = 1
+                    ni_log.save()
+                    dr_log = Quality_Review_Log()
+                    dr_log.status = 5
+                    dr_log.component = component
+                    dr_log.user = request.user
+                    dr_log.tutorial_resource = tr
+                    dr_log.save()
+                    response_msg = 'Review status updated successfully!'
+                except:
+                    error_msg = 'Something went wrong, please try again later.'
+            form = QualityReviewComponentForm()
+    else:
+        form = QualityReviewComponentForm()
+    context = {
+        'form': form,
+        'tr': tr,
+        'component': component,
+        'alert_success': response_msg,
+        'alert_danger': error_msg
+    }
+
+    return render(request, 'creation/templates/quality_review_component.html', context)
 
 def accept_all(request, review, trid):
     status_flag = {
@@ -651,19 +816,93 @@ def accept_all(request, review, trid):
     tr = Tutorial_Resource.objects.select_related().get(pk = trid)
     if Domain_Reviewer_Role.objects.filter(user_id = request.user.id, foss_category_id = tr.tutorial_detail.foss_id, language_id = tr.language_id).count() == 0:
         raise PermissionDenied()
-    if tr.outline_status == 2:
+    current_status = status_flag[review] - 1
+    if tr.outline_status > 0 and tr.outline_status == current_status:
         tr.outline_status = status_flag[review]
-    if tr.script_status == 2:
+        if review == 'quality':
+            dr_log = Quality_Review_Log()
+        else:
+            dr_log = Domain_Review_Log()
+        dr_log.status = status_flag[review]
+        dr_log.component = "outline"
+        dr_log.user = request.user
+        dr_log.tutorial_resource = tr
+        dr_log.save()
+    if tr.script_status > 0 and tr.script_status == current_status:
         tr.script_status = status_flag[review]
-    if tr.video_status == 2:
+        if review == 'quality':
+            dr_log = Quality_Review_Log()
+        else:
+            dr_log = Domain_Review_Log()
+        dr_log.status = status_flag[review]
+        dr_log.component = "script"
+        dr_log.user = request.user
+        dr_log.tutorial_resource = tr
+        dr_log.save()
+    if tr.video_status > 0 and tr.video_status == current_status:
         tr.video_status = status_flag[review]
-    if tr.common_content.slide_status == 2:
-        tr.common_content.slide_status = status_flag[review]
-    if tr.common_content.code_status == 2:
-        tr.common_content.code_status = status_flag[review]
-    if tr.common_content.assignment_status == 2:
-        tr.common_content.assignment_status = status_flag[review]
+        if review == 'quality':
+            dr_log = Quality_Review_Log()
+        else:
+            dr_log = Domain_Review_Log()
+        dr_log.status = status_flag[review]
+        dr_log.component = "video"
+        dr_log.user = request.user
+        dr_log.tutorial_resource = tr
+        dr_log.save()
     tr.save()
+    if tr.language.name == 'English':
+        if tr.common_content.slide_status > 0 and tr.common_content.slide_status == current_status:
+            tr.common_content.slide_status = status_flag[review]
+            if review == 'quality':
+                dr_log = Quality_Review_Log()
+            else:
+                dr_log = Domain_Review_Log()
+            dr_log.status = status_flag[review]
+            dr_log.component = "slide"
+            dr_log.user = request.user
+            dr_log.tutorial_resource = tr
+            dr_log.save()
+        if tr.common_content.code_status > 0 and tr.common_content.code_status == current_status:
+            tr.common_content.code_status = status_flag[review]
+            if review == 'quality':
+                dr_log = Quality_Review_Log()
+            else:
+                dr_log = Domain_Review_Log()
+            dr_log.status = status_flag[review]
+            dr_log.component = "code"
+            dr_log.user = request.user
+            dr_log.tutorial_resource = tr
+            dr_log.save()
+        if tr.common_content.assignment_status > 0 and tr.common_content.assignment_status == current_status:
+            tr.common_content.assignment_status = status_flag[review]
+            if review == 'quality':
+                dr_log = Quality_Review_Log()
+            else:
+                dr_log = Domain_Review_Log()
+            dr_log.status = status_flag[review]
+            dr_log.component = "assignment"
+            dr_log.user = request.user
+            dr_log.tutorial_resource = tr
+            dr_log.save()
     tr.common_content.save()
 
     return HttpResponseRedirect('/creation/' + review + '-review-tutorial/' + str(tr.id) + '/')
+
+def publish_tutorial(request, trid):
+    if not is_qualityreviewer(request.user):
+        raise PermissionDenied()
+    tr = Tutorial_Resource.objects.select_related().get(pk = trid)
+    if Quality_Reviewer_Role.objects.filter(user_id = request.user.id, foss_category_id = tr.tutorial_detail.foss_id, language_id = tr.language_id).count() == 0:
+        raise PermissionDenied()
+    flag = 0
+    if tr.language.name == 'English':
+        if tr.common_content.slide_status == 4 and (tr.common_content.code_status == 4 or tr.common_content.code_status == 6) and (tr.common_content.assignment_status == 4 or tr.common_content.assignment_status == 6):
+            flag = 1
+    else:
+        flag = 1
+    if flag and tr.outline_status == 4 or tr.script_status == 4 or tr.video_status == 4:
+        if tr.status == 0:
+            tr.status = 1
+            tr.save()
+    return HttpResponseRedirect(request.META['HTTP_REFERER'])

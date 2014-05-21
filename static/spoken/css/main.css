@@ -41,7 +41,9 @@
 .review-quality-review {
 	color: #5BC0DE;
 }
-
+.review-accepted {
+	color: #10a41e;
+}
 /* status icon color end */
 
 
@@ -135,3 +137,39 @@ a.twin-button {
 	display: none;
 }
 /* upload page css end */
+
+/* tabs */
+.tab-content{
+    padding: 15px 0;
+}
+/* tabs end */
+/* badge */
+.badge {
+    color: #fff;
+    display: inline-block;
+    min-width: 10px;
+    padding: 3px 7px;
+    font-size: 12px;
+    font-weight: bold;
+    line-height: 1;
+    background-color: #a26dc8;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: 10px;
+}
+.badge-none {
+    color: #fff;
+    display: inline-block;
+    min-width: 10px;
+    padding: 3px 7px;
+    font-size: 12px;
+    font-weight: bold;
+    line-height: 1;
+    background-color: orangered;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: 10px;
+}
+/* badge end */

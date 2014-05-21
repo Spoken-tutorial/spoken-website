@@ -201,7 +201,7 @@ class WorkshopForm(forms.Form):
 			self.fields['skype'].initial = instance.status
 
 class WorkshopPermissionForm(forms.Form):
-	permission_choices = list(PermissionType.objects.all().values_list('id', 'name'))
+	"""permission_choices = list(PermissionType.objects.all().values_list('id', 'name'))
 	permission_choices.insert(0, ('', '-- None --'))
 	permissiontype = forms.ChoiceField(choices = permission_choices, widget=forms.Select(attrs = {}), required = True)
 	
@@ -221,7 +221,7 @@ class WorkshopPermissionForm(forms.Form):
 	institution_type.insert(0, ('', '-- None --'))
 	institutiontype = forms.ChoiceField(choices = institution_type, widget=forms.Select(attrs = {}), required = False)
 	
-	institute = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = False)
+	institute = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = False)"""
 
 	def __init__(self, *args, **kwargs):
 		super(WorkshopPermissionForm, self).__init__(*args, **kwargs)
