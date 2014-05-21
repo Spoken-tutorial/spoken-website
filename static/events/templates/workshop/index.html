@@ -21,7 +21,7 @@
 {% endif %}
 {% block content %}
 	<!-- Nav tabs -->
-	<ul class="tabs">
+	<ul class="tabs nav nav-tabs">
 		<li><a href="/events/workshop/request/">New</a></li>
 		<li {% if status == 'pending' %}{{ 'class="active"'}}{% endif %}><a href="/events/workshop/pending/">Pending</a></li>
 		<li {% if status == 'approved' %}{{ 'class="active"'}}{% endif %}><a href="/events/workshop/approved/">Approved</a></li>
@@ -35,7 +35,8 @@
 			<iframe width = "100%" src="/events/workshop/request/"></iframe> -->
 		</div>
 		<div class="tab-pane active" id="pending">
-			<table class="table table-striped table-hover">
+			{% if collection %}
+			<table class="table table-striped table-hover table-bordered">
 				<tr>
 					<th>Academic Name</th>
 					<th>FOSS</th>
@@ -75,6 +76,9 @@
 					</tr>
 				{% endfor %}
 			</table>
+			{% else %}
+				<p>No record found!</p>
+			{% endif %}
 		</div>
 	</div>
 {% endblock %}

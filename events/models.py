@@ -169,19 +169,42 @@ class Workshop(models.Model):
 
 class Test(models.Model):
     organiser = models.ForeignKey(User, related_name = 'test_organiser')
-    appoved_by = models.ForeignKey(User, related_name = 'test_approved_by')
+    appoved_by = models.ForeignKey(User, related_name = 'test_approved_by', null=True)
     invigilator = models.ForeignKey(User)
     academic = models.ForeignKey(AcademicCenter)
+    department = models.ManyToManyField(Department)
     workshop = models.ForeignKey(Workshop)
     foss = models.ForeignKey(Foss_Category)
     test_code = models.CharField(max_length=100)
     tdate = models.DateField()
     ttime = models.TimeField()
-    status = models.PositiveSmallIntegerField()
-    participant_count = models.PositiveIntegerField()
+    status = models.PositiveSmallIntegerField(default=0)
+    participant_count = models.PositiveIntegerField(default=0)
     created = models.DateTimeField(auto_now_add = True)
     updated = models.DateTimeField(auto_now = True)
-    
+
+class TestAttendance(models.Model):
+    test = models.ForeignKey(Test)
+    mdluser_id = models.PositiveIntegerField()
+    mdlcourse_id = models.PositiveIntegerField(default=0)
+    mdlquiz_id = models.PositiveIntegerField(default=0)
+    mdlattempt_id = models.PositiveIntegerField(default=0)
+    status = models.PositiveSmallIntegerField(default=0)
+    created = models.DateTimeField(auto_now_add = True)
+    updated = models.DateTimeField(auto_now = True)
+    class Meta:
+        verbose_name = "Test Attendance"
+        unique_together = (("test", "mdluser_id"))
+
+class TestCertificate (models.Model):
+    test = models.ForeignKey(Test)
+    mdluser_id = models.PositiveIntegerField()
+    password = models.CharField(max_length = 100)
+    created = models.DateTimeField(auto_now_add = True)
+    class Meta:
+        verbose_name = "Test Certificate"
+        unique_together = (("test", "mdluser_id"))
+
 class PermissionType(models.Model):
     name = models.CharField(max_length=200)
     created = models.DateTimeField(auto_now_add = True)
@@ -205,7 +228,7 @@ class WorkshopAttendance(models.Model):
     workshop = models.ForeignKey(Workshop)
     mdluser_id = models.PositiveIntegerField()
     #mdluser = models.ForeignKey(MdlUser)
-    status = models.PositiveSmallIntegerField()
+    status = models.PositiveSmallIntegerField(default=0)
     created = models.DateTimeField(auto_now_add = True)
     updated = models.DateTimeField(auto_now = True)
     class Meta:
