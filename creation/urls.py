@@ -18,12 +18,14 @@ urlpatterns = patterns('',
     url(r'^review-video/(\d+)/$', 'creation.views.review_video', name="review_video"),
     # Domain Reviewer part
     url(r'^domain-review/$', 'creation.views.domain_review_index', name="domain_review_index"),
-    url(r'^domain-review/(\d+)/$', 'creation.views.domain_review_index', name="domain_review_index"),
     url(r'^domain-review-tutorial/(\d+)/$', 'creation.views.domain_review_tutorial', name="domain_review_tutorial"),
     url(r'^domain-review-component/(\d+)/(\w+)/$', 'creation.views.domain_review_component', name="domain_review_component"),
     # Quality Reviewer part
     url(r'^quality-review/$', 'creation.views.quality_review_index', name="quality_review_index"),
+    url(r'^quality-review-tutorial/(\d+)/$', 'creation.views.quality_review_tutorial', name="quality_review_tutorial"),
+    url(r'^quality-review-component/(\d+)/(\w+)/$', 'creation.views.quality_review_component', name="quality_review_component"),
+    url(r'^publish-tutorial/(\d+)/$', 'creation.views.publish_tutorial', name="publish_tutorial"),
     url(r'^accept-all/(\w+)/(\d+)/$', 'creation.views.accept_all', name="accept_all"),
-    
+
     url(r'^testingvis/$', 'creation.views.testingvis', name="testingvis"),
 )

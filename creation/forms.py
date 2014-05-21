@@ -251,3 +251,14 @@ class DomainReviewComponentForm(forms.Form):
         widget = forms.Textarea,
         required = False
     )
+
+class QualityReviewComponentForm(forms.Form):
+    component_status = forms.ChoiceField(
+        choices = [('', '------'), (4, 'Accept'), (5, 'Need improvement')],
+        required = True,
+        error_messages = {'required': 'Please select the status'}
+    )
+    feedback = forms.CharField(
+        widget = forms.Textarea,
+        required = False
+    )
