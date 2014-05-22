@@ -141,17 +141,20 @@ def offline_details(request, wid):
                 
                 try:
                     wa = WorkshopAttendance.objects.get(workshop_id = wid, mdluser_id = mdluser.id)
+                    if wa.status == 0:
+                        wa.status = 1
+                        wa.save()
                 except Exception, e:
                     wa = WorkshopAttendance()
                     wa.workshop_id = wid
                     wa.status = 1
                     wa.mdluser_id = mdluser.id
                     wa.save()
-            return HttpResponseRedirect('/events/workshop/organiser/'+str(wid)+'/approvel/?status=completed')
-    messages = {}
+
+            messages.success(request, "Offline details uploaded!")
+            return HttpResponseRedirect('/events/workshop/'+str(wid)+'/attendance/')
     context = {
         'form': form,
-        'message':messages,
     }
     context.update(csrf(request))
     return render(request, 'mdl/templates/offline_details.html', context)

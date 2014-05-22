@@ -197,20 +197,13 @@ class TestAttendance(models.Model):
     mdlcourse_id = models.PositiveIntegerField(default=0)
     mdlquiz_id = models.PositiveIntegerField(default=0)
     mdlattempt_id = models.PositiveIntegerField(default=0)
+    password = models.CharField(max_length = 100, null=True)
+    count = models.PositiveSmallIntegerField(default=0)
     status = models.PositiveSmallIntegerField(default=0)
     created = models.DateTimeField(auto_now_add = True)
     updated = models.DateTimeField(auto_now = True)
     class Meta:
         verbose_name = "Test Attendance"
-        unique_together = (("test", "mdluser_id"))
-
-class TestCertificate (models.Model):
-    test = models.ForeignKey(Test)
-    mdluser_id = models.PositiveIntegerField()
-    password = models.CharField(max_length = 100)
-    created = models.DateTimeField(auto_now_add = True)
-    class Meta:
-        verbose_name = "Test Certificate"
         unique_together = (("test", "mdluser_id"))
 
 class PermissionType(models.Model):
@@ -236,6 +229,8 @@ class WorkshopAttendance(models.Model):
     workshop = models.ForeignKey(Workshop)
     mdluser_id = models.PositiveIntegerField()
     #mdluser = models.ForeignKey(MdlUser)
+    password = models.CharField(max_length = 100, null=True)
+    count = models.PositiveSmallIntegerField(default=0)
     status = models.PositiveSmallIntegerField(default=0)
     created = models.DateTimeField(auto_now_add = True)
     updated = models.DateTimeField(auto_now = True)
@@ -243,12 +238,3 @@ class WorkshopAttendance(models.Model):
         verbose_name = "Workshop Attendance"
         unique_together = (("workshop", "mdluser_id"))
         #unique_together = (("workshop", "mdluser"))
-
-class WorkshopCertificate (models.Model):
-    workshop = models.ForeignKey(Workshop)
-    mdluser_id = models.PositiveIntegerField()
-    password = models.CharField(max_length = 100)
-    created = models.DateTimeField(auto_now_add = True)
-    class Meta:
-        verbose_name = "Workshop Certificate"
-        unique_together = (("workshop", "mdluser_id"))

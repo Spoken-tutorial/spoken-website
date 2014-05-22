@@ -4,22 +4,6 @@
 {% load mdldata %}
 {% block title %}Upload Tutorial{% endblock %}
 {% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
-{% if alert_success or alert_danger %}
-	{% block alert %}
-		{% if alert_success %}
-			<div class="alert alert-success alert-dismissable">
-				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-				{{ alert_success }}
-			</div>
-		{% endif %}
-		{% if alert_danger %}
-			<div class="alert alert-danger alert-dismissable">
-				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-				{{ alert_danger }}
-			</div>
-		{% endif %}
-	{% endblock %}
-{% endif %}
 {% block content %}
     <!-- Nav tabs -->
     <ul class="nav nav-tabs">
@@ -45,7 +29,13 @@
 						<td>{{ record.academic }}</td>
 						<td>{{ record.workshop_code }}</td>
 						<td>{{ record.wdate }} {{ record.ttime }}</td>
-						<td><a href="{% url 'events:student_subscribe' 'workshop' record.id mdluserid %}">Subscribe</a></td>
+						<td>
+						    {% if record.id|check_workshop_enrole:mdluserid %}
+						        Subscribed
+						    {% else %}
+						        <a href="{% url 'events:student_subscribe' 'workshop' record.id mdluserid %}">Subscribe</a>
+						    {% endif %}
+						</td>
 					</tr>
 				{% endfor %}
 			</table>

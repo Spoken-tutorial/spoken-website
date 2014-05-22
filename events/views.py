@@ -517,7 +517,7 @@ def workshop_request(request):
                 w.department.add(dept)
             w.save()
             messages.success(request, "Your Workshop request has been send!")
-            return HttpResponseRedirect("/events/workshop/pending/")
+            return HttpResponseRedirect("/events/workshop/organiser/pending/")
         
         context = {'form':form, }
         return render(request, 'events/templates/workshop/form.html', context)
@@ -623,9 +623,15 @@ def workshop_approvel(request, role, rid):
     #todo: add workshop code
     if w.status == 1:
         w.workshop_code = "WC-"+str(w.id)
-    w.save()
     if request.GET['status'] == 'completed':
+        # calculate the participant list
+        wpcount = WorkshopAttendance.objects.filter(workshop_id = rid, status = 1).count()
+        w.participant_counts = wpcount
+        w.save()
+        messages.success(request, "Selected workshop has been "+request.GET['status']+"!")
         return HttpResponseRedirect('/events/workshop/'+role+'/completed/')
+    w.save()
+    messages.success(request, "Selected workshop has been "+request.GET['status']+"!")
     return HttpResponseRedirect('/events/workshop/'+role+'/approved/')
 
 @login_required
@@ -670,6 +676,50 @@ def accessrole(request):
     workshops = Workshop.objects.filter(academic__in = all_academic_ids)
     context = {'collection':workshops}
     return render(request, 'events/templates/accessrole/workshop_accessrole.html', context)
+
+def workshop_attendance(request, wid):
+    user = request.user
+     
+    try:
+        workshop = Workshop.objects.get(pk = wid) 
+    except:
+        raise Http404('Page not found !!')
+    #todo check request user and workshop organiser same or not
+    if request.method == 'POST':
+        users = request.POST
+        if users:
+            #set all record to 0 if status = 1
+            WorkshopAttendance.objects.filter(workshop_id = wid, status = 1).update(status = 0)
+            for u in users:
+                if u != 'csrfmiddlewaretoken':
+                    try:
+                        wa = WorkshopAttendance.objects.get(mdluser_id = users[u], workshop_id = wid)
+                        print wa.id, " => Exits"
+                    except:
+                        wa = WorkshopAttendance()
+                        wa.workshop_id = wid
+                        wa.mdluser_id = users[u]
+                        wa.status = 0
+                        wa.save()
+                        print wa.id, " => Inserted"
+                    if wa:
+                        #todo: if the status = 2 check in moodle if he completed the test set status = 3 (completed)
+                        w = WorkshopAttendance.objects.get(mdluser_id = wa.mdluser_id, workshop_id = wid)
+                        w.status = 1
+                        w.save()
+            messages.success(request, "Marked Attandance has been updated!") 
+    participant_ids = list(WorkshopAttendance.objects.filter(workshop_id = wid).values_list('mdluser_id'))
+    mdlids = []
+    for k in participant_ids:
+        mdlids.append(k[0])
+    if mdlids:
+        wp = MdlUser.objects.filter(id__in = mdlids)
+    context = {}
+    context['collection'] = wp
+    context['workshop'] = workshop
+    context.update(csrf(request))
+    return render(request, 'events/templates/workshop/attendance.html', context)
+
 
 @login_required
 def workshop_participant(request, wid=None):
@@ -725,12 +775,21 @@ def workshop_participant_ceritificate(request, wid, participant_id):
             w = Workshop.objects.get(id = wid)
             mdluser = MdlUser.objects.get(id = participant_id)
             wcf = None
-            try:
-                wcf = WorkshopCertificate.objects.get(workshop_id = wid, mdluser_id = participant_id)
-                certificate_pass = wcf.password
-            except Exception, e:
+            # check if user can get certificate
+            wa = WorkshopAttendance.objects.get(workshop_id = w.id, mdluser_id = participant_id)
+            if wa.status < 1:
+                raise Http404('Page not found')
+            if wa.password:
+                certificate_pass = wa.password
+                wa.count += 1
+                wa.status = 2
+                wa.save()
+            else:
                 certificate_pass = str(mdluser.id)+id_generator(10-len(str(mdluser.id)))
-                WorkshopCertificate.objects.create(workshop_id = wid, mdluser_id = participant_id, password = certificate_pass)
+                wa.password = certificate_pass
+                wa.status = 2
+                wa.count += 1
+                wa.save()
         except:
             raise Http404('Page not found')
         
@@ -1116,13 +1175,6 @@ def test_participant_ceritificate(request, wid, participant_id):
     return response
 
 def student_subscribe(request, events, eventid = None, mdluser_id = None):
-    print "*******************"
-    print request
-    print "*******************"
-    print eventid
-    print "*******************"
-    print mdluser_id
-    print "*******************"
     try:
         mdluser = MdlUser.objects.get(id = mdluser_id)
         if events == 'test':
@@ -1131,6 +1183,7 @@ def student_subscribe(request, events, eventid = None, mdluser_id = None):
             except Exception, e:
                 print e
                 pass
+            messages.success(request, "You have sucessfully subscribe to the "+events+"!")
             return HttpResponseRedirect('/moodle/index/#Upcoming-Test')
         elif events == 'workshop':
             try:
@@ -1138,6 +1191,7 @@ def student_subscribe(request, events, eventid = None, mdluser_id = None):
             except Exception, e:
                 print e
                 pass
+            messages.success(request, "You have sucessfully subscribe to the "+events+"!")
             return HttpResponseRedirect('/moodle/index/#Upcoming-Workshop')
         else:
             raise Http404('Page not found')
