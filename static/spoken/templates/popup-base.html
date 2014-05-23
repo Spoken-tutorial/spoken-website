@@ -47,7 +47,38 @@
 				<div id="content-inner">
 					<div id="content" class="container col-lg-12 col-md-12 col-sm-12">
 						<h4 class="page-title">{% block heading %}{% endblock %}</h4>
-						{% block alert %}{% endblock %}
+						{% block alert %}
+							{% if messages %}
+								{% for message in messages %}
+								    {% if message.tags == 'success' %}
+									    <div class="alert alert-success alert-dismissable">
+										    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+										    {{ message }}
+									    </div>
+									{% elif message.tags == 'warning' %}
+									   <div class="alert alert-warning alert-dismissable">
+										    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+										    {{ message }}
+									    </div>
+									{% elif message.tags == 'error' %}
+									    <div class="alert alert-danger alert-dismissable">
+										    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+										    {{ message }}
+									    </div>
+									{% elif message.tags == 'info' %}
+									     <div class="alert alert-info alert-dismissable">
+										    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+										    {{ message }}
+									    </div>
+									{% elif message.tags == 'debug' %}
+									    <div class="alert alert-info alert-dismissable">
+										    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+										    {{ message }}
+									    </div>
+									{% endif %}
+								{% endfor %}
+							{% endif %}
+						{% endblock %}
 						<p>{% block content %}{% endblock %}</p>
 					</div>
 				</div><!-- /#content-inner .container -->
