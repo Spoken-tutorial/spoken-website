@@ -7,5 +7,5 @@ urlpatterns = patterns('',
 	url(r'^register/', 'mdldjango.views.mdl_register', name='mdl_register'),
 	url(r'^logout/', 'mdldjango.views.mdl_logout', name='mdl_logout'),
 	url(r'^index/', 'mdldjango.views.index', name='mdl_index'),
-	url(r'^offline-data/', 'mdldjango.views.offline_details', name='mdl_offline_workshop_details'),
+	url(r'^offline-data/(\d+)/', 'mdldjango.views.offline_details', name='mdl_offline_workshop_details'),
 )

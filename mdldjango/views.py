@@ -10,6 +10,7 @@ from django.contrib import messages
 import xml.etree.cElementTree as etree
 # Create your views here.
 import hashlib
+from django.core.exceptions import PermissionDenied
 
 def encript_password(password):
     password = hashlib.md5(password+'VuilyKd*PmV?D~lO19jL(Hy4V/7T^G>p').hexdigest()
@@ -92,16 +93,18 @@ def index(request):
     return render(request, 'mdl/templates/mdluser_index.html', context)
     
 @login_required
-def offline_details(request):
+def offline_details(request, wid):
     user = request.user
-    form = OfflineDataForm(user = request.user)
-    wid = 0
+    form = OfflineDataForm()
+    try:
+        Workshop.objects.get(pk=wid, status = 1)
+    except:
+        raise PermissionDenied('You are not allowed to view this page!')
     if request.method == 'POST':
-        form = OfflineDataForm(user, request.POST, request.FILES)
+        form = OfflineDataForm(request.POST, request.FILES)
         if form.is_valid():
             xmlDocData = form.cleaned_data['xml_file'].read()
             xmlDocTree = etree.XML(xmlDocData)
-            wid = form.cleaned_data['workshop_code']
             try:
                 w = Workshop.objects.get(id = wid)
             except:
@@ -124,24 +127,27 @@ def offline_details(request):
                     
                 except Exception, e:
                     mdluser = MdlUser()
+                    mdluser.auth = 'manual'
                     mdluser.firstname = firstname
                     mdluser.username = firstname
                     mdluser.lastname = lastname
                     mdluser.password = password
                     mdluser.institution = w.academic_id
                     mdluser.email = email
+                    mdluser.confirmed = 1
+                    mdluser.mnethostid = 1
                     mdluser.save()
                     mdluser = MdlUser.objects.filter(email = email, firstname= firstname, username=firstname, password=password).first()
                 
                 try:
-                    wa = WorkshopAttendance.objects.get(workshop_id = form.cleaned_data['workshop_code'], mdluser_id = mdluser.id)
+                    wa = WorkshopAttendance.objects.get(workshop_id = wid, mdluser_id = mdluser.id)
                 except Exception, e:
                     wa = WorkshopAttendance()
                     wa.workshop_id = wid
                     wa.status = 1
                     wa.mdluser_id = mdluser.id
                     wa.save()
-            return HttpResponseRedirect('/events/workshop/'+str(wid)+'/approvel/?status=completed')
+            return HttpResponseRedirect('/events/workshop/organiser/'+str(wid)+'/approvel/?status=completed')
     messages = {}
     context = {
         'form': form,

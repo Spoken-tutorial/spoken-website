@@ -1,6 +1,7 @@
 {% extends 'spoken/templates/base.html' %}
 {% load widget_tweaks %}
 {% load static %}
+{% load mdldata %}
 {% block title %}Upload Tutorial{% endblock %}
 {% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
 {% if alert_success or alert_danger %}
@@ -103,6 +104,7 @@
 					<th>Academic Name</th>
 					<th>Test Code</th>
 					<th>Date & Time</th>
+					<th>Score</th>
 					<th>Action</th>
 				</tr>
 				{% for record in past_test %}
@@ -110,7 +112,10 @@
 						<td>{{ record.academic }}</td>
 						<td>{{ record.test_code }}</td>
 						<td>{{ record.tdate }} {{ record.ttime }}</td>
-						<td><a href="{% url 'events:test_participant_ceritificate' record.id mdluserid %}">Certificate</a></td>
+						{% with SCORE=mdluserid|get_participant_score %}
+						    <td>{{ SCORE }}</td>
+						    <td><a href="{% url 'events:test_participant_ceritificate' record.id mdluserid %}">Certificate</a></td>
+					    {% endwith %}
 					</tr>
 				{% endfor %}
 			</table>

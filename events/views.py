@@ -29,6 +29,7 @@ from cms.models import Profile
 from forms import *
 import datetime
 from django.utils import formats
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 #pdf generate
 from reportlab.pdfgen import canvas
@@ -129,7 +130,7 @@ def new_ac(request):
             
             form_data.academic_code = academic_code
             form_data.save()
-            messages.success(request, form_data.institution_name+" added!")
+            messages.success(request, form_data.institution_name+" has been added!")
             return HttpResponseRedirect("/events/ac/")
         
         context = {'form':form}
@@ -503,7 +504,8 @@ def workshop_request(request):
             dateTime = request.POST['wdate'].split(' ')
             w = Workshop()
             w.organiser_id = user.id
-            w.academic_id = request.POST['academic']
+            #w.academic_id = request.POST['academic']
+            w.academic = user.organiser.academic
             w.language_id = request.POST['language']
             w.foss_id = request.POST['foss']
             w.wdate = dateTime[0]
@@ -514,6 +516,7 @@ def workshop_request(request):
             for dept in form.cleaned_data.get('department'):
                 w.department.add(dept)
             w.save()
+            messages.success(request, "Your Workshop request has been send!")
             return HttpResponseRedirect("/events/workshop/pending/")
         
         context = {'form':form, }
@@ -524,7 +527,7 @@ def workshop_request(request):
         context['form'] = WorkshopForm(user = request.user)
         return render(request, 'events/templates/workshop/form.html', context)
 
-def workshop_edit(request, rid):
+def workshop_edit(request, role, rid):
     ''' Workshop edit by organiser or resource person '''
     user = request.user
     if not user.is_authenticated() or not is_organiser:
@@ -540,15 +543,14 @@ def workshop_edit(request, rid):
             #check if date time chenged or not
             if w.status == 1 and (str(w.wdate) != dateTime[0] or str(w.wtime)[0:5] != dateTime[1]):
                 w.status = 4
-            w.organiser_id = user.id
-            w.academic_id = request.POST['academic']
             w.language_id = request.POST['language']
             w.foss_id = request.POST['foss']
             w.wdate = dateTime[0]
             w.wtime = dateTime[1]
             w.skype = request.POST['skype']
             w.save()
-            return HttpResponseRedirect("/events/workshop/pending/")
+            messages.success(request, "Workshop has been sucessfully updated!")
+            return HttpResponseRedirect("/events/workshop/"+role+"/pending/")
         
         context = {'form':form, }
         return render(request, 'events/templates/workshop/form.html', context)
@@ -560,7 +562,7 @@ def workshop_edit(request, rid):
         context['instance'] = record
         return render(request, 'events/templates/workshop/form.html', context)
 
-def workshop_list(request, status):
+def workshop_list(request, role, status):
     """ Organiser index page """
     user = request.user
     if not (user.is_authenticated() and ( is_organiser(user) or is_resource_person(user) or is_event_manager(user))):
@@ -569,26 +571,37 @@ def workshop_list(request, status):
     status_dict = {'pending': 0, 'approved' : 1, 'completed' : 2, 'rejected' : 3, 'reschedule' : 1}
     if status in status_dict:
         context = {}
-        if is_event_manager(user):
+        workshops = None
+        if is_event_manager(user) and role == 'em':
             workshops = Workshop.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status])
-        elif is_resource_person(user):
+        elif is_resource_person(user) and role == 'rp':
             workshops = Workshop.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status])
-        elif is_organiser(user):
+        elif is_organiser(user) and role == 'organiser':
             workshops = Workshop.objects.filter(organiser_id=user, status = status_dict[status])
-            
+        
+        if workshops == None:
+            raise Http404('You are not allowed to view this page!')
+
+        paginator = Paginator(workshops, 30)
+        page = request.GET.get('page')
+        try:
+            workshops =  paginator.page(page)
+        except PageNotAnInteger:
+            workshops =  paginator.page(1)
+        except EmptyPage:
+            workshops = paginator.page(paginator.num_pages)
+        
         context['collection'] = workshops
         context['status'] = status
-        
-        
-        context['can_manage'] = user.groups.filter(Q(name="Event Manager") |  Q(name="Resource Person"))
+        context['role'] = role
         context.update(csrf(request))
         return render(request, 'events/templates/workshop/index.html', context)
     else:
-        raise Http404('Page not found !!')
+        raise Http404('Page not foundddddd !!')
 
 @login_required
 @csrf_exempt
-def workshop_approvel(request, rid):
+def workshop_approvel(request, role, rid):
     """ Resource person: confirm or reject workshop """
     user = request.user
     try:
@@ -612,8 +625,8 @@ def workshop_approvel(request, rid):
         w.workshop_code = "WC-"+str(w.id)
     w.save()
     if request.GET['status'] == 'completed':
-        return HttpResponseRedirect('/events/workshop/completed/')
-    return HttpResponseRedirect('/events/workshop/approved/')
+        return HttpResponseRedirect('/events/workshop/'+role+'/completed/')
+    return HttpResponseRedirect('/events/workshop/'+role+'/approved/')
 
 @login_required
 def workshop_permission(request):
@@ -711,14 +724,15 @@ def workshop_participant_ceritificate(request, wid, participant_id):
         try:
             w = Workshop.objects.get(id = wid)
             mdluser = MdlUser.objects.get(id = participant_id)
-            certificate_pass = str(mdluser.id)+id_generator(10-len(str(mdluser.id)))
+            wcf = None
+            try:
+                wcf = WorkshopCertificate.objects.get(workshop_id = wid, mdluser_id = participant_id)
+                certificate_pass = wcf.password
+            except Exception, e:
+                certificate_pass = str(mdluser.id)+id_generator(10-len(str(mdluser.id)))
+                WorkshopCertificate.objects.create(workshop_id = wid, mdluser_id = participant_id, password = certificate_pass)
         except:
             raise Http404('Page not found')
-    try:
-        WorkshopCertificate.objects.create(workshop_id = wid, mdluser_id = participant_id, password = certificate_pass)
-    except Exception, e:
-        print e
-        pass
         
     response = HttpResponse(mimetype='application/pdf')
     filename = (mdluser.firstname+'-'+w.foss.foss+"-Participant-Certificate").replace(" ", "-");
@@ -1022,6 +1036,7 @@ def test_participant_ceritificate(request, wid, participant_id):
         try:
             w = Test.objects.get(id = wid)
             mdluser = MdlUser.objects.get(id = participant_id)
+            ta = TestAttendance.objects.get(test_id = w.id, mdluser_id = participant_id)
             certificate_pass = str(mdluser.id)+id_generator(10-len(str(mdluser.id)))
         except:
             raise Http404('Page not found')
@@ -1039,8 +1054,11 @@ def test_participant_ceritificate(request, wid, participant_id):
     imgDoc = canvas.Canvas(imgTemp)
 
     # Title 
-    imgDoc.setFont('Helvetica', 40, leading=None)
-    imgDoc.drawCentredString(415, 480, "Certificate of Test")
+    #imgDoc.setFont('Helvetica', 40, leading=None)
+    #imgDoc.drawCentredString(415, 480, "Certificate for Completion of c ")
+    
+    imgDoc.setFont('Helvetica', 18, leading=None)
+    imgDoc.drawCentredString(175, 115, custom_strftime('%B {S} %Y', w.tdate))
     
     #password
     imgDoc.setFillColorRGB(211, 211, 211)
@@ -1052,9 +1070,9 @@ def test_participant_ceritificate(request, wid, participant_id):
     # Draw image on Canvas and save PDF in buffer
     imgPath = "/home/deer/sign.jpg"
     imgDoc.drawImage(imgPath, 600, 100, 150, 76)    ## at (399,760) with size 160x160
-
+    
     #paragraphe
-    text = "This is to certify that <b>"+mdluser.firstname +" "+mdluser.lastname+"</b> participated in the <b>"+w.foss.foss+"</b> test at <b>"+w.academic.institution_name+"</b> organized by <b>"+w.organiser.username+"</b> on <b>"+custom_strftime('%B {S} %Y', w.tdate)+"</b>.  This workshop was conducted with the instructional material created by the Spoken Tutorial Project, IIT Bombay, funded by the National Mission on Education through ICT, MHRD, Govt., of India."
+    text = "This is to certify that <b>"+ta.mdluser_firstname +" "+ta.mdluser_lastname+"</b> has sucessfully completed <b>"+w.foss.foss+"</b> test organized at <b>"+w.academic.institution_name+"</b> by <b>"+w.invigilator.username+"</b>  with course material provided by the Take To A Teacher project at IIT Bombay.  <br /><br /><p>pasing on online exam, conducted remotly from IIT Bombay, is a pre-requisite for completing this workshop. <b>"+w.organiser.username+"</b> at <b>"+w.academic.institution_name+"</b> invigilated this examination. This workshop is offered by the <b>Spoken Tutorial project, IIT Bombay, funded by National Mission on Education through ICT, MHRD, Govt of India.</b></p>"
     
     centered = ParagraphStyle(name = 'centered',
         fontSize = 16,  
@@ -1063,8 +1081,21 @@ def test_participant_ceritificate(request, wid, participant_id):
         spaceAfter = 20)
 
     p = Paragraph(text, centered)
-    p.wrap(650, 200)
-    p.drawOn(imgDoc, 4.2 * cm, 9 * cm)
+    p.wrap(700, 200)
+    p.drawOn(imgDoc, 4.2 * cm, 6 * cm)
+    
+    #paragraphe
+    text = "Certificate for Completion of "+w.foss.foss+" Workshop"
+    
+    centered = ParagraphStyle(name = 'centered',
+        fontSize = 40,  
+        leading = 50,  
+        alignment = 1,  
+        spaceAfter = 20)
+
+    p = Paragraph(text, centered)
+    p.wrap(500, 200)
+    p.drawOn(imgDoc, 6.2 * cm, 16 * cm)
 
     imgDoc.save()
 
@@ -1092,21 +1123,25 @@ def student_subscribe(request, events, eventid = None, mdluser_id = None):
     print "*******************"
     print mdluser_id
     print "*******************"
-    if events == 'test':
-        try:
-            TestAttendance.objects.create(test_id=eventid, mdluser_id = mdluser_id)
-        except Exception, e:
-            print e
-            pass
-        return HttpResponseRedirect('/moodle/index/#Upcoming-Test')
-    elif events == 'workshop':
-        try:
-            WorkshopAttendance.objects.create(workshop_id=eventid, mdluser_id = mdluser_id)
-        except Exception, e:
-            print e
-            pass
-        return HttpResponseRedirect('/moodle/index/#Upcoming-Workshop')
-    else:
+    try:
+        mdluser = MdlUser.objects.get(id = mdluser_id)
+        if events == 'test':
+            try:
+                TestAttendance.objects.create(test_id=eventid, mdluser_id = mdluser_id, mdluser_firstname = mdluser.firstname, mdluser_lastname = mdluser.lastname)
+            except Exception, e:
+                print e
+                pass
+            return HttpResponseRedirect('/moodle/index/#Upcoming-Test')
+        elif events == 'workshop':
+            try:
+                WorkshopAttendance.objects.create(workshop_id=eventid, mdluser_id = mdluser_id)
+            except Exception, e:
+                print e
+                pass
+            return HttpResponseRedirect('/moodle/index/#Upcoming-Workshop')
+        else:
+            raise Http404('Page not found')
+    except:
         raise Http404('Page not found')
     
     return HttpResponseRedirect('/moodle/index/')

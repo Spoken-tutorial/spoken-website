@@ -167,6 +167,9 @@ class Workshop(models.Model):
     created = models.DateTimeField(auto_now_add = True)
     updated = models.DateTimeField(auto_now = True)
 
+    class Meta:
+        unique_together = (("organiser", "academic", "foss", "wdate", "wtime"),)
+
 class Test(models.Model):
     organiser = models.ForeignKey(User, related_name = 'test_organiser')
     appoved_by = models.ForeignKey(User, related_name = 'test_approved_by', null=True)
@@ -183,8 +186,13 @@ class Test(models.Model):
     created = models.DateTimeField(auto_now_add = True)
     updated = models.DateTimeField(auto_now = True)
 
+    class Meta:
+        unique_together = (("organiser", "academic", "foss", "tdate", "ttime"),)
+
 class TestAttendance(models.Model):
     test = models.ForeignKey(Test)
+    mdluser_firstname = models.CharField(max_length = 100)
+    mdluser_lastname = models.CharField(max_length = 100)
     mdluser_id = models.PositiveIntegerField()
     mdlcourse_id = models.PositiveIntegerField(default=0)
     mdlquiz_id = models.PositiveIntegerField(default=0)
