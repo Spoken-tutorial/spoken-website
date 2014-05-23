@@ -45,9 +45,9 @@ urlpatterns = patterns('',
 	url(r'^test/participant/certificate/(\d+)/(\d+)/$', views.test_participant_ceritificate, name='test_participant_ceritificate'),
 	url(r'^test/(\d+)/attendance/$', views.test_attendance, name='test_attendance'),
 	url(r'^test/request/$', views.test_request, name='test_request'),
-	url(r'^test/(\d+)/approvel/$', views.test_approvel, name='test_approvel'),
+	url(r'^test/(?P<role>\w+)/(?P<rid>\d+)/approvel/$', views.test_approvel, name='test_approvel'),
 	url(r'^test/(?P<role>\w+)/(?P<status>\w+)/$', views.test_list, name='test_list'),
-	url(r'^test/(\d+)/edit/$', views.test_edit, name='test_edit'),
+	url(r'^test/(?P<role>\w+)/(?P<rid>\d+)/edit/$', views.test_edit, name='test_edit'),
 
 	#Ajax 
 	url(r'ajax-ac-state/$', views.ajax_ac_state, name='ajax_ac_state'),

@@ -858,8 +858,9 @@ def test_request(request):
             dateTime = request.POST['tdate'].split(' ')
             t = Test()
             t.organiser_id = user.id
-            t.invigilator_id = user.id
-            t.academic_id = form.cleaned_data['academic']
+            t.invigilator_id = form.cleaned_data['invigilator']
+            #t.academic_id = form.cleaned_data['academic']
+            t.academic = user.organiser.academic
             t.workshop_id = form.cleaned_data['workshop']
             t.tdate = dateTime[0]
             t.ttime = dateTime[1]
@@ -869,7 +870,8 @@ def test_request(request):
             for dept in form.cleaned_data.get('department'):
                 t.department.add(dept)
             t.save()
-            return HttpResponseRedirect("/events/test/pending/")
+            messages.success(request, "Thank you, we have received your request")
+            return HttpResponseRedirect("/events/test/organiser/pending/")
         
         context = {'form':form, }
         return render(request, 'events/templates/test/form.html', context)
@@ -925,7 +927,7 @@ def test_list(request, role, status):
     else:
         raise Http404('Page not found !!')
 
-def test_edit(request, rid):
+def test_edit(request, role, rid):
     ''' Workshop edit by organiser or resource person '''
     user = request.user
     if not user.is_authenticated() or not is_organiser:
@@ -940,15 +942,16 @@ def test_edit(request, rid):
             #check if date time chenged or not
             if t.status == 1 and (str(t.tdate) != dateTime[0] or str(t.ttime)[0:5] != dateTime[1]):
                 t.status = 4
-            t.organiser_id = user.id
+            #t.organiser_id = user.id
             t.invigilator_id = form.cleaned_data['invigilator']
-            t.academic_id = form.cleaned_data['academic']
+            #t.academic_id = form.cleaned_data['academic']
             t.workshop_id = form.cleaned_data['workshop']
             t.tdate = dateTime[0]
             t.ttime = dateTime[1]
             t.foss_id = form.cleaned_data['foss']
             t.save()
-            return HttpResponseRedirect("/events/test/pending/")
+            messages.success(request, "Thank you, we have received your request")
+            return HttpResponseRedirect("/events/test/"+role+"/pending/")
         
         context = {'form':form, }
         return render(request, 'events/templates/test/form.html', context)
@@ -962,7 +965,7 @@ def test_edit(request, rid):
 
 @login_required
 @csrf_exempt
-def test_approvel(request, rid):
+def test_approvel(request, role, rid):
     """ Resource person: confirm or reject workshop """
     user = request.user
     status = 0
@@ -1000,8 +1003,8 @@ def test_approvel(request, rid):
     w.save()
     
     if request.GET['status'] == 'completed':
-        return HttpResponseRedirect('/events/test/completed/')
-    return HttpResponseRedirect('/events/test/approved/')
+        return HttpResponseRedirect('/events/test/'+role+'/completed/')
+    return HttpResponseRedirect('/events/test/'+role+'/approved/')
 
 def test_attendance(request, tid):
     user = request.user
@@ -1040,6 +1043,7 @@ def test_attendance(request, tid):
         
     participant_ids = list(WorkshopAttendance.objects.filter(workshop_id = test.workshop_id).values_list('mdluser_id'))
     mdlids = []
+    wp = None
     for k in participant_ids:
         mdlids.append(k[0])
     if mdlids:

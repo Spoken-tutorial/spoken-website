@@ -9,7 +9,7 @@ def get_participant_status(key, testcode):
     try:
         ta = TestAttendance.objects.get(mdluser_id=key, test_id=testcode)
     except:
-        return 'error'
+        return 'Add'
     return status_list[ta.status]
 
 def get_wparticipant_status(key, wcode):

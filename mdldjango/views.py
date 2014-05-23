@@ -80,13 +80,15 @@ def index(request):
     upcoming_test = Test.objects.filter(status=2, academic_id=mdluser.institution)
     past_workshop = Workshop.objects.filter(id__in = WorkshopAttendance.objects.filter(mdluser_id = mdluser.id).values_list('workshop_id'), status = 2)
     past_test = Test.objects.filter(id__in = TestAttendance.objects.filter(mdluser_id = mdluser.id).values_list('test_id'), status = 4)
+    ongoing_test = Test.objects.filter(id__in = TestAttendance.objects.filter(mdluser_id = mdluser.id).values_list('test_id'), status = 3)
     
     context = {
         'mdluserid' : mdluserid,
         'upcoming_workshop' : upcoming_workshop,
         'upcoming_test' : upcoming_test,
         'past_workshop' : past_workshop,
-        'past_test' : past_test
+        'past_test' : past_test,
+        'ongoing_test' : ongoing_test
 
     }
     context.update(csrf(request))

@@ -4,22 +4,6 @@
 {% load eventsdata %}
 {% block title %}Upload Tutorial{% endblock %}
 {% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
-{% if alert_success or alert_danger %}
-	{% block alert %}
-		{% if alert_success %}
-			<div class="alert alert-success alert-dismissable">
-				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-				{{ alert_success }}
-			</div>
-		{% endif %}
-		{% if alert_danger %}
-			<div class="alert alert-danger alert-dismissable">
-				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-				{{ alert_danger }}
-			</div>
-		{% endif %}
-	{% endblock %}
-{% endif %}
 {% block content %}
 	<!-- Nav tabs -->
 	<ul class="tabs nav nav-tabs">
@@ -58,20 +42,23 @@
 						{% endif %}
 						{% if role == 'rp' %}
 						    {% if status == 'pending' or status == 'approved' %}
-							    <a href="{% url 'events:test_edit' record.id %}">Edit</a>
+							    <a href="{% url 'events:test_edit' role record.id %}">Edit</a>
+							{% endif %}
+							{% if status == 'pending' %}
+							    <a href="{% url 'events:test_approvel' role record.id %}?status=accept">Accept</a>
 							{% endif %}
 						{% endif %}
 						
 						{% if role == 'organiser' %}
 						    {% if status == 'pending' or status == 'approved' %}
-							    <a href="{% url 'events:test_edit' record.id %}">Edit</a>
+							    <a href="{% url 'events:test_edit' role record.id %}">Edit</a>
 							{% endif %}
 						{% endif %}
 						
 						{% if role == 'invigilator' %}
 						    {% if status == 'waitingforinvigilator' %}
-							    <a href="{% url 'events:test_approvel' record.id %}?status=invigilatoraccept">Accept</a>
-							    <a href="{% url 'events:test_approvel' record.id %}?status=invigilatorreject">Reject</a>
+							    <a href="{% url 'events:test_approvel' role record.id %}?status=invigilatoraccept">Accept</a>
+							    <a href="{% url 'events:test_approvel' role record.id %}?status=invigilatorreject">Reject</a>
 							{% endif %}
 							{% if status == 'approved' and todaytest %}
 							    <a href="{% url 'events:test_attendance' record.id %}">Attendance</a>

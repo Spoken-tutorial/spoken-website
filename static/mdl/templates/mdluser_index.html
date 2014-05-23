@@ -9,7 +9,8 @@
     <ul class="nav nav-tabs">
         <li><a href="#Past-Workshop" data-toggle="tab">Past Workshop</a></li>
         <li><a href="#Past-Test" data-toggle="tab">Past Test</a></li>
-        <li class="active"><a href="#Upcoming-Workshop" data-toggle="tab">Upcoming Workshop</a></li>
+        <li><a href="#Upcoming-Workshop" data-toggle="tab">Upcoming Workshop</a></li>
+        <li class="active"><a href="#Ongoing-Test" data-toggle="tab">Ongoing Test</a></li>
         <li><a href="#Upcoming-Test" data-toggle="tab">Upcoming Test</a></li>
     </ul>
 
@@ -17,101 +18,124 @@
     <div class="tab-content">
         <div class="tab-pane active" id="Upcoming-Workshop">
             {% if upcoming_workshop %}
-			<table class="table table-striped table-hover table-bordered">
-				<tr>
-					<th>Academic Name</th>
-					<th>Workshop Code</th>
-					<th>Date & Time</th>
-					<th>Action</th>
-				</tr>
-				{% for record in upcoming_workshop %}
-					<tr>
-						<td>{{ record.academic }}</td>
-						<td>{{ record.workshop_code }}</td>
-						<td>{{ record.wdate }} {{ record.ttime }}</td>
-						<td>
-						    {% if record.id|check_workshop_enrole:mdluserid %}
-						        Subscribed
-						    {% else %}
-						        <a href="{% url 'events:student_subscribe' 'workshop' record.id mdluserid %}">Subscribe</a>
-						    {% endif %}
-						</td>
-					</tr>
-				{% endfor %}
-			</table>
-			{% else %}
-				<p>No record found!</p>
-			{% endif %}
+            <table class="table table-striped table-hover table-bordered">
+                <tr>
+                    <th>Academic Name</th>
+                    <th>Workshop Code</th>
+                    <th>Date & Time</th>
+                    <th>Action</th>
+                </tr>
+                {% for record in upcoming_workshop %}
+                    <tr>
+                        <td>{{ record.academic }}</td>
+                        <td>{{ record.workshop_code }}</td>
+                        <td>{{ record.wdate }} {{ record.ttime }}</td>
+                        <td>
+                            {% if record.id|check_workshop_enrole:mdluserid %}
+                                Subscribed
+                            {% else %}
+                                <a href="{% url 'events:student_subscribe' 'workshop' record.id mdluserid %}">Subscribe</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+            {% else %}
+                <p>No record found!</p>
+            {% endif %}
         </div>
         <div class="tab-pane" id="Upcoming-Test">
             {% if upcoming_test %}
-			<table class="table table-striped table-hover table-bordered">
-				<tr>
-					<th>Academic Name</th>
-					<th>Test Code</th>
-					<th>Date & Time</th>
-					<th>Action</th>
-				</tr>
-				{% for record in upcoming_test %}
-					<tr>
-						<td>{{ record.academic }}</td>
-						<td>{{ record.test_code }}</td>
-						<td>{{ record.tdate }} {{ record.ttime }}</td>
-						<td><a href="{% url 'events:student_subscribe' 'test' record.id mdluserid %}">Subscribe</a></td>
-					</tr>
-				{% endfor %}
-			</table>
-			{% else %}
-				<p>No record found!</p>
-			{% endif %}
+            <table class="table table-striped table-hover table-bordered">
+                <tr>
+                    <th>Academic Name</th>
+                    <th>Test Code</th>
+                    <th>Date & Time</th>
+                    <th>Action</th>
+                </tr>
+                {% for record in upcoming_test %}
+                    <tr>
+                        <td>{{ record.academic }}</td>
+                        <td>{{ record.test_code }}</td>
+                        <td>{{ record.tdate }} {{ record.ttime }}</td>
+                        <td><a href="{% url 'events:student_subscribe' 'test' record.id mdluserid %}">Subscribe</a></td>
+                    </tr>
+                {% endfor %}
+            </table>
+            {% else %}
+                <p>No record found!</p>
+            {% endif %}
         </div>
+        <div class="tab-pane" id="Ongoing-Test">
+            {% if upcoming_test %}
+            <table class="table table-striped table-hover table-bordered">
+                <tr>
+                    <th>Academic Name</th>
+                    <th>Test Code</th>
+                    <th>Date & Time</th>
+                    <th>Action</th>
+                </tr>
+                {% for record in upcoming_test %}
+                    <tr>
+                        <td>{{ record.academic }}</td>
+                        <td>{{ record.test_code }}</td>
+                        <td>{{ record.tdate }} {{ record.ttime }}</td>
+                        <td><a href="{% url 'events:student_subscribe' 'test' record.id mdluserid %}">Subscribe</a></td>
+                    </tr>
+                {% endfor %}
+            </table>
+            {% else %}
+                <p>No record found!</p>
+            {% endif %}
+        </div>
+
         <div class="tab-pane" id="Past-Workshop">
             {% if past_workshop %}
-			<table class="table table-striped table-hover table-bordered">
-				<tr>
-					<th>Academic Name</th>
-					<th>Workshop Code</th>
-					<th>Date & Time</th>
-					<th>Action</th>
-				</tr>
-				{% for record in past_workshop %}
-					<tr>
-						<td>{{ record.academic }}</td>
-						<td>{{ record.workshop_code }}</td>
-						<td>{{ record.wdate }} {{ record.ttime }}</td>
-						<td><a href="{% url 'events:workshop_participant_ceritificate' record.id mdluserid %}">Certificate</a></td>
-					</tr>
-				{% endfor %}
-			</table>
-			{% else %}
-				<p>No record found!</p>
-			{% endif %}
+            <table class="table table-striped table-hover table-bordered">
+                <tr>
+                    <th>Academic Name</th>
+                    <th>Workshop Code</th>
+                    <th>Date & Time</th>
+                    <th>Action</th>
+                </tr>
+                {% for record in past_workshop %}
+                    <tr>
+                        <td>{{ record.academic }}</td>
+                        <td>{{ record.workshop_code }}</td>
+                        <td>{{ record.wdate }} {{ record.ttime }}</td>
+                        <td><a href="{% url 'events:workshop_participant_ceritificate' record.id mdluserid %}">Certificate</a></td>
+                    </tr>
+                {% endfor %}
+            </table>
+            {% else %}
+                <p>No record found!</p>
+            {% endif %}
         </div>
         <div class="tab-pane" id="Past-Test">
             {% if past_test %}
-			<table class="table table-striped table-hover table-bordered">
-				<tr>
-					<th>Academic Name</th>
-					<th>Test Code</th>
-					<th>Date & Time</th>
-					<th>Score</th>
-					<th>Action</th>
-				</tr>
-				{% for record in past_test %}
-					<tr>
-						<td>{{ record.academic }}</td>
-						<td>{{ record.test_code }}</td>
-						<td>{{ record.tdate }} {{ record.ttime }}</td>
-						{% with SCORE=mdluserid|get_participant_score %}
-						    <td>{{ SCORE }}</td>
-						    <td><a href="{% url 'events:test_participant_ceritificate' record.id mdluserid %}">Certificate</a></td>
-					    {% endwith %}
-					</tr>
-				{% endfor %}
-			</table>
-			{% else %}
-				<p>No record found!</p>
-			{% endif %}
+            <table class="table table-striped table-hover table-bordered">
+                <tr>
+                    <th>Academic Name</th>
+                    <th>Test Code</th>
+                    <th>Date & Time</th>
+                    <th>Score</th>
+                    <th>Action</th>
+                </tr>
+                {% for record in past_test %}
+                    <tr>
+                        <td>{{ record.academic }}</td>
+                        <td>{{ record.test_code }}</td>
+                        <td>{{ record.tdate }} {{ record.ttime }}</td>
+                        {% with SCORE=mdluserid|get_participant_score %}
+                            <td>{{ SCORE }}</td>
+                            <td><a href="{% url 'events:test_participant_ceritificate' record.id mdluserid %}">Certificate</a></td>
+                        {% endwith %}
+                    </tr>
+                {% endfor %}
+            </table>
+            {% else %}
+                <p>No record found!</p>
+            {% endif %}
         </div>
     </div>
 {% endblock %}
