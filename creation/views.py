@@ -6,6 +6,7 @@ from decimal import Decimal
 from urllib2 import urlopen
 from django.conf import settings
 from django.views import generic
+from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.views.decorators.http import require_POST
 
@@ -21,6 +22,11 @@ from django.contrib.auth import authenticate, login, logout
 
 from creation.forms import *
 from creation.models import *
+
+def testingvis(request):
+    context = {}
+    context.update(csrf(request))
+    return render(request, 'creation/templates/testingvis.html', context)
 
 def is_contributor(user):
     """Check if the user is having contributor rights"""
@@ -78,19 +84,6 @@ def get_video_info(path):
 def get_filesize(path):
     filesize_bytes = os.path.getsize(path)
 
-def contributor_roles(request):
-    form = ContributorRoleForm()
-    context = {
-        'form': form
-    }
-    context.update(csrf(request))
-    return render(request,'creation/templates/testingvis.html', context)
-
-def testingvis(request):
-    context = {}
-    context.update(csrf(request))
-    return render(request, 'creation/templates/testingvis.html', context)
-
 def creationhome(request):
     context = {}
     context.update(csrf(request))
@@ -114,7 +107,6 @@ def upload_tutorial_index(request):
                 common_content.slide_status = 0
                 common_content.code_user = request.user
                 common_content.code_status = 0
-                common_content.assignment = common_content.tutorial_detail.tutorial.replace(' ', '-') + '-Assignment-' + lang.name
                 common_content.assignment_user = request.user
                 common_content.assignment_status = 0
                 common_content.prerequisit_user = request.user
@@ -317,11 +309,13 @@ def upload_component(request, trid, component):
                 print e
                 error_msg = 'Something went wrong, please try again later.'
             form = ComponentForm(component)
+            if response_msg:
+                messages.success(request, response_msg)
+            if error_msg:
+                messages.error(request, error_msg)
             context = {
                 'form': form,
                 'title': component,
-                'alert_success': response_msg,
-                'alert_danger': error_msg,
             }
             context.update(csrf(request))
             return render(request, 'creation/templates/upload_component.html', context)
@@ -355,24 +349,27 @@ def upload_outline(request, trid):
         raise PermissionDenied()
     response_msg = ''
     error_msg = ''
+    warning_msg = ''
     if request.method == 'POST':
         form = UploadOutlineForm(trid, request.POST)
         if form.is_valid():
             try:
                 comp_log.status = tr_rec.outline_status
-                tr_rec.outline = request.POST['outline']
-                tr_rec.outline_user = request.user
-                tr_rec.outline_status = 2
-                tr_rec.save()
-                comp_log.user = request.user
-                comp_log.tutorial_resource = tr_rec
-                comp_log.component = 'outline'
-                comp_log.save()
-                response_msg = 'Outline uploaded successfully!'
+                if tr_rec.outline != request.POST['outline']:
+                    tr_rec.outline = request.POST['outline']
+                    tr_rec.outline_user = request.user
+                    tr_rec.outline_status = 2
+                    tr_rec.save()
+                    comp_log.user = request.user
+                    comp_log.tutorial_resource = tr_rec
+                    comp_log.component = 'outline'
+                    comp_log.save()
+                    response_msg = 'Outline uploaded successfully!'
+                else:
+                    warning_msg = 'There is no change in outline'
             except Exception, e:
                 print e
                 error_msg = 'Something went wrong, please try again later.'
-            
         else:
             context = {
                 'form': form,
@@ -380,10 +377,14 @@ def upload_outline(request, trid):
             context.update(csrf(request))
             return render(request, 'creation/templates/upload_outline.html', context)
     form = UploadOutlineForm(trid)
+    if response_msg:
+        messages.success(request, response_msg)
+    if error_msg:
+        messages.error(request, error_msg)
+    if warning_msg:
+        messages.warning(request, warning_msg)
     context = {
         'form': form,
-        'alert_success': response_msg,
-        'alert_danger': error_msg
     }
     context.update(csrf(request))
     return render(request, 'creation/templates/upload_outline.html', context)
@@ -435,14 +436,33 @@ def upload_script(request, trid):
             context.update(csrf(request))
             return render(request, 'creation/templates/upload_script.html', context)
     form = UploadScriptForm(script_path)
+    if error_msg:
+        messages.error(request, error_msg)
+    if response_msg:
+        messages.success(request, response_msg)
     context = {
         'form': form,
         'script_path': script_path,
-        'alert_success': response_msg,
-        'alert_danger': error_msg
     }
     context.update(csrf(request))
     return render(request, 'creation/templates/upload_script.html', context)
+
+def mark_notrequired(request, tcid, component):
+    tcc = None
+    try:
+        tcc = Tutorial_Common_Content.objects.get(pk = tcid)
+        if getattr(tcc, component + '_status') != 4:
+            if component == 'code':
+                tcc.code_status = 6
+            elif component == 'assignment':
+                tcc.assignment_status = 6
+            tcc.save()
+            messages.success(request, component + " status updated successfully!")
+        else:
+            messages.error(request, "Invalid resource id!")
+    except Exception, e:
+        messages.error(request, 'Something went wrong, please try after some time.')
+    return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
 def view_outline(request, trid):
     tr_rec = None
@@ -503,6 +523,7 @@ def admin_review_index(request):
         return render(request, 'creation/templates/admin_review_index.html', context)
     except Exception, e:
         return e
+
 def review_video(request, trid):
     if not is_videoreviewer(request.user):
         raise PermissionDenied()
@@ -554,13 +575,15 @@ def review_video(request, trid):
         form = ReviewVideoForm()
     video_path = settings.MEDIA_ROOT + "videos/" + str(tr.tutorial_detail.foss_id) + "/" + str(tr.tutorial_detail_id) + "/" + tr.video
     video_info = get_video_info(video_path)
+    if error_msg:
+        messages.error(request, error_msg)
+    if response_msg:
+        messages.success(request, response_msg)
     context = {
         'tr': tr,
         'form': form,
         'media_url': settings.MEDIA_URL,
         'video_info': video_info,
-        'alert_success': response_msg,
-        'alert_danger': error_msg
     }
     context.update(csrf(request))
     return render(request, 'creation/templates/review_video.html', context)
@@ -669,12 +692,14 @@ def domain_review_component(request, trid, component):
             form = DomainReviewComponentForm()
     else:
         form = DomainReviewComponentForm()
+    if error_msg:
+        messages.error(request, error_msg)
+    if response_msg:
+        messages.success(request, response_msg)
     context = {
         'form': form,
         'tr': tr,
         'component': component,
-        'alert_success': response_msg,
-        'alert_danger': error_msg
     }
 
     return render(request, 'creation/templates/domain_review_component.html', context)
@@ -796,12 +821,14 @@ def quality_review_component(request, trid, component):
             form = QualityReviewComponentForm()
     else:
         form = QualityReviewComponentForm()
+    if error_msg:
+        messages.error(request, error_msg)
+    if response_msg:
+        messages.success(request, response_msg)
     context = {
         'form': form,
         'tr': tr,
         'component': component,
-        'alert_success': response_msg,
-        'alert_danger': error_msg
     }
 
     return render(request, 'creation/templates/quality_review_component.html', context)
@@ -905,4 +932,7 @@ def publish_tutorial(request, trid):
         if tr.status == 0:
             tr.status = 1
             tr.save()
+            messages.success(request, 'Tutorial published successfully!')
+        else:
+            messages.warning(request, 'Tutorial already published')
     return HttpResponseRedirect(request.META['HTTP_REFERER'])
