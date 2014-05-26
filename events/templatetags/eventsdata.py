@@ -21,7 +21,6 @@ def get_wparticipant_status(key, wcode):
     return status_list[wa.status]
 
 def get_status(key, testcode):
-
     try:
         ta = TestAttendance.objects.get(mdluser_id=key, test_id=testcode)
     except:
@@ -34,6 +33,15 @@ def get_status(key, testcode):
         return 'disabled=disabled checked'
     
     return ''
+
+def can_enter_test(key, testcode):
+    try:
+        ta = TestAttendance.objects.get(mdluser_id=key, test_id=testcode)
+    except:
+        return None
+    if ta.status >= 0:
+        return ta.status
+    return None
 
 def get_wstatus(key, wcode):
     try:
@@ -68,6 +76,7 @@ def can_upload_workshop_data(wcode):
         return False
     
 
+register.filter('can_enter_test', can_enter_test)
 register.filter('get_status', get_status)
 register.filter('get_wstatus', get_wstatus)
 register.filter('can_close_test', can_close_test)

@@ -81,3 +81,54 @@ class MdlQuizAttempts(models.Model):
     class Meta:
         db_table = u'mdl_quiz_attempts'
 
+class MdlUserEnrolments(models.Model):
+    id = models.BigIntegerField(primary_key=True)
+    status = models.BigIntegerField()
+    enrolid = models.BigIntegerField()
+    userid = models.BigIntegerField()
+    timestart = models.BigIntegerField()
+    timeend = models.BigIntegerField()
+    modifierid = models.BigIntegerField()
+    timecreated = models.BigIntegerField()
+    timemodified = models.BigIntegerField()
+    class Meta:
+        db_table = u'mdl_user_enrolments'
+
+class MdlEnrol(models.Model):
+    id = models.BigIntegerField(primary_key=True)
+    enrol = models.CharField(max_length=60)
+    status = models.BigIntegerField()
+    courseid = models.BigIntegerField()
+    sortorder = models.BigIntegerField()
+    name = models.CharField(max_length=765, blank=True)
+    enrolperiod = models.BigIntegerField(null=True, blank=True)
+    enrolstartdate = models.BigIntegerField(null=True, blank=True)
+    enrolenddate = models.BigIntegerField(null=True, blank=True)
+    expirynotify = models.IntegerField(null=True, blank=True)
+    expirythreshold = models.BigIntegerField(null=True, blank=True)
+    notifyall = models.IntegerField(null=True, blank=True)
+    password = models.CharField(max_length=150, blank=True)
+    cost = models.CharField(max_length=60, blank=True)
+    currency = models.CharField(max_length=9, blank=True)
+    roleid = models.BigIntegerField(null=True, blank=True)
+    customint1 = models.BigIntegerField(null=True, blank=True)
+    customint2 = models.BigIntegerField(null=True, blank=True)
+    customint3 = models.BigIntegerField(null=True, blank=True)
+    customint4 = models.BigIntegerField(null=True, blank=True)
+    customint5 = models.BigIntegerField(null=True, blank=True)
+    customint6 = models.BigIntegerField(null=True, blank=True)
+    customint7 = models.BigIntegerField(null=True, blank=True)
+    customint8 = models.BigIntegerField(null=True, blank=True)
+    customchar1 = models.CharField(max_length=765, blank=True)
+    customchar2 = models.CharField(max_length=765, blank=True)
+    customchar3 = models.CharField(max_length=3999, blank=True)
+    customdec1 = models.DecimalField(null=True, max_digits=14, decimal_places=7, blank=True)
+    customdec2 = models.DecimalField(null=True, max_digits=14, decimal_places=7, blank=True)
+    customtext1 = models.TextField(blank=True)
+    customtext2 = models.TextField(blank=True)
+    customtext3 = models.TextField(blank=True)
+    customtext4 = models.TextField(blank=True)
+    timecreated = models.BigIntegerField()
+    timemodified = models.BigIntegerField()
+    class Meta:
+        db_table = u'mdl_enrol'

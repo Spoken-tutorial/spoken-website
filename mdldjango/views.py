@@ -80,8 +80,8 @@ def index(request):
     upcoming_test = Test.objects.filter(status=2, academic_id=mdluser.institution)
     past_workshop = Workshop.objects.filter(id__in = WorkshopAttendance.objects.filter(mdluser_id = mdluser.id).values_list('workshop_id'), status = 2)
     past_test = Test.objects.filter(id__in = TestAttendance.objects.filter(mdluser_id = mdluser.id).values_list('test_id'), status = 4)
-    ongoing_test = Test.objects.filter(id__in = TestAttendance.objects.filter(mdluser_id = mdluser.id).values_list('test_id'), status = 3)
-    
+    ongoing_test = Test.objects.filter(status=3, academic_id=mdluser.institution)
+    print ongoing_test
     context = {
         'mdluserid' : mdluserid,
         'upcoming_workshop' : upcoming_workshop,
@@ -113,25 +113,24 @@ def offline_details(request, wid):
                 print "Error"
                 
             for studentDetails in xmlDocTree.iter('detail'):
+                print studentDetails
                 firstname = studentDetails[0].text
                 lastname = studentDetails[1].text
                 gender =  studentDetails[2].text
-                age = studentDetails[3].text
                 email = studentDetails[4].text
-                permanent_address = studentDetails[5].text
-                city = studentDetails[6].text
-                country = studentDetails[7].text
-                department = studentDetails[8].text
-                password = hashlib.md5(studentDetails[0].text)
-                password = password.hexdigest()
+                #city = studentDetails[6].text
+                #country = studentDetails[7].text
+                #department = studentDetails[8].text
+                password = encript_password(studentDetails[0].text)
                 try:
                     mdluser = MdlUser.objects.get(email = email)
-                    
+                    print "Already exits!"
                 except Exception, e:
+                    print e
                     mdluser = MdlUser()
                     mdluser.auth = 'manual'
                     mdluser.firstname = firstname
-                    mdluser.username = firstname
+                    mdluser.username = firstname+' '+lastname
                     mdluser.lastname = lastname
                     mdluser.password = password
                     mdluser.institution = w.academic_id
@@ -139,14 +138,16 @@ def offline_details(request, wid):
                     mdluser.confirmed = 1
                     mdluser.mnethostid = 1
                     mdluser.save()
-                    mdluser = MdlUser.objects.filter(email = email, firstname= firstname, username=firstname, password=password).first()
-                
+                    mdluser = MdlUser.objects.filter(email = email, firstname= firstname, username=firstname+' '+lastname, password=password).first()
+                    
                 try:
                     wa = WorkshopAttendance.objects.get(workshop_id = wid, mdluser_id = mdluser.id)
                     if wa.status == 0:
                         wa.status = 1
                         wa.save()
+                    print "Attandance already exits!"
                 except Exception, e:
+                    print e
                     wa = WorkshopAttendance()
                     wa.workshop_id = wid
                     wa.status = 1

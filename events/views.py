@@ -1008,13 +1008,14 @@ def test_approvel(request, role, rid):
 
 def test_attendance(request, tid):
     user = request.user
+    test = None
     try:
         test = Test.objects.get(pk=tid)
         test.status = 3
         test.save()
     except:
         raise Http404('Page not found !!')
-        
+    print test.foss_id
     if request.method == 'POST':
         users = request.POST
         if users:
@@ -1026,11 +1027,12 @@ def test_attendance(request, tid):
                         ta = TestAttendance.objects.get(mdluser_id = users[u], test_id = tid)
                         print ta.id, " => Exits"
                     except:
+                        fossmdlcourse = FossMdlCourses.objects.get(foss_id = test.foss_id)
                         ta = TestAttendance()
                         ta.test_id = test.id
                         ta.mdluser_id = users[u]
-                        ta.mdlcourse_id = 0
-                        ta.mdlquiz_id = 0
+                        ta.mdlcourse_id = fossmdlcourse.mdlcourse_id
+                        ta.mdlquiz_id = fossmdlcourse.mdlquiz_id
                         ta.mdlattempt_id = 0
                         ta.status = 0
                         ta.save()
@@ -1040,6 +1042,23 @@ def test_attendance(request, tid):
                         t = TestAttendance.objects.get(mdluser_id = ta.mdluser_id, test_id = tid)
                         t.status = 1
                         t.save()
+                        #enroll to the course
+                        #get the course enrole id
+                        #todo: If mark absent delete enrolement
+                        try:
+                            mdlenrol = MdlEnrol.objects.get(enrol='self', courseid=2)
+                            print "Role Exits!"
+                        except Exception, e:
+                            print "MdlEnrol => ", e
+                            print "No self enrolement for this course"
+                            
+                        try:
+                            MdlUserEnrolments.objects.get(enrolid = mdlenrol.id, userid = ta.mdluser_id)
+                            print "MdlUserEnrolments Exits!"
+                            #update dateTime
+                        except Exception, e:
+                            print "MdlUserEnrolments => ", e
+                            MdlUserEnrolments.objects.create(enrolid = mdlenrol.id, userid = ta.mdluser_id, status = 0, timestart = datetime.datetime.now().strftime("%s"), timeend = 0, modifierid = ta.mdluser_id, timecreated = datetime.datetime.now().strftime("%s"), timemodified = datetime.datetime.now().strftime("%s"))
         
     participant_ids = list(WorkshopAttendance.objects.filter(workshop_id = test.workshop_id).values_list('mdluser_id'))
     mdlids = []
@@ -1060,19 +1079,20 @@ def test_participant(request, tid=None):
     can_download_certificate = 0
     if tid:
         try:
-            wc = Test.objects.get(id=tid)
+            t = Test.objects.get(id=tid)
         except:
             raise Http404('Page not found')
             
-        workshop_mdlusers = WorkshopAttendance.objects.using('default').filter(workshop_id=tid).values_list('mdluser_id')
+        test_mdlusers = TestAttendance.objects.using('default').filter(test_id=tid).values_list('mdluser_id')
         ids = []
-        for wp in workshop_mdlusers:
-            ids.append(wp[0])
+        print test_mdlusers
+        for tp in test_mdlusers:
+            ids.append(tp[0])
             
-        wp = MdlUser.objects.using('moodle').filter(id__in=ids)
-        if user == wc.organiser:
+        tp = MdlUser.objects.using('moodle').filter(id__in=ids)
+        if user == t.organiser or user == t.invigilator:
             can_download_certificate = 1
-        context = {'collection' : wp, 'wc' : wc, 'can_download_certificate':can_download_certificate}
+        context = {'collection' : tp, 'wc' : t, 'can_download_certificate':can_download_certificate}
         return render(request, 'events/templates/test/test_participant.html', context)
 
 def test_participant_ceritificate(request, wid, participant_id):
@@ -1100,15 +1120,25 @@ def test_participant_ceritificate(request, wid, participant_id):
             w = Test.objects.get(id = wid)
             mdluser = MdlUser.objects.get(id = participant_id)
             ta = TestAttendance.objects.get(test_id = w.id, mdluser_id = participant_id)
-            certificate_pass = str(mdluser.id)+id_generator(10-len(str(mdluser.id)))
-        except:
+            mdlgrade = MdlQuizGrades.objects.get(quiz = ta.mdlquiz_id, userid = participant_id)
+            print "ss"
+            if ta.status < 1 or round(mdlgrade.grade, 1) < 40:
+                raise Http404('Page not found')
+                
+            if ta.password:
+                certificate_pass = ta.password 
+                ta.count += 1
+                ta.status = 4
+                ta.save() 
+            else: 
+                certificate_pass = str(mdluser.id)+id_generator(10-len(str(mdluser.id)))
+                ta.password = certificate_pass 
+                ta.status = 4
+                ta.count += 1
+                ta.save()
+        except Exception, e:
+            print e
             raise Http404('Page not found')
-    try:
-        TestCertificate.objects.create(test_id = wid, mdluser_id = participant_id, password = certificate_pass)
-    except Exception, e:
-        print e
-        pass
-        
     response = HttpResponse(mimetype='application/pdf')
     filename = (mdluser.firstname+'-'+w.foss.foss+"-Participant-Certificate").replace(" ", "-");
     

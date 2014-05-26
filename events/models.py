@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 
 #creation app models
 from creation.models import Foss_Category, Language
-from mdldjango.models import MdlUser
+from mdldjango.models import *
 
 
 #validation
@@ -238,3 +238,8 @@ class WorkshopAttendance(models.Model):
         verbose_name = "Workshop Attendance"
         unique_together = (("workshop", "mdluser_id"))
         #unique_together = (("workshop", "mdluser"))
+
+class FossMdlCourses(models.Model):
+    foss = models.ForeignKey(Foss_Category)
+    mdlcourse_id = models.PositiveIntegerField()
+    mdlquiz_id = models.PositiveIntegerField()
