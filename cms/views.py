@@ -48,10 +48,27 @@ def account_register(request):
 
 def send_registration_confirmation(user):
     p = Profile.objects.get(user=user)
-    title = "CMS account confirmation"
-    content = "http://www.sample.com/confirm/" + str(p.confirmation_code) + "/" + user.username
-    #send_mail(title, content, 'no-reply@sample.com', [user.email], fail_silently=False)
-    
+    #user.email = "k.sanmugam2@gmail.com"
+    # Sending email when an answer is posted
+    subject = 'Account Notification'
+    message = """
+        Dear {0}\n
+        Click this link to activate your account <b>"{1}"</b>\n\n
+        Regards,<br>\n
+        Spoken Tutorial
+    """.format(
+        "sanmugam",
+        "http://beta.spoken-tutorial.org/accounts/confirm/" + str(p.confirmation_code) + "/" + user.username
+    )
+
+    email = EmailMultiAlternatives(
+        subject,'', '',
+        [user.email],
+        headers={"Content-type":"text/html;charset=iso-8859-1"}
+    )
+
+    email.attach_alternative(message, "text/html")
+    result = email.send(fail_silently=True)
 
 def confirm(request, confirmation_code, username):
     try:
