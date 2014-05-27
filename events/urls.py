@@ -1,7 +1,7 @@
 from django.conf.urls import patterns, url
 from events import views
 urlpatterns = patterns('',
-	#url(r'^$', views.state, name='state'),
+	url(r'^$', views.events_dashboard, name='events_dashboard'),
 	url(r'^test/$', views.test, name='test'),
 	
 	url(r'^ac/$', views.ac, name='ac'),

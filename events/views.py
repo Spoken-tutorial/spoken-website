@@ -72,6 +72,16 @@ def is_invigilator(user):
         return True
 
 @login_required
+def events_dashboard(request):
+    user = request.user
+    roles = user.groups.all()
+    context = {
+        'roles' : roles
+    }
+    return render(request, 'events/templates/events_dashboard.html', context)
+
+
+@login_required
 def new_ac(request):
     """ Create new academic center. Academic code generate by autimatic.
         if any code missing in between first assign that code then continue the serial

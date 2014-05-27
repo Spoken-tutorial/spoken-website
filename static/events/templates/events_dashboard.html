@@ -1,0 +1,69 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block title %}Upload Tutorial{% endblock %}
+{% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
+
+{% block content %}
+    <div class="col-lg-6">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                Workshop <span class="badge pull-right">1</span>
+            </div>
+            <div class="panel-body">
+                {% for role in roles %}
+                    {% if role.name == "Resource Person" %}
+                        <h4>{{ role.name }}</h4>
+                        <dl>
+                          <dt><a href="http://localhost:8000/events/workshop/rp/approved/">Workshop Index</a></dt>
+                          <dd>user can raise new workshop request, can see approved</dd>
+                        </dl>
+                    {% endif %}
+                    {% if role.name == "Organiser" %}
+                        <h4>{{ role.name }}</h4>
+                        <dl>
+                          <dt><a href="http://localhost:8000/events/workshop/organiser/approved/">Workshop Index</a></dt>
+                          <dd>user can raise new workshop request, can see approved</dd>
+                        </dl>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                Test <span class="badge pull-right">1</span>
+            </div>
+            <div class="panel-body">
+                {% for role in roles %}
+                    {% if role.name == "Resource Person" %}
+                        <h4>{{ role.name }}</h4>
+                        <dl>
+                          <dt><a href="http://localhost:8000/events/test/rp/approved/">Test Index</a></dt>
+                          <dd>user can raise new test request, can see approved</dd>
+                        </dl>
+                    {% endif %}
+                    {% if role.name == "Organiser" %}
+                        <h4>{{ role.name }}</h4>
+                        <dl>
+                          <dt><a href="http://localhost:8000/events/test/organiser/approved/">Test Index</a></dt>
+                          <dd>user can raise new test request, can see approved</dd>
+                        </dl>
+                    {% endif %}
+                    {% if role.name == "Invigilator" %}
+                        <h4>{{ role.name }}</h4>
+                        <dl>
+                          <dt><a href="http://localhost:8000/events/test/invigilator/approved/">Test Index</a></dt>
+                          <dd>user can raise new test request, can see approved</dd>
+                        </dl>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block jsblock %}
+    <script>
+    </script>
+{% endblock %}
