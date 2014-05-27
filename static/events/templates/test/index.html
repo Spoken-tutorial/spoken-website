@@ -46,13 +46,20 @@
 							{% endif %}
 							{% if status == 'pending' %}
 							    <a href="{% url 'events:test_approvel' role record.id %}?status=accept">Accept</a>
-							{% endif %}
+                            {% endif %}
+                            {% if status == 'ongoing' %}
+                                <a href="{% url 'events:test_participant' record.id %}">View Participant</a>
+                            {% endif %}
 						{% endif %}
 						
 						{% if role == 'organiser' %}
 						    {% if status == 'pending' or status == 'approved' %}
 							    <a href="{% url 'events:test_edit' role record.id %}">Edit</a>
-							{% endif %}
+                            {% endif %}
+                            {% if status == 'ongoing' %}
+                                <a href="{% url 'events:test_participant' record.id %}">View Participant</a>
+                            {% endif %}
+
 						{% endif %}
 						
 						{% if role == 'invigilator' %}

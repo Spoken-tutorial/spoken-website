@@ -74,9 +74,26 @@ def is_invigilator(user):
 @login_required
 def events_dashboard(request):
     user = request.user
-    roles = user.groups.all()
+    user_roles = user.groups.all()
+    roles = []
+    events_roles = ['Resource Person', 'Organiser', 'Invigilator']
+    for role in user_roles:
+        if role.name in events_roles:
+            roles.append(role.name)
+    print roles
+    is_organiser_or_invigilator = 0
+    try:
+        if user.organiser:
+            is_organiser_or_invigilator = 1
+        if user.invigilator:
+            is_organiser_or_invigilator = 2
+        if user.invigilator and user.organiser:
+            is_organiser_or_invigilator = 3
+    except Exception, e:
+        print e
     context = {
-        'roles' : roles
+        'roles' : roles,
+        'is_organiser_or_invigilator' : is_organiser_or_invigilator
     }
     return render(request, 'events/templates/events_dashboard.html', context)
 
@@ -578,16 +595,26 @@ def workshop_list(request, role, status):
     if not (user.is_authenticated() and ( is_organiser(user) or is_resource_person(user) or is_event_manager(user))):
         raise Http404('You are not allowed to view this page!')
         
-    status_dict = {'pending': 0, 'approved' : 1, 'completed' : 2, 'rejected' : 3, 'reschedule' : 1}
+    status_dict = {'pending': 0, 'approved' : 1, 'completed' : 2, 'rejected' : 3, 'reschedule' : 1, 'ongoing': 1}
     if status in status_dict:
         context = {}
         workshops = None
         if is_event_manager(user) and role == 'em':
             workshops = Workshop.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status])
         elif is_resource_person(user) and role == 'rp':
-            workshops = Workshop.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status])
+            if status == 'approved':
+                workshops = Workshop.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status], wdate__gt=datetime.date.today())
+            elif status =='ongoing':
+                workshops = Workshop.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = 1, wdate=datetime.date.today())
+            else:
+                workshops = Workshop.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status])
         elif is_organiser(user) and role == 'organiser':
-            workshops = Workshop.objects.filter(organiser_id=user, status = status_dict[status])
+            if status == 'approved':
+                workshops = Workshop.objects.filter(organiser_id=user, status = status_dict[status], wdate__gt=datetime.date.today())
+            elif status == 'ongoing' :
+                workshops = Workshop.objects.filter(organiser_id=user, status = status_dict[status], wdate=datetime.date.today())
+            else:
+                workshops = Workshop.objects.filter(organiser_id=user, status = status_dict[status])
         
         if workshops == None:
             raise Http404('You are not allowed to view this page!')
@@ -720,6 +747,7 @@ def workshop_attendance(request, wid):
             messages.success(request, "Marked Attandance has been updated!") 
     participant_ids = list(WorkshopAttendance.objects.filter(workshop_id = wid).values_list('mdluser_id'))
     mdlids = []
+    wp = {}
     for k in participant_ids:
         mdlids.append(k[0])
     if mdlids:
@@ -919,7 +947,9 @@ def test_list(request, role, status):
                 test = Test.objects.filter(organiser_id=user, status = status_dict[status])
         elif is_invigilator(user) and role == 'invigilator':
             if status == 'ongoing':
-                test = Test.objects.filter(invigilator_id=user, status = status_dict[status], tdate = datetime.datetime.now().strftime("%Y-%m-%d"))
+                test = Test.objects.filter((Q(status = 2) | Q(status = 3)), tdate = datetime.date.today(), invigilator_id = user)
+            elif status == 'approved':
+                test = Test.objects.filter(invigilator_id=user, status = status_dict[status], tdate__gt=datetime.date.today())
             else:
                 todaytest = datetime.datetime.now().strftime("%Y-%m-%d")
                 test = Test.objects.filter(invigilator_id=user, status = status_dict[status])

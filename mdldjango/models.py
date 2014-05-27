@@ -132,3 +132,16 @@ class MdlEnrol(models.Model):
     timemodified = models.BigIntegerField()
     class Meta:
         db_table = u'mdl_enrol'
+
+class MdlRoleAssignments(models.Model):
+    id = models.BigIntegerField(primary_key=True)
+    roleid = models.BigIntegerField()
+    contextid = models.BigIntegerField()
+    userid = models.BigIntegerField()
+    timemodified = models.BigIntegerField()
+    modifierid = models.BigIntegerField()
+    component = models.CharField(max_length=300)
+    itemid = models.BigIntegerField()
+    sortorder = models.BigIntegerField()
+    class Meta:
+        db_table = u'mdl_role_assignments'

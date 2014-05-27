@@ -9,6 +9,7 @@
 	<ul class="tabs nav nav-tabs">
 		<li><a href="/events/workshop/request/">New</a></li>
         <li {% if status == 'pending' %}{{ 'class="active"'}}{% endif %}><a href="/events/workshop/{{role}}/pending/">Pending</a></li>
+        <li {% if status == 'ongoing' %}{{ 'class="active"'}}{% endif %}><a href="/events/workshop/{{role}}/ongoing/">Ongoing</a></li>
         <li {% if status == 'approved' %}{{ 'class="active"'}}{% endif %}><a href="/events/workshop/{{role}}/approved/">Approved</a></li>
         <li {% if status == 'completed' %}{{ 'class="active"'}}{% endif %}><a href="/events/workshop/{{role}}/completed/">Completed</a></li>
         <li {% if status == 'reschedule' %}{{ 'class="active"'}}{% endif %}><a href="/events/workshop/{{role}}/reschedule/">Reschedule</a></li>
@@ -48,19 +49,29 @@
                                 {% if status == 'approved' %}
                                     <a href="{% url 'events:workshop_approvel' role record.id %}?status=reject">Reject</a>
                                 {% endif %}
+                                {% if status == 'reschedule' %}
+                                    <a href="{% url 'events:workshop_edit' role record.id %}">Edit</a>
+                                {% endif %}
+                                {% if status == 'ongoing' %}
+                                    <a href="{% url 'events:workshop_participant' record.id %}">Participants</a>
+                                {% endif %}
+                                {% if status == 'rejected' %}
+                                    <a href="{% url 'events:workshop_approvel' role record.id %}?status=accept">Accept</a>
+                                {% endif %}
                             {% endif %}
                             {% if role == 'organiser' %}
                                 {% if status == 'reschedule' %}
                                     <a href="{% url 'events:workshop_edit' role record.id %}">Edit</a>
                                 {% endif %}
-                                {% if role == 'organiser' and status == 'approved' %}
-                                    {% if record.id|can_upload_workshop_data %}
-                                        <a href="{% url 'mdldjango:mdl_offline_workshop_details' record.id %}">Upload data</a>
-                                    {% endif %}
+                                {% if status == 'approved' %}
                                     <a href="{% url 'events:workshop_participant' record.id %}">Participants</a>
                                 {% endif %}
-                                {% if role == 'rp' and status == 'rejected' %}
-                                    <a href="{% url 'events:workshop_approvel' role record.id %}?status=accept">Accept</a>
+                                {% if status == 'ongoing' %}
+                                    {% if record.id|can_upload_workshop_data %}
+                                        <a href="{% url 'mdldjango:mdl_offline_workshop_details' record.id %}">Upload data</a> |
+                                    {% endif %}
+                                    <a href="{% url 'events:workshop_attendance' record.id %}">Attendance</a> |
+                                    <a href="{% url 'events:workshop_participant' record.id %}">Participants</a>
                                 {% endif %}
                             {% endif %}
                             {% if status == 'completed' %}
