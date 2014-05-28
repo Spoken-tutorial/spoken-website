@@ -1,0 +1,176 @@
+/* font awesome */
+.fa-1 {
+    font-size: 1.2em;
+}
+
+.fa-2 {
+    font-size: 1.5em;
+}
+
+.fa-3 {
+    font-size: 3.5em;
+}
+
+.fa-4 {
+    font-size: 5.5em;
+}
+
+.fa-5 {
+    font-size: 7em;
+}
+
+.fa-6 {
+    font-size: 20em;
+}
+
+/* font awesome end */
+
+/* status icon color */
+.review-pending-upload {
+	color: #D9534F;
+}
+
+.review-admin-review {
+	color: #D9534F;
+}
+
+.review-domain-review {
+	color: #F0AD4E;
+}
+
+.review-quality-review {
+	color: #5BC0DE;
+}
+.review-accepted {
+	color: #10a41e;
+}
+/* status icon color end */
+
+
+/* Navbar css */
+
+a {
+	text-decoration: none !important;
+}
+
+.navbar > .container .navbar-brand {
+	margin-left: 5px;
+	padding: 0px;
+	padding-top: 3px;
+}
+
+.navbar > .container .navbar-brand img#logo {
+	width: 42px;
+	height: 43px;
+	margin-right: 5px;
+}
+
+/* Navbar css end */
+
+/* Content css */
+
+h4.page-title {
+	font-weight: bold;
+	font-size: 20px;
+	margin: 10px 0 20px 0;
+}
+
+#content-wrapper #content-inner div.container {
+	padding-left: 25px;
+}
+
+/* Content css end */
+
+/* Note box css */
+
+.bs-callout {
+    border-left: 3px solid #EEEEEE;
+    margin: 20px 0;
+    padding: 20px;
+}
+.bs-callout-danger {
+    background-color: #FDF7F7;
+    border-color: #D9534F;
+}
+.bs-callout-info {
+    background-color: #F4F8FA;
+    border-color: #5BC0DE;
+}
+.bs-callout-warning {
+    background-color: #FCF8F2;
+    border-color: #F0AD4E;
+}
+
+/* Note box css end */
+
+/* upload page css */
+
+.reviewers-feedback {
+	margin: 10px 10px 25px 10px;
+}
+
+.review-user {
+	float: left;
+	margin: 5px;
+}
+
+.review-date {
+	float: right;
+	margin: 5px;
+}
+
+.review-data {
+	clear: both;
+}
+
+a.btn-warning {
+	margin-left: 10px;
+	width: 48px;
+}
+a.twin-button {
+	width: 74px;
+}
+.col-center {
+	text-align: center;
+}
+.fancybox-title-float-wrap {
+	display: none;
+}
+/* upload page css end */
+
+/* tabs */
+.tab-content{
+    padding: 15px 0;
+}
+/* tabs end */
+
+/* badge */
+.badge {
+    color: #fff;
+    display: inline-block;
+    min-width: 10px;
+    padding: 3px 7px;
+    font-size: 12px;
+    font-weight: bold;
+    line-height: 1;
+    background-color: #a26dc8;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: 10px;
+}
+.badge-none {
+    color: #fff;
+    display: inline-block;
+    min-width: 10px;
+    padding: 3px 7px;
+    font-size: 12px;
+    font-weight: bold;
+    line-height: 1;
+    background-color: orangered;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: 10px;
+}
+/* badge end */
