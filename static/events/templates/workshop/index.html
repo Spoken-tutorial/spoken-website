@@ -6,9 +6,15 @@
 {% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
 {% block content %}
 	<!-- Nav tabs -->
+	<h4>Workshop</h4>
 	<ul class="tabs nav nav-tabs">
-		<li><a href="/events/workshop/request/">New</a></li>
-        <li {% if status == 'pending' %}{{ 'class="active"'}}{% endif %}><a href="/events/workshop/{{role}}/pending/">Pending</a></li>
+	    {% if role == 'organiser' %}
+		    <li><a href="/events/workshop/{{ role }}/request/">New</a></li>
+		    <li {% if status == 'pending' %}{{ 'class="active"'}}{% endif %}><a href="/events/workshop/{{role}}/pending/">Pending</a></li>
+		{% endif %}
+		{% if role == 'rp' %}
+		    <li {% if status == 'pending' %}{{ 'class="active"'}}{% endif %}><a href="/events/workshop/{{role}}/pending/">New Requests</a></li>
+		{% endif %}
         <li {% if status == 'ongoing' %}{{ 'class="active"'}}{% endif %}><a href="/events/workshop/{{role}}/ongoing/">Ongoing</a></li>
         <li {% if status == 'approved' %}{{ 'class="active"'}}{% endif %}><a href="/events/workshop/{{role}}/approved/">Approved</a></li>
         <li {% if status == 'completed' %}{{ 'class="active"'}}{% endif %}><a href="/events/workshop/{{role}}/completed/">Completed</a></li>

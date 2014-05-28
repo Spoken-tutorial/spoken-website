@@ -303,32 +303,6 @@ def organiser_edit(request, username):
             return render(request, 'events/templates/organiser/form.html', context)
 
 @login_required
-def rp_organiser(request, status = None):
-    """ Resource person: List all inactive organiser under resource person states """
-    #todo: filter to diaplay block and active user
-    user = request.user
-    if not (user.is_authenticated() and (is_event_manager(user) or is_resource_person(user))):
-        raise Http404('You are not allowed to view this page!')
-    if status == 'active':
-        status = 1
-    elif status == 'inactive':
-        status = 0
-    elif status == 'blocked':
-        status = 2
-    else:
-        raise Http404('Page not found !!')
-        
-    user = User.objects.get(pk=user.id)
-    try:
-        organiser = Organiser.objects.filter(academic=AcademicCenter.objects.filter(state=State.objects.filter(resourceperson__user_id=user)), status=status)
-    except:
-        organiser = {}
-    context = {}
-    context['collection'] = organiser
-    context['active'] = status
-    return render(request, 'events/templates/rp/organiser.html', context)
-
-@login_required
 def rp_organiser_confirm(request, code, userid):
     """ Resource person: active organiser """
     user = request.user
@@ -451,33 +425,6 @@ def invigilator_edit(request, username):
             return render(request, 'events/templates/invigilator/form.html', context)
 
 @login_required
-def rp_invigilator(request, status = None):
-    print "ssssss", status
-    """ Resource person: List all inactive Invigilator under resource person states """
-    #todo: filter to diaplay block and active user
-    user = request.user
-    if not (user.is_authenticated() and (is_event_manager(user) or is_resource_person(user))):
-        raise Http404('You are not allowed to view this page!')
-    if status == 'active':
-        status = 1
-    elif status == 'inactive':
-        status = 0
-    elif status == 'blocked':
-        status = 2
-    else:
-        raise Http404('Page not found !!')
-        
-    user = User.objects.get(pk=user.id)
-    try:
-        invigilator = Invigilator.objects.filter(academic=AcademicCenter.objects.filter(state=State.objects.filter(resourceperson__user_id=user)), status=status)
-    except:
-        invigilator = {}
-    context = {}
-    context['collection'] = invigilator
-    context['active'] = status
-    return render(request, 'events/templates/rp/invigilator.html', context)
-
-@login_required
 def rp_invigilator_confirm(request, code, userid):
     """ Resource person: active invigilator """
     user = request.user
@@ -519,7 +466,7 @@ def rp_invigilator_block(request, code, userid):
         raise PermissionDenied('You are not allowed to view this page!')
 
 @login_required
-def workshop_request(request):
+def workshop_request(request, role):
     ''' Workshop request by organiser '''
     user = request.user
     if not user.is_authenticated() or not is_organiser(user):
@@ -546,10 +493,10 @@ def workshop_request(request):
             messages.success(request, "Your Workshop request has been send!")
             return HttpResponseRedirect("/events/workshop/organiser/pending/")
         
-        context = {'form':form, }
+        context = {'form' : form, 'role' : role, 'status' : 'request'}
         return render(request, 'events/templates/workshop/form.html', context)
     else:
-        context = {}
+        context = {'role' : role, 'status' : 'request'}
         context.update(csrf(request))
         context['form'] = WorkshopForm(user = request.user)
         return render(request, 'events/templates/workshop/form.html', context)
@@ -884,7 +831,7 @@ def workshop_participant_ceritificate(request, wid, participant_id):
 
     return response
     
-def test_request(request):
+def test_request(request, role):
     ''' Test request by organiser '''
     user = request.user
     if not user.is_authenticated() or not is_organiser(user):
@@ -911,10 +858,10 @@ def test_request(request):
             messages.success(request, "Thank you, we have received your request")
             return HttpResponseRedirect("/events/test/organiser/pending/")
         
-        context = {'form':form, }
+        context = {'form':form, 'role' : role, 'status' : 'request'}
         return render(request, 'events/templates/test/form.html', context)
     else:
-        context = {}
+        context = {'role' : role, 'status' : 'request'}
         context.update(csrf(request))
         context['form'] = TestForm(user = request.user)
         return render(request, 'events/templates/test/form.html', context)
@@ -1273,6 +1220,43 @@ def student_subscribe(request, events, eventid = None, mdluser_id = None):
         raise Http404('Page not found')
     
     return HttpResponseRedirect('/moodle/index/')
+
+def organiser_invigilator_index(request, role, status):
+    """ Resource person: List all inactive organiser under resource person states """
+    #todo: filter to diaplay block and active user
+    active = status
+    user = request.user
+    if not (user.is_authenticated() and (is_event_manager(user) or is_resource_person(user))):
+        raise Http404('You are not allowed to view this page!')
+    if status == 'active':
+        status = 1
+    elif status == 'inactive':
+        status = 0
+    elif status == 'blocked':
+        status = 2
+    else:
+        raise Http404('Page not found !!')
+        
+    user = User.objects.get(pk=user.id)
+    if role == 'organiser':
+        try:
+            collection = Organiser.objects.filter(academic=AcademicCenter.objects.filter(state=State.objects.filter(resourceperson__user_id=user)), status=status)
+        except:
+            collection = {}
+    elif role == 'invigilator':
+        try:
+            collection = Invigilator.objects.filter(academic=AcademicCenter.objects.filter(state=State.objects.filter(resourceperson__user_id=user)), status=status)
+        except:
+            collection = {}
+    else:
+        raise Http404('Page not found !!')
+            
+    context = {}
+    context['collection'] = collection
+    context['status'] = active
+    context['role'] = role
+    context.update(csrf(request))
+    return render(request, 'events/templates/organiser_invigilator_index.html', context)
 
 #Ajax Request and Responces
 @csrf_exempt

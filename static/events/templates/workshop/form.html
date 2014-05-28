@@ -37,6 +37,20 @@
 	{% else %}
 		<h3 class="form-signin-heading">Workshop</h3>
 	{% endif %}
+	<ul class="tabs nav nav-tabs">
+	    {% if role == 'organiser' %}
+		    <li {% if status == 'request' %}{{ 'class="active"'}}{% endif %}><a href="/events/workshop/{{ role }}/request/">New</a></li>
+		    <li {% if status == 'pending' %}{{ 'class="active"'}}{% endif %}><a href="/events/workshop/{{role}}/pending/">Pending</a></li>
+		{% endif %}
+		{% if role == 'rp' %}
+		    <li {% if status == 'pending' %}{{ 'class="active"'}}{% endif %}><a href="/events/workshop/{{role}}/pending/">New Requests</a></li>
+		{% endif %}
+        <li {% if status == 'ongoing' %}{{ 'class="active"'}}{% endif %}><a href="/events/workshop/{{role}}/ongoing/">Ongoing</a></li>
+        <li {% if status == 'approved' %}{{ 'class="active"'}}{% endif %}><a href="/events/workshop/{{role}}/approved/">Approved</a></li>
+        <li {% if status == 'completed' %}{{ 'class="active"'}}{% endif %}><a href="/events/workshop/{{role}}/completed/">Completed</a></li>
+        <li {% if status == 'reschedule' %}{{ 'class="active"'}}{% endif %}><a href="/events/workshop/{{role}}/reschedule/">Reschedule</a></li>
+        <li {% if status == 'rejected' %}{{ 'class="active"'}}{% endif %}><a href="/events/workshop/{{role}}/rejected/">Rejected</a></li>
+	</ul>
 	<!--
 	<div class="form-group">
 		<label for="id_state">State</label>
