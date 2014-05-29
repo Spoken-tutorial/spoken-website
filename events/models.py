@@ -19,8 +19,8 @@ class State(models.Model):
     latitude = models.DecimalField(null=True, max_digits=10, decimal_places=4, blank=True)
     longtitude = models.DecimalField(null=True, max_digits=10, decimal_places=4, blank=True)
     img_map_area = models.TextField()
-    created = models.DateTimeField(auto_now_add = True)
-    updated = models.DateTimeField(auto_now = True)
+    created = models.DateTimeField(auto_now_add = True, null=True)
+    updated = models.DateTimeField(auto_now = True, null=True)
     
     def __unicode__(self):
         return self.name
@@ -32,8 +32,8 @@ class District(models.Model):
     state = models.ForeignKey(State)
     code = models.CharField(max_length=3)
     name = models.CharField(max_length=200)
-    created = models.DateTimeField(auto_now_add = True)
-    updated = models.DateTimeField(auto_now = True)
+    created = models.DateTimeField(auto_now_add = True, null=True)
+    updated = models.DateTimeField(auto_now = True, null=True)
     
     def __unicode__(self):
         return self.name
@@ -45,8 +45,8 @@ class District(models.Model):
 class City(models.Model):
     state = models.ForeignKey(State)
     name = models.CharField(max_length=200)
-    created = models.DateTimeField(auto_now_add = True)
-    updated = models.DateTimeField(auto_now = True)
+    created = models.DateTimeField(auto_now_add = True, null=True)
+    updated = models.DateTimeField(auto_now = True, null=True)
     
     def __unicode__(self):
         return self.name
@@ -58,8 +58,8 @@ class Location(models.Model):
     district = models.ForeignKey(District)
     name = models.CharField(max_length=200)
     pincode = models.PositiveIntegerField()
-    created = models.DateTimeField(auto_now_add = True)
-    updated = models.DateTimeField(auto_now = True)
+    created = models.DateTimeField(auto_now_add = True, null=True)
+    updated = models.DateTimeField(auto_now = True, null=True)
     
     def __unicode__(self):
         return self.name

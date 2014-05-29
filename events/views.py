@@ -1127,7 +1127,7 @@ def test_participant_ceritificate(request, wid, participant_id):
             print e
             raise Http404('Page not found')
     response = HttpResponse(mimetype='application/pdf')
-    filename = (mdluser.firstname+'-'+w.foss.foss+"-Participant-Certificate").replace(" ", "-");
+    filename = (ta.mdluser_firstname+'-'+ta.mdluser_lastname+"-Participant-Certificate").replace(" ", "-");
     
     response['Content-Disposition'] = 'attachment; filename='+filename+'.pdf'
     imgTemp = StringIO()

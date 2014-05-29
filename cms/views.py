@@ -74,16 +74,23 @@ def confirm(request, confirmation_code, username):
     try:
         user = User.objects.get(username=username)
         profile = Profile.objects.get(user=user)
-        if profile.confirmation_code == confirmation_code and user.date_joined > (timezone.now()-timezone.timedelta(days=1)):
+        #if profile.confirmation_code == confirmation_code and user.date_joined > (timezone.now()-timezone.timedelta(days=1)):
+        if profile.confirmation_code == confirmation_code:
             user.is_active = True
             user.save()
             user.backend='django.contrib.auth.backends.ModelBackend' 
             login(request,user)
+            messages.success(request, "Your account has been activated!. Please update your profile to complete your registration")
+            return HttpResponseRedirect('/accounts/profile/'+user.username)
+        else:
+            messages.success(request, "Something went wrong!. Please try again!")
             return HttpResponseRedirect('/')
-    except:
+    except Exception, e:
+        messages.success(request, "Your account not activated!. Please try again!")
         return HttpResponseRedirect('/')
 
 def account_login(request):
+    user = request.user
     error_msg = ''
     if request.user.is_anonymous():
         form = LoginForm()
@@ -97,9 +104,12 @@ def account_login(request):
             if user is not None:
                 if user.is_active:
                     login(request, user)
-                    if request.GET and request.GET['next']:
-                        return HttpResponseRedirect(request.GET['next'])
-                    return HttpResponseRedirect('/')
+                    if user_has_profile(user):
+                        if request.GET and request.GET['next']:
+                            return HttpResponseRedirect(request.GET['next'])
+                        return HttpResponseRedirect('/')
+                    messages.success(request, "Please update your profile!")
+                    return HttpResponseRedirect('/accounts/profile/'+user.username)
                 else:
                     error_msg = 'Your account is disabled.'
             else:
@@ -130,14 +140,17 @@ def account_profile(request, username):
             
             profile = Profile.objects.get(user=user)
             profile.street = request.POST['street']
-            profile.location = request.POST['location']
-            profile.district = request.POST['district']
-            profile.city = request.POST['city']
-            profile.state = request.POST['state']
+            profile.location_id = request.POST['location']
+            profile.district_id = request.POST['district']
+            profile.city_id = request.POST['city']
+            profile.state_id = request.POST['state']
             profile.country = request.POST['country']
             profile.pincode = request.POST['pincode']
             profile.phone = request.POST['phone']
             profile.save()
+            if user_has_profile(user):
+                messages.success(request, "Your profile has been updated!")
+                return HttpResponseRedirect("/")
             return HttpResponseRedirect("/accounts/profile/"+username+"/")
         
         context = {'form':form}
@@ -153,3 +166,13 @@ def account_profile(request, username):
     #        raise Http404('Page not found')
     #else:
     #    raise Http404('Page not found')
+
+def user_has_profile(user):
+    try:
+        p = Profile.objects.get(user_id = user.id)
+        if not p.street or not p.state or not p.district or not p.location or not p.country:
+            return False
+        return True
+    except Exception, e:
+        print "************"
+        print e
