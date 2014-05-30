@@ -11,16 +11,13 @@ urlpatterns = patterns('',
     #url(r'^xmlparse/$', views.xmlparse, name='xmlparse'),
     #url(r'^pdf/$', views.pdf, name='pdf'),
     url(r'^(?P<role>\w+)/(?P<status>\w+)/$', views.organiser_invigilator_index, name='organiser_invigilator_index'),
-    url(r'^organiser/active/(?P<code>\w+)/(?P<userid>\d+)/$', views.rp_organiser_confirm, name='rp_organiser_confirm'),
-    url(r'^organiser/block/(?P<code>\w+)/(?P<userid>\d+)/$', views.rp_organiser_block, name='rp_organiser_block'),
+    url(r'^organiser/(?P<status>\w+)/(?P<code>\w+)/(?P<userid>\d+)/$', views.rp_organiser, name='rp_organiser'),
     
     url(r'^organiser/request/(?P<username>\w+)/$', views.organiser_request, name='organiser_request'),
     url(r'^organiser/(?P<username>\w+)/edit/$', views.organiser_edit, name='organiser_edit'),
     url(r'^organiser/view/(?P<username>\w+)/$', views.organiser_view, name='organiser_view'),
 
-    url(r'^invigilator/active/(?P<code>\w+)/(?P<userid>\d+)/$', views.rp_invigilator_confirm, name='rp_invigilator_confirm'),
-    url(r'^invigilator/block/(?P<code>\w+)/(?P<userid>\d+)/$', views.rp_invigilator_block, name='rp_invigilator_block'),
-    
+    url(r'^invigilator/(?P<status>\w+)/(?P<code>\w+)/(?P<userid>\d+)/$', views.rp_invigilator, name='rp_invigilator'),
     url(r'^invigilator/request/(?P<username>\w+)/$', views.invigilator_request, name='invigilator_request'),
     url(r'^invigilator/(?P<username>\w+)/edit/$', views.invigilator_edit, name='invigilator_edit'),
     url(r'^invigilator/view/(?P<username>\w+)/$', views.invigilator_view, name='invigilator_view'),

@@ -11,6 +11,8 @@ import xml.etree.cElementTree as etree
 # Create your views here.
 import hashlib
 from django.core.exceptions import PermissionDenied
+from events.views import *
+from events.models import *
 
 def encript_password(password):
     password = hashlib.md5(password+'VuilyKd*PmV?D~lO19jL(Hy4V/7T^G>p').hexdigest()
@@ -153,7 +155,10 @@ def offline_details(request, wid):
                     wa.status = 1
                     wa.mdluser_id = mdluser.id
                     wa.save()
-
+            #update logs
+            message = w.academic.institution_name+" has submited Offline workshop attendance!"
+            update_events_log(user_id = user.id, role = 2, category = 0, category_id = w.id, status = 5)
+            update_events_notification(user_id = user.id, role = 2, category = 0, category_id = w.id, status = 5, message = message)
             messages.success(request, "Offline details uploaded!")
             return HttpResponseRedirect('/events/workshop/'+str(wid)+'/attendance/')
     context = {

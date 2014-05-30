@@ -236,17 +236,18 @@ def organiser_request(request, username):
                 organiser.user_id=request.user.id
                 organiser.academic_id=request.POST['college']
                 organiser.save()
+                messages.success(request, "Organiser request has been updated!")
                 return HttpResponseRedirect("/events/organiser/view/"+user.username+"/")
             context = {'form':form}
             return render(request, 'events/templates/organiser/form.html', context)
         else:
             try:
                 organiser = Organiser.objects.get(user=user)
-                #todo: send status message
                 if organiser.status:
-                    print "you have already organiser role !!"
+                    messages.success(request, "Your Organiser request not yet approve !!")
                     return HttpResponseRedirect("/events/organiser/view/"+user.username+"/")
                 else:
+                    messages.success(request, "You have already organiser role !!")
                     print "Organiser not yet approve !!"
                     return HttpResponseRedirect("/events/organiser/view/"+user.username+"/")
             except:
@@ -291,6 +292,7 @@ def organiser_edit(request, username):
             #organiser.user_id=request.user.id
             organiser.academic_id=request.POST['college']
             organiser.save()
+            messages.success(request, "Details has been updated!")
             return HttpResponseRedirect("/events/organiser/view/"+user.username+"/")
         context = {'form':form}
         return render(request, 'events/templates/organiser/form.html', context)
@@ -303,40 +305,24 @@ def organiser_edit(request, username):
             return render(request, 'events/templates/organiser/form.html', context)
 
 @login_required
-def rp_organiser_confirm(request, code, userid):
+def rp_organiser(request, status, code, userid):
     """ Resource person: active organiser """
     user = request.user
     organiser_in_rp_state = Organiser.objects.filter(user_id=userid, academic=AcademicCenter.objects.filter(state=State.objects.filter(resourceperson__user_id=user)))
-    if not (user.is_authenticated() and organiser_in_rp_state and ( is_event_manager(user) or is_resource_person(user))):
+    if not (user.is_authenticated() and organiser_in_rp_state and ( is_event_manager(user) or is_resource_person(user) or (status == 'active' or status == 'block'))):
         raise PermissionDenied('You are not allowed to view this page!')
 
     try:
         if User.objects.get(pk=userid).profile_set.get().confirmation_code == code:
             organiser = Organiser.objects.get(user_id = userid)
             organiser.appoved_by_id = request.user.id
+            message = "activated"
             organiser.status = 1
+            if status == 'block':
+                organiser.status = 2
+                message = "blocked"
             organiser.save()
-            return HttpResponseRedirect('/events/organiser/active/')
-        else:
-            raise Http404('Page not found !!')
-    except:
-        raise PermissionDenied('You are not allowed to view this page!')
-
-@login_required
-def rp_organiser_block(request, code, userid):
-    """ Resource person: block organiser """
-    #todo: if user block, again he trying to register, display message your accout blocked by rp contact rp
-    user = request.user
-    organiser_in_rp_state = Organiser.objects.filter(user_id=userid, academic=AcademicCenter.objects.filter(state=State.objects.filter(resourceperson__user_id=user)))
-    if not (user.is_authenticated() and organiser_in_rp_state and ( is_event_manager(user) or is_resource_person(user))):
-        raise PermissionDenied('You are not allowed to view this page!')
-
-    try:
-        if User.objects.get(pk=userid).profile_set.get().confirmation_code == code:
-            organiser = Organiser.objects.get(user_id = userid)
-            organiser.appoved_by_id = request.user.id
-            organiser.status = 2
-            organiser.save()
+            messages.success(request, "Organiser has "+message)
             return HttpResponseRedirect('/events/organiser/active/')
         else:
             raise Http404('Page not found !!')
@@ -360,6 +346,7 @@ def invigilator_request(request, username):
                 invigilator.user_id=request.user.id
                 invigilator.academic_id=request.POST['college']
                 invigilator.save()
+                messages.success(request, "Your invigilator request has been send!")
                 return HttpResponseRedirect("/events/invigilator/view/"+user.username+"/")
             context = {'form':form}
             return render(request, 'events/templates/invigilator/form.html', context)
@@ -368,10 +355,10 @@ def invigilator_request(request, username):
                 invigilator = Invigilator.objects.get(user=user)
                 #todo: send status message
                 if invigilator.status:
-                    print "you have already invigilator role !!"
+                    messages.success(request, "You have already invigilator role !!")
                     return HttpResponseRedirect("/events/invigilator/view/"+user.username+"/")
                 else:
-                    print "invigilator not yet approve !!"
+                    messages.success(request, "Your Invigilator request not yet approve !!")
                     return HttpResponseRedirect("/events/invigilator/view/"+user.username+"/")
             except:
                 context = {}
@@ -413,6 +400,7 @@ def invigilator_edit(request, username):
             invigilator = Invigilator.objects.get(user=user)
             invigilator.academic_id=request.POST['college']
             invigilator.save()
+            messages.success(request, "Details has been updated!")
             return HttpResponseRedirect("/events/invigilator/view/"+user.username+"/")
         context = {'form':form}
         return render(request, 'events/templates/invigilator/form.html', context)
@@ -425,11 +413,11 @@ def invigilator_edit(request, username):
             return render(request, 'events/templates/invigilator/form.html', context)
 
 @login_required
-def rp_invigilator_confirm(request, code, userid):
+def rp_invigilator(request, status, code, userid):
     """ Resource person: active invigilator """
     user = request.user
     invigilator_in_rp_state = Invigilator.objects.filter(user_id=userid, academic=AcademicCenter.objects.filter(state=State.objects.filter(resourceperson__user_id=user)))
-    if not (user.is_authenticated() and invigilator_in_rp_state and ( is_event_manager(user) or is_resource_person(user))):
+    if not (user.is_authenticated() and invigilator_in_rp_state and ( is_event_manager(user) or is_resource_person(user) or (status == 'active' or status == 'block'))):
         raise PermissionDenied('You are not allowed to view this page!')
 
     try:
@@ -437,29 +425,13 @@ def rp_invigilator_confirm(request, code, userid):
             invigilator = Invigilator.objects.get(user_id = userid)
             invigilator.appoved_by_id = request.user.id
             invigilator.status = 1
+            message = "accepted"
+            if status == 'block':
+                invigilator.status = 2
+                message = "blocked"
             invigilator.save()
-            return HttpResponseRedirect('/events/invigilator/active/')
-        else:
-            raise Http404('Page not found !!')
-    except:
-        raise PermissionDenied('You are not allowed to view this page!')
-
-@login_required
-def rp_invigilator_block(request, code, userid):
-    """ Resource person: block invigilator """
-    #todo: if user block, again he trying to register, display message your accout blocked by rp contact rp
-    user = request.user
-    invigilator_in_rp_state = Invigilator.objects.filter(user_id=userid, academic=AcademicCenter.objects.filter(state=State.objects.filter(resourceperson__user_id=user)))
-    if not (user.is_authenticated() and invigilator_in_rp_state and ( is_event_manager(user) or is_resource_person(user))):
-        raise PermissionDenied('You are not allowed to view this page!')
-
-    try:
-        if User.objects.get(pk=userid).profile_set.get().confirmation_code == code:
-            invigilator = Invigilator.objects.get(user_id = userid)
-            invigilator.appoved_by_id = request.user.id
-            invigilator.status = 2
-            invigilator.save()
-            return HttpResponseRedirect('/events/invigilator/active/')
+            messages.success(request, "Invigilator has "+message)
+            return HttpResponseRedirect('/events/invigilator/inactive/')
         else:
             raise Http404('Page not found !!')
     except:
@@ -491,6 +463,11 @@ def workshop_request(request, role):
                 w.department.add(dept)
             w.save()
             messages.success(request, "Your Workshop request has been send!")
+            #update logs
+            message = w.academic.institution_name+" has requested for "+w.foss.foss+" workshop on "+w.wdate
+            update_events_log(user_id = user.id, role = 0, category = 0, category_id = w.id, status = 0)
+            update_events_notification(user_id = user.id, role = 0, category = 0, category_id = w.id, status = 0, message = message)
+            
             return HttpResponseRedirect("/events/workshop/organiser/pending/")
         
         context = {'form' : form, 'role' : role, 'status' : 'request'}
@@ -524,6 +501,11 @@ def workshop_edit(request, role, rid):
             w.skype = request.POST['skype']
             w.save()
             messages.success(request, "Workshop has been sucessfully updated!")
+            #update logs
+            logrole = 0
+            if role == 'rp':
+                logrole = 2
+            update_events_log(user_id = user.id, role = logrole, category = 0, category_id = w.id, status = 4)
             return HttpResponseRedirect("/events/workshop/"+role+"/pending/")
         
         context = {'form':form, }
@@ -588,6 +570,9 @@ def workshop_list(request, role, status):
 def workshop_approvel(request, role, rid):
     """ Resource person: confirm or reject workshop """
     user = request.user
+    if not (user.is_authenticated() and (is_resource_person(user) or (is_organiser(user) and request.GET['status'] == 'completed'))):
+        raise Http404('You are not allowed to view this page!')
+        
     try:
         w = Workshop.objects.get(pk=rid)
         if request.GET['status'] == 'accept':
@@ -607,20 +592,35 @@ def workshop_approvel(request, role, rid):
     #todo: add workshop code
     if w.status == 1:
         w.workshop_code = "WC-"+str(w.id)
+    tmp = 0
     if request.GET['status'] == 'completed':
+        message = user.first_name+" "+user.last_name+" from "+w.academic.institution_name+" completed workshop!"
         # calculate the participant list
         wpcount = WorkshopAttendance.objects.filter(workshop_id = rid, status = 1).count()
         w.participant_counts = wpcount
-        w.save()
+        tmp = 1
+    w.save()
+    message = w.academic.institution_name +" has completed "+w.foss.foss+" workshop!"
+    if request.GET['status'] == 'accept':
+        message = user.first_name+" "+user.last_name+" accepted your workshop request!"
+    if request.GET['status'] == 'reject':
+        message = user.first_name+" "+user.last_name+" rejected your workshop request!"
+    #update logs
+    update_events_log(user_id = user.id, role = 2, category = 0, category_id = w.id, status = status)
+    update_events_notification(user_id = user.id, role = 2, category = 0, category_id = w.id, status = status, message = message)
+    if tmp:
         messages.success(request, "Selected workshop has been "+request.GET['status']+"!")
         return HttpResponseRedirect('/events/workshop/'+role+'/completed/')
-    w.save()
-    messages.success(request, "Selected workshop has been "+request.GET['status']+"!")
-    return HttpResponseRedirect('/events/workshop/'+role+'/approved/')
+    else:
+        messages.success(request, "Selected workshop has been "+request.GET['status']+"!")
+        return HttpResponseRedirect('/events/workshop/'+role+'/approved/')
 
 @login_required
 def workshop_permission(request):
     user = request.user
+    if not (user.is_authenticated() and (is_resource_person(user) or is_event_manager(user))):
+        raise Http404('You are not allowed to view this page!')
+        
     permissions = Permission.objects.select_related().all()
     form = WorkshopPermissionForm()
     if request.method == 'POST':
@@ -660,10 +660,12 @@ def accessrole(request):
     workshops = Workshop.objects.filter(academic__in = all_academic_ids)
     context = {'collection':workshops}
     return render(request, 'events/templates/accessrole/workshop_accessrole.html', context)
-
+    
+@login_required
 def workshop_attendance(request, wid):
     user = request.user
-     
+    if not (user.is_authenticated() and (is_invigilator(user))):
+        raise Http404('You are not allowed to view this page!')
     try:
         workshop = Workshop.objects.get(pk = wid) 
     except:
@@ -691,6 +693,10 @@ def workshop_attendance(request, wid):
                         w = WorkshopAttendance.objects.get(mdluser_id = wa.mdluser_id, workshop_id = wid)
                         w.status = 1
                         w.save()
+            message = workshop.academic.institution_name+" has submited workshop attendance!"
+            update_events_log(user_id = user.id, role = 2, category = 0, category_id = workshop.id, status = 6)
+            update_events_notification(user_id = user.id, role = 2, category = 0, category_id = workshop.id, status = 6, message = message)
+            
             messages.success(request, "Marked Attandance has been updated!") 
     participant_ids = list(WorkshopAttendance.objects.filter(workshop_id = wid).values_list('mdluser_id'))
     mdlids = []
@@ -709,6 +715,8 @@ def workshop_attendance(request, wid):
 @login_required
 def workshop_participant(request, wid=None):
     user = request.user
+    if not (user.is_authenticated() and (is_resource_person(user) or is_event_manager(user) or is_organiser(user))):
+        raise Http404('You are not allowed to view this page!')
     can_download_certificate = 0
     if wid:
         try:
@@ -1257,6 +1265,26 @@ def organiser_invigilator_index(request, role, status):
     context['role'] = role
     context.update(csrf(request))
     return render(request, 'events/templates/organiser_invigilator_index.html', context)
+
+def update_events_log(user_id, role, category, category_id, status):
+    if category == 0:
+        try:
+            WorkshopLog.objects.create(user_id = user_id, workshop_id = category_id, role = role, status = status)
+        except Exception, e:
+            print "Workshop Log =>",e
+    elif category == 1:
+        try:
+            TestLog.objects.create(user_id = user_id, test_id = category_id, role = role, status = status)
+        except Exception, e:
+            print "Test Log => ",e
+    else:
+        print "************ Error in events log ***********"
+        
+def update_events_notification(user_id, role, category, category_id, status, message):
+    try:
+        EventsNotification.objects.create(user_id = user_id, role = role, category = category, categoryid = category_id, status = status, message = message)
+    except Exception, e:
+        print "Error in Events Notification => ", e
 
 #Ajax Request and Responces
 @csrf_exempt

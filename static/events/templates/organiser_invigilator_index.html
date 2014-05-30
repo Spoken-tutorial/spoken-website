@@ -3,22 +3,6 @@
 {% load static %}
 {% block title %}Upload Tutorial{% endblock %}
 {% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
-{% if alert_success or alert_danger %}
-    {% block alert %}
-        {% if alert_success %}
-            <div class="alert alert-success alert-dismissable">
-                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-                {{ alert_success }}
-            </div>
-        {% endif %}
-        {% if alert_danger %}
-            <div class="alert alert-danger alert-dismissable">
-                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-                {{ alert_danger }}
-            </div>
-        {% endif %}
-    {% endblock %}
-{% endif %}
 {% block content %}
     <h3 class="form-signin-heading">{{ role }} list</h3>
     <ul class="tabs nav nav-tabs">
@@ -41,19 +25,19 @@
                 <td>{{ record.updated|date:"D d M Y" }}</td>
                 {% if role == 'invigilator' %}
                     {% if status == 'inactive' %}
-                        <td><a href="{% url 'events:invigilator_view' record.user %}">View</a> | <a href="{% url 'events:rp_invigilator_confirm' record.user.profile_set.get.confirmation_code record.user_id %}">Activate</a> | <a href="{% url 'events:rp_invigilator_block' record.user.profile_set.get.confirmation_code record.user_id %}">Block</a></td>
+                        <td><a href="{% url 'events:invigilator_view' record.user %}">View</a> | <a href="{% url 'events:rp_invigilator' 'active' record.user.profile_set.get.confirmation_code record.user_id %}">Activate</a> | <a href="{% url 'events:rp_invigilator' 'block' record.user.profile_set.get.confirmation_code record.user_id %}">Block</a></td>
                     {% elif status == 'active' %}
-                        <td><a href="{% url 'events:invigilator_view' record.user %}">View</a> | <a href="{% url 'events:rp_invigilator_block' record.user.profile_set.get.confirmation_code record.user_id %}">Block</a></td>
+                        <td><a href="{% url 'events:invigilator_view' record.user %}">View</a> | <a href="{% url 'events:rp_invigilator' 'block' record.user.profile_set.get.confirmation_code record.user_id %}">Block</a></td>
                     {% else %}
-                        <td><a href="{% url 'events:invigilator_view' record.user %}">View</a> | <a href="{% url 'events:rp_invigilator_confirm' record.user.profile_set.get.confirmation_code record.user_id %}">Activate</a>
+                        <td><a href="{% url 'events:invigilator_view' record.user %}">View</a> | <a href="{% url 'events:rp_invigilator' 'active' record.user.profile_set.get.confirmation_code record.user_id %}">Activate</a>
                     {% endif %}
                 {% else %}
                     {% if status == 'inactive' %}
-                        <td><a href="{% url 'events:organiser_view' record.user %}">View</a> | <a href="{% url 'events:rp_organiser_confirm' record.user.profile_set.get.confirmation_code record.user_id %}">Activate</a> | <a href="{% url 'events:rp_organiser_block' record.user.profile_set.get.confirmation_code record.user_id %}">Block</a></td>
+                        <td><a href="{% url 'events:organiser_view' record.user %}">View</a> | <a href="{% url 'events:rp_organiser' 'active' record.user.profile_set.get.confirmation_code record.user_id %}">Activate</a> | <a href="{% url 'events:rp_organiser' 'block' record.user.profile_set.get.confirmation_code record.user_id %}">Block</a></td>
                     {% elif status == 'active' %}
-                        <td><a href="{% url 'events:organiser_view' record.user %}">View</a> | <a href="{% url 'events:rp_organiser_block' record.user.profile_set.get.confirmation_code record.user_id %}">Block</a></td>
+                        <td><a href="{% url 'events:organiser_view' record.user %}">View</a> | <a href="{% url 'events:rp_organiser' 'block' record.user.profile_set.get.confirmation_code record.user_id %}">Block</a></td>
                     {% else %}
-                        <td><a href="{% url 'events:organiser_view' record.user %}">View</a> | <a href="{% url 'events:rp_organiser_confirm' record.user.profile_set.get.confirmation_code record.user_id %}">Activate</a>
+                        <td><a href="{% url 'events:organiser_view' record.user %}">View</a> | <a href="{% url 'events:rp_organiser' 'active' record.user.profile_set.get.confirmation_code record.user_id %}">Activate</a>
                     {% endif %}
                 {% endif %}
             </tr>
