@@ -1,13 +1,29 @@
 {% extends 'spoken/templates/base.html' %}
 {% load widget_tweaks %}
 {% load static %}
-{% block title %}Upload Tutorial{% endblock %}
+
+{% block title %}
+    {% if role == 'invigilator' %}
+        Invigilator
+    {% else %}
+        Organiser
+    {% endif %}
+{% endblock %}
+
 {% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
+
+{% block heading %}
+    {% if role == 'invigilator' %}
+        <i class="fa fa-list-ul"></i> Invigilator
+    {% else %}
+        <i class="fa fa-list-ul"></i> Organiser
+    {% endif %}
+{% endblock %}
+
 {% block content %}
-    <h3 class="form-signin-heading">{{ role }} list</h3>
     <ul class="tabs nav nav-tabs">
-        <li {% if status == 'inactive' %}{{ 'class="active"'}}{% endif %}><a href="{% url 'events:organiser_invigilator_index' role 'inactive' %}">Inactive</a></li>
-        <li {% if status == 'active' %}{{ 'class="active"'}}{% endif %}><a href="{% url 'events:organiser_invigilator_index' role 'active' %}">Active</a></li>
+        <li {% if status == 'inactive' %}{{ 'class="active"'}}{% endif %}><a href="{% url 'events:organiser_invigilator_index' role 'inactive' %}">New Requests</a></li>
+        <li {% if status == 'active' %}{{ 'class="active"'}}{% endif %}><a href="{% url 'events:organiser_invigilator_index' role 'active' %}">Existing</a></li>
         <li {% if status == 'blocked' %}{{ 'class="active"'}}{% endif %}><a href="{% url 'events:organiser_invigilator_index' role 'blocked' %}">Blocked</a></li>
     </ul>
     {% if collection %}

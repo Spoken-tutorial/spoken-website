@@ -3,8 +3,11 @@
 {% load static %}
 {% load mdldata %}
 {% load eventsdata %}
-{% block title %}Upload Tutorial{% endblock %}
+{% block title %}Student Dashboard{% endblock %}
 {% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
+{% block heading %}
+        <i class="fa fa-list-ul"></i> Student Dashboard
+{% endblock %}
 {% block content %}
     <!-- Nav tabs -->
     <ul class="nav nav-tabs">
@@ -20,15 +23,15 @@
             {% if past_workshop %}
             <table class="table table-striped table-hover table-bordered">
                 <tr>
-                    <th>Academic Name</th>
-                    <th>Workshop Code</th>
+                    <th>Technology</th>
+
                     <th>Date & Time</th>
                     <th>Action</th>
                 </tr>
                 {% for record in past_workshop %}
                     <tr>
-                        <td>{{ record.academic }}</td>
-                        <td>{{ record.workshop_code }}</td>
+                        <td>{{ record.foss.foss }}</td>
+                        <td>{{ record.department }}</td>
                         <td>{{ record.wdate }} {{ record.ttime }}</td>
                         <td><a href="{% url 'events:workshop_participant_ceritificate' record.id mdluserid %}">Certificate</a></td>
                     </tr>
@@ -42,7 +45,7 @@
             {% if past_test %}
             <table class="table table-striped table-hover table-bordered">
                 <tr>
-                    <th>Academic Name</th>
+                    <th>Technology</th>
                     <th>Test Code</th>
                     <th>Date & Time</th>
                     <th>Score</th>
@@ -50,8 +53,8 @@
                 </tr>
                 {% for record in past_test %}
                     <tr>
-                        <td>{{ record.academic }}</td>
-                        <td>{{ record.test_code }}</td>
+                        <td>{{ record.foss.foss }}</td>
+                        <td>{{ record.department }}</td>
                         <td>{{ record.tdate }} {{ record.ttime }}</td>
                         {% with SCORE=mdluserid|get_participant_score %}
                             <td>{{ SCORE }}</td>
@@ -68,15 +71,15 @@
             {% if upcoming_workshop %}
             <table class="table table-striped table-hover table-bordered">
                 <tr>
-                    <th>Academic Name</th>
-                    <th>Workshop Code</th>
+                    <th>Technology</th>
+
                     <th>Date & Time</th>
                     <th>Action</th>
                 </tr>
                 {% for record in upcoming_workshop %}
                     <tr>
-                        <td>{{ record.academic }}</td>
-                        <td>{{ record.workshop_code }}</td>
+                        <td>{{ record.foss.foss }}</td>
+                        
                         <td>{{ record.wdate }} {{ record.ttime }}</td>
                         <td>
                             {% if record.id|check_workshop_enrole:mdluserid %}
@@ -96,15 +99,15 @@
             {% if ongoing_test %}
             <table class="table table-striped table-hover table-bordered">
                 <tr>
-                    <th>Academic Name</th>
+                    <th>Technology</th>
                     <th>Test Code</th>
                     <th>Date & Time</th>
                     <th>Action</th>
                 </tr>
                 {% for record in ongoing_test %}
                     <tr>
-                        <td>{{ record.academic }}</td>
-                        <td>{{ record.test_code }}</td>
+                        <td>{{ record.foss.foss }}</td>
+                        <td>{{ record.department }}</td>
                         <td>{{ record.tdate }} {{ record.ttime }}</td>
                         <td>
                             {% with status=mdluserid|can_enter_test:record.id %}
@@ -139,15 +142,15 @@
             {% if upcoming_test %}
             <table class="table table-striped table-hover table-bordered">
                 <tr>
-                    <th>Academic Name</th>
+                    <th>Technology</th>
                     <th>Test Code</th>
                     <th>Date & Time</th>
                     <th>Action</th>
                 </tr>
                 {% for record in upcoming_test %}
                     <tr>
-                        <td>{{ record.academic }}</td>
-                        <td>{{ record.test_code }}</td>
+                        <td>{{ record.foss.foss }}</td>
+                        <td>{{ record.department }}</td>
                         <td>{{ record.tdate }} {{ record.ttime }}</td>
                         <td><a href="{% url 'events:student_subscribe' 'test' record.id mdluserid %}">Subscribe</a></td>
                     </tr>

@@ -2,11 +2,13 @@
 {% load widget_tweaks %}
 {% load static %}
 {% load eventsdata %}
-{% block title %}Upload Tutorial{% endblock %}
+{% block title %}Workshop - {{ status}} {% endblock %}
 {% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
+{% block heading %}
+        <i class="fa fa-list-ul"></i> Workshop
+{% endblock %}
 {% block content %}
 	<!-- Nav tabs -->
-	<h4>Workshop</h4>
 	<ul class="tabs nav nav-tabs">
 	    {% if role == 'organiser' %}
 		    <li><a href="/events/workshop/{{ role }}/request/">New</a></li>

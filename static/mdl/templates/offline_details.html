@@ -1,26 +1,12 @@
 {% extends 'spoken/templates/base.html' %}
 {% load widget_tweaks %}
 {% load static %}
-{% block title %}Upload Tutorial{% endblock %}
+{% block title %}Offline Upload Interface - Attendance Sheet {% endblock %}
 {% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
-{% if alert_success or alert_danger %}
-	{% block alert %}
-		{% if alert_success %}
-			<div class="alert alert-success alert-dismissable">
-				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-				{{ alert_success }}
-			</div>
-		{% endif %}
-		{% if alert_danger %}
-			<div class="alert alert-danger alert-dismissable">
-				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-				{{ alert_danger }}
-			</div>
-		{% endif %}
-	{% endblock %}
-{% endif %}
+{% block heading %}
+        <i class="fa fa-list-ul"></i> Offline Upload Interface - Attendance Sheet
+{% endblock %}
 {% block content %}
-
 <form action="{{ action }}" method="post" enctype="multipart/form-data" >{% csrf_token %}
 {% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
     {% if form.non_field_errors %}
@@ -30,14 +16,13 @@
       {% endfor %}
     </ul>
     {% endif %}
-    	<h3 class="form-signin-heading">Offline Details</h3>
 	<!--<div class="form-group">
 		<label for="id_workshop_code">Workshop Code</label>
 		{% render_field form.workshop_code class+="form-control chosen workshop_code" tabindex="1" data-placeholder="Enter Workshop Code" %}
 		{{ form.workshop_code.errors }}
 	</div> -->
 	<div class="form-group">
-		<label for="id_workshop_code">Workshop Code</label>
+		<label for="id_xml_file">Xml File</label>
 		{% render_field form.xml_file class+=" xml_file"%}
 		{{ form.xml_file.errors }}
 	</div>

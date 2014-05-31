@@ -2,25 +2,28 @@
 {% load widget_tweaks %}
 {% load static %}
 {% load eventsdata %}
-{% block title %}Upload Tutorial{% endblock %}
+{% block title %}Workshop Participant Details{% endblock %}
 {% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
-{% if alert_success or alert_danger %}
-	{% block alert %}
-		{% if alert_success %}
-			<div class="alert alert-success alert-dismissable">
-				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-				{{ alert_success }}
-			</div>
-		{% endif %}
-		{% if alert_danger %}
-			<div class="alert alert-danger alert-dismissable">
-				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-				{{ alert_danger }}
-			</div>
-		{% endif %}
-	{% endblock %}
-{% endif %}
+{% block heading %}
+        <i class="fa fa-list-ul"></i> Participant Details<a href="{{ request.META.HTTP_REFERER }}" class='pull-right'>Go Back</a>
+{% endblock %}
 {% block content %}
+    <div class="bs-callout bs-callout-info">
+        <dl class='dl-horizontal'>
+            <dt>Institution Name</dt>
+            <dd>{{ wc.academic }}, {{ wc.academic.state }}</dd>
+            <dt>Foss</dt>
+            <dd>{{ wc.foss.foss }}</dd>
+            <dt>Language</dt>
+            <dd>{{ wc.language }}</dd>
+            <dt>Date</dt>
+            <dd>{{ wc.wdate }}</dd>
+            <dt>Participants Count</dt>
+            <dd>{{ pcount }}</dd>
+            <dt>Organiser</dt>
+            <dd>{{ wc.organiser }}</dd>
+        </dl>
+    </div>
 	<div class="" id="pending">
 		{% if wc.status == 2 %}
 			{% if can_download_certificate %}<!--<p>If you want reupload the students list click <a href="{% url 'mdldjango:mdl_offline_workshop_details' wc.id %}">here</a>.</p>-->{% endif %}

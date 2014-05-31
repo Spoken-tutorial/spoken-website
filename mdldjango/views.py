@@ -78,11 +78,11 @@ def index(request):
     except:
         return HttpResponseRedirect("/moodle/login")
     
-    upcoming_workshop = Workshop.objects.filter(status=1, academic_id=mdluser.institution)
-    upcoming_test = Test.objects.filter(status=2, academic_id=mdluser.institution)
+    upcoming_workshop = Workshop.objects.filter(status=1, academic_id=mdluser.institution, wdate__gt=datetime.date.today())
+    upcoming_test = Test.objects.filter(status=2, academic_id=mdluser.institution, tdate__gt=datetime.date.today())
     past_workshop = Workshop.objects.filter(id__in = WorkshopAttendance.objects.filter(mdluser_id = mdluser.id).values_list('workshop_id'), status = 2)
     past_test = Test.objects.filter(id__in = TestAttendance.objects.filter(mdluser_id = mdluser.id).values_list('test_id'), status = 4)
-    ongoing_test = Test.objects.filter(status=3, academic_id=mdluser.institution)
+    ongoing_test = Test.objects.filter(status=3, academic_id=mdluser.institution, tdate = datetime.date.today())
     print ongoing_test
     context = {
         'mdluserid' : mdluserid,
@@ -156,14 +156,16 @@ def offline_details(request, wid):
                     wa.mdluser_id = mdluser.id
                     wa.save()
             #update logs
-            message = w.academic.institution_name+" has submited Offline workshop attendance!"
+            message = w.academic.institution_name+" has submited Offline workshop attendance."
             update_events_log(user_id = user.id, role = 2, category = 0, category_id = w.id, status = 5)
             update_events_notification(user_id = user.id, role = 2, category = 0, category_id = w.id, status = 5, message = message)
-            messages.success(request, "Offline details uploaded!")
+            messages.success(request, "Thank you for uploading the Attendance. Now make sure that you cross check and verify the details before submiting.")
             return HttpResponseRedirect('/events/workshop/'+str(wid)+'/attendance/')
+        messages.error(request, "Please Upload xml file !") 
     context = {
         'form': form,
     }
+    messages.info(request, "Please upload the xml file which you have generated from the 'Offline Attendance App'. To know more Click Here.") 
     context.update(csrf(request))
     return render(request, 'mdl/templates/offline_details.html', context)
 
