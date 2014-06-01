@@ -1,8 +1,11 @@
 {% extends 'spoken/templates/base.html' %}
 {% load widget_tweaks %}
 {% load static %}
-{% block title %}Upload Tutorial{% endblock %}
+{% block title %}Invigilator Request{% endblock %}
 {% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
+{% block heading %}
+    <i class="fa fa-list-ul"></i> Invigilator Request<a href="{{ request.META.HTTP_REFERER }}" class='pull-right go-back'>Go Back</a>
+    {% endblock %}
 {% block content %}
 	<form action="{{ action }}" method="post">{% csrf_token %}
 	{% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
@@ -13,12 +16,7 @@
 	  {% endfor %}
 	</ul>
 	{% endif %}
-	{% if edit %}
-		<h3 class="form-signin-heading">Edit Invigilator</h3>
-	{% else %}
-		<h3 class="form-signin-heading">Add Invigilator</h3>
-	{% endif %}
-	
+		
 	<div class="form-group">
 		<label for="id_state">State</label>
 		{% render_field form.state class+="form-control chosen state" tabindex="1" data-placeholder="Choose State" %}

@@ -26,6 +26,7 @@
         <li {% if status == 'active' %}{{ 'class="active"'}}{% endif %}><a href="{% url 'events:organiser_invigilator_index' role 'active' %}">Existing</a></li>
         <li {% if status == 'blocked' %}{{ 'class="active"'}}{% endif %}><a href="{% url 'events:organiser_invigilator_index' role 'blocked' %}">Blocked</a></li>
     </ul>
+    <div class='tab-content'>
     {% if collection %}
         <table class="table table-striped table-hover table-bordered">
             <tr>
@@ -62,4 +63,5 @@
     {% else %}
         <p class='no-record'>Sorry, no record found.</p>
     {% endif %}
+    </div>
 {% endblock %}

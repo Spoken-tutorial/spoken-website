@@ -105,7 +105,7 @@ def new_ac(request):
     """
     user = request.user
     if not (user.is_authenticated() and (is_event_manager(user) or is_resource_person(user))):
-        raise Http404('You are not allowed to view this page!')
+        raise Http404('You are not allowed to view this page')
         
     if request.method == 'POST':
         form = AcademicForm(user, request.POST)
@@ -118,7 +118,7 @@ def new_ac(request):
             try:
                 ac = AcademicCenter.objects.filter(state = state).order_by('-academic_code')[:1].get()
             except:
-                #print "This is first record!!"
+                #print "This is first record"
                 ac = None
                 academic_code = 1
                 
@@ -137,7 +137,7 @@ def new_ac(request):
                 academic_code = code_range + 1
                 #finding Missing number
                 for code in available_code_range:
-                    if code != 0:
+                    if code == 0:
                         academic_code = code
                         break
 
@@ -157,7 +157,7 @@ def new_ac(request):
             
             form_data.academic_code = academic_code
             form_data.save()
-            messages.success(request, form_data.institution_name+" has been added!")
+            messages.success(request, form_data.institution_name+" has been added")
             return HttpResponseRedirect("/events/ac/")
         
         context = {'form':form}
@@ -173,7 +173,7 @@ def edit_ac(request, rid = None):
     """ Edit academic center """
     user = request.user
     if not (user.is_authenticated() and (is_event_manager(user) or is_resource_person(user))):
-        raise Http404('You are not allowed to view this page!')
+        raise Http404('You are not allowed to view this page')
         
     if request.method == 'POST':
         contact = AcademicCenter.objects.get(id = rid)
@@ -199,14 +199,14 @@ def ac(request):
     """ Academic index page """
     user = request.user
     if not (user.is_authenticated() and (is_event_manager(user) or is_resource_person(user))):
-        raise Http404('You are not allowed to view this page!')
+        raise Http404('You are not allowed to view this page')
         
     context = {}
     context['collection'] = AcademicCenter.objects.all
     context['model'] = "Academic Center"
     context.update(csrf(request))
     return render(request, 'events/templates/ac/index.html', context)
-    return HttpResponse('RP!')
+    return HttpResponse('RP')
 
 def has_profile_data(request, user):
     ''' check weather user profile having blank data or not '''
@@ -224,7 +224,7 @@ def organiser_request(request, username):
     """ request to bacome a new organiser """
     user = request.user
     if not user.is_authenticated():
-        raise Http404('You are not allowed to view this page!')
+        raise Http404('You are not allowed to view this page')
         
     if username == request.user.username:
         user = User.objects.get(username=username)
@@ -245,11 +245,11 @@ def organiser_request(request, username):
             try:
                 organiser = Organiser.objects.get(user=user)
                 if organiser.status:
-                    messages.error(request, "You are already an Organiser !")
+                    messages.error(request, "You are already an Organiser ")
                     return HttpResponseRedirect("/events/organiser/view/"+user.username+"/")
                 else:
-                    messages.info(request, "Your Organiser request is yet to be approved. Please contact the Resource person of your State. For more details Click Here !")
-                    print "Organiser not yet approve !"
+                    messages.info(request, "Your Organiser request is yet to be approved. Please contact the Resource person of your State. For more details Click Here ")
+                    print "Organiser not yet approve "
                     return HttpResponseRedirect("/events/organiser/view/"+user.username+"/")
             except:
                 messages.info(request, "Please fill the following details")
@@ -258,14 +258,14 @@ def organiser_request(request, username):
                 context['form'] = OrganiserForm()
                 return render(request, 'events/templates/organiser/form.html', context)
     else:
-        raise Http404('You are not allowed to view this page!')
+        raise Http404('You are not allowed to view this page')
 
 @login_required
 def organiser_view(request, username):
     """ view organiser details """
     user = request.user
     if not (user.is_authenticated() and (username == request.user.username or is_event_manager(user) or is_resource_person(user))):
-        raise Http404('You are not allowed to view this page!')
+        raise Http404('You are not allowed to view this page')
     
     user = User.objects.get(username=username)
     context = {}
@@ -284,7 +284,7 @@ def organiser_edit(request, username):
     #todo: confirm event_manager and resource_center can edit organiser details
     user = request.user
     if not (user.is_authenticated() and (username == request.user.username or is_event_manager(user) or is_resource_person(user))):
-        raise Http404('You are not allowed to view this page!')
+        raise Http404('You are not allowed to view this page')
         
     user = User.objects.get(username=username)
     if request.method == 'POST':
@@ -294,7 +294,7 @@ def organiser_edit(request, username):
             #organiser.user_id=request.user.id
             organiser.academic_id=request.POST['college']
             organiser.save()
-            messages.success(request, "Details has been updated!")
+            messages.success(request, "Details has been updated")
             return HttpResponseRedirect("/events/organiser/view/"+user.username+"/")
         context = {'form':form}
         return render(request, 'events/templates/organiser/form.html', context)
@@ -312,7 +312,7 @@ def rp_organiser(request, status, code, userid):
     user = request.user
     organiser_in_rp_state = Organiser.objects.filter(user_id=userid, academic=AcademicCenter.objects.filter(state=State.objects.filter(resourceperson__user_id=user)))
     if not (user.is_authenticated() and organiser_in_rp_state and ( is_event_manager(user) or is_resource_person(user) or (status == 'active' or status == 'block'))):
-        raise PermissionDenied('You are not allowed to view this page !')
+        raise PermissionDenied('You are not allowed to view this page ')
 
     try:
         if User.objects.get(pk=userid).profile_set.get().confirmation_code == code:
@@ -327,16 +327,16 @@ def rp_organiser(request, status, code, userid):
             messages.success(request, "The Organiser account has been "+message)
             return HttpResponseRedirect('/events/organiser/active/')
         else:
-            raise Http404('Page not found !')
+            raise Http404('Page not found ')
     except:
-        raise PermissionDenied('You are not allowed to view this page!')
+        raise PermissionDenied('You are not allowed to view this page')
 
 @login_required
 def invigilator_request(request, username):
     """ Request to bacome a invigilator """
     user = request.user
     if not user.is_authenticated():
-        raise Http404('You are not allowed to view this page!')
+        raise Http404('You are not allowed to view this page')
 
     if username == user.username:
         user = User.objects.get(username=username)
@@ -348,8 +348,9 @@ def invigilator_request(request, username):
                 invigilator.user_id=request.user.id
                 invigilator.academic_id=request.POST['college']
                 invigilator.save()
-                messages.success(request, "Your invigilator request has been send!")
+                messages.success(request, "Thank you. Your request has been sent for Resource Person's approval. You will get the approval with in 24 hours. Once the request is approved, you can request for the workshop. For more details Click Here")
                 return HttpResponseRedirect("/events/invigilator/view/"+user.username+"/")
+            messages.error(request, "Please fill the following details")
             context = {'form':form}
             return render(request, 'events/templates/invigilator/form.html', context)
         else:
@@ -357,25 +358,26 @@ def invigilator_request(request, username):
                 invigilator = Invigilator.objects.get(user=user)
                 #todo: send status message
                 if invigilator.status:
-                    messages.success(request, "You have already invigilator role !")
+                    messages.success(request, "You have already  invigilator role ")
                     return HttpResponseRedirect("/events/invigilator/view/"+user.username+"/")
                 else:
-                    messages.success(request, "Your Invigilator request not yet approve !")
+                    messages.info(request, "Your Invigilator request is yet to be approved. Please contact the Resource person of your State. For more details Click Here ")
                     return HttpResponseRedirect("/events/invigilator/view/"+user.username+"/")
             except:
+                messages.info(request, "Please fill the following details")
                 context = {}
                 context.update(csrf(request))
                 context['form'] = InvigilatorForm()
                 return render(request, 'events/templates/invigilator/form.html', context)
     else:
-        raise Http404('You are not allowed to view this page!')
+        raise Http404('You are not allowed to view this page')
 
 @login_required
 def invigilator_view(request, username):
     """ Invigilator view page """
     user = request.user
     if not (user.is_authenticated() and (username == request.user.username or is_event_manager(user) or is_resource_person(user))):
-        raise Http404('You are not allowed to view this page!')
+        raise Http404('You are not allowed to view this page')
     
     user = User.objects.get(username=username)
     context = {}
@@ -393,7 +395,7 @@ def invigilator_edit(request, username):
     """ Invigilator edit page """
     user = request.user
     if not (user.is_authenticated() and (username == request.user.username or is_event_manager(user) or is_resource_person(user))):
-        raise Http404('You are not allowed to view this page!')
+        raise Http404('You are not allowed to view this page')
         
     user = User.objects.get(username=username)
     if request.method == 'POST':
@@ -402,7 +404,7 @@ def invigilator_edit(request, username):
             invigilator = Invigilator.objects.get(user=user)
             invigilator.academic_id=request.POST['college']
             invigilator.save()
-            messages.success(request, "Details has been updated!")
+            messages.success(request, "Details has been updated")
             return HttpResponseRedirect("/events/invigilator/view/"+user.username+"/")
         context = {'form':form}
         return render(request, 'events/templates/invigilator/form.html', context)
@@ -420,7 +422,7 @@ def rp_invigilator(request, status, code, userid):
     user = request.user
     invigilator_in_rp_state = Invigilator.objects.filter(user_id=userid, academic=AcademicCenter.objects.filter(state=State.objects.filter(resourceperson__user_id=user)))
     if not (user.is_authenticated() and invigilator_in_rp_state and ( is_event_manager(user) or is_resource_person(user) or (status == 'active' or status == 'block'))):
-        raise PermissionDenied('You are not allowed to view this page!')
+        raise PermissionDenied('You are not allowed to view this page')
 
     try:
         if User.objects.get(pk=userid).profile_set.get().confirmation_code == code:
@@ -435,16 +437,16 @@ def rp_invigilator(request, status, code, userid):
             messages.success(request, "Invigilator has "+message)
             return HttpResponseRedirect('/events/invigilator/inactive/')
         else:
-            raise Http404('Page not found !')
+            raise Http404('Page not found ')
     except:
-        raise PermissionDenied('You are not allowed to view this page!')
+        raise PermissionDenied('You are not allowed to view this page')
 
 @login_required
 def workshop_request(request, role):
     ''' Workshop request by organiser '''
     user = request.user
     if not user.is_authenticated() or not is_organiser(user):
-        raise Http404('You are not allowed to view this page!')
+        raise Http404('You are not allowed to view this page')
     
     if request.method == 'POST':
         form = WorkshopForm(request.POST, user = request.user)
@@ -464,18 +466,18 @@ def workshop_request(request, role):
             for dept in form.cleaned_data.get('department'):
                 w.department.add(dept)
             w.save()
-            messages.success(request, "You will receive a workshop confirmation mail shortly. Thank you. !")
+            messages.success(request, "You will receive a workshop confirmation mail shortly. Thank you. ")
             #update logs
             message = w.academic.institution_name+" has made a workshop request for "+w.foss.foss+" on "+w.wdate
             update_events_log(user_id = user.id, role = 0, category = 0, category_id = w.id, status = 0)
             update_events_notification(user_id = user.id, role = 0, category = 0, category_id = w.id, status = 0, message = message)
             
             return HttpResponseRedirect("/events/workshop/organiser/pending/")
-        messages.error(request, "Please fill the following details !")
+        messages.error(request, "Please fill the following details ")
         context = {'form' : form, 'role' : role, 'status' : 'request'}
         return render(request, 'events/templates/workshop/form.html', context)
     else:
-        messages.info(request, "Please check if your mechine is ready. For the Machine Readiness document Click Here. Please make sure that you update the 'Attendance Sheet' after the workshop. For the instruction Click Here !")
+        messages.info(request, "Please check if your mechine is ready. For the Machine Readiness document Click Here. Please make sure that you update the 'Attendance Sheet' after the workshop. For the instruction Click Here ")
         context = {'role' : role, 'status' : 'request'}
         context.update(csrf(request))
         context['form'] = WorkshopForm(user = request.user)
@@ -485,7 +487,7 @@ def workshop_edit(request, role, rid):
     ''' Workshop edit by organiser or resource person '''
     user = request.user
     if not user.is_authenticated() or not is_organiser:
-        raise Http404('You are not allowed to view this page!')
+        raise Http404('You are not allowed to view this page')
     
     if request.method == 'POST':
         form = WorkshopForm(request.POST, user = request.user)
@@ -495,7 +497,7 @@ def workshop_edit(request, role, rid):
             w = Workshop.objects.get(pk=rid)
             
             #check if date time chenged or not
-            if w.status == 1 and (str(w.wdate) != dateTime[0] or str(w.wtime)[0:5] != dateTime[1]):
+            if w.status == 1 and (str(w.wdate) == dateTime[0] or str(w.wtime)[0:5] == dateTime[1]):
                 w.status = 4
             w.language_id = request.POST['language']
             w.foss_id = request.POST['foss']
@@ -503,7 +505,7 @@ def workshop_edit(request, role, rid):
             w.wtime = dateTime[1]
             w.skype = request.POST['skype']
             w.save()
-            messages.success(request, "Workshop has been sucessfully updated!")
+            messages.success(request, "Workshop has been sucessfully updated")
             #update logs
             logrole = 0
             if role == 'rp':
@@ -525,7 +527,7 @@ def workshop_list(request, role, status):
     """ Organiser index page """
     user = request.user
     if not (user.is_authenticated() and ( is_organiser(user) or is_resource_person(user) or is_event_manager(user))):
-        raise Http404('You are not allowed to view this page!')
+        raise Http404('You are not allowed to view this page')
         
     status_dict = {'pending': 0, 'approved' : 1, 'completed' : 2, 'rejected' : 3, 'reschedule' : 1, 'ongoing': 1}
     if status in status_dict:
@@ -549,7 +551,7 @@ def workshop_list(request, role, status):
                 workshops = Workshop.objects.filter(organiser_id=user, status = status_dict[status])
         
         if workshops == None:
-            raise Http404('You are not allowed to view this page!')
+            raise Http404('You are not allowed to view this page')
 
         paginator = Paginator(workshops, 30)
         page = request.GET.get('page')
@@ -566,7 +568,7 @@ def workshop_list(request, role, status):
         context.update(csrf(request))
         return render(request, 'events/templates/workshop/index.html', context)
     else:
-        raise Http404('Page not foundddddd !')
+        raise Http404('Page not foundddddd ')
 
 @login_required
 @csrf_exempt
@@ -574,8 +576,7 @@ def workshop_approvel(request, role, rid):
     """ Resource person: confirm or reject workshop """
     user = request.user
     if not (user.is_authenticated() and (is_resource_person(user) or (is_organiser(user) and request.GET['status'] == 'completed'))):
-        raise Http404('You are not allowed to view this page!')
-        
+        raise Http404('You are not allowed to view this page')
     try:
         w = Workshop.objects.get(pk=rid)
         if request.GET['status'] == 'accept':
@@ -584,11 +585,12 @@ def workshop_approvel(request, role, rid):
             status = 3
         if request.GET['status'] == 'completed':
             status = 2
-    except:
-        raise Http404('Page not found !')
+    except Exception, e:
+        print e
+        raise Http404('Page not found ')
     if status != 2:
         if not (user.is_authenticated() and w.academic.state in State.objects.filter(resourceperson__user_id=user) and ( is_event_manager(user) or is_resource_person(user))):
-            raise PermissionDenied('You are not allowed to view this page!')
+            raise PermissionDenied('You are not allowed to view this page')
     
     w.status = status
     w.appoved_by_id = user.id
@@ -604,9 +606,9 @@ def workshop_approvel(request, role, rid):
     w.save()
     message = w.academic.institution_name +" has completed "+w.foss.foss+" workshop dated "+w.wdate.strftime("%Y-%m-%d")
     if request.GET['status'] == 'accept':
-        message = "Resource Person has approved your "+w.foss.foss+" workshop request !"
+        message = "Resource Person has approved your "+w.foss.foss+" workshop request "
     if request.GET['status'] == 'reject':
-        message = "Resource Person has approved your "+w.foss.foss+" workshop request !"
+        message = "Resource Person has rejected your "+w.foss.foss+" workshop request "
     #update logs
     update_events_log(user_id = user.id, role = 2, category = 0, category_id = w.id, status = status)
     update_events_notification(user_id = user.id, role = 2, category = 0, category_id = w.id, status = status, message = message)
@@ -614,14 +616,14 @@ def workshop_approvel(request, role, rid):
         messages.success(request, "Workshop has been completed. For downloading the learner's certificate click on View Participants ")
         return HttpResponseRedirect('/events/workshop/'+role+'/completed/')
     else:
-        messages.success(request, "Workshop has been accepted !")
+        messages.success(request, "Workshop has been accepted ")
         return HttpResponseRedirect('/events/workshop/'+role+'/approved/')
 
 @login_required
 def workshop_permission(request):
     user = request.user
     if not (user.is_authenticated() and (is_resource_person(user) or is_event_manager(user))):
-        raise Http404('You are not allowed to view this page!')
+        raise Http404('You are not allowed to view this page')
         
     permissions = Permission.objects.select_related().all()
     form = WorkshopPermissionForm()
@@ -667,11 +669,11 @@ def accessrole(request):
 def workshop_attendance(request, wid):
     user = request.user
     if not (user.is_authenticated() and (is_organiser(user))):
-        raise Http404('You are not allowed to view this page!')
+        raise Http404('You are not allowed to view this page')
     try:
         workshop = Workshop.objects.get(pk = wid) 
     except:
-        raise Http404('Page not found !')
+        raise Http404('Page not found ')
     #todo check request user and workshop organiser same or not
     if request.method == 'POST':
         users = request.POST
@@ -695,7 +697,7 @@ def workshop_attendance(request, wid):
                         w = WorkshopAttendance.objects.get(mdluser_id = wa.mdluser_id, workshop_id = wid)
                         w.status = 1
                         w.save()
-            message = workshop.academic.institution_name+" has submited workshop attendance!"
+            message = workshop.academic.institution_name+" has submited workshop attendance"
             update_events_log(user_id = user.id, role = 2, category = 0, category_id = workshop.id, status = 6)
             update_events_notification(user_id = user.id, role = 2, category = 0, category_id = workshop.id, status = 6, message = message)
             
@@ -718,7 +720,7 @@ def workshop_attendance(request, wid):
 def workshop_participant(request, wid=None):
     user = request.user
     if not (user.is_authenticated() and (is_resource_person(user) or is_event_manager(user) or is_organiser(user))):
-        raise Http404('You are not allowed to view this page!')
+        raise Http404('You are not allowed to view this page')
     can_download_certificate = 0
     if wid:
         try:
@@ -845,7 +847,7 @@ def test_request(request, role):
     ''' Test request by organiser '''
     user = request.user
     if not user.is_authenticated() or not is_organiser(user):
-        raise Http404('You are not allowed to view this page!')
+        raise Http404('You are not allowed to view this page')
     
     if request.method == 'POST':
         form = TestForm(request.POST, user = request.user)
@@ -865,17 +867,18 @@ def test_request(request, role):
             for dept in form.cleaned_data.get('department'):
                 t.department.add(dept)
             t.save()
-            
-            message = t.academic.institution_name+" has requested for "+t.foss.foss+" test!"
+            messages.success(request, "You will receive a test confirmation mail shortly. Thank you. ")
+            #update logs
+            message = t.academic.institution_name+" has made a test request for "+t.foss.foss+" on "+t.tdate
             update_events_log(user_id = user.id, role = 0, category = 1, category_id = t.id, status = 0)
             update_events_notification(user_id = user.id, role = 0, category = 1, category_id = t.id, status = 0, message = message)
             
-            messages.success(request, "Thank you, we have received your request")
             return HttpResponseRedirect("/events/test/organiser/pending/")
-        
+            
         context = {'form':form, 'role' : role, 'status' : 'request'}
         return render(request, 'events/templates/test/form.html', context)
     else:
+        messages.info(request, "Upgrade the browser with latest version on all the systems before the test. Please note: Confirm Invigilator availability and acceptance to invigilate before adding his name in this form.")
         context = {'role' : role, 'status' : 'request'}
         context.update(csrf(request))
         context['form'] = TestForm(user = request.user)
@@ -885,7 +888,7 @@ def test_list(request, role, status):
     """ Organiser test index page """
     user = request.user
     if not (user.is_authenticated() and ( is_organiser(user) or is_invigilator(user) or is_resource_person(user) or is_event_manager(user))):
-        raise Http404('You are not allowed to view this page!')
+        raise Http404('You are not allowed to view this page')
         
     status_dict = {'pending': 0, 'waitingforinvigilator': 1, 'approved' : 2, 'ongoing': 3, 'completed' : 4, 'rejected' : 5, 'reschedule' : 1}
     if status in status_dict:
@@ -910,6 +913,7 @@ def test_list(request, role, status):
         elif is_invigilator(user) and role == 'invigilator':
             if status == 'ongoing':
                 test = Test.objects.filter((Q(status = 2) | Q(status = 3)), tdate = datetime.date.today(), invigilator_id = user)
+                messages.info(request, "Click on the Attendance link below to see the participant list. To know more Click Here.")
             elif status == 'approved':
                 test = Test.objects.filter(invigilator_id=user, status = status_dict[status], tdate__gt=datetime.date.today())
             else:
@@ -917,7 +921,7 @@ def test_list(request, role, status):
                 test = Test.objects.filter(invigilator_id=user, status = status_dict[status])
         
         if test == None:
-            raise Http404('You are not allowed to view this page!')
+            raise Http404('You are not allowed to view this page')
             
         context['collection'] = test
         context['status'] = status
@@ -927,13 +931,13 @@ def test_list(request, role, status):
         context.update(csrf(request))
         return render(request, 'events/templates/test/index.html', context)
     else:
-        raise Http404('Page not found !')
+        raise Http404('Page not found ')
 
 def test_edit(request, role, rid):
     ''' Workshop edit by organiser or resource person '''
     user = request.user
     if not user.is_authenticated() or not is_organiser:
-        raise Http404('You are not allowed to view this page!')
+        raise Http404('You are not allowed to view this page')
     
     if request.method == 'POST':
         form = TestForm(request.POST, user = request.user)
@@ -942,7 +946,7 @@ def test_edit(request, role, rid):
             dateTime = request.POST['tdate'].split(' ')
             t = Test.objects.get(pk=rid)
             #check if date time chenged or not
-            if t.status == 1 and (str(t.tdate) != dateTime[0] or str(t.ttime)[0:5] != dateTime[1]):
+            if t.status == 1 and (str(t.tdate) == dateTime[0] or str(t.ttime)[0:5] == dateTime[1]):
                 t.status = 4
             #t.organiser_id = user.id
             t.invigilator_id = form.cleaned_data['invigilator']
@@ -952,12 +956,12 @@ def test_edit(request, role, rid):
             t.ttime = dateTime[1]
             t.foss_id = form.cleaned_data['foss']
             t.save()
+            messages.success(request, "Test has been sucessfully updated")
             #events log
             logrole = 0
             if role == 'rp':
                 logrole = 2
             update_events_log(user_id = user.id, role = logrole, category = 1, category_id = t.id, status = 7)
-            messages.success(request, "Thank you, we have received your request")
             return HttpResponseRedirect("/events/test/"+role+"/pending/")
         
         context = {'form':form, }
@@ -977,28 +981,44 @@ def test_approvel(request, role, rid):
     user = request.user
     status = 0
     message = None
+    alert = None
+    logrole = 0
     try:
         t = Test.objects.get(pk=rid)
         if request.GET['status'] == 'accept':
-            message = user.first_name+" "+user.last_name+" has accepted your "+t.foss.foss+" Test!"
             status = 1
+            message = "The Resource Person has approved "+t.foss.foss+" test dated "+t.tdate.strftime("%Y-%m-%d")
+            alert = "Test has been approved"
+            logrole = 2
         if request.GET['status'] == 'invigilatoraccept':
+            message = "The Invigilator "+t.invigilator.first_name +" "+t.invigilator.last_name+" has approved "+t.foss.foss+" test dated "+t.tdate.strftime("%Y-%m-%d")
             status = 2
+            logrole = 1
+            alert = "Test has been approved"
         if request.GET['status'] == 'ongoing':
             status = 3
         if request.GET['status'] == 'completed':
             status = 4
+            logrole = 1
+            alert = "Test has been Completed"
+            message = t.academic.institution_name +" has completed "+t.foss.foss+" test dated "+t.tdate.strftime("%Y-%m-%d")
         if request.GET['status'] == 'rejected':
+            message = "The Resource Person has rejected "+t.foss.foss+" test dated "+t.tdate.strftime("%Y-%m-%d")
             status = 5
+            logrole = 2
+            alert = "Test has been rejected"
         if request.GET['status'] == 'invigilatorreject':
+            message = "The Invigilator "+t.invigilator.first_name +" "+t.invigilator.last_name+" has rejected "+t.foss.foss+" test dated "+t.tdate.strftime("%Y-%m-%d")
             status = 6
-
-    except:
-        raise Http404('Page not found !')
+            logrole = 1
+            alert = "Test has been rejected"
+    except Exception, e:
+        print e
+        raise Http404('Page not found ')
         
-    #if status != 2:
+    #if status = 2:
     #    if not (user.is_authenticated() and w.academic.state in State.objects.filter(resourceperson__user_id=user) and ( is_event_manager(user) or is_resource_person(user))):
-    #        raise PermissionDenied('You are not allowed to view this page!')
+    #        raise PermissionDenied('You are not allowed to view this page')
     t.status = status
     if t.status == 1:
         t.appoved_by_id = user.id
@@ -1010,10 +1030,10 @@ def test_approvel(request, role, rid):
     t.save()
     
     #events log
-    #message = user.first_name+" "+user.last_name+" has accepted your "+t.foss.foss+" Test!"
-    update_events_log(user_id = user.id, role = 2, category = 1, category_id = t.id, status = status)
-    update_events_notification(user_id = user.id, role = 2, category = 1, category_id = t.id, status = status, message = message)
-    messages.success(request, "Selected test has approved!")
+    #message = user.first_name+" "+user.last_name+" has accepted your "+t.foss.foss+" Test"
+    update_events_log(user_id = user.id, role = logrole, category = 1, category_id = t.id, status = status)
+    update_events_notification(user_id = user.id, role = logrole, category = 1, category_id = t.id, status = status, message = message)
+    messages.success(request, alert)
     
     if request.GET['status'] == 'completed':
         return HttpResponseRedirect('/events/test/'+role+'/completed/')
@@ -1027,7 +1047,7 @@ def test_attendance(request, tid):
         test.status = 3
         test.save()
     except:
-        raise Http404('Page not found !')
+        raise Http404('Page not found ')
     print test.foss_id
     if request.method == 'POST':
         users = request.POST
@@ -1040,7 +1060,11 @@ def test_attendance(request, tid):
                         ta = TestAttendance.objects.get(mdluser_id = users[u], test_id = tid)
                         print ta.id, " => Exits"
                     except:
+                        print "*********"
+                        print users[u]
+                        print test.foss_id
                         fossmdlcourse = FossMdlCourses.objects.get(foss_id = test.foss_id)
+                        print fossmdlcourse.mdlcourse_id,'d',fossmdlcourse.mdlquiz_id
                         ta = TestAttendance()
                         ta.test_id = test.id
                         ta.mdluser_id = users[u]
@@ -1060,18 +1084,23 @@ def test_attendance(request, tid):
                         #todo: If mark absent delete enrolement
                         try:
                             mdlenrol = MdlEnrol.objects.get(enrol='self', courseid=2)
-                            print "Role Exits!"
+                            print "Role Exits"
                         except Exception, e:
                             print "MdlEnrol => ", e
                             print "No self enrolement for this course"
                             
                         try:
                             MdlUserEnrolments.objects.get(enrolid = mdlenrol.id, userid = ta.mdluser_id)
-                            print "MdlUserEnrolments Exits!"
+                            print "MdlUserEnrolments Exits"
                             #update dateTime
                         except Exception, e:
                             print "MdlUserEnrolments => ", e
                             MdlUserEnrolments.objects.create(enrolid = mdlenrol.id, userid = ta.mdluser_id, status = 0, timestart = datetime.datetime.now().strftime("%s"), timeend = 0, modifierid = ta.mdluser_id, timecreated = datetime.datetime.now().strftime("%s"), timemodified = datetime.datetime.now().strftime("%s"))
+                        
+            message = test.academic.institution_name+" has submited Test attendance"
+            update_events_log(user_id = user.id, role = 1, category = 1, category_id = test.id, status = 8)
+            update_events_notification(user_id = user.id, role = 1, category = 1, category_id = test.id, status = 8, message = message)
+            messages.success(request, "Thank you for uploading the Attendance. Now make sure that you cross check and verify the details before submiting.") 
         
     participant_ids = list(WorkshopAttendance.objects.filter(workshop_id = test.workshop_id).values_list('mdluser_id'))
     mdlids = []
@@ -1084,6 +1113,7 @@ def test_attendance(request, tid):
     context['collection'] = wp
     context['test'] = test
     context.update(csrf(request))
+    messages.info(request, "Instruct the students to Register and Login on the Online Test link of Spoken Tutorial. Click on the checkbox so that usernames of all the students who are present for the test are marked, then click the submit button. Students can now proceed for the Test.")
     return render(request, 'events/templates/test/attendance.html', context)
 
 @login_required
@@ -1105,7 +1135,7 @@ def test_participant(request, tid=None):
         tp = MdlUser.objects.using('moodle').filter(id__in=ids)
         if user == t.organiser or user == t.invigilator:
             can_download_certificate = 1
-        context = {'collection' : tp, 'wc' : t, 'can_download_certificate':can_download_certificate}
+        context = {'collection' : tp, 'test' : t, 'can_download_certificate':can_download_certificate}
         return render(request, 'events/templates/test/test_participant.html', context)
 
 def test_participant_ceritificate(request, wid, participant_id):
@@ -1230,7 +1260,7 @@ def student_subscribe(request, events, eventid = None, mdluser_id = None):
             except Exception, e:
                 print e
                 pass
-            messages.success(request, "You have sucessfully subscribe to the "+events+"!")
+            messages.success(request, "You have sucessfully subscribe to the "+events+"")
             return HttpResponseRedirect('/moodle/index/#Upcoming-Test')
         elif events == 'workshop':
             try:
@@ -1238,7 +1268,7 @@ def student_subscribe(request, events, eventid = None, mdluser_id = None):
             except Exception, e:
                 print e
                 pass
-            messages.success(request, "You have sucessfully subscribe to the "+events+"!")
+            messages.success(request, "You have sucessfully subscribe to the "+events+"")
             return HttpResponseRedirect('/moodle/index/#Upcoming-Workshop')
         else:
             raise Http404('Page not found')
@@ -1253,7 +1283,7 @@ def organiser_invigilator_index(request, role, status):
     active = status
     user = request.user
     if not (user.is_authenticated() and (is_event_manager(user) or is_resource_person(user))):
-        raise Http404('You are not allowed to view this page!')
+        raise Http404('You are not allowed to view this page')
     if status == 'active':
         status = 1
     elif status == 'inactive':
@@ -1261,7 +1291,7 @@ def organiser_invigilator_index(request, role, status):
     elif status == 'blocked':
         status = 2
     else:
-        raise Http404('Page not found !')
+        raise Http404('Page not found ')
         
     user = User.objects.get(pk=user.id)
     if role == 'organiser':
@@ -1275,7 +1305,7 @@ def organiser_invigilator_index(request, role, status):
         except:
             collection = {}
     else:
-        raise Http404('Page not found !')
+        raise Http404('Page not found ')
             
     context = {}
     context['collection'] = collection

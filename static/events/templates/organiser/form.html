@@ -3,7 +3,9 @@
 {% load static %}
 {% block title %}Organiser Request{% endblock %}
 {% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
-{% block heading %}<i class="fa fa-list-ul"></i> Organiser Request{% endblock %}
+{% block heading %}
+    <i class="fa fa-list-ul"></i> Organiser Request <a href="{{ request.META.HTTP_REFERER }}" class='pull-right go-back'>Go Back</a>
+    {% endblock %}
 {% block content %}
 	<form action="{{ action }}" method="post">{% csrf_token %}
 		{% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}

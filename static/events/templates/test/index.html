@@ -4,6 +4,9 @@
 {% load eventsdata %}
 {% block title %}Upload Tutorial{% endblock %}
 {% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
+{% block heading %}
+        <i class="fa fa-list-ul"></i> Online Test<a href="{% url 'events:events_dashboard' %}" class='pull-right'>Go to Dashboard</a>
+{% endblock %}
 {% block content %}
     <!-- Nav tabs -->
     <ul class="tabs nav nav-tabs">
