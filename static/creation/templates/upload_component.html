@@ -10,6 +10,13 @@
 			{% render_field form.comp class+="form-control" %}
 			{{ form.comp.errors }}
 		</div>
+		{% if title == "video" and tr.video_status > 0 %}
+		    <div class="form-group">
+		        <label for="id_isarchive">What to do with old video?</label>
+			    {% render_field form.isarchive class+="form-control" %}
+			    {{ form.isarchive.errors }}
+		    </div>
+	    {% endif %}
 		{% render_field form.comptype %}
 		<input type="submit" class="btn btn-primary" value="Upload"  tabindex="4" />
 	</form>

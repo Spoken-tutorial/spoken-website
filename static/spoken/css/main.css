@@ -133,6 +133,12 @@ a.twin-button {
 .col-center {
 	text-align: center;
 }
+.col-left {
+	text-align: left;
+}
+.col-right {
+	text-align: right;
+}
 .fancybox-title-float-wrap {
 	display: none;
 }
@@ -146,18 +152,19 @@ a.twin-button {
 
 /* badge */
 .badge {
-    color: #fff;
+    color: black;
     display: inline-block;
     min-width: 10px;
     padding: 3px 7px;
     font-size: 12px;
     font-weight: bold;
     line-height: 1;
-    background-color: #a26dc8;
+    background-color: white;
     text-align: center;
     white-space: nowrap;
     vertical-align: baseline;
     border-radius: 10px;
+    float: right;
 }
 .badge-none {
     color: #fff;
@@ -172,5 +179,48 @@ a.twin-button {
     white-space: nowrap;
     vertical-align: baseline;
     border-radius: 10px;
+    float: right;
 }
 /* badge end */
+
+/* dashboard style */
+.panel-heading-notif {
+    padding: 5px 15px;
+}
+.panel-body-notif {
+    overflow-y: scroll;
+    max-height: 268px;
+}
+.notif {
+    position: relative;
+}
+.notif-del {
+    top: 0px;
+    right: 0px;
+    position: absolute;
+}
+.clear-all {
+    color: #777;
+    display: inline-block;
+    min-width: 10px;
+    padding: 3px 7px;
+    font-size: 12px;
+    font-weight: bold;
+    line-height: 1;
+    background-color: white;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: 10px;
+    float: right;
+}
+/* dashboard style end */
+.no-padding {
+    padding: 0px;
+}
+.no-padding-right {
+    padding-right: 0px;
+}
+.no-padding-left {
+    padding-left: 0px;
+}

@@ -2,19 +2,42 @@
 {% load widget_tweaks %}
 {% load static %}
 {% load creationdata %}
-{% block title %}Domain review index{% endblock %}
-{% block heading %}<i class="fa fa-list-ul"></i> Tutorials waiting for Domain review{% endblock %}
+{% block title %}Tutorials Quality Review Index{% endblock %}
+{% block heading %}<i class="fa fa-list-ul"></i> Tutorials Quality Review Index{% endblock %}
 {% block content %}
-    <ul class="tabs nav nav-tabs">
-        <li class="active"><a href=""><i class="fa fa-list-ul"></i> Tutorials waiting for Domain review</a></li>
-        <li><a href="/creation/domain-review/reviewed/"><i class="fa fa-list-ul"></i> Tutorials reviewed</a></li>
+    <ul class="nav nav-tabs">
+        <li>
+            <a href="/creation/quality-review/">
+                <i class="fa fa-list-ul"></i> Waiting for review
+            </a>
+        </li>
+        <li>
+            <a href="/creation/quality-review/2/">
+                <i class="fa fa-list-ul"></i> Ready for Public review
+            </a>
+        </li>
+        <li>
+            <a href="/creation/quality-review/3/">
+                <i class="fa fa-list-ul"></i> Ready to publish
+            </a>
+        </li>
+        <li>
+            <a href="/creation/public-review/list/">
+                <i class="fa fa-list-ul"></i> Under Public review
+            </a>
+        </li>
+        <li class="active">
+            <a href="">
+                <i class="fa fa-list-ul"></i> Reviewed
+            </a>
+        </li>
     </ul>
     <div class="tab-content">
         <div class="tab-pane active table-responsive">
             <table class="table table-bordered table-hover">
             {% if not tr_recs|length %}
                 <tr>
-                    <td class="col-center">List is empty!</td>
+                    <td colspan="5" class="col-center">List is empty!</td>
                 </tr>
             {% else %}
                 <tr class="active">
@@ -28,9 +51,9 @@
                     <th>Video</th>
                     <th>Code Files</th>
                     <th>Assignment</th>
-                    <th>Keywords</th>
                     <th>Prerequisite</th>
-                    <th class="col-center"><span title="" data-original-title="" class="fa fa-cogs fa-2"></span></th>
+                    <th>Keywords</th>
+                    <th>Status</th>
                 </tr>
                 {% for tr_rec in tr_recs %}
                     <tr>
@@ -56,19 +79,20 @@
                         <td class="col-center" title="{{ tr_rec.common_content.assignment_status | get_review_status_list }}">
                             <span class="{{ tr_rec.common_content.assignment_status | get_review_status_symbol }}"></span>
                         </td>
-                        <td class="col-center" title="{{ tr_rec.common_content.keyword_status | get_review_status_list }}">
-                            <span class="{{ tr_rec.common_content.keyword_status | get_review_status_symbol }}"></span>
-                        </td>
                         <td class="col-center" title="{{ tr_rec.common_content.prerequisite_status | get_review_status_list }}">
                             <span class="{{ tr_rec.common_content.prerequisite_status | get_review_status_symbol }}"></span>
                         </td>
-                        <td class="col-center"><a href="/creation/domain-review/tutorial/{{ tr_rec.id }}" class="review-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Review</a></td>
+                        <td class="col-center" title="{{ tr_rec.common_content.keyword_status | get_review_status_list }}">
+                            <span class="{{ tr_rec.common_content.keyword_status | get_review_status_symbol }}"></span>
+                        </td>
+                        <td class="col-center">
+                            {% if tr_rec.status == 0 %} Pending {% elif tr_rec.status == 1 %} Accepted {% else %} Public Review {% endif %}
+                        </td>
                     </tr>
                 {% endfor %}
             {% endif %}
             </table>
         </div>
-    </div>
 {% endblock %}
 {% block jsblock %}
     <script src="{% static 'spoken/js/chosen.jquery.min.js' %}"></script>

@@ -43,7 +43,7 @@ class FossCategoryAdmin(admin.ModelAdmin):
 class TutorialDetailAdmin(admin.ModelAdmin):
     exclude = ('user',)
     list_display = ('foss', 'tutorial', 'level', 'order', 'updated', 'user')
-    list_filter = ('foss', 'level', 'updated', 'user')
+    list_filter = ('foss', 'level', 'updated')
     def save_model(self, request, obj, form, change):
         obj.user = request.user
         obj.tutorial = obj.tutorial.strip()
@@ -133,8 +133,8 @@ class QualityReviewerRoleAdmin(admin.ModelAdmin):
     actions = ['mark_quality_reviewer_active', 'mark_quality_reviewer_disabled']
 
 admin.site.register(Language, LanguageAdmin)
-admin.site.register(Foss_Category, FossCategoryAdmin)
-admin.site.register(Tutorial_Detail, TutorialDetailAdmin)
-admin.site.register(Contributor_Role, ContributorRoleAdmin)
-admin.site.register(Domain_Reviewer_Role, DomainReviewerRoleAdmin)
-admin.site.register(Quality_Reviewer_Role, QualityReviewerRoleAdmin)
+admin.site.register(FossCategory, FossCategoryAdmin)
+admin.site.register(TutorialDetail, TutorialDetailAdmin)
+admin.site.register(ContributorRole, ContributorRoleAdmin)
+admin.site.register(DomainReviewerRole, DomainReviewerRoleAdmin)
+admin.site.register(QualityReviewerRole, QualityReviewerRoleAdmin)

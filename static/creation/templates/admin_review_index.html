@@ -4,70 +4,76 @@
 {% load creationdata %}
 {% block title %}Admin review{% endblock %}
 {% block cssblock %}
-	<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />
-	<link rel="stylesheet" href="{% static 'spoken/css/jquery.fancybox.css' %}" type="text/css" media="screen" charset="utf-8" />
+    <link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />
+    <link rel="stylesheet" href="{% static 'spoken/css/jquery.fancybox.css' %}" type="text/css" media="screen" charset="utf-8" />
 {% endblock %}
 {% block heading %}<i class="fa fa-list-ul"></i> Tutorials waiting for Admin review{% endblock %}
 {% block content %}
-	<div class="table-responsive">
-		<table class="table table-bordered table-hover">
-			<tr class="active">
-				<th>S.No</th>
-				<th>Foss</th>
-				<th>Tutorial Name</th>
-				<th>Language</th>
-				<th>Date &amp; Time</th>
-				<th class="col-center"><span title="" data-original-title="" class="fa fa-cogs fa-2"></span></th>
-			</tr>
-		{% if tr_recs == None %}
-			<tr>
-				<td colspan="5" class="col-center">List is empty</td>
-			</tr>
-		{% else %}
-			{% for tr_rec in tr_recs %}
-				<tr>
-					<td>{{ forloop.counter }}</td>
-					<td>{{ tr_rec.tutorial_detail.foss.foss }}</td>
-					<td>{{ tr_rec.tutorial_detail.tutorial }}</td>
-					<td>{{ tr_rec.language.name }}</td>
-					<td>{{ tr_rec | get_last_video_upload_time }}</td>
-					{% if tr_rec.video_status == 1 or tr_rec.video_status == 2 %}
-						<td class="col-center"><a href="/creation/review-video/{{ tr_rec.id }}" class="fancybox fancybox.iframe"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Review</a></td>
-					{% endif %}
-				</tr>
-			{% endfor %}
-		{% endif %}
-		</table>
-	</div>
+    <ul class="tabs nav nav-tabs">
+        <li class="active"><a href=""><i class="fa fa-list-ul"></i> Tutorials waiting for Admin review</a></li>
+        <li><a href="/creation/admin-review/reviewed/"><i class="fa fa-list-ul"></i> Tutorials Reviewed</a></li>
+    </ul>
+    <div class="tab-content">
+        <div class="tab-pane active table-responsive">
+            <table class="table table-bordered table-hover">
+            {% if not tr_recs|length %}
+                <tr>
+                    <td colspan="6" class="col-center">List is empty</td>
+                </tr>
+            {% else %}
+                <tr class="active">
+                    <th>S.No</th>
+                    <th>Foss</th>
+                    <th>Tutorial Name</th>
+                    <th>Language</th>
+                    <th>Date &amp; Time</th>
+                    <th class="col-center"><span title="" data-original-title="" class="fa fa-cogs fa-2"></span></th>
+                </tr>
+                {% for tr_rec in tr_recs %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ tr_rec.tutorial_detail.foss.foss }}</td>
+                        <td>{{ tr_rec.tutorial_detail.tutorial }}</td>
+                        <td>{{ tr_rec.language.name }}</td>
+                        <td>{{ tr_rec | get_last_video_upload_time }}</td>
+                        {% if tr_rec.video_status == 1 or tr_rec.video_status == 2 %}
+                            <td class="col-center"><a href="/creation/admin-review/video/{{ tr_rec.id }}" class="fancybox fancybox.iframe"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Review</a></td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+            {% endif %}
+            </table>
+        </div>
+    </div>
 {% endblock %}
 {% block jsblock %}
-	<script src="{% static 'spoken/js/chosen.jquery.min.js' %}"></script>
-	<script src="{% static 'spoken/js/jquery.fancybox.pack.js' %}"></script>
-	<script src="{% static 'spoken/js/jquery.mousewheel-3.0.6.pack.js' %}"></script>
-	<script type="text/javascript">
-		
-		$(document).ready(function(){
-			$(".fancybox").fancybox({
-				maxWidth	: 600,
-				maxHeight	: 600,
-				fitToView	: true,
-				autoSize	: false,
-				closeClick	: false,
-				openEffect	: "none",
-				closeEffect	: "none",
-				modal		: true,
-				afterClose  : function() {
-								 return parent.location.reload(true);
-           					  }
-			});
-			$(".fancybox").hover(
-				function () {
-					$(this).children(0).addClass("fa-spin");
-				},
-				function () {
-					$(this).children(0).removeClass("fa-spin");
-				}
-			);
-		});
-	</script>
+    <script src="{% static 'spoken/js/chosen.jquery.min.js' %}"></script>
+    <script src="{% static 'spoken/js/jquery.fancybox.pack.js' %}"></script>
+    <script src="{% static 'spoken/js/jquery.mousewheel-3.0.6.pack.js' %}"></script>
+    <script type="text/javascript">
+        
+        $(document).ready(function(){
+            $(".fancybox").fancybox({
+                maxWidth    : 600,
+                maxHeight    : 600,
+                fitToView    : true,
+                autoSize    : false,
+                closeClick    : false,
+                openEffect    : "none",
+                closeEffect    : "none",
+                modal        : true,
+                afterClose  : function() {
+                                 return parent.location.reload(true);
+                                 }
+            });
+            $(".fancybox").hover(
+                function () {
+                    $(this).children(0).addClass("fa-spin");
+                },
+                function () {
+                    $(this).children(0).removeClass("fa-spin");
+                }
+            );
+        });
+    </script>
 {% endblock %}

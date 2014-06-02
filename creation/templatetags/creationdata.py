@@ -1,6 +1,7 @@
 from django import template
 from django.contrib.auth.models import User
 from creation.models import *
+from creation.views import is_contributor, is_videoreviewer, is_domainreviewer, is_qualityreviewer
 
 register = template.Library()
 
@@ -23,7 +24,7 @@ def get_username(key):
 def get_last_video_upload_time(key):
 	rec = None
 	try:
-		rec = Contributor_Log.objects.filter(tutorial_resource_id = key.id).order_by('-created')[0]
+		rec = ContributorLog.objects.filter(tutorial_resource_id = key.id).order_by('-created')[0]
 		tmpdt = key.updated
 		for tmp in rec:
 			tmpdt = rec.created
@@ -31,6 +32,10 @@ def get_last_video_upload_time(key):
 	except:
 		return key.updated
 
+register.filter('get_contributor', is_contributor)
+register.filter('get_videoreviewer', is_videoreviewer)
+register.filter('get_domainreviewer', is_domainreviewer)
+register.filter('get_qualityreviewer', is_qualityreviewer)
 register.filter('get_last_video_upload_time', get_last_video_upload_time)
 register.filter('get_review_status_list', get_review_status_list)
 register.filter('get_review_status_symbol', get_review_status_symbol)

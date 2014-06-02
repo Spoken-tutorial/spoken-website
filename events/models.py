@@ -4,7 +4,7 @@ from django.db import models
 from django.contrib.auth.models import User
 
 #creation app models
-from creation.models import Foss_Category, Language
+from creation.models import FossCategory, Language
 from mdldjango.models import MdlUser
 
 
@@ -157,7 +157,7 @@ class Workshop(models.Model):
     academic = models.ForeignKey(AcademicCenter)
     department = models.ManyToManyField(Department)
     language = models.ForeignKey(Language)
-    foss = models.ForeignKey(Foss_Category)
+    foss = models.ForeignKey(FossCategory)
     workshop_code = models.CharField(max_length=100, null=True)
     wdate = models.DateField()
     wtime = models.TimeField()
@@ -177,7 +177,7 @@ class Test(models.Model):
     academic = models.ForeignKey(AcademicCenter)
     department = models.ManyToManyField(Department)
     workshop = models.ForeignKey(Workshop)
-    foss = models.ForeignKey(Foss_Category)
+    foss = models.ForeignKey(FossCategory)
     test_code = models.CharField(max_length=100)
     tdate = models.DateField()
     ttime = models.TimeField()

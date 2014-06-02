@@ -1,0 +1,65 @@
+{% extends 'spoken/templates/popup-base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% if component == "video" %}
+    {% block cssblock %}
+        {% if component == "video" %}
+            {% block jsblock %}
+                <script src="{% static 'spoken/js/video.js' %}"></script>
+            {% endblock %}
+        {% endif %}
+        <link href="{% static 'spoken/css/video-js.min.css' %}" rel="stylesheet" type="text/css">
+        <style type="text/css">
+            .video-js {
+                padding-top: 56.25%
+            }
+            .vjs-fullscreen {
+                padding-top: 0px;
+            }
+            .video-container {
+                width: 100%;
+                max-width: 1024px;
+                margin: 0 auto;
+            }
+        </style>
+    {% endblock %}
+{% endif %}
+{% block heading %}
+    {% if component == "video" %}
+        {{ tr.tutorial_detail.tutorial }}
+    {% elif component == "keyword" %}
+        Keywords
+    {% else %}
+        {{ component|title }}
+    {% endif %}
+{% endblock %}
+{% block content %}
+    {% if component == "video" %}
+        <table class="table table-bordered table-hover">
+            <tr>
+                <th>Codec:</th><td>{{video_info.codec}}</td>
+                <th>Profile:</th><td>{{video_info.profile}}</td>
+            </tr>
+            <tr>
+                <th>Width:</th><td>{{video_info.width}}</td>
+                <th>Height:</th><td>{{video_info.height}}</td>
+            </tr>
+            <tr>
+                <th>Duration:</th><td>{{video_info.duration}}</td>
+                <th>Size:</th><td>{{video_info.size}}</td>
+            </tr>
+        </table>
+        <div class="video-container">
+            <video id="st_video" class="video-js vjs-default-skin" controls preload="auto" width="auto" height="auto" data-setup="{}">
+                <source src="{{ media_url }}videos/{{ tr.tutorial_detail.foss_id }}/{{ tr.tutorial_detail_id }}/{{ tr.video }}" type="video/ogg" />
+            </video>
+        </div>
+    {% else %}
+        <form role="form" method="post" enctype="multipart/form-data" action="">
+            {% csrf_token %}
+            <div class="form-group">
+                <pre>{{ component_data }}</pre>
+            </div>
+        </form>
+    {% endif %}
+{% endblock %}

@@ -19,7 +19,7 @@
 			<div id="header-wrapper">
 				<div id="header-inner">
 					<nav class="navbar navbar-default" role="navigation">
-						<div class="container col-lg-12 col-md-12 col-sm-12">
+						<div class="container">
 							<!-- Brand and toggle get grouped for better mobile display -->
 							<div class="navbar-header">
 								<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
@@ -57,7 +57,7 @@
 							</div> <!-- /.navbar-collapse -->
 						</div> <!-- /.container -->
 					</nav><!-- / .navbar -->
-					<div class="container col-lg-12 col-md-12 col-sm-12">
+					<div class="container">
 						{% block customheader%}{% endblock %}
 						{% get_cms_header %}
 					</div>
@@ -65,7 +65,7 @@
 			</div><!-- /#header-wrapper -->
 
 			<div id="content-wrapper">
-				<div id="content-inner">
+				<div id="content-inner" class="container">
 					{% get_cms_sidebar %}
 						<h4 class="page-title">{% block heading %}{% endblock %}</h4>
 						{% block alert %}
