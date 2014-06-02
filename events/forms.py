@@ -171,7 +171,7 @@ class WorkshopForm(forms.Form):
         #choices data 
         self.fields['department'].choices = Department.objects.exclude(name='uncategorized').values_list('id', 'name')
 
-        foss_list = list(Foss_Category.objects.all().values_list('id', 'foss'))
+        foss_list = list(FossCategory.objects.all().values_list('id', 'foss'))
         foss_list.insert(0, ('', '-- None --'))
         lang_list = list(Language.objects.all().values_list('id', 'name'))
         lang_list.insert(0, ('', '-- None --'))

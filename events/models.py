@@ -239,7 +239,7 @@ class WorkshopAttendance(models.Model):
         #unique_together = (("workshop", "mdluser"))
 
 class FossMdlCourses(models.Model):
-    foss = models.ForeignKey(Foss_Category)
+    foss = models.ForeignKey(FossCategory)
     mdlcourse_id = models.PositiveIntegerField()
     mdlquiz_id = models.PositiveIntegerField()
 
@@ -272,7 +272,7 @@ class Training(models.Model):
     academic = models.ForeignKey(AcademicCenter)
     department = models.ManyToManyField(Department)
     language = models.ForeignKey(Language)
-    foss = models.ForeignKey(Foss_Category)
+    foss = models.ForeignKey(FossCategory)
     training_code = models.CharField(max_length=100, null=True)
     trdate = models.DateField()
     trtime = models.TimeField()
