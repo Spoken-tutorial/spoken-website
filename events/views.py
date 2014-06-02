@@ -1314,6 +1314,258 @@ def organiser_invigilator_index(request, role, status):
     context.update(csrf(request))
     return render(request, 'events/templates/organiser_invigilator_index.html', context)
 
+@login_required
+def training_request(request, role):
+    ''' training request by organiser '''
+    user = request.user
+    if not user.is_authenticated() or not is_organiser(user):
+        raise Http404('You are not allowed to view this page')
+    
+    if request.method == 'POST':
+        form = WorkshopForm(request.POST, user = request.user)
+        if form.is_valid():
+            dateTime = request.POST['wdate'].split(' ')
+            w = Training()
+            w.organiser_id = user.id
+            #w.academic_id = request.POST['academic']
+            w.academic = user.organiser.academic
+            w.language_id = request.POST['language']
+            w.foss_id = request.POST['foss']
+            w.trdate = dateTime[0]
+            w.trtime = dateTime[1]
+            w.skype = request.POST['skype']
+            w.save()
+            #M2M saving department
+            for dept in form.cleaned_data.get('department'):
+                w.department.add(dept)
+            w.save()
+            messages.success(request, "You will receive a Training confirmation mail shortly. Thank you. ")
+            #update logs
+            message = w.academic.institution_name+" has made a Training request for "+w.foss.foss+" on "+w.trdate
+            update_events_log(user_id = user.id, role = 0, category = 2, category_id = w.id, status = 0)
+            update_events_notification(user_id = user.id, role = 2, category = 2, category_id = w.id, status = 0, message = message)
+            
+            return HttpResponseRedirect("/events/training/organiser/pending/")
+        messages.error(request, "Please fill the following details ")
+        context = {'form' : form, 'role' : role, 'status' : 'request'}
+        return render(request, 'events/templates/workshop/form.html', context)
+    else:
+        messages.info(request, "Please check if your mechine is ready. For the Machine Readiness document Click Here. Please make sure that you update the 'Attendance Sheet' after the Training. For the instruction Click Here ")
+        context = {'role' : role, 'status' : 'request'}
+        context.update(csrf(request))
+        context['form'] = WorkshopForm(user = request.user)
+        return render(request, 'events/templates/training/form.html', context)
+
+def training_edit(request, role, rid):
+    ''' Training edit by organiser or resource person '''
+    user = request.user
+    if not user.is_authenticated() or not is_organiser:
+        raise Http404('You are not allowed to view this page')
+    
+    if request.method == 'POST':
+        form = WorkshopForm(request.POST, user = request.user)
+        if form.is_valid():
+            print form.cleaned_data
+            dateTime = request.POST['wdate'].split(' ')
+            w = Training.objects.get(pk=rid)
+            
+            #check if date time chenged or not
+            if w.status == 1 and (str(w.trdate) == dateTime[0] or str(w.trtime)[0:5] == dateTime[1]):
+                w.status = 4
+            w.language_id = request.POST['language']
+            w.foss_id = request.POST['foss']
+            w.trdate = dateTime[0]
+            w.trtime = dateTime[1]
+            w.skype = request.POST['skype']
+            w.save()
+            messages.success(request, "Training has been sucessfully updated")
+            #update logs
+            logrole = 0
+            if role == 'rp':
+                logrole = 2
+            update_events_log(user_id = user.id, role = logrole, category = 2, category_id = w.id, status = 4)
+            return HttpResponseRedirect("/events/training/"+role+"/pending/")
+        
+        context = {'form':form, }
+        return render(request, 'events/templates/training/form.html', context)
+    else:
+        context = {}
+        record = Training.objects.get(id = rid)
+        context.update(csrf(request))
+        context['form'] = WorkshopForm(instance = record)
+        context['instance'] = record
+        return render(request, 'events/templates/training/form.html', context)
+
+def training_list(request, role, status):
+    """ Organiser index page """
+    user = request.user
+    if not (user.is_authenticated() and ( is_organiser(user) or is_resource_person(user) or is_event_manager(user))):
+        raise Http404('You are not allowed to view this page')
+        
+    status_dict = {'pending': 0, 'approved' : 1, 'completed' : 2, 'rejected' : 3, 'reschedule' : 1, 'ongoing': 1}
+    if status in status_dict:
+        context = {}
+        workshops = None
+        if is_event_manager(user) and role == 'em':
+            workshops = Training.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status])
+        elif is_resource_person(user) and role == 'rp':
+            if status == 'approved':
+                workshops = Training.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status], trdate__gt=datetime.date.today())
+            elif status =='ongoing':
+                workshops = Training.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = 1, trdate=datetime.date.today())
+            else:
+                workshops = Training.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status])
+        elif is_organiser(user) and role == 'organiser':
+            if status == 'approved':
+                workshops = Training.objects.filter(organiser_id=user, status = status_dict[status], trdate__gt=datetime.date.today())
+            elif status == 'ongoing' :
+                workshops = Training.objects.filter(organiser_id=user, status = status_dict[status], trdate=datetime.date.today())
+            else:
+                workshops = Training.objects.filter(organiser_id=user, status = status_dict[status])
+        
+        if workshops == None:
+            raise Http404('You are not allowed to view this page')
+
+        paginator = Paginator(workshops, 30)
+        page = request.GET.get('page')
+        try:
+            workshops =  paginator.page(page)
+        except PageNotAnInteger:
+            workshops =  paginator.page(1)
+        except EmptyPage:
+            workshops = paginator.page(paginator.num_pages)
+        
+        context['collection'] = workshops
+        context['status'] = status
+        context['role'] = role
+        context.update(csrf(request))
+        return render(request, 'events/templates/training/index.html', context)
+    else:
+        raise Http404('Page not found ')
+
+@login_required
+@csrf_exempt
+def training_approvel(request, role, rid):
+    """ Resource person: confirm or reject training """
+    user = request.user
+    if not (user.is_authenticated() and (is_resource_person(user) or (is_organiser(user) and request.GET['status'] == 'completed'))):
+        raise Http404('You are not allowed to view this page')
+    try:
+        w = Training.objects.get(pk=rid)
+        if request.GET['status'] == 'accept':
+            status = 1
+        if request.GET['status'] == 'reject':
+            status = 3
+        if request.GET['status'] == 'completed':
+            status = 2
+    except Exception, e:
+        print e
+        raise Http404('Page not found ')
+    if status != 2:
+        if not (user.is_authenticated() and w.academic.state in State.objects.filter(resourceperson__user_id=user) and ( is_event_manager(user) or is_resource_person(user))):
+            raise PermissionDenied('You are not allowed to view this page')
+    
+    w.status = status
+    w.appoved_by_id = user.id
+    #todo: add workshop code
+    if w.status == 1:
+        w.workshop_code = "TR-"+str(w.id)
+    tmp = 0
+    if request.GET['status'] == 'completed':
+        # calculate the participant list
+        wpcount = WorkshopAttendance.objects.filter(workshop_id = rid, status = 1).count()
+        w.participant_counts = wpcount
+        tmp = 1
+    w.save()
+    message = w.academic.institution_name +" has completed "+w.foss.foss+" training dated "+w.trdate.strftime("%Y-%m-%d")
+    if request.GET['status'] == 'accept':
+        message = "Resource Person has approved your "+w.foss.foss+" training request "
+    if request.GET['status'] == 'reject':
+        message = "Resource Person has rejected your "+w.foss.foss+" training request "
+    #update logs
+    update_events_log(user_id = user.id, role = 2, category = 2, category_id = w.id, status = status)
+    update_events_notification(user_id = user.id, role = 2, category = 2, category_id = w.id, status = status, message = message)
+    if tmp:
+        messages.success(request, "Training has been completed. For downloading the learner's certificate click on View Participants ")
+        return HttpResponseRedirect('/events/training/'+role+'/completed/')
+    else:
+        messages.success(request, "Training has been accepted ")
+        return HttpResponseRedirect('/events/training/'+role+'/approved/')
+
+@login_required
+def training_participant(request, wid=None):
+    user = request.user
+    if not (user.is_authenticated() and (is_resource_person(user) or is_event_manager(user) or is_organiser(user))):
+        raise Http404('You are not allowed to view this page')
+    can_download_certificate = 0
+    if wid:
+        try:
+            wc = Training.objects.get(id=wid)
+        except:
+            raise Http404('Page not found')
+            
+        workshop_mdlusers = TrainingAttendance.objects.using('default').filter(training_id=wid).values_list('mdluser_id')
+        ids = []
+        for wp in workshop_mdlusers:
+            ids.append(wp[0])
+            
+        wp = MdlUser.objects.using('moodle').filter(id__in=ids)
+        if user == wc.organiser:
+            can_download_certificate = 1
+        context = {'collection' : wp, 'wc' : wc, 'can_download_certificate':can_download_certificate, 'pcount': wp.count()}
+        return render(request, 'events/templates/training/workshop_participant.html', context)
+
+@login_required
+def training_attendance(request, wid):
+    user = request.user
+    if not (user.is_authenticated() and (is_organiser(user))):
+        raise Http404('You are not allowed to view this page')
+    try:
+        workshop = Training.objects.get(pk = wid) 
+    except:
+        raise Http404('Page not found ')
+    #todo check request user and workshop organiser same or not
+    if request.method == 'POST':
+        users = request.POST
+        if users:
+            #set all record to 0 if status = 1
+            TrainingAttendance.objects.filter(training_id = wid, status = 1).update(status = 0)
+            for u in users:
+                if u != 'csrfmiddlewaretoken':
+                    try:
+                        wa = TrainingAttendance.objects.get(mdluser_id = users[u], training_id = wid)
+                        print wa.id, " => Exits"
+                    except:
+                        wa = TrainingAttendance()
+                        wa.training_id = wid
+                        wa.mdluser_id = users[u]
+                        wa.status = 0
+                        wa.save()
+                        print wa.id, " => Inserted"
+                    if wa:
+                        #todo: if the status = 2 check in moodle if he completed the test set status = 3 (completed)
+                        w = TrainingAttendance.objects.get(mdluser_id = wa.mdluser_id, training_id = wid)
+                        w.status = 1
+                        w.save()
+            message = workshop.academic.institution_name+" has submited workshop attendance"
+            update_events_log(user_id = user.id, role = 2, category = 2, category_id = workshop.id, status = 6)
+            update_events_notification(user_id = user.id, role = 2, category = 2, category_id = workshop.id, status = 6, message = message)
+            
+            messages.success(request, "Thank you for uploading the Attendance. Now make sure that you cross check and verify the details before submiting.") 
+    participant_ids = list(TrainingAttendance.objects.filter(training_id = wid).values_list('mdluser_id'))
+    mdlids = []
+    wp = {}
+    for k in participant_ids:
+        mdlids.append(k[0])
+    if mdlids:
+        wp = MdlUser.objects.filter(id__in = mdlids)
+    context = {}
+    context['collection'] = wp
+    context['workshop'] = workshop
+    context.update(csrf(request))
+    return render(request, 'events/templates/training/attendance.html', context)
+
+        
 def update_events_log(user_id, role, category, category_id, status):
     if category == 0:
         try:

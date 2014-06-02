@@ -97,20 +97,35 @@ def index(request):
     return render(request, 'mdl/templates/mdluser_index.html', context)
     
 @login_required
-def offline_details(request, wid):
+def offline_details(request, wid, category):
+    wid = int(wid)
+    category = int(category)
+    print category
     user = request.user
     form = OfflineDataForm()
     try:
-        Workshop.objects.get(pk=wid, status = 1)
+        if category == 1:
+            Workshop.objects.get(pk=wid, status = 1)
+        elif category == 2:
+            Training.objects.get(pk=wid, status = 1)
+        else:
+            print 'yes'
+            raise PermissionDenied('You are not allowed to view this page!')
     except:
         raise PermissionDenied('You are not allowed to view this page!')
+        
     if request.method == 'POST':
         form = OfflineDataForm(request.POST, request.FILES)
         if form.is_valid():
             xmlDocData = form.cleaned_data['xml_file'].read()
             xmlDocTree = etree.XML(xmlDocData)
             try:
-                w = Workshop.objects.get(id = wid)
+                if category == 1:
+                    w = Workshop.objects.get(id = wid)
+                elif category == 2:
+                    w = Training.objects.get(id = wid)
+                else:
+                    raise PermissionDenied('You are not allowed to view this page!')
             except:
                 print "Error"
                 
@@ -141,26 +156,47 @@ def offline_details(request, wid):
                     mdluser.mnethostid = 1
                     mdluser.save()
                     mdluser = MdlUser.objects.filter(email = email, firstname= firstname, username=firstname+' '+lastname, password=password).first()
-                    
-                try:
-                    wa = WorkshopAttendance.objects.get(workshop_id = wid, mdluser_id = mdluser.id)
-                    if wa.status == 0:
+                if category == 1:
+                    try:
+                        wa = WorkshopAttendance.objects.get(workshop_id = wid, mdluser_id = mdluser.id)
+                        if wa.status == 0:
+                            wa.status = 1
+                            wa.save()
+                        print "Attandance already exits!"
+                    except Exception, e:
+                        print e
+                        wa = WorkshopAttendance()
+                        wa.workshop_id = wid
                         wa.status = 1
+                        wa.mdluser_id = mdluser.id
                         wa.save()
-                    print "Attandance already exits!"
-                except Exception, e:
-                    print e
-                    wa = WorkshopAttendance()
-                    wa.workshop_id = wid
-                    wa.status = 1
-                    wa.mdluser_id = mdluser.id
-                    wa.save()
+                else:
+                    try:
+                        wa = TrainingAttendance.objects.get(training_id = wid, mdluser_id = mdluser.id)
+                        if wa.status == 0:
+                            wa.status = 1
+                            wa.save()
+                        print "Attandance already exits!"
+                    except Exception, e:
+                        print e
+                        wa = TrainingAttendance()
+                        wa.training_id = wid
+                        wa.status = 1
+                        wa.mdluser_id = mdluser.id
+                        wa.save()
             #update logs
-            message = w.academic.institution_name+" has submited Offline workshop attendance."
-            update_events_log(user_id = user.id, role = 2, category = 0, category_id = w.id, status = 5)
-            update_events_notification(user_id = user.id, role = 2, category = 0, category_id = w.id, status = 5, message = message)
-            messages.success(request, "Thank you for uploading the Attendance. Now make sure that you cross check and verify the details before submiting.")
-            return HttpResponseRedirect('/events/workshop/'+str(wid)+'/attendance/')
+            if category == 1:
+                message = w.academic.institution_name+" has submited Offline workshop attendance."
+                update_events_log(user_id = user.id, role = 2, category = 0, category_id = w.id, status = 5)
+                update_events_notification(user_id = user.id, role = 2, category = 0, category_id = w.id, status = 5, message = message)
+                messages.success(request, "Thank you for uploading the Attendance. Now make sure that you cross check and verify the details before submiting.")
+                return HttpResponseRedirect('/events/workshop/'+str(wid)+'/attendance/')
+            else:
+                message = w.academic.institution_name+" has submited Offline training attendance."
+                update_events_log(user_id = user.id, role = 2, category = 2, category_id = w.id, status = 5)
+                update_events_notification(user_id = user.id, role = 2, category = 2, category_id = w.id, status = 5, message = message)
+                messages.success(request, "Thank you for uploading the Attendance. Now make sure that you cross check and verify the details before submiting.")
+                return HttpResponseRedirect('/events/training/'+str(wid)+'/attendance/')
         messages.error(request, "Please Upload xml file !") 
     context = {
         'form': form,

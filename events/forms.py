@@ -195,7 +195,11 @@ class WorkshopForm(forms.Form):
             #self.fields['academic'].choices = AcademicCenter.objects.filter(district =instance.academic.district).values_list('id', 'institution_name')
             #self.fields['academic'].initial = instance.academic_id
             self.fields['department'].initial = instance.department.all().values_list('id', flat=True)
-            self.fields['wdate'].initial = str(instance.wdate) + " " + str(instance.wtime)[0:5]
+            try:
+                self.fields['wdate'].initial = str(instance.wdate) + " " + str(instance.wtime)[0:5]
+            except Exception, e:
+                print e
+                self.fields['wdate'].initial = str(instance.trdate) + " " + str(instance.trtime)[0:5]
             self.fields['foss'].initial = instance.foss_id
             self.fields['language'].initial = instance.language_id
             self.fields['skype'].initial = instance.status

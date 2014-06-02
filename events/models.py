@@ -261,8 +261,48 @@ class TestLog(models.Model):
 class EventsNotification(models.Model):
     user = models.ForeignKey(User)
     role = models.PositiveSmallIntegerField(default=0) #{0:'organiser', 1:'invigilator', 2:'ResourcePerson', 3: 'Event Manager'}
-    category = models.PositiveSmallIntegerField(default=0) #{'workshop', 'test'}
+    category = models.PositiveSmallIntegerField(default=0) #{'workshop', 'test', 'training'}
     categoryid = models.PositiveIntegerField(default=0)
     status = models.PositiveSmallIntegerField(default=0) #{0:'new', 1:'update', 2:'approved', 3:'attendance', 4: 'completed', 5:'rejected'}
     message = models.CharField(max_length = 255)
+    created = models.DateTimeField(auto_now_add = True)
+
+class Training(models.Model):
+    organiser = models.ForeignKey(User)
+    appoved_by = models.ForeignKey(User, related_name = 'training_approved_by', null=True)
+    academic = models.ForeignKey(AcademicCenter)
+    department = models.ManyToManyField(Department)
+    language = models.ForeignKey(Language)
+    foss = models.ForeignKey(Foss_Category)
+    training_code = models.CharField(max_length=100, null=True)
+    trdate = models.DateField()
+    trtime = models.TimeField()
+    skype = models.BooleanField()
+    status = models.PositiveSmallIntegerField(default=0)
+    participant_counts = models.PositiveIntegerField(default=0)
+    created = models.DateTimeField(auto_now_add = True)
+    updated = models.DateTimeField(auto_now = True)
+
+    class Meta:
+        unique_together = (("organiser", "academic", "foss", "trdate", "trtime"),)
+
+class TrainingAttendance(models.Model):
+    training = models.ForeignKey(Training)
+    mdluser_id = models.PositiveIntegerField()
+    #mdluser = models.ForeignKey(MdlUser)
+    password = models.CharField(max_length = 100, null=True)
+    count = models.PositiveSmallIntegerField(default=0)
+    status = models.PositiveSmallIntegerField(default=0)
+    created = models.DateTimeField(auto_now_add = True)
+    updated = models.DateTimeField(auto_now = True)
+    class Meta:
+        verbose_name = "Training Attendance"
+        unique_together = (("training", "mdluser_id"))
+        #unique_together = (("workshop", "mdluser"))
+        
+class TrainingLog(models.Model):
+    user = models.ForeignKey(User)
+    training = models.ForeignKey(Training)
+    role = models.PositiveSmallIntegerField() #{0:'organiser', 1:'ResourcePerson', 2: 'Event Manager'}
+    status = models.PositiveSmallIntegerField() #{0:'new', 1:'approved', 2:'completed', 3: 'rejected', 4:'update',  5:'Offline-Attendance submited', 6:'Marked Attendance'}
     created = models.DateTimeField(auto_now_add = True)

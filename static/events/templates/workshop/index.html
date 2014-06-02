@@ -78,8 +78,8 @@
                                     <a href="{% url 'events:workshop_participant' record.id %}">Participants</a>
                                 {% endif %}
                                 {% if status == 'ongoing' %}
-                                    {% if record.id|can_upload_workshop_data %}
-                                        <a href="{% url 'mdldjango:mdl_offline_workshop_details' record.id %}">Upload data</a> |
+                                    {% if record.id|can_upload_workshop_data:'workshop' %}
+                                        <a href="{% url 'mdldjango:mdl_offline_workshop_details' record.id 1 %}">Upload data</a> |
                                     {% endif %}
                                     <a href="{% url 'events:workshop_attendance' record.id %}">Attendance</a> |
                                     <a href="{% url 'events:workshop_participant' record.id %}">Participants</a>

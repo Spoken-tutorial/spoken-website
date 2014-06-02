@@ -42,6 +42,14 @@ urlpatterns = patterns('',
     url(r'^test/(?P<role>\w+)/(?P<status>\w+)/$', views.test_list, name='test_list'),
     url(r'^test/(?P<role>\w+)/(?P<rid>\d+)/edit/$', views.test_edit, name='test_edit'),
 
+    #training
+    url(r'^training/(\d+)/participant/$', views.training_participant, name='training_participant'),
+    url(r'^training/(\d+)/attendance/$', views.training_attendance, name='training_attendance'),
+    url(r'^training/(?P<role>\w+)/request/$', views.training_request, name='training_request'),
+    url(r'^training/(?P<role>\w+)/(?P<rid>\d+)/approvel/$', views.training_approvel, name='training_approvel'),
+    url(r'^training/(?P<role>\w+)/(?P<status>\w+)/$', views.training_list, name='training_list'),
+    url(r'^training/(?P<role>\w+)/(?P<rid>\d+)/edit/$', views.training_edit, name='training_edit'),
+    
     #Ajax 
     url(r'ajax-ac-state/$', views.ajax_ac_state, name='ajax_ac_state'),
     url(r'ajax-ac-location/$', views.ajax_ac_location, name='ajax_ac_location'),
