@@ -28,7 +28,7 @@ from creation.models import *
 
 def is_contributor(user):
     """Check if the user is having contributor rights"""
-    if user.groups.filter(Q(name='Contributor')|Q(name='External-Contributor')).count() == 1:
+    if user.groups.filter(Q(name='Contributor')|Q(name='External-Contributor')).count():
         return True
     return False
 
