@@ -195,54 +195,61 @@ class WorkshopForm(forms.Form):
             #self.fields['academic'].choices = AcademicCenter.objects.filter(district =instance.academic.district).values_list('id', 'institution_name')
             #self.fields['academic'].initial = instance.academic_id
             self.fields['department'].initial = instance.department.all().values_list('id', flat=True)
-            self.fields['wdate'].initial = str(instance.wdate) + " " + str(instance.wtime)[0:5]
+            try:
+                self.fields['wdate'].initial = str(instance.wdate) + " " + str(instance.wtime)[0:5]
+            except Exception, e:
+                print e
+                self.fields['wdate'].initial = str(instance.trdate) + " " + str(instance.trtime)[0:5]
             self.fields['foss'].initial = instance.foss_id
             self.fields['language'].initial = instance.language_id
             self.fields['skype'].initial = instance.status
 
 class WorkshopPermissionForm(forms.Form):
-    permission_choices = list(PermissionType.objects.all().values_list('id', 'name'))
-    permission_choices.insert(0, ('', '-- None --'))
-    permissiontype = forms.ChoiceField(choices = permission_choices, widget=forms.Select(attrs = {}), required = True)
-    
-    user_list = list(User.objects.filter(groups__name='Workshop Permission').values_list('id', 'username'))
-    user_list.insert(0, ('', '-- None --'))
-    user = forms.ChoiceField(choices = user_list, widget=forms.Select(attrs = {}), required = True)
-    
-    state_list = list(State.objects.exclude(name='uncategorized').values_list('id', 'name'))
-    state_list.insert(0, ('', '-- None --'))
-    state = forms.ChoiceField(choices = state_list, widget=forms.Select(attrs = {}), required = True)
-    
-    district = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = False, error_messages = {'required':'district field is required.'})
-    
-    university =  forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = False)
-    
-    institution_type = list(InstituteType.objects.order_by('name').values_list('id', 'name'))
-    institution_type.insert(0, ('', '-- None --'))
-    institutiontype = forms.ChoiceField(choices = institution_type, widget=forms.Select(attrs = {}), required = False)
-    
-    institute = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = False)
+    try:
+        permission_choices = list(PermissionType.objects.all().values_list('id', 'name'))
+        permission_choices.insert(0, ('', '-- None --'))
+        permissiontype = forms.ChoiceField(choices = permission_choices, widget=forms.Select(attrs = {}), required = True)
+        
+        user_list = list(User.objects.filter(groups__name='Workshop Permission').values_list('id', 'username'))
+        user_list.insert(0, ('', '-- None --'))
+        user = forms.ChoiceField(choices = user_list, widget=forms.Select(attrs = {}), required = True)
+        
+        state_list = list(State.objects.exclude(name='uncategorized').values_list('id', 'name'))
+        state_list.insert(0, ('', '-- None --'))
+        state = forms.ChoiceField(choices = state_list, widget=forms.Select(attrs = {}), required = True)
+        
+        district = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = False, error_messages = {'required':'district field is required.'})
+        
+        university =  forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = False)
+        
+        institution_type = list(InstituteType.objects.order_by('name').values_list('id', 'name'))
+        institution_type.insert(0, ('', '-- None --'))
+        institutiontype = forms.ChoiceField(choices = institution_type, widget=forms.Select(attrs = {}), required = False)
+        
+        institute = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = False)
 
-    def __init__(self, *args, **kwargs):
-        super(WorkshopPermissionForm, self).__init__(*args, **kwargs)
-        if args:
-            if 'state' in args[0] and 'district' in args[0]:
-                if args[0]['state'] and args[0]['state'] != '' and args[0]['state'] != 'None':
-                    choices = list(District.objects.filter(state_id = args[0]['state']).values_list('id', 'name'))
-                    choices.insert(0, ('', '-- None --'))
-                    self.fields['district'].choices = choices
-                    
-            if 'state' in args[0] and 'university' in args[0]:
-                if args[0]['state'] and args[0]['state'] != '' and args[0]['state'] != 'None':
-                    choices = list(University.objects.filter(state_id = args[0]['state']).values_list('id', 'name'))
-                    choices.insert(0, ('', '-- None --'))
-                    self.fields['university'].choices = choices
-                    
-            if 'district' in args[0] and 'institute' in args[0]:
-                if args[0]['district'] and args[0]['district'] != '' and args[0]['district'] != 'None':
-                    choices = list(AcademicCenter.objects.filter(district_id = args[0]['district']).values_list('id', 'institution_name'))
-                    choices.insert(0, ('', '-- None --'))
-                    self.fields['institute'].choices = choices
+        def __init__(self, *args, **kwargs):
+            super(WorkshopPermissionForm, self).__init__(*args, **kwargs)
+            if args:
+                if 'state' in args[0] and 'district' in args[0]:
+                    if args[0]['state'] and args[0]['state'] != '' and args[0]['state'] != 'None':
+                        choices = list(District.objects.filter(state_id = args[0]['state']).values_list('id', 'name'))
+                        choices.insert(0, ('', '-- None --'))
+                        self.fields['district'].choices = choices
+                        
+                if 'state' in args[0] and 'university' in args[0]:
+                    if args[0]['state'] and args[0]['state'] != '' and args[0]['state'] != 'None':
+                        choices = list(University.objects.filter(state_id = args[0]['state']).values_list('id', 'name'))
+                        choices.insert(0, ('', '-- None --'))
+                        self.fields['university'].choices = choices
+                        
+                if 'district' in args[0] and 'institute' in args[0]:
+                    if args[0]['district'] and args[0]['district'] != '' and args[0]['district'] != 'None':
+                        choices = list(AcademicCenter.objects.filter(district_id = args[0]['district']).values_list('id', 'institution_name'))
+                        choices.insert(0, ('', '-- None --'))
+                        self.fields['institute'].choices = choices
+    except:
+        pass
 
 class TestForm(forms.Form):
     #district = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'district field is required.'})

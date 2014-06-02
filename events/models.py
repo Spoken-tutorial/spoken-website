@@ -5,8 +5,7 @@ from django.contrib.auth.models import User
 
 #creation app models
 from creation.models import FossCategory, Language
-from mdldjango.models import MdlUser
-
+from mdldjango.models import *
 
 #validation
 from django.core.exceptions import ValidationError
@@ -19,8 +18,8 @@ class State(models.Model):
     latitude = models.DecimalField(null=True, max_digits=10, decimal_places=4, blank=True)
     longtitude = models.DecimalField(null=True, max_digits=10, decimal_places=4, blank=True)
     img_map_area = models.TextField()
-    created = models.DateTimeField(auto_now_add = True)
-    updated = models.DateTimeField(auto_now = True)
+    created = models.DateTimeField(auto_now_add = True, null=True)
+    updated = models.DateTimeField(auto_now = True, null=True)
     
     def __unicode__(self):
         return self.name
@@ -32,8 +31,8 @@ class District(models.Model):
     state = models.ForeignKey(State)
     code = models.CharField(max_length=3)
     name = models.CharField(max_length=200)
-    created = models.DateTimeField(auto_now_add = True)
-    updated = models.DateTimeField(auto_now = True)
+    created = models.DateTimeField(auto_now_add = True, null=True)
+    updated = models.DateTimeField(auto_now = True, null=True)
     
     def __unicode__(self):
         return self.name
@@ -45,8 +44,8 @@ class District(models.Model):
 class City(models.Model):
     state = models.ForeignKey(State)
     name = models.CharField(max_length=200)
-    created = models.DateTimeField(auto_now_add = True)
-    updated = models.DateTimeField(auto_now = True)
+    created = models.DateTimeField(auto_now_add = True, null=True)
+    updated = models.DateTimeField(auto_now = True, null=True)
     
     def __unicode__(self):
         return self.name
@@ -58,8 +57,8 @@ class Location(models.Model):
     district = models.ForeignKey(District)
     name = models.CharField(max_length=200)
     pincode = models.PositiveIntegerField()
-    created = models.DateTimeField(auto_now_add = True)
-    updated = models.DateTimeField(auto_now = True)
+    created = models.DateTimeField(auto_now_add = True, null=True)
+    updated = models.DateTimeField(auto_now = True, null=True)
     
     def __unicode__(self):
         return self.name
@@ -238,3 +237,71 @@ class WorkshopAttendance(models.Model):
         verbose_name = "Workshop Attendance"
         unique_together = (("workshop", "mdluser_id"))
         #unique_together = (("workshop", "mdluser"))
+
+class FossMdlCourses(models.Model):
+    foss = models.ForeignKey(Foss_Category)
+    mdlcourse_id = models.PositiveIntegerField()
+    mdlquiz_id = models.PositiveIntegerField()
+
+class WorkshopLog(models.Model):
+    user = models.ForeignKey(User)
+    workshop = models.ForeignKey(Workshop)
+    role = models.PositiveSmallIntegerField() #{0:'organiser', 1:'ResourcePerson', 2: 'Event Manager'}
+    status = models.PositiveSmallIntegerField() #{0:'new', 1:'approved', 2:'completed', 3: 'rejected', 4:'update',  5:'Offline-Attendance submited', 6:'Marked Attendance'}
+    created = models.DateTimeField(auto_now_add = True)
+
+class TestLog(models.Model):
+    user = models.ForeignKey(User)
+    test = models.ForeignKey(Test)
+    role = models.PositiveSmallIntegerField(default=0) #{0:'organiser', 1:'invigilator', 2:'ResourcePerson', 3: 'Event Manager'}
+    status = models.PositiveSmallIntegerField(default=0) #{0:'new', 1:'RP-approved', 2:'Inv-approved', 3: 'ongoing', 4:'completed', 5:'Rp-rejected', 6:'Inv-rejected', 7:'Update', 8:'Attendance submited', 9:'Marked Attendance'}
+    created = models.DateTimeField(auto_now_add = True)
+
+class EventsNotification(models.Model):
+    user = models.ForeignKey(User)
+    role = models.PositiveSmallIntegerField(default=0) #{0:'organiser', 1:'invigilator', 2:'ResourcePerson', 3: 'Event Manager'}
+    category = models.PositiveSmallIntegerField(default=0) #{'workshop', 'test', 'training'}
+    categoryid = models.PositiveIntegerField(default=0)
+    status = models.PositiveSmallIntegerField(default=0) #{0:'new', 1:'update', 2:'approved', 3:'attendance', 4: 'completed', 5:'rejected'}
+    message = models.CharField(max_length = 255)
+    created = models.DateTimeField(auto_now_add = True)
+
+class Training(models.Model):
+    organiser = models.ForeignKey(User)
+    appoved_by = models.ForeignKey(User, related_name = 'training_approved_by', null=True)
+    academic = models.ForeignKey(AcademicCenter)
+    department = models.ManyToManyField(Department)
+    language = models.ForeignKey(Language)
+    foss = models.ForeignKey(Foss_Category)
+    training_code = models.CharField(max_length=100, null=True)
+    trdate = models.DateField()
+    trtime = models.TimeField()
+    skype = models.BooleanField()
+    status = models.PositiveSmallIntegerField(default=0)
+    participant_counts = models.PositiveIntegerField(default=0)
+    created = models.DateTimeField(auto_now_add = True)
+    updated = models.DateTimeField(auto_now = True)
+
+    class Meta:
+        unique_together = (("organiser", "academic", "foss", "trdate", "trtime"),)
+
+class TrainingAttendance(models.Model):
+    training = models.ForeignKey(Training)
+    mdluser_id = models.PositiveIntegerField()
+    #mdluser = models.ForeignKey(MdlUser)
+    password = models.CharField(max_length = 100, null=True)
+    count = models.PositiveSmallIntegerField(default=0)
+    status = models.PositiveSmallIntegerField(default=0)
+    created = models.DateTimeField(auto_now_add = True)
+    updated = models.DateTimeField(auto_now = True)
+    class Meta:
+        verbose_name = "Training Attendance"
+        unique_together = (("training", "mdluser_id"))
+        #unique_together = (("workshop", "mdluser"))
+        
+class TrainingLog(models.Model):
+    user = models.ForeignKey(User)
+    training = models.ForeignKey(Training)
+    role = models.PositiveSmallIntegerField() #{0:'organiser', 1:'ResourcePerson', 2: 'Event Manager'}
+    status = models.PositiveSmallIntegerField() #{0:'new', 1:'approved', 2:'completed', 3: 'rejected', 4:'update',  5:'Offline-Attendance submited', 6:'Marked Attendance'}
+    created = models.DateTimeField(auto_now_add = True)

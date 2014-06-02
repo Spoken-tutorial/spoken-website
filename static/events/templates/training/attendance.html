@@ -23,11 +23,11 @@
 				        </tr>
 				        {% for record in collection %}
 					        <tr>
-					            <th><input type='checkbox' name="user_{{ record.id }}" value="{{ record.id }}" {{ record.id|get_wstatus:workshop.id }} ></th>
+					            <th><input type='checkbox' name="user_{{ record.id }}" value="{{ record.id }}" {{ record.id|get_trainingstatus:workshop.id }} ></th>
 						        <td></td>
 						        <td>{{ record.firstname }} {{ record.lastname }}</td>
 						        <td>
-						            {{ record.id|get_wparticipant_status:workshop.id }}
+						            {{ record.id|get_trainingparticipant_status:workshop.id }}
 						        </td>
 					        </tr>
 				        {% endfor %}
@@ -36,8 +36,8 @@
 			    </form>
 			    <h4 class='step'><span class="label label-default">Step 2</span></h4>
 			    <div class="bs-callout bs-callout-info">
-                    <p>Please click <b>Mark as Complete</b> to end the workshop.</p>
-                    <a class='btn btn-primary' title = "To complete the workshop click here" href="{% url 'events:workshop_approvel' 'organiser' workshop.id %}?status=completed">Mark as Complete</a>
+                    <p>Please click <b>Mark as Complete</b> to end the training.</p>
+                    <a class='btn btn-primary' title = "To complete the training click here" href="{% url 'events:training_approvel' 'organiser' workshop.id %}?status=completed">Mark as Complete</a>
                 </div>
 			{% else %}
 				<p>No record found!</p>

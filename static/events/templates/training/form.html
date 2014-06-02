@@ -1,28 +1,28 @@
 {% extends 'spoken/templates/base.html' %}
 {% load widget_tweaks %}
 {% load static %}
-{% block title %}Workshop Request{% endblock %}
+{% block title %}Training Request{% endblock %}
 {% block cssblock %}
 	<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />
 	<link rel="stylesheet" href="{% static 'spoken/css/jquery.datetimepicker.css' %}" type="text/css" media="screen" charset="utf-8" />
 {% endblock %}
 {% block heading %}
-        <i class="fa fa-list-ul"></i> Workshop
+        <i class="fa fa-list-ul"></i> Training
 {% endblock %}
 {% block content %}
     	<ul class="tabs nav nav-tabs">
 	    {% if role == 'organiser' %}
-		    <li {% if status == 'request' %}{{ 'class="active"'}}{% endif %}><a href="/events/workshop/{{ role }}/request/">New</a></li>
-		    <li {% if status == 'pending' %}{{ 'class="active"'}}{% endif %}><a href="/events/workshop/{{role}}/pending/">Pending</a></li>
+		    <li {% if status == 'request' %}{{ 'class="active"'}}{% endif %}><a href="/events/training/{{ role }}/request/">New</a></li>
+		    <li {% if status == 'pending' %}{{ 'class="active"'}}{% endif %}><a href="/events/training/{{role}}/pending/">Pending</a></li>
 		{% endif %}
 		{% if role == 'rp' %}
-		    <li {% if status == 'pending' %}{{ 'class="active"'}}{% endif %}><a href="/events/workshop/{{role}}/pending/">New Requests</a></li>
+		    <li {% if status == 'pending' %}{{ 'class="active"'}}{% endif %}><a href="/events/training/{{role}}/pending/">New Requests</a></li>
 		{% endif %}
-        <li {% if status == 'ongoing' %}{{ 'class="active"'}}{% endif %}><a href="/events/workshop/{{role}}/ongoing/">Ongoing</a></li>
-        <li {% if status == 'approved' %}{{ 'class="active"'}}{% endif %}><a href="/events/workshop/{{role}}/approved/">Approved</a></li>
-        <li {% if status == 'completed' %}{{ 'class="active"'}}{% endif %}><a href="/events/workshop/{{role}}/completed/">Completed</a></li>
-        <li {% if status == 'reschedule' %}{{ 'class="active"'}}{% endif %}><a href="/events/workshop/{{role}}/reschedule/">Reschedule</a></li>
-        <li {% if status == 'rejected' %}{{ 'class="active"'}}{% endif %}><a href="/events/workshop/{{role}}/rejected/">Rejected</a></li>
+        <li {% if status == 'ongoing' %}{{ 'class="active"'}}{% endif %}><a href="/events/training/{{role}}/ongoing/">Ongoing</a></li>
+        <li {% if status == 'approved' %}{{ 'class="active"'}}{% endif %}><a href="/events/training/{{role}}/approved/">Approved</a></li>
+        <li {% if status == 'completed' %}{{ 'class="active"'}}{% endif %}><a href="/events/training/{{role}}/completed/">Completed</a></li>
+        <li {% if status == 'reschedule' %}{{ 'class="active"'}}{% endif %}><a href="/events/training/{{role}}/reschedule/">Reschedule</a></li>
+        <li {% if status == 'rejected' %}{{ 'class="active"'}}{% endif %}><a href="/events/training/{{role}}/rejected/">Rejected</a></li>
 	</ul>
 	
 	<div class='tab-content'>
