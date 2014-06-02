@@ -1,0 +1,119 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block title %}Upload Tutorial{% endblock %}
+{% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
+
+{% block content %}
+    {% if is_organiser_or_invigilator == 1 %}
+        <div class="col-lg-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Workshop <span class="badge pull-right">1</span>
+                </div>
+                <div class="panel-body">
+                    <dl>
+                      <dt><a href="{% url 'events:invigilator_request' user.username %}">Invigilator Request</a></dt>
+                      <dd>Join WIth Us</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    {% elif is_organiser_or_invigilator == 2 %}
+        <div class="col-lg-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Join With Us
+                </div>
+                <div class="panel-body">
+                    <dl>
+                      <dt><a href="{% url 'events:organiser_request' user.username %}">Organiser Request</a></dt>
+                      <dd>Join WIth Us</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    {% elif is_organiser_or_invigilator == 0 %}
+        <div class="col-lg-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Join With Us
+                </div>
+                <div class="panel-body">
+                    <dl>
+                      <dt><a href="{% url 'events:organiser_request' user.username %}">Organiser Request</a></dt>
+                      <dd>Join WIth Us</dd>
+                    </dl>
+                    <dl>
+                      <dt><a href="{% url 'events:invigilator_request' user.username %}">Invigilator Request</a></dt>
+                      <dd>Join WIth Us</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    {% if roles %}
+        <div class="col-lg-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Workshop <span class="badge pull-right">1</span>
+                </div>
+                <div class="panel-body">
+                    {% for role in roles %}
+                        {% if role == "Resource Person" %}
+                            <h4>{{ role }}</h4>
+                            <dl>
+                              <dt><a href="{% url 'events:workshop_list' 'rp' 'ongoing' %}">Workshop Index</a></dt>
+                              <dd>user can raise new workshop request, can see approved</dd>
+                            </dl>
+                        {% endif %}
+                        {% if role == "Organiser" %}
+                            <h4>{{ role }}</h4>
+                            <dl>
+                              <dt><a href="{% url 'events:workshop_list' 'organiser' 'ongoing' %}">Workshop Index</a></dt>
+                              <dd>user can raise new workshop request, can see approved</dd>
+                            </dl>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Test <span class="badge pull-right">1</span>
+                </div>
+                <div class="panel-body">
+                    {% for role in roles %}
+                        {% if role == "Resource Person" %}
+                            <h4>{{ role }}</h4>
+                            <dl>
+                              <dt><a href="{% url 'events:test_list' 'rp' 'ongoing' %}">Test Index</a></dt>
+                              <dd>user can raise new test request, can see approved</dd>
+                            </dl>
+                        {% endif %}
+                        {% if role == "Organiser" %}
+                            <h4>{{ role }}</h4>
+                            <dl>
+                              <dt><a href="{% url 'events:test_list' 'organiser' 'ongoing' %}">Test Index</a></dt>
+                              <dd>user can raise new test request, can see approved</dd>
+                            </dl>
+                        {% endif %}
+                        {% if role == "Invigilator" %}
+                            <h4>{{ role }}</h4>
+                            <dl>
+                              <dt><a href="{% url 'events:test_list' 'invigilator' 'ongoing' %}">Test Index</a></dt>
+                              <dd>user can raise new test request, can see approved</dd>
+                            </dl>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    {% else %}
+    {% endif%}
+{% endblock %}
+{% block jsblock %}
+    <script>
+    </script>
+{% endblock %}

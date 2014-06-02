@@ -1,0 +1,125 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block title %}Upload Tutorial{% endblock %}
+{% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
+{% if alert_success or alert_danger %}
+	{% block alert %}
+		{% if alert_success %}
+			<div class="alert alert-success alert-dismissable">
+				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+				{{ alert_success }}
+			</div>
+		{% endif %}
+		{% if alert_danger %}
+			<div class="alert alert-danger alert-dismissable">
+				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+				{{ alert_danger }}
+			</div>
+		{% endif %}
+	{% endblock %}
+{% endif %}
+{% block content %}
+
+<form action="{{ action }}" method="post">{% csrf_token %}
+{% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
+    {% if form.non_field_errors %}
+    <ul>
+      {% for error in form.non_field_errors %}
+        <li>{{ error }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+	{% if edit %}
+    	<h3 class="form-signin-heading">Edit Academic Center</h3>
+    {% else %}
+    	<h3 class="form-signin-heading">Add Academic Center</h3>
+    {% endif %}
+	<div class="form-group">
+		<label for="id_state">State</label>
+		{% render_field form.state class+="form-control chosen state" tabindex="1" data-placeholder="Choose state" %}
+		{{ form.state.errors }}
+	</div>
+	<div class="form-group">
+		<label for="id_university">University / Affiliated Board</label>
+		{% render_field form.university class+="form-control chosen university" tabindex="1" data-placeholder="Choose university" %}
+		{{ form.university.errors }}
+	</div>
+	<div class="form-group">
+		<label for="id_institution_name">Institution Name</label>
+		{% render_field form.institution_name class+="form-control institution_name" tabindex="1" data-placeholder="Enter institution name" %}
+		{{ form.institution_name.errors }}
+	</div>
+	<div class="form-group">
+		<label for="id_institution_type">Institute Type</label>
+		{% render_field form.institution_type class+="form-control chosen institution_type" tabindex="1" data-placeholder="Choose Institution Type" %}
+		{{ form.institution_type.errors }}
+	</div>
+	<div class="form-group">
+		<label for="id_district">District</label>
+		{% render_field form.district class+="form-control chosen district" tabindex="1" data-placeholder="Choose district" %}
+		{{ form.district.errors }}
+	</div><div class="form-group">
+		<label for="id_location">Location</label>
+		{% render_field form.location class+="form-control chosen location" tabindex="1" data-placeholder="Choose location" %}
+		{{ form.location.errors }}
+	</div>
+	<div class="form-group">
+		<label for="id_state">City</label>
+		{% render_field form.city class+="form-control chosen city" tabindex="1" data-placeholder="Choose city" %}
+		{{ form.city.errors }}
+	</div>
+	<div class="form-group">
+		<label for="id_street">Street</label>
+		{% render_field form.street class+="form-control street" tabindex="1" data-placeholder="Enter street" %}
+		{{ form.street.errors }}
+	</div>
+	<div class="form-group">
+		<label for="id_pincode">Pincode</label>
+		{% render_field form.pincode class+="form-control pincode" tabindex="1" data-placeholder="Enter pincode" %}
+		{{ form.pincode.errors }}
+	</div>
+	<div class="form-group">
+		<label for="id_resource_center">Resource Center</label>
+		{% render_field form.resource_center class+="form-control resource_center" tabindex="1" %}
+		{{ form.resource_center.errors }}
+	</div>
+	<div class="form-group">
+		<label for="id_rating">Ratings</label>
+		{% render_field form.rating class+="form-control rating" tabindex="1" %}
+		{{ form.rating.errors }}
+	</div>
+	<div class="form-group">
+		<label for="id_contact_person">Contact Person</label>
+		{% render_field form.contact_person class+="form-control contact_person" tabindex="1" data-placeholder="Contact details" %}
+		{{ form.contact_person.errors }}
+	</div>
+	<div class="form-group">
+		<label for="id_remarks">Remarks</label>
+		{% render_field form.remarks class+="form-control remarks" tabindex="1" %}
+		{{ form.remarks.errors }}
+	</div>
+	<div class="form-group">
+		<label for="id_status">Status</label>
+		{% render_field form.status class+="form-control status" tabindex="1" data-placeholder="Contact details" %}
+		{{ form.status.errors }}
+	</div>
+	<input class="btn btn-primary" type="submit" value="Submit" />
+{% endwith %}
+</form>
+
+
+{% endblock %}
+{% block jsblock %}
+	<script src="{% static 'spoken/js/chosen.jquery.min.js' %}"></script>
+	<script src="{% static 'spoken/js/events.js' %}"></script>
+	<script>
+		$("#id_state").change(function(){
+			ajaxStrateFillDatas('district', 'city', 'university');
+		});
+		$('.district').change(function(){
+			ajaxDistrictFillDatas('location', '', $(this).val());
+		});
+	</script>
+{% endblock %}
+

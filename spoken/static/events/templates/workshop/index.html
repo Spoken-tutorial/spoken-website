@@ -1,0 +1,100 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load eventsdata %}
+{% block title %}Workshop - {{ status}} {% endblock %}
+{% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
+{% block heading %}
+        <i class="fa fa-list-ul"></i> Workshop <a href="{% url 'events:events_dashboard' %}" class='pull-right'>Go to Dashboard</a>
+{% endblock %}
+{% block content %}
+	<!-- Nav tabs -->
+	<ul class="tabs nav nav-tabs">
+	    {% if role == 'organiser' %}
+		    <li><a href="/events/workshop/{{ role }}/request/">New</a></li>
+		    <li {% if status == 'pending' %}{{ 'class="active"'}}{% endif %}><a href="/events/workshop/{{role}}/pending/">Pending</a></li>
+		{% endif %}
+		{% if role == 'rp' %}
+		    <li {% if status == 'pending' %}{{ 'class="active"'}}{% endif %}><a href="/events/workshop/{{role}}/pending/">New Requests</a></li>
+		{% endif %}
+        <li {% if status == 'ongoing' %}{{ 'class="active"'}}{% endif %}><a href="/events/workshop/{{role}}/ongoing/">Ongoing</a></li>
+        <li {% if status == 'approved' %}{{ 'class="active"'}}{% endif %}><a href="/events/workshop/{{role}}/approved/">Approved</a></li>
+        <li {% if status == 'completed' %}{{ 'class="active"'}}{% endif %}><a href="/events/workshop/{{role}}/completed/">Completed</a></li>
+        <li {% if status == 'reschedule' %}{{ 'class="active"'}}{% endif %}><a href="/events/workshop/{{role}}/reschedule/">Reschedule</a></li>
+        <li {% if status == 'rejected' %}{{ 'class="active"'}}{% endif %}><a href="/events/workshop/{{role}}/rejected/">Rejected</a></li>
+	</ul>
+	<!-- Tab panes -->
+	<div class="tab-content">
+		<div class="tab-pane" id="new">
+			<iframe width = "100%" src="/events/workshop/request/"></iframe> -->
+		</div>
+		<div class="tab-pane active" id="pending">
+			{% if collection %}
+			<table class="table table-striped table-hover table-bordered">
+				<tr>
+					<th>Academic Name</th>
+					<th>FOSS</th>
+					<th>Language</th>
+					<th>Date </th>
+					<th>Action</th>
+				</tr>
+				{% for record in collection %}
+					<tr>
+						<td>{{ record.academic }}</td>
+						<td>{{ record.foss }}</td>
+						<td>{{ record.language }}</td>
+						<td>{{ record.wdate|date:"d M Y" }} {{	record.wtime }}</td>
+                        <!-- actions based on roles -->
+                        <td>
+                            {% if role == 'rp' %}
+                                {% if status == 'pending' %}
+                                    <a href="{% url 'events:workshop_edit' role record.id %}">Edit</a>
+                                {% endif %}
+                                {% if status == 'pending' %}
+                                    <a href="{% url 'events:workshop_approvel' role record.id %}?status=accept">Accept</a>
+                                    <a href="{% url 'events:workshop_approvel' role record.id %}?status=reject">Reject</a>
+                                {% endif %}
+                                {% if status == 'approved' %}
+                                    <a href="{% url 'events:workshop_approvel' role record.id %}?status=reject">Reject</a>
+                                {% endif %}
+                                {% if status == 'reschedule' %}
+                                    <a href="{% url 'events:workshop_edit' role record.id %}">Edit</a>
+                                {% endif %}
+                                {% if status == 'ongoing' %}
+                                    <a href="{% url 'events:workshop_participant' record.id %}">Participants</a>
+                                {% endif %}
+                                {% if status == 'rejected' %}
+                                    <a href="{% url 'events:workshop_approvel' role record.id %}?status=accept">Accept</a>
+                                {% endif %}
+                            {% endif %}
+                            {% if role == 'organiser' %}
+                                {% if status == 'reschedule' %}
+                                    <a href="{% url 'events:workshop_edit' role record.id %}">Edit</a>
+                                {% endif %}
+                                {% if status == 'pending' %}
+                                    <a href="{% url 'events:workshop_edit' role record.id %}">Edit</a>
+                                {% endif %}
+                                {% if status == 'approved' %}
+                                    <a href="{% url 'events:workshop_participant' record.id %}">Participants</a>
+                                {% endif %}
+                                {% if status == 'ongoing' %}
+                                    {% if record.id|can_upload_workshop_data:'workshop' %}
+                                        <a href="{% url 'mdldjango:mdl_offline_workshop_details' record.id 1 %}">Upload data</a> |
+                                    {% endif %}
+                                    <a href="{% url 'events:workshop_attendance' record.id %}">Attendance</a> |
+                                    <a href="{% url 'events:workshop_participant' record.id %}">Participants</a>
+                                {% endif %}
+                            {% endif %}
+                            {% if status == 'completed' %}
+                                <a href="{% url 'events:workshop_participant' record.id %}">View Participants</a>
+                            {% endif %}
+						</td>
+					</tr>
+                   {% endfor %}
+                </table>
+			{% else %}
+				<p>No record found!</p>
+			{% endif %}
+		</div>
+	</div>
+{% endblock %}

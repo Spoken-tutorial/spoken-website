@@ -1,0 +1,236 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load creationdata %}
+{% block title %}Tutorials Quality Review Index{% endblock %}
+{% block heading %}<i class="fa fa-list-ul"></i> Tutorials Quality Review Index{% endblock %}
+{% block content %}
+    <!-- Nav tabs -->
+    <div class="custom-alert"></div>
+    <ul class="nav nav-tabs">
+        <li{% if tabid == '1' %} class="active"{% endif %}>
+            <a href="#review-tutorial" data-toggle="tab">
+                <i class="fa fa-list-ul"></i> Waiting for review
+            </a>
+        </li>
+        <li{% if tabid == '2' %} class="active"{% endif %}>
+            <a href="#public-review-tutorial" data-toggle="tab">
+                <i class="fa fa-list-ul"></i> Ready for Public review
+            </a>
+        </li>
+        <li{% if tabid == '3' %} class="active"{% endif %}>
+            <a href="#publish-tutorial" data-toggle="tab">
+                <i class="fa fa-list-ul"></i> Ready to publish
+            </a>
+        </li>
+        <li>
+            <a href="/creation/public-review/list/">
+                <i class="fa fa-list-ul"></i> Under Public review
+            </a>
+        </li>
+        <li>
+            <a href="/creation/quality-review/reviewed/">
+                <i class="fa fa-list-ul"></i> Reviewed
+            </a>
+        </li>
+    </ul>
+    <div class="tab-content">
+        <div class="tab-pane{% if tabid == '1' %} active{% endif %}" id="review-tutorial">
+	        <div class="table-responsive">
+		        <table class="table table-bordered table-hover">
+		        {% if not tr_recs|length %}
+			        <tr>
+				        <td colspan="11" class="col-center">List is empty</td>
+			        </tr>
+		        {% else %}
+		            <tr class="active">
+				        <th>S.No</th>
+				        <th>Foss</th>
+				        <th>Tutorial Name</th>
+				        <th>Language</th>
+				        <th>Outline</th>
+				        <th>Script</th>
+				        <th>Slide</th>
+				        <th>Video</th>
+				        <th>Code Files</th>
+				        <th>Assignment</th>
+				        <th>Prerequisite</th>
+				        <th>Keywords</th>
+				        <th class="col-center"><span title="" data-original-title="" class="fa fa-cogs fa-2"></span></th>
+			        </tr>
+			        {% for tr_rec in tr_recs %}
+				        <tr>
+					        <td>{{ forloop.counter }}</td>
+					        <td>{{ tr_rec.tutorial_detail.foss.foss }}</td>
+					        <td>{{ tr_rec.tutorial_detail.tutorial }}</td>
+					        <td>{{ tr_rec.language.name }}</td>
+					        <td class="col-center" title="{{ tr_rec.outline_status | get_review_status_list }}">
+						        <span class="{{ tr_rec.outline_status | get_review_status_symbol }}"></span>
+					        </td>
+					        <td class="col-center" title="{{ tr_rec.script_status | get_review_status_list }}">
+						        <span class="{{ tr_rec.script_status | get_review_status_symbol }}"></span>
+					        </td>
+					        <td class="col-center" title="{{ tr_rec.common_content.slide_status | get_review_status_list }}">
+						        <span class="{{ tr_rec.common_content.slide_status | get_review_status_symbol }}"></span>
+					        </td>
+					        <td class="col-center" title="{{ tr_rec.video_status | get_review_status_list }}">
+						        <span class="{{ tr_rec.video_status | get_review_status_symbol }}"></span>
+					        </td>
+					        <td class="col-center" title="{{ tr_rec.common_content.code_status | get_review_status_list }}">
+						        <span class="{{ tr_rec.common_content.code_status | get_review_status_symbol }}"></span>
+					        </td>
+					        <td class="col-center" title="{{ tr_rec.common_content.assignment_status | get_review_status_list }}">
+						        <span class="{{ tr_rec.common_content.assignment_status | get_review_status_symbol }}"></span>
+					        </td>
+					        <td class="col-center" title="{{ tr_rec.common_content.prerequisite_status | get_review_status_list }}">
+						        <span class="{{ tr_rec.common_content.prerequisite_status | get_review_status_symbol }}"></span>
+					        </td>
+					        <td class="col-center" title="{{ tr_rec.common_content.keyword_status | get_review_status_list }}">
+						        <span class="{{ tr_rec.common_content.keyword_status | get_review_status_symbol }}"></span>
+					        </td>
+					        <td class="col-center"><a href="/creation/quality-review/tutorial/{{ tr_rec.id }}" class="review-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Review</a></td>
+				        </tr>
+			        {% endfor %}
+		        {% endif %}
+		        </table>
+	        </div>
+        </div>
+        <div class="tab-pane {% if tabid == '2' %}active{% endif %}" id="public-review-tutorial">
+	        <div class="table-responsive">
+		        <table class="table table-bordered table-hover">
+		        {% if not pub_recs|length %}
+			        <tr>
+				        <td colspan="11" class="col-center">List is empty</td>
+			        </tr>
+		        {% else %}
+		            <tr class="active">
+				        <th>S.No</th>
+				        <th>Foss</th>
+				        <th>Tutorial Name</th>
+				        <th>Language</th>
+				        <th>Outline</th>
+				        <th>Script</th>
+				        <th>Slide</th>
+				        <th>Video</th>
+				        <th>Code Files</th>
+				        <th>Assignment</th>
+				        <th>Prerequisite</th>
+				        <th>Keywords</th>
+				        <th class="col-center"><span title="" data-original-title="" class="fa fa-cogs fa-2"></span></th>
+			        </tr>
+			        {% for tr_rec in pub_recs %}
+				        <tr>
+					        <td>{{ forloop.counter }}</td>
+					        <td>{{ tr_rec.tutorial_detail.foss.foss }}</td>
+					        <td>{{ tr_rec.tutorial_detail.tutorial }}</td>
+					        <td>{{ tr_rec.language.name }}</td>
+					        <td class="col-center" title="{{ tr_rec.outline_status | get_review_status_list }}">
+						        <span class="{{ tr_rec.outline_status | get_review_status_symbol }}"></span>
+					        </td>
+					        <td class="col-center" title="{{ tr_rec.script_status | get_review_status_list }}">
+						        <span class="{{ tr_rec.script_status | get_review_status_symbol }}"></span>
+					        </td>
+					        <td class="col-center" title="{{ tr_rec.common_content.slide_status | get_review_status_list }}">
+						        <span class="{{ tr_rec.common_content.slide_status | get_review_status_symbol }}"></span>
+					        </td>
+					        <td class="col-center" title="{{ tr_rec.video_status | get_review_status_list }}">
+						        <span class="{{ tr_rec.video_status | get_review_status_symbol }}"></span>
+					        </td>
+					        <td class="col-center" title="{{ tr_rec.common_content.code_status | get_review_status_list }}">
+						        <span class="{{ tr_rec.common_content.code_status | get_review_status_symbol }}"></span>
+					        </td>
+					        <td class="col-center" title="{{ tr_rec.common_content.assignment_status | get_review_status_list }}">
+						        <span class="{{ tr_rec.common_content.assignment_status | get_review_status_symbol }}"></span>
+					        </td>
+					        <td class="col-center" title="{{ tr_rec.common_content.prerequisite_status | get_review_status_list }}">
+						        <span class="{{ tr_rec.common_content.prerequisite_status | get_review_status_symbol }}"></span>
+					        </td>
+					        <td class="col-center" title="{{ tr_rec.common_content.keyword_status | get_review_status_list }}">
+						        <span class="{{ tr_rec.common_content.keyword_status | get_review_status_symbol }}"></span>
+					        </td>
+					        <td class="col-center"><a href="/creation/public-review/tutorial/{{ tr_rec.id }}" class="review-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Mark as Public Review</a></td>
+				        </tr>
+			        {% endfor %}
+		        {% endif %}
+		        </table>
+	        </div>
+        </div>
+        <div class="tab-pane{% if tabid == '3' %} active{% endif %}" id="publish-tutorial">
+            <div class="table-responsive">
+		        <table class="table table-bordered table-hover">
+		        {% if not com_recs|length %}
+			        <tr>
+				        <td colspan="11" class="col-center">List is empty</td>
+			        </tr>
+		        {% else %}
+		            <tr class="active">
+				        <th>S.No</th>
+				        <th>Foss</th>
+				        <th>Tutorial Name</th>
+				        <th>Language</th>
+				        <th>Outline</th>
+				        <th>Script</th>
+				        <th>Slide</th>
+				        <th>Video</th>
+				        <th>Code Files</th>
+				        <th>Assignment</th>
+				        <th>Prerequisite</th>
+				        <th>Keywords</th>
+				        <th class="col-center"><span title="" data-original-title="" class="fa fa-cogs fa-2"></span></th>
+			        </tr>
+			        {% for tr_rec in com_recs %}
+				        <tr>
+					        <td>{{ forloop.counter }}</td>
+					        <td>{{ tr_rec.tutorial_detail.foss.foss }}</td>
+					        <td>{{ tr_rec.tutorial_detail.tutorial }}</td>
+					        <td>{{ tr_rec.language.name }}</td>
+					        <td class="col-center" title="{{ tr_rec.outline_status | get_review_status_list }}">
+						        <span class="{{ tr_rec.outline_status | get_review_status_symbol }}"></span>
+					        </td>
+					        <td class="col-center" title="{{ tr_rec.script_status | get_review_status_list }}">
+						        <span class="{{ tr_rec.script_status | get_review_status_symbol }}"></span>
+					        </td>
+					        <td class="col-center" title="{{ tr_rec.common_content.slide_status | get_review_status_list }}">
+						        <span class="{{ tr_rec.common_content.slide_status | get_review_status_symbol }}"></span>
+					        </td>
+					        <td class="col-center" title="{{ tr_rec.video_status | get_review_status_list }}">
+						        <span class="{{ tr_rec.video_status | get_review_status_symbol }}"></span>
+					        </td>
+					        <td class="col-center" title="{{ tr_rec.common_content.code_status | get_review_status_list }}">
+						        <span class="{{ tr_rec.common_content.code_status | get_review_status_symbol }}"></span>
+					        </td>
+					        <td class="col-center" title="{{ tr_rec.common_content.assignment_status | get_review_status_list }}">
+						        <span class="{{ tr_rec.common_content.assignment_status | get_review_status_symbol }}"></span>
+					        </td>
+					        <td class="col-center" title="{{ tr_rec.common_content.prerequisite_status | get_review_status_list }}">
+						        <span class="{{ tr_rec.common_content.prerequisite_status | get_review_status_symbol }}"></span>
+					        </td>
+					        <td class="col-center" title="{{ tr_rec.common_content.keyword_status | get_review_status_list }}">
+						        <span class="{{ tr_rec.common_content.keyword_status | get_review_status_symbol }}"></span>
+					        </td>
+					        <td class="col-center"><a href="/creation/quality-review/tutorial/publish/{{ tr_rec.id }}" class="review-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Publish</a></td>
+				        </tr>
+			        {% endfor %}
+		        {% endif %}
+		        </table>
+	        </div>
+        </div>
+    </div>
+{% endblock %}
+{% block jsblock %}
+	<script src="{% static 'spoken/js/chosen.jquery.min.js' %}"></script>
+	<script src="{% static 'spoken/js/jquery.fancybox.pack.js' %}"></script>
+	<script src="{% static 'spoken/js/jquery.mousewheel-3.0.6.pack.js' %}"></script>
+	<script type="text/javascript">
+		$(document).ready(function(){
+			$(".review-btn").hover(
+				function () {
+					$(this).children(0).addClass("fa-spin");
+				},
+				function () {
+					$(this).children(0).removeClass("fa-spin");
+				}
+			);
+		});
+	</script>
+{% endblock %}

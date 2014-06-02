@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+{% load static %}
+{% load cmsdata %}
+<html>
+	<head>
+		<title>
+			{% block title %}{% endblock %} | spoken-tutorial.org
+		</title>
+		<link rel="shortcut icon" href="{% static 'spoken/images/favicon.ico' %}" />
+		<!-- Bootstrap core CSS -->
+		<link rel="stylesheet" href="{% static 'spoken/css/bootstrap.min.css' %}" type="text/css" media="screen" charset="utf-8" />
+		<link rel="stylesheet" href="{% static 'spoken/css/font-awesome.min.css' %}" type="text/css" media="screen" charset="utf-8" />
+		<!-- <link rel="stylesheet" href="{% static 'spoken/css/bootstrap-theme.css' %}" type="text/css" media="screen" charset="utf-8"> -->
+		<link rel="stylesheet" href="{% static 'spoken/css/main.css' %}" type="text/css" media="screen" charset="utf-8" />
+		{% block cssblock %}{% endblock %}
+	</head>
+	<body>
+		<div id="page-wrapper">
+			<div id="header-wrapper">
+				<div id="header-inner">
+					<nav class="navbar navbar-default" role="navigation">
+						<div class="container">
+							<!-- Brand and toggle get grouped for better mobile display -->
+							<div class="navbar-header">
+								<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+									<span title="" data-original-title="" class="sr-only">Toggle navigation</span>
+									<span title="" data-original-title="" class="icon-bar"></span>
+									<span title="" data-original-title="" class="icon-bar"></span>
+									<span title="" data-original-title="" class="icon-bar"></span>
+								</button>
+								<a class="navbar-brand" href="/">
+									<img id="logo" src="{% static 'spoken/images/logo.png' %}">
+									Spoken Tutorials
+								</a>
+							</div> <!-- /.navbar-header -->
+
+							<!-- Collect the nav links, forms, and other content for toggling -->
+							<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+								<ul class="nav navbar-nav navbar-right">
+									{% block customnav %}{% endblock %}
+									{% get_cms_nav %}
+									{% if user.is_authenticated %}
+										<li class="dropdown">
+											<a href="#" class="dropdown-toggle" data-toggle="dropdown">
+												<span title="" data-original-title="" class="glyphicon glyphicon-user"></span> {{ user }}<b class="caret"></b>
+											</a>
+											<ul class="dropdown-menu">
+												<li><a href="/accounts/profile/{{ user }}/">Profile</a></li>
+												<li class="divider"></li>
+												<li><a href="/accounts/logout/">Logout</a></li>
+											</ul>
+										</li>
+									{% else %}
+										<li><a href="/accounts/login/"><span class="glyphicon glyphicon-user"></span> Login</a></li>
+									{% endif %}
+								</ul>
+							</div> <!-- /.navbar-collapse -->
+						</div> <!-- /.container -->
+					</nav><!-- / .navbar -->
+					<div class="container">
+						{% block customheader%}{% endblock %}
+						{% get_cms_header %}
+					</div>
+				</div><!-- /#header-inner -->
+			</div><!-- /#header-wrapper -->
+
+			<div id="content-wrapper">
+				<div id="content-inner" class="container">
+					{% get_cms_sidebar %}
+						<h4 class="page-title">{% block heading %}{% endblock %}</h4>
+						{% block alert %}
+							{% if messages %}
+								{% for message in messages %}
+								    {% if message.tags == 'success' %}
+									    <div class="alert alert-success alert-dismissable">
+										    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+										    {{ message }}
+									    </div>
+									{% elif message.tags == 'warning' %}
+									   <div class="alert alert-warning alert-dismissable">
+										    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+										    {{ message }}
+									    </div>
+									{% elif message.tags == 'error' %}
+									    <div class="alert alert-danger alert-dismissable">
+										    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+										    {{ message }}
+									    </div>
+									{% elif message.tags == 'info' %}
+									     <div class="alert alert-info alert-dismissable">
+										    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+										    {{ message }}
+									    </div>
+									{% elif message.tags == 'debug' %}
+									    <div class="alert alert-info alert-dismissable">
+										    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+										    {{ message }}
+									    </div>
+									{% endif %}
+								{% endfor %}
+							{% endif %}
+						{% endblock %}
+                        {% block content %}{% endblock %}
+                        {% block pager %}
+                            {% if collection.paginator.num_pages > 1 %}
+                                <ul class="pagination pull-right">
+                                    {% if collection %}
+                                        {% if collection.has_previous %} 
+                                            <li><a href="?page={ collection.previous_page_number {}}">&laquo; <small>Prev</small></a></li>
+                                        {% else %} 
+                                            <li class="disabled"><a href="#">&laquo;</a></li> 
+                                        {% endif %}
+                                        {% for num in collection.paginator.page_range %}
+                                            {% ifequal num collection.number %} 
+                                                <li class="active"><a href="#">{{ num }}<span class="sr-only">(current)</span></a></li>
+                                            {% else %} 
+                                                <li><a href="?page={{ num }}">{{ num }}</a></li>
+                                            {% endifequal %} 
+                                        {% endfor %} 
+                                        {% if collection.has_next %} 
+                                            <li><a href="?page={{ collection.next_page_number }}"><small>Next</small>&raquo;</a></li>
+                                        {% else %} 
+                                            <li class="disabled"><a href="#">&raquo;</a></li> 
+                                        {% endif %}
+                                    {% endif %}
+                                <ul>
+                            {% endif %}
+                        {% endblock %} 
+					</div>
+				</div><!-- /#content-inner .container -->
+			</div><!-- /#content-wrapper -->
+			<div id="footer-wrapper">
+				<div id="footer-inner" class="container col-lg-12 col-md-12 col-sm-12">
+					{% block customfooter %}{% endblock %}
+					{% get_cms_footer %}
+				</div> <!-- /footer-inner -->
+			</div> <!-- /footer-wrapper -->
+		</div><!-- /#page-wrapper -->
+		<!-- Bootstrap core JavaScript
+		================================================== -->
+		<!-- Placed at the end of the document so the pages load faster -->
+		<script src="{% static 'spoken/js/jquery-1.11.0.min.js' %}"></script>
+		<script src="{% static 'spoken/js/bootstrap.min.js' %}"></script>
+		{% block jsblock %}{% endblock %}
+	</body>
+</html>

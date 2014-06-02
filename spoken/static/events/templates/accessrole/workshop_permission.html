@@ -1,0 +1,190 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block title %}Upload Tutorial{% endblock %}
+{% block cssblock %}
+	<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />
+	<link rel="stylesheet" href="{% static 'spoken/css/jquery.datetimepicker.css' %}" type="text/css" media="screen" charset="utf-8" />
+{% endblock %}
+{% if alert_success or alert_danger %}
+	{% block alert %}
+		{% if alert_success %}
+			<div class="alert alert-success alert-dismissable">
+				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+				{{ alert_success }}
+			</div>
+		{% endif %}
+		{% if alert_danger %}
+			<div class="alert alert-danger alert-dismissable">
+				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+				{{ alert_danger }}
+			</div>
+		{% endif %}
+	{% endblock %}
+{% endif %}
+{% block content %}
+	<form action="{{ action }}" method="post">{% csrf_token %}
+	{{form.errors}}
+	{% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
+	{% if form.non_field_errors %}
+	<ul>
+	  {% for error in form.non_field_errors %}
+		<li>{{ error }}</li>
+	  {% endfor %}
+	</ul>
+	{% endif %}
+	{% if edit %}
+		<h3 class="form-signin-heading">Workshop</h3>
+	{% else %}
+		<h3 class="form-signin-heading">Workshop</h3>
+	{% endif %}
+
+	<div class="form-group">
+		<label for="id_permissiontype"> Permission Type</label>
+		{% render_field form.permissiontype class+="form-control permissiontype" tabindex="1" data-placeholder="Enter district name" %}
+		{{ form.permissiontype.errors }}
+	</div>
+	<div class="form-state-group">
+		<div class="form-group">
+			<label for="id_user">User</label>
+			{% render_field form.user class+="form-control user" tabindex="1" data-placeholder="Enter user name" %}
+			{{ form.user.errors }}
+		</div>
+		<div class="form-group">
+			<label for="id_state">State</label>
+			{% render_field form.state class+="form-control state" tabindex="1" data-placeholder="Enter state name" %}
+			{{ form.state.errors }}
+		</div>
+	</div>
+	<div class="permission-form-group">
+		<div class="form-district-group">
+			<div class="form-group">
+				<label for="id_district">District</label>
+				{% render_field form.district class+="form-control district" tabindex="1" data-placeholder="Enter district name" %}
+				{{ form.district.errors }}
+			</div>
+		</div>
+		
+		<div class="form-university-group">
+			<div class="form-group">
+				<label for="id_state">University</label>
+				{% render_field form.university class+="form-control university" tabindex="1" data-placeholder="Enter university name" %}
+				{{ form.university.errors }}
+			</div>
+		</div>
+		
+		<div class="form-institutiontype-group">
+			<div class="form-group">
+				<label for="id_state">Institute Type</label>
+				{% render_field form.institutiontype class+="form-control institutiontype" tabindex="1" data-placeholder="Enter Institute Type" %}
+				{{ form.institutiontype.errors }}
+			</div>
+		</div>
+	</div>
+	
+	<div class="form-institute-group">
+			<div class="form-group">
+				<label for="id_institute">Institute</label>
+				{% render_field form.institute class+="form-control institute" tabindex="1" data-placeholder="Enter district name" %}
+				{{ form.institute.errors }}
+			</div>
+		</div>
+		
+	<input class="btn btn-primary" type="submit" value="Submit" />
+	{% endwith %}
+</form>
+<br />
+<div class='table-responsive'>
+		{% if collection %}
+			<table class="table table-bordered table-hover table-striped">
+				<tr>
+					<th>User</th>
+					<th>State</th>
+					<th>University</th>
+					<th>Institute Name</th>
+					<th>Institute Type</th>
+					<th>District</th>
+					<!--<th>Action</th> -->
+				</tr>
+				{% for record in collection %}
+					<tr class="{% cycle 'odd' 'even' %}">
+						<td>{{ record.user }}</td>
+						<td>{{ record.state }}</td>
+						<td>{{ record.university }}</td>
+						<td>{{ record.institute }}</td>
+						<td>{{ record.institute_type }}</td>
+						<td>{{ record.district }}</td>
+						<!-- <td><a href="{% url 'events:edit_ac' record.id %}">Edit</a></td> -->
+					</tr>
+				{% endfor %}
+			</table>
+		{% endif %}
+	</div>
+{% endblock %}
+{% block jsblock %}
+	<script src="{% static 'spoken/js/chosen.jquery.min.js' %}"></script>
+	<script src="{% static 'spoken/js/events.js' %}"></script>
+	<script>
+		function disableAllInput(){
+			$('.permission-form-group').each(function(){
+				$(this).find('select').each(function(){
+					$(this).attr("disabled", true);
+				});
+			});
+			$('.form-district-group').css('display','none');
+			$('.form-state-group').css('display','none');
+			$('.form-university-group').css('display','none');
+			$('.form-institutiontype-group').css('display','none');
+			$('.form-institute-group').css('display','none');
+		}
+		
+		function showState(){
+			$('.form-state-group .state').attr("disabled", false);
+			$('.form-state-group').css('display','block');
+		}
+		
+		disableAllInput();
+		$('.permissiontype').change(function(){
+			$district = $('#id_district');
+			disableAllInput();
+			if($(this).val() == 1){
+				showState();
+			}else if($(this).val() == 2){
+				showState();
+				$('.form-district-group .district').attr("disabled", false);
+				$('.form-district-group').css('display','block');
+				$('.state').change(function(){
+					ajaxStrateFillDatas('district');
+				})
+			}else if($(this).val() == 3){
+				showState();
+				$('.form-university-group .university').attr("disabled", false);
+				$('.form-university-group').css('display','block');
+				$('.state').change(function(){
+					ajaxStrateFillDatas('','','university');
+				})
+			}else if($(this).val() == 4){
+				showState();
+				$('.form-institutiontype-group .institutiontype').attr("disabled", false);
+				$('.form-institutiontype-group').css('display','block');
+			}else if($(this).val() == 5){
+				showState();
+				$('.form-district-group .district').attr("disabled", false);
+				$('.form-institute-group').css('display','block');
+				$('.form-district-group').css('display','block');
+				$('.state').change(function(){
+					ajaxStrateFillDatas('district');
+					$('.district').change(function(){
+						ajaxDistrictFillDatas('', 'institute', $(this).val());
+					});
+				})
+			}
+		});
+		
+		$('.district').change(function(){
+			//ajaxDistrictFillDatas('', 'institute', $('.district').val());
+			console.log($('.district').val());
+		});
+	</script>
+	
+{% endblock %}
