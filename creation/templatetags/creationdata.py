@@ -5,6 +5,15 @@ from creation.views import is_contributor, is_videoreviewer, is_domainreviewer, 
 
 register = template.Library()
 
+def is_script_available(path):
+    try:
+        code = urlopen(script_path).code
+    except Exception, e:
+        code = e.code
+    if(int(code) == 200):
+        return True
+    return False
+
 def get_review_status_list(key):
 	status_list = ['Pending', 'Waiting for Admin Review', 'Waiting for Domain Review', 'Waiting for Quality Review', 'Accepted', 'Need Improvement', 'Not Required']
 	return status_list[key];

@@ -1,0 +1,59 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block title %}Upload Tutorial{% endblock %}
+{% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
+{% if alert_success or alert_danger %}
+	{% block alert %}
+		{% if alert_success %}
+			<div class="alert alert-success alert-dismissable">
+				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+				{{ alert_success }}
+			</div>
+		{% endif %}
+		{% if alert_danger %}
+			<div class="alert alert-danger alert-dismissable">
+				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+				{{ alert_danger }}
+			</div>
+		{% endif %}
+	{% endblock %}
+{% endif %}
+{% block content %}
+	<!-- Nav tabs -->
+	<!--<ul class="tabs">
+		<li {% if status == 'pending' %}{{ 'class="active"'}}{% endif %}><a href="/events/workshop/pending/">Pending</a></li>
+		<li {% if status == 'approved' %}{{ 'class="active"'}}{% endif %}><a href="/events/workshop/approved/">Approved</a></li>
+		<li {% if status == 'completed' %}{{ 'class="active"'}}{% endif %}><a href="/events/workshop/completed/">Completed</a></li>
+		<li {% if status == 'reschedule' %}{{ 'class="active"'}}{% endif %}><a href="/events/workshop/reschedule/">Reschedule</a></li>
+		<li {% if status == 'rejected' %}{{ 'class="active"'}}{% endif %}><a href="/events/workshop/rejected/">Rejected</a></li>
+	</ul>->
+	<!-- Tab panes -->
+	<div class="tab-content">
+		<div class="tab-pane" id="new">
+			<iframe width = "100%" src="/events/workshop/request/"></iframe> -->
+		</div>
+		{% if collection %}
+			<div class="tab-pane active" id="pending">
+				<table class="table table-bordered table-hover table-striped">
+					<tr>
+						<th>Academic Name</th>
+						<th>FOSS</th>
+						<th>Language</th>
+						<th>Date </th>
+					</tr>
+					{% for record in collection %}
+						<tr>
+							<td>{{ record.academic }}</td>
+							<td>{{ record.foss }}</td>
+							<td>{{ record.language }}</td>
+							<td>{{ record.wdate|date:"d M Y" }} {{	record.wtime }}</td>
+						</tr>
+					{% endfor %}
+				</table>
+			</div>
+		{% else %}
+			<p>No record found!</p>
+		{% endif %}
+	</div>
+{% endblock %}
