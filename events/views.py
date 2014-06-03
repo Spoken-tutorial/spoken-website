@@ -84,10 +84,11 @@ def events_dashboard(request):
     organiser_notification = None
     rp_notification = None
     if is_organiser(user):
-        organiser_notification = EventsNotification.objects.filter(category = 0, status = 1, academic_id = user.organiser.academic_id, categoryid = user.organiser.academic.workshop_set.filter(organiser_id = user.id).values_list('id'))
-        
+        organiser_notification = EventsNotification.objects.filter(category = 0, status = 1, academic_id = user.organiser.academic_id, categoryid__in = user.organiser.academic.workshop_set.filter(organiser_id = user.id).values_list('id'))
+
     if is_resource_person(user):
-        rp_notification = EventsNotification.objects.filter(category = 0, status = 0)
+        rp_notification = EventsNotification.objects.filter((Q(status = 0) | Q(status = 5) | Q(status = 2)), category = 0)
+        
     context = {
         'roles' : roles,
         'organiser_notification' : organiser_notification,
@@ -374,7 +375,7 @@ def invigilator_request(request, username):
         if request.method == 'POST':
             form = InvigilatorForm(request.POST)
             if form.is_valid():
-                user.groups.add(Group.objects.get(name='invigilator'))
+                user.groups.add(Group.objects.get(name='Invigilator'))
                 invigilator = Invigilator()
                 invigilator.user_id=request.user.id
                 invigilator.academic_id=request.POST['college']
@@ -637,6 +638,11 @@ def workshop_approvel(request, role, rid):
     w.save()
     message = w.academic.institution_name +" has completed "+w.foss.foss+" workshop dated "+w.wdate.strftime("%Y-%m-%d")
     if request.GET['status'] == 'accept':
+        #delete admin notification
+        try:
+            EventsNotification.objects.get(academic_id = w.academic_id, categoryid = w.id, status = 0).delete()
+        except Exception, e:
+            print e
         message = "Resource Person has approved your "+w.foss.foss+" workshop request dated "+w.wdate.strftime("%Y-%m-%d")
     if request.GET['status'] == 'reject':
         message = "Resource Person has rejected your "+w.foss.foss+" workshop request dated "+w.wdate.strftime("%Y-%m-%d")

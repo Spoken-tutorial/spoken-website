@@ -186,15 +186,15 @@ def offline_details(request, wid, category):
                         wa.save()
             #update logs
             if category == 1:
-                message = w.academic.institution_name+" has submited Offline workshop attendance."
-                update_events_log(user_id = user.id, role = 2, category = 0, category_id = w.id, status = 5)
-                update_events_notification(user_id = user.id, role = 2, category = 0, category_id = w.id, status = 5, message = message)
+                message = w.academic.institution_name+" has submited Offline "+w.foss.foss+" workshop attendance dated "+w.wdate.strftime("%Y-%m-%d")
+                update_events_log(user_id = user.id, role = 2, category = 0, category_id = w.id, academic = w.academic_id, status = 5)
+                update_events_notification(user_id = user.id, role = 2, category = 0, category_id = w.id, academic = w.academic_id, status = 5, message = message)
                 messages.success(request, "Thank you for uploading the Attendance. Now make sure that you cross check and verify the details before submiting.")
                 return HttpResponseRedirect('/events/workshop/'+str(wid)+'/attendance/')
             else:
                 message = w.academic.institution_name+" has submited Offline training attendance."
-                update_events_log(user_id = user.id, role = 2, category = 2, category_id = w.id, status = 5)
-                update_events_notification(user_id = user.id, role = 2, category = 2, category_id = w.id, status = 5, message = message)
+                update_events_log(user_id = user.id, role = 2, category = 2, category_id = w.id, academic = w.academic_id, status = 5)
+                update_events_notification(user_id = user.id, role = 2, category = 2, category_id = w.id, academic = w.academic_id, status = 5, message = message)
                 messages.success(request, "Thank you for uploading the Attendance. Now make sure that you cross check and verify the details before submiting.")
                 return HttpResponseRedirect('/events/training/'+str(wid)+'/attendance/')
         messages.error(request, "Please Upload xml file !") 
