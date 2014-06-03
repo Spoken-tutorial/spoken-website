@@ -26,6 +26,11 @@
                                 <li><a href="/events/test/organiser/request/">New Test</a></li>
                                 <li><a href="/events/test/organiser/ongoing">Ongoing Test</a></li>
                             </ul>
+                            <h5>Training</h5>
+                            <ul>
+                                <li><a href="/events/training/organiser/request/">New Training</a></li>
+                                <li><a href="/events/training/organiser/ongoing">Ongoing Test</a></li>
+                            </ul>
                         </div>
                     </div>
                 {% endif %}
@@ -55,6 +60,11 @@
                                 <li><a href="/events/test/rp/waitingforinvigilator/">Approvel Pending</a></li>
                                 <li><a href="/events/test/rp/ongoing">Ongoing Test</a></li>
                             </ul>
+                            <h5>Training</h5>
+                            <ul>
+                                <li><a href="/events/training/rp/pending/">New Requests</a></li>
+                                <li><a href="/events/training/rp/ongoing">Ongoing Test</a></li>
+                            </ul>
                         </div>
                     </div>
                 {% endif %}
@@ -72,6 +82,11 @@
                                 <li><a href="/events/test/em/waitingforinvigilator/">Approvel Pending</a></li>
                                 <li><a href="/events/test/em/ongoing">Ongoing Test</a></li>
                             </ul>
+                            <h5>Training</h5>
+                            <ul>
+                                <li><a href="/events/training/em/pending/">New Requests</a></li>
+                                <li><a href="/events/training/em/ongoing">Ongoing Test</a></li>
+                            </ul>
                         </div>
                     </div>
                 {% endif %}
@@ -84,6 +99,22 @@
                         </div>
                         <div class="panel-body panel-body-notif">
                             {% for notif in organiser_workshop_notification %}
+                                <div class="notif">
+                                    <p>{{ notif.message }}</p>
+                                    <a href="/events/delete-notification/organiser/{{ notif.id }}" class="notif-del"><i class="fa fa-times"></i></a>
+                                    <hr />
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+                {% if organiser_training_notification %}
+                    <div class="panel panel-primary">
+                        <div class="panel-heading panel-heading-notif">Training Notifications
+                            <span class="badge{% if not contrib_notifs|length %}-none{% endif %}" style="float: none; margin-left: 10px;">{{ organiser_training_notification|length }}</span>{% if organiser_training_notification|length %}<a href="/events/clear-notifications/organiser/" class="clear-all" title="Clear all notifications">Clear All</a>{% endif %}
+                        </div>
+                        <div class="panel-body panel-body-notif">
+                            {% for notif in organiser_training_notification %}
                                 <div class="notif">
                                     <p>{{ notif.message }}</p>
                                     <a href="/events/delete-notification/organiser/{{ notif.id }}" class="notif-del"><i class="fa fa-times"></i></a>
@@ -124,6 +155,22 @@
                                 </div>
                             {% endfor %}
                         {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+                {% if rp_training_notification %}
+                    <div class="panel panel-primary">
+                        <div class="panel-heading panel-heading-notif">Training Notifications
+                            <span class="badge{% if not contrib_notifs|length %}-none{% endif %}" style="float: none; margin-left: 10px;">{{ rp_training_notification|length }}</span>{% if rp_training_notification|length %}<a href="/events/clear-notifications/organiser/" class="clear-all" title="Clear all notifications">Clear All</a>{% endif %}
+                        </div>
+                        <div class="panel-body panel-body-notif">
+                            {% for notif in rp_training_notification %}
+                                <div class="notif">
+                                    <p>{{ notif.message }}</p>
+                                    <a href="/events/delete-notification/organiser/{{ notif.id }}" class="notif-del"><i class="fa fa-times"></i></a>
+                                    <hr />
+                                </div>
+                            {% endfor %}
                         </div>
                     </div>
                 {% endif %}

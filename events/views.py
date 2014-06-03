@@ -83,24 +83,27 @@ def events_dashboard(request):
     #print roles
     organiser_workshop_notification = None
     organiser_test_notification = None
+    organiser_training_notification = None
     rp_workshop_notification = None
     rp_test_notification = None
+    rp_training_notification = None
     if is_organiser(user):
         organiser_workshop_notification = EventsNotification.objects.filter((Q(status = 1) | Q(status = 3)), category = 0, status = 1, academic_id = user.organiser.academic_id, categoryid__in = user.organiser.academic.workshop_set.filter(organiser_id = user.id).values_list('id'))
         organiser_test_notification = EventsNotification.objects.filter((Q(status = 1) | Q(status = 2)), category = 1, academic_id = user.organiser.academic_id, categoryid__in = user.organiser.academic.test_set.filter(organiser_id = user.id).values_list('id'))
+        organiser_training_notification = EventsNotification.objects.filter((Q(status = 1) | Q(status = 3)), category = 2, status = 1, academic_id = user.organiser.academic_id, categoryid__in = user.organiser.academic.workshop_set.filter(organiser_id = user.id).values_list('id'))
 
     if is_resource_person(user):
         rp_workshop_notification = EventsNotification.objects.filter((Q(status = 0) | Q(status = 5) | Q(status = 2)), category = 0)
+        rp_training_notification = EventsNotification.objects.filter((Q(status = 0) | Q(status = 5) | Q(status = 2)), category = 2)
         rp_test_notification = EventsNotification.objects.filter((Q(status = 0) | Q(status = 4) | Q(status = 5) | Q(status = 8) | Q(status = 9)), category = 1, categoryid__in = (Workshop.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)))).values_list('id'))
-        print "******************"
-        print rp_test_notification
-        print "******************"
     context = {
         'roles' : roles,
         'organiser_workshop_notification' : organiser_workshop_notification,
         'organiser_test_notification' : organiser_test_notification,
+        'organiser_training_notification' : organiser_training_notification,
         'rp_test_notification' : rp_test_notification,
         'rp_workshop_notification' : rp_workshop_notification,
+        'rp_training_notification' : rp_training_notification,
     }
     return render(request, 'events/templates/events_dashboard.html', context)
 
@@ -1386,8 +1389,8 @@ def training_request(request, role):
             messages.success(request, "You will receive a Training confirmation mail shortly. Thank you. ")
             #update logs
             message = w.academic.institution_name+" has made a Training request for "+w.foss.foss+" on "+w.trdate
-            update_events_log(user_id = user.id, role = 0, category = 2, category_id = w.id, status = 0)
-            update_events_notification(user_id = user.id, role = 2, category = 2, category_id = w.id, status = 0, message = message)
+            update_events_log(user_id = user.id, role = 0, category = 2, category_id = w.id, academic = w.academic_id, status = 0)
+            update_events_notification(user_id = user.id, role = 2, category = 2, category_id = w.id, academic = w.academic_id, status = 0, message = message)
             
             return HttpResponseRedirect("/events/training/organiser/pending/")
         messages.error(request, "Please fill the following details ")
@@ -1427,7 +1430,7 @@ def training_edit(request, role, rid):
             logrole = 0
             if role == 'rp':
                 logrole = 2
-            update_events_log(user_id = user.id, role = logrole, category = 2, category_id = w.id, status = 4)
+            update_events_log(user_id = user.id, role = logrole, category = 2, category_id = w.id, academic = w.academic_id, status = 4)
             return HttpResponseRedirect("/events/training/"+role+"/pending/")
         
         context = {'form':form, }
@@ -1527,8 +1530,8 @@ def training_approvel(request, role, rid):
     if request.GET['status'] == 'reject':
         message = "Resource Person has rejected your "+w.foss.foss+" training request "
     #update logs
-    update_events_log(user_id = user.id, role = 2, category = 2, category_id = w.id, status = status)
-    update_events_notification(user_id = user.id, role = 2, category = 2, category_id = w.id, status = status, message = message)
+    update_events_log(user_id = user.id, role = 2, category = 2, category_id = w.id, academic = w.academic_id, status = status)
+    update_events_notification(user_id = user.id, role = 2, category = 2, category_id = w.id, academic = w.academic_id, status = status, message = message)
     if tmp:
         messages.success(request, "Training has been completed. For downloading the learner's certificate click on View Participants ")
         return HttpResponseRedirect('/events/training/'+role+'/completed/')
@@ -1592,8 +1595,8 @@ def training_attendance(request, wid):
                         w.status = 1
                         w.save()
             message = workshop.academic.institution_name+" has submited workshop attendance"
-            update_events_log(user_id = user.id, role = 2, category = 2, category_id = workshop.id, status = 6)
-            update_events_notification(user_id = user.id, role = 2, category = 2, category_id = workshop.id, status = 6, message = message)
+            update_events_log(user_id = user.id, role = 2, category = 2, category_id = workshop.id, academic = workshop.academic_id, status = 6)
+            update_events_notification(user_id = user.id, role = 2, category = 2, category_id = workshop.id, academic = workshop.academic_id, status = 6, message = message)
             
             messages.success(request, "Thank you for uploading the Attendance. Now make sure that you cross check and verify the details before submiting.") 
     participant_ids = list(TrainingAttendance.objects.filter(training_id = wid).values_list('mdluser_id'))
