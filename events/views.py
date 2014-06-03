@@ -81,18 +81,26 @@ def events_dashboard(request):
         if role.name in events_roles:
             roles.append(role.name)
     #print roles
-    organiser_notification = None
-    rp_notification = None
+    organiser_workshop_notification = None
+    organiser_test_notification = None
+    rp_workshop_notification = None
+    rp_test_notification = None
     if is_organiser(user):
-        organiser_notification = EventsNotification.objects.filter(category = 0, status = 1, academic_id = user.organiser.academic_id, categoryid__in = user.organiser.academic.workshop_set.filter(organiser_id = user.id).values_list('id'))
+        organiser_workshop_notification = EventsNotification.objects.filter((Q(status = 1) | Q(status = 3)), category = 0, status = 1, academic_id = user.organiser.academic_id, categoryid__in = user.organiser.academic.workshop_set.filter(organiser_id = user.id).values_list('id'))
+        organiser_test_notification = EventsNotification.objects.filter((Q(status = 1) | Q(status = 2)), category = 1, academic_id = user.organiser.academic_id, categoryid__in = user.organiser.academic.test_set.filter(organiser_id = user.id).values_list('id'))
 
     if is_resource_person(user):
-        rp_notification = EventsNotification.objects.filter((Q(status = 0) | Q(status = 5) | Q(status = 2)), category = 0)
-        
+        rp_workshop_notification = EventsNotification.objects.filter((Q(status = 0) | Q(status = 5) | Q(status = 2)), category = 0)
+        rp_test_notification = EventsNotification.objects.filter((Q(status = 0) | Q(status = 4) | Q(status = 5) | Q(status = 8) | Q(status = 9)), category = 1, categoryid__in = (Workshop.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)))).values_list('id'))
+        print "******************"
+        print rp_test_notification
+        print "******************"
     context = {
         'roles' : roles,
-        'organiser_notification' : organiser_notification,
-        'rp_notification' : rp_notification,
+        'organiser_workshop_notification' : organiser_workshop_notification,
+        'organiser_test_notification' : organiser_test_notification,
+        'rp_test_notification' : rp_test_notification,
+        'rp_workshop_notification' : rp_workshop_notification,
     }
     return render(request, 'events/templates/events_dashboard.html', context)
 
@@ -117,15 +125,14 @@ def delete_events_notification(request, notif_type, notif_id):
 def clear_events_notification(request, notif_type):
     notif_rec = None
     try:
-        if notif_type == "contributor":
-            notif_rec = ContributorNotification.objects.filter(user = request.user).delete()
+        if notif_type == "organiser":
+            notif_rec = EventsNotification.objects.filter(user = request.user).delete()
         elif notif_type == "invigilator":
-            notif_rec = AdminReviewerNotification.objects.filter(user = request.user).delete()
+            notif_rec = EventsNotification.objects.filter(user = request.user).delete()
         elif notif_type == "rp":
-            notif_rec = DomainReviewerNotification.objects.filter(user = request.user).delete()
-        elif notif_type == "em":
-            notif_rec = QualityReviewerNotification.objects.filter(user = request.user).delete()
-    except:
+            notif_rec = EventsNotification.objects.filter(user = request.user).delete()
+    except Exception, e:
+        print e
         messages.warning(request, 'Something went wrong, contact site administrator.')
 
     return HttpResponseRedirect(request.META['HTTP_REFERER'])
@@ -907,8 +914,8 @@ def test_request(request, role):
             messages.success(request, "You will receive a test confirmation mail shortly. Thank you. ")
             #update logs
             message = t.academic.institution_name+" has made a test request for "+t.foss.foss+" on "+t.tdate
-            update_events_log(user_id = user.id, role = 0, category = 1, category_id = t.id, status = 0)
-            update_events_notification(user_id = user.id, role = 0, category = 1, category_id = t.id, status = 0, message = message)
+            update_events_log(user_id = user.id, role = 0, category = 1, category_id = t.id, academic = t.academic_id, status = 0)
+            update_events_notification(user_id = user.id, role = 0, category = 1, category_id = t.id, academic = t.academic_id, status = 0, message = message)
             
             return HttpResponseRedirect("/events/test/organiser/pending/")
             
@@ -998,7 +1005,7 @@ def test_edit(request, role, rid):
             logrole = 0
             if role == 'rp':
                 logrole = 2
-            update_events_log(user_id = user.id, role = logrole, category = 1, category_id = t.id, status = 7)
+            update_events_log(user_id = user.id, role = logrole, category = 1, category_id = t.id, academic = t.academic_id, status = 7)
             return HttpResponseRedirect("/events/test/"+role+"/pending/")
         
         context = {'form':form, }
@@ -1068,8 +1075,8 @@ def test_approvel(request, role, rid):
     
     #events log
     #message = user.first_name+" "+user.last_name+" has accepted your "+t.foss.foss+" Test"
-    update_events_log(user_id = user.id, role = logrole, category = 1, category_id = t.id, status = status)
-    update_events_notification(user_id = user.id, role = logrole, category = 1, category_id = t.id, status = status, message = message)
+    update_events_log(user_id = user.id, role = logrole, category = 1, category_id = t.id, academic = t.academic_id, status = status)
+    update_events_notification(user_id = user.id, role = logrole, category = 1, category_id = t.id, academic = t.academic_id, status = status, message = message)
     messages.success(request, alert)
     
     if request.GET['status'] == 'completed':
@@ -1134,9 +1141,9 @@ def test_attendance(request, tid):
                             print "MdlUserEnrolments => ", e
                             MdlUserEnrolments.objects.create(enrolid = mdlenrol.id, userid = ta.mdluser_id, status = 0, timestart = datetime.datetime.now().strftime("%s"), timeend = 0, modifierid = ta.mdluser_id, timecreated = datetime.datetime.now().strftime("%s"), timemodified = datetime.datetime.now().strftime("%s"))
                         
-            message = test.academic.institution_name+" has submited Test attendance"
-            update_events_log(user_id = user.id, role = 1, category = 1, category_id = test.id, status = 8)
-            update_events_notification(user_id = user.id, role = 1, category = 1, category_id = test.id, status = 8, message = message)
+            message = test.academic.institution_name+" has submited Test attendance dated "+test.tdate.strftime("%Y-%m-%d")
+            update_events_log(user_id = user.id, role = 1, category = 1, category_id = test.id, academic = test.academic_id, status = 8)
+            update_events_notification(user_id = user.id, role = 1, category = 1, category_id = test.id, academic = test.academic_id, status = 8, message = message)
             messages.success(request, "Thank you for uploading the Attendance. Now make sure that you cross check and verify the details before submiting.") 
         
     participant_ids = list(WorkshopAttendance.objects.filter(workshop_id = test.workshop_id).values_list('mdluser_id'))

@@ -77,17 +77,49 @@
                 {% endif %}
             </div>
             <div class="creation-notifications col-lg-6 col-md-6 col-sm-6">
-                {% if organiser_notification %}
+                {% if organiser_workshop_notification %}
                     <div class="panel panel-primary">
-                        <div class="panel-heading panel-heading-notif">Organiser Notifications
-                            <span class="badge{% if not contrib_notifs|length %}-none{% endif %}" style="float: none; margin-left: 10px;">{{ organiser_notification|length }}</span>{% if organiser_notification|length %}<a href="/creation/clear-notifications/organiser/" class="clear-all" title="Clear all notifications">Clear All</a>{% endif %}
+                        <div class="panel-heading panel-heading-notif">Workshop Notifications
+                            <span class="badge{% if not contrib_notifs|length %}-none{% endif %}" style="float: none; margin-left: 10px;">{{ organiser_workshop_notification|length }}</span>{% if organiser_workshop_notification|length %}<a href="/events/clear-notifications/organiser/" class="clear-all" title="Clear all notifications">Clear All</a>{% endif %}
                         </div>
                         <div class="panel-body panel-body-notif">
-                        {% if organiser_notification %}
-                            {% for notif in organiser_notification %}
+                            {% for notif in organiser_workshop_notification %}
                                 <div class="notif">
                                     <p>{{ notif.message }}</p>
                                     <a href="/events/delete-notification/organiser/{{ notif.id }}" class="notif-del"><i class="fa fa-times"></i></a>
+                                    <hr />
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+                {% if organiser_test_notification %}
+                    <div class="panel panel-primary">
+                        <div class="panel-heading panel-heading-notif">Onlinetest Notifications
+                            <span class="badge{% if not contrib_notifs|length %}-none{% endif %}" style="float: none; margin-left: 10px;">{{ organiser_test_notification|length }}</span>{% if organiser_test_notification|length %}<a href="/events/clear-notifications/organiser/" class="clear-all" title="Clear all notifications">Clear All</a>{% endif %}
+                        </div>
+                        <div class="panel-body panel-body-notif">
+                            {% for notif in organiser_test_notification %}
+                                <div class="notif">
+                                    <p>{{ notif.message }}</p>
+                                    <a href="/events/delete-notification/organiser/{{ notif.id }}" class="notif-del"><i class="fa fa-times"></i></a>
+                                    <hr />
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+                {% if rp_workshop_notification %}
+                    <div class="panel panel-primary">
+                        <div class="panel-heading panel-heading-notif">Workshop Notifications
+                            <span class="badge{% if not contrib_notifs|length %}-none{% endif %}" style="float: none; margin-left: 10px;">{{ rp_workshop_notification|length }}</span>{% if rp_workshop_notification|length %}<a href="/events/clear-notifications/rp/" class="clear-all" title="Clear all notifications">Clear All</a>{% endif %}
+                        </div>
+                        <div class="panel-body panel-body-notif">
+                        {% if rp_workshop_notification %}
+                            {% for notif in rp_workshop_notification %}
+                                <div class="notif">
+                                    <p>{{ notif.message }}</p>
+                                    <a href="/events/delete-notification/rp/{{ notif.id }}" class="notif-del"><i class="fa fa-times"></i></a>
                                     <hr />
                                 </div>
                             {% endfor %}
@@ -95,14 +127,14 @@
                         </div>
                     </div>
                 {% endif %}
-                {% if rp_notification %}
+                {% if rp_test_notification %}
                     <div class="panel panel-primary">
-                        <div class="panel-heading panel-heading-notif">Resource Person Notifications
-                            <span class="badge{% if not contrib_notifs|length %}-none{% endif %}" style="float: none; margin-left: 10px;">{{ rp_notification|length }}</span>{% if rp_notification|length %}<a href="/rp/clear-notifications/organiser/" class="clear-all" title="Clear all notifications">Clear All</a>{% endif %}
+                        <div class="panel-heading panel-heading-notif">Online Test Notifications
+                            <span class="badge{% if not contrib_notifs|length %}-none{% endif %}" style="float: none; margin-left: 10px;">{{ rp_test_notification|length }}</span>{% if rp_test_notification|length %}<a href="/events/clear-notifications/rp/" class="clear-all" title="Clear all notifications">Clear All</a>{% endif %}
                         </div>
                         <div class="panel-body panel-body-notif">
-                        {% if rp_notification %}
-                            {% for notif in rp_notification %}
+                        {% if rp_test_notification %}
+                            {% for notif in rp_test_notification %}
                                 <div class="notif">
                                     <p>{{ notif.message }}</p>
                                     <a href="/events/delete-notification/rp/{{ notif.id }}" class="notif-del"><i class="fa fa-times"></i></a>
