@@ -127,6 +127,8 @@ def init_creation_app(request):
             Group.objects.create(name = 'Contributor')
         if Group.objects.filter(name = 'External-Contributor').count() == 0:
             Group.objects.create(name = 'External-Contributor')
+        if Group.objects.filter(name = 'Video-Reviewer').count() == 0:
+            Group.objects.create(name = 'Video-Reviewer')
         if Group.objects.filter(name = 'Domain-Reviewer').count() == 0:
             Group.objects.create(name = 'Domain-Reviewer')
         if Group.objects.filter(name = 'Quality-Reviewer').count() == 0:
@@ -1438,6 +1440,7 @@ def creation_view_tutorial(request, trid):
         'tr_rec': tr_rec,
         'tr_recs': sorted(tr_recs, key=lambda tutorial_resource: tutorial_resource.tutorial_detail.order),
         'video_info': video_info,
-        'media_url': settings.MEDIA_URL
+        'media_url': settings.MEDIA_URL,
+        'script_base': settings.SCRIPT_URL
     }
     return render(request, 'creation/templates/creation_view_tutorial.html', context)
