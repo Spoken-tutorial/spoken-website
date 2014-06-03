@@ -57,7 +57,7 @@ def send_registration_confirmation(user):
         Regards,<br>\n
         Spoken Tutorial
     """.format(
-        "sanmugam",
+        user.username,
         "http://beta.spoken-tutorial.org/accounts/confirm/" + str(p.confirmation_code) + "/" + user.username
     )
 
@@ -174,5 +174,8 @@ def user_has_profile(user):
             return False
         return True
     except Exception, e:
+        confirmation_code = ''.join(random.choice(string.ascii_uppercase + string.digits + string.ascii_lowercase) for x in range(33))
+        p = Profile(user=user, confirmation_code=confirmation_code)
+        p.save()
         print "************"
         print e

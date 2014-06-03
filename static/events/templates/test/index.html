@@ -42,7 +42,7 @@
                 {% for record in collection %}
                     <tr>
                         <td>{{ record.academic }}</td>
-                        <td>{{ record.foss }}</td>
+                        <td>{{ record.foss.foss }}</td>
                         <td>{{ record.tdate|date:"d M Y" }} {{    record.ttime }}</td>
                         <!-- actions based on roles -->
                         <td>

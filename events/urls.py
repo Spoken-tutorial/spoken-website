@@ -50,6 +50,9 @@ urlpatterns = patterns('',
     url(r'^training/(?P<role>\w+)/(?P<status>\w+)/$', views.training_list, name='training_list'),
     url(r'^training/(?P<role>\w+)/(?P<rid>\d+)/edit/$', views.training_edit, name='training_edit'),
     
+    url(r'^delete-notification/(\w+)/(\d+)/$', 'events.views.delete_events_notification', name="delete_events_notification"),
+    url(r'^clear-notifications/(\w+)/$', 'events.views.clear_events_notification', name="clear_events_notification"),
+    
     #Ajax 
     url(r'ajax-ac-state/$', views.ajax_ac_state, name='ajax_ac_state'),
     url(r'ajax-ac-location/$', views.ajax_ac_location, name='ajax_ac_location'),
