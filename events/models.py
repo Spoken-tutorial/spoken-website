@@ -246,6 +246,7 @@ class FossMdlCourses(models.Model):
 class WorkshopLog(models.Model):
     user = models.ForeignKey(User)
     workshop = models.ForeignKey(Workshop)
+    academic = models.ForeignKey(AcademicCenter)
     role = models.PositiveSmallIntegerField() #{0:'organiser', 1:'ResourcePerson', 2: 'Event Manager'}
     status = models.PositiveSmallIntegerField() #{0:'new', 1:'approved', 2:'completed', 3: 'rejected', 4:'update',  5:'Offline-Attendance submited', 6:'Marked Attendance'}
     created = models.DateTimeField(auto_now_add = True)
@@ -253,6 +254,7 @@ class WorkshopLog(models.Model):
 class TestLog(models.Model):
     user = models.ForeignKey(User)
     test = models.ForeignKey(Test)
+    academic = models.ForeignKey(AcademicCenter)
     role = models.PositiveSmallIntegerField(default=0) #{0:'organiser', 1:'invigilator', 2:'ResourcePerson', 3: 'Event Manager'}
     status = models.PositiveSmallIntegerField(default=0) #{0:'new', 1:'RP-approved', 2:'Inv-approved', 3: 'ongoing', 4:'completed', 5:'Rp-rejected', 6:'Inv-rejected', 7:'Update', 8:'Attendance submited', 9:'Marked Attendance'}
     created = models.DateTimeField(auto_now_add = True)
@@ -260,6 +262,7 @@ class TestLog(models.Model):
 class EventsNotification(models.Model):
     user = models.ForeignKey(User)
     role = models.PositiveSmallIntegerField(default=0) #{0:'organiser', 1:'invigilator', 2:'ResourcePerson', 3: 'Event Manager'}
+    academic = models.ForeignKey(AcademicCenter)
     category = models.PositiveSmallIntegerField(default=0) #{'workshop', 'test', 'training'}
     categoryid = models.PositiveIntegerField(default=0)
     status = models.PositiveSmallIntegerField(default=0) #{0:'new', 1:'update', 2:'approved', 3:'attendance', 4: 'completed', 5:'rejected'}

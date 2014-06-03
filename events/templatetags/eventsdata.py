@@ -1,6 +1,7 @@
 from django import template
 from django.contrib.auth.models import User
 from events.models import *
+from events.views import is_organiser, is_invigilator, is_resource_person, is_event_manager
 import datetime
 register = template.Library()
 
@@ -109,6 +110,10 @@ def can_upload_workshop_data(wcode, category):
             print e
             return False
     
+register.filter('is_organiser', is_organiser)
+register.filter('is_invigilator', is_invigilator)
+register.filter('is_resource_person', is_resource_person)
+register.filter('is_event_manager', is_event_manager)
 
 register.filter('can_enter_test', can_enter_test)
 register.filter('get_status', get_status)

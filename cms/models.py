@@ -11,7 +11,7 @@ class Profile(models.Model):
     state = models.ForeignKey(State, null=True)
     country = models.CharField(max_length=255, blank=True, null=True)
     pincode = models.PositiveIntegerField(blank=True, null=True)
-    phone = models.PositiveIntegerField(blank=True, null=True)
+    phone = models.CharField(max_length=20, null=True)
     created = models.DateTimeField(auto_now_add=True)
     class Meta:
         app_label = 'cms'

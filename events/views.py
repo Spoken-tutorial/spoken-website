@@ -80,23 +80,55 @@ def events_dashboard(request):
     for role in user_roles:
         if role.name in events_roles:
             roles.append(role.name)
-    print roles
-    is_organiser_or_invigilator = 0
-    try:
-        if user.organiser:
-            is_organiser_or_invigilator = 1
-        if user.invigilator:
-            is_organiser_or_invigilator = 2
-        if user.invigilator and user.organiser:
-            is_organiser_or_invigilator = 3
-    except Exception, e:
-        print e
+    #print roles
+    organiser_notification = None
+    rp_notification = None
+    if is_organiser(user):
+        organiser_notification = EventsNotification.objects.filter(category = 0, status = 1, academic_id = user.organiser.academic_id, categoryid__in = user.organiser.academic.workshop_set.filter(organiser_id = user.id).values_list('id'))
+
+    if is_resource_person(user):
+        rp_notification = EventsNotification.objects.filter((Q(status = 0) | Q(status = 5) | Q(status = 2)), category = 0)
+        
     context = {
         'roles' : roles,
-        'is_organiser_or_invigilator' : is_organiser_or_invigilator
+        'organiser_notification' : organiser_notification,
+        'rp_notification' : rp_notification,
     }
     return render(request, 'events/templates/events_dashboard.html', context)
 
+@login_required
+def delete_events_notification(request, notif_type, notif_id):
+    notif_rec = None
+    try:
+        if notif_type == "organiser":
+            notif_rec = EventsNotification.objects.select_related().get(pk = notif_id)
+        elif notif_type == "invigilator":
+            notif_rec = EventsNotification.objects.select_related().get(pk = notif_id)
+        elif notif_type == "rp":
+            notif_rec = EventsNotification.objects.select_related().get(pk = notif_id)
+    except Exception, e:
+        print e
+        messages.warning(request, 'Selected notification is already deleted (or) You do not have permission to delete it.')
+    if notif_rec:
+        notif_rec.delete()
+    return HttpResponseRedirect(request.META['HTTP_REFERER'])
+
+@login_required
+def clear_events_notification(request, notif_type):
+    notif_rec = None
+    try:
+        if notif_type == "contributor":
+            notif_rec = ContributorNotification.objects.filter(user = request.user).delete()
+        elif notif_type == "invigilator":
+            notif_rec = AdminReviewerNotification.objects.filter(user = request.user).delete()
+        elif notif_type == "rp":
+            notif_rec = DomainReviewerNotification.objects.filter(user = request.user).delete()
+        elif notif_type == "em":
+            notif_rec = QualityReviewerNotification.objects.filter(user = request.user).delete()
+    except:
+        messages.warning(request, 'Something went wrong, contact site administrator.')
+
+    return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
 @login_required
 def new_ac(request):
@@ -343,7 +375,7 @@ def invigilator_request(request, username):
         if request.method == 'POST':
             form = InvigilatorForm(request.POST)
             if form.is_valid():
-                user.groups.add(Group.objects.get(name='invigilator'))
+                user.groups.add(Group.objects.get(name='Invigilator'))
                 invigilator = Invigilator()
                 invigilator.user_id=request.user.id
                 invigilator.academic_id=request.POST['college']
@@ -469,8 +501,8 @@ def workshop_request(request, role):
             messages.success(request, "You will receive a workshop confirmation mail shortly. Thank you. ")
             #update logs
             message = w.academic.institution_name+" has made a workshop request for "+w.foss.foss+" on "+w.wdate
-            update_events_log(user_id = user.id, role = 0, category = 0, category_id = w.id, status = 0)
-            update_events_notification(user_id = user.id, role = 0, category = 0, category_id = w.id, status = 0, message = message)
+            update_events_log(user_id = user.id, role = 0, category = 0, category_id = w.id, academic = w.academic_id, status = 0)
+            update_events_notification(user_id = user.id, role = 0, category = 0, category_id = w.id, academic = w.academic_id, status = 0, message = message)
             
             return HttpResponseRedirect("/events/workshop/organiser/pending/")
         messages.error(request, "Please fill the following details ")
@@ -510,7 +542,7 @@ def workshop_edit(request, role, rid):
             logrole = 0
             if role == 'rp':
                 logrole = 2
-            update_events_log(user_id = user.id, role = logrole, category = 0, category_id = w.id, status = 4)
+            update_events_log(user_id = user.id, role = logrole, category = 0, category_id = w.id, academic = w.academic_id, status = 4)
             return HttpResponseRedirect("/events/workshop/"+role+"/pending/")
         
         context = {'form':form, }
@@ -606,12 +638,17 @@ def workshop_approvel(request, role, rid):
     w.save()
     message = w.academic.institution_name +" has completed "+w.foss.foss+" workshop dated "+w.wdate.strftime("%Y-%m-%d")
     if request.GET['status'] == 'accept':
-        message = "Resource Person has approved your "+w.foss.foss+" workshop request "
+        #delete admin notification
+        try:
+            EventsNotification.objects.get(academic_id = w.academic_id, categoryid = w.id, status = 0).delete()
+        except Exception, e:
+            print e
+        message = "Resource Person has approved your "+w.foss.foss+" workshop request dated "+w.wdate.strftime("%Y-%m-%d")
     if request.GET['status'] == 'reject':
-        message = "Resource Person has rejected your "+w.foss.foss+" workshop request "
+        message = "Resource Person has rejected your "+w.foss.foss+" workshop request dated "+w.wdate.strftime("%Y-%m-%d")
     #update logs
-    update_events_log(user_id = user.id, role = 2, category = 0, category_id = w.id, status = status)
-    update_events_notification(user_id = user.id, role = 2, category = 0, category_id = w.id, status = status, message = message)
+    update_events_log(user_id = user.id, role = 2, category = 0, category_id = w.id, academic = w.academic_id, status = status)
+    update_events_notification(user_id = user.id, role = 2, category = 0, category_id = w.id, academic = w.academic_id, status = status, message = message)
     if tmp:
         messages.success(request, "Workshop has been completed. For downloading the learner's certificate click on View Participants ")
         return HttpResponseRedirect('/events/workshop/'+role+'/completed/')
@@ -698,8 +735,8 @@ def workshop_attendance(request, wid):
                         w.status = 1
                         w.save()
             message = workshop.academic.institution_name+" has submited workshop attendance"
-            update_events_log(user_id = user.id, role = 2, category = 0, category_id = workshop.id, status = 6)
-            update_events_notification(user_id = user.id, role = 2, category = 0, category_id = workshop.id, status = 6, message = message)
+            update_events_log(user_id = user.id, role = 2, category = 0, category_id = workshop.id, academic = workshop.academic_id,  status = 6)
+            update_events_notification(user_id = user.id, role = 2, category = 0, category_id = workshop.id, academic = workshop.academic_id, status = 6, message = message)
             
             messages.success(request, "Thank you for uploading the Attendance. Now make sure that you cross check and verify the details before submiting.") 
     participant_ids = list(WorkshopAttendance.objects.filter(workshop_id = wid).values_list('mdluser_id'))
@@ -1566,23 +1603,23 @@ def training_attendance(request, wid):
     return render(request, 'events/templates/training/attendance.html', context)
 
         
-def update_events_log(user_id, role, category, category_id, status):
+def update_events_log(user_id, role, category, category_id, academic, status):
     if category == 0:
         try:
-            WorkshopLog.objects.create(user_id = user_id, workshop_id = category_id, role = role, status = status)
+            WorkshopLog.objects.create(user_id = user_id, workshop_id = category_id, role = role, academic_id = academic, status = status)
         except Exception, e:
             print "Workshop Log =>",e
     elif category == 1:
         try:
-            TestLog.objects.create(user_id = user_id, test_id = category_id, role = role, status = status)
+            TestLog.objects.create(user_id = user_id, test_id = category_id, role = role, academic_id = academic, status = status)
         except Exception, e:
             print "Test Log => ",e
     else:
         print "************ Error in events log ***********"
         
-def update_events_notification(user_id, role, category, category_id, status, message):
+def update_events_notification(user_id, role, category, category_id, status, academic, message):
     try:
-        EventsNotification.objects.create(user_id = user_id, role = role, category = category, categoryid = category_id, status = status, message = message)
+        EventsNotification.objects.create(user_id = user_id, role = role, category = category, categoryid = category_id, academic_id = academic, status = status, message = message)
     except Exception, e:
         print "Error in Events Notification => ", e
 
