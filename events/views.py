@@ -547,6 +547,13 @@ def workshop_edit(request, role, rid):
             w.wtime = dateTime[1]
             w.skype = request.POST['skype']
             w.save()
+            w.department.clear()
+            for dept in form.cleaned_data.get('department'):
+                try:
+                    w.department.add(dept)
+                except Exception, e:
+                    print e,
+                    pass
             messages.success(request, "Workshop has been sucessfully updated")
             #update logs
             logrole = 0
@@ -905,10 +912,15 @@ def test_request(request, role):
             t.invigilator_id = form.cleaned_data['invigilator']
             #t.academic_id = form.cleaned_data['academic']
             t.academic = user.organiser.academic
-            t.workshop_id = form.cleaned_data['workshop']
+            #t.workshop_id = form.cleaned_data['workshop']
             t.tdate = dateTime[0]
             t.ttime = dateTime[1]
             t.foss_id = form.cleaned_data['foss']
+            t.test_category_id = form.cleaned_data['test_category']
+            if int(form.cleaned_data['test_category']) == 1:
+                t.workshop_id = form.cleaned_data['workshop']
+            if int(form.cleaned_data['test_category']) == 2:
+                t.training_id = form.cleaned_data['training']
             t.save()
             #M2M saving department
             for dept in form.cleaned_data.get('department'):
@@ -987,9 +999,8 @@ def test_edit(request, role, rid):
         raise Http404('You are not allowed to view this page')
     
     if request.method == 'POST':
-        form = TestForm(request.POST, user = request.user)
+        form = TestForm(request.POST, 'edit', user = request.user)
         if form.is_valid():
-            print form.cleaned_data
             dateTime = request.POST['tdate'].split(' ')
             t = Test.objects.get(pk=rid)
             #check if date time chenged or not
@@ -1004,6 +1015,15 @@ def test_edit(request, role, rid):
             t.foss_id = form.cleaned_data['foss']
             t.save()
             messages.success(request, "Test has been sucessfully updated")
+            #department save
+            t.department.clear()
+            for dept in form.cleaned_data.get('department'):
+                try:
+                    t.department.add(dept)
+                except Exception, e:
+                    print e,
+                    pass
+            t.save()
             #events log
             logrole = 0
             if role == 'rp':
@@ -1011,7 +1031,7 @@ def test_edit(request, role, rid):
             update_events_log(user_id = user.id, role = logrole, category = 1, category_id = t.id, academic = t.academic_id, status = 7)
             return HttpResponseRedirect("/events/test/"+role+"/pending/")
         
-        context = {'form':form, }
+        context = {'form':form, 'role':role}
         return render(request, 'events/templates/test/form.html', context)
     else:
         context = {}
@@ -1019,6 +1039,7 @@ def test_edit(request, role, rid):
         context.update(csrf(request))
         context['form'] = TestForm(instance = record, user = user)
         context['instance'] = record
+        context['role'] = role
         return render(request, 'events/templates/test/form.html', context)
 
 @login_required
@@ -1066,14 +1087,17 @@ def test_approvel(request, role, rid):
     #if status = 2:
     #    if not (user.is_authenticated() and w.academic.state in State.objects.filter(resourceperson__user_id=user) and ( is_event_manager(user) or is_resource_person(user))):
     #        raise PermissionDenied('You are not allowed to view this page')
-    t.status = status
-    if t.status == 1:
+    if status == 1:
         t.appoved_by_id = user.id
         t.workshop_code = "TC-"+str(t.id)
-    
-    if t.status == 4:
-        t.participant_count = TestAttendance.objects.filter(test_id=1).count()
-    
+    if status == 4:
+        testatten = TestAttendance.objects.filter(test_id=t.id, status__lt=2)
+        if testatten:
+            messages.error(request, "Students are processing the test. Check the status for each students!")
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+        t.participant_count = TestAttendance.objects.filter(test_id=t.id).count()
+
+    t.status = status
     t.save()
     
     #events log
@@ -1148,17 +1172,28 @@ def test_attendance(request, tid):
             update_events_log(user_id = user.id, role = 1, category = 1, category_id = test.id, academic = test.academic_id, status = 8)
             update_events_notification(user_id = user.id, role = 1, category = 1, category_id = test.id, academic = test.academic_id, status = 8, message = message)
             messages.success(request, "Thank you for uploading the Attendance. Now make sure that you cross check and verify the details before submiting.") 
+    
+    participant_ids = []
+    if test.test_category_id == 1:
+        participant_ids = list(WorkshopAttendance.objects.filter(workshop_id = test.workshop_id).values_list('mdluser_id'))
+    elif test.test_category_id == 2:
+        participant_ids = list(TrainingAttendance.objects.filter(training_id = test.training_id).values_list('mdluser_id'))
         
-    participant_ids = list(WorkshopAttendance.objects.filter(workshop_id = test.workshop_id).values_list('mdluser_id'))
     mdlids = []
     wp = None
     for k in participant_ids:
         mdlids.append(k[0])
     if mdlids:
         wp = MdlUser.objects.filter(id__in = mdlids)
+    #check can close the test
+    testatten = TestAttendance.objects.filter(test_id=test.id, status__gte=3)
+    enable_close_test = None
+    if testatten:
+        enable_close_test = True
     context = {}
     context['collection'] = wp
     context['test'] = test
+    context['enable_close_test'] = enable_close_test
     context.update(csrf(request))
     messages.info(request, "Instruct the students to Register and Login on the Online Test link of Spoken Tutorial. Click on the checkbox so that usernames of all the students who are present for the test are marked, then click the submit button. Students can now proceed for the Test.")
     return render(request, 'events/templates/test/attendance.html', context)
@@ -1425,6 +1460,13 @@ def training_edit(request, role, rid):
             w.trtime = dateTime[1]
             w.skype = request.POST['skype']
             w.save()
+            w.department.clear()
+            for dept in form.cleaned_data.get('department'):
+                try:
+                    w.department.add(dept)
+                except Exception, e:
+                    print e,
+                    pass
             messages.success(request, "Training has been sucessfully updated")
             #update logs
             logrole = 0
@@ -1516,7 +1558,7 @@ def training_approvel(request, role, rid):
     w.appoved_by_id = user.id
     #todo: add workshop code
     if w.status == 1:
-        w.workshop_code = "TR-"+str(w.id)
+        w.training_code = "TR-"+str(w.id)
     tmp = 0
     if request.GET['status'] == 'completed':
         # calculate the participant list
@@ -1735,22 +1777,49 @@ def ajax_dept_foss(request):
     data = {}
     if request.method == 'POST':
         tmp = ''
-        workshop = request.POST.get('workshop')
-        print request.POST.get('fields[foss]')
-        print "************"
-        if request.POST.get('fields[dept]'):
-            dept = Department.objects.filter(workshop__id = workshop)
+        category =  int(request.POST.get('fields[type]'))
+        print category
+        print request.POST
+        if category == 1:
+            print request.POST
+            training = request.POST.get('workshop')
+            if request.POST.get('fields[dept]'):
+                dept = Department.objects.filter(training__id = training)
+                for i in dept:
+                    tmp +='<option value='+str(i.id)+'>'+i.name+'</option>'
+                data['dept'] = tmp
+            
+            if request.POST.get('fields[foss]'):
+                training = Training.objects.filter(pk=training)
+                tmp = '<option value = None> -- None -- </option>'
+                if training:
+                    tmp +='<option value='+str(training[0].foss.id)+'>'+training[0].foss.foss+'</option>'
+                data['foss'] = tmp
+        elif category == 0:
+            workshop = request.POST.get('workshop')
+            if request.POST.get('fields[dept]'):
+                dept = Department.objects.filter(workshop__id = workshop)
+                for i in dept:
+                    tmp +='<option value='+str(i.id)+'>'+i.name+'</option>'
+                data['dept'] = tmp
+            
+            if request.POST.get('fields[foss]'):
+                workshop = Workshop.objects.filter(pk=workshop)
+                tmp = '<option value = None> -- None -- </option>'
+                if workshop:
+                    tmp +='<option value='+str(workshop[0].foss.id)+'>'+workshop[0].foss.foss+'</option>'
+                data['foss'] = tmp
+        else:
+            dept = Department.objects.all()
             for i in dept:
                 tmp +='<option value='+str(i.id)+'>'+i.name+'</option>'
             data['dept'] = tmp
-        
-        if request.POST.get('fields[foss]'):
-            workshop = Workshop.objects.filter(pk=workshop)
+            
             tmp = '<option value = None> -- None -- </option>'
-            if workshop:
-                tmp +='<option value='+str(workshop[0].foss.id)+'>'+workshop[0].foss.foss+'</option>'
-            data['foss'] = tmp
-        
+            foss = FossCategory.objects.all()
+            for i in foss:
+                tmp +='<option value='+str(i.id)+'>'+i.foss+'</option>'
+            data['foss'] = tmp            
     return HttpResponse(json.dumps(data), mimetype='application/json')
 
 @csrf_exempt

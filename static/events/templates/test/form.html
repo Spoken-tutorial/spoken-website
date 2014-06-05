@@ -54,9 +54,19 @@
                 {{ form.name.errors }}
             </div>-->
             <div class="form-group">
-                <label for="id_academic">Workshop Code</label>
+                <label for="id_test_category">Test Category</label>
+                {% render_field form.test_category class+="form-control Test Category" tabindex="1" data-placeholder="Enter Test Category" %}
+                {{ form.test_category.errors }}
+            </div>
+            <div class="form-group workshop_group">
+                <label for="id_workshop">Workshop Code</label>
                 {% render_field form.workshop class+="form-control workshop" tabindex="1" data-placeholder="Enter Workshop code" %}
                 {{ form.workshop.errors }}
+            </div>
+            <div class="form-group training_category_group">
+                <label for="id_training">Training Code</label>
+                {% render_field form.training class+="form-control training" tabindex="1" data-placeholder="Enter Training code" %}
+                {{ form.training.errors }}
             </div>
             <div class="form-group">
                 <label for="id_academic">Invigilator</label>
@@ -94,6 +104,37 @@
 {% block jsblock %}
     <script src="{% static 'spoken/js/jquery.datetimepicker.js' %}"></script>
     <script>
+        function hide_input() {
+            $category = $('#id_test_category');
+            if($category.val() == 1){
+                $('.training_category_group').css({'display':'none'});
+                $('.training_category_group .training').attr('disabled', 'disabled');
+                $('.workshop_group').css({'display':'black'});
+                $('.workshop_group .workshop').removeAttr('disabled');
+            } else if ($category.val() == 2){
+                $('.workshop_group').css({'display':'none'});
+                $('.workshop_group .workshop').attr('disabled', 'disabled');
+                $('.training_category_group').css({'display':'black'});
+                $('.training_category_group .training').removeAttr('disabled');
+            }else {
+                ajaxFOssDeptFillDatas('foss', 'dept', 2);
+                $('.training_category_group').css({'display':'none'});
+                $('.workshop_group').css({'display':'none'});
+                $('.training_category_group .training').attr('disabled', 'disabled');
+                $('.workshop_group .workshop').attr('disabled', 'disabled');
+            }
+        }
+        
+        $category = $('#id_test_category');
+        hide_input();
+        $workshop = $('#id_workshop');
+        $training = $('#id_training');
+        console.log($category.val());
+        $category.change(function(){
+            hide_input();
+        });
+        
+        
         $('.date').datetimepicker({
             onGenerate:function( ct ){
                 $(this).find('.xdsoft_day_of_week0')
@@ -132,22 +173,32 @@
         });
         
         $workshop = $('#id_workshop');
+        $training = $('#id_training');
         $department = $('#id_department');
         $foss = $('#id_foss');
         
         $workshop.change(function() {
-            ajaxFOssDeptFillDatas('foss', 'dept');
+            ajaxFOssDeptFillDatas('foss', 'dept', 0);
         });
         
+        $training.change(function() {
+            ajaxFOssDeptFillDatas('foss', 'dept', 1);
+        });
         
-function ajaxFOssDeptFillDatas(foss, dept){
+function ajaxFOssDeptFillDatas(foss, dept, type){
     $afoss = $('#id_foss');
     $adepartment = $('#id_department');
-    var workshop = $(".workshop").val();
+    if(type){
+        var workshop = $(".training").val();
+    } else {
+        var workshop = $(".workshop").val();
+    }
     
     $foss = foss || "";
     $department = dept || "";
+    $type = type;
     fields = {}
+    fields['type'] = type;
     if($foss) {
         fields['foss'] = 'foss';
     }

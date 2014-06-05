@@ -34,11 +34,13 @@
 			        </table>
 			        <input class="btn btn-primary" type="submit" value="Submit" />
 			    </form>
-			    <h4 class='step'><span class="label label-default">Step 2</span></h4>
-			    <div class="bs-callout bs-callout-info">
-                    <p>Please click <b>Close the Test</b> to end the test.</p>
-                    <a class='btn btn-primary' title = "To complete the workshop click here" href="{% url 'events:test_approvel' 'invigilator' test.id %}?status=completed"">Close the Test</a>
-                </div>
+			    {% if enable_close_test %}
+			        <h4 class='step'><span class="label label-default">Step 2</span></h4>
+			        <div class="bs-callout bs-callout-info">
+                        <p>Please click <b>Close the Test</b> to end the test.</p>
+                        <a class='btn btn-primary' title = "To complete the workshop click here" href="{% url 'events:test_approvel' 'invigilator' test.id %}?status=completed"">Close the Test</a>
+                    </div>
+                {% endif %}
 			{% else %}
 				<p>No record found!</p>
 			{% endif %}

@@ -169,13 +169,23 @@ class Workshop(models.Model):
     class Meta:
         unique_together = (("organiser", "academic", "foss", "wdate", "wtime"),)
 
+class TestCategory(models.Model):
+    name = models.CharField(max_length=200)
+    created = models.DateTimeField(auto_now_add = True, null=True)
+    updated = models.DateTimeField(auto_now = True, null=True)
+    
+    def __unicode__(self):
+        return self.name
+        
 class Test(models.Model):
     organiser = models.ForeignKey(User, related_name = 'test_organiser')
+    test_category = models.ForeignKey(TestCategory, related_name = 'test_category')
     appoved_by = models.ForeignKey(User, related_name = 'test_approved_by', null=True)
     invigilator = models.ForeignKey(User)
     academic = models.ForeignKey(AcademicCenter)
     department = models.ManyToManyField(Department)
-    workshop = models.ForeignKey(Workshop)
+    workshop = models.ForeignKey(Workshop, null=True)
+    training = models.ForeignKey('Training', null=True)
     foss = models.ForeignKey(FossCategory)
     test_code = models.CharField(max_length=100)
     tdate = models.DateField()
