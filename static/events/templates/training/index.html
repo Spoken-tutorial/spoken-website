@@ -11,22 +11,22 @@
 	<!-- Nav tabs -->
 	<ul class="tabs nav nav-tabs">
 	    {% if role == 'organiser' %}
-		    <li><a href="/events/training/{{ role }}/request/">New</a></li>
-		    <li {% if status == 'pending' %}{{ 'class="active"'}}{% endif %}><a href="/events/training/{{role}}/pending/">Pending</a></li>
+		    <li><a href="/software-training/training/{{ role }}/request/">New</a></li>
+		    <li {% if status == 'pending' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/training/{{role}}/pending/">Pending</a></li>
 		{% endif %}
 		{% if role == 'rp' %}
-		    <li {% if status == 'pending' %}{{ 'class="active"'}}{% endif %}><a href="/events/training/{{role}}/pending/">New Requests</a></li>
+		    <li {% if status == 'pending' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/training/{{role}}/pending/">New Requests</a></li>
 		{% endif %}
-        <li {% if status == 'ongoing' %}{{ 'class="active"'}}{% endif %}><a href="/events/training/{{role}}/ongoing/">Ongoing</a></li>
-        <li {% if status == 'approved' %}{{ 'class="active"'}}{% endif %}><a href="/events/training/{{role}}/approved/">Approved</a></li>
-        <li {% if status == 'completed' %}{{ 'class="active"'}}{% endif %}><a href="/events/training/{{role}}/completed/">Completed</a></li>
-        <li {% if status == 'reschedule' %}{{ 'class="active"'}}{% endif %}><a href="/events/training/{{role}}/reschedule/">Reschedule</a></li>
-        <li {% if status == 'rejected' %}{{ 'class="active"'}}{% endif %}><a href="/events/training/{{role}}/rejected/">Rejected</a></li>
+        <li {% if status == 'ongoing' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/training/{{role}}/ongoing/">Ongoing</a></li>
+        <li {% if status == 'approved' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/training/{{role}}/approved/">Approved</a></li>
+        <li {% if status == 'completed' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/training/{{role}}/completed/">Completed</a></li>
+        <li {% if status == 'reschedule' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/training/{{role}}/reschedule/">Reschedule</a></li>
+        <li {% if status == 'rejected' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/training/{{role}}/rejected/">Rejected</a></li>
 	</ul>
 	<!-- Tab panes -->
 	<div class="tab-content">
 		<div class="tab-pane" id="new">
-			<iframe width = "100%" src="/events/training/request/"></iframe> -->
+			<iframe width = "100%" src="/software-training/training/request/"></iframe> -->
 		</div>
 		<div class="tab-pane active" id="pending">
 			{% if collection %}

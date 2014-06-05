@@ -11,7 +11,7 @@ $(document).ready(function(){
 		$("#similar-link").hide();
 		var state = $(this).val();
 		$.ajax({
-			url: "/events/ajax-ac-state/",
+			url: "/software-training/ajax-ac-state/",
 			type: "POST",
 			data: {
 				state: state,
@@ -59,7 +59,7 @@ $(document).ready(function(){
 	$ac_district.change(function(){
 		var district = $(this).val();
 		$.ajax({
-			url: "/events/ajax-ac-location/",
+			url: "/software-training/ajax-ac-location/",
 			type: "POST",
 			data: {
 				district: district
@@ -83,7 +83,7 @@ $(document).ready(function(){
 	$ac_location.change(function(){
 		var location = $(this).val();
 		$.ajax({
-			url: "/events/ajax-ac-pincode/",
+			url: "/software-training/ajax-ac-pincode/",
 			type: "POST",
 			data: {
 				location: location
@@ -129,7 +129,7 @@ function ajaxStrateFillDatas(district, city, university){
 	}
 	state = $acstate.val();
 	$.ajax({
-		url: "/events/ajax-ac-state/",
+		url: "/software-training/ajax-ac-state/",
 		type: "POST",
 		data: {
 			state: state,
@@ -189,7 +189,7 @@ function ajaxDistrictFillDatas(location, institute, district){
 	}
 	/* see thread-user.js */
 	$.ajax({
-		url: "/events/ajax-district/",
+		url: "/software-training/ajax-district/",
 		type: "POST",
 		data: {
 			district: district,

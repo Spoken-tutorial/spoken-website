@@ -15,7 +15,7 @@ urlpatterns = patterns('',
 	# Uncomment the next line to enable the admin:
 	url(r'^admin/', include(admin.site.urls)),
 	#events urls
-	url(r'^events/', include('events.urls', namespace='events')),
+	url(r'^software-training/', include('events.urls', namespace='events')),
 	url(r'^moodle/', include('mdldjango.urls', namespace='mdldjango')),
 
 	url(r'^creation/', include('creation.urls', namespace='creation')),

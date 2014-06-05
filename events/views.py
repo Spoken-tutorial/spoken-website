@@ -200,7 +200,7 @@ def new_ac(request):
             form_data.academic_code = academic_code
             form_data.save()
             messages.success(request, form_data.institution_name+" has been added")
-            return HttpResponseRedirect("/events/ac/")
+            return HttpResponseRedirect("/software-training/ac/")
         
         context = {'form':form}
         return render(request, 'events/templates/ac/form.html', context)
@@ -222,7 +222,7 @@ def edit_ac(request, rid = None):
         form = AcademicForm(request.user, request.POST, instance=contact)
         if form.is_valid():
             if form.save():
-                return HttpResponseRedirect("/events/ac/")
+                return HttpResponseRedirect("/software-training/ac/")
         context = {'form':form}
         return render(request, 'events/templates/ac/form.html', context)
     else:
@@ -279,7 +279,7 @@ def organiser_request(request, username):
                 organiser.academic_id=request.POST['college']
                 organiser.save()
                 messages.success(request, "Thank you. Your request has been sent for Resource Person's approval. You will get the approval with in 24 hours. Once the request is approved, you can request for the workshop. For more details Click Here")
-                return HttpResponseRedirect("/events/organiser/view/"+user.username+"/")
+                return HttpResponseRedirect("/software-training/organiser/view/"+user.username+"/")
             messages.error(request, "Please fill the following details")
             context = {'form':form}
             return render(request, 'events/templates/organiser/form.html', context)
@@ -288,11 +288,11 @@ def organiser_request(request, username):
                 organiser = Organiser.objects.get(user=user)
                 if organiser.status:
                     messages.error(request, "You are already an Organiser ")
-                    return HttpResponseRedirect("/events/organiser/view/"+user.username+"/")
+                    return HttpResponseRedirect("/software-training/organiser/view/"+user.username+"/")
                 else:
                     messages.info(request, "Your Organiser request is yet to be approved. Please contact the Resource person of your State. For more details Click Here ")
                     print "Organiser not yet approve "
-                    return HttpResponseRedirect("/events/organiser/view/"+user.username+"/")
+                    return HttpResponseRedirect("/software-training/organiser/view/"+user.username+"/")
             except:
                 messages.info(request, "Please fill the following details")
                 context = {}
@@ -337,7 +337,7 @@ def organiser_edit(request, username):
             organiser.academic_id=request.POST['college']
             organiser.save()
             messages.success(request, "Details has been updated")
-            return HttpResponseRedirect("/events/organiser/view/"+user.username+"/")
+            return HttpResponseRedirect("/software-training/organiser/view/"+user.username+"/")
         context = {'form':form}
         return render(request, 'events/templates/organiser/form.html', context)
     else:
@@ -367,7 +367,7 @@ def rp_organiser(request, status, code, userid):
                 message = "blocked"
             organiser.save()
             messages.success(request, "The Organiser account has been "+message)
-            return HttpResponseRedirect('/events/organiser/active/')
+            return HttpResponseRedirect('/software-training/organiser/active/')
         else:
             raise Http404('Page not found ')
     except:
@@ -391,7 +391,7 @@ def invigilator_request(request, username):
                 invigilator.academic_id=request.POST['college']
                 invigilator.save()
                 messages.success(request, "Thank you. Your request has been sent for Resource Person's approval. You will get the approval with in 24 hours. Once the request is approved, you can request for the workshop. For more details Click Here")
-                return HttpResponseRedirect("/events/invigilator/view/"+user.username+"/")
+                return HttpResponseRedirect("/software-training/invigilator/view/"+user.username+"/")
             messages.error(request, "Please fill the following details")
             context = {'form':form}
             return render(request, 'events/templates/invigilator/form.html', context)
@@ -401,10 +401,10 @@ def invigilator_request(request, username):
                 #todo: send status message
                 if invigilator.status:
                     messages.success(request, "You have already  invigilator role ")
-                    return HttpResponseRedirect("/events/invigilator/view/"+user.username+"/")
+                    return HttpResponseRedirect("/software-training/invigilator/view/"+user.username+"/")
                 else:
                     messages.info(request, "Your Invigilator request is yet to be approved. Please contact the Resource person of your State. For more details Click Here ")
-                    return HttpResponseRedirect("/events/invigilator/view/"+user.username+"/")
+                    return HttpResponseRedirect("/software-training/invigilator/view/"+user.username+"/")
             except:
                 messages.info(request, "Please fill the following details")
                 context = {}
@@ -447,7 +447,7 @@ def invigilator_edit(request, username):
             invigilator.academic_id=request.POST['college']
             invigilator.save()
             messages.success(request, "Details has been updated")
-            return HttpResponseRedirect("/events/invigilator/view/"+user.username+"/")
+            return HttpResponseRedirect("/software-training/invigilator/view/"+user.username+"/")
         context = {'form':form}
         return render(request, 'events/templates/invigilator/form.html', context)
     else:
@@ -477,7 +477,7 @@ def rp_invigilator(request, status, code, userid):
                 message = "blocked"
             invigilator.save()
             messages.success(request, "Invigilator has "+message)
-            return HttpResponseRedirect('/events/invigilator/inactive/')
+            return HttpResponseRedirect('/software-training/invigilator/inactive/')
         else:
             raise Http404('Page not found ')
     except:
@@ -514,7 +514,7 @@ def workshop_request(request, role):
             update_events_log(user_id = user.id, role = 0, category = 0, category_id = w.id, academic = w.academic_id, status = 0)
             update_events_notification(user_id = user.id, role = 0, category = 0, category_id = w.id, academic = w.academic_id, status = 0, message = message)
             
-            return HttpResponseRedirect("/events/workshop/organiser/pending/")
+            return HttpResponseRedirect("/software-training/workshop/organiser/pending/")
         messages.error(request, "Please fill the following details ")
         context = {'form' : form, 'role' : role, 'status' : 'request'}
         return render(request, 'events/templates/workshop/form.html', context)
@@ -560,7 +560,7 @@ def workshop_edit(request, role, rid):
             if role == 'rp':
                 logrole = 2
             update_events_log(user_id = user.id, role = logrole, category = 0, category_id = w.id, academic = w.academic_id, status = 4)
-            return HttpResponseRedirect("/events/workshop/"+role+"/pending/")
+            return HttpResponseRedirect("/software-training/workshop/"+role+"/pending/")
         
         context = {'form':form, }
         return render(request, 'events/templates/workshop/form.html', context)
@@ -668,10 +668,10 @@ def workshop_approvel(request, role, rid):
     update_events_notification(user_id = user.id, role = 2, category = 0, category_id = w.id, academic = w.academic_id, status = status, message = message)
     if tmp:
         messages.success(request, "Workshop has been completed. For downloading the learner's certificate click on View Participants ")
-        return HttpResponseRedirect('/events/workshop/'+role+'/completed/')
+        return HttpResponseRedirect('/software-training/workshop/'+role+'/completed/')
     else:
         messages.success(request, "Workshop has been accepted ")
-        return HttpResponseRedirect('/events/workshop/'+role+'/approved/')
+        return HttpResponseRedirect('/software-training/workshop/'+role+'/approved/')
 
 @login_required
 def workshop_permission(request):
@@ -698,7 +698,7 @@ def workshop_permission(request):
             elif form.cleaned_data['university']:
                 wp.university_id = form.cleaned_data['university']
             wp.save()
-            return HttpResponseRedirect("/events/workshop/permission/")
+            return HttpResponseRedirect("/software-training/workshop/permission/")
     
     context = {}
     context.update(csrf(request))
@@ -932,7 +932,7 @@ def test_request(request, role):
             update_events_log(user_id = user.id, role = 0, category = 1, category_id = t.id, academic = t.academic_id, status = 0)
             update_events_notification(user_id = user.id, role = 0, category = 1, category_id = t.id, academic = t.academic_id, status = 0, message = message)
             
-            return HttpResponseRedirect("/events/test/organiser/pending/")
+            return HttpResponseRedirect("/software-training/test/organiser/pending/")
             
         context = {'form':form, 'role' : role, 'status' : 'request'}
         return render(request, 'events/templates/test/form.html', context)
@@ -1029,7 +1029,7 @@ def test_edit(request, role, rid):
             if role == 'rp':
                 logrole = 2
             update_events_log(user_id = user.id, role = logrole, category = 1, category_id = t.id, academic = t.academic_id, status = 7)
-            return HttpResponseRedirect("/events/test/"+role+"/pending/")
+            return HttpResponseRedirect("/software-training/test/"+role+"/pending/")
         
         context = {'form':form, 'role':role}
         return render(request, 'events/templates/test/form.html', context)
@@ -1107,8 +1107,8 @@ def test_approvel(request, role, rid):
     messages.success(request, alert)
     
     if request.GET['status'] == 'completed':
-        return HttpResponseRedirect('/events/test/'+role+'/completed/')
-    return HttpResponseRedirect('/events/test/'+role+'/approved/')
+        return HttpResponseRedirect('/software-training/test/'+role+'/completed/')
+    return HttpResponseRedirect('/software-training/test/'+role+'/approved/')
 
 def test_attendance(request, tid):
     user = request.user
@@ -1427,7 +1427,7 @@ def training_request(request, role):
             update_events_log(user_id = user.id, role = 0, category = 2, category_id = w.id, academic = w.academic_id, status = 0)
             update_events_notification(user_id = user.id, role = 2, category = 2, category_id = w.id, academic = w.academic_id, status = 0, message = message)
             
-            return HttpResponseRedirect("/events/training/organiser/pending/")
+            return HttpResponseRedirect("/software-training/training/organiser/pending/")
         messages.error(request, "Please fill the following details ")
         context = {'form' : form, 'role' : role, 'status' : 'request'}
         return render(request, 'events/templates/workshop/form.html', context)
@@ -1473,7 +1473,7 @@ def training_edit(request, role, rid):
             if role == 'rp':
                 logrole = 2
             update_events_log(user_id = user.id, role = logrole, category = 2, category_id = w.id, academic = w.academic_id, status = 4)
-            return HttpResponseRedirect("/events/training/"+role+"/pending/")
+            return HttpResponseRedirect("/software-training/training/"+role+"/pending/")
         
         context = {'form':form, }
         return render(request, 'events/templates/training/form.html', context)
@@ -1576,10 +1576,10 @@ def training_approvel(request, role, rid):
     update_events_notification(user_id = user.id, role = 2, category = 2, category_id = w.id, academic = w.academic_id, status = status, message = message)
     if tmp:
         messages.success(request, "Training has been completed. For downloading the learner's certificate click on View Participants ")
-        return HttpResponseRedirect('/events/training/'+role+'/completed/')
+        return HttpResponseRedirect('/software-training/training/'+role+'/completed/')
     else:
         messages.success(request, "Training has been accepted ")
-        return HttpResponseRedirect('/events/training/'+role+'/approved/')
+        return HttpResponseRedirect('/software-training/training/'+role+'/approved/')
 
 @login_required
 def training_participant(request, wid=None):
