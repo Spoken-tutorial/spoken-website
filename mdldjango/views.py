@@ -78,7 +78,7 @@ def index(request):
     except:
         return HttpResponseRedirect("/moodle/login")
     
-    upcoming_workshop = Workshop.objects.filter(status=1, academic_id=mdluser.institution, wdate__gt=datetime.date.today())
+    upcoming_workshop = Workshop.objects.filter(status=1, academic_id=mdluser.institution, wdate__gte=datetime.date.today())
     upcoming_test = Test.objects.filter(status=2, academic_id=mdluser.institution, tdate__gt=datetime.date.today())
     past_workshop = Workshop.objects.filter(id__in = WorkshopAttendance.objects.filter(mdluser_id = mdluser.id).values_list('workshop_id'), status = 2)
     past_test = Test.objects.filter(id__in = TestAttendance.objects.filter(mdluser_id = mdluser.id).values_list('test_id'), status = 4)
@@ -190,13 +190,13 @@ def offline_details(request, wid, category):
                 update_events_log(user_id = user.id, role = 2, category = 0, category_id = w.id, academic = w.academic_id, status = 5)
                 update_events_notification(user_id = user.id, role = 2, category = 0, category_id = w.id, academic = w.academic_id, status = 5, message = message)
                 messages.success(request, "Thank you for uploading the Attendance. Now make sure that you cross check and verify the details before submiting.")
-                return HttpResponseRedirect('/events/workshop/'+str(wid)+'/attendance/')
+                return HttpResponseRedirect('/software-training/workshop/'+str(wid)+'/attendance/')
             else:
                 message = w.academic.institution_name+" has submited Offline training attendance."
                 update_events_log(user_id = user.id, role = 2, category = 2, category_id = w.id, academic = w.academic_id, status = 5)
                 update_events_notification(user_id = user.id, role = 2, category = 2, category_id = w.id, academic = w.academic_id, status = 5, message = message)
                 messages.success(request, "Thank you for uploading the Attendance. Now make sure that you cross check and verify the details before submiting.")
-                return HttpResponseRedirect('/events/training/'+str(wid)+'/attendance/')
+                return HttpResponseRedirect('/software-training/training/'+str(wid)+'/attendance/')
         messages.error(request, "Please Upload xml file !") 
     context = {
         'form': form,

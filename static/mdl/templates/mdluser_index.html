@@ -31,7 +31,6 @@
                 {% for record in past_workshop %}
                     <tr>
                         <td>{{ record.foss.foss }}</td>
-                        <td>{{ record.department }}</td>
                         <td>{{ record.wdate }} {{ record.ttime }}</td>
                         <td><a href="{% url 'events:workshop_participant_ceritificate' record.id mdluserid %}">Certificate</a></td>
                     </tr>
@@ -46,7 +45,6 @@
             <table class="table table-striped table-hover table-bordered">
                 <tr>
                     <th>Technology</th>
-                    <th>Test Code</th>
                     <th>Date & Time</th>
                     <th>Score</th>
                     <th>Action</th>
@@ -54,11 +52,14 @@
                 {% for record in past_test %}
                     <tr>
                         <td>{{ record.foss.foss }}</td>
-                        <td>{{ record.department }}</td>
                         <td>{{ record.tdate }} {{ record.ttime }}</td>
-                        {% with SCORE=mdluserid|get_participant_score %}
-                            <td>{{ SCORE }}</td>
-                            <td><a href="{% url 'events:test_participant_ceritificate' record.id mdluserid %}">Certificate</a></td>
+                        {% with grade=record.id|get_participant_mark:mdluserid %}
+                            {% if grade >= 40 %}
+                                <td>{{ grade }}%</td>
+                                <td><a href="{% url 'events:test_participant_ceritificate' record.id mdluserid %}">Certificate</a></td>                          {% else %}
+                                <td>{{ grade }} (Fail)</td>
+                                <td></td>
+                            {% endif %}
                         {% endwith %}
                     </tr>
                 {% endfor %}
@@ -79,7 +80,6 @@
                 {% for record in upcoming_workshop %}
                     <tr>
                         <td>{{ record.foss.foss }}</td>
-                        
                         <td>{{ record.wdate }} {{ record.ttime }}</td>
                         <td>
                             {% if record.id|check_workshop_enrole:mdluserid %}
@@ -100,14 +100,12 @@
             <table class="table table-striped table-hover table-bordered">
                 <tr>
                     <th>Technology</th>
-                    <th>Test Code</th>
                     <th>Date & Time</th>
                     <th>Action</th>
                 </tr>
                 {% for record in ongoing_test %}
                     <tr>
                         <td>{{ record.foss.foss }}</td>
-                        <td>{{ record.department }}</td>
                         <td>{{ record.tdate }} {{ record.ttime }}</td>
                         <td>
                             {% with status=mdluserid|can_enter_test:record.id %}
@@ -150,7 +148,6 @@
                 {% for record in upcoming_test %}
                     <tr>
                         <td>{{ record.foss.foss }}</td>
-                        <td>{{ record.department }}</td>
                         <td>{{ record.tdate }} {{ record.ttime }}</td>
                         <td><a href="{% url 'events:student_subscribe' 'test' record.id mdluserid %}">Subscribe</a></td>
                     </tr>

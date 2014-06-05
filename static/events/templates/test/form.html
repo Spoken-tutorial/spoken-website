@@ -13,19 +13,19 @@
 {% block content %}
     <ul class="tabs nav nav-tabs">
         {% if role == 'organiser' %}
-            <li {% if status == 'request' %}{{ 'class="active"'}}{% endif %}><a href="/events/test/{{ role }}/request/">New</a></li>
-            <li {% if status == 'pending' %}{{ 'class="active"'}}{% endif %}><a href="/events/test/{{role}}/pending/">Pending</a></li>
+            <li {% if status == 'request' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/test/{{ role }}/request/">New</a></li>
+            <li {% if status == 'pending' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/test/{{role}}/pending/">Pending</a></li>
         {% elif role == 'rp' %}
-            <li {% if status == 'pending' %}{{ 'class="active"'}}{% endif %}><a href="/events/test/{{role}}/pending/">New Request</a></li>
+            <li {% if status == 'pending' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/test/{{role}}/pending/">New Request</a></li>
         {% else %}
-            <li {% if status == 'pending' %}{{ 'class="active"'}}{% endif %}><a href="/events/test/{{role}}/pending/">Pending</a></li>
+            <li {% if status == 'pending' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/test/{{role}}/pending/">Pending</a></li>
         {% endif %}
-        <li {% if status == 'waitingforinvigilator' %}{{ 'class="active"'}}{% endif %}><a href="/events/test/{{role}}/waitingforinvigilator/">Waiting for Invigilator</a></li>
-        <li {% if status == 'approved' %}{{ 'class="active"'}}{% endif %}><a href="/events/test/{{role}}/approved/">Approved</a></li>
-        <li {% if status == 'ongoing' %}{{ 'class="active"'}}{% endif %}><a href="/events/test/{{role}}/ongoing/">Ongoing</a></li>
-        <li {% if status == 'completed' %}{{ 'class="active"'}}{% endif %}><a href="/events/test/{{role}}/completed/">Completed</a></li>
-        <li {% if status == 'reschedule' %}{{ 'class="active"'}}{% endif %}><a href="/events/test/{{role}}/reschedule/">Reschedule</a></li>
-        <li {% if status == 'rejected' %}{{ 'class="active"'}}{% endif %}><a href="/events/test/{{role}}/rejected/">Rejected</a></li>
+        <li {% if status == 'waitingforinvigilator' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/test/{{role}}/waitingforinvigilator/">Waiting for Invigilator</a></li>
+        <li {% if status == 'approved' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/test/{{role}}/approved/">Approved</a></li>
+        <li {% if status == 'ongoing' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/test/{{role}}/ongoing/">Ongoing</a></li>
+        <li {% if status == 'completed' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/test/{{role}}/completed/">Completed</a></li>
+        <li {% if status == 'reschedule' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/test/{{role}}/reschedule/">Reschedule</a></li>
+        <li {% if status == 'rejected' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/test/{{role}}/rejected/">Rejected</a></li>
     </ul>
     <div class='tab-content'>
         <form action="{{ action }}" method="post">{% csrf_token %}
@@ -155,7 +155,7 @@
         $('#id_district').change(function() {
             var district = $(this).val();
             $.ajax({
-                url: "/events/ajax-district-collage/",
+                url: "/software-training/ajax-district-collage/",
                 type: "POST",
                 data: {
                     district : district
@@ -207,7 +207,7 @@ function ajaxFOssDeptFillDatas(foss, dept, type){
     }
     /* see thread-user.js */
     $.ajax({
-        url: "/events/ajax-dept-foss/",
+        url: "/software-training/ajax-dept-foss/",
         type: "POST",
         data: {
             workshop: workshop,

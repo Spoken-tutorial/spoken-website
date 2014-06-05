@@ -1,6 +1,7 @@
 {% extends 'spoken/templates/base.html' %}
 {% load widget_tweaks %}
 {% load static %}
+{% load mdldata %}
 {% block title %}Participants List{% endblock %}
 {% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
 {% block heading %}
@@ -27,13 +28,21 @@
 			<tr>
 				<th>First Name</th>
 				<th>Last Name</th>
+				<th>Score</th>
 				<th>Action</th>
 			</tr>
 			{% for record in collection %}
 				<tr>
 					<td>{{ record.firstname }}</td>
 					<td>{{ record.lastname }}</td>
-					<td>{% if can_download_certificate %}<a href="{% url 'events:test_participant_ceritificate' test.id record.id %}">Certificate</a>{% endif %}</td>
+					{% with grade=test.id|get_participant_mark:record.id %}
+                        {% if grade >= 40 %}
+                            <td>{{ grade }}% (Pass)</td>
+                            <td><a href="{% url 'events:test_participant_ceritificate' test.id record.id %}">Certificate</a></td>                     {% else %}
+                            <td>{{ grade }} (Fail)</td>
+                            <td></td>
+                        {% endif %}
+                    {% endwith %}
 				</tr>
 			{% endfor %}
 		</table>

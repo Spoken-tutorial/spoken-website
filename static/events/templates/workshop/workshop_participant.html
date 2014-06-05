@@ -25,9 +25,6 @@
         </dl>
     </div>
 	<div class="" id="pending">
-		{% if wc.status == 2 %}
-			{% if can_download_certificate %}<!--<p>If you want reupload the students list click <a href="{% url 'mdldjango:mdl_offline_workshop_details' wc.id %}">here</a>.</p>-->{% endif %}
-		{% endif %}
 		{% if collection %}
 		<table class="table table-bordered table-hover table-striped">
 			<tr>

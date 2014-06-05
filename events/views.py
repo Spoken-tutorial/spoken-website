@@ -788,7 +788,7 @@ def workshop_participant(request, wid=None):
             ids.append(wp[0])
             
         wp = MdlUser.objects.using('moodle').filter(id__in=ids)
-        if user == wc.organiser:
+        if user == wc.organiser and wc.status == 2:
             can_download_certificate = 1
         context = {'collection' : wp, 'wc' : wc, 'can_download_certificate':can_download_certificate, 'pcount': wp.count()}
         return render(request, 'events/templates/workshop/workshop_participant.html', context)
@@ -1007,7 +1007,15 @@ def test_edit(request, role, rid):
             if t.status == 1 and (str(t.tdate) == dateTime[0] or str(t.ttime)[0:5] == dateTime[1]):
                 t.status = 4
             #t.organiser_id = user.id
-            t.invigilator_id = form.cleaned_data['invigilator']
+            t.test_category_id = form.cleaned_data['test_category']
+            if int(form.cleaned_data['test_category']) == 1:
+                t.test_id = None
+            elif int(form.cleaned_data['test_category']) == 2:
+                t.workshop_id = None
+            else:
+                t.workshop_id = None
+                t.test_id = None
+                
             #t.academic_id = form.cleaned_data['academic']
             t.workshop_id = form.cleaned_data['workshop']
             t.tdate = dateTime[0]
@@ -1105,10 +1113,9 @@ def test_approvel(request, role, rid):
     update_events_log(user_id = user.id, role = logrole, category = 1, category_id = t.id, academic = t.academic_id, status = status)
     update_events_notification(user_id = user.id, role = logrole, category = 1, category_id = t.id, academic = t.academic_id, status = status, message = message)
     messages.success(request, alert)
-    
     if request.GET['status'] == 'completed':
         return HttpResponseRedirect('/software-training/test/'+role+'/completed/')
-    return HttpResponseRedirect('/software-training/test/'+role+'/approved/')
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 def test_attendance(request, tid):
     user = request.user
@@ -1143,11 +1150,14 @@ def test_attendance(request, tid):
                         ta.mdlquiz_id = fossmdlcourse.mdlquiz_id
                         ta.mdlattempt_id = 0
                         ta.status = 0
-                        ta.save()
+                        #ta.save()
                         print ta.id, " => Inserted"
                     if ta:
                         #todo: if the status = 2 check in moodle if he completed the test set status = 3 (completed)
                         t = TestAttendance.objects.get(mdluser_id = ta.mdluser_id, test_id = tid)
+                        fossmdlcourse = FossMdlCourses.objects.get(foss_id = test.foss_id)
+                        t.mdlcourse_id = fossmdlcourse.mdlcourse_id
+                        t.mdlquiz_id = fossmdlcourse.mdlquiz_id
                         t.status = 1
                         t.save()
                         #enroll to the course
@@ -1172,24 +1182,29 @@ def test_attendance(request, tid):
             update_events_log(user_id = user.id, role = 1, category = 1, category_id = test.id, academic = test.academic_id, status = 8)
             update_events_notification(user_id = user.id, role = 1, category = 1, category_id = test.id, academic = test.academic_id, status = 8, message = message)
             messages.success(request, "Thank you for uploading the Attendance. Now make sure that you cross check and verify the details before submiting.") 
-    
+    mdlids = []
     participant_ids = []
+    online_participant_ids = list(TestAttendance.objects.filter(test_id = test.id).values_list('mdluser_id'))
+    for k in online_participant_ids:
+        mdlids.append(k[0])
+        
     if test.test_category_id == 1:
         participant_ids = list(WorkshopAttendance.objects.filter(workshop_id = test.workshop_id).values_list('mdluser_id'))
     elif test.test_category_id == 2:
         participant_ids = list(TrainingAttendance.objects.filter(training_id = test.training_id).values_list('mdluser_id'))
-        
-    mdlids = []
+    else:
+        participant_ids = list(TestAttendance.objects.filter(test_id = test.id).values_list('mdluser_id'))
+
     wp = None
     for k in participant_ids:
         mdlids.append(k[0])
     if mdlids:
         wp = MdlUser.objects.filter(id__in = mdlids)
     #check can close the test
-    testatten = TestAttendance.objects.filter(test_id=test.id, status__gte=3)
-    enable_close_test = None
+    testatten = TestAttendance.objects.filter(test_id=test.id, status__lte=2)
+    enable_close_test = True
     if testatten:
-        enable_close_test = True
+        enable_close_test = None
     context = {}
     context['collection'] = wp
     context['test'] = test
@@ -1215,8 +1230,8 @@ def test_participant(request, tid=None):
             ids.append(tp[0])
             
         tp = MdlUser.objects.using('moodle').filter(id__in=ids)
-        if user == t.organiser or user == t.invigilator:
-            can_download_certificate = 1
+        #if t.status == 4 and (user == t.organiser or user == t.invigilator):
+        #    can_download_certificate = 1
         context = {'collection' : tp, 'test' : t, 'can_download_certificate':can_download_certificate}
         return render(request, 'events/templates/test/test_participant.html', context)
 
