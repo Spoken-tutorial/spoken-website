@@ -192,6 +192,23 @@
                         </div>
                     </div>
                 {% endif %}
+                {% if invigilator_test_notification %}
+                    <div class="panel panel-primary">
+                        <div class="panel-heading panel-heading-notif">Onlinetest Notifications
+                            <span class="badge{% if not contrib_notifs|length %}-none{% endif %}" style="float: none; margin-left: 10px;">{{ invigilator_test_notification|length }}</span>{% if invigilator_test_notification|length %}<a href="/software-training/clear-notifications/organiser/" class="clear-all" title="Clear all notifications">Clear All</a>{% endif %}
+                        </div>
+                        <div class="panel-body panel-body-notif">
+                            {% for notif in invigilator_test_notification %}
+                                <div class="notif">
+                                    <p>{{ notif.message }}</p>
+                                    <a href="/software-training/delete-notification/invigilator/{{ notif.id }}" class="notif-del"><i class="fa fa-times"></i></a>
+                                    <hr />
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+
             </div>
         </div>
     </div>

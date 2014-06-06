@@ -369,3 +369,15 @@ class TestForm(forms.Form):
             fchoices.insert(0, ('', '-- None --'))
             self.fields['foss'].choices = fchoices
             self.fields['foss'].initial = instance.foss_id
+
+class TrainingScanCopyForm(forms.Form):
+    scan_copy = forms.FileField(label = 'Select a Scaned copy', required = True)
+    def clean(self):
+        super(TrainingScanCopyForm, self).clean()
+        file_type = ['application/pdf']
+        if 'scan_copy' in self.cleaned_data:
+            if not component.content_type in file_type:
+                raise forms.ValidationError("You have forgotten about Fred!")
+        else:
+            raise forms.ValidationError("You have forgotten about Fred!")
+

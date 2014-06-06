@@ -19,8 +19,10 @@ from urlparse import urlparse
 from BeautifulSoup import BeautifulSoup
 
 import xml.etree.cElementTree as etree
-
+from django.conf import settings
 import json
+import os
+import os.path
 import urllib,urllib2
 
 from events.models import *
@@ -83,19 +85,22 @@ def events_dashboard(request):
     #print roles
     organiser_workshop_notification = None
     organiser_test_notification = None
+    invigilator_test_notification = None
     organiser_training_notification = None
     rp_workshop_notification = None
     rp_test_notification = None
     rp_training_notification = None
     if is_organiser(user):
-        organiser_workshop_notification = EventsNotification.objects.filter((Q(status = 1) | Q(status = 3)), category = 0, status = 1, academic_id = user.organiser.academic_id, categoryid__in = user.organiser.academic.workshop_set.filter(organiser_id = user.id).values_list('id'))
-        organiser_test_notification = EventsNotification.objects.filter((Q(status = 1) | Q(status = 2)), category = 1, academic_id = user.organiser.academic_id, categoryid__in = user.organiser.academic.test_set.filter(organiser_id = user.id).values_list('id'))
-        organiser_training_notification = EventsNotification.objects.filter((Q(status = 1) | Q(status = 3)), category = 2, status = 1, academic_id = user.organiser.academic_id, categoryid__in = user.organiser.academic.workshop_set.filter(organiser_id = user.id).values_list('id'))
+        organiser_workshop_notification = EventsNotification.objects.filter((Q(status = 1) | Q(status = 3)), category = 0, status = 1, academic_id = user.organiser.academic_id, categoryid__in = user.organiser.academic.workshop_set.filter(organiser_id = user.id).values_list('id')).order_by('-created')
+        organiser_test_notification = EventsNotification.objects.filter((Q(status = 1) | Q(status = 2)), category = 1, academic_id = user.organiser.academic_id, categoryid__in = user.organiser.academic.test_set.filter(organiser_id = user.id).values_list('id')).order_by('-created')
+        organiser_training_notification = EventsNotification.objects.filter((Q(status = 1) | Q(status = 3)), category = 2, status = 1, academic_id = user.organiser.academic_id, categoryid__in = user.organiser.academic.workshop_set.filter(organiser_id = user.id).values_list('id')).order_by('-created')
 
     if is_resource_person(user):
-        rp_workshop_notification = EventsNotification.objects.filter((Q(status = 0) | Q(status = 5) | Q(status = 2)), category = 0)
-        rp_training_notification = EventsNotification.objects.filter((Q(status = 0) | Q(status = 5) | Q(status = 2)), category = 2)
-        rp_test_notification = EventsNotification.objects.filter((Q(status = 0) | Q(status = 4) | Q(status = 5) | Q(status = 8) | Q(status = 9)), category = 1, categoryid__in = (Workshop.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)))).values_list('id'))
+        rp_workshop_notification = EventsNotification.objects.filter((Q(status = 0) | Q(status = 5) | Q(status = 2)), category = 0).order_by('-created')
+        rp_training_notification = EventsNotification.objects.filter((Q(status = 0) | Q(status = 5) | Q(status = 2)), category = 2).order_by('-created')
+        rp_test_notification = EventsNotification.objects.filter((Q(status = 0) | Q(status = 4) | Q(status = 5) | Q(status = 8) | Q(status = 9)), category = 1, categoryid__in = (Workshop.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)))).values_list('id')).order_by('-created')
+    if is_invigilator(user):
+        invigilator_test_notification = EventsNotification.objects.filter((Q(status = 0) | Q(status = 1)), category = 1, academic_id = user.invigilator.academic_id, categoryid__in = user.invigilator.academic.test_set.filter(invigilator_id = user.id).values_list('id')).order_by('-created')
     context = {
         'roles' : roles,
         'organiser_workshop_notification' : organiser_workshop_notification,
@@ -104,6 +109,7 @@ def events_dashboard(request):
         'rp_test_notification' : rp_test_notification,
         'rp_workshop_notification' : rp_workshop_notification,
         'rp_training_notification' : rp_training_notification,
+        'invigilator_test_notification' : invigilator_test_notification,
     }
     return render(request, 'events/templates/events_dashboard.html', context)
 
@@ -966,7 +972,9 @@ def test_list(request, role, status):
                 test = Test.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status])
         elif is_organiser(user) and role == 'organiser':
             if status == 'ongoing': 
-                test = Test.objects.filter(organiser_id=user, status = status_dict[status], tdate = datetime.datetime.now().strftime("%Y-%m-%d"))
+                test = Test.objects.filter((Q(status = 2) | Q(status = 3)), organiser_id=user , tdate = datetime.datetime.now().strftime("%Y-%m-%d"))
+            elif status == 'approved':
+                test = Test.objects.filter(organiser_id=user, status = status_dict[status], tdate__gt=datetime.date.today())
             else:
                 test = Test.objects.filter(organiser_id=user, status = status_dict[status])
         elif is_invigilator(user) and role == 'invigilator':
@@ -1150,7 +1158,7 @@ def test_attendance(request, tid):
                         ta.mdlquiz_id = fossmdlcourse.mdlquiz_id
                         ta.mdlattempt_id = 0
                         ta.status = 0
-                        #ta.save()
+                        ta.save()
                         print ta.id, " => Inserted"
                     if ta:
                         #todo: if the status = 2 check in moodle if he completed the test set status = 3 (completed)
@@ -1614,9 +1622,17 @@ def training_participant(request, wid=None):
             ids.append(wp[0])
             
         wp = MdlUser.objects.using('moodle').filter(id__in=ids)
+        #scaned copy exits
+        is_file_exits = False
+        file_path = settings.MEDIA_ROOT + 'training/'+wid+'/'+wid+'.pdf'
+        if os.path.isfile(file_path):
+            is_file_exits = True
         if user == wc.organiser:
             can_download_certificate = 1
-        context = {'collection' : wp, 'wc' : wc, 'can_download_certificate':can_download_certificate, 'pcount': wp.count()}
+        status = False
+        if wc.status == 2:
+            status = True
+        context = {'collection' : wp, 'wc' : wc, 'can_download_certificate':can_download_certificate, 'pcount': wp.count(), 'is_file_exits':is_file_exits, 'file_path':'/media/training/'+wid+'/'+wid+'.pdf', 'status':status}
         return render(request, 'events/templates/training/workshop_participant.html', context)
 
 @login_required
@@ -1626,37 +1642,73 @@ def training_attendance(request, wid):
         raise Http404('You are not allowed to view this page')
     try:
         workshop = Training.objects.get(pk = wid) 
+        if workshop.status == 2:
+            return HttpResponseRedirect('/software-training/training/'+str(workshop.id)+'/participant/')
     except:
         raise Http404('Page not found ')
     #todo check request user and workshop organiser same or not
     if request.method == 'POST':
         users = request.POST
         if users:
-            #set all record to 0 if status = 1
-            TrainingAttendance.objects.filter(training_id = wid, status = 1).update(status = 0)
-            for u in users:
-                if u != 'csrfmiddlewaretoken':
-                    try:
-                        wa = TrainingAttendance.objects.get(mdluser_id = users[u], training_id = wid)
-                        print wa.id, " => Exits"
-                    except:
-                        wa = TrainingAttendance()
-                        wa.training_id = wid
-                        wa.mdluser_id = users[u]
-                        wa.status = 0
-                        wa.save()
-                        print wa.id, " => Inserted"
-                    if wa:
-                        #todo: if the status = 2 check in moodle if he completed the test set status = 3 (completed)
-                        w = TrainingAttendance.objects.get(mdluser_id = wa.mdluser_id, training_id = wid)
-                        w.status = 1
-                        w.save()
-            message = workshop.academic.institution_name+" has submited workshop attendance"
-            update_events_log(user_id = user.id, role = 2, category = 2, category_id = workshop.id, academic = workshop.academic_id, status = 6)
-            update_events_notification(user_id = user.id, role = 2, category = 2, category_id = workshop.id, academic = workshop.academic_id, status = 6, message = message)
-            
-            messages.success(request, "Thank you for uploading the Attendance. Now make sure that you cross check and verify the details before submiting.") 
+            if 'submit-attendance' in users:
+                #set all record to 0 if status = 1
+                TrainingAttendance.objects.filter(training_id = wid, status = 1).update(status = 0)
+                for u in users:
+                    print u
+                    if not (u == 'csrfmiddlewaretoken' or u == 'submit-attendance'):
+                        try:
+                            wa = TrainingAttendance.objects.get(mdluser_id = users[u], training_id = wid)
+                            print wa.id, " => Exits"
+                        except:
+                            wa = TrainingAttendance()
+                            wa.training_id = wid
+                            wa.mdluser_id = users[u]
+                            wa.status = 0
+                            wa.save()
+                            print wa.id, " => Inserted"
+                        if wa:
+                            w = TrainingAttendance.objects.get(mdluser_id = wa.mdluser_id, training_id = wid)
+                            w.status = 1
+                            w.save()
+                message = workshop.academic.institution_name+" has submited workshop attendance"
+                update_events_log(user_id = user.id, role = 2, category = 2, category_id = workshop.id, academic = workshop.academic_id, status = 6)
+                update_events_notification(user_id = user.id, role = 2, category = 2, category_id = workshop.id, academic = workshop.academic_id, status = 6, message = message)
+                
+                messages.success(request, "Thank you for uploading the Attendance. Now make sure that you cross check and verify the details before submiting.")
+            if 'submit-scaned-copy' in users:
+                form = TrainingScanCopyForm(request.POST, request.FILES)
+                file_type = ['application/pdf']
+                if 'scan_copy' in request.FILES:
+                    if request.FILES['scan_copy'].content_type in file_type:
+                        file_path = settings.MEDIA_ROOT + 'training/'
+                        try:
+                            os.mkdir(file_path)
+                        except Exception, e:
+                            print e
+                        file_path = settings.MEDIA_ROOT + 'training/'+wid+'/'
+                        try:
+                            os.mkdir(file_path)
+                        except Exception, e:
+                            print e
+                        full_path = file_path + wid +".pdf"
+                        fout = open(full_path, 'wb+')
+                        f = request.FILES['scan_copy']
+                        # Iterate through the chunks.
+                        for chunk in f.chunks():
+                            fout.write(chunk)
+                        fout.close()
+                        messages.success(request, "Waiting for Resource Person approval.")
+                    else:
+                        messages.success(request, "Choose a PDF File")
+                else:
+                    messages.success(request, "Choose a PDF File.")
+  
     participant_ids = list(TrainingAttendance.objects.filter(training_id = wid).values_list('mdluser_id'))
+    #scaned copy exits
+    is_file_exits = False
+    file_path = settings.MEDIA_ROOT + 'training/'+wid+'/'+wid+'.pdf'
+    if os.path.isfile(file_path):
+        is_file_exits = True
     mdlids = []
     wp = {}
     for k in participant_ids:
@@ -1664,10 +1716,109 @@ def training_attendance(request, wid):
     if mdlids:
         wp = MdlUser.objects.filter(id__in = mdlids)
     context = {}
+    context['form'] = TrainingScanCopyForm()
     context['collection'] = wp
     context['workshop'] = workshop
+    context['is_file_exits'] = is_file_exits
+    context['file_path'] = '/media/training/'+wid+'/'+wid+'.pdf'
     context.update(csrf(request))
     return render(request, 'events/templates/training/attendance.html', context)
+
+def training_participant_ceritificate(request, wid, participant_id):
+    #response = HttpResponse(content_type='application/pdf')
+    #response['Content-Disposition'] = 'attachment; filename="somefilename.pdf"'
+
+    # Create the PDF object, using the response object as its "file."
+    #p = canvas.Canvas(response)
+
+    # Draw things on the PDF. Here's where the PDF generation happens.
+    # See the ReportLab documentation for the full list of functionality.
+    #p.drawString(200, 500, "Hello world.")
+
+    # Close the PDF object cleanly, and we're done.
+    #p.showPage()
+    #p.save()
+    #return response
+    # Using ReportLab to insert image into PDF
+    
+    #store Certificate details
+    
+    certificate_pass = ''
+    if wid and participant_id:
+        try:
+            w = Training.objects.get(id = wid)
+            mdluser = MdlUser.objects.get(id = participant_id)
+            wcf = None
+            # check if user can get certificate
+            wa = TrainingAttendance.objects.get(training_id = w.id, mdluser_id = participant_id)
+            if wa.status < 1:
+                raise Http404('Page not found')
+            if wa.password:
+                certificate_pass = wa.password
+                wa.count += 1
+                wa.status = 2
+                wa.save()
+            else:
+                certificate_pass = str(mdluser.id)+id_generator(10-len(str(mdluser.id)))
+                wa.password = certificate_pass
+                wa.status = 2
+                wa.count += 1
+                wa.save()
+        except:
+            raise Http404('Page not found')
+        
+    response = HttpResponse(mimetype='application/pdf')
+    filename = (mdluser.firstname+'-'+w.foss.foss+"-Participant-Certificate").replace(" ", "-");
+    
+    response['Content-Disposition'] = 'attachment; filename='+filename+'.pdf'
+    imgTemp = StringIO()
+    imgDoc = canvas.Canvas(imgTemp)
+
+    # Title 
+    imgDoc.setFont('Helvetica', 40, leading=None)
+    imgDoc.drawCentredString(415, 480, "Certificate of Training")
+    
+    #password
+    imgDoc.setFillColorRGB(211, 211, 211)
+    imgDoc.setFont('Helvetica', 10, leading=None)
+    imgDoc.drawString(10, 6, certificate_pass)
+    #imgDoc.drawString(100, 100, 'transparent')
+    
+
+    # Draw image on Canvas and save PDF in buffer
+    imgPath = "/home/deer/sign.jpg"
+    imgDoc.drawImage(imgPath, 600, 100, 150, 76)    ## at (399,760) with size 160x160
+
+    #paragraphe
+    text = "This is to certify that <b>"+mdluser.firstname +" "+mdluser.lastname+"</b> participated in the <b>"+w.foss.foss+"</b> training at <b>"+w.academic.institution_name+"</b> organized by <b>"+w.organiser.username+"</b> on <b>"+custom_strftime('%B {S} %Y', w.trdate)+"</b>.  This training was conducted with the instructional material created by the Spoken Tutorial Project, IIT Bombay, funded by the National Mission on Education through ICT, MHRD, Govt., of India."
+    
+    centered = ParagraphStyle(name = 'centered',
+        fontSize = 16,  
+        leading = 30,  
+        alignment = 0,  
+        spaceAfter = 20)
+
+    p = Paragraph(text, centered)
+    p.wrap(650, 200)
+    p.drawOn(imgDoc, 4.2 * cm, 9 * cm)
+
+    imgDoc.save()
+
+    # Use PyPDF to merge the image-PDF into the template
+    page = PdfFileReader(file("/home/deer/Blank-Certificate.pdf","rb")).getPage(0)
+    overlay = PdfFileReader(StringIO(imgTemp.getvalue())).getPage(0)
+    page.mergePage(overlay)
+
+    #Save the result
+    output = PdfFileWriter()
+    output.addPage(page)
+    
+    #stream to browser
+    outputStream = response
+    output.write(response)
+    outputStream.close()
+
+    return response
 
         
 def update_events_log(user_id, role, category, category_id, academic, status):
@@ -1837,6 +1988,20 @@ def ajax_dept_foss(request):
             data['foss'] = tmp            
     return HttpResponse(json.dumps(data), mimetype='application/json')
 
+@csrf_exempt
+def ajax_language(request):
+    print "Go to hell------"
+    """ Ajax: Get the Colleges (Academic) based on District selected """
+    if request.method == 'POST':
+        foss = request.POST.get('foss')
+        print foss, "-----------------"
+        language = FossAvailableForWorkshop.objects.select_related().filter(foss_id=foss)
+        tmp = '<option value = None> -- None -- </option>'
+        for i in language:
+            print i
+            tmp +='<option value='+str(i.language.id)+'>'+i.language.name+'</option>'
+        return HttpResponse(json.dumps(tmp), mimetype='application/json')
+        
 @csrf_exempt
 def test(request):
     return render_to_response('events/templates/test/test.html', { 'foo': 123, 'bar': 456 })

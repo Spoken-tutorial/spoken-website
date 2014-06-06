@@ -4,7 +4,7 @@ from django.db import models
 from django.contrib.auth.models import User
 
 #creation app models
-from creation.models import FossCategory, Language
+from creation.models import FossCategory, Language, FossAvailableForWorkshop, FossAvailableForTest
 from mdldjango.models import *
 
 #validation

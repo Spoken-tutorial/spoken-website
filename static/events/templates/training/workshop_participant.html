@@ -22,6 +22,10 @@
             <dd>{{ pcount }}</dd>
             <dt>Organiser</dt>
             <dd>{{ wc.organiser }}</dd>
+            {% if is_file_exits and user|is_resource_person %}
+                <p>Please click <b>Mark as Complete</b> to end the training.</p><a href="{{file_path}}" target="_blank">View uploaded copy</a>
+                <a class='btn btn-primary' title = "To complete the training click here" href="{% url 'events:training_approvel' 'rp' wc.id %}?status=completed">Mark as Complete</a>
+            {% endif %}
         </dl>
     </div>
 	<div class="" id="pending">
@@ -30,11 +34,17 @@
 			<tr>
 				<th>First Name</th>
 				<th>Last Name</th>
+				<th></th>
 			</tr>
 			{% for record in collection %}
 				<tr>
 					<td>{{ record.firstname }}</td>
 					<td>{{ record.lastname }}</td>
+					<td>
+					    {% if can_download_certificate and status %}
+					       <a href="{% url 'events:training_participant_ceritificate' wc.id record.id %}">Certificate</a>
+					    {% endif %}
+					</td>
 				</tr>
 			{% endfor %}
 		</table>
