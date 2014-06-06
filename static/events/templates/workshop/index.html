@@ -32,6 +32,7 @@
 			{% if collection %}
 			<table class="table table-striped table-hover table-bordered">
 				<tr>
+				    <th>State</td>
 					<th>Academic Name</th>
 					<th>FOSS</th>
 					<th>Language</th>
@@ -40,6 +41,7 @@
 				</tr>
 				{% for record in collection %}
 					<tr>
+					    <td>{{ record.academic.state }}</td>
 						<td>{{ record.academic }}</td>
 						<td>{{ record.foss }}</td>
 						<td>{{ record.language }}</td>

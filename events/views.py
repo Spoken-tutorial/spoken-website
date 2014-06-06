@@ -546,7 +546,8 @@ def workshop_edit(request, role, rid):
             
             #check if date time chenged or not
             if w.status == 1 and (str(w.wdate) == dateTime[0] or str(w.wtime)[0:5] == dateTime[1]):
-                w.status = 4
+                #w.status = 4
+                w.status = 0
             w.language_id = request.POST['language']
             w.foss_id = request.POST['foss']
             w.wdate = dateTime[0]
@@ -569,6 +570,7 @@ def workshop_edit(request, role, rid):
             return HttpResponseRedirect("/software-training/workshop/"+role+"/pending/")
         
         context = {'form':form, }
+        context['role'] = role
         return render(request, 'events/templates/workshop/form.html', context)
     else:
         context = {}
@@ -576,6 +578,7 @@ def workshop_edit(request, role, rid):
         context.update(csrf(request))
         context['form'] = WorkshopForm(instance = record)
         context['instance'] = record
+        context['role'] = role
         return render(request, 'events/templates/workshop/form.html', context)
 
 def workshop_list(request, role, status):
@@ -589,21 +592,21 @@ def workshop_list(request, role, status):
         context = {}
         workshops = None
         if is_event_manager(user) and role == 'em':
-            workshops = Workshop.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status])
+            workshops = Workshop.objects.select_related().filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status])
         elif is_resource_person(user) and role == 'rp':
             if status == 'approved':
-                workshops = Workshop.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status], wdate__gt=datetime.date.today())
+                workshops = Workshop.objects.select_related().filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status], wdate__gt=datetime.date.today())
             elif status =='ongoing':
-                workshops = Workshop.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = 1, wdate=datetime.date.today())
+                workshops = Workshop.objects.select_related().filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = 1, wdate=datetime.date.today())
             else:
-                workshops = Workshop.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status])
+                workshops = Workshop.objects.select_related().filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status])
         elif is_organiser(user) and role == 'organiser':
             if status == 'approved':
-                workshops = Workshop.objects.filter(organiser_id=user, status = status_dict[status], wdate__gt=datetime.date.today())
+                workshops = Workshop.objects.select_related().filter(organiser_id=user, status = status_dict[status], wdate__gt=datetime.date.today())
             elif status == 'ongoing' :
-                workshops = Workshop.objects.filter(organiser_id=user, status = status_dict[status], wdate=datetime.date.today())
+                workshops = Workshop.objects.select_related().filter(organiser_id=user, status = status_dict[status], wdate=datetime.date.today())
             else:
-                workshops = Workshop.objects.filter(organiser_id=user, status = status_dict[status])
+                workshops = Workshop.objects.select_related().filter(organiser_id=user, status = status_dict[status])
         
         if workshops == None:
             raise Http404('You are not allowed to view this page')
@@ -1499,6 +1502,7 @@ def training_edit(request, role, rid):
             return HttpResponseRedirect("/software-training/training/"+role+"/pending/")
         
         context = {'form':form, }
+        context['role'] = role
         return render(request, 'events/templates/training/form.html', context)
     else:
         context = {}
@@ -1506,6 +1510,7 @@ def training_edit(request, role, rid):
         context.update(csrf(request))
         context['form'] = WorkshopForm(instance = record)
         context['instance'] = record
+        context['role'] = role
         return render(request, 'events/templates/training/form.html', context)
 
 def training_list(request, role, status):

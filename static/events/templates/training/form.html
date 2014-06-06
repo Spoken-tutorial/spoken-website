@@ -26,6 +26,11 @@
 	</ul>
 	
 	<div class='tab-content'>
+	        {% if instance %}
+	            {{ instance.academic.state }} - {{ instance.academic }}
+	        {% else %}
+	            {{ user.organiser.academic.state }} - {{ user.organiser.academic }}
+	        {% endif %}
 	    <form action="{{ action }}" method="post">{% csrf_token %}
 	        {% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
 	        {% if form.non_field_errors %}
