@@ -509,6 +509,9 @@ def workshop_request(request, role):
             w.wdate = dateTime[0]
             w.wtime = dateTime[1]
             w.skype = request.POST['skype']
+            
+            if 'workshop_type' in request.POST:
+                w.workshop_type = request.POST['workshop_type']
             w.save()
             #M2M saving department
             for dept in form.cleaned_data.get('department'):

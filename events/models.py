@@ -162,6 +162,7 @@ class Workshop(models.Model):
     wtime = models.TimeField()
     skype = models.BooleanField()
     status = models.PositiveSmallIntegerField(default=0)
+    workshop_type = models.PositiveIntegerField(default=0)
     participant_counts = models.PositiveIntegerField(default=0)
     created = models.DateTimeField(auto_now_add = True)
     updated = models.DateTimeField(auto_now = True)

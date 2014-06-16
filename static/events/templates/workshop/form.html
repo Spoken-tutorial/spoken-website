@@ -1,6 +1,7 @@
 {% extends 'spoken/templates/base.html' %}
 {% load widget_tweaks %}
 {% load static %}
+{% load eventsdata %}
 {% block title %}Workshop Request{% endblock %}
 {% block cssblock %}
 	<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />
@@ -59,6 +60,13 @@
 		        {% render_field form.academic class+="form-control academic" tabindex="1" data-placeholder="Enter academic name" %}
 		        {{ form.name.errors }}
             </div> -->
+            {% if user|is_resource_person %}
+                <div class="form-group">
+		            <label for="id_workshop_type">Workshop Type</label>
+		            {% render_field form.workshop_type class+="form-control workshop_type" tabindex="1" data-placeholder="Enter department" %}
+		            {{ form.workshop_type.errors }}
+	            </div>
+	       {% endif %}
 	        <div class="form-group">
 		        <label for="id_department">Department</label>
 		        {% render_field form.department class+="form-control department" tabindex="1" data-placeholder="Enter department" %}

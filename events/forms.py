@@ -153,6 +153,7 @@ class WorkshopForm(forms.Form):
     #state = forms.ChoiceField(choices = state_list, widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'State field is required.'})
     #district = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'district field is required.'})
     #academic = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'College Name field is required.'})
+    workshop_type = forms.ChoiceField(choices = [(0, 'Workshop (Default)'), (1, 'Pilot Workshop'), (2, 'Live Workshop')], widget=forms.Select(attrs = {}), required = False)
     department = forms.MultipleChoiceField(choices = [('', '-- None --'),], widget=forms.SelectMultiple(attrs = {}), required = True, error_messages = {'required':'Department Name field is required.'})
     wdate = forms.DateTimeField(required = True, error_messages = {'required':'Date field is required.'})
     foss = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'Foss field is required.'})

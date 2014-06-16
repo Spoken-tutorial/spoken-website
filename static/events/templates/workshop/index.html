@@ -37,6 +37,9 @@
 					<th>FOSS</th>
 					<th>Language</th>
 					<th>Date </th>
+					{% if status == 'completed' %}
+					    <td>Count</td>
+					{% endif %}
 					<th>Action</th>
 				</tr>
 				{% for record in collection %}
@@ -46,6 +49,9 @@
 						<td>{{ record.foss }}</td>
 						<td>{{ record.language }}</td>
 						<td>{{ record.wdate|date:"d M Y" }} {{	record.wtime }}</td>
+						{% if status == 'completed' %}
+						    <td>{{ record.participant_counts }}</td>
+						{% endif %}
                         <!-- actions based on roles -->
                         <td>
                             {% if role == 'rp' %}
