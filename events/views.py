@@ -528,7 +528,7 @@ def workshop_request(request, role):
         context = {'form' : form, 'role' : role, 'status' : 'request'}
         return render(request, 'events/templates/workshop/form.html', context)
     else:
-        messages.info(request, "Please check if your mechine is ready. For the Machine Readiness document Click Here. Please make sure that you update the 'Attendance Sheet' after the workshop. For the instruction Click Here ")
+        messages.info(request, "<ul><li>Please check if your mechine is ready. For the Machine Readiness document <a href='http://process.spoken-tutorial.org/images/5/58/Machine-Readiness.pdf' class='link alert-link' target='_blank'> Click Here</a>.</li><li> Please make sure that you update the 'Attendance Sheet' after the workshop. For the instruction <a href='#' class='link alert-link' target='_blank'> Click Here</a></li> ")
         context = {'role' : role, 'status' : 'request'}
         context.update(csrf(request))
         context['form'] = WorkshopForm(user = request.user)
@@ -548,7 +548,7 @@ def workshop_edit(request, role, rid):
             w = Workshop.objects.get(pk=rid)
             
             #check if date time chenged or not
-            if w.status == 1 and (str(w.wdate) == dateTime[0] or str(w.wtime)[0:5] == dateTime[1]):
+            if w.status == 1 and (str(w.wdate) != dateTime[0] or str(w.wtime)[0:5] != dateTime[1]):
                 #w.status = 4
                 w.status = 0
             w.language_id = request.POST['language']
@@ -961,7 +961,7 @@ def test_list(request, role, status):
     if not (user.is_authenticated() and ( is_organiser(user) or is_invigilator(user) or is_resource_person(user) or is_event_manager(user))):
         raise Http404('You are not allowed to view this page')
         
-    status_dict = {'pending': 0, 'waitingforinvigilator': 1, 'approved' : 2, 'ongoing': 3, 'completed' : 4, 'rejected' : 5, 'reschedule' : 1}
+    status_dict = {'pending': 0, 'waitingforinvigilator': 1, 'approved' : 2, 'ongoing': 3, 'completed' : 4, 'rejected' : 5, 'reschedule' : 2}
     if status in status_dict:
         context = {}
         test = None
@@ -1018,8 +1018,8 @@ def test_edit(request, role, rid):
             dateTime = request.POST['tdate'].split(' ')
             t = Test.objects.get(pk=rid)
             #check if date time chenged or not
-            if t.status == 1 and (str(t.tdate) == dateTime[0] or str(t.ttime)[0:5] == dateTime[1]):
-                t.status = 4
+            if t.status == 2 and (str(t.tdate) != dateTime[0] or str(t.ttime)[0:5] != dateTime[1]):
+                t.status = 0
             #t.organiser_id = user.id
             t.test_category_id = form.cleaned_data['test_category']
             if int(form.cleaned_data['test_category']) == 1:

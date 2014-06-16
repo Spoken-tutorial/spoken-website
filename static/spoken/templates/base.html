@@ -74,27 +74,27 @@
 								    {% if message.tags == 'success' %}
 									    <div class="alert alert-success alert-dismissable">
 										    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-										    {{ message }}
+										    {{ message|safe }}
 									    </div>
 									{% elif message.tags == 'warning' %}
 									   <div class="alert alert-warning alert-dismissable">
 										    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-										    {{ message }}
+										    {{ message|safe }}
 									    </div>
 									{% elif message.tags == 'error' %}
 									    <div class="alert alert-danger alert-dismissable">
 										    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-										    {{ message }}
+										    {{ message|safe }}
 									    </div>
 									{% elif message.tags == 'info' %}
 									     <div class="alert alert-info alert-dismissable">
 										    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-										    {{ message }}
+										    {{ message|safe }}
 									    </div>
 									{% elif message.tags == 'debug' %}
 									    <div class="alert alert-info alert-dismissable">
 										    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-										    {{ message }}
+										    {{ message|safe }}
 									    </div>
 									{% endif %}
 								{% endfor %}

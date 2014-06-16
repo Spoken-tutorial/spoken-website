@@ -282,7 +282,7 @@ class TestForm(forms.Form):
         self.fields['department'].choices = Department.objects.exclude(name='uncategorized').values_list('id', 'name')
 
         if user:
-            print "i am in user"
+            #print "i am in user"
             #self.fields['district'].choices = District.objects.filter(state =user.organiser.academic.state).values_list('id', 'name')
             #self.fields['district'].initial = user.organiser.academic.district.id
             #if args and 'district' in args[0]:
@@ -293,7 +293,7 @@ class TestForm(forms.Form):
             #self.fields['academic'].choices = choices
             #self.fields['academic'].initial = user.organiser.academic.id
             if instance:
-                print "i am in instance"
+                #print "i am in instance"
                 wchoices = list(Workshop.objects.filter(academic = instance.academic, status = 2).values_list('id', 'workshop_code'))
                 trchoices = list(Training.objects.filter(academic = instance.academic, status = 2).values_list('id', 'training_code'))
             else:
@@ -326,7 +326,7 @@ class TestForm(forms.Form):
             self.fields['invigilator'].choices = ichoices
         
         if args:
-            print "i am in arg"
+            #print "i am in arg"
             if 'test_category' in args[0]:
                 if args[0]['test_category'] and args[0]['test_category'] != '' and args[0]['test_category'] != 'None':
                     if int(args[0]['test_category']) == 1:
@@ -352,7 +352,7 @@ class TestForm(forms.Form):
                                     self.fields['department'].choices = w.department.select_related().values_list('id', 'name')
                     
         if instance:
-            print "I am in instance"
+            #print "I am in instance"
             #self.fields['district'].choices = District.objects.filter(state =instance.academic.state).values_list('id', 'name')
             #self.fields['district'].initial = instance.academic.district.id
             #self.fields['academic'].choices = AcademicCenter.objects.filter(district =instance.academic.district).values_list('id', 'institution_name')
