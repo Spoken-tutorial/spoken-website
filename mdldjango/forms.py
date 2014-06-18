@@ -95,3 +95,47 @@ class RegisterForm(forms.Form):
             self.fields['district'].initial = initial.academic.district_id
             self.fields['college'].initial = initial.academic_id
 
+class FeedbackForm(forms.ModelForm):
+    fiveChoice = (('1', '',), ('2', '',), ('3', '',), ('4', '',), ('5', '',))
+    threeChoice = (('1', '',), ('2', '',), ('3', '',))
+    content = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
+    sequence = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
+    clarity = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
+    interesting = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
+    appropriate_example = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
+    instruction_sheet = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
+    assignment = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
+    
+    pace_of_tutorial = forms.ChoiceField(widget=forms.RadioSelect, choices = threeChoice )
+    rate_workshop = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
+    workshop_learnt = forms.CharField(widget=forms.Textarea)
+    weakness_workshop = forms.BooleanField(label='Duration of the workshop is less', required=False, initial=False)
+    weakness_narration = forms.BooleanField(label='Pace of the narration in the tutorials was very fast', required=False, initial=False)
+    weakness_understand = forms.BooleanField(label='Had to listen more than two times to understand the commands', required=False, initial=False)
+    other_weakness = forms.CharField(widget=forms.Textarea)
+    tutorial_language = forms.ChoiceField(widget=forms.RadioSelect, choices = threeChoice )
+    apply_information = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
+    use_information = forms.CharField(widget=forms.Textarea)
+    
+    setup_learning = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
+    computers_lab = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
+    audio_quality = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
+    video_quality = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
+
+    workshop_orgainsation = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
+    faciliate_learning = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
+    motivate_learners = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
+    time_management = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
+
+    knowledge_about_software = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
+    provide_clear_explanation = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
+    answered_questions = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
+    interested_helping = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
+    executed_workshop = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
+    
+    recommend_workshop = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
+    use_information = forms.CharField(widget=forms.Textarea)
+    other_comments = forms.CharField(widget=forms.Textarea)
+    class Meta:
+        model = WorkshopFeedback
+        exclude = ['workshop', 'mdluser_id']

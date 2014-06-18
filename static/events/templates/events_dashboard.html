@@ -65,6 +65,14 @@
                                 <li><a href="/software-training/training/rp/pending/">New Requests</a></li>
                                 <li><a href="/software-training/training/rp/ongoing">Ongoing Test</a></li>
                             </ul>
+                            <h5>Organiser List</h5>
+                            <ul>
+                                <li><a href="/software-training/organiser/active/">List Organiser</a></li>
+                            </ul>
+                            <h5>Invigilator List</h5>
+                            <ul>
+                                <li><a href="/software-training/invigilator/active/">List Invigilator</a></li>
+                            </ul>
                         </div>
                     </div>
                 {% endif %}
@@ -86,6 +94,21 @@
                             <ul>
                                 <li><a href="/software-training/training/em/pending/">New Requests</a></li>
                                 <li><a href="/software-training/training/em/ongoing">Ongoing Test</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                {% endif %}
+                {% if not user|is_organiser or not user|is_invigilator %}
+                    <div class="panel panel-primary">
+                        <div class="panel-heading panel-heading-notif">Join with Us</div>
+                        <div class="panel-body">
+                            <ul>
+                                {% if not user|is_organiser %}
+                                    <li><a href="/software-training/organiser/request/{{user.username}}">Request for Organiser</a></li>
+                                {% endif %}
+                                {% if not user|is_invigilator %}
+                                    <li><a href="/software-training/invigilator/request/{{user.username}}">Request for Invigilator</a></li>
+                                {% endif %}
                             </ul>
                         </div>
                     </div>

@@ -319,3 +319,48 @@ class TrainingLog(models.Model):
     role = models.PositiveSmallIntegerField() #{0:'organiser', 1:'ResourcePerson', 2: 'Event Manager'}
     status = models.PositiveSmallIntegerField() #{0:'new', 1:'approved', 2:'completed', 3: 'rejected', 4:'update',  5:'Offline-Attendance submited', 6:'Marked Attendance'}
     created = models.DateTimeField(auto_now_add = True)
+
+class WorkshopFeedback(models.Model):
+    workshop = models.ForeignKey(Workshop)
+    mdluser_id = models.PositiveIntegerField()
+    content = models.PositiveSmallIntegerField()
+    sequence = models.PositiveSmallIntegerField()
+    clarity = models.PositiveSmallIntegerField()
+    interesting = models.PositiveSmallIntegerField()
+    appropriate_example = models.PositiveSmallIntegerField()
+    instruction_sheet = models.PositiveSmallIntegerField()
+    assignment = models.PositiveSmallIntegerField()
+    
+    pace_of_tutorial = models.PositiveSmallIntegerField()
+    rate_workshop = models.PositiveSmallIntegerField()
+    workshop_learnt = models.TextField()
+    weakness_workshop = models.BooleanField()
+    weakness_narration = models.BooleanField()
+    weakness_understand = models.BooleanField()
+    other_weakness = models.TextField()
+    tutorial_language = models.PositiveSmallIntegerField()
+    apply_information = models.PositiveSmallIntegerField()
+    use_information = models.TextField()
+    
+    setup_learning = models.PositiveSmallIntegerField()
+    computers_lab = models.PositiveSmallIntegerField()
+    audio_quality = models.PositiveSmallIntegerField()
+    video_quality = models.PositiveSmallIntegerField()
+
+    workshop_orgainsation = models.PositiveSmallIntegerField()
+    faciliate_learning = models.PositiveSmallIntegerField()
+    motivate_learners = models.PositiveSmallIntegerField()
+    time_management = models.PositiveSmallIntegerField()
+
+    knowledge_about_software = models.PositiveSmallIntegerField()
+    provide_clear_explanation = models.PositiveSmallIntegerField()
+    answered_questions = models.PositiveSmallIntegerField()
+    interested_helping = models.PositiveSmallIntegerField()
+    executed_workshop = models.PositiveSmallIntegerField()
+    
+    recommend_workshop = models.PositiveSmallIntegerField()
+    use_information = models.TextField()
+    other_comments = models.TextField()
+    created = models.DateTimeField(auto_now_add = True)
+    class Meta:
+        unique_together = (("workshop", "mdluser_id"))

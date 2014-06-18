@@ -54,6 +54,7 @@ def mdl_login(request):
         if user:
             request.session['mdluserid'] = user.id
             request.session['mdluseremail'] = user.email
+            request.session['mdlusername'] = user.username
             request.session['mdluserinstitution'] = user.institution
             request.session.save()
             request.session.modified = True
@@ -70,6 +71,7 @@ def mdl_login(request):
 
 def index(request):
     mdluserid = request.session.get('mdluserid')
+    mdlusername = request.session.get('mdlusername')
     if not mdluserid:
         return HttpResponseRedirect("/moodle/login")
     
@@ -86,6 +88,7 @@ def index(request):
     print ongoing_test
     context = {
         'mdluserid' : mdluserid,
+        'mdlusername' : mdlusername,
         'upcoming_workshop' : upcoming_workshop,
         'upcoming_test' : upcoming_test,
         'past_workshop' : past_workshop,
@@ -228,3 +231,38 @@ def mdl_register(request):
     context['form'] = form
     context.update(csrf(request))
     return render(request, 'mdl/templates/register.html', context)
+    
+def feedback(request, wid):
+    mdluserid = request.session.get('mdluserid')
+    mdlusername = request.session.get('mdlusername')
+    if not mdluserid:
+        return HttpResponseRedirect("/moodle/login")
+        
+    form = FeedbackForm()
+    mdluserid = request.session.get('mdluserid')
+    if not mdluserid:
+        return HttpResponseRedirect("/moodle/login")
+    w = None
+    try:
+        w = Workshop.objects.select_related().get(pk=wid)
+    except Exception, e:
+        print e
+    
+    if request.method == 'POST':
+        form = FeedbackForm(request.POST)
+        if form.is_valid():
+            try:
+                form_data = form.save(commit=False)
+                form_data.workshop_id = wid
+                form_data.mdluser_id = mdluserid
+                form_data.save()
+            except Exception, e:
+                print e
+    context = {
+        'form' : form,
+        'w' : w,
+        'mdluserid' : mdluserid,
+        'mdlusername' : mdlusername,
+    }
+    context.update(csrf(request))
+    return render(request, 'mdl/templates/feedback.html', context)

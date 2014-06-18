@@ -10,6 +10,9 @@ urlpatterns = patterns('',
     
     #url(r'^xmlparse/$', views.xmlparse, name='xmlparse'),
     #url(r'^pdf/$', views.pdf, name='pdf'),
+    url(r'^workshop/permission/$', views.workshop_permission, name='workshop_permission'),
+    url(r'^workshop/accessrole/$', views.accessrole, name='workshop_accessrole'),
+    
     url(r'^(?P<role>\w+)/(?P<status>\w+)/$', views.organiser_invigilator_index, name='organiser_invigilator_index'),
     url(r'^organiser/(?P<status>\w+)/(?P<code>\w+)/(?P<userid>\d+)/$', views.rp_organiser, name='rp_organiser'),
     
@@ -26,8 +29,7 @@ urlpatterns = patterns('',
     url(r'^workshop/(\d+)/attendance/$', views.workshop_attendance, name='workshop_attendance'),
     url(r'^workshop/(\d+)/participant/$', views.workshop_participant, name='workshop_participant'),
     url(r'^workshop/participant/certificate/(\d+)/(\d+)/$', views.workshop_participant_ceritificate, name='workshop_participant_ceritificate'),
-    url(r'^workshop/permission/$', views.workshop_permission, name='workshop_permission'),
-    url(r'^workshop/accessrole/$', views.accessrole, name='workshop_accessrole'),
+    
     url(r'^workshop/(?P<role>\w+)/request/$', views.workshop_request, name='workshop_request'),
     url(r'^workshop/(?P<role>\w+)/(?P<rid>\d+)/approvel/$', views.workshop_approvel, name='workshop_approvel'),
     url(r'^workshop/(?P<role>\w+)/(?P<status>\w+)/$', views.workshop_list, name='workshop_list'),
