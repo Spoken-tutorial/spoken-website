@@ -21,8 +21,6 @@ class AcademicForm(forms.ModelForm):
     
     university = forms.ModelChoiceField(label='University', cache_choices=True, widget = forms.Select(attrs = {'class' : 'ac-university'}), queryset = University.objects.none(), empty_label = "--- None ---", help_text = "", error_messages = {'required':'University field required.'})
     
-    institution_type = forms.ModelChoiceField(label='Institute Type', cache_choices=True, widget = forms.Select(attrs = {'class' : 'ac-institution_type'}), queryset = InstituteType.objects.all(), empty_label = "--- None ---", help_text = "", error_messages = {'required':'Institute Type field required.'})
-    
     district = forms.ModelChoiceField(label='Dist', cache_choices=True, widget = forms.Select(attrs = {'class' : 'ac-district'}), queryset = District.objects.none(), empty_label = "--- None ---", help_text = "", error_messages = {'required':'Institute Type field required.'})
     
     city = forms.ModelChoiceField(label='City', cache_choices=True, widget = forms.Select(attrs = {'class' : 'ac-city'}), queryset = City.objects.none(), empty_label = "--- None ---", help_text = "", error_messages = {'required':'City Type field required.'})
@@ -255,14 +253,22 @@ class WorkshopPermissionForm(forms.Form):
 class TestForm(forms.Form):
     #district = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'district field is required.'})
     #academic = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'College Name field is required.'})
-    choices = list(TestCategory.objects.all().values_list('id', 'name'))
-    choices.insert(0, ('', '-- None --'))
+    choices = ()
+    try:
+        choices = list(TestCategory.objects.all().values_list('id', 'name'))
+        choices.insert(0, ('', '-- None --'))
+    except:
+        pass
     test_category = forms.ChoiceField(choices = choices, widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'Category field is required.'})
     workshop = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = False, error_messages = {'required':'Workshop field is required.'})
     training = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = False, error_messages = {'required':'Training field is required.'})
     invigilator = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'invigilator Name field is required.'})
-    dchoices = list(Department.objects.all().values_list('id', 'name'))
-    dchoices.insert(0, ('', '-- None --'))
+    dchoices = ()
+    try:
+        dchoices = list(Department.objects.all().values_list('id', 'name'))
+        dchoices.insert(0, ('', '-- None --'))
+    except:
+        pass
     department = forms.MultipleChoiceField(choices = dchoices, widget=forms.SelectMultiple(attrs = {}), required = True, error_messages = {'required':'Department Name field is required.'})
     tdate = forms.DateTimeField(required = True, error_messages = {'required':'Date field is required.'})
     fchoices = list(FossCategory.objects.all().values_list('id', 'foss'))

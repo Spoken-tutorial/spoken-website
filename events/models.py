@@ -91,6 +91,14 @@ class University(models.Model):
     class Meta:
         unique_together = (("name","state"),)
         
+class InstituteCategory(models.Model):
+    name = models.CharField(max_length=200)
+    created = models.DateTimeField(auto_now_add = True)
+    updated = models.DateTimeField(auto_now = True)
+    
+    def __unicode__(self):
+        return self.name
+        
 class InstituteType(models.Model):
     name = models.CharField(max_length=200)
     created = models.DateTimeField(auto_now_add = True)
@@ -98,13 +106,14 @@ class InstituteType(models.Model):
     
     def __unicode__(self):
         return self.name
-
+        
 class AcademicCenter(models.Model):
     user = models.ForeignKey(User)
     state = models.ForeignKey(State)
+    institution_type = models.ForeignKey(InstituteType)
+    institute_category = models.ForeignKey(InstituteCategory)
     university = models.ForeignKey(University)
     academic_code = models.CharField(max_length=100, unique = True)
-    institution_type = models.ForeignKey(InstituteType)
     institution_name = models.CharField(max_length=200, unique = True)
     district = models.ForeignKey(District)
     location = models.ForeignKey(Location)
