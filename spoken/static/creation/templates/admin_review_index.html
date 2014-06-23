@@ -33,7 +33,7 @@
                     <tr>
                         <td>{{ forloop.counter }}</td>
                         <td>{{ tr_rec.tutorial_detail.foss.foss }}</td>
-                        <td>{{ tr_rec.tutorial_detail.tutorial }}</td>
+                        <td><a href="/creation/tutorial/view/{{ tr_rec.tutorial_detail.foss.foss|get_url_name }}/{{ tr_rec.tutorial_detail.tutorial|get_url_name }}/{{ tr_rec.language.name }}/" target="_blank">{{ tr_rec.tutorial_detail.tutorial }}</a></td>
                         <td>{{ tr_rec.language.name }}</td>
                         <td>{{ tr_rec | get_last_video_upload_time }}</td>
                         {% if tr_rec.video_status == 1 or tr_rec.video_status == 2 %}

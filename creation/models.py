@@ -224,6 +224,17 @@ class QualityReviewerNotification(models.Model):
     tutorial_resource = models.ForeignKey(TutorialResource)
     created = models.DateTimeField(auto_now_add = True)
 
+class RoleRequest(models.Model):
+    user = models.ForeignKey(User, related_name = 'user')
+    role_type = models.IntegerField(default = 0)
+    status = models.PositiveSmallIntegerField(default = 0)
+    approved_user = models.ForeignKey(User, related_name = 'approved_user', null = True, blank = True)
+    created = models.DateTimeField(auto_now_add = True)
+    updated = models.DateTimeField(auto_now = True)
+
+    class Meta:
+        unique_together = (('user','role_type',),)
+
 class FossAvailableForWorkshop(models.Model):
     foss = models.ForeignKey(FossCategory)
     language = models.ForeignKey(Language)

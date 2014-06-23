@@ -9,9 +9,9 @@
 {% endblock %}
 {% block heading %}<i class="fa fa-list-ul"></i> Tutorials waiting for Admin review{% endblock %}
 {% block content %}
-    <ul class="tabs nav nav-tabs">
-        <li class="active"><a href=""><i class="fa fa-list-ul"></i> Tutorials waiting for Admin review</a></li>
-        <li><a href="/creation/admin-review/reviewed/"><i class="fa fa-list-ul"></i> Tutorials Reviewed</a></li>
+    <ul class="tabs breadcrumb">
+        <li class="active">Tutorials waiting for Admin review</li>
+        <li><a href="/creation/admin-review/reviewed/">Tutorials Reviewed</a></li>
     </ul>
     <div class="tab-content">
         <div class="tab-pane active table-responsive">
@@ -33,7 +33,7 @@
                     <tr>
                         <td>{{ forloop.counter }}</td>
                         <td>{{ tr_rec.tutorial_detail.foss.foss }}</td>
-                        <td>{{ tr_rec.tutorial_detail.tutorial }}</td>
+                        <td><a href="/creation/tutorial/view/{{ tr_rec.tutorial_detail.foss.foss|get_url_name }}/{{ tr_rec.tutorial_detail.tutorial|get_url_name }}/{{ tr_rec.language.name }}/" target="_blank">{{ tr_rec.tutorial_detail.tutorial }}</a></td>
                         <td>{{ tr_rec.language.name }}</td>
                         <td>{{ tr_rec | get_last_video_upload_time }}</td>
                         {% if tr_rec.video_status == 1 or tr_rec.video_status == 2 %}

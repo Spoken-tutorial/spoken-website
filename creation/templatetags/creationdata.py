@@ -1,9 +1,23 @@
+import zipfile
 from django import template
 from django.contrib.auth.models import User
 from creation.models import *
-from creation.views import is_contributor, is_videoreviewer, is_domainreviewer, is_qualityreviewer
+from creation.filters import *
+from creation.views import is_contributor, is_internal_contributor, is_external_contributor, is_videoreviewer, is_domainreviewer, is_qualityreviewer, is_administrator
 
 register = template.Library()
+
+def get_url_name(name):
+    return name.replace(' ', '-')
+
+def get_zip_content(path):
+    file_names = None
+    try:
+        zf = zipfile.ZipFile(path, 'r')
+        file_names = zf.namelist()
+        return file_names
+    except Exception, e:
+        return False
 
 def is_script_available(path):
     try:
@@ -41,10 +55,16 @@ def get_last_video_upload_time(key):
 	except:
 		return key.updated
 
+register.inclusion_tag('creation/templates/sortable_header.html')(get_sortable_header)
+register.filter('get_url_name', get_url_name)
+register.filter('get_zip_content', get_zip_content)
 register.filter('get_contributor', is_contributor)
+register.filter('get_internal_contributor', is_internal_contributor)
+register.filter('get_external_contributor', is_external_contributor)
 register.filter('get_videoreviewer', is_videoreviewer)
 register.filter('get_domainreviewer', is_domainreviewer)
 register.filter('get_qualityreviewer', is_qualityreviewer)
+register.filter('get_administrator', is_administrator)
 register.filter('get_last_video_upload_time', get_last_video_upload_time)
 register.filter('get_review_status_list', get_review_status_list)
 register.filter('get_review_status_symbol', get_review_status_symbol)

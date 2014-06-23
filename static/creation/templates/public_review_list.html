@@ -59,7 +59,7 @@
                     <tr>
                         <td>{{ forloop.counter }}</td>
                         <td>{{ tr_rec.tutorial_detail.foss.foss }}</td>
-                        <td>{{ tr_rec.tutorial_detail.tutorial }}</td>
+                        <td><a href="/creation/tutorial/view/{{ tr_rec.tutorial_detail.foss.foss|get_url_name }}/{{ tr_rec.tutorial_detail.tutorial|get_url_name }}/{{ tr_rec.language.name }}/" target="_blank">{{ tr_rec.tutorial_detail.tutorial }}</a></td>
                         <td>{{ tr_rec.language.name }}</td>
                         <td class="col-center" title="{{ tr_rec.outline_status | get_review_status_list }}">
                             <span class="{{ tr_rec.outline_status | get_review_status_symbol }}"></span>

@@ -5,9 +5,9 @@
 {% block title %}Tutorials Reviewed{% endblock %}
 {% block heading %}<i class="fa fa-list-ul"></i> Tutorials reviewed{% endblock %}
 {% block content %}
-    <ul class="tabs nav nav-tabs">
-        <li><a href="/creation/admin-review/"><i class="fa fa-list-ul"></i> Tutorials waiting for Admin review</a></li>
-        <li class="active"><a href=""><i class="fa fa-list-ul"></i> Tutorials reviewed</a></li>
+    <ul class="tabs breadcrumb">
+        <li><a href="/creation/admin-review/">Tutorials waiting for Admin review</a></li>
+        <li class="active">Tutorials reviewed</li>
     </ul>
     <div class="tab-content">
         <div class="tab-pane active table-responsive">
@@ -36,7 +36,7 @@
                     <tr>
                         <td>{{ forloop.counter }}</td>
                         <td>{{ tr_rec.tutorial_detail.foss.foss }}</td>
-                        <td>{{ tr_rec.tutorial_detail.tutorial }}</td>
+                        <td><a href="/creation/tutorial/view/{{ tr_rec.tutorial_detail.foss.foss|get_url_name }}/{{ tr_rec.tutorial_detail.tutorial|get_url_name }}/{{ tr_rec.language.name }}/" target="_blank">{{ tr_rec.tutorial_detail.tutorial }}</a></td>
                         <td>{{ tr_rec.language.name }}</td>
                         <td class="col-center" title="{{ tr_rec.outline_status | get_review_status_list }}">
                             <span class="{{ tr_rec.outline_status | get_review_status_symbol }}"></span>
