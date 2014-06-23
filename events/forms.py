@@ -77,13 +77,13 @@ class OrganiserForm(forms.Form):
             
         super(OrganiserForm, self).__init__(*args, **kwargs)
         #load the choices
-        state_list = list(State.objects.exclude(name='uncategorized').values_list('id', 'name'))
+        state_list = list(State.objects.exclude(name='Uncategorized').order_by('name').values_list('id', 'name'))
         state_list.insert(0, ('', '-- None --'))
         self.fields['state'].choices = state_list
         if args:
             if 'state' in args[0]:
                 if args[0]['state'] and args[0]['state'] != '' and args[0]['state'] != 'None':
-                    choices = list(District.objects.filter(state_id = args[0]['state']).values_list('id', 'name'))
+                    choices = list(District.objects.filter(state_id = args[0]['state']).order_by('name').values_list('id', 'name'))
                     choices.insert(0, ('', '-- None --'))
                     self.fields['district'].choices = choices
                     self.fields['district'].widget.attrs = {}
@@ -97,7 +97,7 @@ class OrganiserForm(forms.Form):
                     #self.fields['college'].initial = args[0]['collages']
         if initial:
             self.fields['state'].initial = initial.academic.state_id
-            self.fields['district'].choices = District.objects.filter(state_id =initial.academic.state_id).values_list('id', 'name')
+            self.fields['district'].choices = District.objects.filter(state_id =initial.academic.state_id).order_by('name').values_list('id', 'name')
             self.fields['college'].choices = AcademicCenter.objects.filter(district_id =initial.academic.district_id).values_list('id', 'institution_name')
             #initial data
             self.fields['district'].initial = initial.academic.district_id
@@ -115,7 +115,7 @@ class InvigilatorForm(forms.Form):
             
         super(InvigilatorForm, self).__init__(*args, **kwargs)
         #load the choices
-        state_list = list(State.objects.exclude(name='uncategorized').values_list('id', 'name'))
+        state_list = list(State.objects.exclude(name='Uncategorized').values_list('id', 'name'))
         state_list.insert(0, ('', '-- None --'))
         self.fields['state'].choices = state_list
         if args:
@@ -146,7 +146,7 @@ class DepartmentForm(forms.ModelForm):
         model = Department
 
 class WorkshopForm(forms.Form):
-    #state_list = list(State.objects.exclude(name='uncategorized').values_list('id', 'name'))
+    #state_list = list(State.objects.exclude(name='Uncategorized').values_list('id', 'name'))
     #state_list.insert(0, ('', '-- None --'))
     #state = forms.ChoiceField(choices = state_list, widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'State field is required.'})
     #district = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'district field is required.'})
@@ -168,7 +168,7 @@ class WorkshopForm(forms.Form):
             del kwargs["instance"]
         super(WorkshopForm, self).__init__(*args, **kwargs)
         #choices data 
-        self.fields['department'].choices = Department.objects.exclude(name='uncategorized').values_list('id', 'name')
+        self.fields['department'].choices = Department.objects.exclude(name='Uncategorized').values_list('id', 'name')
 
         foss_list = list(FossCategory.objects.all().values_list('id', 'foss'))
         foss_list.insert(0, ('', '-- None --'))
@@ -213,7 +213,7 @@ class WorkshopPermissionForm(forms.Form):
         user_list.insert(0, ('', '-- None --'))
         user = forms.ChoiceField(choices = user_list, widget=forms.Select(attrs = {}), required = True)
         
-        state_list = list(State.objects.exclude(name='uncategorized').values_list('id', 'name'))
+        state_list = list(State.objects.exclude(name='Uncategorized').values_list('id', 'name'))
         state_list.insert(0, ('', '-- None --'))
         state = forms.ChoiceField(choices = state_list, widget=forms.Select(attrs = {}), required = True)
         
@@ -285,7 +285,7 @@ class TestForm(forms.Form):
             del kwargs["instance"]
         super(TestForm, self).__init__(*args, **kwargs)
         #choices data 
-        self.fields['department'].choices = Department.objects.exclude(name='uncategorized').values_list('id', 'name')
+        self.fields['department'].choices = Department.objects.exclude(name='Uncategorized').values_list('id', 'name')
 
         if user:
             #print "i am in user"

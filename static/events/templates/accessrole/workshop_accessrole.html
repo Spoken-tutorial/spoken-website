@@ -1,24 +1,11 @@
 {% extends 'spoken/templates/base.html' %}
 {% load widget_tweaks %}
 {% load static %}
-{% block title %}Upload Tutorial{% endblock %}
+{% block title %}Workshop Access Role{% endblock %}
 {% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
-{% if alert_success or alert_danger %}
-	{% block alert %}
-		{% if alert_success %}
-			<div class="alert alert-success alert-dismissable">
-				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-				{{ alert_success }}
-			</div>
-		{% endif %}
-		{% if alert_danger %}
-			<div class="alert alert-danger alert-dismissable">
-				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-				{{ alert_danger }}
-			</div>
-		{% endif %}
-	{% endblock %}
-{% endif %}
+{% block heading %}
+    <i class="fa fa-list-ul"></i> Workshop Access Role
+{% endblock %}
 {% block content %}
 	<!-- Nav tabs -->
 	<!--<ul class="tabs">

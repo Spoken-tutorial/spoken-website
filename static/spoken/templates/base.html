@@ -108,7 +108,7 @@
                                 <ul class="pagination pull-right">
                                     {% if collection %}
                                         {% if collection.has_previous %} 
-                                            <li><a href="?page={ collection.previous_page_number {}}">&laquo; <small>Prev</small></a></li>
+                                            <li><a href="?{{ request.GET|combine_get_values }}page={{ collection.previous_page_number }}">&laquo; <small>Prev</small></a></li>
                                         {% else %} 
                                             <li class="disabled"><a href="#">&laquo;</a></li> 
                                         {% endif %}
@@ -116,11 +116,11 @@
                                             {% ifequal num collection.number %} 
                                                 <li class="active"><a href="#">{{ num }}<span class="sr-only">(current)</span></a></li>
                                             {% else %} 
-                                                <li><a href="?page={{ num }}">{{ num }}</a></li>
+                                                <li><a href="?{{ request.GET|combine_get_values }}page={{ num }}">{{ num }}</a></li>
                                             {% endifequal %} 
                                         {% endfor %} 
                                         {% if collection.has_next %} 
-                                            <li><a href="?page={{ collection.next_page_number }}"><small>Next</small>&raquo;</a></li>
+                                            <li><a href="?{{ request.GET|combine_get_values }}page={{ collection.next_page_number }}"><small>Next</small>&raquo;</a></li>
                                         {% else %} 
                                             <li class="disabled"><a href="#">&raquo;</a></li> 
                                         {% endif %}

@@ -47,6 +47,8 @@ from StringIO import StringIO
 import string
 import random
 
+from  filters import *
+
 def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
 
@@ -72,6 +74,15 @@ def is_invigilator(user):
     """Check if the user is having invigilator rights"""
     if user.groups.filter(name='Invigilator').count() == 1:
         return True
+def get_page(resource, page):
+    paginator = Paginator(resource, 1)
+    try:
+        resource =  paginator.page(page)
+    except PageNotAnInteger:
+        resource =  paginator.page(1)
+    except EmptyPage:
+        resource = paginator.page(paginator.num_pages)
+    return resource
 
 @login_required
 def events_dashboard(request):
@@ -250,7 +261,13 @@ def ac(request):
         raise Http404('You are not allowed to view this page')
         
     context = {}
-    context['collection'] = AcademicCenter.objects.all
+    collection = AcademicCenterFilter(request.GET, user = user, queryset=AcademicCenter.objects.all())
+    context['form'] = collection.form
+    
+    page = request.GET.get('page')
+    collection = get_page(collection, page)
+    
+    context['collection'] = collection
     context['model'] = "Academic Center"
     context.update(csrf(request))
     return render(request, 'events/templates/ac/index.html', context)
@@ -614,14 +631,15 @@ def workshop_list(request, role, status):
         if workshops == None:
             raise Http404('You are not allowed to view this page')
 
-        paginator = Paginator(workshops, 30)
+        #paginator = Paginator(workshops, 30)
         page = request.GET.get('page')
-        try:
-            workshops =  paginator.page(page)
-        except PageNotAnInteger:
-            workshops =  paginator.page(1)
-        except EmptyPage:
-            workshops = paginator.page(paginator.num_pages)
+        workshops = get_page(workshops, page)
+        #try:
+        #    workshops =  paginator.page(page)
+        #except PageNotAnInteger:
+        #    workshops =  paginator.page(1)
+        #except EmptyPage:
+        #    workshops = paginator.page(paginator.num_pages)
         
         context['collection'] = workshops
         context['status'] = status
@@ -1857,7 +1875,7 @@ def ajax_ac_state(request):
         state = request.POST.get('state')
         data = {}
         if request.POST.get('fields[district]'):
-            district = District.objects.filter(state=state)
+            district = District.objects.filter(state=state).order_by('name')
             tmp = ''
             for i in district:
                 tmp +='<option value='+str(i.id)+'>'+i.name+'</option>'
@@ -1868,7 +1886,7 @@ def ajax_ac_state(request):
                 data['district'] = tmp
             
         if request.POST.get('fields[city]'):
-            city = City.objects.filter(state=state)
+            city = City.objects.filter(state=state).order_by('name')
             tmp = ''
             for i in city:
                 tmp +='<option value='+str(i.id)+'>'+i.name+'</option>'
@@ -1879,7 +1897,7 @@ def ajax_ac_state(request):
                 data['city'] = tmp
             
         if request.POST.get('fields[university]'):
-            university = University.objects.filter(state=state)
+            university = University.objects.filter(state=state).order_by('name')
             tmp = ''
             for i in university:
                 tmp +='<option value='+str(i.id)+'>'+i.name+'</option>'
@@ -1895,7 +1913,7 @@ def ajax_ac_location(request):
     """ Ajax: Get the location based on district selected """
     if request.method == 'POST':
         district = request.POST.get('district')
-        location = Location.objects.filter(district=district)
+        location = Location.objects.filter(district=district).order_by('name')
         tmp = '<option value = None> -- None -- </option>'
         for i in location:
             tmp +='<option value='+str(i.id)+'>'+i.name+'</option>'
@@ -1908,17 +1926,15 @@ def ajax_district_data(request):
     if request.method == 'POST':
         tmp = ''
         district = request.POST.get('district')
-        print district
-        print "ddddddddddddd"
         if request.POST.get('fields[location]'):
-            location = Location.objects.filter(district_id=district)
+            location = Location.objects.filter(district_id=district).order_by('name')
             tmp = '<option value = None> -- None -- </option>'
             for i in location:
                 tmp +='<option value='+str(i.id)+'>'+i.name+'</option>'
             data['location'] = tmp
         
         if request.POST.get('fields[institute]'):
-            collages = AcademicCenter.objects.filter(district=district)
+            collages = AcademicCenter.objects.filter(district=district).order_by('institution_name')
             tmp = '<option value = None> -- None -- </option>'
             for i in collages:
                 tmp +='<option value='+str(i.id)+'>'+i.institution_name+'</option>'
@@ -1939,7 +1955,7 @@ def ajax_district_collage(request):
     """ Ajax: Get the Colleges (Academic) based on District selected """
     if request.method == 'POST':
         district = request.POST.get('district')
-        collages = AcademicCenter.objects.filter(district=district)
+        collages = AcademicCenter.objects.filter(district=district).order_by('institution_name')
         tmp = '<option value = None> -- None -- </option>'
         for i in collages:
             tmp +='<option value='+str(i.id)+'>'+i.institution_name+'</option>'
@@ -1958,13 +1974,13 @@ def ajax_dept_foss(request):
             print request.POST
             training = request.POST.get('workshop')
             if request.POST.get('fields[dept]'):
-                dept = Department.objects.filter(training__id = training)
+                dept = Department.objects.filter(training__id = training).order_by('name')
                 for i in dept:
                     tmp +='<option value='+str(i.id)+'>'+i.name+'</option>'
                 data['dept'] = tmp
             
             if request.POST.get('fields[foss]'):
-                training = Training.objects.filter(pk=training)
+                training = Training.objects.filter(pk=training).order_by('name')
                 tmp = '<option value = None> -- None -- </option>'
                 if training:
                     tmp +='<option value='+str(training[0].foss.id)+'>'+training[0].foss.foss+'</option>'
@@ -1972,7 +1988,7 @@ def ajax_dept_foss(request):
         elif category == 0:
             workshop = request.POST.get('workshop')
             if request.POST.get('fields[dept]'):
-                dept = Department.objects.filter(workshop__id = workshop)
+                dept = Department.objects.filter(workshop__id = workshop).order_by('name')
                 for i in dept:
                     tmp +='<option value='+str(i.id)+'>'+i.name+'</option>'
                 data['dept'] = tmp
@@ -1984,7 +2000,7 @@ def ajax_dept_foss(request):
                     tmp +='<option value='+str(workshop[0].foss.id)+'>'+workshop[0].foss.foss+'</option>'
                 data['foss'] = tmp
         else:
-            dept = Department.objects.all()
+            dept = Department.objects.all().order_by('name')
             for i in dept:
                 tmp +='<option value='+str(i.id)+'>'+i.name+'</option>'
             data['dept'] = tmp
@@ -2002,7 +2018,6 @@ def ajax_language(request):
     """ Ajax: Get the Colleges (Academic) based on District selected """
     if request.method == 'POST':
         foss = request.POST.get('foss')
-        print foss, "-----------------"
         language = FossAvailableForWorkshop.objects.select_related().filter(foss_id=foss)
         tmp = '<option value = None> -- None -- </option>'
         for i in language:
