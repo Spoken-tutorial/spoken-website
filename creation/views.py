@@ -22,7 +22,6 @@ from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render, render_to_response
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect
-from django_tables2   import RequestConfig
 from creation.forms import *
 from creation.models import *
 from creation.filters import *

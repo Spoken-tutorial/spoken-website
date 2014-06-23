@@ -1,5 +1,4 @@
 import django_filters
-import django_tables2 as tables
 from django.contrib import messages
 from creation.models import *
 
@@ -7,13 +6,6 @@ class RoleFilter(django_filters.FilterSet):
     class Meta:
         model = RoleRequest
         fields = ['user', 'user__email', 'updated']
-
-class RoleTable(tables.Table):
-    email = tables.Column(accessor='user.email', verbose_name=('Email'))
-    class Meta:
-        model = RoleRequest
-        fields = ('user', 'email', 'updated')
-        attrs = {"class": "paleblue"}
 
 class SortableHeader():
     def __init__(self, name, sortable, verbose_name=''):
