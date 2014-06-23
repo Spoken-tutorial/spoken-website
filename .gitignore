@@ -2,11 +2,9 @@
 *.swp
 *.pyc
 config.py
-cms/fixtures/*
-cms/templates/*
-events/fixtures/*
-events/templates/*
 media/*
+!media/videos/README
+!media/training/README
 !media/README
 *.py[cod]
 

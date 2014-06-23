@@ -1,0 +1,26 @@
+[
+	{
+		"model": "cms.block_location",
+		"pk": 1,
+		"fields": {
+			"name": "header",
+			"visible": 1
+		}
+	},
+	{
+		"model": "cms.block_location",
+		"pk": 2,
+		"fields": {
+			"name": "footer",
+			"visible": 1
+		}
+	},
+	{
+		"model": "cms.block_location",
+		"pk": 3,
+		"fields": {
+			"name": "sidebar",
+			"visible": 0
+		}
+	}
+]
