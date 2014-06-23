@@ -59,6 +59,130 @@ class UploadPrerequisiteForm(forms.Form):
                     self.fields['tutorial_name'].widget.attrs = {}
                     self.fields['tutorial_name'].initial = initial_data
 
+class ChangeComponentStatusForm(forms.Form):
+    foss_category = forms.ChoiceField(
+        choices = [('', ''),],
+        widget=forms.Select(),
+        required = True,
+        error_messages = {'required':'FOSS category field is required.'}
+    )
+    tutorial_name = forms.ChoiceField(
+        choices = [('', 'Select Tutorial'),],
+        widget=forms.Select(attrs = {'disabled': 'disabled'}),
+        required = True,
+        error_messages = {'required': 'Tutorial Name field is required.'}
+    )
+    language = forms.ChoiceField(
+        choices = [('', 'Select Language'),],
+        widget = forms.Select(attrs = {'disabled': 'disabled'}),
+        required = True,
+        error_messages = {'required': 'Language field is required.'}
+    )
+    component = forms.ChoiceField(
+        choices = [('', 'Select Component'),],
+        widget = forms.Select(attrs = {'disabled': 'disabled'}),
+        required = True,
+        error_messages = {'required': 'Component field is required.'}
+    )
+    status = forms.ChoiceField(
+        choices = [('', 'Select Status'),],
+        widget = forms.Select(attrs = {'disabled': 'disabled'}),
+        required = True,
+        error_messages = {'required': 'Status field is required.'}
+    )
+    def __init__(self, *args, **kwargs):
+        super(ChangeComponentStatusForm, self).__init__(*args, **kwargs)
+        foss_list = list(FossCategory.objects.all().values_list('id', 'foss'))
+        foss_list.insert(0, ('', 'Select Foss'))
+        self.fields['foss_category'].choices = foss_list
+        if args:
+             if 'foss_category' in args[0]:
+                if args[0]['foss_category']:
+                    initial_data = ''
+                    if 'language' in args[0]:
+                        if args[0]['language']:
+                            initial_data = args[0]['language']
+                    choices = list(Language.objects.filter(id__in = TutorialResource.objects.filter(tutorial_detail__in = TutorialDetail.objects.filter(foss_id = int(args[0]['foss_category'])).values_list('id'), status = 0).values_list('language_id').distinct()).values_list('id', 'name'))
+                    if len(choices):
+                        self.fields['language'].widget.attrs = {}
+                    choices.insert(0, ('', 'Select Language'))
+                    self.fields['language'].choices = choices
+                    if initial_data:
+                        self.fields['language'].initial = initial_data
+                        lang = Language.objects.get(pk = initial_data)
+                        tut_init_data = ''
+                        if 'tutorial_name' in args[0]:
+                            if args[0]['tutorial_name']:
+                                tut_init_data = args[0]['tutorial_name']
+                        td_list = TutorialDetail.objects.filter(foss_id = args[0]['foss_category']).values_list('id')
+                        choices = list(TutorialResource.objects.filter(tutorial_detail_id__in = td_list, language_id = initial_data, status = 0).distinct().values_list('tutorial_detail_id', 'tutorial_detail__tutorial'))
+                        if len(choices):
+                            self.fields['tutorial_name'].widget.attrs = {}
+                        choices.insert(0, ('', ''))
+                        self.fields['tutorial_name'].choices = choices
+                        self.fields['tutorial_name'].initial = tut_init_data
+                        comp_init_data = ''
+                        if 'component' in args[0]:
+                            if args[0]['component']:
+                                comp_init_data = args[0]['component']
+                        if lang.name == 'English':
+                            choices = [('outline', 'Outline'), ('script', 'Script'), ('slide', 'Slides'), ('video', 'Video'), ('code', 'Codefiles'), ('assignment', 'Assignment')]
+                        else:
+                            choices = [('outline', 'Outline'), ('script', 'Script'), ('video', 'Video')]
+                        if len(choices):
+                            self.fields['component'].widget.attrs = {}
+                        self.fields['component'].choices = choices
+                        self.fields['component'].initial = comp_init_data
+class PublishToPending(forms.Form):
+    foss_category = forms.ChoiceField(
+        widget=forms.Select(),
+        required = True,
+        error_messages = {'required':'FOSS category field is required.'}
+    )
+    tutorial_name = forms.ChoiceField(
+        choices = [('', ''),],
+        widget=forms.Select(attrs = {'disabled': 'disabled'}),
+        required = True,
+        error_messages = {'required': 'Tutorial Name field is required.'}
+    )
+    language = forms.ChoiceField(
+        choices = [('', ''),],
+        widget = forms.Select(attrs = {'disabled': 'disabled'}),
+        required = True,
+        error_messages = {'required': 'Language field is required.'}
+    )
+    def __init__(self, *args, **kwargs):
+        super(PublishToPending, self).__init__(*args, **kwargs)
+        foss_list = list(FossCategory.objects.all().values_list('id', 'foss'))
+        foss_list.insert(0, ('', ''))
+        self.fields['foss_category'].choices = foss_list
+
+        if args:
+            if 'foss_category' in args[0]:
+                if args[0]['foss_category'] and args[0]['foss_category'] != '' and args[0]['foss_category'] != 'None':
+                    initial_data = ''
+                    if 'language' in args[0]:
+                        if args[0]['language'] and args[0]['language'] != '' and args[0]['language'] != 'None':
+                            initial_data = args[0]['language']
+                    choices = list(Language.objects.filter(id__in = TutorialResource.objects.filter(tutorial_detail__in = TutorialDetail.objects.filter(foss_id = int(args[0]['foss_category'])).values_list('id'), status = 1).values_list('language_id').distinct()).values_list('id', 'name'))
+                    if len(choices):
+                        self.fields['language'].widget.attrs = {}
+                    choices.insert(0, ('', ''))
+                    self.fields['language'].choices = choices
+                    if initial_data:
+                        self.fields['language'].initial = initial_data
+                        tut_init_data = ''
+                        if 'tutorial_name' in args[0]:
+                            if args[0]['tutorial_name'] and args[0]['tutorial_name'] != '' and args[0]['tutorial_name'] != 'None':
+                                tut_init_data = args[0]['tutorial_name']
+                        td_list = TutorialDetail.objects.filter(foss_id = args[0]['foss_category']).values_list('id')
+                        choices = list(TutorialResource.objects.filter(tutorial_detail_id__in = td_list, language_id = initial_data, status = 1).distinct().values_list('tutorial_detail_id', 'tutorial_detail__tutorial'))
+                        if len(choices):
+                            self.fields['tutorial_name'].widget.attrs = {}
+                        choices.insert(0, ('', ''))
+                        self.fields['tutorial_name'].choices = choices
+                        self.fields['tutorial_name'].initial = tut_init_data
+
 class UploadTutorialForm(forms.Form):
     tutorial_name = forms.ChoiceField(
         choices = [('', ''),],
@@ -94,8 +218,9 @@ class UploadTutorialForm(forms.Form):
             if 'foss_category' in args[0]:
                 if args[0]['foss_category'] and args[0]['foss_category'] != '' and args[0]['foss_category'] != 'None':
                     initial_data = ''
-                    if args[0]['language'] and args[0]['language'] != '' and args[0]['language'] != 'None':
-                        initial_data = args[0]['language']
+                    if 'language' in args[0]:
+                        if args[0]['language'] and args[0]['language'] != '' and args[0]['language'] != 'None':
+                            initial_data = args[0]['language']
                     choices = list(
                         Language.objects.filter(
                             id__in = ContributorRole.objects.filter(
@@ -109,15 +234,17 @@ class UploadTutorialForm(forms.Form):
                             'name'
                         )
                     )
+                    if len(choices):
+                        self.fields['language'].widget.attrs = {}
                     choices.insert(0, ('', ''))
                     self.fields['language'].choices = choices
-                    self.fields['language'].widget.attrs = {}
                     if initial_data:
                         self.fields['language'].initial = initial_data
                         lang_rec = Language.objects.get(pk = int(initial_data))
                         tut_init_data = ''
-                        if args[0]['tutorial_name'] and args[0]['tutorial_name'] != '' and args[0]['tutorial_name'] != 'None':
-                            tut_init_data = args[0]['tutorial_name']
+                        if 'tutorial_name' in args[0]:
+                            if args[0]['tutorial_name'] and args[0]['tutorial_name'] != '' and args[0]['tutorial_name'] != 'None':
+                                tut_init_data = args[0]['tutorial_name']
                         if lang_rec.name == 'English':
                             td_list = TutorialDetail.objects.filter(foss_id = args[0]['foss_category']).values_list('id')
                             choices = list(TutorialDetail.objects.filter(
@@ -151,9 +278,10 @@ class UploadTutorialForm(forms.Form):
                                     'tutorial_detail_id'
                                 )
                             ).values_list('id', 'tutorial'))
+                        if len(choices):
+                            self.fields['tutorial_name'].widget.attrs = {}
                         choices.insert(0, ('', ''))
                         self.fields['tutorial_name'].choices = choices
-                        self.fields['tutorial_name'].widget.attrs = {}
                         self.fields['tutorial_name'].initial = tut_init_data
                     else:
                         self.fields['tutorial_name'].choices = ''

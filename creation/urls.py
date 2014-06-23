@@ -42,10 +42,24 @@ urlpatterns = patterns('',
     url(r'^public-review/mark-as-pending/(\d+)/$', 'creation.views.public_review_mark_as_pending', name="public_review_mark_as_pending"),
     url(r'^public-review/list/$', 'creation.views.public_review_list', name="public_review_list"),
 
+    # Administrator part
+    url(r'^role/requests/$', 'creation.views.creation_list_role_requests', name="creation_list_role_requests"),
+    url(r'^role/requests/([a-zA-Z-]+)/$', 'creation.views.creation_list_role_requests', name="creation_list_role_requests"),
+    url(r'^role/accept/(\d+)/$', 'creation.views.creation_accept_role_request', name="creation_accept_role_request"),
+    url(r'^role/reject/(\d+)/$', 'creation.views.creation_reject_role_request', name="creation_reject_role_request"),
+    url(r'^role/revoke/([a-zA-Z-]+)/$', 'creation.views.creation_revoke_role_request', name="creation_revoke_role_request"),
+    url(r'^admin/tutorial/status/pending/$', 'creation.views.creation_change_published_to_pending', name="creation_change_published_to_pending"),
+    url(r'^admin/tutorial/component/status/$', 'creation.views.creation_change_component_status', name="creation_change_component_status"),
+    url(r'^ajax-publish-to-pending/$', 'creation.views.ajax_publish_to_pending', name="ajax_publish_to_pending"),
+    url(r'^ajax-change-component-status/$', 'creation.views.ajax_change_component_status', name="ajax_change_component_status"),
+
     # Common to Domain & Admin reviewer parts
     url(r'^accept-all/(\w+)/(\d+)/$', 'creation.views.accept_all', name="accept_all"),
     url(r'^delete-notification/(\w+)/(\d+)/$', 'creation.views.delete_creation_notification', name="delete_creation_notification"),
     url(r'^clear-notifications/(\w+)/$', 'creation.views.clear_creation_notification', name="clear_creation_notification"),
-    url(r'^tutorial/view/(\d+)/$', 'creation.views.creation_view_tutorial', name="creation_view_tutorial"),
+    url(r'^tutorial/view/(\w+)/([a-zA-Z-]+)/(\w+)/$', 'creation.views.creation_view_tutorial', name="creation_view_tutorial"),
     url(r'^init/$', 'creation.views.init_creation_app', name="init_creation_app"),
+    url(r'^role/add/([a-zA-Z-]+)/$', 'creation.views.creation_add_role', name="creation_add_role"),
+    url(r'^list/$', 'creation.views.role_list', name="role_list"),
+    url(r'^lists/$', 'creation.views.roles_list', name="roles_list"),
 )

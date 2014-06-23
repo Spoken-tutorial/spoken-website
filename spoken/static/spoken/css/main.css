@@ -194,6 +194,9 @@ a.twin-button {
 .notif {
     position: relative;
 }
+.notif p {
+    padding-rignt: 15px;
+}
 .notif-del {
     top: 0px;
     right: 0px;
@@ -223,4 +226,19 @@ a.twin-button {
 }
 .no-padding-left {
     padding-left: 0px;
+}
+.ico-text {
+    font-size: 18px;
+}
+pre.custom-jumbotron {
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 14px;
+    min-height: 112px;
+    margin-bottom: 30px;
+    color: inherit;
+    background-color: #eee;
+}
+pre.custom-jumbotron b {
+    font-size: 18px;
 }

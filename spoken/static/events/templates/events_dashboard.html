@@ -1,117 +1,121 @@
 {% extends 'spoken/templates/base.html' %}
 {% load widget_tweaks %}
 {% load static %}
+{% load eventsdata %}
 {% block title %}Upload Tutorial{% endblock %}
 {% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
 
 {% block content %}
-    {% if is_organiser_or_invigilator == 1 %}
-        <div class="col-lg-6">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    Workshop <span class="badge pull-right">1</span>
-                </div>
-                <div class="panel-body">
-                    <dl>
-                      <dt><a href="{% url 'events:invigilator_request' user.username %}">Invigilator Request</a></dt>
-                      <dd>Join WIth Us</dd>
-                    </dl>
-                </div>
+    <div class="panel panel-info">
+        <div class="panel-heading">
+            <h4 class="panel-title"><i class="fa fa-desktop"></i> Creation Dashboard</h5>
+        </div>
+        <div class="panel-body row">
+            <div class="creation-links col-lg-6 col-md-6 col-sm-6">
+                {% if user|is_organiser %}
+                    <div class="panel panel-primary">
+                        <div class="panel-heading panel-heading-notif">Organiser</div>
+                        <div class="panel-body">
+                            <h5>Software Training</h5>
+                            <ul>
+                                <li><a href="/events/workshop/organiser/request/">New Workshop</a></li>
+                                <li><a href="/events/workshop/organiser/ongoing">Ongoing Workshop</a></li>
+                            </ul>
+                            <h5>Online Assesment Test</h5>
+                            <ul>
+                                <li><a href="/events/test/organiser/request/">New Test</a></li>
+                                <li><a href="/events/test/organiser/ongoing">Ongoing Test</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                {% endif %}
+                {% if user|is_invigilator %}
+                    <div class="panel panel-primary">
+                        <div class="panel-heading panel-heading-notif">Invigilator</div>
+                        <div class="panel-body">
+                            <h5>Online Assesment Test</h5>
+                            <ul>
+                                <li><a href="/events/test/invigilator/waitingforinvigilator/">Approvel Pending</a></li>
+                                <li><a href="/events/test/invigilator/ongoing">Ongoing Test</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                {% endif %}
+                {% if user|is_resource_person %}
+                    <div class="panel panel-primary">
+                        <div class="panel-heading panel-heading-notif">Resource Person</div>
+                        <div class="panel-body">
+                            <h5>Software Training</h5>
+                            <ul>
+                                <li><a href="/events/workshop/rp/pending/">New Requests</a></li>
+                                <li><a href="/events/workshop/rp/ongoing">Ongoing Workshops</a></li>
+                            </ul>
+                            <h5>Online Assesment Test</h5>
+                            <ul>
+                                <li><a href="/events/test/rp/waitingforinvigilator/">Approvel Pending</a></li>
+                                <li><a href="/events/test/rp/ongoing">Ongoing Test</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                {% endif %}
+                {% if user|is_event_manager %}
+                    <div class="panel panel-primary">
+                        <div class="panel-heading panel-heading-notif">Events Manager</div>
+                        <div class="panel-body">
+                            <h5>Software Training</h5>
+                            <ul>
+                                <li><a href="/events/workshop/em/pending/">New Requests</a></li>
+                                <li><a href="/events/workshop/em/ongoing">Ongoing Workshops</a></li>
+                            </ul>
+                            <h5>Online Assesment Test</h5>
+                            <ul>
+                                <li><a href="/events/test/em/waitingforinvigilator/">Approvel Pending</a></li>
+                                <li><a href="/events/test/em/ongoing">Ongoing Test</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="creation-notifications col-lg-6 col-md-6 col-sm-6">
+                {% if organiser_notification %}
+                    <div class="panel panel-primary">
+                        <div class="panel-heading panel-heading-notif">Organiser Notifications
+                            <span class="badge{% if not contrib_notifs|length %}-none{% endif %}" style="float: none; margin-left: 10px;">{{ organiser_notification|length }}</span>{% if organiser_notification|length %}<a href="/creation/clear-notifications/organiser/" class="clear-all" title="Clear all notifications">Clear All</a>{% endif %}
+                        </div>
+                        <div class="panel-body panel-body-notif">
+                        {% if organiser_notification %}
+                            {% for notif in organiser_notification %}
+                                <div class="notif">
+                                    <p>{{ notif.message }}</p>
+                                    <a href="/events/delete-notification/organiser/{{ notif.id }}" class="notif-del"><i class="fa fa-times"></i></a>
+                                    <hr />
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+                {% if rp_notification %}
+                    <div class="panel panel-primary">
+                        <div class="panel-heading panel-heading-notif">Resource Person Notifications
+                            <span class="badge{% if not contrib_notifs|length %}-none{% endif %}" style="float: none; margin-left: 10px;">{{ rp_notification|length }}</span>{% if rp_notification|length %}<a href="/rp/clear-notifications/organiser/" class="clear-all" title="Clear all notifications">Clear All</a>{% endif %}
+                        </div>
+                        <div class="panel-body panel-body-notif">
+                        {% if rp_notification %}
+                            {% for notif in rp_notification %}
+                                <div class="notif">
+                                    <p>{{ notif.message }}</p>
+                                    <a href="/events/delete-notification/rp/{{ notif.id }}" class="notif-del"><i class="fa fa-times"></i></a>
+                                    <hr />
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
             </div>
         </div>
-    {% elif is_organiser_or_invigilator == 2 %}
-        <div class="col-lg-6">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    Join With Us
-                </div>
-                <div class="panel-body">
-                    <dl>
-                      <dt><a href="{% url 'events:organiser_request' user.username %}">Organiser Request</a></dt>
-                      <dd>Join WIth Us</dd>
-                    </dl>
-                </div>
-            </div>
-        </div>
-    {% elif is_organiser_or_invigilator == 0 %}
-        <div class="col-lg-6">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    Join With Us
-                </div>
-                <div class="panel-body">
-                    <dl>
-                      <dt><a href="{% url 'events:organiser_request' user.username %}">Organiser Request</a></dt>
-                      <dd>Join WIth Us</dd>
-                    </dl>
-                    <dl>
-                      <dt><a href="{% url 'events:invigilator_request' user.username %}">Invigilator Request</a></dt>
-                      <dd>Join WIth Us</dd>
-                    </dl>
-                </div>
-            </div>
-        </div>
-    {% endif %}
-    {% if roles %}
-        <div class="col-lg-6">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    Workshop <span class="badge pull-right">1</span>
-                </div>
-                <div class="panel-body">
-                    {% for role in roles %}
-                        {% if role == "Resource Person" %}
-                            <h4>{{ role }}</h4>
-                            <dl>
-                              <dt><a href="{% url 'events:workshop_list' 'rp' 'ongoing' %}">Workshop Index</a></dt>
-                              <dd>user can raise new workshop request, can see approved</dd>
-                            </dl>
-                        {% endif %}
-                        {% if role == "Organiser" %}
-                            <h4>{{ role }}</h4>
-                            <dl>
-                              <dt><a href="{% url 'events:workshop_list' 'organiser' 'ongoing' %}">Workshop Index</a></dt>
-                              <dd>user can raise new workshop request, can see approved</dd>
-                            </dl>
-                        {% endif %}
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-6">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    Test <span class="badge pull-right">1</span>
-                </div>
-                <div class="panel-body">
-                    {% for role in roles %}
-                        {% if role == "Resource Person" %}
-                            <h4>{{ role }}</h4>
-                            <dl>
-                              <dt><a href="{% url 'events:test_list' 'rp' 'ongoing' %}">Test Index</a></dt>
-                              <dd>user can raise new test request, can see approved</dd>
-                            </dl>
-                        {% endif %}
-                        {% if role == "Organiser" %}
-                            <h4>{{ role }}</h4>
-                            <dl>
-                              <dt><a href="{% url 'events:test_list' 'organiser' 'ongoing' %}">Test Index</a></dt>
-                              <dd>user can raise new test request, can see approved</dd>
-                            </dl>
-                        {% endif %}
-                        {% if role == "Invigilator" %}
-                            <h4>{{ role }}</h4>
-                            <dl>
-                              <dt><a href="{% url 'events:test_list' 'invigilator' 'ongoing' %}">Test Index</a></dt>
-                              <dd>user can raise new test request, can see approved</dd>
-                            </dl>
-                        {% endif %}
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-    {% else %}
-    {% endif%}
+    </div>
 {% endblock %}
 {% block jsblock %}
     <script>
