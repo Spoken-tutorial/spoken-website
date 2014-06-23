@@ -271,8 +271,12 @@ class TestForm(forms.Form):
         pass
     department = forms.MultipleChoiceField(choices = dchoices, widget=forms.SelectMultiple(attrs = {}), required = True, error_messages = {'required':'Department Name field is required.'})
     tdate = forms.DateTimeField(required = True, error_messages = {'required':'Date field is required.'})
-    fchoices = list(FossCategory.objects.all().values_list('id', 'foss'))
-    fchoices.insert(0, ('', '-- None --'))
+    fchoices = []
+    try:
+        fchoices = list(FossCategory.objects.all().values_list('id', 'foss'))
+        fchoices.insert(0, ('', '-- None --'))
+    except:
+        pass
     foss = forms.ChoiceField(choices = fchoices, widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'Foss Name field is required.'})
     def __init__(self, *args, **kwargs):
         user = None

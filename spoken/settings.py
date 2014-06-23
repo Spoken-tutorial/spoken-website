@@ -98,15 +98,6 @@ USE_L10N = True
 
 USE_TZ = True
 
-#email settings
-EMAIL_HOST = EMAIL_HOST
-EMAIL_PORT = EMAIL_PORT
-EMAIL_HOST_USER = EMAIL_HOST_USER
-EMAIL_HOST_PASSWORD = EMAIL_HOST_PASSWORD
-EMAIL_USE_TLS = True
-DEFAULT_FROM_EMAIL = DEFAULT_FROM_EMAIL
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/var/www/example.com/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/') # Absolute path to the media.
