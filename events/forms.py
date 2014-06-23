@@ -21,8 +21,6 @@ class AcademicForm(forms.ModelForm):
     
     university = forms.ModelChoiceField(label='University', cache_choices=True, widget = forms.Select(attrs = {'class' : 'ac-university'}), queryset = University.objects.none(), empty_label = "--- None ---", help_text = "", error_messages = {'required':'University field required.'})
     
-    institution_type = forms.ModelChoiceField(label='Institute Type', cache_choices=True, widget = forms.Select(attrs = {'class' : 'ac-institution_type'}), queryset = InstituteType.objects.all(), empty_label = "--- None ---", help_text = "", error_messages = {'required':'Institute Type field required.'})
-    
     district = forms.ModelChoiceField(label='Dist', cache_choices=True, widget = forms.Select(attrs = {'class' : 'ac-district'}), queryset = District.objects.none(), empty_label = "--- None ---", help_text = "", error_messages = {'required':'Institute Type field required.'})
     
     city = forms.ModelChoiceField(label='City', cache_choices=True, widget = forms.Select(attrs = {'class' : 'ac-city'}), queryset = City.objects.none(), empty_label = "--- None ---", help_text = "", error_messages = {'required':'City Type field required.'})
@@ -153,6 +151,7 @@ class WorkshopForm(forms.Form):
     #state = forms.ChoiceField(choices = state_list, widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'State field is required.'})
     #district = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'district field is required.'})
     #academic = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'College Name field is required.'})
+    workshop_type = forms.ChoiceField(choices = [(0, 'Workshop (Default)'), (1, 'Pilot Workshop'), (2, 'Live Workshop')], widget=forms.Select(attrs = {}), required = False)
     department = forms.MultipleChoiceField(choices = [('', '-- None --'),], widget=forms.SelectMultiple(attrs = {}), required = True, error_messages = {'required':'Department Name field is required.'})
     wdate = forms.DateTimeField(required = True, error_messages = {'required':'Date field is required.'})
     foss = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'Foss field is required.'})
@@ -254,11 +253,27 @@ class WorkshopPermissionForm(forms.Form):
 class TestForm(forms.Form):
     #district = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'district field is required.'})
     #academic = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'College Name field is required.'})
-    workshop = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'workshop Name field is required.'})
+    choices = ()
+    try:
+        choices = list(TestCategory.objects.all().values_list('id', 'name'))
+        choices.insert(0, ('', '-- None --'))
+    except:
+        pass
+    test_category = forms.ChoiceField(choices = choices, widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'Category field is required.'})
+    workshop = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = False, error_messages = {'required':'Workshop field is required.'})
+    training = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = False, error_messages = {'required':'Training field is required.'})
     invigilator = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'invigilator Name field is required.'})
-    department = forms.MultipleChoiceField(choices = [('', '-- None --'),], widget=forms.SelectMultiple(attrs = {}), required = True, error_messages = {'required':'Department Name field is required.'})
+    dchoices = ()
+    try:
+        dchoices = list(Department.objects.all().values_list('id', 'name'))
+        dchoices.insert(0, ('', '-- None --'))
+    except:
+        pass
+    department = forms.MultipleChoiceField(choices = dchoices, widget=forms.SelectMultiple(attrs = {}), required = True, error_messages = {'required':'Department Name field is required.'})
     tdate = forms.DateTimeField(required = True, error_messages = {'required':'Date field is required.'})
-    foss = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'Foss Name field is required.'})
+    fchoices = list(FossCategory.objects.all().values_list('id', 'foss'))
+    fchoices.insert(0, ('', '-- None --'))
+    foss = forms.ChoiceField(choices = fchoices, widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'Foss Name field is required.'})
     def __init__(self, *args, **kwargs):
         user = None
         if 'user' in kwargs:
@@ -273,6 +288,7 @@ class TestForm(forms.Form):
         self.fields['department'].choices = Department.objects.exclude(name='uncategorized').values_list('id', 'name')
 
         if user:
+            #print "i am in user"
             #self.fields['district'].choices = District.objects.filter(state =user.organiser.academic.state).values_list('id', 'name')
             #self.fields['district'].initial = user.organiser.academic.district.id
             #if args and 'district' in args[0]:
@@ -283,16 +299,23 @@ class TestForm(forms.Form):
             #self.fields['academic'].choices = choices
             #self.fields['academic'].initial = user.organiser.academic.id
             if instance:
+                #print "i am in instance"
                 wchoices = list(Workshop.objects.filter(academic = instance.academic, status = 2).values_list('id', 'workshop_code'))
+                trchoices = list(Training.objects.filter(academic = instance.academic, status = 2).values_list('id', 'training_code'))
             else:
                 try:
                     wchoices = list(Workshop.objects.filter(academic = user.organiser.academic, status = 2).values_list('id', 'workshop_code'))
                     wchoices.insert(0, ('', '-- None --'))
+                    trchoices = list(Training.objects.filter(academic = user.organiser.academic, status = 2).values_list('id', 'training_code'))
+                    trchoices.insert(0, ('', '-- None --'))
                 except:
                     i = Invigilator.objects.get(user_id = args[0]['invigilator']) 
                     wchoices = list(Workshop.objects.filter(academic = i.academic, status = 2).values_list('id', 'workshop_code'))
                     wchoices.insert(0, ('', '-- None --'))
+                    trchoices = list(Training.objects.filter(academic = i.academic, status = 2).values_list('id', 'training_code'))
+                    trchoices.insert(0, ('', '-- None --'))
             self.fields['workshop'].choices = wchoices
+            self.fields['training'].choices = trchoices
             
             if instance:
                 invigilators = Invigilator.objects.filter(academic  = instance.academic, status=1)
@@ -309,16 +332,38 @@ class TestForm(forms.Form):
             self.fields['invigilator'].choices = ichoices
         
         if args:
-            if 'workshop' in args[0]:
-                if args[0]['workshop'] and args[0]['workshop'] != '' and args[0]['workshop'] != 'None':
-                    w = Workshop.objects.get(pk=args[0]['workshop'])
-                    choices = (('', '-- None --'), (w.foss_id, w.foss.foss),)
-                    self.fields['foss'].choices = choices
+            #print "i am in arg"
+            if 'test_category' in args[0]:
+                if args[0]['test_category'] and args[0]['test_category'] != '' and args[0]['test_category'] != 'None':
+                    if int(args[0]['test_category']) == 1:
+                        if 'workshop' in args[0]:
+                            if args[0]['workshop'] and args[0]['workshop'] != '' and args[0]['workshop'] != 'None':
+                                w = Workshop.objects.get(pk=args[0]['workshop'])
+                                choices = (('', '-- None --'), (w.foss_id, w.foss.foss),)
+                                self.fields['foss'].choices = choices
+                                if 'edit' in args:
+                                    self.fields['department'].choices = Department.objects.all().values_list('id', 'name')
+                                else:
+                                    self.fields['department'].choices = w.department.select_related().values_list('id', 'name')
+                                    
+                    if int(args[0]['test_category']) == 2:
+                        if 'training' in args[0]:
+                            if args[0]['training'] and args[0]['training'] != '' and args[0]['training'] != 'None':
+                                w = Training.objects.get(pk=args[0]['training'])
+                                choices = (('', '-- None --'), (w.foss_id, w.foss.foss),)
+                                self.fields['foss'].choices = choices
+                                if 'edit' in args:
+                                    self.fields['department'].choices = Department.objects.all().values_list('id', 'name')
+                                else:
+                                    self.fields['department'].choices = w.department.select_related().values_list('id', 'name')
+                    
         if instance:
+            #print "I am in instance"
             #self.fields['district'].choices = District.objects.filter(state =instance.academic.state).values_list('id', 'name')
             #self.fields['district'].initial = instance.academic.district.id
             #self.fields['academic'].choices = AcademicCenter.objects.filter(district =instance.academic.district).values_list('id', 'institution_name')
             #self.fields['academic'].initial = instance.academic_id
+            self.fields['test_category'].initial = instance.test_category_id
             self.fields['department'].initial = instance.department.all().values_list('id', flat=True)
             self.fields['tdate'].initial = str(instance.tdate) + " " + str(instance.ttime)[0:5]
             self.fields['workshop'].initial = instance.workshop_id
@@ -331,3 +376,15 @@ class TestForm(forms.Form):
             fchoices.insert(0, ('', '-- None --'))
             self.fields['foss'].choices = fchoices
             self.fields['foss'].initial = instance.foss_id
+
+class TrainingScanCopyForm(forms.Form):
+    scan_copy = forms.FileField(label = 'Select a Scaned copy', required = True)
+    def clean(self):
+        super(TrainingScanCopyForm, self).clean()
+        file_type = ['application/pdf']
+        if 'scan_copy' in self.cleaned_data:
+            if not component.content_type in file_type:
+                raise forms.ValidationError("You have forgotten about Fred!")
+        else:
+            raise forms.ValidationError("You have forgotten about Fred!")
+

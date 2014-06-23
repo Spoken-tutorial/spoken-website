@@ -47,7 +47,7 @@
 		$acstate.change(function() {
 			var state = $(this).val();
 			$.ajax({
-				url: "/events/ajax-ac-state/",
+				url: "/software-training/ajax-ac-state/",
 				type: "POST",
 				data: {
 					state: state,
@@ -72,7 +72,7 @@
 		$ac_district.change(function() {
 			var district = $(this).val();
 			$.ajax({
-				url: "/events/ajax-district-collage/",
+				url: "/software-training/ajax-district-collage/",
 				type: "POST",
 				data: {
 					district : district

@@ -14,9 +14,9 @@
 
 {% block heading %}
     {% if role == 'invigilator' %}
-        <i class="fa fa-list-ul"></i> Invigilator
+        <i class="fa fa-list-ul"></i> Invigilator <a href="{% url 'events:events_dashboard' %}" class='pull-right'>Go to Dashboard</a>
     {% else %}
-        <i class="fa fa-list-ul"></i> Organiser
+        <i class="fa fa-list-ul"></i> Organiser <a href="{% url 'events:events_dashboard' %}" class='pull-right'>Go to Dashboard</a>
     {% endif %}
 {% endblock %}
 

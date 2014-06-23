@@ -20,7 +20,6 @@
 	{% endblock %}
 {% endif %}
 {% block content %}
-
 <form action="{{ action }}" method="post">{% csrf_token %}
 {% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
     {% if form.non_field_errors %}
@@ -54,6 +53,11 @@
 		<label for="id_institution_type">Institute Type</label>
 		{% render_field form.institution_type class+="form-control chosen institution_type" tabindex="1" data-placeholder="Choose Institution Type" %}
 		{{ form.institution_type.errors }}
+	</div>
+	<div class="form-group">
+		<label for="id_institution_type">Govt / Govt-Aided/Private</label>
+		{% render_field form.institute_category class+="form-control chosen institute_category" tabindex="1" data-placeholder="Choose Institute Category" %}
+		{{ form.institute_category.errors }}
 	</div>
 	<div class="form-group">
 		<label for="id_district">District</label>

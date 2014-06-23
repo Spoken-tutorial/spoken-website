@@ -234,3 +234,19 @@ class RoleRequest(models.Model):
 
     class Meta:
         unique_together = (('user','role_type',),)
+
+class FossAvailableForWorkshop(models.Model):
+    foss = models.ForeignKey(FossCategory)
+    language = models.ForeignKey(Language)
+    status = models.BooleanField(default=0)
+    created = models.DateTimeField(auto_now_add = True)
+    class Meta:
+        unique_together = (('foss','language'),)
+
+class FossAvailableForTest(models.Model):
+    foss = models.ForeignKey(FossCategory)
+    language = models.ForeignKey(Language)
+    status = models.BooleanField(default=0)
+    created = models.DateTimeField(auto_now_add = True)
+    class Meta:
+        unique_together = (('foss','language'),)

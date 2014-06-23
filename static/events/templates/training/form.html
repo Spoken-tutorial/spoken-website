@@ -12,20 +12,25 @@
 {% block content %}
     	<ul class="tabs nav nav-tabs">
 	    {% if role == 'organiser' %}
-		    <li {% if status == 'request' %}{{ 'class="active"'}}{% endif %}><a href="/events/training/{{ role }}/request/">New</a></li>
-		    <li {% if status == 'pending' %}{{ 'class="active"'}}{% endif %}><a href="/events/training/{{role}}/pending/">Pending</a></li>
+		    <li {% if status == 'request' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/training/{{ role }}/request/">New</a></li>
+		    <li {% if status == 'pending' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/training/{{role}}/pending/">Pending</a></li>
 		{% endif %}
 		{% if role == 'rp' %}
-		    <li {% if status == 'pending' %}{{ 'class="active"'}}{% endif %}><a href="/events/training/{{role}}/pending/">New Requests</a></li>
+		    <li {% if status == 'pending' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/training/{{role}}/pending/">New Requests</a></li>
 		{% endif %}
-        <li {% if status == 'ongoing' %}{{ 'class="active"'}}{% endif %}><a href="/events/training/{{role}}/ongoing/">Ongoing</a></li>
-        <li {% if status == 'approved' %}{{ 'class="active"'}}{% endif %}><a href="/events/training/{{role}}/approved/">Approved</a></li>
-        <li {% if status == 'completed' %}{{ 'class="active"'}}{% endif %}><a href="/events/training/{{role}}/completed/">Completed</a></li>
-        <li {% if status == 'reschedule' %}{{ 'class="active"'}}{% endif %}><a href="/events/training/{{role}}/reschedule/">Reschedule</a></li>
-        <li {% if status == 'rejected' %}{{ 'class="active"'}}{% endif %}><a href="/events/training/{{role}}/rejected/">Rejected</a></li>
+        <li {% if status == 'ongoing' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/training/{{role}}/ongoing/">Ongoing</a></li>
+        <li {% if status == 'approved' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/training/{{role}}/approved/">Approved</a></li>
+        <li {% if status == 'completed' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/training/{{role}}/completed/">Completed</a></li>
+        <li {% if status == 'reschedule' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/training/{{role}}/reschedule/">Reschedule</a></li>
+        <li {% if status == 'rejected' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/training/{{role}}/rejected/">Rejected</a></li>
 	</ul>
 	
 	<div class='tab-content'>
+	        {% if instance %}
+	            {{ instance.academic.state }} - {{ instance.academic }}
+	        {% else %}
+	            {{ user.organiser.academic.state }} - {{ user.organiser.academic }}
+	        {% endif %}
 	    <form action="{{ action }}" method="post">{% csrf_token %}
 	        {% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
 	        {% if form.non_field_errors %}
@@ -115,7 +120,7 @@
 		$('#id_district').change(function() {
 			var district = $(this).val();
 			$.ajax({
-				url: "/events/ajax-district-collage/",
+				url: "/software-training/ajax-district-collage/",
 				type: "POST",
 				data: {
 					district : district
@@ -127,6 +132,25 @@
 					} else{
 						$college.attr("disabled", "disabled");
 						alert('No college found for this district!!');
+					}
+				}
+			});
+		});
+		$('.foss').change(function() {
+			var foss = $(this).val();
+			$.ajax({
+				url: "/software-training/ajax-language/",
+				type: "POST",
+				data: {
+					foss : foss
+				},
+				success: function(data) {
+					if(data){
+						$('.language').html(data);
+						$('.language').removeAttr("disabled");
+					} else{
+						$('.language').attr("disabled", "disabled");
+						alert('No language found!');
 					}
 				}
 			});

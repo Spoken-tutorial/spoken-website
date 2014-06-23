@@ -4,7 +4,7 @@ from django.db import models
 from django.contrib.auth.models import User
 
 #creation app models
-from creation.models import FossCategory, Language
+from creation.models import FossCategory, Language, FossAvailableForWorkshop, FossAvailableForTest
 from mdldjango.models import *
 
 #validation
@@ -91,6 +91,14 @@ class University(models.Model):
     class Meta:
         unique_together = (("name","state"),)
         
+class InstituteCategory(models.Model):
+    name = models.CharField(max_length=200)
+    created = models.DateTimeField(auto_now_add = True)
+    updated = models.DateTimeField(auto_now = True)
+    
+    def __unicode__(self):
+        return self.name
+        
 class InstituteType(models.Model):
     name = models.CharField(max_length=200)
     created = models.DateTimeField(auto_now_add = True)
@@ -98,13 +106,14 @@ class InstituteType(models.Model):
     
     def __unicode__(self):
         return self.name
-
+        
 class AcademicCenter(models.Model):
     user = models.ForeignKey(User)
     state = models.ForeignKey(State)
+    institution_type = models.ForeignKey(InstituteType)
+    institute_category = models.ForeignKey(InstituteCategory)
     university = models.ForeignKey(University)
     academic_code = models.CharField(max_length=100, unique = True)
-    institution_type = models.ForeignKey(InstituteType)
     institution_name = models.CharField(max_length=200, unique = True)
     district = models.ForeignKey(District)
     location = models.ForeignKey(Location)
@@ -162,6 +171,7 @@ class Workshop(models.Model):
     wtime = models.TimeField()
     skype = models.BooleanField()
     status = models.PositiveSmallIntegerField(default=0)
+    workshop_type = models.PositiveIntegerField(default=0)
     participant_counts = models.PositiveIntegerField(default=0)
     created = models.DateTimeField(auto_now_add = True)
     updated = models.DateTimeField(auto_now = True)
@@ -169,13 +179,23 @@ class Workshop(models.Model):
     class Meta:
         unique_together = (("organiser", "academic", "foss", "wdate", "wtime"),)
 
+class TestCategory(models.Model):
+    name = models.CharField(max_length=200)
+    created = models.DateTimeField(auto_now_add = True, null=True)
+    updated = models.DateTimeField(auto_now = True, null=True)
+    
+    def __unicode__(self):
+        return self.name
+        
 class Test(models.Model):
     organiser = models.ForeignKey(User, related_name = 'test_organiser')
+    test_category = models.ForeignKey(TestCategory, related_name = 'test_category')
     appoved_by = models.ForeignKey(User, related_name = 'test_approved_by', null=True)
     invigilator = models.ForeignKey(User)
     academic = models.ForeignKey(AcademicCenter)
     department = models.ManyToManyField(Department)
-    workshop = models.ForeignKey(Workshop)
+    workshop = models.ForeignKey(Workshop, null=True)
+    training = models.ForeignKey('Training', null=True)
     foss = models.ForeignKey(FossCategory)
     test_code = models.CharField(max_length=100)
     tdate = models.DateField()
@@ -308,3 +328,48 @@ class TrainingLog(models.Model):
     role = models.PositiveSmallIntegerField() #{0:'organiser', 1:'ResourcePerson', 2: 'Event Manager'}
     status = models.PositiveSmallIntegerField() #{0:'new', 1:'approved', 2:'completed', 3: 'rejected', 4:'update',  5:'Offline-Attendance submited', 6:'Marked Attendance'}
     created = models.DateTimeField(auto_now_add = True)
+
+class WorkshopFeedback(models.Model):
+    workshop = models.ForeignKey(Workshop)
+    mdluser_id = models.PositiveIntegerField()
+    content = models.PositiveSmallIntegerField()
+    sequence = models.PositiveSmallIntegerField()
+    clarity = models.PositiveSmallIntegerField()
+    interesting = models.PositiveSmallIntegerField()
+    appropriate_example = models.PositiveSmallIntegerField()
+    instruction_sheet = models.PositiveSmallIntegerField()
+    assignment = models.PositiveSmallIntegerField()
+    
+    pace_of_tutorial = models.PositiveSmallIntegerField()
+    rate_workshop = models.PositiveSmallIntegerField()
+    workshop_learnt = models.TextField()
+    weakness_workshop = models.BooleanField()
+    weakness_narration = models.BooleanField()
+    weakness_understand = models.BooleanField()
+    other_weakness = models.TextField()
+    tutorial_language = models.PositiveSmallIntegerField()
+    apply_information = models.PositiveSmallIntegerField()
+    use_information = models.TextField()
+    
+    setup_learning = models.PositiveSmallIntegerField()
+    computers_lab = models.PositiveSmallIntegerField()
+    audio_quality = models.PositiveSmallIntegerField()
+    video_quality = models.PositiveSmallIntegerField()
+
+    workshop_orgainsation = models.PositiveSmallIntegerField()
+    faciliate_learning = models.PositiveSmallIntegerField()
+    motivate_learners = models.PositiveSmallIntegerField()
+    time_management = models.PositiveSmallIntegerField()
+
+    knowledge_about_software = models.PositiveSmallIntegerField()
+    provide_clear_explanation = models.PositiveSmallIntegerField()
+    answered_questions = models.PositiveSmallIntegerField()
+    interested_helping = models.PositiveSmallIntegerField()
+    executed_workshop = models.PositiveSmallIntegerField()
+    
+    recommend_workshop = models.PositiveSmallIntegerField()
+    use_information = models.TextField()
+    other_comments = models.TextField()
+    created = models.DateTimeField(auto_now_add = True)
+    class Meta:
+        unique_together = (("workshop", "mdluser_id"))

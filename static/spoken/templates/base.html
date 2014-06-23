@@ -39,20 +39,22 @@
 								<ul class="nav navbar-nav navbar-right">
 									{% block customnav %}{% endblock %}
 									{% get_cms_nav %}
-									{% if user.is_authenticated %}
-										<li class="dropdown">
-											<a href="#" class="dropdown-toggle" data-toggle="dropdown">
-												<span title="" data-original-title="" class="glyphicon glyphicon-user"></span> {{ user }}<b class="caret"></b>
-											</a>
-											<ul class="dropdown-menu">
-												<li><a href="/accounts/profile/{{ user }}/">Profile</a></li>
-												<li class="divider"></li>
-												<li><a href="/accounts/logout/">Logout</a></li>
-											</ul>
-										</li>
-									{% else %}
-										<li><a href="/accounts/login/"><span class="glyphicon glyphicon-user"></span> Login</a></li>
-									{% endif %}
+									{% block userdetails %}
+									    {% if user.is_authenticated %}
+										    <li class="dropdown">
+											    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+												    <span title="" data-original-title="" class="glyphicon glyphicon-user"></span> {{ user }}<b class="caret"></b>
+											    </a>
+											    <ul class="dropdown-menu">
+												    <li><a href="/accounts/profile/{{ user }}/">Profile</a></li>
+												    <li class="divider"></li>
+												    <li><a href="/accounts/logout/">Logout</a></li>
+											    </ul>
+										    </li>
+									    {% else %}
+										    <li><a href="/accounts/login/"><span class="glyphicon glyphicon-user"></span> Login</a></li>
+									    {% endif %}
+									{% endblock %}
 								</ul>
 							</div> <!-- /.navbar-collapse -->
 						</div> <!-- /.container -->
@@ -74,27 +76,27 @@
 								    {% if message.tags == 'success' %}
 									    <div class="alert alert-success alert-dismissable">
 										    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-										    {{ message }}
+										    {{ message|safe }}
 									    </div>
 									{% elif message.tags == 'warning' %}
 									   <div class="alert alert-warning alert-dismissable">
 										    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-										    {{ message }}
+										    {{ message|safe }}
 									    </div>
 									{% elif message.tags == 'error' %}
 									    <div class="alert alert-danger alert-dismissable">
 										    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-										    {{ message }}
+										    {{ message|safe }}
 									    </div>
 									{% elif message.tags == 'info' %}
 									     <div class="alert alert-info alert-dismissable">
 										    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-										    {{ message }}
+										    {{ message|safe }}
 									    </div>
 									{% elif message.tags == 'debug' %}
 									    <div class="alert alert-info alert-dismissable">
 										    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-										    {{ message }}
+										    {{ message|safe }}
 									    </div>
 									{% endif %}
 								{% endfor %}

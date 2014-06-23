@@ -11,29 +11,30 @@
     <!-- Nav tabs -->
     <ul class="tabs nav nav-tabs">
         {% if role == 'organiser' %}
-            <li><a href="/events/test/{{ role }}/request/">New</a></li>
-            <li {% if status == 'pending' %}{{ 'class="active"'}}{% endif %}><a href="/events/test/{{role}}/pending/">Pending</a></li>
+            <li><a href="/software-training/test/{{ role }}/request/">New</a></li>
+            <li {% if status == 'pending' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/test/{{role}}/pending/">Pending</a></li>
         {% elif role == 'rp' %}
-            <li {% if status == 'pending' %}{{ 'class="active"'}}{% endif %}><a href="/events/test/{{role}}/pending/">New Request</a></li>
+            <li {% if status == 'pending' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/test/{{role}}/pending/">New Request</a></li>
         {% else %}
-            <li {% if status == 'pending' %}{{ 'class="active"'}}{% endif %}><a href="/events/test/{{role}}/pending/">Pending</a></li>
+            <li {% if status == 'pending' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/test/{{role}}/pending/">Pending</a></li>
         {% endif %}
-        <li {% if status == 'waitingforinvigilator' %}{{ 'class="active"'}}{% endif %}><a href="/events/test/{{role}}/waitingforinvigilator/">Waiting for Invigilator</a></li>
-        <li {% if status == 'approved' %}{{ 'class="active"'}}{% endif %}><a href="/events/test/{{role}}/approved/">Approved</a></li>
-        <li {% if status == 'ongoing' %}{{ 'class="active"'}}{% endif %}><a href="/events/test/{{role}}/ongoing/">Ongoing</a></li>
-        <li {% if status == 'completed' %}{{ 'class="active"'}}{% endif %}><a href="/events/test/{{role}}/completed/">Completed</a></li>
-        <li {% if status == 'reschedule' %}{{ 'class="active"'}}{% endif %}><a href="/events/test/{{role}}/reschedule/">Reschedule</a></li>
-        <li {% if status == 'rejected' %}{{ 'class="active"'}}{% endif %}><a href="/events/test/{{role}}/rejected/">Rejected</a></li>
+        <li {% if status == 'waitingforinvigilator' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/test/{{role}}/waitingforinvigilator/">Waiting for Invigilator</a></li>
+        <li {% if status == 'approved' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/test/{{role}}/approved/">Approved</a></li>
+        <li {% if status == 'ongoing' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/test/{{role}}/ongoing/">Ongoing</a></li>
+        <li {% if status == 'completed' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/test/{{role}}/completed/">Completed</a></li>
+        <li {% if status == 'reschedule' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/test/{{role}}/reschedule/">Reschedule</a></li>
+        <li {% if status == 'rejected' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/test/{{role}}/rejected/">Rejected</a></li>
     </ul>
     <!-- Tab panes -->
     <div class="tab-content">
         <div class="tab-pane" id="new">
-            <iframe width = "100%" src="/events/test/request/"></iframe> -->
+            <iframe width = "100%" src="/software-training/test/request/"></iframe> -->
         </div>
         <div class="tab-pane active" id="pending">
             {% if collection %}
             <table class="table table-striped table-hover table-bordered">
                 <tr>
+                    <th>State</th>
                     <th>Academic Name</th>
                     <th>FOSS</th>
                     <th>Date </th>
@@ -41,9 +42,10 @@
                 </tr>
                 {% for record in collection %}
                     <tr>
+                        <td>{{ record.academic.state }}</td>
                         <td>{{ record.academic }}</td>
                         <td>{{ record.foss.foss }}</td>
-                        <td>{{ record.tdate|date:"d M Y" }} {{    record.ttime }}</td>
+                        <td>{{ record.tdate|date:"d M Y" }} {{ record.ttime }}</td>
                         <!-- actions based on roles -->
                         <td>
                         {% if status == 'completed' %}
@@ -69,7 +71,9 @@
                             {% if status == 'ongoing' %}
                                 <a href="{% url 'events:test_participant' record.id %}">View Participant</a>
                             {% endif %}
-
+                            {% if status == 'reschedule' %}
+                                <a href="{% url 'events:test_edit' role record.id %}">Edit</a>
+                            {% endif %}
                         {% endif %}
                         
                         {% if role == 'invigilator' %}
