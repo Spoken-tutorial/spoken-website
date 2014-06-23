@@ -3,8 +3,12 @@
 *.pyc
 config.py
 media/*
-!media/videos/README
+!media/videos/
+!media/training/
+media/videos/*
+media/training/*
 !media/training/README
+!media/videos/README
 !media/README
 *.py[cod]
 
