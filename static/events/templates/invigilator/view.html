@@ -4,7 +4,7 @@
 {% block title %}Upload Detail{% endblock %}
 {% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
 {% block heading %}
-    <i class="fa fa-list-ul"></i> Invigilator Details <a href="{{ request.META.HTTP_REFERER }}" class='pull-right go-back'>Go Back</a>
+    <i class="fa fa-list-ul"></i> Invigilator Details <a href="/software-training" class='pull-right go-back'>Dashboard</a>
 {% endblock %}
 {% block content %}
 	<p>If you want to change the Academic details click <a href="{% url 'events:invigilator_edit' record.user %}">here</a></p>

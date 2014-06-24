@@ -322,13 +322,13 @@ class TestForm(forms.Form):
             self.fields['training'].choices = trchoices
             
             if instance:
-                invigilators = Invigilator.objects.filter(academic  = instance.academic, status=1)
+                invigilators = Invigilator.objects.filter(academic  = instance.academic, status=1).exclude(user_id = user.id)
             else:
                 try:
-                    invigilators = Invigilator.objects.filter(academic  = user.organiser.academic, status=1)
+                    invigilators = Invigilator.objects.filter(academic  = user.organiser.academic, status=1).exclude(user_id = user.id)
                 except:
                     i = Invigilator.objects.get(user_id = args[0]['invigilator'])
-                    invigilators = Invigilator.objects.filter(academic  = i.academic, status=1)
+                    invigilators = Invigilator.objects.filter(academic  = i.academic, status=1).exclude(user_id = user.id)
             ichoices = []
             for i in invigilators:
                 ichoices.insert(0, (i.user_id, i.user.username))
