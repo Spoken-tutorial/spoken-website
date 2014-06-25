@@ -887,17 +887,17 @@ def workshop_participant_ceritificate(request, wid, participant_id):
             wcf = None
             # check if user can get certificate
             wa = WorkshopAttendance.objects.get(workshop_id = w.id, mdluser_id = participant_id)
-            if wa.status < 1:
+            if wa.status < 2:
                 raise Http404('Page not found')
             if wa.password:
                 certificate_pass = wa.password
                 wa.count += 1
-                wa.status = 2
+                wa.status = 3
                 wa.save()
             else:
                 certificate_pass = str(mdluser.id)+id_generator(10-len(str(mdluser.id)))
                 wa.password = certificate_pass
-                wa.status = 2
+                wa.status = 3
                 wa.count += 1
                 wa.save()
         except:

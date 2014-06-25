@@ -4,6 +4,7 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
 	url(r'^login/$', 'mdldjango.views.mdl_login', name='mdl_login'),
+	url(r'^forget-password/$', 'mdldjango.views.forget_password', name='forget_password'),
 	url(r'^feedback/(\d+)/$', 'mdldjango.views.feedback', name='feedback'),
 	url(r'^register/$', 'mdldjango.views.mdl_register', name='mdl_register'),
 	url(r'^logout/$', 'mdldjango.views.mdl_logout', name='mdl_logout'),

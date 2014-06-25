@@ -33,8 +33,11 @@
                         <td>{{ record.foss.foss }}</td>
                         <td>{{ record.wdate }} {{ record.ttime }}</td>
                         <td>
-                            <a href="{% url 'events:workshop_participant_ceritificate' record.id mdluserid %}">Certificate</a>
-                            <a href="{% url 'mdldjango:feedback' record.id %}">Feedback</a>
+                            {% if mdluserid|can_download_workshop_certificate:record.id %}
+                                <a href="{% url 'events:workshop_participant_ceritificate' record.id mdluserid %}">Certificate</a>
+                            {% else %}
+                                <a href="{% url 'mdldjango:feedback' record.id %}">Feedback</a>
+                            {% endif %}
                         </td>
                     </tr>
                 {% endfor %}

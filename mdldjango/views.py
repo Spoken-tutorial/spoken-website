@@ -13,10 +13,10 @@ import hashlib
 from django.core.exceptions import PermissionDenied
 from events.views import *
 from events.models import *
+from django.core.mail import EmailMultiAlternatives
 
 def encript_password(password):
     password = hashlib.md5(password+'VuilyKd*PmV?D~lO19jL(Hy4V/7T^G>p').hexdigest()
-    print password
     return password
     
 def authenticate(username = None, password = None):
@@ -212,6 +212,16 @@ def mdl_register(request):
     form = RegisterForm()
     if request.method == "POST":
         form = RegisterForm(request.POST)
+        
+        #Email exits
+        try:
+            user = MdlUser.objects.filter(email=request.POST['email']).first()
+            if user:
+                messages.success(request, "Email : "+request.POST['email']+" already registered on this website. Please click <a href='#'>here </a>to login")
+        except Exception, e:
+            print e
+            pass
+            
         if form.is_valid():
             mdluser = MdlUser()
             mdluser.auth = 'manual'
@@ -256,6 +266,12 @@ def feedback(request, wid):
                 form_data.workshop_id = wid
                 form_data.mdluser_id = mdluserid
                 form_data.save()
+                #change status to 2
+                wa = WorkshopAttendance.objects.get(mdluser_id=mdluserid, workshop_id = wid)
+                wa.status = 2
+                wa.save()
+                messages.success(request, "Thank you for your valuable feedback.")
+                return HttpResponseRedirect("/moodle/index/")
             except Exception, e:
                 print e
     context = {
@@ -266,3 +282,60 @@ def feedback(request, wid):
     }
     context.update(csrf(request))
     return render(request, 'mdl/templates/feedback.html', context)
+
+def forget_password(request):
+    context = {}
+    form = PasswordResetForm()
+    if request.method == "POST":
+        form = PasswordResetForm(request.POST)
+        if form.is_valid():
+            password_string = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(8))
+            user = MdlUser.objects.filter(email=request.POST['email']).first()
+            password_encript = encript_password(password_string)
+            user.password = password_encript
+            user.save()
+            print 'Username => ', user.username
+            print 'New password => ', password_string
+            print 'Encript password => ', password_encript
+            #Send email
+            subject  = ""
+            to = [user.email]
+            message = '''Hi {0},
+
+Your account password at 'Spoken Tutorials Online Test Center' has been reset
+and you have been issued with a new temporary password.
+
+Your current login information is now:
+   username: {1}
+   password: {2}
+
+Please go to this page to change your password:
+   {3}
+
+In most mail programs, this should appear as a blue link
+which you can just click on.  If that doesn't work,
+then cut and paste the address into the address
+line at the top of your web browser window.
+
+Cheers from the 'Spoken Tutorials Online Test Center' administrator,
+
+Admin Spoken Tutorials
+'''.format(user.firstname, user.username, password_string, 'http://onlinetest.spoken-tutorial.org/login/change_password.php')
+
+            # send email
+            email = EmailMultiAlternatives(
+                subject, message, 'administrator@spoken-tutorial.org',
+                to = to, bcc = [], cc = [],
+                headers={'Reply-To': 'no-replay@spoken-tutorial.org', "Content-type":"text/html;charset=iso-8859-1"}
+            )
+
+            result = email.send(fail_silently=False)
+            messages.success(request, "New password sent to your email "+user.email)
+            return HttpResponseRedirect('/moodle/login/')
+            
+
+    context = {
+        'form': form
+    }
+    context.update(csrf(request))
+    return render(request, 'mdl/templates/password_reset.html', context)

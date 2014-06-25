@@ -139,3 +139,17 @@ class FeedbackForm(forms.ModelForm):
     class Meta:
         model = WorkshopFeedback
         exclude = ['workshop', 'mdluser_id']
+
+class PasswordResetForm(forms.Form):
+    email = forms.EmailField()
+    def clean_email(self):
+        email = self.cleaned_data['email']
+        error = 1
+        try:
+            user = MdlUser.objects.filter(email=email).first()
+            if user:
+                error = 0
+        except Exception, e:
+            print e
+        if error:
+            raise forms.ValidationError( u'Email: %s not exists' % email )
