@@ -601,6 +601,76 @@ def upload_script(request, trid):
     return render(request, 'creation/templates/upload_script.html', context)
 
 @login_required
+def upload_timed_script(request):
+    if not is_contributor(request.user):
+        raise PermissionDenied()
+    form = UploadTimedScriptForm(request.user)
+    if request.method == 'POST':
+        form = UploadTimedScriptForm(request.user, request.POST)
+        lang = None
+        if form.is_valid():
+            try:
+                return HttpResponseRedirect('/creation/upload/timed-script/' + request.POST.get('foss_category') + '/save/')
+            except Exception, e:
+                messages.error(request, str(e))
+    context = {
+        'form': form
+    }
+    context.update(csrf(request))
+    return render(request, 'creation/templates/upload_timed_script.html', context)
+
+@login_required
+def save_timed_script(request, tdid):
+    if not is_contributor(request.user):
+        raise PermissionDenied()
+    try:
+        tr_rec = TutorialResource.objects.select_related().get(tutorial_detail_id = tdid, language__name = 'English')
+        ContributorRole.objects.get(user_id = request.user.id, foss_category_id = tr_rec.tutorial_detail.foss_id, language_id = tr_rec.language_id, status = 1)
+    except Exception, e:
+        raise PermissionDenied()
+    response_msg = ''
+    error_msg = ''
+    storage_path = tr_rec.tutorial_detail.foss.foss + '/' + tr_rec.tutorial_detail.level.code + '/' + tr_rec.tutorial_detail.tutorial.replace(' ', '-') + '/' + tr_rec.language.name + '-timed'
+    script_path = settings.SCRIPT_URL + storage_path
+    form = UploadScriptForm(script_path)
+    if request.method == 'POST':
+        form = UploadScriptForm(script_path, request.POST)
+        if form.is_valid():
+            try:
+                code = 0
+                try:
+                    code = urlopen(script_path).code
+                except Exception, e:
+                    code = e.code
+                if(int(code) == 200):
+                    tr_rec.timed_script = storage_path
+                    tr_rec.save()
+                    messages.success(request, 'Timed script updated successfully!')
+                    return HttpResponseRedirect('/creation/upload/timed-script/')
+                else:
+                    messages.error(request, 'Please update the timed-script to wiki before pressing the submit button.')
+            except Exception, e:
+                messages.error(request, str(e))
+    context = {
+        'form': form,
+        'page_heading': 'timed',
+        'script_path': script_path,
+    }
+    context.update(csrf(request))
+    return render(request, 'creation/templates/save_timed_script.html', context)
+
+@csrf_exempt
+def ajax_upload_timed_script(request):
+    data = ''
+    foss = request.POST.get('foss', '')
+    if foss:
+        rows = TutorialDetail.objects.filter(id__in = TutorialResource.objects.filter(tutorial_detail__foss_id = foss, language__name = 'English', script_status = 4).values_list('tutorial_detail_id')).order_by('order')
+        data = '<option value="">Select Tutorial Name</option>'
+        for row in rows:
+            data += '<option value="' + str(row.id) + '">' + row.tutorial + '</option>'
+    return HttpResponse(json.dumps(data), mimetype='application/json')
+
+@login_required
 def upload_prerequisite(request, trid):
     tr_rec = None
     try:
@@ -1692,11 +1762,20 @@ def creation_change_component_status(request):
             try:
                 row = TutorialResource.objects.select_related().get(tutorial_detail_id = request.POST.get('tutorial_name'), language_id = request.POST.get('language'))
                 comp_title = row.tutorial_detail.foss.foss + ': ' + row.tutorial_detail.tutorial + ' - ' + row.language.name
-                #row.status = 0;
-                #row.save()
+                status_list = {
+                    0: 'Pending',
+                    5: 'Need Improvement',
+                    6: 'Not Required'
+                }
                 component = request.POST.get('component', '')
-                add_contributor_notification(row, comp_title, component.title() + ' status has been changed to ' + 'Need Improvement')
-                messages.success(request, component.title() + ' status has been changed to ' + 'Need Improvement')
+                status = status_list[int(request.POST.get('status', 0))]
+                if component in ['outline', 'script', 'video']:
+                    setattr(row, component + '_status', int(request.POST.get('status', 0)))
+                else:
+                    setattr(row.common_content, component + '_status', int(request.POST.get('status', 0)))
+                row.save()
+                add_contributor_notification(row, comp_title, component.title() + ' status has been changed to ' + status)
+                messages.success(request, component.title() + ' status has been changed to ' + status)
                 form = ChangeComponentStatusForm()
             except Exception, e:
                 messages.error(request, str(e))
@@ -1714,16 +1793,29 @@ def ajax_change_component_status(request):
     if request.method == 'POST':
         foss = request.POST.get('foss', '')
         lang = request.POST.get('lang', '')
-        if foss and lang:
+        tut = request.POST.get('tut', '')
+        comp = request.POST.get('comp', '')
+        if foss and lang and tut and comp:
+            tr_rec = TutorialResource.objects.select_related('common_content').get(tutorial_detail_id = tut, language = lang)
+            compValue = None
+            data = '<option value="">Select Status</option><option value="0">Pending</option>'
+            if comp in ['outline', 'script', 'video']:
+                compValue = getattr(tr_rec, comp + '_status')
+            else:
+                compValue = getattr(tr_rec.common_content, comp + '_status')
+            if compValue:
+                data += '<option value="5">Need Improvement</option>'
+                if comp in ['code', 'assignment']:
+                    data += '<option value="6">Not Required</option>'
+        elif foss and lang:
             data = ['', '']
             td_list = TutorialDetail.objects.filter(foss_id = foss).values_list('id')
             lang_rec = Language.objects.get(pk = lang)
-            tutorials = TutorialResource.objects.select_related().filter(tutorial_detail_id__in = td_list, language_id = lang, status = 0).distinct()
-            data[0] = ''
+            tutorials = TutorialResource.objects.select_related('tutorial_detail').filter(tutorial_detail_id__in = td_list, language_id = lang, status = 0).distinct()
+            data[0] = '<option value="">Select Tutorial Name</option>'
             data[1] = '<option value="outline">Outline</option><option value="script">Script</option>'
             for tutorial in tutorials:
                 data[0] += '<option value="' + str(tutorial.tutorial_detail.id) + '">' + tutorial.tutorial_detail.tutorial + '</option>'
-            data[0] = '<option value="">Select Tutorial Name</option>' + data[0]
             if lang_rec.name == 'English':
                 data[1] += '<option value="slide">Slides</option><option value="video">Video</option><option value="code">Codefiles</option><option value="assignment">Assignment</option>'
             else:

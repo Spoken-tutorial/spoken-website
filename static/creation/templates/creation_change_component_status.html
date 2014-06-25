@@ -2,7 +2,6 @@
 {% load widget_tweaks %}
 {% load static %}
 {% block title %}Change Component Status{% endblock %}
-{% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
 {% block heading %}Change Component Status{% endblock %}
 {% block content %}
     <form role="form" method="post" enctype="multipart/form-data" action="" class="form-horizontal">
@@ -32,10 +31,17 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="id_tutorial_name" class="col-lg-3 col-md-3 col-sm-3 control-label">Component:</label>
+                        <label for="id_component" class="col-lg-3 col-md-3 col-sm-3 control-label">Component:</label>
                         <div class="col-lg-9 col-md-9 col-sm-9">
                             {% render_field form.component class+="form-control component" tabindex="3" %}
                             {{ form.component.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_status" class="col-lg-3 col-md-3 col-sm-3 control-label">Status:</label>
+                        <div class="col-lg-9 col-md-9 col-sm-9">
+                            {% render_field form.status class+="form-control status" tabindex="3" %}
+                            {{ form.status.errors }}
                         </div>
                     </div>
                     <div class="form-group">
@@ -49,7 +55,6 @@
     </form>
 {% endblock %}
 {% block jsblock %}
-    <script src="{% static 'spoken/js/chosen.jquery.min.js' %}"></script>
     <script type="text/javascript">
         $(document).ready(function(){
             $('.foss_category').on("change", function(){
@@ -84,7 +89,7 @@
                 $('.tutorial_name').attr("disabled", "disabled");
                 $('.component').html('<option value="" selected="selected">Select Component</option>');
                 $('.component').attr("disabled", "disabled");
-                if(foss != '') {
+                if(foss != '' && lang != '') {
                     $.ajax({
                         url: "/creation/ajax-change-component-status/",
                         type: "POST",
@@ -98,10 +103,46 @@
                                 $('.tutorial_name').html(data[0]);
                                 $('.tutorial_name').removeAttr('disabled');
                                 $('.component').html(data[1]);
-                                $('.component').removeAttr('disabled');
+                                // $('.component').removeAttr('disabled');
                             }
                         }
-                    })
+                    });
+                }
+            });
+            $('.tutorial_name').on("change", function() {
+                var tutName = $('.tutorial_name').val();
+                if(tutName != '') {
+                    $('.component').removeAttr('disabled');
+                } else {
+                    $('.component').val('');
+                    $('.component').attr("disabled", "disabled");
+                }
+            });
+            $('.component').on("change", function() {
+                var foss = $('.foss_category').val();
+                var lang = $('.language').val();
+                var tut = $('.tutorial_name').val();
+                var comp = $('.component').val();
+                $('.status').val('')
+                $('.status').attr("disabled", "disabled");
+                if(foss != '' && lang != '' && tut != '' && comp != '') {
+                    $.ajax({
+                        url: "/creation/ajax-change-component-status/",
+                        type: "POST",
+                        data: {
+                            foss: foss,
+                            lang: lang,
+                            tut: tut,
+                            comp: comp
+                        },
+                        success: function(data) {
+                            // loading tutorial names
+                            if(data){
+                                $('.status').html(data);
+                                $('.status').removeAttr('disabled');
+                            }
+                        }
+                    });
                 }
             });
         });
