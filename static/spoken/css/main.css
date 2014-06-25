@@ -1,3 +1,17 @@
+.no-record{
+     border: 1px solid #ddd;
+     padding: 8px;
+     text-align: center;
+}
+.no-record:hover{
+    background-color: #f5f5f5;
+}
+.form-group .radio ul{
+    list-style: none;
+}
+.form-group .radio ul li{
+    float: left;
+}
 /* font awesome */
 .fa-1 {
     font-size: 1.2em;

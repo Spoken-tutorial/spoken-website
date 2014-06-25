@@ -8,7 +8,7 @@
 	<link rel="stylesheet" href="{% static 'spoken/css/jquery.datetimepicker.css' %}" type="text/css" media="screen" charset="utf-8" />
 {% endblock %}
 {% block heading %}
-        <i class="fa fa-list-ul"></i> Workshop
+        <i class="fa fa-list-ul"></i> Workshop<a href="/software-training" class='pull-right go-back'>Dashboard</a>
 {% endblock %}
 {% block content %}
     	<ul class="tabs nav nav-tabs">
@@ -34,78 +34,99 @@
 	            {{ user.organiser.academic.state }} - {{ user.organiser.academic }}
 	        {% endif %}
 	    </div>
-	    <form action="{{ action }}" method="post">{% csrf_token %}
-	        {% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
-	        {% if form.non_field_errors %}
-	        <ul>
-	          {% for error in form.non_field_errors %}
-		        <li>{{ error }}</li>
-	          {% endfor %}
-	        </ul>
-	        {% endif %}
+	    <div class="row well">
+            <div class='col-sm-8'>
+	            <form action="{{ action }}" method="post" class='form-horizontal'>{% csrf_token %}
+	                {% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
+	                {% if form.non_field_errors %}
+	                <ul>
+	                  {% for error in form.non_field_errors %}
+		                <li>{{ error }}</li>
+	                  {% endfor %}
+	                </ul>
+	                {% endif %}
 
-	        <!--
-	        <div class="form-group">
-		        <label for="id_state">State</label>
-		        {% render_field form.state class+="form-control state" tabindex="1" data-placeholder="Enter state name" %}
-		        {{ form.state.errors }}
-	        </div>
-	        <div class="form-group">
-		        <label for="id_district">District</label>
-		        {% render_field form.district class+="form-control district" tabindex="1" data-placeholder="Enter district name" %}
-		        {{ form.district.errors }}
-	        </div>
-	        <div class="form-group">
-		        <label for="id_academic">Academic name</label>
-		        {% render_field form.academic class+="form-control academic" tabindex="1" data-placeholder="Enter academic name" %}
-		        {{ form.name.errors }}
-            </div> -->
-            {% if user|is_resource_person %}
-                <div class="form-group">
-		            <label for="id_workshop_type">Workshop Type</label>
-		            {% render_field form.workshop_type class+="form-control workshop_type" tabindex="1" data-placeholder="Enter department" %}
-		            {{ form.workshop_type.errors }}
-	            </div>
-	       {% endif %}
-	        <div class="form-group">
-		        <label for="id_department">Department</label>
-		        {% render_field form.department class+="form-control department" tabindex="1" data-placeholder="Enter department" %}
-		        {{ form.department.errors }}
-	        </div>
+	                <!--
+	                <div class="form-group">
+		                <label class="col-sm-3 control-label" for= "id_state">State</label>
+		                {% render_field form.state class+="form-control state" tabindex="1" data-placeholder="Enter state name" %}
+		                {{ form.state.errors }}
+	                </div>
+	                <div class="form-group">
+		                <label class="col-sm-3 control-label" for= "id_district">District</label>
+		                {% render_field form.district class+="form-control district" tabindex="1" data-placeholder="Enter district name" %}
+		                {{ form.district.errors }}
+	                </div>
+	                <div class="form-group">
+		                <label class="col-sm-3 control-label" for= "id_academic">Academic name</label>
+		                {% render_field form.academic class+="form-control academic" tabindex="1" data-placeholder="Enter academic name" %}
+		                {{ form.name.errors }}
+                    </div> -->
+                    {% if user|is_resource_person %}
+                        <div class="form-group">
+		                    <label class="col-sm-3 control-label" for= "id_workshop_type">Workshop Type</label>
+		                    <div class="col-sm-9">
+		                        {% render_field form.workshop_type class+="form-control workshop_type" tabindex="1" data-placeholder="Enter department" %}
+		                        {{ form.workshop_type.errors }}
+		                    </div>
+	                    </div>
+	               {% endif %}
+	                <div class="form-group">
+		                <label class="col-sm-3 control-label" for= "id_department">Department</label>
+		                <div class="col-sm-9">
+		                    {% render_field form.department class+="form-control department" tabindex="1" data-placeholder="Enter department" %}
+		                    {{ form.department.errors }}
+		                </div>
+	                </div>
 
-	        <div class="form-group">
-		        <label for="id_wdate">Date</label>
-		        {% render_field form.wdate class+="form-control date" tabindex="1" data-placeholder="Enter date" %}
-		        {{ form.wdate.errors }}
-	        </div>
-	        <!--
-	        <div class="form-group">
-		        <label for="id_date">Time</label>
-		        {% render_field form.time class+="form-control time" tabindex="1" data-placeholder="Enter time" %}
-		        {{ form.time.errors }}
-	        </div>
-	        -->
-	        <div class="form-group">
-		        <label for="id_foss">Foss</label>
-		        {% render_field form.foss class+="form-control foss" tabindex="1" data-placeholder="Enter foss" %}
-		        {{ form.foss.errors }}
-	        </div>
-	        <div class="form-group">
-		        <label for="id_language">language</label>
-		        {% render_field form.language class+="form-control language" tabindex="1" data-placeholder="Enter language" %}
-		        {{ form.language.errors }}
-	        </div>
-	        <div class="form-group">
-		        <label for="id_skype">Skype</label>
-		        <div class='radio'>
-			        {% render_field form.skype class+="form-control skype" tabindex="1" %}
-			        {{ form.skype.errors }}
-		        </div>
-	        </div>
-	        <input class="btn btn-primary" type="submit" value="Submit" />
-	        {% endwith %}
-        </form>
-    </div>
+	                <div class="form-group">
+		                <label class="col-sm-3 control-label" for= "id_wdate">Date</label>
+		                <div class="col-sm-9">
+		                    {% render_field form.wdate class+="form-control date" tabindex="1" data-placeholder="Enter date" %}
+		                    {{ form.wdate.errors }}
+		                </div>
+	                </div>
+	                <!--
+	                <div class="form-group">
+		                <label class="col-sm-3 control-label" for= "id_date">Time</label>
+		                {% render_field form.time class+="form-control time" tabindex="1" data-placeholder="Enter time" %}
+		                {{ form.time.errors }}
+	                </div>
+	                -->
+	                <div class="form-group">
+		                <label class="col-sm-3 control-label" for= "id_foss">Foss</label>
+		                <div class="col-sm-9">
+		                    {% render_field form.foss class+="form-control foss" tabindex="1" data-placeholder="Enter foss" %}
+		                    {{ form.foss.errors }}
+		                </div>
+	                </div>
+	                <div class="form-group">
+		                <label class="col-sm-3 control-label" for= "id_language">language</label>
+		                <div class="col-sm-9">
+		                    {% render_field form.language class+="form-control language" tabindex="1" data-placeholder="Enter language" %}
+		                    {{ form.language.errors }}
+		                </div>
+	                </div>
+	                <div class="form-group">
+		                <label class="col-sm-3 control-label" for= "id_skype">Skype</label>
+		                <div class="col-sm-9">
+		                    {% for choice in form.skype %}
+                                <div class='radio'>
+                                    {{ choice.choice_label }}
+                                    {{ choice.tag }}
+                               </div>
+                            {% endfor %}
+                        </div>
+	                </div>
+	                <div class="form-group">
+                        <div class="col-sm-offset-3 col-sm-9">
+	                        <input class="btn btn-primary" type="submit" value="Submit" />
+	                    </div>
+	                </div>
+	                {% endwith %}
+                </form>
+            </div>
+        </div>
 {% endblock %}
 {% block jsblock %}
 	<script src="{% static 'spoken/js/jquery.datetimepicker.js' %}"></script>

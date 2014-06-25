@@ -49,6 +49,8 @@ import random
 
 from  filters import *
 
+from spoken.sortable import *
+
 def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
 
@@ -75,7 +77,7 @@ def is_invigilator(user):
     if user.groups.filter(name='Invigilator').count() == 1:
         return True
 def get_page(resource, page):
-    paginator = Paginator(resource, 1)
+    paginator = Paginator(resource, 20)
     try:
         resource =  paginator.page(page)
     except PageNotAnInteger:
@@ -261,14 +263,30 @@ def ac(request):
         raise Http404('You are not allowed to view this page')
         
     context = {}
-    collection = AcademicCenterFilter(request.GET, user = user, queryset=AcademicCenter.objects.all())
+    header = {
+        1: SortableHeader('State', False),
+        2: SortableHeader('university__name', True, 'University'),
+        3: SortableHeader('institution_name', True, 'Institution Name'),
+        4: SortableHeader('institution_type__name', True, 'Institute Type'),
+        5: SortableHeader('institute_category__name', True, 'Institute Category'),
+        6: SortableHeader('Action', False)
+    }
+    
+    collectionSet = AcademicCenter.objects.all()
+    raw_get_data = request.GET.get('o', None)
+    collection = get_sorted_list(request, collectionSet, header, raw_get_data)
+    ordering = get_field_index(raw_get_data)
+    
+    collection = AcademicCenterFilter(request.GET, user = user, queryset=collection)
     context['form'] = collection.form
     
     page = request.GET.get('page')
     collection = get_page(collection, page)
     
     context['collection'] = collection
-    context['model'] = "Academic Center"
+    context['header'] = header
+    context['ordering'] = ordering
+    
     context.update(csrf(request))
     return render(request, 'events/templates/ac/index.html', context)
     return HttpResponse('RP')
@@ -301,7 +319,7 @@ def organiser_request(request, username):
                 organiser.user_id=request.user.id
                 organiser.academic_id=request.POST['college']
                 organiser.save()
-                messages.success(request, "Thank you. Your request has been sent for Resource Person's approval. You will get the approval with in 24 hours. Once the request is approved, you can request for the workshop. For more details Click Here")
+                messages.success(request, "<ul><li>Thank you. Your request has been sent for Resource Person's approval.</li><li>You will get the approval with in 24 hours.Once the request is approved, you can request for the workshop. </li><li>For more details <a target='_blank' href='http://process.spoken-tutorial.org/images/8/89/Workshop-Request-Sheet.pdf'> Click Here</a></li></ul>")
                 return HttpResponseRedirect("/software-training/organiser/view/"+user.username+"/")
             messages.error(request, "Please fill the following details")
             context = {'form':form}
@@ -313,7 +331,7 @@ def organiser_request(request, username):
                     messages.error(request, "You are already an Organiser ")
                     return HttpResponseRedirect("/software-training/organiser/view/"+user.username+"/")
                 else:
-                    messages.info(request, "Your Organiser request is yet to be approved. Please contact the Resource person of your State. For more details Click Here ")
+                    messages.info(request, "Your Organiser request is yet to be approved. Please contact the Resource person of your State. For more details <a href='http://process.spoken-tutorial.org/images/5/5d/Create-New-Account.pdf' target='_blank'> Click Here</a> ")
                     print "Organiser not yet approve "
                     return HttpResponseRedirect("/software-training/organiser/view/"+user.username+"/")
             except:
@@ -426,7 +444,7 @@ def invigilator_request(request, username):
                     messages.success(request, "You have already  invigilator role ")
                     return HttpResponseRedirect("/software-training/invigilator/view/"+user.username+"/")
                 else:
-                    messages.info(request, "Your Invigilator request is yet to be approved. Please contact the Resource person of your State. For more details Click Here ")
+                    messages.info(request, "<ul><li>Your Invigilator request is yet to be approved.</li><li>Please contact the Resource person of your State. For more details <a href='http://process.spoken-tutorial.org/images/5/5d/Create-New-Account.pdf' traget='_blank'>Click Here</a> </li></ul>")
                     return HttpResponseRedirect("/software-training/invigilator/view/"+user.username+"/")
             except:
                 messages.info(request, "Please fill the following details")
@@ -610,38 +628,49 @@ def workshop_list(request, role, status):
     status_dict = {'pending': 0, 'approved' : 1, 'completed' : 2, 'rejected' : 3, 'reschedule' : 1, 'ongoing': 1}
     if status in status_dict:
         context = {}
-        workshops = None
+        collectionSet = None
         if is_event_manager(user) and role == 'em':
-            workshops = Workshop.objects.select_related().filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status])
+            collectionSet = Workshop.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status])
         elif is_resource_person(user) and role == 'rp':
             if status == 'approved':
-                workshops = Workshop.objects.select_related().filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status], wdate__gt=datetime.date.today())
+                collectionSet = Workshop.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status], wdate__gt=datetime.date.today())
             elif status =='ongoing':
-                workshops = Workshop.objects.select_related().filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = 1, wdate=datetime.date.today())
+                collectionSet = Workshop.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = 1, wdate=datetime.date.today())
             else:
-                workshops = Workshop.objects.select_related().filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status])
+                collectionSet = Workshop.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status])
         elif is_organiser(user) and role == 'organiser':
             if status == 'approved':
-                workshops = Workshop.objects.select_related().filter(organiser_id=user, status = status_dict[status], wdate__gt=datetime.date.today())
+                collectionSet = Workshop.objects.filter(organiser_id=user, status = status_dict[status], wdate__gt=datetime.date.today())
             elif status == 'ongoing' :
-                workshops = Workshop.objects.select_related().filter(organiser_id=user, status = status_dict[status], wdate=datetime.date.today())
+                collectionSet = Workshop.objects.filter(organiser_id=user, status = status_dict[status], wdate=datetime.date.today())
             else:
-                workshops = Workshop.objects.select_related().filter(organiser_id=user, status = status_dict[status])
+                collectionSet = Workshop.objects.filter(organiser_id=user, status = status_dict[status])
         
-        if workshops == None:
+        if collectionSet == None:
             raise Http404('You are not allowed to view this page')
 
-        #paginator = Paginator(workshops, 30)
-        page = request.GET.get('page')
-        workshops = get_page(workshops, page)
-        #try:
-        #    workshops =  paginator.page(page)
-        #except PageNotAnInteger:
-        #    workshops =  paginator.page(1)
-        #except EmptyPage:
-        #    workshops = paginator.page(paginator.num_pages)
+        header = {
+            1: SortableHeader('academic__state', True, 'State'),
+            2: SortableHeader('academic', True, 'Institution'),
+            3: SortableHeader('foss', True, 'FOSS'),
+            4: SortableHeader('language', True, 'Language'),
+            5: SortableHeader('wdate', True, 'Date'),
+            6: SortableHeader('Action', False)
+        }
         
-        context['collection'] = workshops
+        raw_get_data = request.GET.get('o', None)
+        collection = get_sorted_list(request, collectionSet, header, raw_get_data)
+        ordering = get_field_index(raw_get_data)
+        
+        collection = WorkshopFilter(request.GET, queryset=collection)
+        context['form'] = collection.form
+        
+        page = request.GET.get('page')
+        collection = get_page(collection, page)
+        
+        context['collection'] = collection
+        context['header'] = header
+        context['ordering'] = ordering
         context['status'] = status
         context['role'] = role
         context.update(csrf(request))
@@ -858,17 +887,17 @@ def workshop_participant_ceritificate(request, wid, participant_id):
             wcf = None
             # check if user can get certificate
             wa = WorkshopAttendance.objects.get(workshop_id = w.id, mdluser_id = participant_id)
-            if wa.status < 1:
+            if wa.status < 2:
                 raise Http404('Page not found')
             if wa.password:
                 certificate_pass = wa.password
                 wa.count += 1
-                wa.status = 2
+                wa.status = 3
                 wa.save()
             else:
                 certificate_pass = str(mdluser.id)+id_generator(10-len(str(mdluser.id)))
                 wa.password = certificate_pass
-                wa.status = 2
+                wa.status = 3
                 wa.count += 1
                 wa.save()
         except:
@@ -982,39 +1011,59 @@ def test_list(request, role, status):
     status_dict = {'pending': 0, 'waitingforinvigilator': 1, 'approved' : 2, 'ongoing': 3, 'completed' : 4, 'rejected' : 5, 'reschedule' : 2}
     if status in status_dict:
         context = {}
-        test = None
+        collectionSet = None
         todaytest = None
         if is_event_manager(user) and role == 'em':
             if status == 'ongoing':
-                test = Test.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status], tdate = datetime.datetime.now().strftime("%Y-%m-%d"))
+                collectionSet = Test.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status], tdate = datetime.datetime.now().strftime("%Y-%m-%d"))
             else:
-                test = Test.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status])
+                collectionSet = Test.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status])
         elif is_resource_person(user) and role == 'rp':
             if status == 'ongoing':
-                test = Test.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status], tdate = datetime.datetime.now().strftime("%Y-%m-%d"))
+                collectionSet = Test.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status], tdate = datetime.datetime.now().strftime("%Y-%m-%d"))
             else:
-                test = Test.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status])
+                collectionSet = Test.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status])
         elif is_organiser(user) and role == 'organiser':
             if status == 'ongoing': 
-                test = Test.objects.filter((Q(status = 2) | Q(status = 3)), organiser_id=user , tdate = datetime.datetime.now().strftime("%Y-%m-%d"))
+                collectionSet = Test.objects.filter((Q(status = 2) | Q(status = 3)), organiser_id=user , tdate = datetime.datetime.now().strftime("%Y-%m-%d"))
             elif status == 'approved':
-                test = Test.objects.filter(organiser_id=user, status = status_dict[status], tdate__gt=datetime.date.today())
+                collectionSet = Test.objects.filter(organiser_id=user, status = status_dict[status], tdate__gt=datetime.date.today())
             else:
-                test = Test.objects.filter(organiser_id=user, status = status_dict[status])
+                collectionSet = Test.objects.filter(organiser_id=user, status = status_dict[status])
         elif is_invigilator(user) and role == 'invigilator':
             if status == 'ongoing':
-                test = Test.objects.filter((Q(status = 2) | Q(status = 3)), tdate = datetime.date.today(), invigilator_id = user)
+                collectionSet = Test.objects.filter((Q(status = 2) | Q(status = 3)), tdate = datetime.date.today(), invigilator_id = user)
                 messages.info(request, "Click on the Attendance link below to see the participant list. To know more Click Here.")
             elif status == 'approved':
-                test = Test.objects.filter(invigilator_id=user, status = status_dict[status], tdate__gt=datetime.date.today())
+                collectionSet = Test.objects.filter(invigilator_id=user, status = status_dict[status], tdate__gt=datetime.date.today())
             else:
                 todaytest = datetime.datetime.now().strftime("%Y-%m-%d")
-                test = Test.objects.filter(invigilator_id=user, status = status_dict[status])
+                collectionSet = Test.objects.filter(invigilator_id=user, status = status_dict[status])
         
-        if test == None:
+        if collectionSet == None:
             raise Http404('You are not allowed to view this page')
             
-        context['collection'] = test
+        header = {
+            1: SortableHeader('academic__state', True, 'State'),
+            2: SortableHeader('academic', True, 'Institution'),
+            3: SortableHeader('foss', True, 'FOSS'),
+            4: SortableHeader('tdate', True, 'Date'),
+            5: SortableHeader('Action', False)
+        }
+        raw_get_data = request.GET.get('o', None)
+        collection = get_sorted_list(request, collectionSet, header, raw_get_data)
+        ordering = get_field_index(raw_get_data)
+        
+        collection = TestFilter(request.GET, queryset=collection)
+        context['form'] = collection.form
+        
+        page = request.GET.get('page')
+        collection = get_page(collection, page)
+        
+        context['collection'] = collection
+        context['header'] = header
+        context['ordering'] = ordering
+        
         context['status'] = status
         context['role'] = role
         context['todaytest'] = todaytest
@@ -1411,6 +1460,7 @@ def organiser_invigilator_index(request, role, status):
     #todo: filter to diaplay block and active user
     active = status
     user = request.user
+    context = {}
     if not (user.is_authenticated() and (is_event_manager(user) or is_resource_person(user))):
         raise Http404('You are not allowed to view this page')
     if status == 'active':
@@ -1423,20 +1473,53 @@ def organiser_invigilator_index(request, role, status):
         raise Http404('Page not found ')
         
     user = User.objects.get(pk=user.id)
+
+    header = {
+        1: SortableHeader('academic__state', True, 'State'),
+        2: SortableHeader('academic', True, 'Institution'),
+        3: SortableHeader('user__username', True, 'Name'),
+        4: SortableHeader('created', True, 'Created'),
+        5: SortableHeader('Action', False)
+    }
+    
     if role == 'organiser':
         try:
-            collection = Organiser.objects.filter(academic=AcademicCenter.objects.filter(state=State.objects.filter(resourceperson__user_id=user)), status=status)
-        except:
+            collectionSet = Organiser.objects.select_related().filter(academic=AcademicCenter.objects.filter(state=State.objects.filter(resourceperson__user_id=user)), status=status)
+            
+            raw_get_data = request.GET.get('o', None)
+            collection = get_sorted_list(request, collectionSet, header, raw_get_data)
+            ordering = get_field_index(raw_get_data)
+            
+            collection = OrganiserFilter(request.GET, queryset=collection)
+            context['form'] = collection.form
+            
+            page = request.GET.get('page')
+            collection = get_page(collection, page)
+        except Exception, e:
+            print e
             collection = {}
     elif role == 'invigilator':
         try:
-            collection = Invigilator.objects.filter(academic=AcademicCenter.objects.filter(state=State.objects.filter(resourceperson__user_id=user)), status=status)
-        except:
+            collectionSet = Invigilator.objects.select_related().filter(academic=AcademicCenter.objects.filter(state=State.objects.filter(resourceperson__user_id=user)), status=status)
+            
+            raw_get_data = request.GET.get('o', None)
+            collection = get_sorted_list(request, collectionSet, header, raw_get_data)
+            ordering = get_field_index(raw_get_data)
+            
+            collection = InvigilatorFilter(request.GET, queryset=collection)
+            context['form'] = collection.form
+            
+            page = request.GET.get('page')
+            collection = get_page(collection, page)
+
+        except Exception, e:
+            print e
             collection = {}
     else:
         raise Http404('Page not found ')
             
-    context = {}
+    context['header'] = header
+    context['ordering'] = ordering
     context['collection'] = collection
     context['status'] = active
     context['role'] = role
@@ -1543,37 +1626,50 @@ def training_list(request, role, status):
     status_dict = {'pending': 0, 'approved' : 1, 'completed' : 2, 'rejected' : 3, 'reschedule' : 1, 'ongoing': 1}
     if status in status_dict:
         context = {}
-        workshops = None
+        collectionSet = None
         if is_event_manager(user) and role == 'em':
-            workshops = Training.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status])
+            collectionSet = Training.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status])
         elif is_resource_person(user) and role == 'rp':
             if status == 'approved':
-                workshops = Training.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status], trdate__gt=datetime.date.today())
+                collectionSet = Training.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status], trdate__gt=datetime.date.today())
             elif status =='ongoing':
-                workshops = Training.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = 1, trdate=datetime.date.today())
+                collectionSet = Training.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = 1, trdate=datetime.date.today())
             else:
-                workshops = Training.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status])
+                collectionSet = Training.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status])
         elif is_organiser(user) and role == 'organiser':
             if status == 'approved':
-                workshops = Training.objects.filter(organiser_id=user, status = status_dict[status], trdate__gt=datetime.date.today())
+                collectionSet = Training.objects.filter(organiser_id=user, status = status_dict[status], trdate__gt=datetime.date.today())
             elif status == 'ongoing' :
-                workshops = Training.objects.filter(organiser_id=user, status = status_dict[status], trdate=datetime.date.today())
+                collectionSet = Training.objects.filter(organiser_id=user, status = status_dict[status], trdate=datetime.date.today())
             else:
-                workshops = Training.objects.filter(organiser_id=user, status = status_dict[status])
+                collectionSet = Training.objects.filter(organiser_id=user, status = status_dict[status])
         
-        if workshops == None:
+        if collectionSet == None:
             raise Http404('You are not allowed to view this page')
 
-        paginator = Paginator(workshops, 30)
-        page = request.GET.get('page')
-        try:
-            workshops =  paginator.page(page)
-        except PageNotAnInteger:
-            workshops =  paginator.page(1)
-        except EmptyPage:
-            workshops = paginator.page(paginator.num_pages)
+        header = {
+            1: SortableHeader('academic__state', True, 'State'),
+            2: SortableHeader('academic', True, 'Institution'),
+            3: SortableHeader('foss', True, 'FOSS'),
+            4: SortableHeader('language', True, 'Language'),
+            5: SortableHeader('trdate', True, 'Date'),
+            6: SortableHeader('Action', False)
+        }
         
-        context['collection'] = workshops
+        raw_get_data = request.GET.get('o', None)
+        collection = get_sorted_list(request, collectionSet, header, raw_get_data)
+        ordering = get_field_index(raw_get_data)
+        
+        collection = TrainingFilter(request.GET, queryset=collection)
+        context['form'] = collection.form
+        
+        page = request.GET.get('page')
+        collection = get_page(collection, page)
+        
+        context['collection'] = collection
+        context['header'] = header
+        context['ordering'] = ordering
+        
         context['status'] = status
         context['role'] = role
         context.update(csrf(request))
@@ -2014,14 +2110,12 @@ def ajax_dept_foss(request):
 
 @csrf_exempt
 def ajax_language(request):
-    print "Go to hell------"
     """ Ajax: Get the Colleges (Academic) based on District selected """
     if request.method == 'POST':
         foss = request.POST.get('foss')
         language = FossAvailableForWorkshop.objects.select_related().filter(foss_id=foss)
         tmp = '<option value = None> -- None -- </option>'
         for i in language:
-            print i
             tmp +='<option value='+str(i.language.id)+'>'+i.language.name+'</option>'
         return HttpResponse(json.dumps(tmp), mimetype='application/json')
         

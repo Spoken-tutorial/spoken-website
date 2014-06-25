@@ -14,12 +14,21 @@ def get_participant_status(key, testcode):
     return status_list[ta.status]
 
 def get_wparticipant_status(key, wcode):
-    status_list = ['Waiting for Attendance', 'Completed', 'Got certificate']
+    status_list = ['Waiting for Attendance', 'Waiting for Feedback', 'Certificate ready', 'Got certificate']
     try:
         wa = WorkshopAttendance.objects.get(mdluser_id=key, workshop_id = wcode)
     except:
         return 'error'
     return status_list[wa.status]
+
+def can_download_workshop_certificate(key, wcode):
+    try:
+        wa = WorkshopAttendance.objects.get(mdluser_id=key, workshop_id = wcode)
+        if wa.status == 2:
+            return True
+        return False
+    except:
+        return 'error'
 
 def get_trainingparticipant_status(key, wcode):
     status_list = ['Waiting for Attendance', 'Completed', 'Got certificate']
@@ -124,3 +133,4 @@ register.filter('get_participant_status', get_participant_status)
 register.filter('get_wparticipant_status', get_wparticipant_status)
 register.filter('get_trainingparticipant_status', get_trainingparticipant_status)
 register.filter('can_upload_workshop_data', can_upload_workshop_data)
+register.filter('can_download_workshop_certificate', can_download_workshop_certificate)

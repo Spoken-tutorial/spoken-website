@@ -2,12 +2,38 @@
 {% load widget_tweaks %}
 {% load static %}
 {% load eventsdata %}
-{% block title %}Workshop - {{ status}} {% endblock %}
+{% load cmsdata %}
+{% load creationdata %}
+{% block title %}Training - {{ status}} {% endblock %}
 {% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
 {% block heading %}
-        <i class="fa fa-list-ul"></i> Training <a href="{% url 'events:events_dashboard' %}" class='pull-right'>Go to Dashboard</a>
+        <i class="fa fa-list-ul"></i> Training <a href="{% url 'events:events_dashboard' %}" class='pull-right'>Dashboard</a>
 {% endblock %}
 {% block content %}
+<div class= 'filters' >
+        <form action="" method="get" class='form-horizontal'>
+            <div class="form-group">
+                <label for="id_state" class="col-sm-2 control-label">State</label>
+                <div class="col-sm-10">
+                    {% render_field form.academic__state class+="form-control chosen academic_state" tabindex="1" %}
+                    {{ form.academic__state.errors }}
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="id_state" class="col-sm-2 control-label">Foss</label>
+                <div class="col-sm-10">
+                    {% render_field form.foss class+="form-control chosen foss" tabindex="1" %}
+                    {{ form.foss.errors }}
+                </div>
+            </div>
+            <div class="form-group">
+              <div class="col-sm-offset-2 col-sm-10">
+                 <input class="btn btn-success" type="submit" value="Filter" />
+                 <a class="btn btn-success" href="{{request.path}}?{{ request.GET|reset_get_values}}">Reset Filter</a>
+              </div>
+           </div>
+        </form>
+    </div>
 	<!-- Nav tabs -->
 	<ul class="tabs nav nav-tabs">
 	    {% if role == 'organiser' %}
@@ -30,15 +56,8 @@
 		</div>
 		<div class="tab-pane active" id="pending">
 			{% if collection %}
-			<table class="table table-striped table-hover table-bordered">
-				<tr>
-				    <th>State</th>
-					<th>Academic Name</th>
-					<th>FOSS</th>
-					<th>Language</th>
-					<th>Date </th>
-					<th>Action</th>
-				</tr>
+			<table class="paleblue table table-striped table-hover table-bordered">
+				{% get_sortable_header header ordering %}
 				{% for record in collection %}
 					<tr>
 					    <td>{{ record.academic.state }}</td>
@@ -95,7 +114,7 @@
                    {% endfor %}
                 </table>
 			{% else %}
-				<p>No record found!</p>
+				<p class='no-record'>No record found!</p>
 			{% endif %}
 		</div>
 	</div>

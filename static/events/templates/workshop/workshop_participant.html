@@ -5,7 +5,7 @@
 {% block title %}Workshop Participant Details{% endblock %}
 {% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
 {% block heading %}
-        <i class="fa fa-list-ul"></i> Participant Details<a href="{{ request.META.HTTP_REFERER }}" class='pull-right'>Go Back</a>
+        <i class="fa fa-list-ul"></i> Participant Details
 {% endblock %}
 {% block content %}
     <div class="bs-callout bs-callout-info">
@@ -38,8 +38,10 @@
 					<td>{{ record.lastname }}</td>
                     <td>
                         {% if can_download_certificate %}
-                            {% if record.id|get_wstatus:wc.id %}
-					            <a href="{% url 'events:workshop_participant_ceritificate' wc.id record.id %}">Certificate</a>
+                            {% if record.id|can_download_workshop_certificate:wc.id %}
+                                <a href="{% url 'events:workshop_participant_ceritificate' wc.id record.id %}">Certificate</a>
+                            {% else %}
+                                 {{ record.id|get_wparticipant_status:wc.id }}
                             {% endif %} 
 					    {% endif %}
 					</td>
