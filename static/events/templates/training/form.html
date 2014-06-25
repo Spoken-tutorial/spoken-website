@@ -91,7 +91,7 @@
 		                </div>
 	                </div>
 	                <div class="form-group">
-		                <label class="col-sm-3 control-label" for= "id_language">language</label>
+		                <label class="col-sm-3 control-label" for= "id_language">language <span class='ajax-refresh ajax-refresh-language'><i class="fa fa-2 fa-refresh fa-spin"></i></span></label>
 		                <div class="col-sm-9">
 		                    {% render_field form.language class+="form-control language" tabindex="1" data-placeholder="Enter language" %}
 		                    {{ form.language.errors }}
@@ -166,12 +166,17 @@
 				data: {
 					foss : foss
 				},
+				beforeSend: function() {
+                    $('.ajax-refresh-language').show();
+                },
 				success: function(data) {
 					if(data){
 						$('.language').html(data);
 						$('.language').removeAttr("disabled");
+						$('.ajax-refresh-language').hide();
 					} else{
 						$('.language').attr("disabled", "disabled");
+						$('.ajax-refresh-language').hide();
 						alert('No language found!');
 					}
 				}

@@ -2052,9 +2052,11 @@ def ajax_district_collage(request):
     if request.method == 'POST':
         district = request.POST.get('district')
         collages = AcademicCenter.objects.filter(district=district).order_by('institution_name')
-        tmp = '<option value = None> -- None -- </option>'
-        for i in collages:
-            tmp +='<option value='+str(i.id)+'>'+i.institution_name+'</option>'
+        tmp = None
+        if collages:
+            tmp = '<option value = None> -- None -- </option>'
+            for i in collages:
+                tmp +='<option value='+str(i.id)+'>'+i.institution_name+'</option>'
         return HttpResponse(json.dumps(tmp), mimetype='application/json')
 
 @csrf_exempt

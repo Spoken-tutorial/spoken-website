@@ -26,14 +26,14 @@
 			            </div>
 			        </div>
 			        <div class="form-group">
-				        <label for="id_district" class="col-sm-3 control-label">District</label><!-- <span class='ajax-refresh'><i class="fa fa-refresh fa-spin"></i></span> -->
+				        <label for="id_district" class="col-sm-3 control-label">District <span class='ajax-refresh ajax-refresh-district'><i class="fa fa-2 fa-refresh fa-spin"></i></span></label>
 				        <div class="col-sm-9">
 				            {% render_field form.district class+="form-control chosen district" tabindex="1" data-placeholder="Choose district" %}
 				            {{ form.district.errors }}
 				        </div>
 			        </div>
 			        <div class="form-group">
-				        <label for="id_college" class="col-sm-3 control-label">Institution</label>
+				        <label for="id_college" class="col-sm-3 control-label">Institution <span class='ajax-refresh ajax-refresh-institution'><i class="fa fa-2 fa-refresh fa-spin"></i></span></label>
 				        <div class="col-sm-9">
 				            {% render_field form.college class+="form-control chosen college" tabindex="1" data-placeholder="Choose Institution" %}
 				            {{ form.college.errors }}
@@ -66,11 +66,15 @@
 					state: state,
 					fields: {'district':'district'},
 				},
+				beforeSend: function() {
+                    $('.ajax-refresh-district').show();
+                },
 				success: function(data) {
 					if(data.district){
 						$ac_district.html(data.district);
 						$ac_district.trigger("chosen:updated");
 						$ac_district.removeAttr("disabled");
+						$('.ajax-refresh-district').hide();
 					}else{
 						$ac_district.html('<option>-- None -- </option>')
 						$ac_district.trigger("chosen:updated");
@@ -90,12 +94,17 @@
 				data: {
 					district : district
 				},
+				beforeSend: function() {
+                    $('.ajax-refresh-institution').show();
+                },
 				success: function(data) {
 					if(data){
 						$college.html(data);
 						$college.removeAttr("disabled");
+						$('.ajax-refresh-institution').hide();
 					} else{
 						$college.attr("disabled", "disabled");
+						$('.ajax-refresh-institution').hide();
 						alert('No college found for this district!!');
 					}
 				}

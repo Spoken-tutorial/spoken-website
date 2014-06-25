@@ -6,6 +6,10 @@
 .no-record:hover{
     background-color: #f5f5f5;
 }
+.ajax-refresh{
+    padding: 0 5px;
+    display: none;
+}
 .form-group .radio ul{
     list-style: none;
 }

@@ -128,47 +128,66 @@ function ajaxStrateFillDatas(district, city, university){
 		fields['university'] = 'university';
 	}
 	state = $acstate.val();
-	$.ajax({
-		url: "/software-training/ajax-ac-state/",
-		type: "POST",
-		data: {
-			state: state,
-			fields: fields,
-		},
-		success: function(data) {
-			console.log(data);
-			if(data.university){
-				$ac_university.html(data.university);
-				$ac_university.removeAttr("disabled");
-				$ac_university.trigger("chosen:updated");
-			}else{
-				$ac_university.html('<option>-- None -- </option>')
-				$ac_university.attr("disabled", "disabled");
-				$ac_university.trigger("chosen:updated");
-				//alert('No University found for this State!!');
-			}
-			if(data.district){
-				$ac_district.html(data.district);
-				$ac_district.trigger("chosen:updated");
-				$ac_district.removeAttr("disabled");
-			}else{
-				$ac_district.html('<option>-- None -- </option>')
-				$ac_district.trigger("chosen:updated");
-				$ac_district.attr("disabled", "disabled");
-				//alert('No District found for this State!!');
-			}
-			if(data.city){
-				$ac_city.html(data.city);
-				$ac_city.trigger("chosen:updated");
-				$ac_city.removeAttr("disabled");
-			}else{
-				$ac_city.html('<option>-- None -- </option>')
-				$ac_city.trigger("chosen:updated");
-				$ac_city.attr("disabled", "disabled");
-				//alert('No City found for this State!!');
-			}
-		}
-	});
+	if (state) {
+	    $.ajax({
+		    url: "/software-training/ajax-ac-state/",
+		    type: "POST",
+		    data: {
+			    state: state,
+			    fields: fields,
+		    },
+		    beforeSend: function() {
+		        if($district) {
+		            $('.ajax-refresh-district').show();
+		        }
+		        if($city) {
+		            $('.ajax-refresh-city').show();
+		        }
+		        if($university) {
+		            $('.ajax-refresh-university').show();
+		        }
+            },
+		    success: function(data) {
+			    console.log(data);
+			    if(data.university){
+				    $ac_university.html(data.university);
+				    $ac_university.removeAttr("disabled");
+				    $('.ajax-refresh-university').hide();
+				    $ac_university.trigger("chosen:updated");
+			    }else{
+				    $ac_university.html('<option>-- None -- </option>')
+				    $('.ajax-refresh-university').hide();
+				    $ac_university.attr("disabled", "disabled");
+				    $ac_university.trigger("chosen:updated");
+				    //alert('No University found for this State!!');
+			    }
+			    if(data.district){
+				    $ac_district.html(data.district);
+				    $ac_district.trigger("chosen:updated");
+				    $ac_district.removeAttr("disabled");
+				    $('.ajax-refresh-district').hide();
+			    }else{
+				    $ac_district.html('<option>-- None -- </option>')
+				    $ac_district.trigger("chosen:updated");
+				    $ac_district.attr("disabled", "disabled");
+				    $('.ajax-refresh-district').hide();
+				    //alert('No District found for this State!!');
+			    }
+			    if(data.city){
+				    $ac_city.html(data.city);
+				    $ac_city.trigger("chosen:updated");
+				    $ac_city.removeAttr("disabled");
+				    $('.ajax-refresh-city').hide();
+			    }else{
+				    $ac_city.html('<option>-- None -- </option>')
+				    $ac_city.trigger("chosen:updated");
+				    $ac_city.attr("disabled", "disabled");
+				    $('.ajax-refresh-city').hide();
+				    //alert('No City found for this State!!');
+			    }
+		    }
+	    });
+	}
 }
 
 //ajaxStrateFillDatas('district');
@@ -195,25 +214,37 @@ function ajaxDistrictFillDatas(location, institute, district){
 			district: district,
 			fields: fields,
 		},
+		beforeSend: function() {
+	        if($location) {
+	            $('.ajax-refresh-location').show();
+	        }
+	        if($institute) {
+	            $('.ajax-refresh-institute').show();
+	        }
+        },
 		success: function(data) {
 			if(data.institute){
 				$ac_institute.html(data.institute);
 				$ac_institute.trigger("chosen:updated");
 				$ac_institute.removeAttr("disabled");
+				$('.ajax-refresh-institute').hide();
 			}else{
 				$ac_institute.html('<option>-- None -- </option>')
 				$ac_institute.trigger("chosen:updated");
 				$ac_institute.attr("disabled", "disabled");
+				$('.ajax-refresh-institute').hide();
 				//alert('No City found for this State!!');
 			}
 			if(data.location){
 				$ac_location.html(data.location);
 				$ac_location.trigger("chosen:updated");
 				$ac_location.removeAttr("disabled");
+				$('.ajax-refresh-location').hide();
 			}else{
 				$ac_location.html('<option>-- None -- </option>')
 				$ac_location.trigger("chosen:updated");
 				$ac_location.attr("disabled", "disabled");
+				$('.ajax-refresh-location').hide();
 				//alert('No Location found for this District!!');
 			}
 			console.log(data);
