@@ -7,6 +7,11 @@ from django.db.models import Q
 from creation.models import *
 
 class UploadPrerequisiteForm(forms.Form):
+    foss_category = forms.ChoiceField(
+        choices = [('', 'Select FOSS Category'),],
+        required = True,
+        error_messages = {'required':'FOSS category field is required.'}
+    )
     tutorial_name = forms.ChoiceField(
         choices = [('', ''),],
         widget=forms.Select(attrs = {'disabled': 'disabled'}),
@@ -27,10 +32,7 @@ class UploadPrerequisiteForm(forms.Form):
             ).values_list('id', 'foss')
         )
         foss_list.insert(0, ('', ''))
-        self.fields['foss_category'] = forms.ChoiceField(
-            choices = foss_list,
-            error_messages = {'required':'FOSS category field is required.'}
-        )
+        self.fields['foss_category'].choices = foss_list
 
         if args:
             if 'foss_category' in args[0]:
@@ -55,6 +57,47 @@ class UploadPrerequisiteForm(forms.Form):
                         )
                     )
                     choices.insert(0, ('', ''))
+                    self.fields['tutorial_name'].choices = choices
+                    self.fields['tutorial_name'].widget.attrs = {}
+                    self.fields['tutorial_name'].initial = initial_data
+
+class UploadTimedScriptForm(forms.Form):
+    foss_category = forms.ChoiceField(
+        choices = [('', 'Select FOSS Category'),],
+        required = True,
+        error_messages = {'required':'FOSS category field is required.'}
+    )
+    tutorial_name = forms.ChoiceField(
+        choices = [('', 'Select Tutorial Name'),],
+        widget=forms.Select(attrs = {'disabled': 'disabled'}),
+        required = True,
+        error_messages = {'required': 'Tutorial Name field is required.'}
+    )
+
+    def __init__(self, user, *args, **kwargs):
+        super(UploadTimedScriptForm, self).__init__(*args, **kwargs)
+        lang_rec = Language.objects.get(name = 'English')
+        foss_list = list(
+            FossCategory.objects.filter(
+                id__in = ContributorRole.objects.filter(
+                    user = user,
+                    language = lang_rec,
+                    status = 1
+                ).values_list(
+                    'foss_category_id'
+                )
+            ).values_list('id', 'foss')
+        )
+        foss_list.insert(0, ('', 'Select FOSS Category'))
+        self.fields['foss_category'].choices = foss_list
+        if args:
+            if 'foss_category' in args[0]:
+                if args[0]['foss_category'] and args[0]['foss_category'] != '' and args[0]['foss_category'] != 'None':
+                    initial_data = ''
+                    if 'tutorial_name' in args[0]:
+                        initial_data = args[0]['tutorial_name']
+                    choices = list(TutorialDetail.objects.filter(id__in = TutorialResource.objects.filter(tutorial_detail__foss_id = args[0]['foss_category'], language = lang_rec, script_status = 4).values_list('tutorial_detail_id')).order_by('order').values_list('id', 'tutorial'))
+                    choices.insert(0, ('', 'Select Tutorial Name'))
                     self.fields['tutorial_name'].choices = choices
                     self.fields['tutorial_name'].widget.attrs = {}
                     self.fields['tutorial_name'].initial = initial_data
@@ -118,7 +161,7 @@ class ChangeComponentStatusForm(forms.Form):
                         choices = list(TutorialResource.objects.filter(tutorial_detail_id__in = td_list, language_id = initial_data, status = 0).distinct().values_list('tutorial_detail_id', 'tutorial_detail__tutorial'))
                         if len(choices):
                             self.fields['tutorial_name'].widget.attrs = {}
-                        choices.insert(0, ('', ''))
+                        choices.insert(0, ('', 'Select Tutorial'))
                         self.fields['tutorial_name'].choices = choices
                         self.fields['tutorial_name'].initial = tut_init_data
                         comp_init_data = ''
@@ -126,13 +169,36 @@ class ChangeComponentStatusForm(forms.Form):
                             if args[0]['component']:
                                 comp_init_data = args[0]['component']
                         if lang.name == 'English':
-                            choices = [('outline', 'Outline'), ('script', 'Script'), ('slide', 'Slides'), ('video', 'Video'), ('code', 'Codefiles'), ('assignment', 'Assignment')]
+                            choices = [('outline', 'Outline'), ('script', 'Script'), ('slide', 'Slides'), ('video', 'Video'), ('code', 'Codefiles'), ('assignment', 'Assignment'), ('prerequisite', 'Prerequisite'), ('keyword', 'Keywords')]
                         else:
                             choices = [('outline', 'Outline'), ('script', 'Script'), ('video', 'Video')]
                         if len(choices):
                             self.fields['component'].widget.attrs = {}
+                        choices.insert(0, ('', 'Select Component'))
                         self.fields['component'].choices = choices
                         self.fields['component'].initial = comp_init_data
+                        if tut_init_data and comp_init_data:
+                            status_init_data = ''
+                            if 'status' in args[0]:
+                                if args[0]['status']:
+                                    status_init_data = args[0]['status']
+                            tr_rec = TutorialResource.objects.select_related().get(tutorial_detail_id = tut_init_data, language = lang)
+                            choices = [("0", 'Pending')]
+                            compValue = None
+                            if comp_init_data in ['outline', 'script', 'video']:
+                                compValue = getattr(tr_rec, comp_init_data + '_status')
+                            else:
+                                compValue = getattr(tr_rec.common_content, comp_init_data + '_status')
+                            if compValue:
+                                choices.append(("5", 'Need Improvement'))
+                                if comp_init_data in ['code', 'assignment']:
+                                    choices.append(("6", 'Not Required'))
+                            if len(choices):
+                                self.fields['status'].widget.attrs = {}
+                            choices.insert(0, ('', 'Select Status'))
+                            self.fields['status'].choices =choices
+                            self.fields['status'].initial = status_init_data
+
 class PublishToPending(forms.Form):
     foss_category = forms.ChoiceField(
         widget=forms.Select(),
