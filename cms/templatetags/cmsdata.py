@@ -1,5 +1,6 @@
 from django import template
 from cms.models import Block, Nav, SubNav
+from cms.sortable import *
 
 register = template.Library()
 
@@ -62,7 +63,8 @@ def reset_get_value(getValue, exclude_key = None):
         if k != exclude_key:
             values += k+'='+v+'&'
     return values
-    
+
+register.inclusion_tag('cms/templates/sortable_header.html')(get_sortable_header)
 register.inclusion_tag('cms/templates/cmsnav.html')(get_cms_nav)
 register.inclusion_tag('cms/templates/cmsidebar.html')(get_cms_sidebar)
 register.inclusion_tag('cms/templates/cmsfooter.html')(get_cms_footer)

@@ -2,7 +2,6 @@ import zipfile
 from django import template
 from django.contrib.auth.models import User
 from creation.models import *
-from creation.filters import *
 from creation.views import is_contributor, is_internal_contributor, is_external_contributor, is_videoreviewer, is_domainreviewer, is_qualityreviewer, is_administrator
 
 register = template.Library()
@@ -55,7 +54,6 @@ def get_last_video_upload_time(key):
 	except:
 		return key.updated
 
-register.inclusion_tag('creation/templates/sortable_header.html')(get_sortable_header)
 register.filter('get_url_name', get_url_name)
 register.filter('get_zip_content', get_zip_content)
 register.filter('get_contributor', is_contributor)

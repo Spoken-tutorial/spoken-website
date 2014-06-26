@@ -49,7 +49,7 @@ import random
 
 from  filters import *
 
-from spoken.sortable import *
+from cms.sortable import *
 
 def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))

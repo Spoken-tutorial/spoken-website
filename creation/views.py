@@ -24,7 +24,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect
 from creation.forms import *
 from creation.models import *
-from creation.filters import *
+from cms.sortable import *
 
 def role_list(request):
     table = RoleFilter(request.GET, queryset=RoleRequest.objects.all())
@@ -739,7 +739,7 @@ def upload_keywords(request, trid):
             try:
                 prev_state = tr_rec.common_content.keyword_status
                 if tr_rec.common_content.keyword != request.POST['keywords']:
-                    tr_rec.common_content.keyword = request.POST['keywords']
+                    tr_rec.common_content.keyword = request.POST['keywords'].lower()
                 else:
                     warning_msg = 'There is no change in keywords'
                 tr_rec.common_content.keyword_user = request.user
