@@ -8,68 +8,96 @@
 {% endblock %}
 
 {% block content %}
-	<form class="form-signin" role="form" id="login_form" method="post">{% csrf_token %}
-		<div class="form-group">
-			<label for="id_first_name">First Name</label>
-			{% render_field form.first_name class+="form-control first_name" tabindex="1" data-placeholder="Choose first_name" %}
-			{{ form.first_name.errors }}
-		</div>
-		<div class="form-group">
-			<label for="id_last_name">Last Name</label>
-			{% render_field form.last_name class+="form-control last_name" tabindex="1" data-placeholder="Choose last_name" %}
-			{{ form.last_name.errors }}
-		</div>
-		<div class="form-group">
-			<label for="id_country">Country</label>
-			{% render_field form.country class+="form-control country" tabindex="1" data-placeholder="Choose country" %}
-			{{ form.country.errors }}
-		</div>
-		<div class="form-group">
-			<label for="id_state">State</label>
-			{% render_field form.state class+="form-control state" tabindex="1" data-placeholder="Choose state" %}
-			{{ form.state.errors }}
-		</div>
-		<div class="form-group">
-			<label for="id_district">District</label>
-			{% render_field form.district class+="form-control district" tabindex="1" data-placeholder="Enter district" %}
-			{{ form.district.errors }}
-		</div>
-		<div class="form-group">
-			<label for="id_location">Location</label>
-			{% render_field form.location class+="form-control location" tabindex="1" data-placeholder="Enter location" %}
-			{{ form.location.errors }}
-		</div>
-		<div class="form-group">
-			<label for="id_street">Street</label>
-			{% render_field form.street class+="form-control street" tabindex="1" data-placeholder="Choose street" %}
-			{{ form.street.errors }}
-		</div>
-		<div class="form-group">
-			<label for="id_city">City</label>
-			{% render_field form.city class+="form-control city" tabindex="1" data-placeholder="Choose city" %}
-			{{ form.city.errors }}
-		</div>
-		<div class="form-group">
-			<label for="id_pincode">Pincode</label>
-			{% render_field form.pincode class+="form-control pincode" tabindex="1" data-placeholder="Choose pincode" %}
-			{{ form.pincode.errors }}
-		</div>
-		<div class="form-group">
-			<label for="id_phone">Phone</label>
-			{% render_field form.phone class+="form-control phone" tabindex="1" data-placeholder="Choose phone" %}
-			{{ form.phone.errors }}
-		</div>
-		<input class="btn btn-primary" type="submit" value="Submit" />
-	</form>
+    <div class="row well ">
+        <div class="col-sm-8">
+            <form class="form-signin form-horizontal" role="form" id="login_form" method="post">{% csrf_token %}
+                <div class="form-group">
+                    <label class="col-sm-3 control-label" for="id_first_name">First Name</label>
+                    <div class="col-sm-9">
+                        {% render_field form.first_name class+="form-control first_name" tabindex="1" data-placeholder="Choose first_name" %}
+                        {{ form.first_name.errors }}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label" for="id_last_name">Last Name</label>
+                    <div class="col-sm-9">
+                        {% render_field form.last_name class+="form-control last_name" tabindex="1" data-placeholder="Choose last_name" %}
+                        {{ form.last_name.errors }}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label" for="id_country">Country</label>
+                    <div class="col-sm-9">
+                        {% render_field form.country class+="form-control country" tabindex="1" data-placeholder="Choose country" %}
+                        {{ form.country.errors }}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label" for="id_state">State</label>
+                    <div class="col-sm-9">
+                        {% render_field form.state class+="form-control state" tabindex="1" data-placeholder="Choose state" %}
+                        {{ form.state.errors }}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label" for="id_district">District</label>
+                    <div class="col-sm-9">
+                        {% render_field form.district class+="form-control district" tabindex="1" data-placeholder="Enter district" %}
+                        {{ form.district.errors }}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label" for="id_location">Location</label>
+                    <div class="col-sm-9">
+                        {% render_field form.location class+="form-control location" tabindex="1" data-placeholder="Enter location" %}
+                        {{ form.location.errors }}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label" for="id_street">Street</label>
+                    <div class="col-sm-9">
+                        {% render_field form.street class+="form-control street" tabindex="1" data-placeholder="Choose street" %}
+                        {{ form.street.errors }}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label" for="id_city">City</label>
+                    <div class="col-sm-9">
+                        {% render_field form.city class+="form-control city" tabindex="1" data-placeholder="Choose city" %}
+                        {{ form.city.errors }}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label" for="id_pincode">Pincode</label>
+                    <div class="col-sm-9">
+                        {% render_field form.pincode class+="form-control pincode" tabindex="1" data-placeholder="Choose pincode" %}
+                        {{ form.pincode.errors }}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label" for="id_phone">Phone</label>
+                    <div class="col-sm-9">
+                        {% render_field form.phone class+="form-control phone" tabindex="1" data-placeholder="Choose phone" %}
+                        {{ form.phone.errors }}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-offset-3 col-sm-9">
+                        <input class="btn btn-primary" type="submit" value="Submit" />
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
 {% endblock %}
 {% block jsblock %}
-	<script src="{% static 'spoken/js/events.js' %}"></script>
-	<script>
-		$("#id_state").change(function(){
-			ajaxStrateFillDatas('district', 'city', 'university');
-		});
-		$('.district').change(function(){
-			ajaxDistrictFillDatas('location', '', $(this).val());
-		});
-	</script>
+    <script src="{% static 'spoken/js/events.js' %}"></script>
+    <script>
+        $("#id_state").change(function(){
+            ajaxStrateFillDatas('district', 'city', 'university');
+        });
+        $('.district').change(function(){
+            ajaxDistrictFillDatas('location', '', $(this).val());
+        });
+    </script>
 {% endblock %}

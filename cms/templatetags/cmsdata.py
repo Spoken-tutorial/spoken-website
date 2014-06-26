@@ -66,6 +66,25 @@ def reset_get_value(getValue, exclude_key = None):
             values += k + '=' + v
     return values
 
+def get_or_create_csrf_token(request):
+    from django.middleware import csrf
+    token = None
+    try:
+        token = request.META.get('CSRF_COOKIE', None)
+    except Exception, e:
+        print e
+        pass
+    if token is None:
+        token = csrf._get_new_csrf_key()
+        try:
+            request.META['CSRF_COOKIE'] = token
+            request.META['CSRF_COOKIE_USED'] = True
+        except Exception, e:
+            print e
+            pass
+    print token
+    return token
+    
 register.inclusion_tag('cms/templates/sortable_header.html')(get_sortable_header)
 register.inclusion_tag('cms/templates/cmsnav.html')(get_cms_nav)
 register.inclusion_tag('cms/templates/cmsidebar.html')(get_cms_sidebar)
@@ -74,4 +93,4 @@ register.inclusion_tag('cms/templates/cmsheader.html')(get_cms_header)
 register.filter('combine_get_values', combine_get_values)
 register.filter('reset_get_values', reset_get_values)
 register.filter('reset_get_value', reset_get_value)
-
+register.filter('get_or_create_csrf_token', get_or_create_csrf_token)
