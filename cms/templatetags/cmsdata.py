@@ -61,7 +61,9 @@ def reset_get_value(getValue, exclude_key = None):
     values = ''
     for k,v in getValue.iteritems():
         if k != exclude_key:
-            values += k+'='+v+'&'
+            if values:
+                values += '&'
+            values += k + '=' + v
     return values
 
 register.inclusion_tag('cms/templates/sortable_header.html')(get_sortable_header)
