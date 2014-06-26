@@ -10,7 +10,7 @@
     <div class="table-responsive">
         <table class="paleblue table table-bordered table-hover table-striped">
             {% if rows|length %}
-                {% get_sortable_header header ordering %}
+                {% get_sortable_header header ordering request.GET %}
                 {% for row in rows %}
                     <tr>
                         <td>{{ row.foss.foss }}</td>

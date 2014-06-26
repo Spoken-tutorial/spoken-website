@@ -74,7 +74,7 @@ def get_ordering(ordering, unsigned_index, signed_index, sign_to_add):
         removable = None
     return order_string, removable
 
-def get_sortable_header(header, ordering):
+def get_sortable_header(header, ordering, getValue):
     descending_list = []
     ascending_list = []
     if ordering:
@@ -109,6 +109,7 @@ def get_sortable_header(header, ordering):
             header[row].class_name = class_name
         headers.append(header[row])
     context = {
-        'headers': headers
+        'headers': headers,
+        'getValue': getValue
     }
     return context

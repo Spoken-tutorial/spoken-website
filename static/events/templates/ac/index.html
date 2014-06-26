@@ -47,7 +47,7 @@
 		{% if collection %}
 		    
 			<table class="paleblue table table-bordered table-hover table-striped">
-				{% get_sortable_header header ordering %}
+				{% get_sortable_header header ordering request.GET %}
 				{% for record in collection %}
 					<tr class="{% cycle 'odd' 'even' %}">
 						<td>{{ record.state }}</td>

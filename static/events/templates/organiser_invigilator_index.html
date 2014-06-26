@@ -62,7 +62,7 @@
     <div class='tab-content'>
     {% if collection %}
         <table class=" paleblue table table-striped table-hover table-bordered">
-            {% get_sortable_header header ordering %}
+            {% get_sortable_header header ordering request.GET %}
             {% for record in collection %}
             <tr class="{% cycle 'odd' 'even' %}">
                 <td>{{ record.academic.state}}
