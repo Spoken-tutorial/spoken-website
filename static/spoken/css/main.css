@@ -1,3 +1,22 @@
+/* video search page */
+.search-result {
+    
+}
+.search-result .result-record{
+    clear: both;
+    padding: 20px 0;
+}
+.search-result .result-record a{
+    display: block;
+}
+.search-result .result-record .thump{
+    float: left;
+    padding: 10px 20px;
+}
+.search-result .result-record .info{
+    float: left;
+}
+/* video search page end */
 .no-record{
      border: 1px solid #ddd;
      padding: 8px;
@@ -341,3 +360,4 @@ pre.custom-jumbotron b {
 .paleblue th.sorted .sortoptions a.descending:hover {
     background: url(../images/sorting-icons.gif) -5px -115px no-repeat;
 /* sortable header end */
+

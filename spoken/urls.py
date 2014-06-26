@@ -6,6 +6,10 @@ admin.autodiscover()
 urlpatterns = patterns('',
 
 	# Examples:
+	url(r'^tutorial-search/$', 'spoken.views.tutorial_search', name="tutorial-search"),
+	url(r'^keyword-search/$', 'spoken.views.keyword_search', name="keyword-search"),
+	url(r'^watch/([a-zA-Z-]+)/([a-zA-Z-]+)/(\w+)/$', 'spoken.views.watch_tutorial', name="watch_tutorial"),
+	url(r'^get-language/$', 'spoken.views.get_language', name="get_language"),
 	url(r'^$', 'spoken.views.home', name='home'),
 	url(r'^home/', 'spoken.views.home', name='home'),
 	# url(r'^spoken/', include('spoken.foo.urls')),
