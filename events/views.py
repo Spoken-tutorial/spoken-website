@@ -2107,7 +2107,7 @@ def ajax_dept_foss(request):
             foss = FossCategory.objects.all()
             for i in foss:
                 tmp +='<option value='+str(i.id)+'>'+i.foss+'</option>'
-            data['foss'] = tmp            
+            data['foss'] = tmp
     return HttpResponse(json.dumps(data), mimetype='application/json')
 
 @csrf_exempt

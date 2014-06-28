@@ -10,62 +10,223 @@
 		<!-- Bootstrap core CSS -->
 		<link rel="stylesheet" href="{% static 'spoken/css/bootstrap.min.css' %}" type="text/css" media="screen" charset="utf-8" />
 		<link rel="stylesheet" href="{% static 'spoken/css/font-awesome.min.css' %}" type="text/css" media="screen" charset="utf-8" />
+		<link rel="stylesheet" href="{% static 'spoken/css/yamm.css' %}" type="text/css" media="screen" charset="utf-8" />
 		<!-- <link rel="stylesheet" href="{% static 'spoken/css/bootstrap-theme.css' %}" type="text/css" media="screen" charset="utf-8"> -->
 		<link rel="stylesheet" href="{% static 'spoken/css/main.css' %}" type="text/css" media="screen" charset="utf-8" />
 		{% block cssblock %}{% endblock %}
 	</head>
 	<body>
 		<div id="page-wrapper">
-			<div id="header-wrapper">
-				<div id="header-inner">
-					<nav class="navbar navbar-default" role="navigation">
-						<div class="container">
-							<!-- Brand and toggle get grouped for better mobile display -->
-							<div class="navbar-header">
-								<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
-									<span title="" data-original-title="" class="sr-only">Toggle navigation</span>
-									<span title="" data-original-title="" class="icon-bar"></span>
-									<span title="" data-original-title="" class="icon-bar"></span>
-									<span title="" data-original-title="" class="icon-bar"></span>
-								</button>
-								<a class="navbar-brand" href="/">
-									<img id="logo" src="{% static 'spoken/images/logo.png' %}">
-									Spoken Tutorials
-								</a>
-							</div> <!-- /.navbar-header -->
-
-							<!-- Collect the nav links, forms, and other content for toggling -->
-							<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-								<ul class="nav navbar-nav navbar-right">
-									{% block customnav %}{% endblock %}
-									{% get_cms_nav %}
-									{% block userdetails %}
-									    {% if user.is_authenticated %}
-										    <li class="dropdown">
-											    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-												    <span title="" data-original-title="" class="glyphicon glyphicon-user"></span> {{ user }}<b class="caret"></b>
-											    </a>
-											    <ul class="dropdown-menu">
-												    <li><a href="/accounts/profile/{{ user }}/">Profile</a></li>
-												    <li class="divider"></li>
-												    <li><a href="/accounts/logout/">Logout</a></li>
-											    </ul>
-										    </li>
-									    {% else %}
-										    <li><a href="/accounts/login/"><span class="glyphicon glyphicon-user"></span> Login</a></li>
-									    {% endif %}
-									{% endblock %}
-								</ul>
-							</div> <!-- /.navbar-collapse -->
-						</div> <!-- /.container -->
-					</nav><!-- / .navbar -->
-					<div class="container">
-						{% block customheader%}{% endblock %}
-						{% get_cms_header %}
-					</div>
-				</div><!-- /#header-inner -->
-			</div><!-- /#header-wrapper -->
-
+			<!-- header begin -->
+            <div id="header-wrapper">
+                <nav class="navbar yamm navbar-default navbar-fixed-top" role="navigation">
+                    <div id="header-inner">
+                        <div class="container-fluid">
+                            <div class="navbar-header">
+                                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#main-nav">
+                                    <span class="sr-only">Toggle Navigation</span>
+                                    <span class="icon-bar"></span>
+                                    <span class="icon-bar"></span>
+                                    <span class="icon-bar"></span>
+                                </button>
+                                <a href="/">
+                                        <img width = "45px" src="{% static 'spoken/images/logo.png' %}">
+                                        Spoken <span class='title'>Tutorial</span>
+                                    </a>
+                            </div>
+                            
+                            <div class="collapse navbar-collapse" id="main-nav">
+                                <div class="row">
+                                    <ul class="nav navbar-nav">
+                                        <li class="dropdown">
+                                            <a class="dropdown-toggle" data-toggle="dropdown" href="#">Software Training<b class="caret"></b></a>
+                                            <ul class="dropdown-menu">
+                                                <div class="yamm-content">
+                                                    <li>
+                                                        <div class="row">
+                                                            <div class="col-lg-12">
+                                                                <div class="col-lg-4 column first">
+                                                                    <h5 class="media-heading"><b>Software Training</b></h5>
+                                                                    <div class="media-body">
+                                                                        <ul class="media-list">
+                                                                            <li class=""><a href="#">About Workshop</a></li>
+                                                                            <li class=""><a href="#">Progress  to date</a></li>
+                                                                            <li class=""><a href="#">Method of training</a></li>
+                                                                            <li class=""><a href="#">Software Offered</a></li>
+                                                                        </ul>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-lg-4 column">
+                                                                    <h5 class="media-heading"><b>Download tutorials</b></h5>
+                                                                    <div class="media-body">
+                                                                        <ul class="media-list">
+                                                                            <li class=""><a href="#">Instruction</a></li>
+                                                                            <li class=""><a href="#">Link for Download</a></li>
+                                                                            <li class=""><a href="#">Create Your own disc image</a></li>
+                                                                        </ul>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-lg-4 column last">
+                                                                    <h5 class="media-heading"><b>Test and Workshop</b></h5>
+                                                                    <div class="media-body">
+                                                                        <ul class="media-list">
+                                                                            <li class=""><a href="#">Organising Workshop</a></li>
+                                                                            <li class=""><a href="#">How to get certificate</a></li>
+                                                                            <li class=""><a href="#">Contact for Workshop</a></li>
+                                                                            <li class=""><a href="#">Assessment Test</a></li>
+                                                                        </ul>
+                                                                    </div>
+                                                                </div>
+                                                        </div>
+                                                    </li>
+                                                </div>
+                                            </ul>
+                                        </li>
+                                        <!-- -->
+                                        <li class="dropdown">
+                                            <a class="dropdown-toggle" data-toggle="dropdown" href="#">Creation<b class="caret"></b></a>
+                                            <ul class="dropdown-menu">
+                                                <div class="yamm-content">
+                                                    <li>
+                                                        <div class="row">
+                                                            <div class="col-lg-12">
+                                                                <div class="col-lg-4 column first">
+                                                                    <h5 class="media-heading"><b>English Contributor</b></h5>
+                                                                    <div class="media-body">
+                                                                        <ul class="media-list">
+                                                                            <li class=""><a href="#">----</a></li>
+                                                                            <li class=""><a href="#">----</a></li>
+                                                                            <li class=""><a href="#">----</a></li>
+                                                                            <li class=""><a href="#">----</a></li>
+                                                                        </ul>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-lg-4 column first">
+                                                                    <h5 class="media-heading"><b>Native Language</b></h5>
+                                                                    <div class="media-body">
+                                                                        <ul class="media-list">
+                                                                            <li class=""><a href="#">----</a></li>
+                                                                            <li class=""><a href="#">----</a></li>
+                                                                            <li class=""><a href="#">----</a></li>
+                                                                            <li class=""><a href="#">----</a></li>
+                                                                        </ul>
+                                                                    </div>
+                                                                </div>
+                                                        </div>
+                                                    </li>
+                                                </div>
+                                            </ul>
+                                        </li>
+                                        <li><a href="#">About us</a></li>
+                                    </ul>
+                                    
+                                    <ul class="nav navbar-nav navbar-right">
+                                        {% if user.is_authenticated %}
+                                            <li class="dropdown">
+                                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                                    <span title="" data-original-title="" class="glyphicon glyphicon-user"></span> {{ user }}<b class="caret"></b>
+                                                </a>
+                                                <ul class="dropdown-menu">
+                                                    <li><a href="/accounts/profile/{{ user }}/">Profile</a></li>
+                                                    <li class="divider"></li>
+                                                    <li><a href="/accounts/logout/">Logout</a></li>
+                                                </ul>
+                                            </li>
+                                        {% else %}
+                                            <li class="dropdown">
+                                                <a href="/accounts/login">Login</a>
+                                                <!--<a class="dropdown-toggle" data-toggle="dropdown" href="#">Login</a>
+                                                <ul class="dropdown-menu">
+                                                    <li>
+                                                        <div class="yamm-content">
+                                                            <div class="row">
+                                                                <form action="/accounts/login/" method="post">
+                                                                    <input type="hidden" name="csrfmiddlewaretoken" value="{{ request|get_or_create_csrf_token }}">
+                                                                    <div class="form-group">
+                                                                        <input class="form-control" type="text" name="username" placeholder="username">
+                                                                    </div>
+                                                                    <div class="form-group">
+                                                                        <input class="form-control" type="password" name="password" placeholder="password">
+                                                                    </div>
+                                                                    <div class="form-group">
+                                                                        <input class="btn btn-primary" type="submit" value="Login">
+                                                                    </div>
+                                                                </form>
+                                                                <a href="/accounts/register">
+                                                                    New user? Create account.
+                                                                </a>
+                                                            </div>
+                                                        </div>
+                                                    </li>
+                                                </ul> -->
+                                            </li>
+                                            <li class="dropdown">
+                                                <a href="/accounts/register">Register</a>
+                                                <!--<a class="dropdown-" data-toggle="dropdown" href="/accounts/register">Register</a>
+                                                <ul class="dropdown-menu">
+                                                    <li>
+                                                    <div class="yamm-content">
+                                                        <div class="row">
+                                                            <form>
+                                                                <div class="form-group">
+                                                                    <input class="form-control" type="text" name="username" placeholder="pick a username">
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <input class="form-control" type="text" name="email" placeholder="enter your email">
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <input class="form-control" type="password" name="password" placeholder="password">
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <input class="form-control" type="password" name="re-password" placeholder="retype password">
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <input class="btn btn-primary" type="submit" value="Register">
+                                                                </div>
+                                                            </form>
+                                                            <a href="#">
+                                                                Already have an account? Login.
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                    </li>
+                                                </ul> -->
+                                            </li>
+                                        {% endif %}
+                                    </ul>
+                                    
+                                    <!-- search -->
+                                    <!-- 
+                                    <form id="custom-search-form" class="form-search form-horizontal pull-right">
+                                        <div class="form-group primary-search">
+                                            <input type="text" class="form-control search-query" placeholder="Search">
+                                            <button type="submit" class="btn search"><span class="glyphicon glyphicon-search"></span></button>
+                                        </div>
+                                     </form> -->
+                                    <!-- search end -->
+                                </div>
+                            </div>
+                        </div> <!-- /.container-fluid -->
+                    </div> <!-- /#header-inner -->
+                </nav>
+            </div> <!-- /#header-wrapper -->
+            {% block search %}
+                <div id="search-wrapper">
+                    <div class="common-search">
+                        <form class="navbar-form" role="search" action="/keyword-search" method="GET" id="search-form">
+                            <div class="input-group">
+                                <input type="text" class="form-control" placeholder="ex: Linux Oscad" name="q" style="padding:6px 6px;">
+                                <div class="input-group-btn">
+                                    <button class="btn btn-default" type="submit"><i class="glyphicon glyphicon-search"></i></button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            {% endblock %}
+            {% block banner %}
+            {% endblock %}
+            <!-- header end -->
 			<div id="content-wrapper">
 				<div id="content-inner" class="container">
 					{% get_cms_sidebar %}
