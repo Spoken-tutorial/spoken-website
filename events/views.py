@@ -695,7 +695,8 @@ def workshop_list(request, role, status):
             3: SortableHeader('foss', True, 'FOSS'),
             4: SortableHeader('language', True, 'Language'),
             5: SortableHeader('wdate', True, 'Date'),
-            6: SortableHeader('Action', False)
+            6: SortableHeader('Participants', False),
+            7: SortableHeader('Action', False)
         }
         
         raw_get_data = request.GET.get('o', None)

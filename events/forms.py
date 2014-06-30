@@ -398,7 +398,10 @@ class ParticipantSearchForm(forms.Form):
 
 class TrainingForm(forms.Form):
     department = forms.MultipleChoiceField(choices = [('', '-- None --'),], widget=forms.SelectMultiple(attrs = {}), required = True, error_messages = {'required':'Department Name field is required.'})
-    course = forms.ChoiceField(choices = [('', '-- None --')] + list(Course.objects.all().values_list('id', 'name')), required = True, error_messages = {'required':'Course Name field is required.'})
+    try:
+        course = forms.ChoiceField(choices = [('', '-- None --')] + list(Course.objects.all().values_list('id', 'name')), required = True, error_messages = {'required':'Course Name field is required.'})
+    except:
+        pass
     course_number = forms.CharField()
     batch = forms.ChoiceField(choices = [('', '-- None --'), (1, '1st Semester'), (2, '2ed Semester'), (3, '3ed Semester'), (4, '4th Semester'), (5, '5th Semester'), (6, '6th Semester'), (7, '7th Semester'), (8, '8th Semester')], required = True, error_messages = {'required':'Batch Name field is required.'})
     free_lab_hours = forms.ChoiceField(widget=forms.RadioSelect, choices=[(0, 'No'),(1, 'Yes')], required = True)
