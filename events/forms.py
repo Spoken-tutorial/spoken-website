@@ -25,7 +25,7 @@ class AcademicForm(forms.ModelForm):
     
     city = forms.ModelChoiceField(label='City', cache_choices=True, widget = forms.Select(attrs = {'class' : 'ac-city'}), queryset = City.objects.none(), empty_label = "--- None ---", help_text = "", error_messages = {'required':'City Type field required.'})
     
-    location = forms.ModelChoiceField(label='Location', cache_choices=True, widget = forms.Select(attrs = {'class' : 'ac-location'}), queryset = Location.objects.none(), empty_label = "--- None ---", help_text = "", error_messages = {'required':'City Type field required.'})
+    location = forms.ModelChoiceField(label='Location', cache_choices=True, widget = forms.Select(attrs = {'class' : 'ac-location'}), queryset = Location.objects.none(), empty_label = "--- None ---", help_text = "", error_messages = {'required':'City Type field required.'}, required = False)
     
     contact_person = forms.CharField(widget = forms.Textarea(attrs = {'rows' : '5'}), required = False)
     remarks = forms.CharField(widget = forms.Textarea(attrs = {'rows' : '5'}), required = False)
@@ -44,10 +44,10 @@ class AcademicForm(forms.ModelForm):
         self.fields["state"].queryset = State.objects.filter(resourceperson__user_id=user).filter(resourceperson__status=1)
         #prevent ajax loaded data
         if args:
-            if 'district' in args[0]:
-                if args[0]['district'] and args[0]['district'] != '' and args[0]['district'] != 'None':
-                    self.fields["location"].queryset = Location.objects.filter(district__id=args[0]['district'])
-                    
+            #if 'district' in args[0]:
+            #    if args[0]['district'] and args[0]['district'] != '' and args[0]['district'] != 'None':
+            #        self.fields["location"].queryset = Location.objects.filter(district__id=args[0]['district'])
+            #        
             if 'state' in args[0]:
                 if args[0]['state'] != '' and args[0]['state'] != 'None':
                     self.fields["university"].queryset = University.objects.filter(state__id=args[0]['state'])
@@ -55,7 +55,7 @@ class AcademicForm(forms.ModelForm):
                     self.fields["city"].queryset = City.objects.filter(state__id=args[0]['state'])
         #for edit
         if initial:
-            self.fields["location"].queryset = Location.objects.filter(district__id=initial.district_id)
+            #self.fields["location"].queryset = Location.objects.filter(district__id=initial.district_id)
             self.fields["university"].queryset = University.objects.filter(state__id=initial.state_id)
             self.fields["district"].queryset = District.objects.filter(state__id=initial.state_id)
             self.fields["city"].queryset = City.objects.filter(state__id=initial.state_id)
@@ -201,7 +201,7 @@ class WorkshopForm(forms.Form):
                 self.fields['wdate'].initial = str(instance.trdate) + " " + str(instance.trtime)[0:5]
             self.fields['foss'].initial = instance.foss_id
             self.fields['language'].initial = instance.language_id
-            self.fields['skype'].initial = instance.status
+            self.fields['skype'].initial = instance.skype
 
 class WorkshopPermissionForm(forms.Form):
     try:
@@ -395,3 +395,44 @@ class TrainingScanCopyForm(forms.Form):
 class ParticipantSearchForm(forms.Form):
     email = forms.EmailField(required = False)
     username = forms.CharField(required =  False)
+
+class TrainingForm(forms.Form):
+    department = forms.MultipleChoiceField(choices = [('', '-- None --'),], widget=forms.SelectMultiple(attrs = {}), required = True, error_messages = {'required':'Department Name field is required.'})
+    course = forms.ChoiceField(choices = [('', '-- None --')] + list(Course.objects.all().values_list('id', 'name')), required = True, error_messages = {'required':'Course Name field is required.'})
+    course_number = forms.CharField()
+    batch = forms.ChoiceField(choices = [('', '-- None --'), (1, '1st Semester'), (2, '2ed Semester'), (3, '3ed Semester'), (4, '4th Semester'), (5, '5th Semester'), (6, '6th Semester'), (7, '7th Semester'), (8, '8th Semester')], required = True, error_messages = {'required':'Batch Name field is required.'})
+    free_lab_hours = forms.ChoiceField(widget=forms.RadioSelect, choices=[(0, 'No'),(1, 'Yes')], required = True)
+    wdate = forms.DateTimeField(required = True, error_messages = {'required':'Date field is required.'})
+    foss = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'Foss field is required.'})
+    language = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'Language field is required.'})
+    skype = forms.ChoiceField(widget=forms.RadioSelect, choices=[(0, 'No'),(1, 'Yes')], required = True)
+    def __init__(self, *args, **kwargs):
+        user = ''
+        if 'user' in kwargs:
+            user = kwargs["user"]
+            del kwargs["user"]
+        instance = ''
+        if 'instance' in kwargs:
+            instance = kwargs["instance"]
+            del kwargs["instance"]
+        super(TrainingForm, self).__init__(*args, **kwargs)
+        #choices data 
+        self.fields['department'].choices = Department.objects.exclude(name='Uncategorized').values_list('id', 'name')
+
+        foss_list = list(FossCategory.objects.all().values_list('id', 'foss'))
+        foss_list.insert(0, ('', '-- None --'))
+        lang_list = list(Language.objects.all().values_list('id', 'name'))
+        lang_list.insert(0, ('', '-- None --'))
+        self.fields['foss'].choices = foss_list
+        self.fields['language'].choices = lang_list
+
+        if instance:
+            self.fields['department'].initial = instance.department.all().values_list('id', flat=True)
+            self.fields['wdate'].initial = str(instance.trdate) + " " + str(instance.trtime)[0:5]
+            self.fields['course'].initial = instance.course.id
+            self.fields['batch'].initial = instance.batch
+            self.fields['course_number'].initial = instance.course_number
+            self.fields['free_lab_hours'].initial = instance.free_lab_hours
+            self.fields['foss'].initial = instance.foss_id
+            self.fields['language'].initial = instance.language_id
+            self.fields['skype'].initial = instance.skype
