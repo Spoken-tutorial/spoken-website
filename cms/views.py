@@ -35,6 +35,7 @@ def account_register(request):
             p = Profile(user=user, confirmation_code=confirmation_code)
             p.save()
             send_registration_confirmation(user)
+            messages.success(request, "Your registration was successful but you must now confirm your email address before you can log in. Please check your email and click on the link provided. Thank you.")
             return HttpResponseRedirect('/')
         context = {'form':form}
         return render_to_response('cms/templates/register.html', context, context_instance = RequestContext(request))
@@ -140,7 +141,7 @@ def account_profile(request, username):
             
             profile = Profile.objects.get(user=user)
             profile.street = request.POST['street']
-            profile.location_id = request.POST['location']
+            #profile.location_id = request.POST['location']
             profile.district_id = request.POST['district']
             profile.city_id = request.POST['city']
             profile.state_id = request.POST['state']
