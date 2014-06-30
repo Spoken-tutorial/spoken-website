@@ -5,9 +5,43 @@
 {% block title %}Attendance Sheet{% endblock %}
 {% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
 {% block heading %}
-        <i class="fa fa-list-ul"></i> Attendance Sheet
+        <i class="fa fa-list-ul"></i> Attendance Sheet <a href="{% url 'events:workshop_list' 'organiser' 'ongoing' %}" class='pull-right'>Back</a>
 {% endblock %}
 {% block content %}
+    <div class='row'>
+        <form class="navbar-form navbar-left" role="search" method="POST">{% csrf_token %}
+          <div class="form-group">
+            {% render_field form.email class+="form-control email" placeholder="Participant email" %}
+          </div> or 
+          <div class="form-group">
+            {% render_field form.username class+="form-control username" placeholder="Participant username" %}
+          </div>
+          <input class="btn btn-default" name="search-participant" type="submit" value="Search Participant" />
+        </form>
+    </div>
+        {% if onlinetest_user and onlinetest_user != 'None' %}
+            <div class="row well">
+                <div class="result">
+                    {% for record in onlinetest_user %}
+                        <div class="col-sm-8">
+                            <div class="col-sm-8">
+                                <p>{{ record.firstname }} {{ record.lastname }} - {{ record.email }}</p>
+                            </div>
+                            <div class="col-sm-4">
+                                <form role="search" method="POST">{% csrf_token %}
+                                    <input name="userid" type="hidden" value="{{ record.id}}">
+                                    <input name="add-participant" type="submit" value="Add" />
+                                </form>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% else %}
+            {% if onlinetest_user == 'None' %}
+                <p class="no-record">No record found!</p>
+            {% endif %}
+        {% endif %}
 	<!-- Tab panes -->
 	<div class="tab-content">
 		<div class="tab-pane active" id="pending">
@@ -32,7 +66,7 @@
 					        </tr>
 				        {% endfor %}
 			        </table>
-			        <input class="btn btn-primary" type="submit" value="Submit" />
+			        <input name="submit-attendance" class="btn btn-primary" type="submit" value="Submit" />
 			    </form>
 			    <h4 class='step'><span class="label label-default">Step 2</span></h4>
 			    <div class="bs-callout bs-callout-info">
@@ -40,7 +74,7 @@
                     <a class='btn btn-primary' title = "To complete the workshop click here" href="{% url 'events:workshop_approvel' 'organiser' workshop.id %}?status=completed">Mark as Complete</a>
                 </div>
 			{% else %}
-				<p>No record found!</p>
+				<p class="no-record">No record found!</p>
 			{% endif %}
 		</div>
 	</div>

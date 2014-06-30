@@ -41,7 +41,7 @@ def get_cms_header():
     return context
 
 ''' excludes: will exclude excludes's values '''
-def combine_get_values(getValue, excludes = {'page'}):
+def combine_get_values(getValue, excludes = ['page']):
     values = ''
     for k,v in getValue.iteritems():
         if k not in excludes:
@@ -49,7 +49,7 @@ def combine_get_values(getValue, excludes = {'page'}):
     return values
 
 ''' includes: will include include's values '''
-def reset_get_values(getValue, includes = {'page'}):
+def reset_get_values(getValue, includes = ['page']):
     values = ''
     for k,v in getValue.iteritems():
         if k in includes:

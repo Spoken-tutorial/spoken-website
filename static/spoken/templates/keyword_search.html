@@ -1,6 +1,7 @@
 {% extends 'spoken/templates/base.html' %}
 {% load widget_tweaks %}
 {% load static %}
+{% load creationdata %}
 {% block title %}Search Tutorials{% endblock %}
 {% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
 {% block heading %}
@@ -39,7 +40,7 @@
                 <div class='result-record'>
                     <a href="#" class='thump'><img src="/static/spoken/images/thumb-even.png"></a>
                     <div class="info">
-                        <div class='title'><h3><a href="#">{{ record.tutorial_detail.tutorial }}</a></h3></div>
+                        <div class='title'><h3><a href="/watch/{{ record.tutorial_detail.foss.foss|get_url_name }}/{{ record.tutorial_detail.tutorial|get_url_name }}/{{ record.language }}">{{ record.tutorial_detail.tutorial }}</a></h3></div>
                         <div class='desc'>
                                 Foss : {{ record.tutorial_detail.foss }}</br>
                                 Language : {{ record.language }}</br>

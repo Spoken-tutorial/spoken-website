@@ -392,3 +392,6 @@ class TrainingScanCopyForm(forms.Form):
         else:
             raise forms.ValidationError("You have forgotten about Fred!")
 
+class ParticipantSearchForm(forms.Form):
+    email = forms.EmailField(required = False)
+    username = forms.CharField(required =  False)

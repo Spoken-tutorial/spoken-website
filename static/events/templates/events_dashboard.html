@@ -16,20 +16,23 @@
                     <div class="panel panel-primary">
                         <div class="panel-heading panel-heading-notif">Organiser</div>
                         <div class="panel-body">
+                            <h5>Training</h5>
+                            <ul>
+                                <li><a href="/software-training/training/organiser/request/">New Training Request</a></li>
+                                <li><a href="/software-training/training/organiser/approved">Approved Training</a></li>
+                                <li><a href="/software-training/training/organiser/completed">Completed Training</a></li>
+                            </ul>
                             <h5>Workshop</h5>
                             <ul>
                                 <li><a href="/software-training/workshop/organiser/request/">New Workshop Request</a></li>
-                                <li><a href="/software-training/workshop/organiser/ongoing">Ongoing Workshop</a></li>
+                                <li><a href="/software-training/workshop/organiser/approved">Approved Workshop</a></li>
+                                <li><a href="/software-training/workshop/organiser/completed">Completed Workshop</a></li>
                             </ul>
                             <h5>Online Assesment Test</h5>
                             <ul>
                                 <li><a href="/software-training/test/organiser/request/">New Test Request</a></li>
-                                <li><a href="/software-training/test/organiser/ongoing">Ongoing Test</a></li>
-                            </ul>
-                            <h5>Training</h5>
-                            <ul>
-                                <li><a href="/software-training/training/organiser/request/">New Training Request</a></li>
-                                <li><a href="/software-training/training/organiser/ongoing">Ongoing Training</a></li>
+                                <li><a href="/software-training/test/organiser/approved">Approved Assesment Test</a></li>
+                                <li><a href="/software-training/test/organiser/completed">Completed Assesment Test</a></li>
                             </ul>
                         </div>
                     </div>
@@ -48,22 +51,25 @@
                 {% endif %}
                 {% if user|is_resource_person %}
                     <div class="panel panel-primary">
-                        <div class="panel-heading panel-heading-notif">Resource Person</div>
+                        <div class="panel-heading panel-heading-notif">Training Manager</div>
                         <div class="panel-body">
+                            <h5>Training</h5>
+                            <ul>
+                                <li><a href="/software-training/training/rp/pending/">New Requests</a></li>
+                                <li><a href="/software-training/training/rp/approved">Approved Training</a></li>
+                                <li><a href="/software-training/training/rp/completed">Completed Training</a></li>
+                            </ul>
                             <h5>Workshop</h5>
                             <ul>
                                 <li><a href="/software-training/workshop/rp/pending/">New Requests</a></li>
-                                <li><a href="/software-training/workshop/rp/ongoing">Ongoing Workshops</a></li>
+                                <li><a href="/software-training/workshop/rp/approved">Approved Workshops</a></li>
+                                <li><a href="/software-training/workshop/rp/completed">Completed Workshops</a></li>
                             </ul>
                             <h5>Online Assesment Test</h5>
                             <ul>
                                 <li><a href="/software-training/test/rp/pending/">Approval Pending</a></li>
-                                <li><a href="/software-training/test/rp/ongoing">Ongoing Test</a></li>
-                            </ul>
-                            <h5>Training</h5>
-                            <ul>
-                                <li><a href="/software-training/training/rp/pending/">New Requests</a></li>
-                                <li><a href="/software-training/training/rp/ongoing">Ongoing Test</a></li>
+                                <li><a href="/software-training/test/rp/approved">Approved Assesment Test</a></li>
+                                <li><a href="/software-training/test/rp/completed">Completed Assesment Test</a></li>
                             </ul>
                             <h5>Organiser List</h5>
                             <ul>
@@ -84,6 +90,11 @@
                     <div class="panel panel-primary">
                         <div class="panel-heading panel-heading-notif">Events Manager</div>
                         <div class="panel-body">
+                            <h5>Training</h5>
+                            <ul>
+                                <li><a href="/software-training/training/em/pending/">New Requests</a></li>
+                                <li><a href="/software-training/training/em/ongoing">Ongoing Test</a></li>
+                            </ul>
                             <h5>Workshop</h5>
                             <ul>
                                 <li><a href="/software-training/workshop/em/pending/">New Requests</a></li>
@@ -93,11 +104,6 @@
                             <ul>
                                 <li><a href="/software-training/test/em/waitingforinvigilator/">Approval Pending</a></li>
                                 <li><a href="/software-training/test/em/ongoing">Ongoing Test</a></li>
-                            </ul>
-                            <h5>Training</h5>
-                            <ul>
-                                <li><a href="/software-training/training/em/pending/">New Requests</a></li>
-                                <li><a href="/software-training/training/em/ongoing">Ongoing Test</a></li>
                             </ul>
                         </div>
                     </div>

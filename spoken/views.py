@@ -52,7 +52,8 @@ def keyword_search(request):
             for key in remove_words:
                 keywords.remove(key)
             query = get_or_query(keywords, search_fields)
-            collection = TutorialCommonContent.objects.select_related('TutorialDetail').filter(query)
+            if query:
+                collection = TutorialResource.objects.filter(common_content = TutorialCommonContent.objects.filter(query), language = Language.objects.filter(name='English'))
         
     context = {}
     context['form'] = KeywordSearchForm()
