@@ -75,7 +75,7 @@
 						{% if status == 'completed' %}
 						    <td>{{ record.participant_counts }}</td>
 						{% else %}
-						    <td>{{ record|workshop_participant_count }}</td>
+						    <td>{{ record|participant_count:"Workshop" }}</td>
 						{% endif %}
                         <!-- actions based on roles -->
                         <td>

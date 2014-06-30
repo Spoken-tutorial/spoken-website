@@ -120,11 +120,22 @@ def can_upload_workshop_data(wcode, category):
             print e
             return False
 
-def workshop_participant_count(workshop):
-    try:
-        return workshop.workshopattendance_set.all().count()
-    except Exception, e:
-        return 0
+def participant_count(objects, category):
+    if category == 'Workshop':
+        try:
+            return objects.workshopattendance_set.all().count()
+        except Exception, e:
+            return 0
+    elif category == 'Training':
+        try:
+            return objects.trainingattendance_set.all().count()
+        except Exception, e:
+            return 0
+    elif category == 'Test':
+        try:
+            return objects.testattendance_set.all().count()
+        except Exception, e:
+            return 0
 
 def participant_picture(user_id):
     print user_id
@@ -133,6 +144,7 @@ def participant_picture(user_id):
     except Exception, e:
         print e
         return None
+
 
 register.filter('is_organiser', is_organiser)
 register.filter('is_invigilator', is_invigilator)
@@ -149,5 +161,5 @@ register.filter('get_wparticipant_status', get_wparticipant_status)
 register.filter('get_trainingparticipant_status', get_trainingparticipant_status)
 register.filter('can_upload_workshop_data', can_upload_workshop_data)
 register.filter('can_download_workshop_certificate', can_download_workshop_certificate)
-register.filter('workshop_participant_count', workshop_participant_count)
+register.filter('participant_count', participant_count)
 register.filter('participant_picture', participant_picture)

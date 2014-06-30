@@ -110,21 +110,49 @@ def search_participant( form):
             onlinetest_user = 'None'
         return onlinetest_user
         
-def add_participant(request, wid):
+def add_participant(request, cid, category ):
     userid = request.POST['userid']
     if userid:
-        try:
-            wa = WorkshopAttendance.objects.get(mdluser_id = userid, workshop_id = wid)
-            print wa.id, " => Exits"
-            messages.success(request, "User has already in the attendance list")
-        except:
-            wa = WorkshopAttendance()
-            wa.workshop_id = wid
-            wa.mdluser_id = userid
-            wa.status = 0
-            wa.save()
-            messages.success(request, "User has added in the attendance list")
-            print wa.id, " => Inserted"
+        if category == 'Workshop':
+            try:
+                wa = WorkshopAttendance.objects.get(mdluser_id = userid, workshop_id = cid)
+                print wa.id, " => Exits"
+                messages.success(request, "User has already in the attendance list")
+            except:
+                wa = WorkshopAttendance()
+                wa.workshop_id = cid
+                wa.mdluser_id = userid
+                wa.status = 0
+                wa.save()
+                messages.success(request, "User has added in the attendance list")
+                print wa.id, " => Inserted"
+        elif category == 'Training':
+            try:
+                wa = TrainingAttendance.objects.get(mdluser_id = userid, training_id = cid)
+                print wa.id, " => Exits"
+                messages.success(request, "User has already in the attendance list")
+            except:
+                wa = TrainingAttendance()
+                wa.training_id = cid
+                wa.mdluser_id = userid
+                wa.status = 0
+                wa.save()
+                messages.success(request, "User has added in the attendance list")
+                print wa.id, " => Inserted"
+                
+        elif category == 'Test':
+            try:
+                wa = TestAttendance.objects.get(mdluser_id = userid, test_id = cid)
+                print wa.id, " => Exits"
+                messages.success(request, "User has already in the attendance list")
+            except:
+                wa = TestAttendance()
+                wa.test_id = cid
+                wa.mdluser_id = userid
+                wa.status = 0
+                wa.save()
+                messages.success(request, "User has added in the attendance list")
+                print wa.id, " => Inserted"
 
 @login_required
 def events_dashboard(request):
@@ -864,7 +892,7 @@ def workshop_attendance(request, wid):
             onlinetest_user = search_participant(form)
                     
         if 'add-participant' in request.POST:
-            add_participant(request, wid)
+            add_participant(request, wid, 'Workshop')
             
     participant_ids = list(WorkshopAttendance.objects.filter(workshop_id = wid).values_list('mdluser_id'))
     mdlids = []
@@ -1101,7 +1129,8 @@ def test_list(request, role, status):
             2: SortableHeader('academic', True, 'Institution'),
             3: SortableHeader('foss', True, 'FOSS'),
             4: SortableHeader('tdate', True, 'Date'),
-            5: SortableHeader('Action', False)
+            5: SortableHeader('Participants', False),
+            6: SortableHeader('Action', False)
         }
         raw_get_data = request.GET.get('o', None)
         collection = get_sorted_list(request, collectionSet, header, raw_get_data)
@@ -1254,6 +1283,8 @@ def test_approvel(request, role, rid):
 def test_attendance(request, tid):
     user = request.user
     test = None
+    onlinetest_user = ''
+    form = ParticipantSearchForm()
     try:
         test = Test.objects.get(pk=tid)
         test.status = 3
@@ -1265,53 +1296,61 @@ def test_attendance(request, tid):
         users = request.POST
         if users:
             #set all record to 0 if status = 1
-            TestAttendance.objects.filter(test_id = tid, status = 1).update(status = 0)
-            for u in users:
-                if u != 'csrfmiddlewaretoken':
-                    try:
-                        ta = TestAttendance.objects.get(mdluser_id = users[u], test_id = tid)
-                        print ta.id, " => Exits"
-                    except:
-                        print "*********"
-                        print users[u]
-                        print test.foss_id
-                        fossmdlcourse = FossMdlCourses.objects.get(foss_id = test.foss_id)
-                        print fossmdlcourse.mdlcourse_id,'d',fossmdlcourse.mdlquiz_id
-                        ta = TestAttendance()
-                        ta.test_id = test.id
-                        ta.mdluser_id = users[u]
-                        ta.mdlcourse_id = fossmdlcourse.mdlcourse_id
-                        ta.mdlquiz_id = fossmdlcourse.mdlquiz_id
-                        ta.mdlattempt_id = 0
-                        ta.status = 0
-                        ta.save()
-                        print ta.id, " => Inserted"
-                    if ta:
-                        #todo: if the status = 2 check in moodle if he completed the test set status = 3 (completed)
-                        t = TestAttendance.objects.get(mdluser_id = ta.mdluser_id, test_id = tid)
-                        fossmdlcourse = FossMdlCourses.objects.get(foss_id = test.foss_id)
-                        t.mdlcourse_id = fossmdlcourse.mdlcourse_id
-                        t.mdlquiz_id = fossmdlcourse.mdlquiz_id
-                        t.status = 1
-                        t.save()
-                        #enroll to the course
-                        #get the course enrole id
-                        #todo: If mark absent delete enrolement
+            if 'submit-attendance' in users:
+                TestAttendance.objects.filter(test_id = tid, status = 1).update(status = 0)
+                for u in users:
+                    if not (u == 'csrfmiddlewaretoken' or u == 'submit-attendance'):
                         try:
-                            mdlenrol = MdlEnrol.objects.get(enrol='self', courseid=2)
-                            print "Role Exits"
-                        except Exception, e:
-                            print "MdlEnrol => ", e
-                            print "No self enrolement for this course"
-                            
-                        try:
-                            MdlUserEnrolments.objects.get(enrolid = mdlenrol.id, userid = ta.mdluser_id)
-                            print "MdlUserEnrolments Exits"
-                            #update dateTime
-                        except Exception, e:
-                            print "MdlUserEnrolments => ", e
-                            MdlUserEnrolments.objects.create(enrolid = mdlenrol.id, userid = ta.mdluser_id, status = 0, timestart = datetime.datetime.now().strftime("%s"), timeend = 0, modifierid = ta.mdluser_id, timecreated = datetime.datetime.now().strftime("%s"), timemodified = datetime.datetime.now().strftime("%s"))
+                            ta = TestAttendance.objects.get(mdluser_id = users[u], test_id = tid)
+                            print ta.id, " => Exits"
+                        except:
+                            print "*********"
+                            print users[u]
+                            print test.foss_id
+                            fossmdlcourse = FossMdlCourses.objects.get(foss_id = test.foss_id)
+                            print fossmdlcourse.mdlcourse_id,'d',fossmdlcourse.mdlquiz_id
+                            ta = TestAttendance()
+                            ta.test_id = test.id
+                            ta.mdluser_id = users[u]
+                            ta.mdlcourse_id = fossmdlcourse.mdlcourse_id
+                            ta.mdlquiz_id = fossmdlcourse.mdlquiz_id
+                            ta.mdlattempt_id = 0
+                            ta.status = 0
+                            ta.save()
+                            print ta.id, " => Inserted"
+                        if ta:
+                            #todo: if the status = 2 check in moodle if he completed the test set status = 3 (completed)
+                            t = TestAttendance.objects.get(mdluser_id = ta.mdluser_id, test_id = tid)
+                            fossmdlcourse = FossMdlCourses.objects.get(foss_id = test.foss_id)
+                            t.mdlcourse_id = fossmdlcourse.mdlcourse_id
+                            t.mdlquiz_id = fossmdlcourse.mdlquiz_id
+                            t.status = 1
+                            t.save()
+                            #enroll to the course
+                            #get the course enrole id
+                            #todo: If mark absent delete enrolement
+                            try:
+                                mdlenrol = MdlEnrol.objects.get(enrol='self', courseid=2)
+                                print "Role Exits"
+                            except Exception, e:
+                                print "MdlEnrol => ", e
+                                print "No self enrolement for this course"
+                                
+                            try:
+                                MdlUserEnrolments.objects.get(enrolid = mdlenrol.id, userid = ta.mdluser_id)
+                                print "MdlUserEnrolments Exits"
+                                #update dateTime
+                            except Exception, e:
+                                print "MdlUserEnrolments => ", e
+                                MdlUserEnrolments.objects.create(enrolid = mdlenrol.id, userid = ta.mdluser_id, status = 0, timestart = datetime.datetime.now().strftime("%s"), timeend = 0, modifierid = ta.mdluser_id, timecreated = datetime.datetime.now().strftime("%s"), timemodified = datetime.datetime.now().strftime("%s"))
+            
+            if 'search-participant' in request.POST:
+                form = ParticipantSearchForm(request.POST)
+                onlinetest_user = search_participant(form)
                         
+            if 'add-participant' in request.POST:
+                add_participant(request, tid, 'Test')
+            
             message = test.academic.institution_name+" has submited Test attendance dated "+test.tdate.strftime("%Y-%m-%d")
             update_events_log(user_id = user.id, role = 1, category = 1, category_id = test.id, academic = test.academic_id, status = 8)
             update_events_notification(user_id = user.id, role = 1, category = 1, category_id = test.id, academic = test.academic_id, status = 8, message = message)
@@ -1342,6 +1381,8 @@ def test_attendance(request, tid):
     context = {}
     context['collection'] = wp
     context['test'] = test
+    context['form'] = form
+    context['onlinetest_user'] = onlinetest_user
     context['enable_close_test'] = enable_close_test
     context.update(csrf(request))
     messages.info(request, "Instruct the students to Register and Login on the Online Test link of Spoken Tutorial. Click on the checkbox so that usernames of all the students who are present for the test are marked, then click the submit button. Students can now proceed for the Test.")
@@ -1722,7 +1763,8 @@ def training_list(request, role, status):
             3: SortableHeader('foss', True, 'FOSS'),
             4: SortableHeader('language', True, 'Language'),
             5: SortableHeader('trdate', True, 'Date'),
-            6: SortableHeader('Action', False)
+            6: SortableHeader('Participants', False),
+            7: SortableHeader('Action', False)
         }
         
         raw_get_data = request.GET.get('o', None)
@@ -1829,6 +1871,8 @@ def training_participant(request, wid=None):
 @login_required
 def training_attendance(request, wid):
     user = request.user
+    psform = ParticipantSearchForm()
+    onlinetest_user = ''
     if not (user.is_authenticated() and (is_organiser(user))):
         raise Http404('You are not allowed to view this page')
     try:
@@ -1893,6 +1937,13 @@ def training_attendance(request, wid):
                         messages.success(request, "Choose a PDF File")
                 else:
                     messages.success(request, "Choose a PDF File.")
+                    
+            if 'search-participant' in request.POST:
+                form = ParticipantSearchForm(request.POST)
+                onlinetest_user = search_participant(form)
+                        
+            if 'add-participant' in request.POST:
+                add_participant(request, wid, 'Training')
   
     participant_ids = list(TrainingAttendance.objects.filter(training_id = wid).values_list('mdluser_id'))
     #scaned copy exits
@@ -1908,8 +1959,10 @@ def training_attendance(request, wid):
         wp = MdlUser.objects.filter(id__in = mdlids)
     context = {}
     context['form'] = TrainingScanCopyForm()
+    context['psform'] = psform
     context['collection'] = wp
-    context['workshop'] = workshop
+    context['training'] = workshop
+    context['onlinetest_user'] = onlinetest_user
     context['is_file_exits'] = is_file_exits
     context['file_path'] = '/media/training/'+wid+'/'+wid+'.pdf'
     context.update(csrf(request))

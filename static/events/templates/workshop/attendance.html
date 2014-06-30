@@ -19,29 +19,29 @@
           <input class="btn btn-default" name="search-participant" type="submit" value="Search Participant" />
         </form>
     </div>
-        {% if onlinetest_user and onlinetest_user != 'None' %}
-            <div class="row well">
-                <div class="result">
-                    {% for record in onlinetest_user %}
+    {% if onlinetest_user and onlinetest_user != 'None' %}
+        <div class="row well">
+            <div class="result">
+                {% for record in onlinetest_user %}
+                    <div class="col-sm-8">
                         <div class="col-sm-8">
-                            <div class="col-sm-8">
-                                <p>{{ record.firstname }} {{ record.lastname }} - {{ record.email }}</p>
-                            </div>
-                            <div class="col-sm-4">
-                                <form role="search" method="POST">{% csrf_token %}
-                                    <input name="userid" type="hidden" value="{{ record.id}}">
-                                    <input name="add-participant" type="submit" value="Add" />
-                                </form>
-                            </div>
+                            <p>{{ record.firstname }} {{ record.lastname }} - {{ record.email }}</p>
                         </div>
-                    {% endfor %}
-                </div>
+                        <div class="col-sm-4">
+                            <form role="search" method="POST">{% csrf_token %}
+                                <input name="userid" type="hidden" value="{{ record.id}}">
+                                <input name="add-participant" type="submit" value="Add" />
+                            </form>
+                        </div>
+                    </div>
+                {% endfor %}
             </div>
-        {% else %}
-            {% if onlinetest_user == 'None' %}
-                <p class="no-record">No record found!</p>
-            {% endif %}
+        </div>
+    {% else %}
+        {% if onlinetest_user == 'None' %}
+            <p class="no-record">No record found!</p>
         {% endif %}
+    {% endif %}
 	<!-- Tab panes -->
 	<div class="tab-content">
 		<div class="tab-pane active" id="pending">
@@ -74,7 +74,7 @@
 				            {% for record in collection %}
 					            <tr>
 					                <th><input type='checkbox' name="user_{{ record.id }}" value="{{ record.id }}" {{ record.id|get_wstatus:workshop.id }} ></th>
-						            <td></td>
+						            <td><iframe style="width:70px; height:70px;" src="{{ record.id|participant_picture }}"></iframe></td>
 						            <td>{{ record.firstname }} {{ record.lastname }}</td>
 						            <td>
 						                {{ record.id|get_wparticipant_status:workshop.id }}

@@ -203,29 +203,29 @@ def offline_details(request, wid, category):
                 if category == 1:
                     try:
                         wa = WorkshopAttendance.objects.get(workshop_id = wid, mdluser_id = mdluser.id)
-                        if wa.status == 0:
-                            wa.status = 1
-                            wa.save()
+                        #if wa.status == 0:
+                        #    wa.status = 1
+                        #    wa.save()
                         print "Attandance already exits!"
                     except Exception, e:
                         print e
                         wa = WorkshopAttendance()
                         wa.workshop_id = wid
-                        wa.status = 1
+                        wa.status = 0
                         wa.mdluser_id = mdluser.id
                         wa.save()
                 else:
                     try:
                         wa = TrainingAttendance.objects.get(training_id = wid, mdluser_id = mdluser.id)
-                        if wa.status == 0:
-                            wa.status = 1
-                            wa.save()
+                        #if wa.status == 0:
+                        #    wa.status = 1
+                        #    wa.save()
                         print "Attandance already exits!"
                     except Exception, e:
                         print e
                         wa = TrainingAttendance()
                         wa.training_id = wid
-                        wa.status = 1
+                        wa.status = 0
                         wa.mdluser_id = mdluser.id
                         wa.save()
             #update logs
