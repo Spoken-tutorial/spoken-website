@@ -21,6 +21,17 @@ SCRIPT_URL = 'http://script.spoken-tutorial.org/index.php/'
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'l0j--m7k_7v4pr&wg7^)f8ptu^gcs7ec5eu9=x8k_@+20c^ym#'
 
+PASSWORD_HASHERS = (
+    'django.contrib.auth.hashers.PBKDF2PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
+    'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
+    'django.contrib.auth.hashers.BCryptPasswordHasher',
+    'django.contrib.auth.hashers.SHA1PasswordHasher',
+    'django.contrib.auth.hashers.MD5PasswordHasher',
+    'django.contrib.auth.hashers.CryptPasswordHasher',
+    'django.contrib.auth.hashers.UnsaltedMD5PasswordHasher',
+)
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -82,6 +93,15 @@ DATABASES = {
 		'PASSWORD': MDB_PASS,
 		'HOST': '',				  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
 		'PORT': '',				  # Set to empty string for default.
+	},
+	'cdeep': {
+		'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+		'NAME': CDB,					  # Or path to database file if using sqlite3.
+		# The following settings are not used with sqlite3:
+		'USER': CDB_USER,
+		'PASSWORD': CDB_PASS,
+		'HOST': '',				  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+		'PORT': '',				  # Set to empty string for default.
 	}
 }
 
@@ -137,7 +157,7 @@ INTERNAL_IPS = ('127.0.0.1',)
 
 #Moodle Auth
 #AUTH_USER_MODEL = 'mdldjango.Users'
-DATABASE_ROUTERS = ['mdldjango.router.MdlRouter']
+DATABASE_ROUTERS = ['mdldjango.router.MdlRouter', 'cdeep.router.CdeepRouter']
 #AUTHENTICATION_BACKENDS = ( 'mdldjango.backend.MdlBackend', )
 
 #template

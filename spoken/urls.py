@@ -24,8 +24,8 @@ urlpatterns = patterns('',
 
 	url(r'^creation/', include('creation.urls', namespace='creation')),
 	url(r'^captcha/', include('captcha.urls')),
-	
-	url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT, 'show_indexes':True}),
+	url(r'^migration/creation/', include('creationmigrate.urls', namespace='creationmigrate')),
+	url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT, 'show_indexes':False}),
 	#cms
 	url(r'^', include('cms.urls', namespace='cms')),
 )
