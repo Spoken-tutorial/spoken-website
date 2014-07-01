@@ -74,16 +74,19 @@
 						<td>{{ record.wdate|date:"d M Y" }} {{	record.wtime }}</td>
 						{% if status == 'completed' %}
 						    <td>{{ record.participant_counts }}</td>
+						{% else %}
+						    <td>{{ record|participant_count:"Workshop" }}</td>
 						{% endif %}
                         <!-- actions based on roles -->
                         <td>
                             {% if role == 'rp' %}
                                 {% if status == 'pending' %}
-                                    <a href="{% url 'events:workshop_edit' role record.id %}">Edit</a>
+                                    <a href="{% url 'events:workshop_edit' role record.id %}">Edit</a> |
                                 {% endif %}
                                 {% if status == 'pending' %}
-                                    <a href="{% url 'events:workshop_approvel' role record.id %}?status=accept">Accept</a>
-                                    <a href="{% url 'events:workshop_approvel' role record.id %}?status=reject">Reject</a>
+                                    <a href="{% url 'events:workshop_approvel' role record.id %}?status=accept">Accept</a> |
+                                    <a href="{% url 'events:workshop_approvel' role record.id %}?status=reject">Reject</a> |
+                                    <a target='_blank' href="{% url 'events:workshop_participant' record.id %}">Participants</a>
                                 {% endif %}
                                 {% if status == 'approved' %}
                                     <a href="{% url 'events:workshop_approvel' role record.id %}?status=reject">Reject</a>
@@ -92,7 +95,7 @@
                                     <a href="{% url 'events:workshop_edit' role record.id %}">Edit</a>
                                 {% endif %}
                                 {% if status == 'ongoing' %}
-                                    <a href="{% url 'events:workshop_participant' record.id %}">Participants</a>
+                                    <a target='_blank' href="{% url 'events:workshop_participant' record.id %}">Participants</a>
                                 {% endif %}
                                 {% if status == 'rejected' %}
                                     <a href="{% url 'events:workshop_approvel' role record.id %}?status=accept">Accept</a>
@@ -103,21 +106,24 @@
                                     <a href="{% url 'events:workshop_edit' role record.id %}">Edit</a>
                                 {% endif %}
                                 {% if status == 'pending' %}
-                                    <a href="{% url 'events:workshop_edit' role record.id %}">Edit</a>
+                                    <a href="{% url 'events:workshop_edit' role record.id %}">Edit</a> |
+                                    <a target='_blank' href="{% url 'events:workshop_participant' record.id %}">Participants</a> |
+                                    <a target='_blank' href="{% url 'events:workshop_attendance' record.id %}">Attendance</a> |
+                                    <a href="{% url 'mdldjango:mdl_offline_workshop_details' record.id 1 %}">Upload data</a>
                                 {% endif %}
                                 {% if status == 'approved' %}
                                     <a href="{% url 'events:workshop_participant' record.id %}">Participants</a>
                                 {% endif %}
                                 {% if status == 'ongoing' %}
                                     {% if record.id|can_upload_workshop_data:'workshop' %}
-                                        <a href="{% url 'mdldjango:mdl_offline_workshop_details' record.id 1 %}">Upload data</a> |
+                                        <!-- <a href="{% url 'mdldjango:mdl_offline_workshop_details' record.id 1 %}">Upload data</a> | -->
                                     {% endif %}
-                                    <a href="{% url 'events:workshop_attendance' record.id %}">Attendance</a> |
-                                    <a href="{% url 'events:workshop_participant' record.id %}">Participants</a>
+                                    <a target='_blank' href="{% url 'events:workshop_attendance' record.id %}">Attendance</a> |
+                                    <a target='_blank' href="{% url 'events:workshop_participant' record.id %}">Participants</a>
                                 {% endif %}
                             {% endif %}
                             {% if status == 'completed' %}
-                                <a href="{% url 'events:workshop_participant' record.id %}">View Participants</a>
+                                <a target='_blank' href="{% url 'events:workshop_participant' record.id %}">View Participants</a>
                             {% endif %}
 						</td>
 					</tr>

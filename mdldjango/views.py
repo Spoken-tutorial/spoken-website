@@ -108,13 +108,14 @@ def offline_details(request, wid, category):
     form = OfflineDataForm()
     try:
         if category == 1:
-            Workshop.objects.get(pk=wid, status = 1)
+            Workshop.objects.get(pk=wid, status = 0)
         elif category == 2:
-            Training.objects.get(pk=wid, status = 1)
+            Training.objects.get(pk=wid, status = 0)
         else:
             print 'yes'
             raise PermissionDenied('You are not allowed to view this page!')
-    except:
+    except Exception, e:
+        print e
         raise PermissionDenied('You are not allowed to view this page!')
         
     if request.method == 'POST':
@@ -133,7 +134,10 @@ def offline_details(request, wid, category):
                 print "Error"
                 
             for studentDetails in xmlDocTree.iter('detail'):
-                print studentDetails
+                password_string = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(8))
+                password_encript = encript_password(password_string)
+            
+                #print studentDetails
                 firstname = studentDetails[0].text
                 lastname = studentDetails[1].text
                 gender =  studentDetails[2].text
@@ -141,7 +145,7 @@ def offline_details(request, wid, category):
                 #city = studentDetails[6].text
                 #country = studentDetails[7].text
                 #department = studentDetails[8].text
-                password = encript_password(studentDetails[0].text)
+                password = password_encript
                 try:
                     mdluser = MdlUser.objects.get(email = email)
                     print "Already exits!"
@@ -159,32 +163,69 @@ def offline_details(request, wid, category):
                     mdluser.mnethostid = 1
                     mdluser.save()
                     mdluser = MdlUser.objects.filter(email = email, firstname= firstname, username=firstname+' '+lastname, password=password).first()
+                    
+                    # send password to email
+                    subject  = "Spoken Tutorial Online Test password"
+                    to = [mdluser.email]
+                    message = '''Hi {0},
+
+        Your account password at 'Spoken Tutorials Online Test as follows'
+
+        Your current login information is now:
+           username: {1}
+           password: {2}
+
+        Please go to this page to change your password:
+           {3}
+
+        In most mail programs, this should appear as a blue link
+        which you can just click on.  If that doesn't work,
+        then cut and paste the address into the address
+        line at the top of your web browser window.
+
+        Cheers from the 'Spoken Tutorials Online Test Center' administrator,
+
+        Admin Spoken Tutorials
+        '''.format(mdluser.firstname, mdluser.username, password_string, 'http://onlinetest.spoken-tutorial.org/login/change_password.php')
+
+                    # send email
+                    email = EmailMultiAlternatives(
+                        subject, message, 'administrator@spoken-tutorial.org',
+                        to = to, bcc = [], cc = [],
+                        headers={'Reply-To': 'no-replay@spoken-tutorial.org', "Content-type":"text/html;charset=iso-8859-1"}
+                    )
+
+                    result = email.send(fail_silently=False)
+                    #messages.success(request, "New password sent to your email "+user.email)
+                    print "-----------------------------------------"
+                    print message
+                    print "-----------------------------------------"
                 if category == 1:
                     try:
                         wa = WorkshopAttendance.objects.get(workshop_id = wid, mdluser_id = mdluser.id)
-                        if wa.status == 0:
-                            wa.status = 1
-                            wa.save()
+                        #if wa.status == 0:
+                        #    wa.status = 1
+                        #    wa.save()
                         print "Attandance already exits!"
                     except Exception, e:
                         print e
                         wa = WorkshopAttendance()
                         wa.workshop_id = wid
-                        wa.status = 1
+                        wa.status = 0
                         wa.mdluser_id = mdluser.id
                         wa.save()
                 else:
                     try:
                         wa = TrainingAttendance.objects.get(training_id = wid, mdluser_id = mdluser.id)
-                        if wa.status == 0:
-                            wa.status = 1
-                            wa.save()
+                        #if wa.status == 0:
+                        #    wa.status = 1
+                        #    wa.save()
                         print "Attandance already exits!"
                     except Exception, e:
                         print e
                         wa = TrainingAttendance()
                         wa.training_id = wid
-                        wa.status = 1
+                        wa.status = 0
                         wa.mdluser_id = mdluser.id
                         wa.save()
             #update logs
@@ -298,7 +339,7 @@ def forget_password(request):
             print 'New password => ', password_string
             print 'Encript password => ', password_encript
             #Send email
-            subject  = ""
+            subject  = "Spoken Tutorial Online Test password reset"
             to = [user.email]
             message = '''Hi {0},
 

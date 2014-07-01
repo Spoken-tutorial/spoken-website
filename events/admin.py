@@ -2,12 +2,15 @@ from django.contrib import admin
 
 # Register your models here.
 
-from events.models import University, InstituteType, State, ResourcePerson, Department, PermissionType, TestCategory, InstituteCategory
+from events.models import University, InstituteType, State, ResourcePerson, Department, PermissionType, TestCategory, InstituteCategory, Course
 from events.forms import RpForm
 
 class UniversityAdmin(admin.ModelAdmin):
     list_display = ('user', 'state', 'name')
-    
+
+class CourseAdmin(admin.ModelAdmin):
+    fields = ['name']
+
 class InstituteTypeAdmin(admin.ModelAdmin):
     fields = ['name']
 
@@ -34,7 +37,8 @@ class DepartmentAdmin(admin.ModelAdmin):
 
 class PermissionTypeAdmin(admin.ModelAdmin):
     fields = ['name']    
-    
+
+admin.site.register(Course, CourseAdmin)
 admin.site.register(University, UniversityAdmin)
 admin.site.register(InstituteType, InstituteTypeAdmin)
 admin.site.register(InstituteCategory, InstituteCategoryAdmin)

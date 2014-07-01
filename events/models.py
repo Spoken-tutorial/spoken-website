@@ -116,7 +116,7 @@ class AcademicCenter(models.Model):
     academic_code = models.CharField(max_length=100, unique = True)
     institution_name = models.CharField(max_length=200, unique = True)
     district = models.ForeignKey(District)
-    location = models.ForeignKey(Location)
+    location = models.ForeignKey(Location, null=True)
     city = models.ForeignKey(City)
     street = models.CharField(max_length = 200)
     pincode = models.PositiveIntegerField()
@@ -158,6 +158,14 @@ class Department(models.Model):
     
     def __unicode__(self):
         return self.name
+
+class Course(models.Model):
+    name = models.CharField(max_length=200)
+    created = models.DateTimeField(auto_now_add = True)
+    updated = models.DateTimeField(auto_now = True)
+    
+    def __unicode__(self):
+        return self.name
         
 class Workshop(models.Model):
     organiser = models.ForeignKey(User)
@@ -169,7 +177,7 @@ class Workshop(models.Model):
     workshop_code = models.CharField(max_length=100, null=True)
     wdate = models.DateField()
     wtime = models.TimeField()
-    skype = models.BooleanField()
+    skype = models.PositiveSmallIntegerField(default=0)
     status = models.PositiveSmallIntegerField(default=0)
     workshop_type = models.PositiveIntegerField(default=0)
     participant_counts = models.PositiveIntegerField(default=0)
@@ -294,12 +302,16 @@ class Training(models.Model):
     appoved_by = models.ForeignKey(User, related_name = 'training_approved_by', null=True)
     academic = models.ForeignKey(AcademicCenter)
     department = models.ManyToManyField(Department)
+    course = models.ForeignKey(Course)
+    course_number = models.CharField(max_length = 255)
+    batch = models.PositiveSmallIntegerField()
+    free_lab_hours = models.PositiveSmallIntegerField()
     language = models.ForeignKey(Language)
     foss = models.ForeignKey(FossCategory)
     training_code = models.CharField(max_length=100, null=True)
     trdate = models.DateField()
     trtime = models.TimeField()
-    skype = models.BooleanField()
+    skype = models.PositiveSmallIntegerField(default=0)
     status = models.PositiveSmallIntegerField(default=0)
     participant_counts = models.PositiveIntegerField(default=0)
     created = models.DateTimeField(auto_now_add = True)

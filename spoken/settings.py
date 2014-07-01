@@ -118,6 +118,9 @@ USE_L10N = True
 
 USE_TZ = True
 
+#events settings
+ONLINE_TEST_URL = ONLINE_TEST_URL
+
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/var/www/example.com/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/') # Absolute path to the media.

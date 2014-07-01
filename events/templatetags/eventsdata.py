@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from events.models import *
 from events.views import is_organiser, is_invigilator, is_resource_person, is_event_manager
 import datetime
+from django.conf import settings
 register = template.Library()
 
 def get_participant_status(key, testcode):
@@ -118,7 +119,33 @@ def can_upload_workshop_data(wcode, category):
         except Exception, e:
             print e
             return False
-    
+
+def participant_count(objects, category):
+    if category == 'Workshop':
+        try:
+            return objects.workshopattendance_set.all().count()
+        except Exception, e:
+            return 0
+    elif category == 'Training':
+        try:
+            return objects.trainingattendance_set.all().count()
+        except Exception, e:
+            return 0
+    elif category == 'Test':
+        try:
+            return objects.testattendance_set.all().count()
+        except Exception, e:
+            return 0
+
+def participant_picture(user_id):
+    print user_id
+    try:
+        return settings.ONLINE_TEST_URL + "get_profile_picture.php?id=" + str(user_id)
+    except Exception, e:
+        print e
+        return None
+
+
 register.filter('is_organiser', is_organiser)
 register.filter('is_invigilator', is_invigilator)
 register.filter('is_resource_person', is_resource_person)
@@ -134,3 +161,5 @@ register.filter('get_wparticipant_status', get_wparticipant_status)
 register.filter('get_trainingparticipant_status', get_trainingparticipant_status)
 register.filter('can_upload_workshop_data', can_upload_workshop_data)
 register.filter('can_download_workshop_certificate', can_download_workshop_certificate)
+register.filter('participant_count', participant_count)
+register.filter('participant_picture', participant_picture)

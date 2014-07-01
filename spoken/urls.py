@@ -27,5 +27,5 @@ urlpatterns = patterns('',
 	url(r'^migration/creation/', include('creationmigrate.urls', namespace='creationmigrate')),
 	url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT, 'show_indexes':False}),
 	#cms
-	url(r'', include('cms.urls', namespace='cms')),
+	url(r'^', include('cms.urls', namespace='cms')),
 )

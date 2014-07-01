@@ -22,7 +22,7 @@
             <dd>{{ pcount }}</dd>
             <dt>Organiser</dt>
             <dd>{{ wc.organiser }}</dd>
-            {% if is_file_exits and user|is_resource_person %}
+            {% if is_file_exits and user|is_resource_person and wc.status != 2 %}
                 <p>Please click <b>Mark as Complete</b> to end the training.</p><a href="{{file_path}}" target="_blank">View uploaded copy</a>
                 <a class='btn btn-primary' title = "To complete the training click here" href="{% url 'events:training_approvel' 'rp' wc.id %}?status=completed">Mark as Complete</a>
             {% endif %}
@@ -49,7 +49,7 @@
 			{% endfor %}
 		</table>
 		{% else %}
-			<p>No student found!</p>
+			<p class="no-record">No student found!</p>
 		{% endif %}
 	</div>
 {% endblock %}

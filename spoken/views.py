@@ -14,8 +14,9 @@ from creation.views import get_video_info
 from creation.models import TutorialCommonContent, TutorialDetail, TutorialResource
 
 def home(request):
-	context = {}
-	return render(request, 'spoken/templates/home.html', context)
+    #messages.success(request, "User has already in the attendance list")
+    context = {}
+    return render(request, 'spoken/templates/home.html', context)
 
 def get_or_query(terms, search_fields):
     #terms = ['linux', ' operating system', ' computers', ' hardware platforms', ' oscad']
@@ -52,7 +53,8 @@ def keyword_search(request):
             for key in remove_words:
                 keywords.remove(key)
             query = get_or_query(keywords, search_fields)
-            collection = TutorialCommonContent.objects.select_related('TutorialDetail').filter(query)
+            if query:
+                collection = TutorialResource.objects.filter(common_content = TutorialCommonContent.objects.filter(query), language = Language.objects.filter(name='English'))
         
     context = {}
     context['form'] = KeywordSearchForm()

@@ -68,6 +68,38 @@
 		                    {{ form.department.errors }}
 		                </div>
 	                </div>
+                    <div class="form-group">
+		                <label class="col-sm-3 control-label" for= "id_course">Course</label>
+		                <div class="col-sm-9">
+		                    {% render_field form.course class+="form-control course" tabindex="1" %}
+		                    {{ form.course.errors }}
+		                </div>
+	                </div>
+	                <div class="form-group">
+		                <label class="col-sm-3 control-label" for= "id_batch">Batch</label>
+		                <div class="col-sm-9">
+		                    {% render_field form.batch class+="form-control batch" tabindex="1" %}
+		                    {{ form.batch.errors }}
+		                </div>
+	                </div>
+	                <div class="form-group">
+		                <label class="col-sm-3 control-label" for= "id_course_number">Course Number</label>
+		                <div class="col-sm-9">
+		                    {% render_field form.course_number class+="form-control course_number" tabindex="1" %}
+		                    {{ form.course_number.errors }}
+		                </div>
+	                </div>
+	                <div class="form-group">
+		                <label class="col-sm-3 control-label" for= "id_free_lab_hours">Free Lab Hours</label>
+		                <div class="col-sm-9">
+		                    {% for choice in form.free_lab_hours %}
+                                <div class='radio'>
+                                    {{ choice.choice_label }}
+                                    {{ choice.tag }}
+                               </div>
+                            {% endfor %}
+		                </div>
+	                </div>
 
 	                <div class="form-group">
 		                <label class="col-sm-3 control-label" for= "id_wdate">Date</label>

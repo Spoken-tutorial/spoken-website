@@ -85,7 +85,7 @@ class ProfileForm(forms.Form):
     
     city = forms.ModelChoiceField(label='City', cache_choices=True, widget = forms.Select(attrs = {'class' : 'ac-city'}), queryset = City.objects.none(), empty_label = "--- None ---", help_text = "", error_messages = {'required':'City Type field required.'})
     
-    location = forms.ModelChoiceField(label='Location', cache_choices=True, widget = forms.Select(attrs = {'class' : 'ac-location'}), queryset = Location.objects.none(), empty_label = "--- None ---", help_text = "", error_messages = {'required':'City Type field required.'})
+    location = forms.ModelChoiceField(label='Location', cache_choices=True, widget = forms.Select(attrs = {'class' : 'ac-location'}), queryset = Location.objects.none(), empty_label = "--- None ---", help_text = "", error_messages = {'required':'City Type field required.'}, required = False)
     def __init__(self, *args, **kwargs):
         initial = ''
         if 'instance' in kwargs:
@@ -108,18 +108,18 @@ class ProfileForm(forms.Form):
         self.fields['phone'].initial = initial.phone
         
         if args:
-            if 'district' in args[0]:
-                if args[0]['district'] and args[0]['district'] != '' and args[0]['district'] != 'None':
-                    self.fields["location"].queryset = Location.objects.filter(district__id=args[0]['district'])
-                    
+            #if 'district' in args[0]:
+            #    if args[0]['district'] and args[0]['district'] != '' and args[0]['district'] != 'None':
+            #        self.fields["location"].queryset = Location.objects.filter(district__id=args[0]['district'])
+            #        
             if 'state' in args[0]:
                 if args[0]['state'] != '' and args[0]['state'] != 'None':
                     self.fields["district"].queryset = District.objects.filter(state__id=args[0]['state'])
                     self.fields["city"].queryset = City.objects.filter(state__id=args[0]['state'])
         try:
             if initial:
-                if initial.district:
-                    self.fields["location"].queryset = Location.objects.filter(district__id=initial.district_id)
+                #if initial.district:
+                #    self.fields["location"].queryset = Location.objects.filter(district__id=initial.district_id)
                 if initial.state:
                     self.fields['state'].initial = initial.state
                     self.fields["district"].queryset = District.objects.filter(state__id=initial.state_id)
@@ -128,8 +128,8 @@ class ProfileForm(forms.Form):
                         self.fields['district'].initial = initial.district
                     if initial.city:
                         self.fields['city'].initial = initial.city
-                    if initial.location:
-                        self.fields['location'].initial = initial.location
+                    #if initial.location:
+                    #    self.fields['location'].initial = initial.location
         except Exception, e:
             print e
             pass

@@ -35,6 +35,7 @@ def account_register(request):
             p = Profile(user=user, confirmation_code=confirmation_code)
             p.save()
             send_registration_confirmation(user)
+            messages.success(request, "Your registration was successful but you must now confirm your email address before you can log in. Please check your email and click on the link provided. Thank you.")
             return HttpResponseRedirect('/')
         context = {'form':form}
         return render_to_response('cms/templates/register.html', context, context_instance = RequestContext(request))
@@ -50,25 +51,27 @@ def send_registration_confirmation(user):
     p = Profile.objects.get(user=user)
     #user.email = "k.sanmugam2@gmail.com"
     # Sending email when an answer is posted
-    subject = 'Account Notification'
-    message = """
-        Dear {0}\n
-        Click this link to activate your account <b>"{1}"</b>\n\n
-        Regards,<br>\n
-        Spoken Tutorial
+    subject = 'Account Active Notification'
+    message = """Dear {0},
+
+Thank you for registering at {1}. You may activate your account by clicking on this link or copying and pasting it in your browser
+{2}
+
+Regards,
+Spoken Tutorial
     """.format(
         user.username,
+        "http://spoken-tutorial.org",
         "http://beta.spoken-tutorial.org/accounts/confirm/" + str(p.confirmation_code) + "/" + user.username
     )
 
     email = EmailMultiAlternatives(
-        subject,'', '',
-        [user.email],
-        headers={"Content-type":"text/html;charset=iso-8859-1"}
+        subject, message, 'administrator@spoken-tutorial.org',
+        to = [user.email], bcc = [], cc = [],
+        headers={'Reply-To': 'no-replay@spoken-tutorial.org', "Content-type":"text/html;charset=iso-8859-1"}
     )
 
-    email.attach_alternative(message, "text/html")
-    result = email.send(fail_silently=True)
+    #email.attach_alternative(message, "text/html")
 
 def confirm(request, confirmation_code, username):
     try:
@@ -140,7 +143,7 @@ def account_profile(request, username):
             
             profile = Profile.objects.get(user=user)
             profile.street = request.POST['street']
-            profile.location_id = request.POST['location']
+            #profile.location_id = request.POST['location']
             profile.district_id = request.POST['district']
             profile.city_id = request.POST['city']
             profile.state_id = request.POST['state']
