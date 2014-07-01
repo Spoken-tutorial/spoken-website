@@ -14,7 +14,7 @@ from creation.views import get_video_info
 from creation.models import TutorialCommonContent, TutorialDetail, TutorialResource
 
 def home(request):
-    messages.success(request, "User has already in the attendance list")
+    #messages.success(request, "User has already in the attendance list")
     context = {}
     return render(request, 'spoken/templates/home.html', context)
 

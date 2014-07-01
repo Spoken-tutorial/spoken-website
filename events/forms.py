@@ -41,7 +41,7 @@ class AcademicForm(forms.ModelForm):
             
         super(AcademicForm, self).__init__(*args, **kwargs)
         #initial
-        self.fields["state"].queryset = State.objects.filter(resourceperson__user_id=user).filter(resourceperson__status=1)
+        self.fields["state"].queryset = State.objects.filter(resourceperson__user = user, resourceperson__status = 1)
         #prevent ajax loaded data
         if args:
             #if 'district' in args[0]:

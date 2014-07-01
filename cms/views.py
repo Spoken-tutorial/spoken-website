@@ -51,25 +51,27 @@ def send_registration_confirmation(user):
     p = Profile.objects.get(user=user)
     #user.email = "k.sanmugam2@gmail.com"
     # Sending email when an answer is posted
-    subject = 'Account Notification'
-    message = """
-        Dear {0}\n
-        Click this link to activate your account <b>"{1}"</b>\n\n
-        Regards,<br>\n
-        Spoken Tutorial
+    subject = 'Account Active Notification'
+    message = """Dear {0},
+
+Thank you for registering at {1}. You may activate your account by clicking on this link or copying and pasting it in your browser
+{2}
+
+Regards,
+Spoken Tutorial
     """.format(
         user.username,
+        "http://spoken-tutorial.org",
         "http://beta.spoken-tutorial.org/accounts/confirm/" + str(p.confirmation_code) + "/" + user.username
     )
 
     email = EmailMultiAlternatives(
-        subject,'', '',
-        [user.email],
-        headers={"Content-type":"text/html;charset=iso-8859-1"}
+        subject, message, 'administrator@spoken-tutorial.org',
+        to = [user.email], bcc = [], cc = [],
+        headers={'Reply-To': 'no-replay@spoken-tutorial.org', "Content-type":"text/html;charset=iso-8859-1"}
     )
 
-    email.attach_alternative(message, "text/html")
-    result = email.send(fail_silently=True)
+    #email.attach_alternative(message, "text/html")
 
 def confirm(request, confirmation_code, username):
     try:
