@@ -331,7 +331,7 @@ class TestForm(forms.Form):
                     invigilators = Invigilator.objects.filter(academic  = i.academic, status=1).exclude(user_id = user.id)
             ichoices = []
             for i in invigilators:
-                ichoices.insert(0, (i.user_id, i.user.username))
+                ichoices.insert(0, (i.id, i.user.username))
             ichoices.insert(0, ('', '-- None --'))
             self.fields['invigilator'].choices = ichoices
         
