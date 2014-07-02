@@ -1,0 +1,74 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load creationdata %}
+{% block title %}Testimonials{% endblock %}
+{% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
+{% block heading %}
+    <i class="fa fa-list-ul"></i> Testimonials
+{% endblock %}
+{% block search %}{% endblock %}
+{% block content %}
+    <div class="row well">
+        <div class='col-sm-8'>
+	        <form action="{{ action }}" method="post" class='form-horizontal' enctype="multipart/form-data">{% csrf_token %}
+		        {% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
+			        {% if form.non_field_errors %}
+			        <ul>
+			          {% for error in form.non_field_errors %}
+				        <li>{{ error }}</li>
+			          {% endfor %}
+			        </ul>
+			        {% endif %}
+			        <div class="form-group">
+				        <label for="id_state" class="col-sm-3 control-label">Actual Content</label>
+				        <div class="col-sm-9">
+				            {% render_field form.actual_content class+="form-control actual_content" tabindex="1" %}
+				            {{ form.actual_content.errors }}
+			            </div>
+			        </div>
+			         <div class="form-group">
+				        <label for="id_state" class="col-sm-3 control-label">Minified Content</label>
+				        <div class="col-sm-9">
+				            {% render_field form.minified_content class+="form-control minified_content" tabindex="1"%}
+				            {{ form.minified_content.errors }}
+			            </div>
+			        </div>
+			         <div class="form-group">
+				        <label for="id_state" class="col-sm-3 control-label">Short Description</label>
+				        <div class="col-sm-9">
+				            {% render_field form.short_description class+="form-control short_description" tabindex="1" %}
+				            {{ form.short_description.errors }}
+			            </div>
+			        </div>
+			         <div class="form-group">
+				        <label for="id_state" class="col-sm-3 control-label">Source Title</label>
+				        <div class="col-sm-9">
+				            {% render_field form.source_title class+="form-control source_title" tabindex="1" %}
+				            {{ form.source_title.errors }}
+			            </div>
+			        </div>
+			         <div class="form-group">
+				        <label for="id_state" class="col-sm-3 control-label">Source Link</label>
+				        <div class="col-sm-9">
+				            {% render_field form.source_link class+="form-control source_link" tabindex="1" %}
+				            {{ form.source_link.errors }}
+			            </div>
+			        </div>
+			        <div class="form-group">
+				        <label for="id_state" class="col-sm-3 control-label">Scan Copy</label>
+				        <div class="col-sm-9">
+				            {% render_field form.scan_copy class+="form-control scan_copy" tabindex="1" %}
+				            {{ form.scan_copy.errors }}
+			            </div>
+			        </div>
+	                <div class="form-group">
+                        <div class="col-sm-offset-3 col-sm-9">
+			                <input class="btn btn-primary" type="submit" value="Submit" />
+			             </div>
+			         </div>
+		        {% endwith %}
+            </form>
+        </div>
+    </div>
+{% endblock %}
