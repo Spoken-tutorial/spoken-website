@@ -1,6 +1,5 @@
 from django import forms
-from creation.models import FossCategory, Language
-
+from events.models import Testimonials
 class KeywordSearchForm(forms.Form):
     q = forms.CharField(required=True)
 
@@ -20,3 +19,12 @@ class TutorialSearchForm(forms.Form):
         )
     except:
         pass
+
+class TestimonialsForm(forms.ModelForm):
+    source_title = forms.CharField(required =  False)
+    source_link = forms.CharField(required =  False)
+    scan_copy = forms.FileField(label = 'Select a Scaned copy', required = True)
+    class Meta:
+        model = Testimonials
+        exclude = ['approved_by', 'user', 'status']
+

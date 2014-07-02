@@ -385,3 +385,19 @@ class WorkshopFeedback(models.Model):
     created = models.DateTimeField(auto_now_add = True)
     class Meta:
         unique_together = (("workshop", "mdluser_id"))
+        
+class Testimonials(models.Model):
+    user = models.ForeignKey(User, related_name = 'testimonial_created_by')
+    approved_by = models.ForeignKey(User, related_name = 'testimonial_approved_by', null=True)
+    actual_content = models.TextField()
+    minified_content = models.TextField()
+    short_description = models.TextField()
+    source_title = models.CharField(max_length=200)
+    source_link = models.URLField(null = True)
+    status = models.PositiveSmallIntegerField(default = 0)
+    created = models.DateTimeField(auto_now_add = True, null=True)
+    updated = models.DateTimeField(auto_now = True, null=True)
+    
+    def __unicode__(self):
+        return self.name
+

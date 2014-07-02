@@ -9,6 +9,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q
 from django.conf import settings
 from forms import *
+import os
+from django.http import Http404
 import json
 from creation.views import get_video_info
 from creation.models import TutorialCommonContent, TutorialDetail, TutorialResource
@@ -129,3 +131,76 @@ def get_language(request):
             
         elif foss and lang:
             pass
+
+def testimonials(request):
+    print "ddddd"
+        
+def testimonials_new(request):
+    ''' new testimonials '''
+    user = request.user
+    context = {}
+    form = TestimonialsForm()
+    if not user.is_authenticated():
+        raise Http404('You are not allowed to view this page')
+    
+    if request.method == 'POST':
+        form = TestimonialsForm(request.POST, request.FILES)
+        if form.is_valid():
+            form_data = form.save(commit=False)
+            form_data.user_id = user.id
+            form_data.save()
+            rid = form_data.id
+            file_type = ['application/pdf']
+            if 'scan_copy' in request.FILES:
+                if request.FILES['scan_copy'].content_type in file_type:
+                    file_path = settings.MEDIA_ROOT + 'testimonial/'
+                    try:
+                        os.mkdir(file_path)
+                    except Exception, e:
+                        print e
+                    file_path = settings.MEDIA_ROOT + 'testimonial/'+ str(rid) +'/'
+                    print "***********", file_path
+                    try:
+                        os.mkdir(file_path)
+                    except Exception, e:
+                        print e
+                    full_path = file_path + str(rid) +".pdf"
+                    fout = open(full_path, 'wb+')
+                    f = request.FILES['scan_copy']
+                    # Iterate through the chunks.
+                    for chunk in f.chunks():
+                        fout.write(chunk)
+                    fout.close()
+                        
+                        
+            messages.success(request, 'Testimonial has posted successfully!')
+            return HttpResponseRedirect('/')
+    context['form'] = form
+    context.update(csrf(request))
+    return render(request, 'spoken/templates/testimonial/form.html', context)
+def admin_testimonials_edit(request, rid):
+    user = request.user
+    context = {}
+    form = TestimonialsForm()
+    if not user.is_authenticated():
+        raise Http404('You are not allowed to view this page')
+    try:
+        form = TestimonialsForm(instance = Testimonials.objects.get(pk= rid))
+    except Exception, e:
+        print e
+    
+    
+    context['form'] = form
+    context.update(csrf(request))
+    return render(request, 'spoken/templates/testimonial/form.html', context)
+
+def admin_testimonials(request):
+    ''' admin testimonials '''
+    user = request.user
+    context = {}
+    if not user.is_authenticated():
+        raise Http404('You are not allowed to view this page')
+    collection = Testimonials.objects.all()
+    context['collection'] = collection
+    context.update(csrf(request))
+    return render(request, 'spoken/templates/testimonial/index.html', context)
