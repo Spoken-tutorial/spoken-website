@@ -4,7 +4,7 @@ import json
 import time
 import subprocess
 from decimal import Decimal
-from urllib2 import urlopen
+from urllib import urlopen, unquote_plus
 from hurry.filesize import size
 from django.conf import settings
 from django.views import generic
@@ -347,9 +347,7 @@ def upload_index(request):
         raise PermissionDenied()
     if request.method == 'POST':
         form = UploadTutorialForm(request.user, request.POST)
-        lang = None
         if form.is_valid():
-            lang = Language.objects.get(pk = int(request.POST['language']))
             common_content = TutorialCommonContent()
             if TutorialCommonContent.objects.filter(tutorial_detail_id = request.POST['tutorial_name']).count():
                 common_content = TutorialCommonContent.objects.get(tutorial_detail_id = request.POST['tutorial_name'])
@@ -367,7 +365,7 @@ def upload_index(request):
                 tutorial_resource = TutorialResource()
                 tutorial_resource.tutorial_detail = common_content.tutorial_detail
                 tutorial_resource.common_content = common_content
-                tutorial_resource.language = lang
+                tutorial_resource.language_id = request.POST['language']
                 tutorial_resource.outline_user = request.user
                 tutorial_resource.script_user = request.user
                 tutorial_resource.video_user = request.user
@@ -460,13 +458,13 @@ def ajax_upload_foss(request):
             for tutorial in tutorials:
                 data += '<option value="' + str(tutorial.id) + '">' + tutorial.tutorial + '</option>'
             if data:
-                data = '<option value=""></option>' + data
+                data = '<option value="">Select Tutorial</option>' + data
         elif foss:
-            languages = Language.objects.filter(id__in=ContributorRole.objects.filter(user_id=request.user.id, foss_category_id=foss).values_list('language_id'))
+            languages = Language.objects.filter(id__in = ContributorRole.objects.filter(user_id = request.user.id, foss_category_id = foss).values_list('language_id'))
             for language in languages:
                 data += '<option value="' + str(language.id) + '">' + language.name + '</option>'
             if data:
-                data = '<option value=""></option>' + data
+                data = '<option value="">Select Language</option>' + data
 
     return HttpResponse(json.dumps(data), mimetype='application/json')
 
@@ -610,7 +608,7 @@ def upload_timed_script(request):
         lang = None
         if form.is_valid():
             try:
-                return HttpResponseRedirect('/creation/upload/timed-script/' + request.POST.get('foss_category') + '/save/')
+                return HttpResponseRedirect('/creation/upload/timed-script/' + request.POST.get('tutorial_name') + '/save/')
             except Exception, e:
                 messages.error(request, str(e))
     context = {
@@ -627,6 +625,7 @@ def save_timed_script(request, tdid):
         tr_rec = TutorialResource.objects.select_related().get(tutorial_detail_id = tdid, language__name = 'English')
         ContributorRole.objects.get(user_id = request.user.id, foss_category_id = tr_rec.tutorial_detail.foss_id, language_id = tr_rec.language_id, status = 1)
     except Exception, e:
+        print e
         raise PermissionDenied()
     response_msg = ''
     error_msg = ''
@@ -800,11 +799,11 @@ def upload_component(request, trid, component):
                         file_path = settings.MEDIA_ROOT + 'videos/' + str(tr_rec.tutorial_detail.foss_id) + '/' + str(tr_rec.tutorial_detail.id) + '/'
                         full_path = file_path + file_name
                         if os.path.isfile(file_path + tr_rec.video) and tr_rec.video_status > 0:
-                            if 'isarchive' in request.POST and int(request.POST['isarchive']) > 0:
+                            if 'isarchive' in request.POST and int(request.POST.get('isarchive', 0)) > 0:
                                 archived_file = 'Archived-' + str(request.user.id) + '-' + str(int(time.time())) + '-' + tr_rec.video
                                 os.rename(file_path + tr_rec.video, file_path + archived_file)
                                 ArchivedVideo.objects.create(tutorial_resource = tr_rec, user = request.user, version = tr_rec.version, video = archived_file, atype = tr_rec.video_status)
-                                if int(request.POST['isarchive']) == 2:
+                                if int(request.POST.get('isarchive', 0)) == 2:
                                     tr_rec.version += 1
                         fout = open(full_path, 'wb+')
                         f = request.FILES['comp']
@@ -818,6 +817,7 @@ def upload_component(request, trid, component):
                         tr_rec.video_status = 1
                         if not tr_rec.version:
                             tr_rec.version = 1
+                        tr_rec.video_thumbnail_time = '00:' + request.POST.get('thumb_mins', '00') + ':' + request.POST.get('thumb_secs', '00')
                         tr_rec.save()
                         comp_log.save()
                         comp_title = tr_rec.tutorial_detail.foss.foss + ': ' + tr_rec.tutorial_detail.tutorial + ' - ' + tr_rec.language.name
@@ -1076,7 +1076,7 @@ def tutorials_needimprovement(request):
     tmp_recs = []
     con_roles = ContributorRole.objects.filter(user_id = request.user.id, status = 1)
     for rec in con_roles:
-        tr_recs = TutorialResource.objects.select_related().filter(tutorial_detail_id__in = TutorialDetail.objects.filter(foss_id = rec.foss_category_id).values_list('id'), language_id = rec.language_id, status = 0).order_by('updated')
+        tr_recs = TutorialResource.objects.select_related().filter(tutorial_detail__foss_id = rec.foss_category_id, language_id = rec.language_id, status = 0).order_by('updated')
         for tr_rec in tr_recs:
             flag = 1
             if tr_rec.language.name == 'English':
@@ -1227,8 +1227,12 @@ def accept_all(request, review, trid):
         'quality': 4
     }
     flag = 0
-    if not is_domainreviewer(request.user):
-        raise PermissionDenied()
+    if review == 'domain':
+        if not is_domainreviewer(request.user):
+            raise PermissionDenied()
+    else:
+        if not is_qualityreviewer(request.user):
+            raise PermissionDenied()
     try:
         tr = TutorialResource.objects.select_related().get(pk = trid, status = 0)
         comp_title = tr.tutorial_detail.foss.foss + ': ' + tr.tutorial_detail.tutorial + ' - ' + tr.language.name
@@ -1679,7 +1683,10 @@ def creation_view_tutorial(request, foss, tutorial, lang):
     if not is_contributor(request.user):
         raise PermissionDenied()
     try:
-        td_rec = TutorialDetail.objects.get(foss = FossCategory.objects.get(foss = foss.replace('-', ' ')), tutorial = tutorial.replace('-', ' '))
+        foss = unquote_plus(foss)
+        tutorial = unquote_plus(tutorial)
+        print tutorial
+        td_rec = TutorialDetail.objects.get(foss = FossCategory.objects.get(foss = foss), tutorial = tutorial)
         tr_rec = TutorialResource.objects.select_related().get(tutorial_detail = td_rec, language = Language.objects.get(name = lang))
         tr_recs = TutorialResource.objects.select_related().filter(tutorial_detail__in = TutorialDetail.objects.filter(foss = tr_rec.tutorial_detail.foss).order_by('order').values_list('id'), language = tr_rec.language)
     except Exception, e:

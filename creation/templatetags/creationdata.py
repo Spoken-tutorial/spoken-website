@@ -1,4 +1,5 @@
 import zipfile
+from urllib import quote_plus
 from django import template
 from django.contrib.auth.models import User
 from creation.models import *
@@ -7,7 +8,7 @@ from creation.views import is_contributor, is_internal_contributor, is_external_
 register = template.Library()
 
 def get_url_name(name):
-    return name.replace(' ', '-')
+    return quote_plus(name)
 
 def get_zip_content(path):
     file_names = None

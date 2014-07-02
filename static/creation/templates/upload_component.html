@@ -6,11 +6,21 @@
 {% block content %}
 	<form role="form" method="post" enctype="multipart/form-data" action="">
 		{% csrf_token %}
-		<div class="form-group">
-			{% render_field form.comp class+="form-control" %}
-			{{ form.comp.errors }}
-		</div>
+		<div class="well">
+		    <fieldset>
+			    {% render_field form.comp %}
+			    {{ form.comp.errors }}
+		    </fieldset>
+	    </div>
 		{% if title == "video" and tr.video_status > 0 %}
+	        <div class="form-group">
+	            <label for="id_isarchive">Video Thumbnail time</label>
+		        <div class="input-group">
+		            {% render_field form.thumb_mins class+="form-control" %}
+		            <span class="input-group-addon">:</span>
+		            {% render_field form.thumb_secs class+="form-control" %}
+		        </div>
+	        </div>
 		    <div class="form-group">
 		        <label for="id_isarchive">What to do with old video?</label>
 			    {% render_field form.isarchive class+="form-control" %}

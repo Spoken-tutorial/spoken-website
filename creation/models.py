@@ -94,6 +94,7 @@ class TutorialResource(models.Model):
     timed_script = models.URLField(max_length = 255)
 
     video = models.CharField(max_length = 255)
+    video_thumbnail_time = models.TimeField(default = '00:00:00')
     video_user = models.ForeignKey(User, related_name='videos')
     video_status = models.PositiveSmallIntegerField(default = 0)
 

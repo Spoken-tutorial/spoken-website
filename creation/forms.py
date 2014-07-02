@@ -38,8 +38,9 @@ class UploadPrerequisiteForm(forms.Form):
             if 'foss_category' in args[0]:
                 if args[0]['foss_category'] and args[0]['foss_category'] != '' and args[0]['foss_category'] != 'None':
                     initial_data = ''
-                    if args[0]['tutorial_name'] and args[0]['tutorial_name'] != '' and args[0]['tutorial_name'] != 'None':
-                        initial_data = args[0]['tutorial_name']
+                    if 'tutorial_name' in args[0]:
+                        if args[0]['tutorial_name'] and args[0]['tutorial_name'] != '' and args[0]['tutorial_name'] != 'None':
+                            initial_data = args[0]['tutorial_name']
                     td_list = TutorialDetail.objects.filter(foss_id = args[0]['foss_category']).values_list('id')
                     lang_rec = Language.objects.get(name = 'English')
                     choices = list(
@@ -251,13 +252,13 @@ class PublishToPending(forms.Form):
 
 class UploadTutorialForm(forms.Form):
     tutorial_name = forms.ChoiceField(
-        choices = [('', ''),],
+        choices = [('', 'Select Tutorial'),],
         widget=forms.Select(attrs = {'disabled': 'disabled'}),
         required = True,
         error_messages = {'required': 'Tutorial Name field is required.'}
     )
     language = forms.ChoiceField(
-        choices = [('', ''),],
+        choices = [('', 'Select Language'),],
         widget = forms.Select(attrs = {'disabled': 'disabled'}),
         required = True,
         error_messages = {'required': 'Language field is required.'}
@@ -274,7 +275,7 @@ class UploadTutorialForm(forms.Form):
                 )
             ).values_list('id', 'foss')
         )
-        foss_list.insert(0, ('', ''))
+        foss_list.insert(0, ('', 'Select FOSS category'))
         self.fields['foss_category'] = forms.ChoiceField(
             choices = foss_list,
             error_messages = {'required':'FOSS category field is required.'}
@@ -302,7 +303,7 @@ class UploadTutorialForm(forms.Form):
                     )
                     if len(choices):
                         self.fields['language'].widget.attrs = {}
-                    choices.insert(0, ('', ''))
+                    choices.insert(0, ('', 'Select Language'))
                     self.fields['language'].choices = choices
                     if initial_data:
                         self.fields['language'].initial = initial_data
@@ -346,11 +347,11 @@ class UploadTutorialForm(forms.Form):
                             ).values_list('id', 'tutorial'))
                         if len(choices):
                             self.fields['tutorial_name'].widget.attrs = {}
-                        choices.insert(0, ('', ''))
+                        choices.insert(0, ('', 'Select Tutorial'))
                         self.fields['tutorial_name'].choices = choices
                         self.fields['tutorial_name'].initial = tut_init_data
                     else:
-                        self.fields['tutorial_name'].choices = ''
+                        self.fields['tutorial_name'].choices = [('', 'Select Tutorial'),]
                         self.fields['tutorial_name'].widget.attrs = {'disabled': 'disabled'}
 
 class ComponentForm(forms.Form):
@@ -384,6 +385,26 @@ class ComponentForm(forms.Form):
     def __init__(self, comptype, *args, **kwargs):
         super(ComponentForm, self).__init__(*args, **kwargs)
         if comptype == 'video':
+            tmp_choices1 = []
+            tmp_choices2 = []
+            for i in range(60):
+                i_str = str(i)
+                if i < 10:
+                    i_str = '0' + i_str
+                tmp_choices1.append((i_str, i_str))
+                tmp_choices2.append((i_str, i_str))
+            tmp_choices1.insert(0, ('', 'Select Minutes'))
+            self.fields['thumb_mins'] = forms.ChoiceField(
+                choices = tmp_choices1,
+                widget=forms.Select(),
+                required = True,
+            )
+            tmp_choices2.insert(0, ('', 'Select Seconds'))
+            self.fields['thumb_secs'] = forms.ChoiceField(
+                choices = tmp_choices2,
+                widget=forms.Select(),
+                required = True,
+            )
             self.fields['isarchive'] = forms.ChoiceField(
                 choices = [(0, 'Replace old video'), (1, 'Archive old video as Correction'), (2, 'Archive old video as Version')],
                 widget=forms.Select(),

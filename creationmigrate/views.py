@@ -1,4 +1,6 @@
 from django.http import HttpResponse, HttpResponseRedirect
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
 from django.contrib.auth.models import User
 from django.shortcuts import render
 from cdeep.models import *
@@ -16,23 +18,21 @@ def test(request):
     row = TutorialResources.objects.get(pk=1)
     return HttpResponse(row.tutorial_content.tutorial_slide)
 
-def get_old_user(uid) {
+def get_old_user(uid):
     user = None
     try:
         user = Users.objects.get(pk = uid)
     except Exception, e:
         pass
     return user
-}
 
-def get_user(uid) {
+def get_user(uid):
     user = None
     try:
         user = User.objects.get(pk = uid)
     except Exception, e:
         pass
     return user
-}
 
 @login_required
 def users(request):
@@ -43,10 +43,11 @@ def users(request):
         name = row.name
         if len(name) > 30:
             name = row.mail
-            tmp_name = name.split("@")
-            name = tmp_name[0]
+            if len(name) > 30:
+                tmp_name = name.split("@")
+                name = tmp_name[0]
         try:
-            User.objects.get(email = row.mail, username = name)
+            User.objects.get(email = row.mail)
         except:
             try:
                 user = User.objects.get(username = name)
@@ -79,7 +80,7 @@ def languages(request):
         try:
             lang_row = Language.objects.get(name = row.name)
         except Exception, e:
-            Language.objects.create(name = name, user = request.user)
+            Language.objects.create(name = row.name, user = request.user)
     return HttpResponse('Success!')
 
 @login_required
@@ -93,9 +94,22 @@ def tutorial_details(request):
     }
     rows = TutorialDetails.objects.all()
     for row in rows:
-        foss_row = FossCategory.objects.get(foss = row.foss_category)
+        foss_row = FossCategory.objects.get(foss = row.foss_category.replace("-", " "))
         try:
             td_row = TutorialDetail.objects.get(foss = foss_row, tutorial = row.tutorial_name.replace("-", " "), level_id = levels[row.tutorial_level])
         except Exception, e:
             TutorialDetail.objects.create(foss = foss_row, tutorial = row.tutorial_name.replace("-", " "), level_id = levels[row.tutorial_level], order = row.order_code, user = request.user)
     return HttpResponse('Success!')
+
+@login_required
+def tutorial_common_contents(request):
+    if not is_administrator(request.user):
+        raise PermissionDenied()
+    levels = {
+        'C2': 1,
+        'C3': 2,
+        'C4': 3,
+    }
+    rows = TutorialCommonContents.objects.select_related().all()
+    for row in rows:
+        td_row = TutorialDetail.objects.get(foss__foss = row.tutorial_detail.foss_category)
