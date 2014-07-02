@@ -1,0 +1,35 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load cmsdata %}
+{% load creationdata %}
+{% block title %}Listing College Details{% endblock %}
+{% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
+{% block heading %}
+    <i class="fa fa-list-ul"></i> Listing College Details <a href="{% url 'events:events_dashboard' %}" class=' dashboard pull-right'>Dashboard</a>
+{% endblock %}
+{% block content %}
+    <div class='add-new'>
+	    <a class="btn btn-primary" href="{% url 'testimonials_new' %}">Add New</a>
+	</div>
+	<div class='table-responsive'>
+		{% if collection %}
+		    
+			<table class="paleblue table table-bordered table-hover table-striped">
+				{% for record in collection %}
+					<tr class="{% cycle 'odd' 'even' %}">
+						<td>{{ record.actual_content }}</td>
+						<td>{{ record.minified_content }}</td>
+						<td>{{ record.short_description }}</td>
+						<td>{{ record.source_title }}</td>
+						<td>{{ record.source_link }}</td>
+						<td>{{ record.status }}</td>
+						<td><a href="{% url 'admin_testimonials_edit' record.id %}">Edit</a></td>
+`					</tr>
+				{% endfor %}
+			</table>
+		{% else %}
+		    <p class="no-record"> No record found!</p>
+		{% endif %}
+	</div>
+{% endblock %}

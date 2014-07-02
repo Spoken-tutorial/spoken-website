@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 from forms import *
 from django.contrib import messages
 import xml.etree.cElementTree as etree
+from xml.etree.ElementTree import ElementTree
 # Create your views here.
 import hashlib
 from django.core.exceptions import PermissionDenied
@@ -121,8 +122,11 @@ def offline_details(request, wid, category):
     if request.method == 'POST':
         form = OfflineDataForm(request.POST, request.FILES)
         if form.is_valid():
-            xmlDocData = form.cleaned_data['xml_file'].read()
-            xmlDocTree = etree.XML(xmlDocData)
+            #xmlDocData = form.cleaned_data['xml_file'].read()
+            #xmlDocTree = etree.XML(xmlDocData)
+            tree = ElementTree()
+            data = tree.parse(form.cleaned_data['xml_file'])
+            details = data.getiterator("detail")
             try:
                 if category == 1:
                     w = Workshop.objects.get(id = wid)
@@ -141,20 +145,25 @@ def offline_details(request, wid, category):
                 firstname = studentDetails[0].text
                 lastname = studentDetails[1].text
                 gender =  studentDetails[2].text
-                email = studentDetails[4].text
+                email = studentDetails[4].text.lower()
                 #city = studentDetails[6].text
                 #country = studentDetails[7].text
                 #department = studentDetails[8].text
                 password = password_encript
+                username = firstname+' '+lastname
                 try:
-                    mdluser = MdlUser.objects.get(email = email)
+                    try:
+                        mdluser = MdlUser.objects.get(email = email)
+                    except:
+                        mdluser = MdlUser.objects.get(username = username)
+                        
                     print "Already exits!"
                 except Exception, e:
                     print e
                     mdluser = MdlUser()
                     mdluser.auth = 'manual'
                     mdluser.firstname = firstname
-                    mdluser.username = firstname+' '+lastname
+                    mdluser.username = username
                     mdluser.lastname = lastname
                     mdluser.password = password
                     mdluser.institution = w.academic_id
@@ -162,7 +171,7 @@ def offline_details(request, wid, category):
                     mdluser.confirmed = 1
                     mdluser.mnethostid = 1
                     mdluser.save()
-                    mdluser = MdlUser.objects.filter(email = email, firstname= firstname, username=firstname+' '+lastname, password=password).first()
+                    mdluser = MdlUser.objects.filter(email = email, firstname= firstname, username=username, password=password).first()
                     
                     # send password to email
                     subject  = "Spoken Tutorial Online Test password"
@@ -195,7 +204,7 @@ def offline_details(request, wid, category):
                         headers={'Reply-To': 'no-replay@spoken-tutorial.org', "Content-type":"text/html;charset=iso-8859-1"}
                     )
 
-                    result = email.send(fail_silently=False)
+                    #result = email.send(fail_silently=False)
                     #messages.success(request, "New password sent to your email "+user.email)
                     print "-----------------------------------------"
                     print message

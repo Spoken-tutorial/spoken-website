@@ -37,13 +37,9 @@
 					<td>{{ record.firstname }}</td>
 					<td>{{ record.lastname }}</td>
                     <td>
-                        {% if can_download_certificate %}
-                            {% if record.id|can_download_workshop_certificate:wc.id %}
-                                <a href="{% url 'events:workshop_participant_ceritificate' wc.id record.id %}">Certificate</a>
-                            {% else %}
-                                 {{ record.id|get_wparticipant_status:wc.id }}
-                            {% endif %} 
-					    {% endif %}
+                        {% if record.id|can_download_workshop_certificate:wc.id %}
+                            <a href="{% url 'events:workshop_participant_ceritificate' wc.id record.id %}">Certificate</a>
+                        {% endif %} 
 					</td>
 				</tr>
 			{% endfor %}

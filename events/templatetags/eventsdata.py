@@ -25,7 +25,7 @@ def get_wparticipant_status(key, wcode):
 def can_download_workshop_certificate(key, wcode):
     try:
         wa = WorkshopAttendance.objects.get(mdluser_id=key, workshop_id = wcode)
-        if wa.status == 2:
+        if wa.status > 0:
             return True
         return False
     except:

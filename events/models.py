@@ -168,7 +168,7 @@ class Course(models.Model):
         return self.name
         
 class Workshop(models.Model):
-    organiser = models.ForeignKey(User)
+    organiser = models.ForeignKey(Organiser)
     appoved_by = models.ForeignKey(User, related_name = 'workshop_approved_by', null=True)
     academic = models.ForeignKey(AcademicCenter)
     department = models.ManyToManyField(Department)
@@ -196,10 +196,10 @@ class TestCategory(models.Model):
         return self.name
         
 class Test(models.Model):
-    organiser = models.ForeignKey(User, related_name = 'test_organiser')
+    organiser = models.ForeignKey(Organiser, related_name = 'test_organiser')
     test_category = models.ForeignKey(TestCategory, related_name = 'test_category')
     appoved_by = models.ForeignKey(User, related_name = 'test_approved_by', null=True)
-    invigilator = models.ForeignKey(User)
+    invigilator = models.ForeignKey(Invigilator, related_name = 'test_invigilator')
     academic = models.ForeignKey(AcademicCenter)
     department = models.ManyToManyField(Department)
     workshop = models.ForeignKey(Workshop, null=True)
@@ -298,7 +298,7 @@ class EventsNotification(models.Model):
     created = models.DateTimeField(auto_now_add = True)
 
 class Training(models.Model):
-    organiser = models.ForeignKey(User)
+    organiser = models.ForeignKey(Organiser, related_name = 'training_organiser')
     appoved_by = models.ForeignKey(User, related_name = 'training_approved_by', null=True)
     academic = models.ForeignKey(AcademicCenter)
     department = models.ManyToManyField(Department)
@@ -385,3 +385,19 @@ class WorkshopFeedback(models.Model):
     created = models.DateTimeField(auto_now_add = True)
     class Meta:
         unique_together = (("workshop", "mdluser_id"))
+        
+class Testimonials(models.Model):
+    user = models.ForeignKey(User, related_name = 'testimonial_created_by')
+    approved_by = models.ForeignKey(User, related_name = 'testimonial_approved_by', null=True)
+    actual_content = models.TextField()
+    minified_content = models.TextField()
+    short_description = models.TextField()
+    source_title = models.CharField(max_length=200)
+    source_link = models.URLField(null = True)
+    status = models.PositiveSmallIntegerField(default = 0)
+    created = models.DateTimeField(auto_now_add = True, null=True)
+    updated = models.DateTimeField(auto_now = True, null=True)
+    
+    def __unicode__(self):
+        return self.name
+

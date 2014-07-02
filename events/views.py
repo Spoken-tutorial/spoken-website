@@ -604,7 +604,7 @@ def workshop_request(request, role):
         if form.is_valid():
             dateTime = request.POST['wdate'].split(' ')
             w = Workshop()
-            w.organiser_id = user.id
+            w.organiser_id = user.organiser.id
             #w.academic_id = request.POST['academic']
             w.academic = user.organiser.academic
             w.language_id = request.POST['language']
@@ -968,7 +968,7 @@ def workshop_participant_ceritificate(request, wid, participant_id):
             wcf = None
             # check if user can get certificate
             wa = WorkshopAttendance.objects.get(workshop_id = w.id, mdluser_id = participant_id)
-            if wa.status < 2:
+            if wa.status < 1:
                 raise Http404('Page not found')
             if wa.password:
                 certificate_pass = wa.password
@@ -1007,7 +1007,7 @@ def workshop_participant_ceritificate(request, wid, participant_id):
     imgDoc.drawImage(imgPath, 600, 100, 150, 76)    ## at (399,760) with size 160x160
 
     #paragraphe
-    text = "This is to certify that <b>"+mdluser.firstname +" "+mdluser.lastname+"</b> participated in the <b>"+w.foss.foss+"</b> workshop at <b>"+w.academic.institution_name+"</b> organized by <b>"+w.organiser.username+"</b> on <b>"+custom_strftime('%B {S} %Y', w.wdate)+"</b>.  This workshop was conducted with the instructional material created by the Spoken Tutorial Project, IIT Bombay, funded by the National Mission on Education through ICT, MHRD, Govt., of India."
+    text = "This is to certify that <b>"+mdluser.firstname +" "+mdluser.lastname+"</b> participated in the <b>"+w.foss.foss+"</b> workshop at <b>"+w.academic.institution_name+"</b> organized by <b>"+w.organiser.user.first_name + " "+w.organiser.user.last_name+"</b> on <b>"+custom_strftime('%B {S} %Y', w.wdate)+"</b>.  This workshop was conducted with the instructional material created by the Spoken Tutorial Project, IIT Bombay, funded by the National Mission on Education through ICT, MHRD, Govt., of India."
     
     centered = ParagraphStyle(name = 'centered',
         fontSize = 16,  
@@ -1048,7 +1048,7 @@ def test_request(request, role):
         if form.is_valid():
             dateTime = request.POST['tdate'].split(' ')
             t = Test()
-            t.organiser_id = user.id
+            t.organiser_id = user.organiser.id
             t.invigilator_id = form.cleaned_data['invigilator']
             #t.academic_id = form.cleaned_data['academic']
             t.academic = user.organiser.academic
@@ -1113,13 +1113,13 @@ def test_list(request, role, status):
                 collectionSet = Test.objects.filter(organiser_id=user, status = status_dict[status])
         elif is_invigilator(user) and role == 'invigilator':
             if status == 'ongoing':
-                collectionSet = Test.objects.filter((Q(status = 2) | Q(status = 3)), tdate = datetime.date.today(), invigilator_id = user)
+                collectionSet = Test.objects.filter((Q(status = 2) | Q(status = 3)), tdate = datetime.date.today(), invigilator_id = user.invigilator.id)
                 messages.info(request, "Click on the Attendance link below to see the participant list. To know more Click Here.")
             elif status == 'approved':
-                collectionSet = Test.objects.filter(invigilator_id=user, status = status_dict[status], tdate__gt=datetime.date.today())
+                collectionSet = Test.objects.filter(invigilator_id=user.invigilator.id, status = status_dict[status], tdate__gt=datetime.date.today())
             else:
                 todaytest = datetime.datetime.now().strftime("%Y-%m-%d")
-                collectionSet = Test.objects.filter(invigilator_id=user, status = status_dict[status])
+                collectionSet = Test.objects.filter(invigilator_id=user.invigilator.id, status = status_dict[status])
         
         if collectionSet == None:
             raise Http404('You are not allowed to view this page')
@@ -1169,7 +1169,7 @@ def test_edit(request, role, rid):
             #check if date time chenged or not
             if t.status == 2 and (str(t.tdate) != dateTime[0] or str(t.ttime)[0:5] != dateTime[1]):
                 t.status = 0
-            #t.organiser_id = user.id
+            #t.organiser_id = user.organiser.id
             t.test_category_id = form.cleaned_data['test_category']
             if int(form.cleaned_data['test_category']) == 1:
                 t.test_id = None
@@ -1230,7 +1230,8 @@ def test_approvel(request, role, rid):
             alert = "Test has been approved"
             logrole = 2
         if request.GET['status'] == 'invigilatoraccept':
-            message = "The Invigilator "+t.invigilator.first_name +" "+t.invigilator.last_name+" has approved "+t.foss.foss+" test dated "+t.tdate.strftime("%Y-%m-%d")
+            print "SSSSSSSSSSSSSSSSSSSSSSSSSSSSS"
+            message = "The Invigilator "+t.organiser.user.first_name +" "+t.organiser.user.last_name+" has approved "+t.foss.foss+" test dated "+t.tdate.strftime("%Y-%m-%d")
             status = 2
             logrole = 1
             alert = "Test has been approved"
@@ -1247,7 +1248,7 @@ def test_approvel(request, role, rid):
             logrole = 2
             alert = "Test has been rejected"
         if request.GET['status'] == 'invigilatorreject':
-            message = "The Invigilator "+t.invigilator.first_name +" "+t.invigilator.last_name+" has rejected "+t.foss.foss+" test dated "+t.tdate.strftime("%Y-%m-%d")
+            message = "The Invigilator "+t.organiser.user.first_name +" "+t.organiser.user.last_name+" has rejected "+t.foss.foss+" test dated "+t.tdate.strftime("%Y-%m-%d")
             status = 6
             logrole = 1
             alert = "Test has been rejected"
@@ -1480,7 +1481,7 @@ def test_participant_ceritificate(request, wid, participant_id):
     imgDoc.drawImage(imgPath, 600, 100, 150, 76)    ## at (399,760) with size 160x160
     
     #paragraphe
-    text = "This is to certify that <b>"+ta.mdluser_firstname +" "+ta.mdluser_lastname+"</b> has sucessfully completed <b>"+w.foss.foss+"</b> test organized at <b>"+w.academic.institution_name+"</b> by <b>"+w.invigilator.username+"</b>  with course material provided by the Take To A Teacher project at IIT Bombay.  <br /><br /><p>pasing on online exam, conducted remotly from IIT Bombay, is a pre-requisite for completing this workshop. <b>"+w.organiser.username+"</b> at <b>"+w.academic.institution_name+"</b> invigilated this examination. This workshop is offered by the <b>Spoken Tutorial project, IIT Bombay, funded by National Mission on Education through ICT, MHRD, Govt of India.</b></p>"
+    text = "This is to certify that <b>"+ta.mdluser_firstname +" "+ta.mdluser_lastname+"</b> has sucessfully completed <b>"+w.foss.foss+"</b> test organized at <b>"+w.academic.institution_name+"</b> by <b>"+w.invigilator.username+"</b>  with course material provided by the Take To A Teacher project at IIT Bombay.  <br /><br /><p>pasing on online exam, conducted remotly from IIT Bombay, is a pre-requisite for completing this workshop. <b>"+w.organiser.user.first_name + " "+w.organiser.user.last_name+"</b> at <b>"+w.academic.institution_name+"</b> invigilated this examination. This workshop is offered by the <b>Spoken Tutorial project, IIT Bombay, funded by National Mission on Education through ICT, MHRD, Govt of India.</b></p>"
     
     centered = ParagraphStyle(name = 'centered',
         fontSize = 16,  
@@ -1632,7 +1633,7 @@ def training_request(request, role):
         if form.is_valid():
             dateTime = request.POST['wdate'].split(' ')
             w = Training()
-            w.organiser_id = user.id
+            w.organiser_id = user.organiser.id
             #w.academic_id = request.POST['academic']
             
             w.course_id = request.POST['course']
@@ -1818,7 +1819,7 @@ def training_approvel(request, role, rid):
     tmp = 0
     if request.GET['status'] == 'completed':
         # calculate the participant list
-        wpcount = WorkshopAttendance.objects.filter(workshop_id = rid, status = 1).count()
+        wpcount = TrainingAttendance.objects.filter(training_id = rid, status = 1).count()
         w.participant_counts = wpcount
         tmp = 1
     w.save()
@@ -2034,7 +2035,7 @@ def training_participant_ceritificate(request, wid, participant_id):
     imgDoc.drawImage(imgPath, 600, 100, 150, 76)    ## at (399,760) with size 160x160
 
     #paragraphe
-    text = "This is to certify that <b>"+mdluser.firstname +" "+mdluser.lastname+"</b> participated in the <b>"+w.foss.foss+"</b> training at <b>"+w.academic.institution_name+"</b> organized by <b>"+w.organiser.username+"</b> on <b>"+custom_strftime('%B {S} %Y', w.trdate)+"</b>.  This training was conducted with the instructional material created by the Spoken Tutorial Project, IIT Bombay, funded by the National Mission on Education through ICT, MHRD, Govt., of India."
+    text = "This is to certify that <b>"+mdluser.firstname +" "+mdluser.lastname+"</b> participated in the <b>"+w.foss.foss+"</b> training at <b>"+w.academic.institution_name+"</b> organized by <b>"+w.organiser.user.first_name + " "+w.organiser.user.last_name+"</b> on <b>"+custom_strftime('%B {S} %Y', w.trdate)+"</b>.  This training was conducted with the instructional material created by the Spoken Tutorial Project, IIT Bombay, funded by the National Mission on Education through ICT, MHRD, Govt., of India."
     
     centered = ParagraphStyle(name = 'centered',
         fontSize = 16,  
