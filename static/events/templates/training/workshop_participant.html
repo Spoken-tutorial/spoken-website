@@ -5,7 +5,7 @@
 {% block title %}Workshop Participant Details{% endblock %}
 {% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
 {% block heading %}
-        <i class="fa fa-list-ul"></i> Participant Details<a href="{{ request.META.HTTP_REFERER }}" class='pull-right'>Go Back</a>
+        <i class="fa fa-list-ul"></i> Participant Details<a href="/software-training" class='pull-right'>Dashboard</a>
 {% endblock %}
 {% block content %}
     <div class="bs-callout bs-callout-info">
@@ -19,9 +19,9 @@
             <dt>Date</dt>
             <dd>{{ wc.trdate }}</dd>
             <dt>Participants Count</dt>
-            <dd>{{ pcount }}</dd>
+            <dd>{{ wc.participant_counts }}</dd>
             <dt>Organiser</dt>
-            <dd>{{ wc.organiser }}</dd>
+            <dd>{{ wc.organiser.user.first_name }} {{ wc.organiser.user.last_name }}</dd>
             {% if is_file_exits and user|is_resource_person and wc.status != 2 %}
                 <p>Please click <b>Mark as Complete</b> to end the training.</p><a href="{{file_path}}" target="_blank">View uploaded copy</a>
                 <a class='btn btn-primary' title = "To complete the training click here" href="{% url 'events:training_approvel' 'rp' wc.id %}?status=completed">Mark as Complete</a>

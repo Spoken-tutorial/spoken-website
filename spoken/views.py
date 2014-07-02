@@ -178,19 +178,30 @@ def testimonials_new(request):
     context['form'] = form
     context.update(csrf(request))
     return render(request, 'spoken/templates/testimonial/form.html', context)
+    
 def admin_testimonials_edit(request, rid):
     user = request.user
     context = {}
     form = TestimonialsForm()
+    instance = ''
     if not user.is_authenticated():
         raise Http404('You are not allowed to view this page')
     try:
-        form = TestimonialsForm(instance = Testimonials.objects.get(pk= rid))
+        instance = Testimonials.objects.get(pk= rid)
     except Exception, e:
+        raise Http404('Page not found')
         print e
+        
+    if request.method == 'POST':
+        form = TestimonialsForm(request.POST, request.FILES, instance = instance)
+        if form.is_valid():
+            form.save()
+            
     
     
+    form = TestimonialsForm(instance = instance)
     context['form'] = form
+    context['instance'] = instance
     context.update(csrf(request))
     return render(request, 'spoken/templates/testimonial/form.html', context)
 
