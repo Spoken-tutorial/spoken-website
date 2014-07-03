@@ -13,11 +13,22 @@ import os
 from django.http import Http404
 import json
 from creation.views import get_video_info
-from creation.models import TutorialCommonContent, TutorialDetail, TutorialResource
+from creation.models import TutorialCommonContent, TutorialDetail, TutorialResource, Language
 
 def home(request):
-    #messages.success(request, "User has already in the attendance list")
-    context = {}
+    tr_rec = ''
+    try:
+        tr_rec = TutorialResource.objects.all().order_by('?')[:1].first()
+    except Exception, e:
+        messages.error(request, str(e))
+    context = {
+        'tr_rec': tr_rec,
+        'media_url': settings.MEDIA_URL,
+    }
+    
+    testimonials = Testimonials.objects.all().order_by('?')[:2]
+    context['testimonials'] = testimonials
+    
     return render(request, 'spoken/templates/home.html', context)
 
 def get_or_query(terms, search_fields):

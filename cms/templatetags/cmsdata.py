@@ -4,6 +4,9 @@ from cms.sortable import *
 
 register = template.Library()
 
+def len_cutter(srting, limit):
+    return srting[:limit] + (srting[limit:] and '..')
+    
 def get_cms_sidebar():
     block = Block.objects.all().filter(block_location_id=3, visible__exact=1).order_by('position')
     context = {
@@ -85,6 +88,7 @@ def get_or_create_csrf_token(request):
     print token
     return token
     
+register.filter('len_cutter', len_cutter)
 register.inclusion_tag('cms/templates/sortable_header.html')(get_sortable_header)
 register.inclusion_tag('cms/templates/cmsnav.html')(get_cms_nav)
 register.inclusion_tag('cms/templates/cmsidebar.html')(get_cms_sidebar)
