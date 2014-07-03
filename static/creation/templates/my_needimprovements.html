@@ -1,6 +1,7 @@
 {% extends 'spoken/templates/base.html' %}
 {% load widget_tweaks %}
 {% load static %}
+{% load cmsdata %}
 {% load creationdata %}
 {% block title %}Tutorials under Need Improvement state{% endblock %}
 {% block heading %}<i class="fa fa-list-ul"></i> Tutorials under Need Improvement state{% endblock %}
@@ -11,29 +12,15 @@
         <li><a href="/creation/upload/contributed/">Tutorials Contributed</a></li>
     </ul>
     <div class="table-responsive">
-        <table class="table table-bordered table-hover">
+        <table class="paleblue table table-bordered table-hover">
         {% if not tr_recs|length %}
             <tr>
                 <td colspan="5" class="col-center">List is empty!</td>
             </tr>
         {% else %}
-            <tr class="active">
-                <th>S.No</th>
-                <th>Foss</th>
-                <th>Tutorial Name</th>
-                <th>Language</th>
-                <th>Outline</th>
-                <th>Script</th>
-                <th>Slide</th>
-                <th>Video</th>
-                <th>Code Files</th>
-                <th>Assignment</th>
-                <th>Prerequisite</th>
-                <th>Keywords</th>
-                <th>Status</th>
-            </tr>
+            {% get_sortable_header header ordering request.GET %}
             {% for tr_rec in tr_recs %}
-                <tr>
+                <tr class="{% cycle 'odd' 'even' %}">
                     <td>{{ forloop.counter }}</td>
                     <td>{{ tr_rec.tutorial_detail.foss.foss }}</td>
                     <td><a href="/creation/upload/tutorial/{{ tr_rec.id }}/">{{ tr_rec.tutorial_detail.tutorial }}</td>

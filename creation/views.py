@@ -22,6 +22,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render, render_to_response
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from creation.forms import *
 from creation.models import *
 from cms.sortable import *
@@ -47,6 +48,16 @@ def roles_list(request):
         'rows': rows
     }
     return render(request, "creation/templates/template1.html", context)
+
+def get_page(resource, page):
+    paginator = Paginator(resource, 2)
+    try:
+        resource =  paginator.page(page)
+    except PageNotAnInteger:
+        resource =  paginator.page(1)
+    except EmptyPage:
+        resource = paginator.page(paginator.num_pages)
+    return resource
 
 def is_contributor(user):
     """Check if the user is having contributor rights"""
@@ -967,11 +978,11 @@ def view_component(request, trid, component):
 
 @login_required
 def tutorials_contributed(request):
-    tmp_recs = []
+    tmp_ids = []
     if is_contributor(request.user):
         foss_contrib_list = ContributorRole.objects.filter(user = request.user, status = 1)
         for foss_contrib in foss_contrib_list:
-            tr_recs = TutorialResource.objects.select_related().filter(tutorial_detail_id__in = TutorialDetail.objects.filter(foss_id = foss_contrib.foss_category_id).values_list('id'), language_id = foss_contrib.language_id)
+            tr_recs = TutorialResource.objects.select_related().filter(tutorial_detail__foss_id = foss_contrib.foss_category_id, language_id = foss_contrib.language_id)
             for tr_rec in tr_recs:
                 flag = 1
                 if tr_rec.language.name == 'English':
@@ -980,9 +991,39 @@ def tutorials_contributed(request):
                 else:
                     flag = 0
                 if flag == 1 or (tr_rec.outline_user_id == request.user.id and tr_rec.outline_status > 0) or (tr_rec.script_user_id == request.user.id and tr_rec.script_status > 0) or (tr_rec.video_user_id == request.user.id and tr_rec.video_status > 0):
-                    tmp_recs.append(tr_rec)
+                    tmp_ids.append(tr_rec.id)
+        tmp_recs = None
+        ordering = ''
+        header = ''
+        try:
+            tmp_recs = TutorialResource.objects.filter(id__in = tmp_ids)
+            raw_get_data = request.GET.get('o', None)
+            header = {
+                1: SortableHeader('S.No', False),
+                2: SortableHeader('tutorial_detail__foss__foss', True, 'Foss'),
+                3: SortableHeader('tutorial_detail__tutorial', True, 'Tutorial Name'),
+                4: SortableHeader('language__name', True, 'Language'),
+                5: SortableHeader('outline_status', True, 'Outline'),
+                6: SortableHeader('script_status', True, 'Script'),
+                7: SortableHeader('common_content__slide_status', True, 'Slide'),
+                8: SortableHeader('video_status', True, 'Video'),
+                9: SortableHeader('common_content__code_status', True, 'Codefiles'),
+                10: SortableHeader('common_content__assignment_status', True, 'Assignment'),
+                11: SortableHeader('common_content__prerequisite_status', True, 'Prerequisite'),
+                12: SortableHeader('common_content__keyword_status', True, 'Keywords'),
+                13: SortableHeader('Status', False)
+            }
+            tmp_recs = get_sorted_list(request, tmp_recs, header, raw_get_data)
+            ordering = get_field_index(raw_get_data)
+            page = request.GET.get('page')
+            tmp_recs = get_page(tmp_recs, page)
+        except:
+            pass
+
         context = {
             'tr_recs': tmp_recs,
+            'header': header,
+            'ordering': ordering,
             'media_url': settings.MEDIA_URL
         }
         return render(request, 'creation/templates/my_contribs.html', context)
@@ -1073,10 +1114,10 @@ def admin_reviewed_video(request):
 def tutorials_needimprovement(request):
     if not is_contributor(request.user):
         raise PermissionDenied()
-    tmp_recs = []
+    tmp_ids = []
     con_roles = ContributorRole.objects.filter(user_id = request.user.id, status = 1)
     for rec in con_roles:
-        tr_recs = TutorialResource.objects.select_related().filter(tutorial_detail__foss_id = rec.foss_category_id, language_id = rec.language_id, status = 0).order_by('updated')
+        tr_recs = TutorialResource.objects.select_related().filter(tutorial_detail__foss_id = rec.foss_category_id, language_id = rec.language_id, status = 0)
         for tr_rec in tr_recs:
             flag = 1
             if tr_rec.language.name == 'English':
@@ -1085,9 +1126,39 @@ def tutorials_needimprovement(request):
             else:
                 flag = 0
             if flag or tr_rec.outline_status == 5 or tr_rec.script_status == 5 or tr_rec.video_status == 5:
-                tmp_recs.append(tr_rec)
+                tmp_ids.append(tr_rec.id)
+    tmp_recs = None
+    ordering = ''
+    header = ''
+    try:
+        tmp_recs = TutorialResource.objects.filter(id__in = tmp_ids)
+        raw_get_data = request.GET.get('o', None)
+        header = {
+            1: SortableHeader('S.No', False),
+            2: SortableHeader('tutorial_detail__foss__foss', True, 'Foss'),
+            3: SortableHeader('tutorial_detail__tutorial', True, 'Tutorial Name'),
+            4: SortableHeader('language__name', True, 'Language'),
+            5: SortableHeader('outline_status', True, 'Outline'),
+            6: SortableHeader('script_status', True, 'Script'),
+            7: SortableHeader('common_content__slide_status', True, 'Slide'),
+            8: SortableHeader('video_status', True, 'Video'),
+            9: SortableHeader('common_content__code_status', True, 'Codefiles'),
+            10: SortableHeader('common_content__assignment_status', True, 'Assignment'),
+            11: SortableHeader('common_content__prerequisite_status', True, 'Prerequisite'),
+            12: SortableHeader('common_content__keyword_status', True, 'Keywords'),
+            13: SortableHeader('Status', False)
+        }
+        tmp_recs = get_sorted_list(request, tmp_recs, header, raw_get_data)
+        ordering = get_field_index(raw_get_data)
+        page = request.GET.get('page')
+        tmp_recs = get_page(tmp_recs, page)
+    except:
+        pass
+
     context = {
-        'tr_recs': sorted(tmp_recs, key=lambda tutorial_resource: tutorial_resource.updated)
+        'tr_recs': tmp_recs,
+        'header': header,
+        'ordering': ordering
     }
     return render(request, 'creation/templates/my_needimprovements.html', context)
 
