@@ -856,6 +856,8 @@ def workshop_attendance(request, wid):
         raise Http404('You are not allowed to view this page')
     try:
         workshop = Workshop.objects.get(pk = wid) 
+        if workshop.status == 2:
+            raise Http404('Page not found ')
     except:
         raise Http404('Page not found ')
     #todo check request user and workshop organiser same or not
@@ -921,8 +923,10 @@ def workshop_participant(request, wid=None):
             wc = Workshop.objects.get(id=wid)
         except:
             raise Http404('Page not found')
-            
-        workshop_mdlusers = WorkshopAttendance.objects.using('default').filter(workshop_id=wid).values_list('mdluser_id')
+        if wc.status == 2:
+            workshop_mdlusers = WorkshopAttendance.objects.using('default').filter(workshop_id=wid, status__gt = 0).values_list('mdluser_id')
+        else:
+            workshop_mdlusers = WorkshopAttendance.objects.using('default').filter(workshop_id=wid).values_list('mdluser_id')
         ids = []
         for wp in workshop_mdlusers:
             ids.append(wp[0])
@@ -1003,11 +1007,11 @@ def workshop_participant_ceritificate(request, wid, participant_id):
     
 
     # Draw image on Canvas and save PDF in buffer
-    imgPath = "/home/deer/sign.jpg"
+    imgPath = settings.MEDIA_ROOT +"sign.jpg"
     imgDoc.drawImage(imgPath, 600, 100, 150, 76)    ## at (399,760) with size 160x160
 
     #paragraphe
-    text = "This is to certify that <b>"+mdluser.firstname +" "+mdluser.lastname+"</b> participated in the <b>"+w.foss.foss+"</b> workshop at <b>"+w.academic.institution_name+"</b> organized by <b>"+w.organiser.user.first_name + " "+w.organiser.user.last_name+"</b> on <b>"+custom_strftime('%B {S} %Y', w.wdate)+"</b>.  This workshop was conducted with the instructional material created by the Spoken Tutorial Project, IIT Bombay, funded by the National Mission on Education through ICT, MHRD, Govt., of India."
+    text = "This is to certify that <b>"+mdluser.firstname +" "+mdluser.lastname+"</b> participated in the <b>"+w.foss.foss+"</b> workshop organized at <b>"+w.academic.institution_name+"</b> by  <b>"+w.organiser.user.first_name + " "+w.organiser.user.last_name+"</b> on <b>"+custom_strftime('%B {S} %Y', w.wdate)+"</b> with course material provided by the Talk To A Teacher project at IIT Bombay.<br /><br />A comprehensive set of topics pertaining to <b>"+w.foss.foss+"</b> were covered in the workshop. This workshop is offered by the Spoken Tutorial project, IIT Bombay, funded by National Mission on Education through ICT, MHRD, Govt., of India."
     
     centered = ParagraphStyle(name = 'centered',
         fontSize = 16,  
@@ -1017,12 +1021,12 @@ def workshop_participant_ceritificate(request, wid, participant_id):
 
     p = Paragraph(text, centered)
     p.wrap(650, 200)
-    p.drawOn(imgDoc, 4.2 * cm, 9 * cm)
+    p.drawOn(imgDoc, 4.2 * cm, 7 * cm)
 
     imgDoc.save()
 
     # Use PyPDF to merge the image-PDF into the template
-    page = PdfFileReader(file("/home/deer/Blank-Certificate.pdf","rb")).getPage(0)
+    page = PdfFileReader(file(settings.MEDIA_ROOT +"Blank-Certificate.pdf","rb")).getPage(0)
     overlay = PdfFileReader(StringIO(imgTemp.getvalue())).getPage(0)
     page.mergePage(overlay)
 
@@ -1477,7 +1481,7 @@ def test_participant_ceritificate(request, wid, participant_id):
     
 
     # Draw image on Canvas and save PDF in buffer
-    imgPath = "/home/deer/sign.jpg"
+    imgPath = settings.MEDIA_ROOT +"sign.jpg"
     imgDoc.drawImage(imgPath, 600, 100, 150, 76)    ## at (399,760) with size 160x160
     
     #paragraphe
@@ -1509,7 +1513,7 @@ def test_participant_ceritificate(request, wid, participant_id):
     imgDoc.save()
 
     # Use PyPDF to merge the image-PDF into the template
-    page = PdfFileReader(file("/home/deer/Blank-Certificate.pdf","rb")).getPage(0)
+    page = PdfFileReader(file(settings.MEDIA_ROOT +"Blank-Certificate.pdf","rb")).getPage(0)
     overlay = PdfFileReader(StringIO(imgTemp.getvalue())).getPage(0)
     page.mergePage(overlay)
 
@@ -1849,8 +1853,10 @@ def training_participant(request, wid=None):
             wc = Training.objects.get(id=wid)
         except:
             raise Http404('Page not found')
-            
-        workshop_mdlusers = TrainingAttendance.objects.using('default').filter(training_id=wid).values_list('mdluser_id')
+        if wc.status == 2:
+            workshop_mdlusers = TrainingAttendance.objects.using('default').filter(training_id=wid, status__gt = 0).values_list('mdluser_id')
+        else:
+            workshop_mdlusers = TrainingAttendance.objects.using('default').filter(training_id=wid).values_list('mdluser_id')
         ids = []
         for wp in workshop_mdlusers:
             ids.append(wp[0])
@@ -2031,7 +2037,7 @@ def training_participant_ceritificate(request, wid, participant_id):
     
 
     # Draw image on Canvas and save PDF in buffer
-    imgPath = "/home/deer/sign.jpg"
+    imgPath = settings.MEDIA_ROOT +"sign.jpg"
     imgDoc.drawImage(imgPath, 600, 100, 150, 76)    ## at (399,760) with size 160x160
 
     #paragraphe
@@ -2050,7 +2056,7 @@ def training_participant_ceritificate(request, wid, participant_id):
     imgDoc.save()
 
     # Use PyPDF to merge the image-PDF into the template
-    page = PdfFileReader(file("/home/deer/Blank-Certificate.pdf","rb")).getPage(0)
+    page = PdfFileReader(file(settings.MEDIA_ROOT +"Blank-Certificate.pdf","rb")).getPage(0)
     overlay = PdfFileReader(StringIO(imgTemp.getvalue())).getPage(0)
     page.mergePage(overlay)
 

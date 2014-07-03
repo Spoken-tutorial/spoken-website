@@ -19,9 +19,9 @@
             <dt>Date</dt>
             <dd>{{ wc.wdate }}</dd>
             <dt>Participants Count</dt>
-            <dd>{{ pcount }}</dd>
+            <dd>{{ wc.participant_counts }}</dd>
             <dt>Organiser</dt>
-            <dd>{{ wc.organiser }}</dd>
+            <dd>{{ wc.organiser.user.first_name }} {{ wc.organiser.user.last_name }}</dd>
         </dl>
     </div>
 	<div class="" id="pending">

@@ -23,8 +23,9 @@ class TutorialSearchForm(forms.Form):
 class TestimonialsForm(forms.ModelForm):
     source_title = forms.CharField(required =  False)
     source_link = forms.CharField(required =  False)
-    scan_copy = forms.FileField(label = 'Select a Scaned copy', required = True)
+    scan_copy = forms.FileField(label = 'Select a Scaned copy', required = False)
+    status = forms.BooleanField(required = False)
     class Meta:
         model = Testimonials
-        exclude = ['approved_by', 'user', 'status']
+        exclude = ['approved_by', 'user']
 

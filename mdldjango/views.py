@@ -137,7 +137,7 @@ def offline_details(request, wid, category):
             except:
                 print "Error"
                 
-            for studentDetails in xmlDocTree.iter('detail'):
+            for studentDetails in details:
                 password_string = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(8))
                 password_encript = encript_password(password_string)
             
