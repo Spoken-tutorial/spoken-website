@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.core.context_processors import csrf
 from models import MdlUser
-from events.models import WorkshopAttendance
+from events.models import TrainingAttendance
 from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 from forms import *

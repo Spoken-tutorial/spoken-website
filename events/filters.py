@@ -25,12 +25,6 @@ class InvigilatorFilter(django_filters.FilterSet):
         model = Invigilator
         fields = ['academic__state', 'academic__institution_type', 'academic__institute_category']
 
-class WorkshopFilter(django_filters.FilterSet):
-    workshop_type = django_filters.ChoiceFilter(choices = (('', '---------'), (0,'Workshop'), (1, 'Pilot Workshop'), (2, 'Live Workshop'),))
-    class Meta:
-        model = Workshop
-        fields = ['academic__state', 'foss', 'workshop_type']
-
 class TrainingFilter(django_filters.FilterSet):
     class Meta:
         model = Training

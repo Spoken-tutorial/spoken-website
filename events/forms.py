@@ -145,17 +145,28 @@ class DepartmentForm(forms.ModelForm):
     class Meta:
         model = Department
 
-class WorkshopForm(forms.Form):
-    #state_list = list(State.objects.exclude(name='Uncategorized').values_list('id', 'name'))
-    #state_list.insert(0, ('', '-- None --'))
-    #state = forms.ChoiceField(choices = state_list, widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'State field is required.'})
-    #district = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'district field is required.'})
-    #academic = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'College Name field is required.'})
-    workshop_type = forms.ChoiceField(choices = [(0, 'Workshop (Default)'), (1, 'Pilot Workshop'), (2, 'Live Workshop')], widget=forms.Select(attrs = {}), required = False)
-    department = forms.MultipleChoiceField(choices = [('', '-- None --'),], widget=forms.SelectMultiple(attrs = {}), required = True, error_messages = {'required':'Department Name field is required.'})
-    wdate = forms.DateTimeField(required = True, error_messages = {'required':'Date field is required.'})
-    foss = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'Foss field is required.'})
-    language = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'Language field is required.'})
+class TrainingForm(forms.ModelForm):
+    class Meta:
+        model = Training
+        exclude = ['status', 'participant_counts', 'extra_fields', 'organiser', 'academic', 'training_code', 'trtime', 'appoved_by']
+    
+    def clean_course_number(self):
+        super(TrainingForm, self).clean()
+        if 'training_type' in self.cleaned_data:
+            if self.cleaned_data['training_type'] == '0' and self.cleaned_data['course_number'] == '':
+                raise forms.ValidationError("Course Number field is required.")
+                
+    training_type = forms.ChoiceField(widget=forms.RadioSelect, choices = [(0, 'Training'),(1, 'Workshop')], required = True)
+    course_number = forms.CharField(required = False)
+    tester = forms.CharField(required = False)
+
+    department = forms.ModelMultipleChoiceField(label='Department', cache_choices=True, widget = forms.SelectMultiple(attrs = {}), queryset = Department.objects.exclude(name='Uncategorized'), help_text = "", error_messages = {'required':'State field required.'})
+    
+    foss = forms.ModelChoiceField(label='Foss', cache_choices=True, widget = forms.Select(attrs = {}), queryset = FossCategory.objects.all(), help_text = "", error_messages = {'required':'Foss field required.'})
+    
+    language = forms.ModelChoiceField(label='Language', cache_choices=True, widget = forms.Select(attrs = {}), queryset = Language.objects.all(), help_text = "", error_messages = {'required':'Language field required.'})
+    
+    trdate = forms.DateTimeField(required = True, error_messages = {'required':'Date field is required.'})
     skype = forms.ChoiceField(widget=forms.RadioSelect, choices=[(0, 'No'),(1, 'Yes')], required = True)
     def __init__(self, *args, **kwargs):
         user = ''
@@ -165,44 +176,24 @@ class WorkshopForm(forms.Form):
         instance = ''
         if 'instance' in kwargs:
             instance = kwargs["instance"]
-            del kwargs["instance"]
-        super(WorkshopForm, self).__init__(*args, **kwargs)
-        #choices data 
-        self.fields['department'].choices = Department.objects.exclude(name='Uncategorized').values_list('id', 'name')
-
-        foss_list = list(FossCategory.objects.all().values_list('id', 'foss'))
-        foss_list.insert(0, ('', '-- None --'))
-        lang_list = list(Language.objects.all().values_list('id', 'name'))
-        lang_list.insert(0, ('', '-- None --'))
-        self.fields['foss'].choices = foss_list
-        self.fields['language'].choices = lang_list
-        #if user:
-        #    self.fields['state'].initial = user.organiser.academic.state.id
-        #    self.fields['district'].choices = District.objects.filter(state =user.organiser.academic.state).values_list('id', 'name')
-        #    self.fields['district'].initial = user.organiser.academic.district.id
-        #    if args and 'district' in args[0]:
-        #            choices = AcademicCenter.objects.filter(district =args[0]['district']).values_list('id', 'institution_name')
-        #    else:
-        #        choices = AcademicCenter.objects.filter(district =user.organiser.academic.district).values_list('id', 'institution_name')
-        #        
-        #    self.fields['academic'].choices = choices
-        #    self.fields['academic'].initial = user.organiser.academic.id
+        super(TrainingForm, self).__init__(*args, **kwargs)
+        if user:
+            from events.views import is_resource_person
+            if is_resource_person(user):
+                self.fields['training_type'].choices = [(0, 'Training'),(1, 'Workshop'),(2, 'Pilot Workshop'), (3, 'Live Workshop')]
         if instance:
-            #self.fields['state'].initial = user.organiser.academic.state.id
-            #self.fields['district'].choices = District.objects.filter(state =instance.academic.state).values_list('id', 'name')
-            #self.fields['district'].initial = instance.academic.district.id
-            #self.fields['academic'].choices = AcademicCenter.objects.filter(district =instance.academic.district).values_list('id', 'institution_name')
-            #self.fields['academic'].initial = instance.academic_id
-            self.fields['department'].initial = instance.department.all().values_list('id', flat=True)
+            self.fields['training_type'].initial = instance.training_type
             try:
-                self.fields['wdate'].initial = str(instance.wdate) + " " + str(instance.wtime)[0:5]
+                self.fields['trdate'].initial = str(instance.trdate) + " " + str(instance.trtime)[0:5]
             except Exception, e:
                 print e
-                self.fields['wdate'].initial = str(instance.trdate) + " " + str(instance.trtime)[0:5]
-            self.fields['foss'].initial = instance.foss_id
-            self.fields['language'].initial = instance.language_id
-            self.fields['skype'].initial = instance.skype
-
+                self.fields['trdate'].initial = str(instance.trdate) + " " + str(instance.trtime)[0:5]
+            try:
+                self.fields['course_number'].initial = instance.extra_fields.paper_name
+            except Exception, e:
+                print e
+                self.fields['course_number'].initial = ''
+            
 class WorkshopPermissionForm(forms.Form):
     try:
         permission_choices = list(PermissionType.objects.all().values_list('id', 'name'))
@@ -396,7 +387,7 @@ class ParticipantSearchForm(forms.Form):
     email = forms.EmailField(required = False)
     username = forms.CharField(required =  False)
 
-class TrainingForm(forms.Form):
+'''class TrainingForm(forms.Form):
     department = forms.MultipleChoiceField(choices = [('', '-- None --'),], widget=forms.SelectMultiple(attrs = {}), required = True, error_messages = {'required':'Department Name field is required.'})
     try:
         course = forms.ChoiceField(choices = [('', '-- None --')] + list(Course.objects.all().values_list('id', 'name')), required = True, error_messages = {'required':'Course Name field is required.'})
@@ -439,3 +430,4 @@ class TrainingForm(forms.Form):
             self.fields['foss'].initial = instance.foss_id
             self.fields['language'].initial = instance.language_id
             self.fields['skype'].initial = instance.skype
+'''
