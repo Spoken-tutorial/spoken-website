@@ -115,12 +115,12 @@ def add_participant(request, cid, category ):
     if userid:
         if category == 'Training':
             try:
-                wa = WorkshopAttendance.objects.get(mdluser_id = userid, workshop_id = cid)
+                wa = TrainingAttendance.objects.get(mdluser_id = userid, training_id = cid)
                 print wa.id, " => Exits"
                 messages.success(request, "User has already in the attendance list")
             except:
-                wa = WorkshopAttendance()
-                wa.workshop_id = cid
+                wa = TrainingAttendance()
+                wa.training_id = cid
                 wa.mdluser_id = userid
                 wa.status = 0
                 wa.save()
@@ -608,10 +608,11 @@ def training_request(request, role, rid = None):
             w = Training()
             if rid:
                 w = Training.objects.get(pk = rid)
+            else:
+                w.organiser_id = user.organiser.id
+                w.academic = user.organiser.academic
             w.course_id = request.POST['course']
             w.training_type = request.POST['training_type']
-            w.organiser_id = user.organiser.id
-            w.academic = user.organiser.academic
             w.language_id = request.POST['language']
             w.foss_id = request.POST['foss']
             w.trdate = dateTime[0]
@@ -646,13 +647,15 @@ def training_request(request, role, rid = None):
                 print "Not training"
                 
             w.save()
-            #messages.success(request, "You will receive a workshop confirmation mail shortly. Thank you. ")
+            messages.success(request, "Please upload the attendance sheet. ")
             #update logs
-            #message = form_data.academic.institution_name+" has made a workshop request for "+form_data.foss.foss+" on "+form_data.trdate
-            #update_events_log(user_id = user.id, role = 0, category = 0, category_id = form_data.id, academic = form_data.academic_id, status = 0)
-            #update_events_notification(user_id = user.id, role = 0, category = 0, category_id = form_data.id, academic = form_data.academic_id, status = 0, message = message)
+            message = w.academic.institution_name+" has made a workshop request for "+w.foss.foss+" on "+w.trdate
+            update_events_log(user_id = user.id, role = 0, category = 0, category_id = w.id, academic = w.academic_id, status = 0)
+            update_events_notification(user_id = user.id, role = 0, category = 0, category_id = w.id, academic = w.academic_id, status = 0, message = message)
             
-            return HttpResponseRedirect("/software-training/training/organiser/pending/")
+            if role == 'organiser' and not rid:
+                return HttpResponseRedirect("/software-training/training/" + str(w.id) + "/attendance/")
+            return HttpResponseRedirect("/software-training/training/" + role + "/pending/")
         messages.error(request, "Please fill the following details ")
         context = {'form' : form, 'role' : role, 'status' : 'request'}
         return render(request, 'events/templates/training/form.html', context)
@@ -673,7 +676,7 @@ def training_list(request, role, status):
     if not (user.is_authenticated() and ( is_organiser(user) or is_resource_person(user) or is_event_manager(user))):
         raise Http404('You are not allowed to view this page')
         
-    status_dict = {'pending': 0, 'approved' : 1, 'completed' : 2, 'rejected' : 3, 'reschedule' : 1, 'ongoing': 1}
+    status_dict = {'pending': 0, 'approved' : 2, 'completed' : 4, 'rejected' : 5, 'reschedule' : 2, 'ongoing': 2}
     if status in status_dict:
         context = {}
         collectionSet = None
@@ -683,14 +686,19 @@ def training_list(request, role, status):
             if status == 'approved':
                 collectionSet = Training.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status], trdate__gt=datetime.date.today())
             elif status =='ongoing':
-                collectionSet = Training.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = 1, trdate=datetime.date.today())
+                collectionSet = Training.objects.filter((Q(status = 2) | Q(status = 3)), academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), trdate=datetime.date.today())
+            elif status =='pending':
+                collectionSet = Training.objects.filter((Q(status = 0) | Q(status = 1)), academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), trdate__gte = datetime.date.today())
+                
             else:
                 collectionSet = Training.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status])
         elif is_organiser(user) and role == 'organiser':
             if status == 'approved':
                 collectionSet = Training.objects.filter(organiser_id=user, status = status_dict[status], trdate__gt=datetime.date.today())
             elif status == 'ongoing' :
-                collectionSet = Training.objects.filter(organiser_id=user, status = status_dict[status], trdate=datetime.date.today())
+                collectionSet = Training.objects.filter((Q(status = 2) | Q(status = 3)), organiser_id=user, trdate=datetime.date.today())
+            elif status == 'pending' :
+                collectionSet = Training.objects.filter((Q(status = 0) | Q(status = 1)), organiser_id=user, trdate__gte=datetime.date.today())
             else:
                 collectionSet = Training.objects.filter(organiser_id=user, status = status_dict[status])
         
@@ -737,11 +745,11 @@ def training_approvel(request, role, rid):
     try:
         w = Training.objects.get(pk=rid)
         if request.GET['status'] == 'accept':
-            status = 1
-        if request.GET['status'] == 'reject':
-            status = 3
-        if request.GET['status'] == 'completed':
             status = 2
+        if request.GET['status'] == 'reject':
+            status = 5
+        if request.GET['status'] == 'completed':
+            status = 4
     except Exception, e:
         print e
         raise Http404('Page not found ')
@@ -757,7 +765,7 @@ def training_approvel(request, role, rid):
     tmp = 0
     if request.GET['status'] == 'completed':
         # calculate the participant list
-        wpcount = WorkshopAttendance.objects.filter(workshop_id = rid, status = 1).count()
+        wpcount = TrainingAttendance.objects.filter(training_id = rid, status = 1).count()
         w.participant_counts = wpcount
         tmp = 1
     w.save()
@@ -776,10 +784,10 @@ def training_approvel(request, role, rid):
     update_events_notification(user_id = user.id, role = 2, category = 0, category_id = w.id, academic = w.academic_id, status = status, message = message)
     if tmp:
         messages.success(request, "Training has been completed. For downloading the learner's certificate click on View Participants ")
-        return HttpResponseRedirect('/software-training/workshop/'+role+'/completed/')
+        return HttpResponseRedirect('/software-training/training/'+role+'/completed/')
     else:
         messages.success(request, "Training has been accepted ")
-        return HttpResponseRedirect('/software-training/workshop/'+role+'/approved/')
+        return HttpResponseRedirect('/software-training/training/'+role+'/approved/')
 
 @login_required
 def training_permission(request):
@@ -806,7 +814,7 @@ def training_permission(request):
             elif form.cleaned_data['university']:
                 wp.university_id = form.cleaned_data['university']
             wp.save()
-            return HttpResponseRedirect("/software-training/workshop/permission/")
+            return HttpResponseRedirect("/software-training/training/permission/")
     
     context = {}
     context.update(csrf(request))
@@ -831,52 +839,59 @@ def accessrole(request):
 def training_attendance(request, wid):
     user = request.user
     onlinetest_user = ''
-    form = ParticipantSearchForm()
+    psform = ParticipantSearchForm()
     if not (user.is_authenticated() and (is_organiser(user))):
         raise Http404('You are not allowed to view this page')
     try:
-        workshop = Training.objects.get(pk = wid) 
-        if workshop.status == 2:
-            raise Http404('Page not found ')
-    except:
+        training = Training.objects.get(pk = wid) 
+        if training.status == 4:
+            return HttpResponseRedirect("/software-training/training/" + str(training.id) + "/participant/")
+    except Exception, e:
+        print e
         raise Http404('Page not found ')
     #todo check request user and workshop organiser same or not
     if request.method == 'POST':
-        if 'submit-attendance' in request.POST:
+        if 'submit-mark-attendance' in request.POST:
             users = request.POST
             if users:
                 #set all record to 0 if status = 1
-                WorkshopAttendance.objects.filter(workshop_id = wid, status = 1).update(status = 0)
+                TrainingAttendance.objects.filter(training_id = wid, status = 1).update(status = 0)
+                training.status = 3
+                training.save()
                 for u in users:
-                    if not (u =='submit-attendance' or u == 'csrfmiddlewaretoken'):
+                    if not (u =='submit-mark-attendance' or u == 'csrfmiddlewaretoken'):
                         try:
-                            wa = WorkshopAttendance.objects.get(mdluser_id = users[u], workshop_id = wid)
+                            wa = TrainingAttendance.objects.get(mdluser_id = users[u], training_id = wid)
                             print wa.id, " => Exits"
                         except:
-                            wa = WorkshopAttendance()
-                            wa.workshop_id = wid
+                            wa = TrainingAttendance()
+                            wa.training_id = wid
                             wa.mdluser_id = users[u]
                             wa.status = 0
                             wa.save()
                             print wa.id, " => Inserted"
                         if wa:
                             #todo: if the status = 2 check in moodle if he completed the test set status = 3 (completed)
-                            w = WorkshopAttendance.objects.get(mdluser_id = wa.mdluser_id, workshop_id = wid)
+                            w = TrainingAttendance.objects.get(mdluser_id = wa.mdluser_id, training_id = wid)
                             w.status = 1
                             w.save()
-                message = workshop.academic.institution_name+" has submited workshop attendance"
-                update_events_log(user_id = user.id, role = 2, category = 0, category_id = workshop.id, academic = workshop.academic_id,  status = 6)
-                update_events_notification(user_id = user.id, role = 2, category = 0, category_id = workshop.id, academic = workshop.academic_id, status = 6, message = message)
+                message = training.academic.institution_name+" has submited workshop attendance"
+                update_events_log(user_id = user.id, role = 2, category = 0, category_id = training.id, academic = training.academic_id,  status = 6)
+                update_events_notification(user_id = user.id, role = 2, category = 0, category_id = training.id, academic = training.academic_id, status = 6, message = message)
                 
                 messages.success(request, "Thank you for uploading the Attendance. Now make sure that you cross check and verify the details before submiting.")
         if 'search-participant' in request.POST:
-            form = ParticipantSearchForm(request.POST)
-            onlinetest_user = search_participant(form)
-                    
+            psform = ParticipantSearchForm(request.POST)
+            onlinetest_user = search_participant(psform)
+        
         if 'add-participant' in request.POST:
             add_participant(request, wid, 'Training')
-            
-    participant_ids = list(WorkshopAttendance.objects.filter(workshop_id = wid).values_list('mdluser_id'))
+        
+        if 'submit-attendance' in request.POST:
+            training.status = 1
+            training.save()
+        
+    participant_ids = list(TrainingAttendance.objects.filter(training_id = wid).values_list('mdluser_id'))
     mdlids = []
     wp = {}
     for k in participant_ids:
@@ -884,12 +899,12 @@ def training_attendance(request, wid):
     if mdlids:
         wp = MdlUser.objects.filter(id__in = mdlids)
     context = {}
-    context['form'] = form
+    context['psform'] = psform
     context['collection'] = wp
     context['onlinetest_user'] = onlinetest_user
-    context['workshop'] = workshop
+    context['training'] = training
     context.update(csrf(request))
-    return render(request, 'events/templates/workshop/attendance.html', context)
+    return render(request, 'events/templates/training/attendance.html', context)
 
 
 @login_required
@@ -903,10 +918,10 @@ def training_participant(request, wid=None):
             wc = Training.objects.get(id=wid)
         except:
             raise Http404('Page not found')
-        if wc.status == 2:
-            workshop_mdlusers = WorkshopAttendance.objects.using('default').filter(workshop_id=wid, status__gt = 0).values_list('mdluser_id')
+        if wc.status == 4:
+            workshop_mdlusers = TrainingAttendance.objects.using('default').filter(training_id = wid, status__gt = 0).values_list('mdluser_id')
         else:
-            workshop_mdlusers = WorkshopAttendance.objects.using('default').filter(workshop_id=wid).values_list('mdluser_id')
+            workshop_mdlusers = TrainingAttendance.objects.using('default').filter(training_id = wid).values_list('mdluser_id')
         ids = []
         for wp in workshop_mdlusers:
             ids.append(wp[0])
@@ -914,8 +929,8 @@ def training_participant(request, wid=None):
         wp = MdlUser.objects.using('moodle').filter(id__in=ids)
         if user == wc.organiser and wc.status == 2:
             can_download_certificate = 1
-        context = {'collection' : wp, 'wc' : wc, 'can_download_certificate':can_download_certificate, 'pcount': wp.count()}
-        return render(request, 'events/templates/workshop/workshop_participant.html', context)
+        context = {'collection' : wp, 'wc' : wc, 'can_download_certificate':can_download_certificate}
+        return render(request, 'events/templates/training/participant.html', context)
 
 
 def suffix(d):
@@ -951,7 +966,7 @@ def training_participant_ceritificate(request, wid, participant_id):
             mdluser = MdlUser.objects.get(id = participant_id)
             wcf = None
             # check if user can get certificate
-            wa = WorkshopAttendance.objects.get(workshop_id = w.id, mdluser_id = participant_id)
+            wa = TrainingAttendance.objects.get(training_id = w.id, mdluser_id = participant_id)
             if wa.status < 1:
                 raise Http404('Page not found')
             if wa.password:
@@ -1036,13 +1051,13 @@ def test_request(request, role):
             t.invigilator_id = form.cleaned_data['invigilator']
             #t.academic_id = form.cleaned_data['academic']
             t.academic = user.organiser.academic
-            #t.workshop_id = form.cleaned_data['workshop']
+            #t.training_id = form.cleaned_data['workshop']
             t.tdate = dateTime[0]
             t.ttime = dateTime[1]
             t.foss_id = form.cleaned_data['foss']
             t.test_category_id = form.cleaned_data['test_category']
             if int(form.cleaned_data['test_category']) == 1:
-                t.workshop_id = form.cleaned_data['workshop']
+                t.training_id = form.cleaned_data['workshop']
             if int(form.cleaned_data['test_category']) == 2:
                 t.training_id = form.cleaned_data['training']
             t.save()
@@ -1158,13 +1173,13 @@ def test_edit(request, role, rid):
             if int(form.cleaned_data['test_category']) == 1:
                 t.test_id = None
             elif int(form.cleaned_data['test_category']) == 2:
-                t.workshop_id = None
+                t.training_id = None
             else:
-                t.workshop_id = None
+                t.training_id = None
                 t.test_id = None
                 
             #t.academic_id = form.cleaned_data['academic']
-            t.workshop_id = form.cleaned_data['workshop']
+            t.training_id = form.cleaned_data['workshop']
             t.tdate = dateTime[0]
             t.ttime = dateTime[1]
             t.foss_id = form.cleaned_data['foss']
@@ -1347,7 +1362,7 @@ def test_attendance(request, tid):
         mdlids.append(k[0])
         
     if test.test_category_id == 1:
-        participant_ids = list(WorkshopAttendance.objects.filter(workshop_id = test.workshop_id).values_list('mdluser_id'))
+        participant_ids = list(TrainingAttendance.objects.filter(training_id = test.training_id).values_list('mdluser_id'))
     elif test.test_category_id == 2:
         participant_ids = list(TrainingAttendance.objects.filter(training_id = test.training_id).values_list('mdluser_id'))
     else:
@@ -1521,7 +1536,7 @@ def student_subscribe(request, events, eventid = None, mdluser_id = None):
             return HttpResponseRedirect('/moodle/index/#Upcoming-Test')
         elif events == 'workshop':
             try:
-                WorkshopAttendance.objects.create(workshop_id=eventid, mdluser_id = mdluser_id)
+                TrainingAttendance.objects.create(training_id=eventid, mdluser_id = mdluser_id)
             except Exception, e:
                 print e
                 pass
@@ -1609,7 +1624,7 @@ def organiser_invigilator_index(request, role, status):
 def update_events_log(user_id, role, category, category_id, academic, status):
     if category == 0:
         try:
-            WorkshopLog.objects.create(user_id = user_id, workshop_id = category_id, role = role, academic_id = academic, status = status)
+            WorkshopLog.objects.create(user_id = user_id, training_id = category_id, role = role, academic_id = academic, status = status)
         except Exception, e:
             print "Training Log =>",e
     elif category == 1:

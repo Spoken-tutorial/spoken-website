@@ -160,7 +160,7 @@ class TrainingForm(forms.ModelForm):
     course_number = forms.CharField(required = False)
     tester = forms.CharField(required = False)
 
-    department = forms.ModelMultipleChoiceField(label='Department', cache_choices=True, widget = forms.SelectMultiple(attrs = {}), queryset = Department.objects.exclude(name='Uncategorized'), help_text = "", error_messages = {'required':'State field required.'})
+    department = forms.ModelMultipleChoiceField(label='Department', cache_choices=True, widget = forms.SelectMultiple(attrs = {}), queryset = Department.objects.exclude(name='Uncategorized'), help_text = "", error_messages = {'required':'Department field required.'})
     
     foss = forms.ModelChoiceField(label='Foss', cache_choices=True, widget = forms.Select(attrs = {}), queryset = FossCategory.objects.all(), help_text = "", error_messages = {'required':'Foss field required.'})
     
@@ -299,11 +299,12 @@ class TestForm(forms.Form):
                 trchoices = list(Training.objects.filter(academic = instance.academic, status = 2).values_list('id', 'training_code'))
             else:
                 try:
-                    wchoices = list(Workshop.objects.filter(academic = user.organiser.academic, status = 2).values_list('id', 'workshop_code'))
+                    wchoices = list(Training.objects.filter(academic = user.organiser.academic, status = 4, training_type__gt=0).values_list('id', 'training_code'))
                     wchoices.insert(0, ('', '-- None --'))
-                    trchoices = list(Training.objects.filter(academic = user.organiser.academic, status = 2).values_list('id', 'training_code'))
+                    trchoices = list(Training.objects.filter(academic = user.organiser.academic, status = 4, training_type = 0).values_list('id', 'training_code'))
                     trchoices.insert(0, ('', '-- None --'))
-                except:
+                except Exception, e:
+                    print e
                     i = Invigilator.objects.get(user_id = args[0]['invigilator']) 
                     wchoices = list(Workshop.objects.filter(academic = i.academic, status = 2).values_list('id', 'workshop_code'))
                     wchoices.insert(0, ('', '-- None --'))
@@ -333,7 +334,7 @@ class TestForm(forms.Form):
                     if int(args[0]['test_category']) == 1:
                         if 'workshop' in args[0]:
                             if args[0]['workshop'] and args[0]['workshop'] != '' and args[0]['workshop'] != 'None':
-                                w = Workshop.objects.get(pk=args[0]['workshop'])
+                                w = Training.objects.get(pk=args[0]['workshop'])
                                 choices = (('', '-- None --'), (w.foss_id, w.foss.foss),)
                                 self.fields['foss'].choices = choices
                                 if 'edit' in args:

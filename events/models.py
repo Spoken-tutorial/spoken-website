@@ -187,7 +187,7 @@ class Training(models.Model):
     trdate = models.DateField()
     trtime = models.TimeField()
     skype = models.PositiveSmallIntegerField(default=0)
-    status = models.PositiveSmallIntegerField(default=0)
+    status = models.PositiveSmallIntegerField(default=0) #{0:request done, 1: attendance submit, 2: training manger approved, 3: mark attenda done, 4: complete, 5: rejected}
     
     extra_fields = models.OneToOneField(TrainingExtraFields, null = True)
     
