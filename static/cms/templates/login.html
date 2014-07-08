@@ -3,7 +3,8 @@
 {% load static %}
 {% block title %}Sign In{% endblock %}
 {% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
-
+{% block search %}
+{% endblock %}
 {% block content %}
     <div class="row">
         <div class="col-sm-6 col-sm-offset-3 well">
@@ -28,6 +29,8 @@
 	                </div>
 	            </div>
             </form>
+        </div>
+    </div>
 {% endblock %}
 {% block jsblock %}
 	<script>

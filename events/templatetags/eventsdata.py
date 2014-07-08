@@ -4,6 +4,8 @@ from events.models import *
 from events.views import is_organiser, is_invigilator, is_resource_person, is_event_manager
 import datetime
 from django.conf import settings
+import datetime
+from dateutil.relativedelta import relativedelta
 register = template.Library()
 
 
@@ -77,6 +79,18 @@ def get_participant_status(key, testcode):
     except:
         return 'Add'
     return status_list[ta.status]
+
+def can_upload_final_training_list(trdate):
+    try:
+        date_after_two_month = trdate + relativedelta(months=2)
+        print date_after_two_month
+        print datetime.date.today()
+        if datetime.date.today() >= date_after_two_month:
+            return True
+        return False
+    except Exception, e:
+        print e
+        return False
     
 register.filter('participant_picture', participant_picture)
 register.filter('get_trainingstatus', get_trainingstatus)
@@ -85,6 +99,7 @@ register.filter('participant_count', participant_count)
 register.filter('can_close_test', can_close_test)
 register.filter('get_status', get_status)
 register.filter('get_participant_status', get_participant_status)
+register.filter('can_upload_final_training_list', can_upload_final_training_list)
 
 register.filter('is_organiser', is_organiser)
 register.filter('is_invigilator', is_invigilator)

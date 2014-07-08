@@ -2,7 +2,51 @@ html,body
 {
   height: 100%;
 }
+/* overwrite */
+.yamm .dropdown-menu {
+  left: 0px;
+}
+.navbar-nav>li>.dropdown-menu{
+    width: 100%;
+}
+.help-text{
+    background-color: #D9EDF7;
+    border-color: #BCE8F1;
+    color: #31708F;
+    font-size: 12px;
+    padding:2px 10px;
+    margin-bottom: 0px;
+}
+/* overwrite end */
+.scroller{
+    position: absolute;
+    top: 40%;
+    right: 10px;
+    width: 20px;
+    position: fixed;
+    z-index: 1000;
+}
+.scroller li{
+    margin: 5px 0;
+}
+.scroller li a{
+    display: block;
+    color: black;
+    width: 20px;
+    height: 20px;
+    background: gray;
+    outline: none;
+}
+.page4 h2.page-title{
+    padding-bottom: 20px;
+}
+.spacer{
+    height: 40px;
+}
 /* layout */
+.container-inner{
+    padding: 25px 0 25px 0;
+}
 #header-wrapper{
     height: 51px;
 }
@@ -66,19 +110,24 @@ html,body
     padding-left: 0px;
     padding-right: 0px;
 }
-
+.stay-middle{
+    text-align: center;
+}
+.justify{
+    text-align: justify;
+}
 /* home page testimonials */
 
 .circular img {
-    width: 100%;
-    height: 100%;
+    width: 100px;
+    height: 100px;
     border-radius: 50%;
     -webkit-border-radius: 50%;
     -moz-border-radius: 50%;
     border: 1px solid gray;
 }
+
 #testimonials .item .content{
-    text-align: center;
     position: relative;
 }
 #testimonials .item .content .caret{
@@ -124,6 +173,44 @@ html,body
     color: white;
 }
 /* home-video-container end */
+
+/* contact */
+.contact-container .contact div{
+    padding: 4px 0;
+    font-size: 16px;
+}
+.contact-container .contact div span{
+    padding-right: 20px;
+}
+/* contact end */
+
+/* footer */
+#footer-wrapper{
+    background: #111111;
+}
+#footer-wrapper a, #footer-wrapper footer{
+    color: white;
+}
+#footer-wrapper .footer-links{
+    border-right: 5px solid #eee;
+}
+#footer-wrapper .footer-links ul li{
+    padding: 2px 0;
+}
+#footer-wrapper .license footer{
+    padding-top: 100px;
+}
+/* footer end */
+
+/* media secreen overwrite */
+media="screen"
+@media (min-width: 768px)
+.circular img{
+    width: 100%;
+    height: 100%;
+}
+
+/* media screen overwrite end */
 /*  layout end */
 
 /* video search page */
@@ -243,7 +330,9 @@ h4.page-title {
 #content-wrapper #content-inner div.container {
     padding-left: 25px;
 }
-
+#content-wrapper{
+    min-height: 400px;
+}
 /* Content css end */
 
 /* Note box css */

@@ -660,7 +660,7 @@ def training_request(request, role, rid = None):
         context = {'form' : form, 'role' : role, 'status' : 'request'}
         return render(request, 'events/templates/training/form.html', context)
     else:
-        messages.info(request, "<ul><li>Please check if your mechine is ready. For the Machine Readiness document <a href='http://process.spoken-tutorial.org/images/5/58/Machine-Readiness.pdf' class='link alert-link' target='_blank'> Click Here</a>.</li><li> Please make sure that you update the 'Attendance Sheet' after the workshop. For the instruction <a href='#' class='link alert-link' target='_blank'> Click Here</a></li> ")
+        messages.info(request, "<ul><li>Please check if your machine is ready. For the Machine Readiness document <a href='http://process.spoken-tutorial.org/images/5/58/Machine-Readiness.pdf' class='link alert-link' target='_blank'> Click Here</a>.</li><li> Please make sure that you update the 'Attendance Sheet' while requesting the Training / Workshop.</li> ")
         if rid:
             form = TrainingForm(instance = Training.objects.get(pk = rid), user = request.user)
         else:
@@ -686,7 +686,7 @@ def training_list(request, role, status):
             if status == 'approved':
                 collectionSet = Training.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status], trdate__gt=datetime.date.today())
             elif status =='ongoing':
-                collectionSet = Training.objects.filter((Q(status = 2) | Q(status = 3)), academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), trdate=datetime.date.today())
+                collectionSet = Training.objects.filter((Q(status = 2) | Q(status = 3)), academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), trdate__lte=datetime.date.today())
             elif status =='pending':
                 collectionSet = Training.objects.filter((Q(status = 0) | Q(status = 1)), academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), trdate__gte = datetime.date.today())
                 
@@ -696,7 +696,7 @@ def training_list(request, role, status):
             if status == 'approved':
                 collectionSet = Training.objects.filter(organiser_id=user, status = status_dict[status], trdate__gt=datetime.date.today())
             elif status == 'ongoing' :
-                collectionSet = Training.objects.filter((Q(status = 2) | Q(status = 3)), organiser_id=user, trdate=datetime.date.today())
+                collectionSet = Training.objects.filter((Q(status = 2) | Q(status = 3)), organiser_id=user, trdate__lte=datetime.date.today())
             elif status == 'pending' :
                 collectionSet = Training.objects.filter((Q(status = 0) | Q(status = 1)), organiser_id=user, trdate__gte=datetime.date.today())
             else:
@@ -840,6 +840,7 @@ def training_attendance(request, wid):
     user = request.user
     onlinetest_user = ''
     psform = ParticipantSearchForm()
+    sform = TrainingScanCopyForm()
     if not (user.is_authenticated() and (is_organiser(user))):
         raise Http404('You are not allowed to view this page')
     try:
@@ -891,7 +892,40 @@ def training_attendance(request, wid):
             training.status = 1
             training.save()
         
+        if 'submit-scaned-copy' in request.POST:
+                form = TrainingScanCopyForm(request.POST, request.FILES)
+                file_type = ['application/pdf']
+                if 'scan_copy' in request.FILES:
+                    if request.FILES['scan_copy'].content_type in file_type:
+                        file_path = settings.MEDIA_ROOT + 'training/'
+                        try:
+                            os.mkdir(file_path)
+                        except Exception, e:
+                            print e
+                        file_path = settings.MEDIA_ROOT + 'training/'+wid+'/'
+                        try:
+                            os.mkdir(file_path)
+                        except Exception, e:
+                            print e
+                        full_path = file_path + wid +".pdf"
+                        fout = open(full_path, 'wb+')
+                        f = request.FILES['scan_copy']
+                        # Iterate through the chunks.
+                        for chunk in f.chunks():
+                            fout.write(chunk)
+                        fout.close()
+                        messages.success(request, "Waiting for Training Manager approval.")
+                    else:
+                        messages.success(request, "Choose a PDF File")
+                else:
+                    messages.success(request, "Choose a PDF File.")
+        
     participant_ids = list(TrainingAttendance.objects.filter(training_id = wid).values_list('mdluser_id'))
+     #scaned copy exits
+    is_file_exits = False
+    file_path = settings.MEDIA_ROOT + 'training/'+wid+'/'+wid+'.pdf'
+    if os.path.isfile(file_path):
+        is_file_exits = True
     mdlids = []
     wp = {}
     for k in participant_ids:
@@ -900,9 +934,12 @@ def training_attendance(request, wid):
         wp = MdlUser.objects.filter(id__in = mdlids)
     context = {}
     context['psform'] = psform
+    context['sform'] = sform
     context['collection'] = wp
     context['onlinetest_user'] = onlinetest_user
     context['training'] = training
+    context['is_file_exits'] = is_file_exits
+    context['file_path'] = '/media/training/'+wid+'/'+wid+'.pdf'
     context.update(csrf(request))
     return render(request, 'events/templates/training/attendance.html', context)
 
