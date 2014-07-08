@@ -14,6 +14,20 @@ from django.http import Http404
 import json
 from creation.views import get_video_info
 from creation.models import TutorialCommonContent, TutorialDetail, TutorialResource, Language
+from cms.models import SiteFeedback
+
+@csrf_exempt
+def site_feedback(request):
+    data = request.POST
+    if data:
+        try:
+            SiteFeedback.objects.create(name=data['name'], email = data['email'], message = data['message'])
+            data = True
+        except Exception, e:
+            print e
+            data = False
+            
+    return HttpResponse(json.dumps(data), mimetype='application/json')
 
 def home(request):
     tr_rec = ''

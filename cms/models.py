@@ -56,3 +56,9 @@ class SubNav(models.Model):
     visible = models.BooleanField()
     created = models.DateTimeField(auto_now_add=True)
 
+class SiteFeedback(models.Model):
+    name = models.CharField(max_length = 255)
+    email =  models.EmailField()
+    message = models.TextField()
+    created = models.DateTimeField(auto_now_add=True)
+
