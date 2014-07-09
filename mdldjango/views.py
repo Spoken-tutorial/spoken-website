@@ -81,9 +81,9 @@ def index(request):
     except:
         return HttpResponseRedirect("/moodle/login")
     
-    upcoming_workshop = Workshop.objects.filter(status=1, academic_id=mdluser.institution, wdate__gte=datetime.date.today())
+    upcoming_workshop = Training.objects.filter((Q(status = 1) | Q(status = 2) | Q(status = 3)), academic_id=mdluser.institution, trdate__gte=datetime.date.today())
     upcoming_test = Test.objects.filter(status=2, academic_id=mdluser.institution, tdate__gt=datetime.date.today())
-    past_workshop = Workshop.objects.filter(id__in = WorkshopAttendance.objects.filter(mdluser_id = mdluser.id).values_list('workshop_id'), status = 2)
+    past_workshop = Training.objects.filter(id__in = TrainingAttendance.objects.filter(mdluser_id = mdluser.id).values_list('training_id'), status = 4)
     past_test = Test.objects.filter(id__in = TestAttendance.objects.filter(mdluser_id = mdluser.id).values_list('test_id'), status = 4)
     ongoing_test = Test.objects.filter(status=3, academic_id=mdluser.institution, tdate = datetime.date.today())
     print ongoing_test
@@ -99,7 +99,7 @@ def index(request):
     }
     context.update(csrf(request))
     return render(request, 'mdl/templates/mdluser_index.html', context)
-    
+
 @login_required
 def offline_details(request, wid, category):
     wid = int(wid)
@@ -109,7 +109,7 @@ def offline_details(request, wid, category):
     form = OfflineDataForm()
     try:
         if category == 1:
-            Workshop.objects.get(pk=wid, status = 0)
+            Training.objects.get(pk=wid, status = 0)
         elif category == 2:
             Training.objects.get(pk=wid, status = 0)
         else:
@@ -129,7 +129,7 @@ def offline_details(request, wid, category):
             details = data.getiterator("detail")
             try:
                 if category == 1:
-                    w = Workshop.objects.get(id = wid)
+                    w = Training.objects.get(id = wid)
                 elif category == 2:
                     w = Training.objects.get(id = wid)
                 else:
@@ -239,7 +239,7 @@ def offline_details(request, wid, category):
                         wa.save()
             #update logs
             if category == 1:
-                message = w.academic.institution_name+" has submited Offline "+w.foss.foss+" workshop attendance dated "+w.wdate.strftime("%Y-%m-%d")
+                message = w.academic.institution_name+" has submited Offline "+w.foss.foss+" workshop attendance dated "+w.trdate.strftime("%Y-%m-%d")
                 update_events_log(user_id = user.id, role = 2, category = 0, category_id = w.id, academic = w.academic_id, status = 5)
                 update_events_notification(user_id = user.id, role = 2, category = 0, category_id = w.id, academic = w.academic_id, status = 5, message = message)
                 messages.success(request, "Thank you for uploading the Attendance. Now make sure that you cross check and verify the details before submiting.")
@@ -304,7 +304,7 @@ def feedback(request, wid):
         return HttpResponseRedirect("/moodle/login")
     w = None
     try:
-        w = Workshop.objects.select_related().get(pk=wid)
+        w = Training.objects.select_related().get(pk=wid)
     except Exception, e:
         print e
     

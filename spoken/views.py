@@ -12,9 +12,10 @@ from forms import *
 import os
 from django.http import Http404
 import json
+import datetime
 from creation.views import get_video_info
 from creation.models import TutorialCommonContent, TutorialDetail, TutorialResource, Language
-from cms.models import SiteFeedback
+from cms.models import SiteFeedback, Event
 
 @csrf_exempt
 def site_feedback(request):
@@ -43,6 +44,9 @@ def home(request):
     testimonials = Testimonials.objects.all().order_by('?')[:2]
     context['testimonials'] = testimonials
     
+    events = Event.objects.filter(event_date__gte=datetime.datetime.today()).order_by('event_date')[:2]
+    context['events'] = events
+    print events, "ssssssssss"
     return render(request, 'spoken/templates/home.html', context)
 
 def get_or_query(terms, search_fields):

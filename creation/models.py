@@ -20,7 +20,7 @@ class FossCategory(models.Model):
     updated = models.DateTimeField(auto_now = True)
 
     class Meta:
-        verbose_name = 'FOSS Category'
+        verbose_name = 'FOSS Categorie'
 
     def __unicode__(self):
         return self.foss

@@ -6,7 +6,7 @@ html,body
 .yamm .dropdown-menu {
   left: 0px;
 }
-.navbar-nav>li>.dropdown-menu{
+.navbar-nav>li>.dropdown-menu.events, .navbar-nav>li>.dropdown-menu.creation{
     width: 100%;
 }
 .help-text{
@@ -74,7 +74,7 @@ html,body
 }
 /* header styles */
 #header-wrapper nav{
-    background: #343434;
+    background: #555555;
 }
 #testimonials, #home-video-container{
     overflow: hidden;
@@ -186,7 +186,7 @@ html,body
 
 /* footer */
 #footer-wrapper{
-    background: #111111;
+    background: #555555;
 }
 #footer-wrapper a, #footer-wrapper footer{
     color: white;

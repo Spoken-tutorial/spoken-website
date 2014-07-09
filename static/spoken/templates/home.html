@@ -167,7 +167,10 @@
                 <h4 class='col-lg-8 col-md-8 col-sm-8 page-title'>Forum</h4>
                 <div class="col-lg-8 col-md-8 col-sm-8">
                     <div class="top-border">
-                        .... <br /><br /> <a class="pull-right" href="#">Continue Forum >></a>
+                        <p class="justify">Spoken Tutorial Forums is a friendly online discussion forum.  You can join existing discussions or start new topics, and get lots of replies from the Spoken Tutorial community.   Registration to Forums is completely free and takes only one minute.</p>
+			<p class="justify">Forums is very easy to use, even for computer newbies. It's very easy to format forum posts with fonts, colors, and many other options. You can attach files to your posts directly from your computer. You can give links to webpages or videos from other video websites.</p>
+
+			<p class="justify">Be assured of an answer within 3 working days of posting your question. <br /><br /> <a class="pull-right" href="#">Continue Forum >></a></p>
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-4 col-sm-4">
@@ -181,14 +184,21 @@
                     <h4 class='page-title'>News / Events</h4>
                     <div class="top-border"></div>
                     <div>
-                        .... <br /><br /> <a class="pull-right" href="#">Continue Forum >></a>
+                        {% for event in events %}
+                            <div class="events">
+                                <div class="event-message">{{ event.message }}</div>
+                                <br />
+                                <div class="pull-left">{{ event.event_date }}</div>
+                            </div>
+                        {% endfor %}
+                        <br /> <a class="pull-right" href="#">Click more >></a>
                     </div>
                 </div>
                 <div class="col-lg-6 col-md-6 col-sm-6">
                     <h4 class='page-title'>Software Training</h4>
                     <div class="top-border"></div>
                     <div>
-                        .... <br /><br /> <a class="pull-right" href="#">Continue Forum >></a>
+                        .... <br /><br /> <a class="pull-right" href="#">Click more >></a>
                     </div>
                 </div>
             </div>
@@ -247,7 +257,7 @@
                     </form>
                 </div>
                 <div class="col-lg-4 col-md-4 col-sm-4 support-us">
-                    <h4 class='page-title'>Support Us</h4>
+                    <h4 class='page-title'>Collaborate with Us</h4>
                     <div>
                         ....
                     </div>

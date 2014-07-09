@@ -91,40 +91,15 @@ def can_upload_final_training_list(trdate):
     except Exception, e:
         print e
         return False
-    
-register.filter('participant_picture', participant_picture)
-register.filter('get_trainingstatus', get_trainingstatus)
-register.filter('get_trainingparticipant_status', get_trainingparticipant_status)
-register.filter('participant_count', participant_count)
-register.filter('can_close_test', can_close_test)
-register.filter('get_status', get_status)
-register.filter('get_participant_status', get_participant_status)
-register.filter('can_upload_final_training_list', can_upload_final_training_list)
-
-register.filter('is_organiser', is_organiser)
-register.filter('is_invigilator', is_invigilator)
-register.filter('is_resource_person', is_resource_person)
-register.filter('is_event_manager', is_event_manager)
-
-'''
-
-def get_wparticipant_status(key, wcode):
-    status_list = ['Waiting for Attendance', 'Waiting for Feedback', 'Certificate ready', 'Got certificate']
-    try:
-        wa = WorkshopAttendance.objects.get(mdluser_id=key, workshop_id = wcode)
-    except:
-        return 'error'
-    return status_list[wa.status]
 
 def can_download_workshop_certificate(key, wcode):
     try:
-        wa = WorkshopAttendance.objects.get(mdluser_id=key, workshop_id = wcode)
+        wa = TrainingAttendance.objects.get(mdluser_id=key, training_id = wcode)
         if wa.status > 0:
             return True
         return False
     except:
-        return 'error'
-
+        return 'errors'
 def can_enter_test(key, testcode):
     try:
         ta = TestAttendance.objects.get(mdluser_id=key, test_id=testcode)
@@ -134,9 +109,46 @@ def can_enter_test(key, testcode):
         return ta.status
     return None
 
+    
+register.filter('participant_picture', participant_picture)
+register.filter('get_trainingstatus', get_trainingstatus)
+register.filter('get_trainingparticipant_status', get_trainingparticipant_status)
+register.filter('participant_count', participant_count)
+register.filter('can_close_test', can_close_test)
+register.filter('get_status', get_status)
+register.filter('get_participant_status', get_participant_status)
+register.filter('can_upload_final_training_list', can_upload_final_training_list)
+register.filter('can_enter_test', can_enter_test)
+
+register.filter('is_organiser', is_organiser)
+register.filter('is_invigilator', is_invigilator)
+register.filter('is_resource_person', is_resource_person)
+register.filter('is_event_manager', is_event_manager)
+register.filter('can_download_workshop_certificate', can_download_workshop_certificate)
+
+'''
+
+def get_wparticipant_status(key, wcode):
+    status_list = ['Waiting for Attendance', 'Waiting for Feedback', 'Certificate ready', 'Got certificate']
+    try:
+        wa = TrainingAttendance.objects.get(mdluser_id=key, training_id = wcode)
+    except:
+        return 'error'
+    return status_list[wa.status]
+
+def can_download_workshop_certificate(key, wcode):
+    try:
+        wa = TrainingAttendance.objects.get(mdluser_id=key, training_id = wcode)
+        if wa.status > 0:
+            return True
+        return False
+    except:
+        return 'error'
+
+
 def get_wstatus(key, wcode):
     try:
-        wa = WorkshopAttendance.objects.get(mdluser_id=key, workshop_id = wcode)
+        wa = TrainingAttendance.objects.get(mdluser_id=key, training_id = wcode)
     except:
         return ''
     
@@ -179,7 +191,6 @@ register.filter('is_invigilator', is_invigilator)
 register.filter('is_resource_person', is_resource_person)
 register.filter('is_event_manager', is_event_manager)
 
-register.filter('can_enter_test', can_enter_test)
 
 register.filter('get_wstatus', get_wstatus)
 
