@@ -3,6 +3,12 @@ from django.conf.urls import patterns, url
 urlpatterns = patterns('',
     url(r'^$', 'events.views.events_dashboard', name='events_dashboard'),
     url(r'^init/$', 'events.views.init_events_app', name='init_events_app'),
+    
+    #cron job
+    #todo: test and workshop auto close
+    url(r'^fix-date-for-first-training/$', 'events.views.fix_date_for_first_training', name='fix_date_for_first_training'),
+    url(r'^training-gentle-reminder/$', 'events.views.training_gentle_reminder', name='training_gentle_reminder'),
+    
     url(r'^test/$', 'events.views.test', name='test'),
     
     url(r'^ac/$', 'events.views.ac', name='ac'),

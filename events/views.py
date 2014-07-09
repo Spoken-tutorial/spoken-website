@@ -50,6 +50,7 @@ import random
 from  filters import *
 
 from cms.sortable import *
+from events_email import send_email
 
 @login_required
 def init_events_app(request):
@@ -153,6 +154,24 @@ def add_participant(request, cid, category ):
                 wa.save()
                 messages.success(request, "User has added in the attendance list")
                 print wa.id, " => Inserted"
+
+def fix_date_for_first_training(request):
+    organisers = Organiser.objects.exclude(id__in = Training.objects.values_list('organiser_id').distinct())
+    if organisers:
+        status = 'Fix a date for your first training'
+        for o in organisers:
+            to = o.user.email
+            send_email(status, to)
+    return HttpResponse("Done!")
+
+def training_gentle_reminder(request):
+    tomorrow_training = Training.objects.filter(trdate=datetime.date.today() + datetime.timedelta(days=1))
+    if tomorrow_training:
+        status = 'How to upload the attendance on the training day'
+        for t in tomorrow_training:
+            to = t.organiser.user.email
+            send_email(status, to, t)
+    return HttpResponse("Done!")
 
 @login_required
 def events_dashboard(request):
@@ -450,7 +469,7 @@ def organiser_edit(request, username):
         context = {'form':form}
         return render(request, 'events/templates/organiser/form.html', context)
     else:
-            #todo : if any workshop and test under this organiser disable the edit
+            #todo : if any training and test under this organiser disable the edit
             record = Organiser.objects.get(user=user)
             context = {}
             context['form'] = OrganiserForm(instance = record)
@@ -560,7 +579,7 @@ def invigilator_edit(request, username):
         context = {'form':form}
         return render(request, 'events/templates/invigilator/form.html', context)
     else:
-            #todo : if any workshop and test under this invigilator disable the edit
+            #todo : if any training and test under this invigilator disable the edit
             record = Invigilator.objects.get(user=user)
             context = {}
             context['form'] = InvigilatorForm(instance = record)
@@ -649,7 +668,7 @@ def training_request(request, role, rid = None):
             w.save()
             messages.success(request, "Please upload the attendance sheet. ")
             #update logs
-            message = w.academic.institution_name+" has made a workshop request for "+w.foss.foss+" on "+w.trdate
+            message = w.academic.institution_name+" has made a training request for "+w.foss.foss+" on "+w.trdate
             update_events_log(user_id = user.id, role = 0, category = 0, category_id = w.id, academic = w.academic_id, status = 0)
             update_events_notification(user_id = user.id, role = 0, category = 0, category_id = w.id, academic = w.academic_id, status = 0, message = message)
             
@@ -738,7 +757,7 @@ def training_list(request, role, status):
 @login_required
 @csrf_exempt
 def training_approvel(request, role, rid):
-    """ Resource person: confirm or reject workshop """
+    """ Resource person: confirm or reject training """
     user = request.user
     if not (user.is_authenticated() and (is_resource_person(user) or (is_organiser(user) and request.GET['status'] == 'completed'))):
         raise Http404('You are not allowed to view this page')
@@ -759,9 +778,10 @@ def training_approvel(request, role, rid):
     
     w.status = status
     w.appoved_by_id = user.id
-    #todo: add workshop code
-    if w.status == 1:
-        w.workshop_code = "WC-"+str(w.id)
+    #todo: add training code
+    if w.status == 2:
+        w.training_code = "WC-"+str(w.id)
+        send_email('Instructions to be followed before conducting the training', w.organiser.user.email, w)
     tmp = 0
     if request.GET['status'] == 'completed':
         # calculate the participant list
@@ -769,16 +789,21 @@ def training_approvel(request, role, rid):
         w.participant_counts = wpcount
         tmp = 1
     w.save()
-    message = w.academic.institution_name +" has completed "+w.foss.foss+" workshop dated "+w.trdate.strftime("%Y-%m-%d")
+    #send email
+    if w.status == 4:
+        status = 'Future activities after conducting the workshop'
+        to = w.organiser.user.email
+        send_email(status, to, w)
+    message = w.academic.institution_name +" has completed "+w.foss.foss+" training dated "+w.trdate.strftime("%Y-%m-%d")
     if request.GET['status'] == 'accept':
         #delete admin notification
         try:
             EventsNotification.objects.get(academic_id = w.academic_id, categoryid = w.id, status = 0).delete()
         except Exception, e:
             print e
-        message = "Training Manager has approved your "+w.foss.foss+" workshop request dated "+w.trdate.strftime("%Y-%m-%d")
+        message = "Training Manager has approved your "+w.foss.foss+" training request dated "+w.trdate.strftime("%Y-%m-%d")
     if request.GET['status'] == 'reject':
-        message = "Training Manager has rejected your "+w.foss.foss+" workshop request dated "+w.trdate.strftime("%Y-%m-%d")
+        message = "Training Manager has rejected your "+w.foss.foss+" training request dated "+w.trdate.strftime("%Y-%m-%d")
     #update logs
     update_events_log(user_id = user.id, role = 2, category = 0, category_id = w.id, academic = w.academic_id, status = status)
     update_events_notification(user_id = user.id, role = 2, category = 0, category_id = w.id, academic = w.academic_id, status = status, message = message)
@@ -796,9 +821,9 @@ def training_permission(request):
         raise Http404('You are not allowed to view this page')
         
     permissions = Permission.objects.select_related().all()
-    form = WorkshopPermissionForm()
+    form = TrainingPermissionForm()
     if request.method == 'POST':
-        form = WorkshopPermissionForm(request.POST)
+        form = TrainingPermissionForm(request.POST)
         if form.is_valid():
             wp = Permission()
             wp.permissiontype_id = form.cleaned_data['permissiontype']
@@ -850,7 +875,7 @@ def training_attendance(request, wid):
     except Exception, e:
         print e
         raise Http404('Page not found ')
-    #todo check request user and workshop organiser same or not
+    #todo check request user and training organiser same or not
     if request.method == 'POST':
         if 'submit-mark-attendance' in request.POST:
             users = request.POST
@@ -876,7 +901,7 @@ def training_attendance(request, wid):
                             w = TrainingAttendance.objects.get(mdluser_id = wa.mdluser_id, training_id = wid)
                             w.status = 1
                             w.save()
-                message = training.academic.institution_name+" has submited workshop attendance"
+                message = training.academic.institution_name+" has submited training attendance"
                 update_events_log(user_id = user.id, role = 2, category = 0, category_id = training.id, academic = training.academic_id,  status = 6)
                 update_events_notification(user_id = user.id, role = 2, category = 0, category_id = training.id, academic = training.academic_id, status = 6, message = message)
                 
@@ -1043,7 +1068,7 @@ def training_participant_ceritificate(request, wid, participant_id):
     imgDoc.drawImage(imgPath, 600, 100, 150, 76)    ## at (399,760) with size 160x160
 
     #paragraphe
-    text = "This is to certify that <b>"+mdluser.firstname +" "+mdluser.lastname+"</b> participated in the <b>"+w.foss.foss+"</b> workshop organized at <b>"+w.academic.institution_name+"</b> by  <b>"+w.organiser.user.first_name + " "+w.organiser.user.last_name+"</b> on <b>"+custom_strftime('%B {S} %Y', w.trdate)+"</b> with course material provided by the Talk To A Teacher project at IIT Bombay.<br /><br />A comprehensive set of topics pertaining to <b>"+w.foss.foss+"</b> were covered in the workshop. This workshop is offered by the Spoken Tutorial project, IIT Bombay, funded by National Mission on Education through ICT, MHRD, Govt., of India."
+    text = "This is to certify that <b>"+mdluser.firstname +" "+mdluser.lastname+"</b> participated in the <b>"+w.foss.foss+"</b> training organized at <b>"+w.academic.institution_name+"</b> by  <b>"+w.organiser.user.first_name + " "+w.organiser.user.last_name+"</b> on <b>"+custom_strftime('%B {S} %Y', w.trdate)+"</b> with course material provided by the Talk To A Teacher project at IIT Bombay.<br /><br />A comprehensive set of topics pertaining to <b>"+w.foss.foss+"</b> were covered in the workshop. This training is offered by the Spoken Tutorial project, IIT Bombay, funded by National Mission on Education through ICT, MHRD, Govt., of India."
     
     centered = ParagraphStyle(name = 'centered',
         fontSize = 16,  
@@ -1252,7 +1277,7 @@ def test_edit(request, role, rid):
 @login_required
 @csrf_exempt
 def test_approvel(request, role, rid):
-    """ Resource person: confirm or reject workshop """
+    """ Resource person: confirm or reject training """
     user = request.user
     status = 0
     message = None
@@ -1264,9 +1289,12 @@ def test_approvel(request, role, rid):
             status = 1
             message = "The Training Manager has approved "+t.foss.foss+" test dated "+t.tdate.strftime("%Y-%m-%d")
             alert = "Test has been approved"
+            #send email
+            send_email('Instructions to be followed before conducting the test-organiser', t.organiser.user.email, t)
+            send_email('Instructions to be followed before conducting the test-invigilator', t.invigilator.user.email, t)
+            
             logrole = 2
         if request.GET['status'] == 'invigilatoraccept':
-            print "SSSSSSSSSSSSSSSSSSSSSSSSSSSSS"
             message = "The Invigilator "+t.organiser.user.first_name +" "+t.organiser.user.last_name+" has approved "+t.foss.foss+" test dated "+t.tdate.strftime("%Y-%m-%d")
             status = 2
             logrole = 1
@@ -1517,7 +1545,7 @@ def test_participant_ceritificate(request, wid, participant_id):
     imgDoc.drawImage(imgPath, 600, 100, 150, 76)    ## at (399,760) with size 160x160
     
     #paragraphe
-    text = "This is to certify that <b>"+ta.mdluser_firstname +" "+ta.mdluser_lastname+"</b> has sucessfully completed <b>"+w.foss.foss+"</b> test organized at <b>"+w.academic.institution_name+"</b> by <b>"+w.invigilator.username+"</b>  with course material provided by the Take To A Teacher project at IIT Bombay.  <br /><br /><p>pasing on online exam, conducted remotly from IIT Bombay, is a pre-requisite for completing this workshop. <b>"+w.organiser.user.first_name + " "+w.organiser.user.last_name+"</b> at <b>"+w.academic.institution_name+"</b> invigilated this examination. This workshop is offered by the <b>Spoken Tutorial project, IIT Bombay, funded by National Mission on Education through ICT, MHRD, Govt of India.</b></p>"
+    text = "This is to certify that <b>"+ta.mdluser_firstname +" "+ta.mdluser_lastname+"</b> has sucessfully completed <b>"+w.foss.foss+"</b> test organized at <b>"+w.academic.institution_name+"</b> by <b>"+w.invigilator.username+"</b>  with course material provided by the Take To A Teacher project at IIT Bombay.  <br /><br /><p>pasing on online exam, conducted remotly from IIT Bombay, is a pre-requisite for completing this training. <b>"+w.organiser.user.first_name + " "+w.organiser.user.last_name+"</b> at <b>"+w.academic.institution_name+"</b> invigilated this examination. This training is offered by the <b>Spoken Tutorial project, IIT Bombay, funded by National Mission on Education through ICT, MHRD, Govt of India.</b></p>"
     
     centered = ParagraphStyle(name = 'centered',
         fontSize = 16,  
@@ -1661,7 +1689,7 @@ def organiser_invigilator_index(request, role, status):
 def update_events_log(user_id, role, category, category_id, academic, status):
     if category == 0:
         try:
-            WorkshopLog.objects.create(user_id = user_id, training_id = category_id, role = role, academic_id = academic, status = status)
+            TrainingLog.objects.create(user_id = user_id, training_id = category_id, role = role, academic_id = academic, status = status)
         except Exception, e:
             print "Training Log =>",e
     elif category == 1:
@@ -1776,7 +1804,7 @@ def ajax_district_collage(request):
 
 @csrf_exempt
 def ajax_dept_foss(request):
-    """ Ajax: Get the dept and foss based on workshop selected """
+    """ Ajax: Get the dept and foss based on training selected """
     data = {}
     if request.method == 'POST':
         tmp = ''
@@ -1801,7 +1829,7 @@ def ajax_dept_foss(request):
         elif category == 0:
             workshop = request.POST.get('workshop')
             if request.POST.get('fields[dept]'):
-                dept = Department.objects.filter(workshop__id = workshop).order_by('name')
+                dept = Department.objects.filter(training__id = workshop).order_by('name')
                 for i in dept:
                     tmp +='<option value='+str(i.id)+'>'+i.name+'</option>'
                 data['dept'] = tmp

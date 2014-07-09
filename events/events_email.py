@@ -1,15 +1,16 @@
 from django.core.mail import EmailMultiAlternatives
 
-def send_email(status, instance = None, to = None, cc = None, bcc = None):
+def send_email(status, to = None, instance = None, cc = None, bcc = None):
     # Sending email when an answer is posted
-    status = 'No workshop request 15 days after registered as Organiser'
-
-    if status == 'Fix a date for your first workshop':
+    #status = 'No training request 15 days after registered as Organiser'
+    subject = None
+    if status == 'Fix a date for your first training':
         subject  = 'Important : Fix a date for your first workshop'
         to = ['k.sanmugam2@gmail.com', 'sanmugam@iitb.ac.in']
         
         message = '''Dear Organiser,
-        You have registered into the spoken-tutorial.org website over 2 weeks back. Please fix a date and time and make a workshop request if you want to organise training workshops. Click on the link below for the instructions to request the workshop: {0}
+        
+        You have registered into the spoken-tutorial.org website over 2 weeks back. Please fix a date and time and make a training request if you want to organise training workshops. Click on the link below for the instructions to request the workshop: {0}
 
         If you have any questions, call or write to your Spoken Tutorial IIT Bombay, team person whose contact details you have. See the link for the contact details of person incharge for your state {1}
 
@@ -17,35 +18,37 @@ Regards,
 Spoken Tutorial
 '''.format('http://process.spoken-tutorial.org/images/8/89/Workshop-Request-Sheet.pdf', 'http://process.spoken-tutorial.org/index.php/Software-Training#Contacts_For_Workshops')
 
-    elif status == 'Instructions to be followed before conducting the workshop':
-        subject  = 'Important : Fix a date for your first workshop'
+    elif status == 'Instructions to be followed before conducting the training':
+        subject  = 'Important :  Post approved training request'
         to = ['k.sanmugam2@gmail.com', 'sanmugam@iitb.ac.in']
         
         message = '''Dear Organiser,
-Your workshop on (FOSS name), requested on (Specify date and time) has been approved. Please find the
-workshop code. (WC-XX). This code is very important, please preserve it for your future reference.
+        
+Your training on {2}, requested on {3} {4} has been approved. Please find the
+workshop code. {5}. This code is very important, please preserve it for your future reference.
 
 If you have clicked YES for Skype support then you can send us a request on our Skype ID namely st-wshop
-and st-iitb. Any day before the workshop please call us on Skype to have a Skype testing session and
+and st-iitb. Any day before the training please call us on Skype to have a Skype testing session and
 interact with Spoken Tutorial, IIT Bombay team.
 
 You also need to download the specified software, for that Click below.
 {0}
 
-For getting the lab and systems ready for the workshop Click below
+For getting the lab and systems ready for the training Click below
 {1}
 
 Regards,
 Spoken Tutorial
-'''.format('http://process.spoken-tutorial.org/images/1/1b/Download-Tutorials.pdf', 'http://process.spoken-tutorial.org/images/5/58/Machine-Readiness.pdf')
+'''.format('http://process.spoken-tutorial.org/images/1/1b/Download-Tutorials.pdf', 'http://process.spoken-tutorial.org/images/5/58/Machine-Readiness.pdf', instance.foss, instance.trdate, instance.trtime, instance.training_code)
     
-    elif status == 'How to upload the attendance on the workshop day':
-        subject  = 'Important : How to upload the attendance on the workshop day.'
+    elif status == 'How to upload the attendance on the training day':
+        subject  = 'Important : How to upload the attendance on the training day.'
         to = ['k.sanmugam2@gmail.com', 'sanmugam@iitb.ac.in']
         
         message = '''Dear Organiser,
-You have the workshop (WC-XX) on (FOSS) at your Institute. Kindly upload the attendance list of students
-who will participate in the workshop, on the workshop day. To do that Login on {0}
+        
+You have the training {1} on {2} at your Institute. Kindly upload the attendance list of students
+who will participate in the workshop, on the training day. To do that Login on {0}
 website, Click on Upload attendance and upload the xml file you have created in your system. This
 activity has to be done before you organise more workshops or make the test request.
 
@@ -58,14 +61,15 @@ the practise and the tutorial window open on the left hand side for the learning
 
 Regards,
 Spoken Tutorial
-'''.format('http://spoken-tutorial.org')
+'''.format('http://spoken-tutorial.org', instance.training_code, instance.foss)
     
     elif status == 'Future activities after conducting the workshop':
         subject  = 'Important : Future activities after conducting the workshop.'
         to = ['k.sanmugam2@gmail.com', 'sanmugam@iitb.ac.in']
         
         message = '''Dear Organiser,
-You have successfully completed the workshop (WC-XX) on (FOSS name) at your institute. Please see the
+        
+You have successfully completed the training {3} on {4} at your institute. Please see the
 following instructions for the future activities.
 
 Bulk Workshops
@@ -74,9 +78,7 @@ It is necessary for all students in the Institute to get the opportunity to take
 training. For this please spread the awareness about the workshops in other departments amongst the
 Faculty. You can also request the Principal to send out a circular to all. For your department prepare a
 calendar/time-table to organise workshops for all the student batches in a systematic way. Send us the
-confirmed schedule soon for the upcoming workshops. To view sample calenders Click here ( Provide the
-link for sample calenders). To know which software is relevant for which department Click here (Provide the
-link for e- brochure).
+confirmed schedule soon for the upcoming workshops. To view sample calenders Click here. To know which software is relevant for which department Click here
 
 Online Assessment test
 
@@ -96,14 +98,15 @@ To make an online Test Request please Click here.
 
 Regards,
 Spoken Tutorial
-'''.format('http://spoken-tutorial.org', 'process.spoken-tutorial.org/images/0/09/Instructions_for_Invigilator.pdf','http://process.spoken-tutorial.org/images/a/aa/Test_Request.pdf' )
+'''.format('http://spoken-tutorial.org', 'process.spoken-tutorial.org/images/0/09/Instructions_for_Invigilator.pdf','http://process.spoken-tutorial.org/images/a/aa/Test_Request.pdf', instance.training_code, instance.foss )
 
     elif status == 'Instructions to be followed before conducting the test-organiser':
         subject  = 'Important : Instructions to be followed before conducting the test.'
         to = ['k.sanmugam2@gmail.com', 'sanmugam@iitb.ac.in']
         
         message = '''Dear Organiser,
-Your (FOSS name) test on (Specify date and time) has been approved. The test code is TC-XX. This code is
+        
+Your {2} test on {3} {4} has been approved. The test code is {5}. This code is
 very important, please preserve it for your future reference and also share it with the students and invigilator
 on the test day. The link for the online test is {0}
 
@@ -115,14 +118,15 @@ All the Best to you and all the participants.
 
 Regards,
 Spoken Tutorial
-'''.format('http://onlinetest.spoken-tutorial.org/', 'http://process.spoken-tutorial.org/images/9/95/Test_Instruction_for_Participants.pdf')
+'''.format('http://onlinetest.spoken-tutorial.org/', 'http://process.spoken-tutorial.org/images/9/95/Test_Instruction_for_Participants.pdf', instance.foss, instance.tdate, instance.ttime, instance.test_code)
 
     elif status == 'Instructions to be followed before conducting the test-invigilator':
         subject  = 'Important : Instructions to be followed before conducting the test.'
         to = ['k.sanmugam2@gmail.com', 'sanmugam@iitb.ac.in']
         
         message = '''Dear Invigilator,
-The organiser has requested for the (FOSS name) test on (Specify date and time). Please confirm your
+        
+The organiser has requested for the {1} test on {2} {3}. Please confirm your
 presence by logging in our website with your username and password and Click on confirmation for the
 Assessment test.
 
@@ -133,14 +137,14 @@ Do not forget to Close the test after the completion of the test.
 
 Regards,
 Spoken Tutorial
-'''.format('http://process.spoken-tutorial.org/images/0/09/Instructions_for_Invigilator.pdf')
+'''.format('http://process.spoken-tutorial.org/images/0/09/Instructions_for_Invigilator.pdf', instance.foss, instance.tdate, instance.ttime, instance.test_code)
 
     elif status == "Learner's Certificate":
         subject  = "Learner's Certificate"
         to = ['k.sanmugam2@gmail.com', 'sanmugam@iitb.ac.in']
         
         message = '''The Gold Certificate will be generated on the basis of the test but many of our series do not have test so
-please upload the attendance within 48 hrs after the workshop so that the students can get the Silver /
+please upload the attendance within 48 hrs after the training so that the students can get the Silver /
 Learner's certificate
 
 Regards,
@@ -153,6 +157,12 @@ Spoken Tutorial
         to = to, bcc = bcc, cc = cc,
         headers={'Reply-To': 'no-replay@spoken-tutorial.org', "Content-type":"text/html;charset=iso-8859-1"}
     )
-
+    
+    print "*******************************************************"
+    print message
+    print "*******************************************************"
     #email.attach_alternative(message, "text/html")
-    result = email.send(fail_silently=False)
+    try:
+        result = email.send(fail_silently=False)
+    except Exception, e:
+        pass

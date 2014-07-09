@@ -72,6 +72,7 @@ Spoken Tutorial
     )
 
     #email.attach_alternative(message, "text/html")
+    result = email.send(fail_silently=False)
 
 def confirm(request, confirmation_code, username):
     try:

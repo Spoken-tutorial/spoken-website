@@ -194,7 +194,7 @@ class TrainingForm(forms.ModelForm):
                 print e
                 self.fields['course_number'].initial = ''
             
-class WorkshopPermissionForm(forms.Form):
+class TrainingPermissionForm(forms.Form):
     try:
         permission_choices = list(PermissionType.objects.all().values_list('id', 'name'))
         permission_choices.insert(0, ('', '-- None --'))
@@ -219,7 +219,7 @@ class WorkshopPermissionForm(forms.Form):
         institute = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = False)
 
         def __init__(self, *args, **kwargs):
-            super(WorkshopPermissionForm, self).__init__(*args, **kwargs)
+            super(TrainingPermissionForm, self).__init__(*args, **kwargs)
             if args:
                 if 'state' in args[0] and 'district' in args[0]:
                     if args[0]['state'] and args[0]['state'] != '' and args[0]['state'] != 'None':
