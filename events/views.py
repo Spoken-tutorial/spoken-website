@@ -195,10 +195,9 @@ def events_dashboard(request):
         #organiser_training_notification = EventsNotification.objects.filter((Q(status = 1) | Q(status = 3)), category = 2, status = 1, academic_id = user.organiser.academic_id, categoryid__in = user.organiser.academic.workshop_set.filter(organiser_id = user.id).values_list('id')).order_by('-created')
 
     if is_resource_person(user):
-        print 'ss'
-        #rp_workshop_notification = EventsNotification.objects.filter((Q(status = 0) | Q(status = 5) | Q(status = 2)), category = 0).order_by('-created')
-        #rp_training_notification = EventsNotification.objects.filter((Q(status = 0) | Q(status = 5) | Q(status = 2)), category = 2).order_by('-created')
-        #rp_test_notification = EventsNotification.objects.filter((Q(status = 0) | Q(status = 4) | Q(status = 5) | Q(status = 8) | Q(status = 9)), category = 1, categoryid__in = (Training.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)))).values_list('id')).order_by('-created')
+        rp_workshop_notification = EventsNotification.objects.filter((Q(status = 0) | Q(status = 5) | Q(status = 2)), category = 0).order_by('-created')
+        rp_training_notification = EventsNotification.objects.filter((Q(status = 0) | Q(status = 5) | Q(status = 2)), category = 2).order_by('-created')
+        rp_test_notification = EventsNotification.objects.filter((Q(status = 0) | Q(status = 4) | Q(status = 5) | Q(status = 8) | Q(status = 9)), category = 1, categoryid__in = (Training.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)))).values_list('id')).order_by('-created')
     if is_invigilator(user):
         invigilator_test_notification = EventsNotification.objects.filter((Q(status = 0) | Q(status = 1)), category = 1, academic_id = user.invigilator.academic_id, categoryid__in = user.invigilator.academic.test_set.filter(invigilator_id = user.id).values_list('id')).order_by('-created')
     context = {
@@ -668,7 +667,12 @@ def training_request(request, role, rid = None):
             w.save()
             messages.success(request, "Please upload the attendance sheet. ")
             #update logs
-            message = w.academic.institution_name+" has made a training request for "+w.foss.foss+" on "+w.trdate
+            message = None
+            if w.training_type == 0:
+                message = w.academic.institution_name+" has made a training request for "+w.foss.foss+" on "+w.trdate
+            else:
+                message = w.academic.institution_name+" has made a Workshop request for "+w.foss.foss+" on "+w.trdate
+                
             update_events_log(user_id = user.id, role = 0, category = 0, category_id = w.id, academic = w.academic_id, status = 0)
             update_events_notification(user_id = user.id, role = 0, category = 0, category_id = w.id, academic = w.academic_id, status = 0, message = message)
             
@@ -713,13 +717,14 @@ def training_list(request, role, status):
                 collectionSet = Training.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status])
         elif is_organiser(user) and role == 'organiser':
             if status == 'approved':
-                collectionSet = Training.objects.filter(organiser_id=user, status = status_dict[status], trdate__gt=datetime.date.today())
-            elif status == 'ongoing' :
-                collectionSet = Training.objects.filter((Q(status = 2) | Q(status = 3)), organiser_id=user, trdate__lte=datetime.date.today())
-            elif status == 'pending' :
-                collectionSet = Training.objects.filter((Q(status = 0) | Q(status = 1)), organiser_id=user, trdate__gte=datetime.date.today())
+                collectionSet = Training.objects.filter(organiser__user = user, status = status_dict[status], trdate__gt=datetime.date.today())
+            elif status == 'ongoing':
+                collectionSet = Training.objects.filter((Q(status = 2) | Q(status = 3)), organiser__user = user, trdate__lte=datetime.date.today())
+            elif status == 'pending':
+                collectionSet = Training.objects.filter((Q(status = 0) | Q(status = 1)), organiser__user = user, trdate__gte=datetime.date.today())
+                print collectionSet
             else:
-                collectionSet = Training.objects.filter(organiser_id=user, status = status_dict[status])
+                collectionSet = Training.objects.filter(organiser__user = user, status = status_dict[status])
         
         if collectionSet == None:
             raise Http404('You are not allowed to view this page')
@@ -782,12 +787,10 @@ def training_approvel(request, role, rid):
     if w.status == 2:
         w.training_code = "WC-"+str(w.id)
         send_email('Instructions to be followed before conducting the training', w.organiser.user.email, w)
-    tmp = 0
     if request.GET['status'] == 'completed':
         # calculate the participant list
         wpcount = TrainingAttendance.objects.filter(training_id = rid, status = 1).count()
         w.participant_counts = wpcount
-        tmp = 1
     w.save()
     #send email
     if w.status == 4:
@@ -807,11 +810,14 @@ def training_approvel(request, role, rid):
     #update logs
     update_events_log(user_id = user.id, role = 2, category = 0, category_id = w.id, academic = w.academic_id, status = status)
     update_events_notification(user_id = user.id, role = 2, category = 0, category_id = w.id, academic = w.academic_id, status = status, message = message)
-    if tmp:
+    if status == 4:
         messages.success(request, "Training has been completed. For downloading the learner's certificate click on View Participants ")
         return HttpResponseRedirect('/software-training/training/'+role+'/completed/')
-    else:
-        messages.success(request, "Training has been accepted ")
+    elif status == 5:
+        messages.success(request, "Training has been rejected ")
+        return HttpResponseRedirect('/software-training/training/'+role+'/rejected/')
+    elif status == 2:
+        messages.success(request, "Training has been approved ")
         return HttpResponseRedirect('/software-training/training/'+role+'/approved/')
 
 @login_required
@@ -1167,11 +1173,11 @@ def test_list(request, role, status):
                 collectionSet = Test.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status])
         elif is_organiser(user) and role == 'organiser':
             if status == 'ongoing': 
-                collectionSet = Test.objects.filter((Q(status = 2) | Q(status = 3)), organiser_id=user , tdate = datetime.datetime.now().strftime("%Y-%m-%d"))
+                collectionSet = Test.objects.filter((Q(status = 2) | Q(status = 3)), organiser__user = user , tdate = datetime.datetime.now().strftime("%Y-%m-%d"))
             elif status == 'approved':
-                collectionSet = Test.objects.filter(organiser_id=user, status = status_dict[status], tdate__gt=datetime.date.today())
+                collectionSet = Test.objects.filter(organiser__user = user, status = status_dict[status], tdate__gt=datetime.date.today())
             else:
-                collectionSet = Test.objects.filter(organiser_id=user, status = status_dict[status])
+                collectionSet = Test.objects.filter(organiser__user = user, status = status_dict[status])
         elif is_invigilator(user) and role == 'invigilator':
             if status == 'ongoing':
                 collectionSet = Test.objects.filter((Q(status = 2) | Q(status = 3)), tdate = datetime.date.today(), invigilator_id = user.invigilator.id)
@@ -1501,7 +1507,6 @@ def test_participant_ceritificate(request, wid, participant_id):
             mdluser = MdlUser.objects.get(id = participant_id)
             ta = TestAttendance.objects.get(test_id = w.id, mdluser_id = participant_id)
             mdlgrade = MdlQuizGrades.objects.get(quiz = ta.mdlquiz_id, userid = participant_id)
-            print "ss"
             if ta.status < 1 or round(mdlgrade.grade, 1) < 40:
                 raise Http404('Page not found')
                 

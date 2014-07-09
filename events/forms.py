@@ -295,8 +295,8 @@ class TestForm(forms.Form):
             #self.fields['academic'].initial = user.organiser.academic.id
             if instance:
                 #print "i am in instance"
-                wchoices = list(Workshop.objects.filter(academic = instance.academic, status = 2).values_list('id', 'workshop_code'))
-                trchoices = list(Training.objects.filter(academic = instance.academic, status = 2).values_list('id', 'training_code'))
+                wchoices = list(Training.objects.filter(academic = instance.academic, status = 4, training_type__gt=0).values_list('id', 'training_code'))
+                trchoices = list(Training.objects.filter(academic = instance.academic, status = 4, training_type=0).values_list('id', 'training_code'))
             else:
                 try:
                     wchoices = list(Training.objects.filter(academic = user.organiser.academic, status = 4, training_type__gt=0).values_list('id', 'training_code'))
@@ -306,9 +306,9 @@ class TestForm(forms.Form):
                 except Exception, e:
                     print e
                     i = Invigilator.objects.get(user_id = args[0]['invigilator']) 
-                    wchoices = list(Workshop.objects.filter(academic = i.academic, status = 2).values_list('id', 'workshop_code'))
+                    wchoices = list(Training.objects.filter(academic = i.academic, status = 4, training_type__gt=0).values_list('id', 'training_code'))
                     wchoices.insert(0, ('', '-- None --'))
-                    trchoices = list(Training.objects.filter(academic = i.academic, status = 2).values_list('id', 'training_code'))
+                    trchoices = list(Training.objects.filter(academic = i.academic, status = 4, training_type=0).values_list('id', 'training_code'))
                     trchoices.insert(0, ('', '-- None --'))
             self.fields['workshop'].choices = wchoices
             self.fields['training'].choices = trchoices
@@ -362,7 +362,7 @@ class TestForm(forms.Form):
             self.fields['test_category'].initial = instance.test_category_id
             self.fields['department'].initial = instance.department.all().values_list('id', flat=True)
             self.fields['tdate'].initial = str(instance.tdate) + " " + str(instance.ttime)[0:5]
-            self.fields['workshop'].initial = instance.workshop_id
+            self.fields['workshop'].initial = instance.training_id
             self.fields['invigilator'].initial = instance.invigilator_id
             
             fchoices = []
