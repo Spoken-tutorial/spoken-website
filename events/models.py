@@ -142,6 +142,9 @@ class Organiser(models.Model):
     status = models.PositiveSmallIntegerField(default=0)
     created = models.DateTimeField(auto_now_add = True)
     updated = models.DateTimeField(auto_now = True)
+    
+    def __unicode__(self):
+        return self.user.username
 
 class Invigilator(models.Model):
     user = models.OneToOneField(User)
@@ -150,6 +153,9 @@ class Invigilator(models.Model):
     status = models.PositiveSmallIntegerField(default=0)
     created = models.DateTimeField(auto_now_add = True)
     updated = models.DateTimeField(auto_now = True)
+    
+    def __unicode__(self):
+        return self.user.username
 
 class Department(models.Model):
     name = models.CharField(max_length=200)

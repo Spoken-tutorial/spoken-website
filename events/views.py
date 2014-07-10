@@ -1114,51 +1114,58 @@ def training_participant_ceritificate(request, wid, participant_id):
     return response
     
 @login_required
-def test_request(request, role):
+def test_request(request, role, rid = None):
     ''' Test request by organiser '''
     user = request.user
-    if not user.is_authenticated() or not is_organiser(user):
+    if not (user.is_authenticated() and ( is_organiser(user) or is_resource_person(user) or is_event_manager(user))):
         raise Http404('You are not allowed to view this page')
-    
+    context = {}
     if request.method == 'POST':
         form = TestForm(request.POST, user = request.user)
         if form.is_valid():
             dateTime = request.POST['tdate'].split(' ')
             t = Test()
-            t.organiser_id = user.organiser.id
-            t.invigilator_id = form.cleaned_data['invigilator']
-            #t.academic_id = form.cleaned_data['academic']
-            t.academic = user.organiser.academic
-            #t.training_id = form.cleaned_data['workshop']
+            if rid:
+                t = Test.objects.get(pk = rid)
+            else:
+                t.organiser_id = user.organiser.id
+                t.academic = user.organiser.academic
+            t.test_category_id = request.POST['test_category']
+            
+            if int(request.POST['test_category']) == 1:
+                t.training_id = request.POST['workshop']
+            if int(request.POST['test_category']) == 2:
+                t.training_id = request.POST['training']
+            if int(request.POST['test_category']) == 3:
+                t.training_id = None
+            
+            t.invigilator_id = request.POST['invigilator']
+            t.foss_id = request.POST['foss']
             t.tdate = dateTime[0]
             t.ttime = dateTime[1]
-            t.foss_id = form.cleaned_data['foss']
-            t.test_category_id = form.cleaned_data['test_category']
-            if int(form.cleaned_data['test_category']) == 1:
-                t.training_id = form.cleaned_data['workshop']
-            if int(form.cleaned_data['test_category']) == 2:
-                t.training_id = form.cleaned_data['training']
             t.save()
-            #M2M saving department
+            t.department.clear()
             for dept in form.cleaned_data.get('department'):
                 t.department.add(dept)
-            t.save()
-            messages.success(request, "You will receive a test confirmation mail shortly. Thank you. ")
+            
             #update logs
             message = t.academic.institution_name+" has made a test request for "+t.foss.foss+" on "+t.tdate
+            if rid:
+                message = t.academic.institution_name+" has updated test for "+t.foss.foss+" on  dated "+t.tdate
             update_events_log(user_id = user.id, role = 0, category = 1, category_id = t.id, academic = t.academic_id, status = 0)
             update_events_notification(user_id = user.id, role = 0, category = 1, category_id = t.id, academic = t.academic_id, status = 0, message = message)
             
-            return HttpResponseRedirect("/software-training/test/organiser/pending/")
+            return HttpResponseRedirect("/software-training/test/"+role+"/pending/")
             
-        context = {'form':form, 'role' : role, 'status' : 'request'}
-        return render(request, 'events/templates/test/form.html', context)
-    else:
-        messages.info(request, "Upgrade the browser with latest version on all the systems before the test. Please note: Confirm Invigilator availability and acceptance to invigilate before adding his name in this form.")
-        context = {'role' : role, 'status' : 'request'}
-        context.update(csrf(request))
-        context['form'] = TestForm(user = request.user)
-        return render(request, 'events/templates/test/form.html', context)
+    form = TestForm(user = request.user)
+    if rid:
+        t = Test.objects.get(pk = rid)
+        form = TestForm(user = t.organiser.user, instance = t)
+    messages.info(request, "Upgrade the browser with latest version on all the systems before the test. Please note: Confirm Invigilator availability and acceptance to invigilate before adding his name in this form.")
+    context = {'role' : role, 'status' : 'request'}
+    context.update(csrf(request))
+    context['form'] = form
+    return render(request, 'events/templates/test/form.html', context)
 
 @login_required
 def test_list(request, role, status):
@@ -1232,65 +1239,6 @@ def test_list(request, role, status):
         return render(request, 'events/templates/test/index.html', context)
     else:
         raise Http404('Page not found ')
-
-@login_required
-def test_edit(request, role, rid):
-    ''' Training edit by organiser or resource person '''
-    user = request.user
-    if not user.is_authenticated() or not is_organiser:
-        raise Http404('You are not allowed to view this page')
-    
-    if request.method == 'POST':
-        form = TestForm(request.POST, 'edit', user = request.user)
-        if form.is_valid():
-            dateTime = request.POST['tdate'].split(' ')
-            t = Test.objects.get(pk=rid)
-            #check if date time chenged or not
-            if t.status == 2 and (str(t.tdate) != dateTime[0] or str(t.ttime)[0:5] != dateTime[1]):
-                t.status = 0
-            #t.organiser_id = user.organiser.id
-            t.test_category_id = form.cleaned_data['test_category']
-            if int(form.cleaned_data['test_category']) == 1:
-                t.test_id = None
-            elif int(form.cleaned_data['test_category']) == 2:
-                t.training_id = None
-            else:
-                t.training_id = None
-                t.test_id = None
-                
-            #t.academic_id = form.cleaned_data['academic']
-            t.training_id = form.cleaned_data['workshop']
-            t.tdate = dateTime[0]
-            t.ttime = dateTime[1]
-            t.foss_id = form.cleaned_data['foss']
-            t.save()
-            messages.success(request, "Test has been sucessfully updated")
-            #department save
-            t.department.clear()
-            for dept in form.cleaned_data.get('department'):
-                try:
-                    t.department.add(dept)
-                except Exception, e:
-                    print e,
-                    pass
-            t.save()
-            #events log
-            logrole = 0
-            if role == 'rp':
-                logrole = 2
-            update_events_log(user_id = user.id, role = logrole, category = 1, category_id = t.id, academic = t.academic_id, status = 7)
-            return HttpResponseRedirect("/software-training/test/"+role+"/pending/")
-        
-        context = {'form':form, 'role':role}
-        return render(request, 'events/templates/test/form.html', context)
-    else:
-        context = {}
-        record = Test.objects.get(id = rid)
-        context.update(csrf(request))
-        context['form'] = TestForm(instance = record, user = user)
-        context['instance'] = record
-        context['role'] = role
-        return render(request, 'events/templates/test/form.html', context)
 
 @login_required
 @csrf_exempt

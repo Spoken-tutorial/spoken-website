@@ -176,6 +176,7 @@ class TrainingForm(forms.ModelForm):
         instance = ''
         if 'instance' in kwargs:
             instance = kwargs["instance"]
+            del kwargs["instance"]
         super(TrainingForm, self).__init__(*args, **kwargs)
         if user:
             from events.views import is_resource_person
@@ -186,6 +187,8 @@ class TrainingForm(forms.ModelForm):
             self.fields['course'].initial = instance.course_id
             self.fields['foss'].initial = instance.foss
             self.fields['language'].initial = instance.language
+            self.fields['trdate'].initial = str(instance.trdate) + " " + str(instance.trtime)[0:5]
+            self.fields['department'].initial = instance.department.all().values_list('id', flat=True)
             self.fields['skype'].initial = instance.skype
             try:
                 self.fields['course_number'].initial = instance.extra_fields.paper_name
@@ -240,137 +243,58 @@ class TrainingPermissionForm(forms.Form):
     except:
         pass
 
-class TestForm(forms.Form):
-    #district = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'district field is required.'})
-    #academic = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'College Name field is required.'})
-    choices = ()
-    try:
-        choices = list(TestCategory.objects.all().values_list('id', 'name'))
-        choices.insert(0, ('', '-- None --'))
-    except:
-        pass
-    test_category = forms.ChoiceField(choices = choices, widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'Category field is required.'})
+class TestForm(forms.ModelForm):
+    class Meta:
+        model = Test
+        exclude = ['status', 'participant_count', 'organiser', 'academic', 'test_code', 'ttime', 'training', 'workshop', 'appoved_by']
+    
+    def clean_workshop(self):
+        super(TestForm, self).clean()
+        if 'test_category' in self.cleaned_data:
+            if self.cleaned_data['test_category'].id == 1 and self.cleaned_data['workshop'] == '':
+                raise forms.ValidationError("Workshop field is required.")
+    
+    def clean_training(self):
+        super(TestForm, self).clean()
+        if 'test_category' in self.cleaned_data:
+            if self.cleaned_data['test_category'].id == 2 and self.cleaned_data['training'] == '':
+                raise forms.ValidationError("Training field is required.")
+            
+    tdate = forms.DateTimeField(required = True, error_messages = {'required':'Date field is required.'})
     workshop = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = False, error_messages = {'required':'Workshop field is required.'})
     training = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = False, error_messages = {'required':'Training field is required.'})
-    invigilator = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'invigilator Name field is required.'})
-    dchoices = ()
-    try:
-        dchoices = list(Department.objects.all().values_list('id', 'name'))
-        dchoices.insert(0, ('', '-- None --'))
-    except:
-        pass
-    department = forms.MultipleChoiceField(choices = dchoices, widget=forms.SelectMultiple(attrs = {}), required = True, error_messages = {'required':'Department Name field is required.'})
-    tdate = forms.DateTimeField(required = True, error_messages = {'required':'Date field is required.'})
-    fchoices = []
-    try:
-        fchoices = list(FossCategory.objects.all().values_list('id', 'foss'))
-        fchoices.insert(0, ('', '-- None --'))
-    except:
-        pass
-    foss = forms.ChoiceField(choices = fchoices, widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'Foss Name field is required.'})
+    
+    
     def __init__(self, *args, **kwargs):
-        user = None
+        user = ''
         if 'user' in kwargs:
             user = kwargs["user"]
             del kwargs["user"]
-        instance = None
+        instance = ''
         if 'instance' in kwargs:
             instance = kwargs["instance"]
             del kwargs["instance"]
         super(TestForm, self).__init__(*args, **kwargs)
-        #choices data 
-        self.fields['department'].choices = Department.objects.exclude(name='Uncategorized').values_list('id', 'name')
-
+        
         if user:
-            #print "i am in user"
-            #self.fields['district'].choices = District.objects.filter(state =user.organiser.academic.state).values_list('id', 'name')
-            #self.fields['district'].initial = user.organiser.academic.district.id
-            #if args and 'district' in args[0]:
-            #        choices = AcademicCenter.objects.filter(district =args[0]['district']).values_list('id', 'institution_name')
-            #else:
-            #    choices = AcademicCenter.objects.filter(district =user.organiser.academic.district).values_list('id', 'institution_name')
-            #    
-            #self.fields['academic'].choices = choices
-            #self.fields['academic'].initial = user.organiser.academic.id
-            if instance:
-                #print "i am in instance"
-                wchoices = list(Training.objects.filter(academic = instance.academic, status = 4, training_type__gt=0).values_list('id', 'training_code'))
-                trchoices = list(Training.objects.filter(academic = instance.academic, status = 4, training_type=0).values_list('id', 'training_code'))
-            else:
-                try:
-                    wchoices = list(Training.objects.filter(academic = user.organiser.academic, status = 4, training_type__gt=0).values_list('id', 'training_code'))
-                    wchoices.insert(0, ('', '-- None --'))
-                    trchoices = list(Training.objects.filter(academic = user.organiser.academic, status = 4, training_type = 0).values_list('id', 'training_code'))
-                    trchoices.insert(0, ('', '-- None --'))
-                except Exception, e:
-                    print e
-                    i = Invigilator.objects.get(user_id = args[0]['invigilator']) 
-                    wchoices = list(Training.objects.filter(academic = i.academic, status = 4, training_type__gt=0).values_list('id', 'training_code'))
-                    wchoices.insert(0, ('', '-- None --'))
-                    trchoices = list(Training.objects.filter(academic = i.academic, status = 4, training_type=0).values_list('id', 'training_code'))
-                    trchoices.insert(0, ('', '-- None --'))
+            self.fields['invigilator'].queryset = Invigilator.objects.filter(academic  = user.organiser.academic, status=1).exclude(user_id = user.id)
+            wchoices = list(Training.objects.filter(academic = user.organiser.academic, status = 4, training_type__gt=0).values_list('id', 'training_code'))
+            wchoices.insert(0, ('', '-- None --'))
+            trchoices = list(Training.objects.filter(academic = user.organiser.academic, status = 4, training_type = 0).values_list('id', 'training_code'))
+            trchoices.insert(0, ('', '-- None --'))
             self.fields['workshop'].choices = wchoices
             self.fields['training'].choices = trchoices
             
-            if instance:
-                invigilators = Invigilator.objects.filter(academic  = instance.academic, status=1).exclude(user_id = user.id)
-            else:
-                try:
-                    invigilators = Invigilator.objects.filter(academic  = user.organiser.academic, status=1).exclude(user_id = user.id)
-                except:
-                    i = Invigilator.objects.get(user_id = args[0]['invigilator'])
-                    invigilators = Invigilator.objects.filter(academic  = i.academic, status=1).exclude(user_id = user.id)
-            ichoices = []
-            for i in invigilators:
-                ichoices.insert(0, (i.id, i.user.username))
-            ichoices.insert(0, ('', '-- None --'))
-            self.fields['invigilator'].choices = ichoices
-        
-        if args:
-            #print "i am in arg"
-            if 'test_category' in args[0]:
-                if args[0]['test_category'] and args[0]['test_category'] != '' and args[0]['test_category'] != 'None':
-                    if int(args[0]['test_category']) == 1:
-                        if 'workshop' in args[0]:
-                            if args[0]['workshop'] and args[0]['workshop'] != '' and args[0]['workshop'] != 'None':
-                                w = Training.objects.get(pk=args[0]['workshop'])
-                                choices = (('', '-- None --'), (w.foss_id, w.foss.foss),)
-                                self.fields['foss'].choices = choices
-                                if 'edit' in args:
-                                    self.fields['department'].choices = Department.objects.all().values_list('id', 'name')
-                                else:
-                                    self.fields['department'].choices = w.department.select_related().values_list('id', 'name')
-                                    
-                    if int(args[0]['test_category']) == 2:
-                        if 'training' in args[0]:
-                            if args[0]['training'] and args[0]['training'] != '' and args[0]['training'] != 'None':
-                                w = Training.objects.get(pk=args[0]['training'])
-                                choices = (('', '-- None --'), (w.foss_id, w.foss.foss),)
-                                self.fields['foss'].choices = choices
-                                if 'edit' in args:
-                                    self.fields['department'].choices = Department.objects.all().values_list('id', 'name')
-                                else:
-                                    self.fields['department'].choices = w.department.select_related().values_list('id', 'name')
-                    
         if instance:
-            #print "I am in instance"
-            #self.fields['district'].choices = District.objects.filter(state =instance.academic.state).values_list('id', 'name')
-            #self.fields['district'].initial = instance.academic.district.id
-            #self.fields['academic'].choices = AcademicCenter.objects.filter(district =instance.academic.district).values_list('id', 'institution_name')
-            #self.fields['academic'].initial = instance.academic_id
-            self.fields['test_category'].initial = instance.test_category_id
-            self.fields['department'].initial = instance.department.all().values_list('id', flat=True)
+            self.fields['invigilator'].initial = instance.invigilator
+            self.fields['test_category'].initial = instance.test_category
+            self.fields['foss'].initial = instance.foss
             self.fields['tdate'].initial = str(instance.tdate) + " " + str(instance.ttime)[0:5]
-            self.fields['workshop'].initial = instance.training_id
-            self.fields['invigilator'].initial = instance.invigilator_id
-            
-            fchoices = []
-            test = Test.objects.filter(pk=instance.id)
-            if test:
-                fchoices.insert(0, (test[0].foss_id, test[0].foss.foss))
-            fchoices.insert(0, ('', '-- None --'))
-            self.fields['foss'].choices = fchoices
-            self.fields['foss'].initial = instance.foss_id
+            self.fields['department'].initial = instance.department.all().values_list('id', flat=True)
+            if instance.test_category.id == 1:
+                self.fields['workshop'].initial = instance.training_id
+            if instance.test_category.id == 2:
+                self.fields['training'].initial = instance.training_id
 
 class TrainingScanCopyForm(forms.Form):
     scan_copy = forms.FileField(label = 'Select a Scaned copy', required = True)
@@ -386,48 +310,3 @@ class TrainingScanCopyForm(forms.Form):
 class ParticipantSearchForm(forms.Form):
     email = forms.EmailField(required = False)
     username = forms.CharField(required =  False)
-
-'''class TrainingForm(forms.Form):
-    department = forms.MultipleChoiceField(choices = [('', '-- None --'),], widget=forms.SelectMultiple(attrs = {}), required = True, error_messages = {'required':'Department Name field is required.'})
-    try:
-        course = forms.ChoiceField(choices = [('', '-- None --')] + list(Course.objects.all().values_list('id', 'name')), required = True, error_messages = {'required':'Course Name field is required.'})
-    except:
-        pass
-    course_number = forms.CharField()
-    batch = forms.ChoiceField(choices = [('', '-- None --'), (1, '1st Semester'), (2, '2ed Semester'), (3, '3ed Semester'), (4, '4th Semester'), (5, '5th Semester'), (6, '6th Semester'), (7, '7th Semester'), (8, '8th Semester')], required = True, error_messages = {'required':'Batch Name field is required.'})
-    free_lab_hours = forms.ChoiceField(widget=forms.RadioSelect, choices=[(0, 'No'),(1, 'Yes')], required = True)
-    wdate = forms.DateTimeField(required = True, error_messages = {'required':'Date field is required.'})
-    foss = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'Foss field is required.'})
-    language = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'Language field is required.'})
-    skype = forms.ChoiceField(widget=forms.RadioSelect, choices=[(0, 'No'),(1, 'Yes')], required = True)
-    def __init__(self, *args, **kwargs):
-        user = ''
-        if 'user' in kwargs:
-            user = kwargs["user"]
-            del kwargs["user"]
-        instance = ''
-        if 'instance' in kwargs:
-            instance = kwargs["instance"]
-            del kwargs["instance"]
-        super(TrainingForm, self).__init__(*args, **kwargs)
-        #choices data 
-        self.fields['department'].choices = Department.objects.exclude(name='Uncategorized').values_list('id', 'name')
-
-        foss_list = list(FossCategory.objects.all().values_list('id', 'foss'))
-        foss_list.insert(0, ('', '-- None --'))
-        lang_list = list(Language.objects.all().values_list('id', 'name'))
-        lang_list.insert(0, ('', '-- None --'))
-        self.fields['foss'].choices = foss_list
-        self.fields['language'].choices = lang_list
-
-        if instance:
-            self.fields['department'].initial = instance.department.all().values_list('id', flat=True)
-            self.fields['wdate'].initial = str(instance.trdate) + " " + str(instance.trtime)[0:5]
-            self.fields['course'].initial = instance.course.id
-            self.fields['batch'].initial = instance.batch
-            self.fields['course_number'].initial = instance.course_number
-            self.fields['free_lab_hours'].initial = instance.free_lab_hours
-            self.fields['foss'].initial = instance.foss_id
-            self.fields['language'].initial = instance.language_id
-            self.fields['skype'].initial = instance.skype
-'''

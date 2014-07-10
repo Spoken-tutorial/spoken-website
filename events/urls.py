@@ -49,7 +49,7 @@ urlpatterns = patterns('',
     url(r'^test/(?P<role>\w+)/request/$', 'events.views.test_request', name='test_request'),
     url(r'^test/(?P<role>\w+)/(?P<rid>\d+)/approvel/$', 'events.views.test_approvel', name='test_approvel'),
     url(r'^test/(?P<role>\w+)/(?P<status>\w+)/$', 'events.views.test_list', name='test_list'),
-    url(r'^test/(?P<role>\w+)/(?P<rid>\d+)/edit/$', 'events.views.test_edit', name='test_edit'),
+    url(r'^test/(?P<role>\w+)/(?P<rid>\d+)/edit/$', 'events.views.test_request', name='test_request'),
 
     url(r'^delete-notification/(\w+)/(\d+)/$', 'events.views.delete_events_notification', name="delete_events_notification"),
     url(r'^clear-notifications/(\w+)/$', 'events.views.clear_events_notification', name="clear_events_notification"),
