@@ -615,13 +615,12 @@ def training_request(request, role, rid = None):
     ''' Training request by organiser '''
     user = request.user
     context = {}
-    if not user.is_authenticated() or not is_organiser(user):
+    if not (user.is_authenticated() and ( is_organiser(user) or is_resource_person(user) or is_event_manager(user))):
         raise Http404('You are not allowed to view this page')
     
     if request.method == 'POST':
         form = TrainingForm(request.POST, user = request.user)
         if form.is_valid():
-        
             dateTime = request.POST['trdate'].split(' ')
             w = Training()
             if rid:
@@ -637,7 +636,7 @@ def training_request(request, role, rid = None):
             w.trtime = dateTime[1]
             w.skype = request.POST['skype']
             w.save()
-            
+            w.department.clear()
             for dept in form.cleaned_data.get('department'):
                 w.department.add(dept)
             
@@ -646,6 +645,7 @@ def training_request(request, role, rid = None):
                 if rid and w.extra_fields:
                     print " edit update existing record"
                     w.extra_fields.paper_name = request.POST['course_number']
+                    w.extra_fields.save()
                 elif not rid and not w.extra_fields:
                     print "new create new record"
                     tef = TrainingExtraFields.objects.create(paper_name = request.POST['course_number'])
@@ -668,10 +668,16 @@ def training_request(request, role, rid = None):
             messages.success(request, "Please upload the attendance sheet. ")
             #update logs
             message = None
-            if w.training_type == 0:
-                message = w.academic.institution_name+" has made a training request for "+w.foss.foss+" on "+w.trdate
+            if rid:
+                if w.training_type == 0:
+                    message = w.academic.institution_name+" has updated training request for "+w.foss.foss+" on dated "+w.trdate
+                else:
+                    message = w.academic.institution_name+" has updated a Workshop request for "+w.foss.foss+" on dated "+w.trdate
             else:
-                message = w.academic.institution_name+" has made a Workshop request for "+w.foss.foss+" on "+w.trdate
+                if w.training_type == 0:
+                    message = w.academic.institution_name+" has made a training request for "+w.foss.foss+" on dated "+w.trdate
+                else:
+                    message = w.academic.institution_name+" has made a Workshop request for "+w.foss.foss+" on dated "+w.trdate
                 
             update_events_log(user_id = user.id, role = 0, category = 0, category_id = w.id, academic = w.academic_id, status = 0)
             update_events_notification(user_id = user.id, role = 0, category = 0, category_id = w.id, academic = w.academic_id, status = 0, message = message)
@@ -693,6 +699,7 @@ def training_request(request, role, rid = None):
         context.update(csrf(request))
         return render(request, 'events/templates/training/form.html', context)
 
+@login_required
 def training_list(request, role, status):
     """ Organiser index page """
     user = request.user
@@ -730,13 +737,14 @@ def training_list(request, role, status):
             raise Http404('You are not allowed to view this page')
 
         header = {
-            1: SortableHeader('academic__state', True, 'State'),
-            2: SortableHeader('academic', True, 'Institution'),
-            3: SortableHeader('foss', True, 'FOSS'),
-            4: SortableHeader('language', True, 'Language'),
-            5: SortableHeader('trdate', True, 'Date'),
-            6: SortableHeader('Participants', False),
-            7: SortableHeader('Action', False)
+            1: SortableHeader('training_type', True, 'Type'),
+            2: SortableHeader('academic__state', True, 'State'),
+            3: SortableHeader('academic', True, 'Institution'),
+            4: SortableHeader('foss', True, 'FOSS'),
+            5: SortableHeader('language', True, 'Language'),
+            6: SortableHeader('trdate', True, 'Date'),
+            7: SortableHeader('Participants', False),
+            8: SortableHeader('Action', False)
         }
         
         raw_get_data = request.GET.get('o', None)
@@ -777,9 +785,10 @@ def training_approvel(request, role, rid):
     except Exception, e:
         print e
         raise Http404('Page not found ')
-    if status != 2:
-        if not (user.is_authenticated() and w.academic.state in State.objects.filter(resourceperson__user_id=user) and ( is_event_manager(user) or is_resource_person(user))):
-            raise PermissionDenied('You are not allowed to view this page')
+    #todo: check rp state same or not
+    #if status != 2:
+    #    if not (user.is_authenticated() and ( is_event_manager(user) or is_resource_person(user))):
+    #        raise PermissionDenied('You are not allowed to view this page')
     
     w.status = status
     w.appoved_by_id = user.id
@@ -797,7 +806,7 @@ def training_approvel(request, role, rid):
         status = 'Future activities after conducting the workshop'
         to = w.organiser.user.email
         send_email(status, to, w)
-    message = w.academic.institution_name +" has completed "+w.foss.foss+" training dated "+w.trdate.strftime("%Y-%m-%d")
+        message = w.academic.institution_name +" has completed "+w.foss.foss+" training dated "+w.trdate.strftime("%Y-%m-%d")
     if request.GET['status'] == 'accept':
         #delete admin notification
         try:
@@ -810,13 +819,13 @@ def training_approvel(request, role, rid):
     #update logs
     update_events_log(user_id = user.id, role = 2, category = 0, category_id = w.id, academic = w.academic_id, status = status)
     update_events_notification(user_id = user.id, role = 2, category = 0, category_id = w.id, academic = w.academic_id, status = status, message = message)
-    if status == 4:
+    if w.status == 4:
         messages.success(request, "Training has been completed. For downloading the learner's certificate click on View Participants ")
         return HttpResponseRedirect('/software-training/training/'+role+'/completed/')
-    elif status == 5:
+    elif w.status == 5:
         messages.success(request, "Training has been rejected ")
         return HttpResponseRedirect('/software-training/training/'+role+'/rejected/')
-    elif status == 2:
+    elif w.status == 2:
         messages.success(request, "Training has been approved ")
         return HttpResponseRedirect('/software-training/training/'+role+'/approved/')
 
@@ -1104,6 +1113,7 @@ def training_participant_ceritificate(request, wid, participant_id):
 
     return response
     
+@login_required
 def test_request(request, role):
     ''' Test request by organiser '''
     user = request.user
@@ -1150,6 +1160,7 @@ def test_request(request, role):
         context['form'] = TestForm(user = request.user)
         return render(request, 'events/templates/test/form.html', context)
 
+@login_required
 def test_list(request, role, status):
     """ Organiser test index page """
     user = request.user
@@ -1222,6 +1233,7 @@ def test_list(request, role, status):
     else:
         raise Http404('Page not found ')
 
+@login_required
 def test_edit(request, role, rid):
     ''' Training edit by organiser or resource person '''
     user = request.user
@@ -1351,6 +1363,7 @@ def test_approvel(request, role, rid):
         return HttpResponseRedirect('/software-training/test/'+role+'/completed/')
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
+@login_required
 def test_attendance(request, tid):
     user = request.user
     test = None
@@ -1619,6 +1632,7 @@ def student_subscribe(request, events, eventid = None, mdluser_id = None):
     
     return HttpResponseRedirect('/moodle/index/')
 
+@login_required
 def organiser_invigilator_index(request, role, status):
     """ Resource person: List all inactive organiser under resource person states """
     #todo: filter to diaplay block and active user

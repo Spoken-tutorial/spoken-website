@@ -60,6 +60,13 @@
 				{% get_sortable_header header ordering request.GET %}
 				{% for record in collection %}
 					<tr>
+					    <td>
+					        {% if record.training_type %}
+					            Training
+					        {% else %}
+					            Workshop
+					        {% endif %}
+					    </td>
 					    <td>{{ record.academic.state }}</td>
 						<td>{{ record.academic }}</td>
 						<td>{{ record.foss }}</td>

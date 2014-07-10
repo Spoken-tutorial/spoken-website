@@ -183,11 +183,10 @@ class TrainingForm(forms.ModelForm):
                 self.fields['training_type'].choices = [(0, 'Training'),(1, 'Workshop'),(2, 'Pilot Workshop'), (3, 'Live Workshop')]
         if instance:
             self.fields['training_type'].initial = instance.training_type
-            try:
-                self.fields['trdate'].initial = str(instance.trdate) + " " + str(instance.trtime)[0:5]
-            except Exception, e:
-                print e
-                self.fields['trdate'].initial = str(instance.trdate) + " " + str(instance.trtime)[0:5]
+            self.fields['course'].initial = instance.course_id
+            self.fields['foss'].initial = instance.foss
+            self.fields['language'].initial = instance.language
+            self.fields['skype'].initial = instance.skype
             try:
                 self.fields['course_number'].initial = instance.extra_fields.paper_name
             except Exception, e:
