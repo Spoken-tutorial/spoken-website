@@ -1,38 +1,30 @@
 {% extends 'spoken/templates/base.html' %}
 {% load widget_tweaks %}
 {% load static %}
+{% load cmsdata %}
 {% load creationdata %}
 {% block title %}Tutorials Reviewed{% endblock %}
+{% block cssblock %}
+    <link rel="stylesheet" href="{% static 'spoken/css/flip-scroll.css' %}" type="text/css" media="screen" charset="utf-8" />
+{% endblock %}
 {% block heading %}<i class="fa fa-list-ul"></i> Tutorials reviewed{% endblock %}
 {% block content %}
-    <ul class="tabs nav nav-tabs">
-        <li><a href="/creation/domain-review/"><i class="fa fa-list-ul"></i> Tutorials waiting for Domain review</a></li>
-        <li class="active"><a href=""><i class="fa fa-list-ul"></i> Tutorials reviewed</a></li>
+    <ul class="breadcrumb">
+        <li><a href="/creation/domain-review/">Tutorials waiting for Domain review</a></li>
+        <li class="active">Tutorials reviewed</li>
     </ul>
-    <div class="tab-content">
-        <div class="tab-pane active table-responsive">
-            <table class="table table-bordered table-hover">
-            {% if not tr_recs|length %}
-                <tr>
-                    <td colspan="5" class="col-center">List is empty!</td>
-                </tr>
-            {% else %}
-                <tr class="active">
-                    <th>S.No</th>
-                    <th>Foss</th>
-                    <th>Tutorial Name</th>
-                    <th>Language</th>
-                    <th>Outline</th>
-                    <th>Script</th>
-                    <th>Slide</th>
-                    <th>Video</th>
-                    <th>Code Files</th>
-                    <th>Assignment</th>
-                    <th>Keywords</th>
-                    <th>Prerequisite</th>
-                    <th>Status</th>
-                </tr>
-                {% for tr_rec in tr_recs %}
+    <div id="flip-scroll" class="table-responsive">
+        <table class="paleblue table table-bordered table-hover">
+        {% if not collection|length %}
+            <tr>
+                <td colspan="5" class="col-center">List is empty!</td>
+            </tr>
+        {% else %}
+            <thead>
+                {% get_sortable_header header ordering request.GET %}
+            </thead>
+            <tbody>
+                {% for tr_rec in collection %}
                     <tr>
                         <td>{{ forloop.counter }}</td>
                         <td>{{ tr_rec.tutorial_detail.foss.foss }}</td>
@@ -67,14 +59,12 @@
                         </td>
                     </tr>
                 {% endfor %}
-            {% endif %}
-            </table>
-        </div>
+            </tbody>
+        {% endif %}
+        </table>
+    </div>
 {% endblock %}
 {% block jsblock %}
-    <script src="{% static 'spoken/js/chosen.jquery.min.js' %}"></script>
-    <script src="{% static 'spoken/js/jquery.fancybox.pack.js' %}"></script>
-    <script src="{% static 'spoken/js/jquery.mousewheel-3.0.6.pack.js' %}"></script>
     <script type="text/javascript">
         $(document).ready(function(){
             $(".review-btn").hover(

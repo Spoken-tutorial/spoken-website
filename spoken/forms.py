@@ -1,6 +1,7 @@
 from django import forms
 from events.models import Testimonials
-from creation.models import  FossCategory, Language
+from creation.models import FossCategory, Language
+
 class KeywordSearchForm(forms.Form):
     q = forms.CharField(required=True)
 

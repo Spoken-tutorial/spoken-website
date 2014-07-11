@@ -4,23 +4,38 @@
 {% load cmsdata %}
 {% load creationdata %}
 {% block title %}Tutorials Quality Review Index{% endblock %}
-{% block cssblock %}
-    <link rel="stylesheet" href="{% static 'spoken/css/flip-scroll.css' %}" type="text/css" media="screen" charset="utf-8" />
-{% endblock %}
 {% block heading %}<i class="fa fa-list-ul"></i> Tutorials Quality Review Index{% endblock %}
 {% block content %}
+    <!-- Nav tabs -->
+    <div class="custom-alert"></div>
     <ul class="breadcrumb">
-        <li><a href="/creation/quality-review/">Waiting for Review</a></li>
-        <li><a href="/creation/public-review/tutorial/index/">Ready for Public review</a></li>
-        <li><a href="/creation/quality-review/tutorial/publish/index/">Ready to publish</a></li>
-        <li><a href="/creation/public-review/list/">Under Public review</a></li>
-        <li class="active">Reviewed</li>
+        <li>
+            <a href="/creation/quality-review/">
+                Waiting for review
+            </a>
+        </li>
+        <li class="active">Ready for Public review</li>
+        <li>
+            <a href="/creation/quality-review/tutorial/publish/index/">
+                Ready to publish
+            </a>
+        </li>
+        <li>
+            <a href="/creation/public-review/list/">
+                Under Public review
+            </a>
+        </li>
+        <li>
+            <a href="/creation/quality-review/reviewed/">
+                Reviewed
+            </a>
+        </li>
     </ul>
     <div id="flip-scroll" class="table-responsive">
         <table class="paleblue table table-bordered table-condensed table-hover">
         {% if not collection|length %}
             <tr>
-                <td colspan="5" class="col-center">List is empty!</td>
+                <td colspan="11" class="col-center">List is empty</td>
             </tr>
         {% else %}
             <thead>
@@ -57,9 +72,7 @@
                         <td class="col-center" title="{{ tr_rec.common_content.keyword_status | get_review_status_list }}">
                             <span class="{{ tr_rec.common_content.keyword_status | get_review_status_symbol }}"></span>
                         </td>
-                        <td class="col-center">
-                            {% if tr_rec.status == 0 %} Pending {% elif tr_rec.status == 1 %} Accepted {% else %} Public Review {% endif %}
-                        </td>
+                        <td class="col-center"><a href="/creation/public-review/tutorial/{{ tr_rec.id }}" class="review-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Mark as Public Review</a></td>
                     </tr>
                 {% endfor %}
             </tbody>
@@ -68,6 +81,8 @@
     </div>
 {% endblock %}
 {% block jsblock %}
+    <script src="{% static 'spoken/js/jquery.fancybox.pack.js' %}"></script>
+    <script src="{% static 'spoken/js/jquery.mousewheel-3.0.6.pack.js' %}"></script>
     <script type="text/javascript">
         $(document).ready(function(){
             $(".review-btn").hover(

@@ -1,7 +1,7 @@
 {% load cmsdata %}
 <tr class="active">
     {% for header in headers %}
-        <th scope="col" class="{{ header.class_name }}">
+        <th scope="col" class="{{ header.class_name }}" {{ header.attribs }}>
             {% if header.sortable %}
                 <div class="sortoptions"{{' data="123"'}}>
                     {% if not header.removable == None %}<a class="sortremove" href="?o={{ header.removable }}{% with other_get_vals=getValue|reset_get_value:'o' %}{% if other_get_vals %}&{{other_get_vals}}{% endif %}{% endwith %}" title="Remove from sorting"></a>{% endif %}
@@ -17,9 +17,9 @@
                 {% endif %}
 
                 {% if header.verbose_name %}
-                    {{ header.verbose_name }}
+                    {{ header.verbose_name|safe }}
                 {% else %}
-                    {{ header.name }}
+                    {{ header.name|safe }}
                 {% endif %}
                 {% if header.sortable %}
                     </a>

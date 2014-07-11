@@ -1,61 +1,33 @@
 {% extends 'spoken/templates/base.html' %}
 {% load widget_tweaks %}
 {% load static %}
+{% load cmsdata %}
 {% load creationdata %}
 {% block title %}Tutorials Quality Review Index{% endblock %}
+{% block cssblock %}
+    <link rel="stylesheet" href="{% static 'spoken/css/flip-scroll.css' %}" type="text/css" media="screen" charset="utf-8" />
+{% endblock %}
 {% block heading %}<i class="fa fa-list-ul"></i> Tutorials Quality Review Index{% endblock %}
 {% block content %}
-    <ul class="nav nav-tabs">
-        <li>
-            <a href="/creation/quality-review/">
-                <i class="fa fa-list-ul"></i> Waiting for Review
-            </a>
-        </li>
-        <li>
-            <a href="/creation/quality-review/2/">
-                <i class="fa fa-list-ul"></i> Ready for Public review
-            </a>
-        </li>
-        <li>
-            <a href="/creation/quality-review/3/">
-                <i class="fa fa-list-ul"></i> Ready to publish
-            </a>
-        </li>
-        <li class="active">
-            <a href="">
-                <i class="fa fa-list-ul"></i> Under Public review
-            </a>
-        </li>
-        <li>
-            <a href="/creation/quality-review/reviewed/">
-                <i class="fa fa-list-ul"></i> Reviewed
-            </a>
-        </li>
+    <ul class="breadcrumb">
+        <li><a href="/creation/quality-review/">Waiting for Review</a></li>
+        <li><a href="/creation/public-review/tutorial/index/">Ready for Public review</a></li>
+        <li><a href="/creation/quality-review/tutorial/publish/index/">Ready to publish</a></li>
+        <li class="active">Under Public review</li>
+        <li><a href="/creation/quality-review/reviewed/">Reviewed</a></li>
     </ul>
-    <div class="tab-content">
-        <div class="tab-pane active table-responsive">
-            <table class="table table-bordered table-hover">
-            {% if not pubrev_recs|length %}
-                <tr>
-                    <td colspan="5" class="col-center">List is empty!</td>
-                </tr>
-            {% else %}
-                <tr class="active">
-                    <th>S.No</th>
-                    <th>Foss</th>
-                    <th>Tutorial Name</th>
-                    <th>Language</th>
-                    <th>Outline</th>
-                    <th>Script</th>
-                    <th>Slide</th>
-                    <th>Video</th>
-                    <th>Code Files</th>
-                    <th>Assignment</th>
-                    <th>Prerequisite</th>
-                    <th>Keywords</th>
-                    <th colspan="2" class="col-center">Status</th>
-                </tr>
-                {% for tr_rec in pubrev_recs %}
+    <div id="flip-scroll" class="table-responsive">
+        <table class="paleblue table table-bordered table-condensed table-hover">
+        {% if not collection|length %}
+            <tr>
+                <td colspan="5" class="col-center">List is empty!</td>
+            </tr>
+        {% else %}
+            <thead>
+                {% get_sortable_header header ordering request.GET %}
+            </thead>
+            <tbody>
+                {% for tr_rec in collection %}
                     <tr>
                         <td>{{ forloop.counter }}</td>
                         <td>{{ tr_rec.tutorial_detail.foss.foss }}</td>
@@ -86,21 +58,19 @@
                             <span class="{{ tr_rec.common_content.keyword_status | get_review_status_symbol }}"></span>
                         </td>
                         <td class="col-center">
-                            <a href="/creation/public-review/publish/{{ tr_rec.id }}" class="review-btn"><span title="" data-original-title="" class="fa fa-cog fa-1"></span> Publish</a>
+                            <a href="/creation/public-review/publish/{{ tr_rec.id }}" title="Publish the Tutorial" class="review-btn"><span title="" data-original-title="" class="fa fa-cog fa-1"></span> Publish</a>
                         </td>
                         <td class="col-center">
-                            <a href="/creation/public-review/mark-as-pending/{{ tr_rec.id }}" class="review-btn"><span title="" data-original-title="" class="fa fa-cog fa-1"></span> Mark as Pending</a>
+                            <a href="/creation/public-review/mark-as-pending/{{ tr_rec.id }}" title="Mark as Pending" class="review-btn"><span title="" data-original-title="" class="fa fa-cog fa-1"></span> Pending</a>
                         </td>
                     </tr>
                 {% endfor %}
-            {% endif %}
-            </table>
-        </div>
+            </tbody>
+        {% endif %}
+        </table>
+    </div>
 {% endblock %}
 {% block jsblock %}
-    <script src="{% static 'spoken/js/chosen.jquery.min.js' %}"></script>
-    <script src="{% static 'spoken/js/jquery.fancybox.pack.js' %}"></script>
-    <script src="{% static 'spoken/js/jquery.mousewheel-3.0.6.pack.js' %}"></script>
     <script type="text/javascript">
         $(document).ready(function(){
             $(".review-btn").hover(

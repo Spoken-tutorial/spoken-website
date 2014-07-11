@@ -2,7 +2,6 @@
 {% load widget_tweaks %}
 {% load static %}
 {% block title %}Unpublish Tutorial on Live for Correction{% endblock %}
-{% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
 {% block heading %}Unpublish Tutorial on Live for Correction{% endblock %}
 {% block content %}
     <form role="form" method="post" enctype="multipart/form-data" action="">
@@ -26,33 +25,15 @@
     </form>
 {% endblock %}
 {% block jsblock %}
-    <script src="{% static 'spoken/js/chosen.jquery.min.js' %}"></script>
-    <script type="text/javascript">
-        $(".foss_category").chosen({width: "100%"});
-        $(".tutorial_name").chosen({width: "100%"});
-        $(".language").chosen({width: "100%"});
-    </script>
     <script type="text/javascript">
         $(document).ready(function(){
-            tutname = $(".tutorial_name");
-            lang = $(".language");
-            lang.chosen();
             $('.foss_category').on("change", function(){
                 var foss = $(this).val();
-                if(foss == '') {
-                    $('.tutorial_name').html('<option value="" selected="selected"></option>');
-                    $('.tutorial_name').attr("disabled", "disabled");
-                    tutname.trigger("chosen:updated");
-                    $('.language').html('<option value="" selected="selected"></option>');
-                    $('.language').attr("disabled", "disabled");
-                    lang.trigger("chosen:updated");
-                } else {
-                    $('.tutorial_name').html('<option value="" selected="selected"></option>');
-                    $('.tutorial_name').attr("disabled", "disabled");
-                    tutname.trigger("chosen:updated");
-                    $('.language').html('<option value="" selected="selected"></option>');
-                    $('.language').attr("disabled", "disabled");
-                    lang.trigger("chosen:updated");
+                $('.tutorial_name').html('<option value="" selected="selected">Select Tutorial</option>');
+                $('.tutorial_name').attr("disabled", "disabled");
+                $('.language').html('<option value="" selected="selected">Select Language</option>');
+                $('.language').attr("disabled", "disabled");
+                if(foss != '') {
                     $.ajax({
                         url: "/creation/ajax-publish-to-pending/",
                         type: "POST",
@@ -64,7 +45,6 @@
                             if(data) {
                                 $('.language').html(data);
                                 $('.language').removeAttr('disabled');
-                                lang.trigger("chosen:updated");
                             }
                         }
                     })
@@ -73,14 +53,9 @@
             $('.language').on("change", function(){
                 var foss = $('.foss_category').val();
                 var lang = $(this).val();
-                if(foss == '') {
-                    $('.tutorial_name').html('<option value="" selected="selected"></option>');
-                    $('.tutorial_name').attr("disabled", "disabled");
-                    tutname.trigger("chosen:updated");
-                } else {
-                    $('.tutorial_name').html('<option value="" selected="selected"></option>');
-                    $('.tutorial_name').attr("disabled", "disabled");
-                    tutname.trigger("chosen:updated");
+                $('.tutorial_name').html('<option value="" selected="selected">Select Tutorial</option>');
+                $('.tutorial_name').attr("disabled", "disabled");
+                if(foss  != '') {
                     $.ajax({
                         url: "/creation/ajax-publish-to-pending/",
                         type: "POST",
@@ -93,7 +68,6 @@
                             if(data){
                                 $('.tutorial_name').html(data);
                                 $('.tutorial_name').removeAttr('disabled');
-                                tutname.trigger("chosen:updated");
                             }
                         }
                     })

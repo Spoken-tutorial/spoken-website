@@ -87,12 +87,12 @@
 {% block title %}{{ tr_rec.tutorial_detail.tutorial }} - {{ tr_rec.language.name }}{% endblock %}
 {% block heading %}{{ tr_rec.tutorial_detail.tutorial }} - {{ tr_rec.language.name }}{% endblock %}
 {% block content %}
-    {% if tr_rec.video_status %}
+   
     <row>
         <div class='container playlist-container col-lg-12 col-md-12 col-sm-12'>
             <div class="video-container col-lg-8 col-md-8 col-sm-8">
                 <video id="st_video" class="video-js vjs-default-skin" controls preload="auto" width="auto" height="auto" data-setup="{}">
-                    <source src="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ tr_rec.video }}" type="video/ogg" />
+                    <source {% if tr_rec.video_status %}src="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ tr_rec.video }}" type="video/ogg"{% endif %} />
                 </video>
             </div>
             <div class='playlist col-lg-4 col-md-4 col-sm-4'>
@@ -121,7 +121,6 @@
             </div>
         </div>
     </row>
-    {% endif %}
     <row>
         <div class="col-lg-7 col-md-7 col-sm-7 no-padding-left">
             <pre class="custom-jumbotron"><b>Outline:<br /></b>{{ tr_rec.outline }}</pre>
