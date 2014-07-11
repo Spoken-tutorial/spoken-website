@@ -13,7 +13,7 @@ import os
 from django.http import Http404
 import json
 from creation.views import get_video_info
-from creation.models import TutorialCommonContent, TutorialDetail, TutorialResource
+from creation.models import TutorialCommonContent, TutorialDetail, TutorialResource, Language
 
 def home(request):
     #messages.success(request, "User has already in the attendance list")

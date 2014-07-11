@@ -4,6 +4,9 @@
 {% load cmsdata %}
 {% load creationdata %}
 {% block title %}Tutorials Contributed{% endblock %}
+{% block cssblock %}
+    <link rel="stylesheet" href="{% static 'spoken/css/flip-scroll.css' %}" type="text/css" media="screen" charset="utf-8" />
+{% endblock %}
 {% block heading %}<i class="fa fa-list-ul"></i> Tutorials Contributed{% endblock %}
 {% block content %}
     <ul class="breadcrumb">
@@ -11,15 +14,18 @@
         <li><a href="/creation/upload/needimprovement/">Tutorials under Need Improvement state</a></li>
         <li class="active">Tutorials Contributed</li>
     </ul>
-    <div class="table-responsive">
-        <table class="paleblue table table-bordered table-hover">
-        {% if not tr_recs|length %}
+    <div id="flip-scroll" class="table-responsive">
+        <table class="paleblue table table-condensed table-bordered table-hover">
+        {% if not collection|length %}
             <tr>
                 <td colspan="5" class="col-center">List is empty!</td>
             </tr>
         {% else %}
-            {% get_sortable_header header ordering request.GET %}
-            {% for tr_rec in tr_recs %}
+            <thead>
+                {% get_sortable_header header ordering request.GET %}
+            </thead>
+            <tbody>
+            {% for tr_rec in collection %}
                 <tr class="{% cycle 'odd' 'even' %}">
                     <td>{{ forloop.counter }}</td>
                     <td>{{ tr_rec.tutorial_detail.foss.foss }}</td>
@@ -54,14 +60,12 @@
                     </td>
                 </tr>
             {% endfor %}
+            </tbody>
         {% endif %}
         </table>
     </div>
 {% endblock %}
 {% block jsblock %}
-    <script src="{% static 'spoken/js/chosen.jquery.min.js' %}"></script>
-    <script src="{% static 'spoken/js/jquery.fancybox.pack.js' %}"></script>
-    <script src="{% static 'spoken/js/jquery.mousewheel-3.0.6.pack.js' %}"></script>
     <script type="text/javascript">
         $(document).ready(function(){
             $(".review-btn").hover(

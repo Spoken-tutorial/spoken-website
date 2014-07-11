@@ -2,15 +2,16 @@ from django.contrib import messages
 from creation.models import *
 
 class SortableHeader():
-    def __init__(self, name, sortable, verbose_name=''):
+    def __init__(self, name, sortable, verbose_name = '', class_name = '', attribs = ''):
         self.name = name
         self.sortable = sortable
         self.verbose_name = verbose_name
         self.ordering = ''
         self.removable = ''
-        self.class_name = ''
+        self.class_name = class_name
         self.sort_type = ''
         self.order = 0
+        self.attribs = attribs
 
 def get_field_index(raw_get_data):
     if raw_get_data:
@@ -106,7 +107,7 @@ def get_sortable_header(header, ordering, getValue):
                 header[row].sort_type = 'descending'
                 signed_index = signed_index * -1
             header[row].ordering, header[row].removable = get_ordering(ordering, row, signed_index, sign_str)
-            header[row].class_name = class_name
+            header[row].class_name = header[row].class_name + ' ' + class_name
         headers.append(header[row])
     context = {
         'headers': headers,

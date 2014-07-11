@@ -15,6 +15,8 @@ import os
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 SCRIPT_URL = 'http://script.spoken-tutorial.org/index.php/'
+
+STVIDEOS_DIR = STVIDEOS_PATH
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.6/howto/deployment/checklist/
 

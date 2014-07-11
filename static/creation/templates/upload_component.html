@@ -14,11 +14,13 @@
 	    </div>
 	    {% if title == "video" %}
 	        <div class="form-group">
-                <label for="id_isarchive">Video Thumbnail time</label>
+                <label for="id_thumb_mins">Video Thumbnail time</label>
 	            <div class="input-group">
 	                {% render_field form.thumb_mins class+="form-control" %}
+	                {{ form.thumb_mins.errors }}
 	                <span class="input-group-addon">:</span>
 	                {% render_field form.thumb_secs class+="form-control" %}
+	                {{ form.thumb_secs.errors }}
 	            </div>
             </div>
         {% endif %}

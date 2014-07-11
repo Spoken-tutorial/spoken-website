@@ -49,19 +49,10 @@ class TutorialDetailAdmin(admin.ModelAdmin):
         obj.tutorial = obj.tutorial.strip()
         obj.save()
         try:
-            foss_dir = settings.MEDIA_ROOT + '/videos/' + str(obj.foss_id)
-            os.mkdir(foss_dir)
+            foss_dir = settings.MEDIA_ROOT + '/videos/' + str(obj.foss_id) + '/' + str(obj.id) + '/resources'
+            os.makedirs(foss_dir)
         except:
-            print "Foss directory already exists..."
-        try:
-            foss_dir += '/' + str(obj.id)
-            os.mkdir(foss_dir)
-        except:
-            print "Tutorial directory already exists..."
-        try:
-            os.mkdir(foss_dir + '/resources')
-        except:
-            print "Resources directory already exists..."
+            print "Tutorial directories already exists..."
 
 class ContributorRoleAdmin(admin.ModelAdmin):
     form = ContributorRoleForm
