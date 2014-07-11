@@ -12,12 +12,41 @@ from forms import *
 import os
 from django.http import Http404
 import json
+import datetime
 from creation.views import get_video_info
 from creation.models import TutorialCommonContent, TutorialDetail, TutorialResource, Language
+from cms.models import SiteFeedback, Event
+
+@csrf_exempt
+def site_feedback(request):
+    data = request.POST
+    if data:
+        try:
+            SiteFeedback.objects.create(name=data['name'], email = data['email'], message = data['message'])
+            data = True
+        except Exception, e:
+            print e
+            data = False
+            
+    return HttpResponse(json.dumps(data), mimetype='application/json')
 
 def home(request):
-    #messages.success(request, "User has already in the attendance list")
-    context = {}
+    tr_rec = ''
+    try:
+        tr_rec = TutorialResource.objects.all().order_by('?')[:1].first()
+    except Exception, e:
+        messages.error(request, str(e))
+    context = {
+        'tr_rec': tr_rec,
+        'media_url': settings.MEDIA_URL,
+    }
+    
+    testimonials = Testimonials.objects.all().order_by('?')[:2]
+    context['testimonials'] = testimonials
+    
+    events = Event.objects.filter(event_date__gte=datetime.datetime.today()).order_by('event_date')[:2]
+    context['events'] = events
+    print events, "ssssssssss"
     return render(request, 'spoken/templates/home.html', context)
 
 def get_or_query(terms, search_fields):

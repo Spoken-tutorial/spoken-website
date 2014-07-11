@@ -62,6 +62,7 @@
                         {% render_field form.academic class+="form-control academic" tabindex="1" data-placeholder="Enter academic name" %}
                         {{ form.name.errors }}
                     </div>-->
+                    {{ form.errors }}
                     <div class="form-group">
                         <label class="col-sm-3 control-label" for= "id_test_category">Test Category</label>
                         <div class="col-sm-9">
@@ -146,7 +147,7 @@
                 $('.training_category_group').css({'display':'black'});
                 $('.training_category_group .training').removeAttr('disabled');
             }else {
-                ajaxFOssDeptFillDatas('foss', 'dept', 2);
+                //ajaxFossDeptFillDatas('foss', 'dept', 2);
                 $('.training_category_group').css({'display':'none'});
                 $('.workshop_group').css({'display':'none'});
                 $('.training_category_group .training').attr('disabled', 'disabled');
@@ -207,14 +208,14 @@
         $foss = $('#id_foss');
         
         $workshop.change(function() {
-            ajaxFOssDeptFillDatas('foss', 'dept', 0);
+            ajaxFossDeptFillDatas('foss', 'dept', 0);
         });
         
         $training.change(function() {
-            ajaxFOssDeptFillDatas('foss', 'dept', 1);
+            ajaxFossDeptFillDatas('foss', 'dept', 1);
         });
         
-function ajaxFOssDeptFillDatas(foss, dept, type){
+function ajaxFossDeptFillDatas(foss, dept, type){
     $afoss = $('#id_foss');
     $adepartment = $('#id_department');
     if(type){

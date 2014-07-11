@@ -142,6 +142,9 @@ class Organiser(models.Model):
     status = models.PositiveSmallIntegerField(default=0)
     created = models.DateTimeField(auto_now_add = True)
     updated = models.DateTimeField(auto_now = True)
+    
+    def __unicode__(self):
+        return self.user.username
 
 class Invigilator(models.Model):
     user = models.OneToOneField(User)
@@ -150,6 +153,9 @@ class Invigilator(models.Model):
     status = models.PositiveSmallIntegerField(default=0)
     created = models.DateTimeField(auto_now_add = True)
     updated = models.DateTimeField(auto_now = True)
+    
+    def __unicode__(self):
+        return self.user.username
 
 class Department(models.Model):
     name = models.CharField(max_length=200)
@@ -167,26 +173,58 @@ class Course(models.Model):
     def __unicode__(self):
         return self.name
         
-class Workshop(models.Model):
+class TrainingExtraFields(models.Model):
+    paper_name = models.CharField(max_length = 200)
+    
+class Training(models.Model):
     organiser = models.ForeignKey(Organiser)
-    appoved_by = models.ForeignKey(User, related_name = 'workshop_approved_by', null=True)
+    appoved_by = models.ForeignKey(User, related_name = 'training_approved_by', null=True)
     academic = models.ForeignKey(AcademicCenter)
+    
+    course = models.ForeignKey(Course)
+    
+    training_type = models.PositiveIntegerField(default=0)
+    
+    training_code = models.CharField(max_length=100, null=True)
+    
     department = models.ManyToManyField(Department)
     language = models.ForeignKey(Language)
     foss = models.ForeignKey(FossCategory)
-    workshop_code = models.CharField(max_length=100, null=True)
-    wdate = models.DateField()
-    wtime = models.TimeField()
+    trdate = models.DateField()
+    trtime = models.TimeField()
     skype = models.PositiveSmallIntegerField(default=0)
-    status = models.PositiveSmallIntegerField(default=0)
-    workshop_type = models.PositiveIntegerField(default=0)
+    status = models.PositiveSmallIntegerField(default=0) #{0:request done, 1: attendance submit, 2: training manger approved, 3: mark attenda done, 4: complete, 5: rejected}
+    
+    extra_fields = models.OneToOneField(TrainingExtraFields, null = True)
+    
     participant_counts = models.PositiveIntegerField(default=0)
     created = models.DateTimeField(auto_now_add = True)
     updated = models.DateTimeField(auto_now = True)
 
     class Meta:
-        unique_together = (("organiser", "academic", "foss", "wdate", "wtime"),)
+        unique_together = (("organiser", "academic", "foss", "trdate", "trtime"),)
 
+class TrainingAttendance(models.Model):
+    training = models.ForeignKey(Training)
+    mdluser_id = models.PositiveIntegerField()
+    #mdluser = models.ForeignKey(MdlUser)
+    password = models.CharField(max_length = 100, null=True)
+    count = models.PositiveSmallIntegerField(default=0)
+    status = models.PositiveSmallIntegerField(default=0)
+    created = models.DateTimeField(auto_now_add = True)
+    updated = models.DateTimeField(auto_now = True)
+    class Meta:
+        verbose_name = "Training Attendance"
+        unique_together = (("training", "mdluser_id"))
+
+class TrainingLog(models.Model):
+    user = models.ForeignKey(User)
+    training = models.ForeignKey(Training)
+    academic = models.ForeignKey(AcademicCenter)
+    role = models.PositiveSmallIntegerField() #{0:'organiser', 1:'ResourcePerson', 2: 'Event Manager'}
+    status = models.PositiveSmallIntegerField() #{0:'new', 1:'approved', 2:'completed', 3: 'rejected', 4:'update',  5:'Offline-Attendance submited', 6:'Marked Attendance'}
+    created = models.DateTimeField(auto_now_add = True)
+    
 class TestCategory(models.Model):
     name = models.CharField(max_length=200)
     created = models.DateTimeField(auto_now_add = True, null=True)
@@ -202,7 +240,6 @@ class Test(models.Model):
     invigilator = models.ForeignKey(Invigilator, related_name = 'test_invigilator')
     academic = models.ForeignKey(AcademicCenter)
     department = models.ManyToManyField(Department)
-    workshop = models.ForeignKey(Workshop, null=True)
     training = models.ForeignKey('Training', null=True)
     foss = models.ForeignKey(FossCategory)
     test_code = models.CharField(max_length=100)
@@ -233,6 +270,14 @@ class TestAttendance(models.Model):
         verbose_name = "Test Attendance"
         unique_together = (("test", "mdluser_id"))
 
+class TestLog(models.Model):
+    user = models.ForeignKey(User)
+    test = models.ForeignKey(Test)
+    academic = models.ForeignKey(AcademicCenter)
+    role = models.PositiveSmallIntegerField(default=0) #{0:'organiser', 1:'invigilator', 2:'ResourcePerson', 3: 'Event Manager'}
+    status = models.PositiveSmallIntegerField(default=0) #{0:'new', 1:'RP-approved', 2:'Inv-approved', 3: 'ongoing', 4:'completed', 5:'Rp-rejected', 6:'Inv-rejected', 7:'Update', 8:'Attendance submited', 9:'Marked Attendance'}
+    created = models.DateTimeField(auto_now_add = True)
+    
 class PermissionType(models.Model):
     name = models.CharField(max_length=200)
     created = models.DateTimeField(auto_now_add = True)
@@ -252,97 +297,23 @@ class Permission(models.Model):
     created = models.DateTimeField(auto_now_add = True)
     updated = models.DateTimeField(auto_now = True)
     
-class WorkshopAttendance(models.Model):
-    workshop = models.ForeignKey(Workshop)
-    mdluser_id = models.PositiveIntegerField()
-    #mdluser = models.ForeignKey(MdlUser)
-    password = models.CharField(max_length = 100, null=True)
-    count = models.PositiveSmallIntegerField(default=0)
-    status = models.PositiveSmallIntegerField(default=0)
-    created = models.DateTimeField(auto_now_add = True)
-    updated = models.DateTimeField(auto_now = True)
-    class Meta:
-        verbose_name = "Workshop Attendance"
-        unique_together = (("workshop", "mdluser_id"))
-        #unique_together = (("workshop", "mdluser"))
-
 class FossMdlCourses(models.Model):
     foss = models.ForeignKey(FossCategory)
     mdlcourse_id = models.PositiveIntegerField()
     mdlquiz_id = models.PositiveIntegerField()
 
-class WorkshopLog(models.Model):
-    user = models.ForeignKey(User)
-    workshop = models.ForeignKey(Workshop)
-    academic = models.ForeignKey(AcademicCenter)
-    role = models.PositiveSmallIntegerField() #{0:'organiser', 1:'ResourcePerson', 2: 'Event Manager'}
-    status = models.PositiveSmallIntegerField() #{0:'new', 1:'approved', 2:'completed', 3: 'rejected', 4:'update',  5:'Offline-Attendance submited', 6:'Marked Attendance'}
-    created = models.DateTimeField(auto_now_add = True)
-
-class TestLog(models.Model):
-    user = models.ForeignKey(User)
-    test = models.ForeignKey(Test)
-    academic = models.ForeignKey(AcademicCenter)
-    role = models.PositiveSmallIntegerField(default=0) #{0:'organiser', 1:'invigilator', 2:'ResourcePerson', 3: 'Event Manager'}
-    status = models.PositiveSmallIntegerField(default=0) #{0:'new', 1:'RP-approved', 2:'Inv-approved', 3: 'ongoing', 4:'completed', 5:'Rp-rejected', 6:'Inv-rejected', 7:'Update', 8:'Attendance submited', 9:'Marked Attendance'}
-    created = models.DateTimeField(auto_now_add = True)
-
 class EventsNotification(models.Model):
     user = models.ForeignKey(User)
     role = models.PositiveSmallIntegerField(default=0) #{0:'organiser', 1:'invigilator', 2:'ResourcePerson', 3: 'Event Manager'}
     academic = models.ForeignKey(AcademicCenter)
-    category = models.PositiveSmallIntegerField(default=0) #{'workshop', 'test', 'training'}
+    category = models.PositiveSmallIntegerField(default=0) #{'workshop', 'training', 'test'}
     categoryid = models.PositiveIntegerField(default=0)
     status = models.PositiveSmallIntegerField(default=0) #{0:'new', 1:'update', 2:'approved', 3:'attendance', 4: 'completed', 5:'rejected'}
     message = models.CharField(max_length = 255)
     created = models.DateTimeField(auto_now_add = True)
 
-class Training(models.Model):
-    organiser = models.ForeignKey(Organiser, related_name = 'training_organiser')
-    appoved_by = models.ForeignKey(User, related_name = 'training_approved_by', null=True)
-    academic = models.ForeignKey(AcademicCenter)
-    department = models.ManyToManyField(Department)
-    course = models.ForeignKey(Course)
-    course_number = models.CharField(max_length = 255)
-    batch = models.PositiveSmallIntegerField()
-    free_lab_hours = models.PositiveSmallIntegerField()
-    language = models.ForeignKey(Language)
-    foss = models.ForeignKey(FossCategory)
-    training_code = models.CharField(max_length=100, null=True)
-    trdate = models.DateField()
-    trtime = models.TimeField()
-    skype = models.PositiveSmallIntegerField(default=0)
-    status = models.PositiveSmallIntegerField(default=0)
-    participant_counts = models.PositiveIntegerField(default=0)
-    created = models.DateTimeField(auto_now_add = True)
-    updated = models.DateTimeField(auto_now = True)
-
-    class Meta:
-        unique_together = (("organiser", "academic", "foss", "trdate", "trtime"),)
-
-class TrainingAttendance(models.Model):
+class TrainingFeedback(models.Model):
     training = models.ForeignKey(Training)
-    mdluser_id = models.PositiveIntegerField()
-    #mdluser = models.ForeignKey(MdlUser)
-    password = models.CharField(max_length = 100, null=True)
-    count = models.PositiveSmallIntegerField(default=0)
-    status = models.PositiveSmallIntegerField(default=0)
-    created = models.DateTimeField(auto_now_add = True)
-    updated = models.DateTimeField(auto_now = True)
-    class Meta:
-        verbose_name = "Training Attendance"
-        unique_together = (("training", "mdluser_id"))
-        #unique_together = (("workshop", "mdluser"))
-        
-class TrainingLog(models.Model):
-    user = models.ForeignKey(User)
-    training = models.ForeignKey(Training)
-    role = models.PositiveSmallIntegerField() #{0:'organiser', 1:'ResourcePerson', 2: 'Event Manager'}
-    status = models.PositiveSmallIntegerField() #{0:'new', 1:'approved', 2:'completed', 3: 'rejected', 4:'update',  5:'Offline-Attendance submited', 6:'Marked Attendance'}
-    created = models.DateTimeField(auto_now_add = True)
-
-class WorkshopFeedback(models.Model):
-    workshop = models.ForeignKey(Workshop)
     mdluser_id = models.PositiveIntegerField()
     content = models.PositiveSmallIntegerField()
     sequence = models.PositiveSmallIntegerField()
@@ -384,7 +355,7 @@ class WorkshopFeedback(models.Model):
     other_comments = models.TextField()
     created = models.DateTimeField(auto_now_add = True)
     class Meta:
-        unique_together = (("workshop", "mdluser_id"))
+        unique_together = (("training", "mdluser_id"))
         
 class Testimonials(models.Model):
     user = models.ForeignKey(User, related_name = 'testimonial_created_by')

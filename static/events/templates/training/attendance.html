@@ -5,7 +5,7 @@
 {% block title %}Attendance Sheet{% endblock %}
 {% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
 {% block heading %}
-        <i class="fa fa-list-ul"></i> Attendance Sheet
+        <i class="fa fa-list-ul"></i> Attendance Sheet <a href="/software-training" class='pull-right go-back'>Dashboard</a>
 {% endblock %}
 {% block content %}
         <div class='row'>
@@ -18,6 +18,7 @@
           </div>
           <input class="btn btn-default" name="search-participant" type="submit" value="Search Participant" />
         </form>
+        <a class="pull-right btn btn-primary" href="{% url 'mdldjango:mdl_offline_workshop_details' training.id 2 %}">Upload data</a>
     </div>
     {% if onlinetest_user and onlinetest_user != 'None' %}
         <div class="row well">
@@ -46,7 +47,20 @@
 	<div class="tab-content">
 		<div class="tab-pane active" id="pending">
 			{% if collection %}
-			    {% if training.status == 0 %}
+			    {% if training.status < 2 %}
+			    
+			        <div class="bs-callout bs-callout-info">
+			            {% if training.status == 0 %}
+			                <form action="{{ action }}" method="post" enctype="multipart/form-data">{% csrf_token %}
+			                    {% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
+                                <p>Please check weather all the Names in the following attendance register are correct. Then click "Submit Attendance".</p>
+                                <input name="submit-attendance" class="btn btn-primary" type="submit" value="Submit Attendance" />
+                                {% endwith %}
+                            </form>
+                        {% else %}
+                            <p>Your request has been sent, waiting for Training Manager's approval.</p>
+                        {% endif %}
+                    </div>
 			        <table class="table table-striped table-hover table-bordered">
 			            <tr>
 				            <th>Photo</th>
@@ -54,7 +68,7 @@
 			            </tr>
 			            {% for record in collection %}
 				            <tr>
-					            <td><iframe style="width:70px; height:70px;" src="{{ record.id|participant_picture }}"></iframe></td>
+					            <td><iframe style="width:70px; height:70px; border:0px;" src="{{ record.id|participant_picture }}"></iframe></td>
 					            <td>{{ record.firstname }} {{ record.lastname }}</td>
 				            </tr>
 			            {% endfor %}
@@ -72,7 +86,7 @@
 				            {% for record in collection %}
 					            <tr>
 					                <th><input type='checkbox' name="user_{{ record.id }}" value="{{ record.id }}" {{ record.id|get_trainingstatus:training.id }} ></th>
-						            <td><iframe style="width:70px; height:70px;" src="{{ record.id|participant_picture }}"></iframe></td>
+						            <td><iframe style="width:70px; height:70px; border:0px;" src="{{ record.id|participant_picture }}"></iframe></td>
 						            <td>{{ record.firstname }} {{ record.lastname }}</td>
 						            <td>
 						                {{ record.id|get_trainingparticipant_status:training.id }}
@@ -80,9 +94,33 @@
 					            </tr>
 				            {% endfor %}
 			            </table>
-			            <input name="submit-attendance" class="btn btn-primary" type="submit" value="Submit" />
+			            <input name="submit-mark-attendance" class="btn btn-primary" type="submit" value="Submit" />
 			        </form>
-                    <h4 class='step'><span class="label label-default">Step 2</span></h4>
+			        {% if training.training_type != 0  and training.status == 3 %}
+			            <h4 class='step'><span class="label label-default">Step 2</span></h4>
+			            <div class="bs-callout bs-callout-info">
+                            <p>Please click <b>Mark as Complete</b> to end the training.</p>
+                            <a class='btn btn-primary' title = "To complete the workshop click here" href="{% url 'events:training_approvel' 'organiser' training.id %}?status=completed">Mark as Complete</a>
+                        </div>
+                    {% endif %}
+                    {% if training.training_type == 0  and training.status == 3 and training.trdate|can_upload_final_training_list %}
+			            <h4 class='step'><span class="label label-default">Step 2</span></h4>
+			            <div class="bs-callout bs-callout-info">
+			                <form action="{{ action }}" method="post" enctype="multipart/form-data">{% csrf_token %}
+			                    {% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
+                                <p>Upload the scaned copy training student attendance.</p>{% if is_file_exits %} <a href="{{file_path}}" target="_blank">View uploaded copy</a>{% endif %}
+                                {{form.errors}}
+                                <div class="form-group file">
+                                    <label for="id_scan_copy">scan_copy</label>
+                                    {% render_field sform.scan_copy class+="form-control scan_copy" tabindex="1" %}
+                                    {{ sform.scan_copy.errors }}
+                                </div>
+                                <input name="submit-scaned-copy" class="btn btn-primary" type="submit" value="Submit" />
+                                {% endwith %}
+                            </form>
+                        </div>
+                    {% endif %}
+                    <!-- <h4 class='step'><span class="label label-default">Step 2</span></h4>
 			        <div class="bs-callout bs-callout-info">
 			            <form action="{{ action }}" method="post" enctype="multipart/form-data">{% csrf_token %}
 			                {% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
@@ -96,7 +134,7 @@
                             <input name="submit-scaned-copy" class="btn btn-primary" type="submit" value="Submit" />
                             {% endwith %}
                         </form>
-                    </div>
+                    </div> -->
                 {% endif %}
 			{% else %}
 				<p class='no-record'>No record found!</p>

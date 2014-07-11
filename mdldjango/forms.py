@@ -137,7 +137,7 @@ class FeedbackForm(forms.ModelForm):
     use_information = forms.CharField(widget=forms.Textarea)
     other_comments = forms.CharField(widget=forms.Textarea)
     class Meta:
-        model = WorkshopFeedback
+        model = TrainingFeedback
         exclude = ['workshop', 'mdluser_id']
 
 class PasswordResetForm(forms.Form):

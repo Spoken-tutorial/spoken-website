@@ -41,10 +41,12 @@
 					<td>{{ record.firstname }}</td>
 					<td>{{ record.lastname }}</td>
 					<td>
-					    {% if can_download_certificate and status %}
-					       <a href="{% url 'events:training_participant_ceritificate' wc.id record.id %}">Certificate</a>
-					    {% endif %}
-					</td>
+					{% if wc.status == 4 %}
+				        {% if can_download_certificate and status %}
+				           <a href="{% url 'events:training_participant_ceritificate' wc.id record.id %}">Certificate</a>
+				        {% endif %}
+				    {% endif %}
+				    </td>
 				</tr>
 			{% endfor %}
 		</table>

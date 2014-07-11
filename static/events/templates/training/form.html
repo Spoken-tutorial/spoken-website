@@ -1,18 +1,19 @@
 {% extends 'spoken/templates/base.html' %}
 {% load widget_tweaks %}
 {% load static %}
-{% block title %}Training Request{% endblock %}
+{% load eventsdata %}
+{% block title %}Training / Workshop - Request{% endblock %}
 {% block cssblock %}
 	<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />
 	<link rel="stylesheet" href="{% static 'spoken/css/jquery.datetimepicker.css' %}" type="text/css" media="screen" charset="utf-8" />
 {% endblock %}
 {% block heading %}
-        <i class="fa fa-list-ul"></i> Training<a href="/software-training" class='pull-right go-back'>Dashboard</a>
+        <i class="fa fa-list-ul"></i> Training / Workshop<a href="/software-training" class='pull-right go-back'>Dashboard</a>
 {% endblock %}
 {% block content %}
     	<ul class="tabs nav nav-tabs">
 	    {% if role == 'organiser' %}
-		    <li {% if status == 'request' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/training/{{ role }}/request/">New</a></li>
+		    <li class="active"><a href="/software-training/training/{{ role }}/request/">New</a></li>
 		    <li {% if status == 'pending' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/training/{{role}}/pending/">Pending</a></li>
 		{% endif %}
 		{% if role == 'rp' %}
@@ -61,6 +62,39 @@
 		                {% render_field form.academic class+="form-control academic" tabindex="1" data-placeholder="Enter academic name" %}
 		                {{ form.name.errors }}
                     </div> -->
+                    {{ form.errors }}
+	               <div class="form-group">
+                        <label class="col-sm-3 control-label" for= "id_training_type">Training Type</label>
+                        <div class="col-sm-9">
+                            {% for choice in form.training_type %}
+                                <div class='radio training_type'>
+                                    {{ choice.choice_label }}
+                                    {{ choice.tag }}
+                                    {% if choice.choice_label == 'Training' %}
+                                        <div class="help-text alert">Please select Training, If you are going to conduct the training as a part of lab hours alongside a course.</div>
+                                    {% endif %}
+                                    {% if choice.choice_label == 'Workshop' %}
+                                        <div class="help-text alert">Please select Workshop, If you are going to conduct a two hour Workshop session.</div>
+                                    {% endif %}
+                               </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {{ instance.course_number }}
+                    <div class="form-group">
+		                <label class="col-sm-3 control-label" for= "id_course">Course / Stream</label>
+		                <div class="col-sm-9">
+		                    {% render_field form.course class+="form-control course" tabindex="1" %}
+		                    {{ form.course.errors }}
+		                </div>
+	                </div>
+	                <div class="form-group course_number_group">
+		                <label class="col-sm-3 control-label" for= "id_course_number">Course / Paper Name</label>
+		                <div class="col-sm-9">
+		                    {% render_field form.course_number class+="form-control course_number" tabindex="1" %}
+		                    {{ form.course_number.errors }}
+		                </div>
+	                </div>
 	                <div class="form-group">
 		                <label class="col-sm-3 control-label" for= "id_department">Department</label>
 		                <div class="col-sm-9">
@@ -68,44 +102,11 @@
 		                    {{ form.department.errors }}
 		                </div>
 	                </div>
-                    <div class="form-group">
-		                <label class="col-sm-3 control-label" for= "id_course">Course</label>
-		                <div class="col-sm-9">
-		                    {% render_field form.course class+="form-control course" tabindex="1" %}
-		                    {{ form.course.errors }}
-		                </div>
-	                </div>
 	                <div class="form-group">
-		                <label class="col-sm-3 control-label" for= "id_batch">Batch</label>
+		                <label class="col-sm-3 control-label" for= "id_trdate">Date</label>
 		                <div class="col-sm-9">
-		                    {% render_field form.batch class+="form-control batch" tabindex="1" %}
-		                    {{ form.batch.errors }}
-		                </div>
-	                </div>
-	                <div class="form-group">
-		                <label class="col-sm-3 control-label" for= "id_course_number">Course Number</label>
-		                <div class="col-sm-9">
-		                    {% render_field form.course_number class+="form-control course_number" tabindex="1" %}
-		                    {{ form.course_number.errors }}
-		                </div>
-	                </div>
-	                <div class="form-group">
-		                <label class="col-sm-3 control-label" for= "id_free_lab_hours">Free Lab Hours</label>
-		                <div class="col-sm-9">
-		                    {% for choice in form.free_lab_hours %}
-                                <div class='radio'>
-                                    {{ choice.choice_label }}
-                                    {{ choice.tag }}
-                               </div>
-                            {% endfor %}
-		                </div>
-	                </div>
-
-	                <div class="form-group">
-		                <label class="col-sm-3 control-label" for= "id_wdate">Date</label>
-		                <div class="col-sm-9">
-		                    {% render_field form.wdate class+="form-control date" tabindex="1" data-placeholder="Enter date" %}
-		                    {{ form.wdate.errors }}
+		                    {% render_field form.trdate class+="form-control date" tabindex="1" data-placeholder="Enter date" %}
+		                    {{ form.trdate.errors }}
 		                </div>
 	                </div>
 	                <!--
@@ -213,6 +214,22 @@
 					}
 				}
 			});
+		});
+		
+		$(".course_number_group").css('display', 'none');
+		
+		function hideShowCourseNumber(Val){
+		    if(Val == 0){
+		        $(".course_number_group").css('display', 'black');
+		        $('#id_course_number').attr("disabled", false);
+		    }else{
+		        $(".course_number_group").css('display', 'none');
+		        $('#id_course_number').attr("disabled", 'disabled');
+		    }
+		}
+		hideShowCourseNumber($(".training_type input[name=training_type]:checked").val());
+		$('.training_type input').change(function(){
+		    hideShowCourseNumber($(this).val())
 		});
 	</script>
 {% endblock %}

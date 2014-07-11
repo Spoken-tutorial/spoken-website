@@ -4,10 +4,10 @@
 {% load eventsdata %}
 {% load cmsdata %}
 {% load creationdata %}
-{% block title %}Training - {{ status}} {% endblock %}
+{% block title %}Training / Workshop - {{ status}} {% endblock %}
 {% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
 {% block heading %}
-        <i class="fa fa-list-ul"></i> Training <a href="{% url 'events:events_dashboard' %}" class='pull-right'>Dashboard</a>
+        <i class="fa fa-list-ul"></i> Training / Workshop <a href="{% url 'events:events_dashboard' %}" class='pull-right'>Dashboard</a>
 {% endblock %}
 {% block content %}
 <div class= 'filters' >
@@ -60,6 +60,13 @@
 				{% get_sortable_header header ordering request.GET %}
 				{% for record in collection %}
 					<tr>
+					    <td>
+					        {% if record.training_type %}
+					            Workshop
+					        {% else %}
+					            Training
+					        {% endif %}
+					    </td>
 					    <td>{{ record.academic.state }}</td>
 						<td>{{ record.academic }}</td>
 						<td>{{ record.foss }}</td>
@@ -77,9 +84,13 @@
                                     <a href="{% url 'events:training_edit' role record.id %}">Edit</a> |
                                 {% endif %}
                                 {% if status == 'pending' %}
-                                    <a href="{% url 'events:training_approvel' role record.id %}?status=accept">Accept</a> |
-                                    <a href="{% url 'events:training_approvel' role record.id %}?status=reject">Reject</a> |
-                                    <a target='_blank' href="{% url 'events:training_participant' record.id %}">Participants</a>
+                                    {% if record.status == 0 %}
+                                        Waiting for attendance
+                                    {% else %}
+                                        <a target='_blank' href="{% url 'events:training_participant' record.id %}">Participants</a> |
+                                        <a href="{% url 'events:training_approvel' role record.id %}?status=accept">Accept</a> |
+                                        <a href="{% url 'events:training_approvel' role record.id %}?status=reject">Reject</a>
+                                    {% endif %}
                                 {% endif %}
                                 {% if status == 'approved' %}
                                     <a href="{% url 'events:training_approvel' role record.id %}?status=reject">Reject</a>
@@ -100,17 +111,18 @@
                                 {% endif %}
                                 {% if status == 'pending' %}
                                     <a href="{% url 'events:training_edit' role record.id %}">Edit</a> |
-                                    <a href="{% url 'mdldjango:mdl_offline_workshop_details' record.id 2 %}">Upload data</a> |
                                     <a target='_blank' href="{% url 'events:training_attendance' record.id %}">Attendance</a> |
                                     <a target='_blank' href="{% url 'events:training_participant' record.id %}">Participants</a>
+                                    <!--{% if record.status == 0 %}
+                                        <a href="{% url 'mdldjango:mdl_offline_workshop_details' record.id 2 %}">Upload data</a>
+                                    {% else %}
+                                        <a href="{% url 'mdldjango:mdl_offline_workshop_details' record.id 2 %}">Re-Upload data</a>
+                                    {% endif %} -->
                                 {% endif %}
                                 {% if status == 'approved' %}
                                     <a target='_blank' href="{% url 'events:training_participant' record.id %}">Participants</a>
                                 {% endif %}
                                 {% if status == 'ongoing' %}
-                                    {% if record.id|can_upload_workshop_data:'training' %}
-                                        <!-- <a href="{% url 'mdldjango:mdl_offline_workshop_details' record.id 2 %}">Upload data</a> | -->
-                                    {% endif %}
                                     <a target='_blank' href="{% url 'events:training_attendance' record.id %}">Attendance</a> |
                                     <a target='_blank' href="{% url 'events:training_participant' record.id %}">Participants</a>
                                 {% endif %}

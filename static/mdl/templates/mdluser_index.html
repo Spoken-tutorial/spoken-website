@@ -11,9 +11,9 @@
 {% block content %}
     <!-- Nav tabs -->
     <ul class="nav nav-tabs">
-        <li><a href="#Past-Workshop" data-toggle="tab">Past Workshop</a></li>
+        <li><a href="#Past-Workshop" data-toggle="tab">Past Training / Workshop</a></li>
         <li><a href="#Past-Test" data-toggle="tab">Past Test</a></li>
-        <li><a href="#Upcoming-Workshop" data-toggle="tab">Upcoming Workshop</a></li>
+        <li><a href="#Upcoming-Workshop" data-toggle="tab">Upcoming Training / Workshop</a></li>
         <li class="active"><a href="#Ongoing-Test" data-toggle="tab">Ongoing Test</a></li>
         <li><a href="#Upcoming-Test" data-toggle="tab">Upcoming Test</a></li>
     </ul>
@@ -88,7 +88,7 @@
                         <td>{{ record.foss.foss }}</td>
                         <td>{{ record.wdate }} {{ record.ttime }}</td>
                         <td>
-                            {% if record.id|check_workshop_enrole:mdluserid %}
+                            {% if record.id|check_training_enrole:mdluserid %}
                                 Subscribed
                             {% else %}
                                 <a href="{% url 'events:student_subscribe' 'workshop' record.id mdluserid %}">Subscribe</a>
