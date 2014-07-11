@@ -44,8 +44,6 @@ html,body
     height: 40px;
 }
 /* layout */
-.table-responsive {
-    overflow-x: auto;
 .container-inner{
     padding: 25px 0 25px 0;
 }
@@ -501,8 +499,8 @@ pre.custom-jumbotron b {
 
 /* sortable header */
 .paleblue th {
+    padding: 2px 5px;
     line-height: normal;
-    min-height: 31px;
 }
 
 .paleblue th a:link, .paleblue th a:visited {
@@ -514,12 +512,14 @@ pre.custom-jumbotron b {
 }
 
 .paleblue th .text span {
+    padding: 2px 5px;
     display:block;
 }
 
 .paleblue th .text a {
     display: block;
     cursor: pointer;
+    padding: 2px 5px;
 }
 
 .paleblue th.sortable:hover {
