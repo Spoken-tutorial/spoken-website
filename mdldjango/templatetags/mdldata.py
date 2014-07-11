@@ -15,7 +15,7 @@ def get_participant_score(key):
 
 def check_training_enrole(rid, mdluser_id):
     try:
-        wa = TrainingAttendance.objects.get(workshop_id = rid, mdluser_id = mdluser_id)
+        wa = TrainingAttendance.objects.get(training_id = rid, mdluser_id = mdluser_id)
         return True
     except:
         return False

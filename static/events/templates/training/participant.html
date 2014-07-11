@@ -22,7 +22,8 @@
             <dd>{{ wc.participant_counts }}</dd>
             <dt>Organiser</dt>
             <dd>{{ wc.organiser.user.first_name }} {{ wc.organiser.user.last_name }}</dd>
-            {% if is_file_exits and user|is_resource_person and wc.status != 2 %}
+            <br /></br />
+            {% if wc.id|training_file_exits and user|is_resource_person and wc.status == 3 %}
                 <p>Please click <b>Mark as Complete</b> to end the training.</p><a href="{{file_path}}" target="_blank">View uploaded copy</a>
                 <a class='btn btn-primary' title = "To complete the training click here" href="{% url 'events:training_approvel' 'rp' wc.id %}?status=completed">Mark as Complete</a>
             {% endif %}
@@ -41,11 +42,9 @@
 					<td>{{ record.firstname }}</td>
 					<td>{{ record.lastname }}</td>
 					<td>
-					{% if wc.status == 4 %}
-				        {% if can_download_certificate and status %}
-				           <a href="{% url 'events:training_participant_ceritificate' wc.id record.id %}">Certificate</a>
-				        {% endif %}
-				    {% endif %}
+			            {% if can_download_certificate and wc.status == 4 %}
+			               <a href="{% url 'events:training_participant_ceritificate' wc.id record.id %}">Certificate</a>
+			            {% endif %}
 				    </td>
 				</tr>
 			{% endfor %}
