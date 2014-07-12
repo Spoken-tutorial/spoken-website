@@ -1,6 +1,30 @@
+/* title font */
+@import url(http://fonts.googleapis.com/css?family=Oswald);
+/* mini text font */
+@import url(http://fonts.googleapis.com/css?family=Ubuntu+Mono);
+/* site font */
+@import url(http://fonts.googleapis.com/css?family=Alegreya);
+/* testimonial */
+@import url(http://fonts.googleapis.com/css?family=Josefin+Sans);
+
+@import url(http://fonts.googleapis.com/css?family=Comfortaa:700);
+
+#testimonials{
+    color: black;
+    font-family: 'Josefin Sans', sans-serif;
+    line-height: 22px;
+}
+.three-cols {
+    font-family: 'Comfortaa', cursive;
+}
 html,body
 {
+  font-family: 'Alegreya', serif;
   height: 100%;
+  font-size: 14px;
+}
+.mini-text{
+    font-family: 'Ubuntu Mono';
 }
 /* overwrite */
 .yamm .dropdown-menu {
@@ -49,6 +73,7 @@ html,body
 }
 #header-wrapper{
     height: 51px;
+    font-family: sans-serif;
 }
 #testimonials, #home-video-container{
     clear: both;
@@ -322,9 +347,9 @@ a {
 /* Content css */
 
 h4.page-title {
-    font-weight: bold;
     font-size: 20px;
     margin: 10px 0 20px 0;
+    font-family: 'Oswald', sans-serif;
 }
 
 #content-wrapper #content-inner div.container {
