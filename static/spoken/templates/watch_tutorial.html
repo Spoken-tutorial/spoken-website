@@ -106,7 +106,7 @@
                 <ul>
                     {% for rec in tr_recs %}
                         <li class="playlist-item{% if tr_rec.id == rec.id %} active{% endif %}"{% if tr_rec.id == rec.id %} data="{{ forloop.counter }}"{% endif %}>
-                            <a href="/creation/tutorial/view/{{ rec.tutorial_detail.foss.foss }}/{{ rec.tutorial_detail.tutorial|get_url_name }}/{{ rec.language.name }}/">
+                            <a href="/watch/{{ rec.tutorial_detail.foss.foss }}/{{ rec.tutorial_detail.tutorial|get_url_name }}/{{ rec.language.name }}/">
                                 <div class='pull-left thumb'>
                                     <span class='order'>{% if tr_rec.id == rec.id %}<i class="fa fa-play"></i>{% else %}{{ forloop.counter }}{% endif %}</span>
                                     <img src="{% static 'spoken/images/thumb-even.png' %}" width=70 >
@@ -125,21 +125,6 @@
     <row>
         <div class="col-lg-7 col-md-7 col-sm-7 no-padding-left">
             <pre class="custom-jumbotron"><b>Outline:<br /></b>{{ tr_rec.outline }}</pre>
-            {% if ni_recs|length %}
-                <h4>Reviewers Feedback</h4>
-                {% for ni_rec in ni_recs %}
-                    <div class="review-feedback">
-                        <div class="review-data">
-                            <pre><b>Component: {{ ni_rec.component|title }}</b>
-                            <p>{{ ni_rec.comment }}</p></pre>
-                        </div>
-                        <div class="review-info">
-                            <div class="review-user">- <a href="/accounts/profile/{{ ni_rec.user }}">{{ ni_rec.user }}</a></div>
-                            <div class="review-date">{{ ni_rec.created }}</div>
-                        </div>
-                    </div>
-                {% endfor %}
-            {% endif %}
         </div>
         <div class="col-lg-5 col-md-5 col-sm-5 no-padding-right">
             <table class="table table-bordered table-hover">

@@ -67,4 +67,7 @@ urlpatterns = patterns('',
     url(r'^role/add/([a-zA-Z-]+)/$', 'creation.views.creation_add_role', name="creation_add_role"),
     url(r'^list/$', 'creation.views.role_list', name="role_list"),
     url(r'^lists/$', 'creation.views.roles_list', name="roles_list"),
+    url(r'^report-missing-component/(\d+)/$', 'creation.views.report_missing_component', name="report_missing_component"),
+    url(r'^report-missing-component/reply/(\d+)/$', 'creation.views.report_missing_component_reply', name="report_missing_component_reply"),
+    url(r'^report-missing-component/list/$', 'creation.views.report_missing_component_list', name="report_missing_component_list"),
 )

@@ -11,6 +11,7 @@ from django.conf import settings
 from forms import *
 import os
 from django.http import Http404
+from urllib import unquote_plus
 import json
 import datetime
 from creation.views import get_video_info
@@ -85,7 +86,7 @@ def keyword_search(request):
                 keywords.remove(key)
             query = get_or_query(keywords, search_fields)
             if query:
-                collection = TutorialResource.objects.filter(common_content = TutorialCommonContent.objects.filter(query), language = Language.objects.filter(name='English'))
+                collection = TutorialResource.objects.filter(common_content = TutorialCommonContent.objects.filter(query), language__name = 'English')
         
     context = {}
     context['form'] = KeywordSearchForm()
@@ -117,9 +118,12 @@ def tutorial_search(request):
 
 def watch_tutorial(request, foss, tutorial, lang):
     try:
-        td_rec = TutorialDetail.objects.get(foss = FossCategory.objects.get(foss = foss.replace('-', ' ')), tutorial = tutorial.replace('-', ' '))
+        foss = unquote_plus(foss)
+        tutorial = unquote_plus(tutorial)
+        print foss, tutorial
+        td_rec = TutorialDetail.objects.get(foss__foss = foss, tutorial = tutorial)
         tr_rec = TutorialResource.objects.select_related().get(tutorial_detail = td_rec, language = Language.objects.get(name = lang))
-        tr_recs = TutorialResource.objects.select_related().filter(tutorial_detail__in = TutorialDetail.objects.filter(foss = tr_rec.tutorial_detail.foss).order_by('order').values_list('id'), language = tr_rec.language)
+        tr_recs = TutorialResource.objects.select_related('tutorial_detail').filter(tutorial_detail__in = TutorialDetail.objects.filter(foss = tr_rec.tutorial_detail.foss).order_by('order').values_list('id'), language = tr_rec.language)
     except Exception, e:
         messages.error(request, str(e))
         return HttpResponseRedirect('/')
