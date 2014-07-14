@@ -6,6 +6,8 @@ import datetime
 from django.conf import settings
 import datetime
 from dateutil.relativedelta import relativedelta
+import os
+import os.path
 register = template.Library()
 
 
@@ -32,7 +34,7 @@ def get_trainingstatus(key, wcode):
     return ''
 
 def get_trainingparticipant_status(key, wcode):
-    status_list = ['Waiting for Attendance', 'Completed', 'Got certificate']
+    status_list = ['Waiting for Attendance', 'Completed', 'Got certificate', 'Got certificate']
     try:
         wa = TrainingAttendance.objects.get(mdluser_id=key, training_id = wcode)
     except:
@@ -109,6 +111,11 @@ def can_enter_test(key, testcode):
         return ta.status
     return None
 
+def training_file_exits(wid):
+    file_path = settings.MEDIA_ROOT + 'training/' + str(wid) + '/' + str(wid) + '.pdf'
+    if os.path.isfile(file_path):
+        return True
+    return False
     
 register.filter('participant_picture', participant_picture)
 register.filter('get_trainingstatus', get_trainingstatus)
@@ -125,6 +132,7 @@ register.filter('is_invigilator', is_invigilator)
 register.filter('is_resource_person', is_resource_person)
 register.filter('is_event_manager', is_event_manager)
 register.filter('can_download_workshop_certificate', can_download_workshop_certificate)
+register.filter('training_file_exits', training_file_exits)
 
 '''
 

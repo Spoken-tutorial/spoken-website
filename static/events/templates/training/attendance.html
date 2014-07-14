@@ -108,7 +108,7 @@
 			            <div class="bs-callout bs-callout-info">
 			                <form action="{{ action }}" method="post" enctype="multipart/form-data">{% csrf_token %}
 			                    {% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
-                                <p>Upload the scaned copy training student attendance.</p>{% if is_file_exits %} <a href="{{file_path}}" target="_blank">View uploaded copy</a>{% endif %}
+                                <p>Upload the scaned copy training student attendance.</p>{% if training.id|training_file_exits %} <a href="{{file_path}}" target="_blank">View uploaded copy</a>{% endif %}
                                 {{form.errors}}
                                 <div class="form-group file">
                                     <label for="id_scan_copy">scan_copy</label>
@@ -124,7 +124,7 @@
 			        <div class="bs-callout bs-callout-info">
 			            <form action="{{ action }}" method="post" enctype="multipart/form-data">{% csrf_token %}
 			                {% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
-                            <p>Upload the scaned copy training student attendance.</p>{% if is_file_exits %} <a href="{{file_path}}" target="_blank">View uploaded copy</a>{% endif %}
+                            <p>Upload the scaned copy training student attendance.</p>{% if training.id|training_file_exits %} <a href="{{file_path}}" target="_blank">View uploaded copy</a>{% endif %}
                             {{form.errors}}
                             <div class="form-group file">
                                 <label for="id_scan_copy">scan_copy</label>

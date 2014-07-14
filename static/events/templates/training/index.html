@@ -99,6 +99,9 @@
                                     <a href="{% url 'events:training_edit' role record.id %}">Edit</a>
                                 {% endif %}
                                 {% if status == 'ongoing' %}
+                                    {% if record.id|training_file_exits %}
+                                        <a href="{% url 'events:training_participant' record.id %}">Close Training</a> |
+                                    {% endif %}
                                     <a target='_blank' href="{% url 'events:training_participant' record.id %}">Participants</a>
                                 {% endif %}
                                 {% if status == 'rejected' %}

@@ -961,11 +961,6 @@ def training_attendance(request, wid):
                     messages.success(request, "Choose a PDF File.")
         
     participant_ids = list(TrainingAttendance.objects.filter(training_id = wid).values_list('mdluser_id'))
-     #scaned copy exits
-    is_file_exits = False
-    file_path = settings.MEDIA_ROOT + 'training/'+wid+'/'+wid+'.pdf'
-    if os.path.isfile(file_path):
-        is_file_exits = True
     mdlids = []
     wp = {}
     for k in participant_ids:
@@ -978,7 +973,6 @@ def training_attendance(request, wid):
     context['collection'] = wp
     context['onlinetest_user'] = onlinetest_user
     context['training'] = training
-    context['is_file_exits'] = is_file_exits
     context['file_path'] = '/media/training/'+wid+'/'+wid+'.pdf'
     context.update(csrf(request))
     return render(request, 'events/templates/training/attendance.html', context)
@@ -1004,7 +998,7 @@ def training_participant(request, wid=None):
             ids.append(wp[0])
             
         wp = MdlUser.objects.using('moodle').filter(id__in=ids)
-        if user == wc.organiser and wc.status == 2:
+        if user == wc.organiser.user and wc.status == 4:
             can_download_certificate = 1
         context = {'collection' : wp, 'wc' : wc, 'can_download_certificate':can_download_certificate}
         return render(request, 'events/templates/training/participant.html', context)
@@ -1362,7 +1356,7 @@ def test_attendance(request, tid):
                             #get the course enrole id
                             #todo: If mark absent delete enrolement
                             try:
-                                mdlenrol = MdlEnrol.objects.get(enrol='self', courseid=2)
+                                mdlenrol = MdlEnrol.objects.get(enrol='self', courseid = fossmdlcourse.mdlcourse_id )
                                 print "Role Exits"
                             except Exception, e:
                                 print "MdlEnrol => ", e
@@ -1374,6 +1368,7 @@ def test_attendance(request, tid):
                                 #update dateTime
                             except Exception, e:
                                 print "MdlUserEnrolments => ", e
+                                MdlRoleAssignments.objects.create(roleid = 5, contextid = 16, userid = ta.mdluser_id, timemodified = datetime.datetime.now().strftime("%s"), modifierid = ta.mdluser_id, itemid = 0, sortorder = 0)
                                 MdlUserEnrolments.objects.create(enrolid = mdlenrol.id, userid = ta.mdluser_id, status = 0, timestart = datetime.datetime.now().strftime("%s"), timeend = 0, modifierid = ta.mdluser_id, timecreated = datetime.datetime.now().strftime("%s"), timemodified = datetime.datetime.now().strftime("%s"))
             
             if 'search-participant' in request.POST:
@@ -1511,7 +1506,7 @@ def test_participant_ceritificate(request, wid, participant_id):
     imgDoc.drawImage(imgPath, 600, 100, 150, 76)    ## at (399,760) with size 160x160
     
     #paragraphe
-    text = "This is to certify that <b>"+ta.mdluser_firstname +" "+ta.mdluser_lastname+"</b> has sucessfully completed <b>"+w.foss.foss+"</b> test organized at <b>"+w.academic.institution_name+"</b> by <b>"+w.invigilator.username+"</b>  with course material provided by the Take To A Teacher project at IIT Bombay.  <br /><br /><p>pasing on online exam, conducted remotly from IIT Bombay, is a pre-requisite for completing this training. <b>"+w.organiser.user.first_name + " "+w.organiser.user.last_name+"</b> at <b>"+w.academic.institution_name+"</b> invigilated this examination. This training is offered by the <b>Spoken Tutorial project, IIT Bombay, funded by National Mission on Education through ICT, MHRD, Govt of India.</b></p>"
+    text = "This is to certify that <b>"+ta.mdluser_firstname +" "+ta.mdluser_lastname+"</b> has sucessfully completed <b>"+w.foss.foss+"</b> test organized at <b>"+w.academic.institution_name+"</b> by <b>"+w.invigilator.user.first_name+"</b>  with course material provided by the Take To A Teacher project at IIT Bombay.  <br /><br /><p>pasing on online exam, conducted remotly from IIT Bombay, is a pre-requisite for completing this training. <b>"+w.organiser.user.first_name + " "+w.organiser.user.last_name+"</b> at <b>"+w.academic.institution_name+"</b> invigilated this examination. This training is offered by the <b>Spoken Tutorial project, IIT Bombay, funded by National Mission on Education through ICT, MHRD, Govt of India.</b></p>"
     
     centered = ParagraphStyle(name = 'centered',
         fontSize = 16,  
@@ -1554,7 +1549,8 @@ def test_participant_ceritificate(request, wid, participant_id):
 
     return response
 
-def student_subscribe(request, events, eventid = None, mdluser_id = None):
+@csrf_exempt
+def training_subscribe(request, events, eventid = None, mdluser_id = None):
     try:
         mdluser = MdlUser.objects.get(id = mdluser_id)
         if events == 'test':
@@ -1565,7 +1561,7 @@ def student_subscribe(request, events, eventid = None, mdluser_id = None):
                 pass
             messages.success(request, "You have sucessfully subscribe to the "+events+"")
             return HttpResponseRedirect('/moodle/index/#Upcoming-Test')
-        elif events == 'workshop':
+        elif events == 'training':
             try:
                 TrainingAttendance.objects.create(training_id=eventid, mdluser_id = mdluser_id)
             except Exception, e:

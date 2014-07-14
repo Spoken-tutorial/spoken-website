@@ -81,7 +81,7 @@ def index(request):
     except:
         return HttpResponseRedirect("/moodle/login")
     
-    upcoming_workshop = Training.objects.filter((Q(status = 1) | Q(status = 2) | Q(status = 3)), academic_id=mdluser.institution, trdate__gte=datetime.date.today())
+    upcoming_workshop = Training.objects.filter((Q(status = 0) | Q(status = 1) | Q(status = 2) | Q(status = 3)), academic_id=mdluser.institution, trdate__gte=datetime.date.today())
     upcoming_test = Test.objects.filter(status=2, academic_id=mdluser.institution, tdate__gt=datetime.date.today())
     past_workshop = Training.objects.filter(id__in = TrainingAttendance.objects.filter(mdluser_id = mdluser.id).values_list('training_id'), status = 4)
     past_test = Test.objects.filter(id__in = TestAttendance.objects.filter(mdluser_id = mdluser.id).values_list('test_id'), status = 4)
@@ -156,7 +156,8 @@ def offline_details(request, wid, category):
                         mdluser = MdlUser.objects.get(email = email)
                     except:
                         mdluser = MdlUser.objects.get(username = username)
-                        
+                    mdluser.institution = w.academic_id
+                    mdluser.save()
                     print "Already exits!"
                 except Exception, e:
                     print e
