@@ -287,7 +287,7 @@
                                         {% else %} 
                                             <li class="disabled"><a href="#">&laquo;</a></li> 
                                         {% endif %}
-                                        {% for num in collection.paginator.page_range %}
+                                        {% for num in collection.paginator.page_range|paginator_page_cutter:collection.number %}
                                             {% ifequal num collection.number %} 
                                                 <li class="active"><a href="#">{{ num }}<span class="sr-only">(current)</span></a></li>
                                             {% else %} 

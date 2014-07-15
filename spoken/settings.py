@@ -104,6 +104,15 @@ DATABASES = {
 		'PASSWORD': CDB_PASS,
 		'HOST': '',				  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
 		'PORT': '',				  # Set to empty string for default.
+	},
+	'workshop_info': {
+		'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+		'NAME': WDB,					  # Or path to database file if using sqlite3.
+		# The following settings are not used with sqlite3:
+		'USER': WDB_USER,
+		'PASSWORD': WDB_PASS,
+		'HOST': '',				  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+		'PORT': '',				  # Set to empty string for default.
 	}
 }
 
@@ -118,7 +127,7 @@ USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
+USE_TZ = False
 
 #events settings
 ONLINE_TEST_URL = ONLINE_TEST_URL
@@ -159,7 +168,7 @@ INTERNAL_IPS = ('127.0.0.1',)
 
 #Moodle Auth
 #AUTH_USER_MODEL = 'mdldjango.Users'
-DATABASE_ROUTERS = ['mdldjango.router.MdlRouter', 'cdeep.router.CdeepRouter']
+DATABASE_ROUTERS = ['mdldjango.router.MdlRouter', 'cdeep.router.CdeepRouter', 'workshop.router.WorkshopRouter']
 #AUTHENTICATION_BACKENDS = ( 'mdldjango.backend.MdlBackend', )
 
 #template

@@ -358,7 +358,7 @@ def ac(request):
         6: SortableHeader('Action', False)
     }
     
-    collectionSet = AcademicCenter.objects.all()
+    collectionSet = AcademicCenter.objects.filter(state = user.resource_person.all())
     raw_get_data = request.GET.get('o', None)
     collection = get_sorted_list(request, collectionSet, header, raw_get_data)
     ordering = get_field_index(raw_get_data)

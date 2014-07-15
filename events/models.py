@@ -114,10 +114,11 @@ class AcademicCenter(models.Model):
     institute_category = models.ForeignKey(InstituteCategory)
     university = models.ForeignKey(University)
     academic_code = models.CharField(max_length=100, unique = True)
-    institution_name = models.CharField(max_length=200, unique = True)
+    institution_name = models.CharField(max_length=200)
     district = models.ForeignKey(District)
     location = models.ForeignKey(Location, null=True)
     city = models.ForeignKey(City)
+    address = models.TextField()
     street = models.CharField(max_length = 200)
     pincode = models.PositiveIntegerField()
     resource_center = models.BooleanField()
@@ -125,12 +126,12 @@ class AcademicCenter(models.Model):
     contact_person = models.TextField()
     remarks = models.TextField()
     status = models.BooleanField()
-    created = models.DateTimeField(auto_now_add = True)
-    updated = models.DateTimeField(auto_now = True)
+    created = models.DateTimeField()
+    updated = models.DateTimeField()
     
     class Meta:
         verbose_name = "Academic Center"
-        unique_together = (("institution_name","district"), ("institution_name","university"))
+        #unique_together = (("institution_name","district"), ("institution_name","university"))
         
     def __unicode__(self):
         return self.institution_name
@@ -140,8 +141,8 @@ class Organiser(models.Model):
     appoved_by = models.ForeignKey(User, related_name = 'organiser_approved_by', blank=True, null=True)
     academic = models.ForeignKey(AcademicCenter, blank=True, null=True)
     status = models.PositiveSmallIntegerField(default=0)
-    created = models.DateTimeField(auto_now_add = True)
-    updated = models.DateTimeField(auto_now = True)
+    created = models.DateTimeField()
+    updated = models.DateTimeField()
     
     def __unicode__(self):
         return self.user.username
@@ -151,8 +152,8 @@ class Invigilator(models.Model):
     appoved_by = models.ForeignKey(User, related_name = 'invigilator_approved_by', blank=True, null=True)
     academic = models.ForeignKey(AcademicCenter)
     status = models.PositiveSmallIntegerField(default=0)
-    created = models.DateTimeField(auto_now_add = True)
-    updated = models.DateTimeField(auto_now = True)
+    created = models.DateTimeField()
+    updated = models.DateTimeField()
     
     def __unicode__(self):
         return self.user.username
@@ -198,8 +199,8 @@ class Training(models.Model):
     extra_fields = models.OneToOneField(TrainingExtraFields, null = True)
     
     participant_counts = models.PositiveIntegerField(default=0)
-    created = models.DateTimeField(auto_now_add = True)
-    updated = models.DateTimeField(auto_now = True)
+    created = models.DateTimeField()
+    updated = models.DateTimeField()
 
     class Meta:
         unique_together = (("organiser", "academic", "foss", "trdate", "trtime"),)
@@ -211,8 +212,8 @@ class TrainingAttendance(models.Model):
     password = models.CharField(max_length = 100, null=True)
     count = models.PositiveSmallIntegerField(default=0)
     status = models.PositiveSmallIntegerField(default=0)
-    created = models.DateTimeField(auto_now_add = True)
-    updated = models.DateTimeField(auto_now = True)
+    created = models.DateTimeField()
+    updated = models.DateTimeField()
     class Meta:
         verbose_name = "Training Attendance"
         unique_together = (("training", "mdluser_id"))
@@ -247,8 +248,8 @@ class Test(models.Model):
     ttime = models.TimeField()
     status = models.PositiveSmallIntegerField(default=0)
     participant_count = models.PositiveIntegerField(default=0)
-    created = models.DateTimeField(auto_now_add = True)
-    updated = models.DateTimeField(auto_now = True)
+    created = models.DateTimeField()
+    updated = models.DateTimeField()
 
     class Meta:
         unique_together = (("organiser", "academic", "foss", "tdate", "ttime"),)
@@ -264,8 +265,8 @@ class TestAttendance(models.Model):
     password = models.CharField(max_length = 100, null=True)
     count = models.PositiveSmallIntegerField(default=0)
     status = models.PositiveSmallIntegerField(default=0)
-    created = models.DateTimeField(auto_now_add = True)
-    updated = models.DateTimeField(auto_now = True)
+    created = models.DateTimeField()
+    updated = models.DateTimeField()
     class Meta:
         verbose_name = "Test Attendance"
         unique_together = (("test", "mdluser_id"))
@@ -315,6 +316,8 @@ class EventsNotification(models.Model):
 class TrainingFeedback(models.Model):
     training = models.ForeignKey(Training)
     mdluser_id = models.PositiveIntegerField()
+    rate_workshop = models.PositiveSmallIntegerField()
+    
     content = models.PositiveSmallIntegerField()
     sequence = models.PositiveSmallIntegerField()
     clarity = models.PositiveSmallIntegerField()
@@ -324,7 +327,6 @@ class TrainingFeedback(models.Model):
     assignment = models.PositiveSmallIntegerField()
     
     pace_of_tutorial = models.PositiveSmallIntegerField()
-    rate_workshop = models.PositiveSmallIntegerField()
     workshop_learnt = models.TextField()
     weakness_workshop = models.BooleanField()
     weakness_narration = models.BooleanField()
@@ -349,11 +351,12 @@ class TrainingFeedback(models.Model):
     answered_questions = models.PositiveSmallIntegerField()
     interested_helping = models.PositiveSmallIntegerField()
     executed_workshop = models.PositiveSmallIntegerField()
+    workshop_improved = models.TextField()
     
     recommend_workshop = models.PositiveSmallIntegerField()
     use_information = models.TextField()
     other_comments = models.TextField()
-    created = models.DateTimeField(auto_now_add = True)
+    created = models.DateTimeField()
     class Meta:
         unique_together = (("training", "mdluser_id"))
         

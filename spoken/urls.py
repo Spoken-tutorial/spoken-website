@@ -30,6 +30,7 @@ urlpatterns = patterns('',
     url(r'^creation/', include('creation.urls', namespace='creation')),
     url(r'^captcha/', include('captcha.urls')),
     url(r'^migration/creation/', include('creationmigrate.urls', namespace='creationmigrate')),
+    url(r'^migration/events/', include('eventsmigration.urls', namespace='eventsmigration')),
     url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT, 'show_indexes':False}),
     #cms
     url(r'^', include('cms.urls', namespace='cms')),
