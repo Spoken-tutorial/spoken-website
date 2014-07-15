@@ -55,6 +55,33 @@ def get_last_video_upload_time(key):
 	except:
 		return key.updated
 
+def get_component_name(comp):
+    comps = {
+        1: 'Outline',
+        2: 'Script',
+        3: 'Video',
+        4: 'Slides',
+        5: 'Codefiles',
+        6: 'Assignment'
+    }
+    key = ''
+    try:
+        key = comps[comp]
+    except:
+        pass
+    return key.title()
+
+def get_missing_component_reply(mcid):
+    rows = TutorialMissingComponentReply.objects.filter(missing_component_id = mcid)
+    replies = ''
+    for row in rows:
+        replies += '<p>' + row.reply_message + '<b> -' + row.user.username + '</b></p>'
+    if replies:
+        replies = '<br /><b>Replies:</b>' + replies
+    return replies
+
+register.filter('get_missing_component_reply', get_missing_component_reply)
+register.filter('get_component_name', get_component_name)
 register.filter('get_url_name', get_url_name)
 register.filter('get_zip_content', get_zip_content)
 register.filter('get_contributor', is_contributor)

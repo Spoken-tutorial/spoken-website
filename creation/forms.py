@@ -557,3 +557,60 @@ class QualityReviewComponentForm(forms.Form):
         widget = forms.Textarea,
         required = False
     )
+
+class TutorialMissingComponentForm(forms.Form):
+    component = forms.ChoiceField(
+        choices = [('', 'Select Component'), (1, 'Outline'), (2, 'Script'), (3, 'Video'), (4, 'Slides'), (5, 'Codefiles'), (6, 'Assignment')],
+        required = True,
+        error_messages = {'required': 'Please select component'}
+    )
+    report_type = forms.ChoiceField(
+        choices = [(0, 'Component itself is missing'), (1, 'Some content is missing')],
+        widget = forms.RadioSelect(),
+        required = True,
+        error_messages = {'required': 'Please select one from the above options'}
+    )
+    remarks = forms.CharField(
+        widget = forms.Textarea,
+        required = False,
+        error_messages = {'required': 'Please fill the Remarks field'}
+    )
+    inform_me = forms.ChoiceField(
+        choices = [(0, 'No'), (1, 'Yes')],
+        widget = forms.RadioSelect(),
+        required = True,
+        error_messages = {'required': 'Please select one from the above options'}
+    )
+    email = forms.EmailField(required = False, error_messages = {'required': 'Please fill the Email field'})
+
+    def __init__(self, user, *args, **kwargs):
+        super(TutorialMissingComponentForm, self).__init__(*args, **kwargs)
+        self.user = user
+
+    def clean(self):
+        super(TutorialMissingComponentForm, self).clean()
+        print self.user
+        if 'report_type' in self.cleaned_data:
+            if self.cleaned_data['report_type'] == '1':
+                if 'remarks' in self.cleaned_data:
+                    if not self.cleaned_data['remarks']:
+                        self._errors['remarks'] = '<ul class="errorlist"><li>Please fill Remarks field</li></ul>'
+                else:
+                    self._errors['remarks'] = '<ul class="errorlist"><li>Please fill Remarks field</li></ul>'
+        if 'inform_me' in self.cleaned_data:
+            print self.cleaned_data
+            if self.cleaned_data['inform_me'] == '1':
+                print self.cleaned_data['inform_me']
+                if not self.user.is_authenticated():
+                    if 'email' in self.cleaned_data:
+                        if not self.cleaned_data['email']:
+                            self._errors['email'] = '<ul class="errorlist"><li>Please fill Email field</li></ul>'
+                    else:
+                        self._errors['email'] = '<ul class="errorlist"><li>Please fill Email field</li></ul>'
+
+class TutorialMissingComponentReplyForm(forms.Form):
+    reply_message = forms.CharField(
+        widget = forms.Textarea,
+        required = True,
+        error_messages = {'required': 'Please fill the "Reply Message" field'}
+    )

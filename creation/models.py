@@ -249,5 +249,24 @@ class FossAvailableForTest(models.Model):
     language = models.ForeignKey(Language)
     status = models.BooleanField(default=0)
     created = models.DateTimeField(auto_now_add = True)
+
     class Meta:
         unique_together = (('foss','language'),)
+
+class TutorialMissingComponent(models.Model):
+    user = models.ForeignKey(User, related_name = 'raised_user', null = True, blank = True)
+    tutorial_resource = models.ForeignKey(TutorialResource)
+    component = models.PositiveSmallIntegerField()
+    report_type = models.BooleanField(default = 0)
+    remarks = models.TextField(null = True, blank = True)
+    inform_me = models.BooleanField(default = 0)
+    email = models.CharField(max_length = 255, null = True, blank = True)
+    reply_status = models.BooleanField(default = 0)
+    created = models.DateTimeField(auto_now_add = True)
+    updated = models.DateTimeField(auto_now = True)
+
+class TutorialMissingComponentReply(models.Model):
+    missing_component = models.ForeignKey(TutorialMissingComponent)
+    user = models.ForeignKey(User)
+    reply_message = models.TextField()
+    created = models.DateTimeField(auto_now_add = True)

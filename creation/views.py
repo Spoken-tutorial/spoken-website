@@ -2169,3 +2169,144 @@ def ajax_change_component_status(request):
                 data = '<option value="">Select Language</option>' + data
 
     return HttpResponse(json.dumps(data), mimetype='application/json')
+
+def report_missing_component(request, trid):
+    comps = {
+        1: 'outline',
+        2: 'script',
+        3: 'video',
+        4: 'slide',
+        5: 'Code',
+        6: 'assignment'
+    }
+    try:
+        tr_rec = TutorialResource.objects.get(pk = trid)
+        comp_title = tr_rec.tutorial_detail.foss.foss + ': ' + tr_rec.tutorial_detail.tutorial + ' - ' + tr_rec.language.name
+    except:
+        raise PermissionDenied()
+    form = TutorialMissingComponentForm(request.user)
+    if request.method == 'POST':
+        form = TutorialMissingComponentForm(request.user, request.POST)
+        if form.is_valid():
+            remarks = ''
+            component = int(request.POST.get('component'))
+            report_type = int(request.POST.get('report_type'))
+            if report_type:
+                remarks = request.POST.get('remarks')
+            else:
+                compStatus = 0
+                compValue = ''
+                if component <= 3:
+                    compStatus = getattr(tr_rec, comps[component] + '_status')
+                    compValue = getattr(tr_rec, comps[component])
+                else:
+                    compStatus = getattr(tr_rec.common_content, comps[component] + '_status')
+                    compValue = getattr(tr_rec.common_content, comps[component])
+                flag = 0
+                if compStatus == 6:
+                    flag = 1
+                    messages.warning(request, 'The contributor of this tutorial says that the selected component is not required. However if you wish to report an error, please click on "Some content is missing" radio button.')
+                elif compValue:
+                    if component == 1:
+                        flag = 1
+                        messages.warning(request, 'The selected component is available. However if you wish to report an error, please click on "Some content is missing" radio button.')
+                    if component <= 3:
+                        if component != 1 and os.path.isfile(settings.MEDIA_ROOT + 'videos/' + tr_rec.tutorial_detail__foss_id + '/' + tr_rec.tutorial_detail_id + '/' + compValue):
+                            flag = 1
+                            messages.warning(request, 'The selected component is available. However if you wish to report an error, please click on "Some content is missing" radio button.')
+                    else:
+                        if os.path.isfile(settings.MEDIA_ROOT + 'videos/resources/' + tr_rec.tutorial_detail__foss_id + '/' + tr_rec.tutorial_detail_id + '/' + compValue):
+                            flag = 1
+                            messages.warning(request, 'The selected component is available. However if you wish to report an error, please click on "Some content is missing" radio button.')
+                if flag:
+                    context = {
+                        'form': form,
+                    }
+                    context.update(csrf(request))
+                    return render(request, 'creation/templates/report_missing_component.html', context)
+            email = ''
+            inform_me = request.POST.get('inform_me')
+            if inform_me and request.user.is_authenticated() == False:
+                email = request.POST.get('email', '')
+            if request.user.is_authenticated():
+                TutorialMissingComponent.objects.create(
+                    user = request.user,
+                    tutorial_resource = tr_rec,
+                    component = component,
+                    report_type = report_type,
+                    remarks = remarks,
+                    inform_me = inform_me,
+                    email = email,
+                )
+            else:
+                TutorialMissingComponent.objects.create(
+                    tutorial_resource = tr_rec,
+                    component = component,
+                    report_type = report_type,
+                    remarks = remarks,
+                    inform_me = inform_me,
+                    email = email,
+                )
+            add_contributor_notification(tr_rec, comp_title, 'Component missing form submitted by public')
+            form = TutorialMissingComponentForm(request.user)
+            messages.success(request, 'Thanks for submitting your query. Your query will be addressed shortly.')
+    context = {
+        'form': form
+    }
+    context.update(csrf(request))
+    return render(request, 'creation/templates/report_missing_component.html', context)
+
+def get_and_query_for_contributor_roles(data_rows, fields):
+    query = None
+    for row in data_rows:
+        and_query = None # Query to search for a given term in each field
+        counter = 0
+        for field in fields:
+            q = Q(**{"%s" % field: row[counter]})
+            if and_query is None:
+                and_query = q
+            else:
+                and_query = and_query & q
+            counter = counter + 1
+        if query is None:
+            query = and_query
+        else:
+            query = query | and_query
+    return query
+
+def report_missing_component_reply(request, tmcid):
+    if not is_contributor(request.user) and not is_administrator(request.user):
+        raise PermissionDenied()
+    try:
+        tmc_row = TutorialMissingComponent.objects.get(pk = tmcid)
+    except:
+        raise PermissionDenied()
+    form = TutorialMissingComponentReplyForm()
+    if request.method == 'POST':
+        form = TutorialMissingComponentReplyForm(request.POST)
+        if form.is_valid():
+            TutorialMissingComponentReply.objects.create(missing_component = tmc_row, user = request.user, reply_message = request.POST.get('reply_message', ''))
+            messages.success(request, 'Reply message added successfully!')
+            form = TutorialMissingComponentReplyForm()
+    context = {
+        'form': form,
+        'tmc_row': tmc_row
+    }
+    return render(request, 'creation/templates/report_missing_component_reply.html', context)
+
+@login_required
+def report_missing_component_list(request):
+    if not is_contributor(request.user) and not is_administrator(request.user):
+        raise PermissionDenied()
+    rows = None
+    if is_administrator(request.user):
+        rows = TutorialMissingComponent.objects.all().order_by('-created')
+    elif is_contributor(request.user):
+        contrib_roles = list(ContributorRole.objects.filter(user = request.user).values_list('foss_category_id', 'language_id'))
+        fields = ['tutorial_resource__tutorial_detail__foss_id', 'tutorial_resource__language_id']
+        query = get_and_query_for_contributor_roles(contrib_roles, fields)
+        rows = TutorialMissingComponent.objects.filter(query).order_by('-created')
+    context = {
+        'rows': rows
+    }
+    return render(request, 'creation/templates/report_missing_component_list.html', context)

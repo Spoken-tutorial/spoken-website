@@ -5,6 +5,7 @@ from django.contrib.auth.models import Group
 from django.contrib.auth.models import User
 from django.shortcuts import render
 from django.conf import settings
+from django.db.models import Q
 from shutil import copyfile
 import os
 
@@ -45,6 +46,14 @@ def get_current_user_from_old_email(mail, user):
     except:
         pass
     return int(user.id)
+
+def get_current_user_from_old_email_strict(mail):
+    try:
+        row = User.objects.get(email = mail)
+        return row
+    except:
+        pass
+    return None
 
 def get_last_index(input_string, td_row, concat_str):
     if input_string == 'pending' or input_string == 'notrequired':
@@ -125,15 +134,15 @@ def users(request):
             if len(name) > 30:
                 tmp_name = name.split("@")
                 name = tmp_name[0]
+            print 'success', ',', row.mail, ',', row.name, ',', name
         try:
             User.objects.get(email = row.mail)
         except:
             try:
                 user = User.objects.get(username = name)
-                name = name + '_' + str(user.id)
+                print 'Problem', ',', row.mail, ',', row.name, ',', name
             except:
-                pass
-            User.objects.create(password = row.pass_field,username = name, email = row.mail, is_active = row.status)
+                User.objects.create(password = row.pass_field,username = name, email = row.mail, is_active = row.status)
     return HttpResponse('Success!')
 
 @login_required
@@ -429,4 +438,101 @@ def tutorial_resources(request):
             except Exception, e:
                 print 4, e
 
+    return HttpResponse('Success!')
+
+@login_required
+def admin_reviewer_roles(request):
+    if not is_administrator(request.user):
+        raise PermissionDenied()
+    try:
+        role = Role.objects.get(name = 'admin_review_user')
+        rows = UsersRoles.objects.filter(rid = role)
+        for row in rows:
+            current_user = get_current_user_from_old_email_strict(row.uid.mail)
+            print current_user
+            try:
+                current_user.groups.add(Group.objects.get(name = 'Video-Reviewer'))
+            except:
+                pass
+    except Exception, e:
+        return HttpResponse(str(e))
+    return HttpResponse('Success!')
+
+@login_required
+def domain_reviewer_roles(request):
+    if not is_administrator(request.user):
+        raise PermissionDenied()
+    rows = TutorialDomainReviewerRoles.objects.all()
+    for row in rows:
+        tr_update_rows = TutorialUpdateLog.objects.filter(updated_by = row.uid.name, tutorial_resources__language = row.language.name, updated_content = 'review').distinct()
+        current_user = get_current_user_from_old_email_strict(row.uid.mail)
+        for tr_update_row in tr_update_rows:
+            try:
+                current_user.groups.add(Group.objects.get(name = 'Domain-Reviewer'))
+            except Exception, e:
+                #print e
+                pass
+            try:
+                DomainReviewerRole.objects.create(
+                    foss_category = FossCategory.objects.get(foss = tr_update_row.tutorial_resources.tutorial_detail.foss_category.replace('-', ' ')),
+                    language = Language.objects.get(name = row.language.name),
+                    user = current_user,
+                    status = 1
+                )
+            except Exception, e:
+                #print e
+                pass
+            print "****************", tr_update_row.id, "****************"
+    return HttpResponse('Success!')
+
+@login_required
+def quality_reviewer_roles(request):
+    if not is_administrator(request.user):
+        raise PermissionDenied()
+    rows = TutorialQualityRoles.objects.all()
+    for row in rows:
+        tr_update_rows = TutorialUpdateLog.objects.filter(updated_by = row.uid.name, tutorial_resources__language = row.language.name, updated_content = 'review').distinct()
+        current_user = get_current_user_from_old_email_strict(row.uid.mail)
+        for tr_update_row in tr_update_rows:
+            try:
+                current_user.groups.add(Group.objects.get(name = 'Quality-Reviewer'))
+            except Exception, e:
+                #print e
+                pass
+            try:
+                QualityReviewerRole.objects.create(
+                    foss_category = FossCategory.objects.get(foss = tr_update_row.tutorial_resources.tutorial_detail.foss_category.replace('-', ' ')),
+                    language = Language.objects.get(name = row.language.name),
+                    user = current_user,
+                    status = 1
+                )
+            except Exception, e:
+                #print e
+                pass
+            print "****************", tr_update_row.id, "****************"
+    return HttpResponse('Success!')
+
+def fix_tutorial_resources_status(request):
+    if not is_administrator(request.user):
+        raise PermissionDenied()
+    rows = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2))
+    for row in rows:
+        flag = 0
+        comp = ''
+        if row.common_content.assignment == '' and row.common_content.assignment_status != 6:
+            row.common_content.assignment_status = 6
+            flag = 1
+            comp = 'assignment'
+        if row.common_content.code == '' and row.common_content.code_status != 6:
+            row.common_content.code_status = 6
+            flag = 1
+            comp = 'code'
+        if row.common_content.prerequisite == '' and row.common_content.prerequisite_status != 6:
+            row.common_content.prerequisite_status = 6
+            flag = 1
+            comp = 'prerequisite'
+        if flag:
+            row.common_content.save()
+            print row.id, comp, 'status fixed'
+            
     return HttpResponse('Success!')
