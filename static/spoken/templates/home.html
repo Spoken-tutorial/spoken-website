@@ -72,23 +72,21 @@
     <!-- testimonial start -->
         <div class="row">
             <div id="testimonials" class="inner">
-                <h4 style="padding-left:10px" class='page-title'>Testimonials</h4>
+                <h4 class='page-title'>Testimonials</h4>
                 {% for record in testimonials %}
                     <div class="col-lg-6 col-md-6 col-sm-6 testimonial-item">
-                        <div class="top-border"></div>
-                        <div class='item'>
-                            <div class="col-lg-3 col-md-3 col-sm-3">
-                                <div class="circular">
-                                    <img src="/static/spoken/images/no-profile-image.jpg" />
-                                    <div class="user-details stay-middle">
-                                        {{ record.user.first_name }}<br />
-                                        {{ record.updated|date:"M d Y"|lower }}
-                                    </div>
-                                </div>
-                            </div>
-                            <div class=" col-lg-9 col-md-9 col-sm-9 content stay-middle">
-                                <b class="caret"></b>
-                                {{ record.minified_content|len_cutter:320 }} - <a href="#"> read </a>
+                        <div class="testimonial-content">
+                            <i class="fa fa-quote-left pull-left" style="color:#e6e6e6;"></i>{{ record.minified_content|len_cutter:320 }} - <a href="#"> read </a><i class="fa fa-quote-right pull-right" style="color:#e6e6e6;"></i>
+                        </div>
+                        <div class="pull-left">
+                            <div class="user-details">
+                                <div class="caretr"></div>
+                                <img width="30" height="30" src="/static/spoken/images/no-profile-image.jpg" />
+                                {% if record.user.first_name %}
+                                    {{ record.user.first_name }}
+                                {% else %}
+                                    {{ record.user.username }}
+                                {% endif %}
                             </div>
                         </div>
                     </div>
@@ -105,7 +103,7 @@
                     </video>
                 </div>
                 <div class="col-lg-7 col-md-7 col-sm-7 video-lists">
-                    <div class="video-item col-md-4">
+                    <div class="video-item">
                         <div class="thump">
                             <img src="http://www.spoken-tutorial.org/sites/default/files/thumb-even.png">
                             <div class="video-item-playlist">
@@ -113,7 +111,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="video-item col-md-4">
+                    <div class="video-item">
                         <div class="thump">
                             <img src="http://www.spoken-tutorial.org/sites/default/files/thumb-even.png">
                             <div class="video-item-playlist">
@@ -121,7 +119,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="video-item col-md-4">
+                    <div class="video-item">
                         <div class="thump">
                             <img src="http://www.spoken-tutorial.org/sites/default/files/thumb-even.png">
                             <div class="video-item-playlist">
@@ -129,7 +127,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="video-item col-md-4">
+                    <div class="video-item">
                         <div class="thump">
                             <img src="http://www.spoken-tutorial.org/sites/default/files/thumb-even.png">
                             <div class="video-item-playlist">
@@ -137,7 +135,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="video-item col-md-4">
+                    <div class="video-item">
                         <div class="thump">
                             <img src="http://www.spoken-tutorial.org/sites/default/files/thumb-even.png">
                             <div class="video-item-playlist">
@@ -146,7 +144,7 @@
                         </div>
                     </div>
                     
-                    <div class="video-item col-md-4">
+                    <div class="video-item">
                         <div class="thump">
                             <img src="http://www.spoken-tutorial.org/sites/default/files/thumb-even.png">
                             <div class="video-item-playlist">
@@ -159,7 +157,7 @@
         </div>
         <!-- videos end -->
     </div>
-    <div id="page3" class='page3'>
+    <div id="page3" class='page3 forum-container'>
         <a href="#page3"></a>
         <div class="spacer"></div>
         <div class="row">
