@@ -149,6 +149,7 @@ def account_profile(request, username):
             profile.city_id = request.POST['city']
             profile.state_id = request.POST['state']
             profile.country = request.POST['country']
+            profile.address = request.POST['address']
             profile.pincode = request.POST['pincode']
             profile.phone = request.POST['phone']
             profile.save()

@@ -13,7 +13,7 @@ from django.core.exceptions import ValidationError
 # Create your models here.
 class State(models.Model):
     users = models.ManyToManyField(User, related_name="resource_person", through='ResourcePerson')
-    code = models.CharField(max_length=2)
+    code = models.CharField(max_length=3)
     name = models.CharField(max_length=50)
     latitude = models.DecimalField(null=True, max_digits=10, decimal_places=4, blank=True)
     longtitude = models.DecimalField(null=True, max_digits=10, decimal_places=4, blank=True)

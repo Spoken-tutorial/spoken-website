@@ -787,10 +787,22 @@ def workshop_feedback(request):
                 t.save()
                 
                 #Save training attendance register
-                #try:
-                #    TrainingAttendance.objects.get()
-                #except Exception, e:
-                #    pass
+                try:
+                    TrainingAttendance.objects.get(training_id = training.id, mdluser_id = wwf.user_id)
+                except Exception, e:
+                    print e, " => sss"
+                    t = TrainingAttendance()
+                    t.training_id = training.id
+                    t.mdluser_id = wwf.user_id
+                    t.status = 1
+                    
+                    if wwf.updated_at:
+                        t.created  = wwf.updated_at
+                        t.updated  = wwf.updated_at
+                    else:
+                        t.created  = datetime.datetime.now()
+                        t.updated  = datetime.datetime.now()
+                    t.save()
             except Exception, e:
                 print e, " => 3", wwf.workshop_code, " => ", wwf.user_id
                 sys.exit()
@@ -798,8 +810,15 @@ def workshop_feedback(request):
     
     
 def test(request):
-    test_status = 3
-    wtrs = WTestRequests.objects.filter(status = test_status)
+    test_status = 4
+    if workshop_status == 4:
+        wtrs = WTestRequests.objects.filter(status = test_status)
+    elif workshop_status == 2:
+        wtrs = WTestRequests.objects.filter(status = test_status, pref_test_date__gt = datetime.datetime.today())
+    elif workshop_status == 1:
+        wtrs = WTestRequests.objects.filter(status = test_status, pref_test_date__gt = datetime.datetime.today())
+    elif workshop_status == 0:
+        wtrs = WTestRequests.objects.filter(status = test_status, pref_test_date__gt = datetime.datetime.today())
     for wtr in wtrs:
         #Save department
         try:

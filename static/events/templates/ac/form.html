@@ -82,6 +82,13 @@
                         </div>
                     </div>
                     <div class="form-group">
+                        <label class="col-sm-3 control-label" for= "id_street">Address</label>
+                        <div class="col-sm-9">
+                            {% render_field form.address class+="form-control street" tabindex="1" data-placeholder="Enter street" %}
+                            {{ form.address.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
                         <label class="col-sm-3 control-label" for= "id_pincode">Pincode</label>
                         <div class="col-sm-9">
                             {% render_field form.pincode class+="form-control pincode" tabindex="1" data-placeholder="Enter pincode" %}

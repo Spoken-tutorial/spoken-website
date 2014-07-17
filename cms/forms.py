@@ -75,6 +75,7 @@ class ProfileForm(forms.Form):
     #district = forms.CharField()
     #city = forms.CharField()
     #state = forms.CharField()
+    address = forms.CharField(widget = forms.Textarea(attrs = {'rows' : '5'}))
     country = forms.CharField()
     pincode = forms.CharField()
     phone = forms.CharField(required = False)
@@ -99,6 +100,7 @@ class ProfileForm(forms.Form):
         self.fields['first_name'].initial = user.first_name
         self.fields['last_name'].initial = user.last_name
         self.fields['street'].initial = initial.street
+        self.fields['address'].initial = initial.address
         #self.fields['location'].initial = initial.location
         #self.fields['district'].initial = initial.district
         #self.fields['city'].initial = initial.city

@@ -1,5 +1,14 @@
 {% extends 'spoken/templates/base.html' %}
 {% load cmsdata %}
+{% load static %}
+{% block cssblock %}
+    <link href="{% static 'spoken/css/video-js.min.css' %}" rel="stylesheet" type="text/css">
+    <style>
+        #st_video, #st_video_html5_api{
+            width: 100%;
+        }
+    </style>
+{% endblock %}
 {% block title %}Home{% endblock %}
 {% block heading %}{% endblock %}
 {% block homealert %}
@@ -38,16 +47,16 @@
 {% block banner %}
     <div class="page1">
         <div id="banner-wrapper">
-            <img class="banner-img" src="/static/spoken/images/home-banner.jpg">
-            <div class="banner-items col-sm-offset-2 col-sm-8">
-                <div class="col-sm-4">
-                    <img class="banner-item" src="/static/spoken/images/1.jpg">
+            <img class="col-lg-12 col-md-12 col-sm-12 col-xs-12 banner-img" src="/static/spoken/images/home-banner.jpg">
+            <div class="banner-items col-lg-offset-2 col-md-offset-2 col-sm-offset-2 col-xs-offset-2 col-lg-8 col-md-8 col-sm-8 col-xs-8">
+                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                <a href="/software-training/" title="Software Training"><img class="banner-item" src="/static/spoken/images/1.jpg"></a>
                 </div>
-                <div class="col-sm-4">
-                    <img class="banner-item" src="/static/spoken/images/2.jpg">
+                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                    <a href="/creation/" title="Spoken Tutorial Creation"><img class="banner-item" src="/static/spoken/images/2.jpg"></a>
                 </div>
-                <div class="col-sm-4">
-                    <img class="banner-item" src="/static/spoken/images/3.jpg">
+                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                    <a href="http://forums.spoken-tutorial.org" title="Spoken Tutorial Forum"><img class="banner-item" src="/static/spoken/images/3.jpg"></a>
                 </div>
             </div>
         </div>
@@ -72,7 +81,7 @@
     <!-- testimonial start -->
         <div class="row">
             <div id="testimonials" class="inner">
-                <h4 class='page-title'>Testimonials</h4>
+                <h4 class='col-lg-12 col-md-12 col-sm-12 page-title'>Testimonials</h4>
                 {% for record in testimonials %}
                     <div class="col-lg-6 col-md-6 col-sm-6 testimonial-item">
                         <div class="testimonial-content">
@@ -95,55 +104,14 @@
         </div>
         <!-- testimonial end -->
         <!-- videos -->
-        <div class="row">
-            <div id="home-video-container" class="container-inner">
-                <div class="col-lg-5 col-md-5 col-sm-5 big-video">
-                    <video id="st_video" class="col-lg-12 col-md-12 col-sm-12 video-js vjs-default-skin" controls preload="auto" width="auto" height="auto" data-setup="{}">
+        <div class="">
+            <div id="home-video-container" class="container-inner row">
+                <div class="col-lg-6 col-md-6 col-sm-6 big-video">
+                    <video id="st_video" class="video-js vjs-default-skin" controls preload="auto" width="auto" height="auto" data-setup="{}">
                         <source src="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ tr_rec.video }}" type="video/ogg" />
                     </video>
                 </div>
-                <div class="col-lg-7 col-md-7 col-sm-7 video-lists">
-                    <div class="video-item">
-                        <div class="thump">
-                            <img src="http://www.spoken-tutorial.org/sites/default/files/thumb-even.png">
-                            <div class="video-item-playlist">
-                            <h5>Linux 50 +</h5>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="video-item">
-                        <div class="thump">
-                            <img src="http://www.spoken-tutorial.org/sites/default/files/thumb-even.png">
-                            <div class="video-item-playlist">
-                            <h5>Linux 50 +</h5>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="video-item">
-                        <div class="thump">
-                            <img src="http://www.spoken-tutorial.org/sites/default/files/thumb-even.png">
-                            <div class="video-item-playlist">
-                            <h5>Linux 50 +</h5>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="video-item">
-                        <div class="thump">
-                            <img src="http://www.spoken-tutorial.org/sites/default/files/thumb-even.png">
-                            <div class="video-item-playlist">
-                            <h5>Linux 50 +</h5>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="video-item">
-                        <div class="thump">
-                            <img src="http://www.spoken-tutorial.org/sites/default/files/thumb-even.png">
-                            <div class="video-item-playlist">
-                            <h5>Linux 50 +</h5>
-                            </div>
-                        </div>
-                    </div>
-                    
+                <div class="col-lg-6 col-md-6 col-sm-6 video-lists">
                     <div class="video-item">
                         <div class="thump">
                             <img src="http://www.spoken-tutorial.org/sites/default/files/thumb-even.png">
@@ -266,9 +234,10 @@
 {% endblock %}
 {% block jsblock %}
     <script src="static/spoken/js/jquery.easing.1.3.js"></script> 
+    <script src="{% static 'spoken/js/video.js' %}"></script>
     <script>
         $(document).ready(function(){
-            $('.banner-img').css({'width': $( window ).width()});
+            //$('.banner-img').css({'width': $( window ).width()});
         });
         $(function(){
             // catch all a clicks

@@ -11,6 +11,7 @@
     <div class="row well ">
         <div class="col-sm-8">
             <form class="form-signin form-horizontal" role="form" id="login_form" method="post">{% csrf_token %}
+                {{ form.errors }}
                 <div class="form-group">
                     <label class="col-sm-3 control-label" for="id_first_name">First Name</label>
                     <div class="col-sm-9">
@@ -60,6 +61,13 @@
                     <div class="col-sm-9">
                         {% render_field form.street class+="form-control street" tabindex="1" data-placeholder="Choose street" %}
                         {{ form.street.errors }}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label" for= "id_street">Address</label>
+                    <div class="col-sm-9">
+                        {% render_field form.address class+="form-control street" tabindex="1" data-placeholder="Enter street" %}
+                        {{ form.address.errors }}
                     </div>
                 </div>
                 <div class="form-group">
