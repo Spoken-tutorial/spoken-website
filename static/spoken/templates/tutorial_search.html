@@ -38,12 +38,14 @@
         </div>
     </div>
     
-    <div class='search-result'>
+    <div class='search-result col-lg-12 col-md-12 col-sm-12 col-xs-12'>
         {% if collection %}
             {% for record in collection %}
-                <div class='result-record'>
-                    <a href="#" class='thump'><img src="/static/spoken/images/thumb-even.png"></a>
-                    <div class="info">
+                <div class='result-record row'>
+                    <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2 thumb">
+                        <a href="#" class='thumb'><img width="100%" src="/static/spoken/images/thumb-even.png"></a>
+                    </div>
+                    <div class="info col-lg-8 col-md-8 col-sm-8 col-xs-8">
                         <div class='title'><h3><a href="/watch/{{ record.tutorial_detail.foss.foss|get_url_name }}/{{ record.tutorial_detail.tutorial|get_url_name }}/{{ record.language }}">{{ record.tutorial_detail.tutorial }}</a></h3></div>
                         <div class='desc'>
                                 Foss : {{ record.tutorial_detail.foss }}</br>
@@ -52,6 +54,9 @@
                                 Published on : {{ record.updated }}</br>
                             </dl>
                         </div>
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
+                        <div class="{{ record.tutorial_detail.level }}"></div>
                     </div>
                 </div>
             {% endfor %}

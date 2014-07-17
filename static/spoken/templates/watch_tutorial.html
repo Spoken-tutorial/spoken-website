@@ -21,6 +21,10 @@
         .forward {
             float: right;
         }
+        .playlist ul {
+             height: 330px;
+             overflow-y: scroll;
+        }
         .playlist, .playlist-container, .video-container{
             padding-left: 0px;
             padding-right: 0px;
@@ -93,6 +97,8 @@
 {% load creationdata %}
 {% block title %}{{ tr_rec.tutorial_detail.tutorial }} - {{ tr_rec.language.name }}{% endblock %}
 {% block heading %}{{ tr_rec.tutorial_detail.tutorial }} - {{ tr_rec.language.name }}{% endblock %}
+{% block search %}
+{% endblock %}
 {% block content %}
     {% if tr_rec.video_status %}
     <row>
@@ -134,20 +140,19 @@
             <pre class="custom-jumbotron"><b>Outline:<br /></b>{{ tr_rec.outline }}</pre>
         </div>
         <div class="col-lg-5 col-md-5 col-sm-5 no-padding-right">
-            <table class="table table-bordered table-hover">
-                <tr>
-                    <th>Codec:</th><td>{{video_info.codec}}</td>
-                    <th>Profile:</th><td>{{video_info.profile}}</td>
-                </tr>
-                <tr>
-                    <th>Width:</th><td>{{video_info.width}}</td>
-                    <th>Height:</th><td>{{video_info.height}}</td>
-                </tr>
-                <tr>
-                    <th>Duration:</th><td>{{video_info.duration}}</td>
-                    <th>Size:</th><td>{{video_info.size}}</td>
-                </tr>
-            </table>
+            <div class="panel panel-default">
+              <div class="panel-heading">
+                <h3 class="panel-title">Prerequsite</h3>
+              </div>
+              <div class="panel-body">
+              {% if tr_rec.common_content.prerequisite %}
+                <img src="/static/spoken/images/thumb-even.png" width="70" style="padding-right: 10px;">
+                <a href="#">{{ tr_rec.common_content.prerequisite.tutorial }}</a>
+              {% else %}
+                No Prerequsite for this tutorial.
+              {% endif %}
+              </div>
+            </div>
             <div class="list-group">
                 {% if tr_rec.common_content.assignment_status and tr_rec.common_content.assignment_status != 6 %}
                     <div  class="list-group-item">

@@ -33,6 +33,21 @@ def site_feedback(request):
 
 def home(request):
     tr_rec = ''
+    
+    foss = list(TutorialResource.objects.filter(Q(status = 1) | Q(status = 2)).order_by('?').values_list('tutorial_detail__foss_id').distinct()[:9])
+    random_tutorials = []
+    eng_lang = Language.objects.get(name='English')
+    for f in foss:
+        tcount = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss_id = f, language__name='English').order_by('tutorial_detail__order').count()
+        tutorial = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss_id = f, language__name='English').order_by('tutorial_detail__order')[:1].first()
+        
+        print tcount, ' => ', tutorial
+        random_tutorials.append((tcount, tutorial))
+        
+    #print random_tutorials
+    #for a in random_tutorials:
+    #    print a
+    #    print a.id
     try:
         tr_rec = TutorialResource.objects.all().order_by('?')[:1].first()
     except Exception, e:
@@ -40,6 +55,7 @@ def home(request):
     context = {
         'tr_rec': tr_rec,
         'media_url': settings.MEDIA_URL,
+        'random_tutorials' : random_tutorials,
     }
     
     testimonials = Testimonials.objects.all().order_by('?')[:2]
@@ -47,7 +63,6 @@ def home(request):
     
     events = Event.objects.filter(event_date__gte=datetime.datetime.today()).order_by('event_date')[:2]
     context['events'] = events
-    print events, "ssssssssss"
     return render(request, 'spoken/templates/home.html', context)
 
 def get_or_query(terms, search_fields):
@@ -86,7 +101,7 @@ def keyword_search(request):
                 keywords.remove(key)
             query = get_or_query(keywords, search_fields)
             if query:
-                collection = TutorialResource.objects.filter(common_content = TutorialCommonContent.objects.filter(query), language__name = 'English')
+                collection = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), common_content = TutorialCommonContent.objects.filter(query), language__name = 'English')
         
     context = {}
     context['form'] = KeywordSearchForm()
@@ -105,11 +120,11 @@ def tutorial_search(request):
             lang = form.cleaned_data['language']
             foss = form.cleaned_data['foss_category']
             if not lang and foss:
-                collection = TutorialResource.objects.filter(tutorial_detail__foss_id = foss)
+                collection = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), tutorial_detail__foss_id = foss)
             elif lang and not foss:
-                collection = TutorialResource.objects.filter(language_id = lang)
+                collection = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), language_id = lang)
             elif foss and lang:
-                collection = TutorialResource.objects.filter(tutorial_detail__foss_id = foss, language_id = lang)
+                collection = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), tutorial_detail__foss_id = foss, language_id = lang)
             
     context['form'] = form
     context['collection'] = collection
@@ -123,7 +138,7 @@ def watch_tutorial(request, foss, tutorial, lang):
         print foss, tutorial
         td_rec = TutorialDetail.objects.get(foss__foss = foss, tutorial = tutorial)
         tr_rec = TutorialResource.objects.select_related().get(tutorial_detail = td_rec, language = Language.objects.get(name = lang))
-        tr_recs = TutorialResource.objects.select_related('tutorial_detail').filter(tutorial_detail__in = TutorialDetail.objects.filter(foss = tr_rec.tutorial_detail.foss).order_by('order').values_list('id'), language = tr_rec.language)
+        tr_recs = TutorialResource.objects.select_related('tutorial_detail').filter(Q(status = 1) | Q(status = 2), tutorial_detail__foss = tr_rec.tutorial_detail.foss, language = tr_rec.language)
     except Exception, e:
         messages.error(request, str(e))
         return HttpResponseRedirect('/')

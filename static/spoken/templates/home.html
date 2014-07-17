@@ -1,6 +1,7 @@
 {% extends 'spoken/templates/base.html' %}
 {% load cmsdata %}
 {% load static %}
+{% load creationdata %}
 {% block cssblock %}
     <link href="{% static 'spoken/css/video-js.min.css' %}" rel="stylesheet" type="text/css">
     <style>
@@ -56,7 +57,7 @@
                     <a href="/creation/" title="Spoken Tutorial Creation"><img class="banner-item" src="/static/spoken/images/2.jpg"></a>
                 </div>
                 <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
-                    <a href="http://forums.spoken-tutorial.org" title="Spoken Tutorial Forum"><img class="banner-item" src="/static/spoken/images/3.jpg"></a>
+                    <a href="http://forums.spoken-tutorial.org" title="Spoken Tutorial Forum" target="_blank"><img class="banner-item" src="/static/spoken/images/3.jpg"></a>
                 </div>
             </div>
         </div>
@@ -112,14 +113,18 @@
                     </video>
                 </div>
                 <div class="col-lg-6 col-md-6 col-sm-6 video-lists">
-                    <div class="video-item">
-                        <div class="thump">
-                            <img src="http://www.spoken-tutorial.org/sites/default/files/thumb-even.png">
-                            <div class="video-item-playlist">
-                            <h5>Linux 50 +</h5>
+                    {% for k, record in random_tutorials %}
+                        <div class="video-item">
+                            <div class="thump">
+                                <a href="/watch/{{ record.tutorial_detail.foss.foss|get_url_name }}/{{ record.tutorial_detail.tutorial|get_url_name }}/{{ record.language }}">
+                                    <img src="http://www.spoken-tutorial.org/sites/default/files/thumb-even.png">
+                                    <div class="video-item-playlist">
+                                    <h5> {{ record.tutorial_detail.foss.foss }} {{ k }} +</h5>
+                                    </div>
+                                </a>
                             </div>
                         </div>
-                    </div>
+                    {% endfor %}
                 </div>
             </div>
         </div>
@@ -136,7 +141,7 @@
                         <p class="justify">Spoken Tutorial Forums is a friendly online discussion forum.  You can join existing discussions or start new topics, and get lots of replies from the Spoken Tutorial community.   Registration to Forums is completely free and takes only one minute.</p>
 			<p class="justify">Forums is very easy to use, even for computer newbies. It's very easy to format forum posts with fonts, colors, and many other options. You can attach files to your posts directly from your computer. You can give links to webpages or videos from other video websites.</p>
 
-			<p class="justify">Be assured of an answer within 3 working days of posting your question. <br /><br /> <a class="pull-right" href="#">Continue Forum >></a></p>
+			<p class="justify">Be assured of an answer within 3 working days of posting your question. <a class="pull-right" href="http://forums.spoken-tutorial.org" target="_blank">Click here to proceed >></a></p>
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-4 col-sm-4">
@@ -150,14 +155,18 @@
                     <h4 class='page-title'>News / Events</h4>
                     <div class="top-border"></div>
                     <div>
-                        {% for event in events %}
-                            <div class="events">
-                                <div class="event-message">{{ event.message }}</div>
-                                <br />
-                                <div class="pull-left">{{ event.event_date }}</div>
-                            </div>
-                        {% endfor %}
-                        <br /> <a class="pull-right" href="#">Click more >></a>
+                        {% if events %}
+                            {% for event in events %}
+                                <div class="events">
+                                    <div class="event-message">{{ event.message }}</div>
+                                    <br />
+                                    <div class="pull-left">{{ event.event_date }}</div>
+                                </div>
+                            {% endfor %}
+                            <br /> <a class="pull-right" href="#">Click more >></a>
+                        {% else %}
+                            Check out the amazing testimonials, media articles, events, seminars, talks and campaigns about the Spoken Tutorial Project.   Browse through our gallery and see what the Project has been doing across India. 
+                        {% endif %}
                     </div>
                 </div>
                 <div class="col-lg-6 col-md-6 col-sm-6">
@@ -176,7 +185,7 @@
         <div class="row">
             <div class="contact-container container-inner three-cols">
                 <h2 class='page-title stay-middle'>Thanks for visiting us</h2>
-                <div class="col-lg-4 col-md-4 col-sm-4 contact">
+                <div class="col-lg-4 col-md-4 col-sm-4 contact comfortaa">
                     <h4 class='page-title'>Contact</h4>
                     <div><span class="fa fa-2 fa-home"></span> IIT Powai</div>
                     <div><span class="fa fa-2 fa-phone"></span> + 91 22 484900 </div>
@@ -191,7 +200,7 @@
                         <fieldset>
                             <!-- Name input-->
                             <div class="form-group feedback-name">
-                                <label class="col-md-4 control-label" for="name">Name</label>
+                                <label class="col-md-4 control-label comfortaa" for="name">Name</label>
                                 <div class="col-md-8">
                                     <input id="name" name="name" type="text" placeholder="Your name" class="form-control">
                                 </div>
@@ -199,7 +208,7 @@
 
                             <!-- Email input-->
                             <div class="form-group feedback-email">
-                                <label class="col-md-4 control-label" for="email">Your E-mail</label>
+                                <label class="col-md-4 control-label comfortaa" for="email">Your E-mail</label>
                                 <div class="col-md-8">
                                     <input id="email" name="email" type="email" placeholder="Your email" class="form-control email">
                                 </div>
@@ -207,7 +216,7 @@
 
                             <!-- Message body -->
                             <div class="form-group feedback-message">
-                                <label class="col-md-4 control-label" for="message">Your message</label>
+                                <label class="col-md-4 control-label comfortaa" for="message">Your message</label>
                                 <div class="col-md-8">
                                     <textarea class="form-control" id="message" name="message" placeholder="Please enter your message here..." rows="5"></textarea>
                                 </div>
@@ -224,8 +233,8 @@
                 </div>
                 <div class="col-lg-4 col-md-4 col-sm-4 support-us">
                     <h4 class='page-title'>Collaborate with Us</h4>
-                    <div>
-                        ....
+                    <div class='collaborate'>
+                        <p>We invite you to become a part of this amazing journey of making India IT-literate.  Join our growing network of Resources Centres, Organisers, Content creators, Domain Experts, Translators, Dubbers, Reviewers and help us to reach every nook and corner of India.</p><p>First step to do so - fill the form given <a href="#">here</a>.</p>
                     </div>
                 </div>
             </div>
@@ -238,7 +247,14 @@
     <script>
         $(document).ready(function(){
             //$('.banner-img').css({'width': $( window ).width()});
+            $('.video-lists .video-item .thump').hover(function(){
+                //console.log($(this).find('.video-item-playlist'));
+                $(this).find('.video-item-playlist').slideToggle();
+            });
         });
+        
+        
+        
         $(function(){
             // catch all a clicks
             $('a').click(function(){
