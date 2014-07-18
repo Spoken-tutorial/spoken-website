@@ -18,6 +18,7 @@
                       {% endfor %}
                     </ul>
                     {% endif %}
+                    {{ form.errors }}
                     <div class="form-group">
                         <label class="col-sm-3 control-label" for= "id_state">State</label>
                         <div class="col-sm-9">
@@ -74,13 +75,13 @@
                             {{ form.city.errors }}
                         </div>
                     </div>
-                    <div class="form-group">
+                    <!--<div class="form-group">
                         <label class="col-sm-3 control-label" for= "id_street">Street</label>
                         <div class="col-sm-9">
                             {% render_field form.street class+="form-control street" tabindex="1" data-placeholder="Enter street" %}
                             {{ form.street.errors }}
                         </div>
-                    </div>
+                    </div> -->
                     <div class="form-group">
                         <label class="col-sm-3 control-label" for= "id_street">Address</label>
                         <div class="col-sm-9">

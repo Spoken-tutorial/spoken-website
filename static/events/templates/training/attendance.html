@@ -12,10 +12,12 @@
         <form class="navbar-form navbar-left" role="search" method="POST">{% csrf_token %}
           <div class="form-group">
             {% render_field psform.email class+="form-control email" placeholder="Participant email" %}
-          </div> or 
+          </div>
+          <!--
+           or 
           <div class="form-group">
             {% render_field psform.username class+="form-control username" placeholder="Participant username" %}
-          </div>
+          </div> -->
           <input class="btn btn-default" name="search-participant" type="submit" value="Search Participant" />
         </form>
         <a class="pull-right btn btn-primary" href="{% url 'mdldjango:mdl_offline_workshop_details' training.id 2 %}">Upload data</a>
@@ -68,7 +70,7 @@
 			            </tr>
 			            {% for record in collection %}
 				            <tr>
-					            <td><iframe style="width:70px; height:70px; border:0px;" src="{{ record.id|participant_picture }}"></iframe></td>
+					            <td><iframe style="width:70px; height:70px;" src="{{ record.id|participant_picture }}"></iframe></iframe></td>
 					            <td>{{ record.firstname }} {{ record.lastname }}</td>
 				            </tr>
 			            {% endfor %}

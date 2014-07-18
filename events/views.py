@@ -103,10 +103,11 @@ def get_page(resource, page):
 
 def search_participant( form):
     if form.is_valid():
+        onlinetest_user = {}
         if form.cleaned_data['email']:
             onlinetest_user  = MdlUser.objects.filter(email = form.cleaned_data['email'])
-        else:
-            onlinetest_user  = MdlUser.objects.filter(Q(username__icontains = form.cleaned_data['username']) | Q(firstname__icontains = form.cleaned_data['username']))
+        #else:
+        #    onlinetest_user  = MdlUser.objects.filter(Q(username__icontains = form.cleaned_data['username']) | Q(firstname__icontains = form.cleaned_data['username']))
         if not onlinetest_user:
             onlinetest_user = 'None'
         return onlinetest_user
@@ -405,7 +406,7 @@ def organiser_request(request, username):
                 organiser.user_id=request.user.id
                 organiser.academic_id=request.POST['college']
                 organiser.save()
-                messages.success(request, "<ul><li>Thank you. Your request has been sent for Training Manager's approval.</li><li>You will get the approval with in 24 hours.Once the request is approved, you can request for the workshop. </li><li>For more details <a target='_blank' href='http://process.spoken-tutorial.org/images/8/89/Training-Request-Sheet.pdf'> Click Here</a></li></ul>")
+                messages.success(request, "<ul><li>Thank you. Your request has been sent for Training Manager's approval.</li><li>You will get the approval with in 24 hours.Once the request is approved, you can request for the Training / Workshop. </li><li>For more details <a target='_blank' href='http://process.spoken-tutorial.org/images/1/1f/Training-Request-Sheet.pdf'> Click Here</a></li></ul>")
                 return HttpResponseRedirect("/software-training/organiser/view/"+user.username+"/")
             messages.error(request, "Please fill the following details")
             context = {'form':form}
@@ -1000,7 +1001,12 @@ def training_participant(request, wid=None):
         wp = MdlUser.objects.using('moodle').filter(id__in=ids)
         if user == wc.organiser.user and wc.status == 4:
             can_download_certificate = 1
-        context = {'collection' : wp, 'wc' : wc, 'can_download_certificate':can_download_certificate}
+        context = {
+            'collection' : wp,
+            'wc' : wc,
+            'can_download_certificate':can_download_certificate,
+            'file_path' : '/media/training/'+wid+'/'+wid+'.pdf',
+        }
         return render(request, 'events/templates/training/participant.html', context)
 
 
