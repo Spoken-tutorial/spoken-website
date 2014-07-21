@@ -21,6 +21,13 @@
 			        </ul>
 			        {% endif %}
 			        <div class="form-group">
+				        <label for="id_user_name" class="col-sm-3 control-label">User Name</label>
+				        <div class="col-sm-9">
+				            {% render_field form.user_name class+="form-control user_name" tabindex="1" %}
+				            {{ form.user_name.errors }}
+			            </div>
+			        </div>
+			        <div class="form-group">
 				        <label for="id_state" class="col-sm-3 control-label">Actual Content</label>
 				        <div class="col-sm-9">
 				            {% render_field form.actual_content class+="form-control actual_content" tabindex="1" %}

@@ -40,14 +40,7 @@ def home(request):
     for f in foss:
         tcount = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss_id = f, language__name='English').order_by('tutorial_detail__order').count()
         tutorial = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss_id = f, language__name='English').order_by('tutorial_detail__order')[:1].first()
-        
-        print tcount, ' => ', tutorial
         random_tutorials.append((tcount, tutorial))
-        
-    #print random_tutorials
-    #for a in random_tutorials:
-    #    print a
-    #    print a.id
     try:
         tr_rec = TutorialResource.objects.all().order_by('?')[:1].first()
     except Exception, e:
@@ -125,6 +118,8 @@ def tutorial_search(request):
                 collection = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), language_id = lang)
             elif foss and lang:
                 collection = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), tutorial_detail__foss_id = foss, language_id = lang)
+    else:
+        collection = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), tutorial_detail__foss__foss = 'Linux', language__name = 'English')
             
     context['form'] = form
     context['collection'] = collection
@@ -181,7 +176,10 @@ def get_language(request):
             pass
 
 def testimonials(request):
-    print "ddddd"
+    testimonials = Testimonials.objects.all()
+    context = { 'testimonials' : testimonials}
+    context.update(csrf(request))
+    return render(request, 'spoken/templates/testimonial/testimonials.html', context)
         
 def testimonials_new(request):
     ''' new testimonials '''

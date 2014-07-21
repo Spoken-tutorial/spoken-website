@@ -1,0 +1,79 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load creationdata %}
+{% load cmsdata %}
+{% block title %} Testimonials {% endblock %}
+{% block cssblock %}
+    <style type="text/css">
+        .testimonial-container{
+            background: #f0f3e6;
+        }
+        .testimonial-item{
+            clear: both;
+            margin: 40px 0;
+        }
+        .testimonial-content{
+            overflow: hidden;
+            padding: 20px;
+            border: 1px solid #cdd4b8;
+            line-height: 22px;
+            background: white;
+        }
+        .testimonial-content img{
+            float: left;
+        }
+        .testimonial-content .message{
+            margin-left: 120px;
+        }
+        .testimonials-caret{
+            position: absolute;
+            top: -1px;
+            left: 5px;
+            width: 50px;
+            height: 32px;
+            background:url('/static/spoken/images/testimonials-caret.png') no-repeat;
+    }
+    .testimonials-details{
+        position: relative;
+    }
+    .user-details{
+        padding-top: 16px;
+        padding-left: 70px;
+    }
+    .fa-quote-left, .fa-quote-right{
+        display: block;
+    }
+    </style>
+{% endblock %}
+{% block heading %}{% endblock %}
+{% block content %}
+    <div class="testimonial-container col-sm-offset-2 col-md-offset-2 col-lg-offset-2 col-lg-8 col-md-8 col-sm-8 ">
+        <h4 class="page-title">
+            <i class="fa fa-list-ul"></i> Testimonials
+        </h4>
+        {% for record in testimonials %}
+            <div class="testimonial-item">
+                <div class="testimonial-content">
+                    <img width="100" height="100" src="/static/spoken/images/no-profile-image.jpg" />
+                    <div class="message">
+                        <i class="fa fa-quote-left" style="color:#e6e6e6;"></i>{{ record.minified_content|len_cutter:320 }} - <a href="#"> read </a><i class="fa fa-quote-right pull-right" style="color:#e6e6e6;"></i>
+                    </div>
+                </div>
+                <div class="testimonials-details">
+                     <div class="testimonials-caret"></div>
+                    <div class="user-details">
+                        {% if record.user_name %}
+                            {{ record.user_name }}
+                        {% elif record.user.first_name %}
+                            {{ record.user.username }}
+                        {% else %}
+                            {{ record.user.username }}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}
+

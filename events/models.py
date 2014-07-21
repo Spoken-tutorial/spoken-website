@@ -362,6 +362,7 @@ class TrainingFeedback(models.Model):
 class Testimonials(models.Model):
     user = models.ForeignKey(User, related_name = 'testimonial_created_by')
     approved_by = models.ForeignKey(User, related_name = 'testimonial_approved_by', null=True)
+    user_name = models.CharField(max_length=200)
     actual_content = models.TextField()
     minified_content = models.TextField()
     short_description = models.TextField()
@@ -370,7 +371,3 @@ class Testimonials(models.Model):
     status = models.PositiveSmallIntegerField(default = 0)
     created = models.DateTimeField(auto_now_add = True, null=True)
     updated = models.DateTimeField(auto_now = True, null=True)
-    
-    def __unicode__(self):
-        return self.name
-
