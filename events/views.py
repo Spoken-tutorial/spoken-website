@@ -55,12 +55,76 @@ from events_email import send_email
 @login_required
 def init_events_app(request):
     try:
+        # Group
         if Group.objects.filter(name = 'Resource Person').count() == 0:
             Group.objects.create(name = 'Resource Person')
         if Group.objects.filter(name = 'Organiser').count() == 0:
             Group.objects.create(name = 'Organiser')
         if Group.objects.filter(name = 'Invigilator').count() == 0:
             Group.objects.create(name = 'Invigilator')
+        
+        #testcategory
+        try:
+            TestCategory.objects.get_or_create(name= 'College')
+            TestCategory.objects.get_or_create(name= 'Polytechnic')
+            TestCategory.objects.get_or_create(name= 'Others')
+            TestCategory.objects.get_or_create(name= 'Uncategorized')
+        except Exception, e:
+            print e, "test_category"
+        
+        try:
+            InstituteType.objects.get_or_create(name= 'Workshop')
+            InstituteType.objects.get_or_create(name= 'Training')
+            InstituteType.objects.get_or_create(name= 'ITI')
+            InstituteType.objects.get_or_create(name= 'Vocational')
+            InstituteType.objects.get_or_create(name= 'School')
+            InstituteType.objects.get_or_create(name= 'Uncategorized')
+        except Exception, e:
+            print e, "institute_type"
+        
+        #institutecategory
+        try:
+            InstituteCategory.objects.get_or_create(name= 'Govt')
+            InstituteCategory.objects.get_or_create(name= 'Private')
+            InstituteCategory.objects.get_or_create(name= 'NGO')
+            InstituteCategory.objects.get_or_create(name= 'Uncategorized')
+        except Exception, e:
+            print e, "InstituteCategory"
+            
+        #permissiontype
+        try:
+            PermissionType.objects.get_or_create(name= 'State')
+            PermissionType.objects.get_or_create(name= 'District')
+            PermissionType.objects.get_or_create(name= 'University')
+            PermissionType.objects.get_or_create(name= 'Institution Type')
+            PermissionType.objects.get_or_create(name= 'Institution')
+        except Exception, e:
+             print e, "PermissionType"
+        
+        #state
+        state = None
+        try:
+            state = State.objects.get_or_create(name= 'Uncategorized')
+        except Exception, e:
+             print e, "State"
+        #District
+        try:
+            District.objects.get_or_create(name= 'Uncategorized', state_id = state[0].id)
+        except Exception, e:
+             print e, "District"
+        
+        #City
+        try:
+            City.objects.get_or_create(name= 'Uncategorized', state_id = state[0].id)
+        except Exception, e:
+             print e, "City"
+        
+        #University
+        try:
+            University.objects.get_or_create(name= 'Uncategorized', state_id = state[0].id, user_id = 1)
+        except Exception, e:
+             print e, "University"
+             
         messages.success(request, 'Events application initialised successfully!')
     except Exception, e:
         messages.error(request, str(e))

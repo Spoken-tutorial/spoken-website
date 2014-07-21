@@ -237,7 +237,7 @@ class Test(models.Model):
     organiser = models.ForeignKey(Organiser, related_name = 'test_organiser')
     test_category = models.ForeignKey(TestCategory, related_name = 'test_category')
     appoved_by = models.ForeignKey(User, related_name = 'test_approved_by', null=True)
-    invigilator = models.ForeignKey(Invigilator, related_name = 'test_invigilator')
+    invigilator = models.ForeignKey(Invigilator, related_name = 'test_invigilator', null=True)
     academic = models.ForeignKey(AcademicCenter)
     department = models.ManyToManyField(Department)
     training = models.ForeignKey('Training', null=True)

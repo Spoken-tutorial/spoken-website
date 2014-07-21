@@ -10,5 +10,4 @@ urlpatterns = patterns('',
     url(r'^workshop-feedback/$', 'eventsmigration.views.workshop_feedback', name="workshop_feedback"),
     url(r'^test/$', 'eventsmigration.views.test', name="test"),
     url(r'^test-attendance/$', 'eventsmigration.views.test_attendance', name="test_attendance"),
-
 )

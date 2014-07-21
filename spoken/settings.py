@@ -127,7 +127,7 @@ USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = False
+USE_TZ = True
 
 #events settings
 ONLINE_TEST_URL = ONLINE_TEST_URL
