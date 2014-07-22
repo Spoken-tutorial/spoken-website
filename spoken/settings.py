@@ -55,6 +55,7 @@ INSTALLED_APPS = (
 	'captcha',
 	'cms',
 	'creation',
+	'statistics',
 	'events',
 	'mdldjango'
 )

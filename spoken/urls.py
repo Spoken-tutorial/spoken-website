@@ -26,7 +26,7 @@ urlpatterns = patterns('',
     #events urls
     url(r'^software-training/', include('events.urls', namespace='events')),
     url(r'^moodle/', include('mdldjango.urls', namespace='mdldjango')),
-
+    url(r'^cdcontent/', include('cdcontent.urls', namespace='cdcontent')),
     url(r'^creation/', include('creation.urls', namespace='creation')),
     url(r'^captcha/', include('captcha.urls')),
     url(r'^migration/creation/', include('creationmigrate.urls', namespace='creationmigrate')),
