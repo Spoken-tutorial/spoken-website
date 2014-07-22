@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 from events.models import State, District, City, Location
+import os
+
 class Profile(models.Model):
     user = models.ForeignKey(User)
     confirmation_code = models.CharField(max_length=255)
@@ -71,3 +73,27 @@ class Event(models.Model):
     event_date = models.DateTimeField()
     created = models.DateTimeField(auto_now_add=True)
 
+class NewsType(models.Model):
+    name = models.CharField(max_length = 255)
+    
+    def __unicode__(self):
+        return self.name
+        
+def content_file_name(instance, filename):
+    ext = os.path.splitext(filename)[1]
+    ext = ext.lower()
+    return '/'.join(['news', str(instance.id), str(instance.id) + ext])
+
+class News(models.Model):
+    news_type = models.ForeignKey(NewsType)
+    title = models.CharField(max_length = 255)
+    picture = models.FileField(upload_to=content_file_name, null=True, blank=True)
+    body = models.TextField()
+    url = models.URLField(null=True, blank=True)
+    url_title = models.CharField(max_length = 200, null=True, blank=True)
+    created_by = models.ForeignKey(User)
+    created = models.DateTimeField(auto_now_add = True)
+    updated = models.DateTimeField(auto_now = True)
+    
+    class Meta:
+        verbose_name = "New"

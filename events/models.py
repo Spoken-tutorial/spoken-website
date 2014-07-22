@@ -99,6 +99,9 @@ class InstituteCategory(models.Model):
     def __unicode__(self):
         return self.name
         
+    class Meta:
+        verbose_name = "Institute Categorie"
+        
 class InstituteType(models.Model):
     name = models.CharField(max_length=200)
     created = models.DateTimeField(auto_now_add = True)
@@ -251,6 +254,7 @@ class Test(models.Model):
     updated = models.DateTimeField(auto_now = True)
 
     class Meta:
+        verbose_name = "Test Categorie"
         unique_together = (("organiser", "academic", "foss", "tdate", "ttime"),)
 
 class TestAttendance(models.Model):
