@@ -1,0 +1,24 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load cmsdata %}
+{% load creationdata %}
+{% block title %} News {% endblock %}
+{% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
+{% block heading %}
+    <i class="fa fa-list-ul"></i> News
+{% endblock %}
+{% block content %}
+	<div class='news-container'>
+		{% if collection %}
+			{% for record in collection %}
+				<div class="{% cycle 'odd' 'even' %}">
+				    <h5><a href="/news/{{ category }}/{{ record.slug }}">{{ record.title }}</a></h5>
+				    <h6>{{ record.created|date:"M d, Y" }}</h6>
+			    </div>
+			{% endfor %}
+		{% else %}
+		    <p class="no-record"> No record found!</p>
+		{% endif %}
+	</div>
+{% endblock %}

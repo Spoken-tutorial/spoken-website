@@ -16,7 +16,7 @@ import json
 import datetime
 from creation.views import get_video_info
 from creation.models import TutorialCommonContent, TutorialDetail, TutorialResource, Language
-from cms.models import SiteFeedback, Event
+from cms.models import SiteFeedback, Event, NewsType, News
 
 @csrf_exempt
 def site_feedback(request):
@@ -242,8 +242,6 @@ def admin_testimonials_edit(request, rid):
         form = TestimonialsForm(request.POST, request.FILES, instance = instance)
         if form.is_valid():
             form.save()
-            
-    
     
     form = TestimonialsForm(instance = instance)
     context['form'] = form
@@ -261,3 +259,32 @@ def admin_testimonials(request):
     context['collection'] = collection
     context.update(csrf(request))
     return render(request, 'spoken/templates/testimonial/index.html', context)
+
+def news(request, category):
+    try:
+        newstype = NewsType.objects.get(name = category)
+        collection = newstype.news_set.all()
+        context = {
+            'collection' : collection,
+            'category' : category
+        }
+        context.update(csrf(request))
+        return render(request, 'spoken/templates/news/index.html', context)
+    
+    except:
+        raise Http404('You are not allowed to view this page')
+
+    
+def news_view(request, category, slug):
+    try:
+        newstype = NewsType.objects.get(name = category)
+        news = News.objects.get(slug = slug)
+        context = {
+            'news' : news,
+        }
+        context.update(csrf(request))
+        return render(request, 'spoken/templates/news/view-news.html', context)
+        
+    except Exception, e:
+        print e
+        raise Http404('You are not allowed to view this page')

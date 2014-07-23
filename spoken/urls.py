@@ -7,6 +7,8 @@ urlpatterns = patterns('',
 
     # Examples:
     url(r'^tutorial-search/$', 'spoken.views.tutorial_search', name="tutorial-search"),
+    url(r'^news/(?P<category>\w+)/$', 'spoken.views.news', name="news"),
+    url(r'^news/(?P<category>\w+)/(?P<slug>[\w. -]+)/$', 'spoken.views.news_view', name="news_view"),
     url(r'^keyword-search/$', 'spoken.views.keyword_search', name="keyword-search"),
     url(r'^watch/([0-9a-zA-Z-+%]+)/([0-9a-zA-Z-+%]+)/(\w+)/$', 'spoken.views.watch_tutorial', name="watch_tutorial"),
     url(r'^get-language/$', 'spoken.views.get_language', name="get_language"),

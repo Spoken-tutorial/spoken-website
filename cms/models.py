@@ -99,6 +99,7 @@ def content_file_name(instance, filename):
 class News(models.Model):
     news_type = models.ForeignKey(NewsType)
     title = models.CharField(max_length = 255)
+    slug = models.CharField(max_length = 255)
     picture = models.FileField(upload_to=content_file_name, null=True, blank=True)
     body = models.TextField()
     url = models.URLField(null=True, blank=True)
@@ -106,6 +107,10 @@ class News(models.Model):
     created_by = models.ForeignKey(User)
     created = models.DateTimeField(auto_now_add = True)
     updated = models.DateTimeField(auto_now = True)
+    
+    @models.permalink
+    def get_absolute_url(self):
+        return ('views.view_something', (), {'slug': self.slug})
     
     class Meta:
         verbose_name = "New"
