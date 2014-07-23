@@ -1,0 +1,51 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block title %}User Profile{% endblock %}
+{% block cssblock %}
+    <link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />
+    <style>
+        .view-profile .dl-horizontal dt{
+            text-align: left;
+            width: 100px;
+        }
+        .view-profile .dl-horizontal dd{
+            margin-left: 100px;
+        }
+    </style>
+{% endblock %}
+{% block heading %}
+        <i class="fa fa-list-ul"></i> User Profile
+{% endblock %}
+
+{% block content %}
+    <div class="row well view-profile">
+        <div class="col-sm-8">
+            <img class="col-sm-4" src="{{ media_url }}{{ profile.picture }}">
+            <div class="col-sm-8">
+                <dl class="dl-horizontal">
+                    <dt>First name</dt>
+                    <dd>{{ profile.user.first_name }}</dd>
+
+                    <dt>Last name</dt>
+                    <dd>{{ profile.user.last_name }}</dd>
+                    
+                    <dt>From</dt>
+                    <dd>{{ profile.created }}</dd>
+                  
+                </dl>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block jsblock %}
+    <script src="{% static 'spoken/js/events.js' %}"></script>
+    <script>
+        $("#id_state").change(function(){
+            ajaxStrateFillDatas('district', 'city', 'university');
+        });
+        $('.district').change(function(){
+            ajaxDistrictFillDatas('location', '', $(this).val());
+        });
+    </script>
+{% endblock %}

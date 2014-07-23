@@ -136,7 +136,9 @@
                                                     <span title="" data-original-title="" class="glyphicon glyphicon-user"></span> {{ user }}<b class="caret"></b>
                                                 </a>
                                                 <ul class="dropdown-menu user-details">
-                                                    <li><a href="/accounts/profile/{{ user }}/">Profile</a></li>
+                                                    <li><a href="/accounts/profile/{{ user }}/">Edit Profile</a></li>
+                                                    <li class="divider"></li>
+                                                    <li><a href="/accounts/view-profile/{{ user }}/">View Profile</a></li>
                                                     <li class="divider"></li>
                                                     <li><a href="/accounts/logout/">Logout</a></li>
                                                 </ul>
@@ -144,75 +146,12 @@
                                         {% else %}
                                             <li class="dropdown">
                                                 <a href="/accounts/login">Login</a>
-                                                <!--<a class="dropdown-toggle" data-toggle="dropdown" href="#">Login</a>
-                                                <ul class="dropdown-menu">
-                                                    <li>
-                                                        <div class="yamm-content">
-                                                            <div class="row">
-                                                                <form action="/accounts/login/" method="post">
-                                                                    <input type="hidden" name="csrfmiddlewaretoken" value="{{ request|get_or_create_csrf_token }}">
-                                                                    <div class="form-group">
-                                                                        <input class="form-control" type="text" name="username" placeholder="username">
-                                                                    </div>
-                                                                    <div class="form-group">
-                                                                        <input class="form-control" type="password" name="password" placeholder="password">
-                                                                    </div>
-                                                                    <div class="form-group">
-                                                                        <input class="btn btn-primary" type="submit" value="Login">
-                                                                    </div>
-                                                                </form>
-                                                                <a href="/accounts/register">
-                                                                    New user? Create account.
-                                                                </a>
-                                                            </div>
-                                                        </div>
-                                                    </li>
-                                                </ul> -->
                                             </li>
                                             <li class="dropdown">
                                                 <a href="/accounts/register">Register</a>
-                                                <!--<a class="dropdown-" data-toggle="dropdown" href="/accounts/register">Register</a>
-                                                <ul class="dropdown-menu">
-                                                    <li>
-                                                    <div class="yamm-content">
-                                                        <div class="row">
-                                                            <form>
-                                                                <div class="form-group">
-                                                                    <input class="form-control" type="text" name="username" placeholder="pick a username">
-                                                                </div>
-                                                                <div class="form-group">
-                                                                    <input class="form-control" type="text" name="email" placeholder="enter your email">
-                                                                </div>
-                                                                <div class="form-group">
-                                                                    <input class="form-control" type="password" name="password" placeholder="password">
-                                                                </div>
-                                                                <div class="form-group">
-                                                                    <input class="form-control" type="password" name="re-password" placeholder="retype password">
-                                                                </div>
-                                                                <div class="form-group">
-                                                                    <input class="btn btn-primary" type="submit" value="Register">
-                                                                </div>
-                                                            </form>
-                                                            <a href="#">
-                                                                Already have an account? Login.
-                                                            </a>
-                                                        </div>
-                                                    </div>
-                                                    </li>
-                                                </ul> -->
                                             </li>
                                         {% endif %}
                                     </ul>
-                                    
-                                    <!-- search -->
-                                    <!-- 
-                                    <form id="custom-search-form" class="form-search form-horizontal pull-right">
-                                        <div class="form-group primary-search">
-                                            <input type="text" class="form-control search-query" placeholder="Search">
-                                            <button type="submit" class="btn search"><span class="glyphicon glyphicon-search"></span></button>
-                                        </div>
-                                     </form> -->
-                                    <!-- search end -->
                             </div>
                         </div> <!-- /.container-fluid -->
                     </div> <!-- /#header-inner -->

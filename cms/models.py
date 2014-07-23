@@ -3,6 +3,16 @@ from django.contrib.auth.models import User
 from events.models import State, District, City, Location
 import os
 
+def profile_picture(instance, filename):
+    ext = os.path.splitext(filename)[1]
+    ext = ext.lower()
+    return '/'.join(['user', str(instance.id), str(instance.id) + ext])
+
+def profile_picture_thumb(instance, filename):
+    ext = os.path.splitext(filename)[1]
+    ext = ext.lower()
+    return '/'.join(['user', str(instance.id), str(instance.id) + "-thumb" + ext])
+
 class Profile(models.Model):
     user = models.ForeignKey(User)
     confirmation_code = models.CharField(max_length=255)
@@ -14,6 +24,8 @@ class Profile(models.Model):
     country = models.CharField(max_length=255, blank=True, null=True)
     pincode = models.PositiveIntegerField(blank=True, null=True)
     phone = models.CharField(max_length=20, null=True)
+    picture = models.FileField(upload_to=profile_picture, null=True, blank=True)
+    thumb = models.FileField(upload_to=profile_picture_thumb, null=True, blank=True)
     address = models.TextField(null=True)
     created = models.DateTimeField(auto_now_add=True)
     class Meta:
