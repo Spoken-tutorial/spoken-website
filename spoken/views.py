@@ -11,7 +11,7 @@ from django.conf import settings
 from forms import *
 import os
 from django.http import Http404
-from urllib import unquote_plus
+from urllib import unquote
 import json
 import datetime
 from creation.views import get_video_info
@@ -133,8 +133,8 @@ def tutorial_search(request):
 
 def watch_tutorial(request, foss, tutorial, lang):
     try:
-        foss = unquote_plus(foss)
-        tutorial = unquote_plus(tutorial)
+        foss = unquote(foss)
+        tutorial = unquote(tutorial)
         print foss, tutorial
         td_rec = TutorialDetail.objects.get(foss__foss = foss, tutorial = tutorial)
         tr_rec = TutorialResource.objects.select_related().get(tutorial_detail = td_rec, language = Language.objects.get(name = lang))

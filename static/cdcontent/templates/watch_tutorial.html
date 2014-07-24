@@ -120,7 +120,7 @@
                 <ul>
                     {% for rec in tr_recs %}
                         <li class="playlist-item{% if tr_rec.id == rec.id %} active{% endif %}"{% if tr_rec.id == rec.id %} data="{{ forloop.counter }}"{% endif %}>
-                            <a href="/creation/tutorial/view/{{ rec.tutorial_detail.foss.foss|get_url_name }}/{{ rec.tutorial_detail.tutorial|get_url_name }}/{{ rec.language.name }}/">
+                            <a href="/watch/{{ rec.tutorial_detail.foss.foss|get_url_name }}/{{ rec.tutorial_detail.tutorial|get_url_name }}/{{ rec.language.name }}/">
                                 <div class='pull-left thumb'>
                                     <span class='order'>{% if tr_rec.id == rec.id %}<i class="fa fa-play"></i>{% else %}{{ forloop.counter }}{% endif %}</span>
                                     <img src="{% static 'spoken/images/thumb-even.png' %}" width=70 >
@@ -141,20 +141,6 @@
             <pre class="custom-jumbotron"><b>Outline:<br /></b>{{ tr_rec.outline }}</pre>
         </div>
         <div class="col-lg-5 col-md-5 col-sm-5 no-padding-right">
-            <table class="table table-bordered table-hover">
-                <tr>
-                    <th>Codec:</th><td>{{video_info.codec}}</td>
-                    <th>Profile:</th><td>{{video_info.profile}}</td>
-                </tr>
-                <tr>
-                    <th>Width:</th><td>{{video_info.width}}</td>
-                    <th>Height:</th><td>{{video_info.height}}</td>
-                </tr>
-                <tr>
-                    <th>Duration:</th><td>{{video_info.duration}}</td>
-                    <th>Size:</th><td>{{video_info.size}}</td>
-                </tr>
-            </table>
             <div class="panel panel-default">
               <div class="panel-heading">
                 <h3 class="panel-title">Prerequsite</h3>

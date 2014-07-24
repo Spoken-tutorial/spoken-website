@@ -24,6 +24,7 @@
         .playlist ul {
              height: 330px;
              overflow-y: scroll;
+             margin-bottom: 0px;
         }
         .playlist, .playlist-container, .video-container{
             padding-left: 0px;
@@ -119,7 +120,7 @@
                 <ul>
                     {% for rec in tr_recs %}
                         <li class="playlist-item{% if tr_rec.id == rec.id %} active{% endif %}"{% if tr_rec.id == rec.id %} data="{{ forloop.counter }}"{% endif %}>
-                            <a href="/watch/{{ rec.tutorial_detail.foss.foss }}/{{ rec.tutorial_detail.tutorial|get_url_name }}/{{ rec.language.name }}/">
+                            <a href="/watch/{{ rec.tutorial_detail.foss.foss|get_url_name }}/{{ rec.tutorial_detail.tutorial|get_url_name }}/{{ rec.language.name }}/">
                                 <div class='pull-left thumb'>
                                     <span class='order'>{% if tr_rec.id == rec.id %}<i class="fa fa-play"></i>{% else %}{{ forloop.counter }}{% endif %}</span>
                                     <img src="{% static 'spoken/images/thumb-even.png' %}" width=70 >

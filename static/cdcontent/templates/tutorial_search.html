@@ -1,0 +1,101 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load creationdata %}
+{% block title %}Search Tutorials{% endblock %}
+{% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
+{% block heading %}
+    <i class="fa fa-list-ul"></i> Search Tutorials
+{% endblock %}
+{% block search %}{% endblock %}
+{% block content %}
+    <div class="row well">
+        <div class='col-sm-12'>
+            <form action="{{ action }}" method="POST" class='form-horizontal'>{% csrf_token %}
+                {% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
+                    {% if form.non_field_errors %}
+                    <ul>
+                      {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                      {% endfor %}
+                    </ul>
+                    {% endif %}
+                    <div class="form-group">
+                        <div class="col-sm-5">
+                            {% render_field form.foss_category class+="form-control foss_category" tabindex="1" value=keywords %}
+                            {{ form.foss_category.errors }}
+                        </div>
+                        <div class="col-sm-5">
+                            {% render_field form.language class+="form-control language" tabindex="1" value=keywords %}
+                            {{ form.language.errors }}
+                        </div>
+                        <div class="col-sm-2">
+                            <input class="btn btn-primary" type="submit" value="Submit" />
+                        </div>
+                    </div>
+                {% endwith %}
+            </form>
+        </div>
+    </div>
+    
+    <div class='search-result col-lg-12 col-md-12 col-sm-12 col-xs-12'>
+        {% if collection %}
+            {% for record in collection %}
+                <div class='result-record row'>
+                    <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2 thumb">
+                        <a href="#" class='thumb'><img width="100%" src="/static/spoken/images/thumb-even.png"></a>
+                    </div>
+                    <div class="info col-lg-8 col-md-8 col-sm-8 col-xs-8">
+                        <div class='title'><h3><a href="/watch/{{ record.tutorial_detail.foss.foss|get_url_name }}/{{ record.tutorial_detail.tutorial|get_url_name }}/{{ record.language }}">{{ record.tutorial_detail.tutorial }}</a></h3></div>
+                        <div class='desc'>
+                                Foss : {{ record.tutorial_detail.foss }}</br>
+                                Language : {{ record.language }}</br>
+                                Level : {{ record.tutorial_detail.level }}</br>
+                                Published on : {{ record.updated }}</br>
+                            </dl>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
+                        <div class="{{ record.tutorial_detail.level }}"></div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class='no-record'> No result found!</p>
+        {% endif %}
+    </div>
+
+
+{% endblock %}
+{% block jsblock %}
+    <script src="{% static 'spoken/js/chosen.jquery.min.js' %}"></script>
+    <script src="{% static 'spoken/js/events.js' %}"></script>
+    <script>
+        $("#id_foss_category, #id_language").change(function(){
+            var foss = $('#id_foss_category').val();
+            var lang = $('#id_language').val();
+            if (foss == '' || lang == ''){
+                $.ajax({
+				    url: "/get-language/",
+				    type: "POST",
+				    data: {
+					    foss : foss,
+					    lang : lang,
+				    },
+				    beforeSend: function() {
+                        $('.ajax-refresh-district').show();
+                    },
+				    success: function(data) {
+				        console.log(data[0])
+				        if (data[0] == 'foss'){
+				            $('#id_language').html(data);
+				        }else if (data[0] == 'lang'){
+				            $('#id_foss_category').html(data);
+				        }
+				    }
+			    });
+			}
+        });
+    </script>
+{% endblock %}
+
