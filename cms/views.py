@@ -6,9 +6,11 @@ from django.contrib.auth import authenticate, login, logout
 from django.core.mail import EmailMultiAlternatives
 from django.contrib import messages
 from django.utils import timezone
+from django.conf import settings
 from django.http import Http404
 from cms.models import *
 from cms.forms import *
+from PIL import Image
 import random, string
 
 def dispatcher(request, permalink=''):
@@ -108,12 +110,12 @@ def account_login(request):
             if user is not None:
                 if user.is_active:
                     login(request, user)
-                    if user_has_profile(user):
-                        if request.GET and request.GET['next']:
-                            return HttpResponseRedirect(request.GET['next'])
-                        return HttpResponseRedirect('/')
-                    messages.success(request, "Please update your profile!")
-                    return HttpResponseRedirect('/accounts/profile/'+user.username)
+                    # if user_has_profile(user):
+                    if request.GET and request.GET['next']:
+                        return HttpResponseRedirect(request.GET['next'])
+                    return HttpResponseRedirect('/')
+                    # messages.success(request, "Please update your profile!")
+                    # return HttpResponseRedirect('/accounts/profile/'+user.username)
                 else:
                     error_msg = 'Your account is disabled.'
             else:
@@ -132,46 +134,57 @@ def account_logout(request):
     return HttpResponseRedirect('/')
 
 def account_profile(request, username):
-    #todo: validation
-    #todo: store location, state and etc.. ids
+    user = request.user
+    profile = Profile.objects.get(user_id=user.id)
+    old_file_path = settings.MEDIA_ROOT + str(profile.picture)
+    new_file_path = None
     if request.method == 'POST':
-        user = User.objects.get(username=username)
-        form = ProfileForm(request.POST, user = request.user, instance = Profile.objects.get(user = user))
+        form = ProfileForm(user, request.POST, instance = profile)
         if form.is_valid():
             user.first_name = request.POST['first_name']
             user.last_name = request.POST['last_name']
             user.save()
             
-            profile = Profile.objects.get(user=user)
-            profile.street = request.POST['street']
-            #profile.location_id = request.POST['location']
-            profile.district_id = request.POST['district']
-            profile.city_id = request.POST['city']
-            profile.state_id = request.POST['state']
-            profile.country = request.POST['country']
-            profile.address = request.POST['address']
-            profile.pincode = request.POST['pincode']
-            profile.phone = request.POST['phone']
-            profile.save()
-            if user_has_profile(user):
-                messages.success(request, "Your profile has been updated!")
-                return HttpResponseRedirect("/")
-            return HttpResponseRedirect("/accounts/profile/"+username+"/")
+            form_data = form.save(commit=False)
+            form_data.user_id = user.id
+            
+            if 'picture-clear' in request.POST and request.POST['picture-clear']:
+                #if not old_file == new_file:
+                if os.path.isfile(old_file_path):
+                    os.remove(old_file_path)
+            
+            if 'picture' in request.FILES:
+                form_data.picture = request.FILES['picture']
+            
+            form_data.save()
+            
+            if 'picture' in request.FILES:
+                size = 128, 128
+                filename = str(request.FILES['picture'])
+                ext = os.path.splitext(filename)[1]
+                if ext != '.pdf' and ext != '':
+                    im = Image.open(settings.MEDIA_ROOT + str(form_data.picture))
+                    im.thumbnail(size, Image.ANTIALIAS)
+                    ext = ext[1:]
+                    
+                    mimeType = ext.upper()
+                    if mimeType == 'JPG':
+                        mimeType = 'JPEG'
+                    im.save(settings.MEDIA_ROOT + "user/" + str(user.id) + "/" + str(user.id) + "-thumb." + ext, mimeType)
+                    form_data.thumb = 'user/' + str(user.id)+ '/' + str(user.id) + '-thumb.' + ext
+                    form_data.save()
+            messages.success(request, "Your profile has been updated!")
+            return HttpResponseRedirect("/accounts/view-profile/" + user.username)
         
         context = {'form':form}
-        return render_to_response('cms/templates/profile.html', context, context_instance = RequestContext(request))
-    #if username:
-    #    try:
-    user = User.objects.get(username=username)
-    context = {}
-    context['form'] = ProfileForm(user = request.user, instance = Profile.objects.get(user = user))
-    context.update(csrf(request))
-    return render(request, 'cms/templates/profile.html', context)
-    #    except:
-    #        raise Http404('Page not found')
-    #else:
-    #    raise Http404('Page not found')
-
+        return render(request, 'cms/templates/profile.html', context)
+    else:
+        context = {}
+        context.update(csrf(request))
+        instance = Profile.objects.get(user_id=user.id)
+        context['form'] = ProfileForm(user, instance = instance)
+        return render(request, 'cms/templates/profile.html', context)
+        
 def user_has_profile(user):
     try:
         p = Profile.objects.get(user_id = user.id)
@@ -184,3 +197,14 @@ def user_has_profile(user):
         p.save()
         print "************"
         print e
+
+def account_view_profile(request, username):
+    user = User.objects.get(username = username)
+    profile = Profile.objects.get(user = user)
+    context = {
+        'profile' : profile,
+        'media_url' : settings.MEDIA_URL,
+    }
+    return render(request, 'cms/templates/view-profile.html', context)
+    
+    

@@ -57,7 +57,8 @@ INSTALLED_APPS = (
 	'creation',
 	'statistics',
 	'events',
-	'mdldjango'
+	'mdldjango',
+	'nicedit',
 )
 
 MIDDLEWARE_CLASSES = (

@@ -1,6 +1,18 @@
 from django.db import models
 from django.contrib.auth.models import User
 from events.models import State, District, City, Location
+import os
+
+def profile_picture(instance, filename):
+    ext = os.path.splitext(filename)[1]
+    ext = ext.lower()
+    return '/'.join(['user', str(instance.id), str(instance.id) + ext])
+
+def profile_picture_thumb(instance, filename):
+    ext = os.path.splitext(filename)[1]
+    ext = ext.lower()
+    return '/'.join(['user', str(instance.id), str(instance.id) + "-thumb" + ext])
+
 class Profile(models.Model):
     user = models.ForeignKey(User)
     confirmation_code = models.CharField(max_length=255)
@@ -12,6 +24,8 @@ class Profile(models.Model):
     country = models.CharField(max_length=255, blank=True, null=True)
     pincode = models.PositiveIntegerField(blank=True, null=True)
     phone = models.CharField(max_length=20, null=True)
+    picture = models.FileField(upload_to=profile_picture, null=True, blank=True)
+    thumb = models.FileField(upload_to=profile_picture_thumb, null=True, blank=True)
     address = models.TextField(null=True)
     created = models.DateTimeField(auto_now_add=True)
     class Meta:
@@ -66,8 +80,38 @@ class SiteFeedback(models.Model):
 class Event(models.Model):
     user = models.ForeignKey(User)
     title = models.CharField(max_length = 255)
-    message = models.TextField()
+    body = models.TextField()
     source_link = models.URLField(max_length=255, null=True, blank=True)
     event_date = models.DateTimeField()
     created = models.DateTimeField(auto_now_add=True)
 
+class NewsType(models.Model):
+    name = models.CharField(max_length = 50)
+    slug = models.CharField(max_length = 50)
+    
+    def __unicode__(self):
+        return self.name
+        
+def content_file_name(instance, filename):
+    ext = os.path.splitext(filename)[1]
+    ext = ext.lower()
+    return '/'.join(['news', str(instance.id), str(instance.id) + ext])
+
+class News(models.Model):
+    news_type = models.ForeignKey(NewsType)
+    title = models.CharField(max_length = 255)
+    slug = models.CharField(max_length = 255)
+    picture = models.FileField(upload_to=content_file_name, null=True, blank=True)
+    body = models.TextField()
+    url = models.URLField(null=True, blank=True)
+    url_title = models.CharField(max_length = 200, null=True, blank=True)
+    created_by = models.ForeignKey(User)
+    created = models.DateTimeField(auto_now_add = True)
+    updated = models.DateTimeField(auto_now = True)
+    
+#    @models.permalink
+#    def get_absolute_url(self):
+#        return ('views.view_something', (), {'slug': self.slug})
+#    
+    class Meta:
+        verbose_name = "New"

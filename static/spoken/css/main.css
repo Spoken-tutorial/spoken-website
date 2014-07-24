@@ -22,9 +22,10 @@
 }
 html,body
 {
-  font-family: 'Alegreya', serif;
+  /* font-family: 'Alegreya', serif; */
   height: 100%;
   font-size: 15px;
+  font-size: 13px;
 }
 .mini-text{
     font-family: 'Ubuntu Mono';
@@ -190,6 +191,7 @@ h4.page-title {
     overflow: hidden;
     padding: 10px;
     min-height: 120px;
+    font-size: 14px;
 }
 #testimonials .caretr{
     position: absolute;
@@ -204,7 +206,7 @@ h4.page-title {
     padding: 20px;
     position: relative;
 }
-#testimonials img {
+#testimonials img, .testimonial-content img {
     border-radius: 50%;
     -webkit-border-radius: 50%;
     -moz-border-radius: 50%;

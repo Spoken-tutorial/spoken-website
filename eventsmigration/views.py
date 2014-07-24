@@ -16,6 +16,7 @@ import os, sys
 from workshop.models import *
 from events.models import *
 from cms.models import Profile
+from django.db.models import Sum
 
 def get_dept(dept):
     getDept = {
@@ -43,6 +44,11 @@ def get_dept(dept):
         'COMPUTER SCIENCE AND ENGINEERING DEPARTMENT' : 'Computer Science and Engineering',
         'CSE Department' : 'Computer Science and Engineering',
         'COMPUTER ENGG' : 'Computer Science and Engineering',
+        'COMPUTER SCIENCE & ENGINEERING' : 'Computer Science and Engineering',
+        'department of computer science' : 'Computer Science and Engineering',
+        'COMPUTER SCIENCE & ENGINEERING ' : 'Computer Science and Engineering',
+        'computer science & engineering' : 'Computer Science and Engineering',
+        'Computer Science and Enggineering' : 'Computer Science and Engineering',
         
         ###
         'CST' : 'Computer Science and Technology',
@@ -67,9 +73,12 @@ def get_dept(dept):
         'Master of Computer' : 'Computer Applications',
         'BCA' : 'Computer Applications',
         'MCA' : 'Computer Applications',
+        'Computer Application' : 'Computer Applications',
+        'Master of Computer Application' : 'Computer Applications',
         
         ###
         'Computer' : 'Computer Science',
+        'computers' : 'Computer Science',
         'Computer GU' : 'Computer Science',
         'cs' : 'Computer Science',
         'CS' : 'Computer Science',
@@ -81,6 +90,7 @@ def get_dept(dept):
         'COMPUTERS' : 'Computer Science',
         'School of computer science' : 'Computer Science',
         'SCHOOL OF COMPUTER SCIENCE' : 'Computer Science',
+        'Comuter Science' : 'Computer Science',
         
         
         ###
@@ -94,6 +104,7 @@ def get_dept(dept):
         'EXTC' : 'Electronics and Communication Engineering',
         'EECE' : 'Electronics and Communication Engineering',
         'Electronics and Communication' : 'Electronics and Communication Engineering',
+        'ece' : 'Electronics and Communication Engineering',
         
         ###
         'EEE' : 'Electrical and Electronics Engineering',
@@ -112,6 +123,7 @@ def get_dept(dept):
         ###
         'INSTRUMENTATION AND CONTROL' : 'Electronics and instrumentation Engineering',
         'INSTRUMENTATION ENGINEERING' : 'Electronics and instrumentation Engineering',
+        'ICE' : 'Electronics and instrumentation Engineering',
         
         ###
         'ME' : 'Mechanical Engineering',
@@ -168,10 +180,11 @@ def get_dept(dept):
         
         ###
         'BTECH' : 'Batchelor of Tehchnology',
-        
+        'Btech' : 'Batchelor of Tehchnology',
         ###
         'Department of Physics' : 'Physics',
         'Physics' : 'Physics',
+        'Department of Physics,  Sri Sathya Sai Institute o' : 'Physics',
         
         ###
         'Information Science' : 'Information Science',
@@ -187,6 +200,11 @@ def get_dept(dept):
         'CSE IT MCA' : 'CSE,IT,MCA',
         'EEE ECE' : 'EEE,ECE',
         'EEE ECE' : 'EEE,ECE',
+        'ECE CSE CIVIL IT' : 'ECE,CSE,CIVIL,IT',
+        'CSE IT' : 'CSE,IT',
+        'CSE ECE CIVIL' : 'CSE,ECE,CIVIL',
+        'ECE EEE ICE CSE ' : 'ECE,EEE,ICE,CSE',
+        'Computer Science / Information Technology' : 'CS,IT',
         'MAC BTECH' : 'MCA,BTECH',
         'Civil Mech' : 'Civil,Mechanical',
         'Civil Mechanical' : 'Civil,Mechanical',
@@ -236,7 +254,9 @@ def department(request):
         'Computer Science and Technology',
         'Biotechnology',
         'Bioinformatics',
-        'Biology'
+        'Biology',
+        'Computer Science and Engineering',
+        'Information Technology',
     ]
     for dept in newDept:
         try:
@@ -324,9 +344,11 @@ def academic_center(request):
 def organiser(request):
     worganisers = WOrganiser.objects.all()
     for wo in worganisers:
+        duser = get_user(wo.organiser_id)
+        
         try:
-            o = Organiser.objects.get(user_id  = wo.organiser_id)
-            print "Organiser Already Exits!", wo.organiser_id
+            o = Organiser.objects.get(user_id  = duser.id)
+            #print "Organiser Already Exits!", "Django user id => ", duser.id, "Drupal id => ", wo.organiser_id
             continue
         except Exception, e:
             #print e
@@ -348,25 +370,25 @@ def organiser(request):
                     ac = AcademicCenter.objects.get(academic_code = wwr.academic_code)
                 #profile
                 try:
-                    p = Profile.objects.get(user_id = wo.organiser_id)
+                    p = Profile.objects.get(user_id = duser.id)
                 except Exception, e:
                     #print e
                     #print "*********** => 2"
                     try:
                         confirmation_code = ''.join(random.choice(string.ascii_uppercase + string.digits + string.ascii_lowercase) for x in range(33))
                         p = Profile()
-                        p.user_id = wo.organiser_id
+                        p.user_id = duser.id
                         p.confirmation_code = confirmation_code
                         p.address = wo.address
                         p.phone = wo.phone
                         p.save()
                     except Exception, e:
-                        print "User not exits", wo.organiser_id
+                        print "User not exits", "Django user id => ", duser.id, "Drupal id => ", wo.organiser_id
                         sys.exit(0)
                     
                 #save organiser name ad user first name
                 try:
-                    u = User.objects.get(pk = wo.organiser_id)
+                    u = User.objects.get(pk = duser.id)
                     u.first_name = wo.organiser_name
                     u.save()
                     try:
@@ -376,11 +398,11 @@ def organiser(request):
                         
                 except Exception, e:
                     print e
-                    print "*********** => 3", wo.organiser_id
+                    print "*********** => 3", "Django user id => ", duser.id, "Drupal id => ", wo.organiser_id
                     #print "User not exits => ", wo.organiser_id
                 try:
                     o = Organiser()
-                    o.user_id  = wo.organiser_id
+                    o.user_id  = duser.id
                     o.academic_id = ac.id
                     o.status = 1
                     if wo.created_at:
@@ -397,7 +419,7 @@ def organiser(request):
                     
             except Exception, e:
                 print e
-                print "*********** => 5 => ", wo.organiser_id
+                print "*********** => 5 => ", "Django user id => ", duser.id, "Drupal id => ", wo.organiser_id
                 print "Something went wrong"
                 
     return HttpResponse("Organiser migration Done!")
@@ -405,9 +427,10 @@ def organiser(request):
 def invigilator(request):
     winvigilators = WInvigilator.objects.all()
     for wo in winvigilators:
+        duser = get_user(wo.invigilator_id)
         try:
-            o = Invigilator.objects.get(user_id  = wo.invigilator_id)
-            print "Invigilator Already Exits!", wo.invigilator_id
+            o = Invigilator.objects.get(user_id  = duser.id)
+            print "Invigilator Already Exits!", "Django user id => ", duser.id, "Drupal id => ", wo.invigilator_id
             continue
         except Exception, e:
             #print e
@@ -429,25 +452,25 @@ def invigilator(request):
                     ac = AcademicCenter.objects.get(academic_code = wwr.academic_code)
                 #profile
                 try:
-                    p = Profile.objects.get(user_id = wo.invigilator_id)
+                    p = Profile.objects.get(user_id = duser.id)
                 except Exception, e:
                     #print e
                     #print "*********** => 2"
                     try:
                         confirmation_code = ''.join(random.choice(string.ascii_uppercase + string.digits + string.ascii_lowercase) for x in range(33))
                         p = Profile()
-                        p.user_id = wo.invigilator_id
+                        p.user_id = duser.id
                         p.confirmation_code = confirmation_code
                         p.address = wo.address
                         p.phone = wo.phone
                         p.save()
                     except Exception, e:
-                        print "User not exits", wo.invigilator_id
+                        print "User not exits", "Django user id => ", duser.id, "Drupal id => ", wo.invigilator_id
                         sys.exit(0)
                     
                 #save invigilator name ad user first name
                 try:
-                    u = User.objects.get(pk = wo.invigilator_id)
+                    u = User.objects.get(pk = duser.id)
                     u.first_name = wo.invigilator_name
                     u.save()
                     try:
@@ -457,11 +480,11 @@ def invigilator(request):
                         
                 except Exception, e:
                     print e
-                    print "*********** => 3", wo.invigilator_id
+                    print "*********** => 3", "Django user id => ", duser.id, "Drupal id => ", wo.invigilator_id
                     #print "User not exits => ", wo.invigilator_id
                 try:
                     o = Invigilator()
-                    o.user_id  = wo.invigilator_id
+                    o.user_id  = duser.id
                     o.academic_id = ac.id
                     o.status = 1
                     if wo.created_at:
@@ -478,14 +501,14 @@ def invigilator(request):
                     
             except Exception, e:
                 print e
-                print "*********** => 5 => ", wo.invigilator_id
+                print "*********** => 5 => ", "Django user id => ", duser.id, "Drupal id => ", wo.invigilator_id
                 print "Something went wrong"
                 
     return HttpResponse("Invigilator migration Done!")
 
 #MAH-00029 Live workshop
 def workshop(request):
-    workshop_status = 1
+    workshop_status = 2
     if workshop_status == 2:
         wwrs = WWorkshopRequests.objects.filter(status = workshop_status)
     elif workshop_status == 1:
@@ -496,7 +519,7 @@ def workshop(request):
     for wwr in wwrs:
         #Save department
         try:
-            
+            duser = get_user(wwr.organiser_id)
             # Save Workshop
             w = None
             try:
@@ -512,7 +535,7 @@ def workshop(request):
             #check organiser there or not
             organiser = None
             try:
-                organiser = Organiser.objects.get(user_id = wwr.organiser_id)
+                organiser = Organiser.objects.get(user_id = duser.id)
             except Exception, e:
                 #print e
                 print "Organiser Not there => ", wwr.organiser_id
@@ -544,8 +567,8 @@ def workshop(request):
                             Department.objects.get(name=d)
                         except Exception, e:
                             print e, " => 2ab ", wwr.workshop_code, " => ", d
-                            sys.exit(0)
-                #dept = Department.objects.create(name = wdept)
+                            #sys.exit(0)
+                dept = Department.objects.create(name = wdept)
             
             #find academic_center id
             ac = None
@@ -554,12 +577,12 @@ def workshop(request):
             except Exception, e:
                 #print e, " => 4 ", wwr.academic_code, wwr.workshop_code
                 if '-- select ' == wwr.academic_code:
-                    o = Organiser.objects.get(organiser_id = wwr.organiser_id)
+                    o = Organiser.objects.get(organiser_id = duser.id)
                     ac = AcademicCenter.objects.get(academic_code = o.academic_code)
                 
                 #get organiser academic and set to workshop
                 try:
-                    o  = Organiser.objects.get(user_id = wwr.organiser_id)
+                    o  = Organiser.objects.get(user_id = duser.id)
                     ac = AcademicCenter.objects.get(pk = o.academic_id)
                 except Exception, e:
                     print e, "=> 4aa "
@@ -640,7 +663,7 @@ def workshop(request):
                 #continue
                 w.save()
             except Exception, e:
-                print "Duplicate ---", wwr.workshop_code, " => ", wwr.academic_code, wwr.cfm_wkshop_date, wwr.foss_category
+                #print "Duplicate ---", wwr.workshop_code, " => ", wwr.academic_code, wwr.cfm_wkshop_date, wwr.foss_category
                 post_time = 5
                 for i in range(150):
                     try:
@@ -650,7 +673,7 @@ def workshop(request):
                         break
                     except Exception, e:
                         #duplicate because of unique_together
-                        print "Duplicate post change time save ******", wwr.workshop_code, " => ", wwr.academic_code, wwr.cfm_wkshop_date, 
+                        #print "Duplicate post change time save ******", wwr.workshop_code, " => ", wwr.academic_code, wwr.cfm_wkshop_date, 
                         if i == 149:
                             sys.exit(0)
                         post_time = post_time + 5
@@ -684,9 +707,8 @@ def workshop(request):
                 sys.exit(0)
             
         except Exception, e:
-            print "Something went wrong!"
-            print e, " => 9", wwr.id," => ", wwr.workshop_code
-            print "Organiser => ", wwr.organiser_id
+            #print "Something went wrong!"
+            print e, "Something went wrong => 9", wwr.id," => ", wwr.workshop_code, "Organiser => ", wwr.organiser_id
             #sys.exit(0)
             continue
     return HttpResponse("Workshop migration Done!")
@@ -810,17 +832,19 @@ def workshop_feedback(request):
     
     
 def test(request):
-    test_status = 4
-    if workshop_status == 4:
+    test_status = 2
+    if test_status == 4:
         wtrs = WTestRequests.objects.filter(status = test_status)
-    elif workshop_status == 2:
+    elif test_status == 2:
         wtrs = WTestRequests.objects.filter(status = test_status, pref_test_date__gt = datetime.datetime.today())
-    elif workshop_status == 1:
+    elif test_status == 1:
         wtrs = WTestRequests.objects.filter(status = test_status, pref_test_date__gt = datetime.datetime.today())
-    elif workshop_status == 0:
+    elif test_status == 0:
         wtrs = WTestRequests.objects.filter(status = test_status, pref_test_date__gt = datetime.datetime.today())
+    
     for wtr in wtrs:
         #Save department
+        douser = get_user(wtr.organiser_id)
         try:
             
             # Save Workshop
@@ -837,24 +861,29 @@ def test(request):
             #check organiser there or not
             organiser = None
             try:
-                organiser = Organiser.objects.get(user_id = wtr.organiser_id)
+                organiser = Organiser.objects.get(user_id = douser.id)
             except Exception, e:
                 #print e
                 print "Organiser Not there => ", wtr.organiser_id
                 continue
             
             #check organiser there or not
+            diuser = get_user(wtr.invigilator_id)
             invigilator = None
             try:
-                invigilator = Invigilator.objects.get(user_id = wtr.invigilator_id)
+                invigilator = Invigilator.objects.get(user_id = diuser.id)
             except Exception, e:
                 print e
                 print "Invigilator Not there => ", wtr.invigilator_id
+                # if invigilator id = 0 store null set allow null
                 if not wtr.invigilator_id:
                     try:
                         ac = AcademicCenter.objects.get(academic_code = wtr.academic_code)
                         invigilator = Invigilator.objects.filter(academic_id = ac.id).first()
-                        invigilator.id
+                        if wtr.invigilator_id == 0:
+                            pass
+                        else:
+                            invigilator.id
                         print invigilator, "Invigilator found!"
                     except Exception, e:
                         print e, " => AC ", wtr.academic_code
@@ -862,7 +891,6 @@ def test(request):
                 else:
                     #sys.exit(0)
                     continue
-                
             #check dept in WDepartments
             wdept = wtr.department
             try:
@@ -870,7 +898,6 @@ def test(request):
             except Exception, e:
                 #print e, " => 1", wtr.test_code
                 wdept = get_dept(wdept)
-            
             # check in Department
             dept = None
             try:
@@ -891,50 +918,53 @@ def test(request):
                             print e, " => 2ab ", wtr.test_code, " => ", d
                             sys.exit(0)
                 #dept = Department.objects.create(name = wdept)
-            
             #find academic_center id
             ac = None
             try:
                 ac = AcademicCenter.objects.get(academic_code = wtr.academic_code)
             except Exception, e:
-                #print e, " => 4 ", wtr.academic_code, wtr.test_code
+                print e, " => 4 ", wtr.academic_code, wtr.test_code
                 if '-- select ' == wtr.academic_code:
-                    o = Organiser.objects.get(organiser_id = wtr.organiser_id)
+                    o = Organiser.objects.get(organiser_id = douser.id)
                     ac = AcademicCenter.objects.get(academic_code = o.academic_code)
                 
                 #get organiser academic and set to workshop
                 try:
-                    o  = Organiser.objects.get(user_id = wtr.organiser_id)
+                    o  = Organiser.objects.get(user_id = wtr.douser.id)
                     ac = AcademicCenter.objects.get(pk = o.academic_id)
                 except Exception, e:
                     print e, "=> 4aa "
-                    
-                continue
-            
+                #continue
             #find foss_category_id
             foss = None
             try:
                 if wtr.foss_category == 'Linux-Ubuntu':
                     wtr.foss_category = 'Linux'
+                if wtr.foss_category in ['C', 'C-Plus-Plus', 'C-and-C-Plus-Plus']:
+                    wtr.foss_category = 'C and C++'
                 foss = FossCategory.objects.get(foss = wtr.foss_category.replace("-", " "))
             except Exception, e:
                 print e, " => 5 ", wtr.foss_category
                 continue
-            
             # get participants count
             wp = None
             try:
-                wp =WTestDetails.objects.get(test_code = wtr.test_code)
+                wp = WTestDetails.objects.filter(test_code = wtr.test_code).aggregate(Sum('no_of_participants'))
             except Exception, e:
                 print e, " => 7 ", wtr.test_code
                 continue
             
-                
+            if test_status == 4 and not wp['no_of_participants__sum']:
+                continue
             # new status
             #wstatus = {0 : 0, 1 : 1, 2 : 4}
             w = Test()
             w.organiser_id = organiser.id
-            w.invigilator_id = invigilator.id
+            if wtr.invigilator_id == 0:
+                w.invigilator_id = None
+            else:
+                w.invigilator_id = invigilator.id
+                
             w.test_code = wtr.test_code.upper()
             w.academic_id = ac.id
             w.foss_id = foss.id
@@ -944,7 +974,10 @@ def test(request):
             
             w.test_category_id = 1
             
-            w.participant_count = wp.no_of_participants
+            if test_status == 4:
+                w.participant_count = wp['no_of_participants__sum']
+            else:
+                w.participant_count = 0
             
             if wtr.created_at:
                 w.created = wtr.created_at
@@ -959,7 +992,7 @@ def test(request):
                 print e, "Duplicate ---", wtr.test_code, " => ", wtr.academic_code, wtr.cfm_test_date, wtr.foss_category
                 #sys.exit(0)
                 post_time = 5
-                for i in range(5):
+                for i in range(50):
                     try:
                         post_five_min = datetime.datetime.combine(datetime.date.today(), wtr.cfm_test_time) + datetime.timedelta(minutes=post_time)
                         w.ttime = post_five_min.time()
@@ -968,11 +1001,10 @@ def test(request):
                     except Exception, e:
                         #duplicate because of unique_together
                         print e, "Duplicate post change time save ******", wtr.test_code, " => ", wtr.academic_code, wtr.cfm_test_date, 
-                        if i == 4:
+                        if i == 49:
                             sys.exit(0)
                         post_time = post_time + 5
                         continue
-            
             #save departments
             try:
                 try:
@@ -1035,4 +1067,28 @@ def test_attendance(request):
             t.save()
         
     return HttpResponse("Test attendance migration Done!")
+
+def get_user(old_user_id):
+#find the user
+    user = None
+    try:
+        user = Users.objects.get(pk = old_user_id)
+    except Exception, e:
+        print e, " user not getting"
     
+    name = user.name
+    if len(name) > 30:
+        name = user.mail
+        if len(name) > 30:
+            tmp_name = name.split("@")
+            name = tmp_name[0]
+
+    duser = None
+    try:
+        duser = User.objects.get(email = user.mail)
+    except:
+        try:
+            duser = User.objects.get(username = name)
+        except Exception, e:
+            print e, " ======> ", user.mail, user.name
+    return duser

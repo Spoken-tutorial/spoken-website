@@ -3,7 +3,7 @@
 	{% for block in blocks %}
 		<div class="block">
 			<h5>{{ block.title }}</h5>
-			<p>{{ block.body }}</p>
+			<p>{{ block.body|safe }}</p>
 		</div> <!-- /block -->
 	{% endfor %}
 	</div> <!-- /sidebar -->

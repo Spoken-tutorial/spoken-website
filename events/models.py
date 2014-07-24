@@ -99,6 +99,9 @@ class InstituteCategory(models.Model):
     def __unicode__(self):
         return self.name
         
+    class Meta:
+        verbose_name = "Institute Categorie"
+        
 class InstituteType(models.Model):
     name = models.CharField(max_length=200)
     created = models.DateTimeField(auto_now_add = True)
@@ -237,7 +240,7 @@ class Test(models.Model):
     organiser = models.ForeignKey(Organiser, related_name = 'test_organiser')
     test_category = models.ForeignKey(TestCategory, related_name = 'test_category')
     appoved_by = models.ForeignKey(User, related_name = 'test_approved_by', null=True)
-    invigilator = models.ForeignKey(Invigilator, related_name = 'test_invigilator')
+    invigilator = models.ForeignKey(Invigilator, related_name = 'test_invigilator', null=True)
     academic = models.ForeignKey(AcademicCenter)
     department = models.ManyToManyField(Department)
     training = models.ForeignKey('Training', null=True)
@@ -251,6 +254,7 @@ class Test(models.Model):
     updated = models.DateTimeField(auto_now = True)
 
     class Meta:
+        verbose_name = "Test Categorie"
         unique_together = (("organiser", "academic", "foss", "tdate", "ttime"),)
 
 class TestAttendance(models.Model):
@@ -362,6 +366,7 @@ class TrainingFeedback(models.Model):
 class Testimonials(models.Model):
     user = models.ForeignKey(User, related_name = 'testimonial_created_by')
     approved_by = models.ForeignKey(User, related_name = 'testimonial_approved_by', null=True)
+    user_name = models.CharField(max_length=200)
     actual_content = models.TextField()
     minified_content = models.TextField()
     short_description = models.TextField()
@@ -370,7 +375,3 @@ class Testimonials(models.Model):
     status = models.PositiveSmallIntegerField(default = 0)
     created = models.DateTimeField(auto_now_add = True, null=True)
     updated = models.DateTimeField(auto_now = True, null=True)
-    
-    def __unicode__(self):
-        return self.name
-
