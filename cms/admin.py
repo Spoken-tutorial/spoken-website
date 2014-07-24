@@ -4,6 +4,7 @@ from cms.models import *
 from django.conf import settings
 from PIL import Image
 import glob, os
+from cms.forms import *
 
 class SubNavInline(admin.TabularInline):
     model = SubNav
@@ -14,14 +15,17 @@ class NavAdmin(admin.ModelAdmin):
     inlines = [SubNavInline]
 
 class BlockAdmin(admin.ModelAdmin):
+    form = AdminBodyForm
     list_display = ('title', 'block_location', 'position', 'visible', 'created')
 
 class PageAdmin(admin.ModelAdmin):
+    form = AdminBodyForm
     list_display = ('title', 'permalink', 'target_new', 'visible', 'created')
     
 class EventAdmin(admin.ModelAdmin):
+    form = AdminBodyForm
     exclude = ('user',)
-    list_display = ('user', 'title', 'message', 'event_date', 'source_link', 'created')
+    list_display = ('user', 'title', 'body', 'event_date', 'source_link', 'created')
     def save_model(self, request, obj, form, change):
         obj.user = request.user
         obj.save()
@@ -34,6 +38,7 @@ class NewsTypeAdmin(admin.ModelAdmin):
         obj.save()
 
 class NewsAdmin(admin.ModelAdmin):
+    form = AdminBodyForm
     exclude = ('created_by', 'slug')
     list_display = ('title', 'picture', 'body', 'url', 'url_title', 'created_by', 'created')
     def save_model(self, request, obj, form, change):

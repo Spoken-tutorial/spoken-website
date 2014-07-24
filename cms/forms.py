@@ -3,6 +3,7 @@ from cms.models import *
 from events.models import *
 from django.contrib.auth.models import User
 from captcha.fields import CaptchaField
+from nicedit.widgets import NicEditWidget
 from django.utils.translation import ugettext_lazy as _
 from django.core.validators import MinLengthValidator, MinValueValidator, RegexValidator, URLValidator
 
@@ -102,3 +103,9 @@ class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
         exclude = ['user', 'confirmation_code']
+
+#Overwrite NewsAdminBodyField
+class AdminBodyForm(forms.ModelForm):
+    body = forms.CharField(
+            widget=NicEditWidget(attrs={'style': 'width: 800px;'}))
+

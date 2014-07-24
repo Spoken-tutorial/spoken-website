@@ -80,7 +80,7 @@ class SiteFeedback(models.Model):
 class Event(models.Model):
     user = models.ForeignKey(User)
     title = models.CharField(max_length = 255)
-    message = models.TextField()
+    body = models.TextField()
     source_link = models.URLField(max_length=255, null=True, blank=True)
     event_date = models.DateTimeField()
     created = models.DateTimeField(auto_now_add=True)
