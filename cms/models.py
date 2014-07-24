@@ -86,7 +86,8 @@ class Event(models.Model):
     created = models.DateTimeField(auto_now_add=True)
 
 class NewsType(models.Model):
-    name = models.CharField(max_length = 255)
+    name = models.CharField(max_length = 50)
+    slug = models.CharField(max_length = 50)
     
     def __unicode__(self):
         return self.name
@@ -108,9 +109,9 @@ class News(models.Model):
     created = models.DateTimeField(auto_now_add = True)
     updated = models.DateTimeField(auto_now = True)
     
-    @models.permalink
-    def get_absolute_url(self):
-        return ('views.view_something', (), {'slug': self.slug})
-    
+#    @models.permalink
+#    def get_absolute_url(self):
+#        return ('views.view_something', (), {'slug': self.slug})
+#    
     class Meta:
         verbose_name = "New"

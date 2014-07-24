@@ -260,24 +260,25 @@ def admin_testimonials(request):
     context.update(csrf(request))
     return render(request, 'spoken/templates/testimonial/index.html', context)
 
-def news(request, category):
+def news(request, cslug):
     try:
-        newstype = NewsType.objects.get(name = category)
+        newstype = NewsType.objects.get(slug = cslug)
         collection = newstype.news_set.all()
         context = {
             'collection' : collection,
-            'category' : category
+            'category' : cslug
         }
         context.update(csrf(request))
         return render(request, 'spoken/templates/news/index.html', context)
     
-    except:
+    except Exception, e:
+        print e
         raise Http404('You are not allowed to view this page')
 
     
-def news_view(request, category, slug):
+def news_view(request, cslug, slug):
     try:
-        newstype = NewsType.objects.get(name = category)
+        newstype = NewsType.objects.get(slug = cslug)
         news = News.objects.get(slug = slug)
         context = {
             'news' : news,

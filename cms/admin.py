@@ -27,7 +27,11 @@ class EventAdmin(admin.ModelAdmin):
         obj.save()
 
 class NewsTypeAdmin(admin.ModelAdmin):
+    exclude = ('slug',)
     list_display = ('name',)
+    def save_model(self, request, obj, form, change):
+        obj.slug = slugify(request.POST['name'])
+        obj.save()
 
 class NewsAdmin(admin.ModelAdmin):
     exclude = ('created_by', 'slug')
