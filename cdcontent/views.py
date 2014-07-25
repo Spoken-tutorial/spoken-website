@@ -29,16 +29,15 @@ def home(request):
             temp = tempfile.TemporaryFile()
             archive = zipfile.ZipFile(temp, 'w', zipfile.ZIP_DEFLATED)
             selectedfoss = json.loads(request.POST.get('selected_foss', {}))
-            list_recs = {}
-            list_foss = {}
-            list_lang = {}
             for key, values in selectedfoss.iteritems():
                 foss_rec = FossCategory.objects.get(pk = key)
-                list_recs[foss_rec.foss] = list(values)
-                list_foss[foss_rec.id] = foss_rec.foss
-                tr_recs = TutorialResource.objects.filter(Q(status = 1)|Q(status = 2), tutorial_detail__foss_id = key, language_id__in = list(values)).order_by('tutorial_detail__level', 'tutorial_detail__order', 'language__name')
+                print values
+                level = int(values[1])
+                if level:
+                    tr_recs = TutorialResource.objects.filter(Q(status = 1)|Q(status = 2), tutorial_detail__foss_id = key, tutorial_detail__level_id = level, language_id__in = list(values[0])).order_by('tutorial_detail__level', 'tutorial_detail__order', 'language__name')
+                else:
+                    tr_recs = TutorialResource.objects.filter(Q(status = 1)|Q(status = 2), tutorial_detail__foss_id = key, language_id__in = list(values[0])).order_by('tutorial_detail__level', 'tutorial_detail__order', 'language__name')
                 for rec in tr_recs:
-                    list_lang[rec.language_id] = rec.language.name
                     filepath = 'videos/' + str(key) + '/' + str(rec.tutorial_detail_id) + '/' + rec.video
                     if os.path.isfile(settings.MEDIA_ROOT + filepath):
                         archive.write(settings.MEDIA_ROOT + filepath, filepath)
@@ -79,8 +78,12 @@ def home(request):
 def ajax_fill_languages(request):
     data = ''
     fossid = request.POST.get('foss', '')
+    levelid = int(request.POST.get('level', 0))
     if fossid:
-        lang_recs = TutorialResource.objects.filter(Q(status = 1)|Q(status = 2), tutorial_detail__foss_id = fossid).values_list('language_id', 'language__name').order_by('language__name').distinct()
+        if levelid:
+            lang_recs = TutorialResource.objects.filter(Q(status = 1)|Q(status = 2), tutorial_detail__foss_id = fossid, tutorial_detail__level_id = levelid).values_list('language_id', 'language__name').order_by('language__name').distinct()
+        else:
+            lang_recs = TutorialResource.objects.filter(Q(status = 1)|Q(status = 2), tutorial_detail__foss_id = fossid).values_list('language_id', 'language__name').order_by('language__name').distinct()
         for row in lang_recs:
             data = data + '<option value="' + str(row[0]) + '">' + row[1] + '</option>'
 
@@ -89,6 +92,7 @@ def ajax_fill_languages(request):
 @csrf_exempt
 def ajax_add_foss(request):
     foss = request.POST.get('foss', '')
+    level = int(request.POST.get('level', 0))
     selectedfoss = {}
     try:
         langs = json.loads(request.POST.get('langs', []))
@@ -99,7 +103,7 @@ def ajax_add_foss(request):
     except:
         pass
     if foss and langs:
-        selectedfoss[foss] = langs
+        selectedfoss[foss] = [langs, level]
     data = json.dumps(selectedfoss)
 
     return HttpResponse(json.dumps(data), mimetype='application/json')
@@ -112,10 +116,16 @@ def ajax_show_added_foss(request):
         tmp = {}
     data = ''
     fsize_total = 0.0
+    print '--------------'
     for key, values in tmp.iteritems():
         foss = FossCategory.objects.get(pk = key)
-        langs = ', '.join(list(Language.objects.filter(id__in = list(values)).order_by('name').values_list('name', flat=True)))
-        tr_recs = TutorialResource.objects.filter(Q(status = 1)|Q(status = 2), tutorial_detail__foss = foss, language_id__in = list(values))
+        level = int(values[1])
+        print foss, level
+        langs = ', '.join(list(Language.objects.filter(id__in = list(values[0])).order_by('name').values_list('name', flat=True)))
+        if level:
+            tr_recs = TutorialResource.objects.filter(Q(status = 1)|Q(status = 2), tutorial_detail__foss = foss, tutorial_detail__level_id = level, language_id__in = list(values[0]))
+        else:
+            tr_recs = TutorialResource.objects.filter(Q(status = 1)|Q(status = 2), tutorial_detail__foss = foss, language_id__in = list(values[0]))
         fsize = 0.0
         for rec in tr_recs:
             try:

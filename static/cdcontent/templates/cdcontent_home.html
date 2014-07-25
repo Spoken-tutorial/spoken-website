@@ -33,17 +33,24 @@
                         </div>
                     </div>
                     <div class="form-group">
+                        <label for="id_level" class="col-lg-3 col-md-3 col-sm-3 col-xs-3 control-label">Level:</label>
+                        <div class="col-lg-9 col-md-9 col-sm-9 col-xs-9">
+                            {% render_field form.level class+="form-control level" tabindex="2" %}
+                            {{ form.level.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
                         <label for="id_language" class="col-lg-3 col-md-3 col-sm-3 col-xs-3 control-label">Languages: <span class='ajax-refresh ajax-refresh-language'><i class="fa fa-2 fa-refresh fa-spin"></i></span></label>
                         <div class="col-lg-9 col-md-9 col-sm-9 col-xs-9">
-                            {% render_field form.language class+="form-control language" tabindex="2" %}
+                            {% render_field form.language class+="form-control language" tabindex="3" %}
                             {{ form.language.errors }}
                         </div>
                     </div>
                     <div class="form-group">
                         <div class="col-lg-9 col-md-9 col-sm-9 col-xs-9 col-lg-offset-3 col-md-offset-3 col-sm-offset-3">
                             <span class='ajax-refresh ajax-refresh-add-foss'><i class="fa fa-2 fa-refresh fa-spin"></i></span>
-                            <input type="button" class="add_foss_lang btn btn-primary" value="Add selected FOSS"  tabindex="3" />
-                            <input type="submit" class="btn btn-primary" value="Create ZIP file"  tabindex="3" />
+                            <input type="button" class="add_foss_lang btn btn-primary" value="Add selected FOSS"  tabindex="4" />
+                            <input type="submit" class="btn btn-primary" value="Create ZIP file"  tabindex="5" />
                         </div>
                     </div>
                 </fieldset>
@@ -60,16 +67,32 @@
 {% block jsblock %}
     <script type="text/javascript">
         $(document).ready(function(){
+            if($('.foss_category').val() == '') {
+                $('.level').attr("disabled", "disabled");
+                $('.language').attr("disabled", "disabled");
+            }
             $('.foss_category').on("change", function(){
-                var foss = $(this).val();
+                $('.level').val('');
+                $('.language').html('');
+                if($('.foss_category').val() == '') {
+                    $('.level').attr("disabled", "disabled");
+                    $('.language').attr("disabled", "disabled");
+                }else {
+                    $('.level').removeAttr('disabled');
+                }
+            });
+            $('.level').on("change", function(){
+                var foss = $('.foss_category').val();
+                var level = $(this).val();
                 $('.language').html('');
                 $('.language').attr("disabled", "disabled");
-                if(foss != '') {
+                if(foss != '' && level != '') {
                     $.ajax({
                         url: "/cdcontent/ajax-fill-languages/",
                         type: "POST",
                         data: {
-                            foss: foss
+                            foss: foss,
+                            level: level
                         },
                         beforeSend: function() {
                             $('.ajax-refresh-language').show();
@@ -87,16 +110,18 @@
             });
             $('.add_foss_lang').on("click", function(){
                 foss = $('.foss_category').val();
+                level = $('.level').val();
                 langs = JSON.stringify($('.language').val());
                 console.log(langs)
                 selectedfoss = $('.selected_foss').val();
-                if(foss && langs) {
+                if(foss && langs && level != '') {
                     $.ajax({
                         url: "/cdcontent/ajax-add-foss/",
                         type: "POST",
                         data: {
                             foss: foss,
                             langs: langs,
+                            level: level,
                             selectedfoss: selectedfoss,
                         },
                         beforeSend: function() {

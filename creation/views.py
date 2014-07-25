@@ -4,7 +4,7 @@ import json
 import time
 import subprocess
 from decimal import Decimal
-from urllib import urlopen, unquote
+from urllib import urlopen, unquote_plus
 from django.conf import settings
 from django.views import generic
 from django.contrib import messages
@@ -2024,8 +2024,8 @@ def creation_view_tutorial(request, foss, tutorial, lang):
     if not is_contributor(request.user):
         raise PermissionDenied()
     try:
-        foss = unquote(foss)
-        tutorial = unquote(tutorial)
+        foss = unquote_plus(foss)
+        tutorial = unquote_plus(tutorial)
         td_rec = TutorialDetail.objects.get(foss = FossCategory.objects.get(foss = foss), tutorial = tutorial)
         tr_rec = TutorialResource.objects.get(tutorial_detail = td_rec, language = Language.objects.get(name = lang))
         tr_recs = TutorialResource.objects.filter(tutorial_detail__in = TutorialDetail.objects.filter(foss = tr_rec.tutorial_detail.foss).order_by('order').values_list('id'), language = tr_rec.language)
