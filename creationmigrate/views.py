@@ -62,7 +62,7 @@ def get_last_index(input_string, td_row, concat_str):
         tmp_string = input_string.split('/')
         tmp_index = len(tmp_string) - 1
         file_name, file_extension = os.path.splitext(tmp_string[tmp_index])
-        filename = td_row.tutorial.replace(' ', '-') + '-' + concat_str + file_extension
+        filename = td_row.tutorial.replace(' ', '-').replace("+", "p") + '-' + concat_str + file_extension
         return filename
     return ''
 
@@ -89,7 +89,7 @@ def get_current_tutorial_detail(old_td):
         'C4': 3,
     }
     try:
-        new_td = TutorialDetail.objects.get(foss__foss = old_td.foss_category.replace('-', ' '), tutorial = old_td.tutorial_name.replace('-', ' '), level_id = levels[old_td.tutorial_level])
+        new_td = TutorialDetail.objects.get(foss__foss = old_td.foss_category.replace('-', ' ').replace("+", "p"), tutorial = old_td.tutorial_name.replace('-', ' ').replace("+", "p"), level_id = levels[old_td.tutorial_level])
         return new_td
     except:
         pass
@@ -152,7 +152,7 @@ def foss_categories(request):
     rows = FossCategories.objects.all()
     for row in rows:
         foss_name = row.name
-        foss_name = foss_name.replace("-", " ")
+        foss_name = foss_name.replace("-", " ").replace("+", "p")
         try:
             foss_row = FossCategory.objects.get(foss = foss_name)
         except Exception, e:
@@ -183,11 +183,11 @@ def tutorial_details(request):
     rows = TutorialDetails.objects.all()
     lang_rec = Language.objects.get(name = 'English')
     for row in rows:
-        foss_row = FossCategory.objects.get(foss = row.foss_category.replace("-", " "))
+        foss_row = FossCategory.objects.get(foss = row.foss_category.replace("-", " ").replace("+", "p"))
         try:
-            td_row = TutorialDetail.objects.get(foss = foss_row, tutorial = row.tutorial_name.replace("-", " "), level_id = levels[row.tutorial_level])
+            td_row = TutorialDetail.objects.get(foss = foss_row, tutorial = row.tutorial_name.replace("-", " ").replace("+", "p"), level_id = levels[row.tutorial_level])
         except Exception, e:
-            td_row = TutorialDetail.objects.create(foss = foss_row, tutorial = row.tutorial_name.replace("-", " "), level_id = levels[row.tutorial_level], order = row.order_code, user = request.user)
+            td_row = TutorialDetail.objects.create(foss = foss_row, tutorial = row.tutorial_name.replace("-", " ").replace("+", "p"), level_id = levels[row.tutorial_level], order = row.order_code, user = request.user)
         try:
             foss_dir = settings.MEDIA_ROOT + '/videos/' + str(foss_row.id) + '/' + str(td_row.id) + '/resources'
             os.makedirs(foss_dir)
@@ -269,13 +269,19 @@ def tutorial_details(request):
                     role_rec = RoleRequest.objects.create(user = new_tcc.slide_user, role_type = 0, status = 1, approved_user = request.user)
                 if role_rec:
                     try:
-                        role_rec.user.groups.add(Group.objects.get(name = 'Contributor'))
-                    except Exception, e:
-                        print 2, e
-                    try:
-                        ContributorRole.objects.create(foss_category = new_tcc.tutorial_detail.foss, language = lang_rec, user = role_rec.user, status = 1)
+                        role_rec.user.groups.get(name='Contributor')
                     except:
-                        pass
+                        try:
+                            role_rec.user.groups.add(Group.objects.get(name = 'Contributor'))
+                        except Exception, e:
+                            print 2, e
+                    try:
+                        ContributorRole.objects.get(foss_category = new_tcc.tutorial_detail.foss, language = lang_rec, user = role_rec.user)
+                    except:
+                        try:
+                            ContributorRole.objects.create(foss_category = new_tcc.tutorial_detail.foss, language = lang_rec, user = role_rec.user, status = 1)
+                        except:
+                            pass
             if new_tcc.code_user_id != request.user.id and new_tcc.code_user_id != new_tcc.slide_user_id:
                 try:
                     role_rec = RoleRequest.objects.get(user = new_tcc.code_user, role_type = 0)
@@ -284,13 +290,19 @@ def tutorial_details(request):
                     role_rec = RoleRequest.objects.create(user = new_tcc.code_user, role_type = 0, status = 1, approved_user = request.user)
                 if role_rec:
                     try:
-                        role_rec.user.groups.add(Group.objects.get(name = 'Contributor'))
-                    except Exception, e:
-                        print 4, e
-                    try:
-                        ContributorRole.objects.create(foss_category = new_tcc.tutorial_detail.foss, language = lang_rec, user = role_rec.user, status = 1)
+                        role_rec.user.groups.get(name='Contributor')
                     except:
-                        pass
+                        try:
+                            role_rec.user.groups.add(Group.objects.get(name = 'Contributor'))
+                        except Exception, e:
+                            print 4, e
+                    try:
+                        ContributorRole.objects.get(foss_category = new_tcc.tutorial_detail.foss, language = lang_rec, user = role_rec.user)
+                    except:
+                        try:
+                            ContributorRole.objects.create(foss_category = new_tcc.tutorial_detail.foss, language = lang_rec, user = role_rec.user, status = 1)
+                        except:
+                            pass
             if new_tcc.assignment_user_id != request.user.id and new_tcc.assignment_user_id != new_tcc.slide_user_id and new_tcc.assignment_user_id != new_tcc.code_user_id:
                 try:
                     role_rec = RoleRequest.objects.get(user = new_tcc.assignment_user, role_type = 0)
@@ -298,13 +310,19 @@ def tutorial_details(request):
                     role_rec = RoleRequest.objects.create(user = new_tcc.assignment_user, role_type = 0, status = 1, approved_user = request.user)
                 if role_rec:
                     try:
-                        role_rec.user.groups.add(Group.objects.get(name = 'Contributor'))
+                        role_rec.user.groups.get(name='Contributor')
                     except:
-                        pass
+                        try:
+                            role_rec.user.groups.add(Group.objects.get(name = 'Contributor'))
+                        except:
+                            pass
                     try:
-                        ContributorRole.objects.create(foss_category = new_tcc.tutorial_detail.foss, language = lang_rec, user = role_rec.user, status = 1)
+                        ContributorRole.objects.get(foss_category = new_tcc.tutorial_detail.foss, language = lang_rec, user = role_rec.user)
                     except:
-                        pass
+                        try:
+                            ContributorRole.objects.create(foss_category = new_tcc.tutorial_detail.foss, language = lang_rec, user = role_rec.user, status = 1)
+                        except:
+                            pass
             if new_tcc.prerequisite_user_id != request.user.id and new_tcc.prerequisite_user_id != new_tcc.slide_user_id and new_tcc.prerequisite_user_id != new_tcc.code_user_id and new_tcc.prerequisite_user_id != new_tcc.assignment_user_id:
                 try:
                     role_rec = RoleRequest.objects.get(user = new_tcc.prerequisite_user, role_type = 0)
@@ -312,13 +330,19 @@ def tutorial_details(request):
                     role_rec = RoleRequest.objects.create(user = new_tcc.prerequisite_user, role_type = 0, status = 1, approved_user = request.user)
                 if role_rec:
                     try:
-                        role_rec.user.groups.add(Group.objects.get(name = 'Contributor'))
+                        role_rec.user.groups.get(name='Contributor')
                     except:
-                        pass
+                        try:
+                            role_rec.user.groups.add(Group.objects.get(name = 'Contributor'))
+                        except:
+                            pass
                     try:
-                        ContributorRole.objects.create(foss_category = new_tcc.tutorial_detail.foss, language = lang_rec, user = role_rec.user, status = 1)
+                        ContributorRole.objects.get(foss_category = new_tcc.tutorial_detail.foss, language = lang_rec, user = role_rec.user)
                     except:
-                        pass
+                        try:
+                            ContributorRole.objects.create(foss_category = new_tcc.tutorial_detail.foss, language = lang_rec, user = role_rec.user, status = 1)
+                        except:
+                            pass
 
     update_prerequisite(request)
     return HttpResponse('Success!')
@@ -394,13 +418,19 @@ def tutorial_resources(request):
                     role_rec = RoleRequest.objects.create(user = new_tr.outline_user, role_type = 0, status = 1, approved_user = request.user)
                 if role_rec:
                     try:
-                        role_rec.user.groups.add(Group.objects.get(name = 'Contributor'))
-                    except Exception, e:
-                        print 2, e
-                    try:
-                        ContributorRole.objects.create(foss_category = new_tr.tutorial_detail.foss, language = new_tr.language, user = role_rec.user, status = 1)
+                        role_rec.user.groups.get(name='Contributor')
                     except:
-                        pass
+                        try:
+                            role_rec.user.groups.add(Group.objects.get(name = 'Contributor'))
+                        except Exception, e:
+                            print 2, e
+                    try:
+                        ContributorRole.objects.get(foss_category = new_tr.tutorial_detail.foss, language = new_tr.language, user = role_rec.user)
+                    except:
+                        try:
+                            ContributorRole.objects.create(foss_category = new_tr.tutorial_detail.foss, language = new_tr.language, user = role_rec.user, status = 1)
+                        except:
+                            pass
             if new_tr.script_user_id != request.user.id:
                 try:
                     role_rec = RoleRequest.objects.get(user = new_tr.script_user, role_type = 0)
@@ -409,13 +439,19 @@ def tutorial_resources(request):
                     role_rec = RoleRequest.objects.create(user = new_tr.script_user, role_type = 0, status = 1, approved_user = request.user)
                 if role_rec:
                     try:
-                        role_rec.user.groups.add(Group.objects.get(name = 'Contributor'))
-                    except Exception, e:
-                        print 2, e
-                    try:
-                        ContributorRole.objects.create(foss_category = new_tr.tutorial_detail.foss, language = new_tr.language, user = role_rec.user, status = 1)
+                        role_rec.user.groups.get(name='Contributor')
                     except:
-                        pass
+                        try:
+                            role_rec.user.groups.add(Group.objects.get(name = 'Contributor'))
+                        except Exception, e:
+                            print 2, e
+                    try:
+                        ContributorRole.objects.get(foss_category = new_tr.tutorial_detail.foss, language = new_tr.language, user = role_rec.user)
+                    except:
+                        try:
+                            ContributorRole.objects.create(foss_category = new_tr.tutorial_detail.foss, language = new_tr.language, user = role_rec.user, status = 1)
+                        except:
+                            pass
             if new_tr.video_user_id != request.user.id:
                 try:
                     role_rec = RoleRequest.objects.get(user = new_tr.video_user, role_type = 0)
@@ -424,17 +460,29 @@ def tutorial_resources(request):
                     role_rec = RoleRequest.objects.create(user = new_tr.video_user, role_type = 0, status = 1, approved_user = request.user)
                 if role_rec:
                     try:
-                        role_rec.user.groups.add(Group.objects.get(name = 'Contributor'))
-                    except Exception, e:
-                        print 2, e
-                    try:
-                        ContributorRole.objects.create(foss_category = new_tr.tutorial_detail.foss, language = new_tr.language, user = role_rec.user, status = 1)
+                        role_rec.user.groups.get(name='Contributor')
                     except:
-                        pass
+                        try:
+                            role_rec.user.groups.add(Group.objects.get(name = 'Contributor'))
+                        except Exception, e:
+                            print 2, e
+                    try:
+                        ContributorRole.objects.get(foss_category = new_tr.tutorial_detail.foss, language = new_tr.language, user = role_rec.user)
+                    except:
+                        try:
+                            ContributorRole.objects.create(foss_category = new_tr.tutorial_detail.foss, language = new_tr.language, user = role_rec.user, status = 1)
+                        except:
+                            pass
         if new_tr and new_tr.video:
             new_tutorial_path = settings.MEDIA_ROOT + 'videos/' + str(new_tr.tutorial_detail.foss_id) + '/' + str(new_tr.tutorial_detail.id) + '/'
             try:
                 copyfile(settings.STVIDEOS_DIR + row.tutorial_video, new_tutorial_path + new_tr.video)
+                k = row.tutorial_video.rfind(".")
+                old_srtfile = row.tutorial_video[:k] + '.srt'
+                k = new_tr.video.rfind(".")
+                new_srtfile = new_tr.video[:k] + '.srt'
+                if os.path.isfile(settings.STVIDEOS_DIR + old_srtfile):
+                    copyfile(settings.STVIDEOS_DIR + old_srtfile, new_tutorial_path + new_srtfile)
             except Exception, e:
                 print 4, e
 
@@ -451,9 +499,12 @@ def admin_reviewer_roles(request):
             current_user = get_current_user_from_old_email_strict(row.uid.mail)
             print current_user
             try:
-                current_user.groups.add(Group.objects.get(name = 'Video-Reviewer'))
+                current_user.groups.get(name='Video-Reviewer')
             except:
-                pass
+                try:
+                    current_user.groups.add(Group.objects.get(name = 'Video-Reviewer'))
+                except:
+                    pass
     except Exception, e:
         return HttpResponse(str(e))
     return HttpResponse('Success!')
@@ -468,20 +519,32 @@ def domain_reviewer_roles(request):
         current_user = get_current_user_from_old_email_strict(row.uid.mail)
         for tr_update_row in tr_update_rows:
             try:
-                current_user.groups.add(Group.objects.get(name = 'Domain-Reviewer'))
-            except Exception, e:
-                #print e
-                pass
+                current_user.groups.get(name='Domain-Reviewer')
+            except:
+                try:
+                    current_user.groups.add(Group.objects.get(name = 'Domain-Reviewer'))
+                except Exception, e:
+                    #print e
+                    pass
             try:
-                DomainReviewerRole.objects.create(
-                    foss_category = FossCategory.objects.get(foss = tr_update_row.tutorial_resources.tutorial_detail.foss_category.replace('-', ' ')),
+                DomainReviewerRole.objects.get(
+                    foss_category = FossCategory.objects.get(
+                        foss = tr_update_row.tutorial_resources.tutorial_detail.foss_category.replace('-', ' ').replace('+', 'p')
+                    ),
                     language = Language.objects.get(name = row.language.name),
                     user = current_user,
-                    status = 1
                 )
-            except Exception, e:
-                #print e
-                pass
+            except:
+                try:
+                    DomainReviewerRole.objects.create(
+                        foss_category = FossCategory.objects.get(foss = tr_update_row.tutorial_resources.tutorial_detail.foss_category.replace('-', ' ').replace('+', 'p')),
+                        language = Language.objects.get(name = row.language.name),
+                        user = current_user,
+                        status = 1
+                    )
+                except Exception, e:
+                    #print e
+                    pass
             print "****************", tr_update_row.id, "****************"
     return HttpResponse('Success!')
 
@@ -495,20 +558,34 @@ def quality_reviewer_roles(request):
         current_user = get_current_user_from_old_email_strict(row.uid.mail)
         for tr_update_row in tr_update_rows:
             try:
-                current_user.groups.add(Group.objects.get(name = 'Quality-Reviewer'))
-            except Exception, e:
-                #print e
-                pass
+                current_user.groups.get(name='Quality-Reviewer')
+            except:
+                try:
+                    current_user.groups.add(Group.objects.get(name = 'Quality-Reviewer'))
+                except Exception, e:
+                    #print e
+                    pass
             try:
-                QualityReviewerRole.objects.create(
-                    foss_category = FossCategory.objects.get(foss = tr_update_row.tutorial_resources.tutorial_detail.foss_category.replace('-', ' ')),
-                    language = Language.objects.get(name = row.language.name),
-                    user = current_user,
-                    status = 1
-                )
-            except Exception, e:
-                #print e
-                pass
+                QualityReviewerRole.objects.get(
+                        foss_category = FossCategory.objects.get(
+                            foss = tr_update_row.tutorial_resources.tutorial_detail.foss_category.replace('-', ' ').replace('+', 'p')
+                        ),
+                        language = Language.objects.get(name = row.language.name),
+                        user = current_user,
+                    )
+            except:
+                try:
+                    QualityReviewerRole.objects.create(
+                        foss_category = FossCategory.objects.get(
+                            foss = tr_update_row.tutorial_resources.tutorial_detail.foss_category.replace('-', ' ').replace('+', 'p')
+                        ),
+                        language = Language.objects.get(name = row.language.name),
+                        user = current_user,
+                        status = 1
+                    )
+                except Exception, e:
+                    #print e
+                    pass
             print "****************", tr_update_row.id, "****************"
     return HttpResponse('Success!')
 

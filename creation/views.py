@@ -5,11 +5,9 @@ import time
 import subprocess
 from decimal import Decimal
 from urllib import urlopen, unquote_plus
-from hurry.filesize import size
 from django.conf import settings
 from django.views import generic
 from django.contrib import messages
-from hurry.filesize import alternative
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import Group
 from django.views.decorators.http import require_POST
@@ -26,6 +24,16 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from creation.forms import *
 from creation.models import *
 from cms.sortable import *
+
+def humansize(nbytes):
+    suffixes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
+    if nbytes == 0: return '0 B'
+    i = 0
+    while nbytes >= 1024 and i < len(suffixes)-1:
+        nbytes /= 1024.
+        i += 1
+    f = ('%.1f' % nbytes).rstrip('0').rstrip('.')
+    return '%s %s' % (f, suffixes[i])
 
 def role_list(request):
     table = RoleFilter(request.GET, queryset=RoleRequest.objects.all())
@@ -103,7 +111,7 @@ def is_administrator(user):
 
 def get_filesize(path):
     filesize_bytes = os.path.getsize(path)
-    return size(filesize_bytes, system=alternative)
+    return humansize(filesize_bytes)
 
 # returns video meta info using ffmpeg
 def get_video_info(path):
@@ -2018,7 +2026,6 @@ def creation_view_tutorial(request, foss, tutorial, lang):
     try:
         foss = unquote_plus(foss)
         tutorial = unquote_plus(tutorial)
-        print tutorial
         td_rec = TutorialDetail.objects.get(foss = FossCategory.objects.get(foss = foss), tutorial = tutorial)
         tr_rec = TutorialResource.objects.get(tutorial_detail = td_rec, language = Language.objects.get(name = lang))
         tr_recs = TutorialResource.objects.filter(tutorial_detail__in = TutorialDetail.objects.filter(foss = tr_rec.tutorial_detail.foss).order_by('order').values_list('id'), language = tr_rec.language)

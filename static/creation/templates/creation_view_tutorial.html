@@ -21,6 +21,10 @@
         .forward {
             float: right;
         }
+        .playlist ul {
+             height: 330px;
+             overflow-y: scroll;
+        }
         .playlist, .playlist-container, .video-container{
             padding-left: 0px;
             padding-right: 0px;
@@ -28,6 +32,7 @@
         .playlist ul{
             list-style:none;
             padding-left: 0px;
+            margin-bottom: 0px;
         }
         .playlist ul .playlist-item{
             clear: both;
@@ -80,19 +85,28 @@
         .review-data pre {
             margin-bottom: 0px;
         }
+        .video-js .vjs-tech{
+            position:absolute;
+            top:0;
+            left:0;
+            width:100%;
+            height:100%;
+        }
     </style>
     <script src="{% static 'spoken/js/video.js' %}"></script>
 {% endblock %}
 {% load creationdata %}
 {% block title %}{{ tr_rec.tutorial_detail.tutorial }} - {{ tr_rec.language.name }}{% endblock %}
 {% block heading %}{{ tr_rec.tutorial_detail.tutorial }} - {{ tr_rec.language.name }}{% endblock %}
+{% block search %}
+{% endblock %}
 {% block content %}
-   
+    {% if tr_rec.video_status %}
     <row>
         <div class='container playlist-container col-lg-12 col-md-12 col-sm-12'>
             <div class="video-container col-lg-8 col-md-8 col-sm-8">
                 <video id="st_video" class="video-js vjs-default-skin" controls preload="auto" width="auto" height="auto" data-setup="{}">
-                    <source {% if tr_rec.video_status %}src="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ tr_rec.video }}" type="video/ogg"{% endif %} />
+                    <source src="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ tr_rec.video }}" type="video/ogg" />
                 </video>
             </div>
             <div class='playlist col-lg-4 col-md-4 col-sm-4'>
@@ -106,7 +120,7 @@
                 <ul>
                     {% for rec in tr_recs %}
                         <li class="playlist-item{% if tr_rec.id == rec.id %} active{% endif %}"{% if tr_rec.id == rec.id %} data="{{ forloop.counter }}"{% endif %}>
-                            <a href="/creation/tutorial/view/{{ rec.tutorial_detail.foss.foss }}/{{ rec.tutorial_detail.tutorial|get_url_name }}/{{ rec.language.name }}/">
+                            <a href="/creation/tutorial/view/{{ rec.tutorial_detail.foss.foss|get_url_name }}/{{ rec.tutorial_detail.tutorial|get_url_name }}/{{ rec.language.name }}/">
                                 <div class='pull-left thumb'>
                                     <span class='order'>{% if tr_rec.id == rec.id %}<i class="fa fa-play"></i>{% else %}{{ forloop.counter }}{% endif %}</span>
                                     <img src="{% static 'spoken/images/thumb-even.png' %}" width=70 >
@@ -121,24 +135,10 @@
             </div>
         </div>
     </row>
+    {% endif %}
     <row>
         <div class="col-lg-7 col-md-7 col-sm-7 no-padding-left">
             <pre class="custom-jumbotron"><b>Outline:<br /></b>{{ tr_rec.outline }}</pre>
-            {% if ni_recs|length %}
-                <h4>Reviewers Feedback</h4>
-                {% for ni_rec in ni_recs %}
-                    <div class="review-feedback">
-                        <div class="review-data">
-                            <pre><b>Component: {{ ni_rec.component|title }}</b>
-                            <p>{{ ni_rec.comment }}</p></pre>
-                        </div>
-                        <div class="review-info">
-                            <div class="review-user">- <a href="/accounts/profile/{{ ni_rec.user }}">{{ ni_rec.user }}</a></div>
-                            <div class="review-date">{{ ni_rec.created }}</div>
-                        </div>
-                    </div>
-                {% endfor %}
-            {% endif %}
         </div>
         <div class="col-lg-5 col-md-5 col-sm-5 no-padding-right">
             <table class="table table-bordered table-hover">
@@ -155,6 +155,19 @@
                     <th>Size:</th><td>{{video_info.size}}</td>
                 </tr>
             </table>
+            <div class="panel panel-default">
+              <div class="panel-heading">
+                <h3 class="panel-title">Prerequsite</h3>
+              </div>
+              <div class="panel-body">
+              {% if tr_rec.common_content.prerequisite %}
+                <img src="/static/spoken/images/thumb-even.png" width="70" style="padding-right: 10px;">
+                <a href="#">{{ tr_rec.common_content.prerequisite.tutorial }}</a>
+              {% else %}
+                No Prerequsite for this tutorial.
+              {% endif %}
+              </div>
+            </div>
             <div class="list-group">
                 {% if tr_rec.common_content.assignment_status and tr_rec.common_content.assignment_status != 6 %}
                     <div  class="list-group-item">

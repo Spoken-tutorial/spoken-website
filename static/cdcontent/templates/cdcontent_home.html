@@ -2,33 +2,64 @@
 {% load widget_tweaks %}
 {% load static %}
 {% block title %}CD Content Creation{% endblock %}
+{% block cssblock %}
+    <style type="text/css">
+        .add-foss{
+            margin-right: 15px;
+        }
+        #id_language {
+            min-height: 180px;
+        }
+    </style>
+{% endblock %}
 {% block heading %}CD Content Creation{% endblock %}
 {% block content %}
     <form role="form" method="post" enctype="multipart/form-data" action="" class="form-horizontal">
         <div class="row well bs-component">
-            <div class="col-lg-8">
+            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
                 <fieldset>
                     {% csrf_token %}
+                    <div class="form-group">
+                        <div class="col-lg-9 col-md-9 col-sm-9 col-xs-9 col-lg-offset-3 col-md-offset-3 col-sm-offset-3">
+                            {{ form.selected_foss.errors }}
+                        </div>
+                    </div>
                     <div class="form-group">
                         <label for="id_foss_category" class="col-lg-3 col-md-3 col-sm-3 col-xs-3 control-label">FOSS Category:</label>
                         <div class="col-lg-9 col-md-9 col-sm-9 col-xs-9">
                             {% render_field form.foss_category class+="form-control foss_category" tabindex="1" %}
                             {{ form.foss_category.errors }}
+                            {% render_field form.selected_foss class+='selected_foss' %}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_level" class="col-lg-3 col-md-3 col-sm-3 col-xs-3 control-label">Level:</label>
+                        <div class="col-lg-9 col-md-9 col-sm-9 col-xs-9">
+                            {% render_field form.level class+="form-control level" tabindex="2" %}
+                            {{ form.level.errors }}
                         </div>
                     </div>
                     <div class="form-group">
                         <label for="id_language" class="col-lg-3 col-md-3 col-sm-3 col-xs-3 control-label">Languages: <span class='ajax-refresh ajax-refresh-language'><i class="fa fa-2 fa-refresh fa-spin"></i></span></label>
                         <div class="col-lg-9 col-md-9 col-sm-9 col-xs-9">
-                            {% render_field form.language class+="form-control language" tabindex="2" %}
+                            {% render_field form.language class+="form-control language" tabindex="3" %}
                             {{ form.language.errors }}
                         </div>
                     </div>
                     <div class="form-group">
                         <div class="col-lg-9 col-md-9 col-sm-9 col-xs-9 col-lg-offset-3 col-md-offset-3 col-sm-offset-3">
-                            <input type="submit" class="btn btn-primary" value="Submit"  tabindex="3" />
+                            <span class='ajax-refresh ajax-refresh-add-foss'><i class="fa fa-2 fa-refresh fa-spin"></i></span>
+                            <input type="button" class="add_foss_lang btn btn-primary" value="Add selected FOSS"  tabindex="4" />
+                            <input type="submit" class="btn btn-primary" value="Create ZIP file"  tabindex="5" />
                         </div>
                     </div>
                 </fieldset>
+            </div>
+            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                <div class="table-responsive">
+                    <table class="added-foss table table-condensed table-bordered table-hover">
+                    </table>
+                </div>
             </div>
         </div>
     </form>
@@ -36,16 +67,32 @@
 {% block jsblock %}
     <script type="text/javascript">
         $(document).ready(function(){
+            if($('.foss_category').val() == '') {
+                $('.level').attr("disabled", "disabled");
+                $('.language').attr("disabled", "disabled");
+            }
             $('.foss_category').on("change", function(){
-                var foss = $(this).val();
+                $('.level').val('');
+                $('.language').html('');
+                if($('.foss_category').val() == '') {
+                    $('.level').attr("disabled", "disabled");
+                    $('.language').attr("disabled", "disabled");
+                }else {
+                    $('.level').removeAttr('disabled');
+                }
+            });
+            $('.level').on("change", function(){
+                var foss = $('.foss_category').val();
+                var level = $(this).val();
                 $('.language').html('');
                 $('.language').attr("disabled", "disabled");
-                if(foss != '') {
+                if(foss != '' && level != '') {
                     $.ajax({
                         url: "/cdcontent/ajax-fill-languages/",
                         type: "POST",
                         data: {
-                            foss: foss
+                            foss: foss,
+                            level: level
                         },
                         beforeSend: function() {
                             $('.ajax-refresh-language').show();
@@ -58,33 +105,65 @@
                             }
                             $('.ajax-refresh-language').hide();
                         }
-                    })
+                    });
                 }
             });
-            $('.language').on("change", function(){
-                var foss = $('.foss_category').val();
-                var lang = $(this).val();
-                if(foss != '' and lang != '') {
+            $('.add_foss_lang').on("click", function(){
+                foss = $('.foss_category').val();
+                level = $('.level').val();
+                langs = JSON.stringify($('.language').val());
+                console.log(langs)
+                selectedfoss = $('.selected_foss').val();
+                if(foss && langs && level != '') {
                     $.ajax({
-                        url: "/cdcontent/ajax-add-selected/",
+                        url: "/cdcontent/ajax-add-foss/",
                         type: "POST",
                         data: {
                             foss: foss,
-                            lang: lang
+                            langs: langs,
+                            level: level,
+                            selectedfoss: selectedfoss,
                         },
                         beforeSend: function() {
-                            $('.ajax-refresh-language').show();
-                            $(this).val('');
+                            $('.add_foss_lang').css('display', 'none');
+                            $('.ajax-refresh-add-foss').show();
                         },
                         success: function(data) {
-                            // loading languages
+                            data = JSON.parse(data);
                             if(data) {
-                                $('.language').html(data);
-                                $('.language').removeAttr('disabled');
+                                data = JSON.stringify(data);
+                                if(data != '{}') {
+                                    $('.selected_foss').val(data);
+                                } else {
+                                    $('.selected_foss').val('');
+                                }
                             }
-                            $('.ajax-refresh-language').hide();
+                            $.ajax({
+                                url: "/cdcontent/ajax-show-added-foss/",
+                                type: "POST",
+                                data: {
+                                    selectedfoss: $('.selected_foss').val(),
+                                },
+                                beforeSend: function() {
+                                    $('.add_foss_lang').css('display', 'none');
+                                    $('.ajax-refresh-add-foss').show();
+                                },
+                                success: function(data) {
+                                    //data = JSON.parse(data);
+                                    header = '<caption class="col-left"><b>Selected FOSS List:</b></caption><tr><th>FOSS</th><th>Languages</th><th>Size</th>';
+                                    if(data) {
+                                        $('.added-foss').html(header + data);
+                                        console.log(data);
+                                    }
+                                    $('.ajax-refresh-add-foss').hide();
+                                }
+                            });
+                            $('.ajax-refresh-add-foss').hide();
+                            $('.add_foss_lang').show();
                         }
-                    })
+                    });
+                    $('.add_foss_lang').show();
+                    $('.ajax-refresh-add-foss').hide();
                 }
             });
         });
