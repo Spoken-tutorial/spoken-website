@@ -148,7 +148,7 @@
               <div class="panel-body">
               {% if tr_rec.common_content.prerequisite %}
                 <img src="/static/spoken/images/thumb-even.png" width="70" style="padding-right: 10px;">
-                <a href="#">{{ tr_rec.common_content.prerequisite.tutorial }}</a>
+                <a href="/watch/{{ tr_rec.common_content.prerequisite.foss.foss|get_url_name }}/{{ tr_rec.common_content.prerequisite.tutorial|get_url_name }}/{{ tr_rec.language.name }}/">{{ tr_rec.common_content.prerequisite.tutorial }}</a>
               {% else %}
                 No Prerequsite for this tutorial.
               {% endif %}
