@@ -109,6 +109,9 @@ class InstituteType(models.Model):
     
     def __unicode__(self):
         return self.name
+    
+    class Meta:
+        unique_together = (("name"),)
         
 class AcademicCenter(models.Model):
     user = models.ForeignKey(User)
@@ -175,6 +178,9 @@ class Course(models.Model):
     
     def __unicode__(self):
         return self.name
+        
+    class Meta:
+        unique_together = (("name"),)
         
 class TrainingExtraFields(models.Model):
     paper_name = models.CharField(max_length = 200)

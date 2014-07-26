@@ -242,22 +242,7 @@ def department(request):
     wd = WDepartments.objects.all().values_list('name')
     wwrd = WWorkshopRequests.objects.exclude(department__in = wd).values_list('department').distinct()
     #print list(wwrd)
-    newDept = [
-        'Batchelor of Tehchnology',
-        'Others',
-        'Electronics Engineering',
-        'Faculty Development Program',
-        'Physics',
-        'Oceanography',
-        'Information Science',
-        'Computer Applications',
-        'Computer Science and Technology',
-        'Biotechnology',
-        'Bioinformatics',
-        'Biology',
-        'Computer Science and Engineering',
-        'Information Technology',
-    ]
+    newDept = ['Batchelor of Tehchnology', 'Others', 'Electronics Engineering', 'Faculty Development Program', 'Physics', 'Oceanography', 'Information Science', 'Computer Applications', 'Computer Science and Technology', 'Biotechnology', 'Bioinformatics', 'Biology', 'Computer Science and Engineering', 'Information Technology', 'Information Science', 'Batchelor of Tehchnology', 'Computer Science and Engineering', 'Computer Science and Technology', 'Computer Applications', 'Computer Science', 'Electronics and Communication Engineering', 'Electrical and Electronics Engineering', 'Electronics and Telecommunication', 'Electronics and instrumentation Engineering', 'Mechanical Engineering', 'Civil Engineering', 'Aeronautical Engineering', 'Electronics and Telecommunication', 'Electronics Engineering', 'Faculty Development Program', 'Applied Mathematics', 'Batchelor of Tehchnology']
     for dept in newDept:
         try:
             Department.objects.get(name = dept)
@@ -282,6 +267,23 @@ def states(request):
             State.objects.create(code = ws.code, name = ws.name)
             print "created => ", ws.name
     return HttpResponse("States migration complted!")
+
+def resource_person(request):
+    wrps = WResourcePerson.objects.all()
+    for wrp in wrps:
+        try:
+            duser = get_user(wrp.user_uid)
+        except:
+            continue
+        wstates = wrp.states.split(',')
+        for wstate in wstates:
+            try:
+                state = State.objects.get(code = wstate)
+                print "******", wstate, "******"
+                ResourcePerson.objects.get_or_create(state=state, user=duser, assigned_by = 1, status = 1)
+            except Exception, e:
+                print e, "ResourcePerson => ", duser, wrp.user_uid
+    return HttpResponse("Rp migration complted!")
 
 def academic_center(request):
     state_list = {'' : 36L, 'ANP' : 2L, 'ANR' : 1L, 'ARP' : 3L, 'ASM' : 4L, 'BHR' : 5L, 'CHG' : 6L, 'CTG' : 7L, 'DDU' : 9L, 'DEL' : 10L, 'DNG' : 8L, 'GOA' : 11L, 'GUJ' : 12L, 'HAR' : 13L, 'HMP' : 14L, 'INL' : 37L, 'JHD' : 16L, 'JNK' : 15L, 'KAR' : 17L, 'KER' : 18L, 'LKD' : 19L, 'MAH' : 21L, 'MAN' : 22L, 'MDP' : 20L, 'MEG' : 23L, 'MIZ' : 24L, 'NAG' : 25L, 'ODI' : 26L, 'PCY' : 27L, 'PJB' : 28L, 'RAJ' : 29L, 'SIK' : 30L, 'TAM' : 31L, 'TRP' : 32L, 'UTK' : 34L, 'UTP' : 33L, 'WBN' : 35L}
@@ -371,6 +373,9 @@ def organiser(request):
                 #profile
                 try:
                     p = Profile.objects.get(user_id = duser.id)
+                    p.address = wo.address
+                    p.phone = wo.phone
+                    p.save()
                 except Exception, e:
                     #print e
                     #print "*********** => 2"
@@ -453,6 +458,8 @@ def invigilator(request):
                 #profile
                 try:
                     p = Profile.objects.get(user_id = duser.id)
+                    p.address = wo.address
+                    p.phone = wo.phone
                 except Exception, e:
                     #print e
                     #print "*********** => 2"
@@ -568,7 +575,8 @@ def workshop(request):
                         except Exception, e:
                             print e, " => 2ab ", wwr.workshop_code, " => ", d
                             #sys.exit(0)
-                dept = Department.objects.create(name = wdept)
+                #if not ',' in wdept:
+                #    dept = Department.objects.create(name = wdept)
             
             #find academic_center id
             ac = None

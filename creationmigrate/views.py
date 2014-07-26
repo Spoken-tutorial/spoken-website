@@ -7,7 +7,9 @@ from django.shortcuts import render
 from django.conf import settings
 from django.db.models import Q
 from shutil import copyfile
+import random, string
 import os
+import shutil
 
 from cdeep.models import *
 from creation.models import *
@@ -142,7 +144,24 @@ def users(request):
                 user = User.objects.get(username = name)
                 print 'Problem', ',', row.mail, ',', row.name, ',', name
             except:
-                User.objects.create(password = row.pass_field,username = name, email = row.mail, is_active = row.status)
+                user = User.objects.create(password = row.pass_field,username = name, email = row.mail, is_active = row.status)
+                confirmation_code = ''.join(random.choice(string.ascii_uppercase + string.digits + string.ascii_lowercase) for x in range(33))
+                p = Profile(user=user, confirmation_code=confirmation_code)
+                p.save()
+                
+                # move profile image
+                if row.picture:
+                    srcfile = row.picture
+                    file_ext = row.picture.split('.')[1]
+                    dstdir = settings.MEDIA_ROOT + 'user/' + user.id + '/'
+                    
+                    try:
+                        os.makedirs(dstdir)
+                    except:
+                        pass
+                        
+                    shutil.copy(srcfile, dstdir + user.id + '.' + file_ext)
+                
     return HttpResponse('Success!')
 
 @login_required
