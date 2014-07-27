@@ -4,6 +4,7 @@ from django.core.exceptions import PermissionDenied
 from django.contrib.auth.models import Group
 from django.contrib.auth.models import User
 from django.shortcuts import render
+ from django.db import connection
 from django.conf import settings
 from django.db.models import Q
 from shutil import copyfile
@@ -396,6 +397,7 @@ def tutorial_resources(request):
         raise PermissionDenied()
     rows = TutorialResources.objects.all()
     new_tr = None
+    cursor = connection.cursor()
     for row in rows:
         #break
         new_td = get_current_tutorial_detail(row.tutorial_detail)
@@ -442,6 +444,8 @@ def tutorial_resources(request):
                     except Exception, e:
                         print 2, e
                         #break
+                if new_tr:
+                    cursor.execute("""update creation_tutorialresource set created='""" + str(row.upload_time) + """', updated='""" + str(row.upload_time) + """' where id=""" + str(new_tr.id))
             except Exception, e:
                 print 3, e
                 #break
