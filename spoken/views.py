@@ -94,7 +94,7 @@ def keyword_search(request):
                 keywords.remove(key)
             query = get_or_query(keywords, search_fields)
             if query:
-                collection = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), common_content = TutorialCommonContent.objects.filter(query), language__name = 'English')
+                collection = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), common_content = TutorialCommonContent.objects.filter(query), language__name = 'English').order_by('tutorial_detail__foss__foss', 'tutorial_detail__level', 'tutorial_detail__order', 'language__name')
         
     context = {}
     context['form'] = KeywordSearchForm()
@@ -133,7 +133,7 @@ def watch_tutorial(request, foss, tutorial, lang):
         print foss, tutorial
         td_rec = TutorialDetail.objects.get(foss__foss = foss, tutorial = tutorial)
         tr_rec = TutorialResource.objects.select_related().get(tutorial_detail = td_rec, language = Language.objects.get(name = lang))
-        tr_recs = TutorialResource.objects.select_related('tutorial_detail').filter(Q(status = 1) | Q(status = 2), tutorial_detail__foss = tr_rec.tutorial_detail.foss, language = tr_rec.language)
+        tr_recs = TutorialResource.objects.select_related('tutorial_detail').filter(Q(status = 1) | Q(status = 2), tutorial_detail__foss = tr_rec.tutorial_detail.foss, language = tr_rec.language).order_by('tutorial_detail__foss__foss', 'tutorial_detail__level', 'tutorial_detail__order', 'language__name')
     except Exception, e:
         messages.error(request, str(e))
         return HttpResponseRedirect('/')
@@ -141,7 +141,7 @@ def watch_tutorial(request, foss, tutorial, lang):
     video_info = get_video_info(video_path)
     context = {
         'tr_rec': tr_rec,
-        'tr_recs': sorted(tr_recs, key=lambda tutorial_resource: tutorial_resource.tutorial_detail.order),
+        'tr_recs': tr_recs,
         'video_info': video_info,
         'media_url': settings.MEDIA_URL,
         'media_path': settings.MEDIA_ROOT,
