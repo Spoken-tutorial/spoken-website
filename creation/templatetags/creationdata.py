@@ -83,24 +83,28 @@ def get_missing_component_reply(mcid):
     return replies
 
 def instruction_sheet(foss, lang):
-    file_path = settings.MEDIA_ROOT + 'videos/' + str(foss.id) + foss.foss + '-Instruction-Sheet-' + lang.name + '.pdf'
+    file_path = settings.MEDIA_ROOT + 'videos/' + str(foss.id) + '/' + foss.foss.replace(' ', '-') + '-Instruction-Sheet-' + lang.name + '.pdf'
     if lang.name != 'English':
         if os.path.isfile(file_path):
+            file_path = settings.MEDIA_URL + 'videos/' + str(foss.id) + '/' + foss.foss.replace(' ', '-') + '-Instruction-Sheet-' + lang.name + '.pdf'
             return file_path
     
-    file_path = settings.MEDIA_ROOT + 'videos/' + str(foss.id) + foss.foss + '-Instruction-Sheet-English.pdf'
+    file_path = settings.MEDIA_ROOT + 'videos/' + str(foss.id) + '/' + foss.foss.replace(' ', '-') + '-Instruction-Sheet-English.pdf'
     if os.path.isfile(file_path):
+            file_path = settings.MEDIA_URL + 'videos/' + str(foss.id) + '/' + foss.foss.replace(' ', '-') + '-Instruction-Sheet-English.pdf'
             return file_path
     return False
 
 def installation_sheet(foss, lang):
-    file_path = settings.MEDIA_ROOT + 'videos/' + str(foss.id) + foss.foss + '-Installation-Sheet-' + lang.name + '.pdf'
+    file_path = settings.MEDIA_ROOT + 'videos/' + str(foss.id) + '/' + foss.foss.replace(' ', '-') + '-Installation-Sheet-' + lang.name + '.pdf'
     if lang.name != 'English':
         if os.path.isfile(file_path):
+            file_path = settings.MEDIA_URL + 'videos/' + str(foss.id) + '/' + foss.foss.replace(' ', '-') + '-Installation-Sheet-' + lang.name + '.pdf'
             return file_path
     
-    file_path = settings.MEDIA_ROOT + 'videos/' + str(foss.id) + foss.foss + '-Installation-Sheet-English.pdf'
+    file_path = settings.MEDIA_ROOT + 'videos/' + str(foss.id) + '/' + foss.foss.replace(' ', '-') + '-Installation-Sheet-English.pdf'
     if os.path.isfile(file_path):
+            file_path = settings.MEDIA_URL + 'videos/' + str(foss.id) + '/' + foss.foss.replace(' ', '-') + '-Installation-Sheet-English.pdf'
             return file_path
     return False
     
