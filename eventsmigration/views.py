@@ -750,6 +750,7 @@ def workshop(request):
             # new status
             wstatus = {0 : 0, 1 : 0, 2 : 4}
             w = Training()
+            w.id = wwr.id
             w.organiser_id = organiser.id
             w.training_code = wwr.workshop_code.upper()
             w.academic_id = ac.id
