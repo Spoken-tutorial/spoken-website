@@ -4,10 +4,13 @@ from django.core.exceptions import PermissionDenied
 from django.contrib.auth.models import Group
 from django.contrib.auth.models import User
 from django.shortcuts import render
+ from django.db import connection
 from django.conf import settings
 from django.db.models import Q
 from shutil import copyfile
+import random, string
 import os
+import shutil
 
 from cdeep.models import *
 from creation.models import *
@@ -142,7 +145,26 @@ def users(request):
                 user = User.objects.get(username = name)
                 print 'Problem', ',', row.mail, ',', row.name, ',', name
             except:
-                User.objects.create(password = row.pass_field,username = name, email = row.mail, is_active = row.status)
+                user = User.objects.create(password = row.pass_field,username = name, email = row.mail, is_active = row.status)
+                confirmation_code = ''.join(random.choice(string.ascii_uppercase + string.digits + string.ascii_lowercase) for x in range(33))
+                p = Profile(user=user, confirmation_code=confirmation_code)
+                p.save()
+                
+                # move profile image
+                if row.picture:
+                    srcfile = row.picture
+                    file_ext = row.picture.split('.')[1]
+                    dstdir = settings.MEDIA_ROOT + 'user/' + str(user.id) + '/'
+                    
+                    try:
+                        os.makedirs(dstdir)
+                    except:
+                        pass
+                        
+                    shutil.copy(srcfile, dstdir + str(user.id) + '.' + file_ext)
+                    p.picture = 'user/' + str(user.id) + '/' + str(user.id) + '.' + file_ext
+                    p.save()
+                    
     return HttpResponse('Success!')
 
 @login_required
@@ -153,10 +175,25 @@ def foss_categories(request):
     for row in rows:
         foss_name = row.name
         foss_name = foss_name.replace("-", " ").replace("+", "p")
+        foss_filename = foss_name.replace(" ", "-")
         try:
             foss_row = FossCategory.objects.get(foss = foss_name)
         except Exception, e:
-            FossCategory.objects.create(foss = foss_name, description = row.foss_desc, status = 1, user = request.user)
+            foss_row = FossCategory.objects.create(foss = foss_name, description = row.foss_desc, status = 1, user = request.user)
+        if foss_row:
+            foss_dir = settings.MEDIA_ROOT + '/videos/' + str(foss_row.id)
+            try:
+                os.makedirs(foss_dir)
+            except:
+                pass
+            old_installation_sheet = settings.STVIDEOS_DIR + 'st_videos/' + row.name + '/' + row.name + '_Installation_Sheet_English.pdf'
+            old_instruction_sheet = settings.STVIDEOS_DIR + 'st_videos/' + row.name + '/' + row.name + '_Instruction_Sheet_English.pdf'
+            new_installation_sheet = foss_dir + '/' + foss_filename + '-Installation-Sheet-English.pdf'
+            new_instruction_sheet = foss_dir + '/' + foss_filename + '-Instruction-Sheet-English.pdf'
+            if os.path.isfile(old_installation_sheet):
+                copyfile( old_installation_sheet, new_installation_sheet)
+            if os.path.isfile(old_instruction_sheet):
+                copyfile( old_instruction_sheet, new_instruction_sheet)
     return HttpResponse('Success!')
 
 @login_required
@@ -360,6 +397,7 @@ def tutorial_resources(request):
         raise PermissionDenied()
     rows = TutorialResources.objects.all()
     new_tr = None
+    cursor = connection.cursor()
     for row in rows:
         #break
         new_td = get_current_tutorial_detail(row.tutorial_detail)
@@ -406,6 +444,8 @@ def tutorial_resources(request):
                     except Exception, e:
                         print 2, e
                         #break
+                if new_tr:
+                    cursor.execute("""update creation_tutorialresource set created='""" + str(row.upload_time) + """', updated='""" + str(row.upload_time) + """' where id=""" + str(new_tr.id))
             except Exception, e:
                 print 3, e
                 #break

@@ -15,8 +15,9 @@ import os, sys
 
 from workshop.models import *
 from events.models import *
-from cms.models import Profile
+from cms.models import *
 from django.db.models import Sum
+from cdeep.models import *
 
 def get_dept(dept):
     getDept = {
@@ -242,22 +243,7 @@ def department(request):
     wd = WDepartments.objects.all().values_list('name')
     wwrd = WWorkshopRequests.objects.exclude(department__in = wd).values_list('department').distinct()
     #print list(wwrd)
-    newDept = [
-        'Batchelor of Tehchnology',
-        'Others',
-        'Electronics Engineering',
-        'Faculty Development Program',
-        'Physics',
-        'Oceanography',
-        'Information Science',
-        'Computer Applications',
-        'Computer Science and Technology',
-        'Biotechnology',
-        'Bioinformatics',
-        'Biology',
-        'Computer Science and Engineering',
-        'Information Technology',
-    ]
+    newDept = ['Batchelor of Tehchnology', 'Others', 'Electronics Engineering', 'Faculty Development Program', 'Physics', 'Oceanography', 'Information Science', 'Computer Applications', 'Computer Science and Technology', 'Biotechnology', 'Bioinformatics', 'Biology', 'Computer Science and Engineering', 'Information Technology', 'Information Science', 'Batchelor of Tehchnology', 'Computer Science and Engineering', 'Computer Science and Technology', 'Computer Applications', 'Computer Science', 'Electronics and Communication Engineering', 'Electrical and Electronics Engineering', 'Electronics and Telecommunication', 'Electronics and instrumentation Engineering', 'Mechanical Engineering', 'Civil Engineering', 'Aeronautical Engineering', 'Electronics and Telecommunication', 'Electronics Engineering', 'Faculty Development Program', 'Applied Mathematics', 'Batchelor of Tehchnology']
     for dept in newDept:
         try:
             Department.objects.get(name = dept)
@@ -282,6 +268,140 @@ def states(request):
             State.objects.create(code = ws.code, name = ws.name)
             print "created => ", ws.name
     return HttpResponse("States migration complted!")
+
+def testimonials(request):
+    collection = ContentTypeCredentials.objects.all()
+    for r in collection:
+        try:
+            Testimonials.objects.get(user_name = r.field_credentials_source_value)
+        except Exception, e:
+            pass
+        
+        try:
+            t = Testimonials()
+            t.user_id = 1
+            t.user_name = r.field_credentials_source_value
+            t.actual_content = r.field_short_description_value
+            t.minified_content = r.field_short_description_value
+            t.short_description = r.field_short_description_value
+            t.source_title = r.field_credentials_source_link_title
+            t.source_link = r.field_credentials_source_link_url
+            t.status = 1
+            t.save()
+        except Exception, e:
+            print e
+    return HttpResponse("testimonials migration complted!")
+
+def articles(request):
+    from django.template.defaultfilters import slugify
+    import shutil
+    dtypes = ['article', 'media_reports', 'news_and_events', 'official_letters_or_links']
+    newstype = {'article' : 1, 'media_reports' : 2, 'news_and_events' :3, 'official_letters_or_links' : 4}
+    for dt in dtypes:
+        anodes = Node.objects.filter(type = dt)
+        for nodeid in anodes:
+            node = NodeRevisions.objects.get(nid = nodeid.nid)
+            
+            try:
+                nodefile = None
+                if dt == 'article':
+                    nodeextra = ContentTypeArticle.objects.get(nid = nodeid.nid)
+                    nodefile = Files.objects.get(fid  = nodeextra.field_photo_fid)
+                elif dt == 'media_reports':
+                    nodeextra = ContentTypeMediaReports.objects.get(nid = nodeid.nid)
+                    nodefile = Files.objects.get(fid  = nodeextra.field_media_report_image_fid)
+                elif dt == 'news_and_events':
+                    nodeextra = ContentTypeNewsAndEvents.objects.get(nid = nodeid.nid)
+                    nodefile = Files.objects.get(fid  = nodeextra.field_event_image_fid)
+                elif dt == 'official_letters_or_links':
+                    nodeextra = ContentTypeOfficialLettersOrLinks.objects.get(nid = nodeid.nid)
+                    nodefile = Files.objects.get(fid  = nodeextra.field_official_litter_fid)
+            except:
+                pass
+                
+            #print node
+            #print nodeextra
+            #print nodefile
+            
+            try:
+                News.objects.get(title = node.title)
+                #print "Already exits!"
+                continue
+            except:
+                pass
+            
+            #return HttpResponse("Articles migration complted!")
+            try:
+                n = News()
+                n.news_type_id = newstype[dt]
+                n.title = node.title
+                n.body = node.body
+                n.slug = slugify(node.title)
+                
+                nodelink = None
+                nodeltile = None
+                if dt == 'article':
+                    nodelink = nodeextra.field_link_url
+                    nodeltile = nodeextra.field_link_title
+                elif dt == 'media_reports':
+                    nodelink = nodeextra.field_media_report_link_url
+                    nodeltile = nodeextra.field_media_report_link_title 
+                elif dt == 'news_and_events':
+                    nodelink = nodeextra.field_event_link_url
+                    nodeltile = nodeextra.field_event_link_title
+                elif dt == 'official_letters_or_links':
+                    nodelink = nodeextra.field_official_link_url
+                    nodeltile = nodeextra.field_official_link_title
+                
+                n.url = nodelink
+                n.url_title = nodeltile
+                duser = get_user(node.uid)
+                n.created_by_id = duser.id
+                
+                if nodeid.created:
+                    n.created = datetime.datetime.fromtimestamp(int(nodeid.created)).strftime('%Y-%m-%d %H:%M:%S')
+                    n.updated = datetime.datetime.fromtimestamp(int(nodeid.changed)).strftime('%Y-%m-%d %H:%M:%S')
+                else:
+                    n.created = datetime.datetime.now()
+                    n.updated = datetime.datetime.now()
+                
+                n.save()
+                if nodefile:
+                    srcfile = nodefile.filepath
+                    file_ext = nodefile.filename.split('.')[1]
+                    dstdir = settings.MEDIA_ROOT + 'news/' + str(n.id) + '/'
+                    
+                    try:
+                        os.makedirs(dstdir)
+                    except:
+                        pass
+                        
+                    shutil.copy(srcfile, dstdir + str(n.id) + '.' + file_ext)
+                    n.picture = 'news/' + str(n.id) + '/' + str(n.id) + '.' + file_ext
+                    n.save()
+                    
+            except Exception, e:
+                print e, "+++++++++", node.nid, node.title, "++++++++++++"
+        
+    return HttpResponse("Articles migration complted!")
+    
+def resource_person(request):
+    wrps = WResourcePerson.objects.all()
+    for wrp in wrps:
+        try:
+            duser = get_user(wrp.user_uid)
+            duser.groups.add(Group.objects.get(name='Resource Person'))
+        except:
+            continue
+        wstates = wrp.states.split(',')
+        for wstate in wstates:
+            try:
+                state = State.objects.get(code = wstate)
+                print "******", wstate, "******"
+                ResourcePerson.objects.get_or_create(state=state, user=duser, assigned_by = 1, status = 1)
+            except Exception, e:
+                print e, "ResourcePerson => ", duser, wrp.user_uid
+    return HttpResponse("Rp migration complted!")
 
 def academic_center(request):
     state_list = {'' : 36L, 'ANP' : 2L, 'ANR' : 1L, 'ARP' : 3L, 'ASM' : 4L, 'BHR' : 5L, 'CHG' : 6L, 'CTG' : 7L, 'DDU' : 9L, 'DEL' : 10L, 'DNG' : 8L, 'GOA' : 11L, 'GUJ' : 12L, 'HAR' : 13L, 'HMP' : 14L, 'INL' : 37L, 'JHD' : 16L, 'JNK' : 15L, 'KAR' : 17L, 'KER' : 18L, 'LKD' : 19L, 'MAH' : 21L, 'MAN' : 22L, 'MDP' : 20L, 'MEG' : 23L, 'MIZ' : 24L, 'NAG' : 25L, 'ODI' : 26L, 'PCY' : 27L, 'PJB' : 28L, 'RAJ' : 29L, 'SIK' : 30L, 'TAM' : 31L, 'TRP' : 32L, 'UTK' : 34L, 'UTP' : 33L, 'WBN' : 35L}
@@ -371,6 +491,9 @@ def organiser(request):
                 #profile
                 try:
                     p = Profile.objects.get(user_id = duser.id)
+                    p.address = wo.address
+                    p.phone = wo.phone
+                    p.save()
                 except Exception, e:
                     #print e
                     #print "*********** => 2"
@@ -453,6 +576,8 @@ def invigilator(request):
                 #profile
                 try:
                     p = Profile.objects.get(user_id = duser.id)
+                    p.address = wo.address
+                    p.phone = wo.phone
                 except Exception, e:
                     #print e
                     #print "*********** => 2"
@@ -568,7 +693,8 @@ def workshop(request):
                         except Exception, e:
                             print e, " => 2ab ", wwr.workshop_code, " => ", d
                             #sys.exit(0)
-                dept = Department.objects.create(name = wdept)
+                #if not ',' in wdept:
+                #    dept = Department.objects.create(name = wdept)
             
             #find academic_center id
             ac = None

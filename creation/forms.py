@@ -1,8 +1,8 @@
-from django import forms
 from django.core.validators import RegexValidator
 from django.contrib.sessions.models import Session
 from django.contrib.auth.models import User
 from django.db.models import Q
+from django import forms
 
 from creation.models import *
 
@@ -614,3 +614,65 @@ class TutorialMissingComponentReplyForm(forms.Form):
         required = True,
         error_messages = {'required': 'Please fill the "Reply Message" field'}
     )
+
+class SuggestTopicForm(forms.ModelForm):
+    difficulty_level = forms.ModelChoiceField(
+        cache_choices = True,
+        widget = forms.Select(
+            attrs = {'class' : 'ac-state'}),
+            queryset = Level.objects.all().order_by('id'),
+            empty_label = "Select Difficulty Level",
+            help_text = "",
+            error_messages = {'required':'Please select Difficulty Level'}
+    )
+    example_suggestion = forms.ChoiceField(
+        choices = [(True, 'Yes'), (False, 'No')],
+        required = True,
+        error_messages = {'required': 'Please select Yes or No for this option'}
+    )
+    class Meta:
+        model = SuggestTopic
+        exclude = ['user', 'created']
+
+class SuggestExampleForm(forms.ModelForm):
+    script_writer = forms.ChoiceField(
+        choices = [(True, 'Yes'), (False, 'No')],
+        required = True,
+        error_messages = {'required': 'Please select Yes or No for this option'}
+    )
+    is_reviewer = forms.ChoiceField(
+        choices = [(True, 'Yes'), (False, 'No')],
+        required = True,
+        error_messages = {'required': 'Please select Yes or No for this option'}
+    )
+    class Meta:
+        model = SuggestExample
+        exclude = ['user', 'created']
+
+class CollaborateForm(forms.ModelForm):
+    are_you_one = forms.ChoiceField(
+        choices=[('Novice', 'Novice'), ('Junior Expert', 'Junior Expert'), ('Mature Expert', 'Mature Expert')],
+        widget=forms.RadioSelect()
+    )
+    howmuch_time = forms.ChoiceField(
+        choices=[(1, '1 Hour per day'), (2, '2 Hours per week'), (3, '6 Hours per month')],
+        widget=forms.RadioSelect()
+    )
+    is_reviewer = forms.ChoiceField(
+        choices = [(True, 'Yes'), (False, 'No')],
+        required = True,
+        error_messages = {'required': 'Please select Yes or No for this option'}
+    )
+    lang_contributor = forms.ChoiceField(
+        choices = [(True, 'Yes'), (False, 'No')],
+        required = True,
+        error_messages = {'required': 'Please select Yes or No for this option'}
+    )
+    lead_st = forms.ChoiceField(
+        choices = [(True, 'Yes'), (False, 'No')],
+        required = True,
+        error_messages = {'required': 'Please select Yes or No for this option'}
+    )
+    class Meta:
+        model = Collaborate
+        exclude = ['user', 'created']

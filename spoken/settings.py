@@ -56,6 +56,7 @@ INSTALLED_APPS = (
 	'cms',
 	'creation',
 	'statistics',
+	'cdcontent',
 	'events',
 	'mdldjango',
 	'nicedit',

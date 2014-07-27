@@ -187,3 +187,106 @@ class VideoComments(models.Model):
     created_at = models.DateTimeField()
     class Meta:
         db_table = 'video_comments'
+
+class ContentTypeCredentials(models.Model):
+    vid = models.IntegerField(primary_key=True)
+    nid = models.IntegerField()
+    field_credentials_source_value = models.TextField(blank=True)
+    field_credentials_source_link_url = models.CharField(max_length=2048, blank=True)
+    field_credentials_source_link_title = models.CharField(max_length=255, blank=True)
+    field_credentials_source_link_attributes = models.TextField(blank=True)
+    field_short_description_value = models.TextField(blank=True)
+    class Meta:
+        db_table = 'content_type_credentials'
+
+class Node(models.Model):
+    nid = models.IntegerField(primary_key=True)
+    vid = models.IntegerField(unique=True)
+    type = models.CharField(max_length=32)
+    language = models.CharField(max_length=12)
+    title = models.CharField(max_length=255)
+    uid = models.IntegerField()
+    status = models.IntegerField()
+    created = models.IntegerField()
+    changed = models.IntegerField()
+    comment = models.IntegerField()
+    promote = models.IntegerField()
+    moderate = models.IntegerField()
+    sticky = models.IntegerField()
+    tnid = models.IntegerField()
+    translate = models.IntegerField()
+    class Meta:
+        db_table = 'node'
+
+class NodeRevisions(models.Model):
+    nid = models.IntegerField()
+    vid = models.IntegerField(primary_key=True)
+    uid = models.IntegerField()
+    title = models.CharField(max_length=255)
+    body = models.TextField()
+    teaser = models.TextField()
+    log = models.TextField()
+    timestamp = models.IntegerField()
+    format = models.IntegerField()
+    class Meta:
+        db_table = 'node_revisions'
+
+class ContentTypeArticle(models.Model):
+    vid = models.IntegerField(primary_key=True)
+    nid = models.IntegerField()
+    field_link_url = models.CharField(max_length=2048, blank=True)
+    field_link_title = models.CharField(max_length=255, blank=True)
+    field_link_attributes = models.TextField(blank=True)
+    field_photo_fid = models.IntegerField(blank=True, null=True)
+    field_photo_list = models.IntegerField(blank=True, null=True)
+    field_photo_data = models.TextField(blank=True)
+    class Meta:
+        db_table = 'content_type_article'
+
+class Files(models.Model):
+    fid = models.IntegerField(primary_key=True)
+    uid = models.IntegerField()
+    filename = models.CharField(max_length=255)
+    filepath = models.CharField(max_length=255)
+    filemime = models.CharField(max_length=255)
+    filesize = models.IntegerField()
+    status = models.IntegerField()
+    timestamp = models.IntegerField()
+    class Meta:
+        db_table = 'files'
+
+class ContentTypeMediaReports(models.Model):
+    vid = models.IntegerField(primary_key=True)
+    nid = models.IntegerField()
+    field_media_report_image_fid = models.IntegerField(blank=True, null=True)
+    field_media_report_image_list = models.IntegerField(blank=True, null=True)
+    field_media_report_image_data = models.TextField(blank=True)
+    field_media_report_link_url = models.CharField(max_length=2048, blank=True)
+    field_media_report_link_title = models.CharField(max_length=255, blank=True)
+    field_media_report_link_attributes = models.TextField(blank=True)
+    class Meta:
+        db_table = 'content_type_media_reports'
+
+class ContentTypeNewsAndEvents(models.Model):
+    vid = models.IntegerField(primary_key=True)
+    nid = models.IntegerField()
+    field_event_link_url = models.CharField(max_length=2048, blank=True)
+    field_event_link_title = models.CharField(max_length=255, blank=True)
+    field_event_link_attributes = models.TextField(blank=True)
+    field_event_image_fid = models.IntegerField(blank=True, null=True)
+    field_event_image_list = models.IntegerField(blank=True, null=True)
+    field_event_image_data = models.TextField(blank=True)
+    class Meta:
+        db_table = 'content_type_news_and_events'
+
+class ContentTypeOfficialLettersOrLinks(models.Model):
+    vid = models.IntegerField(primary_key=True)
+    nid = models.IntegerField()
+    field_official_link_url = models.CharField(max_length=2048, blank=True)
+    field_official_link_title = models.CharField(max_length=255, blank=True)
+    field_official_link_attributes = models.TextField(blank=True)
+    field_official_litter_fid = models.IntegerField(blank=True, null=True)
+    field_official_litter_list = models.IntegerField(blank=True, null=True)
+    field_official_litter_data = models.TextField(blank=True)
+    class Meta:
+        db_table = 'content_type_official_letters_or_links'
