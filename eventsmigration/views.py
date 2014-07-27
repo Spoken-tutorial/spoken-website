@@ -490,6 +490,7 @@ def organiser(request):
                     #    print "******* workshop academic code not there ******", wo.organiser_id
                     #    #continue
                     if not wwr:
+                        print 'id:', wo.id, 'Academic Code Missing'
                         continue
                     try:
                         ac = AcademicCenter.objects.get(academic_code = wwr.academic_code)

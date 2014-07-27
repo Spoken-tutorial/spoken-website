@@ -2,6 +2,7 @@ import zipfile
 from urllib import quote_plus
 from django import template
 from django.contrib.auth.models import User
+from django.conf import settings
 from creation.models import *
 from creation.views import is_contributor, is_internal_contributor, is_external_contributor, is_videoreviewer, is_domainreviewer, is_qualityreviewer, is_administrator
 
@@ -80,6 +81,28 @@ def get_missing_component_reply(mcid):
         replies = '<br /><b>Replies:</b>' + replies
     return replies
 
+def instruction_sheet(foss, lang):
+    file_path = settings.MEDIA_ROOT + 'videos/' + str(foss.id) + foss.foss + '-Instruction-Sheet-' + lang.name + '.pdf'
+    if lang.name != 'English':
+        if os.path.isfile(file_path):
+            return file_path
+    
+    file_path = settings.MEDIA_ROOT + 'videos/' + str(foss.id) + foss.foss + '-Instruction-Sheet-English.pdf'
+    if os.path.isfile(file_path):
+            return file_path
+    return False
+
+def installation_sheet(foss, lang):
+    file_path = settings.MEDIA_ROOT + 'videos/' + str(foss.id) + foss.foss + '-Installation-Sheet-' + lang.name + '.pdf'
+    if lang.name != 'English':
+        if os.path.isfile(file_path):
+            return file_path
+    
+    file_path = settings.MEDIA_ROOT + 'videos/' + str(foss.id) + foss.foss + '-Installation-Sheet-English.pdf'
+    if os.path.isfile(file_path):
+            return file_path
+    return False
+    
 register.filter('get_missing_component_reply', get_missing_component_reply)
 register.filter('get_component_name', get_component_name)
 register.filter('get_url_name', get_url_name)
@@ -96,3 +119,5 @@ register.filter('get_review_status_list', get_review_status_list)
 register.filter('get_review_status_symbol', get_review_status_symbol)
 register.filter('get_review_status_class', get_review_status_class)
 register.filter('get_username', get_username)
+register.filter('instruction_sheet', instruction_sheet)
+register.filter('installation_sheet', installation_sheet)

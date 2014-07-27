@@ -142,8 +142,17 @@
             
             <ol class="breadcrumb">
               <li><a href="/creation/report-missing-component/{{ tr_rec.id}}"> Report Missing Component</a></li>
-              <li><a href="#">Instruction Sheet</a></li>
-              <li><a href="#">Installation Sheet</a></li>
+              {% with link=tr_rec.tutorial_detail.foss|instruction_sheet:tr_rec.language %}
+                {% if link %}
+                    <li><a href="{{ link }}">Instruction Sheet</a></li>
+                {% endif %}
+              {% endwith %}
+              
+              {% with link=tr_rec.tutorial_detail.foss|installation_sheet:tr_rec.language %}
+                {% if link %}
+                    <li><a href="{{ link }}">Installation Sheet</a></li>
+                {% endif %}
+              {% endwith %}
             </ol>
         </div>
         
