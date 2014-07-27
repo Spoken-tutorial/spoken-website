@@ -4,6 +4,7 @@ from django import template
 from django.contrib.auth.models import User
 from django.conf import settings
 from creation.models import *
+import os
 from creation.views import is_contributor, is_internal_contributor, is_external_contributor, is_videoreviewer, is_domainreviewer, is_qualityreviewer, is_administrator
 
 register = template.Library()
