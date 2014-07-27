@@ -160,11 +160,12 @@ class TrainingForm(forms.ModelForm):
     course_number = forms.CharField(required = False)
     tester = forms.CharField(required = False)
 
-    department = forms.ModelMultipleChoiceField(label='Department', cache_choices=True, widget = forms.SelectMultiple(attrs = {}), queryset = Department.objects.exclude(name='Uncategorized'), help_text = "", error_messages = {'required':'Department field required.'})
+    department = forms.ModelMultipleChoiceField(label='Department', cache_choices=True, widget = forms.SelectMultiple(attrs = {}), queryset = Department.objects.exclude(name='Uncategorized').order_by('name'), help_text = "", error_messages = {'required':'Department field required.'})
     
-    foss = forms.ModelChoiceField(label='Foss', cache_choices=True, widget = forms.Select(attrs = {}), queryset = FossCategory.objects.all(), help_text = "", error_messages = {'required':'Foss field required.'})
+    foss = forms.ModelChoiceField(label='Foss', cache_choices=True, widget = forms.Select(attrs = {}), queryset = FossCategory.objects.filter(id__in = FossAvailableForWorkshop.objects.all().values_list('foss').distinct()).order_by('foss')
+, help_text = "", error_messages = {'required':'Foss field required.'})
     
-    language = forms.ModelChoiceField(label='Language', cache_choices=True, widget = forms.Select(attrs = {}), queryset = Language.objects.all(), help_text = "", error_messages = {'required':'Language field required.'})
+    language = forms.ModelChoiceField(label='Language', cache_choices=True, widget = forms.Select(attrs = {}), queryset = Language.objects.filter(id__in = FossAvailableForWorkshop.objects.all().values_list('language').distinct()).order_by('name'), help_text = "", error_messages = {'required':'Language field required.'})
     
     trdate = forms.DateTimeField(required = True, error_messages = {'required':'Date field is required.'})
     skype = forms.ChoiceField(widget=forms.RadioSelect, choices=[(0, 'No'),(1, 'Yes')], required = True)
@@ -263,7 +264,9 @@ class TestForm(forms.ModelForm):
     tdate = forms.DateTimeField(required = True, error_messages = {'required':'Date field is required.'})
     workshop = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = False, error_messages = {'required':'Workshop field is required.'})
     training = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = False, error_messages = {'required':'Training field is required.'})
-    
+    foss = forms.ModelChoiceField(label='Foss', cache_choices=True, widget = forms.Select(attrs = {}), queryset = FossCategory.objects.filter(id__in = FossAvailableForTest.objects.all().values_list('foss').distinct()).order_by('foss')
+, help_text = "", error_messages = {'required':'Foss field required.'})
+    department = forms.ModelMultipleChoiceField(label='Department', cache_choices=True, widget = forms.SelectMultiple(attrs = {}), queryset = Department.objects.exclude(name='Uncategorized').order_by('name'), help_text = "", error_messages = {'required':'Department field required.'})
     
     def __init__(self, *args, **kwargs):
         user = ''

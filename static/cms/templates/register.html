@@ -4,13 +4,13 @@
 {% block title %}Sign Up{% endblock %}
 {% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
 {% block heading %}
-        <i class="fa fa-list-ul"></i> Sign Up
 {% endblock %}
 {% block search %}
 {% endblock %}
 {% block content %}
-    <div class="row well">
-        <div class="col-sm-8">
+    <div class="row">
+        <div class="col-sm-6 well col-sm-offset-3">
+            <h4 style="text-align:center;"class='page-title'>Sign Up</h4>
             <form class="form-signin form-horizontal" role="form" id="login_form" method="post">{% csrf_token %}
                 {{ form.non_field_errors }}
                 <div class="form-group">
