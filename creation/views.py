@@ -2340,6 +2340,7 @@ def suggest_topic(request):
     context.update(csrf(request))
     return render(request, 'creation/templates/suggest_topic.html', context)
 
+@login_required
 def suggest_example(request):
     form = None
     if request.method == 'POST':
@@ -2358,6 +2359,7 @@ def suggest_example(request):
     context.update(csrf(request))
     return render(request, 'creation/templates/suggest_example.html', context)
 
+@login_required
 def collaborate(request):
     form = None
     if request.method == 'POST':

@@ -44,8 +44,11 @@ html,body
 .mseprator{
     border-right: 1px solid #e5e5e5;
 }
-.events .yamm-content .mseprator{
+.events .yamm-content .mseprator, .creation .yamm-content .mseprator{
     min-height: 170px;
+}
+.creation .yamm-content .mseprator{
+    min-height: 110px;
 }
 .yamm-content li ul li a{
     padding: 4px 0;
