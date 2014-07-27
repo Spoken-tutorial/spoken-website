@@ -139,7 +139,24 @@
     <row>
         <div class="col-lg-7 col-md-7 col-sm-7 no-padding-left">
             <pre class="custom-jumbotron"><b>Outline:<br /></b>{{ tr_rec.outline }}</pre>
+            
+            <ol class="breadcrumb">
+              <li><a href="/creation/report-missing-component/{{ tr_rec.id}}"> Report Missing Component</a></li>
+              {% with link=tr_rec.tutorial_detail.foss|instruction_sheet:tr_rec.language %}
+                {% if link %}
+                    <li><a href="{{ link }}" target="_blank">Instruction Sheet</a></li>
+                {% endif %}
+              {% endwith %}
+              
+              {% with link=tr_rec.tutorial_detail.foss|installation_sheet:tr_rec.language %}
+                {% if link %}
+                    <li><a href="{{ link }}" target="_blank">Installation Sheet</a></li>
+                {% endif %}
+              {% endwith %}
+            </ol>
         </div>
+        
+        
         <div class="col-lg-5 col-md-5 col-sm-5 no-padding-right">
             <div class="panel panel-default">
               <div class="panel-heading">

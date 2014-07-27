@@ -4,10 +4,11 @@ from django.core.exceptions import PermissionDenied
 from django.contrib.auth.models import Group
 from django.contrib.auth.models import User
 from django.shortcuts import render
- from django.db import connection
+from django.db import connection
 from django.conf import settings
 from django.db.models import Q
 from shutil import copyfile
+from cms.models import *
 import random, string
 import os
 import shutil
@@ -152,7 +153,7 @@ def users(request):
                 
                 # move profile image
                 if row.picture:
-                    srcfile = row.picture
+                    srcfile = settings.PROFILE_PATH + row.picture
                     file_ext = row.picture.split('.')[1]
                     dstdir = settings.MEDIA_ROOT + 'user/' + str(user.id) + '/'
                     
@@ -160,11 +161,12 @@ def users(request):
                         os.makedirs(dstdir)
                     except:
                         pass
-                        
-                    shutil.copy(srcfile, dstdir + str(user.id) + '.' + file_ext)
-                    p.picture = 'user/' + str(user.id) + '/' + str(user.id) + '.' + file_ext
-                    p.save()
-                    
+                    try:
+                        copyfile(srcfile, dstdir + str(user.id) + '.' + file_ext)
+                        p.picture = 'user/' + str(user.id) + '/' + str(user.id) + '.' + file_ext
+                        p.save()
+                    except:
+                        pass
     return HttpResponse('Success!')
 
 @login_required
@@ -216,6 +218,8 @@ def tutorial_details(request):
         'C2': 1,
         'C3': 2,
         'C4': 3,
+        'S1': 1,
+        'D0': 1,
     }
     rows = TutorialDetails.objects.all()
     lang_rec = Language.objects.get(name = 'English')

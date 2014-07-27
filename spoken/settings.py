@@ -166,7 +166,7 @@ STATICFILES_DIRS = (
 )
 
 #debugging 
-INSTALLED_APPS = INSTALLED_APPS + ('debug_toolbar',)
+#INSTALLED_APPS = INSTALLED_APPS + ('debug_toolbar',)
 INTERNAL_IPS = ('127.0.0.1',)
 
 #Moodle Auth

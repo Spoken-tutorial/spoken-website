@@ -99,7 +99,7 @@ class WLiveWorkshopParticipants(models.Model):
 class WOrganiser(models.Model):
     id = models.IntegerField(primary_key=True)
     organiser_id = models.IntegerField()
-    academic_code = models.CharField(unique=True, max_length=10)
+    academic_code = models.CharField(max_length=10)
     organiser_name = models.CharField(max_length=50)
     address = models.TextField()
     city = models.CharField(max_length=100)
