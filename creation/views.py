@@ -2299,6 +2299,7 @@ def report_missing_component_reply(request, tmcid):
         'form': form,
         'tmc_row': tmc_row
     }
+    context.update(csrf(request))
     return render(request, 'creation/templates/report_missing_component_reply.html', context)
 
 @login_required
@@ -2317,3 +2318,62 @@ def report_missing_component_list(request):
         'rows': rows
     }
     return render(request, 'creation/templates/report_missing_component_list.html', context)
+
+@login_required
+def suggest_topic(request):
+    form = None
+    if request.method == 'POST':
+        form = SuggestTopicForm(request.POST)
+        if form.is_valid():
+            form_data = form.save(commit=False)
+            form_data.user_id = request.user.id
+            form_data.save()
+            for o in form.cleaned_data.get('operating_system'):
+                form_data.operating_system.add(o)
+            form = SuggestTopicForm()
+            messages.success(request, 'Your suggestion for the Topic has been submitted to concerned person. We\'ll contact you soon.')
+    else:
+        form = SuggestTopicForm()
+    context = {
+        'form': form
+    }
+    context.update(csrf(request))
+    return render(request, 'creation/templates/suggest_topic.html', context)
+
+def suggest_example(request):
+    form = None
+    if request.method == 'POST':
+        form = SuggestExampleForm(request.POST)
+        if form.is_valid():
+            form_data = form.save(commit=False)
+            form_data.user_id = request.user.id
+            form_data.save()
+            form = SuggestExampleForm()
+            messages.success(request, 'Your suggestion for the Example has been submitted to concerned person. We\'ll contact you soon.')
+    else:
+        form = SuggestExampleForm()
+    context = {
+        'form': form
+    }
+    context.update(csrf(request))
+    return render(request, 'creation/templates/suggest_example.html', context)
+
+def collaborate(request):
+    form = None
+    if request.method == 'POST':
+        form = CollaborateForm(request.POST)
+        if form.is_valid():
+            form_data = form.save(commit=False)
+            form_data.user_id = request.user.id
+            form_data.save()
+            for o in form.cleaned_data.get('contribute_towards'):
+                form_data.contribute_towards.add(o)
+            form = CollaborateForm()
+            messages.success(request, 'Form has been submitted to concerned person. Thank you for showing interest on collaborate with us. We\'ll contact you soon.')
+    else:
+        form = CollaborateForm()
+    context = {
+        'form': form
+    }
+    context.update(csrf(request))
+    return render(request, 'creation/templates/collaborate.html', context)

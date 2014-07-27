@@ -270,3 +270,52 @@ class TutorialMissingComponentReply(models.Model):
     user = models.ForeignKey(User)
     reply_message = models.TextField()
     created = models.DateTimeField(auto_now_add = True)
+
+class OperatingSystem(models.Model):
+    name = models.CharField(max_length = 255)
+    def __unicode__(self):
+        return self.name
+
+class SuggestTopic(models.Model):
+    user = models.ForeignKey(User)
+    topic_title = models.CharField(max_length = 255)
+    difficulty_level = models.ForeignKey(Level)
+    operating_system = models.ManyToManyField(OperatingSystem)
+    brief_description = models.TextField()
+    example_suggestion = models.BooleanField()
+    created = models.DateTimeField(auto_now_add = True)
+    def __unicode__(self):
+        return self.topic_title
+
+class SuggestExample(models.Model):
+    user = models.ForeignKey(User)
+    topic_title = models.CharField(max_length = 255)
+    example_description = models.TextField()
+    script_writer = models.BooleanField()
+    is_reviewer = models.BooleanField()
+    created = models.DateTimeField(auto_now_add = True)
+    def __unicode__(self):
+        return self.topic_title
+
+class ContributeTowards(models.Model):
+    name = models.CharField(max_length = 255)
+    def __unicode__(self):
+        return self.name
+
+class Collaborate(models.Model):
+    user = models.ForeignKey(User)
+    contact_number = models.CharField(max_length = 20, null = True)
+    institution_name = models.CharField(max_length = 255)
+    foss_name = models.CharField(max_length = 255)
+    are_you_one = models.CharField(max_length = 255)
+    contribute_towards = models.ManyToManyField(ContributeTowards)
+    howmuch_time = models.PositiveIntegerField()
+    availability_constraints = models.TextField(null = True, blank = True)
+    is_reviewer = models.BooleanField()
+    contribs_foss = models.TextField(null = True, blank = True)
+    educational_qualifications = models.TextField(null = True, blank = True)
+    prof_experience = models.CharField(max_length = 255, null = True, blank = True)
+    lang_contributor = models.BooleanField()
+    language = models.ForeignKey(Language)
+    lead_st = models.BooleanField()
+    created = models.DateTimeField(auto_now_add = True)
