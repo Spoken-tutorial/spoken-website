@@ -367,7 +367,7 @@ def articles(request):
                 
                 n.save()
                 if nodefile:
-                    srcfile = nodefile.filepath
+                    srcfile = settings.PROFILE_PATH + nodefile.filepath
                     file_ext = nodefile.filename.split('.')[1]
                     dstdir = settings.MEDIA_ROOT + 'news/' + str(n.id) + '/'
                     
@@ -376,7 +376,7 @@ def articles(request):
                     except:
                         pass
                         
-                    shutil.copy(srcfile, dstdir + str(n.id) + '.' + file_ext)
+                    copyfile(srcfile, dstdir + str(n.id) + '.' + file_ext)
                     n.picture = 'news/' + str(n.id) + '/' + str(n.id) + '.' + file_ext
                     n.save()
                     
@@ -481,12 +481,12 @@ def organiser(request):
                 try:
                     ac = AcademicCenter.objects.get(academic_code = wo.academic_code)
                 except Exception, e:
-                    print e
-                    print "******* Getting workshop academic code *********"
+                    #print e
+                    #print "******* Getting workshop academic code *********"
                     wwr = WWorkshopRequests.objects.filter(organiser_id = wo.organiser_id).first()
-                    if not wwr:
-                        print "******* workshop academic code not there ******", wo.organiser_id
-                        continue
+                    #if not wwr:
+                    #    print "******* workshop academic code not there ******", wo.organiser_id
+                    #    #continue
                     ac = AcademicCenter.objects.get(academic_code = wwr.academic_code)
                 #profile
                 try:
@@ -527,7 +527,7 @@ def organiser(request):
                     o = Organiser()
                     o.user_id  = duser.id
                     o.academic_id = ac.id
-                    o.status = 1
+                    o.status = wo.status
                     if wo.created_at:
                         o.created = wo.created_at
                         o.updated = wo.updated_at
@@ -543,7 +543,7 @@ def organiser(request):
             except Exception, e:
                 print e
                 print "*********** => 5 => ", "Django user id => ", duser.id, "Drupal id => ", wo.organiser_id
-                print "Something went wrong"
+                #print "Something went wrong"
                 
     return HttpResponse("Organiser migration Done!")
 
@@ -611,7 +611,7 @@ def invigilator(request):
                     o = Invigilator()
                     o.user_id  = duser.id
                     o.academic_id = ac.id
-                    o.status = 1
+                    o.status = wo.status
                     if wo.created_at:
                         o.created = wo.created_at
                         o.updated = wo.updated_at
@@ -656,7 +656,7 @@ def workshop(request):
                     continue
                 if not wwr.workshop_code:
                     wwr.workshop_code = "WC-"+str(wwr.id)
-                print e, " => 3 ", wwr.workshop_code
+                #print e, " => 3 ", wwr.workshop_code
             #check organiser there or not
             organiser = None
             try:
@@ -693,8 +693,11 @@ def workshop(request):
                         except Exception, e:
                             print e, " => 2ab ", wwr.workshop_code, " => ", d
                             #sys.exit(0)
-                #if not ',' in wdept:
-                #    dept = Department.objects.create(name = wdept)
+                if not ',' in wdept:
+                    try:
+                        dept = Department.objects.get(name=wdept)
+                    except:
+                        dept = Department.objects.create(name = wdept)
             
             #find academic_center id
             ac = None
@@ -720,7 +723,7 @@ def workshop(request):
             try:
                 if wwr.foss_category == 'Linux-Ubuntu':
                     wwr.foss_category = 'Linux'
-                foss = FossCategory.objects.get(foss = wwr.foss_category.replace("-", " "))
+                foss = FossCategory.objects.get(foss = wwr.foss_category.replace("-", " ").replace('+', 'p'))
             except Exception, e:
                 print e, " => 5 ", wwr.foss_category
                 continue
