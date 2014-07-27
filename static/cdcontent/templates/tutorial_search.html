@@ -1,101 +1,179 @@
-{% extends 'spoken/templates/base.html' %}
-{% load widget_tweaks %}
-{% load static %}
-{% load creationdata %}
-{% block title %}Search Tutorials{% endblock %}
-{% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
-{% block heading %}
-    <i class="fa fa-list-ul"></i> Search Tutorials
-{% endblock %}
-{% block search %}{% endblock %}
-{% block content %}
-    <div class="row well">
-        <div class='col-sm-12'>
-            <form action="{{ action }}" method="POST" class='form-horizontal'>{% csrf_token %}
-                {% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
-                    {% if form.non_field_errors %}
-                    <ul>
-                      {% for error in form.non_field_errors %}
-                        <li>{{ error }}</li>
-                      {% endfor %}
-                    </ul>
-                    {% endif %}
-                    <div class="form-group">
-                        <div class="col-sm-5">
-                            {% render_field form.foss_category class+="form-control foss_category" tabindex="1" value=keywords %}
-                            {{ form.foss_category.errors }}
+{% load cdcontentdata %}{% load cmsdata %}<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>
+            Search Tutorials | spoken-tutorial.org
+        </title>
+        <link rel="shortcut icon" href="./includes/images/favicon.ico">
+        <link rel="stylesheet" href="./includes/css/bootstrap.min.css" type="text/css" media="screen" charset="utf-8">
+        <link rel="stylesheet" href="./includes/css/font-awesome.min.css" type="text/css" media="screen" charset="utf-8">
+        <link rel="stylesheet" href="./includes/css/main.css" type="text/css" media="screen" charset="utf-8">
+        <style>
+            .tutorial-search-form{
+                margin-top: 20px;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="page-wrapper">
+            <!-- header begin -->
+            <div id="header-wrapper">
+                <nav class="navbar yamm navbar-default navbar-fixed-top" role="navigation">
+                    <div id="header-inner">
+                        <div class="container-fluid">
+                            <div class="navbar-header">
+                                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#main-nav">
+                                    <span class="sr-only">Toggle Navigation</span>
+                                    <span class="icon-bar"></span>
+                                    <span class="icon-bar"></span>
+                                    <span class="icon-bar"></span>
+                                </button>
+                                <a href="">
+                                    <img width="45px" src="./includes/images/logo.png">
+                                    Spoken <span class="title">Tutorial</span>
+                                </a>
+                            </div>
+                        </div> <!-- /.container-fluid -->
+                    </div> <!-- /#header-inner -->
+                </nav>
+            </div> <!-- /#header-wrapper -->
+            <!-- header end -->
+            <div id="content-wrapper">
+                <div id="content-inner" class="container">
+                    <div id="content" class="col-lg-12 col-md-12 col-sm-12">
+                        <h4 class="page-title"><i class="fa fa-list-ul"></i> Search Tutorials</h4>
+                        <div class="row well tab-content tutorial-search-form">
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                <form action="" method="POST" class="form-horizontal" style="margin-bottom: 0px;">
+                                    <div class="form-group" style="margin-bottom: 0px;">
+                                        <div class="col-lg-5 col-md-5 col-sm-5 col-xs-5">
+                                            <select class="form-control foss" id="id_foss" name="foss" tabindex="1">
+                                                <option value="0">All Foss Categories</option>
+                                                {% for foss_key,foss_detail in foss_details.items %}
+                                                    <option value="{{ foss_key }}">{{ foss_details|get_foss_name:foss_key }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="col-lg-5 col-md-5 col-sm-5 col-xs-5">
+                                            <select class="form-control language" id="id_language" name="language" tabindex="1" value="">
+                                                <option value="0">All Languages</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
+                                            <input class="btn btn-primary search-btn" type="button" value="Submit">
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div><!-- .row well tab-content tutorial-search-form -->
+                        <div class="search-result col-lg-offset-1 col-md-offset-1 col-sm-offset-1 col-xs-offset-1 col-lg-10 col-md-10 col-sm-10 col-xs-10">
+                        {% for record in collection %}
+                            <div class="result-record row video-{{ record.tutorial_detail.foss_id }} video-{{ record.tutorial_detail.foss_id }}-{{ record.language_id }} language-{{ record.language_id }}">
+                                <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2 thumb">
+                                    <a href="./videos/{{ record.tutorial_detail.foss_id }}/{{ record.tutorial_detail_id }}/show-video-{{ record.language.name }}.html" class="thumb"><img width="100%" src="./includes/images/thumb-even.png"></a>
+                                </div>
+                                <div class="info col-lg-8 col-md-8 col-sm-8 col-xs-8">
+                                    <div class="title"><h4><a href="./videos/{{ record.tutorial_detail.foss_id }}/{{ record.tutorial_detail_id }}/show-video-{{ record.language.name }}.html">{{ record.tutorial_detail.tutorial }}</a></h4></div>
+                                    <div class="desc">
+                                            <p><b>Foss:</b> <i>{{ record.tutorial_detail.foss }} - {{ record.language }}</i></p>
+                                            <p><b>Outline:</b> {{ record.outline|len_cutter:200 }}</b> </p>
+                                    </div>
+                                </div>
+                                <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
+                                    <div class="Basic pull-right">
+                                        <h5 style="text-align:right;">{{ record.tutorial_detail.level.level }}</h5>
+                                        <img style="display:block;" width="30%" src="./includes/images/{{ record.tutorial_detail.level.level }}.png" class="pull-right">
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
                         </div>
-                        <div class="col-sm-5">
-                            {% render_field form.language class+="form-control language" tabindex="1" value=keywords %}
-                            {{ form.language.errors }}
+                    </div><!-- .content -->
+                </div><!-- /#content-inner .container -->
+            </div><!-- /#content-wrapper -->
+            <div id="footer-wrapper">
+                <div class="container-inner sans-serif">
+                    <div class="container">
+                        <div class="col-lg-8 col-md-8 col-sm-8  footer-links">
+                            <div class="col-lg-3 col-md-3 col-sm-3">
+                                <ul class="list-unstyled">
+                                    <li><a href="http://fossee.in/" traget="_blank">FOSSEE Project</a></li>
+                                    <li><a href="http://www.scilab.in/" traget="_blank">Scilab Project</a></li>
+                                    <li><a href="http://www.oscad.in/" traget="_blank">Oscad</a></li>
+                                    <li><a href="http://python.fossee.in/" traget="_blank">Python</a></li>
+                                    <li><a href="http://cfd.fossee.in/" traget="_blank">CFD</a></li>
+                                    <li><a href="http://or.fossee.in/" traget="_blank">OR-Project</a></li>
+                                </ul>
+                            </div>
+                            <div class="col-lg-3 col-md-3 col-sm-3">
+                                <ul class="list-unstyled">
+                                    <li><a href="http://aakashlabs.org/" traget="_blank">Aakash Labs</a></li>
+                                    <li><a href="http://www.co-learn.in/" traget="_blank">Co-learn</a></li>
+                                    <li><a href="http://www.sakshat.ac.in/" traget="_blank">Education Mission</a></li>
+                                </ul>
+                            </div>
+                            <div class="col-lg-3 col-md-3 col-sm-3">
+                                <ul class="list-unstyled">
+                                    <li><a href="http://process.spoken-tutorial.org/index.php/Software-Training#About_SELF_Workshops" traget="_blank">Software Training</a></li>
+                                    <li><a href="http://process.spoken-tutorial.org/" traget="_blank">Creation</a></li>
+                                    <li><a href="http://spoken-tutorial.org/articles/" traget="_blank">News</a></li>
+                                </ul>
+                            </div>
+                            <div class="col-lg-3 col-md-3 col-sm-3">
+                                <ul class="list-unstyled">
+                                    <li><a href="http://spoken-tutorial.org/about" traget="_blank">About</a></li>
+                                    <!-- <li><a href="http://localhost:8000/tutorial-search/#" traget="_blank">Partners</a></li> -->
+                                    <li><a href="http://spoken-tutorial.org/software-training/" traget="_blank">Training / Workshop</a></li>
+                                </ul>
+                            </div>
                         </div>
-                        <div class="col-sm-2">
-                            <input class="btn btn-primary" type="submit" value="Submit" />
+                        <div class="col-lg-4 col-md-4 col-sm-4 license fill">
+                            <div class="fill">
+                                <footer>
+                                    Developed at IIT Bombay <br>
+                                    This work is licensed under <a href="http://creativecommons.org/licenses/by-nc-nd/3.0/" rel="license" class="ext" target="_blank">Creative Commons</a>
+                                </footer>
+                            </div>
                         </div>
-                    </div>
-                {% endwith %}
-            </form>
-        </div>
-    </div>
-    
-    <div class='search-result col-lg-12 col-md-12 col-sm-12 col-xs-12'>
-        {% if collection %}
-            {% for record in collection %}
-                <div class='result-record row'>
-                    <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2 thumb">
-                        <a href="#" class='thumb'><img width="100%" src="/static/spoken/images/thumb-even.png"></a>
-                    </div>
-                    <div class="info col-lg-8 col-md-8 col-sm-8 col-xs-8">
-                        <div class='title'><h3><a href="/watch/{{ record.tutorial_detail.foss.foss|get_url_name }}/{{ record.tutorial_detail.tutorial|get_url_name }}/{{ record.language }}">{{ record.tutorial_detail.tutorial }}</a></h3></div>
-                        <div class='desc'>
-                                Foss : {{ record.tutorial_detail.foss }}</br>
-                                Language : {{ record.language }}</br>
-                                Level : {{ record.tutorial_detail.level }}</br>
-                                Published on : {{ record.updated }}</br>
-                            </dl>
-                        </div>
-                    </div>
-                    <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
-                        <div class="{{ record.tutorial_detail.level }}"></div>
                     </div>
                 </div>
-            {% endfor %}
-        {% else %}
-            <p class='no-record'> No result found!</p>
-        {% endif %}
-    </div>
-
-
-{% endblock %}
-{% block jsblock %}
-    <script src="{% static 'spoken/js/chosen.jquery.min.js' %}"></script>
-    <script src="{% static 'spoken/js/events.js' %}"></script>
-    <script>
-        $("#id_foss_category, #id_language").change(function(){
-            var foss = $('#id_foss_category').val();
-            var lang = $('#id_language').val();
-            if (foss == '' || lang == ''){
-                $.ajax({
-				    url: "/get-language/",
-				    type: "POST",
-				    data: {
-					    foss : foss,
-					    lang : lang,
-				    },
-				    beforeSend: function() {
-                        $('.ajax-refresh-district').show();
-                    },
-				    success: function(data) {
-				        console.log(data[0])
-				        if (data[0] == 'foss'){
-				            $('#id_language').html(data);
-				        }else if (data[0] == 'lang'){
-				            $('#id_foss_category').html(data);
-				        }
-				    }
-			    });
-			}
-        });
-    </script>
-{% endblock %}
-
+            </div>
+        </div><!-- /#page-wrapper -->
+        <!-- Bootstrap core JavaScript
+        ================================================== -->
+        <!-- Placed at the end of the document so the pages load faster -->
+        <script src="./includes/js/jquery-1.11.0.min.js"></script>
+        <script src="./includes/js/bootstrap.min.js"></script>
+        <script>
+            $(document).ready(function(){
+                var fossList = []
+                fossList[0] = '<option value="0">All Languages</option>';
+                {% for foss_key,foss_detail in foss_details.items %}
+                    fossList[{{ foss_key }}] = '{{ foss_details|get_lang_details:foss_key|safe }}';
+                {% endfor %}
+                $('.foss').on("change", function(){
+                    foss = $('.foss').val();
+                    $('.language').html('<option value="0">All Languages</option>' + fossList[foss]);
+                    if(foss == 0){
+                        $('.result-record').show();
+                    }
+                });
+                $('.search-btn').on("click", function(){
+                    foss = $('.foss').val();
+                    lang = $('.language').val();
+                    if(foss != 0) {
+                        $('.result-record').hide();
+                        if(lang != 0) {
+                            $('.video-'+foss+'-'+lang).show();
+                        } else {
+                            $('.video-'+foss).show();
+                        }
+                    } else {
+                        $('.result-record').show();
+                    }
+                });
+            });
+        </script>
+    </body>
+</html>
