@@ -3,7 +3,6 @@
 *.pyc
 config.py
 media/*
-static/statistics/*
 !media/videos/
 !media/training/
 media/videos/*

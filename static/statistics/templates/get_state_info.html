@@ -1,0 +1,30 @@
+<html>
+    <head>
+        <title>State Workshop Information</title>
+    </head>
+    <body style="overflow: hidden;">
+        <div style="background-color: #ececec;">
+            <table border="0" width="100%" height="100%" style="padding:10px;">
+                <caption align="center"><h3 style="margin: 0px; padding: 2px;">{{ state_name }}</h3></caption>
+                <tr>
+                    <td><b>Workshops:</b></td>
+                    <td>{{ workshops }}</td>
+                </tr>
+                <tr>
+                    <td><b>Participants:</b></td>
+                    <td>{{ participants }}</td>
+                </tr>
+                <tr>
+                    <td><b>Resource Centers:</b></td>
+                    <td>{{ resource_centers }}</td>
+                </tr>
+                <tr>
+                    {% if from_date %}
+                    <td><b>From:</b></td>
+                    <td>{{ from_date }}</td>
+                    {% endif %}
+                </tr>
+            </table>
+        </div>
+    </body>
+</html>
