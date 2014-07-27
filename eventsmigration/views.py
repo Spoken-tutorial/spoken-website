@@ -1083,6 +1083,7 @@ def test(request):
             # new status
             #wstatus = {0 : 0, 1 : 1, 2 : 4}
             w = Test()
+            w.id = wtr.id
             w.organiser_id = organiser.id
             if wtr.invigilator_id == 0:
                 w.invigilator_id = None
