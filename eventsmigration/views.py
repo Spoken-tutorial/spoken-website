@@ -465,7 +465,9 @@ def organiser(request):
     worganisers = WOrganiser.objects.all()
     for wo in worganisers:
         duser = get_user(wo.organiser_id)
-        
+        if duser == None:
+            print 'id:', wo.id, 'user missing in auth_user'
+            continue
         try:
             o = Organiser.objects.get(user_id  = duser.id)
             #print "Organiser Already Exits!", "Django user id => ", duser.id, "Drupal id => ", wo.organiser_id
@@ -487,7 +489,13 @@ def organiser(request):
                     #if not wwr:
                     #    print "******* workshop academic code not there ******", wo.organiser_id
                     #    #continue
-                    ac = AcademicCenter.objects.get(academic_code = wwr.academic_code)
+                    if not wwr:
+                        continue
+                    try:
+                        ac = AcademicCenter.objects.get(academic_code = wwr.academic_code)
+                    except:
+                        print 'id:', wo.id, 'Academic Code Missing'
+                        continue
                 #profile
                 try:
                     p = Profile.objects.get(user_id = duser.id)
@@ -495,33 +503,22 @@ def organiser(request):
                     p.phone = wo.phone
                     p.save()
                 except Exception, e:
-                    #print e
-                    #print "*********** => 2"
-                    try:
-                        confirmation_code = ''.join(random.choice(string.ascii_uppercase + string.digits + string.ascii_lowercase) for x in range(33))
-                        p = Profile()
-                        p.user_id = duser.id
-                        p.confirmation_code = confirmation_code
-                        p.address = wo.address
-                        p.phone = wo.phone
-                        p.save()
-                    except Exception, e:
-                        print "User not exits", "Django user id => ", duser.id, "Drupal id => ", wo.organiser_id
-                        sys.exit(0)
-                    
+                    print 'id:', wo.id, 'error adding profile info'
                 #save organiser name ad user first name
                 try:
                     u = User.objects.get(pk = duser.id)
                     u.first_name = wo.organiser_name
                     u.save()
                     try:
-                        u.groups.add(Group.objects.get(name='Organiser'))
+                        u.groups.get(name='Organiser')
                     except Exception, e:
-                        print e
-                        
+                        try:
+                            u.groups.add(Group.objects.get(name='Organiser'))
+                        except:
+                            print 'id:', wo.id, 'error while Orgainser group'
                 except Exception, e:
                     print e
-                    print "*********** => 3", "Django user id => ", duser.id, "Drupal id => ", wo.organiser_id
+                    #print "*********** => 3", "Django user id => ", duser.id, "Drupal id => ", wo.organiser_id
                     #print "User not exits => ", wo.organiser_id
                 try:
                     o = Organiser()
@@ -551,9 +548,11 @@ def invigilator(request):
     winvigilators = WInvigilator.objects.all()
     for wo in winvigilators:
         duser = get_user(wo.invigilator_id)
+        if duser == None:
+            print 'id:', wo.id, 'user missing in auth_user'
+            continue
         try:
             o = Invigilator.objects.get(user_id  = duser.id)
-            print "Invigilator Already Exits!", "Django user id => ", duser.id, "Drupal id => ", wo.invigilator_id
             continue
         except Exception, e:
             #print e
@@ -562,7 +561,6 @@ def invigilator(request):
                 #find academic_id
                 if 'ANR' in wo.academic_code:
                     continue
-                
                 try:
                     ac = AcademicCenter.objects.get(academic_code = wo.academic_code)
                 except Exception, e:
@@ -572,40 +570,35 @@ def invigilator(request):
                     if not wwr:
                         print "******* workshop academic code not there ******", wo.invigilator_id
                         continue
-                    ac = AcademicCenter.objects.get(academic_code = wwr.academic_code)
+                    try:
+                        ac = AcademicCenter.objects.get(academic_code = wwr.academic_code)
+                    except:
+                        print 'id:', wo.id, 'Academic Code Missing'
+                        continue
+                        
                 #profile
                 try:
                     p = Profile.objects.get(user_id = duser.id)
                     p.address = wo.address
                     p.phone = wo.phone
+                    p.save()
                 except Exception, e:
-                    #print e
-                    #print "*********** => 2"
-                    try:
-                        confirmation_code = ''.join(random.choice(string.ascii_uppercase + string.digits + string.ascii_lowercase) for x in range(33))
-                        p = Profile()
-                        p.user_id = duser.id
-                        p.confirmation_code = confirmation_code
-                        p.address = wo.address
-                        p.phone = wo.phone
-                        p.save()
-                    except Exception, e:
-                        print "User not exits", "Django user id => ", duser.id, "Drupal id => ", wo.invigilator_id
-                        sys.exit(0)
-                    
+                    print 'id:', wo.id, 'error adding profile info'
                 #save invigilator name ad user first name
                 try:
                     u = User.objects.get(pk = duser.id)
                     u.first_name = wo.invigilator_name
                     u.save()
                     try:
-                        u.groups.add(Group.objects.get(name='Invigilator'))
+                        u.groups.get(name='Invigilator')
                     except Exception, e:
-                        print e
-                        
+                        try:
+                            u.groups.add(Group.objects.get(name='Invigilator'))
+                        except:
+                            print 'id:', wo.id, 'error while Invigilator group'
                 except Exception, e:
                     print e
-                    print "*********** => 3", "Django user id => ", duser.id, "Drupal id => ", wo.invigilator_id
+                    #print "*********** => 3", "Django user id => ", duser.id, "Drupal id => ", wo.invigilator_id
                     #print "User not exits => ", wo.invigilator_id
                 try:
                     o = Invigilator()
@@ -637,14 +630,17 @@ def workshop(request):
     if workshop_status == 2:
         wwrs = WWorkshopRequests.objects.filter(status = workshop_status)
     elif workshop_status == 1:
-        wwrs = WWorkshopRequests.objects.filter(status = workshop_status, pref_wkshop_date__gte = datetime.datetime.today())
+        wwrs = WWorkshopRequests.objects.filter(status = workshop_status, pref_wkshop_date__gt = datetime.datetime.today())
     else:
-        wwrs = WWorkshopRequests.objects.filter(status = workshop_status, pref_wkshop_date__gte = datetime.datetime.today())
+        wwrs = WWorkshopRequests.objects.filter(status = workshop_status, pref_wkshop_date__gt = datetime.datetime.today())
         
     for wwr in wwrs:
         #Save department
         try:
             duser = get_user(wwr.organiser_id)
+            if duser == None:
+                print 'id:', wwr.id, 'user missing in auth_user'
+                continue
             # Save Workshop
             w = None
             try:
@@ -653,6 +649,7 @@ def workshop(request):
                 continue
             except Exception, e:
                 if not wwr.workshop_code and wwr.status == 2:
+                    print 'id:', wwr.id, 'workshop code missing'
                     continue
                 if not wwr.workshop_code:
                     wwr.workshop_code = "WC-"+str(wwr.id)
@@ -663,9 +660,8 @@ def workshop(request):
                 organiser = Organiser.objects.get(user_id = duser.id)
             except Exception, e:
                 #print e
-                print "Organiser Not there => ", wwr.organiser_id
+                print 'id:', wwr.id, "Organiser Not there => ", wwr.organiser_id
                 continue
-                
             #check dept in WDepartments
             wdept = wwr.department
             try:
@@ -675,49 +671,42 @@ def workshop(request):
                 wdept = get_dept(wdept)
             
             # check in Department
-            dept = None
+            """dept = None
             try:
                 dept = Department.objects.get(name=wdept)
             except Exception, e:
-                print e, " => 2",
+                #print e, " => 2",
                 if ',' in wdept:
                     cwdept = wdept.split(',');
                     for d in cwdept:
                         try:
                             d = Department.objects.get(name = d)
                         except Exception, e:
-                            print e, " => 2aa ", wwr.workshop_code, " => ", d
+                            print e, " => 2aa ", wwr.id, " => ", d
                             d = get_dept(d)
                         try:
                             Department.objects.get(name=d)
                         except Exception, e:
-                            print e, " => 2ab ", wwr.workshop_code, " => ", d
+                            print e, " => 2ab ", wwr.id, " => ", d
                             #sys.exit(0)
                 if not ',' in wdept:
                     try:
-                        dept = Department.objects.get(name=wdept)
-                    except:
                         dept = Department.objects.create(name = wdept)
+                    except:
+                        dept = Department.objects.get(name = 'Others')"""
             
             #find academic_center id
             ac = None
             try:
                 ac = AcademicCenter.objects.get(academic_code = wwr.academic_code)
             except Exception, e:
-                #print e, " => 4 ", wwr.academic_code, wwr.workshop_code
-                if '-- select ' == wwr.academic_code:
-                    o = Organiser.objects.get(organiser_id = duser.id)
-                    ac = AcademicCenter.objects.get(academic_code = o.academic_code)
-                
                 #get organiser academic and set to workshop
                 try:
                     o  = Organiser.objects.get(user_id = duser.id)
                     ac = AcademicCenter.objects.get(pk = o.academic_id)
                 except Exception, e:
-                    print e, "=> 4aa "
-                    
-                continue
-            
+                    print 'id:', wwr.id, 'academic code missing'
+                    continue
             #find foss_category_id
             foss = None
             try:
@@ -725,7 +714,8 @@ def workshop(request):
                     wwr.foss_category = 'Linux'
                 foss = FossCategory.objects.get(foss = wwr.foss_category.replace("-", " ").replace('+', 'p'))
             except Exception, e:
-                print e, " => 5 ", wwr.foss_category
+                #print e, " => 5 ", wwr.foss_category
+                print 'id:', wwr.id, 'foss category missing', wwr.foss_category
                 continue
                 
              #find language_id
@@ -733,7 +723,8 @@ def workshop(request):
             try:
                 lang = Language.objects.get(name = wwr.pref_language)
             except Exception, e:
-                print e, " => 6 ", wwr.pref_language
+                #print e, " => 6 ", wwr.pref_language
+                print 'id:', wwr.id, 'language missing', wwr.pref_language
                 continue
             
             # get participants count
@@ -742,17 +733,18 @@ def workshop(request):
                 try:
                     wp = WWorkshopDetails.objects.get(workshop_code = wwr.workshop_code)
                 except Exception, e:
-                    print e, " => 7 ", wwr.workshop_code
+                    #print e, " => 7 ", wwr.workshop_code
+                    print 'id:', wwr.id, 'workshop details missing', wwr.workshop_code
                     continue
-            elif workshop_status == 1:
+            """elif workshop_status == 1:
                 try:
-                    WWorkshopFeedback.objects.filter(workshop_code = wwf.workshop_code).count()
+                    #WWorkshopFeedback.objects.filter(workshop_code = wwf.workshop_code).count()
                     wp = WWorkshopDetails.objects.get(workshop_code = wwr.workshop_code)
                     print "7aaa,  yes yes", wwr.workshop_code
                 except Exception, e:
                     pass
             else:
-                pass
+                pass"""
                 
             # new status
             wstatus = {0 : 0, 1 : 0, 2 : 4}
@@ -803,9 +795,9 @@ def workshop(request):
                     except Exception, e:
                         #duplicate because of unique_together
                         #print "Duplicate post change time save ******", wwr.workshop_code, " => ", wwr.academic_code, wwr.cfm_wkshop_date, 
-                        if i == 149:
-                            sys.exit(0)
                         post_time = post_time + 5
+                        if i >= 149:
+                            print 'i exceeded 149'
                         continue
             
             #save departments
@@ -823,18 +815,19 @@ def workshop(request):
                             try:
                                 dept = Department.objects.get(name = dept)
                             except Exception, e:
-                                print e, " => sss ", wwr.workshop_code, " => ", dept
+                                #print e, " => sss ", wwr.workshop_code, " => ", dept
                                 dept = get_dept(dept)
-                                
-                            dept = Department.objects.get(name = dept)
-                            w.department.add(dept)
+                            try:
+                                dept = Department.objects.get(name = dept)
+                                w.department.add(dept)
+                            except:
+                                pass
                     w.save()
             
             except Exception, e:
                 print e, " => 8", wwr.workshop_code, " => ", wdept
                 w.delete()
-                sys.exit(0)
-            
+                continue
         except Exception, e:
             #print "Something went wrong!"
             print e, "Something went wrong => 9", wwr.id," => ", wwr.workshop_code, "Organiser => ", wwr.organiser_id
@@ -1203,7 +1196,8 @@ def get_user(old_user_id):
     try:
         user = Users.objects.get(pk = old_user_id)
     except Exception, e:
-        print e, " user not getting"
+        #print e, " user not getting"
+        pass
     
     name = user.name
     if len(name) > 30:
@@ -1219,5 +1213,6 @@ def get_user(old_user_id):
         try:
             duser = User.objects.get(username = name)
         except Exception, e:
-            print e, " ======> ", user.mail, user.name
+            #print e, " ======> ", user.mail, user.name
+            pass
     return duser
