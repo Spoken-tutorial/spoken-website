@@ -11,6 +11,7 @@ media/training/*
 !media/training/README
 !media/videos/README
 !media/README
+uwsgi-master.pid
 *.py[cod]
 
 # C extensions
