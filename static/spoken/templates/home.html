@@ -92,7 +92,9 @@
                             <div class="user-details">
                                 <div class="caretr"></div>
                                 <img width="30" height="30" src="/static/spoken/images/no-profile-image.jpg" />
-                                {% if record.user.first_name %}
+                                {% if record.user_name %}
+                                     {{ record.user_name }}
+                                {% elif record.user.first_name %}
                                     {{ record.user.first_name }}
                                 {% else %}
                                     {{ record.user.username }}

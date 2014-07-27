@@ -153,15 +153,17 @@ def users(request):
                 if row.picture:
                     srcfile = row.picture
                     file_ext = row.picture.split('.')[1]
-                    dstdir = settings.MEDIA_ROOT + 'user/' + user.id + '/'
+                    dstdir = settings.MEDIA_ROOT + 'user/' + str(user.id) + '/'
                     
                     try:
                         os.makedirs(dstdir)
                     except:
                         pass
                         
-                    shutil.copy(srcfile, dstdir + user.id + '.' + file_ext)
-                
+                    shutil.copy(srcfile, dstdir + str(user.id) + '.' + file_ext)
+                    p.picture = 'user/' + str(user.id) + '/' + str(user.id) + '.' + file_ext
+                    p.save()
+                    
     return HttpResponse('Success!')
 
 @login_required

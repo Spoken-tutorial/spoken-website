@@ -15,8 +15,9 @@ import os, sys
 
 from workshop.models import *
 from events.models import *
-from cms.models import Profile
+from cms.models import *
 from django.db.models import Sum
+from cdeep.models import *
 
 def get_dept(dept):
     getDept = {
@@ -268,11 +269,128 @@ def states(request):
             print "created => ", ws.name
     return HttpResponse("States migration complted!")
 
+def testimonials(request):
+    collection = ContentTypeCredentials.objects.all()
+    for r in collection:
+        try:
+            Testimonials.objects.get(user_name = r.field_credentials_source_value)
+        except Exception, e:
+            pass
+        
+        try:
+            t = Testimonials()
+            t.user_id = 1
+            t.user_name = r.field_credentials_source_value
+            t.actual_content = r.field_short_description_value
+            t.minified_content = r.field_short_description_value
+            t.short_description = r.field_short_description_value
+            t.source_title = r.field_credentials_source_link_title
+            t.source_link = r.field_credentials_source_link_url
+            t.status = 1
+            t.save()
+        except Exception, e:
+            print e
+    return HttpResponse("testimonials migration complted!")
+
+def articles(request):
+    from django.template.defaultfilters import slugify
+    import shutil
+    dtypes = ['article', 'media_reports', 'news_and_events', 'official_letters_or_links']
+    newstype = {'article' : 1, 'media_reports' : 2, 'news_and_events' :3, 'official_letters_or_links' : 4}
+    for dt in dtypes:
+        anodes = Node.objects.filter(type = dt)
+        for nodeid in anodes:
+            node = NodeRevisions.objects.get(nid = nodeid.nid)
+            
+            try:
+                nodefile = None
+                if dt == 'article':
+                    nodeextra = ContentTypeArticle.objects.get(nid = nodeid.nid)
+                    nodefile = Files.objects.get(fid  = nodeextra.field_photo_fid)
+                elif dt == 'media_reports':
+                    nodeextra = ContentTypeMediaReports.objects.get(nid = nodeid.nid)
+                    nodefile = Files.objects.get(fid  = nodeextra.field_media_report_image_fid)
+                elif dt == 'news_and_events':
+                    nodeextra = ContentTypeNewsAndEvents.objects.get(nid = nodeid.nid)
+                    nodefile = Files.objects.get(fid  = nodeextra.field_event_image_fid)
+                elif dt == 'official_letters_or_links':
+                    nodeextra = ContentTypeOfficialLettersOrLinks.objects.get(nid = nodeid.nid)
+                    nodefile = Files.objects.get(fid  = nodeextra.field_official_litter_fid)
+            except:
+                pass
+                
+            #print node
+            #print nodeextra
+            #print nodefile
+            
+            try:
+                News.objects.get(title = node.title)
+                #print "Already exits!"
+                continue
+            except:
+                pass
+            
+            #return HttpResponse("Articles migration complted!")
+            try:
+                n = News()
+                n.news_type_id = newstype[dt]
+                n.title = node.title
+                n.body = node.body
+                n.slug = slugify(node.title)
+                
+                nodelink = None
+                nodeltile = None
+                if dt == 'article':
+                    nodelink = nodeextra.field_link_url
+                    nodeltile = nodeextra.field_link_title
+                elif dt == 'media_reports':
+                    nodelink = nodeextra.field_media_report_link_url
+                    nodeltile = nodeextra.field_media_report_link_title 
+                elif dt == 'news_and_events':
+                    nodelink = nodeextra.field_event_link_url
+                    nodeltile = nodeextra.field_event_link_title
+                elif dt == 'official_letters_or_links':
+                    nodelink = nodeextra.field_official_link_url
+                    nodeltile = nodeextra.field_official_link_title
+                
+                n.url = nodelink
+                n.url_title = nodeltile
+                duser = get_user(node.uid)
+                n.created_by_id = duser.id
+                
+                if nodeid.created:
+                    n.created = datetime.datetime.fromtimestamp(int(nodeid.created)).strftime('%Y-%m-%d %H:%M:%S')
+                    n.updated = datetime.datetime.fromtimestamp(int(nodeid.changed)).strftime('%Y-%m-%d %H:%M:%S')
+                else:
+                    n.created = datetime.datetime.now()
+                    n.updated = datetime.datetime.now()
+                
+                n.save()
+                if nodefile:
+                    srcfile = nodefile.filepath
+                    file_ext = nodefile.filename.split('.')[1]
+                    dstdir = settings.MEDIA_ROOT + 'news/' + str(n.id) + '/'
+                    
+                    try:
+                        os.makedirs(dstdir)
+                    except:
+                        pass
+                        
+                    shutil.copy(srcfile, dstdir + str(n.id) + '.' + file_ext)
+                    n.picture = 'news/' + str(n.id) + '/' + str(n.id) + '.' + file_ext
+                    n.save()
+                    
+            except Exception, e:
+                print e, "+++++++++", node.nid, node.title, "++++++++++++"
+        
+    return HttpResponse("Articles migration complted!")
+    
 def resource_person(request):
     wrps = WResourcePerson.objects.all()
     for wrp in wrps:
         try:
             duser = get_user(wrp.user_uid)
+            duser.groups.add(Group.objects.get(name='Resource Person'))
         except:
             continue
         wstates = wrp.states.split(',')

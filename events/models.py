@@ -376,7 +376,7 @@ class Testimonials(models.Model):
     actual_content = models.TextField()
     minified_content = models.TextField()
     short_description = models.TextField()
-    source_title = models.CharField(max_length=200)
+    source_title = models.CharField(max_length=200, null=True)
     source_link = models.URLField(null = True)
     status = models.PositiveSmallIntegerField(default = 0)
     created = models.DateTimeField(auto_now_add = True, null=True)
