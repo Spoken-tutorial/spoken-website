@@ -106,8 +106,8 @@ class News(models.Model):
     url = models.URLField(null=True, blank=True)
     url_title = models.CharField(max_length = 200, null=True, blank=True)
     created_by = models.ForeignKey(User)
-    created = models.DateTimeField(auto_now_add = True)
-    updated = models.DateTimeField(auto_now = True)
+    created = models.DateTimeField()
+    updated = models.DateTimeField()
     
 #    @models.permalink
 #    def get_absolute_url(self):

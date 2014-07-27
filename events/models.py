@@ -109,6 +109,9 @@ class InstituteType(models.Model):
     
     def __unicode__(self):
         return self.name
+    
+    class Meta:
+        unique_together = (("name"),)
         
 class AcademicCenter(models.Model):
     user = models.ForeignKey(User)
@@ -175,6 +178,9 @@ class Course(models.Model):
     
     def __unicode__(self):
         return self.name
+        
+    class Meta:
+        unique_together = (("name"),)
         
 class TrainingExtraFields(models.Model):
     paper_name = models.CharField(max_length = 200)
@@ -370,7 +376,7 @@ class Testimonials(models.Model):
     actual_content = models.TextField()
     minified_content = models.TextField()
     short_description = models.TextField()
-    source_title = models.CharField(max_length=200)
+    source_title = models.CharField(max_length=200, null=True)
     source_link = models.URLField(null = True)
     status = models.PositiveSmallIntegerField(default = 0)
     created = models.DateTimeField(auto_now_add = True, null=True)

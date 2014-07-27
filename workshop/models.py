@@ -112,7 +112,7 @@ class WOrganiser(models.Model):
 
 class WResourcePerson(models.Model):
     id = models.IntegerField(primary_key=True)
-    user_uid = models.ForeignKey(Users, db_column='uid')
+    user_uid = models.IntegerField()
     rp_fname = models.CharField(max_length=50)
     phone = models.CharField(max_length=20)
     states = models.CommaSeparatedIntegerField(max_length=200)
