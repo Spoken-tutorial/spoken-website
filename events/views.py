@@ -65,10 +65,9 @@ def init_events_app(request):
         
         #testcategory
         try:
-            TestCategory.objects.get_or_create(name= 'College')
-            TestCategory.objects.get_or_create(name= 'Polytechnic')
+            TestCategory.objects.get_or_create(name= 'Workshop')
+            TestCategory.objects.get_or_create(name= 'Training')
             TestCategory.objects.get_or_create(name= 'Others')
-            TestCategory.objects.get_or_create(name= 'Uncategorized')
         except Exception, e:
             print e, "test_category"
         

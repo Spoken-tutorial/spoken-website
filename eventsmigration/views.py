@@ -627,7 +627,7 @@ def invigilator(request):
 
 #MAH-00029 Live workshop
 def workshop(request):
-    workshop_status = 2
+    workshop_status = 0
     if workshop_status == 2:
         wwrs = WWorkshopRequests.objects.filter(status = workshop_status)
     elif workshop_status == 1:
