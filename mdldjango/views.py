@@ -90,12 +90,26 @@ def index(request):
             pass
             
         if academic:
-            upcoming_workshop = Training.objects.filter((Q(status = 0) | Q(status = 1) | Q(status = 2) | Q(status = 3)), academic_id=mdluser.institution, trdate__gte=datetime.date.today())
-            upcoming_test = Test.objects.filter(status=2, academic_id=mdluser.institution, tdate__gt=datetime.date.today())
-            past_workshop = Training.objects.filter(id__in = TrainingAttendance.objects.filter(mdluser_id = mdluser.id).values_list('training_id'), status = 4)
-            past_test = Test.objects.filter(id__in = TestAttendance.objects.filter(mdluser_id = mdluser.id).values_list('test_id'), status = 4)
-            ongoing_test = Test.objects.filter(status=3, academic_id=mdluser.institution, tdate = datetime.date.today())
-            #print ongoing_test
+            category = int(request.GET.get('category', 4))
+            if not (category > 0 and category < 6):
+                return HttpResponseRedirect("/moodle/index/?category=4")
+                
+            upcoming_workshop = None
+            upcoming_test = None
+            past_workshop = None
+            past_test = None
+            ongoing_test = None
+            if category == 3:
+                upcoming_workshop = Training.objects.filter((Q(status = 0) | Q(status = 1) | Q(status = 2) | Q(status = 3)), academic_id=mdluser.institution, trdate__gte=datetime.date.today())
+            if category == 5:
+                upcoming_test = Test.objects.filter(status=2, academic_id=mdluser.institution, tdate__gt=datetime.date.today())
+            if category == 1:
+                past_workshop = Training.objects.filter(id__in = TrainingAttendance.objects.filter(mdluser_id = mdluser.id).values_list('training_id'), status = 4)
+            if category == 2:
+                past_test = Test.objects.filter(id__in = TestAttendance.objects.filter(mdluser_id = mdluser.id).values_list('test_id'), status = 4)
+            if category == 4:
+                ongoing_test = Test.objects.filter(status=3, academic_id=mdluser.institution, tdate = datetime.date.today())
+            
             context = {
                 'mdluserid' : mdluserid,
                 'mdlusername' : mdlusername,
@@ -103,7 +117,8 @@ def index(request):
                 'upcoming_test' : upcoming_test,
                 'past_workshop' : past_workshop,
                 'past_test' : past_test,
-                'ongoing_test' : ongoing_test
+                'ongoing_test' : ongoing_test,
+                'category' : category,
 
             }
             context.update(csrf(request))

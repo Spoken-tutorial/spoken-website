@@ -1879,7 +1879,7 @@ def ajax_dept_foss(request):
             data['dept'] = tmp
             
             tmp = '<option value = None> -- None -- </option>'
-            foss = FossCategory.objects.all()
+            foss = FossCategory.objects.all(status = 1)
             for i in foss:
                 tmp +='<option value='+str(i.id)+'>'+i.foss+'</option>'
             data['foss'] = tmp

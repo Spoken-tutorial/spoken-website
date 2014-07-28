@@ -1055,8 +1055,14 @@ def test(request):
             w.test_code = wtr.test_code.upper()
             w.academic_id = ac.id
             w.foss_id = foss.id
-            w.tdate = wtr.cfm_test_date
-            w.ttime = wtr.cfm_test_time
+            
+            if wtr.cfm_test_date and cfm_test_time:
+                w.tdate = wtr.cfm_test_date
+                w.ttime = wtr.cfm_test_time
+            else:
+                w.tdate = wtr.pref_test_date
+                w.ttime = wtr.pref_test_time
+            
             w.status = wtr.status
             
             w.test_category_id = 1
