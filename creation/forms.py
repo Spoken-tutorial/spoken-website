@@ -676,3 +676,12 @@ class CollaborateForm(forms.ModelForm):
     class Meta:
         model = Collaborate
         exclude = ['user', 'created']
+
+class AvailableFossForm(forms.ModelForm):
+    foss = forms.ModelChoiceField(
+        cache_choices = True,
+        queryset = FossCategory.objects.filter(status = 1).order_by('foss'),
+        empty_label = "----------",
+        help_text = "",
+        error_messages = {'required': 'FOSS category field required.'}
+    )

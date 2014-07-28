@@ -1185,3 +1185,21 @@ def get_user(old_user_id):
             #print e, " ======> ", user.mail, user.name
             pass
     return duser
+
+def test_foss_fix(request):
+    tests = Test.objects.all()
+    for test in tests:
+        wtest = WTestRequests.objects.get(pk = test.id)
+        foss = None
+        if wtest.foss_category == 'C':
+            foss = FossCategory.objects.get(foss = 'C')
+        if wtest.foss_category == 'C-Plus-Plus':
+            foss = FossCategory.objects.get(foss = 'Cpp')
+            
+        if not foss:
+            continue
+        
+        test.foss = foss
+        test.save()
+        print "completed => ", test.test_code
+    return HttpResponse("Test foss fix migration Done!")

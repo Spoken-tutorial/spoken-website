@@ -41,6 +41,7 @@ class FossCategoryAdmin(admin.ModelAdmin):
     actions = [mark_foss_completed, mark_foss_pending]
 
 class TutorialDetailAdmin(admin.ModelAdmin):
+    form = AvailableFossForm
     exclude = ('user',)
     list_display = ('foss', 'tutorial', 'level', 'order', 'updated', 'user')
     list_filter = ('foss', 'level', 'updated')
