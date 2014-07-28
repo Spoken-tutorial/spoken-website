@@ -627,7 +627,7 @@ def invigilator(request):
 
 #MAH-00029 Live workshop
 def workshop(request):
-    workshop_status = 0
+    workshop_status = 2
     if workshop_status == 2:
         wwrs = WWorkshopRequests.objects.filter(status = workshop_status)
     elif workshop_status == 1:
@@ -965,12 +965,14 @@ def test(request):
         wtrs = WTestRequests.objects.filter(status = test_status, pref_test_date__gt = datetime.datetime.today())
     elif test_status == 0:
         wtrs = WTestRequests.objects.filter(status = test_status, pref_test_date__gt = datetime.datetime.today())
-    
+
     for wtr in wtrs:
         #Save department
         douser = get_user(wtr.organiser_id)
+        if douser == None:
+            print 'id', wtr.id, 'Organiser id missing', wtr.organiser_id
+            continue
         try:
-            
             # Save Workshop
             w = None
             try:
@@ -978,86 +980,51 @@ def test(request):
                 #print "Already exits !"
                 continue
             except Exception, e:
-                print e, " => 3 ", wtr.test_code, wtr.academic_code
-                if not wtr.test_code:
-                    wtr.test_code = "TC-"+str(wtr.id)
-            
+                pass
+                #print e, " => 3 ", wtr.test_code, wtr.academic_code
+                #if not wtr.test_code:
+                    #wtr.test_code = "TC-"+str(wtr.id)
             #check organiser there or not
             organiser = None
             try:
                 organiser = Organiser.objects.get(user_id = douser.id)
             except Exception, e:
                 #print e
-                print "Organiser Not there => ", wtr.organiser_id
+                print 'id', wtr.id, 'Organiser record missing', wtr.organiser_id
                 continue
             
             #check organiser there or not
             diuser = get_user(wtr.invigilator_id)
+            if diuser == None:
+                print 'id', wtr.id, 'Invigilator id missing', wtr.invigilator_id
             invigilator = None
+            new_invigilator_id = None
             try:
                 invigilator = Invigilator.objects.get(user_id = diuser.id)
+                new_invigilator_id = invigilator.id
             except Exception, e:
-                print e
-                print "Invigilator Not there => ", wtr.invigilator_id
-                # if invigilator id = 0 store null set allow null
                 if not wtr.invigilator_id:
                     try:
                         ac = AcademicCenter.objects.get(academic_code = wtr.academic_code)
                         invigilator = Invigilator.objects.filter(academic_id = ac.id).first()
-                        if wtr.invigilator_id == 0:
-                            pass
+                        if not invigilator:
+                            new_invigilator_id = None
                         else:
-                            invigilator.id
-                        print invigilator, "Invigilator found!"
+                            new_invigilator_id = invigilator.id
                     except Exception, e:
-                        print e, " => AC ", wtr.academic_code
-                        continue
+                        new_invigilator_id = None
                 else:
-                    #sys.exit(0)
-                    continue
-            #check dept in WDepartments
-            wdept = wtr.department
-            try:
-                WDepartments.objects.get(name=wdept)
-            except Exception, e:
-                #print e, " => 1", wtr.test_code
-                wdept = get_dept(wdept)
-            # check in Department
-            dept = None
-            try:
-                dept = Department.objects.get(name=wdept)
-            except Exception, e:
-                print e, " => 2",
-                if ',' in wdept:
-                    cwdept = wdept.split(',');
-                    for d in cwdept:
-                        try:
-                            d = Department.objects.get(name = d)
-                        except Exception, e:
-                            print e, " => 2aa ", wtr.test_code, " => ", d
-                            d = get_dept(d)
-                        try:
-                            Department.objects.get(name=d)
-                        except Exception, e:
-                            print e, " => 2ab ", wtr.test_code, " => ", d
-                            sys.exit(0)
-                #dept = Department.objects.create(name = wdept)
-            #find academic_center id
+                    print 'id:', wtr.id, 'Invigilator record missing', wtr.invigilator_id
+                    new_invigilator_id = None
             ac = None
             try:
                 ac = AcademicCenter.objects.get(academic_code = wtr.academic_code)
             except Exception, e:
-                print e, " => 4 ", wtr.academic_code, wtr.test_code
-                if '-- select ' == wtr.academic_code:
-                    o = Organiser.objects.get(organiser_id = douser.id)
-                    ac = AcademicCenter.objects.get(academic_code = o.academic_code)
-                
-                #get organiser academic and set to workshop
                 try:
                     o  = Organiser.objects.get(user_id = wtr.douser.id)
                     ac = AcademicCenter.objects.get(pk = o.academic_id)
                 except Exception, e:
-                    print e, "=> 4aa "
+                    print 'id:', wtr.id, 'Academic code missing'
                 #continue
             #find foss_category_id
             foss = None
@@ -1068,28 +1035,23 @@ def test(request):
                     wtr.foss_category = 'C and Cpp'
                 foss = FossCategory.objects.get(foss = wtr.foss_category.replace("-", " "))
             except Exception, e:
-                print e, " => 5 ", wtr.foss_category
+                print 'id:', wtr.id, 'Foss category missing', wtr.foss_category.replace("-", " ")
                 continue
             # get participants count
             wp = None
-            try:
-                wp = WTestDetails.objects.filter(test_code = wtr.test_code).aggregate(Sum('no_of_participants'))
-            except Exception, e:
-                print e, " => 7 ", wtr.test_code
-                continue
-            
+            if wtr.status == 4:
+                try:
+                    wp = WTestDetails.objects.filter(test_code = wtr.test_code).aggregate(Sum('no_of_participants'))
+                except Exception, e:
+                    print 'id:', wtr.id, 'Test Details Missing', wtr.test_code
+                    continue
             if test_status == 4 and not wp['no_of_participants__sum']:
+                print 'id:', wtr.id, 'Test Details Missing', wtr.test_code
                 continue
-            # new status
-            #wstatus = {0 : 0, 1 : 1, 2 : 4}
             w = Test()
             w.id = wtr.id
             w.organiser_id = organiser.id
-            if wtr.invigilator_id == 0:
-                w.invigilator_id = None
-            else:
-                w.invigilator_id = invigilator.id
-                
+            w.invigilator_id = new_invigilator_id
             w.test_code = wtr.test_code.upper()
             w.academic_id = ac.id
             w.foss_id = foss.id
@@ -1117,7 +1079,7 @@ def test(request):
                 print e, "Duplicate ---", wtr.test_code, " => ", wtr.academic_code, wtr.cfm_test_date, wtr.foss_category
                 #sys.exit(0)
                 post_time = 5
-                for i in range(50):
+                for i in range(150):
                     try:
                         post_five_min = datetime.datetime.combine(datetime.date.today(), wtr.cfm_test_time) + datetime.timedelta(minutes=post_time)
                         w.ttime = post_five_min.time()
@@ -1126,8 +1088,8 @@ def test(request):
                     except Exception, e:
                         #duplicate because of unique_together
                         print e, "Duplicate post change time save ******", wtr.test_code, " => ", wtr.academic_code, wtr.cfm_test_date, 
-                        if i == 49:
-                            sys.exit(0)
+                        if i >= 149:
+                            print 'i exceeded'
                         post_time = post_time + 5
                         continue
             #save departments
@@ -1147,21 +1109,19 @@ def test(request):
                             except Exception, e:
                                 print e, " => sss ", wtr.test_code, " => ", dept
                                 dept = get_dept(dept)
-                                
-                            dept = Department.objects.get(name = dept)
-                            w.department.add(dept)
+                            if dept:
+                                dept = Department.objects.get(name = dept)
+                                w.department.add(dept)
                     w.save()
             
             except Exception, e:
                 print e, " => 8", wtr.test_code, " => ", wdept
                 w.delete()
-                sys.exit(0)
-            
+                continue
         except Exception, e:
             print "Something went wrong!"
             print e, " => 9", wtr.id," => ", wtr.test_code
             print "Organiser => ", wtr.organiser_id
-            sys.exit(0)
             continue
     return HttpResponse("Test migration Done!")
     
