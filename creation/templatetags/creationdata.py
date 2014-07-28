@@ -109,7 +109,7 @@ def installation_sheet(foss, lang):
     return False
 
 def get_thumb_path(row, append_str):
-    path = '/media/videos/' + str(row.tutorial_detail.foss_id) + '/' + str(row.tutorial_detail_id) + '/' + row.tutorial_detail.tutorial.replace(' ', '-') + '-' + append_str + '.png'
+    path = '/media/videos/' + str(row.foss_id) + '/' + str(row.id) + '/' + row.tutorial.replace(' ', '-') + '-' + append_str + '.png'
     return path
 
 register.filter('get_thumb_path', get_thumb_path)

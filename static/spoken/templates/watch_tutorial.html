@@ -123,7 +123,7 @@
                             <a href="/watch/{{ rec.tutorial_detail.foss.foss|get_url_name }}/{{ rec.tutorial_detail.tutorial|get_url_name }}/{{ rec.language.name }}/">
                                 <div class='pull-left thumb'>
                                     <span class='order'>{% if tr_rec.id == rec.id %}<i class="fa fa-play"></i>{% else %}{{ forloop.counter }}{% endif %}</span>
-                                    <img src="{% static 'spoken/images/thumb-even.png' %}" width=70 >
+                                    <img src="{{ rec.tutorial_detail|get_thumb_path:'Small' }}" width=70 >
                                 </div>
                                 <div class='description'>
                                     {{rec.tutorial_detail.tutorial}}
@@ -164,7 +164,7 @@
               </div>
               <div class="panel-body">
               {% if tr_rec.common_content.prerequisite %}
-                <img src="/static/spoken/images/thumb-even.png" width="70" style="padding-right: 10px;">
+                <img src="{{ tr_rec.common_content.prerequisite|get_thumb_path:'Small' }}" width="70" style="padding-right: 10px;">
                 <a href="/watch/{{ tr_rec.common_content.prerequisite.foss.foss|get_url_name }}/{{ tr_rec.common_content.prerequisite.tutorial|get_url_name }}/{{ tr_rec.language.name }}/">{{ tr_rec.common_content.prerequisite.tutorial }}</a>
               {% else %}
                 No Prerequsite for this tutorial.

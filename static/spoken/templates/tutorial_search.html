@@ -55,7 +55,7 @@
             {% for record in collection %}
                 <div class='result-record row'>
                     <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2 thumb">
-                        <a href="#" class='thumb'><img width="100%" src="/static/spoken/images/thumb-even.png"></a>
+                        <a href="/watch/{{ record.tutorial_detail.foss.foss|get_url_name }}/{{ record.tutorial_detail.tutorial|get_url_name }}/{{ record.language }}" class='thumb'><img width="100%" src="{{ record.tutorial_detail|get_thumb_path:'Small' }}"></a>
                     </div>
                     <div class="info col-lg-8 col-md-8 col-sm-8 col-xs-8">
                         <div class='title'><h4><a href="/watch/{{ record.tutorial_detail.foss.foss|get_url_name }}/{{ record.tutorial_detail.tutorial|get_url_name }}/{{ record.language }}">{{ record.tutorial_detail.tutorial }}</a></h4></div>
