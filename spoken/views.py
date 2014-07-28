@@ -94,7 +94,7 @@ def keyword_search(request):
                 keywords.remove(key)
             query = get_or_query(keywords, search_fields)
             if query:
-                collection = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), common_content = TutorialCommonContent.objects.filter(query), language__name = 'English').order_by('tutorial_detail__foss__foss', 'tutorial_detail__level', 'tutorial_detail__order', 'language__name')
+                collection = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), tutorial_detail__foss__status = 1, common_content = TutorialCommonContent.objects.filter(query), language__name = 'English').order_by('tutorial_detail__foss__foss', 'tutorial_detail__level', 'tutorial_detail__order', 'language__name')
         
     context = {}
     context['form'] = KeywordSearchForm()

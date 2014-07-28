@@ -8,7 +8,7 @@ class KeywordSearchForm(forms.Form):
 class TutorialSearchForm(forms.Form):
     try:
         foss_category = forms.ChoiceField(
-            choices = [('', '-- Select Foss --')] + list(FossCategory.objects.all().values_list('id', 'foss')),
+            choices = [('', '-- Select Foss --')] + list(FossCategory.objects.filter(status = 1).values_list('id', 'foss')),
             widget=forms.Select(),
             required = False,
         )
