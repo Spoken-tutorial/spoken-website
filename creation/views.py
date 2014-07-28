@@ -155,6 +155,15 @@ def get_video_info(path):
         info_m['height'] = 0
         info_m['size'] = 0
     return info_m
+#create_thumbnail(tr_rec, 'Big', tr_rec.video_thumbnail_time, '700:500')
+def create_thumbnail(row, attach_str, thumb_time, thumb_size):
+    filepath = settings.MEDIA_ROOT + 'videos/' + str(row.tutorial_detail.foss_id) + '/' + str(row.tutorial_detail_id) + '/'
+    filename = row.tutorial_detail.tutorial.replace(' ', '-') + '-' + attach_str + '.png'
+    try:
+        process = subprocess.Popen(['/usr/bin/avconv', '-i', filepath + row.video, '-r', str(30), '-ss', thumb_time, '-s', thumb_size, '-vframes', str(1), '-f', 'image2', filepath + filename], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        stdout, stderr = process.communicate()
+    except:
+        pass
 
 def add_qualityreviewer_notification(tr_rec, comp_title, message):
     dr_roles = QualityReviewerRole.objects.filter(foss_category = tr_rec.tutorial_detail.foss, language = tr_rec.language, status = 1)
@@ -838,6 +847,9 @@ def upload_component(request, trid, component):
                             tr_rec.version = 1
                         tr_rec.video_thumbnail_time = '00:' + request.POST.get('thumb_mins', '00') + ':' + request.POST.get('thumb_secs', '00')
                         tr_rec.save()
+                        if tr_rec.language.name == 'English':
+                            create_thumbnail(tr_rec, 'Big', tr_rec.video_thumbnail_time, '700:500')
+                            create_thumbnail(tr_rec, 'Small', tr_rec.video_thumbnail_time, '170:127')
                         comp_log.save()
                         comp_title = tr_rec.tutorial_detail.foss.foss + ': ' + tr_rec.tutorial_detail.tutorial + ' - ' + tr_rec.language.name
                         add_adminreviewer_notification(tr_rec, comp_title, 'Video waiting for admin review')

@@ -28,7 +28,7 @@
                 {% for record in onlinetest_user %}
                     <div class="col-sm-8">
                         <div class="col-sm-8">
-                            <p>{{ record.firstname }} {{ record.lastname }} - {{ record.email }}</p>
+                            <p>{{ record.firstname|lower|title }} {{ record.lastname|lower|title }} - {{ record.email }}</p>
                         </div>
                         <div class="col-sm-4">
                             <form role="search" method="POST">{% csrf_token %}
@@ -71,7 +71,7 @@
 			            {% for record in collection %}
 				            <tr>
 					            <td><iframe style="width:70px; height:70px;" src="{{ record.id|participant_picture }}"></iframe></iframe></td>
-					            <td>{{ record.firstname }} {{ record.lastname }}</td>
+					            <td>{{ record.firstname|lower|title }} {{ record.lastname|lower|title }}</td>
 				            </tr>
 			            {% endfor %}
 		            </table>
@@ -89,7 +89,7 @@
 					            <tr>
 					                <th><input type='checkbox' name="user_{{ record.id }}" value="{{ record.id }}" {{ record.id|get_trainingstatus:training.id }} ></th>
 						            <td><iframe style="width:70px; height:70px; border:0px;" src="{{ record.id|participant_picture }}"></iframe></td>
-						            <td>{{ record.firstname }} {{ record.lastname }}</td>
+						            <td>{{ record.firstname|lower|title }} {{ record.lastname|lower|title }}</td>
 						            <td>
 						                {{ record.id|get_trainingparticipant_status:training.id }}
 						            </td>

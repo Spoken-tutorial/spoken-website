@@ -136,7 +136,7 @@ class ChangeComponentStatusForm(forms.Form):
     )
     def __init__(self, *args, **kwargs):
         super(ChangeComponentStatusForm, self).__init__(*args, **kwargs)
-        foss_list = list(FossCategory.objects.all().values_list('id', 'foss'))
+        foss_list = list(FossCategory.objects.filter(status = 1).values_list('id', 'foss'))
         foss_list.insert(0, ('', 'Select Foss'))
         self.fields['foss_category'].choices = foss_list
         if args:
@@ -220,7 +220,7 @@ class PublishToPending(forms.Form):
     )
     def __init__(self, *args, **kwargs):
         super(PublishToPending, self).__init__(*args, **kwargs)
-        foss_list = list(FossCategory.objects.all().values_list('id', 'foss'))
+        foss_list = list(FossCategory.objects.filter(status = 1).values_list('id', 'foss'))
         foss_list.insert(0, ('', 'Select Foss Category'))
         self.fields['foss_category'].choices = foss_list
 
@@ -455,7 +455,7 @@ class ContributorRoleForm(forms.ModelForm):
     )
     foss_category = forms.ModelChoiceField(
         cache_choices = True,
-        queryset = FossCategory.objects.order_by('foss'),
+        queryset = FossCategory.objects.filter(status = 1).order_by('foss'),
         empty_label = "----------",
         help_text = "",
         error_messages = {'required': 'FOSS category field required.'}
@@ -482,7 +482,7 @@ class DomainReviewerRoleForm(forms.ModelForm):
     )
     foss_category = forms.ModelChoiceField(
         cache_choices = True,
-        queryset = FossCategory.objects.order_by('foss'),
+        queryset = FossCategory.objects.filter(status = 1).order_by('foss'),
         empty_label = "----------",
         help_text = "",
         error_messages = {'required': 'FOSS category field required.'}
@@ -507,7 +507,7 @@ class QualityReviewerRoleForm(forms.ModelForm):
     )
     foss_category = forms.ModelChoiceField(
         cache_choices = True,
-        queryset = FossCategory.objects.order_by('foss'),
+        queryset = FossCategory.objects.filter(status = 1).order_by('foss'),
         empty_label = "----------",
         help_text = "",
         error_messages = {'required': 'FOSS category field required.'}
