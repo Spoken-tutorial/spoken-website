@@ -119,7 +119,7 @@
                         <div class="video-item">
                             <div class="thump">
                                 <a href="/watch/{{ record.tutorial_detail.foss.foss|get_url_name }}/{{ record.tutorial_detail.tutorial|get_url_name }}/{{ record.language }}">
-                                    <img src="/static/spoken/images/thumb-even.png">
+                                    <img src="{{ record|get_thumb_path:'Small' }}">
                                     <div class="video-item-playlist">
                                     <h5> {{ record.tutorial_detail.foss.foss }} {{ k }} +</h5>
                                     </div>

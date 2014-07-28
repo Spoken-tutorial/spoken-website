@@ -107,7 +107,11 @@ def installation_sheet(foss, lang):
             file_path = settings.MEDIA_URL + 'videos/' + str(foss.id) + '/' + foss.foss.replace(' ', '-') + '-Installation-Sheet-English.pdf'
             return file_path
     return False
-    
+
+def get_thumb_path(row, append_str):
+    path = '/media/' + str(row.tutorial_detail.foss_id) + '/' + str(row.tutorial_detail_id) + '/' + row.tutorial_detail.tutorial.replace(' ', '-') + '-' + attach_str + '.png'
+
+register.filter('get_thumb_path', get_thumb_path)
 register.filter('get_missing_component_reply', get_missing_component_reply)
 register.filter('get_component_name', get_component_name)
 register.filter('get_url_name', get_url_name)
