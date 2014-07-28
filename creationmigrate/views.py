@@ -15,6 +15,7 @@ import shutil
 
 from cdeep.models import *
 from creation.models import *
+from creation.views import *
 
 def is_administrator(user):
     """Check if the user is having administrator rights"""
@@ -657,3 +658,9 @@ def fix_tutorial_resources_status(request):
             print row.id, comp, 'status fixed'
             
     return HttpResponse('Success!')
+
+def create_thumbnails(request):
+    tr_recs = TutorialResource.objects.filter(language__name = 'English')
+    for tr_rec in tr_recs:
+        create_thumbnail(tr_rec, 'Big', tr_rec.video_thumbnail_time, '700:500')
+        create_thumbnail(tr_rec, 'Small', tr_rec.video_thumbnail_time, '170:127')
