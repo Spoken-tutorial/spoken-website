@@ -662,5 +662,7 @@ def fix_tutorial_resources_status(request):
 def create_thumbnails(request):
     tr_recs = TutorialResource.objects.filter(language__name = 'English')
     for tr_rec in tr_recs:
+        print tr_rec.tutorial_detail.tutorial
         create_thumbnail(tr_rec, 'Big', tr_rec.video_thumbnail_time, '700:500')
         create_thumbnail(tr_rec, 'Small', tr_rec.video_thumbnail_time, '170:127')
+    return HttpResponse('Success!')
