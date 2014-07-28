@@ -956,7 +956,7 @@ def workshop_feedback(request):
     
     
 def test(request):
-    test_status = 2
+    test_status = 4
     if test_status == 4:
         wtrs = WTestRequests.objects.filter(status = test_status)
     elif test_status == 2:
@@ -1065,7 +1065,7 @@ def test(request):
                 if wtr.foss_category == 'Linux-Ubuntu':
                     wtr.foss_category = 'Linux'
                 if wtr.foss_category in ['C', 'C-Plus-Plus', 'C-and-C-Plus-Plus']:
-                    wtr.foss_category = 'C and C++'
+                    wtr.foss_category = 'C and Cpp'
                 foss = FossCategory.objects.get(foss = wtr.foss_category.replace("-", " "))
             except Exception, e:
                 print e, " => 5 ", wtr.foss_category
