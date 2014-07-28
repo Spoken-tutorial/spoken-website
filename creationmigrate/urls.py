@@ -11,6 +11,7 @@ urlpatterns = patterns('',
     url(r'^domain-reviewer-roles/$', 'creationmigrate.views.domain_reviewer_roles', name="domain_reviewer_roles"),
     url(r'^quality-reviewer-roles/$', 'creationmigrate.views.quality_reviewer_roles', name="quality_reviewer_roles"),
     url(r'^fix-tutorial-resources-status/$', 'creationmigrate.views.fix_tutorial_resources_status', name="fix_tutorial_resources_status"),
+    url(r'^create-thumbnails/$', 'creationmigrate.views.create_thumbnails', name="create_thumbnails"),
     #url(r'^tutorial-common-contents/$', 'creationmigrate.views.tutorial_common_contents', name="tutorial_common_contents"),
     url(r'^test/$', 'creationmigrate.views.test', name="test"),
 
