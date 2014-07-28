@@ -39,8 +39,8 @@
 			</tr>
 			{% for record in collection %}
 				<tr>
-					<td>{{ record.firstname }}</td>
-					<td>{{ record.lastname }}</td>
+					<td>{{ record.firstname|lower|title }}</td>
+					<td>{{ record.lastname|lower|title }}</td>
 					<td>
 			            {% if can_download_certificate and wc.status == 4 %}
 			               <a href="{% url 'events:training_participant_ceritificate' wc.id record.id %}">Certificate</a>

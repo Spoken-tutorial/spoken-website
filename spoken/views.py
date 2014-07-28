@@ -42,7 +42,7 @@ def home(request):
         tutorial = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss_id = f, language__name='English').order_by('tutorial_detail__order')[:1].first()
         random_tutorials.append((tcount, tutorial))
     try:
-        tr_rec = TutorialResource.objects.all().order_by('?')[:1].first()
+        tr_rec = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2)).order_by('?')[:1].first()
     except Exception, e:
         messages.error(request, str(e))
     context = {

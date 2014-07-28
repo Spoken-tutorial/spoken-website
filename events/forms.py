@@ -77,7 +77,7 @@ class OrganiserForm(forms.Form):
             
         super(OrganiserForm, self).__init__(*args, **kwargs)
         #load the choices
-        state_list = list(State.objects.exclude(name='Uncategorized').order_by('name').values_list('id', 'name'))
+        state_list = list(State.objects.exclude().order_by('name').values_list('id', 'name'))
         state_list.insert(0, ('', '-- None --'))
         self.fields['state'].choices = state_list
         if args:

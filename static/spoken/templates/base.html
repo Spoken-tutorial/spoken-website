@@ -62,7 +62,7 @@
                                                                     <div class="media-body">
                                                                         <ul class="media-list">
                                                                             <li class=""><a href="http://process.spoken-tutorial.org/index.php/Software-Training#Downloading_Spoken_Tutorials" target="_blank">Instruction for Downloading Tutorials</a></li>
-                                                                            <li class=""><a href="http://www.spoken-tutorial.org/create_cd_content" target="_blank">Create Your Own Disc Image</a></li>
+                                                                            <li class=""><a href="http://www.spoken-tutorial.org/cdcontent/" target="_blank">Create Your Own Disc Image</a></li>
                                                                             <li class=""><a href="/offline-attendance-app/">Download Offline  Attendance App</a></li>
                                                                         </ul>
                                                                     </div>
@@ -124,7 +124,7 @@
                                                 </div>
                                             </ul>
                                         </li>
-                                        <li><a href="#">About us</a></li>
+                                        <li><a href="/about-us/">About us</a></li>
                                     </ul>
                                     
                                     <ul class="nav navbar-nav navbar-right">
@@ -142,12 +142,12 @@
                                                 </ul>
                                             </li>
                                         {% else %}
-                                            <li class="dropdown">
+                                            <!--<li class="dropdown">
                                                 <a href="/accounts/login">Login</a>
                                             </li>
                                             <li class="dropdown">
                                                 <a href="/accounts/register">Register</a>
-                                            </li>
+                                            </li>-->
                                         {% endif %}
                                     </ul>
                             </div>
@@ -155,6 +155,10 @@
                     </div> <!-- /#header-inner -->
                 </nav>
             </div> <!-- /#header-wrapper -->
+            <div role="alert" class="alert alert-danger stay-middle">
+                       Login has been restricted temporarily for a few hours.
+                               </div>
+
             {% block search %}
                 <div id="search-wrapper">
                     <div class="common-search">
