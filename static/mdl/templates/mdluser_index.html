@@ -60,17 +60,24 @@
                     <th>Technology</th>
                     <th>Date & Time</th>
                     <th>Score</th>
-                    <th>Action</th>
                 </tr>
                 {% for record in past_test %}
                     <tr>
                         <td>{{ record.foss.foss }}</td>
                         <td>{{ record.tdate }} {{ record.trtime }}</td>
                         {% with grade=record.id|get_participant_mark:mdluserid %}
-                            {% if grade >= 40 %}
-                                <td>{{ grade }}%</td>
-                                <td><a href="{% url 'events:test_participant_ceritificate' record.id mdluserid %}">Certificate</a></td>                          {% else %}
-                                <td>{{ grade }} (Fail)</td>
+                            {% if grade %}
+                                {% if grade >= 40 %}
+                                    <td>
+                                        {{ grade }}%
+                                        {% if record.invigilator %}
+                                         - <a href="{% url 'events:test_participant_ceritificate' record.id mdluserid %}">Certificate</a>
+                                        {% endif %}
+                                    </td>
+                                {% else %}
+                                    <td>{{ grade }} (Fail)</td>
+                                {% endif %}
+                            {% else %}
                                 <td></td>
                             {% endif %}
                         {% endwith %}
@@ -141,10 +148,19 @@
                                     <a href="http://localhost/OTC/course/view.php?id=2" target="_blank"> Continue Test</a>
                                 {% elif status >= 3 %}
                                     {% with grade=record.id|get_participant_mark:mdluserid %}
-                                        {% if grade >= 40 %}
-                                            {{ grade }}%
-                                            <a href="{% url 'events:test_participant_ceritificate' record.id mdluserid %}">Certificate</a>                                        {% else %}
-                                            {{ grade }} (Fail)
+                                        {% if grade %}
+                                            {% if grade >= 40 %}
+                                                <td>
+                                                    {{ grade }}%
+                                                    {% if record.invigilator %}
+                                                     - <a href="{% url 'events:test_participant_ceritificate' record.id mdluserid %}">Certificate</a>
+                                                    {% endif %}
+                                                </td>
+                                            {% else %}
+                                                <td>{{ grade }} (Fail)</td>
+                                            {% endif %}
+                                        {% else %}
+                                            <td></td>
                                         {% endif %}
                                     {% endwith %}
                                 {% endif %}

@@ -1134,6 +1134,10 @@ def training_participant_ceritificate(request, wid, participant_id):
     imgDoc.setFont('Helvetica', 40, leading=None)
     imgDoc.drawCentredString(415, 480, "Certificate of Learning")
     
+    #date
+    imgDoc.setFont('Helvetica', 18, leading=None)
+    imgDoc.drawCentredString(211, 115, custom_strftime('%B {S} %Y', w.trdate)) 
+
     #password
     imgDoc.setFillColorRGB(211, 211, 211)
     imgDoc.setFont('Helvetica', 10, leading=None)
@@ -1532,7 +1536,7 @@ def test_participant_ceritificate(request, wid, participant_id):
             mdluser = MdlUser.objects.get(id = participant_id)
             ta = TestAttendance.objects.get(test_id = w.id, mdluser_id = participant_id)
             mdlgrade = MdlQuizGrades.objects.get(quiz = ta.mdlquiz_id, userid = participant_id)
-            if ta.status < 1 or round(mdlgrade.grade, 1) < 40:
+            if ta.status < 1 or round(mdlgrade.grade, 1) < 40 or not w.invigilator:
                 raise Http404('Page not found')
                 
             if ta.password:
@@ -1561,7 +1565,7 @@ def test_participant_ceritificate(request, wid, participant_id):
     #imgDoc.drawCentredString(415, 480, "Certificate for Completion of c ")
     
     imgDoc.setFont('Helvetica', 18, leading=None)
-    imgDoc.drawCentredString(175, 115, custom_strftime('%B {S} %Y', w.tdate))
+    imgDoc.drawCentredString(211, 115, custom_strftime('%B {S} %Y', w.tdate))
     
     #password
     imgDoc.setFillColorRGB(211, 211, 211)

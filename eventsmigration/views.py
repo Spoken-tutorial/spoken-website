@@ -1134,29 +1134,70 @@ def test(request):
 def test_attendance(request):
     tas = WAttendanceRegister.objects.all()
     for ta in tas:
-        #check test
+        
+        mdluser = None
+        try:
+            mdluser = MdlUser.objects.get(id = ta.moodle_uid)
+        except:
+            print 'id:', ta.id, 'MdlUser missing', ta.moodle_uid
+            continue
+        
         test = None
         try:
             test = Test.objects.get(test_code = ta.test_code)
         except Exception, e:
-            print e, " => ", ta.test_code, ta.moodle_uid
+            print 'id:', ta.id, 'Test missing', ta.test_code
             continue
         
         try:
             TestAttendance.objects.get(test_id = test.id, mdluser_id = ta.moodle_uid)
-            print "Already Exits"
             continue
-        except Exception, e:
-            print e, " => 1", ta.test_code, ta.moodle_uid
+        except:
+            pass
+        
+        #check weather student attent in current foss mdl courses available
+        mdlcourse = None
+        try:
+            mdlcourse = FossMdlCourses.objects.get(foss = test.foss)
+        except:
+            print 'id:', test.id, 'FossMdlCourses missing', test.foss
+            continue
             
+        mdlcourse_id = 0
+        mdlquiz_id = 0
+        try:
+            mdlgrade = MdlQuizGrades.objects.filter(quiz = mdlcourse.mdlquiz_id, userid = ta.moodle_uid).first()
+            if mdlgrade:
+                mdlcourse_id = mdlcourse.mdlcourse_id
+                mdlquiz_id = mdlcourse.mdlquiz_id
+            #else:
+            #    print 'id:', ta.id, 'student grade missing, Old Quiz', ta.moodle_uid
+        except:
+            #print 'id:', ta.id, 'student grade missing, Old Quiz', ta.moodle_uid
+            pass
+        
+        try:
             t = TestAttendance()
             t.mdluser_id = ta.moodle_uid
             t.test_id = test.id
-            t.status = 4
+            
+            t.mdlcourse_id = mdlcourse_id
+            t.mdlquiz_id = mdlquiz_id
+            
+            t.mdluser_firstname = mdluser.firstname.lower().title()
+            t.mdluser_lastname = mdluser.lastname.lower().title()
+            
+            t.status = 3
+            if ta.status == 0:
+                t.status = 0
+            
             t.created = datetime.datetime.now()
             t.updated = datetime.datetime.now()
+            
             t.save()
-        
+        except Exception, e:
+            print 'id:', ta.id, 'Failed', ta.moodle_uid
+            return HttpResponse("Test attendance migration Done!")
     return HttpResponse("Test attendance migration Done!")
 
 def get_user(old_user_id):

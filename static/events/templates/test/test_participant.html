@@ -29,17 +29,24 @@
 				<th>First Name</th>
 				<th>Last Name</th>
 				<th>Score</th>
-				<th>Action</th>
 			</tr>
 			{% for record in collection %}
 				<tr>
 					<td>{{ record.firstname }}</td>
 					<td>{{ record.lastname }}</td>
 					{% with grade=test.id|get_participant_mark:record.id %}
-                        {% if grade >= 40 %}
-                            <td>{{ grade }}% (Pass)</td>
-                            <td><a href="{% url 'events:test_participant_ceritificate' test.id record.id %}">Certificate</a></td>                     {% else %}
-                            <td>{{ grade }} (Fail)</td>
+					    {% if grade %}
+                            {% if grade >= 40 %}
+                                <td>
+                                    {{ grade }}%
+                                    {% if record.invigilator %}
+                                     - <a href="{% url 'events:test_participant_ceritificate' record.id mdluserid %}">Certificate</a>
+                                    {% endif %}
+                                </td>
+                            {% else %}
+                                <td>{{ grade }} (Fail)</td>
+                            {% endif %}
+                        {% else %}
                             <td></td>
                         {% endif %}
                     {% endwith %}
