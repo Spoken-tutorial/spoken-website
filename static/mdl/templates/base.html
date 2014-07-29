@@ -10,11 +10,11 @@
 			    <span title="" data-original-title="" class="glyphicon glyphicon-user"></span> {{ mdlusername }}<b class="caret"></b>
 		    </a>
 		    <ul class="dropdown-menu">
-			    <li class="divider"></li>
 			    <li><a href="/moodle/logout/">Logout</a></li>
 		    </ul>
 	    </li>
     {% else %}
-	    <li><a href="/moodle/login/"><span class="glyphicon glyphicon-user"></span> Login</a></li>
+	    <li><a href="/moodle/login/">Login</a></li>
+	    <li><a href="/moodle/register/">Register</a></li>
     {% endif %}
 {% endblock %}
