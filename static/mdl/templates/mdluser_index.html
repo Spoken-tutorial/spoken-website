@@ -70,7 +70,7 @@
                                 {% if grade >= 40 %}
                                     <td>
                                         {{ grade }}%
-                                        {% if w.invigilator %}
+                                        {% if record.invigilator %}
                                          - <a href="{% url 'events:test_participant_ceritificate' record.id mdluserid %}">Certificate</a>
                                         {% endif %}
                                     </td>
@@ -152,7 +152,7 @@
                                             {% if grade >= 40 %}
                                                 <td>
                                                     {{ grade }}%
-                                                    {% if w.invigilator %}
+                                                    {% if record.invigilator %}
                                                      - <a href="{% url 'events:test_participant_ceritificate' record.id mdluserid %}">Certificate</a>
                                                     {% endif %}
                                                 </td>

@@ -1134,6 +1134,10 @@ def training_participant_ceritificate(request, wid, participant_id):
     imgDoc.setFont('Helvetica', 40, leading=None)
     imgDoc.drawCentredString(415, 480, "Certificate of Learning")
     
+    #date
+    imgDoc.setFont('Helvetica', 18, leading=None)
+    imgDoc.drawCentredString(211, 115, custom_strftime('%B {S} %Y', w.trdate)) 
+
     #password
     imgDoc.setFillColorRGB(211, 211, 211)
     imgDoc.setFont('Helvetica', 10, leading=None)
@@ -1561,7 +1565,7 @@ def test_participant_ceritificate(request, wid, participant_id):
     #imgDoc.drawCentredString(415, 480, "Certificate for Completion of c ")
     
     imgDoc.setFont('Helvetica', 18, leading=None)
-    imgDoc.drawCentredString(175, 115, custom_strftime('%B {S} %Y', w.tdate))
+    imgDoc.drawCentredString(211, 115, custom_strftime('%B {S} %Y', w.tdate))
     
     #password
     imgDoc.setFillColorRGB(211, 211, 211)
