@@ -124,6 +124,18 @@
                                                 </div>
                                             </ul>
                                         </li>
+                                        <li class="dropdown">
+                                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                                News<b class="caret"></b>
+                                            </a>
+                                            <ul class="dropdown-menu creation">
+                                                <li><a href="/news/article/">Media Articles</a></li>
+                                                <li class="divider"></li>
+                                                <li><a href="/news/news-and-events/">News and Events</a></li>
+                                                <li class="divider"></li>
+                                                <li><a href="/news/official-letters-and-links/">Official Letters and Links</a></li>
+                                            </ul>
+                                        </li>
                                         <li><a href="/about-us/">About us</a></li>
                                         <li><a href="/statistics/">Statistics</a></li>
                                         <li><a href="http://old.spoken-tutorial.org" target="_blank">Old Website</a></li>
@@ -159,7 +171,7 @@
             </div> <!-- /#header-wrapper -->
             {% block search %}
                 <div id="search-wrapper">
-                    <div class="common-search">
+                    <div class="common-search row">
                         <form class="navbar-form" role="search" action="/keyword-search" method="GET" id="search-form">
                             <div class="input-group">
                                 <input type="text" class="form-control" placeholder="ex: Linux Oscad" name="q" style="padding:6px 6px;">
@@ -168,6 +180,7 @@
                                 </div>
                             </div>
                         </form>
+                        <div class="pull-right" style="margin-right:20px;"><a href="/tutorial-search/">Advanced Search</a></div>
                     </div>
                 </div>
             {% endblock %}

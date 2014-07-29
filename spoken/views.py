@@ -263,7 +263,7 @@ def admin_testimonials(request):
 def news(request, cslug):
     try:
         newstype = NewsType.objects.get(slug = cslug)
-        collection = newstype.news_set.all()
+        collection = newstype.news_set.all().order_by('-created')
         context = {
             'collection' : collection,
             'category' : cslug
