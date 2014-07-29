@@ -10,11 +10,11 @@
 			    <span title="" data-original-title="" class="glyphicon glyphicon-user"></span> {{ mdlusername }}<b class="caret"></b>
 		    </a>
 		    <ul class="dropdown-menu">
-			    <li><a href="/moodle/logout/">Logout</a></li>
+			    <li><a href="{% url 'mdldjango:mdl_logout' %}">Logout</a></li>
 		    </ul>
 	    </li>
     {% else %}
-	    <li><a href="/moodle/login/">Login</a></li>
-	    <li><a href="/moodle/register/">Register</a></li>
+	    <li><a href="{% url 'mdldjango:mdl_login' %}">Login</a></li>
+	    <li><a href="{% url 'mdldjango:mdl_register' %}"">Register</a></li>
     {% endif %}
 {% endblock %}

@@ -42,7 +42,7 @@ def mdl_logout(request):
     del request.session['mdluserid']
     request.session.save()
     print "logout !!"
-    return HttpResponseRedirect("/moodle/login")
+    return HttpResponseRedirect('/participant/login')
     
 def mdl_login(request):
     messages = {}
@@ -51,7 +51,7 @@ def mdl_login(request):
         password = request.POST["password"]
         if not username or not password:
             messages['error'] = "Please enter valide Username and Password!"
-            #return HttpResponseRedirect("/moodle/login")
+            #return HttpResponseRedirect('/participant/login')
         user = authenticate(username = username, password = password)
         if user:
             request.session['mdluserid'] = user.id
@@ -65,7 +65,7 @@ def mdl_login(request):
 
     if request.session.get('mdluserid'):
         print "Current user is ", request.session.get('mdluserid')
-        return HttpResponseRedirect("/moodle/index")
+        return HttpResponseRedirect('/participant/index')
         
     context = {'message':messages}
     context.update(csrf(request))
@@ -75,12 +75,12 @@ def index(request):
     mdluserid = request.session.get('mdluserid')
     mdlusername = request.session.get('mdlusername')
     if not mdluserid:
-        return HttpResponseRedirect("/moodle/login")
+        return HttpResponseRedirect('/participant/login')
     
     try:
         mdluser = MdlUser.objects.get(id=mdluserid)
     except:
-        return HttpResponseRedirect("/moodle/login")
+        return HttpResponseRedirect('/participant/login')
     
     if str(mdluser.institution).isdigit():
         academic = None
@@ -92,7 +92,7 @@ def index(request):
         if academic:
             category = int(request.GET.get('category', 4))
             if not (category > 0 and category < 6):
-                return HttpResponseRedirect("/moodle/index/?category=4")
+                return HttpResponseRedirect('/participant/index/?category=4')
                 
             upcoming_workshop = None
             upcoming_test = None
@@ -130,7 +130,7 @@ def index(request):
         if form.is_valid():
             mdluser.institution = form.cleaned_data['college']
             mdluser.save()
-            return HttpResponseRedirect("/moodle/index")
+            return HttpResponseRedirect('/participant/index')
     context = {
         'form' : form
     }
@@ -323,7 +323,7 @@ def mdl_register(request):
             mdluser.mnethostid = 1
             mdluser.save()
             messages.success(request, "User " + form.cleaned_data['firstname'] +" "+form.cleaned_data['firstname']+" Created!")
-            return HttpResponseRedirect('/moodle/register/')
+            return HttpResponseRedirect('/participant/register/')
             
     context = {}
     context['form'] = form
@@ -334,12 +334,12 @@ def feedback(request, wid):
     mdluserid = request.session.get('mdluserid')
     mdlusername = request.session.get('mdlusername')
     if not mdluserid:
-        return HttpResponseRedirect("/moodle/login")
+        return HttpResponseRedirect('/participant/login')
         
     form = FeedbackForm()
     mdluserid = request.session.get('mdluserid')
     if not mdluserid:
-        return HttpResponseRedirect("/moodle/login")
+        return HttpResponseRedirect('/participant/login')
     w = None
     try:
         w = Training.objects.select_related().get(pk=wid)
@@ -359,7 +359,7 @@ def feedback(request, wid):
                 wa.status = 2
                 wa.save()
                 messages.success(request, "Thank you for your valuable feedback.")
-                return HttpResponseRedirect("/moodle/index/")
+                return HttpResponseRedirect('/participant/index/')
             except Exception, e:
                 print e
     context = {
@@ -419,7 +419,7 @@ Admin Spoken Tutorials
 
             result = email.send(fail_silently=False)
             messages.success(request, "New password sent to your email "+user.email)
-            return HttpResponseRedirect('/moodle/login/')
+            return HttpResponseRedirect('/participant/login/')
             
 
     context = {

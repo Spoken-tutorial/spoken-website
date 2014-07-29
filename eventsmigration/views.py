@@ -270,8 +270,10 @@ def states(request):
     return HttpResponse("States migration complted!")
 
 def testimonials(request):
-    collection = ContentTypeCredentials.objects.all()
-    for r in collection:
+    anodes = Node.objects.filter(type = 'credentials')
+    for nodeid in anodes:
+        node = NodeRevisions.objects.get(nid = nodeid.nid)
+        r = ContentTypeCredentials.objects.get(nid = nodeid.nid)
         try:
             Testimonials.objects.get(user_name = r.field_credentials_source_value)
         except Exception, e:
@@ -281,7 +283,7 @@ def testimonials(request):
             t = Testimonials()
             t.user_id = 1
             t.user_name = r.field_credentials_source_value
-            t.actual_content = r.field_short_description_value
+            t.actual_content = node.body
             t.minified_content = r.field_short_description_value
             t.short_description = r.field_short_description_value
             t.source_title = r.field_credentials_source_link_title

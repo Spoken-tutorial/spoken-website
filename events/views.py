@@ -1633,7 +1633,7 @@ def training_subscribe(request, events, eventid = None, mdluser_id = None):
                 print e
                 pass
             messages.success(request, "You have sucessfully subscribe to the "+events+"")
-            return HttpResponseRedirect('/moodle/index/#Upcoming-Test')
+            return HttpResponseRedirect('/participant/index/#Upcoming-Test')
         elif events == 'training':
             try:
                 TrainingAttendance.objects.create(training_id=eventid, mdluser_id = mdluser_id)
@@ -1641,13 +1641,13 @@ def training_subscribe(request, events, eventid = None, mdluser_id = None):
                 print e
                 pass
             messages.success(request, "You have sucessfully subscribe to the "+events+"")
-            return HttpResponseRedirect('/moodle/index/#Upcoming-Training')
+            return HttpResponseRedirect('/participant/index/#Upcoming-Training')
         else:
             raise Http404('Page not found')
     except:
         raise Http404('Page not found')
     
-    return HttpResponseRedirect('/moodle/index/')
+    return HttpResponseRedirect('/participant/index/')
 
 @login_required
 def organiser_invigilator_index(request, role, status):
