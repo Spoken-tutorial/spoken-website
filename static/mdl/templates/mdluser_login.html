@@ -24,8 +24,8 @@
 	            <div class="form-group">
                     <div class="col-sm-offset-3 col-sm-9">
 	                    <input class="btn btn-primary" type="submit" value="Sign In" />
-	                    <a href='/moodle/register' class="btn btn-primary"> Register</a>
-			            <a href='/moodle/forget-password'>Forgot Password</a>
+	                    <a href="{% url 'mdldjango:mdl_register' %}" class="btn btn-primary"> Register</a>
+			            <a href="{% url 'mdldjango:forget_password' %}">Forgot Password</a>
 	                </div>
 	            </div>
             </form>
