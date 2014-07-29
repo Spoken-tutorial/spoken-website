@@ -37,7 +37,12 @@
 					{% with grade=test.id|get_participant_mark:record.id %}
 					    {% if grade %}
                             {% if grade >= 40 %}
-                                <td>{{ grade }}% (Pass) - <a href="{% url 'events:test_participant_ceritificate' test.id record.id %}">Certificate</a></td>
+                                <td>
+                                    {{ grade }}%
+                                    {% if w.invigilator %}
+                                     - <a href="{% url 'events:test_participant_ceritificate' record.id mdluserid %}">Certificate</a>
+                                    {% endif %}
+                                </td>
                             {% else %}
                                 <td>{{ grade }} (Fail)</td>
                             {% endif %}

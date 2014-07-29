@@ -1532,7 +1532,7 @@ def test_participant_ceritificate(request, wid, participant_id):
             mdluser = MdlUser.objects.get(id = participant_id)
             ta = TestAttendance.objects.get(test_id = w.id, mdluser_id = participant_id)
             mdlgrade = MdlQuizGrades.objects.get(quiz = ta.mdlquiz_id, userid = participant_id)
-            if ta.status < 1 or round(mdlgrade.grade, 1) < 40:
+            if ta.status < 1 or round(mdlgrade.grade, 1) < 40 or not w.invigilator:
                 raise Http404('Page not found')
                 
             if ta.password:
