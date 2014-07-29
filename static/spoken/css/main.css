@@ -64,6 +64,10 @@ html,body
 .navbar-nav>li>.dropdown-menu.events, .navbar-nav>li>.dropdown-menu.creation{
     left: auto;
 }
+.dropdown-menu.creation > li > a{
+    color: #428bca;
+    font-size: 12px;
+}
 .help-text{
     background-color: #D9EDF7;
     border-color: #BCE8F1;
