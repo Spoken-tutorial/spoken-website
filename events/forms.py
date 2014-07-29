@@ -115,7 +115,7 @@ class InvigilatorForm(forms.Form):
             
         super(InvigilatorForm, self).__init__(*args, **kwargs)
         #load the choices
-        state_list = list(State.objects.exclude(name='Uncategorized').values_list('id', 'name'))
+        state_list = list(State.objects.exclude().values_list('id', 'name'))
         state_list.insert(0, ('', '-- None --'))
         self.fields['state'].choices = state_list
         if args:

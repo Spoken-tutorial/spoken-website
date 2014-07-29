@@ -182,10 +182,7 @@ def offline_details(request, wid, category):
                 firstname = studentDetails[0].text
                 lastname = studentDetails[1].text
                 gender =  studentDetails[2].text
-                email = studentDetails[4].text.lower()
-                #city = studentDetails[6].text
-                #country = studentDetails[7].text
-                #department = studentDetails[8].text
+                email = studentDetails[3].text.lower()
                 password = password_encript
                 username = firstname+' '+lastname
                 try:

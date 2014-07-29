@@ -292,7 +292,8 @@ h4.page-title {
     padding: 2px 0;
 }
 #footer-wrapper .license footer{
-    padding-top: 100px;
+    padding-top: 10px;
+    font-size: 10px;
 }
 /* footer end */
 

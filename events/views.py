@@ -1401,13 +1401,10 @@ def test_attendance(request, tid):
                     if not (u == 'csrfmiddlewaretoken' or u == 'submit-attendance'):
                         try:
                             ta = TestAttendance.objects.get(mdluser_id = users[u], test_id = tid)
-                            print ta.id, " => Exits"
+                            if ta.status > 1:
+                                continue
                         except:
-                            print "*********"
-                            print users[u]
-                            print test.foss_id
                             fossmdlcourse = FossMdlCourses.objects.get(foss_id = test.foss_id)
-                            print fossmdlcourse.mdlcourse_id,'d',fossmdlcourse.mdlquiz_id
                             ta = TestAttendance()
                             ta.test_id = test.id
                             ta.mdluser_id = users[u]
@@ -1416,7 +1413,6 @@ def test_attendance(request, tid):
                             ta.mdlattempt_id = 0
                             ta.status = 0
                             ta.save()
-                            print ta.id, " => Inserted"
                         if ta:
                             #todo: if the status = 2 check in moodle if he completed the test set status = 3 (completed)
                             t = TestAttendance.objects.get(mdluser_id = ta.mdluser_id, test_id = tid)
@@ -1428,21 +1424,23 @@ def test_attendance(request, tid):
                             #enroll to the course
                             #get the course enrole id
                             #todo: If mark absent delete enrolement
+                            mdlenrol = None
                             try:
                                 mdlenrol = MdlEnrol.objects.get(enrol='self', courseid = fossmdlcourse.mdlcourse_id )
                                 print "Role Exits"
                             except Exception, e:
                                 print "MdlEnrol => ", e
                                 print "No self enrolement for this course"
-                                
-                            try:
-                                MdlUserEnrolments.objects.get(enrolid = mdlenrol.id, userid = ta.mdluser_id)
-                                print "MdlUserEnrolments Exits"
-                                #update dateTime
-                            except Exception, e:
-                                print "MdlUserEnrolments => ", e
-                                MdlRoleAssignments.objects.create(roleid = 5, contextid = 16, userid = ta.mdluser_id, timemodified = datetime.datetime.now().strftime("%s"), modifierid = ta.mdluser_id, itemid = 0, sortorder = 0)
-                                MdlUserEnrolments.objects.create(enrolid = mdlenrol.id, userid = ta.mdluser_id, status = 0, timestart = datetime.datetime.now().strftime("%s"), timeend = 0, modifierid = ta.mdluser_id, timecreated = datetime.datetime.now().strftime("%s"), timemodified = datetime.datetime.now().strftime("%s"))
+                            
+                            if mdlenrol:
+                                try:
+                                    MdlUserEnrolments.objects.get(enrolid = mdlenrol.id, userid = ta.mdluser_id)
+                                    print "MdlUserEnrolments Exits"
+                                    #update dateTime
+                                except Exception, e:
+                                    print "MdlUserEnrolments => ", e
+                                    MdlRoleAssignments.objects.create(roleid = 5, contextid = 16, userid = ta.mdluser_id, timemodified = datetime.datetime.now().strftime("%s"), modifierid = ta.mdluser_id, itemid = 0, sortorder = 0)
+                                    MdlUserEnrolments.objects.create(enrolid = mdlenrol.id, userid = ta.mdluser_id, status = 0, timestart = datetime.datetime.now().strftime("%s"), timeend = 0, modifierid = ta.mdluser_id, timecreated = datetime.datetime.now().strftime("%s"), timemodified = datetime.datetime.now().strftime("%s"))
             
             if 'search-participant' in request.POST:
                 form = ParticipantSearchForm(request.POST)
