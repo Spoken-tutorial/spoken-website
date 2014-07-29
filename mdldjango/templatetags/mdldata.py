@@ -30,13 +30,15 @@ def check_test_enrole(rid, mdluser_id):
 def get_participant_mark(rid, mdluser_id):
     try:
         ta = TestAttendance.objects.get(test_id = rid, mdluser_id = mdluser_id)
-    except Exception, e:
-        print e
+    except:
         return False
+    
+    if not ta.mdlquiz_id:
+        return False
+        
     try:
         mdlgrade = MdlQuizGrades.objects.get(quiz = ta.mdlquiz_id, userid = mdluser_id)
     except Exception, e:
-        print e
         return False
         
     return round(mdlgrade.grade, 1)

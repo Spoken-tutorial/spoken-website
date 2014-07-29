@@ -1184,8 +1184,8 @@ def test_attendance(request):
             t.mdlcourse_id = mdlcourse_id
             t.mdlquiz_id = mdlquiz_id
             
-            t.mdluser_firstname = mdluser.firstname
-            t.mdluser_lastname = mdluser.lastname
+            t.mdluser_firstname = mdluser.firstname.lower().title()
+            t.mdluser_lastname = mdluser.lastname.lower().title()
             
             t.status = 3
             if ta.status == 0:
