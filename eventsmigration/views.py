@@ -1134,6 +1134,14 @@ def test(request):
 def test_attendance(request):
     tas = WAttendanceRegister.objects.all()
     for ta in tas:
+        
+        mdluser = None
+        try:
+            mdluser = MdlUser.objects.get(id = ta.moodle_uid)
+        except:
+            print 'id:', ta.id, 'MdlUser missing', ta.moodle_uid
+            continue
+        
         test = None
         try:
             test = Test.objects.get(test_code = ta.test_code)
@@ -1175,6 +1183,9 @@ def test_attendance(request):
             
             t.mdlcourse_id = mdlcourse_id
             t.mdlquiz_id = mdlquiz_id
+            
+            t.mdluser_firstname = mdluser.firstname
+            t.mdluser_lastname = mdluser.lastname
             
             t.status = 3
             if ta.status == 0:
