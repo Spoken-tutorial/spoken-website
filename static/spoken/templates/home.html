@@ -211,12 +211,12 @@
                 <h2 class='page-title stay-middle'>Thanks for visiting us</h2>
                 <div class="col-lg-4 col-md-4 col-sm-4 contact comfortaa">
                     <h4 class='page-title'>Contact</h4>
-                    <div><span class="fa fa-2 fa-home"></span> IIT Bombay</div>
+                    <div><span class="fa fa-2 fa-home"></span> Spoken Tutorial, IIT Bombay</div>
                     <div><span class="fa fa-2 fa-phone"></span> + 91 22 25764229 </div>
                     <div><span class="fa fa-2 fa-envelope"></span> contact [at] spoken-tutorial [dot] org</div>
-                    <div><span class="fa fa-2 fa-skype"></span> <a href="#">Skype</a></div>
-                    <div><span class="fa fa-2 fa-twitter"></span> <a href="#">Twitter</a></div>
-                    <div><span class="fa fa-2 fa-facebook-square"></span> <a href="#">Facebook</a></div>
+                    <div><span class="fa fa-2 fa-skype"></span> st-iitb</div>
+                    <!--<div><span class="fa fa-2 fa-twitter"></span> <a href="#">Twitter</a></div>-->
+                    <div><span class="fa fa-2 fa-facebook-square"></span> <a href="https://www.facebook.com/SpokenTutorial.org" target="_blank">Facebook</a></div>
                 </div>
                 <div class="col-lg-4 col-md-4 col-sm-4 feedback">
                     <h4 class='page-title'>Feedback</h4>
@@ -258,7 +258,7 @@
                 <div class="col-lg-4 col-md-4 col-sm-4 support-us">
                     <h4 class='page-title'>Collaborate with Us</h4>
                     <div class='collaborate'>
-                        <p>We invite you to become a part of this amazing journey of making India IT-literate.  Join our growing network of Resources Centres, Organisers, Content creators, Domain Experts, Translators, Dubbers, Reviewers and help us to reach every nook and corner of India.</p><p>First step to do so - fill the form given <a href="#">here</a>.</p>
+                        <p>We invite you to become a part of this amazing journey of making India IT-literate.  Join our growing network of Resources Centres, Organisers, Content creators, Domain Experts, Translators, Dubbers, Reviewers and help us to reach every nook and corner of India.</p><p>First step to do so - fill the form given <a href="/creation/collaborate/">here</a>.</p>
                     </div>
                 </div>
             </div>
@@ -277,6 +277,9 @@
                 $(this).find('.video-item-playlist').slideToggle();
             });
             
+        });
+        $(window).bind("load", function() {
+           setGoImageWith();
         });
         function setGoImageWith(){
             imgWidth = (10*$('.banner-img').height())/ 100
