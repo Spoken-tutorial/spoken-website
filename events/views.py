@@ -593,7 +593,13 @@ def invigilator_request(request, username):
                 invigilator = Invigilator()
                 invigilator.user_id=request.user.id
                 invigilator.academic_id=request.POST['college']
-                invigilator.save()
+                try:
+                    invigilator.save()
+                except:
+                    invigilator = Invigilator.objects.get(user = user)
+                    invigilator.academic_id=request.POST['college']
+                    invigilator.save()
+                
                 messages.success(request, "Thank you. Your request has been sent for Training Manager's approval. You will get the approval with in 24 hours. Once the request is approved, you can request for the workshop. For more details Click Here")
                 return HttpResponseRedirect("/software-training/invigilator/view/"+user.username+"/")
             messages.error(request, "Please fill the following details")
@@ -603,6 +609,13 @@ def invigilator_request(request, username):
             try:
                 invigilator = Invigilator.objects.get(user=user)
                 #todo: send status message
+                if not is_invigilator(invigilator):
+                    messages.info(request, "Please fill the following details")
+                    context = {}
+                    context.update(csrf(request))
+                    context['form'] = InvigilatorForm()
+                    return render(request, 'events/templates/invigilator/form.html', context)
+                    
                 if invigilator.status:
                     messages.success(request, "You have already  invigilator role ")
                     return HttpResponseRedirect("/software-training/invigilator/view/"+user.username+"/")
