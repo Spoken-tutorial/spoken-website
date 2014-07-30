@@ -64,7 +64,7 @@ Spoken Tutorial
     """.format(
         user.username,
         "http://spoken-tutorial.org",
-        "http://beta.spoken-tutorial.org/accounts/confirm/" + str(p.confirmation_code) + "/" + user.username
+        "http://spoken-tutorial.org/accounts/confirm/" + str(p.confirmation_code) + "/" + user.username
     )
 
     email = EmailMultiAlternatives(
