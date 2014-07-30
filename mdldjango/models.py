@@ -6,6 +6,13 @@ class MdlUser(models.Model):
     confirmed = models.IntegerField()
     #policyagreed = models.IntegerField()
     #deleted = models.IntegerField()
+    gender = models.CharField(max_length=100, null=True)
+    age_range = models.CharField(max_length=100, null=True, blank=True, default='0')
+    academic_code = models.CharField(max_length=100, null=True, blank=True, default='0')
+    organizer = models.CharField(max_length=100, null=True, blank=True, default='0')
+    invigilator = models.CharField(max_length=100, null=True, blank=True, default='0')
+    flag = models.CharField(max_length=100, null=True, blank=True, default='0')
+    
     #suspended = models.IntegerField()
     mnethostid = models.BigIntegerField(unique=True)
     username = models.CharField(unique=True, max_length=255)
