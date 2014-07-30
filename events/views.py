@@ -152,7 +152,7 @@ def is_organiser(user):
 
 def is_invigilator(user):
     """Check if the user is having invigilator rights"""
-    if user.groups.filter(name='Invigilator').count() == 1:
+    if user.groups.filter(name='Invigilator').count() == 1 and user.invigilator and user.invigilator.status == 1:
         return True
 def get_page(resource, page):
     paginator = Paginator(resource, 20)
@@ -1829,6 +1829,19 @@ def ajax_district_collage(request):
     if request.method == 'POST':
         district = request.POST.get('district')
         collages = AcademicCenter.objects.filter(district=district).order_by('institution_name')
+        tmp = None
+        if collages:
+            tmp = '<option value = None> -- None -- </option>'
+            for i in collages:
+                tmp +='<option value='+str(i.id)+'>'+i.institution_name+'</option>'
+        return HttpResponse(json.dumps(tmp), mimetype='application/json')
+
+@csrf_exempt
+def ajax_state_collage(request):
+    """ Ajax: Get the Colleges (Academic) based on District selected """
+    if request.method == 'POST':
+        state = request.POST.get('state')
+        collages = AcademicCenter.objects.filter(state=state).order_by('institution_name')
         tmp = None
         if collages:
             tmp = '<option value = None> -- None -- </option>'
