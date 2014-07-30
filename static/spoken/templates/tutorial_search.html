@@ -10,6 +10,9 @@
         .tutorial-search-form{
             margin-top: 20px;
         }
+        .result-record .thumb img {
+            border: 5px solid #E5E5E5;
+        }
     </style>
 {% endblock %}
 {% block heading %}
@@ -60,8 +63,8 @@
                     <div class="info col-lg-8 col-md-8 col-sm-8 col-xs-8">
                         <div class='title'><h4><a href="/watch/{{ record.tutorial_detail.foss.foss|get_url_name }}/{{ record.tutorial_detail.tutorial|get_url_name }}/{{ record.language }}">{{ record.tutorial_detail.tutorial }}</a></h4></div>
                         <div class='desc'>
-                                <p>Foss : </b><i>{{ record.tutorial_detail.foss }} - {{ record.language }}</i></p>
-                                <p>{{ record.outline|len_cutter:200 }}</p>
+                                <p><b>Foss : </b><i>{{ record.tutorial_detail.foss }} - {{ record.language }}</i></p>
+                                <p><b>Outline: </b>{{ record.outline|len_cutter:180 }}</p>
                             </dl>
                         </div>
                     </div>

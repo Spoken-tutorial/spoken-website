@@ -326,6 +326,7 @@ media="screen"
 }
 .search-result .result-record a img{
     min-width: 100px;
+    border: 5px solid #E5E5E5;
 }
 .search-result .result-record .thump{
 }
