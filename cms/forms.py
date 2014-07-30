@@ -77,8 +77,6 @@ class ProfileForm(forms.ModelForm):
     
     city = forms.ModelChoiceField(label='City', cache_choices=True, widget = forms.Select(attrs = {'class' : 'ac-city'}), queryset = City.objects.none(), empty_label = "--- None ---", help_text = "", error_messages = {'required':'City Type field required.'})
     
-    location = forms.ModelChoiceField(label='Location', cache_choices=True, widget = forms.Select(attrs = {'class' : 'ac-location'}), queryset = Location.objects.none(), empty_label = "--- None ---", help_text = "", error_messages = {'required':'Location Type field required.'}, required = False)
-    
     def __init__(self, user, *args, **kwargs):
         initial = ''
         if 'instance' in kwargs:
@@ -91,18 +89,19 @@ class ProfileForm(forms.ModelForm):
         self.fields['first_name'].initial = user.first_name
         self.fields['last_name'].initial = user.last_name
         self.fields["state"].queryset = State.objects.filter()
+        if initial:
+            self.fields["district"].queryset = District.objects.filter(state__id=initial.state_id)
+            self.fields["city"].queryset = City.objects.filter(state__id=initial.state_id)
+            
         if args:
             if 'state' in args[0]:
                 if args[0]['state'] != '' and args[0]['state'] != 'None':
                     self.fields["district"].queryset = District.objects.filter(state__id=args[0]['state'])
                     self.fields["city"].queryset = City.objects.filter(state__id=args[0]['state'])
-        if initial:
-            self.fields["district"].queryset = District.objects.filter(state__id=initial.state_id)
-            self.fields["city"].queryset = City.objects.filter(state__id=initial.state_id)
             
     class Meta:
         model = Profile
-        exclude = ['user', 'confirmation_code']
+        exclude = ['user', 'confirmation_code', 'street', 'location']
 
 #Overwrite NewsAdminBodyField
 class AdminBodyForm(forms.ModelForm):
