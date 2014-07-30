@@ -14,6 +14,7 @@ import hashlib
 from django.core.exceptions import PermissionDenied
 from events.views import *
 from events.models import *
+from django.conf import settings
 from events.forms import OrganiserForm
 from django.core.mail import EmailMultiAlternatives
 
@@ -119,6 +120,7 @@ def index(request):
                 'past_test' : past_test,
                 'ongoing_test' : ongoing_test,
                 'category' : category,
+                'ONLINE_TEST_URL' : settings.ONLINE_TEST_URL
 
             }
             context.update(csrf(request))
@@ -349,7 +351,7 @@ def feedback(request, wid):
         if form.is_valid():
             try:
                 form_data = form.save(commit=False)
-                form_data.workshop_id = wid
+                form_data.training_id = wid
                 form_data.mdluser_id = mdluserid
                 form_data.save()
                 #change status to 2
@@ -360,6 +362,7 @@ def feedback(request, wid):
                 return HttpResponseRedirect('/participant/index/')
             except Exception, e:
                 print e
+                return HttpResponseRedirect('/participant/index/')
     context = {
         'form' : form,
         'w' : w,

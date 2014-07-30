@@ -1309,10 +1309,11 @@ def test_list(request, role, status):
         header = {
             1: SortableHeader('academic__state', True, 'State'),
             2: SortableHeader('academic', True, 'Institution'),
-            3: SortableHeader('foss', True, 'FOSS'),
-            4: SortableHeader('tdate', True, 'Date'),
-            5: SortableHeader('Participants', False),
-            6: SortableHeader('Action', False)
+            3: SortableHeader('organiser', True, 'Orgainser'),
+            4: SortableHeader('foss', True, 'FOSS'),
+            5: SortableHeader('tdate', True, 'Date'),
+            6: SortableHeader('Participants', False),
+            7: SortableHeader('Action', False)
         }
         raw_get_data = request.GET.get('o', None)
         collection = get_sorted_list(request, collectionSet, header, raw_get_data)
@@ -1350,6 +1351,7 @@ def test_approvel(request, role, rid):
         t = Test.objects.get(pk=rid)
         if request.GET['status'] == 'accept':
             status = 1
+            t.test_code = "TC-" + str(t.id)
             message = "The Training Manager has approved "+t.foss.foss+" test dated "+t.tdate.strftime("%Y-%m-%d")
             alert = "Test has been approved"
             #send email
@@ -1390,11 +1392,11 @@ def test_approvel(request, role, rid):
         t.appoved_by_id = user.id
         t.workshop_code = "TC-"+str(t.id)
     if status == 4:
-        testatten = TestAttendance.objects.filter(test_id=t.id, status__lt=2)
-        if testatten:
+        testatten = TestAttendance.objects.filter(test_id=t.id, status__gt=2)
+        if  not testatten:
             messages.error(request, "Students are processing the test. Check the status for each students!")
             return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-        t.participant_count = TestAttendance.objects.filter(test_id=t.id).count()
+        t.participant_count = TestAttendance.objects.filter(test_id=t.id, status__gte=2).count()
 
     t.status = status
     t.save()
@@ -1416,6 +1418,8 @@ def test_attendance(request, tid):
     form = ParticipantSearchForm()
     try:
         test = Test.objects.get(pk=tid)
+        if test.status == 4 or test.status == 1:
+            return HttpResponseRedirect('/software-training/test/' + str(test.id) + '/participant/')
         test.status = 3
         test.save()
     except:
@@ -1462,15 +1466,15 @@ def test_attendance(request, tid):
                                 print "MdlEnrol => ", e
                                 print "No self enrolement for this course"
                             
-                            if mdlenrol:
-                                try:
-                                    MdlUserEnrolments.objects.get(enrolid = mdlenrol.id, userid = ta.mdluser_id)
-                                    print "MdlUserEnrolments Exits"
-                                    #update dateTime
-                                except Exception, e:
-                                    print "MdlUserEnrolments => ", e
-                                    MdlRoleAssignments.objects.create(roleid = 5, contextid = 16, userid = ta.mdluser_id, timemodified = datetime.datetime.now().strftime("%s"), modifierid = ta.mdluser_id, itemid = 0, sortorder = 0)
-                                    MdlUserEnrolments.objects.create(enrolid = mdlenrol.id, userid = ta.mdluser_id, status = 0, timestart = datetime.datetime.now().strftime("%s"), timeend = 0, modifierid = ta.mdluser_id, timecreated = datetime.datetime.now().strftime("%s"), timemodified = datetime.datetime.now().strftime("%s"))
+                            #if mdlenrol:
+                            #    try:
+                            #        MdlUserEnrolments.objects.get(enrolid = mdlenrol.id, userid = ta.mdluser_id)
+                            #        print "MdlUserEnrolments Exits"
+                            #        #update dateTime
+                            #    except Exception, e:
+                            #        print "MdlUserEnrolments => ", e
+                            #        MdlRoleAssignments.objects.create(roleid = 5, contextid = 16, userid = ta.mdluser_id, timemodified = datetime.datetime.now().strftime("%s"), modifierid = ta.mdluser_id, itemid = 0, sortorder = 0)
+                            #        MdlUserEnrolments.objects.create(enrolid = mdlenrol.id, userid = ta.mdluser_id, status = 0, timestart = datetime.datetime.now().strftime("%s"), timeend = 0, modifierid = ta.mdluser_id, timecreated = datetime.datetime.now().strftime("%s"), timemodified = datetime.datetime.now().strftime("%s"))
             
             if 'search-participant' in request.POST:
                 form = ParticipantSearchForm(request.POST)
@@ -1502,10 +1506,10 @@ def test_attendance(request, tid):
     if mdlids:
         wp = MdlUser.objects.filter(id__in = mdlids)
     #check can close the test
-    testatten = TestAttendance.objects.filter(test_id=test.id, status__lte=2)
-    enable_close_test = True
+    testatten = TestAttendance.objects.filter(test_id=test.id, status__gte=2)
+    enable_close_test = None
     if testatten:
-        enable_close_test = None
+        enable_close_test = True
     context = {}
     context['collection'] = wp
     context['test'] = test
@@ -1526,16 +1530,16 @@ def test_participant(request, tid=None):
         except:
             raise Http404('Page not found')
             
-        test_mdlusers = TestAttendance.objects.using('default').filter(test_id=tid).values_list('mdluser_id')
-        ids = []
-        print test_mdlusers
-        for tp in test_mdlusers:
-            ids.append(tp[0])
-            
-        tp = MdlUser.objects.using('moodle').filter(id__in=ids)
+        test_mdlusers = TestAttendance.objects.using('default').filter(test_id=tid)
+        #ids = []
+        #print test_mdlusers
+        #for tp in test_mdlusers:
+        #    ids.append(tp[0])
+        #print ids, 'ssssssssssss', tid
+        #tp = MdlUser.objects.using('moodle').filter(id__in=ids)
         #if t.status == 4 and (user == t.organiser or user == t.invigilator):
         #    can_download_certificate = 1
-        context = {'collection' : tp, 'test' : t, 'can_download_certificate':can_download_certificate}
+        context = {'collection' : test_mdlusers, 'test' : t, 'can_download_certificate':can_download_certificate}
         return render(request, 'events/templates/test/test_participant.html', context)
 
 def test_participant_ceritificate(request, wid, participant_id):

@@ -73,6 +73,7 @@
                     <tr>
                         <td>{{ record.academic.state }}</td>
                         <td>{{ record.academic }}</td>
+                        <td>{{ record.organiser.user.first_name }}</td>
                         <td>{{ record.foss.foss }}</td>
                         <td>{{ record.tdate|date:"d M Y" }} {{ record.ttime }}</td>
                         {% if status == 'completed' %}

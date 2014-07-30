@@ -73,7 +73,7 @@
 			    {% if enable_close_test %}
 			        <h4 class='step'><span class="label label-default">Step 2</span></h4>
 			        <div class="bs-callout bs-callout-info">
-                        <p>Please click <b>Close the Test</b> to end the test.</p>
+                        <p>Please make sure that you have marked attendance for all presented student. Then click <b>Close the Test</b> to end the test.</p>
                         <a class='btn btn-primary' title = "To complete the workshop click here" href="{% url 'events:test_approvel' 'invigilator' test.id %}?status=completed"">Close the Test</a>
                     </div>
                 {% endif %}

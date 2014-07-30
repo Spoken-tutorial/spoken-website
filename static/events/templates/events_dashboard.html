@@ -60,6 +60,18 @@
                         </div>
                     </div>
                 {% endif %}
+                {% if user|is_invigilator %}
+                    <div class="panel panel-primary">
+                        <div class="panel-heading panel-heading-notif">Invigilator</div>
+                        <div class="panel-body">
+                            <h5>Online Assessment Test</h5>
+                            <ul>
+                                <li><a href="/software-training/test/invigilator/waitingforinvigilator/">Approval Pending</a></li>
+                                <li><a href="/software-training/test/invigilator/ongoing/">Ongoing Test</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                {% endif %}
                 {% if user|is_organiser %}
                     <div class="panel panel-primary">
                         <div class="panel-heading panel-heading-notif">Organiser</div>
@@ -76,18 +88,6 @@
                                 <li><a href="/software-training/test/organiser/request/">New Test Request</a></li>
                                 <li><a href="/software-training/test/organiser/approved/">Approved Assessment Test</a></li>
                                 <li><a href="/software-training/test/organiser/completed/">Completed Assessment Test</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                {% endif %}
-                {% if user|is_invigilator %}
-                    <div class="panel panel-primary">
-                        <div class="panel-heading panel-heading-notif">Invigilator</div>
-                        <div class="panel-body">
-                            <h5>Online Assessment Test</h5>
-                            <ul>
-                                <li><a href="/software-training/test/invigilator/waitingforinvigilator/">Approval Pending</a></li>
-                                <li><a href="/software-training/test/invigilator/ongoing/">Ongoing Test</a></li>
                             </ul>
                         </div>
                     </div>

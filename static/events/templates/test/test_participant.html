@@ -5,7 +5,7 @@
 {% block title %}Participants List{% endblock %}
 {% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
 {% block heading %}
-        <i class="fa fa-list-ul"></i> Participants List<a href="{{ request.META.HTTP_REFERER }}" class='pull-right'>Go Back</a>
+        <i class="fa fa-list-ul"></i> Participants List <a href="{% url 'events:events_dashboard' %}" class='pull-right'>Dashboard</a>
 {% endblock %}
 {% block content %}
     <div class="bs-callout bs-callout-info">
@@ -17,7 +17,11 @@
             <dt>Date</dt>
             <dd>{{ test.tdate }}</dd>
             <dt>Participants Count</dt>
-            <dd>{{ collection|length }}</dd>
+            {% if test.participant_count %}
+                <dd>{{ test.participant_count }}</dd>
+            {% else %}
+                <dd>{{ collection|length }}</dd>
+            {% endif %}
             <dt>Organiser</dt>
             <dd>{{ test.organiser }}</dd>
         </dl>
@@ -31,26 +35,40 @@
 				<th>Score</th>
 			</tr>
 			{% for record in collection %}
-				<tr>
-					<td>{{ record.firstname }}</td>
-					<td>{{ record.lastname }}</td>
-					{% with grade=test.id|get_participant_mark:record.id %}
-					    {% if grade %}
-                            {% if grade >= 40 %}
-                                <td>
-                                    {{ grade }}%
-                                    {% if record.invigilator %}
-                                     - <a href="{% url 'events:test_participant_ceritificate' record.id mdluserid %}">Certificate</a>
+			    {% with mdluser=record.mdluser_id|get_mdluser_details %}
+				    <tr>
+					    <td>
+					        {% if record.mdluser_firstname  %}
+					            {{ record.mdluser_firstname }}
+					        {% else %}
+					            {{ mdluser.firstname }}
+					        {% endif %}
+					    </td>
+					    <td>
+					        {% if record.mdluser_lastname  %}
+					            {{ record.mdluser_lastname }}
+					        {% else %}
+					            {{ mdluser.lastname }}
+					        {% endif %}
+					    </td>
+					    <td>
+					        {% if record.status > 2 %}
+					            {% with grade=test.id|get_participant_mark:record.mdluser_id %}
+					                {% if grade %}
+                                        {% if grade >= 40 %}
+                                            {{ grade }}%
+                                            {% if test.invigilator %}
+                                             - <a href="{% url 'events:test_participant_ceritificate' test.id record.mdluser_id %}">Certificate</a>
+                                            {% endif %}
+                                        {% else %}
+                                            {{ grade }} (Fail)
+                                        {% endif %}
                                     {% endif %}
-                                </td>
-                            {% else %}
-                                <td>{{ grade }} (Fail)</td>
+                                {% endwith %}
                             {% endif %}
-                        {% else %}
-                            <td></td>
-                        {% endif %}
-                    {% endwith %}
-				</tr>
+                        </td>
+				    </tr>
+				{% endwith %}
 			{% endfor %}
 		</table>
 		{% else %}

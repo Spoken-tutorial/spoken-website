@@ -43,7 +43,28 @@ def get_participant_mark(rid, mdluser_id):
         
     return round(mdlgrade.grade, 1)
 
+def get_moodle_courseid(rid, mdluser_id):
+    #print "rid =>", rid
+    #print "mdluser =>", mdluser_id
+    try:
+        wa = TestAttendance.objects.get(test_id = rid, mdluser_id = mdluser_id)
+        #print wa.mdlcourse_id
+        return wa.mdlcourse_id
+    except Exception, e:
+        #print e
+        return False
+
+def get_mdluser_details(mdluser_id):
+    try:
+        mdluser = MdlUser.objects.get(id=mdluser_id)
+        return mdluser
+    except:
+        return False
+    
+    
 register.filter('get_participant_score', get_participant_score)
 register.filter('get_participant_mark', get_participant_mark)
 register.filter('check_training_enrole', check_training_enrole)
 register.filter('check_test_enrole', check_test_enrole)
+register.filter('get_moodle_courseid', get_moodle_courseid)
+register.filter('get_mdluser_details', get_mdluser_details)

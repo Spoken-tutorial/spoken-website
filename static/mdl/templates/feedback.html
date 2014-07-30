@@ -11,12 +11,11 @@
             <dt>Software Taken</dt>
                 <dd>{{ w.foss }}</dd>
             <dt>Date of Taken</dt>
-                <dd>{{ w.wdate }}</dd>
+                <dd>{{ w.trdate }}</dd>
             <dt>Organiser</dt>
-                <dd>{{ w.organiser }}</dd>
+                <dd>{{ w.organiser.user.first_name }}</dd>
         </dd>
     </div>
-    {{ form.errors}}
     <form action="{{ action }}" method="post">{% csrf_token %}
     {% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
     {% if form.non_field_errors %}
@@ -448,7 +447,7 @@
             <td colspan="5">{{ form.time_management.errors }}</td>
     </tr>
     </table>
-    <div><p><label>How can the workshop be improved ?</label></p><p>{{ form.workshop_learnt }}</p>
+    <div><p><label>How can the workshop be improved ?</label></p><p>{{ form.workshop_improved }}</p>
     </div>
     <!-- Recommend workshop-->
     <table style="width:100%">

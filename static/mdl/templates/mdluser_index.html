@@ -143,24 +143,32 @@
                                     Waiting for Attandance
                                 <!-- Todo: Link to go attempt page -->
                                 {% elif status == 1 %}
-                                    <a href="http://localhost/OTC/course/view.php?id=2" target="_blank"> Enter into Test</a>
+                                    {% with courseid=record.id|get_moodle_courseid:mdluserid %}
+                                        {% if courseid %}
+                                            <a href="{{ ONLINE_TEST_URL }}course/view.php?id={{courseid}}" target="_blank"> Enter into Test</a>
+                                        {% else %}
+                                            <a href="{{ ONLINE_TEST_URL }}course/" target="_blank"> Enter into Test</a>
+                                        {% endif %}
+                                    {% endwith %}
                                 {% elif status == 2 %}
-                                    <a href="http://localhost/OTC/course/view.php?id=2" target="_blank"> Continue Test</a>
+                                    {% with courseid=record.id|get_moodle_courseid:mdluserid %}
+                                        {% if courseid %}
+                                            <a href="{{ ONLINE_TEST_URL }}course/view.php?id={{courseid}}" target="_blank"> Continue Test</a>
+                                        {% else %}
+                                            <a href="{{ ONLINE_TEST_URL }}course/" target="_blank"> Continue Test</a>
+                                        {% endif %}
+                                    {% endwith %}
                                 {% elif status >= 3 %}
                                     {% with grade=record.id|get_participant_mark:mdluserid %}
                                         {% if grade %}
                                             {% if grade >= 40 %}
-                                                <td>
-                                                    {{ grade }}%
-                                                    {% if record.invigilator %}
-                                                     - <a href="{% url 'events:test_participant_ceritificate' record.id mdluserid %}">Certificate</a>
-                                                    {% endif %}
-                                                </td>
+                                                {{ grade }}%
+                                                {% if record.invigilator %}
+                                                 - <a href="{% url 'events:test_participant_ceritificate' record.id mdluserid %}">Certificate</a>
+                                                {% endif %}
                                             {% else %}
-                                                <td>{{ grade }} (Fail)</td>
+                                                {{ grade }} (Fail)
                                             {% endif %}
-                                        {% else %}
-                                            <td></td>
                                         {% endif %}
                                     {% endwith %}
                                 {% endif %}
