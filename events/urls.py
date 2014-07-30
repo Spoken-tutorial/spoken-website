@@ -23,12 +23,12 @@ urlpatterns = patterns('',
     url(r'^(?P<role>\w+)/(?P<status>\w+)/$', 'events.views.organiser_invigilator_index', name='organiser_invigilator_index'),
     url(r'^organiser/(?P<status>\w+)/(?P<code>\w+)/(?P<userid>\d+)/$', 'events.views.rp_organiser', name='rp_organiser'),
     
-    url(r"^organiser/request/(?P<username>[\w. @-']+)/$", 'events.views.organiser_request', name='organiser_request'),
-    url(r"^organiser/(?P<username>[\w. @-']+)/edit/$", 'events.views.organiser_edit', name='organiser_edit'),
-    url(r"^organiser/view/(?P<username>[\w. @-']+)/$", 'events.views.organiser_view', name='organiser_view'),
+    url(r"^organiser/request/(?P<username>[\w. @-]+)/$", 'events.views.organiser_request', name='organiser_request'),
+    url(r"^organiser/(?P<username>[\w. @-]+)/edit/$", 'events.views.organiser_edit', name='organiser_edit'),
+    url(r"^organiser/view/(?P<username>[\w. @-]+)/$", 'events.views.organiser_view', name='organiser_view'),
 
     url(r'^invigilator/(?P<status>\w+)/(?P<code>\w+)/(?P<userid>\d+)/$', 'events.views.rp_invigilator', name='rp_invigilator'),
-    url(r"^invigilator/request/(?P<username>[\w. @-']+)/$", 'events.views.invigilator_request', name='invigilator_request'),
+    url(r"^invigilator/request/(?P<username>[\w. @-]+)/$", 'events.views.invigilator_request', name='invigilator_request'),
     url(r"^invigilator/(?P<username>[\w. @-]+)/edit/$", 'events.views.invigilator_edit', name='invigilator_edit'),
     url(r"^invigilator/view/(?P<username>[\w. @-]+)/$", 'events.views.invigilator_view', name='invigilator_view'),
     

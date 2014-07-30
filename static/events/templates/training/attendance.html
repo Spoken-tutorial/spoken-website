@@ -20,7 +20,8 @@
           </div> -->
           <input class="btn btn-default" name="search-participant" type="submit" value="Search Participant" />
         </form>
-        <a class="pull-right btn btn-primary" href="{% url 'mdldjango:mdl_offline_workshop_details' training.id 2 %}">Upload data</a>
+        <a class="pull-right btn btn-primary" href="{% url 'mdldjango:mdl_offline_workshop_details' training.id 2 %}">Upload Participant Data</a>
+        <div class="help-text alert pull-left" style="margin: 0 0 0 15px; clear:both;">You can search participant by email.</div>
     </div>
     {% if onlinetest_user and onlinetest_user != 'None' %}
         <div class="row well">

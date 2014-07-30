@@ -629,13 +629,13 @@ def invigilator(request):
 
 #MAH-00029 Live workshop
 def workshop(request):
-    workshop_status = 2
+    workshop_status = 1
     if workshop_status == 2:
         wwrs = WWorkshopRequests.objects.filter(status = workshop_status)
     elif workshop_status == 1:
-        wwrs = WWorkshopRequests.objects.filter(status = workshop_status, pref_wkshop_date__gt = datetime.datetime.today())
+        wwrs = WWorkshopRequests.objects.filter(status = workshop_status, pref_wkshop_date__gt = '2014-07-24')
     else:
-        wwrs = WWorkshopRequests.objects.filter(status = workshop_status, pref_wkshop_date__gt = datetime.datetime.today())
+        wwrs = WWorkshopRequests.objects.filter(status = workshop_status, pref_wkshop_date__gt = '2014-07-24')
         
     for wwr in wwrs:
         #Save department
@@ -754,7 +754,10 @@ def workshop(request):
             w = Training()
             w.id = wwr.id
             w.organiser_id = organiser.id
-            w.training_code = wwr.workshop_code.upper()
+            if workshop_status == 0:
+                w.training_code = None
+            else:
+                w.training_code = wwr.workshop_code.upper()
             w.academic_id = ac.id
             w.foss_id = foss.id
             w.language_id = lang.id

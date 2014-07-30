@@ -10,6 +10,7 @@
         <i class="fa fa-list-ul"></i> Online Test <a href="{% url 'events:events_dashboard' %}" class='pull-right'>Dashboard</a>
 {% endblock %}
 {% block content %}
+{% if role == 'rp' or role == 'em' %}
     <div class= 'filters' >
         <form action="" method="get" class='form-horizontal'>
             <div class="form-group">
@@ -41,6 +42,7 @@
            </div>
         </form>
     </div>
+{% endif %}
     <!-- Nav tabs -->
     <ul class="tabs nav nav-tabs">
         {% if role == 'organiser' %}

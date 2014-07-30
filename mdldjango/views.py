@@ -146,9 +146,9 @@ def offline_details(request, wid, category):
     form = OfflineDataForm()
     try:
         if category == 1:
-            Training.objects.get(pk=wid, status = 0)
+            Training.objects.get(pk=wid, status__lt=4)
         elif category == 2:
-            Training.objects.get(pk=wid, status = 0)
+            Training.objects.get(pk=wid, status__lt=4)
         else:
             print 'yes'
             raise PermissionDenied('You are not allowed to view this page!')
