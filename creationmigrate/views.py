@@ -92,6 +92,8 @@ def get_current_tutorial_detail(old_td):
         'C2': 1,
         'C3': 2,
         'C4': 3,
+        'S1': 1,
+        'D0': 1,
     }
     try:
         new_td = TutorialDetail.objects.get(foss__foss = old_td.foss_category.replace('-', ' ').replace("+", "p"), tutorial = old_td.tutorial_name.replace('-', ' ').replace("+", "p"), level_id = levels[old_td.tutorial_level])
@@ -406,6 +408,9 @@ def tutorial_resources(request):
     for row in rows:
         #break
         new_td = get_current_tutorial_detail(row.tutorial_detail)
+        if new_td == None:
+            print row.id, '------TD Missing'
+            continue
         print new_td
         if new_td:
             try:
@@ -522,6 +527,7 @@ def tutorial_resources(request):
             new_tutorial_path = settings.MEDIA_ROOT + 'videos/' + str(new_tr.tutorial_detail.foss_id) + '/' + str(new_tr.tutorial_detail.id) + '/'
             try:
                 copyfile(settings.STVIDEOS_DIR + row.tutorial_video, new_tutorial_path + new_tr.video)
+                print row.tutorial_video, new_tr.video
                 k = row.tutorial_video.rfind(".")
                 old_srtfile = row.tutorial_video[:k] + '.srt'
                 k = new_tr.video.rfind(".")
