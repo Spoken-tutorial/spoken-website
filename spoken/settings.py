@@ -35,7 +35,7 @@ PASSWORD_HASHERS = (
 )
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 TEMPLATE_DEBUG = True
 
@@ -130,7 +130,7 @@ USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = False
+USE_TZ = True
 
 #events settings
 ONLINE_TEST_URL = ONLINE_TEST_URL

@@ -205,6 +205,7 @@ def offline_details(request, wid, category):
                     mdluser.email = email
                     mdluser.confirmed = 1
                     mdluser.mnethostid = 1
+                    mdluser.gender = gender
                     mdluser.save()
                     mdluser = MdlUser.objects.filter(email = email, firstname= firstname, username=username, password=password).first()
                     
