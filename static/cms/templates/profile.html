@@ -41,7 +41,7 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="col-sm-3 control-label" for="id_district">District</label>
+                    <label class="col-sm-3 control-label" for="id_district">District<span class='ajax-refresh ajax-refresh-district'></label>
                     <div class="col-sm-9">
                         {% render_field form.district class+="form-control district" tabindex="1" data-placeholder="Enter district" %}
                         {{ form.district.errors }}
