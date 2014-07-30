@@ -71,6 +71,15 @@ def get_last_index(input_string, td_row, concat_str):
         return filename
     return ''
 
+def get_old_exact_filename(input_string):
+    if input_string == 'pending' or input_string == 'notrequired':
+        return ''
+    if len(input_string):
+        tmp_string = input_string.split('/')
+        tmp_index = len(tmp_string) - 1
+        return filename.replace("+", "p")
+    return ''
+
 def get_current_status(input_string, input_status):
     if input_status:
         if input_string == 'notrequired' or input_status == 6:
@@ -392,9 +401,9 @@ def tutorial_details(request):
     return HttpResponse('Success!')
 
 def get_current_tutorial_status(input_status):
-    if input_status == 'accepted':
+    if input_status.lower() == 'accepted':
         return 1
-    elif input_status == 'public_review':
+    elif input_status.lower() == 'public_review':
         return 2
     return 0
 
@@ -417,21 +426,42 @@ def tutorial_resources(request):
                 new_tcc = TutorialCommonContent.objects.get(tutorial_detail = new_td)
                 new_lang = Language.objects.get(name = row.language)
                 try:
+                    outline_user_id = get_current_user_from_old_email(row.tutorial_outline_uid.mail, request.user)
+                except:
+                    outline_user_id = request.user.id
+                try:
+                    script_user_id = get_current_user_from_old_email(row.tutorial_script_uid.mail, request.user)
+                except:
+                    script_user_id = request.user.id
+                try:
+                    video_user_id = get_current_user_from_old_email(row.tutorial_video_uid.mail, request.user)
+                except:
+                    video_user_id = request.user.id
+                try:
                     new_tr = TutorialResource.objects.get(tutorial_detail = new_td, common_content = new_tcc, language = new_lang)
+                    new_tr.tutorial_detail = new_td
+                    new_tr.common_content = new_tcc
+                    new_tr.language = new_lang
+                    new_tr.outline = row.tutorial_outline
+                    new_tr.outline_user_id = outline_user_id
+                    new_tr.outline_status = get_current_status(row.tutorial_outline, row.tutorial_outline_status)
+                    if new_tr.outline_status == 1:
+                        new_tr.outline_status = 2
+                    new_tr.script = row.tutorial_script
+                    new_tr.script_user_id = script_user_id
+                    new_tr.script_status = get_current_status(row.tutorial_script, row.tutorial_script_status)
+                    if new_tr.script_status == 1:
+                        new_tr.script_status = 2
+                    new_tr.timed_script = row.tutorial_script_timed
+                    new_tr.video = get_last_index(row.tutorial_video, new_td, new_lang.name)
+                    new_tr.video_user_id = video_user_id
+                    new_tr.video_status = get_current_status(row.tutorial_video, row.tutorial_video_status)
+                    new_tr.status = get_current_tutorial_status(row.tutorial_status)
+                    new_tr.version = row.cvideo_version
+                    new_tr.hit_count = row.hit_count
+                    new_tr.save()
                 except Exception, e:
                     #print 1, e
-                    try:
-                        outline_user_id = get_current_user_from_old_email(row.tutorial_outline_uid.mail, request.user)
-                    except:
-                        outline_user_id = request.user.id
-                    try:
-                        script_user_id = get_current_user_from_old_email(row.tutorial_script_uid.mail, request.user)
-                    except:
-                        script_user_id = request.user.id
-                    try:
-                        video_user_id = get_current_user_from_old_email(row.tutorial_video_uid.mail, request.user)
-                    except:
-                        video_user_id = request.user.id
                     try:
                         new_tr = TutorialResource.objects.create(
                             tutorial_detail = new_td,
@@ -453,12 +483,12 @@ def tutorial_resources(request):
                         )
                     except Exception, e:
                         print 2, e
-                        #break
+                        continue
                 if new_tr:
                     cursor.execute("""update creation_tutorialresource set created='""" + str(row.upload_time) + """', updated='""" + str(row.upload_time) + """' where id=""" + str(new_tr.id))
             except Exception, e:
                 print 3, e
-                #break
+                continue
         if new_tr:
             if new_tr.outline_user_id != request.user.id:
                 try:
@@ -524,6 +554,10 @@ def tutorial_resources(request):
                         except:
                             pass
         if new_tr and new_tr.video:
+            old_file = get_old_exact_filename(row.tutorial_video)
+            if old_file != new_tr.video:
+                print 'old and new file names not matching'
+                continue
             new_tutorial_path = settings.MEDIA_ROOT + 'videos/' + str(new_tr.tutorial_detail.foss_id) + '/' + str(new_tr.tutorial_detail.id) + '/'
             try:
                 copyfile(settings.STVIDEOS_DIR + row.tutorial_video, new_tutorial_path + new_tr.video)
