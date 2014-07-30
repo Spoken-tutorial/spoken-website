@@ -76,8 +76,8 @@ def get_old_exact_filename(input_string):
         return ''
     if len(input_string):
         tmp_string = input_string.split('/')
-        tmp_index = len(tmp_string) - 1
-        return filename.replace("+", "p")
+        tmp_string = tmp_string[len(tmp_string) - 1]
+        return tmp_string.replace("+", "p")
     return ''
 
 def get_current_status(input_string, input_status):
