@@ -113,11 +113,11 @@ def tutorial_search(request):
             lang = form.cleaned_data['language']
             foss = form.cleaned_data['foss_category']
             if not lang and foss:
-                collection = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), tutorial_detail__foss_id = foss)
+                collection = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), tutorial_detail__foss_id = foss).order_by('tutorial_detail__level', 'tutorial_detail__order')
             elif lang and not foss:
-                collection = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), language_id = lang)
+                collection = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), language_id = lang).order_by('tutorial_detail__level', 'tutorial_detail__order')
             elif foss and lang:
-                collection = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), tutorial_detail__foss_id = foss, language_id = lang)
+                collection = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), tutorial_detail__foss_id = foss, language_id = lang).order_by('tutorial_detail__level', 'tutorial_detail__order')
     else:
         collection = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), tutorial_detail__foss__foss = 'Linux', language__name = 'English')
             
