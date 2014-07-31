@@ -8,11 +8,11 @@ class KeywordSearchForm(forms.Form):
 class TutorialSearchForm(forms.Form):
     try:
         foss_category = forms.ChoiceField(
-            choices = [('', '-- Select Foss --')] + list(FossCategory.objects.filter(status = 1).values_list('id', 'foss')),
+            choices = [('', '-- Select Foss --')] + list(FossCategory.objects.filter(status = 1).order_by('foss').values_list('id', 'foss')),
             widget=forms.Select(),
             required = False,
         )
-        lang_list = list(Language.objects.all().values_list('id', 'name'))
+        lang_list = list(Language.objects.all().order_by('name').values_list('id', 'name'))
         lang_list.insert(0, ('', '-- Select Language --'))
         language = forms.ChoiceField(
             choices = lang_list,
