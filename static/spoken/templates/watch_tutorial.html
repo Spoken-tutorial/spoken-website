@@ -160,14 +160,14 @@
         <div class="col-lg-5 col-md-5 col-sm-5 no-padding-right">
             <div class="panel panel-default">
               <div class="panel-heading">
-                <h3 class="panel-title">Prerequsite</h3>
+                <h3 class="panel-title">Pre-requisites</h3>
               </div>
               <div class="panel-body">
               {% if tr_rec.common_content.prerequisite %}
                 <img src="{{ tr_rec.common_content.prerequisite|get_thumb_path:'Small' }}" width="70" style="padding-right: 10px;">
                 <a href="/watch/{{ tr_rec.common_content.prerequisite.foss.foss|get_url_name }}/{{ tr_rec.common_content.prerequisite.tutorial|get_url_name }}/{{ tr_rec.language.name }}/">{{ tr_rec.common_content.prerequisite.tutorial }}</a>
               {% else %}
-                No Prerequsite for this tutorial.
+                No Pre-requisites for this tutorial.
               {% endif %}
               </div>
             </div>
