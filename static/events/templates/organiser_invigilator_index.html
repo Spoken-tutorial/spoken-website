@@ -67,8 +67,9 @@
             <tr class="{% cycle 'odd' 'even' %}">
                 <td>{{ record.academic.state}}
                 <td>{{ record.academic.institution_name }}</td>
-                <td>{{ record.user }}</td>
-                <td>{{ record.created|date:"D d M Y" }}</td>
+                <td>{{ record.user.first_name }}</td>
+                <td>{{ record.user.email }}</td>
+                <td>{{ record.user.profile_set.get.phone }}</td>
                 {% if role == 'invigilator' %}
                     {% if status == 'inactive' %}
                         <td><a href="{% url 'events:invigilator_view' record.user %}">View</a> | <a href="{% url 'events:rp_invigilator' 'active' record.user.profile_set.get.confirmation_code record.user_id %}">Activate</a> | <a href="{% url 'events:rp_invigilator' 'block' record.user.profile_set.get.confirmation_code record.user_id %}">Block</a></td>

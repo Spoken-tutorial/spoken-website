@@ -90,6 +90,7 @@
                                 {% if status == 'pending' or status == 'predated' %}
                                     {% if record.status == 0 %}
                                         Waiting for attendance
+                                        <a href="{% url 'events:training_approvel' role record.id %}?status=reject"> | Reject</a>
                                     {% else %}
                                         <a target='_blank' href="{% url 'events:training_participant' record.id %}">Participants</a> |
                                         {% if record.status == 1 %}
