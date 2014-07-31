@@ -513,15 +513,15 @@ def organiser_view(request, username):
     if not (user.is_authenticated() and (username == request.user.username or is_event_manager(user) or is_resource_person(user))):
         raise Http404('You are not allowed to view this page')
     
-    user = User.objects.get(username=username)
     context = {}
-    organiser = Organiser.objects.get(user=user)
-    context['record'] = organiser
     try:
-        profile = organiser.user.profile_set.get()
-    except:
-        profile = ''
-    context['profile'] = profile
+        user = User.objects.get(username=username)
+        organiser = Organiser.objects.get(user=user)
+        context['record'] = organiser
+        context['profile'] = organiser.user.profile_set.get(user= user)
+    except Exception, e:
+        print e
+        raise Http404('Page not found!')
     return render(request, 'events/templates/organiser/view.html', context)
 
 #@login_required
@@ -638,15 +638,15 @@ def invigilator_view(request, username):
     if not (user.is_authenticated() and (username == request.user.username or is_event_manager(user) or is_resource_person(user))):
         raise Http404('You are not allowed to view this page')
     
-    user = User.objects.get(username=username)
     context = {}
-    invigilator = Invigilator.objects.get(user=user)
-    context['record'] = invigilator
     try:
-        profile = invigilator.user.profile_set.get()
-    except:
-        profile = ''
-    context['profile'] = profile
+        user = User.objects.get(username=username)
+        invigilator = Invigilator.objects.get(user=user)
+        context['record'] = invigilator
+        context['profile'] = invigilator.user.profile_set.get(user= user)
+    except Exception, e:
+        print e
+        raise Http404('Page not found!')
     return render(request, 'events/templates/invigilator/view.html', context)
     
 @login_required
@@ -1705,8 +1705,9 @@ def organiser_invigilator_index(request, role, status):
         1: SortableHeader('academic__state', True, 'State'),
         2: SortableHeader('academic', True, 'Institution'),
         3: SortableHeader('user__username', True, 'Name'),
-        4: SortableHeader('created', True, 'Created'),
-        5: SortableHeader('Action', False)
+        4: SortableHeader('Email', 'False'),
+        5: SortableHeader('Phone', False),
+        6: SortableHeader('Action', False)
     }
     
     if role == 'organiser':

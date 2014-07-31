@@ -35,7 +35,7 @@ PASSWORD_HASHERS = (
 )
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = DEBUG_MODE
 
 TEMPLATE_DEBUG = True
 

@@ -7,7 +7,9 @@
     <i class="fa fa-list-ul"></i> Organiser Details <a href="/software-training" class='pull-right go-back'>Dashboard</a>
 {% endblock %}
 {% block content %}
-	<p>If you want to change the Academic details click <a href="{% url 'events:organiser_edit' record.user %}">here</a></p>
+    {% if request.user == record.user %}
+        <p>If you want to change the Academic details click <a href="{% url 'events:organiser_edit' record.user %}">here</a></p>
+    {% endif %}
 	<table class="table table-striped table-hover table-bordered">
 		<tr>
 			<th>Organiser name</td>

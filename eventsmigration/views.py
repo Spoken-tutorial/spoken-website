@@ -633,9 +633,9 @@ def workshop(request):
     if workshop_status == 2:
         wwrs = WWorkshopRequests.objects.filter(status = workshop_status)
     elif workshop_status == 1:
-        wwrs = WWorkshopRequests.objects.filter(status = workshop_status, pref_wkshop_date__gt = '2014-07-24')
+        wwrs = WWorkshopRequests.objects.filter(status = workshop_status)
     else:
-        wwrs = WWorkshopRequests.objects.filter(status = workshop_status, pref_wkshop_date__gt = '2014-07-24')
+        wwrs = WWorkshopRequests.objects.filter(status = workshop_status)
         
     for wwr in wwrs:
         #Save department
@@ -961,17 +961,18 @@ def workshop_feedback(request):
     
     
 def test(request):
-    test_status = 0
+    test_status = 2
     if test_status == 4:
         wtrs = WTestRequests.objects.filter(status = test_status)
     elif test_status == 2:
-        wtrs = WTestRequests.objects.filter(status = test_status, pref_test_date__gte = datetime.datetime.today())
+        wtrs = WTestRequests.objects.filter(status = test_status, cfm_test_date__gte = datetime.datetime.today())
     elif test_status == 1:
         wtrs = WTestRequests.objects.filter(status = test_status, pref_test_date__gte = datetime.datetime.today())
     elif test_status == 0:
         wtrs = WTestRequests.objects.filter(status = test_status, pref_test_date__gte = datetime.datetime.today())
 
     for wtr in wtrs:
+        print wtr.cfm_test_date, "sssssss", wtr.test_code, wtr.cfm_test_date, wtr.cfm_test_time
         #Save department
         douser = get_user(wtr.organiser_id)
         if douser == None:
@@ -982,7 +983,7 @@ def test(request):
             w = None
             try:
                 w = Test.objects.get(test_code = wtr.test_code)
-                #print "Already exits !"
+                print "Already exits !"
                 continue
             except Exception, e:
                 pass
@@ -1061,7 +1062,7 @@ def test(request):
             w.academic_id = ac.id
             w.foss_id = foss.id
             
-            if wtr.cfm_test_date and cfm_test_time:
+            if wtr.cfm_test_date and wtr.cfm_test_time:
                 w.tdate = wtr.cfm_test_date
                 w.ttime = wtr.cfm_test_time
             else:
@@ -1126,7 +1127,7 @@ def test(request):
                     w.save()
             
             except Exception, e:
-                print e, " => 8", wtr.test_code, " => ", wdept
+                print e, " => 8", wtr.test_code, " => ", wdept, wtr.department
                 w.delete()
                 continue
         except Exception, e:
