@@ -961,15 +961,15 @@ def workshop_feedback(request):
     
     
 def test(request):
-    test_status = 4
+    test_status = 0
     if test_status == 4:
         wtrs = WTestRequests.objects.filter(status = test_status)
     elif test_status == 2:
-        wtrs = WTestRequests.objects.filter(status = test_status, pref_test_date__gt = datetime.datetime.today())
+        wtrs = WTestRequests.objects.filter(status = test_status, pref_test_date__gte = datetime.datetime.today())
     elif test_status == 1:
-        wtrs = WTestRequests.objects.filter(status = test_status, pref_test_date__gt = datetime.datetime.today())
+        wtrs = WTestRequests.objects.filter(status = test_status, pref_test_date__gte = datetime.datetime.today())
     elif test_status == 0:
-        wtrs = WTestRequests.objects.filter(status = test_status, pref_test_date__gt = datetime.datetime.today())
+        wtrs = WTestRequests.objects.filter(status = test_status, pref_test_date__gte = datetime.datetime.today())
 
     for wtr in wtrs:
         #Save department
