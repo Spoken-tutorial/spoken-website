@@ -158,7 +158,7 @@ def account_profile(request, username):
             
             form_data.save()
             
-            if 'picture' in request.FILES:
+            """if 'picture' in request.FILES:
                 size = 128, 128
                 filename = str(request.FILES['picture'])
                 ext = os.path.splitext(filename)[1]
@@ -172,7 +172,7 @@ def account_profile(request, username):
                         mimeType = 'JPEG'
                     im.save(settings.MEDIA_ROOT + "user/" + str(user.id) + "/" + str(user.id) + "-thumb." + ext, mimeType)
                     form_data.thumb = 'user/' + str(user.id)+ '/' + str(user.id) + '-thumb.' + ext
-                    form_data.save()
+                    form_data.save()"""
             messages.success(request, "Your profile has been updated!")
             return HttpResponseRedirect("/accounts/view-profile/" + user.username)
         
