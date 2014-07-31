@@ -12,6 +12,15 @@
 		<link rel="stylesheet" href="{% static 'spoken/css/font-awesome.min.css' %}" type="text/css" media="screen" charset="utf-8" />
 		<link rel="stylesheet" href="{% static 'spoken/css/yamm.css' %}" type="text/css" media="screen" charset="utf-8" />
 		<!-- <link rel="stylesheet" href="{% static 'spoken/css/bootstrap-theme.css' %}" type="text/css" media="screen" charset="utf-8"> -->
+		<style>
+		    #footer-wrapper a:hover {
+		        color: #FFA500;
+		    }
+		    .cc-data {
+		        color: #fff;
+		        text-align: center;
+		    }
+		</style>
 		<link rel="stylesheet" href="{% static 'spoken/css/main.css' %}" type="text/css" media="screen" charset="utf-8" />
 		{% block cssblock %}{% endblock %}
 	</head>
@@ -265,8 +274,8 @@
 			<div id="footer-wrapper">
                 <div class="container-inner sans-serif">
                     <div class="container">
-                        <div class="col-lg-8 col-md-8 col-sm-8  footer-links">
-                            <div class="col-lg-3 col-md-3 col-sm-3">
+                        <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 footer-links">
+                            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
                                 <ul class="list-unstyled">
                                     <li><a href="http://fossee.in/" target="_blank">FOSSEE Project</a></li>
                                     <li><a href="http://www.scilab.in/" target="_blank">Scilab Project</a></li>
@@ -276,21 +285,21 @@
                                     <li><a href="http://or.fossee.in/" target="_blank">OR-Project</a></li>
                                 </ul>
                             </div>
-                            <div class="col-lg-3 col-md-3 col-sm-3">
+                            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
                                 <ul class="list-unstyled">
                                     <li><a href="#" target="_blank">Aakash Labs</a></li>
                                     <li><a href="http://www.co-learn.in/" target="_blank">Co-learn</a></li>
                                     <li><a href="http://www.sakshat.ac.in/" target="_blank">Education Mission</a></li>
                                 </ul>
                             </div>
-                            <div class="col-lg-3 col-md-3 col-sm-3">
+                            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
                                 <ul class="list-unstyled">
                                     <li><a href="http://process.spoken-tutorial.org/index.php/Software-Training" target="_blank">Software Training</a></li>
                                     <li><a href="/creation/">Creation</a></li>
                                     <li><a href="/news/article/">News</a></li>
                                 </ul>
                             </div>
-                            <div class="col-lg-3 col-md-3 col-sm-3">
+                            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
                                 <ul class="list-unstyled">
                                     <li><a href="/about-us/">About</a></li>
                                     <!-- <li><a href="#" target="_blank">Partners</a></li> -->
@@ -313,19 +322,26 @@
                                         src="http://c.statcounter.com/5528933/0/e5fd867b/0/"
                                         alt="hits counter"></a></div></noscript></b> page loads
                                         <!-- End of StatCounter Code for Default Guide -->
-                                        <p style="padding-top: 6px;"><a href="http://statcounter.com/p5528933/?guest=1">Click here to view stats</a></p>
+                                        <p style="padding-top: 6px; font-size: 12px;"><a href="http://statcounter.com/p5528933/?guest=1">Click here to view stats</a></p>
                                     </li>
                                 </ul>
                             </div>
                         </div>
-                        <div class="col-lg-4 col-md-4 col-sm-4 license fill">
+                        <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1 footer-seperator"></div>
+                        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3 license fill iitb-logo">
                             <div class="fill">
-                                <img width="110px" src="/static/spoken/images/iitb-logo.png">
-                                <footer>
-                                    Developed at IIT Bombay <br />
-                                    This work is licensed under <a href="http://creativecommons.org/licenses/by-nc-nd/3.0/" rel="license" class="ext" target="_blank">Creative Commons</a>
-                                </footer>
+                                <a href="http://www.iitb.ac.in" target="_blank">
+                                    <img width="110px" src="/static/spoken/images/iitb-logo.png">
+                                    <footer>
+                                        Developed at IIT Bombay <br />
+                                    </footer>
+                                </a>
                             </div>
+                        </div>
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                             <p class="cc-data"><a rel="license" href="http://creativecommons.org/licenses/by-nd/4.0/" target="_blank">
+                                <img src="{% static 'spoken/images/80x15.png' %}" />
+                            </a> This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nd/4.0/" target="_blank">Creative Commons Attribution-NoDerivatives 4.0 International License.</a></p>
                         </div>
                     </div>
                 </div>
