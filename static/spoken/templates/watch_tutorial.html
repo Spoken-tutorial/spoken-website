@@ -4,6 +4,7 @@
 {% load creationdata %}
 {% block cssblock %}
     <link href="{% static 'spoken/css/video-js.min.css' %}" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="{% static 'spoken/css/jquery.fancybox.css' %}" type="text/css" media="screen" charset="utf-8" />
     <style type="text/css">
         .video-js {
             padding-top: 56.25%
@@ -92,6 +93,26 @@
             width:100%;
             height:100%;
         }
+        .vjs-tt-cue {
+            font-size: 16px;
+        }
+        .video-js .vjs-text-track {
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+        .custom-jumbotron {
+            max-height: 180px;
+        }
+        .video-visits {
+            text-align: right;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .container.playlist-container.col-lg-12.col-md-12.col-sm-12 {
+            margin-bottom: 10px;
+        }
+        .col-lg-5.col-md-5.col-sm-5.no-padding-right.right-bar {
+            margin-top: 5px;
+        }
     </style>
     <script src="{% static 'spoken/js/video.js' %}"></script>
 {% endblock %}
@@ -105,8 +126,9 @@
     <row>
         <div class='container playlist-container col-lg-12 col-md-12 col-sm-12'>
             <div class="video-container col-lg-8 col-md-8 col-sm-8">
-                <video id="st_video" class="video-js vjs-default-skin" controls preload="auto" width="auto" height="auto" data-setup="{}">
+                <video id="st_video" class="video-js vjs-default-skin" controls preload="none" poster="{{ tr_rec.tutorial_detail|get_thumb_path:'Big' }}" width="auto" height="auto" data-setup="{}">
                     <source src="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ tr_rec.video }}" type="video/ogg" />
+                    {{ tr_rec|get_srt_path|safe }}
                 </video>
             </div>
             <div class='playlist col-lg-4 col-md-4 col-sm-4'>
@@ -138,26 +160,26 @@
     {% endif %}
     <row>
         <div class="col-lg-7 col-md-7 col-sm-7 no-padding-left">
-            <pre class="custom-jumbotron"><b>Outline:<br /></b>{{ tr_rec.outline }}</pre>
-            
+            <p class="video-visits">{{ tr_rec|get_video_visits }} visits</p>
             <ol class="breadcrumb">
-              <li><a href="/creation/report-missing-component/{{ tr_rec.id}}"> Report Missing Component</a></li>
-              {% with link=tr_rec.tutorial_detail.foss|instruction_sheet:tr_rec.language %}
-                {% if link %}
-                    <li><a href="{{ link }}" target="_blank">Instruction Sheet</a></li>
-                {% endif %}
-              {% endwith %}
-              
-              {% with link=tr_rec.tutorial_detail.foss|installation_sheet:tr_rec.language %}
-                {% if link %}
-                    <li><a href="{{ link }}" target="_blank">Installation Sheet</a></li>
-                {% endif %}
-              {% endwith %}
+                <li><a href="/creation/report-missing-component/{{ tr_rec.id}}" class="fancybox fancybox.iframe"> Report Missing Component</a></li>
+                {% with link=tr_rec.tutorial_detail.foss|instruction_sheet:tr_rec.language %}
+                    {% if link %}
+                        <li><a href="{{ link }}" target="_blank">Instruction Sheet</a></li>
+                    {% endif %}
+                {% endwith %}
+
+                {% with link=tr_rec.tutorial_detail.foss|installation_sheet:tr_rec.language %}
+                    {% if link %}
+                        <li><a href="{{ link }}" target="_blank">Installation Sheet</a></li>
+                    {% endif %}
+                {% endwith %}
             </ol>
+            <pre class="custom-jumbotron"><b>Outline:<br /></b>{{ tr_rec.outline }}</pre>
         </div>
         
         
-        <div class="col-lg-5 col-md-5 col-sm-5 no-padding-right">
+        <div class="col-lg-5 col-md-5 col-sm-5 no-padding-right right-bar">
             <div class="panel panel-default">
               <div class="panel-heading">
                 <h3 class="panel-title">Pre-requisites</h3>
@@ -165,7 +187,7 @@
               <div class="panel-body">
               {% if tr_rec.common_content.prerequisite %}
                 <img src="{{ tr_rec.common_content.prerequisite|get_thumb_path:'Small' }}" width="70" style="padding-right: 10px;">
-                <a href="/watch/{{ tr_rec.common_content.prerequisite.foss.foss|get_url_name }}/{{ tr_rec.common_content.prerequisite.tutorial|get_url_name }}/{{ tr_rec.language.name }}/">{{ tr_rec.common_content.prerequisite.tutorial }}</a>
+                <a href="/watch/{{ tr_rec|get_prerequisite:tr_rec.common_content.prerequisite }}/">{{ tr_rec.common_content.prerequisite.tutorial }}</a>
               {% else %}
                 No Pre-requisites for this tutorial.
               {% endif %}
@@ -180,7 +202,7 @@
                         <p class="list-group-item-text">
                             <span style="text-align: left">Status: <i class="{{ tr_rec.common_content.assignment_status|get_review_status_symbol }}" title="{{ tr_rec.common_content.assignment_status|get_review_status_list }}"></i></span>
                             <span style="float: right">
-                                - <a href="/accounts/profile/{{ tr_rec.common_content.assignment_user }}">{{tr_rec.common_content.assignment_user}}</a>
+                                - <a href="/accounts/view-profile/{{ tr_rec.common_content.assignment_user }}" target="_blank">{{tr_rec.common_content.assignment_user}}</a>
                             </span>
                         </p>
                     </div>
@@ -204,7 +226,7 @@
                         <p class="list-group-item-text">
                             <span style="text-align: left">Status: <i class="{{ tr_rec.common_content.code_status|get_review_status_symbol }}" title="{{ tr_rec.common_content.code_status|get_review_status_list }}"></i></span>
                             <span style="float: right">
-                                - <a href="/accounts/profile/{{ tr_rec.common_content.code_user }}">{{tr_rec.common_content.code_user}}</a>
+                                - <a href="/accounts/view-profile/{{ tr_rec.common_content.code_user }}" target="_blank">{{tr_rec.common_content.code_user}}</a>
                             </span>
                         </p>
                     </div>
@@ -217,7 +239,7 @@
                         <p class="list-group-item-text">
                             <span style="text-align: left">Status: <i class="{{ tr_rec.script_status|get_review_status_symbol }}" title="{{ tr_rec.script_status|get_review_status_list }}"></i></span>
                             <span style="float: right">
-                                - <a href="/accounts/profile/{{ tr_rec.script_user }}">{{tr_rec.script_user}}</a>
+                                - <a href="/accounts/view-profile/{{ tr_rec.script_user }}" target="_blank">{{tr_rec.script_user}}</a>
                             </span>
                         </p>
                     </div>
@@ -241,7 +263,7 @@
                         <p class="list-group-item-text">
                             <span style="text-align: left">Status: <i class="{{ tr_rec.common_content.slide_status|get_review_status_symbol }}" title="{{ tr_rec.common_content.slide_status|get_review_status_list }}"></i></span>
                             <span style="float: right">
-                                - <a href="/accounts/profile/{{ tr_rec.common_content.slide_user }}">{{tr_rec.common_content.slide_user}}</a>
+                                - <a href="/accounts/view-profile/{{ tr_rec.common_content.slide_user }}" target="_blank">{{tr_rec.common_content.slide_user}}</a>
                             </span>
                         </p>
                     </div>
@@ -251,6 +273,8 @@
     </row>
 {% endblock %}
 {% block jsblock %}
+    <script src="{% static 'spoken/js/jquery.fancybox.pack.js' %}"></script>
+    <script src="{% static 'spoken/js/jquery.mousewheel-3.0.6.pack.js' %}"></script>
     <script>
         currentVideo = $('.playlist-item.active');
         nextVideo = currentVideo.next('li');
@@ -270,5 +294,19 @@
             $('.backward').html('<i class="fa fa-1 fa-fast-backward"></i>');
         }
         
+    </script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $(".fancybox").fancybox({
+                maxWidth    : 500,
+                maxHeight   : 485,
+                fitToView   : true,
+                autoSize    : false,
+                closeClick  : false,
+                openEffect  : "none",
+                closeEffect : "none",
+                modal       : true,
+            });
+        });
     </script>
 {% endblock %}
