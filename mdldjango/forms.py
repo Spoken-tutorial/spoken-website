@@ -26,6 +26,7 @@ class RegisterForm(forms.Form):
     firstname = forms.CharField()
     lastname = forms.CharField()
     email = forms.EmailField()
+    gender = forms.ChoiceField(widget=forms.RadioSelect, choices=[('Male', 'Male'),('Female', 'Female')], required = True)
     username = forms.CharField()
     password = forms.CharField(widget=forms.PasswordInput())
     password_confirm = forms.CharField(widget=forms.PasswordInput())
