@@ -61,7 +61,9 @@ Thank you for registering at {1}. You may activate your account by clicking on t
 {2}
 
 Regards,
-Spoken Tutorial
+Admin
+Spoken Tutorials
+IIT Bombay.
     """.format(
         user.username,
         "http://spoken-tutorial.org",
@@ -224,7 +226,7 @@ def password_reset(request):
             print 'Username => ', user.username
             print 'New password => ', password_string
             #Send email
-            subject  = "Spoken Tutorial Online Test password reset"
+            subject  = "Spoken Tutorial password reset"
             to = [user.email]
             message = '''Hi {0},
 
@@ -243,9 +245,10 @@ which you can just click on.  If that doesn't work,
 then cut and paste the address into the address
 line at the top of your web browser window.
 
-Cheers from the 'Spoken Tutorials Online Test Center' administrator,
-
-Admin Spoken Tutorials
+Best Wishes,
+Admin
+Spoken Tutorials
+IIT Bombay.
 '''.format(user.username, user.username, password_string, 'http://www.spoken-tutorial.org/accounts/change-password/')
 
             # send email
