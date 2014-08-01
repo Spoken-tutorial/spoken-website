@@ -2,6 +2,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, render_to_response, get_object_or_404
 from django.core.context_processors import csrf
 from django.template import RequestContext
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.core.mail import EmailMultiAlternatives
 from django.contrib import messages
@@ -127,12 +128,13 @@ def account_login(request):
             messages.error(request, error_msg)
         return render_to_response('cms/templates/login.html', context)
     return HttpResponseRedirect('/')
-
+@login_required
 def account_logout(request):
     context = RequestContext(request)
     logout(request)
     return HttpResponseRedirect('/')
 
+@login_required
 def account_profile(request, username):
     user = request.user
     profile = Profile.objects.get(user_id=user.id)
@@ -184,7 +186,8 @@ def account_profile(request, username):
         instance = Profile.objects.get(user_id=user.id)
         context['form'] = ProfileForm(user, instance = instance)
         return render(request, 'cms/templates/profile.html', context)
-        
+
+@login_required
 def user_has_profile(user):
     try:
         p = Profile.objects.get(user_id = user.id)
@@ -198,6 +201,7 @@ def user_has_profile(user):
         print "************"
         print e
 
+@login_required
 def account_view_profile(request, username):
     user = User.objects.get(username = username)
     profile = Profile.objects.get(user = user)
@@ -206,5 +210,76 @@ def account_view_profile(request, username):
         'media_url' : settings.MEDIA_URL,
     }
     return render(request, 'cms/templates/view-profile.html', context)
-    
-    
+
+def password_reset(request):
+    context = {}
+    form = PasswordResetForm()
+    if request.method == "POST":
+        form = PasswordResetForm(request.POST)
+        if form.is_valid():
+            password_string = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(8))
+            user = User.objects.filter(email=request.POST['email']).first()
+            user.set_password(password_string)
+            user.save()
+            print 'Username => ', user.username
+            print 'New password => ', password_string
+            #Send email
+            subject  = "Spoken Tutorial Online Test password reset"
+            to = [user.email]
+            message = '''Hi {0},
+
+Your account password at 'Spoken Tutorials' has been reset
+and you have been issued with a new temporary password.
+
+Your current login information is now:
+   username: {1}
+   password: {2}
+
+Please go to this page to change your password:
+   {3}
+
+In most mail programs, this should appear as a blue link
+which you can just click on.  If that doesn't work,
+then cut and paste the address into the address
+line at the top of your web browser window.
+
+Cheers from the 'Spoken Tutorials Online Test Center' administrator,
+
+Admin Spoken Tutorials
+'''.format(user.username, user.username, password_string, 'http://www.spoken-tutorial.org/accounts/change-password/')
+
+            # send email
+            email = EmailMultiAlternatives(
+                subject, message, 'administrator@spoken-tutorial.org',
+                to = to, bcc = [], cc = [],
+                headers={'Reply-To': 'no-replay@spoken-tutorial.org', "Content-type":"text/html;charset=iso-8859-1"}
+            )
+
+            result = email.send(fail_silently=False)
+            messages.success(request, "New password sent to your email "+user.email)
+            return HttpResponseRedirect('/accounts/login/')
+            
+
+    context = {
+        'form': form
+    }
+    context.update(csrf(request))
+    return render(request, 'cms/templates/password_reset.html', context)
+
+
+@login_required
+def change_password(request):
+    context = {}
+    form = ChangePasswordForm()
+    if request.method == "POST":
+        form = ChangePasswordForm(request.POST)
+        if form.is_valid():
+            profile = Profile.objects.get(user_id = form.cleaned_data['userid'], confirmation_code = form.cleaned_data['code'])
+            user = profile.user
+            user.set_password(form.cleaned_data['new_password'])
+            user.save()
+            messages.success(request, "Your account password has been updated successfully!")
+            return HttpResponseRedirect("/accounts/view-profile/" + user.username)
+    context['form'] = form
+    context.update(csrf(request))
+    return render(request, 'cms/templates/change_password.html', context)
