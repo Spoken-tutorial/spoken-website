@@ -1,6 +1,6 @@
 from django import forms
 from events.models import Testimonials
-from creation.models import FossCategory, Language
+from creation.models import FossCategory, Language, TutorialResource
 
 class KeywordSearchForm(forms.Form):
     q = forms.CharField(required=True)
@@ -8,7 +8,7 @@ class KeywordSearchForm(forms.Form):
 class TutorialSearchForm(forms.Form):
     try:
         foss_category = forms.ChoiceField(
-            choices = [('', '-- Select Foss --')] + list(FossCategory.objects.filter(status = 1).order_by('foss').values_list('id', 'foss')),
+            choices = [('', '-- Select Foss --')] + list(TutorialResource.objects.filter(status = 1, language__name = 'English').values_list('tutorial_detail__foss__id', 'tutorial_detail__foss__foss').order_by('tutorial_detail__foss__foss').distinct()),
             widget=forms.Select(),
             required = False,
         )

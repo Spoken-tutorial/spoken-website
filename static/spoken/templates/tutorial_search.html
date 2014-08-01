@@ -24,7 +24,7 @@
         <li class="{% if request.path == '/keyword-search/' %} active {% endif %}"><a href="/keyword-search/">Keyword Search</a></li>
         <li class="{% if request.path == '/tutorial-search/' %} active {% endif %}"><a href="/tutorial-search/">Tutorial Search</a></li>
     </ul>
-    <div class="row well tab-content tutorial-search-form">
+    <div class="well tab-content tutorial-search-form col-lg-offset-1 col-md-offset-1 col-lg-10 col-md-10 col-sm-12 col-xs-12">
         <div class="col-sm-12">
             <form action="{{ action }}" method="POST" class='form-horizontal'>{% csrf_token %}
                 {% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
