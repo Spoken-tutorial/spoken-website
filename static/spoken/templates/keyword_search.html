@@ -4,7 +4,14 @@
 {% load cmsdata %}
 {% load creationdata %}
 {% block title %}Search Tutorials{% endblock %}
-{% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
+{% block cssblock %}
+    <link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />
+    <style type="text/css">
+        .no-record {
+            margin-top: 30px;
+        }
+    </style>
+{% endblock %}
 {% block heading %}
     <i class="fa fa-list-ul"></i> Search Tutorials
 {% endblock %}
