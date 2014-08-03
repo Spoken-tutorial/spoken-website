@@ -45,6 +45,7 @@
 {% endif %}
     <!-- Nav tabs -->
     <ul class="tabs nav nav-tabs">
+            <li {% if status == 'predated' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/test/{{role}}/predated/">Pre-Dated</a></li>
         {% if role == 'organiser' %}
             <li><a href="/software-training/test/{{ role }}/request/">New</a></li>
             <li {% if status == 'pending' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/test/{{role}}/pending/">Pending</a></li>
@@ -87,8 +88,11 @@
                             <a href="{% url 'events:test_participant' record.id %}">View Participant</a>
                         {% endif %}
                         {% if role == 'rp' %}
-                            {% if status == 'pending' or status == 'approved' %}
+                            {% if status == 'pending' or status == 'approved' or 'predated' %}
                                 <a href="{% url 'events:test_request' role record.id %}">Edit</a>
+                            {% endif %}
+                            {% if status = 'predated' %}
+                                | <a href="{% url 'events:test_approvel' role record.id %}?status=reject">Reject</a>
                             {% endif %}
                             {% if status == 'pending' %}
                                 <a href="{% url 'events:test_approvel' role record.id %}?status=accept">Accept</a>
@@ -100,7 +104,7 @@
                         {% endif %}
                         
                         {% if role == 'organiser' %}
-                            {% if status == 'pending' or status == 'approved' %}
+                            {% if status == 'pending' or status == 'approved' or status == 'predated' %}
                                 <a href="{% url 'events:test_request' role record.id %}">Edit</a>
                             {% endif %}
                             {% if status == 'ongoing' %}
