@@ -25,10 +25,10 @@
             <div class="col-sm-8">
                 <dl class="dl-horizontal">
                     <dt>First name</dt>
-                    <dd>{{ profile.user.first_name }}</dd>
+                    <dd>{% if profile.user.first_name %}{{ profile.user.first_name }}{% else %}-{% endif %}</dd>
 
                     <dt>Last name</dt>
-                    <dd>{{ profile.user.last_name }}</dd>
+                    <dd>{% if profile.user.last_name %}{{ profile.user.last_name }}{% else %}-{% endif %}</dd>
                     
                     <dt>From</dt>
                     <dd>{{ profile.created }}</dd>

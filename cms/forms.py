@@ -108,3 +108,45 @@ class AdminBodyForm(forms.ModelForm):
     body = forms.CharField(
             widget=NicEditWidget(attrs={'style': 'width: 800px;'}))
 
+class PasswordResetForm(forms.Form):
+    email = forms.EmailField()
+    def clean_email(self):
+        email = self.cleaned_data['email']
+        error = 1
+        try:
+            user = User.objects.filter(email=email).first()
+            if user:
+                error = 0
+        except Exception, e:
+            print e
+        if error:
+            raise forms.ValidationError( u'Email: %s not exists' % email )
+            
+class ChangePasswordForm(forms.Form):
+    old_password = forms.CharField(
+        widget=forms.PasswordInput(render_value=False),
+        #min_length=8,
+    )
+    code = forms.CharField()
+    userid = forms.CharField()
+    new_password = forms.CharField(
+        widget=forms.PasswordInput(render_value=False),
+        min_length=8,
+    )
+    confirm_new_password = forms.CharField(
+        widget=forms.PasswordInput(render_value=False),
+        min_length=8,
+    )
+    
+    def clean(self):
+        profile = Profile.objects.get(user_id = self.cleaned_data['userid'], confirmation_code = self.cleaned_data['code'])
+        user = profile.user
+        if 'old_password' in self.cleaned_data:
+            if not user.check_password(self.cleaned_data['old_password']):
+                raise forms.ValidationError("Old password did not match")
+        
+        new_password = self.cleaned_data.get('new_password')
+        confirm_new_password = self.cleaned_data.get('confirm_new_password')
+        if confirm_new_password and new_password != new_password:
+            raise forms.ValidationError("Passwords did not match")
+        return self.cleaned_data

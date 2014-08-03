@@ -285,8 +285,12 @@ h4.page-title {
 #footer-wrapper a, #footer-wrapper footer{
     color: white;
 }
-#footer-wrapper .footer-links{
-    border-right: 5px solid #eee;
+#footer-wrapper .footer-seperator{
+    border-right: 1px solid #eee;
+    min-height: 130px;
+}
+.iitb-logo {
+    text-align: center;
 }
 #footer-wrapper .footer-links ul li{
     padding: 2px 0;

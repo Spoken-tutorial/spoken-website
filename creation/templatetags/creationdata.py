@@ -109,9 +109,37 @@ def installation_sheet(foss, lang):
     return False
 
 def get_thumb_path(row, append_str):
-    path = '/media/videos/' + str(row.foss_id) + '/' + str(row.id) + '/' + row.tutorial.replace(' ', '-') + '-' + append_str + '.png'
+    path = settings.MEDIA_URL + 'videos/' + str(row.foss_id) + '/' + str(row.id) + '/' + row.tutorial.replace(' ', '-') + '-' + append_str + '.png'
     return path
 
+def get_srt_path(tr):
+    data = ''
+    english_srt = settings.MEDIA_ROOT + 'videos/' + str(tr.tutorial_detail.foss_id) + '/' + str(tr.tutorial_detail_id) + '/' + tr.tutorial_detail.tutorial.replace(' ', '-') + '-English.srt'
+    if os.path.isfile(english_srt):
+        data = '<track kind="captions" src="'+ settings.MEDIA_URL + 'videos/' + str(tr.tutorial_detail.foss_id) + '/' + str(tr.tutorial_detail_id) + '/' + tr.tutorial_detail.tutorial.replace(' ', '-') + '-English.srt' + '" srclang="en" label="English"></track>'
+    if tr.language.name != 'English':
+        native_srt = settings.MEDIA_ROOT + 'videos/' + str(tr.tutorial_detail.foss_id) + '/' + str(tr.tutorial_detail_id) + '/' + tr.tutorial_detail.tutorial.replace(' ', '-') + '-' + tr.language.name +'.srt'
+        print native_srt
+        if os.path.isfile(native_srt):
+            data += '<track kind="captions" src="'+ settings.MEDIA_URL + 'videos/' + str(tr.tutorial_detail.foss_id) + '/' + str(tr.tutorial_detail_id) + '/' + tr.tutorial_detail.tutorial.replace(' ', '-') + '-' + tr.language.name + '.srt' + '" srclang="en" label="' + tr.language.name + '"></track>'
+    return data
+
+def get_video_visits(tr):
+    tr.hit_count = tr.hit_count + 1
+    tr.save()
+    return tr.hit_count
+
+def get_prerequisite(tr, td):
+    try:
+        tr_rec = TutorialResource.objects.get(tutorial_detail = td, language_id = tr.language_id)
+        return get_url_name(td.foss.foss) + '/' + get_url_name(td.tutorial) + '/' + tr_rec.language.name
+    except:
+        pass
+    return get_url_name(td.foss.foss) + '/' + get_url_name(td.tutorial) + '/English'
+
+register.filter('get_prerequisite', get_prerequisite)
+register.filter('get_video_visits', get_video_visits)
+register.filter('get_srt_path', get_srt_path)
 register.filter('get_thumb_path', get_thumb_path)
 register.filter('get_missing_component_reply', get_missing_component_reply)
 register.filter('get_component_name', get_component_name)

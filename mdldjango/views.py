@@ -305,7 +305,7 @@ def mdl_register(request):
         try:
             user = MdlUser.objects.filter(email=request.POST['email']).first()
             if user:
-                messages.success(request, "Email : "+request.POST['email']+" already registered on this website. Please click <a href='#'>here </a>to login")
+                messages.success(request, "Email : "+request.POST['email']+" already registered on this website. Please click <a href='http://www.spoken-tutorial.org/participant/login/'>here </a>to login")
         except Exception, e:
             print e
             pass
@@ -314,6 +314,7 @@ def mdl_register(request):
             mdluser = MdlUser()
             mdluser.auth = 'manual'
             mdluser.institution = form.cleaned_data['college']
+            mdluser.gender = form.cleaned_data['gender']
             mdluser.firstname = form.cleaned_data['firstname']
             mdluser.lastname = form.cleaned_data['lastname']
             mdluser.email = form.cleaned_data['email']
@@ -321,6 +322,7 @@ def mdl_register(request):
             mdluser.password = encript_password(form.cleaned_data['password'])
             mdluser.confirmed = 1
             mdluser.mnethostid = 1
+            print mdluser.gender, "***********"
             mdluser.save()
             messages.success(request, "User " + form.cleaned_data['firstname'] +" "+form.cleaned_data['firstname']+" Created!")
             return HttpResponseRedirect('/participant/register/')

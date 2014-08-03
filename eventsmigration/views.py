@@ -961,7 +961,7 @@ def workshop_feedback(request):
     
     
 def test(request):
-    test_status = 2
+    test_status = 0
     if test_status == 4:
         wtrs = WTestRequests.objects.filter(status = test_status)
     elif test_status == 2:

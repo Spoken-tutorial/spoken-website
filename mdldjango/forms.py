@@ -26,11 +26,14 @@ class RegisterForm(forms.Form):
     firstname = forms.CharField()
     lastname = forms.CharField()
     email = forms.EmailField()
+    gender = forms.ChoiceField(widget=forms.RadioSelect, choices=[('Male', 'Male'),('Female', 'Female')], required = True)
     username = forms.CharField()
     password = forms.CharField(widget=forms.PasswordInput())
     password_confirm = forms.CharField(widget=forms.PasswordInput())
-    course = forms.ChoiceField(choices = (('', '-- None --'), (1, 'B.E'), (2, 'MCA'),))
-    year = forms.ChoiceField(choices = (('', '-- None --'), (1, '1st Year'), (2, '2ed year'),))
+    choices = list(Course.objects.order_by('name').values_list('id', 'name'))
+    choices.insert(0, ('', '-- None --'),)
+    course = forms.ChoiceField(choices = choices)
+    year = forms.ChoiceField(choices = (('', '-- None --'), (1, '1st Year'), (2, '2ed year'), (3, '3ed year'), (4, '4th year'), (5, '5th year'), (6, '6th year'),))
     
     def clean_username(self):
         username = self.cleaned_data['username']
@@ -69,30 +72,22 @@ class RegisterForm(forms.Form):
             
         super(RegisterForm, self).__init__(*args, **kwargs)
         #load the choices
-        state_list = list(State.objects.exclude().values_list('id', 'name'))
+        state_list = list(State.objects.exclude(name = 'Uncategorized').order_by('name').values_list('id', 'name'))
         state_list.insert(0, ('', '-- None --'))
         self.fields['state'].choices = state_list
         if args:
             if 'state' in args[0]:
                 if args[0]['state'] and args[0]['state'] != '' and args[0]['state'] != 'None':
-                    choices = list(District.objects.filter(state_id = args[0]['state']).values_list('id', 'name'))
-                    choices.insert(0, ('', '-- None --'))
-                    self.fields['district'].choices = choices
-                    self.fields['district'].widget.attrs = {}
-                    self.fields['district'].initial = args[0]['district']
-            if 'district' in args[0]:
-                if args[0]['district'] and args[0]['district'] != '' and args[0]['district'] != 'None':
-                    choices = list(AcademicCenter.objects.filter(district_id = args[0]['district']).values_list('id', 'institution_name'))
+                    choices = list(AcademicCenter.objects.filter(state_id = args[0]['state']).values_list('id', 'institution_name'))
                     choices.insert(0, ('', '-- None --'))
                     self.fields['college'].choices = choices
                     self.fields['college'].widget.attrs = {}
-                    #self.fields['college'].initial = args[0]['collages']
         if initial:
             self.fields['state'].initial = initial.academic.state_id
-            self.fields['district'].choices = District.objects.filter(state_id =initial.academic.state_id).values_list('id', 'name')
+            #self.fields['district'].choices = District.objects.filter(state_id =initial.academic.state_id).values_list('id', 'name')
             self.fields['college'].choices = AcademicCenter.objects.filter(district_id =initial.academic.district_id).values_list('id', 'institution_name')
             #initial data
-            self.fields['district'].initial = initial.academic.district_id
+            #self.fields['district'].initial = initial.academic.district_id
             self.fields['college'].initial = initial.academic_id
 
 class FeedbackForm(forms.ModelForm):
