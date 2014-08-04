@@ -1223,7 +1223,6 @@ def test_request(request, role, rid = None):
         user = t.organiser.user
         form = TestForm(user = user, instance = t)
         context['instance'] = t
-        
     if request.method == 'POST':
         form = TestForm(request.POST, user = user)
         if form.is_valid():
@@ -1260,7 +1259,6 @@ def test_request(request, role, rid = None):
             update_events_notification(user_id = user.id, role = 0, category = 1, category_id = t.id, academic = t.academic_id, status = 0, message = message)
             
             return HttpResponseRedirect("/software-training/test/"+role+"/pending/")
-    
     messages.info(request, "Upgrade the browser with latest version on all the systems before the test. Please note: Confirm Invigilator availability and acceptance to invigilate before adding his name in this form.")
     context['role'] = role
     context['status'] = 'request'
