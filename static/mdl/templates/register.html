@@ -64,6 +64,17 @@
                         </div>
                     </div>
                     <div class="form-group">
+                        <label class="col-sm-3 control-label" for= "id_gender">Gender</label>
+                        <div class="col-sm-9">
+                            {% for choice in form.gender %}
+                                <div class='radio'>
+                                    {{ choice.choice_label }}
+                                    {{ choice.tag }}
+                               </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="form-group">
                         <label class="col-sm-3 control-label" for= "id_state">Username</label>
                         <div class="col-sm-9">
                             {% render_field form.username class+="form-control username" tabindex="1" %}
