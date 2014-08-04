@@ -1217,6 +1217,7 @@ def test_request(request, role, rid = None):
     if not (user.is_authenticated() and ( is_organiser(user) or is_resource_person(user) or is_event_manager(user))):
         raise Http404('You are not allowed to view this page')
     context = {}
+    form = TestForm(user = request.user)
     if request.method == 'POST':
         form = TestForm(request.POST, user = request.user)
         if form.is_valid():
@@ -1254,7 +1255,6 @@ def test_request(request, role, rid = None):
             
             return HttpResponseRedirect("/software-training/test/"+role+"/pending/")
             
-    form = TestForm(user = request.user)
     if rid:
         t = Test.objects.get(pk = rid)
         form = TestForm(user = t.organiser.user, instance = t)
@@ -1271,7 +1271,7 @@ def test_list(request, role, status):
     if not (user.is_authenticated() and ( is_organiser(user) or is_invigilator(user) or is_resource_person(user) or is_event_manager(user))):
         raise Http404('You are not allowed to view this page')
         
-    status_dict = {'pending': 0, 'waitingforinvigilator': 1, 'approved' : 2, 'ongoing': 3, 'completed' : 4, 'rejected' : 5, 'reschedule' : 2}
+    status_dict = {'pending': 0, 'waitingforinvigilator': 1, 'approved' : 2, 'ongoing': 3, 'completed' : 4, 'rejected' : 5, 'reschedule' : 2, 'predated' : ''}
     if status in status_dict:
         context = {}
         collectionSet = None
@@ -1284,11 +1284,15 @@ def test_list(request, role, status):
         elif is_resource_person(user) and role == 'rp':
             if status == 'ongoing':
                 collectionSet = Test.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status], tdate = datetime.datetime.now().strftime("%Y-%m-%d"))
+            elif status == 'predated':
+                collectionSet = Test.objects.filter((Q(status = 0) | Q(status = 1) | Q(status = 2) | Q(status = 3)), academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), tdate__lt=datetime.date.today())
             else:
                 collectionSet = Test.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status])
         elif is_organiser(user) and role == 'organiser':
             if status == 'ongoing': 
                 collectionSet = Test.objects.filter((Q(status = 2) | Q(status = 3)), organiser__user = user , tdate = datetime.datetime.now().strftime("%Y-%m-%d"))
+            elif status == 'predated':
+                collectionSet = Test.objects.filter((Q(status = 0) | Q(status = 1) | Q(status = 2) | Q(status = 3)), organiser__user = user, tdate__lt=datetime.date.today())
             elif status == 'approved':
                 collectionSet = Test.objects.filter(organiser__user = user, status = status_dict[status], tdate__gt=datetime.date.today())
             else:
