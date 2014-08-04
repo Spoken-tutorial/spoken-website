@@ -1217,9 +1217,14 @@ def test_request(request, role, rid = None):
     if not (user.is_authenticated() and ( is_organiser(user) or is_resource_person(user) or is_event_manager(user))):
         raise Http404('You are not allowed to view this page')
     context = {}
-    form = TestForm(user = request.user)
+    form = TestForm(user = user)
+    if rid:
+        t = Test.objects.get(pk = rid)
+        user = t.organiser.user
+        form = TestForm(user = user, instance = t)
+        context['instance'] = t
     if request.method == 'POST':
-        form = TestForm(request.POST, user = request.user)
+        form = TestForm(request.POST, user = user)
         if form.is_valid():
             dateTime = request.POST['tdate'].split(' ')
             t = Test()
@@ -1254,12 +1259,9 @@ def test_request(request, role, rid = None):
             update_events_notification(user_id = user.id, role = 0, category = 1, category_id = t.id, academic = t.academic_id, status = 0, message = message)
             
             return HttpResponseRedirect("/software-training/test/"+role+"/pending/")
-            
-    if rid:
-        t = Test.objects.get(pk = rid)
-        form = TestForm(user = t.organiser.user, instance = t)
     messages.info(request, "Upgrade the browser with latest version on all the systems before the test. Please note: Confirm Invigilator availability and acceptance to invigilate before adding his name in this form.")
-    context = {'role' : role, 'status' : 'request'}
+    context['role'] = role
+    context['status'] = 'request'
     context.update(csrf(request))
     context['form'] = form
     return render(request, 'events/templates/test/form.html', context)
@@ -1278,34 +1280,34 @@ def test_list(request, role, status):
         todaytest = None
         if is_event_manager(user) and role == 'em':
             if status == 'ongoing':
-                collectionSet = Test.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status], tdate = datetime.datetime.now().strftime("%Y-%m-%d"))
+                collectionSet = Test.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status], tdate = datetime.datetime.now().strftime("%Y-%m-%d")).order_by('-tdate')
             else:
-                collectionSet = Test.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status])
+                collectionSet = Test.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status]).order_by('-tdate')
         elif is_resource_person(user) and role == 'rp':
             if status == 'ongoing':
-                collectionSet = Test.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status], tdate = datetime.datetime.now().strftime("%Y-%m-%d"))
+                collectionSet = Test.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status], tdate = datetime.datetime.now().strftime("%Y-%m-%d")).order_by('-tdate')
             elif status == 'predated':
-                collectionSet = Test.objects.filter((Q(status = 0) | Q(status = 1) | Q(status = 2) | Q(status = 3)), academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), tdate__lt=datetime.date.today())
+                collectionSet = Test.objects.filter((Q(status = 0) | Q(status = 1) | Q(status = 2) | Q(status = 3)), academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), tdate__lt=datetime.date.today()).order_by('-tdate')
             else:
-                collectionSet = Test.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status])
+                collectionSet = Test.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status]).order_by('-tdate')
         elif is_organiser(user) and role == 'organiser':
             if status == 'ongoing': 
-                collectionSet = Test.objects.filter((Q(status = 2) | Q(status = 3)), organiser__user = user , tdate = datetime.datetime.now().strftime("%Y-%m-%d"))
+                collectionSet = Test.objects.filter((Q(status = 2) | Q(status = 3)), organiser__user = user , tdate = datetime.datetime.now().strftime("%Y-%m-%d")).order_by('-tdate')
             elif status == 'predated':
-                collectionSet = Test.objects.filter((Q(status = 0) | Q(status = 1) | Q(status = 2) | Q(status = 3)), organiser__user = user, tdate__lt=datetime.date.today())
+                collectionSet = Test.objects.filter((Q(status = 0) | Q(status = 1) | Q(status = 2) | Q(status = 3)), organiser__user = user, tdate__lt=datetime.date.today()).order_by('-tdate')
             elif status == 'approved':
-                collectionSet = Test.objects.filter(organiser__user = user, status = status_dict[status], tdate__gt=datetime.date.today())
+                collectionSet = Test.objects.filter(organiser__user = user, status = status_dict[status], tdate__gt=datetime.date.today()).order_by('-tdate')
             else:
-                collectionSet = Test.objects.filter(organiser__user = user, status = status_dict[status])
+                collectionSet = Test.objects.filter(organiser__user = user, status = status_dict[status]).order_by('-tdate')
         elif is_invigilator(user) and role == 'invigilator':
             if status == 'ongoing':
-                collectionSet = Test.objects.filter((Q(status = 2) | Q(status = 3)), tdate = datetime.date.today(), invigilator_id = user.invigilator.id)
+                collectionSet = Test.objects.filter((Q(status = 2) | Q(status = 3)), tdate = datetime.date.today(), invigilator_id = user.invigilator.id).order_by('-tdate')
                 messages.info(request, "Click on the Attendance link below to see the participant list. To know more Click Here.")
             elif status == 'approved':
-                collectionSet = Test.objects.filter(invigilator_id=user.invigilator.id, status = status_dict[status], tdate__gt=datetime.date.today())
+                collectionSet = Test.objects.filter(invigilator_id=user.invigilator.id, status = status_dict[status], tdate__gt=datetime.date.today()).order_by('-tdate')
             else:
                 todaytest = datetime.datetime.now().strftime("%Y-%m-%d")
-                collectionSet = Test.objects.filter(invigilator_id=user.invigilator.id, status = status_dict[status])
+                collectionSet = Test.objects.filter(invigilator_id=user.invigilator.id, status = status_dict[status]).order_by('-tdate')
         
         if collectionSet == None:
             raise Http404('You are not allowed to view this page')

@@ -6,6 +6,7 @@ from django.core.exceptions import PermissionDenied
 from django.contrib.auth.models import Group
 from django.contrib.auth.models import User
 from django.shortcuts import render
+from django.db import connection
 from django.conf import settings
 from shutil import copyfile
 import random, string
@@ -972,46 +973,46 @@ def test(request):
         wtrs = WTestRequests.objects.filter(status = test_status, pref_test_date__gte = datetime.datetime.today())
 
     for wtr in wtrs:
-        print wtr.cfm_test_date, "sssssss", wtr.test_code, wtr.cfm_test_date, wtr.cfm_test_time
+        print old_treq.cfm_test_date, "sssssss", old_treq.test_code, old_treq.cfm_test_date, old_treq.cfm_test_time
         #Save department
-        douser = get_user(wtr.organiser_id)
+        douser = get_user(old_treq.organiser_id)
         if douser == None:
-            print 'id', wtr.id, 'Organiser id missing', wtr.organiser_id
+            print 'id', old_treq.id, 'Organiser id missing', old_treq.organiser_id
             continue
         try:
             # Save Workshop
             w = None
             try:
-                w = Test.objects.get(test_code = wtr.test_code)
+                w = Test.objects.get(test_code = old_treq.test_code)
                 print "Already exits !"
                 continue
             except Exception, e:
                 pass
-                #print e, " => 3 ", wtr.test_code, wtr.academic_code
-                #if not wtr.test_code:
-                    #wtr.test_code = "TC-"+str(wtr.id)
+                #print e, " => 3 ", old_treq.test_code, old_treq.academic_code
+                #if not old_treq.test_code:
+                    #old_treq.test_code = "TC-"+str(old_treq.id)
             #check organiser there or not
             organiser = None
             try:
                 organiser = Organiser.objects.get(user_id = douser.id)
             except Exception, e:
                 #print e
-                print 'id', wtr.id, 'Organiser record missing', wtr.organiser_id
+                print 'id', old_treq.id, 'Organiser record missing', old_treq.organiser_id
                 continue
             
             #check organiser there or not
-            diuser = get_user(wtr.invigilator_id)
+            diuser = get_user(old_treq.invigilator_id)
             if diuser == None:
-                print 'id', wtr.id, 'Invigilator id missing', wtr.invigilator_id
+                print 'id', old_treq.id, 'Invigilator id missing', old_treq.invigilator_id
             invigilator = None
             new_invigilator_id = None
             try:
                 invigilator = Invigilator.objects.get(user_id = diuser.id)
                 new_invigilator_id = invigilator.id
             except Exception, e:
-                if not wtr.invigilator_id:
+                if not old_treq.invigilator_id:
                     try:
-                        ac = AcademicCenter.objects.get(academic_code = wtr.academic_code)
+                        ac = AcademicCenter.objects.get(academic_code = old_treq.academic_code)
                         invigilator = Invigilator.objects.filter(academic_id = ac.id).first()
                         if not invigilator:
                             new_invigilator_id = None
@@ -1020,56 +1021,56 @@ def test(request):
                     except Exception, e:
                         new_invigilator_id = None
                 else:
-                    print 'id:', wtr.id, 'Invigilator record missing', wtr.invigilator_id
+                    print 'id:', old_treq.id, 'Invigilator record missing', old_treq.invigilator_id
                     new_invigilator_id = None
             ac = None
             try:
-                ac = AcademicCenter.objects.get(academic_code = wtr.academic_code)
+                ac = AcademicCenter.objects.get(academic_code = old_treq.academic_code)
             except Exception, e:
                 try:
-                    o  = Organiser.objects.get(user_id = wtr.douser.id)
+                    o  = Organiser.objects.get(user_id = old_treq.douser.id)
                     ac = AcademicCenter.objects.get(pk = o.academic_id)
                 except Exception, e:
-                    print 'id:', wtr.id, 'Academic code missing'
+                    print 'id:', old_treq.id, 'Academic code missing'
                 #continue
             #find foss_category_id
             foss = None
             try:
-                if wtr.foss_category == 'Linux-Ubuntu':
-                    wtr.foss_category = 'Linux'
-                if wtr.foss_category in ['C', 'C-Plus-Plus', 'C-and-C-Plus-Plus']:
-                    wtr.foss_category = 'C and Cpp'
-                foss = FossCategory.objects.get(foss = wtr.foss_category.replace("-", " "))
+                if old_treq.foss_category == 'Linux-Ubuntu':
+                    old_treq.foss_category = 'Linux'
+                if old_treq.foss_category in ['C', 'C-Plus-Plus', 'C-and-C-Plus-Plus']:
+                    old_treq.foss_category = 'C and Cpp'
+                foss = FossCategory.objects.get(foss = old_treq.foss_category.replace("-", " "))
             except Exception, e:
-                print 'id:', wtr.id, 'Foss category missing', wtr.foss_category.replace("-", " ")
+                print 'id:', old_treq.id, 'Foss category missing', old_treq.foss_category.replace("-", " ")
                 continue
             # get participants count
             wp = None
-            if wtr.status == 4:
+            if old_treq.status == 4:
                 try:
-                    wp = WTestDetails.objects.filter(test_code = wtr.test_code).aggregate(Sum('no_of_participants'))
+                    wp = WTestDetails.objects.filter(test_code = old_treq.test_code).aggregate(Sum('no_of_participants'))
                 except Exception, e:
-                    print 'id:', wtr.id, 'Test Details Missing', wtr.test_code
+                    print 'id:', old_treq.id, 'Test Details Missing', old_treq.test_code
                     continue
             if test_status == 4 and not wp['no_of_participants__sum']:
-                print 'id:', wtr.id, 'Test Details Missing', wtr.test_code
+                print 'id:', old_treq.id, 'Test Details Missing', old_treq.test_code
                 continue
             w = Test()
-            w.id = wtr.id
+            w.id = old_treq.id
             w.organiser_id = organiser.id
             w.invigilator_id = new_invigilator_id
-            w.test_code = wtr.test_code.upper()
+            w.test_code = old_treq.test_code.upper()
             w.academic_id = ac.id
             w.foss_id = foss.id
             
-            if wtr.cfm_test_date and wtr.cfm_test_time:
-                w.tdate = wtr.cfm_test_date
-                w.ttime = wtr.cfm_test_time
+            if old_treq.cfm_test_date and old_treq.cfm_test_time:
+                w.tdate = old_treq.cfm_test_date
+                w.ttime = old_treq.cfm_test_time
             else:
-                w.tdate = wtr.pref_test_date
-                w.ttime = wtr.pref_test_time
+                w.tdate = old_treq.pref_test_date
+                w.ttime = old_treq.pref_test_time
             
-            w.status = wtr.status
+            w.status = old_treq.status
             
             w.test_category_id = 1
             
@@ -1078,9 +1079,9 @@ def test(request):
             else:
                 w.participant_count = 0
             
-            if wtr.created_at:
-                w.created = wtr.created_at
-                w.updated = wtr.updated_at
+            if old_treq.created_at:
+                w.created = old_treq.created_at
+                w.updated = old_treq.updated_at
             else:
                 w.created = datetime.datetime.now()
                 w.updated = datetime.datetime.now()
@@ -1088,18 +1089,18 @@ def test(request):
                 #continue
                 w.save()
             except Exception, e:
-                print e, "Duplicate ---", wtr.test_code, " => ", wtr.academic_code, wtr.cfm_test_date, wtr.foss_category
+                print e, "Duplicate ---", old_treq.test_code, " => ", old_treq.academic_code, old_treq.cfm_test_date, old_treq.foss_category
                 #sys.exit(0)
                 post_time = 5
                 for i in range(150):
                     try:
-                        post_five_min = datetime.datetime.combine(datetime.date.today(), wtr.cfm_test_time) + datetime.timedelta(minutes=post_time)
+                        post_five_min = datetime.datetime.combine(datetime.date.today(), old_treq.cfm_test_time) + datetime.timedelta(minutes=post_time)
                         w.ttime = post_five_min.time()
                         w.save()
                         break
                     except Exception, e:
                         #duplicate because of unique_together
-                        print e, "Duplicate post change time save ******", wtr.test_code, " => ", wtr.academic_code, wtr.cfm_test_date, 
+                        print e, "Duplicate post change time save ******", old_treq.test_code, " => ", old_treq.academic_code, old_treq.cfm_test_date, 
                         if i >= 149:
                             print 'i exceeded'
                         post_time = post_time + 5
@@ -1119,7 +1120,7 @@ def test(request):
                             try:
                                 dept = Department.objects.get(name = dept)
                             except Exception, e:
-                                print e, " => sss ", wtr.test_code, " => ", dept
+                                print e, " => sss ", old_treq.test_code, " => ", dept
                                 dept = get_dept(dept)
                             if dept:
                                 dept = Department.objects.get(name = dept)
@@ -1127,13 +1128,13 @@ def test(request):
                     w.save()
             
             except Exception, e:
-                print e, " => 8", wtr.test_code, " => ", wdept, wtr.department
+                print e, " => 8", old_treq.test_code, " => ", wdept, old_treq.department
                 w.delete()
                 continue
         except Exception, e:
             print "Something went wrong!"
-            print e, " => 9", wtr.id," => ", wtr.test_code
-            print "Organiser => ", wtr.organiser_id
+            print e, " => 9", old_treq.id," => ", old_treq.test_code
+            print "Organiser => ", old_treq.organiser_id
             continue
     return HttpResponse("Test migration Done!")
     
@@ -1250,3 +1251,245 @@ def test_foss_fix(request):
         test.save()
         print "completed => ", test.test_code
     return HttpResponse("Test foss fix migration Done!")
+
+def test_workshop_link(request):
+    old_treqs = WTestRequests.objects.all()
+    for old_treq in old_treqs:
+        if old_treq.workshop_code == '' or old_treq.workshop_code == None or old_treq.test_code == '' or old_treq.test_code == None:
+            continue
+        try:
+            new_wr = Training.objects.get(training_code = old_treq.workshop_code)
+        except Exception, e:
+            print e, "id:", old_treq.id
+            continue
+        try:
+            new_treq = Test.objects.get(test_code = old_treq.test_code)
+        except Exception, e:
+            print e, "id:", old_treq.id
+            continue
+        new_treq.training = new_wr
+        
+        dept = None
+        wdept = old_treq.department
+        try:
+            dept = Department.objects.get(name=wdept)
+        except Exception, e:
+            print e, "id:", old_treq.id
+            dept = Department.objects.get(name='Others')
+            #wdept = get_dept(wdept)
+                
+        #save dept
+        new_treq.department.add(dept.id)
+        new_treq.save()
+
+def test_workshop_pending_link(request):
+    old_treqs = WTestRequests.objects.all()
+    for old_treq in old_treqs:
+        if old_treq.workshop_code == '' or old_treq.workshop_code == None:
+            continue
+        try:
+            new_wr = Training.objects.get(training_code = old_treq.workshop_code)
+        except Exception, e:
+            print e, "id:", old_treq.id
+            continue
+        try:
+            new_treq = Test.objects.get(id = old_treq.id)
+        except Exception, e:
+            print e, "id:", old_treq.id
+            continue
+        new_treq.training = new_wr
+        if new_treq.test_code == '' or new_treq.test_code == None:
+            new_treq.test_code = 'TC-' + str(new_treq.id)
+        dept = None
+        wdept = old_treq.department
+        try:
+            dept = Department.objects.get(name=wdept)
+        except Exception, e:
+            print e, "id:", old_treq.id
+            dept = Department.objects.get(name='Others')
+            #wdept = get_dept(wdept)
+                
+        #save dept
+        new_treq.department.add(dept.id)
+        new_treq.save()
+
+def old_test_to_new(request):
+    old_treqs = WTestRequests.objects.all()
+
+    for old_treq in old_treqs:
+        if old_treq.status == 5:
+            continue
+
+        #fetching academic center record
+        try:
+            academic_center = AcademicCenter.objects.get(academic_code = old_treq.academic_code)
+        except:
+            print 'id:', old_treq.id, 'Academic record missing:', old_treq.academic_code
+            continue
+
+        # Fetching organiser record
+        organiser_user = get_user(old_treq.organiser_id)
+        if organiser_user == None:
+            print 'id:', old_treq.id, 'Organiser user record missing - uid:', old_treq.organiser_id
+            continue
+        try:
+            organiser = Organiser.objects.get(user = organiser_user)
+        except Exception, e:
+            print e
+            #break
+            organiser = Organiser.objects.create(
+                user = organiser_user,
+                academic = academic_center,
+                status = 1,
+            )
+            try:
+                organiser.groups.add(Group.objects.get(name='Organiser'))
+            except:
+                pass
+
+        #Fetching invigilator record
+        invigilator_user = get_user(old_treq.invigilator_id)
+        if invigilator_user == None:
+            #print 'id:', old_treq.id, 'Invigilator user record missing - uid:', old_treq.invigilator_id
+            invigilator = None
+            #continue
+        else:
+            try:
+                invigilator = Invigilator.objects.get(user = invigilator_user)
+            except:
+                invigilator = Invigilator.objects.create(
+                    user = invigilator_user,
+                    academic = academic_center,
+                    status = 1,
+                )
+                try:
+                    organiser.groups.add(Group.objects.get(name='Invigilator'))
+                except:
+                    pass
+
+        foss = None
+        try:
+            if old_treq.foss_category == 'Linux-Ubuntu':
+                old_treq.foss_category = 'Linux'
+            if old_treq.foss_category in ['C', 'C-Plus-Plus', 'C-and-C-Plus-Plus']:
+                old_treq.foss_category = 'C and Cpp'
+            foss = FossCategory.objects.get(foss = old_treq.foss_category.replace("-", " "))
+        except Exception, e:
+            print 'id:', old_treq.id, 'Foss category missing', old_treq.foss_category.replace("-", " ")
+            continue
+
+        #Fetching workshop record
+        workshop = None
+        test_category = TestCategory.objects.get(name='Others')
+        if old_treq.workshop_code != '' and old_treq.workshop_code != None:
+            try:
+                workshop = Training.objects.get(training_code = old_treq.workshop_code)
+                test_category = TestCategory.objects.get(name='Workshop')
+            except:
+                pass
+
+        try:
+            department = Department.objects.get(name = old_treq.department)
+        except:
+            department = Department.objects.get(name = 'Others')
+        participants_count = 0
+        td_recs = WTestDetails.objects.filter(test_code = old_treq.test_code)
+        for td_rec in td_recs:
+            participants_count = participants_count + int(td_rec.no_of_participants)
+        created = None
+        updated = None
+        if old_treq.cfm_test_date and old_treq.cfm_test_time:
+            tdate = old_treq.cfm_test_date
+            ttime = old_treq.cfm_test_time
+        else:
+            tdate = old_treq.pref_test_date
+            ttime = old_treq.pref_test_time
+        if old_treq.created_at:
+            created = old_treq.created_at
+            created_str = str(old_treq.created_at)
+        else:
+            created = datetime.datetime.now()
+            created_str = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        test_code = 'TC-' + str(old_treq.id)
+        try:
+            new_treq = Test.objects.get(pk = old_treq.id)
+            new_treq.organiser = organiser
+            new_treq.test_category = test_category
+            new_treq.invigilator = invigilator
+            new_treq.academic = academic_center
+            new_treq.training = workshop
+            new_treq.foss = foss
+            new_treq.test_code = test_code
+            new_treq.tdate = tdate
+            new_treq.ttime = ttime
+            #new_treq.status = old_treq.status
+            new_treq.participant_count = participants_count
+            new_treq.created = created
+            new_treq.updated = created
+            try:
+                new_treq.save()
+            except:
+                post_time = 5
+                for i in range(150):
+                    try:
+                        post_five_min = datetime.datetime.combine(datetime.date.today(), ttime) + datetime.timedelta(minutes=post_time)
+                        ttime = post_five_min.time()
+                        new_treq.ttime = ttime
+                        new_treq.save()
+                        break
+                    except:
+                        if i >= 149:
+                            print '1 - i exceeded'
+                        post_time = post_time + 5
+        except Exception, e:
+            #print 'main', e
+            try:
+                new_treq = Test.objects.create(
+                    id = old_treq.id,
+                    organiser = organiser,
+                    test_category = test_category,
+                    invigilator = invigilator,
+                    academic = academic_center,
+                    training = workshop,
+                    foss = foss,
+                    test_code = test_code,
+                    tdate = tdate,
+                    ttime = ttime,
+                    status = old_treq.status,
+                    participant_count = participants_count,
+                    created = created,
+                    updated = created
+                )
+            except Exception, e:
+                #print 'sub', e
+                post_time = 5
+                for i in range(150):
+                    try:
+                        post_five_min = datetime.datetime.combine(datetime.date.today(), ttime) + datetime.timedelta(minutes=post_time)
+                        ttime = post_five_min.time()
+                        new_treq = Test.objects.create(
+                            id = old_treq.id,
+                            organiser = organiser,
+                            test_category = test_category,
+                            invigilator = invigilator,
+                            academic = academic_center,
+                            training = workshop,
+                            foss = foss,
+                            test_code = test_code,
+                            tdate = tdate,
+                            ttime = ttime,
+                            status = old_treq.status,
+                            participant_count = participants_count,
+                            created = created,
+                            updated = updated
+                        )
+                        break
+                    except Exception, e:
+                        #print e
+                        if i >= 149:
+                            print '2 - i exceeded'
+                        post_time = post_time + 5
+        cursor = connection.cursor()
+        cursor.execute("""update events_test set created='""" + str(created_str) + """', updated='""" + str(created_str) + """' where id=""" + str(new_treq.id))
+        new_treq.department.add(department.id)
+    return HttpResponse("Success!")
