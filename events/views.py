@@ -1217,6 +1217,7 @@ def test_request(request, role, rid = None):
     if not (user.is_authenticated() and ( is_organiser(user) or is_resource_person(user) or is_event_manager(user))):
         raise Http404('You are not allowed to view this page')
     context = {}
+    form = TestForm(user = request.user)
     if request.method == 'POST':
         form = TestForm(request.POST, user = request.user)
         if form.is_valid():
@@ -1254,7 +1255,6 @@ def test_request(request, role, rid = None):
             
             return HttpResponseRedirect("/software-training/test/"+role+"/pending/")
             
-    form = TestForm(user = request.user)
     if rid:
         t = Test.objects.get(pk = rid)
         form = TestForm(user = t.organiser.user, instance = t)
