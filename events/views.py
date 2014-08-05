@@ -804,28 +804,28 @@ def training_list(request, role, status):
             collectionSet = Training.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status])
         elif is_resource_person(user) and role == 'rp':
             if status == 'approved':
-                collectionSet = Training.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status], trdate__gt=datetime.date.today())
+                collectionSet = Training.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status], trdate__gt=datetime.date.today()).order_by('-trdate')
             elif status == 'predated':
-                collectionSet = Training.objects.filter((Q(status = 0) | Q(status = 1) | Q(status = 2) | Q(status = 3)), academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), trdate__lte=datetime.date.today())
+                collectionSet = Training.objects.filter((Q(status = 0) | Q(status = 1) | Q(status = 2) | Q(status = 3)), academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), trdate__lte=datetime.date.today()).order_by('-trdate')
             elif status =='ongoing':
-                collectionSet = Training.objects.filter((Q(status = 2) | Q(status = 3)), academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), trdate__lte=datetime.date.today())
+                collectionSet = Training.objects.filter((Q(status = 2) | Q(status = 3)), academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), trdate__lte=datetime.date.today()).order_by('-trdate')
             elif status =='pending':
-                collectionSet = Training.objects.filter((Q(status = 0) | Q(status = 1)), academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), trdate__gte = datetime.date.today())
+                collectionSet = Training.objects.filter((Q(status = 0) | Q(status = 1)), academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), trdate__gte = datetime.date.today()).order_by('-trdate')
                 
             else:
-                collectionSet = Training.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status])
+                collectionSet = Training.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status]).order_by('-trdate')
         elif is_organiser(user) and role == 'organiser':
             if status == 'approved':
-                collectionSet = Training.objects.filter(organiser__user = user, status = status_dict[status], trdate__gt=datetime.date.today())
+                collectionSet = Training.objects.filter(organiser__user = user, status = status_dict[status], trdate__gt=datetime.date.today()).order_by('-trdate')
             elif status == 'predated':
-                collectionSet = Training.objects.filter((Q(status = 0) | Q(status = 1) | Q(status = 2) | Q(status = 3)), organiser__user = user, trdate__lt=datetime.date.today())
+                collectionSet = Training.objects.filter((Q(status = 0) | Q(status = 1) | Q(status = 2) | Q(status = 3)), organiser__user = user, trdate__lt=datetime.date.today()).order_by('-trdate')
             elif status == 'ongoing':
-                collectionSet = Training.objects.filter((Q(status = 2) | Q(status = 3)), organiser__user = user, trdate__lte=datetime.date.today())
+                collectionSet = Training.objects.filter((Q(status = 2) | Q(status = 3)), organiser__user = user, trdate__lte=datetime.date.today()).order_by('-trdate')
             elif status == 'pending':
-                collectionSet = Training.objects.filter((Q(status = 0) | Q(status = 1)), organiser__user = user, trdate__gte=datetime.date.today())
-                print collectionSet
+                collectionSet = Training.objects.filter((Q(status = 0) | Q(status = 1)), organiser__user = user, trdate__gte=datetime.date.today()).order_by('-trdate')
+                #print collectionSet
             else:
-                collectionSet = Training.objects.filter(organiser__user = user, status = status_dict[status])
+                collectionSet = Training.objects.filter(organiser__user = user, status = status_dict[status]).order_by('-trdate')
         
         if collectionSet == None:
             raise Http404('You are not allowed to view this page')
