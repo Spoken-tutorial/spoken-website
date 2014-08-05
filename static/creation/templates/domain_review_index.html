@@ -48,11 +48,11 @@
                         <td class="col-center" title="{{ tr_rec.common_content.assignment_status | get_review_status_list }}">
                             <span class="{{ tr_rec.common_content.assignment_status | get_review_status_symbol }}"></span>
                         </td>
-                        <td class="col-center" title="{{ tr_rec.common_content.keyword_status | get_review_status_list }}">
-                            <span class="{{ tr_rec.common_content.keyword_status | get_review_status_symbol }}"></span>
-                        </td>
                         <td class="col-center" title="{{ tr_rec.common_content.prerequisite_status | get_review_status_list }}">
                             <span class="{{ tr_rec.common_content.prerequisite_status | get_review_status_symbol }}"></span>
+                        </td>
+                        <td class="col-center" title="{{ tr_rec.common_content.keyword_status | get_review_status_list }}">
+                            <span class="{{ tr_rec.common_content.keyword_status | get_review_status_symbol }}"></span>
                         </td>
                         <td class="col-center"><a href="/creation/domain-review/tutorial/{{ tr_rec.id }}" class="review-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Review</a></td>
                     </tr>
