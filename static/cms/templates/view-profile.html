@@ -21,7 +21,7 @@
 {% block content %}
     <div class="row well view-profile">
         <div class="col-sm-8">
-            <img class="col-sm-4" src="{{ media_url }}{{ profile.picture }}">
+            <img class="col-sm-4" src="{% if profile.picture %} {{media_url }}{{ profile.picture }} {% else %}/static/spoken/images/no-profile-image.jpg{% endif %}">
             <div class="col-sm-8">
                 <dl class="dl-horizontal">
                     <dt>First name</dt>

@@ -14,5 +14,11 @@
 	    <div class="description">
 	        {{ news.body|safe }}
 	    </div>
+	    {% if news.url %}
+	        <a target="_blank" href="{{news.url}}" title="{{ news.url_title}}">{{news.url}}</a> 
+	    {% endif %}
+	    {% if news.picture %}
+	        <a href="/media/{{news.picture}}" target="_blank">View image</a>
+	    {% endif %}
 	</div>
 {% endblock %}

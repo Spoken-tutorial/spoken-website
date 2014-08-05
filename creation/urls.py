@@ -49,6 +49,7 @@ urlpatterns = patterns('',
 
     # Administrator part
     url(r'^role/requests/$', 'creation.views.creation_list_role_requests', name="creation_list_role_requests"),
+    url(r'^update-prerequisite/$', 'creation.views.update_prerequisite', name="update_prerequisite"),
     url(r'^role/requests/([a-zA-Z-]+)/$', 'creation.views.creation_list_role_requests', name="creation_list_role_requests"),
     url(r'^role/accept/(\d+)/$', 'creation.views.creation_accept_role_request', name="creation_accept_role_request"),
     url(r'^role/reject/(\d+)/$', 'creation.views.creation_reject_role_request', name="creation_reject_role_request"),
