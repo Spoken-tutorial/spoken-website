@@ -16,4 +16,5 @@ urlpatterns = patterns('',
     url(r'^test-foss-fix/$', 'eventsmigration.views.test_foss_fix', name="test_foss_fix"),
     url(r'^test-workshop-link/$', 'eventsmigration.views.test_workshop_pending_link', name="test_workshop_link"),
     url(r'^old-test-to-new/$', 'eventsmigration.views.old_test_to_new', name="old_test_to_new"),
+    url(r'^old-workshop-to-new/$', 'eventsmigration.views.old_workshop_to_new', name="old_workshop_to_new"),
 )
