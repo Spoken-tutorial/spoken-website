@@ -1335,15 +1335,18 @@ def old_test_to_new(request):
         try:
             organiser = Organiser.objects.get(user = organiser_user)
         except Exception, e:
-            print e
+            #print e
             #break
             organiser = Organiser.objects.create(
                 user = organiser_user,
                 academic = academic_center,
                 status = 1,
             )
+        try:
+            organiser_user.groups.get(name='Organiser')
+        except:
             try:
-                organiser.groups.add(Group.objects.get(name='Organiser'))
+                organiser_user.groups.add(Group.objects.get(name='Organiser'))
             except:
                 pass
 
@@ -1363,9 +1366,12 @@ def old_test_to_new(request):
                     status = 1,
                 )
                 try:
-                    organiser.groups.add(Group.objects.get(name='Invigilator'))
+                    invigilator_user.groups.get(name='Invigilator')
                 except:
-                    pass
+                    try:
+                        invigilator_user.groups.add(Group.objects.get(name='Invigilator'))
+                    except:
+                        pass
 
         foss = None
         try:
@@ -1493,3 +1499,340 @@ def old_test_to_new(request):
         cursor.execute("""update events_test set created='""" + str(created_str) + """', updated='""" + str(created_str) + """' where id=""" + str(new_treq.id))
         new_treq.department.add(department.id)
     return HttpResponse("Success!")
+
+def get_course(dept):
+    getCourse = {
+        'CSE':'BE',
+        'Others':'Others',
+        'Dept. of Computer Science and Engineering':'BE',
+        'COMPUTER INFORMATION TECHNOLOGY':'BE',
+        'ECE, IT, CSE, EEE, MCA':'BE',
+        'Department of Computer Application':'MCA',
+        'INFORMATION TECHNOLOGY':'BE',
+        'Computer Science & Engineering':'BE',
+        '50':'Others',
+        'E&TC':'BE',
+        'Department of Computer Applications':'MCA',
+        'Common to all Branches - 1st semester':'Others'
+        'Computer Applications':'MCA',
+        'Computer Science':'BE',
+        'CSE & IT':'BE',
+        'DEPARTMENT OF COMPUTER SCIENCE & ENGINEERING':'BE',
+        'School':'Others',
+        'ELECTRONICS AND COMMUNICATION ENGINEERING DEPARTME':'BE',
+        'School of Elect. Engg and IT':'BE',
+        'Computer Science Engineering':'BE',
+        'E&TC and CS':'BE',
+        'BCA B.Com B.SC':'BE',
+        'COMPUTER SCIENCE AND ENGINEERING':'BE',
+        'BCA-III Students':'BCA',
+        'Department of Electronics':'BE',
+        'Computer Science Engg.':'BE',
+        'DEPARTMENT OF COMPUTER ENGINEERING':'BE',
+        'Computer Engineering':'BE',
+        'Electronics & Telecomunication':'BE',
+        'EECE':'BE',
+        'Computer':'BE',
+        'MECHANICAL ENGINEERING':'BE',
+        'E&TC ENGINEERING':'BE',
+        'CIVIL ENGINEERING':'BE',
+        'PRODUCTION ENGINEERING':'BE',
+        'INSTRUMENTATION ENGINEERING':'BE',
+        'Dept. of Electronics and Communication Engineering':'BE',
+        'All(Faculity Members, FDP)':'Others',
+        'Mechanical':'BE',
+        'IT':'BE',
+        'Oceanography':'Others',
+        'Chemistry':'BSc',
+        'CSE Department':'BE',
+        'Linux':'Others',
+        'Electrical Engineering':'BE',
+        'BSH':'Others',
+        'Central Library KKHSOU':'Others',
+        'Central Library':'Others',
+        'KTurtle Pilot Workshop for class VII students':'Others',
+        'COPA':'Others',
+        'Morigaon College':'Others',
+        'Computer GU':'Others',
+        'Civil':'BE',
+        'CSE IT MCA':'BE',
+        'EEE ECE':'BE',
+        'Civil Mech':'BE',
+        'MCA':'MCA',
+        'Computer and IT Department':'BE',
+        'Department of Computer Science':'BE',
+        'TechFest-2013 participants':'Others',
+        'CSI-IT2020 Participants':'Others',
+        'ECE':'BE',
+        'AERONAUTICAL':'BE',
+        'EEE':'BE',
+        'Department of IT':'BE',
+        'Electronics and Communication Engineering':'BE',
+        'Library':'Others',
+        'cs':'BE',
+        'School of Computer Science':'Others',
+        'School of Chemical and Biotechnology':'Others',
+        'Faculty':'Others',
+        'THE FUTURE COMPUTER SCIENCE COLLEGE':'Others',
+        'Information Technology and Computer science and en':'BE',
+        'MATHEMATICS':'Others',
+        'EC':'BE',
+        'Information Science':'BE',
+        'Civil Mechanical':'BE',
+        'DEPARTMENT OF MATHEMATICS':'Others',
+        'Open to All':'Others',
+        'IT and Computer Science':'BE',
+        'BCA':'BCA',
+        'Department of Information Technology':'BE',
+        'Sowdambika Polytechnic College':'Diploma',
+        'computers and information technology':'BE',
+        'electronics':'BE',
+        'ELECTRONICS AND COMMUNICATION':'BE',
+        'Future Computer Science College':'Others',
+        'Kamani Science College':'Others',
+        'P S HIRPARA MAHILA COLLEGE':'Others',
+        'ComputerScience':'BE',
+        'Master of Computer':'MCA',
+        'Computer science and engineering department':'BE',
+        'computer Science Dept':'BE',
+        'MCA staff and faculty':'MCA',
+        'Administrative':'Others',
+        'Physics':'MSc',
+        'Telecommunication and Engineering':'BE',
+        'GYANBHARTI COMPUTER SCIENCE COLLEGE':'Others',
+        'Department of Computer Science and Technology':'BE',
+        'ELECTRONIC':'BE',
+        'INFORMATION TECH':'BE',
+        'ECE CIVIL CSE':'BE',
+        'CSE IT':'BE',
+        'ALL':'Others',
+        'Department of Electrical and Electronics Engineeri':'BE',
+        'ELECTRONICCS':'BE',
+        'Electrical and Communication Engineering':'BE',
+        'CSE MCA':'BE',
+        'CSEIT':'BE',
+        'VARMORA COLLEGE':'Others',
+        'Department of Physics':'MSc',
+        'Electronics and Telecommunication':'BE',
+        'Computer Sc and Engg':'BE',
+        'Chemical Engineering':'BE',
+        'Computer Scince':'BE',
+        'Department of Computer Science and Engineering':'BE',
+        'AUTOMOBILE ENGINEERING':'BE',
+        'Department of Technology':'BE',
+        'GAJERA SANKUL':'Others',
+        'electrical and electronics':'BE',
+        'INSTRUMENTATION AND CONTROL':'BE',
+        'ME':'BE',
+        'Information Tehnology':'BE',
+        'Computational Biology and Bioinformatics':'BE',
+        'EC Department':'BE',
+        'G K C K BOSAMIYA COLLEGE':'Others',
+        'CST':'BSc',
+        'COMPUTERS':'BE',
+        'EXTC':'BE',
+        'CE':'BE',
+        'MAC BTECH':'BTech',
+        'Electrical and Electronics Engineering':'BE',
+        'Telecommunication Engineering':'BE',
+        'Master of Bussiness Administration':'MBA',
+        'Electronics and instrumentation Engineering':'BE',
+        'Science':'Others',
+        'Earth Sciences':'Others',
+        'Aeronautical Engineering':'BE',
+        'Aerospace':'BE',
+        'Arts':'BSc',
+        'Law':'BL',
+        'Polytechnic':'Diploma',
+        'Petrochemical Engineering':'BE',
+        'Textile Engineering':'BE',
+        'Biomedical Engineering':'BE',
+        'Production Engineering':'BE',
+        'Mechanical Design Engineering':'BE',
+        'Applied Physics':'Others',
+        'Applied Mathematics':'Others',
+        'Commerce and Management':'BComm',
+        'Soil and Water Engineering':'BE',
+        'Thermal Engineering':'BE',
+        'Agricultural Process and Food Engineering':'BE',
+        'Structural Engineering':'BE',
+        'Instrumentation and  Control Engineering':'BE',
+        'Department of Foods and Nutrition':'Others',
+        'Biochemical Engineering':'BE',
+        'Energy Engineering':'BE',
+    }
+
+    if dept in getCourse:
+        return getCourse[dept]
+
+    return 'Others'
+
+def old_workshop_to_new(request):
+    old_wreqs = WWorkshopRequests.objects.all()
+    for old_wreq in old_wreqs:
+        # skip records with status 3
+        if old_wreq.status == 3:
+            continue
+
+         #fetching academic center record
+        try:
+            academic_center = AcademicCenter.objects.get(academic_code = old_wreq.academic_code)
+        except:
+            print 'id:', old_wreq.id, 'Academic record missing:', old_wreq.academic_code
+            continue
+
+        # Fetching organiser record
+        organiser_user = get_user(old_wreq.organiser_id)
+        if organiser_user == None:
+            print 'id:', old_wreq.id, 'Organiser user record missing - uid:', old_wreq.organiser_id
+            continue
+        try:
+            organiser = Organiser.objects.get(user = organiser_user)
+        except Exception, e:
+            #print e
+            #break
+            organiser = Organiser.objects.create(
+                user = organiser_user,
+                academic = academic_center,
+                status = 1,
+            )
+            try:
+                organiser_user.groups.get(name='Organiser')
+            except:
+                try:
+                    organiser_user.groups.add(Group.objects.get(name='Organiser'))
+                except:
+                    pass
+
+        #training code
+        training_code = 'WC-' + str(old_wreq.id)
+
+        #language record
+        try:
+            language = Language.objects.get(name = old_wreq.pref_language)
+        except Exception, e:
+            language = Language.objects.get(name = 'English')
+
+        #foss category
+        foss = None
+        try:
+            if old_wreq.foss_category == 'Linux-Ubuntu':
+                old_wreq.foss_category = 'Linux'
+            if old_wreq.foss_category in ['C', 'C-Plus-Plus', 'C-and-C-Plus-Plus']:
+                old_wreq.foss_category = 'C and Cpp'
+            foss = FossCategory.objects.get(foss = old_wreq.foss_category.replace("-", " "))
+        except Exception, e:
+            print 'id:', old_wreq.id, 'Foss category missing', old_wreq.foss_category.replace("-", " ")
+            continue
+
+        # generating date and time
+        if old_wreq.cfm_test_date and old_wreq.cfm_test_time:
+            tdate = old_wreq.cfm_wkshop_date
+            ttime = old_wreq.cfm_wkshop_time
+        else:
+            tdate = old_wreq.pref_wkshop_date
+            ttime = old_wreq.pref_wkshop_time
+        if old_wreq.created_at:
+            created = old_wreq.created_at
+            created_str = str(old_wreq.created_at)
+        else:
+            created = datetime.datetime.now()
+            created_str = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+        # get course
+        course = Course.objects.get(name = get_course(old_wreq.department))
+
+        # participants count
+        participants_count = 0
+        count_recs = WWorkshopDetails.objects.filter(workshop_code = training_code)
+        for count_rec in count_recs:
+            participants_count = participants_count + int(count_rec.no_of_participants)
+        if participants_count == 0:
+            participants_count = WWorkshopFeedback.objects.filter(workshop_code = training_code).count()
+
+        # status
+        status = int(old_wreq.status)
+        if status == 1:
+            status = 0
+
+        # training type
+        training_type = 1
+        if old_wreq.academic_code == 'MAH-00029':
+            training_type = 2
+        try:
+            new_wreq = Training.objects.get(id = old_wreq.id)
+            new_wreq.organiser = organiser
+            new_wreq.academic = academic_center
+            new_wreq.course = course
+            new_wreq.training_type = training_type
+            new_wreq.training_code = training_code
+            new_wreq.language = language
+            new_wreq.foss = foss
+            new_wreq.skype = old_wreq.skype_request
+            new_wreq.participant_counts = participants_count
+            new_wreq.save()
+        except Exception, e:
+            try:
+                new_wreq.objects.create(
+                    id = old_wreq.id,
+                    organiser = organiser,
+                    appoved_by = None,
+                    academic = academic_center,
+                    course = course,
+                    training_type = training_type,
+                    training_code = training_code,
+                    language = language,
+                    foss = foss,
+                    trdate = tdate,
+                    trtime = ttime,
+                    skype = old_wreq.skype_request,
+                    status = status,
+                    participant_counts = participants_count,
+                    created = created,
+                    updated = created
+                )
+            except Exception, e:
+                #print 'sub', e
+                post_time = 5
+                for i in range(150):
+                    try:
+                        post_five_min = datetime.datetime.combine(datetime.date.today(), ttime) + datetime.timedelta(minutes=post_time)
+                        ttime = post_five_min.time()
+                        new_wreq.objects.create(
+                            id = old_wreq.id,
+                            organiser = organiser,
+                            appoved_by = None,
+                            academic = academic_center,
+                            course = course,
+                            training_type = training_type,
+                            training_code = training_code,
+                            language = language,
+                            foss = foss,
+                            trdate = tdate,
+                            trtime = ttime,
+                            skype = old_wreq.skype_request,
+                            status = status,
+                            participant_counts = participants_count,
+                            created = created,
+                            updated = created
+                        )
+                        break
+                    except Exception, e:
+                        #print e
+                        if i >= 149:
+                            print '2 - i exceeded'
+                        post_time = post_time + 5
+        cursor = connection.cursor()
+        cursor.execute("""update events_training set created='""" + str(created_str) + """', updated='""" + str(created_str) + """' where id=""" + str(new_wreq.id))
+        try:
+            dept = Department.objects.get(name = old_wreq.department)
+            new_wreq.department.add(dept.id)
+        except Exception, e:
+            depts = get_dept(old_wreq.department)
+            dept_list = depts.split(',')
+            for deptrec in dept_list:
+                try:
+                    dept = Department.objects.get(name = deptrec)
+                except:
+                    continue
+                new_wreq.department.add(dept.id)
