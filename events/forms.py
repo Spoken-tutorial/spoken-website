@@ -337,15 +337,19 @@ class TestForm(forms.ModelForm):
         super(TestForm, self).__init__(*args, **kwargs)
         
         if user:
-            self.fields['invigilator'].queryset = Invigilator.objects.filter(academic  = user.organiser.academic, status=1).exclude(user_id = user.id)
-            wchoices = list(Training.objects.filter(academic = user.organiser.academic, status = 4, training_type__gt=0).values_list('id', 'training_code'))
-            wchoices.insert(0, ('', '-- None --'))
-            trchoices = list(Training.objects.filter(academic = user.organiser.academic, status = 4, training_type = 0).values_list('id', 'training_code'))
-            trchoices.insert(0, ('', '-- None --'))
-            self.fields['workshop'].choices = wchoices
-            self.fields['training'].choices = trchoices
+            try:
+                self.fields['invigilator'].queryset = Invigilator.objects.filter(academic  = user.organiser.academic, status=1).exclude(user_id = user.id)
+                wchoices = list(Training.objects.filter(academic = user.organiser.academic, status = 4, training_type__gt=0).values_list('id', 'training_code'))
+                wchoices.insert(0, ('', '-- None --'))
+                trchoices = list(Training.objects.filter(academic = user.organiser.academic, status = 4, training_type = 0).values_list('id', 'training_code'))
+                trchoices.insert(0, ('', '-- None --'))
+                self.fields['workshop'].choices = wchoices
+                self.fields['training'].choices = trchoices
+            except:
+                pass
             
         if instance:
+            self.fields['invigilator'].queryset = Invigilator.objects.filter(academic  = instance.organiser.academic, status=1).exclude(user_id = user.id)
             self.fields['invigilator'].initial = instance.invigilator
             self.fields['test_category'].initial = instance.test_category
             self.fields['foss'].initial = instance.foss

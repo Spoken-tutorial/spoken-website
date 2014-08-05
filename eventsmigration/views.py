@@ -1214,8 +1214,8 @@ def get_user(old_user_id):
         user = Users.objects.get(pk = old_user_id)
     except Exception, e:
         #print e, " user not getting"
-        pass
-    
+        return None
+
     name = user.name
     if len(name) > 30:
         name = user.mail
@@ -1513,7 +1513,7 @@ def get_course(dept):
         '50':'Others',
         'E&TC':'BE',
         'Department of Computer Applications':'MCA',
-        'Common to all Branches - 1st semester':'Others'
+        'Common to all Branches - 1st semester':'Others',
         'Computer Applications':'MCA',
         'Computer Science':'BE',
         'CSE & IT':'BE',
@@ -1718,15 +1718,15 @@ def old_workshop_to_new(request):
         try:
             if old_wreq.foss_category == 'Linux-Ubuntu':
                 old_wreq.foss_category = 'Linux'
-            if old_wreq.foss_category in ['C', 'C-Plus-Plus', 'C-and-C-Plus-Plus']:
+            if old_wreq.foss_category in ['C', 'C-Plus-Plus', 'C-and-C-Plus-Plus', 'C-and-C++', 'C-and-C-Plus-Plus,Geogebra,Java,KTurtle,Linux,Linux-Ubuntu,OpenFOAM,PHP-and-MySQL,Python,Scilab', 'C-and-C-Plus-Plus,Java,PHP-and-MySQL,Python,Scilab']:
                 old_wreq.foss_category = 'C and Cpp'
             foss = FossCategory.objects.get(foss = old_wreq.foss_category.replace("-", " "))
         except Exception, e:
-            print 'id:', old_wreq.id, 'Foss category missing', old_wreq.foss_category.replace("-", " ")
+            print 'id:', old_wreq.id, 'Foss category missing', '"' + old_wreq.foss_category + '"'
             continue
 
         # generating date and time
-        if old_wreq.cfm_test_date and old_wreq.cfm_test_time:
+        if old_wreq.cfm_wkshop_date and old_wreq.cfm_wkshop_time:
             tdate = old_wreq.cfm_wkshop_date
             ttime = old_wreq.cfm_wkshop_time
         else:
@@ -1740,7 +1740,9 @@ def old_workshop_to_new(request):
             created_str = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
         # get course
-        course = Course.objects.get(name = get_course(old_wreq.department))
+        course_name = get_course(old_wreq.department)
+        print course_name
+        course = Course.objects.get(name = course_name)
 
         # participants count
         participants_count = 0
@@ -1772,8 +1774,9 @@ def old_workshop_to_new(request):
             new_wreq.participant_counts = participants_count
             new_wreq.save()
         except Exception, e:
+            #print 'main', e, 'id:', old_wreq.id
             try:
-                new_wreq.objects.create(
+                new_wreq = Training.objects.create(
                     id = old_wreq.id,
                     organiser = organiser,
                     appoved_by = None,
@@ -1792,13 +1795,13 @@ def old_workshop_to_new(request):
                     updated = created
                 )
             except Exception, e:
-                #print 'sub', e
+                #print 'sub1', e, 'id:', old_wreq.id
                 post_time = 5
                 for i in range(150):
                     try:
                         post_five_min = datetime.datetime.combine(datetime.date.today(), ttime) + datetime.timedelta(minutes=post_time)
                         ttime = post_five_min.time()
-                        new_wreq.objects.create(
+                        new_wreq = Training.objects.create(
                             id = old_wreq.id,
                             organiser = organiser,
                             appoved_by = None,
@@ -1818,9 +1821,9 @@ def old_workshop_to_new(request):
                         )
                         break
                     except Exception, e:
-                        #print e
+                        #print 'sub2', e, 'id:', old_wreq.id
                         if i >= 149:
-                            print '2 - i exceeded'
+                            print 'i exceeded', 'id:', old_wreq.id
                         post_time = post_time + 5
         cursor = connection.cursor()
         cursor.execute("""update events_training set created='""" + str(created_str) + """', updated='""" + str(created_str) + """' where id=""" + str(new_wreq.id))
@@ -1836,3 +1839,4 @@ def old_workshop_to_new(request):
                 except:
                     continue
                 new_wreq.department.add(dept.id)
+    return HttpResponse("Success!")
