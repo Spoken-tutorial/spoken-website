@@ -66,9 +66,9 @@
 					<tr>
 					    <td>
 					        {% if record.training_type %}
-					            Workshop
+					            Workshop - {{record.training_code}}
 					        {% else %}
-					            Training
+					            Training - {{record.training_code}}
 					        {% endif %}
 					    </td>
 					    <td>{{ record.academic.state }}</td>
