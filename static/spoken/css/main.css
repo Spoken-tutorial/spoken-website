@@ -299,6 +299,9 @@ h4.page-title {
     padding-top: 10px;
     font-size: 10px;
 }
+#footer-wrapper .container-inner sans-serif {
+    padding-bottom: 5px;
+}
 /* footer end */
 
 /* media secreen overwrite */
