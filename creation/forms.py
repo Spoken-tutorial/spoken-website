@@ -366,15 +366,14 @@ class ComponentForm(forms.Form):
         super(ComponentForm, self).clean()
         file_types = {
             'video': 'video/ogg',
-            'slide': 'application/zip',
-            'code': 'application/zip',
+            'slide': ['application/zip', 'application/x-zip-compressed'],
+            'code': ['application/zip', 'application/x-zip-compressed'],
             'assignment': ['text/plain', 'application/pdf']
         }
         component = ''
         if 'comp' in self.cleaned_data:
             component = self.cleaned_data['comp']
         component_type = self.cleaned_data['comptype']
-        print self.cleaned_data
         if component and component_type:
             if not component.content_type in file_types[component_type]:
                 self._errors["comp"] = self.error_class(["Not a valid file format."])
