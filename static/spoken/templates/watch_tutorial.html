@@ -2,6 +2,9 @@
 {% load widget_tweaks %}
 {% load static %}
 {% load creationdata %}
+{% block metatag %}
+        <meta name="Keywords" content="{{ tr_rec.tutorial_detail.foss }} free training in india, {% if tr_rec.common_content.keyword %} {{ tr_rec.common_content.keyword }} {% else %} {{ tr_rec.tutorial_detail.tutorial }} {% endif %}">
+{% endblock %}
 {% block cssblock %}
     <link href="{% static 'spoken/css/video-js.min.css' %}" rel="stylesheet" type="text/css">
     <link rel="stylesheet" href="{% static 'spoken/css/jquery.fancybox.css' %}" type="text/css" media="screen" charset="utf-8" />

@@ -2397,3 +2397,28 @@ def collaborate(request):
     }
     context.update(csrf(request))
     return render(request, 'creation/templates/collaborate.html', context)
+
+def update_prerequisite(request):
+    user = request.user
+    if not is_contributor(request.user) and not is_administrator(request.user):
+        raise PermissionDenied()
+    form = UpdatePrerequisiteForm()
+    if request.method == 'POST':
+        form = UpdatePrerequisiteForm(request.POST)
+        if form.is_valid():
+            try:
+                source_tutorial = TutorialDetail.objects.get(pk = form.cleaned_data['source_tutorial'] , foss = form.cleaned_data['source_foss'])
+                destination_tutorial = TutorialDetail.objects.get(pk = form.cleaned_data['destination_tutorial'] , foss = form.cleaned_data['destination_foss'])
+                
+                tcc = TutorialCommonContent.objects.get(tutorial_detail = source_tutorial)
+                tcc.prerequisite_id = destination_tutorial.id
+                tcc.save()
+                messages.success(request, 'Prerequisite <b>' + destination_tutorial.tutorial + '</b> added to <b>' + source_tutorial.tutorial + '</b>.')
+                return HttpResponseRedirect('/creation/update-prerequisite/')
+            except Exception, e:
+                pass
+    context = {
+        'form': form
+    }
+    context.update(csrf(request))
+    return render(request, 'creation/templates/update_prerequisite.html', context)

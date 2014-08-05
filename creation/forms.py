@@ -685,3 +685,77 @@ class AvailableFossForm(forms.ModelForm):
         help_text = "",
         error_messages = {'required': 'FOSS category field required.'}
     )
+    
+class UpdatePrerequisiteForm(forms.Form):
+    source_foss = forms.ChoiceField(
+        choices = [('', '-- Select Foss --'),] + list(FossCategory.objects.filter(status=1).values_list('id', 'foss').order_by('foss')),
+        required = True,
+        error_messages = {'required':'FOSS category field is required.'}
+    )
+    source_tutorial = forms.ChoiceField(
+        choices = [('', '-- Select Tutorial --'),],
+        widget=forms.Select(attrs = {'disabled': 'disabled'}),
+        required = True,
+        error_messages = {'required': 'Tutorial Name field is required.'}
+    )
+    destination_foss = forms.ChoiceField(
+        choices = [('', '-- Select Foss --'),] + list(FossCategory.objects.filter(status=1).values_list('id', 'foss').order_by('foss')),
+        required = True,
+        error_messages = {'required':'FOSS category field is required.'}
+    )
+    destination_tutorial = forms.ChoiceField(
+        choices = [('', '-- Select Tutorial --'),],
+        widget=forms.Select(attrs = {'disabled': 'disabled'}),
+        required = True,
+        error_messages = {'required': 'Tutorial Name field is required.'}
+    )
+
+    def __init__(self, *args, **kwargs):
+        super(UpdatePrerequisiteForm, self).__init__(*args, **kwargs)
+        if args:
+            if 'source_foss' in args[0]:
+                if args[0]['source_foss'] and args[0]['source_foss'] != '' and args[0]['source_foss'] != 'None':
+                    initial_data = ''
+                    td_list = TutorialDetail.objects.filter(foss_id = args[0]['source_foss']).values_list('id')
+                    lang_rec = Language.objects.get(name = 'English')
+                    choices = list(
+                        TutorialDetail.objects.filter(
+                            id__in = TutorialResource.objects.filter(
+                                tutorial_detail_id__in = td_list,
+                                language_id = lang_rec.id,
+                                status = 1
+                            ).values_list(
+                                'tutorial_detail_id'
+                            )
+                        ).values_list(
+                            'id',
+                            'tutorial'
+                        )
+                    )
+                    choices.insert(0, ('', 'Select Tutorial'))
+                    self.fields['source_tutorial'].choices = choices
+                    self.fields['source_tutorial'].widget.attrs = {}
+                    self.fields['source_tutorial'].initial = initial_data
+            if 'destination_foss' in args[0]:
+                if args[0]['destination_foss'] and args[0]['destination_foss'] != '' and args[0]['destination_foss'] != 'None':
+                    initial_data = ''
+                    td_list = TutorialDetail.objects.filter(foss_id = args[0]['destination_foss']).values_list('id')
+                    lang_rec = Language.objects.get(name = 'English')
+                    choices = list(
+                        TutorialDetail.objects.filter(
+                            id__in = TutorialResource.objects.filter(
+                                tutorial_detail_id__in = td_list,
+                                language_id = lang_rec.id,
+                                status = 1
+                            ).values_list(
+                                'tutorial_detail_id'
+                            )
+                        ).values_list(
+                            'id',
+                            'tutorial'
+                        )
+                    )
+                    choices.insert(0, ('', 'Select Tutorial'))
+                    self.fields['destination_tutorial'].choices = choices
+                    self.fields['destination_tutorial'].widget.attrs = {}
+                    self.fields['destination_tutorial'].initial = initial_data
