@@ -6,8 +6,6 @@ def send_email(status, to = None, instance = None, cc = None, bcc = None):
     subject = None
     if status == 'Fix a date for your first training':
         subject  = 'Important : Fix a date for your first workshop'
-        to = ['k.sanmugam2@gmail.com', 'sanmugam@iitb.ac.in']
-        
         message = '''Dear Organiser,
         
         You have registered into the spoken-tutorial.org website over 2 weeks back. Please fix a date and time and make a training request if you want to organise training workshops. Click on the link below for the instructions to request the workshop: {0}
@@ -20,8 +18,6 @@ Spoken Tutorial
 
     elif status == 'Instructions to be followed before conducting the training':
         subject  = 'Important :  Post approved training request'
-        to = ['k.sanmugam2@gmail.com', 'sanmugam@iitb.ac.in']
-        
         message = '''Dear Organiser,
         
 Your training on {2}, requested on {3} {4} has been approved. Please find the
@@ -43,7 +39,6 @@ Spoken Tutorial
     
     elif status == 'How to upload the attendance on the training day':
         subject  = 'Important : How to upload the attendance on the training day.'
-        to = ['k.sanmugam2@gmail.com', 'sanmugam@iitb.ac.in']
         
         message = '''Dear Organiser,
         
@@ -65,8 +60,6 @@ Spoken Tutorial
     
     elif status == 'Future activities after conducting the workshop':
         subject  = 'Important : Future activities after conducting the workshop.'
-        to = ['k.sanmugam2@gmail.com', 'sanmugam@iitb.ac.in']
-        
         message = '''Dear Organiser,
         
 You have successfully completed the training {3} on {4} at your institute. Please see the
@@ -102,8 +95,6 @@ Spoken Tutorial
 
     elif status == 'Instructions to be followed before conducting the test-organiser':
         subject  = 'Important : Instructions to be followed before conducting the test.'
-        to = ['k.sanmugam2@gmail.com', 'sanmugam@iitb.ac.in']
-        
         message = '''Dear Organiser,
         
 Your {2} test on {3} {4} has been approved. The test code is {5}. This code is
@@ -122,8 +113,6 @@ Spoken Tutorial
 
     elif status == 'Instructions to be followed before conducting the test-invigilator':
         subject  = 'Important : Instructions to be followed before conducting the test.'
-        to = ['k.sanmugam2@gmail.com', 'sanmugam@iitb.ac.in']
-        
         message = '''Dear Invigilator,
         
 The organiser has requested for the {1} test on {2} {3}. Please confirm your
@@ -141,8 +130,6 @@ Spoken Tutorial
 
     elif status == "Learner's Certificate":
         subject  = "Learner's Certificate"
-        to = ['k.sanmugam2@gmail.com', 'sanmugam@iitb.ac.in']
-        
         message = '''The Gold Certificate will be generated on the basis of the test but many of our series do not have test so
 please upload the attendance within 48 hrs after the training so that the students can get the Silver /
 Learner's certificate
@@ -158,9 +145,9 @@ Spoken Tutorial
         headers={'Reply-To': 'no-replay@spoken-tutorial.org', "Content-type":"text/html;charset=iso-8859-1"}
     )
     
-    print "*******************************************************"
-    print message
-    print "*******************************************************"
+    #print "*******************************************************"
+    #print message
+    #print "*******************************************************"
     #email.attach_alternative(message, "text/html")
     try:
         result = email.send(fail_silently=False)
