@@ -218,9 +218,13 @@
                         </a>
                     {% endif %}
                     {% if tr.common_content.prerequisite_status and tr.common_content.prerequisite_status != 6 %}
-                        <a class="btn btn-primary fancybox-outline fancybox.iframe" href="/creation/view/component/{{ tr.common_content.prerequisite_id }}/video/" title="View Prerequisite">
-                            <span title="" data-original-title="" class="fa fa-film fa-2"></span>
-                        </a>
+                        {% with prereqid=tr.common_content.prerequisite_id|get_prerequisite_from_td:tr.language %}
+                            {% if prereqid %}
+                                <a class="btn btn-primary fancybox-outline fancybox.iframe" href="/creation/view/component/{{ prereqid }}/video/" title="View Prerequisite">
+                                    <span title="" data-original-title="" class="fa fa-film fa-2"></span>
+                                </a>
+                            {% endif %}
+                        {% endwith %}
                     {% endif %}
                     </td>
                 </tr>

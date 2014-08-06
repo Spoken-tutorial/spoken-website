@@ -23,13 +23,11 @@ class UploadPrerequisiteForm(forms.Form):
         super(UploadPrerequisiteForm, self).__init__(*args, **kwargs)
         foss_list = list(
             FossCategory.objects.filter(
-                id__in = ContributorRole.objects.filter(
-                    user = user,
-                    status = 1
-                ).values_list(
-                    'foss_category_id'
-                )
-            ).values_list('id', 'foss')
+                id__in = TutorialResource.objects.filter(
+                    Q(status=1)|Q(status=2),
+                    language__name = 'English'
+                ).values_list('tutorial_detail__foss_id').distinct()
+            ).order_by('foss').values_list('id', 'foss')
         )
         foss_list.insert(0, ('', 'Select FOSS Category'))
         self.fields['foss_category'].choices = foss_list
@@ -136,7 +134,7 @@ class ChangeComponentStatusForm(forms.Form):
     )
     def __init__(self, *args, **kwargs):
         super(ChangeComponentStatusForm, self).__init__(*args, **kwargs)
-        foss_list = list(FossCategory.objects.filter(status = 1).values_list('id', 'foss'))
+        foss_list = list(FossCategory.objects.filter(status = 1).values_list('id', 'foss').order_by('foss'))
         foss_list.insert(0, ('', 'Select Foss'))
         self.fields['foss_category'].choices = foss_list
         if args:
@@ -146,7 +144,7 @@ class ChangeComponentStatusForm(forms.Form):
                     if 'language' in args[0]:
                         if args[0]['language']:
                             initial_data = args[0]['language']
-                    choices = list(Language.objects.filter(id__in = TutorialResource.objects.filter(tutorial_detail__in = TutorialDetail.objects.filter(foss_id = int(args[0]['foss_category'])).values_list('id'), status = 0).values_list('language_id').distinct()).values_list('id', 'name'))
+                    choices = list(Language.objects.filter(id__in = TutorialResource.objects.filter(tutorial_detail__in = TutorialDetail.objects.filter(foss_id = int(args[0]['foss_category'])).values_list('id'), status = 0).values_list('language_id').distinct()).values_list('id', 'name').order_by('name'))
                     if len(choices):
                         self.fields['language'].widget.attrs = {}
                     choices.insert(0, ('', 'Select Language'))
@@ -220,7 +218,7 @@ class PublishToPending(forms.Form):
     )
     def __init__(self, *args, **kwargs):
         super(PublishToPending, self).__init__(*args, **kwargs)
-        foss_list = list(FossCategory.objects.filter(status = 1).values_list('id', 'foss'))
+        foss_list = list(FossCategory.objects.filter(status = 1).values_list('id', 'foss').order_by('foss'))
         foss_list.insert(0, ('', 'Select Foss Category'))
         self.fields['foss_category'].choices = foss_list
 
