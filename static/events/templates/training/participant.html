@@ -45,6 +45,7 @@
 			            {% if can_download_certificate and wc.status == 4 %}
 			               <a href="{% url 'events:training_participant_ceritificate' wc.id record.id %}">Certificate</a>
 			            {% endif %}
+			            <a href="{% url 'events:training_participant_feedback' wc.id record.id %}">Feedback</a>
 				    </td>
 				</tr>
 			{% endfor %}

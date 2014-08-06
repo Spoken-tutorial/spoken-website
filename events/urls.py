@@ -36,6 +36,7 @@ urlpatterns = patterns('',
     url(r'^training/(\d+)/attendance/$', 'events.views.training_attendance', name='training_attendance'),
     url(r'^training/(\d+)/participant/$', 'events.views.training_participant', name='training_participant'),
     url(r'^training/participant/certificate/(\d+)/(\d+)/$', 'events.views.training_participant_ceritificate', name='training_participant_ceritificate'),
+    url(r'^training/participant/feedback/(\d+)/(\d+)/$', 'events.views.training_participant_feedback', name='training_participant_feedback'),
     
     url(r'^training/(?P<role>\w+)/request/$', 'events.views.training_request', name='training_request'),
     url(r'^training/(?P<role>\w+)/(?P<rid>\d+)/approvel/$', 'events.views.training_approvel', name='training_approvel'),
