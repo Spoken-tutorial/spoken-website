@@ -2182,7 +2182,7 @@ def ajax_change_component_status(request):
             for tutorial in tutorials:
                 data[0] += '<option value="' + str(tutorial.tutorial_detail.id) + '">' + tutorial.tutorial_detail.tutorial + '</option>'
             if lang_rec.name == 'English':
-                data[1] += '<option value="slide">Slides</option><option value="video">Video</option><option value="code">Codefiles</option><option value="assignment">Assignment</option>'
+                data[1] += '<option value="slide">Slides</option><option value="video">Video</option><option value="code">Codefiles</option><option value="assignment">Assignment</option><option value="prerequisite">Prerequisite</option><option value="keyword">Keywords</option>'
             else:
                 data[1] += '<option value="video">Video</option>'
             data[1] = '<option value="">Select Component</option>' + data[1]

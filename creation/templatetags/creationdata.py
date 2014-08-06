@@ -137,6 +137,20 @@ def get_prerequisite(tr, td):
         pass
     return get_url_name(td.foss.foss) + '/' + get_url_name(td.tutorial) + '/English'
 
+def get_prerequisite_from_td(td, lang):
+    try:
+        tr_rec = TutorialResource.objects.get(tutorial_detail = td, language_id = lang.id)
+        return tr_rec.id
+    except:
+        if lang.name != 'English':
+            try:
+                tr_rec = TutorialResource.objects.get(tutorial_detail = td, language__name = 'English')
+                return tr_rec.id
+            except:
+                pass
+    return None
+
+register.filter('get_prerequisite_from_td', get_prerequisite_from_td)
 register.filter('get_prerequisite', get_prerequisite)
 register.filter('get_video_visits', get_video_visits)
 register.filter('get_srt_path', get_srt_path)
