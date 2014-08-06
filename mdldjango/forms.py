@@ -12,9 +12,9 @@ class OfflineDataForm(forms.Form):
     xml_file  = forms.FileField(required=True)
     def clean(self):
         #super(OfflineDataForm, self).clean()
-        file_types = ['text/xml', 'text/csv']
+        file_types = ['text']
         if 'xml_file' in self.cleaned_data and self.cleaned_data['xml_file']:
-            if not self.cleaned_data['xml_file'].content_type in file_types:
+            if not self.cleaned_data['xml_file'].content_type.split('/')[0] in file_types:
                 raise forms.ValidationError("Not a valid file format.")
         #else:
         #    raise forms.ValidationError("Not a valid file format.")

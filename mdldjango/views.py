@@ -26,25 +26,25 @@ def encript_password(password):
     
 def authenticate(username = None, password = None):
     try:
-        print " i am in moodle auth"
+        #print " i am in moodle auth"
         user = MdlUser.objects.get(username=username)
-        print user
+        #print user
         pwd = user.password
         p = encript_password(password)
         pwd_valid =  (pwd == p)
-        print pwd
+        #print pwd
         #print "------------"
         if user and pwd_valid:
             return user
     except Exception, e:
-        print e
-        print "except ---"
+        #print e
+        #print "except ---"
         return None
 
 def mdl_logout(request):
     del request.session['mdluserid']
     request.session.save()
-    print "logout !!"
+    #print "logout !!"
     return HttpResponseRedirect('/participant/login')
     
 def mdl_login(request):
@@ -67,7 +67,7 @@ def mdl_login(request):
             messages['error'] = "Username or Password Doesn't match!"
 
     if request.session.get('mdluserid'):
-        print "Current user is ", request.session.get('mdluserid')
+        #print "Current user is ", request.session.get('mdluserid')
         return HttpResponseRedirect('/participant/index')
         
     context = {'message':messages}
@@ -145,7 +145,7 @@ def index(request):
 def offline_details(request, wid, category):
     wid = int(wid)
     category = int(category)
-    print category
+    #print category
     user = request.user
     form = OfflineDataForm()
     try:
@@ -175,47 +175,55 @@ def offline_details(request, wid, category):
         if form.is_valid():
             if request.FILES['xml_file'].content_type == 'text/xml':
                 tree = ElementTree()
-                data = tree.parse(request.FILES['xml_file'])
+                try:
+                    data = tree.parse(request.FILES['xml_file'])
+                except:
+                    messages.error(request, "Mismatched tags in Xml file. Please check weather all tags placed properly.")
+                    return HttpResponseRedirect('/participant/offline-data/'+ str(wid) + '/' + str(category))
                 details = data.getiterator("detail")
+                count = 0
                 for studentDetails in details:
+                    count = count + 1
                     #print studentDetails
-                    firstname = studentDetails[0].text.strip()
-                    lastname = studentDetails[1].text.strip()
-                    gender =  studentDetails[2].text.strip()
-                    email = None
                     try:
-                        email = studentDetails[3].text.lower().strip()
+                        firstname = studentDetails[0].text.strip().title()
+                        lastname = studentDetails[1].text.strip().title()
+                        gender =  studentDetails[2].text.strip().title()
+                        email = None
+                        try:
+                            email = studentDetails[3].text.lower().strip()
+                        except:
+                            messages.error(request, "Participant/Student's Email ID is Required. Please open with browser and check all required details are exits!")
+                            return HttpResponseRedirect('/participant/offline-data/'+ str(wid) + '/' + str(category))
+                        get_or_create_participant(w, firstname, lastname, gender, email, category)
                     except:
-                        messages.error(request, "Participant/Student's Email ID Required!")
-                        return HttpResponseRedirect('/participant/offline-data/'+ str(wid) + '/' + str(category))
-                    get_or_create_participant(w, firstname, lastname, gender, email, category)
+                        messages.error(request, "Record number "+ str(count) + " required data is missing. Please open with browser and check all required details are exits!.")
+                        continue
             else:
-                #print "csv file"
                 file_path = settings.MEDIA_ROOT + str(wid) + str(time.time())
-                #print "***********", file_path
                 f = request.FILES['xml_file']
-                # Iterate through the chunks.
                 fout = open(file_path, 'wb+')
                 for chunk in f.chunks():
                     fout.write(chunk)
                 fout.close()
                     
                 with open(file_path, 'rb') as csvfile:
-                    spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
-                    for row in spamreader:
-                        #print row
+                    count  = 0
+                    csvdata = csv.reader(csvfile, delimiter=',', quotechar='|')
+                    for row in csvdata:
+                        count = count + 1
                         try:
-                            firstname = row[0].strip()
-                            lastname = row[1].strip()
+                            firstname = row[0].strip().title()
+                            lastname = row[1].strip().title()
                             email = row[2].strip()
-                            gender = row[3].strip()
+                            gender = row[3].strip().title()
                             if not validate_email(email):
+                                messages.error(request, "Line number "+ str(count) + ' : ' + firstname + ' ' + lastname + "'s email missing!")
                                 continue
                             get_or_create_participant(w, firstname, lastname, gender, email, category)
                         except Exception, e:
-                            os.unlink(file_path)
-                            messages.error(request, "Participant/Student's Email ID Required!")
-                            return HttpResponseRedirect('/participant/offline-data/'+ str(w.id) + '/' + str(category))
+                            messages.error(request, "Line number "+ str(count) + " : Required data is missing. Please check value seperated by <b>Comma (,) </b>.")
+                        continue
                 os.unlink(file_path)
                 
             #update logs
@@ -250,7 +258,7 @@ def mdl_register(request):
             if user:
                 messages.success(request, "Email : "+request.POST['email']+" already registered on this website. Please click <a href='http://www.spoken-tutorial.org/participant/login/'>here </a>to login")
         except Exception, e:
-            print e
+            #print e
             pass
             
         if form.is_valid():
@@ -265,7 +273,6 @@ def mdl_register(request):
             mdluser.password = encript_password(form.cleaned_data['password'])
             mdluser.confirmed = 1
             mdluser.mnethostid = 1
-            #print mdluser.gender, "***********"
             mdluser.save()
             messages.success(request, "User " + form.cleaned_data['firstname'] +" "+form.cleaned_data['firstname']+" Created!")
             return HttpResponseRedirect('/participant/register/')
@@ -289,7 +296,8 @@ def feedback(request, wid):
     try:
         w = Training.objects.select_related().get(pk=wid)
     except Exception, e:
-        print e
+        #print e
+        pass
     
     if request.method == 'POST':
         form = FeedbackForm(request.POST)
@@ -299,14 +307,13 @@ def feedback(request, wid):
                 form_data.training_id = wid
                 form_data.mdluser_id = mdluserid
                 form_data.save()
-                #change status to 2
                 wa = WorkshopAttendance.objects.get(mdluser_id=mdluserid, workshop_id = wid)
                 wa.status = 2
                 wa.save()
                 messages.success(request, "Thank you for your valuable feedback.")
                 return HttpResponseRedirect('/participant/index/')
             except Exception, e:
-                print e
+                #print e
                 return HttpResponseRedirect('/participant/index/')
     context = {
         'form' : form,
@@ -328,10 +335,6 @@ def forget_password(request):
             password_encript = encript_password(password_string)
             user.password = password_encript
             user.save()
-            #print 'Username => ', user.username
-            #print 'New password => ', password_string
-            #print 'Encript password => ', password_encript
-            #Send email
             subject  = "Spoken Tutorial Online Test password reset"
             to = [user.email]
             message = '''Hi {0},
@@ -432,15 +435,15 @@ Admin Spoken Tutorials
             headers={'Reply-To': 'no-replay@spoken-tutorial.org', "Content-type":"text/html;charset=iso-8859-1"}
         )
 
-        #result = email.send(fail_silently=False)
-        print "-----------------------------------------"
-        print message
-        print "-----------------------------------------"
+        result = email.send(fail_silently=False)
+        #print "-----------------------------------------"
+        #print message
+        #print "-----------------------------------------"
     if category == 2:
         try:
             wa = TrainingAttendance.objects.get(training_id = w.id, mdluser_id = mdluser.id)
         except Exception, e:
-            print e
+            #print e
             wa = TrainingAttendance()
             wa.training_id = w.id
             wa.status = 0
