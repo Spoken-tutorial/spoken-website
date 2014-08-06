@@ -7,8 +7,12 @@ from creation.models import FossAvailableForTest, FossAvailableForWorkshop
 from events.forms import RpForm
 
 class UniversityAdmin(admin.ModelAdmin):
+    exclude = ('user',)
     list_display = ('user', 'state', 'name')
     list_filter = ('state',)
+    def save_model(self, request, obj, form, change):
+        obj.user_id = request.user.id
+        obj.save()
 
 class CourseAdmin(admin.ModelAdmin):
     fields = ['name']
@@ -23,17 +27,17 @@ class TestCategoryAdmin(admin.ModelAdmin):
     fields = ['name']
 
 class StateAdmin(admin.ModelAdmin):
-	fields = ['name']
+    fields = ['name']
 
 class DistrictAdmin(admin.ModelAdmin):
-	fields = ['name']
-	list_display = ('name', 'state', 'created')
-	list_filter = ('state',)
+    fields = ['name', 'state']
+    list_display = ('name', 'state', 'created')
+    list_filter = ('state',)
 
 class CityAdmin(admin.ModelAdmin):
-	list_display = ('name', 'state', 'created')
-	fields = ['name']
-	list_filter = ('state',)
+    list_display = ('name', 'state', 'created')
+    fields = ['name', 'state']
+    list_filter = ('state',)
 
 class FossAvailableForTestAdmin(admin.ModelAdmin):
     fields = ['foss', 'language', 'status']
@@ -50,16 +54,16 @@ class FossMdlCoursesAdmin(admin.ModelAdmin):
     list_display = ('foss', 'mdlcourse_id', 'mdlquiz_id')
     
 class RpRoleAdmin(admin.ModelAdmin):
-	form = RpForm
-	fields = ('user', 'state', 'status')
-	list_display = ('user', 'state', 'status')
-	
-	def save_model(self, request, obj, form, change):
-		obj.assigned_by = request.user.id
-		obj.save()
+    form = RpForm
+    fields = ('user', 'state', 'status')
+    list_display = ('user', 'state', 'status')
+    
+    def save_model(self, request, obj, form, change):
+        obj.assigned_by = request.user.id
+        obj.save()
 
 class DepartmentAdmin(admin.ModelAdmin):
-	fields = ['name']
+    fields = ['name']
 
 class PermissionTypeAdmin(admin.ModelAdmin):
     fields = ['name']
