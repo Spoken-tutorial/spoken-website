@@ -1720,6 +1720,8 @@ def old_workshop_to_new(request):
                 old_wreq.foss_category = 'Linux'
             if old_wreq.foss_category in ['C', 'C-Plus-Plus', 'C-and-C-Plus-Plus', 'C-and-C++', 'C-and-C-Plus-Plus,Geogebra,Java,KTurtle,Linux,Linux-Ubuntu,OpenFOAM,PHP-and-MySQL,Python,Scilab', 'C-and-C-Plus-Plus,Java,PHP-and-MySQL,Python,Scilab']:
                 old_wreq.foss_category = 'C and Cpp'
+            if old_wreq.foss_category == 'Advanced-C++':
+                old_wreq.foss_category = 'Advanced Cpp'
             foss = FossCategory.objects.get(foss = old_wreq.foss_category.replace("-", " "))
         except Exception, e:
             print 'id:', old_wreq.id, 'Foss category missing', '"' + old_wreq.foss_category + '"'
@@ -1741,7 +1743,7 @@ def old_workshop_to_new(request):
 
         # get course
         course_name = get_course(old_wreq.department)
-        print course_name
+        #print course_name
         course = Course.objects.get(name = course_name)
 
         # participants count
@@ -1795,7 +1797,7 @@ def old_workshop_to_new(request):
                     updated = created
                 )
             except Exception, e:
-                #print 'sub1', e, 'id:', old_wreq.id
+                print 'sub1', e, 'id:', old_wreq.id
                 post_time = 5
                 for i in range(150):
                     try:
