@@ -184,7 +184,12 @@ def offline_details(request, wid, category):
                 firstname = studentDetails[0].text
                 lastname = studentDetails[1].text
                 gender =  studentDetails[2].text
-                email = studentDetails[3].text.lower()
+                email = None
+                try:
+                    email = studentDetails[3].text.lower()
+                except:
+                    messages.error(request, "Participant/Student's Email ID Required!")
+                    return HttpResponseRedirect('/participant/offline-data/'+ str(wid) + '/' + str(category))
                 password = password_encript
                 username = firstname+' '+lastname
                 try:

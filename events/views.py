@@ -224,7 +224,7 @@ def fix_date_for_first_training(request):
     if organisers:
         status = 'Fix a date for your first training'
         for o in organisers:
-            to = o.user.email
+            to = [o.user.email]
             send_email(status, to)
     return HttpResponse("Done!")
 
@@ -233,7 +233,7 @@ def training_gentle_reminder(request):
     if tomorrow_training:
         status = 'How to upload the attendance on the training day'
         for t in tomorrow_training:
-            to = t.organiser.user.email
+            to = [t.organiser.user.email]
             send_email(status, to, t)
     return HttpResponse("Done!")
 
@@ -889,7 +889,7 @@ def training_approvel(request, role, rid):
     #todo: add training code
     if w.status == 2:
         w.training_code = "WC-"+str(w.id)
-        send_email('Instructions to be followed before conducting the training', w.organiser.user.email, w)
+        send_email('Instructions to be followed before conducting the training', [w.organiser.user.email], w)
     if request.GET['status'] == 'completed':
         # calculate the participant list
         wpcount = TrainingAttendance.objects.filter(training_id = rid, status = 1).count()
@@ -898,7 +898,7 @@ def training_approvel(request, role, rid):
     #send email
     if w.status == 4:
         status = 'Future activities after conducting the workshop'
-        to = w.organiser.user.email
+        to = [w.organiser.user.email]
         send_email(status, to, w)
         message = w.academic.institution_name +" has completed "+w.foss.foss+" training dated "+w.trdate.strftime("%Y-%m-%d")
     if request.GET['status'] == 'accept':
@@ -1356,14 +1356,14 @@ def test_approvel(request, role, rid):
     try:
         t = Test.objects.get(pk=rid)
         if request.GET['status'] == 'accept':
+            print "!!!!!!!!"
             status = 1
             t.test_code = "TC-" + str(t.id)
             message = "The Training Manager has approved "+t.foss.foss+" test dated "+t.tdate.strftime("%Y-%m-%d")
             alert = "Test has been approved"
             #send email
-            send_email('Instructions to be followed before conducting the test-organiser', t.organiser.user.email, t)
-            send_email('Instructions to be followed before conducting the test-invigilator', t.invigilator.user.email, t)
-            
+            send_email('Instructions to be followed before conducting the test-organiser', [t.organiser.user.email], t)
+            send_email('Instructions to be followed before conducting the test-invigilator', [t.invigilator.user.email], t)
             logrole = 2
         if request.GET['status'] == 'invigilatoraccept':
             message = "The Invigilator "+t.organiser.user.first_name +" "+t.organiser.user.last_name+" has approved "+t.foss.foss+" test dated "+t.tdate.strftime("%Y-%m-%d")
@@ -1377,7 +1377,7 @@ def test_approvel(request, role, rid):
             logrole = 1
             alert = "Test has been Completed"
             message = t.academic.institution_name +" has completed "+t.foss.foss+" test dated "+t.tdate.strftime("%Y-%m-%d")
-        if request.GET['status'] == 'rejected':
+        if request.GET['status'] == 'reject':
             message = "The Training Manager has rejected "+t.foss.foss+" test dated "+t.tdate.strftime("%Y-%m-%d")
             status = 5
             logrole = 2
@@ -1780,6 +1780,11 @@ def update_events_notification(user_id, role, category, category_id, status, aca
         EventsNotification.objects.create(user_id = user_id, role = role, category = category, categoryid = category_id, academic_id = academic, status = status, message = message)
     except Exception, e:
         print "Error in Events Notification => ", e
+
+def training_participant_feedback(request, training_id, participant_id):
+    context = {}
+    context.update(csrf(request))
+    return render(request, 'events/templates/training/view-feedback.html', context)
 
 #Ajax Request and Responces
 @csrf_exempt
