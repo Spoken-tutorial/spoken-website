@@ -12,7 +12,7 @@ media/training/*
 !media/README
 uwsgi-master.pid
 *.py[cod]
-
+robots.txt
 # C extensions
 *.so
 
