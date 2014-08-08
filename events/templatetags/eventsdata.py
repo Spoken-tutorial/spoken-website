@@ -116,7 +116,39 @@ def training_file_exits(wid):
     if os.path.isfile(file_path):
         return True
     return False
-    
+
+def feedback_status_good(status):
+    status_dict = {1 : 'Very Bad', 2 : 'Bad', 3 : 'Fair', 4 : 'Good', 5 : 'Very Good'}
+    return status_dict[status]
+
+def feedback_status_moderately(status):
+    status_dict = {1 : 'Not at All', 2 : 'Slightly', 3 : 'Moderately', 4 : 'Very', 5 : 'Extremely'}
+    return status_dict[status]
+
+def feedback_status_appropriate(status):
+    status_dict = {1 : 'Slow', 2 : 'Appropriate', 3 : 'Fast'}
+    return status_dict[status]
+
+def feedback_status_satisfactory(status):
+    status_dict = {1 : 'Very Bad', 2 : 'Bad', 3 : 'Satisfactory', 4 : 'Good', 5 : 'Excellent'}
+    return status_dict[status]
+
+def feedback_status_somewhat(status):
+    status_dict = {1 : 'Very Bad', 2 : 'A little bit', 3 : 'Somewhat', 4 : 'Quite a bit', 5 : 'A lot'}
+    return status_dict[status]
+
+def feedback_status_average(status):
+    status_dict = {1 : 'Very Low', 2 : 'Below average', 3 : 'Average', 4 : 'Above average', 5 : 'Very High'}
+    return status_dict[status]
+
+def feedback_status_neutral(status):
+    status_dict = {1 : 'Strongly Disagree', 2 : 'Disagree', 3 : 'Likely', 4 : 'Agree', 5 : 'Strongly Agree'}
+    return status_dict[status]
+
+def feedback_status_likely(status):
+    status_dict = {1 : 'Not at all', 2 : 'Maybe', 3 : 'Likely', 4 : 'Quite likely', 5 : 'Definitely'}
+    return status_dict[status]
+
 register.filter('participant_picture', participant_picture)
 register.filter('get_trainingstatus', get_trainingstatus)
 register.filter('get_trainingparticipant_status', get_trainingparticipant_status)
@@ -133,77 +165,11 @@ register.filter('is_resource_person', is_resource_person)
 register.filter('is_event_manager', is_event_manager)
 register.filter('can_download_workshop_certificate', can_download_workshop_certificate)
 register.filter('training_file_exits', training_file_exits)
-
-'''
-
-def get_wparticipant_status(key, wcode):
-    status_list = ['Waiting for Attendance', 'Waiting for Feedback', 'Certificate ready', 'Got certificate']
-    try:
-        wa = TrainingAttendance.objects.get(mdluser_id=key, training_id = wcode)
-    except:
-        return 'error'
-    return status_list[wa.status]
-
-def can_download_workshop_certificate(key, wcode):
-    try:
-        wa = TrainingAttendance.objects.get(mdluser_id=key, training_id = wcode)
-        if wa.status > 0:
-            return True
-        return False
-    except:
-        return 'error'
-
-
-def get_wstatus(key, wcode):
-    try:
-        wa = TrainingAttendance.objects.get(mdluser_id=key, training_id = wcode)
-    except:
-        return ''
-    
-    if wa.status == 1:
-        return 'checked'
-    
-    if wa.status > 1:
-        return 'disabled=disabled checked'
-    
-    return ''
-
-def can_upload_workshop_data(wcode, category):
-    if category == 'workshop':
-        try:
-            w = Workshop.objects.get(pk=wcode)
-            today_date = datetime.datetime.now().strftime("%Y-%m-%d")
-            wdate = w.wdate.strftime("%Y-%m-%d")
-            if wdate <= today_date:
-                return True
-            return False
-        except Exception, e:
-            print e
-            return False
-    if category == 'training':
-        try:
-            w = Training.objects.get(pk=wcode)
-            today_date = datetime.datetime.now().strftime("%Y-%m-%d")
-            wdate = w.trdate.strftime("%Y-%m-%d")
-            if wdate <= today_date:
-                return True
-            return False
-        except Exception, e:
-            print e
-            return False
-
-
-
-register.filter('is_organiser', is_organiser)
-register.filter('is_invigilator', is_invigilator)
-register.filter('is_resource_person', is_resource_person)
-register.filter('is_event_manager', is_event_manager)
-
-
-register.filter('get_wstatus', get_wstatus)
-
-
-register.filter('get_wparticipant_status', get_wparticipant_status)
-register.filter('can_upload_workshop_data', can_upload_workshop_data)
-register.filter('can_download_workshop_certificate', can_download_workshop_certificate)
-'''
+register.filter('feedback_status_good', feedback_status_good)
+register.filter('feedback_status_moderately', feedback_status_moderately)
+register.filter('feedback_status_appropriate', feedback_status_appropriate)
+register.filter('feedback_status_satisfactory', feedback_status_satisfactory)
+register.filter('feedback_status_somewhat', feedback_status_somewhat)
+register.filter('feedback_status_average', feedback_status_average)
+register.filter('feedback_status_neutral', feedback_status_neutral)
+register.filter('feedback_status_likely', feedback_status_likely)

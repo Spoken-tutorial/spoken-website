@@ -113,12 +113,16 @@ def account_login(request):
             if user is not None:
                 if user.is_active:
                     login(request, user)
-                    # if user_has_profile(user):
+                    try:
+                        p = Profile.objects.get(user_id = user.id)
+                        if not user.first_name or not user.last_name or not p.country or not p.state or not p.district or not p.city  or not p.address or not p.pincode or not p.phone or not p.picture:
+                            messages.success(request, "Please update your profile!")
+                            return HttpResponseRedirect('/accounts/profile/'+user.username)
+                    except: 
+                        pass
                     if request.GET and request.GET['next']:
                         return HttpResponseRedirect(request.GET['next'])
                     return HttpResponseRedirect('/')
-                    # messages.success(request, "Please update your profile!")
-                    # return HttpResponseRedirect('/accounts/profile/'+user.username)
                 else:
                     error_msg = 'Your account is disabled.'
             else:
@@ -143,12 +147,11 @@ def account_profile(request, username):
     old_file_path = settings.MEDIA_ROOT + str(profile.picture)
     new_file_path = None
     if request.method == 'POST':
-        form = ProfileForm(user, request.POST, instance = profile)
+        form = ProfileForm(user, request.POST, request.FILES, instance = profile)
         if form.is_valid():
             user.first_name = request.POST['first_name']
             user.last_name = request.POST['last_name']
             user.save()
-            
             form_data = form.save(commit=False)
             form_data.user_id = user.id
             
@@ -188,20 +191,6 @@ def account_profile(request, username):
         instance = Profile.objects.get(user_id=user.id)
         context['form'] = ProfileForm(user, instance = instance)
         return render(request, 'cms/templates/profile.html', context)
-
-@login_required
-def user_has_profile(user):
-    try:
-        p = Profile.objects.get(user_id = user.id)
-        if not p.street or not p.state or not p.district or not p.location or not p.country:
-            return False
-        return True
-    except Exception, e:
-        confirmation_code = ''.join(random.choice(string.ascii_uppercase + string.digits + string.ascii_lowercase) for x in range(33))
-        p = Profile(user=user, confirmation_code=confirmation_code)
-        p.save()
-        print "************"
-        print e
 
 @login_required
 def account_view_profile(request, username):

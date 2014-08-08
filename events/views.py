@@ -1303,6 +1303,8 @@ def test_list(request, role, status):
             if status == 'ongoing':
                 collectionSet = Test.objects.filter((Q(status = 2) | Q(status = 3)), tdate = datetime.date.today(), invigilator_id = user.invigilator.id).order_by('-tdate')
                 messages.info(request, "Click on the Attendance link below to see the participant list. To know more Click Here.")
+            elif status == 'predated':
+                collectionSet = Test.objects.none()
             elif status == 'approved':
                 collectionSet = Test.objects.filter(invigilator_id=user.invigilator.id, status = status_dict[status], tdate__gt=datetime.date.today()).order_by('-tdate')
             else:
@@ -1782,7 +1784,14 @@ def update_events_notification(user_id, role, category, category_id, status, aca
         print "Error in Events Notification => ", e
 
 def training_participant_feedback(request, training_id, participant_id):
-    context = {}
+    try:
+        tf = TrainingFeedback.objects.get(training_id = training_id, mdluser_id = participant_id)
+    except:
+        messages.success(request, 'Feedback not exits!')
+        return HttpResponseRedirect('/software-training/training/' + training_id + '/participant/')
+    context = {
+        'feedback' : tf,
+    }
     context.update(csrf(request))
     return render(request, 'events/templates/training/view-feedback.html', context)
 

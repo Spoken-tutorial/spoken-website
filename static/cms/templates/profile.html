@@ -29,7 +29,7 @@
                 <div class="form-group">
                     <label class="col-sm-3 control-label" for="id_country">Country</label>
                     <div class="col-sm-9">
-                        {% render_field form.country class+="form-control country" tabindex="1" data-placeholder="Choose country" value="India" disabled="disabled" %}
+                        {% render_field form.country class+="form-control country" tabindex="1" data-placeholder="Choose country" value="India" readonly="readonly" %}
                         {{ form.country.errors }}
                     </div>
                 </div>

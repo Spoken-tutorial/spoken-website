@@ -295,6 +295,10 @@ def feedback(request, wid):
     w = None
     try:
         w = Training.objects.select_related().get(pk=wid)
+        #check if feedback already exits
+        TrainingFeedback.objects.get(training_id = wid, mdluser_id = mdluserid)
+        messages.success(request, "We have already received your feedback. ")
+        return HttpResponseRedirect('/participant/index/?category=1')
     except Exception, e:
         #print e
         pass
@@ -307,14 +311,15 @@ def feedback(request, wid):
                 form_data.training_id = wid
                 form_data.mdluser_id = mdluserid
                 form_data.save()
-                wa = WorkshopAttendance.objects.get(mdluser_id=mdluserid, workshop_id = wid)
+                wa = TrainingAttendance.objects.get(mdluser_id=mdluserid, training_id = wid)
                 wa.status = 2
                 wa.save()
                 messages.success(request, "Thank you for your valuable feedback.")
-                return HttpResponseRedirect('/participant/index/')
+                return HttpResponseRedirect('/participant/index/?category=1')
             except Exception, e:
-                #print e
-                return HttpResponseRedirect('/participant/index/')
+                print e
+                pass
+                #return HttpResponseRedirect('/participant/index/')
     context = {
         'form' : form,
         'w' : w,

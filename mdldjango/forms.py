@@ -104,14 +104,15 @@ class FeedbackForm(forms.ModelForm):
     
     pace_of_tutorial = forms.ChoiceField(widget=forms.RadioSelect, choices = threeChoice )
     rate_workshop = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
-    workshop_learnt = forms.CharField(widget=forms.Textarea)
+    workshop_learnt = forms.CharField(widget=forms.Textarea(attrs={'rows': 2}))
+    workshop_improved = forms.CharField(widget=forms.Textarea(attrs={'rows': 2}))
     weakness_workshop = forms.BooleanField(label='Duration of the workshop is less', required=False, initial=False)
     weakness_narration = forms.BooleanField(label='Pace of the narration in the tutorials was very fast', required=False, initial=False)
     weakness_understand = forms.BooleanField(label='Had to listen more than two times to understand the commands', required=False, initial=False)
-    other_weakness = forms.CharField(widget=forms.Textarea)
+    other_weakness = forms.CharField(widget=forms.Textarea(attrs={'rows': 2}))
     tutorial_language = forms.ChoiceField(widget=forms.RadioSelect, choices = threeChoice )
     apply_information = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
-    use_information = forms.CharField(widget=forms.Textarea)
+    if_apply_information_yes = forms.CharField(widget=forms.Textarea(attrs={'rows': 2}))
     
     setup_learning = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
     computers_lab = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
@@ -130,8 +131,8 @@ class FeedbackForm(forms.ModelForm):
     executed_workshop = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
     
     recommend_workshop = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
-    use_information = forms.CharField(widget=forms.Textarea)
-    other_comments = forms.CharField(widget=forms.Textarea)
+    reason_why = forms.CharField(widget=forms.Textarea(attrs={'rows': 2}))
+    other_comments = forms.CharField(widget=forms.Textarea(attrs={'rows': 2}))
     class Meta:
         model = TrainingFeedback
         exclude = ['training', 'mdluser_id']
