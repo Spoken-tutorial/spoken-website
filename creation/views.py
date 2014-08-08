@@ -1644,13 +1644,14 @@ def public_review_tutorial_index(request):
         raise PermissionDenied()
     tmp_ids = []
     qr_roles =  QualityReviewerRole.objects.filter(user_id = request.user.id, status = 1)
+    tr_recs = ''
     for rec in qr_roles:
         if rec.language.name != 'English':
             tr_recs = TutorialResource.objects.filter(Q(outline_status__gt = 0) & Q(outline_status__lt = 5), Q(script_status__gt = 0) & Q(script_status__lt = 5), Q(video_status__gt = 0) & Q(video_status__lt = 5), Q(tutorial_detail__foss_id = rec.foss_category_id) & Q(language_id = rec.language_id) & Q(status = 0)).order_by('updated')
 
         for tr_rec in tr_recs:
             tmp_ids.append(tr_rec.id)
-    
+
     collection = None
     header = ''
     ordering = ''
