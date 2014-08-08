@@ -11,12 +11,14 @@ import xml.etree.cElementTree as etree
 from xml.etree.ElementTree import ElementTree
 # Create your views here.
 import hashlib
+import csv, os, time
 from django.core.exceptions import PermissionDenied
 from events.views import *
 from events.models import *
 from django.conf import settings
 from events.forms import OrganiserForm
 from django.core.mail import EmailMultiAlternatives
+from validate_email import validate_email
 
 def encript_password(password):
     password = hashlib.md5(password+'VuilyKd*PmV?D~lO19jL(Hy4V/7T^G>p').hexdigest()
@@ -24,25 +26,25 @@ def encript_password(password):
     
 def authenticate(username = None, password = None):
     try:
-        print " i am in moodle auth"
+        #print " i am in moodle auth"
         user = MdlUser.objects.get(username=username)
-        print user
+        #print user
         pwd = user.password
         p = encript_password(password)
         pwd_valid =  (pwd == p)
-        print pwd
+        #print pwd
         #print "------------"
         if user and pwd_valid:
             return user
     except Exception, e:
-        print e
-        print "except ---"
+        #print e
+        #print "except ---"
         return None
 
 def mdl_logout(request):
     del request.session['mdluserid']
     request.session.save()
-    print "logout !!"
+    #print "logout !!"
     return HttpResponseRedirect('/participant/login')
     
 def mdl_login(request):
@@ -65,7 +67,7 @@ def mdl_login(request):
             messages['error'] = "Username or Password Doesn't match!"
 
     if request.session.get('mdluserid'):
-        print "Current user is ", request.session.get('mdluserid')
+        #print "Current user is ", request.session.get('mdluserid')
         return HttpResponseRedirect('/participant/index')
         
     context = {'message':messages}
@@ -143,7 +145,7 @@ def index(request):
 def offline_details(request, wid, category):
     wid = int(wid)
     category = int(category)
-    print category
+    #print category
     user = request.user
     form = OfflineDataForm()
     try:
@@ -152,134 +154,78 @@ def offline_details(request, wid, category):
         elif category == 2:
             Training.objects.get(pk=wid, status__lt=4)
         else:
-            print 'yes'
+            #print 'yes'
             raise PermissionDenied('You are not allowed to view this page!')
     except Exception, e:
-        print e
+        #print e
         raise PermissionDenied('You are not allowed to view this page!')
         
     if request.method == 'POST':
         form = OfflineDataForm(request.POST, request.FILES)
-        if form.is_valid():
-            #xmlDocData = form.cleaned_data['xml_file'].read()
-            #xmlDocTree = etree.XML(xmlDocData)
-            tree = ElementTree()
-            data = tree.parse(form.cleaned_data['xml_file'])
-            details = data.getiterator("detail")
-            try:
-                if category == 1:
-                    w = Training.objects.get(id = wid)
-                elif category == 2:
-                    w = Training.objects.get(id = wid)
-                else:
-                    raise PermissionDenied('You are not allowed to view this page!')
-            except:
-                print "Error"
-                
-            for studentDetails in details:
-                password_string = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(8))
-                password_encript = encript_password(password_string)
-            
-                #print studentDetails
-                firstname = studentDetails[0].text
-                lastname = studentDetails[1].text
-                gender =  studentDetails[2].text
-                email = None
-                try:
-                    email = studentDetails[3].text.lower()
-                except:
-                    messages.error(request, "Participant/Student's Email ID Required!")
-                    return HttpResponseRedirect('/participant/offline-data/'+ str(wid) + '/' + str(category))
-                password = password_encript
-                username = firstname+' '+lastname
-                try:
-                    try:
-                        mdluser = MdlUser.objects.get(email = email)
-                    except:
-                        mdluser = MdlUser.objects.get(username = username)
-                    mdluser.institution = w.academic_id
-                    mdluser.save()
-                    print "Already exits!"
-                except Exception, e:
-                    print e
-                    mdluser = MdlUser()
-                    mdluser.auth = 'manual'
-                    mdluser.firstname = firstname
-                    mdluser.username = username
-                    mdluser.lastname = lastname
-                    mdluser.password = password
-                    mdluser.institution = w.academic_id
-                    mdluser.email = email
-                    mdluser.confirmed = 1
-                    mdluser.mnethostid = 1
-                    mdluser.gender = gender
-                    mdluser.save()
-                    mdluser = MdlUser.objects.filter(email = email, firstname= firstname, username=username, password=password).first()
+        try:
+            if category == 1:
+                w = Training.objects.get(id = wid)
+            elif category == 2:
+                w = Training.objects.get(id = wid)
+            else:
+                raise PermissionDenied('You are not allowed to view this page!')
+        except:
+            raise PermissionDenied('You are not allowed to view this page!')
                     
-                    # send password to email
-                    subject  = "Spoken Tutorial Online Test password"
-                    to = [mdluser.email]
-                    message = '''Hi {0},
-
-        Your account password at 'Spoken Tutorials Online Test as follows'
-
-        Your current login information is now:
-           username: {1}
-           password: {2}
-
-        Please go to this page to change your password:
-           {3}
-
-        In most mail programs, this should appear as a blue link
-        which you can just click on.  If that doesn't work,
-        then cut and paste the address into the address
-        line at the top of your web browser window.
-
-        Cheers from the 'Spoken Tutorials Online Test Center' administrator,
-
-        Admin Spoken Tutorials
-        '''.format(mdluser.firstname, mdluser.username, password_string, 'http://onlinetest.spoken-tutorial.org/login/change_password.php')
-
-                    # send email
-                    email = EmailMultiAlternatives(
-                        subject, message, 'administrator@spoken-tutorial.org',
-                        to = to, bcc = [], cc = [],
-                        headers={'Reply-To': 'no-replay@spoken-tutorial.org', "Content-type":"text/html;charset=iso-8859-1"}
-                    )
-
-                    #result = email.send(fail_silently=False)
-                    #messages.success(request, "New password sent to your email "+user.email)
-                    print "-----------------------------------------"
-                    print message
-                    print "-----------------------------------------"
-                if category == 1:
+        if form.is_valid():
+            if request.FILES['xml_file'].content_type == 'text/xml':
+                tree = ElementTree()
+                try:
+                    data = tree.parse(request.FILES['xml_file'])
+                except:
+                    messages.error(request, "Mismatched tags in Xml file. Please check weather all tags placed properly.")
+                    return HttpResponseRedirect('/participant/offline-data/'+ str(wid) + '/' + str(category))
+                details = data.getiterator("detail")
+                count = 0
+                for studentDetails in details:
+                    count = count + 1
+                    #print studentDetails
                     try:
-                        wa = WorkshopAttendance.objects.get(workshop_id = wid, mdluser_id = mdluser.id)
-                        #if wa.status == 0:
-                        #    wa.status = 1
-                        #    wa.save()
-                        print "Attandance already exits!"
-                    except Exception, e:
-                        print e
-                        wa = WorkshopAttendance()
-                        wa.workshop_id = wid
-                        wa.status = 0
-                        wa.mdluser_id = mdluser.id
-                        wa.save()
-                else:
-                    try:
-                        wa = TrainingAttendance.objects.get(training_id = wid, mdluser_id = mdluser.id)
-                        #if wa.status == 0:
-                        #    wa.status = 1
-                        #    wa.save()
-                        print "Attandance already exits!"
-                    except Exception, e:
-                        print e
-                        wa = TrainingAttendance()
-                        wa.training_id = wid
-                        wa.status = 0
-                        wa.mdluser_id = mdluser.id
-                        wa.save()
+                        firstname = studentDetails[0].text.strip().title()
+                        lastname = studentDetails[1].text.strip().title()
+                        gender =  studentDetails[2].text.strip().title()
+                        email = None
+                        try:
+                            email = studentDetails[3].text.lower().strip()
+                        except:
+                            messages.error(request, "Participant/Student's Email ID is Required. Please open with browser and check all required details are exits!")
+                            return HttpResponseRedirect('/participant/offline-data/'+ str(wid) + '/' + str(category))
+                        get_or_create_participant(w, firstname, lastname, gender, email, category)
+                    except:
+                        messages.error(request, "Record number "+ str(count) + " required data is missing. Please open with browser and check all required details are exits!.")
+                        continue
+            else:
+                file_path = settings.MEDIA_ROOT + str(wid) + str(time.time())
+                f = request.FILES['xml_file']
+                fout = open(file_path, 'wb+')
+                for chunk in f.chunks():
+                    fout.write(chunk)
+                fout.close()
+                    
+                with open(file_path, 'rb') as csvfile:
+                    count  = 0
+                    csvdata = csv.reader(csvfile, delimiter=',', quotechar='|')
+                    for row in csvdata:
+                        count = count + 1
+                        try:
+                            firstname = row[0].strip().title()
+                            lastname = row[1].strip().title()
+                            email = row[2].strip()
+                            gender = row[3].strip().title()
+                            if not validate_email(email):
+                                messages.error(request, "Line number "+ str(count) + ' : ' + firstname + ' ' + lastname + "'s email missing!")
+                                continue
+                            get_or_create_participant(w, firstname, lastname, gender, email, category)
+                        except Exception, e:
+                            messages.error(request, "Line number "+ str(count) + " : Required data is missing. Please check value seperated by <b>Comma (,) </b>.")
+                        continue
+                os.unlink(file_path)
+                
             #update logs
             if category == 1:
                 message = w.academic.institution_name+" has submited Offline "+w.foss.foss+" workshop attendance dated "+w.trdate.strftime("%Y-%m-%d")
@@ -312,7 +258,7 @@ def mdl_register(request):
             if user:
                 messages.success(request, "Email : "+request.POST['email']+" already registered on this website. Please click <a href='http://www.spoken-tutorial.org/participant/login/'>here </a>to login")
         except Exception, e:
-            print e
+            #print e
             pass
             
         if form.is_valid():
@@ -327,7 +273,6 @@ def mdl_register(request):
             mdluser.password = encript_password(form.cleaned_data['password'])
             mdluser.confirmed = 1
             mdluser.mnethostid = 1
-            print mdluser.gender, "***********"
             mdluser.save()
             messages.success(request, "User " + form.cleaned_data['firstname'] +" "+form.cleaned_data['firstname']+" Created!")
             return HttpResponseRedirect('/participant/register/')
@@ -351,7 +296,8 @@ def feedback(request, wid):
     try:
         w = Training.objects.select_related().get(pk=wid)
     except Exception, e:
-        print e
+        #print e
+        pass
     
     if request.method == 'POST':
         form = FeedbackForm(request.POST)
@@ -361,14 +307,13 @@ def feedback(request, wid):
                 form_data.training_id = wid
                 form_data.mdluser_id = mdluserid
                 form_data.save()
-                #change status to 2
                 wa = WorkshopAttendance.objects.get(mdluser_id=mdluserid, workshop_id = wid)
                 wa.status = 2
                 wa.save()
                 messages.success(request, "Thank you for your valuable feedback.")
                 return HttpResponseRedirect('/participant/index/')
             except Exception, e:
-                print e
+                #print e
                 return HttpResponseRedirect('/participant/index/')
     context = {
         'form' : form,
@@ -390,10 +335,6 @@ def forget_password(request):
             password_encript = encript_password(password_string)
             user.password = password_encript
             user.save()
-            print 'Username => ', user.username
-            print 'New password => ', password_string
-            print 'Encript password => ', password_encript
-            #Send email
             subject  = "Spoken Tutorial Online Test password reset"
             to = [user.email]
             message = '''Hi {0},
@@ -435,3 +376,76 @@ Admin Spoken Tutorials
     }
     context.update(csrf(request))
     return render(request, 'mdl/templates/password_reset.html', context)
+
+def get_or_create_participant(w, firstname, lastname, gender, email, category):
+    password_string = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(8))
+    password_encript = encript_password(password_string)
+
+    password = password_encript
+    username = email
+    try:
+        mdluser = MdlUser.objects.get(email = email)
+        mdluser.institution = w.academic_id
+        mdluser.firstname = firstname
+        mdluser.lastname = lastname
+        mdluser.save()
+    except Exception, e:
+        mdluser = MdlUser()
+        mdluser.auth = 'manual'
+        mdluser.firstname = firstname
+        mdluser.username = username
+        mdluser.lastname = lastname
+        mdluser.password = password
+        mdluser.institution = w.academic_id
+        mdluser.email = email
+        mdluser.confirmed = 1
+        mdluser.mnethostid = 1
+        mdluser.gender = gender
+        mdluser.save()
+        mdluser = MdlUser.objects.filter(email = email, firstname= firstname, username=username, password=password).first()
+        
+        # send password to email
+        subject  = "Spoken Tutorial Online Test password"
+        to = [mdluser.email]
+        message = '''Hi {0},
+
+Your account password at 'Spoken Tutorials Online Test as follows'
+
+Your current login information is now:
+username: {1}
+password: {2}
+
+Please go to this page to change your password:
+{3}
+
+In most mail programs, this should appear as a blue link
+which you can just click on.  If that doesn't work,
+then cut and paste the address into the address
+line at the top of your web browser window.
+
+Cheers from the 'Spoken Tutorials Online Test Center' administrator,
+
+Admin Spoken Tutorials
+'''.format(mdluser.firstname, mdluser.username, password_string, 'http://onlinetest.spoken-tutorial.org/login/change_password.php')
+
+        # send email
+        email = EmailMultiAlternatives(
+            subject, message, 'administrator@spoken-tutorial.org',
+            to = to, bcc = [], cc = [],
+            headers={'Reply-To': 'no-replay@spoken-tutorial.org', "Content-type":"text/html;charset=iso-8859-1"}
+        )
+
+        result = email.send(fail_silently=False)
+        #print "-----------------------------------------"
+        #print message
+        #print "-----------------------------------------"
+    if category == 2:
+        try:
+            wa = TrainingAttendance.objects.get(training_id = w.id, mdluser_id = mdluser.id)
+        except Exception, e:
+            #print e
+            wa = TrainingAttendance()
+            wa.training_id = w.id
+            wa.status = 0
+            wa.mdluser_id = mdluser.id
+            wa.save()

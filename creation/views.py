@@ -2137,9 +2137,10 @@ def creation_change_component_status(request):
                 status = status_list[int(request.POST.get('status', 0))]
                 if component in ['outline', 'script', 'video']:
                     setattr(row, component + '_status', int(request.POST.get('status', 0)))
+                    row.save()
                 else:
                     setattr(row.common_content, component + '_status', int(request.POST.get('status', 0)))
-                row.save()
+                    row.common_content.save()
                 add_contributor_notification(row, comp_title, component.title() + ' status has been changed to ' + status)
                 messages.success(request, component.title() + ' status has been changed to ' + status)
                 form = ChangeComponentStatusForm()

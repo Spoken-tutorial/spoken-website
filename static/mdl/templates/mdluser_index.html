@@ -111,9 +111,9 @@
                         <td>{{ record.trdate }} {{ record.trtime }}</td>
                         <td>
                             {% if record.id|check_training_enrole:mdluserid %}
-                                Subscribed
+                                Enrolled
                             {% else %}
-                                <a href="{% url 'events:student_subscribe' 'training' record.id mdluserid %}">Subscribe</a>
+                                <a href="{% url 'events:student_subscribe' 'training' record.id mdluserid %}">Enroll</a>
                             {% endif %}
                         </td>
                     </tr>
@@ -138,7 +138,7 @@
                         <td>
                             {% with status=mdluserid|can_enter_test:record.id %}
                                 {% if status == None %}
-                                    <a href="{% url 'events:student_subscribe' 'test' record.id mdluserid %}">Subscribe</a>
+                                    <a href="{% url 'events:student_subscribe' 'test' record.id mdluserid %}">Enroll</a>
                                 {% elif status == 0 %}
                                     Waiting for Attandance
                                 <!-- Todo: Link to go attempt page -->
@@ -194,7 +194,7 @@
                     <tr>
                         <td>{{ record.foss.foss }}</td>
                         <td>{{ record.tdate }} {{ record.ttime }}</td>
-                        <td><a href="{% url 'events:student_subscribe' 'test' record.id mdluserid %}">Subscribe</a></td>
+                        <td><a href="{% url 'events:student_subscribe' 'test' record.id mdluserid %}">Enroll</a></td>
                     </tr>
                 {% endfor %}
             </table>
