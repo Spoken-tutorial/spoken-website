@@ -1,5 +1,5 @@
 import zipfile
-from urllib import quote_plus
+from urllib import urlopen, quote_plus
 from django import template
 from django.contrib.auth.models import User
 from django.conf import settings
@@ -150,6 +150,18 @@ def get_prerequisite_from_td(td, lang):
                 pass
     return None
 
+def get_timed_script(script_path):
+    timed_script = settings.SCRIPT_URL + script_path + '-timed'
+    code = 0
+    try:
+        code = urlopen(timed_script).code
+    except Exception, e:
+        code = e.code
+    if(int(code) == 200):
+        return timed_script
+    return ''
+
+register.filter('get_timed_script', get_timed_script)
 register.filter('get_prerequisite_from_td', get_prerequisite_from_td)
 register.filter('get_prerequisite', get_prerequisite)
 register.filter('get_video_visits', get_video_visits)

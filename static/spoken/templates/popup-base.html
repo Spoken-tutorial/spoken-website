@@ -87,11 +87,13 @@
 				</div><!-- /#content-inner .container -->
 			</div><!-- /#content-wrapper -->
 		</div><!-- /#page-wrapper -->
+		{% get_analytics_code %}
 		<!-- Bootstrap core JavaScript
 		================================================== -->
 		<!-- Placed at the end of the document so the pages load faster -->
 		<script src="{% static 'spoken/js/jquery-1.11.0.min.js' %}"></script>
 		<script src="{% static 'spoken/js/bootstrap.min.js' %}"></script>
 		{% block jsblock %}{% endblock %}
+		{{ get_analytics_code }}
 	</body>
 </html>

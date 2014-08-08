@@ -274,7 +274,7 @@ def mdl_register(request):
             mdluser.confirmed = 1
             mdluser.mnethostid = 1
             mdluser.save()
-            messages.success(request, "User " + form.cleaned_data['firstname'] +" "+form.cleaned_data['firstname']+" Created!")
+            messages.success(request, "User " + form.cleaned_data['firstname'] +" "+form.cleaned_data['lastname']+" Created!")
             return HttpResponseRedirect('/participant/register/')
             
     context = {}
