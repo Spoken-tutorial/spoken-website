@@ -160,7 +160,7 @@
                                         </li>
                                         <li><a href="/about-us/">About Us</a></li>
                                         <li><a href="/statistics/">Statistics</a></li>
-                                        <li><a href="http://old.spoken-tutorial.org" target="_blank">Old Website</a></li>
+                                        <!-- <li><a href="http://old.spoken-tutorial.org" target="_blank">Old Website</a></li> -->
                                     </ul>
                                     
                                     <ul class="nav navbar-nav navbar-right">
@@ -372,5 +372,20 @@
 		<script src="{% static 'spoken/js/jquery-1.11.0.min.js' %}"></script>
 		<script src="{% static 'spoken/js/bootstrap.min.js' %}"></script>
 		{% block jsblock %}{% endblock %}
+        <!-- Piwik -->
+        <script type="text/javascript">
+            var _paq = _paq || [];
+            _paq.push(['trackPageView']);
+            _paq.push(['enableLinkTracking']);
+            (function() {
+                var u=(("https:" == document.location.protocol) ? "https" : "http") + "://analytics.spoken-tutorial.org/";
+                _paq.push(['setTrackerUrl', u+'piwik.php']);
+                _paq.push(['setSiteId', 1]);
+                var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0]; g.type='text/javascript';
+                g.defer=true; g.async=true; g.src=u+'piwik.js'; s.parentNode.insertBefore(g,s);
+            })();
+        </script>
+        <noscript><p><img src="http://analytics.spoken-tutorial.org/piwik.php?idsite=1&rec=1&bots=1" style="border:0;" alt="" /></p></noscript>
+        <!-- End Piwik Code -->
 	</body>
 </html>
