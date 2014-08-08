@@ -10,8 +10,6 @@ media/training/*
 !media/training/README
 !media/videos/README
 !media/README
-static/spoken/templates/base.html
-static/spoken/templates/popup-base.html
 uwsgi-master.pid
 *.py[cod]
 robots.txt
