@@ -1,5 +1,6 @@
 from django import template
 from cms.models import Block, Nav, SubNav
+from django.conf import settings
 from cms.sortable import *
 
 register = template.Library()
@@ -111,7 +112,15 @@ def paginator_page_cutter(page_range, current_page):
         start_page =  start_page - (5 - tmp)
     
     return range(start_page, end_page+1)
-    
+
+def get_analytics_code():
+    context = {
+        'analytics_data': settings.ANALYTICS_DATA
+    }
+
+    return context
+
+register.inclusion_tag('cms/templates/analytics_code.html')(get_analytics_code)
 register.filter('len_cutter', len_cutter)
 register.inclusion_tag('cms/templates/sortable_header.html')(get_sortable_header)
 register.inclusion_tag('cms/templates/cmsnav.html')(get_cms_nav)

@@ -234,10 +234,19 @@
                     </div>
                 {% endif %}
                 {% if tr_rec.script_status %}
-                    <div  class="list-group-item">
+                    <div class="list-group-item">
                         <a href="{{ script_base|add:tr_rec.script }}" target="_blank" class="list-group-item">
                             <h4 class="list-group-item-heading"><i class="fa fa-2 fa-globe"></i> Script</h4>
                         </a>
+                        {% if tr_rec.language.name == 'English' %}
+                            {% with timed_script=tr_rec.script|get_timed_script %}
+                                {% if timed_script %}
+                                    <a href="{{ timed_script }}" target="_blank" class="list-group-item">
+                                        <h4 class="list-group-item-heading"><i class="fa fa-2 fa-globe"></i> Timed Script</h4>
+                                    </a>
+                                {% endif %}
+                            {% endwith %}
+                        {% endif %}
                         <p class="list-group-item-text">
                             <span style="text-align: left">Status: <i class="{{ tr_rec.script_status|get_review_status_symbol }}" title="{{ tr_rec.script_status|get_review_status_list }}"></i></span>
                             <span style="float: right">
