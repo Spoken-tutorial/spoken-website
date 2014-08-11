@@ -180,7 +180,7 @@ def testimonials(request):
     context = { 'testimonials' : testimonials}
     context.update(csrf(request))
     return render(request, 'spoken/templates/testimonial/testimonials.html', context)
-        
+
 def testimonials_new(request):
     ''' new testimonials '''
     user = request.user
@@ -245,6 +245,26 @@ def admin_testimonials_edit(request, rid):
     
     form = TestimonialsForm(instance = instance)
     context['form'] = form
+    context['instance'] = instance
+    context.update(csrf(request))
+    return render(request, 'spoken/templates/testimonial/form.html', context)
+
+def admin_testimonials_delete(request, rid):
+    user = request.user
+    context = {}
+    instance = ''
+    if not user.is_authenticated():
+        raise Http404('You are not allowed to view this page')
+    try:
+        instance = Testimonials.objects.get(pk= rid)
+    except Exception, e:
+        raise Http404('Page not found')
+        print e
+    if request.method == 'POST':
+        instance = Testimonials.objects.get(pk= rid)
+        instance.delete()
+        messages.success(request, 'Testimonial deleted successfully')
+        return HttpResponseRedirect('/admin/testimonials')
     context['instance'] = instance
     context.update(csrf(request))
     return render(request, 'spoken/templates/testimonial/form.html', context)

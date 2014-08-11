@@ -368,7 +368,7 @@ class TrainingFeedback(models.Model):
     created = models.DateTimeField(auto_now_add = True)
     class Meta:
         unique_together = (("training", "mdluser_id"))
-        
+
 class Testimonials(models.Model):
     user = models.ForeignKey(User, related_name = 'testimonial_created_by')
     approved_by = models.ForeignKey(User, related_name = 'testimonial_approved_by', null=True)

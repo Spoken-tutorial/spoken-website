@@ -11,6 +11,7 @@
 {% block content %}
     <div class="row well">
         <div class='col-sm-8'>
+            {% if form %}
 	        <form action="{{ action }}" method="post" class='form-horizontal' enctype="multipart/form-data">{% csrf_token %}
 		        {% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
 			        {% if form.non_field_errors %}
@@ -85,6 +86,25 @@
 			         </div>
 		        {% endwith %}
             </form>
+            {% else %}
+                <h3>Are you sure you want to delete the testimonial?</h3>
+                <p>
+                    <dl>
+                        <dt> User Name: </dt>
+                        <dd> {{ instance.user_name }} </dd>
+                        <dt> Short Description: </dt>
+                        <dd> {{ instance.short_description }} </dd>
+                        <dt> Created: </dt>
+                        <dd> {{ instance.created }} </dd>
+                        <dt> Last Updated: </dt>
+                        <dd> {{ instance.updated }} </dd>
+                    </dl>
+                    <form action="{% url 'admin_testimonials_delete' instance.id %}" method="POST"> {% csrf_token %}
+                        <input class="btn btn-danger" type="submit" value="Delete">
+                        <a class="btn btn-default" href="{% url 'admin_testimonials' %}">Cancel</a>
+                    </form>
+                </p>
+            {% endif%}
         </div>
     </div>
 {% endblock %}

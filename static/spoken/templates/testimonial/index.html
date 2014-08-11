@@ -25,6 +25,7 @@
 						<td>{{ record.source_link }}</td>
 						<td>{{ record.status }}</td>
 						<td><a href="{% url 'admin_testimonials_edit' record.id %}">Edit</a></td>
+                    <td><a href="{% url 'admin_testimonials_delete' record.id %}">Delete</a></td>
 `					</tr>
 				{% endfor %}
 			</table>
