@@ -340,17 +340,17 @@ def new_ac(request):
                     available_code_range.insert(i, i+1)
                 
                 #find the existing numbers
-                ac = AcademicCenter.objects.filter(state = state).order_by('-academic_code')
-                for record in ac:
-                    a = int(record.academic_code.split('-')[1])-1
-                    available_code_range[a] = 0
+                #ac = AcademicCenter.objects.filter(state = state).order_by('-academic_code')
+                #for record in ac:
+                #    a = int(record.academic_code.split('-')[1])-1
+                #    available_code_range[a] = 0
                 
                 academic_code = code_range + 1
                 #finding Missing number
-                for code in available_code_range:
-                    if code == 0:
-                        academic_code = code
-                        break
+                #for code in available_code_range:
+                #    if code == 0:
+                #        academic_code = code
+                #        break
 
             # Generate academic code
             if academic_code < 10:
