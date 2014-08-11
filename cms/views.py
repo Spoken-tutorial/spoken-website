@@ -21,7 +21,7 @@ def dispatcher(request, permalink=''):
     context = {
         'page': page_content,
     }
-    return render_to_response('cms/templates/page.html', context)
+    return render(request, 'cms/templates/page.html', context)
 
 def account_register(request):
     context = {}
