@@ -243,7 +243,10 @@ def offline_details(request, wid, category):
     context = {
         'form': form,
     }
-    messages.info(request, "Please upload the xml file which you have generated from the 'Offline Attendance App'. To know more Click Here.") 
+    messages.info(request, """
+        Please upload the CSV file which you have generated. 
+        To know more <a href="http://process.spoken-tutorial.org/images/9/96/Upload_Attendance.pdf" target="_blank">Click here</a>.
+    """) 
     context.update(csrf(request))
     return render(request, 'mdl/templates/offline_details.html', context)
 
