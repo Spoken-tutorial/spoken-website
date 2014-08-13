@@ -851,7 +851,7 @@ def training_list(request, role, status):
             2: SortableHeader('academic__state', True, 'State'),
             3: SortableHeader('academic', True, 'Institution'),
             4: SortableHeader('foss', True, 'FOSS'),
-            5: SortableHeader('organiser__user', True, 'Orgainser'),
+            5: SortableHeader('organiser__user', True, 'Organiser'),
             6: SortableHeader('trdate', True, 'Date'),
             7: SortableHeader('Participants', False),
             8: SortableHeader('Action', False)

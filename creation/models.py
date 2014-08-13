@@ -8,8 +8,12 @@ class Language(models.Model):
     created = models.DateTimeField(auto_now_add = True)
     updated = models.DateTimeField(auto_now = True)
 
+    class Meta:
+        ordering = ('name',)
+
     def __unicode__(self):
         return self.name
+    
 
 class FossCategory(models.Model):
     foss = models.CharField(unique=True, max_length = 255)
@@ -21,6 +25,7 @@ class FossCategory(models.Model):
 
     class Meta:
         verbose_name = 'FOSS Categorie'
+        ordering = ('foss',)
 
     def __unicode__(self):
         return self.foss
