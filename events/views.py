@@ -414,12 +414,14 @@ def ac(request):
         
     context = {}
     header = {
-        1: SortableHeader('State', False),
-        2: SortableHeader('university__name', True, 'University'),
-        3: SortableHeader('institution_name', True, 'Institution Name'),
-        4: SortableHeader('institution_type__name', True, 'Institute Type'),
-        5: SortableHeader('institute_category__name', True, 'Institute Category'),
-        6: SortableHeader('Action', False)
+        1: SortableHeader('#', False),
+        2: SortableHeader('State', False),
+        3: SortableHeader('academic_code', True, 'Academic Code'),
+        4: SortableHeader('institution_name', True, 'Institution Name'),
+        5: SortableHeader('university__name', True, 'University'),
+        6: SortableHeader('institution_type__name', True, 'Institute Type'),
+        7: SortableHeader('institute_category__name', True, 'Institute Category'),
+        8: SortableHeader('Action', False)
     }
     
     collectionSet = AcademicCenter.objects.filter(state = user.resource_person.all())
@@ -847,14 +849,16 @@ def training_list(request, role, status):
             raise Http404('You are not allowed to view this page')
 
         header = {
-            1: SortableHeader('training_type', True, 'Type'),
-            2: SortableHeader('academic__state', True, 'State'),
-            3: SortableHeader('academic', True, 'Institution'),
-            4: SortableHeader('foss', True, 'FOSS'),
-            5: SortableHeader('organiser__user', True, 'Organiser'),
-            6: SortableHeader('trdate', True, 'Date'),
-            7: SortableHeader('Participants', False),
-            8: SortableHeader('Action', False)
+            1: SortableHeader('#', False),
+            2: SortableHeader('training_type', True, 'Type'),
+            3: SortableHeader('academic__state', True, 'State'),
+            4: SortableHeader('academic__academic_code', True, 'Academic Code'),
+            5: SortableHeader('academic', True, 'Institution'),
+            6: SortableHeader('foss', True, 'FOSS'),
+            7: SortableHeader('organiser__user', True, 'Organiser'),
+            8: SortableHeader('trdate', True, 'Date'),
+            9: SortableHeader('Participants', False),
+            10: SortableHeader('Action', False)
         }
         
         raw_get_data = request.GET.get('o', None)
@@ -1348,13 +1352,15 @@ def test_list(request, role, status):
             raise Http404('You are not allowed to view this page')
             
         header = {
-            1: SortableHeader('academic__state', True, 'State'),
-            2: SortableHeader('academic', True, 'Institution'),
-            3: SortableHeader('organiser', True, 'Orgainser'),
-            4: SortableHeader('foss', True, 'FOSS'),
-            5: SortableHeader('tdate', True, 'Date'),
-            6: SortableHeader('Participants', False),
-            7: SortableHeader('Action', False)
+            1: SortableHeader('#', False),
+            2: SortableHeader('academic__state', True, 'State'),
+            3: SortableHeader('academic__academic_code', True, 'Academic Code'),
+            4: SortableHeader('academic', True, 'Institution'),
+            5: SortableHeader('organiser', True, 'Organiser'),
+            6: SortableHeader('foss', True, 'FOSS'),
+            7: SortableHeader('tdate', True, 'Date'),
+            8: SortableHeader('Participants', False),
+            9: SortableHeader('Action', False)
         }
         raw_get_data = request.GET.get('o', None)
         collection = get_sorted_list(request, collectionSet, header, raw_get_data)
@@ -1743,12 +1749,14 @@ def organiser_invigilator_index(request, role, status):
     user = User.objects.get(pk=user.id)
 
     header = {
-        1: SortableHeader('academic__state', True, 'State'),
-        2: SortableHeader('academic__institution_name', True, 'Institution'),
-        3: SortableHeader('user__username', True, 'Name'),
-        4: SortableHeader('Email', False),
-        5: SortableHeader('Phone', False),
-        6: SortableHeader('Action', False)
+        1: SortableHeader('#', False),
+        2: SortableHeader('academic__state', True, 'State'),
+        3: SortableHeader('academic__academic_code', True, 'Academic Code'),
+        4: SortableHeader('academic__institution_name', True, 'Institution'),
+        5: SortableHeader('user__first_name', True, 'Name'),
+        6: SortableHeader('Email', False),
+        7: SortableHeader('Phone', False),
+        8: SortableHeader('Action', False)
     }
     
     if role == 'organiser':

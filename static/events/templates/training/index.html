@@ -64,6 +64,7 @@
 				{% get_sortable_header header ordering request.GET %}
 				{% for record in collection %}
 					<tr>
+                        <td>{{ forloop.counter }}
 					    <td>
 					        {% if record.training_type %}
 					            Workshop - {{record.training_code}}
@@ -72,6 +73,7 @@
 					        {% endif %}
 					    </td>
 					    <td>{{ record.academic.state }}</td>
+					    <td>{{ record.academic.academic_code}}</td>
 						<td>{{ record.academic }}</td>
 						<td>{{ record.foss }}</td>
 						<td>{{ record.organiser.user.first_name }}</td>

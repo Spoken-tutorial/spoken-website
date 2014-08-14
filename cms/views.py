@@ -38,7 +38,9 @@ def account_register(request):
             p = Profile(user=user, confirmation_code=confirmation_code)
             p.save()
             send_registration_confirmation(user)
-            messages.success(request, "Your registration was successful but you must now confirm your email address before you can log in. Please check your email and click on the link provided. Thank you.")
+            messages.success(request, """
+                Please confirm your registration by clicking on the activation link which has been sent to your registered email id.
+            """)
             return HttpResponseRedirect('/')
         context = {'form':form}
         return render_to_response('cms/templates/register.html', context, context_instance = RequestContext(request))
