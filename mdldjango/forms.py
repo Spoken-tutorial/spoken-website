@@ -12,13 +12,13 @@ class OfflineDataForm(forms.Form):
     xml_file  = forms.FileField(required=True)
     def clean(self):
         #super(OfflineDataForm, self).clean()
-        file_types = ['text']
-        if 'xml_file' in self.cleaned_data and self.cleaned_data['xml_file']:
-            if not self.cleaned_data['xml_file'].content_type.split('/')[0] in file_types:
-                raise forms.ValidationError("Not a valid file format.")
+        # file_types = ['text']
+        # if 'xml_file' in self.cleaned_data and self.cleaned_data['xml_file']:
+        #     if not self.cleaned_data['xml_file'].content_type.split('/')[0] in file_types:
+        #         raise forms.ValidationError("Not a valid file format.")
         #else:
         #    raise forms.ValidationError("Not a valid file format.")
-        #return self.cleaned_data
+        return self.cleaned_data
 
 class RegisterForm(forms.Form):
     state = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'State field is required.'})
