@@ -1744,9 +1744,9 @@ def organiser_invigilator_index(request, role, status):
 
     header = {
         1: SortableHeader('academic__state', True, 'State'),
-        2: SortableHeader('academic', True, 'Institution'),
+        2: SortableHeader('academic__institution_name', True, 'Institution'),
         3: SortableHeader('user__username', True, 'Name'),
-        4: SortableHeader('Email', 'False'),
+        4: SortableHeader('Email', False),
         5: SortableHeader('Phone', False),
         6: SortableHeader('Action', False)
     }
