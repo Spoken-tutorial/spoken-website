@@ -207,7 +207,7 @@ def offline_details(request, wid, category):
                     fout.write(chunk)
                 fout.close()
                     
-                with open(file_path, 'rb') as csvfile:
+                with open(file_path, 'rbU') as csvfile:
                     count  = 0
                     csvdata = csv.reader(csvfile, delimiter=',', quotechar='|')
                     for row in csvdata:
