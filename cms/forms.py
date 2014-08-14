@@ -71,11 +71,11 @@ class RegisterForm(forms.Form):
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
-        exclude = ['user', 'confirmation_code', 'street', 'location']
+        exclude = ['user', 'confirmation_code', 'street', 'location', 'picture']
     
-    def clean_picture(self):
-        if 'picture' in self.cleaned_data and not self.cleaned_data['picture']:
-            raise forms.ValidationError("Profile picture required!")
+    # def clean_picture(self):
+    #     if 'picture' in self.cleaned_data and not self.cleaned_data['picture']:
+    #         raise forms.ValidationError("Profile picture required!")
     first_name = forms.CharField()
     last_name = forms.CharField()
     state = forms.ModelChoiceField(label='State', cache_choices=True, widget = forms.Select(attrs = {'class' : 'ac-state'}), queryset = State.objects.order_by('name'), empty_label = "--- None ---", help_text = "", error_messages = {'required':'State field required.'})

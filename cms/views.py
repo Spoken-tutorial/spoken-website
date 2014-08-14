@@ -157,13 +157,13 @@ def account_profile(request, username):
             form_data = form.save(commit=False)
             form_data.user_id = user.id
             
-            if 'picture-clear' in request.POST and request.POST['picture-clear']:
-                #if not old_file == new_file:
-                if os.path.isfile(old_file_path):
-                    os.remove(old_file_path)
-            
-            if 'picture' in request.FILES:
-                form_data.picture = request.FILES['picture']
+            # if 'picture-clear' in request.POST and request.POST['picture-clear']:
+            #     #if not old_file == new_file:
+            #     if os.path.isfile(old_file_path):
+            #         os.remove(old_file_path)
+            #
+            # if 'picture' in request.FILES:
+            #     form_data.picture = request.FILES['picture']
             
             form_data.save()
             
