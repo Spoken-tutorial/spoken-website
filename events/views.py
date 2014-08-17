@@ -797,7 +797,14 @@ def training_request(request, role, rid = None):
         context = {'form' : form, 'role' : role, 'status' : 'request'}
         return render(request, 'events/templates/training/form.html', context)
     else:
-        messages.info(request, "<ul><li>Before the Training/Workshop date upload the Participants name list.</li><li>You will need to submit the participants name list through <b><a target='_blank' href='/offline-attendance-app/'> Offline Participant Attendance App</a></b></li><li>Please check if your machine is ready. For the Machine Readiness document <a href='http://process.spoken-tutorial.org/images/5/58/Machine-Readiness.pdf' class='link alert-link' target='_blank'> Click Here</a>.</li></ul>")
+        messages.info(request, """
+            <ul>
+                <li>Please download a copy of tutorials on all the machines. For instructions to download tutorials <a href="http://process.spoken-tutorial.org/images/1/1b/Download-Tutorials.pdf" class="link alert-link" target="_blank">Click Here</a></li>
+                <li>Internet is not required while conducting the training/workshop.</li>
+                <li>Before the Training/Workshop date upload the Participants name list. Click here for instructions <a href="http://process.spoken-tutorial.org/images/9/96/Upload_Attendance.pdf" class="link alert-link" target="_blank"><b>Click Here</b></a>.</li>
+                <li>Please check if your machine is ready. For the Machine Readiness document <a href='http://process.spoken-tutorial.org/images/5/58/Machine-Readiness.pdf' class='link alert-link' target='_blank'> Click Here</a>.</li>
+            </ul>
+        """)
         if rid:
             form = TrainingForm(instance = Training.objects.get(pk = rid), user = request.user)
         else:
@@ -1533,7 +1540,13 @@ def test_attendance(request, tid):
             message = test.academic.institution_name+" has submited Test attendance dated "+test.tdate.strftime("%Y-%m-%d")
             update_events_log(user_id = user.id, role = 1, category = 1, category_id = test.id, academic = test.academic_id, status = 8)
             update_events_notification(user_id = user.id, role = 1, category = 1, category_id = test.id, academic = test.academic_id, status = 8, message = message)
-            messages.success(request, "Thank you for uploading the Attendance. Now make sure that you cross check and verify the details before submiting.") 
+            messages.success(request, """
+                <ul>
+                    <li>Thank you for uploading the Attendance. Now make sure that you cross check and verify the details before submiting.</li>
+                    <li>If you want to add more participants please upload a new CSV file containing the missing participants details.</li>
+                    <li>Once you confirm the list of participants please click on <b>'Mark as Complete'</b></li>
+                </ul>
+            """)
     mdlids = []
     participant_ids = []
     online_participant_ids = list(TestAttendance.objects.filter(test_id = test.id).values_list('mdluser_id'))

@@ -136,6 +136,7 @@ def account_login(request):
             messages.error(request, error_msg)
         return render_to_response('cms/templates/login.html', context)
     return HttpResponseRedirect('/')
+
 @login_required
 def account_logout(request):
     context = RequestContext(request)

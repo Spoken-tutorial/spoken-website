@@ -86,6 +86,7 @@
 		                <div class="col-sm-9">
 		                    {% render_field form.course class+="form-control course" tabindex="1" %}
 		                    {{ form.course.errors }}
+                            <small>Please select the appropriate stream of the participants.</small>
 		                </div>
 	                </div>
 	                <div class="form-group course_number_group">
@@ -100,6 +101,8 @@
 		                <div class="col-sm-9">
 		                    {% render_field form.department class+="form-control department" tabindex="1" data-placeholder="Enter department" %}
 		                    {{ form.department.errors }}
+                            <small>Please select the appropriate department of the participants.</small>
+                            <small><b>&lt;CTRL&gt; + Click</b> for multiple selections.</small>
 		                </div>
 	                </div>
 	                <div class="form-group">
@@ -107,6 +110,7 @@
 		                <div class="col-sm-9">
 		                    {% render_field form.trdate class+="form-control date" tabindex="1" data-placeholder="Enter date" %}
 		                    {{ form.trdate.errors }}
+                            <small>Please select the date on which on which you want to conduct the training/workshop.</small>
 		                </div>
 	                </div>
 	                <!--
@@ -121,6 +125,7 @@
 		                <div class="col-sm-9">
 		                    {% render_field form.foss class+="form-control foss" tabindex="1" data-placeholder="Enter foss" %}
 		                    {{ form.foss.errors }}
+                            <small>Please select the FOSS category.</small>
 		                </div>
 	                </div>
 	                <div class="form-group">
@@ -128,6 +133,7 @@
 		                <div class="col-sm-9">
 		                    {% render_field form.language class+="form-control language" tabindex="1" data-placeholder="Enter language" %}
 		                    {{ form.language.errors }}
+                            <small>Please select your preferred language.</small>
 		                </div>
 	                </div>
 	                <div class="form-group">
@@ -139,6 +145,7 @@
                                     {{ choice.tag }}
                                </div>
                             {% endfor %}
+                            <small>Please select Yes if you are going to conduct the training activity for the first time in your campus.</small>
                         </div>
                     </div>
                     <div class="form-group">
