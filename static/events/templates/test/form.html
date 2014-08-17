@@ -68,6 +68,7 @@
                         <div class="col-sm-9">
                             {% render_field form.test_category class+="form-control Test Category" tabindex="1" data-placeholder="Enter Test Category" %}
                             {{ form.test_category.errors }}
+                            <small>Please select a Test category.</small>
                         </div>
                     </div>
                     <div class="form-group workshop_group">
@@ -89,6 +90,7 @@
                         <div class="col-sm-9">
                             {% render_field form.invigilator class+="form-control invigilator" tabindex="1" data-placeholder="Enter Invigilator Name" %}
                             {{ form.invigilator.errors }}
+                            <small>Please select the invigilator of your choice.</small>
                         </div>
                     </div>
                     <div class="form-group">
@@ -96,6 +98,7 @@
                         <div class="col-sm-9">
                             {% render_field form.department class+="form-control department" tabindex="1" data-placeholder="Enter department" %}
                             {{ form.department.errors }}
+                            <small>Please select the department of participants. <b>&lt;CTRL&gt; + Click</b> for multiple selections.</small>
                         </div>
                     </div>
 
@@ -104,6 +107,7 @@
                         <div class="col-sm-9">
                             {% render_field form.tdate class+="form-control tdate date" tabindex="1" data-placeholder="Enter date" %}
                             {{ form.tdate.errors }}
+                            <small>Please select a preferred date for conducting the Test.</small>
                         </div>
                     </div>
                     <!--
@@ -118,6 +122,7 @@
                         <div class="col-sm-9">
                             {% render_field form.foss class+="form-control foss" tabindex="1" data-placeholder="Enter foss" %}
                             {{ form.foss.errors }}
+                            <small>Please select a FOSS catgegory.</small>
                         </div>
                     </div>
                     <div class="form-group">

@@ -1303,7 +1303,14 @@ def test_request(request, role, rid = None):
             update_events_notification(user_id = user.id, role = 0, category = 1, category_id = t.id, academic = t.academic_id, status = 0, message = message)
             
             return HttpResponseRedirect("/software-training/test/"+role+"/pending/")
-    messages.info(request, "Upgrade the browser with latest version on all the systems before the test. Please note: Confirm Invigilator availability and acceptance to invigilate before adding his name in this form.")
+    messages.info(request, """
+        <ul>
+            <li>Please make sure that before making the test request a faculty/trainer should have registered as invigilator.</li>
+            <li>Same user cannot be an organiser and the invigilator for the same test.</li>
+            <li>Please confirm the Invigilator's availability and acceptance to invigilate before selecting his name in this form.</li>
+            <li>Upgrade the browser with latest version on all the systems before the test.</li>
+        </ul>
+    """)
     context['role'] = role
     context['status'] = 'request'
     context.update(csrf(request))

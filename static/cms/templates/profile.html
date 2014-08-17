@@ -17,6 +17,7 @@
                     <div class="col-sm-9">
                         {% render_field form.first_name class+="form-control first_name" tabindex="1" data-placeholder="Choose first_name" %}
                         {{ form.first_name.errors }}
+                        <small>Please enter your first name.</small>
                     </div>
                 </div>
                 <div class="form-group">
@@ -24,6 +25,7 @@
                     <div class="col-sm-9">
                         {% render_field form.last_name class+="form-control last_name" tabindex="1" data-placeholder="Choose last_name" %}
                         {{ form.last_name.errors }}
+                        <small>Please enter your last name.</small>
                     </div>
                 </div>
                 <div class="form-group">
@@ -38,6 +40,7 @@
                     <div class="col-sm-9">
                         {% render_field form.state class+="form-control state" tabindex="1" data-placeholder="Choose state" %}
                         {{ form.state.errors }}
+                        <small>Please select your state.</small>
                     </div>
                 </div>
                 <div class="form-group">
@@ -45,6 +48,7 @@
                     <div class="col-sm-9">
                         {% render_field form.district class+="form-control district" tabindex="1" data-placeholder="Enter district" %}
                         {{ form.district.errors }}
+                        <small>Please select your district.</small>
                     </div>
                 </div>
                 <!--
@@ -69,6 +73,7 @@
                     <div class="col-sm-9">
                         {% render_field form.address class+="form-control street" tabindex="1" data-placeholder="Enter street" %}
                         {{ form.address.errors }}
+                        <small>Please enter your valid address.</small>
                     </div>
                 </div>
                 <div class="form-group">
@@ -76,6 +81,7 @@
                     <div class="col-sm-9">
                         {% render_field form.city class+="form-control city" tabindex="1" data-placeholder="Choose city" %}
                         {{ form.city.errors }}
+                        <small>Please select your city.</small>
                     </div>
                 </div>
                 <div class="form-group">
@@ -83,6 +89,7 @@
                     <div class="col-sm-9">
                         {% render_field form.pincode class+="form-control pincode" tabindex="1" data-placeholder="Choose pincode" %}
                         {{ form.pincode.errors }}
+                        <small>Please enter your pincode.</small>
                     </div>
                 </div>
                 <div class="form-group">
@@ -90,6 +97,7 @@
                     <div class="col-sm-9">
                         {% render_field form.phone class+="form-control phone" tabindex="1" data-placeholder="Choose phone" %}
                         {{ form.phone.errors }}
+                        <small>Please enter your valid phone number.</small>
                     </div>
                 </div>
                 {# <div class="form-group"> #}
