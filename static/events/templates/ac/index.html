@@ -50,9 +50,11 @@
 				{% get_sortable_header header ordering request.GET %}
 				{% for record in collection %}
 					<tr class="{% cycle 'odd' 'even' %}">
+                        <td>{{ forloop.counter }}
 						<td>{{ record.state }}</td>
-						<td>{{ record.university }}</td>
+						<td>{{ record.academic_code }}</td>
 						<td>{{ record.institution_name }}</td>
+						<td>{{ record.university }}</td>
 						<td>{{ record.institution_type }}</td>
 						<td>{{ record.institute_category }}</td>
 						<td><a href="{% url 'events:edit_ac' record.id %}">Edit</a></td>

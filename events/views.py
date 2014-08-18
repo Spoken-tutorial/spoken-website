@@ -255,15 +255,15 @@ def events_dashboard(request):
     rp_test_notification = None
     rp_training_notification = None
     if is_organiser(user):
-        organiser_test_notification = EventsNotification.objects.filter((Q(status = 1) | Q(status = 2)), category = 1, academic_id = user.organiser.academic_id, categoryid__in = user.organiser.academic.test_set.filter(organiser_id = user.id).values_list('id')).order_by('-created')
-        #organiser_training_notification = EventsNotification.objects.filter((Q(status = 1) | Q(status = 3)), category = 2, status = 1, academic_id = user.organiser.academic_id, categoryid__in = user.organiser.academic.workshop_set.filter(organiser_id = user.id).values_list('id')).order_by('-created')
+        organiser_test_notification = EventsNotification.objects.filter((Q(status = 1) | Q(status = 2)), category = 1, academic_id = user.organiser.academic_id, categoryid__in = user.organiser.academic.test_set.filter(organiser_id = user.id).values_list('id')).order_by('-created')[:30]
+        #organiser_training_notification = EventsNotification.objects.filter((Q(status = 1) | Q(status = 3)), category = 2, status = 1, academic_id = user.organiser.academic_id, categoryid__in = user.organiser.academic.workshop_set.filter(organiser_id = user.id).values_list('id')).order_by('-created')[:30]
 
     if is_resource_person(user):
-        rp_workshop_notification = EventsNotification.objects.filter((Q(status = 0) | Q(status = 5) | Q(status = 2)), category = 0).order_by('-created')
-        rp_training_notification = EventsNotification.objects.filter((Q(status = 0) | Q(status = 5) | Q(status = 2)), category = 2).order_by('-created')
-        rp_test_notification = EventsNotification.objects.filter((Q(status = 0) | Q(status = 4) | Q(status = 5) | Q(status = 8) | Q(status = 9)), category = 1, categoryid__in = (Training.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)))).values_list('id')).order_by('-created')
+        rp_workshop_notification = EventsNotification.objects.filter((Q(status = 0) | Q(status = 5) | Q(status = 2)), category = 0).order_by('-created')[:30]
+        rp_training_notification = EventsNotification.objects.filter((Q(status = 0) | Q(status = 5) | Q(status = 2)), category = 2).order_by('-created')[:30]
+        rp_test_notification = EventsNotification.objects.filter((Q(status = 0) | Q(status = 4) | Q(status = 5) | Q(status = 8) | Q(status = 9)), category = 1, categoryid__in = (Training.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)))).values_list('id')).order_by('-created')[:30]
     if is_invigilator(user):
-        invigilator_test_notification = EventsNotification.objects.filter((Q(status = 0) | Q(status = 1)), category = 1, academic_id = user.invigilator.academic_id, categoryid__in = user.invigilator.academic.test_set.filter(invigilator_id = user.id).values_list('id')).order_by('-created')
+        invigilator_test_notification = EventsNotification.objects.filter((Q(status = 0) | Q(status = 1)), category = 1, academic_id = user.invigilator.academic_id, categoryid__in = user.invigilator.academic.test_set.filter(invigilator_id = user.id).values_list('id')).order_by('-created')[:30]
     context = {
         'roles' : roles,
         'organiser_workshop_notification' : organiser_workshop_notification,
@@ -340,17 +340,17 @@ def new_ac(request):
                     available_code_range.insert(i, i+1)
                 
                 #find the existing numbers
-                ac = AcademicCenter.objects.filter(state = state).order_by('-academic_code')
-                for record in ac:
-                    a = int(record.academic_code.split('-')[1])-1
-                    available_code_range[a] = 0
+                #ac = AcademicCenter.objects.filter(state = state).order_by('-academic_code')
+                #for record in ac:
+                #    a = int(record.academic_code.split('-')[1])-1
+                #    available_code_range[a] = 0
                 
                 academic_code = code_range + 1
                 #finding Missing number
-                for code in available_code_range:
-                    if code == 0:
-                        academic_code = code
-                        break
+                #for code in available_code_range:
+                #    if code == 0:
+                #        academic_code = code
+                #        break
 
             # Generate academic code
             if academic_code < 10:
@@ -414,12 +414,14 @@ def ac(request):
         
     context = {}
     header = {
-        1: SortableHeader('State', False),
-        2: SortableHeader('university__name', True, 'University'),
-        3: SortableHeader('institution_name', True, 'Institution Name'),
-        4: SortableHeader('institution_type__name', True, 'Institute Type'),
-        5: SortableHeader('institute_category__name', True, 'Institute Category'),
-        6: SortableHeader('Action', False)
+        1: SortableHeader('#', False),
+        2: SortableHeader('State', False),
+        3: SortableHeader('academic_code', True, 'Academic Code'),
+        4: SortableHeader('institution_name', True, 'Institution Name'),
+        5: SortableHeader('university__name', True, 'University'),
+        6: SortableHeader('institution_type__name', True, 'Institute Type'),
+        7: SortableHeader('institute_category__name', True, 'Institute Category'),
+        8: SortableHeader('Action', False)
     }
     
     collectionSet = AcademicCenter.objects.filter(state = user.resource_person.all())
@@ -755,7 +757,23 @@ def training_request(request, role, rid = None):
                 print "Not training"
                 
             w.save()
-            messages.success(request, "<ul><li>Before the Training/Workshop date upload the Participants name list. It is necessary for approving your Training/Workshop request.</li><li>Please click on <b>Upload Participant Data</b> and upload the <b>StudentRegistration.xml</b> file which is generated by the <a target='_blank' href='/offline-attendance-app/'> Offline Participant Attendance App</a> and click <b>Submit</b></li></ul> ")
+            messages.success(request, """
+                <ul>
+                    <li>
+                        Before the Training/Workshop date upload the Participants name 
+                        list. It is necessary for approving your Training/Workshop request.
+                    </li>
+                    <li>
+                        Please click on <b>Upload Participant Data</b> and upload the <b>
+                        CSV </b>(.csv) file which you have generated (using LibreOffice 
+                        Calc / MS Excel) and click <b>Submit</b>.
+                    </li>
+                    <li>
+                        For more details on how to create the .csv file. 
+                        Please <a href="http://process.spoken-tutorial.org/images/9/96/Upload_Attendance.pdf" target="_blank">Click here</a>
+                    </li>
+                </ul>
+            """)
             #update logs
             message = None
             if rid:
@@ -779,7 +797,14 @@ def training_request(request, role, rid = None):
         context = {'form' : form, 'role' : role, 'status' : 'request'}
         return render(request, 'events/templates/training/form.html', context)
     else:
-        messages.info(request, "<ul><li>Before the Training/Workshop date upload the Participants name list.</li><li>You will need to submit the participants name list through <b><a target='_blank' href='/offline-attendance-app/'> Offline Participant Attendance App</a></b></li><li>Please check if your machine is ready. For the Machine Readiness document <a href='http://process.spoken-tutorial.org/images/5/58/Machine-Readiness.pdf' class='link alert-link' target='_blank'> Click Here</a>.</li></ul>")
+        messages.info(request, """
+            <ul>
+                <li>Please download a copy of tutorials on all the machines. For instructions to download tutorials <a href="http://process.spoken-tutorial.org/images/1/1b/Download-Tutorials.pdf" class="link alert-link" target="_blank">Click Here</a></li>
+                <li>Internet is not required while conducting the training/workshop.</li>
+                <li>Before the Training/Workshop date upload the Participants name list. Click here for instructions <a href="http://process.spoken-tutorial.org/images/9/96/Upload_Attendance.pdf" class="link alert-link" target="_blank"><b>Click Here</b></a>.</li>
+                <li>Please check if your machine is ready. For the Machine Readiness document <a href='http://process.spoken-tutorial.org/images/5/58/Machine-Readiness.pdf' class='link alert-link' target='_blank'> Click Here</a>.</li>
+            </ul>
+        """)
         if rid:
             form = TrainingForm(instance = Training.objects.get(pk = rid), user = request.user)
         else:
@@ -831,14 +856,16 @@ def training_list(request, role, status):
             raise Http404('You are not allowed to view this page')
 
         header = {
-            1: SortableHeader('training_type', True, 'Type'),
-            2: SortableHeader('academic__state', True, 'State'),
-            3: SortableHeader('academic', True, 'Institution'),
-            4: SortableHeader('foss', True, 'FOSS'),
-            5: SortableHeader('organiser__user', True, 'Orgainser'),
-            6: SortableHeader('trdate', True, 'Date'),
-            7: SortableHeader('Participants', False),
-            8: SortableHeader('Action', False)
+            1: SortableHeader('#', False),
+            2: SortableHeader('training_type', True, 'Type'),
+            3: SortableHeader('academic__state', True, 'State'),
+            4: SortableHeader('academic__academic_code', True, 'Academic Code'),
+            5: SortableHeader('academic', True, 'Institution'),
+            6: SortableHeader('foss', True, 'FOSS'),
+            7: SortableHeader('organiser__user', True, 'Organiser'),
+            8: SortableHeader('trdate', True, 'Date'),
+            9: SortableHeader('Participants', False),
+            10: SortableHeader('Action', False)
         }
         
         raw_get_data = request.GET.get('o', None)
@@ -971,6 +998,23 @@ def accessrole(request):
 
 @login_required
 def training_attendance(request, wid):
+    messages.success(request, """
+        <ul>
+            <li>
+                Before the Training/Workshop date upload the Participants name 
+                list. It is necessary for approving your Training/Workshop request.
+            </li>
+            <li>
+                Please click on <b>Upload Participant Data</b> and upload the <b>
+                CSV </b>(.csv) file which you have generated (using LibreOffice 
+                Calc / MS Excel) and click <b>Submit</b>.
+            </li>
+            <li>
+                For more details on how to create the .csv file. 
+                Please <a href="http://process.spoken-tutorial.org/images/9/96/Upload_Attendance.pdf" target="_blank">Click here</a>
+            </li>
+        </ul>
+    """)
     user = request.user
     onlinetest_user = ''
     psform = ParticipantSearchForm()
@@ -1259,7 +1303,14 @@ def test_request(request, role, rid = None):
             update_events_notification(user_id = user.id, role = 0, category = 1, category_id = t.id, academic = t.academic_id, status = 0, message = message)
             
             return HttpResponseRedirect("/software-training/test/"+role+"/pending/")
-    messages.info(request, "Upgrade the browser with latest version on all the systems before the test. Please note: Confirm Invigilator availability and acceptance to invigilate before adding his name in this form.")
+    messages.info(request, """
+        <ul>
+            <li>Please make sure that before making the test request a faculty/trainer should have registered as invigilator.</li>
+            <li>Same user cannot be an organiser and the invigilator for the same test.</li>
+            <li>Please confirm the Invigilator's availability and acceptance to invigilate before selecting his name in this form.</li>
+            <li>Upgrade the browser with latest version on all the systems before the test.</li>
+        </ul>
+    """)
     context['role'] = role
     context['status'] = 'request'
     context.update(csrf(request))
@@ -1303,6 +1354,8 @@ def test_list(request, role, status):
             if status == 'ongoing':
                 collectionSet = Test.objects.filter((Q(status = 2) | Q(status = 3)), tdate = datetime.date.today(), invigilator_id = user.invigilator.id).order_by('-tdate')
                 messages.info(request, "Click on the Attendance link below to see the participant list. To know more Click Here.")
+            elif status == 'predated':
+                collectionSet = Test.objects.none()
             elif status == 'approved':
                 collectionSet = Test.objects.filter(invigilator_id=user.invigilator.id, status = status_dict[status], tdate__gt=datetime.date.today()).order_by('-tdate')
             else:
@@ -1313,13 +1366,15 @@ def test_list(request, role, status):
             raise Http404('You are not allowed to view this page')
             
         header = {
-            1: SortableHeader('academic__state', True, 'State'),
-            2: SortableHeader('academic', True, 'Institution'),
-            3: SortableHeader('organiser', True, 'Orgainser'),
-            4: SortableHeader('foss', True, 'FOSS'),
-            5: SortableHeader('tdate', True, 'Date'),
-            6: SortableHeader('Participants', False),
-            7: SortableHeader('Action', False)
+            1: SortableHeader('#', False),
+            2: SortableHeader('academic__state', True, 'State'),
+            3: SortableHeader('academic__academic_code', True, 'Academic Code'),
+            4: SortableHeader('academic', True, 'Institution'),
+            5: SortableHeader('organiser', True, 'Organiser'),
+            6: SortableHeader('foss', True, 'FOSS'),
+            7: SortableHeader('tdate', True, 'Date'),
+            8: SortableHeader('Participants', False),
+            9: SortableHeader('Action', False)
         }
         raw_get_data = request.GET.get('o', None)
         collection = get_sorted_list(request, collectionSet, header, raw_get_data)
@@ -1492,7 +1547,13 @@ def test_attendance(request, tid):
             message = test.academic.institution_name+" has submited Test attendance dated "+test.tdate.strftime("%Y-%m-%d")
             update_events_log(user_id = user.id, role = 1, category = 1, category_id = test.id, academic = test.academic_id, status = 8)
             update_events_notification(user_id = user.id, role = 1, category = 1, category_id = test.id, academic = test.academic_id, status = 8, message = message)
-            messages.success(request, "Thank you for uploading the Attendance. Now make sure that you cross check and verify the details before submiting.") 
+            messages.success(request, """
+                <ul>
+                    <li>Thank you for uploading the Attendance. Now make sure that you cross check and verify the details before submiting.</li>
+                    <li>If you want to add more participants please upload a new CSV file containing the missing participants details.</li>
+                    <li>Once you confirm the list of participants please click on <b>'Mark as Complete'</b></li>
+                </ul>
+            """)
     mdlids = []
     participant_ids = []
     online_participant_ids = list(TestAttendance.objects.filter(test_id = test.id).values_list('mdluser_id'))
@@ -1708,12 +1769,14 @@ def organiser_invigilator_index(request, role, status):
     user = User.objects.get(pk=user.id)
 
     header = {
-        1: SortableHeader('academic__state', True, 'State'),
-        2: SortableHeader('academic', True, 'Institution'),
-        3: SortableHeader('user__username', True, 'Name'),
-        4: SortableHeader('Email', 'False'),
-        5: SortableHeader('Phone', False),
-        6: SortableHeader('Action', False)
+        1: SortableHeader('#', False),
+        2: SortableHeader('academic__state', True, 'State'),
+        3: SortableHeader('academic__academic_code', True, 'Academic Code'),
+        4: SortableHeader('academic__institution_name', True, 'Institution'),
+        5: SortableHeader('user__first_name', True, 'Name'),
+        6: SortableHeader('Email', False),
+        7: SortableHeader('Phone', False),
+        8: SortableHeader('Action', False)
     }
     
     if role == 'organiser':
@@ -1782,7 +1845,14 @@ def update_events_notification(user_id, role, category, category_id, status, aca
         print "Error in Events Notification => ", e
 
 def training_participant_feedback(request, training_id, participant_id):
-    context = {}
+    try:
+        tf = TrainingFeedback.objects.get(training_id = training_id, mdluser_id = participant_id)
+    except:
+        messages.success(request, 'Feedback not exits!')
+        return HttpResponseRedirect('/software-training/training/' + training_id + '/participant/')
+    context = {
+        'feedback' : tf,
+    }
     context.update(csrf(request))
     return render(request, 'events/templates/training/view-feedback.html', context)
 

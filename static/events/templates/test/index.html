@@ -72,7 +72,9 @@
 				{% get_sortable_header header ordering request.GET %}
                 {% for record in collection %}
                     <tr>
+                        <td>{{ forloop.counter }}
                         <td>{{ record.academic.state }}</td>
+                        <td>{{ record.academic.academic_code}}</td>
                         <td>{{ record.academic }}</td>
                         <td>{{ record.organiser.user.first_name }}</td>
                         <td>{{ record.foss.foss }}</td>

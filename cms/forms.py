@@ -69,6 +69,13 @@ class RegisterForm(forms.Form):
         return self.cleaned_data
 
 class ProfileForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        exclude = ['user', 'confirmation_code', 'street', 'location', 'picture']
+    
+    # def clean_picture(self):
+    #     if 'picture' in self.cleaned_data and not self.cleaned_data['picture']:
+    #         raise forms.ValidationError("Profile picture required!")
     first_name = forms.CharField()
     last_name = forms.CharField()
     state = forms.ModelChoiceField(label='State', cache_choices=True, widget = forms.Select(attrs = {'class' : 'ac-state'}), queryset = State.objects.order_by('name'), empty_label = "--- None ---", help_text = "", error_messages = {'required':'State field required.'})
@@ -98,10 +105,6 @@ class ProfileForm(forms.ModelForm):
                 if args[0]['state'] != '' and args[0]['state'] != 'None':
                     self.fields["district"].queryset = District.objects.filter(state__id=args[0]['state'])
                     self.fields["city"].queryset = City.objects.filter(state__id=args[0]['state'])
-            
-    class Meta:
-        model = Profile
-        exclude = ['user', 'confirmation_code', 'street', 'location']
 
 #Overwrite NewsAdminBodyField
 class AdminBodyForm(forms.ModelForm):

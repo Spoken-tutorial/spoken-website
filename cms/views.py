@@ -21,7 +21,7 @@ def dispatcher(request, permalink=''):
     context = {
         'page': page_content,
     }
-    return render_to_response('cms/templates/page.html', context)
+    return render(request, 'cms/templates/page.html', context)
 
 def account_register(request):
     context = {}
@@ -38,7 +38,9 @@ def account_register(request):
             p = Profile(user=user, confirmation_code=confirmation_code)
             p.save()
             send_registration_confirmation(user)
-            messages.success(request, "Your registration was successful but you must now confirm your email address before you can log in. Please check your email and click on the link provided. Thank you.")
+            messages.success(request, """
+                Please confirm your registration by clicking on the activation link which has been sent to your registered email id.
+            """)
             return HttpResponseRedirect('/')
         context = {'form':form}
         return render_to_response('cms/templates/register.html', context, context_instance = RequestContext(request))
@@ -113,12 +115,16 @@ def account_login(request):
             if user is not None:
                 if user.is_active:
                     login(request, user)
-                    # if user_has_profile(user):
+                    try:
+                        p = Profile.objects.get(user_id = user.id)
+                        if not user.first_name or not user.last_name or not p.country or not p.state or not p.district or not p.city  or not p.address or not p.pincode or not p.phone:# or not p.picture:
+                            messages.success(request, "Please update your profile!")
+                            return HttpResponseRedirect('/accounts/profile/'+user.username)
+                    except: 
+                        pass
                     if request.GET and request.GET['next']:
                         return HttpResponseRedirect(request.GET['next'])
                     return HttpResponseRedirect('/')
-                    # messages.success(request, "Please update your profile!")
-                    # return HttpResponseRedirect('/accounts/profile/'+user.username)
                 else:
                     error_msg = 'Your account is disabled.'
             else:
@@ -130,6 +136,7 @@ def account_login(request):
             messages.error(request, error_msg)
         return render_to_response('cms/templates/login.html', context)
     return HttpResponseRedirect('/')
+
 @login_required
 def account_logout(request):
     context = RequestContext(request)
@@ -143,22 +150,21 @@ def account_profile(request, username):
     old_file_path = settings.MEDIA_ROOT + str(profile.picture)
     new_file_path = None
     if request.method == 'POST':
-        form = ProfileForm(user, request.POST, instance = profile)
+        form = ProfileForm(user, request.POST, request.FILES, instance = profile)
         if form.is_valid():
             user.first_name = request.POST['first_name']
             user.last_name = request.POST['last_name']
             user.save()
-            
             form_data = form.save(commit=False)
             form_data.user_id = user.id
             
-            if 'picture-clear' in request.POST and request.POST['picture-clear']:
-                #if not old_file == new_file:
-                if os.path.isfile(old_file_path):
-                    os.remove(old_file_path)
-            
-            if 'picture' in request.FILES:
-                form_data.picture = request.FILES['picture']
+            # if 'picture-clear' in request.POST and request.POST['picture-clear']:
+            #     #if not old_file == new_file:
+            #     if os.path.isfile(old_file_path):
+            #         os.remove(old_file_path)
+            #
+            # if 'picture' in request.FILES:
+            #     form_data.picture = request.FILES['picture']
             
             form_data.save()
             
@@ -188,20 +194,6 @@ def account_profile(request, username):
         instance = Profile.objects.get(user_id=user.id)
         context['form'] = ProfileForm(user, instance = instance)
         return render(request, 'cms/templates/profile.html', context)
-
-@login_required
-def user_has_profile(user):
-    try:
-        p = Profile.objects.get(user_id = user.id)
-        if not p.street or not p.state or not p.district or not p.location or not p.country:
-            return False
-        return True
-    except Exception, e:
-        confirmation_code = ''.join(random.choice(string.ascii_uppercase + string.digits + string.ascii_lowercase) for x in range(33))
-        p = Profile(user=user, confirmation_code=confirmation_code)
-        p.save()
-        print "************"
-        print e
 
 @login_required
 def account_view_profile(request, username):

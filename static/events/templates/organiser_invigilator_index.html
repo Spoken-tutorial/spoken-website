@@ -65,7 +65,9 @@
             {% get_sortable_header header ordering request.GET %}
             {% for record in collection %}
             <tr class="{% cycle 'odd' 'even' %}">
+                <td>{{ forloop.counter }}
                 <td>{{ record.academic.state}}
+                <td>{{ record.academic.academic_code }}
                 <td>{{ record.academic.institution_name }}</td>
                 <td>{{ record.user.first_name }}</td>
                 <td>{{ record.user.email }}</td>

@@ -343,7 +343,7 @@ class TrainingFeedback(models.Model):
     other_weakness = models.TextField()
     tutorial_language = models.PositiveSmallIntegerField()
     apply_information = models.PositiveSmallIntegerField()
-    use_information = models.TextField()
+    if_apply_information_yes = models.TextField()
     
     setup_learning = models.PositiveSmallIntegerField()
     computers_lab = models.PositiveSmallIntegerField()
@@ -363,12 +363,12 @@ class TrainingFeedback(models.Model):
     workshop_improved = models.TextField()
     
     recommend_workshop = models.PositiveSmallIntegerField()
-    use_information = models.TextField()
+    reason_why = models.TextField()
     other_comments = models.TextField()
     created = models.DateTimeField(auto_now_add = True)
     class Meta:
         unique_together = (("training", "mdluser_id"))
-        
+
 class Testimonials(models.Model):
     user = models.ForeignKey(User, related_name = 'testimonial_created_by')
     approved_by = models.ForeignKey(User, related_name = 'testimonial_approved_by', null=True)

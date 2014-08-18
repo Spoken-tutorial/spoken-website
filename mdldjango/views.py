@@ -207,7 +207,7 @@ def offline_details(request, wid, category):
                     fout.write(chunk)
                 fout.close()
                     
-                with open(file_path, 'rb') as csvfile:
+                with open(file_path, 'rbU') as csvfile:
                     count  = 0
                     csvdata = csv.reader(csvfile, delimiter=',', quotechar='|')
                     for row in csvdata:
@@ -243,7 +243,10 @@ def offline_details(request, wid, category):
     context = {
         'form': form,
     }
-    messages.info(request, "Please upload the xml file which you have generated from the 'Offline Attendance App'. To know more Click Here.") 
+    messages.info(request, """
+        Please upload the CSV file which you have generated. 
+        To know more <a href="http://process.spoken-tutorial.org/images/9/96/Upload_Attendance.pdf" target="_blank">Click here</a>.
+    """) 
     context.update(csrf(request))
     return render(request, 'mdl/templates/offline_details.html', context)
 
@@ -295,6 +298,10 @@ def feedback(request, wid):
     w = None
     try:
         w = Training.objects.select_related().get(pk=wid)
+        #check if feedback already exits
+        TrainingFeedback.objects.get(training_id = wid, mdluser_id = mdluserid)
+        messages.success(request, "We have already received your feedback. ")
+        return HttpResponseRedirect('/participant/index/?category=1')
     except Exception, e:
         #print e
         pass
@@ -307,14 +314,15 @@ def feedback(request, wid):
                 form_data.training_id = wid
                 form_data.mdluser_id = mdluserid
                 form_data.save()
-                wa = WorkshopAttendance.objects.get(mdluser_id=mdluserid, workshop_id = wid)
+                wa = TrainingAttendance.objects.get(mdluser_id=mdluserid, training_id = wid)
                 wa.status = 2
                 wa.save()
                 messages.success(request, "Thank you for your valuable feedback.")
-                return HttpResponseRedirect('/participant/index/')
+                return HttpResponseRedirect('/participant/index/?category=1')
             except Exception, e:
-                #print e
-                return HttpResponseRedirect('/participant/index/')
+                print e
+                pass
+                #return HttpResponseRedirect('/participant/index/')
     context = {
         'form' : form,
         'w' : w,
