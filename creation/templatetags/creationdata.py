@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.conf import settings
 from creation.models import *
 import os
+from django.db.models import Q
 from creation.views import is_contributor, is_internal_contributor, is_external_contributor, is_videoreviewer, is_domainreviewer, is_qualityreviewer, is_administrator
 
 register = template.Library()
@@ -130,21 +131,29 @@ def get_video_visits(tr):
     return tr.hit_count
 
 def get_prerequisite(tr, td):
+    print tr, td
     try:
-        tr_rec = TutorialResource.objects.get(tutorial_detail = td, language_id = tr.language_id)
+        tr_rec = TutorialResource.objects.get(Q(status = 1) | Q(status = 2), tutorial_detail = td, language_id = tr.language_id)
         return get_url_name(td.foss.foss) + '/' + get_url_name(td.tutorial) + '/' + tr_rec.language.name
-    except:
+    except Exception, e:
+        print e
+        if tr.language.name != 'English':
+            try:
+                tr_rec = TutorialResource.objects.get(Q(status = 1) | Q(status = 2), tutorial_detail = td, language__name = 'English')
+                return get_url_name(td.foss.foss) + '/' + get_url_name(td.tutorial) + '/English'
+            except:
+                return None
         pass
-    return get_url_name(td.foss.foss) + '/' + get_url_name(td.tutorial) + '/English'
+    return None
 
 def get_prerequisite_from_td(td, lang):
     try:
-        tr_rec = TutorialResource.objects.get(tutorial_detail = td, language_id = lang.id)
+        tr_rec = TutorialResource.objects.get(Q(status = 1) | Q(status = 2), tutorial_detail = td, language_id = lang.id)
         return tr_rec.id
     except:
         if lang.name != 'English':
             try:
-                tr_rec = TutorialResource.objects.get(tutorial_detail = td, language__name = 'English')
+                tr_rec = TutorialResource.objects.get(Q(status = 1) | Q(status = 2), tutorial_detail = td, language__name = 'English')
                 return tr_rec.id
             except:
                 pass
