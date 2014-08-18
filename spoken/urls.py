@@ -37,6 +37,11 @@ urlpatterns = patterns('',
     url(r'^migration/creation/', include('creationmigrate.urls', namespace='creationmigrate')),
     url(r'^migration/events/', include('eventsmigration.urls', namespace='eventsmigration')),
     url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT, 'show_indexes':False}),
+
+    # Old url adjustments
+    url(r'^list_videos/$', 'cdeep.views.list_videos', name='list_videos'),
+    url(r'^show_video/$', 'cdeep.views.show_video', name='show_video'),
+
     #cms
     url(r'^', include('cms.urls', namespace='cms')),
 )

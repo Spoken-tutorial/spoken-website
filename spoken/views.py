@@ -103,27 +103,30 @@ def keyword_search(request):
     context.update(csrf(request))
     return render(request, 'spoken/templates/keyword_search.html', context)
 
+@csrf_exempt
 def tutorial_search(request):
     context = {}
     collection = None
     form = TutorialSearchForm()
-    if request.method == 'POST':
-        form = TutorialSearchForm(request.POST)
+    if request.method == 'GET':
+        form = TutorialSearchForm(request.GET)
         if form.is_valid():
-            lang = form.cleaned_data['language']
-            foss = form.cleaned_data['foss_category']
-            if not lang and foss:
-                collection = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), tutorial_detail__foss_id = foss).order_by('tutorial_detail__level', 'tutorial_detail__order')
-            elif lang and not foss:
-                collection = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), language_id = lang).order_by('tutorial_detail__level', 'tutorial_detail__order')
-            elif foss and lang:
-                collection = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), tutorial_detail__foss_id = foss, language_id = lang).order_by('tutorial_detail__level', 'tutorial_detail__order')
+            foss_get = request.GET.get('foss_category', '')
+            language_get = request.GET.get('language', '')
+            print foss_get, language_get
+            if foss_get and language_get:
+                collection = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), tutorial_detail__foss__foss = foss_get, language__name = language_get).order_by('tutorial_detail__level', 'tutorial_detail__order')
+            elif foss_get:
+                collection = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), tutorial_detail__foss__foss = foss_get).order_by('tutorial_detail__level', 'tutorial_detail__order', 'language__name')
+            elif language_get:
+                collection = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), language__name = language_get).order_by('tutorial_detail__foss__foss', 'tutorial_detail__level', 'tutorial_detail__order')
+            else:
+                collection = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), tutorial_detail__foss__foss = 'Linux', language__name = 'English')
     else:
         collection = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), tutorial_detail__foss__foss = 'Linux', language__name = 'English')
             
     context['form'] = form
     context['collection'] = collection
-    context.update(csrf(request))
     return render(request, 'spoken/templates/tutorial_search.html', context)
 
 def watch_tutorial(request, foss, tutorial, lang):
@@ -157,21 +160,19 @@ def get_language(request):
         lang = request.POST.get('lang')
         output = ''
         if not lang and foss:
-            collection = TutorialResource.objects.select_related('Language').filter(tutorial_detail__foss_id = foss).values_list('language__id', 'language__name').distinct()
+            collection = TutorialResource.objects.select_related('Language').filter(tutorial_detail__foss__foss = foss).values_list('language__name').distinct()
             tmp = '<option value = ""> -- Select Language -- </option>'
             for i in collection:
-                tmp +='<option value='+str(i[0])+'>'+i[1]+'</option>'
+                tmp += '<option value="' + str(i[0]) + '">' + str(i[0]) + '</option>'
             output = ['foss', tmp]
             return HttpResponse(json.dumps(output), mimetype='application/json')
-            
         elif lang and not foss:
-            collection = TutorialResource.objects.filter(language_id = lang).values_list('tutorial_detail__foss__id', 'tutorial_detail__foss__foss').distinct()
+            collection = TutorialResource.objects.filter(language__name = lang).values_list('tutorial_detail__foss__foss').distinct()
             tmp = '<option value = ""> -- Select Foss -- </option>'
             for i in collection:
-                tmp +='<option value='+str(i[0])+'>'+i[1]+'</option>'
+                tmp += '<option value="' + str(i[0]) +'">' + str(i[0]) + '</option>'
             output = ['lang', tmp]
             return HttpResponse(json.dumps(output), mimetype='application/json')
-            
         elif foss and lang:
             pass
 
