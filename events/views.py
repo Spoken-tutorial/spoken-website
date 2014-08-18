@@ -255,15 +255,15 @@ def events_dashboard(request):
     rp_test_notification = None
     rp_training_notification = None
     if is_organiser(user):
-        organiser_test_notification = EventsNotification.objects.filter((Q(status = 1) | Q(status = 2)), category = 1, academic_id = user.organiser.academic_id, categoryid__in = user.organiser.academic.test_set.filter(organiser_id = user.id).values_list('id')).order_by('-created')
-        #organiser_training_notification = EventsNotification.objects.filter((Q(status = 1) | Q(status = 3)), category = 2, status = 1, academic_id = user.organiser.academic_id, categoryid__in = user.organiser.academic.workshop_set.filter(organiser_id = user.id).values_list('id')).order_by('-created')
+        organiser_test_notification = EventsNotification.objects.filter((Q(status = 1) | Q(status = 2)), category = 1, academic_id = user.organiser.academic_id, categoryid__in = user.organiser.academic.test_set.filter(organiser_id = user.id).values_list('id')).order_by('-created')[:30]
+        #organiser_training_notification = EventsNotification.objects.filter((Q(status = 1) | Q(status = 3)), category = 2, status = 1, academic_id = user.organiser.academic_id, categoryid__in = user.organiser.academic.workshop_set.filter(organiser_id = user.id).values_list('id')).order_by('-created')[:30]
 
     if is_resource_person(user):
-        rp_workshop_notification = EventsNotification.objects.filter((Q(status = 0) | Q(status = 5) | Q(status = 2)), category = 0).order_by('-created')
-        rp_training_notification = EventsNotification.objects.filter((Q(status = 0) | Q(status = 5) | Q(status = 2)), category = 2).order_by('-created')
-        rp_test_notification = EventsNotification.objects.filter((Q(status = 0) | Q(status = 4) | Q(status = 5) | Q(status = 8) | Q(status = 9)), category = 1, categoryid__in = (Training.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)))).values_list('id')).order_by('-created')
+        rp_workshop_notification = EventsNotification.objects.filter((Q(status = 0) | Q(status = 5) | Q(status = 2)), category = 0).order_by('-created')[:30]
+        rp_training_notification = EventsNotification.objects.filter((Q(status = 0) | Q(status = 5) | Q(status = 2)), category = 2).order_by('-created')[:30]
+        rp_test_notification = EventsNotification.objects.filter((Q(status = 0) | Q(status = 4) | Q(status = 5) | Q(status = 8) | Q(status = 9)), category = 1, categoryid__in = (Training.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)))).values_list('id')).order_by('-created')[:30]
     if is_invigilator(user):
-        invigilator_test_notification = EventsNotification.objects.filter((Q(status = 0) | Q(status = 1)), category = 1, academic_id = user.invigilator.academic_id, categoryid__in = user.invigilator.academic.test_set.filter(invigilator_id = user.id).values_list('id')).order_by('-created')
+        invigilator_test_notification = EventsNotification.objects.filter((Q(status = 0) | Q(status = 1)), category = 1, academic_id = user.invigilator.academic_id, categoryid__in = user.invigilator.academic.test_set.filter(invigilator_id = user.id).values_list('id')).order_by('-created')[:30]
     context = {
         'roles' : roles,
         'organiser_workshop_notification' : organiser_workshop_notification,
