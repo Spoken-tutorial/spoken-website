@@ -7,7 +7,7 @@ class KeywordSearchForm(forms.Form):
 
 class TutorialSearchForm(forms.Form):
     try:
-        foss_category = forms.ChoiceField(
+        foss = forms.ChoiceField(
             choices = [('', '-- Select Foss --')] + list(TutorialResource.objects.filter(status = 1, language__name = 'English').values_list('tutorial_detail__foss__foss', 'tutorial_detail__foss__foss').order_by('tutorial_detail__foss__foss').distinct()),
             widget=forms.Select(),
             required = False,

@@ -117,7 +117,7 @@ def tutorial_search(request):
     if request.method == 'GET':
         form = TutorialSearchForm(request.GET)
         if form.is_valid():
-            foss_get = request.GET.get('foss_category', '')
+            foss_get = request.GET.get('foss', '')
             language_get = request.GET.get('language', '')
             print foss_get, language_get
             if foss_get and language_get:

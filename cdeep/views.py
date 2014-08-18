@@ -11,7 +11,7 @@ def list_videos(request):
     foss = foss.replace('+', 'p').replace('-', ' ')
     language = request.GET.get('language', '')
     if foss or language:
-        return HttpResponseRedirect('/tutorial-search/?foss_category=' + foss + '&language=' + language)
+        return HttpResponseRedirect('/tutorial-search/?foss=' + foss + '&language=' + language)
 
     return HttpResponseRedirect('/tutorial-search/')
 
