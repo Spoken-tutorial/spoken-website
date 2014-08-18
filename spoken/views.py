@@ -11,12 +11,18 @@ from django.conf import settings
 from forms import *
 import os
 from django.http import Http404
+from django.core.exceptions import PermissionDenied
 from urllib import unquote_plus
 import json
 import datetime
-from creation.views import get_video_info
+from creation.views import get_video_info, is_administrator
 from creation.models import TutorialCommonContent, TutorialDetail, TutorialResource, Language
 from cms.models import SiteFeedback, Event, NewsType, News
+
+def is_resource_person(user):
+    """Check if the user is having resource person  rights"""
+    if user.groups.filter(name='Resource Person').count() == 1:
+        return True
 
 @csrf_exempt
 def site_feedback(request):
@@ -186,8 +192,8 @@ def testimonials_new(request):
     user = request.user
     context = {}
     form = TestimonialsForm()
-    if not user.is_authenticated():
-        raise Http404('You are not allowed to view this page')
+    if (not user.is_authenticated()) or ((not is_resource_person(user)) and (not is_administrator(user))):
+        raise PermissionDenied()
     
     if request.method == 'POST':
         form = TestimonialsForm(request.POST, request.FILES)
@@ -230,8 +236,8 @@ def admin_testimonials_edit(request, rid):
     context = {}
     form = TestimonialsForm()
     instance = ''
-    if not user.is_authenticated():
-        raise Http404('You are not allowed to view this page')
+    if (not user.is_authenticated()) or ((not is_resource_person(user)) and (not is_administrator(user))):
+        raise PermissionDenied()
     try:
         instance = Testimonials.objects.get(pk= rid)
     except Exception, e:
@@ -253,8 +259,8 @@ def admin_testimonials_delete(request, rid):
     user = request.user
     context = {}
     instance = ''
-    if not user.is_authenticated():
-        raise Http404('You are not allowed to view this page')
+    if (not user.is_authenticated()) or ((not is_resource_person(user)) and (not is_administrator(user))):
+        raise PermissionDenied()
     try:
         instance = Testimonials.objects.get(pk= rid)
     except Exception, e:
@@ -273,8 +279,8 @@ def admin_testimonials(request):
     ''' admin testimonials '''
     user = request.user
     context = {}
-    if not user.is_authenticated():
-        raise Http404('You are not allowed to view this page')
+    if (not user.is_authenticated()) or ((not is_resource_person(user)) and (not is_administrator(user))):
+        raise PermissionDenied()
     collection = Testimonials.objects.all()
     context['collection'] = collection
     context.update(csrf(request))
