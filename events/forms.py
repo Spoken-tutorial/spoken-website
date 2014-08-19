@@ -62,7 +62,7 @@ class AcademicForm(forms.ModelForm):
             
     class Meta:
         model = AcademicCenter
-        exclude = ['user', 'academic_code']
+        exclude = ['user', 'academic_code', 'institute_category']
 
 '''
 class OrganiserForm(forms.Form):

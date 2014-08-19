@@ -402,6 +402,8 @@ def new_ac(request):
             academic_code = state_code +'-'+ ac_code
             
             form_data.academic_code = academic_code
+            ic = InstituteCategory.objects.get(name = 'Uncategorized')
+            form_data.institute_category = ic
             form_data.save()
             messages.success(request, form_data.institution_name+" has been added")
             return HttpResponseRedirect("/software-training/ac/")
