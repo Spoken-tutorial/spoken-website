@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 {% load static %}
 {% load cmsdata %}
+{% load creationdata %}
 <html>
 	<head>
 		<title>
@@ -177,6 +178,14 @@
                                                         <li class="divider"></li>
                                                         <li><a href="/accounts/view-profile/{{ user }}/">View Profile</a></li>
                                                         <li class="divider"></li>
+                                                        {% if user|get_administrator or user.is_masked %}
+                                                            {% if user.is_masked %}
+                                                                <li><a href="/masquerade/unmask">Switch Back</a></li>
+                                                            {% else %}
+                                                                <li><a href="/masquerade/">Masquerade</a></li>
+                                                            {% endif %}
+                                                            <li class="divider"></li>
+                                                        {% endif %}
                                                         <li><a href="/accounts/logout/">Log Out</a></li>
                                                     </ul>
                                                 </li>

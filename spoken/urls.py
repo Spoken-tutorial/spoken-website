@@ -44,6 +44,9 @@ urlpatterns = patterns('',
     url(r'^show_video/$', 'cdeep.views.show_video', name='show_video'),
     url(r'^search/node/([0-9a-zA-Z-+%\(\)]+)/$', 'cdeep.views.search_node', name='search_node'),
 
+    # Masquerade user
+    url(r'^masquerade/', include('masquerade.urls', namespace='masquerade')),
+
     #cms
     url(r'^', include('cms.urls', namespace='cms')),
 )
