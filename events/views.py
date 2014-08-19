@@ -237,6 +237,41 @@ def training_gentle_reminder(request):
             send_email(status, to, t)
     return HttpResponse("Done!")
 
+# only for workshop, pilot, live workshop
+def close_predated_ongoing_workshop(request):
+    predated_ongoing_workshop = Training.objects.filter(training_type__gt = 0, status = 3, trdate__lt = datetime.date.today())
+    if predated_ongoing_workshop:
+        for w in predated_ongoing_workshop:
+            try:
+                present = TrainingAttendance.objects.get(training = w, status__gte = 1).count()
+                absentees = TrainingAttendance.objects.get(training = w, status = 0).count()
+                if present:
+                    w.participant_counts = present
+                    w.status = 4
+                    w.save()
+                    
+                    #email
+            except:
+                pass
+    return HttpResponse("Done!")
+
+# Mark as complelete when invigilator forgot to close the Test
+def close_predated_ongoing_test(request):
+    predated_ongoing_test = Test.objects.filter(status = 3, tdate__lt = datetime.date.today())
+    if predated_ongoing_test:
+        for t in predated_ongoing_test:
+            try:
+                present = TestAttendance.objects.get(test = t, status__gte = 1).count()
+                absentees = TestAttendance.objects.get(test = t, status = 0).count()
+                if present:
+                    w.participant_count = present
+                    w.status = 4
+                    w.save()
+                    #email
+            except:
+                pass
+    return HttpResponse("Done!")
+
 @login_required
 def events_dashboard(request):
     user = request.user
