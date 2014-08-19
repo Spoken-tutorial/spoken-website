@@ -587,7 +587,7 @@ def upload_script(request, trid):
         raise PermissionDenied()
     response_msg = ''
     error_msg = ''
-    storage_path = tr_rec.tutorial_detail.foss.foss + '/' + tr_rec.tutorial_detail.level.code + '/' + tr_rec.tutorial_detail.tutorial.replace(' ', '-') + '/' + tr_rec.language.name
+    storage_path = tr_rec.tutorial_detail.foss.foss.replace(' ', '-') + '/' + tr_rec.tutorial_detail.level.code + '/' + tr_rec.tutorial_detail.tutorial.replace(' ', '-') + '/' + tr_rec.language.name
     script_path = settings.SCRIPT_URL + storage_path
     if request.method == 'POST':
         form = UploadScriptForm(script_path, request.POST)
@@ -663,7 +663,7 @@ def save_timed_script(request, tdid):
         raise PermissionDenied()
     response_msg = ''
     error_msg = ''
-    storage_path = tr_rec.tutorial_detail.foss.foss + '/' + tr_rec.tutorial_detail.level.code + '/' + tr_rec.tutorial_detail.tutorial.replace(' ', '-') + '/' + tr_rec.language.name + '-timed'
+    storage_path = tr_rec.tutorial_detail.foss.foss.replace(' ', '-') + '/' + tr_rec.tutorial_detail.level.code + '/' + tr_rec.tutorial_detail.tutorial.replace(' ', '-') + '/' + tr_rec.language.name + '-timed'
     script_path = settings.SCRIPT_URL + storage_path
     form = UploadScriptForm(script_path)
     if request.method == 'POST':
