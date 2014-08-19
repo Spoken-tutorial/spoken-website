@@ -8,6 +8,7 @@ from django.contrib import messages
 from django.shortcuts import render, render_to_response
 from django.template import RequestContext
 from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import get_object_or_404
 
 from django.views.decorators.csrf import csrf_exempt
 
@@ -833,8 +834,8 @@ def training_request(request, role, rid = None):
     else:
         messages.info(request, """
             <ul>
+		<li><b>TO HAVE YOUR TRAINING / WORKSHOP REQUEST APPROVED IT IS NECESSARY TO UPLOAD THE LIST OF PARTICIPANTS <a href="http://process.spoken-tutorial.org/images/9/96/Upload_Attendance.pdf" class="link alert-link" target="_blank"><b>Click Here</b></a></b></li>
                 <li>Please download a copy of tutorials on all the machines. For instructions to download tutorials <a href="http://process.spoken-tutorial.org/images/1/1b/Download-Tutorials.pdf" class="link alert-link" target="_blank">Click Here</a></li>
-                <li>Internet is not required while conducting the training/workshop.</li>
                 <li>Before the Training/Workshop date upload the Participants name list. Click here for instructions <a href="http://process.spoken-tutorial.org/images/9/96/Upload_Attendance.pdf" class="link alert-link" target="_blank"><b>Click Here</b></a>.</li>
                 <li>Please check if your machine is ready. For the Machine Readiness document <a href='http://process.spoken-tutorial.org/images/5/58/Machine-Readiness.pdf' class='link alert-link' target='_blank'> Click Here</a>.</li>
             </ul>
@@ -1340,9 +1341,9 @@ def test_request(request, role, rid = None):
     messages.info(request, """
         <ul>
             <li>Please make sure that before making the test request a faculty/trainer should have registered as invigilator.</li>
-            <li>Same user cannot be an organiser and the invigilator for the same test.</li>
+            <li>Same person cannot be an organiser and the invigilator for the same test.</li>
             <li>Please confirm the Invigilator's availability and acceptance to invigilate before selecting his name in this form.</li>
-            <li>Upgrade the browser with latest version on all the systems before the test.</li>
+            <li>Upgrade the browser with version of Mozilla Firefox 30 or higher on all the systems before the test.</li>
         </ul>
     """)
     context['role'] = role
@@ -1889,6 +1890,43 @@ def training_participant_feedback(request, training_id, participant_id):
     }
     context.update(csrf(request))
     return render(request, 'events/templates/training/view-feedback.html', context)
+
+def resource_center(request, slug = None):
+    context = {}
+    header = {
+        1: SortableHeader('#', False),
+        2: SortableHeader('State', False),
+        3: SortableHeader('institution_name', True, 'Institution Name'),
+        4: SortableHeader('Address', False),
+        5: SortableHeader('Contact Person', False),
+        6: SortableHeader('Action', False)
+    }
+    
+    collection = None
+    if slug:
+        collection = AcademicCenter.objects.filter(resource_center = 1, state__slug = slug).order_by('state__name', 'institution_name')
+    else:
+        collection = AcademicCenter.objects.filter(resource_center = 1).order_by('state__name', 'institution_name')
+    
+    raw_get_data = request.GET.get('o', None)
+    collection = get_sorted_list(request, collection, header, raw_get_data)
+    ordering = get_field_index(raw_get_data)
+    
+    collection = AcademicCenterFilter(request.GET, queryset=collection)
+    context['form'] = collection.form
+    
+    page = request.GET.get('page')
+    collection = get_page(collection, page)
+    
+    context['collection'] = collection
+    context['header'] = header
+    context['ordering'] = ordering
+    return render(request, 'events/templates/ac/resource-center.html', context)
+
+def academic_center(request, academic_id = None, slug = None):
+    academic = get_object_or_404(AcademicCenter, id=academic_id)
+    context = {}
+    return render(request, 'events/templates/ac/academic-center.html', context)
 
 #Ajax Request and Responces
 @csrf_exempt

@@ -4,10 +4,17 @@ from events.models import *
 class AcademicCenterFilter(django_filters.FilterSet):
     state = django_filters.ChoiceFilter(choices=State.objects.none())
     def __init__(self, *args, **kwargs):
-        user = kwargs['user']
-        kwargs.pop('user')
+        user = None
+        if 'user' in kwargs:
+            user = kwargs['user']
+            kwargs.pop('user')
+            
         super(AcademicCenterFilter, self).__init__(*args, **kwargs)
-        choices = list(State.objects.filter(resourceperson__user_id=user).values_list('id', 'name'))
+        choices = None
+        if user:
+            choices = list(State.objects.filter(resourceperson__user_id=user).values_list('id', 'name').order_by('name'))
+        else:
+            choices = list(State.objects.exclude(name = 'Uncategorized').values_list('id', 'name').order_by('name'))
         choices.insert(0, ('', '---------'),)
         self.filters['state'].extra.update({'choices' : choices})
     class Meta:

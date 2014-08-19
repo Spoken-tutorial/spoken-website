@@ -15,6 +15,7 @@ class State(models.Model):
     users = models.ManyToManyField(User, related_name="resource_person", through='ResourcePerson')
     code = models.CharField(max_length=3)
     name = models.CharField(max_length=50)
+    slug = models.CharField(max_length = 100)
     latitude = models.DecimalField(null=True, max_digits=10, decimal_places=4, blank=True)
     longtitude = models.DecimalField(null=True, max_digits=10, decimal_places=4, blank=True)
     img_map_area = models.TextField()

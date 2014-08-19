@@ -55,6 +55,12 @@ urlpatterns = patterns('',
     url(r'^delete-notification/(\w+)/(\d+)/$', 'events.views.delete_events_notification', name="delete_events_notification"),
     url(r'^clear-notifications/(\w+)/$', 'events.views.clear_events_notification', name="clear_events_notification"),
     
+    url(r'^resource-center/$', 'events.views.resource_center', name="resource_center"),
+    url(r'^resource-center/(?P<slug>[\w-]+)/$', 'events.views.resource_center', name="resource_center"),
+    
+    url(r'^academic-center/$', 'events.views.academic_center', name="academic_center"),
+    url(r'^academic-center/(?P<slug>[\w-]+)/$', 'events.views.academic_center', name="academic_center"),
+    
     #Ajax 
     url(r'ajax-ac-state/$', 'events.views.ajax_ac_state', name='ajax_ac_state'),
     url(r'ajax-ac-location/$', 'events.views.ajax_ac_location', name='ajax_ac_location'),

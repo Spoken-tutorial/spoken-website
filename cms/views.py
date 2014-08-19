@@ -118,7 +118,7 @@ def account_login(request):
                     try:
                         p = Profile.objects.get(user_id = user.id)
                         if not user.first_name or not user.last_name or not p.country or not p.state or not p.district or not p.city  or not p.address or not p.pincode or not p.phone:# or not p.picture:
-                            messages.success(request, "Please update your profile!")
+                            messages.success(request, "<ul><li>Please update your profile.</li><li>Please make sure you enter your First name, Last name both and with correct spelling.</li><li>It is recommended that you do upload the photo.</li></ul>")
                             return HttpResponseRedirect('/accounts/profile/'+user.username)
                     except: 
                         pass

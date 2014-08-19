@@ -1,5 +1,5 @@
 from django.contrib import admin
-
+from django.template.defaultfilters import slugify
 # Register your models here.
 
 from events.models import *
@@ -28,6 +28,9 @@ class TestCategoryAdmin(admin.ModelAdmin):
 
 class StateAdmin(admin.ModelAdmin):
     fields = ['name']
+    def save_model(self, request, obj, form, change):
+        obj.slug = slugify(request.POST['name'])
+        obj.save()
 
 class DistrictAdmin(admin.ModelAdmin):
     fields = ['name', 'state']
