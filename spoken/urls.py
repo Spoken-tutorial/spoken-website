@@ -35,8 +35,8 @@ urlpatterns = patterns('',
     url(r'^creation/', include('creation.urls', namespace='creation')),
     url(r'^captcha/', include('captcha.urls')),
     url(r'^nicedit/', include('nicedit.urls')),
-    url(r'^migration/creation/', include('creationmigrate.urls', namespace='creationmigrate')),
-    url(r'^migration/events/', include('eventsmigration.urls', namespace='eventsmigration')),
+    #url(r'^migration/creation/', include('creationmigrate.urls', namespace='creationmigrate')),
+    #url(r'^migration/events/', include('eventsmigration.urls', namespace='eventsmigration')),
     url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT, 'show_indexes':False}),
 
     # Old url adjustments
