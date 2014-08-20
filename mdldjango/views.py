@@ -19,10 +19,7 @@ from django.conf import settings
 from events.forms import OrganiserForm
 from django.core.mail import EmailMultiAlternatives
 from validate_email import validate_email
-
-def encript_password(password):
-    password = hashlib.md5(password+'VuilyKd*PmV?D~lO19jL(Hy4V/7T^G>p').hexdigest()
-    return password
+from get_or_create_participant import get_or_create_participant
     
 def authenticate(username = None, password = None):
     try:
@@ -196,7 +193,8 @@ def offline_details(request, wid, category):
                             messages.error(request, "Participant/Student's Email ID is Required. Please open with browser and check all required details are exits!")
                             return HttpResponseRedirect('/participant/offline-data/'+ str(wid) + '/' + str(category))
                         get_or_create_participant(w, firstname, lastname, gender, email, category)
-                    except:
+                    except Exception, e:
+                        #print e, "sssssssssss"
                         messages.error(request, "Record number "+ str(count) + " required data is missing. Please open with browser and check all required details are exits!.")
                         continue
             else:
@@ -206,7 +204,8 @@ def offline_details(request, wid, category):
                 for chunk in f.chunks():
                     fout.write(chunk)
                 fout.close()
-                    
+                
+                error_line_no = ''
                 with open(file_path, 'rbU') as csvfile:
                     count  = 0
                     csvdata = csv.reader(csvfile, delimiter=',', quotechar='|')
@@ -222,22 +221,31 @@ def offline_details(request, wid, category):
                                 continue
                             get_or_create_participant(w, firstname, lastname, gender, email, category)
                         except Exception, e:
-                            messages.error(request, "Line number "+ str(count) + " : Required data is missing. Please check value seperated by <b>Comma (,) </b>.")
+                            print e, "ssssssssssssssssss"
+                            if not error_line_no:
+                                error_line_no = error_line_no + str(count)
+                            else:
+                                error_line_no = error_line_no + ', ' + str(count)
+                            #messages.error(request, "Line number "+ str(count) + " : Required data is missing. Please check value seperated by <b>Comma (,) </b>.")
                         continue
                 os.unlink(file_path)
                 
+                if error_line_no:
+                    messages.error(request, "<b>Error: Line number "+ error_line_no + " in CSV file data is not in a proper format in the Participant list. The format should be First name, Last name, Email, Gender. For more details <a href='http://process.spoken-tutorial.org/images/c/c2/Participant_data.pdf' target='_blank'>Click here</a></b>")
             #update logs
             if category == 1:
                 message = w.academic.institution_name+" has submited Offline "+w.foss.foss+" workshop attendance dated "+w.trdate.strftime("%Y-%m-%d")
                 update_events_log(user_id = user.id, role = 2, category = 0, category_id = w.id, academic = w.academic_id, status = 5)
                 update_events_notification(user_id = user.id, role = 2, category = 0, category_id = w.id, academic = w.academic_id, status = 5, message = message)
-                messages.success(request, "Thank you for uploading the Attendance. Now make sure that you cross check and verify the details before submiting.")
+                if not error_line_no:
+                    messages.success(request, "Thank you for uploading the Attendance. Now make sure that you cross check and verify the details before submiting.")
                 return HttpResponseRedirect('/software-training/workshop/'+str(wid)+'/attendance/')
             else:
                 message = w.academic.institution_name+" has submited Offline training attendance."
                 update_events_log(user_id = user.id, role = 2, category = 2, category_id = w.id, academic = w.academic_id, status = 5)
                 update_events_notification(user_id = user.id, role = 2, category = 2, category_id = w.id, academic = w.academic_id, status = 5, message = message)
-                messages.success(request, "Thank you for uploading the Attendance. Now make sure that you cross check and verify the details before submiting.")
+                if not error_line_no:
+                    messages.success(request, "Thank you for uploading the Attendance. Now make sure that you cross check and verify the details before submiting.")
                 return HttpResponseRedirect('/software-training/training/'+str(wid)+'/attendance/')
         messages.error(request, "Please Upload xml file !") 
     context = {
@@ -384,76 +392,3 @@ Admin Spoken Tutorials
     }
     context.update(csrf(request))
     return render(request, 'mdl/templates/password_reset.html', context)
-
-def get_or_create_participant(w, firstname, lastname, gender, email, category):
-    password_string = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(8))
-    password_encript = encript_password(password_string)
-
-    password = password_encript
-    username = email
-    try:
-        mdluser = MdlUser.objects.get(email = email)
-        mdluser.institution = w.academic_id
-        mdluser.firstname = firstname
-        mdluser.lastname = lastname
-        mdluser.save()
-    except Exception, e:
-        mdluser = MdlUser()
-        mdluser.auth = 'manual'
-        mdluser.firstname = firstname
-        mdluser.username = username
-        mdluser.lastname = lastname
-        mdluser.password = password
-        mdluser.institution = w.academic_id
-        mdluser.email = email
-        mdluser.confirmed = 1
-        mdluser.mnethostid = 1
-        mdluser.gender = gender
-        mdluser.save()
-        mdluser = MdlUser.objects.filter(email = email, firstname= firstname, username=username, password=password).first()
-        
-        # send password to email
-        subject  = "Spoken Tutorial Online Test password"
-        to = [mdluser.email]
-        message = '''Hi {0},
-
-Your account password at 'Spoken Tutorials Online Test as follows'
-
-Your current login information is now:
-username: {1}
-password: {2}
-
-Please go to this page to change your password:
-{3}
-
-In most mail programs, this should appear as a blue link
-which you can just click on.  If that doesn't work,
-then cut and paste the address into the address
-line at the top of your web browser window.
-
-Cheers from the 'Spoken Tutorials Online Test Center' administrator,
-
-Admin Spoken Tutorials
-'''.format(mdluser.firstname, mdluser.username, password_string, 'http://onlinetest.spoken-tutorial.org/login/change_password.php')
-
-        # send email
-        email = EmailMultiAlternatives(
-            subject, message, 'administrator@spoken-tutorial.org',
-            to = to, bcc = [], cc = [],
-            headers={'Reply-To': 'no-replay@spoken-tutorial.org', "Content-type":"text/html;charset=iso-8859-1"}
-        )
-
-        result = email.send(fail_silently=False)
-        #print "-----------------------------------------"
-        #print message
-        #print "-----------------------------------------"
-    if category == 2:
-        try:
-            wa = TrainingAttendance.objects.get(training_id = w.id, mdluser_id = mdluser.id)
-        except Exception, e:
-            #print e
-            wa = TrainingAttendance()
-            wa.training_id = w.id
-            wa.status = 0
-            wa.mdluser_id = mdluser.id
-            wa.save()

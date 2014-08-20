@@ -36,7 +36,7 @@
 	    </div>
 	    <div class="row well">
             <div class='col-sm-8'>
-	            <form action="{{ action }}" method="post" class='form-horizontal'>{% csrf_token %}
+	            <form action="{{ action }}" method="post" class='form-horizontal' enctype="multipart/form-data">{% csrf_token %}
 	                {% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
 	                {% if form.non_field_errors %}
 	                <ul>
@@ -62,7 +62,6 @@
 		                {% render_field form.academic class+="form-control academic" tabindex="1" data-placeholder="Enter academic name" %}
 		                {{ form.name.errors }}
                     </div> -->
-                    {{ form.errors }}
 	               <div class="form-group">
                         <label class="col-sm-3 control-label" for= "id_training_type">Training Type</label>
                         <div class="col-sm-9">
@@ -80,7 +79,13 @@
                             {% endfor %}
                         </div>
                     </div>
-                    {{ instance.course_number }}
+                    <div class="form-group">
+		                <label class="col-sm-3 control-label" for="id_xml_file">Participant List (Upload CSV File)</label>
+		                <div class="col-sm-9">
+		                    {% render_field form.xml_file class+=" xml_file"%}
+		                    {{ form.xml_file.errors }}
+		                </div>
+	                </div>
                     <div class="form-group">
 		                <label class="col-sm-3 control-label" for= "id_course">Course / Stream</label>
 		                <div class="col-sm-9">

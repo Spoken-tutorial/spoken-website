@@ -226,8 +226,10 @@ class TrainingForm(forms.ModelForm):
     
     trdate = forms.DateTimeField(required = True, error_messages = {'required':'Date field is required.'})
     skype = forms.ChoiceField(widget=forms.RadioSelect, choices=[(0, 'No'),(1, 'Yes')], required = True)
+    xml_file  = forms.FileField(required = True)
     def __init__(self, *args, **kwargs):
         user = ''
+        tmp = 0
         if 'user' in kwargs:
             user = kwargs["user"]
             del kwargs["user"]
@@ -237,6 +239,8 @@ class TrainingForm(forms.ModelForm):
             del kwargs["instance"]
         super(TrainingForm, self).__init__(*args, **kwargs)
         if user:
+            if instance:
+                self.fields['xml_file'].required = False
             from events.views import is_resource_person
             if is_resource_person(user):
                 self.fields['training_type'].choices = [(0, 'Training'),(1, 'Workshop'),(2, 'Pilot Workshop'), (3, 'Live Workshop')]
@@ -251,7 +255,7 @@ class TrainingForm(forms.ModelForm):
             try:
                 self.fields['course_number'].initial = instance.extra_fields.paper_name
             except Exception, e:
-                print e
+                #print e
                 self.fields['course_number'].initial = ''
             
 class TrainingPermissionForm(forms.Form):

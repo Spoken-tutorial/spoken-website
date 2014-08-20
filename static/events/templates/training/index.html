@@ -77,12 +77,8 @@
 						<td>{{ record.academic }}</td>
 						<td>{{ record.foss }}</td>
 						<td>{{ record.organiser.user.first_name }}</td>
-						<td>{{ record.trdate|date:"d M Y" }} {{	record.wtime }}</td>
-						{% if status == 'completed' %}
-						    <td>{{ record.participant_counts }}</td>
-						{% else %}
-						    <td>{{ record|participant_count:"Training" }}</td>
-						{% endif %}
+						<td>{{ record.trdate|date:"d M Y" }} {{ record.wtime }}</td>
+						<td>{{ record.participant_counts }}</td>
                         <!-- actions based on roles -->
                         <td>
                             {% if role == 'rp' %}
@@ -127,11 +123,6 @@
                                     <a href="{% url 'events:training_edit' role record.id %}">Edit</a> |
                                     <a target='_blank' href="{% url 'events:training_attendance' record.id %}">Attendance</a> |
                                     <a target='_blank' href="{% url 'events:training_participant' record.id %}">Participants</a>
-                                    <!--{% if record.status == 0 %}
-                                        <a href="{% url 'mdldjango:mdl_offline_workshop_details' record.id 2 %}">Upload data</a>
-                                    {% else %}
-                                        <a href="{% url 'mdldjango:mdl_offline_workshop_details' record.id 2 %}">Re-Upload data</a>
-                                    {% endif %} -->
                                 {% endif %}
                                 {% if status == 'approved' %}
                                     <a target='_blank' href="{% url 'events:training_participant' record.id %}">Participants</a>

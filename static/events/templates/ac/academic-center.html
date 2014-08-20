@@ -1,0 +1,30 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load cmsdata %}
+{% load creationdata %}
+{% block title %} Listing Resourse Centers {% endblock %}
+{% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
+{% block heading %}
+    <i class="fa fa-list-ul"></i> Listing Resourse Centers <a href="{% url 'events:events_dashboard' %}" class=' dashboard pull-right'>Dashboard</a>
+{% endblock %}
+{% block content %}
+	<div class='table-responsive'>
+		{% if collection %}
+			<table class="paleblue table table-bordered table-hover table-striped">
+				{% get_sortable_header header ordering request.GET %}
+				{% for record in collection %}
+					<tr class="{% cycle 'odd' 'even' %}">
+                        <td>{{ forloop.counter }}
+						<td>{{ record.state }}</td>
+						<td>{{ record.institution_name }}</td>
+						<td>{{ record.address|safe }}</td>
+						<td>{{ record.contact_person|safe }}</td>
+					</tr>
+				{% endfor %}
+			</table>
+		{% else %}
+		    <p class="no-record"> No record found!</p>
+		{% endif %}
+	</div>
+{% endblock %}
