@@ -317,7 +317,7 @@ def news_view(request, cslug, slug):
         print e
         raise Http404('You are not allowed to view this page')
 
-def create_subtitle_files(request, overwrite = False):
+def create_subtitle_files(request, overwrite = True):
     rows = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2))
     for row in rows:
         code = 0
@@ -335,7 +335,7 @@ def create_subtitle_files(request, overwrite = False):
                 continue
         srt_file_path = settings.MEDIA_ROOT + 'videos/' + str(row.tutorial_detail.foss_id) + '/' + str(row.tutorial_detail_id) + '/'
         srt_file_name = row.tutorial_detail.tutorial.replace(' ', '-') + '-' + row.language.name + '.srt'
-        print srt_file_name
+        # print srt_file_name
         if not overwrite and os.path.isfile(srt_file_path + srt_file_name):
             continue
         try:
@@ -345,7 +345,7 @@ def create_subtitle_files(request, overwrite = False):
         result = ''
         if(int(code) == 200):
             if generate_subtitle(script_path, srt_file_path + srt_file_name):
-                print 'Success: ', row.tutorial_detail.foss.foss, + srt_file_name + '<br />'
+                print 'Success: ', row.tutorial_detail.foss.foss + ',', srt_file_name
             else:
-                print 'Failed: ', row.tutorial_detail.foss.foss + srt_file_name + '<br />'
+                print 'Failed: ', row.tutorial_detail.foss.foss + ',', srt_file_name
     return HttpResponse('Success!')

@@ -95,7 +95,7 @@ def generate_subtitle(srt_url, srt_file_path):
             file_head.close()
         #print srt_data
     except Exception, e:
-        print e
+        #print e
         return False
     return True
 
