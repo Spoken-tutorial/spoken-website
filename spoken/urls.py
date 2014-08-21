@@ -46,6 +46,9 @@ urlpatterns = patterns('',
 
     # Masquerade user
     url(r'^masquerade/', include('masquerade.urls', namespace='masquerade')),
+    
+    # Cron links
+    url(r'^cron/subtitle-files/create/$', 'spoken.views.create_subtitle_files', name='create_subtitle_files'),
 
     #cms
     url(r'^', include('cms.urls', namespace='cms')),

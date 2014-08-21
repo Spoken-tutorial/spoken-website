@@ -17,7 +17,7 @@ def strip_tags(html):
     return str(s.get_data())
 
 def readUrl(url):
-    print "Reading :", url
+    # print "Reading :", url
     b = getNewBrowser()
     b.open(url, timeout = 30.0)
     return BeautifulSoup(b.response())

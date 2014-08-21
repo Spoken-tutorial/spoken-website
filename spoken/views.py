@@ -12,9 +12,10 @@ from forms import *
 import os
 from django.http import Http404
 from django.core.exceptions import PermissionDenied
-from urllib import unquote_plus
+from urllib import urlopen, quote, unquote_plus
 import json
 import datetime
+from creation.subtitles import *
 from creation.views import get_video_info, is_administrator
 from creation.models import TutorialCommonContent, TutorialDetail, TutorialResource, Language
 from cms.models import SiteFeedback, Event, NewsType, News
@@ -302,7 +303,6 @@ def news(request, cslug):
         print e
         raise Http404('You are not allowed to view this page')
 
-    
 def news_view(request, cslug, slug):
     try:
         newstype = NewsType.objects.get(slug = cslug)
@@ -316,3 +316,36 @@ def news_view(request, cslug, slug):
     except Exception, e:
         print e
         raise Http404('You are not allowed to view this page')
+
+def create_subtitle_files(request, overwrite = False):
+    rows = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2))
+    for row in rows:
+        code = 0
+        if row.language.name == 'English':
+            if row.timed_script and row.timed_script != 'pending':
+                script_path = settings.SCRIPT_URL.strip('/') + '?title=' + quote(row.timed_script) + '&printable=yes'
+            elif row.script and row.script != 'pending':
+                script_path = settings.SCRIPT_URL.strip('/') + '?title=' + quote(row.script + '-timed') + '&printable=yes'
+            else:
+                continue
+        else:
+            if row.script and row.script != 'pending':
+                script_path = settings.SCRIPT_URL.strip('/') + '?title=' + quote(row.script) + '&printable=yes'
+            else:
+                continue
+        srt_file_path = settings.MEDIA_ROOT + 'videos/' + str(row.tutorial_detail.foss_id) + '/' + str(row.tutorial_detail_id) + '/'
+        srt_file_name = row.tutorial_detail.tutorial.replace(' ', '-') + '-' + row.language.name + '.srt'
+        print srt_file_name
+        if not overwrite and os.path.isfile(srt_file_path + srt_file_name):
+            continue
+        try:
+            code = urlopen(script_path).code
+        except Exception, e:
+            code = e.code
+        result = ''
+        if(int(code) == 200):
+            if generate_subtitle(script_path, srt_file_path + srt_file_name):
+                print 'Success: ', row.tutorial_detail.foss.foss, + srt_file_name + '<br />'
+            else:
+                print 'Failed: ', row.tutorial_detail.foss.foss + srt_file_name + '<br />'
+    return HttpResponse('Success!')
