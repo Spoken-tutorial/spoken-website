@@ -13,6 +13,6 @@ urlpatterns = patterns('',
     url(r'^fix-tutorial-resources-status/$', 'creationmigrate.views.fix_tutorial_resources_status', name="fix_tutorial_resources_status"),
     url(r'^create-thumbnails/$', 'creationmigrate.views.create_thumbnails', name="create_thumbnails"),
     #url(r'^tutorial-common-contents/$', 'creationmigrate.views.tutorial_common_contents', name="tutorial_common_contents"),
+    url(r'^srtfiles/$', 'creationmigrate.views.srtfiles', name="srtfiles"),
     url(r'^test/$', 'creationmigrate.views.test', name="test"),
-
 )

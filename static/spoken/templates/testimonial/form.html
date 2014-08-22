@@ -2,10 +2,10 @@
 {% load widget_tweaks %}
 {% load static %}
 {% load creationdata %}
-{% block title %}Testimonials{% endblock %}
+{% block title %} Add/Edit Testimonial{% endblock %}
 {% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
 {% block heading %}
-    <i class="fa fa-list-ul"></i> Testimonials
+    Add / Edit Testimonial
 {% endblock %}
 {% block search %}{% endblock %}
 {% block content %}
@@ -22,7 +22,7 @@
 			        </ul>
 			        {% endif %}
 			        <div class="form-group">
-				        <label for="id_user_name" class="col-sm-3 control-label">User Name</label>
+				        <label for="id_user_name" class="col-sm-3 control-label">Full Name</label>
 				        <div class="col-sm-9">
 				            {% render_field form.user_name class+="form-control user_name" tabindex="1" %}
 				            {{ form.user_name.errors }}

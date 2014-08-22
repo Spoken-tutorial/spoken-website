@@ -35,9 +35,21 @@ urlpatterns = patterns('',
     url(r'^creation/', include('creation.urls', namespace='creation')),
     url(r'^captcha/', include('captcha.urls')),
     url(r'^nicedit/', include('nicedit.urls')),
-    url(r'^migration/creation/', include('creationmigrate.urls', namespace='creationmigrate')),
-    url(r'^migration/events/', include('eventsmigration.urls', namespace='eventsmigration')),
+    #url(r'^migration/creation/', include('creationmigrate.urls', namespace='creationmigrate')),
+    #url(r'^migration/events/', include('eventsmigration.urls', namespace='eventsmigration')),
     url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT, 'show_indexes':False}),
+
+    # Old url adjustments
+    url(r'^list_videos/$', 'cdeep.views.list_videos', name='list_videos'),
+    url(r'^show_video/$', 'cdeep.views.show_video', name='show_video'),
+    url(r'^search/node/([0-9a-zA-Z-+%\(\)]+)/$', 'cdeep.views.search_node', name='search_node'),
+
+    # Masquerade user
+    url(r'^masquerade/', include('masquerade.urls', namespace='masquerade')),
+    
+    # Cron links
+    url(r'^cron/subtitle-files/create/$', 'spoken.views.create_subtitle_files', name='create_subtitle_files'),
+
     #cms
     url(r'^', include('cms.urls', namespace='cms')),
 )

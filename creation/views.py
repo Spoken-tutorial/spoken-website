@@ -4,7 +4,7 @@ import json
 import time
 import subprocess
 from decimal import Decimal
-from urllib import urlopen, unquote_plus
+from urllib import urlopen, quote, unquote_plus
 from django.conf import settings
 from django.views import generic
 from django.contrib import messages
@@ -18,13 +18,14 @@ from django.core.context_processors import csrf
 from django.core.exceptions import PermissionDenied
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render, render_to_response
-from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+
+from cms.sortable import *
 from creation.forms import *
 from creation.models import *
-from cms.sortable import *
+from creation.subtitles import *
 
 def humansize(nbytes):
     suffixes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
@@ -587,7 +588,7 @@ def upload_script(request, trid):
         raise PermissionDenied()
     response_msg = ''
     error_msg = ''
-    storage_path = tr_rec.tutorial_detail.foss.foss + '/' + tr_rec.tutorial_detail.level.code + '/' + tr_rec.tutorial_detail.tutorial.replace(' ', '-') + '/' + tr_rec.language.name
+    storage_path = tr_rec.tutorial_detail.foss.foss.replace(' ', '-') + '/' + tr_rec.tutorial_detail.level.code + '/' + tr_rec.tutorial_detail.tutorial.replace(' ', '-') + '/' + tr_rec.language.name
     script_path = settings.SCRIPT_URL + storage_path
     if request.method == 'POST':
         form = UploadScriptForm(script_path, request.POST)
@@ -663,7 +664,7 @@ def save_timed_script(request, tdid):
         raise PermissionDenied()
     response_msg = ''
     error_msg = ''
-    storage_path = tr_rec.tutorial_detail.foss.foss + '/' + tr_rec.tutorial_detail.level.code + '/' + tr_rec.tutorial_detail.tutorial.replace(' ', '-') + '/' + tr_rec.language.name + '-timed'
+    storage_path = tr_rec.tutorial_detail.foss.foss.replace(' ', '-') + '/' + tr_rec.tutorial_detail.level.code + '/' + tr_rec.tutorial_detail.tutorial.replace(' ', '-') + '/' + tr_rec.language.name + '-timed'
     script_path = settings.SCRIPT_URL + storage_path
     form = UploadScriptForm(script_path)
     if request.method == 'POST':
@@ -678,7 +679,12 @@ def save_timed_script(request, tdid):
                 if(int(code) == 200):
                     tr_rec.timed_script = storage_path
                     tr_rec.save()
-                    messages.success(request, 'Timed script updated successfully!')
+                    srt_file_path = settings.MEDIA_ROOT + 'videos/' + str(tr_rec.tutorial_detail.foss_id) + '/' + str(tr_rec.tutorial_detail_id) + '/' + tr_rec.tutorial_detail.tutorial.replace(' ', '-') + '-English.srt'
+                    minified_script_url = settings.SCRIPT_URL.strip('/') + '?title=' + quote(storage_path) + '&printable=yes'
+                    if generate_subtitle(minified_script_url, srt_file_path):
+                        messages.success(request, 'Timed script updated and subtitle file generated successfully!')
+                    else:
+                        messages.success(request, 'Timed script updated successfully! But there is a in generating subtitle file.')
                     return HttpResponseRedirect('/creation/upload/timed-script/')
                 else:
                     messages.error(request, 'Please update the timed-script to wiki before pressing the submit button.')

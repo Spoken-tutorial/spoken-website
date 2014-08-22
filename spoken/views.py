@@ -11,12 +11,19 @@ from django.conf import settings
 from forms import *
 import os
 from django.http import Http404
-from urllib import unquote_plus
+from django.core.exceptions import PermissionDenied
+from urllib import urlopen, quote, unquote_plus
 import json
 import datetime
-from creation.views import get_video_info
+from creation.subtitles import *
+from creation.views import get_video_info, is_administrator
 from creation.models import TutorialCommonContent, TutorialDetail, TutorialResource, Language
 from cms.models import SiteFeedback, Event, NewsType, News
+
+def is_resource_person(user):
+    """Check if the user is having resource person  rights"""
+    if user.groups.filter(name='Resource Person').count() == 1:
+        return True
 
 @csrf_exempt
 def site_feedback(request):
@@ -103,27 +110,30 @@ def keyword_search(request):
     context.update(csrf(request))
     return render(request, 'spoken/templates/keyword_search.html', context)
 
+@csrf_exempt
 def tutorial_search(request):
     context = {}
     collection = None
     form = TutorialSearchForm()
-    if request.method == 'POST':
-        form = TutorialSearchForm(request.POST)
+    if request.method == 'GET':
+        form = TutorialSearchForm(request.GET)
         if form.is_valid():
-            lang = form.cleaned_data['language']
-            foss = form.cleaned_data['foss_category']
-            if not lang and foss:
-                collection = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), tutorial_detail__foss_id = foss).order_by('tutorial_detail__level', 'tutorial_detail__order')
-            elif lang and not foss:
-                collection = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), language_id = lang).order_by('tutorial_detail__level', 'tutorial_detail__order')
-            elif foss and lang:
-                collection = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), tutorial_detail__foss_id = foss, language_id = lang).order_by('tutorial_detail__level', 'tutorial_detail__order')
+            foss_get = request.GET.get('foss', '')
+            language_get = request.GET.get('language', '')
+            print foss_get, language_get
+            if foss_get and language_get:
+                collection = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), tutorial_detail__foss__foss = foss_get, language__name = language_get).order_by('tutorial_detail__level', 'tutorial_detail__order')
+            elif foss_get:
+                collection = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), tutorial_detail__foss__foss = foss_get).order_by('tutorial_detail__level', 'tutorial_detail__order', 'language__name')
+            elif language_get:
+                collection = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), language__name = language_get).order_by('tutorial_detail__foss__foss', 'tutorial_detail__level', 'tutorial_detail__order')
+            else:
+                collection = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), tutorial_detail__foss__foss = 'Linux', language__name = 'English')
     else:
         collection = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), tutorial_detail__foss__foss = 'Linux', language__name = 'English')
             
     context['form'] = form
     context['collection'] = collection
-    context.update(csrf(request))
     return render(request, 'spoken/templates/tutorial_search.html', context)
 
 def watch_tutorial(request, foss, tutorial, lang):
@@ -157,21 +167,19 @@ def get_language(request):
         lang = request.POST.get('lang')
         output = ''
         if not lang and foss:
-            collection = TutorialResource.objects.select_related('Language').filter(tutorial_detail__foss_id = foss).values_list('language__id', 'language__name').distinct()
+            collection = TutorialResource.objects.select_related('Language').filter(tutorial_detail__foss__foss = foss).values_list('language__name').distinct()
             tmp = '<option value = ""> -- Select Language -- </option>'
             for i in collection:
-                tmp +='<option value='+str(i[0])+'>'+i[1]+'</option>'
+                tmp += '<option value="' + str(i[0]) + '">' + str(i[0]) + '</option>'
             output = ['foss', tmp]
             return HttpResponse(json.dumps(output), mimetype='application/json')
-            
         elif lang and not foss:
-            collection = TutorialResource.objects.filter(language_id = lang).values_list('tutorial_detail__foss__id', 'tutorial_detail__foss__foss').distinct()
+            collection = TutorialResource.objects.filter(language__name = lang).values_list('tutorial_detail__foss__foss').distinct()
             tmp = '<option value = ""> -- Select Foss -- </option>'
             for i in collection:
-                tmp +='<option value='+str(i[0])+'>'+i[1]+'</option>'
+                tmp += '<option value="' + str(i[0]) +'">' + str(i[0]) + '</option>'
             output = ['lang', tmp]
             return HttpResponse(json.dumps(output), mimetype='application/json')
-            
         elif foss and lang:
             pass
 
@@ -186,8 +194,8 @@ def testimonials_new(request):
     user = request.user
     context = {}
     form = TestimonialsForm()
-    if not user.is_authenticated():
-        raise Http404('You are not allowed to view this page')
+    if (not user.is_authenticated()) or ((not is_resource_person(user)) and (not is_administrator(user))):
+        raise PermissionDenied()
     
     if request.method == 'POST':
         form = TestimonialsForm(request.POST, request.FILES)
@@ -230,8 +238,8 @@ def admin_testimonials_edit(request, rid):
     context = {}
     form = TestimonialsForm()
     instance = ''
-    if not user.is_authenticated():
-        raise Http404('You are not allowed to view this page')
+    if (not user.is_authenticated()) or ((not is_resource_person(user)) and (not is_administrator(user))):
+        raise PermissionDenied()
     try:
         instance = Testimonials.objects.get(pk= rid)
     except Exception, e:
@@ -253,8 +261,8 @@ def admin_testimonials_delete(request, rid):
     user = request.user
     context = {}
     instance = ''
-    if not user.is_authenticated():
-        raise Http404('You are not allowed to view this page')
+    if (not user.is_authenticated()) or ((not is_resource_person(user)) and (not is_administrator(user))):
+        raise PermissionDenied()
     try:
         instance = Testimonials.objects.get(pk= rid)
     except Exception, e:
@@ -273,8 +281,8 @@ def admin_testimonials(request):
     ''' admin testimonials '''
     user = request.user
     context = {}
-    if not user.is_authenticated():
-        raise Http404('You are not allowed to view this page')
+    if (not user.is_authenticated()) or ((not is_resource_person(user)) and (not is_administrator(user))):
+        raise PermissionDenied()
     collection = Testimonials.objects.all()
     context['collection'] = collection
     context.update(csrf(request))
@@ -295,7 +303,6 @@ def news(request, cslug):
         print e
         raise Http404('You are not allowed to view this page')
 
-    
 def news_view(request, cslug, slug):
     try:
         newstype = NewsType.objects.get(slug = cslug)
@@ -309,3 +316,36 @@ def news_view(request, cslug, slug):
     except Exception, e:
         print e
         raise Http404('You are not allowed to view this page')
+
+def create_subtitle_files(request, overwrite = True):
+    rows = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2))
+    for row in rows:
+        code = 0
+        if row.language.name == 'English':
+            if row.timed_script and row.timed_script != 'pending':
+                script_path = settings.SCRIPT_URL.strip('/') + '?title=' + quote(row.timed_script) + '&printable=yes'
+            elif row.script and row.script != 'pending':
+                script_path = settings.SCRIPT_URL.strip('/') + '?title=' + quote(row.script + '-timed') + '&printable=yes'
+            else:
+                continue
+        else:
+            if row.script and row.script != 'pending':
+                script_path = settings.SCRIPT_URL.strip('/') + '?title=' + quote(row.script) + '&printable=yes'
+            else:
+                continue
+        srt_file_path = settings.MEDIA_ROOT + 'videos/' + str(row.tutorial_detail.foss_id) + '/' + str(row.tutorial_detail_id) + '/'
+        srt_file_name = row.tutorial_detail.tutorial.replace(' ', '-') + '-' + row.language.name + '.srt'
+        # print srt_file_name
+        if not overwrite and os.path.isfile(srt_file_path + srt_file_name):
+            continue
+        try:
+            code = urlopen(script_path).code
+        except Exception, e:
+            code = e.code
+        result = ''
+        if(int(code) == 200):
+            if generate_subtitle(script_path, srt_file_path + srt_file_name):
+                print 'Success: ', row.tutorial_detail.foss.foss + ',', srt_file_name
+            else:
+                print 'Failed: ', row.tutorial_detail.foss.foss + ',', srt_file_name
+    return HttpResponse('Success!')

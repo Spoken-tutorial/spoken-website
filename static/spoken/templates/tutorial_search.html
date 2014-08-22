@@ -26,7 +26,7 @@
     </ul>
     <div class="well tab-content tutorial-search-form col-lg-offset-1 col-md-offset-1 col-lg-10 col-md-10 col-sm-12 col-xs-12">
         <div class="col-sm-12">
-            <form action="{{ action }}" method="POST" class='form-horizontal'>{% csrf_token %}
+            <form action="{{ action }}" method="GET" class='form-horizontal'>
                 {% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
                     {% if form.non_field_errors %}
                     <ul>
@@ -37,10 +37,12 @@
                     {% endif %}
                     <div class="form-group">
                         <div class="col-sm-5">
-                            {% render_field form.foss_category class+="form-control foss_category" tabindex="1" value=keywords %}
-                            {{ form.foss_category.errors }}
+                            <span class='ajax-refresh ajax-refresh-foss'><i class="fa fa-2 fa-refresh fa-spin"></i></span>
+                            {% render_field form.foss class+="form-control foss" tabindex="1" value=keywords %}
+                            {{ form.foss.errors }}
                         </div>
                         <div class="col-sm-5">
+                            <span class='ajax-refresh ajax-refresh-language'><i class="fa fa-2 fa-refresh fa-spin"></i></span>
                             {% render_field form.language class+="form-control language" tabindex="1" value=keywords %}
                             {{ form.language.errors }}
                         </div>
@@ -84,8 +86,8 @@
     <script src="{% static 'spoken/js/chosen.jquery.min.js' %}"></script>
     <script src="{% static 'spoken/js/events.js' %}"></script>
     <script>
-        $("#id_foss_category, #id_language").change(function(){
-            var foss = $('#id_foss_category').val();
+        $("#id_foss, #id_language").change(function(){
+            var foss = $('#id_foss').val();
             var lang = $('#id_language').val();
             if (foss == '' || lang == ''){
                 $.ajax({
@@ -96,15 +98,22 @@
 					    lang : lang,
 				    },
 				    beforeSend: function() {
-                        $('.ajax-refresh-district').show();
+				        if(foss == '')
+                            $('.ajax-refresh-foss').show();
+                        if(lang == '')
+                            $('.ajax-refresh-language').show();
                     },
 				    success: function(data) {
 				        console.log(data[0])
 				        if (data[0] == 'foss'){
 				            $('#id_language').html(data);
 				        }else if (data[0] == 'lang'){
-				            $('#id_foss_category').html(data);
+				            $('#id_foss').html(data);
 				        }
+				        if(foss == '')
+                            $('.ajax-refresh-foss').hide();
+                        if(lang == '')
+                            $('.ajax-refresh-language').hide();
 				    }
 			    });
 			}

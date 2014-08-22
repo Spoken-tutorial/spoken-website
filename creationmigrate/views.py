@@ -706,3 +706,27 @@ def create_thumbnails(request):
         create_thumbnail(tr_rec, 'Big', tr_rec.video_thumbnail_time, '700:500')
         create_thumbnail(tr_rec, 'Small', tr_rec.video_thumbnail_time, '170:127')
     return HttpResponse('Success!')
+
+def srtfiles(request):
+    old_recs = TutorialResources.objects.all()
+    for old_rec in old_recs:
+        new_foss_with_hyphen = old_rec.tutorial_detail.foss_category.replace('+', 'p')
+        new_foss = new_foss_with_hyphen.replace('-', ' ')
+        new_tutorial_with_hyphen = old_rec.tutorial_detail.tutorial_name.replace('+', 'p')
+        new_tutorial = new_tutorial_with_hyphen.replace('-', ' ')
+        try:
+            new_rec = TutorialResource.objects.get(tutorial_detail__foss__foss = new_foss, tutorial_detail__tutorial = new_tutorial, language__name = old_rec.language)
+        except Exception, e:
+            print e
+            continue
+        new_srtfile = settings.MEDIA_ROOT + 'videos/' + str(new_rec.tutorial_detail.foss_id) + '/' + str(new_rec.tutorial_detail_id) + '/' + new_tutorial_with_hyphen + '-' + new_rec.language.name + '.srt'
+        if os.path.isfile(new_srtfile):
+            os.remove(new_srtfile)
+            print 'deleted: ', new_tutorial_with_hyphen + '-' + new_rec.language.name + '.srt'
+        old_srtfile = settings.STVIDEOS_PATH + 'st_videos/' + old_rec.tutorial_detail.foss_category + '/' + old_rec.tutorial_detail.tutorial_level + '/' + old_rec.tutorial_detail.tutorial_name + '/' + old_rec.tutorial_detail.tutorial_name + '-' + old_rec.language + '.srt'
+        #print old_srtfile
+        if os.path.isfile(old_srtfile):
+            copyfile(old_srtfile, new_srtfile)
+            print 'from: ', old_rec.tutorial_detail.tutorial_name + '-' + old_rec.language + '.srt'
+            print 'created: ', new_tutorial_with_hyphen + '-' + new_rec.language.name + '.srt'
+    return HttpResponse('Success!')

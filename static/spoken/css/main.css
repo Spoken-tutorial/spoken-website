@@ -302,6 +302,9 @@ h4.page-title {
 #footer-wrapper .container-inner sans-serif {
     padding-bottom: 5px;
 }
+#footer-wrapper .container-inner.sans-serif {
+    padding-bottom: 2px;
+}
 /* footer end */
 
 /* media secreen overwrite */
