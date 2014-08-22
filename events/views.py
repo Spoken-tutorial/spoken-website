@@ -36,6 +36,7 @@ import datetime
 from django.utils import formats
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from mdldjango.get_or_create_participant import get_or_create_participant
+from django.template.defaultfilters import slugify
 
 #pdf generate
 from reportlab.pdfgen import canvas
@@ -2051,8 +2052,13 @@ def resource_center(request, slug = None):
     return render(request, 'events/templates/ac/resource-center.html', context)
 
 def academic_center(request, academic_id = None, slug = None):
-    academic = get_object_or_404(AcademicCenter, id=academic_id)
-    context = {}
+    collection = get_object_or_404(AcademicCenter, id=academic_id)
+    slug_title =  slugify(collection.institution_name)
+    if slug != slug_title:
+        return HttpResponseRedirect('/software-training/academic-center/'+ str(collection.id) + '/' + slug_title)
+    context = {
+        'collection' : collection
+    }
     return render(request, 'events/templates/ac/academic-center.html', context)
 
 #Ajax Request and Responces

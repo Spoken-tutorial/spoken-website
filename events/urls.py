@@ -60,8 +60,8 @@ urlpatterns = patterns('',
     url(r'^resource-center/$', 'events.views.resource_center', name="resource_center"),
     url(r'^resource-center/(?P<slug>[\w-]+)/$', 'events.views.resource_center', name="resource_center"),
     
-    url(r'^academic-center/$', 'events.views.academic_center', name="academic_center"),
-    url(r'^academic-center/(?P<slug>[\w-]+)/$', 'events.views.academic_center', name="academic_center"),
+    url(r'^academic-center/(?P<academic_id>\d+)/$', 'events.views.academic_center', name="academic_center"),
+    url(r'^academic-center/(?P<academic_id>\d+)/(?P<slug>[\w-]+)/$', 'events.views.academic_center', name="academic_center"),
     
     #Ajax 
     url(r'ajax-ac-state/$', 'events.views.ajax_ac_state', name='ajax_ac_state'),

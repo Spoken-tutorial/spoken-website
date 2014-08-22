@@ -51,6 +51,7 @@
 						<td>{{ record.institution_name }}</td>
 						<td>{{ record.address|safe }}</td>
 						<td>{{ record.contact_person|safe }}</td>
+						<td><a href="{% url 'events:academic_center' record.id %}" target="_blank">View</a></td>
 					</tr>
 				{% endfor %}
 			</table>

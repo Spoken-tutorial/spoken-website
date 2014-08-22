@@ -57,7 +57,8 @@
 						<td>{{ record.university }}</td>
 						<td>{{ record.institution_type }}</td>
 						<td>{{ record.institute_category }}</td>
-						<td><a href="{% url 'events:edit_ac' record.id %}">Edit</a></td>
+						<td><a href="{% url 'events:edit_ac' record.id %}">Edit</a> | 
+						<a href="{% url 'events:academic_center' record.id %}" target="_blank">View</a></td>
 					</tr>
 				{% endfor %}
 			</table>
