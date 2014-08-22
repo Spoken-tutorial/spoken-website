@@ -121,26 +121,21 @@
                                 {% endif %}
                                 {% if status == 'pending' or status == 'predated' %}
                                     <a href="{% url 'events:training_edit' role record.id %}">Edit</a> |
-                                    <a target='_blank' href="{% url 'events:training_attendance' record.id %}">
-                                        {% if record.training_type %}
-                                            Attendance
-                                        {% else %}
-                                            Training Completion Form
-                                        {% endif %}
-                                    </a> |
+                                    {% if record.training_type %}
+                                        <a target='_blank' href="{% url 'events:training_attendance' record.id %}"> Attendance</a> |
+                                    {% endif %}
                                     <a target='_blank' href="{% url 'events:training_participant' record.id %}">Participants</a>
                                 {% endif %}
                                 {% if status == 'approved' %}
                                     <a target='_blank' href="{% url 'events:training_participant' record.id %}">Participants</a>
                                 {% endif %}
                                 {% if status == 'ongoing' %}
-                                    <a target='_blank' href="{% url 'events:training_attendance' record.id %}">
-                                        {% if record.training_type %}
-                                            Attendance
-                                        {% else %}
-                                            Training Completion Form
-                                        {% endif %}
-                                    </a> |
+                                    {% if record.training_type == 0 and record.trdate|can_upload_final_training_list %}
+                                        <a target='_blank' href="{% url 'events:training_attendance' record.id %}"> Training Completion Form</a> |
+                                    {% endif %}
+                                    {% if record.training_type %}
+                                        <a target='_blank' href="{% url 'events:training_attendance' record.id %}"> Attendance</a> |
+                                    {% endif %}
                                     <a target='_blank' href="{% url 'events:training_participant' record.id %}">Participants</a>
                                 {% endif %}
                             {% endif %}

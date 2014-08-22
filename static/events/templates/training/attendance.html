@@ -2,12 +2,12 @@
 {% load widget_tweaks %}
 {% load static %}
 {% load eventsdata %}
-{% block title %}Attendance Sheet{% endblock %}
+{% block title %}Participant List{% endblock %}
 {% block cssblock %}
     <link rel="stylesheet" href="{% static 'spoken/css/jquery.fancybox.css' %}" type="text/css" media="screen" charset="utf-8" />
 {% endblock %}
 {% block heading %}
-        <i class="fa fa-list-ul"></i> Attendance Sheet <a href="/software-training" class='pull-right go-back'>Dashboard</a>
+        <i class="fa fa-list-ul"></i> Participant List <a href="/software-training" class='pull-right go-back'>Dashboard</a>
 {% endblock %}
 {% block content %}
         <div class='row'>
@@ -84,8 +84,10 @@
                     </table>
 			    {% else %}
 			        <div class='row'>
-			            {% if training.status == 3 or training.status == 2 %}
-			                <a class="fancybox fancybox.iframe pull-right" href="/software-training/training/training-completion/{{ training.id }}" title="View Outline"><h4 class='step'><span class="label label-default">Training Completion Form</span></h4></a>
+			            {% if training.training_type == 0 and training.trdate|can_upload_final_training_list %}
+			                {% if training.status == 3 or training.status == 2 %}
+			                    <a class="fancybox fancybox.iframe pull-right" href="/software-training/training/training-completion/{{ training.id }}" title="View Outline"><h4 class='step'><span class="label label-default">Training Completion Form</span></h4></a>
+			                {% endif %}
 			            {% endif %}
 			        </div>
                     <form action="{{ action }}" method="post">{% csrf_token %}
@@ -111,7 +113,6 @@
                         </table>
                         <input name="submit-mark-attendance" class="btn btn-primary" type="submit" value="Submit" />
                     </form>
-                    <!--
 			        {% if training.training_type != 0  and training.status == 3 %}
 			            <h4 class='step'><span class="label label-default">Step 2</span></h4>
 			            <div class="bs-callout bs-callout-info">
@@ -119,7 +120,6 @@
                             <a class='btn btn-primary' title = "To complete the workshop click here" href="{% url 'events:training_approvel' 'organiser' training.id %}?status=completed">Mark as Complete</a>
                         </div>
                     {% endif %}
-                    -->
                     <!--
                     {% if training.training_type == 0  and training.status == 3 and training.trdate|can_upload_final_training_list %}
 			            <h4 class='step'><span class="label label-default">Step 2</span></h4>

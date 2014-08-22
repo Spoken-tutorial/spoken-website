@@ -8,6 +8,7 @@ urlpatterns = patterns('',
     #todo: test and workshop auto close
     url(r'^fix-date-for-first-training/$', 'events.views.fix_date_for_first_training', name='fix_date_for_first_training'),
     url(r'^training-gentle-reminder/$', 'events.views.training_gentle_reminder', name='training_gentle_reminder'),
+    url(r'^training-completion-reminder/$', 'events.views.training_completion_reminder', name='training_completion_reminder'),
     
     url(r'^test/$', 'events.views.test', name='test'),
     

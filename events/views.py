@@ -241,6 +241,15 @@ def training_gentle_reminder(request):
             send_email(status, to, t)
     return HttpResponse("Done!")
 
+def training_completion_reminder(request):
+    training_need_to_complete = Training.objects.filter(trdate_gte=datetime.date.today() - datetime.timedelta(days=60))
+    if training_need_to_complete:
+        status = 'How to upload the attendance on the training day'
+        for t in training_need_to_complete:
+            to = [t.organiser.user.email]
+            send_email(status, to, t)
+    return HttpResponse("Done!")
+
 # only for workshop, pilot, live workshop
 def close_predated_ongoing_workshop(request):
     predated_ongoing_workshop = Training.objects.filter(training_type__gt = 0, status = 3, trdate__lt = datetime.date.today())
@@ -776,24 +785,28 @@ def training_request(request, role, rid = None):
                 with open(file_path, 'rbU') as csvfile:
                     count  = 0
                     csvdata = csv.reader(csvfile, delimiter=',', quotechar='|')
-                    for row in csvdata:
-                        count = count + 1
-                        try:
-                            firstname = row[0].strip().title()
-                            lastname = row[1].strip().title()
-                            email = row[2].strip()
-                            gender = row[3].strip().title()
-                            if not validate_email(email):
-                                messages.error(request, "Line number "+ str(count) + ' : ' + firstname + ' ' + lastname + "'s email missing!")
-                                continue
-                        except Exception, e:
-                            print e, "Error is comming"
-                            csv_file_error = 1
-                            if not error_line_no:
-                                error_line_no = error_line_no + str(count)
-                            else:
-                                error_line_no = error_line_no + ', ' + str(count)
-                        continue
+                    try:
+                        for row in csvdata:
+                            count = count + 1
+                            try:
+                                firstname = row[0].strip().title()
+                                lastname = row[1].strip().title()
+                                email = row[2].strip()
+                                gender = row[3].strip().title()
+                                if not validate_email(email):
+                                    messages.error(request, "Line number "+ str(count) + ' : ' + firstname + ' ' + lastname + "'s email missing!")
+                                    continue
+                            except Exception, e:
+                                print e, "Error is comming"
+                                csv_file_error = 1
+                                if not error_line_no:
+                                    error_line_no = error_line_no + str(count)
+                                else:
+                                    error_line_no = error_line_no + ', ' + str(count)
+                            continue
+                    except:
+                        csv_file_error = 1
+                        error_line_no = '1'
             ####
             if not csv_file_error:
                 dateTime = request.POST['trdate'].split(' ')
@@ -1093,11 +1106,16 @@ def training_permission(request):
     context['collection'] = permissions
     return render(request, 'events/templates/accessrole/workshop_permission.html', context)
 
+@login_required
 def training_completion(request, rid):
+    user = request.user
+    if not (user.is_authenticated() and is_organiser(user)):
+        raise Http404('You are not allowed to view this page')
+        
     context = {}
-    form = TrainingCompletionForm()
+    form = TrainingCompletionForm(user = user)
     if request.method == 'POST':
-        form = TrainingCompletionForm(request.POST)
+        form = TrainingCompletionForm(request.POST, user = user)
         if form.is_valid():
             t = Training.objects.get(pk = rid)
             t.extra_fields.approximate_hour = form.cleaned_data['approximate_hour']

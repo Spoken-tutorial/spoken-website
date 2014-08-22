@@ -385,3 +385,12 @@ class TrainingCompletionForm(forms.Form):
     is_tutorial_useful = forms.ChoiceField(widget=forms.RadioSelect, choices=[(1, 'Yes'), (0, 'No')])
     future_training = forms.ChoiceField(widget=forms.RadioSelect, choices=[(1, 'Yes'), (0, 'No')])
     recommend_to_others = forms.ChoiceField(widget=forms.RadioSelect, choices=[(1, 'Yes'), (0, 'No')])
+    def __init__(self, *args, **kwargs):
+        user = ''
+        if 'user' in kwargs:
+            user = kwargs["user"]
+            del kwargs["user"]
+        super(TrainingCompletionForm, self).__init__(*args, **kwargs)
+        if user:
+            if user.organiser.training_set.filter(status=4).count():
+                self.fields['online_test'].choices=[('', '---------'), (0, 'Will Request'), (1, 'Will not Request')]
