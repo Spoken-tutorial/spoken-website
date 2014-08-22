@@ -196,13 +196,9 @@ class Training(models.Model):
     organiser = models.ForeignKey(Organiser)
     appoved_by = models.ForeignKey(User, related_name = 'training_approved_by', null=True)
     academic = models.ForeignKey(AcademicCenter)
-    
     course = models.ForeignKey(Course)
-    
     training_type = models.PositiveIntegerField(default=0)
-    
     training_code = models.CharField(max_length=100, null=True)
-    
     department = models.ManyToManyField(Department)
     language = models.ForeignKey(Language)
     foss = models.ForeignKey(FossCategory)
@@ -210,10 +206,9 @@ class Training(models.Model):
     trtime = models.TimeField()
     skype = models.PositiveSmallIntegerField(default=0)
     status = models.PositiveSmallIntegerField(default=0) #{0:request done, 1: attendance submit, 2: training manger approved, 3: mark attenda done, 4: complete, 5: rejected}
-    
     extra_fields = models.OneToOneField(TrainingExtraFields, null = True)
-    
     participant_counts = models.PositiveIntegerField(default=0)
+    trusted = models.BooleanField(default=1)
     created = models.DateTimeField(auto_now_add = True)
     updated = models.DateTimeField(auto_now = True)
 

@@ -236,9 +236,11 @@ def fix_date_for_first_training(request):
 def training_gentle_reminder(request):
     tomorrow_training = Training.objects.filter(trdate=datetime.date.today() + datetime.timedelta(days=1))
     if tomorrow_training:
-        status = 'How to upload the attendance on the training day'
+        status = 'How to upload the attendance on the Workshop day'
         for t in tomorrow_training:
             to = [t.organiser.user.email]
+            if t.training_type == 0:
+                status = 'How to upload the attendance on the Training day'
             send_email(status, to, t)
     return HttpResponse("Done!")
 
@@ -262,9 +264,8 @@ def close_predated_ongoing_workshop(request):
                 if present:
                     w.participant_counts = present
                     w.status = 4
+                    w.trusted = 0
                     w.save()
-                    
-                    #email
             except:
                 pass
     return HttpResponse("Done!")
@@ -281,7 +282,6 @@ def close_predated_ongoing_test(request):
                     w.participant_count = present
                     w.status = 4
                     w.save()
-                    #email
             except:
                 pass
     return HttpResponse("Done!")
