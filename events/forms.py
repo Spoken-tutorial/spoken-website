@@ -378,3 +378,10 @@ class TrainingScanCopyForm(forms.Form):
 class ParticipantSearchForm(forms.Form):
     email = forms.EmailField(required = False)
     username = forms.CharField(required =  False)
+    
+class TrainingCompletionForm(forms.Form):
+    approximate_hour = forms.ChoiceField(choices=[('', '---------'), (0, '0 - 5'), (1, '6 - 10') , (2, '11 - 15'), (3, '16 - 20'), (4, ' > 20')])
+    online_test = forms.ChoiceField(choices=[('', '---------'), (0, 'Will Request'), (1, 'Will not Request'), (2, 'Already Requested')])
+    is_tutorial_useful = forms.ChoiceField(widget=forms.RadioSelect, choices=[(1, 'Yes'), (0, 'No')])
+    future_training = forms.ChoiceField(widget=forms.RadioSelect, choices=[(1, 'Yes'), (0, 'No')])
+    recommend_to_others = forms.ChoiceField(widget=forms.RadioSelect, choices=[(1, 'Yes'), (0, 'No')])

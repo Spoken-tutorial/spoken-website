@@ -967,7 +967,7 @@ def training_list(request, role, status):
 
         header = {
             1: SortableHeader('#', False),
-            2: SortableHeader('training_type', True, 'Type'),
+            2: SortableHeader('training_type', True, 'Training Type'),
             3: SortableHeader('academic__state', True, 'State'),
             4: SortableHeader('academic__academic_code', True, 'Academic Code'),
             5: SortableHeader('academic', True, 'Institution'),
@@ -1092,7 +1092,30 @@ def training_permission(request):
     context['form'] = form
     context['collection'] = permissions
     return render(request, 'events/templates/accessrole/workshop_permission.html', context)
-    
+
+def training_completion(request, rid):
+    context = {}
+    form = TrainingCompletionForm()
+    if request.method == 'POST':
+        form = TrainingCompletionForm(request.POST)
+        if form.is_valid():
+            t = Training.objects.get(pk = rid)
+            t.extra_fields.approximate_hour = form.cleaned_data['approximate_hour']
+            t.extra_fields.online_test = form.cleaned_data['online_test']
+            t.extra_fields.is_tutorial_useful = int(form.cleaned_data['is_tutorial_useful'])
+            t.extra_fields.future_training = int(form.cleaned_data['future_training'])
+            t.extra_fields.recommend_to_others = int(form.cleaned_data['recommend_to_others'])
+            t.extra_fields.save()
+            
+            t.participant_counts = t.trainingattendance_set.filter(status__gte = 1).count()
+            t.status = 4
+            t.save()
+            messages.success(request, "Training has been completed. Close the window and download the learner's certificate.")
+            form = None
+    context['form'] = form
+    context.update(csrf(request))
+    return render(request, 'events/templates/training/training_approvel_form.html', context)
+
 @login_required
 def accessrole(request):
     user = request.user
@@ -1108,23 +1131,6 @@ def accessrole(request):
 
 @login_required
 def training_attendance(request, wid):
-    messages.success(request, """
-        <ul>
-            <li>
-                Before the Training/Workshop date upload the Participants name 
-                list. It is necessary for approving your Training/Workshop request.
-            </li>
-            <li>
-                Please click on <b>Upload Participant Data</b> and upload the <b>
-                CSV </b>(.csv) file which you have generated (using LibreOffice 
-                Calc / MS Excel) and click <b>Submit</b>.
-            </li>
-            <li>
-                For more details on how to create the .csv file. 
-                Please <a href="http://process.spoken-tutorial.org/images/9/96/Upload_Attendance.pdf" target="_blank">Click here</a>
-            </li>
-        </ul>
-    """)
     user = request.user
     onlinetest_user = ''
     psform = ParticipantSearchForm()
@@ -1139,6 +1145,7 @@ def training_attendance(request, wid):
         print e
         raise Http404('Page not found ')
     #todo check request user and training organiser same or not
+    show_success_message = False
     if request.method == 'POST':
         if 'submit-mark-attendance' in request.POST:
             users = request.POST
@@ -1168,7 +1175,14 @@ def training_attendance(request, wid):
                 update_events_log(user_id = user.id, role = 2, category = 0, category_id = training.id, academic = training.academic_id,  status = 6)
                 update_events_notification(user_id = user.id, role = 2, category = 0, category_id = training.id, academic = training.academic_id, status = 6, message = message)
                 
-                messages.success(request, "Thank you for uploading the Attendance. Now make sure that you cross check and verify the details before submiting.")
+                messages.success(request, """
+                <ul>
+                    <li>Thank you for uploading the Attendance. Now make sure that you cross check and verify the details before submiting.</li>
+                    <li>To Complete the training Click Training Completion form and fill required details.</li>
+                </ul>
+                    """
+                )
+                show_success_message = True
         if 'search-participant' in request.POST:
             psform = ParticipantSearchForm(request.POST)
             onlinetest_user = search_participant(psform)
@@ -1215,6 +1229,26 @@ def training_attendance(request, wid):
         mdlids.append(k[0])
     if mdlids:
         wp = MdlUser.objects.filter(id__in = mdlids)
+    
+    if not show_success_message:
+        messages.success(request, """
+            <ul>
+                <li>
+                    Before the Training/Workshop date upload the Participants name 
+                    list. It is necessary for approving your Training/Workshop request.
+                </li>
+                <li>
+                    Please click on <b>Upload Participant Data</b> and upload the <b>
+                    CSV </b>(.csv) file which you have generated (using LibreOffice 
+                    Calc / MS Excel) and click <b>Submit</b>.
+                </li>
+                <li>
+                    For more details on how to create the .csv file. 
+                    Please <a href="http://process.spoken-tutorial.org/images/9/96/Upload_Attendance.pdf" target="_blank">Click here</a>
+                </li>
+            </ul>
+        """)
+    
     context = {}
     context['psform'] = psform
     context['sform'] = sform

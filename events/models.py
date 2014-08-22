@@ -185,6 +185,12 @@ class Course(models.Model):
         
 class TrainingExtraFields(models.Model):
     paper_name = models.CharField(max_length = 200)
+    approximate_hour = models.PositiveIntegerField(default = 0)
+    online_test = models.PositiveIntegerField(default = 0)
+    is_tutorial_useful = models.BooleanField(default = 0)
+    future_training = models.BooleanField(default = 0)
+    recommend_to_others = models.BooleanField(default = 0)
+    
     
 class Training(models.Model):
     organiser = models.ForeignKey(Organiser)

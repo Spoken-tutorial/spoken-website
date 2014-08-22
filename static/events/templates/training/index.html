@@ -121,14 +121,26 @@
                                 {% endif %}
                                 {% if status == 'pending' or status == 'predated' %}
                                     <a href="{% url 'events:training_edit' role record.id %}">Edit</a> |
-                                    <a target='_blank' href="{% url 'events:training_attendance' record.id %}">Attendance</a> |
+                                    <a target='_blank' href="{% url 'events:training_attendance' record.id %}">
+                                        {% if record.training_type %}
+                                            Attendance
+                                        {% else %}
+                                            Training Completion Form
+                                        {% endif %}
+                                    </a> |
                                     <a target='_blank' href="{% url 'events:training_participant' record.id %}">Participants</a>
                                 {% endif %}
                                 {% if status == 'approved' %}
                                     <a target='_blank' href="{% url 'events:training_participant' record.id %}">Participants</a>
                                 {% endif %}
                                 {% if status == 'ongoing' %}
-                                    <a target='_blank' href="{% url 'events:training_attendance' record.id %}">Attendance</a> |
+                                    <a target='_blank' href="{% url 'events:training_attendance' record.id %}">
+                                        {% if record.training_type %}
+                                            Attendance
+                                        {% else %}
+                                            Training Completion Form
+                                        {% endif %}
+                                    </a> |
                                     <a target='_blank' href="{% url 'events:training_participant' record.id %}">Participants</a>
                                 {% endif %}
                             {% endif %}
