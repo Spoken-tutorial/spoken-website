@@ -230,6 +230,10 @@ def offline_details(request, wid, category):
                         continue
                 os.unlink(file_path)
                 
+                #save participant_count
+                w.participant_counts = TrainingAttendance.objects.filter(training = w, status__gte = 1).count()
+                w.save()
+                
                 if error_line_no:
                     messages.error(request, "<b>Error: Line number "+ error_line_no + " in CSV file data is not in a proper format in the Participant list. The format should be First name, Last name, Email, Gender. For more details <a href='http://process.spoken-tutorial.org/images/c/c2/Participant_data.pdf' target='_blank'>Click here</a></b>")
             #update logs
