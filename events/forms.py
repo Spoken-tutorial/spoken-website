@@ -391,6 +391,6 @@ class TrainingCompletionForm(forms.Form):
             user = kwargs["user"]
             del kwargs["user"]
         super(TrainingCompletionForm, self).__init__(*args, **kwargs)
-        if user:
-            if user.organiser.training_set.filter(status=4).count():
-                self.fields['online_test'].choices=[('', '---------'), (0, 'Will Request'), (1, 'Will not Request')]
+#        if user:
+#            if user.organiser.test_organiser.filter(status=4).count():
+#                self.fields['online_test'].choices=[('', '---------'), (0, 'Will Request'), (1, 'Will not Request')]
