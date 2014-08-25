@@ -1204,6 +1204,10 @@ def training_attendance(request, wid):
                             w = TrainingAttendance.objects.get(mdluser_id = wa.mdluser_id, training_id = wid)
                             w.status = 1
                             w.save()
+                #update participant
+                training.participant_counts = TrainingAttendance.objects.filter(training = training, status__gte = 1).count()
+                training.save()
+                
                 message = training.academic.institution_name+" has submited training attendance"
                 update_events_log(user_id = user.id, role = 2, category = 0, category_id = training.id, academic = training.academic_id,  status = 6)
                 update_events_notification(user_id = user.id, role = 2, category = 0, category_id = training.id, academic = training.academic_id, status = 6, message = message)
