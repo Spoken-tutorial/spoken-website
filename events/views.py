@@ -14,6 +14,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from django.http import Http404
 from django.db.models import Q
+from django.db import IntegrityError
 
 from urlparse import urlparse
 
@@ -824,95 +825,108 @@ def training_request(request, role, rid = None):
                 w.trdate = dateTime[0]
                 w.trtime = dateTime[1]
                 w.skype = request.POST['skype']
-                w.save()
-                w.training_code = "WC-"+str(w.id)
-                w.department.clear()
-                for dept in form.cleaned_data.get('department'):
-                    w.department.add(dept)
                 
-                if request.POST['training_type'] == '0':
-                    if rid and w.extra_fields:
-                        w.extra_fields.paper_name = request.POST['course_number']
-                        w.extra_fields.save()
-                    elif not rid and not w.extra_fields:
-                        tef = TrainingExtraFields.objects.create(paper_name = request.POST['course_number'])
-                        w.extra_fields_id = tef.id
-                    elif rid and not w.extra_fields:
-                        tef = TrainingExtraFields.objects.create(paper_name = request.POST['course_number'])
-                        w.extra_fields_id = tef.id
-                    else:
-                       pass
-                else:
-                    if w.extra_fields:
-                        eid = w.extra_fields_id
-                        w.extra_fields_id = None
-                        w.save()
-                        TrainingExtraFields.objects.filter(pk=eid).delete()
-                w.status = 1
-                w.save()
-                #####
-                #get or create participants list
-                if f:
-                    with open(file_path, 'rbU') as csvfile:
-                        count  = 0
-                        csvdata = csv.reader(csvfile, delimiter=',', quotechar='|')
-                        for row in csvdata:
-                            count = count + 1
-                            try:
-                                firstname = row[0].strip().title()
-                                lastname = row[1].strip().title()
-                                email = row[2].strip()
-                                gender = row[3].strip().title()
-                                if not validate_email(email):
-                                    messages.error(request, "Line number "+ str(count) + ' : ' + firstname + ' ' + lastname + "'s email missing!")
-                                    continue
-                                get_or_create_participant(w, firstname, lastname, gender, email, 2)
-                            except Exception, e:
-                                print e, "Error is comming =>>>>>>>>>>>>"
-                                messages.error(request, "Line number "+ str(count) + " : Required data is missing. Please check value seperated by <b>Comma (,) </b>.")
-                            continue
-                    os.unlink(file_path)
-                    
-                    #file the participant count
-                    w.participant_counts = TrainingAttendance.objects.filter(training = w, status__gte = 1).count()
+                error = 0
+                try:
                     w.save()
-                #####
-                    '''messages.success(request, """
-                        <ul>
-                            <li>
-                                Before the Training/Workshop date upload the Participants name 
-                                list. It is necessary for approving your Training/Workshop request.
-                            </li>
-                            <li>
-                                Please click on <b>Upload Participant Data</b> and upload the <b>
-                                CSV </b>(.csv) file which you have generated (using LibreOffice 
-                                Calc / MS Excel) and click <b>Submit</b>.
-                            </li>
-                            <li>
-                                For more details on how to create the .csv file. 
-                                Please <a href="http://process.spoken-tutorial.org/images/9/96/Upload_Attendance.pdf" target="_blank">Click here</a>
-                            </li>
-                        </ul>
-                    """)'''
-                #update logs
-                message = None
-                if rid:
-                    if w.training_type == 0:
-                        message = w.academic.institution_name+" has updated training request for "+w.foss.foss+" on dated "+w.trdate
-                    else:
-                        message = w.academic.institution_name+" has updated a Workshop request for "+w.foss.foss+" on dated "+w.trdate
-                else:
-                    if w.training_type == 0:
-                        message = w.academic.institution_name+" has made a training request for "+w.foss.foss+" on dated "+w.trdate
-                    else:
-                        message = w.academic.institution_name+" has made a Workshop request for "+w.foss.foss+" on dated "+w.trdate
-                    
-                update_events_log(user_id = user.id, role = 0, category = 0, category_id = w.id, academic = w.academic_id, status = 0)
-                update_events_notification(user_id = user.id, role = 0, category = 0, category_id = w.id, academic = w.academic_id, status = 0, message = message)
+                except IntegrityError:
+                    error = 1
+                    prev_training = Training.objects.filter(organiser = w.organiser_id, academic = w.academic, foss = w.foss_id, trdate = w.trdate, trtime = w.trtime)
+                    if prev_training:
+                        messages.error(request, "You have already scheduled <b>"+ w.foss.foss + "</b> training on <b>"+w.trdate + " "+ w.trtime + "</b>. Please select some other time.")
+                except:
+                    messages.error(request, "Sorry, Something went wrong. try again!")
+                    error = 1
                 
-                if role == 'organiser' and not rid:
-                    return HttpResponseRedirect("/software-training/training/" + str(w.id) + "/attendance/")
-                return HttpResponseRedirect("/software-training/training/" + role + "/pending/")
+                if not error:
+                    w.training_code = "WC-"+str(w.id)
+                    w.department.clear()
+                    for dept in form.cleaned_data.get('department'):
+                        w.department.add(dept)
+                    
+                    if request.POST['training_type'] == '0':
+                        if rid and w.extra_fields:
+                            w.extra_fields.paper_name = request.POST['course_number']
+                            w.extra_fields.save()
+                        elif not rid and not w.extra_fields:
+                            tef = TrainingExtraFields.objects.create(paper_name = request.POST['course_number'])
+                            w.extra_fields_id = tef.id
+                        elif rid and not w.extra_fields:
+                            tef = TrainingExtraFields.objects.create(paper_name = request.POST['course_number'])
+                            w.extra_fields_id = tef.id
+                        else:
+                           pass
+                    else:
+                        if w.extra_fields:
+                            eid = w.extra_fields_id
+                            w.extra_fields_id = None
+                            w.save()
+                            TrainingExtraFields.objects.filter(pk=eid).delete()
+                    w.status = 1
+                    w.save()
+                    #####
+                    #get or create participants list
+                    if f:
+                        with open(file_path, 'rbU') as csvfile:
+                            count  = 0
+                            csvdata = csv.reader(csvfile, delimiter=',', quotechar='|')
+                            for row in csvdata:
+                                count = count + 1
+                                try:
+                                    firstname = row[0].strip().title()
+                                    lastname = row[1].strip().title()
+                                    email = row[2].strip()
+                                    gender = row[3].strip().title()
+                                    if not validate_email(email):
+                                        messages.error(request, "Line number "+ str(count) + ' : ' + firstname + ' ' + lastname + "'s email missing!")
+                                        continue
+                                    get_or_create_participant(w, firstname, lastname, gender, email, 2)
+                                except Exception, e:
+                                    print e, "Error is comming =>>>>>>>>>>>>"
+                                    messages.error(request, "Line number "+ str(count) + " : Required data is missing. Please check value seperated by <b>Comma (,) </b>.")
+                                continue
+                        os.unlink(file_path)
+                        
+                        #file the participant count
+                        w.participant_counts = TrainingAttendance.objects.filter(training = w, status__gte = 1).count()
+                        w.save()
+                    #####
+                        '''messages.success(request, """
+                            <ul>
+                                <li>
+                                    Before the Training/Workshop date upload the Participants name 
+                                    list. It is necessary for approving your Training/Workshop request.
+                                </li>
+                                <li>
+                                    Please click on <b>Upload Participant Data</b> and upload the <b>
+                                    CSV </b>(.csv) file which you have generated (using LibreOffice 
+                                    Calc / MS Excel) and click <b>Submit</b>.
+                                </li>
+                                <li>
+                                    For more details on how to create the .csv file. 
+                                    Please <a href="http://process.spoken-tutorial.org/images/9/96/Upload_Attendance.pdf" target="_blank">Click here</a>
+                                </li>
+                            </ul>
+                        """)'''
+                    #update logs
+                    message = None
+                    if rid:
+                        if w.training_type == 0:
+                            message = w.academic.institution_name+" has updated training request for "+w.foss.foss+" on dated "+w.trdate
+                        else:
+                            message = w.academic.institution_name+" has updated a Workshop request for "+w.foss.foss+" on dated "+w.trdate
+                    else:
+                        if w.training_type == 0:
+                            message = w.academic.institution_name+" has made a training request for "+w.foss.foss+" on dated "+w.trdate
+                        else:
+                            message = w.academic.institution_name+" has made a Workshop request for "+w.foss.foss+" on dated "+w.trdate
+                        
+                    update_events_log(user_id = user.id, role = 0, category = 0, category_id = w.id, academic = w.academic_id, status = 0)
+                    update_events_notification(user_id = user.id, role = 0, category = 0, category_id = w.id, academic = w.academic_id, status = 0, message = message)
+                    
+                    if role == 'organiser' and not rid:
+                        return HttpResponseRedirect("/software-training/training/" + str(w.id) + "/attendance/")
+                    return HttpResponseRedirect("/software-training/training/" + role + "/pending/")
             else:
                 messages.error(request, "<b>Error: Line number "+ error_line_no + " in CSV file data is not in a proper format in the Participant list. The format should be First name, Last name, Email, Gender. For more details <a href='http://process.spoken-tutorial.org/images/c/c2/Participant_data.pdf' target='_blank'>Click here</a></b>")
             messages.error(request, "Please fill the following details ")
@@ -1453,27 +1467,41 @@ def test_request(request, role, rid = None):
             t.foss_id = request.POST['foss']
             t.tdate = dateTime[0]
             t.ttime = dateTime[1]
-            t.save()
-            t.department.clear()
-            for dept in form.cleaned_data.get('department'):
-                t.department.add(dept)
             
-            #update logs
-            message = t.academic.institution_name+" has made a test request for "+t.foss.foss+" on "+t.tdate
-            if rid:
-                message = t.academic.institution_name+" has updated test for "+t.foss.foss+" on  dated "+t.tdate
-            update_events_log(user_id = user.id, role = 0, category = 1, category_id = t.id, academic = t.academic_id, status = 0)
-            update_events_notification(user_id = user.id, role = 0, category = 1, category_id = t.id, academic = t.academic_id, status = 0, message = message)
             
-            return HttpResponseRedirect("/software-training/test/"+role+"/pending/")
-    messages.info(request, """
-        <ul>
-            <li>Please make sure that before making the test request a faculty/trainer should have registered as invigilator.</li>
-            <li>Same person cannot be an organiser and the invigilator for the same test.</li>
-            <li>Please confirm the Invigilator's availability and acceptance to invigilate before selecting his name in this form.</li>
-            <li>Upgrade the browser with version of Mozilla Firefox 30 or higher on all the systems before the test.</li>
-        </ul>
-    """)
+            error = 0
+            try:
+                t.save()
+            except IntegrityError:
+                error = 1
+                prev_test = Test.objects.filter(organiser = t.organiser_id, academic = t.academic, foss = t.foss_id, tdate = t.tdate, ttime = t.ttime)
+                if prev_test:
+                    messages.error(request, "You have already scheduled <b>"+ t.foss.foss + "</b> Test on <b>"+t.tdate + " "+ t.ttime + "</b>. Please select some other time.")
+            except:
+                messages.error(request, "Sorry, Something went wrong. try again!")
+                error = 1
+            
+            if not error:
+                t.department.clear()
+                for dept in form.cleaned_data.get('department'):
+                    t.department.add(dept)
+                
+                #update logs
+                message = t.academic.institution_name+" has made a test request for "+t.foss.foss+" on "+t.tdate
+                if rid:
+                    message = t.academic.institution_name+" has updated test for "+t.foss.foss+" on  dated "+t.tdate
+                update_events_log(user_id = user.id, role = 0, category = 1, category_id = t.id, academic = t.academic_id, status = 0)
+                update_events_notification(user_id = user.id, role = 0, category = 1, category_id = t.id, academic = t.academic_id, status = 0, message = message)
+                
+                return HttpResponseRedirect("/software-training/test/"+role+"/pending/")
+        messages.info(request, """
+            <ul>
+                <li>Please make sure that before making the test request a faculty/trainer should have registered as invigilator.</li>
+                <li>Same person cannot be an organiser and the invigilator for the same test.</li>
+                <li>Please confirm the Invigilator's availability and acceptance to invigilate before selecting his name in this form.</li>
+                <li>Upgrade the browser with version of Mozilla Firefox 30 or higher on all the systems before the test.</li>
+            </ul>
+        """)
     context['role'] = role
     context['status'] = 'request'
     context.update(csrf(request))
