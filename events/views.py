@@ -1299,7 +1299,7 @@ def training_participant(request, wid=None):
             ids.append(wp[0])
             
         wp = MdlUser.objects.using('moodle').filter(id__in=ids)
-        if user == wc.organiser.user and wc.status == 4:
+        if (is_resource_person(user) or is_event_manager(user) or user == wc.organiser.user) and wc.status == 4:
             can_download_certificate = 1
         context = {
             'collection' : wp,
