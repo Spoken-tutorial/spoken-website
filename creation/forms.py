@@ -24,7 +24,6 @@ class UploadPrerequisiteForm(forms.Form):
         foss_list = list(
             FossCategory.objects.filter(
                 id__in = TutorialResource.objects.filter(
-                    Q(status=1)|Q(status=2),
                     language__name = 'English'
                 ).values_list('tutorial_detail__foss_id').distinct()
             ).order_by('foss').values_list('id', 'foss')
@@ -46,7 +45,6 @@ class UploadPrerequisiteForm(forms.Form):
                             id__in = TutorialResource.objects.filter(
                                 tutorial_detail_id__in = td_list,
                                 language_id = lang_rec.id,
-                                status = 1
                             ).values_list(
                                 'tutorial_detail_id'
                             )
