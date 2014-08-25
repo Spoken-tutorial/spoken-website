@@ -720,7 +720,6 @@ class UpdatePrerequisiteForm(forms.Form):
                             id__in = TutorialResource.objects.filter(
                                 tutorial_detail_id__in = td_list,
                                 language_id = lang_rec.id,
-                                status = 1
                             ).values_list(
                                 'tutorial_detail_id'
                             )
@@ -743,7 +742,6 @@ class UpdatePrerequisiteForm(forms.Form):
                             id__in = TutorialResource.objects.filter(
                                 tutorial_detail_id__in = td_list,
                                 language_id = lang_rec.id,
-                                status = 1
                             ).values_list(
                                 'tutorial_detail_id'
                             )
