@@ -44,7 +44,7 @@ class TutorialDetailAdmin(admin.ModelAdmin):
     form = AvailableFossForm
     exclude = ('user',)
     list_display = ('foss', 'tutorial', 'level', 'order', 'updated', 'user')
-    list_filter = ('foss', 'level', 'updated')
+    list_filter = ('updated', 'level', 'foss')
     def save_model(self, request, obj, form, change):
         obj.user = request.user
         obj.tutorial = obj.tutorial.strip()
@@ -58,6 +58,7 @@ class TutorialDetailAdmin(admin.ModelAdmin):
 class ContributorRoleAdmin(admin.ModelAdmin):
     form = ContributorRoleForm
     list_display = ('user', 'foss_category', 'language', 'status', 'created', 'updated')
+    list_filter = ('updated', 'language', 'foss_category')
 
     def mark_contributor_disabled(self, request, queryset):
         rows_updated = queryset.update(status=0)
@@ -81,6 +82,7 @@ class ContributorRoleAdmin(admin.ModelAdmin):
 class DomainReviewerRoleAdmin(admin.ModelAdmin):
     form = DomainReviewerRoleForm
     list_display = ('user', 'foss_category', 'language', 'status', 'created', 'updated')
+    list_filter = ('updated', 'language', 'foss_category')
 
     def mark_domain_reviewer_disabled(self, request, queryset):
         rows_updated = queryset.update(status=0)
@@ -104,6 +106,7 @@ class DomainReviewerRoleAdmin(admin.ModelAdmin):
 class QualityReviewerRoleAdmin(admin.ModelAdmin):
     form = QualityReviewerRoleForm
     list_display = ('user', 'foss_category', 'language', 'status', 'created', 'updated')
+    list_filter = ('updated', 'language', 'foss_category')
 
     def mark_quality_reviewer_disabled(self, request, queryset):
         rows_updated = queryset.update(status=0)

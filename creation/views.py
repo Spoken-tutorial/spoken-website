@@ -2408,7 +2408,7 @@ def collaborate(request):
 
 def update_prerequisite(request):
     user = request.user
-    if not is_contributor(request.user) and not is_administrator(request.user):
+    if not is_administrator(request.user):
         raise PermissionDenied()
     form = UpdatePrerequisiteForm()
     if request.method == 'POST':
