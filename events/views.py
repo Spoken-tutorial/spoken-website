@@ -285,6 +285,7 @@ def close_predated_ongoing_test(request):
                 present = TestAttendance.objects.get(test = t, status__gt = 1).count()
                 absentees = TestAttendance.objects.get(test = t, status = 0).count()
                 if present:
+                    TestAttendance.objects.filter(test_id=t.id, status = 2).update(status = 3)
                     w.participant_count = present
                     w.status = 4
                     w.save()
@@ -1652,6 +1653,7 @@ def test_approvel(request, role, rid):
         t.appoved_by_id = user.id
         t.workshop_code = "TC-"+str(t.id)
     if status == 4:
+        TestAttendance.objects.filter(test_id=t.id, status = 2).update(status = 3)
         testatten = TestAttendance.objects.filter(test_id=t.id, status__gt=2)
         if  not testatten:
             messages.error(request, "Students are processing the test. Check the status for each students!")
