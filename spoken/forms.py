@@ -1,4 +1,6 @@
 from django import forms
+from django.db.models import Q
+from django.db.models import Count
 from events.models import Testimonials
 from creation.models import FossCategory, Language, TutorialResource
 
@@ -6,21 +8,27 @@ class KeywordSearchForm(forms.Form):
     q = forms.CharField(required=True)
 
 class TutorialSearchForm(forms.Form):
-    try:
+    #try:
+        foss_list = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), language__name = 'English').values('tutorial_detail__foss__foss').annotate(Count('id')).order_by('tutorial_detail__foss__foss').values_list('tutorial_detail__foss__foss', 'id__count').distinct()
+        choices = [('', '-- Select Foss --'),]
+        for foss_row in foss_list:
+            choices.append((str(foss_row[0]), str(foss_row[0]) + ' (' + str(foss_row[1]) + ')'))
         foss = forms.ChoiceField(
-            choices = [('', '-- Select Foss --')] + list(TutorialResource.objects.filter(status = 1, language__name = 'English').values_list('tutorial_detail__foss__foss', 'tutorial_detail__foss__foss').order_by('tutorial_detail__foss__foss').distinct()),
+            choices = choices,
             widget=forms.Select(),
             required = False,
         )
-        lang_list = list(Language.objects.all().order_by('name').values_list('name','name'))
-        lang_list.insert(0, ('', '-- Select Language --'))
+        lang_list = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2)).values('language__name').annotate(Count('id')).order_by('language__name').values_list('language__name', 'id__count').distinct()
+        choices = [('', '-- Select Language --'),]
+        for lang_row in lang_list:
+            choices.append((str(lang_row[0]), str(lang_row[0]) + ' (' + str(lang_row[1]) + ')'))
         language = forms.ChoiceField(
-            choices = lang_list,
+            choices = choices,
             widget = forms.Select(),
             required = False,
         )
-    except:
-        pass
+    #except:
+     #   pass
 
 class TestimonialsForm(forms.ModelForm):
     source_title = forms.CharField(required =  False)

@@ -162,26 +162,35 @@ def watch_tutorial(request, foss, tutorial, lang):
 
 @csrf_exempt
 def get_language(request):
+    output = ''
     if request.method == "POST":
         foss = request.POST.get('foss')
         lang = request.POST.get('lang')
-        output = ''
         if not lang and foss:
-            collection = TutorialResource.objects.select_related('Language').filter(tutorial_detail__foss__foss = foss).values_list('language__name').distinct()
+            lang_list = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), tutorial_detail__foss__foss = foss).values('language__name').annotate(Count('id')).order_by('language__name').values_list('language__name', 'id__count').distinct()
             tmp = '<option value = ""> -- Select Language -- </option>'
-            for i in collection:
-                tmp += '<option value="' + str(i[0]) + '">' + str(i[0]) + '</option>'
+            for lang_row in lang_list:
+                tmp += '<option value="' + str(lang_row[0]) +'">' + str(lang_row[0]) + ' (' + str(lang_row[1]) + ')</option>'
             output = ['foss', tmp]
-            return HttpResponse(json.dumps(output), mimetype='application/json')
         elif lang and not foss:
-            collection = TutorialResource.objects.filter(language__name = lang).values_list('tutorial_detail__foss__foss').distinct()
+            foss_list = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), language__name = lang).values('tutorial_detail__foss__foss').annotate(Count('id')).order_by('tutorial_detail__foss__foss').values_list('tutorial_detail__foss__foss', 'id__count').distinct()
             tmp = '<option value = ""> -- Select Foss -- </option>'
-            for i in collection:
-                tmp += '<option value="' + str(i[0]) +'">' + str(i[0]) + '</option>'
+            for foss_row in foss_list:
+                tmp += '<option value="' + str(foss_row[0]) +'">' + str(foss_row[0]) + ' (' + str(foss_row[1]) + ')</option>'
             output = ['lang', tmp]
-            return HttpResponse(json.dumps(output), mimetype='application/json')
         elif foss and lang:
             pass
+        else:
+            lang_list = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2)).values('language__name').annotate(Count('id')).order_by('language__name').values_list('language__name', 'id__count').distinct()
+            tmp1 = '<option value = ""> -- Select Language -- </option>'
+            for lang_row in lang_list:
+                tmp1 += '<option value="' + str(lang_row[0]) +'">' + str(lang_row[0]) + ' (' + str(lang_row[1]) + ')</option>'
+            foss_list = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), language__name = 'English').values('tutorial_detail__foss__foss').annotate(Count('id')).order_by('tutorial_detail__foss__foss').values_list('tutorial_detail__foss__foss', 'id__count').distinct()
+            tmp2 = '<option value = ""> -- Select Foss -- </option>'
+            for foss_row in foss_list:
+                tmp2 += '<option value="' + str(foss_row[0]) +'">' + str(foss_row[0]) + ' (' + str(foss_row[1]) + ')</option>'
+            output = ['reset', tmp1, tmp2]
+    return HttpResponse(json.dumps(output), mimetype='application/json')
 
 def testimonials(request):
     testimonials = Testimonials.objects.all()
