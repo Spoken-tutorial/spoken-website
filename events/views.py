@@ -285,6 +285,7 @@ def close_predated_ongoing_test(request):
                 present = TestAttendance.objects.get(test = t, status__gt = 1).count()
                 absentees = TestAttendance.objects.get(test = t, status = 0).count()
                 if present:
+                    TestAttendance.objects.filter(test_id=t.id, status = 2).update(status = 3)
                     w.participant_count = present
                     w.status = 4
                     w.save()
@@ -476,8 +477,7 @@ def ac(request):
         4: SortableHeader('institution_name', True, 'Institution Name'),
         5: SortableHeader('university__name', True, 'University'),
         6: SortableHeader('institution_type__name', True, 'Institute Type'),
-        7: SortableHeader('institute_category__name', True, 'Institute Category'),
-        8: SortableHeader('Action', False)
+        7: SortableHeader('Action', False)
     }
     
     collectionSet = AcademicCenter.objects.filter(state = user.resource_person.all())
@@ -1653,6 +1653,7 @@ def test_approvel(request, role, rid):
         t.appoved_by_id = user.id
         t.workshop_code = "TC-"+str(t.id)
     if status == 4:
+        TestAttendance.objects.filter(test_id=t.id, status = 2).update(status = 3)
         testatten = TestAttendance.objects.filter(test_id=t.id, status__gt=2)
         if  not testatten:
             messages.error(request, "Students are processing the test. Check the status for each students!")
@@ -2271,4 +2272,11 @@ def ajax_language(request):
         
 @csrf_exempt
 def test(request):
-    return render_to_response('events/templates/test/test.html', { 'foo': 123, 'bar': 456 })
+    training = Training.objects.exclude(Q(status=5) | Q(status=4))
+    for t in training:
+        if TrainingAttendance.objects.filter(training=t).count():
+            TrainingAttendance.objects.filter(training=t).update(status=1)
+            t.participant_counts = TrainingAttendance.objects.filter(training=t, status=1).count()
+            t.save()
+            print t.id, ",", "count => ", t.participant_counts
+    return HttpResponse("Done!")
