@@ -2266,4 +2266,11 @@ def ajax_language(request):
         
 @csrf_exempt
 def test(request):
-    return render_to_response('events/templates/test/test.html', { 'foo': 123, 'bar': 456 })
+    training = Training.objects.exclude(Q(status=5) | Q(status=4))
+    for t in training:
+        if TrainingAttendance.objects.filter(training=t).count():
+            TrainingAttendance.objects.filter(training=t).update(status=1)
+            t.participant_counts = TrainingAttendance.objects.filter(training=t, status=1).count()
+            t.save()
+            print t.id, ",", "count => ", t.participant_counts
+    return HttpResponse("Done!")
