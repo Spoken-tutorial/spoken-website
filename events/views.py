@@ -476,8 +476,7 @@ def ac(request):
         4: SortableHeader('institution_name', True, 'Institution Name'),
         5: SortableHeader('university__name', True, 'University'),
         6: SortableHeader('institution_type__name', True, 'Institute Type'),
-        7: SortableHeader('institute_category__name', True, 'Institute Category'),
-        8: SortableHeader('Action', False)
+        7: SortableHeader('Action', False)
     }
     
     collectionSet = AcademicCenter.objects.filter(state = user.resource_person.all())
