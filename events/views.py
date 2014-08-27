@@ -248,7 +248,7 @@ def training_gentle_reminder(request):
 def training_completion_reminder(request):
     training_need_to_complete = Training.objects.filter(trdate_gte=datetime.date.today() - datetime.timedelta(days=60))
     if training_need_to_complete:
-        status = 'How to upload the attendance on the training day'
+        status = 'How to upload the attendance on the Training day'
         for t in training_need_to_complete:
             to = [t.organiser.user.email]
             send_email(status, to, t)
@@ -256,17 +256,22 @@ def training_completion_reminder(request):
 
 # only for workshop, pilot, live workshop
 def close_predated_ongoing_workshop(request):
-    predated_ongoing_workshop = Training.objects.filter(training_type__gt = 0, status = 3, trdate__lt = datetime.date.today())
+    predated_ongoing_workshop = Training.objects.filter(Q(status = 2) | Q(status = 3), training_type__gt = 0, trdate__lt = datetime.date.today())
     if predated_ongoing_workshop:
         for w in predated_ongoing_workshop:
             try:
-                present = TrainingAttendance.objects.get(training = w, status__gte = 1).count()
-                absentees = TrainingAttendance.objects.get(training = w, status = 0).count()
+                present = TrainingAttendance.objects.filter(training = w, status__gte = 1).count()
+                absentees = TrainingAttendance.objects.filter(training = w, status = 0).count()
                 if present:
-                    w.participant_counts = present
-                    w.status = 4
-                    w.trusted = 0
-                    w.save()
+                    final_count = present
+                else:
+                    final_count = absentees
+                    TrainingAttendance.objects.filter(training = w, status = 0).update(status = 1)
+
+                w.participant_counts = final_count
+                w.status = 4
+                w.trusted = 0
+                w.save()
             except:
                 pass
     return HttpResponse("Done!")
@@ -277,7 +282,7 @@ def close_predated_ongoing_test(request):
     if predated_ongoing_test:
         for t in predated_ongoing_test:
             try:
-                present = TestAttendance.objects.get(test = t, status__gte = 1).count()
+                present = TestAttendance.objects.get(test = t, status__gt = 1).count()
                 absentees = TestAttendance.objects.get(test = t, status = 0).count()
                 if present:
                     w.participant_count = present
