@@ -2427,12 +2427,17 @@ def update_prerequisite(request):
         if form.is_valid():
             try:
                 source_tutorial = TutorialDetail.objects.get(pk = form.cleaned_data['source_tutorial'] , foss_id = form.cleaned_data['source_foss'])
-                destination_tutorial = TutorialDetail.objects.get(pk = form.cleaned_data['destination_tutorial'] , foss_id = form.cleaned_data['destination_foss'])
-                
                 tcc = TutorialCommonContent.objects.get(tutorial_detail = source_tutorial)
-                tcc.prerequisite_id = destination_tutorial.id
+                if int(form.cleaned_data['destination_tutorial']) == 0:
+                    tcc.prerequisite_id = None
+                    tcc.prerequisite_status = 6
+                    messages.success(request, 'Prerequisite for <b>' + source_tutorial.tutorial + '</b> updated to <b>Not Required</b>')
+                else:
+                    destination_tutorial = TutorialDetail.objects.get(pk = form.cleaned_data['destination_tutorial'] , foss_id = form.cleaned_data['destination_foss'])
+                    tcc.prerequisite_id = destination_tutorial.id
+                    tcc.prerequisite_status = 4
+                    messages.success(request, 'Prerequisite <b>' + destination_tutorial.tutorial + '</b> updated to <b>' + source_tutorial.tutorial + '</b>.')
                 tcc.save()
-                messages.success(request, 'Prerequisite <b>' + destination_tutorial.tutorial + '</b> updated to <b>' + source_tutorial.tutorial + '</b>.')
                 return HttpResponseRedirect('/creation/update-prerequisite/')
             except Exception, e:
                 pass

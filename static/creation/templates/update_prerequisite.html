@@ -59,9 +59,14 @@
             });
             $('.destination_foss').on("change", function(){
                 var foss = $(this).val();
-                $('.destination_tutorial').html('<option value="" selected="selected">Select Tutorial</option>');
-                $('.destination_tutorial').attr("disabled", "disabled");
-                if(foss != '') {
+                $('.destination_tutorial').html('<option value="" selected="selected">-- Select Tutorial --</option> <option value="0">-- Not Required --</option>');
+                if(foss == '0') {
+                    $('.destination_tutorial').removeAttr('disabled');
+                    $('.destination_tutorial').val('0');
+                } else {
+                    $('.destination_tutorial').attr("disabled", "disabled");
+                }
+                if(foss != '' && foss != '0') {
                     $.ajax({
                         url: "/creation/ajax-upload-prerequisite/",
                         type: "POST",

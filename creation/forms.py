@@ -694,12 +694,12 @@ class UpdatePrerequisiteForm(forms.Form):
         error_messages = {'required': 'Tutorial Name field is required.'}
     )
     destination_foss = forms.ChoiceField(
-        choices = [('', '-- Select Foss --'),] + list(FossCategory.objects.filter(status=1).values_list('id', 'foss').order_by('foss')),
+        choices = [('', '-- Select Foss --'), ('0', '-- Not Required --'),] + list(FossCategory.objects.filter(status=1).values_list('id', 'foss').order_by('foss')),
         required = True,
         error_messages = {'required':'FOSS category field is required.'}
     )
     destination_tutorial = forms.ChoiceField(
-        choices = [('', '-- Select Tutorial --'),],
+        choices = [('', '-- Select Tutorial --'), ('0', '-- Not Required --'),],
         widget=forms.Select(attrs = {'disabled': 'disabled'}),
         required = True,
         error_messages = {'required': 'Tutorial Name field is required.'}
@@ -748,7 +748,8 @@ class UpdatePrerequisiteForm(forms.Form):
                             'tutorial'
                         )
                     )
-                    choices.insert(0, ('', 'Select Tutorial'))
+                    choices.insert(0, ('', '-- Select Tutorial --'))
+                    choices.insert(1, ('0', '-- Not Required --'))
                     self.fields['destination_tutorial'].choices = choices
                     self.fields['destination_tutorial'].widget.attrs = {}
                     self.fields['destination_tutorial'].initial = initial_data
