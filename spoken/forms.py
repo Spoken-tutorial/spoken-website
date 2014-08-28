@@ -18,7 +18,7 @@ class TutorialSearchForm(forms.Form):
             widget=forms.Select(),
             required = False,
         )
-        lang_list = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2)).values('language__name').annotate(Count('id')).order_by('language__name').values_list('language__name', 'id__count').distinct()
+        lang_list = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2)).values('language__name').annotate(Count('id')).order_by('language').values_list('language__name', 'id__count').distinct()
         choices = [('', '-- Select Language --'),]
         for lang_row in lang_list:
             choices.append((str(lang_row[0]), str(lang_row[0]) + ' (' + str(lang_row[1]) + ')'))
