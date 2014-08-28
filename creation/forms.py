@@ -752,3 +752,36 @@ class UpdatePrerequisiteForm(forms.Form):
                     self.fields['destination_tutorial'].choices = choices
                     self.fields['destination_tutorial'].widget.attrs = {}
                     self.fields['destination_tutorial'].initial = initial_data
+
+class UpdateKeywordsForm(forms.Form):
+    foss = forms.ChoiceField(
+        choices = [('', '-- Select Foss --'),] + list(FossCategory.objects.filter(status=1).values_list('id', 'foss').order_by('foss')),
+        required = True,
+        error_messages = {'required':'FOSS category field is required.'}
+    )
+    tutorial = forms.ChoiceField(
+        choices = [('', '-- Select Tutorial --'),],
+        widget=forms.Select(attrs = {'disabled': 'disabled'}),
+        required = True,
+        error_messages = {'required': 'Tutorial Name field is required.'}
+    )
+    keywords = forms.CharField(
+        widget = forms.Textarea,
+        required = True,
+        error_messages = {'required':'Keywords field required'}
+    )
+
+    def __init__(self, *args, **kwargs):
+        super(UpdateKeywordsForm, self).__init__(*args, **kwargs)
+        if args:
+            if 'foss' in args[0] and args[0]['foss']:
+                initial_data = ''
+                if 'tutorial' in args[0] and args[0]['tutorial']:
+                    initial_data = args[0]['tutorial']
+                choices = TutorialResource.objects.filter(
+                    tutorial_detail__foss_id = args[0]['foss'],
+                    language__name = 'English'
+                ).values_list('tutorial_detail_id', 'tutorial_detail__tutorial').order_by('tutorial_detail__tutorial')
+                self.fields['tutorial'].choices = choices
+                self.fields['tutorial'].widget.attrs = {}
+                self.fields['tutorial'].initial = initial_data

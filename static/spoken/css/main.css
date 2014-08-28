@@ -443,6 +443,7 @@ a {
 }
 #content-wrapper{
     min-height: 400px;
+    margin-bottom: 10px;
 }
 /* Content css end */
 
