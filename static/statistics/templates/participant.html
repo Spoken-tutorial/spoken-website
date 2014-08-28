@@ -5,7 +5,7 @@
 {% block title %}Workshop Participant Details{% endblock %}
 {% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
 {% block heading %}
-        <i class="fa fa-list-ul"></i> Participant Details {% if can_download_certificate %}<a href="/software-training" class='pull-right'>Dashboard</a> {% endif %}
+        <i class="fa fa-list-ul"></i> Participant Details
 {% endblock %}
 {% block content %}
     <div class="bs-callout bs-callout-info">
@@ -42,9 +42,6 @@
 					<td>{{ record.firstname|lower|title }}</td>
 					<td>{{ record.lastname|lower|title }}</td>
 					<td>
-			            {% if can_download_certificate and wc.status == 4 %}
-			               <a href="{% url 'events:training_participant_ceritificate' wc.id record.id %}">Certificate</a> | 
-			            {% endif %}
 			            <a href="{% url 'events:training_participant_feedback' wc.id record.id %}">Feedback</a>
 				    </td>
 				</tr>
