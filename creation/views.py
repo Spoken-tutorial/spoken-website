@@ -435,7 +435,7 @@ def ajax_upload_prerequisite(request):
                 ).values_list(
                     'tutorial_detail_id'
                 )
-            )
+            ).order_by('tutorial')
             for td_rec in td_recs:
                 data += '<option value="' + str(td_rec.id) + '">' + td_rec.tutorial + '</option>'
             if data:
@@ -500,6 +500,18 @@ def ajax_upload_foss(request):
             if data:
                 data = '<option value="">Select Language</option>' + data
 
+    return HttpResponse(json.dumps(data), mimetype='application/json')
+
+@csrf_exempt
+def ajax_get_keywords(request):
+    data = ''
+    if request.method == 'POST':
+        try:
+            tutorial_detail_id = int(request.POST.get('tutorial_detail'))
+            tcc = TutorialCommonContent.objects.get(tutorial_detail_id = tutorial_detail_id)
+            data = tcc.keyword
+        except Exception, e:
+            pass
     return HttpResponse(json.dumps(data), mimetype='application/json')
 
 @login_required
@@ -2405,8 +2417,8 @@ def collaborate(request):
     context.update(csrf(request))
     return render(request, 'creation/templates/collaborate.html', context)
 
+@login_required
 def update_prerequisite(request):
-    user = request.user
     if not is_administrator(request.user):
         raise PermissionDenied()
     form = UpdatePrerequisiteForm()
@@ -2414,13 +2426,18 @@ def update_prerequisite(request):
         form = UpdatePrerequisiteForm(request.POST)
         if form.is_valid():
             try:
-                source_tutorial = TutorialDetail.objects.get(pk = form.cleaned_data['source_tutorial'] , foss = form.cleaned_data['source_foss'])
-                destination_tutorial = TutorialDetail.objects.get(pk = form.cleaned_data['destination_tutorial'] , foss = form.cleaned_data['destination_foss'])
-                
+                source_tutorial = TutorialDetail.objects.get(pk = form.cleaned_data['source_tutorial'] , foss_id = form.cleaned_data['source_foss'])
                 tcc = TutorialCommonContent.objects.get(tutorial_detail = source_tutorial)
-                tcc.prerequisite_id = destination_tutorial.id
+                if int(form.cleaned_data['destination_tutorial']) == 0:
+                    tcc.prerequisite_id = None
+                    tcc.prerequisite_status = 6
+                    messages.success(request, 'Prerequisite for <b>' + source_tutorial.tutorial + '</b> updated to <b>Not Required</b>')
+                else:
+                    destination_tutorial = TutorialDetail.objects.get(pk = form.cleaned_data['destination_tutorial'] , foss_id = form.cleaned_data['destination_foss'])
+                    tcc.prerequisite_id = destination_tutorial.id
+                    tcc.prerequisite_status = 4
+                    messages.success(request, 'Prerequisite <b>' + destination_tutorial.tutorial + '</b> updated to <b>' + source_tutorial.tutorial + '</b>.')
                 tcc.save()
-                messages.success(request, 'Prerequisite <b>' + destination_tutorial.tutorial + '</b> added to <b>' + source_tutorial.tutorial + '</b>.')
                 return HttpResponseRedirect('/creation/update-prerequisite/')
             except Exception, e:
                 pass
@@ -2429,3 +2446,27 @@ def update_prerequisite(request):
     }
     context.update(csrf(request))
     return render(request, 'creation/templates/update_prerequisite.html', context)
+
+@login_required
+def update_keywords(request):
+    if not is_administrator(request.user):
+        raise PermissionDenied()
+    form = UpdateKeywordsForm()
+    if request.method == 'POST':
+        form = UpdateKeywordsForm(request.POST)
+        if form.is_valid():
+            try:
+                tcc = TutorialCommonContent.objects.get(tutorial_detail_id = request.POST.get('tutorial'))
+                tcc.keyword = request.POST.get('keywords')
+                tcc.keyword_user = request.user
+                tcc.status = 4
+                tcc.save()
+                messages.success(request, 'Keywords updated successfully!')
+                return HttpResponseRedirect('/creation/update-keywords/')
+            except Exception, e:
+                pass
+    context = {
+        'form': form
+    }
+    context.update(csrf(request))
+    return render(request, 'creation/templates/update_keywords.html', context)
