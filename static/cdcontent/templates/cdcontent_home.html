@@ -29,6 +29,7 @@
                         <div class="col-lg-9 col-md-9 col-sm-9 col-xs-9">
                             {% render_field form.foss_category class+="form-control foss_category" tabindex="1" %}
                             {{ form.foss_category.errors }}
+                            <small>Please select FOSS</small>
                             {% render_field form.selected_foss class+='selected_foss' %}
                         </div>
                     </div>
@@ -37,6 +38,7 @@
                         <div class="col-lg-9 col-md-9 col-sm-9 col-xs-9">
                             {% render_field form.level class+="form-control level" tabindex="2" %}
                             {{ form.level.errors }}
+                            <small>Please select the Level</small>
                         </div>
                     </div>
                     <div class="form-group">
@@ -44,6 +46,8 @@
                         <div class="col-lg-9 col-md-9 col-sm-9 col-xs-9">
                             {% render_field form.language class+="form-control language" tabindex="3" %}
                             {{ form.language.errors }}
+                            <small>For selecting multiple languages, please use </small>
+                            <small><b>&lt;CTRL&gt; + Click</b>.</small>
                         </div>
                     </div>
                     <div class="form-group">

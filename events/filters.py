@@ -49,11 +49,18 @@ class InvigilatorFilter(django_filters.FilterSet):
 
 class TrainingFilter(django_filters.FilterSet):
     academic__state = django_filters.ChoiceFilter(choices=State.objects.none())
+    foss = django_filters.ChoiceFilter(choices= [('', '---------')] + list(FossAvailableForWorkshop.objects.filter(status=1).order_by('foss__foss').values_list('foss__id', 'foss__foss')))
     def __init__(self, *args, **kwargs):
-        user = kwargs['user']
-        kwargs.pop('user')
+        user=None
+        if 'user' in kwargs:
+            user = kwargs['user']
+            kwargs.pop('user')
         super(TrainingFilter, self).__init__(*args, **kwargs)
-        choices = list(State.objects.filter(resourceperson__user_id=user).values_list('id', 'name'))
+        choices = None
+        if user:
+            choices = list(State.objects.filter(resourceperson__user_id=user).values_list('id', 'name'))
+        else:
+            choices = list(State.objects.exclude(name='Uncategorized').order_by('name').values_list('id', 'name'))
         choices.insert(0, ('', '---------'),)
         self.filters['academic__state'].extra.update({'choices' : choices})
     class Meta:

@@ -1302,11 +1302,11 @@ def training_attendance(request, wid):
     return render(request, 'events/templates/training/attendance.html', context)
 
 
-@login_required
 def training_participant(request, wid=None):
     user = request.user
-    if not (user.is_authenticated() and (is_resource_person(user) or is_event_manager(user) or is_organiser(user))):
-        raise Http404('You are not allowed to view this page')
+    if user.is_authenticated():
+        if not ((is_resource_person(user) or is_event_manager(user) or is_organiser(user))):
+            raise Http404('You are not allowed to view this page')
     can_download_certificate = 0
     if wid:
         try:
@@ -2050,7 +2050,7 @@ def training_participant_feedback(request, training_id, participant_id):
         tf = TrainingFeedback.objects.get(training_id = training_id, mdluser_id = participant_id)
     except:
         messages.success(request, 'Feedback not exits!')
-        return HttpResponseRedirect('/software-training/training/' + training_id + '/participant/')
+        return HttpResponseRedirect(request.META['HTTP_REFERER'])
     context = {
         'feedback' : tf,
     }
