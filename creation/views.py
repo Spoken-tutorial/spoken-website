@@ -2220,7 +2220,7 @@ def report_missing_component(request, trid):
         2: 'script',
         3: 'video',
         4: 'slide',
-        5: 'Code',
+        5: 'code',
         6: 'assignment'
     }
     try:
@@ -2255,11 +2255,11 @@ def report_missing_component(request, trid):
                         flag = 1
                         messages.warning(request, 'The selected component is available. However if you wish to report an error, please click on "Some content is missing" radio button.')
                     if component <= 3:
-                        if component != 1 and os.path.isfile(settings.MEDIA_ROOT + 'videos/' + tr_rec.tutorial_detail__foss_id + '/' + tr_rec.tutorial_detail_id + '/' + compValue):
+                        if component != 1 and os.path.isfile(settings.MEDIA_ROOT + 'videos/' + str(tr_rec.tutorial_detail.foss_id) + '/' + str(tr_rec.tutorial_detail_id) + '/' + compValue):
                             flag = 1
                             messages.warning(request, 'The selected component is available. However if you wish to report an error, please click on "Some content is missing" radio button.')
                     else:
-                        if os.path.isfile(settings.MEDIA_ROOT + 'videos/resources/' + tr_rec.tutorial_detail__foss_id + '/' + tr_rec.tutorial_detail_id + '/' + compValue):
+                        if os.path.isfile(settings.MEDIA_ROOT + 'videos/resources/' + str(tr_rec.tutorial_detail.foss_id) + '/' + str(tr_rec.tutorial_detail_id) + '/' + compValue):
                             flag = 1
                             messages.warning(request, 'The selected component is available. However if you wish to report an error, please click on "Some content is missing" radio button.')
                 if flag:

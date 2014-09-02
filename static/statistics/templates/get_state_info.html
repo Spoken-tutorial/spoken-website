@@ -5,9 +5,9 @@
     <body style="overflow: hidden;">
         <div>
             <table border="0" width="100%" height="100%" style="padding:10px;">
-                <caption align="center"><h3 style="margin: 0px; padding: 2px;">{{ state_name }}</h3></caption>
+                <caption align="center"><h3 style="margin: 0px; padding: 2px;">{{ state.name }}</h3></caption>
                 <tr>
-                    <td><b>Workshops:</b></td>
+                    <td><b><a href="/statistics/training/{{ state.slug }}/" target="_blank">Workshops:</a></b></td>
                     <td>{{ workshops }}</td>
                 </tr>
                 <tr>
@@ -15,7 +15,7 @@
                     <td>{{ participants }}</td>
                 </tr>
                 <tr>
-                    <td><b>Resource Centers:</b></td>
+                    <td><b><a href="/software-training/resource-center/{{ state.slug }}" target="_blank">Resource Centers:</a></b></td>
                     <td>{{ resource_centers }}</td>
                 </tr>
                 <tr>
