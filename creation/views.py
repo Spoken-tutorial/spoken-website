@@ -2447,6 +2447,7 @@ def update_prerequisite(request):
     context.update(csrf(request))
     return render(request, 'creation/templates/update_prerequisite.html', context)
 
+
 @login_required
 def update_keywords(request):
     if not is_administrator(request.user):
@@ -2470,3 +2471,76 @@ def update_keywords(request):
     }
     context.update(csrf(request))
     return render(request, 'creation/templates/update_keywords.html', context)
+
+
+@login_required
+def update_sheet(request, sheet_type):
+    if not is_administrator(request.user) and not is_contributor(request.user):
+        raise PermissionDenied()
+    form = UpdateSheetsForm()
+    if request.method == 'POST':
+        form = UpdateSheetsForm(request.POST, request.FILES)
+        if form.is_valid():
+            try:
+                foss_id = request.POST.get('foss')
+                foss = FossCategory.objects.get(pk = foss_id)
+                language_id = request.POST.get('language')
+                language = Language.objects.get(pk = language_id)
+                sheet_path = 'videos/' + str(foss.id) + '/' + \
+                    foss.foss + '-' + sheet_type.title() + \
+                    '-Sheet-' + language.name + '.pdf'
+                fout = open(settings.MEDIA_ROOT + sheet_path, 'wb+')
+                f = request.FILES['comp']
+                # Iterate through the chunks.
+                for chunk in f.chunks():
+                    fout.write(chunk)
+                fout.close()
+                messages.success(request, sheet_type.title() + \
+                    ' sheet uploaded successfully!')
+                form = UpdateSheetsForm()
+            except Exception, e:
+                print e
+    context = {
+        'form': form,
+        'sheet_type': sheet_type
+    }
+    context.update(csrf(request))
+    return render(request, 'creation/templates/update_sheet.html', context)
+
+
+@csrf_exempt
+def ajax_manual_language(request):
+    data = ''
+    if request.method == 'POST':
+        foss_id = request.POST.get('foss', '')
+        language_id = request.POST.get('language', '')
+        sheet_type = request.POST.get('sheet_type', '')
+        if foss_id and language_id and sheet_type:
+            try:
+                foss = FossCategory.objects.get(pk = foss_id)
+                language = Language.objects.get(pk = language_id)
+                sheet_path = 'videos/' + str(foss.id) + '/' + \
+                    foss.foss + '-' + sheet_type.title() + '-Sheet-' + \
+                    language.name + '.pdf'
+                if os.path.isfile(settings.MEDIA_ROOT + sheet_path):
+                    data = '<a href="' + settings.MEDIA_URL + sheet_path + \
+                    '" target="_blank"> Click here to view the currently \
+                    available instruction sheet for the tutorial selected \
+                    above</a>'
+            except Exception, e:
+                print e
+                pass
+        elif foss_id:
+            tutorials = TutorialResource.objects.filter(
+                Q(status = 1) | Q(status = 2),
+                tutorial_detail__foss_id = foss_id
+            ).values_list(
+                'language_id',
+                'language__name'
+            ).order_by('language__name').distinct()
+            for tutorial in tutorials:
+                data += '<option value="' + str(tutorial[0]) + '">' + \
+                str(tutorial[1]) + '</option>'
+            if data:
+                data = '<option value="">-- Select Language --</option>' + data
+    return HttpResponse(json.dumps(data), mimetype='application/json')

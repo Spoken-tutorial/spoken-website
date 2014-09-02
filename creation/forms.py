@@ -786,3 +786,46 @@ class UpdateKeywordsForm(forms.Form):
                 self.fields['tutorial'].choices = choices
                 self.fields['tutorial'].widget.attrs = {}
                 self.fields['tutorial'].initial = initial_data
+
+class UpdateSheetsForm(forms.Form):
+    foss = forms.ChoiceField(
+        choices = [('', '-- Select Foss --'),] + list(TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), language__name='English').values_list('tutorial_detail__foss_id', 'tutorial_detail__foss__foss').order_by('tutorial_detail__foss__foss').distinct()),
+        required = True,
+        error_messages = {'required':'FOSS category field is required.'}
+    )
+    language = forms.ChoiceField(
+        choices = [('', '-- Select Language --'),],
+        widget=forms.Select(attrs = {'disabled': 'disabled'}),
+        required = True,
+        error_messages = {'required': 'Language field is required.'}
+    )
+    comp = forms.FileField(required = False)
+
+
+    def clean(self):
+        super(UpdateSheetsForm, self).clean()
+        file_types = ['application/pdf']
+        component = ''
+        if 'comp' in self.cleaned_data:
+            component = self.cleaned_data['comp']
+        if component:
+            if not component.content_type in file_types:
+                self._errors["comp"] = self.error_class(["Not a valid file format."])
+        else:
+            self._errors["comp"] = self.error_class(["This field is required."])
+        return component
+
+
+    def __init__(self, *args, **kwargs):
+        super(UpdateSheetsForm, self).__init__(*args, **kwargs)
+        
+        if args and 'comp' not in args[0]:
+            if 'foss' in args[0] and args[0]['foss']:
+                initial_lang = ''
+                if 'language' in args[0] and args[0]['language']:
+                    initial_lang = args[0]['language']
+                choices = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), tutorial_detail__foss_id = args[0]['foss']).values_list('language_id', 'language__name').order_by('language__name').distinct()
+                self.fields['language'].choices = choices
+                self.fields['language'].widget.attrs = {}
+                self.fields['language'].initial = initial_lang
+
