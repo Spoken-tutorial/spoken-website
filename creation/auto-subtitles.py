@@ -60,7 +60,8 @@ def getNewBrowser():
 def generate_subtitle(srt_url, srt_file_path):
     soup = readUrl(srt_url)
     table = soup.findAll("table", attrs={'border':'1'})
-    
+    if not table:
+        return False
     #try:
     rows = table[0].findAll("tr")
     counter = 1
@@ -106,6 +107,10 @@ def generate_subtitle(srt_url, srt_file_path):
     return True
 
 
+def get_digits(raw_string):
+    return ''.join(digit for digit in raw_string if digit.isdigit())
+
+
 def get_formatted_time(raw_time_string):
     raw_time_parts_tmp = raw_time_string.strip().strip(':').split(':')
     raw_time_parts = []
@@ -113,6 +118,8 @@ def get_formatted_time(raw_time_string):
         if time_part and time_part != ' ':
             raw_time_parts.append(time_part)
     if(len(raw_time_parts) == 2):
+        raw_time_parts[0] = get_digits(raw_time_parts[0])
+        raw_time_parts[1] = get_digits(raw_time_parts[1])
         minutes = int(raw_time_parts[0])
         seconds = int(raw_time_parts[1])
         raw_time_parts[0] = str(minutes)
@@ -124,6 +131,9 @@ def get_formatted_time(raw_time_string):
         return '00:' + raw_time_parts[0] + ':' + raw_time_parts[1]
     elif(len(raw_time_parts) == 3):
         print raw_time_parts
+        raw_time_parts[0] = get_digits(raw_time_parts[0])
+        raw_time_parts[1] = get_digits(raw_time_parts[1])
+        raw_time_parts[2] = get_digits(raw_time_parts[2])
         hours = int(raw_time_parts[0])
         minutes = int(raw_time_parts[1])
         seconds = int(raw_time_parts[2])
