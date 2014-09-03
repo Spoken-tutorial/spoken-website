@@ -291,8 +291,8 @@ def close_predated_ongoing_test(request):
     if predated_ongoing_test:
         for t in predated_ongoing_test:
             try:
-                present = TestAttendance.objects.get(test = t, status__gt = 1).count()
-                # absentees = TestAttendance.objects.get(test = t, status = 0).count()
+                present = TestAttendance.objects.filter(test = t, status__gt = 1).count()
+                # absentees = TestAttendance.objects.filter(test = t, status = 0).count()
                 if present:
                     TestAttendance.objects.filter(test_id=t.id, status = 2).update(status = 3)
                     t.participant_count = present
