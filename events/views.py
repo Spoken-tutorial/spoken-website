@@ -230,28 +230,37 @@ def fix_date_for_first_training(request):
     if organisers:
         status = 'Fix a date for your first training'
         for o in organisers:
-            to = [o.user.email]
-            send_email(status, to)
+            try:
+                to = [o.user.email]
+                send_email(status, to)
+            except:
+                pass
     return HttpResponse("Done!")
 
 def training_gentle_reminder(request):
     tomorrow_training = Training.objects.filter(trdate=datetime.date.today() + datetime.timedelta(days=1))
     if tomorrow_training:
-        status = 'How to upload the attendance on the Workshop day'
         for t in tomorrow_training:
-            to = [t.organiser.user.email]
-            if t.training_type == 0:
-                status = 'How to upload the attendance on the Training day'
-            send_email(status, to, t)
+            status = 'How to upload the attendance on the Workshop day'
+            try:
+                to = [t.organiser.user.email]
+                if t.training_type == 0:
+                    status = 'How to upload the attendance on the Training day'
+                send_email(status, to, t)
+            except:
+                pass
     return HttpResponse("Done!")
 
 def training_completion_reminder(request):
-    training_need_to_complete = Training.objects.filter(trdate_gte=datetime.date.today() - datetime.timedelta(days=60))
+    training_need_to_complete = Training.objects.filter(trdate__gte=datetime.date.today() - datetime.timedelta(days=60))
     if training_need_to_complete:
         status = 'How to upload the attendance on the Training day'
         for t in training_need_to_complete:
-            to = [t.organiser.user.email]
-            send_email(status, to, t)
+            try:
+                to = [t.organiser.user.email]
+                send_email(status, to, t)
+            except:
+                pass
     return HttpResponse("Done!")
 
 # only for workshop, pilot, live workshop
@@ -283,12 +292,12 @@ def close_predated_ongoing_test(request):
         for t in predated_ongoing_test:
             try:
                 present = TestAttendance.objects.get(test = t, status__gt = 1).count()
-                absentees = TestAttendance.objects.get(test = t, status = 0).count()
+                # absentees = TestAttendance.objects.get(test = t, status = 0).count()
                 if present:
                     TestAttendance.objects.filter(test_id=t.id, status = 2).update(status = 3)
-                    w.participant_count = present
-                    w.status = 4
-                    w.save()
+                    t.participant_count = present
+                    t.status = 4
+                    t.save()
             except:
                 pass
     return HttpResponse("Done!")

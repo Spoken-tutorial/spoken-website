@@ -9,6 +9,8 @@ urlpatterns = patterns('',
     url(r'^fix-date-for-first-training/$', 'events.views.fix_date_for_first_training', name='fix_date_for_first_training'),
     url(r'^training-gentle-reminder/$', 'events.views.training_gentle_reminder', name='training_gentle_reminder'),
     url(r'^training-completion-reminder/$', 'events.views.training_completion_reminder', name='training_completion_reminder'),
+    url(r'^close-predated-ongoing-workshop/$', 'events.views.close_predated_ongoing_workshop', name='close_predated_ongoing_workshop'),
+    url(r'^close-predated-ongoing-test/$', 'events.views.close_predated_ongoing_test', name='close_predated_ongoing_test'),
     
     url(r'^test/$', 'events.views.test', name='test'),
     
