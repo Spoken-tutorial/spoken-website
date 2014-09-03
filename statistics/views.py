@@ -26,7 +26,7 @@ def get_state_info(request, code):
         #workshop_details = Training.objects.filter(academic_id__in = academic_list, status = 4).aggregate(Sum('participant_counts'), Count('id'), Min('trdate'))
         workshop_details = Training.objects.filter(Q(status = 4) | (Q(training_type = 0) & Q(status__gt = 1) & Q(trdate__lte = datetime.date.today())), academic__state_id = state.id).aggregate(Sum('participant_counts'), Count('id'), Min('trdate'))
         context = {
-            'state_name': state.name,
+            'state': state,
             'workshops': workshop_details['id__count'],
             'participants': workshop_details['participant_counts__sum'],
             'resource_centers': resource_centers,

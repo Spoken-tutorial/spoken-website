@@ -49,7 +49,7 @@ class InvigilatorFilter(django_filters.FilterSet):
 
 class TrainingFilter(django_filters.FilterSet):
     academic__state = django_filters.ChoiceFilter(choices=State.objects.none())
-    foss = django_filters.ChoiceFilter(choices= [('', '---------')] + list(FossAvailableForWorkshop.objects.filter(status=1).order_by('foss__foss').values_list('foss__id', 'foss__foss')))
+    foss = django_filters.ChoiceFilter(choices= [('', '---------')] + list(FossAvailableForWorkshop.objects.filter(status=1).order_by('foss__foss').values_list('foss__id', 'foss__foss').distinct()))
     def __init__(self, *args, **kwargs):
         user=None
         if 'user' in kwargs:
