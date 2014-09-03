@@ -41,8 +41,6 @@
                 var foss = $(this).val();
                 $('.language').html('<option value="" selected="selected">-- Select Language --</option>');
                 $('.language').attr("disabled", "disabled");
-                $('.tutorial').html('<option value="" selected="selected">-- Select Tutorial --</option>');
-                $('.tutorial').attr("disabled", "disabled");
                 if(foss != '') {
                     $.ajax({
                         url: "/creation/ajax-manual-language/",
@@ -67,9 +65,8 @@
             $('.language').on("change", function(){
                 var foss = $('.foss').val();
                 var language = $('.language').val();
-                var tutorial = $(this).val();
                 $('.existing-sheet').html('');
-                if(foss && language && tutorial) {
+                if(foss && language) {
                     $.ajax({
                         url: "/creation/ajax-manual-language/",
                         type: "POST",

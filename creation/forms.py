@@ -819,13 +819,13 @@ class UpdateSheetsForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super(UpdateSheetsForm, self).__init__(*args, **kwargs)
         
-        if args and 'comp' not in args[0]:
+        if args:
             if 'foss' in args[0] and args[0]['foss']:
                 initial_lang = ''
                 if 'language' in args[0] and args[0]['language']:
                     initial_lang = args[0]['language']
                 choices = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), tutorial_detail__foss_id = args[0]['foss']).values_list('language_id', 'language__name').order_by('language__name').distinct()
-                self.fields['language'].choices = choices
+                self.fields['language'].choices =  [('', '-- Select Language --'),] + list(choices)
                 self.fields['language'].widget.attrs = {}
                 self.fields['language'].initial = initial_lang
 

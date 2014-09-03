@@ -2475,7 +2475,9 @@ def update_keywords(request):
 
 @login_required
 def update_sheet(request, sheet_type):
-    if not is_administrator(request.user) and not is_contributor(request.user):
+    sheet_types = ['instruction', 'installation']
+    if not is_administrator(request.user) and not is_contributor(request.user)\
+     or not sheet_type in sheet_types:
         raise PermissionDenied()
     form = UpdateSheetsForm()
     if request.method == 'POST':
