@@ -50,6 +50,8 @@ INSTALLED_APPS = (
 	'django.contrib.sessions',
 	'django.contrib.messages',
 	'django.contrib.staticfiles',
+    'django.contrib.sites',
+    'django.contrib.redirects',
 	'django_extensions',
 	'widget_tweaks',
 	'captcha',
@@ -70,6 +72,7 @@ MIDDLEWARE_CLASSES = (
 	'django.contrib.auth.middleware.AuthenticationMiddleware',
 	'django.contrib.messages.middleware.MessageMiddleware',
 	'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.contrib.redirects.middleware.RedirectFallbackMiddleware',
 	'masquerade.middleware.MasqueradeMiddleware',
 )
 
@@ -77,6 +80,8 @@ ROOT_URLCONF = 'spoken.urls'
 
 WSGI_APPLICATION = 'spoken.wsgi.application'
 
+# for django.contrib.sites
+SITE_ID = 1
 
 # Database
 # https://docs.djangoproject.com/en/1.6/ref/settings/#databases
