@@ -2460,7 +2460,7 @@ def update_keywords(request):
                 tcc = TutorialCommonContent.objects.get(tutorial_detail_id = request.POST.get('tutorial'))
                 tcc.keyword = request.POST.get('keywords')
                 tcc.keyword_user = request.user
-                tcc.status = 4
+                tcc.keyword_status = 4
                 tcc.save()
                 messages.success(request, 'Keywords updated successfully!')
                 return HttpResponseRedirect('/creation/update-keywords/')
