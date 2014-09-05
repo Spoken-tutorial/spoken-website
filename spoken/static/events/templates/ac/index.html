@@ -1,0 +1,68 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load cmsdata %}
+{% load creationdata %}
+{% block title %}Listing College Details{% endblock %}
+{% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
+{% block heading %}
+    <i class="fa fa-list-ul"></i> Listing College Details <a href="{% url 'events:events_dashboard' %}" class=' dashboard pull-right'>Dashboard</a>
+{% endblock %}
+{% block content %}
+    <div class= 'filters' >
+        <form action="" method="get" class='form-horizontal'>
+            <div class="form-group">
+                <label for="id_state" class="col-sm-2 control-label">State</label>
+                <div class="col-sm-10">
+                    {% render_field form.state class+="form-control chosen state" tabindex="1" %}
+                    {{ form.state.errors }}
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="id_state" class="col-sm-2 control-label">Instituttion Type</label>
+                <div class="col-sm-10">
+                    {% render_field form.institution_type class+="form-control chosen institution_type" tabindex="1" %}
+                    {{ form.institution_type.errors }}
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="id_state" class="col-sm-2 control-label">Instituttion Category</label>
+                <div class="col-sm-10">
+                    {% render_field form.institute_category class+="form-control chosen institute_category" tabindex="1" %}
+                    {{ form.institute_category.errors }}
+                </div>
+            </div>
+            <div class="form-group">
+              <div class="col-sm-offset-2 col-sm-10">
+                 <input class="btn btn-success" type="submit" value="Filter" />
+                 <a class="btn btn-success" href="{{request.path}}?{{ request.GET|reset_get_values}}">Reset Filter</a>
+              </div>
+           </div>
+        </form>
+    </div>
+    <div class='add-new'>
+	    <a class="btn btn-primary" href="{% url 'events:new_ac' %}">Add New</a>
+	</div>
+	<div class='table-responsive'>
+		{% if collection %}
+		    
+			<table class="paleblue table table-bordered table-hover table-striped">
+				{% get_sortable_header header ordering request.GET %}
+				{% for record in collection %}
+					<tr class="{% cycle 'odd' 'even' %}">
+                        <td>{{ forloop.counter }}
+						<td>{{ record.state }}</td>
+						<td>{{ record.academic_code }}</td>
+						<td>{{ record.institution_name }}</td>
+						<td>{{ record.university }}</td>
+						<td>{{ record.institution_type }}</td>
+						<td><a href="{% url 'events:edit_ac' record.id %}">Edit</a> | 
+						<a href="{% url 'events:academic_center' record.id %}" target="_blank">View</a></td>
+					</tr>
+				{% endfor %}
+			</table>
+		{% else %}
+		    <p class="no-record"> No record found!</p>
+		{% endif %}
+	</div>
+{% endblock %}

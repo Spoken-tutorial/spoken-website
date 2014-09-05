@@ -49,7 +49,10 @@ urlpatterns = patterns('',
     
     # Cron links
     url(r'^cron/subtitle-files/create/$', 'spoken.views.create_subtitle_files', name='create_subtitle_files'),
-
+    
+    # reports
+    url(r'^report_builder/', include('report_builder.urls')),
+    
     #cms
     url(r'^', include('cms.urls', namespace='cms')),
 )

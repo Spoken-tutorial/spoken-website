@@ -1,0 +1,24 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load cmsdata %}
+{% load creationdata %}
+{% block title %} News {% endblock %}
+{% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
+{% block heading %}
+    {{ news.title }}
+{% endblock %}
+{% block content %}
+	<div class="news-container news-view">
+	    <h6>{{ news.created }}</h6>
+	    <div class="description">
+	        {{ news.body|safe }}
+	    </div>
+	    {% if news.url %}
+	        <a target="_blank" href="{{news.url}}" title="{{ news.url_title}}">{{news.url}}</a> 
+	    {% endif %}
+	    {% if news.picture %}
+	        <a href="/media/{{news.picture}}" target="_blank">View image</a>
+	    {% endif %}
+	</div>
+{% endblock %}

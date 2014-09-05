@@ -1,0 +1,58 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block title %}Suggest a Topic for a Spoken Tutorial{% endblock %}
+{% block heading %}
+    Suggest a Topic for a Spoken Tutorial
+{% endblock %}
+{% block content %}
+    <form role="form" method="post" enctype="multipart/form-data" action="" class="form-horizontal">
+        <div class="row well bs-component">
+            <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
+                <fieldset>
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="id_topic_title" class="col-lg-4 control-label">Title for Suggested Topic:</label>
+                        <div class="col-lg-8">
+                            {% render_field form.topic_title class+="form-control topic_title" tabindex="1" %}
+                            {{ form.topic_title.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_difficulty_level" class="col-lg-4 control-label">Recommend a Difficulty Level:</label>
+                        <div class="col-lg-8">
+                            {% render_field form.difficulty_level class+="form-control difficulty_level" tabindex="2" %}
+                            {{ form.difficulty_level.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_operating_system" class="col-lg-4 control-label">For which Operating System:</label>
+                        <div class="col-lg-8">
+                            {% render_field form.operating_system class+="form-control operating_system" tabindex="3" %}
+                            {{ form.operating_system.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_brief_description" class="col-lg-4 control-label">Brief Description:</label>
+                        <div class="col-lg-8">
+                            {% render_field form.brief_description class+="form-control brief_description" tabindex="4" %}
+                            {{ form.brief_description.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_example_suggestion" class="col-lg-4 control-label">Would you like to suggest an example for this topic?</label>
+                        <div class="col-lg-8">
+                            {% render_field form.example_suggestion class+="form-control example_suggestion" tabindex="5" %}
+                            {{ form.example_suggestion.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-lg-8 col-lg-offset-4">
+                            <input type="submit" class="btn btn-primary" value="Submit"  tabindex="6" />
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+    </form>
+{% endblock %}
