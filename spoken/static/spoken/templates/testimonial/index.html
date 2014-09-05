@@ -1,0 +1,56 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load cmsdata %}
+{% load creationdata %}
+{% block title %}Testimonials{% endblock %}
+{% block cssblock %}
+    <link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />
+    <style type="text/css">
+        .add-new {
+            margin-bottom: 15px;
+        }
+    </style>
+{% endblock %}
+{% block heading %}
+    <i class="fa fa-list-ul"></i> Testimonials <a href="{% url 'events:events_dashboard' %}" class=' dashboard pull-right'>Dashboard</a>
+{% endblock %}
+{% block content %}
+    <div class='add-new'>
+	    <a class="btn btn-primary" href="{% url 'testimonials_new' %}">Add New</a>
+	</div>
+	<div class='table-responsive'>
+		{% if collection %}		    
+			<table class="paleblue table table-bordered table-hover table-striped">
+                <tr>
+                    <th>Actual Content</th>
+                    <th>Minified Content</th>
+                    <th>Short Description</th>
+                    <th>Source Link</th>
+                    <th>Status</th>
+                    <th colspan="2" class="col-center">Action</th>
+                </tr>
+				{% for record in collection %}
+					<tr class="{% cycle 'odd' 'even' %}">
+						<td>{{ record.actual_content }}</td>
+						<td>{{ record.minified_content }}</td>
+						<td>{{ record.short_description }}</td>
+						<!-- <td>{{ record.source_title }}</td> -->
+                        {% if record.source_title and record.source_link %}
+                            <td><a href="{{ record.source_link }}" target="_blank">{{ record.source_title }}</a>
+                        {% elif record.source_link %}
+                            <td><a href="{{ record.source_link }}" target="_blank">{{ record.source_link }}</a>
+                        {% else %}
+						    <td>{{ record.source_link }}</td>
+                        {% endif %}
+						<td class="col-center">{{ record.status }}</td>
+						<td><a href="{% url 'admin_testimonials_edit' record.id %}">Edit</a></td>
+                    <td><a href="{% url 'admin_testimonials_delete' record.id %}">Delete</a></td>
+					</tr>
+				{% endfor %}
+			</table>
+		{% else %}
+		    <p class="no-record"> No record found!</p>
+		{% endif %}
+	</div>
+{% endblock %}

@@ -1,0 +1,121 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block title %}We are happy to collaborate with you{% endblock %}
+{% block heading %}
+    We are happy to collaborate with you
+{% endblock %}
+{% block content %}
+    <form role="form" method="post" enctype="multipart/form-data" action="" class="form-horizontal">
+        <div class="row well bs-component">
+            <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
+                <fieldset>
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="id_contact_number" class="col-lg-4 control-label">Contact Number:</label>
+                        <div class="col-lg-8">
+                            {% render_field form.contact_number class+="form-control contact_number" tabindex="1" %}
+                            {{ form.contact_number.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_institution_name" class="col-lg-4 control-label">Name of Institution:</label>
+                        <div class="col-lg-8">
+                            {% render_field form.institution_name class+="form-control institution_name" tabindex="2" %}
+                            {{ form.institution_name.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_foss_name" class="col-lg-4 control-label">Name of FOSS</label>
+                        <div class="col-lg-8">
+                            {% render_field form.foss_name class+="form-control foss_name" tabindex="3" %}
+                            {{ form.foss_name.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_are_you_one" class="col-lg-4 control-label">Are you one of the following:</label>
+                        <div class="col-lg-8">
+                            {% render_field form.are_you_one class+="are_you_one" tabindex="4" %}
+                            {{ form.are_you_one.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_contribute_towards" class="col-lg-4 control-label">Would you like to contribute towards:</label>
+                        <div class="col-lg-8">
+                            {% render_field form.contribute_towards class+="form-control contribute_towards" tabindex="4" %}
+                            {{ form.contribute_towards.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_howmuch_time" class="col-lg-4 control-label">How much time can you devote on a regular basis?</label>
+                        <div class="col-lg-8">
+                            {% render_field form.howmuch_time class+="howmuch_time" tabindex="4" %}
+                            {{ form.howmuch_time.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_availability_constraints" class="col-lg-4 control-label">List any constraints on availability:</label>
+                        <div class="col-lg-8">
+                            {% render_field form.availability_constraints class+="form-control availability_constraints" tabindex="4" %}
+                            {{ form.availability_constraints.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_is_reviewer" class="col-lg-4 control-label">Would you like to be a reviewer for the above?</label>
+                        <div class="col-lg-8">
+                            {% render_field form.is_reviewer class+="form-control is_reviewer" tabindex="4" %}
+                            {{ form.is_reviewer.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_contribs_foss" class="col-lg-4 control-label">If Reviewer, some of your contributions in this FOSS system:</label>
+                        <div class="col-lg-8">
+                            {% render_field form.contribs_foss class+="form-control contribs_foss" tabindex="4" %}
+                            {{ form.contribs_foss.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_educational_qualifications" class="col-lg-4 control-label">Educational Qualifications</label>
+                        <div class="col-lg-8">
+                            {% render_field form.educational_qualifications class+="form-control educational_qualifications" tabindex="4" %}
+                            {{ form.educational_qualifications.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_prof_experience" class="col-lg-4 control-label">Training/Professional Experience:</label>
+                        <div class="col-lg-8">
+                            {% render_field form.prof_experience class+="form-control prof_experience" tabindex="4" %}
+                            {{ form.prof_experience.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_lang_contributor" class="col-lg-4 control-label">Would you like to be a language contributor?</label>
+                        <div class="col-lg-8">
+                            {% render_field form.lang_contributor class+="form-control lang_contributor" tabindex="4" %}
+                            {{ form.lang_contributor.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_language" class="col-lg-4 control-label">Select Language:</label>
+                        <div class="col-lg-8">
+                            {% render_field form.language class+="form-control language" tabindex="4" %}
+                            {{ form.language.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_lead_st" class="col-lg-4 control-label">Would you like to lead the Spoken Tutorial effort?</label>
+                        <div class="col-lg-8">
+                            {% render_field form.lead_st class+="form-control lead_st" tabindex="4" %}
+                            {{ form.lead_st.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-lg-8 col-lg-offset-4">
+                            <input type="submit" class="btn btn-primary" value="Submit"  tabindex="6" />
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+    </form>
+{% endblock %}

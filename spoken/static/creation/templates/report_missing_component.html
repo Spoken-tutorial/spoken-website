@@ -1,0 +1,90 @@
+{% extends 'spoken/templates/popup-base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block cssblock %}
+    <style type="text/css">
+        ul#id_inform_me, ul#id_report_type {
+            list-style-type: none;
+            padding-left: 0px;
+        }
+        ul#id_inform_me li {
+            float: left;
+            margin-right: 20px;
+        }
+        .errorlist {
+            list-style-type: none;
+            color: red;
+            clear: both;
+        }
+    </style>
+{% endblock %}
+{% block title %}Report Missing Component{% endblock %}
+{% block heading %}
+    Report Missing Component
+{% endblock %}
+{% block content %}
+    <form role="form" method="post" enctype="multipart/form-data" action="">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="id_component">Component:</label>
+            {% render_field form.component class+="form-control component" tabindex="1" %}
+            {{ form.component.errors }}
+        </div>
+        <div class="form-group">
+            <div class="well">
+                {% render_field form.report_type class+="report_type" tabindex="2" %}
+                {{ form.report_type.errors }}
+            </div>
+        </div>
+        <div class="form-group remarks-parent">
+            <label for="id_remarks">Remarks:</label>
+            {% render_field form.remarks class+="form-control remarks" tabindex="3" %}
+            {{ form.remarks.errors|safe }}
+        </div>
+        <div class="form-group">
+            <div class="well">
+                <label>Do you want to be reported about the missing component has been fixed ?</label>
+                    <!--<label for="id_inform_me_0"><input id="id_inform_me_0" name="inform_me" value="1" type="radio"> Yes</label>
+                    <label for="id_inform_me_1"><input id="id_inform_me_1" name="inform_me" value="0" type="radio"> No</label>-->
+                    {% render_field form.inform_me class+="inform_me" tabindex="4" %}
+                    {{ form.inform_me.errors }}
+            </div>
+        </div>
+        <div class="form-group email-parent">
+        {% if not user.is_authenticated %}
+            <label for="id_email">Email:</label>
+            {% render_field form.email class+="form-control email" tabindex="5" %}
+            {{ form.email.errors|safe }}
+        {% endif %}
+        </div>
+        <div class="form-group">
+            <input type="submit" class="btn btn-primary" value="Submit"  tabindex="6" />
+        </div>
+    </form>
+{% endblock %}
+{% block jsblock %}
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('.remarks-parent').hide();
+            $('.email-parent').hide();
+            if($('#id_report_type_1').is(':checked'))
+                $('.remarks-parent').show();
+            if($('#id_inform_me_1').is(':checked'))
+                $('.email-parent').show();
+            $('#id_report_type_0').on('click', function(){
+                $('#id_remarks').val('');
+                $('.remarks-parent').hide();
+            });
+            $('#id_report_type_1').on('click', function(){
+                $('.remarks-parent').show();
+            });
+             $('#id_inform_me_0').on('click', function(){
+                $('#id_email').val('');
+                $('.email-parent').hide();
+            });
+            $('#id_inform_me_1').on('click', function(){
+                $('.email-parent').show();
+            });
+        });
+    </script>
+{% endblock %}

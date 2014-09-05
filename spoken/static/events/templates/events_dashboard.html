@@ -1,0 +1,241 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load eventsdata %}
+{% block title %}Software Training Dashboard{% endblock %}
+{% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
+
+{% block content %}
+    <div class="panel panel-info">
+        <div class="panel-heading">
+            <h4 class="panel-title"><i class="fa fa-desktop"></i> Software Training Dashboard</h5>
+        </div>
+        <div class="panel-body row">
+            <div class="creation-links col-lg-6 col-md-6 col-sm-6">
+                {% if user|is_resource_person %}
+                    <div class="panel panel-primary">
+                        <div class="panel-heading panel-heading-notif">Training Manager</div>
+                        <div class="panel-body">
+                            <h5>Training / Workshop</h5>
+                            <ul>
+                                <li><a href="/software-training/training/rp/pending/">New Requests</a></li>
+                                <li><a href="/software-training/training/rp/approved/">Approved Training / Workshop</a></li>
+                                <li><a href="/software-training/training/rp/completed/">Completed Training / Workshop</a></li>
+                            </ul>
+                            <h5>Online Assessment Test</h5>
+                            <ul>
+                                <li><a href="/software-training/test/rp/pending/">Approval Pending</a></li>
+                                <li><a href="/software-training/test/rp/approved/">Approved Assessment Test</a></li>
+                                <li><a href="/software-training/test/rp/completed/">Completed Assessment Test</a></li>
+                            </ul>
+                            <h5>Organiser List</h5>
+                            <ul>
+                                <li><a href="/software-training/organiser/active/">List Organiser</a></li>
+                            </ul>
+                            <h5>Invigilator List</h5>
+                            <ul>
+                                <li><a href="/software-training/invigilator/active/">List Invigilator</a></li>
+                            </ul>
+                            <h5>Institution List</h5>
+                            <ul>
+                                <li><a href="/software-training/ac/">List Institution</a></li>
+                            </ul>
+                            <h5>Testimonials</h5>
+                            <ul>
+                                <li><a href="/testimonials/new/">New Testimonial</a></li>
+                                <li><a href="/admin/testimonials/">List Testimonials</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                {% endif %}
+                {% if user|is_event_manager %}
+                    <div class="panel panel-primary">
+                        <div class="panel-heading panel-heading-notif">Events Manager</div>
+                        <div class="panel-body">
+                            <h5>Training</h5>
+                            <ul>
+                                <li><a href="/software-training/training/em/pending/">New Requests</a></li>
+                                <li><a href="/software-training/training/em/ongoing/">Ongoing Test</a></li>
+                            </ul>
+                            <h5>Online Assessment Test</h5>
+                            <ul>
+                                <li><a href="/software-training/test/em/waitingforinvigilator/">Approval Pending</a></li>
+                                <li><a href="/software-training/test/em/ongoing/">Ongoing Test</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                {% endif %}
+                {% if user|is_invigilator %}
+                    <div class="panel panel-primary">
+                        <div class="panel-heading panel-heading-notif">Invigilator</div>
+                        <div class="panel-body">
+                            <h5>Online Assessment Test</h5>
+                            <ul>
+                                <li><a href="/software-training/test/invigilator/waitingforinvigilator/">Approval Pending</a></li>
+                                <li><a href="/software-training/test/invigilator/ongoing/">Ongoing Test</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                {% endif %}
+                {% if user|is_organiser %}
+                    <div class="panel panel-primary">
+                        <div class="panel-heading panel-heading-notif">Organiser</div>
+                        <div class="panel-body">
+                            <h5>Training / Workshop</h5>
+                            <ul>
+                                <li><a href="/software-training/training/organiser/request/">New Training / Workshop Request and Participant List</a></li>
+                                <li><a href="/software-training/training/organiser/pending/">Pending Training / Workshop</a></li>
+                                <li><a href="/software-training/training/organiser/approved/">Approved Training / Workshop</a></li>
+                                <li><a href="/software-training/training/organiser/completed/">Completed Training / Workshop</a></li>
+                            </ul>
+                            <h5>Online Assessment Test</h5>
+                            <ul>
+                                <li><a href="/software-training/test/organiser/request/">New Test Request</a></li>
+                                <li><a href="/software-training/test/organiser/approved/">Approved Assessment Test</a></li>
+                                <li><a href="/software-training/test/organiser/completed/">Completed Assessment Test</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                {% endif %}
+                {% if not user|is_organiser or not user|is_invigilator %}
+                    <div class="panel panel-primary">
+                        <div class="panel-heading panel-heading-notif">Join with Us</div>
+                        <div class="panel-body">
+                            <ul>
+                                {% if not user|is_organiser %}
+                                    <li><a href="/software-training/organiser/request/{{user.username}}">Add me as Organiser</a></li>
+                                {% endif %}
+                                {% if not user|is_invigilator %}
+                                    <li><a href="/software-training/invigilator/request/{{user.username}}">Add me as Invigilator</a></li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="creation-notifications col-lg-6 col-md-6 col-sm-6">
+                {% if organiser_workshop_notification %}
+                    <div class="panel panel-primary">
+                        <div class="panel-heading panel-heading-notif">Workshop Notifications
+                            <span class="badge{% if not contrib_notifs|length %}-none{% endif %}" style="float: none; margin-left: 10px;">{{ organiser_workshop_notification|length }}</span>{% if organiser_workshop_notification|length %}<a href="/software-training/clear-notifications/organiser/" class="clear-all" title="Clear all notifications">Clear All</a>{% endif %}
+                        </div>
+                        <div class="panel-body panel-body-notif">
+                            {% for notif in organiser_workshop_notification %}
+                                <div class="notif">
+                                    <p>{{ notif.message }}</p>
+                                    <a href="/software-training/delete-notification/organiser/{{ notif.id }}" class="notif-del"><i class="fa fa-times"></i></a>
+                                    <hr />
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+                {% if organiser_training_notification %}
+                    <div class="panel panel-primary">
+                        <div class="panel-heading panel-heading-notif">Training Notifications
+                            <span class="badge{% if not contrib_notifs|length %}-none{% endif %}" style="float: none; margin-left: 10px;">{{ organiser_training_notification|length }}</span>{% if organiser_training_notification|length %}<a href="/software-training/clear-notifications/organiser/" class="clear-all" title="Clear all notifications">Clear All</a>{% endif %}
+                        </div>
+                        <div class="panel-body panel-body-notif">
+                            {% for notif in organiser_training_notification %}
+                                <div class="notif">
+                                    <p>{{ notif.message }}</p>
+                                    <a href="/software-training/delete-notification/organiser/{{ notif.id }}" class="notif-del"><i class="fa fa-times"></i></a>
+                                    <hr />
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+                {% if organiser_test_notification %}
+                    <div class="panel panel-primary">
+                        <div class="panel-heading panel-heading-notif">Onlinetest Notifications
+                            <span class="badge{% if not contrib_notifs|length %}-none{% endif %}" style="float: none; margin-left: 10px;">{{ organiser_test_notification|length }}</span>{% if organiser_test_notification|length %}<a href="/software-training/clear-notifications/organiser/" class="clear-all" title="Clear all notifications">Clear All</a>{% endif %}
+                        </div>
+                        <div class="panel-body panel-body-notif">
+                            {% for notif in organiser_test_notification %}
+                                <div class="notif">
+                                    <p>{{ notif.message }}</p>
+                                    <a href="/software-training/delete-notification/organiser/{{ notif.id }}" class="notif-del"><i class="fa fa-times"></i></a>
+                                    <hr />
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+                {% if rp_workshop_notification %}
+                    <div class="panel panel-primary">
+                        <div class="panel-heading panel-heading-notif">Workshop Notifications
+                            <span class="badge{% if not contrib_notifs|length %}-none{% endif %}" style="float: none; margin-left: 10px;">{{ rp_workshop_notification|length }}</span>{% if rp_workshop_notification|length %}<a href="/software-training/clear-notifications/rp/" class="clear-all" title="Clear all notifications">Clear All</a>{% endif %}
+                        </div>
+                        <div class="panel-body panel-body-notif">
+                        {% if rp_workshop_notification %}
+                            {% for notif in rp_workshop_notification %}
+                                <div class="notif">
+                                    <p>{{ notif.message }}</p>
+                                    <a href="/software-training/delete-notification/rp/{{ notif.id }}" class="notif-del"><i class="fa fa-times"></i></a>
+                                    <hr />
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+                {% if rp_training_notification %}
+                    <div class="panel panel-primary">
+                        <div class="panel-heading panel-heading-notif">Training Notifications
+                            <span class="badge{% if not contrib_notifs|length %}-none{% endif %}" style="float: none; margin-left: 10px;">{{ rp_training_notification|length }}</span>{% if rp_training_notification|length %}<a href="/software-training/clear-notifications/organiser/" class="clear-all" title="Clear all notifications">Clear All</a>{% endif %}
+                        </div>
+                        <div class="panel-body panel-body-notif">
+                            {% for notif in rp_training_notification %}
+                                <div class="notif">
+                                    <p>{{ notif.message }}</p>
+                                    <a href="/software-training/delete-notification/organiser/{{ notif.id }}" class="notif-del"><i class="fa fa-times"></i></a>
+                                    <hr />
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+                {% if rp_test_notification %}
+                    <div class="panel panel-primary">
+                        <div class="panel-heading panel-heading-notif">Online Test Notifications
+                            <span class="badge{% if not contrib_notifs|length %}-none{% endif %}" style="float: none; margin-left: 10px;">{{ rp_test_notification|length }}</span>{% if rp_test_notification|length %}<a href="/software-training/clear-notifications/rp/" class="clear-all" title="Clear all notifications">Clear All</a>{% endif %}
+                        </div>
+                        <div class="panel-body panel-body-notif">
+                        {% if rp_test_notification %}
+                            {% for notif in rp_test_notification %}
+                                <div class="notif">
+                                    <p>{{ notif.message }}</p>
+                                    <a href="/software-training/delete-notification/rp/{{ notif.id }}" class="notif-del"><i class="fa fa-times"></i></a>
+                                    <hr />
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+                {% if invigilator_test_notification %}
+                    <div class="panel panel-primary">
+                        <div class="panel-heading panel-heading-notif">Onlinetest Notifications
+                            <span class="badge{% if not contrib_notifs|length %}-none{% endif %}" style="float: none; margin-left: 10px;">{{ invigilator_test_notification|length }}</span>{% if invigilator_test_notification|length %}<a href="/software-training/clear-notifications/organiser/" class="clear-all" title="Clear all notifications">Clear All</a>{% endif %}
+                        </div>
+                        <div class="panel-body panel-body-notif">
+                            {% for notif in invigilator_test_notification %}
+                                <div class="notif">
+                                    <p>{{ notif.message }}</p>
+                                    <a href="/software-training/delete-notification/invigilator/{{ notif.id }}" class="notif-del"><i class="fa fa-times"></i></a>
+                                    <hr />
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block jsblock %}
+    <script>
+    </script>
+{% endblock %}

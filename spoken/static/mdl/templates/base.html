@@ -1,0 +1,20 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load mdldata %}
+{% load eventsdata %}
+{% block userdetails %}
+    {% if mdluserid %}
+	    <li class="dropdown">
+		    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+			    <span title="" data-original-title="" class="glyphicon glyphicon-user"></span> {{ mdlusername }}<b class="caret"></b>
+		    </a>
+		    <ul class="dropdown-menu">
+			    <li><a href="{% url 'mdldjango:mdl_logout' %}">Logout</a></li>
+		    </ul>
+	    </li>
+    {% else %}
+	    <li><a href="{% url 'mdldjango:mdl_login' %}">Login</a></li>
+	    <li><a href="{% url 'mdldjango:mdl_register' %}"">Register</a></li>
+    {% endif %}
+{% endblock %}

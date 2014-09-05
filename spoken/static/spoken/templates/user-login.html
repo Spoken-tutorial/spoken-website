@@ -1,0 +1,51 @@
+<html>
+    <head><title>Login | spoken-tutorial.org</title></head>
+    <body>
+        <div class="container" style="padding-top:2.5cm;" align="center">
+            {% block alert %}
+				{% if messages %}
+					{% for message in messages %}
+					    {% if message.tags == 'success' %}
+						    <div class="alert alert-success alert-dismissable">
+							    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+							    {{ message }}
+						    </div>
+						{% elif message.tags == 'warning' %}
+						   <div class="alert alert-warning alert-dismissable">
+							    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+							    {{ message }}
+						    </div>
+						{% elif message.tags == 'error' %}
+						    <div class="alert alert-danger alert-dismissable">
+							    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+							    {{ message }}
+						    </div>
+						{% elif message.tags == 'info' %}
+						     <div class="alert alert-info alert-dismissable">
+							    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+							    {{ message }}
+						    </div>
+						{% elif message.tags == 'debug' %}
+						    <div class="alert alert-info alert-dismissable">
+							    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+							    {{ message }}
+						    </div>
+						{% endif %}
+					{% endfor %}
+				{% endif %}
+			{% endblock %}
+            <div>
+                <form class="form-signin" role="form" id="login_form" method="post">
+                    {% csrf_token %}
+                    <h2 class="form-signin-heading">Please sign in</h2>
+                    <input name="username" id="id_username" type="text" class="form-control" placeholder="Username" required autofocus>
+                    <input name="password" id="id_username" type="password" class="form-control" placeholder="Password" required>
+                    <br /><br />
+                    <input class="btn btn-lg btn-primary btn-block" type="submit" value="Sign in" />
+                </form>
+                <div class="error">{{error}}</div>
+                <div class="info">{{info}}</div>
+            </div>
+        </div> <!-- /container -->
+    </body>
+</html>

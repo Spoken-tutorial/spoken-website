@@ -1,0 +1,27 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load cmsdata %}
+{% block title %}Test Filter{% endblock %}
+{% block heading %}<i class="fa fa-list-ul"></i> Test Filter{% endblock %}
+{% block cssblock %}
+{% endblock %}
+{% block content %}
+    <div class="table-responsive">
+        <table class="paleblue table table-bordered table-hover table-striped">
+            {% if rows|length %}
+                {% get_sortable_header header ordering request.GET %}
+                {% for row in rows %}
+                    <tr>
+                        <td>{{ row.foss.foss }}</td>
+                        <td>{{ row.tutorial }}</td>
+                        <td>{{ row.order }}</td>
+                        <td>{{ forloop.counter }}</td>
+                    </tr>
+                {% endfor %}
+            {% else %}
+                <tr><td class="col-center">List is empty!</td></tr>
+            {% endif %}
+        </table>
+    </div>
+{% endblock %}

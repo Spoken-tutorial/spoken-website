@@ -1,0 +1,31 @@
+{% load cmsdata %}
+<tr class="active">
+    {% for header in headers %}
+        <th scope="col" class="{{ header.class_name }}" {{ header.attribs }}>
+            {% if header.sortable %}
+                <div class="sortoptions"{{' data="123"'}}>
+                    {% if not header.removable == None %}<a class="sortremove" href="?o={{ header.removable }}{% with other_get_vals=getValue|reset_get_value:'o' %}{% if other_get_vals %}&{{other_get_vals}}{% endif %}{% endwith %}" title="Remove from sorting"></a>{% endif %}
+                    {% if header.order %}
+                        <span class="sortpriority" title="Sorting priority: {{ header.order }}">{{ header.order }}</span>
+                    {% endif %}
+                    <a href="?o={{ header.ordering }}{% with other_get_vals=getValue|reset_get_value:'o' %}{% if other_get_vals %}&{{other_get_vals}}{% endif %}{% endwith %}" class="toggle {{ header.sort_type }}" title="Toggle sorting"></a>
+                </div>
+            {% endif %}
+            <div class="text">
+                {% if header.sortable %}
+                    <a href="?o={{ header.ordering }}{% with other_get_vals=getValue|reset_get_value:'o' %}{% if other_get_vals %}&{{other_get_vals}}{% endif %}{% endwith %}">
+                {% endif %}
+
+                {% if header.verbose_name %}
+                    {{ header.verbose_name|safe }}
+                {% else %}
+                    {{ header.name|safe }}
+                {% endif %}
+                {% if header.sortable %}
+                    </a>
+                {% endif %}
+            </div>
+            <div class="clear"></div>
+        </th>
+    {% endfor %}
+</tr>

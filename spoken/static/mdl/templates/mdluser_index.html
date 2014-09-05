@@ -1,0 +1,206 @@
+{% extends 'mdl/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load mdldata %}
+{% load eventsdata %}
+{% block title %}Student Dashboard{% endblock %}
+{% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
+{% block heading %}
+        <i class="fa fa-list-ul"></i> Student Dashboard
+{% endblock %}
+{% block content %}
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs">
+        <li class="{% if category == 1 %} active {% endif %}"><a href="{% url 'mdldjango:mdl_index' %}?category=1">Past Training / Workshop</a></li>
+        <li class="{% if category == 2 %} active {% endif %}"><a href="{% url 'mdldjango:mdl_index' %}?category=2">Past Test</a></li>
+        <li class="{% if category == 3 %} active {% endif %}"><a href="{% url 'mdldjango:mdl_index' %}?category=3">Upcoming Training / Workshop</a></li>
+        <li class="{% if category == 4 %} active {% endif %}"><a href="{% url 'mdldjango:mdl_index' %}?category=4">Ongoing Test</a></li>
+        <li class="{% if category == 5 %} active {% endif %}"><a href="{% url 'mdldjango:mdl_index' %}?category=5">Upcoming Test</a></li>
+    </ul>
+    <!-- Tab panes -->
+    <div class="tab-content">
+        <div class="tab-pane {% if category == 1 %} active {% endif %}" id="Past-Workshop">
+            {% if past_workshop %}
+            <table class="table table-striped table-hover table-bordered">
+                <tr>
+                    <th>Type</th>
+                    <th>Technology</th>
+
+                    <th>Date & Time</th>
+                    <th>Action</th>
+                </tr>
+                {% for record in past_workshop %}
+                    <tr>
+                        <td>
+                            {% if record.training_type %}
+                                Workshop
+                            {% else %}
+                                Training
+                            {% endif %}
+                        </td>
+                        <td>{{ record.foss.foss }}</td>
+                        <td>{{ record.trdate }} {{ record.trtime }}</td>
+                        <td>
+                            <a href="{% url 'mdldjango:feedback' record.id %}">Feedback</a>
+                            {% if mdluserid|can_download_workshop_certificate:record.id and record.training_type %}
+                                | <a href="{% url 'events:training_participant_ceritificate' record.id mdluserid %}">Certificate</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+            {% else %}
+                <p class='no-record'>No record found!</p>
+            {% endif %}
+        </div>
+        <div class="tab-pane {% if category == 2 %} active {% endif %}" id="Past-Test">
+            {% if past_test %}
+            <table class="table table-striped table-hover table-bordered">
+                <tr>
+                    <th>Technology</th>
+                    <th>Date & Time</th>
+                    <th>Score</th>
+                </tr>
+                {% for record in past_test %}
+                    <tr>
+                        <td>{{ record.foss.foss }}</td>
+                        <td>{{ record.tdate }} {{ record.trtime }}</td>
+                        {% with grade=record.id|get_participant_mark:mdluserid %}
+                            {% if grade %}
+                                {% if grade >= 40 %}
+                                    <td>
+                                        {{ grade }}%
+                                        {% if record.invigilator %}
+                                         - <a href="{% url 'events:test_participant_ceritificate' record.id mdluserid %}">Certificate</a>
+                                        {% endif %}
+                                    </td>
+                                {% else %}
+                                    <td>{{ grade }} (Fail)</td>
+                                {% endif %}
+                            {% else %}
+                                <td></td>
+                            {% endif %}
+                        {% endwith %}
+                    </tr>
+                {% endfor %}
+            </table>
+            {% else %}
+                <p class='no-record'>No record found!</p>
+            {% endif %}
+        </div>
+        <div class="tab-pane {% if category == 3 %} active {% endif %}" id="Upcoming-Workshop">
+            {% if upcoming_workshop %}
+            <table class="table table-striped table-hover table-bordered">
+                <tr>
+                    <th>Type</th>
+                    <th>Technology</th>
+
+                    <th>Date & Time</th>
+                    <th>Action</th>
+                </tr>
+                {% for record in upcoming_workshop %}
+                    <tr>
+                        <td>
+                            {% if record.training_type %}
+                                Workshop
+                            {% else %}
+                                Training
+                            {% endif %}
+                        </td>
+                        <td>{{ record.foss.foss }}</td>
+                        <td>{{ record.trdate }} {{ record.trtime }}</td>
+                        <td>
+                            {% if record.id|check_training_enrole:mdluserid %}
+                                Enrolled
+                            {% else %}
+                                <a href="{% url 'events:student_subscribe' 'training' record.id mdluserid %}">Enroll</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+            {% else %}
+                <p class='no-record'>No record found!</p>
+            {% endif %}
+        </div>
+        <div class="tab-pane {% if category == 4 %} active {% endif %}" id="Ongoing-Test">
+            {% if ongoing_test %}
+            <table class="table table-striped table-hover table-bordered">
+                <tr>
+                    <th>Technology</th>
+                    <th>Date & Time</th>
+                    <th>Action</th>
+                </tr>
+                {% for record in ongoing_test %}
+                    <tr>
+                        <td>{{ record.foss.foss }}</td>
+                        <td>{{ record.tdate }} {{ record.ttime }}</td>
+                        <td>
+                            {% with status=mdluserid|can_enter_test:record.id %}
+                                {% if status == None %}
+                                    <a href="{% url 'events:student_subscribe' 'test' record.id mdluserid %}">Enroll</a>
+                                {% elif status == 0 %}
+                                    Waiting for Attandance
+                                <!-- Todo: Link to go attempt page -->
+                                {% elif status == 1 %}
+                                    {% with courseid=record.id|get_moodle_courseid:mdluserid %}
+                                        {% if courseid %}
+                                            <a href="{{ ONLINE_TEST_URL }}course/view.php?id={{courseid}}" target="_blank"> Enter into Test</a>
+                                        {% else %}
+                                            <a href="{{ ONLINE_TEST_URL }}course/" target="_blank"> Enter into Test</a>
+                                        {% endif %}
+                                    {% endwith %}
+                                {% elif status == 2 %}
+                                    {% with courseid=record.id|get_moodle_courseid:mdluserid %}
+                                        {% if courseid %}
+                                            <a href="{{ ONLINE_TEST_URL }}course/view.php?id={{courseid}}" target="_blank"> Continue Test</a>
+                                        {% else %}
+                                            <a href="{{ ONLINE_TEST_URL }}course/" target="_blank"> Continue Test</a>
+                                        {% endif %}
+                                    {% endwith %}
+                                {% elif status >= 3 %}
+                                    {% with grade=record.id|get_participant_mark:mdluserid %}
+                                        {% if grade %}
+                                            {% if grade >= 40 %}
+                                                {{ grade }}%
+                                                {% if record.invigilator %}
+                                                 - <a href="{% url 'events:test_participant_ceritificate' record.id mdluserid %}">Certificate</a>
+                                                {% endif %}
+                                            {% else %}
+                                                {{ grade }} (Fail)
+                                            {% endif %}
+                                        {% endif %}
+                                    {% endwith %}
+                                {% endif %}
+                            {% endwith %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+            {% else %}
+                <p class='no-record'>No record found!</p>
+            {% endif %}
+        </div>
+        <div class="tab-pane {% if category == 5 %} active {% endif %}" id="Upcoming-Test">
+            {% if upcoming_test %}
+            <table class="table table-striped table-hover table-bordered">
+                <tr>
+                    <th>Technology</th>
+                    <th>Test Code</th>
+                    <th>Date & Time</th>
+                    <th>Action</th>
+                </tr>
+                {% for record in upcoming_test %}
+                    <tr>
+                        <td>{{ record.foss.foss }}</td>
+                        <td>{{ record.tdate }} {{ record.ttime }}</td>
+                        <td><a href="{% url 'events:student_subscribe' 'test' record.id mdluserid %}">Enroll</a></td>
+                    </tr>
+                {% endfor %}
+            </table>
+            {% else %}
+                <p class='no-record'>No record found!</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

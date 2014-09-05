@@ -1,0 +1,150 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block title %}Change Component Status{% endblock %}
+{% block heading %}Change Component Status{% endblock %}
+{% block content %}
+    <form role="form" method="post" enctype="multipart/form-data" action="" class="form-horizontal">
+        {% csrf_token %}
+        <div class="row well bs-component">
+            <div class="col-lg-8">
+                <fieldset>
+                    <div class="form-group">
+                        <label for="id_foss_category" class="col-lg-3 col-md-3 col-sm-3 control-label">FOSS Category:</label>
+                        <div class="col-lg-9 col-md-9 col-sm-9">
+                            {% render_field form.foss_category class+="form-control foss_category" tabindex="1" %}
+                            {{ form.foss_category.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_language" class="col-lg-3 col-md-3 col-sm-3 control-label">Language:</label>
+                        <div class="col-lg-9 col-md-9 col-sm-9">
+                            {% render_field form.language class+="form-control language" tabindex="2" %}
+                            {{ form.language.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group" class="col-lg-3 col-md-3 col-sm-3 control-label">
+                        <label for="id_tutorial_name" class="col-lg-3 col-md-3 col-sm-3 control-label">Tutorial Name:</label>
+                        <div class="col-lg-9 col-md-9 col-sm-9">
+                            {% render_field form.tutorial_name class+="form-control tutorial_name" tabindex="3" %}
+                            {{ form.tutorial_name.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_component" class="col-lg-3 col-md-3 col-sm-3 control-label">Component:</label>
+                        <div class="col-lg-9 col-md-9 col-sm-9">
+                            {% render_field form.component class+="form-control component" tabindex="3" %}
+                            {{ form.component.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_status" class="col-lg-3 col-md-3 col-sm-3 control-label">Status:</label>
+                        <div class="col-lg-9 col-md-9 col-sm-9">
+                            {% render_field form.status class+="form-control status" tabindex="3" %}
+                            {{ form.status.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-lg-9 col-md-9 col-sm-9 col-lg-offset-3 col-md-offset-3 col-sm-offset-3">
+                            <input type="submit" class="btn btn-primary" value="Submit"  tabindex="4" />
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+    </form>
+{% endblock %}
+{% block jsblock %}
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $('.foss_category').on("change", function(){
+                var foss = $(this).val();
+                $('.tutorial_name').html('<option value="" selected="selected">Select Tutorial</option>');
+                $('.tutorial_name').attr("disabled", "disabled");
+                $('.language').html('<option value="" selected="selected">Select Language</option>');
+                $('.language').attr("disabled", "disabled");
+                $('.component').html('<option value="" selected="selected">Select Component</option>');
+                $('.component').attr("disabled", "disabled");
+                if(foss != '') {
+                    $.ajax({
+                        url: "/creation/ajax-change-component-status/",
+                        type: "POST",
+                        data: {
+                            foss: foss
+                        },
+                        success: function(data) {
+                            // loading languages
+                            if(data) {
+                                $('.language').html(data);
+                                $('.language').removeAttr('disabled');
+                            }
+                        }
+                    })
+                }
+            });
+            $('.language').on("change", function(){
+                var foss = $('.foss_category').val();
+                var lang = $(this).val();
+                $('.tutorial_name').html('<option value="" selected="selected">Select Tutorial</option>');
+                $('.tutorial_name').attr("disabled", "disabled");
+                $('.component').html('<option value="" selected="selected">Select Component</option>');
+                $('.component').attr("disabled", "disabled");
+                if(foss != '' && lang != '') {
+                    $.ajax({
+                        url: "/creation/ajax-change-component-status/",
+                        type: "POST",
+                        data: {
+                            foss: foss,
+                            lang: lang
+                        },
+                        success: function(data) {
+                            // loading tutorial names
+                            if(data){
+                                $('.tutorial_name').html(data[0]);
+                                $('.tutorial_name').removeAttr('disabled');
+                                $('.component').html(data[1]);
+                                // $('.component').removeAttr('disabled');
+                            }
+                        }
+                    });
+                }
+            });
+            $('.tutorial_name').on("change", function() {
+                var tutName = $('.tutorial_name').val();
+                if(tutName != '') {
+                    $('.component').removeAttr('disabled');
+                } else {
+                    $('.component').val('');
+                    $('.component').attr("disabled", "disabled");
+                }
+            });
+            $('.component').on("change", function() {
+                var foss = $('.foss_category').val();
+                var lang = $('.language').val();
+                var tut = $('.tutorial_name').val();
+                var comp = $('.component').val();
+                $('.status').val('')
+                $('.status').attr("disabled", "disabled");
+                if(foss != '' && lang != '' && tut != '' && comp != '') {
+                    $.ajax({
+                        url: "/creation/ajax-change-component-status/",
+                        type: "POST",
+                        data: {
+                            foss: foss,
+                            lang: lang,
+                            tut: tut,
+                            comp: comp
+                        },
+                        success: function(data) {
+                            // loading tutorial names
+                            if(data){
+                                $('.status').html(data);
+                                $('.status').removeAttr('disabled');
+                            }
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+{% endblock %}

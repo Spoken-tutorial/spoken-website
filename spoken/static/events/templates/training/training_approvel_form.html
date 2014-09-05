@@ -1,0 +1,94 @@
+{% extends 'spoken/templates/popup-base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load eventsdata %}
+{% block title %}Training Completion Form{% endblock %}
+{% block cssblock %}
+    <link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />
+    <link rel="stylesheet" href="{% static 'spoken/css/jquery.datetimepicker.css' %}" type="text/css" media="screen" charset="utf-8" />
+{% endblock %}
+{% block heading %}
+        <i class="fa fa-list-ul"></i> Training Completion Form
+{% endblock %}
+{% block content %}
+    {% if form %}
+        <div class="row well col-sm-8">
+            <div class='col-sm-12'>
+                <form action="{{ action }}" method="post" class='form-horizontal' enctype="multipart/form-data">{% csrf_token %}
+                    {% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
+                    {% if form.non_field_errors %}
+                    <ul>
+                      {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                      {% endfor %}
+                    </ul>
+                    {% endif %}
+                    <div class="form-group">
+                        <label class="col-sm-6 control-label" for= "id_approximate_hour">Approximate number of hours viewed / Practised</label>
+                        <div class="col-sm-6">
+                            {% render_field form.approximate_hour class+="form-control approximate_hour" tabindex="1" %}
+                            {{ form.approximate_hour.errors }}
+                            <small></small>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-6 control-label" for= "id_online_test">Online Assignment Test</label>
+                        <div class="col-sm-6">
+                            {% render_field form.online_test class+="form-control online_test" tabindex="1" %}
+                            {{ form.online_test.errors }}
+                            <small></small>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                            <label class="col-sm-6 control-label" for= "id_is_tutorial_useful">Tutorial were useful in understanding the Lab Course</label>
+                        <div class="col-sm-6">
+                            {% for choice in form.is_tutorial_useful %}
+                                <div class='radio'>
+                                    {{ choice.choice_label }}
+                                    {{ choice.tag }}
+                               </div>
+                            {% endfor %}
+                            <small></small>
+                            {{ form.is_tutorial_useful.errors }}
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                            <label class="col-sm-6 control-label" for= "id_future_training">Will continue to request the Training in future</label>
+                        <div class="col-sm-6">
+                            {% for choice in form.future_training %}
+                                <div class='radio'>
+                                    {{ choice.choice_label }}
+                                    {{ choice.tag }}
+                               </div>
+                            {% endfor %}
+                            <small></small>
+                            {{ form.future_training.errors }}
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                            <label class="col-sm-6 control-label" for= "id_recommend_to_others">Will recommend Spoken Tutorial Training to Others</label>
+                        <div class="col-sm-6">
+                            {% for choice in form.recommend_to_others %}
+                                <div class='radio'>
+                                    {{ choice.choice_label }}
+                                    {{ choice.tag }}
+                               </div>
+                            {% endfor %}
+                            <small></small>
+                            {{ form.recommend_to_others.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-offset-6 col-sm-6">
+                            <input class="btn btn-primary" type="submit" value="Submit" />
+                        </div>
+                    </div>
+                    {% endwith %}
+                </form>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}

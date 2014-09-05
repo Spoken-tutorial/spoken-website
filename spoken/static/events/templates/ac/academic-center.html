@@ -1,0 +1,50 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load cmsdata %}
+{% load creationdata %}
+{% block title %} Academic Center {% endblock %}
+{% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
+{% block heading %}
+    <i class="fa fa-list-ul"></i> Academic Center
+{% endblock %}
+{% block content %}
+	<div class='table-responsive'>
+		{% if collection %}
+			<table class="paleblue table table-bordered table-hover table-striped">
+				<tr>
+				    <th>Institution Name</th><td>{{ collection.institution_name }}</td>
+				</tr>
+				<tr>
+				    <th>Address</th><td>{{ collection.address }}</td>
+				</tr>
+				<tr>
+				    <th>City</th><td>{{ collection.city }}</td>
+				</tr>
+				<tr>
+					<th>State</th><td>{{ collection.state }}</td>
+				</tr>
+				<tr>
+				    <th>pincode</th><td>{{ collection.pincode }}</td>
+				</tr>
+				<tr>
+				    <th>Rating</th><td>{{ collection.rating }}</td>
+				</tr>
+				<tr>
+				    <th>Contact Person</th><td>{{ collection.contact_person }}</td>
+				</tr>
+				<tr>
+				    <th>Remaks</th><td>{{ collection.remarks }}</td>
+				</tr>
+				<tr>
+				    <th>University</th><td>{{ collection.university }}</td>
+				</tr>
+				<tr>
+				    <th>Institution Type</th><td>{{ collection.institution_type }}</td>
+				</tr>
+			</table>
+		{% else %}
+		    <p class="no-record"> No record found!</p>
+		{% endif %}
+	</div>
+{% endblock %}

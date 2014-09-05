@@ -1,0 +1,92 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block title %}Update Prerequisite{% endblock %}
+{% block heading %}Update Prerequisite{% endblock %}
+{% block content %}
+    <form role="form" method="post" enctype="multipart/form-data" action="">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="id_source_foss">Source FOSS Category </label>
+            {% render_field form.source_foss class+="form-control source_foss" tabindex="1" data-placeholder="Choose FOSS Category" %}
+            {{ form.source_foss.errors }}
+        </div>
+        <div class="form-group">
+            <label for="id_source_tutorial">Source Tutorial Name <span class='ajax-refresh ajax-refresh-stutorial'><i class="fa fa-2 fa-refresh fa-spin"></i></span></label>
+            {% render_field form.source_tutorial class+="form-control source_tutorial" tabindex="2" data-placeholder="Choose Tutorial Name" %}
+            {{ form.source_tutorial.errors }}
+        </div>
+        <div class="form-group">
+            <label for="id_destination_foss">Destination FOSS Category </label>
+            {% render_field form.destination_foss class+="form-control destination_foss" tabindex="1" data-placeholder="Choose FOSS Category" %}
+            {{ form.destination_foss.errors }}
+        </div>
+        <div class="form-group">
+            <label for="id_destination_tutorial">Destination Tutorial Name <span class='ajax-refresh ajax-refresh-dtutorial'><i class="fa fa-2 fa-refresh fa-spin"></i></span></label>
+            {% render_field form.destination_tutorial class+="form-control destination_tutorial" tabindex="2" data-placeholder="Choose Tutorial Name" %}
+            {{ form.destination_tutorial.errors }}
+        </div>
+        <input type="submit" class="btn btn-primary" value="Save"  tabindex="4" />
+    </form>
+{% endblock %}
+{% block jsblock %}
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $('.source_foss').on("change", function(){
+                var foss = $(this).val();
+                $('.source_tutorial').html('<option value="" selected="selected">Select Tutorial</option>');
+                $('.source_tutorial').attr("disabled", "disabled");
+                if(foss != '') {
+                    $.ajax({
+                        url: "/creation/ajax-upload-prerequisite/",
+                        type: "POST",
+                        data: {
+                            foss: foss,
+                        },
+                        beforeSend: function() {
+                            $('.ajax-refresh-stutorial').show();
+                        },
+                        success: function(data) {
+                            // loading tutorial names
+                            $('.ajax-refresh-stutorial').hide();
+                            if(data){
+                                $('.source_tutorial').html(data);
+                                $('.source_tutorial').removeAttr('disabled');
+                            }
+                        }
+                    })
+                }
+            });
+            $('.destination_foss').on("change", function(){
+                var foss = $(this).val();
+                $('.destination_tutorial').html('<option value="" selected="selected">-- Select Tutorial --</option> <option value="0">-- Not Required --</option>');
+                if(foss == '0') {
+                    $('.destination_tutorial').removeAttr('disabled');
+                    $('.destination_tutorial').val('0');
+                } else {
+                    $('.destination_tutorial').attr("disabled", "disabled");
+                }
+                if(foss != '' && foss != '0') {
+                    $.ajax({
+                        url: "/creation/ajax-upload-prerequisite/",
+                        type: "POST",
+                        data: {
+                            foss: foss,
+                        },
+                        beforeSend: function() {
+                            $('.ajax-refresh-dtutorial').show();
+                        },
+                        success: function(data) {
+                            // loading tutorial names
+                            $('.ajax-refresh-dtutorial').hide();
+                            if(data){
+                                $('.destination_tutorial').html(data);
+                                $('.destination_tutorial').removeAttr('disabled');
+                            }
+                        }
+                    })
+                }
+            });
+        });
+    </script>
+{% endblock %}

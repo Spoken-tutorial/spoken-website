@@ -1,0 +1,46 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block title %}Workshop Access Role{% endblock %}
+{% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
+{% block heading %}
+    <i class="fa fa-list-ul"></i> Workshop Access Role
+{% endblock %}
+{% block content %}
+	<!-- Nav tabs -->
+	<!--<ul class="tabs">
+		<li {% if status == 'pending' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/workshop/pending/">Pending</a></li>
+		<li {% if status == 'approved' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/workshop/approved/">Approved</a></li>
+		<li {% if status == 'completed' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/workshop/completed/">Completed</a></li>
+		<li {% if status == 'reschedule' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/workshop/reschedule/">Reschedule</a></li>
+		<li {% if status == 'rejected' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/workshop/rejected/">Rejected</a></li>
+	</ul>->
+	<!-- Tab panes -->
+	<div class="tab-content">
+		<div class="tab-pane" id="new">
+			<iframe width = "100%" src="/software-training/workshop/request/"></iframe> -->
+		</div>
+		{% if collection %}
+			<div class="tab-pane active" id="pending">
+				<table class="table table-bordered table-hover table-striped">
+					<tr>
+						<th>Academic Name</th>
+						<th>FOSS</th>
+						<th>Language</th>
+						<th>Date </th>
+					</tr>
+					{% for record in collection %}
+						<tr>
+							<td>{{ record.academic }}</td>
+							<td>{{ record.foss }}</td>
+							<td>{{ record.language }}</td>
+							<td>{{ record.wdate|date:"d M Y" }} {{	record.wtime }}</td>
+						</tr>
+					{% endfor %}
+				</table>
+			</div>
+		{% else %}
+			<p>No record found!</p>
+		{% endif %}
+	</div>
+{% endblock %}

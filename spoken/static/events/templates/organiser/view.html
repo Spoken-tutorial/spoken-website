@@ -1,0 +1,73 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block title %}Organiser Details{% endblock %}
+{% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
+{% block heading %}
+    <i class="fa fa-list-ul"></i> Organiser Details <a href="/software-training" class='pull-right go-back'>Dashboard</a>
+{% endblock %}
+{% block content %}
+    {% if request.user == record.user %}
+        <p>If you want to change the Academic details click <a href="{% url 'events:organiser_edit' record.user %}">here</a></p>
+    {% endif %}
+	<table class="table table-striped table-hover table-bordered">
+		<tr>
+			<th>Organiser name</td>
+			<td>{{ record.user }}</td>
+		</tr>
+		<tr>
+			<th>Academic name</td>
+			<td>{{ record.academic.institution_name }}</td>
+		</tr>
+		<tr>
+			<th>Status</td>
+			{% if record.status %}
+				<td>Active</td>
+			{% else %}
+				<td>Waiting for approval</td>
+			{% endif %}
+		</tr>
+		{% if profile %}
+			<tr>
+				<th>First Name</th>
+				<td>{{ record.user.first_name }}</td>
+			</tr>
+			<tr>
+				<th>Last Name</th>
+				<td>{{ record.user.last_name }}</td>
+			</tr>
+			<tr>
+				<th>Street</th>
+				<td>{{ profile.street }}</td>
+			</tr>
+			<tr>
+				<th>Location</th>
+				<td>{{ profile.location }}</td>
+			</tr>
+			<tr>
+				<th>District</th>
+				<td>{{ profile.district }}</td>
+			</tr>
+			<tr>
+				<th>City</th>
+				<td>{{ profile.city }}</td>
+			</tr>
+			<tr>
+				<th>State</th>
+				<td>{{ profile.state }}</td>
+			</tr>
+			<tr>
+				<th>Country</th>
+				<td>{{ profile.country }}</td>
+			</tr>
+			<tr>
+				<th>Pincode</th>
+				<td>{{ profile.pincode }}</td>
+			</tr>
+			<tr>
+				<th>Phone</th>
+				<td>{{ profile.phone }}</td>
+			</tr>
+		{% endif %}
+	</table>
+{% endblock %}

@@ -1,0 +1,92 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block title %}Upload {{ sheet_type|title }} Sheet{% endblock %}
+{% block heading %}Upload {{ sheet_type|title }} Sheet{% endblock %}
+{% block content %}
+    <form role="form" method="post" enctype="multipart/form-data" action="">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="id_foss">FOSS Category </label>
+            {% render_field form.foss class+="form-control foss" tabindex="1" %}
+            {{ form.foss.errors }}
+        </div>
+        <div class="form-group">
+            <label for="id_language">Language 
+                <span class='ajax-refresh ajax-refresh-language'>
+                    <i class="fa fa-2 fa-refresh fa-spin"></i>
+                </span>
+            </label>
+            {% render_field form.language class+="form-control language" tabindex="2" %}
+            {{ form.language.errors }}
+        </div>
+        <div class="well">
+		    <fieldset>
+		        <label for="id_comp">{{ sheet_type|title }} Sheet</label>
+                {% render_field form.comp class+="manual-upload comp" tabindex="4" %}
+                {{ form.comp.errors }}
+            </fieldset>
+        </div>
+        <div class="form-group">
+            <div class="existing-sheet"></div>
+        </div>
+        <input type="submit" class="btn btn-primary" value="Save"  tabindex="5" />
+    </form>
+{% endblock %}
+{% block jsblock %}
+    <script type="text/javascript">
+        $(document).ready(function(){
+            var sheetType = '{{ sheet_type }}';
+            $('.foss').on("change", function(){
+                var foss = $(this).val();
+                $('.language').html('<option value="" selected="selected">-- Select Language --</option>');
+                $('.language').attr("disabled", "disabled");
+                if(foss != '') {
+                    $.ajax({
+                        url: "/creation/ajax-manual-language/",
+                        type: "POST",
+                        data: {
+                            foss: foss,
+                        },
+                        beforeSend: function() {
+                            $('.ajax-refresh-language').show();
+                        },
+                        success: function(data) {
+                            if(data){
+                                $('.language').html(data);
+                                $('.language').removeAttr('disabled');
+                            }
+                            $('.ajax-refresh-language').hide();
+                        }
+                    });
+                }
+            });
+
+            $('.language').on("change", function(){
+                var foss = $('.foss').val();
+                var language = $('.language').val();
+                $('.existing-sheet').html('');
+                if(foss && language) {
+                    $.ajax({
+                        url: "/creation/ajax-manual-language/",
+                        type: "POST",
+                        data: {
+                            foss: foss,
+                            language: language,
+                            sheet_type: sheetType
+                        },
+                        beforeSend: function() {
+                            $('.ajax-refresh-language').show();
+                        },
+                        success: function(data) {
+                            if(data){
+                                $('.existing-sheet').html(data);
+                            }
+                            $('.ajax-refresh-language').hide();
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+{% endblock %}
