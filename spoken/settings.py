@@ -63,6 +63,7 @@ INSTALLED_APPS = (
 	'mdldjango',
 	'nicedit',
 	'masquerade',
+	'report_builder'
 )
 
 MIDDLEWARE_CLASSES = (
@@ -180,6 +181,10 @@ INTERNAL_IPS = ('127.0.0.1',)
 #AUTH_USER_MODEL = 'mdldjango.Users'
 DATABASE_ROUTERS = ['mdldjango.router.MdlRouter', 'cdeep.router.CdeepRouter', 'workshop.router.WorkshopRouter']
 #AUTHENTICATION_BACKENDS = ( 'mdldjango.backend.MdlBackend', )
+
+# Reports
+REPORT_BUILDER_INCLUDE = []
+REPORT_BUILDER_EXCLUDE = ['user'] # Allow all models except User to be accessed
 
 #template
 TEMPLATE_CONTEXT_PROCESSORS = (
