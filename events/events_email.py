@@ -14,7 +14,7 @@ def send_email(status, to = None, instance = None, cc = None, bcc = None):
 
 Regards,
 Spoken Tutorial
-'''.format('http://process.spoken-tutorial.org/images/8/89/Workshop-Request-Sheet.pdf', 'http://process.spoken-tutorial.org/index.php/Software-Training#Contacts_For_Workshops')
+'''.format('http://process.spoken-tutorial.org/images/1/1f/Training-Request-Sheet.pdf', 'http://process.spoken-tutorial.org/index.php/Software-Training#Contacts_For_Training')
 
     elif status == 'Instructions to be followed before conducting the training':
         subject  = 'Important : Instructions to be followed before conducting the training'
