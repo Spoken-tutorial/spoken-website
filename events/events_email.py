@@ -17,7 +17,7 @@ Spoken Tutorial
 '''.format('http://process.spoken-tutorial.org/images/8/89/Workshop-Request-Sheet.pdf', 'http://process.spoken-tutorial.org/index.php/Software-Training#Contacts_For_Workshops')
 
     elif status == 'Instructions to be followed before conducting the training':
-        subject  = 'Important : Instructions to be followed before conducting the Training mainly uploading the Participant List while making the Training / Workshop Request.'
+        subject  = 'Important : Instructions to be followed before conducting the training'
         message = '''Dear Organiser,
         
 Thank you for making the Training / workshop request on {3} to be conducted at your Institute. Please upload the "Participant List" of students who are expected to take part in the Training BEFORE the Training / Workshop. The Training Manager at Spoken Tutorial Project Team, IIT Bombay will only be able to approve your request if "Participant List" is Uploaded.
@@ -47,7 +47,7 @@ Spoken Tutorial
 '''.format('http://process.spoken-tutorial.org/images/c/c2/Participant_data.pdf', 'http://process.spoken-tutorial.org/images/1/1b/Download-Tutorials.pdf', 'http://process.spoken-tutorial.org/images/5/58/Machine-Readiness.pdf', instance.foss, instance.trdate, instance.trtime, instance.training_code)
     
     elif status == 'How to upload the attendance on the Workshop day':
-        subject  = 'Important : How to upload the attendance on the workshop day.'
+        subject  = 'Important : How to upload the attendance on the workshop day'
         
         message = '''Dear Organiser,
         
@@ -101,7 +101,7 @@ Spoken Tutorial
 '''.format(instance.training_code, instance.foss)
 
     elif status == 'How to upload the attendance on the Training day':
-        subject  = 'Important : How to upload the attendance on the training day.'
+        subject  = 'Important : Instruction to fill the Training Completion Form'
         
         message = '''Dear Organiser,
         
@@ -177,7 +177,7 @@ Spoken Tutorial
 
     
     elif status == 'Future activities after conducting the workshop':
-        subject  = 'Important : Future activities after conducting the workshop.'
+        subject  = 'Important : Future activities after conducting the workshop'
         message = '''Dear Organiser,
         
 You have successfully completed the training {3} on {4} at your institute. Please see the following instructions for the future activities.
@@ -203,7 +203,7 @@ Spoken Tutorial
 '''.format('http://spoken-tutorial.org', 'process.spoken-tutorial.org/images/0/09/Instructions_for_Invigilator.pdf','http://process.spoken-tutorial.org/images/a/aa/Test_Request.pdf', instance.training_code, instance.foss )
 
     elif status == 'Instructions to be followed before conducting the test-organiser':
-        subject  = 'Important : Instructions to be followed before conducting the test.'
+        subject  = 'Important : Instructions to be followed before conducting the test - Organiser'
         message = '''Dear Organiser,
         
 Your {2} test on {3} {4} has been approved. The test code is {5}. This code is very important, please preserve it for your future reference and also share it with the students and invigilator on the test day. The link for the online test is {0}
@@ -217,7 +217,7 @@ Spoken Tutorial
 '''.format('http://onlinetest.spoken-tutorial.org/', 'http://process.spoken-tutorial.org/images/9/95/Test_Instruction_for_Participants.pdf', instance.foss, instance.tdate, instance.ttime, instance.test_code)
 
     elif status == 'Instructions to be followed before conducting the test-invigilator':
-        subject  = 'Important : Instructions to be followed before conducting the test.'
+        subject  = 'Important : Instructions to be followed before conducting the test - Invigilator'
         message = '''Dear Invigilator,
         
 The organiser has requested for the {1} test on {2} {3}. Please confirm your presence by logging in our website with your username and password and Click on confirmation for the Assessment test.

@@ -238,14 +238,14 @@ def fix_date_for_first_training(request):
     return HttpResponse("Done!")
 
 def training_gentle_reminder(request):
-    tomorrow_training = Training.objects.filter(trdate=datetime.date.today() + datetime.timedelta(days=1))
+    tomorrow_training = Training.objects.filter(trdate=datetime.date.today() + datetime.timedelta(days=1), training_type__gt=0)
     if tomorrow_training:
         for t in tomorrow_training:
             status = 'How to upload the attendance on the Workshop day'
             try:
                 to = [t.organiser.user.email]
-                if t.training_type == 0:
-                    status = 'How to upload the attendance on the Training day'
+                #if t.training_type == 0:
+                #    status = 'How to upload the attendance on the Training day'
                 send_email(status, to, t)
             except:
                 pass
