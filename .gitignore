@@ -2,6 +2,8 @@
 *.swp
 *.pyc
 config.py
+cron/config.py
+cron/logs/*
 media/*
 !media/videos/
 !media/training/

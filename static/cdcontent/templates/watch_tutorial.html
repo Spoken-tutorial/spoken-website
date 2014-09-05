@@ -166,6 +166,19 @@
                         </row>
                         <row>
                             <div class="col-lg-7 col-md-7 col-sm-7 no-padding-left">
+                                <ol class="breadcrumb">
+                                    {% with link=tr_rec.tutorial_detail.foss|instruction_sheet:tr_rec.language %}
+                                        {% if link %}
+                                            <li><a href="{{ link }}" target="_blank">Instruction Sheet</a></li>
+                                        {% endif %}
+                                    {% endwith %}
+
+                                    {% with link=tr_rec.tutorial_detail.foss|installation_sheet:tr_rec.language %}
+                                        {% if link %}
+                                            <li><a href="{{ link }}" target="_blank">Installation Sheet</a></li>
+                                        {% endif %}
+                                    {% endwith %}
+                                </ol>
                                 <pre class="custom-jumbotron"><b>Outline:<br /></b>{{ tr_rec.outline }}</pre>
                             </div>
                             <div class="col-lg-5 col-md-5 col-sm-5 no-padding-right">
