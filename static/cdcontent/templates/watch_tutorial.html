@@ -167,13 +167,13 @@
                         <row>
                             <div class="col-lg-7 col-md-7 col-sm-7 no-padding-left">
                                 <ol class="breadcrumb">
-                                    {% with link=tr_rec.tutorial_detail.foss|instruction_sheet:tr_rec.language %}
+                                    {% with link=tr_rec.tutorial_detail.foss|cd_instruction_sheet:tr_rec.language %}
                                         {% if link %}
                                             <li><a href="{{ link }}" target="_blank">Instruction Sheet</a></li>
                                         {% endif %}
                                     {% endwith %}
 
-                                    {% with link=tr_rec.tutorial_detail.foss|installation_sheet:tr_rec.language %}
+                                    {% with link=tr_rec.tutorial_detail.foss|cd_installation_sheet:tr_rec.language %}
                                         {% if link %}
                                             <li><a href="{{ link }}" target="_blank">Installation Sheet</a></li>
                                         {% endif %}

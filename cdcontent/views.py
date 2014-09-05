@@ -27,6 +27,21 @@ def humansize(nbytes):
     f = ('%.1f' % nbytes).rstrip('0').rstrip('.')
     return '%s %s' % (f, suffixes[i])
 
+
+def get_sheet_path(foss, lang, sheet):
+    file_path = settings.MEDIA_ROOT + 'videos/' + str(foss.id) + '/' + foss.foss.replace(' ', '-') + '-' + sheet.title() + '-Sheet-' + lang.name + '.pdf'
+    if lang.name != 'English':
+        if os.path.isfile(file_path):
+            new_file_path = 'spoken/videos/' + str(foss.id) + '/' + foss.foss.replace(' ', '-') + '-' + sheet.title() + '-Sheet-' + lang.name + '.pdf'
+            return file_path, new_file_path
+    
+    file_path = settings.MEDIA_ROOT + 'videos/' + str(foss.id) + '/' + foss.foss.replace(' ', '-') + '-' + sheet.title() + '-Sheet-English.pdf'
+    if os.path.isfile(file_path):
+            new_file_path = 'spoken/videos/' + str(foss.id) + '/' + foss.foss.replace(' ', '-') + '-' + sheet.title() + '-Sheet-English.pdf'
+            return file_path, new_file_path
+    return False, False
+
+
 def home(request):
     if request.method == 'POST':
         form = CDContentForm(request.POST)
@@ -40,6 +55,13 @@ def home(request):
                 foss_rec = FossCategory.objects.get(pk = key)
                 level = int(values[1])
                 for value in values[0]:
+                    language = Language.objects.get(pk = value)
+                    src_path, dst_path = get_sheet_path(foss_rec, language, 'instruction')
+                    if dst_path:
+                        archive.write(src_path, dst_path)
+                    src_path, dst_path = get_sheet_path(foss_rec, language, 'installation')
+                    if dst_path:
+                        archive.write(src_path, dst_path)
                     if level:
                         tr_recs = TutorialResource.objects.filter(Q(status = 1)|Q(status = 2), tutorial_detail__foss_id = key, tutorial_detail__level_id = level, language_id = value).order_by('tutorial_detail__level', 'tutorial_detail__order', 'language__name')
                     else:
