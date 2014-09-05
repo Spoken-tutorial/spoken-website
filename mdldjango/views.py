@@ -39,8 +39,9 @@ def authenticate(username = None, password = None):
         return None
 
 def mdl_logout(request):
-    del request.session['mdluserid']
-    request.session.save()
+    if 'mdluserid' in request.session:
+        del request.session['mdluserid']
+        request.session.save()
     #print "logout !!"
     return HttpResponseRedirect('/participant/login')
     
