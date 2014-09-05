@@ -34,6 +34,13 @@ PASSWORD_HASHERS = (
     'django.contrib.auth.hashers.UnsaltedMD5PasswordHasher',
 )
 
+# email errors and 404
+ADMINS = (
+    ('vishnuraj', 'vishnukraj007@gmail.com'),
+    ('sanmugam', 'k.sanmugam2@gmail.com'),
+)
+
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = DEBUG_MODE
 
