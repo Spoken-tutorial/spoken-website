@@ -8,6 +8,7 @@ from cms.sortable import *
 from events.filters import TrainingFilter
 from events.views import get_page
 import datetime
+from django.http import Http404
 
 # Create your views here.
 def maphome(request):
@@ -41,13 +42,13 @@ def training(request, slug = None):
     """ Organiser index page """
     user = request.user
     collectionSet = None
+    if not State.objects.filter(slug=slug):
+        raise Http404('Page Not Found!')
+        
     if slug:
         collectionSet = Training.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(slug=slug)), status = 4, participant_counts__gt=0).order_by('-trdate')
     else:
         collectionSet = Training.objects.filter(status = 4, participant_counts__gt=0).order_by('-trdate')
-        
-    if not collectionSet:
-        raise Http404('You are not allowed to view this page')
 
     header = {
         1: SortableHeader('#', False),
