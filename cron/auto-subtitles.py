@@ -21,8 +21,12 @@ class MLStripper(HTMLParser):
 
 def strip_tags(html):
     s = MLStripper()
-    s.feed(html)
-    return str(s.get_data())
+    try:
+        s.feed(html)
+        return str(s.get_data())
+    except:
+        pass
+    return html
 
 
 def readUrl(url):
