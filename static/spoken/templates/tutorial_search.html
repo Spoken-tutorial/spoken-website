@@ -70,7 +70,7 @@
                         <a href="/watch/{{ record.tutorial_detail.foss.foss|get_url_name }}/{{ record.tutorial_detail.tutorial|get_url_name }}/{{ record.language }}" class='thumb'><img width="100%" src="{{ record.tutorial_detail|get_thumb_path:'Small' }}"></a>
                     </div>
                     <div class="info col-lg-8 col-md-8 col-sm-8 col-xs-8">
-                        <div class='title'><h4><a href="/watch/{{ record.tutorial_detail.foss.foss|get_url_name }}/{{ record.tutorial_detail.tutorial|get_url_name }}/{{ record.language }}">{{ record.tutorial_detail.tutorial }}</a></h4></div>
+                        <div class='title'><h4><span style="font-size: 14px; padding-right: 6px;">{{ forloop.counter }}.</span><a href="/watch/{{ record.tutorial_detail.foss.foss|get_url_name }}/{{ record.tutorial_detail.tutorial|get_url_name }}/{{ record.language }}">{{ record.tutorial_detail.tutorial }}</a></h4></div>
                         <div class='desc'>
                                 <p><b>Foss : </b><i>{{ record.tutorial_detail.foss }} - {{ record.language }}</i></p>
                                 <p><b>Outline: </b>{{ record.outline|len_cutter:180 }}</p>
