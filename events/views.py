@@ -2059,7 +2059,7 @@ def training_participant_feedback(request, training_id, participant_id):
         tf = TrainingFeedback.objects.get(training_id = training_id, mdluser_id = participant_id)
     except:
         messages.success(request, 'Feedback not exits!')
-        return HttpResponseRedirect(request.META['HTTP_REFERER'])
+        return HttpResponseRedirect("/software-training/training/" + str(training_id) + "/participant/")
     context = {
         'feedback' : tf,
     }
@@ -2167,19 +2167,21 @@ def ajax_district_data(request):
     if request.method == 'POST':
         tmp = ''
         district = request.POST.get('district')
-        if request.POST.get('fields[location]'):
-            location = Location.objects.filter(district_id=district).order_by('name')
-            tmp = '<option value = None> -- None -- </option>'
-            for i in location:
-                tmp +='<option value='+str(i.id)+'>'+i.name+'</option>'
-            data['location'] = tmp
+        if district and district != None:
+            if request.POST.get('fields[location]'):
+                location = Location.objects.filter(district_id=district).order_by('name')
+                tmp = '<option value = None> -- None -- </option>'
+                for i in location:
+                    tmp +='<option value='+str(i.id)+'>'+i.name+'</option>'
+                data['location'] = tmp
         
         if request.POST.get('fields[institute]'):
             collages = AcademicCenter.objects.filter(district=district).order_by('institution_name')
-            tmp = '<option value = None> -- None -- </option>'
-            for i in collages:
-                tmp +='<option value='+str(i.id)+'>'+i.institution_name+'</option>'
-            data['institute'] = tmp
+            if collages:
+                tmp = '<option value = None> -- None -- </option>'
+                for i in collages:
+                    tmp +='<option value='+str(i.id)+'>'+i.institution_name+'</option>'
+                data['institute'] = tmp
         
     return HttpResponse(json.dumps(data), mimetype='application/json')
 
@@ -2210,9 +2212,8 @@ def ajax_state_collage(request):
     if request.method == 'POST':
         state = request.POST.get('state')
         collages = AcademicCenter.objects.filter(state=state).order_by('institution_name')
-        tmp = None
+        tmp = '<option value = None> --------- </option>'
         if collages:
-            tmp = '<option value = None> -- None -- </option>'
             for i in collages:
                 tmp +='<option value='+str(i.id)+'>'+i.institution_name+'</option>'
         return HttpResponse(json.dumps(tmp), mimetype='application/json')
@@ -2273,10 +2274,11 @@ def ajax_language(request):
     """ Ajax: Get the Colleges (Academic) based on District selected """
     if request.method == 'POST':
         foss = request.POST.get('foss')
-        language = FossAvailableForWorkshop.objects.select_related().filter(foss_id=foss)
-        tmp = '<option value = None> -- None -- </option>'
-        for i in language:
-            tmp +='<option value='+str(i.language.id)+'>'+i.language.name+'</option>'
+        tmp = '<option value = None> --------- </option>'
+        if foss:
+            language = FossAvailableForWorkshop.objects.select_related().filter(foss_id=foss)
+            for i in language:
+                tmp +='<option value='+str(i.language.id)+'>'+i.language.name+'</option>'
         return HttpResponse(json.dumps(tmp), mimetype='application/json')
         
 @csrf_exempt
