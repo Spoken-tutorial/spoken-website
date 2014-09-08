@@ -381,7 +381,7 @@ def new_ac(request):
     """
     user = request.user
     if not (user.is_authenticated() and (is_event_manager(user) or is_resource_person(user))):
-        raise Http404('You are not allowed to view this page')
+        raise PermissionDenied()
         
     if request.method == 'POST':
         form = AcademicForm(user, request.POST)
@@ -450,7 +450,7 @@ def edit_ac(request, rid = None):
     """ Edit academic center """
     user = request.user
     if not (user.is_authenticated() and (is_event_manager(user) or is_resource_person(user))):
-        raise Http404('You are not allowed to view this page')
+        raise PermissionDenied()
         
     if request.method == 'POST':
         contact = AcademicCenter.objects.get(id = rid)
@@ -469,14 +469,14 @@ def edit_ac(request, rid = None):
             context.update(csrf(request))
             return render(request, 'events/templates/ac/form.html', context)
         except:
-            raise Http404('Page not found')
+            raise PermissionDenied()
 
 @login_required
 def ac(request):
     """ Academic index page """
     user = request.user
     if not (user.is_authenticated() and (is_event_manager(user) or is_resource_person(user))):
-        raise Http404('You are not allowed to view this page')
+        raise PermissionDenied()
         
     context = {}
     header = {
@@ -524,7 +524,7 @@ def organiser_request(request, username):
     """ request to bacome a new organiser """
     user = request.user
     if not user.is_authenticated():
-        raise Http404('You are not allowed to view this page')
+        raise PermissionDenied()
         
     if username == request.user.username:
         user = User.objects.get(username=username)
@@ -571,14 +571,14 @@ def organiser_request(request, username):
             context['form'] = OrganiserForm()
             return render(request, 'events/templates/organiser/form.html', context)
     else:
-        raise Http404('You are not allowed to view this page')
+        raise PermissionDenied()
 
 @login_required
 def organiser_view(request, username):
     """ view organiser details """
     user = request.user
     if not (user.is_authenticated() and (username == request.user.username or is_event_manager(user) or is_resource_person(user))):
-        raise Http404('You are not allowed to view this page')
+        raise PermissionDenied()
     
     context = {}
     try:
@@ -588,7 +588,7 @@ def organiser_view(request, username):
         context['profile'] = organiser.user.profile_set.get(user= user)
     except Exception, e:
         print e
-        raise Http404('Page not found!')
+        raise PermissionDenied()
     return render(request, 'events/templates/organiser/view.html', context)
 
 #@login_required
@@ -597,7 +597,7 @@ def organiser_edit(request, username):
     #todo: confirm event_manager and resource_center can edit organiser details
     user = request.user
     if not (user.is_authenticated() and (username == request.user.username or is_event_manager(user) or is_resource_person(user))):
-        raise Http404('You are not allowed to view this page')
+        raise PermissionDenied()
         
     user = User.objects.get(username=username)
     if request.method == 'POST':
@@ -640,7 +640,7 @@ def rp_organiser(request, status, code, userid):
             messages.success(request, "The Organiser account has been "+message)
             return HttpResponseRedirect('/software-training/organiser/active/')
         else:
-            raise Http404('Page not found ')
+            raise PermissionDenied()
     except:
         raise PermissionDenied('You are not allowed to view this page')
 
@@ -649,7 +649,7 @@ def invigilator_request(request, username):
     """ Request to bacome a invigilator """
     user = request.user
     if not user.is_authenticated():
-        raise Http404('You are not allowed to view this page')
+        raise PermissionDenied()
 
     if username == user.username:
         user = User.objects.get(username=username)
@@ -696,14 +696,14 @@ def invigilator_request(request, username):
                 context['form'] = InvigilatorForm()
                 return render(request, 'events/templates/invigilator/form.html', context)
     else:
-        raise Http404('You are not allowed to view this page')
+        raise PermissionDenied()
 
 @login_required
 def invigilator_view(request, username):
     """ Invigilator view page """
     user = request.user
     if not (user.is_authenticated() and (username == request.user.username or is_event_manager(user) or is_resource_person(user))):
-        raise Http404('You are not allowed to view this page')
+        raise PermissionDenied()
     
     context = {}
     try:
@@ -713,7 +713,7 @@ def invigilator_view(request, username):
         context['profile'] = invigilator.user.profile_set.get(user= user)
     except Exception, e:
         print e
-        raise Http404('Page not found!')
+        raise PermissionDenied()
     return render(request, 'events/templates/invigilator/view.html', context)
     
 @login_required
@@ -721,7 +721,7 @@ def invigilator_edit(request, username):
     """ Invigilator edit page """
     user = request.user
     if not (user.is_authenticated() and (username == request.user.username or is_event_manager(user) or is_resource_person(user))):
-        raise Http404('You are not allowed to view this page')
+        raise PermissionDenied()
         
     user = User.objects.get(username=username)
     if request.method == 'POST':
@@ -763,7 +763,7 @@ def rp_invigilator(request, status, code, userid):
             messages.success(request, "Invigilator has "+message)
             return HttpResponseRedirect('/software-training/invigilator/inactive/')
         else:
-            raise Http404('Page not found ')
+            raise PermissionDenied()
     except:
         raise PermissionDenied('You are not allowed to view this page')
 
@@ -773,7 +773,7 @@ def training_request(request, role, rid = None):
     user = request.user
     context = {}
     if not (user.is_authenticated() and ( is_organiser(user) or is_resource_person(user) or is_event_manager(user))):
-        raise Http404('You are not allowed to view this page')
+        raise PermissionDenied()
     form = None
     if request.method == 'POST':
         if rid:
@@ -971,7 +971,7 @@ def training_list(request, role, status):
     """ Organiser index page """
     user = request.user
     if not (user.is_authenticated() and ( is_organiser(user) or is_resource_person(user) or is_event_manager(user))):
-        raise Http404('You are not allowed to view this page')
+        raise PermissionDenied()
         
     status_dict = {'pending': 0, 'approved' : 2, 'completed' : 4, 'rejected' : 5, 'reschedule' : 2, 'ongoing': 2, 'predated' : ''}
     if status in status_dict:
@@ -1005,7 +1005,7 @@ def training_list(request, role, status):
                 collectionSet = Training.objects.filter(organiser__user = user, status = status_dict[status]).order_by('-trdate')
         
         if collectionSet == None:
-            raise Http404('You are not allowed to view this page')
+            raise PermissionDenied()
 
         header = {
             1: SortableHeader('#', False),
@@ -1038,7 +1038,7 @@ def training_list(request, role, status):
         context.update(csrf(request))
         return render(request, 'events/templates/training/index.html', context)
     else:
-        raise Http404('Page not found!')
+        raise PermissionDenied()
 
 @login_required
 @csrf_exempt
@@ -1046,7 +1046,7 @@ def training_approvel(request, role, rid):
     """ Resource person: confirm or reject training """
     user = request.user
     if not (user.is_authenticated() and (is_resource_person(user) or (is_organiser(user) and request.GET['status'] == 'completed'))):
-        raise Http404('You are not allowed to view this page')
+        raise PermissionDenied()
     try:
         w = Training.objects.get(pk=rid)
         if request.GET['status'] == 'accept':
@@ -1057,7 +1057,7 @@ def training_approvel(request, role, rid):
             status = 4
     except Exception, e:
         print e
-        raise Http404('Page not found ')
+        raise PermissionDenied()
     #todo: check rp state same or not
     #if status != 2:
     #    if not (user.is_authenticated() and ( is_event_manager(user) or is_resource_person(user))):
@@ -1106,7 +1106,7 @@ def training_approvel(request, role, rid):
 def training_permission(request):
     user = request.user
     if not (user.is_authenticated() and (is_resource_person(user) or is_event_manager(user))):
-        raise Http404('You are not allowed to view this page')
+        raise PermissionDenied()
         
     permissions = Permission.objects.select_related().all()
     form = TrainingPermissionForm()
@@ -1139,7 +1139,7 @@ def training_permission(request):
 def training_completion(request, rid):
     user = request.user
     if not (user.is_authenticated() and is_organiser(user)):
-        raise Http404('You are not allowed to view this page')
+        raise PermissionDenied()
         
     context = {}
     form = TrainingCompletionForm(user = user)
@@ -1183,14 +1183,14 @@ def training_attendance(request, wid):
     psform = ParticipantSearchForm()
     sform = TrainingScanCopyForm()
     if not (user.is_authenticated() and (is_organiser(user))):
-        raise Http404('You are not allowed to view this page')
+        raise PermissionDenied()
     try:
         training = Training.objects.get(pk = wid) 
         if training.status == 4:
             return HttpResponseRedirect("/software-training/training/" + str(training.id) + "/participant/")
     except Exception, e:
         print e
-        raise Http404('Page not found ')
+        raise PermissionDenied()
     #todo check request user and training organiser same or not
     show_success_message = False
     if request.method == 'POST':
@@ -1315,13 +1315,13 @@ def training_participant(request, wid=None):
     user = request.user
     if user.is_authenticated():
         if not ((is_resource_person(user) or is_event_manager(user) or is_organiser(user))):
-            raise Http404('You are not allowed to view this page')
+            raise PermissionDenied()
     can_download_certificate = 0
     if wid:
         try:
             wc = Training.objects.get(id=wid)
         except:
-            raise Http404('Page not found')
+            raise PermissionDenied()
         if wc.status == 4:
             workshop_mdlusers = TrainingAttendance.objects.using('default').filter(training_id = wid, status__gt = 0).values_list('mdluser_id')
         else:
@@ -1377,7 +1377,7 @@ def training_participant_ceritificate(request, wid, participant_id):
             # check if user can get certificate
             wa = TrainingAttendance.objects.get(training_id = w.id, mdluser_id = participant_id)
             if wa.status < 1:
-                raise Http404('Page not found')
+                raise PermissionDenied()
             if wa.password:
                 certificate_pass = wa.password
                 wa.count += 1
@@ -1390,7 +1390,7 @@ def training_participant_ceritificate(request, wid, participant_id):
                 wa.count += 1
                 wa.save()
         except:
-            raise Http404('Page not found')
+            raise PermissionDenied()
         
     response = HttpResponse(mimetype='application/pdf')
     filename = (mdluser.firstname+'-'+w.foss.foss+"-Participant-Certificate").replace(" ", "-");
@@ -1454,7 +1454,7 @@ def test_request(request, role, rid = None):
     ''' Test request by organiser '''
     user = request.user
     if not (user.is_authenticated() and ( is_organiser(user) or is_resource_person(user) or is_event_manager(user))):
-        raise Http404('You are not allowed to view this page')
+        raise PermissionDenied()
     context = {}
     form = TestForm(user = user)
     if rid:
@@ -1531,7 +1531,7 @@ def test_list(request, role, status):
     """ Organiser test index page """
     user = request.user
     if not (user.is_authenticated() and ( is_organiser(user) or is_invigilator(user) or is_resource_person(user) or is_event_manager(user))):
-        raise Http404('You are not allowed to view this page')
+        raise PermissionDenied()
         
     status_dict = {'pending': 0, 'waitingforinvigilator': 1, 'approved' : 2, 'ongoing': 3, 'completed' : 4, 'rejected' : 5, 'reschedule' : 2, 'predated' : ''}
     if status in status_dict:
@@ -1572,7 +1572,7 @@ def test_list(request, role, status):
                 collectionSet = Test.objects.filter(invigilator_id=user.invigilator.id, status = status_dict[status]).order_by('-tdate')
         
         if collectionSet == None:
-            raise Http404('You are not allowed to view this page')
+            raise PermissionDenied()
             
         header = {
             1: SortableHeader('#', False),
@@ -1606,7 +1606,7 @@ def test_list(request, role, status):
         context.update(csrf(request))
         return render(request, 'events/templates/test/index.html', context)
     else:
-        raise Http404('Page not found ')
+        raise PermissionDenied()
 
 @login_required
 @csrf_exempt
@@ -1653,7 +1653,7 @@ def test_approvel(request, role, rid):
             alert = "Test has been rejected"
     except Exception, e:
         print e
-        raise Http404('Page not found ')
+        raise PermissionDenied()
         
     #if status = 2:
     #    if not (user.is_authenticated() and w.academic.state in State.objects.filter(resourceperson__user_id=user) and ( is_event_manager(user) or is_resource_person(user))):
@@ -1694,7 +1694,7 @@ def test_attendance(request, tid):
         test.status = 3
         test.save()
     except:
-        raise Http404('Page not found ')
+        raise PermissionDenied()
     print test.foss_id
     if request.method == 'POST':
         users = request.POST
@@ -1805,7 +1805,7 @@ def test_participant(request, tid=None):
         try:
             t = Test.objects.get(id=tid)
         except:
-            raise Http404('Page not found')
+            raise PermissionDenied()
             
         test_mdlusers = TestAttendance.objects.using('default').filter(test_id=tid)
         #ids = []
@@ -1846,7 +1846,7 @@ def test_participant_ceritificate(request, wid, participant_id):
             ta = TestAttendance.objects.get(test_id = w.id, mdluser_id = participant_id)
             mdlgrade = MdlQuizGrades.objects.get(quiz = ta.mdlquiz_id, userid = participant_id)
             if ta.status < 1 or round(mdlgrade.grade, 1) < 40 or not w.invigilator:
-                raise Http404('Page not found')
+                raise PermissionDenied()
                 
             if ta.password:
                 certificate_pass = ta.password 
@@ -1861,7 +1861,7 @@ def test_participant_ceritificate(request, wid, participant_id):
                 ta.save()
         except Exception, e:
             print e
-            raise Http404('Page not found')
+            raise PermissionDenied()
     response = HttpResponse(mimetype='application/pdf')
     filename = (ta.mdluser_firstname+'-'+ta.mdluser_lastname+"-Participant-Certificate").replace(" ", "-");
     
@@ -1952,9 +1952,9 @@ def training_subscribe(request, events, eventid = None, mdluser_id = None):
             messages.success(request, "You have sucessfully subscribe to the "+events+"")
             return HttpResponseRedirect('/participant/index/#Upcoming-Training')
         else:
-            raise Http404('Page not found')
+            raise PermissionDenied()
     except:
-        raise Http404('Page not found')
+        raise PermissionDenied()
     
     return HttpResponseRedirect('/participant/index/')
 
@@ -1966,7 +1966,7 @@ def organiser_invigilator_index(request, role, status):
     user = request.user
     context = {}
     if not (user.is_authenticated() and (is_event_manager(user) or is_resource_person(user))):
-        raise Http404('You are not allowed to view this page')
+        raise PermissionDenied()
     if status == 'active':
         status = 1
     elif status == 'inactive':
@@ -1974,7 +1974,7 @@ def organiser_invigilator_index(request, role, status):
     elif status == 'blocked':
         status = 2
     else:
-        raise Http404('Page not found ')
+        raise PermissionDenied()
         
     user = User.objects.get(pk=user.id)
 
@@ -2023,7 +2023,7 @@ def organiser_invigilator_index(request, role, status):
             print e
             collection = {}
     else:
-        raise Http404('Page not found ')
+        raise PermissionDenied()
             
     context['header'] = header
     context['ordering'] = ordering

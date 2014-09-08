@@ -43,7 +43,7 @@ def training(request, slug = None):
     user = request.user
     collectionSet = None
     if not State.objects.filter(slug=slug):
-        raise Http404('Page Not Found!')
+        raise PermissionDenied()
         
     if slug:
         collectionSet = Training.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(slug=slug)), status = 4, participant_counts__gt=0).order_by('-trdate')
@@ -85,7 +85,7 @@ def training_participant(request, wid=None):
         try:
             wc = Training.objects.get(id=wid)
         except:
-            raise Http404('Page not found')
+            raise PermissionDenied()
         if wc.status == 4:
             workshop_mdlusers = TrainingAttendance.objects.using('default').filter(training_id = wid, status__gt = 0).values_list('mdluser_id')
         else:

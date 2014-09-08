@@ -210,27 +210,28 @@ def offline_details(request, wid, category):
                 with open(file_path, 'rbU') as csvfile:
                     count  = 0
                     csvdata = csv.reader(csvfile, delimiter=',', quotechar='|')
-                    for row in csvdata:
-                        count = count + 1
-                        try:
-                            firstname = row[0].strip().title()
-                            lastname = row[1].strip().title()
-                            email = row[2].strip()
-                            gender = row[3].strip().title()
-                            if not validate_email(email):
-                                messages.error(request, "Line number "+ str(count) + ' : ' + firstname + ' ' + lastname + "'s email missing!")
-                                continue
-                            get_or_create_participant(w, firstname, lastname, gender, email, category)
-                        except Exception, e:
-                            print e, "ssssssssssssssssss"
-                            if not error_line_no:
-                                error_line_no = error_line_no + str(count)
-                            else:
-                                error_line_no = error_line_no + ', ' + str(count)
-                            #messages.error(request, "Line number "+ str(count) + " : Required data is missing. Please check value seperated by <b>Comma (,) </b>.")
-                        continue
+                    if csvdata:
+                        for row in csvdata:
+                            count = count + 1
+                            try:
+                                firstname = row[0].strip().title()
+                                lastname = row[1].strip().title()
+                                email = row[2].strip()
+                                gender = row[3].strip().title()
+                                if not validate_email(email):
+                                    messages.error(request, "Line number "+ str(count) + ' : ' + firstname + ' ' + lastname + "'s email missing!")
+                                    continue
+                                get_or_create_participant(w, firstname, lastname, gender, email, category)
+                            except Exception, e:
+                                if not error_line_no:
+                                    error_line_no = error_line_no + str(count)
+                                else:
+                                    error_line_no = error_line_no + ', ' + str(count)
+                                #messages.error(request, "Line number "+ str(count) + " : Required data is missing. Please check value seperated by <b>Comma (,) </b>.")
+                            continue
+                    else:
+                        error_line_no = 1
                 os.unlink(file_path)
-                
                 #save participant_count
                 w.participant_counts = TrainingAttendance.objects.filter(training = w, status__gte = 1).count()
                 w.save()
