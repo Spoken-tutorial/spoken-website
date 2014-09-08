@@ -238,7 +238,7 @@ def fix_date_for_first_training(request):
     return HttpResponse("Done!")
 
 def training_gentle_reminder(request):
-    tomorrow_training = Training.objects.filter(trdate=datetime.date.today() + datetime.timedelta(days=1), training_type__gt=0)
+    tomorrow_training = Training.objects.filter(training_type__gt=0, status__lte=2, trdate=datetime.date.today() + datetime.timedelta(days=1))
     if tomorrow_training:
         for t in tomorrow_training:
             status = 'How to upload the attendance on the Workshop day'
@@ -252,7 +252,7 @@ def training_gentle_reminder(request):
     return HttpResponse("Done!")
 
 def training_completion_reminder(request):
-    training_need_to_complete = Training.objects.filter(trdate__gte=datetime.date.today() - datetime.timedelta(days=60))
+    training_need_to_complete = Training.objects.filter(training_type = 0, status__lte = 3, trdate__lte=datetime.date.today() - datetime.timedelta(days=60))
     if training_need_to_complete:
         status = 'How to upload the attendance on the Training day'
         for t in training_need_to_complete:
