@@ -35,8 +35,9 @@ class CDContentForm(forms.Form):
         if args:
             if ('foss_category' in args[0]) and ('level' in args[0]):
                 if args[0]['foss_category'] and args[0]['foss_category'] != '' and args[0]['foss_category'] != 'None':
-                    tmp_level = int(args[0]['level'])
+                    tmp_level = args[0]['level']
                     if tmp_level:
+                        tmp_level = int(args[0]['level'])
                         lang_recs = list(TutorialResource.objects.filter(Q(status = 1)|Q(status = 2), tutorial_detail__foss_id = args[0]['foss_category'], tutorial_detail__level_id = tmp_level).values_list('language_id', 'language__name').order_by('language__name').distinct())
                     else:
                         lang_recs = list(TutorialResource.objects.filter(Q(status = 1)|Q(status = 2), tutorial_detail__foss_id = args[0]['foss_category']).values_list('language_id', 'language__name').order_by('language__name').distinct())

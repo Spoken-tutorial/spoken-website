@@ -47,7 +47,7 @@ def home(request):
         form = CDContentForm(request.POST)
         if form.is_valid():
             temp = tempfile.TemporaryFile()
-            archive = zipfile.ZipFile(temp, 'w', zipfile.ZIP_DEFLATED)
+            archive = zipfile.ZipFile(temp, 'w', zipfile.ZIP_DEFLATED, allowZip64=True)
             selectedfoss = json.loads(request.POST.get('selected_foss', {}))
             all_rows = []
             all_foss_details = {}

@@ -90,7 +90,7 @@
                 var level = $(this).val();
                 $('.language').html('');
                 $('.language').attr("disabled", "disabled");
-                if(foss != '' && level != '') {
+                if(foss && level) {
                     $.ajax({
                         url: "/cdcontent/ajax-fill-languages/",
                         type: "POST",
@@ -118,7 +118,7 @@
                 langs = JSON.stringify($('.language').val());
                 console.log(langs)
                 selectedfoss = $('.selected_foss').val();
-                if(foss && langs && level != '') {
+                if(foss && langs && level) {
                     $.ajax({
                         url: "/cdcontent/ajax-add-foss/",
                         type: "POST",
