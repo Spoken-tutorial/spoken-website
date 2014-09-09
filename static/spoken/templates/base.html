@@ -72,7 +72,7 @@
                                                                             <li class=""><a href="http://process.spoken-tutorial.org/index.php/Software-Training#Progress_To_Date" target="_blank">Progress  to Date</a></li>
                                                                             <li class=""><a href="http://process.spoken-tutorial.org/index.php/Software-Training#Software_Offered" target="_blank">Software Offered</a></li>
                                                                             <li class=""><a href="http://process.spoken-tutorial.org/index.php/Software-Training#Organising_Training_.2F_Workshop" target="_blank">Organising Training / Workshop</a></li>
-                                                                            <li class=""><a href="http://process.spoken-tutorial.org/index.php/Software-Training#Contacts_For_Workshops" target="_blank">Contacts for Training / Workshop</a></li>
+                                                                            <li class=""><a href="http://process.spoken-tutorial.org/index.php/Software-Training#Contacts_For_Training" target="_blank">Contacts for Training / Workshop</a></li>
                                                                         </ul>
                                                                     </div>
                                                                 </div>
@@ -122,7 +122,9 @@
                                                                     <!-- <h5 class="media-heading"><b>Contributor</b></h5> -->
                                                                     <div class="media-body">
                                                                         <ul class="media-list">
-                                                                            <li class=""><a target="_blank" href="http://files.spoken-tutorial.org/english-videos/">Video for Dubbing</a></li>
+                                                                            {% if user|get_contributor or user|get_domainreviewer or user|get_qualityreviewer or user|get_administrator %}
+                                                                                <li class=""><a target="_blank" href="http://files.spoken-tutorial.org/english-videos/">Video for Dubbing</a></li>
+                                                                            {% endif %}
                                                                             <li class=""><a target="_blank" href="http://process.spoken-tutorial.org/index.php/Main_Page">Creation Process</a></li>
                                                                             <li class=""><a target="_blank" href="http://script.spoken-tutorial.org/index.php/Main_Page">Outline and Script</a></li>
                                                                             <li class=""><a href="/creation">Creation Dashboard</a></li>

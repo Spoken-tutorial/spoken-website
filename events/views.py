@@ -2058,7 +2058,7 @@ def training_participant_feedback(request, training_id, participant_id):
     try:
         tf = TrainingFeedback.objects.get(training_id = training_id, mdluser_id = participant_id)
     except:
-        messages.success(request, 'Feedback not exits!')
+        messages.success(request, 'Feedback does not exist!')
         return HttpResponseRedirect("/software-training/training/" + str(training_id) + "/participant/")
     context = {
         'feedback' : tf,
