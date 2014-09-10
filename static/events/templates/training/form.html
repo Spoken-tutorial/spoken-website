@@ -19,8 +19,8 @@
 		{% if role == 'rp' %}
 		    <li {% if status == 'pending' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/training/{{role}}/pending/">New Requests</a></li>
 		{% endif %}
+		<li {% if status == 'approved' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/training/{{role}}/approved/">Approved</a></li>
         <li {% if status == 'ongoing' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/training/{{role}}/ongoing/">Ongoing</a></li>
-        <li {% if status == 'approved' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/training/{{role}}/approved/">Approved</a></li>
         <li {% if status == 'completed' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/training/{{role}}/completed/">Completed</a></li>
         <li {% if status == 'reschedule' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/training/{{role}}/reschedule/">Reschedule</a></li>
         <li {% if status == 'rejected' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/training/{{role}}/rejected/">Rejected</a></li>

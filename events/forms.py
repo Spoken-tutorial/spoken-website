@@ -56,9 +56,15 @@ class AcademicForm(forms.ModelForm):
         #for edit
         if initial:
             #self.fields["location"].queryset = Location.objects.filter(district__id=initial.district_id)
-            self.fields["university"].queryset = University.objects.filter(state__id=initial.state_id)
-            self.fields["district"].queryset = District.objects.filter(state__id=initial.state_id)
-            self.fields["city"].queryset = City.objects.filter(state__id=initial.state_id)
+            if args and 'state' in args[0]:
+                if args[0]['state'] != '' and args[0]['state'] != 'None':
+                    self.fields["university"].queryset = University.objects.filter(state__id=args[0]['state'])
+                self.fields["district"].queryset = District.objects.filter(state__id=args[0]['state'])
+                self.fields["city"].queryset = City.objects.filter(state__id=args[0]['state'])
+            else:
+                self.fields["university"].queryset = University.objects.filter(state__id=initial.state_id)
+                self.fields["district"].queryset = District.objects.filter(state__id=initial.state_id)
+                self.fields["city"].queryset = City.objects.filter(state__id=initial.state_id)
             
     class Meta:
         model = AcademicCenter

@@ -302,6 +302,48 @@ def close_predated_ongoing_test(request):
                 pass
     return HttpResponse("Done!")
 
+def get_academic_code(state):
+    # find the academic code available number
+    try:
+        ac = AcademicCenter.objects.filter(state = state).order_by('-academic_code')[:1].get()
+    except:
+        #print "This is first record"
+        ac = None
+        academic_code = 1
+        
+    if ac:
+        code_range = int(ac.academic_code.split('-')[1])
+        available_code_range = []
+        for i in range(code_range):
+            available_code_range.insert(i, i+1)
+        
+        #find the existing numbers
+        ac = AcademicCenter.objects.filter(state = state).order_by('-academic_code')
+        for record in ac:
+            a = int(record.academic_code.split('-')[1])-1
+            available_code_range[a] = 0
+        academic_code = code_range + 1
+        #finding Missing number
+        for code in available_code_range:
+            if code != 0:
+                academic_code = code
+                break
+
+    # Generate academic code
+    if academic_code < 10:
+        ac_code = '0000'+str(academic_code)
+    elif academic_code <= 99:
+        ac_code = '000'+str(academic_code)
+    elif academic_code <= 999:
+        ac_code = '00'+str(academic_code)
+    elif academic_code <= 9999:
+        ac_code = '0'+str(academic_code)
+    
+    #get state code
+    state_code = State.objects.get(pk = state.id).code
+    return state_code +'-'+ ac_code
+    
+    
 @login_required
 def events_dashboard(request):
     user = request.user
@@ -390,45 +432,7 @@ def new_ac(request):
             form_data.user_id = user.id
             
             state = form.cleaned_data['state']
-            # find the academic code available number
-            try:
-                ac = AcademicCenter.objects.filter(state = state).order_by('-academic_code')[:1].get()
-            except:
-                #print "This is first record"
-                ac = None
-                academic_code = 1
-                
-            if ac:
-                code_range = int(ac.academic_code.split('-')[1])
-                available_code_range = []
-                for i in range(code_range):
-                    available_code_range.insert(i, i+1)
-                
-                #find the existing numbers
-                ac = AcademicCenter.objects.filter(state = state).order_by('-academic_code')
-                for record in ac:
-                    a = int(record.academic_code.split('-')[1])-1
-                    available_code_range[a] = 0
-                academic_code = code_range + 1
-                #finding Missing number
-                for code in available_code_range:
-                    if code != 0:
-                        academic_code = code
-                        break
-
-            # Generate academic code
-            if academic_code < 10:
-                ac_code = '0000'+str(academic_code)
-            elif academic_code <= 99:
-                ac_code = '000'+str(academic_code)
-            elif academic_code <= 999:
-                ac_code = '00'+str(academic_code)
-            elif academic_code <= 9999:
-                ac_code = '0'+str(academic_code)
-            
-            #get state code
-            state_code = State.objects.get(pk = state.id).code
-            academic_code = state_code +'-'+ ac_code
+            academic_code = get_academic_code(state)
             
             form_data.academic_code = academic_code
             ic = InstituteCategory.objects.get(name = 'Uncategorized')
@@ -453,9 +457,14 @@ def edit_ac(request, rid = None):
         raise PermissionDenied()
         
     if request.method == 'POST':
-        contact = AcademicCenter.objects.get(id = rid)
-        form = AcademicForm(request.user, request.POST, instance=contact)
+        academic = AcademicCenter.objects.get(id = rid)
+        form = AcademicForm(request.user, request.POST, instance=academic)
         if form.is_valid():
+            #change academic_code if state change
+            form_state = form.cleaned_data['state']
+            if academic.state_id != form_state:
+                form_data = form.save(commit=False)
+                form_data.academic_code = get_academic_code(form_state)
             if form.save():
                 return HttpResponseRedirect("/software-training/ac/")
         context = {'form':form}
