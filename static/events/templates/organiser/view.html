@@ -1,13 +1,14 @@
 {% extends 'spoken/templates/base.html' %}
 {% load widget_tweaks %}
 {% load static %}
+{% load eventsdata %}
 {% block title %}Organiser Details{% endblock %}
 {% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
 {% block heading %}
     <i class="fa fa-list-ul"></i> Organiser Details <a href="/software-training" class='pull-right go-back'>Dashboard</a>
 {% endblock %}
 {% block content %}
-    {% if request.user == record.user %}
+    {% if user|is_resource_person %}
         <p>If you want to change the Academic details click <a href="{% url 'events:organiser_edit' record.user %}">here</a></p>
     {% endif %}
 	<table class="table table-striped table-hover table-bordered">

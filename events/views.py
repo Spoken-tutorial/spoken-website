@@ -226,7 +226,7 @@ def add_participant(request, cid, category ):
                 print wa.id, " => Inserted"
 
 def fix_date_for_first_training(request):
-    organisers = Organiser.objects.exclude(id__in = Training.objects.values_list('organiser_id').distinct())
+    organisers = Organiser.objects.exclude(id__in = Training.objects.filter(status=1).values_list('organiser_id').distinct())
     if organisers:
         status = 'Fix a date for your first training'
         for o in organisers:

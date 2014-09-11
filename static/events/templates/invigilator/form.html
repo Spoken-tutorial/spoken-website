@@ -23,6 +23,7 @@
 		                <label for="id_state" class="col-sm-3 control-label">State</label>
 		                <div class="col-sm-9">
 		                    {% render_field form.state class+="form-control chosen state" tabindex="1" data-placeholder="Choose State" %}
+		                    <small>Please select the state in which your institution is located.</small>
 		                    {{ form.state.errors }}
 		                </div>
 	                </div>
@@ -39,6 +40,8 @@
 		                <label for="id_college" class="col-sm-3 control-label">Institution <span class='ajax-refresh ajax-refresh-institution'><i class="fa fa-2 fa-refresh fa-spin"></i></span></label>
 		                <div class="col-sm-9">
 		                    {% render_field form.college class+="form-control chosen college" tabindex="1" data-placeholder="Choose Institution" %}
+		                    <small>Please select <strong>Only</strong> the exact name of your Institution / College / Politechnic / ITI.</small><br>
+		                    <small>If your institution's name is missing, please contact the <a href="http://process.spoken-tutorial.org/index.php/Software-Training#Contacts_For_Training" target="_blank">Training Manger</a> of your state.</small>
 		                    {{ form.college.errors }}
 		                </div>
 	                </div>
