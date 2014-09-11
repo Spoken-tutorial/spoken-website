@@ -43,6 +43,7 @@ urlpatterns = patterns('',
     url(r'^list_videos/$', 'cdeep.views.list_videos', name='list_videos'),
     url(r'^show_video/$', 'cdeep.views.show_video', name='show_video'),
     url(r'^search/node/([0-9a-zA-Z-+%\(\)]+)/$', 'cdeep.views.search_node', name='search_node'),
+    url(r'^workshops/college/view_college/(\d+)/$', 'workshop.views.view_college', name='view_college'),
 
     # Masquerade user
     url(r'^masquerade/', include('masquerade.urls', namespace='masquerade')),
