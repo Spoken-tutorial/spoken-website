@@ -100,7 +100,7 @@
                                     <a href="{% url 'events:training_edit' role record.id %}">Edit</a> |
                                 {% endif %}
                                 {% if status == 'pending' or status == 'predated' %}
-                                    {% if record.status == 0 %}
+                                    {% if record.status == 0 or record.participant_counts == 0 %}
                                         Waiting for attendance
                                         <a href="{% url 'events:training_approvel' role record.id %}?status=reject"> | Reject</a>
                                     {% else %}
