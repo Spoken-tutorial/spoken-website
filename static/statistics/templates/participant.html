@@ -42,7 +42,11 @@
 					<td>{{ record.firstname|lower|title }}</td>
 					<td>{{ record.lastname|lower|title }}</td>
 					<td>
-			            <a href="{% url 'events:training_participant_feedback' wc.id record.id %}">Feedback</a>
+					    {% if wc|is_feedback_exits:record %}
+			                <a target="_blank" href="{% url 'events:training_participant_feedback' wc.id record.id %}">View Feedback</a>
+			            {% else %}
+			                Feedback not given
+			            {% endif %}
 				    </td>
 				</tr>
 			{% endfor %}
