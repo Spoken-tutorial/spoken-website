@@ -14,7 +14,7 @@ from config import *
 import os
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
-SCRIPT_URL = 'http://script.spoken-tutorial.org/index.php/'
+SCRIPT_URL = SCRIPT_URL
 
 STVIDEOS_DIR = STVIDEOS_PATH
 # Quick-start development settings - unsuitable for production

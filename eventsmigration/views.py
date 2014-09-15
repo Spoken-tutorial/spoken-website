@@ -20,6 +20,19 @@ from cms.models import *
 from django.db.models import Sum
 from cdeep.models import *
 
+def update_old_city(request):
+    newac = AcademicCenter.objects.filter(city = City.objects.filter(name="Uncategorized"))
+    for nac in newac:
+        oldac = WAcademicCenter.objects.get(academic_code=nac.academic_code)
+        #find in new City
+        city = City.objects.filter(name=oldac.city)
+        if city and city.first():
+            city = city.first()
+            nac.city = city
+            nac.save()
+            print nac.institution_name, " => ", city.name, " Saved!" 
+    return HttpResponse("Done")
+    
 def get_dept(dept):
     getDept = {
         ###
