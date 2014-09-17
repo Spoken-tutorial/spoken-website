@@ -25,7 +25,7 @@ def get_state_info(request, code):
         #academic_list = AcademicCenter.objects.filter(state = state).values_list('id')
         resource_centers = AcademicCenter.objects.filter(state = state, resource_center = 1).count()
         #workshop_details = Training.objects.filter(academic_id__in = academic_list, status = 4).aggregate(Sum('participant_counts'), Count('id'), Min('trdate'))
-        workshop_details = Training.objects.filter(Q(status = 4) | (Q(training_type = 0) & Q(status__gt = 1) & Q(trdate__lte = datetime.date.today())), academic__state_id = state.id).aggregate(Sum('participant_counts'), Count('id'), Min('trdate'))
+        workshop_details = Training.objects.filter(Q(status = 4) | (Q(training_type = 0) & Q(status__gt = 1) & Q(trdate__lte = datetime.date.today())), participant_counts__gt=0, academic__state_id = state.id).aggregate(Sum('participant_counts'), Count('id'), Min('trdate'))
         context = {
             'state': state,
             'workshops': workshop_details['id__count'],
@@ -48,9 +48,9 @@ def training(request, slug = None):
         state = State.objects.filter(slug=slug)
         if not State.objects.filter(slug=slug):
             raise PermissionDenied()
-        collectionSet = Training.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(slug=slug)), status = 4, participant_counts__gt=0).order_by('-trdate')
+        collectionSet = Training.objects.filter(Q(status = 4) | (Q(training_type = 0) & Q(status__gt = 1) & Q(trdate__lte = datetime.date.today())), academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(slug=slug)), participant_counts__gt=0).order_by('-trdate')
     else:
-        collectionSet = Training.objects.filter(status = 4, participant_counts__gt=0).order_by('-trdate')
+        collectionSet = Training.objects.filter(Q(status = 4) | (Q(training_type = 0) & Q(status__gt = 1) & Q(trdate__lte = datetime.date.today())),  participant_counts__gt=0).order_by('-trdate')
     header = {
         1: SortableHeader('#', False),
         2: SortableHeader('academic__state', True, 'State'),

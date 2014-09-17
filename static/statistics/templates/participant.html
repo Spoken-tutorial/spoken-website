@@ -22,11 +22,6 @@
             <dd>{{ wc.participant_counts }}</dd>
             <dt>Organiser</dt>
             <dd>{{ wc.organiser.user.first_name }} {{ wc.organiser.user.last_name }}</dd>
-            <br /></br />
-            {% if wc.id|training_file_exits and user|is_resource_person and wc.status == 3 %}
-                <p>Please click <b>Mark as Complete</b> to end the training.</p><a href="{{file_path}}" target="_blank">View uploaded copy</a>
-                <a class='btn btn-primary' title = "To complete the training click here" href="{% url 'events:training_approvel' 'rp' wc.id %}?status=completed">Mark as Complete</a>
-            {% endif %}
         </dl>
     </div>
 	<div class="" id="pending">
@@ -35,19 +30,11 @@
 			<tr>
 				<th>First Name</th>
 				<th>Last Name</th>
-				<th></th>
 			</tr>
 			{% for record in collection %}
 				<tr>
 					<td>{{ record.firstname|lower|title }}</td>
 					<td>{{ record.lastname|lower|title }}</td>
-					<td>
-					    {% if wc|is_feedback_exits:record %}
-			                <a target="_blank" href="{% url 'events:training_participant_feedback' wc.id record.id %}">View Feedback</a>
-			            {% else %}
-			                Feedback not given
-			            {% endif %}
-				    </td>
 				</tr>
 			{% endfor %}
 		</table>
