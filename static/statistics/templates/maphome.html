@@ -16,6 +16,7 @@
 {% endblock %}
 {% block content %}
     <div class="col-lg-12 col-md-12 clo-sm-12 col-xs-12 col-center map-stats">
+        <div id="popup_box" style="display:none;font-size:16px;color:#000000; padding-top:30px;">Click on any state to get statistics.</div>
         <img src="{% static 'statistics/images/map-of-india.gif' %}" alt="" usemap="#states-and-territories-map-of-india" style="border-style:none" />
         <map id="states-and-territories-map-of-india" name="states-and-territories-map-of-india">
             {% for state in states %}
@@ -41,6 +42,7 @@
                 closeEffect    : "none",
                 modal        : true,
             });
+            $.fancybox.open('#popup_box');
         });
     </script>
 {% endblock %}
