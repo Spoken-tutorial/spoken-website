@@ -128,7 +128,8 @@ def tutorial_search(request):
             elif language_get:
                 collection = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), language__name = language_get).order_by('tutorial_detail__foss__foss', 'tutorial_detail__level', 'tutorial_detail__order')
             else:
-                collection = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), tutorial_detail__foss__foss = 'Linux', language__name = 'English')
+                foss = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), language__name = 'English').values('tutorial_detail__foss__foss').annotate(Count('id')).values_list('tutorial_detail__foss__foss').distinct().order_by('?')[:1].first()
+                collection = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), tutorial_detail__foss__foss = foss[0], language__name = 'English')
     else:
         collection = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), tutorial_detail__foss__foss = 'Linux', language__name = 'English')
             
@@ -140,7 +141,6 @@ def watch_tutorial(request, foss, tutorial, lang):
     try:
         foss = unquote_plus(foss)
         tutorial = unquote_plus(tutorial)
-        print foss, tutorial
         td_rec = TutorialDetail.objects.get(foss__foss = foss, tutorial = tutorial)
         tr_rec = TutorialResource.objects.select_related().get(tutorial_detail = td_rec, language = Language.objects.get(name = lang))
         tr_recs = TutorialResource.objects.select_related('tutorial_detail').filter(Q(status = 1) | Q(status = 2), tutorial_detail__foss = tr_rec.tutorial_detail.foss, language = tr_rec.language).order_by('tutorial_detail__foss__foss', 'tutorial_detail__level', 'tutorial_detail__order', 'language__name')
@@ -203,7 +203,7 @@ def testimonials_new(request):
     user = request.user
     context = {}
     form = TestimonialsForm()
-    if (not user.is_authenticated()) or ((not is_resource_person(user)) and (not is_administrator(user))):
+    if (not user.is_authenticated()) or ((not user.has_perm('events.add_testimonials'))):
         raise PermissionDenied()
     
     if request.method == 'POST':
@@ -247,7 +247,7 @@ def admin_testimonials_edit(request, rid):
     context = {}
     form = TestimonialsForm()
     instance = ''
-    if (not user.is_authenticated()) or ((not is_resource_person(user)) and (not is_administrator(user))):
+    if (not user.is_authenticated()) or ((not user.has_perm('events.change_testimonials'))):
         raise PermissionDenied()
     try:
         instance = Testimonials.objects.get(pk= rid)
@@ -270,7 +270,7 @@ def admin_testimonials_delete(request, rid):
     user = request.user
     context = {}
     instance = ''
-    if (not user.is_authenticated()) or ((not is_resource_person(user)) and (not is_administrator(user))):
+    if (not user.is_authenticated()) or ((not user.has_perm('events.delete_testimonials'))):
         raise PermissionDenied()
     try:
         instance = Testimonials.objects.get(pk= rid)
@@ -290,7 +290,7 @@ def admin_testimonials(request):
     ''' admin testimonials '''
     user = request.user
     context = {}
-    if (not user.is_authenticated()) or ((not is_resource_person(user)) and (not is_administrator(user))):
+    if (not user.is_authenticated()) or (not user.has_perm('events.add_testimonials') and (not user.has_perm('events.change_testimonials'))):
         raise PermissionDenied()
     collection = Testimonials.objects.all()
     context['collection'] = collection

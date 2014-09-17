@@ -5,7 +5,6 @@
 {% block title %}Training / Workshop - Request{% endblock %}
 {% block cssblock %}
 	<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />
-	<link rel="stylesheet" href="{% static 'spoken/css/jquery.datetimepicker.css' %}" type="text/css" media="screen" charset="utf-8" />
 {% endblock %}
 {% block heading %}
         <i class="fa fa-list-ul"></i> Training / Workshop and Participant Name List<a href="/software-training" class='pull-right go-back'>Dashboard</a>
@@ -114,7 +113,7 @@
 	                <div class="form-group">
 		                <label class="col-sm-3 control-label" for= "id_trdate">Date</label>
 		                <div class="col-sm-9">
-		                    {% render_field form.trdate class+="form-control date" tabindex="1" data-placeholder="Enter date" %}
+		                    {% render_field form.trdate class+="form-control datetime" tabindex="1" data-placeholder="Enter date" %}
 		                    {{ form.trdate.errors }}
                             <small>Please select the date on which on which you want to conduct the training/workshop.</small>
 		                </div>
@@ -166,24 +165,7 @@
     </div>
 {% endblock %}
 {% block jsblock %}
-	<script src="{% static 'spoken/js/jquery.datetimepicker.js' %}"></script>
 	<script>
-		$('.date').datetimepicker({
-			onGenerate:function( ct ){
-				$(this).find('.xdsoft_day_of_week0')
-					.addClass('xdsoft_disabled');
-			},
-			lang:'en',
-			format:'Y-m-d H:i',
-			formatDate:'Y/m/d',
-			minDate:0, // yesterday is minimum date
-			weekends:[],
-			maxDate:'+1970/06/31', // tommorow date with in 6 month
-			step:5,
-			minTime:'08:00',
-			maxTime:'18:00',
-		});
-		
 		$college = $('#id_academic');
 		$('#id_district').change(function() {
 			var district = $(this).val();

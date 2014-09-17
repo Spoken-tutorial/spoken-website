@@ -21,6 +21,7 @@
 		<link rel="stylesheet" href="{% static 'spoken/css/bootstrap.min.css' %}" type="text/css" media="screen" charset="utf-8" />
 		<link rel="stylesheet" href="{% static 'spoken/css/font-awesome.min.css' %}" type="text/css" media="screen" charset="utf-8" />
 		<link rel="stylesheet" href="{% static 'spoken/css/yamm.css' %}" type="text/css" media="screen" charset="utf-8" />
+		<link rel="stylesheet" href="{% static 'spoken/css/jquery.datetimepicker.css' %}" type="text/css" media="screen" charset="utf-8" />
 		<!-- <link rel="stylesheet" href="{% static 'spoken/css/bootstrap-theme.css' %}" type="text/css" media="screen" charset="utf-8"> -->
 		<style>
 		    #footer-wrapper a:hover {
@@ -385,6 +386,31 @@
 		<!-- Placed at the end of the document so the pages load faster -->
 		<script src="{% static 'spoken/js/jquery-1.11.0.min.js' %}"></script>
 		<script src="{% static 'spoken/js/bootstrap.min.js' %}"></script>
+		<script src="{% static 'spoken/js/jquery.datetimepicker.js' %}"></script>
+	    <script>
+		    $('.datetime').datetimepicker({
+			    onGenerate:function( ct ){
+				    $(this).find('.xdsoft_day_of_week0')
+					    .addClass('xdsoft_disabled');
+			    },
+			    lang:'en',
+			    format:'Y-m-d H:i',
+			    formatDate:'Y/m/d',
+			    minDate:0, // yesterday is minimum date
+			    weekends:[],
+			    maxDate:'+1970/06/31', // tommorow date with in 6 month
+			    step:5,
+			    minTime:'08:00',
+			    maxTime:'18:00',
+		    });
+		    $('.date').datetimepicker({
+			    lang:'en',
+			    timepicker:false,
+			    format:'Y-m-d',
+			    formatDate:'Y/m/d',
+			    maxDate:'+1970/06/31', // tommorow date with in 6 month
+		    });
+		</script>
 		{% block jsblock %}{% endblock %}
 	</body>
 </html>
