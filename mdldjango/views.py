@@ -19,7 +19,7 @@ from django.conf import settings
 from events.forms import OrganiserForm
 from django.core.mail import EmailMultiAlternatives
 from validate_email import validate_email
-from get_or_create_participant import get_or_create_participant, encript_password
+from get_or_create_participant import get_or_create_participant, encript_password, check_csvfile
     
 def authenticate(username = None, password = None):
     try:
@@ -199,7 +199,7 @@ def offline_details(request, wid, category):
                         messages.error(request, "Record number "+ str(count) + " required data is missing. Please open with browser and check all required details are exits!.")
                         continue
             else:
-                file_path = settings.MEDIA_ROOT + str(wid) + str(time.time())
+                file_path = settings.MEDIA_ROOT + 'training/' + str(wid) + str(time.time())
                 f = request.FILES['xml_file']
                 fout = open(file_path, 'wb+')
                 for chunk in f.chunks():
@@ -207,30 +207,8 @@ def offline_details(request, wid, category):
                 fout.close()
                 
                 error_line_no = ''
-                with open(file_path, 'rbU') as csvfile:
-                    count  = 0
-                    csvdata = csv.reader(csvfile, delimiter=',', quotechar='|')
-                    if csvdata:
-                        for row in csvdata:
-                            count = count + 1
-                            try:
-                                firstname = row[0].strip().title()
-                                lastname = row[1].strip().title()
-                                email = row[2].strip()
-                                gender = row[3].strip().title()
-                                if not validate_email(email):
-                                    messages.error(request, "Line number "+ str(count) + ' : ' + firstname + ' ' + lastname + "'s email missing!")
-                                    continue
-                                get_or_create_participant(w, firstname, lastname, gender, email, category)
-                            except Exception, e:
-                                if not error_line_no:
-                                    error_line_no = error_line_no + str(count)
-                                else:
-                                    error_line_no = error_line_no + ', ' + str(count)
-                                #messages.error(request, "Line number "+ str(count) + " : Required data is missing. Please check value seperated by <b>Comma (,) </b>.")
-                            continue
-                    else:
-                        error_line_no = 1
+                csv_file_error = 0
+                csv_file_error, error_line_no = check_csvfile(file_path, w, flag=1)
                 os.unlink(file_path)
                 #save participant_count
                 w.participant_counts = TrainingAttendance.objects.filter(training = w, status__gte = 1).count()

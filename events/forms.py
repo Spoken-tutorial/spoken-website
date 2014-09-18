@@ -70,46 +70,6 @@ class AcademicForm(forms.ModelForm):
         model = AcademicCenter
         exclude = ['user', 'academic_code', 'institute_category']
 
-'''
-class OrganiserForm(forms.Form):
-    state = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'State field is required.'})
-    district = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'district field is required.'})
-    college = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'College Name field is required.'})
-    
-    def __init__(self, *args, **kwargs):
-        initial = ''
-        if 'instance' in kwargs:
-            initial = kwargs["instance"]
-            del kwargs["instance"]
-            
-        super(OrganiserForm, self).__init__(*args, **kwargs)
-        #load the choices
-        state_list = list(State.objects.exclude().order_by('name').values_list('id', 'name'))
-        state_list.insert(0, ('', '-- None --'))
-        self.fields['state'].choices = state_list
-        if args:
-            if 'state' in args[0]:
-                if args[0]['state'] and args[0]['state'] != '' and args[0]['state'] != 'None':
-                    choices = list(District.objects.filter(state_id = args[0]['state']).order_by('name').values_list('id', 'name'))
-                    choices.insert(0, ('', '-- None --'))
-                    self.fields['district'].choices = choices
-                    self.fields['district'].widget.attrs = {}
-                    self.fields['district'].initial = args[0]['district']
-            if 'district' in args[0]:
-                if args[0]['district'] and args[0]['district'] != '' and args[0]['district'] != 'None':
-                    choices = list(AcademicCenter.objects.filter(district_id = args[0]['district']).values_list('id', 'institution_name'))
-                    choices.insert(0, ('', '-- None --'))
-                    self.fields['college'].choices = choices
-                    self.fields['college'].widget.attrs = {}
-                    #self.fields['college'].initial = args[0]['collages']
-        if initial:
-            self.fields['state'].initial = initial.academic.state_id
-            self.fields['district'].choices = District.objects.filter(state_id =initial.academic.state_id).order_by('name').values_list('id', 'name')
-            self.fields['college'].choices = AcademicCenter.objects.filter(district_id =initial.academic.district_id).values_list('id', 'institution_name')
-            #initial data
-            self.fields['district'].initial = initial.academic.district_id
-            self.fields['college'].initial = initial.academic_id
-'''
 class OrganiserForm(forms.Form):
     state = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'State field is required.'})
     college = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'College Name field is required.'})
@@ -137,45 +97,6 @@ class OrganiserForm(forms.Form):
             self.fields['college'].choices = AcademicCenter.objects.filter(district_id =initial.academic.district_id).values_list('id', 'institution_name')
             #initial data
             self.fields['college'].initial = initial.academic_id
-'''
-class InvigilatorForm(forms.Form):
-    state = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'State field is required.'})
-    district = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'district field is required.'})
-    college = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'College Name field is required.'})
-    def __init__(self, *args, **kwargs):
-        initial = ''
-        if 'instance' in kwargs:
-            initial = kwargs["instance"]
-            del kwargs["instance"]
-            
-        super(InvigilatorForm, self).__init__(*args, **kwargs)
-        #load the choices
-        state_list = list(State.objects.exclude().values_list('id', 'name'))
-        state_list.insert(0, ('', '-- None --'))
-        self.fields['state'].choices = state_list
-        if args:
-            if 'state' in args[0]:
-                if args[0]['state'] and args[0]['state'] != '' and args[0]['state'] != 'None':
-                    choices = list(District.objects.filter(state_id = args[0]['state']).values_list('id', 'name'))
-                    choices.insert(0, ('', '-- None --'))
-                    self.fields['district'].choices = choices
-                    self.fields['district'].widget.attrs = {}
-                    self.fields['district'].initial = args[0]['district']
-            if 'district' in args[0]:
-                if args[0]['district'] and args[0]['district'] != '' and args[0]['district'] != 'None':
-                    choices = list(AcademicCenter.objects.filter(district_id = args[0]['district']).values_list('id', 'institution_name'))
-                    choices.insert(0, ('', '-- None --'))
-                    self.fields['college'].choices = choices
-                    self.fields['college'].widget.attrs = {}
-                    #self.fields['college'].initial = args[0]['collages']
-        if initial:
-            self.fields['state'].initial = initial.academic.state_id
-            self.fields['district'].choices = District.objects.filter(state_id =initial.academic.state_id).values_list('id', 'name')
-            self.fields['college'].choices = AcademicCenter.objects.filter(district_id =initial.academic.district_id).values_list('id', 'institution_name')
-            #initial data
-            self.fields['district'].initial = initial.academic.district_id
-            self.fields['college'].initial = initial.academic_id
-'''
 
 class InvigilatorForm(forms.Form):
     state = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'State field is required.'})
