@@ -18,7 +18,6 @@ class Language(models.Model):
 class FossCategory(models.Model):
     foss = models.CharField(unique=True, max_length = 255)
     description = models.TextField()
-    playlist_id = models.CharField(max_length = 255, null = True, blank = True, default = None)
     status = models.BooleanField(max_length = 2)
     user = models.ForeignKey(User)
     created = models.DateTimeField(auto_now_add = True)
