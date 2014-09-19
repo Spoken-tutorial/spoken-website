@@ -271,6 +271,8 @@ def close_predated_ongoing_workshop(request):
             try:
                 present = TrainingAttendance.objects.filter(training = w, status__gte = 1).count()
                 absentees = TrainingAttendance.objects.filter(training = w, status = 0).count()
+                if not present and not absentees:
+                    continue
                 if present:
                     final_count = present
                 else:

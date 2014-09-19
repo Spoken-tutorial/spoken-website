@@ -19,6 +19,7 @@ from creation.subtitles import *
 from creation.views import get_video_info, is_administrator
 from creation.models import TutorialCommonContent, TutorialDetail, TutorialResource, Language
 from cms.models import SiteFeedback, Event, NewsType, News
+from events.views import get_page
 
 def is_resource_person(user):
     """Check if the user is having resource person  rights"""
@@ -102,7 +103,11 @@ def keyword_search(request):
             query = get_or_query(keywords, search_fields)
             if query:
                 collection = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), tutorial_detail__foss__status = 1, common_content = TutorialCommonContent.objects.filter(query), language__name = 'English').order_by('tutorial_detail__foss__foss', 'tutorial_detail__level', 'tutorial_detail__order', 'language__name')
-        
+    
+    if collection:
+        page = request.GET.get('page')
+        collection = get_page(collection, page)
+    
     context = {}
     context['form'] = KeywordSearchForm()
     context['collection'] = collection
@@ -115,12 +120,11 @@ def tutorial_search(request):
     context = {}
     collection = None
     form = TutorialSearchForm()
-    if request.method == 'GET':
+    if request.method == 'GET' and request.GET:
         form = TutorialSearchForm(request.GET)
         if form.is_valid():
             foss_get = request.GET.get('foss', '')
             language_get = request.GET.get('language', '')
-            print foss_get, language_get
             if foss_get and language_get:
                 collection = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), tutorial_detail__foss__foss = foss_get, language__name = language_get).order_by('tutorial_detail__level', 'tutorial_detail__order')
             elif foss_get:
@@ -128,11 +132,14 @@ def tutorial_search(request):
             elif language_get:
                 collection = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), language__name = language_get).order_by('tutorial_detail__foss__foss', 'tutorial_detail__level', 'tutorial_detail__order')
             else:
-                foss = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), language__name = 'English').values('tutorial_detail__foss__foss').annotate(Count('id')).values_list('tutorial_detail__foss__foss').distinct().order_by('?')[:1].first()
-                collection = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), tutorial_detail__foss__foss = foss[0], language__name = 'English')
+                collection = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), tutorial_detail__foss__id__in = FossCategory.objects.values('id'), language__id__in = Language.objects.values('id')).order_by('tutorial_detail__foss__foss', 'language__name', 'tutorial_detail__level', 'tutorial_detail__order')
     else:
-        collection = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), tutorial_detail__foss__foss = 'Linux', language__name = 'English')
-            
+        foss = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), language__name = 'English').values('tutorial_detail__foss__foss').annotate(Count('id')).values_list('tutorial_detail__foss__foss').distinct().order_by('?')[:1].first()
+        collection = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), tutorial_detail__foss__foss = foss[0], language__name = 'English')
+    
+    page = request.GET.get('page')
+    collection = get_page(collection, page)
+    
     context['form'] = form
     context['collection'] = collection
     return render(request, 'spoken/templates/tutorial_search.html', context)
@@ -168,13 +175,13 @@ def get_language(request):
         lang = request.POST.get('lang')
         if not lang and foss:
             lang_list = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), tutorial_detail__foss__foss = foss).values('language__name').annotate(Count('id')).order_by('language__name').values_list('language__name', 'id__count').distinct()
-            tmp = '<option value = ""> -- Select Language -- </option>'
+            tmp = '<option value = ""> -- All Language -- </option>'
             for lang_row in lang_list:
                 tmp += '<option value="' + str(lang_row[0]) +'">' + str(lang_row[0]) + ' (' + str(lang_row[1]) + ')</option>'
             output = ['foss', tmp]
         elif lang and not foss:
             foss_list = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), language__name = lang).values('tutorial_detail__foss__foss').annotate(Count('id')).order_by('tutorial_detail__foss__foss').values_list('tutorial_detail__foss__foss', 'id__count').distinct()
-            tmp = '<option value = ""> -- Select Foss -- </option>'
+            tmp = '<option value = ""> -- All Foss -- </option>'
             for foss_row in foss_list:
                 tmp += '<option value="' + str(foss_row[0]) +'">' + str(foss_row[0]) + ' (' + str(foss_row[1]) + ')</option>'
             output = ['lang', tmp]
@@ -182,11 +189,11 @@ def get_language(request):
             pass
         else:
             lang_list = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2)).values('language__name').annotate(Count('id')).order_by('language__name').values_list('language__name', 'id__count').distinct()
-            tmp1 = '<option value = ""> -- Select Language -- </option>'
+            tmp1 = '<option value = ""> -- All Language -- </option>'
             for lang_row in lang_list:
                 tmp1 += '<option value="' + str(lang_row[0]) +'">' + str(lang_row[0]) + ' (' + str(lang_row[1]) + ')</option>'
             foss_list = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), language__name = 'English').values('tutorial_detail__foss__foss').annotate(Count('id')).order_by('tutorial_detail__foss__foss').values_list('tutorial_detail__foss__foss', 'id__count').distinct()
-            tmp2 = '<option value = ""> -- Select Foss -- </option>'
+            tmp2 = '<option value = ""> -- All Foss -- </option>'
             for foss_row in foss_list:
                 tmp2 += '<option value="' + str(foss_row[0]) +'">' + str(foss_row[0]) + ' (' + str(foss_row[1]) + ')</option>'
             output = ['reset', tmp1, tmp2]
