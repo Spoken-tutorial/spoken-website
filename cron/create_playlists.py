@@ -28,14 +28,12 @@ for row in rows:
         creation_language WHERE (creation_language.id IN (SELECT DISTINCT \
         U0.language_id FROM creation_tutorialresource U0 INNER JOIN \
         creation_tutorialdetail U1 ON ( U0.tutorial_detail_id = U1.id ) \
-        WHERE ((U0.status = 1  OR U0.status = 2 ) AND U1.foss_id = 2 )) \
+        WHERE ((U0.status = 1  OR U0.status = 2 ) AND U1.foss_id = %s )) \
         AND NOT (creation_language.id IN (SELECT U0.language_id FROM \
-        creation_playlistinfo U0 WHERE U0.foss_id = 2 ))) ORDER BY \
-        creation_language.name ASC")
+        creation_playlistinfo U0 WHERE U0.foss_id = %s ))) ORDER BY \
+        creation_language.name ASC" % (row[0], row[0]))
     langrows = cur.fetchall()
     for langrow in langrows:
-        if langrow[1] != 'English':
-            continue
         title = row[1] + ' - ' + langrow[1]
         playlistid = youtube.create_playlist(title, row[2])
         if playlistid:
