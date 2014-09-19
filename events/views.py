@@ -36,7 +36,7 @@ from forms import *
 import datetime
 from django.utils import formats
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from mdldjango.get_or_create_participant import get_or_create_participant
+from mdldjango.get_or_create_participant import get_or_create_participant, check_csvfile
 from django.template.defaultfilters import slugify
 
 #pdf generate
@@ -226,7 +226,7 @@ def add_participant(request, cid, category ):
                 print wa.id, " => Inserted"
 
 def fix_date_for_first_training(request):
-    organisers = Organiser.objects.exclude(id__in = Training.objects.values_list('organiser_id').distinct())
+    organisers = Organiser.objects.exclude(id__in = Training.objects.values_list('organiser_id').distinct(), status=1).filter(Q(created__startswith=datetime.date.today() - datetime.timedelta(days=15)) | Q(created__startswith=datetime.date.today() - datetime.timedelta(days=30)))
     if organisers:
         status = 'Fix a date for your first training'
         for o in organisers:
@@ -271,6 +271,8 @@ def close_predated_ongoing_workshop(request):
             try:
                 present = TrainingAttendance.objects.filter(training = w, status__gte = 1).count()
                 absentees = TrainingAttendance.objects.filter(training = w, status = 0).count()
+                if not present and not absentees:
+                    continue
                 if present:
                     final_count = present
                 else:
@@ -342,7 +344,6 @@ def get_academic_code(state):
     #get state code
     state_code = State.objects.get(pk = state.id).code
     return state_code +'-'+ ac_code
-    
     
 @login_required
 def events_dashboard(request):
@@ -796,7 +797,7 @@ def training_request(request, role, rid = None):
             error_line_no = ''
             wid = 1
             f = None
-            file_path = settings.MEDIA_ROOT + str(wid) + str(time.time())
+            file_path = settings.MEDIA_ROOT +'training/' + str(wid) + str(time.time())
             if 'xml_file' in request.FILES: 
                 f = request.FILES['xml_file']
                 
@@ -807,31 +808,7 @@ def training_request(request, role, rid = None):
                 fout.close()
                 
                 #validate file
-                with open(file_path, 'rbU') as csvfile:
-                    count  = 0
-                    csvdata = csv.reader(csvfile, delimiter=',', quotechar='|')
-                    try:
-                        for row in csvdata:
-                            count = count + 1
-                            try:
-                                firstname = row[0].strip().title()
-                                lastname = row[1].strip().title()
-                                email = row[2].strip()
-                                gender = row[3].strip().title()
-                                if not validate_email(email):
-                                    messages.error(request, "Line number "+ str(count) + ' : ' + firstname + ' ' + lastname + "'s email missing!")
-                                    continue
-                            except Exception, e:
-                                print e, "Error is comming"
-                                csv_file_error = 1
-                                if not error_line_no:
-                                    error_line_no = error_line_no + str(count)
-                                else:
-                                    error_line_no = error_line_no + ', ' + str(count)
-                            continue
-                    except:
-                        csv_file_error = 1
-                        error_line_no = '1'
+                csv_file_error, error_line_no = check_csvfile(file_path)
             ####
             if not csv_file_error:
                 dateTime = request.POST['trdate'].split(' ')
@@ -890,24 +867,7 @@ def training_request(request, role, rid = None):
                     #####
                     #get or create participants list
                     if f:
-                        with open(file_path, 'rbU') as csvfile:
-                            count  = 0
-                            csvdata = csv.reader(csvfile, delimiter=',', quotechar='|')
-                            for row in csvdata:
-                                count = count + 1
-                                try:
-                                    firstname = row[0].strip().title()
-                                    lastname = row[1].strip().title()
-                                    email = row[2].strip()
-                                    gender = row[3].strip().title()
-                                    if not validate_email(email):
-                                        messages.error(request, "Line number "+ str(count) + ' : ' + firstname + ' ' + lastname + "'s email missing!")
-                                        continue
-                                    get_or_create_participant(w, firstname, lastname, gender, email, 2)
-                                except Exception, e:
-                                    print e, "Error is comming =>>>>>>>>>>>>"
-                                    messages.error(request, "Line number "+ str(count) + " : Required data is missing. Please check value seperated by <b>Comma (,) </b>.")
-                                continue
+                        csv_file_error, error_line_no = check_csvfile(file_path, w, flag=1)
                         os.unlink(file_path)
                         
                         #file the participant count
@@ -951,6 +911,7 @@ def training_request(request, role, rid = None):
                         return HttpResponseRedirect("/software-training/training/" + str(w.id) + "/attendance/")
                     return HttpResponseRedirect("/software-training/training/" + role + "/pending/")
             else:
+                os.unlink(file_path)
                 messages.error(request, "<b>Error: Line number "+ error_line_no + " in CSV file data is not in a proper format in the Participant list. The format should be First name, Last name, Email, Gender. For more details <a href='http://process.spoken-tutorial.org/images/c/c2/Participant_data.pdf' target='_blank'>Click here</a></b>")
             messages.error(request, "Please fill the following details ")
             context = {'form' : form, 'role' : role, 'status' : 'request'}
@@ -1897,7 +1858,7 @@ def test_participant_ceritificate(request, wid, participant_id):
     imgDoc.drawImage(imgPath, 600, 100, 150, 76)    ## at (399,760) with size 160x160
     
     #paragraphe
-    text = "This is to certify that <b>"+ta.mdluser_firstname +" "+ta.mdluser_lastname+"</b> has sucessfully completed <b>"+w.foss.foss+"</b> test organized at <b>"+w.academic.institution_name+"</b> by <b>"+w.organiser.user.first_name+"</b>  with course material provided by the Talk To A Teacher project at IIT Bombay.  <br /><br /><p>Passing on online exam, conducted remotely from IIT Bombay, is a pre-requisite for completing this training. <b>"+w.invigilator.user.first_name + " "+w.invigilator.user.last_name+"</b> at <b>"+w.academic.institution_name+"</b> invigilated this examination. This training is offered by the <b>Spoken Tutorial project, IIT Bombay, funded by National Mission on Education through ICT, MHRD, Govt of India.</b></p>"
+    text = "This is to certify that <b>"+ta.mdluser_firstname +" "+ta.mdluser_lastname+"</b> has sucessfully completed <b>"+w.foss.foss+"</b> test organized at <b>"+w.academic.institution_name+"</b> by <b>"+w.organiser.user.first_name + " " + w.organiser.user.last_name+"</b>  with course material provided by the Talk To A Teacher project at IIT Bombay.  <br /><br /><p>Passing on online exam, conducted remotely from IIT Bombay, is a pre-requisite for completing this training. <b>"+w.invigilator.user.first_name + " "+w.invigilator.user.last_name+"</b> at <b>"+w.academic.institution_name+"</b> invigilated this examination. This training is offered by the <b>Spoken Tutorial project, IIT Bombay, funded by National Mission on Education through ICT, MHRD, Govt of India.</b></p>"
     
     centered = ParagraphStyle(name = 'centered',
         fontSize = 16,  

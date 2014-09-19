@@ -14,7 +14,7 @@ from config import *
 import os
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
-SCRIPT_URL = 'http://script.spoken-tutorial.org/index.php/'
+SCRIPT_URL = SCRIPT_URL
 
 STVIDEOS_DIR = STVIDEOS_PATH
 # Quick-start development settings - unsuitable for production
@@ -35,11 +35,16 @@ PASSWORD_HASHERS = (
 )
 
 # email errors and 404
+SERVER_EMAIL = 'error-report@spoken-tutorial.org'
 ADMINS = (
     ('vishnuraj', 'vishnukraj007@gmail.com'),
     ('sanmugam', 'k.sanmugam2@gmail.com'),
 )
 
+MANAGERS = (
+    ('vishnuraj', 'vishnukraj007@gmail.com'),
+    ('sanmugam', 'k.sanmugam2@gmail.com'),
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = DEBUG_MODE
@@ -80,8 +85,9 @@ MIDDLEWARE_CLASSES = (
 	'django.contrib.auth.middleware.AuthenticationMiddleware',
 	'django.contrib.messages.middleware.MessageMiddleware',
 	'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django.contrib.redirects.middleware.RedirectFallbackMiddleware',
+    'django.middleware.common.BrokenLinkEmailsMiddleware',
 	'masquerade.middleware.MasqueradeMiddleware',
+    'django.contrib.redirects.middleware.RedirectFallbackMiddleware',
 )
 
 ROOT_URLCONF = 'spoken.urls'

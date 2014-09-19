@@ -21,6 +21,7 @@
 		<link rel="stylesheet" href="{% static 'spoken/css/bootstrap.min.css' %}" type="text/css" media="screen" charset="utf-8" />
 		<link rel="stylesheet" href="{% static 'spoken/css/font-awesome.min.css' %}" type="text/css" media="screen" charset="utf-8" />
 		<link rel="stylesheet" href="{% static 'spoken/css/yamm.css' %}" type="text/css" media="screen" charset="utf-8" />
+		<link rel="stylesheet" href="{% static 'spoken/css/jquery.datetimepicker.css' %}" type="text/css" media="screen" charset="utf-8" />
 		<!-- <link rel="stylesheet" href="{% static 'spoken/css/bootstrap-theme.css' %}" type="text/css" media="screen" charset="utf-8"> -->
 		<style>
 		    #footer-wrapper a:hover {
@@ -82,7 +83,6 @@
                                                                         <ul class="media-list">
                                                                             <li class=""><a href="http://process.spoken-tutorial.org/index.php/Software-Training#Downloading_Spoken_Tutorials" target="_blank">Instruction for Downloading Tutorials</a></li>
                                                                             <li class=""><a href="http://www.spoken-tutorial.org/cdcontent/" target="_blank">Create Your Own Disc Image</a></li>
-                                                                            <li class=""><a href="/offline-attendance-app/">Download Offline  Attendance App</a></li>
                                                                         </ul>
                                                                     </div>
                                                                 </div>
@@ -311,7 +311,7 @@
                             </div>
                             <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
                                 <ul class="list-unstyled">
-                                    <li><a href="#" target="_blank">Aakash Labs</a></li>
+                                    <li><a href="http://aakashlabs.org" target="_blank">Aakash Labs</a></li>
                                     <li><a href="http://www.co-learn.in/" target="_blank">Co-learn</a></li>
                                     <li><a href="http://www.sakshat.ac.in/" target="_blank">Education Mission</a></li>
                                 </ul>
@@ -385,6 +385,31 @@
 		<!-- Placed at the end of the document so the pages load faster -->
 		<script src="{% static 'spoken/js/jquery-1.11.0.min.js' %}"></script>
 		<script src="{% static 'spoken/js/bootstrap.min.js' %}"></script>
+		<script src="{% static 'spoken/js/jquery.datetimepicker.js' %}"></script>
+	    <script>
+		    $('.datetime').datetimepicker({
+			    onGenerate:function( ct ){
+				    $(this).find('.xdsoft_day_of_week0')
+					    .addClass('xdsoft_disabled');
+			    },
+			    lang:'en',
+			    format:'Y-m-d H:i',
+			    formatDate:'Y/m/d',
+			    minDate:0, // yesterday is minimum date
+			    weekends:[],
+			    maxDate:'+1970/06/31', // tommorow date with in 6 month
+			    step:5,
+			    minTime:'08:00',
+			    maxTime:'18:00',
+		    });
+		    $('.date').datetimepicker({
+			    lang:'en',
+			    timepicker:false,
+			    format:'Y-m-d',
+			    formatDate:'Y/m/d',
+			    maxDate:'+1970/06/31', // tommorow date with in 6 month
+		    });
+		</script>
 		{% block jsblock %}{% endblock %}
 	</body>
 </html>

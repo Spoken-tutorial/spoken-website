@@ -4,7 +4,6 @@
 {% block title %}New Test Request{% endblock %}
 {% block cssblock %}
     <link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />
-    <link rel="stylesheet" href="{% static 'spoken/css/jquery.datetimepicker.css' %}" type="text/css" media="screen" charset="utf-8" />
 {% endblock %}
 
 {% block heading %}
@@ -105,7 +104,7 @@
                     <div class="form-group">
                         <label class="col-sm-3 control-label" for= "id_tdate">Date</label>
                         <div class="col-sm-9">
-                            {% render_field form.tdate class+="form-control tdate date" tabindex="1" data-placeholder="Enter date" %}
+                            {% render_field form.tdate class+="form-control tdate datetime" tabindex="1" data-placeholder="Enter date" %}
                             {{ form.tdate.errors }}
                             <small>Please select a preferred date for conducting the Test.</small>
                         </div>
@@ -137,7 +136,6 @@
     </div>
 {% endblock %}
 {% block jsblock %}
-    <script src="{% static 'spoken/js/jquery.datetimepicker.js' %}"></script>
     <script>
         function hide_input() {
             $category = $('#id_test_category');
@@ -167,23 +165,6 @@
         console.log($category.val());
         $category.change(function(){
             hide_input();
-        });
-        
-        
-        $('.date').datetimepicker({
-            onGenerate:function( ct ){
-                $(this).find('.xdsoft_day_of_week0')
-                    .addClass('xdsoft_disabled');
-            },
-            lang:'en',
-            format:'Y-m-d H:i',
-            formatDate:'Y/m/d',
-            minDate:0, // yesterday is minimum date
-            weekends:[],
-            maxDate:'+1970/06/31', // tommorow date with in 6 month
-            step:5,
-            minTime:'08:00',
-            maxTime:'18:00',
         });
         
         $college = $('#id_academic');

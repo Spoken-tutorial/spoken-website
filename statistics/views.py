@@ -25,7 +25,7 @@ def get_state_info(request, code):
         #academic_list = AcademicCenter.objects.filter(state = state).values_list('id')
         resource_centers = AcademicCenter.objects.filter(state = state, resource_center = 1).count()
         #workshop_details = Training.objects.filter(academic_id__in = academic_list, status = 4).aggregate(Sum('participant_counts'), Count('id'), Min('trdate'))
-        workshop_details = Training.objects.filter(Q(status = 4) | (Q(training_type = 0) & Q(status__gt = 1) & Q(trdate__lte = datetime.date.today())), academic__state_id = state.id).aggregate(Sum('participant_counts'), Count('id'), Min('trdate'))
+        workshop_details = Training.objects.filter(Q(status = 4) | (Q(training_type = 0) & Q(status__gt = 1) & Q(trdate__lte = datetime.date.today())), participant_counts__gt=0, academic__state_id = state.id).aggregate(Sum('participant_counts'), Count('id'), Min('trdate'))
         context = {
             'state': state,
             'workshops': workshop_details['id__count'],
@@ -42,32 +42,42 @@ def training(request, slug = None):
     """ Organiser index page """
     user = request.user
     collectionSet = None
-    if not State.objects.filter(slug=slug):
-        raise PermissionDenied()
-        
+    state = None
+    participant_count = 0
     if slug:
-        collectionSet = Training.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(slug=slug)), status = 4, participant_counts__gt=0).order_by('-trdate')
+        state = State.objects.filter(slug=slug)
+        if not State.objects.filter(slug=slug):
+            raise PermissionDenied()
+        collectionSet = Training.objects.filter(Q(status = 4) | (Q(training_type = 0) & Q(status__gt = 1) & Q(trdate__lte = datetime.date.today())), academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(slug=slug)), participant_counts__gt=0).order_by('-trdate')
     else:
-        collectionSet = Training.objects.filter(status = 4, participant_counts__gt=0).order_by('-trdate')
-
+        collectionSet = Training.objects.filter(Q(status = 4) | (Q(training_type = 0) & Q(status__gt = 1) & Q(trdate__lte = datetime.date.today())), participant_counts__gt=0).order_by('-trdate')
     header = {
         1: SortableHeader('#', False),
-        2: SortableHeader('training_type', True, 'Training Type'),
-        3: SortableHeader('academic__state', True, 'State'),
-        4: SortableHeader('academic__academic_code', True, 'Academic Code'),
-        5: SortableHeader('academic', True, 'Institution'),
-        6: SortableHeader('foss', True, 'FOSS'),
-        7: SortableHeader('organiser__user', True, 'Organiser'),
-        8: SortableHeader('trdate', True, 'Date'),
-        9: SortableHeader('Participants', False),
-        10: SortableHeader('Action', False)
+        2: SortableHeader('academic__state', True, 'State'),
+        3: SortableHeader('academic__city', True, 'City'),
+        4: SortableHeader('academic', True, 'Institution'),
+        5: SortableHeader('foss', True, 'FOSS'),
+        6: SortableHeader('organiser__user', True, 'Organiser'),
+        7: SortableHeader('trdate', True, 'Date'),
+        8: SortableHeader('Participants', False),
+        9: SortableHeader('Action', False)
     }
     
     raw_get_data = request.GET.get('o', None)
     collection = get_sorted_list(request, collectionSet, header, raw_get_data)
     ordering = get_field_index(raw_get_data)
     
-    collection = TrainingFilter(request.GET, queryset=collection)
+    # find state id
+    state_id = None
+    if 'academic__state' in request.GET and request.GET['academic__state'] and slug:
+        # todo
+        pass
+    elif 'academic__state' in request.GET and request.GET['academic__state']:
+        state = State.objects.get(id=request.GET['academic__state'])
+    
+    collection = TrainingFilter(request.GET, queryset=collection, state=state)
+    # find participants count
+    participant_count = collection.qs.aggregate(Sum('participant_counts'))
     context = {}
     context['form'] = collection.form
     
@@ -77,6 +87,7 @@ def training(request, slug = None):
     context['header'] = header
     context['ordering'] = ordering
     context['state'] = slug
+    context['participant_count'] = participant_count
     return render(request, 'statistics/templates/training.html', context)
     
 def training_participant(request, wid=None):

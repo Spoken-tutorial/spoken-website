@@ -117,24 +117,32 @@ def training_file_exits(wid):
         return True
     return False
 
+def is_feedback_exits(w, record):
+    try:
+        TrainingFeedback.objects.get(training_id=w.id, mdluser_id=record.id)
+        return True
+    except Exception, e:
+        print e
+        return False
+    
 def feedback_status_good(status):
-    status_dict = {1 : 'Very Bad', 2 : 'Bad', 3 : 'Fair', 4 : 'Good', 5 : 'Very Good'}
+    status_dict = {0 : 'Very Bad', 1 : 'Very Bad', 2 : 'Bad', 3 : 'Fair', 4 : 'Good', 5 : 'Very Good'}
     return status_dict[status]
 
 def feedback_status_moderately(status):
-    status_dict = {1 : 'Not at All', 2 : 'Slightly', 3 : 'Moderately', 4 : 'Very', 5 : 'Extremely'}
+    status_dict = {0 : 'Not at All', 1 : 'Not at All', 2 : 'Slightly', 3 : 'Moderately', 4 : 'Very Good', 5 : 'Extremely'}
     return status_dict[status]
 
 def feedback_status_appropriate(status):
-    status_dict = {1 : 'Slow', 2 : 'Appropriate', 3 : 'Fast'}
+    status_dict = {0 : 'Slow', 1 : 'Slow', 2 : 'Appropriate', 3 : 'Fast'}
     return status_dict[status]
 
 def feedback_status_satisfactory(status):
-    status_dict = {1 : 'Very Bad', 2 : 'Bad', 3 : 'Satisfactory', 4 : 'Good', 5 : 'Excellent'}
+    status_dict = {0 : 'Very Bad', 0 : 'Very Bad', 1 : 'Very Bad', 2 : 'Bad', 3 : 'Satisfactory', 4 : 'Good', 5 : 'Excellent'}
     return status_dict[status]
 
 def feedback_status_somewhat(status):
-    status_dict = {1 : 'Very Bad', 2 : 'A little bit', 3 : 'Somewhat', 4 : 'Quite a bit', 5 : 'A lot'}
+    status_dict = {0 : 'Very Bad', 0 : 'Very Bad', 1 : 'Very Bad', 2 : 'A little bit', 3 : 'Somewhat', 4 : 'Quite a bit', 5 : 'A lot'}
     return status_dict[status]
 
 def feedback_status_average(status):
@@ -146,7 +154,7 @@ def feedback_status_neutral(status):
     return status_dict[status]
 
 def feedback_status_likely(status):
-    status_dict = {1 : 'Not at all', 2 : 'Maybe', 3 : 'Likely', 4 : 'Quite likely', 5 : 'Definitely'}
+    status_dict = {0 : 'Not at All', 1 : 'Not at All', 2 : 'Maybe', 3 : 'Likely', 4 : 'Quite likely', 5 : 'Definitely'}
     return status_dict[status]
 
 register.filter('participant_picture', participant_picture)
@@ -165,6 +173,7 @@ register.filter('is_resource_person', is_resource_person)
 register.filter('is_event_manager', is_event_manager)
 register.filter('can_download_workshop_certificate', can_download_workshop_certificate)
 register.filter('training_file_exits', training_file_exits)
+register.filter('is_feedback_exits', is_feedback_exits)
 register.filter('feedback_status_good', feedback_status_good)
 register.filter('feedback_status_moderately', feedback_status_moderately)
 register.filter('feedback_status_appropriate', feedback_status_appropriate)
