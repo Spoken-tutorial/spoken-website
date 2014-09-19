@@ -65,15 +65,16 @@ for row in rows:
         cpi WHERE (cpi.language_id = %s  AND cpi.foss_id = %s)" % (row[3], row[8]))
     playlist = cur.fetchone()
     if not playlist:
-        error_string = row[8] + ' - ' + row[3] + ' -- ' + 'Playlist Missing'
+        error_string = row[8] + ' - ' + row[3] + ' -- Playlist Missing'
         error_log_file_head.write(error_string + '\n')
         print error_string
         continue
     video_path = MEDIA_ROOT + 'videos/' + str(row[8]) + '/' + str(row[1]) + '/' + row[5]
     video_path = convert_video(video_path)
-    if video_path:
-        error_string = row[8] + ' - ' + row[3] + ' -- ' + 'Conversion Error'
+    if not os.path.isfile(video_path):
+        error_string = row[9] + ' - ' + row[13] + ' -- Conversion Error'
         error_log_file_head.write(error_string + '\n')
+        continue
     options = {
         'title': row[9] + ' - ' + row[13],
         'description': to_utf8(row[4]),
