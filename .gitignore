@@ -4,6 +4,7 @@
 config.py
 cron/config.py
 cron/logs/*
+youtube/secrets/*
 media/*
 !media/videos/
 !media/training/

@@ -1,0 +1,19 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block title %}Youtube Videos{% endblock %}
+{% block content %}
+    <table class="table">
+    {% for playlist in playlists %}
+        {% for playlistitem in playlist.items %}
+            <tr>
+                <td><img src="{{ playlistitem.snippet.thumbnails.default.url }}"></td>
+                <td>
+                    <a href="https://youtube.com/watch?v={{ playlistitem.snippet.resourceId.videoId }}"><h2>{{ playlistitem.snippet.title }}</h2></a><br />
+                    <p>{{ playlistitem.snippet.description }}</p>
+                </td>
+            </tr>
+        {% endfor %}
+    {% endfor %}
+    </table>
+{% endblock %}

@@ -18,6 +18,7 @@ class Language(models.Model):
 class FossCategory(models.Model):
     foss = models.CharField(unique=True, max_length = 255)
     description = models.TextField()
+    playlist_id = models.CharField(max_length = 255, null = True, blank = True, default = None)
     status = models.BooleanField(max_length = 2)
     user = models.ForeignKey(User)
     created = models.DateTimeField(auto_now_add = True)
@@ -29,6 +30,30 @@ class FossCategory(models.Model):
 
     def __unicode__(self):
         return self.foss
+
+class PlaylistInfo(models.Model):
+    foss = models.ForeignKey(FossCategory)
+    language = models.ForeignKey(Language)
+    playlist_id = models.CharField(max_length = 255)
+    created = models.DateTimeField(auto_now_add = True)
+    updated = models.DateTimeField(auto_now = True)
+
+    class Meta:
+        verbose_name = 'Playlist Info'
+        unique_together = (('foss', 'language'),)
+
+    def __unicode__(self):
+        return self.playlist_id
+
+class PlaylistItem(models.Model):
+    playlist = models.ForeignKey(PlaylistInfo)
+    item_id = models.CharField(max_length = 255)
+    created = models.DateTimeField(auto_now_add = True)
+    updated = models.DateTimeField(auto_now = True)
+
+    class Meta:
+        verbose_name = 'Playlist Item'
+        unique_together = (('playlist', 'item_id'),)
 
 class Level(models.Model):
     level = models.CharField(max_length = 255)
@@ -99,6 +124,8 @@ class TutorialResource(models.Model):
     timed_script = models.URLField(max_length = 255)
 
     video = models.CharField(max_length = 255)
+    video_id = models.CharField(max_length = 255, null = True, blank = True, default = None)
+    playlist_item_id = models.CharField(max_length = 255, null = True, blank = True, default = None)
     video_thumbnail_time = models.TimeField(default = '00:00:00')
     video_user = models.ForeignKey(User, related_name='videos')
     video_status = models.PositiveSmallIntegerField(default = 0)
