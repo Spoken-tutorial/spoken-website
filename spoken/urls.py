@@ -50,6 +50,12 @@ urlpatterns = patterns('',
     # Cron links
     url(r'^cron/subtitle-files/create/$', 'spoken.views.create_subtitle_files', name='create_subtitle_files'),
 
+    #online Test
+    url(r'^exam/', include('exam.urls')),
+    url(r'^taggit_autocomplete_modified/', include\
+                                        ('taggit_autocomplete_modified.urls')),
+
+
     #cms
     url(r'^', include('cms.urls', namespace='cms')),
 )

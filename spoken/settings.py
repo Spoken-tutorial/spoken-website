@@ -61,6 +61,10 @@ INSTALLED_APPS = (
 	'mdldjango',
 	'nicedit',
 	'masquerade',
+	'exam',
+	'taggit',
+	'taggit_autocomplete_modified',
+	#'south'
 )
 
 MIDDLEWARE_CLASSES = (
@@ -176,6 +180,8 @@ INTERNAL_IPS = ('127.0.0.1',)
 DATABASE_ROUTERS = ['mdldjango.router.MdlRouter', 'cdeep.router.CdeepRouter', 'workshop.router.WorkshopRouter']
 #AUTHENTICATION_BACKENDS = ( 'mdldjango.backend.MdlBackend', )
 
+# online test 
+AUTH_PROFILE_MODULE = 'cms.Profile'
 #template
 TEMPLATE_CONTEXT_PROCESSORS = (
     "django.contrib.auth.context_processors.auth",

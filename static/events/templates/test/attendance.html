@@ -59,11 +59,11 @@
 				        </tr>
 				        {% for record in collection %}
 					        <tr>
-					            <th><input type='checkbox' name="user_{{ record.id }}" value="{{ record.id }}" {{ record.id|get_status:test.id }} ></th>
+					            <th><input type='checkbox' name="user_{{ record.id }}" value="{{ record.id }}" {{ record.id|get_status:test }} ></th>
 						        <td><iframe style="width:70px; height:70px;" src="{{ record.id|participant_picture }}"></iframe></td>
 						        <td>{{ record.firstname|lower|title }} {{ record.lastname|lower|title }}</td>
 						        <td>
-						            {{ record.id|get_participant_status:test.id }}
+						            {{ record.id|get_participant_status:test }}
 						        </td>
 					        </tr>
 				        {% endfor %}

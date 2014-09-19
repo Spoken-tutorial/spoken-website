@@ -6,6 +6,8 @@ from django.forms import ModelForm
 
 #import events models
 from events.models import *
+from mdldjango.models import MdlCourse, MdlQuiz
+from exam.models import Quiz, QuestionPaper
 from django.contrib.auth.models import User, Group
 
 class RpForm(forms.ModelForm):
@@ -15,6 +17,11 @@ class RpForm(forms.ModelForm):
     class Meta:
         model = ResourcePerson
         exclude = ['assigned_by']
+
+class FossMdlCoursesForm(forms.ModelForm):
+    mdlcourse_id = forms.ChoiceField(choices = MdlCourse.objects.filter(visible=1).values_list('id', 'fullname'))
+    mdlquiz_id = forms.ChoiceField(choices = MdlQuiz.objects.filter().values_list('id', 'name'))
+    examquestionpaper = forms.ModelChoiceField(queryset = QuestionPaper.objects.all())
 
 class AcademicForm(forms.ModelForm):
     state = forms.ModelChoiceField(label='State', cache_choices=True, widget = forms.Select(attrs = {'class' : 'ac-state'}), queryset = State.objects.order_by('name'), empty_label = "--- None ---", help_text = "", error_messages = {'required':'State field required.'})

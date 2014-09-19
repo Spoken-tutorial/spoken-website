@@ -60,9 +60,14 @@ def can_close_test(testcode):
         return True
     return False
 
-def get_status(key, testcode):
+def get_status(key, test):
+    ta=None
     try:
-        ta = TestAttendance.objects.get(mdluser_id=key, test_id=testcode)
+        #for-exam-app
+        if test.use_exam_app:
+            ta = TestAttendance.objects.get(pk=key, test_id=test.id)
+        else:
+            ta = TestAttendance.objects.get(mdluser_id=key, test_id=test.id)
     except:
         return 'error'
     
@@ -74,10 +79,15 @@ def get_status(key, testcode):
     
     return ''
 
-def get_participant_status(key, testcode):
+def get_participant_status(key, test):
     status_list = ['Waiting for Attendance', 'Ready to enter in to test', 'Entered in to test', 'Completed', 'Got certificate']
+    ta=None
     try:
-        ta = TestAttendance.objects.get(mdluser_id=key, test_id=testcode)
+        #for-exam-app
+        if test.use_exam_app:
+            ta = TestAttendance.objects.get(pk=key, test_id=test.id)
+        else:
+            ta = TestAttendance.objects.get(mdluser_id=key, test_id=test.id)
     except:
         return 'Add'
     return status_list[ta.status]
@@ -102,13 +112,18 @@ def can_download_workshop_certificate(key, wcode):
         return False
     except:
         return 'errors'
-def can_enter_test(key, testcode):
+def can_enter_test(key, test):
+    ta = None
     try:
-        ta = TestAttendance.objects.get(mdluser_id=key, test_id=testcode)
-    except:
+        #for-exam-app
+        if test.use_exam_app:
+            ta = TestAttendance.objects.get(user_id=key, test_id=test.id)
+        else:
+            ta = TestAttendance.objects.get(mdluser_id=key, test_id=test)
+    except Exception, e:
         return None
     if ta.status >= 0:
-        return ta.status
+        return ta
     return None
 
 def training_file_exits(wid):
