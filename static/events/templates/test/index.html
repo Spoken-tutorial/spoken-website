@@ -129,7 +129,6 @@
                                 <a href="{% url 'events:test_attendance' record.id %}">Attendance</a> |
                                 {% with a=record.id|can_close_test %}
                                     {% if a %}
-                                        <a title = "button will enable after student completed the test" href="{% url 'events:test_approvel' record.id %}?status=completed">Close</a>
                                     {% else %}
                                         <a title = "On going" href="">test ongoing</a>
                                     {% endif %}

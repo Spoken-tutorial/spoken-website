@@ -75,7 +75,11 @@ INSTALLED_APPS = (
 	'mdldjango',
 	'nicedit',
 	'masquerade',
-	'report_builder'
+	'report_builder',
+	'exam',
+	'taggit',
+	'taggit_autocomplete_modified',
+	#'south'
 )
 
 MIDDLEWARE_CLASSES = (
@@ -198,6 +202,9 @@ DATABASE_ROUTERS = ['mdldjango.router.MdlRouter', 'cdeep.router.CdeepRouter', 'w
 # Reports
 REPORT_BUILDER_INCLUDE = []
 REPORT_BUILDER_EXCLUDE = ['user'] # Allow all models except User to be accessed
+
+# online test 
+AUTH_PROFILE_MODULE = 'cms.Profile'
 
 #template
 TEMPLATE_CONTEXT_PROCESSORS = (

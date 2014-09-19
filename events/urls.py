@@ -65,6 +65,9 @@ urlpatterns = patterns('',
     url(r'^academic-center/(?P<academic_id>\d+)/$', 'events.views.academic_center', name="academic_center"),
     url(r'^academic-center/(?P<academic_id>\d+)/(?P<slug>[\w-]+)/$', 'events.views.academic_center', name="academic_center"),
     
+    #Online exam
+    url(r'^participant-exam/$', 'events.views.participant_exam_index', name='participant_exam_index'),
+    
     #Ajax 
     url(r'ajax-ac-state/$', 'events.views.ajax_ac_state', name='ajax_ac_state'),
     url(r'ajax-ac-location/$', 'events.views.ajax_ac_location', name='ajax_ac_location'),

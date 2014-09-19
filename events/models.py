@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 
 #creation app models
 from creation.models import FossCategory, Language, FossAvailableForWorkshop, FossAvailableForTest
+from exam.models import Quiz, QuestionPaper
 from mdldjango.models import *
 
 #validation
@@ -258,6 +259,7 @@ class Test(models.Model):
     ttime = models.TimeField()
     status = models.PositiveSmallIntegerField(default=0)
     participant_count = models.PositiveIntegerField(default=0)
+    use_exam_app = models.BooleanField()
     created = models.DateTimeField(auto_now_add = True)
     updated = models.DateTimeField(auto_now = True)
 
@@ -269,10 +271,15 @@ class TestAttendance(models.Model):
     test = models.ForeignKey(Test)
     mdluser_firstname = models.CharField(max_length = 100)
     mdluser_lastname = models.CharField(max_length = 100)
-    mdluser_id = models.PositiveIntegerField()
+    
+    mdluser_id = models.PositiveIntegerField(default=0)
     mdlcourse_id = models.PositiveIntegerField(default=0)
     mdlquiz_id = models.PositiveIntegerField(default=0)
     mdlattempt_id = models.PositiveIntegerField(default=0)
+    
+    user = models.ForeignKey(User, null=True)
+    examquestionpaper = models.ForeignKey(QuestionPaper, null=True)
+    
     password = models.CharField(max_length = 100, null=True)
     count = models.PositiveSmallIntegerField(default=0)
     status = models.PositiveSmallIntegerField(default=0)
@@ -313,6 +320,8 @@ class FossMdlCourses(models.Model):
     foss = models.ForeignKey(FossCategory)
     mdlcourse_id = models.PositiveIntegerField()
     mdlquiz_id = models.PositiveIntegerField()
+    examquestionpaper = models.ForeignKey(QuestionPaper, null=True)
+    use_exam_app = models.BooleanField()
 
 class EventsNotification(models.Model):
     user = models.ForeignKey(User)

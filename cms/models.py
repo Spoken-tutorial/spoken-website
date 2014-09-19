@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-from events.models import State, District, City, Location
+from events.models import State, District, City, Location, AcademicCenter
 import os
 
 def profile_picture(instance, filename):
@@ -14,7 +14,7 @@ def profile_picture_thumb(instance, filename):
     return '/'.join(['user', str(instance.id), str(instance.id) + "-thumb" + ext])
 
 class Profile(models.Model):
-    user = models.ForeignKey(User)
+    user = models.OneToOneField(User)
     confirmation_code = models.CharField(max_length=255)
     street = models.CharField(max_length=255, blank=True, null=True)
     location = models.ForeignKey(Location, null=True)
@@ -27,6 +27,9 @@ class Profile(models.Model):
     picture = models.FileField(upload_to=profile_picture, null=True, blank=True)
     thumb = models.FileField(upload_to=profile_picture_thumb, null=True, blank=True)
     address = models.TextField(null=True)
+    #Online Exam App
+    institution = models.ForeignKey(AcademicCenter, null=True, blank=True)
+    
     created = models.DateTimeField(auto_now_add=True)
     class Meta:
         app_label = 'cms'

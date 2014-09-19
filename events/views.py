@@ -218,8 +218,14 @@ def add_participant(request, cid, category ):
                 messages.success(request, "User has already in the attendance list")
             except:
                 wa = TestAttendance()
-                wa.test_id = cid
-                wa.mdluser_id = userid
+                wa.test_id = cid.id
+                
+                #for-exam-app
+                if cid.use_exam_app:
+                    wa.user_id = request.user.id
+                else:
+                    wa.mdluser_id = userid
+                    
                 wa.status = 0
                 wa.save()
                 messages.success(request, "User has added in the attendance list")
@@ -1665,7 +1671,6 @@ def test_attendance(request, tid):
         test.save()
     except:
         raise PermissionDenied()
-    print test.foss_id
     if request.method == 'POST':
         users = request.POST
         if users:
@@ -1675,27 +1680,52 @@ def test_attendance(request, tid):
                 for u in users:
                     if not (u == 'csrfmiddlewaretoken' or u == 'submit-attendance'):
                         try:
-                            ta = TestAttendance.objects.get(mdluser_id = users[u], test_id = tid)
+                            ta = None
+                            #for-exam-app
+                            if test.use_exam_app:
+                                ta = TestAttendance.objects.get(pk = users[u], test_id = tid)
+                                fossmdlcourse = FossMdlCourses.objects.get(foss_id = test.foss_id)
+                                ta.examquestionpaper_id = fossmdlcourse.examquestionpaper_id
+                                ta.save()
+                            else:
+                                ta = TestAttendance.objects.get(mdluser_id = users[u], test_id = tid)
+                            
                             if ta.status > 1:
                                 continue
-                        except:
+                        except Exception, e:
                             fossmdlcourse = FossMdlCourses.objects.get(foss_id = test.foss_id)
                             ta = TestAttendance()
                             ta.test_id = test.id
-                            ta.mdluser_id = users[u]
-                            ta.mdlcourse_id = fossmdlcourse.mdlcourse_id
-                            ta.mdlquiz_id = fossmdlcourse.mdlquiz_id
-                            ta.mdlattempt_id = 0
+                            
+                            #for-exam-app
+                            if test.use_exam_app:
+                                ta.user_id = user.id
+                                ta.examquestionpaper_id = fossmdlcourse.examquestionpaper_id
+                            else:
+                                ta.mdluser_id = users[u]
+                                ta.mdlcourse_id = fossmdlcourse.mdlcourse_id
+                                ta.mdlquiz_id = fossmdlcourse.mdlquiz_id
+                                ta.mdlattempt_id = 0
+                                
                             ta.status = 0
                             ta.save()
                         if ta:
                             #todo: if the status = 2 check in moodle if he completed the test set status = 3 (completed)
-                            t = TestAttendance.objects.get(mdluser_id = ta.mdluser_id, test_id = tid)
-                            fossmdlcourse = FossMdlCourses.objects.get(foss_id = test.foss_id)
-                            t.mdlcourse_id = fossmdlcourse.mdlcourse_id
-                            t.mdlquiz_id = fossmdlcourse.mdlquiz_id
-                            t.status = 1
-                            t.save()
+                            #for-exam-app
+                            if test.use_exam_app:
+                                t = TestAttendance.objects.get(mdluser_id = ta.mdluser_id, test_id = tid)
+                                fossmdlcourse = FossMdlCourses.objects.get(foss_id = test.foss_id)
+                                t.mdlcourse_id = fossmdlcourse.mdlcourse_id
+                                t.mdlquiz_id = fossmdlcourse.mdlquiz_id
+                                t.status = 1
+                                t.save()
+                            else:
+                                t = TestAttendance.objects.get(user_id = ta.user_id, test_id = tid)
+                                fossmdlcourse = FossMdlCourses.objects.get(foss_id = test.foss_id)
+                                t.examquiz_id = fossmdlcourse.examquestionpaper_id
+                                t.status = 1
+                                t.save()
+                                
                             #enroll to the course
                             #get the course enrole id
                             #todo: If mark absent delete enrolement
@@ -1722,7 +1752,7 @@ def test_attendance(request, tid):
                 onlinetest_user = search_participant(form)
                         
             if 'add-participant' in request.POST:
-                add_participant(request, tid, 'Test')
+                add_participant(request, test, 'Test')
             
             message = test.academic.institution_name+" has submited Test attendance dated "+test.tdate.strftime("%Y-%m-%d")
             update_events_log(user_id = user.id, role = 1, category = 1, category_id = test.id, academic = test.academic_id, status = 8)
@@ -1734,24 +1764,31 @@ def test_attendance(request, tid):
                     <li>Once you confirm the list of participants please click on <b>'Mark as Complete'</b></li>
                 </ul>
             """)
+    
     mdlids = []
     participant_ids = []
-    online_participant_ids = list(TestAttendance.objects.filter(test_id = test.id).values_list('mdluser_id'))
-    for k in online_participant_ids:
-        mdlids.append(k[0])
-        
-    if test.test_category_id == 1:
-        participant_ids = list(TrainingAttendance.objects.filter(training_id = test.training_id).values_list('mdluser_id'))
-    elif test.test_category_id == 2:
-        participant_ids = list(TrainingAttendance.objects.filter(training_id = test.training_id).values_list('mdluser_id'))
-    else:
-        participant_ids = list(TestAttendance.objects.filter(test_id = test.id).values_list('mdluser_id'))
-
     wp = None
-    for k in participant_ids:
-        mdlids.append(k[0])
-    if mdlids:
-        wp = MdlUser.objects.filter(id__in = mdlids)
+    #for-exam-app
+    if test.use_exam_app:
+        wp = TestAttendance.objects.filter(test = test)
+    else:
+        online_participant_ids = list(TestAttendance.objects.filter(test_id = test.id).values_list('mdluser_id'))
+        for k in online_participant_ids:
+            mdlids.append(k[0])
+            
+        if test.test_category_id == 1:
+            participant_ids = list(TrainingAttendance.objects.filter(training_id = test.training_id).values_list('mdluser_id'))
+        elif test.test_category_id == 2:
+            participant_ids = list(TrainingAttendance.objects.filter(training_id = test.training_id).values_list('mdluser_id'))
+        else:
+            participant_ids = list(TestAttendance.objects.filter(test_id = test.id).values_list('mdluser_id'))
+
+        
+        for k in participant_ids:
+            mdlids.append(k[0])
+        if mdlids:
+            wp = MdlUser.objects.filter(id__in = mdlids)
+            
     #check can close the test
     testatten = TestAttendance.objects.filter(test_id=test.id, status__gte=2)
     enable_close_test = None
@@ -1813,11 +1850,15 @@ def test_participant_ceritificate(request, wid, participant_id):
         try:
             w = Test.objects.get(id = wid)
             mdluser = MdlUser.objects.get(id = participant_id)
-            ta = TestAttendance.objects.get(test_id = w.id, mdluser_id = participant_id)
-            mdlgrade = MdlQuizGrades.objects.get(quiz = ta.mdlquiz_id, userid = participant_id)
-            if ta.status < 1 or round(mdlgrade.grade, 1) < 40 or not w.invigilator:
-                raise PermissionDenied()
-                
+            ta = None
+            #for-exam-app
+            if w.use_exam_app:
+                ta = TestAttendance.objects.get(test_id = w.id, user_id = participant_id)
+            else:
+                ta = TestAttendance.objects.get(test_id = w.id, mdluser_id = participant_id)
+                mdlgrade = MdlQuizGrades.objects.get(quiz = ta.mdlquiz_id, userid = participant_id)
+                if ta.status < 1 or round(mdlgrade.grade, 1) < 40 or not w.invigilator:
+                    raise PermissionDenied()
             if ta.password:
                 certificate_pass = ta.password 
                 ta.count += 1
@@ -1904,15 +1945,23 @@ def test_participant_ceritificate(request, wid, participant_id):
 @csrf_exempt
 def training_subscribe(request, events, eventid = None, mdluser_id = None):
     try:
-        mdluser = MdlUser.objects.get(id = mdluser_id)
+        #Online Exam App
+        test = Test.objects.get(pk=eventid)
+        mdluser = None
+        if not test.use_exam_app:
+            mdluser = MdlUser.objects.get(id = mdluser_id)
         if events == 'test':
             try:
-                TestAttendance.objects.create(test_id=eventid, mdluser_id = mdluser_id, mdluser_firstname = mdluser.firstname, mdluser_lastname = mdluser.lastname)
+                #Online Exam App
+                if test.use_exam_app:
+                    TestAttendance.objects.create(test=test, user = request.user)
+                else:
+                    TestAttendance.objects.create(test_id=eventid, mdluser_id = mdluser_id, mdluser_firstname = mdluser.firstname, mdluser_lastname = mdluser.lastname)
             except Exception, e:
                 print e
                 pass
             messages.success(request, "You have sucessfully subscribe to the "+events+"")
-            return HttpResponseRedirect('/participant/index/#Upcoming-Test')
+            return HttpResponseRedirect('/software-training/participant-exam/?category=4')
         elif events == 'training':
             try:
                 TrainingAttendance.objects.create(training_id=eventid, mdluser_id = mdluser_id)
@@ -1925,7 +1974,6 @@ def training_subscribe(request, events, eventid = None, mdluser_id = None):
             raise PermissionDenied()
     except:
         raise PermissionDenied()
-    
     return HttpResponseRedirect('/participant/index/')
 
 @login_required
@@ -2077,6 +2125,66 @@ def academic_center(request, academic_id = None, slug = None):
         'collection' : collection
     }
     return render(request, 'events/templates/ac/academic-center.html', context)
+
+
+#Online Exam App
+@login_required
+def participant_exam_index(request):
+    user = request.user
+    if user.profile.institution_id:
+        academic = None
+        try:
+            academic = AcademicCenter.objects.get(id = user.profile.institution_id)
+        except:
+            pass
+        if academic:
+            category = int(request.GET.get('category', 4))
+            if not (category > 0 and category < 6):
+                return HttpResponseRedirect('/participant/index/?category=4')
+                
+            upcoming_workshop = None
+            upcoming_test = None
+            past_workshop = None
+            past_test = None
+            ongoing_test = None
+            if category == 3:
+                upcoming_workshop = Training.objects.filter((Q(status = 0) | Q(status = 1) | Q(status = 2) | Q(status = 3)), academic_id=user.profile.institution, trdate__gte=datetime.date.today()).order_by('-trdate')
+            if category == 5:
+                upcoming_test = Test.objects.filter(status=2, academic_id=user.profile.institution, tdate__gt=datetime.date.today()).order_by('-tdate')
+            if category == 1:
+                past_workshop = Training.objects.filter(id__in = TrainingAttendance.objects.filter(mdluser_id = user.id).values_list('training_id'), status = 4).order_by('-trdate')
+            if category == 2:
+                past_test = Test.objects.filter(id__in = TestAttendance.objects.filter(mdluser_id = user.id).values_list('test_id'), status = 4).order_by('-tdate')
+            if category == 4:
+                ongoing_test = Test.objects.filter(status=3, academic_id=user.profile.institution, tdate = datetime.date.today()).order_by('-tdate')
+            
+            context = {
+                'test' : test,
+                'upcoming_workshop' : upcoming_workshop,
+                'upcoming_test' : upcoming_test,
+                'past_workshop' : past_workshop,
+                'past_test' : past_test,
+                'ongoing_test' : ongoing_test,
+                'category' : category,
+                'ONLINE_TEST_URL' : settings.ONLINE_TEST_URL
+
+            }
+            context.update(csrf(request))
+            return render(request, 'events/templates/exam_index.html', context)
+    
+    form  = OrganiserForm()
+    if request.method == 'POST':
+        form = OrganiserForm(request.POST)
+        if form.is_valid():
+            user.profile.institution_id = form.cleaned_data['college']
+            user.profile.save()
+            return HttpResponseRedirect('/software-training/participant-exam/')
+    context = {
+        'form' : form
+    }
+    context.update(csrf(request))
+    return render(request, 'mdl/templates/academic.html', context)
+
 
 #Ajax Request and Responces
 @csrf_exempt

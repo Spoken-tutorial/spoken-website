@@ -4,7 +4,7 @@ from django.template.defaultfilters import slugify
 
 from events.models import *
 from creation.models import FossAvailableForTest, FossAvailableForWorkshop
-from events.forms import RpForm
+from events.forms import RpForm, FossMdlCoursesForm
 
 class UniversityAdmin(admin.ModelAdmin):
     exclude = ('user',)
@@ -53,8 +53,9 @@ class FossAvailableForWorkshopAdmin(admin.ModelAdmin):
     list_filter = ('language',)
 
 class FossMdlCoursesAdmin(admin.ModelAdmin):
-    fields = ['foss', 'mdlcourse_id', 'mdlquiz_id']
-    list_display = ('foss', 'mdlcourse_id', 'mdlquiz_id')
+    form = FossMdlCoursesForm
+    fields = ['foss', 'mdlcourse_id', 'mdlquiz_id', 'examquestionpaper', 'use_exam_app']
+    list_display = ('foss', 'mdlcourse_id', 'mdlquiz_id', 'examquestionpaper', 'use_exam_app')
     
 class RpRoleAdmin(admin.ModelAdmin):
     form = RpForm
