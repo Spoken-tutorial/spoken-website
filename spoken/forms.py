@@ -10,7 +10,7 @@ class KeywordSearchForm(forms.Form):
 class TutorialSearchForm(forms.Form):
     #try:
         foss_list = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), language__name = 'English').values('tutorial_detail__foss__foss').annotate(Count('id')).order_by('tutorial_detail__foss__foss').values_list('tutorial_detail__foss__foss', 'id__count').distinct()
-        choices = [('', '-- All Foss --'),]
+        choices = [('', '-- All Courses --'),]
         for foss_row in foss_list:
             choices.append((str(foss_row[0]), str(foss_row[0]) + ' (' + str(foss_row[1]) + ')'))
         foss = forms.ChoiceField(
@@ -19,7 +19,7 @@ class TutorialSearchForm(forms.Form):
             required = False,
         )
         lang_list = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2)).values('language__name').annotate(Count('id')).order_by('language').values_list('language__name', 'id__count').distinct()
-        choices = [('', '-- All Language --'),]
+        choices = [('', '-- All Languages --'),]
         for lang_row in lang_list:
             choices.append((str(lang_row[0]), str(lang_row[0]) + ' (' + str(lang_row[1]) + ')'))
         language = forms.ChoiceField(

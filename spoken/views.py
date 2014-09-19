@@ -175,13 +175,13 @@ def get_language(request):
         lang = request.POST.get('lang')
         if not lang and foss:
             lang_list = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), tutorial_detail__foss__foss = foss).values('language__name').annotate(Count('id')).order_by('language__name').values_list('language__name', 'id__count').distinct()
-            tmp = '<option value = ""> -- All Language -- </option>'
+            tmp = '<option value = ""> -- All Languages -- </option>'
             for lang_row in lang_list:
                 tmp += '<option value="' + str(lang_row[0]) +'">' + str(lang_row[0]) + ' (' + str(lang_row[1]) + ')</option>'
             output = ['foss', tmp]
         elif lang and not foss:
             foss_list = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), language__name = lang).values('tutorial_detail__foss__foss').annotate(Count('id')).order_by('tutorial_detail__foss__foss').values_list('tutorial_detail__foss__foss', 'id__count').distinct()
-            tmp = '<option value = ""> -- All Foss -- </option>'
+            tmp = '<option value = ""> -- All Courses -- </option>'
             for foss_row in foss_list:
                 tmp += '<option value="' + str(foss_row[0]) +'">' + str(foss_row[0]) + ' (' + str(foss_row[1]) + ')</option>'
             output = ['lang', tmp]
@@ -189,11 +189,11 @@ def get_language(request):
             pass
         else:
             lang_list = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2)).values('language__name').annotate(Count('id')).order_by('language__name').values_list('language__name', 'id__count').distinct()
-            tmp1 = '<option value = ""> -- All Language -- </option>'
+            tmp1 = '<option value = ""> -- All Languages -- </option>'
             for lang_row in lang_list:
                 tmp1 += '<option value="' + str(lang_row[0]) +'">' + str(lang_row[0]) + ' (' + str(lang_row[1]) + ')</option>'
             foss_list = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), language__name = 'English').values('tutorial_detail__foss__foss').annotate(Count('id')).order_by('tutorial_detail__foss__foss').values_list('tutorial_detail__foss__foss', 'id__count').distinct()
-            tmp2 = '<option value = ""> -- All Foss -- </option>'
+            tmp2 = '<option value = ""> -- All Courses -- </option>'
             for foss_row in foss_list:
                 tmp2 += '<option value="' + str(foss_row[0]) +'">' + str(foss_row[0]) + ' (' + str(foss_row[1]) + ')</option>'
             output = ['reset', tmp1, tmp2]
