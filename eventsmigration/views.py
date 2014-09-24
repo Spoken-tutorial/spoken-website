@@ -973,7 +973,109 @@ def workshop_feedback(request):
                 sys.exit()
     return HttpResponse("Workshop Feedback migration Done!")
     
-    
+
+def workshop_livefeedback(request):
+    wwfs = WLiveWorkshopParticipants.objects.all()
+    for wwf in wwfs:
+        # find the training id
+        training = None
+        try:
+            training = Training.objects.get(training_code = wwf.workshop_code)
+        except Exception, e:
+            print e, " => 1 ", wwf.workshop_code, " => ", wwf.user_id, " => ", wwf.id
+            #wpc = WWorkshopFeedback.objects.filter(workshop_code = wwf.workshop_code).count()
+            continue
+            
+        #existing record
+        try:
+            TrainingLiveFeedback.objects.get(training_id = training.id, email = wwf.email )
+            continue
+        except:
+            pass
+        
+        lang = None
+        try:
+            lang = Language.objects.get(name = wwf.workshop_language)
+        except Exception, e:
+            #todo: if reginal get language from w
+            try:
+                if wwf.workshop_language == 'Regional':
+                    te = Training.objects.get(training_code = wwf.workshop_code)
+                    lang = Language.objects.get(name = te.language)
+                else:
+                    lang = Language.objects.get(name = 'English')
+            except Exception, ee:
+                print e, " => 6 ", wwf.workshop_language
+                print ee, " => 6aa ", wwf.workshop_language
+                continue
+                
+        try:
+            TrainingLiveFeedback.objects.get(training_id = training.id, mdluser_id = wwf.user_id )
+            #print "already exits!"
+            continue
+        except Exception, e:
+            #print e, " => 2", wwf.workshop_code, " => ", wwf.user_id
+            try:
+                t = TrainingLiveFeedback()
+                
+                t.name = wwf.pname
+                t.email = wwf.email
+                t.branch = wwf.branch
+                t.institution = wwf.institution
+                
+                t.training_id  = training.id
+                t.rate_workshop  = wwf.rate_workshop
+                t.content  = wwf.content
+                t.sequence  = wwf.logical_arrangement
+                t.clarity  = wwf.clarity
+                t.interesting  = wwf.understandable
+                t.appropriate_example  = wwf.included_examples
+                t.instruction_sheet  = wwf.instruction_sheet
+                t.assignment  = wwf.assignments
+                t.pace_of_tutorial  = wwf.pace_tutorial
+                t.workshop_learnt  = wwf.useful_thing
+                t.weakness_workshop  = wwf.weakness_duration
+                t.weakness_narration  = wwf.weakness_narration
+                t.weakness_understand  = wwf.weakness_understand
+                t.other_weakness  = wwf.other_weakness
+                t.tutorial_language  = lang.id
+                t.apply_information  = wwf.info_received
+                t.setup_learning  = wwf.comfortable_learning
+                t.computers_lab  = wwf.working_computers
+                t.audio_quality  = wwf.audio_quality
+                t.video_quality  = wwf.video_quality
+                t.workshop_orgainsation  = wwf.orgn_wkshop
+                t.faciliate_learning  = wwf.facil_learning
+                t.motivate_learners  = wwf.motiv_learning
+                t.time_management  = wwf.time_mgmt
+                t.knowledge_about_software  = wwf.soft_klg
+                t.provide_clear_explanation  = wwf.prov_expn
+                t.answered_questions  = wwf.ans_cln
+                t.interested_helping  = wwf.help_lern
+                t.executed_workshop  = wwf.exec_effly
+                t.workshop_improved  = wwf.ws_improved
+                t.recommend_workshop  = wwf.recomm_wkshop
+                t.use_information  = wwf.reason_why
+                t.other_comments  = wwf.general_comment
+                
+                if wwf.updated_at:
+                    t.created  = wwf.updated_at
+                else:
+                    t.created  = datetime.datetime.now()
+                t.save()
+                    
+                if wwf.updated_at:
+                    t.created  = wwf.updated_at
+                    t.updated  = wwf.updated_at
+                else:
+                    t.created  = datetime.datetime.now()
+                    t.updated  = datetime.datetime.now()
+                t.save()
+            except Exception, e:
+                print e, " => 3", wwf.workshop_code, " => ", wwf.email
+                sys.exit()
+    return HttpResponse("Workshop Feedback migration Done!")
+
 def test(request):
     test_status = 0
     if test_status == 4:

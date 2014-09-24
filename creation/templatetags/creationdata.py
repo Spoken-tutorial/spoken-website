@@ -7,6 +7,7 @@ from creation.models import *
 import os
 from django.db.models import Q
 from creation.views import is_contributor, is_internal_contributor, is_external_contributor, is_videoreviewer, is_domainreviewer, is_qualityreviewer, is_administrator
+from spoken.forms import TutorialSearchForm
 
 register = template.Library()
 
@@ -170,6 +171,15 @@ def get_timed_script(script_path):
         return timed_script
     return ''
 
+def tutorialsearch():
+    context = {
+        'form': TutorialSearchForm()
+    }
+
+    return context
+
+register.inclusion_tag('spoken/templates/tutorial_search_form.html')(tutorialsearch)
+#register.filter('tutorialsearch', tutorialsearch)
 register.filter('get_timed_script', get_timed_script)
 register.filter('get_prerequisite_from_td', get_prerequisite_from_td)
 register.filter('get_prerequisite', get_prerequisite)

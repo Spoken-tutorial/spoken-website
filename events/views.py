@@ -1661,6 +1661,7 @@ def test_attendance(request, tid):
         test = Test.objects.get(pk=tid)
         if test.status == 4 or test.status == 1:
             return HttpResponseRedirect('/software-training/test/' + str(test.id) + '/participant/')
+            
         test.status = 3
         test.save()
     except:
@@ -2032,6 +2033,45 @@ def training_participant_feedback(request, training_id, participant_id):
         return HttpResponseRedirect("/software-training/training/" + str(training_id) + "/participant/")
     context = {
         'feedback' : tf,
+    }
+    context.update(csrf(request))
+    return render(request, 'events/templates/training/view-feedback.html', context)
+
+def training_participant_livefeedback(request, training_id):
+    form = LiveFeedbackForm()
+    w = None
+    try:
+        w = Training.objects.get(pk=training_id)
+    except Exception, e:
+        raise PermissionDenied()
+    if request.method == 'POST':
+        form = LiveFeedbackForm(request.POST)
+        if form.is_valid():
+            try:
+                form_data = form.save(commit=False)
+                form_data.training_id = w.id
+                form_data.save()
+                messages.success(request, "Thank you for your valuable feedback.")
+                return HttpResponseRedirect('/')
+            except Exception, e:
+                print e
+                messages.success(request, "Thank you for your valuable feedback.")
+                return HttpResponseRedirect('/')
+    context = {
+        'form' : form,
+        'w' : w
+    }
+    return render(request, 'events/templates/training/lfeedback.html', context)
+
+def training_participant_viewlivefeedback(request, training_id, feedback_id):
+    tf = None
+    try:
+        tf = TrainingLiveFeedback.objects.get(training_id = training_id, id = feedback_id)
+    except:
+        raise PermissionDenied()
+    context = {
+        'feedback' : tf,
+        'live' : True
     }
     context.update(csrf(request))
     return render(request, 'events/templates/training/view-feedback.html', context)

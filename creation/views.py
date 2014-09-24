@@ -15,6 +15,7 @@ from django.views.decorators.http import require_POST
 from django import forms
 from django.template import RequestContext
 from django.core.context_processors import csrf
+from django.core.mail import EmailMultiAlternatives
 from django.core.exceptions import PermissionDenied
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render, render_to_response
@@ -2321,6 +2322,7 @@ def get_and_query_for_contributor_roles(data_rows, fields):
 def report_missing_component_reply(request, tmcid):
     if not is_contributor(request.user) and not is_administrator(request.user):
         raise PermissionDenied()
+    tmc_row = None
     try:
         tmc_row = TutorialMissingComponent.objects.get(pk = tmcid)
     except:
@@ -2330,6 +2332,35 @@ def report_missing_component_reply(request, tmcid):
         form = TutorialMissingComponentReplyForm(request.POST)
         if form.is_valid():
             TutorialMissingComponentReply.objects.create(missing_component = tmc_row, user = request.user, reply_message = request.POST.get('reply_message', ''))
+            #send email
+            to = []
+            bcc = []
+            cc = []
+            try:
+                to = [tmc_row.user.email]
+                bcc = settings.ADMINISTRATOR_EMAIL
+            except:
+                raise PermissionDenied()
+            subject  = "Missing Component Reply Notifications"
+            message = '''Dear {0},
+
+{1}
+
+Regards,
+Spoken Tutorial
+'''.format(tmc_row.user.first_name, request.POST.get('reply_message', ''))
+            # send email
+            email = EmailMultiAlternatives(
+                subject, message, 'administrator@spoken-tutorial.org',
+                to = to , bcc = bcc, cc = cc,
+                headers={'Reply-To': 'no-replay@spoken-tutorial.org', "Content-type":"text/html;charset=iso-8859-1"}
+            )
+            try:
+                result = email.send(fail_silently=False)
+            except Exception, e:
+                print "*******************************************************"
+                print message
+                print "*******************************************************"
             messages.success(request, 'Reply message added successfully!')
             form = TutorialMissingComponentReplyForm()
     context = {

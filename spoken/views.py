@@ -139,7 +139,8 @@ def tutorial_search(request):
     
     page = request.GET.get('page')
     collection = get_page(collection, page)
-    
+    print dir(collection.paginator)
+    print "Last page ", collection.paginator.num_pages
     context['form'] = form
     context['collection'] = collection
     return render(request, 'spoken/templates/tutorial_search.html', context)

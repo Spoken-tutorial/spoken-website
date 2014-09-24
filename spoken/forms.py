@@ -8,7 +8,7 @@ class KeywordSearchForm(forms.Form):
     q = forms.CharField(required=True)
 
 class TutorialSearchForm(forms.Form):
-    #try:
+    try:
         foss_list = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), language__name = 'English').values('tutorial_detail__foss__foss').annotate(Count('id')).order_by('tutorial_detail__foss__foss').values_list('tutorial_detail__foss__foss', 'id__count').distinct()
         choices = [('', '-- All Courses --'),]
         for foss_row in foss_list:
@@ -27,8 +27,8 @@ class TutorialSearchForm(forms.Form):
             widget = forms.Select(),
             required = False,
         )
-    #except:
-     #   pass
+    except:
+        pass
 
 class TestimonialsForm(forms.ModelForm):
     source_title = forms.CharField(required =  False)
