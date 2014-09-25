@@ -13,7 +13,7 @@ class TutorialSearchForm(forms.Form):
         choices = [('', '-- All Courses --'),]
         for foss_row in foss_list:
             choices.append((str(foss_row[0]), str(foss_row[0]) + ' (' + str(foss_row[1]) + ')'))
-        foss = forms.ChoiceField(
+        search_foss = forms.ChoiceField(
             choices = choices,
             widget=forms.Select(),
             required = False,
@@ -22,7 +22,7 @@ class TutorialSearchForm(forms.Form):
         choices = [('', '-- All Languages --'),]
         for lang_row in lang_list:
             choices.append((str(lang_row[0]), str(lang_row[0]) + ' (' + str(lang_row[1]) + ')'))
-        language = forms.ChoiceField(
+        search_language = forms.ChoiceField(
             choices = choices,
             widget = forms.Select(),
             required = False,
