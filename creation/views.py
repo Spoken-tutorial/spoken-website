@@ -2336,19 +2336,34 @@ def report_missing_component_reply(request, tmcid):
             to = []
             bcc = []
             cc = []
+            comps = {
+                1: 'Outline',
+                2: 'Script',
+                3: 'Video',
+                4: 'Slides',
+                5: 'Codefiles',
+                6: 'Assignment'
+            }
             try:
                 to = [tmc_row.user.email]
                 bcc = settings.ADMINISTRATOR_EMAIL
             except:
                 raise PermissionDenied()
-            subject  = "Missing Component Reply Notifications"
+            subject  = "Reply: Missing Component Reply Notifications"
             message = '''Dear {0},
-
+You had posted Missing Component for the following tutorial:
+Foss: {2}
+Tutorial: {3}
+Language: {4}
+Component: {5}
+Nature of Report: Component itself is missing
+Following is the reply for your post:
 {1}
 
+--
 Regards,
 Spoken Tutorial
-'''.format(tmc_row.user.first_name, request.POST.get('reply_message', ''))
+'''.format(tmc_row.user.first_name, request.POST.get('reply_message', ''), tmc_row.tutorial_resource.tutorial_detail.foss, tmc_row.tutorial_resource.tutorial_detail.tutorial, tmc_row.tutorial_resource.language, comps[tmc_row.component])
             # send email
             email = EmailMultiAlternatives(
                 subject, message, 'administrator@spoken-tutorial.org',
