@@ -127,7 +127,7 @@ class TutorialUpdateLog(models.Model):
     class Meta:
         db_table = 'tutorial_update_log'
 
-class TutorialMissingComponent(models.Model):
+class CTutorialMissingComponent(models.Model):
     id = models.IntegerField(primary_key=True)
     uid = models.ForeignKey(Users, db_column='uid')
     trid = models.ForeignKey(TutorialResources, db_column='trid')
@@ -142,7 +142,7 @@ class TutorialMissingComponent(models.Model):
     class Meta:
         db_table = 'tutorial_missing_component'
 
-class TutorialMissingComponentReply(models.Model):
+class CTutorialMissingComponentReply(models.Model):
     id = models.IntegerField(primary_key=True)
     missing_component_id = models.IntegerField()
     uid = models.ForeignKey(Users, db_column='uid')
