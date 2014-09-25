@@ -357,9 +357,12 @@ media="screen"
 .no-record:hover{
     background-color: #f5f5f5;
 }
-.ajax-refresh{
+.ajax-refresh, .ajax-search-refresh{
     padding: 0 5px;
     display: none;
+    position: absolute;
+    left: 45%;
+    top: 6px;
 }
 .form-group .radio ul{
     list-style: none;

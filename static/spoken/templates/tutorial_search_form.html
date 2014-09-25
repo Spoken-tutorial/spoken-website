@@ -10,14 +10,14 @@
         {% endif %}
         <div class="form-group">
             <div class="col-sm-5">
-                <span class='ajax-refresh ajax-refresh-foss'><i class="fa fa-2 fa-refresh fa-spin"></i></span>
-                {% render_field form.foss class+="form-control foss" tabindex="1" value=keywords %}
-                {{ form.foss.errors }}
+                <span class='ajax-search-refresh ajax-refresh-search-foss'><i class="fa fa-2 fa-refresh fa-spin"></i></span>
+                {% render_field form.search_foss class+="form-control search-foss" tabindex="1" value=keywords %}
+                {{ form.search_foss.errors }}
             </div>
             <div class="col-sm-5">
-                <span class='ajax-refresh ajax-refresh-language'><i class="fa fa-2 fa-refresh fa-spin"></i></span>
-                {% render_field form.language class+="form-control language" tabindex="1" value=keywords %}
-                {{ form.language.errors }}
+                <span class='ajax-search-refresh ajax-refresh-search-language'><i class="fa fa-2 fa-refresh fa-spin"></i></span>
+                {% render_field form.search_language class+="form-control search-language" tabindex="1" value=keywords %}
+                {{ form.search_language.errors }}
             </div>
             <div class="col-sm-2">
                 <input class="btn btn-primary" type="submit" value="Search" />

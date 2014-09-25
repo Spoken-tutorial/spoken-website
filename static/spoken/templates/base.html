@@ -423,9 +423,9 @@
 		</script>
 		{% block jsblock %}{% endblock %}
 		<script>
-        $("#id_foss, #id_language").change(function(){
-            var foss = $('#id_foss').val();
-            var lang = $('#id_language').val();
+        $("#id_search_foss, #id_search_language").change(function(){
+            var foss = $('#id_search_foss').val();
+            var lang = $('#id_search_language').val();
             if ((foss == '' || lang == '') && ($(this).val() != '')){
                 $.ajax({
                     url: "/get-language/",
@@ -436,31 +436,31 @@
                     },
                     beforeSend: function() {
                         if(foss == '')
-                            $('.ajax-refresh-foss').show();
+                            $('.ajax-refresh-search-foss').show();
                         if(lang == '')
-                            $('.ajax-refresh-language').show();
+                            $('.ajax-refresh-search-language').show();
                     },
                     success: function(data) {
                         if(data[0] == 'foss'){
-                            $('#id_language').html(data[1]);
+                            $('#id_search_language').html(data[1]);
                         } else if(data[0] == 'lang'){
-                            $('#id_foss').html(data[1]);
+                            $('#id_search_foss').html(data[1]);
                         } else if(data[0] == 'reset') {
-                            $('#id_language').html(data[1]);
-                            $('#id_foss').html(data[2]);
+                            $('#id_search_language').html(data[1]);
+                            $('#id_search_foss').html(data[2]);
                         }
                         if(foss == '')
-                            $('.ajax-refresh-foss').hide();
+                            $('.ajax-refresh-search-foss').hide();
                         if(lang == '')
-                            $('.ajax-refresh-language').hide();
+                            $('.ajax-refresh-search-language').hide();
                     }
                 });
             }
         });
         $('.reset-filter').click(function(evt) {
             evt.preventDefault();
-            $('#id_foss').val('');
-            $('#id_language').val('');
+            $('#id_search_foss').val('');
+            $('#id_search_language').val('');
             $.ajax({
                     url: "/get-language/",
                     type: "POST",
@@ -469,15 +469,15 @@
                         lang : '',
                     },
                     beforeSend: function() {
-                        $('.ajax-refresh-foss').show();
-                        $('.ajax-refresh-language').show();
+                        $('.ajax-refresh-search-foss').show();
+                        $('.ajax-refresh-search-language').show();
                     },
                     success: function(data) {
                         if(data[0] == 'reset') {
-                            $('#id_language').html(data[1]);
-                            $('#id_foss').html(data[2]);
-                            $('.ajax-refresh-foss').hide();
-                            $('.ajax-refresh-language').hide();
+                            $('#id_search_language').html(data[1]);
+                            $('#id_search_foss').html(data[2]);
+                            $('.ajax-refresh-search-foss').hide();
+                            $('.ajax-refresh-search-language').hide();
                         }
                     }
                 });
