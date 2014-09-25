@@ -2332,25 +2332,31 @@ def report_missing_component_reply(request, tmcid):
         form = TutorialMissingComponentReplyForm(request.POST)
         if form.is_valid():
             TutorialMissingComponentReply.objects.create(missing_component = tmc_row, user = request.user, reply_message = request.POST.get('reply_message', ''))
-            #send email
-            to = []
-            bcc = []
-            cc = []
-            comps = {
-                1: 'Outline',
-                2: 'Script',
-                3: 'Video',
-                4: 'Slides',
-                5: 'Codefiles',
-                6: 'Assignment'
-            }
-            try:
-                to = [tmc_row.user.email]
-                bcc = settings.ADMINISTRATOR_EMAIL
-            except:
-                raise PermissionDenied()
-            subject  = "Reply: Missing Component Reply Notifications"
-            message = '''Dear {0},
+            if tmc_row.inform_me:
+                #send email
+                to = []
+                bcc = []
+                cc = []
+                username = "User"
+                comps = {
+                    1: 'Outline',
+                    2: 'Script',
+                    3: 'Video',
+                    4: 'Slides',
+                    5: 'Codefiles',
+                    6: 'Assignment'
+                }
+                try:
+                    if tmc_row.user:
+                        to = [tmc_row.user.email]
+                        username = tmc_row.user.first_name
+                    else:
+                        to = [tmc_row.email]
+                    bcc = settings.ADMINISTRATOR_EMAIL
+                except:
+                    raise PermissionDenied()
+                subject  = "Reply: Missing Component Reply Notifications"
+                message = '''Dear {0},
 You had posted Missing Component for the following tutorial:
 Foss: {2}
 Tutorial: {3}
@@ -2363,19 +2369,19 @@ Following is the reply for your post:
 --
 Regards,
 Spoken Tutorial
-'''.format(tmc_row.user.first_name, request.POST.get('reply_message', ''), tmc_row.tutorial_resource.tutorial_detail.foss, tmc_row.tutorial_resource.tutorial_detail.tutorial, tmc_row.tutorial_resource.language, comps[tmc_row.component])
-            # send email
-            email = EmailMultiAlternatives(
-                subject, message, 'administrator@spoken-tutorial.org',
-                to = to , bcc = bcc, cc = cc,
-                headers={'Reply-To': 'no-replay@spoken-tutorial.org', "Content-type":"text/html;charset=iso-8859-1"}
-            )
-            try:
-                result = email.send(fail_silently=False)
-            except Exception, e:
-                print "*******************************************************"
-                print message
-                print "*******************************************************"
+'''.format(username, request.POST.get('reply_message', ''), tmc_row.tutorial_resource.tutorial_detail.foss, tmc_row.tutorial_resource.tutorial_detail.tutorial, tmc_row.tutorial_resource.language, comps[tmc_row.component])
+                # send email
+                email = EmailMultiAlternatives(
+                    subject, message, 'administrator@spoken-tutorial.org',
+                    to = to , bcc = bcc, cc = cc,
+                    headers={'Reply-To': 'no-replay@spoken-tutorial.org', "Content-type":"text/html;charset=iso-8859-1"}
+                )
+                try:
+                    result = email.send(fail_silently=False)
+                except Exception, e:
+                    print "*******************************************************"
+                    print message
+                    print "*******************************************************"
             messages.success(request, 'Reply message added successfully!')
             form = TutorialMissingComponentReplyForm()
     context = {
