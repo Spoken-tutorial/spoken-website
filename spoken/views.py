@@ -123,8 +123,8 @@ def tutorial_search(request):
     if request.method == 'GET' and request.GET:
         form = TutorialSearchForm(request.GET)
         if form.is_valid():
-            foss_get = request.GET.get('foss', '')
-            language_get = request.GET.get('language', '')
+            foss_get = request.GET.get('search_foss', '')
+            language_get = request.GET.get('search_language', '')
             if foss_get and language_get:
                 collection = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), tutorial_detail__foss__foss = foss_get, language__name = language_get).order_by('tutorial_detail__level', 'tutorial_detail__order')
             elif foss_get:
