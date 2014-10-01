@@ -308,7 +308,8 @@ def news(request, cslug):
         collection = newstype.news_set.all().order_by('-created')
         context = {
             'collection' : collection,
-            'category' : cslug
+            'category' : cslug,
+            'newstype' : newstype
         }
         context.update(csrf(request))
         return render(request, 'spoken/templates/news/index.html', context)

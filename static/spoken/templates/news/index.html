@@ -3,7 +3,7 @@
 {% load static %}
 {% load cmsdata %}
 {% load creationdata %}
-{% block title %} News {% endblock %}
+{% block title %} {{ newstype.name }} {% endblock %}
 {% block cssblock %}
     <link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />
     <style>
@@ -13,7 +13,7 @@
     </style>
 {% endblock %}
 {% block heading %}
-    <i class="fa fa-list-ul"></i> News
+    <i class="fa fa-list-ul"></i> {{ newstype.name }}
 {% endblock %}
 {% block content %}
 	<div class='news-container'>
