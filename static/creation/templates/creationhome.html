@@ -99,9 +99,9 @@
                                 <li><a href="/creation/role/add/external-contributor">Add me as External Contributor</a></li>
                             {% endif %}
                             {% if user|get_videoreviewer %}
-                                <li><a href="/creation/role/revoke/video-reviewer">Revoke Video Reviewer Role</a></li>
+                                <li><a href="/creation/role/revoke/video-reviewer">Revoke Admin Reviewer Role</a></li>
                             {% else %}
-                                <li><a href="/creation/role/add/video-reviewer">Add me as Video Reviewer</a></li>
+                                <li><a href="/creation/role/add/video-reviewer">Add me as Admin Reviewer</a></li>
                             {% endif %}
                             {% if user|get_domainreviewer %}
                                 <li><a href="/creation/role/revoke/domain-reviewer">Revoke Domain Reviewer Role</a></li>
