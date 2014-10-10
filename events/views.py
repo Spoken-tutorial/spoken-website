@@ -2036,6 +2036,21 @@ def training_participant_feedback(request, training_id, participant_id):
     }
     context.update(csrf(request))
     return render(request, 'events/templates/training/view-feedback.html', context)
+    
+def live_training(request, training_id=None):
+    
+    context = {}
+    if not training_id:
+        context['training_list'] = Training.objects.filter(Q(training_type = 2) | Q(training_type = 3))
+    else:
+        try:
+            context['training'] = TrainingLiveFeedback.objects.filter(training_id = training_id)
+        except Exception, e:
+            print e
+            raise PermissionDenied()
+            
+    context.update(csrf(request))
+    return render(request, 'events/templates/training/live-feedback-list.html', context)
 
 def training_participant_livefeedback(request, training_id):
     form = LiveFeedbackForm()
