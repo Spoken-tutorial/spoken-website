@@ -4,6 +4,7 @@ from BeautifulSoup import BeautifulSoup
 from urllib import urlopen, quote
 import MySQLdb
 import sys
+import os
 #sys.path.insert(0, '../spoken')
 #sys.path.insert(0, '../../spoken')
 from config import *
@@ -162,7 +163,7 @@ db = MySQLdb.connect(host = DB_HOST, user = DB_USER, passwd = DB_PASS, db = DB_N
 cur = db.cursor()
 cur.execute("SELECT * FROM creation_tutorialresource where status = 1 or status = 2")
 rows = cur.fetchall()
-overwrite = True
+overwrite = False
 error_log_file_head = open(LOG_ROOT + 'srt-error-log.txt',"w")
 success_log_file_head = open(LOG_ROOT + 'srt-success-log.txt',"w")
 for row in rows:
