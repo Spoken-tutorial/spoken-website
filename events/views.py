@@ -252,7 +252,7 @@ def training_gentle_reminder(request):
     return HttpResponse("Done!")
 
 def training_completion_reminder(request):
-    training_need_to_complete = Training.objects.filter(training_type = 0, status__lte = 3, trdate__lte=datetime.date.today() - datetime.timedelta(days=60))
+    training_need_to_complete = Training.objects.filter(training_type = 0, status__lte = 3, trdate__lte=datetime.date.today() - datetime.timedelta(days=30))
     if training_need_to_complete:
         status = 'How to upload the attendance on the Training day'
         for t in training_need_to_complete:

@@ -84,10 +84,8 @@ def get_participant_status(key, testcode):
 
 def can_upload_final_training_list(trdate):
     try:
-        date_after_two_month = trdate + relativedelta(months=2)
-        print date_after_two_month
-        print datetime.date.today()
-        if datetime.date.today() >= date_after_two_month:
+        date_after_one_month = trdate + relativedelta(days=30)
+        if datetime.date.today() >= date_after_one_month:
             return True
         return False
     except Exception, e:
