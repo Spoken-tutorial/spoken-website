@@ -21,7 +21,13 @@
                     </div>
                 </div>
             {% endif %}
-            
+            <div class="form-group">
+                <label for="id_training_type" class="col-sm-2 control-label">Training Type</label>
+                <div class="col-sm-10">
+                    {% render_field form.training_type class+="form-control chosen training_type" tabindex="1" %}
+                    {{ form.training_type.errors }}
+                </div>
+            </div>
             <div class="form-group">
                 <label for="id_city" class="col-sm-2 control-label">City/Town</label>
                 <div class="col-sm-10">

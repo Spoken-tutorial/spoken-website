@@ -1134,6 +1134,18 @@ def training_completion(request, rid):
     return render(request, 'events/templates/training/training_approvel_form.html', context)
 
 @login_required
+def view_training_completion(request, rid):
+    user = request.user
+    context = {}
+    if not (user.is_authenticated() and is_resource_person(user)):
+        raise PermissionDenied()
+    try:
+        context['training'] = Training.objects.get(pk = rid)
+    except Exception, e:
+        raise PermissionDenied()
+    return render(request, 'events/templates/training/view_training_completion.html', context)
+
+@login_required
 def accessrole(request):
     user = request.user
     state =  list(AcademicCenter.objects.filter(state__in = Permission.objects.filter(user=user, permissiontype_id=1).values_list('state_id')).values_list('id'))
