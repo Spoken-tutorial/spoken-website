@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 
 #creation app models
 from creation.models import FossCategory, Language, FossAvailableForWorkshop, FossAvailableForTest
-from exam.models import Quiz, QuestionPaper
+from testapp.exam.models import Quiz, QuestionPaper
 from mdldjango.models import *
 
 #validation
@@ -259,7 +259,7 @@ class Test(models.Model):
     ttime = models.TimeField()
     status = models.PositiveSmallIntegerField(default=0)
     participant_count = models.PositiveIntegerField(default=0)
-    use_exam_app = models.BooleanField()
+    use_exam_app = models.BooleanField(blank=True, default=0)
     created = models.DateTimeField(auto_now_add = True)
     updated = models.DateTimeField(auto_now = True)
 
@@ -287,7 +287,6 @@ class TestAttendance(models.Model):
     updated = models.DateTimeField(auto_now = True)
     class Meta:
         verbose_name = "Test Attendance"
-        unique_together = (("test", "mdluser_id"))
 
 class TestLog(models.Model):
     user = models.ForeignKey(User)

@@ -61,7 +61,17 @@
 					        <tr>
 					            <th><input type='checkbox' name="user_{{ record.id }}" value="{{ record.id }}" {{ record.id|get_status:test }} ></th>
 						        <td><iframe style="width:70px; height:70px;" src="{{ record.id|participant_picture }}"></iframe></td>
-						        <td>{{ record.firstname|lower|title }} {{ record.lastname|lower|title }}</td>
+						        <td>
+						            {% if record.test.use_exam_app %}
+						                {% if record.user.first_name %}
+						                    {{ record.user.first_name|lower|title }}
+						                {% else %}
+						                    {{ record.user.username|lower|title }}
+						                {% endif %}
+						            {% else %}
+						                {{ record.firstname|lower|title }} {{ record.lastname|lower|title }}
+						            {% endif %}
+						        </td>
 						        <td>
 						            {{ record.id|get_participant_status:test }}
 						        </td>

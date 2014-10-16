@@ -7,7 +7,7 @@ from django.forms import ModelForm
 #import events models
 from events.models import *
 from mdldjango.models import MdlCourse, MdlQuiz
-from exam.models import Quiz, QuestionPaper
+from testapp.exam.models import Quiz, QuestionPaper
 from django.contrib.auth.models import User, Group
 
 class RpForm(forms.ModelForm):

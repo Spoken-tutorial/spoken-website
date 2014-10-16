@@ -155,11 +155,15 @@
                                         {% endif %}
                                     {% endwith %}
                                 {% elif ta.status == 2 %}
-                                    {% with courseid=record.id|get_moodle_courseid:user.id %}
-                                        {% if courseid %}
-                                            <a href="{{ ONLINE_TEST_URL }}course/view.php?id={{courseid}}" target="_blank"> Continue Test</a>
+                                    {% with course=record|get_moodle_courseid:user.id %}
+                                        {% if record.use_exam_app %}
+                                            <a href="/exam/intro/{{course.examquestionpaper_id}}/" target="_blank"> Continue Test</a>
                                         {% else %}
-                                            <a href="{{ ONLINE_TEST_URL }}course/" target="_blank"> Continue Test</a>
+                                            {% if course %}
+                                                <a href="{{ ONLINE_TEST_URL }}course/view.php?id={{course.mdlcourse_id}}" target="_blank"> Continue Test</a>
+                                            {% else %}
+                                                <a href="{{ ONLINE_TEST_URL }}course/" target="_blank"> Continue Test</a>
+                                            {% endif %}
                                         {% endif %}
                                     {% endwith %}
                                 {% elif ta.status >= 3 %}

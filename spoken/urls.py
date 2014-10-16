@@ -55,7 +55,7 @@ urlpatterns = patterns('',
     url(r'^report_builder/', include('report_builder.urls')),
     
     #online Test
-    url(r'^exam/', include('exam.urls')),
+    url(r'^exam/', include('testapp.exam.urls')),
     url(r'^taggit_autocomplete_modified/', include\
                                         ('taggit_autocomplete_modified.urls')),
     

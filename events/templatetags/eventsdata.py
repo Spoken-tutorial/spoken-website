@@ -119,7 +119,7 @@ def can_enter_test(key, test):
         if test.use_exam_app:
             ta = TestAttendance.objects.get(user_id=key, test_id=test.id)
         else:
-            ta = TestAttendance.objects.get(mdluser_id=key, test_id=test)
+            ta = TestAttendance.objects.get(mdluser_id=key, test_id=test.id)
     except Exception, e:
         return None
     if ta.status >= 0:

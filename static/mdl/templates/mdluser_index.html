@@ -136,30 +136,30 @@
                         <td>{{ record.foss.foss }}</td>
                         <td>{{ record.tdate }} {{ record.ttime }}</td>
                         <td>
-                            {% with status=mdluserid|can_enter_test:record.id %}
-                                {% if status == None %}
+                            {% with ta=mdluserid|can_enter_test:record %}
+                                {% if ta.status == None %}
                                     <a href="{% url 'events:student_subscribe' 'test' record.id mdluserid %}">Enroll</a>
-                                {% elif status == 0 %}
+                                {% elif ta.status == 0 %}
                                     Waiting for Attandance
                                 <!-- Todo: Link to go attempt page -->
-                                {% elif status == 1 %}
-                                    {% with courseid=record.id|get_moodle_courseid:mdluserid %}
-                                        {% if courseid %}
-                                            <a href="{{ ONLINE_TEST_URL }}course/view.php?id={{courseid}}" target="_blank"> Enter into Test</a>
+                                {% elif ta.status == 1 %}
+                                    {% with course=record|get_moodle_courseid:mdluserid %}
+                                        {% if course %}
+                                            <a href="{{ ONLINE_TEST_URL }}course/view.php?id={{course.mdlcourse_id}}" target="_blank"> Enter into Test</a>
                                         {% else %}
                                             <a href="{{ ONLINE_TEST_URL }}course/" target="_blank"> Enter into Test</a>
                                         {% endif %}
                                     {% endwith %}
-                                {% elif status == 2 %}
-                                    {% with courseid=record.id|get_moodle_courseid:mdluserid %}
-                                        {% if courseid %}
-                                            <a href="{{ ONLINE_TEST_URL }}course/view.php?id={{courseid}}" target="_blank"> Continue Test</a>
+                                {% elif ta.status == 2 %}
+                                    {% with course=record|get_moodle_courseid:mdluserid %}
+                                        {% if course %}
+                                            <a href="{{ ONLINE_TEST_URL }}course/view.php?id={{course.mdlcourse_id}}" target="_blank"> Continue Test</a>
                                         {% else %}
                                             <a href="{{ ONLINE_TEST_URL }}course/" target="_blank"> Continue Test</a>
                                         {% endif %}
                                     {% endwith %}
-                                {% elif status >= 3 %}
-                                    {% with grade=record.id|get_participant_mark:mdluserid %}
+                                {% elif ta.status >= 3 %}
+                                    {% with grade=record|get_participant_mark:mdluserid %}
                                         {% if grade %}
                                             {% if grade >= 40 %}
                                                 {{ grade }}%

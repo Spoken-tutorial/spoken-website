@@ -76,7 +76,7 @@ INSTALLED_APPS = (
 	'nicedit',
 	'masquerade',
 	'report_builder',
-	'exam',
+	'testapp.exam',
 	'taggit',
 	'taggit_autocomplete_modified',
 	#'south'

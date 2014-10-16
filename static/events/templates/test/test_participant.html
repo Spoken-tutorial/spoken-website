@@ -40,6 +40,8 @@
 					    <td>
 					        {% if record.mdluser_firstname  %}
 					            {{ record.mdluser_firstname }}
+					        {% elif record.user %}
+					            {{ record.user.first_name }}
 					        {% else %}
 					            {{ mdluser.firstname }}
 					        {% endif %}
@@ -47,26 +49,46 @@
 					    <td>
 					        {% if record.mdluser_lastname  %}
 					            {{ record.mdluser_lastname }}
+					        {% elif record.user %}
+					            {{ record.user.last_name }}
 					        {% else %}
 					            {{ mdluser.lastname }}
 					        {% endif %}
 					    </td>
 					    <td>
-					        {% if record.status > 2 %}
-					            {% with grade=test.id|get_participant_mark:record.mdluser_id %}
-					                {% if grade %}
-                                        {% if grade >= 40 %}
-                                            {{ grade }}%
-                                            {% if test.invigilator %}
-                                             - <a href="{% url 'events:test_participant_ceritificate' test.id record.mdluser_id %}">Certificate</a>
+					        {% if test.use_exam_app %}
+					            {% with grade=test|get_participant_mark:record %}
+					                    {{ grade }}
+					                    {% if grade %}
+                                            {% if grade >= 40 %}
+                                                {{ grade }}%
+                                                {% if test.invigilator %}
+                                                 - <a href="{% url 'events:test_participant_ceritificate' test.id record.user_id %}">Certificate</a>
+                                                {% endif %}
+                                            {% else %}
+                                                {{ grade }} (Fail)
                                             {% endif %}
                                         {% else %}
-                                            {{ grade }} (Fail)
+                                            Never submitted
                                         {% endif %}
-                                    {% else %}
-                                        Never submitted
-                                    {% endif %}
-                                {% endwith %}
+                                    {% endwith %}
+					        {% else %}
+					            {% if record.status > 2 %}
+					                {% with grade=test|get_participant_mark:record %}
+					                    {% if grade %}
+                                            {% if grade >= 40 %}
+                                                {{ grade }}%
+                                                {% if test.invigilator %}
+                                                 - <a href="{% url 'events:test_participant_ceritificate' test.id record.mdluser_id %}">Certificate</a>
+                                                {% endif %}
+                                            {% else %}
+                                                {{ grade }} (Fail)
+                                            {% endif %}
+                                        {% else %}
+                                            Never submitted
+                                        {% endif %}
+                                    {% endwith %}
+                                {% endif %}
                             {% endif %}
                         </td>
 				    </tr>

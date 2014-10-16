@@ -2,7 +2,7 @@ from django import template
 from django.contrib.auth.models import User
 from mdldjango.models import *
 from events.models import TrainingAttendance, TestAttendance
-from exam.models import AnswerPaper
+from testapp.exam.models import AnswerPaper
 
 register = template.Library()
 
@@ -28,16 +28,16 @@ def check_test_enrole(rid, mdluser_id):
     except:
         return False
 
-def get_participant_mark(record, mdluser_id):
+def get_participant_mark(record, user):
     try:
         #for-exam-app
         if record.use_exam_app:
-            ta = TestAttendance.objects.get(test_id = record.id, user_id = mdluser_id)
-            ans = AnswerPaper.objects.filter(question_paper_id = ta.examquestionpaper_id, user_id = mdluser_id).order_by('-percent')
+            ta = TestAttendance.objects.get(test_id = record.id, user_id = user.user_id)
+            ans = AnswerPaper.objects.filter(question_paper_id = ta.examquestionpaper_id, user_id = user.user_id).order_by('-percent')
             if ans:
                 return ans.first().percent
         else:
-            ta = TestAttendance.objects.get(test_id = record.id, mdluser_id = mdluser_id)
+            ta = TestAttendance.objects.get(test_id = record.id, mdluser_id = user.mdluser_id)
     except Exception, e:
         print e
         return False
@@ -54,9 +54,16 @@ def get_participant_mark(record, mdluser_id):
 
 def get_moodle_courseid(test, mdluser_id):
     try:
-        wa = TestAttendance.objects.get(test_id = test.id, user_id = mdluser_id)
+        #for-exam-app
+        wa = False
+        if test.use_exam_app:
+            wa = TestAttendance.objects.get(test_id = test.id, user_id = mdluser_id)
+        else:
+            wa = TestAttendance.objects.get(test_id = test.id, mdluser_id = mdluser_id)
+        print wa.id
         return wa
     except Exception, e:
+        print e, "***********"
         return False
 
 def get_mdluser_details(mdluser_id):

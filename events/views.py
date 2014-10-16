@@ -1668,6 +1668,9 @@ def test_attendance(request, tid):
         if test.status == 4 or test.status == 1:
             return HttpResponseRedirect('/software-training/test/' + str(test.id) + '/participant/')
         test.status = 3
+        #for-exam-app
+        if FossMdlCourses.objects.filter(foss = test.foss, use_exam_app = 1).exists():
+            test.use_exam_app = 1
         test.save()
     except:
         raise PermissionDenied()
@@ -1682,14 +1685,17 @@ def test_attendance(request, tid):
                         try:
                             ta = None
                             #for-exam-app
+                            fossmdlcourse = FossMdlCourses.objects.get(foss_id = test.foss_id)
                             if test.use_exam_app:
                                 ta = TestAttendance.objects.get(pk = users[u], test_id = tid)
-                                fossmdlcourse = FossMdlCourses.objects.get(foss_id = test.foss_id)
                                 ta.examquestionpaper_id = fossmdlcourse.examquestionpaper_id
                                 ta.save()
                             else:
                                 ta = TestAttendance.objects.get(mdluser_id = users[u], test_id = tid)
-                            
+                                ta.mdlcourse_id = fossmdlcourse.mdlcourse_id
+                                ta.mdlquiz_id = fossmdlcourse.mdlquiz_id
+                                ta.mdlattempt_id = 0
+                                ta.save()
                             if ta.status > 1:
                                 continue
                         except Exception, e:
@@ -1713,16 +1719,16 @@ def test_attendance(request, tid):
                             #todo: if the status = 2 check in moodle if he completed the test set status = 3 (completed)
                             #for-exam-app
                             if test.use_exam_app:
+                                t = TestAttendance.objects.get(user_id = ta.user_id, test_id = tid)
+                                fossmdlcourse = FossMdlCourses.objects.get(foss_id = test.foss_id)
+                                t.examquiz_id = fossmdlcourse.examquestionpaper_id
+                                t.status = 1
+                                t.save()
+                            else:
                                 t = TestAttendance.objects.get(mdluser_id = ta.mdluser_id, test_id = tid)
                                 fossmdlcourse = FossMdlCourses.objects.get(foss_id = test.foss_id)
                                 t.mdlcourse_id = fossmdlcourse.mdlcourse_id
                                 t.mdlquiz_id = fossmdlcourse.mdlquiz_id
-                                t.status = 1
-                                t.save()
-                            else:
-                                t = TestAttendance.objects.get(user_id = ta.user_id, test_id = tid)
-                                fossmdlcourse = FossMdlCourses.objects.get(foss_id = test.foss_id)
-                                t.examquiz_id = fossmdlcourse.examquestionpaper_id
                                 t.status = 1
                                 t.save()
                                 
@@ -1954,9 +1960,15 @@ def training_subscribe(request, events, eventid = None, mdluser_id = None):
             try:
                 #Online Exam App
                 if test.use_exam_app:
-                    TestAttendance.objects.create(test=test, user = request.user)
+                    if not TestAttendance.objects.filter(test=test, user = request.user).exists():
+                        TestAttendance.objects.create(test=test, user = request.user)
+                        messages.success(request, "You have sucessfully subscribe to the "+events+"")
+                    return HttpResponseRedirect('/software-training/participant-exam/?category=4')
                 else:
-                    TestAttendance.objects.create(test_id=eventid, mdluser_id = mdluser_id, mdluser_firstname = mdluser.firstname, mdluser_lastname = mdluser.lastname)
+                    if not TestAttendance.objects.filter(test_id=eventid, mdluser_id = mdluser_id).exists():
+                        TestAttendance.objects.create(test_id=eventid, mdluser_id = mdluser_id, mdluser_firstname = mdluser.firstname, mdluser_lastname = mdluser.lastname)
+                    messages.success(request, "You have sucessfully subscribe to the "+events+"")
+                    return HttpResponseRedirect('/participant/index/')
             except Exception, e:
                 print e
                 pass
