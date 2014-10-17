@@ -15,6 +15,7 @@ from django.views.decorators.http import require_POST
 from django import forms
 from django.template import RequestContext
 from django.core.context_processors import csrf
+from django.core.mail import EmailMultiAlternatives
 from django.core.exceptions import PermissionDenied
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render, render_to_response
@@ -2321,6 +2322,7 @@ def get_and_query_for_contributor_roles(data_rows, fields):
 def report_missing_component_reply(request, tmcid):
     if not is_contributor(request.user) and not is_administrator(request.user):
         raise PermissionDenied()
+    tmc_row = None
     try:
         tmc_row = TutorialMissingComponent.objects.get(pk = tmcid)
     except:
@@ -2330,6 +2332,56 @@ def report_missing_component_reply(request, tmcid):
         form = TutorialMissingComponentReplyForm(request.POST)
         if form.is_valid():
             TutorialMissingComponentReply.objects.create(missing_component = tmc_row, user = request.user, reply_message = request.POST.get('reply_message', ''))
+            if tmc_row.inform_me:
+                #send email
+                to = []
+                bcc = []
+                cc = []
+                username = "User"
+                comps = {
+                    1: 'Outline',
+                    2: 'Script',
+                    3: 'Video',
+                    4: 'Slides',
+                    5: 'Codefiles',
+                    6: 'Assignment'
+                }
+                try:
+                    if tmc_row.user:
+                        to = [tmc_row.user.email]
+                        username = tmc_row.user.first_name
+                    else:
+                        to = [tmc_row.email]
+                    bcc = settings.ADMINISTRATOR_EMAIL
+                except:
+                    raise PermissionDenied()
+                subject  = "Reply: Missing Component Reply Notifications"
+                message = '''Dear {0},
+You had posted Missing Component for the following tutorial:
+Foss: {2}
+Tutorial: {3}
+Language: {4}
+Component: {5}
+Nature of Report: Component itself is missing
+Following is the reply for your post:
+{1}
+
+--
+Regards,
+Spoken Tutorial
+'''.format(username, request.POST.get('reply_message', ''), tmc_row.tutorial_resource.tutorial_detail.foss, tmc_row.tutorial_resource.tutorial_detail.tutorial, tmc_row.tutorial_resource.language, comps[tmc_row.component])
+                # send email
+                email = EmailMultiAlternatives(
+                    subject, message, 'administrator@spoken-tutorial.org',
+                    to = to , bcc = bcc, cc = cc,
+                    headers={'Reply-To': 'no-replay@spoken-tutorial.org', "Content-type":"text/html;charset=iso-8859-1"}
+                )
+                try:
+                    result = email.send(fail_silently=False)
+                except Exception, e:
+                    print "*******************************************************"
+                    print message
+                    print "*******************************************************"
             messages.success(request, 'Reply message added successfully!')
             form = TutorialMissingComponentReplyForm()
     context = {

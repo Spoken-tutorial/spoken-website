@@ -123,8 +123,8 @@ def tutorial_search(request):
     if request.method == 'GET' and request.GET:
         form = TutorialSearchForm(request.GET)
         if form.is_valid():
-            foss_get = request.GET.get('foss', '')
-            language_get = request.GET.get('language', '')
+            foss_get = request.GET.get('search_foss', '')
+            language_get = request.GET.get('search_language', '')
             if foss_get and language_get:
                 collection = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), tutorial_detail__foss__foss = foss_get, language__name = language_get).order_by('tutorial_detail__level', 'tutorial_detail__order')
             elif foss_get:
@@ -139,7 +139,6 @@ def tutorial_search(request):
     
     page = request.GET.get('page')
     collection = get_page(collection, page)
-    
     context['form'] = form
     context['collection'] = collection
     return render(request, 'spoken/templates/tutorial_search.html', context)
@@ -229,7 +228,6 @@ def testimonials_new(request):
                     except Exception, e:
                         print e
                     file_path = settings.MEDIA_ROOT + 'testimonial/'+ str(rid) +'/'
-                    print "***********", file_path
                     try:
                         os.mkdir(file_path)
                     except Exception, e:
@@ -310,7 +308,8 @@ def news(request, cslug):
         collection = newstype.news_set.all().order_by('-created')
         context = {
             'collection' : collection,
-            'category' : cslug
+            'category' : cslug,
+            'newstype' : newstype
         }
         context.update(csrf(request))
         return render(request, 'spoken/templates/news/index.html', context)

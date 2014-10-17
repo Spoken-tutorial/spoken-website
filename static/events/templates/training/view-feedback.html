@@ -25,6 +25,18 @@
         <i class="fa fa-list-ul"></i> Participant Details<a href="/software-training" class='pull-right'>Dashboard</a>
 {% endblock %}
 {% block content %}
+    <div class="bs-callout bs-callout-info">
+        <dl class="dl-horizontal">
+            <dt>Name</dt>
+                <dd>{{ feedback.name }}</dd>
+            <dt>Email</dt>
+                <dd>{{ feedback.email }}</dd>
+            <dt>Institution</dt>
+                <dd>{{ feedback.institution }}</dd>
+            <dt>Branch</dt>
+                <dd>{{ feedback.branch }}</dd>
+        </dd>
+    </div>
     <table class="paleblue table table-striped table-hover table-bordered">
         <tr><td class='boldy'>Content</td>
         <td>{{ feedback.content|feedback_status_good }}</td></tr>

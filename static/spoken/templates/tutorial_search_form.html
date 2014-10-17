@@ -1,0 +1,27 @@
+{% load widget_tweaks %}
+<form action="/tutorial-search" method="GET" class='form-horizontal'>
+    {% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
+        {% if form.non_field_errors %}
+        <ul>
+          {% for error in form.non_field_errors %}
+            <li>{{ error }}</li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+        <div class="form-group">
+            <div class="col-sm-5">
+                <span class='ajax-search-refresh ajax-refresh-search-foss'><i class="fa fa-2 fa-refresh fa-spin"></i></span>
+                {% render_field form.search_foss class+="form-control search-foss" tabindex="1" value=keywords %}
+                {{ form.search_foss.errors }}
+            </div>
+            <div class="col-sm-5">
+                <span class='ajax-search-refresh ajax-refresh-search-language'><i class="fa fa-2 fa-refresh fa-spin"></i></span>
+                {% render_field form.search_language class+="form-control search-language" tabindex="1" value=keywords %}
+                {{ form.search_language.errors }}
+            </div>
+            <div class="col-sm-2">
+                <input class="btn btn-primary" type="submit" value="Search" />
+            </div>
+        </div>
+    {% endwith %}
+</form>

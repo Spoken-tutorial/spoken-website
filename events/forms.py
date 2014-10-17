@@ -328,3 +328,55 @@ class TrainingCompletionForm(forms.Form):
 #        if user:
 #            if user.organiser.test_organiser.filter(status=4).count():
 #                self.fields['online_test'].choices=[('', '---------'), (0, 'Will Request'), (1, 'Will not Request')]
+
+class LiveFeedbackForm(forms.ModelForm):
+    fiveChoice = (('1', '',), ('2', '',), ('3', '',), ('4', '',), ('5', '',))
+    threeChoice = (('1', '',), ('2', '',), ('3', '',))
+    
+    name = forms.CharField()
+    email = forms.EmailField()
+    branch = forms.CharField()
+    institution = forms.CharField()
+    
+    content = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
+    sequence = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
+    clarity = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
+    interesting = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
+    appropriate_example = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
+    instruction_sheet = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
+    assignment = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
+    
+    pace_of_tutorial = forms.ChoiceField(widget=forms.RadioSelect, choices = threeChoice )
+    rate_workshop = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
+    workshop_learnt = forms.CharField(widget=forms.Textarea(attrs={'rows': 2}))
+    workshop_improved = forms.CharField(widget=forms.Textarea(attrs={'rows': 2}))
+    weakness_workshop = forms.BooleanField(label='Duration of the workshop is less', required=False, initial=False)
+    weakness_narration = forms.BooleanField(label='Pace of the narration in the tutorials was very fast', required=False, initial=False)
+    weakness_understand = forms.BooleanField(label='Had to listen more than two times to understand the commands', required=False, initial=False)
+    other_weakness = forms.CharField(widget=forms.Textarea(attrs={'rows': 2}))
+    tutorial_language = forms.ChoiceField(widget=forms.RadioSelect, choices = threeChoice )
+    apply_information = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
+    if_apply_information_yes = forms.CharField(widget=forms.Textarea(attrs={'rows': 2}))
+    
+    setup_learning = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
+    computers_lab = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
+    audio_quality = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
+    video_quality = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
+
+    workshop_orgainsation = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
+    faciliate_learning = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
+    motivate_learners = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
+    time_management = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
+
+    knowledge_about_software = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
+    provide_clear_explanation = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
+    answered_questions = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
+    interested_helping = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
+    executed_workshop = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
+    
+    recommend_workshop = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
+    reason_why = forms.CharField(widget=forms.Textarea(attrs={'rows': 2}))
+    other_comments = forms.CharField(widget=forms.Textarea(attrs={'rows': 2}))
+    class Meta:
+        model = TrainingLiveFeedback
+        exclude = ['training', 'mdluser_id']

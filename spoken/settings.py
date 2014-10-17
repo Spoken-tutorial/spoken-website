@@ -46,6 +46,8 @@ MANAGERS = (
     ('sanmugam', 'k.sanmugam2@gmail.com'),
 )
 
+ADMINISTRATOR_EMAIL = ADMINISTRATOR_EMAIL
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = DEBUG_MODE
 

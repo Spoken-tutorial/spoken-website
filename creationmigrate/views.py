@@ -730,3 +730,30 @@ def srtfiles(request):
             print 'from: ', old_rec.tutorial_detail.tutorial_name + '-' + old_rec.language + '.srt'
             print 'created: ', new_tutorial_with_hyphen + '-' + new_rec.language.name + '.srt'
     return HttpResponse('Success!')
+    
+def missing_component(request):
+    tmc = CTutorialMissingComponent.objects.all()
+    for t in tmc:
+        if t.uid.uid or t.email:
+            tr = None
+            if TutorialDetail.objects.filter(tutorial = t.trid.tutorial_detail.tutorial_name.replace('-', ' ')).exists():
+                td = TutorialDetail.objects.get(tutorial = t.trid.tutorial_detail.tutorial_name.replace('-', ' '))
+                lang = Language.objects.get(name=t.trid.language)
+                try:
+                    tr = TutorialResource.objects.get(tutorial_detail_id = td.id, language = lang.id)
+                except:
+                    continue
+                user_id = None
+                if t.uid.uid:
+                    user_id = get_current_user_from_old_email(t.uid.mail, request.user)
+                comps = {
+                    'outline': 1,
+                    'script' : 2,
+                    'video' : 3,
+                    'slide' : 4,
+                    'codefile' : 5,
+                    'assignment' : 6
+                }
+                if not TutorialMissingComponent.objects.filter(user_id = user_id, email = t.email, tutorial_resource_id= tr.id, component = comps[t.component], report_type = t.type, remarks = t.remarks, inform_me = t.reported, reply_status = t.reply_status).exists():
+                    TutorialMissingComponent.objects.create(user_id = user_id, email = t.email, tutorial_resource_id= tr.id, component = comps[t.component], report_type = t.type, remarks = t.remarks, inform_me = t.reported, reply_status = t.reply_status, created = t.created, updated = t.updated);
+    return HttpResponse('Success!')

@@ -258,7 +258,7 @@ def training_gentle_reminder(request):
     return HttpResponse("Done!")
 
 def training_completion_reminder(request):
-    training_need_to_complete = Training.objects.filter(training_type = 0, status__lte = 3, trdate__lte=datetime.date.today() - datetime.timedelta(days=60))
+    training_need_to_complete = Training.objects.filter(training_type = 0, status__lte = 3, trdate__lte=datetime.date.today() - datetime.timedelta(days=30))
     if training_need_to_complete:
         status = 'How to upload the attendance on the Training day'
         for t in training_need_to_complete:
@@ -959,7 +959,7 @@ def training_list(request, role, status):
             if status == 'approved':
                 collectionSet = Training.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status], trdate__gt=datetime.date.today()).order_by('-trdate')
             elif status == 'predated':
-                collectionSet = Training.objects.filter((Q(status = 0) | Q(status = 1) | Q(status = 2) | Q(status = 3)), academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), trdate__lte=datetime.date.today()).order_by('-trdate')
+                collectionSet = Training.objects.filter((Q(status = 0) | Q(status = 1) | Q(status = 2) | Q(status = 3)), academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), trdate__lt=datetime.date.today()).order_by('-trdate')
             elif status =='ongoing':
                 collectionSet = Training.objects.filter((Q(status = 2) | Q(status = 3)), academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), trdate__lte=datetime.date.today()).order_by('-trdate')
             elif status =='pending':
@@ -1138,6 +1138,18 @@ def training_completion(request, rid):
     context['form'] = form
     context.update(csrf(request))
     return render(request, 'events/templates/training/training_approvel_form.html', context)
+
+@login_required
+def view_training_completion(request, rid):
+    user = request.user
+    context = {}
+    if not (user.is_authenticated() and is_resource_person(user)):
+        raise PermissionDenied()
+    try:
+        context['training'] = Training.objects.get(pk = rid)
+    except Exception, e:
+        raise PermissionDenied()
+    return render(request, 'events/templates/training/view_training_completion.html', context)
 
 @login_required
 def accessrole(request):
@@ -1667,6 +1679,7 @@ def test_attendance(request, tid):
         test = Test.objects.get(pk=tid)
         if test.status == 4 or test.status == 1:
             return HttpResponseRedirect('/software-training/test/' + str(test.id) + '/participant/')
+            
         test.status = 3
         #for-exam-app
         if FossMdlCourses.objects.filter(foss = test.foss, use_exam_app = 1).exists():
@@ -2092,6 +2105,60 @@ def training_participant_feedback(request, training_id, participant_id):
         return HttpResponseRedirect("/software-training/training/" + str(training_id) + "/participant/")
     context = {
         'feedback' : tf,
+    }
+    context.update(csrf(request))
+    return render(request, 'events/templates/training/view-feedback.html', context)
+    
+def live_training(request, training_id=None):
+    
+    context = {}
+    if not training_id:
+        context['training_list'] = Training.objects.filter(Q(training_type = 2) | Q(training_type = 3))
+    else:
+        try:
+            context['training'] = TrainingLiveFeedback.objects.filter(training_id = training_id)
+        except Exception, e:
+            print e
+            raise PermissionDenied()
+            
+    context.update(csrf(request))
+    return render(request, 'events/templates/training/live-feedback-list.html', context)
+
+def training_participant_livefeedback(request, training_id):
+    form = LiveFeedbackForm()
+    w = None
+    try:
+        w = Training.objects.get(pk=training_id)
+    except Exception, e:
+        raise PermissionDenied()
+    if request.method == 'POST':
+        form = LiveFeedbackForm(request.POST)
+        if form.is_valid():
+            try:
+                form_data = form.save(commit=False)
+                form_data.training_id = w.id
+                form_data.save()
+                messages.success(request, "Thank you for your valuable feedback.")
+                return HttpResponseRedirect('/')
+            except Exception, e:
+                print e
+                messages.success(request, "Thank you for your valuable feedback.")
+                return HttpResponseRedirect('/')
+    context = {
+        'form' : form,
+        'w' : w
+    }
+    return render(request, 'events/templates/training/lfeedback.html', context)
+
+def training_participant_viewlivefeedback(request, training_id, feedback_id):
+    tf = None
+    try:
+        tf = TrainingLiveFeedback.objects.get(training_id = training_id, id = feedback_id)
+    except:
+        raise PermissionDenied()
+    context = {
+        'feedback' : tf,
+        'live' : True
     }
     context.update(csrf(request))
     return render(request, 'events/templates/training/view-feedback.html', context)

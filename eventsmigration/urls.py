@@ -18,4 +18,5 @@ urlpatterns = patterns('',
     url(r'^old-test-to-new/$', 'eventsmigration.views.old_test_to_new', name="old_test_to_new"),
     url(r'^old-workshop-to-new/$', 'eventsmigration.views.old_workshop_to_new', name="old_workshop_to_new"),
     url(r'^update-old-city/$', 'eventsmigration.views.update_old_city', name="update_old_city"),
+    url(r'^workshop-livefeedback/$', 'eventsmigration.views.workshop_livefeedback', name="workshop_livefeedback"),
 )

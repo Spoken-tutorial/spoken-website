@@ -15,4 +15,5 @@ urlpatterns = patterns('',
     #url(r'^tutorial-common-contents/$', 'creationmigrate.views.tutorial_common_contents', name="tutorial_common_contents"),
     url(r'^srtfiles/$', 'creationmigrate.views.srtfiles', name="srtfiles"),
     url(r'^test/$', 'creationmigrate.views.test', name="test"),
+    url(r'^missing-component/$', 'creationmigrate.views.missing_component', name="missing_component"),
 )

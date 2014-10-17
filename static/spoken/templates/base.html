@@ -99,8 +99,8 @@
                                                                     <h5 class="media-heading"><b>Online Test</b></h5>
                                                                     <div class="media-body">
                                                                         <ul class="media-list">
-                                                                        <li class=""><a href="http://onlinetest.spoken-tutorial.org/" target="_blank">Instruction for Invigilator</a></li>
-                                                                        <li class=""><a href="http://onlinetest.spoken-tutorial.org/" target="_blank">Instruction for Participants</a></li>
+                                                                        <li class=""><a href="http://process.spoken-tutorial.org/images/0/09/Instructions_for_Invigilator.pdf" target="_blank">Instruction for Invigilator</a></li>
+                                                                        <li class=""><a href="http://process.spoken-tutorial.org/images/9/95/Test_Instruction_for_Participants.pdf" target="_blank">Instruction for Participants</a></li>
                                                                             <li class=""><a href="http://onlinetest.spoken-tutorial.org/" target="_blank">Assessment Test</a></li>
                                                                         </ul>
                                                                     </div>
@@ -209,7 +209,7 @@
                 </nav>
             </div> <!-- /#header-wrapper -->
             {% block search %}
-                <div id="search-wrapper">
+                <!-- <div id="search-wrapper">
                     <div class="common-search row">
                         <form class="navbar-form" role="search" action="/keyword-search" method="GET" id="search-form">
                             <div class="input-group">
@@ -220,6 +220,12 @@
                             </div>
                         </form>
                         <div class="pull-right" style="margin-right:20px;"><a href="/tutorial-search/">Advanced Search</a></div>
+                    </div>
+                </div> -->
+                <div id="search-wrapper">
+                    <div class="common-search row">
+                        {% tutorialsearch %}
+                        <div class="pull-right" style="margin-right:32px;"><a href="/keyword-search/">Keyword Search</a></div>
                     </div>
                 </div>
             {% endblock %}
@@ -271,10 +277,11 @@
                             {% if collection.paginator.num_pages > 1 %}
                                 <ul class="pagination pull-right">
                                     {% if collection %}
-                                        {% if collection.has_previous %} 
+                                        {% if collection.has_previous %}
+                                            <li><a href="?{{ request.GET|combine_get_values }}page=1">&laquo; <small>First</small></a></li>
                                             <li><a href="?{{ request.GET|combine_get_values }}page={{ collection.previous_page_number }}">&laquo; <small>Prev</small></a></li>
                                         {% else %} 
-                                            <li class="disabled"><a href="#">&laquo;</a></li> 
+                                            <li class="disabled"><a href="#">&laquo;</a></li>
                                         {% endif %}
                                         {% for num in collection.paginator.page_range|paginator_page_cutter:collection.number %}
                                             {% ifequal num collection.number %} 
@@ -284,9 +291,13 @@
                                             {% endifequal %} 
                                         {% endfor %} 
                                         {% if collection.has_next %} 
-                                            <li><a href="?{{ request.GET|combine_get_values }}page={{ collection.next_page_number }}"><small>Next</small>&raquo;</a></li>
+                                            <li><a href="?{{ request.GET|combine_get_values }}page={{ collection.next_page_number }}"><small>Next</small> &raquo;</a></li>
+                                            {% if collection.paginator.page_range|length > 10 %}
+                                                <li><a href="?{{ request.GET|combine_get_values }}page={{ collection.paginator.num_pages }}"><small>Last</small> &raquo;</a></li>
+                                            {% endif %}
                                         {% else %} 
-                                            <li class="disabled"><a href="#">&raquo;</a></li> 
+                                            <li class="disabled"><a href="#">&raquo;</a></li>
+                                            <li class="disabled"><a href="?{{ request.GET|combine_get_values }}page={{ collection.paginator.num_pages }}"><small>Last</small> &raquo;</a></li>
                                         {% endif %}
                                     {% endif %}
                                 <ul>
@@ -411,5 +422,66 @@
 		    });
 		</script>
 		{% block jsblock %}{% endblock %}
+		<script>
+        $("#id_search_foss, #id_search_language").change(function(){
+            var foss = $('#id_search_foss').val();
+            var lang = $('#id_search_language').val();
+            if ((foss == '' || lang == '') && ($(this).val() != '')){
+                $.ajax({
+                    url: "/get-language/",
+                    type: "POST",
+                    data: {
+                        foss : foss,
+                        lang : lang,
+                    },
+                    beforeSend: function() {
+                        if(foss == '')
+                            $('.ajax-refresh-search-foss').show();
+                        if(lang == '')
+                            $('.ajax-refresh-search-language').show();
+                    },
+                    success: function(data) {
+                        if(data[0] == 'foss'){
+                            $('#id_search_language').html(data[1]);
+                        } else if(data[0] == 'lang'){
+                            $('#id_search_foss').html(data[1]);
+                        } else if(data[0] == 'reset') {
+                            $('#id_search_language').html(data[1]);
+                            $('#id_search_foss').html(data[2]);
+                        }
+                        if(foss == '')
+                            $('.ajax-refresh-search-foss').hide();
+                        if(lang == '')
+                            $('.ajax-refresh-search-language').hide();
+                    }
+                });
+            }
+        });
+        $('.reset-filter').click(function(evt) {
+            evt.preventDefault();
+            $('#id_search_foss').val('');
+            $('#id_search_language').val('');
+            $.ajax({
+                    url: "/get-language/",
+                    type: "POST",
+                    data: {
+                        foss : '',
+                        lang : '',
+                    },
+                    beforeSend: function() {
+                        $('.ajax-refresh-search-foss').show();
+                        $('.ajax-refresh-search-language').show();
+                    },
+                    success: function(data) {
+                        if(data[0] == 'reset') {
+                            $('#id_search_language').html(data[1]);
+                            $('#id_search_foss').html(data[2]);
+                            $('.ajax-refresh-search-foss').hide();
+                            $('.ajax-refresh-search-language').hide();
+                        }
+                    }
+                });
+        });
+    </script>
 	</body>
 </html>

@@ -35,17 +35,26 @@ urlpatterns = patterns('',
     url(r"^invigilator/(?P<username>[\w. @-]+)/edit/$", 'events.views.invigilator_edit', name='invigilator_edit'),
     url(r"^invigilator/view/(?P<username>[\w. @-]+)/$", 'events.views.invigilator_view', name='invigilator_view'),
     
+    #live feedback
+    url(r'^training/live/list/$', 'events.views.live_training', name='live_training'),
+    url(r'^training/live/list/(\d+)/$', 'events.views.live_training', name='live_training'),
+    
     url(r'^training/subscribe/(\w+)/(\d+)/(\d+)/$', 'events.views.training_subscribe', name='student_subscribe'),
     url(r'^training/(\d+)/attendance/$', 'events.views.training_attendance', name='training_attendance'),
     url(r'^training/(\d+)/participant/$', 'events.views.training_participant', name='training_participant'),
     url(r'^training/participant/certificate/(\d+)/(\d+)/$', 'events.views.training_participant_ceritificate', name='training_participant_ceritificate'),
     url(r'^training/participant/feedback/(\d+)/(\d+)/$', 'events.views.training_participant_feedback', name='training_participant_feedback'),
     
+    #live feedback
+     url(r'^training/participant/lfeedback/(\d+)/(\d+)/$', 'events.views.training_participant_viewlivefeedback', name='training_participant_viewlivefeedback'),
+    url(r'^training/participant/lfeedback/(\d+)/$', 'events.views.training_participant_livefeedback', name='training_participant_livefeedback'),
+    
     url(r'^training/(?P<role>\w+)/request/$', 'events.views.training_request', name='training_request'),
     url(r'^training/(?P<role>\w+)/(?P<rid>\d+)/approvel/$', 'events.views.training_approvel', name='training_approvel'),
     url(r'^training/(?P<role>\w+)/(?P<status>\w+)/$', 'events.views.training_list', name='training_list'),
     url(r'^training/(?P<role>\w+)/(?P<rid>\d+)/edit/$', 'events.views.training_request', name='training_edit'),
     url(r'^training/training-completion/(?P<rid>\d+)/$', 'events.views.training_completion', name="training_completion"),
+    url(r'^training/view/training-completion/(?P<rid>\d+)/$', 'events.views.view_training_completion', name="view_training_completion"),
     
     #url(r'^test/subscribe/(\d+)/(\d+)/$', 'events.views.test_student_subscribe', name='test_student_subscribe'),
     url(r'^test/(\d+)/participant/$', 'events.views.test_participant', name='test_participant'),

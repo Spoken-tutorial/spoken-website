@@ -36,10 +36,10 @@ from gdata.media import YOUTUBE_NAMESPACE
 from atom import ExtensionElement
 
 # http://pycurl.sourceforge.net/
-try:
-    import pycurl
-except ImportError:
-    pycurl = None
+#try:
+import pycurl
+#except ImportError:
+#pycurl = None
 
 # http://code.google.com/p/python-progressbar (>= 2.3)
 try:
@@ -213,6 +213,10 @@ class Youtube:
         template = 'http://gdata.youtube.com/feeds/api/users/default/uploads/%s' 
         return self.service.GetYouTubeVideoEntry(template % video_id)
 
+    def get_feed_from_video_id(self, video_id):
+        template = 'http://gdata.youtube.com/feeds/api/users/default/uploads/%s' 
+        return self.service.GetYouTubeVideoEntry(template % video_id)
+
     def _create_video_entry(self, title, description, category, keywords=None,
             location=None, private=False, unlisted=False):
         self.categories = self.get_categories()
@@ -329,6 +333,7 @@ def upload_video(youtube, options, video_path):
         #url = "http://www.youtube.com/watch?v=%s" % video_id
         """if options.wait_processing:
             wait_processing(youtube, video_id)"""
-    except:
+    except Exception, e:
+        print e
         pass
     return video_id
