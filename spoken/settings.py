@@ -81,7 +81,7 @@ INSTALLED_APPS = (
 	'testapp.exam',
 	'taggit',
 	'taggit_autocomplete_modified',
-	#'south'
+	'south',
 )
 
 MIDDLEWARE_CLASSES = (

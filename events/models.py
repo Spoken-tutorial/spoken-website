@@ -320,7 +320,7 @@ class FossMdlCourses(models.Model):
     mdlcourse_id = models.PositiveIntegerField()
     mdlquiz_id = models.PositiveIntegerField()
     examquestionpaper = models.ForeignKey(QuestionPaper, null=True)
-    use_exam_app = models.BooleanField()
+    use_exam_app = models.BooleanField(default=0)
 
 class EventsNotification(models.Model):
     user = models.ForeignKey(User)
