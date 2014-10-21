@@ -155,7 +155,7 @@
                                 {% endif %}
                                 {% if status == 'ongoing' %}
                                     {% if record.training_type == 0 and record.trdate|can_upload_final_training_list %}
-                                        <a target='_blank' href="{% url 'events:training_attendance' record.id %}"> Training Completion Form</a> |
+                                        <a target='_blank' href="{% url 'events:training_attendance' record.id %}"> Attendance</a> | <a target='_blank' href="/software-training/training/training-completion/{{ record.id }}" class="fancybox fancybox.iframe"> Training Completion Form</a> |
                                     {% endif %}
                                     {% if record.training_type %}
                                         <a target='_blank' href="{% url 'events:training_attendance' record.id %}"> Attendance</a> |
@@ -193,6 +193,9 @@
                 openEffect    : "none",
                 closeEffect    : "none",
                 modal        : true,
+                afterClose  : function() {
+                    return parent.location.reload(true);
+                }
             });
         });
     </script>
