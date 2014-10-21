@@ -923,6 +923,7 @@ def training_request(request, role, rid = None):
                 <li>Please download a copy of tutorials on all the machines. For instructions to download tutorials <a href="http://process.spoken-tutorial.org/images/1/1b/Download-Tutorials.pdf" class="link alert-link" target="_blank">Click Here</a></li>
                 <li>Before the Training/Workshop date upload the Participants name list. Click here for instructions <a href="http://process.spoken-tutorial.org/images/9/96/Upload_Attendance.pdf" class="link alert-link" target="_blank"><b>Click Here</b></a>.</li>
                 <li>Please check if your machine is ready. For the Machine Readiness document <a href='http://process.spoken-tutorial.org/images/5/58/Machine-Readiness.pdf' class='link alert-link' target='_blank'> Click Here</a>.</li>
+                <li>If you have selected Training request make sure you complete <b>Training Completion Form</b> 30 days from Training date in order to receive the Learner's Certificate.</li>
             </ul>
         """)
     if rid and not form:
@@ -1279,6 +1280,7 @@ def training_attendance(request, wid):
                     For more details on how to create the .csv file. 
                     Please <a href="http://process.spoken-tutorial.org/images/9/96/Upload_Attendance.pdf" target="_blank">Click here</a>
                 </li>
+                <li>Make sure you complete <b>Training Completion Form</b> 30 days from Training date in order to receive the Learner's Certificate.</li>
             </ul>
         """)
     
