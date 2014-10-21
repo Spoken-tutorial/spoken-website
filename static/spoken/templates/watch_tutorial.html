@@ -116,6 +116,9 @@
         .col-lg-5.col-md-5.col-sm-5.no-padding-right.right-bar {
             margin-top: 5px;
         }
+        .video-info{
+            display: none;
+        }
     </style>
     <script src="{% static 'spoken/js/video.js' %}"></script>
 {% endblock %}
@@ -162,7 +165,28 @@
     {% endif %}
     <row>
         <div class="col-lg-7 col-md-7 col-sm-7 no-padding-left">
-            <p class="video-visits">{{ tr_rec|get_video_visits }} visits</p>
+            <div class='row'>
+                <div class="video-info-show-more pull-left col-lg-9 col-md-9 col-sm-9">
+                    <div class="video-info">
+                        <table class="table table-bordered table-hover">
+                            <tr>
+                                <th>Codec:</th><td>{{video_info.codec}}</td>
+                                <th>Profile:</th><td>{{video_info.profile}}</td>
+                            </tr>
+                            <tr>
+                                <th>Width:</th><td>{{video_info.width}}</td>
+                                <th>Height:</th><td>{{video_info.height}}</td>
+                            </tr>
+                            <tr>
+                                <th>Duration:</th><td>{{video_info.duration}}</td>
+                                <th>Size:</th><td>{{video_info.size}}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <p class="video-show-more no-record">Show more</p>
+                </div>
+                <p class="video-visits pull-right col-lg-3 col-md-3 col-sm-3">{{ tr_rec|get_video_visits }} visits</p>
+            </div>
             <ol class="breadcrumb">
                 {% with link=tr_rec.tutorial_detail.foss|instruction_sheet:tr_rec.language %}
                     {% if link %}
@@ -324,6 +348,9 @@
                 openEffect  : "none",
                 closeEffect : "none",
                 modal       : true,
+            });
+            $(".video-show-more").click(function() {
+                $(".video-info").slideToggle( "slow" );
             });
         });
     </script>
