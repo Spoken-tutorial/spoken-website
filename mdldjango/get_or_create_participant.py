@@ -97,7 +97,7 @@ def check_csvfile(file_path, w=None, flag=0):
                     lastname = row[1].strip().title()
                     email = row[2].strip()
                     gender = row[3].strip().title()
-                    if not validate_email(email):
+                    if not validate_email(email, check_mx=True):
                         if email in ['Email', 'email', 'mail']:
                             continue
                         if not error_line_no:
