@@ -41,7 +41,8 @@
                         <td>{{ record.foss.foss }}</td>
                         <td>{{ record.trdate }} {{ record.trtime }}</td>
                         <td>
-                            <a href="{% url 'mdldjango:feedback' record.id %}">Feedback</a>
+                            <a href="{% url 'mdldjango:feedback' record.id %}">Feedback</a> | 
+                            <a href="{% url 'events:training_participant_language_feedback' record.id mdluserid %}">Language Feedback</a>
                             {% if mdluserid|can_download_workshop_certificate:record.id and record.training_type %}
                                 | <a href="{% url 'events:training_participant_ceritificate' record.id mdluserid %}">Certificate</a>
                             {% endif %}

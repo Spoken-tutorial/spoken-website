@@ -2050,7 +2050,40 @@ def training_participant_feedback(request, training_id, participant_id):
     }
     context.update(csrf(request))
     return render(request, 'events/templates/training/view-feedback.html', context)
+
+def training_participant_language_feedback(request, training_id, user_id):
+    form = TrainingLanguageFeedbackForm()
+    w = None
+    try:
+        w = Training.objects.get(pk=training_id)
+        MdlUser.objects.get(id = user_id)
+    except Exception, e:
+        raise PermissionDenied()
     
+    if request.method == 'POST':
+        form = TrainingLanguageFeedbackForm(request.POST)
+        if form.is_valid():
+            try:
+                form_data = form.save(commit=False)
+                form_data.training_id = w.id
+                form_data.mdluser_id = user_id
+                form_data.save()
+                messages.success(request, "Thank you for your valuable feedback.")
+                return HttpResponseRedirect('/')
+            except Exception, e:
+                print e
+                messages.success(request, "Sorry, something went wrong, Please try again!")
+                #return HttpResponseRedirect('/')
+    context = {
+        'form' : form,
+        'w' : w
+    }
+    
+    
+    context = {}
+    context['form'] = form
+    return render(request, 'events/templates/training/language_feedback.html', context)
+
 def live_training(request, training_id=None):
     
     context = {}
