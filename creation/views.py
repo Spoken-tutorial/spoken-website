@@ -144,7 +144,8 @@ def get_video_info(path):
         info_m['duration'] = duration_m['hours'] + ':' + duration_m['minutes'] + ":" + tmp_seconds
         info_m['total'] = int(total)
         info_m['width'] = int(info_m['width'])
-        info_m['height'] = int(info_m['height'])
+        # [PAR 1i:1 DAR 3:2] error in height
+        info_m['height'] = int(info_m['height'].split()[0])
         info_m['size'] = get_filesize(path)
     except:
         info_m['codec'] = ''
@@ -1040,7 +1041,7 @@ def tutorials_contributed(request):
         ordering = ''
         header = ''
         try:
-            tmp_recs = TutorialResource.objects.filter(id__in = tmp_ids)
+            tmp_recs = TutorialResource.objects.filter(id__in = tmp_ids).distinct()
             raw_get_data = request.GET.get('o', None)
             header = {
                 1: SortableHeader('S.No', False),
@@ -1059,6 +1060,11 @@ def tutorials_contributed(request):
             }
             tmp_recs = get_sorted_list(request, tmp_recs, header, raw_get_data)
             ordering = get_field_index(raw_get_data)
+            counter = 1
+            for tmp_rec in tmp_recs:
+                if tmp_rec.id == 3311:
+                    print counter, tmp_rec.tutorial_detail.tutorial
+                counter += 1
             page = request.GET.get('page')
             tmp_recs = get_page(tmp_recs, page)
         except:

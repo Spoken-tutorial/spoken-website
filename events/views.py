@@ -929,6 +929,7 @@ def training_request(request, role, rid = None):
                 <li>Please download a copy of tutorials on all the machines. For instructions to download tutorials <a href="http://process.spoken-tutorial.org/images/1/1b/Download-Tutorials.pdf" class="link alert-link" target="_blank">Click Here</a></li>
                 <li>Before the Training/Workshop date upload the Participants name list. Click here for instructions <a href="http://process.spoken-tutorial.org/images/9/96/Upload_Attendance.pdf" class="link alert-link" target="_blank"><b>Click Here</b></a>.</li>
                 <li>Please check if your machine is ready. For the Machine Readiness document <a href='http://process.spoken-tutorial.org/images/5/58/Machine-Readiness.pdf' class='link alert-link' target='_blank'> Click Here</a>.</li>
+                <li>If you have selected Training request make sure you complete <b>Training Completion Form</b> 30 days from Training date in order to receive the Learner's Certificate.</li>
             </ul>
         """)
     if rid and not form:
@@ -1285,6 +1286,7 @@ def training_attendance(request, wid):
                     For more details on how to create the .csv file. 
                     Please <a href="http://process.spoken-tutorial.org/images/9/96/Upload_Attendance.pdf" target="_blank">Click here</a>
                 </li>
+                <li>Make sure you complete <b>Training Completion Form</b> 30 days from Training date in order to receive the Learner's Certificate.</li>
             </ul>
         """)
     
@@ -1407,7 +1409,7 @@ def training_participant_ceritificate(request, wid, participant_id):
     imgDoc.drawImage(imgPath, 600, 100, 150, 76)    ## at (399,760) with size 160x160
 
     #paragraphe
-    text = "This is to certify that <b>"+mdluser.firstname +" "+mdluser.lastname+"</b> participated in the <b>"+w.foss.foss+"</b> training organized at <b>"+w.academic.institution_name+"</b> by  <b>"+w.organiser.user.first_name + " "+w.organiser.user.last_name+"</b> on <b>"+custom_strftime('%B {S} %Y', w.trdate)+"</b> with course material provided by the Talk To A Teacher project at IIT Bombay.<br /><br />A comprehensive set of topics pertaining to <b>"+w.foss.foss+"</b> were covered in the workshop. This training is offered by the Spoken Tutorial project, IIT Bombay, funded by National Mission on Education through ICT, MHRD, Govt., of India."
+    text = "This is to certify that <b>"+mdluser.firstname +" "+mdluser.lastname+"</b> participated in the <b>"+w.foss.foss+"</b> training organized at <b>"+w.academic.institution_name+"</b> by  <b>"+w.organiser.user.first_name + " "+w.organiser.user.last_name+"</b> on <b>"+custom_strftime('%B {S} %Y', w.trdate)+"</b> with course material provided by the Talk To A Teacher project at IIT Bombay.<br /><br />A comprehensive set of topics pertaining to <b>"+w.foss.foss+"</b> were covered in the workshop. This training is offered by the Spoken Tutorial Project, IIT Bombay, funded by National Mission on Education through ICT, MHRD, Govt., of India."
     
     centered = ParagraphStyle(name = 'centered',
         fontSize = 16,  
@@ -1918,7 +1920,7 @@ def test_participant_ceritificate(request, wid, participant_id):
     imgDoc.drawImage(imgPath, 600, 100, 150, 76)    ## at (399,760) with size 160x160
     
     #paragraphe
-    text = "This is to certify that <b>"+ta.mdluser_firstname +" "+ta.mdluser_lastname+"</b> has sucessfully completed <b>"+w.foss.foss+"</b> test organized at <b>"+w.academic.institution_name+"</b> by <b>"+w.organiser.user.first_name + " " + w.organiser.user.last_name+"</b>  with course material provided by the Talk To A Teacher project at IIT Bombay.  <br /><br /><p>Passing on online exam, conducted remotely from IIT Bombay, is a pre-requisite for completing this training. <b>"+w.invigilator.user.first_name + " "+w.invigilator.user.last_name+"</b> at <b>"+w.academic.institution_name+"</b> invigilated this examination. This training is offered by the <b>Spoken Tutorial project, IIT Bombay, funded by National Mission on Education through ICT, MHRD, Govt of India.</b></p>"
+    text = "This is to certify that <b>"+ta.mdluser_firstname +" "+ta.mdluser_lastname+"</b> has sucessfully completed <b>"+w.foss.foss+"</b> test organized at <b>"+w.academic.institution_name+"</b> by <b>"+w.organiser.user.first_name + " " + w.organiser.user.last_name+"</b>  with course material provided by the Talk To A Teacher project at IIT Bombay.  <br /><br /><p>Passing an online exam, conducted remotely from IIT Bombay, is a pre-requisite for completing this training. <b>"+w.invigilator.user.first_name + " "+w.invigilator.user.last_name+"</b> at <b>"+w.academic.institution_name+"</b> invigilated this examination. This training is offered by the <b>Spoken Tutorial Project, IIT Bombay, funded by National Mission on Education through ICT, MHRD, Govt., of India.</b></p>"
     
     centered = ParagraphStyle(name = 'centered',
         fontSize = 16,  
@@ -2108,7 +2110,40 @@ def training_participant_feedback(request, training_id, participant_id):
     }
     context.update(csrf(request))
     return render(request, 'events/templates/training/view-feedback.html', context)
+
+def training_participant_language_feedback(request, training_id, user_id):
+    form = TrainingLanguageFeedbackForm()
+    w = None
+    try:
+        w = Training.objects.get(pk=training_id)
+        MdlUser.objects.get(id = user_id)
+    except Exception, e:
+        raise PermissionDenied()
     
+    if request.method == 'POST':
+        form = TrainingLanguageFeedbackForm(request.POST)
+        if form.is_valid():
+            try:
+                form_data = form.save(commit=False)
+                form_data.training_id = w.id
+                form_data.mdluser_id = user_id
+                form_data.save()
+                messages.success(request, "Thank you for your valuable feedback.")
+                return HttpResponseRedirect('/')
+            except Exception, e:
+                print e
+                messages.success(request, "Sorry, something went wrong, Please try again!")
+                #return HttpResponseRedirect('/')
+    context = {
+        'form' : form,
+        'w' : w
+    }
+    
+    
+    context = {}
+    context['form'] = form
+    return render(request, 'events/templates/training/language_feedback.html', context)
+
 def live_training(request, training_id=None):
     
     context = {}
