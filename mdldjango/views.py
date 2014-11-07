@@ -306,9 +306,16 @@ def feedback(request, wid):
                 form_data.training_id = wid
                 form_data.mdluser_id = mdluserid
                 form_data.save()
-                wa = TrainingAttendance.objects.get(mdluser_id=mdluserid, training_id = wid)
-                wa.status = 2
-                wa.save()
+                try:
+                    wa = TrainingAttendance.objects.get(mdluser_id=mdluserid, training_id = wid)
+                    wa.status = 2
+                    wa.save()
+                except:
+                    wa = TrainingAttendance()
+                    wa.training_id = wid
+                    wa.mdluser_id = mdluserid
+                    wa.status = 1
+                    wa.save()
                 messages.success(request, "Thank you for your valuable feedback.")
                 return HttpResponseRedirect('/participant/index/?category=1')
             except Exception, e:
