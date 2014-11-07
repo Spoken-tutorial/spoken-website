@@ -153,3 +153,6 @@ class ChangePasswordForm(forms.Form):
         if confirm_new_password and new_password != new_password:
             raise forms.ValidationError("Passwords did not match")
         return self.cleaned_data
+        
+class NewsAdditionaFieldAdmin(forms.ModelForm):
+    weight = forms.ChoiceField(choices = ((1, 'Z'), (2, 'A'), (3, 'B')))

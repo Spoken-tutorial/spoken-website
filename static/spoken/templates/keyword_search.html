@@ -58,7 +58,9 @@
                     </div>
                 {% endfor %}
             {% else %}
-                <p class='no-record'> No result found!</p>
+                {% if request.GET %}
+                    <p class='no-record'> No result found!</p>
+                {% endif %}
             {% endif %}
         </div>
     </div>

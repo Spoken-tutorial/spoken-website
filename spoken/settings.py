@@ -77,7 +77,8 @@ INSTALLED_APPS = (
 	'mdldjango',
 	'nicedit',
 	'masquerade',
-	'report_builder'
+	'report_builder',
+	#'south',
 )
 
 MIDDLEWARE_CLASSES = (

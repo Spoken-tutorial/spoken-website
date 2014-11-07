@@ -141,6 +141,7 @@ def tutorial_search(request):
     collection = get_page(collection, page)
     context['form'] = form
     context['collection'] = collection
+    context['SCRIPT_URL'] = settings.SCRIPT_URL
     return render(request, 'spoken/templates/tutorial_search.html', context)
 
 def watch_tutorial(request, foss, tutorial, lang):

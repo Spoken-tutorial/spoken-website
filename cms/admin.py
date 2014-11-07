@@ -38,7 +38,8 @@ class NewsTypeAdmin(admin.ModelAdmin):
         obj.save()
 
 class NewsAdmin(admin.ModelAdmin):
-    form = AdminBodyForm
+    #form = AdminBodyForm
+    form = NewsAdditionaFieldAdmin
     exclude = ('created_by', 'slug')
     list_display = ('title', 'picture', 'body', 'url', 'url_title', 'created_by', 'created')
     def save_model(self, request, obj, form, change):

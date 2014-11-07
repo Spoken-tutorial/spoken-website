@@ -25,9 +25,79 @@
             
         }
         
+        #slideshow{
+            height: 50px;
+            overflow: hidden;
+        }
+        #slideshow .btn-primary, button.close{
+            background-color: black;
+            border-color: black;
+            opacity: 10;
+            color: white;
+        }
+        .announcement{
+            height: 50px;
+            font-size: 14px;
+            font-weight: bold;
+            color: white;
+            border-radius: 0px;
+        }
+        .text-container{
+            padding: 0 60px;
+        }
+        .navbar-fixed-top{
+            position: relative;
+        }
+        button.close{
+            padding-top: 0px;
+            padding-bottom: 3px;
+            padding-left: 4px;
+            padding-right: 4px;
+        }
+        button.close:hover{
+            background: white;
+            opacity: 10;
+        }
     </style>
 {% endblock %}
 {% block title %}Home{% endblock %}
+
+{% block announcement %}
+    <div id="slideshow" class="">
+        <div class="announcement alert" style="background:#1B83BC;">
+            <div class="inner">
+                <div class="text-container">
+                    One Day Workshop on Open Source Chemistry Software for College Teachers. <em>Registrations are now open.</em>
+                    <a class="btn btn-primary btn-xs" href="http://spoken-tutorial.org/workshop/gcp-jmol/#home">Register</a>
+                    <button type="button" class="close" data-dismiss="alert">&times;</button>
+                </div>
+            </div>
+        </div>
+        <div class="announcement alert" style="background:#27AE60;">
+            <div class="inner">
+                <div class="text-container">
+                    <img src="http://scipy.in/2014/static/website/images/scipy_india_logo.png" style="width: 25px; position: relative; top: -2px;">
+                    Scipy India Conference 2014. <em>Registrations are now open.</em>
+                    <a class="btn btn-primary btn-xs" href="http://scipy.in/2014" target="_blank">Website</a>
+                    <a class="btn btn-primary btn-xs" href="http://scipy.in/2014/register" target="_blank">Register</a>
+                    <button type="button" class="close" data-dismiss="alert">&times;</button>
+                </div>
+            </div>
+        </div>
+        <div class="announcement alert" style="background:#34495E;">
+            <div class="inner">
+                <div class="text-container">
+                    <img src="http://scilab.in/sites/default/files/scilab_logo.png" style="width: 60px; position: relative; top: -2px;">&nbsp;
+                    Scilab India Conference 2014. <em>Registrations are now open.</em>
+                    <a class="btn btn-primary btn-xs" href="http://fossee.in/conference/scilab" target="_blank">Website</a>
+                    <a class="btn btn-primary btn-xs" href="http://fossee.in/conference/scilab/#register" target="_blank">Register</a>
+                    <button type="button" class="close" data-dismiss="alert">&times;</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
 {% block heading %}{% endblock %}
 {% block homealert %}
 	{% if messages %}
@@ -380,6 +450,23 @@
             });
              
             //$("#ajaxform").submit(); //Submit  the FORM
+            
+            /* announcement */
+            if($(".announcement").length > 1){
+			    $("#slideshow > div:gt(0)").hide();
+			    setInterval(function() { 
+			      $('#slideshow > div:first')
+			        .fadeOut(0)
+			        .next()
+			        .fadeIn(0)
+			        .end()
+			        .appendTo('#slideshow');
+			    },  3000);
+			}
+            $('.close').click(function(){
+                $(".navbar-fixed-top").css({'top' : '0px', 'position' : 'fixed'});
+                $("#header-wrapper").css({'height' : '0px'});
+            });
         });
     </script>
 {% endblock %}
