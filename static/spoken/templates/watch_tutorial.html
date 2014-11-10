@@ -170,10 +170,6 @@
                     <div class="video-info">
                         <table class="table table-bordered table-hover">
                             <tr>
-                                <th>Codec:</th><td>{{video_info.codec}}</td>
-                                <th>Profile:</th><td>{{video_info.profile}}</td>
-                            </tr>
-                            <tr>
                                 <th>Width:</th><td>{{video_info.width}}</td>
                                 <th>Height:</th><td>{{video_info.height}}</td>
                             </tr>
@@ -349,8 +345,10 @@
                 closeEffect : "none",
                 modal       : true,
             });
-            $(".video-show-more").click(function() {
+            $(".video-show-more").click(function(e) {
+                e.preventDefault();
                 $(".video-info").slideToggle( "slow" );
+                $(this).text( $(this).text() == 'Show more' ? "Show less" : "Show more");
             });
         });
     </script>

@@ -78,6 +78,7 @@ INSTALLED_APPS = (
 	'nicedit',
 	'masquerade',
 	'report_builder',
+    'youtube',
 	#'south',
 )
 

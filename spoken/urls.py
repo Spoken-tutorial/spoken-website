@@ -54,6 +54,9 @@ urlpatterns = patterns('',
     # reports
     url(r'^report_builder/', include('report_builder.urls')),
     
+    # Youtube API V3
+    url(r'^youtube/', include('youtube.urls', namespace='youtube')),
+
     #cms
     url(r'^', include('cms.urls', namespace='cms')),
 )
