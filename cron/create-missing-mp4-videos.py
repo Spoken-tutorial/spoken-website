@@ -88,6 +88,7 @@ for row in rows:
         stdout, stderr = convert_video(mp4_tmp_video_path, mp4_video_path)
         print 'Stdout: ', stdout
         print 'Stderr: ', stderr
+        os.remove(mp4_tmp_video_path)
         error_log_file_head2.write(mp4_video_path + ', File not found' + '\n')
 error_log_file_head1.close()
 error_log_file_head2.close()
