@@ -104,6 +104,59 @@
                         </div>
                     </div>
                 </div><!-- when and where part end -->
+                <div class="clock row">
+                    <div class="clock-item clock-days countdown-time-value col-sm-3 col-md-3">
+                        <div class="wrap">
+                            <div class="inner">
+                                <div id="canvas-days" class="clock-canvas"><div class="kineticjs-content" role="presentation"><canvas></canvas></div></div>
+
+                                <div class="text">
+                                    <p class="val">16</p>
+                                    <p class="type-days type-time">DAYS</p>
+                                </div><!-- /.text -->
+                            </div><!-- /.inner -->
+                        </div><!-- /.wrap -->
+                    </div><!-- /.clock-item -->
+
+                    <div class="clock-item clock-hours countdown-time-value col-sm-3 col-md-3">
+                        <div class="wrap">
+                            <div class="inner">
+                                <div id="canvas-hours" class="clock-canvas"><div class="kineticjs-content" role="presentation"><canvas></canvas></div></div>
+
+                                <div class="text">
+                                    <p class="val">16</p>
+                                    <p class="type-hours type-time">HOURS</p>
+                                </div><!-- /.text -->
+                            </div><!-- /.inner -->
+                        </div><!-- /.wrap -->
+                    </div><!-- /.clock-item -->
+
+                    <div class="clock-item clock-minutes countdown-time-value col-sm-3 col-md-3">
+                        <div class="wrap">
+                            <div class="inner">
+                                <div id="canvas-minutes" class="clock-canvas"><div class="kineticjs-content" role="presentation"><canvas></canvas></div></div>
+
+                                <div class="text">
+                                    <p class="val">40</p>
+                                    <p class="type-minutes type-time">MINUTES</p>
+                                </div><!-- /.text -->
+                            </div><!-- /.inner -->
+                        </div><!-- /.wrap -->
+                    </div><!-- /.clock-item -->
+
+                    <div class="clock-item clock-seconds countdown-time-value col-sm-3 col-md-3">
+                        <div class="wrap">
+                            <div class="inner">
+                                <div id="canvas-seconds" class="clock-canvas"><div class="kineticjs-content" role="presentation"><canvas></canvas></div></div>
+
+                                <div class="text">
+                                    <p class="val">37</p>
+                                    <p class="type-seconds type-time">SECONDS</p>
+                                </div><!-- /.text -->
+                            </div><!-- /.inner -->
+                        </div><!-- /.wrap -->
+                    </div><!-- /.clock-item -->
+                </div>
                 <div id="about"></div><!-- about part start -->
                 <div class="bs-callout bs-callout-info">
                     <h2 class="bs-title">About</h2>
@@ -402,6 +455,17 @@
     </div><!-- #wrapper end -->
 {% endblock %}
 {% block jsblock %}
+    <script type="text/javascript" src="{% static 'spoken/js/jquery-1.11.0.min.js' %}"></script>
+    <script type="text/javascript" src="% static 'spoken/js/kinetic.js' %}"></script>
+    <script type="text/javascript" src="% static 'spoken/js/jquery.final-countdown.min.js' %}"></script>
+    <script type="text/javascript">
+        var end = new Date('2014-11-29 08:58:00'.replace(' ', 'T')).getTime() * 0.001;
+        var now = new Date().getTime() * 0.001;
+        $('.countdown').final_countdown({
+            'end': end,
+            'now': now
+        });
+    </script>
     <script type="text/javascript">
         $(document).ready(function() {
             $('.site-home').mouseover(function() {
