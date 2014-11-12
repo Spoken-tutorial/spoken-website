@@ -1,7 +1,8 @@
-import random, string, hashlib
+import random, string, hashlib, csv
 from models import MdlUser
 from events.models import TrainingAttendance
 from django.core.mail import EmailMultiAlternatives
+from validate_email import validate_email
 
 def encript_password(password):
     password = hashlib.md5(password+'VuilyKd*PmV?D~lO19jL(Hy4V/7T^G>p').hexdigest()
@@ -80,3 +81,43 @@ Admin Spoken Tutorials
             wa.status = 1
             wa.mdluser_id = mdluser.id
             wa.save()
+            
+def check_csvfile(file_path, w=None, flag=0):
+    print w, "####################"
+    csv_file_error = 0
+    error_line_no = ''
+    with open(file_path, 'rbU') as csvfile:
+        count  = 0
+        csvdata = csv.reader(csvfile, delimiter=',', quotechar='|')
+        try:
+            for row in csvdata:
+                count = count + 1
+                try:
+                    firstname = row[0].strip().title()
+                    lastname = row[1].strip().title()
+                    email = row[2].strip()
+                    gender = row[3].strip().title()
+                    if not validate_email(email):
+                        if email in ['Email', 'email', 'mail']:
+                            continue
+                        if not error_line_no:
+                            error_line_no = error_line_no + str(count)
+                        else:
+                            error_line_no = error_line_no + ', ' + str(count)
+                        csv_file_error = 1
+                        continue
+                    if flag:
+                        if not w:
+                            return 1, error_line_no
+                        get_or_create_participant(w, firstname, lastname, gender, email, 2)
+                except Exception, e:
+                    print e
+                    csv_file_error = 1
+                    if not error_line_no:
+                        error_line_no = error_line_no + str(count)
+                    else:
+                        error_line_no = error_line_no + ', ' + str(count)
+        except:
+            csv_file_error = 1
+            error_line_no = '1'
+    return csv_file_error, error_line_no
