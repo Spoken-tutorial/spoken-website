@@ -603,4 +603,45 @@ tr.tinfo:hover {
     font-weight: 400;
     text-transform: none;
 }
-
+.clock-canvas {
+    background-color: rgba(31, 43, 82, 0.31);
+    border-radius: 50%;
+    height: 0px;
+    padding-bottom: 100%;
+}
+.text {
+    color: #444547;
+    font-size: 30px;
+    font-weight: bold;
+    margin-top: -50px;
+    position: absolute;
+    top: 50%;
+    text-align: center;
+    text-shadow: 1px 1px 1px rgba(195, 192, 219, 1);
+    width: 100%;
+}
+.text .val {
+    font-size: 35px;
+}
+.text .type-time {
+    font-size: 14px;
+}
+.clock.row {
+    padding-left: 20px;
+    overflow: hidden;
+}
+.clock-item .wrap {
+    max-width: 180px;
+}
+.kineticjs-content {
+    position: relative;
+    display: inline-block;
+}
+.kineticjs-content canvas {
+    padding: 0px;
+    margin: 0px;
+    border: 0px;
+    position: relative;
+    top: 0px;
+    left: 0px
+}
