@@ -66,6 +66,9 @@ def home(request):
     context['events'] = events
     return render(request, 'spoken/templates/home.html', context)
 
+def workshop_advt(request):
+    return render(request, 'spoken/templates/workshop.html')
+
 def get_or_query(terms, search_fields):
     #terms = ['linux', ' operating system', ' computers', ' hardware platforms', ' oscad']
     #search_fields = ['keyword']

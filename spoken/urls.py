@@ -57,6 +57,9 @@ urlpatterns = patterns('',
     # Youtube API V3
     url(r'^youtube/', include('youtube.urls', namespace='youtube')),
 
+    # workshop anouncement page
+    url(r'^workshop/gcp-jmol/$', 'spoken.views.workshop_advt', name='workshop_advt'),
+
     #cms
     url(r'^', include('cms.urls', namespace='cms')),
 )
