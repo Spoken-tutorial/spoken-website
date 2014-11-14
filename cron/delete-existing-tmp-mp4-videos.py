@@ -30,3 +30,6 @@ for row in rows:
             os.remove(mp4_video_path)
         if os.path.isfile(mp4_tmp_video_path):
             os.remove(mp4_tmp_video_path)
+    if os.path.isfile(mp4_video_path) and (not os.path.getsize(mp4_video_path)):
+        print row[5]
+        os.remove(mp4_video_path)
