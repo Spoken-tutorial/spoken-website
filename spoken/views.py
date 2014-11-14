@@ -6,6 +6,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.context_processors import csrf
 from django.views.decorators.csrf import csrf_exempt
+from django.core.mail import EmailMultiAlternatives
 from django.db.models import Q
 from django.conf import settings
 from forms import *
@@ -20,6 +21,7 @@ from creation.views import get_video_info, is_administrator
 from creation.models import TutorialCommonContent, TutorialDetail, TutorialResource, Language
 from cms.models import SiteFeedback, Event, NewsType, News
 from events.views import get_page
+from mdldjango import MdlUser
 
 def is_resource_person(user):
     """Check if the user is having resource person  rights"""
@@ -368,3 +370,22 @@ def create_subtitle_files(request, overwrite = True):
             else:
                 print 'Failed: ', row.tutorial_detail.foss.foss + ',', srt_file_name
     return HttpResponse('Success!')
+
+def scilab_conf_email(request):
+    #rows = TestAttendance.objects.filter(mdluser_id__gt=0, test__foss_id=29).values_list('mdluser_id').distinct()
+    subject = 'Scilab India 2014 conference - 3 & 4 December 2014 @ IIT Bombay'
+    message = 'Hello Vishnu,<p>On behalf of the Scilab Team, FOSSEE Project, IIT Bombay, we invite you to the <b>Scilab India 2014 conference on 3 and 4 December, 2014 at IIT Bombay, Mumbai.</b></p><br /><p>For details about the conference, please visit <a href="http://fossee.in/conference/scilab/">http://fossee.in/conference/scilab</a></p><br /><p>We look forward to seeing you at the conference.</p><br /><br />Team Scilab<br />FOSSEE Project<br />IIT Bombay'
+    email = EmailMultiAlternatives(
+        subject, message, 'administrator@spoken-tutorial.org',
+        to = 'vishnukraj007@gmail.com', bcc = None, cc = None,
+        headers={'Reply-To': 'no-replay@spoken-tutorial.org', "Content-type":"text/html;charset=iso-8859-1"}
+    )
+    
+    try:
+        result = email.send(fail_silently=False)
+    except Exception, e:
+        print "*******************************************************"
+        print message
+        print "*******************************************************"
+        pass
+    #for row in rows:
