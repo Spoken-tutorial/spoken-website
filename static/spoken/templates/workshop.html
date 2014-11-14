@@ -354,7 +354,7 @@
                             <article class="branch">
                                 <div class="branch-icon">
                                     <div class="branch-icon-container">
-                                        <i class="fa fa-times"></i> 
+                                        <i class="fa fa-sun-o"></i> 
                                     </div>
                                 </div>
                                 <div class="branch-time-box"><time>17:00</time></div>
@@ -372,7 +372,7 @@
                 <div id="organizer"></div><!-- organizer part start -->
                 <div class="bs-callout bs-callout-info">
                     <h2 class="bs-title">Organizer</h2>
-                    <p>Open Source Chemistry Software workshop for College Teachers is organized by <a href="/" target="_blank">Spoken Tutorial Project</a>. This project is part of the National Mission on Education through ICT, funded by MHRD Govt of India.</p>
+                    <p>Open Source Chemistry Software workshop for College Teachers is organized by <a href="/" target="_blank">Spoken Tutorial Project</a>.</p><p>This project is part of the National Mission on Education through ICT, funded by MHRD Govt of India.</p>
                 </div><!-- organizer part end -->
                 <div id="contact"></div><!-- contact part start -->
                 <div class="bs-callout bs-callout-info">
@@ -455,9 +455,8 @@
     </div><!-- #wrapper end -->
 {% endblock %}
 {% block jsblock %}
-    <script type="text/javascript" src="{% static 'spoken/js/jquery-1.11.0.min.js' %}"></script>
-    <script type="text/javascript" src="% static 'spoken/js/kinetic.js' %}"></script>
-    <script type="text/javascript" src="% static 'spoken/js/jquery.final-countdown.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'spoken/js/kinetic.js' %}"></script>
+    <script type="text/javascript" src="{% static 'spoken/js/jquery.final-countdown.min.js' %}"></script>
     <script type="text/javascript">
         var end = new Date('2014-11-29 08:58:00'.replace(' ', 'T')).getTime() * 0.001;
         var now = new Date().getTime() * 0.001;
