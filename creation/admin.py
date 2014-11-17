@@ -14,7 +14,7 @@ class LanguageAdmin(admin.ModelAdmin):
 
 class FossCategoryAdmin(admin.ModelAdmin):
     exclude = ('user',)
-    list_display = ('foss', 'status', 'created', 'updated', 'user')
+    list_display = ('foss', 'id', 'status', 'created', 'updated', 'user')
 
     def save_model(self, request, obj, form, change):
         obj.user = request.user

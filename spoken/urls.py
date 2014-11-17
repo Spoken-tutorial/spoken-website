@@ -54,6 +54,13 @@ urlpatterns = patterns('',
     # reports
     url(r'^report_builder/', include('report_builder.urls')),
     
+    # Youtube API V3
+    url(r'^youtube/', include('youtube.urls', namespace='youtube')),
+
+    # workshop anouncement page
+    url(r'^workshop/gcp-jmol/$', 'spoken.views.workshop_advt', name='workshop_advt'),
+    url(r'^scilab-conference-email/$', 'spoken.views.scilab_conf_email', name='scilab_conf_email'),
+
     #cms
     url(r'^', include('cms.urls', namespace='cms')),
 )
