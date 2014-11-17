@@ -16,60 +16,17 @@
     <i class="fa fa-list-ul"></i> {{ newstype.name }}
 {% endblock %}
 {% block content %}
-    <div class='news-container'>
-        {% if collection %}
-            {% if request.path == '/news/news-and-eventss/' %}
-                <ul class="tabs nav nav-tabs nav-pills nav-justified">
-                    <li class="active"><a href="#tab_z" data-toggle="pill">Z</a></li>
-                    <li><a href="#tab_a" data-toggle="pill">A</a></li>
-                    <li><a href="#tab_b" data-toggle="pill">B</a></li>
-                </ul>
-                <div class="tab-content">
-                    <div class="tab-pane active" id="tab_z">
-                         {% with collection=collection|filter_news_weight:1 %}
-                             {% for record in collection %}
-                                <div class="item {% cycle 'odd' 'even' %}">
-                                    <h5><a href="/news/{{ category }}/{{ record.slug }}">{{ record.title }}</a></h5>
-                                    <p>{{ record.body|len_cutter:150|safe }}</p>
-                                    <h6>{{ record.created|date:"M d, Y" }}</h6>
-                                </div>
-                            {% endfor %}
-                        {% endwith %}
-                    </div>
-                    <div class="tab-pane" id="tab_a">
-                         {% with collection=collection|filter_news_weight:2 %}
-                             {% for record in collection %}
-                                <div class="item {% cycle 'odd' 'even' %}">
-                                    <h5><a href="/news/{{ category }}/{{ record.slug }}">{{ record.title }}</a></h5>
-                                    <p>{{ record.body|len_cutter:150|safe }}</p>
-                                    <h6>{{ record.created|date:"M d, Y" }}</h6>
-                                </div>
-                            {% endfor %}
-                        {% endwith %}
-                    </div>
-                    <div class="tab-pane" id="tab_b">
-                         {% with collection=collection|filter_news_weight:3 %}
-                             {% for record in collection %}
-                                <div class="item {% cycle 'odd' 'even' %}">
-                                    <h5><a href="/news/{{ category }}/{{ record.slug }}">{{ record.title }}</a></h5>
-                                    <p>{{ record.body|len_cutter:150|safe }}</p>
-                                    <h6>{{ record.created|date:"M d, Y" }}</h6>
-                                </div>
-                            {% endfor %}
-                        {% endwith %}
-                    </div>
-                </div>
-            {% else %}
-                {% for record in collection %}
-                    <div class="item {% cycle 'odd' 'even' %}">
-                        <h5><a href="/news/{{ category }}/{{ record.slug }}">{{ record.title }}</a></h5>
-                        <p>{{ record.body|len_cutter:150|safe }}</p>
-                        <h6>{{ record.created|date:"M d, Y" }}</h6>
-                    </div>
-                {% endfor %}
-             {% endif %}
-        {% else %}
-            <p class="no-record"> No record found!</p>
-        {% endif %}
-    </div>
+	<div class='news-container'>
+		{% if collection %}
+			{% for record in collection %}
+				<div class="item {% cycle 'odd' 'even' %}">
+				    <h5><a href="/news/{{ category }}/{{ record.slug }}">{{ record.title }}</a></h5>
+				    <p>{{ record.body|len_cutter:150|safe }}</p>
+				    <h6>{{ record.created|date:"M d, Y" }}</h6>
+			    </div>
+			{% endfor %}
+		{% else %}
+		    <p class="no-record"> No record found!</p>
+		{% endif %}
+	</div>
 {% endblock %}

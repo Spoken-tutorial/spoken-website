@@ -78,7 +78,7 @@ INSTALLED_APPS = (
 	'nicedit',
 	'masquerade',
 	'report_builder',
-	#'south',
+	'south',
 )
 
 MIDDLEWARE_CLASSES = (

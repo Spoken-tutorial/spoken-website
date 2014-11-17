@@ -306,7 +306,10 @@ def admin_testimonials(request):
 def news(request, cslug):
     try:
         newstype = NewsType.objects.get(slug = cslug)
-        collection = newstype.news_set.all().order_by('-created')
+        collection = newstype.news_set.order_by('weight', '-created')
+        if collection:
+            page = request.GET.get('page')
+            collection = get_page(collection, page)
         context = {
             'collection' : collection,
             'category' : cslug,
