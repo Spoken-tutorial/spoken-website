@@ -21,7 +21,7 @@ from creation.views import get_video_info, is_administrator
 from creation.models import TutorialCommonContent, TutorialDetail, TutorialResource, Language
 from cms.models import SiteFeedback, Event, NewsType, News
 from events.views import get_page
-from mdldjango import MdlUser
+from mdldjango.models import MdlUser
 
 def is_resource_person(user):
     """Check if the user is having resource person  rights"""
