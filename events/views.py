@@ -36,7 +36,7 @@ from forms import *
 import datetime
 from django.utils import formats
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from mdldjango.get_or_create_participant import get_or_create_participant, check_csvfile
+from mdldjango.get_or_create_participant import get_or_create_participant, check_csvfile, update_participants_count
 from django.template.defaultfilters import slugify
 
 #pdf generate
@@ -58,6 +58,48 @@ from  filters import *
 from cms.sortable import *
 from events_email import send_email
 
+def _get_training_participant(training):
+    if training.organiser.academic.institution_type.name == "School":
+        if training.status == 4:
+            return SchoolTrainingAttendance.objects.filter(training = training, status__gte=1)
+        return SchoolTrainingAttendance.objects.filter(training = training)
+    else:
+        participant_ids = None
+        if training.status == 4:
+            participant_ids = list(TrainingAttendance.objects.filter(training = training, status__gte=1).values_list('mdluser_id'))
+        else:
+            participant_ids = list(TrainingAttendance.objects.filter(training = training).values_list('mdluser_id'))
+        mdlids = []
+        wp = {}
+        for k in participant_ids:
+            mdlids.append(k[0])
+        if mdlids:
+            wp = MdlUser.objects.filter(id__in = mdlids)
+        return wp
+
+def _mark_training_attendance(training, participant_id):
+    if training.organiser.academic.institution_type.name == "School":
+        ta = SchoolTrainingAttendance.objects.get(id = participant_id, training = training)
+        ta.status = 1
+        ta.save()
+    else:
+        try:
+            ta = TrainingAttendance.objects.get(mdluser_id = participant_id, training = training)
+            ta.status = 1
+            ta.save()
+        except:
+            ta = TrainingAttendance()
+            ta.training = training
+            ta.mdluser_id = participant_id
+            ta.status = 1
+            ta.save()
+
+def _mark_all_training_participants_to_zero(training):
+    if training.organiser.academic.institution_type.name == "School":
+        SchoolTrainingAttendance.objects.filter(training = training).update(status = 0)
+    else:
+        TrainingAttendance.objects.filter(training = training).update(status = 0)
+    
 @login_required
 def init_events_app(request):
     try:
@@ -808,7 +850,7 @@ def training_request(request, role, rid = None):
                 fout.close()
                 
                 #validate file
-                csv_file_error, error_line_no = check_csvfile(file_path)
+                csv_file_error, error_line_no = check_csvfile(user, file_path)
             ####
             if not csv_file_error:
                 dateTime = request.POST['trdate'].split(' ')
@@ -867,7 +909,7 @@ def training_request(request, role, rid = None):
                     #####
                     #get or create participants list
                     if f:
-                        csv_file_error, error_line_no = check_csvfile(file_path, w, flag=1)
+                        csv_file_error, error_line_no = check_csvfile(user, file_path, w, flag=1)
                         os.unlink(file_path)
                         
                         #file the participant count
@@ -1025,6 +1067,7 @@ def training_approvel(request, role, rid):
         if request.GET['status'] == 'reject':
             status = 5
         if request.GET['status'] == 'completed':
+            update_participants_count(w)
             status = 4
     except Exception, e:
         print e
@@ -1040,10 +1083,6 @@ def training_approvel(request, role, rid):
     if w.status == 2:
         w.training_code = "WC-"+str(w.id)
         send_email('Instructions to be followed before conducting the training', [w.organiser.user.email], w)
-    if request.GET['status'] == 'completed':
-        # calculate the participant list
-        wpcount = TrainingAttendance.objects.filter(training_id = rid, status = 1).count()
-        w.participant_counts = wpcount
     w.save()
     #send email
     if w.status == 4:
@@ -1181,29 +1220,14 @@ def training_attendance(request, wid):
             users = request.POST
             if users:
                 #set all record to 0 if status = 1
-                TrainingAttendance.objects.filter(training_id = wid, status = 1).update(status = 0)
+                _mark_all_training_participants_to_zero(training)
                 training.status = 3
                 training.save()
                 for u in users:
                     if not (u =='submit-mark-attendance' or u == 'csrfmiddlewaretoken'):
-                        try:
-                            wa = TrainingAttendance.objects.get(mdluser_id = users[u], training_id = wid)
-                            print wa.id, " => Exits"
-                        except:
-                            wa = TrainingAttendance()
-                            wa.training_id = wid
-                            wa.mdluser_id = users[u]
-                            wa.status = 0
-                            wa.save()
-                            print wa.id, " => Inserted"
-                        if wa:
-                            #todo: if the status = 2 check in moodle if he completed the test set status = 3 (completed)
-                            w = TrainingAttendance.objects.get(mdluser_id = wa.mdluser_id, training_id = wid)
-                            w.status = 1
-                            w.save()
+                        _mark_training_attendance(training, users[u])
                 #update participant
-                training.participant_counts = TrainingAttendance.objects.filter(training = training, status__gte = 1).count()
-                training.save()
+                #update_participants_count(training)
                 
                 message = training.academic.institution_name+" has submited training attendance"
                 update_events_log(user_id = user.id, role = 2, category = 0, category_id = training.id, academic = training.academic_id,  status = 6)
@@ -1255,14 +1279,8 @@ def training_attendance(request, wid):
                         messages.success(request, "Choose a PDF File")
                 else:
                     messages.success(request, "Choose a PDF File.")
-        
-    participant_ids = list(TrainingAttendance.objects.filter(training_id = wid).values_list('mdluser_id'))
-    mdlids = []
-    wp = {}
-    for k in participant_ids:
-        mdlids.append(k[0])
-    if mdlids:
-        wp = MdlUser.objects.filter(id__in = mdlids)
+    
+    wp = _get_training_participant(training)
     
     if not show_success_message:
         messages.success(request, """
@@ -1297,29 +1315,22 @@ def training_attendance(request, wid):
 
 def training_participant(request, wid=None):
     user = request.user
+    training = None
     if user.is_authenticated():
         if not ((is_resource_person(user) or is_event_manager(user) or is_organiser(user))):
             raise PermissionDenied()
     can_download_certificate = 0
     if wid:
         try:
-            wc = Training.objects.get(id=wid)
+            training = Training.objects.get(id=wid)
         except:
             raise PermissionDenied()
-        if wc.status == 4:
-            workshop_mdlusers = TrainingAttendance.objects.using('default').filter(training_id = wid, status__gt = 0).values_list('mdluser_id')
-        else:
-            workshop_mdlusers = TrainingAttendance.objects.using('default').filter(training_id = wid).values_list('mdluser_id')
-        ids = []
-        for wp in workshop_mdlusers:
-            ids.append(wp[0])
-            
-        wp = MdlUser.objects.using('moodle').filter(id__in=ids)
-        if (is_resource_person(user) or is_event_manager(user) or user == wc.organiser.user) and wc.status == 4:
+        wp = _get_training_participant(training)
+        if (is_resource_person(user) or is_event_manager(user) or user == training.organiser.user) and training.status == 4:
             can_download_certificate = 1
         context = {
             'collection' : wp,
-            'wc' : wc,
+            'wc' : training,
             'can_download_certificate':can_download_certificate,
             'file_path' : '/media/training/'+wid+'/'+wid+'.pdf',
         }

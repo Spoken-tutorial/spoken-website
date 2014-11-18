@@ -228,6 +228,18 @@ class TrainingAttendance(models.Model):
         verbose_name = "Training Attendance"
         unique_together = (("training", "mdluser_id"))
 
+class SchoolTrainingAttendance(models.Model):
+    training = models.ForeignKey(Training)
+    firstname = models.CharField(max_length = 100)
+    lastname = models.CharField(max_length = 100)
+    gender = models.CharField(max_length=10)
+    email = models.EmailField(null=True)
+    status = models.PositiveIntegerField(default=0)
+    created = models.DateTimeField(auto_now_add = True)
+    updated = models.DateTimeField(auto_now = True)
+    class Meta:
+        verbose_name = "School Training Attendance"
+
 class TrainingLog(models.Model):
     user = models.ForeignKey(User)
     training = models.ForeignKey(Training)

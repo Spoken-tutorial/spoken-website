@@ -19,9 +19,13 @@ def participant_picture(user_id):
         print e
         return None
 
-def get_trainingstatus(key, wcode):
+def get_trainingstatus(key, training):
+    wa = None
     try:
-        wa = TrainingAttendance.objects.get(mdluser_id=key, training_id = wcode)
+        if training.organiser.academic.institution_type.name == "School":
+            wa = SchoolTrainingAttendance.objects.get(id = key, training = training)
+        else:
+            wa = TrainingAttendance.objects.get(mdluser_id=key, training = training)
     except:
         return ''
     

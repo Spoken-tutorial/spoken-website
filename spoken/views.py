@@ -16,6 +16,7 @@ from django.core.exceptions import PermissionDenied
 from urllib import urlopen, quote, unquote_plus
 import json
 import datetime
+from dateutil.relativedelta import relativedelta
 from creation.subtitles import *
 from creation.views import get_video_info, is_administrator
 from creation.models import TutorialCommonContent, TutorialDetail, TutorialResource, Language
@@ -311,14 +312,28 @@ def admin_testimonials(request):
 def news(request, cslug):
     try:
         newstype = NewsType.objects.get(slug = cslug)
-        collection = newstype.news_set.order_by('weight', '-created')
+        collection = None
+        latest = None
+        if request.GET and 'latest' in request.GET and int(request.GET.get('latest')):
+            level = int(request.GET.get('latest')) # 1 => last month, 2 => last 6 month, 3 => all
+            if level == 1:
+                collection = newstype.news_set.filter(created__gte=datetime.date.today() - relativedelta(months=+1)).order_by('-created')
+            elif level == 2:
+                collection = newstype.news_set.filter(created__gte=datetime.date.today() - relativedelta(months=+6)).order_by('-created')
+            else:
+                collection = newstype.news_set.order_by('-created')
+            latest = True
+        else:
+            collection = newstype.news_set.order_by('weight', '-created')
+            
         if collection:
             page = request.GET.get('page')
             collection = get_page(collection, page)
         context = {
             'collection' : collection,
             'category' : cslug,
-            'newstype' : newstype
+            'newstype' : newstype,
+            'latest' : latest,
         }
         context.update(csrf(request))
         return render(request, 'spoken/templates/news/index.html', context)

@@ -141,6 +141,7 @@ def index(request):
 
 @login_required
 def offline_details(request, wid, category):
+    user = request.user
     wid = int(wid)
     category = int(category)
     #print category
@@ -152,10 +153,8 @@ def offline_details(request, wid, category):
         elif category == 2:
             Training.objects.get(pk=wid, status__lt=4)
         else:
-            #print 'yes'
             raise PermissionDenied('You are not allowed to view this page!')
     except Exception, e:
-        #print e
         raise PermissionDenied('You are not allowed to view this page!')
         
     if request.method == 'POST':
@@ -195,7 +194,6 @@ def offline_details(request, wid, category):
                             return HttpResponseRedirect('/participant/offline-data/'+ str(wid) + '/' + str(category))
                         get_or_create_participant(w, firstname, lastname, gender, email, category)
                     except Exception, e:
-                        #print e, "sssssssssss"
                         messages.error(request, "Record number "+ str(count) + " required data is missing. Please open with browser and check all required details are exits!.")
                         continue
             else:
@@ -208,11 +206,10 @@ def offline_details(request, wid, category):
                 
                 error_line_no = ''
                 csv_file_error = 0
-                csv_file_error, error_line_no = check_csvfile(file_path, w, flag=1)
+                csv_file_error, error_line_no = check_csvfile(user, file_path, w, flag=1)
                 os.unlink(file_path)
-                #save participant_count
-                w.participant_counts = TrainingAttendance.objects.filter(training = w, status__gte = 1).count()
-                w.save()
+                #update participant count
+                update_participants_count(w)
                 
                 if error_line_no:
                     messages.error(request, "<b>Error: Line number "+ error_line_no + " in CSV file data is not in a proper format in the Participant list. The format should be First name, Last name, Email, Gender. For more details <a href='http://process.spoken-tutorial.org/images/c/c2/Participant_data.pdf' target='_blank'>Click here</a></b>")

@@ -15,11 +15,6 @@
           <div class="form-group">
             {% render_field psform.email class+="form-control email" placeholder="Participant email" %}
           </div>
-          <!--
-           or 
-          <div class="form-group">
-            {% render_field psform.username class+="form-control username" placeholder="Participant username" %}
-          </div> -->
           <input class="btn btn-default" name="search-participant" type="submit" value="Search Participant" />
         </form>
         <a class="pull-right btn btn-primary" href="{% url 'mdldjango:mdl_offline_workshop_details' training.id 2 %}">Upload Participant Data</a>
@@ -101,7 +96,7 @@
                             </tr>
                             {% for record in collection %}
                                 <tr>
-                                    <th><input type='checkbox' name="user_{{ record.id }}" value="{{ record.id }}" {{ record.id|get_trainingstatus:training.id }} ></th>
+                                    <th><input type='checkbox' name="user_{{ record.id }}" value="{{ record.id }}" {{ record.id|get_trainingstatus:training }} ></th>
                                     <td>{{ record.firstname|lower|title }} {{ record.lastname|lower|title }}</td>
                                     <td>{{ record.email }}</td>
                                     <td>{{ record.gender }}</td>
@@ -120,25 +115,6 @@
                             <a class='btn btn-primary' title = "To complete the workshop click here" href="{% url 'events:training_approvel' 'organiser' training.id %}?status=completed">Mark as Complete</a>
                         </div>
                     {% endif %}
-                    <!--
-                    {% if training.training_type == 0  and training.status == 3 and training.trdate|can_upload_final_training_list %}
-			            <h4 class='step'><span class="label label-default">Step 2</span></h4>
-			            <div class="bs-callout bs-callout-info">
-			                <form action="{{ action }}" method="post" enctype="multipart/form-data">{% csrf_token %}
-			                    {% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
-                                <p>Upload the scaned copy training student attendance.</p>{% if training.id|training_file_exits %} <a href="{{file_path}}" target="_blank">View uploaded copy</a>{% endif %}
-                                {{form.errors}}
-                                <div class="form-group file">
-                                    <label for="id_scan_copy">scan_copy</label>
-                                    {% render_field sform.scan_copy class+="form-control scan_copy" tabindex="1" %}
-                                    {{ sform.scan_copy.errors }}
-                                </div>
-                                <input name="submit-scaned-copy" class="btn btn-primary" type="submit" value="Submit" />
-                                {% endwith %}
-                            </form>
-                        </div>
-                    {% endif %}
-                    -->
                 {% endif %}
 			{% else %}
 				<p class='no-record'>No record found!</p>
