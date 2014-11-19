@@ -41,7 +41,8 @@ class NewsAdmin(admin.ModelAdmin):
     #form = AdminBodyForm
     form = NewsAdditionaFieldAdmin
     exclude = ('created_by', 'slug')
-    list_display = ('title', 'picture', 'body', 'url', 'url_title', 'created_by', 'created')
+    list_display = ('title', 'weight', 'picture', 'body', 'url', 'url_title', 'created_by', 'created')
+    list_filter = ('news_type',)
     def save_model(self, request, obj, form, change):
         obj.created_by = request.user
         obj.picture = None

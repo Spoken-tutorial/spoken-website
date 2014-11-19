@@ -6,70 +6,75 @@
 {% block title %} {{ newstype.name }} {% endblock %}
 {% block cssblock %}
     <link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />
+    <link rel="stylesheet" href="{% static 'spoken/css/bootstrap-select.min.css' %}" type="text/css" media="screen" charset="utf-8" />
     <style>
         .item{
             padding: 5px 0;
+        }
+        .news-filter{
+            top: 10px;
+            position: absolute;
+            left: 40%;
         }
     </style>
 {% endblock %}
 {% block heading %}
     <i class="fa fa-list-ul"></i> {{ newstype.name }}
+    {% if request.path == "/news/article/" %}
+    <!-- 
+        {% if latest %}
+            <small><a class="btn btn-default" style="margin-left:30%;" href="{{ request.path }}">View Most Important</a></small>
+        {% else %}
+            <small><a class="btn btn-default" style="margin-left:30%;" href="{{ request.path }}?latest=True">View Latest</a></small>
+        {% endif %}
+    -->
+    {% endif %}
+    
 {% endblock %}
 {% block content %}
-    <div class='news-container'>
-        {% if collection %}
-            {% if request.path == '/news/news-and-eventss/' %}
-                <ul class="tabs nav nav-tabs nav-pills nav-justified">
-                    <li class="active"><a href="#tab_z" data-toggle="pill">Z</a></li>
-                    <li><a href="#tab_a" data-toggle="pill">A</a></li>
-                    <li><a href="#tab_b" data-toggle="pill">B</a></li>
-                </ul>
-                <div class="tab-content">
-                    <div class="tab-pane active" id="tab_z">
-                         {% with collection=collection|filter_news_weight:1 %}
-                             {% for record in collection %}
-                                <div class="item {% cycle 'odd' 'even' %}">
-                                    <h5><a href="/news/{{ category }}/{{ record.slug }}">{{ record.title }}</a></h5>
-                                    <p>{{ record.body|len_cutter:150|safe }}</p>
-                                    <h6>{{ record.created|date:"M d, Y" }}</h6>
-                                </div>
-                            {% endfor %}
-                        {% endwith %}
-                    </div>
-                    <div class="tab-pane" id="tab_a">
-                         {% with collection=collection|filter_news_weight:2 %}
-                             {% for record in collection %}
-                                <div class="item {% cycle 'odd' 'even' %}">
-                                    <h5><a href="/news/{{ category }}/{{ record.slug }}">{{ record.title }}</a></h5>
-                                    <p>{{ record.body|len_cutter:150|safe }}</p>
-                                    <h6>{{ record.created|date:"M d, Y" }}</h6>
-                                </div>
-                            {% endfor %}
-                        {% endwith %}
-                    </div>
-                    <div class="tab-pane" id="tab_b">
-                         {% with collection=collection|filter_news_weight:3 %}
-                             {% for record in collection %}
-                                <div class="item {% cycle 'odd' 'even' %}">
-                                    <h5><a href="/news/{{ category }}/{{ record.slug }}">{{ record.title }}</a></h5>
-                                    <p>{{ record.body|len_cutter:150|safe }}</p>
-                                    <h6>{{ record.created|date:"M d, Y" }}</h6>
-                                </div>
-                            {% endfor %}
-                        {% endwith %}
-                    </div>
-                </div>
-            {% else %}
-                {% for record in collection %}
-                    <div class="item {% cycle 'odd' 'even' %}">
-                        <h5><a href="/news/{{ category }}/{{ record.slug }}">{{ record.title }}</a></h5>
-                        <p>{{ record.body|len_cutter:150|safe }}</p>
-                        <h6>{{ record.created|date:"M d, Y" }}</h6>
-                    </div>
-                {% endfor %}
-             {% endif %}
-        {% else %}
-            <p class="no-record"> No record found!</p>
-        {% endif %}
+    <div class="news-filter">
+        <select class="selectpicker news-category" data-max-options="2">
+            <option value="0"><a href="#most-important">View Most Important</option>
+            <optgroup label="View Latest" data-max-options="1">
+                <option value=1>Last Month</option>
+                <option value=2>Last 6 Months</option>
+                <option value=3>All News</option>
+            </optgroup>
+        </select>
     </div>
+    
+	<div class='news-container'>
+		{% if collection %}
+			{% for record in collection %}
+				<div class="item {% cycle 'odd' 'even' %}">
+				    <h5><a href="/news/{{ category }}/{{ record.slug }}">{{ record.title }}</a></h5>
+				    <p>{{ record.body|len_cutter:150|safe }}</p>
+				    <h6>{{ record.created|date:"M d, Y" }}</h6>
+			    </div>
+			{% endfor %}
+		{% else %}
+		    <p class="no-record"> No record found!</p>
+		{% endif %}
+	</div>
+{% endblock %}
+{% block jsblock %}
+    <script src="{% static 'spoken/js/bootstrap-select.js' %}"></script>
+    <script>
+        $('.selectpicker').selectpicker();
+        var request_data = "{{ request.GET.latest }}";
+        if(request_data){
+            $('.selectpicker').selectpicker('val', request_data);
+        }
+        $(function(){
+            $('.selectpicker').change(function(){
+                var data = $('.selectpicker').val();
+                console.log(data)
+                if(data){
+                    window.location.href = location.protocol + '//' + location.host + location.pathname + "?latest=" + data
+                }else{
+                    window.location.href = location.protocol + '//' + location.host + location.pathname
+                }
+            });
+        });
+    </script>
 {% endblock %}

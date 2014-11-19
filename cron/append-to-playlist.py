@@ -41,7 +41,12 @@ for row in rows:
         print error_string
         continue
     video_id = row[6]
-    item_id = youtube.add_video_to_playlist(video_id, playlist[3])
+    try:
+        item_id = youtube.add_video_to_playlist(video_id, playlist[3])
+    except Exception, e:
+        print e
+        time.sleep(1)
+        continue
     if item_id:
         currtime = time.strftime('%Y-%m-%d %H:%M:%S')
         cur.execute("UPDATE creation_tutorialresource SET \

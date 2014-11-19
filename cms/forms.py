@@ -155,4 +155,4 @@ class ChangePasswordForm(forms.Form):
         return self.cleaned_data
         
 class NewsAdditionaFieldAdmin(forms.ModelForm):
-    weight = forms.ChoiceField(choices = ((1, 'Z'), (2, 'A'), (3, 'B')))
+    weight = forms.ChoiceField(choices = ((1, 'A'), (2, 'Z'), (3, 'B')))
