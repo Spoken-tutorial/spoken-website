@@ -315,13 +315,7 @@ def news(request, cslug):
         collection = None
         latest = None
         if request.GET and 'latest' in request.GET and int(request.GET.get('latest')):
-            level = int(request.GET.get('latest')) # 1 => last month, 2 => last 6 month, 3 => all
-            if level == 1:
-                collection = newstype.news_set.filter(created__gte=datetime.date.today() - relativedelta(months=+1)).order_by('-created')
-            elif level == 2:
-                collection = newstype.news_set.filter(created__gte=datetime.date.today() - relativedelta(months=+6)).order_by('-created')
-            else:
-                collection = newstype.news_set.order_by('-created')
+            collection = newstype.news_set.order_by('-created')
             latest = True
         else:
             collection = newstype.news_set.order_by('weight', '-created')
