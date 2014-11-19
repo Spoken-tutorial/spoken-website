@@ -120,13 +120,6 @@ def get_analytics_code():
 
     return context
 
-def filter_news_weight(collection, weight):
-    try:
-        return collection.filter(weight=weight)
-    except Exception, e:
-        print e
-        return None
-
 register.inclusion_tag('cms/templates/analytics_code.html')(get_analytics_code)
 register.filter('len_cutter', len_cutter)
 register.inclusion_tag('cms/templates/sortable_header.html')(get_sortable_header)
@@ -139,4 +132,3 @@ register.filter('reset_get_values', reset_get_values)
 register.filter('reset_get_value', reset_get_value)
 register.filter('get_or_create_csrf_token', get_or_create_csrf_token)
 register.filter('paginator_page_cutter', paginator_page_cutter)
-register.filter('filter_news_weight', filter_news_weight)

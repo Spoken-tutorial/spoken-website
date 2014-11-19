@@ -105,7 +105,7 @@ class News(models.Model):
     body = models.TextField()
     url = models.URLField(null=True, blank=True)
     url_title = models.CharField(max_length = 200, null=True, blank=True)
-    weight = models.PositiveIntegerField(default=0)
+    weight = models.PositiveIntegerField(default=3)
     created_by = models.ForeignKey(User)
     created = models.DateTimeField()
     updated = models.DateTimeField()
