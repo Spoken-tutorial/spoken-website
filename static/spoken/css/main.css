@@ -9,7 +9,38 @@
 
 @import url(http://fonts.googleapis.com/css?family=Comfortaa:700);
 
-#testimonials{
+@media (min-width: 1200px) {
+    .col-lg-offset-6p5 {
+        margin-left: 54.12222223%;
+    }
+    .col-lg-offset-5p5 {
+        margin-left: 45.77777775%;
+    }
+    .col-lg-offset-4p5 {
+        margin-left: 37.44444445%;
+    }
+    .col-lg-offset-3p5 {
+        margin-left: 29.12222223%;
+    }
+    .col-lg-offset-2p5 {
+        margin-left: 20.77777778%;
+    }
+    .col-lg-offset-1p5 {
+        margin-left: 12.44444445%;
+    }
+    .col-lg-offset-0p5 {
+        margin-left: 4.12222223%;
+    }
+    .col-lg-shadow {
+        -webkit-box-shadow: 0px 0px 20px 0px rgba(84, 70, 70, 0.87);
+        -moz-box-shadow: 0px 0px 20px 0px rgba(84, 70, 70, 0.87);
+        box-shadow: 0px 0px 20px 0px rgba(84, 70, 70, 0.87);
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+}
+
+#testimonials {
     color: black;
     font-family: 'Josefin Sans', sans-serif;
     line-height: 22px;
