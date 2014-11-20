@@ -3,22 +3,107 @@
 {% load static %}
 {% load cmsdata %}
 {% load creationdata %}
-{% block title %} News {% endblock %}
-{% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
+
+{% block title %} {{ news.title }} {% endblock %}
+
+{% block cssblock %}
+    <style>
+        .item{
+            padding: 5px 0;
+            border-bottom: 1px solid #DDD9D9;
+        }
+        #content {
+            padding: 60px;
+            padding-top: 20px;
+            background: white;
+            min-height: 400px;
+        }
+        #content-wrapper {
+            background: lightgray;
+        }
+        .page-title {
+            float: left;
+        }
+        .actual-data {
+            /* margin-left: 30px; */
+        }
+        .news-container {
+            clear: both;
+            padding-top: 5px;
+        }
+        .news-container a {
+            line-height: 1.5em;
+        }
+        #content-wrapper #content-block, #content-wrapper #content-inner {
+            padding-left: 0px;
+            padding-right: 0px
+        }
+        #page-wrapper #content-wrapper {
+            margin-bottom: 0px;
+        }
+        .news-view h6 {
+            margin-top: 0px;
+            margin-bottom: 25px;
+        }
+        h4.page-title {
+            margin-bottom: 4px;
+            line-height: 1.5em;
+        }
+        .news-view .image-thumb {
+            float: left;
+            
+            margin-right: 20px;
+        }
+        .news-view .image-thumb:hover {
+            
+        }
+        .news-view .image-thumb a {
+            display: block;
+            border: 1px solid #DAD9D9;
+        }
+        .news-view .image-thumb a:hover {
+            display: block;
+            border: 1px solid #2D63D8;
+        }
+        .news-view .image-thumb img {
+            padding: 2px;
+        }
+        .news-view .description {
+            text-align: justify;
+            line-height: 1.6em;
+        }
+        .news-source {
+            clear: both;
+            margin-top: 15px;
+        }
+    </style>
+{% endblock %}
+
 {% block heading %}
     {{ news.title }}
 {% endblock %}
+
+{% block content_head %}
+    <div id="content" class="col-lg-9 col-lg-offset-1p5 col-md-12 col-sm-12 col-lg-shadow">
+{% endblock %}
+
 {% block content %}
-	<div class="news-container news-view">
-	    <h6>{{ news.created }}</h6>
-	    <div class="description">
-	        {{ news.body|safe }}
-	    </div>
-	    {% if news.url %}
-	        <a target="_blank" href="{{news.url}}" title="{{ news.url_title}}">{{news.url}}</a> 
-	    {% endif %}
-	    {% if news.picture %}
-	        <a href="/media/{{news.picture}}" target="_blank">View image</a>
-	    {% endif %}
-	</div>
+    <div class="news-container news-view">
+        <h6>{{ news.created }}</h6>
+        {% if news.picture %}
+            <div class="image-thumb">
+                <a href="/media/{{news.picture}}" target="_blank">
+                    <img src="/media/{{news.picture}}" width="200" height="200" />
+                </a>
+            </div>
+        {% endif %}
+        <div class="description">
+            {{ news.body|format_raw_data|safe }}
+        </div>
+        {% if news.url %}
+            <p class="news-source">
+                <b>Source:</b> <a target="_blank" href="{{news.url}}" title="{{ news.url_title}}">{{news.url}}</a>
+            </p>
+        {% endif %}
+    </div>
 {% endblock %}

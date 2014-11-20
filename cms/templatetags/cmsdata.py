@@ -120,6 +120,14 @@ def get_analytics_code():
 
     return context
 
+def format_raw_data(raw_data):
+    str_rows = raw_data.split('\n')
+    formatted_data = ''
+    for str_row in str_rows:
+        formatted_data += '<p>' + str_row + '</p>'
+    return formatted_data
+
+register.filter('format_raw_data', format_raw_data)
 register.inclusion_tag('cms/templates/analytics_code.html')(get_analytics_code)
 register.filter('len_cutter', len_cutter)
 register.inclusion_tag('cms/templates/sortable_header.html')(get_sortable_header)
