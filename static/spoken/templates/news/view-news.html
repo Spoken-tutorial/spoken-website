@@ -111,7 +111,14 @@
         {% endif %}
         {% if news.url %}
             <p class="news-source">
-                <b><i class="fa fa-link fa-2"></i></b> &nbsp;&nbsp;<a target="_blank" href="{{news.url}}" title="{{ news.url_title}}"> &nbsp;{{news.url}}</a>
+                <b><i class="fa fa-link fa-2"></i></b> &nbsp;&nbsp;
+                <a target="_blank" href="{{news.url}}" title="{{ news.url_title}}">
+                    {% if news.url_title %}
+                        {{news.url_title}}
+                    {% else %}
+                        {{news.url}}
+                    {% endif %}
+                </a>
             </p>
         {% endif %}
     </div>
