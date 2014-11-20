@@ -340,8 +340,16 @@ def news_view(request, cslug, slug):
     try:
         newstype = NewsType.objects.get(slug = cslug)
         news = News.objects.get(slug = slug)
+        image_or_doc = None
+        if news.picture:
+            supported_formats = ['.gif', '.png', '.bmp', '.jpg', '.jpeg']
+            file_name, file_extension = os.path.splitext(settings.MEDIA_ROOT + str(news.picture))
+            image_or_doc = 1
+            if not (file_extension.lower() in supported_formats):
+                image_or_doc = 2
         context = {
             'news' : news,
+            'image_or_doc' : image_or_doc,
         }
         context.update(csrf(request))
         return render(request, 'spoken/templates/news/view-news.html', context)

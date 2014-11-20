@@ -74,7 +74,11 @@
         }
         .news-source {
             clear: both;
+            color: lightseagreen;
             margin-top: 15px;
+        }
+        ..news-source a {
+            display: block;
         }
     </style>
 {% endblock %}
@@ -90,7 +94,7 @@
 {% block content %}
     <div class="news-container news-view">
         <h6>{{ news.created }}</h6>
-        {% if news.picture %}
+        {% if news.picture and image_or_doc == 1 %}
             <div class="image-thumb">
                 <a href="/media/{{news.picture}}" target="_blank">
                     <img src="/media/{{news.picture}}" width="200" height="200" />
@@ -100,9 +104,14 @@
         <div class="description">
             {{ news.body|format_raw_data|safe }}
         </div>
+        {% if news.picture and image_or_doc == 2 %}
+            <p class="news-source">
+                <b><i class="fa fa-file-text-o fa-2"></i></b> &nbsp;&nbsp;<a href="/media/{{news.picture}}" target="_blank">Click here to <b>download</b> (or) <b>view</b> the attachment</a>
+            </p>
+        {% endif %}
         {% if news.url %}
             <p class="news-source">
-                <b>Source:</b> <a target="_blank" href="{{news.url}}" title="{{ news.url_title}}">{{news.url}}</a>
+                <b><i class="fa fa-link fa-2"></i></b> &nbsp;&nbsp;<a target="_blank" href="{{news.url}}" title="{{ news.url_title}}"> &nbsp;{{news.url}}</a>
             </p>
         {% endif %}
     </div>
