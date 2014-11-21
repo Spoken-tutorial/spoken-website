@@ -25,7 +25,7 @@ def get_cms_nav():
     return context
 
 def get_cms_subnavs(src_subnav):
-    subnavs = src_subnav.filter(visible__exact=1).order_by('position')
+    subnavs = src_subnav.all().filter(visible__exact=1).order_by('position')
 
     return subnavs
 

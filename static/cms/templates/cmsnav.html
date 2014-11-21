@@ -1,6 +1,6 @@
 {% load cmsdata %}
 {% for nav in navs %}
-	{% with subnavs=nav.subnav_set.all|get_cms_subnavs %}
+	{% with subnavs=nav.subnav_set|get_cms_subnavs %}
 		{% if subnavs|length > 0 %}
 			<li class="dropdown">
 				<a  class="dropdown-toggle" data-toggle="dropdown" href="#">{{ nav.nav_title }}<b class="caret"></b></a>
