@@ -3,7 +3,7 @@
 	{% with subnavs=nav.subnav_set|get_cms_subnavs %}
 		{% if subnavs|length > 0 %}
 			<li class="dropdown">
-				<a  class="dropdown-toggle" data-toggle="dropdown" href="#">{{ nav.nav_title }}<b class="caret"></b></a>
+				<a  class="dropdown-toggle" data-toggle="dropdown" href="#">{{ nav.nav_title }} <b class="caret"></b></a>
 				<ul class="dropdown-menu creation">
 					{% for subnav in subnavs %}
 					    {% if forloop.counter > 1 %}
