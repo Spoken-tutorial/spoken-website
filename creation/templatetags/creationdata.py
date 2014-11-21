@@ -166,7 +166,7 @@ def get_timed_script(script_path):
     try:
         code = urlopen(timed_script).code
     except Exception, e:
-        code = e.code
+        code = 0
     if(int(code) == 200):
         return timed_script
     return ''

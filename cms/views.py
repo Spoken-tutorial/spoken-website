@@ -16,10 +16,15 @@ import random, string
 
 def dispatcher(request, permalink=''):
     if permalink == '':
-        permalink = 'home'
-    page_content = get_object_or_404(Page, permalink=permalink)
+        return HttpResponseRedirect('/')
+    page_content = get_object_or_404(Page, permalink=permalink, visible=True)
+    col_offset = int((12 - page_content.cols) / 2)
+    col_remainder = int((12 - page_content.cols) % 2)
+    if col_remainder:
+        col_offset = str(col_offset) + 'p5'
     context = {
         'page': page_content,
+        'col_offset': col_offset,
     }
     return render(request, 'cms/templates/page.html', context)
 

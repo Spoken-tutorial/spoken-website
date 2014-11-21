@@ -5,7 +5,8 @@ from django.contrib.auth.models import User
 from captcha.fields import CaptchaField
 from nicedit.widgets import NicEditWidget
 from django.utils.translation import ugettext_lazy as _
-from django.core.validators import MinLengthValidator, MinValueValidator, RegexValidator, URLValidator
+from django.core.validators import MinLengthValidator, MinValueValidator, \
+    RegexValidator, URLValidator
 
 class LoginForm(forms.Form):
     username = forms.CharField(
@@ -18,49 +19,55 @@ class LoginForm(forms.Form):
 
 class RegisterForm(forms.Form):
     username = forms.CharField(
-        label=_("Username"),
-        max_length=30,
-        widget=forms.TextInput(),
-        required=True,
-        validators=[
+        label = _("Username"),
+        max_length = 30,
+        widget = forms.TextInput(),
+        required = True,
+        validators = [
             RegexValidator(
-                regex='^[a-zA-Z0-9-_+.]*$',
-                message='Username required. 30 characters or fewer. Letters, digits and @/./+/-/_ only.',
-                code='invalid_username'
-                ),
-            ]
+                regex = '^[a-zA-Z0-9-_+.]*$',
+                message = 'Username required. 30 characters or fewer. \
+                    Letters, digits and @/./+/-/_ only.',
+                code = 'invalid_username'
+            ),
+        ]
     )
     password = forms.CharField(
-        label=_("Password"),
-        widget=forms.PasswordInput(render_value=False),
-        min_length=8,
+        label = _("Password"),
+        widget = forms.PasswordInput(render_value = False),
+        min_length = 8,
     )
     password_confirm = forms.CharField(
-        label=_("Password (again)"),
-        widget=forms.PasswordInput(render_value=False),
-        min_length=8,
+        label = _("Password (again)"),
+        widget = forms.PasswordInput(render_value = False),
+        min_length = 8,
     )
     email = forms.EmailField(
-        label=_("Email"),
-        widget=forms.TextInput(), required=True)
+        label = _("Email"),
+        widget = forms.TextInput(),
+        required=True
+    )
     captcha = CaptchaField()
-    
+
+
     def clean_username(self):
         username = self.cleaned_data['username']
         try:
-            user = User.objects.get(username=username)
+            user = User.objects.get(username = username)
         except User.DoesNotExist:
             return username
         raise forms.ValidationError(u'%s already exists' % username )
-        
+
+
     def clean_email(self):
         email = self.cleaned_data['email']
         try:
-            user = User.objects.get(email=email)
+            user = User.objects.get(email = email)
         except User.DoesNotExist:
             return email
         raise forms.ValidationError(u'%s already exists' % email )
-        
+
+
     def clean(self):
         password = self.cleaned_data.get('password')
         password_confirm = self.cleaned_data.get('password_confirm')
@@ -68,22 +75,37 @@ class RegisterForm(forms.Form):
             raise forms.ValidationError("Passwords don't match")
         return self.cleaned_data
 
+
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
-        exclude = ['user', 'confirmation_code', 'street', 'location', 'picture']
-    
+        exclude = ['user', 'confirmation_code', 'street', 'location', \
+            'picture']
+
     # def clean_picture(self):
-    #     if 'picture' in self.cleaned_data and not self.cleaned_data['picture']:
+    #    if 'picture' in self.cleaned_data and not \
+    #        self.cleaned_data['picture']:
     #         raise forms.ValidationError("Profile picture required!")
+
     first_name = forms.CharField()
     last_name = forms.CharField()
-    state = forms.ModelChoiceField(label='State', cache_choices=True, widget = forms.Select(attrs = {'class' : 'ac-state'}), queryset = State.objects.order_by('name'), empty_label = "--- None ---", help_text = "", error_messages = {'required':'State field required.'})
-    
-    district = forms.ModelChoiceField(label='Dist', cache_choices=True, widget = forms.Select(attrs = {'class' : 'ac-district'}), queryset = District.objects.none(), empty_label = "--- None ---", help_text = "", error_messages = {'required':'District Type field required.'})
-    
-    city = forms.ModelChoiceField(label='City', cache_choices=True, widget = forms.Select(attrs = {'class' : 'ac-city'}), queryset = City.objects.none(), empty_label = "--- None ---", help_text = "", error_messages = {'required':'City Type field required.'})
-    
+    state = forms.ModelChoiceField(label = 'State', cache_choices = True, \
+        widget = forms.Select(attrs = {'class' : 'ac-state'}), queryset = \
+        State.objects.order_by('name'), empty_label = "--- None ---", \
+        help_text = "", error_messages = {'required':'State field required.'})
+
+    district = forms.ModelChoiceField(label='Dist', cache_choices=True, \
+        widget = forms.Select(attrs = {'class' : 'ac-district'}), \
+        queryset = District.objects.none(), empty_label = "--- None ---", \
+        help_text = "", error_messages = \
+        {'required':'District Type field required.'})
+
+    city = forms.ModelChoiceField(label = 'City', cache_choices = True, \
+    widget = forms.Select(attrs = {'class' : 'ac-city'}), \
+    queryset = City.objects.none(), empty_label = "--- None ---", \
+    help_text = "", error_messages = {'required':'City Type field required.'})
+
+
     def __init__(self, user, *args, **kwargs):
         initial = ''
         if 'instance' in kwargs:
@@ -97,22 +119,41 @@ class ProfileForm(forms.ModelForm):
         self.fields['last_name'].initial = user.last_name
         self.fields["state"].queryset = State.objects.filter()
         if initial:
-            self.fields["district"].queryset = District.objects.filter(state__id=initial.state_id)
-            self.fields["city"].queryset = City.objects.filter(state__id=initial.state_id)
+            self.fields["district"].queryset = \
+                District.objects.filter(state__id = initial.state_id)
+            self.fields["city"].queryset = \
+                City.objects.filter(state__id = initial.state_id)
             
         if args:
             if 'state' in args[0]:
                 if args[0]['state'] != '' and args[0]['state'] != 'None':
-                    self.fields["district"].queryset = District.objects.filter(state__id=args[0]['state'])
-                    self.fields["city"].queryset = City.objects.filter(state__id=args[0]['state'])
+                    self.fields["district"].queryset = \
+                        District.objects.filter(state__id = args[0]['state'])
+                    self.fields["city"].queryset = \
+                        City.objects.filter(state__id = args[0]['state'])
+
 
 #Overwrite NewsAdminBodyField
 class AdminBodyForm(forms.ModelForm):
     body = forms.CharField(
-            widget=NicEditWidget(attrs={'style': 'width: 800px;'}))
+            widget = NicEditWidget(attrs = {'style': 'width: 800px;'}))
+
+
+class CmsPageForm(forms.ModelForm):
+    body = forms.CharField(widget = NicEditWidget(attrs = \
+        {'style': 'width: 800px;'}))
+    cols = forms.ChoiceField(choices = ((6, '6'), (7, '7'), (8, '8'), \
+        (9, '9'), (10, '10'), (11, '11'), (12, '12')))
+
+
+    class Meta:
+        model = Page
+
 
 class PasswordResetForm(forms.Form):
     email = forms.EmailField()
+
+
     def clean_email(self):
         email = self.cleaned_data['email']
         error = 1
@@ -124,7 +165,8 @@ class PasswordResetForm(forms.Form):
             print e
         if error:
             raise forms.ValidationError( u'Email: %s not exists' % email )
-            
+
+
 class ChangePasswordForm(forms.Form):
     old_password = forms.CharField(
         widget=forms.PasswordInput(render_value=False),
@@ -140,9 +182,11 @@ class ChangePasswordForm(forms.Form):
         widget=forms.PasswordInput(render_value=False),
         min_length=8,
     )
-    
+
+
     def clean(self):
-        profile = Profile.objects.get(user_id = self.cleaned_data['userid'], confirmation_code = self.cleaned_data['code'])
+        profile = Profile.objects.get(user_id = self.cleaned_data['userid'], \
+            confirmation_code = self.cleaned_data['code'])
         user = profile.user
         if 'old_password' in self.cleaned_data:
             if not user.check_password(self.cleaned_data['old_password']):
@@ -153,6 +197,7 @@ class ChangePasswordForm(forms.Form):
         if confirm_new_password and new_password != new_password:
             raise forms.ValidationError("Passwords did not match")
         return self.cleaned_data
-        
+
+
 class NewsAdditionaFieldAdmin(forms.ModelForm):
     weight = forms.ChoiceField(choices = ((1, 'A'), (2, 'Z'), (3, 'B')))

@@ -19,9 +19,9 @@ class BlockAdmin(admin.ModelAdmin):
     list_display = ('title', 'block_location', 'position', 'visible', 'created')
 
 class PageAdmin(admin.ModelAdmin):
-    form = AdminBodyForm
+    form = CmsPageForm
     list_display = ('title', 'permalink', 'target_new', 'visible', 'created')
-    
+
 class EventAdmin(admin.ModelAdmin):
     form = AdminBodyForm
     exclude = ('user',)
