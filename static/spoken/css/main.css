@@ -95,7 +95,7 @@ html,body
 .navbar-nav>li>.dropdown-menu.events, .navbar-nav>li>.dropdown-menu.creation{
     left: auto;
 }
-.dropdown-menu.creation > li > a{
+.dropdown-menu.creation > li > a, .dropdown-menu.user-details > li > a{
     color: #428bca;
     font-size: 12px;
 }

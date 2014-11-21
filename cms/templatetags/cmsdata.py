@@ -24,6 +24,11 @@ def get_cms_nav():
 
     return context
 
+def get_cms_subnavs(src_subnav):
+    subnavs = src_subnav.filter(visible__exact=1).order_by('position')
+
+    return subnavs
+
 @register.filter
 def sort_by(queryset, order):
     return queryset.filter(visible__exact=1).order_by('position')
@@ -141,3 +146,4 @@ register.filter('reset_get_values', reset_get_values)
 register.filter('reset_get_value', reset_get_value)
 register.filter('get_or_create_csrf_token', get_or_create_csrf_token)
 register.filter('paginator_page_cutter', paginator_page_cutter)
+register.filter('get_cms_subnavs', get_cms_subnavs)
