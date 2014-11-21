@@ -15,11 +15,7 @@
 			</li>
 		{% else %}
 			<li>
-			{% if nav.permalink|slice:":4" == "http" or nav.permalink == "#" %}
-				<a href="{{ nav.permalink }}" {% if nav.target_new %}target="_blank"{% endif %}>{{ nav.nav_title }}</a>
-			{% else %}
-				<a href="{% url 'dispatcher' nav.permalink %}" {% if nav.target_new %}target="_blank"{% endif %}>{{ nav.nav_title }}</a>
-			{% endif %}
+    			<a href="{{ nav.permalink }}" {% if nav.target_new %}target="_blank"{% endif %}>{{ nav.nav_title }}</a>
 			</li>
 		{% endif %}
 	{% endwith %}
