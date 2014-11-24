@@ -101,7 +101,7 @@ if __name__ == "__main__":
     rows = db_cursor.fetchall()
     for row in rows:
         db_cursor.execute("select id, name, code from creation_language \
-            where id = %d", [int(row[1]),])
+            where id = %s", str(row[1]))
         language = db_cursor.fetchone()
         video_title = str(row[6].replace(' ', '-'))
         video_path = config.MEDIA_ROOT + 'videos/' + str(row[5]) + '/' + str(row[3]) + '/'
