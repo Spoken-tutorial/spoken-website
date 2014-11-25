@@ -160,13 +160,19 @@ def get_prerequisite_from_td(td, lang):
                 pass
     return None
 
-def get_timed_script(script_path):
-    timed_script = settings.SCRIPT_URL + script_path + '-timed'
+def get_timed_script(tr):
+    timed_script = settings.SCRIPT_URL + tr.script + '-timed'
     code = 0
     try:
         code = urlopen(timed_script).code
     except Exception, e:
-        code = 0
+        timed_script = settings.SCRIPT_URL + tr.tutorial_detail.foss.foss + \
+            '/' + tr.tutorial_detail.level.level + '/' + \
+            tr.tutorial_detail.tutorial.replace(' ', '-') + '/English-timed'
+        try:
+            code = urlopen(timed_script).code
+        except Exception, e:
+            code = 0
     if(int(code) == 200):
         return timed_script
     return ''
