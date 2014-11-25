@@ -3,6 +3,7 @@
 *.pyc
 config.py
 cron/config.py
+cron/youtube-oauth.storage
 cron/logs/*
 youtube/secrets/*
 media/*

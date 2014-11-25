@@ -3,6 +3,7 @@ import MySQLdb
 import json
 import os
 import sys
+import time
 import config
 
 from apiclient.discovery import build
@@ -73,11 +74,11 @@ class YoutubeCaption(object):
             headers = self.headers
         )
         if response_headers["status"] != "201":
-            raise Error("Received HTTP response %s when uploading captions \
-                to %s." % (response_headers["status"], url))
+            return "Received HTTP response %s when uploading captions \
+                to %s." % (response_headers["status"], url), False
 
         return '%s - %s %s - caption updated' % (video_id, \
-            self.CAPTIONS_LANGUAGE_CODE, self.CAPTIONS_TITLE)
+            self.CAPTIONS_LANGUAGE_CODE, self.CAPTIONS_TITLE), True
 
 
     def set_caption_language_title(self, language='', title=''):
@@ -90,6 +91,9 @@ if __name__ == "__main__":
         config.CLIENT_SECRET)
     db = MySQLdb.connect(host = config.DB_HOST, user = config.DB_USER, \
         passwd = config.DB_PASS, db = config.DB_NAME)
+
+    ldb = MySQLdb.connect(host = config.DB_HOST, user = config.DB_USER, \
+        passwd = config.DB_PASS, db = 'cron_logs')
     db_cursor = db.cursor()
     db_cursor.execute("select ctr.id, ctr.language_id, ctr.video, \
         ctr.tutorial_detail_id, ctr.video_id, ctd.foss_id, ctd.tutorial from \
@@ -99,16 +103,26 @@ if __name__ == "__main__":
         (select distinct trid from cron_logs.srt_uploads)) ORDER BY \
         ctd.foss_id, ctd.level_id, ctd.order ASC")
     rows = db_cursor.fetchall()
+
+    ldb = MySQLdb.connect(host = config.DB_HOST, user = config.DB_USER, \
+        passwd = config.DB_PASS, db = 'cron_logs')
+    ldb_cursor = ldb.cursor()
+
     for row in rows:
+        overall_status = 0
         db_cursor.execute("select id, name, code from creation_language \
-            where id = %s", str(row[1]))
+            where id = %s", [str(row[1]),])
         language = db_cursor.fetchone()
         video_title = str(row[6].replace(' ', '-'))
         video_path = config.MEDIA_ROOT + 'videos/' + str(row[5]) + '/' + str(row[3]) + '/'
         english_srt = video_path + video_title + '-English.srt'
+        status_flag = False
         if os.path.isfile(english_srt):
             caption.set_caption_language_title('en')
-            print caption.upload_translated_captions(english_srt, row[4])
+            message, status_flag = caption.upload_translated_captions(english_srt, row[4])
+            if status_flag:
+                overall_status = 1
+            print message
         if language[1] != 'English':
             native_srt = video_path + video_title + '-' + language[1] + '.srt'
             if os.path.isfile(native_srt):
@@ -116,4 +130,13 @@ if __name__ == "__main__":
                 if language[2] == 'en':
                     language_title = language[1]
                 caption.set_caption_language_title(language[2], language_title)
-                print caption.upload_translated_captions(native_srt, row[4])
+                message, status_flag = caption.upload_translated_captions(native_srt, row[4])
+                print message
+            else:
+                status_flag = False
+        if status_flag and overall_status:
+            ldb_cursor.execute("insert into srt_uploads (trid) values(%s)", [str(row[0]),])
+            ldb.commit()
+        else:
+            continue
+        time.sleep(1)
