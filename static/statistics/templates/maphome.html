@@ -34,7 +34,7 @@
 
 {% block content %}
     <div class="map-stats col-lg-shadow">
-        <!-- <div id="popup_box" style="display:none;font-size:16px;color:#000000; padding-top:30px;">Click on any state to get statistics.</div> -->
+        <div id="popup_box" style="display:none;font-size:16px;color:#000000; padding-top:30px;">Click on any state to get statistics.</div>
         <br />
         <img src="{% static 'statistics/images/map-of-india.gif' %}" alt="" usemap="#states-and-territories-map-of-india" style="border-style:none" />
         <map id="states-and-territories-map-of-india" name="states-and-territories-map-of-india">
@@ -57,12 +57,12 @@
                 maxHeight    : 210,
                 fitToView    : true,
                 autoSize    : false,
-                closeClick    : false,
+                /*closeClick    : false,*/
                 openEffect    : "none",
                 closeEffect    : "none",
                 modal        : true,
             });
-            /*$.fancybox.open('#popup_box');*/
+            $.fancybox.open('#popup_box');
         });
     </script>
 {% endblock %}

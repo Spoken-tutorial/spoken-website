@@ -69,9 +69,6 @@ def home(request):
     context['events'] = events
     return render(request, 'spoken/templates/home.html', context)
 
-def workshop_advt(request):
-    return render(request, 'spoken/templates/workshop.html')
-
 def get_or_query(terms, search_fields):
     #terms = ['linux', ' operating system', ' computers', ' hardware platforms', ' oscad']
     #search_fields = ['keyword']
@@ -126,6 +123,7 @@ def tutorial_search(request):
     context = {}
     collection = None
     form = TutorialSearchForm()
+    foss_get = ''
     if request.method == 'GET' and request.GET:
         form = TutorialSearchForm(request.GET)
         if form.is_valid():
@@ -142,12 +140,14 @@ def tutorial_search(request):
     else:
         foss = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), language__name = 'English').values('tutorial_detail__foss__foss').annotate(Count('id')).values_list('tutorial_detail__foss__foss').distinct().order_by('?')[:1].first()
         collection = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), tutorial_detail__foss__foss = foss[0], language__name = 'English')
+        foss_get = foss[0]
     
     page = request.GET.get('page')
     collection = get_page(collection, page)
     context['form'] = form
     context['collection'] = collection
     context['SCRIPT_URL'] = settings.SCRIPT_URL
+    context['current_foss'] = foss_get
     return render(request, 'spoken/templates/tutorial_search.html', context)
 
 def watch_tutorial(request, foss, tutorial, lang):
@@ -390,22 +390,3 @@ def create_subtitle_files(request, overwrite = True):
             else:
                 print 'Failed: ', row.tutorial_detail.foss.foss + ',', srt_file_name
     return HttpResponse('Success!')
-
-def scilab_conf_email(request):
-    #rows = TestAttendance.objects.filter(mdluser_id__gt=0, test__foss_id=29).values_list('mdluser_id').distinct()
-    subject = 'Scilab India 2014 conference - 3 & 4 December 2014 @ IIT Bombay'
-    message = 'Hello Vishnu,<p>On behalf of the Scilab Team, FOSSEE Project, IIT Bombay, we invite you to the <b>Scilab India 2014 conference on 3 and 4 December, 2014 at IIT Bombay, Mumbai.</b></p><br /><p>For details about the conference, please visit <a href="http://fossee.in/conference/scilab/">http://fossee.in/conference/scilab</a></p><br /><p>We look forward to seeing you at the conference.</p><br /><br />Team Scilab<br />FOSSEE Project<br />IIT Bombay'
-    email = EmailMultiAlternatives(
-        subject, message, 'administrator@spoken-tutorial.org',
-        to = 'vishnukraj007@gmail.com', bcc = None, cc = None,
-        headers={'Reply-To': 'no-replay@spoken-tutorial.org', "Content-type":"text/html;charset=iso-8859-1"}
-    )
-    
-    try:
-        result = email.send(fail_silently=False)
-    except Exception, e:
-        print "*******************************************************"
-        print message
-        print "*******************************************************"
-        pass
-    #for row in rows:
