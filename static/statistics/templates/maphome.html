@@ -2,21 +2,40 @@
 {% load widget_tweaks %}
 {% load static %}
 {% block title %}India Map{% endblock %}
-{% block heading %}India Map{% endblock %}
+{% block heading %}{% endblock %}
 {% block search %}{% endblock %}
+
 {% block cssblock %}
     <link rel="stylesheet" href="{% static 'spoken/css/jquery.fancybox.css' %}" type="text/css" media="screen" charset="utf-8" />
     <link rel="stylesheet" href="{% static 'spoken/css/flip-scroll.css' %}" type="text/css" media="screen" charset="utf-8" />
     <style type="text/css">
         .map-stats {
-            margin-bottom: 30px;
-            margin-top: 20px;
+            width: 800px;
+            background: white;
+        }
+        #content-wrapper {
+            background: lightgray;
+        }
+        #content-wrapper #content-block, #content-wrapper #content-inner {
+            padding: 0px;
+        }
+        #page-wrapper #content-wrapper {
+            margin-bottom: 0px;
+        }
+        #content-wrapper #content-inner {
+            max-width: 800px;
         }
     </style>
 {% endblock %}
+
+{% block content_head %}
+    <div id="content" class="col-lg-12 col-md-12 col-sm-12">
+{% endblock %}
+
 {% block content %}
-    <div class="col-lg-12 col-md-12 clo-sm-12 col-xs-12 col-center map-stats">
+    <div class="map-stats col-lg-shadow">
         <div id="popup_box" style="display:none;font-size:16px;color:#000000; padding-top:30px;">Click on any state to get statistics.</div>
+        <br />
         <img src="{% static 'statistics/images/map-of-india.gif' %}" alt="" usemap="#states-and-territories-map-of-india" style="border-style:none" />
         <map id="states-and-territories-map-of-india" name="states-and-territories-map-of-india">
             {% for state in states %}
@@ -27,6 +46,7 @@
         </map>
     </div>
 {% endblock %}
+
 {% block jsblock %}
     <script src="{% static 'spoken/js/jquery.fancybox.pack.js' %}"></script>
     <script src="{% static 'spoken/js/jquery.mousewheel-3.0.6.pack.js' %}"></script>
@@ -37,7 +57,7 @@
                 maxHeight    : 210,
                 fitToView    : true,
                 autoSize    : false,
-                closeClick    : false,
+                /*closeClick    : false,*/
                 openEffect    : "none",
                 closeEffect    : "none",
                 modal        : true,

@@ -33,8 +33,12 @@ class Profile(models.Model):
 
 class Page(models.Model):
     title = models.CharField(max_length=255)
+    css = models.TextField(default=None, null=True, blank=True)
     body = models.TextField()
+    js = models.TextField(default=None, null=True, blank=True)
+    cols = models.IntegerField(default=9)
     permalink = models.CharField(max_length=255, unique=True)
+    formatting = models.BooleanField(default = True)
     target_new = models.BooleanField()
     visible = models.BooleanField()
     created = models.DateTimeField(auto_now_add=True)

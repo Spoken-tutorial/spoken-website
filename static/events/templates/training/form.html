@@ -5,6 +5,11 @@
 {% block title %}Training / Workshop - Request{% endblock %}
 {% block cssblock %}
 	<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />
+    <style>
+        .radio input[type="radio"]{
+            left: 0px;
+        }
+    </style>
 {% endblock %}
 {% block heading %}
         <i class="fa fa-list-ul"></i> Training / Workshop and Participant Name List<a href="/software-training" class='pull-right go-back'>Dashboard</a>

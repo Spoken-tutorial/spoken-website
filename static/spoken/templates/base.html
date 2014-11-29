@@ -3,43 +3,46 @@
 {% load cmsdata %}
 {% load creationdata %}
 <html>
-	<head>
-		<title>
-			{% block title %}{% endblock %} | spoken-tutorial.org
-		</title>
-		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-		<meta name="google-site-verification" content="cEzhkvpVPFzrNFq1SPhnX-cm87KaIzy5eqKm6I77trc" />
-		<meta property="og:url" content="http://www.spoken-tutorial.org">
+    <head>
+        <title>
+            {% block title %}{% endblock %} | spoken-tutorial.org
+        </title>
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+        <meta name="google-site-verification" content="cEzhkvpVPFzrNFq1SPhnX-cm87KaIzy5eqKm6I77trc" />
+        <meta property="og:url" content="http://www.spoken-tutorial.org">
         <meta property="og:title" content="Spoken Tutorial">
         <meta property="og:description" content="A spoken tutorial is a an audio-video tutorial that explains an activity performed on the computer. An expert explains the working of a software, by demonstrating it on the screen, along with a running commentary.">
         <meta name="Description" content="A spoken tutorial is a an audio-video tutorial that explains an activity performed on the computer. An expert explains the working of a software, by demonstrating it on the screen, along with a running commentary.">
         {% block metatag %}
             <meta name="Keywords" content="Free software training in india, Blender free training in india,  Digital-Divide  free training in india,  Drupal free training in india,  Firefox free training in india,  Geogebra free training in india,  GeoGebra-for-Engineering-drawing free training in india,  GIMP free training in india,  GNS3 free training in india,  GSchem free training in india,  Java free training in india,  KiCad free training in india,  KTouch free training in india,  KTurtle free training in india,  LaTeX  free training in india, LibreOffice-Suite-Base free training in india,  LibreOffice-Suite-Calc free training in india,  LibreOffice-Suite-Draw free training in india,  LibreOffice-Suite-Impress free training in india, LibreOffice-Suite-Math free training in india,  LibreOffice-Suite-Writer free training in india, Linux free training in india,  Netbeans free training in india,  Ngspice free training in india,  OpenFOAM free training in india,  PHP-and-MySQL free training in india,  Python free training in india,  Python-Old-Version free training in india,  QCad free training in india,  Scilab free training in india,  Selenium free training in india,  Basic IT skills free training in india, Free animation and graphics training in india, Free programming software in india">
         {% endblock %}
-		<link rel="shortcut icon" href="{% static 'spoken/images/favicon.ico' %}" />
-		<!-- Bootstrap core CSS -->
-		<link rel="stylesheet" href="{% static 'spoken/css/bootstrap.min.css' %}" type="text/css" media="screen" charset="utf-8" />
-		<link rel="stylesheet" href="{% static 'spoken/css/font-awesome.min.css' %}" type="text/css" media="screen" charset="utf-8" />
-		<link rel="stylesheet" href="{% static 'spoken/css/yamm.css' %}" type="text/css" media="screen" charset="utf-8" />
-		<link rel="stylesheet" href="{% static 'spoken/css/jquery.datetimepicker.css' %}" type="text/css" media="screen" charset="utf-8" />
-		<!-- <link rel="stylesheet" href="{% static 'spoken/css/bootstrap-theme.css' %}" type="text/css" media="screen" charset="utf-8"> -->
-		<style>
-		    #footer-wrapper a:hover {
-		        color: #FFA500;
-		    }
-		    .cc-data {
-		        color: #DEB887;
-		        text-align: center;
-		    }
-		</style>
-		<link rel="stylesheet" href="{% static 'spoken/css/main.css' %}" type="text/css" media="screen" charset="utf-8" />
-		{% block cssblock %}{% endblock %}
-	</head>
-	<body>
-	    {% block announcement %}{% endblock %}
-		<div id="page-wrapper">
-		    <a href="#page-wrapper"></a>
-			<!-- header begin -->
+        <link rel="shortcut icon" href="{% static 'spoken/images/favicon.ico' %}" />
+        <!-- Bootstrap core CSS -->
+        <link rel="stylesheet" href="{% static 'spoken/css/bootstrap.min.css' %}" type="text/css" media="screen" charset="utf-8" />
+        <link rel="stylesheet" href="{% static 'spoken/css/font-awesome.min.css' %}" type="text/css" media="screen" charset="utf-8" />
+        <link rel="stylesheet" href="{% static 'spoken/css/yamm.css' %}" type="text/css" media="screen" charset="utf-8" />
+        <link rel="stylesheet" href="{% static 'spoken/css/jquery.datetimepicker.css' %}" type="text/css" media="screen" charset="utf-8" />
+        <!-- <link rel="stylesheet" href="{% static 'spoken/css/bootstrap-theme.css' %}" type="text/css" media="screen" charset="utf-8"> -->
+        <style>
+            #footer-wrapper a:hover {
+                color: #FFA500;
+            }
+            .cc-data {
+                color: #DEB887;
+                text-align: center;
+            }
+            .add-padding {
+                padding: 5px;
+            }
+        </style>
+        <link rel="stylesheet" href="{% static 'spoken/css/main.css' %}" type="text/css" media="screen" charset="utf-8" />
+        {% block cssblock %}{% endblock %}
+    </head>
+    <body>
+        {% block announcement %}{% endblock %}
+        <div id="page-wrapper">
+            <a href="#page-wrapper"></a>
+            <!-- header begin -->
             <div id="header-wrapper">
                 <nav class="navbar yamm navbar-default navbar-fixed-top" role="navigation">
                     <div id="header-inner">
@@ -149,6 +152,7 @@
                                                 </div>
                                             </ul>
                                         </li>
+                                        <!--
                                         <li class="dropdown">
                                             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                                                 News <b class="caret"></b>
@@ -156,7 +160,7 @@
                                             <ul class="dropdown-menu creation">
                                                 <li><a href="/testimonials/">Testimonials</a></li>
                                                 <li class="divider"></li>
-                                                <li><a href="/news/article/">Media Articles</a></li>
+                                                <li><a href="/news/media-articles/">Media Articles</a></li>
                                                 <li class="divider"></li>
                                                 <li><a href="/news/news-and-events/">News and Events</a></li>
                                                 <li class="divider"></li>
@@ -167,7 +171,8 @@
                                         </li>
                                         <li><a href="http://forums.spoken-tutorial.org/" target="_blank">Forum</a></li>
                                         <li><a href="/about-us/">About Us</a></li>
-                                        <li><a href="/statistics/">Statistics</a></li>
+                                        <li><a href="/statistics/">Statistics</a></li> -->
+                                        {% get_cms_nav %}
                                         <!-- <li><a href="http://old.spoken-tutorial.org" target="_blank">Old Website</a></li> -->
                                     </ul>
                                     
@@ -237,79 +242,83 @@
             {% block banner %}
             {% endblock %}
             <!-- header end -->
-			<div id="content-wrapper">
-				<div id="content-inner" class="container">
-					{% get_cms_sidebar %}
-					    {% block page_title %}
-						    <h4 class="page-title">{% block heading %}{% endblock %}</h4>
-						{% endblock %}
-						{% block alert %}
-							{% if messages %}
-								{% for message in messages %}
-								    {% if message.tags == 'success' %}
-									    <div class="alert alert-success alert-dismissable">
-										    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-										    {{ message|safe }}
-									    </div>
-									{% elif message.tags == 'warning' %}
-									   <div class="alert alert-warning alert-dismissable">
-										    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-										    {{ message|safe }}
-									    </div>
-									{% elif message.tags == 'error' %}
-									    <div class="alert alert-danger alert-dismissable">
-										    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-										    {{ message|safe }}
-									    </div>
-									{% elif message.tags == 'info' %}
-									     <div class="alert alert-info alert-dismissable">
-										    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-										    {{ message|safe }}
-									    </div>
-									{% elif message.tags == 'debug' %}
-									    <div class="alert alert-info alert-dismissable">
-										    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-										    {{ message|safe }}
-									    </div>
-									{% endif %}
-								{% endfor %}
-							{% endif %}
-						{% endblock %}
-                        {% block content %}{% endblock %}
-                        {% block pager %}
-                            {% if collection.paginator.num_pages > 1 %}
-                                <ul class="pagination pull-right">
-                                    {% if collection %}
-                                        {% if collection.has_previous %}
-                                            <li><a href="?{{ request.GET|combine_get_values }}page=1">&laquo; <small>First</small></a></li>
-                                            <li><a href="?{{ request.GET|combine_get_values }}page={{ collection.previous_page_number }}">&laquo; <small>Prev</small></a></li>
-                                        {% else %} 
-                                            <li class="disabled"><a href="#">&laquo;</a></li>
+            <div id="content-wrapper">
+                <div id="content-inner" class="container">
+                    {% get_cms_sidebar %}
+                    {% block content_head %}
+                        <div id="content" class="col-lg-12 col-md-12 col-sm-12">
+                    {% endblock %}
+                            {% block page_title %}
+                                <h4 class="page-title">{% block heading %}{% endblock %}</h4>
+                            {% endblock %}
+                            {% block alert %}
+                                {% if messages %}
+                                    {% for message in messages %}
+                                        {% if message.tags == 'success' %}
+                                            <div class="alert alert-success alert-dismissable">
+                                                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                                                {{ message|safe }}
+                                            </div>
+                                        {% elif message.tags == 'warning' %}
+                                           <div class="alert alert-warning alert-dismissable">
+                                                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                                                {{ message|safe }}
+                                            </div>
+                                        {% elif message.tags == 'error' %}
+                                            <div class="alert alert-danger alert-dismissable">
+                                                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                                                {{ message|safe }}
+                                            </div>
+                                        {% elif message.tags == 'info' %}
+                                             <div class="alert alert-info alert-dismissable">
+                                                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                                                {{ message|safe }}
+                                            </div>
+                                        {% elif message.tags == 'debug' %}
+                                            <div class="alert alert-info alert-dismissable">
+                                                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                                                {{ message|safe }}
+                                            </div>
                                         {% endif %}
-                                        {% for num in collection.paginator.page_range|paginator_page_cutter:collection.number %}
-                                            {% ifequal num collection.number %} 
-                                                <li class="active"><a href="#">{{ num }}<span class="sr-only">(current)</span></a></li>
+                                    {% endfor %}
+                                {% endif %}
+                            {% endblock %}
+                            <div class="actual-data">{% block content %}{% endblock %}</div>
+                            {% block pager %}
+                                {% if collection.paginator.num_pages > 1 %}
+                                    <ul class="pagination pull-right">
+                                        {% if collection %}
+                                            {% if collection.has_previous %}
+                                                <li><a href="?{{ request.GET|combine_get_values }}page=1">&laquo; <small>First</small></a></li>
+                                                <li><a href="?{{ request.GET|combine_get_values }}page={{ collection.previous_page_number }}">&laquo; <small>Prev</small></a></li>
                                             {% else %} 
-                                                <li><a href="?{{ request.GET|combine_get_values }}page={{ num }}">{{ num }}</a></li>
-                                            {% endifequal %} 
-                                        {% endfor %} 
-                                        {% if collection.has_next %} 
-                                            <li><a href="?{{ request.GET|combine_get_values }}page={{ collection.next_page_number }}"><small>Next</small> &raquo;</a></li>
-                                            {% if collection.paginator.page_range|length > 10 %}
-                                                <li><a href="?{{ request.GET|combine_get_values }}page={{ collection.paginator.num_pages }}"><small>Last</small> &raquo;</a></li>
+                                                <li class="disabled"><a href="#">&laquo;</a></li>
                                             {% endif %}
-                                        {% else %} 
-                                            <li class="disabled"><a href="#">&raquo;</a></li>
-                                            <li class="disabled"><a href="?{{ request.GET|combine_get_values }}page={{ collection.paginator.num_pages }}"><small>Last</small> &raquo;</a></li>
+                                            {% for num in collection.paginator.page_range|paginator_page_cutter:collection.number %}
+                                                {% ifequal num collection.number %} 
+                                                    <li class="active"><a href="#">{{ num }}<span class="sr-only">(current)</span></a></li>
+                                                {% else %} 
+                                                    <li><a href="?{{ request.GET|combine_get_values }}page={{ num }}">{{ num }}</a></li>
+                                                {% endifequal %} 
+                                            {% endfor %} 
+                                            {% if collection.has_next %} 
+                                                <li><a href="?{{ request.GET|combine_get_values }}page={{ collection.next_page_number }}"><small>Next</small> &raquo;</a></li>
+                                                {% if collection.paginator.page_range|length > 10 %}
+                                                    <li><a href="?{{ request.GET|combine_get_values }}page={{ collection.paginator.num_pages }}"><small>Last</small> &raquo;</a></li>
+                                                {% endif %}
+                                            {% else %} 
+                                                <li class="disabled"><a href="#">&raquo;</a></li>
+                                                <li class="disabled"><a href="?{{ request.GET|combine_get_values }}page={{ collection.paginator.num_pages }}"><small>Last</small> &raquo;</a></li>
+                                            {% endif %}
                                         {% endif %}
-                                    {% endif %}
-                                <ul>
-                            {% endif %}
-                        {% endblock %} 
-					</div>
-				</div><!-- /#content-inner .container -->
-			</div><!-- /#content-wrapper -->
-			<div id="footer-wrapper">
+                                    <ul>
+                                {% endif %}
+                            {% endblock %} 
+                        </div>
+                    </div>
+                </div><!-- /#content-inner .container -->
+            </div><!-- /#content-wrapper -->
+            <div id="footer-wrapper">
                 <div class="container-inner sans-serif">
                     <div class="container">
                         <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 footer-links">
@@ -386,46 +395,46 @@
                     </div>
                 </div>
             </div>
-			<!--<div id="footer-wrapper">
-				<div id="footer-inner" class="container col-lg-12 col-md-12 col-sm-12">
-					{% block customfooter %}{% endblock %}
-					{% get_cms_footer %}
-				</div> <!-- /footer-inner -->
-			<!--</div> <!-- /footer-wrapper -->
-		</div><!-- /#page-wrapper -->
-		{% get_analytics_code %}
-		<!-- Bootstrap core JavaScript
-		================================================== -->
-		<!-- Placed at the end of the document so the pages load faster -->
-		<script src="{% static 'spoken/js/jquery-1.11.0.min.js' %}"></script>
-		<script src="{% static 'spoken/js/bootstrap.min.js' %}"></script>
-		<script src="{% static 'spoken/js/jquery.datetimepicker.js' %}"></script>
-	    <script>
-		    $('.datetime').datetimepicker({
-			    onGenerate:function( ct ){
-				    $(this).find('.xdsoft_day_of_week0')
-					    .addClass('xdsoft_disabled');
-			    },
-			    lang:'en',
-			    format:'Y-m-d H:i',
-			    formatDate:'Y/m/d',
-			    minDate:0, // yesterday is minimum date
-			    weekends:[],
-			    maxDate:'+1970/06/31', // tommorow date with in 6 month
-			    step:5,
-			    minTime:'08:00',
-			    maxTime:'18:00',
-		    });
-		    $('.date').datetimepicker({
-			    lang:'en',
-			    timepicker:false,
-			    format:'Y-m-d',
-			    formatDate:'Y/m/d',
-			    maxDate:'+1970/06/31', // tommorow date with in 6 month
-		    });
-		</script>
-		{% block jsblock %}{% endblock %}
-		<script>
+            <!--<div id="footer-wrapper">
+                <div id="footer-inner" class="container col-lg-12 col-md-12 col-sm-12">
+                    {% block customfooter %}{% endblock %}
+                    {% get_cms_footer %}
+                </div> <!-- /footer-inner -->
+            <!--</div> <!-- /footer-wrapper -->
+        </div><!-- /#page-wrapper -->
+        {% get_analytics_code %}
+        <!-- Bootstrap core JavaScript
+        ================================================== -->
+        <!-- Placed at the end of the document so the pages load faster -->
+        <script src="{% static 'spoken/js/jquery-1.11.0.min.js' %}"></script>
+        <script src="{% static 'spoken/js/bootstrap.min.js' %}"></script>
+        <script src="{% static 'spoken/js/jquery.datetimepicker.js' %}"></script>
+        <script>
+            $('.datetime').datetimepicker({
+                onGenerate:function( ct ){
+                    $(this).find('.xdsoft_day_of_week0')
+                        .addClass('xdsoft_disabled');
+                },
+                lang:'en',
+                format:'Y-m-d H:i',
+                formatDate:'Y/m/d',
+                minDate:0, // yesterday is minimum date
+                weekends:[],
+                maxDate:'+1970/06/31', // tommorow date with in 6 month
+                step:5,
+                minTime:'08:00',
+                maxTime:'18:00',
+            });
+            $('.date').datetimepicker({
+                lang:'en',
+                timepicker:false,
+                format:'Y-m-d',
+                formatDate:'Y/m/d',
+                maxDate:'+1970/06/31', // tommorow date with in 6 month
+            });
+        </script>
+        {% block jsblock %}{% endblock %}
+        <script>
         $("#id_search_foss, #id_search_language").change(function(){
             var foss = $('#id_search_foss').val();
             var lang = $('#id_search_language').val();
@@ -486,5 +495,5 @@
                 });
         });
     </script>
-	</body>
+    </body>
 </html>

@@ -60,10 +60,6 @@ urlpatterns = patterns('',
     # reports
     url(r'^reports/', include('reports.urls', namespace='reports')),
 
-    # workshop anouncement page
-    url(r'^workshop/gcp-jmol/$', 'spoken.views.workshop_advt', name='workshop_advt'),
-    url(r'^scilab-conference-email/$', 'spoken.views.scilab_conf_email', name='scilab_conf_email'),
-
     #cms
     url(r'^', include('cms.urls', namespace='cms')),
 )

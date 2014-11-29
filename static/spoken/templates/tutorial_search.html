@@ -44,12 +44,12 @@
                     <div class="form-group">
                         <div class="col-sm-5">
                             <span class='ajax-search-refresh ajax-refresh-search-foss'><i class="fa fa-2 fa-refresh fa-spin"></i></span>
-                            {% render_field form.search_foss class+="form-control search-foss" tabindex="1" value=keywords %}
+                            {% render_field form.search_foss class+="form-control search-foss" tabindex="1" %}
                             {{ form.search_foss.errors }}
                         </div>
                         <div class="col-sm-5">
                             <span class='ajax-search-refresh ajax-refresh-search-language'><i class="fa fa-2 fa-refresh fa-spin"></i></span>
-                            {% render_field form.search_language class+="form-control search-language" tabindex="1" value=keywords %}
+                            {% render_field form.search_language class+="form-control search-language" tabindex="2" %}
                             {{ form.search_language.errors }}
                         </div>
                         <div class="col-sm-2">
@@ -64,8 +64,17 @@
     
     <div class='search-result col-lg-offset-1 col-md-offset-1 col-sm-offset-1 col-xs-offset-1 col-lg-10 col-md-10 col-sm-10 col-xs-10'>
         {% if collection %}
-            <p><i>{{ collection.0.tutorial_detail.foss.description }} <a href="{{ SCRIPT_URL }}{{collection.0.tutorial_detail.foss }}" target="_blank">Read more</a> </p></i>
-            <div>About <b>{{ collection.paginator.count }}</b> results found.</div>
+            {% if collection.0.tutorial_detail.foss.description %}
+                <p><i>{{ collection.0.tutorial_detail.foss.description }} <a href="{{ SCRIPT_URL }}{{collection.0.tutorial_detail.foss }}" target="_blank">Read more</a></i></p>
+                <hr>
+            {% endif %}
+            <div style="float: left;">About <b>{{ collection.paginator.count }}</b> results found.</div>
+            {% if current_foss and current_foss == 'Spoken Tutorial Technology' %}
+                <div style="float: right; font-size: 16px;"><i><a href="/side-by-side-method/" target="_blank">Click here</a></i> to view <b>Side by Side method</b> video.</div>
+                <div style="clear: both;"></div>
+                <hr>
+            {% endif %}
+            <div style="clear: both;"></div>
             {% for record in collection %}
                 <div class='result-record row'>
                     <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2 thumb">

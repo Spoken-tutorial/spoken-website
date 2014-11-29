@@ -3,71 +3,94 @@
 {% load static %}
 {% load cmsdata %}
 {% load creationdata %}
+
 {% block title %} {{ newstype.name }} {% endblock %}
+
 {% block cssblock %}
-    <link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />
-    <link rel="stylesheet" href="{% static 'spoken/css/bootstrap-select.min.css' %}" type="text/css" media="screen" charset="utf-8" />
     <style>
         .item{
             padding: 5px 0;
+            border-bottom: 1px solid #DDD9D9;
+        }
+        #content {
+            padding: 60px;
+            padding-top: 20px;
+            background: white;
+            min-height: 400px;
+        }
+        #content-wrapper {
+            background: lightgray;
+        }
+        .page-title {
+            float: left;
         }
         .news-filter{
-            top: 10px;
-            position: absolute;
-            left: 40%;
+            float: right;
+            margin-top: 7px;
+            position: relative;
+        }
+        .actual-data {
+            /* margin-left: 30px; */
+        }
+        .news-container {
+            clear: both;
+            padding-top: 5px;
+        }
+        .news-container a {
+            line-height: 1.5em;
+        }
+        #content-wrapper #content-block, #content-wrapper #content-inner {
+            padding-left: 0px;
+            padding-right: 0px
+        }
+        #page-wrapper #content-wrapper {
+            margin-bottom: 0px;
         }
     </style>
 {% endblock %}
+
 {% block heading %}
-    <i class="fa fa-list-ul"></i> {{ newstype.name }}
-    {% if request.path == "/news/article/" %}
-    <!-- 
-        {% if latest %}
-            <small><a class="btn btn-default" style="margin-left:30%;" href="{{ request.path }}">View Most Important</a></small>
-        {% else %}
-            <small><a class="btn btn-default" style="margin-left:30%;" href="{{ request.path }}?latest=True">View Latest</a></small>
-        {% endif %}
-    -->
-    {% endif %}
-    
+    {{ newstype.name }}
 {% endblock %}
+
+{% block content_head %}
+    <div id="content" class="col-lg-9 col-lg-offset-1p5 col-md-12 col-sm-12 col-lg-shadow">
+{% endblock %}
+
 {% block content %}
-    <div class="news-filter">
-        <select class="selectpicker news-category" data-max-options="2">
-            <option value="0"><a href="#most-important">View Most Important</option>
-            <optgroup label="View Latest" data-max-options="1">
-                <option value=1>Last Month</option>
-                <option value=2>Last 6 Months</option>
-                <option value=3>All News</option>
-            </optgroup>
-        </select>
+    {% if request.path == "/news/media-articles/" %}
+        <div class="news-filter">
+            <select class="select-news form-control news-category" data-max-options="2">
+                <option value="0"><a href="#most-important">View Most Important</option>
+                <option value="3"><a href="#most-important">View Latest</option>
+            </select>
+        </div>
+    {% endif %}
+
+    <div class='news-container'>
+        {% if collection %}
+            {% for record in collection %}
+                <div class="item {% cycle 'odd' 'even' %}">
+                    <h5><a href="/news/{{ category }}/{{ record.slug }}">{{ record.title }}</a></h5>
+                    <p>{{ record.body|len_cutter:150|safe }}</p>
+                    <h6>{{ record.created|date:"M d, Y" }}</h6>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="no-record"> No record found!</p>
+        {% endif %}
     </div>
-    
-	<div class='news-container'>
-		{% if collection %}
-			{% for record in collection %}
-				<div class="item {% cycle 'odd' 'even' %}">
-				    <h5><a href="/news/{{ category }}/{{ record.slug }}">{{ record.title }}</a></h5>
-				    <p>{{ record.body|len_cutter:150|safe }}</p>
-				    <h6>{{ record.created|date:"M d, Y" }}</h6>
-			    </div>
-			{% endfor %}
-		{% else %}
-		    <p class="no-record"> No record found!</p>
-		{% endif %}
-	</div>
 {% endblock %}
+
 {% block jsblock %}
-    <script src="{% static 'spoken/js/bootstrap-select.js' %}"></script>
     <script>
-        $('.selectpicker').selectpicker();
         var request_data = "{{ request.GET.latest }}";
         if(request_data){
-            $('.selectpicker').selectpicker('val', request_data);
+            $('.select-news').val(request_data);
         }
         $(function(){
-            $('.selectpicker').change(function(){
-                var data = $('.selectpicker').val();
+            $('.select-news').change(function(){
+                var data = $('.select-news').val();
                 console.log(data)
                 if(data){
                     window.location.href = location.protocol + '//' + location.host + location.pathname + "?latest=" + data

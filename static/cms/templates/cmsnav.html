@@ -1,26 +1,21 @@
 {% load cmsdata %}
 {% for nav in navs %}
-	{% with subnavs=nav.subnav_set.all|sort_by:'position' %}
+	{% with subnavs=nav.subnav_set|get_cms_subnavs %}
 		{% if subnavs|length > 0 %}
 			<li class="dropdown">
-				<a  class="dropdown-toggle" data-toggle="dropdown" href="#">{{ nav.nav_title }}<b class="caret"></b></a>
-				<ul class="dropdown-menu">
+				<a  class="dropdown-toggle" data-toggle="dropdown" href="#">{{ nav.nav_title }} <b class="caret"></b></a>
+				<ul class="dropdown-menu creation">
 					{% for subnav in subnavs %}
-						{% if subnav.permalink|slice:":4" == "http" or subnav.permalink == "#" %}
-							<li><a href="{{ subnav.permalink }}" {% if subnav.target_new %}target="_blank"{% endif %}>{{ subnav.subnav_title }}</a></li>
-						{% else %}
-							<li><a href="{% url 'dispatcher' subnav.permalink %}" {% if subnav.target_new %}target="_blank"{% endif %}>{{ subnav.subnav_title }}</a></li>
-						{% endif %}
+					    {% if forloop.counter > 1 %}
+					        <li class="divider"></li>
+					    {% endif %}
+						<li><a href="{{ subnav.permalink }}" {% if subnav.target_new %}target="_blank"{% endif %}>{{ subnav.subnav_title }}</a></li>
 					{% endfor %}
 				</ul>
 			</li>
 		{% else %}
 			<li>
-			{% if nav.permalink|slice:":4" == "http" or nav.permalink == "#" %}
-				<a href="{{ nav.permalink }}" {% if nav.target_new %}target="_blank"{% endif %}>{{ nav.nav_title }}</a>
-			{% else %}
-				<a href="{% url 'dispatcher' nav.permalink %}" {% if nav.target_new %}target="_blank"{% endif %}>{{ nav.nav_title }}</a>
-			{% endif %}
+    			<a href="{{ nav.permalink }}" {% if nav.target_new %}target="_blank"{% endif %}>{{ nav.nav_title }}</a>
 			</li>
 		{% endif %}
 	{% endwith %}

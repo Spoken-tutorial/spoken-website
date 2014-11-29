@@ -24,6 +24,11 @@ def get_cms_nav():
 
     return context
 
+def get_cms_subnavs(src_subnav):
+    subnavs = src_subnav.all().filter(visible__exact=1).order_by('position')
+
+    return subnavs
+
 @register.filter
 def sort_by(queryset, order):
     return queryset.filter(visible__exact=1).order_by('position')
@@ -120,6 +125,15 @@ def get_analytics_code():
 
     return context
 
+def format_raw_data(raw_data):
+    str_rows = raw_data.split('\n')
+    formatted_data = ''
+    for str_row in str_rows:
+        if str_row:
+            formatted_data += '<p>' + str_row + '</p>'
+    return formatted_data
+
+register.filter('format_raw_data', format_raw_data)
 register.inclusion_tag('cms/templates/analytics_code.html')(get_analytics_code)
 register.filter('len_cutter', len_cutter)
 register.inclusion_tag('cms/templates/sortable_header.html')(get_sortable_header)
@@ -132,3 +146,4 @@ register.filter('reset_get_values', reset_get_values)
 register.filter('reset_get_value', reset_get_value)
 register.filter('get_or_create_csrf_token', get_or_create_csrf_token)
 register.filter('paginator_page_cutter', paginator_page_cutter)
+register.filter('get_cms_subnavs', get_cms_subnavs)

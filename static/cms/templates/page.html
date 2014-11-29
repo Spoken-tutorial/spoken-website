@@ -1,5 +1,6 @@
 {% extends 'spoken/templates/base.html' %}
 {% load static %}
+{% load cmsdata %}
 
 {% block title %}
 	{{ page.title }}
@@ -9,6 +10,45 @@
 	{{ page.title }}
 {% endblock %}
 
+{% block cssblock %}
+    <style>
+        #content {
+            padding: 60px;
+            padding-top: 20px;
+            background: white;
+            min-height: 400px;
+            text-align: justify;
+            line-height: 1.6em;
+        }
+        #content-wrapper {
+            background: lightgray;
+        }
+        #content-wrapper #content-block, #content-wrapper #content-inner {
+            padding-left: 0px;
+            padding-right: 0px
+        }
+        #page-wrapper #content-wrapper {
+            margin-bottom: 0px;
+        }
+        h4.page-title {
+            margin: 10px 0 40px 0;
+        }
+    </style>
+    {{ page.css|safe }}
+{% endblock %}
+
+{% block content_head %}
+    <div id="content" class="col-lg-{{ page.cols }} col-lg-offset-{{ col_offset }} col-md-12 col-sm-12 col-lg-shadow">
+{% endblock %}
+
 {% block content %}
-	{{ page.body|safe }}
+    {% if page.formatting %}
+	    {{ page.body|format_raw_data|safe }}
+    {% else %}
+        {{ page.body|safe }}
+    {% endif %}
+{% endblock %}
+
+{% block jsblock %}
+    {{ page.js|safe }}
 {% endblock %}

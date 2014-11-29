@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 class Language(models.Model):
     name = models.CharField(max_length = 255, unique = True)
     user = models.ForeignKey(User)
+    code = models.CharField(max_length = 10, default = 'en')
     created = models.DateTimeField(auto_now_add = True)
     updated = models.DateTimeField(auto_now = True)
 
