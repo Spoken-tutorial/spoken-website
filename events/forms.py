@@ -132,7 +132,7 @@ class DepartmentForm(forms.ModelForm):
 class TrainingForm(forms.ModelForm):
     class Meta:
         model = Training
-        exclude = ['status', 'participant_counts', 'extra_fields', 'organiser', 'academic', 'training_code', 'trtime', 'appoved_by']
+        exclude = ['status', 'participant_count', 'extra_fields', 'organiser', 'academic', 'training_code', 'ttime', 'appoved_by']
     
     def clean_course_number(self):
         super(TrainingForm, self).clean()
@@ -140,9 +140,9 @@ class TrainingForm(forms.ModelForm):
             if self.cleaned_data['training_type'] == '0' and self.cleaned_data['course_number'] == '':
                 raise forms.ValidationError("Course Number field is required.")
                 
-    training_type = forms.ChoiceField(widget=forms.RadioSelect, choices = [(0, 'Training'),(1, 'Workshop')], required = True)
-    course_number = forms.CharField(required = False)
-    tester = forms.CharField(required = False)
+    training_type = forms.ChoiceField(widget=forms.RadioSelect, choices = [(0, 'Training'),], required = True)
+    course_number = forms.CharField(required = True)
+    no_of_lab_session = forms.ChoiceField(widget=forms.Select, choices = [('', '---------'), ('1', '1'), ('2-5', '2 - 5'),('6-10', '6 - 10'),('above 10', 'Above 10')], required = True)
 
     department = forms.ModelMultipleChoiceField(label='Department', cache_choices=True, widget = forms.SelectMultiple(attrs = {}), queryset = Department.objects.exclude(name='Uncategorized').order_by('name'), help_text = "", error_messages = {'required':'Department field required.'})
     
@@ -151,7 +151,7 @@ class TrainingForm(forms.ModelForm):
     
     language = forms.ModelChoiceField(label='Language', cache_choices=True, widget = forms.Select(attrs = {}), queryset = Language.objects.filter(id__in = FossAvailableForWorkshop.objects.all().values_list('language').distinct()).order_by('name'), help_text = "", error_messages = {'required':'Language field required.'})
     
-    trdate = forms.DateTimeField(required = True, error_messages = {'required':'Date field is required.'})
+    tdate = forms.DateTimeField(required = True, error_messages = {'required':'Timing field is required.'})
     skype = forms.ChoiceField(widget=forms.RadioSelect, choices=[(0, 'No'),(1, 'Yes')], required = True)
     xml_file  = forms.FileField(required = True)
     def __init__(self, *args, **kwargs):
@@ -170,20 +170,19 @@ class TrainingForm(forms.ModelForm):
                 self.fields['xml_file'].required = False
             from events.views import is_resource_person
             if is_resource_person(user):
-                self.fields['training_type'].choices = [(0, 'Training'),(1, 'Workshop'),(2, 'Pilot Workshop'), (3, 'Live Workshop')]
+                self.fields['training_type'].choices = [(0, 'Training'),(2, 'Pilot Workshop'), (3, 'Live Workshop')]
+            self.fields['training_type'].initial = 0
         if instance:
             self.fields['training_type'].initial = instance.training_type
             self.fields['course'].initial = instance.course_id
             self.fields['foss'].initial = instance.foss
             self.fields['language'].initial = instance.language
-            self.fields['trdate'].initial = str(instance.trdate) + " " + str(instance.trtime)[0:5]
+            self.fields['tdate'].initial = str(instance.tdate) + " " + str(instance.ttime)[0:5]
             self.fields['department'].initial = instance.department.all().values_list('id', flat=True)
             self.fields['skype'].initial = instance.skype
-            try:
+            if instance.extra_fields:
                 self.fields['course_number'].initial = instance.extra_fields.paper_name
-            except Exception, e:
-                #print e
-                self.fields['course_number'].initial = ''
+                self.fields['no_of_lab_session'].initial = instance.extra_fields.no_of_lab_session
             
 class TrainingPermissionForm(forms.Form):
     try:
@@ -382,6 +381,9 @@ class TrainingLanguageFeedbackForm(forms.ModelForm):
     
     medium_of_instruction = forms.ChoiceField(widget=forms.RadioSelect, choices = ((0, 'English'), (1, "Vernacular Medium")) )
     gender = forms.ChoiceField(widget=forms.RadioSelect, choices = ((0, 'Male'), (1, "Female")) )
+
+    language_prefered = forms.ModelChoiceField(cache_choices=True, widget = forms.Select(attrs = {}), queryset = Language.objects.none(), empty_label = "--- None ---", error_messages = {'required':'Language field required.'})
+
     tutorial_was_useful = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice)
     learning_experience = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice)
     satisfied_with_learning_experience = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice)
@@ -392,6 +394,7 @@ class TrainingLanguageFeedbackForm(forms.ModelForm):
     curious_and_motivated = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice)
     similar_tutorial_with_other_content = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice)
     foss_tutorial_was_mentally_demanding = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice)
+    side_by_side_method_is_understood = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice)
     
     compfortable_learning_in_language = forms.ChoiceField(widget=forms.RadioSelect, choices = ((1, 'Least comfortable'), (2, 'Less comfortable'), (3, 'Neither comfortable nor uncomfortable'), (4, 'Comfortable'), (5, 'Extremely comfortable')))
     confidence_level_in_language = forms.ChoiceField(widget=forms.RadioSelect, choices = ((1, 'Least confident'), (2, 'Less confident'), (3, 'Neither confident nor unconfident'), (4, 'Very confident'), (5, 'Extremely confident')))
@@ -402,6 +405,8 @@ class TrainingLanguageFeedbackForm(forms.ModelForm):
     side_by_side_method_meant = forms.ChoiceField(widget=forms.RadioSelect, choices = ((1, 'Yes'), (0, 'No')))
     side_by_side_method_is_beneficial = forms.ChoiceField(widget=forms.RadioSelect, choices = ((1, 'Yes'), (0, 'No')))
     side_by_side_method_is_beneficial_reason = forms.CharField(widget=forms.Textarea(attrs={'rows': 2}))
+    side_by_side_method_is_effective = forms.ChoiceField(widget=forms.RadioSelect, choices = ((1, 'Yes'), (0, 'No')))
+    side_by_side_method_is = forms.ChoiceField(widget=forms.RadioSelect, choices = ((1, 'Effective because it allows to see the video and practice the software simultaneously'), (0, 'Is not effective for me as I like to see one window at a time')))
     limitations_of_side_by_side_method = forms.CharField(widget=forms.Textarea(attrs={'rows': 2}))
     
     content_information_flow = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice)
@@ -427,3 +432,14 @@ class TrainingLanguageFeedbackForm(forms.ModelForm):
     class Meta:
         model = TrainingLanguageFeedback
         exclude = ['training', 'mdluser_id']
+        
+    def __init__(self, *args, **kwargs):
+        training = None
+        print kwargs
+        if 'training' in kwargs:
+            training = kwargs["training"]
+            del kwargs["training"]
+        super(TrainingLanguageFeedbackForm, self).__init__(*args, **kwargs)
+        self.fields['language_prefered'].queryset = Language.objects.filter(id__in = FossAvailableForWorkshop.objects.filter(foss=training.foss).values_list('language_id'))
+        #if args and 'language_prefered' in args[0]:
+        #    self.fields['language_prefered'].queryset = Language.objects.filter(id__in = FossAvailableForWorkshop.objects.filter(foss=training.foss).values_list('language_id'))

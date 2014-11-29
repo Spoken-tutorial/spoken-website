@@ -31,8 +31,8 @@
 						    <td>{{ record.academic }}</td>
 						    <td>{{ record.foss }}</td>
 						    <td>{{ record.organiser.user.first_name }}</td>
-						    <td>{{ record.trdate|date:"d M Y" }} {{ record.wtime }}</td>
-						    <td><a target="_blank" href="/software-training/training/live/list/{{ record.id}}">{{ record.participant_counts }}</a></td>
+						    <td>{{ record.tdate|date:"d M Y" }} {{ record.wtime }}</td>
+						    <td><a target="_blank" href="/software-training/training/live/list/{{ record.id}}">{{ record.participant_count }}</a></td>
                             <!-- actions based on roles -->
 					    </tr>
                    {% endfor %}

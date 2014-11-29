@@ -44,23 +44,6 @@
 	                  {% endfor %}
 	                </ul>
 	                {% endif %}
-
-	                <!--
-	                <div class="form-group">
-		                <label class="col-sm-3 control-label" for= "id_state">State</label>
-		                {% render_field form.state class+="form-control state" tabindex="1" data-placeholder="Enter state name" %}
-		                {{ form.state.errors }}
-	                </div>
-	                <div class="form-group">
-		                <label class="col-sm-3 control-label" for= "id_district">District</label>
-		                {% render_field form.district class+="form-control district" tabindex="1" data-placeholder="Enter district name" %}
-		                {{ form.district.errors }}
-	                </div>
-	                <div class="form-group">
-		                <label class="col-sm-3 control-label" for= "id_academic">Academic name</label>
-		                {% render_field form.academic class+="form-control academic" tabindex="1" data-placeholder="Enter academic name" %}
-		                {{ form.name.errors }}
-                    </div> -->
 	               <div class="form-group">
                         <label class="col-sm-3 control-label" for= "id_training_type">Training Type</label>
                         <div class="col-sm-9">
@@ -68,12 +51,6 @@
                                 <div class='radio training_type'>
                                     {{ choice.choice_label }}
                                     {{ choice.tag }}
-                                    {% if choice.choice_label == 'Training' %}
-                                        <div class="help-text alert">Please select Training, If you are going to conduct the training as a part of lab hours alongside a course.</div>
-                                    {% endif %}
-                                    {% if choice.choice_label == 'Workshop' %}
-                                        <div class="help-text alert">Please select Workshop, If you are going to conduct a two hour Workshop session.</div>
-                                    {% endif %}
                                </div>
                             {% endfor %}
                         </div>
@@ -111,22 +88,22 @@
 		                </div>
 	                </div>
 	                <div class="form-group">
-		                <label class="col-sm-3 control-label" for= "id_trdate">Date</label>
+		                <label class="col-sm-3 control-label" for= "id_tdate">Timing</label>
 		                <div class="col-sm-9">
-		                    {% render_field form.trdate class+="form-control datetime" tabindex="1" data-placeholder="Enter date" %}
-		                    {{ form.trdate.errors }}
+		                    {% render_field form.tdate class+="form-control datetime" tabindex="1" data-placeholder="Enter date" %}
+		                    {{ form.tdate.errors }}
                             <small>Please select the date on which on which you want to conduct the training/workshop.</small>
 		                </div>
 	                </div>
-	                <!--
-	                <div class="form-group">
-		                <label class="col-sm-3 control-label" for= "id_date">Time</label>
-		                {% render_field form.time class+="form-control time" tabindex="1" data-placeholder="Enter time" %}
-		                {{ form.time.errors }}
+	                <div class="form-group no_of_lab_session_group">
+		                <label class="col-sm-3 control-label" for= "id_no_of_lab_session">No.of lab session</label>
+		                <div class="col-sm-9">
+		                    {% render_field form.no_of_lab_session class+="form-control no_of_lab_session" tabindex="1" %}
+		                    {{ form.no_of_lab_session.errors }}
+		                </div>
 	                </div>
-	                -->
 	                <div class="form-group">
-		                <label class="col-sm-3 control-label" for= "id_foss">Foss</label>
+		                <label class="col-sm-3 control-label" for= "id_foss">FOSS</label>
 		                <div class="col-sm-9">
 		                    {% render_field form.foss class+="form-control foss" tabindex="1" data-placeholder="Enter foss" %}
 		                    {{ form.foss.errors }}
@@ -209,22 +186,6 @@
 					}
 				}
 			});
-		});
-		
-		$(".course_number_group").css('display', 'none');
-		
-		function hideShowCourseNumber(Val){
-		    if(Val == 0){
-		        $(".course_number_group").css('display', 'black');
-		        $('#id_course_number').attr("disabled", false);
-		    }else{
-		        $(".course_number_group").css('display', 'none');
-		        $('#id_course_number').attr("disabled", 'disabled');
-		    }
-		}
-		hideShowCourseNumber($(".training_type input[name=training_type]:checked").val());
-		$('.training_type input').change(function(){
-		    hideShowCourseNumber($(this).val())
 		});
 	</script>
 {% endblock %}

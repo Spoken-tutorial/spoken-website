@@ -3,6 +3,7 @@ from events.models import *
 
 class AcademicCenterFilter(django_filters.FilterSet):
     state = django_filters.ChoiceFilter(choices=State.objects.none())
+    resource_center = django_filters.ChoiceFilter(choices=[('', '---------'), (1, 'Resource Centers Only')])
     def __init__(self, *args, **kwargs):
         user = None
         if 'user' in kwargs:
@@ -54,7 +55,7 @@ class TrainingFilter(django_filters.FilterSet):
     training_type = django_filters.ChoiceFilter(choices= [('', '---------'), (0, 'Training'), (1, 'Workshop'), (2, 'Live Workshop'), (3, 'Pilot Workshop')])
     academic__institution_type = django_filters.ChoiceFilter(choices= [('', '---------')] + list(InstituteType.objects.values_list('id', 'name').distinct()))
     academic__city = django_filters.ChoiceFilter(choices=State.objects.none())
-    trdate = django_filters.DateRangeCompareFilter()
+    tdate = django_filters.DateRangeCompareFilter()
     def __init__(self, *args, **kwargs):
         user=None
         if 'user' in kwargs:
@@ -88,13 +89,38 @@ class TrainingFilter(django_filters.FilterSet):
 
 class TestFilter(django_filters.FilterSet):
     academic__state = django_filters.ChoiceFilter(choices=State.objects.none())
+    foss = django_filters.ChoiceFilter(choices= [('', '---------')] + list(FossAvailableForTest.objects.filter(status=1).order_by('foss__foss').values_list('foss__id', 'foss__foss').distinct()))
+    test_category = django_filters.ChoiceFilter(choices= [('', '---------'), (1, 'Training'), (2, 'Workshop'), (3, 'Others'), (3, 'Pilot Workshop')])
+    academic__institution_type = django_filters.ChoiceFilter(choices= [('', '---------')] + list(InstituteType.objects.values_list('id', 'name').distinct()))
+    academic__city = django_filters.ChoiceFilter(choices=State.objects.none())
+    tdate = django_filters.DateRangeCompareFilter()
     def __init__(self, *args, **kwargs):
-        user = kwargs['user']
-        kwargs.pop('user')
+        user=None
+        if 'user' in kwargs:
+            user = kwargs['user']
+            kwargs.pop('user')
+        
+        state = None
+        if 'state' in kwargs:
+            state = kwargs['state']
+            kwargs.pop('state')
         super(TestFilter, self).__init__(*args, **kwargs)
-        choices = list(State.objects.filter(resourceperson__user_id=user).values_list('id', 'name'))
+        choices = None
+        if user:
+            choices = list(State.objects.filter(resourceperson__user_id=user).values_list('id', 'name'))
+        else:
+            choices = list(State.objects.exclude(name='Uncategorized').order_by('name').values_list('id', 'name'))
         choices.insert(0, ('', '---------'),)
         self.filters['academic__state'].extra.update({'choices' : choices})
+        
+        choices = None
+        if state:
+            choices = list(City.objects.filter(state=state).order_by('name').values_list('id', 'name')) + [('189', 'Uncategorized')]
+        else:
+            choices = list(City.objects.none())
+        choices.insert(0, ('', '---------'),)
+        self.filters['academic__city'].extra.update({'choices' : choices})
+        
     class Meta:
         model = Test
-        fields = ['academic__state', 'foss', 'test_category']
+        fields = ['academic__state', 'foss']

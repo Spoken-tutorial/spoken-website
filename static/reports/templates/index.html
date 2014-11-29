@@ -1,0 +1,37 @@
+{% extends 'spoken/templates/popup-base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load eventsdata %}
+{% load cmsdata %}
+{% load creationdata %}
+{% block title %} Reports {% endblock %}
+{% block cssblock %}
+    <link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />
+    <link rel="stylesheet" href="{% static 'spoken/css/jquery.fancybox.css' %}" type="text/css" media="screen" charset="utf-8" />
+{% endblock%}
+{% block heading %}
+        <i class="fa fa-list-ul"></i> Reports
+{% endblock %}
+{% block content %}
+    <div class="row well">
+        <div class='col-sm-8'>
+            <form method="post" class='form-horizontal' enctype="multipart/form-data">{% csrf_token %}
+                <div class="form-group">
+                    <label class="col-sm-3 control-label" for= "id_training_type">Select Fields you want to download.</label>
+                    <div class="col-sm-9">
+                        <select class="form-control" multiple="multiple" name="column_name">
+                            {% for field in fields %}
+                                <option value="{{ field }}">{{ field.title }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-offset-3 col-sm-9">
+                        <input class="btn btn-primary" type="submit" value="Submit" />
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}

@@ -22,11 +22,12 @@ def participant_picture(user_id):
 def get_trainingstatus(key, training):
     wa = None
     try:
-        if training.organiser.academic.institution_type.name == "School":
-            wa = SchoolTrainingAttendance.objects.get(id = key, training = training)
-        else:
-            wa = TrainingAttendance.objects.get(mdluser_id=key, training = training)
-    except:
+        #if training.organiser.academic.institution_type.name == "School":
+        #    wa = SchoolTrainingAttendance.objects.get(id = key, training = training)
+        #else:
+        wa = TrainingAttendance.objects.get(id=key, training = training)
+    except Exception, e:
+        print e
         return ''
     
     if wa.status == 1:
@@ -40,7 +41,7 @@ def get_trainingstatus(key, training):
 def get_trainingparticipant_status(key, wcode):
     status_list = ['Waiting for Attendance', 'Completed', 'Got certificate', 'Got certificate']
     try:
-        wa = TrainingAttendance.objects.get(mdluser_id=key, training_id = wcode)
+        wa = TrainingAttendance.objects.get(id=key, training_id = wcode)
     except:
         return 'error'
     return status_list[wa.status]
@@ -86,9 +87,9 @@ def get_participant_status(key, testcode):
         return 'Add'
     return status_list[ta.status]
 
-def can_upload_final_training_list(trdate):
+def can_upload_final_training_list(tdate):
     try:
-        date_after_one_month = trdate + relativedelta(days=30)
+        date_after_one_month = tdate + relativedelta(days=30)
         if datetime.date.today() >= date_after_one_month:
             return True
         return False
