@@ -1,6 +1,8 @@
 *~
 *.swp
 *.pyc
+spoken/wsgi.py
+static/CACHE/*
 config.py
 cron/config.py
 cron/logs/*
