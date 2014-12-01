@@ -173,8 +173,8 @@ def academic_center_view(request, academic_id = None, slug = None):
     collection = get_object_or_404(AcademicCenter, id=academic_id)
     slug_title =  slugify(collection.institution_name)
     if slug != slug_title:
-        return HttpResponseRedirect('/software-training/academic-center/'+ str(collection.id) + '/' + slug_title)
+        return HttpResponseRedirect('/statistics/academic-center/'+ str(collection.id) + '/' + slug_title)
     context = {
         'collection' : collection
     }
-    return render(request, 'events/templates/ac/academic-center.html', context)
+    return render(request, 'statistics/templates/view-academic-center.html', context)

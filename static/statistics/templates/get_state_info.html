@@ -7,7 +7,7 @@
             <table border="0" width="100%" height="100%" style="padding:10px;">
                 <caption align="center"><h3 style="margin: 0px; padding: 2px;">{{ state.name }}</h3></caption>
                 <tr>
-                    <td><b><a href="/statistics/training/?academic__state={{ state.id }}" target="_blank">Workshops:</a></b></td>
+                    <td><b><a href="/statistics/training/?academic__state={{ state.id }}" target="_blank">Workshops/Trainings:</a></b></td>
                     <td>{{ workshops }}</td>
                 </tr>
                 <tr>
@@ -15,7 +15,7 @@
                     <td>{{ participants }}</td>
                 </tr>
                 <tr>
-                    <td><b><a href="/statistics/academic-center/?resource_center=1" target="_blank">Resource Centers:</a></b></td>
+                    <td><b><a href="/statistics/academic-center/?resource_center=1&state={{ state.id }}" target="_blank">Resource Centers:</a></b></td>
                     <td>{{ resource_centers }}</td>
                 </tr>
                 <tr>
