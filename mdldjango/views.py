@@ -101,16 +101,17 @@ def index(request):
             past_test = None
             ongoing_test = None
             if category == 3:
-                upcoming_workshop = Training.objects.filter((Q(status = 0) | Q(status = 1) | Q(status = 2) | Q(status = 3)), academic_id=mdluser.institution, trdate__gte=datetime.date.today()).order_by('-trdate')
+                upcoming_workshop = Training.objects.filter((Q(status = 0) | Q(status = 1) | Q(status = 2) | Q(status = 3)), academic_id=mdluser.institution, tdate__gte=datetime.date.today()).order_by('-tdate')
             if category == 5:
                 upcoming_test = Test.objects.filter(status=2, academic_id=mdluser.institution, tdate__gt=datetime.date.today()).order_by('-tdate')
             if category == 1:
-                past_workshop = Training.objects.filter(id__in = TrainingAttendance.objects.filter(mdluser_id = mdluser.id).values_list('training_id'), status = 4).order_by('-trdate')
+                past_workshop = Training.objects.filter(id__in = TrainingAttendance.objects.filter(mdluser_id = mdluser.id).values_list('training_id'), status = 4).order_by('-tdate')
             if category == 2:
                 past_test = Test.objects.filter(id__in = TestAttendance.objects.filter(mdluser_id = mdluser.id).values_list('test_id'), status = 4).order_by('-tdate')
             if category == 4:
                 ongoing_test = Test.objects.filter(status=3, academic_id=mdluser.institution, tdate = datetime.date.today()).order_by('-tdate')
             
+            print past_workshop, "******************8"
             context = {
                 'mdluserid' : mdluserid,
                 'mdlusername' : mdlusername,
@@ -141,6 +142,7 @@ def index(request):
 
 @login_required
 def offline_details(request, wid, category):
+    user = request.user
     wid = int(wid)
     category = int(category)
     #print category
@@ -152,10 +154,8 @@ def offline_details(request, wid, category):
         elif category == 2:
             Training.objects.get(pk=wid, status__lt=4)
         else:
-            #print 'yes'
             raise PermissionDenied('You are not allowed to view this page!')
     except Exception, e:
-        #print e
         raise PermissionDenied('You are not allowed to view this page!')
         
     if request.method == 'POST':
@@ -171,54 +171,25 @@ def offline_details(request, wid, category):
             raise PermissionDenied('You are not allowed to view this page!')
                     
         if form.is_valid():
-            if request.FILES['xml_file'].content_type == 'text/xml':
-                tree = ElementTree()
-                try:
-                    data = tree.parse(request.FILES['xml_file'])
-                except:
-                    messages.error(request, "Mismatched tags in Xml file. Please check weather all tags placed properly.")
-                    return HttpResponseRedirect('/participant/offline-data/'+ str(wid) + '/' + str(category))
-                details = data.getiterator("detail")
-                count = 0
-                for studentDetails in details:
-                    count = count + 1
-                    #print studentDetails
-                    try:
-                        firstname = studentDetails[0].text.strip().title()
-                        lastname = studentDetails[1].text.strip().title()
-                        gender =  studentDetails[2].text.strip().title()
-                        email = None
-                        try:
-                            email = studentDetails[3].text.lower().strip()
-                        except:
-                            messages.error(request, "Participant/Student's Email ID is Required. Please open with browser and check all required details are exits!")
-                            return HttpResponseRedirect('/participant/offline-data/'+ str(wid) + '/' + str(category))
-                        get_or_create_participant(w, firstname, lastname, gender, email, category)
-                    except Exception, e:
-                        #print e, "sssssssssss"
-                        messages.error(request, "Record number "+ str(count) + " required data is missing. Please open with browser and check all required details are exits!.")
-                        continue
-            else:
-                file_path = settings.MEDIA_ROOT + 'training/' + str(wid) + str(time.time())
-                f = request.FILES['xml_file']
-                fout = open(file_path, 'wb+')
-                for chunk in f.chunks():
-                    fout.write(chunk)
-                fout.close()
-                
-                error_line_no = ''
-                csv_file_error = 0
-                csv_file_error, error_line_no = check_csvfile(file_path, w, flag=1)
-                os.unlink(file_path)
-                #save participant_count
-                w.participant_counts = TrainingAttendance.objects.filter(training = w, status__gte = 1).count()
-                w.save()
-                
-                if error_line_no:
-                    messages.error(request, "<b>Error: Line number "+ error_line_no + " in CSV file data is not in a proper format in the Participant list. The format should be First name, Last name, Email, Gender. For more details <a href='http://process.spoken-tutorial.org/images/c/c2/Participant_data.pdf' target='_blank'>Click here</a></b>")
+            file_path = settings.MEDIA_ROOT + 'training/' + str(wid) + str(time.time())
+            f = request.FILES['xml_file']
+            fout = open(file_path, 'wb+')
+            for chunk in f.chunks():
+                fout.write(chunk)
+            fout.close()
+            
+            error_line_no = ''
+            csv_file_error = 0
+            csv_file_error, error_line_no = check_csvfile(user, file_path, w, flag=1)
+            os.unlink(file_path)
+            #update participant count
+            update_participants_count(w)
+            
+            if error_line_no:
+                messages.error(request, "<b>Error: Line number "+ error_line_no + " in CSV file data is not in a proper format in the Participant list. The format should be First name, Last name, Email, Gender. For more details <a href='http://process.spoken-tutorial.org/images/c/c2/Participant_data.pdf' target='_blank'>Click here</a></b>")
             #update logs
             if category == 1:
-                message = w.academic.institution_name+" has submited Offline "+w.foss.foss+" workshop attendance dated "+w.trdate.strftime("%Y-%m-%d")
+                message = w.academic.institution_name+" has submited Offline "+w.foss.foss+" workshop attendance dated "+w.tdate.strftime("%Y-%m-%d")
                 update_events_log(user_id = user.id, role = 2, category = 0, category_id = w.id, academic = w.academic_id, status = 5)
                 update_events_notification(user_id = user.id, role = 2, category = 0, category_id = w.id, academic = w.academic_id, status = 5, message = message)
                 if not error_line_no:

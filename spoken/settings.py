@@ -80,6 +80,7 @@ INSTALLED_APPS = (
 	'report_builder',
 	'south',
     'youtube',
+    'reports',
 )
 
 MIDDLEWARE_CLASSES = (

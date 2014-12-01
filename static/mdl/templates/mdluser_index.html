@@ -39,7 +39,7 @@
                             {% endif %}
                         </td>
                         <td>{{ record.foss.foss }}</td>
-                        <td>{{ record.trdate }} {{ record.trtime }}</td>
+                        <td>{{ record.tdate }} {{ record.ttime }}</td>
                         <td>
                             <a href="{% url 'mdldjango:feedback' record.id %}">Feedback</a> | 
                             <a href="{% url 'events:training_participant_language_feedback' record.id mdluserid %}">Language Feedback</a>
@@ -65,7 +65,7 @@
                 {% for record in past_test %}
                     <tr>
                         <td>{{ record.foss.foss }}</td>
-                        <td>{{ record.tdate }} {{ record.trtime }}</td>
+                        <td>{{ record.tdate }} {{ record.ttime }}</td>
                         {% with grade=record.id|get_participant_mark:mdluserid %}
                             {% if grade %}
                                 {% if grade >= 40 %}
@@ -109,7 +109,7 @@
                             {% endif %}
                         </td>
                         <td>{{ record.foss.foss }}</td>
-                        <td>{{ record.trdate }} {{ record.trtime }}</td>
+                        <td>{{ record.tdate }} {{ record.ttime }}</td>
                         <td>
                             {% if record.id|check_training_enrole:mdluserid %}
                                 Enrolled

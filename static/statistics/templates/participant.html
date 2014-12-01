@@ -2,7 +2,7 @@
 {% load widget_tweaks %}
 {% load static %}
 {% load eventsdata %}
-{% block title %}Workshop Participant Details{% endblock %}
+{% block title %} {{ model_label.title }} Participant Details{% endblock %}
 {% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
 {% block heading %}
         <i class="fa fa-list-ul"></i> Participant Details
@@ -11,28 +11,30 @@
     <div class="bs-callout bs-callout-info">
         <dl class='dl-horizontal'>
             <dt>Institution Name</dt>
-            <dd>{{ wc.academic }}, {{ wc.academic.state }}</dd>
+            <dd>{{ model.academic }}, {{ model.academic.state }}</dd>
             <dt>Foss</dt>
-            <dd>{{ wc.foss.foss }}</dd>
+            <dd>{{ model.foss.foss }}</dd>
             <dt>Language</dt>
-            <dd>{{ wc.language }}</dd>
+            <dd>{{ model.language }}</dd>
             <dt>Date</dt>
-            <dd>{{ wc.trdate }}</dd>
+            <dd>{{ model.tdate }}</dd>
             <dt>Participants Count</dt>
-            <dd>{{ wc.participant_counts }}</dd>
+            <dd>{{ model.participant_count }}</dd>
             <dt>Organiser</dt>
-            <dd>{{ wc.organiser.user.first_name }} {{ wc.organiser.user.last_name }}</dd>
+            <dd>{{ model.organiser.user.first_name }} {{ model.organiser.user.last_name }}</dd>
         </dl>
     </div>
 	<div class="" id="pending">
 		{% if collection %}
 		<table class="table table-bordered table-hover table-striped">
 			<tr>
+			    <th>#</th>
 				<th>First Name</th>
 				<th>Last Name</th>
 			</tr>
 			{% for record in collection %}
 				<tr>
+				    <td>{{ forloop.counter }}
 					<td>{{ record.firstname|lower|title }}</td>
 					<td>{{ record.lastname|lower|title }}</td>
 				</tr>

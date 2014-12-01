@@ -44,7 +44,7 @@ For getting the lab and systems ready for the workshop Click below
 
 Regards,
 Spoken Tutorial
-'''.format('http://process.spoken-tutorial.org/images/c/c2/Participant_data.pdf', 'http://process.spoken-tutorial.org/images/1/1b/Download-Tutorials.pdf', 'http://process.spoken-tutorial.org/images/5/58/Machine-Readiness.pdf', instance.foss, instance.trdate, instance.trtime, instance.training_code)
+'''.format('http://process.spoken-tutorial.org/images/c/c2/Participant_data.pdf', 'http://process.spoken-tutorial.org/images/1/1b/Download-Tutorials.pdf', 'http://process.spoken-tutorial.org/images/5/58/Machine-Readiness.pdf', instance.foss, instance.tdate, instance.ttime, instance.training_code)
     
     elif status == 'How to upload the attendance on the Workshop day':
         subject  = 'Important : How to upload the attendance on the workshop day'
@@ -173,7 +173,7 @@ process.spoken-tutorial.org/images/a/aa/Test_Request.pdf for the instructions on
 
 Regards,
 Spoken Tutorial
-'''.format(instance.training_code, instance.foss, instance.trdate)
+'''.format(instance.training_code, instance.foss, instance.tdate)
 
     
     elif status == 'Future activities after conducting the workshop':

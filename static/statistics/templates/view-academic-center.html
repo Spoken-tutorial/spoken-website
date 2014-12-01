@@ -1,0 +1,120 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load cmsdata %}
+{% load creationdata %}
+{% block title %} Academic Center Information {% endblock %}
+{% block cssblock %}
+    <link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />
+    <style>
+        .nav.nav-tabs a{
+            color: #000;
+            font-weight: bold;
+        }
+        .badge{
+            background-color: #777;
+            color: white;
+        }
+        .badge:hover{
+            background-color: #000;
+            color: white;
+        }
+        .nav-tabs.nav-justified>li>a{
+            border-bottom: 1px solid #E5A61E;
+        }
+    </style>
+{% endblock %}
+{% block heading %}
+    <i class="fa fa-list-ul"></i> Academic Center Information
+{% endblock %}
+{% block content %}
+	<div class='table-responsive'>
+		{% if collection %}
+			<table class="paleblue table table-bordered table-hover table-striped">
+				<tr>
+				    <th>Institution Name</th><td>{{ collection.institution_name }}</td>
+				</tr>
+				<tr>
+				    <th>Address</th><td>{{ collection.address }}</td>
+				</tr>
+				<tr>
+				    <th>City</th><td>{{ collection.city }}</td>
+				</tr>
+				<tr>
+					<th>State</th><td>{{ collection.state }} - {{ collection.pincode }}</td>
+				</tr>
+				<tr>
+				    <th>Rating</th><td>{{ collection.rating }}</td>
+				</tr>
+				<tr>
+				    <th>Contact Person</th><td>{{ collection.contact_person }}</td>
+				</tr>
+				<tr>
+				    <th>Remarks</th><td>{{ collection.remarks }}</td>
+				</tr>
+				<!-- <tr>
+				    <th>University</th><td>{{ collection.university }}</td>
+				</tr> -->
+			</table>
+		    <div role="tabpanel">
+
+              <!-- Nav tabs -->
+              <ul class="nav nav-tabs nav-pills nav-justified" role="tablist">
+                <li role="presentation" class="active "><a href="#training" aria-controls="training" role="tab" data-toggle="tab">Training<span class="badge">{{ collection.training_set.count }}</span></a></li>
+                <li role="presentation" class=""><a href="#test" aria-controls="test" role="tab" data-toggle="tab">Test<span class="badge">{{ collection.test_set.count }}</span></a></li>
+            </ul>
+
+              <!-- Tab panes -->
+              <div class="tab-content">
+                <div role="tabpanel" class="tab-pane active" id="training">
+                    {% if collection.training_set.all %}
+		                <table class="paleblue table table-striped table-hover table-bordered">
+			                {% get_sortable_header header ordering request.GET %}
+			                {% for record in collection.training_set.all %}
+				                <tr>
+                                    <td>{{ forloop.counter }}
+					                <td>{{ record.foss }}</td>
+					                <td>{{ record.organiser.user.first_name }}</td>
+					                <td>{{ record.tdate|date:"d M Y" }} {{ record.wtime }}</td>
+					                <td>{{ record.participant_count }}</td>
+                                    <!-- actions based on roles -->
+                                    <td><a href="{% url 'statistics:statistics_training_participant' 'training' record.id %}" target="_blank">View Participants</a></td>
+                                </tr>
+                           {% endfor %}
+                        </table>
+		            {% else %}
+			            <p class='no-record'>No record found!</p>
+		            {% endif %}
+                </div>
+                <div role="tabpanel" class="tab-pane" id="test">
+                    {% if collection.test_set.all %}
+		                <table class="paleblue table table-striped table-hover table-bordered">
+			                {% get_sortable_header header ordering request.GET %}
+			                {% for record in collection.test_set.all %}
+				                <tr>
+                                    <td>{{ forloop.counter }}
+				                    <td>{{ record.academic.state }}</td>
+				                    <td>{{ record.academic.city }}</td>
+					                <td>{{ record.academic }}</td>
+					                <td>{{ record.foss }}</td>
+					                <td>{{ record.organiser.user.first_name }}</td>
+					                <td>{{ record.tdate|date:"d M Y" }} {{ record.wtime }}</td>
+					                <td>{{ record.participant_count }}</td>
+                                    <!-- actions based on roles -->
+                                    <td><a href="{% url 'statistics:statistics_training_participant' 'test' record.id %}" target="_blank">View Participants</a></td>
+                                </tr>
+                           {% endfor %}
+                        </table>
+		            {% else %}
+			            <p class='no-record'>No record found!</p>
+		            {% endif %}
+                </div>
+              </div>
+
+            </div>
+		        
+		{% else %}
+		    <p class="no-record"> No record found!</p>
+		{% endif %}
+	</div>
+{% endblock %}

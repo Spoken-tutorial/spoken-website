@@ -190,6 +190,7 @@ class TrainingExtraFields(models.Model):
     is_tutorial_useful = models.BooleanField(default = 0)
     future_training = models.BooleanField(default = 0)
     recommend_to_others = models.BooleanField(default = 0)
+    no_of_lab_session = models.CharField(max_length = 30, null=True)
     
     
 class Training(models.Model):
@@ -202,23 +203,26 @@ class Training(models.Model):
     department = models.ManyToManyField(Department)
     language = models.ForeignKey(Language)
     foss = models.ForeignKey(FossCategory)
-    trdate = models.DateField()
-    trtime = models.TimeField()
+    tdate = models.DateField()
+    ttime = models.TimeField()
     skype = models.PositiveSmallIntegerField(default=0)
     status = models.PositiveSmallIntegerField(default=0) #{0:request done, 1: attendance submit, 2: training manger approved, 3: mark attenda done, 4: complete, 5: rejected}
     extra_fields = models.OneToOneField(TrainingExtraFields, null = True)
-    participant_counts = models.PositiveIntegerField(default=0)
+    participant_count = models.PositiveIntegerField(default=0)
     trusted = models.BooleanField(default=1)
     created = models.DateTimeField(auto_now_add = True)
     updated = models.DateTimeField(auto_now = True)
 
     class Meta:
-        unique_together = (("organiser", "academic", "foss", "trdate", "trtime"),)
+        unique_together = (("organiser", "academic", "foss", "tdate", "ttime"),)
 
 class TrainingAttendance(models.Model):
     training = models.ForeignKey(Training)
-    mdluser_id = models.PositiveIntegerField()
-    #mdluser = models.ForeignKey(MdlUser)
+    mdluser_id = models.PositiveIntegerField(null=True, blank=True)
+    firstname = models.CharField(max_length = 100, null=True)
+    lastname = models.CharField(max_length = 100, null=True)
+    gender = models.CharField(max_length=10, null=True)
+    email = models.EmailField(null=True)
     password = models.CharField(max_length = 100, null=True)
     count = models.PositiveSmallIntegerField(default=0)
     status = models.PositiveSmallIntegerField(default=0)
@@ -226,8 +230,20 @@ class TrainingAttendance(models.Model):
     updated = models.DateTimeField(auto_now = True)
     class Meta:
         verbose_name = "Training Attendance"
-        unique_together = (("training", "mdluser_id"))
+        #unique_together = (("training", "mdluser_id"))
 
+'''class SchoolTrainingAttendance(models.Model):
+    training = models.ForeignKey(Training)
+    firstname = models.CharField(max_length = 100)
+    lastname = models.CharField(max_length = 100)
+    gender = models.CharField(max_length=10)
+    email = models.EmailField(null=True)
+    status = models.PositiveIntegerField(default=0)
+    created = models.DateTimeField(auto_now_add = True)
+    updated = models.DateTimeField(auto_now = True)
+    class Meta:
+        verbose_name = "School Training Attendance"
+'''
 class TrainingLog(models.Model):
     user = models.ForeignKey(User)
     training = models.ForeignKey(Training)
@@ -378,6 +394,7 @@ class TrainingLanguageFeedback(models.Model):
     age = models.PositiveIntegerField()
     medium_of_instruction = models.PositiveIntegerField()
     gender = models.BooleanField()
+    language_prefered = models.ForeignKey(Language, null=True)
     tutorial_was_useful = models.PositiveIntegerField()
     learning_experience = models.PositiveIntegerField()
     satisfied_with_learning_experience = models.PositiveIntegerField()
@@ -388,6 +405,7 @@ class TrainingLanguageFeedback(models.Model):
     curious_and_motivated = models.PositiveIntegerField()
     similar_tutorial_with_other_content = models.PositiveIntegerField()
     foss_tutorial_was_mentally_demanding = models.PositiveIntegerField()
+    side_by_side_method_is_understood = models.PositiveIntegerField(default=0)
     
     compfortable_learning_in_language = models.PositiveIntegerField()
     confidence_level_in_language = models.PositiveIntegerField()
@@ -419,6 +437,10 @@ class TrainingLanguageFeedback(models.Model):
     audio_understandable_and_clear_speech = models.PositiveIntegerField()
     audio_best_features = models.TextField()
     audio_areas_of_improvement = models.TextField()
+    
+    side_by_side_method_is_effective = models.PositiveIntegerField(default=0)
+    side_by_side_method_is = models.PositiveIntegerField(default=0)
+    
     created = models.DateTimeField(auto_now_add = True)
     class Meta:
         unique_together = (("training", "mdluser_id"))

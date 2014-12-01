@@ -45,16 +45,17 @@
                 </div>
             </div>
             <div class="form-group">
-                <label for="id_trdate" class="col-sm-2 control-label">Date Range</label>
+                <label for="id_tdate" class="col-sm-2 control-label">Date Range</label>
                 <div class="col-sm-10">
-                    {% render_field form.trdate class+="form-control chosen trdate date" tabindex="1" %}
-                    {{ form.trdate.errors }}
+                    {% render_field form.tdate class+="form-control chosen tdate date" tabindex="1" %}
+                    {{ form.tdate.errors }}
                 </div>
             </div>
             <div class="form-group">
               <div class="col-sm-offset-2 col-sm-10">
                  <input class="btn btn-success" type="submit" value="Filter" />
                  <a class="btn btn-success" href="{{request.path}}?{{ request.GET|reset_get_values}}">Reset Filter</a>
+                 <a class="pull-right fancybox fancybox.iframe btn btn-default " href="/reports/events/training/report/{% if request.GET %}?{{ request.GET.urlencode }}&status={{ status_code }}{% else %}?status={{ status_code }} {% endif %}" class="addlink">Export to CSV</a>
               </div>
            </div>
         </form>
@@ -101,8 +102,8 @@
 						<td>{{ record.academic }}</td>
 						<td>{{ record.foss }}</td>
 						<td>{{ record.organiser.user.first_name }}</td>
-						<td>{{ record.trdate|date:"d M Y" }} {{ record.wtime }}</td>
-						<td>{{ record.participant_counts }}</td>
+						<td>{{ record.tdate|date:"d M Y" }} {{ record.wtime }}</td>
+						<td>{{ record.participant_count }}</td>
                         <!-- actions based on roles -->
                         <td>
                             {% if role == 'rp' %}
@@ -110,7 +111,7 @@
                                     <a href="{% url 'events:training_edit' role record.id %}">Edit</a> |
                                 {% endif %}
                                 {% if status == 'pending' or status == 'predated' %}
-                                    {% if record.status == 0 or record.participant_counts == 0 %}
+                                    {% if record.status == 0 or record.participant_count == 0 %}
                                         Waiting for attendance
                                         <a href="{% url 'events:training_approvel' role record.id %}?status=reject"> | Reject</a>
                                     {% else %}
@@ -145,21 +146,23 @@
                                 {% endif %}
                                 {% if status == 'pending' or status == 'predated' %}
                                     <a href="{% url 'events:training_edit' role record.id %}">Edit</a> |
-                                    {% if record.training_type %}
+                                    <!-- {% if record.training_type %}
                                         <a target='_blank' href="{% url 'events:training_attendance' record.id %}"> Attendance</a> |
-                                    {% endif %}
+                                    {% endif %} -->
+                                    <a target='_blank' href="{% url 'events:training_attendance' record.id %}"> Attendance</a> |
                                     <a target='_blank' href="{% url 'events:training_participant' record.id %}">Participants</a>
                                 {% endif %}
                                 {% if status == 'approved' %}
                                     <a target='_blank' href="{% url 'events:training_participant' record.id %}">Participants</a>
                                 {% endif %}
                                 {% if status == 'ongoing' %}
-                                    {% if record.training_type == 0 and record.trdate|can_upload_final_training_list %}
+                                    <!-- {% if record.training_type == 0 and record.tdate|can_upload_final_training_list %}
                                         <a target='_blank' href="{% url 'events:training_attendance' record.id %}"> Attendance</a> | <a target='_blank' href="/software-training/training/training-completion/{{ record.id }}" class="fancybox fancybox.iframe"> Training Completion Form</a> |
                                     {% endif %}
                                     {% if record.training_type %}
                                         <a target='_blank' href="{% url 'events:training_attendance' record.id %}"> Attendance</a> |
-                                    {% endif %}
+                                    {% endif %} -->
+                                    <a target='_blank' href="{% url 'events:training_attendance' record.id %}"> Attendance</a> |
                                     <a target='_blank' href="{% url 'events:training_participant' record.id %}">Participants</a>
                                 {% endif %}
                             {% endif %}

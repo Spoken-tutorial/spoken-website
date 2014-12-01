@@ -6,14 +6,44 @@
     <link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />
     <style>
         table tr td, table tr th{
-            padding: 4px 0;
+            padding: 4px 0px 0px 5px;
         }
+	.tablest td input[type='radio']{
+            margin: 0px 23px !important;
+        }
+        .rowcolor{
+            background-color: #E0E0E0;
+        }
+        .rowborder{
+            border-bottom : 1px solid #A8A8A8;
+            background-color: #E0E0E0;
+        }
+	.bgcolor{
+            background-color: #E0E0E0;
+            padding: 3px 15px;
+        }
+	.tabhead{
+	    border: 1px solid #000;
+	    text-align: center;
+	    border-style: inset;
+	    background-color: #D0D0D0;
+	}
+	.highlight{
+	    width:100%;
+	    background-color: #E0E0E0;
+	}
+	.highlight textarea{
+	   height:110px;
+	}
+	.tablest textarea{
+	   height:110px;
+	}
     </style>
 {% endblock %}
 {% block content %}
     <div class="row well">
         <div class='col-sm-10'>
-            <form action="{{ action }}" method="post">{% csrf_token %}
+          <form action="{{ action }}" method="post">{% csrf_token %}
             {% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
             {% if form.non_field_errors %}
             <ul>
@@ -58,19 +88,26 @@
                             {% endfor %}
                         </div>
                     </div>
+		   <div class="form-group">
+                        <label class="col-sm-3 control-label" for= "id_language_prefered">Language Preferred</label>
+                        <div class="col-sm-9">
+                            {% render_field form.language_prefered class+="form-control language_prefered" tabindex="1" %}
+                        </div>
+                        {{ form.language_prefered.errors }}
+                    </div>
                 </div>
             </div>
-            <table style="width:100%">
+            <table style="width:100%" class="tablest">
                 <tr>
                     <th></th>
-                    <th>Strongly Disagree</th>
-                    <th>Disagree</th>
-                    <th>Neutral</th>
-                    <th>Agree</th>
-                    <th>Strongly Agree</th>
+                    <th class="bgcolor">Strongly<br>Disagree</th>
+                    <th class="bgcolor">Disagree</th>
+                    <th class="bgcolor">Neutral</th>
+                    <th class="bgcolor">Agree</th>
+                    <th class="bgcolor">Strongly<br>Agree</th>
                </tr>
                <!-- Tutorial Was Useful -->
-               <tr>
+               <tr class="rowcolor">
                     <td>
                         <label for="id_tutorial_was_useful">The  tutorial was  useful in learning the course</label>
                     </td>
@@ -78,11 +115,11 @@
                       <td>{{ choice.tag }}</td>
                     {% endfor %}
                 </tr>
-                <tr>
-                    <td colspan="5">{{ form.tutorial_was_useful.errors }}</td>
+                <tr class="rowborder">
+                    <td colspan="6">{{ form.tutorial_was_useful.errors }}</td>
                 </tr>
                 <!-- Learning Experience -->
-                <tr>
+                <tr class="rowcolor">
                     <td>
                         <label for="id_learning_experience">The learning experience will improve my performance and grades</label>
                     </td>
@@ -90,11 +127,11 @@
                       <td>{{ choice.tag }}</td>
                     {% endfor %}
                 </tr>
-                <tr>
-                    <td colspan="5">{{ form.learning_experience.errors }}</td>
+                <tr class="rowborder">
+                    <td colspan="6">{{ form.learning_experience.errors }}</td>
                 </tr>
                 <!-- Satisfied with learning experience -->
-                <tr>
+                <tr class="rowcolor">
                     <td>
                         <label for="id_satisfied_with_learning_experience">Overall I am satisfied with the learning experience of the course</label>
                     </td>
@@ -102,11 +139,11 @@
                       <td>{{ choice.tag }}</td>
                     {% endfor %}
                 </tr>
-                <tr>
-                    <td colspan="5">{{ form.satisfied_with_learning_experience.errors }}</td>
+                <tr class="rowborder">
+                    <td colspan="6">{{ form.satisfied_with_learning_experience.errors }}</td>
                 </tr>
                 <!--Concept Explain Clearly -->
-                <tr>
+                <tr class="rowcolor">
                     <td>
                         <label for="id_concept_explain_clearity">The tutorial explained concepts clearly</label>
                     </td>
@@ -114,11 +151,11 @@
                       <td>{{ choice.tag }}</td>
                     {% endfor %}
                 </tr>
-                <tr>
-                    <td colspan="5">{{ form.concept_explain_clearity.errors }}</td>
+                <tr class="rowborder">
+                    <td colspan="6">{{ form.concept_explain_clearity.errors }}</td>
                 </tr>
                 <!--Overall I enjoyed the learning experience  -->
-                <tr>
+                <tr class="rowcolor">
                     <td>
                         <label for="id_overall_learning_experience">Overall I enjoyed the learning experience in the course</label>
                     </td>
@@ -126,11 +163,11 @@
                       <td>{{ choice.tag }}</td>
                     {% endfor %}
                 </tr>
-                <tr>
-                    <td colspan="5">{{ form.overall_learning_experience.errors }}</td>
+                <tr class="rowborder">
+                    <td colspan="6">{{ form.overall_learning_experience.errors }}</td>
                 </tr>
                 <!--I found the  User interface to be  uncomfortable to interact   -->
-                <tr>
+                <tr class="rowcolor">
                     <td>
                         <label for="id_user_interface">I found the  User interface to be  uncomfortable to interact</label>
                     </td>
@@ -138,11 +175,11 @@
                       <td>{{ choice.tag }}</td>
                     {% endfor %}
                 </tr>
-                <tr>
-                    <td colspan="5">{{ form.user_interface.errors }}</td>
+                <tr class="rowborder">
+                    <td colspan="6">{{ form.user_interface.errors }}</td>
                 </tr>
                 <!--I am not confident about understanding difficult concept-->
-                <tr>
+                <tr class="rowcolor">
                     <td>
                         <label for="id_understanding_difficult_concept">I am not confident about understanding difficult concepts</label>
                     </td>
@@ -150,11 +187,11 @@
                       <td>{{ choice.tag }}</td>
                     {% endfor %}
                 </tr>
-                <tr>
-                    <td colspan="5">{{ form.understanding_difficult_concept.errors }}</td>
+                <tr class="rowborder">
+                    <td colspan="6">{{ form.understanding_difficult_concept.errors }}</td>
                 </tr>
                 <!--I was very curious and motivated to learn the tutorial-->
-                <tr>
+                <tr class="rowcolor">
                     <td>
                         <label for="id_curious_and_motivated">I was very curious and motivated to learn the tutorials</label>
                     </td>
@@ -162,11 +199,11 @@
                       <td>{{ choice.tag }}</td>
                     {% endfor %}
                 </tr>
-                <tr>
-                    <td colspan="5">{{ form.curious_and_motivated.errors }}</td>
+                <tr class="rowborder">
+                    <td colspan="6">{{ form.curious_and_motivated.errors }}</td>
                 </tr>
                 <!--I will use similar tutorial for my learning with other content materials-->
-                <tr>
+                <tr class="rowcolor">
                     <td>
                         <label for="id_similar_tutorial_with_other_content">I would use similar tutorials for my learning with other content materials</label>
                     </td>
@@ -174,11 +211,11 @@
                       <td>{{ choice.tag }}</td>
                     {% endfor %}
                 </tr>
-                <tr>
-                    <td colspan="5">{{ form.similar_tutorial_with_other_content.errors }}</td>
+                <tr class="rowborder">
+                    <td colspan="6">{{ form.similar_tutorial_with_other_content.errors }}</td>
                 </tr>
                 <!--The task of learning FOSS tutorial was mentally demanding-->
-                <tr>
+                <tr class="rowcolor">
                     <td>
                         <label for="id_foss_tutorial_was_mentally_demanding">The task of learning tutorials was mentally demanding</label>
                     </td>
@@ -186,17 +223,30 @@
                       <td>{{ choice.tag }}</td>
                     {% endfor %}
                 </tr>
-                <tr>
-                    <td colspan="5">{{ form.foss_tutorial_was_mentally_demanding.errors }}</td>
+                <tr class="rowborder">
+                    <td colspan="6">{{ form.foss_tutorial_was_mentally_demanding.errors }}</td>
                 </tr>
+                
+                <tr class="rowcolor">
+                    <td>
+                        <label for="id_side_by_side_method_is_understood">I have understood what is meant by the side-by-side method</label>
+                    </td>
+                    {% for choice in form.side_by_side_method_is_understood %}
+                      <td>{{ choice.tag }}</td>
+                    {% endfor %}
+                </tr>
+                <tr class="rowborder">
+                    <td colspan="6">{{ form.side_by_side_method_is_understood.errors }}</td>
+                </tr>
+                
              </table>
             <br>
-            
-            <table style="width:100%">
+           
+            <table class="highlight">
                 <tr>
                     <td colspan="6"><label for="id_compfortable_learning_in_language">How comfortable was your learning  in Indian language?</label></td>
                 </tr>
-                <tr>
+                <tr >
                         {% for choice in form.compfortable_learning_in_language %}
                           <td>{{ choice.tag }} <b>{{ choice.choice_label }}</b></td>
                         {% endfor %}
@@ -207,7 +257,7 @@
             </table>
             <br>
             
-            <table style="width:100%">
+            <table class="highlight">
                 <tr>
                     <td colspan="6"><label for="id_confidence_level_in_language">How do you rate your confidence level in applying the concepts after learning the tutorials in Indian language?</label></td>
                 </tr>
@@ -221,45 +271,54 @@
                 </tr>
             </table>
             <br>
-            
-            <table style="width:100%">
+           <div class="highlight"> 
+            <table style="width:70%">
                 <tr>
                     <td colspan="6"><label for="id_preferred_language">Which is your preferred language of learning the tutorial? Why?</label></td>
                 </tr>
                 <tr>
                         {% for choice in form.preferred_language %}
-                          <td>{{ choice.tag }} <b>{{ choice.choice_label }}</b></td>
+                          <td style="width:50%">{{ choice.tag }} <b>{{ choice.choice_label }}</b></td>
                         {% endfor %}
                 </tr>
-            <tr>
-                <td><label>Reason</label></td>
-            </tr>
-            <tr>
-                <td>{{ form.preferred_language_reason }}</td>
+	        <tr>
+        	        <td><label>Reason</label></td>
+	        </tr>
+        	<tr>
+                	<td>{{ form.preferred_language_reason }}</td>
                         <td>{{ form.preferred_language_reason.errors }}</td>
-                    </div>
+                    <!--</div>-->
                 <tr>
                         <td colspan="3">{{ form.preferred_language_reason.errors }}</td>
                 </tr>
             </table>
+	    </div>
             <br>
-            
-            <table style="width:100%">
+            <div class="highlight">
+            <table style="width:70%">
                 <tr>
                     <td colspan="6"><label for="id_prefer_translation_in_mother_tongue">Do you prefer translation in mother tongue for better comprehension?</label></td>
                 </tr>
                 <tr>
                         {% for choice in form.prefer_translation_in_mother_tongue %}
-                          <td>{{ choice.tag }} <b>{{ choice.choice_label }}</b></td>
+                          <td style="width:50%;">{{ choice.tag }} <b>{{ choice.choice_label }}</b></td>
                         {% endfor %}
                 </tr>
                 <tr>
-                        <td colspan="3">{{ form.prefer_translation_in_mother_tongue.errors }}</td>
+                        <td>{{ form.prefer_translation_in_mother_tongue.errors }}</td>
                 </tr>
+		<tr>
+			<td><label>Reason</label></td>
+		</tr>
+		<tr>
+			<td>{{ form.prefer_translation_in_mother_tongue_reason }}</td>
+		</tr>
+		<tr>
+			<td>{{ form.prefer_translation_in_mother_tongue_reason.errors }}</td>
+		</tr>
             </table>
-            <br>
-            
-            <div>
+	    </div>
+            <!--<div class="highlight">
                 <p>
                     <label>Reason</label>
                 </p>
@@ -267,118 +326,193 @@
                     {{ form.prefer_translation_in_mother_tongue_reason }}
                 </p>
                 {{ form.prefer_translation_in_mother_tongue_reason.errors }}
-            </div>
+            </div>-->
             <br>
-            <table style="width:100%">
+	    <div class="highlight">
+            <table style="width:70%">
                 <tr>
-                    <td colspan="6"><label for="side_by_side_method_meant">What is meant by side-by-side method (Seeing video and practicing at the same time)?</td>
+                    <td colspan="6"><label for="side_by_side_method_meant">Do you know about side-by-side method (seeing video and practicing at the same time)?</td>
                 </tr>
                 <tr>
                     {% for choice in form.side_by_side_method_meant %}
-                                      <td>{{ choice.tag }} <b>{{ choice.choice_label }}</b></td>
-                                    {% endfor %}
+                        <td style="width:50%;">{{ choice.tag }} <b>{{ choice.choice_label }}</b></td>
+                    {% endfor %}
                 </tr>
                 <tr>
                     <td colspan="3">{{ form.side_by_side_method_meant.errors }}</td>
                 </tr>
             </table>
-            <table style="width:100%">
+	    </div>
+	    <br>
+	    <div class="highlight">
+            <table style="width:70%">
                 <tr>
-                    <td style="width:50%">
-                        <label> Do you feel  Side by side method beneficial (Seeing video and practicing at the same time)?</label></td>
+                    <td colspan="6">
+                        <label>Do you feel side-by-side method beneficial (seeing video and practicing at the same time)?</label></td>
                 </tr>
                 <tr>
                         {% for choice in form.side_by_side_method_is_beneficial %}
-                          <td>{{ choice.tag }} <b>{{ choice.choice_label }}</b></td>
+                          <td style="width:50%">{{ choice.tag }} <b>{{ choice.choice_label }}</b></td>
                         {% endfor %}
                 </tr>
                 <tr>
-                        <td colspan="3">{{ form.side_by_side_method_is_beneficial.errors }}</td>
+                        <td>{{ form.side_by_side_method_is_beneficial.errors }}</td>
+                </tr>
+		<tr>
+			<td><label>Reason</label></td>
+		</tr>
+		<tr>
+			<td>{{ form.side_by_side_method_is_beneficial_reason }}</td>
+		</tr>
+		<tr>
+			<td>{{ form.side_by_side_method_is_beneficial_reason.errors }}</td>
+		</tr>
+            </table>
+	    </div>
+	    <br>
+            <!--<div class="highlight">
+		<p>
+		    <label>Reason</label>
+		</p>
+		<p>{{ form.side_by_side_method_is_beneficial_reason }}</p>
+                {{ form.side_by_side_method_is_beneficial_reason.errors }}
+            </div>-->
+        <div class="highlight">
+            <table style="width:70%">
+                <tr>
+                    <td colspan="6"><label for="side_by_side_method_meant">Do you think side-by-side method (seeing video and practicing at the same time) is effective ?</td>
+                </tr>
+                <tr>
+                    {% for choice in form.side_by_side_method_is_effective %}
+                        <td style="width:50%;">{{ choice.tag }} <b>{{ choice.choice_label }}</b></td>
+                    {% endfor %}
+                </tr>
+                <tr>
+                    <td colspan="3">{{ form.side_by_side_method_is_effective.errors }}</td>
                 </tr>
             </table>
-            <br>
-            <div><p><label>Reason</label></p><p>{{ form.side_by_side_method_is_beneficial_reason }}</p>
-                {{ form.side_by_side_method_is_beneficial_reason.errors }}
-            </div>
-
-            <div>
-        <p><label>What do you feel are the limitations of side by side method (Seeing video and practicing at the same time)?</label></p><p>{{ form.limitations_of_side_by_side_method }}</p>
+	    </div>
+	    <br>
+	    <div class="highlight">
+            <table style="width:70%">
+                <tr>
+                    <td colspan="6"><label for="side_by_side_method_meant">Side-by-side method is</td>
+                </tr>
+                    {% for choice in form.side_by_side_method_is %}
+                        <tr>
+                            <td style="width:50%;">{{ choice.tag }} <b>{{ choice.choice_label }}</b></td>
+                        </tr>
+                    {% endfor %}
+                <tr>
+                    <td colspan="3">{{ form.side_by_side_method_is.errors }}</td>
+                </tr>
+            </table>
+	    </div>
+	    <br>
+	   <div class="highlight">
+	   <table style="width:70%">
+		<tr>
+		    <td colspan="6">
+			<label>What do you feel are the limitations of side-by-side method (seeing video and practicing at the same time)?</label>
+		    </td>
+		</tr>
+		<tr>
+		    <td>{{ form.limitations_of_side_by_side_method }}</td>
+		</tr>
+		<tr>
+		    <td>{{ form.limitations_of_side_by_side_method.errors }}</td>
+		</tr>
+	   </table>
+	   </div>
+            <!--<div class="highlight">
+                <p>
+                    <label>What do you feel are the limitations of side-by-side method (seeing video and practicing at the same time)?</label>
+                </p>
+		<p>
+		   {{ form.limitations_of_side_by_side_method }}
+		</p>
                 {{ form.limitations_of_side_by_side_method.errors }}
-            </div>
-            <table style="width:100%">
+            </div>-->
+            <table style="width:100%;border:1px solid #000;" class="tablest"> 
                 <tr>
-                    <th>Content Quality</th>
-                    <th>Very Bad</th>
-                    <th>Bad</th>
-                    <th>Fair</th>
-                    <th>Good</th>
-                    <th>Excellent</th>
+                    <th class="tabhead">CONTENT QUALITY</th>
+                    <th class="bgcolor">Very Bad</th>
+                    <th class="bgcolor">Bad</th>
+                    <th class="bgcolor">Fair</th>
+                    <th class="bgcolor">Good</th>
+                    <th class="bgcolor">Excellent</th>
                </tr>
-                <tr>
+                <tr class="rowcolor">
                     <td><label for="id_content_information_flow">Information flow of Content</label></td>
                     
                             {% for choice in form.content_information_flow %}
                               <td>{{ choice.tag }}</td>
                             {% endfor %}
                 </tr>
-                <tr>
-                            <td colspan="3">{{ form.content_information_flow.errors }}</td>
+                <tr class="rowborder">
+                            <td colspan="6">{{ form.content_information_flow.errors }}</td>
                 </tr>
                 <br>
-                <tr>
+                <tr class="rowcolor">
                     <td><label for="id_content_appropriate_examples">Appropriateness of examples</label></td>
                             {% for choice in form.content_appropriate_examples %}
                               <td>{{ choice.tag }}</td>
                             {% endfor %}
                 </tr>
-                <tr>
-                    <td colspan="3">{{ form.content_appropriate_examples.errors }}</td>
+                <tr class="rowborder">
+                    <td colspan="6">{{ form.content_appropriate_examples.errors }}</td>
                 </tr>
                 <br>
-                <tr>
+                <tr class="rowcolor">
                     <td><label for="id_content_ease_of_understanding">Ease of understanding content</label></td>
                             {% for choice in form.content_ease_of_understanding %}
                               <td>{{ choice.tag }}</td>
                             {% endfor %}
                 </tr>
-                <tr>
-                    <td>{{ form.content_ease_of_understanding.errors }}</td>
+                <tr class="rowborder">
+                    <td colspan="6">{{ form.content_ease_of_understanding.errors }}</td>
                 </tr>
                 <br>
-                <tr>
+                <tr class="rowcolor">
                     <td><label for="id_content_clarity_of_instruction_sheet">Clarity of Instruction sheet</label></td>
                     {% for choice in form.content_clarity_of_instruction_sheet %}
                       <td>{{ choice.tag }}</td>
                     {% endfor %}
                 </tr>
-                <tr>
-                    <td>{{ form.content_clarity_of_instruction_sheet.errors }}</td>
+                <tr class="rowborder">
+                    <td colspan="6">{{ form.content_clarity_of_instruction_sheet.errors }}</td>
                 </tr>
                 <br>
-                <tr>
+                <tr class="rowcolor">
                     <td><label for="id_content_ease_of_performing_assignment">Ease of performing assignment</label></td>
                     {% for choice in form.content_ease_of_performing_assignment %}
                     <td>{{ choice.tag }}</td>
                     {% endfor %}
                 </tr>
-                <tr>
-                    <td>{{ form.content_ease_of_performing_assignment.errors }}</td>
+                <tr class="rowborder">
+                    <td colspan="6">{{ form.content_ease_of_performing_assignment.errors }}</td>
                 </tr>
-                <tr>
-                    <td style="width:50%">
+                <tr class="rowcolor">
+                    <td colspan="1">
                     <label>Content: Best Features</label></td>
+		    <td colspan="5">
+                    <label>Content: Areas of Improvement</label></td>
                 </tr>
-                <tr>
-                    <td style="width:50%">
+                <tr class="rowcolor">
+                    <td colspan="1">
                     {{ form.content_best_features }}
+                    </td>
+		    <td colspan="5">
+                    {{ form.content_areas_of_improvement }}
                     </td>
                 </tr>
                 <tr>
-                    <td colspan="3">{{ form.content_best_features.errors }}</td>
+                    <td colspan="1">{{ form.content_best_features.errors }}</td>
+		    <td colspan="5">{{ form.content_areas_of_improvement.errors  }}</td>
                 </tr>
-                <tr>
+                <!--<tr>
                     <td style="width:50%">
-                    <label>Content: Areas Of Improvement</label></td>
+                    <label>Content: Areas of Improvement</label></td>
                 </tr>
                 <tr>
                     <td style="width:50%">
@@ -387,61 +521,66 @@
                 </tr>
                 <tr>
                     <td colspan="3">{{ form.content_areas_of_improvement.errors }}</td>
-                </tr>
+                </tr>-->
         </table> 
         
-        <table style="width:100%">
+        <table style="width:100%;border:1px solid #000;" class="tablest">
         <tr>
-                    <th>Video Quality</th>
-                    <th>Very Bad</th>
-                    <th>Bad</th>
-                    <th>Fair</th>
-                    <th>Good</th>
-                    <th>Excellent</th>
+                    <th class="tabhead">VIDEO QUALITY</th>
+                    <th class="bgcolor">Very Bad</th>
+                    <th class="bgcolor">Bad</th>
+                    <th class="bgcolor">Fair</th>
+                    <th class="bgcolor">Good</th>
+                    <th class="bgcolor">Excellent</th>
         </tr>
-        <tr>
+        <tr class="rowcolor">
             <td><label for="id_video_audio_video_synchronization">Audio-Video Synchronization</label></td>
             {% for choice in form.video_audio_video_synchronization %}
                 <td>{{ choice.tag }} <b>{{ choice.choice_label }}</b></td>
             {% endfor %}
         </tr>
-        <tr>
-            <td>{{ form.video_audio_video_synchronization.errors }}</td>
+        <tr class="rowborder">
+            <td colspan="6">{{ form.video_audio_video_synchronization.errors }}</td>
         </tr>
         <br>
-        <tr>
+        <tr class="rowcolor">
             <td><label for="id_video_attractive_color_features">Attractiveness</label></td>
             {% for choice in form.video_attractive_color_features %}
             <td>{{ choice.tag }} <b>{{ choice.choice_label }}</b></td>
             {% endfor %}
         </tr>
-        <tr>
-            <td>{{ form.video_attractive_color_features.errors }}</td>
+        <tr class="rowborder">
+            <td colspan="6">{{ form.video_attractive_color_features.errors }}</td>
            </tr>
         <br>
-        <tr>
+        <tr class="rowcolor">
             <td><label for="id_video_text_readable">Text readability</label></td>
             {% for choice in form.video_text_readable %}
             <td>{{ choice.tag }} <b>{{ choice.choice_label }}</b></td>
             {% endfor %}
         </tr>
-        <tr>
-            <td>{{ form.video_text_readable.errors }}</td>
+        <tr class="rowborder">
+            <td colspan="6">{{ form.video_text_readable.errors }}</td>
         </tr>
-        <tr>
-            <td style="width:50%">
+        <tr class="rowcolor">
+            <td colspan="1">
             <label>Video: Best Features</label></td>
+	    <td colspan="5"><label>Video: Areas of Improvement</label></td>
         </tr>
-        <tr>
-            <td style="width:50%">
+        <tr class="rowcolor">
+            <td colspan="1">
             {{ form.video_best_features }}
             </td>
+	    <td colspan="5">
+            {{ form.video_areas_of_improvement }}
+            </td>
         </tr>
-        <tr>
-            <td colspan="3">{{ form.video_best_features.errors }}</td>
+        <tr class="rowcolor">
+            <td colspan="1">{{ form.video_best_features.errors }}</td>
+	    <td colspan="5">{{ form.video_areas_of_improvement.errors }}</td>
         </tr>
-        <tr>
-            <td style="width:50%"><label>Video: Areas Of Improvement</label></td>
+        <!--<tr>
+            <td style="width:50%"><label>Video: Areas of Improvement</label></td>
         </tr>
         <tr>
             <td style="width:50%">
@@ -450,61 +589,66 @@
         </tr>
         <tr>
             <td colspan="3">{{ form.video_areas_of_improvement.errors }}</td>
-        </tr>
+        </tr>-->
         </table>
 
-        <table style="width:100%">
+        <table style="width:100%;border:1px solid #000;" class="tablest"> 
         <tr>
-                    <th>Audio Quality</th>
-                    <th>Very Bad</th>
-                    <th>Bad</th>
-                    <th>Fair</th>
-                    <th>Good</th>
-                    <th>Excellent</th>
+                    <th class="tabhead">AUDIO QUALITY</th>
+                    <th class="bgcolor">Very Bad</th>
+                    <th class="bgcolor">Bad</th>
+                    <th class="bgcolor">Fair</th>
+                    <th class="bgcolor">Good</th>
+                    <th class="bgcolor">Excellent</th>
                </tr>
-        <tr>
+        <tr class="rowcolor">
             <td><label for="id_audio_pleasant_speech_and_accent">Pleasantness</label></td>
             {% for choice in form.audio_pleasant_speech_and_accent %}
                 <td>{{ choice.tag }} <b>{{ choice.choice_label }}</b></td>
             {% endfor %}
             </tr>
-        <tr>
-            <td>{{ form.audio_pleasant_speech_and_accent.errors }}</td>
+        <tr class="rowborder">
+            <td colspan="6">{{ form.audio_pleasant_speech_and_accent.errors }}</td>
         </tr>
         <br>
-        <tr>
+        <tr class="rowcolor">
             <td><label for="id_audio_soothing_and_friendly_tone">Friendliness</label></td>
             {% for choice in form.audio_soothing_and_friendly_tone %}
                 <td>{{ choice.tag }} <b>{{ choice.choice_label }}</b></td>
             {% endfor %}
         </tr>
-        <tr>
-            <td>{{ form.audio_soothing_and_friendly_tone.errors }}</td>
+        <tr class="rowborder">
+            <td colspan="6">{{ form.audio_soothing_and_friendly_tone.errors }}</td>
         </tr>
         <br>
-        <tr>
+        <tr class="rowcolor">
             <td><label for="id_audio_understandable_and_clear_speech">Clarity of speech</label></td>
             {% for choice in form.audio_understandable_and_clear_speech %}
                 <td>{{ choice.tag }} <b>{{ choice.choice_label }}</b></td>
             {% endfor %}
         </tr>
-        <tr>
-            <td>{{ form.audio_understandable_and_clear_speech.errors }}</td>
+        <tr class="rowborder">
+            <td colspan="6">{{ form.audio_understandable_and_clear_speech.errors }}</td>
         </tr>
-        <tr>
-            <td style="width:50%"><label>Audio: Best Features</label></td>
+        <tr class="rowcolor">
+            <td colspan="1"><label>Audio: Best Features</label></td>
+	    <td colspan="5"> <label>Audio: Areas of Improvement</label></td>
         </tr>
-        <tr>
-            <td style="width:50%">
+        <tr class="rowcolor">
+            <td colspan="1">
                 {{ form.audio_best_features }}
             </td>
+	    <td colspan="5">
+                {{ form.audio_areas_of_improvement }}
+            </td>
         </tr>
-        <tr>
-            <td colspan="3">{{ form.audio_best_features.errors }}</td>
+        <tr class="rowcolor">
+            <td colspan="1">{{ form.audio_best_features.errors }}</td>
+	    <td colspan="5">{{ form.audio_areas_of_improvement.errors }}</td>
         </tr>
-        <tr>
+        <!--<tr>
             <td style="width:50%">
-            <label>Audio: Areas Of Improvement</label></td>
+            <label>Audio: Areas of Improvement</label></td>
         </tr>
         <tr>
             <td style="width:50%">
@@ -513,9 +657,9 @@
         </tr>
         <tr>
             <td colspan="3">{{ form.audio_areas_of_improvement.errors }}</td>
-        </tr>
+        </tr>-->
         </table>
-
+	<br>
         <input class="btn btn-primary" type="submit" value="Submit" />
         {% endwith %}
         </form>
