@@ -2354,7 +2354,7 @@ def ajax_language(request):
         
 @csrf_exempt
 def test(request):
-    tas = TrainingAttendance.objects.all()
+    '''    tas = TrainingAttendance.objects.all()
     for ta in tas:
         if ta.mdluser_id:
             try:
@@ -2367,4 +2367,14 @@ def test(request):
             except Exception, e:
                 print e
         continue
+    return HttpResponse("Done!")'''
+    academics = AcademicCenter.objects.filter(institution_type__name='Uncategorized')
+    for academic in academics:
+        if "Polytechnic" in academic.institution_name.title():
+            academic.institution_type = InstituteType.objects.get(name='Polytechnic')
+            academic.save()
+        if "Iti" in academic.institution_name.title():
+            academic.institution_type = InstituteType.objects.get(name='ITI')
+            academic.save()
     return HttpResponse("Done!")
+
