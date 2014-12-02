@@ -283,7 +283,7 @@
                                     {% endfor %}
                                 {% endif %}
                             {% endblock %}
-                            <div class="actual-data">{% block content %}{% endblock %}</div>
+                            {% block actual_data %}<div class="actual-data">{% endblock %}{% block content %}{% endblock %}</div>
                             {% block pager %}
                                 {% if collection.paginator.num_pages > 1 %}
                                     <ul class="pagination pull-right">

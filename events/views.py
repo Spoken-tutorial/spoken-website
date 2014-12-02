@@ -2203,7 +2203,7 @@ def ajax_ac_state(request):
                 tmp +='<option value='+str(i.id)+'>'+i.name+'</option>'
                 
             if(tmp):
-                data['district'] = '<option value = ""> -- None -- </option>'+tmp
+                data['district'] = '<option value=""> -- None -- </option>'+tmp
             else:
                 data['district'] = tmp
             
@@ -2214,7 +2214,17 @@ def ajax_ac_state(request):
                 tmp +='<option value='+str(i.id)+'>'+i.name+'</option>'
                 
             if(tmp):
-                data['city'] = '<option value = ""> -- None -- </option>'+tmp
+                data['city'] = '<option value=""> -- None -- </option>'+tmp
+            else:
+                data['city'] = tmp
+        
+        if request.POST.get('fields[university]'):
+            university = University.objects.filter(state=state).order_by('name')
+            tmp = ''
+            for i in university:
+                tmp +='<option value='+str(i.id)+'>'+i.name+'</option>'
+            if(tmp):
+                data['university'] = '<option value=""> -- None -- </option>'+tmp
             else:
                 data['university'] = tmp
         

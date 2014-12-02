@@ -9,6 +9,9 @@
     <link rel="stylesheet" href="{% static 'spoken/css/jquery.fancybox.css' %}" type="text/css" media="screen" charset="utf-8" />
     <link rel="stylesheet" href="{% static 'spoken/css/flip-scroll.css' %}" type="text/css" media="screen" charset="utf-8" />
     <style type="text/css">
+        .map-stats, .col-lg-shadow {
+            background: white;
+        }
         .map-stats {
             width: 800px;
             background: white;
@@ -25,17 +28,38 @@
         #content-wrapper #content-inner {
             max-width: 800px;
         }
+        .total-summary {
+            padding: 10px;
+        }
     </style>
 {% endblock %}
 
 {% block content_head %}
     <div id="content" class="col-lg-12 col-md-12 col-sm-12">
 {% endblock %}
-
+{% block actual_data %}
+    <div class="actual-data col-lg-shadow">
+{% endblock %}
 {% block content %}
-    <div class="map-stats col-lg-shadow">
-        <div id="popup_box" style="display:none;font-size:16px;color:#000000; padding-top:30px;">Click on any state to get statistics.</div>
-        <br />
+    <div class="map-stats">
+        <div id="popup_box" style="display:none;font-size:16px;color:#000000; padding-top:30px;">
+            <table class="table table-bordered table-hover">
+                <tr>
+                    <th>Total no. of Training/Workshop</th>
+                    <td>{{ training_count }}</td>
+                </tr>
+                <tr>
+                    <th>Total no. of Participants</th>
+                    <td>{{ participant_count }}</td>
+                </tr>
+                <tr>
+                    <th>Total no. of Institutions</th>
+                    <td>{{ institution_count }}</td>
+                </tr>
+            </table>
+            <p class="col-center">Click on any state to get statistics.</p>
+        </div>
+        <p class="col-right total-summary"><a href="#" class="total-summary-link"><i class="fa fa-link fa-2"></i> <b>Total Summary</b></a></p>
         <img src="{% static 'statistics/images/map-of-india.gif' %}" alt="" usemap="#states-and-territories-map-of-india" style="border-style:none" />
         <map id="states-and-territories-map-of-india" name="states-and-territories-map-of-india">
             {% for state in states %}
@@ -63,6 +87,9 @@
                 modal        : true,
             });
             $.fancybox.open('#popup_box');
+            $('.total-summary-link').click(function(){
+                $.fancybox.open('#popup_box');
+            });
         });
     </script>
 {% endblock %}

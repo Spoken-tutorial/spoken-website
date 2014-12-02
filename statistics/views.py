@@ -14,8 +14,14 @@ from django.template.defaultfilters import slugify
 # Create your views here.
 def maphome(request):
     states = State.objects.all().exclude(name = 'Uncategorized')
+    counts = Training.objects.filter(status = 4, participant_count__gt=0).aggregate(Count('id'), Sum('participant_count'))
+    institution_count = AcademicCenter.objects.filter(id__in=Training.objects.filter(status = 4, participant_count__gt=0).values_list('academic_id').distinct()).aggregate(Count('id'))
+    print institution_count
     context = {
-        'states': states
+        'states': states,
+        'participant_count': counts['participant_count__sum'],
+        'training_count': counts['id__count'],
+        'institution_count': institution_count['id__count'],
     }
     return render(request, 'statistics/templates/maphome.html', context)
 
@@ -24,14 +30,14 @@ def get_state_info(request, code):
     try:
         state = State.objects.get(code = code)
         #academic_list = AcademicCenter.objects.filter(state = state).values_list('id')
-        resource_centers = AcademicCenter.objects.filter(state = state, resource_center = 1).count()
+        academic_centers = AcademicCenter.objects.filter(state = state, id__in=Training.objects.filter(status = 4, participant_count__gt=0).values_list('academic_id').distinct()).count()
         #workshop_details = Training.objects.filter(academic_id__in = academic_list, status = 4).aggregate(Sum('participant_count'), Count('id'), Min('tdate'))
         workshop_details = Training.objects.filter(Q(status = 4) | (Q(training_type = 0) & Q(status__gt = 1) & Q(tdate__lte = datetime.date.today())), participant_count__gt=0, academic__state_id = state.id).aggregate(Sum('participant_count'), Count('id'), Min('tdate'))
         context = {
             'state': state,
             'workshops': workshop_details['id__count'],
             'participants': workshop_details['participant_count__sum'],
-            'resource_centers': resource_centers,
+            'academic_centers': academic_centers,
             'from_date': workshop_details['tdate__min']
         }
         return render(request, 'statistics/templates/get_state_info.html', context)
@@ -141,9 +147,9 @@ def academic_center(request, slug = None):
     if slug:
         collection = AcademicCenter.objects.filter(state__slug = slug).order_by('state__name', 'institution_name')
     elif training_index:
-        collection = AcademicCenter.objects.filter(training__status=4).annotate(num_training=Count('training'), num_participant=Sum('training__participant_count')).filter(num_training__gte=training_index).order_by('state__name', 'institution_name')
+        collection = AcademicCenter.objects.filter(training__status=4, training__participant_count__gt=0).annotate(num_training=Count('training'), num_participant=Sum('training__participant_count')).filter(num_training__gte=training_index).order_by('state__name', 'institution_name')
     else:
-        collection = AcademicCenter.objects.filter(training__status=4).annotate(num_training=Count('training'), num_participant=Sum('training__participant_count')).order_by('state__name', 'institution_name')
+        collection = AcademicCenter.objects.filter(training__status=4, training__participant_count__gt=0).annotate(num_training=Count('training'), num_participant=Sum('training__participant_count')).order_by('state__name', 'institution_name')
     
     raw_get_data = request.GET.get('o', None)
     collection = get_sorted_list(request, collection, header, raw_get_data)

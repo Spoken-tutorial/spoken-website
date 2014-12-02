@@ -148,7 +148,7 @@ function ajaxStrateFillDatas(district, city, university){
 		        }
             },
 		    success: function(data) {
-			    console.log(data);
+			    //console.log(data);
 			    if(data.university){
 				    $ac_university.html(data.university);
 				    $ac_university.removeAttr("disabled");
