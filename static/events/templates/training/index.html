@@ -168,9 +168,9 @@
                             {% endif %}
                             {% if status == 'completed' %}
                                 <a href="{% url 'events:training_participant' record.id %}">View Participants</a>
-                                {% if record.training_type == 0 and record.extra_fields and user|is_resource_person %}
+                                <!-- {% if record.training_type == 0 and record.extra_fields and user|is_resource_person %}
                                     | <a target='_blank' href="{% url 'events:view_training_completion' record.id %}" class="fancybox fancybox.iframe">Training Completion Form</a>
-                                {% endif %}
+                                {% endif %} -->
                             {% endif %}
 						</td>
 					</tr>

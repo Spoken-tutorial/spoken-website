@@ -301,7 +301,7 @@ def training_gentle_reminder(request):
 
 # only for workshop, pilot, live workshop
 def close_predated_ongoing_workshop(request):
-    predated_ongoing_workshop = Training.objects.filter(Q(status = 2) | Q(status = 3), training_type__gte = 0, tdate__lt = datetime.date.today() + datetime.timedelta(days = 2))
+    predated_ongoing_workshop = Training.objects.filter(Q(status = 2) | Q(status = 3), training_type__gte = 0, tdate__lt = datetime.date.today() - datetime.timedelta(days = 3))
     if predated_ongoing_workshop:
         for w in predated_ongoing_workshop:
             try:
@@ -2354,7 +2354,7 @@ def ajax_language(request):
         
 @csrf_exempt
 def test(request):
-    '''    tas = TrainingAttendance.objects.all()
+    tas = TrainingAttendance.objects.filter(firstname=None)
     for ta in tas:
         if ta.mdluser_id:
             try:
@@ -2367,8 +2367,8 @@ def test(request):
             except Exception, e:
                 print e
         continue
-    return HttpResponse("Done!")'''
-    academics = AcademicCenter.objects.filter(institution_type__name='Uncategorized')
+    return HttpResponse("Done!")
+    '''academics = AcademicCenter.objects.filter(institution_type__name='Uncategorized')
     for academic in academics:
         if "Polytechnic" in academic.institution_name.title():
             academic.institution_type = InstituteType.objects.get(name='Polytechnic')
@@ -2376,5 +2376,5 @@ def test(request):
         if "Iti" in academic.institution_name.title():
             academic.institution_type = InstituteType.objects.get(name='ITI')
             academic.save()
-    return HttpResponse("Done!")
+    return HttpResponse("Done!")'''
 
