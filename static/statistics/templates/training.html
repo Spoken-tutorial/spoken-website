@@ -5,7 +5,10 @@
 {% load cmsdata %}
 {% load creationdata %}
 {% block title %} {{ model }} {% endblock %}
-{% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
+{% block cssblock %}
+    <link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />
+    <link rel="stylesheet" href="{% static 'spoken/css/jquery.fancybox.css' %}" type="text/css" media="screen" charset="utf-8" />
+{% endblock %}
 {% block heading %}
 {% endblock %}
 {% block content %}
@@ -84,7 +87,7 @@
                </div>
             </div>
             <div class="col-lg-4 col-md-4 col-sm-4">
-                <table class="table table-bordered table-hover">
+                <table class="table table-bordered table-hover" style="margin-bottom:0px;">
                     <tr>
                         <th>Total number of {{ model }}</th>
                         <td>{{ collection.paginator.count }}</td>
@@ -94,6 +97,10 @@
                         <td>{{ participant_count.participant_count__sum }}</td>
                     </tr>
                 </table>
+                <div style="min-height:100px;">
+                    <div id="chart_div"></div>
+                    <a target='_blank' href="#inline" class="fancybox pull-right" style="bottom: 30px; right:20px; position: absolute;" ><i class="fa fa-1 fa-search-plus"></i> Enlarge chart</a>
+                </div>
                 <!-- <div>
 			    <span class="pull-left">Total number of {{ model }} : <b>{{ collection.paginator.count }}</b></span>
 			    {% if participant_count %}
@@ -103,6 +110,11 @@
             </div>
         </form>
     </div>
+    <!-- big chart -->
+    <div id="inline" style="height: 100%; width: 100%;">
+        <div id="big_chart_div" style="width:800px; height:500px; left:-999px; position:absolute; overflow:hidden;"></div>
+    </div>
+    <!-- big chart-->
 	<div class="tab-content">
 		<div class="tab-pane active" id="pending">
 			{% if collection %}
@@ -135,6 +147,39 @@
     <script>
         $(".academic_state").change(function(){
             ajaxStrateFillDatas('', 'city', '');
+        });
+    </script>
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type="text/javascript">
+      google.load("visualization", "1", {packages:["corechart"]});
+      google.setOnLoadCallback(drawChart);
+      function drawChart() {
+        var data = google.visualization.arrayToDataTable([
+          ['Year', 'Participants'],
+          {{ chart_data|safe }}
+        ]);
+
+        var options = {
+          //title: '{{ model }} Performance',
+          pieHole: 0.4,
+        };
+
+        var chart = new google.visualization.PieChart(document.getElementById('chart_div'));
+
+        chart.draw(data, options);
+        chart = new google.visualization.PieChart(document.getElementById('big_chart_div'));
+
+        chart.draw(data, options);
+      }
+    </script>
+    <script src="{% static 'spoken/js/jquery.fancybox.pack.js' %}"></script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $('.fancybox').click(function(){
+                $("#big_chart_div").css({'left' : 0, 'position' : 'relative'});
+            });
+            $(".fancybox").fancybox();
+            
         });
     </script>
 {% endblock %}

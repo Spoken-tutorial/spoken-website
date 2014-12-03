@@ -23,35 +23,34 @@
 {% endblock %}
 
 {% block content %}
-    <div class= 'filters' >
+    <div class= 'filters row' >
         <form action="" method="get" class='form-horizontal'>
-            <div class="form-group">
-                <label for="id_state" class="col-sm-2 control-label">State</label>
-                <div class="col-sm-10">
-                    {% render_field form.academic__state class+="form-control chosen academic_state" tabindex="1" %}
-                    {{ form.academic__state.errors }}
+            <div class="col-lg-4 col-md-4 col-sm-4">
+                <div class="form-group">
+                    <label for="id_state" class="col-sm-2 control-label">State</label>
+                    <div class="col-sm-10">
+                        {% render_field form.academic__state class+="form-control chosen academic_state" tabindex="1" %}
+                        {{ form.academic__state.errors }}
+                    </div>
                 </div>
             </div>
-            <div class="form-group">
-                <label for="id_state" class="col-sm-2 control-label">Instituttion Type</label>
-                <div class="col-sm-10">
-                    {% render_field form.academic__institution_type class+="form-control chosen institution_type" tabindex="1" %}
-                    {{ form.academic__institution_type.errors }}
+            <div class="col-lg-4 col-md-4 col-sm-4">
+                <div class="form-group">
+                    <label for="id_state" class="col-sm-2 control-label">Instituttion Type</label>
+                    <div class="col-sm-10">
+                        {% render_field form.academic__institution_type class+="form-control chosen institution_type" tabindex="1" %}
+                        {{ form.academic__institution_type.errors }}
+                    </div>
                 </div>
             </div>
-            <div class="form-group">
-                <label for="id_state" class="col-sm-2 control-label">Instituttion Category</label>
-                <div class="col-sm-10">
-                    {% render_field form.academic__institute_category class+="form-control chosen institute_category" tabindex="1" %}
-                    {{ form.academic__institute_category.errors }}
-                </div>
+            <div class="col-lg-4 col-md-4 col-sm-4">
+                <div class="form-group">
+                  <div class="col-sm-offset-2 col-sm-10">
+                     <input class="btn btn-success" type="submit" value="Filter" />
+                     <a class="btn btn-success" href="{{request.path}}?{{ request.GET|reset_get_values}}">Reset Filter</a>
+                  </div>
+               </div>
             </div>
-            <div class="form-group">
-              <div class="col-sm-offset-2 col-sm-10">
-                 <input class="btn btn-success" type="submit" value="Filter" />
-                 <a class="btn btn-success" href="{{request.path}}?{{ request.GET|reset_get_values}}">Reset Filter</a>
-              </div>
-           </div>
         </form>
     </div>
     <ul class="tabs nav nav-tabs">

@@ -392,8 +392,12 @@ media="screen"
     padding: 0 5px;
     display: none;
     position: absolute;
-    left: 45%;
+    left: 0;
     top: 6px;
+}
+.ajax-search-refresh{
+    left: 45%;
+    top: 11px;
 }
 .form-group .radio ul{
     list-style: none;
@@ -722,4 +726,9 @@ pre.custom-jumbotron b {
 
 .paleblue th.sorted .sortoptions a.descending:hover {
     background: url(../images/sorting-icons.gif) -5px -115px no-repeat;
+}
 /* sortable header end */
+
+#search-wrapper .form-group{
+    margin-bottom: 2px;
+}

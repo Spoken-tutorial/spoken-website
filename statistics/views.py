@@ -89,9 +89,15 @@ def training(request, slug = None):
     collection = model_filter(request.GET, queryset=collection, state=state)
     # find participants count
     participant_count = collection.qs.aggregate(Sum('participant_count'))
+    
+    #
+    chart_query_set = collection.qs.extra(select={'year': "EXTRACT(year FROM tdate)"}).values('year').annotate(total_training=Count('tdate'), total_participant=Sum('participant_count'))
+    chart_data = ''
+    for data in chart_query_set:
+        chart_data += "['" + str(data['year']) + "', " + str(data['total_participant']) + "],"
     context = {}
     context['form'] = collection.form
-    
+    context['chart_data'] = chart_data
     page = request.GET.get('page')
     collection = get_page(collection, page)
     context['collection'] = collection
