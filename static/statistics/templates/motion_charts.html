@@ -1,0 +1,92 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block title %}Motion Charts{% endblock %}
+{% block heading %}{% endblock %}
+{% block search %}{% endblock %}
+
+{% block cssblock %}
+    <link rel="stylesheet" href="{% static 'spoken/css/jquery.fancybox.css' %}" type="text/css" media="screen" charset="utf-8" />
+    <link rel="stylesheet" href="{% static 'spoken/css/flip-scroll.css' %}" type="text/css" media="screen" charset="utf-8" />
+    <style type="text/css">
+        .chart-stats {
+            width: 800px;
+            background: white;
+            padding: 15px;
+        }
+        #content-wrapper {
+            background: lightgray;
+        }
+        #content-wrapper #content-block, #content-wrapper #content-inner {
+            padding: 0px;
+        }
+        #page-wrapper #content-wrapper {
+            margin-bottom: 0px;
+        }
+        #content-wrapper #content-inner {
+            max-width: 800px;
+        }
+        .chart-title {
+            padding: 10px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+        }
+    </style>
+{% endblock %}
+
+{% block content_head %}
+    <div id="content" class="col-lg-12 col-md-12 col-sm-12">
+{% endblock %}
+
+{% block content %}
+    <div class="chart-stats col-lg-shadow">
+        <h4 class="page-title">Workshop / Training</h4>
+        <div id="workshop-static-chart"></div>
+        <p class="chart-title">Static Chart</p>
+        <hr />
+        <div id="workshop-interactive-chart"></div>
+        <p class="chart-title">Interactive Chart</p>
+    </div>
+{% endblock %}
+
+{% block jsblock %}
+    <script type="text/javascript" src="http://www.google.com/jsapi"></script>
+    <script type="text/javascript">
+        google.load('visualization', '1', {packages: ['motionchart']});
+        function drawVisualization() {
+            /* Common variables */
+            var chartOptions = {};
+            chartOptions['state'] ='{"playDuration":15000,"xZoomedIn":false,"xZoomedDataMax":49,"sizeOption":"2","duration":{"multiplier":1,"timeUnit":"Y"},"yLambda":0,"nonSelectedAlpha":0.4,"iconKeySettings":[],"dimensions":{"iconDimensions":["dim0"]},"xAxisOption":"2","time":"notime","yZoomedDataMin":10,"yZoomedIn":false,"orderedByX":false,"colorOption":"_UNIQUE_COLOR","uniColorForNonSelected":false,"xZoomedDataMin":1,"showTrails":true,"orderedByY":false,"xLambda":1,"iconType":"BUBBLE","yZoomedDataMax":4242,"yAxisOption":"3"}';
+            chartOptions['width'] = 780;
+            chartOptions['height'] = 560;
+            
+            /* Static workshop chart */
+            var workshopStaticData = new google.visualization.DataTable();
+            workshopStaticData.addColumn('string', 'State');
+            workshopStaticData.addColumn('number', 'Date');
+            workshopStaticData.addColumn('number', 'Workshop');
+            workshopStaticData.addColumn('number', 'Participants');
+            workshopStaticData.addRows([{{ static_workshop_data|safe }}]);
+            var workshopStaticChart = new google.visualization.MotionChart(document.getElementById('workshop-static-chart'));
+            workshopStaticChart.draw(workshopStaticData, chartOptions);
+            
+            /* Interactive workshop chart */
+            var workshopInteractiveData = new google.visualization.DataTable();
+            workshopInteractiveData.addColumn('string', 'State');
+            workshopInteractiveData.addColumn('date', 'Date');
+            workshopInteractiveData.addColumn('number', 'Workshop');
+            workshopInteractiveData.addColumn('number', 'Participants');
+            workshopInteractiveData.addRows([{{ interactive_workshop_data|safe }}]);
+            var workshopInteractiveChart = new google.visualization.MotionChart(document.getElementById('workshop-interactive-chart'));
+            workshopInteractiveChart.draw(workshopInteractiveData, chartOptions);
+        }
+        var timeUnits = 0;
+        google.setOnLoadCallback(drawVisualization);
+
+        function changeTimeUnits(value) {
+            timeUnits = parseInt(value, 10);  
+            drawVisualization();
+        }
+    </script>
+{% endblock %}
