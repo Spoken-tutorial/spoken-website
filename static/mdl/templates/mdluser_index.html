@@ -43,9 +43,11 @@
                         <td>
                             <a href="{% url 'mdldjango:feedback' record.id %}">Feedback</a> | 
                             <a href="{% url 'events:training_participant_language_feedback' record.id mdluserid %}">Language Feedback</a>
-                            {% if mdluserid|can_download_workshop_certificate:record.id and record.training_type %}
-                                | <a href="{% url 'events:training_participant_ceritificate' record.id mdluserid %}">Certificate</a>
-                            {% endif %}
+                            {% with result=mdluserid|can_download_workshop_certificate:record %}
+                                {% if result %}
+                                    | <a href="{% url 'events:training_participant_ceritificate' record.id result %}">Certificate</a>
+                                {% endif %}
+                            {% endwith %}
                         </td>
                     </tr>
                 {% endfor %}

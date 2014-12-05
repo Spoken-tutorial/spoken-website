@@ -97,11 +97,11 @@ def can_upload_final_training_list(tdate):
         print e
         return False
 
-def can_download_workshop_certificate(key, wcode):
+def can_download_workshop_certificate(key, training):
     try:
-        wa = TrainingAttendance.objects.get(mdluser_id=key, training_id = wcode)
+        wa = TrainingAttendance.objects.get(mdluser_id=key, training = training)
         if wa.status > 0:
-            return True
+            return wa.id
         return False
     except:
         return 'errors'
@@ -122,7 +122,7 @@ def training_file_exits(wid):
 
 def is_feedback_exits(w, record):
     try:
-        TrainingFeedback.objects.get(training_id=w.id, mdluser_id=record.id)
+        TrainingFeedback.objects.get(training_id=w.id, mdluser_id=record.mdluser_id)
         return True
     except Exception, e:
         print e
