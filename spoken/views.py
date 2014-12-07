@@ -141,9 +141,9 @@ def tutorial_search(request):
         foss = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), language__name = 'English').values('tutorial_detail__foss__foss').annotate(Count('id')).values_list('tutorial_detail__foss__foss').distinct().order_by('?')[:1].first()
         collection = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), tutorial_detail__foss__foss = foss[0], language__name = 'English')
         foss_get = foss[0]
-    
-    page = request.GET.get('page')
-    collection = get_page(collection, page)
+    if collection:
+        page = request.GET.get('page')
+        collection = get_page(collection, page)
     context['form'] = form
     context['collection'] = collection
     context['SCRIPT_URL'] = settings.SCRIPT_URL

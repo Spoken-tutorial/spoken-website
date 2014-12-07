@@ -114,28 +114,31 @@ def account_login(request):
             'form' : form
         }
         if request.method == 'POST':
-            username = request.POST['username']
-            password = request.POST['password']
-            user = authenticate(username=username, password=password)
-            if user is not None:
-                if user.is_active:
-                    login(request, user)
-                    try:
-                        p = Profile.objects.get(user_id = user.id)
-                        if not user.first_name or not user.last_name or not p.country or not p.state or not p.district or not p.city  or not p.address or not p.pincode or not p.phone:# or not p.picture:
-                            messages.success(request, "<ul><li>Please update your profile.</li><li>Please make sure you enter your First name, Last name both and with correct spelling.</li><li>It is recommended that you do upload the photo.</li></ul>")
-                            return HttpResponseRedirect('/accounts/profile/'+user.username)
-                    except: 
-                        pass
-                    if request.GET and request.GET['next']:
-                        return HttpResponseRedirect(request.GET['next'])
-                    return HttpResponseRedirect('/')
+            username = request.POST.get('username', None)
+            password = request.POST.get('password', None)
+            if username and password:
+                user = authenticate(username=username, password=password)
+                if user is not None:
+                    if user.is_active:
+                        login(request, user)
+                        try:
+                            p = Profile.objects.get(user_id = user.id)
+                            if not user.first_name or not user.last_name or not p.country or not p.state or not p.district or not p.city  or not p.address or not p.pincode or not p.phone:# or not p.picture:
+                                messages.success(request, "<ul><li>Please update your profile.</li><li>Please make sure you enter your First name, Last name both and with correct spelling.</li><li>It is recommended that you do upload the photo.</li></ul>")
+                                return HttpResponseRedirect('/accounts/profile/'+user.username)
+                        except: 
+                            pass
+                        if request.GET and request.GET['next']:
+                            return HttpResponseRedirect(request.GET['next'])
+                        return HttpResponseRedirect('/')
+                    else:
+                        error_msg = 'Your account is disabled.'
                 else:
-                    error_msg = 'Your account is disabled.'
+                    error_msg = 'Invalid username / password'
             else:
-                error_msg = 'Invalid username / password'
-                messages.error(request, error_msg)
-                return render(request, 'cms/templates/login.html', context)
+                error_msg = 'Please enter username and Password'
+            messages.error(request, error_msg)
+            return render(request, 'cms/templates/login.html', context)
         context.update(csrf(request))
         if error_msg:
             messages.error(request, error_msg)

@@ -7,6 +7,7 @@ from nicedit.widgets import NicEditWidget
 from django.utils.translation import ugettext_lazy as _
 from django.core.validators import MinLengthValidator, MinValueValidator, \
     RegexValidator, URLValidator
+from django.template.defaultfilters import filesizeformat
 
 class LoginForm(forms.Form):
     username = forms.CharField(
@@ -201,3 +202,15 @@ class ChangePasswordForm(forms.Form):
 
 class NewsAdditionaFieldAdmin(forms.ModelForm):
     weight = forms.ChoiceField(choices = ((1, 'A'), (2, 'Z'), (3, 'B')))
+    def clean_picture(self):
+        CONTENT_TYPES = ['image']
+        MAX_UPLOAD_SIZE = 1024 * 1024 * 2
+        content = self.cleaned_data['picture']
+        if content:
+            content_type = content.content_type.split('/')[0]
+            if content_type in CONTENT_TYPES:
+                if content._size > MAX_UPLOAD_SIZE:
+                    raise forms.ValidationError(_('Please keep filesize under %s. Current filesize %s') % (filesizeformat(MAX_UPLOAD_SIZE), filesizeformat(content._size)))
+            else:
+                raise forms.ValidationError(_('Please choose image file format.'))
+            return content
