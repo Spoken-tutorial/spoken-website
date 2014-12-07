@@ -128,27 +128,29 @@
         
         $acstate.change(function() {
 			var state = $(this).val();
-			$.ajax({
-				url: "/software-training/ajax-state-collage/",
-				type: "POST",
-				data: {
-					state : state
-				},
-				beforeSend: function() {
-                    $('.ajax-refresh-institution').show();
-                },
-				success: function(data) {
-					if(data){
-						$college.html(data);
-						$college.removeAttr("disabled");
-						$('.ajax-refresh-institution').hide();
-					} else{
-						$college.attr("disabled", "disabled");
-						$('.ajax-refresh-institution').hide();
-						alert('No college found for this district!!');
-					}
-				}
-			});
+			if(state){
+			    $.ajax({
+				    url: "/software-training/ajax-state-collage/",
+				    type: "POST",
+				    data: {
+					    state : state
+				    },
+				    beforeSend: function() {
+                        $('.ajax-refresh-institution').show();
+                    },
+				    success: function(data) {
+					    if(data){
+						    $college.html(data);
+						    $college.removeAttr("disabled");
+						    $('.ajax-refresh-institution').hide();
+					    } else{
+						    $college.attr("disabled", "disabled");
+						    $('.ajax-refresh-institution').hide();
+						    alert('No college found for this district!!');
+					    }
+				    }
+			    });
+			}
 		});
         /*$acstate.change(function() {
             var state = $(this).val();
