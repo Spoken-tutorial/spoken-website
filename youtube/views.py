@@ -94,8 +94,16 @@ def remove_video_entry(request, tdid, lgid):
             service = build(settings.YOUTUBE_API_SERVICE_NAME, settings.YOUTUBE_API_VERSION, http = http)
             result = delete_video(service, tr_rec.video_id)
             if result:
+                tr_rec.video_id = None
                 if tr_rec.playlist_item_id:
                     delete_playlistitem(service, tr_rec.playlist_item_id)
+                    try:
+                        playlist_item = PlaylistItem.objects.get(item_id = tr_rec.playlist_item_id)
+                        playlist_item.delete()
+                        tr_rec.playlist_item_id = None
+                    except:
+                        pass
+                tr_rec.save()
                 messages.success(
                     request,
                     tr_rec.tutorial_detail.foss.foss + ': ' + tr_rec.tutorial_detail.tutorial + ' - ' + tr_rec.language.name + ' <b>video removed from youtube ...</b>'
