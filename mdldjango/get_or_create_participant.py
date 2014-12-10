@@ -169,7 +169,7 @@ def check_csvfile(user, file_path, w=None, flag=0):
                                 error_line_no = error_line_no + ', ' + str(count)
                             csv_file_error = 1
                             continue
-                    if flag:
+                    if flag and flag <= 2:
                         if not w:
                             return 1, error_line_no
                         get_or_create_participant(w, firstname, lastname, gender, email, 2)
@@ -179,7 +179,12 @@ def check_csvfile(user, file_path, w=None, flag=0):
                         error_line_no = error_line_no + str(count)
                     else:
                         error_line_no = error_line_no + ', ' + str(count)
+            if error_line_no:
+                error_line_no = "<b>Error: Line number "+ error_line_no + " in CSV file data is not in a proper format in the Participant list. The format should be First name, Last name, Email, Gender. For more details <a href='http://process.spoken-tutorial.org/images/c/c2/Participant_data.pdf' target='_blank'>Click here</a></b>"
         except Exception, e:
             csv_file_error = 1
-            error_line_no = '1'
+            error_line_no = "<b>Error: CSV file data is not in a proper format in the Participant list. The format should be First name, Last name, Email, Gender. For more details <a href='http://process.spoken-tutorial.org/images/c/c2/Participant_data.pdf' target='_blank'>Click here</a></b>"
+        if flag == 3 and int(w.participant_count < count):
+            csv_file_error = 1
+            error_line_no = "Training participant count less than {0}.".format(w.participant_count)
     return csv_file_error, error_line_no

@@ -240,12 +240,35 @@ please upload the attendance within 48 hrs after the training so that the studen
 Regards,
 Spoken Tutorial
 '''.format()
+    
+    elif status == "Reminder mail to close Training":
+        subject = ""
+        message = '''Dear Organizer,
+Greetings from IIT Bombay!
+Thanks for successfully conducting the Training session, today. We hereby urge \
+you to click on the following link close the training session and click on \
+'Mark as Complete'..If for some reason you are not able to conduct the \
+Session 1, please ensure that you continue on to the further Sessions 2,3,4,\
+...and so on.
+Please click on the following link to close the Training:
 
+....(link comes here)...
+
+Note:
+    It you do not close the Training by clicking on the above link then \
+automatically after 2 days the system will close on your behalf
+
+Regards,
+Spoken Tutorial
+'''
     # send email
     email = EmailMultiAlternatives(
         subject, message, 'administrator@spoken-tutorial.org',
         to = to, bcc = bcc, cc = cc,
-        headers={'Reply-To': 'no-replay@spoken-tutorial.org', "Content-type":"text/html;charset=iso-8859-1"}
+        headers = {
+            'Reply-To' : 'no-replay@spoken-tutorial.org',
+            "Content-type" : "text/html;charset=iso-8859-1"
+        }
     )
     
     try:

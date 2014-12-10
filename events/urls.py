@@ -22,6 +22,8 @@ urlpatterns = patterns('',
     #url(r'^pdf/$', 'events.views.pdf', name='pdf'),
     url(r'^training/permission/$', 'events.views.training_permission', name='training_permission'),
     url(r'^training/accessrole/$', 'events.views.accessrole', name='training_accessrole'),
+    url(r'^training/old-training-attendance/$', 'events.views.old_training_attendance', name='old_training_attendance'),
+    url(r'^training/old-training-attendance-upload/(\d+)/$', 'events.views.old_training_attendance_upload', name='old_training_attendance_upload'),
     
     url(r'^(?P<role>\w+)/(?P<status>\w+)/$', 'events.views.organiser_invigilator_index', name='organiser_invigilator_index'),
     url(r'^organiser/(?P<status>\w+)/(?P<code>\w+)/(?P<userid>\d+)/$', 'events.views.rp_organiser', name='rp_organiser'),

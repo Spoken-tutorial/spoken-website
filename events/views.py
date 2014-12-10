@@ -31,7 +31,8 @@ import urllib,urllib2
 
 from events.models import *
 from cms.models import Profile
-
+from mdldjango.forms import OfflineDataForm
+    
 from forms import *
 import datetime
 from django.utils import formats
@@ -287,6 +288,18 @@ def training_gentle_reminder(request):
                 pass
     return HttpResponse("Done!")
 
+def reminder_mail_to_close_training(request):
+    predated_ongoing_workshop = Training.objects.filter(Q(status = 2) | Q(status = 3), training_type__gte = 0, tdate__lt = datetime.date.today() - datetime.timedelta(days = 1))
+    if predated_ongoing_workshop:
+        status = "Reminder mail to close Training"
+        for w in predated_ongoing_workshop:
+            try:
+                to = [w.organiser.user.email]
+                send_email(status, to, w)
+            except:
+                pass
+    return HttpResponse("Done!")
+
 #def training_completion_reminder(request):
 #    training_need_to_complete = Training.objects.filter(training_type = 0, status__lte = 3, tdate__lte=datetime.date.today() - datetime.timedelta(days=30))
 #    if training_need_to_complete:
@@ -382,6 +395,90 @@ def get_academic_code(state):
     return state_code +'-'+ ac_code
     
 @login_required
+def old_training_attendance(request):
+    user = request.user
+    context = {}
+    if not (user.is_authenticated() and (is_event_manager(user) or is_resource_person(user))):
+        raise PermissionDenied()
+    collectionSet = Training.objects.exclude(id__in=TrainingAttendance.objects.all().values_list('training_id').distinct()).filter(status=4)
+    if not collectionSet:
+        raise PermissionDenied()
+    header = {
+        1: SortableHeader('#', False),
+        2: SortableHeader('training_type', True, 'Training Type'),
+        3: SortableHeader('academic__state', True, 'State'),
+        4: SortableHeader('academic__academic_code', True, 'Academic Code'),
+        5: SortableHeader('academic', True, 'Institution'),
+        6: SortableHeader('foss', True, 'FOSS'),
+        7: SortableHeader('organiser__user', True, 'Organiser'),
+        8: SortableHeader('tdate', True, 'Date'),
+        9: SortableHeader('Participants', False),
+        10: SortableHeader('Action', False)
+    }
+    
+    raw_get_data = request.GET.get('o', None)
+    collection = get_sorted_list(request, collectionSet, header, raw_get_data)
+    ordering = get_field_index(raw_get_data)
+    print collection
+    collection = TrainingFilter(request.GET, user = user, queryset=collection)
+    context['form'] = collection.form
+    
+    page = request.GET.get('page')
+    collection = get_page(collection, page)
+    
+    context['collection'] = collection
+    context['header'] = header
+    context['ordering'] = ordering
+    context.update(csrf(request))
+    return render(request, 'events/templates/training/old-index.html', context)
+
+def old_training_attendance_upload(request, wid):
+    user = request.user
+    form = OfflineDataForm()
+    enable_form = True
+    try:
+        training = Training.objects.get(pk=wid, status=4)
+        if TrainingAttendance.objects.filter(training=training).count():
+            messages.info(request, "You have already submited the training attendance!")
+            return HttpResponseRedirect('/software-training/training/old-training-attendance/')
+    except Exception, e:
+        raise PermissionDenied('You are not allowed to view this page!')
+    if request.method == 'POST':
+        form = OfflineDataForm(request.POST, request.FILES)
+        if form.is_valid():
+            file_path = settings.MEDIA_ROOT + 'training/' + str(wid) + str(time.time())
+            f = request.FILES['xml_file']
+            fout = open(file_path, 'wb+')
+            for chunk in f.chunks():
+                fout.write(chunk)
+            fout.close()
+            error_line_no = ''
+            csv_file_error = 0
+            csv_file_error, error_line_no = check_csvfile(user, file_path, training, 3)
+            if not csv_file_error:
+                csv_file_error, error_line_no = check_csvfile(user, file_path, training, 1)
+            os.unlink(file_path)
+            #update participant count
+            #update_participants_count(training)
+            if error_line_no:
+                messages.error(request, error_line_no)
+            else:
+                enable_form = False
+                messages.info(request, "Thank you for submitting attendance!. Now you can download the certificate.")
+                #return HttpResponseRedirect('/software-training/training/old-training-attendance/')
+    context = {
+        'form': form,
+        'enable_form' : enable_form
+    }
+    if enable_form:
+        messages.info(request, """
+            Please upload the CSV file which you have generated. 
+        To know more <a href="http://process.spoken-tutorial.org/images/9/96/Upload_Attendance.pdf" target="_blank">Click here</a>.
+        <br><b>Note: Participant list should not be exced {0}</b>
+        """.format(training.participant_count))
+    context.update(csrf(request))
+    return render(request, 'events/templates/training/old-attendance.html', context)
+
 def events_dashboard(request):
     user = request.user
     user_roles = user.groups.all()
@@ -952,7 +1049,7 @@ def training_request(request, role, rid = None):
                     return HttpResponseRedirect("/software-training/training/" + role + "/pending/")
             else:
                 os.unlink(file_path)
-                messages.error(request, "<b>Error: Line number "+ error_line_no + " in CSV file data is not in a proper format in the Participant list. The format should be First name, Last name, Email, Gender. For more details <a href='http://process.spoken-tutorial.org/images/c/c2/Participant_data.pdf' target='_blank'>Click here</a></b>")
+                messages.error(request, error_line_no)
             messages.error(request, "Please fill the following details ")
             context = {'form' : form, 'role' : role, 'status' : 'request'}
             return render(request, 'events/templates/training/form.html', context)
