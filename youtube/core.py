@@ -36,24 +36,24 @@ def get_storage_flow_secret(scope):
 
 def delete_video(service, video_id):
     try:
-        result = service.videos().delete(id = video_id).execute()
-        return result
+        service.videos().delete(id = video_id).execute()
+        return True
     except Exception, e:
         print e
     return None
 
 def delete_playlist(service, playlist_id):
     try:
-        result = service.playlists().delete(id = playlist_id).execute()
-        return playlist_delete_response
+        service.playlists().delete(id = playlist_id).execute()
+        return True
     except Exception, e:
         print e
     return None
 
 def delete_playlistitem(service, playlist_item_id):
     try:
-        result = service.playlistItems().delete(id = playlist_item_id).execute()
-        return result
+        service.playlistItems().delete(id = playlist_item_id).execute()
+        return True
     except Exception, e:
         print e
     return None

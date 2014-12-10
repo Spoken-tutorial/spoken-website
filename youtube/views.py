@@ -1,3 +1,5 @@
+import os
+
 from django.conf import settings
 from django.contrib import messages
 from django.shortcuts import render
@@ -97,6 +99,10 @@ def remove_video_entry(request, tdid, lgid):
                 tr_rec.video_id = None
                 if tr_rec.playlist_item_id:
                     delete_playlistitem(service, tr_rec.playlist_item_id)
+                    video_path, file_extension = os.path.splitext(tr_rec.video)
+                    video_path = settings.MEDIA_ROOT + 'videos/' + str(tr_rec.tutorial_detail.foss_id) + '/' str(tr_rec.tutorial_detail_id) + '/' + video_path + '.mp4'
+                    if os.path.isfile(video_path):
+                        os.remove(video_path)
                     try:
                         playlist_item = PlaylistItem.objects.get(item_id = tr_rec.playlist_item_id)
                         playlist_item.delete()
