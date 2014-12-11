@@ -203,11 +203,11 @@ class ChangePasswordForm(forms.Form):
 class NewsAdditionaFieldAdmin(forms.ModelForm):
     weight = forms.ChoiceField(choices = ((1, 'A'), (2, 'Z'), (3, 'B')))
     def clean_picture(self):
-        CONTENT_TYPES = ['image']
+        CONTENT_TYPES = ['jpg', 'jpeg', 'png', 'pdf']
         MAX_UPLOAD_SIZE = 1024 * 1024 * 2
         content = self.cleaned_data['picture']
         if content:
-            content_type = content.content_type.split('/')[0]
+            content_type = content.content_type.split('/')[1]
             if content_type in CONTENT_TYPES:
                 if content._size > MAX_UPLOAD_SIZE:
                     raise forms.ValidationError(_('Please keep filesize under %s. Current filesize %s') % (filesizeformat(MAX_UPLOAD_SIZE), filesizeformat(content._size)))
