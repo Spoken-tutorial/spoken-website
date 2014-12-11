@@ -2547,7 +2547,7 @@ def update_sheet(request, sheet_type):
                 language_id = request.POST.get('language')
                 language = Language.objects.get(pk = language_id)
                 sheet_path = 'videos/' + str(foss.id) + '/' + \
-                    foss.foss + '-' + sheet_type.title() + \
+                    foss.foss.replace(' ', '-') + '-' + sheet_type.title() + \
                     '-Sheet-' + language.name + '.pdf'
                 fout = open(settings.MEDIA_ROOT + sheet_path, 'wb+')
                 f = request.FILES['comp']

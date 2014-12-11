@@ -203,7 +203,7 @@ class ChangePasswordForm(forms.Form):
 class NewsAdditionaFieldAdmin(forms.ModelForm):
     weight = forms.ChoiceField(choices = ((1, 'A'), (2, 'Z'), (3, 'B')))
     def clean_picture(self):
-        CONTENT_TYPES = ['image']
+        CONTENT_TYPES = ['image', 'pdf']
         MAX_UPLOAD_SIZE = 1024 * 1024 * 2
         content = self.cleaned_data['picture']
         if content:
