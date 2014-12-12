@@ -2,8 +2,25 @@
 {% load widget_tweaks %}
 {% load static %}
 {% load creationdata %}
+
+{% block meta %}
+    <meta name="title" content="{{ tr_rec.tutorial_detail.tutorial }} in {{ tr_rec.language.name }}">
+    <meta name="description" content="{{ tr_rec.tutorial_detail.foss.description }}">
+
+    <meta property="og:site_name" content="Spoken-Tutorial">
+    <meta property="og:url" content="{{ request.META.HTTP_HOST }}{{ request.path}}">
+    <meta property="og:title" content="{{ tr_rec.tutorial_detail.tutorial }} in {{ tr_rec.language.name }}">
+    <meta property="og:image" content="{{ tr_rec.tutorial_detail|get_thumb_path:'Small' }}">
+    <meta property="og:description" content="{{ tr_rec.tutorial_detail.foss.description }}">
+
+    <meta property="og:type" content="video">
+    <meta property="og:video" content="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ tr_rec.video }}">
+    {% for key in tr_rec.common_content.keyword_as_list %}
+        <meta property="og:video:tag" content="{{ key }}">
+    {% endfor %}
+{% endblock %}
 {% block metatag %}
-        <meta name="Keywords" content="{{ tr_rec.tutorial_detail.foss }} free training in india, {% if tr_rec.common_content.keyword %} {{ tr_rec.common_content.keyword }} {% else %} {{ tr_rec.tutorial_detail.tutorial }} {% endif %}">
+    <meta name="keywords" content="{{ tr_rec.tutorial_detail.foss }} free training in india, {% if tr_rec.common_content.keyword %} {{ tr_rec.common_content.keyword }} {% else %} {{ tr_rec.tutorial_detail.tutorial }} {% endif %}">
 {% endblock %}
 {% block cssblock %}
     <link href="{% static 'spoken/css/video-js.min.css' %}" rel="stylesheet" type="text/css">

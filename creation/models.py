@@ -109,6 +109,9 @@ class TutorialCommonContent(models.Model):
     class Meta:
         verbose_name = 'Tutorial Common Content'
 
+    def keyword_as_list(self):
+        return self.keyword.split(',')
+
 class TutorialResource(models.Model):
     tutorial_detail = models.ForeignKey(TutorialDetail)
     common_content = models.ForeignKey(TutorialCommonContent)
