@@ -163,6 +163,17 @@
         .video-info-show-more, .list-group-item-container, .panel {
             margin-bottom: 14px;
         }
+        a.list-group-item .list-group-item-heading {
+            color: #337AB7;
+        }
+        .panel-body-heading {
+            font-size: 16px;
+            margin-bottom: 0px;
+            color: slategray;
+        }
+        .panel-body .hline {
+            margin-bottom: 8px;
+        }
     </style>
     <script src="{% static 'spoken/js/video.js' %}"></script>
 {% endblock %}
@@ -259,10 +270,9 @@
                     <p class="video-show-more no-record">Show video info</p>
                 </div>
                 <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">Pre-requisite</h3>
-                    </div>
                     <div class="panel-body">
+                        <p class="panel-body-heading">Pre-requisite</p>
+                        <hr class="hline" />
                         {% if tr_rec.common_content.prerequisite %}
                             {% with prerequisite=tr_rec|get_prerequisite:tr_rec.common_content.prerequisite %}
                                 {% if prerequisite %}
@@ -315,30 +325,6 @@
                             </p>-->
                         </div>
                     {% endif %}
-                    {% if tr_rec.script_status %}
-                        <div class="list-group-item-container">
-                            <a href="{{ script_base|add:tr_rec.script }}" target="_blank" class="list-group-item">
-                                <h4 class="list-group-item-heading"><i class="fa fa-2 fa-globe"></i> Script</h4>
-                            </a>
-                            <!--<p class="list-group-item-text">
-                                <span style="text-align: left">Status: <i class="{{ tr_rec.script_status|get_review_status_symbol }}" title="{{ tr_rec.script_status|get_review_status_list }}"></i></span>
-                                <span style="float: right">
-                                    - <a href="/accounts/view-profile/{{ tr_rec.script_user }}" target="_blank">{{tr_rec.script_user}}</a>
-                                </span>
-                            </p>-->
-                        </div>
-                        <div class="list-group-item-container">
-                            {% if tr_rec.language.name == 'English' %}
-                                {% with timed_script=tr_rec.script|get_timed_script:tr_rec.timed_script %}
-                                    {% if timed_script %}
-                                        <a href="{{ timed_script }}" target="_blank" class="list-group-item">
-                                            <h4 class="list-group-item-heading"><i class="fa fa-2 fa-globe"></i> Timed Script</h4>
-                                        </a>
-                                    {% endif %}
-                                {% endwith %}
-                            {% endif %}
-                        </div>
-                    {% endif %}
                     {% if tr_rec.common_content.slide_status and tr_rec.common_content.slide_status != 6 %}
                         <div class="list-group-item-container">
                             <a href="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/resources/{{ tr_rec.common_content.slide }}" target="_blank" class="list-group-item">
@@ -362,6 +348,30 @@
                                 </span>
                             </p>-->
                         </div>
+                    {% endif %}
+                    {% if tr_rec.script_status %}
+                        <div class="list-group-item-container">
+                            <a href="{{ script_base|add:tr_rec.script }}" target="_blank" class="list-group-item">
+                                <h4 class="list-group-item-heading"><i class="fa fa-2 fa-globe"></i> Script</h4>
+                            </a>
+                            <!--<p class="list-group-item-text">
+                                <span style="text-align: left">Status: <i class="{{ tr_rec.script_status|get_review_status_symbol }}" title="{{ tr_rec.script_status|get_review_status_list }}"></i></span>
+                                <span style="float: right">
+                                    - <a href="/accounts/view-profile/{{ tr_rec.script_user }}" target="_blank">{{tr_rec.script_user}}</a>
+                                </span>
+                            </p>-->
+                        </div>
+                        {% if tr_rec.language.name == 'English' %}
+                            {% with timed_script=tr_rec.script|get_timed_script:tr_rec.timed_script %}
+                                {% if timed_script %}
+                                    <div class="list-group-item-container">
+                                        <a href="{{ timed_script }}" target="_blank" class="list-group-item">
+                                            <h4 class="list-group-item-heading"><i class="fa fa-2 fa-globe"></i> Timed Script</h4>
+                                        </a>
+                                    </div>
+                                {% endif %}
+                            {% endwith %}
+                        {% endif %}
                     {% endif %}
                 </div>
             </div>
