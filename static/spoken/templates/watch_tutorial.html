@@ -169,7 +169,7 @@
         .panel-body-heading {
             font-size: 16px;
             margin-bottom: 0px;
-            color: #555555;
+            color: #337AB7;
         }
         .panel-body .hline {
             margin-bottom: 8px;
@@ -271,13 +271,13 @@
                 </div>
                 <div class="panel panel-default">
                     <div class="panel-body">
-                        <p class="panel-body-heading">Pre-requisite</p>
+                        <p class="panel-body-heading"><i class="fa fa-youtube-play fa-1"></i> Pre-requisite</p>
                         <hr class="hline" />
                         {% if tr_rec.common_content.prerequisite %}
                             {% with prerequisite=tr_rec|get_prerequisite:tr_rec.common_content.prerequisite %}
                                 {% if prerequisite %}
-                                    <img src="{{ tr_rec.common_content.prerequisite|get_thumb_path:'Small' }}" width="70" style="padding-right: 10px;">
-                                    <a href="/watch/{{ prerequisite }}/">{{ tr_rec.common_content.prerequisite.tutorial }}</a>
+                                    <a href="/watch/{{ prerequisite }}/"><img src="{{ tr_rec.common_content.prerequisite|get_thumb_path:'Small' }}" width="70" style="padding-right: 10px;">
+                                    {{ tr_rec.common_content.prerequisite.tutorial }}</a>
                                 {% else %}
                                     No Pre-requisites for this tutorial.
                                 {% endif %}
@@ -291,7 +291,7 @@
                     {% if tr_rec.common_content.assignment_status and tr_rec.common_content.assignment_status != 6 %}
                         <div  class="list-group-item-container">
                             <a href="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/resources/{{ tr_rec.common_content.assignment }}" target="_blank" class="list-group-item">
-                                <h4 class="list-group-item-heading"><i class="fa fa-2 fa-globe"></i> Assignment</h4>
+                                <h4 class="list-group-item-heading"><i class="fa fa-1 fa-file-text"></i>&nbsp; Assignment</h4>
                             </a>
                             <!--<p class="list-group-item-text">
                                 <span style="text-align: left">Status: <i class="{{ tr_rec.common_content.assignment_status|get_review_status_symbol }}" title="{{ tr_rec.common_content.assignment_status|get_review_status_list }}"></i></span>
@@ -304,10 +304,11 @@
                     {% if tr_rec.common_content.code_status and tr_rec.common_content.code_status != 6 %}
                         <div  class="list-group-item-container">
                             <a href="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/resources/{{ tr_rec.common_content.code }}" target="_blank" class="list-group-item">
-                                <h4 class="list-group-item-heading"><i class="fa fa-2 fa-globe"></i> Code files</h4>
+                                <h4 class="list-group-item-heading"><i class="fa fa-1 fa-archive"></i> Code files</h4>
                                 {% with path=media_path|add:'videos/'|add:tutorial_path|add:'resources/'|add:tr_rec.common_content.code %}
                                     {% with code_files=path|get_zip_content %}
                                         {% if code_files %}
+                                            <hr class="hline" />
                                             <ul class="list-zipfiles">
                                                 {% for code_file in code_files %}
                                                     <li>{{ code_file }}</li>
@@ -328,10 +329,11 @@
                     {% if tr_rec.common_content.slide_status and tr_rec.common_content.slide_status != 6 %}
                         <div class="list-group-item-container">
                             <a href="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/resources/{{ tr_rec.common_content.slide }}" target="_blank" class="list-group-item">
-                                <h4 class="list-group-item-heading"><i class="fa fa-2 fa-globe"></i> Slides</h4>
+                                <h4 class="list-group-item-heading"><i class="fa fa-1 fa-archive"></i> Slides</h4>
                                 {% with path=media_path|add:'videos/'|add:tutorial_path|add:'resources/'|add:tr_rec.common_content.slide %}
                                     {% with slide_files=path|get_zip_content %}
                                         {% if slide_files %}
+                                            <hr class="hline" />
                                             <ul class="list-zipfiles">
                                                 {% for slide_file in slide_files %}
                                                     <li>{{ slide_file }}</li>
@@ -352,7 +354,7 @@
                     {% if tr_rec.script_status %}
                         <div class="list-group-item-container">
                             <a href="{{ script_base|add:tr_rec.script }}" target="_blank" class="list-group-item">
-                                <h4 class="list-group-item-heading"><i class="fa fa-2 fa-globe"></i> Script</h4>
+                                <h4 class="list-group-item-heading"><i class="fa fa-1 fa-link"></i> Script</h4>
                             </a>
                             <!--<p class="list-group-item-text">
                                 <span style="text-align: left">Status: <i class="{{ tr_rec.script_status|get_review_status_symbol }}" title="{{ tr_rec.script_status|get_review_status_list }}"></i></span>
@@ -366,7 +368,7 @@
                                 {% if timed_script %}
                                     <div class="list-group-item-container">
                                         <a href="{{ timed_script }}" target="_blank" class="list-group-item">
-                                            <h4 class="list-group-item-heading"><i class="fa fa-2 fa-globe"></i> Timed Script</h4>
+                                            <h4 class="list-group-item-heading"><i class="fa fa-1 fa-link"></i> Timed Script</h4>
                                         </a>
                                     </div>
                                 {% endif %}
