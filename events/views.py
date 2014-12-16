@@ -419,7 +419,6 @@ def old_training_attendance(request):
     raw_get_data = request.GET.get('o', None)
     collection = get_sorted_list(request, collectionSet, header, raw_get_data)
     ordering = get_field_index(raw_get_data)
-    print collection
     collection = TrainingFilter(request.GET, user = user, queryset=collection)
     context['form'] = collection.form
     
@@ -479,6 +478,7 @@ def old_training_attendance_upload(request, wid):
     context.update(csrf(request))
     return render(request, 'events/templates/training/old-attendance.html', context)
 
+@login_required
 def events_dashboard(request):
     user = request.user
     user_roles = user.groups.all()
