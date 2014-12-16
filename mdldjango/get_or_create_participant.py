@@ -159,16 +159,16 @@ def check_csvfile(user, file_path, w=None, flag=0):
                     if row_length > 3:
                         email = row[2].strip().lower()
                         gender = row[3].strip().title()
-                        
-                        if not validate_email(email):
-                            if email in ['Email', 'email', 'mail']:
+                        if _is_organiser(user) and (user.organiser.academic.institution_type.name != 'School' or (w and w.organiser.academic.institution_type.name != 'School')):
+                            if not validate_email(email):
+                                if email in ['Email', 'email', 'mail']:
+                                    continue
+                                if not error_line_no:
+                                    error_line_no = error_line_no + str(count)
+                                else:
+                                    error_line_no = error_line_no + ', ' + str(count)
+                                csv_file_error = 1
                                 continue
-                            if not error_line_no:
-                                error_line_no = error_line_no + str(count)
-                            else:
-                                error_line_no = error_line_no + ', ' + str(count)
-                            csv_file_error = 1
-                            continue
                     if flag and flag <= 2:
                         if not w:
                             return 1, error_line_no

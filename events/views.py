@@ -400,7 +400,7 @@ def old_training_attendance(request):
     context = {}
     if not (user.is_authenticated() and (is_event_manager(user) or is_resource_person(user))):
         raise PermissionDenied()
-    collectionSet = Training.objects.exclude(id__in=TrainingAttendance.objects.all().values_list('training_id').distinct()).filter(status=4)
+    collectionSet = Training.objects.exclude(id__in=TrainingAttendance.objects.all().values_list('training_id').distinct()).filter(status=4, academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)))
     if not collectionSet:
         raise PermissionDenied()
     header = {
@@ -781,7 +781,7 @@ def rp_organiser(request, status, code, userid):
                 message = "blocked"
             organiser.save()
             messages.success(request, "The Organiser account has been "+message)
-            return HttpResponseRedirect('/software-training/organiser/active/')
+            return HttpResponseRedirect('/software-training/organiser/inactive/')
         else:
             raise PermissionDenied()
     except:
