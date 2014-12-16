@@ -14,11 +14,15 @@
 		<link rel="stylesheet" href="{% static 'spoken/css/main.css' %}" type="text/css" media="screen" charset="utf-8" />
 		{% block cssblock %}{% endblock %}
 		<style type="text/css">
+		    .navbar {
+		        min-height: 45px;
+		    }
 			.navbar-toggle {
 				display: none;
 			}
-			.navbar-header .navbar-brand{
+			.container>.navbar-header{
 			    color: white;
+			    margin-left: 0px;;
 			}
 			#content-wrapper {
 			    min-height: 200px;
@@ -34,17 +38,17 @@
 						<div class="container col-lg-12 col-md-12 col-sm-12">
 							<!-- Brand and toggle get grouped for better mobile display -->
 							<div class="navbar-header">
-								<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
-									<span title="" data-original-title="" class="sr-only">Toggle navigation</span>
-									<span title="" data-original-title="" class="icon-bar"></span>
-									<span title="" data-original-title="" class="icon-bar"></span>
-									<span title="" data-original-title="" class="icon-bar"></span>
-								</button>
-								<div class="navbar-brand" href="">
-									<img id="logo" src="{% static 'spoken/images/logo.png' %}">
-									Spoken Tutorials
-								</div>
-							</div> <!-- /.navbar-header -->
+                                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#main-nav">
+                                    <span class="sr-only">Toggle Navigation</span>
+                                    <span class="icon-bar"></span>
+                                    <span class="icon-bar"></span>
+                                    <span class="icon-bar"></span>
+                                </button>
+                                <a href="#">
+                                        <img width = "40px" src="{% static 'spoken/images/logo.png' %}">
+                                        Spoken <span class='title'>Tutorial</span>
+                                    </a>
+                            </div> <!-- /.navbar-header -->
 						</div> <!-- /.container -->
 					</nav><!-- / .navbar -->
 				</div><!-- /#header-inner -->
