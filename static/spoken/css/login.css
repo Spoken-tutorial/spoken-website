@@ -1,0 +1,111 @@
+#loggit {
+    color: #fff;
+    font-family: "Open Sans",sans-serif;
+	background: #404040;
+	width: 480px;
+	margin: 5% auto;
+	padding: 20px 40px;
+}
+#loggit .captcha-refresh{
+    margin-left: 10px;
+}
+#loggit .form-control.captcha{
+    margin: 5px 0;
+}
+#loggit .form-group{
+    margin-bottom: 20px;
+}
+#loggit a{
+    color: #20B2AA;
+}
+#loggit a:hover{
+    color: #D26800;
+}
+#loggit h1 {
+	text-align: center;
+	font-size: 26px;
+	font-weight: 700;
+	margin: 5px 0 15px;
+}
+#loggit h3 {
+	text-align: center;
+	font-size: 14px;
+	color: #bbb;
+	margin: 0 0 20px;
+}
+#loggit .input-group-addon {
+	border: 0 none;
+}
+#loggit .form-control {
+	border: 0 none;
+}
+#loggit .form-control:focus {
+	box-shadow: none;
+}
+#loggit .formSubmit {
+	margin-bottom: 25px;
+}
+#loggit .submitWrap {
+	text-align: right;
+}
+#loggit .formNotice {
+	margin: 0;
+	font-size: 13px;
+}
+#loggit .formNotice span {
+	cursor: pointer;
+	color: #428BCA;
+}
+#loggit .formNotice span:hover,
+#loggit .formNotice span:focus {
+    color: #2A6496;
+    text-decoration: underline;
+}
+#loggit #regForm {
+	display: none;
+}
+.errorlist{
+    color: #FF4500;
+    margin-top: 5px;
+    margin-bottom: 0px;
+}
+.input-group.captcha-group{
+    background-color: #EEE;
+    border: 1px solid #eee !important;
+    -webkit-border-radius: 4px;
+     -moz-border-radius: 4px;
+          border-radius: 4px;
+}
+/**********************************************************************/
+/****************** MEDIA QUERIES ************************************/
+/********************************************************************/
+
+@media(max-width:979px){
+
+
+}
+@media (max-width: 768px) {
+	body {
+		padding-bottom: 0;
+	}
+	#loggit {
+		margin-top: 0;
+		width: 100%;
+	}
+	#loggit .submitWrap {
+		margin-top: 15px;
+		text-align: center;
+	}
+	footer {
+		position: relative;
+	}
+	footer p{
+		font-size: 13px;
+	}
+	
+}
+@media (max-width: 500px) {
+	#loggit {
+		width: 100%;
+	}
+}

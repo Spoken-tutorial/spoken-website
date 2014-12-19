@@ -160,7 +160,8 @@ USE_TZ = TZ_STATUS
 
 #events settings
 ONLINE_TEST_URL = ONLINE_TEST_URL
-
+KEEP_LOGGED_DURATION = 604800
+CAPTCHA_OUTPUT_FORMAT = u'%(hidden_field)s<span class="input-group-addon">%(image)s<a href="#void" class="captcha-refresh"><i class="fa fa-2 fa-refresh"></i></a></span>%(text_field)s'
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/var/www/example.com/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/') # Absolute path to the media.

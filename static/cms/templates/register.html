@@ -1,66 +1,70 @@
 {% extends 'spoken/templates/base.html' %}
 {% load widget_tweaks %}
 {% load static %}
-{% block title %}Sign Up{% endblock %}
-{% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
-{% block heading %}
+{% block title %}Register{% endblock %}
+{% block cssblock %}
+    <link rel="stylesheet" href="{% static 'spoken/css/login.css' %}" type="text/css" media="screen" charset="utf-8" />
 {% endblock %}
 {% block search %}
 {% endblock %}
 {% block content %}
-    <div class="row">
-        <div class="col-sm-6 well col-sm-offset-3">
-            <h4 style="text-align:center;"class='page-title'>Sign Up</h4>
-            <form class="form-signin form-horizontal" role="form" id="login_form" method="post">{% csrf_token %}
-                {{ form.non_field_errors }}
-                <div class="form-group">
-                    <label class="col-sm-3 control-label" for= "id_username">Username</label>
-                    <div class="col-sm-9">
-                        {% render_field form.username class+="form-control username" tabindex="1" data-placeholder="Pick a Username" %}
-                        {{ form.username.errors }}
-                        <small>Enter your desired username.</small>
+    <div id="loggit" class="img-rounded">
+        <h1><i class="fa fa-pencil"></i> Register Yourself</h1>
+        <br>
+        <form id="logForm" method="post" class="form-horizontal">{% csrf_token %}
+            <div class="form-group">
+                <div class="col-xs-12">
+                    <div class="input-group">
+                        <span class="input-group-addon"><i class="fa fa-user fa-fw"></i></span>
+                        {% render_field form.username class+="form-control username" tabindex="1" placeholder="Desired Username" %}
                     </div>
+                    {{ form.username.errors }}
                 </div>
-                <div class="form-group">
-                    <label class="col-sm-3 control-label" for= "id_email">Email</label>
-                    <div class="col-sm-9">
-                        {% render_field form.email class+="form-control email" tabindex="1" data-placeholder="Your Email" %}
-                        {{ form.email.errors }}
-                        <small>Enter your valid email id.</small>
+            </div>
+            <div class="form-group">
+                <div class="col-xs-12">
+                    <div class="input-group">
+                        <span class="input-group-addon"><i class="fa fa-envelope fa-fw"></i></span>
+                        {% render_field form.email class+="form-control email" tabindex="1" placeholder="Your Email" %}
                     </div>
+                    {{ form.email.errors }}
                 </div>
-                <div class="form-group">
-                    <label class="col-sm-3 control-label" for= "id_password">Password</label>
-                    <div class="col-sm-9">
-                        {% render_field form.password class+="form-control password" tabindex="1" data-placeholder="Enter password" %}
-                        {{ form.password.errors }}
-                        <small>Password should me atleast 8 characters long.</small>
+            </div>
+            <div class="form-group">
+                <div class="col-xs-12">
+                    <div class="input-group">
+                        <span class="input-group-addon"><i class="fa fa-key fa-fw"></i></span>
+                        {% render_field form.password class+="form-control password" tabindex="1" placeholder="Enter password" %}
                     </div>
+                    {{ form.password.errors }}
                 </div>
-                <div class="form-group">
-                    <label class="col-sm-3 control-label" for= "id_password_confirm">Confirm Password</label>
-                    <div class="col-sm-9">
-                        {% render_field form.password_confirm class+="form-control password_confirm" tabindex="1" data-placeholder="Enter confirm password" %}
-                        {{ form.password_confirm.errors }}
-                        <small>Please re-enter your password.</small>
+            </div>
+            <div class="form-group">
+                <div class="col-xs-12">
+                    <div class="input-group">
+                        <span class="input-group-addon"><i class="fa fa-key fa-fw"></i></span>
+                        {% render_field form.password_confirm class+="form-control password_confirm" tabindex="1" placeholder="Retype Password" %}
                     </div>
+                    {{ form.password_confirm.errors }}
                 </div>
-                <div class="form-group">
-                    <label class="col-sm-3 control-label" for= "id_captcha">Enter Captcha</label>
-                    <div class="col-sm-9">
-                        {% render_field form.captcha class+="form-control captcha" %}
-                        <small>Enter the text as shown in the image.</small>
-                        <a href="#void" class="captcha-refresh">Refresh</a>
-                        {{ form.captcha.errors }}
+            </div>
+            <div class="form-group">
+                <div class="col-xs-12">
+                    <div class="input-group captcha-group">
+                        {% render_field form.captcha class+="form-control captcha" placeholder="Enter Captcha" %}
                     </div>
+                    {{ form.captcha.errors }}
                 </div>
-                <div class="form-group">
-                    <div class="col-sm-offset-3 col-sm-9">
-                        <input class="btn btn-primary" type="submit" value="Create New Account" />
-                    </div>
+            </div>
+            <div class="form-group formSubmit">
+                <div class="col-sm-7">
+                    <p class="text-center">Already Registered? <span><a href="/accounts/login/">Login here</span></a></p>
                 </div>
-            </form>
-        </div>
+                <div class="col-sm-5 submitWrap">
+                    <button type="submit" class="btn btn-primary btn-lg">Register Me</button>
+                </div>
+            </div>
+        </form>
     </div>
 {% endblock %}
 {% block jsblock %}
