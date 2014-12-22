@@ -50,6 +50,7 @@ ADMINISTRATOR_EMAIL = ADMINISTRATOR_EMAIL
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = DEBUG_MODE
+COMPRESS_ENABLED = True
 
 TEMPLATE_DEBUG = True
 
@@ -81,6 +82,7 @@ INSTALLED_APPS = (
 	'south',
     'youtube',
     'reports',
+    'compressor',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -173,9 +175,12 @@ MEDIA_URL = '/media/'
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.6/howto/static-files/
 
-STATIC_ROOT = os.path.join(os.path.dirname(__file__), 'static/')
+STATIC_ROOT = BASE_DIR + '/static/'
 
 STATIC_URL = '/static/'
+
+COMPRESS_ROOT = STATIC_ROOT
+COMPRESS_URL = STATIC_URL
 
 TEMPLATE_DIRS = (
 	# Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
@@ -188,7 +193,7 @@ STATICFILES_DIRS = (
 	# Put strings here, like "/home/html/static" or "C:/www/django/static".
 	# Always use forward slashes, even on Windows.
 	# Don't forget to use absolute paths, not relative paths.
-	BASE_DIR + '/static/',
+	#BASE_DIR + '/static/',
 )
 
 #debugging 
@@ -204,6 +209,12 @@ DATABASE_ROUTERS = ['mdldjango.router.MdlRouter', 'cdeep.router.CdeepRouter', 'w
 REPORT_BUILDER_INCLUDE = []
 REPORT_BUILDER_EXCLUDE = ['user'] # Allow all models except User to be accessed
 
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+    }
+}
+
 #template
 TEMPLATE_CONTEXT_PROCESSORS = (
     "django.contrib.auth.context_processors.auth",
@@ -214,4 +225,15 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "django.core.context_processors.tz",
     "django.contrib.messages.context_processors.messages",
     "django.core.context_processors.request"
+)
+
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'compressor.finders.CompressorFinder',
+)
+
+COMPRESS_CSS_FILTERS = (
+    'compressor.filters.css_default.CssAbsoluteFilter',
+    'compressor.filters.cssmin.CSSMinFilter',
 )

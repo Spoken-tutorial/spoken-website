@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+{% load compress  %}
 {% load static %}
 {% load cmsdata %}
 {% load creationdata %}
@@ -20,6 +21,7 @@
         {% endblock %}
         <link rel="shortcut icon" href="{% static 'spoken/images/favicon.ico' %}" />
         <!-- Bootstrap core CSS -->
+        {% compress css %}
         <link rel="stylesheet" href="{% static 'spoken/css/bootstrap.min.css' %}" type="text/css" media="screen" charset="utf-8" />
         <link rel="stylesheet" href="{% static 'spoken/css/font-awesome.min.css' %}" type="text/css" media="screen" charset="utf-8" />
         <link rel="stylesheet" href="{% static 'spoken/css/yamm.css' %}" type="text/css" media="screen" charset="utf-8" />
@@ -39,6 +41,7 @@
         </style>
         <link rel="stylesheet" href="{% static 'spoken/css/main.css' %}" type="text/css" media="screen" charset="utf-8" />
         {% block cssblock %}{% endblock %}
+        {% endcompress %}
     </head>
     <body>
         {% block announcement %}{% endblock %}
@@ -408,6 +411,7 @@
         <!-- Bootstrap core JavaScript
         ================================================== -->
         <!-- Placed at the end of the document so the pages load faster -->
+        {% compress js %}
         <script src="{% static 'spoken/js/jquery-1.11.0.min.js' %}"></script>
         <script src="{% static 'spoken/js/bootstrap.min.js' %}"></script>
         <script src="{% static 'spoken/js/jquery.datetimepicker.js' %}"></script>
@@ -497,5 +501,7 @@
                 });
         });
     </script>
+    {% endcompress %}
+    {% block uncompressjsblock %}{% endblock %}
     </body>
 </html>

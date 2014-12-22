@@ -149,29 +149,6 @@
             ajaxStrateFillDatas('', 'city', '');
         });
     </script>
-    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
-    <script type="text/javascript">
-      google.load("visualization", "1", {packages:["corechart"]});
-      google.setOnLoadCallback(drawChart);
-      function drawChart() {
-        var data = google.visualization.arrayToDataTable([
-          ['Year', 'Participants'],
-          {{ chart_data|safe }}
-        ]);
-
-        var options = {
-          //title: '{{ model }} Performance',
-          pieHole: 0.3,
-        };
-
-        var chart = new google.visualization.PieChart(document.getElementById('chart_div'));
-
-        chart.draw(data, options);
-        chart = new google.visualization.PieChart(document.getElementById('big_chart_div'));
-
-        chart.draw(data, options);
-      }
-    </script>
     <script src="{% static 'spoken/js/jquery.fancybox.pack.js' %}"></script>
     <script type="text/javascript">
         $(document).ready(function(){
@@ -183,4 +160,24 @@
         });
     </script>
 {% endblock %}
-
+{% block uncompressjsblock %}
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type="text/javascript">
+      google.load("visualization", "1", {packages:["corechart"]});
+      google.setOnLoadCallback(drawChart);
+      function drawChart() {
+        var data = google.visualization.arrayToDataTable([
+          ['Year', 'Participants'],
+          {{ chart_data|safe }}
+        ]);
+        var options = {
+          //title: '{{ model }} Performance',
+          pieHole: 0.3,
+        };
+        var chart = new google.visualization.PieChart(document.getElementById('chart_div'));
+        chart.draw(data, options);
+        chart = new google.visualization.PieChart(document.getElementById('big_chart_div'));
+        chart.draw(data, options);
+      }
+    </script>
+{% endblock %}
