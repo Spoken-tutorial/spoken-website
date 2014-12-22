@@ -1,0 +1,121 @@
+{% extends 'spoken/templates/base.html' %}
+{% load static %}
+{% block cssblock %}
+    <style>
+        #xsg {
+            line-height: 22px;
+            color: #666;
+            font-family: Tahoma,Verdana,Arial,sans-serif;
+            font-size: 13px;
+        }
+        #xsg .title {
+            font-size: 0.9em;
+            color: #132687;
+            display: inline;
+            font-weight: bold;
+            text-decoration: none;
+        }
+        #xsg .title-disabled {
+            color: #708090;
+        }
+        #xsg .main-title {
+            font-size: 1.0em;
+        }
+        #xsg .inner-title {
+            font-weight: normal;
+        }
+        ul {
+            list-style: square outside none;
+        }
+    </style>
+{% endblock %}
+{% block title %}Site Map{% endblock %}
+{% block heading %}Site Map{% endblock %}
+{% block content %}
+    <ul id="xsg">
+        <li>
+            <a class="title main-title" href="http://spoken-tutorial.org/">Home | spoken-tutorial.org</a>
+            <ul>
+                <li>
+                    <span class="title title-disabled">Search</span>
+                    <ul>
+                        <li><a class="title inner-title" href="http://spoken-tutorial.org/tutorial-search/">Tutorial Search</a></li>
+                        <li><a class="title inner-title" href="http://spoken-tutorial.org/keyword-search/">Keyword Search</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a class="title" href="http://spoken-tutorial.org/accounts/login/">Login</a>
+                    <ul>
+                        <li><a class="title inner-title" href="http://spoken-tutorial.org/accounts/forget-password/">Password Rest</a></li>
+                    </ul>
+                </li>
+                <li><a class="title" href="http://spoken-tutorial.org/accounts/register/">Register</a></li>
+                <li>
+                    <span class="title title-disabled">Software Training</span>
+                    <ul>
+                        <li><a class="title inner-title" href="http://process.spoken-tutorial.org/index.php/Software-Training#About_SELF_Workshops">About the Training / Workshop</a></li>
+                        <li><a class="title inner-title" href="http://process.spoken-tutorial.org/index.php/Software-Training#Progress_To_Date">Progress to Date</a></li>
+                        <li><a class="title inner-title" href="http://process.spoken-tutorial.org/index.php/Software-Training#Software_Offered">Software Offered</a></li>
+                        <li><a class="title inner-title" href="http://process.spoken-tutorial.org/index.php/Software-Training#Contacts_For_Training">Contacts for Training / Workshop</a></li>
+                        <li><a class="title inner-title" href="http://process.spoken-tutorial.org/index.php/Software-Training#Organising_Training_.2F_Workshop">Organising Training / Workshop</a></li>
+                        <li><a class="title inner-title" href="http://process.spoken-tutorial.org/index.php/Software-Training#Downloading_Spoken_Tutorials">Instruction for Downloading Tutorials</a></li>
+                        <li><a class="title inner-title" href="http://spoken-tutorial.org/cdcontent/">Create Your Own Disc Image</a></li>
+                        <li><a class="title inner-title" href="http://spoken-tutorial.org/software-training/">Training / Workshop Dashboard</a></li>
+                        <li>
+                            <a class="title inner-title" href="http://spoken-tutorial.org/participant/index/">Participant Dashboard</a>
+                            <ul>
+                                <li><a class="title inner-title" href="http://spoken-tutorial.org/participant/login/">Login | Participant / Student</a></li>
+                                <li><a class="title inner-title" href="http://spoken-tutorial.org/participant/register/">Register | Participant / Student</a></li>
+                                <li><a class="title inner-title" href="http://spoken-tutorial.org/participant/forget-password/">Password Rest | Participant / Student</a></li>
+                            </ul>
+                        </li>
+                        <li><a class="title inner-title" href="http://spoken-tutorial.org/software-training/resource-center/">Resource Centers</a></li>
+                        <li><a class="title inner-title" href="http://process.spoken-tutorial.org/images/0/09/Instructions_for_Invigilator.pdf">Instruction for Invigilator</a></li>
+                        <li><a class="title inner-title" href="http://process.spoken-tutorial.org/images/9/95/Test_Instruction_for_Participants.pdf">Instruction for Participants</a></li>
+                        <li><a class="title inner-title" href="http://onlinetest.spoken-tutorial.org/">Assessment Test</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <span class="title title-disabled">Creation</span>
+                    <ul>
+                        <li><a class="title inner-title" href="http://process.spoken-tutorial.org/index.php/Main_Page">Creation Process</a></li>
+                        <li><a class="title inner-title" href="http://script.spoken-tutorial.org/index.php/Main_Page">Outline and Script</a></li>
+                        <li><a class="title inner-title" href="http://spoken-tutorial.org/creation/">Creation Dashboard</a></li>
+                        <li><a class="title inner-title" href="http://spoken-tutorial.org/creation/suggest-a-topic/">Suggest a Topic</a></li>
+                        <li><a class="title inner-title" href="http://spoken-tutorial.org/creation/suggest-an-example/">Suggest an Example</a></li>
+                        <li><a class="title inner-title" href="http://spoken-tutorial.org/creation/collaborate/">Collaborate with Us</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <span class="title title-disabled">News</span>
+                    <ul>
+                        <li><a class="title inner-title" href="http://spoken-tutorial.org/testimonials/">Testimonials</a></li>
+                        <li><a class="title inner-title" href="http://spoken-tutorial.org/news/media-articles/">Media Articles</a></li>
+                        <li><a class="title inner-title" href="http://spoken-tutorial.org/news/news-and-events">News and Events</a></li>
+                        <li><a class="title inner-title" href="http://spoken-tutorial.org/news/official-letters-and-links/">Official Letters and Links</a></li>
+                        <li><a class="title inner-title" href="http://spoken-tutorial.org/research-popular-articles/">Research / Popular Articles</a></li>
+                    </ul>
+                </li>
+                <li><a class="title" href="http://forums.spoken-tutorial.org/">Forums</a></li>
+                <li>
+                    <span class="title title-disabled">About</span>
+                    <ul>
+                        <li><a class="title inner-title" href="http://spoken-tutorial.org/about-us/">About Us</a></li>
+                        <li><a class="title inner-title" href="http://spoken-tutorial.org/mission/">Mission</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <span class="title title-disabled">Statistics</span>
+                    <ul>
+                        <li><a class="title inner-title" href="http://spoken-tutorial.org/statistics/training-onlinetest/training/">Workshop / Training</a></li>
+                        <li><a class="title inner-title" href="http://spoken-tutorial.org/statistics/training-onlinetest/onlinetest/">Online-Test</a></li>
+                        <li><a class="title inner-title" href="http://spoken-tutorial.org/statistics/academic-center/">Academic Center</a></li>
+                        <li><a class="title inner-title" href="http://spoken-tutorial.org/statistics/">India Map</a></li>
+                        <li><a class="title inner-title" href="http://spoken-tutorial.org/statistics/motion-chart/">Motion Charts</a></li>
+                    </ul>
+                </li>
+                <li><a class="title" href="http://www.youtube.com/user/SpokenTutorialIITB/">YouTube Channel</a></li>
+            </ul>
+        </li>
+    </ul>
+{% endblock %}

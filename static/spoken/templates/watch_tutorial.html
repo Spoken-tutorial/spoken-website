@@ -171,7 +171,7 @@
                             <a href="/watch/{{ rec.tutorial_detail.foss.foss|get_url_name }}/{{ rec.tutorial_detail.tutorial|get_url_name }}/{{ rec.language.name }}/">
                                 <div class='pull-left thumb'>
                                     <span class='order'>{% if tr_rec.id == rec.id %}<i class="fa fa-play"></i>{% else %}{{ forloop.counter }}{% endif %}</span>
-                                    <img src="{{ rec.tutorial_detail|get_thumb_path:'Small' }}" width=70 >
+                                    <img alt="{{ rec.tutorial_detail.tutorial }} - thumb" src="{{ rec.tutorial_detail|get_thumb_path:'Small' }}" width=70 >
                                 </div>
                                 <div class='description'>
                                     {{rec.tutorial_detail.tutorial}}
@@ -226,13 +226,13 @@
         <div class="col-lg-4 col-md-4 col-sm-4 no-padding-right right-bar">
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <h3 class="panel-title">Pre-requisites</h3>
+                    <h2 class="panel-title">Pre-requisites</h2>
                 </div>
                 <div class="panel-body">
                     {% if tr_rec.common_content.prerequisite %}
                         {% with prerequisite=tr_rec|get_prerequisite:tr_rec.common_content.prerequisite %}
                             {% if prerequisite %}
-                                <img src="{{ tr_rec.common_content.prerequisite|get_thumb_path:'Small' }}" width="70" style="padding-right: 10px;">
+                                <img alt="{{ rec.tutorial_detail.tutorial }} - thumb" src="{{ tr_rec.common_content.prerequisite|get_thumb_path:'Small' }}" width="70" style="padding-right: 10px;">
                                 <a href="/watch/{{ prerequisite }}/">{{ tr_rec.common_content.prerequisite.tutorial }}</a>
                             {% else %}
                                 No Pre-requisites for this tutorial.

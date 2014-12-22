@@ -19,7 +19,7 @@
                     <label for="id_event_type" class="col-sm-4 control-label">Test / Training</label>
                     <div class="col-sm-8">
                         <select class="form-control event_type" id="id_event_type" name="event_type" tabindex="1">
-                            {% if request.GET and request.GET.event_type == "1" %}
+                            {% if  event_type == "test" %}
                                 <option value=1 selected="selected">Test</option>
                                 <option value=0>Training</option>
                             {% else %}
@@ -56,7 +56,7 @@
             
             
             <div class="col-lg-4 col-md-4 col-sm-4">
-                {% if request.GET and request.GET.event_type == "0" or not request.GET %}
+                {% if event_type == 'training' %}
                     <div class="form-group">
                         <label for="id_training_type" class="col-sm-4 control-label">Training Type</label>
                         <div class="col-sm-8">
@@ -115,6 +115,7 @@
         <div id="big_chart_div" style="width:800px; height:500px; left:-999px; position:absolute; overflow:hidden;"></div>
     </div>
     <!-- big chart-->
+    {{event_type}}
 	<div class="tab-content">
 		<div class="tab-pane active" id="pending">
 			{% if collection %}
