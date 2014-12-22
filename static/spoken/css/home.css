@@ -1,0 +1,70 @@
+        #st_video, #st_video_html5_api{
+            width: 100%;
+        }
+        #st_video {
+            max-height: 398px;
+        }
+        #st_video_html5_api {
+            max-height: 392px;
+        }
+        .banner-img-container{
+            position: relative;
+            overflow: hidden;
+        }
+        .banner-img-container .go{
+            position: absolute;
+            top: 84.5%;
+            right: 8%;
+            
+        }
+        
+        #slideshow{
+            height: 50px;
+            overflow: hidden;
+        }
+        #slideshow .btn-primary, button.close{
+            background-color: black;
+            border-color: black;
+            opacity: 10;
+            color: white;
+        }
+        .announcement{
+            height: 50px;
+            font-size: 14px;
+            font-weight: bold;
+            color: white;
+            border-radius: 0px;
+        }
+        .text-container{
+            padding: 0 60px;
+        }
+        .navbar-fixed-top{
+            position: relative;
+        }
+        button.close{
+            padding-top: 0px;
+            padding-bottom: 3px;
+            padding-left: 4px;
+            padding-right: 4px;
+        }
+.home-page-title-i {
+    display: none;
+}
+.testimonial-quote {
+    color: #e6e6e6;
+}
+.contact-container .contact .fa-phone {
+    color: #008000;
+}
+.contact-container .contact .fa-envelope {
+        color: #bac88a;
+}
+.contact-container .contact .fa-youtube {
+        color: #db2625;
+}
+.contact-container .contact .fa-google-plus {
+        color: #dc4836;
+}
+.contact-container .contact .fa-skype {
+        color: #00a5e1;
+}

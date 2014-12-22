@@ -390,3 +390,6 @@ def create_subtitle_files(request, overwrite = True):
             else:
                 print 'Failed: ', row.tutorial_detail.foss.foss + ',', srt_file_name
     return HttpResponse('Success!')
+
+def sitemap(request):
+    return render(request, 'sitemap.html', {})

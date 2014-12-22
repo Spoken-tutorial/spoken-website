@@ -130,7 +130,7 @@ html,body
 .page4 h2.page-title{
     padding-bottom: 20px;
 }
-h4.page-title {
+h1.page-title, h4.page-title {
     font-size: 20px;
     margin: 10px 0 20px 0;
     font-family: 'Oswald';
@@ -731,4 +731,27 @@ pre.custom-jumbotron b {
 
 #search-wrapper .form-group{
     margin-bottom: 2px;
+}
+.alternate-search-link {
+    margin-right:32px;
+}
+#footer-wrapper a:hover {
+	color: #FFA500;
+}
+.cc-data {
+    color: #DEB887;
+    text-align: center;
+}
+.add-padding {
+    padding: 5px;
+}
+.st-statcounter-seperator {
+    border-top: 1px solid white;
+    margin-top: 20px;}
+.st-statcounter {
+    color: white;
+}
+.st-statcounter p {
+    padding-top: 6px;
+    font-size: 12px;
 }
