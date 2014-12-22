@@ -59,27 +59,27 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = (
-	'django.contrib.admin',
-	'django.contrib.auth',
-	'django.contrib.contenttypes',
-	'django.contrib.sessions',
-	'django.contrib.messages',
-	'django.contrib.staticfiles',
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
     'django.contrib.sites',
     'django.contrib.redirects',
-	'django_extensions',
-	'widget_tweaks',
-	'captcha',
-	'cms',
-	'creation',
-	'statistics',
-	'cdcontent',
-	'events',
-	'mdldjango',
-	'nicedit',
-	'masquerade',
-	'report_builder',
-	'south',
+    'django_extensions',
+    'widget_tweaks',
+    'captcha',
+    'cms',
+    'creation',
+    'statistics',
+    'cdcontent',
+    'events',
+    'mdldjango',
+    'nicedit',
+    'masquerade',
+    'report_builder',
+    'south',
     'youtube',
     'reports',
     'compressor',
@@ -87,16 +87,18 @@ INSTALLED_APPS = (
 
 MIDDLEWARE_CLASSES = (
     'django.middleware.cache.UpdateCacheMiddleware',
-	'django.contrib.sessions.middleware.SessionMiddleware',
-	'django.middleware.common.CommonMiddleware',
-	'django.middleware.csrf.CsrfViewMiddleware',
-	'django.contrib.auth.middleware.AuthenticationMiddleware',
-	'django.contrib.messages.middleware.MessageMiddleware',
-	'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'htmlmin.middleware.HtmlMinifyMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.common.BrokenLinkEmailsMiddleware',
-	'masquerade.middleware.MasqueradeMiddleware',
+    'masquerade.middleware.MasqueradeMiddleware',
     'django.contrib.redirects.middleware.RedirectFallbackMiddleware',
-    'django.middleware.cache.FetchFromCacheMiddleware'
+    'django.middleware.cache.FetchFromCacheMiddleware',
+    'htmlmin.middleware.MarkRequestMiddleware',
 )
 
 ROOT_URLCONF = 'spoken.urls'
@@ -110,43 +112,43 @@ SITE_ID = 1
 # https://docs.djangoproject.com/en/1.6/ref/settings/#databases
 
 DATABASES = {
-	'default': {
-		'ENGINE': 'django.db.backends.mysql',	# Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-		'NAME': DB,						# Or path to database file if using sqlite3.
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',    # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': DB,                        # Or path to database file if using sqlite3.
 
-		# The following settings are not used with sqlite3:
-		'USER': DB_USER,
-		'PASSWORD': DB_PASS,
-		'HOST': '',							# Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
-		'PORT': '',							# Set to empty string for default.
-	},
-	'moodle': {
-		'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-		'NAME': MDB,					  # Or path to database file if using sqlite3.
-		# The following settings are not used with sqlite3:
-		'USER': MDB_USER,
-		'PASSWORD': MDB_PASS,
-		'HOST': '',				  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
-		'PORT': '',				  # Set to empty string for default.
-	},
-	'cdeep': {
-		'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-		'NAME': CDB,					  # Or path to database file if using sqlite3.
-		# The following settings are not used with sqlite3:
-		'USER': CDB_USER,
-		'PASSWORD': CDB_PASS,
-		'HOST': '',				  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
-		'PORT': '',				  # Set to empty string for default.
-	},
-	'workshop_info': {
-		'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-		'NAME': WDB,					  # Or path to database file if using sqlite3.
-		# The following settings are not used with sqlite3:
-		'USER': WDB_USER,
-		'PASSWORD': WDB_PASS,
-		'HOST': '',				  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
-		'PORT': '',				  # Set to empty string for default.
-	}
+        # The following settings are not used with sqlite3:
+        'USER': DB_USER,
+        'PASSWORD': DB_PASS,
+        'HOST': '',                            # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+        'PORT': '',                            # Set to empty string for default.
+    },
+    'moodle': {
+        'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': MDB,                      # Or path to database file if using sqlite3.
+        # The following settings are not used with sqlite3:
+        'USER': MDB_USER,
+        'PASSWORD': MDB_PASS,
+        'HOST': '',                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+        'PORT': '',                  # Set to empty string for default.
+    },
+    'cdeep': {
+        'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': CDB,                      # Or path to database file if using sqlite3.
+        # The following settings are not used with sqlite3:
+        'USER': CDB_USER,
+        'PASSWORD': CDB_PASS,
+        'HOST': '',                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+        'PORT': '',                  # Set to empty string for default.
+    },
+    'workshop_info': {
+        'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': WDB,                      # Or path to database file if using sqlite3.
+        # The following settings are not used with sqlite3:
+        'USER': WDB_USER,
+        'PASSWORD': WDB_PASS,
+        'HOST': '',                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+        'PORT': '',                  # Set to empty string for default.
+    }
 }
 
 # Internationalization
@@ -185,17 +187,17 @@ COMPRESS_ROOT = STATIC_ROOT
 COMPRESS_URL = STATIC_URL
 
 TEMPLATE_DIRS = (
-	# Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-	# Always use forward slashes, even on Windows.
-	# Don't forget to use absolute paths, not relative paths.
-	BASE_DIR + '/static/',
+    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
+    # Always use forward slashes, even on Windows.
+    # Don't forget to use absolute paths, not relative paths.
+    BASE_DIR + '/static/',
 )
 
 STATICFILES_DIRS = (
-	# Put strings here, like "/home/html/static" or "C:/www/django/static".
-	# Always use forward slashes, even on Windows.
-	# Don't forget to use absolute paths, not relative paths.
-	#BASE_DIR + '/static/',
+    # Put strings here, like "/home/html/static" or "C:/www/django/static".
+    # Always use forward slashes, even on Windows.
+    # Don't forget to use absolute paths, not relative paths.
+    #BASE_DIR + '/static/',
 )
 
 #debugging 
@@ -245,3 +247,4 @@ CACHES = {
         'LOCATION': 'unique-snowflake'
     }
 }
+HTML_MINIFY = HTML_MINIFY

@@ -5,6 +5,7 @@
 {% block title %}Training / Workshop - Request{% endblock %}
 {% block cssblock %}
 	<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />
+	<link rel="stylesheet" href="{% static 'spoken/css/jquery.datetimepicker.css' %}" type="text/css" media="screen" charset="utf-8" />
     <style>
         .radio input[type="radio"]{
             left: 0px;
@@ -147,6 +148,7 @@
     </div>
 {% endblock %}
 {% block jsblock %}
+    <script src="{% static 'spoken/js/jquery.datetimepicker.js' %}"></script>
 	<script>
 		$college = $('#id_academic');
 		$('#id_district').change(function() {
@@ -192,5 +194,27 @@
 				}
 			});
 		});
+		$('.datetime').datetimepicker({
+                onGenerate:function( ct ){
+                    $(this).find('.xdsoft_day_of_week0')
+                        .addClass('xdsoft_disabled');
+                },
+                lang:'en',
+                format:'Y-m-d H:i',
+                formatDate:'Y/m/d',
+                minDate:0, // yesterday is minimum date
+                weekends:[],
+                maxDate:'+1970/06/31', // tommorow date with in 6 month
+                step:5,
+                minTime:'08:00',
+                maxTime:'18:00',
+            });
+            $('.date').datetimepicker({
+                lang:'en',
+                timepicker:false,
+                format:'Y-m-d',
+                formatDate:'Y/m/d',
+                maxDate:'+1970/06/31', // tommorow date with in 6 month
+            });
 	</script>
 {% endblock %}
