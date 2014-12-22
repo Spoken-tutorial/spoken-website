@@ -120,7 +120,15 @@
             background-color: rgba(0, 0, 0, 0.7);
         }
         .custom-jumbotron {
-            max-height: 180px;
+            background-color: white !important;
+            border: none;
+            padding: 0px !important;
+        }
+        .custom-jumbotron p {
+            padding-left: 20px;
+        }
+        .custom-jumbotron h3 {
+            margin-top: 10px;
         }
         .video-visits {
             text-align: right;
@@ -135,6 +143,53 @@
         }
         .video-info{
             display: none;
+        }
+        .breadcrumb {
+            background: white;
+            margin: 0px;
+        }
+        .list-group-item{
+            border-top: none;
+            padding-top: 0px;
+        }
+        .list-group-item:first-child {
+            padding-top: 10px;
+            border-top: 1px solid #ddd;
+        }
+        .hline {
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+        .video-share {
+            margin-bottom: 10px;
+        }
+        .inner-shadow {
+            padding: 15px;
+            /*-webkit-box-shadow: 0px 0px 10px 0px rgba(84, 70, 70, 0.87);
+            -moz-box-shadow: 0px 0px 10px 0px rgba(84, 70, 70, 0.87);
+            box-shadow: 0px 0px 10px 0px rgba(84, 70, 70, 0.87);*/
+            border: 1px solid #ddd;
+        }
+        .inner-sidebar {
+            padding-left: 15px;
+            padding-top: 5px;
+        }
+        .inner-content-body {
+            margin-top: 5px;
+        }
+        .video-info-show-more, .list-group-item-container, .panel {
+            margin-bottom: 14px;
+        }
+        a.list-group-item .list-group-item-heading {
+            color: #337AB7;
+        }
+        .panel-body-heading {
+            font-size: 16px;
+            margin-bottom: 0px;
+            color: #337AB7;
+        }
+        .panel-body .hline {
+            margin-bottom: 8px;
         }
     </style>
     <script src="{% static 'spoken/js/video.js' %}"></script>
@@ -171,7 +226,7 @@
                             <a href="/watch/{{ rec.tutorial_detail.foss.foss|get_url_name }}/{{ rec.tutorial_detail.tutorial|get_url_name }}/{{ rec.language.name }}/">
                                 <div class='pull-left thumb'>
                                     <span class='order'>{% if tr_rec.id == rec.id %}<i class="fa fa-play"></i>{% else %}{{ forloop.counter }}{% endif %}</span>
-                                    <img src="{{ rec.tutorial_detail|get_thumb_path:'Small' }}" width=70 >
+                                    <img alt="{{ rec.tutorial_detail.tutorial }} - thumb" src="{{ rec.tutorial_detail|get_thumb_path:'Small' }}" width=70 >
                                 </div>
                                 <div class='description'>
                                     {{rec.tutorial_detail.tutorial}}
@@ -185,9 +240,38 @@
     </row>
     {% endif %}
     <row>
-        <div class="col-lg-8 col-md-8 col-sm-8 no-padding-left">
-            <div class='row'>
-                <div class="video-info-show-more pull-left col-lg-9 col-md-9 col-sm-9">
+        <div class="inner-content-body col-lg-8 col-md-8 col-sm-8 no-padding">
+            <div class="inner-shadow">
+                <div class="row video-share">
+                    <div class="ysubscribe pull-left col-lg-9 col-md-9 col-sm-9">
+                        <div class="g-ytsubscribe" data-channel="SpokenTutorialIITB" data-layout="full" data-count="default" data-onytevent="onYtEvent"></div>
+                    </div>
+                    <p class="video-visits pull-right col-lg-3 col-md-3 col-sm-3">{{ tr_rec|get_video_visits }} visits</p>
+                </div>
+                <hr class="hline" />
+                <ol class="breadcrumb">
+                    {% with link=tr_rec.tutorial_detail.foss|instruction_sheet:tr_rec.language %}
+                        {% if link %}
+                            <li><a href="{{ link }}" target="_blank">Instruction Sheet</a></li>
+                        {% endif %}
+                    {% endwith %}
+
+                    {% with link=tr_rec.tutorial_detail.foss|installation_sheet:tr_rec.language %}
+                        {% if link %}
+                            <li><a href="{{ link }}" target="_blank">Installation Sheet</a></li>
+                        {% endif %}
+                    {% endwith %}
+                    <li><a href="/creation/report-missing-component/{{ tr_rec.id}}" class="fancybox fancybox.iframe"> Report Missing Component</a></li>
+                    <li><a target="_blank" href="http://forums.spoken-tutorial.org/">Post your Question on the Forum</a></li>
+                </ol>
+                <hr class="hline" />
+                <pre class="custom-jumbotron"><h3><b>Outline:</b></h3><p>{{ tr_rec.outline }}</p></pre>
+                <hr class="hline" />
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-4 col-sm-4 no-padding right-bar">
+            <div class="inner-sidebar">
+                <div class="video-info-show-more">
                     <div class="video-info">
                         <table class="table table-bordered table-hover">
                             <tr>
@@ -200,133 +284,115 @@
                             </tr>
                         </table>
                     </div>
-                    <p class="video-show-more no-record">Show more</p>
+                    <p class="video-show-more no-record">Show video info</p>
                 </div>
-                <p class="video-visits pull-right col-lg-3 col-md-3 col-sm-3">{{ tr_rec|get_video_visits }} visits</p>
-            </div>
-            <ol class="breadcrumb">
-                {% with link=tr_rec.tutorial_detail.foss|instruction_sheet:tr_rec.language %}
-                    {% if link %}
-                        <li><a href="{{ link }}" target="_blank">Instruction Sheet</a></li>
-                    {% endif %}
-                {% endwith %}
-
-                {% with link=tr_rec.tutorial_detail.foss|installation_sheet:tr_rec.language %}
-                    {% if link %}
-                        <li><a href="{{ link }}" target="_blank">Installation Sheet</a></li>
-                    {% endif %}
-                {% endwith %}
-                <li><a href="/creation/report-missing-component/{{ tr_rec.id}}" class="fancybox fancybox.iframe"> Report Missing Component</a></li>
-                <li><a target="_blank" href="http://forums.spoken-tutorial.org/">Post your Question on the Forum</a></li>
-            </ol>
-            <pre class="custom-jumbotron"><b>Outline:<br /></b>{{ tr_rec.outline }}</pre>
-        </div>
-        
-        
-        <div class="col-lg-4 col-md-4 col-sm-4 no-padding-right right-bar">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title">Pre-requisites</h3>
-                </div>
-                <div class="panel-body">
-                    {% if tr_rec.common_content.prerequisite %}
-                        {% with prerequisite=tr_rec|get_prerequisite:tr_rec.common_content.prerequisite %}
-                            {% if prerequisite %}
-                                <img src="{{ tr_rec.common_content.prerequisite|get_thumb_path:'Small' }}" width="70" style="padding-right: 10px;">
-                                <a href="/watch/{{ prerequisite }}/">{{ tr_rec.common_content.prerequisite.tutorial }}</a>
-                            {% else %}
-                                No Pre-requisites for this tutorial.
-                            {% endif %}
-                        {% endwith %}
-                    {% else %}
-                        No Pre-requisites for this tutorial.
-                    {% endif %}
-                </div>
-            </div>
-            <div class="list-group">
-                {% if tr_rec.common_content.assignment_status and tr_rec.common_content.assignment_status != 6 %}
-                    <div  class="list-group-item">
-                        <a href="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/resources/{{ tr_rec.common_content.assignment }}" target="_blank" class="list-group-item">
-                            <h4 class="list-group-item-heading"><i class="fa fa-2 fa-globe"></i> Assignment</h4>
-                        </a>
-                        <p class="list-group-item-text">
-                            <span style="text-align: left">Status: <i class="{{ tr_rec.common_content.assignment_status|get_review_status_symbol }}" title="{{ tr_rec.common_content.assignment_status|get_review_status_list }}"></i></span>
-                            <span style="float: right">
-                                - <a href="/accounts/view-profile/{{ tr_rec.common_content.assignment_user }}" target="_blank">{{tr_rec.common_content.assignment_user}}</a>
-                            </span>
-                        </p>
-                    </div>
-                {% endif %}
-                {% if tr_rec.common_content.code_status and tr_rec.common_content.code_status != 6 %}
-                    <div  class="list-group-item">
-                        <a href="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/resources/{{ tr_rec.common_content.code }}" target="_blank" class="list-group-item">
-                            <h4 class="list-group-item-heading"><i class="fa fa-2 fa-globe"></i> Code files</h4>
-                            {% with path=media_path|add:'videos/'|add:tutorial_path|add:'resources/'|add:tr_rec.common_content.code %}
-                                {% with code_files=path|get_zip_content %}
-                                    {% if code_files %}
-                                        <ul class="list-zipfiles">
-                                            {% for code_file in code_files %}
-                                                <li>{{ code_file }}</li>
-                                            {% endfor %}
-                                        </ul>
-                                    {% endif %}
-                                {% endwith %}
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <p class="panel-body-heading"><i class="fa fa-youtube-play fa-1"></i> Pre-requisite</p>
+                        <hr class="hline" />
+                        {% if tr_rec.common_content.prerequisite %}
+                            {% with prerequisite=tr_rec|get_prerequisite:tr_rec.common_content.prerequisite %}
+                                {% if prerequisite %}
+                                    <a href="/watch/{{ prerequisite }}/"><img src="{{ tr_rec.common_content.prerequisite|get_thumb_path:'Small' }}" width="70" style="padding-right: 10px;">
+                                    {{ tr_rec.common_content.prerequisite.tutorial }}</a>
+                                {% else %}
+                                    No Pre-requisites for this tutorial.
+                                {% endif %}
                             {% endwith %}
-                        </a>
-                        <p class="list-group-item-text">
-                            <span style="text-align: left">Status: <i class="{{ tr_rec.common_content.code_status|get_review_status_symbol }}" title="{{ tr_rec.common_content.code_status|get_review_status_list }}"></i></span>
-                            <span style="float: right">
-                                - <a href="/accounts/view-profile/{{ tr_rec.common_content.code_user }}" target="_blank">{{tr_rec.common_content.code_user}}</a>
-                            </span>
-                        </p>
+                        {% else %}
+                            No Pre-requisites for this tutorial.
+                        {% endif %}
                     </div>
-                {% endif %}
-                {% if tr_rec.script_status %}
-                    <div class="list-group-item">
-                        <a href="{{ script_base|add:tr_rec.script }}" target="_blank" class="list-group-item">
-                            <h4 class="list-group-item-heading"><i class="fa fa-2 fa-globe"></i> Script</h4>
-                        </a>
+                </div>
+                <div class="list-group">
+                    {% if tr_rec.common_content.assignment_status and tr_rec.common_content.assignment_status != 6 %}
+                        <div  class="list-group-item-container">
+                            <a href="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/resources/{{ tr_rec.common_content.assignment }}" target="_blank" class="list-group-item">
+                                <h4 class="list-group-item-heading"><i class="fa fa-1 fa-file-text"></i>&nbsp; Assignment</h4>
+                            </a>
+                            <!--<p class="list-group-item-text">
+                                <span style="text-align: left">Status: <i class="{{ tr_rec.common_content.assignment_status|get_review_status_symbol }}" title="{{ tr_rec.common_content.assignment_status|get_review_status_list }}"></i></span>
+                                <span style="float: right">
+                                    - <a href="/accounts/view-profile/{{ tr_rec.common_content.assignment_user }}" target="_blank">{{tr_rec.common_content.assignment_user}}</a>
+                                </span>
+                            </p>-->
+                        </div>
+                    {% endif %}
+                    {% if tr_rec.common_content.code_status and tr_rec.common_content.code_status != 6 %}
+                        <div  class="list-group-item-container">
+                            <a href="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/resources/{{ tr_rec.common_content.code }}" target="_blank" class="list-group-item">
+                                <h4 class="list-group-item-heading"><i class="fa fa-1 fa-archive"></i> Code files</h4>
+                                {% with path=media_path|add:'videos/'|add:tutorial_path|add:'resources/'|add:tr_rec.common_content.code %}
+                                    {% with code_files=path|get_zip_content %}
+                                        {% if code_files %}
+                                            <hr class="hline" />
+                                            <ul class="list-zipfiles">
+                                                {% for code_file in code_files %}
+                                                    <li>{{ code_file }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                        {% endif %}
+                                    {% endwith %}
+                                {% endwith %}
+                            </a>
+                            <!--<p class="list-group-item-text">
+                                <span style="text-align: left">Status: <i class="{{ tr_rec.common_content.code_status|get_review_status_symbol }}" title="{{ tr_rec.common_content.code_status|get_review_status_list }}"></i></span>
+                                <span style="float: right">
+                                    - <a href="/accounts/view-profile/{{ tr_rec.common_content.code_user }}" target="_blank">{{tr_rec.common_content.code_user}}</a>
+                                </span>
+                            </p>-->
+                        </div>
+                    {% endif %}
+                    {% if tr_rec.common_content.slide_status and tr_rec.common_content.slide_status != 6 %}
+                        <div class="list-group-item-container">
+                            <a href="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/resources/{{ tr_rec.common_content.slide }}" target="_blank" class="list-group-item">
+                                <h4 class="list-group-item-heading"><i class="fa fa-1 fa-archive"></i> Slides</h4>
+                                {% with path=media_path|add:'videos/'|add:tutorial_path|add:'resources/'|add:tr_rec.common_content.slide %}
+                                    {% with slide_files=path|get_zip_content %}
+                                        {% if slide_files %}
+                                            <hr class="hline" />
+                                            <ul class="list-zipfiles">
+                                                {% for slide_file in slide_files %}
+                                                    <li>{{ slide_file }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                        {% endif %}
+                                    {% endwith %}
+                                {% endwith %}
+                            </a>
+                            <!--<p class="list-group-item-text">
+                                <span style="text-align: left">Status: <i class="{{ tr_rec.common_content.slide_status|get_review_status_symbol }}" title="{{ tr_rec.common_content.slide_status|get_review_status_list }}"></i></span>
+                                <span style="float: right">
+                                    - <a href="/accounts/view-profile/{{ tr_rec.common_content.slide_user }}" target="_blank">{{tr_rec.common_content.slide_user}}</a>
+                                </span>
+                            </p>-->
+                        </div>
+                    {% endif %}
+                    {% if tr_rec.script_status %}
+                        <div class="list-group-item-container">
+                            <a href="{{ script_base|add:tr_rec.script }}" target="_blank" class="list-group-item">
+                                <h4 class="list-group-item-heading"><i class="fa fa-1 fa-link"></i> Script</h4>
+                            </a>
+                            <!--<p class="list-group-item-text">
+                                <span style="text-align: left">Status: <i class="{{ tr_rec.script_status|get_review_status_symbol }}" title="{{ tr_rec.script_status|get_review_status_list }}"></i></span>
+                                <span style="float: right">
+                                    - <a href="/accounts/view-profile/{{ tr_rec.script_user }}" target="_blank">{{tr_rec.script_user}}</a>
+                                </span>
+                            </p>-->
+                        </div>
                         {% if tr_rec.language.name == 'English' %}
                             {% with timed_script=tr_rec.script|get_timed_script:tr_rec.timed_script %}
                                 {% if timed_script %}
-                                    <a href="{{ timed_script }}" target="_blank" class="list-group-item">
-                                        <h4 class="list-group-item-heading"><i class="fa fa-2 fa-globe"></i> Timed Script</h4>
-                                    </a>
+                                    <div class="list-group-item-container">
+                                        <a href="{{ timed_script }}" target="_blank" class="list-group-item">
+                                            <h4 class="list-group-item-heading"><i class="fa fa-1 fa-link"></i> Timed Script</h4>
+                                        </a>
+                                    </div>
                                 {% endif %}
                             {% endwith %}
                         {% endif %}
-                        <p class="list-group-item-text">
-                            <span style="text-align: left">Status: <i class="{{ tr_rec.script_status|get_review_status_symbol }}" title="{{ tr_rec.script_status|get_review_status_list }}"></i></span>
-                            <span style="float: right">
-                                - <a href="/accounts/view-profile/{{ tr_rec.script_user }}" target="_blank">{{tr_rec.script_user}}</a>
-                            </span>
-                        </p>
-                    </div>
-                {% endif %}
-                {% if tr_rec.common_content.slide_status and tr_rec.common_content.slide_status != 6 %}
-                    <div  class="list-group-item">
-                        <a href="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/resources/{{ tr_rec.common_content.slide }}" target="_blank" class="list-group-item">
-                            <h4 class="list-group-item-heading"><i class="fa fa-2 fa-globe"></i> Slides</h4>
-                            {% with path=media_path|add:'videos/'|add:tutorial_path|add:'resources/'|add:tr_rec.common_content.slide %}
-                                {% with slide_files=path|get_zip_content %}
-                                    {% if slide_files %}
-                                        <ul class="list-zipfiles">
-                                            {% for slide_file in slide_files %}
-                                                <li>{{ slide_file }}</li>
-                                            {% endfor %}
-                                        </ul>
-                                    {% endif %}
-                                {% endwith %}
-                            {% endwith %}
-                        </a>
-                        <p class="list-group-item-text">
-                            <span style="text-align: left">Status: <i class="{{ tr_rec.common_content.slide_status|get_review_status_symbol }}" title="{{ tr_rec.common_content.slide_status|get_review_status_list }}"></i></span>
-                            <span style="float: right">
-                                - <a href="/accounts/view-profile/{{ tr_rec.common_content.slide_user }}" target="_blank">{{tr_rec.common_content.slide_user}}</a>
-                            </span>
-                        </p>
-                    </div>
-                {% endif %}
+                    {% endif %}
+                </div>
             </div>
         </div>
     </row>
@@ -369,8 +435,11 @@
             $(".video-show-more").click(function(e) {
                 e.preventDefault();
                 $(".video-info").slideToggle( "slow" );
-                $(this).text( $(this).text() == 'Show more' ? "Show less" : "Show more");
+                $(this).text( $(this).text() == 'Show video info' ? "Hide video info" : "Show video info");
             });
         });
     </script>
+{% endblock %}
+{% block uncompressjsblock %}
+    <script src="https://apis.google.com/js/platform.js"></script> <!-- youtube subscribe button js -->
 {% endblock %}

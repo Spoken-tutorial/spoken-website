@@ -382,7 +382,7 @@ class TrainingLanguageFeedbackForm(forms.ModelForm):
     medium_of_instruction = forms.ChoiceField(widget=forms.RadioSelect, choices = ((0, 'English'), (1, "Vernacular Medium")) )
     gender = forms.ChoiceField(widget=forms.RadioSelect, choices = ((0, 'Male'), (1, "Female")) )
 
-    language_prefered = forms.ModelChoiceField(cache_choices=True, widget = forms.Select(attrs = {}), queryset = Language.objects.none(), empty_label = "--- None ---", error_messages = {'required':'Language field required.'})
+    language_prefered = forms.ModelChoiceField(cache_choices=True, widget = forms.Select(attrs = {}), queryset = Language.objects.order_by('name'), empty_label = "--- None ---", error_messages = {'required':'Language field required.'})
 
     tutorial_was_useful = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice)
     learning_experience = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice)
@@ -440,6 +440,6 @@ class TrainingLanguageFeedbackForm(forms.ModelForm):
             training = kwargs["training"]
             del kwargs["training"]
         super(TrainingLanguageFeedbackForm, self).__init__(*args, **kwargs)
-        self.fields['language_prefered'].queryset = Language.objects.filter(id__in = FossAvailableForWorkshop.objects.filter(foss=training.foss).values_list('language_id'))
+        #self.fields['language_prefered'].queryset = Language.objects.filter(id__in = FossAvailableForWorkshop.objects.filter(foss=training.foss).values_list('language_id'))
         #if args and 'language_prefered' in args[0]:
         #    self.fields['language_prefered'].queryset = Language.objects.filter(id__in = FossAvailableForWorkshop.objects.filter(foss=training.foss).values_list('language_id'))

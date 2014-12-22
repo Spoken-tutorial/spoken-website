@@ -45,23 +45,23 @@ def get_state_info(request, code):
         print e
         return HttpResponse('<h4 style="margin: 30px;">Permission Denied!</h4>')
 
-def training(request, slug = None):
+def training(request, slug = 'training'):
     """ Organiser index page """
     user = request.user
     collectionSet = None
     state = None
     participant_count = 0
     event_type = ['Training', 'Test']
-    model_index = int(request.GET.get('event_type', 0))
+    model_type = {
+        'training' : 0,
+        'onlinetest' : 1
+    }
+    if  not (slug in model_type.keys()):
+        return HttpResponseRedirect('/statistics/training/')
+    model_index = int(request.GET.get('event_type', model_type[slug]))
     model_filter = eval(event_type[model_index] + 'Filter')
     model = eval(event_type[model_index])
-    if slug:
-        state = State.objects.filter(slug=slug)
-        if not State.objects.filter(slug=slug):
-            raise PermissionDenied()
-        collectionSet = model.objects.filter(status = 4, academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(slug=slug)), participant_count__gt=0).order_by('-tdate')
-    else:
-        collectionSet = model.objects.filter(status = 4, participant_count__gt=0).order_by('-tdate')
+    collectionSet = model.objects.filter(status = 4, participant_count__gt=0).order_by('-tdate')
     header = {
         1: SortableHeader('#', False),
         2: SortableHeader('academic__state', True, 'State'),
@@ -105,7 +105,7 @@ def training(request, slug = None):
     context['ordering'] = ordering
     context['state'] = slug
     context['participant_count'] = participant_count
-    context['event_type'] = event_type[int(request.GET.get('event_type', 0))].lower
+    context['event_type'] = event_type[model_index].lower
     if model_index:
         context['model'] = 'Online-Test'
     else:

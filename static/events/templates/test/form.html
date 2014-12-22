@@ -4,6 +4,7 @@
 {% block title %}New Test Request{% endblock %}
 {% block cssblock %}
     <link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />
+    <link rel="stylesheet" href="{% static 'spoken/css/jquery.datetimepicker.css' %}" type="text/css" media="screen" charset="utf-8" />
 {% endblock %}
 
 {% block heading %}
@@ -201,60 +202,84 @@
             ajaxFossDeptFillDatas('foss', 'dept', 1);
         });
         
-function ajaxFossDeptFillDatas(foss, dept, type){
-    $afoss = $('#id_foss');
-    $adepartment = $('#id_department');
-    if(type){
-        var workshop = $(".training").val();
-    } else {
-        var workshop = $(".workshop").val();
-    }
-    
-    $foss = foss || "";
-    $department = dept || "";
-    $type = type;
-    fields = {}
-    fields['type'] = type;
-    if($foss) {
-        fields['foss'] = 'foss';
-    }
-    if($department) {
-        fields['dept'] = 'dept';
-    }
-    /* see thread-user.js */
-    $.ajax({
-        url: "/software-training/ajax-dept-foss/",
-        type: "POST",
-        data: {
-            workshop: workshop,
-            fields: fields,
-        },
-        success: function(data) {
-            console.log(data);
-            if(data.foss){
-                $afoss.html(data.foss);
-                $afoss.trigger("chosen:updated");
-                $afoss.removeAttr("disabled");
-            }else{
-                $ac_institute.html('<option>-- None -- </option>')
-                $ac_institute.trigger("chosen:updated");
-                $ac_institute.attr("disabled", "disabled");
-                //alert('No City found for this State!!');
-            }
-            if(data.dept){
-                $adepartment.html(data.dept);
-                $adepartment.trigger("chosen:updated");
-                $adepartment.removeAttr("disabled");
-            }else{
-                $adepartment.html('<option>-- None -- </option>')
-                $adepartment.trigger("chosen:updated");
-                $adepartment.attr("disabled", "disabled");
-                //alert('No Location found for this District!!');
-            }
-            console.log(data);
+    function ajaxFossDeptFillDatas(foss, dept, type){
+        $afoss = $('#id_foss');
+        $adepartment = $('#id_department');
+        if(type){
+            var workshop = $(".training").val();
+        } else {
+            var workshop = $(".workshop").val();
         }
-    });
-}
-
+        
+        $foss = foss || "";
+        $department = dept || "";
+        $type = type;
+        fields = {}
+        fields['type'] = type;
+        if($foss) {
+            fields['foss'] = 'foss';
+        }
+        if($department) {
+            fields['dept'] = 'dept';
+        }
+        /* see thread-user.js */
+        $.ajax({
+            url: "/software-training/ajax-dept-foss/",
+            type: "POST",
+            data: {
+                workshop: workshop,
+                fields: fields,
+            },
+            success: function(data) {
+                console.log(data);
+                if(data.foss){
+                    $afoss.html(data.foss);
+                    $afoss.trigger("chosen:updated");
+                    $afoss.removeAttr("disabled");
+                }else{
+                    $ac_institute.html('<option>-- None -- </option>')
+                    $ac_institute.trigger("chosen:updated");
+                    $ac_institute.attr("disabled", "disabled");
+                    //alert('No City found for this State!!');
+                }
+                if(data.dept){
+                    $adepartment.html(data.dept);
+                    $adepartment.trigger("chosen:updated");
+                    $adepartment.removeAttr("disabled");
+                }else{
+                    $adepartment.html('<option>-- None -- </option>')
+                    $adepartment.trigger("chosen:updated");
+                    $adepartment.attr("disabled", "disabled");
+                    //alert('No Location found for this District!!');
+                }
+                console.log(data);
+            }
+        });
+    }
+    </script>
+    <script src="{% static 'spoken/js/jquery.datetimepicker.js' %}"></script>
+    <script>
+        $('.datetime').datetimepicker({
+            onGenerate:function( ct ){
+                $(this).find('.xdsoft_day_of_week0')
+                    .addClass('xdsoft_disabled');
+            },
+            lang:'en',
+            format:'Y-m-d H:i',
+            formatDate:'Y/m/d',
+            minDate:0, // yesterday is minimum date
+            weekends:[],
+            maxDate:'+1970/06/31', // tommorow date with in 6 month
+            step:5,
+            minTime:'08:00',
+            maxTime:'18:00',
+        });
+        $('.date').datetimepicker({
+            lang:'en',
+            timepicker:false,
+            format:'Y-m-d',
+            formatDate:'Y/m/d',
+            maxDate:'+1970/06/31', // tommorow date with in 6 month
+        });
     </script>
 {% endblock %}

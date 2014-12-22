@@ -245,14 +245,14 @@ Spoken Tutorial
         subject = ""
         message = '''Dear Organizer,
 Greetings from IIT Bombay!
-Thanks for successfully conducting the Training session, today. We hereby urge \
-you to click on the following link close the training session and click on \
-'Mark as Complete'..If for some reason you are not able to conduct the \
+Thanks for successfully conducting the Training session on {0}. We hereby urge \
+you to click on the following link to close the training session and click on \
+'Mark as Complete'. If for some reason you are not able to conduct the \
 Session 1, please ensure that you continue on to the further Sessions 2,3,4,\
 ...and so on.
 Please click on the following link to close the Training:
 
-....(link comes here)...
+{1}
 
 Note:
     It you do not close the Training by clicking on the above link then \
@@ -260,7 +260,7 @@ automatically after 2 days the system will close on your behalf
 
 Regards,
 Spoken Tutorial
-'''
+'''.format(instance.tdate, "http://spoken-tutorial.org/software-training/training/"+instance.id+"/attendance")
     # send email
     email = EmailMultiAlternatives(
         subject, message, 'administrator@spoken-tutorial.org',
