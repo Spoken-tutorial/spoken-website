@@ -1,6 +1,7 @@
 from HTMLParser import HTMLParser
-import time, mechanize, cookielib
+import time, mechanize, cookielib, datetime
 from BeautifulSoup import BeautifulSoup
+from creation.views import get_video_info
 
 class MLStripper(HTMLParser):
     def __init__(self):
@@ -53,13 +54,16 @@ def getNewBrowser():
 
 def generate_subtitle(srt_url, srt_file_path):
     soup = readUrl(srt_url)
-    table = soup.findAll("table", attrs={'border':'1'})
-    
+    table = soup.findAll("table")
+    if not table:
+        print 'table not found'
+        return False
     try:
         rows = table[0].findAll("tr")
         counter = 1
         srt_data = ''
-        previous_time = '00:00:00'
+        previous_time = None
+        previous_script_data = None
         for row in rows:
             cols = row.findAll("td")
             flag = 0
@@ -69,19 +73,21 @@ def generate_subtitle(srt_url, srt_file_path):
                     break
                 if flag:
                     flag = 0
+                    if previous_script_data == None:
+                        previous_script_data = get_formatted_script(col)
+                        continue
                     if time_error:
                         time_error = 0
                         continue
-                    if col.string:
-                        srt_data += col.text.strip('\n').strip() + '\n\n'
-                    else:
-                        srt_data += strip_tags(str(col.renderContents())\
-                        .replace('&amp;', '&').replace('&quot;', '"')\
-                        .replace('&gt;', '>').replace('&lt;', '<')).decode('utf-8').strip('\n').strip() + '\n\n'
+                    srt_data += previous_script_data
+                    previous_script_data = get_formatted_script(col)
                 else:
                     flag = 1
                     formatted_time = get_formatted_time(col.text.replace('.', ':').replace('-', ':').replace('/', ':'))
                     if formatted_time:
+                        if previous_time == None:
+                            previous_time = formatted_time
+                            continue
                         srt_data += str(counter) + '\n'
                         srt_data += previous_time + ' --> ' + formatted_time + '\n'
                         counter += 1
@@ -89,11 +95,20 @@ def generate_subtitle(srt_url, srt_file_path):
                     else:
                         time_error = 1
                 #print col.text
+        video_info = get_video_info(rreplace(srt_file_path, 'srt', 'ogv', 1))
         if srt_data:
+            if previous_script_data:
+                srt_data += str(counter) + '\n'
+                if video_info['duration']:
+                    srt_data += previous_time + ' --> ' + video_info['duration'] + '\n'
+                else:
+                    srt_data += previous_time + ' --> ' + str((datetime.datetime.strptime(\
+                        previous_time, "%H:%M:%S") + datetime.timedelta(seconds = 5)).time()) + '\n'
+                srt_data += previous_script_data
             file_head = open(srt_file_path,"w")
             file_head.write(srt_data.encode("utf-8"))
             file_head.close()
-        #print srt_data
+           #print srt_data
     except Exception, e:
         #print e
         return False
@@ -126,3 +141,15 @@ def get_formatted_time(raw_time_string):
             raw_time_parts[2] = '0' + raw_time_parts[2]
         return raw_time_parts[0] + ':' + raw_time_parts[1] + ':' + raw_time_parts[2]
     return None
+
+def get_formatted_script(script):
+    if script.string:
+        return script.text.strip('\n').strip() + '\n\n'
+    else:
+        return strip_tags(str(script.renderContents())\
+        .replace('&amp;', '&').replace('&quot;', '"')\
+        .replace('&gt;', '>').replace('&lt;', '<')).decode('utf-8').strip('\n').strip() + '\n\n'
+
+def rreplace(s, old, new, occurrence):
+    li = s.rsplit(old, occurrence)
+    return new.join(li)

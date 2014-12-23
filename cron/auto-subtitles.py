@@ -73,52 +73,119 @@ def generate_subtitle(srt_url, srt_file_path):
     if not table:
         print 'table not found'
         return False
-    #try:
-    rows = table[0].findAll("tr")
-    counter = 1
-    srt_data = ''
-    previous_time = '00:00:00'
-    for row in rows:
-        cols = row.findAll("td")
-        flag = 0
-        time_error = 0
-        for col in cols:
-            if col.text.lower() == 'time':
-                break
-            if flag:
-                flag = 0
-                if time_error:
-                    time_error = 0
-                    continue
-                if col.string:
-                    srt_data += col.text.strip('\n').strip() + '\n\n'
+    try:
+        rows = table[0].findAll("tr")
+        counter = 1
+        srt_data = ''
+        previous_time = None
+        previous_script_data = None
+        for row in rows:
+            cols = row.findAll("td")
+            flag = 0
+            time_error = 0
+            for col in cols:
+                if col.text.lower() == 'time':
+                    break
+                if flag:
+                    flag = 0
+                    if previous_script_data == None:
+                        previous_script_data = get_formatted_script(col)
+                        continue
+                    if time_error:
+                        time_error = 0
+                        continue
+                    srt_data += previous_script_data
+                    previous_script_data = get_formatted_script(col)
                 else:
-                    srt_data += strip_tags(str(col.renderContents())\
-                    .replace('&amp;', '&').replace('&quot;', '"')\
-                    .replace('&gt;', '>').replace('&lt;', '<')).decode('utf-8').strip('\n').strip() + '\n\n'
-            else:
-                flag = 1
-                formatted_time = get_formatted_time(col.text.replace('.', ':').replace('-', ':').replace('/', ':'))
-                if formatted_time:
-                    srt_data += str(counter) + '\n'
-                    srt_data += previous_time + ' --> ' + formatted_time + '\n'
-                    counter += 1
-                    previous_time = formatted_time
+                    flag = 1
+                    formatted_time = get_formatted_time(col.text.replace('.', ':').replace('-', ':').replace('/', ':'))
+                    if formatted_time:
+                        if previous_time == None:
+                            previous_time = formatted_time
+                            continue
+                        srt_data += str(counter) + '\n'
+                        srt_data += previous_time + ' --> ' + formatted_time + '\n'
+                        counter += 1
+                        previous_time = formatted_time
+                    else:
+                        time_error = 1
+                #print col.text
+        video_info = get_video_info(rreplace(srt_file_path, 'srt', 'ogv', 1))
+        if srt_data:
+            if previous_script_data:
+                srt_data += str(counter) + '\n'
+                if video_info['duration']:
+                    srt_data += previous_time + ' --> ' + video_info['duration'] + '\n'
                 else:
-                    time_error = 1
-            #print col.text
-    if srt_data:
-        file_head = open(srt_file_path,"w")
-        file_head.write(srt_data.encode("utf-8"))
-        file_head.close()
-        #print srt_data
-    else:
-        print 'no srt data'
-        return False
-    """except Exception, e:
+                    srt_data += previous_time + ' --> ' + str((datetime.datetime.strptime(\
+                        previous_time, "%H:%M:%S") + datetime.timedelta(seconds = 5)).time()) + '\n'
+                srt_data += previous_script_data
+            file_head = open(srt_file_path,"w")
+            file_head.write(srt_data.encode("utf-8"))
+            file_head.close()
+    except Exception, e:
         print e
-        return False"""
+        return False
     return True
+
+
+# returns video meta info using ffmpeg
+def get_video_info(path):
+    """Uses ffmpeg to determine information about a video."""
+    info_m = {}
+    try:
+        process = subprocess.Popen(['/usr/bin/ffmpeg', '-i', path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        stdout, stderr = process.communicate()
+        duration_m = re.search(r"Duration:\s{1}(?P<hours>\d+?):(?P<minutes>\d+?):(?P<seconds>\d+\.\d+?)", stdout, re.DOTALL).groupdict()
+        info_m = re.search(r": Video: (?P<codec>.*?), (?P<profile>.*?), (?P<width>.*?)x(?P<height>.*?), ", stdout, re.DOTALL).groupdict()
+
+        hours = Decimal(duration_m['hours'])
+        minutes = Decimal(duration_m['minutes'])
+        seconds = Decimal(duration_m['seconds'])
+
+        total = 0
+        total += 60 * 60 * hours
+        total += 60 * minutes
+        total += seconds
+
+        info_m['hours'] = hours
+        info_m['minutes'] = minutes
+        info_m['seconds'] = seconds
+        tmp_seconds = str(int(seconds))
+        if seconds < 10:
+            tmp_seconds = "0" + tmp_seconds
+        info_m['duration'] = duration_m['hours'] + ':' + duration_m['minutes'] + ":" + tmp_seconds
+        info_m['total'] = int(total)
+        info_m['width'] = int(info_m['width'])
+        # [PAR 1i:1 DAR 3:2] error in height
+        info_m['height'] = int(info_m['height'].split()[0])
+        info_m['size'] = get_filesize(path)
+    except:
+        info_m['codec'] = ''
+        info_m['profile'] = ''
+        info_m['hours'] = 0
+        info_m['minutes'] = 0
+        info_m['seconds'] = 0
+        info_m['duration'] = 0
+        info_m['total'] = 0
+        info_m['width'] = 0
+        info_m['height'] = 0
+        info_m['size'] = 0
+    return info_m
+
+
+def get_formatted_script(script):
+    if script.string:
+        return script.text.strip('\n').strip() + '\n\n'
+    else:
+        return strip_tags(str(script.renderContents())\
+        .replace('&amp;', '&').replace('&quot;', '"')\
+        .replace('&gt;', '>').replace('&lt;', '<')).decode('utf-8').strip('\n').strip() + '\n\n'
+
+
+def rreplace(s, old, new, occurrence):
+    li = s.rsplit(old, occurrence)
+    return new.join(li)
 
 
 def get_digits(raw_string):
