@@ -30,6 +30,7 @@
 		{% if collection %}
 		<table class="table table-striped table-hover table-bordered">
 			<tr>
+                <th>#</th>
 				<th>First Name</th>
 				<th>Last Name</th>
 				<th>Score</th>
@@ -37,6 +38,7 @@
 			{% for record in collection %}
 			    {% with mdluser=record.mdluser_id|get_mdluser_details %}
 				    <tr>
+                        <td>{{ forloop.counter }}</td>
 					    <td>
 					        {% if record.mdluser_firstname  %}
 					            {{ record.mdluser_firstname }}

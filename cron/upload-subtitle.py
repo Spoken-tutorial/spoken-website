@@ -114,29 +114,73 @@ if __name__ == "__main__":
             where id = %s", [str(row[1]),])
         language = db_cursor.fetchone()
         video_title = str(row[6].replace(' ', '-'))
-        video_path = config.MEDIA_ROOT + 'videos/' + str(row[5]) + '/' + str(row[3]) + '/'
+        video_path = config.MEDIA_ROOT + 'videos/' + str(row[5]) + '/' + \
+            str(row[3]) + '/'
         english_srt = video_path + video_title + '-English.srt'
         status_flag = False
+        file_missing = False
+        print ''
+        print 'FOSS Id:', row[5]
+        print 'Tutorial:', row[6]
+        print 'Language:', language[1]
         if os.path.isfile(english_srt):
-            caption.set_caption_language_title('en')
-            message, status_flag = caption.upload_translated_captions(english_srt, row[4])
-            if status_flag:
+            file_missing = False
+            ldb_cursor.execute("select * from srt_pending_uploads where trid=" \
+                + str(row[0]) + " and native_or_english=0")
+            esrt_row = ldb_cursor.fetchone()
+            #print 'e------------', esrt_row, '----------'
+            if esrt_row is None:
+                caption.set_caption_language_title('en')
+                message, status_flag = caption.upload_translated_captions(\
+                    english_srt, row[4])
+                if status_flag:
+                    ldb_cursor.execute("insert into srt_pending_uploads \
+                        (trid,native_or_english) values(%s, 0)", \
+                        [str(row[0]),])
+                    ldb.commit()
+                    overall_status = 1
+                print message
+            else:
+                print row[4], '- English - Already Exist'
                 overall_status = 1
-            print message
+        else:
+            file_missing = True
+            print row[4], '- English -', 'SRT File Missing'
         if language[1] != 'English':
             native_srt = video_path + video_title + '-' + language[1] + '.srt'
             if os.path.isfile(native_srt):
-                language_title = ''
-                if language[2] == 'en':
-                    language_title = language[1]
-                caption.set_caption_language_title(language[2], language_title)
-                message, status_flag = caption.upload_translated_captions(native_srt, row[4])
-                print message
+                ldb_cursor.execute("select * from srt_pending_uploads where \
+                trid=" + str(row[0]) + " and native_or_english=1")
+                nsrt_row = ldb_cursor.fetchone()
+                #print 'n------------', nsrt_row, '----------'
+                if nsrt_row is None:
+                    file_missing = False
+                    language_title = ''
+                    if language[2] == 'en':
+                        language_title = language[1]
+                    caption.set_caption_language_title(language[2], \
+                        language_title)
+                    message, status_flag = caption.upload_translated_captions(\
+                        native_srt, row[4])
+                    if status_flag:
+                        ldb_cursor.execute("insert into srt_pending_uploads \
+                            (trid,native_or_english) values(%s, 1)", \
+                            [str(row[0]),])
+                        ldb.commit()
+                    print message
+                else:
+                    print row[4], '-', language[1], '- Already Exist'
+                    status_flag = True
             else:
+                file_missing = True
+                print row[4], '-', language[1], '-', 'SRT File Missing'
                 status_flag = False
         if status_flag and overall_status:
-            ldb_cursor.execute("insert into srt_uploads (trid) values(%s)", [str(row[0]),])
+            ldb_cursor.execute("insert into srt_uploads (trid) values(%s)", \
+                [str(row[0]),])
             ldb.commit()
-        else:
+        elif file_missing:
             continue
+        else:
+            time.sleep(1)
         time.sleep(1)

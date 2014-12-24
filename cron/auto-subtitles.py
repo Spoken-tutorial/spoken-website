@@ -1,5 +1,5 @@
 from HTMLParser import HTMLParser
-import time, mechanize, cookielib
+import time, mechanize, cookielib, datetime
 from BeautifulSoup import BeautifulSoup
 from urllib import urlopen, quote
 import MySQLdb
@@ -104,7 +104,8 @@ def generate_subtitle(srt_url, srt_file_path):
                             previous_time = formatted_time
                             continue
                         srt_data += str(counter) + '\n'
-                        srt_data += previous_time + ' --> ' + formatted_time + '\n'
+                        srt_data += previous_time + ' --> ' + str((datetime.datetime.strptime(\
+                                                formatted_time, "%H:%M:%S") - datetime.timedelta(seconds = 1)).time()) + '\n'
                         counter += 1
                         previous_time = formatted_time
                     else:
@@ -230,7 +231,7 @@ db = MySQLdb.connect(host = DB_HOST, user = DB_USER, passwd = DB_PASS, db = DB_N
 cur = db.cursor()
 cur.execute("SELECT * FROM creation_tutorialresource where status = 1 or status = 2")
 rows = cur.fetchall()
-overwrite = False
+overwrite = True
 error_log_file_head = open(LOG_ROOT + 'srt-error-log.txt',"w")
 success_log_file_head = open(LOG_ROOT + 'srt-success-log.txt',"w")
 for row in rows:
@@ -264,6 +265,8 @@ for row in rows:
         code = e.code
     result = ''
     if(int(code) == 200):
+        if overwrite and os.path.isfile(srt_file_path + srt_file_name):
+            os.remove(srt_file_path + srt_file_name)
         if generate_subtitle(script_path, srt_file_path + srt_file_name):
             success_string = 'Success: ' + str(foss[1]) + ', ' + srt_file_name + '\n'
             success_log_file_head.write(success_string)
