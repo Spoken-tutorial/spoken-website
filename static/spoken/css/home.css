@@ -18,16 +18,6 @@
             
         }
         
-        #slideshow{
-            height: 50px;
-            overflow: hidden;
-        }
-        #slideshow .btn-primary, button.close{
-            background-color: black;
-            border-color: black;
-            opacity: 10;
-            color: white;
-        }
         .announcement{
             height: 50px;
             font-size: 14px;

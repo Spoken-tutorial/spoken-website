@@ -24,7 +24,9 @@
 {% endblock %}
 {% block cssblock %}
     <link href="{% static 'spoken/css/video-js.min.css' %}" rel="stylesheet" type="text/css">
-    <link rel="stylesheet" href="{% static 'spoken/css/jquery.fancybox.css' %}" type="text/css" media="screen" charset="utf-8" />
+    <link rel="stylesheet" href="{% static 'spoken/css/jquery.fancybox.pack.css' %}" type="text/css" media="screen" charset="utf-8" />
+{% endblock %}
+{% block cssblock %}
     <style type="text/css">
         .video-js {
             padding-top: 56.25%
@@ -192,7 +194,6 @@
             margin-bottom: 8px;
         }
     </style>
-    <script src="{% static 'spoken/js/video.js' %}"></script>
 {% endblock %}
 {% load creationdata %}
 {% block title %}{{ tr_rec.tutorial_detail.tutorial }} - {{ tr_rec.language.name }}{% endblock %}
@@ -398,8 +399,6 @@
     </row>
 {% endblock %}
 {% block jsblock %}
-    <script src="{% static 'spoken/js/jquery.fancybox.pack.js' %}"></script>
-    <script src="{% static 'spoken/js/jquery.mousewheel-3.0.6.pack.js' %}"></script>
     <script>
         currentVideo = $('.playlist-item.active');
         nextVideo = currentVideo.next('li');
@@ -441,5 +440,8 @@
     </script>
 {% endblock %}
 {% block uncompressjsblock %}
+    <script src="{% static 'spoken/js/video.min.js' %}"></script>
+    <script src="{% static 'spoken/js/jquery.fancybox.pack.js' %}"></script>
+    <script src="{% static 'spoken/js/jquery.mousewheel-3.0.6.pack.js' %}"></script>
     <script src="https://apis.google.com/js/platform.js"></script> <!-- youtube subscribe button js -->
 {% endblock %}

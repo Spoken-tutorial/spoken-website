@@ -29,10 +29,11 @@
         <link href='http://fonts.googleapis.com/css?family=Alegreya' rel='stylesheet' type='text/css'>
         <link href='http://fonts.googleapis.com/css?family=Josefin+Sans' rel='stylesheet' type='text/css'>
         <link href='http://fonts.googleapis.com/css?family=Comfortaa' rel='stylesheet' type='text/css'>
-        {% compress css %}
         <link rel="stylesheet" href="{% static 'spoken/css/bootstrap.min.css' %}" type="text/css" media="screen" charset="utf-8" />
         <link rel="stylesheet" href="{% static 'spoken/css/font-awesome.min.css' %}" type="text/css" media="screen" charset="utf-8" />
-        <link rel="stylesheet" href="{% static 'spoken/css/yamm.css' %}" type="text/css" media="screen" charset="utf-8" />
+        <link rel="stylesheet" href="{% static 'spoken/css/yamm-min.css' %}" type="text/css" media="screen" charset="utf-8" />
+        {% block uncompresscssblock %}{% endblock %}
+        {% compress css %}
         <link rel="stylesheet" href="{% static 'spoken/css/main.css' %}" type="text/css" media="screen" charset="utf-8" />
         {% block cssblock %}{% endblock %}
         {% endcompress %}
@@ -367,12 +368,12 @@
         <!-- Bootstrap core JavaScript
         ================================================== -->
         <!-- Placed at the end of the document so the pages load faster -->
-        {% compress js %}
         <script src="{% static 'spoken/js/jquery-1.11.0.min.js' %}"></script>
         <script src="{% static 'spoken/js/bootstrap.min.js' %}"></script>
+    {% block uncompressjsblock %}{% endblock %}
+    {% compress js %}
         <script src="{% static 'spoken/js/base.js' %}"></script>
         {% block jsblock %}{% endblock %}
     {% endcompress %}
-    {% block uncompressjsblock %}{% endblock %}
     </body>
 </html>
