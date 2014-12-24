@@ -167,7 +167,6 @@ USE_TZ = TZ_STATUS
 #events settings
 ONLINE_TEST_URL = ONLINE_TEST_URL
 KEEP_LOGGED_DURATION = 604800
-CAPTCHA_OUTPUT_FORMAT = u'%(hidden_field)s<span class="input-group-addon">%(image)s<a href="#void" class="captcha-refresh"><i class="fa fa-2 fa-refresh"></i></a></span>%(text_field)s'
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/var/www/example.com/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/') # Absolute path to the media.
@@ -214,12 +213,6 @@ DATABASE_ROUTERS = ['mdldjango.router.MdlRouter', 'cdeep.router.CdeepRouter', 'w
 REPORT_BUILDER_INCLUDE = []
 REPORT_BUILDER_EXCLUDE = ['user'] # Allow all models except User to be accessed
 
-"""CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-    }
-}"""
-
 #template
 TEMPLATE_CONTEXT_PROCESSORS = (
     "django.contrib.auth.context_processors.auth",
@@ -250,3 +243,6 @@ COMPRESS_CSS_FILTERS = (
 }"""
 
 HTML_MINIFY = HTML_MINIFY
+RECAPTCHA_PUBLIC_KEY = '6Le8qf8SAAAAABV9wYBW99Jotv-EygJXIhMa_n54'
+RECAPTCHA_PRIVATE_KEY = '6Le8qf8SAAAAAF9CkucURPapw2vaDPrU4qMzfg73'
+RECAPTCHA_USE_SSL = True
