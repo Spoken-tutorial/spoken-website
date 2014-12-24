@@ -86,7 +86,7 @@ INSTALLED_APPS = (
 )
 
 MIDDLEWARE_CLASSES = (
-    'django.middleware.cache.UpdateCacheMiddleware',
+    #'django.middleware.cache.UpdateCacheMiddleware',
     'htmlmin.middleware.HtmlMinifyMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -97,7 +97,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.common.BrokenLinkEmailsMiddleware',
     'masquerade.middleware.MasqueradeMiddleware',
     'django.contrib.redirects.middleware.RedirectFallbackMiddleware',
-    'django.middleware.cache.FetchFromCacheMiddleware',
+    #'django.middleware.cache.FetchFromCacheMiddleware',
     'htmlmin.middleware.MarkRequestMiddleware',
 )
 
@@ -214,11 +214,11 @@ DATABASE_ROUTERS = ['mdldjango.router.MdlRouter', 'cdeep.router.CdeepRouter', 'w
 REPORT_BUILDER_INCLUDE = []
 REPORT_BUILDER_EXCLUDE = ['user'] # Allow all models except User to be accessed
 
-CACHES = {
+"""CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
     }
-}
+}"""
 
 #template
 TEMPLATE_CONTEXT_PROCESSORS = (
@@ -242,10 +242,11 @@ COMPRESS_CSS_FILTERS = (
     'compressor.filters.css_default.CssAbsoluteFilter',
     'compressor.filters.cssmin.CSSMinFilter',
 )
-CACHES = {
+"""CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
         'LOCATION': 'unique-snowflake'
     }
-}
+}"""
+
 HTML_MINIFY = HTML_MINIFY
