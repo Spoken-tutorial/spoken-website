@@ -4,64 +4,10 @@
 {% load creationdata %}
 {% block cssblock %}
     <link href="{% static 'spoken/css/video-js.min.css' %}" rel="stylesheet" type="text/css">
-    <style>
-        #st_video, #st_video_html5_api{
-            width: 100%;
-        }
-        #st_video {
-            max-height: 398px;
-        }
-        #st_video_html5_api {
-            max-height: 392px;
-        }
-        .banner-img-container{
-            position: relative;
-            overflow: hidden;
-        }
-        .banner-img-container .go{
-            position: absolute;
-            top: 84.5%;
-            right: 8%;
-            
-        }
-        
-        #slideshow{
-            height: 50px;
-            overflow: hidden;
-        }
-        #slideshow .btn-primary, button.close{
-            background-color: black;
-            border-color: black;
-            opacity: 10;
-            color: white;
-        }
-        .announcement{
-            height: 50px;
-            font-size: 14px;
-            font-weight: bold;
-            color: white;
-            border-radius: 0px;
-        }
-        .text-container{
-            padding: 0 60px;
-        }
-        .navbar-fixed-top{
-            position: relative;
-        }
-        button.close{
-            padding-top: 0px;
-            padding-bottom: 3px;
-            padding-left: 4px;
-            padding-right: 4px;
-        }
-        button.close:hover{
-            background: white;
-            opacity: 10;
-        }
-    </style>
+    <link href="{% static 'spoken/css/home.css' %}" rel="stylesheet" type="text/css">
 {% endblock %}
 {% block title %}Home{% endblock %}
-{% block heading %}{% endblock %}
+{% block heading %}<i class="home-page-title-i">spoken tutorial</i>{% endblock %}
 {% block homealert %}
 	{% if messages %}
 		{% for message in messages %}
@@ -99,20 +45,20 @@
     <div class="page1">
         <div id="banner-wrapper">
             <div class="banner-img-container">
-                <img class="col-lg-12 col-md-12 col-sm-12 col-xs-12 banner-img" src="/static/spoken/images/home-banner.jpg">
+                <img class="col-lg-12 col-md-12 col-sm-12 col-xs-12 banner-img" alt="banner image" src="/static/spoken/images/home-banner.jpg">
                 <div class='go'>
-                    <a href="/tutorial-search/" title="Search videos"><img class='go-image' src="/static/spoken/images/rounded-arrow.png"></a>
+                    <a href="/tutorial-search/" title="Search videos"><img class='go-image' alt="rounded arrow" src="/static/spoken/images/rounded-arrow.png"></a>
                 </div>
             </div>
             <div class="banner-items col-lg-offset-2 col-md-offset-2 col-sm-offset-2 col-xs-offset-2 col-lg-8 col-md-8 col-sm-8 col-xs-8">
                 <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
-                <a href="/software-training/" title="Software Training"><img class="banner-item" src="/static/spoken/images/1.jpg"></a>
+                <a href="/software-training/" title="Software Training"><img alt="Software training" class="banner-item" src="/static/spoken/images/1.jpg"></a>
                 </div>
                 <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
-                    <a href="/creation/" title="Spoken Tutorial Creation"><img class="banner-item" src="/static/spoken/images/2.jpg"></a>
+                    <a href="/creation/" title="Spoken Tutorial Creation"><img alt="Spoken-Tutorial creation" class="banner-item" src="/static/spoken/images/2.jpg"></a>
                 </div>
                 <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
-                    <a href="http://forums.spoken-tutorial.org" title="Spoken Tutorial Forum" target="_blank"><img class="banner-item" src="/static/spoken/images/3.jpg"></a>
+                    <a href="http://forums.spoken-tutorial.org" title="Spoken Tutorial Forum" target="_blank"><img alt="Spoken-Tutorial forums"class="banner-item" src="/static/spoken/images/3.jpg"></a>
                 </div>
             </div>
         </div>
@@ -129,8 +75,6 @@
 {% block content %}
     {% block alert %}
     {% endblock %}
-    {% block page_title %}
-    {% endblock %}
     <div id="page2" class="page2">
         <a href="#page2"></a>
         <div class="spacer"></div>
@@ -141,12 +85,14 @@
                 {% for record in testimonials %}
                     <div class="col-lg-6 col-md-6 col-sm-6 testimonial-item">
                         <div class="testimonial-content">
-                            <i class="fa fa-quote-left pull-left" style="color:#e6e6e6;"></i>{{ record.minified_content|len_cutter:320 }} - <a href="/testimonials"> read </a><i class="fa fa-quote-right pull-right" style="color:#e6e6e6;"></i>
+                            <i class="fa fa-quote-left pull-left testimonial-quote"></i>
+                            {{ record.minified_content|len_cutter:320 }} - <a href="/testimonials"> read </a>
+                            <i class="fa fa-quote-right pull-right testimonial-quote"></i>
                         </div>
                         <div class="pull-left">
                             <div class="user-details">
                                 <div class="caretr"></div>
-                                <img width="30" height="30" src="/static/spoken/images/no-profile-image.jpg" />
+                                <img width="30" height="30" alt="blank profile image" src="/static/spoken/images/no-profile-image.jpg" />
                                 {% if record.user_name %}
                                      {{ record.user_name }}
                                 {% elif record.user.first_name %}
@@ -174,7 +120,7 @@
                         <div class="video-item">
                             <div class="thump">
                                 <a href="/watch/{{ record.tutorial_detail.foss.foss|get_url_name }}/{{ record.tutorial_detail.tutorial|get_url_name }}/{{ record.language }}">
-                                    <img src="{{ record.tutorial_detail|get_thumb_path:'Small' }}">
+                                    <img alt="{{ record.tutorial_detail.tutorial }}" src="{{ record.tutorial_detail|get_thumb_path:'Small' }}">
                                     <div class="video-item-playlist">
                                     <h5> {{ record.tutorial_detail.foss.foss }} {{ k }} +</h5>
                                     </div>
@@ -202,7 +148,7 @@
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-4 col-sm-4">
-                     <img  src="/static/spoken/images/forum.jpg">
+                     <img  src="/static/spoken/images/forum.jpg" alt="forums image">
                 </div>
             </div>
         </div>
@@ -245,11 +191,11 @@
                 <div class="col-lg-4 col-md-4 col-sm-4 contact comfortaa">
                     <h4 class='page-title'>Contact</h4>
                     <div><span class="fa fa-2 fa-home"></span> Spoken Tutorial, IIT Bombay</div>
-                    <div><span style="color:#008000" class="fa fa-2 fa-phone"></span> + 91 22 25764229 </div>
-                    <div><span style="color:#bac88a" class="fa fa-2 fa-envelope"></span> contact [at] spoken-tutorial [dot] org</div>
-                    <div><span style="color:#db2625" class="fa fa-2 fa-youtube"></span> <a href="http://www.youtube.com/user/SpokenTutorialIITB/" target="_blank">YouTube channel</a></div>
-                    <div><span style="color:#dc4836" class="fa fa-2 fa-google-plus"></span> <a href="https://plus.google.com/114550410376641567079" target="_blank">Google+ page</a></div>
-                    <div><span style="color:#00a5e1" class="fa fa-2 fa-skype"></span> st-iitb</div>
+                    <div><span class="fa fa-2 fa-phone"></span> + 91 22 25764229 </div>
+                    <div><span class="fa fa-2 fa-envelope"></span> contact [at] spoken-tutorial [dot] org</div>
+                    <div><span class="fa fa-2 fa-youtube"></span> <a href="http://www.youtube.com/user/SpokenTutorialIITB/" target="_blank">YouTube channel</a></div>
+                    <div><span class="fa fa-2 fa-google-plus"></span> <a href="https://plus.google.com/114550410376641567079" target="_blank">Google+ page</a></div>
+                    <div><span class="fa fa-2 fa-skype"></span> st-iitb</div>
                     <!--<div><span class="fa fa-2 fa-twitter"></span> <a href="#">Twitter</a></div>-->
                 </div>
                 <div class="col-lg-4 col-md-4 col-sm-4 feedback">
@@ -300,145 +246,7 @@
     </div>
 {% endblock %}
 {% block jsblock %}
-    <script src="static/spoken/js/jquery.easing.1.3.js"></script> 
+    <script src="{% static 'spoken/js/jquery.easing.1.3.js' %}"></script> 
     <script src="{% static 'spoken/js/video.js' %}"></script>
-    <script>
-        $(document).ready(function(){
-            //$('.banner-img').css({'width': $( window ).width()});
-            setGoImageWith();
-            $('.video-lists .video-item .thump').hover(function(){
-                //console.log($(this).find('.video-item-playlist'));
-                $(this).find('.video-item-playlist').slideToggle();
-            });
-            
-        });
-        $(window).bind("load", function() {
-           setGoImageWith();
-        });
-        function setGoImageWith(){
-            imgWidth = (10*$('.banner-img').height())/ 100
-            $('.go-image').css({'width' : imgWidth});
-        }
-        $( window ).resize(function() {
-            setGoImageWith();
-        });
-        
-        $(function(){
-            // catch all a clicks
-            $('a').click(function(){
-                // check if has hash
-                if(this.hash){
-                    // get rid of the # sign
-                    var hash  = this.hash.substr(1);
-                    console.log(hash);
-                    // get the position of the <a name>
-                    var $toElement = $("div[id="+hash+"]");
-                    console.log($toElement);
-                    var toPosition = $toElement.offset().top;
-                    
-                    //scroll / animate to that element
-                    $("body, html").animate({
-                        scrollTop : toPosition
-                    }, 2000, "easeOutExpo");
-                    
-                    // don't to the jump'
-                    return false;
-                }
-            });
-            if(location.hash){
-                var hash = location.hash;
-                console.log(hash);
-                window.scroll(0,0);
-                $("a[href="+hash+"]").click();
-            }
-            
-            //callback handler for form submit
-            $("#ajaxform").submit(function(e)
-            {
-                var postData = $(this).serializeArray();
-                var formURL = $(this).attr("action");
-                console.log(postData[0].value);
-                var error = 1
-                if (postData[0].value == ''){
-                    error = 0
-                    $('.feedback-name').addClass('has-error');
-                    
-                }else{
-                    $('.feedback-name').removeClass('has-error');
-                }
-                if (postData[1].value == ''){
-                    error = 0
-                    $('.feedback-email').addClass('has-error');
-                    
-                }else{
-                    $('.feedback-email').removeClass('has-error');
-                }
-                if (postData[2].value == ''){
-                    error = 0
-                    $('.feedback-message').addClass('has-error');
-                    
-                }else{
-                     $('.feedback-message').removeClass('has-error');
-                }
-                if(error) {
-                    $.ajax(
-                    {
-                        url : formURL,
-                        type: "POST",
-                        data : postData,
-                        success:function(data, textStatus, jqXHR)
-                        {
-                            if(data){
-                                //data: return data from server
-                                $('.alert-success').remove();
-                                message = '<div class="alert alert-success alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button> Thank you for your valuable feedback.</div>';
-                                $('#page4 .contact-container h2').after(message);
-                                document.getElementById("ajaxform").reset();
-                                //location.reload();
-                            } else{
-                                $('.alert-danger').remove();
-                                message = '<div class="alert alert-danger alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button> Something went wrong, will get back soon..</div>';
-                                $('#page4 .contact-container h2').after(message);
-                                document.getElementById("ajaxform").reset();
-                            }
-                                
-                        },
-                        error: function(jqXHR, textStatus, errorThrown)
-                        {
-                            //if fails     
-                        }
-                    });
-                }
-                e.preventDefault(); //STOP default action
-                //e.unbind(); //unbind. to stop multiple form submit.
-            });
-             
-            //$("#ajaxform").submit(); //Submit  the FORM
-            
-            /* announcement */
-            /* var stop = 1
-            $('#slideshow').hover(function(){
-		        stop = 0
-	        }, function(){
-		        stop = 1
-	        });
-            if($(".announcement").length > 1){
-			    $("#slideshow > div:gt(0)").hide();
-			    setInterval(function() {
-			      if(stop){
-			          $('#slideshow > div:first')
-			            .fadeOut(0)
-			            .next()
-			            .fadeIn(0)
-			            .end()
-			            .appendTo('#slideshow');
-			         }
-			    },  5000);
-			}
-            $('.close').click(function(){
-                $(".navbar-fixed-top").css({'top' : '0px', 'position' : 'fixed'});
-                $("#header-wrapper").css({'height' : '0px'});
-            }); */
-        });
-    </script>
+    <script src="{% static 'spoken/js/home.js' %}"></script>
 {% endblock %}

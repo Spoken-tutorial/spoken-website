@@ -84,7 +84,10 @@ IIT Bombay.
     )
 
     #email.attach_alternative(message, "text/html")
-    result = email.send(fail_silently=False)
+    try:
+        result = email.send(fail_silently=False)
+    except:
+        pass
 
 def confirm(request, confirmation_code, username):
     try:
@@ -116,11 +119,16 @@ def account_login(request):
         if request.method == 'POST':
             username = request.POST.get('username', None)
             password = request.POST.get('password', None)
+            remember = request.POST.get('remember', None)
             if username and password:
                 user = authenticate(username=username, password=password)
                 if user is not None:
                     if user.is_active:
                         login(request, user)
+                        if remember:
+                            request.session.set_expiry(settings.KEEP_LOGGED_DURATION)
+                        else:
+                            request.session.set_expiry(0)
                         try:
                             p = Profile.objects.get(user_id = user.id)
                             if not user.first_name or not user.last_name or not p.country or not p.state or not p.district or not p.city  or not p.address or not p.pincode or not p.phone:# or not p.picture:
