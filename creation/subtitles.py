@@ -1,7 +1,6 @@
 from HTMLParser import HTMLParser
 import time, mechanize, cookielib, datetime
 from BeautifulSoup import BeautifulSoup
-from creation.views import get_video_info
 
 class MLStripper(HTMLParser):
     def __init__(self):
@@ -95,12 +94,12 @@ def generate_subtitle(srt_url, srt_file_path):
                     else:
                         time_error = 1
                 #print col.text
-        video_info = get_video_info(rreplace(srt_file_path, 'srt', 'ogv', 1))
+        duration_info = get_duration_info(rreplace(srt_file_path, 'srt', 'ogv', 1))
         if srt_data:
             if previous_script_data:
                 srt_data += str(counter) + '\n'
-                if video_info['duration']:
-                    srt_data += previous_time + ' --> ' + video_info['duration'] + '\n'
+                if duration_info:
+                    srt_data += previous_time + ' --> ' + duration_info + '\n'
                 else:
                     srt_data += previous_time + ' --> ' + str((datetime.datetime.strptime(\
                         previous_time, "%H:%M:%S") + datetime.timedelta(seconds = 5)).time()) + '\n'
@@ -153,3 +152,22 @@ def get_formatted_script(script):
 def rreplace(s, old, new, occurrence):
     li = s.rsplit(old, occurrence)
     return new.join(li)
+
+# returns video duration info using ffmpeg
+def get_duration_info(path):
+    """Uses ffmpeg to determine information about a video."""
+    info_m = {}
+    try:
+        process = subprocess.Popen(['/usr/bin/ffmpeg', '-i', path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        stdout, stderr = process.communicate()
+        duration_m = re.search(r"Duration:\s{1}(?P<hours>\d+?):(?P<minutes>\d+?):(?P<seconds>\d+\.\d+?)", stdout, re.DOTALL).groupdict()
+
+        seconds = Decimal(duration_m['seconds'])
+        tmp_seconds = str(int(seconds))
+        if seconds < 10:
+            tmp_seconds = "0" + tmp_seconds
+
+        duration =  duration_m['hours'] + ':' + duration_m['minutes'] + ":" + tmp_seconds
+    except:
+        duration = None
+    return duration
