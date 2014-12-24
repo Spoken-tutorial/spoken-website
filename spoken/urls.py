@@ -1,10 +1,13 @@
 from django.conf.urls import patterns, include, url
+from django.views.generic import TemplateView
 import settings
 from django.contrib import admin
 admin.autodiscover()
 
 urlpatterns = patterns('',
-
+    (r'^robots\.txt$', TemplateView.as_view(template_name='robots.txt', content_type='text/plain')),
+    (r'^sitemap\.xml$', TemplateView.as_view(template_name='sitemap.xml', content_type='text/xml')),
+    url(r'^sitemap\.html$', 'spoken.views.sitemap', name='sitemap'),
     # Examples:
     url(r'^tutorial-search/$', 'spoken.views.tutorial_search', name="tutorial-search"),
     url(r'^news/(?P<cslug>[\w-]+)/$', 'spoken.views.news', name="news"),
@@ -33,7 +36,6 @@ urlpatterns = patterns('',
     url(r'^create_cd_content/', include('cdcontent.urls', namespace='cdcontent')),
     url(r'^statistics/', include('statistics.urls', namespace='statistics')),
     url(r'^creation/', include('creation.urls', namespace='creation')),
-    url(r'^captcha/', include('captcha.urls')),
     url(r'^nicedit/', include('nicedit.urls')),
     url(r'^migration/creation/', include('creationmigrate.urls', namespace='creationmigrate')),
     url(r'^migration/events/', include('eventsmigration.urls', namespace='eventsmigration')),

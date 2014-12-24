@@ -2,8 +2,25 @@
 {% load widget_tweaks %}
 {% load static %}
 {% load creationdata %}
+
+{% block meta %}
+    <meta name="title" content="{{ tr_rec.tutorial_detail.tutorial }} in {{ tr_rec.language.name }}">
+    <meta name="description" content="{{ tr_rec.tutorial_detail.foss.description }}">
+
+    <meta property="og:site_name" content="Spoken-Tutorial">
+    <meta property="og:url" content="{{ request.META.HTTP_HOST }}{{ request.path}}">
+    <meta property="og:title" content="{{ tr_rec.tutorial_detail.tutorial }} in {{ tr_rec.language.name }}">
+    <meta property="og:image" content="{{ tr_rec.tutorial_detail|get_thumb_path:'Small' }}">
+    <meta property="og:description" content="{{ tr_rec.tutorial_detail.foss.description }}">
+
+    <meta property="og:type" content="video">
+    <meta property="og:video" content="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ tr_rec.video }}">
+    {% for key in tr_rec.common_content.keyword_as_list %}
+        <meta property="og:video:tag" content="{{ key }}">
+    {% endfor %}
+{% endblock %}
 {% block metatag %}
-        <meta name="Keywords" content="{{ tr_rec.tutorial_detail.foss }} free training in india, {% if tr_rec.common_content.keyword %} {{ tr_rec.common_content.keyword }} {% else %} {{ tr_rec.tutorial_detail.tutorial }} {% endif %}">
+    <meta name="keywords" content="{{ tr_rec.tutorial_detail.foss }} free training in india, {% if tr_rec.common_content.keyword %} {{ tr_rec.common_content.keyword }} {% else %} {{ tr_rec.tutorial_detail.tutorial }} {% endif %}">
 {% endblock %}
 {% block cssblock %}
     <link href="{% static 'spoken/css/video-js.min.css' %}" rel="stylesheet" type="text/css">
@@ -209,7 +226,7 @@
                             <a href="/watch/{{ rec.tutorial_detail.foss.foss|get_url_name }}/{{ rec.tutorial_detail.tutorial|get_url_name }}/{{ rec.language.name }}/">
                                 <div class='pull-left thumb'>
                                     <span class='order'>{% if tr_rec.id == rec.id %}<i class="fa fa-play"></i>{% else %}{{ forloop.counter }}{% endif %}</span>
-                                    <img src="{{ rec.tutorial_detail|get_thumb_path:'Small' }}" width=70 >
+                                    <img alt="{{ rec.tutorial_detail.tutorial }} - thumb" src="{{ rec.tutorial_detail|get_thumb_path:'Small' }}" width=70 >
                                 </div>
                                 <div class='description'>
                                     {{rec.tutorial_detail.tutorial}}
@@ -422,5 +439,7 @@
             });
         });
     </script>
+{% endblock %}
+{% block uncompressjsblock %}
     <script src="https://apis.google.com/js/platform.js"></script> <!-- youtube subscribe button js -->
 {% endblock %}

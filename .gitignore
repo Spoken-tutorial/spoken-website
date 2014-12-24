@@ -30,6 +30,7 @@ media/cms/js/*
 !media/cms/css/README
 !media/cms/js/README
 uwsgi-master.pid
+static/CACHE/*
 *.py[cod]
 robots.txt
 # C extensions
