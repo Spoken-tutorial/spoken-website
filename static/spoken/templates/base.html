@@ -373,7 +373,7 @@
     {% block uncompressjsblock %}{% endblock %}
     {% compress js %}
         <script src="{% static 'spoken/js/base.js' %}"></script>
-        {% block jsblock %}{% endblock %}
     {% endcompress %}
+    {% block jsblock %}{% endblock %}
     </body>
 </html>
