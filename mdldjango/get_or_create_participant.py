@@ -80,8 +80,11 @@ Admin Spoken Tutorials
             to = to, bcc = [], cc = [],
             headers={'Reply-To': 'no-replay@spoken-tutorial.org', "Content-type":"text/html;charset=iso-8859-1"}
         )
-
-        result = email.send(fail_silently=False)
+        try:
+            result = email.send(fail_silently=False)
+        except:
+            print "email disable"
+            pass
     return mdluser
 
 def get_or_create_participant(w, firstname, lastname, gender, email, category):
@@ -120,7 +123,15 @@ def get_or_create_participant(w, firstname, lastname, gender, email, category):
     #        wa.status = 1
     #        wa.mdluser_id = mdluser.id
     #        wa.save()
-            
+
+def store_error(error_line_no, count):
+    if not error_line_no:
+        error_line_no = error_line_no + str(count)
+    else:
+        error_line_no = error_line_no + ', ' + str(count)
+    csv_file_error = 1
+    return csv_file_error, error_line_no
+    
 def check_csvfile(user, file_path, w=None, flag=0):
     csv_file_error = 0
     error_line_no = ''
@@ -132,58 +143,43 @@ def check_csvfile(user, file_path, w=None, flag=0):
                 count = count + 1
                 try:
                     row_length = len(row)
-                    if row_length < 3:
+                    if row_length < 1:
                         continue
                     firstname = row[0].strip().title()
                     lastname = row[1].strip().title()
                     gender = None
                     email = None
                     
+                    if not firstname or not firstname or row_length < 3:
+                        csv_file_error, error_line_no = store_error(error_line_no, count)
                     if row_length == 3:
                         if _is_organiser(user) and (user.organiser.academic.institution_type.name == 'School' or (w and w.organiser.academic.institution_type.name == 'School')):
                             gender = row[2].strip().title()
                             if '@' in gender:
-                                if not error_line_no:
-                                    error_line_no = error_line_no + str(count)
-                                else:
-                                    error_line_no = error_line_no + ', ' + str(count)
-                                csv_file_error = 1
+                                csv_file_error, error_line_no = store_error(error_line_no, count)
                                 continue
                         else:
-                            if not error_line_no:
-                                error_line_no = error_line_no + str(count)
-                            else:
-                                error_line_no = error_line_no + ', ' + str(count)
-                            csv_file_error = 1
+                            csv_file_error, error_line_no = store_error(error_line_no, count)
                             continue
                     if row_length > 3:
                         email = row[2].strip().lower()
                         gender = row[3].strip().title()
                         if _is_organiser(user) and (user.organiser.academic.institution_type.name != 'School' or (w and w.organiser.academic.institution_type.name != 'School')):
                             if not validate_email(email):
-                                if email in ['Email', 'email', 'mail']:
-                                    continue
-                                if not error_line_no:
-                                    error_line_no = error_line_no + str(count)
-                                else:
-                                    error_line_no = error_line_no + ', ' + str(count)
-                                csv_file_error = 1
+                                csv_file_error, error_line_no = store_error(error_line_no, count)
                                 continue
                     if flag and flag <= 2:
                         if not w:
                             return 1, error_line_no
                         get_or_create_participant(w, firstname, lastname, gender, email, 2)
                 except Exception, e:
-                    csv_file_error = 1
-                    if not error_line_no:
-                        error_line_no = error_line_no + str(count)
-                    else:
-                        error_line_no = error_line_no + ', ' + str(count)
+                    csv_file_error, error_line_no = store_error(error_line_no, count)
             if error_line_no:
-                error_line_no = "<b>Error: Line number "+ error_line_no + " in CSV file data is not in a proper format in the Participant list. The format should be First name, Last name, Email, Gender. For more details <a href='http://process.spoken-tutorial.org/images/c/c2/Participant_data.pdf' target='_blank'>Click here</a></b>"
+                error_line_no = """
+ <b>Error: Line number {0} in CSV file data is not in a proper format in the Participant list. The format should be First name, Last name, Email, Gender. For more details <a href={1} target='_blank'>Click here</a></b>""".format(error_line_no, "http://process.spoken-tutorial.org/images/c/c2/Participant_data.pdf")
         except Exception, e:
             csv_file_error = 1
-            error_line_no = "<b>Error: CSV file data is not in a proper format in the Participant list. The format should be First name, Last name, Email, Gender. For more details <a href='http://process.spoken-tutorial.org/images/c/c2/Participant_data.pdf' target='_blank'>Click here</a></b>"
+            error_line_no = """<b>Error: CSV file data is not in a proper format in the Participant list. The format should be First name, Last name, Email, Gender. For more details <a href={0} target='_blank'>Click here</a></b>""".format("http://process.spoken-tutorial.org/images/c/c2/Participant_data.pdf")
         if flag == 3 and int(w.participant_count < count):
             csv_file_error = 1
             error_line_no = "Training participant count less than {0}.".format(w.participant_count)
