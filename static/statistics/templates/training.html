@@ -8,6 +8,7 @@
 {% block cssblock %}
     <link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />
     <link rel="stylesheet" href="{% static 'spoken/css/jquery.fancybox.css' %}" type="text/css" media="screen" charset="utf-8" />
+    <link rel="stylesheet" href="{% static 'spoken/css/jquery.datetimepicker.css' %}" type="text/css" media="screen" charset="utf-8" />
 {% endblock %}
 {% block heading %}
 {% endblock %}
@@ -29,15 +30,13 @@
                         </select>
                     </div>
                 </div>
-                {% if not state %}
-                    <div class="form-group">
-                        <label for="id_state" class="col-sm-4 control-label">State</label>
-                        <div class="col-sm-8">
-                            {% render_field form.academic__state class+="form-control state academic_state" tabindex="1" %}
-                            {{ form.academic__state.errors }}
-                        </div>
+                <div class="form-group">
+                    <label for="id_state" class="col-sm-4 control-label">State</label>
+                    <div class="col-sm-8">
+                        {% render_field form.academic__state class+="form-control state academic_state" tabindex="1" %}
+                        {{ form.academic__state.errors }}
                     </div>
-                {% endif %}
+                </div>
                 <div class="form-group">
                     <label for="id_city" class="col-sm-4 control-label">City/Town</label>
                     <div class="col-sm-8">
@@ -46,11 +45,11 @@
                     </div>
                 </div>
                 <div class="form-group">
-                        <label for="id_academic_institution_type" class="col-sm-4 control-label">Institution Type</label>
-                        <div class="col-sm-8">
-                            {% render_field form.academic__institution_type class+="form-control academic_institution_type" tabindex="1" %}
-                            {{ form.academic__institution_type.errors }}
-                        </div>
+                    <label for="id_academic_institution_type" class="col-sm-4 control-label">Institution Type</label>
+                    <div class="col-sm-8">
+                        {% render_field form.academic__institution_type class+="form-control academic_institution_type" tabindex="1" %}
+                        {{ form.academic__institution_type.errors }}
+                    </div>
 	            </div>
             </div>
             
@@ -158,6 +157,16 @@
             });
             $(".fancybox").fancybox();
             
+        });
+    </script>
+    <script src="{% static 'spoken/js/jquery.datetimepicker.js' %}"></script>
+    <script>
+        $('.date').datetimepicker({
+            lang:'en',
+            timepicker:false,
+            format:'Y-m-d',
+            formatDate:'Y/m/d',
+            maxDate:'+1970/06/31', // tommorow date with in 6 month
         });
     </script>
 {% endblock %}

@@ -2,7 +2,16 @@
 {% load widget_tweaks %}
 {% load static %}
 {% block title %}Student Register{% endblock %}
-{% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
+{% block cssblock %}
+    <style>
+        .radio{
+            margin-left: 18px;
+        }
+        .radio input[type="radio"]{
+            left: 0px;
+        }
+    </style>
+{% endblock %}
 {% block heading %}
     <i class="fa fa-list-ul"></i> Student Register
 {% endblock %}
