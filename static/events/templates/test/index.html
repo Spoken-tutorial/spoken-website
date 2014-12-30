@@ -105,7 +105,7 @@
                             <a href="{% url 'events:test_participant' record.id %}">View Participant</a>
                         {% endif %}
                         {% if role == 'rp' %}
-                            {% if status == 'pending' or status == 'approved' or 'predated' %}
+                            {% if status == 'pending' or status == 'approved' or status == 'predated' %}
                                 <a href="{% url 'events:test_request' role record.id %}">Edit</a>
                             {% endif %}
                             {% if status = 'predated' %}
