@@ -4,9 +4,6 @@
 {% load cmsdata %}
 {% load creationdata %}
 {% block title %}Tutorials under Need Improvement state{% endblock %}
-{% block cssblock %}
-    <link rel="stylesheet" href="{% static 'spoken/css/flip-scroll.css' %}" type="text/css" media="screen" charset="utf-8" />
-{% endblock %}
 {% block heading %}<i class="fa fa-list-ul"></i> Tutorials under Need Improvement state{% endblock %}
 {% block content %}
     <ul class="breadcrumb">
@@ -14,7 +11,7 @@
         <li class="active">Tutorials under Need Improvement state</li>
         <li><a href="/creation/upload/contributed/">Tutorials Contributed</a></li>
     </ul>
-    <div id="flip-scroll" class="table-responsive">
+    <div class="table-responsive">
         <table class="paleblue table table-condensed table-bordered table-hover">
         {% if not collection|length %}
             <tr>
@@ -65,7 +62,7 @@
         </table>
     </div>
 {% endblock %}
-{% block jsblock %}
+{% block compressinlinejsblock %}
     <script type="text/javascript">
         $(document).ready(function(){
             $(".review-btn").hover(

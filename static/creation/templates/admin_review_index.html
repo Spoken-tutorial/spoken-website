@@ -4,9 +4,9 @@
 {% load cmsdata %}
 {% load creationdata %}
 {% block title %}Admin review{% endblock %}
-{% block cssblock %}
-    <link rel="stylesheet" href="{% static 'spoken/css/jquery.fancybox.css' %}" type="text/css" media="screen" charset="utf-8" />
-    <link rel="stylesheet" href="{% static 'spoken/css/flip-scroll.css' %}" type="text/css" media="screen" charset="utf-8" />
+{% block uncompresscssblock %}
+    <link rel="stylesheet" href="{% static 'spoken/css/jquery.fancybox.pack.css' %}" type="text/css" media="screen" charset="utf-8" />
+    <link rel="stylesheet" href="{% static 'spoken/css/flip-scroll.min.css' %}" type="text/css" media="screen" charset="utf-8" />
 {% endblock %}
 {% block heading %}<i class="fa fa-list-ul"></i> Tutorials waiting for Admin review{% endblock %}
 {% block content %}
@@ -45,33 +45,36 @@
         </table>
     </div>
 {% endblock %}
-{% block jsblock %}
+{% block uncompressjsblock %}
     <script src="{% static 'spoken/js/jquery.fancybox.pack.js' %}"></script>
     <script src="{% static 'spoken/js/jquery.mousewheel-3.0.6.pack.js' %}"></script>
+{% endblock %}
+{% block compressinlinejsblock %}
     <script type="text/javascript">
-        
-        $(document).ready(function(){
-            $(".fancybox").fancybox({
-                maxWidth    : 1024,
-                maxHeight    : 900,
-                fitToView    : true,
-                autoSize    : false,
-                closeClick    : false,
-                openEffect    : "none",
-                closeEffect    : "none",
-                modal        : true,
-                afterClose  : function() {
-                                 return parent.location.reload(true);
-                                 }
-            });
-            $(".fancybox").hover(
-                function () {
-                    $(this).children(0).addClass("fa-spin");
-                },
-                function () {
-                    $(this).children(0).removeClass("fa-spin");
-                }
-            );
-        });
+        $(document).ready(
+            function(){
+                $(".fancybox").fancybox({
+                    maxWidth    : 1024,
+                    maxHeight    : 900,
+                    fitToView    : true,
+                    autoSize    : false,
+                    closeClick    : false,
+                    openEffect    : "none",
+                    closeEffect    : "none",
+                    modal        : true,
+                    afterClose  : function() {
+                         return parent.location.reload(true);
+                    }
+                });
+                $(".fancybox").hover(
+                    function () {
+                        $(this).children(0).addClass("fa-spin");
+                    },
+                    function () {
+                        $(this).children(0).removeClass("fa-spin");
+                    }
+                );
+            }
+        );
     </script>
 {% endblock %}

@@ -34,30 +34,34 @@
         </div>
     </form>
 {% endblock %}
-{% block jsblock %}
+{% block compressinlinejsblock %}
     <script type="text/javascript">
-        $(document).ready(function(){
-            $('.foss_category').on("change", function(){
-                var foss = $(this).val();
-                $('.tutorial_name').html('<option value="" selected="selected">Select Tutorial Name</option>');
-                $('.tutorial_name').attr("disabled", "disabled");
-                if(foss != '') {
-                    $.ajax({
-                        url: "/creation/ajax-upload-timed-script/",
-                        type: "POST",
-                        data: {
-                            foss: foss
-                        },
-                        success: function(data) {
-                            // loading languages
-                            if(data) {
-                                $('.tutorial_name').html(data);
-                                $('.tutorial_name').removeAttr('disabled');
-                            }
+        $(document).ready(
+            function(){
+                $('.foss_category').on("change", 
+                    function(){
+                        var foss = $(this).val();
+                        $('.tutorial_name').html('<option value="" selected="selected">Select Tutorial Name</option>');
+                        $('.tutorial_name').attr("disabled", "disabled");
+                        if(foss != '') {
+                            $.ajax({
+                                url: "/creation/ajax-upload-timed-script/",
+                                type: "POST",
+                                data: {
+                                    foss: foss
+                                },
+                                success: function(data) {
+                                    // loading languages
+                                    if(data) {
+                                        $('.tutorial_name').html(data);
+                                        $('.tutorial_name').removeAttr('disabled');
+                                    }
+                                }
+                            });
                         }
-                    });
-                }
-            });
-        });
+                    }
+                );
+            }
+        );
     </script>
 {% endblock %}

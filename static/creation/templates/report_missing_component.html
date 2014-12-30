@@ -1,7 +1,7 @@
 {% extends 'spoken/templates/popup-base.html' %}
 {% load widget_tweaks %}
 {% load static %}
-{% block cssblock %}
+{% block compressinlinecssblock %}
     <style type="text/css">
         ul#id_inform_me, ul#id_report_type {
             list-style-type: none;
@@ -62,7 +62,7 @@
         </div>
     </form>
 {% endblock %}
-{% block jsblock %}
+{% block compressinlinejsblock %}
     <script type="text/javascript">
         $(document).ready(function() {
             $('.remarks-parent').hide();

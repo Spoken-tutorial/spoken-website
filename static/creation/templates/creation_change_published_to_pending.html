@@ -24,55 +24,57 @@
         <input type="submit" class="btn btn-primary" value="Submit"  tabindex="4" />
     </form>
 {% endblock %}
-{% block jsblock %}
+{% block compressinlinejsblock %}
     <script type="text/javascript">
-        $(document).ready(function(){
-            $('.foss_category').on("change", function(){
-                var foss = $(this).val();
-                $('.tutorial_name').html('<option value="" selected="selected">Select Tutorial</option>');
-                $('.tutorial_name').attr("disabled", "disabled");
-                $('.language').html('<option value="" selected="selected">Select Language</option>');
-                $('.language').attr("disabled", "disabled");
-                if(foss != '') {
-                    $.ajax({
-                        url: "/creation/ajax-publish-to-pending/",
-                        type: "POST",
-                        data: {
-                            foss: foss
-                        },
-                        success: function(data) {
-                            // loading languages
-                            if(data) {
-                                $('.language').html(data);
-                                $('.language').removeAttr('disabled');
+        $(document).ready(
+            function(){
+                $('.foss_category').on("change", function() {
+                    var foss = $(this).val();
+                    $('.tutorial_name').html('<option value="" selected="selected">Select Tutorial</option>');
+                    $('.tutorial_name').attr("disabled", "disabled");
+                    $('.language').html('<option value="" selected="selected">Select Language</option>');
+                    $('.language').attr("disabled", "disabled");
+                    if(foss != '') {
+                        $.ajax({
+                            url: "/creation/ajax-publish-to-pending/",
+                            type: "POST",
+                            data: {
+                                foss: foss
+                            },
+                            success: function(data) {
+                                // loading languages
+                                if(data) {
+                                    $('.language').html(data);
+                                    $('.language').removeAttr('disabled');
+                                }
                             }
-                        }
-                    })
-                }
-            });
-            $('.language').on("change", function(){
-                var foss = $('.foss_category').val();
-                var lang = $(this).val();
-                $('.tutorial_name').html('<option value="" selected="selected">Select Tutorial</option>');
-                $('.tutorial_name').attr("disabled", "disabled");
-                if(foss  != '') {
-                    $.ajax({
-                        url: "/creation/ajax-publish-to-pending/",
-                        type: "POST",
-                        data: {
-                            foss: foss,
-                            lang: lang
-                        },
-                        success: function(data) {
-                            // loading tutorial names
-                            if(data){
-                                $('.tutorial_name').html(data);
-                                $('.tutorial_name').removeAttr('disabled');
+                        });
+                    }
+                });
+                $('.language').on("change", function() {
+                    var foss = $('.foss_category').val();
+                    var lang = $(this).val();
+                    $('.tutorial_name').html('<option value="" selected="selected">Select Tutorial</option>');
+                    $('.tutorial_name').attr("disabled", "disabled");
+                    if(foss  != '') {
+                        $.ajax({
+                            url: "/creation/ajax-publish-to-pending/",
+                            type: "POST",
+                            data: {
+                                foss: foss,
+                                lang: lang
+                            },
+                            success: function(data) {
+                                // loading tutorial names
+                                if(data){
+                                    $('.tutorial_name').html(data);
+                                    $('.tutorial_name').removeAttr('disabled');
+                                }
                             }
-                        }
-                    })
-                }
-            });
-        });
+                        });
+                    }
+                });
+            }
+        );
     </script>
 {% endblock %}

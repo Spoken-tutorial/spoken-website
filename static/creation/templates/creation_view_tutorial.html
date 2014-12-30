@@ -2,8 +2,10 @@
 {% load widget_tweaks %}
 {% load static %}
 {% load creationdata %}
-{% block cssblock %}
+{% block uncompresscssblock %}
     <link href="{% static 'spoken/css/video-js.min.css' %}" rel="stylesheet" type="text/css">
+{% endblock %}
+{% block compressinlinecssblock %}
     <style type="text/css">
         .video-js {
             padding-top: 56.25%
@@ -92,22 +94,29 @@
             width:100%;
             height:100%;
         }
+        .video-container p{
+            color: white;
+            text-align: center;
+            padding: 30px;
+            font-size: 14px;
+        }
     </style>
-    <script src="{% static 'spoken/js/video.js' %}"></script>
 {% endblock %}
-{% load creationdata %}
 {% block title %}{{ tr_rec.tutorial_detail.tutorial }} - {{ tr_rec.language.name }}{% endblock %}
 {% block heading %}{{ tr_rec.tutorial_detail.tutorial }} - {{ tr_rec.language.name }}{% endblock %}
 {% block search %}
 {% endblock %}
 {% block content %}
-    {% if tr_rec.video_status %}
     <row>
         <div class='container playlist-container col-lg-12 col-md-12 col-sm-12'>
             <div class="video-container col-lg-8 col-md-8 col-sm-8">
+                {% if tr_rec.video_status %}
                 <video id="st_video" class="video-js vjs-default-skin" controls preload="auto" width="auto" height="auto" data-setup="{}">
                     <source src="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ tr_rec.video }}" type="video/ogg" />
                 </video>
+                {% else %}
+                    <p>Video missing...</p>
+                {% endif %}
             </div>
             <div class='playlist col-lg-4 col-md-4 col-sm-4'>
                 <div class='playlist-info'>
@@ -135,7 +144,6 @@
             </div>
         </div>
     </row>
-    {% endif %}
     <row>
         <div class="col-lg-7 col-md-7 col-sm-7 no-padding-left">
             <pre class="custom-jumbotron"><b>Outline:<br /></b>{{ tr_rec.outline }}</pre>
@@ -256,25 +264,25 @@
         </div>
     </row>
 {% endblock %}
-{% block jsblock %}
-    <script>
+{% block uncompressjsblock %}
+    <script src="{% static 'spoken/js/video.min.js' %}"></script>
+{% endblock %}
+{% block compressinlinejsblock %}
+    <script type="text/javascript">
         currentVideo = $('.playlist-item.active');
         nextVideo = currentVideo.next('li');
         prevVideo = currentVideo.prev('li');
-        var tmpHtml = currentVideo.attr('data') + '/' + $('.video-count').html()
-        $('.video-count').html(tmpHtml)
+        var tmpHtml = currentVideo.attr('data') + '/' + $('.video-count').html();
+        $('.video-count').html(tmpHtml);
         if(nextVideo.length){
-            //console.log(nextVideo.children('a').attr('href'));
             $('.forward').html('<a href="'+nextVideo.children('a').attr('href')+'"><i class="fa fa-1 fa-fast-forward"></i></a>');
         } else {
             $('.forward').html('<i class="fa fa-1 fa-fast-forward"></i>');
         }
         if(prevVideo.length){
-            //console.log(prevVideo.children('a').attr('href'));
             $('.backward').html('<a href="'+prevVideo.children('a').attr('href')+'"><i class="fa fa-1 fa-fast-backward"></i></a>');
         } else {
             $('.backward').html('<i class="fa fa-1 fa-fast-backward"></i>');
         }
-        
     </script>
 {% endblock %}

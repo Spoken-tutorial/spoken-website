@@ -170,19 +170,22 @@
         </div>
     </div>
 {% endblock %}
-{% block jsblock %}
+{% block uncompressjsblock %}
     <script src="{% static 'spoken/js/jquery.mousewheel-3.0.6.pack.js' %}"></script>
+{% endblock %}
+{% block compressinlinejsblock %}
     <script type="text/javascript">
-        
-        $(document).ready(function(){
-            $(".spin-btn").hover(
-                function () {
-                    $(this).children(0).addClass("fa-spin");
-                },
-                function () {
-                    $(this).children(0).removeClass("fa-spin");
-                }
-            );
-        });
+        $(document).ready(
+            function(){
+                $(".spin-btn").hover(
+                    function () {
+                        $(this).children(0).addClass("fa-spin");
+                    },
+                    function () {
+                        $(this).children(0).removeClass("fa-spin");
+                    }
+                );
+            }
+        );
     </script>
 {% endblock %}

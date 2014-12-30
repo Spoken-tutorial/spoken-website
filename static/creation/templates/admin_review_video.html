@@ -1,8 +1,10 @@
 {% extends 'spoken/templates/popup-base.html' %}
 {% load widget_tweaks %}
 {% load static %}
-{% block cssblock %}
+{% block uncompresscssblock %}
 	<link href="{% static 'spoken/css/video-js.min.css' %}" rel="stylesheet" type="text/css">
+{% endblock %}
+{% block compressinlinecssblock %}
 	<style type="text/css">
 		.video-js {
             padding-top: 56.25%
@@ -34,7 +36,6 @@
             padding-top: 10px;
         }
 	</style>
-	<script src="{% static 'spoken/js/video.js' %}"></script>
 {% endblock %}
 {% block title %}Review Video{% endblock %}
 {% block heading %}
@@ -76,24 +77,33 @@
 		<input type="submit" class="btn btn-primary review-submit" value="Submit"  tabindex="4" />
 	</form>
 {% endblock %}
-{% block jsblock %}
+{% block uncompressjsblock %}
+    <script src="{% static 'spoken/js/video.min.js' %}"></script>
+{% endblock %}
+{% block compressinlinejsblock %}
 	<script type="text/javascript">
-		$(document).ready(function() {
-			$('.remarks-parent').hide();
-			$('#id_video_status').change(function() {
-				if($('#id_video_status').val() == 5)
-					$('.remarks-parent').show();
-				else
-					$('.remarks-parent').hide();
-			});
-			$( "form" ).submit(function( event ) {
-				var videoStatus = $('#id_video_status').val();
-				var remarks = $('#id_feedback').val();
-				if(videoStatus == 5 && remarks == '') {
-					$('.cerrorlist').html('<li>Please fill the remarks field</li>');
-					event.preventDefault();
-				}
-			});
-		});
+		$(document).ready(
+		    function() {
+			    $('.remarks-parent').hide();
+			    $('#id_video_status').change(
+			        function() {
+				        if($('#id_video_status').val() == 5)
+					        $('.remarks-parent').show();
+				        else
+					        $('.remarks-parent').hide();
+			        }
+			    );
+			    $( "form" ).submit(
+			        function( event ) {
+				        var videoStatus = $('#id_video_status').val();
+				        var remarks = $('#id_feedback').val();
+				        if(videoStatus == 5 && remarks == '') {
+					        $('.cerrorlist').html('<li>Please fill the remarks field</li>');
+					        event.preventDefault();
+				        }
+			        }
+			    );
+		    }
+		);
 	</script>
 {% endblock %}

@@ -11,36 +11,36 @@
 {% block title %}Home{% endblock %}
 {% block heading %}<i class="home-page-title-i">spoken tutorial</i>{% endblock %}
 {% block homealert %}
-	{% if messages %}
-		{% for message in messages %}
-		    {% if message.tags == 'success' %}
-			    <div class="alert alert-success alert-dismissable">
-				    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-				    {{ message|safe }}
-			    </div>
-			{% elif message.tags == 'warning' %}
-			   <div class="alert alert-warning alert-dismissable">
-				    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-				    {{ message|safe }}
-			    </div>
-			{% elif message.tags == 'error' %}
-			    <div class="alert alert-danger alert-dismissable">
-				    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-				    {{ message|safe }}
-			    </div>
-			{% elif message.tags == 'info' %}
-			     <div class="alert alert-info alert-dismissable">
-				    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-				    {{ message|safe }}
-			    </div>
-			{% elif message.tags == 'debug' %}
-			    <div class="alert alert-info alert-dismissable">
-				    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-				    {{ message|safe }}
-			    </div>
-			{% endif %}
-		{% endfor %}
-	{% endif %}
+    {% if messages %}
+        {% for message in messages %}
+            {% if message.tags == 'success' %}
+                <div class="alert alert-success alert-dismissable">
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                    {{ message|safe }}
+                </div>
+            {% elif message.tags == 'warning' %}
+               <div class="alert alert-warning alert-dismissable">
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                    {{ message|safe }}
+                </div>
+            {% elif message.tags == 'error' %}
+                <div class="alert alert-danger alert-dismissable">
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                    {{ message|safe }}
+                </div>
+            {% elif message.tags == 'info' %}
+                 <div class="alert alert-info alert-dismissable">
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                    {{ message|safe }}
+                </div>
+            {% elif message.tags == 'debug' %}
+                <div class="alert alert-info alert-dismissable">
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                    {{ message|safe }}
+                </div>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
 {% endblock %}
 
 {% block banner %}
@@ -144,9 +144,9 @@
                 <div class="col-lg-8 col-md-8 col-sm-8">
                     <div class="top-border">
                         <p class="justify">Spoken Tutorial Forums is a friendly online discussion forum.  You can join existing discussions or start new topics, and get lots of replies from the Spoken Tutorial community.   Registration to Forums is completely free and takes only one minute.</p>
-			<p class="justify">Forums is very easy to use, even for computer newbies. It's very easy to format forum posts with fonts, colors, and many other options. You can attach files to your posts directly from your computer. You can give links to webpages or videos from other video websites.</p>
+            <p class="justify">Forums is very easy to use, even for computer newbies. It's very easy to format forum posts with fonts, colors, and many other options. You can attach files to your posts directly from your computer. You can give links to webpages or videos from other video websites.</p>
 
-			<p class="justify">Be assured of an answer within 3 working days of posting your question. <a class="pull-right" href="http://forums.spoken-tutorial.org" target="_blank">Click here to proceed >></a></p>
+            <p class="justify">Be assured of an answer within 3 working days of posting your question. <a class="pull-right" href="http://forums.spoken-tutorial.org" target="_blank">Click here to proceed >></a></p>
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-4 col-sm-4">

@@ -45,63 +45,69 @@
         </div>
     </form>
 {% endblock %}
-{% block uncompressjsblock %}
+{% block compressinlinejsblock %}
     <script type="text/javascript">
-        $(document).ready(function(){
-            $('.foss_category').on("change", function(){
-                var foss = $(this).val();
-                $('.tutorial_name').html('<option value="" selected="selected">Select Tutorial</option>');
-                $('.tutorial_name').attr("disabled", "disabled");
-                $('.language').html('<option value="" selected="selected">Select Language</option>');
-                $('.language').attr("disabled", "disabled");
-                if(foss != '') {
-                    $.ajax({
-                        url: "/creation/ajax-upload-foss/",
-                        type: "POST",
-                        data: {
-                            foss: foss
-                        },
-                        beforeSend: function() {
-                            $('.ajax-refresh-language').show();
-                        },
-                        success: function(data) {
-                            // loading languages
-                            if(data) {
-                                $('.language').html(data);
-                                $('.language').removeAttr('disabled');
-                            }
-                            $('.ajax-refresh-language').hide();
+        $(document).ready(
+            function() {
+                $('.foss_category').on("change", 
+                    function() {
+                        var foss = $(this).val();
+                        $('.tutorial_name').html('<option value="" selected="selected">Select Tutorial</option>');
+                        $('.tutorial_name').attr("disabled", "disabled");
+                        $('.language').html('<option value="" selected="selected">Select Language</option>');
+                        $('.language').attr("disabled", "disabled");
+                        if(foss != '') {
+                            $.ajax({
+                                url: "/creation/ajax-upload-foss/",
+                                type: "POST",
+                                data: {
+                                    foss: foss
+                                },
+                                beforeSend: function() {
+                                    $('.ajax-refresh-language').show();
+                                },
+                                success: function(data) {
+                                    // loading languages
+                                    if(data) {
+                                        $('.language').html(data);
+                                        $('.language').removeAttr('disabled');
+                                    }
+                                    $('.ajax-refresh-language').hide();
+                                }
+                            });
                         }
-                    })
-                }
-            });
-            $('.language').on("change", function(){
-                var foss = $('.foss_category').val();
-                var lang = $(this).val();
-                $('.tutorial_name').html('<option value="" selected="selected">Select Tutorial</option>');
-                $('.tutorial_name').attr("disabled", "disabled");
-                if(foss != '') {
-                    $.ajax({
-                        url: "/creation/ajax-upload-foss/",
-                        type: "POST",
-                        data: {
-                            foss: foss,
-                            lang: lang
-                        },
-                        beforeSend: function() {
-                            $('.ajax-refresh-tutorial').show();
-                        },
-                        success: function(data) {
-                            // loading tutorial names
-                            if(data){
-                                $('.tutorial_name').html(data);
-                                $('.tutorial_name').removeAttr('disabled');
-                            }
-                            $('.ajax-refresh-tutorial').hide();
+                    }
+                );
+                $('.language').on("change",
+                    function() {
+                        var foss = $('.foss_category').val();
+                        var lang = $(this).val();
+                        $('.tutorial_name').html('<option value="" selected="selected">Select Tutorial</option>');
+                        $('.tutorial_name').attr("disabled", "disabled");
+                        if(foss != '' && lang != '') {
+                            $.ajax({
+                                url: "/creation/ajax-upload-foss/",
+                                type: "POST",
+                                data: {
+                                    foss: foss,
+                                    lang: lang
+                                },
+                                beforeSend: function() {
+                                    $('.ajax-refresh-tutorial').show();
+                                },
+                                success: function(data) {
+                                    // loading tutorial names
+                                    if(data){
+                                        $('.tutorial_name').html(data);
+                                        $('.tutorial_name').removeAttr('disabled');
+                                    }
+                                    $('.ajax-refresh-tutorial').hide();
+                                }
+                            });
                         }
-                    })
-                }
-            });
-        });
+                    }
+                );
+            }
+        );
     </script>
 {% endblock %}
