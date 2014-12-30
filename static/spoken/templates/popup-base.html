@@ -1,43 +1,52 @@
 <!DOCTYPE html>
 {% load static %}
+{% load compress %}
 {% load cmsdata %}
 <html>
-	<head>
-		<title>
-			{% block title %}{% endblock %} | spoken-tutorial.org
-		</title>
-		<link rel="shortcut icon" href="{% static 'spoken/images/favicon.ico' %}" />
-		<!-- Bootstrap core CSS -->
-		<link rel="stylesheet" href="{% static 'spoken/css/bootstrap.min.css' %}" type="text/css" media="screen" charset="utf-8" />
-		<link rel="stylesheet" href="{% static 'spoken/css/font-awesome.min.css' %}" type="text/css" media="screen" charset="utf-8" />
-		<!-- <link rel="stylesheet" href="{% static 'spoken/css/bootstrap-theme.css' %}" type="text/css" media="screen" charset="utf-8"> -->
-		<link rel="stylesheet" href="{% static 'spoken/css/main.css' %}" type="text/css" media="screen" charset="utf-8" />
-		{% block cssblock %}{% endblock %}
-		<style type="text/css">
-		    .navbar {
-		        min-height: 45px;
-		    }
-			.navbar-toggle {
-				display: none;
-			}
-			.container>.navbar-header{
-			    color: white;
-			    margin-left: 0px;;
-			}
-			#content-wrapper {
-			    min-height: 200px;
-			    padding-right: 20px;
-			}
-		</style>
-	</head>
-	<body>
-		<div id="page-wrapper">
-			<div id="header-wrapper">
-				<div id="header-inner">
-					<nav class="navbar navbar-default" role="navigation">
-						<div class="container col-lg-12 col-md-12 col-sm-12">
-							<!-- Brand and toggle get grouped for better mobile display -->
-							<div class="navbar-header">
+    <head>
+        <title>
+            {% block title %}{% endblock %} | spoken-tutorial.org
+        </title>
+        <link rel="shortcut icon" href="{% static 'spoken/images/favicon.ico' %}" />
+        <!-- Bootstrap core CSS -->
+        <link rel="stylesheet" href="{% static 'spoken/css/bootstrap.min.css' %}" type="text/css" media="screen" charset="utf-8" />
+        <link rel="stylesheet" href="{% static 'spoken/css/font-awesome.min.css' %}" type="text/css" media="screen" charset="utf-8" />
+        <!-- <link rel="stylesheet" href="{% static 'spoken/css/bootstrap-theme.css' %}" type="text/css" media="screen" charset="utf-8"> -->
+        {% block uncompresscssblock %}{% endblock %}
+        {% compress css %}
+            <link rel="stylesheet" href="{% static 'spoken/css/main.css' %}" type="text/css" media="screen" charset="utf-8" />
+        {% endcompress %}
+        {% compress css %}{% block compresscssblock %}{% endblock %}{% endcompress %}
+        {% compress css %}
+            <style type="text/css">
+                .navbar {
+                    min-height: 45px;
+                }
+                .navbar-toggle {
+                    display: none;
+                }
+                .container>.navbar-header{
+                    color: white;
+                    margin-left: 0px;;
+                }
+                #content-wrapper {
+                    min-height: 200px;
+                    padding-right: 20px;
+                }
+            </style>
+            {% block compressinlinecssblock %}{% endblock %}
+        {% endcompress %}
+        {% block cssblock %}{% endblock %}
+            
+    </head>
+    <body>
+        <div id="page-wrapper">
+            <div id="header-wrapper">
+                <div id="header-inner">
+                    <nav class="navbar navbar-default" role="navigation">
+                        <div class="container col-lg-12 col-md-12 col-sm-12">
+                            <!-- Brand and toggle get grouped for better mobile display -->
+                            <div class="navbar-header">
                                 <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#main-nav">
                                     <span class="sr-only">Toggle Navigation</span>
                                     <span class="icon-bar"></span>
@@ -49,59 +58,61 @@
                                         Spoken <span class='title'>Tutorial</span>
                                     </a>
                             </div> <!-- /.navbar-header -->
-						</div> <!-- /.container -->
-					</nav><!-- / .navbar -->
-				</div><!-- /#header-inner -->
-			</div><!-- /#header-wrapper -->
+                        </div> <!-- /.container -->
+                    </nav><!-- / .navbar -->
+                </div><!-- /#header-inner -->
+            </div><!-- /#header-wrapper -->
 
-			<div id="content-wrapper">
-				<div id="content-inner">
-					<div id="content" class="container col-lg-12 col-md-12 col-sm-12">
-						<h4 class="page-title">{% block heading %}{% endblock %}</h4>
-						{% block alert %}
-							{% if messages %}
-								{% for message in messages %}
-								    {% if message.tags == 'success' %}
-									    <div class="alert alert-success alert-dismissable">
-										    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-										    {{ message|safe }}
-									    </div>
-									{% elif message.tags == 'warning' %}
-									   <div class="alert alert-warning alert-dismissable">
-										    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-										    {{ message|safe }}
-									    </div>
-									{% elif message.tags == 'error' %}
-									    <div class="alert alert-danger alert-dismissable">
-										    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-										    {{ message|safe }}
-									    </div>
-									{% elif message.tags == 'info' %}
-									     <div class="alert alert-info alert-dismissable">
-										    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-										    {{ message|safe }}
-									    </div>
-									{% elif message.tags == 'debug' %}
-									    <div class="alert alert-info alert-dismissable">
-										    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-										    {{ message|safe }}
-									    </div>
-									{% endif %}
-								{% endfor %}
-							{% endif %}
-						{% endblock %}
-						<p>{% block content %}{% endblock %}</p>
-					</div>
-				</div><!-- /#content-inner .container -->
-			</div><!-- /#content-wrapper -->
-		</div><!-- /#page-wrapper -->
-		{% get_analytics_code %}
-		<!-- Bootstrap core JavaScript
-		================================================== -->
-		<!-- Placed at the end of the document so the pages load faster -->
-		<script src="{% static 'spoken/js/jquery-1.11.0.min.js' %}"></script>
-		<script src="{% static 'spoken/js/bootstrap.min.js' %}"></script>
-		{% block jsblock %}{% endblock %}
-		{{ get_analytics_code }}
-	</body>
+            <div id="content-wrapper">
+                <div id="content-inner">
+                    <div id="content" class="container col-lg-12 col-md-12 col-sm-12">
+                        <h4 class="page-title">{% block heading %}{% endblock %}</h4>
+                        {% block alert %}
+                            {% if messages %}
+                                {% for message in messages %}
+                                    {% if message.tags == 'success' %}
+                                        <div class="alert alert-success alert-dismissable">
+                                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                                            {{ message|safe }}
+                                        </div>
+                                    {% elif message.tags == 'warning' %}
+                                       <div class="alert alert-warning alert-dismissable">
+                                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                                            {{ message|safe }}
+                                        </div>
+                                    {% elif message.tags == 'error' %}
+                                        <div class="alert alert-danger alert-dismissable">
+                                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                                            {{ message|safe }}
+                                        </div>
+                                    {% elif message.tags == 'info' %}
+                                         <div class="alert alert-info alert-dismissable">
+                                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                                            {{ message|safe }}
+                                        </div>
+                                    {% elif message.tags == 'debug' %}
+                                        <div class="alert alert-info alert-dismissable">
+                                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                                            {{ message|safe }}
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endif %}
+                        {% endblock %}
+                        <p>{% block content %}{% endblock %}</p>
+                    </div>
+                </div><!-- /#content-inner .container -->
+            </div><!-- /#content-wrapper -->
+        </div><!-- /#page-wrapper -->
+        {% get_analytics_code %}
+        <!-- Bootstrap core JavaScript
+        ================================================== -->
+        <!-- Placed at the end of the document so the pages load faster -->
+        <script src="{% static 'spoken/js/jquery-1.11.0.min.js' %}"></script>
+        <script src="{% static 'spoken/js/bootstrap.min.js' %}"></script>
+        {% block uncompressjsblock %}{% endblock %}
+        {% compress js %}{% block compressjsblock %}{% endblock %}{% endcompress %}
+        {% compress js %}{% block compressinlinejsblock %}{% endblock %}{% endcompress %}
+        {% block jsblock %}{% endblock %}
+    </body>
 </html>

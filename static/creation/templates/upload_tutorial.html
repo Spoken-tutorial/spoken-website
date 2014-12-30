@@ -3,8 +3,8 @@
 {% load static %}
 {% load creationdata %}
 {% block title %}Upload Tutorial{% endblock %}
-{% block cssblock %}
-    <link rel="stylesheet" href="{% static 'spoken/css/jquery.fancybox.css' %}" type="text/css" media="screen" charset="utf-8" />
+{% block uncompresscssblock %}
+    <link rel="stylesheet" href="{% static 'spoken/css/jquery.fancybox.pack.css' %}" type="text/css" media="screen" charset="utf-8" />
 {% endblock %}
 {% block heading %}Upload Tutorial{% endblock %}
 {% block content %}
@@ -299,50 +299,60 @@
     {% endif %}
     </form>
 {% endblock %}
-{% block jsblock %}
+{% block uncompressjsblock %}
     <script src="{% static 'spoken/js/jquery.fancybox.pack.js' %}"></script>
     <script src="{% static 'spoken/js/jquery.mousewheel-3.0.6.pack.js' %}"></script>
+{% endblock %}
+{% block compressinlinejsblock %}
     <script type="text/javascript">
-        $(document).ready(function(){
-            $(".fancybox").fancybox({
-                maxWidth    : 500,
-                maxHeight    : 300,
-                fitToView    : true,
-                autoSize    : false,
-                closeClick    : false,
-                openEffect    : "none",
-                closeEffect    : "none",
-                modal        : true,
-                afterClose  : function() {
+        $(document).ready(
+            function() {
+                $(".fancybox").fancybox(
+                    {
+                        maxWidth    : 500,
+                        maxHeight    : 300,
+                        fitToView    : true,
+                        autoSize    : false,
+                        closeClick    : false,
+                        openEffect    : "none",
+                        closeEffect    : "none",
+                        modal        : true,
+                        afterClose  : function() {
                             return parent.location.reload(true);
-                                  }
-            });
-            $(".fancybox-outline").fancybox({
-                maxWidth    : 500,
-                maxHeight    : 485,
-                fitToView    : true,
-                autoSize    : false,
-                closeClick    : false,
-                openEffect    : "none",
-                closeEffect    : "none",
-                modal        : true,
-                afterClose  : function() {
+                        }
+                    }
+                );
+                $(".fancybox-outline").fancybox(
+                    {
+                        maxWidth    : 500,
+                        maxHeight    : 485,
+                        fitToView    : true,
+                        autoSize    : false,
+                        closeClick    : false,
+                        openEffect    : "none",
+                        closeEffect    : "none",
+                        modal        : true,
+                        afterClose  : function() {
                             return parent.location.reload(true);
-                                  }
-            });
-            $(".fancybox-script").fancybox({
-                maxWidth    : 700,
-                maxHeight    : 700,
-                fitToView    : true,
-                autoSize    : false,
-                closeClick    : false,
-                openEffect    : "none",
-                closeEffect    : "none",
-                modal        : true,
-                afterClose  : function() {
+                        }
+                    }
+                );
+                $(".fancybox-script").fancybox(
+                    {
+                        maxWidth    : 700,
+                        maxHeight    : 700,
+                        fitToView    : true,
+                        autoSize    : false,
+                        closeClick    : false,
+                        openEffect    : "none",
+                        closeEffect    : "none",
+                        modal        : true,
+                        afterClose  : function() {
                             return parent.location.reload(true);
-                                  }
-            });
-        });
+                        }
+                    }
+                );
+            }
+        );
     </script>
 {% endblock %}

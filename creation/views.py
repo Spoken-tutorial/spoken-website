@@ -38,28 +38,6 @@ def humansize(nbytes):
     f = ('%.1f' % nbytes).rstrip('0').rstrip('.')
     return '%s %s' % (f, suffixes[i])
 
-def role_list(request):
-    table = RoleFilter(request.GET, queryset=RoleRequest.objects.all())
-    return render(request, "creation/templates/template.html", {"table": table})
-
-def roles_list(request):
-    header = {
-        1: SortableHeader('foss__foss', True, 'Foss'),
-        2: SortableHeader('tutorial', True, 'Tutorial Name'),
-        3: SortableHeader('order', True, 'Order'),
-        4: SortableHeader('Action', False)
-    }
-    rows = TutorialDetail.objects.all()
-    raw_get_data = request.GET.get('o', None)
-    rows = get_sorted_list(request, rows, header, raw_get_data)
-    ordering = get_field_index(raw_get_data)
-    context = {
-        'ordering': ordering,
-        'header': header,
-        'rows': rows
-    }
-    return render(request, "creation/templates/template1.html", context)
-
 def get_page(resource, page, page_count = 20):
     paginator = Paginator(resource, page_count)
     try:
@@ -1018,7 +996,6 @@ def view_component(request, trid, component):
     else:
         messages.error(request, 'Invalid component passed as argument!')
         return HttpResponseRedirect(request.META['HTTP_REFERER'])
-    context.update(csrf(request))
     return render(request, 'creation/templates/view_component.html', context)
 
 @login_required
@@ -1442,10 +1419,13 @@ def accept_all(request, review, trid):
         'quality': 4
     }
     flag = 0
+    reviewer_role_check = None
     if review == 'domain':
+        reviewer_role_check = DomainReviewerRole
         if not is_domainreviewer(request.user):
             raise PermissionDenied()
     else:
+        reviewer_role_check = QualityReviewerRole
         if not is_qualityreviewer(request.user):
             raise PermissionDenied()
     try:
@@ -1453,7 +1433,7 @@ def accept_all(request, review, trid):
         comp_title = tr.tutorial_detail.foss.foss + ': ' + tr.tutorial_detail.tutorial + ' - ' + tr.language.name
     except:
         raise PermissionDenied()
-    if DomainReviewerRole.objects.filter(user_id = request.user.id, foss_category_id = tr.tutorial_detail.foss_id, language_id = tr.language_id).count() == 0:
+    if reviewer_role_check and reviewer_role_check.objects.filter(user_id = request.user.id, foss_category_id = tr.tutorial_detail.foss_id, language_id = tr.language_id).count() == 0:
         raise PermissionDenied()
     if review in status_flag:
         current_status = status_flag[review] - 1

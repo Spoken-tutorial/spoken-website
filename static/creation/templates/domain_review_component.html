@@ -20,24 +20,30 @@
 		<input type="submit" class="btn btn-primary review-submit" value="Submit"  tabindex="4" />
 	</form>
 {% endblock %}
-{% block jsblock %}
+{% block compressinlinejsblock %}
 	<script type="text/javascript">
-		$(document).ready(function() {
-			$('.remarks-parent').hide();
-			$('#id_component_status').change(function() {
-				if($('#id_component_status').val() == 5)
-					$('.remarks-parent').show();
-				else
-					$('.remarks-parent').hide();
-			});
-			$( "form" ).submit(function( event ) {
-				var compStatus = $('#id_component_status').val();
-				var remarks = $('#id_feedback').val();
-				if(compStatus == 5 && remarks == '') {
-					$('.cerrorlist').html('<li>Please fill the remarks field</li>');
-					event.preventDefault();
-				}
-			});
-		});
+		$(document).ready(
+		    function() {
+			    $('.remarks-parent').hide();
+			    $('#id_component_status').change(
+			        function() {
+				        if($('#id_component_status').val() == 5)
+					        $('.remarks-parent').show();
+				        else
+					        $('.remarks-parent').hide();
+			        }
+			    );
+			    $("form").submit(
+			        function(event) {
+				        var compStatus = $('#id_component_status').val();
+				        var remarks = $('#id_feedback').val();
+				        if(compStatus == 5 && remarks == '') {
+					        $('.cerrorlist').html('<li>Please fill the remarks field</li>');
+					        event.preventDefault();
+				        }
+			        }
+			    );
+		    }
+		);
 	</script>
 {% endblock %}

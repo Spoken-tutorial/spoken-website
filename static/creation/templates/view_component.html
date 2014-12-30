@@ -1,16 +1,15 @@
 {% extends 'spoken/templates/popup-base.html' %}
 {% load widget_tweaks %}
 {% load static %}
-{% if component == "video" %}
-    {% block cssblock %}
-        {% if component == "video" %}
-            {% block jsblock %}
-                <script src="{% static 'spoken/js/video.js' %}"></script>
-            {% endblock %}
-        {% endif %}
-        <link href="{% static 'spoken/css/video-js.min.css' %}" rel="stylesheet" type="text/css">
+{% block uncompresscssblock %}
+    {% if component == "video" %}
+    <link href="{% static 'spoken/css/video-js.min.css' %}" rel="stylesheet" type="text/css">
+    {% endif %}
+{% endblock %}
+{% block compressinlinecssblock %}
+    {% if component == "video" %}
         <style type="text/css">
-		    .video-js {
+	        .video-js {
                 padding-top: 56.25%
             }
             .vjs-fullscreen {
@@ -39,9 +38,9 @@
                 clear: both;
                 padding-top: 10px;
             }
-	    </style>
-    {% endblock %}
-{% endif %}
+        </style>
+    {% endif %}
+{% endblock %}
 {% block heading %}
     {% if component == "video" %}
         {{ tr.tutorial_detail.tutorial }}
@@ -52,7 +51,7 @@
     {% endif %}
 {% endblock %}
 {% block content %}
-    {% if component == "video" %}
+    {% if component == "video" %}4
         <table class="table table-bordered table-hover">
             <tr>
                 <th>Codec:</th><td>{{video_info.codec}}</td>
@@ -74,10 +73,14 @@
         </div>
     {% else %}
         <form role="form" method="post" enctype="multipart/form-data" action="">
-            {% csrf_token %}
             <div class="form-group">
                 <pre>{{ component_data }}</pre>
             </div>
         </form>
+    {% endif %}
+{% endblock %}
+{% block uncompressjsblock %}
+    {% if component == "video" %}
+        <script src="{% static 'spoken/js/video.min.js' %}"></script>
     {% endif %}
 {% endblock %}

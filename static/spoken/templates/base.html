@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-{% load compress  %}
+{% load compress %}
 {% load static %}
 {% load cmsdata %}
 {% load creationdata %}
@@ -34,9 +34,11 @@
         <link rel="stylesheet" href="{% static 'spoken/css/yamm-min.css' %}" type="text/css" media="screen" charset="utf-8" />
         {% block uncompresscssblock %}{% endblock %}
         {% compress css %}
-        <link rel="stylesheet" href="{% static 'spoken/css/main.css' %}" type="text/css" media="screen" charset="utf-8" />
-        {% block cssblock %}{% endblock %}
+            <link rel="stylesheet" href="{% static 'spoken/css/main.css' %}" type="text/css" media="screen" charset="utf-8" />
         {% endcompress %}
+        {% compress css %}{% block compresscssblock %}{% endblock %}{% endcompress %}
+	    {% compress css %}{% block compressinlinecssblock %}{% endblock %}{% endcompress %}
+        {% block cssblock %}{% endblock %}
     </head>
     <body>
         {% block announcement %}{% endblock %}
@@ -374,6 +376,8 @@
     {% compress js %}
         <script src="{% static 'spoken/js/base.js' %}"></script>
     {% endcompress %}
+    {% compress js %}{% block compressjsblock %}{% endblock %}{% endcompress %}
+    {% compress js %}{% block compressinlinejsblock %}{% endblock %}{% endcompress %}
     {% block jsblock %}{% endblock %}
     </body>
 </html>

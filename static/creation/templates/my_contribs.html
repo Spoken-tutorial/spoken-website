@@ -4,8 +4,8 @@
 {% load cmsdata %}
 {% load creationdata %}
 {% block title %}Tutorials Contributed{% endblock %}
-{% block cssblock %}
-    <link rel="stylesheet" href="{% static 'spoken/css/flip-scroll.css' %}" type="text/css" media="screen" charset="utf-8" />
+{% block uncompresscssblock %}
+    <link rel="stylesheet" href="{% static 'spoken/css/flip-scroll.min.css' %}" type="text/css" media="screen" charset="utf-8" />
 {% endblock %}
 {% block heading %}<i class="fa fa-list-ul"></i> Tutorials Contributed{% endblock %}
 {% block content %}
@@ -65,7 +65,7 @@
         </table>
     </div>
 {% endblock %}
-{% block jsblock %}
+{% block compressinlinejsblock %}
     <script type="text/javascript">
         $(document).ready(function(){
             $(".review-btn").hover(
