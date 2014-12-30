@@ -186,7 +186,7 @@ def offline_details(request, wid, category):
             update_participants_count(w)
             
             if error_line_no:
-                messages.error(request, "<b>Error: Line number "+ error_line_no + " in CSV file data is not in a proper format in the Participant list. The format should be First name, Last name, Email, Gender. For more details <a href='http://process.spoken-tutorial.org/images/c/c2/Participant_data.pdf' target='_blank'>Click here</a></b>")
+                messages.error(request, error_line_no)
             #update logs
             if category == 1:
                 message = w.academic.institution_name+" has submited Offline "+w.foss.foss+" workshop attendance dated "+w.tdate.strftime("%Y-%m-%d")
