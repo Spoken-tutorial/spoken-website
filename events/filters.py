@@ -68,7 +68,7 @@ class TrainingFilter(django_filters.FilterSet):
             state = kwargs['state']
             kwargs.pop('state')
         super(TrainingFilter, self).__init__(*args, **kwargs)
-        if args and args[0] and 'academic__state' in args[0]:
+        if args and args[0] and 'academic__state' in args[0] and args[0]['academic__state']:
             try:
                 state = State.objects.get(pk = args[0]['academic__state'])
             except ObjectDoesNotExist:
@@ -111,7 +111,7 @@ class TestFilter(django_filters.FilterSet):
             state = kwargs['state']
             kwargs.pop('state')
         super(TestFilter, self).__init__(*args, **kwargs)
-        if args and args[0] and 'academic__state' in args[0]:
+        if args and args[0] and 'academic__state' in args[0] and args[0]['academic__state']:
             try:
                 state = State.objects.get(pk = args[0]['academic__state'])
             except ObjectDoesNotExist:
