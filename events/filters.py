@@ -1,5 +1,6 @@
 import django_filters
 from events.models import *
+from django.core.exceptions import ObjectDoesNotExist
 
 class AcademicCenterFilter(django_filters.FilterSet):
     state = django_filters.ChoiceFilter(choices=State.objects.none())
@@ -67,6 +68,11 @@ class TrainingFilter(django_filters.FilterSet):
             state = kwargs['state']
             kwargs.pop('state')
         super(TrainingFilter, self).__init__(*args, **kwargs)
+        if args and args[0] and 'academic__state' in args[0]:
+            try:
+                state = State.objects.get(pk = args[0]['academic__state'])
+            except ObjectDoesNotExist:
+                pass
         choices = None
         if user:
             choices = list(State.objects.filter(resourceperson__user_id=user).values_list('id', 'name'))
@@ -105,6 +111,11 @@ class TestFilter(django_filters.FilterSet):
             state = kwargs['state']
             kwargs.pop('state')
         super(TestFilter, self).__init__(*args, **kwargs)
+        if args and args[0] and 'academic__state' in args[0]:
+            try:
+                state = State.objects.get(pk = args[0]['academic__state'])
+            except ObjectDoesNotExist:
+                pass
         choices = None
         if user:
             choices = list(State.objects.filter(resourceperson__user_id=user).values_list('id', 'name'))
