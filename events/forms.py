@@ -144,7 +144,7 @@ class TrainingForm(forms.ModelForm):
     course_number = forms.CharField(required = True)
     no_of_lab_session = forms.ChoiceField(widget=forms.Select, choices = [('', '---------'), ('1', '1'), ('2-5', '2 - 5'),('6-10', '6 - 10'),('above 10', 'Above 10')], required = True)
 
-    department = forms.ModelMultipleChoiceField(label='Department', cache_choices=True, widget = forms.SelectMultiple(attrs = {}), queryset = Department.objects.exclude(name='Uncategorized').order_by('name'), help_text = "", error_messages = {'required':'Department field required.'})
+    department = forms.ModelMultipleChoiceField(label='Department', cache_choices=True, widget = forms.SelectMultiple(attrs = {}), queryset = Department.objects.exclude(name='Uncategorised').order_by('name'), help_text = "", error_messages = {'required':'Department field required.'})
     
     foss = forms.ModelChoiceField(label='Foss', cache_choices=True, widget = forms.Select(attrs = {}), queryset = FossCategory.objects.filter(status = 1, id__in = FossAvailableForWorkshop.objects.filter(status=1).values_list('foss').distinct()).order_by('foss')
 , help_text = "", error_messages = {'required':'Foss field required.'})
@@ -194,7 +194,7 @@ class TrainingPermissionForm(forms.Form):
         user_list.insert(0, ('', '-- None --'))
         user = forms.ChoiceField(choices = user_list, widget=forms.Select(attrs = {}), required = True)
         
-        state_list = list(State.objects.exclude(name='Uncategorized').values_list('id', 'name'))
+        state_list = list(State.objects.exclude(name='Uncategorised').values_list('id', 'name'))
         state_list.insert(0, ('', '-- None --'))
         state = forms.ChoiceField(choices = state_list, widget=forms.Select(attrs = {}), required = True)
         
@@ -253,7 +253,7 @@ class TestForm(forms.ModelForm):
     training = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = False, error_messages = {'required':'Training field is required.'})
     foss = forms.ModelChoiceField(label='Foss', cache_choices=True, widget = forms.Select(attrs = {}), queryset = FossCategory.objects.filter(id__in = FossAvailableForTest.objects.filter(status=1).values_list('foss').distinct()).order_by('foss')
 , help_text = "", error_messages = {'required':'Foss field required.'})
-    department = forms.ModelMultipleChoiceField(label='Department', cache_choices=True, widget = forms.SelectMultiple(attrs = {}), queryset = Department.objects.exclude(name='Uncategorized').order_by('name'), help_text = "", error_messages = {'required':'Department field required.'})
+    department = forms.ModelMultipleChoiceField(label='Department', cache_choices=True, widget = forms.SelectMultiple(attrs = {}), queryset = Department.objects.exclude(name='Uncategorised').order_by('name'), help_text = "", error_messages = {'required':'Department field required.'})
     
     def __init__(self, *args, **kwargs):
         user = ''

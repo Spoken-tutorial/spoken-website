@@ -16,7 +16,7 @@ class AcademicCenterFilter(django_filters.FilterSet):
         if user:
             choices = list(State.objects.filter(resourceperson__user_id=user).values_list('id', 'name').order_by('name'))
         else:
-            choices = list(State.objects.exclude(name = 'Uncategorized').values_list('id', 'name').order_by('name'))
+            choices = list(State.objects.exclude(name = 'Uncategorised').values_list('id', 'name').order_by('name'))
         choices.insert(0, ('', '---------'),)
         self.filters['state'].extra.update({'choices' : choices})
     class Meta:
@@ -77,13 +77,13 @@ class TrainingFilter(django_filters.FilterSet):
         if user:
             choices = list(State.objects.filter(resourceperson__user_id=user).values_list('id', 'name'))
         else:
-            choices = list(State.objects.exclude(name='Uncategorized').order_by('name').values_list('id', 'name'))
+            choices = list(State.objects.exclude(name='Uncategorised').order_by('name').values_list('id', 'name'))
         choices.insert(0, ('', '---------'),)
         self.filters['academic__state'].extra.update({'choices' : choices})
         
         choices = None
         if state:
-            choices = list(City.objects.filter(state=state).order_by('name').values_list('id', 'name')) + [('189', 'Uncategorized')]
+            choices = list(City.objects.filter(state=state).order_by('name').values_list('id', 'name')) + [('189', 'Uncategorised')]
         else:
             choices = list(City.objects.none())
         choices.insert(0, ('', '---------'),)
@@ -120,13 +120,13 @@ class TestFilter(django_filters.FilterSet):
         if user:
             choices = list(State.objects.filter(resourceperson__user_id=user).values_list('id', 'name'))
         else:
-            choices = list(State.objects.exclude(name='Uncategorized').order_by('name').values_list('id', 'name'))
+            choices = list(State.objects.exclude(name='Uncategorised').order_by('name').values_list('id', 'name'))
         choices.insert(0, ('', '---------'),)
         self.filters['academic__state'].extra.update({'choices' : choices})
         
         choices = None
         if state:
-            choices = list(City.objects.filter(state=state).order_by('name').values_list('id', 'name')) + [('189', 'Uncategorized')]
+            choices = list(City.objects.filter(state=state).order_by('name').values_list('id', 'name')) + [('189', 'Uncategorised')]
         else:
             choices = list(City.objects.none())
         choices.insert(0, ('', '---------'),)

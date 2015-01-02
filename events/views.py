@@ -120,7 +120,7 @@ def init_events_app(request):
             InstituteType.objects.get_or_create(name= 'ITI')
             InstituteType.objects.get_or_create(name= 'Vocational')
             InstituteType.objects.get_or_create(name= 'School')
-            InstituteType.objects.get_or_create(name= 'Uncategorized')
+            InstituteType.objects.get_or_create(name= 'Uncategorised')
         except Exception, e:
             print e, "institute_type"
         
@@ -129,7 +129,7 @@ def init_events_app(request):
             InstituteCategory.objects.get_or_create(name= 'Govt')
             InstituteCategory.objects.get_or_create(name= 'Private')
             InstituteCategory.objects.get_or_create(name= 'NGO')
-            InstituteCategory.objects.get_or_create(name= 'Uncategorized')
+            InstituteCategory.objects.get_or_create(name= 'Uncategorised')
         except Exception, e:
             print e, "InstituteCategory"
             
@@ -146,24 +146,24 @@ def init_events_app(request):
         #state
         state = None
         try:
-            state = State.objects.get_or_create(name= 'Uncategorized')
+            state = State.objects.get_or_create(name= 'Uncategorised')
         except Exception, e:
              print e, "State"
         #District
         try:
-            District.objects.get_or_create(name= 'Uncategorized', state_id = state[0].id)
+            District.objects.get_or_create(name= 'Uncategorised', state_id = state[0].id)
         except Exception, e:
              print e, "District"
         
         #City
         try:
-            City.objects.get_or_create(name= 'Uncategorized', state_id = state[0].id)
+            City.objects.get_or_create(name= 'Uncategorised', state_id = state[0].id)
         except Exception, e:
              print e, "City"
         
         #University
         try:
-            University.objects.get_or_create(name= 'Uncategorized', state_id = state[0].id, user_id = 1)
+            University.objects.get_or_create(name= 'Uncategorised', state_id = state[0].id, user_id = 1)
         except Exception, e:
              print e, "University"
              
@@ -569,7 +569,7 @@ def new_ac(request):
             academic_code = get_academic_code(state)
             
             form_data.academic_code = academic_code
-            ic = InstituteCategory.objects.get(name = 'Uncategorized')
+            ic = InstituteCategory.objects.get(name = 'Uncategorised')
             form_data.institute_category = ic
             form_data.save()
             messages.success(request, form_data.institution_name+" has been added")
@@ -2475,7 +2475,7 @@ def test(request):
                 print e
         continue
     return HttpResponse("Done!")
-    '''academics = AcademicCenter.objects.filter(institution_type__name='Uncategorized')
+    '''academics = AcademicCenter.objects.filter(institution_type__name='Uncategorised')
     for academic in academics:
         if "Polytechnic" in academic.institution_name.title():
             academic.institution_type = InstituteType.objects.get(name='Polytechnic')
