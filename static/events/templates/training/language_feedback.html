@@ -2,13 +2,12 @@
 {% load widget_tweaks %}
 {% load static %}
 {% block title %}Participant Feedback{% endblock %}
-{% block cssblock %}
-    <link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />
+{% block compressinlinecssblock %}
     <style>
         table tr td, table tr th{
             padding: 4px 0px 0px 5px;
         }
-	.tablest td input[type='radio']{
+    .tablest td input[type='radio']{
             margin: 0px 23px !important;
         }
         .rowcolor{
@@ -18,26 +17,26 @@
             border-bottom : 1px solid #A8A8A8;
             background-color: #E0E0E0;
         }
-	.bgcolor{
+    .bgcolor{
             background-color: #E0E0E0;
             padding: 3px 15px;
         }
-	.tabhead{
-	    border: 1px solid #000;
-	    text-align: center;
-	    border-style: inset;
-	    background-color: #D0D0D0;
-	}
-	.highlight{
-	    width:100%;
-	    background-color: #E0E0E0;
-	}
-	.highlight textarea{
-	   height:110px;
-	}
-	.tablest textarea{
-	   height:110px;
-	}
+    .tabhead{
+        border: 1px solid #000;
+        text-align: center;
+        border-style: inset;
+        background-color: #D0D0D0;
+    }
+    .highlight{
+        width:100%;
+        background-color: #E0E0E0;
+    }
+    .highlight textarea{
+       height:110px;
+    }
+    .tablest textarea{
+       height:110px;
+    }
     </style>
 {% endblock %}
 {% block content %}
@@ -88,7 +87,7 @@
                             {% endfor %}
                         </div>
                     </div>
-		   <div class="form-group">
+           <div class="form-group">
                         <label class="col-sm-3 control-label" for= "id_language_prefered">Language Preferred</label>
                         <div class="col-sm-9">
                             {% render_field form.language_prefered class+="form-control language_prefered" tabindex="1" %}
@@ -281,18 +280,18 @@
                           <td style="width:50%">{{ choice.tag }} <b>{{ choice.choice_label }}</b></td>
                         {% endfor %}
                 </tr>
-	        <tr>
-        	        <td><label>Reason</label></td>
-	        </tr>
-        	<tr>
-                	<td>{{ form.preferred_language_reason }}</td>
+            <tr>
+                    <td><label>Reason</label></td>
+            </tr>
+            <tr>
+                    <td>{{ form.preferred_language_reason }}</td>
                         <td>{{ form.preferred_language_reason.errors }}</td>
                     <!--</div>-->
                 <tr>
                         <td colspan="3">{{ form.preferred_language_reason.errors }}</td>
                 </tr>
             </table>
-	    </div>
+        </div>
             <br>
             <div class="highlight">
             <table style="width:70%">
@@ -307,17 +306,17 @@
                 <tr>
                         <td>{{ form.prefer_translation_in_mother_tongue.errors }}</td>
                 </tr>
-		<tr>
-			<td><label>Reason</label></td>
-		</tr>
-		<tr>
-			<td>{{ form.prefer_translation_in_mother_tongue_reason }}</td>
-		</tr>
-		<tr>
-			<td>{{ form.prefer_translation_in_mother_tongue_reason.errors }}</td>
-		</tr>
+        <tr>
+            <td><label>Reason</label></td>
+        </tr>
+        <tr>
+            <td>{{ form.prefer_translation_in_mother_tongue_reason }}</td>
+        </tr>
+        <tr>
+            <td>{{ form.prefer_translation_in_mother_tongue_reason.errors }}</td>
+        </tr>
             </table>
-	    </div>
+        </div>
             <!--<div class="highlight">
                 <p>
                     <label>Reason</label>
@@ -328,7 +327,7 @@
                 {{ form.prefer_translation_in_mother_tongue_reason.errors }}
             </div>-->
             <br>
-	    <div class="highlight">
+        <div class="highlight">
             <table style="width:70%">
                 <tr>
                     <td colspan="6"><label for="side_by_side_method_meant">Do you know about the side-by-side method?</td>
@@ -342,9 +341,9 @@
                     <td colspan="3">{{ form.side_by_side_method_meant.errors }}</td>
                 </tr>
             </table>
-	    </div>
-	    <br>
-	    <div class="highlight">
+        </div>
+        <br>
+        <div class="highlight">
             <table style="width:70%">
                 <tr>
                     <td colspan="6">
@@ -358,23 +357,23 @@
                 <tr>
                         <td>{{ form.side_by_side_method_is_beneficial.errors }}</td>
                 </tr>
-		<tr>
-			<td><label>Reason</label></td>
-		</tr>
-		<tr>
-			<td>{{ form.side_by_side_method_is_beneficial_reason }}</td>
-		</tr>
-		<tr>
-			<td>{{ form.side_by_side_method_is_beneficial_reason.errors }}</td>
-		</tr>
+        <tr>
+            <td><label>Reason</label></td>
+        </tr>
+        <tr>
+            <td>{{ form.side_by_side_method_is_beneficial_reason }}</td>
+        </tr>
+        <tr>
+            <td>{{ form.side_by_side_method_is_beneficial_reason.errors }}</td>
+        </tr>
             </table>
-	    </div>
-	    <br>
+        </div>
+        <br>
             <!--<div class="highlight">
-		<p>
-		    <label>Reason</label>
-		</p>
-		<p>{{ form.side_by_side_method_is_beneficial_reason }}</p>
+        <p>
+            <label>Reason</label>
+        </p>
+        <p>{{ form.side_by_side_method_is_beneficial_reason }}</p>
                 {{ form.side_by_side_method_is_beneficial_reason.errors }}
             </div>-->
         <div class="highlight">
@@ -391,9 +390,9 @@
                     <td colspan="3">{{ form.side_by_side_method_is_effective.errors }}</td>
                 </tr>
             </table>
-	    </div>
-	    <br>
-	    <div class="highlight">
+        </div>
+        <br>
+        <div class="highlight">
             <table style="width:70%">
                 <tr>
                     <td colspan="6"><label for="side_by_side_method_meant">Side-by-side method is</td>
@@ -407,30 +406,30 @@
                     <td colspan="3">{{ form.side_by_side_method_is.errors }}</td>
                 </tr>
             </table>
-	    </div>
-	    <br>
-	   <div class="highlight">
-	   <table style="width:70%">
-		<tr>
-		    <td colspan="6">
-			<label>What do you feel are the limitations of side-by-side method?</label>
-		    </td>
-		</tr>
-		<tr>
-		    <td>{{ form.limitations_of_side_by_side_method }}</td>
-		</tr>
-		<tr>
-		    <td>{{ form.limitations_of_side_by_side_method.errors }}</td>
-		</tr>
-	   </table>
-	   </div>
+        </div>
+        <br>
+       <div class="highlight">
+       <table style="width:70%">
+        <tr>
+            <td colspan="6">
+            <label>What do you feel are the limitations of side-by-side method?</label>
+            </td>
+        </tr>
+        <tr>
+            <td>{{ form.limitations_of_side_by_side_method }}</td>
+        </tr>
+        <tr>
+            <td>{{ form.limitations_of_side_by_side_method.errors }}</td>
+        </tr>
+       </table>
+       </div>
             <!--<div class="highlight">
                 <p>
                     <label>What do you feel are the limitations of side-by-side method?</label>
                 </p>
-		<p>
-		   {{ form.limitations_of_side_by_side_method }}
-		</p>
+        <p>
+           {{ form.limitations_of_side_by_side_method }}
+        </p>
                 {{ form.limitations_of_side_by_side_method.errors }}
             </div>-->
             <table style="width:100%;border:1px solid #000;" class="tablest"> 
@@ -495,20 +494,20 @@
                 <tr class="rowcolor">
                     <td colspan="1">
                     <label>Content: Best Features</label></td>
-		    <td colspan="5">
+            <td colspan="5">
                     <label>Content: Areas of Improvement</label></td>
                 </tr>
                 <tr class="rowcolor">
                     <td colspan="1">
                     {{ form.content_best_features }}
                     </td>
-		    <td colspan="5">
+            <td colspan="5">
                     {{ form.content_areas_of_improvement }}
                     </td>
                 </tr>
                 <tr>
                     <td colspan="1">{{ form.content_best_features.errors }}</td>
-		    <td colspan="5">{{ form.content_areas_of_improvement.errors  }}</td>
+            <td colspan="5">{{ form.content_areas_of_improvement.errors  }}</td>
                 </tr>
                 <!--<tr>
                     <td style="width:50%">
@@ -565,19 +564,19 @@
         <tr class="rowcolor">
             <td colspan="1">
             <label>Video: Best Features</label></td>
-	    <td colspan="5"><label>Video: Areas of Improvement</label></td>
+        <td colspan="5"><label>Video: Areas of Improvement</label></td>
         </tr>
         <tr class="rowcolor">
             <td colspan="1">
             {{ form.video_best_features }}
             </td>
-	    <td colspan="5">
+        <td colspan="5">
             {{ form.video_areas_of_improvement }}
             </td>
         </tr>
         <tr class="rowcolor">
             <td colspan="1">{{ form.video_best_features.errors }}</td>
-	    <td colspan="5">{{ form.video_areas_of_improvement.errors }}</td>
+        <td colspan="5">{{ form.video_areas_of_improvement.errors }}</td>
         </tr>
         <!--<tr>
             <td style="width:50%"><label>Video: Areas of Improvement</label></td>
@@ -632,19 +631,19 @@
         </tr>
         <tr class="rowcolor">
             <td colspan="1"><label>Audio: Best Features</label></td>
-	    <td colspan="5"> <label>Audio: Areas of Improvement</label></td>
+        <td colspan="5"> <label>Audio: Areas of Improvement</label></td>
         </tr>
         <tr class="rowcolor">
             <td colspan="1">
                 {{ form.audio_best_features }}
             </td>
-	    <td colspan="5">
+        <td colspan="5">
                 {{ form.audio_areas_of_improvement }}
             </td>
         </tr>
         <tr class="rowcolor">
             <td colspan="1">{{ form.audio_best_features.errors }}</td>
-	    <td colspan="5">{{ form.audio_areas_of_improvement.errors }}</td>
+        <td colspan="5">{{ form.audio_areas_of_improvement.errors }}</td>
         </tr>
         <!--<tr>
             <td style="width:50%">
@@ -659,13 +658,10 @@
             <td colspan="3">{{ form.audio_areas_of_improvement.errors }}</td>
         </tr>-->
         </table>
-	<br>
+    <br>
         <input class="btn btn-primary" type="submit" value="Submit" />
         {% endwith %}
         </form>
     </div>
 </div>
 {% endblock %}
-{% block jsblock %}
-{% endblock %}
-

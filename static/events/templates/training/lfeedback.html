@@ -2,8 +2,7 @@
 {% load widget_tweaks %}
 {% load static %}
 {% block title %}Participant Feedback{% endblock %}
-{% block cssblock %}
-    <link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />
+{% block compressinlinecssblock %}
     <style>
         table tr td, table tr th{
             padding: 4px 0;
@@ -526,6 +525,3 @@
     </div>
 </div>
 {% endblock %}
-{% block jsblock %}
-{% endblock %}
-

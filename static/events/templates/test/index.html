@@ -5,7 +5,7 @@
 {% load creationdata %}
 {% load eventsdata %}
 {% block title %}Online Test{% endblock %}
-{% block cssblock %}
+{% block compresscssblock %}
     <link rel="stylesheet" href="{% static 'spoken/css/jquery.datetimepicker.css' %}" type="text/css" media="screen" charset="utf-8" />
 {% endblock %}
 {% block heading %}
@@ -19,14 +19,14 @@
                 <div class="form-group">
                     <label for="id_state" class="col-sm-4 control-label">State</label>
                     <div class="col-sm-8">
-                        {% render_field form.academic__state class+="form-control chosen academic_state" tabindex="1" %}
+                        {% render_field form.academic__state class+="form-control academic_state" tabindex="1" %}
                         {{ form.academic__state.errors }}
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="id_state" class="col-sm-4 control-label">Foss</label>
                     <div class="col-sm-8">
-                        {% render_field form.foss class+="form-control chosen foss" tabindex="1" %}
+                        {% render_field form.foss class+="form-control foss" tabindex="1" %}
                         {{ form.foss.errors }}
                     </div>
                 </div>
@@ -35,7 +35,7 @@
                 <div class="form-group">
                     <label for="id_tdate" class="col-sm-4 control-label">Date Range</label>
                     <div class="col-sm-8">
-                        {% render_field form.tdate class+="form-control chosen tdate date" tabindex="1" %}
+                        {% render_field form.tdate class+="form-control tdate date" tabindex="1" %}
                         {{ form.tdate.errors }}
                     </div>
                 </div>
@@ -44,7 +44,7 @@
                 <div class="form-group">
                     <label for="id_state" class="col-sm-4 control-label">Test Category</label>
                     <div class="col-sm-8">
-                        {% render_field form.test_category class+="form-control chosen test_category" tabindex="1" %}
+                        {% render_field form.test_category class+="form-control test_category" tabindex="1" %}
                         {{ form.test_category.errors }}
                     </div>
                 </div>
@@ -162,8 +162,10 @@
         </div>
     </div>
 {% endblock %}
-{% block jsblock %}
+{% block compressjsblock %}
     <script src="{% static 'spoken/js/jquery.datetimepicker.js' %}"></script>
+{% endblock %}
+{% block compressinlinejsblock %}
     <script type="text/javascript">
         $(document).ready(function(){
             $(".fancybox").fancybox({

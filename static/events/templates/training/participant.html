@@ -3,7 +3,6 @@
 {% load static %}
 {% load eventsdata %}
 {% block title %}Workshop Participant Details{% endblock %}
-{% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
 {% block heading %}
         <i class="fa fa-list-ul"></i> Participant Details {% if can_download_certificate %}<a href="/software-training" class='pull-right'>Dashboard</a> {% endif %}
 {% endblock %}
@@ -29,33 +28,33 @@
             {% endif %}
         </dl>
     </div>
-	<div class="" id="pending">
-		{% if collection %}
-		<table class="table table-bordered table-hover table-striped">
-			<tr>
-				<th>First Name</th>
-				<th>Last Name</th>
-				<th></th>
-			</tr>
-			{% for record in collection %}
-				<tr>
-					<td>{{ record.firstname|lower|title }}</td>
-					<td>{{ record.lastname|lower|title }}</td>
-					<td>
-			            {% if can_download_certificate and wc.status == 4 %}
-			               <a href="{% url 'events:training_participant_ceritificate' wc.id record.id %}">Certificate</a> | 
-			            {% endif %}
-			            {% if wc|is_feedback_exits:record %}
-			                <a target="_blank" href="{% url 'events:training_participant_feedback' wc.id record.mdluser_id %}">View Feedback</a>
-			            {% else %}
-			                Feedback not given
-			            {% endif %}
-				    </td>
-				</tr>
-			{% endfor %}
-		</table>
-		{% else %}
-			<p class="no-record">No student found!</p>
-		{% endif %}
-	</div>
+    <div class="" id="pending">
+        {% if collection %}
+        <table class="table table-bordered table-hover table-striped">
+            <tr>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th></th>
+            </tr>
+            {% for record in collection %}
+                <tr>
+                    <td>{{ record.firstname|lower|title }}</td>
+                    <td>{{ record.lastname|lower|title }}</td>
+                    <td>
+                        {% if can_download_certificate and wc.status == 4 %}
+                           <a href="{% url 'events:training_participant_ceritificate' wc.id record.id %}">Certificate</a> | 
+                        {% endif %}
+                        {% if wc|is_feedback_exits:record %}
+                            <a target="_blank" href="{% url 'events:training_participant_feedback' wc.id record.mdluser_id %}">View Feedback</a>
+                        {% else %}
+                            Feedback not given
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+        {% else %}
+            <p class="no-record">No student found!</p>
+        {% endif %}
+    </div>
 {% endblock %}

@@ -4,7 +4,7 @@
 {% load cmsdata %}
 {% load creationdata %}
 {% block title %}Search Tutorials{% endblock %}
-{% block cssblock %}
+{% block compressinlinecssblock %}
     <style>
         .tutorial-search-form{
             margin-top: 20px;
@@ -96,10 +96,5 @@
             <p class='no-record'> No result found!</p>
         {% endif %}
     </div>
-
-
-{% endblock %}
-{% block jsblock %}
-    <script src="{% static 'spoken/js/events.js' %}"></script>
 {% endblock %}
 

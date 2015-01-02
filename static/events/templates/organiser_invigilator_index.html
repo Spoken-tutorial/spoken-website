@@ -12,8 +12,6 @@
     {% endif %}
 {% endblock %}
 
-{% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
-
 {% block heading %}
     {% if role == 'invigilator' %}
         <i class="fa fa-list-ul"></i> Invigilator <a href="{% url 'events:events_dashboard' %}" class='pull-right'>Dashboard</a>
@@ -29,7 +27,7 @@
                 <div class="form-group">
                     <label for="id_state" class="col-sm-2 control-label">State</label>
                     <div class="col-sm-10">
-                        {% render_field form.academic__state class+="form-control chosen academic_state" tabindex="1" %}
+                        {% render_field form.academic__state class+="form-control academic_state" tabindex="1" %}
                         {{ form.academic__state.errors }}
                     </div>
                 </div>
@@ -38,7 +36,7 @@
                 <div class="form-group">
                     <label for="id_state" class="col-sm-2 control-label">Instituttion Type</label>
                     <div class="col-sm-10">
-                        {% render_field form.academic__institution_type class+="form-control chosen institution_type" tabindex="1" %}
+                        {% render_field form.academic__institution_type class+="form-control institution_type" tabindex="1" %}
                         {{ form.academic__institution_type.errors }}
                     </div>
                 </div>

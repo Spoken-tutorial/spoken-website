@@ -2,11 +2,12 @@
 {% load widget_tweaks %}
 {% load static %}
 {% load creationdata %}
-
-{% block meta %}
-    <meta name="title" content="{{ tr_rec.tutorial_detail.tutorial }} in {{ tr_rec.language.name }}">
+{% block main_meta %}
+    <meta name="title" content="{{ tr_rec.tutorial_detail.tutorial }} - {{ tr_rec.language.name }}">
     <meta name="description" content="{{ tr_rec.tutorial_detail.foss.description }}">
-
+    <meta name="keywords" content="{{ tr_rec.tutorial_detail.foss }} free training in india, {% if tr_rec.common_content.keyword %} {{ tr_rec.common_content.keyword }} {% else %} {{ tr_rec.tutorial_detail.tutorial }} {% endif %}">
+{% endblock %}
+{% block meta %}
     <meta property="og:site_name" content="Spoken-Tutorial">
     <meta property="og:url" content="{{ request.META.HTTP_HOST }}{{ request.path}}">
     <meta property="og:title" content="{{ tr_rec.tutorial_detail.tutorial }} in {{ tr_rec.language.name }}">
@@ -19,14 +20,11 @@
         <meta property="og:video:tag" content="{{ key }}">
     {% endfor %}
 {% endblock %}
-{% block metatag %}
-    <meta name="keywords" content="{{ tr_rec.tutorial_detail.foss }} free training in india, {% if tr_rec.common_content.keyword %} {{ tr_rec.common_content.keyword }} {% else %} {{ tr_rec.tutorial_detail.tutorial }} {% endif %}">
-{% endblock %}
 {% block uncompresscssblock %}
     <link href="{% static 'spoken/css/video-js.min.css' %}" rel="stylesheet" type="text/css">
     <link rel="stylesheet" href="{% static 'spoken/css/jquery.fancybox.pack.css' %}" type="text/css" media="screen" charset="utf-8" />
 {% endblock %}
-{% block cssblock %}
+{% block compressinlinecssblock %}
     <style type="text/css">
         .video-js {
             padding-top: 56.25%
@@ -311,12 +309,6 @@
                             <a href="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/resources/{{ tr_rec.common_content.assignment }}" target="_blank" class="list-group-item">
                                 <h4 class="list-group-item-heading"><i class="fa fa-1 fa-file-text"></i>&nbsp; Assignment</h4>
                             </a>
-                            <!--<p class="list-group-item-text">
-                                <span style="text-align: left">Status: <i class="{{ tr_rec.common_content.assignment_status|get_review_status_symbol }}" title="{{ tr_rec.common_content.assignment_status|get_review_status_list }}"></i></span>
-                                <span style="float: right">
-                                    - <a href="/accounts/view-profile/{{ tr_rec.common_content.assignment_user }}" target="_blank">{{tr_rec.common_content.assignment_user}}</a>
-                                </span>
-                            </p>-->
                         </div>
                     {% endif %}
                     {% if tr_rec.common_content.code_status and tr_rec.common_content.code_status != 6 %}
@@ -336,12 +328,6 @@
                                     {% endwith %}
                                 {% endwith %}
                             </a>
-                            <!--<p class="list-group-item-text">
-                                <span style="text-align: left">Status: <i class="{{ tr_rec.common_content.code_status|get_review_status_symbol }}" title="{{ tr_rec.common_content.code_status|get_review_status_list }}"></i></span>
-                                <span style="float: right">
-                                    - <a href="/accounts/view-profile/{{ tr_rec.common_content.code_user }}" target="_blank">{{tr_rec.common_content.code_user}}</a>
-                                </span>
-                            </p>-->
                         </div>
                     {% endif %}
                     {% if tr_rec.common_content.slide_status and tr_rec.common_content.slide_status != 6 %}
@@ -361,12 +347,6 @@
                                     {% endwith %}
                                 {% endwith %}
                             </a>
-                            <!--<p class="list-group-item-text">
-                                <span style="text-align: left">Status: <i class="{{ tr_rec.common_content.slide_status|get_review_status_symbol }}" title="{{ tr_rec.common_content.slide_status|get_review_status_list }}"></i></span>
-                                <span style="float: right">
-                                    - <a href="/accounts/view-profile/{{ tr_rec.common_content.slide_user }}" target="_blank">{{tr_rec.common_content.slide_user}}</a>
-                                </span>
-                            </p>-->
                         </div>
                     {% endif %}
                     {% if tr_rec.script_status %}
@@ -374,12 +354,6 @@
                             <a href="{{ script_base|add:tr_rec.script }}" target="_blank" class="list-group-item">
                                 <h4 class="list-group-item-heading"><i class="fa fa-1 fa-link"></i> Script</h4>
                             </a>
-                            <!--<p class="list-group-item-text">
-                                <span style="text-align: left">Status: <i class="{{ tr_rec.script_status|get_review_status_symbol }}" title="{{ tr_rec.script_status|get_review_status_list }}"></i></span>
-                                <span style="float: right">
-                                    - <a href="/accounts/view-profile/{{ tr_rec.script_user }}" target="_blank">{{tr_rec.script_user}}</a>
-                                </span>
-                            </p>-->
                         </div>
                         {% if tr_rec.language.name == 'English' %}
                             {% with timed_script=tr_rec.script|get_timed_script:tr_rec.timed_script %}
@@ -398,29 +372,26 @@
         </div>
     </row>
 {% endblock %}
-{% block jsblock %}
-    <script>
-        currentVideo = $('.playlist-item.active');
-        nextVideo = currentVideo.next('li');
-        prevVideo = currentVideo.prev('li');
-        var tmpHtml = currentVideo.attr('data') + '/' + $('.video-count').html()
-        $('.video-count').html(tmpHtml)
-        if(nextVideo.length){
-            //console.log(nextVideo.children('a').attr('href'));
-            $('.forward').html('<a href="'+nextVideo.children('a').attr('href')+'"><i class="fa fa-1 fa-fast-forward"></i></a>');
-        } else {
-            $('.forward').html('<i class="fa fa-1 fa-fast-forward"></i>');
-        }
-        if(prevVideo.length){
-            //console.log(prevVideo.children('a').attr('href'));
-            $('.backward').html('<a href="'+prevVideo.children('a').attr('href')+'"><i class="fa fa-1 fa-fast-backward"></i></a>');
-        } else {
-            $('.backward').html('<i class="fa fa-1 fa-fast-backward"></i>');
-        }
-        
-    </script>
+{% block compressinlinejsblock %}
     <script type="text/javascript">
         $(document).ready(function(){
+            currentVideo = $('.playlist-item.active');
+            nextVideo = currentVideo.next('li');
+            prevVideo = currentVideo.prev('li');
+            var tmpHtml = currentVideo.attr('data') + '/' + $('.video-count').html()
+            $('.video-count').html(tmpHtml)
+            if(nextVideo.length){
+                //console.log(nextVideo.children('a').attr('href'));
+                $('.forward').html('<a href="'+nextVideo.children('a').attr('href')+'"><i class="fa fa-1 fa-fast-forward"></i></a>');
+            } else {
+                $('.forward').html('<i class="fa fa-1 fa-fast-forward"></i>');
+            }
+            if(prevVideo.length){
+                //console.log(prevVideo.children('a').attr('href'));
+                $('.backward').html('<a href="'+prevVideo.children('a').attr('href')+'"><i class="fa fa-1 fa-fast-backward"></i></a>');
+            } else {
+                $('.backward').html('<i class="fa fa-1 fa-fast-backward"></i>');
+            }
             $(".fancybox").fancybox({
                 maxWidth    : 500,
                 maxHeight   : 485,
@@ -443,5 +414,5 @@
     <script src="{% static 'spoken/js/video.min.js' %}"></script>
     <script src="{% static 'spoken/js/jquery.fancybox.pack.js' %}"></script>
     <script src="{% static 'spoken/js/jquery.mousewheel-3.0.6.pack.js' %}"></script>
-    <script src="https://apis.google.com/js/platform.js"></script> <!-- youtube subscribe button js -->
+    <script src="https://apis.google.com/js/platform.js"></script>
 {% endblock %}

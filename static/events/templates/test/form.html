@@ -2,8 +2,7 @@
 {% load widget_tweaks %}
 {% load static %}
 {% block title %}New Test Request{% endblock %}
-{% block cssblock %}
-    <link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />
+{% block compresscssblock %}
     <link rel="stylesheet" href="{% static 'spoken/css/jquery.datetimepicker.css' %}" type="text/css" media="screen" charset="utf-8" />
 {% endblock %}
 
@@ -136,8 +135,11 @@
         </div>
     </div>
 {% endblock %}
-{% block jsblock %}
-    <script>
+{% block compressjsblock %}
+    <script src="{% static 'spoken/js/jquery.datetimepicker.js' %}"></script>
+{% endblock %}
+{% block compressinlinejsblock %}
+    <script type="text/javascript">
         function hide_input() {
             $category = $('#id_test_category');
             if($category.val() == 1){
@@ -202,63 +204,57 @@
             ajaxFossDeptFillDatas('foss', 'dept', 1);
         });
         
-    function ajaxFossDeptFillDatas(foss, dept, type){
-        $afoss = $('#id_foss');
-        $adepartment = $('#id_department');
-        if(type){
-            var workshop = $(".training").val();
-        } else {
-            var workshop = $(".workshop").val();
-        }
-        
-        $foss = foss || "";
-        $department = dept || "";
-        $type = type;
-        fields = {}
-        fields['type'] = type;
-        if($foss) {
-            fields['foss'] = 'foss';
-        }
-        if($department) {
-            fields['dept'] = 'dept';
-        }
-        /* see thread-user.js */
-        $.ajax({
-            url: "/software-training/ajax-dept-foss/",
-            type: "POST",
-            data: {
-                workshop: workshop,
-                fields: fields,
-            },
-            success: function(data) {
-                console.log(data);
-                if(data.foss){
-                    $afoss.html(data.foss);
-                    $afoss.trigger("chosen:updated");
-                    $afoss.removeAttr("disabled");
-                }else{
-                    $ac_institute.html('<option>-- None -- </option>')
-                    $ac_institute.trigger("chosen:updated");
-                    $ac_institute.attr("disabled", "disabled");
-                    //alert('No City found for this State!!');
-                }
-                if(data.dept){
-                    $adepartment.html(data.dept);
-                    $adepartment.trigger("chosen:updated");
-                    $adepartment.removeAttr("disabled");
-                }else{
-                    $adepartment.html('<option>-- None -- </option>')
-                    $adepartment.trigger("chosen:updated");
-                    $adepartment.attr("disabled", "disabled");
-                    //alert('No Location found for this District!!');
-                }
-                console.log(data);
+        function ajaxFossDeptFillDatas(foss, dept, type){
+            $afoss = $('#id_foss');
+            $adepartment = $('#id_department');
+            if(type){
+                var workshop = $(".training").val();
+            } else {
+                var workshop = $(".workshop").val();
             }
-        });
-    }
-    </script>
-    <script src="{% static 'spoken/js/jquery.datetimepicker.js' %}"></script>
-    <script>
+            
+            $foss = foss || "";
+            $department = dept || "";
+            $type = type;
+            fields = {}
+            fields['type'] = type;
+            if($foss) {
+                fields['foss'] = 'foss';
+            }
+            if($department) {
+                fields['dept'] = 'dept';
+            }
+            /* see thread-user.js */
+            $.ajax({
+                url: "/software-training/ajax-dept-foss/",
+                type: "POST",
+                data: {
+                    workshop: workshop,
+                    fields: fields,
+                },
+                success: function(data) {
+                    console.log(data);
+                    if(data.foss){
+                        $afoss.html(data.foss);
+                        $afoss.removeAttr("disabled");
+                    }else{
+                        $ac_institute.html('<option>-- None -- </option>')
+                        $ac_institute.attr("disabled", "disabled");
+                        //alert('No City found for this State!!');
+                    }
+                    if(data.dept){
+                        $adepartment.html(data.dept);
+                        $adepartment.removeAttr("disabled");
+                    }else{
+                        $adepartment.html('<option>-- None -- </option>')
+                        $adepartment.attr("disabled", "disabled");
+                        //alert('No Location found for this District!!');
+                    }
+                    console.log(data);
+                }
+            });
+        }
+
         $('.datetime').datetimepicker({
             onGenerate:function( ct ){
                 $(this).find('.xdsoft_day_of_week0')

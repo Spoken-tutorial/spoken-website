@@ -3,9 +3,10 @@
 {% load static %}
 {% load eventsdata %}
 {% block title %}Training / Workshop - Request{% endblock %}
-{% block cssblock %}
-	<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />
-	<link rel="stylesheet" href="{% static 'spoken/css/jquery.datetimepicker.css' %}" type="text/css" media="screen" charset="utf-8" />
+{% block compresscssblock %}
+    <link rel="stylesheet" href="{% static 'spoken/css/jquery.datetimepicker.css' %}" type="text/css" media="screen" charset="utf-8" />
+{% endblock %}
+{% block compressinlinecssblock %}
     <style>
         .radio input[type="radio"]{
             left: 0px;
@@ -16,41 +17,41 @@
         <i class="fa fa-list-ul"></i> Training / Workshop and Participant Name List<a href="/software-training" class='pull-right go-back'>Dashboard</a>
 {% endblock %}
 {% block content %}
-    	<ul class="tabs nav nav-tabs">
-	    {% if role == 'organiser' %}
-		    <li class="active"><a href="/software-training/training/{{ role }}/request/">New</a></li>
-		    <li {% if status == 'pending' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/training/{{role}}/pending/">Pending</a></li>
-		{% endif %}
-		{% if role == 'rp' %}
-		    <li {% if status == 'pending' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/training/{{role}}/pending/">New Requests</a></li>
-		{% endif %}
-		<li {% if status == 'approved' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/training/{{role}}/approved/">Approved</a></li>
+        <ul class="tabs nav nav-tabs">
+        {% if role == 'organiser' %}
+            <li class="active"><a href="/software-training/training/{{ role }}/request/">New</a></li>
+            <li {% if status == 'pending' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/training/{{role}}/pending/">Pending</a></li>
+        {% endif %}
+        {% if role == 'rp' %}
+            <li {% if status == 'pending' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/training/{{role}}/pending/">New Requests</a></li>
+        {% endif %}
+        <li {% if status == 'approved' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/training/{{role}}/approved/">Approved</a></li>
         <li {% if status == 'ongoing' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/training/{{role}}/ongoing/">Ongoing</a></li>
         <li {% if status == 'completed' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/training/{{role}}/completed/">Completed</a></li>
         <li {% if status == 'reschedule' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/training/{{role}}/reschedule/">Reschedule</a></li>
         <li {% if status == 'rejected' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/training/{{role}}/rejected/">Rejected</a></li>
-	</ul>
-	
-	<div class='tab-content'>
-	     <div class="bs-callout bs-callout-info">
+    </ul>
+    
+    <div class='tab-content'>
+         <div class="bs-callout bs-callout-info">
             {% if instance %}
-	            {{ instance.academic.state }} - {{ instance.academic }}
-	        {% else %}
-	            {{ user.organiser.academic.state }} - {{ user.organiser.academic }}
-	        {% endif %}
-	    </div>
-	    <div class="row well">
+                {{ instance.academic.state }} - {{ instance.academic }}
+            {% else %}
+                {{ user.organiser.academic.state }} - {{ user.organiser.academic }}
+            {% endif %}
+        </div>
+        <div class="row well">
             <div class='col-sm-8'>
-	            <form action="{{ action }}" method="post" class='form-horizontal' enctype="multipart/form-data">{% csrf_token %}
-	                {% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
-	                {% if form.non_field_errors %}
-	                <ul>
-	                  {% for error in form.non_field_errors %}
-		                <li>{{ error }}</li>
-	                  {% endfor %}
-	                </ul>
-	                {% endif %}
-	               <div class="form-group">
+                <form action="{{ action }}" method="post" class='form-horizontal' enctype="multipart/form-data">{% csrf_token %}
+                    {% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
+                    {% if form.non_field_errors %}
+                    <ul>
+                      {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                      {% endfor %}
+                    </ul>
+                    {% endif %}
+                   <div class="form-group">
                         <label class="col-sm-3 control-label" for= "id_training_type">Training Type</label>
                         <div class="col-sm-9">
                             {% for choice in form.training_type %}
@@ -62,69 +63,69 @@
                         </div>
                     </div>
                     <div class="form-group">
-		                <label class="col-sm-3 control-label" for="id_xml_file">Participant List (Upload CSV File)</label>
-		                <div class="col-sm-9">
-		                    {% render_field form.xml_file class+=" xml_file"%}
-		                    {{ form.xml_file.errors }}
-		                    <small>Please upload your CSV file here. If you have used <b>MS-EXCEL</b> to create the CSV file please make sure that you have saved it with <b><big>csv(ms-dos)</big></b> file extention.</small>
-		                </div>
-	                </div>
+                        <label class="col-sm-3 control-label" for="id_xml_file">Participant List (Upload CSV File)</label>
+                        <div class="col-sm-9">
+                            {% render_field form.xml_file class+=" xml_file"%}
+                            {{ form.xml_file.errors }}
+                            <small>Please upload your CSV file here. If you have used <b>MS-EXCEL</b> to create the CSV file please make sure that you have saved it with <b><big>csv(ms-dos)</big></b> file extention.</small>
+                        </div>
+                    </div>
                     <div class="form-group">
-		                <label class="col-sm-3 control-label" for= "id_course">Course / Stream</label>
-		                <div class="col-sm-9">
-		                    {% render_field form.course class+="form-control course" tabindex="1" %}
-		                    {{ form.course.errors }}
+                        <label class="col-sm-3 control-label" for= "id_course">Course / Stream</label>
+                        <div class="col-sm-9">
+                            {% render_field form.course class+="form-control course" tabindex="1" %}
+                            {{ form.course.errors }}
                             <small>Please select the appropriate stream of the participants.</small>
-		                </div>
-	                </div>
-	                <div class="form-group course_number_group">
-		                <label class="col-sm-3 control-label" for= "id_course_number">Course / Paper Name</label>
-		                <div class="col-sm-9">
-		                    {% render_field form.course_number class+="form-control course_number" tabindex="1" %}
-		                    {{ form.course_number.errors }}
-		                </div>
-	                </div>
-	                <div class="form-group">
-		                <label class="col-sm-3 control-label" for= "id_department">Department</label>
-		                <div class="col-sm-9">
-		                    {% render_field form.department class+="form-control department" tabindex="1" data-placeholder="Enter department" %}
-		                    {{ form.department.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group course_number_group">
+                        <label class="col-sm-3 control-label" for= "id_course_number">Course / Paper Name</label>
+                        <div class="col-sm-9">
+                            {% render_field form.course_number class+="form-control course_number" tabindex="1" %}
+                            {{ form.course_number.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for= "id_department">Department</label>
+                        <div class="col-sm-9">
+                            {% render_field form.department class+="form-control department" tabindex="1" data-placeholder="Enter department" %}
+                            {{ form.department.errors }}
                             <small>Please select the appropriate department of the participants.</small>
                             <small><b>&lt;CTRL&gt; + Click</b> for multiple selections.</small>
-		                </div>
-	                </div>
-	                <div class="form-group">
-		                <label class="col-sm-3 control-label" for= "id_tdate">Timing</label>
-		                <div class="col-sm-9">
-		                    {% render_field form.tdate class+="form-control datetime" tabindex="1" data-placeholder="Enter date" %}
-		                    {{ form.tdate.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for= "id_tdate">Timing</label>
+                        <div class="col-sm-9">
+                            {% render_field form.tdate class+="form-control datetime" tabindex="1" data-placeholder="Enter date" %}
+                            {{ form.tdate.errors }}
                             <small>Please select the date on which on which you want to conduct the training/workshop.</small>
-		                </div>
-	                </div>
-	                <div class="form-group no_of_lab_session_group">
-		                <label class="col-sm-3 control-label" for= "id_no_of_lab_session">No.of lab session</label>
-		                <div class="col-sm-9">
-		                    {% render_field form.no_of_lab_session class+="form-control no_of_lab_session" tabindex="1" %}
-		                    {{ form.no_of_lab_session.errors }}
-		                </div>
-	                </div>
-	                <div class="form-group">
-		                <label class="col-sm-3 control-label" for= "id_foss">FOSS</label>
-		                <div class="col-sm-9">
-		                    {% render_field form.foss class+="form-control foss" tabindex="1" data-placeholder="Enter foss" %}
-		                    {{ form.foss.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group no_of_lab_session_group">
+                        <label class="col-sm-3 control-label" for= "id_no_of_lab_session">No.of lab session</label>
+                        <div class="col-sm-9">
+                            {% render_field form.no_of_lab_session class+="form-control no_of_lab_session" tabindex="1" %}
+                            {{ form.no_of_lab_session.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for= "id_foss">FOSS</label>
+                        <div class="col-sm-9">
+                            {% render_field form.foss class+="form-control foss" tabindex="1" data-placeholder="Enter foss" %}
+                            {{ form.foss.errors }}
                             <small>Please select the FOSS category.</small>
-		                </div>
-	                </div>
-	                <div class="form-group">
-		                <label class="col-sm-3 control-label" for= "id_language">Preferred Language <span class='ajax-refresh ajax-refresh-language'><i class="fa fa-2 fa-refresh fa-spin"></i></span></label>
-		                <div class="col-sm-9">
-		                    {% render_field form.language class+="form-control language" tabindex="1" data-placeholder="Enter language" %}
-		                    {{ form.language.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for= "id_language">Preferred Language <span class='ajax-refresh ajax-refresh-language'><i class="fa fa-2 fa-refresh fa-spin"></i></span></label>
+                        <div class="col-sm-9">
+                            {% render_field form.language class+="form-control language" tabindex="1" data-placeholder="Enter language" %}
+                            {{ form.language.errors }}
                             <small>Please select your preferred language.</small>
-		                </div>
-	                </div>
-	                <div class="form-group">
+                        </div>
+                    </div>
+                    <div class="form-group">
                         <label class="col-sm-3 control-label" for= "id_skype">Skype</label>
                         <div class="col-sm-9">
                             {% for choice in form.skype %}
@@ -138,76 +139,78 @@
                     </div>
                     <div class="form-group">
                         <div class="col-sm-offset-3 col-sm-9">
-	                        <input class="btn btn-primary" type="submit" value="Submit" />
-	                    </div>
-	                </div>
-	                {% endwith %}
+                            <input class="btn btn-primary" type="submit" value="Submit" />
+                        </div>
+                    </div>
+                    {% endwith %}
                 </form>
             </div>
         </div>
     </div>
 {% endblock %}
-{% block jsblock %}
+{% block compressjsblock %}
     <script src="{% static 'spoken/js/jquery.datetimepicker.js' %}"></script>
-	<script>
-		$college = $('#id_academic');
-		$('#id_district').change(function() {
-			var district = $(this).val();
-			$.ajax({
-				url: "/software-training/ajax-district-collage/",
-				type: "POST",
-				data: {
-					district : district
-				},
-				success: function(data) {
-					if(data){
-						$college.html(data);
-						$college.removeAttr("disabled");
-					} else{
-						$college.attr("disabled", "disabled");
-						alert('No college found for this district!!');
-					}
-				}
-			});
-		});
-		$('.foss').change(function() {
-			var foss = $(this).val();
-			$.ajax({
-				url: "/software-training/ajax-language/",
-				type: "POST",
-				data: {
-					foss : foss
-				},
-				beforeSend: function() {
+{% endblock %}
+{% block compressinlinejsblock %}
+    <script>
+        $college = $('#id_academic');
+        $('#id_district').change(function() {
+            var district = $(this).val();
+            $.ajax({
+                url: "/software-training/ajax-district-collage/",
+                type: "POST",
+                data: {
+                    district : district
+                },
+                success: function(data) {
+                    if(data){
+                        $college.html(data);
+                        $college.removeAttr("disabled");
+                    } else{
+                        $college.attr("disabled", "disabled");
+                        alert('No college found for this district!!');
+                    }
+                }
+            });
+        });
+        $('.foss').change(function() {
+            var foss = $(this).val();
+            $.ajax({
+                url: "/software-training/ajax-language/",
+                type: "POST",
+                data: {
+                    foss : foss
+                },
+                beforeSend: function() {
                     $('.ajax-refresh-language').show();
                 },
-				success: function(data) {
-					if(data){
-						$('.language').html(data);
-						$('.language').removeAttr("disabled");
-						$('.ajax-refresh-language').hide();
-					} else{
-						$('.language').attr("disabled", "disabled");
-						$('.ajax-refresh-language').hide();
-						alert('No language found!');
-					}
-				}
-			});
-		});
-		$('.datetime').datetimepicker({
-                onGenerate:function( ct ){
-                    $(this).find('.xdsoft_day_of_week0')
-                        .addClass('xdsoft_disabled');
-                },
-                lang:'en',
-                format:'Y-m-d H:i',
-                formatDate:'Y/m/d',
-                minDate:0, // yesterday is minimum date
-                weekends:[],
-                maxDate:'+1970/06/31', // tommorow date with in 6 month
-                step:5,
-                minTime:'08:00',
-                maxTime:'18:00',
+                success: function(data) {
+                    if(data){
+                        $('.language').html(data);
+                        $('.language').removeAttr("disabled");
+                        $('.ajax-refresh-language').hide();
+                    } else{
+                        $('.language').attr("disabled", "disabled");
+                        $('.ajax-refresh-language').hide();
+                        alert('No language found!');
+                    }
+                }
             });
-	</script>
+        });
+        $('.datetime').datetimepicker({
+            onGenerate:function( ct ){
+                $(this).find('.xdsoft_day_of_week0')
+                    .addClass('xdsoft_disabled');
+            },
+            lang:'en',
+            format:'Y-m-d H:i',
+            formatDate:'Y/m/d',
+            minDate:0, // yesterday is minimum date
+            weekends:[],
+            maxDate:'+1970/06/31', // tommorow date with in 6 month
+            step:5,
+            minTime:'08:00',
+            maxTime:'18:00',
+        });
+    </script>
 {% endblock %}
