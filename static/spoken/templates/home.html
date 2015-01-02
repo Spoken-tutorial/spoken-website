@@ -5,7 +5,7 @@
 {% block uncompresscssblock %}
     <link href="{% static 'spoken/css/video-js.min.css' %}" rel="stylesheet" type="text/css">
 {% endblock %}
-{% block cssblock %}
+{% block compresscssblock %}
     <link href="{% static 'spoken/css/home.css' %}" rel="stylesheet" type="text/css">
 {% endblock %}
 {% block title %}Home{% endblock %}
@@ -251,6 +251,6 @@
     <script src="{% static 'spoken/js/jquery.easing.1.3.min.js' %}"></script> 
     <script src="{% static 'spoken/js/video.min.js' %}"></script>
 {% endblock %}
-{% block jsblock %}
+{% block compressjsblock %}
     <script src="{% static 'spoken/js/home.js' %}"></script>
 {% endblock %}

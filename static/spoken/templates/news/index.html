@@ -6,7 +6,7 @@
 
 {% block title %} {{ newstype.name }} {% endblock %}
 
-{% block cssblock %}
+{% block compressinlinecssblock %}
     <style>
         .item{
             padding: 5px 0;
@@ -82,7 +82,7 @@
     </div>
 {% endblock %}
 
-{% block jsblock %}
+{% block compressinlinejsblock %}
     <script>
         var request_data = "{{ request.GET.latest }}";
         if(request_data){

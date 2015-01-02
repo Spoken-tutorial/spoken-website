@@ -2,7 +2,6 @@
 {% load widget_tweaks %}
 {% load static %}
 {% block title %}New Institution{% endblock %}
-{% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
 {% block heading %}
     <i class="fa fa-list-ul"></i> New Institution
 {% endblock %}
@@ -22,14 +21,14 @@
                     <div class="form-group">
                         <label class="col-sm-3 control-label" for= "id_state">State</label>
                         <div class="col-sm-9">
-                            {% render_field form.state class+="form-control chosen state" tabindex="1" data-placeholder="Choose state" %}
+                            {% render_field form.state class+="form-control  state" tabindex="1" data-placeholder="Choose state" %}
                             {{ form.state.errors }}
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="col-sm-3 control-label" for= "id_university">University / Affiliated Board <span class='ajax-refresh ajax-refresh-university'><i class="fa fa-2 fa-refresh fa-spin"></i></span></label>
                         <div class="col-sm-9">
-                            {% render_field form.university class+="form-control chosen university" tabindex="1" data-placeholder="Choose university" %}
+                            {% render_field form.university class+="form-control  university" tabindex="1" data-placeholder="Choose university" %}
                             {{ form.university.errors }}
                         </div>
                     </div>
@@ -43,7 +42,7 @@
                     <div class="form-group">
                         <label class="col-sm-3 control-label" for= "id_institution_type">Institute Type</label>
                         <div class="col-sm-9">
-                            {% render_field form.institution_type class+="form-control chosen institution_type" tabindex="1" data-placeholder="Choose Institution Type" %}
+                            {% render_field form.institution_type class+="form-control  institution_type" tabindex="1" data-placeholder="Choose Institution Type" %}
                             {{ form.institution_type.errors }}
                         </div>
                     </div>
@@ -51,7 +50,7 @@
                     <div class="form-group">
                         <label class="col-sm-3 control-label" for= "id_institution_type">Govt / Govt-Aided/Private</label>
                         <div class="col-sm-9">
-                            {% render_field form.institute_category class+="form-control chosen institute_category" tabindex="1" data-placeholder="Choose Institute Category" %}
+                            {% render_field form.institute_category class+="form-control  institute_category" tabindex="1" data-placeholder="Choose Institute Category" %}
                             {{ form.institute_category.errors }}
                         </div>
                     </div>
@@ -59,21 +58,21 @@
                     <div class="form-group">
                         <label class="col-sm-3 control-label" for= "id_district">District <span class='ajax-refresh ajax-refresh-district'><i class="fa fa-2 fa-refresh fa-spin"></i></span></label>
                         <div class="col-sm-9">
-                            {% render_field form.district class+="form-control chosen district" tabindex="1" data-placeholder="Choose district" %}
+                            {% render_field form.district class+="form-control  district" tabindex="1" data-placeholder="Choose district" %}
                             {{ form.district.errors }}
                         </div>
                     </div>
                     <!-- <div class="form-group">
                         <label class="col-sm-3 control-label" for= "id_location">Location <span class='ajax-refresh ajax-refresh-location'><i class="fa fa-2 fa-refresh fa-spin"></i></span></label>
                         <div class="col-sm-9">
-                            {% render_field form.location class+="form-control chosen location" tabindex="1" data-placeholder="Choose location" %}
+                            {% render_field form.location class+="form-control  location" tabindex="1" data-placeholder="Choose location" %}
                             {{ form.location.errors }}
                         </div>
                     </div> -->
                     <div class="form-group">
                         <label class="col-sm-3 control-label" for= "id_state">City <span class='ajax-refresh ajax-refresh-city'><i class="fa fa-2 fa-refresh fa-spin"></i></span></label>
                         <div class="col-sm-9">
-                            {% render_field form.city class+="form-control chosen city" tabindex="1" data-placeholder="Choose city" %}
+                            {% render_field form.city class+="form-control  city" tabindex="1" data-placeholder="Choose city" %}
                             {{ form.city.errors }}
                         </div>
                     </div>
@@ -145,9 +144,10 @@
 
 
 {% endblock %}
-{% block jsblock %}
-    <script src="{% static 'spoken/js/chosen.jquery.min.js' %}"></script>
+{% block compressjsblock %}
     <script src="{% static 'spoken/js/events.js' %}"></script>
+{% endblock %}
+{% block compressinlinejsblock %}
     <script>
         $("#id_state").change(function(){
             ajaxStrateFillDatas('district', 'city', 'university');

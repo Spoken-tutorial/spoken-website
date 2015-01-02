@@ -4,7 +4,6 @@
 {% load cmsdata %}
 {% load creationdata %}
 {% block title %}Listing College Details{% endblock %}
-{% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
 {% block heading %}
     <i class="fa fa-list-ul"></i> Listing College Details <a href="{% url 'events:events_dashboard' %}" class=' dashboard pull-right'>Dashboard</a>
 {% endblock %}
@@ -15,7 +14,7 @@
                 <div class="form-group">
                     <label for="id_state" class="col-sm-4 control-label">State</label>
                     <div class="col-sm-8">
-                        {% render_field form.state class+="form-control chosen state" tabindex="1" %}
+                        {% render_field form.state class+="form-control state" tabindex="1" %}
                         {{ form.state.errors }}
                     </div>
                 </div>
@@ -24,7 +23,7 @@
                 <div class="form-group">
                     <label for="id_state" class="col-sm-4 control-label">Instituttion Type</label>
                     <div class="col-sm-8">
-                        {% render_field form.institution_type class+="form-control chosen institution_type" tabindex="1" %}
+                        {% render_field form.institution_type class+="form-control institution_type" tabindex="1" %}
                         {{ form.institution_type.errors }}
                     </div>
                 </div>

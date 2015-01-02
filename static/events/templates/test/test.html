@@ -2,9 +2,6 @@
 {% load widget_tweaks %}
 {% load static %}
 {% block title %}Test{% endblock %}
-{% block cssblock %}
-	<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />
-{% endblock %}
 {% block heading %}
         <i class="fa fa-list-ul"></i> Test
 {% endblock %}
@@ -15,14 +12,14 @@
     <input type="hidden" name="password" id="password" value="admin" />
 </form>
 {% endblock %}
-{% block jsblock %}
-    <script>
-    $(document).ready(function(){
-         mywindow = window.open('http://localhost/OTC/mod/quiz/view.php?id=2', 'test', "height=100,width=100");
-         if (mywindow){
-            $("#frm1").submit();
-            //mywindow.close();
-         }
-    });
+{% block compressjsblock %}
+    <script type="text/javascript">
+        $(document).ready(function(){
+             mywindow = window.open('http://localhost/OTC/mod/quiz/view.php?id=2', 'test', "height=100,width=100");
+             if (mywindow){
+                $("#frm1").submit();
+                //mywindow.close();
+             }
+        });
     </script>
 {% endblock %}

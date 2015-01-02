@@ -5,8 +5,10 @@
 {% load cmsdata %}
 {% load creationdata %}
 {% block title %}Training / Workshop - {{ status}} {% endblock %}
-{% block cssblock %}
-    <link rel="stylesheet" href="{% static 'spoken/css/jquery.fancybox.css' %}" type="text/css" media="screen" charset="utf-8" />
+{% block uncompresscssblock %}
+    <link rel="stylesheet" href="{% static 'spoken/css/jquery.fancybox.pack.css' %}" type="text/css" media="screen" charset="utf-8" />
+{% endblock %}
+{% block compresscssblock %}
     <link rel="stylesheet" href="{% static 'spoken/css/jquery.datetimepicker.css' %}" type="text/css" media="screen" charset="utf-8" />
 {% endblock%}
 {% block heading %}
@@ -70,46 +72,46 @@
         </form>
     </div>
 {% endif %}
-	<!-- Nav tabs -->
-	<ul class="tabs nav nav-tabs">
-	    {% if role == 'organiser' %}
-		    <li><a href="/software-training/training/{{ role }}/request/">New</a></li>
-		    <li {% if status == 'predated' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/training/{{role}}/predated/">Pre-Dated</a></li>
-		    <li {% if status == 'pending' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/training/{{role}}/pending/">Pending</a></li>
-		{% endif %}
-		{% if role == 'rp' %}
-		    <li {% if status == 'predated' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/training/{{role}}/predated/">Pre-Dated</a></li>
-		    <li {% if status == 'pending' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/training/{{role}}/pending/">New Requests</a></li>
-		{% endif %}
-		<li {% if status == 'approved' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/training/{{role}}/approved/">Approved</a></li>
+    <!-- Nav tabs -->
+    <ul class="tabs nav nav-tabs">
+        {% if role == 'organiser' %}
+            <li><a href="/software-training/training/{{ role }}/request/">New</a></li>
+            <li {% if status == 'predated' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/training/{{role}}/predated/">Pre-Dated</a></li>
+            <li {% if status == 'pending' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/training/{{role}}/pending/">Pending</a></li>
+        {% endif %}
+        {% if role == 'rp' %}
+            <li {% if status == 'predated' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/training/{{role}}/predated/">Pre-Dated</a></li>
+            <li {% if status == 'pending' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/training/{{role}}/pending/">New Requests</a></li>
+        {% endif %}
+        <li {% if status == 'approved' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/training/{{role}}/approved/">Approved</a></li>
         <li {% if status == 'ongoing' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/training/{{role}}/ongoing/">Ongoing</a></li>
         <li {% if status == 'completed' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/training/{{role}}/completed/">Completed</a></li>
         <li {% if status == 'reschedule' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/training/{{role}}/reschedule/">Reschedule</a></li>
         <li {% if status == 'rejected' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/training/{{role}}/rejected/">Rejected</a></li>
-	</ul>
-	<!-- Tab panes -->
-	<div class="tab-content">
-		<div class="tab-pane active" id="pending">
-			{% if collection %}
-			<table class="paleblue table table-striped table-hover table-bordered">
-				{% get_sortable_header header ordering request.GET %}
-				{% for record in collection %}
-					<tr>
+    </ul>
+    <!-- Tab panes -->
+    <div class="tab-content">
+        <div class="tab-pane active" id="pending">
+            {% if collection %}
+            <table class="paleblue table table-striped table-hover table-bordered">
+                {% get_sortable_header header ordering request.GET %}
+                {% for record in collection %}
+                    <tr>
                         <td>{{ forloop.counter }}
-					    <td>
-					        {% if record.training_type %}
-					            Workshop - {{record.training_code}}
-					        {% else %}
-					            Training - {{record.training_code}}
-					        {% endif %}
-					    </td>
-					    <td>{{ record.academic.state }}</td>
-					    <td>{{ record.academic.academic_code}}</td>
-						<td>{{ record.academic }}</td>
-						<td>{{ record.foss }}</td>
-						<td>{{ record.organiser.user.first_name }}</td>
-						<td>{{ record.tdate|date:"d M Y" }} {{ record.wtime }}</td>
-						<td>{{ record.participant_count }}</td>
+                        <td>
+                            {% if record.training_type %}
+                                Workshop - {{record.training_code}}
+                            {% else %}
+                                Training - {{record.training_code}}
+                            {% endif %}
+                        </td>
+                        <td>{{ record.academic.state }}</td>
+                        <td>{{ record.academic.academic_code}}</td>
+                        <td>{{ record.academic }}</td>
+                        <td>{{ record.foss }}</td>
+                        <td>{{ record.organiser.user.first_name }}</td>
+                        <td>{{ record.tdate|date:"d M Y" }} {{ record.wtime }}</td>
+                        <td>{{ record.participant_count }}</td>
                         <!-- actions based on roles -->
                         <td>
                             {% if role == 'rp' %}
@@ -178,24 +180,25 @@
                                     | <a target='_blank' href="{% url 'events:view_training_completion' record.id %}" class="fancybox fancybox.iframe">Training Completion Form</a>
                                 {% endif %} -->
                             {% endif %}
-						</td>
-					</tr>
+                        </td>
+                    </tr>
                    {% endfor %}
                 </table>
-			{% else %}
-				<p class='no-record'>No record found!</p>
-			{% endif %}
-		</div>
-	</div>
+            {% else %}
+                <p class='no-record'>No record found!</p>
+            {% endif %}
+        </div>
+    </div>
 {% endblock %}
 
 {% block uncompressjsblock %}
     <script src="{% static 'spoken/js/jquery.fancybox.pack.js' %}"></script>
     <script src="{% static 'spoken/js/jquery.mousewheel-3.0.6.pack.js' %}"></script>
 {% endblock %}
-
-{% block jsblock %}
+{% block compressjsblock %}
     <script src="{% static 'spoken/js/jquery.datetimepicker.js' %}"></script>
+{% endblock %}
+{% block compressinlinejsblock %}
     <script type="text/javascript">
         $(document).ready(function(){
             $(".fancybox").fancybox({
