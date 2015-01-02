@@ -143,9 +143,7 @@ def academic_center(request, slug = None):
         3: SortableHeader('institution_name', True, 'Institution Name'),
         4: SortableHeader('num_training', True, 'Training'),
         5: SortableHeader('num_participant', True, 'Participants'),
-        6: SortableHeader('Address', False),
-        7: SortableHeader('Contact Person', False),
-        8: SortableHeader('Action', False)
+        6: SortableHeader('Action', False)
     }
     
     collection = None

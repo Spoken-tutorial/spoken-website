@@ -46,12 +46,6 @@
 				<tr>
 				    <th>Rating</th><td>{{ collection.rating }}</td>
 				</tr>
-				<tr>
-				    <th>Contact Person</th><td>{{ collection.contact_person }}</td>
-				</tr>
-				<tr>
-				    <th>Remarks</th><td>{{ collection.remarks }}</td>
-				</tr>
 				<!-- <tr>
 				    <th>University</th><td>{{ collection.university }}</td>
 				</tr> -->
@@ -93,9 +87,6 @@
 			                {% for record in collection.test_set.all %}
 				                <tr>
                                     <td>{{ forloop.counter }}
-				                    <td>{{ record.academic.state }}</td>
-				                    <td>{{ record.academic.city }}</td>
-					                <td>{{ record.academic }}</td>
 					                <td>{{ record.foss }}</td>
 					                <td>{{ record.organiser.user.first_name }}</td>
 					                <td>{{ record.tdate|date:"d M Y" }} {{ record.wtime }}</td>
