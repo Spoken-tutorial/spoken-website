@@ -18,23 +18,30 @@
                         {{ form.state.errors }}
                     </div>
                 </div>
+                <div class="form-group">
+                    <label for="id_resource_center" class="col-sm-4 control-label">Institution</label>
+                    <div class="col-sm-8">
+                        {% render_field form.institution_name class+="form-control institution_name" tabindex="1" %}
+                        {{ form.institution_name.errors }}
+                    </div>
+                </div>
             </div>
             <div class="col-lg-4 col-md-4 col-sm-4">
                 <div class="form-group">
-                    <label for="id_state" class="col-sm-4 control-label">Instituttion Type</label>
+                    <label for="id_state" class="col-sm-4 control-label">Institution Type</label>
                     <div class="col-sm-8">
                         {% render_field form.institution_type class+="form-control institution_type" tabindex="1" %}
                         {{ form.institution_type.errors }}
                     </div>
                 </div>
-            </div>
-            <div class="col-lg-4 col-md-4 col-sm-4">
                 <div class="form-group">
                   <div class="col-sm-offset-4 col-sm-8">
                      <input class="btn btn-success" type="submit" value="Filter" />
                      <a class="btn btn-success" href="{{request.path}}?{{ request.GET|reset_get_values}}">Reset Filter</a>
                   </div>
                </div>
+            </div>
+            <div class="col-lg-4 col-md-4 col-sm-4">
             </div>
         </form>
     </div>

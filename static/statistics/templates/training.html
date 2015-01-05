@@ -5,8 +5,7 @@
 {% load cmsdata %}
 {% load creationdata %}
 {% block title %} {{ model }} {% endblock %}
-{% block cssblock %}
-    <link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />
+{% block compresscssblock %}
     <link rel="stylesheet" href="{% static 'spoken/css/jquery.fancybox.css' %}" type="text/css" media="screen" charset="utf-8" />
     <link rel="stylesheet" href="{% static 'spoken/css/jquery.datetimepicker.css' %}" type="text/css" media="screen" charset="utf-8" />
 {% endblock %}
@@ -51,6 +50,13 @@
                         {{ form.academic__institution_type.errors }}
                     </div>
 	            </div>
+	            <div class="form-group">
+                    <label for="id_resource_center" class="col-sm-4 control-label">Institution</label>
+                    <div class="col-sm-8">
+                        {% render_field form.academic__institution_name class+="form-control chosen academic_institution_name" tabindex="1" %}
+                        {{ form.academic__institution_name.errors }}
+                    </div>
+                </div>
             </div>
             
             
@@ -140,16 +146,14 @@
 		</div>
 	</div>
 {% endblock %}
-{% block jsblock %}
-    <script src="{% static 'spoken/js/chosen.jquery.min.js' %}"></script>
+{% block compressjsblock %}
     <script src="{% static 'spoken/js/events.js' %}"></script>
-    <script>
+    <script src="{% static 'spoken/js/jquery.datetimepicker.js' %}"></script>
+    <script src="{% static 'spoken/js/jquery.fancybox.pack.js' %}"></script>
+    <script type="text/javascript">
         $(".academic_state").change(function(){
             ajaxStrateFillDatas('', 'city', '');
         });
-    </script>
-    <script src="{% static 'spoken/js/jquery.fancybox.pack.js' %}"></script>
-    <script type="text/javascript">
         $(document).ready(function(){
             $('.fancybox').click(function(){
                 $("#big_chart_div").css({'left' : 0, 'position' : 'relative'});
@@ -157,9 +161,6 @@
             $(".fancybox").fancybox();
             
         });
-    </script>
-    <script src="{% static 'spoken/js/jquery.datetimepicker.js' %}"></script>
-    <script>
         $('.date').datetimepicker({
             lang:'en',
             timepicker:false,

@@ -30,6 +30,13 @@
                         {{ form.foss.errors }}
                     </div>
                 </div>
+                <div class="form-group">
+                    <label for="id_resource_center" class="col-sm-4 control-label">Institution</label>
+                    <div class="col-sm-8">
+                        {% render_field form.academic__institution_name class+="form-control academic_institution_name" tabindex="1" %}
+                        {{ form.academic__institution_name.errors }}
+                    </div>
+                </div>
             </div>
             <div class="col-lg-4 col-md-4 col-sm-4">
                 <div class="form-group">

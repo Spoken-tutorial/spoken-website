@@ -7,7 +7,8 @@ from events.models import *
 from cms.sortable import *
 from events.filters import TrainingFilter, TestFilter, AcademicCenterFilter
 from events.views import get_page
-import datetime
+from datetime import timedelta, datetime
+from django.utils.timezone import now
 from django.http import Http404, HttpResponseRedirect
 from django.template.defaultfilters import slugify
 
@@ -148,12 +149,25 @@ def academic_center(request, slug = None):
     
     collection = None
     training_index = int(request.GET.get('training', 0))
+    start_date = request.GET.get('training__tdate_0', 0)
+    end_date = request.GET.get('training__tdate_1', 0)
+    lookup = None
+    if start_date or end_date:
+        if start_date and end_date:
+            lookup = [start_date, end_date]
+        elif start_date:
+            lookup = [start_date, now()]
+        else:
+            lookup = [datetime.strptime('1970-01-01', '%Y-%m-%d'), end_date]
     if slug:
         collection = AcademicCenter.objects.filter(state__slug = slug).order_by('state__name', 'institution_name')
     elif training_index:
         collection = AcademicCenter.objects.filter(training__status=4, training__participant_count__gt=0).annotate(num_training=Count('training'), num_participant=Sum('training__participant_count')).filter(num_training__gte=training_index).order_by('state__name', 'institution_name')
     else:
-        collection = AcademicCenter.objects.filter(training__status=4, training__participant_count__gt=0).annotate(num_training=Count('training'), num_participant=Sum('training__participant_count')).order_by('state__name', 'institution_name')
+        if lookup:
+            collection = AcademicCenter.objects.filter(training__status=4, training__participant_count__gt=0, training__tdate__range=lookup).annotate(num_training=Count('training'), num_participant=Sum('training__participant_count')).order_by('state__name', 'institution_name')
+        else:
+            collection = AcademicCenter.objects.filter(training__status=4, training__participant_count__gt=0).annotate(num_training=Count('training'), num_participant=Sum('training__participant_count')).order_by('state__name', 'institution_name')
     
     raw_get_data = request.GET.get('o', None)
     collection = get_sorted_list(request, collection, header, raw_get_data)
