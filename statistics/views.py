@@ -221,7 +221,7 @@ def motion_chart(request):
         interactive_workshop_data += "['" + curr_state + "', " + js_date + ", " + str(row['tcount']) + ", " + str(row['pcount']) + "],"
     
     for key, value in states.iteritems():
-        curr_year = str(datetime.datetime.now().year)
+        curr_year = str(datetime.now().year)
         static_workshop_data += "['" + key + "', " + curr_year + ", " + str(value['tcount']) + ", " + str(value['pcount']) + "],"
     
     context = {

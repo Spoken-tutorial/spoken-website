@@ -1991,7 +1991,8 @@ def quality_reviewed_tutorials(request):
             10: SortableHeader('Assignment', False, '', 'col-center'),
             11: SortableHeader('Prerequisite', False, '', 'col-center'),
             12: SortableHeader('Keywords', False, '', 'col-center'),
-            13: SortableHeader('Status', False, '', 'col-center')
+            13: SortableHeader('Status', False, '', 'col-center'),
+            14: SortableHeader('publishtutoriallog__created', True, 'Date')
         }
         collection = TutorialResource.objects.filter(id__in = QualityReviewLog.objects.filter(user = request.user).values_list('tutorial_resource_id').distinct())
         collection = get_sorted_list(request, collection, header, raw_get_data)
