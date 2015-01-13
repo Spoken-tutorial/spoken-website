@@ -49,7 +49,7 @@ urlpatterns = patterns('',
     url(r'^completed_workshops_list/(?P<state_code>[\w-]+)/$', 'workshop.views.training_list', name='training_list'),
     url(r'^view_completed_workshop/(\d+)/$', 'workshop.views.view_training', name='view_training'),
     url(r'^feedback_list/(?P<code>.+)/$', 'workshop.views.training_feedback', name='training_feedback'),
-    url(r'^feedback_view/(?P<code>.+)/(?P<feedback_id>.+)/$', 'workshop.views.view_training_feedback', name='view_training_feedback'),
+    url(r'^feedback_view/(?P<code>.+)/(?P<user_id>.+)/$', 'workshop.views.view_training_feedback', name='view_training_feedback'),
     url(r'^workshops/academic_details/$', 'workshop.views.academic_details', name='academic_details'),
     url(r'^workshops/academic_details/(?P<state>.+)/$', 'workshop.views.academic_details_state', name='academic_details_state'),
 

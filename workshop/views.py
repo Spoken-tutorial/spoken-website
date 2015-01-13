@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.core.exceptions import MultipleObjectsReturned
 from django.http import HttpResponsePermanentRedirect, HttpResponseRedirect
 from django.template.defaultfilters import slugify
 from workshop.models import WAcademicCenter, WWorkshopRequests, WWorkshopFeedback
@@ -41,12 +42,19 @@ def training_feedback(request, code=None):
     except Exception, e:
         return HttpResponseRedirect('/')
 
-def view_training_feedback(request, code=None, feedback_id=None):
+def view_training_feedback(request, code=None, user_id=None):
+    if '/' in code:
+        tmp = code.split('/')
+        code = tmp[0]
     code = base64.b64decode(code)
-    feedback_id = base64.b64decode(feedback_id)
+    user_id = base64.b64decode(user_id)
     try:
         training = Training.objects.get(training_code = code)
-        old_feedback = WWorkshopFeedback.objects.get(user_id=feedback_id)
+        old_feedback = None
+        try:
+            old_feedback = WWorkshopFeedback.objects.get(user_id=user_id)
+        except MultipleObjectsReturned:
+            old_feedback = WWorkshopFeedback.objects.filter(user_id=user_id).first()
         feedback = TrainingFeedback.objects.get(training=training, mdluser_id=old_feedback.user_id)
         redirect_url = "/software-training/training/participant/feedback/{0}/{1}/".format(training.id, feedback.mdluser_id)
         return HttpResponsePermanentRedirect(redirect_url)
