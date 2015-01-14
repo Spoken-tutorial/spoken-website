@@ -400,7 +400,7 @@ def old_training_attendance(request):
     context = {}
     if not (user.is_authenticated() and (is_event_manager(user) or is_resource_person(user))):
         raise PermissionDenied()
-    collectionSet = Training.objects.exclude(id__in=TrainingAttendance.objects.all().values_list('training_id').distinct()).filter(status=4, academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)))
+    collectionSet = Training.objects.exclude(id__in=TrainingAttendance.objects.all().values_list('training_id').distinct()).filter(status=4, academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)))
     if not collectionSet:
         raise PermissionDenied()
     header = {
@@ -502,7 +502,7 @@ def events_dashboard(request):
     if is_resource_person(user):
         rp_workshop_notification = EventsNotification.objects.filter((Q(status = 0) | Q(status = 5) | Q(status = 2)), category = 0).order_by('-created')[:30]
         rp_training_notification = EventsNotification.objects.filter((Q(status = 0) | Q(status = 5) | Q(status = 2)), category = 2).order_by('-created')[:30]
-        rp_test_notification = EventsNotification.objects.filter((Q(status = 0) | Q(status = 4) | Q(status = 5) | Q(status = 8) | Q(status = 9)), category = 1, categoryid__in = (Training.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)))).values_list('id')).order_by('-created')[:30]
+        rp_test_notification = EventsNotification.objects.filter((Q(status = 0) | Q(status = 4) | Q(status = 5) | Q(status = 8) | Q(status = 9)), category = 1, categoryid__in = (Training.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)))).values_list('id')).order_by('-created')[:30]
     if is_invigilator(user):
         invigilator_test_notification = EventsNotification.objects.filter((Q(status = 0) | Q(status = 1)), category = 1, academic_id = user.invigilator.academic_id, categoryid__in = user.invigilator.academic.test_set.filter(invigilator_id = user.id).values_list('id')).order_by('-created')[:30]
     context = {
@@ -632,7 +632,7 @@ def ac(request):
         7: SortableHeader('Action', False)
     }
     
-    collectionSet = AcademicCenter.objects.filter(state = user.resource_person.all())
+    collectionSet = AcademicCenter.objects.filter(state = user.resource_person.filter(resourceperson__status=1))
     raw_get_data = request.GET.get('o', None)
     collection = get_sorted_list(request, collectionSet, header, raw_get_data)
     ordering = get_field_index(raw_get_data)
@@ -766,7 +766,7 @@ def organiser_edit(request, username):
 def rp_organiser(request, status, code, userid):
     """ Resource person: active organiser """
     user = request.user
-    organiser_in_rp_state = Organiser.objects.filter(user_id=userid, academic=AcademicCenter.objects.filter(state=State.objects.filter(resourceperson__user_id=user)))
+    organiser_in_rp_state = Organiser.objects.filter(user_id=userid, academic=AcademicCenter.objects.filter(state=State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)))
     if not (user.is_authenticated() and organiser_in_rp_state and ( is_event_manager(user) or is_resource_person(user) or (status == 'active' or status == 'block'))):
         raise PermissionDenied('You are not allowed to view this page ')
 
@@ -889,7 +889,7 @@ def invigilator_edit(request, username):
 def rp_invigilator(request, status, code, userid):
     """ Resource person: active invigilator """
     user = request.user
-    invigilator_in_rp_state = Invigilator.objects.filter(user_id=userid, academic=AcademicCenter.objects.filter(state=State.objects.filter(resourceperson__user_id=user)))
+    invigilator_in_rp_state = Invigilator.objects.filter(user_id=userid, academic=AcademicCenter.objects.filter(state=State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)))
     if not (user.is_authenticated() and invigilator_in_rp_state and ( is_event_manager(user) or is_resource_person(user) or (status == 'active' or status == 'block'))):
         raise PermissionDenied('You are not allowed to view this page')
 
@@ -1086,19 +1086,19 @@ def training_list(request, role, status):
         context = {}
         collectionSet = None
         if is_event_manager(user) and role == 'em':
-            collectionSet = Training.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status])
+            collectionSet = Training.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)), status = status_dict[status])
         elif is_resource_person(user) and role == 'rp':
             if status == 'approved':
-                collectionSet = Training.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status], tdate__gt=datetime.date.today()).order_by('-tdate')
+                collectionSet = Training.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)), status = status_dict[status], tdate__gt=datetime.date.today()).order_by('-tdate')
             elif status == 'predated':
-                collectionSet = Training.objects.filter((Q(status = 0) | Q(status = 1) | Q(status = 2) | Q(status = 3)), academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), tdate__lt=datetime.date.today()).order_by('-tdate')
+                collectionSet = Training.objects.filter((Q(status = 0) | Q(status = 1) | Q(status = 2) | Q(status = 3)), academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)), tdate__lt=datetime.date.today()).order_by('-tdate')
             elif status =='ongoing':
-                collectionSet = Training.objects.filter((Q(status = 2) | Q(status = 3)), academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), tdate__lte=datetime.date.today()).order_by('-tdate')
+                collectionSet = Training.objects.filter((Q(status = 2) | Q(status = 3)), academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)), tdate__lte=datetime.date.today()).order_by('-tdate')
             elif status =='pending':
-                collectionSet = Training.objects.filter((Q(status = 0) | Q(status = 1)), academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), tdate__gte = datetime.date.today()).order_by('-tdate')
+                collectionSet = Training.objects.filter((Q(status = 0) | Q(status = 1)), academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)), tdate__gte = datetime.date.today()).order_by('-tdate')
                 
             else:
-                collectionSet = Training.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status]).order_by('-tdate')
+                collectionSet = Training.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)), status = status_dict[status]).order_by('-tdate')
         elif is_organiser(user) and role == 'organiser':
             if status == 'approved':
                 collectionSet = Training.objects.filter(organiser__user = user, status = status_dict[status], tdate__gt=datetime.date.today()).order_by('-tdate')
@@ -1630,16 +1630,16 @@ def test_list(request, role, status):
         todaytest = None
         if is_event_manager(user) and role == 'em':
             if status == 'ongoing':
-                collectionSet = Test.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status], tdate = datetime.datetime.now().strftime("%Y-%m-%d")).order_by('-tdate')
+                collectionSet = Test.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)), status = status_dict[status], tdate = datetime.datetime.now().strftime("%Y-%m-%d")).order_by('-tdate')
             else:
-                collectionSet = Test.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status]).order_by('-tdate')
+                collectionSet = Test.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)), status = status_dict[status]).order_by('-tdate')
         elif is_resource_person(user) and role == 'rp':
             if status == 'ongoing':
-                collectionSet = Test.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status], tdate = datetime.datetime.now().strftime("%Y-%m-%d")).order_by('-tdate')
+                collectionSet = Test.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)), status = status_dict[status], tdate = datetime.datetime.now().strftime("%Y-%m-%d")).order_by('-tdate')
             elif status == 'predated':
-                collectionSet = Test.objects.filter((Q(status = 0) | Q(status = 1) | Q(status = 2) | Q(status = 3)), academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), tdate__lt=datetime.date.today()).order_by('-tdate')
+                collectionSet = Test.objects.filter((Q(status = 0) | Q(status = 1) | Q(status = 2) | Q(status = 3)), academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)), tdate__lt=datetime.date.today()).order_by('-tdate')
             else:
-                collectionSet = Test.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user)), status = status_dict[status]).order_by('-tdate')
+                collectionSet = Test.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)), status = status_dict[status]).order_by('-tdate')
         elif is_organiser(user) and role == 'organiser':
             if status == 'ongoing': 
                 collectionSet = Test.objects.filter((Q(status = 2) | Q(status = 3)), organiser__user = user , tdate = datetime.datetime.now().strftime("%Y-%m-%d")).order_by('-tdate')
@@ -1746,7 +1746,7 @@ def test_approvel(request, role, rid):
         raise PermissionDenied()
         
     #if status = 2:
-    #    if not (user.is_authenticated() and w.academic.state in State.objects.filter(resourceperson__user_id=user) and ( is_event_manager(user) or is_resource_person(user))):
+    #    if not (user.is_authenticated() and w.academic.state in State.objects.filter(resourceperson__user_id=user, resourceperson__status=1) and ( is_event_manager(user) or is_resource_person(user))):
     #        raise PermissionDenied('You are not allowed to view this page')
     if status == 1:
         t.appoved_by_id = user.id
@@ -2082,7 +2082,7 @@ def organiser_invigilator_index(request, role, status):
     
     if role == 'organiser':
         try:
-            collectionSet = Organiser.objects.select_related().filter(academic=AcademicCenter.objects.filter(state=State.objects.filter(resourceperson__user_id=user)), status=status)
+            collectionSet = Organiser.objects.select_related().filter(academic=AcademicCenter.objects.filter(state=State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)), status=status)
             
             raw_get_data = request.GET.get('o', None)
             collection = get_sorted_list(request, collectionSet, header, raw_get_data)
@@ -2098,7 +2098,7 @@ def organiser_invigilator_index(request, role, status):
             collection = {}
     elif role == 'invigilator':
         try:
-            collectionSet = Invigilator.objects.select_related().filter(academic=AcademicCenter.objects.filter(state=State.objects.filter(resourceperson__user_id=user)), status=status)
+            collectionSet = Invigilator.objects.select_related().filter(academic=AcademicCenter.objects.filter(state=State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)), status=status)
             
             raw_get_data = request.GET.get('o', None)
             collection = get_sorted_list(request, collectionSet, header, raw_get_data)

@@ -15,7 +15,7 @@ class AcademicCenterFilter(django_filters.FilterSet):
         super(AcademicCenterFilter, self).__init__(*args, **kwargs)
         choices = None
         if user:
-            choices = list(State.objects.filter(resourceperson__user_id=user).values_list('id', 'name').order_by('name'))
+            choices = list(State.objects.filter(resourceperson__user_id=user, resourceperson__status=1).values_list('id', 'name').order_by('name'))
         else:
             choices = list(State.objects.exclude(name = 'Uncategorised').values_list('id', 'name').order_by('name'))
         choices.insert(0, ('', '---------'),)
@@ -31,7 +31,7 @@ class OrganiserFilter(django_filters.FilterSet):
         user = kwargs['user']
         kwargs.pop('user')
         super(OrganiserFilter, self).__init__(*args, **kwargs)
-        choices = list(State.objects.filter(resourceperson__user_id=user).values_list('id', 'name'))
+        choices = list(State.objects.filter(resourceperson__user_id=user, resourceperson__status=1).values_list('id', 'name'))
         choices.insert(0, ('', '---------'),)
         self.filters['academic__state'].extra.update({'choices' : choices})
     class Meta:
@@ -45,7 +45,7 @@ class InvigilatorFilter(django_filters.FilterSet):
         user = kwargs['user']
         kwargs.pop('user')
         super(InvigilatorFilter, self).__init__(*args, **kwargs)
-        choices = list(State.objects.filter(resourceperson__user_id=user).values_list('id', 'name'))
+        choices = list(State.objects.filter(resourceperson__user_id=user, resourceperson__status=1).values_list('id', 'name'))
         choices.insert(0, ('', '---------'),)
         self.filters['academic__state'].extra.update({'choices' : choices})
     class Meta:
@@ -79,7 +79,7 @@ class TrainingFilter(django_filters.FilterSet):
                 pass
         choices = None
         if user:
-            choices = list(State.objects.filter(resourceperson__user_id=user).values_list('id', 'name'))
+            choices = list(State.objects.filter(resourceperson__user_id=user, resourceperson__status=1).values_list('id', 'name'))
         else:
             choices = list(State.objects.exclude(name='Uncategorised').order_by('name').values_list('id', 'name'))
         choices.insert(0, ('', '---------'),)
@@ -123,7 +123,7 @@ class TestFilter(django_filters.FilterSet):
                 pass
         choices = None
         if user:
-            choices = list(State.objects.filter(resourceperson__user_id=user).values_list('id', 'name'))
+            choices = list(State.objects.filter(resourceperson__user_id=user, resourceperson__status=1).values_list('id', 'name'))
         else:
             choices = list(State.objects.exclude(name='Uncategorised').order_by('name').values_list('id', 'name'))
         choices.insert(0, ('', '---------'),)
