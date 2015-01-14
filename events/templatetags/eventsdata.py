@@ -149,11 +149,11 @@ def feedback_status_somewhat(status):
     return status_dict[status]
 
 def feedback_status_average(status):
-    status_dict = {1 : 'Very Low', 2 : 'Below average', 3 : 'Average', 4 : 'Above average', 5 : 'Very High'}
+    status_dict = {0 : 'Very Low', 1 : 'Very Low', 2 : 'Below average', 3 : 'Average', 4 : 'Above average', 5 : 'Very High'}
     return status_dict[status]
 
 def feedback_status_neutral(status):
-    status_dict = {1 : 'Strongly Disagree', 2 : 'Disagree', 3 : 'Likely', 4 : 'Agree', 5 : 'Strongly Agree'}
+    status_dict = {0 : 'Strongly Disagree', 1 : 'Strongly Disagree', 2 : 'Disagree', 3 : 'Likely', 4 : 'Agree', 5 : 'Strongly Agree'}
     return status_dict[status]
 
 def feedback_status_likely(status):
