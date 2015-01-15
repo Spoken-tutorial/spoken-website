@@ -232,6 +232,8 @@ cur = db.cursor()
 cur.execute("SELECT * FROM creation_tutorialresource where status = 1 or status = 2")
 rows = cur.fetchall()
 overwrite = True
+if 'False' in sys.argv:
+    overwrite = False
 error_log_file_head = open(LOG_ROOT + 'srt-error-log.txt',"w")
 success_log_file_head = open(LOG_ROOT + 'srt-success-log.txt',"w")
 for row in rows:
