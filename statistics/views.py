@@ -14,7 +14,7 @@ from django.template.defaultfilters import slugify
 
 # Create your views here.
 def maphome(request):
-    states = State.objects.all().exclude(name = 'Uncategorized')
+    states = State.objects.all().exclude(name = 'Uncategorised')
     counts = Training.objects.filter(status = 4, participant_count__gt=0).aggregate(Count('id'), Sum('participant_count'))
     institution_count = AcademicCenter.objects.filter(id__in=Training.objects.filter(status = 4, participant_count__gt=0).values_list('academic_id').distinct()).aggregate(Count('id'))
     print institution_count

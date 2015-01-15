@@ -17,7 +17,7 @@
         <loc>http://spoken-tutorial.org/accounts/register/</loc>
     </url>
     <url>
-        <loc>http://spoken-tutorial.org/accounts/forget-password/</loc>
+        <loc>http://spoken-tutorial.org/accounts/forgot-password/</loc>
     </url>
     <url>
         <loc>http://spoken-tutorial.org/software-training/</loc>
@@ -53,7 +53,7 @@
         <loc>http://spoken-tutorial.org/participant/register/</loc>
     </url>
     <url>
-        <loc>http://spoken-tutorial.org/participant/forget-password/</loc>
+        <loc>http://spoken-tutorial.org/participant/forgot-password/</loc>
     </url>
     <url>
         <loc>http://spoken-tutorial.org/software-training/resource-center/</loc>
