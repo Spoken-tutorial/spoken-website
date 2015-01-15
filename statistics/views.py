@@ -33,7 +33,7 @@ def get_state_info(request, code):
         #academic_list = AcademicCenter.objects.filter(state = state).values_list('id')
         academic_centers = AcademicCenter.objects.filter(state = state, id__in=Training.objects.filter(status = 4, participant_count__gt=0).values_list('academic_id').distinct()).count()
         #workshop_details = Training.objects.filter(academic_id__in = academic_list, status = 4).aggregate(Sum('participant_count'), Count('id'), Min('tdate'))
-        workshop_details = Training.objects.filter(Q(status = 4) | (Q(training_type = 0) & Q(status__gt = 1) & Q(tdate__lte = date.today())), participant_count__gt=0, academic__state_id = state.id).aggregate(Sum('participant_count'), Count('id'), Min('tdate'))
+        workshop_details = Training.objects.filter(Q(status = 4) | (Q(training_type = 0) & Q(status = 4) & Q(tdate__lte = date.today())), participant_count__gt=0, academic__state_id = state.id).aggregate(Sum('participant_count'), Count('id'), Min('tdate'))
         context = {
             'state': state,
             'workshops': workshop_details['id__count'],
@@ -90,7 +90,6 @@ def training(request, slug = 'training'):
     collection = model_filter(request.GET, queryset=collection, state=state)
     # find participants count
     participant_count = collection.qs.aggregate(Sum('participant_count'))
-    
     #
     chart_query_set = collection.qs.extra(select={'year': "EXTRACT(year FROM tdate)"}).values('year').annotate(total_training=Count('tdate'), total_participant=Sum('participant_count'))
     chart_data = ''

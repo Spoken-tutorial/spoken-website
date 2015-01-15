@@ -29,6 +29,22 @@ urlpatterns = patterns('',
 
     # Uncomment the next line to enable the admin:
     url(r'^admin/', include(admin.site.urls)),
+    
+    #evens old url
+    url(r'^workshops/college/view_college/(\d+)/$', 'workshop.views.view_college', name='view_college'),
+    url(r'^workshops/resource_center_view_college/(\d+)/$', 'workshop.views.view_college', name='view_college'),
+    url(r'^resource_center_view_college_map_details/(\d+)/$', 'workshop.views.view_college', name='view_college'),
+    url(r'^software-training/academic-center/(\d+)/([a-zA-Z-]+)/$', 'workshop.views.view_college', name='view_college'),
+    url(r'^completed_workshops_list/(?P<state_code>[\w-]+)/$', 'workshop.views.training_list', name='training_list'),
+    url(r'^view_completed_workshop/(\d+)/$', 'workshop.views.view_training', name='view_training'),
+    url(r'^feedback_list/(?P<code>.+)/$', 'workshop.views.training_feedback', name='training_feedback'),
+    url(r'^feedback_view/(?P<code>.+)/(?P<user_id>.+)/$', 'workshop.views.view_training_feedback', name='view_training_feedback'),
+    url(r'^workshops/academic_details/$', 'workshop.views.academic_details', name='academic_details'),
+    url(r'^workshops/academic_details/(?P<state>.+)/$', 'workshop.views.academic_details_state', name='academic_details_state'),
+    url(r'^resource_center_map_details/(?P<state>.+)/$', 'workshop.views.academic_details_state', name='academic_details_state'),
+    url(r'^workshops/resource_center_details/$', 'workshop.views.view_college', name='view_college'),
+    url(r'^statistics/training/$', 'workshop.views.statistics_training', name='statistics_training'),
+    
     #events urls
     url(r'^software-training/', include('events.urls', namespace='events')),
     url(r'^participant/', include('mdldjango.urls', namespace='mdldjango')),
@@ -45,14 +61,7 @@ urlpatterns = patterns('',
     url(r'^list_videos/$', 'cdeep.views.list_videos', name='list_videos'),
     url(r'^show_video/$', 'cdeep.views.show_video', name='show_video'),
     url(r'^search/node/([0-9a-zA-Z-+%\(\)]+)/$', 'cdeep.views.search_node', name='search_node'),
-    url(r'^workshops/college/view_college/(\d+)/$', 'workshop.views.view_college', name='view_college'),
-    url(r'^completed_workshops_list/(?P<state_code>[\w-]+)/$', 'workshop.views.training_list', name='training_list'),
-    url(r'^view_completed_workshop/(\d+)/$', 'workshop.views.view_training', name='view_training'),
-    url(r'^feedback_list/(?P<code>.+)/$', 'workshop.views.training_feedback', name='training_feedback'),
-    url(r'^feedback_view/(?P<code>.+)/(?P<user_id>.+)/$', 'workshop.views.view_training_feedback', name='view_training_feedback'),
-    url(r'^workshops/academic_details/$', 'workshop.views.academic_details', name='academic_details'),
-    url(r'^workshops/academic_details/(?P<state>.+)/$', 'workshop.views.academic_details_state', name='academic_details_state'),
-
+    
     # Masquerade user
     url(r'^masquerade/', include('masquerade.urls', namespace='masquerade')),
     

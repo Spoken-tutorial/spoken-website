@@ -7,11 +7,13 @@ from events.models import AcademicCenter, State, Training, TrainingFeedback
 import base64
 # Create your views here.
 
-def view_college(request, collage_id=None):
+def view_college(request, collage_id=None, college_name=None):
+    if not collage_id:
+        return HttpResponsePermanentRedirect('/statistics/academic-center/')
     try:
         college = WAcademicCenter.objects.get(id = collage_id)
         academic = AcademicCenter.objects.get(academic_code = college.academic_code)
-        redirect_url = "/software-training/academic-center/" + str(academic.id) + "/" + slugify(academic.institution_name)
+        redirect_url = "/statistics/academic-center/" + str(academic.id) + "/" + slugify(academic.institution_name)
         return HttpResponsePermanentRedirect(redirect_url)
     except Exception, e:
         return HttpResponseRedirect('/')
@@ -70,9 +72,13 @@ def academic_details(request):
 
 def academic_details_state(request, state=None):
     try:
-        state = state.split('=')[1]
+        if '=' in state:
+            state = state.split('=')[1]
         state = State.objects.get(code=state)
         redirect_url = "/statistics/academic-center/?state={0}".format(state.id)
         return HttpResponsePermanentRedirect(redirect_url)
     except Exception, e:
         return HttpResponseRedirect('/')
+
+def statistics_training(request):
+    return HttpResponsePermanentRedirect('/statistics/training-onlinetest/training/')
