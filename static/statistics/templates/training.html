@@ -78,6 +78,13 @@
                     </div>
                 </div>
                 <div class="form-group">
+                    <label for="id_state" class="col-sm-4 control-label">Language</label>
+                    <div class="col-sm-8">
+                        {% render_field form.language class+="form-control language" tabindex="1" %}
+                        {{ form.language.errors }}
+                    </div>
+                </div>
+                <div class="form-group">
                     <label for="id_tdate" class="col-sm-4 control-label">Date Range</label>
                     <div class="col-sm-8">
                         {% render_field form.tdate class+="form-control tdate date" tabindex="1" %}
@@ -171,7 +178,7 @@
     </script>
 {% endblock %}
 {% block uncompressjsblock %}
-    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script src="{% static 'spoken/js/google-jsapi.js' %}"></script>
     <script type="text/javascript">
       google.load("visualization", "1", {packages:["corechart"]});
       google.setOnLoadCallback(drawChart);
