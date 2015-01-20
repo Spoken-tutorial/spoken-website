@@ -253,10 +253,10 @@ h1.page-title, h4.page-title {
 /* home page testimonials end */
 
 /* home-video-container */
-#home-video-container .big-video{
+/*#home-video-container .big-video{
     background: black;
     border: 5px solid black;
-}
+}*/
 .video-lists .video-item{
     margin: 20px 10px;
     margin-top: 0px;

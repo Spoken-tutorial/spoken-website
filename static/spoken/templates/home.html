@@ -113,9 +113,14 @@
         <div class="">
             <div id="home-video-container" class="container-inner row">
                 <div class="col-lg-6 col-md-6 col-sm-6 big-video">
-                    <video id="st_video" class="video-js vjs-default-skin" controls preload="auto" width="auto" height="auto" data-setup="{}">
-                        <source src="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ tr_rec.video }}" type="video/ogg" />
-                    </video>
+                    {% if tr_rec.video_id and tr_rec.video_id != None and tr_rec.video_id != '0' %}
+                        <iframe width="100%" height="420px" src="//www.youtube.com/embed/{{ tr_rec.video_id }}?rel=0&modestbranding=1&iv_load_policy=1" frameborder="0" allowfullscreen></iframe>
+                    {% else %}
+                        <video id="st_video" class="video-js vjs-default-skin" controls preload="none" poster="{{ tr_rec.tutorial_detail|get_thumb_path:'Big' }}" width="auto" height="auto" data-setup="{}">
+                            <source src="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ tr_rec.video }}" type="video/ogg" />
+                            {{ tr_rec|get_srt_path|safe }}
+                        </video>
+                    {% endif %}
                 </div>
                 <div class="col-lg-6 col-md-6 col-sm-6 video-lists">
                     {% for k, record in random_tutorials %}
