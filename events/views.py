@@ -1160,8 +1160,10 @@ def training_approvel(request, role, rid):
         w = Training.objects.get(pk=rid)
         if request.GET['status'] == 'accept':
             status = 2
+            w.appoved_by_id = user.id
         if request.GET['status'] == 'reject':
             status = 5
+            w.appoved_by_id = user.id
         if request.GET['status'] == 'completed':
             update_participants_count(w)
             status = 4
@@ -1174,7 +1176,6 @@ def training_approvel(request, role, rid):
     #        raise PermissionDenied('You are not allowed to view this page')
     
     w.status = status
-    w.appoved_by_id = user.id
     #todo: add training code
     if w.status == 2:
         w.training_code = "WC-"+str(w.id)
