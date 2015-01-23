@@ -11,6 +11,8 @@ def send_email(status, to = None, instance = None, cc = None, bcc = None):
         You have registered into the spoken-tutorial.org website over 2 weeks back. Please fix a date and time and make a training request if you want to organise training workshops. Click on the link below for the instructions to request the workshop: {0}
 
         If you have any questions, call or write to your Spoken Tutorial IIT Bombay, team person whose contact details you have. See the link for the contact details of person incharge for your state {1}
+        
+        Note: PLEASE ENSURE THAT YOU FILL IN ONLY THE GENUINE EMAIL ID'S OF THE PARTICIPANTS / STUDENTS. IF THEY DON'T HAVE ANY, PLEASE HELP THEM CREATE ONE
 
 Regards,
 Spoken Tutorial

@@ -1057,6 +1057,7 @@ def training_request(request, role, rid = None):
         messages.info(request, """
             <ul>
 		<li><b>TO HAVE YOUR TRAINING REQUEST APPROVED IT IS NECESSARY TO UPLOAD THE LIST OF PARTICIPANTS <a href="http://process.spoken-tutorial.org/images/9/96/Upload_Attendance.pdf" class="link alert-link" target="_blank"><b>Click Here</b></a></b></li>
+		<li><b style="color:red;">PLEASE ENSURE THAT YOU FILL IN ONLY THE GENUINE EMAIL ID'S OF THE PARTICIPANTS / STUDENTS. IF THEY DON'T HAVE ANY, PLEASE HELP THEM CREATE ONE.</b></li>
 		<li>Select a Timing in the Training Request where the chosen FOSS is relevant/useful/matching to the Course/Paper. </li>
         <li>One can also select FOSS which might not be relevant/matching to any Course/Paper.</li>
                 <li>Please download a copy of tutorials on all the machines. For instructions to download tutorials <a href="http://process.spoken-tutorial.org/images/1/1b/Download-Tutorials.pdf" class="link alert-link" target="_blank">Click Here</a></li>
