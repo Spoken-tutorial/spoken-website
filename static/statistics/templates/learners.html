@@ -1,0 +1,65 @@
+{% extends 'mdl/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block title %}Student Information{% endblock %}
+{% block cssblock %}
+    <link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />
+    <!--<link rel="stylesheet" href="{% static 'statistics/css/modal.css' %}" type="text/css" media="screen" charset="utf-8" />-->
+    <style>
+    .modal-footer{
+        border:none;
+    }
+    </style>
+{% endblock %}
+{% block content %}
+<div class="col-sm-offset-2 col-sm-8" id="contactModal">
+    <form id="form" class="well contact-form" action='{{ action }}' method='POST'>{% csrf_token %}
+        {% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
+        {% if form.non_field_errors %}
+        <ul>
+            {% for error in form.non_field_errors %}
+            <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        <div>
+            <div class='form-horizontal'>
+                <div class="col-sm-10">
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for= "id_fname">Full Name</label>
+                        <div class="col-sm-9">
+                            {% render_field form.fname class+="form-control fname" tabindex="1" %}
+                            {{ form.fname.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for= "id_email">Email</label>
+                        <div class="col-sm-9">
+                            {% render_field form.email class+="form-control email" tabindex="1" %}
+                            {{ form.email.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for= "id_roll_no">Roll no</label>
+                        <div class="col-sm-9">
+                            {% render_field form.roll_no class+="form-control roll_no" tabindex="1" %}
+                            {{ form.roll_no.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for= "id_roll_no"></label>
+                        <div class="col-sm-9">
+                            <input class="btn btn-primary" type="submit" value="Submit" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+
+        </div>
+        {% endwith %}
+</form>
+</div>
+
+{% endblock %}
