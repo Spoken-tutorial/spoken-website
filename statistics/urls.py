@@ -12,4 +12,5 @@ urlpatterns = patterns('',
     url(r'^academic-center/$', 'statistics.views.academic_center', name="acdemic_center"),
     url(r'^academic-center/(?P<academic_id>\d+)/$', 'statistics.views.academic_center_view', name="academic_center_view"),
     url(r'^academic-center/(?P<academic_id>\d+)/(?P<slug>[\w-]+)/$', 'statistics.views.academic_center_view', name="academic_center_view"),
+    url(r'^learners/$', 'statistics.views.learners', name="learners"),
 )

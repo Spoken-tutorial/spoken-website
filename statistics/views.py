@@ -4,6 +4,7 @@ from django.shortcuts import render, get_object_or_404
 from django.db.models import Count, Sum, Min
 from django.db.models import Q
 from events.models import *
+from statistics.forms import *
 from cms.sortable import *
 from events.filters import TrainingFilter, TestFilter, AcademicCenterFilter
 from events.views import get_page
@@ -229,3 +230,19 @@ def motion_chart(request):
     }
     
     return render(request, 'statistics/templates/motion_charts.html', context)
+
+def learners(request):
+    context = {}
+    form = LearnerForm()
+    if request.method == 'POST':
+        form = LearnerForm(request.POST)
+        if form.is_valid():
+            try:
+                form.save()
+                messages.success(request, "Thank you for submitting your details. You can choose your course and then continue..")
+                return HttpResponseRedirect('/tutorial-search/?search_foss=&search_language=')
+            except Exception, e:
+                print e
+                messages.success(request, "Sorry, something went wrong, Please try again!")
+    context['form'] = form
+    return render(request, 'statistics/templates/learners.html', context)
