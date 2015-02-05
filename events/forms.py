@@ -130,6 +130,7 @@ class DepartmentForm(forms.ModelForm):
         model = Department
 
 class TrainingForm(forms.ModelForm):
+    user = None
     class Meta:
         model = Training
         exclude = ['status', 'participant_count', 'extra_fields', 'organiser', 'academic', 'training_code', 'ttime', 'appoved_by']
@@ -139,7 +140,16 @@ class TrainingForm(forms.ModelForm):
         if 'training_type' in self.cleaned_data:
             if self.cleaned_data['training_type'] == '0' and self.cleaned_data['course_number'] == '':
                 raise forms.ValidationError("Course Number field is required.")
-                
+    # Organiser training count restrict
+    def clean_tdate(self):
+        super(TrainingForm, self).clean()
+        organiser = self.user.organiser
+        tdate = self.cleaned_data['tdate']
+        training_count = Training.objects.filter(tdate = tdate, organiser = organiser).count()
+        if training_count >= 3:
+            raise ValidationError("Organiser cannot schedule more than 3 software training workshops per day.  Kindly choose other dates for other training workshops")
+        return self.cleaned_data['tdate']
+
     training_type = forms.ChoiceField(widget=forms.RadioSelect, choices = [(0, 'Training'),], required = True)
     course_number = forms.CharField(required = True)
     no_of_lab_session = forms.ChoiceField(widget=forms.Select, choices = [('', '---------'), ('1', '1'), ('2-5', '2 - 5'),('6-10', '6 - 10'),('above 10', 'Above 10')], required = True)
@@ -155,21 +165,20 @@ class TrainingForm(forms.ModelForm):
     skype = forms.ChoiceField(widget=forms.RadioSelect, choices=[(0, 'No'),(1, 'Yes')], required = True)
     xml_file  = forms.FileField(required = True)
     def __init__(self, *args, **kwargs):
-        user = ''
         tmp = 0
         if 'user' in kwargs:
-            user = kwargs["user"]
+            self.user = kwargs["user"]
             del kwargs["user"]
         instance = ''
         if 'instance' in kwargs:
             instance = kwargs["instance"]
             del kwargs["instance"]
         super(TrainingForm, self).__init__(*args, **kwargs)
-        if user:
+        if self.user:
             if instance:
                 self.fields['xml_file'].required = False
             from events.views import is_resource_person
-            if is_resource_person(user):
+            if is_resource_person(self.user):
                 self.fields['training_type'].choices = [(0, 'Training'),(2, 'Pilot Workshop'), (3, 'Live Workshop')]
             self.fields['training_type'].initial = 0
         if instance:

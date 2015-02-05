@@ -3,11 +3,9 @@ from models import MdlUser
 from events.models import *
 from django.core.mail import EmailMultiAlternatives
 from validate_email import validate_email
+from datetime import datetime
 
 def update_participants_count(training):
-    #if training.organiser.academic.institution_type.name == "School":
-    #    training.participant_counts = SchoolTrainingAttendance.objects.filter(training = training, status__gte = 1).count()
-    #else:
     training.participant_counts = TrainingAttendance.objects.filter(training = training, status__gte = 1).count()
     training.save()
 
@@ -114,27 +112,64 @@ def get_or_create_participant(w, firstname, lastname, gender, email, category):
         ta.save()
         return True
     return False
-    #if category == 2:
-    #    try:
-    #        wa = TrainingAttendance.objects.get(training_id = w.id, mdluser_id = mdluser.id)
-    #    except Exception, e:
-    #        wa = TrainingAttendance()
-    #        wa.training_id = w.id
-    #        wa.status = 1
-    #        wa.mdluser_id = mdluser.id
-    #        wa.save()
 
-def store_error(error_line_no, count):
-    if not error_line_no:
-        error_line_no = error_line_no + str(count)
+def store_error(error_line_no, count, invalid_emails=None, email=None):
+    if not email:
+        if not error_line_no:
+            error_line_no = error_line_no + str(count)
+        else:
+            error_line_no = error_line_no + ', ' + str(count)
     else:
-        error_line_no = error_line_no + ', ' + str(count)
+        if not invalid_emails:
+            invalid_emails = invalid_emails + email
+        else:
+            invalid_emails = invalid_emails + ', ' + email
     csv_file_error = 1
-    return csv_file_error, error_line_no
+    return csv_file_error, error_line_no, invalid_emails
+
+def can_allow_participant_to_attend(more_then_two_per_day_list, tdate, email):
+    """ restrict participating more then 2 training per day """
+    if tdate:
+        tdate = tdate.split(' ')[0]
+        training_count = TrainingAttendance.objects.filter(email=email, training__tdate = tdate).count()
+        if training_count < 2:
+            return more_then_two_per_day_list
+        if not more_then_two_per_day_list:
+            more_then_two_per_day_list = more_then_two_per_day_list + email
+        else:
+            more_then_two_per_day_list = more_then_two_per_day_list + ', ' + email
+        return more_then_two_per_day_list
+
+def is_new_participant(reattempt_list, foss, email):
+    """  check weather already participated in particular software """
+    training_count = TrainingAttendance.objects.filter(email=email, training__foss_id = foss).count()
+    if training_count == 0:
+        return reattempt_list
+    if not reattempt_list:
+        reattempt_list = reattempt_list + email
+    else:
+        reattempt_list = reattempt_list + ', ' + email
+    return reattempt_list
+
+def check_csvfile(user, file_path, w=None, flag=0, **kwargs):
+    tdate = None
+    foss = None
+    if w:
+        try:
+            tdate = w.tdate.strftime("%Y-%m-%d")
+            foss = w.foss_id
+        except:
+            tdate = w.tdate
+            foss = w.foss_id
+    if kwargs and 'tdate' in kwargs['form_data'] and 'foss' in kwargs['form_data']:
+        tdate = kwargs['form_data']['tdate']
+        foss = kwargs['form_data']['foss']
     
-def check_csvfile(user, file_path, w=None, flag=0):
     csv_file_error = 0
     error_line_no = ''
+    invalid_emails = ''
+    reattempt_list = ''
+    more_then_two_per_day_list = ''
     with open(file_path, 'rbU') as csvfile:
         count  = 0
         csvdata = csv.reader(csvfile, delimiter=',', quotechar='|')
@@ -149,38 +184,83 @@ def check_csvfile(user, file_path, w=None, flag=0):
                     lastname = row[1].strip().title()
                     gender = None
                     email = None
-                    
-                    if not firstname or not firstname or row_length < 3:
-                        csv_file_error, error_line_no = store_error(error_line_no, count)
-                    if row_length == 3:
-                        if _is_organiser(user) and (user.organiser.academic.institution_type.name == 'School' or (w and w.organiser.academic.institution_type.name == 'School')):
-                            gender = row[2].strip().title()
-                            if '@' in gender:
-                                csv_file_error, error_line_no = store_error(error_line_no, count)
-                                continue
-                        else:
-                            csv_file_error, error_line_no = store_error(error_line_no, count)
-                            continue
+                    if not firstname or not firstname or row_length < 4:
+                        csv_file_error, error_line_no, invalid_emails = store_error(error_line_no, count, invalid_emails)
                     if row_length > 3:
                         email = row[2].strip().lower()
                         gender = row[3].strip().title()
-                        if _is_organiser(user) and (user.organiser.academic.institution_type.name != 'School' or (w and w.organiser.academic.institution_type.name != 'School')):
-                            if not validate_email(email, verify=True):
-                                csv_file_error, error_line_no = store_error(error_line_no, count)
-                                continue
+                        if not validate_email(email, verify=True):
+                            csv_file_error, error_line_no, invalid_emails = store_error(error_line_no, count, invalid_emails, email)
+                            continue
+                        # restrict the participant
+                        more_then_two_per_day_list = can_allow_participant_to_attend(more_then_two_per_day_list, tdate, email)
+                        reattempt_list = is_new_participant(reattempt_list, foss, email)
                     if flag and flag <= 2:
                         if not w:
                             return 1, error_line_no
                         get_or_create_participant(w, firstname, lastname, gender, email, 2)
                 except Exception, e:
-                    csv_file_error, error_line_no = store_error(error_line_no, count)
+                    print e
+                    csv_file_error, error_line_no, invalid_emails = store_error(error_line_no, count, invalid_emails)
             if error_line_no:
                 error_line_no = """
- <b>Error: Line number {0} in CSV file data is not in a proper format in the Participant list. The format should be First name, Last name, Email, Gender. For more details <a href={1} target='_blank'>Click here</a></b>""".format(error_line_no, "http://process.spoken-tutorial.org/images/c/c2/Participant_data.pdf")
+                <ul>
+                    <li>
+                        The Line numbers {0} in CSV file data is not in a proper format in the Participant list. The format should be First name, Last name, Email, Gender.</br>
+                        For more details <a href={1} target='_blank'>Click here</a>.
+                        <hr>
+                    </li>
+                </ul>
+                """.format(error_line_no, "http://process.spoken-tutorial.org/images/c/c2/Participant_data.pdf")
         except Exception, e:
             csv_file_error = 1
-            error_line_no = """<b>Error: CSV file data is not in a proper format in the Participant list. The format should be First name, Last name, Email, Gender. For more details <a href={0} target='_blank'>Click here</a></b>""".format("http://process.spoken-tutorial.org/images/c/c2/Participant_data.pdf")
+            error_line_no = """
+                <ul>
+                    <li>
+                        The Line numbers {0} in CSV file data is not in a proper format in the Participant list. The format should be First name, Last name, Email, Gender.</br>
+                        For more details <a href={1} target='_blank'>Click here</a>.
+                        <hr>
+                    </li>
+                </ul>
+                """.format(error_line_no, "http://process.spoken-tutorial.org/images/c/c2/Participant_data.pdf")
+        if invalid_emails:
+            error_line_no += """
+                <ul>
+                    <li>
+                        The participants listed below do not have valid email-ids.  Pls create valid email-ids and upload once again.
+                        <br><b>{0}</b>
+                        <hr>
+                    </li>
+                </ul>
+            """.format(invalid_emails)
         if flag == 3 and int(w.participant_count < count):
             csv_file_error = 1
-            error_line_no = "Training participant count less than {0}.".format(w.participant_count)
+            error_line_no = """
+            <ul>
+                <li>
+                    Training participant count less than {0}.
+                </li>
+            </ul>
+            """.format(w.participant_count)
+        if more_then_two_per_day_list:
+            csv_file_error = 1
+            error_line_no += """
+            <ul>
+                <li>
+                    The participants listed below have already enrolled for 2 software training workshops on the given date.
+                    <br>
+                    <b>NOTE:</b> Participants cannot enroll for more than 2 workshops per day. <b>{0}</b>
+                    <hr>
+                </li>
+            </ul>
+            """.format(more_then_two_per_day_list)
+        if reattempt_list:
+            csv_file_error = 1
+            error_line_no += """
+            <ul>
+                <li>
+                    The participants listed below have already attended this software training workshop before. <br> <b>{0}</b><hr>
+                </li>
+            </ul>
+            """.format(reattempt_list)
     return csv_file_error, error_line_no

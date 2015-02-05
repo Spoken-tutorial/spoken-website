@@ -941,7 +941,7 @@ def training_request(request, role, rid = None):
                 fout.close()
                 
                 #validate file
-                csv_file_error, error_line_no = check_csvfile(user, file_path)
+                csv_file_error, error_line_no = check_csvfile(user, file_path, form_data = request.POST)
                 #return
             ####
             if not csv_file_error:
