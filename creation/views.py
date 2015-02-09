@@ -396,6 +396,23 @@ def upload_index(request):
     context.update(csrf(request))
     return render(request, 'creation/templates/upload_index.html', context)
 
+def upload_publish_outline(request):
+    if not is_contributor(request.user):
+        raise PermissionDenied()
+    if request.method == 'POST':
+        form = UploadPublishTutorialForm(request.user, request.POST)
+        if form.is_valid():
+            tutorial_resource = TutorialResource.objects.get(tutorial_detail_id = request.POST['tutorial_name'], language_id = request.POST['language'])
+            return HttpResponseRedirect('/creation/upload/outline/' + str(tutorial_resource.id) + '/?publish=True')
+    else:
+        form = UploadPublishTutorialForm(user=request.user)
+
+    context = {
+        'form': form,
+    }
+    context.update(csrf(request))
+    return render(request, 'creation/templates/upload-publish-script.html', context)
+
 @csrf_exempt
 def ajax_upload_prerequisite(request):
     data = ''
@@ -428,13 +445,37 @@ def ajax_upload_foss(request):
     if request.method == 'POST':
         foss = ''
         lang = ''
+        publish = request.POST.get('publish', False)
         try:
             foss = request.POST.get('foss')
             lang = request.POST.get('lang')
         except:
             foss = ''
             lang = ''
-        if foss and lang:
+        if foss and lang and publish:
+            lang_rec = Language.objects.get(pk = int(lang))
+            if lang_rec.name == 'English':
+                td_list = TutorialDetail.objects.filter(foss_id = foss).values_list('id')
+                tutorials = TutorialDetail.objects.filter(
+                    id__in = td_list
+                )
+            else:
+                eng_rec = Language.objects.get(name = 'English')
+                td_list = TutorialDetail.objects.filter(foss_id = foss).values_list('id')
+                tutorials = TutorialDetail.objects.filter(
+                    id__in = TutorialResource.objects.filter(
+                        tutorial_detail_id__in = td_list,
+                        language_id = eng_rec.id,
+                        status = 1
+                    ).values_list(
+                        'tutorial_detail_id'
+                    )
+                )
+            for tutorial in tutorials:
+                data += '<option value="' + str(tutorial.id) + '">' + tutorial.tutorial + '</option>'
+            if data:
+                data = '<option value="">Select Tutorial</option>' + data
+        elif foss and lang:
             lang_rec = Language.objects.get(pk = int(lang))
             if lang_rec.name == 'English':
                 td_list = TutorialDetail.objects.filter(foss_id = foss).values_list('id')
@@ -520,11 +561,14 @@ def upload_tutorial(request, trid):
 def upload_outline(request, trid):
     tr_rec = None
     try:
-        tr_rec = TutorialResource.objects.get(pk = trid, status = 0)
+        status = 0
+        if publish:
+            status = 1
+        tr_rec = TutorialResource.objects.get(pk = trid, status = status)
         ContributorRole.objects.get(user_id = request.user.id, foss_category_id = tr_rec.tutorial_detail.foss_id, language_id = tr_rec.language_id, status = 1)
     except Exception, e:
         raise PermissionDenied()
-    if tr_rec.outline_status > 2 and tr_rec.outline_status != 5:
+    if not publish and tr_rec.outline_status > 2 and tr_rec.outline_status != 5:
         raise PermissionDenied()
     response_msg = ''
     error_msg = ''
@@ -545,6 +589,9 @@ def upload_outline(request, trid):
                 comp_title = tr_rec.tutorial_detail.foss.foss + ': ' + tr_rec.tutorial_detail.tutorial + ' - ' + tr_rec.language.name
                 add_domainreviewer_notification(tr_rec, comp_title, 'Outline waiting for Domain review')
                 response_msg = 'Outline status updated successfully!'
+                if publish:
+                    messages.success(request, response_msg)
+                    return HttpResponseRedirect('/creation/upload-publish-outline/')
             except Exception, e:
                 print e
                 error_msg = 'Something went wrong, please try again later.'

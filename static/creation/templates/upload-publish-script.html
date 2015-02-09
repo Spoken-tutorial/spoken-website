@@ -1,0 +1,109 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block title %}Upload Outline{% endblock %}
+{% block heading %}<i class="fa fa-list-ul"></i> Upload Outline{% endblock %}
+{% block content %}
+    <form role="form" method="post" enctype="multipart/form-data" action="" class="form-horizontal">
+        <div class="row well bs-component">
+            <div class="col-lg-8">
+                <fieldset>
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="id_foss_category" class="col-lg-3 col-md-3 col-sm-3 control-label">FOSS Category:</label>
+                        <div class="col-lg-9 col-md-9 col-sm-9">
+                            {% render_field form.foss_category class+="form-control foss_category" tabindex="1" %}
+                            {{ form.foss_category.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_language" class="col-lg-3 col-md-3 col-sm-3 control-label">Language: <span class='ajax-refresh ajax-refresh-language'><i class="fa fa-2 fa-refresh fa-spin"></i></span></label>
+                        <div class="col-lg-9 col-md-9 col-sm-9">
+                            {% render_field form.language class+="form-control language" tabindex="2" %}
+                            {{ form.language.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_tutorial_name" class="col-lg-3 col-md-3 col-sm-3 control-label">Tutorial Name: <span class='ajax-refresh ajax-refresh-tutorial'><i class="fa fa-2 fa-refresh fa-spin"></i></span></label>
+                        <div class="col-lg-9 col-md-9 col-sm-9">
+                            {% render_field form.tutorial_name class+="form-control tutorial_name" tabindex="3" %}
+                            {{ form.tutorial_name.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-lg-9 col-md-9 col-sm-9 col-lg-offset-3 col-md-offset-3 col-sm-offset-3">
+                            <input type="submit" class="btn btn-primary" value="Submit"  tabindex="4" />
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+    </form>
+{% endblock %}
+{% block compressinlinejsblock %}
+    <script type="text/javascript">
+        $(document).ready(
+            function() {
+                $('.foss_category').on("change", 
+                    function() {
+                        var foss = $(this).val();
+                        $('.tutorial_name').html('<option value="" selected="selected">Select Tutorial</option>');
+                        $('.tutorial_name').attr("disabled", "disabled");
+                        $('.language').html('<option value="" selected="selected">Select Language</option>');
+                        $('.language').attr("disabled", "disabled");
+                        if(foss != '') {
+                            $.ajax({
+                                url: "/creation/ajax-upload-foss/",
+                                type: "POST",
+                                data: {
+                                    foss: foss
+                                },
+                                beforeSend: function() {
+                                    $('.ajax-refresh-language').show();
+                                },
+                                success: function(data) {
+                                    // loading languages
+                                    if(data) {
+                                        $('.language').html(data);
+                                        $('.language').removeAttr('disabled');
+                                    }
+                                    $('.ajax-refresh-language').hide();
+                                }
+                            });
+                        }
+                    }
+                );
+                $('.language').on("change",
+                    function() {
+                        var foss = $('.foss_category').val();
+                        var lang = $(this).val();
+                        $('.tutorial_name').html('<option value="" selected="selected">Select Tutorial</option>');
+                        $('.tutorial_name').attr("disabled", "disabled");
+                        if(foss != '' && lang != '') {
+                            $.ajax({
+                                url: "/creation/ajax-upload-foss/",
+                                type: "POST",
+                                data: {
+                                    foss: foss,
+                                    lang: lang,
+                                    publish: true,
+                                },
+                                beforeSend: function() {
+                                    $('.ajax-refresh-tutorial').show();
+                                },
+                                success: function(data) {
+                                    // loading tutorial names
+                                    if(data){
+                                        $('.tutorial_name').html(data);
+                                        $('.tutorial_name').removeAttr('disabled');
+                                    }
+                                    $('.ajax-refresh-tutorial').hide();
+                                }
+                            });
+                        }
+                    }
+                );
+            }
+        );
+    </script>
+{% endblock %}
