@@ -21,6 +21,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render, render_to_response
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect
+from creation.views import is_administrator
 
 from creation.models import *
 @login_required
@@ -29,7 +30,7 @@ def list_missing_script(request):
         raise PermissionDenied()
     trs = TutorialResource.objects.filter(status=1)
     for tr_rec in trs:
-        storage_path = tr_rec.tutorial_detail.foss.foss.replace(' ', '-') + '/' + tr_rec.tutorial_detail.level.code + '/' + tr_rec.tutorial_detail.tutorial.replace(' ', '-') + '/' + tr_rec.language.name
+        storage_path = tr_rec.script
         script_path = settings.SCRIPT_URL + storage_path
         try:
             code = 0
@@ -37,17 +38,8 @@ def list_missing_script(request):
                 code = urlopen(script_path).code
             except Exception, e:
                 code = e.code
-            if(int(code) == 200):
-                prev_state = tr_rec.script_status
-                tr_rec.script = storage_path
-                tr_rec.script_user = request.user
-                tr_rec.script_status = 2
-                tr_rec.save()
-                ContributorLog.objects.create(status = prev_state, user = request.user, tutorial_resource = tr_rec, component = 'script')
-                comp_title = tr_rec.tutorial_detail.foss.foss + ': ' + tr_rec.tutorial_detail.tutorial + ' - ' + tr_rec.language.name
-                response_msg = 'Script status updated successfully'
-            else:
-                print '{0},{1},{2},{3}'.format(tr_rec.id,tr_rec.tutorial_detail.foss, tr_rec.language, tr_rec.tutorial_detail.tutorial)
+            if not (int(code) == 200):
+                print '{0},{1},{2},{3},{4},{5}'.format(code, tr_rec.id,tr_rec.tutorial_detail.foss, tr_rec.language, tr_rec.tutorial_detail.tutorial, script_path)
         except Exception, e:
             print e
         #break

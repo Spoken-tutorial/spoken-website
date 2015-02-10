@@ -403,7 +403,7 @@ def upload_publish_outline(request):
         form = UploadPublishTutorialForm(request.user, request.POST)
         if form.is_valid():
             tutorial_resource = TutorialResource.objects.get(tutorial_detail_id = request.POST['tutorial_name'], language_id = request.POST['language'])
-            return HttpResponseRedirect('/creation/upload/outline/' + str(tutorial_resource.id) + '/?publish=True')
+            return HttpResponseRedirect('/creation/upload/outline/' + str(tutorial_resource.id) + '/?publish=1')
     else:
         form = UploadPublishTutorialForm(user=request.user)
 
@@ -560,6 +560,7 @@ def upload_tutorial(request, trid):
 @login_required
 def upload_outline(request, trid):
     tr_rec = None
+    publish = int(request.GET.get('publish', 0))
     try:
         status = 0
         if publish:
@@ -582,6 +583,10 @@ def upload_outline(request, trid):
                     tr_rec.outline = request.POST['outline']
                 else:
                     warning_msg = 'There is no change in outline'
+                if publish:
+                    tr_rec.save()
+                    messages.success(request, "Outline status updated successfully!")
+                    return HttpResponseRedirect('/creation/upload-publish-outline/')
                 tr_rec.outline_user = request.user
                 tr_rec.outline_status = 2
                 tr_rec.save()
@@ -589,9 +594,6 @@ def upload_outline(request, trid):
                 comp_title = tr_rec.tutorial_detail.foss.foss + ': ' + tr_rec.tutorial_detail.tutorial + ' - ' + tr_rec.language.name
                 add_domainreviewer_notification(tr_rec, comp_title, 'Outline waiting for Domain review')
                 response_msg = 'Outline status updated successfully!'
-                if publish:
-                    messages.success(request, response_msg)
-                    return HttpResponseRedirect('/creation/upload-publish-outline/')
             except Exception, e:
                 print e
                 error_msg = 'Something went wrong, please try again later.'
