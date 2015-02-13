@@ -274,31 +274,31 @@ def fix_date_for_first_training(request):
                 pass
     return HttpResponse("Done!")
 
-def training_gentle_reminder(request):
-    tomorrow_training = Training.objects.filter(training_type__gt=0, status__lte=2, tdate=datetime.date.today() + datetime.timedelta(days=1))
-    if tomorrow_training:
-        for t in tomorrow_training:
-            status = 'How to upload the attendance on the Workshop day'
-            try:
-                to = [t.organiser.user.email]
-                #if t.training_type == 0:
-                #    status = 'How to upload the attendance on the Training day'
-                send_email(status, to, t)
-            except:
-                pass
-    return HttpResponse("Done!")
+#def training_gentle_reminder(request):
+#    tomorrow_training = Training.objects.filter(training_type__gt=0, status__lte=2, tdate=datetime.date.today() + datetime.timedelta(days=1))
+#    if tomorrow_training:
+#        for t in tomorrow_training:
+#            status = 'How to upload the attendance on the Workshop day'
+#            try:
+#                to = [t.organiser.user.email]
+#                #if t.training_type == 0:
+#                #    status = 'How to upload the attendance on the Training day'
+#                send_email(status, to, t)
+#            except:
+#                pass
+#    return HttpResponse("Done!")
 
-def reminder_mail_to_close_training(request):
-    predated_ongoing_workshop = Training.objects.filter(Q(status = 2) | Q(status = 3), training_type__gte = 0, tdate__lt = datetime.date.today() - datetime.timedelta(days = 1))
-    if predated_ongoing_workshop:
-        status = "Reminder mail to close Training"
-        for w in predated_ongoing_workshop:
-            try:
-                to = [w.organiser.user.email]
-                send_email(status, to, w)
-            except:
-                pass
-    return HttpResponse("Done!")
+#def reminder_mail_to_close_training(request):
+#    predated_ongoing_workshop = Training.objects.filter(Q(status = 2) | Q(status = 3), training_type__gte = 0, tdate__lt = datetime.date.today() - datetime.timedelta(days = 1))
+#    if predated_ongoing_workshop:
+#        status = "Reminder mail to close Training"
+#        for w in predated_ongoing_workshop:
+#            try:
+#                to = [w.organiser.user.email]
+#                send_email(status, to, w)
+#            except:
+#                pass
+#    return HttpResponse("Done!")
 
 #def training_completion_reminder(request):
 #    training_need_to_complete = Training.objects.filter(training_type = 0, status__lte = 3, tdate__lte=datetime.date.today() - datetime.timedelta(days=30))
@@ -684,7 +684,7 @@ def organiser_request(request, username):
                     organiser = Organiser.objects.get(user = user)
                     organiser.academic_id=request.POST['college']
                     organiser.save()
-                messages.success(request, "<ul><li>Thank you. Your request has been sent for Training Manager's approval.</li><li>You will get the approval with in 24 hours.Once the request is approved, you can request for the Training / Workshop. </li><li>For more details <a target='_blank' href='http://process.spoken-tutorial.org/images/1/1f/Training-Request-Sheet.pdf'> Click Here</a></li></ul>")
+                messages.success(request, "<ul><li>Thank you. Your request has been sent for Training Manager's approval.</li><li>You will get the approval with in 24 hours.Once the request is approved, you can request for the Training. </li><li>For more details <a target='_blank' href='http://process.spoken-tutorial.org/images/1/1f/Training-Request-Sheet.pdf'> Click Here</a></li></ul>")
                 return HttpResponseRedirect("/software-training/organiser/view/"+user.username+"/")
             messages.error(request, "Please fill the following details")
             context = {'form':form}
@@ -1184,7 +1184,7 @@ def training_approvel(request, role, rid):
     w.save()
     #send email
     if w.status == 4:
-        status = 'Future activities after conducting the workshop'
+        status = 'Future activities after conducting the Training'
         to = [w.organiser.user.email]
         send_email(status, to, w)
         message = w.academic.institution_name +" has completed "+w.foss.foss+" training dated "+w.tdate.strftime("%Y-%m-%d")

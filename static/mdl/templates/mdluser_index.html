@@ -11,9 +11,9 @@
 {% block content %}
     <!-- Nav tabs -->
     <ul class="nav nav-tabs">
-        <li class="{% if category == 1 %} active {% endif %}"><a href="{% url 'mdldjango:mdl_index' %}?category=1">Past Training / Workshop</a></li>
+        <li class="{% if category == 1 %} active {% endif %}"><a href="{% url 'mdldjango:mdl_index' %}?category=1">Past Training</a></li>
         <li class="{% if category == 2 %} active {% endif %}"><a href="{% url 'mdldjango:mdl_index' %}?category=2">Past Test</a></li>
-        <li class="{% if category == 3 %} active {% endif %}"><a href="{% url 'mdldjango:mdl_index' %}?category=3">Upcoming Training / Workshop</a></li>
+        <li class="{% if category == 3 %} active {% endif %}"><a href="{% url 'mdldjango:mdl_index' %}?category=3">Upcoming Training</a></li>
         <li class="{% if category == 4 %} active {% endif %}"><a href="{% url 'mdldjango:mdl_index' %}?category=4">Ongoing Test</a></li>
         <li class="{% if category == 5 %} active {% endif %}"><a href="{% url 'mdldjango:mdl_index' %}?category=5">Upcoming Test</a></li>
     </ul>

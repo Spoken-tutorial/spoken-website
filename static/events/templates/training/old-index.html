@@ -4,12 +4,12 @@
 {% load eventsdata %}
 {% load cmsdata %}
 {% load creationdata %}
-{% block title %}Training / Workshop - {{ status}} {% endblock %}
+{% block title %}Training - {{ status}} {% endblock %}
 {% block uncompresscssblock %}
     <link rel="stylesheet" href="{% static 'spoken/css/jquery.fancybox.pack.css' %}" type="text/css" media="screen" charset="utf-8" />
 {% endblock%}
 {% block heading %}
-        <i class="fa fa-list-ul"></i> Training / Workshop <a href="{% url 'events:events_dashboard' %}" class='pull-right'>Dashboard</a>
+        <i class="fa fa-list-ul"></i> Training <a href="{% url 'events:events_dashboard' %}" class='pull-right'>Dashboard</a>
 {% endblock %}
 {% block content %}
     <div class= 'filters row' >
