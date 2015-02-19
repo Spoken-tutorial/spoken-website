@@ -6,7 +6,7 @@ from validate_email import validate_email
 from datetime import datetime
 
 def update_participants_count(training):
-    training.participant_counts = TrainingAttendance.objects.filter(training = training, status__gte = 1).count()
+    training.participant_count = TrainingAttendance.objects.filter(training = training, status__gte = 1).count()
     training.save()
 
 def _is_organiser(user):
@@ -131,7 +131,7 @@ def can_allow_participant_to_attend(more_then_two_per_day_list, tdate, email):
     """ restrict participating more then 2 training per day """
     if tdate:
         tdate = tdate.split(' ')[0]
-        training_count = TrainingAttendance.objects.filter(email=email, training__tdate = tdate).count()
+        training_count = TrainingAttendance.objects.filter(email=email, training__tdate = tdate, status=1).count()
         if training_count < 2:
             return more_then_two_per_day_list
         if not more_then_two_per_day_list:
@@ -142,7 +142,7 @@ def can_allow_participant_to_attend(more_then_two_per_day_list, tdate, email):
 
 def is_new_participant(reattempt_list, foss, email):
     """  check weather already participated in particular software """
-    training_count = TrainingAttendance.objects.filter(email=email, training__foss_id = foss).count()
+    training_count = TrainingAttendance.objects.filter(email=email, training__foss_id = foss, status=1).count()
     if training_count == 0:
         return reattempt_list
     if not reattempt_list:
