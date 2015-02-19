@@ -121,6 +121,47 @@
             {% endif %}
         </div>
     </div>
+    {% if clone %}
+        <div class="modal fade">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h4 class="modal-title">Clone Training</h4>
+              </div>
+              <div class="modal-body">
+                <p>Do you wish to add another FOSS for the existing participant list?</p>
+                <div style="max-height: 300px; overflow-y:scroll;">
+                <table class="table table-condensed table-striped table-bordered">
+                {% if training.trainingattendance_set.all %}
+                    <tr>
+                        <td>#</td>
+                        <td>First Name</td>
+                        <td>Last Name</td>
+                        <td>Email</td>
+                    </tr>
+                {% endif %}
+                {% for p in training.trainingattendance_set.all %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ p.firstname}}</td>
+                        <td>{{ p.lastname}}</td>
+                        <td>{{ p.email}}</td>
+                    </tr>
+                {% endfor %}
+                </table>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">No</button>
+                <form action="/software-training/training/organiser/clone/" method="post" style="display: initial;">{% csrf_token %}
+                     <input type="hidden" name="clone-training" value="{{training.id}}"> 
+                     <input type="submit" class="btn btn-primary" value="Yes" />
+                </form>
+              </div>
+            </div><!-- /.modal-content -->
+          </div><!-- /.modal-dialog -->
+        </div><!-- /.modal -->
+    {% endif %}
 {% endblock %}
 {% block uncompressjsblock %}
     <script src="{% static 'spoken/js/jquery.fancybox.pack.js' %}"></script>
@@ -141,6 +182,15 @@
                 afterClose  : function() {
                     return parent.location.reload(true);
                 }
+            });
+        });
+    </script>
+    <script>
+    $(window).load(function(){
+            $('.modal').modal({
+                backdrop: 'static',
+                keyboard: false,
+                show: true,
             });
         });
     </script>

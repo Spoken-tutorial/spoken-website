@@ -37,7 +37,7 @@ from forms import *
 import datetime
 from django.utils import formats
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from mdldjango.get_or_create_participant import get_or_create_participant, check_csvfile, update_participants_count
+from mdldjango.get_or_create_participant import get_or_create_participant, check_csvfile, update_participants_count, clone_participant
 from django.template.defaultfilters import slugify
 
 #pdf generate
@@ -960,7 +960,7 @@ def training_request(request, role, rid = None):
                 w.language_id = request.POST['language']
                 w.foss_id = request.POST['foss']
                 w.tdate = dateTime[0]
-                w.ttime = dateTime[1]
+                w.ttime = '00:00'
                 w.skype = request.POST['skype']
                 
                 error = 0
@@ -1045,7 +1045,7 @@ def training_request(request, role, rid = None):
                     update_events_notification(user_id = user.id, role = 0, category = 0, category_id = w.id, academic = w.academic_id, status = 0, message = message)
                     
                     if role == 'organiser' and not rid:
-                        return HttpResponseRedirect("/software-training/training/" + str(w.id) + "/attendance/")
+                        return HttpResponseRedirect("/software-training/training/" + str(w.id) + "/attendance/?clone=1")
                     return HttpResponseRedirect("/software-training/training/" + role + "/pending/")
             else:
                 os.unlink(file_path)
@@ -1074,6 +1074,70 @@ def training_request(request, role, rid = None):
     context['role'] = role
     context.update(csrf(request))
     return render(request, 'events/templates/training/form.html', context)
+
+def copy_participant(training, participants):
+    for p in participants:
+        ta = TrainingAttendance()
+        ta.training_id = training.id
+        ta.mdluser_id = p.mdluser_id
+        ta.status = 1
+        ta.firstname = p.firstname
+        ta.lastname = p.lastname
+        ta.gender = p.gender
+        ta.email = p.email
+        ta.save()
+
+@login_required
+def training_clone(request, role, rid = None):
+    ''' Training request by organiser '''
+    user = request.user
+    context = {}
+    participant = None
+    csv_file_error = 0
+    if not (user.is_authenticated() and ( is_organiser(user) or is_resource_person(user) or is_event_manager(user))):
+        raise PermissionDenied()
+
+    if not rid and request.method=="POST" and 'clone-training' in request.POST:
+        return HttpResponseRedirect('/software-training/training/organiser/'+str(request.POST['clone-training'])+'/clone/')
+
+    form = TrainingReUseForm()
+    if rid and request.method=="POST":
+        form = TrainingReUseForm(request.POST, user = request.user)
+        if form.is_valid():
+            master_training = Training.objects.get(pk=rid)
+            csv_file_error, error_line_no, reattempt_list,  more_then_two_per_day_list = clone_participant(master_training, request.POST)
+            if csv_file_error:
+                messages.error(request, error_line_no)
+            if not csv_file_error or csv_file_error and request.POST.get('remove-error'):
+                existing_emails = None
+                if reattempt_list and more_then_two_per_day_list:
+                    existing_emails = set(reattempt_list.split(',')).union(set(more_then_two_per_day_list.split(',')))
+                elif reattempt_list:
+                    existing_emails = reattempt_list.split(',')
+                else:
+                    existing_emails = more_then_two_per_day_list.split(',')
+                participants = master_training.trainingattendance_set.exclude(email__in=existing_emails)
+                if participants:
+                    training = master_training
+                    training.id = None
+                    training.foss = form.cleaned_data['foss']
+                    training.language = form.cleaned_data['language']
+                    training.tdate = form.cleaned_data['tdate']
+                    training.extra_fields.id = None
+                    training.extra_fields.save()
+                    training.extra_fields_id = training.extra_fields.id
+                    training.save()
+                    copy_participant(training, participants)
+                    messages.success(request, "Training has been created! ")
+                    return HttpResponseRedirect("/software-training/training/" + str(training.id) + "/attendance/?clone=1")
+                messages.error(request, "Participants are empty!")
+    context['form'] = form
+    context['role'] = role
+    context['participant'] = participant
+    context['error'] = csv_file_error
+    context['rid'] = rid
+    context.update(csrf(request))
+    return render(request, 'events/templates/training/request-reuse.html', context)
 
 @login_required
 def training_list(request, role, status):
@@ -1119,13 +1183,13 @@ def training_list(request, role, status):
         header = {
             1: SortableHeader('#', False),
             2: SortableHeader('training_type', True, 'Training Type'),
-            3: SortableHeader('academic__state', True, 'State'),
+            3: SortableHeader('academic__state__name', True, 'State'),
             4: SortableHeader('academic__academic_code', True, 'Academic Code'),
-            5: SortableHeader('academic', True, 'Institution'),
-            6: SortableHeader('foss', True, 'FOSS'),
-            7: SortableHeader('organiser__user', True, 'Organiser'),
+            5: SortableHeader('academic__institution_name', True, 'Institution'),
+            6: SortableHeader('foss__foss', True, 'FOSS'),
+            7: SortableHeader('organiser__user__first_name', True, 'Organiser'),
             8: SortableHeader('tdate', True, 'Date'),
-            9: SortableHeader('Participants', False),
+            9: SortableHeader('participant_count', True, 'Participants'),
             10: SortableHeader('Action', False)
         }
         
@@ -1407,6 +1471,7 @@ def training_attendance(request, wid):
     context['onlinetest_user'] = onlinetest_user
     context['training'] = training
     context['file_path'] = '/media/training/'+wid+'/'+wid+'.pdf'
+    context['clone'] = request.GET.get('clone', None)
     context.update(csrf(request))
     return render(request, 'events/templates/training/attendance.html', context)
 
@@ -1675,7 +1740,7 @@ def test_list(request, role, status):
             6: SortableHeader('foss', True, 'FOSS'),
             7: SortableHeader('tdate', True, 'Date'),
             8: SortableHeader('Participants', False),
-            9: SortableHeader('Action', False)
+            9: SortableHeader('', False)
         }
         raw_get_data = request.GET.get('o', None)
         collection = get_sorted_list(request, collectionSet, header, raw_get_data)

@@ -202,7 +202,7 @@ def offline_details(request, wid, category):
                 if not error_line_no:
                     messages.success(request, "Thank you for uploading the Attendance. Now make sure that you cross check and verify the details before submiting.")
                 return HttpResponseRedirect('/software-training/training/'+str(wid)+'/attendance/')
-        messages.error(request, "Please Upload xml file !") 
+        messages.error(request, "Please Upload CSV file !") 
     context = {
         'form': form,
     }

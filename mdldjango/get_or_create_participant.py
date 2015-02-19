@@ -137,7 +137,7 @@ def can_allow_participant_to_attend(more_then_two_per_day_list, tdate, email):
         if not more_then_two_per_day_list:
             more_then_two_per_day_list = more_then_two_per_day_list + email
         else:
-            more_then_two_per_day_list = more_then_two_per_day_list + ', ' + email
+            more_then_two_per_day_list = more_then_two_per_day_list + ',' + email
         return more_then_two_per_day_list
 
 def is_new_participant(reattempt_list, foss, email):
@@ -148,7 +148,7 @@ def is_new_participant(reattempt_list, foss, email):
     if not reattempt_list:
         reattempt_list = reattempt_list + email
     else:
-        reattempt_list = reattempt_list + ', ' + email
+        reattempt_list = reattempt_list + ',' + email
     return reattempt_list
 
 def check_csvfile(user, file_path, w=None, flag=0, **kwargs):
@@ -264,3 +264,51 @@ def check_csvfile(user, file_path, w=None, flag=0, **kwargs):
             </ul>
             """.format(reattempt_list)
     return csv_file_error, error_line_no
+
+
+def clone_participant(training, form_data):
+    tdate = None
+    foss = None
+    if form_data and 'foss' in form_data:
+        tdate = form_data['tdate']
+        foss = form_data['foss']
+
+    csv_file_error = 0
+    error_line_no = ''
+    invalid_emails = ''
+    reattempt_list = ''
+    more_then_two_per_day_list = ''
+    count = 0
+    participants = TrainingAttendance.objects.filter(training=training)
+    for row in participants:
+        count = count + 1
+        email = row.email
+        try:
+            # restrict the participant
+            more_then_two_per_day_list = can_allow_participant_to_attend(more_then_two_per_day_list, tdate, email)
+            reattempt_list = is_new_participant(reattempt_list, foss, email)
+        except Exception, e:
+            print e
+
+    if more_then_two_per_day_list:
+        csv_file_error = 1
+        error_line_no += """
+        <ul>
+            <li>
+                The participants listed below have already enrolled for 2 software training workshops on the given date.
+                <br>
+                <b>NOTE:</b> Participants cannot enroll for more than 2 workshops per day. <b>{0}</b>
+                <hr>
+            </li>
+        </ul>
+        """.format(more_then_two_per_day_list)
+    if reattempt_list:
+        csv_file_error = 1
+        error_line_no += """
+        <ul>
+            <li>
+                The participants listed below have already attended this software training workshop before. <br> <b>{0}</b><hr>
+            </li>
+        </ul>
+        """.format(reattempt_list)
+    return csv_file_error, error_line_no, reattempt_list,  more_then_two_per_day_list

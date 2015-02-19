@@ -1,0 +1,143 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load eventsdata %}
+{% block title %}Training - Request{% endblock %}
+{% block compresscssblock %}
+    <link rel="stylesheet" href="{% static 'spoken/css/jquery.datetimepicker.css' %}" type="text/css" media="screen" charset="utf-8" />
+{% endblock %}
+{% block compressinlinecssblock %}
+    <style>
+        .radio input[type="radio"]{
+            left: 0px;
+        }
+    </style>
+{% endblock %}
+{% block heading %}
+        <i class="fa fa-list-ul"></i> Participant List
+{% endblock %}
+{% block content %}
+    <div class='tab-content'>
+        <div class="row well">
+            <div class='col-sm-8'>
+                <form action="{{ action }}" method="post" class='form-horizontal' enctype="multipart/form-data">{% csrf_token %}
+                    {% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
+                    {% if form.non_field_errors %}
+                    <ul>
+                      {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                      {% endfor %}
+                    </ul>
+                    {% endif %}
+                    
+                    {% if error %}
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label" for= "id_language"></label>
+                            <div class="col-sm-9">
+                                <input type="checkbox" name="remove-error" value="1"> <b> Remove above user from participant list?</b><br>
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for= "id_foss">FOSS</label>
+                        <div class="col-sm-9">
+                            {% render_field form.foss class+="form-control foss" tabindex="1" data-placeholder="Enter foss" %}
+                            {{ form.foss.errors }}
+                            <small>Please select the FOSS category.</small>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for= "id_language">Preferred Language <span class='ajax-refresh ajax-refresh-language'><i class="fa fa-2 fa-refresh fa-spin"></i></span></label>
+                        <div class="col-sm-9">
+                            {% render_field form.language class+="form-control language" tabindex="1" data-placeholder="Enter language" %}
+                            {{ form.language.errors }}
+                            <small>Please select your preferred language.</small>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for= "id_tdate">Start Date</label>
+                        <div class="col-sm-9">
+                            {% render_field form.tdate class+="form-control datetime" tabindex="1" data-placeholder="Enter date" %}
+                            {{ form.tdate.errors }}
+                            <small>Please select the date on which on which you want to conduct the training/workshop.</small>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-offset-3 col-sm-9">
+                            <input class="btn btn-primary" type="submit" value="Submit" />
+                            <a href="/software-training/training/{{rid}}/attendance/?clone=1" class="btn btn-primary" role="button">Cancel</a>
+                        </div>
+                    </div>
+                    {% endwith %}
+                </form>
+
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block compressjsblock %}
+    <script src="{% static 'spoken/js/jquery.datetimepicker.js' %}"></script>
+{% endblock %}
+{% block compressinlinejsblock %}
+    <script>
+        $college = $('#id_academic');
+        $('#id_district').change(function() {
+            var district = $(this).val();
+            $.ajax({
+                url: "/software-training/ajax-district-collage/",
+                type: "POST",
+                data: {
+                    district : district
+                },
+                success: function(data) {
+                    if(data){
+                        $college.html(data);
+                        $college.removeAttr("disabled");
+                    } else{
+                        $college.attr("disabled", "disabled");
+                        alert('No college found for this district!!');
+                    }
+                }
+            });
+        });
+        $('.foss').change(function() {
+            var foss = $(this).val();
+            $.ajax({
+                url: "/software-training/ajax-language/",
+                type: "POST",
+                data: {
+                    foss : foss
+                },
+                beforeSend: function() {
+                    $('.ajax-refresh-language').show();
+                },
+                success: function(data) {
+                    if(data){
+                        $('.language').html(data);
+                        $('.language').removeAttr("disabled");
+                        $('.ajax-refresh-language').hide();
+                    } else{
+                        $('.language').attr("disabled", "disabled");
+                        $('.ajax-refresh-language').hide();
+                        alert('No language found!');
+                    }
+                }
+            });
+        });
+        $('.datetime').datetimepicker({
+            onGenerate:function( ct ){
+                $(this).find('.xdsoft_day_of_week0')
+                    .addClass('xdsoft_disabled');
+            },
+            lang:'en',
+            format:'Y-m-d',
+            formatDate:'Y/m/d',
+            minDate:0, // yesterday is minimum date
+            weekends:[],
+            maxDate:'+1970/06/31', // tommorow date with in 6 month
+            step:5,
+            timepicker:false,
+        });
+    </script>
+{% endblock %}

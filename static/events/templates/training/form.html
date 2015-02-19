@@ -40,6 +40,7 @@
                 {{ user.organiser.academic.state }} - {{ user.organiser.academic }}
             {% endif %}
         </div>
+        {{form.error}}
         <div class="row well">
             <div class='col-sm-8'>
                 <form action="{{ action }}" method="post" class='form-horizontal' enctype="multipart/form-data">{% csrf_token %}
@@ -95,7 +96,7 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-sm-3 control-label" for= "id_tdate">Timing</label>
+                        <label class="col-sm-3 control-label" for= "id_tdate">Start Date</label>
                         <div class="col-sm-9">
                             {% render_field form.tdate class+="form-control datetime" tabindex="1" data-placeholder="Enter date" %}
                             {{ form.tdate.errors }}
@@ -103,7 +104,7 @@
                         </div>
                     </div>
                     <div class="form-group no_of_lab_session_group">
-                        <label class="col-sm-3 control-label" for= "id_no_of_lab_session">No.of lab session</label>
+                        <label class="col-sm-3 control-label" for= "id_no_of_lab_session">Semester</label>
                         <div class="col-sm-9">
                             {% render_field form.no_of_lab_session class+="form-control no_of_lab_session" tabindex="1" %}
                             {{ form.no_of_lab_session.errors }}
@@ -203,14 +204,13 @@
                     .addClass('xdsoft_disabled');
             },
             lang:'en',
-            format:'Y-m-d H:i',
+            format:'Y-m-d',
             formatDate:'Y/m/d',
             minDate:0, // yesterday is minimum date
             weekends:[],
             maxDate:'+1970/06/31', // tommorow date with in 6 month
             step:5,
-            minTime:'08:00',
-            maxTime:'18:00',
+            timepicker:false,
         });
     </script>
 {% endblock %}

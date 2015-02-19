@@ -54,7 +54,10 @@ def participant_count(objects, category):
             return 0
     elif category == 'Test':
         try:
-            return objects.testattendance_set.all().count()
+            count = objects.testattendance_set.all().count()
+            if  not count:
+                return objects.training.participant_count
+            return count
         except Exception, e:
             return 0
 
@@ -80,7 +83,7 @@ def get_status(key, testcode):
     return ''
 
 def get_participant_status(key, testcode):
-    status_list = ['Waiting for Attendance', 'Ready to enter in to test', 'Entered in to test', 'Completed', 'Got certificate']
+    status_list = ['Waiting for Attendance', 'Ready for test', 'Ongoing Test', 'Test Completed', 'Certificate Issued']
     try:
         ta = TestAttendance.objects.get(mdluser_id=key, test_id=testcode)
     except:

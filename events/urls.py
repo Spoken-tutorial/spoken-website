@@ -56,9 +56,11 @@ urlpatterns = patterns('',
     url(r'^training/participant/language-feedback/(\d+)/(\d+)/$', 'events.views.training_participant_language_feedback', name='training_participant_language_feedback'),
     
     url(r'^training/(?P<role>\w+)/request/$', 'events.views.training_request', name='training_request'),
+    url(r'^training/(?P<role>\w+)/clone/$', 'events.views.training_clone', name='training_clone'),
     url(r'^training/(?P<role>\w+)/(?P<rid>\d+)/approvel/$', 'events.views.training_approvel', name='training_approvel'),
     url(r'^training/(?P<role>\w+)/(?P<status>\w+)/$', 'events.views.training_list', name='training_list'),
     url(r'^training/(?P<role>\w+)/(?P<rid>\d+)/edit/$', 'events.views.training_request', name='training_edit'),
+    url(r'^training/(?P<role>\w+)/(?P<rid>\d+)/clone/$', 'events.views.training_clone', name='training_clone'),
     url(r'^training/training-completion/(?P<rid>\d+)/$', 'events.views.training_completion', name="training_completion"),
     url(r'^training/view/training-completion/(?P<rid>\d+)/$', 'events.views.view_training_completion', name="view_training_completion"),
     

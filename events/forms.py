@@ -152,7 +152,7 @@ class TrainingForm(forms.ModelForm):
 
     training_type = forms.ChoiceField(widget=forms.RadioSelect, choices = [(0, 'Training'),], required = True)
     course_number = forms.CharField(required = True)
-    no_of_lab_session = forms.ChoiceField(widget=forms.Select, choices = [('', '---------'), ('1', '1'), ('2-5', '2 - 5'),('6-10', '6 - 10'),('above 10', 'Above 10')], required = True)
+    no_of_lab_session = forms.ChoiceField(widget=forms.Select, choices = [('', '---------'), ('1', 'Semester I'), ('2', 'Semester II'),('3', 'Semester III'),('4', 'Semester IV'),('5', 'Semester V'),('6', 'Semester VI'),('7', 'Semester VII'),('8', 'Semester VIII')], required = True)
 
     department = forms.ModelMultipleChoiceField(label='Department', cache_choices=True, widget = forms.SelectMultiple(attrs = {}), queryset = Department.objects.exclude(name='Uncategorised').order_by('name'), help_text = "", error_messages = {'required':'Department field required.'})
     
@@ -280,7 +280,7 @@ class TestForm(forms.ModelForm):
                 self.fields['invigilator'].queryset = Invigilator.objects.filter(academic  = user.organiser.academic, status=1).exclude(user_id = user.id)
                 wchoices = list(Training.objects.filter(academic = user.organiser.academic, status = 4, training_type__gt=0).values_list('id', 'training_code'))
                 wchoices.insert(0, ('', '-- None --'))
-                trchoices = list(Training.objects.filter(academic = user.organiser.academic, status = 4, training_type = 0).values_list('id', 'training_code'))
+                trchoices = list(Training.objects.filter(academic = user.organiser.academic, status = 4, training_type = 1).values_list('id', 'training_code'))
                 trchoices.insert(0, ('', '-- None --'))
                 self.fields['workshop'].choices = wchoices
                 self.fields['training'].choices = trchoices
@@ -452,3 +452,25 @@ class TrainingLanguageFeedbackForm(forms.ModelForm):
         #self.fields['language_prefered'].queryset = Language.objects.filter(id__in = FossAvailableForWorkshop.objects.filter(foss=training.foss).values_list('language_id'))
         #if args and 'language_prefered' in args[0]:
         #    self.fields['language_prefered'].queryset = Language.objects.filter(id__in = FossAvailableForWorkshop.objects.filter(foss=training.foss).values_list('language_id'))
+
+class TrainingReUseForm(forms.Form):
+    user = None
+    foss = forms.ModelChoiceField(label='Foss', cache_choices=True, widget = forms.Select(attrs = {}), queryset = FossCategory.objects.filter(status = 1, id__in = FossAvailableForWorkshop.objects.filter(status=1).values_list('foss').distinct()).order_by('foss')
+, help_text = "", error_messages = {'required':'Foss field required.'})
+
+    language = forms.ModelChoiceField(label='Language', cache_choices=True, widget = forms.Select(attrs = {}), queryset = Language.objects.filter(id__in = FossAvailableForWorkshop.objects.all().values_list('language').distinct()).order_by('name'), help_text = "", error_messages = {'required':'Language field required.'})
+
+    tdate = forms.DateTimeField(required = True, error_messages = {'required':'Timing field is required.'})
+
+    def clean_tdate(self):
+        super(TrainingReUseForm, self).clean()
+        organiser = self.user.organiser
+        tdate = self.cleaned_data['tdate']
+        training_count = Training.objects.filter(tdate = tdate, organiser = organiser).count()
+        if training_count >= 3:
+            raise ValidationError("Organiser cannot schedule more than 3 software training workshops per day.  Kindly choose other dates for other training workshops")
+        return self.cleaned_data['tdate']
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super(TrainingReUseForm, self).__init__(*args, **kwargs)
