@@ -22,13 +22,13 @@ from django.shortcuts import render, render_to_response
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect
 from creation.views import is_administrator
-
+from django.db.models import Q
 from creation.models import *
 @login_required
 def list_missing_script(request):
     if not is_administrator(request.user):
         raise PermissionDenied()
-    trs = TutorialResource.objects.filter(status=1)
+    trs = TutorialResource.objects.filter(Q(status=1) | Q(status=2))
     for tr_rec in trs:
         storage_path = tr_rec.script
         script_path = settings.SCRIPT_URL + storage_path

@@ -40,7 +40,7 @@
 {% block content_head %}
     <div id="content" class="col-lg-{{ page.cols }} col-lg-offset-{{ col_offset }} col-md-12 col-sm-12 col-lg-shadow">
 {% endblock %}
-
+{% block search %}{% endblock %}
 {% block content %}
     {% if page.formatting %}
 	    {{ page.body|format_raw_data|safe }}

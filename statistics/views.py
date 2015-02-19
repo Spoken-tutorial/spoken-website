@@ -66,11 +66,11 @@ def training(request, slug = 'training'):
     collectionSet = model.objects.filter(status = 4, participant_count__gt=0).order_by('-tdate')
     header = {
         1: SortableHeader('#', False),
-        2: SortableHeader('academic__state', True, 'State'),
-        3: SortableHeader('academic__city', True, 'City'),
-        4: SortableHeader('academic', True, 'Institution'),
-        5: SortableHeader('foss', True, 'FOSS'),
-        6: SortableHeader('organiser__user', True, 'Organiser'),
+        2: SortableHeader('academic__state__name', True, 'State'),
+        3: SortableHeader('academic__city__name', True, 'City'),
+        4: SortableHeader('academic__institution_name', True, 'Institution'),
+        5: SortableHeader('foss__foss', True, 'FOSS'),
+        6: SortableHeader('organiser__user__first_name', True, 'Organiser'),
         7: SortableHeader('tdate', True, 'Date'),
         8: SortableHeader('participant_count', 'True', 'Participants'),
         9: SortableHeader('Action', False)
