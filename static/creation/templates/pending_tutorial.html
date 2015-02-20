@@ -3,16 +3,19 @@
 {% load static %}
 {% load cmsdata %}
 {% load creationdata %}
-{% block title %}Tutorials under Need Improvement state{% endblock %}
-{% block heading %}<i class="fa fa-list-ul"></i> Tutorials under Need Improvement state{% endblock %}
+{% block title %}Tutorials Contributed{% endblock %}
+{% block uncompresscssblock %}
+    <link rel="stylesheet" href="{% static 'spoken/css/flip-scroll.min.css' %}" type="text/css" media="screen" charset="utf-8" />
+{% endblock %}
+{% block heading %}<i class="fa fa-list-ul"></i> Tutorials Contributed{% endblock %}
 {% block content %}
     <ul class="breadcrumb">
         <li><a href="/creation/upload/">Tutorial Upload Index</a></li>
-        <li class="active">Tutorials under Need Improvement state</li>
+        <li><a href="/creation/upload/needimprovement/">Tutorials under Need Improvement state</a></li>
         <li><a href="/creation/upload/contributed/">Tutorials Contributed</a></li>
-        <li><a href="/creation/upload/pending-tutorials/">All Pending Tutorials</a></li>
+        <li class="active">All Pending Tutorials</li>
     </ul>
-    <div class="table-responsive">
+    <div id="flip-scroll" class="table-responsive">
         <table class="paleblue table table-condensed table-bordered table-hover">
         {% if not collection|length %}
             <tr>
@@ -27,7 +30,7 @@
                 <tr class="{% cycle 'odd' 'even' %}">
                     <td>{{ forloop.counter }}</td>
                     <td>{{ tr_rec.tutorial_detail.foss.foss }}</td>
-                    <td><a href="/creation/upload/tutorial/{{ tr_rec.id }}/">{{ tr_rec.tutorial_detail.tutorial }}</td>
+                    <td><a href="/creation/tutorial/view/{{ tr_rec.tutorial_detail.foss.foss|get_url_name }}/{{ tr_rec.tutorial_detail.tutorial|get_url_name }}/{{ tr_rec.language.name }}/" target="_blank">{{ tr_rec.tutorial_detail.tutorial }}</a></td>
                     <td>{{ tr_rec.language.name }}</td>
                     <td class="col-center" title="{{ tr_rec.outline_status | get_review_status_list }}">
                         <span class="{{ tr_rec.outline_status | get_review_status_symbol }}"></span>

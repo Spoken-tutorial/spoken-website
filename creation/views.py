@@ -1107,6 +1107,52 @@ def tutorials_contributed(request):
         raise PermissionDenied()
 
 @login_required
+def tutorials_pending(request):
+    tmp_ids = []
+    if is_contributor(request.user) or is_domainreviewer(request.user) or \
+        is_qualityreviewer(request.user) or is_administrator(is_domainreviewer(request.user)):
+        try:
+            tmp_recs = TutorialResource.objects.filter(status=0)
+            raw_get_data = request.GET.get('o', None)
+            header = {
+                1: SortableHeader('S.No', False),
+                2: SortableHeader('tutorial_detail__foss__foss', True, 'Foss'),
+                3: SortableHeader('tutorial_detail__tutorial', True, 'Tutorial Name'),
+                4: SortableHeader('language__name', True, 'Language'),
+                5: SortableHeader('Outline', False, '', 'col-center'),
+                6: SortableHeader('Script', False, '', 'col-center'),
+                7: SortableHeader('Slide', False, '', 'col-center'),
+                8: SortableHeader('Video', False, '', 'col-center'),
+                9: SortableHeader('Codefiles', False, '', 'col-center'),
+                10: SortableHeader('Assignment', False, '', 'col-center'),
+                11: SortableHeader('Prerequisite', False, '', 'col-center'),
+                12: SortableHeader('Keywords', False, '', 'col-center'),
+                13: SortableHeader('Status', False)
+            }
+            tmp_recs = get_sorted_list(request, tmp_recs, header, raw_get_data)
+            ordering = get_field_index(raw_get_data)
+            counter = 1
+            for tmp_rec in tmp_recs:
+                if tmp_rec.id == 3311:
+                    print counter, tmp_rec.tutorial_detail.tutorial
+                counter += 1
+            page = request.GET.get('page')
+            tmp_recs = get_page(tmp_recs, page, 50)
+        except Exception, e:
+            print e
+            pass
+
+        context = {
+            'collection': tmp_recs,
+            'header': header,
+            'ordering': ordering,
+            'media_url': settings.MEDIA_URL
+        }
+        return render(request, 'creation/templates/pending_tutorial.html', context)
+    else:
+        raise PermissionDenied()
+
+@login_required
 def admin_review_index(request):
     if not is_videoreviewer(request.user):
         raise PermissionDenied()
