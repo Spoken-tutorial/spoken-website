@@ -1120,12 +1120,16 @@ def training_clone(request, role, rid = None):
                 if participants:
                     training = master_training
                     training.id = None
+                    training.status = 1
+                    training.appoved_by_id = None
                     training.foss = form.cleaned_data['foss']
                     training.language = form.cleaned_data['language']
                     training.tdate = form.cleaned_data['tdate']
                     training.extra_fields.id = None
                     training.extra_fields.save()
                     training.extra_fields_id = training.extra_fields.id
+                    training.save()
+                    training.training_code = "WC-" + str(training.id)
                     training.save()
                     copy_participant(training, participants)
                     messages.success(request, "Training has been created! ")

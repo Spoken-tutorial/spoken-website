@@ -163,7 +163,6 @@
                                 {% endif %}
                             {% endif %}
                             {% if role == 'organiser' %}
-                                    <a href="{% url 'events:training_clone' role record.id %}" title="For the existing participant">Add FOSS</a> | 
                                 {% if status == 'reschedule' %}
                                     <a href="{% url 'events:training_edit' role record.id %}">Edit</a>
                                 {% endif %}
