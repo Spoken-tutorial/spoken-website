@@ -207,7 +207,7 @@ def get_page(resource, page):
         resource = paginator.page(paginator.num_pages)
     return resource
 
-def search_participant( form):
+def search_participant(form):
     if form.is_valid():
         onlinetest_user = {}
         if form.cleaned_data['email']:
@@ -227,9 +227,14 @@ def add_participant(request, cid, category ):
                 print wa.id, " => Exits"
                 messages.success(request, "User has already in the attendance list")
             except:
+                mdluser = MdlUser.objects.get(pk=userid)
                 wa = TrainingAttendance()
                 wa.training_id = cid
-                wa.mdluser_id = userid
+                wa.mdluser_id = mdluser.id
+                wa.firstname = mdluser.firstname
+                wa.lastname = mdluser.lastname
+                wa.email = mdluser.email
+                wa.gender = mdluser.gender
                 wa.status = 0
                 wa.save()
                 messages.success(request, "User has added in the attendance list")
