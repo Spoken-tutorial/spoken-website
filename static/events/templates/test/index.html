@@ -127,6 +127,10 @@
                             {% if status == 'ongoing' %}
                                 <a href="{% url 'events:test_participant' record.id %}">View Participant</a>
                             {% endif %}
+                            {% if status == 'rejected' %}
+                                <a href="{% url 'events:test_approvel' role record.id %}?status=accept">Accept</a>
+                            {% endif %}
+
                         {% endif %}
                         
                         {% if role == 'organiser' %}
