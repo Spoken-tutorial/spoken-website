@@ -1233,23 +1233,20 @@ def training_approvel(request, role, rid):
     try:
         w = Training.objects.get(pk=rid)
         if request.GET['status'] == 'accept':
-            status = 2
+            w.status = 2
             w.appoved_by_id = user.id
         if request.GET['status'] == 'reject':
-            status = 5
+            w.status = 5
             w.appoved_by_id = user.id
         if request.GET['status'] == 'completed':
-            update_participants_count(w)
-            status = 4
+            if w.tdate <= datetime.date.today():
+                update_participants_count(w)
+                w.status = 4
+            else:
+                raise PermissionDenied()
     except Exception, e:
         print e
         raise PermissionDenied()
-    #todo: check rp state same or not
-    #if status != 2:
-    #    if not (user.is_authenticated() and ( is_event_manager(user) or is_resource_person(user))):
-    #        raise PermissionDenied('You are not allowed to view this page')
-    
-    w.status = status
     #todo: add training code
     if w.status == 2:
         w.training_code = "WC-"+str(w.id)
@@ -1271,8 +1268,8 @@ def training_approvel(request, role, rid):
     if request.GET['status'] == 'reject':
         message = "Training Manager has rejected your "+w.foss.foss+" training request dated "+w.tdate.strftime("%Y-%m-%d")
     #update logs
-    update_events_log(user_id = user.id, role = 2, category = 0, category_id = w.id, academic = w.academic_id, status = status)
-    update_events_notification(user_id = user.id, role = 2, category = 0, category_id = w.id, academic = w.academic_id, status = status, message = message)
+    update_events_log(user_id = user.id, role = 2, category = 0, category_id = w.id, academic = w.academic_id, status = w.status)
+    update_events_notification(user_id = user.id, role = 2, category = 0, category_id = w.id, academic = w.academic_id, status = w.status, message = message)
     if w.status == 4:
         messages.success(request, "Training has been completed. For downloading the learner's certificate click on View Participants ")
         return HttpResponseRedirect('/software-training/training/'+role+'/completed/')
@@ -1282,6 +1279,7 @@ def training_approvel(request, role, rid):
     elif w.status == 2:
         messages.success(request, "Training has been approved ")
         return HttpResponseRedirect('/software-training/training/'+role+'/approved/')
+    return HttpResponseRedirect('/software-training/training/'+role+'/approved/')
 
 @login_required
 def training_permission(request):

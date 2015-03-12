@@ -27,7 +27,7 @@ class TestCategoryAdmin(admin.ModelAdmin):
     fields = ['name']
 
 class StateAdmin(admin.ModelAdmin):
-    fields = ['name']
+    fields = ['name', 'code']
     def save_model(self, request, obj, form, change):
         obj.slug = slugify(request.POST['name'])
         obj.save()

@@ -61,7 +61,7 @@ urlpatterns = patterns('',
     url(r'^training/(?P<role>\w+)/(?P<status>\w+)/$', 'events.views.training_list', name='training_list'),
     url(r'^training/(?P<role>\w+)/(?P<rid>\d+)/edit/$', 'events.views.training_request', name='training_edit'),
     url(r'^training/(?P<role>\w+)/(?P<rid>\d+)/clone/$', 'events.views.training_clone', name='training_clone'),
-    url(r'^training/training-completion/(?P<rid>\d+)/$', 'events.views.training_completion', name="training_completion"),
+    #url(r'^training/training-completion/(?P<rid>\d+)/$', 'events.views.training_completion', name="training_completion"),
     url(r'^training/view/training-completion/(?P<rid>\d+)/$', 'events.views.view_training_completion', name="view_training_completion"),
     
     #url(r'^test/subscribe/(\d+)/(\d+)/$', 'events.views.test_student_subscribe', name='test_student_subscribe'),
