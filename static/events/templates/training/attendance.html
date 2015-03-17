@@ -103,13 +103,13 @@
                         </table>
                         <input name="submit-mark-attendance" class="btn btn-primary" type="submit" value="Submit" />
                     </form>
-                    {% if training.status == 3 %}
+                    <!-- {% if training.status == 3 %}
                         <h4 class='step'><span class="label label-default">Step 2</span></h4>
                         <div class="bs-callout bs-callout-info">
                             <p>Please click <b>Mark as Complete</b> to end the training.</p>
                             <a class='btn btn-primary' title = "To complete the workshop click here" href="{% url 'events:training_approvel' 'organiser' training.id %}?status=completed">Mark as Complete</a>
                         </div>
-                    {% endif %}
+                    {% endif %} -->
                 {% endif %}
             {% else %}
                 <p class='no-record'>No record found!</p>
