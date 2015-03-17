@@ -81,7 +81,6 @@ Admin Spoken Tutorials
         try:
             result = email.send(fail_silently=False)
         except:
-            print "email disable"
             pass
     return mdluser
 
@@ -118,12 +117,12 @@ def store_error(error_line_no, count, invalid_emails=None, email=None):
         if not error_line_no:
             error_line_no = error_line_no + str(count)
         else:
-            error_line_no = error_line_no + ', ' + str(count)
+            error_line_no = error_line_no + ',<br>' + str(count)
     else:
         if not invalid_emails:
             invalid_emails = invalid_emails + email
         else:
-            invalid_emails = invalid_emails + ', ' + email
+            invalid_emails = invalid_emails + ',<br>' + email
     csv_file_error = 1
     return csv_file_error, error_line_no, invalid_emails
 
@@ -137,7 +136,7 @@ def can_allow_participant_to_attend(more_then_two_per_day_list, tdate, email):
         if not more_then_two_per_day_list:
             more_then_two_per_day_list = more_then_two_per_day_list + email
         else:
-            more_then_two_per_day_list = more_then_two_per_day_list + ',' + email
+            more_then_two_per_day_list = more_then_two_per_day_list + ',<br>' + email
         return more_then_two_per_day_list
 
 def is_new_participant(reattempt_list, foss, email):
@@ -148,7 +147,7 @@ def is_new_participant(reattempt_list, foss, email):
     if not reattempt_list:
         reattempt_list = reattempt_list + email
     else:
-        reattempt_list = reattempt_list + ',' + email
+        reattempt_list = reattempt_list + ',<br>' + email
     return reattempt_list
 
 def check_csvfile(user, file_path, w=None, flag=0, **kwargs):
@@ -184,14 +183,15 @@ def check_csvfile(user, file_path, w=None, flag=0, **kwargs):
                     lastname = row[1].strip().title()
                     gender = row[3].strip().title()
                     email = None
-                    print "firstname => ", firstname
                     if not firstname or not gender or row_length < 4:
                         csv_file_error, error_line_no, invalid_emails = store_error(error_line_no, count, invalid_emails)
                     if row_length > 3:
                         email = row[2].strip().lower()
-                        if not validate_email(email, verify=True):
-                            csv_file_error, error_line_no, invalid_emails = store_error(error_line_no, count, invalid_emails, email)
-                            continue
+                        if not flag:
+                            #print "firstname => ", firstname
+                            if not validate_email(email):
+                                csv_file_error, error_line_no, invalid_emails = store_error(error_line_no, count, invalid_emails, email)
+                                continue
                         # restrict the participant
                         more_then_two_per_day_list = can_allow_participant_to_attend(more_then_two_per_day_list, tdate, email)
                         reattempt_list = is_new_participant(reattempt_list, foss, email)
