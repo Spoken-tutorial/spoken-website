@@ -195,7 +195,7 @@ def check_csvfile(user, file_path, w=None, flag=0, **kwargs):
                         # restrict the participant
                         more_then_two_per_day_list = can_allow_participant_to_attend(more_then_two_per_day_list, tdate, email)
                         reattempt_list = is_new_participant(reattempt_list, foss, email)
-                    if flag and flag <= 2 and not csv_file_error and not reattempt_list and not more_then_two_per_day_list:
+                    if flag and flag <= 2 and not csv_file_error:
                         if not w:
                             return 1, error_line_no
                         get_or_create_participant(w, firstname, lastname, gender, email, 2)
