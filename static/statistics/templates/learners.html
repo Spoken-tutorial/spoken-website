@@ -47,6 +47,13 @@
                         </div>
                     </div>
                     <div class="form-group">
+                        <label class="col-sm-3 control-label" for= "id_foss">Software</label>
+                        <div class="col-sm-9">
+                            {% render_field form.foss class+="form-control foss" tabindex="1" %}
+                            {{ form.foss.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
                         <label class="col-sm-3 control-label" for= "id_roll_no"></label>
                         <div class="col-sm-9">
                             <input class="btn btn-primary" type="submit" value="Submit" />
