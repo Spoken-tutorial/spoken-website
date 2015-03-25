@@ -123,12 +123,37 @@ def home(request):
             archive.write(settings.BASE_DIR + '/static/spoken/images/Basic.png', 'spoken/includes/images/Basic.png')
             archive.write(settings.BASE_DIR + '/static/spoken/images/Intermediate.png', 'spoken/includes/images/Intermediate.png')
             archive.write(settings.BASE_DIR + '/static/spoken/images/Advanced.png', 'spoken/includes/images/Advanced.png')
+            archive.write(settings.BASE_DIR + '/media/side-by-side-method.ogv', 'spoken/side-by-side-method.ogv')
             zipdir(settings.BASE_DIR + '/static/spoken/fonts', 'spoken/includes/fonts/', archive)
             list_page = str(render(request, "cdcontent/templates/tutorial_search.html", {'collection': all_rows, 'foss_details': all_foss_details}))
             list_page = list_page.replace('Content-Type: text/html; charset=utf-8', '')
             list_page = list_page.strip("\n")
             archive.writestr('spoken/index.html', list_page)
-            archive.writestr('spoken/README.txt', 'Open the "index.html" file in Chrome/Firefox/Safari web browser to access the videos.\n\nNote:\n------\nIf you are using Firefox, then type "about:config" on address bar. Once the config page is loaded, then click on "I\'ll be more careful, I promise!" button. Then search for the option "security.fileuri.strict_origin_policy" and change the value to "false", this step is mandatory to load the web fonts offline.')
+            archive.writestr('spoken/README.txt', """
+------
+Step 1
+------
+Locate the file "side-by-side-method.ogv"
+Right-click on it and choose "Open with Firefox/Chrome/Chromium".
+The video will play in the web browser.
+Once completed, close the web browser.
+
+------
+Step 2
+------
+Open the "index.html" file in Firefox/Chrome/Chromium web browser, to view the videos.
+After this, refer to the "Instruction Sheet".
+
+------
+Step 3
+------
+Note about Firefox:
+
+If you are using Firefox, then type "about:config" on address bar.
+Once the config page is loaded, then click on "I'll be more careful, I promise!" button.
+Then search for the option "security.fileuri.strict_origin_policy".
+Change the value to "false", this step is mandatory to load the web fonts offline."""
+                )
             archive.close()
             wrapper = FileWrapper(temp)
             response = HttpResponse(wrapper, content_type='application/zip')
