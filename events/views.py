@@ -1405,7 +1405,6 @@ def training_attendance(request, wid):
                 messages.success(request, """
                 <ul>
                     <li>Thank you for uploading the Attendance. Now make sure that you cross check and verify the details before submiting.</li>
-                    <li>To Complete the training Click Training Completion form and fill required details.</li>
                 </ul>
                     """
                 )
@@ -1467,7 +1466,6 @@ def training_attendance(request, wid):
                     For more details on how to create the .csv file. 
                     Please <a href="http://process.spoken-tutorial.org/images/9/96/Upload_Attendance.pdf" target="_blank">Click here</a>
                 </li>
-                <li>Make sure you complete <b>Training Completion Form</b> 30 days from Training date in order to receive the Learner's Certificate.</li>
             </ul>
         """)
     

@@ -249,6 +249,7 @@ def ajax_show_added_foss(request):
                 continue
         fsize_total += fsize
         data += '<tr><td>' + foss.foss + '</td><td>' + langs + '</td><td>' + humansize(fsize) + '</td></tr>'
-    if data:
-        data += '<tr><td colspan="2" class="col-right">~ Total Size</td><td>' + humansize(fsize_total) + '</td></tr>'
-    return HttpResponse(json.dumps(data), mimetype='application/json')
+    #if data:
+    #    data += '<tr><td colspan="2" class="col-right">~ Total Size</td><td>' + humansize(fsize_total) + '</td></tr>'
+    output = {0:data, 1:humansize(fsize_total)}
+    return HttpResponse(json.dumps(output), mimetype='application/json')

@@ -18,6 +18,9 @@
     <form role="form" method="post" enctype="multipart/form-data" action="" class="form-horizontal">
         <div class="row well bs-component">
             <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                <div class="alert alert-danger" role="alert">
+                  <strong>Note:</strong> The maximum file size to download is 1 GB.
+                </div>
                 <fieldset>
                     {% csrf_token %}
                     <div class="form-group">
@@ -155,9 +158,9 @@
                                 },
                                 success: function(data) {
                                     //data = JSON.parse(data);
-                                    header = '<caption class="col-left"><b>Selected FOSS List:</b></caption><tr><th>FOSS</th><th>Languages</th><th>Size</th>';
+                                    header = '<caption class="col-left"><b>Selected FOSS List:<span class="pull-right"> ~ Total Size : '+data[1]+'</span></b></caption><tr><th>FOSS</th><th>Languages</th><th>Size</th>';
                                     if(data) {
-                                        $('.added-foss').html(header + data);
+                                        $('.added-foss').html(header + data[0]);
                                         console.log(data);
                                     }
                                     $('.ajax-refresh-add-foss').hide();

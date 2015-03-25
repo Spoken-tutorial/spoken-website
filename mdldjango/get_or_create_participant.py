@@ -189,13 +189,13 @@ def check_csvfile(user, file_path, w=None, flag=0, **kwargs):
                         email = row[2].strip().lower()
                         if not flag:
                             #print "firstname => ", firstname
-                            if not validate_email(email):
+                            if not validate_email(email, verify=True):
                                 csv_file_error, error_line_no, invalid_emails = store_error(error_line_no, count, invalid_emails, email)
                                 continue
                         # restrict the participant
                         more_then_two_per_day_list = can_allow_participant_to_attend(more_then_two_per_day_list, tdate, email)
                         reattempt_list = is_new_participant(reattempt_list, foss, email)
-                    if flag and flag <= 2 and not csv_file_error and not reattempt_list and not more_then_two_per_day_list:
+                    if flag and flag <= 2 and not csv_file_error:
                         if not w:
                             return 1, error_line_no
                         get_or_create_participant(w, firstname, lastname, gender, email, 2)
