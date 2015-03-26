@@ -189,7 +189,7 @@ def check_csvfile(user, file_path, w=None, flag=0, **kwargs):
                         email = row[2].strip().lower()
                         if not flag:
                             #print "firstname => ", firstname
-                            if not validate_email(email):
+                            if not validate_email(email, verify=True):
                                 csv_file_error, error_line_no, invalid_emails = store_error(error_line_no, count, invalid_emails, email)
                                 continue
                         # restrict the participant
