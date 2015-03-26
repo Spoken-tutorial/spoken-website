@@ -324,7 +324,7 @@ def fix_date_for_first_training(request):
 
 # only for workshop, pilot, live workshop
 def close_predated_ongoing_workshop(request):
-    predated_ongoing_workshop = Training.objects.filter(Q(status = 2) | Q(status = 3), training_type__gte = 0, tdate__lt = datetime.date.today() - datetime.timedelta(days = 2))
+    predated_ongoing_workshop = Training.objects.filter(status = 3, training_type__gte = 0, tdate__lt = datetime.date.today() - datetime.timedelta(days = 2))
     if predated_ongoing_workshop:
         for w in predated_ongoing_workshop:
             try:
