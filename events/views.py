@@ -59,6 +59,11 @@ from  filters import *
 from cms.sortable import *
 from events_email import send_email
 
+def can_clone_training(training):
+    if training.tdate > datetime.datetime.strptime('01-02-2015', "%d-%m-%Y").date():
+        return True
+    return False
+
 def _get_training_participant(training):
     #if training.organiser.academic.institution_type.name == "School":
     #    if training.status == 4:
@@ -928,8 +933,11 @@ def training_request(request, role, rid = None):
             form = TrainingForm(request.POST, request.FILES, instance = Training.objects.get(pk = rid), user = request.user)
         else:
             form = TrainingForm(request.POST, request.FILES, user = request.user)
-            
         if form.is_valid():
+            #existing_training = Training.objects.filter(organiser = request.user.organiser, academic = request.user.organiser.academic, foss = request.POST['foss'], tdate = request.POST['tdate'])
+            #if existing_training:
+            #    messages.error(request, "You have already scheduled <b>"+ str(request.POST['tdate']) + "</b> training on <b>"+ str(master_training.tdate) + "</b>. Please select some other date.")
+            #    break
             ####
             csv_file_error = 0
             error_line_no = ''
@@ -1104,16 +1112,28 @@ def training_clone(request, role, rid = None):
 
     if not rid and request.method=="POST" and 'clone-training' in request.POST:
         return HttpResponseRedirect('/software-training/training/organiser/'+str(request.POST['clone-training'])+'/clone/')
+    master_training = None
+    try:
+        master_training = Training.objects.get(pk=rid)
+        if not can_clone_training(master_training):
+            raise PermissionDenied()
+    except:
+        raise PermissionDenied()
 
     form = TrainingReUseForm()
     if rid and request.method=="POST":
         form = TrainingReUseForm(request.POST, user = request.user)
         if form.is_valid():
-            master_training = Training.objects.get(pk=rid)
             csv_file_error, error_line_no, reattempt_list,  more_then_two_per_day_list = clone_participant(master_training, request.POST)
             if csv_file_error:
                 messages.error(request, error_line_no)
-            if not csv_file_error or csv_file_error and request.POST.get('remove-error'):
+            existing_training = Training.objects.filter(organiser = request.user.organiser, academic = request.user.organiser.academic, foss = request.POST['foss'], tdate = request.POST['tdate'])
+            if existing_training:
+                csv_file_error = 1
+                messages.error(request, "You have already scheduled <b>"+ str(request.POST['tdate']) + "</b> training on <b>"+ str(master_training.tdate) + "</b>. Please select some other date.")
+
+
+            if not csv_file_error:# and request.POST.get('remove-error')):
                 existing_emails = None
                 if reattempt_list and more_then_two_per_day_list:
                     existing_emails = set(reattempt_list.split(',')).union(set(more_then_two_per_day_list.split(',')))

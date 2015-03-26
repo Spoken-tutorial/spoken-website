@@ -179,17 +179,20 @@ def check_csvfile(user, file_path, w=None, flag=0, **kwargs):
                     row_length = len(row)
                     if row_length < 1:
                         continue
+                    if row_length < 4:
+                        csv_file_error, error_line_no, invalid_emails = store_error(error_line_no, count, invalid_emails)
+                        continue
                     firstname = row[0].strip().title()
                     lastname = row[1].strip().title()
                     gender = row[3].strip().title()
-                    email = None
-                    if not firstname or not gender or row_length < 4:
+                    email = row[2].strip().lower()
+                    if not firstname or not gender or row_length < 4 or ((user.organiser.academic.institution_type.name != 'School' or (w and w.organiser.academic.institution_type.name != 'School')) and not email):
                         csv_file_error, error_line_no, invalid_emails = store_error(error_line_no, count, invalid_emails)
-                    if row_length > 3:
-                        email = row[2].strip().lower()
+                        continue
+                    if row_length > 3 and email:
                         if not flag:
                             #print "firstname => ", firstname
-                            if not validate_email(email, verify=True):
+                            if not validate_email(email):
                                 csv_file_error, error_line_no, invalid_emails = store_error(error_line_no, count, invalid_emails, email)
                                 continue
                         # restrict the participant

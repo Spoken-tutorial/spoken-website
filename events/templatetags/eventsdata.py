@@ -1,7 +1,7 @@
 from django import template
 from django.contrib.auth.models import User
 from events.models import *
-from events.views import is_organiser, is_invigilator, is_resource_person, is_event_manager
+from events.views import is_organiser, is_invigilator, is_resource_person, is_event_manager, can_clone_training
 import datetime
 from django.conf import settings
 import datetime
@@ -188,3 +188,4 @@ register.filter('feedback_status_somewhat', feedback_status_somewhat)
 register.filter('feedback_status_average', feedback_status_average)
 register.filter('feedback_status_neutral', feedback_status_neutral)
 register.filter('feedback_status_likely', feedback_status_likely)
+register.filter('can_clone_training', can_clone_training)
