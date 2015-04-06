@@ -3,6 +3,7 @@
 {% load static %}
 {% load cmsdata %}
 {% load creationdata %}
+{% load statisticsdata %}
 {% block title %} Academic Center Information {% endblock %}
 {% block cssblock %}
     <link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />
@@ -53,19 +54,19 @@
 			</table>
 		    <div role="tabpanel">
 
-              <!-- Nav tabs -->
-              <ul class="nav nav-tabs nav-pills nav-justified" role="tablist">
-                <li role="presentation" class="active "><a href="#training" aria-controls="training" role="tab" data-toggle="tab">Training<span class="badge">{{ collection.training_set.count }}</span></a></li>
-                <li role="presentation" class=""><a href="#test" aria-controls="test" role="tab" data-toggle="tab">Test<span class="badge">{{ collection.test_set.count }}</span></a></li>
+            <!-- Nav tabs -->
+            <ul class="nav nav-tabs nav-pills nav-justified" role="tablist">
+                <li role="presentation" class="active "><a href="#training" aria-controls="training" role="tab" data-toggle="tab">Training<span class="badge">{{ collection.training_set|get_valid_statistics:1 }}</span></a></li>
+                <li role="presentation" class=""><a href="#test" aria-controls="test" role="tab" data-toggle="tab">Test<span class="badge">{{ collection.test_set|get_valid_statistics:1 }}</span></a></li>
             </ul>
 
               <!-- Tab panes -->
               <div class="tab-content">
                 <div role="tabpanel" class="tab-pane active" id="training">
-                    {% if collection.training_set.all %}
+                    {% if collection.training_set|get_valid_statistics %}
 		                <table class="paleblue table table-striped table-hover table-bordered">
 			                {% get_sortable_header header ordering request.GET %}
-			                {% for record in collection.training_set.all %}
+			                {% for record in collection.training_set|get_valid_statistics %}
 				                <tr>
                                     <td>{{ forloop.counter }}
 					                <td>{{ record.foss }}</td>
@@ -82,10 +83,10 @@
 		            {% endif %}
                 </div>
                 <div role="tabpanel" class="tab-pane" id="test">
-                    {% if collection.test_set.all %}
+                    {% if collection.test_set|get_valid_statistics %}
 		                <table class="paleblue table table-striped table-hover table-bordered">
 			                {% get_sortable_header header ordering request.GET %}
-			                {% for record in collection.test_set.all %}
+			                {% for record in collection.test_set|get_valid_statistics %}
 				                <tr>
                                     <td>{{ forloop.counter }}
 					                <td>{{ record.foss }}</td>
