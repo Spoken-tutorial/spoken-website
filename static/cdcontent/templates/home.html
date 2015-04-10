@@ -5,15 +5,104 @@
         <title>
             Search Tutorials | spoken-tutorial.org
         </title>
-        <link rel="shortcut icon" href="../../includes/images/favicon.ico">
-        <link rel="stylesheet" href="../../includes/css/bootstrap.min.css" type="text/css" media="screen" charset="utf-8">
-        <link rel="stylesheet" href="../../includes/css/font-awesome.min.css" type="text/css" media="screen" charset="utf-8">
-        <link rel="stylesheet" href="../../includes/css/main.css" type="text/css" media="screen" charset="utf-8">
+        <link rel="shortcut icon" href="../includes/images/favicon.ico">
+        <link rel="stylesheet" href="../includes/css/bootstrap.min.css" type="text/css" media="screen" charset="utf-8">
+        <link rel="stylesheet" href="../includes/css/font-awesome.min.css" type="text/css" media="screen" charset="utf-8">
+        <link rel="stylesheet" href="../includes/css/main.css" type="text/css" media="screen" charset="utf-8">
+        <link href="../includes/css/video-js.min.css" rel="stylesheet" type="text/css">
         <style>
             .tutorial-search-form{
                 margin-top: 20px;
             }
+            .video-js {
+                padding-top: 56.25%
+            }
+            .vjs-fullscreen {
+                padding-top: 0px;
+            }
+            .playlist-container{
+                background: #1a1a1a;
+                margin-bottom: 20px;
+            }
+            .description, .order {
+                font-size: 13px;
+            }
+            .forward {
+                float: right;
+            }
+            .playlist ul {
+                 height: 330px;
+                 overflow-y: scroll;
+                 margin-bottom: 0px;
+            }
+            .playlist, .playlist-container, .video-container{
+                padding-left: 0px;
+                padding-right: 0px;
+            }
+            .playlist ul{
+                list-style:none;
+                padding-left: 0px;
+            }
+            .playlist ul .playlist-item{
+                clear: both;
+                overflow: hidden;
+            }
+            .playlist ul .playlist-item.active{
+                background: #3a3a3a;
+            }
+            .playlist ul .playlist-item a{
+                color: white;
+                display: block;
+                overflow: hidden;
+                padding: 15px 10px;
+            }
+            .playlist ul .playlist-item.active a{
+                color: orange;
+            }
+            .playlist ul .playlist-item:hover{
+                background: gray;
+            }
+            .playlist ul .playlist-item .thumb, .playlist ul .playlist-item .thumb .order{
+                padding-right: 10px;
+            }
+            .playlist-info{
+                color: white;
+                padding: 10px;
+                background: black;
+            }
+            .playlist-controls{
+                background: black;
+                border-top: 1px solid #3a3a3a;
+                padding: 10px 0;
+            }
+            .playlist-controls a{
+                color: white;
+            }
+            .playlist-controls span{
+                margin: 0 10px;
+            }
+            #content-wrapper #content-inner div.container{
+                padding-left: 0px;
+            }
+            p.list-group-item-text {
+                margin-top: 7px;
+            }
+            .list-zipfiles {
+                overflow-x: hidden;
+                max-height: 150px;
+            }
+            .review-data pre {
+                margin-bottom: 0px;
+            }
+            .video-js .vjs-tech{
+                position:absolute;
+                top:0;
+                left:0;
+                width:100%;
+                height:100%;
+            }
         </style>
+        <script src="../includes/js/video.js"></script>
     </head>
     <body>
         <div id="page-wrapper">
@@ -30,7 +119,7 @@
                                     <span class="icon-bar"></span>
                                 </button>
                                 <a href="">
-                                    <img width="45px" src="../../includes/images/logo.png">
+                                    <img width="45px" src="../includes/images/logo.png">
                                     Spoken <span class="title">Tutorial</span>
                                 </a>
                             </div>
@@ -51,7 +140,7 @@
                                             <select class="form-control foss" id="id_foss" name="foss" tabindex="1">
                                                 <option value="0">Select Foss Category</option>
                                                 {% for foss_key,foss_detail in foss_details.items %}
-                                                    <option value="{{ foss_key }}"{% if foss_key == foss %} selected="selected"{% endif %}>{{ foss_details|get_foss_name:foss_key }}</option>
+                                                    <option value="{{ foss_key }}">{{ foss_details|get_foss_name:foss_key }}</option>
                                                 {% endfor %}
                                             </select>
                                         </div>
@@ -67,31 +156,16 @@
                                 </form>
                             </div>
                         </div><!-- .row well tab-content tutorial-search-form -->
-                        <div class="search-result col-lg-offset-1 col-md-offset-1 col-sm-offset-1 col-xs-offset-1 col-lg-10 col-md-10 col-sm-10 col-xs-10">
-                        {% for record in collection %}
-                            <div class="result-record row video-{{ record.tutorial_detail.foss_id }} video-{{ record.tutorial_detail.foss_id }}-{{ record.language_id }} language-{{ record.language_id }}">
-                                <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2 thumb">
-                                    <a target="_blank" href="../../videos/{{ record.tutorial_detail.foss_id }}/{{ record.tutorial_detail_id }}/show-video-{{ record.language.name }}.html" class="thumb"><img width="100%" src="../../includes/images/thumb-even.png"></a>
-                                </div>
-                                <div class="info col-lg-8 col-md-8 col-sm-8 col-xs-8">
-                                    <div class="title"><h4><a target="_blank" href="../../videos/{{ record.tutorial_detail.foss_id }}/{{ record.tutorial_detail_id }}/show-video-{{ record.language.name }}.html">{{ record.tutorial_detail.tutorial }}</a></h4></div>
-                                    <div class="desc">
-                                            <p><b>Foss:</b> <i>{{ record.tutorial_detail.foss }} - {{ record.language }}</i></p>
-                                            <p><b>Outline:</b> {{ record.outline|len_cutter:200 }}</b> </p>
-                                    </div>
-                                </div>
-                                <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
-                                    <div class="Basic pull-right">
-                                        <h5 style="text-align:right;">{{ record.tutorial_detail.level.level }}</h5>
-                                        <img style="display:block;" width="30%" src="../../includes/images/{{ record.tutorial_detail.level.level }}.png" class="pull-right">
-                                    </div>
-                                </div>
-                            </div>
-                        {% endfor %}
+                        <hr />
+                        <div class="video-container col-lg-8 col-md-8 col-sm-8 col-lg-offset-2 col-md-offset-2">
+                            <video id="st_video" class="video-js vjs-default-skin" controls preload="auto" width="auto" height="auto" data-setup="{}">
+                                <source src="../side-by-side-method.ogv" type="video/ogg" />
+                            </video>
                         </div>
-                    </div><!-- .content -->
-                </div><!-- /#content-inner .container -->
-            </div><!-- /#content-wrapper -->
+                    </div>
+                </div>
+            </div>
+            <br>
             <div id="footer-wrapper">
                 <div class="container-inner sans-serif">
                     <div class="container">
@@ -143,8 +217,8 @@
         <!-- Bootstrap core JavaScript
         ================================================== -->
         <!-- Placed at the end of the document so the pages load faster -->
-        <script src="../../includes/js/jquery-1.11.0.min.js"></script>
-        <script src="../../includes/js/bootstrap.min.js"></script>
+        <script src="../includes/js/jquery-1.11.0.min.js"></script>
+        <script src="../includes/js/bootstrap.min.js"></script>
         <script>
             $(document).ready(function(){
                 var fossList = []
@@ -152,8 +226,6 @@
                 {% for foss_key,foss_detail in foss_details.items %}
                     fossList[{{ foss_key }}] = '{{ foss_details|get_lang_details:foss_key|safe }}';
                 {% endfor %}
-                $('.language').html('<option value="0">Select Language</option>' + fossList[{{foss}}]);
-                $('.language').val('{{lang}}');
                 $('.foss').on("change", function(){
                     foss = $('.foss').val();
                     $('.language').html('<option value="0">Select Language</option>' + fossList[foss]);
@@ -163,7 +235,7 @@
                     lang = $('.language').val();
                     lang_name = $('.language option:selected').text();
                     if(foss != 0 && lang != 0) {
-                        parent.frame1.location.href = "../" + foss + '/list-videos-' + lang_name + ".html";
+                        parent.frame1.location.href = "./" + foss + '/list-videos-' + lang_name + ".html";
                     }
                 });
             });

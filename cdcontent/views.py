@@ -41,6 +41,23 @@ def get_sheet_path(foss, lang, sheet):
             return file_path, new_file_path
     return False, False
 
+def get_all_foss_details(selectedfoss):
+    all_foss_details = {}
+    for key, values in selectedfoss.iteritems():
+        foss_rec = FossCategory.objects.get(pk = key)
+        try:
+            tmp = all_foss_details[foss_rec.id]
+        except:
+            all_foss_details[foss_rec.id] = {}
+        all_foss_details[foss_rec.id]['foss'] = foss_rec.foss
+        try:
+            tmp = all_foss_details[foss_rec.id]['langs']
+        except:
+            all_foss_details[foss_rec.id]['langs'] = {}
+        for value in values[0]:
+            language = Language.objects.get(pk = value)
+            all_foss_details[foss_rec.id]['langs'][language.id] = language.name
+    return all_foss_details
 
 def home(request):
     if request.method == 'POST':
@@ -49,11 +66,14 @@ def home(request):
             temp = tempfile.TemporaryFile()
             archive = zipfile.ZipFile(temp, 'w', zipfile.ZIP_DEFLATED, allowZip64=True)
             selectedfoss = json.loads(request.POST.get('selected_foss', {}))
-            all_rows = []
-            all_foss_details = {}
+            all_foss_details = get_all_foss_details(selectedfoss)
+            eng_rec = Language.objects.get(name="English")
             for key, values in selectedfoss.iteritems():
                 foss_rec = FossCategory.objects.get(pk = key)
                 level = int(values[1])
+                eng_flag = True
+                if str(eng_rec.id) in values[0]:
+                    eng_flag = False
                 for value in values[0]:
                     language = Language.objects.get(pk = value)
                     src_path, dst_path = get_sheet_path(foss_rec, language, 'instruction')
@@ -68,7 +88,10 @@ def home(request):
                         tr_recs = TutorialResource.objects.filter(Q(status = 1)|Q(status = 2), tutorial_detail__foss_id = key, language_id = value).order_by('tutorial_detail__level', 'tutorial_detail__order', 'language__name')
                     rec = None
                     for rec in tr_recs:
-                        all_rows.append(rec)
+                        if eng_flag:
+                            filepath = 'videos/' + str(key) + '/' + str(rec.tutorial_detail_id) + '/' + rec.tutorial_detail.tutorial.replace(' ', '-') + "-English.srt"
+                            if os.path.isfile(settings.MEDIA_ROOT + filepath):
+                                archive.write(settings.MEDIA_ROOT + filepath, 'spoken/' + filepath)
                         filepath = 'videos/' + str(key) + '/' + str(rec.tutorial_detail_id) + '/' + rec.video
                         if os.path.isfile(settings.MEDIA_ROOT + filepath):
                             archive.write(settings.MEDIA_ROOT + filepath, 'spoken/' + filepath)
@@ -99,17 +122,14 @@ def home(request):
                         watch_page = watch_page.replace('Content-Type: text/html; charset=utf-8', '')
                         watch_page = watch_page.strip("\n")
                         archive.writestr('spoken/videos/' + tutorial_path + 'show-video-' + rec.language.name + '.html', watch_page)
-                    if rec != None:
-                        try:
-                            tmp = all_foss_details[foss_rec.id]
-                        except:
-                            all_foss_details[foss_rec.id] = {}
-                        all_foss_details[foss_rec.id]['foss'] = foss_rec.foss
-                        try:
-                            tmp = all_foss_details[foss_rec.id]['langs']
-                        except:
-                            all_foss_details[foss_rec.id]['langs'] = {}
-                        all_foss_details[foss_rec.id]['langs'][rec.language_id] = rec.language.name
+                    list_page = str(render(request, "cdcontent/templates/tutorial_search.html", {'collection': tr_recs, 'foss_details': all_foss_details, 'foss': foss_rec.id, 'lang': language.id}))
+                    list_page = list_page.replace('Content-Type: text/html; charset=utf-8', '')
+                    list_page = list_page.strip("\n")
+                    archive.writestr('spoken/videos/' + str(foss_rec.id) + '/list-videos-' + language.name + '.html', list_page)
+            home_page = str(render(request, "cdcontent/templates/home.html", {'foss_details': all_foss_details, 'foss': foss_rec.id, 'lang': language.id}))
+            home_page = home_page.replace('Content-Type: text/html; charset=utf-8', '')
+            home_page = home_page.strip("\n")
+            archive.writestr('spoken/videos/home.html', home_page)
             archive.write(settings.BASE_DIR + '/static/spoken/css/bootstrap.min.css', 'spoken/includes/css/bootstrap.min.css')
             archive.write(settings.BASE_DIR + '/static/spoken/css/font-awesome.min.css', 'spoken/includes/css/font-awesome.min.css')
             archive.write(settings.BASE_DIR + '/static/spoken/css/main.css', 'spoken/includes/css/main.css')
@@ -125,35 +145,8 @@ def home(request):
             archive.write(settings.BASE_DIR + '/static/spoken/images/Advanced.png', 'spoken/includes/images/Advanced.png')
             archive.write(settings.BASE_DIR + '/media/side-by-side-method.ogv', 'spoken/side-by-side-method.ogv')
             zipdir(settings.BASE_DIR + '/static/spoken/fonts', 'spoken/includes/fonts/', archive)
-            list_page = str(render(request, "cdcontent/templates/tutorial_search.html", {'collection': all_rows, 'foss_details': all_foss_details}))
-            list_page = list_page.replace('Content-Type: text/html; charset=utf-8', '')
-            list_page = list_page.strip("\n")
-            archive.writestr('spoken/index.html', list_page)
-            archive.writestr('spoken/README.txt', """
-------
-Step 1
-------
-Locate the file "side-by-side-method.ogv"
-Right-click on it and choose "Open with Firefox/Chrome/Chromium".
-The video will play in the web browser.
-Once completed, close the web browser.
-
-------
-Step 2
-------
-Open the "index.html" file in Firefox/Chrome/Chromium web browser, to view the videos.
-After this, refer to the "Instruction Sheet".
-
-------
-Step 3
-------
-Note about Firefox:
-
-If you are using Firefox, then type "about:config" on address bar.
-Once the config page is loaded, then click on "I'll be more careful, I promise!" button.
-Then search for the option "security.fileuri.strict_origin_policy".
-Change the value to "false", this step is mandatory to load the web fonts offline."""
-                )
+            archive.write(settings.BASE_DIR + '/static/cdcontent/templates/readme.txt', 'spoken/README.txt')
+            archive.write(settings.BASE_DIR + '/static/cdcontent/templates/index.html', 'spoken/index.html')
             archive.close()
             wrapper = FileWrapper(temp)
             response = HttpResponse(wrapper, content_type='application/zip')

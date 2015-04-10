@@ -34,6 +34,36 @@ def get_storage_flow_secret(scope):
     credential = storage.get()
     return flow, credential
 
+def upload_video(service, options):
+    body = dict(
+        snippet = dict(
+            title = options.title,
+            description = options.description,
+            tags = options.tags,
+            categoryId = options.category
+        ),
+        status = dict(
+            privacyStatus = options.privacyStatus
+        )
+    )
+    insert_request = youtube.videos().insert(
+        part = ",".join(body.keys()),
+        body = body,
+        media_body = MediaFileUpload(
+            options.file,
+            chunksize = -1,
+            resumable = False
+        )
+    )
+    response = None
+    try:
+        status, response = insert_request.next_chunk()
+        if 'id' in response:
+            return True, response
+    except:
+        pass
+    return False, response
+
 def delete_video(service, video_id):
     try:
         service.videos().delete(id = video_id).execute()
