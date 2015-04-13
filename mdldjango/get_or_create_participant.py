@@ -117,7 +117,7 @@ def store_error(error_line_no, count, invalid_emails=None, email=None):
         if not error_line_no:
             error_line_no = error_line_no + str(count)
         else:
-            error_line_no = error_line_no + ',<br>' + str(count)
+            error_line_no = error_line_no + ',' + str(count)
     else:
         if not invalid_emails:
             invalid_emails = invalid_emails + email
@@ -130,7 +130,7 @@ def can_allow_participant_to_attend(more_then_two_per_day_list, tdate, email):
     """ restrict participating more then 2 training per day """
     if tdate:
         tdate = tdate.split(' ')[0]
-        training_count = TrainingAttendance.objects.filter(email=email, training__tdate = tdate, status=1).count()
+        training_count = TrainingAttendance.objects.filter(email=email, training__tdate = tdate, training__status__lte=4, status=1).count()
         if training_count < 2:
             return more_then_two_per_day_list
         if not more_then_two_per_day_list:
@@ -141,7 +141,7 @@ def can_allow_participant_to_attend(more_then_two_per_day_list, tdate, email):
 
 def is_new_participant(reattempt_list, foss, email):
     """  check weather already participated in particular software """
-    training_count = TrainingAttendance.objects.filter(email=email, training__foss_id = foss, status=1).count()
+    training_count = TrainingAttendance.objects.filter(email=email, training__foss_id = foss, training__status__lte=4, status=1).count()
     if training_count == 0:
         return reattempt_list
     if not reattempt_list:
@@ -192,7 +192,7 @@ def check_csvfile(user, file_path, w=None, flag=0, **kwargs):
                     if row_length > 3 and email:
                         if not flag:
                             #print "firstname => ", firstname
-                            if not validate_email(email):
+                            if not validate_email(email, verify=True):
                                 csv_file_error, error_line_no, invalid_emails = store_error(error_line_no, count, invalid_emails, email)
                                 continue
                         # restrict the participant

@@ -60,7 +60,7 @@ from cms.sortable import *
 from events_email import send_email
 
 def can_clone_training(training):
-    if training.tdate > datetime.datetime.strptime('01-02-2015', "%d-%m-%Y").date():
+    if training.tdate > datetime.datetime.strptime('01-02-2015', "%d-%m-%Y").date() and training.organiser.academic.institution_type.name != 'School':
         return True
     return False
 

@@ -29,7 +29,7 @@ class RegisterForm(forms.Form):
             RegexValidator(
                 regex = '^[a-zA-Z0-9-_+.]*$',
                 message = 'Username required. 30 characters or fewer. \
-                    Letters, digits and @/./+/-/_ only.',
+                    Letters, digits and ./+/-/_ only.',
                 code = 'invalid_username'
             ),
         ]

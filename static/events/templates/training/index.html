@@ -158,9 +158,9 @@
                                     {% endif %}
                                     <a target='_blank' href="{% url 'events:training_participant' record.id %}">Participants</a>
                                 {% endif %}
-                                {% if status == 'rejected' %}
+                                <!-- {% if status == 'rejected' %}
                                     <a href="{% url 'events:training_approvel' role record.id %}?status=accept">Accept</a>
-                                {% endif %}
+                                {% endif %} -->
                             {% endif %}
                             {% if role == 'organiser' %}
                                 {% if record|can_clone_training %}
