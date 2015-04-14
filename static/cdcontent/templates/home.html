@@ -221,7 +221,10 @@
         <script src="../includes/js/bootstrap.min.js"></script>
         <script>
             $(document).ready(function(){
-                var fossList = []
+                // set video player volume by 20%
+                var myPlayer = videojs('st_video');
+                myPlayer.volume(0.2);
+                var fossList = [];
                 fossList[0] = '';
                 {% for foss_key,foss_detail in foss_details.items %}
                     fossList[{{ foss_key }}] = '{{ foss_details|get_lang_details:foss_key|safe }}';

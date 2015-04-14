@@ -189,9 +189,6 @@
                                             </a>
                                             <p class="list-group-item-text">
                                                 <span style="text-align: left">Status: <i class="{{ tr_rec.common_content.assignment_status|get_review_status_symbol }}" title="{{ tr_rec.common_content.assignment_status|get_review_status_list }}"></i></span>
-                                                <span style="float: right">
-                                                    - <a href="">{{tr_rec.common_content.assignment_user}}</a>
-                                                </span>
                                             </p>
                                         </div>
                                     {% endif %}
@@ -213,9 +210,6 @@
                                             </a>
                                             <p class="list-group-item-text">
                                                 <span style="text-align: left">Status: <i class="{{ tr_rec.common_content.code_status|get_review_status_symbol }}" title="{{ tr_rec.common_content.code_status|get_review_status_list }}"></i></span>
-                                                <span style="float: right">
-                                                    - <a href="">{{tr_rec.common_content.code_user}}</a>
-                                                </span>
                                             </p>
                                         </div>
                                     {% endif %}
@@ -237,9 +231,6 @@
                                             </a>
                                             <p class="list-group-item-text">
                                                 <span style="text-align: left">Status: <i class="{{ tr_rec.common_content.slide_status|get_review_status_symbol }}" title="{{ tr_rec.common_content.slide_status|get_review_status_list }}"></i></span>
-                                                <span style="float: right">
-                                                    - <a href="">{{tr_rec.common_content.slide_user}}</a>
-                                                </span>
                                             </p>
                                         </div>
                                     {% endif %}
@@ -302,6 +293,9 @@
         <script src="../../../includes/js/bootstrap.min.js"></script>
         
         <script>
+            // set video player volume by 20%
+            var myPlayer = videojs('st_video');
+            myPlayer.volume(0.2);
             currentVideo = $('.playlist-item.active');
             nextVideo = currentVideo.next('li');
             prevVideo = currentVideo.prev('li');
