@@ -20,7 +20,7 @@ from dateutil.relativedelta import relativedelta
 from creation.subtitles import *
 from creation.views import get_video_info, is_administrator
 from creation.models import TutorialCommonContent, TutorialDetail, TutorialResource, Language
-from cms.models import SiteFeedback, Event, NewsType, News
+from cms.models import SiteFeedback, Event, NewsType, News, Notification
 from events.views import get_page
 from mdldjango.models import MdlUser
 
@@ -64,6 +64,9 @@ def home(request):
     
     testimonials = Testimonials.objects.all().order_by('?')[:2]
     context['testimonials'] = testimonials
+    
+    notifications = Notification.objects.filter(Q(start_date__lte=datetime.datetime.today()) & Q(expiry_date__gte=datetime.datetime.today())).order_by('expiry_date')
+    context['notifications'] = notifications
     
     events = Event.objects.filter(event_date__gte=datetime.datetime.today()).order_by('event_date')[:2]
     context['events'] = events

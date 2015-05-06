@@ -25,16 +25,19 @@
 {% endblock %}
 {% block title %}Home{% endblock %}
 {% block announcement %}
-    <div id="slideshow" class="" style="">
-        <div class="announcement alert" style="background:#1B83BC;">
-            <div class="inner">
-                <div class="text-container">
-	            Workshop on DWSIM, an open source chemical process simulator, 29-30 May 2015
-	            <a class="btn btn-primary btn-xs abt" href="http://fossee.in/workshop/dwsim/#register" target='_blank'>Register</a>
-                    <button type="button" class="close" data-dismiss="alert">&times;</button>
+    <div id="slideshow">
+        {% if notifications %}
+            {% for notification in notifications %}
+                <div class="announcement alert" style="background:#{% if notification.bg_color %}{{ notification.bg_color }}{% else %}1B83BC{% endif %};border-bottom: 1px solid #fff;">
+                    <div class="inner">
+                        <div class="text-container">
+                            {{ notification.body|safe }}
+                            <button type="button" class="close" data-dismiss="alert">&times;</button>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
+            {% endfor %}
+        {% endif %}
     </div>
 {% endblock %}
 {% block heading %}<i class="home-page-title-i">spoken tutorial</i>{% endblock %}

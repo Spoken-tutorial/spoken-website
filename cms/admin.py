@@ -30,6 +30,14 @@ class EventAdmin(admin.ModelAdmin):
         obj.user = request.user
         obj.save()
 
+class NotificationAdmin(admin.ModelAdmin):
+    form = AdminBodyForm
+    exclude = ('user',)
+    list_display = ('user', 'body', 'expiry_date', 'updated')
+    def save_model(self, request, obj, form, change):
+        obj.user = request.user
+        obj.save()
+
 class NewsTypeAdmin(admin.ModelAdmin):
     exclude = ('slug',)
     list_display = ('name',)
@@ -69,5 +77,6 @@ admin.site.register(Block, BlockAdmin)
 admin.site.register(Nav, NavAdmin)
 admin.site.register(Page, PageAdmin)
 admin.site.register(Event, EventAdmin)
+admin.site.register(Notification, NotificationAdmin)
 admin.site.register(NewsType, NewsTypeAdmin)
 admin.site.register(News, NewsAdmin)
