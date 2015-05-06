@@ -314,11 +314,11 @@ def news(request, cslug):
         newstype = NewsType.objects.get(slug = cslug)
         collection = None
         latest = None
-        if request.GET and 'latest' in request.GET and int(request.GET.get('latest')):
+        if request.GET and 'latest' in request.GET and int(request.GET.get('latest') == 0 and cslug == 'media-articles'):
+            collection = newstype.news_set.order_by('weight', '-created')
+        else:
             collection = newstype.news_set.order_by('-created')
             latest = True
-        else:
-            collection = newstype.news_set.order_by('weight', '-created')
             
         if collection:
             page = request.GET.get('page')

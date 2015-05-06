@@ -2553,27 +2553,10 @@ def ajax_language(request):
         
 @csrf_exempt
 def test(request):
-    tas = TrainingAttendance.objects.filter(firstname=None)
-    for ta in tas:
-        if ta.mdluser_id:
-            try:
-                mdluser = MdlUser.objects.get(id=ta.mdluser_id)
-                ta.firstname =  mdluser.firstname
-                ta.lastname = mdluser.lastname
-                ta.gender = mdluser.gender
-                ta.email = mdluser.email
-                ta.save()
-            except Exception, e:
-                print e
-        continue
-    return HttpResponse("Done!")
-    '''academics = AcademicCenter.objects.filter(institution_type__name='Uncategorised')
+    academics = AcademicCenter.objects.filter(Q(institution_name__icontains="Engineering")).exclude(Q(institution_type__name="Engineering") | Q(institution_type__name="Polytechnic") | Q(institution_type__name="ITI") | Q(institution_type__name="University"))
     for academic in academics:
-        if "Polytechnic" in academic.institution_name.title():
-            academic.institution_type = InstituteType.objects.get(name='Polytechnic')
-            academic.save()
-        if "Iti" in academic.institution_name.title():
-            academic.institution_type = InstituteType.objects.get(name='ITI')
-            academic.save()
-    return HttpResponse("Done!")'''
+        print academic.institution_name, " => ", academic.institution_type
+        academic.institution_type = InstituteType.objects.get(name='Engineering')
+        academic.save()
+    return HttpResponsei("Done!")
 
