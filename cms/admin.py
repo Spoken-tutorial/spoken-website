@@ -31,9 +31,8 @@ class EventAdmin(admin.ModelAdmin):
         obj.save()
 
 class NotificationAdmin(admin.ModelAdmin):
-    form = AdminBodyForm
     exclude = ('user',)
-    list_display = ('user', 'body', 'expiry_date', 'updated')
+    list_display = ('user', 'body', 'start_date', 'expiry_date', 'updated')
     def save_model(self, request, obj, form, change):
         obj.user = request.user
         obj.save()
