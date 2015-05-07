@@ -89,6 +89,15 @@ class Event(models.Model):
     event_date = models.DateTimeField()
     created = models.DateTimeField(auto_now_add=True)
 
+class Notification(models.Model):
+    user = models.ForeignKey(User)
+    body = models.TextField()
+    bg_color = models.CharField(max_length=15, null=True, blank=True)
+    start_date = models.DateField()
+    expiry_date = models.DateField()
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now = True)
+
 class NewsType(models.Model):
     name = models.CharField(max_length = 50)
     slug = models.CharField(max_length = 50)

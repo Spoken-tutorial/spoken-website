@@ -23,6 +23,13 @@
             {% endif %}
             <dt>Organiser</dt>
             <dd>{{ test.organiser }}</dd>
+            <dt>Dept.</dt>
+            <dd>
+                {%  for dept in test.department.all %}
+                    {{ dept }}
+                {% endfor %}
+            </dd>
+
         </dl>
     </div>
 	<div class="" id="pending">

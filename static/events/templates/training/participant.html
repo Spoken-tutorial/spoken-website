@@ -32,12 +32,14 @@
         {% if collection %}
         <table class="table table-bordered table-hover table-striped">
             <tr>
+		<th>#</th>
                 <th>First Name</th>
                 <th>Last Name</th>
                 <th></th>
             </tr>
             {% for record in collection %}
                 <tr>
+		    <td>{{ forloop.counter }}</td>
                     <td>{{ record.firstname|lower|title }}</td>
                     <td>{{ record.lastname|lower|title }}</td>
                     <td>

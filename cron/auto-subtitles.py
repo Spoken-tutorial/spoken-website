@@ -231,7 +231,7 @@ db = MySQLdb.connect(host = DB_HOST, user = DB_USER, passwd = DB_PASS, db = DB_N
 cur = db.cursor()
 cur.execute("SELECT * FROM creation_tutorialresource where status = 1 or status = 2")
 rows = cur.fetchall()
-overwrite = True
+overwrite = False
 if 'False' in sys.argv:
     overwrite = False
 error_log_file_head = open(LOG_ROOT + 'srt-error-log.txt',"w")
