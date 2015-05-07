@@ -83,7 +83,7 @@
                         {% endif %}
                     {% endwith %}
 
-                    {% with link=collection.0.tutorial_detail.foss|instruction_sheet:collection.0.language %}
+                    {% with link=collection.0.tutorial_detail.foss|installation_sheet:collection.0.language %}
                         {% if link %}
                             <li><a class="download-insc-sheet" href="{{ link }}" target="_blank"> <i class="fa fa-2 fa-download"></i>
     Installation Sheet</a></li>
