@@ -114,6 +114,7 @@ class News(models.Model):
     news_type = models.ForeignKey(NewsType)
     title = models.CharField(max_length = 255)
     slug = models.CharField(max_length = 255)
+    state = models.ForeignKey(State, null=True)
     picture = models.FileField(upload_to=content_file_name, null=True, blank=True)
     body = models.TextField()
     url = models.URLField(null=True, blank=True)
