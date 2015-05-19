@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from events.models import State, District, City, Location
+from datetime import datetime
 import os
 
 def profile_picture(instance, filename):
@@ -93,7 +94,7 @@ class Notification(models.Model):
     user = models.ForeignKey(User)
     body = models.TextField()
     bg_color = models.CharField(max_length=15, null=True, blank=True)
-    start_date = models.DateField()
+    start_date = models.DateField(default=datetime.now)
     expiry_date = models.DateField()
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now = True)

@@ -8,55 +8,15 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Adding model 'Notification'
-        db.create_table(u'cms_notification', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'])),
-            ('body', self.gf('django.db.models.fields.TextField')()),
-            ('bg_color', self.gf('django.db.models.fields.CharField')(max_length=15, null=True, blank=True)),
-            ('start_date', self.gf('django.db.models.fields.DateField')(default=datetime.datetime.now)),
-            ('expiry_date', self.gf('django.db.models.fields.DateField')()),
-            ('created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
-            ('updated', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, blank=True)),
-        ))
-        db.send_create_signal(u'cms', ['Notification'])
-
-        # Adding field 'Page.css'
-        db.add_column(u'cms_page', 'css',
-                      self.gf('django.db.models.fields.TextField')(default=None, null=True, blank=True),
-                      keep_default=False)
-
-        # Adding field 'Page.js'
-        db.add_column(u'cms_page', 'js',
-                      self.gf('django.db.models.fields.TextField')(default=None, null=True, blank=True),
-                      keep_default=False)
-
-        # Adding field 'Page.cols'
-        db.add_column(u'cms_page', 'cols',
-                      self.gf('django.db.models.fields.IntegerField')(default=9),
-                      keep_default=False)
-
-        # Adding field 'Page.formatting'
-        db.add_column(u'cms_page', 'formatting',
-                      self.gf('django.db.models.fields.BooleanField')(default=True),
+        # Adding field 'News.state'
+        db.add_column(u'cms_news', 'state',
+                      self.gf('django.db.models.fields.related.ForeignKey')(to=orm['events.State'], null=True),
                       keep_default=False)
 
 
     def backwards(self, orm):
-        # Deleting model 'Notification'
-        db.delete_table(u'cms_notification')
-
-        # Deleting field 'Page.css'
-        db.delete_column(u'cms_page', 'css')
-
-        # Deleting field 'Page.js'
-        db.delete_column(u'cms_page', 'js')
-
-        # Deleting field 'Page.cols'
-        db.delete_column(u'cms_page', 'cols')
-
-        # Deleting field 'Page.formatting'
-        db.delete_column(u'cms_page', 'formatting')
+        # Deleting field 'News.state'
+        db.delete_column(u'cms_news', 'state_id')
 
 
     models = {
@@ -134,6 +94,7 @@ class Migration(SchemaMigration):
             'news_type': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['cms.NewsType']"}),
             'picture': ('django.db.models.fields.files.FileField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
             'slug': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            'state': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['events.State']", 'null': 'True'}),
             'title': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
             'updated': ('django.db.models.fields.DateTimeField', [], {}),
             'url': ('django.db.models.fields.URLField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'}),
@@ -153,6 +114,7 @@ class Migration(SchemaMigration):
             'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'expiry_date': ('django.db.models.fields.DateField', [], {}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'start_date': ('django.db.models.fields.DateField', [], {'default': 'datetime.datetime.now'}),
             'updated': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['auth.User']"})
         },
