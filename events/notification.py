@@ -62,8 +62,8 @@ def nemail(request):
 
 
   for organiser in organisers:
-      to  = organiser.user.email
-      to = ['k.sanmugam2@gmail.com']
+      to  = [organiser.user.email]
+      #to = ['k.sanmugam2@gmail.com', 'sanmugam@iitb.ac.in']
       email = EmailMultiAlternatives(
           subject, text_content, 'administrator@spoken-tutorial.org',
           to = to,
@@ -76,14 +76,14 @@ def nemail(request):
       try:
           result = email.send(fail_silently=False)
           sent += 1
-          cur.execute("INSERT INTO organiser_sent_email (user_id) VALUES (" + str(organiser.user.id) + ")")
+          OrganiserNotification.objects.create(user=organiser.user)
           if sent%50 == 0:
               time.sleep(5)
           print to," => sent (", str(count),"/",str(tot_count),")"
       except Exception, e:
           print e
           print to," => not sent (",count,"/",tot_count,")"
-      break
+      #break
   print "--------------------------------"
   print "Total sent mails:", sent
   print "Total not sent mails:", notsent
