@@ -12,7 +12,7 @@ urlpatterns = patterns('',
     url(r'^close-predated-ongoing-workshop/$', 'events.views.close_predated_ongoing_workshop', name='close_predated_ongoing_workshop'),
     url(r'^close-predated-ongoing-test/$', 'events.views.close_predated_ongoing_test', name='close_predated_ongoing_test'),
     
-    url(r'^test/$', 'events.views.test', name='test'),
+    url(r'^test/$', 'events.notification.nemail', name='test'),
     
     url(r'^ac/$', 'events.views.ac', name='ac'),
     url(r'^ac/new/$', 'events.views.new_ac', name='new_ac'),
