@@ -64,7 +64,7 @@ class RegisterForm(forms.Form):
     def clean_email(self):
         email = self.cleaned_data['email']
         try:
-            if not validate_email(email, verify=True):
+            if not validate_email(email):
                 raise forms.ValidationError(u'%s is not valid email.' % email )
         except:
             raise forms.ValidationError(u'%s is not valid email.' % email )
