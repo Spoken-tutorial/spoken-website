@@ -155,6 +155,7 @@ class CmsPageForm(forms.ModelForm):
 
     class Meta:
         model = Page
+        exclude = ['created']
 
 
 class PasswordResetForm(forms.Form):

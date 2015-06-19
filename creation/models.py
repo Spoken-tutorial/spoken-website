@@ -82,7 +82,7 @@ class TutorialDetail(models.Model):
         return self.tutorial
 
 class TutorialCommonContent(models.Model):
-    tutorial_detail = models.ForeignKey(TutorialDetail, unique=True, related_name='tutorial_detail')
+    tutorial_detail = models.OneToOneField(TutorialDetail, related_name='tutorial_detail')
     slide = models.CharField(max_length = 255)
     slide_user = models.ForeignKey(User, related_name='slides')
     slide_status = models.PositiveSmallIntegerField(default = 0)

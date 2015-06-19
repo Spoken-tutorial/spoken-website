@@ -79,10 +79,11 @@ INSTALLED_APPS = (
     'nicedit',
     'masquerade',
     'report_builder',
-    'south',
     'youtube',
     'reports',
     'compressor',
+    'events2',
+    'eventsmigration',
 )
 
 MIDDLEWARE_CLASSES = (

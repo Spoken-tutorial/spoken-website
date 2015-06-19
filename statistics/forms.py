@@ -8,3 +8,4 @@ class LearnerForm(forms.ModelForm):
  
     class Meta:
         model = Learner
+        exclude = ['created', 'updated']

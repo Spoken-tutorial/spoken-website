@@ -92,7 +92,7 @@ def training(request, slug = 'training'):
     # find participants count
     participant_count = collection.qs.aggregate(Sum('participant_count'))
     #
-    chart_query_set = collection.qs.extra(select={'year': "EXTRACT(year FROM tdate)"}).values('year').annotate(total_training=Count('tdate'), total_participant=Sum('participant_count'))
+    chart_query_set = collection.qs.extra(select={'year': "EXTRACT(year FROM tdate)"}).values('year').order_by('-year').annotate(total_training=Count('tdate'), total_participant=Sum('participant_count'))
     chart_data = ''
     for data in chart_query_set:
         chart_data += "['" + str(data['year']) + "', " + str(data['total_participant']) + "],"

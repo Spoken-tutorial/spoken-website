@@ -76,7 +76,10 @@ urlpatterns = patterns('',
     
     # reports
     url(r'^reports/', include('reports.urls', namespace='reports')),
-
+    
+    #events2
+    url(r'^events2/', include('events2.urls', namespace='events2')),
+    
     #cms
     url(r'^', include('cms.urls', namespace='cms')),
 )

@@ -32,7 +32,7 @@ def get_all_field_names(model):
 
 def export(qs, fields=None):
     model = qs.model
-    response = HttpResponse(mimetype='text/csv')
+    response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename=%s.csv' % slugify(model.__name__)
     writer = csv.writer(response, delimiter=';')
     # Write headers to CSV file

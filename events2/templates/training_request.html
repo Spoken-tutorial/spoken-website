@@ -1,0 +1,180 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block title %}Training Planner Form{% endblock %}
+{% block heading %}<i class="home-page-title-i">Training Planner Form</i>{% endblock %}
+{% block search %}{% endblock %}
+{% block content %}
+        {% if form %}
+          <div class="row well">
+              <div class='col-sm-8'>
+                  <form action="{{ action }}" method="post" class='form-horizontal' enctype="multipart/form-data">{% csrf_token %}
+                      {% render_field form.training_planner type="hidden" value=training_planner_id class+="training-planner" %}
+                      {% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
+                      {% if form.non_field_errors %}
+                      <ul>
+                        {% for error in form.non_field_errors %}
+                          <li>{{ error }}</li>
+                        {% endfor %}
+                      </ul>
+                      {% endif %}
+                      <div class='form-row'>
+                        <div class='col-xs-12 form-group required'>
+                          <label class='control-label'>Department</label>
+                          {% render_field form.department class+="form-control department" tabindex="1" %}
+                          {{ form.department.errors }}
+                        </div>
+                      </div>
+                      
+                      <div class='form-row'>
+                        <div class='col-xs-12 form-group required'>
+                          <label class='control-label'>Batch</label>
+                          {% render_field form.batch class+="form-control batch" tabindex="1" %}
+                          {{ form.batch.errors }}
+                        </div>
+                      </div>
+                      
+                      <div class='form-row'>
+                        <div class='col-xs-12 form-group required'>
+                          <label class='control-label'>Semester Start Date</label>
+                          {% render_field form.sem_start_date class+="form-control sem_start_date" tabindex="1" %}
+                          {{ form.sem_start_date.errors }}
+                        </div>
+                      </div>
+
+                      <div class='form-row'>
+                        <div class='col-xs-12 form-group required'>
+                          <label class='control-label'>Training Type</label>
+                          {% render_field form.course_type class+="form-control course_type" tabindex="1" %}
+                          {{ form.course_type.errors }}
+                        </div>
+                      </div>
+                      
+                      <div class='form-row'>
+                        <div class='col-xs-12 form-group required'>
+                          <label class='control-label'>Software Course </label>
+                          {% render_field form.course class+="form-control course" tabindex="1" %}
+                          {{ form.course.errors }}
+                        </div>
+                      </div>
+                      
+                      <!-- <div class='form-row'>
+                        <div class='col-xs-12 form-group required'>
+                          <label class='control-label'>Language </label>
+                          {% render_field form.language class+="form-control language" tabindex="1" %}
+                          {{ form.language.errors }}
+                        </div>
+                      </div> -->
+                      
+                      <div class="form-group">
+                          <div class="col-xs-12 form-group">
+                              <input class="btn btn-primary" type="submit" value="Submit" />
+                              <a class="btn btn-default" href="{% url 'events2:training_planner' %}">Cancel</a>
+                          </div>
+                      </div>
+                      {% endwith %}
+                  </form>
+              </div>
+          </div>
+        {% endif %}
+{% endblock %}
+{% block jsblock %}
+  <script>
+    $(document).ready(function(){
+      if($('.department').val() == '') {
+        $('.course_type').val('');
+        $('.course_type').prop('disabled', 'disabled');
+        $('.course').html('<option>---------</option>');
+      }
+      $('.course_type').on('change', function(){
+        course_type = $(this).val();
+        department = $('.department').val();
+        $('.course').html('<option>---------</option>');
+        if(course_type != '' && department != ''){
+          $.ajax({
+            url: "/events2/get-course-option/",
+            type: "POST",
+            data: {
+              course_type: course_type,
+              department: department,
+              training_planner: $('.training-planner').val()
+            },
+            beforeSend: function() {
+              //$('.ajax-refresh-language').show();
+            },
+            success: function(data) {
+              // loading languages
+              if(data) {
+                  if(data['is_full']){
+                    $(".course_type").val('');
+                    alert('No. of training requests for selected course type exceeded.');
+                  }else{
+                    $('.course').html(data['course_option']);
+                  }
+              }
+              //$('.ajax-refresh-language').hide();
+            }
+          });
+        }
+      });
+      $('.department').on('change', function(){
+        department = $(this).val();
+        department_name = $(this).children("option").filter(":selected").text()
+        $('.batch').html('<option>---------</option>');
+        $('.course_type').val('');
+        $('.course_type').prop('disabled', 'disabled');
+        $('.course').html('<option>---------</option>');
+        if(department != ''){
+          $.ajax({
+            url: "/events2/get-batch-option/",
+            type: "POST",
+            data: {
+              department: department,
+              training_planner: $('.training-planner').val()
+            },
+            beforeSend: function() {
+              //$('.ajax-refresh-language').show();
+            },
+            success: function(data) {
+              // loading languages
+              if(data) {
+                  if(data['is_full']){
+                    $(".department").val('');
+                    alert('No. of training requests for "' + department_name + '" department exceeded.');
+                  }else{
+                    $('.batch').html(data['batch_option']);
+                    $('.course_type').prop('disabled', false);
+                  }
+              }
+              //$('.ajax-refresh-language').hide();
+            }
+          });
+        }
+      });
+      /*$('.course').on('change', function(){
+        course = $(this).val();
+        $('.language').html('<option>---------</option>');
+        if(course != ''){
+          $.ajax({
+            url: "/events2/get-language-option/",
+            type: "POST",
+            data: {
+              course: course
+            },
+            beforeSend: function() {
+              //$('.ajax-refresh-language').show();
+            },
+            success: function(data) {
+              // loading languages
+              if(data) {
+                  $('.language').html(data);
+              }
+              //$('.ajax-refresh-language').hide();
+            }
+          });
+        }
+      });*/
+    });
+    
+  </script>
+{% endblock %}

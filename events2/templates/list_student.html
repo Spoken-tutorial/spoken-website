@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% load cmsdata %}
+{% load static %}
+{% block title %}Participant List{% endblock %}
+{% block heading %}<i class="home-page-title-i">Participant List</i>{% endblock %}
+{% block search %}{% endblock %}
+{% block content %}
+  {% if object_list %}
+    <div><a class="btn btn-default" href="{% url 'events2:batch_list' %}">Go to Master List</a><br><br></div>
+    <table class="paleblue table">
+      {% get_sortable_header header ordering request.GET %}
+      {% for record in object_list %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td>{{ batch.department}}</td>
+          <td>{{ batch.year}}</td>
+          <td>{{ record.user.first_name }}</td>
+          <td>{{ record.user.last_name }}</td>
+          <td class='email'>{{ record.user.email }}</td>
+          <td>{{ record.gender }}</td>
+          <td>
+            {% if not record.verified %}
+              <span class="review-domain-review">Verification Pending</span>
+            {% elif record.user.is_active %}
+              <span class="review-accepted">Verified
+            {% else %}
+              <span class="review-pending-upload">Invalid Email</span>
+            {% endif %}
+          </td>
+          <td>
+            <a class="btn btn-default" href="{% url 'events2:student_delete' batch.id record.id %}">Delete</a>
+          </td>
+        </tr>
+      {% endfor %}
+    </table>
+  {% endif %}
+  
+{% endblock %}

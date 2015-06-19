@@ -437,7 +437,7 @@ def ajax_upload_prerequisite(request):
                 data += '<option value="' + str(td_rec.id) + '">' + td_rec.tutorial + '</option>'
             if data:
                 data = '<option value="">Select Tutorial</option>' + data
-    return HttpResponse(json.dumps(data), mimetype='application/json')
+    return HttpResponse(json.dumps(data), content_type='application/json')
 
 @csrf_exempt
 def ajax_upload_foss(request):
@@ -521,7 +521,7 @@ def ajax_upload_foss(request):
             if data:
                 data = '<option value="">Select Language</option>' + data
 
-    return HttpResponse(json.dumps(data), mimetype='application/json')
+    return HttpResponse(json.dumps(data), content_type='application/json')
 
 @csrf_exempt
 def ajax_get_keywords(request):
@@ -533,7 +533,7 @@ def ajax_get_keywords(request):
             data = tcc.keyword
         except Exception, e:
             pass
-    return HttpResponse(json.dumps(data), mimetype='application/json')
+    return HttpResponse(json.dumps(data), content_type='application/json')
 
 @login_required
 def upload_tutorial(request, trid):
@@ -747,7 +747,7 @@ def ajax_upload_timed_script(request):
         data = '<option value="">Select Tutorial Name</option>'
         for row in rows:
             data += '<option value="' + str(row.id) + '">' + row.tutorial + '</option>'
-    return HttpResponse(json.dumps(data), mimetype='application/json')
+    return HttpResponse(json.dumps(data), content_type='application/json')
 
 @login_required
 def upload_prerequisite(request, trid):
@@ -2216,7 +2216,7 @@ def ajax_publish_to_pending(request):
             if data:
                 data = '<option value="">Select Language</option>' + data
 
-    return HttpResponse(json.dumps(data), mimetype='application/json')
+    return HttpResponse(json.dumps(data), content_type='application/json')
 
 @login_required
 def creation_change_component_status(request):
@@ -2295,7 +2295,7 @@ def ajax_change_component_status(request):
             if data:
                 data = '<option value="">Select Language</option>' + data
 
-    return HttpResponse(json.dumps(data), mimetype='application/json')
+    return HttpResponse(json.dumps(data), content_type='application/json')
 
 def report_missing_component(request, trid):
     comps = {
@@ -2679,4 +2679,4 @@ def ajax_manual_language(request):
                 str(tutorial[1]) + '</option>'
             if data:
                 data = '<option value="">-- Select Language --</option>' + data
-    return HttpResponse(json.dumps(data), mimetype='application/json')
+    return HttpResponse(json.dumps(data), content_type='application/json')

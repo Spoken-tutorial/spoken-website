@@ -40,7 +40,7 @@ def site_feedback(request):
             print e
             data = False
             
-    return HttpResponse(json.dumps(data), mimetype='application/json')
+    return HttpResponse(json.dumps(data), content_type='application/json')
 
 def home(request):
     tr_rec = ''
@@ -206,7 +206,7 @@ def get_language(request):
             for foss_row in foss_list:
                 tmp2 += '<option value="' + str(foss_row[0]) +'">' + str(foss_row[0]) + ' (' + str(foss_row[1]) + ')</option>'
             output = ['reset', tmp1, tmp2]
-    return HttpResponse(json.dumps(output), mimetype='application/json')
+    return HttpResponse(json.dumps(output), content_type='application/json')
 
 def testimonials(request):
     testimonials = Testimonials.objects.all()

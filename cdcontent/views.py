@@ -176,7 +176,7 @@ def ajax_fill_languages(request):
         for row in lang_recs:
             data = data + '<option value="' + str(row[0]) + '">' + row[1] + '</option>'
 
-    return HttpResponse(json.dumps(data), mimetype='application/json')
+    return HttpResponse(json.dumps(data), content_type='application/json')
 
 @csrf_exempt
 def ajax_add_foss(request):
@@ -195,7 +195,7 @@ def ajax_add_foss(request):
         selectedfoss[foss] = [langs, level]
     data = json.dumps(selectedfoss)
 
-    return HttpResponse(json.dumps(data), mimetype='application/json')
+    return HttpResponse(json.dumps(data), content_type='application/json')
 
 @csrf_exempt
 def ajax_show_added_foss(request):
@@ -245,4 +245,4 @@ def ajax_show_added_foss(request):
     #if data:
     #    data += '<tr><td colspan="2" class="col-right">~ Total Size</td><td>' + humansize(fsize_total) + '</td></tr>'
     output = {0:data, 1:humansize(fsize_total)}
-    return HttpResponse(json.dumps(output), mimetype='application/json')
+    return HttpResponse(json.dumps(output), content_type='application/json')

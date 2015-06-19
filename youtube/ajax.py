@@ -40,4 +40,4 @@ def ajax_foss_based_language_tutorial(request):
             if data:
                 data = '<option value="">Select Language</option>' + data
 
-    return HttpResponse(json.dumps(data), mimetype='application/json')
+    return HttpResponse(json.dumps(data), content_type='application/json')

@@ -1,0 +1,162 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block title %}Student Batch{% endblock %}
+{% block heading %}<i class="home-page-title-i">Student Batch</i> <a class="btn btn-default pull-right" href="{% url 'events2:batch_list' %}">Back to MB Master Batch</a>{% endblock %}
+{% block search %}{% endblock %}
+{% block content %}
+        {% if form %}
+          <div class="row well">
+              <div class='col-sm-8'>
+                  <form action="{{ action }}" method="post" class='form-horizontal' enctype="multipart/form-data">{% csrf_token %}
+                      {% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
+                      {% if form.non_field_errors %}
+                      <ul>
+                        {% for error in form.non_field_errors %}
+                          <li>{{ error }}</li>
+                        {% endfor %}
+                      </ul>
+                      {% endif %}
+                      <div class='form-row'>
+                        <div class='col-xs-12 form-group required'>
+                          <label class='control-label'>Csv File</label>
+                          {% render_field form.csv_file class+="file csv_file" tabindex="1" %}
+                          {{ form.csv_file.errors }}
+                        </div>
+                      </div>
+              
+              
+                      <div class="form-group">
+                          <div class="col-xs-12 form-group">
+                              <input class="btn btn-primary" type="submit" value="Add Student" />
+                              <a class="btn btn-default" href="{% url 'events2:batch_list' %}">Cancel</a>
+                          </div>
+                      </div>
+                      {% endwith %}
+                  </form>
+              </div>
+          </div>
+          {% if existing_student %}
+            <h4>Existing Student List</h4>
+            <table class="table">
+              <tr>
+                <th>#</th>
+                <th>Department</th>
+                <th>Year</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Email</th>
+                <th>Gender</th>
+              </tr>
+              {% for record in existing_student %}
+                <tr class="{% if record.user.is_active %} valid {% else %} invalid {% endif %}">
+                  <td>{{ forloop.counter }}</td>
+                  <td>{{ batch.department}}</td>
+                  <td>{{ batch.year}}</td>
+                  <td>{{ record.user.first_name }}</td>
+                  <td>{{ record.user.last_name }}</td>
+                  <td class='email'>{{ record.user.email }}</td>
+                  <td>{{ record.gender }}</td>
+                </tr>
+              {% endfor %}
+            </table>
+          {% endif %}
+        {% else %}
+              <h4><center>{{ batch.get_batch_info }}</center></h4>
+          <form action="{{ action }}" method="post" class='form-horizontal' enctype="multipart/form-data">{% csrf_token %}
+            <h5>Errors <span class="pull-right review-accepted">Note: Click on the email to correct email format</span></h5>
+            <div class="row well">
+              <table class="table">
+                <tr>
+                  <th>#</th>
+                  <th>Full name</th>
+                  <th>Email</th>
+                  <th>Gender</th>
+                </tr>
+              {% for e in error %}
+                <tr id="error{{forloop.counter}}">
+                  <td>{{ forloop.counter }}</td>
+                  <td>{{ e.0 }} {{ e.1 }}</td>
+                  <td><div row="{{forloop.counter}}" data="{{ e.0 }},{{ e.1 }},{{ e.3 }}" class="editable" id="div_1">{{ e.2 }}</div></td>
+                  <td>{{ e.3 }}</td>
+                </tr>
+              {% endfor %}
+              </table>
+            </div>
+          </form>
+        {% endif %}
+        {% if warning %}
+          
+          <h5>Warning <span class="pull-right review-accepted">Note: Click on the email to correct email format</span></h5>
+            <div class="row well">
+              <table class="table">
+                <tr>
+                  <th>#</th>
+                  <th>Full name</th>
+                  <th>Email</th>
+                  <th>Gender</th>
+                  <th></th>
+                </tr>
+              {% for e in warning %}
+                <tr id="error{{forloop.counter}}">
+                  <td>{{ forloop.counter }}</td>
+                  <td>{{ e.0 }} {{ e.1 }}</td>
+                  <td>{{ e.2 }}</td>
+                  <td>{{ e.3 }}</td>
+                  <td>
+                    {% if e.4 %}
+                      Already exists in this batch.
+                    {% else %}
+                      Already exists in another batch.
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+              </table>
+            </div>
+        {% endif %}
+{% endblock %}
+{% block jsblock %}
+  <script src="{% static 'spoken/js/jquery.jeditable.js' %}"></script>
+  <script>
+    $('.editable').editable(function(value, settings) {
+       thisData = $(this);
+       message = '';
+       if (validEmail(value)){
+          $.ajax({
+            url: "/events2/save-student/",
+            type: "POST",
+            data: {
+                student_details: $(this).attr("data"),
+                email: value,
+                batch: "{{batch.id}}"
+            },
+            success: function(data) {
+              currentRow = $("#error" + thisData.attr('row'))
+              if(data.code == 2){
+                currentRow.html('<td colspan="4" class="alert alert-danger"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> ' + value + ': ' + data.message + '</td>');
+              }else if(data.code == 1){
+                currentRow.html('<td colspan="4" class="alert alert-warning"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> ' + value + ': ' + data.message + '</td>');
+              }else if(data.code == 4){
+                alert(value + " " + data.message);
+              }else{
+                currentRow.html('<td colspan="4" class="alert alert-success"> ' + value + ': Student record added successfully</td>');
+              }
+            }
+        });
+       }else{
+         $(this).css({'color': 'red'});
+       }
+       return(value);
+    }, {
+       type    : 'text',
+       submit  : 'OK',
+       indicator : '<i class="fa fa-spinner fa-spin"></i>',
+       tooltip   : 'Click to edit...',
+   });
+   function validEmail(v) {
+      var r = new RegExp("[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?");
+      return (v.match(r) == null) ? false : true;
+  }
+  </script>
+{% endblock %}

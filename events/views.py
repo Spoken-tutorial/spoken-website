@@ -1574,7 +1574,7 @@ def training_participant_ceritificate(request, wid, participant_id):
             print e
             raise PermissionDenied()
         
-    response = HttpResponse(mimetype='application/pdf')
+    response = HttpResponse(content_type='application/pdf')
     filename = (wa.firstname+'-'+w.foss.foss+"-Participant-Certificate").replace(" ", "-");
     
     response['Content-Disposition'] = 'attachment; filename='+filename+'.pdf'
@@ -2045,7 +2045,7 @@ def test_participant_ceritificate(request, wid, participant_id):
         except Exception, e:
             print e
             raise PermissionDenied()
-    response = HttpResponse(mimetype='application/pdf')
+    response = HttpResponse(content_type='application/pdf')
     filename = (ta.mdluser_firstname+'-'+ta.mdluser_lastname+"-Participant-Certificate").replace(" ", "-");
     
     response['Content-Disposition'] = 'attachment; filename='+filename+'.pdf'
@@ -2417,7 +2417,7 @@ def ajax_ac_state(request):
             else:
                 data['university'] = tmp
         
-        return HttpResponse(json.dumps(data), mimetype='application/json')
+        return HttpResponse(json.dumps(data), content_type='application/json')
         
 @csrf_exempt
 def ajax_ac_location(request):
@@ -2428,7 +2428,7 @@ def ajax_ac_location(request):
         tmp = '<option value = None> -- None -- </option>'
         for i in location:
             tmp +='<option value='+str(i.id)+'>'+i.name+'</option>'
-        return HttpResponse(json.dumps(tmp), mimetype='application/json')
+        return HttpResponse(json.dumps(tmp), content_type='application/json')
 
 @csrf_exempt
 def ajax_district_data(request):
@@ -2453,7 +2453,7 @@ def ajax_district_data(request):
                     tmp +='<option value='+str(i.id)+'>'+i.institution_name+'</option>'
                 data['institute'] = tmp
         
-    return HttpResponse(json.dumps(data), mimetype='application/json')
+    return HttpResponse(json.dumps(data), content_type='application/json')
 
 @csrf_exempt
 def ajax_ac_pincode(request):
@@ -2461,7 +2461,7 @@ def ajax_ac_pincode(request):
     if request.method == 'POST':
         location = request.POST.get('location')
         location = Location.objects.get(pk=location)
-        return HttpResponse(json.dumps(location.pincode), mimetype='application/json')
+        return HttpResponse(json.dumps(location.pincode), content_type='application/json')
 
 @csrf_exempt
 def ajax_district_collage(request):
@@ -2474,7 +2474,7 @@ def ajax_district_collage(request):
             tmp = '<option value = None> -- None -- </option>'
             for i in collages:
                 tmp +='<option value='+str(i.id)+'>'+i.institution_name+'</option>'
-        return HttpResponse(json.dumps(tmp), mimetype='application/json')
+        return HttpResponse(json.dumps(tmp), content_type='application/json')
 
 @csrf_exempt
 def ajax_state_collage(request):
@@ -2486,7 +2486,7 @@ def ajax_state_collage(request):
         if collages:
             for i in collages:
                 tmp +='<option value='+str(i.id)+'>'+i.institution_name+'</option>'
-        return HttpResponse(json.dumps(tmp), mimetype='application/json')
+        return HttpResponse(json.dumps(tmp), content_type='application/json')
 
 @csrf_exempt
 def ajax_dept_foss(request):
@@ -2537,7 +2537,7 @@ def ajax_dept_foss(request):
             for i in foss:
                 tmp +='<option value='+str(i.id)+'>'+i.foss+'</option>'
             data['foss'] = tmp
-    return HttpResponse(json.dumps(data), mimetype='application/json')
+    return HttpResponse(json.dumps(data), content_type='application/json')
 
 @csrf_exempt
 def ajax_language(request):
@@ -2549,7 +2549,7 @@ def ajax_language(request):
             language = FossAvailableForWorkshop.objects.select_related().filter(foss_id=foss)
             for i in language:
                 tmp +='<option value='+str(i.language.id)+'>'+i.language.name+'</option>'
-        return HttpResponse(json.dumps(tmp), mimetype='application/json')
+        return HttpResponse(json.dumps(tmp), content_type='application/json')
         
 @csrf_exempt
 def test(request):

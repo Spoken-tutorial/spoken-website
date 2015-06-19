@@ -128,6 +128,7 @@ class InvigilatorForm(forms.Form):
 class DepartmentForm(forms.ModelForm):
     class Meta:
         model = Department
+        exclude = ['created', 'updated']
 
 class TrainingForm(forms.ModelForm):
     user = None

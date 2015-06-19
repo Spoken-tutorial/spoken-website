@@ -1,7 +1,11 @@
-var reportBuilder = angular.module('reportBuilder', ['ngRoute', 'restangular', 'ngMaterial', 'ui.tree', 'ngHandsontable']);
+var reportBuilder = angular.module('reportBuilder', ['ngRoute', 'restangular', 'ngMaterial', 'ui.tree', 'ngHandsontable', 'angularPikaday']);
+
+reportBuilder.config(function($sceProvider) {
+   $sceProvider.enabled(false);
+});
 
 reportBuilder.config(function(RestangularProvider) {
-    RestangularProvider.setBaseUrl("/report_builder/api");
+    RestangularProvider.setBaseUrl(BASE_URL + "api");
     RestangularProvider.addResponseInterceptor(function(data, operation, what, url, response, deferred) {
       var extractedData;
       if (operation === "getList" && _.has(data, 'meta')) {
