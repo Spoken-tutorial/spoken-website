@@ -513,3 +513,5 @@ class TrainingLiveFeedback(models.Model):
     class Meta:
         unique_together = (("training", "email"))
 
+class OrganiserNotification(models.Model):
+    user = models.ForeignKey(User)

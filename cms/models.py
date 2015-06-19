@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from events.models import State, District, City, Location
+from datetime import datetime
 import os
 
 def profile_picture(instance, filename):
@@ -93,7 +94,7 @@ class Notification(models.Model):
     user = models.ForeignKey(User)
     body = models.TextField()
     bg_color = models.CharField(max_length=15, null=True, blank=True)
-    start_date = models.DateField()
+    start_date = models.DateField(default=datetime.now)
     expiry_date = models.DateField()
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now = True)
@@ -114,6 +115,7 @@ class News(models.Model):
     news_type = models.ForeignKey(NewsType)
     title = models.CharField(max_length = 255)
     slug = models.CharField(max_length = 255)
+    state = models.ForeignKey(State, null=True)
     picture = models.FileField(upload_to=content_file_name, null=True, blank=True)
     body = models.TextField()
     url = models.URLField(null=True, blank=True)
