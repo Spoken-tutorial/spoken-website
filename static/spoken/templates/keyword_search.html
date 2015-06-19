@@ -25,12 +25,12 @@
 	    <li class="{% if request.path == '/keyword-search/' %} active {% endif %}"><a href="/keyword-search/">Keyword Search</a></li>
 	    <li class="{% if request.path == '/tutorial-search/' %} active {% endif %}"><a href="/tutorial-search/">Tutorial Search</a></li>
 	</ul>
-    <div class="tab-content">
+    <div class="tab-content" style="min-height:420px;">
         <div class="row">
             <div class='col-lg-offset-2 col-md-offset-2 col-sm-offset-2 col-xs-offset-2 col-lg-8 col-md-8 col-sm-8 col-xs-8'>
                 <form class="navbar-form" role="search" action="/keyword-search" method="GET" id="search-form">
                     <div class="input-group big-searchbar">
-                        <input type="text" class="form-control" value="{{ keywords }}" placeholder="e.g: Linux Oscad" name="q" style="padding:6px 6px;">
+                        <input type="text" class="form-control" value="{{ keywords }}" placeholder="e.g: while loop, if statement" name="q" style="padding:6px 6px;">
                         <div class="input-group-btn">
                             <button class="btn btn-primary" type="submit"><i class="glyphicon glyphicon-search"></i></button>
                         </div>
@@ -39,8 +39,9 @@
             </div>
         </div>
         <div class='search-result col-lg-offset-1 col-lg-10 col-md-12 col-sm-12 col-xs-12'>
+            {% if correction %}Did you mean: <b><a href="?q={{ correction }}" title="click here to search for '{{ correction }}'">{{ correction }}</a></b>{% endif %}
             {% if collection %}
-                <div>About <b>{{ collection.paginator.count }}</b> results found.</div>
+                <div style="float:right;">About <b>{{ collection.paginator.count }}</b> results found.</div>
                 {% for record in collection %}
                     <div class='result-record row'>
                         <div class="col-lg-2 col-md-2 col-sm-2 thumb">

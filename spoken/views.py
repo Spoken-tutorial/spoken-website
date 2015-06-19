@@ -22,6 +22,7 @@ from creation.views import get_video_info, is_administrator
 from creation.models import TutorialCommonContent, TutorialDetail, TutorialResource, Language
 from cms.models import SiteFeedback, Event, NewsType, News, Notification
 from events.views import get_page
+from spoken.search import search_for_results
 from mdldjango.models import MdlUser
 
 def is_resource_person(user):
@@ -95,20 +96,14 @@ def keyword_search(request):
     context = {}
     keyword = ''
     collection = None
+    correction = None
     conjunction_words = ['a', 'i']
     form = TutorialSearchForm()
     if request.method == 'GET' and 'q' in request.GET and request.GET['q'] != '':
         form = KeywordSearchForm(request.GET)
         if form.is_valid():
-            keyword = request.GET['q']
-            keywords = keyword.split(' ')
-            search_fields = ['keyword']
-            remove_words = set(keywords).intersection(set(conjunction_words))
-            for key in remove_words:
-                keywords.remove(key)
-            query = get_or_query(keywords, search_fields)
-            if query:
-                collection = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), tutorial_detail__foss__status = 1, common_content = TutorialCommonContent.objects.filter(query), language__name = 'English').order_by('tutorial_detail__foss__foss', 'tutorial_detail__level', 'tutorial_detail__order', 'language__name')
+            keyword = request.GET['q'].lower()
+            collection, correction = search_for_results(keyword)
     
     if collection:
         page = request.GET.get('page')
@@ -117,6 +112,7 @@ def keyword_search(request):
     context = {}
     context['form'] = KeywordSearchForm()
     context['collection'] = collection
+    context['correction'] = correction
     context['keywords'] = keyword
     context.update(csrf(request))
     return render(request, 'spoken/templates/keyword_search.html', context)
