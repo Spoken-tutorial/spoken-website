@@ -17,6 +17,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 SCRIPT_URL = SCRIPT_URL
 
 STVIDEOS_DIR = STVIDEOS_PATH
+SEARCH_INDEX_DIR = os.path.join(BASE_DIR, INDEX_PATH)
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.6/howto/deployment/checklist/
 

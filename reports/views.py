@@ -129,7 +129,7 @@ def report_filter(request, model_name="None", app_label="None", queryset=None, f
 def elibrary(request):
     # Create the HttpResponse object with the appropriate CSV header.
     response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="somefilename.csv"'
+    response['Content-Disposition'] = 'attachment; filename="E-library-data.csv"'
 
     writer = csv.writer(response)
     writer.writerow(['FileNamewithExtension', 'dc.contributor.author', 'dc.contributor.illustrator', 'dc.creator', 'dc.contributor.editor', 'dc.date.created', 'dc.date.copyright', 'dc.date.accessioned', 'dc.date.available', 'dc.identifier.uri', 'dc.identifier.isbn', 'dc.identifier.issn', 'dc.identifier.citation', 'dc.description.abstract', 'dc.description.tableofcontents', 'dc.format.extent', 'dc.format.mimetype', 'dc.language.iso', 'dc.relation.ispartof', 'dc.relation.ispartofseries', 'dc.relation.haspart', 'dc.source', 'dc.subject', 'dc.subject.ddc', 'dc.subject.lcc', 'dc.title', 'dc.title.alternative', 'dc.publisher', 'dc.type', 'dcterms.educationLevel', 'dc.subject.pedagogicobjective', 'dc.coverage.board', 'dc.format.typicallearningtime', 'dc.format.difficultylevel', 'dc.type.typeoflearningmaterial', 'dc.creator.researcher', 'dc.subject.authorkeyword', 'dc.contributor.advisor', 'dc.publisher.place', 'dc.publisher.institution', 'dc.date.awarded', 'dc.type.degree', 'dc.publisher.department', 'dc.rights.uri', 'dc.rights.rightsholder'])
@@ -160,7 +160,7 @@ def find_tutorial_user(tr):
         return "FOSSEE Ptyhon Team"
     elif tr.tutorial_detail.foss.foss == "Scilab":
         return "FOSSEE Scilab Team"
-    file_path = "/home/sanmugam/Desktop/Tutorial-user-name-modification-Sheet5.csv"
+    file_path = "/websites_dir/django_spoken/spoken/media/Tutorial-user-name-modification-Sheet5.csv"
     if tr.video_user.username == 'pravin1389':
         with open(file_path, 'rbU') as csvfile:
             csvdata = csv.reader(csvfile, delimiter=',', quotechar='|')
@@ -172,12 +172,12 @@ def find_tutorial_user(tr):
                         if user.first_name:
                             return user.first_name + " " + user.last_name
                         else:
-                            return user.username + "-"
+                            return user.username
                 except Exception, e:
                     print e, " => ", row[8]
     if tr.video_user.first_name:
         return str(tr.video_user.first_name) + " " + str(tr.video_user.last_name)
-    return str(tr.video_user.username) + "-"
+    return str(tr.video_user.username)
 
 def formated_publish_date(tr):
     print tr.id
