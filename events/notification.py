@@ -3,7 +3,7 @@ from django.template.loader import get_template
 from django.template import Context
 from events.models import *
 from django.http import HttpResponse, HttpResponseRedirect
-
+import time
 def nemail(request):
   
   plaintext = get_template('email-template/email-template.txt')
@@ -11,9 +11,7 @@ def nemail(request):
   d = Context({ 'username': 'username' })
   text_content = plaintext.render(d)
   html_content = htmly.render(d)
-
-  organisers = Organiser.objects.filter(status=1)
-
+  organisers = Organiser.objects.filter(status=1).exclude(user_id__in=OrganiserNotification.objects.all().values_list('user_id'))
   sent = 0
   notsent = 0
   count = 0
@@ -77,7 +75,7 @@ def nemail(request):
           result = email.send(fail_silently=False)
           sent += 1
           OrganiserNotification.objects.create(user=organiser.user)
-          if sent%50 == 0:
+          if sent%10 == 0:
               time.sleep(5)
           print to," => sent (", str(count),"/",str(tot_count),")"
       except Exception, e:
