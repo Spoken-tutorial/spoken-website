@@ -22,6 +22,7 @@ from events2.models import *
 def participants(request):
     emails = TrainingAttendance.objects.all().values('email').distinct()
     student = Group.objects.get(name = 'Student')
+    error_log_file_head = open('error-log.txt',"w")
     for email in emails:
         if email['email'] == None or (not email['email'].strip()):
             continue
@@ -58,7 +59,11 @@ def participants(request):
                 gender = 'Female'
             password = row.password
             if not user:
-                user = User.objects.create_user(mail, mail, firstname)
+                try:
+                    user = User.objects.create_user(mail, mail, firstname)
+                except Exception, e:
+                    error_log_file_head.write(mail+','+mail+','+firstname)
+                    continue
             user.is_active = False
             user.first_name = firstname.upper()
             if lastname:
