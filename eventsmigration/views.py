@@ -129,12 +129,11 @@ def _find_course(foss, category):
     return CourseMap.objects.get(foss= foss, category = category)
 
 def training_planner(request):
-    #organisers = Training.objects.filter().values('organiser').distinct()[:100]
-    organisers = Training.objects.filter(organiser_id=44).values('organiser').distinct()[:10]
+    organisers = Training.objects.filter().values('organiser').distinct()
     for organiser in organisers:
         # organiser training per year
         organiser_id = int(organiser['organiser'])
-        organiser_training_by_year = Training.objects.filter(organiser_id = organiser_id).exclude(academic__institution_type__name='School').extra(select={'year': "EXTRACT(year FROM tdate)"}).values('year', 'academic').distinct().order_by('academic', 'year')
+        organiser_training_by_year = Training.objects.filter(Q(training_type=0) | Q(training_type=1), organiser_id = organiser_id).exclude(academic__institution_type__name='School').extra(select={'year': "EXTRACT(year FROM tdate)"}).values('year', 'academic').distinct().order_by('academic', 'year')
         for record in organiser_training_by_year:
             year = str(record['year'])
             academic_id = record['academic']
