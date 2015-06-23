@@ -242,6 +242,7 @@ class TrainingPermissionForm(forms.Form):
         pass
 
 class TestForm(forms.ModelForm):
+    test_category = forms.ModelChoiceField(widget = forms.Select(attrs = {}), queryset = TestCategory.objects.filter(status=1))
     class Meta:
         model = Test
         exclude = ['status', 'participant_count', 'organiser', 'academic', 'test_code', 'ttime', 'training', 'workshop', 'appoved_by']

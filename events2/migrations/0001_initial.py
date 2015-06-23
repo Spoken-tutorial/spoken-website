@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('creation', '__first__'),
-        ('events', '__first__'),
+        ('events', '0001_initial'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
