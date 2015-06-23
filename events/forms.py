@@ -6,6 +6,7 @@ from django.forms import ModelForm
 
 #import events models
 from events.models import *
+from events.formsv2 import *
 from django.contrib.auth.models import User, Group
 
 class RpForm(forms.ModelForm):
@@ -242,7 +243,6 @@ class TrainingPermissionForm(forms.Form):
         pass
 
 class TestForm(forms.ModelForm):
-    test_category = forms.ModelChoiceField(widget = forms.Select(attrs = {}), queryset = TestCategory.objects.filter(status=1))
     class Meta:
         model = Test
         exclude = ['status', 'participant_count', 'organiser', 'academic', 'test_code', 'ttime', 'training', 'workshop', 'appoved_by']
@@ -258,9 +258,9 @@ class TestForm(forms.ModelForm):
         if 'test_category' in self.cleaned_data:
             if self.cleaned_data['test_category'].id == 2 and self.cleaned_data['training'] == '':
                 raise forms.ValidationError("Training field is required.")
-            
+    test_category = forms.ModelChoiceField(queryset = TestCategory.objects.filter(status=True), required = False)
     tdate = forms.DateTimeField(required = True, error_messages = {'required':'Date field is required.'})
-    workshop = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = False, error_messages = {'required':'Workshop field is required.'})
+    #workshop = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = False, error_messages = {'required':'Workshop field is required.'})
     training = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = False, error_messages = {'required':'Training field is required.'})
     foss = forms.ModelChoiceField(label='Foss', cache_choices=True, widget = forms.Select(attrs = {}), queryset = FossCategory.objects.filter(id__in = FossAvailableForTest.objects.filter(status=1).values_list('foss').distinct()).order_by('foss')
 , help_text = "", error_messages = {'required':'Foss field required.'})
@@ -279,12 +279,9 @@ class TestForm(forms.ModelForm):
         
         if user:
             try:
-                self.fields['invigilator'].queryset = Invigilator.objects.filter(academic  = user.organiser.academic, status=1).exclude(user_id = user.id)
-                wchoices = list(Training.objects.filter(academic = user.organiser.academic, status = 4, training_type__gt=0).values_list('id', 'training_code'))
-                wchoices.insert(0, ('', '-- None --'))
-                trchoices = list(Training.objects.filter(academic = user.organiser.academic, status = 4, training_type__gte=0).values_list('id', 'training_code'))
-                trchoices.insert(0, ('', '-- None --'))
-                self.fields['workshop'].choices = wchoices
+                trainings = TrainingRequest.test_training.filter(training_planner__academic = user.organiser.academic, training_planner__organiser=user.organiser)
+                trchoices = [(training.id, training.training_name()) for training in trainings]
+                trchoices.insert(0, ('', '-------'))
                 self.fields['training'].choices = trchoices
             except:
                 pass
@@ -296,8 +293,6 @@ class TestForm(forms.ModelForm):
             self.fields['foss'].initial = instance.foss
             self.fields['tdate'].initial = str(instance.tdate) + " " + str(instance.ttime)[0:5]
             self.fields['department'].initial = instance.department.all().values_list('id', flat=True)
-            if instance.test_category.id == 1:
-                self.fields['workshop'].initial = instance.training_id
             if instance.test_category.id == 2:
                 self.fields['training'].initial = instance.training_id
 

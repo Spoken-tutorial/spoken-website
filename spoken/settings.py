@@ -83,7 +83,6 @@ INSTALLED_APPS = (
     'youtube',
     'reports',
     'compressor',
-    'events2',
     'eventsmigration',
 )
 

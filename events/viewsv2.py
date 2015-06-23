@@ -122,7 +122,8 @@ class TrainingPlannerListView(ListView):
       even = False
     sem = self.get_semester(even)
     try:
-      next_planner = TrainingPlanner.objects.get(year=year, semester=sem)
+      next_planner = TrainingPlanner.objects.get(year=year, semester=sem, \
+        academic=self.user.organiser.academic, organiser=self.user.organiser)
       return next_planner
     except ObjectDoesNotExist:
       return TrainingPlanner.objects.create(year=year, \

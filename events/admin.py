@@ -85,3 +85,7 @@ admin.site.register(City, CityAdmin)
 admin.site.register(FossAvailableForTest, FossAvailableForTestAdmin)
 admin.site.register(FossAvailableForWorkshop, FossAvailableForWorkshopAdmin)
 admin.site.register(FossMdlCourses, FossMdlCoursesAdmin)
+
+
+# EVENTS V2
+admin.site.register(CourseMap)

@@ -11,9 +11,9 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(
-            model_name='testcategory',
-            name='status',
-            field=models.BooleanField(default=0),
+        migrations.AlterField(
+            model_name='test',
+            name='training',
+            field=models.ForeignKey(to='events.TrainingRequest', null=True),
         ),
     ]

@@ -1,4 +1,4 @@
-from django.conf.urls import patterns, url
+from django.conf.urls import patterns, url, include
 
 urlpatterns = patterns('',
     url(r'^$', 'events.views.events_dashboard', name='events_dashboard'),
@@ -41,7 +41,7 @@ urlpatterns = patterns('',
     url(r'^training/live/list/$', 'events.views.live_training', name='live_training'),
     url(r'^training/live/list/(\d+)/$', 'events.views.live_training', name='live_training'),
     
-    url(r'^training/subscribe/(\w+)/(\d+)/(\d+)/$', 'events.views.training_subscribe', name='student_subscribe'),
+    #url(r'^training/subscribe/(\w+)/(\d+)/(\d+)/$', 'events.views.training_subscribe', name='student_subscribe'),
     url(r'^training/(\d+)/attendance/$', 'events.views.training_attendance', name='training_attendance'),
     url(r'^training/(\d+)/participant/$', 'events.views.training_participant', name='training_participant'),
     url(r'^training/participant/certificate/(\d+)/(\d+)/$', 'events.views.training_participant_ceritificate', name='training_participant_ceritificate'),
@@ -94,4 +94,6 @@ urlpatterns = patterns('',
     #url(r'add$', 'events.views.add_contact', name='add_contact'),
     #url(r'edit/(\d+)$', 'events.views.edit_contact', name='edit_contact'),   
     #url(r'delete/(\d+)$', 'events.views.delete_contact', name='delete_contact'),
+    # EVENTS V2 URLs
+    url(r'^', include('events.urlsv2')),
 )
