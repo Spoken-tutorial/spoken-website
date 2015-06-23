@@ -311,17 +311,6 @@ class SingleTrainingAttendance(models.Model):
   class Meta:
     unique_together = (("training", "firstname", "lastname", "email"),)
 
-class T1(models.Model):
-    name = models.CharField(max_length = 100)
-
-class T2(models.Model):
-    name = models.CharField(max_length = 100)
-
-class T3(models.Model):
-    name = models.CharField(max_length = 100)
-    test = models.ForeignKey(T1)
-
-
 ### Signals
 def revoke_student_permission(sender, instance, *args, **kwargs):
   try:
