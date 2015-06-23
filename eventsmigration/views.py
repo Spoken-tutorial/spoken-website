@@ -22,6 +22,7 @@ from events2.models import *
 def participants(request):
     emails = TrainingAttendance.objects.all().values('email').distinct()
     student = Group.objects.get(name = 'Student')
+    error_log_file_head = open('error-log.txt',"w")
     for email in emails:
         if email['email'] == None or (not email['email'].strip()):
             continue
@@ -58,7 +59,11 @@ def participants(request):
                 gender = 'Female'
             password = row.password
             if not user:
-                user = User.objects.create_user(mail, mail, firstname)
+                try:
+                    user = User.objects.create_user(mail, mail, firstname)
+                except Exception, e:
+                    error_log_file_head.write(mail+','+mail+','+firstname)
+                    continue
             user.is_active = False
             user.first_name = firstname.upper()
             if lastname:
@@ -83,19 +88,23 @@ def course_map(request):
     return HttpResponse('Success')
 
 def _create_training_planner(year, academic_id, organiser_id, created, even=False):
+    others = Department.objects.get(name="Others")
     try:
-        tp = TrainingPlanner()
-        tp.semester_id = 2
-        tp.year = year
-        if even:
-            tp.year = int(year) -1
-            tp.semester_id = 1
-        tp.academic_id = academic_id
-        tp.organiser_id = organiser_id
-        tp.created = created
-        tp.updated = created
-        tp.save()
-        
+        tp = None
+        try:
+            tp = TrainingPlanner.objects.get(year=year, academic_id=academic_id, organiser_id=organiser_id, semester__even=even)
+        except:
+            tp = TrainingPlanner()
+            tp.semester_id = 2
+            tp.year = year
+            if even:
+                tp.year = int(year) -1
+                tp.semester_id = 1
+            tp.academic_id = academic_id
+            tp.organiser_id = organiser_id
+            tp.created = created
+            tp.updated = created
+            tp.save() 
         # Get old training request
         trainings = None
         if even:
@@ -112,6 +121,8 @@ def _create_training_planner(year, academic_id, organiser_id, created, even=Fals
             tr.updated = training.updated
             tr.batch_id = None
             tr.course = _find_course(training.foss, 0)
+            if not training.department.first():
+                training.department.add(others.id)
             tr.department = training.department.first() # what to do if multiple dept
             tr.language = training.language
             tr.training_planner = tp
@@ -145,21 +156,29 @@ def training_planner(request):
 
 def attendance(request):
     training_requests = TrainingRequest.objects.all()
+    attend_student = open('no-student-attendance-log.txt',"w")
+    attend = open('duplicate-attendance-log.txt',"w")
+    attend_user = open('no-user-attendance-log.txt',"w")
     for tr in training_requests:
         attendance = TrainingAttendance.objects.filter(training_id = tr.id)
         for record in attendance:
+            if not record.email:
+                continue
             record.email = record.email.lower()
-            record.firstname = record.firstname.upper()
-            record.lastname = record.lastname.upper()
+            #record.firstname = record.firstname.upper()
+            #record.lastname = record.lastname.upper()
             if User.objects.filter(email = record.email).exists():
                 try:
-                    user = User.objects.get(email = record.email, first_name = record.firstname, last_name = record.lastname)
+                    #user = User.objects.get(email = record.email, first_name = record.firstname, last_name = record.lastname)
+                    user = User.objects.get(email = record.email)
                     if Student.objects.filter(user = user).exists():
                         student = Student.objects.get(user = user)
                         # Create Attendance
                         ta = TrainingAttend()
                         ta.training = tr
                         ta.student = student
+                        old_tr = Training.objects.get(pk=tr.id)
+                        ta.language = old_tr.language
                         ta.created = record.created
                         ta.updated = record.updated
                         ta.save()
@@ -172,12 +191,14 @@ def attendance(request):
                         tc.updated = record.updated
                         tc.save()
                     else:
+                        attend_student.write(str(record.id)+','+str(record.training_id)+','+str(record.email)+ '\n')
                         print "No student => ", record.id, ", ", record.training_id,", ", record.email
                 except Exception, e:
+                    attend.write(str(record.id)+','+str(record.training_id)+','+str(record.email)+ '\n')
                     print e, "name mismatch => ", record.id, ", ", record.training_id,", ", record.email
             else:
+                attend_user.write(str(record.id)+','+str(record.training_id)+','+str(record.email)+ '\n')
                 print "No user => ", record.id, ", ", record.training_id,", ", record.email
-            print "************************************************"
     return HttpResponse('Success')
 
 def _get_training_type(training):
