@@ -203,7 +203,7 @@ class TrainingPlanner(models.Model):
 
   def get_current_semester_date_duration(self):
     if self.semester.even:
-      return datetime.strptime(str(int(self.year)+1)+'-01-01', '%Y-%m-%d').date(), datetime.strptime(str(self.year+1)+'-06-30', '%Y-%m-%d').date()
+      return datetime.strptime(str(int(self.year)+1)+'-01-01', '%Y-%m-%d').date(), datetime.strptime(str(int(self.year)+1)+'-06-30', '%Y-%m-%d').date()
     return datetime.strptime(str(self.year)+'-07-01', '%Y-%m-%d').date(), datetime.strptime(str(self.year)+'-12-31', '%Y-%m-%d').date()
 
   class Meta:
@@ -224,7 +224,11 @@ class TrainingRequest(models.Model):
   
   # restrict the month to rise a training request
   def can_mark_attendance(self):
-    if self.status or date.today() < self.sem_start_date:
+    sem_start, sem_end = self.training_planner.get_current_semester_date_duration()
+    today = date.today()
+    if self.status or today < self.sem_start_date or today > sem_end:
+      return False
+    elif self.course.category == 0 and date.today() > self.sem_start_date:
       return False
     return True
 
@@ -306,6 +310,16 @@ class SingleTrainingAttendance(models.Model):
 
   class Meta:
     unique_together = (("training", "firstname", "lastname", "email"),)
+
+class T1(models.Model):
+    name = models.CharField(max_length = 100)
+
+class T2(models.Model):
+    name = models.CharField(max_length = 100)
+
+class T3(models.Model):
+    name = models.CharField(max_length = 100)
+    test = models.ForeignKey(T1)
 
 
 ### Signals

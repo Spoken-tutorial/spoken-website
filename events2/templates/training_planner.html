@@ -98,11 +98,9 @@
                   <td>{{ training.department }}</td>
                   <td>{{ training.attendance_summery }}</td>
                   <td>
-                    {% if training.can_mark_attendance %}
-                      | <a href="{% url 'events2:training_attendance' training.id %}">Participant List</a>
-                    {% endif %}
+                    | <a href="{% url 'events2:training_attendance' training.id %}">Participant List</a> |
                     {% if training.can_edit %}
-                      | <a href="{% url 'events2:edit_training_request' training.id %}">Edit</a> |
+                      <a href="{% url 'events2:edit_training_request' training.id %}">Edit</a> |
                     {% endif %}
                   </td>
                 </tr>

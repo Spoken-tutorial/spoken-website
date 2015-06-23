@@ -24,6 +24,16 @@ from cms.sortable import *
 from events.views import get_page
 from django.contrib import messages
 
+#pdf generate
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter, landscape
+from reportlab.platypus import Paragraph
+from reportlab.lib.styles import ParagraphStyle
+from reportlab.lib.units import cm
+from reportlab.lib.enums import TA_CENTER
+from PyPDF2 import PdfFileWriter, PdfFileReader
+from StringIO import StringIO
+
 class JSONResponseMixin(object):
   """
   A mixin that can be used to render a JSON response.
@@ -480,9 +490,9 @@ class TrainingAttendanceListView(ListView):
   
   def dispatch(self, *args, **kwargs):
     self.training_request = TrainingRequest.objects.get(pk=kwargs['tid'])
-    if not self.training_request.can_mark_attendance():
+    """if not self.training_request.can_mark_attendance():
       messages.warning(self.request, 'You do not have permission to fill participants list for this training.')
-      return HttpResponseRedirect('/events2/training-planner/')
+      return HttpResponseRedirect('/events2/training-planner/')"""
     self.queryset = StudentMaster.objects.filter(batch_id=self.training_request.batch_id)
     return super(TrainingAttendanceListView, self).dispatch(*args, **kwargs)
 
@@ -541,6 +551,110 @@ class StudentDeleteView(DeleteView):
       pass
     return super(StudentDeleteView, self).dispatch(*args, **kwargs)
 
+class TrainingCertificate():
+  def custom_strftime(self, format, t):
+    return t.strftime(format).replace('{S}', str(t.day) + self.suffix(t.day))
+
+  def suffix(self, d):
+    return 'th' if 11<=d<=13 else {1:'st',2:'nd',3:'rd'}.get(d%10, 'th')
+
+  def training_certificate(self, ta):
+    response = HttpResponse(content_type='application/pdf')
+    filename = (ta.student.user.first_name+'-'+ta.training.course.foss.foss+"-Participant-Certificate").replace(" ", "-");
+    
+    response['Content-Disposition'] = 'attachment; filename='+filename+'.pdf'
+    imgTemp = StringIO()
+    imgDoc = canvas.Canvas(imgTemp)
+
+    # Title 
+    imgDoc.setFont('Helvetica', 40, leading=None)
+    imgDoc.drawCentredString(415, 480, "Certificate of Learning")
+
+    #date
+    imgDoc.setFont('Helvetica', 18, leading=None)
+    imgDoc.drawCentredString(211, 115, self.custom_strftime('%B {S} %Y', ta.training.sem_start_date)) 
+
+    #password
+    certificate_pass = ''
+    imgDoc.setFillColorRGB(211, 211, 211)
+    imgDoc.setFont('Helvetica', 10, leading=None)
+    imgDoc.drawString(10, 6, certificate_pass)
+
+    # Draw image on Canvas and save PDF in buffer
+    imgPath = settings.MEDIA_ROOT +"sign.jpg"
+    imgDoc.drawImage(imgPath, 600, 100, 150, 76)
+
+    #paragraphe
+    text = "This is to certify that <b>"+ta.student.user.first_name +" "+ta.student.user.last_name+"</b> participated in the <b>"+ta.training.course.foss.foss+"</b> training organized at <b>"+ta.training.training_planner.academic.institution_name+"</b> by  <b>"+ta.training.training_planner.organiser.user.first_name + " "+ta.training.training_planner.organiser.user.last_name+"</b> on <b>"+self.custom_strftime('%B {S} %Y', ta.training.sem_start_date)+"</b> with course material provided by the Talk To A Teacher project at IIT Bombay.<br /><br />A comprehensive set of topics pertaining to <b>"+ta.training.course.foss.foss+"</b> were covered in the workshop. This training is offered by the Spoken Tutorial Project, IIT Bombay, funded by National Mission on Education through ICT, MHRD, Govt., of India."
+    
+    centered = ParagraphStyle(name = 'centered',
+      fontSize = 16,  
+      leading = 30,  
+      alignment = 0,  
+      spaceAfter = 20
+    )
+
+    p = Paragraph(text, centered)
+    p.wrap(650, 200)
+    p.drawOn(imgDoc, 4.2 * cm, 7 * cm)
+
+    imgDoc.save()
+
+    # Use PyPDF to merge the image-PDF into the template
+    page = PdfFileReader(file(settings.MEDIA_ROOT +"Blank-Certificate.pdf","rb")).getPage(0)
+    overlay = PdfFileReader(StringIO(imgTemp.getvalue())).getPage(0)
+    page.mergePage(overlay)
+
+    #Save the result
+    output = PdfFileWriter()
+    output.addPage(page)
+    
+    #stream to browser
+    outputStream = response
+    output.write(response)
+    outputStream.close()
+
+    return response
+
+class OrganiserTrainingCertificateView(TrainingCertificate, View):
+  template_name = ""
+  @method_decorator(group_required("Organiser"))
+  def dispatch(self, *args, **kwargs):
+    return super(OrganiserTrainingCertificateView, self).dispatch(*args, **kwargs)
+
+  def get(self, request, *args, **kwargs):
+    ta = None
+    try:
+      ta = TrainingAttend.objects.get(pk=kwargs['taid'])
+    except ObjectDoesNotExist:
+      messages.error(self.request, "Record not found")
+      pass
+
+    if ta and ta.training.training_planner.organiser == self.request.user.organiser:
+      return self.training_certificate(ta)
+    else:
+      messages.error(self.request, "PermissionDenied!")
+    return HttpResponseRedirect("/")
+
+class StudentTrainingCertificateView(TrainingCertificate, View):
+  template_name = ""
+  @method_decorator(group_required("Student"))
+  def dispatch(self, *args, **kwargs):
+    return super(StudentTrainingCertificateView, self).dispatch(*args, **kwargs)
+
+  def get(self, request, *args, **kwargs):
+    ta = None
+    try:
+      ta = TrainingAttend.objects.get(pk=kwargs['taid'])
+    except ObjectDoesNotExist:
+      messages.error(self.request, "Record not found")
+      pass
+
+    if ta and ta.student.user == self.request.user:
+      return self.training_certificate(ta)
+    else:
+      messages.error(self.request, "PermissionDenied!")
+    return HttpResponseRedirect("/")
 
 ### Ajax
 class SaveStudentView(JSONResponseMixin, View):

@@ -54,7 +54,16 @@ urlpatterns = [
         success_url="/events2/student-batch"), 
       name="student_delete"
     ),
-
+    url(
+      r'^training-certificate/(?P<taid>\d+)/organiser/$', 
+      OrganiserTrainingCertificateView.as_view(), \
+        name="organiser_training_certificate"
+    ),
+    url(
+      r'^training-certificate/(?P<taid>\d+)/student/$', 
+      StudentTrainingCertificateView.as_view(), \
+        name="student_training_certificate"
+    ),
     #ajax
     url(
       r'^save-student/', 

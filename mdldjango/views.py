@@ -20,6 +20,7 @@ from events.forms import OrganiserForm
 from django.core.mail import EmailMultiAlternatives
 from validate_email import validate_email
 from get_or_create_participant import get_or_create_participant, encript_password, check_csvfile
+from events2.signals import get_or_create_user
     
 def authenticate(username = None, password = None):
     try:
@@ -232,14 +233,15 @@ def mdl_register(request):
             mdluser.auth = 'manual'
             mdluser.institution = form.cleaned_data['college']
             mdluser.gender = form.cleaned_data['gender']
-            mdluser.firstname = form.cleaned_data['firstname']
-            mdluser.lastname = form.cleaned_data['lastname']
-            mdluser.email = form.cleaned_data['email']
-            mdluser.username = form.cleaned_data['username']
+            mdluser.firstname = form.cleaned_data['firstname'].upper()
+            mdluser.lastname = form.cleaned_data['lastname'].upper()
+            mdluser.email = form.cleaned_data['email'].lower()
+            mdluser.username = mdluser.email
             mdluser.password = encript_password(form.cleaned_data['password'])
             mdluser.confirmed = 1
             mdluser.mnethostid = 1
             mdluser.save()
+            get_or_create_user(mdluser, form.cleaned_data['password'])
             messages.success(request, "User " + form.cleaned_data['firstname'] +" "+form.cleaned_data['lastname']+" Created!")
             return HttpResponseRedirect('/participant/register/')
             
@@ -313,6 +315,10 @@ def forget_password(request):
             password_encript = encript_password(password_string)
             user.password = password_encript
             user.save()
+            # reset auth user password
+            mdluser, flag, authuser = get_or_create_user(user)
+            authuser.set_password(password_string)
+            
             subject  = "Spoken Tutorial Online Test password reset"
             to = [user.email]
             message = '''Hi {0},

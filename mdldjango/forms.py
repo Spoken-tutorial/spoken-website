@@ -7,6 +7,8 @@ from django.forms import ModelForm
 #import events models
 from events.models import *
 from django.contrib.auth.models import User, Group
+from events2.signals import get_or_create_user
+from get_or_create_participant import encript_password
 
 class OfflineDataForm(forms.Form):
     xml_file  = forms.FileField(required=True)
@@ -28,7 +30,6 @@ class RegisterForm(forms.Form):
     lastname = forms.CharField()
     email = forms.EmailField()
     gender = forms.ChoiceField(widget=forms.RadioSelect, choices=[('Male', 'Male'),('Female', 'Female')], required = True)
-    username = forms.CharField()
     password = forms.CharField(widget=forms.PasswordInput())
     password_confirm = forms.CharField(widget=forms.PasswordInput())
     choices = list(Course.objects.order_by('name').values_list('id', 'name'))
@@ -48,11 +49,18 @@ class RegisterForm(forms.Form):
             raise forms.ValidationError(u'Username: %s already exists' % username )
         
     def clean_email(self):
-        email = self.cleaned_data['email']
+        email = self.cleaned_data['email'].lower()
         error = 0
         try:
-            user = MdlUser.objects.filter(email=email).first().id
+            user = MdlUser.objects.filter(email=email).first()
+            user.id
             error = 1
+            # check if user exists
+            mdluser, flag, authuser = get_or_create_user(user)
+            if flag:
+            	mdluser.password = encript_password(mdluser.firstname)
+            	mdluser.save()
+            	# send email along with password
         except Exception, e:
             return email
         if error:

@@ -118,7 +118,7 @@ def _create_training_planner(year, academic_id, organiser_id, created, even=Fals
             tr.status = 1
             tr.save()
     except Exception, e:
-        print e,  "************************************************"
+        print e, training.id, "************************************************"
 
 def _find_course(foss, category):
     return CourseMap.objects.get(foss= foss, category = category)
