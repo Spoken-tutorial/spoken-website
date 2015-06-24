@@ -20,7 +20,7 @@ from events.forms import OrganiserForm
 from django.core.mail import EmailMultiAlternatives
 from validate_email import validate_email
 from get_or_create_participant import get_or_create_participant, encript_password, check_csvfile
-from events2.signals import get_or_create_user
+from events.signals import get_or_create_user
     
 def authenticate(username = None, password = None):
     try:

@@ -7,7 +7,7 @@ from django.forms import ModelForm
 #import events models
 from events.models import *
 from django.contrib.auth.models import User, Group
-from events2.signals import get_or_create_user
+from events.signals import get_or_create_user
 from get_or_create_participant import encript_password
 
 class OfflineDataForm(forms.Form):

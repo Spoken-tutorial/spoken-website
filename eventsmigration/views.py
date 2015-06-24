@@ -17,7 +17,6 @@ import datetime
 import os, sys
 from django.core.validators import validate_email
 from events.models import *
-from events2.models import *
 
 def participants(request):
     emails = TrainingAttendance.objects.all().values('email').distinct()
