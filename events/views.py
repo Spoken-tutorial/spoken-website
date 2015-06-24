@@ -34,10 +34,10 @@ from cms.models import Profile
 from mdldjango.forms import OfflineDataForm
     
 from forms import *
-import datetime
 from django.utils import formats
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from mdldjango.get_or_create_participant import get_or_create_participant, check_csvfile, update_participants_count, clone_participant
+from mdldjango.helper import get_moodle_user
 from django.template.defaultfilters import slugify
 
 #pdf generate
@@ -58,6 +58,7 @@ from  filters import *
 
 from cms.sortable import *
 from events_email import send_email
+import datetime
 
 def can_clone_training(training):
     if training.tdate > datetime.datetime.strptime('01-02-2015', "%d-%m-%Y").date() and training.organiser.academic.institution_type.name != 'School':
@@ -1656,8 +1657,8 @@ def test_request(request, role, rid = None):
                 t.academic = user.organiser.academic
             t.test_category_id = request.POST['test_category']
             
-            if int(request.POST['test_category']) == 1:
-                t.training_id = request.POST['workshop']
+            """if int(request.POST['test_category']) == 1:
+                t.training_id = request.POST['workshop']"""
             if int(request.POST['test_category']) == 2:
                 t.training_id = request.POST['training']
             if int(request.POST['test_category']) == 3:
@@ -1672,12 +1673,29 @@ def test_request(request, role, rid = None):
             error = 0
             try:
                 t.save()
+                if t and t.training_id:
+                    tras = TrainingAttend.objects.filter(training=t.training)
+                    for tra in tras:
+                        user = tra.student.user
+                        mdluser = get_moodle_user(tra.training.training_planner.academic_id, user.first_name, user.last_name, tra.student.gender, tra.student.user.email)# if it create user rest password for django user too
+                        if mdluser:
+                            fossmdlcourse = FossMdlCourses.objects.get(foss_id = t.foss_id)
+                            instance = TestAttendance()
+                            instance.student = tra.student
+                            instance.test_id = t.id
+                            instance.mdluser_id = mdluser.id
+                            instance.mdlcourse_id = fossmdlcourse.mdlcourse_id
+                            instance.mdlquiz_id = fossmdlcourse.mdlquiz_id
+                            instance.mdlattempt_id = 0
+                            instance.status = 0
+                            instance.save()
             except IntegrityError:
                 error = 1
                 prev_test = Test.objects.filter(organiser = t.organiser_id, academic = t.academic, foss = t.foss_id, tdate = t.tdate, ttime = t.ttime)
                 if prev_test:
                     messages.error(request, "You have already scheduled <b>"+ t.foss.foss + "</b> Test on <b>"+t.tdate + " "+ t.ttime + "</b>. Please select some other time.")
-            except:
+            except Exception, e:
+                print e
                 messages.error(request, "Sorry, Something went wrong. try again!")
                 error = 1
             
@@ -1989,8 +2007,11 @@ def test_participant(request, tid=None):
             t = Test.objects.get(id=tid)
         except:
             raise PermissionDenied()
-            
-        test_mdlusers = TestAttendance.objects.using('default').filter(test_id=tid)
+        
+        if t.status == 4:
+            test_mdlusers = TestAttendance.objects.filter(test_id=tid, status__gte=2)
+        else:
+            test_mdlusers = TestAttendance.objects.filter(test_id=tid)
         #ids = []
         #print test_mdlusers
         #for tp in test_mdlusers:

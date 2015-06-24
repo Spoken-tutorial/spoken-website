@@ -92,7 +92,7 @@
                             <h5>Online Assessment Test</h5>
                             <ul>
                                 <li><a href="/software-training/test/organiser/request/">New Test Request</a></li>
-                                <li><a href="/software-training/tesparticipant/login/t/organiser/approved/">Approved Assessment Test</a></li>
+                                <li><a href="/software-training/test/organiser/approved/">Approved Assessment Test</a></li>
                                 <li><a href="/software-training/test/organiser/completed/">Completed Assessment Test</a></li>
                             </ul>
                         </div>
@@ -102,7 +102,7 @@
                     <div class="panel panel-primary">
                         <div class="panel-heading panel-heading-notif">Join with Us</div>
                         <div class="panel-body">
-                            <ul>participant/login/
+                            <ul>
                                 {% if not user|is_organiser %}
                                     <li><a href="/software-training/organiser/request/{{user.username}}">Add me as Organiser</a></li>
                                 {% endif %}

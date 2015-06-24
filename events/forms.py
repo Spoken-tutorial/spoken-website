@@ -279,9 +279,12 @@ class TestForm(forms.ModelForm):
         
         if user:
             try:
+                self.fields['invigilator'].queryset = Invigilator.objects.filter(academic = user.organiser.academic, status=1).exclude(user_id = user.id)
                 trainings = TrainingRequest.test_training.filter(training_planner__academic = user.organiser.academic, training_planner__organiser=user.organiser)
                 trchoices = [(training.id, training.training_name()) for training in trainings]
                 trchoices.insert(0, ('', '-------'))
+                if instance:
+                    trchoices.insert(0, (instance.training_id, instance.training.training_name()))
                 self.fields['training'].choices = trchoices
             except:
                 pass

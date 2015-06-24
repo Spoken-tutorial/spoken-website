@@ -277,6 +277,7 @@ class Test(models.Model):
 
 class TestAttendance(models.Model):
     test = models.ForeignKey(Test)
+    student = models.ForeignKey('Student', null=True)
     mdluser_firstname = models.CharField(max_length = 100)
     mdluser_lastname = models.CharField(max_length = 100)
     mdluser_id = models.PositiveIntegerField()
