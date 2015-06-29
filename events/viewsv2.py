@@ -379,6 +379,10 @@ class TrainingRequestCreateView(CreateView):
 
   @method_decorator(group_required("Organiser"))
   def dispatch(self, *args, **kwargs):
+    if not StudentBatch.objects.filter(academic=self.request.user.organiser.academic).exists():
+        messages.warning(self.request, 'Please upload the master batch.')
+        return HttpResponseRedirect("/software-training/training-planner")
+
     if 'tpid' in self.kwargs:
       self.tpid = self.kwargs['tpid']
       training_planner = TrainingPlanner.objects.filter(pk=self.tpid, organiser_id = self.request.user.organiser.id)
@@ -392,7 +396,7 @@ class TrainingRequestCreateView(CreateView):
           messages.warning(self.request, 'Selected Training Planner is already expired')
           return HttpResponseRedirect("/software-training/training-planner")
     return super(TrainingRequestCreateView, self).dispatch(*args, **kwargs)
-  
+
   def get_context_data(self, **kwargs):
     context = super(TrainingRequestCreateView, self).get_context_data(**kwargs)
     context['training_planner_id'] = self.tpid
