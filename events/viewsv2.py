@@ -9,7 +9,8 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
 from django.utils.decorators import method_decorator
 from events.decorators import group_required
-from events.forms import StudentBatchForm, TrainingRequestForm, TrainingRequestEditForm
+from events.forms import StudentBatchForm, TrainingRequestForm, \
+    TrainingRequestEditForm, CourseMapForm
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, render_to_response
 from django.core.validators import validate_email
@@ -650,12 +651,70 @@ class StudentTrainingCertificateView(TrainingCertificate, View):
     except ObjectDoesNotExist:
       messages.error(self.request, "Record not found")
       pass
-
-    if ta and ta.student.user == self.request.user:
-      return self.training_certificate(ta)
-    else:
+    
+    try:
+        mdluserid = request.session.get('mdluserid', None)
+        mdluser = MdlUser.objects.get(id=mdluserid)
+        if ta and ta.student.user.email == mdluser.email:
+            return self.training_certificate(ta)
+    except Exception, e:
       messages.error(self.request, "PermissionDenied!")
     return HttpResponseRedirect("/")
+
+class CourseMapCreateView(CreateView):
+  form_class = CourseMapForm
+  @method_decorator(group_required("Organiser"))
+  def dispatch(self, *args, **kwargs):
+    return super(CourseMapCreateView, self).dispatch(*args, **kwargs)
+
+  def get_context_data(self, **kwargs):
+    context = super(CourseMapCreateView, self).get_context_data(**kwargs)
+    return context
+  
+  def form_valid(self, form, **kwargs):
+    # Check if all student participate in selected foss
+    try:
+      form_data = form.save(commit=False)
+      if FossAvailableForTest.objects.filter(foss_id=form_data.foss).exists():
+        form_data.test = 1
+      form_data.save()
+    except IntegrityError:
+      messages.error(self.request, 'Course with this Foss and Category already exists.')
+      return self.form_invalid(form)
+    return HttpResponseRedirect('/software-training/course-map/')
+
+class CourseMapListView(ListView):
+  model = CourseMap
+  paginate_by = 50
+  template_name = ""
+  
+  def get_context_data(self, **kwargs):
+    context = super(CourseMapListView, self).get_context_data(**kwargs)
+    collectionSet = CourseMap.objects.exclude(category=0)
+    header = {
+        1: SortableHeader('#', False),
+        2: SortableHeader('course', True, 'Course'),
+        3: SortableHeader('test', True, 'Test'),
+        4: SortableHeader('category', True, 'Category'),
+        5: SortableHeader('', False, ''),
+    }
+    raw_get_data = self.request.GET.get('o', None)
+    collection = get_sorted_list(self.request, collectionSet, header, raw_get_data)
+    ordering = get_field_index(raw_get_data)
+    #collection = TrainingFilter(self.request.GET, user = user, queryset=collection)
+    
+    page = self.request.GET.get('page')
+    collection = get_page(collection, page)
+    context['object_list'] = collection
+    context['header'] = header
+    context['ordering'] = ordering
+    return context
+
+class CourseMapUpdateView(UpdateView):
+    model = CourseMap
+    form_class = CourseMapForm
+    success_url = "/software-training/course-map-list/"
+
 
 ### Ajax
 class SaveStudentView(JSONResponseMixin, View):

@@ -1,6 +1,6 @@
 
 from django import forms
-
+from captcha.fields import ReCaptchaField
 #import Model form
 from django.forms import ModelForm
 
@@ -36,6 +36,7 @@ class RegisterForm(forms.Form):
     choices.insert(0, ('', '-- None --'),)
     course = forms.ChoiceField(choices = choices)
     year = forms.ChoiceField(choices = (('', '-- None --'), (1, '1st Year'), (2, '2nd year'), (3, '3rd year'), (4, '4th year'), (5, '5th year'), (6, '6th year'),(7, 'Others'),))
+    captcha = ReCaptchaField()
     
     def clean_username(self):
         username = self.cleaned_data['username']
