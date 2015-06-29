@@ -113,6 +113,15 @@
                         </div>
                     </div>
                     <div class="form-group">
+                        <label class="col-sm-3 control-label" for= ""></label>
+                        <div class="col-sm-9">
+                            <div class="input-group captcha-group">
+                                {% render_field form.captcha class+="form-control captcha" placeholder="Enter Captcha" %}
+                            </div>
+                            {{ form.captcha.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
                         <div class="col-sm-offset-3 col-sm-9">
                             <input class="btn btn-primary" type="submit" value="Submit" />
                         </div>

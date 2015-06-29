@@ -123,3 +123,13 @@ class TrainingRequestEditForm(forms.ModelForm):
       self.fields['course_type'].initial = training.course.category
       self.fields['course'].queryset = CourseMap.objects.filter(category=training.course.category)
       self.fields['course'].initial = training.course_id
+
+class CourseMapForm(forms.ModelForm):
+  category = forms.ChoiceField(choices=[('', '---------'), (1, 'Software Course mapped in lab hours'), (2, ' Software Course unmapped in lab hours')])
+  course = forms.ModelChoiceField(queryset=LabCourse.objects.all())
+  class Meta:
+    model = CourseMap
+    exclude = ['test']
+
+  def __init__(self, *args, **kwargs):
+    super(CourseMapForm, self).__init__(*args, **kwargs)

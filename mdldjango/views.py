@@ -21,22 +21,15 @@ from django.core.mail import EmailMultiAlternatives
 from validate_email import validate_email
 from get_or_create_participant import get_or_create_participant, encript_password, check_csvfile
 from events.signals import get_or_create_user
-
-def authenticate(username = None, password = None):
+import datetime
+def authenticate(email = None, password = None):
     try:
-        #print " i am in moodle auth"
-        user = MdlUser.objects.get(username=username)
-        #print user
-        pwd = user.password
-        p = encript_password(password)
-        pwd_valid =  (pwd == p)
-        #print pwd
-        #print "------------"
-        if user and pwd_valid:
+        password = encript_password(password)
+        user = MdlUser.objects.filter(email=email, password=password).last()
+        print user
+        if user:
             return user
     except Exception, e:
-        #print e
-        #print "except ---"
         return None
 
 def mdl_logout(request):
@@ -49,16 +42,16 @@ def mdl_logout(request):
 def mdl_login(request):
     messages = {}
     if request.POST:
-        username = request.POST["username"]
+        email = request.POST["username"]
         password = request.POST["password"]
-        if not username or not password:
+        if not email or not password:
             messages['error'] = "Please enter valide Username and Password!"
             #return HttpResponseRedirect('/participant/login')
-        user = authenticate(username = username, password = password)
+        user = authenticate(email = email, password = password)
         if user:
             request.session['mdluserid'] = user.id
             request.session['mdluseremail'] = user.email
-            request.session['mdlusername'] = user.username
+            request.session['mdlusername'] = user.email
             request.session['mdluserinstitution'] = user.institution
             request.session.save()
             request.session.modified = True
@@ -101,18 +94,17 @@ def index(request):
             past_workshop = None
             past_test = None
             ongoing_test = None
-            if category == 3:
-                upcoming_workshop = Training.objects.filter((Q(status = 0) | Q(status = 1) | Q(status = 2) | Q(status = 3)), academic_id=mdluser.institution, tdate__gte=datetime.date.today()).order_by('-tdate')
+            #if category == 3:
+            #    upcoming_workshop = Training.objects.filter((Q(status = 0) | Q(status = 1) | Q(status = 2) | Q(status = 3)), academic_id=mdluser.institution, tdate__gte=datetime.date.today()).order_by('-tdate')
             if category == 5:
                 upcoming_test = Test.objects.filter(status=2, academic_id=mdluser.institution, tdate__gt=datetime.date.today()).order_by('-tdate')
             if category == 1:
-                past_workshop = Training.objects.filter(id__in = TrainingAttendance.objects.filter(mdluser_id = mdluser.id).values_list('training_id'), status = 4).order_by('-tdate')
+                past_workshop = TrainingAttend.objects.filter(student__user__email = mdluser.email).order_by('-training__sem_start_date')
             if category == 2:
                 past_test = Test.objects.filter(id__in = TestAttendance.objects.filter(mdluser_id = mdluser.id).values_list('test_id'), status = 4).order_by('-tdate')
             if category == 4:
                 ongoing_test = Test.objects.filter(status=3, academic_id=mdluser.institution, tdate = datetime.date.today()).order_by('-tdate')
             
-            print past_workshop, "******************8"
             context = {
                 'mdluserid' : mdluserid,
                 'mdlusername' : mdlusername,
@@ -218,17 +210,14 @@ def mdl_register(request):
     form = RegisterForm()
     if request.method == "POST":
         form = RegisterForm(request.POST)
-        
-        #Email exits
-        try:
-            user = MdlUser.objects.filter(email=request.POST['email']).first()
-            if user:
-                messages.success(request, "Email : "+request.POST['email']+" already registered on this website. Please click <a href='http://www.spoken-tutorial.org/participant/login/'>here </a>to login")
-        except Exception, e:
-            #print e
-            pass
-            
         if form.is_valid():
+            #Email exits
+            try:
+                user = MdlUser.objects.filter(email=request.POST['email']).first()
+                if user:
+                    messages.success(request, "Email : "+request.POST['email']+" already registered on this website. Please click <a href='http://www.spoken-tutorial.org/participant/login/'>here </a>to login")
+            except Exception, e:
+                pass
             mdluser = MdlUser()
             mdluser.auth = 'manual'
             mdluser.institution = form.cleaned_data['college']
