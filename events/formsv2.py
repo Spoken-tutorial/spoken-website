@@ -18,10 +18,10 @@ class StudentBatchForm(forms.ModelForm):
       'csv': 'text/csv',
     }
     component = ''
-    if 'csv_file' in self.cleaned_data:
-      component = self.cleaned_data['csv_file']
-      if not component.content_type in file_types['csv']:
-        self._errors["csv_file"] = self.error_class(["Not a valid file format."])
+    #if 'csv_file' in self.cleaned_data:
+    #  component = self.cleaned_data['csv_file']
+    #  if not component.content_type in file_types['csv']:
+    #    self._errors["csv_file"] = self.error_class(["Not a valid file format."])
     return
   #def __init__(self, *args, **kwargs):
   #  user = kwargs.pop('user')
