@@ -293,6 +293,22 @@ class StudentBatchCreateView(CreateView):
     StudentBatch.objects.get(pk=batch_id).update_student_count()
     return skipped, error, warning, write_flag
 
+class StudentBatchUpdateView(UpdateView):
+    model = StudentBatch
+    success_url = "/software-training/student-batch/"
+    @method_decorator(group_required("Organiser"))
+    def dispatch(self, *args, **kwargs):
+      #trainingrequest_set.all()
+      if 'pk' in kwargs:
+        try:
+          sb = StudentBatch.objects.get(pk=kwargs['pk'])
+          if sb.trainingrequest_set.exists():
+            messages.warning(self.request, 'This Student Batch has Training. You can not edit this batch.')
+            return HttpResponseRedirect('/software-training/student-batch/')
+        except:
+          pass
+      return super(StudentBatchUpdateView, self).dispatch(*args, **kwargs)
+
 
 class StudentBatchListView(ListView):
   model = StudentBatch #queryset = MyModel.objects.filter(myfield="foo")

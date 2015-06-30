@@ -110,12 +110,10 @@
                         {% endif %}
                         <!-- actions based on roles -->
                         <td>
-                        {% if status == 'completed' %}
                             <a href="{% url 'events:test_participant' record.id %}">View Participant</a>
-                        {% endif %}
                         {% if role == 'rp' %}
                             {% if status == 'pending' or status == 'approved' or status == 'predated' %}
-                                <a href="{% url 'events:test_request' role record.id %}">Edit</a>
+                                | <a href="{% url 'events:test_request' role record.id %}">Edit</a>
                             {% endif %}
                             {% if status = 'predated' %}
                                 | <a href="{% url 'events:test_approvel' role record.id %}?status=reject">Reject</a>
