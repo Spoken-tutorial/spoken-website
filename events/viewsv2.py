@@ -515,7 +515,10 @@ class TrainingAttendanceListView(ListView):
     """if not self.training_request.can_mark_attendance():
       messages.warning(self.request, 'You do not have permission to fill participants list for this training.')
       return HttpResponseRedirect('/software-training/training-planner/')"""
-    self.queryset = StudentMaster.objects.filter(batch_id=self.training_request.batch_id)
+    if self.training_request.status:
+      self.queryset = self.training_request.trainingattend_set.all()
+    else:
+      self.queryset = StudentMaster.objects.filter(batch_id=self.training_request.batch_id, moved=False)
     return super(TrainingAttendanceListView, self).dispatch(*args, **kwargs)
 
   def get_context_data(self, **kwargs):
