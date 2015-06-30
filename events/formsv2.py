@@ -13,22 +13,6 @@ class StudentBatchForm(forms.ModelForm):
     model = StudentBatch
     exclude = ['academic', 'stcount', 'organiser']
 
-  def clean(self):
-    file_types = {
-      'csv': 'text/csv',
-    }
-    component = ''
-    #if 'csv_file' in self.cleaned_data:
-    #  component = self.cleaned_data['csv_file']
-    #  if not component.content_type in file_types['csv']:
-    #    self._errors["csv_file"] = self.error_class(["Not a valid file format."])
-    return
-  #def __init__(self, *args, **kwargs):
-  #  user = kwargs.pop('user')
-  #  super(StudentBatchForm, self).__init__(*args, **kwargs)
-  #  self.fields['academic'].queryset = AcademicCenter.objects.filter(pk=user.organiser.academic.id)
-
-
 class NewStudentBatchForm(forms.ModelForm):
   csv_file = forms.FileField(required = True)
 
@@ -36,16 +20,11 @@ class NewStudentBatchForm(forms.ModelForm):
     model = StudentBatch
     exclude = ['academic', 'year', 'department', 'stcount', 'organiser']
 
-  def clean(self):
-    file_types = {
-      'csv': 'text/csv',
-    }
-    component = ''
-    if 'csv_file' in self.cleaned_data:
-      component = self.cleaned_data['csv_file']
-      if not component.content_type in file_types['csv']:
-        self._errors["csv_file"] = self.error_class(["Not a valid file format."])
-    return
+class UpdateStudentBatchForm(forms.ModelForm):
+  year = forms.ChoiceField(choices = get_academic_years())
+  class Meta:
+    model = StudentBatch
+    exclude = ['academic', 'stcount', 'organiser']
 
 class TrainingRequestForm(forms.ModelForm):
   department = forms.ModelChoiceField(empty_label='---------', queryset=CourseMap.objects.none())
