@@ -75,8 +75,7 @@ class TrainingRequestForm(forms.ModelForm):
         self.fields['batch'].queryset = StudentBatch.objects.filter(academic_id=user.organiser.academic.id, stcount__gt=0, department_id=department)
         self.fields['batch'].initial =  kwargs['data']['batch']
     # overwrite department choices
-    self.fields['department'].queryset = Department.objects.filter(pk__in=StudentBatch.objects.filter(academic=user.organiser.academic))
-
+    self.fields['department'].queryset = Department.objects.filter(id__in=StudentBatch.objects.filter(academic=user.organiser.academic).values_list('department_id'))
 class TrainingRequestEditForm(forms.ModelForm):
   course_type = forms.ChoiceField(choices=[('', '---------'), (0, 'Software Course outside lab hours'), (1, 'Software Course mapped in lab hours'), (2, ' Software Course unmapped in lab hours')])
   course = forms.ModelChoiceField(empty_label='---------', queryset=CourseMap.objects.none())
