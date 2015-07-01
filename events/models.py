@@ -586,7 +586,7 @@ class StudentMaster(models.Model):
 
   class Meta:
     unique_together = ("batch", "student")
-
+    ordering = ["student__user__first_name"]
 
 class Semester(models.Model):
   name = models.CharField(max_length = 50)
@@ -651,7 +651,7 @@ class TrainingPlanner(models.Model):
     return self.semester.name
 
   def training_requests(self):
-    return TrainingRequest.objects.filter(training_planner_id = self.id)
+    return TrainingRequest.objects.filter(training_planner_id = self.id).exclude(Q(participants=0)&Q(status=1))
 
   def get_semester(self):
     if self.semester.even:

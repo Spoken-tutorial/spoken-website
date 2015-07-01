@@ -28,6 +28,12 @@ def dispatcher(request, permalink=''):
     }
     return render(request, 'cms/templates/page.html', context)
 
+def create_profile(user):
+    confirmation_code = ''.join(random.choice(string.ascii_uppercase + string.digits + string.ascii_lowercase) for x in range(33))
+    profile = Profile(user=user, confirmation_code=confirmation_code)
+    profile.save()
+    return profile
+
 def account_register(request):
     context = {}
     if request.method == 'POST':
@@ -39,9 +45,7 @@ def account_register(request):
             user = User.objects.create_user(username, email, password)
             user.is_active = False
             user.save()
-            confirmation_code = ''.join(random.choice(string.ascii_uppercase + string.digits + string.ascii_lowercase) for x in range(33))
-            p = Profile(user=user, confirmation_code=confirmation_code)
-            p.save()
+            create_profile(user)
             send_registration_confirmation(user)
             messages.success(request, """
                 Please confirm your registration by clicking on the activation link which has been sent to your registered email id.
@@ -162,7 +166,10 @@ def account_logout(request):
 @login_required
 def account_profile(request, username):
     user = request.user
-    profile = Profile.objects.get(user_id=user.id)
+    try:
+      profile = Profile.objects.get(user_id=user.id)
+    except:
+      profile = create_profile(user)
     old_file_path = settings.MEDIA_ROOT + str(profile.picture)
     new_file_path = None
     if request.method == 'POST':
@@ -214,7 +221,11 @@ def account_profile(request, username):
 @login_required
 def account_view_profile(request, username):
     user = User.objects.get(username = username)
-    profile = Profile.objects.get(user = user)
+    profile = None
+    try:
+      profile = Profile.objects.get(user = user)
+    except:
+      profile = create_profile(user)
     context = {
         'profile' : profile,
         'media_url' : settings.MEDIA_URL,
