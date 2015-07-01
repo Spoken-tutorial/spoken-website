@@ -10,24 +10,30 @@ urlpatterns = [
       name="training_planner"
     ),
     url(
-      r'^student-batch/new', 
+      r'^student-batch/new/$', 
       StudentBatchCreateView.as_view(template_name="new_batch.html", \
         form_class=StudentBatchForm), 
       name="add_batch"
     ),
     url(
-      r'^student-batch/(?P<bid>\d+)/new', 
+      r'^student-batch/(?P<bid>\d+)/new/$', 
       StudentBatchCreateView.as_view(template_name="update_batch.html", \
         form_class=NewStudentBatchForm), 
       name="add_student"
     ),
     url(
-      r'^student-batch/(?P<bid>\d+)/view', 
+      r'^student-batch/(?P<pk>\d+)/$', 
+      StudentBatchUpdateView.as_view(template_name="edit_batch.html", \
+        form_class=UpdateStudentBatchForm), 
+      name="edit_student"
+    ),
+    url(
+      r'^student-batch/(?P<bid>\d+)/view/$', 
       StudentListView.as_view(template_name="list_student.html"), 
       name="list_student"
     ),
     url(
-      r'^student-batch', 
+      r'^student-batch/$', 
       StudentBatchListView.as_view(template_name="student_batch_list.html"), 
       name="batch_list"
     ),

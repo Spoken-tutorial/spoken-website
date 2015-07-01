@@ -293,6 +293,22 @@ class StudentBatchCreateView(CreateView):
     StudentBatch.objects.get(pk=batch_id).update_student_count()
     return skipped, error, warning, write_flag
 
+class StudentBatchUpdateView(UpdateView):
+    model = StudentBatch
+    success_url = "/software-training/student-batch/"
+    @method_decorator(group_required("Organiser"))
+    def dispatch(self, *args, **kwargs):
+      #trainingrequest_set.all()
+      if 'pk' in kwargs:
+        try:
+          sb = StudentBatch.objects.get(pk=kwargs['pk'])
+          if sb.trainingrequest_set.exists():
+            messages.warning(self.request, 'This Student Batch has Training. You can not edit this batch.')
+            return HttpResponseRedirect('/software-training/student-batch/')
+        except:
+          pass
+      return super(StudentBatchUpdateView, self).dispatch(*args, **kwargs)
+
 
 class StudentBatchListView(ListView):
   model = StudentBatch #queryset = MyModel.objects.filter(myfield="foo")
@@ -499,7 +515,10 @@ class TrainingAttendanceListView(ListView):
     """if not self.training_request.can_mark_attendance():
       messages.warning(self.request, 'You do not have permission to fill participants list for this training.')
       return HttpResponseRedirect('/software-training/training-planner/')"""
-    self.queryset = StudentMaster.objects.filter(batch_id=self.training_request.batch_id)
+    if self.training_request.status:
+      self.queryset = self.training_request.trainingattend_set.all()
+    else:
+      self.queryset = StudentMaster.objects.filter(batch_id=self.training_request.batch_id, moved=False)
     return super(TrainingAttendanceListView, self).dispatch(*args, **kwargs)
 
   def get_context_data(self, **kwargs):

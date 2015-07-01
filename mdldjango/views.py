@@ -213,26 +213,25 @@ def mdl_register(request):
         if form.is_valid():
             #Email exits
             try:
-                user = MdlUser.objects.filter(email=request.POST['email']).first()
-                if user:
-                    messages.success(request, "Email : "+request.POST['email']+" already registered on this website. Please click <a href='http://www.spoken-tutorial.org/participant/login/'>here </a>to login")
+                user = MdlUser.objects.filter(email=request.POST['email']).first().id
+                messages.success(request, "Email : "+request.POST['email']+" already registered on this website. Please click <a href='http://www.spoken-tutorial.org/participant/login/'>here </a>to login")
             except Exception, e:
-                pass
-            mdluser = MdlUser()
-            mdluser.auth = 'manual'
-            mdluser.institution = form.cleaned_data['college']
-            mdluser.gender = form.cleaned_data['gender']
-            mdluser.firstname = form.cleaned_data['firstname'].upper()
-            mdluser.lastname = form.cleaned_data['lastname'].upper()
-            mdluser.email = form.cleaned_data['email'].lower()
-            mdluser.username = mdluser.email
-            mdluser.password = encript_password(form.cleaned_data['password'])
-            mdluser.confirmed = 1
-            mdluser.mnethostid = 1
-            mdluser.save()
-            get_or_create_user(mdluser, form.cleaned_data['password'])
-            messages.success(request, "User " + form.cleaned_data['firstname'] +" "+form.cleaned_data['lastname']+" Created!")
-            return HttpResponseRedirect('/participant/register/')
+                mdluser = MdlUser()
+                mdluser.auth = 'manual'
+                mdluser.institution = form.cleaned_data['college']
+                mdluser.gender = form.cleaned_data['gender']
+                mdluser.firstname = form.cleaned_data['firstname'].upper()
+                mdluser.lastname = form.cleaned_data['lastname'].upper()
+                mdluser.email = form.cleaned_data['email'].lower()
+                mdluser.username = mdluser.email
+                mdluser.password = encript_password(form.cleaned_data['password'])
+                mdluser.confirmed = 1
+                mdluser.mnethostid = 1
+                mdluser.save()
+                mdluser = MdlUser.objects.get(email=mdluser.email)
+                get_or_create_user(mdluser, form.cleaned_data['password'])
+                messages.success(request, "User " + form.cleaned_data['firstname'] +" "+form.cleaned_data['lastname']+" Created!. Please click <a href='http://www.spoken-tutorial.org/participant/login/'>here </a>to login")
+                return HttpResponseRedirect('/participant/register/')
             
     context = {}
     context['form'] = form

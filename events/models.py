@@ -572,6 +572,11 @@ class StudentBatch(models.Model):
        return True
     return False
 
+  def has_training(self):
+    if self.trainingrequest_set.exists():
+       return False
+    return True
+
 class StudentMaster(models.Model):
   batch = models.ForeignKey(StudentBatch)
   student = models.ForeignKey(Student)
@@ -784,8 +789,8 @@ class TrainingRequest(models.Model):
   
   def training_name(self):
     if self.batch:
-      return '%s - %s - %s, %s Semester' % (self.course, self.batch, self.training_planner.year, self.training_planner.semester.name)
-    return '%s - %s, %s Semester' % (self.course, self.training_planner.year, self.training_planner.semester.name)
+      return '%s, %s - %s - %s, %s Semester' % (self.course, self.batch, self.training_planner.year, int(self.training_planner.year)+1, self.training_planner.semester.name)
+    return '%s, %s - %s, %s Semester' % (self.course, self.training_planner.year, int(self.training_planner.year)+1,  self.training_planner.semester.name)
 
 class TrainingAttend(models.Model):
   training = models.ForeignKey(TrainingRequest)
