@@ -22,7 +22,6 @@ from django.http import JsonResponse
 from creation.models import FossAvailableForWorkshop
 import csv
 from cms.sortable import *
-from events.views import get_page
 from django.contrib import messages
 
 #pdf generate
@@ -311,58 +310,46 @@ class StudentBatchUpdateView(UpdateView):
 
 
 class StudentBatchListView(ListView):
-  model = StudentBatch #queryset = MyModel.objects.filter(myfield="foo")
+  queryset = StudentBatch.objects.none()
   paginate_by = 20
   template_name = ""
-  
+  header = None
+  raw_get_data = None
+  @method_decorator(group_required("Organiser"))
+  def dispatch(self, *args, **kwargs):
+    self.queryset = StudentBatch.objects.filter(academic_id=self.request.user.organiser.academic_id)
+    self.header = {
+      1: SortableHeader('#', False),
+      2: SortableHeader('academic', True, 'Institution'),
+      3: SortableHeader('department', True, 'Department'),
+      4: SortableHeader('year', True, 'Year'),
+      5: SortableHeader('stcount', True, 'Student Count'),
+      6: SortableHeader('', False, ''),
+    }
+    self.raw_get_data = self.request.GET.get('o', None)
+    self.queryset = get_sorted_list(self.request, self.queryset, self.header, self.raw_get_data)
+    return super(StudentBatchListView, self).dispatch(*args, **kwargs)
+    
   def get_context_data(self, **kwargs):
     context = super(StudentBatchListView, self).get_context_data(**kwargs)
-    collectionSet = StudentBatch.objects.filter(academic_id=self.request.user.organiser.academic_id)
-    header = {
-        1: SortableHeader('#', False),
-        2: SortableHeader('academic', True, 'Institution'),
-        3: SortableHeader('department', True, 'Department'),
-        4: SortableHeader('year', True, 'Year'),
-        5: SortableHeader('stcount', True, 'Student Count'),
-        6: SortableHeader('', False, ''),
-    }
-    
-    raw_get_data = self.request.GET.get('o', None)
-    collection = get_sorted_list(self.request, collectionSet, header, raw_get_data)
-    ordering = get_field_index(raw_get_data)
-    #collection = TrainingFilter(self.request.GET, user = user, queryset=collection)
-    
-    page = self.request.GET.get('page')
-    collection = get_page(collection, page)
-    context['object_list'] = collection
-    context['header'] = header
-    context['ordering'] = ordering
+    context['header'] = self.header
+    context['ordering'] = get_field_index(self.raw_get_data)
     return context
 
 class StudentListView(ListView):
   queryset = Student.objects.none()
-  paginate_by = 20
+  paginate_by = 30
   template_name = None
   batch = None
+  header = None
+  raw_get_data = None
   @method_decorator(group_required("Organiser"))
   def dispatch(self, *args, **kwargs):
     self.batch = StudentBatch.objects.filter(pk=kwargs['bid'])
     if not self.batch.exists():
       return HttpResponseRedirect('/student-batch')
     self.batch = self.batch.first()
-    return super(StudentListView, self).dispatch(*args, **kwargs)
-    
-  def get_context_data(self, **kwargs):
-    context = super(StudentListView, self).get_context_data(**kwargs)
-    collectionSet = self.queryset = Student.objects.filter(
-      id__in = StudentMaster.objects.filter(
-        batch_id=self.batch.id,
-        moved=False
-      ).values_list(
-        'student'
-      )
-    )
-    header = {
+    self.header = {
         1: SortableHeader('#', False),
         2: SortableHeader('', False, 'Department'),
         3: SortableHeader('', False, 'Year'),
@@ -373,17 +360,22 @@ class StudentListView(ListView):
         8: SortableHeader('', False, 'Status'),
         9: SortableHeader('', False, ''),
     }
+    self.queryset = Student.objects.filter(
+      id__in = StudentMaster.objects.filter(
+        batch_id=self.batch.id,
+        moved=False
+      ).values_list(
+        'student'
+      )
+    )
+    self.raw_get_data = self.request.GET.get('o', None)
+    self.queryset = get_sorted_list(self.request, self.queryset, self.header, self.raw_get_data)
+    return super(StudentListView, self).dispatch(*args, **kwargs)
     
-    raw_get_data = self.request.GET.get('o', None)
-    collection = get_sorted_list(self.request, collectionSet, header, raw_get_data)
-    ordering = get_field_index(raw_get_data)
-    #collection = TrainingFilter(self.request.GET, user = user, queryset=collection)
-    
-    page = self.request.GET.get('page')
-    collection = get_page(collection, page)
-    context['object_list'] = collection
-    context['header'] = header
-    context['ordering'] = ordering
+  def get_context_data(self, **kwargs):
+    context = super(StudentListView, self).get_context_data(**kwargs)
+    context['header'] = self.header
+    context['ordering'] = get_field_index(self.raw_get_data)
     context['batch'] = self.batch
     return context
 
@@ -505,16 +497,13 @@ class TrainingRequestEditView(CreateView):
       return self.form_invalid(form)
 
 class TrainingAttendanceListView(ListView):
-  model = StudentMaster
-  paginate_by = 20
+  queryset = StudentMaster.objects.none()
+  paginate_by = 50
   template_name = ""
   training_request = None
   
   def dispatch(self, *args, **kwargs):
     self.training_request = TrainingRequest.objects.get(pk=kwargs['tid'])
-    """if not self.training_request.can_mark_attendance():
-      messages.warning(self.request, 'You do not have permission to fill participants list for this training.')
-      return HttpResponseRedirect('/software-training/training-planner/')"""
     if self.training_request.status:
       self.queryset = self.training_request.trainingattend_set.all()
     else:
@@ -707,30 +696,28 @@ class CourseMapCreateView(CreateView):
     return HttpResponseRedirect('/software-training/course-map/')
 
 class CourseMapListView(ListView):
-  model = CourseMap
+  queryset = CourseMap.objects.none()
   paginate_by = 50
-  template_name = ""
-  
-  def get_context_data(self, **kwargs):
-    context = super(CourseMapListView, self).get_context_data(**kwargs)
-    collectionSet = CourseMap.objects.exclude(category=0)
-    header = {
+  header = None
+  raw_get_data = None
+  @method_decorator(group_required("Organiser"))
+  def dispatch(self, *args, **kwargs):
+    self.header = {
         1: SortableHeader('#', False),
         2: SortableHeader('course', True, 'Course'),
         3: SortableHeader('test', True, 'Test'),
         4: SortableHeader('category', True, 'Category'),
         5: SortableHeader('', False, ''),
     }
-    raw_get_data = self.request.GET.get('o', None)
-    collection = get_sorted_list(self.request, collectionSet, header, raw_get_data)
-    ordering = get_field_index(raw_get_data)
-    #collection = TrainingFilter(self.request.GET, user = user, queryset=collection)
-    
-    page = self.request.GET.get('page')
-    collection = get_page(collection, page)
-    context['object_list'] = collection
-    context['header'] = header
-    context['ordering'] = ordering
+    self.queryset = CourseMap.objects.exclude(category=0)
+    self.raw_get_data = self.request.GET.get('o', None)
+    collection = get_sorted_list(self.request, self.queryset, self.header, self.raw_get_data)
+    return super(CourseMapListView, self).dispatch(*args, **kwargs)
+
+  def get_context_data(self, **kwargs):
+    context = super(CourseMapListView, self).get_context_data(**kwargs)
+    context['header'] = self.header
+    context['ordering'] = get_field_index(self.raw_get_data)
     return context
 
 class CourseMapUpdateView(UpdateView):

@@ -203,8 +203,8 @@ def is_invigilator(user):
     """Check if the user is having invigilator rights"""
     if user.groups.filter(name='Invigilator').count() == 1 and user.invigilator and user.invigilator.status == 1:
         return True
-def get_page(resource, page):
-    paginator = Paginator(resource, 20)
+def get_page(resource, page, limit=20):
+    paginator = Paginator(resource, limit)
     try:
         resource =  paginator.page(page)
     except PageNotAnInteger:
