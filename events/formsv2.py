@@ -48,7 +48,7 @@ class TrainingRequestForm(forms.ModelForm):
     
     # Date restriction
     if self.cleaned_data and 'sem_start_date' in self.cleaned_data and self.cleaned_data['sem_start_date']:
-      start_date, end_date =tp.get_current_semester_date_duration()
+      start_date, end_date =tp.get_current_semester_date_duration_new()
       print tp.id, '-------------------'
       print start_date, end_date, self.cleaned_data['sem_start_date']
       if not (self.cleaned_data['sem_start_date'] <= end_date and self.cleaned_data['sem_start_date'] >= start_date):
@@ -89,7 +89,7 @@ class TrainingRequestEditForm(forms.ModelForm):
     # Date restriction
     if self.cleaned_data and 'sem_start_date' in self.cleaned_data and self.cleaned_data['sem_start_date']:
       tp = TrainingPlanner.objects.get(pk=self.cleaned_data['training_planner'])
-      start_date, end_date =tp.get_current_semester_date_duration()
+      start_date, end_date =tp.get_current_semester_date_duration_new()
       print start_date, end_date, self.cleaned_data['sem_start_date']
       if not (self.cleaned_data['sem_start_date'] <= end_date and self.cleaned_data['sem_start_date'] >= start_date):
         raise forms.ValidationError("Invalid semester start date")

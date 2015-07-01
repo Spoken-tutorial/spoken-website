@@ -35,7 +35,15 @@
               <div class="modal-content">
                 <div class="modal-body">
                   <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                  <div>Choose Semester to fill <b>Training Planner Form</b></div><br />
+                  <div><font size="3">Choose Semester to fill <b>Training Planner Form</b></font>
+                    <br><br><div style="text-align: justify; width:350px;"><ul>
+                      <li>Select Jan-Jun for 2nd, 4th, 6th, 8th semesters</li>
+                      <li>Select Jul-Dec for 1st, 3rd, 5th semesters</li>
+                    </ul></div>
+                    <i>In case your semester begins <b>mid-June</b> onwards, please choose July-Dec semester 
+                    <br/>and select 1 July as Semester Start Date.</i>
+                  </div><br />
+                  
                   <a class="btn btn-primary " href="{% url 'events:training_request' current_planner.id %}">Current Semester: {{current_planner.get_semester}}</a>
                   <a class="btn btn-primary " href="{% url 'events:training_request' next_planner.id %}"> Next Semester: {{next_planner.get_semester}}</a>
                 </div>
