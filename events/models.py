@@ -719,6 +719,10 @@ class TrainingPlanner(models.Model):
       return datetime.strptime(str(int(self.year)+1)+'-01-01', '%Y-%m-%d').date(), datetime.strptime(str(int(self.year)+1)+'-06-30', '%Y-%m-%d').date()
     return datetime.strptime(str(self.year)+'-07-01', '%Y-%m-%d').date(), datetime.strptime(str(self.year)+'-12-31', '%Y-%m-%d').date()
 
+  def get_current_semester_date_duration_new(self):
+    if self.semester.even:
+      return datetime.strptime(str(int(self.year)+1)+'-01-01', '%Y-%m-%d').date(), datetime.strptime(str(int(self.year)+1)+'-02-28', '%Y-%m-%d').date()
+    return datetime.strptime(str(self.year)+'-07-01', '%Y-%m-%d').date(), datetime.strptime(str(self.year)+'-8-31', '%Y-%m-%d').date()
   class Meta:
     unique_together = ("year", "academic", "organiser", "semester")
 
