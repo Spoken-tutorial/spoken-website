@@ -11,11 +11,10 @@ def is_attendance_marked(training, student):
 
 @register.filter
 def get_attendance(training, student):
-  print training.id, student.id
   if TrainingAttend.objects.filter(training=training, student=student).exists():
-    print "1"
     return TrainingAttend.objects.filter(training=training, student=student).first()
-  print "2"
+  if training.batch_id:
+    return True
   return False
 
 @register.filter
