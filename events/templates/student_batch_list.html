@@ -2,12 +2,11 @@
 {% load widget_tweaks %}
 {% load static %}
 {% block title %}Master Batch Student List{% endblock %}
-{% block heading %}<i class="home-page-title-i">Master Batch Student List</i>{% endblock %}
+{% block heading %}<i class="home-page-title-i">Master Batch Student List</i><a href="/software-training" class='pull-right go-back'>Dashboard</a>{% endblock %}
 {% block search %}{% endblock %}
 {% block content %}
 {% load cmsdata %}
 {% load student %}
-  
   <div>
     <center>
       <a class="btn btn-success pull-left" href="{% url 'events:add_batch' %}">Add Batch</a>
