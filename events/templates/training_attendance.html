@@ -18,7 +18,6 @@
       <div style="width:200px;float:left;text-align:center;">
         <p id="button-select">To select all participants</p> <input type=button class="btn btn-success"  value="Check All" onClick="this.value=check()"> 
       </div> 
-      
       <div style="width:250px; text-align:center; float:right;"> 
         <p>To select language for all participants</p>
         <select name="selectall" id="selectall" style="height:30px;">
@@ -32,7 +31,6 @@
         </select>
       </div>
   </div>
-  
   {% if object_list %}
     {% with can_mark_attendance=training.can_mark_attendance %}
       {% if can_mark_attendance %}
@@ -126,13 +124,11 @@
       return "Check All";
     }
   }
-  
-  $("#selectall").change(function () {
+  $("#selectall").click(function () {
     var option=document.getElementsByClassName('selectall'); 
     for (i = 0; i < option.length; i++) {
      option[i].value = this.value;
     }
   });
-
   </script>
 {% endblock %}
