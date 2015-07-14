@@ -14,6 +14,25 @@
 {% block search %}{% endblock %}
 {% block content %}
   <div><a class="btn btn-success" href="{% url 'events:training_planner' %}">Go Back to Training Planner</a><br><br></div>
+  <div style="height:70px;">
+      <div style="width:200px;float:left;text-align:center;">
+        <p id="button-select">To select all participants</p> <input type=button class="btn btn-success"  value="Check All" onClick="this.value=check()"> 
+      </div> 
+      
+      <div style="width:250px; text-align:center; float:right;"> 
+        <p>To select language for all participants</p>
+        <select name="selectall" id="selectall" style="height:30px;">
+        {% for lang in languages %}
+          {% if lang_id %}
+          <option {% if lang_id == lang.id %}selected="selected"{% endif %} value="{{lang.id}}">{{ lang.name}}</option>
+          {% else %}
+          <option {% if lang.name == 'English' %}selected="selected"{% endif %} value="{{lang.id}}">{{ lang.name}}</option>
+          {% endif %}
+        {% endfor %}
+        </select>
+      </div>
+  </div>
+  
   {% if object_list %}
     {% with can_mark_attendance=training.can_mark_attendance %}
       {% if can_mark_attendance %}
@@ -30,7 +49,8 @@
           <th>Email</th>
           <th>Gender</th>
           {% if can_mark_attendance %}
-            <th>Action</th>
+            <th>Preffered Language
+            </th>
           {% endif %}
         {% for record in object_list %}
           {% if not record.moved %}
@@ -54,7 +74,7 @@
                 {% if can_mark_attendance and attendance_allowed %}
                   <td>
                   {% with lang_id=training|get_langid:record.student %}
-                    <select name="{{record.student.id}}">
+                    <select name="{{record.student.id}}" class="selectall">
                       {% for lang in languages %}
                         {% if lang_id %}
                           <option {% if lang_id == lang.id %}selected="selected"{% endif %} value="{{lang.id}}">{{ lang.name}}</option>
@@ -85,4 +105,34 @@
       {% endif %}
     {% endwith %}
   {% endif %}
+{% endblock %}
+{% block jsblock %}
+  <script type="text/javascript">
+  var checkflag = "false";
+  function check() {
+  var field=document.getElementsByName('user'); 
+    if (checkflag == "false") {
+      for (i = 0; i < field.length; i++) {
+        field[i].checked = true;
+      }
+      checkflag = "true";
+      $("#button-select").text("To deselect all participants");
+      return "Uncheck All";
+    } else {
+      for (i = 0; i < field.length; i++) {
+        field[i].checked = false;
+      }
+      checkflag = "false";
+      return "Check All";
+    }
+  }
+  
+  $("#selectall").change(function () {
+    var option=document.getElementsByClassName('selectall'); 
+    for (i = 0; i < option.length; i++) {
+     option[i].value = this.value;
+    }
+  });
+
+  </script>
 {% endblock %}
