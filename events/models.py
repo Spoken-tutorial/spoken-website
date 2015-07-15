@@ -572,6 +572,11 @@ class StudentBatch(models.Model):
        return True
     return False
 
+  def has_training(self):
+    if self.trainingrequest_set.exists():
+       return False
+    return True
+
 class StudentMaster(models.Model):
   batch = models.ForeignKey(StudentBatch)
   student = models.ForeignKey(Student)
@@ -581,7 +586,7 @@ class StudentMaster(models.Model):
 
   class Meta:
     unique_together = ("batch", "student")
-
+    ordering = ["student__user__first_name"]
 
 class Semester(models.Model):
   name = models.CharField(max_length = 50)
@@ -619,11 +624,18 @@ class CourseMap(models.Model):
     if self.course_id:
       return '%s - %s' % (self.course.name, self.foss.foss)
     return self.foss
+  
+  def category_name(self):
+    courses = {
+      0 : 'Software Course outside lab hours',
+      1 : 'Software Course mapped in lab hours',
+      2 : 'Software Course unmapped in lab hours'
+    }
+    return courses[self.category]
 
   class Meta:
     unique_together = ("course", "foss", "category")
     ordering = ('foss',)
-
 
 class TrainingPlanner(models.Model):
   year = models.CharField(max_length = 50)
@@ -639,7 +651,7 @@ class TrainingPlanner(models.Model):
     return self.semester.name
 
   def training_requests(self):
-    return TrainingRequest.objects.filter(training_planner_id = self.id)
+    return TrainingRequest.objects.filter(training_planner_id = self.id).exclude(Q(participants=0)&Q(status=1))
 
   def get_semester(self):
     if self.semester.even:
@@ -712,6 +724,10 @@ class TrainingPlanner(models.Model):
       return datetime.strptime(str(int(self.year)+1)+'-01-01', '%Y-%m-%d').date(), datetime.strptime(str(int(self.year)+1)+'-06-30', '%Y-%m-%d').date()
     return datetime.strptime(str(self.year)+'-07-01', '%Y-%m-%d').date(), datetime.strptime(str(self.year)+'-12-31', '%Y-%m-%d').date()
 
+  def get_current_semester_date_duration_new(self):
+    if self.semester.even:
+      return datetime.strptime(str(int(self.year)+1)+'-01-01', '%Y-%m-%d').date(), datetime.strptime(str(int(self.year)+1)+'-02-28', '%Y-%m-%d').date()
+    return datetime.strptime(str(self.year)+'-07-01', '%Y-%m-%d').date(), datetime.strptime(str(self.year)+'-8-31', '%Y-%m-%d').date()
   class Meta:
     unique_together = ("year", "academic", "organiser", "semester")
 
@@ -773,8 +789,8 @@ class TrainingRequest(models.Model):
   
   def training_name(self):
     if self.batch:
-      return '%s - %s - %s, %s Semester' % (self.course, self.batch, self.training_planner.year, self.training_planner.semester.name)
-    return '%s - %s, %s Semester' % (self.course, self.training_planner.year, self.training_planner.semester.name)
+      return '%s, %s - %s - %s, %s Semester' % (self.course, self.batch, self.training_planner.year, int(self.training_planner.year)+1, self.training_planner.semester.name)
+    return '%s, %s - %s, %s Semester' % (self.course, self.training_planner.year, int(self.training_planner.year)+1,  self.training_planner.semester.name)
 
 class TrainingAttend(models.Model):
   training = models.ForeignKey(TrainingRequest)

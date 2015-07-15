@@ -13,7 +13,7 @@
     <ul class="nav nav-tabs">
         <li class="{% if category == 1 %} active {% endif %}"><a href="{% url 'mdldjango:mdl_index' %}?category=1">Past Training</a></li>
         <li class="{% if category == 2 %} active {% endif %}"><a href="{% url 'mdldjango:mdl_index' %}?category=2">Past Test</a></li>
-        <!-- <li class="{% if category == 3 %} active {% endif %}"><a href="{% url 'mdldjango:mdl_index' %}?category=3">Upcoming Training</a></li> -->
+        <!--<li class="{% if category == 3 %} active {% endif %}"><a href="{% url 'mdldjango:mdl_index' %}?category=3">Upcoming Training</a></li>-->
         <li class="{% if category == 4 %} active {% endif %}"><a href="{% url 'mdldjango:mdl_index' %}?category=4">Ongoing Test</a></li>
         <li class="{% if category == 5 %} active {% endif %}"><a href="{% url 'mdldjango:mdl_index' %}?category=5">Upcoming Test</a></li>
     </ul>
@@ -31,23 +31,13 @@
                 </tr>
                 {% for record in past_workshop %}
                     <tr>
+                        <td>Training</td>
+                        <td>{{ record.training.course }}</td>
+                        <td>{{ record.training.sem_start_date }} {{ record.ttime }}</td>
                         <td>
-                            {% if record.training_type %}
-                                Workshop
-                            {% else %}
-                                Training
-                            {% endif %}
-                        </td>
-                        <td>{{ record.foss.foss }}</td>
-                        <td>{{ record.tdate }} {{ record.ttime }}</td>
-                        <td>
-                            <a href="{% url 'mdldjango:feedback' record.id %}">Feedback</a> | 
-                            <a href="{% url 'events:training_participant_language_feedback' record.id mdluserid %}">Language Feedback</a>
-                            {% with result=mdluserid|can_download_workshop_certificate:record %}
-                                {% if result %}
-                                    | <a href="{% url 'events:training_participant_ceritificate' record.id result %}">Certificate</a>
-                                {% endif %}
-                            {% endwith %}
+                            <!--<a href="{% url 'mdldjango:feedback' record.id %}">Feedback</a> | 
+                            <a href="{% url 'events:training_participant_language_feedback' record.id mdluserid %}">Language Feedback</a>-->
+                            <a href="{% url 'events:student_training_certificate' record.id %}">Certificate</a>
                         </td>
                     </tr>
                 {% endfor %}

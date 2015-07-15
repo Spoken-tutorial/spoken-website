@@ -9,7 +9,8 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
 from django.utils.decorators import method_decorator
 from events.decorators import group_required
-from events.forms import StudentBatchForm, TrainingRequestForm, TrainingRequestEditForm
+from events.forms import StudentBatchForm, TrainingRequestForm, \
+    TrainingRequestEditForm, CourseMapForm
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, render_to_response
 from django.core.validators import validate_email
@@ -21,7 +22,6 @@ from django.http import JsonResponse
 from creation.models import FossAvailableForWorkshop
 import csv
 from cms.sortable import *
-from events.views import get_page
 from django.contrib import messages
 
 #pdf generate
@@ -292,60 +292,64 @@ class StudentBatchCreateView(CreateView):
     StudentBatch.objects.get(pk=batch_id).update_student_count()
     return skipped, error, warning, write_flag
 
+class StudentBatchUpdateView(UpdateView):
+    model = StudentBatch
+    success_url = "/software-training/student-batch/"
+    @method_decorator(group_required("Organiser"))
+    def dispatch(self, *args, **kwargs):
+      #trainingrequest_set.all()
+      if 'pk' in kwargs:
+        try:
+          sb = StudentBatch.objects.get(pk=kwargs['pk'])
+          if sb.trainingrequest_set.exists():
+            messages.warning(self.request, 'This Student Batch has Training. You can not edit this batch.')
+            return HttpResponseRedirect('/software-training/student-batch/')
+        except:
+          pass
+      return super(StudentBatchUpdateView, self).dispatch(*args, **kwargs)
+
 
 class StudentBatchListView(ListView):
-  model = StudentBatch #queryset = MyModel.objects.filter(myfield="foo")
+  queryset = StudentBatch.objects.none()
   paginate_by = 20
   template_name = ""
-  
+  header = None
+  raw_get_data = None
+  @method_decorator(group_required("Organiser"))
+  def dispatch(self, *args, **kwargs):
+    self.queryset = StudentBatch.objects.filter(academic_id=self.request.user.organiser.academic_id)
+    self.header = {
+      1: SortableHeader('#', False),
+      2: SortableHeader('academic', True, 'Institution'),
+      3: SortableHeader('department', True, 'Department'),
+      4: SortableHeader('year', True, 'Year'),
+      5: SortableHeader('stcount', True, 'Student Count'),
+      6: SortableHeader('', False, ''),
+    }
+    self.raw_get_data = self.request.GET.get('o', None)
+    self.queryset = get_sorted_list(self.request, self.queryset, self.header, self.raw_get_data)
+    return super(StudentBatchListView, self).dispatch(*args, **kwargs)
+    
   def get_context_data(self, **kwargs):
     context = super(StudentBatchListView, self).get_context_data(**kwargs)
-    collectionSet = StudentBatch.objects.filter(academic_id=self.request.user.organiser.academic_id)
-    header = {
-        1: SortableHeader('#', False),
-        2: SortableHeader('academic', True, 'Institution'),
-        3: SortableHeader('department', True, 'Department'),
-        4: SortableHeader('year', True, 'Year'),
-        5: SortableHeader('stcount', True, 'Student Count'),
-        6: SortableHeader('', False, ''),
-    }
-    
-    raw_get_data = self.request.GET.get('o', None)
-    collection = get_sorted_list(self.request, collectionSet, header, raw_get_data)
-    ordering = get_field_index(raw_get_data)
-    #collection = TrainingFilter(self.request.GET, user = user, queryset=collection)
-    
-    page = self.request.GET.get('page')
-    collection = get_page(collection, page)
-    context['object_list'] = collection
-    context['header'] = header
-    context['ordering'] = ordering
+    context['header'] = self.header
+    context['ordering'] = get_field_index(self.raw_get_data)
     return context
 
 class StudentListView(ListView):
   queryset = Student.objects.none()
-  paginate_by = 20
+  paginate_by = 30
   template_name = None
   batch = None
+  header = None
+  raw_get_data = None
   @method_decorator(group_required("Organiser"))
   def dispatch(self, *args, **kwargs):
     self.batch = StudentBatch.objects.filter(pk=kwargs['bid'])
     if not self.batch.exists():
       return HttpResponseRedirect('/student-batch')
     self.batch = self.batch.first()
-    return super(StudentListView, self).dispatch(*args, **kwargs)
-    
-  def get_context_data(self, **kwargs):
-    context = super(StudentListView, self).get_context_data(**kwargs)
-    collectionSet = self.queryset = Student.objects.filter(
-      id__in = StudentMaster.objects.filter(
-        batch_id=self.batch.id,
-        moved=False
-      ).values_list(
-        'student'
-      )
-    )
-    header = {
+    self.header = {
         1: SortableHeader('#', False),
         2: SortableHeader('', False, 'Department'),
         3: SortableHeader('', False, 'Year'),
@@ -356,17 +360,22 @@ class StudentListView(ListView):
         8: SortableHeader('', False, 'Status'),
         9: SortableHeader('', False, ''),
     }
+    self.queryset = Student.objects.filter(
+      id__in = StudentMaster.objects.filter(
+        batch_id=self.batch.id,
+        moved=False
+      ).values_list(
+        'student'
+      )
+    )
+    self.raw_get_data = self.request.GET.get('o', None)
+    self.queryset = get_sorted_list(self.request, self.queryset, self.header, self.raw_get_data)
+    return super(StudentListView, self).dispatch(*args, **kwargs)
     
-    raw_get_data = self.request.GET.get('o', None)
-    collection = get_sorted_list(self.request, collectionSet, header, raw_get_data)
-    ordering = get_field_index(raw_get_data)
-    #collection = TrainingFilter(self.request.GET, user = user, queryset=collection)
-    
-    page = self.request.GET.get('page')
-    collection = get_page(collection, page)
-    context['object_list'] = collection
-    context['header'] = header
-    context['ordering'] = ordering
+  def get_context_data(self, **kwargs):
+    context = super(StudentListView, self).get_context_data(**kwargs)
+    context['header'] = self.header
+    context['ordering'] = get_field_index(self.raw_get_data)
     context['batch'] = self.batch
     return context
 
@@ -378,6 +387,10 @@ class TrainingRequestCreateView(CreateView):
 
   @method_decorator(group_required("Organiser"))
   def dispatch(self, *args, **kwargs):
+    if not StudentBatch.objects.filter(academic=self.request.user.organiser.academic).exists():
+        messages.warning(self.request, 'Please upload the master batch.')
+        return HttpResponseRedirect("/software-training/training-planner")
+
     if 'tpid' in self.kwargs:
       self.tpid = self.kwargs['tpid']
       training_planner = TrainingPlanner.objects.filter(pk=self.tpid, organiser_id = self.request.user.organiser.id)
@@ -391,7 +404,7 @@ class TrainingRequestCreateView(CreateView):
           messages.warning(self.request, 'Selected Training Planner is already expired')
           return HttpResponseRedirect("/software-training/training-planner")
     return super(TrainingRequestCreateView, self).dispatch(*args, **kwargs)
-  
+
   def get_context_data(self, **kwargs):
     context = super(TrainingRequestCreateView, self).get_context_data(**kwargs)
     context['training_planner_id'] = self.tpid
@@ -484,17 +497,17 @@ class TrainingRequestEditView(CreateView):
       return self.form_invalid(form)
 
 class TrainingAttendanceListView(ListView):
-  model = StudentMaster
-  paginate_by = 20
+  queryset = StudentMaster.objects.none()
+  paginate_by = 500
   template_name = ""
   training_request = None
   
   def dispatch(self, *args, **kwargs):
     self.training_request = TrainingRequest.objects.get(pk=kwargs['tid'])
-    """if not self.training_request.can_mark_attendance():
-      messages.warning(self.request, 'You do not have permission to fill participants list for this training.')
-      return HttpResponseRedirect('/software-training/training-planner/')"""
-    self.queryset = StudentMaster.objects.filter(batch_id=self.training_request.batch_id)
+    if self.training_request.status:
+      self.queryset = self.training_request.trainingattend_set.all()
+    else:
+      self.queryset = StudentMaster.objects.filter(batch_id=self.training_request.batch_id, moved=False)
     return super(TrainingAttendanceListView, self).dispatch(*args, **kwargs)
 
   def get_context_data(self, **kwargs):
@@ -650,12 +663,68 @@ class StudentTrainingCertificateView(TrainingCertificate, View):
     except ObjectDoesNotExist:
       messages.error(self.request, "Record not found")
       pass
-
-    if ta and ta.student.user == self.request.user:
-      return self.training_certificate(ta)
-    else:
+    
+    try:
+        mdluserid = request.session.get('mdluserid', None)
+        mdluser = MdlUser.objects.get(id=mdluserid)
+        if ta and ta.student.user.email == mdluser.email:
+            return self.training_certificate(ta)
+    except Exception, e:
       messages.error(self.request, "PermissionDenied!")
     return HttpResponseRedirect("/")
+
+class CourseMapCreateView(CreateView):
+  form_class = CourseMapForm
+  @method_decorator(group_required("Organiser"))
+  def dispatch(self, *args, **kwargs):
+    return super(CourseMapCreateView, self).dispatch(*args, **kwargs)
+
+  def get_context_data(self, **kwargs):
+    context = super(CourseMapCreateView, self).get_context_data(**kwargs)
+    return context
+  
+  def form_valid(self, form, **kwargs):
+    # Check if all student participate in selected foss
+    try:
+      form_data = form.save(commit=False)
+      if FossAvailableForTest.objects.filter(foss_id=form_data.foss).exists():
+        form_data.test = 1
+      form_data.save()
+    except IntegrityError:
+      messages.error(self.request, 'Course with this Foss and Category already exists.')
+      return self.form_invalid(form)
+    return HttpResponseRedirect('/software-training/course-map/')
+
+class CourseMapListView(ListView):
+  queryset = CourseMap.objects.none()
+  paginate_by = 50
+  header = None
+  raw_get_data = None
+  @method_decorator(group_required("Organiser"))
+  def dispatch(self, *args, **kwargs):
+    self.header = {
+        1: SortableHeader('#', False),
+        2: SortableHeader('course', True, 'Course'),
+        3: SortableHeader('test', True, 'Test'),
+        4: SortableHeader('category', True, 'Category'),
+        5: SortableHeader('', False, ''),
+    }
+    self.queryset = CourseMap.objects.exclude(category=0)
+    self.raw_get_data = self.request.GET.get('o', None)
+    collection = get_sorted_list(self.request, self.queryset, self.header, self.raw_get_data)
+    return super(CourseMapListView, self).dispatch(*args, **kwargs)
+
+  def get_context_data(self, **kwargs):
+    context = super(CourseMapListView, self).get_context_data(**kwargs)
+    context['header'] = self.header
+    context['ordering'] = get_field_index(self.raw_get_data)
+    return context
+
+class CourseMapUpdateView(UpdateView):
+    model = CourseMap
+    form_class = CourseMapForm
+    success_url = "/software-training/course-map-list/"
+
 
 ### Ajax
 class SaveStudentView(JSONResponseMixin, View):
@@ -716,8 +785,9 @@ class GetCourseOptionView(JSONResponseMixin, View):
       courses = CourseMap.objects.filter(category=category)
       course_option = "<option value=''>---------</option>"
       for course in courses:
+        course_detail = '{0} ({1})'.format(course.foss.foss, course.course)
         if course.course:
-          course_option += "<option value=" + str(course.id) + ">" + course.foss.foss + " (" + course.course + ")" + "</option>"
+          course_option += "<option value=" + str(course.id) + ">" + course_detail +  "</option>"
         else:
           course_option += "<option value=" + str(course.id) + ">" + course.foss.foss + "</option>"
       context = {

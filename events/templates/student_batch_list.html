@@ -23,9 +23,9 @@
         <div class="modal-body">
            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
            <ul>
-              <li>Please upload Master Batch of all students in that department and year in .csv file.</li>
-              <li>Use this Master Batch student list to select Participant List per Software.</li>
-              <li>Please ensure that you fill in only the genuine email id's of the Participants/Students. If they don't have any, please help them to create one.</li>
+              <li>Please upload Master Batch of all students in that department and year in .csv file .</li>
+              <li>Use this Master Batch student list to select Participant List per Software <a href="http://process.spoken-tutorial.org/images/4/49/Upload_Select_Participant_list.pdf" traget="_blank"> Click Here</a>.</li>
+              <li>Please ensure that you fill in only the genuine Email ID's of the Participants/Students. If they don't have any, please help them to create one.</li>
            </ul>
         </div>
       </div>
@@ -43,6 +43,9 @@
           <td>{{ record.year }}</td>
           <td>{{ record.student_count }}</td>
           <td>
+            {% if record.has_training %}
+              <a href="{% url 'events:edit_student' record.id %}">Edit</a> | 
+            {% endif %}
             <a href="{% url 'events:list_student' record.id %}">Student List</a>
             {% if record|can_add_student:request.user %}
              | <a href="{% url 'events:add_student' record.id %}">Add Student</a>

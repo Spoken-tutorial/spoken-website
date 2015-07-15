@@ -13,22 +13,6 @@ class StudentBatchForm(forms.ModelForm):
     model = StudentBatch
     exclude = ['academic', 'stcount', 'organiser']
 
-  def clean(self):
-    file_types = {
-      'csv': 'text/csv',
-    }
-    component = ''
-    if 'csv_file' in self.cleaned_data:
-      component = self.cleaned_data['csv_file']
-      if not component.content_type in file_types['csv']:
-        self._errors["csv_file"] = self.error_class(["Not a valid file format."])
-    return
-  #def __init__(self, *args, **kwargs):
-  #  user = kwargs.pop('user')
-  #  super(StudentBatchForm, self).__init__(*args, **kwargs)
-  #  self.fields['academic'].queryset = AcademicCenter.objects.filter(pk=user.organiser.academic.id)
-
-
 class NewStudentBatchForm(forms.ModelForm):
   csv_file = forms.FileField(required = True)
 
@@ -36,18 +20,14 @@ class NewStudentBatchForm(forms.ModelForm):
     model = StudentBatch
     exclude = ['academic', 'year', 'department', 'stcount', 'organiser']
 
-  def clean(self):
-    file_types = {
-      'csv': 'text/csv',
-    }
-    component = ''
-    if 'csv_file' in self.cleaned_data:
-      component = self.cleaned_data['csv_file']
-      if not component.content_type in file_types['csv']:
-        self._errors["csv_file"] = self.error_class(["Not a valid file format."])
-    return
+class UpdateStudentBatchForm(forms.ModelForm):
+  year = forms.ChoiceField(choices = get_academic_years())
+  class Meta:
+    model = StudentBatch
+    exclude = ['academic', 'stcount', 'organiser']
 
 class TrainingRequestForm(forms.ModelForm):
+  department = forms.ModelChoiceField(empty_label='---------', queryset=CourseMap.objects.none())
   course_type = forms.ChoiceField(choices=[('', '---------'), (0, 'Software Course outside lab hours'), (1, 'Software Course mapped in lab hours'), (2, ' Software Course unmapped in lab hours')])
   course = forms.ModelChoiceField(empty_label='---------', queryset=CourseMap.objects.none())
   batch = forms.ModelChoiceField(empty_label='---------', queryset=StudentBatch.objects.none())
@@ -68,7 +48,7 @@ class TrainingRequestForm(forms.ModelForm):
     
     # Date restriction
     if self.cleaned_data and 'sem_start_date' in self.cleaned_data and self.cleaned_data['sem_start_date']:
-      start_date, end_date =tp.get_current_semester_date_duration()
+      start_date, end_date =tp.get_current_semester_date_duration_new()
       print tp.id, '-------------------'
       print start_date, end_date, self.cleaned_data['sem_start_date']
       if not (self.cleaned_data['sem_start_date'] <= end_date and self.cleaned_data['sem_start_date'] >= start_date):
@@ -94,6 +74,8 @@ class TrainingRequestForm(forms.ModelForm):
         department = kwargs['data']['department']
         self.fields['batch'].queryset = StudentBatch.objects.filter(academic_id=user.organiser.academic.id, stcount__gt=0, department_id=department)
         self.fields['batch'].initial =  kwargs['data']['batch']
+    # overwrite department choices
+    self.fields['department'].queryset = Department.objects.filter(id__in=StudentBatch.objects.filter(academic=user.organiser.academic).values_list('department_id'))
 
 class TrainingRequestEditForm(forms.ModelForm):
   course_type = forms.ChoiceField(choices=[('', '---------'), (0, 'Software Course outside lab hours'), (1, 'Software Course mapped in lab hours'), (2, ' Software Course unmapped in lab hours')])
@@ -107,7 +89,7 @@ class TrainingRequestEditForm(forms.ModelForm):
     # Date restriction
     if self.cleaned_data and 'sem_start_date' in self.cleaned_data and self.cleaned_data['sem_start_date']:
       tp = TrainingPlanner.objects.get(pk=self.cleaned_data['training_planner'])
-      start_date, end_date =tp.get_current_semester_date_duration()
+      start_date, end_date =tp.get_current_semester_date_duration_new()
       print start_date, end_date, self.cleaned_data['sem_start_date']
       if not (self.cleaned_data['sem_start_date'] <= end_date and self.cleaned_data['sem_start_date'] >= start_date):
         raise forms.ValidationError("Invalid semester start date")
@@ -123,3 +105,13 @@ class TrainingRequestEditForm(forms.ModelForm):
       self.fields['course_type'].initial = training.course.category
       self.fields['course'].queryset = CourseMap.objects.filter(category=training.course.category)
       self.fields['course'].initial = training.course_id
+
+class CourseMapForm(forms.ModelForm):
+  category = forms.ChoiceField(choices=[('', '---------'), (1, 'Software Course mapped in lab hours'), (2, ' Software Course unmapped in lab hours')])
+  course = forms.ModelChoiceField(queryset=LabCourse.objects.all())
+  class Meta:
+    model = CourseMap
+    exclude = ['test']
+
+  def __init__(self, *args, **kwargs):
+    super(CourseMapForm, self).__init__(*args, **kwargs)

@@ -2,6 +2,9 @@
 {% load widget_tweaks %}
 {% load static %}
 {% block title %}Training Planner Form{% endblock %}
+{% block compresscssblock %}
+    <link rel="stylesheet" href="{% static 'spoken/css/jquery.datetimepicker.css' %}" type="text/css" media="screen" charset="utf-8" />
+{% endblock %}
 {% block heading %}
   <i class="home-page-title-i">Training Planner Form</i>
   <a class="btn btn-primary pull-right" data-toggle="modal" data-target="#myModal"><i class="fa fa-2 fa-question"></i> Help</a>
@@ -18,7 +21,7 @@
                     <li>It is best to select Software courses mapped to relevant courses being taught during this semester in the department.</li>
                     <li>You can also select Software courses which are unmapped with courses being taught during this semester in the department.</li>
                     <li>Unmapped Software courses can be planned during designated computer lab hours present in the time table during this semester.</li>
-                    <li>See link for suggestions: ( Wiki  Time Table )</li>
+                    <!-- <li>See link for suggestions: ( Wiki  Time Table )</li> -->
                  </ul>
               </div>
             </div>
@@ -56,8 +59,9 @@
                       <div class='form-row'>
                         <div class='col-xs-12 form-group required'>
                           <label class='control-label'>Semester Start Date</label>
-                          {% render_field form.sem_start_date class+="form-control sem_start_date" tabindex="1" %}
+                          {% render_field form.sem_start_date class+="form-control date sem_start_date" tabindex="1" %}
                           {{ form.sem_start_date.errors }}
+                          <small>Odd Semester July to Aug, Even Semester Jan to Feb </small>
                         </div>
                       </div>
 
@@ -96,6 +100,9 @@
               </div>
           </div>
         {% endif %}
+{% endblock %}
+{% block compressjsblock %}
+    <script src="{% static 'spoken/js/jquery.datetimepicker.js' %}"></script>
 {% endblock %}
 {% block jsblock %}
   <script>
@@ -172,5 +179,19 @@
       });
     });
     
+    $('.date').datetimepicker({
+        onGenerate:function( ct ){
+            $(this).find('.xdsoft_day_of_week0')
+                .addClass('xdsoft_disabled');
+        },
+        lang:'en',
+        format:'Y-m-d',
+        formatDate:'Y/m/d',
+        minDate:0, // yesterday is minimum date
+        weekends:[],
+        maxDate:'+1970/06/31', // tommorow date with in 6 month
+        step:5,
+        timepicker:false,
+    });
   </script>
 {% endblock %}
