@@ -498,7 +498,7 @@ class TrainingRequestEditView(CreateView):
 
 class TrainingAttendanceListView(ListView):
   queryset = StudentMaster.objects.none()
-  paginate_by = 50
+  paginate_by = 500
   template_name = ""
   training_request = None
   
