@@ -792,8 +792,8 @@ class TrainingRequest(models.Model):
   
   def training_name(self):
     if self.batch:
-      return '%s, %s - %s - %s, %s Semester' % (self.course, self.batch, self.training_planner.year, int(self.training_planner.year)+1, self.training_planner.semester.name)
-    return '%s, %s - %s, %s Semester' % (self.course, self.training_planner.year, int(self.training_planner.year)+1,  self.training_planner.semester.name)
+      return 'WC-%d, %s, %s - %s - %s' % (self.id, self.course, self.batch, self.training_planner.year, int(self.training_planner.year)+1)
+    return 'WC-%d, %s, %s - %s' % (self.id, self.course, self.training_planner.year, int(self.training_planner.year)+1)
 
 class TrainingAttend(models.Model):
   training = models.ForeignKey(TrainingRequest)
