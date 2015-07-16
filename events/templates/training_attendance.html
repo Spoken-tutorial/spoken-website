@@ -37,7 +37,7 @@
             {% with training_attendance=training|get_attendance:record.student %}
             {% if can_mark_attendance or training_attendance %}
             {% with attendance_allowed=training|is_attendance_allowed:record.student %}
-              <tr id="{{record.student.id}}" {% if not attendance_allowed %}class="invalid"{% endif %}>
+              <tr id="{{record.student.id}}" {% if not attendance_allowed and not training_attendance %}class="invalid"{% endif %}>
                 <td>{{ forloop.counter }}</td>
                 {% if can_mark_attendance and attendance_allowed %}
                   <td>
@@ -65,11 +65,11 @@
                     </select>
                   {% endwith %}
                   </td>
-                {% elif not attendance_allowed %}
-                  </td>Already attended this course</td>
+                {% elif not attendance_allowed and not training_attendance %}
+                  <td>Already attended this course</td>
                 {% endif %}
                 </td>
-                {% if not can_mark_attendance and training_attendance and  training_attendance.id %}
+                {% if not can_mark_attendance and training_attendance and training_attendance.id %}
                   <td><a href="{% url 'events:organiser_training_certificate' training_attendance.id %}">Download Certificate</a></td>
                 {% endif %}
               </tr>

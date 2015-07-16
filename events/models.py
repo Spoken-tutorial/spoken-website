@@ -775,6 +775,9 @@ class TrainingRequest(models.Model):
     self.save()
     return self.participants
 
+  def get_partipants_from_attendance(self):
+    return TrainingAttend.objects.filter(training_id = self.id).count()
+
   def attendance_summery(self):
     if self.status == 1:
       return self.participants
