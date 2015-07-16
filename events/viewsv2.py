@@ -498,7 +498,7 @@ class TrainingRequestEditView(CreateView):
 
 class TrainingAttendanceListView(ListView):
   queryset = StudentMaster.objects.none()
-  paginate_by = 50
+  paginate_by = 500
   template_name = ""
   training_request = None
   
@@ -785,8 +785,9 @@ class GetCourseOptionView(JSONResponseMixin, View):
       courses = CourseMap.objects.filter(category=category)
       course_option = "<option value=''>---------</option>"
       for course in courses:
+        course_detail = '{0} ({1})'.format(course.foss.foss, course.course)
         if course.course:
-          course_option += "<option value=" + str(course.id) + ">" + course.foss.foss + " (" + course.course + ")" + "</option>"
+          course_option += "<option value=" + str(course.id) + ">" + course_detail +  "</option>"
         else:
           course_option += "<option value=" + str(course.id) + ">" + course.foss.foss + "</option>"
       context = {
