@@ -14,26 +14,26 @@
 {% block search %}{% endblock %}
 {% block content %}
   <div><a class="btn btn-success" href="{% url 'events:training_planner' %}">Go Back to Training Planner</a><br><br></div>
-  <div style="height:70px;">
-      <div style="width:200px;float:left;text-align:center;">
-        <p id="button-select">To select all participants</p> <input type=button class="btn btn-success"  value="Check All" onClick="this.value=check()"> 
-      </div> 
-      <div style="width:250px; text-align:center; float:right;"> 
-        <p>To select language for all participants</p>
-        <select name="selectall" id="selectall" style="height:30px;">
-        {% for lang in languages %}
-          {% if lang_id %}
-          <option {% if lang_id == lang.id %}selected="selected"{% endif %} value="{{lang.id}}">{{ lang.name}}</option>
-          {% else %}
-          <option {% if lang.name == 'English' %}selected="selected"{% endif %} value="{{lang.id}}">{{ lang.name}}</option>
-          {% endif %}
-        {% endfor %}
-        </select>
-      </div>
-  </div>
   {% if object_list %}
     {% with can_mark_attendance=training.can_mark_attendance %}
       {% if can_mark_attendance %}
+        <div style="height:70px;">
+            <div style="width:200px;float:left;text-align:center;">
+              <p id="button-select">To select all participants</p> <input type=button class="btn btn-success"  value="Check All" onClick="this.value=check()"> 
+            </div> 
+            <div style="width:250px; text-align:center; float:right;"> 
+              <p>To select language for all participants</p>
+              <select name="selectall" id="selectall" style="height:30px;">
+              {% for lang in languages %}
+                {% if lang_id %}
+                <option {% if lang_id == lang.id %}selected="selected"{% endif %} value="{{lang.id}}">{{ lang.name}}</option>
+                {% else %}
+                <option {% if lang.name == 'English' %}selected="selected"{% endif %} value="{{lang.id}}">{{ lang.name}}</option>
+                {% endif %}
+              {% endfor %}
+              </select>
+            </div>
+        </div>
         <form action="{{ action }}" method="post">
           {% csrf_token %}
       {% endif %}
