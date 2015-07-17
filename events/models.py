@@ -759,7 +759,17 @@ class TrainingRequest(models.Model):
   # managers
   objects = models.Manager() # The default manager.
   test_training = TestTrainingManager()
-  
+
+  # return course type
+  def get_course_type(self):
+    if self.course.category == 0:
+      return 'One Day Training'
+    elif self.course.category == 1:
+      return 'Mapped Course'
+    elif self.course.category == 2:
+      return 'Unmapped Course'
+    return ''
+
   # restrict the month to rise a training request
   def can_mark_attendance(self):
     sem_start, sem_end = self.training_planner.get_current_semester_date_duration()

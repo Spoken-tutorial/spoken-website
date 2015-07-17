@@ -19,6 +19,7 @@ from django.template import RequestContext
 from django.views.decorators.csrf import csrf_exempt
 from django.middleware import csrf
 from django.http import JsonResponse
+from django.core.exceptions import PermissionDenied
 from creation.models import FossAvailableForWorkshop
 import csv
 from cms.sortable import *
@@ -844,3 +845,101 @@ class GetBatchOptionView(JSONResponseMixin, View):
     }
     return render(request, 'language_options.html', context)
 '''
+
+
+class TrainingRequestListView(ListView):
+  queryset = None
+  paginate_by = 20
+  user = None
+  template_name = None
+  header = None
+  raw_get_data = None
+  role = None
+  status = None
+
+  @method_decorator(group_required("Resource Person"))
+  def dispatch(self, *args, **kwargs):
+    print 'entered', '************************'
+    if (not 'role' in kwargs) or (not 'status' in kwargs):
+      print 11111111
+      raise PermissionDenied()
+    self.role = kwargs['role']
+    self.status = kwargs['status']
+    status_list = {'pending': 0, 'completed': 1}
+    roles = ['rp', 'em']
+    self.user = self.request.user
+    if self.role in roles and self.status in status_list:
+      if self.status == 'completed':
+        self.queryset = TrainingRequest.objects.filter(
+          training_planner__academic_id__in=AcademicCenter.objects.filter(
+            state__in = State.objects.filter(
+              resourceperson__user_id=self.user, 
+              resourceperson__status=1
+            )
+          ).values_list('id'), 
+          status=True,
+          participants__gt=0
+        ).order_by('-updated')
+      else:
+        self.queryset = TrainingRequest.objects.filter(
+          training_planner__academic_id__in=AcademicCenter.objects.filter(
+            state__in = State.objects.filter(
+              resourceperson__user_id=self.user, 
+              resourceperson__status=1
+            )
+          ).values_list('id'), 
+          status=False
+        ).order_by('-updated')
+
+      self.header = {
+        1: SortableHeader('#', False),
+        2: SortableHeader(
+          'training_planner__academic__state__name', 
+          True, 
+          'State'
+        ),
+        3: SortableHeader(
+          'training_planner__academic__academic_code', 
+          True, 
+          'Code'
+        ),
+        4: SortableHeader(
+          'training_planner__academic__institution_name', 
+          True, 
+          'Institution'
+        ),
+        5: SortableHeader('course__foss__foss', True, 'FOSS'),
+        6: SortableHeader('course__course', True, 'Course Name'),
+        7: SortableHeader('course__category', True, 'Course Type'),
+        8: SortableHeader(
+          'training_planner__organiser__user__first_name', 
+          True, 
+          'Organiser'
+        ),
+        9: SortableHeader(
+          'sem_start_date', 
+          True, 
+          'Sem Start Date / Training Date'
+        ),
+        10: SortableHeader('participants', True, 'Participants'),
+        #11: SortableHeader('Action', False)
+      }
+      self.raw_get_data = self.request.GET.get('o', None)
+      self.queryset = get_sorted_list(
+        self.request, 
+        self.queryset, 
+        self.header, 
+        self.raw_get_data
+      )
+    else:
+      print 222222
+      raise PermissionDenied()
+    return super(TrainingRequestListView, self).dispatch(*args, **kwargs)
+
+  def get_context_data(self, **kwargs):
+    context = super(TrainingRequestListView, self).get_context_data(**kwargs)
+    context['role'] = self.role
+    context['status'] = self.status
+    context['header'] = self.header
+    context['ordering'] = get_field_index(self.raw_get_data)
+    return context

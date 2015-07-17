@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load eventsdata %}
+{% load cmsdata %}
+{% load creationdata %}
+{% block title %}Training - {{ status}} {% endblock %}
+{% block uncompresscssblock %}
+  <link rel="stylesheet" href="{% static 'spoken/css/jquery.fancybox.pack.css' %}" type="text/css" media="screen" charset="utf-8" />
+{% endblock %}
+{% block compresscssblock %}
+  <link rel="stylesheet" href="{% static 'spoken/css/jquery.datetimepicker.css' %}" type="text/css" media="screen" charset="utf-8" />
+{% endblock%}
+{% block heading %}
+  <i class="fa fa-list-ul"></i> Training <a href="{% url 'events:events_dashboard' %}" class='pull-right'>Dashboard</a>
+{% endblock %}
+{% block content %}
+  <!-- Nav tabs -->
+  <ul class="tabs nav nav-tabs">
+    <li {% if status == 'pending' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/training-request/{{role}}/pending/">Pending / Ongoing</a></li>
+    <li {% if status == 'completed' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/training-request/{{role}}/completed/">Completed</a></li>
+  </ul>
+  <!-- Tab panes -->
+  <div class="tab-content">
+    <div class="tab-pane active" id="pending">
+      {% if object_list %}
+      <table class="paleblue table table-striped table-hover table-bordered">
+        {% get_sortable_header header ordering request.GET %}
+        {% for record in object_list %}
+          <tr>
+            <td>{{ forloop.counter }}
+            <td>{{ record.training_planner.academic.state }}</td>
+            <td>{{ record.training_planner.academic.academic_code }}</td>
+            <td>{{ record.training_planner.academic.institution_name }}</td>
+            <td>{{ record.course.foss.foss }}</td>
+            <td>{{ record.course.course }}</td>
+            <td>{{ record.get_course_type }}</td>
+            <td>{{ record.training_planner.organiser.user.first_name }}</td>
+            <td>{{ record.sem_start_date }}</td>
+            <td>{{ record.participants }}</td>
+            <!-- actions based on roles -->
+            <!--<td></td>-->
+          </tr>
+        {% endfor %}
+      </table>
+      {% else %}
+        <p class='no-record'>No record found!</p>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}
+
+{% block uncompressjsblock %}
+  <script src="{% static 'spoken/js/jquery.fancybox.pack.js' %}"></script>
+  <script src="{% static 'spoken/js/jquery.mousewheel-3.0.6.pack.js' %}"></script>
+{% endblock %}
+{% block compressjsblock %}
+  <script src="{% static 'spoken/js/jquery.datetimepicker.js' %}"></script>
+{% endblock %}
+{% block compressinlinejsblock %}
+  <script type="text/javascript">
+    /*$(document).ready(function(){
+      $(".fancybox").fancybox({
+        maxWidth  : 600,
+        maxHeight  : 500,
+        fitToView  : true,
+        autoSize  : false,
+        closeClick  : false,
+        openEffect  : "none",
+        closeEffect  : "none",
+        modal    : true,
+        afterClose  : function() {
+          return parent.location.reload(true);
+        }
+      });
+    });
+    $('.date').datetimepicker({
+      lang:'en',
+      timepicker:false,
+      format:'Y-m-d',
+      formatDate:'Y/m/d',
+      maxDate:'+1970/06/31', // tommorow date with in 6 month
+    });*/
+  </script>
+{% endblock %}
