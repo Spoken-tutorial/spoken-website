@@ -21,6 +21,9 @@ def get_moodle_user(academic_id, firstname, lastname, gender, email):
             mdluser.gender = gender
         if not mdluser.username == email:
             mdluser.username = email
+        """password = encript_password(firstname)
+        if not mdluser.password == password:
+            mdluser.password = password"""
         mdluser.save()
     except Exception, e:
         mdluser = MdlUser()

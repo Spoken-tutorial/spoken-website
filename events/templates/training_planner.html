@@ -187,6 +187,7 @@
                     <th>Software Course</th>
                     <th>Department</th>
                     <th>Participant Count</th>
+                    <th>Action</th>
                   </tr>
                   {% for training in record.training_requests %}
                     <tr class="{% if training.status %}completed{% else %}ongoing{% endif %}">
@@ -195,6 +196,11 @@
                       <td>{{ training.course.course_name }}</td>
                       <td>{{ training.department }}</td>
                       <td>{{ training.attendance_summery }}</td>
+                      <td>
+                        {% if training.get_partipants_from_attendance %}
+                          | <a href="{% url 'events:training_attendance' training.id %}">Participant List</a> |
+                        {% endif %}
+                      </td>
                     </tr>
                   {% endfor %}
                 </table>

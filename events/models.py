@@ -750,7 +750,7 @@ class TrainingRequest(models.Model):
   course = models.ForeignKey(CourseMap)
   batch = models.ForeignKey(StudentBatch, null = True)
   participants = models.PositiveIntegerField(default=0)
-  status = models.BooleanField(default=0)
+  status = models.BooleanField(default=False)
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
   #created = models.DateTimeField()
@@ -759,7 +759,17 @@ class TrainingRequest(models.Model):
   # managers
   objects = models.Manager() # The default manager.
   test_training = TestTrainingManager()
-  
+
+  # return course type
+  def get_course_type(self):
+    if self.course.category == 0:
+      return 'One Day Training'
+    elif self.course.category == 1:
+      return 'Mapped Course'
+    elif self.course.category == 2:
+      return 'Unmapped Course'
+    return ''
+
   # restrict the month to rise a training request
   def can_mark_attendance(self):
     sem_start, sem_end = self.training_planner.get_current_semester_date_duration()
@@ -775,6 +785,9 @@ class TrainingRequest(models.Model):
     self.save()
     return self.participants
 
+  def get_partipants_from_attendance(self):
+    return TrainingAttend.objects.filter(training_id = self.id).count()
+
   def attendance_summery(self):
     if self.status == 1:
       return self.participants
@@ -789,8 +802,8 @@ class TrainingRequest(models.Model):
   
   def training_name(self):
     if self.batch:
-      return '%s, %s - %s - %s, %s Semester' % (self.course, self.batch, self.training_planner.year, int(self.training_planner.year)+1, self.training_planner.semester.name)
-    return '%s, %s - %s, %s Semester' % (self.course, self.training_planner.year, int(self.training_planner.year)+1,  self.training_planner.semester.name)
+      return 'WC-%d, %s, %s - %s - %s' % (self.id, self.course, self.batch, self.training_planner.year, int(self.training_planner.year)+1)
+    return 'WC-%d, %s, %s - %s' % (self.id, self.course, self.training_planner.year, int(self.training_planner.year)+1)
 
 class TrainingAttend(models.Model):
   training = models.ForeignKey(TrainingRequest)

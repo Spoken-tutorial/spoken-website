@@ -99,12 +99,34 @@ class TrainingRequestEditForm(forms.ModelForm):
     training = kwargs.pop('training', None)
     user = kwargs.pop('user', None)
     super(TrainingRequestEditForm, self).__init__(*args, **kwargs)
-    
-    if training:
-      self.fields['sem_start_date'].initial = training.sem_start_date
+    flag = True
+    data = kwargs.pop('data', None)
+    if data and 'course_type' in data:
+      if data['course_type']:
+        print 1
+        self.fields['course'].queryset = CourseMap.objects.filter(category=data['course_type'])
+        if 'course' in data and data['course']:
+          self.fields['course'].initial = data['course']
+      else:
+        print 2
+        flag = False
+    else:
+      print 3
+      flag = False
+    if not flag and training:
       self.fields['course_type'].initial = training.course.category
       self.fields['course'].queryset = CourseMap.objects.filter(category=training.course.category)
       self.fields['course'].initial = training.course_id
+    flag = True
+    if data and 'sem_start_date' in data:
+      if data['sem_start_date']:
+        self.fields['sem_start_date'].initial = data['sem_start_date']
+      else:
+        flag = False
+    else:
+      flag = False
+    if not flag and training:
+      self.fields['sem_start_date'].initial = training.sem_start_date
 
 class CourseMapForm(forms.ModelForm):
   category = forms.ChoiceField(choices=[('', '---------'), (1, 'Software Course mapped in lab hours'), (2, ' Software Course unmapped in lab hours')])

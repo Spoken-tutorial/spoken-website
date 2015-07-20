@@ -100,5 +100,10 @@ urlpatterns = [
       r'^get-batch-option/', 
       GetBatchOptionView.as_view()
     ),
+    url(
+      r'^training-request/(?P<role>\w+)/(?P<status>\w+)/$', 
+      TrainingRequestListView.as_view(template_name='training_list.html'), 
+      name='training_list'
+    ),
     #url(r'^get-language-option/', GetLanguageOptionView.as_view()),
 ]
