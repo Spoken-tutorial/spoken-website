@@ -131,6 +131,7 @@ class TrainingRequestEditForm(forms.ModelForm):
 class CourseMapForm(forms.ModelForm):
   category = forms.ChoiceField(choices=[('', '---------'), (1, 'Software Course mapped in lab hours'), (2, ' Software Course unmapped in lab hours')])
   course = forms.ModelChoiceField(queryset=LabCourse.objects.all())
+  foss = forms.ModelChoiceField(queryset=FossCategory.objects.filter(status=True))
   class Meta:
     model = CourseMap
     exclude = ['test']
