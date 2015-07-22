@@ -842,18 +842,18 @@ class SingleTraining(models.Model):
   organiser = models.ForeignKey(Organiser)
   academic = models.ForeignKey(AcademicCenter)
   course = models.ForeignKey(CourseMap) # type 0
-  # {0:School, 1:Live Workshop, 2:Pilot Workshop}
+  # {0:School, 1:Vocational, 2:Live Workshop, 3:Pilot Workshop}
   training_type = models.PositiveIntegerField(default=0)
   language = models.ForeignKey(Language)
   tdate = models.DateField()
-  ttime = models.TimeField()
+  ttime = models.TimeField(null=True, blank=True)
   #{0:request done, 1: attendance submited, 2: completed}
   status = models.PositiveSmallIntegerField(default=0)
   participant_count = models.PositiveIntegerField(default=0)
-  #created = models.DateTimeField(auto_now_add = True)
-  #updated = models.DateTimeField(auto_now = True)
-  created = models.DateTimeField()
-  updated = models.DateTimeField()
+  created = models.DateTimeField(auto_now_add = True)
+  updated = models.DateTimeField(auto_now = True)
+  #created = models.DateTimeField()
+  #updated = models.DateTimeField()
 
   class Meta:
     unique_together = (("organiser", "academic", "course", "tdate", "ttime"),)
@@ -868,10 +868,10 @@ class SingleTrainingAttendance(models.Model):
   count = models.PositiveSmallIntegerField(default=0)
   # {0:waiting for confirmation, 1:approved, 2:complete}
   status = models.PositiveSmallIntegerField(default=0)
-  #created = models.DateTimeField(auto_now_add = True)
-  #updated = models.DateTimeField(auto_now = True)
-  created = models.DateTimeField()
-  updated = models.DateTimeField()
+  created = models.DateTimeField(auto_now_add = True)
+  updated = models.DateTimeField(auto_now = True)
+  #created = models.DateTimeField()
+  #updated = models.DateTimeField()
 
   class Meta:
     unique_together = (("training", "firstname", "lastname", "email"),)

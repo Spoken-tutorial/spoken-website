@@ -2,7 +2,7 @@ from django import forms
 from django.forms import ModelForm
 from django.forms.models import BaseModelFormSet
 from events.models import *
-from datetime import datetime
+from datetime import datetime, date
 from events.helpers import get_academic_years
 
 
@@ -138,3 +138,25 @@ class CourseMapForm(forms.ModelForm):
 
   def __init__(self, *args, **kwargs):
     super(CourseMapForm, self).__init__(*args, **kwargs)
+
+class SingleTrainingForm(forms.ModelForm):
+  training_type = forms.ChoiceField(choices=[('', '---------'), (0, 'School'),(1,'Vocational'),(2,'Live workshop'),(3,'Pilot workshop')])
+  csv_file = forms.FileField(required = True)
+  class Meta:
+    model = SingleTraining
+    exclude = ['academic', 'organiser', 'status', 'participant_count']
+  
+  def clean(self): 
+        #self.cleaned_data['csv_file']
+    if self.cleaned_data['csv_file'].name.split('.')[-1] == 'csv':
+      pass
+    else:
+        raise forms.ValidationError("Invalid file format.")
+    return self.cleaned_data
+    
+  def clean_tdate(self):
+    today = datetime.now()
+    tdate = self.cleaned_data['tdate']
+    if today.date() > tdate:
+      raise forms.ValidationError("Invalid semester training date")
+    return tdate
