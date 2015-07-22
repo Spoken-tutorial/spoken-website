@@ -18,56 +18,47 @@
                 <div class="form-group">
                     <label for="id_state" class="col-sm-4 control-label">State</label>
                     <div class="col-sm-8">
-                        {% render_field form.training_planner__academic__state class+="form-control state academic_state" tabindex="1" %}
-                        {{ form.training_planner__academic__state.errors }}
+                        {% render_field form.academic__state class+="form-control state academic_state" tabindex="1" %}
+                        {{ form.academic__state.errors }}
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="id_city" class="col-sm-4 control-label">City/Town</label>
                     <div class="col-sm-8">
-                        {% render_field form.training_planner__academic__city class+="form-control city academic_city" tabindex="1" %}
-                        {{ form.training_planner__academic__city.errors }}
+                        {% render_field form.academic__city class+="form-control city academic_city" tabindex="1" %}
+                        {{ form.academic__city.errors }}
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="id_academic_institution_type" class="col-sm-4 control-label">Institution Type</label>
                     <div class="col-sm-8">
-                        {% render_field form.training_planner__academic__institution_type class+="form-control academic_institution_type" tabindex="1" %}
-                        {{ form.training_planner__academic__institution_type.errors }}
+                        {% render_field form.academic__institution_type class+="form-control academic_institution_type" tabindex="1" %}
+                        {{ form.academic__institution_type.errors }}
                     </div>
               </div>
               <div class="form-group">
                     <label for="id_resource_center" class="col-sm-4 control-label">Institution</label>
                     <div class="col-sm-8">
-                        {% render_field form.training_planner__academic__institution_name class+="form-control chosen academic_institution_name" tabindex="1" %}
-                        {{ form.training_planner__academic__institution_name.errors }}
+                        {% render_field form.academic__institution_name class+="form-control chosen academic_institution_name" tabindex="1" %}
+                        {{ form.academic__institution_name.errors }}
                     </div>
                 </div>
             </div>
             
             
             <div class="col-lg-4 col-md-4 col-sm-4">
-                {% if event_type == 'training' %}
-                    <div class="form-group">
-                        <label for="id_training_type" class="col-sm-4 control-label">Type</label>
-                        <div class="col-sm-8">
-                            {% render_field form.course__category class+="form-control training_type" tabindex="1" %}
-                            {{ form.course__category.errors }}
-                        </div>
-                    </div>
-                {% endif %}
               <div class="form-group">
                     <label for="id_state" class="col-sm-4 control-label">Foss</label>
                     <div class="col-sm-8">
-                        {% render_field form.course__foss class+="form-control foss" tabindex="1" %}
-                        {{ form.course__foss.errors }}
+                        {% render_field form.foss class+="form-control foss" tabindex="1" %}
+                        {{ form.foss.errors }}
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="id_tdate" class="col-sm-4 control-label">Date Range</label>
                     <div class="col-sm-8">
-                        {% render_field form.sem_start_date class+="form-control tdate date" tabindex="1" %}
-                        {{ form.sem_start_date.errors }}
+                        {% render_field form.tdate class+="form-control tdate date" tabindex="1" %}
+                        {{ form.tdate.errors }}
                     </div>
                 </div>
                 <div class="form-group">
@@ -85,7 +76,7 @@
                     </tr>
                     <tr>
                         <th>Participants Count</th>
-                        <td>{{ participants.participants__sum }}</td>
+                        <td>{{ participant_count.participant_count__sum }}</td>
                     </tr>
                 </table>
                 <div style="min-height:100px;">
@@ -103,27 +94,27 @@
   <div class="tab-content">
     <div class="tab-pane active" id="pending">
       {% if collection %}
-      <table class="paleblue table table-striped table-hover table-bordered">
-        {% get_sortable_header header ordering request.GET %}
-        {% for record in collection %}
-          <tr>
-            <td>{{ forloop.counter }}
-            <td>{{ record.training_planner.academic.state }}</td>
-            <td>{{ record.training_planner.academic.city }}</td>
-            <td>{{ record.training_planner.academic }}</td>
-            <td>{{ record.course.foss }}</td>
-            <td>{{ record.training_planner.organiser.user.first_name }}</td>
-            <td>{{ record.sem_start_date|date:"d M Y" }} {{ record.wtime }}</td>
-            <td>{{ record.participants }}</td>
-            <!-- actions based on roles -->
-            <td>
-              {% if record.get_partipants_from_attendance %}
-                <a href="{% url 'statistics:statistics_training_participants' record.id %}" target="_blank">View Participants</a>
-              {% endif %}
-            </td>
-          </tr>
-        {% endfor %}
-      </table>
+        <table class="paleblue table table-striped table-hover table-bordered">
+          {% get_sortable_header header ordering request.GET %}
+          {% for record in collection %}
+            <tr>
+              <td>{{ forloop.counter }}
+              <td>{{ record.academic.state }}</td>
+              <td>{{ record.academic.city }}</td>
+              <td>{{ record.academic }}</td>
+              <td>{{ record.foss }}</td>
+              <td>{{ record.organiser.user.first_name }}</td>
+              <td>{{ record.tdate|date:"d M Y" }} {{ record.wtime }}</td>
+              <td>{{ record.get_test_attendance_count }}</td>
+              <!-- actions based on roles -->
+              <td>
+                {%if record.get_test_attendance_count %}
+                  <a href="{% url 'statistics:statistics_test_participants' record.id %}" target="_blank">View Participants</a>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </table>
       {% else %}
         <p class='no-record'>No record found!</p>
       {% endif %}

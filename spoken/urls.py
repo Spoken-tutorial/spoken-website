@@ -43,7 +43,7 @@ urlpatterns = patterns('',
     url(r'^workshops/academic_details/(?P<state>.+)/$', 'workshop.views.academic_details_state', name='academic_details_state'),
     url(r'^resource_center_map_details/(?P<state>.+)/$', 'workshop.views.academic_details_state', name='academic_details_state'),
     url(r'^workshops/resource_center_details/$', 'workshop.views.view_college', name='view_college'),
-    url(r'^statistics/training/$', 'workshop.views.statistics_training', name='statistics_training'),
+    #url(r'^statistics/training/$', 'workshop.views.statistics_training', name='statistics_training'),
     
     #events urls
     url(r'^software-training/', include('events.urls', namespace='events')),

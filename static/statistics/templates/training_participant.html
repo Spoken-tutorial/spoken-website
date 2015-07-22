@@ -12,17 +12,15 @@
     <div class="bs-callout bs-callout-info">
         <dl class='dl-horizontal'>
             <dt>Institution Name</dt>
-            <dd>{{ model.academic }}, {{ model.academic.state }}</dd>
+            <dd>{{ model.training_planner.academic }}, {{ model.training_planner.academic.state }}</dd>
             <dt>Foss</dt>
-            <dd>{{ model.foss.foss }}</dd>
-            <dt>Language</dt>
-            <dd>{{ model.language }}</dd>
+            <dd>{{ model.course.foss.foss }}</dd>
             <dt>Date</dt>
-            <dd>{{ model.tdate }}</dd>
+            <dd>{{ model.sem_start_date }}</dd>
             <dt>Participants Count</dt>
-            <dd>{{ model.participant_count }}</dd>
+            <dd>{{ model.participants }}</dd>
             <dt>Organiser</dt>
-            <dd>{{ model.organiser.user.first_name }} {{ model.organiser.user.last_name }}</dd>
+            <dd>{{ model.training_planner.organiser.user.first_name }} {{ model.training_planner.organiser.user.last_name }}</dd>
         </dl>
     </div>
 	<div class="" id="pending">
@@ -36,8 +34,8 @@
 			{% for record in collection %}
 				<tr>
 				    <td>{{ forloop.counter }}
-					<td>{{ record.firstname|lower|title }}</td>
-					<td>{{ record.lastname|lower|title }}</td>
+					<td>{{ record.student.user.first_name }}</td>
+					<td>{{ record.student.user.last_name }}</td>
 				</tr>
 			{% endfor %}
 		</table>

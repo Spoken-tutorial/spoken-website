@@ -253,7 +253,7 @@ class TestCategory(models.Model):
     
     def __unicode__(self):
         return self.name
-        
+
 class Test(models.Model):
     organiser = models.ForeignKey(Organiser, related_name = 'test_organiser')
     test_category = models.ForeignKey(TestCategory, related_name = 'test_category')
@@ -274,6 +274,15 @@ class Test(models.Model):
     class Meta:
         verbose_name = "Test Categorie"
         unique_together = (("organiser", "academic", "foss", "tdate", "ttime"),)
+
+    def get_test_attendance_count(self):
+        return TestAttendance.objects.filter(test_id=self.id, status__gte=2).count()
+
+    def update_test_participant_count(self):
+        self.participant_count = self.get_test_attendance_count()
+        self.save()
+        return self
+
 
 class TestAttendance(models.Model):
     test = models.ForeignKey(Test)

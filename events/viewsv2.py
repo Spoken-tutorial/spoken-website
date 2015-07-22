@@ -433,7 +433,7 @@ class TrainingRequestCreateView(CreateView):
       sb = StudentBatch.objects.get(pk=form_data.batch.id)
       if sb.is_foss_batch_acceptable(form_data.course.id):
         form_data.training_planner_id = self.kwargs['tpid']
-        form_data.participants = StudentMaster.objects.filter(batch_id = form_data.batch_id).count()
+        # form_data.participants = StudentMaster.objects.filter(batch_id = form_data.batch_id).count()
         form_data.save()
       else:
         messages.error(self.request, 'This student batch already taken the selected course.')
