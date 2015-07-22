@@ -87,6 +87,21 @@ urlpatterns = [
         "coursemap.html"), 
       name="coursemapupdate"
     ),
+    url(
+      r'^single-training/approved/$', 
+     SingletrainingApprovedListView.as_view(template_name="single-training.html"), 
+      name="single-training-approved"
+    ),
+    url(
+      r'^single-training/completed/$', 
+     SingletrainingCompletedListView.as_view(template_name="single-training.html"), 
+      name="single-training-completed"
+    ),
+    url(
+      r'^single-training/new/$', 
+     SingletrainingCreateView.as_view(template_name="single-training-form.html"), 
+      name="new-single-training"
+    ),
     #ajax
     url(
       r'^save-student/', 
