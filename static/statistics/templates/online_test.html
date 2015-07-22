@@ -105,7 +105,7 @@
               <td>{{ record.foss }}</td>
               <td>{{ record.organiser.user.first_name }}</td>
               <td>{{ record.tdate|date:"d M Y" }} {{ record.wtime }}</td>
-              <td>{{ record.get_test_attendance_count }}</td>
+              <td>{{ record.participant_count }}</td>
               <!-- actions based on roles -->
               <td>
                 {%if record.get_test_attendance_count %}
