@@ -855,14 +855,13 @@ class SingletrainingCreateView(CreateView):
     form_data = form.save(commit=False)
     form_data.academic = self.request.user.organiser.academic
     form_data.organiser = self.request.user.organiser
-    skipped, error, warning, write_flag = self.csv_email_validate(self.request.FILES['csv_file'], form_data.id, str(self.request.POST.get('training_type')))
+    student = None
+    skipped, error, warning, write_flag = self.csv_email_validate(self.request.FILES['csv_file'], str(self.request.POST.get('training_type')))
     context = {'error': error, 'warning': warning, 'batch': form_data}
     csv_error_line_num = ''
     
     if error or skipped:
-#     print error, skipped
-#     print self.request.POST.get('training_type')
-      return render_to_response(self.template_name, context, context_instance=RequestContext(self.request))
+#     return render_to_response(self.template_name, context, context_instance=RequestContext(self.request))
       messages.error(self.request, "Batch not added: Error in CSV file")
       for i in error:
         csv_error_line_num = (csv_error_line_num+'%d, ')%(i+1)
@@ -871,6 +870,7 @@ class SingletrainingCreateView(CreateView):
     else:
       messages.success(self.request, "Student Batch added successfully.")
       form_data.save()
+      self.create_singletraining_db(self.request.FILES['csv_file'], form_data.id)
     return HttpResponseRedirect(self.success_url)
 
   def email_validator(self, email):
@@ -883,7 +883,35 @@ class SingletrainingCreateView(CreateView):
         pass
     return False
 
-  def csv_email_validate(self, file_path, batch_id, ttype):
+  def get_student_vocational(self, email):
+    if email and email.strip():
+      email = email.strip().lower()
+      try:
+        student = SingleTrainingAttendance.objects.get(email=email)
+        return student
+      except ObjectDoesNotExist:
+        pass
+    return False
+
+  def create_student_vocational(self, training_id, fname, lname, email, gender):
+    if not fname or not lname or not email or not gender:
+      return False
+    user = None
+    fname = fname.strip().upper()
+    lname = lname.strip().upper()
+    email = email.strip().lower()
+    gender = gender.strip().lower()
+
+    if fname and lname and email and gender:
+      if gender == 'male' or gender == 'm':
+        gender = 'Male'
+      else:
+        gender = 'Female'
+      student = SingleTrainingAttendance.objects.create(training_id = training_id, firstname = fname, lastname = lname, email = email, gender = gender)
+      return student
+    return False
+  
+  def csv_email_validate(self, file_path, ttype):
     skipped = []
     error = []
     warning = []
@@ -911,11 +939,19 @@ class SingletrainingCreateView(CreateView):
         if not self.email_validator(csv_data[j][2]):
           error.append(j)
           continue
-        
-    '''
-      student = self.get_student(row[2])
+    return skipped, error, warning, write_flag
+  
+  def create_singletraining_db(self, file_path, batch_id):
+    csv_data_list = []
+    csvdata = csv.reader(file_path, delimiter=',', quotechar='|')
+    for i in csvdata:
+      csv_data_list.append(i)
+    for j in range(len(csv_data_list)):
+      student = self.get_student_vocational(csv_data_list[j][2])
       if not student:
-      student = self.create_student(row[0], row[1], row[2], row[3])
+        self.create_student_vocational(batch_id, csv_data_list[j][0], csv_data_list[j][1], csv_data_list[j][2], csv_data_list[j][3])
+
+    '''
       if student:
         try:
           smrec = StudentMaster.objects.get(student=student, moved=False)
@@ -927,9 +963,9 @@ class SingletrainingCreateView(CreateView):
              continue
          except ObjectDoesNotExist:
            StudentMaster.objects.create(student=student, batch_id=batch_id)
-           write_flag = True
-      StudentBatch.objects.get(pk=batch_id).update_student_count()'''
-    return skipped, error, warning, write_flag
+           write_flag = True'''
+#     SingleTrainingAttendance.objects.get(pk=batch_id).update_student_count()
+    
   
   
 '''class GetLanguageOptionView(JSONResponseMixin, View):
