@@ -93,7 +93,7 @@
 						<td>{{ record.institution_name }}</td>
 						<td>{{ record.num_training }}</td>
 						<td>{% if record.num_participant %}{{ record.num_participant }}{% else %} 0 {% endif %}</td>
-						<td><a href="{% url 'statistics:academic_center_view' record.id %}" target="_blank">View</a></td>
+						<td><!--<a href="{% url 'statistics:academic_center_view' record.id %}" target="_blank">View</a>--></td>
 					</tr>
 				{% endfor %}
 			</table>
