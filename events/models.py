@@ -253,7 +253,7 @@ class TestCategory(models.Model):
     
     def __unicode__(self):
         return self.name
-        
+
 class Test(models.Model):
     organiser = models.ForeignKey(Organiser, related_name = 'test_organiser')
     test_category = models.ForeignKey(TestCategory, related_name = 'test_category')
@@ -274,6 +274,15 @@ class Test(models.Model):
     class Meta:
         verbose_name = "Test Categorie"
         unique_together = (("organiser", "academic", "foss", "tdate", "ttime"),)
+
+    def get_test_attendance_count(self):
+        return TestAttendance.objects.filter(test_id=self.id, status__gte=2).count()
+
+    def update_test_participant_count(self):
+        self.participant_count = self.get_test_attendance_count()
+        self.save()
+        return self
+
 
 class TestAttendance(models.Model):
     test = models.ForeignKey(Test)
@@ -833,18 +842,18 @@ class SingleTraining(models.Model):
   organiser = models.ForeignKey(Organiser)
   academic = models.ForeignKey(AcademicCenter)
   course = models.ForeignKey(CourseMap) # type 0
-  # {0:School, 1:Live Workshop, 2:Pilot Workshop}
+  # {0:School, 1:Vocational, 2:Live Workshop, 3:Pilot Workshop}
   training_type = models.PositiveIntegerField(default=0)
   language = models.ForeignKey(Language)
   tdate = models.DateField()
-  ttime = models.TimeField()
+  ttime = models.TimeField(null=True, blank=True)
   #{0:request done, 1: attendance submited, 2: completed}
   status = models.PositiveSmallIntegerField(default=0)
   participant_count = models.PositiveIntegerField(default=0)
-  #created = models.DateTimeField(auto_now_add = True)
-  #updated = models.DateTimeField(auto_now = True)
-  created = models.DateTimeField()
-  updated = models.DateTimeField()
+  created = models.DateTimeField(auto_now_add = True)
+  updated = models.DateTimeField(auto_now = True)
+  #created = models.DateTimeField()
+  #updated = models.DateTimeField()
 
   class Meta:
     unique_together = (("organiser", "academic", "course", "tdate", "ttime"),)
@@ -859,10 +868,10 @@ class SingleTrainingAttendance(models.Model):
   count = models.PositiveSmallIntegerField(default=0)
   # {0:waiting for confirmation, 1:approved, 2:complete}
   status = models.PositiveSmallIntegerField(default=0)
-  #created = models.DateTimeField(auto_now_add = True)
-  #updated = models.DateTimeField(auto_now = True)
-  created = models.DateTimeField()
-  updated = models.DateTimeField()
+  created = models.DateTimeField(auto_now_add = True)
+  updated = models.DateTimeField(auto_now = True)
+  #created = models.DateTimeField()
+  #updated = models.DateTimeField()
 
   class Meta:
     unique_together = (("training", "firstname", "lastname", "email"),)
