@@ -47,15 +47,13 @@
             
             
             <div class="col-lg-4 col-md-4 col-sm-4">
-                {% if event_type == 'training' %}
-                    <div class="form-group">
-                        <label for="id_training_type" class="col-sm-4 control-label">Type</label>
-                        <div class="col-sm-8">
-                            {% render_field form.course__category class+="form-control training_type" tabindex="1" %}
-                            {{ form.course__category.errors }}
-                        </div>
-                    </div>
-                {% endif %}
+              <div class="form-group">
+                  <label for="id_training_type" class="col-sm-4 control-label">Type</label>
+                  <div class="col-sm-8">
+                      {% render_field form.course__category class+="form-control training_type" tabindex="1" %}
+                      {{ form.course__category.errors }}
+                  </div>
+              </div>
               <div class="form-group">
                     <label for="id_state" class="col-sm-4 control-label">Foss</label>
                     <div class="col-sm-8">
@@ -107,13 +105,14 @@
         {% get_sortable_header header ordering request.GET %}
         {% for record in collection %}
           <tr>
-            <td>{{ forloop.counter }}
+            <td>{{ forloop.counter }}<input type="hidden" value="{{ record.id }}"></td>
             <td>{{ record.training_planner.academic.state }}</td>
             <td>{{ record.training_planner.academic.city }}</td>
             <td>{{ record.training_planner.academic }}</td>
             <td>{{ record.course.foss }}</td>
+            <td>{% if record.course.category == 1 %}Mapped{% elif record.course.category == 2 %}Unmapped{% else %}Outside{% endif %}</td>
             <td>{{ record.training_planner.organiser.user.first_name }}</td>
-            <td>{{ record.sem_start_date|date:"d M Y" }} {{ record.wtime }}</td>
+            <td>{{ record.sem_start_date|date:"d M Y" }}</td>
             <td>{{ record.participants }}</td>
             <!-- actions based on roles -->
             <td>

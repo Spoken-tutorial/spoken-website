@@ -1,7 +1,7 @@
 from django.db import models
 from datetime import datetime, date, timedelta
 from django.db.models.signals import pre_delete
-from django.db.models import Q
+from django.db.models import Q, Count, Sum, Min
 #import auth user models
 from django.contrib.auth.models import User
 
@@ -144,7 +144,23 @@ class AcademicCenter(models.Model):
         
     def __unicode__(self):
         return self.institution_name
-        
+    
+    def get_training_count(self):
+        return TrainingRequest.objects.filter(
+            training_planner__academic_id=self.id,
+            participants__gt=0,
+            sem_start_date__lte=datetime.now()
+        ).count()
+    
+    def get_training_participant_count(self):
+        training = TrainingRequest.objects.filter(
+            training_planner__academic_id=self.id,
+            participants__gt=0,
+            sem_start_date__lte=datetime.now()
+        ).aggregate(Sum('participants'))
+        return training['participants__sum']
+
+
 class Organiser(models.Model):
     user = models.OneToOneField(User, related_name = 'organiser')
     appoved_by = models.ForeignKey(User, related_name = 'organiser_approved_by', blank=True, null=True)
