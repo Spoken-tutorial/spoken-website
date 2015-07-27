@@ -148,11 +148,11 @@ def home(request):
             archive.write(settings.BASE_DIR + '/static/cdcontent/templates/readme.txt', 'spoken/README.txt')
             archive.write(settings.BASE_DIR + '/static/cdcontent/templates/index.html', 'spoken/index.html')
             archive.close()
+            temp.seek(0)
             wrapper = FileWrapper(temp)
             response = HttpResponse(wrapper, content_type='application/zip')
             response['Content-Disposition'] = 'attachment; filename=spoken-tutorial-cdcontent.zip'
             response['Content-Length'] = temp.tell()
-            temp.seek(0)
             return response
     else:
         form = CDContentForm()

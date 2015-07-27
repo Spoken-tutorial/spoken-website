@@ -127,9 +127,22 @@ class QualityReviewerRoleAdmin(admin.ModelAdmin):
     mark_quality_reviewer_disabled.short_description = "Mark selected quality reviewer roles as disabled"
     actions = ['mark_quality_reviewer_active', 'mark_quality_reviewer_disabled']
 
+class FossAvailableForTestAdmin(admin.ModelAdmin):
+    form = FossAvailableForTestForm
+    fields = ['foss', 'language', 'status']
+    list_display = ('foss', 'language', 'status', 'created')
+    list_filter = ('language',)
+
+class FossAvailableForWorkshopAdmin(admin.ModelAdmin):
+    fields = ['foss', 'language', 'status']
+    list_display = ('foss', 'language', 'status', 'created')
+    list_filter = ('language',)
+
 admin.site.register(Language, LanguageAdmin)
 admin.site.register(FossCategory, FossCategoryAdmin)
 admin.site.register(TutorialDetail, TutorialDetailAdmin)
 admin.site.register(ContributorRole, ContributorRoleAdmin)
 admin.site.register(DomainReviewerRole, DomainReviewerRoleAdmin)
 admin.site.register(QualityReviewerRole, QualityReviewerRoleAdmin)
+admin.site.register(FossAvailableForTest, FossAvailableForTestAdmin)
+admin.site.register(FossAvailableForWorkshop, FossAvailableForWorkshopAdmin)

@@ -1,67 +1,92 @@
-import MySQLdb
 import time
-from youtube_upload import *
+import os, sys
+from django.db.models import Q
+
+# setting django environment
+from django.core.wsgi import get_wsgi_application
+sys.path.append("/websites_dir/django_spoken/spoken")
+os.environ["DJANGO_SETTINGS_MODULE"] = "spoken.settings"
+application = get_wsgi_application()
+
 from config import *
+from youtube_upload import *
+from creation.models import *
 
 # creating youtube object
 youtube = Youtube(DEVELOPER_KEY)
 debug("Login to Youtube API: email='%s', password='%s'" %
-      (EMAIL, "*" * len(PASSWORD)))
+  (EMAIL, "*" * len(PASSWORD)))
+
+# login to youtube
 try:
-    youtube.login(EMAIL, PASSWORD)
+  youtube.login(EMAIL, PASSWORD)
 except gdata.service.BadAuthentication:
-    raise BadAuthentication("Authentication failed")
+  raise BadAuthentication("Authentication failed")
 
-db = MySQLdb.connect(host = DB_HOST, user = DB_USER, passwd = DB_PASS, \
-    db = DB_NAME)
+# fetching tutorial resource records
+rows = TutorialResource.objects.filter(
+  Q(status=1)|Q(status=2), 
+  video_id__isnull=False,
+  playlist_item_id__isnull=True
+).order_by(
+  'tutorial_detail__foss__foss', 
+  'tutorial_detail__level_id', 
+  'tutorial_detail__order'
+)
 
-cur = db.cursor()
-cur.execute("SELECT ctr.id, ctr.tutorial_detail_id, ctr.common_content_id, \
-    ctr.language_id, ctr.outline, ctr.video, ctr.video_id, \
-    ctr.playlist_item_id, ctd.foss_id, ctd.tutorial, ctd.level_id, ctd.order, \
-    ctc.keyword, clg.name FROM creation_tutorialresource ctr INNER JOIN \
-    creation_tutorialdetail ctd ON (ctr.tutorial_detail_id = ctd.id) \
-    INNER JOIN creation_fosscategory cfc ON (ctd.foss_id = cfc.id) INNER JOIN \
-    creation_tutorialcommoncontent ctc ON (ctr.common_content_id = ctc.id) \
-    INNER JOIN creation_language clg ON (ctr.language_id = clg.id) WHERE \
-    ((ctr.status = 1 OR ctr.status = 2) AND ctr.video_id IS NOT NULL AND ctr.playlist_item_id IS NULL) ORDER BY \
-    cfc.foss, ctd.level_id, ctd.order ASC")
-rows = cur.fetchall()
-error_log_file_head = open(LOG_ROOT + 'playlistitem-error-log.txt',"w")
-success_log_file_head = open(LOG_ROOT + 'playlistitem-success-log.txt',"w")
+# opening log file to keep details of updated records
+today = time.strftime('%Y-%m-%d_%H-%M-%S')
+
+error_log_file_head = open(
+  LOG_ROOT + 'playlistitem-error-log-' + today + '.txt',
+  "w"
+)
+
+success_log_file_head = open(
+  LOG_ROOT + 'playlistitem-success-log-' + today + '.txt',
+  "w"
+)
 
 for row in rows:
-    cur.execute("SELECT cpi.id, cpi.foss_id, cpi.language_id, \
-        cpi.playlist_id, cpi.created, cpi.updated FROM creation_playlistinfo \
-        cpi WHERE (cpi.language_id = %s  AND cpi.foss_id = %s)" % (row[3], row[8]))
-    playlist = cur.fetchone()
-    if not playlist:
-        error_string = row[8] + ' - ' + row[3] + ' -- Playlist Missing'
-        error_log_file_head.write(error_string + '\n')
-        print error_string
-        continue
-    video_id = row[6]
-    try:
-        item_id = youtube.add_video_to_playlist(video_id, playlist[3])
-    except Exception, e:
-        print e
-        time.sleep(1)
-        continue
-    if item_id:
-        currtime = time.strftime('%Y-%m-%d %H:%M:%S')
-        cur.execute("UPDATE creation_tutorialresource SET \
-            playlist_item_id='%s' WHERE id=%s" % (item_id, row[0]))
-        cur.execute("INSERT INTO creation_playlistitem (playlist_id, \
-            item_id, created, updated) VALUES('%s', '%s', '%s', '%s')" % \
-            (playlist[0], item_id, currtime, currtime))
-        db.commit()
-        success_string = error_string = row[9] + ' - ' + row[13] + ' -- success'
-        success_log_file_head.write(success_string + '\n')
-        print success_string
-    else:
-        error_string = row[9] + ' - ' + row[13] + ' -- Failed'
-        error_log_file_head.write(error_string + '\n')
-        print error_string
+  # fetching playlist record
+  playlist = PlaylistInfo.objects.filter(
+    language_id=row.language_id, 
+    foss_id=row.tutorial_detail.foss.id
+  ).first()
+
+  # throw error if the playlist entry is not available
+  if not playlist:
+    error_string = str(row.tutorial_detail.foss.id) + ',' + str(row.language_id) + ',Playlist-Missing'
+    error_log_file_head.write(error_string + '\n')
+    print error_string
+    continue
+
+  # adding video to playlist
+  try:
+    item_id = youtube.add_video_to_playlist(row.video_id, playlist.playlist_id)
+  except Exception, e:
+    print e
     time.sleep(1)
+    continue
+
+  # check if the item_id is generated or not
+  if item_id:
+    # save the item_id to tutorial_resource
+    row.playlist_item_id = item_id
+    row.save()
+
+    # insert item_id to playlistitem
+    PlaylistItem.objects.create(playlist=playlist, item_id=item_id)
+
+    # generating success message
+    success_string = row.tutorial_detail.tutorial + ',' + row.language.name + ',Success'
+    success_log_file_head.write(success_string + '\n')
+    print success_string
+  else:
+    # generating failure message
+    error_string = row.tutorial_detail.tutorial + ',' + row.language.name + ',Failed'
+    error_log_file_head.write(error_string + '\n')
+    print error_string
+  time.sleep(1)
 error_log_file_head.close()
 success_log_file_head.close()

@@ -6,108 +6,129 @@
 {% load statisticsdata %}
 {% block title %} Academic Center Information {% endblock %}
 {% block cssblock %}
-    <link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />
-    <style>
-        .nav.nav-tabs a{
-            color: #000;
-            font-weight: bold;
-        }
-        .badge{
-            background-color: #777;
-            color: white;
-        }
-        .badge:hover{
-            background-color: #000;
-            color: white;
-        }
-        .nav-tabs.nav-justified>li>a{
-            border-bottom: 1px solid #E5A61E;
-        }
-    </style>
+  <link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />
+  <style>
+    .nav.nav-tabs a{
+      color: #000;
+      font-weight: bold;
+    }
+    .badge{
+      background-color: #777;
+      color: white;
+    }
+    .badge:hover{
+      background-color: #000;
+      color: white;
+    }
+    .nav-tabs.nav-justified>li>a{
+      border-bottom: 1px solid #E5A61E;
+    }
+  </style>
 {% endblock %}
 {% block heading %}
-    <i class="fa fa-list-ul"></i> Academic Center Information
+  <i class="fa fa-list-ul"></i> Academic Center Information
 {% endblock %}
 {% block search %}{% endblock %}
 {% block content %}
-	<div class='table-responsive'>
-		{% if collection %}
-			<table class="paleblue table table-bordered table-hover table-striped">
-				<tr>
-				    <th>Institution Name</th><td>{{ collection.institution_name }}</td>
-				</tr>
-				<tr>
-				    <th>Address</th><td>{{ collection.address }}</td>
-				</tr>
-				<tr>
-				    <th>City</th><td>{{ collection.city }}</td>
-				</tr>
-				<tr>
-					<th>State</th><td>{{ collection.state }} - {{ collection.pincode }}</td>
-				</tr>
-				<tr>
-				    <th>Rating</th><td>{{ collection.rating }}</td>
-				</tr>
-				<!-- <tr>
-				    <th>University</th><td>{{ collection.university }}</td>
-				</tr> -->
-			</table>
-		    <div role="tabpanel">
-
-            <!-- Nav tabs -->
-            <ul class="nav nav-tabs nav-pills nav-justified" role="tablist">
-                <li role="presentation" class="active "><a href="#training" aria-controls="training" role="tab" data-toggle="tab">Training<span class="badge">{{ collection.training_set|get_valid_statistics:1 }}</span></a></li>
-                <li role="presentation" class=""><a href="#test" aria-controls="test" role="tab" data-toggle="tab">Test<span class="badge">{{ collection.test_set|get_valid_statistics:1 }}</span></a></li>
-            </ul>
-
-              <!-- Tab panes -->
-              <div class="tab-content">
-                <div role="tabpanel" class="tab-pane active" id="training">
-                    {% if collection.training_set|get_valid_statistics %}
-		                <table class="paleblue table table-striped table-hover table-bordered">
-			                {% get_sortable_header header ordering request.GET %}
-			                {% for record in collection.training_set|get_valid_statistics %}
-				                <tr>
-                                    <td>{{ forloop.counter }}
-					                <td>{{ record.foss }}</td>
-					                <td>{{ record.organiser.user.first_name }}</td>
-					                <td>{{ record.tdate|date:"d M Y" }} {{ record.wtime }}</td>
-					                <td>{{ record.participant_count }}</td>
-                                    <!-- actions based on roles -->
-                                    <td><a href="{% url 'statistics:statistics_training_participant' 'training' record.id %}" target="_blank">View Participants</a></td>
-                                </tr>
-                           {% endfor %}
-                        </table>
-		            {% else %}
-			            <p class='no-record'>No record found!</p>
-		            {% endif %}
-                </div>
-                <div role="tabpanel" class="tab-pane" id="test">
-                    {% if collection.test_set|get_valid_statistics %}
-		                <table class="paleblue table table-striped table-hover table-bordered">
-			                {% get_sortable_header header ordering request.GET %}
-			                {% for record in collection.test_set|get_valid_statistics %}
-				                <tr>
-                                    <td>{{ forloop.counter }}
-					                <td>{{ record.foss }}</td>
-					                <td>{{ record.organiser.user.first_name }}</td>
-					                <td>{{ record.tdate|date:"d M Y" }} {{ record.wtime }}</td>
-					                <td>{{ record.participant_count }}</td>
-                                    <!-- actions based on roles -->
-                                    <td><a href="{% url 'statistics:statistics_training_participant' 'test' record.id %}" target="_blank">View Participants</a></td>
-                                </tr>
-                           {% endfor %}
-                        </table>
-		            {% else %}
-			            <p class='no-record'>No record found!</p>
-		            {% endif %}
-                </div>
-              </div>
-
-            </div>
-		        
-		{% else %}
-		    <p class="no-record"> No record found!</p>
-		{% endif %}
-	</div>
+  <div class='table-responsive'>
+    {% if collection %}
+      <table class="paleblue table table-bordered table-hover table-striped">
+        <tr>
+            <th>Institution Name</th><td>{{ collection.institution_name }}</td>
+        </tr>
+        <tr>
+            <th>Address</th><td><pre>{{ collection.address }}</pre></td>
+        </tr>
+        <tr>
+            <th>City</th><td>{{ collection.city }}</td>
+        </tr>
+        <tr>
+          <th>State</th><td>{{ collection.state }} - {{ collection.pincode }}</td>
+        </tr>
+        <tr>
+            <th>Rating</th><td>{{ collection.rating }}</td>
+        </tr>
+        <!-- <tr>
+            <th>University</th><td>{{ collection.university }}</td>
+        </tr> -->
+      </table>
+      <div role="tabpanel">
+        <!-- Nav tabs -->
+        <ul class="nav nav-tabs nav-pills nav-justified" role="tablist">
+            <li role="presentation" class="active "><a href="#training" aria-controls="training" role="tab" data-toggle="tab">Training<span class="badge">{{ collection|get_valid_statistics_count:'training' }}</span></a></li>
+            <li role="presentation" class=""><a href="#test" aria-controls="test" role="tab" data-toggle="tab">Test<span class="badge">{{ collection.test_set|get_valid_statistics_count:'test' }}</span></a></li>
+        </ul>
+        <!-- Tab panes -->
+        <div class="tab-content">
+          <div role="tabpanel" class="tab-pane active" id="training">
+            {% with records=collection|get_valid_statistics:'training' %}
+              {% if records %}
+                <table class="paleblue table table-striped table-hover table-bordered">
+                  <tr>
+                    <th>#</th>
+                    <th>FOSS</th>
+                    <th>Organiser</th>
+                    <th>Date</th>
+                    <th>Participants</th>
+                    <th>Action</th>
+                  </tr>
+                  {% for record in records %}
+                    <tr>
+                      <td>{{ forloop.counter }}
+                      <td>{{ record.course.foss }}</td>
+                      <td>
+                        {{ record.training_planner.organiser.user.first_name }} 
+                        {{ record.training_planner.organiser.user.last_name }}
+                      </td>
+                      <td>{{ record.sem_start_date|date:"d M Y" }}</td>
+                      <td>{{ record.participants }}</td>
+                      <!-- actions based on roles -->
+                      <td>
+                        {% if record.get_partipants_from_attendance %}
+                          <a href="{% url 'statistics:statistics_training_participants' record.id %}" target="_blank">View Participants</a>
+                        {% endif %}
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </table>
+              {% else %}
+                <p class='no-record'>No record found!</p>
+              {% endif %}
+            {% endwith %}
+          </div>
+          <div role="tabpanel" class="tab-pane" id="test">
+            {% with records=collection.test_set|get_valid_statistics:'test' %}
+              {% if records %}
+                <table class="paleblue table table-striped table-hover table-bordered">
+                  <tr>
+                    <th>#</th>
+                    <th>FOSS</th>
+                    <th>Organiser</th>
+                    <th>Date</th>
+                    <th>Participants</th>
+                    <th>Action</th>
+                  </tr>
+                  {% for record in records %}
+                    <tr>
+                      <td>{{ forloop.counter }}
+                      <td>{{ record.foss }}</td>
+                      <td>{{ record.organiser.user.first_name }} {{ record.organiser.user.last_name }}</td>
+                      <td>{{ record.tdate|date:"d M Y" }}</td>
+                      <td>{{ record.participant_count }}</td>
+                      <!-- actions based on roles -->
+                      <td><a href="{% url 'statistics:statistics_test_participants' record.id %}" target="_blank">View Participants</a></td>
+                    </tr>
+                  {% endfor %}
+                </table>
+              {% else %}
+                <p class='no-record'>No record found!</p>
+              {% endif %}
+            {% endwith %}
+          </div>
+        </div>
+      </div>
+    {% else %}
+        <p class="no-record"> No record found!</p>
+    {% endif %}
+  </div>
 {% endblock %}

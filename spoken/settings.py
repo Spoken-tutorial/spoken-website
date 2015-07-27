@@ -38,13 +38,13 @@ PASSWORD_HASHERS = (
 # email errors and 404
 SERVER_EMAIL = 'error-report@spoken-tutorial.org'
 ADMINS = (
+    ('Administrator', 'administrator@spoken-tutorial.org'),
     ('vishnuraj', 'vishnukraj007@gmail.com'),
-    ('sanmugam', 'k.sanmugam2@gmail.com'),
 )
 
 MANAGERS = (
+    ('Administrator', 'administrator@spoken-tutorial.org'),
     ('vishnuraj', 'vishnukraj007@gmail.com'),
-    ('sanmugam', 'k.sanmugam2@gmail.com'),
 )
 
 ADMINISTRATOR_EMAIL = ADMINISTRATOR_EMAIL
@@ -71,20 +71,20 @@ INSTALLED_APPS = (
     'django_extensions',
     'widget_tweaks',
     'captcha',
+    'nicedit',
+    'report_builder',
+    'compressor',
+
     'cms',
+    'cdeep',
     'creation',
     'statistics',
     'cdcontent',
     'events',
     'mdldjango',
-    'nicedit',
     'masquerade',
-    'report_builder',
     'youtube',
     'reports',
-    'compressor',
-    'events2',
-    'eventsmigration',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -248,3 +248,4 @@ HTML_MINIFY = HTML_MINIFY
 RECAPTCHA_PUBLIC_KEY = '6Le8qf8SAAAAABV9wYBW99Jotv-EygJXIhMa_n54'
 RECAPTCHA_PRIVATE_KEY = '6Le8qf8SAAAAAF9CkucURPapw2vaDPrU4qMzfg73'
 RECAPTCHA_USE_SSL = True
+ACADEMIC_DURATION = 5
