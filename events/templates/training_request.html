@@ -58,18 +58,18 @@
                       
                       <div class='form-row'>
                         <div class='col-xs-12 form-group required'>
-                          <label class='control-label'>Semester Start Date</label>
-                          {% render_field form.sem_start_date class+="form-control date sem_start_date" tabindex="1" %}
-                          {{ form.sem_start_date.errors }}
-                          <small>Odd Semester July to Aug, Even Semester Jan to Feb </small>
-                        </div>
-                      </div>
-
-                      <div class='form-row'>
-                        <div class='col-xs-12 form-group required'>
                           <label class='control-label'>Training Type</label>
                           {% render_field form.course_type class+="form-control course_type" tabindex="1" %}
                           {{ form.course_type.errors }}
+                        </div>
+                      </div>
+                      
+                      <div class='form-row'>
+                        <div class='col-xs-12 form-group required'>
+                          <label class='control-label' id="sem_start_date">Semester Start Date</label>
+                          {% render_field form.sem_start_date class+="form-control date sem_start_date" tabindex="1" readonly='true' style="cursor:pointer"%}
+                          {{ form.sem_start_date.errors }}
+                          <small>Odd Semester July to Aug, Even Semester Jan to Feb </small>
                         </div>
                       </div>
                       
@@ -106,6 +106,11 @@
 {% endblock %}
 {% block jsblock %}
   <script>
+    var td = new Date();
+    var y=td.getFullYear();
+    var sem_type = "{{tp}}";
+    var current_sem = "{{tp.is_current_planner}}";
+    var mind = 0 ; var maxd = 0;
     $(document).ready(function(){
       if($('.department').val() == '') {
         $('.course_type').val('');
@@ -115,6 +120,82 @@
       $('.course_type').on('change', function(){
         course_type = $(this).val();
         department = $('.department').val();
+        if(course_type == 0)
+        {
+          document.getElementById('sem_start_date').innerHTML ="Training Date";
+          $('.sem_start_date').val('');
+          if(sem_type == "Odd")
+          {
+            if(current_sem == "True")
+            {
+              mind = y+'/07/01';
+              maxd = y+'/12/31';
+            }
+            else if(current_sem == "False")
+            {
+              mind = y+'/07/01';
+              maxd = y+'/12/31';
+            }
+          }
+          else if(sem_type == "Even")
+          {
+            if(current_sem == "True")
+            {
+              mind = y+'/01/01';
+              maxd = y+'/06/30';
+            }
+            else if(current_sem == "False")
+            {
+              mind = (y+1)+'/01/01';
+              maxd = (y+1)+'/06/30';
+            }
+          }
+        }
+        else
+        {
+          document.getElementById('sem_start_date').innerHTML ="Semester Start Date";
+          $('.sem_start_date').val('');
+          if(sem_type == "Odd")
+          {
+            if(current_sem == "True")
+            {
+              mind = y+'/07/01';
+              maxd = y+'/09/30';
+            }
+            else if(current_sem == "False")
+            {
+              mind = y+'/07/01';
+              maxd = y+'/09/30';
+            }
+          }
+          else if(sem_type == "Even")
+          {
+            if(current_sem == "True")
+            {
+              mind = y+'/01/01';
+              maxd = y+'/03/30';
+            }
+            else if(current_sem == "False")
+            {
+              mind = (y+1)+'/01/01';
+              maxd = (y+1)+'/03/30';
+            }
+          }
+        }
+        $('.date').datetimepicker({
+          onGenerate:function( ct ){
+              $(this).find('.xdsoft_day_of_week0')
+                  .addClass('xdsoft_disabled');
+          },
+          lang:'en',
+          format:'Y-m-d',
+          formatDate:'Y/m/d',
+          minDate:mind, 
+          weekends:[],
+          maxDate:maxd,
+          step:5,
+          timepicker:false,
+        });
         $('.course').html('<option>---------</option>');
         if(course_type != '' && department != ''){
           $.ajax({
@@ -177,21 +258,6 @@
           });
         }
       });
-    });
-    
-    $('.date').datetimepicker({
-        onGenerate:function( ct ){
-            $(this).find('.xdsoft_day_of_week0')
-                .addClass('xdsoft_disabled');
-        },
-        lang:'en',
-        format:'Y-m-d',
-        formatDate:'Y/m/d',
-        minDate:0, // yesterday is minimum date
-        weekends:[],
-        maxDate:'+1970/06/31', // tommorow date with in 6 month
-        step:5,
-        timepicker:false,
     });
   </script>
 {% endblock %}
