@@ -18,12 +18,22 @@ from events.filters import TrainingRequestFilter, \
 # Create your views here.
 def maphome(request):
   states = State.objects.all().exclude(name = 'Uncategorised')
-  counts = Training.objects.filter(status = 4, participant_count__gt=0).aggregate(Count('id'), Sum('participant_count'))
-  institution_count = AcademicCenter.objects.filter(id__in=Training.objects.filter(status = 4, participant_count__gt=0).values_list('academic_id').distinct()).aggregate(Count('id'))
-  print institution_count
+
+  counts = TrainingRequest.objects.filter(
+    participants__gt=0,
+    sem_start_date__lte=datetime.now()
+  ).aggregate(Count('id'), Sum('participants'))
+
+  institution_count = AcademicCenter.objects.filter(
+    id__in=TrainingRequest.objects.filter(
+      participants__gt=0, 
+      sem_start_date__lte=datetime.now()
+    ).values_list('training_planner__academic_id').distinct()
+  ).aggregate(Count('id'))
+
   context = {
     'states': states,
-    'participant_count': counts['participant_count__sum'],
+    'participant_count': counts['participants__sum'],
     'training_count': counts['id__count'],
     'institution_count': institution_count['id__count'],
   }
@@ -35,15 +45,26 @@ def get_state_info(request, code):
   try:
     state = State.objects.get(code = code)
     #academic_list = AcademicCenter.objects.filter(state = state).values_list('id')
-    academic_centers = AcademicCenter.objects.filter(state = state, id__in=Training.objects.filter(status = 4, participant_count__gt=0).values_list('academic_id').distinct()).count()
+
+    academic_centers = AcademicCenter.objects.filter(
+      state = state, 
+      id__in=TrainingRequest.objects.filter(
+        participants__gt=0,
+        sem_start_date__lte=datetime.now()
+      ).values_list('training_planner__academic_id').distinct()
+    ).count()
     #workshop_details = Training.objects.filter(academic_id__in = academic_list, status = 4).aggregate(Sum('participant_count'), Count('id'), Min('tdate'))
-    workshop_details = Training.objects.filter(Q(status = 4) | (Q(training_type = 0) & Q(status = 4) & Q(tdate__lte = date.today())), participant_count__gt=0, academic__state_id = state.id).aggregate(Sum('participant_count'), Count('id'), Min('tdate'))
+    workshop_details = TrainingRequest.objects.filter(
+      participants__gt=0,
+      sem_start_date__lte=datetime.now(),
+      training_planner__academic__state_id = state.id
+    ).aggregate(Sum('participants'), Count('id'), Min('sem_start_date'))
     context = {
       'state': state,
       'workshops': workshop_details['id__count'],
-      'participants': workshop_details['participant_count__sum'],
+      'participants': workshop_details['participants__sum'],
       'academic_centers': academic_centers,
-      'from_date': workshop_details['tdate__min']
+      'from_date': workshop_details['sem_start_date__min']
     }
     return render(request, 'statistics/templates/get_state_info.html', context)
   except Exception, e:
@@ -67,10 +88,11 @@ def training(request):
     3: SortableHeader('training_planner__academic__city__name', True, 'City'),
     4: SortableHeader('training_planner__academic__institution_name', True, 'Institution'),
     5: SortableHeader('course__foss__foss', True, 'FOSS'),
-    6: SortableHeader('training_planner__organiser__user__first_name', True, 'Organiser'),
-    7: SortableHeader('sem_start_date', True, 'Date'),
-    8: SortableHeader('participants', 'True', 'Participants'),
-    9: SortableHeader('Action', False)
+    6: SortableHeader('course__category', True, 'Type'),
+    7: SortableHeader('training_planner__organiser__user__first_name', True, 'Organiser'),
+    8: SortableHeader('sem_start_date', True, 'Date'),
+    9: SortableHeader('participants', 'True', 'Participants'),
+    10: SortableHeader('Action', False)
   }
 
   raw_get_data = request.GET.get('o', None)
@@ -189,16 +211,19 @@ def academic_center(request, slug = None):
     1: SortableHeader('#', False),
     2: SortableHeader('State', False),
     3: SortableHeader('institution_name', True, 'Institution Name'),
-    4: SortableHeader('num_training', True, 'Training'),
-    5: SortableHeader('num_participant', True, 'Participants'),
+    4: SortableHeader('Training', False),
+    5: SortableHeader('Participants', True),
     6: SortableHeader('Action', False)
   }
   
   collection = None
-  training_index = int(request.GET.get('training', 0))
   start_date = request.GET.get('training__tdate_0', 0)
   end_date = request.GET.get('training__tdate_1', 0)
   lookup = None
+  training_query = TrainingRequest.objects.filter(
+    participants__gt=0,
+    sem_start_date__lte=datetime.now()
+  )
   if start_date or end_date:
     if start_date and end_date:
       lookup = [start_date, end_date]
@@ -207,14 +232,29 @@ def academic_center(request, slug = None):
     else:
       lookup = [datetime.strptime('1970-01-01', '%Y-%m-%d'), end_date]
   if slug:
-    collection = AcademicCenter.objects.filter(state__slug = slug).order_by('state__name', 'institution_name')
-  elif training_index:
-    collection = AcademicCenter.objects.filter(training__status=4, training__participant_count__gt=0).annotate(num_training=Count('training'), num_participant=Sum('training__participant_count')).filter(num_training__gte=training_index).order_by('state__name', 'institution_name')
+    collection = AcademicCenter.objects.filter(
+      id__in = training_query.values_list(
+        'training_planner__academic_id'
+      ).distinct(),
+      state__slug = slug
+    ).order_by('state__name', 'institution_name')
   else:
     if lookup:
-      collection = AcademicCenter.objects.filter(training__status=4, training__participant_count__gt=0, training__tdate__range=lookup).annotate(num_training=Count('training'), num_participant=Sum('training__participant_count')).order_by('state__name', 'institution_name')
+      training_query = TrainingRequest.objects.filter(
+        Q(sem_start_date__range=lookup)&Q(sem_start_date__lte=datetime.now()),
+        participants__gt=0
+      )
+      collection = AcademicCenter.objects.filter(
+        id__in = training_query.values_list(
+          'training_planner__academic_id'
+        ).distinct()
+      ).order_by('state__name', 'institution_name')
     else:
-      collection = AcademicCenter.objects.filter(training__status=4, training__participant_count__gt=0).annotate(num_training=Count('training'), num_participant=Sum('training__participant_count')).order_by('state__name', 'institution_name')
+      collection = AcademicCenter.objects.filter(
+        id__in = training_query.values_list(
+          'training_planner__academic_id'
+        ).distinct()
+      ).order_by('state__name', 'institution_name')
   
   raw_get_data = request.GET.get('o', None)
   collection = get_sorted_list(request, collection, header, raw_get_data)
@@ -222,21 +262,16 @@ def academic_center(request, slug = None):
   
   collection = AcademicCenterFilter(request.GET, queryset=collection)
   context['form'] = collection.form
-  context['total_training'] = collection.qs.aggregate(Sum('num_training'))
-  context['total_participant'] = collection.qs.aggregate(Sum('num_participant'))
+  context['total_training'] = training_query.count()
+  participant_count = training_query.aggregate(Sum('participants'))
+  print participant_count
+  context['total_participant'] = participant_count['participants__sum']
   
   page = request.GET.get('page')
   collection = get_page(collection, page)
-  options = '<option value="0"> --------- </option><option value="1">at least 1</option>'
-  for i in range(5, 105, 5):
-    options += '<option value="' + str(i) + '"> at least ' + str(i) + '</option>'
-  options += '<option value="101">more than 100</option>'
-  options = options.replace('<option value="' + str(training_index) + '">', \
-    '<option value="' + str(training_index) + '" selected="selected">')
   context['collection'] = collection
   context['header'] = header
   context['ordering'] = ordering
-  context['options'] = options
   
   return render(request, 'statistics/templates/academic-center.html', context)
 
