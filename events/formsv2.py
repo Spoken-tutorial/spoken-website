@@ -37,22 +37,24 @@ class TrainingRequestForm(forms.ModelForm):
     exclude = ['participants', 'status', 'training_planner']
 
   def clean(self):
-    tp = TrainingPlanner.objects.get(pk=self.cleaned_data['training_planner'])
-    if self.cleaned_data and 'department' in self.cleaned_data and self.cleaned_data['department']:
-      if tp.is_full(self.cleaned_data['department']):
-        raise forms.ValidationError("No. of training requests for this department exceeded.")
+    if self.cleaned_data:
+      tp = TrainingPlanner.objects.get(pk=self.cleaned_data['training_planner'])
+      if 'department' in self.cleaned_data and self.cleaned_data['department'] \
+        and 'batch' in self.cleaned_data and self.cleaned_data['batch']:
+        if tp.is_full(self.cleaned_data['department'], self.cleaned_data['batch']):
+          raise forms.ValidationError("No. of training requests for this department exceeded.")
 
-    if 'course_type' in self.cleaned_data and self.cleaned_data['course_type'] and 'department' in self.cleaned_data and self.cleaned_data['department']:
-      if tp.is_course_full(self.cleaned_data['course_type'], self.cleaned_data['department']):
-        raise forms.ValidationError("No. of training requests for selected course type exceeded")
-    
-    # Date restriction
-    if self.cleaned_data and 'sem_start_date' in self.cleaned_data and self.cleaned_data['sem_start_date']:
-      start_date, end_date =tp.get_current_semester_date_duration_new()
-      print tp.id, '-------------------'
-      print start_date, end_date, self.cleaned_data['sem_start_date']
-      if not (self.cleaned_data['sem_start_date'] <= end_date and self.cleaned_data['sem_start_date'] >= start_date):
-        raise forms.ValidationError("Invalid semester start date")
+        if 'course_type' in self.cleaned_data and self.cleaned_data['course_type']:
+          if tp.is_course_full(self.cleaned_data['course_type'], self.cleaned_data['department'], self.cleaned_data['batch']):
+            raise forms.ValidationError("No. of training requests for selected course type exceeded")
+      
+      # Date restriction
+      if self.cleaned_data and 'sem_start_date' in self.cleaned_data and self.cleaned_data['sem_start_date']:
+        start_date, end_date =tp.get_current_semester_date_duration_new()
+        print tp.id, '-------------------'
+        print start_date, end_date, self.cleaned_data['sem_start_date']
+        if not (self.cleaned_data['sem_start_date'] <= end_date and self.cleaned_data['sem_start_date'] >= start_date):
+          raise forms.ValidationError("Invalid semester start date")
     return self.cleaned_data
   
   def __init__(self, *args, **kwargs):
@@ -75,7 +77,7 @@ class TrainingRequestForm(forms.ModelForm):
         self.fields['batch'].queryset = StudentBatch.objects.filter(academic_id=user.organiser.academic.id, stcount__gt=0, department_id=department)
         self.fields['batch'].initial =  kwargs['data']['batch']
     # overwrite department choices
-    self.fields['department'].queryset = Department.objects.filter(id__in=StudentBatch.objects.filter(academic=user.organiser.academic).values_list('department_id'))
+    self.fields['department'].queryset = Department.objects.filter(id__in=StudentBatch.objects.filter(academic=user.organiser.academic, stcount__gt=0).values_list('department_id'))
 
 class TrainingRequestEditForm(forms.ModelForm):
   course_type = forms.ChoiceField(choices=[('', '---------'), (0, 'Software Course outside lab hours'), (1, 'Software Course mapped in lab hours'), (2, ' Software Course unmapped in lab hours')])

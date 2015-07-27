@@ -726,16 +726,16 @@ class TrainingPlanner(models.Model):
   def ongoing_training(self):
     return self.training_requests().filter(status=0)
 
-  def is_full(self, department_id):
-    if self.training_requests().filter(department_id=department_id).count() > 3:
+  def is_full(self, department_id, batch_id):
+    if self.training_requests().filter(department_id=department_id, batch_id=batch_id).count() > 2:
       return True
     return False
   
   # todo with test without test
-  def is_course_full(self, category, department_id):
-    if self.training_requests().filter(department_id=department_id, course__category = category, course__test = True).count() > 1:
+  def is_course_full(self, category, department_id, batch_id):
+    if self.training_requests().filter(department_id=department_id, batch_id=batch_id, course__category = category, course__test = True).count() > 1:
       return True
-    elif self.training_requests().filter(department_id=department_id, course__category = category, course__test = False).count() > 2:
+    elif self.training_requests().filter(department_id=department_id, batch_id=batch_id, course__category = category, course__test = False).count() > 2:
       return True
     return False
 
@@ -794,6 +794,11 @@ class TrainingRequest(models.Model):
     elif self.course.category == 2:
       return 'Unmapped Course'
     return ''
+
+  def is_training_certificate_allowed(self):
+    if not FossAvailableForTest.objects.filter(foss=self.course.foss, foss__status=True).count():
+      return True
+    return False
 
   # restrict the month to rise a training request
   def can_mark_attendance(self):

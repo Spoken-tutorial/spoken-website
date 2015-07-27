@@ -3,7 +3,6 @@ from django.template.defaultfilters import slugify
 # Register your models here.
 
 from events.models import *
-from creation.models import FossAvailableForTest, FossAvailableForWorkshop
 from events.forms import RpForm
 
 class UniversityAdmin(admin.ModelAdmin):
@@ -42,16 +41,6 @@ class CityAdmin(admin.ModelAdmin):
     fields = ['name', 'state']
     list_filter = ('state',)
 
-class FossAvailableForTestAdmin(admin.ModelAdmin):
-    fields = ['foss', 'language', 'status']
-    list_display = ('foss', 'language', 'status', 'created')
-    list_filter = ('language',)
-
-class FossAvailableForWorkshopAdmin(admin.ModelAdmin):
-    fields = ['foss', 'language', 'status']
-    list_display = ('foss', 'language', 'status', 'created')
-    list_filter = ('language',)
-
 class FossMdlCoursesAdmin(admin.ModelAdmin):
     fields = ['foss', 'mdlcourse_id', 'mdlquiz_id']
     list_display = ('foss', 'mdlcourse_id', 'mdlquiz_id')
@@ -82,8 +71,6 @@ admin.site.register(Department, DepartmentAdmin)
 admin.site.register(PermissionType, PermissionTypeAdmin)
 admin.site.register(District, DistrictAdmin)
 admin.site.register(City, CityAdmin)
-admin.site.register(FossAvailableForTest, FossAvailableForTestAdmin)
-admin.site.register(FossAvailableForWorkshop, FossAvailableForWorkshopAdmin)
 admin.site.register(FossMdlCourses, FossMdlCoursesAdmin)
 
 

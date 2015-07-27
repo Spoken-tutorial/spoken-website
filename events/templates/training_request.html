@@ -111,18 +111,22 @@
         $('.course_type').val('');
         $('.course_type').prop('disabled', 'disabled');
         $('.course').html('<option>---------</option>');
+        $('.course').prop('disabled', 'disabled');
       }
       $('.course_type').on('change', function(){
         course_type = $(this).val();
         department = $('.department').val();
+        batch = $('.batch').val();
         $('.course').html('<option>---------</option>');
-        if(course_type != '' && department != ''){
+        $('.course').prop('disabled', 'disabled');
+        if(course_type != '' && department != '' && batch != ''){
           $.ajax({
             url: "/software-training/get-course-option/",
             type: "POST",
             data: {
               course_type: course_type,
               department: department,
+              batch: batch,
               training_planner: $('.training-planner').val()
             },
             beforeSend: function() {
@@ -136,11 +140,45 @@
                     alert('No. of training requests for selected course type exceeded.');
                   }else{
                     $('.course').html(data['course_option']);
+                    $('.course').prop('disabled', false);
                   }
               }
               //$('.ajax-refresh-language').hide();
             }
           });
+        }
+      });
+      $('.batch').on('change', function() {
+        batch = $(this).val();
+        department = $('.department').val();
+        $('.course_type').val('');
+        $('.course_type').prop('disabled', 'disabled');
+        $('.course').html('<option>---------</option>');
+        $('.course').prop('disabled', 'disabled');
+        if(department != '' && batch != '') {
+          $.ajax({
+            url: "/software-training/get-batch-course-status/",
+            type: "POST",
+            data: {
+              department: department,
+              batch: batch,
+              training_planner: $('.training-planner').val()
+            },
+            beforeSend: function() {
+              //$('.ajax-refresh-language').show();
+            },
+            success: function(data) {
+              // loading languages
+              if(data && data['batch_status']) {
+                $('.course_type').prop('disabled', false);
+              } else {
+                $('.batch').val('');
+                alert('No. of training requests for selected batch exceeded.');
+              }
+              //$('.ajax-refresh-language').hide();
+            }
+          });
+                
         }
       });
       $('.department').on('change', function(){
@@ -150,27 +188,21 @@
         $('.course_type').val('');
         $('.course_type').prop('disabled', 'disabled');
         $('.course').html('<option>---------</option>');
+        $('.course').prop('disabled', 'disabled');
         if(department != ''){
           $.ajax({
             url: "/software-training/get-batch-option/",
             type: "POST",
             data: {
               department: department,
-              training_planner: $('.training-planner').val()
             },
             beforeSend: function() {
               //$('.ajax-refresh-language').show();
             },
             success: function(data) {
               // loading languages
-              if(data) {
-                  if(data['is_full']){
-                    $(".department").val('');
-                    alert('No. of training requests for "' + department_name + '" department exceeded.');
-                  }else{
-                    $('.batch').html(data['batch_option']);
-                    $('.course_type').prop('disabled', false);
-                  }
+              if(data && data['batch_option']) {
+                  $('.batch').html(data['batch_option']);
               }
               //$('.ajax-refresh-language').hide();
             }

@@ -435,12 +435,17 @@ class TrainingRequestCreateView(CreateView):
     try:
       form_data = form.save(commit=False)
       sb = StudentBatch.objects.get(pk=form_data.batch.id)
-      if sb.is_foss_batch_acceptable(form_data.course.id):
-        form_data.training_planner_id = self.kwargs['tpid']
-        # form_data.participants = StudentMaster.objects.filter(batch_id = form_data.batch_id).count()
-        form_data.save()
+      if sb.student_count():
+        if sb.is_foss_batch_acceptable(form_data.course.id):
+          form_data.training_planner_id = self.kwargs['tpid']
+          # form_data.participants = StudentMaster.objects.filter(batch_id = form_data.batch_id).count()
+          form_data.save()
+        else:
+          messages.error(self.request, 'This student batch already taken the selected course.')
+          return self.form_invalid(form)
       else:
-        messages.error(self.request, 'This student batch already taken the selected course.')
+        sb.update_student_count()
+        messages.error(self.request, 'There is no student present in this batch.')
         return self.form_invalid(form)
     except:
       messages.error(self.request, 'Something went wrong, Contact site administrator.')
@@ -784,7 +789,7 @@ class GetCourseOptionView(JSONResponseMixin, View):
     context = {}
     category = self.request.POST.get('course_type')
     tp = TrainingPlanner.objects.get(pk=self.request.POST.get('training_planner'))
-    if tp.is_course_full(category, self.request.POST.get('department')):
+    if tp.is_course_full(category, self.request.POST.get('department'), self.request.POST.get('batch')):
       context['is_full'] = True
     else:
       courses = CourseMap.objects.filter(category=category)
@@ -812,22 +817,38 @@ class GetBatchOptionView(JSONResponseMixin, View):
   def post(self, request, *args, **kwargs):
     department_id = self.request.POST.get('department')
     context = {}
+
+    batches = StudentBatch.objects.filter(
+      academic_id=request.user.organiser.academic.id,
+      stcount__gt=0,
+      department_id=department_id
+    )
+    batch_option = "<option value=''>---------</option>"
+    for batch in batches:
+      batch_option += "<option value=" + str(batch.id) + ">" + str(batch) + "</option>"
+    context = {
+      'batch_option' : batch_option,
+    }
+    return self.render_to_json_response(context)
+
+
+class GetBatchStatusView(JSONResponseMixin, View):
+  @method_decorator(csrf_exempt)
+  def dispatch(self, *args, **kwargs):
+    return super(GetBatchStatusView, self).dispatch(*args, **kwargs)
+  
+  def post(self, request, *args, **kwargs):
+    department_id = self.request.POST.get('department')
+    batch_id = self.request.POST.get('batch')
     tp = TrainingPlanner.objects.get(pk=self.request.POST.get('training_planner'))
-    if tp.is_full(department_id):
-      context['is_full'] = True
-    else:
-      batches = StudentBatch.objects.filter(
-        academic_id=request.user.organiser.academic.id,
-        stcount__gt=0,
-        department_id=department_id
-      )
-      batch_option = "<option value=''>---------</option>"
-      for batch in batches:
-        batch_option += "<option value=" + str(batch.id) + ">" + str(batch) + "</option>"
-      context = {
-        'batch_option' : batch_option,
-        'is_full' : False
-      }
+    context = {}
+
+    batch_status = True
+    if tp.is_full(department_id, batch_id):
+      batch_status = False
+    context = {
+      'batch_status' : batch_status,
+    }
     return self.render_to_json_response(context)
 
 
