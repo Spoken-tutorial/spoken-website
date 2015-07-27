@@ -76,7 +76,6 @@ INSTALLED_APPS = (
     'compressor',
 
     'cms',
-    'cdeep',
     'creation',
     'statistics',
     'cdcontent',
