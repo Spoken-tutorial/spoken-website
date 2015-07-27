@@ -71,19 +71,20 @@ INSTALLED_APPS = (
     'django_extensions',
     'widget_tweaks',
     'captcha',
+    'nicedit',
+    'report_builder',
+    'compressor',
+
     'cms',
+    'cdeep',
     'creation',
     'statistics',
     'cdcontent',
     'events',
     'mdldjango',
-    'nicedit',
     'masquerade',
-    'report_builder',
     'youtube',
     'reports',
-    'compressor',
-    'eventsmigration',
 )
 
 MIDDLEWARE_CLASSES = (
