@@ -845,7 +845,7 @@ class SingletrainingCompletedListView(ListView):
   paginate_by = 10
   
   def dispatch(self, *args, **kwargs):
-    self.queryset = SingleTraining.objects.filter(status=2)
+    self.queryset = SingleTraining.objects.filter(status=2).order_by('-tdate')
     return super(SingletrainingCompletedListView, self).dispatch(*args, **kwargs)
 
 class SingletrainingCreateView(CreateView):
