@@ -106,12 +106,17 @@
             <td>{{ record.sem_start_date }}</td>
             <td>
               {% with attendance_count=record.get_partipants_from_attendance %}
-                {% if attendance_count %}
-                  <a href="{% url 'statistics:statistics_training_participants' record.id %}" target="_blank">
-                {% endif %}
-                {{ attendance_count }}{% if record.get_partipants_from_batch %}/{{record.get_partipants_from_batch }}{% endif %}
-                {% if attendance_count %}
-                  </a>
+                {% if record.batch %}
+                  {% if attendance_count %}
+                    <a href="{% url 'statistics:statistics_training_participants' record.id %}" target="_blank">
+                  {% endif %}
+                  {% if attendance_count == record.participants %}{{ attendance_count }}{% else %}{{ record.update_participants_count }}{% endif %}
+                  {% if record.get_partipants_from_batch %}/{{record.get_partipants_from_batch }}{% endif %}
+                  {% if attendance_count %}
+                    </a>
+                  {% endif %}
+                {% else %}
+                  {{ record.participants }}
                 {% endif %}
               {% endwith %}
             </td>
