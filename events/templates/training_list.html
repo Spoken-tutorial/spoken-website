@@ -104,7 +104,17 @@
             <td>{{ record.get_course_type }}</td>
             <td>{{ record.training_planner.organiser.user.first_name }}</td>
             <td>{{ record.sem_start_date }}</td>
-            <td>{{ record.get_partipants_from_attendance}}{% if record.get_partipants_from_batch %}/{{record.get_partipants_from_batch }}{% endif %}</td>
+            <td>
+              {% with attendance_count=record.get_partipants_from_attendance %}
+                {% if attendance_count %}
+                  <a href="{% url 'statistics:statistics_training_participants' record.id %}" target="_blank">
+                {% endif %}
+                {{ attendance_count }}{% if record.get_partipants_from_batch %}/{{record.get_partipants_from_batch }}{% endif %}
+                {% if attendance_count %}
+                  </a>
+                {% endif %}
+              {% endwith %}
+            </td>
             <!-- actions based on roles -->
             <!--<td></td>-->
           </tr>
