@@ -852,27 +852,113 @@ class GetBatchStatusView(JSONResponseMixin, View):
     }
     return self.render_to_json_response(context)
 
+''' 
+SingleTrainingNewListView will list all the new/pending training requests in the single-training page pertaining to a specific user, i.e, Organiser or Resource Person.
 
+'''
+class SingleTrainingNewListView(ListView):
+  queryset = None
+  paginate_by = 10
+
+  def get_context_data(self, **kwargs):
+    context = super(SingleTrainingNewListView, self).get_context_data(**kwargs)
+    temp = self.request.user.groups.all()
+    grup = []
+    for i in temp:
+      grup.append(i.name)
+    context['group'] = grup
+    return context
+  
+  def dispatch(self, *args, **kwargs):
+    user_groups_object = self.request.user.groups.all()
+    user_group = []
+    for i in user_groups_object:
+      user_group.append(i.name)
+    if 'Administrator' in user_group:
+      self.queryset = SingleTraining.objects.filter(Q(status=0)).order_by('-tdate')
+      return super(SingleTrainingNewListView, self).dispatch(*args, **kwargs)
+    elif 'Organiser' in user_group:
+      rp_state = self.request.user.organiser.academic_id
+      self.queryset = SingleTraining.objects.filter(Q(status=0), academic__id = rp_state)
+      return super(SingleTrainingNewListView, self).dispatch(*args, **kwargs)
+    elif 'Resource Person' in user_group:
+      state_list = []
+      rp_state = self.request.user.id
+      a = ResourcePerson.objects.filter(user__id=rp_state)
+      for i in a:
+        state_list.append(i.state_id)
+      self.queryset = SingleTraining.objects.filter(Q(status=0), academic__state__id__in = state_list)
+      return super(SingleTrainingNewListView, self).dispatch(*args, **kwargs)
+
+
+'''
+SingletrainingApprovedListView will list all the approved training requests in the single-training page.
+
+'''
 class SingletrainingApprovedListView(ListView):
   queryset = None
   paginate_by = 10
   
   def dispatch(self, *args, **kwargs):
-    self.queryset = SingleTraining.objects.filter(Q(status=0) | Q(status=1))
-    return super(SingletrainingApprovedListView, self).dispatch(*args, **kwargs)
+    user_groups_object = self.request.user.groups.all()
+    user_group = []
+    for i in user_groups_object:
+      user_group.append(i.name)
+    if 'Administrator' in user_group:
+      self.queryset = SingleTraining.objects.filter(Q(status=2)).order_by('-tdate')
+      return super(SingletrainingApprovedListView, self).dispatch(*args, **kwargs)
+    elif 'Organiser' in user_group:
+      rp_state = self.request.user.organiser.academic_id
+      self.queryset = SingleTraining.objects.filter(Q(status=2), academic__id = rp_state)
+      return super(SingletrainingApprovedListView, self).dispatch(*args, **kwargs)
+    elif 'Resource Person' in user_group:
+      state_list = []
+      rp_state = self.request.user.id
+      a = ResourcePerson.objects.filter(user__id=rp_state)
+      for i in a:
+        state_list.append(i.state_id)
+      self.queryset = SingleTraining.objects.filter(Q(status=2), academic__state__id__in = state_list)
+      return super(SingletrainingApprovedListView, self).dispatch(*args, **kwargs)
 
+'''
+SingleTrainingCompletedListView will list all the completed training requests in the single-training page.
+
+'''
 class SingletrainingCompletedListView(ListView):
   queryset = None
   paginate_by = 10
   
+  
   def dispatch(self, *args, **kwargs):
-    self.queryset = SingleTraining.objects.filter(status=2).order_by('-tdate')
-    return super(SingletrainingCompletedListView, self).dispatch(*args, **kwargs)
+    user_groups_object = self.request.user.groups.all()
+    user_group = []
+    for i in user_groups_object:
+      user_group.append(i.name)
+    if 'Administrator' in user_group:
+      self.queryset = SingleTraining.objects.filter(Q(status=4)).order_by('-tdate')
+      return super(SingletrainingCompletedListView, self).dispatch(*args, **kwargs)
+    elif 'Organiser' in user_group:
+      rp_state = self.request.user.organiser.academic_id
+      self.queryset = SingleTraining.objects.filter(Q(status=4), academic__id = rp_state)
+      return super(SingletrainingCompletedListView, self).dispatch(*args, **kwargs)
+    elif 'Resource Person' in user_group:
+      state_list = []
+      rp_state = self.request.user.id
+      a = ResourcePerson.objects.filter(user__id=rp_state)
+      for i in a:
+        state_list.append(i.state_id)
+      self.queryset = SingleTraining.objects.filter(Q(status=4), academic__state__id__in = state_list)
+      return super(SingletrainingCompletedListView, self).dispatch(*args, **kwargs)
+
+'''
+SingleTrainingCreateView will create a request for a new One day workshop.
+
+'''
 
 class SingletrainingCreateView(CreateView):
   form_class = SingleTrainingForm
   template_name = ""
-  success_url = "/software-training/single-training/approved/"
+  success_url = "/software-training/single-training/pending/"
   
   def form_valid(self, form, **kwargs):
     form_data = form.save(commit=False)
@@ -884,7 +970,6 @@ class SingletrainingCreateView(CreateView):
     csv_error_line_num = ''
     
     if error or skipped:
-#     return render_to_response(self.template_name, context, context_instance=RequestContext(self.request))
       messages.error(self.request, "Batch not added: Error in CSV file")
       for i in error:
         csv_error_line_num = (csv_error_line_num+'%d, ')%(i+1)
@@ -906,6 +991,10 @@ class SingletrainingCreateView(CreateView):
         pass
     return False
 
+  '''
+  get_student_vocational() will fetch the student object having the email id passed to it as an argument.
+
+  '''
   def get_student_vocational(self, email):
     if email and email.strip():
       email = email.strip().lower()
@@ -916,6 +1005,10 @@ class SingletrainingCreateView(CreateView):
         pass
     return False
 
+  '''
+  create_student_vocational() will add the database entry for the student 
+
+  '''
   def create_student_vocational(self, training_id, fname, lname, email, gender):
     if not fname or not lname or not email or not gender:
       return False
@@ -933,7 +1026,11 @@ class SingletrainingCreateView(CreateView):
       student = SingleTrainingAttendance.objects.create(training_id = training_id, firstname = fname, lastname = lname, email = email, gender = gender)
       return student
     return False
-  
+
+  '''
+  csv_email_validate() will validate the email field, from the CSV file, for the School and Vocational training type.
+
+  '''  
   def csv_email_validate(self, file_path, ttype):
     skipped = []
     error = []
@@ -963,7 +1060,11 @@ class SingletrainingCreateView(CreateView):
           error.append(j)
           continue
     return skipped, error, warning, write_flag
+
+  '''
+  This will call the create_student_vocational() method to create the student entry, from the  CSV file, in the SingleTraining database.
   
+  '''  
   def create_singletraining_db(self, file_path, batch_id):
     csv_data_list = []
     csvdata = csv.reader(file_path, delimiter=',', quotechar='|')
@@ -973,45 +1074,42 @@ class SingletrainingCreateView(CreateView):
       student = self.get_student_vocational(csv_data_list[j][2])
       if not student:
         self.create_student_vocational(batch_id, csv_data_list[j][0], csv_data_list[j][1], csv_data_list[j][2], csv_data_list[j][3])
+    return None
 
-    '''
-      if student:
-        try:
-          smrec = StudentMaster.objects.get(student=student, moved=False)
-           if int(batch_id) == int(smrec.batch_id):
-             row.append(1)
-           else:
-             row.append(0)
-             warning.append(row)
-             continue
-         except ObjectDoesNotExist:
-           StudentMaster.objects.create(student=student, batch_id=batch_id)
-           write_flag = True'''
-#     SingleTrainingAttendance.objects.get(pk=batch_id).update_student_count()
-    
-  
-  
-'''class GetLanguageOptionView(JSONResponseMixin, View):
-  @method_decorator(csrf_exempt)
-  def dispatch(self, *args, **kwargs):
-    return super(GetLanguageOptionView, self).dispatch(*args, **kwargs)
-  
-  def post(self, request, *args, **kwargs):
-    try:
-      course = CourseMap.objects.get(pk=self.request.POST.get('course'))
-    except Exception, e:
-      return HttpResponse('')
-    context = {
-      'languages': Language.objects.filter(
-        id__in = FossAvailableForWorkshop.objects.filter(
-          foss_id = course.foss_id
-        ).values_list('language_id')
-      )
-    }
-    return render(request, 'language_options.html', context)
+''' SingleTrainingApprove will take an argument(primary key of a training batch) and change the status of the SingleTraining batch, in the SingleTraining database, from pending to approved.
+
+Status code:
+------------
+0 - new/pending
+2 - approved
+3 - ongoing
+4 - completed
+5 - Rejected
+
+'''
+def SingleTrainingApprove(request, pk):     
+  print pk
+  st = SingleTraining.objects.get(pk=pk)
+  if st:
+    st.status = 2
+    st.save()
+  else:
+    print "Error"
+  return HttpResponseRedirect('/software-training/single-training/approved/')
+
+''' SingleTrainingReject will take an argument(primary key of a training batch) and change the status of the SingleTraining batch, in the database, from pending to rejected
 '''
 
+def SingleTrainingReject(request, pk):
+  st = SingleTraining.objects.get(pk=pk)
+  if st:
+    st.status = 5
+    st.save()
+  else:
+    print "Error"
+  return HttpResponseRedirect("/software-training/single-training/approved/")
 
+	
 class TrainingRequestListView(ListView):
   queryset = None
   paginate_by = 20

@@ -88,6 +88,11 @@ urlpatterns = [
       name="coursemapupdate"
     ),
     url(
+      r'^single-training/pending/$', 
+     SingleTrainingNewListView.as_view(template_name="single-training.html"), 
+      name="single-training-pending"
+    ),
+    url(
       r'^single-training/approved/$', 
      SingletrainingApprovedListView.as_view(template_name="single-training.html"), 
       name="single-training-approved"
@@ -125,4 +130,14 @@ urlpatterns = [
       name='training_list'
     ),
     #url(r'^get-language-option/', GetLanguageOptionView.as_view()),
+    url(
+      r'^single-training/pending/(?P<pk>\d+)/$',
+      'events.viewsv2.SingleTrainingApprove', 
+      name="single-training-approve"
+    ),
+    url(
+      r'^single-training/pending/(?P<pk>\d+)/$', 
+      'events.viewsv2.SingleTrainingReject', 
+      name="single-training-reject"
+    ),
 ]

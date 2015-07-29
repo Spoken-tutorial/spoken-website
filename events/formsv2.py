@@ -142,7 +142,7 @@ class CourseMapForm(forms.ModelForm):
     super(CourseMapForm, self).__init__(*args, **kwargs)
 
 class SingleTrainingForm(forms.ModelForm):
-  training_type = forms.ChoiceField(choices=[('', '---------'), (0, 'School'),(1,'Vocational'),(2,'Live workshop'),(3,'Pilot workshop')])
+  training_type = forms.ChoiceField(choices=[('', '---------'), (0, 'School'),(3,'Vocational'),(1,'Live workshop'),(2,'Pilot workshop')])
   csv_file = forms.FileField(required = True)
   class Meta:
     model = SingleTraining

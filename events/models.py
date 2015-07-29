@@ -863,7 +863,7 @@ class SingleTraining(models.Model):
   organiser = models.ForeignKey(Organiser)
   academic = models.ForeignKey(AcademicCenter)
   course = models.ForeignKey(CourseMap) # type 0
-  # {0:School, 1:Vocational, 2:Live Workshop, 3:Pilot Workshop}
+  # {0:School, 3:Vocational, 1:Live Workshop, 2:Pilot Workshop}
   training_type = models.PositiveIntegerField(default=0)
   language = models.ForeignKey(Language)
   tdate = models.DateField()
