@@ -35,9 +35,10 @@
                       
                       <div class='form-row'>
                         <div class='col-xs-12 form-group required'>
-                          <label class='control-label'>Csv File</label>
+                          <label class='control-label'>Csv File</label>&nbsp;&nbsp;<small>(Please upload your CSV file here.) </small>
                           {% render_field form.csv_file class+="file csv_file" tabindex="1" %}
                           {{ form.csv_file.errors }}
+			  <small>If you have used MS-EXCEL to create the CSV file please make sure that you have saved it with csv(ms-dos) file extention.</small>
                         </div>
                       </div>
               
@@ -55,7 +56,7 @@
         {% else %}
           <h4><center>{{ batch.get_batch_info }}</center></h4>
           <form action="{{ action }}" method="post" class='form-horizontal' enctype="multipart/form-data">{% csrf_token %}
-            <h5>Errors <span class="pull-right review-accepted">Note: Click on the email to correct email format</span></h5>
+            <h5>Errors (Invalid Email ID)<span class="pull-right review-accepted">Note: Click on the email to correct email format</span></h5>
             <div class="row well">
               <table class="table">
                 <tr>
@@ -77,7 +78,7 @@
           </form>
         {% endif %}
         {% if warning %}
-          <h5>Warning <span class="pull-right review-accepted">Note: Click on the email to correct email format</span></h5>
+          <h5>Warning (Student Already Exists)<span class="pull-right review-accepted">Note: Click on the email to correct email format</span></h5>
             <div class="row well">
               <table class="table">
                 <tr>
