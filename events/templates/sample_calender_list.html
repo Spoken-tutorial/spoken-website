@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block title %}Sample Calender List{% endblock %}
+{% block heading %}<i class="home-page-title-i">Sample Calender  List</i>{% endblock %}
+{% block search %}{% endblock %}
+{% block content %}
+{% load cmsdata %}
+{% load student %}
+            {% if "Resource Person" in group %}
+            <a class="btn btn-default" href="{% url 'events:sample_calender_new' %}">Add New</a><br><br>
+            {% endif %}
+            {% if object_list %}
+                <table class="paleblue table">
+                {% for record in object_list %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ record.state }}</td>
+                    <td>{{ record.institute_type }}</td>
+                    <td><a href="{{ MEDIA_URL }}{{ record.file }}" target="_blank">Link</a></td>
+
+                    {% if "Resource Person" in group %}
+                    <td><a href="{% url 'events:sample_calender_delete' record.id %}">Delete</a></td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+                </table>
+            {% else %}
+                <p class='no-record'>No record found!</p>
+            {% endif %}
+{% endblock %}
