@@ -191,6 +191,53 @@
         .panel-body .hline {
             margin-bottom: 8px;
         }
+        .forum-questions h4 {
+            font-family: Menlo,Monaco,Consolas,"Courier New",monospace;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .forum-questions .question {
+            padding: 5px;
+            clear: both;
+        }
+        .forum-questions .question a {
+            font-weight: bold;
+        }
+        .forum-questions .question p {
+            font-weight: normal;
+            padding: 5px;
+            font-size: 13px !important;
+            font-family: Verdana, Arial, Helvetica, sans-serif !important;
+            color: rgb(85, 85, 85) !important;
+            line-height: 18px !important;
+        }
+        .forum-questions .question p span, .forum-questions .question p div {
+            font-size: 13px !important;
+            font-family: Verdana, Arial, Helvetica, sans-serif !important;
+            color: rgb(85, 85, 85) !important;
+            line-height: 18px !important;
+        }
+        .hline-inner {
+            clear: both;
+        }
+        small {
+            padding: 3px 5px;
+            margin: 0 5px 0 0;
+            -webkit-border-radius: 3px;
+            -moz-border-radius: 3px;
+            -o-border-radius: 3px;
+            border-radius: 3px;
+            background: #424242;
+            color: #ffffff;
+            width: 100px;
+            overflow: hidden;
+        }
+        small.timing {
+            background: #a26dc8;
+        }
+        .forum-post {
+            color: #4F8811;
+        }
     </style>
 {% endblock %}
 {% load creationdata %}
@@ -261,11 +308,32 @@
                         {% endif %}
                     {% endwith %}
                     <li><a href="/creation/report-missing-component/{{ tr_rec.id}}" class="fancybox fancybox.iframe"> Report Missing Component</a></li>
-                    <li><a target="_blank" href="http://forums.spoken-tutorial.org/">Post your Question on the Forum</a></li>
+                    <li><a target="_blank" href="http://forums.spoken-tutorial.org/new-question/?category={{ tr_rec.tutorial_detail.foss.foss }}" class="forum-post">Post your Question on the Forum</a></li>
                 </ol>
                 <hr class="hline" />
                 <pre class="custom-jumbotron"><h3><b>Outline:</b></h3><p>{{ tr_rec.outline }}</p></pre>
                 <hr class="hline" />
+                <hr class="hline" />
+                {% if questions %}
+                    <div class="forum-questions">
+                      <h4>Questions posted on ST Forums:</h4>
+                      {% for question in questions %}
+                        <div class="question">
+                            <a href="http://forums.spoken-tutorial.org/question/{{ question.id }}/{{ question.get_slugified_title }}" target="_blank">{{ question.title }}</a>
+                            <p>{{ question.body|safe }}</p>
+                            <div class="timing pull-left">
+                                {% if not question.minute_range == 'None' %}<small class="timing">{{ question.minute_range }}M</small>{% endif %}
+                                {% if not question.second_range == 'None' %}<small class="timing">{{ question.second_range }}S</small>{% endif %}
+                            </div>
+                            <div class="user pull-right">
+                                <span>{{ question.date_modified }}</span>
+                                <small>{{ question.user }}</small>
+                            </div>
+                        </div>
+                        <hr class="hline-inner" />
+                      {% endfor %}
+                    </div>
+                {% endif %}
             </div>
         </div>
         <div class="col-lg-4 col-md-4 col-sm-4 no-padding right-bar">

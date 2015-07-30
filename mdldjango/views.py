@@ -12,6 +12,7 @@ from xml.etree.ElementTree import ElementTree
 # Create your views here.
 import hashlib
 import csv, os, time
+from django.db.models import Q
 from django.core.exceptions import PermissionDenied
 from events.views import *
 from events.models import *
@@ -103,7 +104,7 @@ def index(request):
             if category == 2:
                 past_test = Test.objects.filter(id__in = TestAttendance.objects.filter(mdluser_id = mdluser.id).values_list('test_id'), status = 4).order_by('-tdate')
             if category == 4:
-                ongoing_test = Test.objects.filter(status=3, academic_id=mdluser.institution, tdate = datetime.date.today()).order_by('-tdate')
+                ongoing_test = Test.objects.filter(Q(status=2)|Q(status=3), academic_id=mdluser.institution, tdate=datetime.date.today()).order_by('-tdate')
             
             context = {
                 'mdluserid' : mdluserid,

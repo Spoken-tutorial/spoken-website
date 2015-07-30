@@ -760,9 +760,9 @@ class TrainingPlanner(models.Model):
 class TestTrainingManager(models.Manager):
     def get_queryset(self):
         return super(TestTrainingManager, self).get_queryset().filter(
-          (Q(course__category=0) & Q(sem_start_date__lte=datetime.now()-timedelta(days=30))) | 
-          (Q(course__category__gt=0) & Q(sem_start_date__lte=datetime.now()-timedelta(days=120))),
-          status=1
+          (Q(course__category=0) & Q(status=1) & Q(sem_start_date__lte=datetime.now()-timedelta(days=15))) | 
+          (Q(course__category__gt=0) & Q(sem_start_date__lte=datetime.now()-timedelta(days=30))),
+          participants__gt=0
         ).exclude(
           id__in=Test.objects.exclude(training_id=None).values_list('training_id').distinct()
         ).order_by('-training_planner__year', '-training_planner__semester_id')
@@ -817,6 +817,11 @@ class TrainingRequest(models.Model):
 
   def get_partipants_from_attendance(self):
     return TrainingAttend.objects.filter(training_id = self.id).count()
+
+  def get_partipants_from_batch(self):
+    if self.batch:
+      return self.batch.stcount
+    return 0
 
   def attendance_summery(self):
     if self.status == 1:

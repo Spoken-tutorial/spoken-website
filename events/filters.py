@@ -150,9 +150,9 @@ class TrainingRequestFilter(django_filters.FilterSet):
 
   course__foss = django_filters.ChoiceFilter(
     choices= [('', '---------')] + list(
-      FossAvailableForWorkshop.objects.filter(
-        status=1
-      ).order_by('foss__foss').values_list('foss__id', 'foss__foss').distinct()
+      TrainingRequest.objects.filter(
+        status=True
+      ).order_by('course__foss__foss').values_list('course__foss__id', 'course__foss__foss').distinct()
     )
   )
 
@@ -167,7 +167,7 @@ class TrainingRequestFilter(django_filters.FilterSet):
 
   training_planner__academic__institution_type = django_filters.ChoiceFilter(
     choices=[('', '---------')] + list(
-      InstituteType.objects.values_list('id', 'name').distinct()
+      InstituteType.objects.exclude(name='School').values_list('id', 'name').distinct()
     )
   )
 
@@ -186,7 +186,14 @@ class TrainingRequestFilter(django_filters.FilterSet):
     if 'user' in kwargs:
       user = kwargs['user']
       kwargs.pop('user')
-    
+    rp_completed = None
+    if 'rp_completed' in kwargs:
+      rp_completed = kwargs['rp_completed']
+      kwargs.pop('rp_completed')
+    rp_ongoing = None
+    if 'rp_ongoing' in kwargs:
+      rp_ongoing = kwargs['rp_ongoing']
+      kwargs.pop('rp_ongoing')
     state = None
     if 'state' in kwargs:
       state = kwargs['state']
@@ -202,6 +209,24 @@ class TrainingRequestFilter(django_filters.FilterSet):
         pass
     choices = None
     if user:
+      if rp_completed:
+        foss_list = TrainingRequest.objects.filter(
+          status = True,
+          training_planner__academic__state_id__in=user.resourceperson_set.all().values_list('state_id').distinct()
+        ).order_by('course__foss__foss').values_list('course__foss__id', 'course__foss__foss').distinct()
+      elif rp_ongoing:
+        foss_list = TrainingRequest.objects.filter(
+          status = False,
+          training_planner__academic__state_id__in=user.resourceperson_set.all().values_list('state_id').distinct()
+        ).order_by('course__foss__foss').values_list('course__foss__id', 'course__foss__foss').distinct()
+      else:
+        foss_list = TrainingRequest.objects.filter(
+          training_planner__academic__state_id__in=user.resourceperson_set.all().values_list('state_id').distinct()
+        ).order_by('course__foss__foss').values_list('course__foss__id', 'course__foss__foss').distinct()
+      choices = [('', '---------')] + list(foss_list)
+      self.filters['course__foss'].extra.update(
+        {'choices' : choices}
+      )
       choices = list(
         State.objects.filter(
           resourceperson__user_id=user, 

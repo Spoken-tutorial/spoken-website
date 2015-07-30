@@ -5,6 +5,7 @@ from datetime import datetime
 from django.views.generic import View, ListView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from events.models import *
+from events.filters import TrainingRequestFilter
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
 from django.utils.decorators import method_decorator
@@ -1170,8 +1171,8 @@ class TrainingRequestListView(ListView):
           True, 
           'Institution'
         ),
-        5: SortableHeader('course__foss__foss', True, 'FOSS'),
-        6: SortableHeader('course__course', True, 'Course Name'),
+        5: SortableHeader('batch__department__name', True, 'Department / Batch'),
+        6: SortableHeader('course__foss__foss', True, 'Course Name'),
         7: SortableHeader('course__category', True, 'Course Type'),
         8: SortableHeader(
           'training_planner__organiser__user__first_name', 
@@ -1193,6 +1194,10 @@ class TrainingRequestListView(ListView):
         self.header, 
         self.raw_get_data
       )
+      if self.status == 'completed':
+        self.queryset = TrainingRequestFilter(self.request.GET, queryset=self.queryset, user=self.user, rp_completed=True)
+      else:
+        self.queryset = TrainingRequestFilter(self.request.GET, queryset=self.queryset, user=self.user, rp_ongoing=True)
     else:
       print 222222
       raise PermissionDenied()
@@ -1200,6 +1205,7 @@ class TrainingRequestListView(ListView):
 
   def get_context_data(self, **kwargs):
     context = super(TrainingRequestListView, self).get_context_data(**kwargs)
+    context['form'] = self.queryset.form
     context['role'] = self.role
     context['status'] = self.status
     context['header'] = self.header
