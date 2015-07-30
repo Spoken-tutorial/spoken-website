@@ -322,8 +322,8 @@
                             <a href="http://forums.spoken-tutorial.org/question/{{ question.id }}/{{ question.get_slugified_title }}" target="_blank">{{ question.title }}</a>
                             <p>{{ question.body|safe }}</p>
                             <div class="timing pull-left">
-                                {% if question.minute_range %}<small class="timing">{{ question.minute_range }}M</small>{% endif %}
-                                {% if question.second_range %}<small class="timing">{{ question.second_range }}S</small>{% endif %}
+                                {% if not question.minute_range == 'None' %}<small class="timing">{{ question.minute_range }}M</small>{% endif %}
+                                {% if not question.second_range == 'None' %}<small class="timing">{{ question.second_range }}S</small>{% endif %}
                             </div>
                             <div class="user pull-right">
                                 <span>{{ question.date_modified }}</span>
