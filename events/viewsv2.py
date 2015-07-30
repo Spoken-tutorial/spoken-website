@@ -1088,7 +1088,6 @@ Status code:
 
 '''
 def SingleTrainingApprove(request, pk):     
-  print pk
   st = SingleTraining.objects.get(pk=pk)
   if st:
     st.status = 2
