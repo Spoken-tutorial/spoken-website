@@ -162,3 +162,9 @@ class SingleTrainingForm(forms.ModelForm):
     if today.date() > tdate:
       raise forms.ValidationError("Invalid semester training date")
     return tdate
+
+
+class SampleCalenderForm(forms.ModelForm):
+  class Meta:
+    model = SampleTrainingTimeTable
+    exclude = []

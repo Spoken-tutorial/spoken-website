@@ -13,6 +13,8 @@ from events.signals import revoke_student_permission
 #validation
 from django.core.exceptions import ValidationError
 
+import os
+
 # Create your models here.
 class State(models.Model):
     users = models.ManyToManyField(User, related_name="resource_person", through='ResourcePerson')
@@ -903,5 +905,14 @@ class SingleTrainingAttendance(models.Model):
 
 ### Signals
 
+def sample_file_path(instance, filename):
+  ext = os.path.splitext(filename)[1]
+  ext = ext.lower()
+  return '/'.join(['calender', str(instance.id), str(instance.id) + ext])
+
+class SampleTrainingTimeTable(models.Model):
+  state = models.ForeignKey(State)
+  institute_type = models.ForeignKey(InstituteType)
+  file = models.FileField(upload_to=sample_file_path, null=True, blank=True)
 
 pre_delete.connect(revoke_student_permission, sender=Student)
