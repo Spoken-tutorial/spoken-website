@@ -251,7 +251,11 @@ def feedback(request, wid):
         return HttpResponseRedirect('/participant/login')
     w = None
     try:
-        w = Training.objects.select_related().get(pk=wid)
+        w = TrainingRequest.objects.select_related().get(pk=wid)
+    except Exception, e:
+        #print e
+        return PermissionDenied('Invalid Training-Request ID passed')
+    try:
         #check if feedback already exits
         TrainingFeedback.objects.get(training_id = wid, mdluser_id = mdluserid)
         messages.success(request, "We have already received your feedback. ")
@@ -268,16 +272,6 @@ def feedback(request, wid):
                 form_data.training_id = wid
                 form_data.mdluser_id = mdluserid
                 form_data.save()
-                try:
-                    wa = TrainingAttendance.objects.get(mdluser_id=mdluserid, training_id = wid)
-                    wa.status = 2
-                    wa.save()
-                except:
-                    wa = TrainingAttendance()
-                    wa.training_id = wid
-                    wa.mdluser_id = mdluserid
-                    wa.status = 1
-                    wa.save()
                 messages.success(request, "Thank you for your valuable feedback.")
                 return HttpResponseRedirect('/participant/index/?category=1')
             except Exception, e:
