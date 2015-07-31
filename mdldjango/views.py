@@ -254,7 +254,9 @@ def feedback(request, wid):
         w = TrainingRequest.objects.select_related().get(pk=wid)
     except Exception, e:
         #print e
-        return PermissionDenied('Invalid Training-Request ID passed')
+        messages.error(request, 'Invalid Training-Request ID passed')
+        return HttpResponseRedirect('/participant/index/?category=1')
+        #return PermissionDenied('Invalid Training-Request ID passed')
     try:
         #check if feedback already exits
         TrainingFeedback.objects.get(training_id = wid, mdluser_id = mdluserid)

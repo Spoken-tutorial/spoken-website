@@ -35,7 +35,7 @@
                         <td>{{ record.training.course }}</td>
                         <td>{{ record.training.sem_start_date }}</td>
                         <td>
-                            <a href="{% url 'mdldjango:feedback' record.id %}">Feedback</a> | 
+                            <a href="{% url 'mdldjango:feedback' record.training.id %}">Feedback</a> | 
                             <!--<a href="{% url 'events:training_participant_language_feedback' record.id mdluserid %}">Language Feedback</a>-->
                             {% if record.training.is_training_certificate_allowed %}
                               <a href="{% url 'events:student_training_certificate' record.id %}">Certificate</a>
