@@ -906,3 +906,43 @@ class SingleTrainingAttendance(models.Model):
 
 
 pre_delete.connect(revoke_student_permission, sender=Student)
+
+class OrganiserFeedback(models.Model):
+  name = models.CharField(max_length = 100)
+  gender = models.CharField(max_length = 10, choices=[('', '----'), ('0', 'Male'), ('1', 'Female')])#form
+  age = models.CharField(max_length = 20, choices=[('', '----'), ('0', '<25 years'), ('1', '25-35 years'), ('2', '35 years and above')])#form
+  state = models.ForeignKey(State)
+  district =  models.ForeignKey(District)
+  city = models.ForeignKey(City)
+  institution_name = models.ForeignKey(AcademicCenter)
+  designation = models.CharField(max_length = 20, choices=[('', '----'), ('0', 'student'), ('1', 'faculty'), ('2', 'staff'), ('3', 'admin')])#form
+  medium_of_instruction = models.CharField(max_length =50, choices=[('', '----'), ('0', 'english'), ('1', 'vernacular'), ('2', 'mixed')])#form
+  #student_stream =  models.CharField(max_length = 100)#form
+  student_education_language = models.CharField(max_length =50, choices=[('', '----'), ('0', 'mostly english'), ('1', 'mostly vernacular'), ('2', 'mostly mixed')])#form
+  student_gender =  models.CharField(max_length =50 ,choices=[('', '----'), ('0', 'mostly Male'), ('1', 'mostly Female'), ('2', 'mixed')])#form
+  student_location =  models.CharField(max_length =50,  choices=[('', '----'), ('0', 'mainly urban'), ('1', 'mainly rural'), ('2', 'mixed'), ('2', 'not sure')])#form
+  #offered_training_foss =  models.ManyToManyField()
+  duration_of_tutorial =  models.CharField(max_length = 100)#form
+  #language = models.ManyToManyField(Language)
+  side_by_side_yes_no = models.BooleanField()#form
+  side_by_side_method_is = models.CharField(max_length = 100)#form
+  in_side_by_side_method = models.CharField(max_length = 100)#form
+  good_investment = models.BooleanField()#form
+  #helpful_for = models.ManyToManyField()
+  is_comfortable_self_learning = models.PositiveSmallIntegerField(default=0)
+  is_classroom_better = models.PositiveSmallIntegerField(default=0)
+  is_student_expectations = models.PositiveSmallIntegerField(default=0)
+  is_help_get_interview = models.PositiveSmallIntegerField(default=0)
+  is_help_get_job = models.PositiveSmallIntegerField(default=0)
+  is_got_job = models.PositiveSmallIntegerField(default=0)
+  relevance = models.PositiveSmallIntegerField(default=0)
+  information_content = models.PositiveSmallIntegerField(default=0)
+  audio_video_quality = models.PositiveSmallIntegerField(default=0)
+  presentation_quality = models.PositiveSmallIntegerField(default=0)
+  overall_rating = models.PositiveSmallIntegerField(default=0)
+  #trained_foss =  models.ManyToManyField()
+  is_training_benefited = models.BooleanField()#form
+  testimonial = models.CharField(max_length = 200 , null=True)#form
+  any_other_suggestions = models.CharField(max_length = 200 , null=True)#form
+  can_contact = models.BooleanField()#form
+  

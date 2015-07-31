@@ -125,4 +125,9 @@ urlpatterns = [
       name='training_list'
     ),
     #url(r'^get-language-option/', GetLanguageOptionView.as_view()),
+    url(
+      r'^feedbacks/', 
+      OrganiserFeedbackCreateView.as_view(template_name='organiser_feedback.html'), 
+      name='organiser_feedback'
+    ),
 ]

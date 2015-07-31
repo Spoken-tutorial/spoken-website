@@ -162,3 +162,8 @@ class SingleTrainingForm(forms.ModelForm):
     if today.date() > tdate:
       raise forms.ValidationError("Invalid semester training date")
     return tdate
+    
+class OrganiserFeedbackForm(forms.ModelForm):
+  class Meta:
+    model = OrganiserFeedback
+    fields = '__all__'
