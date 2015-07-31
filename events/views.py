@@ -2273,7 +2273,7 @@ def training_participant_feedback(request, training_id, participant_id):
 def training_participant_language_feedback(request, training_id, user_id):
     w = None
     try:
-        w = Training.objects.get(pk=training_id)
+        w = TrainingRequest.objects.get(pk=training_id)
         MdlUser.objects.get(id = user_id)
     except Exception, e:
         raise PermissionDenied()
