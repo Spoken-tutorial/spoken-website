@@ -807,7 +807,7 @@ class TrainingFeedback(models.Model):
 class TrainingLanguageFeedback(models.Model):
     training = models.ForeignKey(TrainingRequest)
     mdluser_id = models.PositiveIntegerField()
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, null=True, default=None)
     age = models.PositiveIntegerField()
     medium_of_instruction = models.PositiveIntegerField()
     gender = models.BooleanField()
