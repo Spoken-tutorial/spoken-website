@@ -140,4 +140,10 @@ urlpatterns = [
       'events.viewsv2.SingleTrainingReject', 
       name="single-training-reject"
     ),
+    url(
+      r'^single-training/(?P<tid>\d+)/attendance', 
+      SingleTrainingAttendanceListView.as_view(template_name=\
+        "single-training-attendance.html"), 
+      name="single_training_attendance"
+    ),
 ]
