@@ -2,9 +2,33 @@
 {% load widget_tweaks %}
 {% load static %}
 {% block title %}Master Batch{% endblock %}
-{% block heading %}<i class="home-page-title-i">Master Batch</i><a class="btn btn-success pull-right" href="{% url 'events:batch_list' %}">Back to MB Master Batch</a>{% endblock %}
+{% block heading %}<center><a class="btn btn-primary" data-toggle="modal" data-target="#myModal"><i class="fa fa-2 fa-question"></i> Help</a></center><i class="home-page-title-i">Master Batch</i><a class="btn btn-success pull-right" href="{% url 'events:batch_list' %}">Back to MB Master Batch</a>{% endblock %}
 {% block search %}{% endblock %}
 {% block content %}
+
+	<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    	 <div class="modal-dialog">
+          <div class="modal-content">
+           <div class="modal-body">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <ul>
+               <li>Important points to follow while uploading the <strong>.csv</strong> file :
+		   <ul>
+		       <li>All the fields/columns <strong>MUST</strong> be filled.</li>
+		       <li>Make sure that there are no empty/blank spaces in the lettering.</li>
+		       <li>After filling the details, save the file as <strong>.csv (for Libre Office)</strong> and <strong>.csv (MS-DOS) (for Microsoft Office)</strong></li>
+		       <li>Make sure that <strong>commas (,)</strong> are seen at the end of each entry.</li>
+		       <li>Please provide only First and Last Names. Middle names or initials will not be accepted.</li>
+		       <li>No <strong>middle name</strong> or <strong>initials</strong> allowed.</li>
+		   </ul>
+	       </li>
+             </ul>
+           </div>
+          </div>
+         </div>
+       </div>
+	
+
         {% if form %}
           <div class="row well">
               <div class='col-sm-8'>
@@ -35,9 +59,10 @@
                       
                       <div class='form-row'>
                         <div class='col-xs-12 form-group required'>
-                          <label class='control-label'>Csv File</label>
+                          <label class='control-label'>Csv File</label>&nbsp;&nbsp;<small>(Please upload your CSV file here.) </small>
                           {% render_field form.csv_file class+="file csv_file" tabindex="1" %}
                           {{ form.csv_file.errors }}
+			  <small>If you have used MS-EXCEL to create the CSV file please make sure that you have saved it with csv(ms-dos) file extention.</small>
                         </div>
                       </div>
               
@@ -55,7 +80,7 @@
         {% else %}
           <h4><center>{{ batch.get_batch_info }}</center></h4>
           <form action="{{ action }}" method="post" class='form-horizontal' enctype="multipart/form-data">{% csrf_token %}
-            <h5>Errors <span class="pull-right review-accepted">Note: Click on the email to correct email format</span></h5>
+            <h5>Errors (Invalid Email ID)<span class="pull-right review-accepted">Note: Click on the email to correct email format</span></h5>
             <div class="row well">
               <table class="table">
                 <tr>
@@ -77,7 +102,7 @@
           </form>
         {% endif %}
         {% if warning %}
-          <h5>Warning <span class="pull-right review-accepted">Note: Click on the email to correct email format</span></h5>
+          <h5>Warning (Student Already Exists)<span class="pull-right review-accepted">Note: Click on the email to correct email format</span></h5>
             <div class="row well">
               <table class="table">
                 <tr>
@@ -109,6 +134,9 @@
 {% block jsblock %}
   <script src="{% static 'spoken/js/jquery.jeditable.js' %}"></script>
   <script>
+    $(window).load(function(){
+        $('#myModal').modal('show');
+    });
     $('.editable').editable(function(value, settings) {
        thisData = $(this);
        message = '';
