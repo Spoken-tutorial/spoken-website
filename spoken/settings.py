@@ -39,12 +39,10 @@ PASSWORD_HASHERS = (
 SERVER_EMAIL = 'error-report@spoken-tutorial.org'
 ADMINS = (
     ('Administrator', 'administrator@spoken-tutorial.org'),
-    ('vishnuraj', 'vishnukraj007@gmail.com'),
 )
 
 MANAGERS = (
     ('Administrator', 'administrator@spoken-tutorial.org'),
-    ('vishnuraj', 'vishnukraj007@gmail.com'),
 )
 
 ADMINISTRATOR_EMAIL = ADMINISTRATOR_EMAIL
