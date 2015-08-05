@@ -125,6 +125,7 @@ urlpatterns = [
       name='training_list'
     ),
     #url(r'^get-language-option/', GetLanguageOptionView.as_view()),
+<<<<<<< HEAD
     #For Sample Calender Add/Delete/View
     url(
       r'^sample-calender/new/$',
@@ -144,5 +145,20 @@ urlpatterns = [
         "student_delete.html", \
         success_url="/software-training/sample-calender/"),
       name="sample_calender_delete"
+    url(
+      r'^old-training/$',
+      OldTrainingListView.as_view(template_name=\
+        "old_training.html"),
+      name="old_training"
+    ),
+    url(
+      r'^old-training/(?P<tid>\d+)/participant/$',
+      OldStudentListView.as_view(template_name="old_list_student.html"), 
+      name="old_list_student"
+    ),
+    url(
+      r'^old-training/(?P<tid>\d+)/close/$',
+      OldTrainingCloseView.as_view(template_name=""), 
+      name="old_training_close"
     ),
 ]

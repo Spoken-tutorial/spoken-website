@@ -2273,7 +2273,7 @@ def training_participant_feedback(request, training_id, participant_id):
 def training_participant_language_feedback(request, training_id, user_id):
     w = None
     try:
-        w = Training.objects.get(pk=training_id)
+        w = TrainingRequest.objects.get(pk=training_id)
         MdlUser.objects.get(id = user_id)
     except Exception, e:
         raise PermissionDenied()
@@ -2307,10 +2307,14 @@ def live_training(request, training_id=None):
     
     context = {}
     if not training_id:
-        context['training_list'] = Training.objects.filter(Q(training_type = 2) | Q(training_type = 3))
+        context['training_list'] = SingleTraining.objects.filter(
+          training_type = 2
+        )
     else:
         try:
-            context['training'] = TrainingLiveFeedback.objects.filter(training_id = training_id)
+            context['training'] = TrainingLiveFeedback.objects.filter(
+              training_id = training_id
+            )
         except Exception, e:
             print e
             raise PermissionDenied()
@@ -2322,7 +2326,7 @@ def training_participant_livefeedback(request, training_id):
     form = LiveFeedbackForm()
     w = None
     try:
-        w = Training.objects.get(pk=training_id)
+        w = SingleTraining.objects.get(pk=training_id)
     except Exception, e:
         raise PermissionDenied()
     if request.method == 'POST':
@@ -2336,7 +2340,7 @@ def training_participant_livefeedback(request, training_id):
                 return HttpResponseRedirect('/')
             except Exception, e:
                 print e
-                messages.success(request, "Thank you for your valuable feedback.")
+                messages.success(request, "Something went wrong, please contact site administrator.")
                 return HttpResponseRedirect('/')
     context = {
         'form' : form,

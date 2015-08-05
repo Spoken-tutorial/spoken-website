@@ -26,12 +26,14 @@
 {% block content %}
     <div class="bs-callout bs-callout-info">
         <dl class="dl-horizontal">
-            <dt>Organiser Name</dt>
-                <dd>{{ feedback.training.organiser.user.first_name }}</dd>
+            <dt>Name</dt>
+                <dd>{{ feedback.name }}</dd>
             <dt>Institution</dt>
                 <dd>{{ feedback.training.academic }}</dd>
             <dt>Software Taken</dt>
-                <dd>{{ feedback.training.foss }}</dd>
+                <dd>{{ feedback.training.course.foss }}</dd>
+            <dt>Organiser Name</dt>
+                <dd>{{ feedback.training.organiser.user.first_name }}</dd>
             <dt>Date of Taken</dt>
                 <dd>{{ feedback.training.tdate }}</dd>
         </dd>
