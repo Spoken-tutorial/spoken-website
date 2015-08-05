@@ -3,6 +3,7 @@ from django.conf.urls import url
 from events.viewsv2 import *
 from events.decorators import *
 from events.formsv2 import *
+from events.urls import *
 urlpatterns = [
     url(
       r'^training-planner/', 

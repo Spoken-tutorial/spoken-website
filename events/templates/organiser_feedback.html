@@ -5,5 +5,14 @@
 {% block compressinlinecssblock %}
 {% endblock %}
 {% block content %}
+<form action="/software-training/feedbacks/" method="post" class='form-horizontal' enctype="multipart/form-data">{% csrf_token %}
+
+ <div class="form-group">
+ {{Success}}
 {{ form.as_p }}
+    <div class="col-sm-offset-3 col-sm-9">
+      <input class="btn btn-primary" type="submit" value="Submit" />
+    </div>
+  </div>
+</form>
 {% endblock %}

@@ -1114,11 +1114,22 @@ class TrainingRequestListView(ListView):
     context['ordering'] = get_field_index(self.raw_get_data)
     return context
     
-class OrganiserFeedbackCreateView(View):
+class OrganiserFeedbackCreateView(CreateView):
     form_class = OrganiserFeedbackForm
     template_name = "organiser_feedback.html"
     #success_url = "/software-training/"
 
     def get(self, request, *args, **kwargs):
-	return render_to_response(self.template_name, {'form': self.form_class()},
-		 context_instance=RequestContext(self.request))
+	    return render_to_response(self.template_name, {'form': self.form_class()}, 
+	      context_instance=RequestContext(self.request))
+	 
+    def post(self,  request, *args, **kwargs):
+      self.object = None
+      form = self.get_form(self.get_form_class())
+      if form.is_valid():
+        form.save()
+        return render_to_response(self.template_name, {'form': self.form_class() , 'Success':'Feedback Saved'},
+          context_instance=RequestContext(self.request))
+      else:
+        return self.form_invalid(form)
+        
