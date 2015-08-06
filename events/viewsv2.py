@@ -5,13 +5,13 @@ from datetime import datetime
 from django.views.generic import View, ListView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from events.models import *
-from events.filters import TrainingRequestFilter
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
 from django.utils.decorators import method_decorator
 from events.decorators import group_required
 from events.forms import StudentBatchForm, TrainingRequestForm, \
-    TrainingRequestEditForm, CourseMapForm, SingleTrainingForm
+    TrainingRequestEditForm, CourseMapForm, SingleTrainingForm, \
+    OrganiserFeedbackForm
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, render_to_response
 from django.core.validators import validate_email
@@ -437,17 +437,12 @@ class TrainingRequestCreateView(CreateView):
     try:
       form_data = form.save(commit=False)
       sb = StudentBatch.objects.get(pk=form_data.batch.id)
-      if sb.student_count():
-        if sb.is_foss_batch_acceptable(form_data.course.id):
-          form_data.training_planner_id = self.kwargs['tpid']
-          # form_data.participants = StudentMaster.objects.filter(batch_id = form_data.batch_id).count()
-          form_data.save()
-        else:
-          messages.error(self.request, 'This student batch already taken the selected course.')
-          return self.form_invalid(form)
+      if sb.is_foss_batch_acceptable(form_data.course.id):
+        form_data.training_planner_id = self.kwargs['tpid']
+        # form_data.participants = StudentMaster.objects.filter(batch_id = form_data.batch_id).count()
+        form_data.save()
       else:
-        sb.update_student_count()
-        messages.error(self.request, 'There is no student present in this batch.')
+        messages.error(self.request, 'This student batch already taken the selected course.')
         return self.form_invalid(form)
     except:
       messages.error(self.request, 'Something went wrong, Contact site administrator.')
@@ -791,7 +786,7 @@ class GetCourseOptionView(JSONResponseMixin, View):
     context = {}
     category = self.request.POST.get('course_type')
     tp = TrainingPlanner.objects.get(pk=self.request.POST.get('training_planner'))
-    if tp.is_course_full(category, self.request.POST.get('department'), self.request.POST.get('batch')):
+    if tp.is_course_full(category, self.request.POST.get('department')):
       context['is_full'] = True
     else:
       courses = CourseMap.objects.filter(category=category)
@@ -819,20 +814,23 @@ class GetBatchOptionView(JSONResponseMixin, View):
   def post(self, request, *args, **kwargs):
     department_id = self.request.POST.get('department')
     context = {}
-
-    batches = StudentBatch.objects.filter(
-      academic_id=request.user.organiser.academic.id,
-      stcount__gt=0,
-      department_id=department_id
-    )
-    batch_option = "<option value=''>---------</option>"
-    for batch in batches:
-      batch_option += "<option value=" + str(batch.id) + ">" + str(batch) + "</option>"
-    context = {
-      'batch_option' : batch_option,
-    }
+    tp = TrainingPlanner.objects.get(pk=self.request.POST.get('training_planner'))
+    if tp.is_full(department_id):
+      context['is_full'] = True
+    else:
+      batches = StudentBatch.objects.filter(
+        academic_id=request.user.organiser.academic.id,
+        stcount__gt=0,
+        department_id=department_id
+      )
+      batch_option = "<option value=''>---------</option>"
+      for batch in batches:
+        batch_option += "<option value=" + str(batch.id) + ">" + str(batch) + "</option>"
+      context = {
+        'batch_option' : batch_option,
+        'is_full' : False
+      }
     return self.render_to_json_response(context)
-
 
 class GetBatchStatusView(JSONResponseMixin, View):
   @method_decorator(csrf_exempt)
@@ -857,6 +855,15 @@ class GetBatchStatusView(JSONResponseMixin, View):
 class SingletrainingApprovedListView(ListView):
   queryset = None
   paginate_by = 10
+  
+  def get_context_data(self, **kwargs):
+    context = super(SingletrainingApprovedListView, self).get_context_data(**kwargs)
+    temp = self.request.user.groups.all()
+    grup = []
+    for i in temp:
+      grup.append(i.name)
+    context['group'] = grup
+    return context
   
   def dispatch(self, *args, **kwargs):
     self.queryset = SingleTraining.objects.filter(Q(status=0) | Q(status=1))
@@ -989,9 +996,7 @@ class SingletrainingCreateView(CreateView):
            StudentMaster.objects.create(student=student, batch_id=batch_id)
            write_flag = True'''
 #     SingleTrainingAttendance.objects.get(pk=batch_id).update_student_count()
-    
-  
-  
+
 '''class GetLanguageOptionView(JSONResponseMixin, View):
   @method_decorator(csrf_exempt)
   def dispatch(self, *args, **kwargs):
@@ -1011,7 +1016,6 @@ class SingletrainingCreateView(CreateView):
     }
     return render(request, 'language_options.html', context)
 '''
-
 
 class TrainingRequestListView(ListView):
   queryset = None
@@ -1074,8 +1078,8 @@ class TrainingRequestListView(ListView):
           True, 
           'Institution'
         ),
-        5: SortableHeader('batch__department__name', True, 'Department / Batch'),
-        6: SortableHeader('course__foss__foss', True, 'Course Name'),
+        5: SortableHeader('course__foss__foss', True, 'FOSS'),
+        6: SortableHeader('course__course', True, 'Course Name'),
         7: SortableHeader('course__category', True, 'Course Type'),
         8: SortableHeader(
           'training_planner__organiser__user__first_name', 
@@ -1097,10 +1101,6 @@ class TrainingRequestListView(ListView):
         self.header, 
         self.raw_get_data
       )
-      if self.status == 'completed':
-        self.queryset = TrainingRequestFilter(self.request.GET, queryset=self.queryset, user=self.user, rp_completed=True)
-      else:
-        self.queryset = TrainingRequestFilter(self.request.GET, queryset=self.queryset, user=self.user, rp_ongoing=True)
     else:
       print 222222
       raise PermissionDenied()
@@ -1108,12 +1108,31 @@ class TrainingRequestListView(ListView):
 
   def get_context_data(self, **kwargs):
     context = super(TrainingRequestListView, self).get_context_data(**kwargs)
-    context['form'] = self.queryset.form
     context['role'] = self.role
     context['status'] = self.status
     context['header'] = self.header
     context['ordering'] = get_field_index(self.raw_get_data)
     return context
+    
+class OrganiserFeedbackCreateView(CreateView):
+    form_class = OrganiserFeedbackForm
+    template_name = "organiser_feedback.html"
+    success_url = "/home"
+
+    def get(self, request, *args, **kwargs):
+	    return render_to_response(self.template_name, {'form': self.form_class()}, 
+	      context_instance=RequestContext(self.request))
+	 
+    def post(self,  request, *args, **kwargs):
+      self.object = None
+      form = self.get_form(self.get_form_class())
+      if form.is_valid():
+        form.save()
+        messages.success(self.request, "Thank you for completing this feedback form. We appreciate your input and valuable suggestions.")
+        return HttpResponseRedirect(self.success_url)
+      else:
+        return self.form_invalid(form)
+      
 
 
 class OldTrainingListView(ListView):

@@ -3,6 +3,7 @@ from django.conf.urls import url
 from events.viewsv2 import *
 from events.decorators import *
 from events.formsv2 import *
+from events.urls import *
 urlpatterns = [
     url(
       r'^training-planner/', 
@@ -126,6 +127,9 @@ urlpatterns = [
     ),
     #url(r'^get-language-option/', GetLanguageOptionView.as_view()),
     url(
+      r'^organiser-feedback/', 
+      OrganiserFeedbackCreateView.as_view(template_name='organiser_feedback.html'), 
+      name='organiser_feedback'
       r'^old-training/$',
       OldTrainingListView.as_view(template_name=\
         "old_training.html"),
