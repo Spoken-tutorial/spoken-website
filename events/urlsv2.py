@@ -130,6 +130,8 @@ urlpatterns = [
       r'^organiser-feedback/', 
       OrganiserFeedbackCreateView.as_view(template_name='organiser_feedback.html'), 
       name='organiser_feedback'
+    ),
+    url(
       r'^old-training/$',
       OldTrainingListView.as_view(template_name=\
         "old_training.html"),
