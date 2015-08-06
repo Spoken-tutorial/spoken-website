@@ -46,9 +46,9 @@
                 <table class="table table-striped table-hover table-bordered">
                   <tr>
                     <th>#</th>
-                    {% if training_date == date and 'Organiser' in group and training_status == 2 %}
+                    {% if 'Organiser' in group and training_status == 2 %}
                     <th>Check</th>
-                    {% endif %}
+                      {% endif %}
                     <th>First name</th>
                     <th>Last name</th>
                     <th>Email</th>
@@ -57,7 +57,7 @@
                   {% for training in object_list %}
                     <tr >
                       <td>{{ forloop.counter }}</td>
-                      {% if training_date == date and 'Organiser' in group and training_status == 2 %}
+                      {% if 'Organiser' in group and training_status == 2 %}
                       <td><input type="checkbox" name="user" value="{{ training.id }}"/></td>
                       {% endif %}
                       <td>{{ training.firstname }} </td>
@@ -67,7 +67,7 @@
                     </tr>
                   {% endfor %}
                 </table>
-            {% if training_date == date and 'Organiser' in group and training_status == 2 %}
+            {% if 'Organiser' in group and training_status == 2 %}
           <input class="btn btn-primary" type="submit" value="Submit Attendance" />
             {% endif %}
         </form>

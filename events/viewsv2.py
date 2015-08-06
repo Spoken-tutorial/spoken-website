@@ -1024,7 +1024,7 @@ class SingletrainingApprovedListView(ListView):
       return super(SingletrainingApprovedListView, self).dispatch(*args, **kwargs)
     elif 'Organiser' in user_group:
       rp_state = self.request.user.organiser.academic_id
-      self.queryset = SingleTraining.objects.filter(Q(status=2), academic__id = rp_state).order_by('-tdate')
+      self.queryset = SingleTraining.objects.filter(Q(status=2), academic__id = rp_state,tdate__gt=datetime.today().date().isoformat()).order_by('-tdate')
       return super(SingletrainingApprovedListView, self).dispatch(*args, **kwargs)
     elif 'Resource Person' in user_group:
       state_list = []
@@ -1059,7 +1059,7 @@ class SingletrainingOngoingListView(ListView):
       return super(SingletrainingOngoingListView, self).dispatch(*args, **kwargs)
     elif 'Organiser' in user_group:
       rp_state = self.request.user.organiser.academic_id
-      self.queryset = SingleTraining.objects.filter(tdate=datetime.today().date().isoformat(), status=2).order_by('-tdate')
+      self.queryset = SingleTraining.objects.filter(tdate__lte=datetime.today().date().isoformat(), status=2).order_by('-tdate')
       return super(SingletrainingOngoingListView, self).dispatch(*args, **kwargs)
     elif 'Resource Person' in user_group:
       state_list = []
