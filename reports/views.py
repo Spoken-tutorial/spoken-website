@@ -147,11 +147,12 @@ def elibrary(request):
         vdurwithsize = '"' + str(duration) + ";" + str(filesize) + '"'
         tutorial_duration = time_plus_ten_min(tr,duration)
         tlevel = get_level(tr)
+        videourl = "http://spoken-tutorial.org/watch/" + tr.tutorial_detail.foss.foss + "/" + tr.tutorial_detail.tutorial + "/" + tr.language.name
         #writer.writerow([outline])
         #print "___________________________"
         
         #writer.writerow(['File Name with Extension', 'dc.contributor.author', 'dc.contributor.illustrator', 'dc.creator', 'dc.contributor.editor', 'dc.date.created', 'dc.date.copyright', 'dc.date.accessioned', 'dc.date.available', 'dc.identifier.uri', 'dc.identifier.isbn', 'dc.identifier.issn', 'dc.identifier.citation', 'dc.description.abstract', 'dc.description.tableofcontents', 'dc.format.extent', 'dc.format.mimetype', 'dc.language.iso', 'dc.relation.ispartof', 'dc.relation.ispartofseries', 'dc.relation.haspart', 'dc.source', 'dc.subject'             , 'dc.subject.ddc', 'dc.subject.lcc', 'dc.title'                 , 'dc.title.alternative', 'dc.publisher', 'dc.type', 'dcterms.educationLevel', 'dc.subject.pedagogicobjective', 'dc.coverage.board', 'dc.format.typicallearningtime', 'dc.format.difficultylevel', 'dc.type.typeoflearningmaterial', 'dc.creator.researcher', 'dc.subject.authorkeyword', 'dc.contributor.advisor', 'dc.publisher.place', 'dc.publisher.institution', 'dc.date.awarded', 'dc.type.degree', 'dc.publisher.department', 'dc.rights.uri', 'dc.rights.rightsholder']) 
-        writer.writerow( [         tr.video         ,       user_name        ,      domain_reviewer        , 'NMEICT'    ,             ''         ,     tr.created   ,       ''           ,          ''          ,    publish_date    ,         ''         ,            ''       ,         ''          ,            ''           ,        tr.outline        ,                  ''             ,     vdurwithsize  ,      'video/ogg'    , tr.language.name ,           ''          , tr.tutorial_detail.foss.foss,            ''        ,      ''    , tr.common_content.keyword,         ''      ,         ''      , tr.tutorial_detail.tutorial,           ''          ,        ''     ,  'Video' ,     education_level      ,                 ''            ,     edu_board      ,       tutorial_duration        ,               tlevel       ,  'Audio-Video Lecture/Tutorial' ,            ''          ,              ''           ,            ''           ,            ''       ,            ''             ,         ''       ,         ''      ,              ''          , 'CC BY SA'     ,          'NMEICT'       ])
+        writer.writerow( [         tr.video         ,       user_name        ,      domain_reviewer        , 'NMEICT'    ,             ''         ,     tr.created   ,       ''           ,          ''          ,    publish_date    ,       videourl     ,            ''       ,         ''          ,            ''           ,        tr.outline        ,                  ''             ,     vdurwithsize  ,      'video/ogg'    , tr.language.name ,           ''          , tr.tutorial_detail.foss.foss,            ''        ,      ''    , tr.common_content.keyword,         ''      ,         ''      , tr.tutorial_detail.tutorial,           ''          ,        ''     ,  'Video' ,     education_level      ,                 ''            ,     edu_board      ,       tutorial_duration        ,               tlevel       ,  'Audio-Video Lecture/Tutorial' ,            ''          ,              ''           ,            ''           ,            ''       ,            ''             ,         ''       ,         ''      ,              ''          , 'CC BY SA'     ,          'NMEICT'       ])
         #break
     return response
 
@@ -160,7 +161,7 @@ def find_tutorial_user(tr):
         return "FOSSEE Ptyhon Team"
     elif tr.tutorial_detail.foss.foss == "Scilab":
         return "FOSSEE Scilab Team"
-    file_path = "/websites_dir/django_spoken/spoken/media/Tutorial-user-name-modification-Sheet5.csv"
+    file_path = settings.MEDIA_ROOT + "Tutorial-user-name-modification-Sheet5.csv"
     if tr.video_user.username == 'pravin1389':
         with open(file_path, 'rbU') as csvfile:
             csvdata = csv.reader(csvfile, delimiter=',', quotechar='|')
