@@ -11,7 +11,8 @@ from django.db import IntegrityError
 from django.utils.decorators import method_decorator
 from events.decorators import group_required
 from events.forms import StudentBatchForm, TrainingRequestForm, \
-    TrainingRequestEditForm, CourseMapForm, SingleTrainingForm
+    TrainingRequestEditForm, CourseMapForm, SingleTrainingForm, \
+    OrganiserFeedbackForm
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, render_to_response
 from django.core.validators import validate_email
@@ -1283,3 +1284,22 @@ class OldTrainingCloseView(CreateView):
       else:
         return PermissionDenied()
     return super(OldTrainingCloseView, self).dispatch(*args, **kwargs)
+
+class OrganiserFeedbackCreateView(CreateView):
+    form_class = OrganiserFeedbackForm
+    template_name = "organiser_feedback.html"
+    success_url = "/home"
+
+    def get(self, request, *args, **kwargs):
+	    return render_to_response(self.template_name, {'form': self.form_class()}, 
+	      context_instance=RequestContext(self.request))
+	 
+    def post(self,  request, *args, **kwargs):
+      self.object = None
+      form = self.get_form(self.get_form_class())
+      if form.is_valid():
+        form.save()
+        messages.success(self.request, "Thank you for completing this feedback form. We appreciate your input and valuable suggestions.")
+        return HttpResponseRedirect(self.success_url)
+      else:
+        return self.form_invalid(form)
