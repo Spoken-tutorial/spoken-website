@@ -24,6 +24,7 @@ from cms.models import SiteFeedback, Event, NewsType, News, Notification
 from events.views import get_page
 from spoken.search import search_for_results
 from mdldjango.models import MdlUser
+from forums.models import Question
 
 def is_resource_person(user):
     """Check if the user is having resource person  rights"""
@@ -156,6 +157,7 @@ def watch_tutorial(request, foss, tutorial, lang):
         td_rec = TutorialDetail.objects.get(foss__foss = foss, tutorial = tutorial)
         tr_rec = TutorialResource.objects.select_related().get(tutorial_detail = td_rec, language = Language.objects.get(name = lang))
         tr_recs = TutorialResource.objects.select_related('tutorial_detail').filter(Q(status = 1) | Q(status = 2), tutorial_detail__foss = tr_rec.tutorial_detail.foss, language = tr_rec.language).order_by('tutorial_detail__foss__foss', 'tutorial_detail__level', 'tutorial_detail__order', 'language__name')
+        questions = Question.objects.filter(category=td_rec.foss.foss.replace(' ', '-'), tutorial=td_rec.tutorial.replace(' ', '-')).order_by('-date_created')
     except Exception, e:
         messages.error(request, str(e))
         return HttpResponseRedirect('/')
@@ -164,6 +166,7 @@ def watch_tutorial(request, foss, tutorial, lang):
     context = {
         'tr_rec': tr_rec,
         'tr_recs': tr_recs,
+        'questions': questions,
         'video_info': video_info,
         'media_url': settings.MEDIA_URL,
         'media_path': settings.MEDIA_ROOT,

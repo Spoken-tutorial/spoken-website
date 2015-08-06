@@ -11,9 +11,9 @@
             <form class="form-signin form-horizontal" role="form" id="login_form" method="post">{% csrf_token %}
 	            {{ form.non_field_errors }}
 	            <div class="form-group">
-		            <label class="col-sm-3 control-label" for= "id_username">Username</label>
+		            <label class="col-sm-3 control-label" for= "id_username">Email</label>
 		            <div class="col-sm-9">
-		                <input name="username" id="id_username" type="text" class="form-control" placeholder="Username" required autofocus>
+		                <input name="username" id="id_username" type="text" class="form-control" placeholder="Email" required autofocus>
 		            </div>
 	            </div>
 	            <div class="form-group">

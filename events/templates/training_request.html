@@ -1,0 +1,295 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block title %}Training Planner Form{% endblock %}
+{% block compresscssblock %}
+    <link rel="stylesheet" href="{% static 'spoken/css/jquery.datetimepicker.css' %}" type="text/css" media="screen" charset="utf-8" />
+{% endblock %}
+{% block heading %}
+  <i class="home-page-title-i">Training Planner Form</i>
+  <a class="btn btn-primary pull-right" data-toggle="modal" data-target="#myModal"><i class="fa fa-2 fa-question"></i> Help</a>
+{% endblock %}
+{% block search %}{% endblock %}
+{% block content %}
+        <!-- Modal -->
+        <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-body">
+                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                 <ul>
+                    <li>It is best to select Software courses mapped to relevant courses being taught during this semester in the department.</li>
+                    <li>You can also select Software courses which are unmapped with courses being taught during this semester in the department.</li>
+                    <li>Unmapped Software courses can be planned during designated computer lab hours present in the time table during this semester.</li>
+                    <!-- <li>See link for suggestions: ( Wiki  Time Table )</li> -->
+                 </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% if form %}
+          <div class="row well">
+              <div class='col-sm-8'>
+                  <form action="{{ action }}" method="post" class='form-horizontal' enctype="multipart/form-data">{% csrf_token %}
+                      {% render_field form.training_planner type="hidden" value=training_planner_id class+="training-planner" %}
+                      {% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
+                      {% if form.non_field_errors %}
+                      <ul>
+                        {% for error in form.non_field_errors %}
+                          <li>{{ error }}</li>
+                        {% endfor %}
+                      </ul>
+                      {% endif %}
+                      <div class='form-row'>
+                        <div class='col-xs-12 form-group required'>
+                          <label class='control-label'>Department</label>
+                          {% render_field form.department class+="form-control department" tabindex="1" %}
+                          {{ form.department.errors }}
+                        </div>
+                      </div>
+                      
+                      <div class='form-row'>
+                        <div class='col-xs-12 form-group required'>
+                          <label class='control-label'>Batch</label>
+                          {% render_field form.batch class+="form-control batch" tabindex="1" %}
+                          {{ form.batch.errors }}
+                        </div>
+                      </div>
+                      
+                      <div class='form-row'>
+                        <div class='col-xs-12 form-group required'>
+                          <label class='control-label'>Training Type</label>
+                          {% render_field form.course_type class+="form-control course_type" tabindex="1" %}
+                          {{ form.course_type.errors }}
+                        </div>
+                      </div>
+                      
+                      <div class='form-row'>
+                        <div class='col-xs-12 form-group required'>
+                          <label class='control-label' id="sem_start_date">Semester Start Date</label>
+                          {% render_field form.sem_start_date class+="form-control date sem_start_date" tabindex="1" readonly='true' style="cursor:pointer"%}
+                          {{ form.sem_start_date.errors }}
+                          <small>Odd Semester July to Aug, Even Semester Jan to Feb </small>
+                        </div>
+                      </div>
+                      
+                      <div class='form-row'>
+                        <div class='col-xs-12 form-group required'>
+                          <label class='control-label'>Software Course </label>
+                          {% render_field form.course class+="form-control course" tabindex="1" %}
+                          {{ form.course.errors }}
+                        </div>
+                      </div>
+                      
+                      <!-- <div class='form-row'>
+                        <div class='col-xs-12 form-group required'>
+                          <label class='control-label'>Language </label>
+                          {% render_field form.language class+="form-control language" tabindex="1" %}
+                          {{ form.language.errors }}
+                        </div>
+                      </div> -->
+                      
+                      <div class="form-group">
+                          <div class="col-xs-12 form-group">
+                              <input class="btn btn-primary" type="submit" value="Submit" />
+                              <a class="btn btn-danger" href="{% url 'events:training_planner' %}">Cancel</a>
+                          </div>
+                      </div>
+                      {% endwith %}
+                  </form>
+              </div>
+          </div>
+        {% endif %}
+{% endblock %}
+{% block compressjsblock %}
+    <script src="{% static 'spoken/js/jquery.datetimepicker.js' %}"></script>
+{% endblock %}
+{% block jsblock %}
+  <script>
+    var td = new Date();
+    var y=td.getFullYear();
+    var sem_type = "{{tp}}";
+    var current_sem = "{{tp.is_current_planner}}";
+    var mind = 0 ; var maxd = 0;
+    $(document).ready(function(){
+      if($('.department').val() == '') {
+        $('.course_type').val('');
+        $('.course_type').prop('disabled', 'disabled');
+        $('.course').html('<option>---------</option>');
+        $('.course').prop('disabled', 'disabled');
+      }
+      $('.course_type').on('change', function(){
+        course_type = $(this).val();
+        department = $('.department').val();
+        batch = $('.batch').val();
+        if(course_type == 0)
+        {
+          document.getElementById('sem_start_date').innerHTML ="Training Date";
+          $('.sem_start_date').val('');
+          if(sem_type == "Odd")
+          {
+            if(current_sem == "True")
+            {
+              mind = y+'/07/01';
+              maxd = y+'/12/31';
+            }
+            else if(current_sem == "False")
+            {
+              mind = y+'/07/01';
+              maxd = y+'/12/31';
+            }
+          }
+          else if(sem_type == "Even")
+          {
+            if(current_sem == "True")
+            {
+              mind = y+'/01/01';
+              maxd = y+'/06/30';
+            }
+            else if(current_sem == "False")
+            {
+              mind = (y+1)+'/01/01';
+              maxd = (y+1)+'/06/30';
+            }
+          }
+        }
+        else
+        {
+          document.getElementById('sem_start_date').innerHTML ="Semester Start Date";
+          $('.sem_start_date').val('');
+          if(sem_type == "Odd")
+          {
+            if(current_sem == "True")
+            {
+              mind = y+'/07/01';
+              maxd = y+'/09/30';
+            }
+            else if(current_sem == "False")
+            {
+              mind = y+'/07/01';
+              maxd = y+'/09/30';
+            }
+          }
+          else if(sem_type == "Even")
+          {
+            if(current_sem == "True")
+            {
+              mind = y+'/01/01';
+              maxd = y+'/03/30';
+            }
+            else if(current_sem == "False")
+            {
+              mind = (y+1)+'/01/01';
+              maxd = (y+1)+'/03/30';
+            }
+          }
+        }
+        $('.date').datetimepicker({
+          onGenerate:function( ct ){
+              $(this).find('.xdsoft_day_of_week0')
+                  .addClass('xdsoft_disabled');
+          },
+          lang:'en',
+          format:'Y-m-d',
+          formatDate:'Y/m/d',
+          minDate:mind, 
+          weekends:[],
+          maxDate:maxd,
+          step:5,
+          timepicker:false,
+        });
+        $('.course').html('<option>---------</option>');
+        $('.course').prop('disabled', 'disabled');
+        if(course_type != '' && department != '' && batch != ''){
+          $.ajax({
+            url: "/software-training/get-course-option/",
+            type: "POST",
+            data: {
+              course_type: course_type,
+              department: department,
+              batch: batch,
+              training_planner: $('.training-planner').val()
+            },
+            beforeSend: function() {
+              //$('.ajax-refresh-language').show();
+            },
+            success: function(data) {
+              // loading languages
+              if(data) {
+                  if(data['is_full']){
+                    $(".course_type").val('');
+                    alert('No. of training requests for selected course type exceeded.');
+                  }else{
+                    $('.course').html(data['course_option']);
+                    $('.course').prop('disabled', false);
+                  }
+              }
+              //$('.ajax-refresh-language').hide();
+            }
+          });
+        }
+      });
+      $('.batch').on('change', function() {
+        batch = $(this).val();
+        department = $('.department').val();
+        $('.course_type').val('');
+        $('.course_type').prop('disabled', 'disabled');
+        $('.course').html('<option>---------</option>');
+        $('.course').prop('disabled', 'disabled');
+        if(department != '' && batch != '') {
+          $.ajax({
+            url: "/software-training/get-batch-course-status/",
+            type: "POST",
+            data: {
+              department: department,
+              batch: batch,
+              training_planner: $('.training-planner').val()
+            },
+            beforeSend: function() {
+              //$('.ajax-refresh-language').show();
+            },
+            success: function(data) {
+              // loading languages
+              if(data && data['batch_status']) {
+                $('.course_type').prop('disabled', false);
+              } else {
+                $('.batch').val('');
+                alert('No. of training requests for selected batch exceeded.');
+              }
+              //$('.ajax-refresh-language').hide();
+            }
+          });
+                
+        }
+      });
+      $('.department').on('change', function(){
+        department = $(this).val();
+        department_name = $(this).children("option").filter(":selected").text()
+        $('.batch').html('<option>---------</option>');
+        $('.course_type').val('');
+        $('.course_type').prop('disabled', 'disabled');
+        $('.course').html('<option>---------</option>');
+        $('.course').prop('disabled', 'disabled');
+        if(department != ''){
+          $.ajax({
+            url: "/software-training/get-batch-option/",
+            type: "POST",
+            data: {
+              department: department,
+            },
+            beforeSend: function() {
+              //$('.ajax-refresh-language').show();
+            },
+            success: function(data) {
+              // loading languages
+              if(data && data['batch_option']) {
+                  $('.batch').html(data['batch_option']);
+              }
+              //$('.ajax-refresh-language').hide();
+            }
+          });
+        }
+      });
+    });
+  </script>
+{% endblock %}

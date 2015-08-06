@@ -1,4 +1,4 @@
-from django.conf.urls import patterns, url
+from django.conf.urls import patterns, url, include
 
 urlpatterns = patterns('',
     url(r'^$', 'events.views.events_dashboard', name='events_dashboard'),
@@ -94,4 +94,6 @@ urlpatterns = patterns('',
     #url(r'add$', 'events.views.add_contact', name='add_contact'),
     #url(r'edit/(\d+)$', 'events.views.edit_contact', name='edit_contact'),   
     #url(r'delete/(\d+)$', 'events.views.delete_contact', name='delete_contact'),
+    # EVENTS V2 URLs
+    url(r'^', include('events.urlsv2')),
 )

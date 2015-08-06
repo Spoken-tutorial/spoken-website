@@ -85,13 +85,6 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-sm-3 control-label" for= "id_state">Username</label>
-                        <div class="col-sm-9">
-                            {% render_field form.username class+="form-control username" tabindex="1" %}
-                            {{ form.username.errors }}
-                        </div>
-                    </div>
-                    <div class="form-group">
                         <label class="col-sm-3 control-label" for= "id_state">Password</label>
                         <div class="col-sm-9">
                             {% render_field form.password class+="form-control password" tabindex="1" %}
@@ -117,6 +110,15 @@
                         <div class="col-sm-9">
                             {% render_field form.year class+="form-control year" tabindex="1" %}
                             {{ form.course.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for= ""></label>
+                        <div class="col-sm-9">
+                            <div class="input-group captcha-group">
+                                {% render_field form.captcha class+="form-control captcha" placeholder="Enter Captcha" %}
+                            </div>
+                            {{ form.captcha.errors }}
                         </div>
                     </div>
                     <div class="form-group">
