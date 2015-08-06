@@ -1117,7 +1117,7 @@ class TrainingRequestListView(ListView):
 class OrganiserFeedbackCreateView(CreateView):
     form_class = OrganiserFeedbackForm
     template_name = "organiser_feedback.html"
-    #success_url = "/software-training/"
+    success_url = "/home"
 
     def get(self, request, *args, **kwargs):
 	    return render_to_response(self.template_name, {'form': self.form_class()}, 
@@ -1128,8 +1128,8 @@ class OrganiserFeedbackCreateView(CreateView):
       form = self.get_form(self.get_form_class())
       if form.is_valid():
         form.save()
-        return render_to_response(self.template_name, {'form': self.form_class() , 'Success':'Feedback Saved'},
-          context_instance=RequestContext(self.request))
+        messages.success(self.request, "Thank you for completing this feedback form. We appreciate your input and valuable suggestions.")
+        return HttpResponseRedirect(self.success_url)
       else:
         return self.form_invalid(form)
-        
+      

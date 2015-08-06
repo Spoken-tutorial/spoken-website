@@ -909,8 +909,8 @@ pre_delete.connect(revoke_student_permission, sender=Student)
 
 class StudentStream(models.Model):
   STUDENT_STREAM_CHOICES = (
-  ('0', 'Engineering'), ('1', 'science'), ('2', 'Arts and Humanities'),('3', 'Polytechnic/ Diploma programs'),
-  ('4', 'Commerce and Business Studies'),('5', 'Schools'),('6', 'ITI'),('7', 'Other (need to give textbox)')
+  ('0', 'Engineering'), ('1', 'Science'), ('2', 'Arts and Humanities'),('3', 'Polytechnic/ Diploma programs'),
+  ('4', 'Commerce and Business Studies'),('5', 'ITI'),('6', 'Other')
   )
   student_stream = models.CharField(max_length =50, choices = STUDENT_STREAM_CHOICES)
   
@@ -920,7 +920,7 @@ class StudentStream(models.Model):
 class HelpfulFor(models.Model):
   HELPFUL_FOR_CHOICES = (
   ('0', 'Academic Performance'), ('1', 'Project Assignments'), ('2', 'To get job interviews'),('3', 'To get jobs'),
-  ('4', 'All of the    above')
+  ('4', 'All of the above')
   )
   helpful_for = models.CharField(max_length = 50, choices = HELPFUL_FOR_CHOICES)
   
@@ -929,50 +929,49 @@ class HelpfulFor(models.Model):
 
 class OrganiserFeedback(models.Model):
   IS_SPOKEN_HELPFUL_CHOICES = (
-    ('0', 'Strongly Agree'), ('1', 'Agree'), ('2', 'Neutral'), ('3', 'Disagree'), ('4', 'Strongly Disagree'),
-    ('5', 'No idea'),
-  )
+    ('','-----'), ('0', 'Strongly Agree'), ('1', 'Agree'), ('2', 'Neutral'), ('3', 'Disagree'), ('4', 'Strongly Disagree'),
+    ('5', 'No idea'))
   RATE_SPOKEN_CHOICES = (
-    ('0', 'Excellent'), ('1', 'Good'), ('2', 'Fair'), ('3', 'Bad'), ('4', 'Very bad'),
-  )
+    ('','-----'), ('0', 'Excellent'), ('1', 'Good'), ('2', 'Fair'), ('3', 'Bad'), ('4', 'Very bad'))
   YES_NO_CHOICES =(
-    ('','-----'), ('0', 'YES'), ('1', 'NO'),
+    ('','-----'), ('0', 'Yes'), ('1', 'No'),
   )
   AGE_CHOICES = (
-    ('', '----'), ('0', '<25 years'), ('1', '25-35 years'), ('2', '35 years and above'),
+    ('', '-----'), ('0', '<25 years'), ('1', '25-35 years'), ('2', '35 years and above'),
   )
   GENDER_CHOICES =(
-    ('', '----'), ('0', 'Male'), ('1', 'Female'),
+    ('', '-----'), ('0', 'Male'), ('1', 'Female'),
   )
   DESIGNATION_CHOICES = (
-    ('', '----'), ('0', 'student'), ('1', 'faculty'), ('2', 'staff'), ('3', 'admin'),
+    ('', '-----'), ('0', 'Student'), ('1', 'Faculty'), ('2', 'Staff'), ('3', 'Admin'),
   )
   MEDIUM_OF_INSTRUCTION_CHOICES = (
-    ('', '----'), ('0', 'english'), ('1', 'vernacular'), ('2', 'mixed'),
+    ('', '-----'), ('0', 'English'), ('1', 'Vernacular'), ('2', 'Mixed'),
   )
   STUDENT_EDUCATION_LANGUAGE_CHOICES = (
-    ('', '----'), ('0', 'mostly english'), ('1', 'mostly vernacular'), ('2', 'mostly mixed')
+    ('', '-----'), ('0', 'Mostly English'), ('1', 'Mostly Vernacular'), ('2', 'Mostly Mixed')
   )
   STUDENT_GENDER_CHOICES = (
-    ('', '----'), ('0', 'mostly Male'), ('1', 'mostly Female'), ('2', 'mixed')
+    ('', '-----'), ('0', 'Mostly Male'), ('1', 'Mostly Female'), ('2', 'Mixed')
   )
   STUDENT_LOCATION_CHOICES = (
-    ('', '----'), ('0', 'mainly urban'), ('1', 'mainly rural'), ('2', 'mixed'), ('3', 'not sure')
+    ('', '-----'), ('0', 'Mainly urban'), ('1', 'Mainly rural'), ('2', 'Mixed'), ('3', 'Not sure')
   )
   DURATION_OF_TUTORIAL_CHOICES = (
-    ('', '----'), ('0', 'Less than 0.5 hour'), ('1', '0.5 - 2 hour'), ('2', '2-10 hours'),('3', 'Above 10 hours'),('4', 'Not applicable')
+    ('', '-----'), ('0', 'Less than 0.5 hour'), ('1', '0.5 - 2 hour'), ('2', '2-10 hours'),('3', 'Above 10 hours'),('4', 'Not applicable')
   )
   SIDE_BY_SIDE_METHOD_IS_CHOICES = (
-    ('', '----'), ('0', 'Explaining the video to a neighbor'), ('1', 'Waiting for mentors explanation'), ('2', 'Watching and practicing simultaneously'), ('3', 'Dont know what this method is')
+    ('', '-----'), ('0', 'Explaining the video to a neighbor'), ('1', 'Waiting for mentors explanation'), ('2', 'Watching and practicing simultaneously'), ('3', 'Dont know what this method is')
   )
   IN_SIDE_BY_SIDE_METHOD_CHOICES = (
-    ('', '----'), ('0', 'The video has to be maximized'), ('1', 'The software has to be maximized'), ('2', 'Both software and video are maximized'), ('3', 'None of the above are maximized')
+    ('', '-----'), ('0', 'The video has to be maximized'), ('1', 'The software has to be maximized'), ('2', 'Both software and video are maximized'), ('3', 'None of the above are maximized')
   )
   GOOD_INVESTMENT_CHOICES = (
-    ('', '----'), ('0', 'Yes'), ('1', 'No'), ('2', 'Not Sure')
+    ('', '-----'), ('0', 'Yes'), ('1', 'No'), ('2', 'Not Sure')
   )
   
   name = models.CharField(max_length = 100)
+  email = models.EmailField(max_length = 100)
   gender = models.CharField(max_length = 10, choices = GENDER_CHOICES)
   age = models.CharField(max_length = 20, choices = AGE_CHOICES)
   state = models.ForeignKey(State)
@@ -985,7 +984,7 @@ class OrganiserFeedback(models.Model):
   student_education_language = models.CharField(max_length =50, choices = STUDENT_EDUCATION_LANGUAGE_CHOICES)
   student_gender =  models.CharField(max_length =50 ,choices = STUDENT_GENDER_CHOICES)
   student_location =  models.CharField(max_length =50,  choices = STUDENT_LOCATION_CHOICES)
-  offered_training_foss = models.ManyToManyField(FossCategory) 
+  offered_training_foss = models.ManyToManyField(FossCategory , related_name = 'events_FossCategory_related') 
   duration_of_tutorial =  models.CharField(max_length =50 ,choices = DURATION_OF_TUTORIAL_CHOICES)
   language = models.ManyToManyField(Language , related_name = 'events_Language_related')
   side_by_side_yes_no = models.CharField(max_length = 10, choices = YES_NO_CHOICES)
@@ -1004,10 +1003,8 @@ class OrganiserFeedback(models.Model):
   audio_video_quality = models.CharField(max_length = 10, choices = RATE_SPOKEN_CHOICES)
   presentation_quality = models.CharField(max_length = 10, choices = RATE_SPOKEN_CHOICES)
   overall_rating = models.CharField(max_length = 10, choices = RATE_SPOKEN_CHOICES)
-  trained_foss =  models.ManyToManyField(Language)
+  trained_foss =  models.ManyToManyField(FossCategory)
   is_training_benefited = models.CharField(max_length = 10, choices = YES_NO_CHOICES)
-  testimonial = models.CharField(max_length = 10)
-  any_other_suggestions = models.CharField(max_length = 10)
+  testimonial = models.CharField(max_length = 500)
+  any_other_suggestions = models.CharField(max_length = 500)
   can_contact = models.CharField(max_length = 10, choices = YES_NO_CHOICES)
-
-

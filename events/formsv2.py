@@ -164,13 +164,11 @@ class SingleTrainingForm(forms.ModelForm):
     return tdate
     
 class OrganiserFeedbackForm(forms.ModelForm):
-  #offered_training_foss = forms.ModelMultipleChoiceField(queryset=FossCategory.objects,
-  #widget=forms.CheckboxSelectMultiple(), required=True)
+  offered_training_foss = forms.ModelMultipleChoiceField(queryset=FossCategory.objects.filter(status=1), widget=forms.CheckboxSelectMultiple)
   class Meta:
     model = OrganiserFeedback
     fields = '__all__'
     widgets = {'student_stream': forms.CheckboxSelectMultiple,
-              'offered_training_foss': forms.CheckboxSelectMultiple ,
               'language' : forms.CheckboxSelectMultiple, 
               'trained_foss' : forms.CheckboxSelectMultiple, 
               'helpful_for' : forms.CheckboxSelectMultiple ,
@@ -185,6 +183,5 @@ class OrganiserFeedbackForm(forms.ModelForm):
               'audio_video_quality' : forms.RadioSelect, 
               'presentation_quality' : forms.RadioSelect , 
               'overall_rating' : forms.RadioSelect ,
-              'can_contact' : forms.RadioSelect,
               'testimonial' : forms.Textarea , 
               'any_other_suggestions' : forms.Textarea}

@@ -127,7 +127,7 @@ urlpatterns = [
     ),
     #url(r'^get-language-option/', GetLanguageOptionView.as_view()),
     url(
-      r'^feedbacks/', 
+      r'^organiser-feedback/', 
       OrganiserFeedbackCreateView.as_view(template_name='organiser_feedback.html'), 
       name='organiser_feedback'
     ),
