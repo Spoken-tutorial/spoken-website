@@ -985,7 +985,7 @@ class SingleTrainingNewListView(ListView):
       return super(SingleTrainingNewListView, self).dispatch(*args, **kwargs)
     elif 'Organiser' in user_group:
       rp_state = self.request.user.organiser.academic_id
-      self.queryset = SingleTraining.objects.filter(Q(status=0), academic__id = rp_state)
+      self.queryset = SingleTraining.objects.filter(Q(status=0), academic__id = rp_state).order_by('-tdate')
       return super(SingleTrainingNewListView, self).dispatch(*args, **kwargs)
     elif 'Resource Person' in user_group:
       state_list = []
@@ -993,7 +993,7 @@ class SingleTrainingNewListView(ListView):
       a = ResourcePerson.objects.filter(user__id=rp_state)
       for i in a:
         state_list.append(i.state_id)
-      self.queryset = SingleTraining.objects.filter(Q(status=0), academic__state__id__in = state_list)
+      self.queryset = SingleTraining.objects.filter(Q(status=0), academic__state__id__in = state_list).order_by('-tdate')
       return super(SingleTrainingNewListView, self).dispatch(*args, **kwargs)
 
 
@@ -1024,7 +1024,7 @@ class SingletrainingApprovedListView(ListView):
       return super(SingletrainingApprovedListView, self).dispatch(*args, **kwargs)
     elif 'Organiser' in user_group:
       rp_state = self.request.user.organiser.academic_id
-      self.queryset = SingleTraining.objects.filter(Q(status=2), academic__id = rp_state)
+      self.queryset = SingleTraining.objects.filter(Q(status=2), academic__id = rp_state).order_by('-tdate')
       return super(SingletrainingApprovedListView, self).dispatch(*args, **kwargs)
     elif 'Resource Person' in user_group:
       state_list = []
@@ -1032,8 +1032,43 @@ class SingletrainingApprovedListView(ListView):
       a = ResourcePerson.objects.filter(user__id=rp_state)
       for i in a:
         state_list.append(i.state_id)
-      self.queryset = SingleTraining.objects.filter(Q(status=2), academic__state__id__in = state_list)
+      self.queryset = SingleTraining.objects.filter(Q(status=2), academic__state__id__in = state_list).order_by('-tdate')
       return super(SingletrainingApprovedListView, self).dispatch(*args, **kwargs)
+
+''' SingletrainingOngoingListView displays the workshops going on that particular day '''
+class SingletrainingOngoingListView(ListView):
+  queryset = None
+  paginate_by = 10
+
+  def get_context_data(self, **kwargs):
+    context = super(SingletrainingOngoingListView, self).get_context_data(**kwargs)
+    temp = self.request.user.groups.all()
+    grup = []
+    for i in temp:
+      grup.append(i.name)
+    context['group'] = grup
+    return context
+  
+  def dispatch(self, *args, **kwargs):
+    user_groups_object = self.request.user.groups.all()
+    user_group = []
+    for i in user_groups_object:
+      user_group.append(i.name)
+    if 'Administrator' in user_group:
+      self.queryset = SingleTraining.objects.filter(tdate=datetime.today().date().isoformat(), status=2).order_by('-tdate')
+      return super(SingletrainingOngoingListView, self).dispatch(*args, **kwargs)
+    elif 'Organiser' in user_group:
+      rp_state = self.request.user.organiser.academic_id
+      self.queryset = SingleTraining.objects.filter(tdate=datetime.today().date().isoformat(), status=2).order_by('-tdate')
+      return super(SingletrainingOngoingListView, self).dispatch(*args, **kwargs)
+    elif 'Resource Person' in user_group:
+      state_list = []
+      rp_state = self.request.user.id
+      a = ResourcePerson.objects.filter(user__id=rp_state)
+      for i in a:
+        state_list.append(i.state_id)
+      self.queryset = SingleTraining.objects.filter(tdate=datetime.today().date().isoformat(), status=2).order_by('-tdate')
+      return super(SingletrainingOngoingListView, self).dispatch(*args, **kwargs)
 
 '''
 SingleTrainingCompletedListView will list all the completed training requests in the single-training page.
@@ -1042,15 +1077,6 @@ SingleTrainingCompletedListView will list all the completed training requests in
 class SingletrainingCompletedListView(ListView):
   queryset = None
   paginate_by = 10
-
-  def get_context_data(self, **kwargs):
-    context = super(SingletrainingCompletedListView, self).get_context_data(**kwargs)
-    temp = self.request.user.groups.all()
-    grup = []
-    for i in temp:
-      grup.append(i.name)
-    context['group'] = grup
-    return context
   
   
   def dispatch(self, *args, **kwargs):
@@ -1063,7 +1089,7 @@ class SingletrainingCompletedListView(ListView):
       return super(SingletrainingCompletedListView, self).dispatch(*args, **kwargs)
     elif 'Organiser' in user_group:
       rp_state = self.request.user.organiser.academic_id
-      self.queryset = SingleTraining.objects.filter(Q(status=4), academic__id = rp_state)
+      self.queryset = SingleTraining.objects.filter(Q(status=4), academic__id = rp_state).order_by('-tdate')
       return super(SingletrainingCompletedListView, self).dispatch(*args, **kwargs)
     elif 'Resource Person' in user_group:
       state_list = []
@@ -1071,9 +1097,17 @@ class SingletrainingCompletedListView(ListView):
       a = ResourcePerson.objects.filter(user__id=rp_state)
       for i in a:
         state_list.append(i.state_id)
-      self.queryset = SingleTraining.objects.filter(Q(status=4), academic__state__id__in = state_list)
+      self.queryset = SingleTraining.objects.filter(Q(status=4), academic__state__id__in = state_list).order_by('-tdate')
       return super(SingletrainingCompletedListView, self).dispatch(*args, **kwargs)
 
+  def get_context_data(self, **kwargs):
+    context = super(SingletrainingCompletedListView, self).get_context_data(**kwargs)
+    temp = self.request.user.groups.all()
+    grup = []
+    for i in temp:
+      grup.append(i.name)
+    context['group'] = grup
+    return context
 '''
 SingleTrainingCreateView will create a request for a new One day workshop.
 
@@ -1217,6 +1251,8 @@ class SingleTrainingAttendanceListView(ListView):
     if self.single_training_request.status == 2:
 #     self.queryset = self.training_request.trainingattend_set.all()
       self.queryset = SingleTrainingAttendance.objects.filter(training_id=self.single_training_request.id)
+    elif self.single_training_request.status == 4:
+      self.queryset = SingleTrainingAttendance.objects.filter(training_id=self.single_training_request.id, status=1)
     else:
       self.queryset = SingleTrainingAttendance.objects.filter(training_id=self.single_training_request.id)
     return super(SingleTrainingAttendanceListView, self).dispatch(*args, **kwargs)
@@ -1252,7 +1288,50 @@ class SingleTrainingAttendanceListView(ListView):
     context['training_date'] = training_date
     context['training_status'] = training_status
     return context
-  
+
+  def post(self, request, *args, **kwargs):
+    training_id = kwargs['tid']
+    if request.POST:
+      if csrf.get_token(request) == request.POST['csrfmiddlewaretoken']:
+        marked_student = request.POST.getlist('user',None)
+        for record in marked_student:
+	  student = SingleTrainingAttendance.objects.get(id=record)
+          student.status = 1
+          training_id = student.training_id
+          student.save()
+        training_status = SingleTraining.objects.get(id=training_id)
+        training_status.status = 4
+        training_status.participant_count = len(marked_student)
+        training_status.save()
+      print marked_student
+    return HttpResponseRedirect('/software-training/single-training/approved')
+
+  '''
+  def post(self, request, *args, **kwargs):
+    self.object = None
+    self.user = request.user
+    training_id = kwargs['tid']
+    if request.POST and 'user' in request.POST:
+      if csrf.get_token(request) == request.POST['csrfmiddlewaretoken']:
+        marked_student = request.POST.getlist('user', None)
+        # delete un marked record if exits
+        TrainingAttend.objects.filter(training_id =training_id).exclude(student_id__in = marked_student).delete()
+        # insert new record if not exits
+        for record in marked_student:
+          language_id = request.POST.get(record)
+          training_attend = TrainingAttend.objects.filter(training_id =training_id, student_id = record)
+          if not training_attend.exists():
+            TrainingAttend.objects.create(training_id =training_id, student_id = record, language_id=language_id)
+          else:
+            training_attend = training_attend.first()
+            training_attend.language_id = language_id
+            training_attend.save()
+      #print marked_student
+    else:
+      TrainingAttend.objects.filter(training_id =training_id).delete()
+    self.training_request.update_participants_count()
+    return HttpResponseRedirect('/software-training/training-planner') 
+  '''
   
 
 ''' SingleTrainingApprove will take an argument(primary key of a training batch) and change the status of the SingleTraining batch, in the SingleTraining database, from pending to approved.

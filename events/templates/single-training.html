@@ -25,6 +25,7 @@
   <ul class="nav nav-tabs">
     <li {% if request.path == "/software-training/single-training/pending/" %}class="active" {% endif %}><a href="/software-training/single-training/pending/">New</a></li>
     <li {% if request.path == "/software-training/single-training/approved/" %}class="active" {% endif %}><a href="/software-training/single-training/approved/">Approved</a></li>
+    <li {% if request.path == "/software-training/single-training/ongoing/" %}class="active" {% endif %}><a href="/software-training/single-training/ongoing/">Ongoing</a></li>
     <li {% if request.path == "/software-training/single-training/completed/" %}class="active" {% endif %}><a href="/software-training/single-training/completed/">Completed</a></li>
   </ul>
   <div class="tab-content">
@@ -53,6 +54,8 @@
                              <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }}</a></td>
                            {% elif request.path == '/software-training/single-training/pending/' %}
                               <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }}</a></td>
+                           {% elif request.path == '/software-training/single-training/ongoing/' %}
+                             <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }}</a></td>
                            {% elif request.path == '/software-training/single-training/completed/' %}
                               <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }}</a></td>
                            {% endif %}

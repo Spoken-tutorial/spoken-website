@@ -58,7 +58,7 @@
                     <tr >
                       <td>{{ forloop.counter }}</td>
                       {% if training_date == date and 'Organiser' in group and training_status == 2 %}
-                      <td><input type="checkbox" /></td>
+                      <td><input type="checkbox" name="user" value="{{ training.id }}"/></td>
                       {% endif %}
                       <td>{{ training.firstname }} </td>
                       <td>{{ training.lastname }}</td>
