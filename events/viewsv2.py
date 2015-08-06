@@ -1204,12 +1204,14 @@ class SingletrainingCreateView(CreateView):
     student_count = SingleTrainingAttendance.objects.filter(training_id=batch_id).count()
     return student_count
 
+''' SingleTrainingAttendance is used to (1) List the attendance view, (2) Mark the attendance ''' 
+
 class SingleTrainingAttendanceListView(ListView):
   queryset = SingleTrainingAttendance.objects.none()
   paginate_by = 500 
   template_name = ""
   single_training_request = None
-  
+
   def dispatch(self, *args, **kwargs):
     self.single_training_request = SingleTraining.objects.get(pk=kwargs['tid'])
     if self.single_training_request.status == 2:
@@ -1218,6 +1220,39 @@ class SingleTrainingAttendanceListView(ListView):
     else:
       self.queryset = SingleTrainingAttendance.objects.filter(training_id=self.single_training_request.id)
     return super(SingleTrainingAttendanceListView, self).dispatch(*args, **kwargs)
+
+  def get_context_data(self, **kwargs):
+    context = super(SingleTrainingAttendanceListView, self).get_context_data(**kwargs)
+    date_today = datetime.today().date().isoformat()
+    participant_count = self.queryset[0].training.participant_count
+    tr_date = self.queryset[0].training.tdate
+    training_date = self.queryset[0].training.tdate.isoformat()
+    training_status = self.queryset[0].training.status
+    institute_id = self.queryset[0].training.academic_id
+    institute = AcademicCenter.objects.get(id=institute_id)
+    foss_id = self.queryset[0].training.course_id
+    foss_list = CourseMap.objects.get(id=foss_id)
+    foss_name_list = foss_list.foss
+    organiser_id = self.queryset[0].training.organiser_id
+    organiser_object = Organiser.objects.get(id=organiser_id).user_id
+    organiser_firstname = User.objects.get(id=organiser_object).first_name
+    organiser_lastname = User.objects.get(id=organiser_object).last_name
+    organiser_name = organiser_firstname + " " + organiser_lastname
+    temp = self.request.user.groups.all()
+    grup = []
+    for i in temp:
+      grup.append(i.name)
+    context['organiser_name'] = organiser_name
+    context['pr_count'] = participant_count
+    context['tdate'] = tr_date
+    context['foss'] = foss_name_list
+    context['institute'] = institute
+    context['group'] = grup
+    context['date'] = date_today
+    context['training_date'] = training_date
+    context['training_status'] = training_status
+    return context
+  
   
 
 ''' SingleTrainingApprove will take an argument(primary key of a training batch) and change the status of the SingleTraining batch, in the SingleTraining database, from pending to approved.
