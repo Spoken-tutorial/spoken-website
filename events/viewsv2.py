@@ -1106,6 +1106,9 @@ class SingletrainingCompletedListView(ListView):
     grup = []
     for i in temp:
       grup.append(i.name)
+    for i in self.queryset:
+      total_participant_count = SingleTrainingAttendance.objects.filter(training_id=i.id).count()
+      context['total_participant_count'] = total_participant_count
     context['group'] = grup
     return context
 '''
@@ -1274,10 +1277,13 @@ class SingleTrainingAttendanceListView(ListView):
     organiser_firstname = User.objects.get(id=organiser_object).first_name
     organiser_lastname = User.objects.get(id=organiser_object).last_name
     organiser_name = organiser_firstname + " " + organiser_lastname
+    total_participant_count = SingleTrainingAttendance.objects.filter(training_id=self.single_training_request.id)
+    print total_participant_count
     temp = self.request.user.groups.all()
     grup = []
     for i in temp:
       grup.append(i.name)
+    context['total_participant_count'] = total_participant_count
     context['organiser_name'] = organiser_name
     context['pr_count'] = participant_count
     context['tdate'] = tr_date
