@@ -32,6 +32,7 @@
        </a></li> 
     <li {% if request.path == "/software-training/single-training/approved/" %}class="active" {% endif %}><a href="/software-training/single-training/approved/">Approved</a></li>
     <li {% if request.path == "/software-training/single-training/ongoing/" %}class="active" {% endif %}><a href="/software-training/single-training/ongoing/">Ongoing</a></li>
+    <li {% if request.path == "/software-training/single-training/pendingattendance/" %}class="active" {% endif %}><a href="/software-training/single-training/pendingattendance/">Attendance Pending</a></li>
     <li {% if request.path == "/software-training/single-training/completed/" %}class="active" {% endif %}><a href="/software-training/single-training/completed/">Completed</a></li>
   </ul>
   <div class="tab-content">
@@ -55,16 +56,30 @@
                       <td>{{ training.course.course_name }}</td>
                       <td>{{ training.language }}</td>
                       <td>{{ training.academic }}</td>
-                       {% if 'Organiser' in group %}
+                       {% if 'Organiser' in group  %}
                            {% if request.path == '/software-training/single-training/approved/' %}
                              <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }}</a></td>
                            {% elif request.path == '/software-training/single-training/pending/' %}
                               <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }}</a></td>
                            {% elif request.path == '/software-training/single-training/ongoing/' %}
                              <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }}</a></td>
+                           {% elif request.path == '/software-training/single-training/pendingattendance/' %}
+                             <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }}</a></td>
                            {% elif request.path == '/software-training/single-training/completed/' %}
                               <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }} | {{ total_participant_count }}</a></td>
                            {% endif %}
+                       {% elif 'Resource Person' in group %}
+                          {% if request.path == '/software-training/single-training/pendingattendance/' %}
+                             <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }}</a></td>
+                           {% elif request.path == '/software-training/single-training/approved/' %}
+                             <td>{{ training.participant_count }}</td>
+                           {% elif request.path == '/software-training/single-training/ongoing/' %}
+                             <td>{{ training.participant_count }}</td>
+                           {% elif request.path == '/software-training/single-training/pending/' %}
+                             <td>{{ training.participant_count }}</td>
+                           {% elif request.path == '/software-training/single-training/completed/' %}
+                              <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }} | {{ total_participant_count }}</a></td>
+                          {% endif %}
                        {% else %}
                       <td>{{ training.participant_count }}</td>
                        {% endif %}

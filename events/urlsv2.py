@@ -103,6 +103,11 @@ urlpatterns = [
       name="single-training-ongoing"
     ),
     url(
+      r'^single-training/pendingattendance/$', 
+     SingletrainingPendingAttendanceListView.as_view(template_name="single-training.html"), 
+      name="single-training-pendingattendance"
+    ),
+    url(
       r'^single-training/completed/$', 
      SingletrainingCompletedListView.as_view(template_name="single-training.html"), 
       name="single-training-completed"

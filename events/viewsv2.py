@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from datetime import datetime
+from datetime import timedelta
 
 # Create your views here.
 from django.views.generic import View, ListView
@@ -1020,11 +1021,11 @@ class SingletrainingApprovedListView(ListView):
     for i in user_groups_object:
       user_group.append(i.name)
     if 'Administrator' in user_group:
-      self.queryset = SingleTraining.objects.filter(Q(status=2)).order_by('-tdate')
+      self.queryset = SingleTraining.objects.filter(tdate__gt=datetime.today().date().isoformat(), status=2).order_by('-tdate')
       return super(SingletrainingApprovedListView, self).dispatch(*args, **kwargs)
     elif 'Organiser' in user_group:
       rp_state = self.request.user.organiser.academic_id
-      self.queryset = SingleTraining.objects.filter(Q(status=2), academic__id = rp_state,tdate__gt=datetime.today().date().isoformat()).order_by('-tdate')
+      self.queryset = SingleTraining.objects.filter(status=2, academic__id = rp_state,tdate__gt=datetime.today().date().isoformat()).order_by('-tdate')
       return super(SingletrainingApprovedListView, self).dispatch(*args, **kwargs)
     elif 'Resource Person' in user_group:
       state_list = []
@@ -1032,7 +1033,7 @@ class SingletrainingApprovedListView(ListView):
       a = ResourcePerson.objects.filter(user__id=rp_state)
       for i in a:
         state_list.append(i.state_id)
-      self.queryset = SingleTraining.objects.filter(Q(status=2), academic__state__id__in = state_list).order_by('-tdate')
+      self.queryset = SingleTraining.objects.filter(tdate__gt=datetime.today().date().isoformat(),status=2, academic__state__id__in = state_list).order_by('-tdate')
       return super(SingletrainingApprovedListView, self).dispatch(*args, **kwargs)
 
 ''' SingletrainingOngoingListView displays the workshops going on that particular day '''
@@ -1059,7 +1060,7 @@ class SingletrainingOngoingListView(ListView):
       return super(SingletrainingOngoingListView, self).dispatch(*args, **kwargs)
     elif 'Organiser' in user_group:
       rp_state = self.request.user.organiser.academic_id
-      self.queryset = SingleTraining.objects.filter(tdate__lte=datetime.today().date().isoformat(), status=2).order_by('-tdate')
+      self.queryset = SingleTraining.objects.filter(tdate=datetime.today().date().isoformat(), status=2).order_by('-tdate')
       return super(SingletrainingOngoingListView, self).dispatch(*args, **kwargs)
     elif 'Resource Person' in user_group:
       state_list = []
@@ -1111,6 +1112,43 @@ class SingletrainingCompletedListView(ListView):
       context['total_participant_count'] = total_participant_count
     context['group'] = grup
     return context
+
+''' Pending Attendance '''
+class SingletrainingPendingAttendanceListView(ListView):
+  queryset = None
+  paginate_by = 10
+  
+  def dispatch(self, *args, **kwargs):
+    user_groups_object = self.request.user.groups.all()
+    user_group = []
+    for i in user_groups_object:
+      user_group.append(i.name)
+    if 'Administrator' in user_group:
+      self.queryset = SingleTraining.objects.filter(tdate__lt=datetime.today().date().isoformat(), status=2).order_by('-tdate')
+      return super(SingletrainingPendingAttendanceListView, self).dispatch(*args, **kwargs)
+    elif 'Organiser' in user_group:
+      rp_state = self.request.user.organiser.academic_id
+      self.queryset = SingleTraining.objects.filter(tdate__lt=datetime.today().date().isoformat(), status=2).order_by('-tdate')  
+      return super(SingletrainingPendingAttendanceListView, self).dispatch(*args, **kwargs)
+    elif 'Resource Person' in user_group:
+      state_list = []
+      rp_state = self.request.user.id
+      a = ResourcePerson.objects.filter(user__id=rp_state)
+      for i in a:
+        state_list.append(i.state_id)
+      self.queryset = SingleTraining.objects.filter(tdate__lt=datetime.today().date().isoformat(), status=2).order_by('-tdate')
+      return super(SingletrainingPendingAttendanceListView, self).dispatch(*args, **kwargs)
+
+  def get_context_data(self, **kwargs):
+    context = super(SingletrainingPendingAttendanceListView, self).get_context_data(**kwargs)
+    temp = self.request.user.groups.all()
+    date_today = datetime.today().date().isoformat()
+    grup = []
+    for i in temp:
+      grup.append(i.name)
+    context['group'] = grup
+    return context
+
 '''
 SingleTrainingCreateView will create a request for a new One day workshop.
 
@@ -1277,8 +1315,10 @@ class SingleTrainingAttendanceListView(ListView):
     organiser_firstname = User.objects.get(id=organiser_object).first_name
     organiser_lastname = User.objects.get(id=organiser_object).last_name
     organiser_name = organiser_firstname + " " + organiser_lastname
+    date_extn = tr_date + timedelta(days=15)
+    date_extn = date_extn.isoformat()
     total_participant_count = SingleTrainingAttendance.objects.filter(training_id=self.single_training_request.id)
-    print total_participant_count
+    print date_extn
     temp = self.request.user.groups.all()
     grup = []
     for i in temp:
@@ -1287,6 +1327,7 @@ class SingleTrainingAttendanceListView(ListView):
     context['organiser_name'] = organiser_name
     context['pr_count'] = participant_count
     context['tdate'] = tr_date
+    context['extn_date'] = date_extn
     context['foss'] = foss_name_list
     context['institute'] = institute
     context['group'] = grup
