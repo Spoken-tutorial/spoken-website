@@ -391,7 +391,7 @@ class LiveFeedbackForm(forms.ModelForm):
 
 class TrainingLanguageFeedbackForm(forms.ModelForm):
     fiveChoice = ((1, ''), (2, ''), (3, ''), (4, ''), (5, ''))
-    name = forms.CharField()
+    #name = forms.CharField()
     age = forms.CharField()
     
     medium_of_instruction = forms.ChoiceField(widget=forms.RadioSelect, choices = ((0, 'English'), (1, "Vernacular Medium")) )
@@ -446,7 +446,7 @@ class TrainingLanguageFeedbackForm(forms.ModelForm):
     
     class Meta:
         model = TrainingLanguageFeedback
-        exclude = ['training', 'mdluser_id']
+        exclude = ['name', 'training', 'mdluser_id']
         
     def __init__(self, *args, **kwargs):
         training = None

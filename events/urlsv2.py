@@ -3,6 +3,7 @@ from django.conf.urls import url
 from events.viewsv2 import *
 from events.decorators import *
 from events.formsv2 import *
+from events.urls import *
 urlpatterns = [
     url(
       r'^training-planner/', 
@@ -155,5 +156,26 @@ urlpatterns = [
       SingleTrainingAttendanceListView.as_view(template_name=\
         "single-training-attendance.html"), 
       name="single_training_attendance"
+     ),
+     url(
+      r'^organiser-feedback/', 
+      OrganiserFeedbackCreateView.as_view(template_name='organiser_feedback.html'), 
+      name='organiser_feedback'
+    ),
+    url(
+      r'^old-training/$',
+      OldTrainingListView.as_view(template_name=\
+        "old_training.html"),
+      name="old_training"
+    ),
+    url(
+      r'^old-training/(?P<tid>\d+)/participant/$',
+      OldStudentListView.as_view(template_name="old_list_student.html"), 
+      name="old_list_student"
+    ),
+    url(
+      r'^old-training/(?P<tid>\d+)/close/$',
+      OldTrainingCloseView.as_view(template_name=""), 
+      name="old_training_close"
     ),
 ]

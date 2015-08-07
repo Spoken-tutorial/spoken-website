@@ -12,7 +12,8 @@ from django.db import IntegrityError
 from django.utils.decorators import method_decorator
 from events.decorators import group_required
 from events.forms import StudentBatchForm, TrainingRequestForm, \
-    TrainingRequestEditForm, CourseMapForm, SingleTrainingForm
+    TrainingRequestEditForm, CourseMapForm, SingleTrainingForm, \
+    OrganiserFeedbackForm
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, render_to_response
 from django.core.validators import validate_email
@@ -1413,5 +1414,190 @@ def SingleTrainingReject(request, pk):
     print "Error"
   return HttpResponseRedirect("/software-training/single-training/approved/")
 
-	
 
+class OldTrainingListView(ListView):
+  queryset = Training.objects.none()
+  paginate_by = 50
+  template_name = ""
+  header = None
+  raw_get_data = None
+  @method_decorator(group_required("Resource Person"))
+  def dispatch(self, *args, **kwargs):
+    self.queryset = Training.objects.exclude(id__in=TrainingRequest.objects.filter(participants__gt=0).values_list('id'), ).filter(Q(status__gte=1) & Q(status__lte=3), id__in=TrainingAttendance.objects.all().values_list('training_id').distinct(), academic__state_id__in=self.request.user.resourceperson_set.all().values_list('state_id').distinct())
+    self.header = {
+      1: SortableHeader('#', False),
+      2: SortableHeader('academic', True, 'Institution'),
+      3: SortableHeader('academic__state', True, 'State'),
+      4: SortableHeader('foss_foss', True, 'Foss'),
+      5: SortableHeader('tdate', True, 'Date'),
+      6: SortableHeader('id', True, 'Workshop Code'),
+      7: SortableHeader('Action', False, ''),
+    }
+    self.raw_get_data = self.request.GET.get('o', None)
+    self.queryset = get_sorted_list(self.request, self.queryset, self.header, self.raw_get_data)
+    return super(OldTrainingListView, self).dispatch(*args, **kwargs)
+    
+  def get_context_data(self, **kwargs):
+    context = super(OldTrainingListView, self).get_context_data(**kwargs)
+    context['header'] = self.header
+    context['ordering'] = get_field_index(self.raw_get_data)
+    return context
+
+
+class OldStudentListView(ListView):
+  queryset = TrainingAttendance.objects.none()
+  paginate_by = 0
+  template_name = None
+  header = None
+  raw_get_data = None
+  @method_decorator(group_required("Resource Person"))
+  def dispatch(self, *args, **kwargs):
+    self.queryset = TrainingAttendance.objects.filter(training_id=kwargs['tid'])
+    self.header = {
+        1: SortableHeader('#', False),
+        2: SortableHeader('firstname', True, 'First Name'),
+        3: SortableHeader('lastname', True, 'Last Name'),
+        4: SortableHeader('email', True, 'Email'),
+        5: SortableHeader('gender', True, 'Gender'),
+        6: SortableHeader('', False, ''),
+    }
+    self.raw_get_data = self.request.GET.get('o', None)
+    self.queryset = get_sorted_list(self.request, self.queryset, self.header, self.raw_get_data)
+    return super(OldStudentListView, self).dispatch(*args, **kwargs)
+    
+  def get_context_data(self, **kwargs):
+    context = super(OldStudentListView, self).get_context_data(**kwargs)
+    context['header'] = self.header
+    context['ordering'] = get_field_index(self.raw_get_data)
+    return context
+
+
+class OldTrainingCloseView(CreateView):
+  def _find_course(self, foss, category):
+    return CourseMap.objects.get(foss= foss, category = category)
+
+  def _create_training_planner(self, year, academic_id, organiser_id, created, even=False):
+    tp = None
+    semester = 2
+    if even:
+      year = int(year) -1
+      semester = 1
+    try:
+      tp = TrainingPlanner.objects.get(year=year, academic_id=academic_id, organiser_id=organiser_id, semester__even=even)
+    except:
+      try:
+        tp = TrainingPlanner()
+        tp.semester_id = semester
+        tp.year = year
+        tp.academic_id = academic_id
+        tp.organiser_id = organiser_id
+        tp.created = created
+        tp.updated = created
+        tp.save()
+      except Exception, e:
+        print e
+    return tp
+
+  def _get_student(self, ta):
+    mail = ta.email.strip().lower()
+    firstname = ta.firstname.strip()
+    lastname = ta.lastname.strip()
+    student = None
+    if firstname:
+      firstname = firstname.upper()
+    if lastname:
+      lastname = lastname.upper()
+    gender = 'Female'
+    if ta.gender == 'Male' or ta.gender == 'M':
+      gender = 'Male'
+    user = None
+    try:
+      user = User.objects.get(email = mail)
+    except:
+      user = User.objects.create_user(mail, mail, firstname)
+    if user:
+      try:
+        user.groups.add(student)
+      except:
+        pass
+      try:
+        student = Student.objects.get(user = user)
+      except:
+        student = Student.objects.create(user = user, gender = gender)
+    return student
+
+  def _fill_participants_attendance(self, tr, otr, language):
+    st_count = 0
+    tas = TrainingAttendance.objects.exclude(email=None).filter(training=otr)
+    for ta in tas:
+      student = self._get_student(ta)
+      if not student:
+        print ta.id, '---------'
+        continue
+      if not TrainingAttend.objects.filter(training=tr, student=student).count():
+        TrainingAttend.objects.create(training=tr, student=student, language=language)
+      st_count += 1
+    return st_count
+
+  def dispatch(self, *args, **kwargs):
+    if 'tid' in kwargs:
+      training = Training.objects.filter(pk=kwargs['tid'])
+      others = Department.objects.get(name="Others")
+      if training.exists():
+        training = training.first()
+        try:
+          new_training = TrainingRequest.objects.get(pk=training.id)
+          new_training = self._fill_participants_attendance(tr, training, training.language)
+          new_training.save()
+          messages.error(self.request, 'The selected training is already added to Semester-Planner')
+        except:
+          year = str(datetime.now().year)
+          tdate = datetime.strptime(training.tdate.strftime('%Y-%m-%d'), '%Y-%m-%d')
+          even_start = datetime.strptime(year + '-01-01', '%Y-%m-%d')
+          even_end = datetime.strptime(year + '-06-30', '%Y-%m-%d')
+          if tdate >= even_start and tdate <= even_end:
+            tp = self._create_training_planner(year, training.academic_id, training.organiser_id, training.tdate, even=True)
+          else:
+            tp = self._create_training_planner(year, training.academic_id, training.organiser_id, training.tdate)
+          if tp:
+            tr = TrainingRequest()
+            tr.id = training.id
+            tr.sem_start_date = training.tdate
+            tr.created = training.created
+            tr.updated = training.updated
+            tr.batch_id = None
+            tr.course = self._find_course(training.foss, 0)
+            if not training.department.first():
+                training.department.add(others.id)
+            tr.department = training.department.first() # what to do if multiple dept
+            tr.language = training.language
+            tr.training_planner = tp
+            tr.status = 1
+            tr.save()
+            tr_count = self._fill_participants_attendance(tr, training, training.language)
+            tr.participants = tr_count
+            tr.save()
+            messages.success(self.request, 'Training status updated successfully')
+        return HttpResponseRedirect('/software-training/old-training/')
+      else:
+        return PermissionDenied()
+    return super(OldTrainingCloseView, self).dispatch(*args, **kwargs)
+
+class OrganiserFeedbackCreateView(CreateView):
+    form_class = OrganiserFeedbackForm
+    template_name = "organiser_feedback.html"
+    success_url = "/home"
+
+    def get(self, request, *args, **kwargs):
+	    return render_to_response(self.template_name, {'form': self.form_class()}, 
+	      context_instance=RequestContext(self.request))
+	 
+    def post(self,  request, *args, **kwargs):
+      self.object = None
+      form = self.get_form(self.get_form_class())
+      if form.is_valid():
+        form.save()
+        messages.success(self.request, "Thank you for completing this feedback form. We appreciate your input and valuable suggestions.")
+        return HttpResponseRedirect(self.success_url)
+      else:
+        return self.form_invalid(form)
