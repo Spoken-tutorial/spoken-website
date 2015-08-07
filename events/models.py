@@ -1183,7 +1183,7 @@ class OrganiserFeedback(models.Model):
   presentation_quality = models.CharField(max_length = 10, choices = RATE_SPOKEN_CHOICES)
   overall_rating = models.CharField(max_length = 10, choices = RATE_SPOKEN_CHOICES)
   trained_foss =  models.ManyToManyField(FossCategory)
-  is_training_benefited = models.CharField(max_length = 10, choices = YES_NO_CHOICES)
+  is_training_benefited = models.CharField(max_length = 10, choices = GOOD_INVESTMENT_CHOICES)
   testimonial = models.CharField(max_length = 500)
   any_other_suggestions = models.CharField(max_length = 500)
   can_contact = models.CharField(max_length = 10, choices = YES_NO_CHOICES)
