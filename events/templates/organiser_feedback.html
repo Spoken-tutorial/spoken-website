@@ -469,18 +469,17 @@
 {% block compressinlinejsblock %}
   <script>
   $( document ).ready(function() {
-    $can_contact  = null;
+  
     $district = $('#id_district');
     $city = $('#id_city');
-    $university = $('#id_university');
     $('#id_state').change(function(){
       var state = $(this).val();
       $.ajax({
-        url: "/software-training/ajax-ac-state/",
+        url: "/software-training/ajax_state_details/",
         type: "POST",
         data: {
           state : state,
-          fields: {'district':'district' , 'city':'city' , 'university':'university'},
+          fields: {'district':'district' , 'city':'city' },
         },
         success: function(data) {
           if(data.district){
@@ -499,17 +498,30 @@
             $city.attr("disabled", "disabled");
             alert('No city found for this state!!');
           }
-          if(data.university){
-            console.log(data.university);
-            $university.html(data.university);
-            $university.removeAttr("disabled");
-          } else{
-            $university.attr("disabled", "disabled");
-            alert('No university found for this state!!');
-          }
         }
       });
     });
+    $college = $('#id_university');
+      $('#id_district').change(function() {
+        var district = $(this).val();
+        $.ajax({
+          url: "/software-training/ajax-district-collage/",
+          type: "POST",
+          data: {
+             district : district
+          },
+          success: function(data) {
+            if(data){
+              $college.html(data);
+              $college.removeAttr("disabled");
+            } else{
+            $college.attr("disabled", "disabled");
+            alert('No college found for this district!!');
+            }
+          }
+        });
+      });
+    
   });
   </script>
 {% endblock %}
