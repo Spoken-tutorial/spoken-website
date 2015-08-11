@@ -1290,6 +1290,7 @@ class OrganiserFeedbackCreateView(CreateView):
     template_name = "organiser_feedback.html"
     success_url = "/home"
 
+    @method_decorator(group_required("Organiser"))
     def get(self, request, *args, **kwargs):
 	    return render_to_response(self.template_name, {'form': self.form_class()}, 
 	      context_instance=RequestContext(self.request))
