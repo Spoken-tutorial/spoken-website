@@ -132,6 +132,11 @@ urlpatterns = [
       name='organiser_feedback'
     ),
     url(
+      r'^organiser-feedback-display/$', 
+     OrganiserFeedbackListView.as_view(template_name="organiser_feedback_display.html"), 
+      name="organiser-feedback-display"
+    ),
+    url(
       r'^old-training/$',
       OldTrainingListView.as_view(template_name=\
         "old_training.html"),
