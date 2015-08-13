@@ -1304,3 +1304,16 @@ class OrganiserFeedbackCreateView(CreateView):
         return HttpResponseRedirect(self.success_url)
       else:
         return self.form_invalid(form)
+
+class OrganiserFeedbackListView(ListView):
+  queryset = None
+  paginate_by = 10
+  
+  def dispatch(self, *args, **kwargs):
+    self.queryset = OrganiserFeedback.objects.all()
+    return super(OrganiserFeedbackListView, self).dispatch(*args, **kwargs)
+  
+  def get_context_data(self, **kwargs):
+    context = super(OrganiserFeedbackListView, self).get_context_data(**kwargs)
+    context['count'] = OrganiserFeedback.objects.all().count()
+    return context
