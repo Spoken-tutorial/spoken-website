@@ -89,9 +89,24 @@ urlpatterns = [
       name="coursemapupdate"
     ),
     url(
+      r'^single-training/pending/$', 
+     SingleTrainingNewListView.as_view(template_name="single-training.html"), 
+      name="single-training-pending"
+    ),
+    url(
       r'^single-training/approved/$', 
      SingletrainingApprovedListView.as_view(template_name="single-training.html"), 
       name="single-training-approved"
+    ),
+    url(
+      r'^single-training/ongoing/$', 
+     SingletrainingOngoingListView.as_view(template_name="single-training.html"), 
+      name="single-training-ongoing"
+    ),
+    url(
+      r'^single-training/pendingattendance/$', 
+     SingletrainingPendingAttendanceListView.as_view(template_name="single-training.html"), 
+      name="single-training-pendingattendance"
     ),
     url(
       r'^single-training/completed/$', 
@@ -127,6 +142,22 @@ urlpatterns = [
     ),
     #url(r'^get-language-option/', GetLanguageOptionView.as_view()),
     url(
+      r'^single-training/pending/(?P<pk>\d+)/$',
+      'events.viewsv2.SingleTrainingApprove', 
+      name="single-training-approve"
+    ),
+    url(
+      r'^single-training/pending/(?P<pk>\d+)/$', 
+      'events.viewsv2.SingleTrainingReject', 
+      name="single-training-reject"
+    ),
+    url(
+      r'^single-training/(?P<tid>\d+)/attendance', 
+      SingleTrainingAttendanceListView.as_view(template_name=\
+        "single-training-attendance.html"), 
+      name="single_training_attendance"
+     ),
+     url(
       r'^organiser-feedback/', 
       OrganiserFeedbackCreateView.as_view(template_name='organiser_feedback.html'), 
       name='organiser_feedback'
