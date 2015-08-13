@@ -1258,9 +1258,19 @@ class SingletrainingCreateView(CreateView):
         if len(csv_data[j]) < 4:
           skipped.append(j)
           continue
+	if csv_data[j][0]=='':
+	  error.append(j)
+	  continue
+	if csv_data[j][1]=='':
+	  error.append(j)
+	  continue
         if not self.email_validator(csv_data[j][2]):
           error.append(j)
           continue
+	if csv_data[j][3]=='':
+	  error.append(j)
+	  continue
+
     return skipped, error, warning, write_flag
 
   '''
