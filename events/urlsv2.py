@@ -157,6 +157,11 @@ urlpatterns = [
       name="single-training-reject"
     ),
     url(
+      r'^single-training/pending/(?P<pk>\d+)/requestmarkattendance/$', 
+      'events.viewsv2.SingleTrainingPendingAttendance', 
+      name="single_training_pending"
+    ),
+    url(
       r'^single-training/(?P<tid>\d+)/attendance', 
       SingleTrainingAttendanceListView.as_view(template_name=\
         "single-training-attendance.html"), 

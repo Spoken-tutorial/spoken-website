@@ -67,7 +67,7 @@
                            {% elif request.path == '/software-training/single-training/ongoing/' %}
                              <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }}</a></td>
                            {% elif request.path == '/software-training/single-training/pendingattendance/' %}
-                             <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }}</a></td>
+                             <td>{{ training.participant_count }} |<a href="{% url 'events:single_training_pending' training.id %}"> Request to mark attendance</a></td>
                            {% elif request.path == '/software-training/single-training/completed/' %}
                               <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }}</a></td>
                            {% endif %}

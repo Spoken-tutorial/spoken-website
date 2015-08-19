@@ -1174,7 +1174,7 @@ class SingletrainingPendingAttendanceListView(ListView):
       a = ResourcePerson.objects.filter(user__id=rp_state)
       for i in a:
         state_list.append(i.state_id)
-      self.queryset = SingleTraining.objects.filter(tdate__lt=datetime.today().date().isoformat(), status=2, academic__state_id__in=state_list).order_by('-tdate')
+      self.queryset = SingleTraining.objects.filter(tdate__lt=datetime.today().date().isoformat(), status=6, academic__state_id__in=state_list).order_by('-tdate')
       return super(SingletrainingPendingAttendanceListView, self).dispatch(*args, **kwargs)
 
   def get_context_data(self, **kwargs):
@@ -1447,6 +1447,7 @@ Status code:
 3 - ongoing
 4 - completed
 5 - Rejected
+6 - PendingAttendanceMark
 
 '''
 def SingleTrainingApprove(request, pk):     
@@ -1470,6 +1471,14 @@ def SingleTrainingReject(request, pk):
     print "Error"
   return HttpResponseRedirect("/software-training/single-training/approved/")
 
+def SingleTrainingPendingAttendance(request, pk):
+  st = SingleTraining.objects.get(pk=pk)
+  if st:
+    st.status = 6
+    st.save()
+  else:
+    print "Error"
+  return HttpResponseRedirect("/software-training/single-training/pending/")
 
 class OldTrainingListView(ListView):
   queryset = Training.objects.none()
