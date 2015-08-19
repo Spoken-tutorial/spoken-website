@@ -790,7 +790,7 @@ class TrainingRequest(models.Model):
   # return course type
   def get_course_type(self):
     if self.course.category == 0:
-      return 'One Day Training'
+      return 'Outside Lab Hours'
     elif self.course.category == 1:
       return 'Mapped Course'
     elif self.course.category == 2:
