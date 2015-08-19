@@ -142,12 +142,12 @@ urlpatterns = [
     ),
     #url(r'^get-language-option/', GetLanguageOptionView.as_view()),
     url(
-      r'^single-training/pending/(?P<pk>\d+)/$',
+      r'^single-training/pending/(?P<pk>\d+)/approve/$',
       'events.viewsv2.SingleTrainingApprove', 
       name="single-training-approve"
     ),
     url(
-      r'^single-training/pending/(?P<pk>\d+)/$', 
+      r'^single-training/pending/(?P<pk>\d+)/reject/$', 
       'events.viewsv2.SingleTrainingReject', 
       name="single-training-reject"
     ),

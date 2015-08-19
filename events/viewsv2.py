@@ -1128,8 +1128,8 @@ class SingletrainingPendingAttendanceListView(ListView):
       self.queryset = SingleTraining.objects.filter(tdate__lt=datetime.today().date().isoformat(), status=2).order_by('-tdate')
       return super(SingletrainingPendingAttendanceListView, self).dispatch(*args, **kwargs)
     elif 'Organiser' in user_group:
-      rp_state = self.request.user.organiser.academic_id
-      self.queryset = SingleTraining.objects.filter(tdate__lt=datetime.today().date().isoformat(), status=2).order_by('-tdate')  
+      org_inst = self.request.user.organiser.academic_id
+      self.queryset = SingleTraining.objects.filter(tdate__lt=datetime.today().date().isoformat(), status=2, academic__id=org_inst).order_by('-tdate')  
       return super(SingletrainingPendingAttendanceListView, self).dispatch(*args, **kwargs)
     elif 'Resource Person' in user_group:
       state_list = []
@@ -1137,7 +1137,7 @@ class SingletrainingPendingAttendanceListView(ListView):
       a = ResourcePerson.objects.filter(user__id=rp_state)
       for i in a:
         state_list.append(i.state_id)
-      self.queryset = SingleTraining.objects.filter(tdate__lt=datetime.today().date().isoformat(), status=2).order_by('-tdate')
+      self.queryset = SingleTraining.objects.filter(tdate__lt=datetime.today().date().isoformat(), status=2, academic__state_id__in=state_list).order_by('-tdate')
       return super(SingletrainingPendingAttendanceListView, self).dispatch(*args, **kwargs)
 
   def get_context_data(self, **kwargs):
@@ -1248,6 +1248,15 @@ class SingletrainingCreateView(CreateView):
       for j in range(len(csv_data)):
         if len(csv_data[j]) < 3:
           skipped.append(j)
+          continue
+        if csv_data[j][0] == '':
+          error.append(j)
+          continue
+        if csv_data[j][1] == '':
+	  error.append(j)
+          continue
+        if csv_data[j][3] == '':
+          error.append(j)
           continue
       
     #Vocational

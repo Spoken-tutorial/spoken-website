@@ -95,7 +95,7 @@
                        {% if 'Resource Person' in group %}			
 			{% if request.path == "/software-training/single-training/pending/" %} 
 		      <td><a href="{% url 'events:single-training-approve' training.id %}">Approve</a></td>
-                      <td><a href="">Reject</a></td>
+                      <td><a href="{% url 'events:single-training-reject' training.id %}">Reject</a></td>
                         {% endif %}
                        {% endif %}
                     </tr>
