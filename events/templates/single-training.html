@@ -67,9 +67,13 @@
                            {% elif request.path == '/software-training/single-training/ongoing/' %}
                              <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }}</a></td>
                            {% elif request.path == '/software-training/single-training/pendingattendance/' %}
+                             {% if 'Administrator' not in group and 'Resource Person' not in group %}
                              <td>{{ training.participant_count }} |<a href="{% url 'events:single_training_pending' training.id %}"> Request to mark attendance</a></td>
-                           {% elif request.path == '/software-training/single-training/completed/' %}
+                             {% else %}
                               <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }}</a></td>
+                             {% endif %}
+                           {% elif request.path == '/software-training/single-training/completed/' %}
+                              <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }} | {{ total_participant_count }}</a></td>
                            {% endif %}
                        {% elif 'Resource Person' in group %}
                           {% if request.path == '/software-training/single-training/pendingattendance/' %}
