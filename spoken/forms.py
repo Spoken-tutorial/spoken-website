@@ -31,11 +31,35 @@ class TutorialSearchForm(forms.Form):
         pass
 
 class TestimonialsForm(forms.ModelForm):
+    actual_content = forms.CharField(widget=forms.Textarea(attrs={'cols': 10, 'rows': 4}))
+    minified_content = forms.CharField(widget=forms.Textarea(attrs={'cols': 10, 'rows': 4}))
     source_title = forms.CharField(required =  False)
     source_link = forms.CharField(required =  False)
-    scan_copy = forms.FileField(label = 'Select a Scaned copy', required = False)
     status = forms.BooleanField(required = False)
+    compn_type = forms.ChoiceField(widget=forms.Select, choices = [('none','---------'),('doc', 'Document'), ('audio', 'Audio'), ('video', 'Video')], required = True)
+    source = forms.FileField(label = 'Select a file', required = False)
     class Meta:
         model = Testimonials
         exclude = ['approved_by', 'user']
-
+        
+    def clean(self):
+        super(TestimonialsForm, self).clean()
+        ct = self.cleaned_data['compn_type']
+        content = self.cleaned_data['source']
+	if content:
+        	extension = self.cleaned_data['source'].name.split('.')[-1]
+        if (ct == "audio" or ct == "video" or ct == ""):
+            try :
+                content.content_type
+            except :
+                raise forms.ValidationError("Please upload the selected component. Upload the file")
+                
+        if ct == "audio" and content.name.split('.')[-1] != "ogg" and content.name.split('.')[-1] != "mp3" and content.name.split('.')[-1] != "amr":
+            raise forms.ValidationError("Audio file format mis-match!!. Only .ogg file allowed")
+        elif ct == "video" and content.name.split('.')[-1] != "ogv" and content.name.split('.')[-1] != "avi" and content.name.split('.')[-1] != "webm" and content.name.split('.')[-1] != 'flv':
+            raise forms.ValidationError("Video file format mis-match!!. Only .ogv file allowed")
+        elif ct == "doc" and self.cleaned_data['source'].name.split('.')[-1] != "pdf":
+            raise forms.ValidationError("Document file format mis-match!!. Only .pdf file allowed")
+	#elif ct == "none" and content.content_type is not None:
+	#    raise forms.ValidationError("Please select proper component type.")
+        return self.cleaned_data

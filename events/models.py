@@ -469,18 +469,16 @@ class EventsNotification(models.Model):
 
 
 class Testimonials(models.Model):
-  user = models.ForeignKey(User, related_name = 'testimonial_created_by')
-  approved_by = models.ForeignKey(User, related_name = 'testimonial_approved_by', null=True)
-  user_name = models.CharField(max_length=200)
-  actual_content = models.TextField()
-  minified_content = models.TextField()
-  short_description = models.TextField()
-  source_title = models.CharField(max_length=200, null=True)
-  source_link = models.URLField(null = True)
-  status = models.PositiveSmallIntegerField(default = 0)
-  created = models.DateTimeField(auto_now_add = True, null=True)
-  updated = models.DateTimeField(auto_now = True, null=True)
-
+    user = models.ForeignKey(User, related_name = 'testimonial_created_by')
+    user_name = models.CharField(max_length=200, null=False)
+    actual_content = models.TextField()
+    minified_content = models.TextField()
+    source_title = models.CharField(max_length=200, null=True)
+    source_link = models.URLField(null = True)
+    status = models.PositiveSmallIntegerField(default = 0)
+    compn_type = models.CharField(max_length = 30, null=True)
+    created = models.DateTimeField(auto_now_add = True, null=True)
+    updated = models.DateTimeField(auto_now = True, null=True)
 
 class OrganiserNotification(models.Model):
   user = models.ForeignKey(User)
@@ -1031,7 +1029,6 @@ class SingleTrainingAttendance(models.Model):
     unique_together = (("training", "firstname", "lastname", "email"),)
 
 
-<<<<<<< HEAD
 def sample_file_path(instance, filename):
   ext = os.path.splitext(filename)[1]
   ext = ext.lower()

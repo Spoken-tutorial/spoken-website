@@ -25,16 +25,22 @@
                 <tr>
                     <th>Actual Content</th>
                     <th>Minified Content</th>
-                    <th>Short Description</th>
+                    <th>Component Type</th>
                     <th>Source Link</th>
                     <th>Status</th>
                     <th colspan="2" class="col-center">Action</th>
                 </tr>
 				{% for record in collection %}
 					<tr class="{% cycle 'odd' 'even' %}">
-						<td>{{ record.actual_content }}</td>
-						<td>{{ record.minified_content }}</td>
-						<td>{{ record.short_description }}</td>
+						<td>{{ record.actual_content|truncatechars:70 }}</td>
+						<td>{{ record.minified_content|truncatechars:35 }}</td>
+						{% if record.compn_type == 'video'%}
+						    <td><a href="{{ MEDIA_URL }}testimonials/{{record.id}}/{{record.compn_type}}/{{record.id}}.ogv" target="_blank">{{ record.compn_type }}</a></td>
+						{% elif record.compn_type == 'audio' %}
+						    <td><a href="{{ MEDIA_URL }}testimonials/{{record.id}}/{{record.compn_type}}/{{record.id}}.ogg" target="_blank">{{ record.compn_type }}</a></td>
+						{% else %}
+						    <td>{{ record.compn_type }}</td>
+						{% endif %}
 						<!-- <td>{{ record.source_title }}</td> -->
                         {% if record.source_title and record.source_link %}
                             <td><a href="{{ record.source_link }}" target="_blank">{{ record.source_title }}</a>
@@ -43,6 +49,7 @@
                         {% else %}
 						    <td>{{ record.source_link }}</td>
                         {% endif %}
+                        
 						<td class="col-center">{{ record.status }}</td>
 						<td><a href="{% url 'admin_testimonials_edit' record.id %}">Edit</a></td>
                     <td><a href="{% url 'admin_testimonials_delete' record.id %}">Delete</a></td>
