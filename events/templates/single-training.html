@@ -31,6 +31,7 @@
        {% endif %}
        </a></li> 
     <li {% if request.path == "/software-training/single-training/approved/" %}class="active" {% endif %}><a href="/software-training/single-training/approved/">Approved</a></li>
+    <li {% if request.path == "/software-training/single-training/rejected/" %}class="active" {% endif %}><a href="/software-training/single-training/rejected/">Rejected</a></li>
     <li {% if request.path == "/software-training/single-training/ongoing/" %}class="active" {% endif %}><a href="/software-training/single-training/ongoing/">Ongoing</a></li>
     <li {% if request.path == "/software-training/single-training/pendingattendance/" %}class="active" {% endif %}><a href="/software-training/single-training/pendingattendance/">Attendance Pending</a></li>
     <li {% if request.path == "/software-training/single-training/completed/" %}class="active" {% endif %}><a href="/software-training/single-training/completed/">Completed</a></li>
@@ -61,6 +62,8 @@
                              <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }}</a></td>
                            {% elif request.path == '/software-training/single-training/pending/' %}
                               <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }}</a></td>
+                           {% elif request.path == '/software-training/single-training/rejected/' %}
+                              <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }}</a></td>
                            {% elif request.path == '/software-training/single-training/ongoing/' %}
                              <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }}</a></td>
                            {% elif request.path == '/software-training/single-training/pendingattendance/' %}
@@ -72,6 +75,8 @@
                           {% if request.path == '/software-training/single-training/pendingattendance/' %}
                              <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }}</a></td>
                            {% elif request.path == '/software-training/single-training/approved/' %}
+                             <td>{{ training.participant_count }}</td>
+                           {% elif request.path == '/software-training/single-training/rejected/' %}
                              <td>{{ training.participant_count }}</td>
                            {% elif request.path == '/software-training/single-training/ongoing/' %}
                              <td>{{ training.participant_count }}</td>

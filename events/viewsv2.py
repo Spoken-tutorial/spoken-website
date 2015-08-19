@@ -1037,6 +1037,43 @@ class SingletrainingApprovedListView(ListView):
       self.queryset = SingleTraining.objects.filter(tdate__gt=datetime.today().date().isoformat(),status=2, academic__state__id__in = state_list).order_by('-tdate')
       return super(SingletrainingApprovedListView, self).dispatch(*args, **kwargs)
 
+'''
+ SingletrainingRejectedListView displays the workshop requests which have been rejected 
+'''
+class SingletrainingRejectedListView(ListView):
+  queryset = None
+  paginate_by = 10
+
+  def get_context_data(self, **kwargs):
+    context = super(SingletrainingRejectedListView, self).get_context_data(**kwargs)
+    temp = self.request.user.groups.all()
+    grup = []
+    for i in temp:
+      grup.append(i.name)
+    context['group'] = grup
+    return context
+  
+  def dispatch(self, *args, **kwargs):
+    user_groups_object = self.request.user.groups.all()
+    user_group = []
+    for i in user_groups_object:
+      user_group.append(i.name)
+    if 'Administrator' in user_group:
+      self.queryset = SingleTraining.objects.filter(tdate__gt=datetime.today().date().isoformat(), status=5).order_by('-tdate')
+      return super(SingletrainingRejectedListView, self).dispatch(*args, **kwargs)
+    elif 'Organiser' in user_group:
+      rp_state = self.request.user.organiser.academic_id
+      self.queryset = SingleTraining.objects.filter(status=5, academic__id = rp_state,tdate__gt=datetime.today().date().isoformat()).order_by('-tdate')
+      return super(SingletrainingRejectedListView, self).dispatch(*args, **kwargs)
+    elif 'Resource Person' in user_group:
+      state_list = []
+      rp_state = self.request.user.id
+      a = ResourcePerson.objects.filter(user__id=rp_state)
+      for i in a:
+        state_list.append(i.state_id)
+      self.queryset = SingleTraining.objects.filter(tdate__gt=datetime.today().date().isoformat(),status=5, academic__state__id__in = state_list).order_by('-tdate')
+      return super(SingletrainingRejectedListView, self).dispatch(*args, **kwargs)
+
 ''' SingletrainingOngoingListView displays the workshops going on that particular day '''
 class SingletrainingOngoingListView(ListView):
   queryset = None

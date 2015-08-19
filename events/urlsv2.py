@@ -99,6 +99,11 @@ urlpatterns = [
       name="single-training-approved"
     ),
     url(
+      r'^single-training/rejected/$', 
+     SingletrainingRejectedListView.as_view(template_name="single-training.html"), 
+      name="single-training-rejected"
+    ),
+    url(
       r'^single-training/ongoing/$', 
      SingletrainingOngoingListView.as_view(template_name="single-training.html"), 
       name="single-training-ongoing"
