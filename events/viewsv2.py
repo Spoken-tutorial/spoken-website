@@ -1185,6 +1185,7 @@ class SingletrainingPendingAttendanceListView(ListView):
     for i in temp:
       grup.append(i.name)
     context['group'] = grup
+    context['date'] = date_today
     return context
 
 '''
@@ -1213,11 +1214,17 @@ class SingletrainingCreateView(CreateView):
       messages.error(self.request, "You have error(s) in your CSV file on line numbers %s"%(csv_error_line_num))
       
     else:
-      messages.success(self.request, "Student Batch added successfully.")
       form_data.save()
-      student_count = self.create_singletraining_db(self.request.FILES['csv_file'], form_data.id)
-      form_data.participant_count = student_count
-      form_data.save()
+      student_exists, student_count, csv_data_list = self.create_singletraining_db(self.request.FILES['csv_file'], form_data.id, form_data.course.id)
+      if student_exists:
+        messages.error(self.request, "Batch added but Duplicate entries exist in CSV file")
+        form_data.participant_count = student_count
+      elif len(student_exists) == len(csv_data_list):
+        messages.error(self.request, "Batch not added: Batch already exists for the same course")
+      else:
+        messages.success(self.request, "Student Batch added successfully.")
+        form_data.participant_count = student_count
+        form_data.save()
     return HttpResponseRedirect(self.success_url)
 
   def email_validator(self, email):
@@ -1238,7 +1245,7 @@ class SingletrainingCreateView(CreateView):
     if email and email.strip():
       email = email.strip().lower()
       try:
-        student = SingleTrainingAttendance.objects.get(email=email, training__id=batch_id)
+        student = SingleTrainingAttendance.objects.get(email=email, foss=batch_id)
         return student
       except ObjectDoesNotExist:
         pass
@@ -1248,7 +1255,7 @@ class SingletrainingCreateView(CreateView):
   create_student_vocational() will add the database entry for the student 
 
   '''
-  def create_student_vocational(self, training_id, fname, lname, email, gender):
+  def create_student_vocational(self, training_id, fossid, fname, lname, email, gender):
     if not fname or not lname or not email or not gender:
       return False
     user = None
@@ -1262,7 +1269,7 @@ class SingletrainingCreateView(CreateView):
         gender = 'Male'
       else:
         gender = 'Female'
-      student = SingleTrainingAttendance.objects.create(training_id = training_id, firstname = fname, lastname = lname, email = email, gender = gender)
+      student = SingleTrainingAttendance.objects.create(training_id = training_id, foss = fossid, firstname = fname, lastname = lname, email = email, gender = gender)
       return student
     return False
 
@@ -1314,7 +1321,7 @@ class SingletrainingCreateView(CreateView):
           error.append(j)
           continue
 	if csv_data[j][3]=='':
-	  error.append(j)
+	  error .append(j)
 	  continue
 
     return skipped, error, warning, write_flag
@@ -1323,18 +1330,21 @@ class SingletrainingCreateView(CreateView):
   This will call the create_student_vocational() method to create the student entry, from the  CSV file, in the SingleTraining database.
   
   '''  
-  def create_singletraining_db(self, file_path, batch_id):
+  def create_singletraining_db(self, file_path, tr_id, batch_id):
     csv_data_list = []
+    student_exists = []
     count = 0
     csvdata = csv.reader(file_path, delimiter=',', quotechar='|')
     for i in csvdata:
       csv_data_list.append(i)
     for j in range(len(csv_data_list)):
       student = self.get_student_vocational(batch_id, csv_data_list[j][2])
-      if not student:
-        self.create_student_vocational(batch_id, csv_data_list[j][0], csv_data_list[j][1], csv_data_list[j][2], csv_data_list[j][3])
-    student_count = SingleTrainingAttendance.objects.filter(training_id=batch_id).count()
-    return student_count
+      if student:
+        student_exists.append(student)
+      else:
+         self.create_student_vocational(tr_id, batch_id, csv_data_list[j][0], csv_data_list[j][1], csv_data_list[j][2], csv_data_list[j][3])
+      student_count = SingleTrainingAttendance.objects.filter(training_id=tr_id).count()
+    return student_exists, student_count, csv_data_list
 
 ''' SingleTrainingAttendance is used to (1) List the attendance view, (2) Mark the attendance ''' 
 
@@ -1375,7 +1385,8 @@ class SingleTrainingAttendanceListView(ListView):
     date_extn = tr_date + timedelta(days=15)
     date_extn = date_extn.isoformat()
     total_participant_count = SingleTrainingAttendance.objects.filter(training_id=self.single_training_request.id)
-    print date_extn
+    print tr_date
+    print date_extn, "************"
     temp = self.request.user.groups.all()
     grup = []
     for i in temp:

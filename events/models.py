@@ -1012,6 +1012,7 @@ class SingleTraining(models.Model):
 
 class SingleTrainingAttendance(models.Model):
   training = models.ForeignKey(SingleTraining)
+  foss = models.PositiveIntegerField(default=0)
   firstname = models.CharField(max_length = 100, null=True)
   lastname = models.CharField(max_length = 100, null=True)
   gender = models.CharField(max_length=10, null=True)
