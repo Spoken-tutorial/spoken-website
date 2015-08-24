@@ -10,7 +10,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.db.models import Q
 from django.conf import settings
 from forms import *
-import os
+import os, subprocess
 from django.http import Http404
 from django.core.exceptions import PermissionDenied
 from urllib import urlopen, quote, unquote_plus
@@ -64,7 +64,7 @@ def home(request):
         'random_tutorials' : random_tutorials,
     }
     
-    testimonials = Testimonials.objects.all().order_by('?')[:2]
+    testimonials = Testimonials.objects.filter(Q(compn_type = None)|Q(compn_type = 'doc')).all().order_by('?')[:2]
     context['testimonials'] = testimonials
     
     notifications = Notification.objects.filter(Q(start_date__lte=datetime.datetime.today()) & Q(expiry_date__gte=datetime.datetime.today())).order_by('expiry_date')
@@ -207,8 +207,15 @@ def get_language(request):
             output = ['reset', tmp1, tmp2]
     return HttpResponse(json.dumps(output), content_type='application/json')
 
-def testimonials(request):
-    testimonials = Testimonials.objects.all()
+def testimonials(request,component):
+    #testimonials = Testimonials.objects.all()
+    if 'video' in component:
+        testimonials = Testimonials.objects.filter(compn_type='video').all()
+    elif 'audio' in component:
+        testimonials = Testimonials.objects.filter(compn_type='audio').all()
+    else:
+        testimonials = Testimonials.objects.filter(Q(compn_type = None)|Q(compn_type = 'doc')|Q(compn_type = 'none')).all()
+
     context = { 'testimonials' : testimonials}
     context.update(csrf(request))
     return render(request, 'spoken/templates/testimonial/testimonials.html', context)
@@ -228,33 +235,72 @@ def testimonials_new(request):
             form_data.user_id = user.id
             form_data.save()
             rid = form_data.id
-            file_type = ['application/pdf']
-            if 'scan_copy' in request.FILES:
-                if request.FILES['scan_copy'].content_type in file_type:
-                    file_path = settings.MEDIA_ROOT + 'testimonial/'
+            file_type = ['application/pdf','video/ogg','audio/mpeg','audio/amr','video/quicktime','video/webm','video/x-flv','video/x-msvideo']
+            if 'source' in request.FILES:
+                if request.FILES['source'].content_type in file_type:
+		    content = request.FILES['source'].content_type.split('/')[0]
+                    file_name, file_extension = os.path.splitext(request.FILES['source'].name)
+		    if file_extension=='.ogg':
+		    	file_path = settings.MEDIA_ROOT + 'testimonial/'+ str(rid) +'/' + 'audio' + '/'
+		    else:
+		        file_path = settings.MEDIA_ROOT + 'testimonial/'+ str(rid) +'/'+ str(content) + '/'
                     try:
-                        os.mkdir(file_path)
+                        os.makedirs(file_path)
                     except Exception, e:
                         print e
-                    file_path = settings.MEDIA_ROOT + 'testimonial/'+ str(rid) +'/'
-                    try:
-                        os.mkdir(file_path)
-                    except Exception, e:
-                        print e
-                    full_path = file_path + str(rid) +".pdf"
+                    full_path = file_path + str(rid) + file_extension
+		    file_name = str(rid)
+		    file_extension = file_extension
                     fout = open(full_path, 'wb+')
-                    f = request.FILES['scan_copy']
+                    f = request.FILES['source']
                     # Iterate through the chunks.
                     for chunk in f.chunks():
                         fout.write(chunk)
                     fout.close()
-                        
-                        
-            messages.success(request, 'Testimonial has posted successfully!')
+		    if ((content != 'application') and (file_extension != '.ogv') and (file_extension != '.ogg')):
+	                convert(file_path, content, file_name, file_extension)
             return HttpResponseRedirect('/')
     context['form'] = form
     context.update(csrf(request))
     return render(request, 'spoken/templates/testimonial/form.html', context)
+
+def convert(path,content_type, filename, fileextension):
+    stdout = None
+    stderr = None
+    if content_type=='audio':
+        process = subprocess.Popen(
+            [
+                '/usr/bin/ffmpeg',
+                '-i', path+filename+fileextension,
+                '-acodec',
+                'libvorbis',
+                path+filename+'.ogg'
+            ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT
+        )
+    elif content_type=='video':
+	process = subprocess.Popen(
+            [
+                '/usr/bin/ffmpeg',
+                '-i', path+filename+fileextension,
+                '-acodec',
+                'libvorbis',
+		'-ac',
+		'2',
+		'-ab',
+		'96k',
+		'-ar',
+		'44100',
+		'-b',
+		'345k',
+                path+filename+'.ogv'
+            ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT
+        )
+    stdout, stderr = process.communicate()
+    return stdout, stderr
     
 def admin_testimonials_edit(request, rid):
     user = request.user
@@ -395,3 +441,4 @@ def create_subtitle_files(request, overwrite = True):
 
 def sitemap(request):
     return render(request, 'sitemap.html', {})
+

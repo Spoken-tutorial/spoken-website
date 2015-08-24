@@ -13,7 +13,7 @@ from django.utils.decorators import method_decorator
 from events.decorators import group_required
 from events.forms import StudentBatchForm, TrainingRequestForm, \
     TrainingRequestEditForm, CourseMapForm, SingleTrainingForm, \
-    OrganiserFeedbackForm
+    SampleCalenderForm, OrganiserFeedbackForm
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, render_to_response
 from django.core.validators import validate_email
@@ -1348,6 +1348,31 @@ class SingleTrainingAttendanceListView(ListView):
     context['training_status'] = training_status
     return context
 
+class SampleCalenderCreateView(CreateView):
+  form_class = SampleCalenderForm
+  success_url = "/software-training/sample-calender/"
+  @method_decorator(group_required("Organiser"))
+  def dispatch(self, *args, **kwargs):
+    return super(SampleCalenderCreateView, self).dispatch(*args, **kwargs)
+
+
+class SampleCalenderListView(ListView):
+  model = SampleTrainingTimeTable
+  paginate_by = 50
+  def get_context_data(self, **kwargs):
+    context = super(SampleCalenderListView, self).get_context_data(**kwargs)
+    temp = self.request.user.groups.all()
+    grup = []
+    for i in temp:
+        grup.append(i.name)
+    context['group']=grup
+    return context
+
+class SampleCalenderDeleteView(DeleteView):
+  model=SampleTrainingTimeTable
+  def dispatch(self, *args, **kwargs):
+    return super(SampleCalenderDeleteView, self).dispatch(*args, **kwargs)
+  
   def post(self, request, *args, **kwargs):
     training_id = kwargs['tid']
     if request.POST:

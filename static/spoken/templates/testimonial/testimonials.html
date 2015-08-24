@@ -5,6 +5,7 @@
 {% load cmsdata %}
 {% block title %} Testimonials {% endblock %}
 {% block compressinlinecssblock %}
+<link rel="stylesheet" href="{% static 'spoken/blue.monday/css/jplayer.blue.monday.css' %}" type="text/css" media="screen" charset="utf-8" />
     <style type="text/css">
         .testimonial-item{
             clear: both;
@@ -21,7 +22,7 @@
             float: left;
         }
         .testimonial-content .message{
-            margin-left: 120px;
+            margin-left: 130px;
         }
         .testimonials-caret{
             position: absolute;
@@ -61,25 +62,51 @@
         .modal-header button.close {
             padding-left: 10px;
         }
+        .jp-jplayer audio, .jp-jplayer{
+            height:0px;
+        }
     </style>
+    <link href="{% static 'spoken/css/video-js.min.css' %}" rel="stylesheet" type="text/css">
 {% endblock %}
 {% block heading %}{% endblock %}
 {% block search %}{% endblock %}
 {% block content %}
+<ul class="tabs nav nav-tabs">
+    <li {% if 'msg' in request.path %}{{ 'class="active"'}}{% endif %}  ><a href="/testimonials/list/msg">Message</a></li>
+    <li {% if 'audio' in request.path %}{{ 'class="active"'}}{% endif %}  ><a href="/testimonials/list/audio">Audio</a></li>
+    <li {% if 'video' in request.path %}{{ 'class="active"'}}{% endif %}  ><a href="/testimonials/list/video">Video</a></li>
+</ul>
     <div class="testimonial-container col-sm-offset-2 col-md-offset-2 col-lg-offset-2 col-lg-8 col-md-8 col-sm-8 ">
         <h4 class="page-title">
             <i class="fa fa-list-ul"></i> Testimonials
         </h4>
+	{% if not testimonials %}
+		<div class="testimonial-item">
+		<div class="testimonial-content">
+		There are no testimonials.
+		</div>
+		</div>
+	{% else %}
         {% for record in testimonials %}
             <div class="testimonial-item">
                 <div class="testimonial-content">
-                    <img width="100" height="100" src="/static/spoken/images/no-profile-image.jpg" />
+                        {% if record.compn_type == 'audio' or record.compn_type == 'video' %}
+		                <a class="audio" id="{{ record.id }}" href='#' data-toggle="modal" data-target="#myModal{{ record.id }}">
+					<img width="100" height="100" id="jplayer-icon" src="/static/spoken/images/jplayer-icon.png" onmouseover="this.src='/static/spoken/images/jplayer-icon-hover.png'" onmouseout="this.src='/static/spoken/images/jplayer-icon.png'"/>
+				</a>
+                        {% else %}
+                        	<img width="100" height="100" src="/static/spoken/images/no-profile-image.jpg" />
+                        {% endif %}
                     <div class="message">
                         <i class="fa fa-quote-left" style="color:#e6e6e6;"></i>{{ record.minified_content|format_raw_data|safe }} <i class="fa fa-quote-right pull-right" style="color:#e6e6e6;"></i>
                         {% if record.minified_content != record.actual_content %}
                             <p>
                                 <a href="#" data-toggle="modal" data-target="#myModal{{ record.id }}">
-                                    <i class="fa fa-plus-square"></i> read more
+                                    {% if record.compn_type == 'audio' or record.compn_type == 'video' %}
+                                        <!--<i class="fa fa-plus-square"></i>click here to view-->
+                                    {% else %}
+                                        <i class="fa fa-plus-square"></i>read more
+                                    {% endif %}
                                 </a>
                             </p>
                         {% else %}
@@ -111,8 +138,8 @@
                     </div>
                 </div>
             </div>
-            {% if record.minified_content != record.actual_content %}
-            <div class="modal fade" id="myModal{{ record.id }}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            {% if record.minified_content != record.actual_content or record.compn_type %}
+            <div class="modal fade" id="myModal{{ record.id }}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
@@ -127,7 +154,56 @@
                             </h4>
                         </div>
                         <div class="modal-body">
+                        <!---Start of audio--->
+                            {% if record.compn_type == 'audio' %}
+                                <div id="jquery_jplayer_{{record.id}}" class="jp-jplayer"></div>
+                                <div id="jp_container_{{record.id}}" class="jp-audio" role="application" aria-label="media player">
+	                        <div class="jp-type-single">
+		                <div class="jp-gui jp-interface">
+			            <div class="jp-controls">
+				        <button class="jp-play" role="button" tabindex="0">play</button>
+				        <button class="jp-stop" role="button" tabindex="0">stop</button>
+			            </div>
+			           <div class="jp-progress">
+				   <div class="jp-seek-bar">
+					<div class="jp-play-bar"></div>
+				   </div>
+			           </div>
+			           <div class="jp-volume-controls">
+				       <button class="jp-mute" role="button" tabindex="0">mute</button>
+				       <button class="jp-volume-max" role="button" tabindex="0">max volume</button>
+				       <div class="jp-volume-bar"><div class="jp-volume-bar-value"></div></div>
+			           </div>
+			           <div class="jp-time-holder">
+				       <div class="jp-current-time" role="timer" aria-label="time">&nbsp;</div>
+				       <div class="jp-duration" role="timer" aria-label="duration">&nbsp;</div>
+				       <div class="jp-toggles">
+				           <button class="jp-repeat" role="button" tabindex="0">repeat</button>
+				       </div>
+			               </div>
+		                   </div>
+		                   <!--<div class="jp-details">
+			           	<div class="jp-title" aria-label="title">&nbsp;</div>
+		                   </div>-->
+		                   <div class="jp-no-solution">
+			           	<span>Update Required</span>
+			                To play the media you will need to either update your browser to a recent version or update your <a href="http://get.adobe.com/flashplayer/" target="_blank">Flash plugin</a>.
+		                   </div>
+	                           </div>
+                        	</div>
+                        <!---End of audio--->
+                        <!---Start of video--->
+                        {% elif record.compn_type == 'video' %}
+                            <video id="st_video_{{record.id}}" class="video-js vjs-default-skin" controls preload="auto" width="565" height="400" data-setup="{}">
+                            <source src="/media/testimonial/{{ record.id }}/{{ record.compn_type }}/{{ record.id }}.ogv" type="video/ogg" />
+                            </video>
+                            <!---End of video--->
+                         {% else%}
                             {{ record.actual_content|format_raw_data|safe }}
+			    {% if record.compn_type == 'doc'%}
+			    <div><a href='/media/testimonial/{{ record.id }}/application/{{ record.id }}.pdf' target='_blank'>Link To Document</a></div>
+			    {% endif %}
+                        {% endif %}
                             {% if record.source_link %}
                                 <p>
                                     <i class="fa fa-link fa-1"></i> 
@@ -150,6 +226,57 @@
             </div>
             {% endif %}
         {% endfor %}
+	{% endif %}
     </div>
 {% endblock %}
-
+{% block jsblock %}
+    <script src="{% static 'spoken/js/jquery-1.11.0.min.js' %}"></script>
+    <script src="{% static 'spoken/js/jquery.jplayer.min.js' %}"></script>
+    <script type="text/javascript">
+    $(document).ready(function(){
+    
+        /*On click of the close button the jplayer stops playing the media file*/
+        
+        $( ".close" ).click(function() {
+            /* On click of the close button stops the audio file playing */
+            
+            var audio_id = $(this).parents('div').prev().find('.jp-jplayer').prop('id');
+            var audio_temp = '#'+video_id;
+            $.jPlayer.pause();
+            
+	    /* On click of the close button pauses the video file playing */
+            var video_id = $(this).parents('div').prev().find('.video-js').prop('id');
+            var video_temp = '#'+video_id;
+	    $(video_temp).get(0).paused ? $(video_temp).get(0).pause() : $(video_temp).get(0).pause();
+        });
+        
+        /*---Create a jplayer instance on click on the play image---*/
+        
+        $(".audio").click(function() {
+           
+           var record_id = this.id;
+           var path = '/media/testimonial/'+record_id+'/audio/'+record_id+'.ogg';
+           $("#jquery_jplayer_"+record_id).jPlayer({
+		    ready: function (event) {
+			    $(this).jPlayer("setMedia", {
+				    title: "Bubble",
+				    oga: path,
+			    });
+		    },
+		    cssSelectorAncestor: "#jp_container_"+record_id,
+		    supplied: "oga",
+		    wmode: "window",
+		    //errorAlerts: true,
+		    //consoleAlerts: true,
+		    //warningAlerts: true,
+		    useStateClassSkin: true,
+		    autoBlur: false,
+		    smoothPlayBar: true,
+		    keyEnabled: true,
+		    remainingDuration: true,
+		    toggleDuration: true
+	        });
+        });
+    });
+    </script>
+{% endblock %}

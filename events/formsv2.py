@@ -162,6 +162,11 @@ class SingleTrainingForm(forms.ModelForm):
     if today.date() > tdate:
       raise forms.ValidationError("Invalid semester training date")
     return tdate
+
+class SampleCalenderForm(forms.ModelForm):
+  class Meta:
+    model = SampleTrainingTimeTable
+    exclude = []
     
 class OrganiserFeedbackForm(forms.ModelForm):
   offered_training_foss = forms.ModelMultipleChoiceField(queryset=FossCategory.objects.filter(status=1), widget=forms.CheckboxSelectMultiple)

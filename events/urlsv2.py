@@ -146,6 +146,25 @@ urlpatterns = [
       name='training_list'
     ),
     #url(r'^get-language-option/', GetLanguageOptionView.as_view()),
+    #For Sample Calender Add/Delete/View
+    url(
+      r'^sample-calender/new/$',
+      SampleCalenderCreateView.as_view(template_name=\
+        "sample_calender.html"),
+      name="sample_calender_new"
+    ),
+    url(
+      r'^sample-calender/$',
+      SampleCalenderListView.as_view(template_name=\
+        "sample_calender_list.html"),
+      name="sample_calender_list"
+    ),
+    url(
+      r'^sample-calender/delete/(?P<pk>\d+)$',
+      SampleCalenderDeleteView.as_view(template_name=\
+        "student_delete.html", \
+        success_url="/software-training/sample-calender/"),
+      name="sample_calender_delete"),
     url(
       r'^single-training/pending/(?P<pk>\d+)/$',
       'events.viewsv2.SingleTrainingApprove', 

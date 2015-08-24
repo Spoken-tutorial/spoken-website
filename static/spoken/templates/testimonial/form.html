@@ -19,10 +19,11 @@
 			        </ul>
 			        {% endif %}
 			        <div class="form-group">
-				        <label for="id_user_name" class="col-sm-3 control-label">Full Name</label>
+				        <label for="id_user_name" class="col-sm-3 control-label">Full Name and Organisation</label>
 				        <div class="col-sm-9">
 				            {% render_field form.user_name class+="form-control user_name" tabindex="1" %}
 				            {{ form.user_name.errors }}
+				            <small>Provide the Person Full Name and Organisation he belongs. For example : <strong>Mr.XYZ, ABC College of Engineering</strong></small>
 			            </div>
 			        </div>
 			        <div class="form-group">
@@ -30,6 +31,7 @@
 				        <div class="col-sm-9">
 				            {% render_field form.actual_content class+="form-control actual_content" tabindex="1" %}
 				            {{ form.actual_content.errors }}
+				            <small>Provide the whole content of the Testimonial</small>
 			            </div>
 			        </div>
 			         <div class="form-group">
@@ -37,13 +39,23 @@
 				        <div class="col-sm-9">
 				            {% render_field form.minified_content class+="form-control minified_content" tabindex="1"%}
 				            {{ form.minified_content.errors }}
+				            <small>Provide the short content of the Testimonial</small>
 			            </div>
 			        </div>
 			         <div class="form-group">
-				        <label for="id_state" class="col-sm-3 control-label">Short Description</label>
+				        <label for="id_state" class="col-sm-3 control-label">Component Type</label>
 				        <div class="col-sm-9">
-				            {% render_field form.short_description class+="form-control short_description" tabindex="1" %}
-				            {{ form.short_description.errors }}
+				            {% render_field form.compn_type class+="form-control compn_type" tabindex="1" %}
+				            {{ form.compn_type.errors }}
+				            <small>Please select the type of component for the testimonial.</small>
+			            </div>
+			        </div>
+			        <div class="form-group">
+				        <label for="id_state" class="col-sm-3 control-label">Upload File</label>
+				        <div class="col-sm-9">
+				            {% render_field form.source class+="form-control source" tabindex="1" %}
+				            {{ form.source.errors }}
+				            <small id='cmpnt_desc' >Upload the file for the Testimonial.</small>
 			            </div>
 			        </div>
 			         <div class="form-group">
@@ -60,22 +72,14 @@
 				            {{ form.source_link.errors }}
 			            </div>
 			        </div>
-			        <div class="form-group">
-				        <label for="id_state" class="col-sm-3 control-label">Scan Copy</label>
-				        <div class="col-sm-9">
-				            {% render_field form.scan_copy class+="form-control scan_copy" tabindex="1" %}
-				            {{ form.scan_copy.errors }}
-			            </div>
-			        </div>
-			        {% if instance %}
-			            <div class="form-group">
-				            <label for="id_state" class="col-sm-3 control-label">Status</label>
-				            <div class="col-sm-9">
-				                {% render_field form.status class+="form-control status" tabindex="1" %}
-				                {{ form.status.errors }}
-			                </div>
-			            </div>
-			        {% endif %}
+			        
+		            <div class="form-group">
+			            <label for="id_state" class="col-sm-3 control-label">Status</label>
+			            <div class="col-sm-9">
+			                {% render_field form.status class+="form-control status" tabindex="1" %}
+			                {{ form.status.errors }}
+		                </div>
+		            </div>
 	                <div class="form-group">
                         <div class="col-sm-offset-3 col-sm-9">
 			                <input class="btn btn-primary" type="submit" value="Submit" />
@@ -104,4 +108,23 @@
             {% endif%}
         </div>
     </div>
+{% endblock %}
+{% block compressinlinejsblock %}
+    <script>
+        $("#id_compn_type").change(function(){
+            var component = $("#id_compn_type").val();
+            if(component == 'video')
+            {
+                $("#cmpnt_desc").html("<strong>Only OGV format files accepted.</strong>")
+            }
+            else if(component == 'audio')
+            {
+                $("#cmpnt_desc").html("<strong>Only OGG format files accepted.</strong>")
+            }
+            else if(component == 'doc')
+            {
+                $("#cmpnt_desc").html("<strong>Only PDF format files accepted.</strong>")
+            }
+        });
+    </script>
 {% endblock %}
