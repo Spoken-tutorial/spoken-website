@@ -3,11 +3,17 @@ from django.conf.urls import url
 from events.viewsv2 import *
 from events.decorators import *
 from events.formsv2 import *
+from events.urls import *
 urlpatterns = [
     url(
       r'^training-planner/', 
       TrainingPlannerListView.as_view(template_name="training_planner.html"), 
       name="training_planner"
+    ),
+    url(
+      r'^select-participants/', 
+      TrainingPlannerListView.as_view(template_name="select_participants.html"), 
+      name="select_participants"
     ),
     url(
       r'^student-batch/new/$', 
@@ -88,9 +94,24 @@ urlpatterns = [
       name="coursemapupdate"
     ),
     url(
+      r'^single-training/pending/$', 
+     SingleTrainingNewListView.as_view(template_name="single-training.html"), 
+      name="single-training-pending"
+    ),
+    url(
       r'^single-training/approved/$', 
      SingletrainingApprovedListView.as_view(template_name="single-training.html"), 
       name="single-training-approved"
+    ),
+    url(
+      r'^single-training/ongoing/$', 
+     SingletrainingOngoingListView.as_view(template_name="single-training.html"), 
+      name="single-training-ongoing"
+    ),
+    url(
+      r'^single-training/pendingattendance/$', 
+     SingletrainingPendingAttendanceListView.as_view(template_name="single-training.html"), 
+      name="single-training-pendingattendance"
     ),
     url(
       r'^single-training/completed/$', 
@@ -125,7 +146,6 @@ urlpatterns = [
       name='training_list'
     ),
     #url(r'^get-language-option/', GetLanguageOptionView.as_view()),
-<<<<<<< HEAD
     #For Sample Calender Add/Delete/View
     url(
       r'^sample-calender/new/$',
@@ -144,7 +164,33 @@ urlpatterns = [
       SampleCalenderDeleteView.as_view(template_name=\
         "student_delete.html", \
         success_url="/software-training/sample-calender/"),
-      name="sample_calender_delete"
+      name="sample_calender_delete"),
+    url(
+      r'^single-training/pending/(?P<pk>\d+)/$',
+      'events.viewsv2.SingleTrainingApprove', 
+      name="single-training-approve"
+    ),
+    url(
+      r'^single-training/pending/(?P<pk>\d+)/$', 
+      'events.viewsv2.SingleTrainingReject', 
+      name="single-training-reject"
+    ),
+    url(
+      r'^single-training/(?P<tid>\d+)/attendance', 
+      SingleTrainingAttendanceListView.as_view(template_name=\
+        "single-training-attendance.html"), 
+      name="single_training_attendance"
+     ),
+     url(
+      r'^organiser-feedback/', 
+      OrganiserFeedbackCreateView.as_view(template_name='organiser_feedback.html'), 
+      name='organiser_feedback'
+    ),
+    url(
+      r'^organiser-feedback-display/$', 
+     OrganiserFeedbackListView.as_view(template_name="organiser_feedback_display.html"), 
+      name="organiser-feedback-display"
+    ),
     url(
       r'^old-training/$',
       OldTrainingListView.as_view(template_name=\

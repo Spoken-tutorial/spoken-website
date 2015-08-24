@@ -2443,7 +2443,34 @@ def ajax_ac_state(request):
                 data['university'] = tmp
         
         return HttpResponse(json.dumps(data), content_type='application/json')
-        
+
+@csrf_exempt
+def ajax_state_details(request):
+    """ Ajax: Get District, City based State selected """
+    if request.method == 'POST':
+        state = request.POST.get('state')
+        data = {}
+        if request.POST.get('fields[district]'):
+            district = District.objects.filter(state=state).order_by('name')
+            tmp = ''
+            for i in district:
+                tmp +='<option value='+str(i.id)+'>'+i.name+'</option>'
+            if(tmp):
+                data['district'] = '<option value=""> -- None -- </option>'+tmp
+            else:
+                data['district'] = tmp
+        if request.POST.get('fields[city]'):
+            city = City.objects.filter(state=state).order_by('name')
+            tmp = ''
+            for i in city:
+                tmp +='<option value='+str(i.id)+'>'+i.name+'</option>'
+            if(tmp):
+                data['city'] = '<option value=""> -- None -- </option>'+tmp
+            else:
+                data['city'] = tmp
+        return HttpResponse(json.dumps(data), content_type='application/json')
+
+
 @csrf_exempt
 def ajax_ac_location(request):
     """ Ajax: Get the location based on district selected """

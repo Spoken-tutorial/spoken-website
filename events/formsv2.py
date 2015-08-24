@@ -142,7 +142,7 @@ class CourseMapForm(forms.ModelForm):
     super(CourseMapForm, self).__init__(*args, **kwargs)
 
 class SingleTrainingForm(forms.ModelForm):
-  training_type = forms.ChoiceField(choices=[('', '---------'), (0, 'School'),(1,'Vocational'),(2,'Live workshop'),(3,'Pilot workshop')])
+  training_type = forms.ChoiceField(choices=[('', '---------'), (0, 'School'),(3,'Vocational'),(1,'Live workshop'),(2,'Pilot workshop')])
   csv_file = forms.FileField(required = True)
   class Meta:
     model = SingleTraining
@@ -163,8 +163,30 @@ class SingleTrainingForm(forms.ModelForm):
       raise forms.ValidationError("Invalid semester training date")
     return tdate
 
-
 class SampleCalenderForm(forms.ModelForm):
   class Meta:
     model = SampleTrainingTimeTable
     exclude = []
+    
+class OrganiserFeedbackForm(forms.ModelForm):
+  offered_training_foss = forms.ModelMultipleChoiceField(queryset=FossCategory.objects.filter(status=1), widget=forms.CheckboxSelectMultiple)
+  class Meta:
+    model = OrganiserFeedback
+    fields = '__all__'
+    widgets = {'student_stream': forms.CheckboxSelectMultiple,
+              'language' : forms.CheckboxSelectMultiple, 
+              'trained_foss' : forms.CheckboxSelectMultiple, 
+              'helpful_for' : forms.CheckboxSelectMultiple ,
+              'is_comfortable_self_learning' : forms.RadioSelect , 
+              'is_classroom_better' : forms.RadioSelect , 
+              'is_student_expectations' : forms.RadioSelect , 
+              'is_help_get_interview' : forms.RadioSelect , 
+              'is_help_get_job' : forms.RadioSelect , 
+              'is_got_job' : forms.RadioSelect , 
+              'relevance' : forms.RadioSelect, 
+              'information_content' : forms.RadioSelect, 
+              'audio_video_quality' : forms.RadioSelect, 
+              'presentation_quality' : forms.RadioSelect , 
+              'overall_rating' : forms.RadioSelect ,
+              'testimonial' : forms.Textarea , 
+              'any_other_suggestions' : forms.Textarea}

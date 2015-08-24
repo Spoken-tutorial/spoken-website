@@ -790,7 +790,7 @@ class TrainingRequest(models.Model):
   # return course type
   def get_course_type(self):
     if self.course.category == 0:
-      return 'One Day Training'
+      return 'Outside Lab Hours'
     elif self.course.category == 1:
       return 'Mapped Course'
     elif self.course.category == 2:
@@ -993,7 +993,7 @@ class SingleTraining(models.Model):
   organiser = models.ForeignKey(Organiser)
   academic = models.ForeignKey(AcademicCenter)
   course = models.ForeignKey(CourseMap) # type 0
-  # {0:School, 1:Vocational, 2:Live Workshop, 3:Pilot Workshop}
+  # {0:School, 3:Vocational, 1:Live Workshop, 2:Pilot Workshop}
   training_type = models.PositiveIntegerField(default=0)
   language = models.ForeignKey(Language)
   tdate = models.DateField()
@@ -1095,3 +1095,105 @@ class TrainingLiveFeedback(models.Model):
 
 ### Signals
 pre_delete.connect(revoke_student_permission, sender=Student)
+
+class StudentStream(models.Model):
+  STUDENT_STREAM_CHOICES = (
+  ('0', 'Engineering'), ('1', 'Science'), ('2', 'Arts and Humanities'),('3', 'Polytechnic/ Diploma programs'),
+  ('4', 'Commerce and Business Studies'),('5', 'ITI'),('6', 'Other')
+  )
+  student_stream = models.CharField(max_length =50, choices = STUDENT_STREAM_CHOICES)
+  
+  def __unicode__(self):
+        return self.student_stream
+        
+class HelpfulFor(models.Model):
+  HELPFUL_FOR_CHOICES = (
+  ('0', 'Academic Performance'), ('1', 'Project Assignments'), ('2', 'To get job interviews'),('3', 'To get jobs'),
+  ('4', 'All of the above')
+  )
+  helpful_for = models.CharField(max_length = 50, choices = HELPFUL_FOR_CHOICES)
+  
+  def __unicode__(self):
+        return self.helpful_for
+
+class OrganiserFeedback(models.Model):
+  IS_SPOKEN_HELPFUL_CHOICES = (
+    ('','-----'), ('StronglyAgree', 'Strongly Agree'), ('Agree', 'Agree'), ('Neutral', 'Neutral'), ('Disagree', 'Disagree'), 
+    ('StronglyDisagree', 'Strongly Disagree'), ('Noidea', 'No idea'))
+  RATE_SPOKEN_CHOICES = (
+    ('','-----'), ('Excellent', 'Excellent'), ('Good', 'Good'), ('Fair', 'Fair'), ('Bad', 'Bad'), ('Verybad', 'Very bad'))
+  YES_NO_CHOICES =(
+    ('','-----'), ('Yes', 'Yes'), ('No', 'No'),
+  )
+  AGE_CHOICES = (
+    ('', '-----'), ('<25', '<25 years'), ('25-35', '25-35 years'), ('35+', '35 years and above'),
+  )
+  GENDER_CHOICES =(
+    ('', '-----'), ('Male', 'Male'), ('Female', 'Female'),
+  )
+  DESIGNATION_CHOICES = (
+    ('', '-----'), ('Student', 'Student'), ('Faculty', 'Faculty'), ('Staff', 'Staff'), ('Admin', 'Admin'),
+  )
+  MEDIUM_OF_INSTRUCTION_CHOICES = (
+    ('', '-----'), ('English', 'English'), ('Vernacular', 'Vernacular'), ('Mixed', 'Mixed'),
+  )
+  STUDENT_EDUCATION_LANGUAGE_CHOICES = (
+    ('', '-----'), ('English', 'Mostly English'), ('Vernacular', 'Mostly Vernacular'), ('Mixed', 'Mostly Mixed')
+  )
+  STUDENT_GENDER_CHOICES = (
+    ('', '-----'), ('Male', 'Mostly Male'), ('Female', 'Mostly Female'), ('Mixed', 'Mixed')
+  )
+  STUDENT_LOCATION_CHOICES = (
+    ('', '-----'), ('Urban', 'Mainly Urban'), ('Rural', 'Mainly Rural'), ('Mixed', 'Mixed'), ('Notsure', 'Not sure')
+  )
+  DURATION_OF_TUTORIAL_CHOICES = (
+    ('', '-----'), ('<0.5', 'Less than 0.5 hour'), ('0.5-2', '0.5 - 2 hour'), ('2-10', '2-10 hours'),('10+', 'Above 10 hours'),('NA', 'Not applicable')
+  )
+  SIDE_BY_SIDE_METHOD_IS_CHOICES = (
+    ('', '-----'), ('0', 'Explaining the video to a neighbor'), ('1', 'Waiting for mentors explanation'), ('2', 'Watching and practicing simultaneously'), ('3', 'Dont know what this method is')
+  )
+  IN_SIDE_BY_SIDE_METHOD_CHOICES = (
+    ('', '-----'), ('0', 'The video has to be maximized'), ('1', 'The software has to be maximized'), ('2', 'Both software and video are maximized'), ('3', 'None of the above are maximized')
+  )
+  GOOD_INVESTMENT_CHOICES = (
+    ('', '-----'), ('Yes', 'Yes'), ('No', 'No'), ('Notsure', 'Not sure')
+  )
+  
+  name = models.CharField(max_length = 100)
+  email = models.EmailField(max_length = 100)
+  gender = models.CharField(max_length = 10, choices = GENDER_CHOICES)
+  age = models.CharField(max_length = 20, choices = AGE_CHOICES)
+  state = models.ForeignKey(State)
+  district =  models.ForeignKey(District)
+  city = models.ForeignKey(City)
+  university = models.ForeignKey(AcademicCenter)
+  designation = models.CharField(max_length = 20, choices = DESIGNATION_CHOICES)
+  medium_of_instruction = models.CharField(max_length =50, choices = MEDIUM_OF_INSTRUCTION_CHOICES)
+  student_stream = models.ManyToManyField(StudentStream , related_name = 'events_StudentStream_related')
+  student_education_language = models.CharField(max_length =50, choices = STUDENT_EDUCATION_LANGUAGE_CHOICES)
+  student_gender =  models.CharField(max_length =50 ,choices = STUDENT_GENDER_CHOICES)
+  student_location =  models.CharField(max_length =50,  choices = STUDENT_LOCATION_CHOICES)
+  offered_training_foss = models.ManyToManyField(FossCategory , related_name = 'events_FossCategory_related') 
+  duration_of_tutorial =  models.CharField(max_length =50 ,choices = DURATION_OF_TUTORIAL_CHOICES)
+  language = models.ManyToManyField(Language , related_name = 'events_Language_related')
+  side_by_side_yes_no = models.CharField(max_length = 50, choices = YES_NO_CHOICES)
+  side_by_side_method_is = models.CharField(max_length = 50, choices = SIDE_BY_SIDE_METHOD_IS_CHOICES)
+  in_side_by_side_method = models.CharField(max_length = 50, choices = IN_SIDE_BY_SIDE_METHOD_CHOICES)
+  good_investment = models.CharField(max_length = 50, choices = GOOD_INVESTMENT_CHOICES)
+  helpful_for = models.ManyToManyField(HelpfulFor , related_name = 'events_HelpfulFor_related')
+  is_comfortable_self_learning = models.CharField(max_length = 50, choices = IS_SPOKEN_HELPFUL_CHOICES)
+  is_classroom_better = models.CharField(max_length = 50, choices = IS_SPOKEN_HELPFUL_CHOICES)
+  is_student_expectations = models.CharField(max_length = 50, choices = IS_SPOKEN_HELPFUL_CHOICES)
+  is_help_get_interview = models.CharField(max_length = 50, choices = IS_SPOKEN_HELPFUL_CHOICES)
+  is_help_get_job = models.CharField(max_length = 50, choices = IS_SPOKEN_HELPFUL_CHOICES)
+  is_got_job = models.CharField(max_length = 50, choices = IS_SPOKEN_HELPFUL_CHOICES)
+  relevance = models.CharField(max_length = 50, choices = RATE_SPOKEN_CHOICES)
+  information_content = models.CharField(max_length = 50, choices = RATE_SPOKEN_CHOICES)
+  audio_video_quality = models.CharField(max_length = 50, choices = RATE_SPOKEN_CHOICES)
+  presentation_quality = models.CharField(max_length = 50, choices = RATE_SPOKEN_CHOICES)
+  overall_rating = models.CharField(max_length = 50, choices = RATE_SPOKEN_CHOICES)
+  trained_foss =  models.ManyToManyField(FossCategory)
+  is_training_benefited = models.CharField(max_length = 50, choices = GOOD_INVESTMENT_CHOICES)
+  testimonial = models.CharField(max_length = 500)
+  any_other_suggestions = models.CharField(max_length = 500)
+  can_contact = models.CharField(max_length = 50, choices = YES_NO_CHOICES)
