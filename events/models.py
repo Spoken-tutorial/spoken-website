@@ -1001,6 +1001,7 @@ class SingleTraining(models.Model):
   #{0:request done, 1: attendance submited, 2: completed}
   status = models.PositiveSmallIntegerField(default=0)
   participant_count = models.PositiveIntegerField(default=0)
+  total_participant_count = models.PositiveIntegerField(default=0)
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
   #created = models.DateTimeField()

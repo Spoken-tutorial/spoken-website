@@ -1145,9 +1145,6 @@ class SingletrainingCompletedListView(ListView):
     grup = []
     for i in temp:
       grup.append(i.name)
-    for i in self.queryset:
-      total_participant_count = SingleTrainingAttendance.objects.filter(training_id=i.id).count()
-      context['total_participant_count'] = total_participant_count
     context['group'] = grup
     return context
 
@@ -1224,7 +1221,9 @@ class SingletrainingCreateView(CreateView):
       else:
         messages.success(self.request, "Student Batch added successfully.")
         form_data.participant_count = student_count
+        form_data.total_participant_count = student_count
         form_data.save()
+        #SingleTraining.objects.get(id=form_data.id).update(total_participant_count=student_count)
     return HttpResponseRedirect(self.success_url)
 
   def email_validator(self, email):
@@ -1385,8 +1384,6 @@ class SingleTrainingAttendanceListView(ListView):
     date_extn = tr_date + timedelta(days=15)
     date_extn = date_extn.isoformat()
     total_participant_count = SingleTrainingAttendance.objects.filter(training_id=self.single_training_request.id)
-    print tr_date
-    print date_extn, "************"
     temp = self.request.user.groups.all()
     grup = []
     for i in temp:
@@ -1418,7 +1415,6 @@ class SingleTrainingAttendanceListView(ListView):
         training_status.status = 4
         training_status.participant_count = len(marked_student)
         training_status.save()
-      print marked_student
     return HttpResponseRedirect('/software-training/single-training/approved')
 
   '''

@@ -73,7 +73,7 @@
                               <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }} </a></td>
                              {% endif %}
                            {% elif request.path == '/software-training/single-training/completed/' %}
-                              <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }} | {{ total_participant_count }}</a></td>
+                              <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }} | {{ training.total_participant_count }}</a></td>
                            {% endif %}
                        {% elif 'Resource Person' in group %}
                           {% if request.path == '/software-training/single-training/pendingattendance/' %}
@@ -87,7 +87,7 @@
                            {% elif request.path == '/software-training/single-training/pending/' %}
                              <td>{{ training.participant_count }}</td>
                            {% elif request.path == '/software-training/single-training/completed/' %}
-                              <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }} | {{ total_participant_count }}</a></td>
+                              <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }} | {{ training.total_participant_count }}</a></td>
                           {% endif %}
                        {% else %}
                       <td>{{ training.participant_count }}</td>

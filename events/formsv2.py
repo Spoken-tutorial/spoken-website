@@ -146,7 +146,7 @@ class SingleTrainingForm(forms.ModelForm):
   csv_file = forms.FileField(required = True)
   class Meta:
     model = SingleTraining
-    exclude = ['academic', 'organiser', 'status', 'participant_count']
+    exclude = ['academic', 'organiser', 'status', 'participant_count', 'total_participant_count']
   
   def clean(self): 
         #self.cleaned_data['csv_file']
