@@ -11,6 +11,11 @@ urlpatterns = [
       name="training_planner"
     ),
     url(
+      r'^select-participants/', 
+      TrainingPlannerListView.as_view(template_name="select_participants.html"), 
+      name="select_participants"
+    ),
+    url(
       r'^student-batch/new/$', 
       StudentBatchCreateView.as_view(template_name="new_batch.html", \
         form_class=StudentBatchForm), 
