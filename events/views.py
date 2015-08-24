@@ -492,6 +492,7 @@ def old_training_attendance_upload(request, wid):
 @login_required
 def events_dashboard(request):
     user = request.user
+    institution_type = AcademicCenter.objects.get(id=user.organiser.academic_id)
     user_roles = user.groups.all()
     roles = []
     events_roles = ['Resource Person', 'Organiser', 'Invigilator']
@@ -499,6 +500,7 @@ def events_dashboard(request):
         if role.name in events_roles:
             roles.append(role.name)
     #print roles
+    print institution_type.institution_type_id
     organiser_workshop_notification = None
     organiser_test_notification = None
     invigilator_test_notification = None
@@ -518,6 +520,7 @@ def events_dashboard(request):
         invigilator_test_notification = EventsNotification.objects.filter((Q(status = 0) | Q(status = 1)), category = 1, academic_id = user.invigilator.academic_id, categoryid__in = user.invigilator.academic.test_set.filter(invigilator_id = user.id).values_list('id')).order_by('-created')[:30]
     context = {
         'roles' : roles,
+        'institution_type' : institution_type,
         'organiser_workshop_notification' : organiser_workshop_notification,
         'organiser_test_notification' : organiser_test_notification,
         'organiser_training_notification' : organiser_training_notification,
