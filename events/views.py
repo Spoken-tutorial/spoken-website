@@ -199,6 +199,11 @@ def is_organiser(user):
     except:
         pass
 
+def is_administrator(user):
+    """Check if the user is having resource person  rights"""
+    if user.groups.filter(name='Administrator').count() == 1:
+        return True
+
 def is_invigilator(user):
     """Check if the user is having invigilator rights"""
     if user.groups.filter(name='Invigilator').count() == 1 and user.invigilator and user.invigilator.status == 1:
