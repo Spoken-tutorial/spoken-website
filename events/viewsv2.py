@@ -1462,6 +1462,7 @@ def SingleTrainingApprove(request, pk):
   if st:
     st.status = 2
     st.save()
+    #Send Emails from here
   else:
     print "Error"
   return HttpResponseRedirect('/software-training/single-training/approved/')

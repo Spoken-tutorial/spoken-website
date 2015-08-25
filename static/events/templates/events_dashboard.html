@@ -77,7 +77,7 @@
                             <h5>Training</h5>
                             <ul>
                                 <li><a href="/software-training/training-planner/">Semester Training Planner Summary (STPS)</a></li>
-                                {% if institution_type.institution_type_id == 5 or institution_type.institution_type_id == 4 or user.is_superuser  %}
+                                {% if institution_type.name == 'School' or institution_type.name == 'Vocational' or user.is_superuser  %}
                                 <li><a href="/software-training/single-training/pending/">School / Vocational Training request summary</a></li>
                                 {% endif %}
                                 <li><a href="/software-training/student-batch/">Master Batch Student List</a></li>
