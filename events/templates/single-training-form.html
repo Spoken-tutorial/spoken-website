@@ -23,6 +23,7 @@
             {% else %}
                 {{ user.organiser.academic.state }} - {{ user.organiser.academic }}
             {% endif %}
+             
         </div>
         <div class="row well">
             <div class='col-sm-8'>
@@ -43,6 +44,11 @@
                             {{ form.training_type.errors }}
                         </div>
                     </div>
+                     <div>
+                          {% if user.is_superuser %}
+			   
+                          {% endif %}
+                      </div>
                     <div class="form-group">
                         <label class="col-sm-3 control-label" for="id_csv_file">Participant List (Upload CSV File)</label>
                         <div class="col-sm-9">

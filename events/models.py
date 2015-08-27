@@ -1001,6 +1001,7 @@ class SingleTraining(models.Model):
   #{0:request done, 1: attendance submited, 2: completed}
   status = models.PositiveSmallIntegerField(default=0)
   participant_count = models.PositiveIntegerField(default=0)
+  total_participant_count = models.PositiveIntegerField(default=0)
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
   #created = models.DateTimeField()
@@ -1012,6 +1013,7 @@ class SingleTraining(models.Model):
 
 class SingleTrainingAttendance(models.Model):
   training = models.ForeignKey(SingleTraining)
+  foss = models.PositiveIntegerField(default=0)
   firstname = models.CharField(max_length = 100, null=True)
   lastname = models.CharField(max_length = 100, null=True)
   gender = models.CharField(max_length=10, null=True)
