@@ -26,7 +26,7 @@
 {% endblock %}
 {% block compressinlinecssblock %}
     <style type="text/css">
-        .video-js {
+  .video-js {
             padding-top: 56.25%
         }
         .vjs-fullscreen {
@@ -238,6 +238,16 @@
         .forum-post {
             color: #4F8811;
         }
+	.ScrollStyle
+	{
+	    max-height: 370px;
+ 	    min-height: 370px;
+	    overflow-y: scroll;
+	    float: left;
+	    background: white;
+	}
+
+
     </style>
 {% endblock %}
 {% load creationdata %}
@@ -258,12 +268,22 @@
                         </video>
                     {% endif %}
             </div>
-            <div class='playlist col-lg-4 col-md-4 col-sm-4'>
-                <div class='playlist-info'>
-                    <h5>{{tr_rec.tutorial_detail.foss}} Tutorials - {{tr_rec.language}} <span class="video-count pull-right">{{tr_recs|length}}</span></h5>
-                </div>
+
+
+<div class="container">
+
+<!-------->
+<div id="content">
+    <ul id="tabs" class="nav nav-tabs" data-tabs="tabs">
+        <li style="width:180px;" class="active"><a style= "min-height: 60px;padding-top: 12px;"href="#tutorials" data-toggle="tab">{{tr_rec.tutorial_detail.foss}} Tutorials - {{tr_rec.language}} </a></li>
+        <li style="width:190px"><a href="#forums" data-toggle="tab">Questions posted on Forums</a></li>
+     <div id="my-tab-content" class="tab-content">
+        <div class="tab-pane active" id="tutorials" >
+            <div class='playlist col-lg-4 col-md-4 col-sm-4' style="width: 32%">
+              
                 <div class='playlist-controls'>
                     <span class='backward'></span>
+<span class=" video-count pull-right" style="color: #ffffff;" >{{tr_recs|length}}</span>
                     <span class='forward'></span>
                 </div>
                 <ul>
@@ -282,6 +302,51 @@
                     {% endfor %}
                 </ul>
             </div>
+        </div>
+        <div class="tab-pane" id="forums" >
+
+<div class='ScrollStyle ' style="width: 32%; " >
+
+  
+  {% if questions %}
+                    <div class="forum-questions" style="padding : 6px ">
+                      <h4 style="font-family: Menlo;font-size: 16px;">Questions posted on ST Forums: </h4>
+                      {% for question in questions %}
+			
+                        <div class="question">
+                            <a href="http://forums.spoken-tutorial.org/question/{{ question.id }}/{{ question.get_slugified_title }}" target="_blank">{{ question.title }}</a>
+                            <p>{{ question.body|safe }}</p>
+                            <div class="timing pull-left">
+                                {% if not question.minute_range == 'None' %}<small class="timing">{{ question.minute_range }}M</small>{% endif %}
+                                {% if not question.second_range == 'None' %}<small class="timing">{{ question.second_range }}S</small>{% endif %}
+                            </div>
+                            <div class="user pull-right">
+                                <span>{{ question.date_modified }}</span>
+                                <small>{{ question.user }}</small>
+                            </div>
+                        </div>
+                        <hr class="hline-inner" />
+                      {% endfor %}
+                    </div>
+ {% else %}
+<p style=" text-align: center; padding: 40px"> No questions yet</p>
+                {% endif %}
+            </div>
+
+        </div>
+       
+    </div>
+</div>  
+    </ul>   
+
+<script type="text/javascript">
+    jQuery(document).ready(function ($) {
+        $('#tabs').tab();
+		
+    });
+</script>    
+</div> <!-- container -->
+
         </div>
     </row>
     {% endif %}
@@ -312,28 +377,8 @@
                 </ol>
                 <hr class="hline" />
                 <pre class="custom-jumbotron"><h3><b>Outline:</b></h3><p>{{ tr_rec.outline }}</p></pre>
-                <hr class="hline" />
-                <hr class="hline" />
-                {% if questions %}
-                    <div class="forum-questions">
-                      <h4>Questions posted on ST Forums:</h4>
-                      {% for question in questions %}
-                        <div class="question">
-                            <a href="http://forums.spoken-tutorial.org/question/{{ question.id }}/{{ question.get_slugified_title }}" target="_blank">{{ question.title }}</a>
-                            <p>{{ question.body|safe }}</p>
-                            <div class="timing pull-left">
-                                {% if not question.minute_range == 'None' %}<small class="timing">{{ question.minute_range }}M</small>{% endif %}
-                                {% if not question.second_range == 'None' %}<small class="timing">{{ question.second_range }}S</small>{% endif %}
-                            </div>
-                            <div class="user pull-right">
-                                <span>{{ question.date_created }}</span>
-                                <small>{{ question.user }}</small>
-                            </div>
-                        </div>
-                        <hr class="hline-inner" />
-                      {% endfor %}
-                    </div>
-                {% endif %}
+               
+
             </div>
         </div>
         <div class="col-lg-4 col-md-4 col-sm-4 no-padding right-bar">
