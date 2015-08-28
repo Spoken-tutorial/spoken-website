@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <form action=" " method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  <div>
+   {% if success %}
+     <p> You have successfully uploaded the assignment. </p>
+   {% endif %}
+   <div>
+    <label>Email: </label> 
+    <div> 
+      {{ form.email }} {{ form.email.errors }}
+    </div>
+   </div>
+   <br />
+   <div>
+     <label>Upload file:</label>
+      <div> 
+         {{ form.file_upload }} {{ form.file_upload.errors }}
+      </div>
+   </div>
+ </div>
+  <br /><input type="submit" value="Upload" /> 
+  </form>
+{% endblock content %}
+
