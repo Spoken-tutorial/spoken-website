@@ -185,3 +185,11 @@ class OrganiserFeedbackForm(forms.ModelForm):
               'overall_rating' : forms.RadioSelect ,
               'testimonial' : forms.Textarea , 
               'any_other_suggestions' : forms.Textarea}
+
+class LatexWorkshopFileUploadForm(forms.ModelForm):
+  class Meta:
+    model = LatexWorkshopFileUpload
+    fields = '__all__'
+
+
+
