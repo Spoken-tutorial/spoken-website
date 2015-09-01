@@ -1187,3 +1187,14 @@ class OrganiserFeedback(models.Model):
   testimonial = models.CharField(max_length = 500)
   any_other_suggestions = models.CharField(max_length = 500)
   can_contact = models.CharField(max_length = 50, choices = YES_NO_CHOICES)
+
+def get_email_dir(instance, filename):
+  email_dir = instance.email.replace('.','_')
+  email_dir = email_dir.replace('@','on')
+  return "latex/%s/%s" %(email_dir, filename)
+  
+class LatexWorkshopFileUpload(models.Model):
+  email = models.EmailField()
+  file_upload = models.FileField(upload_to=get_email_dir)
+
+
