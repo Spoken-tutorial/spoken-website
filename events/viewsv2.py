@@ -455,7 +455,7 @@ class TrainingRequestCreateView(CreateView):
       messages.error(self.request, 'Something went wrong, Contact site administrator.')
       return self.form_invalid(form)
     context = {}
-    messages.success(self.request,'STP has been added successfully.  Now continue with step 3 "Select Participants " on STPS page, to select the participants from the Master Batch Student List for any one course that you are starting with. This is necessary for receiving certificates.')
+    messages.success(self.request,'STP has been added successfully. Now continue with step 3 "Select Participants " on STPS page. Select the participants from the Master Batch Student List for any one course that you are starting with. This is necessary for receiving certificates.')
     return HttpResponseRedirect('/software-training/{0}/training-request/'.format(self.tpid))
     #return render_to_response(self.template_name, context, context_instance=RequestContext(self.request))
 

@@ -2,10 +2,35 @@
 {% load widget_tweaks %}
 {% load static %}
 {% block title %}Master Batch Student List{% endblock %}
-{% block heading %}<center><a class="btn btn-primary" data-toggle="modal" data-target="#myModal"><i class="fa fa-2 fa-question"></i> Help</a></center><i class="home-page-title-i">Master Batch Student List</i><a class="btn btn-success pull-right" href="{% url 'events:batch_list' %}">Back to MB Master Batch</a>{% endblock %}
+{% block cssblock %}
+  <style>
+  .header-table{
+  width:1100px;
+  }
+  .csv-link{
+  font-size:13px;
+  text-decoration: underline;
+  }
+  </style>
+{% endblock %} 
+{% block heading %}
+<table  class="header-table">
+  <tr>
+    <td><i class="home-page-title-i">Master Batch Student List</i></td>
+    <td><center><a class="btn btn-primary" data-toggle="modal" data-target="#myModal"><i class="fa fa-2 fa-question"></i>Instructions for Adding MB</a>
+    <br><a class="csv-link" data-toggle="modal" data-target="#csvModal"><u>Sample CSV file</u></a></center>
+    </td>
+    <td><a class="btn btn-success pull-right" href="{% url 'events:batch_list' %}">Back to MB Master Batch</a></td>
+  </tr>
+</table>
+
+
+
+{% endblock %}
 {% block search %}{% endblock %}
 {% block content %}
 {{message.tags}}
+
 	<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     	 <div class="modal-dialog">
           <div class="modal-content">
@@ -17,8 +42,8 @@
 		       <li>Make sure that there are no empty/blank spaces in the lettering.</li>
 		       <li>After filling the details, save the file as <strong>.csv (for Libre Office)</strong> and <strong>.csv (MS-DOS) (for Microsoft Office)</strong></li>
 		       <li>Make sure that <strong>commas (,)</strong> are seen at the end of each entry.</li>
-		       <li>Please provide only First and Last Names. Middle names or initials will not be accepted.</li>
-		       <li>No <strong>middle name</strong> or <strong>initials</strong> allowed.</li>
+		       <li>Ensure <b>First and Last names</b> are filled.</li>
+           <li><b>Middle names</b> or <b>Middle Initials</b> will <b>not</b> be accepted.</li>
 		   </ul>
 	       </li>
              </ul>
@@ -26,12 +51,23 @@
           </div>
          </div>
        </div>
-	
+       
+       <div class="modal fade" id="csvModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"style=" color:#0052A3; font-size:15px;" aria-hidden="true">
+    	 <div class="modal-dialog">
+          <div class="modal-content">
+           <div class="modal-body">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <p>Open your csv file in Notepad(Windows OS) or in gedit(Linux OS) , It should look like below format :</p>
+              <img width="520px" src="/static/spoken/images/sample_csv.png">
+           </div>
+          </div>
+         </div>
+       </div>
 
         {% if form %}
           <div class="row well">
               <div class='col-sm-8'>
-                  <form action="{{ action }}" method="post" class='form-horizontal' enctype="multipart/form-data">{% csrf_token %}
+                  <form id="form-id" action="{{ action }}" method="post" class='form-horizontal' enctype="multipart/form-data">{% csrf_token %}
                       {% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
                       {% if form.non_field_errors %}
                       <ul>
@@ -65,10 +101,22 @@
                         </div>
                       </div>
               
-              
+                       <div class="modal fade" id="confirmModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" style="color:#0052A3; font-size:15px;">
+                        <div class="modal-dialog ">
+                          <div class="modal-content">
+                            <div class="modal-body">
+                               Are you sure all fields are filled in csv file as instructed? Recheck the csv file before you upload.
+                            </div>
+                            <div class="modal-footer">
+                              <button type="button" class="btn btn-default" data-dismiss="modal">NO</button>
+                              <a type ="submit" class="btn btn-primary" onclick="document.forms['form-id'].submit();" %}">Yes</a>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                       <div class="form-group">
                           <div class="col-xs-12 form-group">
-                              <input class="btn btn-primary" type="submit" value="Upload Master Batch" />
+                              <input class="btn btn-primary" id="upload_button" type="button" value="Upload Master Batch" />
                               <a class="btn btn-danger" href="{% url 'events:batch_list' %}">Cancel</a>
                           </div>
                       </div>
@@ -101,7 +149,7 @@
           </form>
         {% endif %}
         {% if warning %}
-          <h5>Warning (Student Already Exists)<span class="pull-right review-accepted">Note: Click on the email to correct email format</span></h5>
+          <h5>Warning (Student Already Exists)<span class="pull-right review-accepted"></span></h5>
             <div class="row well">
               <table class="table">
                 <tr>
@@ -135,6 +183,9 @@
   <script>
     $(window).load(function(){
         $('#myModal').modal('show');
+    });
+    $('#upload_button').on('click', function(){
+      $('#confirmModal').modal('show');
     });
     $('.editable').editable(function(value, settings) {
        thisData = $(this);
