@@ -811,8 +811,8 @@ class TrainingRequest(models.Model):
     today = date.today()
     if self.status or today < self.sem_start_date or today > sem_end:
       return False
-    elif self.course.category == 0 and date.today() > self.sem_start_date:
-      return False
+    #elif self.course.category == 0 and date.today() > self.sem_start_date:
+      #return False
     return True
 
   def update_participants_count(self):
