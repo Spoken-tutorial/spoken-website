@@ -13,7 +13,7 @@ from django.utils.decorators import method_decorator
 from events.decorators import group_required
 from events.forms import StudentBatchForm, TrainingRequestForm, \
     TrainingRequestEditForm, CourseMapForm, SingleTrainingForm, \
-    OrganiserFeedbackForm
+    OrganiserFeedbackForm, LatexWorkshopFileUploadForm
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, render_to_response
 from django.core.validators import validate_email
@@ -27,6 +27,7 @@ from creation.models import FossAvailableForWorkshop
 import csv
 from cms.sortable import *
 from django.contrib import messages
+from django.template import RequestContext, loader
 
 #pdf generate
 from reportlab.pdfgen import canvas
@@ -455,7 +456,7 @@ class TrainingRequestCreateView(CreateView):
       messages.error(self.request, 'Something went wrong, Contact site administrator.')
       return self.form_invalid(form)
     context = {}
-    messages.success(self.request,'STP has been added successfully.  Now continue with step 3 "Select Participants " on STPS page, to select the participants from the Master Batch Student List for any one course that you are starting with. This is necessary for receiving certificates.')
+    messages.success(self.request,'STP has been added successfully. Now continue with step 3 "Select Participants " on STPS page. Select the participants from the Master Batch Student List for any one course that you are starting with. This is necessary for receiving certificates.')
     return HttpResponseRedirect('/software-training/{0}/training-request/'.format(self.tpid))
     #return render_to_response(self.template_name, context, context_instance=RequestContext(self.request))
 
@@ -1626,3 +1627,30 @@ class OrganiserFeedbackListView(ListView):
     context = super(OrganiserFeedbackListView, self).get_context_data(**kwargs)
     context['count'] = OrganiserFeedback.objects.all().count()
     return context
+
+def LatexWorkshopFileUpload(request):
+  template_name = 'latex_workshop_file_upload.html'
+  if request.method == 'POST':
+    form = LatexWorkshopFileUploadForm(request.POST, request.FILES)
+    if form.is_valid(): 
+      uploaded_file = request.FILES['file_upload']
+      '''
+      email = request.POST['email']
+      email = email.replace('.', '_')
+      email = email.replace('@', '_')
+      print email
+      f = open('media/latex/{0}/{1}'.format(email, uploaded_file), 'wb+')
+      for data in uploaded_file.chunks():
+          f.write(data)
+      f.close()
+      '''
+      form.save()
+      return HttpResponse("Thank you, your file has been successfully uploaded.")
+    else:
+      context=RequestContext(request, {'form': form})
+      return render_to_response(template_name, context)
+  else:
+    form = LatexWorkshopFileUploadForm()
+    context=RequestContext(request, {'form':form})
+  return render_to_response(template_name, context)
+

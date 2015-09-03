@@ -19,7 +19,6 @@ today = date.today()
 
 # fetching all training requests needs to closed
 training_requests = TrainingRequest.objects.filter(
-  (Q(course__category=0) & Q(sem_start_date__lte=today)) | \
   Q(sem_start_date__lte=datetime.now()-timedelta(days=120)), \
   status=False
 )
