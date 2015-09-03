@@ -34,7 +34,33 @@
               </select>
             </div>
         </div>
-        <form action="{{ action }}" method="post">
+      <form action="{{ action }}" id="form-id" method="post">
+        <div class="modal fade" id="confirmModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" style=" color:#0052A3; font-size:15px;">
+          <div class="modal-dialog " >
+            <div class="modal-content" >
+              <div class="modal-body" >
+                Are you sure <b>Department,Year, Student count and Course</b> are mentioned correctly? Once the Participant List is selected no changes can be made.
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal" id="modal-no" onclick="confirmation();">NO</button>
+                <a type ="submit" class="btn btn-primary" onclick="document.forms['form-id'].submit();" %}">Yes</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="modal fade" id="alertModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="color:#0052A3; font-size:15px;">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-body">
+                 Make necessary corrections in <b>MB</b> or <b>STP</b>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal" id="modal-no">OK</button>
+              </div>
+            </div>
+          </div>
+        </div>
           {% csrf_token %}
       {% endif %}
       <table class="table table-striped table-hover table-bordered">
@@ -98,7 +124,7 @@
         {% endfor %}
       </table>
       {% if can_mark_attendance %}
-          <input class="btn btn-primary" type="submit" value="Submit" />
+          <input class="btn btn-primary" type="button" id="attendance_submit" value="Submit" />
         </form>
       {% endif %}
     {% endwith %}
@@ -124,11 +150,18 @@
       return "Check All";
     }
   }
+  function confirmation()
+  {
+    $('#alertModal').modal('show');
+  }
   $("#selectall").click(function () {
     var option=document.getElementsByClassName('selectall'); 
     for (i = 0; i < option.length; i++) {
      option[i].value = this.value;
     }
+  });
+  $("#attendance_submit").click(function () {
+    $('#confirmModal').modal('show');
   });
   </script>
 {% endblock %}
