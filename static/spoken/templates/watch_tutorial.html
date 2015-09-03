@@ -530,7 +530,7 @@
 	  <script>
 
 			 Number.prototype.between = function (min, max) {
-   return this >= min && this <= max;
+   			return this >= min && this <= max;
 			};
       // 2. This code loads the IFrame Player API code asynchronously.
       var tag = document.createElement('script');
@@ -565,7 +565,7 @@
 			var myTimer; 
 			var time;
 			
-							var min_range ;
+							var min_range,sec_range;
 						
 							var min_split,sec_split,sec,total;
 							
@@ -581,7 +581,7 @@
 						  
 								time = Math.floor(player.getCurrentTime() / 60)
 								sec = Math.ceil(player.getCurrentTime() % 60)
-								total = parseFloat(time+"."+s)
+								total = parseFloat(time+"."+sec)
 							
 							{% for q in questions %}
 										
@@ -594,20 +594,18 @@
 										if(total.between(parseFloat(min_split[0]+"."+sec_split[0]), parseFloat(min_split[1]+"."+sec_split[1])))
 										{
 											
-												var e = document.getElementById(id).style.background="#CBCBC4"
+												var ele = document.getElementById(id).style.background="#CBCBC4"
 												//var container = $("div"),
-													//scrollTo = $('#'+id);
+												//crollTo = $('#'+id);
 
 											//container.scrollTop(
-													//scrollTo.offset().top - container.offset().top + container.scrollTop()
+												//scrollTo.offset().top - container.offset().top + container.scrollTop()
 											//);
-								
-
-										}
+								}
 										if(total > parseFloat(min_split[1]+"."+sec_split[1]))
 										{
 
-													var e = document.getElementById(id).style.background="white"
+													var ele = document.getElementById(id).style.background="white"
 												
 										}
 										
@@ -621,31 +619,8 @@
 						
 			}
     
-      // Stop video playing
-      function stopVideo() {
-        player.stopVideo();
-      }
-      
-      // Play Video
-      function playVideo() {
-				
-				//alert("playing"+player.getCurrentTime())
-      
-      }
-      
-      // pause current playing video
-      function pauseVideo() {
-        player.pauseVideo()
-      }
-      
-      // get current playing time
-     // function getCurrentTime() {
-        
-				//m = Math.floor(player.getCurrentTime() / 60)
-				
-				//s = Math.ceil(player.getCurrentTime() % 60)
-				//document.write(m);
-     //}
+    
+   
 	</script>
 {% endblock %}
 {% block uncompressjsblock %}
