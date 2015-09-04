@@ -262,7 +262,6 @@
                     {% if tr_rec.video_id and tr_rec.video_id != None and tr_rec.video_id != '0' %}
                         <div id="player"></div> <!-- add YOUtube Player API-->
                     {% else %}
-												<p style="color: #ffffff" >  Hello Skin </p>
                         <video id="st_video" class="video-js vjs-default-skin" controls preload="none" poster="{{ tr_rec.tutorial_detail|get_thumb_path:'Big' }}" width="auto" height="auto" data-setup="{}">
                             <source src="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ tr_rec.video }}" type="video/ogg" />
                             {{ tr_rec|get_srt_path|safe }}
@@ -577,7 +576,6 @@
       // Play Video
       function playVideo() {
         player.playVideo()
-				alert("playing"+player.getCurrentTime())
       
       }
       
