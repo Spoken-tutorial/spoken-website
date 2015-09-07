@@ -198,4 +198,9 @@ urlpatterns = [
       OldTrainingCloseView.as_view(template_name=""), 
       name="old_training_close"
     ),
+    url(
+       r'^latex_workshop/$',
+       'events.viewsv2.LatexWorkshopFileUpload',
+       name="latex-workshop"
+       ),
 ]
