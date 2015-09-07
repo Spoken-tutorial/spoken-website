@@ -2551,6 +2551,23 @@ def ajax_state_collage(request):
                 tmp +='<option value='+str(i.id)+'>'+i.institution_name+'</option>'
         return HttpResponse(json.dumps(tmp), content_type='application/json')
 
+
+@csrf_exempt
+def ajax_academic_center(request):
+    """Ajax: Get academic centers according to institute type and state"""
+    if request.method == 'POST':
+        state = request.POST.get('state')
+        itype = request.POST.get('itype')
+        center = AcademicCenter.objects.filter(state=state,
+            institution_type=itype).order_by('institution_name')
+	html = '<option value=None> --------- </option>'
+        if center:
+            for ac in center:
+                html += '<option value={0}>{1}</option>'.format(ac.id,
+                    ac.institution_name)
+    return HttpResponse(json.dumps(html), content_type='application/json')
+
+
 @csrf_exempt
 def ajax_dept_foss(request):
     """ Ajax: Get the dept and foss based on training selected """

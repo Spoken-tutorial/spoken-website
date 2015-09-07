@@ -1198,7 +1198,11 @@ class SingletrainingCreateView(CreateView):
   
   def form_valid(self, form, **kwargs):
     form_data = form.save(commit=False)
-    form_data.academic = self.request.user.organiser.academic
+    if 'academic' not in self.request.POST:
+        form_data.academic = self.request.user.organiser.academic
+    elif not self.request.POST.get('academic'):
+        form_data.academic = self.request.user.organiser.academic
+
     form_data.organiser = self.request.user.organiser
     student = None
     skipped, error, warning, write_flag = self.csv_email_validate(self.request.FILES['csv_file'], str(self.request.POST.get('training_type')))
