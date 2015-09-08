@@ -242,7 +242,7 @@ class Course(models.Model):
   name = models.CharField(max_length=200)
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
-  
+
   def __unicode__(self):
     return self.name
 
@@ -991,6 +991,8 @@ class TrainingLanguageFeedback(models.Model):
 # School, Live Workshop, Pilot Workshop
 class SingleTraining(models.Model):
   organiser = models.ForeignKey(Organiser)
+  state = models.ForeignKey(State, null=True)
+  institution_type = models.ForeignKey(InstituteType, null=True)
   academic = models.ForeignKey(AcademicCenter)
   course = models.ForeignKey(CourseMap) # type 0
   # {0:School, 3:Vocational, 1:Live Workshop, 2:Pilot Workshop}
@@ -1001,6 +1003,7 @@ class SingleTraining(models.Model):
   #{0:request done, 1: attendance submited, 2: completed}
   status = models.PositiveSmallIntegerField(default=0)
   participant_count = models.PositiveIntegerField(default=0)
+  total_participant_count = models.PositiveIntegerField(default=0)
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
   #created = models.DateTimeField()
@@ -1012,6 +1015,7 @@ class SingleTraining(models.Model):
 
 class SingleTrainingAttendance(models.Model):
   training = models.ForeignKey(SingleTraining)
+  foss = models.PositiveIntegerField(default=0)
   firstname = models.CharField(max_length = 100, null=True)
   lastname = models.CharField(max_length = 100, null=True)
   gender = models.CharField(max_length=10, null=True)

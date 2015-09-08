@@ -104,6 +104,11 @@ urlpatterns = [
       name="single-training-approved"
     ),
     url(
+      r'^single-training/rejected/$', 
+     SingletrainingRejectedListView.as_view(template_name="single-training.html"), 
+      name="single-training-rejected"
+    ),
+    url(
       r'^single-training/ongoing/$', 
      SingletrainingOngoingListView.as_view(template_name="single-training.html"), 
       name="single-training-ongoing"
@@ -147,14 +152,19 @@ urlpatterns = [
     ),
     #url(r'^get-language-option/', GetLanguageOptionView.as_view()),
     url(
-      r'^single-training/pending/(?P<pk>\d+)/$',
+      r'^single-training/pending/(?P<pk>\d+)/approve/$',
       'events.viewsv2.SingleTrainingApprove', 
       name="single-training-approve"
     ),
     url(
-      r'^single-training/pending/(?P<pk>\d+)/$', 
+      r'^single-training/pending/(?P<pk>\d+)/reject/$', 
       'events.viewsv2.SingleTrainingReject', 
       name="single-training-reject"
+    ),
+    url(
+      r'^single-training/pending/(?P<pk>\d+)/requestmarkattendance/$', 
+      'events.viewsv2.SingleTrainingPendingAttendance', 
+      name="single_training_pending"
     ),
     url(
       r'^single-training/(?P<tid>\d+)/attendance', 

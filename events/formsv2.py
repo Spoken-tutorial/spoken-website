@@ -146,8 +146,14 @@ class SingleTrainingForm(forms.ModelForm):
   csv_file = forms.FileField(required = True)
   class Meta:
     model = SingleTraining
-    exclude = ['academic', 'organiser', 'status', 'participant_count']
-  
+    exclude = ['organiser', 'status', 'participant_count', 'total_participant_count']
+
+  def __init__(self, *args, **kwargs):
+    super(SingleTrainingForm, self).__init__(*args, **kwargs)
+    self.fields['academic'].required = False
+    self.fields['state'].required = False
+    self.fields['institution_type'].required = False
+
   def clean(self): 
         #self.cleaned_data['csv_file']
     if self.cleaned_data['csv_file'].name.split('.')[-1] == 'csv':
