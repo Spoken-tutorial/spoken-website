@@ -265,7 +265,7 @@
                         <div  id="player"></div> <!-- add YOUtube Player API-->
                     {% else %}
                         <video id="st_video" class="video-js vjs-default-skin" controls preload="none" poster="{{ tr_rec.tutorial_detail|get_thumb_path:'Big' }}" width="auto" height="auto" data-setup="{}">
-                            <source src="/static/spoken/images/Overview-and-Installation-of-Git-English.ogv" type="video/ogg" />
+                             <source src="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ tr_rec.video }}" type="video/ogg" />
                             {{ tr_rec|get_srt_path|safe }}
                         </video>
                     {% endif %}
