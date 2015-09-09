@@ -1,0 +1,263 @@
+{% extends 'spoken/templates/base.html' %}
+{% block title %}Semester Training Planner Summary{% endblock %}
+{% block heading %}
+  <i class="home-page-title-i">Semester Training Planner Summary (STPS)</i>
+  <a href="/software-training" class='pull-right go-back'>Dashboard</a>
+  <center><a class="btn btn-primary" data-toggle="modal" data-target="#myModal"><i class="fa fa-2 fa-question"></i> Instructions</a></center>
+{% endblock %}
+{% block search %}{% endblock %}
+
+{% block cssblock %}
+  <style>
+    
+    /*.tp .training-row{
+        display: none;
+    }*/
+    ul.tp{
+          list-style: none;
+    }
+    ul.tp .yeardesc{
+      padding: 5px;
+    }
+    ul.tp .yeardesc.active-planner{
+      
+    }
+    .pull-center{
+      text-align: center;
+    }
+    #steps-table {
+    width:650px;
+    }
+    .steps-btn{
+    width:300px;
+    }
+    #steps-table tr{
+    height:50px;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+<center>
+<table border="0" id="steps-table">
+  <tr>
+    <td >
+      <center class="pull-left"><font size=3 color="#FF6705"><b>STEP 1 :</b></font> Upload students <b>Master Batch Student List</b> :</center>
+    </td>
+    
+    <td>
+      <center><a class="btn btn-success steps-btn" href="{% url 'events:batch_list' %}">MB Master Batch Student List</a></center>
+    </td>
+      
+  </tr>
+  
+  <tr>
+    <td>
+      <center class="pull-left"> <font size=3 color="#FF6705"><b>STEP 2 : </b></font> Complete the <b>STPF</b> :</center>
+    </td>
+    
+    <td>
+      <center><a class="btn btn-success steps-btn"  data-toggle="modal" data-target="#plannerModal"> STPF – Semester Training Planner Form</a></center>
+    </td>
+      
+  </tr>
+  
+  <tr>
+    <td>
+      <center class="pull-left"> <font size=3 color="#FF6705"><b>STEP 3 : </b></font> Select <b>Participant List</b> :</center>
+    </td>
+    
+    <td>
+      <center><a class="btn btn-success steps-btn" href="{% url 'events:select_participants' %}"> Select Participant List</a></center>
+    </td>
+      
+  </tr>
+</table>
+</center>  
+  
+  <!-- Modal -->
+  <center>
+  <div class="modal fade" id="plannerModal" tabindex="-1" role="dialog" aria-labelledby="plannerModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-body">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <div><font size="3">Choose Semester to fill <b>Training Planner Form</b></font>
+            <br><br><div style="text-align: justify; width:350px;">
+              <ul>
+                <li>Select Jan-Jun for 2nd, 4th, 6th, 8th semesters</li>
+                <li>Select Jul-Dec for 1st, 3rd, 5th, 7th semesters</li>
+              </ul>
+            </div>
+            <i>In case your semester begins <b>mid-June</b> onwards, please choose July-Dec semester 
+            <br/>and select 1 July as Semester Start Date.</i>
+          </div><br />
+          <a class="btn btn-primary " href="{% url 'events:training_request' current_planner.id %}">Current Semester: {{current_planner.get_semester}}</a>
+          <a class="btn btn-primary " href="{% url 'events:training_request' next_planner.id %}"> Next Semester: {{next_planner.get_semester}}</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  </center>
+  
+  <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-body">
+           <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+           <ul>
+              <li>You are on the STPS page.</li>
+              <li>Complete the 3 steps in sequence and follow all the instructions.</li>
+              <li>The <b>Click here</b> will give a detailed instruction sheet for the particular step:
+                <ol>
+                  <li>For <b>Master Batch</b>: <a href="http://process.spoken-tutorial.org/images/b/bc/Semester_Training_Planner.pdf" traget="_blank"> Click Here</a>.</li>
+                  <li>For <b>STPF</b>: <a href="http://process.spoken-tutorial.org/images/b/bc/Semester_Training_Planner.pdf" traget="_blank"> Click Here</a>.</li>
+                  <li>For <b>Participants List</b>: <a href="http://process.spoken-tutorial.org/images/4/49/Upload_Select_Participant_list.pdf" traget="_blank"> Click Here</a>.</li>
+                </ol>
+              </li>
+              <li>Please download a copy of tutorials on all the machines. For instructions to download tutorials <a href="http://process.spoken-tutorial.org/images/1/1b/Download-Tutorials.pdf" traget="_blank"> Click Here</a></li>
+              <li>Please check if your machine is ready. For the Machine Readiness document <a href="http://process.spoken-tutorial.org/images/5/58/Machine-Readiness.pdf" target="_blank">Click Here</a>.</li>
+           </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <br /><br />
+  {{message}}
+  <center>
+    <h3>
+      {{current_planner.academic.institution_name}}, {{current_planner.academic.district.name}}
+    </h3>
+  </center>
+  <ul class="tp">
+    <li class="semester active-planner">
+      <div class="semdesc">
+        <b>{{ current_planner.get_semester }} (Current Semester)</b>
+        <span class="badge">completed : {{ current_planner.completed_training.count }}</span>
+        <span class="badge">Ongoing : {{ current_planner.ongoing_training.count }}</span>
+      </div>
+      <div class="training-row"><br>
+        {% if current_planner.training_requests %}
+        <table class="table table-striped table-hover table-bordered">
+          <tr>
+            <th>#</th>
+            <th>Semester State Date</th>
+            <th>Software Course</th>
+            <th>Department</th>
+            <th>Participant List Status</th>
+          </tr>
+          {% for training in current_planner.training_requests %}
+          <tr class="{% if training.status %}completed{% else %}ongoing{% endif %}">
+            <td>{{ forloop.counter }}</td>
+            <td>{{ training.sem_start_date }} </td>
+            <td>{{ training.course.course_name }}</td>
+            <td>{{ training.department }}</td>
+            <td>{{ training.attendance_summery }}</td>
+          </tr>
+          {% endfor %}
+        </table>
+        {% else %}
+        <table class="table table-striped table-hover table-bordered">
+          <tr><td class="pull-center">Training planner is empty</td></tr>
+        </table>
+        {% endif %}
+      </div>
+    </li>
+    {% if next_planner %}
+    <li class="semester future-planner"><br>
+    <div class="semdesc">
+      <b>{{ next_planner.get_semester }} (Next Semester)</b>
+      <span class="badge">Planned : {{ next_planner.ongoing_training.count }}</span>
+    </div>
+    <div class="training-row"><br>
+      {% if next_planner.training_requests %}
+        <table class="table table-striped table-hover table-bordered">
+          <tr>
+            <th>#</th>
+            <th>Semester State Date</th>
+            <th>Software Course</th>
+            <th>Department</th>
+            <th>Participant List Status</th>
+            <th>Action</th>
+          </tr>
+          {% for training in next_planner.training_requests %}
+          <tr class="future">
+            <td>{{ forloop.counter }}</td>
+            <td>{{ training.sem_start_date }} </td>
+            <td>{{ training.course.course_name }}</td>
+            <td>{{ training.department }}</td>
+            <td>{{ training.attendance_summery }}</td>
+            <td>
+            {% if training.can_edit %}
+            | <a href="{% url 'events:edit_training_request' training.id %}">Edit</a> |
+            {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </table>
+        {% else %}
+        <table class="table table-striped table-hover table-bordered">
+          <tr><td class="pull-center">Training planner is empty</td></tr>
+        </table>
+        {% endif %}
+      </div>
+    </li>
+    {% endif %}
+    {% for record in object_list %}
+    {% if not record.id == current_planner.id and not record.id == next_planner.id %}
+    <li class="semester">
+      <div class="semdesc">
+        <b>{{ record.get_semester }}</b>
+        <span class="badge">Total : {{ record.completed_training.count }}</span>
+      </div>
+      {% if record.training_requests %}
+      <div class="training-row">
+        <table class="table table-striped table-hover table-bordered">
+          <tr>
+            <th>#</th>
+            <th>Semester State Date</th>
+            <th>Software Course</th>
+            <th>Department</th>
+            <th>Participant List Status</th>
+            <th>Action</th>
+          </tr>
+          {% for training in record.training_requests %}
+          <tr class="{% if training.status %}completed{% else %}ongoing{% endif %}">
+            <td>{{ forloop.counter }}</td>
+            <td>{{ training.sem_start_date }} </td>
+            <td>{{ training.course.course_name }}</td>
+            <td>{{ training.department }}</td>
+            <td>{{ training.attendance_summery }}</td>
+            <td>
+              {% if training.get_partipants_from_attendance %}
+              | <a href="{% url 'events:training_attendance' training.id %}">Participant List</a> |
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </table>
+      </div>
+      {% endif %}
+    </li>
+    {% endif %}
+    {% endfor %}
+  </table>
+{% endblock %}
+
+{% block jsblock %}
+  <!--<script>
+  
+    $('.tp>li>.yeardesc').click(function(e){
+      if( $(this).parent('li').hasClass('active') ){
+          $(this).parent('li').removeClass('active').children('.training-row').slideUp();
+          e.stopPropagation();
+      }
+      else{
+          $('.tp').find('li').removeClass('active').children('.training-row').slideUp();
+          $(this).parent('li').addClass('active').children('.training-row').slideDown();
+          e.stopPropagation();
+      }
+    });
+    
+  </script> -->
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load eventsdata %}
+{% block title %} {{ model_label.title }} Participants{% endblock %}
+{% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
+{% block heading %}
+        <i class="fa fa-list-ul"></i> {{ model_label.title }} Participants
+{% endblock %}
+{% block search %}{% endblock %}
+{% block content %}
+    <div class="bs-callout bs-callout-info">
+        <dl class='dl-horizontal'>
+            <dt>Institution Name</dt>
+            <dd>{{ model.training_planner.academic }}, {{ model.training_planner.academic.state }}</dd>
+            <dt>Foss</dt>
+            <dd>{{ model.course.foss.foss }}</dd>
+            <dt>Date</dt>
+            <dd>{{ model.sem_start_date }}</dd>
+            <dt>Participants Count</dt>
+            <dd>{{ model.participants }}</dd>
+            <dt>Organiser</dt>
+            <dd>{{ model.training_planner.organiser.user.first_name }} {{ model.training_planner.organiser.user.last_name }}</dd>
+        </dl>
+    </div>
+	<div class="" id="pending">
+		{% if collection %}
+		<table class="table table-bordered table-hover table-striped">
+			<tr>
+			    <th>#</th>
+				<th>First Name</th>
+				<th>Last Name</th>
+			</tr>
+			{% for record in collection %}
+				<tr>
+				    <td>{{ forloop.counter }}
+					<td>{{ record.student.user.first_name }}</td>
+					<td>{{ record.student.user.last_name }}</td>
+				</tr>
+			{% endfor %}
+		</table>
+		{% else %}
+			<p class="no-record">No student found!</p>
+		{% endif %}
+	</div>
+{% endblock %}

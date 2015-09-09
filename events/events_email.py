@@ -106,10 +106,10 @@ IIT Bombay.
 
     # send email
     email = EmailMultiAlternatives(
-        subject, message, 'administrator@spoken-tutorial.org',
+        subject, message, 'no-reply@spoken-tutorial.org',
         to = to, bcc = bcc, cc = cc,
         headers = {
-            'Reply-To' : 'no-replay@spoken-tutorial.org',
+            'Reply-To' : 'no-reply@spoken-tutorial.org',
             "Content-type" : "text/html;charset=iso-8859-1"
         }
     )
