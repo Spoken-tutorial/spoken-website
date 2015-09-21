@@ -197,7 +197,9 @@
             font-weight: bold;
         }
        .forum-questions .question {
-            padding: 5px;
+         padding-left: 5px;
+         padding-right: 5px;
+             padding-top: 5px;
             clear: both;
         }
         .forum-questions .question a {
@@ -239,15 +241,15 @@
             color: #4F8811;
         }
 
-	.ScrollStyle
-	{
-	    max-height: 370px;
- 	    min-height: 370px;
-	    overflow-y: scroll;
+    .ScrollStyle
+    {
+        max-height: 370px;
+         min-height: 370px;
+        overflow:scroll;
 
-	    float: left;
-	    background: white;
-	}
+        float: left;
+        background: white;
+    }
 
 
     </style>
@@ -276,7 +278,7 @@
 
 <div id="content">
     <ul id="tabs" class="nav nav-tabs" data-tabs="tabs">
-       
+      
         <li style="width:190px" class="active" ><a href="#forums" data-toggle="tab">Questions posted on Forums</a></li>
                 <li style="width:180px;" ><a style= "min-height: 60px;padding-top: 12px;" href="#tutorials" data-toggle="tab">{{tr_rec.tutorial_detail.foss}} Tutorials - {{tr_rec.language}} </a></li>
      <div id="my-tab-content" class="tab-content">
@@ -285,11 +287,12 @@
 <div id="forums_Q" class='ScrollStyle' style="width: 32%; " >
  
   {% if questions %}
-        <div class="forum-questions" id="#forum_Q" style="padding : 6px ">
-        <h4 style="font-family: Menlo;font-size: 16px;">Questions posted on ST Forums: </h4>
+        <h4 style="font-family: Menlo;font-size: 16px; padding-left: 8px; ">Questions posted on ST Forums: </h4>
+        <ul class="forum-questions" id="forum_Q" style="padding : 6px ">
+      
         {% for question in questions %}
 
-        <div class="question" id="{{ question.id }}">
+        <li class="question" id="{{ question.id }}">
             <a href="http://forums.spoken-tutorial.org/question/{{ question.id }}/{{ question.get_slugified_title }}" target="_blank" class="{{ question.id }}">{{ question.title }}</a>
             <p>{{ question.body|striptags|safe }}
             <div class="timing pull-left">
@@ -298,23 +301,26 @@
             </div>
             <div class="user pull-right">
             <span>{{ question.date_modified }}</span>
+        {% if not question.user == "" %}
             <small>{{ question.user }}</small>
-            </div></p>
-          
-        </div>
-        <hr class="hline-inner" style="margin-top: 5px;margin-bottom: 5px" />
+        {% endif %}
+            </div>
+       </p>
+    <hr class="hline-inner" style="margin-top: 18px;margin-bottom: 4px;" />
+           </li>
+       
         {% endfor %}
-        </div>
+        </ul>
         {% else %}
             <p style=" text-align: center; padding: 40px"> No questions yet</p>
         {% endif %}
         </div>
 
         </div>
-      
+     
         <div class="tab-pane " id="tutorials" >
             <div class='playlist col-lg-4 col-md-4 col-sm-4' style="width: 32%">
-             
+            
         <div class='playlist-controls'>
             <span class='backward'></span>
         <span class=" video-count pull-right" style="color: #ffffff;" >{{tr_recs|length}}</span>
@@ -337,17 +343,17 @@
         </ul>
         </div>
         </div>
-       
+      
 
     </div>
-</div> 
-    </ul>  
+</div>
+    </ul> 
 
 <script type="text/javascript">
     jQuery(document).ready(function ($) {
        $("#tabs").tab();
     });
-</script>   
+</script>  
 </div> <!-- container -->
 
         </div>
@@ -376,13 +382,13 @@
                         {% endif %}
                     {% endwith %}
                     <li><a href="/creation/report-missing-component/{{ tr_rec.id}}" class="fancybox fancybox.iframe"> Report Missing Component</a></li>
-                    <li><a target="_blank" href="http://forums.spoken-tutorial.org/new-question/?category={{ tr_rec.tutorial_detail.foss.foss }}" class="forum-post">Post your Question on the Forum</a></li>
-         <!--<li><p id="playerHolder"></p></li> 
-	<li><p id="playerHolder1"></p></li> !-->
+                    <li><a id="text" target="_blank" href="http://forums.spoken-tutorial.org/new-question/?category={{ tr_rec.tutorial_detail.foss.foss }}" class="forum-post">Post your Question on the Forum</a></li>
+       <!--  <li><p id="playerHolder"></p></li>
+             <li><p id="playerHolder1"></p></li> !-->
                 </ol>
                 <hr class="hline" />
                 <pre class="custom-jumbotron"><h3><b>Outline:</b></h3><p>{{ tr_rec.outline }}</p></pre>
-              
+             
 
             </div>
         </div>
@@ -493,6 +499,7 @@
 {% block compressinlinejsblock %}
     <script type="text/javascript">
         $(document).ready(function(){
+
             currentVideo = $('.playlist-item.active');
             nextVideo = currentVideo.next('li');
             prevVideo = currentVideo.prev('li');
@@ -530,73 +537,97 @@
 
     <script>
 
-	var player,
-	tag = document.createElement('script'),
-	firstScriptTag = document.getElementsByTagName('script')[0];
+    var player,
+    tag = document.createElement('script'),
+    firstScriptTag = document.getElementsByTagName('script')[0];
+    var flag= false;
+   
 
-	tag.src = "https://www.youtube.com/iframe_api";
-	firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+    tag.src = "https://www.youtube.com/iframe_api";
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-	function onPlaybackQualityChange(event) {
-	    console.log(event);
-	}
+    function onPlaybackQualityChange(event) {
+        console.log(event);
+    }
 
-	Number.prototype.between = function (min, max) {
-		return this >= min && this <= max;
-	};
+    Number.prototype.between = function (min, max) {
+        return this >= min && this <= max;
+    };
 
-			var ik_player;
-			//this function is called by the API
-			function onYouTubeIframeAPIReady() {
-				//creates the player object
-				ik_player = new YT.Player('player');
-				//Holds a reference to the YouTube player  
-				//subscribe to events
-				ik_player.addEventListener("onReady",       "onReady");
-				ik_player.addEventListener("onStateChange", "onStateChange");
-			}
-	
-	    function formatTime(time){
-					time = Math.round(time);
-					var minutes = Math.floor(time / 60),
-					seconds = time - minutes * 60;
-					seconds = seconds < 10 ? '0' + seconds : seconds;
-					return minutes + "." + seconds;
-	    }
+            var ik_player;
+            //this function is called by the API
+            function onYouTubeIframeAPIReady() {
+                //creates the player object
+                ik_player = new YT.Player('player');
+                //Holds a reference to the YouTube player 
+                //subscribe to events
+                ik_player.addEventListener("onReady",       "onReady");
+                ik_player.addEventListener("onStateChange", "onStateChange");
+            }
+   
+        function formatTime(time){
+        time = Math.round(time);
+        var minutes = Math.floor(time / 60),
+        seconds = time - minutes * 60;
+        seconds = seconds < 10 ? '0' + seconds : seconds;
+        return minutes + "." + seconds;
+        }
 
-			function onReady(event) {
+    function onReady(event) {
         function logDuration() {
-        window.setTimeout(logDuration,1000);
-        var cur_time = formatTime(ik_player.getCurrentTime()).toString();
-         trigger(cur_time);
+	     window.setTimeout(logDuration,1000);
+	     var cur_time = formatTime(ik_player.getCurrentTime()).toString();
+	     var duration=  formatTime(ik_player.getDuration()).toString();
+             trigger(cur_time, duration);
+
+        return cur_time
         }
         logDuration();
-    	}
 
-			function trigger(cur_time){
-    			{% for q in questions %}
-          	min_range = '{{ q.minute_range }}'
+    //var title = $('#text').html("Post your Question on the Forum");
+       // $("#text").click(function(e){
+     // e.preventDefault();
+         // alert(logDuration());
+            //title.html('new title'+logDuration());
+       // });
+        }
+
+      function trigger(cur_time, duration){
+      //$("#playerHolder").text("dura"+duration);
+        {% for q in questions %}
+            min_range = '{{ q.minute_range }}'
             sec_range = '{{ q.second_range }}'
-           	id = '{{ q.id }}'
+            id = '{{ q.id }}'
             min_split = min_range.split("-")
             sec_split = sec_range.split("-")
             lower = min_split[0]+"."+sec_split[0];
             upper = min_split[1]+"."+sec_split[1];
             var div = document.getElementById( '{{ q.id }}' );
-            if((parseFloat(cur_time)).between(parseFloat(lower.toString()),parseFloat(upper.toString())))   
+           
+            if((parseFloat(cur_time)).between(parseFloat(lower.toString()),parseFloat(upper.toString())))  
             {
-              div.style.backgroundColor = "#cdcdcd";
-							var container = $("div"),
-												scrollTo = $('#'+id );
-												container.animate({
-    										scrollTop:(scrollTo.offset().top)
-												},500);
+             $("#"+'{{ q.id }}').prependTo("#forum_Q");
+         
+             if(flag == false){
+       
+             var el = document.getElementById('forums_Q');
+                 el.scrollTop = 0;
+             flag = true;
             }else{
-              div.style.backgroundColor = "#ffffff";
+                //$("#playerHolder").text("else");
             }
-					{% endfor %}
-    		}
-						//for videojs trigger
+         
+           if(parseFloat(cur_time) == parseFloat(duration.toString())){
+               div.style.backgroundColor = "#ffffff";
+           }else{
+                div.style.backgroundColor = "#cdcdcd";
+           }
+           }else{
+              div.style.backgroundColor = "#ffffff";
+           }
+           {% endfor %}
+           }
+                        //for videojs trigger
             var trackedPlayer = videojs('st_video');
             var previousTime = 0;
             var currentTime = 0;
@@ -604,11 +635,11 @@
             previousTime = currentTime;
             currentTime = trackedPlayer.currentTime();
             var cur_time = formatTime(currentTime).toString();
-           
+          
             trigger( cur_time);
             });
  
-  
+ 
     </script>
 {% endblock %}
 {% block uncompressjsblock %}
@@ -616,7 +647,6 @@
     <script src="{% static 'spoken/js/jquery.fancybox.pack.js' %}"></script>
     <script src="{% static 'spoken/js/jquery.mousewheel-3.0.6.pack.js' %}"></script>
     <script src="https://apis.google.com/js/platform.js"></script>
-		<script type="text/javascript" src="http://www.youtube.com/iframe_api"></script>
+        <script type="text/javascript" src="http://www.youtube.com/iframe_api"></script>
 {% endblock %}
-
 
