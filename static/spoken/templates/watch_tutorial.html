@@ -376,7 +376,7 @@
                         {% endif %}
                     {% endwith %}
                     <li><a href="/creation/report-missing-component/{{ tr_rec.id}}" class="fancybox fancybox.iframe"> Report Missing Component</a></li>
-                    <li><a target="_blank" href="http://forums.spoken-tutorial.org/new-question/?category={{ tr_rec.tutorial_detail.foss.foss }}" class="forum-post">Post your Question on the Forum</a></li>
+                    <li><a id="text" target="_blank" href="" class="forum-post">Post your Question on the Forum</a></li>
          <!--<li><p id="playerHolder"></p></li> 
 	<li><p id="playerHolder1"></p></li> !-->
                 </ol>
@@ -569,8 +569,15 @@
         window.setTimeout(logDuration,1000);
         var cur_time = formatTime(ik_player.getCurrentTime()).toString();
          trigger(cur_time);
+					return cur_time
         }
         logDuration();
+				$("#text").click(function(e){
+						ik_player.pauseVideo()
+         		setForum(logDuration())
+           
+        });
+			
     	}
 
 			function trigger(cur_time){
@@ -578,6 +585,7 @@
           	min_range = '{{ q.minute_range }}'
             sec_range = '{{ q.second_range }}'
            	id = '{{ q.id }}'
+						
             min_split = min_range.split("-")
             sec_split = sec_range.split("-")
             lower = min_split[0]+"."+sec_split[0];
@@ -586,11 +594,7 @@
             if((parseFloat(cur_time)).between(parseFloat(lower.toString()),parseFloat(upper.toString())))   
             {
               div.style.backgroundColor = "#cdcdcd";
-							var container = $("div"),
-												scrollTo = $('#'+id );
-												container.animate({
-    										scrollTop:(scrollTo.offset().top)
-												},500);
+							
             }else{
               div.style.backgroundColor = "#ffffff";
             }
@@ -604,11 +608,39 @@
             previousTime = currentTime;
             currentTime = trackedPlayer.currentTime();
             var cur_time = formatTime(currentTime).toString();
-           
-            trigger( cur_time);
+           	trigger( cur_time);
+							$("#text").click(function(e){
+							trackedPlayer.pause()
+		       		setForum(cur_time)
+		         
+		      		});
+			
             });
  
-  
+  		
+				function setForum(cur_time)
+				{
+					 
+						var time_split = cur_time.split(".")
+						var minute = parseFloat(time_split[0]);
+						var min_range = minute+"-"+(minute+parseFloat(1))
+						if(parseInt(time_split[1]).between(parseInt(0),parseInt(9))){
+									sec_range = "0-10"
+						}else if(parseFloat(time_split[1]).between(parseFloat(10),parseFloat(19))){
+									sec_range = "10-20"
+						}else if(parseFloat(time_split[1]).between(parseFloat(20),parseFloat(29))){
+									sec_range = "20-30"
+						}else if(parseFloat(time_split[1]).between(parseFloat(30),parseFloat(39))){
+									sec_range = "30-40"
+						}else if(parseFloat(time_split[1]).between(parseFloat(40),parseFloat(49))){
+									sec_range = "40-50"
+						}else {
+									sec_range = "50-60"
+						}
+		
+						 var url = "http://forums.spoken-tutorial.org/new-question/?category={{ tr_rec.tutorial_detail.foss.foss }}&tutorial={{ tr_rec.tutorial_detail.tutorial }}&minute_range="+min_range+"&second_range="+sec_range;
+						$("#text").attr("href", url);
+				}
     </script>
 {% endblock %}
 {% block uncompressjsblock %}
@@ -618,5 +650,6 @@
     <script src="https://apis.google.com/js/platform.js"></script>
 		<script type="text/javascript" src="http://www.youtube.com/iframe_api"></script>
 {% endblock %}
+
 
 
