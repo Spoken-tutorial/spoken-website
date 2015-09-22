@@ -578,19 +578,15 @@
 	     window.setTimeout(logDuration,1000);
 	     var cur_time = formatTime(ik_player.getCurrentTime()).toString();
 	     var duration=  formatTime(ik_player.getDuration()).toString();
-             trigger(cur_time, duration);
 
+		if(parseFloat(cur_time) == parseFloat(duration.toString())){
+		 $('.ScrollStyle').find('.question').css("background-color", "white");
+		}else{
+		trigger(cur_time, duration);
+		}
         return cur_time
         }
         logDuration();
-
-    //var title = $('#text').html("Post your Question on the Forum");
-       // $("#text").click(function(e){
-     // e.preventDefault();
-         // alert(logDuration());
-            //title.html('new title'+logDuration());
-       // });
-        }
 
       function trigger(cur_time, duration){
       //$("#playerHolder").text("dura"+duration);
@@ -606,22 +602,17 @@
            
             if((parseFloat(cur_time)).between(parseFloat(lower.toString()),parseFloat(upper.toString())))  
             {
-             $("#"+'{{ q.id }}').prependTo("#forum_Q");
          
-             if(flag == false){
-       
-             var el = document.getElementById('forums_Q');
-                 el.scrollTop = 0;
-             flag = true;
-            }else{
-                //$("#playerHolder").text("else");
-            }
-         
-           if(parseFloat(cur_time) == parseFloat(duration.toString())){
-               div.style.backgroundColor = "#ffffff";
-           }else{
-                div.style.backgroundColor = "#cdcdcd";
-           }
+	      bgColor = $("#"+'{{ q.id }}').css('background-color')
+	      if($("#"+'{{ q.id }}').css("background-color")=="rgb(205, 205, 205)"){
+	      }else{
+		var el = document.getElementById('forums_Q');
+                el.scrollTop = 0;
+		div.style.backgroundColor = "#cdcdcd";
+	      }
+		
+              $("#"+'{{ q.id }}').prependTo("#forum_Q");
+            
            }else{
               div.style.backgroundColor = "#ffffff";
            }
@@ -649,4 +640,5 @@
     <script src="https://apis.google.com/js/platform.js"></script>
         <script type="text/javascript" src="http://www.youtube.com/iframe_api"></script>
 {% endblock %}
+
 
