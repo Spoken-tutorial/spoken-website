@@ -133,7 +133,13 @@ class TrainingRequestEditForm(forms.ModelForm):
 class CourseMapForm(forms.ModelForm):
   category = forms.ChoiceField(choices=[('', '---------'), (1, 'Software Course mapped in lab hours'), (2, ' Software Course unmapped in lab hours')])
   course = forms.ModelChoiceField(queryset=LabCourse.objects.all())
-  foss = forms.ModelChoiceField(queryset=FossCategory.objects.filter(status=True))
+  foss = forms.ModelChoiceField(
+        queryset = FossCategory.objects.filter(
+            id__in=FossAvailableForWorkshop.objects.filter(status=1).values('foss').distinct(),
+            status=True
+        )
+  )
+
   class Meta:
     model = CourseMap
     exclude = ['test']
@@ -204,7 +210,8 @@ class MapCourseWithFossForm(forms.ModelForm):
     # in FossAvailableForWorkshop.
     foss = forms.ModelChoiceField(
         queryset = FossCategory.objects.filter(
-            id__in=FossAvailableForWorkshop.objects.filter(status=1).values('foss').distinct()
+            id__in=FossAvailableForWorkshop.objects.filter(status=1).values('foss').distinct(),
+            status = True
         )
     )
     class Meta:
