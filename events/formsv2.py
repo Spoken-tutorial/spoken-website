@@ -198,4 +198,15 @@ class LatexWorkshopFileUploadForm(forms.ModelForm):
     fields = '__all__'
 
 
-
+class MapCourseWithFossForm(forms.ModelForm):
+    # Loading only the foss which is AvailableForWorkshop
+    # To display new foss need to make one entry with default language english \
+    # in FossAvailableForWorkshop.
+    foss = forms.ModelChoiceField(
+        queryset = FossCategory.objects.filter(
+            id__in=FossAvailableForWorkshop.objects.filter(status=1).values('foss').distinct()
+        )
+    )
+    class Meta:
+        model = CourseMap
+        exclude = ()

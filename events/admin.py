@@ -4,6 +4,7 @@ from django.template.defaultfilters import slugify
 
 from events.models import *
 from events.forms import RpForm
+from events.formsv2 import MapCourseWithFossForm
 
 class UniversityAdmin(admin.ModelAdmin):
     exclude = ('user',)
@@ -75,4 +76,9 @@ admin.site.register(FossMdlCourses, FossMdlCoursesAdmin)
 
 
 # EVENTS V2
-admin.site.register(CourseMap)
+
+class CourseMapAdmin(admin.ModelAdmin):
+    # Custom form to overwrite the default form field options
+    form = MapCourseWithFossForm
+
+admin.site.register(CourseMap, CourseMapAdmin)
