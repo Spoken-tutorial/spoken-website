@@ -1,6 +1,7 @@
 from models import MdlUser
 from events.models import *
 from django.core.mail import EmailMultiAlternatives
+import hashlib
 
 def encript_password(password):
     password = hashlib.md5(password+'VuilyKd*PmV?D~lO19jL(Hy4V/7T^G>p').hexdigest()
@@ -26,6 +27,7 @@ def get_moodle_user(academic_id, firstname, lastname, gender, email):
             mdluser.password = password"""
         mdluser.save()
     except Exception, e:
+      try:
         mdluser = MdlUser()
         mdluser.auth = 'manual'
         mdluser.firstname = firstname
@@ -74,4 +76,6 @@ Admin Spoken Tutorials
             result = email.send(fail_silently=False)
         except:
             pass
+      except:
+        return MdlUser.objects.filter(email = email).first()
     return mdluser

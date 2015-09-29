@@ -763,10 +763,6 @@ class TestTrainingManager(models.Manager):
         Q(sem_start_date__lte=datetime.now()-timedelta(days=30))
       ),
       participants__gt=0
-    ).exclude(
-      id__in=Test.objects.exclude(
-        training_id=None
-      ).values_list('training_id').distinct()
     ).order_by('-training_planner__year', '-training_planner__semester_id')
 
 
