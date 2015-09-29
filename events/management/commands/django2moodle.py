@@ -6,6 +6,7 @@ from mdldjango.models import MdlUser
 from hashlib import md5
 from string import digits, ascii_uppercase
 from random import sample
+from datetime import datetime
 
 
 class Command(BaseCommand):
@@ -16,36 +17,62 @@ class Command(BaseCommand):
     HEADERS = {'Reply-To': 'no-replay@spoken-tutorial.org',
             "Content-type":"text/html;charset=iso-8859-1"}
 
+    rmsg = 'Report {0}\n'.format(datetime.now())
+    cmsg = 'Completed {0}\n'.format(datetime.now())
+    imsg = 'Incomplete {0}\n'.format(datetime.now())
+
     def handle(self, *args, **options):
         users = self.get_spoken_user()
-        self.log(users.count())
+        self.log('Total users: {0}'.format(users.count()), 'r')
+        count = 0
+        ncount= 0
 
         for user in users:
+            self.log('\n###############\n', 'i')
             if self.is_student(user):
-                self.log(user)
+                self.log('\n###############\n', 'c')
+                self.log(user, 'c')
                 if not self. is_moodle_user(user):
-                    self.log(user.email+" not in moodle")
+                    self.log('email: {0} not in moodle'.format(user.email), 'c')
                     academy = self.get_academy(user)
                     if academy:
-                        self.log(academy)
+                        self.log('Academy {0}'.format(academy), 'c')
                         password = self.get_raw_password()
+                        self.log('Password '+password, 'c')
                         mdluser = self.add_moodle_user(user, password, academy)
                         if mdluser:
-                            self.log("Added to moodle")
+                            self.log("Added to moodle", 'c')
                             ex, res = self.send_email(mdluser, password)
-                            self.log(ex)
-                            self.log('+')
-                            self.log(res)
+                            self.log(res, 'c')
+                            self.log(res, 'i')
+                            if ex:
+                                self.log(ex, 'i')
+                                ncount += 1
+                                break
+                            count += 1
                         else:
-                            self.log("user not added")
+                            self.log("user not added" , 'i')
+                            ncount += 1
                     else:
-                        self.log("no academy")
+                        self.log("no academy", 'i')
+                        ncount += 1
                 else:
-                    self.log(user.email+" in moodle")
+                    self.log('Email: {0} in moodle'.format(user.email), 'i')
+                    ncount += 1
             else:
-                self.log(user)
-                self.log("not student")
+                self.log('{0} not student'.format(user), 'i')
+                ncount += 1
 
+        self.log('Added and Mailed:{0}'.format(count), 'r')
+        self.log('Not added: {0}'.format(ncount), 'r')
+
+        self.create_log_file(self.cmsg, 'c')
+        self.create_log_file(self.imsg, 'i')
+        err_value = self.create_log_file(self.rmsg, 'r')
+        if err_value:
+            self.stdout.write(self.cmsg)
+            self.stdout.write(self.imsg)
+            self.stdout.write(self.rmsg)
 
     def get_spoken_user(self):
         return User.objects.all()
@@ -124,10 +151,10 @@ Cheers from the 'Spoken Tutorials Online Test Center' administrator,
 Admin Spoken Tutorials
 '''
         message = message.format(user.firstname, user.username, password)
-        self.log(message)
+        self.log(message, 'c')
         email = EmailMultiAlternatives(self.SUBJECT, message, self.FROM,
             to = [user.email], bcc = [], cc = [], headers=self.HEADERS)
-        self.log(email)
+        self.log(email, 'c')
         try:
             result = email.send(fail_silently=False)
             return None, result
@@ -135,5 +162,25 @@ Admin Spoken Tutorials
             return e, result
 
 
-    def log(self, data):
-        print data
+    def log(self, data, _type):
+        if _type == 'c':
+            self.cmsg = '{0} {1}\n'.format(self.cmsg,data)
+        if _type == 'i':
+            self.imsg = '{0} {1}\n'.format(self.imsg,data)
+        if _type == 'r':
+            self.rmsg = '{0} {1}\n'.format(self.rmsg,data)
+
+    def create_log_file(self, data, _type):
+        try:
+            if _type == 'c':
+                _file = open('migrated.log', 'ab+')
+            if _type == 'i':
+                _file = open('not_migrated.log', 'ab+')
+            if _type == 'r':
+                _file = open('report.log', 'ab+')
+
+            _file.write('\n{0}\n'.format(data))
+            _file.close()
+        except Exception, e:
+            return e
+
