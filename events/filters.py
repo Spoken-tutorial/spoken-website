@@ -167,7 +167,7 @@ class TrainingRequestFilter(django_filters.FilterSet):
 
   training_planner__academic__institution_type = django_filters.ChoiceFilter(
     choices=[('', '---------')] + list(
-      InstituteType.objects.exclude(name='School').values_list('id', 'name').distinct()
+      InstituteType.objects.all().values_list('id', 'name').distinct()
     )
   )
 
