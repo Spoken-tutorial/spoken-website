@@ -203,4 +203,9 @@ urlpatterns = [
        'events.viewsv2.LatexWorkshopFileUpload',
        name="latex-workshop"
        ),
+    url(
+       r'^student-batch/(?P<bid>\d+)/view/(?P<pk>\d+)$',
+       UpdateStudentName.as_view(template_name="update_student.html"),
+       name="update_student"
+       ),
 ]
