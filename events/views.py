@@ -1691,7 +1691,10 @@ def test_request(request, role, rid = None):
                         mdluser = get_moodle_user(tra.training.training_planner.academic_id, user.first_name, user.last_name, tra.student.gender, tra.student.user.email)# if it create user rest password for django user too
                         if mdluser:
                             fossmdlcourse = FossMdlCourses.objects.get(foss_id = t.foss_id)
-                            instance = TestAttendance()
+                            try:
+                                instance = TestAttendance.objects.get(test_id=t.id, mdluser_id=mdluser.id)
+                            except:
+                                instance = TestAttendance()
                             instance.student = tra.student
                             instance.test_id = t.id
                             instance.mdluser_id = mdluser.id

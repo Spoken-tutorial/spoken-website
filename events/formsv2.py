@@ -4,6 +4,7 @@ from django.forms.models import BaseModelFormSet
 from events.models import *
 from datetime import datetime, date
 from events.helpers import get_academic_years
+import datetime
 
 
 class StudentBatchForm(forms.ModelForm):
@@ -38,11 +39,25 @@ class TrainingRequestForm(forms.ModelForm):
 
   def clean(self):
     if self.cleaned_data:
+      #48hrs, batch id fetched
+      batch_id_list = []
+      sm_batch_all = StudentMaster.objects.all()
+      for i in sm_batch_all:
+        if datetime.datetime.today().isoformat() < (i.created+datetime.timedelta(days=2)).isoformat():
+          batch_id_list.append(i.batch_id)
+      batch_id_set = set(batch_id_list)
+      uniq_batch_id = []
+      for j in batch_id_set:
+        uniq_batch_id.append(j)
+      #
       tp = TrainingPlanner.objects.get(pk=self.cleaned_data['training_planner'])
       if 'department' in self.cleaned_data and self.cleaned_data['department'] \
         and 'batch' in self.cleaned_data and self.cleaned_data['batch']:
         if tp.is_full(self.cleaned_data['department'], self.cleaned_data['batch']):
           raise forms.ValidationError("No. of training requests for this department exceeded.")
+
+        if self.cleaned_data['batch'].id in uniq_batch_id:
+          raise forms.ValidationError("You cannot add selected Master Batch prior to 48 hours of requesting STP.")
 
         if 'course_type' in self.cleaned_data and self.cleaned_data['course_type']:
           if tp.is_course_full(self.cleaned_data['course_type'], self.cleaned_data['department'], self.cleaned_data['batch']):
@@ -133,7 +148,13 @@ class TrainingRequestEditForm(forms.ModelForm):
 class CourseMapForm(forms.ModelForm):
   category = forms.ChoiceField(choices=[('', '---------'), (1, 'Software Course mapped in lab hours'), (2, ' Software Course unmapped in lab hours')])
   course = forms.ModelChoiceField(queryset=LabCourse.objects.all())
-  foss = forms.ModelChoiceField(queryset=FossCategory.objects.filter(status=True))
+  foss = forms.ModelChoiceField(
+        queryset = FossCategory.objects.filter(
+            id__in=FossAvailableForWorkshop.objects.filter(status=1).values('foss').distinct(),
+            status=True
+        )
+  )
+
   class Meta:
     model = CourseMap
     exclude = ['test']
@@ -206,4 +227,16 @@ class LatexWorkshopFileUploadForm(forms.ModelForm):
     fields = '__all__'
 
 
-
+class MapCourseWithFossForm(forms.ModelForm):
+    # Loading only the foss which is AvailableForWorkshop
+    # To display new foss need to make one entry with default language english \
+    # in FossAvailableForWorkshop.
+    foss = forms.ModelChoiceField(
+        queryset = FossCategory.objects.filter(
+            id__in=FossAvailableForWorkshop.objects.filter(status=1).values('foss').distinct(),
+            status = True
+        )
+    )
+    class Meta:
+        model = CourseMap
+        exclude = ()

@@ -17,7 +17,7 @@ from events.filters import TrainingRequestFilter, \
 
 # Create your views here.
 def maphome(request):
-  states = State.objects.all().exclude(name = 'Uncategorised')
+  states = State.objects.filter(has_map = 1)
 
   counts = TrainingRequest.objects.filter(
     participants__gt=0,

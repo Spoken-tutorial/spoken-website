@@ -28,6 +28,7 @@ import csv
 from cms.sortable import *
 from django.contrib import messages
 from django.template import RequestContext, loader
+from mdldjango.get_or_create_participant import get_or_create_participant
 
 #pdf generate
 from reportlab.pdfgen import canvas
@@ -143,6 +144,7 @@ class StudentBatchCreateView(CreateView):
   template_name = None
   user = None
   batch = None
+  organiser = None
 
   @method_decorator(group_required("Organiser"))
   def dispatch(self, *args, **kwargs):
@@ -185,6 +187,7 @@ class StudentBatchCreateView(CreateView):
   def form_valid(self, form, **kwargs):
     form_data = form.save(commit=False)
     form_data.academic = self.user.organiser.academic
+    self.organiser = self.user.organiser
     form_data.organiser = self.user.organiser
     try:
       if 'bid' in self.kwargs:
@@ -263,6 +266,7 @@ class StudentBatchCreateView(CreateView):
         except:
           pass
         student = Student.objects.create(user = user, gender = gender)
+        get_or_create_participant(self.organiser, fname, lname, gender, email, 0)
         return student
     return False
 
