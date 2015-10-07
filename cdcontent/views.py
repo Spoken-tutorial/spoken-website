@@ -92,7 +92,7 @@ def home(request):
                             filepath = 'videos/' + str(key) + '/' + str(rec.tutorial_detail_id) + '/' + rec.tutorial_detail.tutorial.replace(' ', '-') + "-English.srt"
                             if os.path.isfile(settings.MEDIA_ROOT + filepath):
                                 archive.write(settings.MEDIA_ROOT + filepath, 'spoken/' + filepath)
-                        filepath = 'videos/' + str(key) + '/' + str(rec.tutorial_detail_id) + '/' + rec.video
+                        filepath = 'videos/' + str(key) + '/' + str(rec.tutorial_detail_id) + '/' + rec.video 
                         if os.path.isfile(settings.MEDIA_ROOT + filepath):
                             archive.write(settings.MEDIA_ROOT + filepath, 'spoken/' + filepath)
                         ptr = filepath.rfind(".")
@@ -143,7 +143,8 @@ def home(request):
             archive.write(settings.BASE_DIR + '/static/spoken/images/Basic.png', 'spoken/includes/images/Basic.png')
             archive.write(settings.BASE_DIR + '/static/spoken/images/Intermediate.png', 'spoken/includes/images/Intermediate.png')
             archive.write(settings.BASE_DIR + '/static/spoken/images/Advanced.png', 'spoken/includes/images/Advanced.png')
-            archive.write(settings.BASE_DIR + '/media/side-by-side-method.ogv', 'spoken/side-by-side-method.ogv')
+            archive.write(settings.BASE_DIR + '/media/videos/side-by-side/Side-by-Side-Method-%s.ogv'%(language__name), 'spoken/Side_by_Side-Method-%s.ogv'%(language__name))
+            # archive.write(settings.BASE_DIR + '/media/side-by-side-method.ogv', 'spoken/side-by-side-method.ogv')
             zipdir(settings.BASE_DIR + '/static/spoken/fonts', 'spoken/includes/fonts/', archive)
             archive.write(settings.BASE_DIR + '/static/cdcontent/templates/readme.txt', 'spoken/README.txt')
             archive.write(settings.BASE_DIR + '/static/cdcontent/templates/index.html', 'spoken/index.html')
