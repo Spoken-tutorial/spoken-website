@@ -13,7 +13,7 @@ from django.utils.decorators import method_decorator
 from events.decorators import group_required
 from events.forms import StudentBatchForm, TrainingRequestForm, \
     TrainingRequestEditForm, CourseMapForm, SingleTrainingForm, \
-    OrganiserFeedbackForm, LatexWorkshopFileUploadForm
+    OrganiserFeedbackForm, LatexWorkshopFileUploadForm, UserForm
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, render_to_response
 from django.core.validators import validate_email
@@ -360,14 +360,15 @@ class StudentListView(ListView):
     self.batch = self.batch.first()
     self.header = {
         1: SortableHeader('#', False),
-        2: SortableHeader('', False, 'Department'),
-        3: SortableHeader('', False, 'Year'),
-        4: SortableHeader('user__first_name', True, 'First Name'),
-        5: SortableHeader('user__last_name', True, 'Last Name'),
-        6: SortableHeader('user__email', True, 'Email'),
-        7: SortableHeader('gender', True, 'Gender'),
-        8: SortableHeader('', False, 'Status'),
-        9: SortableHeader('', False, ''),
+        2: SortableHeader('Edit', False),
+        3: SortableHeader('', False, 'Department'),
+        4: SortableHeader('', False, 'Year'),
+        5: SortableHeader('user__first_name', True, 'First Name'),
+        6: SortableHeader('user__last_name', True, 'Last Name'),
+        7: SortableHeader('user__email', True, 'Email'),
+        8: SortableHeader('gender', True, 'Gender'),
+        9: SortableHeader('', False, 'Status'),
+        10: SortableHeader('', False, ''),
     }
     self.queryset = Student.objects.filter(
       id__in = StudentMaster.objects.filter(
@@ -1720,4 +1721,10 @@ def LatexWorkshopFileUpload(request):
     form = LatexWorkshopFileUploadForm()
     context=RequestContext(request, {'form':form})
   return render_to_response(template_name, context)
-
+  
+class UpdateStudentName(UpdateView):
+  model = User
+  form_class = UserForm
+  def dispatch(self, *args, **kwargs):
+    self.success_url="/software-training/student-batch/"+str(kwargs['bid'])+"/view"
+    return super(UpdateStudentName, self).dispatch(*args, **kwargs)

@@ -140,6 +140,14 @@ class CourseMapForm(forms.ModelForm):
 
   def __init__(self, *args, **kwargs):
     super(CourseMapForm, self).__init__(*args, **kwargs)
+    
+class UserForm(forms.ModelForm):
+  class Meta:
+    model = User
+    exclude = ['password','last_login','is_superuser','username','is_staff','is_active','date_joined','groups','user_permissions','email']
+  
+  def __init__(self, *args, **kwargs):
+    super(UserForm, self).__init__(*args, **kwargs)
 
 class SingleTrainingForm(forms.ModelForm):
   training_type = forms.ChoiceField(choices=[('', '---------'), (0, 'School'),(3,'Vocational'),(1,'Live workshop'),(2,'Pilot workshop')])
