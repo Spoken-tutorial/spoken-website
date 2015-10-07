@@ -43,7 +43,7 @@
         {% if record.user.is_active %}
         <tr>
           <td>{{ forloop.counter }}</td>
-          <td>Edit</td>
+          <td><a href="{% url 'events:update_student' batch.id record.user.id %}">Edit</a></td>
           <td>{{ batch.department}}</td>
           <td>{{ batch.year}}</td>
           <td>{{ record.user.first_name }}</td>
