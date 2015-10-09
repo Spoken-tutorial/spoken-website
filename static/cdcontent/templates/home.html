@@ -158,7 +158,7 @@
                         </div><!-- .row well tab-content tutorial-search-form -->
                         <hr />
                         <div class="video-container col-lg-8 col-md-8 col-sm-8 col-lg-offset-2 col-md-offset-2">
-<select class="form-control language" id="id_language" name="language" tabindex="1" value="">
+<select class="form-control languages" id="id_languages" name="languages" tabindex="1" value="">
 <option value="0">Select Language for Side-by-Side method video</option>
               {% for language in languages %}
                     <option value="{{ language }} ">{{ language }}</option>
@@ -243,7 +243,7 @@
                     $('.language').html('<option value="0">Select Language</option>' + fossList[foss]);
                 });
 
-                $('.language').on("change", function(){
+                $('.languages').on("change", function(){
                     language = ($(this).val()).trim();
 		    mp = videojs('st_video');
                     mp.src({ type: "video/ogg", src: '../Side_by_Side-Method-'+language+'.ogv' });
