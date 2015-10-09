@@ -161,16 +161,14 @@
 <select class="form-control language" id="id_language" name="language" tabindex="1" value="">
 <option value="0">Select Language for Side-by-Side method video</option>
               {% for foss_key,foss_detail in foss_details.items %}
-                    <option value="{{ foss_key }} ">{{ foss_details|get_lang_details:foss_key|safe }}</option>
+                    <option value="{{ foss_details|get_lang_details:foss_key|safe }} ">{{ foss_details|get_lang_details:foss_key|safe }}</option>
               {% endfor %}
-                                                
-
-                                                <option value="{{ lang.name }}"></option> 
+                    <option value="{{ lang.name }}"></option> 
                                 </select>
                                 <br />
                             <video id="st_video" class="video-js vjs-default-skin" controls preload="auto" width="auto" height="auto" data-setup="{}">
                                 
-                                <source src="../side-by-side-method.ogv" type="video/ogg" />
+                                <source src="../Side_by_Side-Method-English.ogv" type="video/ogg" />
                             </video>
 
                         </div>
@@ -246,10 +244,23 @@
                     $('.language').html('<option value="0">Select Language</option>' + fossList[foss]);
                 });
 
-                $('#id_language').on("change", function(){
-                    language = $('#id_language').val();
-                    $('#st_video')..attr("src","../Side-by-Side-Method-"+ language +".ogv");
+                $('.language').on("change", function(){
+                    console.log("ef")
+                    language = $(this).val();
+                    console.log(language);
+                    //$('.video-js').attr("src","/tmp/spoken/Side_by_Side-Method-Hindi.ogv");
+		    mp = videojs('st_video');
+                    mp.src({ type: "video/ogg", src: '../Side_by_Side-Method-'+language+'.ogv' });
+	            mp.play();                    
+	 	    mp.volume(0.2);
+   
                 });
+
+               // $('#id_language').on("change", function(){
+               //     language = $('#id_language').val();
+               //     $('#st_video')..attr("src","../Side-by-Side-Method-"+ language +".ogv");
+               // });
+
                 $('.search-btn').on("click", function(){
                     foss = $('.foss').val();
                     lang = $('.language').val();
