@@ -43,6 +43,7 @@ def get_sheet_path(foss, lang, sheet):
 
 def get_all_foss_details(selectedfoss):
     all_foss_details = {}
+    languages = set()
     for key, values in selectedfoss.iteritems():
         foss_rec = FossCategory.objects.get(pk = key)
         try:
@@ -57,7 +58,8 @@ def get_all_foss_details(selectedfoss):
         for value in values[0]:
             language = Language.objects.get(pk = value)
             all_foss_details[foss_rec.id]['langs'][language.id] = language.name
-    return all_foss_details
+            languages.add(language.name)
+    return all_foss_details, languages
 
 def home(request):
     if request.method == 'POST':
@@ -66,7 +68,7 @@ def home(request):
             temp = tempfile.TemporaryFile()
             archive = zipfile.ZipFile(temp, 'w', zipfile.ZIP_DEFLATED, allowZip64=True)
             selectedfoss = json.loads(request.POST.get('selected_foss', {}))
-            all_foss_details = get_all_foss_details(selectedfoss)
+            all_foss_details, languages = get_all_foss_details(selectedfoss)
             eng_rec = Language.objects.get(name="English")
             for key, values in selectedfoss.iteritems():
                 foss_rec = FossCategory.objects.get(pk = key)
@@ -127,7 +129,7 @@ def home(request):
                     list_page = list_page.replace('Content-Type: text/html; charset=utf-8', '')
                     list_page = list_page.strip("\n")
                     archive.writestr('spoken/videos/' + str(foss_rec.id) + '/list-videos-' + language.name + '.html', list_page)
-            home_page = str(render(request, "cdcontent/templates/home.html", {'foss_details': all_foss_details, 'foss': foss_rec.id, 'lang': language.id}))
+            home_page = str(render(request, "cdcontent/templates/home.html", {'foss_details': all_foss_details, 'foss': foss_rec.id, 'lang': language.id, 'languages': languages}))
             home_page = home_page.replace('Content-Type: text/html; charset=utf-8', '')
             home_page = home_page.strip("\n")
             archive.writestr('spoken/videos/home.html', home_page)
