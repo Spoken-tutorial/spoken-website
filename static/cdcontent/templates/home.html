@@ -158,9 +158,19 @@
                         </div><!-- .row well tab-content tutorial-search-form -->
                         <hr />
                         <div class="video-container col-lg-8 col-md-8 col-sm-8 col-lg-offset-2 col-md-offset-2">
+<select class="form-control language" id="id_language" name="language" tabindex="1" value="">
+<option value="0">Select Language for Side-by-Side method video</option>
+              {% for foss_key,foss_detail in foss_details.items %}
+                    <option value="{{ foss_details|get_lang_details:foss_key|safe }} ">{{ foss_details|get_lang_details:foss_key|safe }}</option>
+              {% endfor %}
+                    <option value="{{ lang.name }}"></option> 
+                                </select>
+                                <br />
                             <video id="st_video" class="video-js vjs-default-skin" controls preload="auto" width="auto" height="auto" data-setup="{}">
-                                <source src="../side-by-side-method.ogv" type="video/ogg" />
+                                
+                                <source src="../Side_by_Side-Method-English.ogv" type="video/ogg" />
                             </video>
+
                         </div>
                     </div>
                 </div>
@@ -233,6 +243,24 @@
                     foss = $('.foss').val();
                     $('.language').html('<option value="0">Select Language</option>' + fossList[foss]);
                 });
+
+                $('.language').on("change", function(){
+                    console.log("ef")
+                    language = $(this).val();
+                    console.log(language);
+                    //$('.video-js').attr("src","/tmp/spoken/Side_by_Side-Method-Hindi.ogv");
+		    mp = videojs('st_video');
+                    mp.src({ type: "video/ogg", src: '../Side_by_Side-Method-'+language+'.ogv' });
+	            mp.play();                    
+	 	    mp.volume(0.2);
+   
+                });
+
+               // $('#id_language').on("change", function(){
+               //     language = $('#id_language').val();
+               //     $('#st_video')..attr("src","../Side-by-Side-Method-"+ language +".ogv");
+               // });
+
                 $('.search-btn').on("click", function(){
                     foss = $('.foss').val();
                     lang = $('.language').val();
