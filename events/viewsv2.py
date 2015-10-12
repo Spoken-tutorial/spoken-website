@@ -315,12 +315,15 @@ class StudentBatchUpdateView(UpdateView):
         try:
           sb = StudentBatch.objects.get(pk=kwargs['pk'])
           if sb.trainingrequest_set.exists():
-            messages.warning(self.request, 'This Student Batch has Training. You can not edit this batch.')
-            return HttpResponseRedirect('/software-training/student-batch/')
+            #messages.warning(self.request, 'This Student Batch has Training. You can not edit this batch.')
+            return HttpResponseRedirect('/software-training/student-batch/edit/'+str(kwargs['pk']))
         except:
           pass
       return super(StudentBatchUpdateView, self).dispatch(*args, **kwargs)
-
+      
+class StudentBatchYearUpdateView(UpdateView):
+    model = StudentBatch
+    success_url = "/software-training/student-batch/"
 
 class StudentBatchListView(ListView):
   queryset = StudentBatch.objects.none()
