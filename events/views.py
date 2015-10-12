@@ -55,7 +55,7 @@ import string
 import random
 
 from  filters import *
-
+from cms.views import create_profile
 from cms.sortable import *
 from events_email import send_email
 import datetime
@@ -2242,7 +2242,13 @@ def organiser_invigilator_index(request, role, status):
             collection = {}
     else:
         raise PermissionDenied()
-            
+
+    for record in collection:
+        try:
+            record.user.profile_set.get()
+        except:
+            create_profile(record.user)
+
     context['header'] = header
     context['ordering'] = ordering
     context['collection'] = collection

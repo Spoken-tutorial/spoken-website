@@ -530,7 +530,8 @@ class StudentBatch(models.Model):
     return StudentMaster.objects.filter(batch_id = self.id).count()
 
   def can_add_student(self, organiser_id):
-    if self.organiser.id == organiser_id:
+    organiser = Organiser.objects.get(pk=organiser_id)
+    if self.organiser.academic_id == organiser.academic_id:
       return True
     return False
 
