@@ -61,6 +61,12 @@ urlpatterns = [
       name="training_attendance"
     ),
     url(
+      r'^(?P<tid>\d+)/certificate', 
+      TrainingCertificateListView.as_view(template_name=\
+        "training_certificate.html"), 
+      name="training_certificate"
+    ),
+    url(
       r'^training-request/(?P<trid>\d+)/$', 
       TrainingRequestEditView.as_view(template_name=\
         "edit_training_request.html"), 

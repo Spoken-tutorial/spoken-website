@@ -230,7 +230,7 @@
             <td>{{ training.attendance_summery }}</td>
             <td>
               {% if training.get_partipants_from_attendance %}
-              | <a href="{% url 'events:training_attendance' training.id %}">Participant List</a> |
+              | <a href="{% url 'events:training_certificate' training.id %}">Participant List</a> |
               {% endif %}
             </td>
           </tr>

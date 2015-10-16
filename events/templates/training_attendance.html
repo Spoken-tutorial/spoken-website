@@ -98,18 +98,13 @@
                     <input type='checkbox' name="user" value="{{record.student.id}}">
                   {% endif %}
                 </td>
-                {% elif not attendance_allowed and not training_attendance %}
-                  <td>**N/A**</td>
                 {% endif %}
                 {% if can_mark_attendance and attendance_allowed %}
                 <td>{{ record.student.student_fullname }}</td>
                 <td>{{ record.student.user.email }}</td>
                 <td>{{ record.student.gender }}</td>
-                 {% elif not can_mark_attendance and training_attendance and training_attendance.id and training.is_training_certificate_allowed %}
-                <td>{{ record.student.student_fullname }}</td>
-                <td>{{ record.student.user.email }}</td>
-                <td>{{ record.student.gender }}</td>
                 {% endif %}
+                
                 {% if can_mark_attendance and attendance_allowed %}
                 <td>
                   {% with lang_id=training|get_langid:record.student %}
@@ -124,11 +119,6 @@
                     </select>
                   {% endwith %}
                 </td>
-                {% elif not attendance_allowed and not training_attendance %}
-                  <td>**N/A**</td>
-                {% endif %}
-                {% if not can_mark_attendance and training_attendance and training_attendance.id and training.is_training_certificate_allowed %}
-                  <td><a href="{% url 'events:organiser_training_certificate' training_attendance.id %}">Download Certificate</a></td>
                 {% endif %}
               </tr>
             {% endwith %}
@@ -156,9 +146,6 @@
                 <td>{{ record.student.student_fullname }}</td>
                 <td>{{ record.student.user.email }}</td>
                 <td>{{ record.student.gender }}</td>
-                {% if not can_mark_attendance and training_attendance and training_attendance.id and training.is_training_certificate_allowed %}
-                  <td><a href="{% url 'events:organiser_training_certificate' training_attendance.id %}">Download Certificate</a></td>
-                {% endif %}
               </tr>
               {% endif %}
             {% endwith %}

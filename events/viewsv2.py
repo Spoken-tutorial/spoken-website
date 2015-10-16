@@ -572,6 +572,34 @@ class TrainingAttendanceListView(ListView):
     self.training_request.update_participants_count()
     return HttpResponseRedirect('/software-training/training-planner')
 
+class TrainingCertificateListView(ListView):
+  queryset = StudentMaster.objects.none()
+  paginate_by = 500
+  template_name = ""
+  training_request = None
+  
+  def dispatch(self, *args, **kwargs):
+    self.training_request = TrainingRequest.objects.get(pk=kwargs['tid'])
+    if self.training_request.status:
+      self.queryset = self.training_request.trainingattend_set.all()
+    else:
+      self.queryset = StudentMaster.objects.filter(batch_id=self.training_request.batch_id, moved=False)
+    return super(TrainingCertificateListView, self).dispatch(*args, **kwargs)
+
+  def get_context_data(self, **kwargs):
+    context = super(TrainingCertificateListView, self).get_context_data(**kwargs)
+    context['training'] = self.training_request
+    languages = Language.objects.filter(
+        id__in = FossAvailableForWorkshop.objects.filter(
+          foss_id = self.training_request.course.foss_id
+        ).values_list('language_id')
+      )
+    #language
+    #for lang in languages:
+    context['languages'] = languages
+    return context
+
+
 class StudentDeleteView(DeleteView):
   model=Student
   def dispatch(self, *args, **kwargs):
