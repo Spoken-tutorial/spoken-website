@@ -3,25 +3,26 @@
 {% block content %}
   <form action=" " method="post" enctype="multipart/form-data">
   {% csrf_token %}
-  <div>
    {% if success %}
      <p> You have successfully uploaded the assignment. </p>
    {% endif %}
-   <div>
-    <label>Email: </label> 
-    <div> 
+   <div class="form-group" >
+    <label  class="col-sm-3 control-label">Email: </label> 
+    <div class="col-sm-9">
       {{ form.email }} {{ form.email.errors }}
     </div>
    </div>
    <br />
-   <div>
-     <label>Upload file:</label>
-      <div> 
+   <br />
+   <div class="form-group">
+     <label  class="col-sm-3 control-label">Upload file:</label>
+      <div class="col-sm-9"> 
          {{ form.file_upload }} {{ form.file_upload.errors }}
       </div>
    </div>
- </div>
-  <br /><input type="submit" value="Upload" /> 
+   <br />
+<input class="btn btn-primary" type="submit" value="Upload"/>
+
   </form>
 {% endblock content %}
 

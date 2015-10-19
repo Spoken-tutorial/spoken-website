@@ -25,6 +25,9 @@ from events.views import get_page
 from spoken.search import search_for_results
 from mdldjango.models import MdlUser
 from forums.models import Question
+from cms.forms import *
+
+from django.contrib.auth.models import User
 
 def is_resource_person(user):
     """Check if the user is having resource person  rights"""
@@ -67,10 +70,10 @@ def home(request):
     testimonials = Testimonials.objects.all().order_by('?')[:2]
     context['testimonials'] = testimonials
     
-    notifications = Notification.objects.filter(Q(start_date__lte=datetime.datetime.today()) & Q(expiry_date__gte=datetime.datetime.today())).order_by('expiry_date')
+    notifications = Notification.objects.filter(Q(start_date__lte=datetime.today()) & Q(expiry_date__gte=datetime.today())).order_by('expiry_date')
     context['notifications'] = notifications
     
-    events = Event.objects.filter(event_date__gte=datetime.datetime.today()).order_by('event_date')[:2]
+    events = Event.objects.filter(event_date__gte=datetime.today()).order_by('event_date')[:2]
     context['events'] = events
     return render(request, 'spoken/templates/home.html', context)
 
@@ -395,3 +398,26 @@ def create_subtitle_files(request, overwrite = True):
 
 def sitemap(request):
     return render(request, 'sitemap.html', {})
+
+
+def add_user(request):
+    username = None
+    password = None
+    email = None
+    count = 1
+    f = open('/websites_dir/django_spoken/spoken/spoken/users', 'r')
+    ulist = f.read().splitlines()
+    f.close()
+    for data in ulist:
+        username = data
+        password = data
+        email = data
+        try:
+            user = User.objects.create_user(username, email, password)
+            user.save()
+            profile = Profile(user=user, confirmation_code='12345')
+            profile.save()
+            count += 1
+        except Exception, e:
+            print e
+    return HttpResponse("success")

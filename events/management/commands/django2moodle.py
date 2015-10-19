@@ -33,7 +33,11 @@ class Command(BaseCommand):
                 self.log('\n###############\n', 'c')
                 self.log(user, 'c')
                 if not self. is_moodle_user(user):
-                    self.log('email: {0} not in moodle'.format(user.email), 'c')
+                    try:
+                      self.log('email: {0} not in moodle'.format(user.email.encode('utf8')), 'c')
+                    except:
+                      print user.email
+                      pass
                     academy = self.get_academy(user)
                     if academy:
                         self.log('Academy {0}'.format(academy), 'c')
@@ -57,7 +61,7 @@ class Command(BaseCommand):
                         self.log("no academy", 'i')
                         ncount += 1
                 else:
-                    self.log('Email: {0} in moodle'.format(user.email), 'i')
+                    self.log('Email: {0} in moodle'.format(user.email.encode('utf8')), 'i')
                     ncount += 1
             else:
                 self.log('{0} not student'.format(user), 'i')
@@ -75,7 +79,7 @@ class Command(BaseCommand):
             self.stdout.write(self.rmsg)
 
     def get_spoken_user(self):
-        return User.objects.all()
+        return User.objects.filter(id = 333224)
 
 
     def is_student(self, user):
@@ -94,6 +98,9 @@ class Command(BaseCommand):
             return False
         except MdlUser.MultipleObjectsReturned:
             return True
+        except Exception, e:
+            print e
+            return True
 
 
     def get_academy(self, user):
@@ -105,19 +112,23 @@ class Command(BaseCommand):
 
     def add_moodle_user(self, user, password, academy):
         ''' Creates moodle account and sends email'''
-        mdluser = MdlUser()
-        mdluser.auth = 'manual'
-        mdluser.firstname = user.first_name
-        mdluser.lastname = user.last_name
-        mdluser.username = user.email
-        mdluser.password = self.encrypt_password(password)
-        mdluser.institution = academy
-        mdluser.gender = user.student.gender
-        mdluser.email = user.email
-        mdluser.confirmed = 1
-        mdluser.mnethostid = 1
-        mdluser.save()
-        return mdluser
+        try:
+            mdluser = MdlUser()
+            mdluser.auth = 'manual'
+            mdluser.firstname = user.first_name
+            mdluser.lastname = user.last_name
+            mdluser.username = user.email
+            mdluser.password = self.encrypt_password(password)
+            mdluser.institution = academy
+            mdluser.gender = user.student.gender
+            mdluser.email = user.email
+            mdluser.confirmed = 1
+            mdluser.mnethostid = 1
+            mdluser.save()
+            return mdluser
+        except Exception, e:
+           print e
+           return None
 
 
     def get_raw_password(self):
@@ -150,7 +161,7 @@ Cheers from the 'Spoken Tutorials Online Test Center' administrator,
 
 Admin Spoken Tutorials
 '''
-        message = message.format(user.firstname, user.username, password)
+        message = message.format(user.firstname.encode('utf8'), user.username.encode('utf8'), password)
         self.log(message, 'c')
         email = EmailMultiAlternatives(self.SUBJECT, message, self.FROM,
             to = [user.email], bcc = [], cc = [], headers=self.HEADERS)
@@ -163,12 +174,15 @@ Admin Spoken Tutorials
 
 
     def log(self, data, _type):
+      try:
         if _type == 'c':
             self.cmsg = '{0} {1}\n'.format(self.cmsg,data)
         if _type == 'i':
             self.imsg = '{0} {1}\n'.format(self.imsg,data)
         if _type == 'r':
             self.rmsg = '{0} {1}\n'.format(self.rmsg,data)
+      except:
+        print e
 
     def create_log_file(self, data, _type):
         try:
