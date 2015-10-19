@@ -192,7 +192,7 @@ class SingleTrainingForm(forms.ModelForm):
     return self.cleaned_data
     
   def clean_tdate(self):
-    today = datetime.now()
+    today = datetime.datetime.now()
     tdate = self.cleaned_data['tdate']
     if today.date() > tdate:
       raise forms.ValidationError("Invalid semester training date")
