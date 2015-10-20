@@ -45,7 +45,7 @@ for student in students:
       time.sleep(3)
       continue
     student.save()
-  print student.user.email, '-', status
+  print str(student.user.email), '-', status
 
 error_log_file_head.close()
 success_log_file_head.close()
