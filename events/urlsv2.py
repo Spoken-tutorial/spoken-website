@@ -34,6 +34,12 @@ urlpatterns = [
       name="edit_student"
     ),
     url(
+      r'^student-batch/edit/(?P<pk>\d+)/$', 
+      StudentBatchYearUpdateView.as_view(template_name="edit_batch_year.html", \
+        form_class=UpdateStudentYearBatchForm), 
+      name="edit_year"
+    ),
+    url(
       r'^student-batch/(?P<bid>\d+)/view/$', 
       StudentListView.as_view(template_name="list_student.html"), 
       name="list_student"
@@ -53,6 +59,12 @@ urlpatterns = [
       TrainingAttendanceListView.as_view(template_name=\
         "training_attendance.html"), 
       name="training_attendance"
+    ),
+    url(
+      r'^(?P<tid>\d+)/certificate', 
+      TrainingCertificateListView.as_view(template_name=\
+        "training_certificate.html"), 
+      name="training_certificate"
     ),
     url(
       r'^training-request/(?P<trid>\d+)/$', 
