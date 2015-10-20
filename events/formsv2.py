@@ -27,6 +27,12 @@ class UpdateStudentBatchForm(forms.ModelForm):
     model = StudentBatch
     exclude = ['academic', 'stcount', 'organiser']
 
+class UpdateStudentYearBatchForm(forms.ModelForm):
+  year = forms.ChoiceField(choices = get_academic_years())
+  class Meta:
+    model = StudentBatch
+    exclude = ['academic', 'stcount', 'organiser','department']
+
 class TrainingRequestForm(forms.ModelForm):
   department = forms.ModelChoiceField(empty_label='---------', queryset=CourseMap.objects.none())
   course_type = forms.ChoiceField(choices=[('', '---------'), (0, 'Software Course outside lab hours'), (1, 'Software Course mapped in lab hours'), (2, ' Software Course unmapped in lab hours')])
