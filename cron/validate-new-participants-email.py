@@ -25,6 +25,7 @@ for student in students:
   status = 'Invalid Format'
 
   # validating email format
+  student.user.email = student.user.email.strip()
   if validate_email(student.user.email):
     student.verified = True
     try:
