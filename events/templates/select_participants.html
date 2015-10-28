@@ -1,3 +1,4 @@
+<!-- This page is to list all planned training requests of current and next semester, to proceed for attendance or edit training request -->
 {% extends 'spoken/templates/base.html' %}
 {% block title %}Semester Training Planner Summary{% endblock %}
 {% block heading %}
@@ -48,6 +49,7 @@
     </div>
   </div>
 
+<!-- Following table will display all training request attendance status from current semester -->
 <center>
   <h3>
     {{current_planner.academic.institution_name}}, {{current_planner.academic.district.name}}
@@ -78,12 +80,24 @@
             <td>{{ training.course.course_name }}</td>
             <td>{{ training.department }}</td>
             <td>{{ training.attendance_summery }}</td>
+            {% if training.status and training.is_training_certificate_allowed %}
+              <td>
+              {% if training.get_partipants_from_attendance %}
+              | <a href="{% url 'events:training_certificate' training.id %}">Download Certificate</a> |
+              {% endif %}
+            </td>
+            {% else %}
             <td>
-              | <a href="{% url 'events:training_attendance' training.id %}">Select Participant List</a> |
+            {% if training.status and not training.is_training_certificate_allowed %}
+              | Training Completed</a> |
+            {% else %}
+              | <a href="{% url 'events:training_attendance' training.id %}">Participant List</a> |
+            {% endif %}
               {% if training.can_edit %}
               <a href="{% url 'events:edit_training_request' training.id %}">Edit</a> |
               {% endif %}
             </td>
+            {% endif %}
           </tr>
         {% endfor %}
         </table>
@@ -94,6 +108,7 @@
       {% endif %}
     </div>
   </li>
+  <!-- Following table will display all training request attendance status from next semester -->
   {% if next_planner %}
   <li class="semester future-planner"><br>
     <div class="semdesc">

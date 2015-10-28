@@ -63,12 +63,14 @@ class JSONResponseMixin(object):
     # -- can be serialized as JSON.
     return context
 
+# This class is to display the taining planner details of that organiser on main page of STP.
 class TrainingPlannerListView(ListView):
   queryset = None
   paginate_by = 20
   user = None
   template_name = None
   @method_decorator(group_required("Organiser"))
+  # following function is only applicable to organiser login
   def dispatch(self, *args, **kwargs):
     self.user = self.request.user
     self.get_current_planner()

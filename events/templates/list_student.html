@@ -1,3 +1,4 @@
+<!-- This page displays the the list of students of particular master batch and their email verifivation status.-->
 {% extends 'base.html' %}
 {% load widget_tweaks %}
 {% load cmsdata %}
@@ -8,6 +9,7 @@
 {% block content %}
 {% if object_list %}
     <div><a class="btn btn-success" href="{% url 'events:batch_list' %}">Go to Master List</a><br><br></div>
+    <!-- This table shows the list of students whose email id's are invalid or in process of verification -->
     <h4>Invalid Users or Verification Pending Users List</h4>
     <table class="paleblue table">
       {% get_sortable_header header ordering request.GET %}
@@ -36,6 +38,8 @@
         {% endif %}
       {% endfor %}
     </table>
+    
+     <!-- This table shows the list of students whose email id's are validated and their account is now active in spoken tutorail website -->
     <h4>Verified Users List</h4>
     <table class="paleblue table">
       {% get_sortable_header header ordering request.GET %}
