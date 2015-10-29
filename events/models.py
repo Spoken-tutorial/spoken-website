@@ -43,6 +43,7 @@ class State(models.Model):
     blank=True
   )
   img_map_area = models.TextField()
+  has_map = models.BooleanField(default=1)
   created = models.DateTimeField(auto_now_add = True, null=True)
   updated = models.DateTimeField(auto_now = True, null=True)
   

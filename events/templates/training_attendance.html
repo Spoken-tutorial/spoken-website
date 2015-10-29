@@ -1,3 +1,4 @@
+<!-- this page gives inteface to mark the attendance of participants who all will attend the training -->
 {% extends 'base.html' %}
 {% load attendance %}
 {% load widget_tweaks %}
@@ -67,8 +68,7 @@
         </div>
       {% endif %}
 
-
-<!--table to select start -->
+<!--table of participants who can mark attendance -->
   <table class="table table-striped table-hover table-bordered">
     <tr>
       <th>#</th>
@@ -127,7 +127,8 @@
       {% endif %}
     {% endfor %}
   </table>
-<!--table to select end -->
+<!--table end -->
+<!--table of participants who can not mark attendance -->
 <i class="home-page-title-i">Below Participants Already Attended the Foss : </i>
 <table class="table table-striped table-hover table-bordered">
     <tr>

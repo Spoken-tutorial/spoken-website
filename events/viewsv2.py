@@ -63,12 +63,14 @@ class JSONResponseMixin(object):
     # -- can be serialized as JSON.
     return context
 
+# This class is to display the taining planner details of that organiser on main page of STP.
 class TrainingPlannerListView(ListView):
   queryset = None
   paginate_by = 20
   user = None
   template_name = None
   @method_decorator(group_required("Organiser"))
+  # following function is only applicable to organiser login
   def dispatch(self, *args, **kwargs):
     self.user = self.request.user
     self.get_current_planner()
@@ -653,7 +655,7 @@ class TrainingCertificate():
     imgDoc.drawImage(imgPath, 600, 100, 150, 76)
 
     #paragraphe
-    text = "This is to certify that <b>"+ta.student.user.first_name +" "+ta.student.user.last_name+"</b> participated in the <b>"+ta.training.course.foss.foss+"</b> training organized at <b>"+ta.training.training_planner.academic.institution_name+"</b> by  <b>"+ta.training.training_planner.organiser.user.first_name + " "+ta.training.training_planner.organiser.user.last_name+"</b> on <b>"+self.custom_strftime('%B {S} %Y', ta.training.sem_start_date)+"</b> with course material provided by the Talk To A Teacher project at IIT Bombay.<br /><br />A comprehensive set of topics pertaining to <b>"+ta.training.course.foss.foss+"</b> were covered in the workshop. This training is offered by the Spoken Tutorial Project, IIT Bombay, funded by National Mission on Education through ICT, MHRD, Govt., of India."
+    text = "This is to certify that <b>"+ta.student.user.first_name +" "+ta.student.user.last_name+"</b> participated in the <b>"+ta.training.course.foss.foss+"</b> training organized at <b>"+ta.training.training_planner.academic.institution_name+"</b> by  <b>"+ta.training.training_planner.organiser.user.first_name + " "+ta.training.training_planner.organiser.user.last_name+"</b> on <b>"+self.custom_strftime('%B {S} %Y', ta.training.sem_start_date)+"</b> with course material provided by the Spoken Tutorial Project, IIT Bombay.<br /><br />A comprehensive set of topics pertaining to <b>"+ta.training.course.foss.foss+"</b> were covered in the workshop. This training is offered by the Spoken Tutorial Project, IIT Bombay, funded by National Mission on Education through ICT, MHRD, Govt. of India."
     
     centered = ParagraphStyle(name = 'centered',
       fontSize = 16,  
@@ -1750,7 +1752,9 @@ def LatexWorkshopFileUpload(request):
       f.close()
       '''
       form.save()
-      return HttpResponse("Thank you, your file has been successfully uploaded.")
+      form = LatexWorkshopFileUploadForm()
+      context=RequestContext(request, {'form': form, 'success': True})
+      return render_to_response(template_name, context)
     else:
       context=RequestContext(request, {'form': form})
       return render_to_response(template_name, context)
