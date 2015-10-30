@@ -17,10 +17,9 @@
                         <div class="panel-body">
                             <h5>Training</h5>
                             <ul>
-                                <li><a href="/software-training/training/rp/pending/">New Requests</a></li>
-                                <li><a href="/software-training/training/rp/approved/">Approved Training</a></li>
-                                <li><a href="/software-training/training/rp/completed/">Completed Training</a></li>
-                                <li><a href="/software-training/training/old-training-attendance/">Old  Training attendance</a></li>
+                                <li><a href="/software-training/training-request/rp/pending/">Pending / Ongoing Training Request</a></li>
+                                <li><a href="/software-training/training-request/rp/completed/">Completed Training Request</a></li>
+                                <!--<li><a href="/software-training/single-training/pending/">School / Vocational Training request summary</a></li>-->
                             </ul>
                             <h5>Online Assessment Test</h5>
                             <ul>
@@ -28,17 +27,11 @@
                                 <li><a href="/software-training/test/rp/approved/">Approved Assessment Test</a></li>
                                 <li><a href="/software-training/test/rp/completed/">Completed Assessment Test</a></li>
                             </ul>
-                            <h5>Organiser List</h5>
+                            <h5>List</h5>
                             <ul>
-                                <li><a href="/software-training/organiser/active/">List Organiser</a></li>
-                            </ul>
-                            <h5>Invigilator List</h5>
-                            <ul>
-                                <li><a href="/software-training/invigilator/active/">List Invigilator</a></li>
-                            </ul>
-                            <h5>Institution List</h5>
-                            <ul>
-                                <li><a href="/software-training/ac/">List Institution</a></li>
+                                <li><a href="/software-training/organiser/active/">Organiser List</a></li>
+                                <li><a href="/software-training/invigilator/active/">Invigilator List</a></li>
+                                <li><a href="/software-training/ac/">Institution List</a></li>
                             </ul>
                             <h5>Testimonials</h5>
                             <ul>
@@ -54,8 +47,8 @@
                         <div class="panel-body">
                             <h5>Training</h5>
                             <ul>
-                                <li><a href="/software-training/training/em/pending/">New Requests</a></li>
-                                <li><a href="/software-training/training/em/ongoing/">Ongoing Test</a></li>
+                                <li><a href="/software-training/training-request/rp/pending/">Pending / Ongoing Training Request</a></li>
+                                <li><a href="/software-training/training-request/rp/completed/">Completed Training Request</a></li>
                             </ul>
                             <h5>Online Assessment Test</h5>
                             <ul>
@@ -81,18 +74,27 @@
                     <div class="panel panel-primary">
                         <div class="panel-heading panel-heading-notif">Organiser</div>
                         <div class="panel-body">
-                            <h5>Training</h5>
+                            <h5>Training <b>(To Start the Training Go here)</b></h5>
                             <ul>
-                                <li><a href="/software-training/training/organiser/request/">New Training Request and Participant List</a></li>
+                                <li><a href="/software-training/training-planner/">Semester Training Planner Summary (STPS)</a></li>
+				{% if institution_type.name == 'School' or institution_type.name == 'Vocational' or user.is_superuser  %}
+					<li><a href="/software-training/single-training/pending/">School / Vocational Training request summary</a></li>
+				{% endif %}
+                                <!-- <li><a href="/software-training/training/organiser/request/">New Training Request and Participant List</a></li>
                                 <li><a href="/software-training/training/organiser/pending/">Pending Training</a></li>
                                 <li><a href="/software-training/training/organiser/approved/">Approved Training</a></li>
-                                <li><a href="/software-training/training/organiser/completed/">Completed Training</a></li>
+                                <li><a href="/software-training/training/organiser/completed/">Completed Training</a></li> -->
                             </ul>
                             <h5>Online Assessment Test</h5>
                             <ul>
                                 <li><a href="/software-training/test/organiser/request/">New Test Request</a></li>
                                 <li><a href="/software-training/test/organiser/approved/">Approved Assessment Test</a></li>
                                 <li><a href="/software-training/test/organiser/completed/">Completed Assessment Test</a></li>
+                            </ul>
+                            <h5>Course</h5>
+                            <ul>
+                                <li><a href="/software-training/course-map-list/">Course List</a></li>
+                                <li><a href="/software-training/course-map">Add New Course</a></li>
                             </ul>
                         </div>
                     </div>
@@ -113,8 +115,9 @@
                     </div>
                 {% endif %}
             </div>
+            
             <div class="creation-notifications col-lg-6 col-md-6 col-sm-6">
-                {% if organiser_workshop_notification %}
+                <!-- {% if organiser_workshop_notification %}
                     <div class="panel panel-primary">
                         <div class="panel-heading panel-heading-notif">Workshop Notifications
                             <span class="badge{% if not contrib_notifs|length %}-none{% endif %}" style="float: none; margin-left: 10px;">{{ organiser_workshop_notification|length }}</span>{% if organiser_workshop_notification|length %}<a href="/software-training/clear-notifications/organiser/" class="clear-all" title="Clear all notifications">Clear All</a>{% endif %}
@@ -145,7 +148,7 @@
                             {% endfor %}
                         </div>
                     </div>
-                {% endif %}
+                {% endif %} -->
                 {% if organiser_test_notification %}
                     <div class="panel panel-primary">
                         <div class="panel-heading panel-heading-notif">Onlinetest Notifications
@@ -162,7 +165,7 @@
                         </div>
                     </div>
                 {% endif %}
-                {% if rp_workshop_notification %}
+                <!-- {% if rp_workshop_notification %}
                     <div class="panel panel-primary">
                         <div class="panel-heading panel-heading-notif">Workshop Notifications
                             <span class="badge{% if not contrib_notifs|length %}-none{% endif %}" style="float: none; margin-left: 10px;">{{ rp_workshop_notification|length }}</span>{% if rp_workshop_notification|length %}<a href="/software-training/clear-notifications/rp/" class="clear-all" title="Clear all notifications">Clear All</a>{% endif %}
@@ -195,7 +198,7 @@
                             {% endfor %}
                         </div>
                     </div>
-                {% endif %}
+                {% endif %} -->
                 {% if rp_test_notification %}
                     <div class="panel panel-primary">
                         <div class="panel-heading panel-heading-notif">Online Test Notifications

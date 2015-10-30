@@ -65,7 +65,7 @@
                     <div class="form-group">
                         <label class="col-sm-3 control-label" for= "id_test_category">Test Category</label>
                         <div class="col-sm-9">
-                            {% render_field form.test_category class+="form-control Test Category" tabindex="1" data-placeholder="Enter Test Category" %}
+                            {% render_field form.test_category class+="form-control test_category" tabindex="1" data-placeholder="Enter Test Category" %}
                             {{ form.test_category.errors }}
                             <small>Please select a Test category.</small>
                         </div>
@@ -78,10 +78,11 @@
                         </div>
                     </div>
                     <div class="form-group training_category_group">
-                        <label class="col-sm-3 control-label" for= "id_training">Training Code</label>
+                        <label class="col-sm-3 control-label" for= "id_training">Batch Code</label>
                         <div class="col-sm-9">
-                            {% render_field form.training class+="form-control training" tabindex="1" data-placeholder="Enter Training code" %}
+                            {% render_field form.training class+="form-control training" tabindex="1" data-placeholder="Enter batch code" %}
                             {{ form.training.errors }}
+                            <small>Please select the participants Batch for training.</small>
                         </div>
                     </div>
                     <div class="form-group">

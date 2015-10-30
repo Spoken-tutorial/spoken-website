@@ -16,13 +16,13 @@
             <div class="bs-callout bs-callout-info">
                 <dl class="dl-horizontal">
                     <dt>Institution name</dt>
-                        <dd>{{ w.academic }}</dd>
+                        <dd>{{ w.training_planner.academic }}</dd>
                     <dt>Software Taken</dt>
-                        <dd>{{ w.foss }}</dd>
+                        <dd>{{ w.course.foss }}</dd>
                     <dt>Date of Taken</dt>
-                        <dd>{{ w.tdate }}</dd>
+                        <dd>{{ w.sem_start_date }}</dd>
                     <dt>Organiser</dt>
-                        <dd>{{ w.organiser.user.first_name }}</dd>
+                        <dd>{{ w.training_planner.organiser.user.first_name }}</dd>
                 </dd>
             </div>
             <form action="{{ action }}" method="post">{% csrf_token %}

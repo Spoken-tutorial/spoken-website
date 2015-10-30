@@ -2454,9 +2454,9 @@ Spoken Tutorial
 '''.format(username, request.POST.get('reply_message', ''), tmc_row.tutorial_resource.tutorial_detail.foss, tmc_row.tutorial_resource.tutorial_detail.tutorial, tmc_row.tutorial_resource.language, comps[tmc_row.component])
                 # send email
                 email = EmailMultiAlternatives(
-                    subject, message, 'administrator@spoken-tutorial.org',
+                    subject, message, 'no-reply@spoken-tutorial.org',
                     to = to , bcc = bcc, cc = cc,
-                    headers={'Reply-To': 'no-replay@spoken-tutorial.org', "Content-type":"text/html;charset=iso-8859-1"}
+                    headers={'Reply-To': 'no-reply@spoken-tutorial.org', "Content-type":"text/html;charset=iso-8859-1"}
                 )
                 try:
                     result = email.send(fail_silently=False)

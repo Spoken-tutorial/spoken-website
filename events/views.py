@@ -34,10 +34,10 @@ from cms.models import Profile
 from mdldjango.forms import OfflineDataForm
     
 from forms import *
-import datetime
 from django.utils import formats
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from mdldjango.get_or_create_participant import get_or_create_participant, check_csvfile, update_participants_count, clone_participant
+from mdldjango.helper import get_moodle_user
 from django.template.defaultfilters import slugify
 
 #pdf generate
@@ -55,9 +55,10 @@ import string
 import random
 
 from  filters import *
-
+from cms.views import create_profile
 from cms.sortable import *
 from events_email import send_email
+import datetime
 
 def can_clone_training(training):
     if training.tdate > datetime.datetime.strptime('01-02-2015', "%d-%m-%Y").date() and training.organiser.academic.institution_type.name != 'School':
@@ -198,12 +199,17 @@ def is_organiser(user):
     except:
         pass
 
+def is_administrator(user):
+    """Check if the user is having resource person  rights"""
+    if user.groups.filter(name='Administrator').count() == 1:
+        return True
+
 def is_invigilator(user):
     """Check if the user is having invigilator rights"""
     if user.groups.filter(name='Invigilator').count() == 1 and user.invigilator and user.invigilator.status == 1:
         return True
-def get_page(resource, page):
-    paginator = Paginator(resource, 20)
+def get_page(resource, page, limit=20):
+    paginator = Paginator(resource, limit)
     try:
         resource =  paginator.page(page)
     except PageNotAnInteger:
@@ -505,8 +511,12 @@ def events_dashboard(request):
     rp_workshop_notification = None
     rp_test_notification = None
     rp_training_notification = None
+    institute_name = None
     if is_organiser(user):
+	institution_type = AcademicCenter.objects.get(id=user.organiser.academic_id)
+        institute_name = InstituteType.objects.get(id=institution_type.institution_type_id)
         organiser_test_notification = EventsNotification.objects.filter((Q(status = 1) | Q(status = 2)), category = 1, academic_id = user.organiser.academic_id, categoryid__in = user.organiser.academic.test_set.filter(organiser_id = user.id).values_list('id')).order_by('-created')[:30]
+
         #organiser_training_notification = EventsNotification.objects.filter((Q(status = 1) | Q(status = 3)), category = 2, status = 1, academic_id = user.organiser.academic_id, categoryid__in = user.organiser.academic.workshop_set.filter(organiser_id = user.id).values_list('id')).order_by('-created')[:30]
 
     if is_resource_person(user):
@@ -515,8 +525,10 @@ def events_dashboard(request):
         rp_test_notification = EventsNotification.objects.filter((Q(status = 0) | Q(status = 4) | Q(status = 5) | Q(status = 8) | Q(status = 9)), category = 1, categoryid__in = (Training.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)))).values_list('id')).order_by('-created')[:30]
     if is_invigilator(user):
         invigilator_test_notification = EventsNotification.objects.filter((Q(status = 0) | Q(status = 1)), category = 1, academic_id = user.invigilator.academic_id, categoryid__in = user.invigilator.academic.test_set.filter(invigilator_id = user.id).values_list('id')).order_by('-created')[:30]
+
     context = {
         'roles' : roles,
+        'institution_type' : institute_name,
         'organiser_workshop_notification' : organiser_workshop_notification,
         'organiser_test_notification' : organiser_test_notification,
         'organiser_training_notification' : organiser_training_notification,
@@ -1656,8 +1668,8 @@ def test_request(request, role, rid = None):
                 t.academic = user.organiser.academic
             t.test_category_id = request.POST['test_category']
             
-            if int(request.POST['test_category']) == 1:
-                t.training_id = request.POST['workshop']
+            """if int(request.POST['test_category']) == 1:
+                t.training_id = request.POST['workshop']"""
             if int(request.POST['test_category']) == 2:
                 t.training_id = request.POST['training']
             if int(request.POST['test_category']) == 3:
@@ -1672,12 +1684,32 @@ def test_request(request, role, rid = None):
             error = 0
             try:
                 t.save()
+                if t and t.training_id:
+                    tras = TrainingAttend.objects.filter(training=t.training)
+                    for tra in tras:
+                        user = tra.student.user
+                        mdluser = get_moodle_user(tra.training.training_planner.academic_id, user.first_name, user.last_name, tra.student.gender, tra.student.user.email)# if it create user rest password for django user too
+                        if mdluser:
+                            fossmdlcourse = FossMdlCourses.objects.get(foss_id = t.foss_id)
+                            try:
+                                instance = TestAttendance.objects.get(test_id=t.id, mdluser_id=mdluser.id)
+                            except:
+                                instance = TestAttendance()
+                            instance.student = tra.student
+                            instance.test_id = t.id
+                            instance.mdluser_id = mdluser.id
+                            instance.mdlcourse_id = fossmdlcourse.mdlcourse_id
+                            instance.mdlquiz_id = fossmdlcourse.mdlquiz_id
+                            instance.mdlattempt_id = 0
+                            instance.status = 0
+                            instance.save()
             except IntegrityError:
                 error = 1
                 prev_test = Test.objects.filter(organiser = t.organiser_id, academic = t.academic, foss = t.foss_id, tdate = t.tdate, ttime = t.ttime)
                 if prev_test:
                     messages.error(request, "You have already scheduled <b>"+ t.foss.foss + "</b> Test on <b>"+t.tdate + " "+ t.ttime + "</b>. Please select some other time.")
-            except:
+            except Exception, e:
+                print e
                 messages.error(request, "Sorry, Something went wrong. try again!")
                 error = 1
             
@@ -1989,8 +2021,11 @@ def test_participant(request, tid=None):
             t = Test.objects.get(id=tid)
         except:
             raise PermissionDenied()
-            
-        test_mdlusers = TestAttendance.objects.using('default').filter(test_id=tid)
+        
+        if t.status == 4:
+            test_mdlusers = TestAttendance.objects.filter(test_id=tid, status__gte=2)
+        else:
+            test_mdlusers = TestAttendance.objects.filter(test_id=tid)
         #ids = []
         #print test_mdlusers
         #for tp in test_mdlusers:
@@ -2207,7 +2242,13 @@ def organiser_invigilator_index(request, role, status):
             collection = {}
     else:
         raise PermissionDenied()
-            
+
+    for record in collection:
+        try:
+            record.user.profile_set.get()
+        except:
+            create_profile(record.user)
+
     context['header'] = header
     context['ordering'] = ordering
     context['collection'] = collection
@@ -2252,7 +2293,7 @@ def training_participant_feedback(request, training_id, participant_id):
 def training_participant_language_feedback(request, training_id, user_id):
     w = None
     try:
-        w = Training.objects.get(pk=training_id)
+        w = TrainingRequest.objects.get(pk=training_id)
         MdlUser.objects.get(id = user_id)
     except Exception, e:
         raise PermissionDenied()
@@ -2286,10 +2327,14 @@ def live_training(request, training_id=None):
     
     context = {}
     if not training_id:
-        context['training_list'] = Training.objects.filter(Q(training_type = 2) | Q(training_type = 3))
+        context['training_list'] = SingleTraining.objects.filter(
+          training_type = 2
+        )
     else:
         try:
-            context['training'] = TrainingLiveFeedback.objects.filter(training_id = training_id)
+            context['training'] = TrainingLiveFeedback.objects.filter(
+              training_id = training_id
+            )
         except Exception, e:
             print e
             raise PermissionDenied()
@@ -2301,7 +2346,7 @@ def training_participant_livefeedback(request, training_id):
     form = LiveFeedbackForm()
     w = None
     try:
-        w = Training.objects.get(pk=training_id)
+        w = SingleTraining.objects.get(pk=training_id)
     except Exception, e:
         raise PermissionDenied()
     if request.method == 'POST':
@@ -2315,7 +2360,7 @@ def training_participant_livefeedback(request, training_id):
                 return HttpResponseRedirect('/')
             except Exception, e:
                 print e
-                messages.success(request, "Thank you for your valuable feedback.")
+                messages.success(request, "Something went wrong, please contact site administrator.")
                 return HttpResponseRedirect('/')
     context = {
         'form' : form,
@@ -2418,7 +2463,34 @@ def ajax_ac_state(request):
                 data['university'] = tmp
         
         return HttpResponse(json.dumps(data), content_type='application/json')
-        
+
+@csrf_exempt
+def ajax_state_details(request):
+    """ Ajax: Get District, City based State selected """
+    if request.method == 'POST':
+        state = request.POST.get('state')
+        data = {}
+        if request.POST.get('fields[district]'):
+            district = District.objects.filter(state=state).order_by('name')
+            tmp = ''
+            for i in district:
+                tmp +='<option value='+str(i.id)+'>'+i.name+'</option>'
+            if(tmp):
+                data['district'] = '<option value=""> -- None -- </option>'+tmp
+            else:
+                data['district'] = tmp
+        if request.POST.get('fields[city]'):
+            city = City.objects.filter(state=state).order_by('name')
+            tmp = ''
+            for i in city:
+                tmp +='<option value='+str(i.id)+'>'+i.name+'</option>'
+            if(tmp):
+                data['city'] = '<option value=""> -- None -- </option>'+tmp
+            else:
+                data['city'] = tmp
+        return HttpResponse(json.dumps(data), content_type='application/json')
+
+
 @csrf_exempt
 def ajax_ac_location(request):
     """ Ajax: Get the location based on district selected """
@@ -2487,6 +2559,23 @@ def ajax_state_collage(request):
             for i in collages:
                 tmp +='<option value='+str(i.id)+'>'+i.institution_name+'</option>'
         return HttpResponse(json.dumps(tmp), content_type='application/json')
+
+
+@csrf_exempt
+def ajax_academic_center(request):
+    """Ajax: Get academic centers according to institute type and state"""
+    if request.method == 'POST':
+        state = request.POST.get('state')
+        itype = request.POST.get('itype')
+        center = AcademicCenter.objects.filter(state=state,
+            institution_type=itype).order_by('institution_name')
+	html = '<option value=None> --------- </option>'
+        if center:
+            for ac in center:
+                html += '<option value={0}>{1}</option>'.format(ac.id,
+                    ac.institution_name)
+    return HttpResponse(json.dumps(html), content_type='application/json')
+
 
 @csrf_exempt
 def ajax_dept_foss(request):

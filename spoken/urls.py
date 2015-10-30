@@ -43,7 +43,7 @@ urlpatterns = patterns('',
     url(r'^workshops/academic_details/(?P<state>.+)/$', 'workshop.views.academic_details_state', name='academic_details_state'),
     url(r'^resource_center_map_details/(?P<state>.+)/$', 'workshop.views.academic_details_state', name='academic_details_state'),
     url(r'^workshops/resource_center_details/$', 'workshop.views.view_college', name='view_college'),
-    url(r'^statistics/training/$', 'workshop.views.statistics_training', name='statistics_training'),
+    #url(r'^statistics/training/$', 'workshop.views.statistics_training', name='statistics_training'),
     
     #events urls
     url(r'^software-training/', include('events.urls', namespace='events')),
@@ -53,8 +53,8 @@ urlpatterns = patterns('',
     url(r'^statistics/', include('statistics.urls', namespace='statistics')),
     url(r'^creation/', include('creation.urls', namespace='creation')),
     url(r'^nicedit/', include('nicedit.urls')),
-    url(r'^migration/creation/', include('creationmigrate.urls', namespace='creationmigrate')),
-    url(r'^migration/events/', include('eventsmigration.urls', namespace='eventsmigration')),
+    #url(r'^migration/creation/', include('creationmigrate.urls', namespace='creationmigrate')),
+    #url(r'^migration/events/', include('eventsmigration.urls', namespace='eventsmigration')),
     url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT, 'show_indexes':False}),
 
     # Old url adjustments
@@ -78,7 +78,7 @@ urlpatterns = patterns('',
     url(r'^reports/', include('reports.urls', namespace='reports')),
     
     #events2
-    url(r'^events2/', include('events2.urls', namespace='events2')),
+    #url(r'^events2/', include('events2.urls', namespace='events2')),
     
     #cms
     url(r'^', include('cms.urls', namespace='cms')),

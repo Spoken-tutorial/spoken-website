@@ -63,7 +63,7 @@ def nemail(request):
       to  = [organiser.user.email]
       #to = ['k.sanmugam2@gmail.com', 'sanmugam@iitb.ac.in']
       email = EmailMultiAlternatives(
-          subject, text_content, 'administrator@spoken-tutorial.org',
+          subject, text_content, 'no-reply@spoken-tutorial.org',
           to = to,
           headers = {
            "Content-type" : "text/html"

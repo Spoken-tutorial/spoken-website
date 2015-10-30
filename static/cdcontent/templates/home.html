@@ -158,9 +158,18 @@
                         </div><!-- .row well tab-content tutorial-search-form -->
                         <hr />
                         <div class="video-container col-lg-8 col-md-8 col-sm-8 col-lg-offset-2 col-md-offset-2">
+<select class="form-control languages" id="id_languages" name="languages" tabindex="1" value="">
+<option value="0">Select Language for Side-by-Side method video</option>
+              {% for language in languages %}
+                    <option value="{{ language }} ">{{ language }}</option>
+              {% endfor %}
+                                </select>
+                                <br />
                             <video id="st_video" class="video-js vjs-default-skin" controls preload="auto" width="auto" height="auto" data-setup="{}">
-                                <source src="../side-by-side-method.ogv" type="video/ogg" />
+                                
+                                <source src="../Side_by_Side-Method-English.ogv" type="video/ogg" />
                             </video>
+
                         </div>
                     </div>
                 </div>
@@ -233,6 +242,16 @@
                     foss = $('.foss').val();
                     $('.language').html('<option value="0">Select Language</option>' + fossList[foss]);
                 });
+
+                $('.languages').on("change", function(){
+                    language = ($(this).val()).trim();
+		    mp = videojs('st_video');
+                    mp.src({ type: "video/ogg", src: '../Side_by_Side-Method-'+language+'.ogv' });
+	            mp.play();                    
+	 	    mp.volume(0.2);
+   
+                });
+
                 $('.search-btn').on("click", function(){
                     foss = $('.foss').val();
                     lang = $('.language').val();

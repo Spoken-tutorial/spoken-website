@@ -38,13 +38,11 @@ PASSWORD_HASHERS = (
 # email errors and 404
 SERVER_EMAIL = 'error-report@spoken-tutorial.org'
 ADMINS = (
-    ('vishnuraj', 'vishnukraj007@gmail.com'),
-    ('sanmugam', 'k.sanmugam2@gmail.com'),
+    ('Administrator', 'administrator@spoken-tutorial.org'),
 )
 
 MANAGERS = (
-    ('vishnuraj', 'vishnukraj007@gmail.com'),
-    ('sanmugam', 'k.sanmugam2@gmail.com'),
+    ('Administrator', 'administrator@spoken-tutorial.org'),
 )
 
 ADMINISTRATOR_EMAIL = ADMINISTRATOR_EMAIL
@@ -71,20 +69,19 @@ INSTALLED_APPS = (
     'django_extensions',
     'widget_tweaks',
     'captcha',
+    'nicedit',
+    'report_builder',
+    'compressor',
+
     'cms',
     'creation',
     'statistics',
     'cdcontent',
     'events',
     'mdldjango',
-    'nicedit',
     'masquerade',
-    'report_builder',
     'youtube',
     'reports',
-    'compressor',
-    'events2',
-    'eventsmigration',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -150,6 +147,15 @@ DATABASES = {
         'PASSWORD': WDB_PASS,
         'HOST': '',                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
         'PORT': '',                  # Set to empty string for default.
+    },
+    'forums': {
+        'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': FDB,                      # Or path to database file if using sqlite3.
+        # The following settings are not used with sqlite3:
+        'USER': FDB_USER,
+        'PASSWORD': FDB_PASS,
+        'HOST': '',                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+        'PORT': '',                  # Set to empty string for default.
     }
 }
 
@@ -208,7 +214,12 @@ INTERNAL_IPS = ('127.0.0.1',)
 
 #Moodle Auth
 #AUTH_USER_MODEL = 'mdldjango.Users'
-DATABASE_ROUTERS = ['mdldjango.router.MdlRouter', 'cdeep.router.CdeepRouter', 'workshop.router.WorkshopRouter']
+DATABASE_ROUTERS = [
+    'mdldjango.router.MdlRouter', 
+    'cdeep.router.CdeepRouter', 
+    'workshop.router.WorkshopRouter',
+    'forums.router.ForumsRouter'
+]
 #AUTHENTICATION_BACKENDS = ( 'mdldjango.backend.MdlBackend', )
 
 # Reports
@@ -248,3 +259,4 @@ HTML_MINIFY = HTML_MINIFY
 RECAPTCHA_PUBLIC_KEY = '6Le8qf8SAAAAABV9wYBW99Jotv-EygJXIhMa_n54'
 RECAPTCHA_PRIVATE_KEY = '6Le8qf8SAAAAAF9CkucURPapw2vaDPrU4qMzfg73'
 RECAPTCHA_USE_SSL = True
+ACADEMIC_DURATION = 5

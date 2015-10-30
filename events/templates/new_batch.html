@@ -1,0 +1,230 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block title %}Master Batch Student List{% endblock %}
+{% block cssblock %}
+  <style>
+  .header-table{
+  width:1100px;
+  }
+  .csv-link{
+  font-size:13px;
+  text-decoration: underline;
+  }
+  </style>
+{% endblock %} 
+{% block heading %}
+<table  class="header-table">
+  <tr>
+    <td><i class="home-page-title-i">Master Batch Student List</i></td>
+    <td><center><a class="btn btn-primary" data-toggle="modal" data-target="#myModal"><i class="fa fa-2 fa-question"></i>Instructions for Adding MB</a>
+    <br><a class="csv-link" data-toggle="modal" data-target="#csvModal"><u>Sample CSV file</u></a></center>
+    </td>
+    <td><a class="btn btn-success pull-right" href="{% url 'events:batch_list' %}">Back to MB Master Batch</a></td>
+  </tr>
+</table>
+
+
+
+{% endblock %}
+{% block search %}{% endblock %}
+{% block content %}
+{{message.tags}}
+
+	<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    	 <div class="modal-dialog">
+          <div class="modal-content">
+           <div class="modal-body">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <ul>
+               <li>Important points to follow while uploading the <b>Master Batch Student List</b> (regarding <strong>.csv</strong> file please note the following): <ul>
+		       <li>All the fields/columns <strong>MUST</strong> be filled.</li>
+		       <li>Make sure that there are no empty/blank spaces in the lettering.</li>
+		       <li>After filling the details, save the file as <strong>.csv (for Libre Office)</strong> and <strong>.csv (MS-DOS) (for Microsoft Office)</strong></li>
+		       <li>Make sure that <strong>commas (,)</strong> are seen at the end of each entry.</li>
+		       <li>Ensure <b>First and Last names</b> are filled.</li>
+           <li><b>Middle names</b> or <b>Middle Initials</b> will <b>not</b> be accepted.</li>
+		   </ul>
+	       </li>
+             </ul>
+           </div>
+          </div>
+         </div>
+       </div>
+       
+       <div class="modal fade" id="csvModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"style=" color:#0052A3; font-size:15px;" aria-hidden="true">
+    	 <div class="modal-dialog">
+          <div class="modal-content">
+           <div class="modal-body">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <p>Open your csv file in Notepad(Windows OS) or in gedit(Linux OS) , It should look like below format :</p>
+              <img width="520px" src="/static/spoken/images/sample_csv.png">
+           </div>
+          </div>
+         </div>
+       </div>
+
+        {% if form %}
+          <div class="row well">
+              <div class='col-sm-8'>
+                  <form id="form-id" action="{{ action }}" method="post" class='form-horizontal' enctype="multipart/form-data">{% csrf_token %}
+                      {% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
+                      {% if form.non_field_errors %}
+                      <ul>
+                        {% for error in form.non_field_errors %}
+                          <li>{{ error }}</li>
+                        {% endfor %}
+                      </ul>
+                      {% endif %}
+                      <div class='form-row'>
+                        <div class='col-xs-12 form-group required'>
+                          <label class='control-label'>Department</label>
+                          {% render_field form.department class+="form-control department" tabindex="1" %}
+                          {{ form.department.errors }}
+                        </div>
+                      </div>
+                      
+                      <div class='form-row'>
+                        <div class='col-xs-12 form-group required'>
+                          <label class='control-label'>Year of Joining </label><small> (Academic Joining year of students)</small>
+                          {% render_field form.year class+="form-control year" tabindex="1" %}
+                          {{ form.year.errors }}
+                        </div>
+                      </div>
+                      
+                      <div class='form-row'>
+                        <div class='col-xs-12 form-group required'>
+                          <label class='control-label'>Master Batch Student List - Csv File</label>&nbsp;&nbsp;<small>(Please upload your CSV file here.)<br> Click Browse to select the spreadsheet containing student details.</small>
+                          {% render_field form.csv_file class+="file csv_file" tabindex="1" %}
+                          {{ form.csv_file.errors }}
+			  <small>If you have used MS-EXCEL to create the CSV file please make sure that you have saved it with csv(ms-dos) file extention.</small>
+                        </div>
+                      </div>
+              
+                       <div class="modal fade" id="confirmModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" style="color:#0052A3; font-size:15px;">
+                        <div class="modal-dialog ">
+                          <div class="modal-content">
+                            <div class="modal-body">
+                               Are you sure all fields are filled in csv file as instructed? Recheck the csv file before you upload.
+                            </div>
+                            <div class="modal-footer">
+                              <button type="button" class="btn btn-default" data-dismiss="modal">NO</button>
+                              <a type ="submit" class="btn btn-primary" onclick="document.forms['form-id'].submit();" %}">Yes</a>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="form-group">
+                          <div class="col-xs-12 form-group">
+                              <input class="btn btn-primary" id="upload_button" type="button" value="Upload Master Batch" />
+                              <a class="btn btn-danger" href="{% url 'events:batch_list' %}">Cancel</a>
+                          </div>
+                      </div>
+                      {% endwith %}
+                  </form>
+              </div>
+          </div>
+        {% else %}
+          <h4><center>{{ batch.get_batch_info }}</center></h4>
+          <form action="{{ action }}" method="post" class='form-horizontal' enctype="multipart/form-data">{% csrf_token %}
+            <h5>Errors (Invalid Email ID)<span class="pull-right review-accepted">Note: Click on the email to correct email format</span></h5>
+            <div class="row well">
+              <table class="table">
+                <tr>
+                  <th>#</th>
+                  <th>Full name</th>
+                  <th>Email</th>
+                  <th>Gender</th>
+                </tr>
+              {% for e in error %}
+                <tr id="error{{forloop.counter}}">
+                  <td>{{ forloop.counter }}</td>
+                  <td>{{ e.0 }} {{ e.1 }}</td>
+                  <td><div row="{{forloop.counter}}" data="{{ e.0 }},{{ e.1 }},{{ e.3 }}" class="editable" id="div_1">{{ e.2 }}</div></td>
+                  <td>{{ e.3 }}</td>
+                </tr>
+              {% endfor %}
+              </table>
+            </div>
+          </form>
+        {% endif %}
+        {% if warning %}
+          <h5>Warning (Student Already Exists)<span class="pull-right review-accepted"></span></h5>
+            <div class="row well">
+              <table class="table">
+                <tr>
+                  <th>#</th>
+                  <th>Full name</th>
+                  <th>Email</th>
+                  <th>Gender</th>
+                  <th></th>
+                </tr>
+              {% for e in warning %}
+                <tr id="error{{forloop.counter}}">
+                  <td>{{ forloop.counter }}</td>
+                  <td>{{ e.0 }} {{ e.1 }}</td>
+                  <td>{{ e.2 }}</td>
+                  <td>{{ e.3 }}</td>
+                  <td>
+                    {% if e.4 %}
+                      Already exists in this batch.
+                    {% else %}
+                      Already exists in another batch.
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+              </table>
+            </div>
+        {% endif %}
+{% endblock %}
+{% block jsblock %}
+  <script src="{% static 'spoken/js/jquery.jeditable.js' %}"></script>
+  <script>
+    $(window).load(function(){
+        $('#myModal').modal('show');
+    });
+    $('#upload_button').on('click', function(){
+      $('#confirmModal').modal('show');
+    });
+    $('.editable').editable(function(value, settings) {
+       thisData = $(this);
+       message = '';
+       if (validEmail(value)){
+          $.ajax({
+            url: "/software-training/save-student/",
+            type: "POST",
+            data: {
+                student_details: $(this).attr("data"),
+                email: value,
+                batch: "{{batch.id}}"
+            },
+            success: function(data) {
+              currentRow = $("#" + thisData.attr('row'))
+              if(data.code == 2){
+                currentRow.html('<td colspan="2" class="alert alert-danger"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> ' + value + ': ' + data.message + '</td>');
+              }else if(data.code == 1){
+                currentRow.html('<td colspan="2" class="alert alert-warning"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> ' + value + ': ' + data.message + '</td>');
+              }else if(data.code == 4){
+                alert(value + " " + data.message);
+              }else{
+                currentRow.html('<td colspan="2" class="alert alert-success"> ' + value + ': Student record added successfully</td>');
+              }
+            }
+        });
+       }else{
+         $(this).css({'color': 'red'});
+       }
+       return(value);
+    }, {
+       type    : 'text',
+       submit  : 'OK',
+       indicator : '<i class="fa fa-spinner fa-spin"></i>',
+       tooltip   : 'Click to edit...',
+   });
+   function validEmail(v) {
+      var r = new RegExp("[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?");
+      return (v.match(r) == null) ? false : true;
+  }
+  </script>
+{% endblock %}

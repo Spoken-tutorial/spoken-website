@@ -43,6 +43,7 @@ def get_sheet_path(foss, lang, sheet):
 
 def get_all_foss_details(selectedfoss):
     all_foss_details = {}
+    languages = set()
     for key, values in selectedfoss.iteritems():
         foss_rec = FossCategory.objects.get(pk = key)
         try:
@@ -57,7 +58,8 @@ def get_all_foss_details(selectedfoss):
         for value in values[0]:
             language = Language.objects.get(pk = value)
             all_foss_details[foss_rec.id]['langs'][language.id] = language.name
-    return all_foss_details
+            languages.add(language.name)
+    return all_foss_details, languages
 
 def home(request):
     if request.method == 'POST':
@@ -66,7 +68,7 @@ def home(request):
             temp = tempfile.TemporaryFile()
             archive = zipfile.ZipFile(temp, 'w', zipfile.ZIP_DEFLATED, allowZip64=True)
             selectedfoss = json.loads(request.POST.get('selected_foss', {}))
-            all_foss_details = get_all_foss_details(selectedfoss)
+            all_foss_details, languages = get_all_foss_details(selectedfoss)
             eng_rec = Language.objects.get(name="English")
             for key, values in selectedfoss.iteritems():
                 foss_rec = FossCategory.objects.get(pk = key)
@@ -93,6 +95,14 @@ def home(request):
                             if os.path.isfile(settings.MEDIA_ROOT + filepath):
                                 archive.write(settings.MEDIA_ROOT + filepath, 'spoken/' + filepath)
                         filepath = 'videos/' + str(key) + '/' + str(rec.tutorial_detail_id) + '/' + rec.video
+                        
+			#Check if the side by side video for the selected language is present or not, if not, fetch default language as English
+                        side_by_side_language = settings.BASE_DIR + '/media/videos/32/714/Side-by-Side-Method-%s.ogv'%(language.name)
+                        if os.path.exists(side_by_side_language):
+                          archive.write(settings.BASE_DIR + '/media/videos/32/714/Side-by-Side-Method-%s.ogv'%(language.name), 'spoken/Side_by_Side-Method-%s.ogv'%(language.name))
+                        else:
+                          archive.write(settings.BASE_DIR + '/media/side-by-side-method.ogv', 'spoken/side-by-side-method.ogv') 
+
                         if os.path.isfile(settings.MEDIA_ROOT + filepath):
                             archive.write(settings.MEDIA_ROOT + filepath, 'spoken/' + filepath)
                         ptr = filepath.rfind(".")
@@ -126,7 +136,7 @@ def home(request):
                     list_page = list_page.replace('Content-Type: text/html; charset=utf-8', '')
                     list_page = list_page.strip("\n")
                     archive.writestr('spoken/videos/' + str(foss_rec.id) + '/list-videos-' + language.name + '.html', list_page)
-            home_page = str(render(request, "cdcontent/templates/home.html", {'foss_details': all_foss_details, 'foss': foss_rec.id, 'lang': language.id}))
+            home_page = str(render(request, "cdcontent/templates/home.html", {'foss_details': all_foss_details, 'foss': foss_rec.id, 'lang': language.id, 'languages': languages}))
             home_page = home_page.replace('Content-Type: text/html; charset=utf-8', '')
             home_page = home_page.strip("\n")
             archive.writestr('spoken/videos/home.html', home_page)
@@ -143,16 +153,16 @@ def home(request):
             archive.write(settings.BASE_DIR + '/static/spoken/images/Basic.png', 'spoken/includes/images/Basic.png')
             archive.write(settings.BASE_DIR + '/static/spoken/images/Intermediate.png', 'spoken/includes/images/Intermediate.png')
             archive.write(settings.BASE_DIR + '/static/spoken/images/Advanced.png', 'spoken/includes/images/Advanced.png')
-            archive.write(settings.BASE_DIR + '/media/side-by-side-method.ogv', 'spoken/side-by-side-method.ogv')
+            # archive.write(settings.BASE_DIR + '/media/side-by-side-method.ogv', 'spoken/side-by-side-method.ogv')
             zipdir(settings.BASE_DIR + '/static/spoken/fonts', 'spoken/includes/fonts/', archive)
             archive.write(settings.BASE_DIR + '/static/cdcontent/templates/readme.txt', 'spoken/README.txt')
             archive.write(settings.BASE_DIR + '/static/cdcontent/templates/index.html', 'spoken/index.html')
             archive.close()
+            temp.seek(0)
             wrapper = FileWrapper(temp)
             response = HttpResponse(wrapper, content_type='application/zip')
             response['Content-Disposition'] = 'attachment; filename=spoken-tutorial-cdcontent.zip'
             response['Content-Length'] = temp.tell()
-            temp.seek(0)
             return response
     else:
         form = CDContentForm()

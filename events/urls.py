@@ -1,4 +1,4 @@
-from django.conf.urls import patterns, url
+from django.conf.urls import patterns, url, include
 
 urlpatterns = patterns('',
     url(r'^$', 'events.views.events_dashboard', name='events_dashboard'),
@@ -91,7 +91,11 @@ urlpatterns = patterns('',
     url(r'ajax-state-collage/$', 'events.views.ajax_state_collage', name='ajax_state_collage'),
     url(r'ajax-dept-foss/$', 'events.views.ajax_dept_foss', name='ajax_dept_foss'),
     url(r'ajax-language/$', 'events.views.ajax_language', name='ajax_language'),
+    url(r'ajax_state_details/$', 'events.views.ajax_state_details', name='ajax_state_details'),
+    url(r'ajax-academic-center/$', 'events.views.ajax_academic_center', name='ajax_academic_center'),
     #url(r'add$', 'events.views.add_contact', name='add_contact'),
     #url(r'edit/(\d+)$', 'events.views.edit_contact', name='edit_contact'),   
     #url(r'delete/(\d+)$', 'events.views.delete_contact', name='delete_contact'),
+    # EVENTS V2 URLs
+    url(r'^', include('events.urlsv2')),
 )

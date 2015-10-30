@@ -152,3 +152,4 @@ class MdlRoleAssignments(models.Model):
     sortorder = models.BigIntegerField()
     class Meta:
         db_table = u'mdl_role_assignments'
+
