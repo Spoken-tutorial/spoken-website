@@ -96,7 +96,7 @@ def home(request):
                                 archive.write(settings.MEDIA_ROOT + filepath, 'spoken/' + filepath)
                         filepath = 'videos/' + str(key) + '/' + str(rec.tutorial_detail_id) + '/' + rec.video
                         
-			#Check if the side by side video for the selected language is present or not, if not, fetch default language as English.
+			#Check if the side by side video for the selected language is present or not, if not, fetch default language as English
                         side_by_side_language = settings.BASE_DIR + '/media/videos/32/714/Side-by-Side-Method-%s.ogv'%(language.name)
                         if os.path.exists(side_by_side_language):
                           archive.write(settings.BASE_DIR + '/media/videos/32/714/Side-by-Side-Method-%s.ogv'%(language.name), 'spoken/Side_by_Side-Method-%s.ogv'%(language.name))
