@@ -1,3 +1,4 @@
+<!-- This page is to list all planned training requests of current and next semester, to proceed for attendance or edit training request -->
 {% extends 'spoken/templates/base.html' %}
 {% block title %}Semester Training Planner Summary{% endblock %}
 {% block heading %}
@@ -40,6 +41,7 @@
            <ul>
               <li>For detailed instruction on Step 3 click here : <b>Upload/Select Participant List from MB:</b> <a href ="http://process.spoken-tutorial.org/images/4/49/Upload_Select_Participant_list.pdf" target="_blank">http://process.spoken-tutorial.org/images/4/49/Upload_Select_Participant_list.pdf</a></li>
               <li>Select the list of students taking the course/s you have chosen in this semester from the <b>Master Batch</b>.</li>
+              <li>Make sure you mark the attendance within <b>60 Days</b> from Semester Start Date.</li>
               <li>Make sure you do this before you plan to start the training for the particular course.</li>
               <li>Repeat the same when you move to the next course of the semester.</li>
            </ul>
@@ -48,6 +50,7 @@
     </div>
   </div>
 
+<!-- Following table will display all training request attendance status from current semester -->
 <center>
   <h3>
     {{current_planner.academic.institution_name}}, {{current_planner.academic.district.name}}
@@ -78,12 +81,24 @@
             <td>{{ training.course.course_name }}</td>
             <td>{{ training.department }}</td>
             <td>{{ training.attendance_summery }}</td>
+            {% if training.status and training.is_training_certificate_allowed %}
+              <td>
+              {% if training.get_partipants_from_attendance %}
+              | <a href="{% url 'events:training_certificate' training.id %}">Download Certificate</a> |
+              {% endif %}
+            </td>
+            {% else %}
             <td>
-              | <a href="{% url 'events:training_attendance' training.id %}">Select Participant List</a> |
+            {% if training.status and not training.is_training_certificate_allowed %}
+              | Training Completed</a> |
+            {% else %}
+              | <a href="{% url 'events:training_attendance' training.id %}">Participant List</a> |
+            {% endif %}
               {% if training.can_edit %}
               <a href="{% url 'events:edit_training_request' training.id %}">Edit</a> |
               {% endif %}
             </td>
+            {% endif %}
           </tr>
         {% endfor %}
         </table>
@@ -94,6 +109,7 @@
       {% endif %}
     </div>
   </li>
+  <!-- Following table will display all training request attendance status from next semester -->
   {% if next_planner %}
   <li class="semester future-planner"><br>
     <div class="semdesc">

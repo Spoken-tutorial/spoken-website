@@ -70,6 +70,7 @@ def mdl_login(request):
 def index(request):
     mdluserid = request.session.get('mdluserid')
     mdlusername = request.session.get('mdlusername')
+    p = 0
     if not mdluserid:
         return HttpResponseRedirect('/participant/login')
     
@@ -95,8 +96,12 @@ def index(request):
             past_workshop = None
             past_test = None
             ongoing_test = None
-            #if category == 3:
-            #    upcoming_workshop = Training.objects.filter((Q(status = 0) | Q(status = 1) | Q(status = 2) | Q(status = 3)), academic_id=mdluser.institution, tdate__gte=datetime.date.today()).order_by('-tdate')
+            if category == 3:
+                upcoming_workshop = []
+                #up = Training.objects.filter((Q(status = 10) | Q(status = 11) | Q(status = 12) |Q(status = 3)), academic_id=mdluser.institution, tdate__lte=datetime.date.today()).order_by('-tdate')[0]
+                up = Training.objects.filter(id=23270)[0]
+                upcoming_workshop.append(up)
+                p = up.trainingattendance_set.get(mdluser_id=mdluser.id)
             if category == 5:
                 upcoming_test = Test.objects.filter(status=2, academic_id=mdluser.institution, tdate__gt=datetime.date.today()).order_by('-tdate')
             if category == 1:
@@ -107,6 +112,7 @@ def index(request):
                 ongoing_test = Test.objects.filter(Q(status=2)|Q(status=3), academic_id=mdluser.institution, tdate=datetime.date.today()).order_by('-tdate')
             
             context = {
+                'p': p,
                 'mdluserid' : mdluserid,
                 'mdlusername' : mdlusername,
                 'upcoming_workshop' : upcoming_workshop,

@@ -1,3 +1,4 @@
+<!--this the the main planner page, here it displays the complete STP planning of particular college by the organiser -->
 {% extends 'spoken/templates/base.html' %}
 {% block title %}Semester Training Planner Summary{% endblock %}
 {% block heading %}
@@ -113,6 +114,7 @@
                   <li>For <b>Master Batch</b>: <a href="http://process.spoken-tutorial.org/images/b/bc/Semester_Training_Planner.pdf" traget="_blank"> Click Here</a>.</li>
                   <li>For <b>STPF</b>: <a href="http://process.spoken-tutorial.org/images/b/bc/Semester_Training_Planner.pdf" traget="_blank"> Click Here</a>.</li>
                   <li>For <b>Participants List</b>: <a href="http://process.spoken-tutorial.org/images/4/49/Upload_Select_Participant_list.pdf" traget="_blank"> Click Here</a>.</li>
+                  <li>Proceed with <b>Test</b> after <b>30 days</b> of Semester Start Date.</li>
                 </ol>
               </li>
               <li>Please download a copy of tutorials on all the machines. For instructions to download tutorials <a href="http://process.spoken-tutorial.org/images/1/1b/Download-Tutorials.pdf" traget="_blank"> Click Here</a></li>
@@ -163,6 +165,7 @@
         {% endif %}
       </div>
     </li>
+    
     {% if next_planner %}
     <li class="semester future-planner"><br>
     <div class="semdesc">

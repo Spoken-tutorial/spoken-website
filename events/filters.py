@@ -133,7 +133,7 @@ class TestFilter(django_filters.FilterSet):
     if state:
       choices = list(City.objects.filter(state=state).order_by('name').values_list('id', 'name')) + [('189', 'Uncategorised')]
     else:
-      choices = list(City.objects.none())
+      choices = list(City.objects.order_by('name').values_list('id', 'name'))
     choices.insert(0, ('', '---------'),)
     self.filters['academic__city'].extra.update({'choices' : choices})
     
@@ -252,7 +252,7 @@ class TrainingRequestFilter(django_filters.FilterSet):
         ).order_by('name').values_list('id', 'name')
       ) + [('189', 'Uncategorised')]
     else:
-      choices = list(City.objects.none())
+      choices = list(City.objects.order_by('name').values_list('id', 'name'))
     choices.insert(0, ('', '---------'),)
     self.filters['training_planner__academic__city'].extra.update(
       {'choices' : choices}

@@ -42,7 +42,7 @@ urlpatterns = patterns('',
     url(r'^training/live/list/(\d+)/$', 'events.views.live_training', name='live_training'),
     
     url(r'^training/subscribe/(\w+)/(\d+)/(\d+)/$', 'events.views.training_subscribe', name='student_subscribe'),
-    url(r'^training/(\d+)/attendance/$', 'events.views.training_attendance', name='training_attendance'),
+    url(r'^training/(\d+)/attendance/$', 'events.views.training_attendance', name='training_attend'),
     url(r'^training/(\d+)/participant/$', 'events.views.training_participant', name='training_participant'),
     url(r'^training/participant/certificate/(\d+)/(\d+)/$', 'events.views.training_participant_ceritificate', name='training_participant_ceritificate'),
     url(r'^training/participant/feedback/(\d+)/(\d+)/$', 'events.views.training_participant_feedback', name='training_participant_feedback'),

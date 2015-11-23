@@ -1569,8 +1569,8 @@ def training_participant_ceritificate(request, wid, participant_id):
             w = Training.objects.get(id = wid)
             # check if user can get certificate
             wa = TrainingAttendance.objects.get(training_id = w.id, id = participant_id)
-            if wa.status < 1:
-                raise PermissionDenied()
+            #if wa.status < 1:
+            #    raise PermissionDenied()
             if wa.password:
                 certificate_pass = wa.password
                 wa.count += 1
@@ -1595,11 +1595,11 @@ def training_participant_ceritificate(request, wid, participant_id):
 
     # Title 
     imgDoc.setFont('Helvetica', 40, leading=None)
-    imgDoc.drawCentredString(415, 480, "Certificate of Learning")
+    imgDoc.drawCentredString(415, 480, "Certificate of Appreciation")
     
     #date
     imgDoc.setFont('Helvetica', 18, leading=None)
-    imgDoc.drawCentredString(211, 115, custom_strftime('%B {S} %Y', w.tdate)) 
+    imgDoc.drawCentredString(211, 115, "29 August 2015") 
 
     #password
     imgDoc.setFillColorRGB(211, 211, 211)
@@ -1613,7 +1613,7 @@ def training_participant_ceritificate(request, wid, participant_id):
     imgDoc.drawImage(imgPath, 600, 100, 150, 76)    ## at (399,760) with size 160x160
 
     #paragraphe
-    text = "This is to certify that <b>"+wa.firstname +" "+wa.lastname+"</b> participated in the <b>"+w.foss.foss+"</b> training organized at <b>"+w.academic.institution_name+"</b> by  <b>"+w.organiser.user.first_name + " "+w.organiser.user.last_name+"</b> on <b>"+custom_strftime('%B {S} %Y', w.tdate)+"</b> with course material provided by the Talk To A Teacher project at IIT Bombay.<br /><br />A comprehensive set of topics pertaining to <b>"+w.foss.foss+"</b> were covered in the workshop. This training is offered by the Spoken Tutorial Project, IIT Bombay, funded by National Mission on Education through ICT, MHRD, Govt., of India."
+    text = "This is to certify that <b>"+wa.firstname +" "+wa.lastname+"</b> participated in the <b>"+w.foss.foss+"</b> workshop organized at <b>"+w.academic.institution_name+"</b> by  <b>Spoken Tutorial Project</b> on <b> 29 August 2015</b><br /><br />A comprehensive set of topics pertaining to <b>"+w.foss.foss+"</b> were covered in the workshop. <br />The Spoken Tutorial Project, IIT Bombay, funded by National Mission on Education <br />through ICT, MHRD, Govt. of India."
     
     centered = ParagraphStyle(name = 'centered',
         fontSize = 16,  
