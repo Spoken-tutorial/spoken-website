@@ -1189,6 +1189,30 @@ class SingletrainingCompletedListView(ListView):
       grup.append(i.name)
     context['group'] = grup
     return context
+#$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$4444
+class SingleTrainingCertificateListView(ListView):
+  queryset = SingleTrainingAttendance.objects.none()
+  paginate_by = 500
+  template_name = ""
+  training_request = None
+  
+  def dispatch(self, *args, **kwargs):
+      self.queryset = SingleTrainingAttendance.objects.filter(training=kwargs['tid'], moved=False)
+    return super(TrainingCertificateListView, self).dispatch(*args, **kwargs)
+
+  def get_context_data(self, **kwargs):
+    context = super(SingleTrainingCertificateListView, self).get_context_data(**kwargs)
+    context['training'] = self.training_request
+    languages = Language.objects.filter(
+        id__in = FossAvailableForWorkshop.objects.filter(
+          foss_id = self.training_request.course.foss_id
+        ).values_list('language_id')
+      )
+    #language
+    #for lang in languages:
+    context['languages'] = languages
+    return context
+
 
 ''' Pending Attendance '''
 class SingletrainingPendingAttendanceListView(ListView):
