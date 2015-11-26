@@ -73,7 +73,13 @@
                               <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }} </a></td>
                              {% endif %}
                            {% elif request.path == '/software-training/single-training/completed/' %}
-                              <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }} | {{ training.total_participant_count }}</a></td>
+                              <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }} | {{ training.total_participant_count }}</a>
+                              {% if training.is_singletraining_certificate_allowed %}
+                                <a href="{% url 'events:single-training-certificate' training.id %}" >Download Certificate</a>
+                              {% elif not training.is_singletraining_certificate_allowed %}
+                                Training Completed
+                              {% endif %}
+                              </td>
                            {% endif %}
                        {% elif 'Resource Person' in group %}
                           {% if request.path == '/software-training/single-training/pendingattendance/' %}
@@ -88,11 +94,7 @@
                              <td>{{ training.participant_count }}</td>
                            {% elif request.path == '/software-training/single-training/completed/' %}
                               <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }} | {{ training.total_participant_count }}</a>
-                              {% if training.is_training_certificate_allowed %}
-                              <a href="{% url 'events:single_training_certificate' training.id %}" >Download Certificate</a>
-                              {% elif not training.is_training_certificate_allowed %}
-                              |Training Completed|
-                              {% endif %}
+                              <a href="{% url 'events:single-training-certificate' training.id %}" >Download Certificate</a>
                               </td>
                           {% endif %}
                        {% else %}
