@@ -140,6 +140,17 @@ urlpatterns = [
      SingletrainingCreateView.as_view(template_name="single-training-form.html"), 
       name="new-single-training"
     ),
+    url(
+      r'^single-training/(?P<tid>\d+)/certificate', 
+      SingleTrainingCertificateListView.as_view(template_name=\
+        "single-training-certificate.html"), 
+      name="single-training-certificate"
+    ),
+    url(
+      r'^single-training-certificate/(?P<taid>\d+)/organiser/$', 
+      OrganiserSingleTrainingCertificateView.as_view(), \
+        name="organiser_singletraining_certificate"
+    ),
     #ajax
     url(
       r'^save-student/', 
