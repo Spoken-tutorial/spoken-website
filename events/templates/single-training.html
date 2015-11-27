@@ -94,7 +94,11 @@
                              <td>{{ training.participant_count }}</td>
                            {% elif request.path == '/software-training/single-training/completed/' %}
                               <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }} | {{ training.total_participant_count }}</a>
-                              <a href="{% url 'events:single-training-certificate' training.id %}" >Download Certificate</a>
+                              {% if training.is_singletraining_certificate_allowed %}
+                                <a href="{% url 'events:single-training-certificate' training.id %}" >Download Certificate</a>
+                              {% elif not training.is_singletraining_certificate_allowed %}
+                                Training Completed
+                              {% endif %}
                               </td>
                           {% endif %}
                        {% else %}

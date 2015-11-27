@@ -1285,7 +1285,7 @@ class SingleTrainingCertificateListView(ListView):
   def dispatch(self, *args, **kwargs):
     self.training_request = SingleTraining.objects.get(pk=kwargs['tid'])
     print self.training_request.id
-    self.queryset = SingleTrainingAttendance.objects.filter(training_id=self.training_request.id)
+    self.queryset = SingleTrainingAttendance.objects.filter(training_id=self.training_request.id, status=1)
     return super(SingleTrainingCertificateListView, self).dispatch(*args, **kwargs)
 
   def get_context_data(self, **kwargs):

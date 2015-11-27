@@ -19,6 +19,7 @@
 {% if object_list %}
   <table class="table table-striped table-hover table-bordered">
     <tr>
+      <th>#</th>
       <th>Name</th>
       <th>Email</th>
       <th>Gender</th>
@@ -26,7 +27,8 @@
     </tr>
     {% for record in object_list %}
               <tr id="{{record.student.id}}">
-                <td>{{ record.firstname }}  {{ record.lastname }} {{record.id}}</td>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ record.firstname }}  {{ record.lastname }}</td>
                 <td>{{ record.email }}</td>
                 <td>{{ record.gender }}</td>
                 <td><a href="{% url 'events:organiser_singletraining_certificate' record.id %}">  Download Certificate</a></td>
