@@ -57,7 +57,23 @@
                       <td>{{ training.course.course_name }}</td>
                       <td>{{ training.language }}</td>
                       <td>{{ training.academic }}</td>
-                       {% if 'Organiser' in group  %}
+		       {% if 'Administrator' in group  %}
+                            {% if request.path == '/software-training/single-training/pendingattendance/' %}
+                             <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }}</a></td>
+                           {% elif request.path == '/software-training/single-training/approved/' %}
+                             <td>{{ training.participant_count }}</td>
+                           {% elif request.path == '/software-training/single-training/rejected/' %}
+                             <td>{{ training.participant_count }}</td>
+                           {% elif request.path == '/software-training/single-training/ongoing/' %}
+                             <td>{{ training.participant_count }}</td>
+                           {% elif request.path == '/software-training/single-training/pending/' %}
+                             <td>{{ training.participant_count }}</td>
+                           {% elif request.path == '/software-training/single-training/completed/' %}
+                              <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }} | {{ training.total_participant_count }}</a></td>
+                          {% endif %}
+
+			  
+                       {% elif 'Organiser' in group  %}
                            {% if request.path == '/software-training/single-training/approved/' %}
                              <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }}</a></td>
                            {% elif request.path == '/software-training/single-training/pending/' %}
@@ -69,7 +85,7 @@
                            {% elif request.path == '/software-training/single-training/pendingattendance/' %}
                              {% if 'Administrator' not in group and 'Resource Person' not in group and date > extn_date %}
                              <td>{{ training.participant_count }} |<a href="{% url 'events:single_training_pending' training.id %}"> Request to mark attendance</a></td>
-                             {% else %}
+		             {% else %}
                               <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }} </a></td>
                              {% endif %}
                            {% elif request.path == '/software-training/single-training/completed/' %}
