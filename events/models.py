@@ -1006,6 +1006,14 @@ class SingleTraining(models.Model):
   updated = models.DateTimeField(auto_now = True)
   #created = models.DateTimeField()
   #updated = models.DateTimeField()
+  
+  def is_singletraining_certificate_allowed(self):
+    if not FossAvailableForTest.objects.filter(
+      foss=self.course.foss, 
+      foss__status=True
+    ).count():
+      return True
+    return False
 
   class Meta:
     unique_together = (("organiser", "academic", "course", "tdate", "ttime"),)
