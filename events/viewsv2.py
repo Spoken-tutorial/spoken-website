@@ -720,7 +720,7 @@ class SingleTrainingCertificate():
     imgDoc.drawImage(imgPath, 600, 100, 150, 76)
 
     #paragraphe
-    text = "This is to certify that <b>"+ta.firstname +" "+ta.lastname+"</b> participated in the <b>"+ta.training.course.foss.foss+"</b> training organized at <b>"+ta.training.academic_id.institution_name+"</b> by  <b>"+ta.training.organiser_id.user.first_name + " "+ta.training.organiser_id.user.last_name+"</b> on <b>"+self.custom_strftime('%B {S} %Y', ta.training.tdate)+"</b> with course material provided by the Spoken Tutorial Project, IIT Bombay.<br /><br />A comprehensive set of topics pertaining to <b>"+ta.training.course.foss.foss+"</b> were covered in the workshop. This training is offered by the Spoken Tutorial Project, IIT Bombay, funded by National Mission on Education through ICT, MHRD, Govt. of India."
+    text = "This is to certify that <b>"+ta.firstname +" "+ta.lastname+"</b> participated in the <b>"+ta.training.course.foss.foss+"</b> training organized at <b>"+ ta.training.academic.institution_name+"</b> by  <b>"+ta.training.organiser.user.first_name + " "+ta.training.organiser.user.last_name+"</b> on <b>"+self.custom_strftime('%B {S} %Y', ta.training.tdate)+"</b> with course material provided by the Spoken Tutorial Project, IIT Bombay.<br /><br />A comprehensive set of topics pertaining to <b>"+ta.training.course.foss.foss+"</b> were covered in the workshop. This training is offered by the Spoken Tutorial Project, IIT Bombay, funded by National Mission on Education through ICT, MHRD, Govt. of India."
     
     centered = ParagraphStyle(name = 'centered',
       fontSize = 16,  
