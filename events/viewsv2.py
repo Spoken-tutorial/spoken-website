@@ -720,7 +720,7 @@ class SingleTrainingCertificate():
     imgDoc.drawImage(imgPath, 600, 100, 150, 76)
 
     #paragraphe
-    text = "This is to certify that <b>"+ta.firstname +" "+ta.lastname+"</b> participated in the <b>"+ta.training.course.foss.foss+"</b> training organized at <b>"+ta.training.academic_id.institution_name+"</b> by  <b>"+ta.training.organiser_id.user.first_name + " "+ta.training.organiser_id.user.last_name+"</b> on <b>"+self.custom_strftime('%B {S} %Y', ta.training.tdate)+"</b> with course material provided by the Spoken Tutorial Project, IIT Bombay.<br /><br />A comprehensive set of topics pertaining to <b>"+ta.training.course.foss.foss+"</b> were covered in the workshop. This training is offered by the Spoken Tutorial Project, IIT Bombay, funded by National Mission on Education through ICT, MHRD, Govt. of India."
+    text = "This is to certify that <b>"+ta.firstname +" "+ta.lastname+"</b> participated in the <b>"+ta.training.course.foss.foss+"</b> training organized at <b>"+ ta.training.academic.institution_name+"</b> by  <b>"+ta.training.organiser.user.first_name + " "+ta.training.organiser.user.last_name+"</b> on <b>"+self.custom_strftime('%B {S} %Y', ta.training.tdate)+"</b> with course material provided by the Spoken Tutorial Project, IIT Bombay.<br /><br />A comprehensive set of topics pertaining to <b>"+ta.training.course.foss.foss+"</b> were covered in the workshop. This training is offered by the Spoken Tutorial Project, IIT Bombay, funded by National Mission on Education through ICT, MHRD, Govt. of India."
     
     centered = ParagraphStyle(name = 'centered',
       fontSize = 16,  
@@ -1113,6 +1113,14 @@ class SingleTrainingNewListView(ListView):
     if 'Administrator' in user_group:
       self.queryset = SingleTraining.objects.filter(Q(status=0)).order_by('-tdate')
       return super(SingleTrainingNewListView, self).dispatch(*args, **kwargs)
+    if 'Resource Person' in user_group and 'Organiser' in user_group:
+      state_list = []
+      rp_state = self.request.user.id
+      a = ResourcePerson.objects.filter(user__id=rp_state)
+      for i in a:
+        state_list.append(i.state_id)
+      self.queryset = SingleTraining.objects.filter(Q(status=0), academic__state__id__in = state_list).order_by('-tdate')
+      return super(SingleTrainingNewListView, self).dispatch(*args, **kwargs)
     elif 'Organiser' in user_group:
       rp_state = self.request.user.organiser.academic_id
       self.queryset = SingleTraining.objects.filter(Q(status=0), academic__id = rp_state).order_by('-tdate')
@@ -1152,6 +1160,14 @@ class SingletrainingApprovedListView(ListView):
     if 'Administrator' in user_group:
       self.queryset = SingleTraining.objects.filter(tdate__gt=datetime.today().date().isoformat(), status=2).order_by('-tdate')
       return super(SingletrainingApprovedListView, self).dispatch(*args, **kwargs)
+    if 'Resource Person' in user_group and 'Organiser' in user_group:
+      state_list = []
+      rp_state = self.request.user.id
+      a = ResourcePerson.objects.filter(user__id=rp_state)
+      for i in a:
+        state_list.append(i.state_id)
+      self.queryset = SingleTraining.objects.filter(tdate__gt=datetime.today().date().isoformat(),status=2, academic__state__id__in = state_list).order_by('-tdate')
+      return super(SingletrainingApprovedListView, self).dispatch(*args, **kwargs)
     elif 'Organiser' in user_group:
       rp_state = self.request.user.organiser.academic_id
       self.queryset = SingleTraining.objects.filter(status=2, academic__id = rp_state,tdate__gt=datetime.today().date().isoformat()).order_by('-tdate')
@@ -1189,6 +1205,14 @@ class SingletrainingRejectedListView(ListView):
     if 'Administrator' in user_group:
       self.queryset = SingleTraining.objects.filter(tdate__gt=datetime.today().date().isoformat(), status=5).order_by('-tdate')
       return super(SingletrainingRejectedListView, self).dispatch(*args, **kwargs)
+    if 'Resource Person' in user_group and 'Organiser' in user_group:
+      state_list = []
+      rp_state = self.request.user.id
+      a = ResourcePerson.objects.filter(user__id=rp_state)
+      for i in a:
+        state_list.append(i.state_id)
+      self.queryset = SingleTraining.objects.filter(tdate__gt=datetime.today().date().isoformat(),status=5, academic__state__id__in = state_list).order_by('-tdate')
+      return super(SingletrainingRejectedListView, self).dispatch(*args, **kwargs)
     elif 'Organiser' in user_group:
       rp_state = self.request.user.organiser.academic_id
       self.queryset = SingleTraining.objects.filter(status=5, academic__id = rp_state,tdate__gt=datetime.today().date().isoformat()).order_by('-tdate')
@@ -1224,6 +1248,14 @@ class SingletrainingOngoingListView(ListView):
     if 'Administrator' in user_group:
       self.queryset = SingleTraining.objects.filter(tdate=datetime.today().date().isoformat(), status=2).order_by('-tdate')
       return super(SingletrainingOngoingListView, self).dispatch(*args, **kwargs)
+    if 'Resource Person' in user_group and 'Organiser' in user_group:
+      state_list = []
+      rp_state = self.request.user.id
+      a = ResourcePerson.objects.filter(user__id=rp_state)
+      for i in a:
+        state_list.append(i.state_id)
+      self.queryset = SingleTraining.objects.filter(tdate=datetime.today().date().isoformat(), status=2).order_by('-tdate')
+      return super(SingletrainingOngoingListView, self).dispatch(*args, **kwargs)
     elif 'Organiser' in user_group:
       rp_state = self.request.user.organiser.academic_id
       self.queryset = SingleTraining.objects.filter(tdate=datetime.today().date().isoformat(), status=2).order_by('-tdate')
@@ -1253,6 +1285,14 @@ class SingletrainingCompletedListView(ListView):
       user_group.append(i.name)
     if 'Administrator' in user_group:
       self.queryset = SingleTraining.objects.filter(Q(status=4)).order_by('-tdate')
+      return super(SingletrainingCompletedListView, self).dispatch(*args, **kwargs)
+    if 'Resource Person' in user_group and 'Organiser' in user_group:
+      state_list = []
+      rp_state = self.request.user.id
+      a = ResourcePerson.objects.filter(user__id=rp_state)
+      for i in a:
+        state_list.append(i.state_id)
+      self.queryset = SingleTraining.objects.filter(Q(status=4), academic__state__id__in = state_list).order_by('-tdate')
       return super(SingletrainingCompletedListView, self).dispatch(*args, **kwargs)
     elif 'Organiser' in user_group:
       rp_state = self.request.user.organiser.academic_id
@@ -1315,6 +1355,14 @@ class SingletrainingPendingAttendanceListView(ListView):
     if 'Administrator' in user_group:
      # self.queryset = SingleTraining.objects.filter(tdate__lt=datetime.today().date().isoformat(), status=2).order_by('-tdate')
      # return super(SingletrainingPendingAttendanceListView, self).dispatch(*args, **kwargs)
+      state_list = []
+      rp_state = self.request.user.id
+      a = ResourcePerson.objects.filter(user__id=rp_state)
+      for i in a:
+        state_list.append(i.state_id)
+      self.queryset = SingleTraining.objects.filter(tdate__lt=datetime.today().date().isoformat(), status=6, academic__state_id__in=state_list).order_by('-tdate')
+      return super(SingletrainingPendingAttendanceListView, self).dispatch(*args, **kwargs)
+    if 'Resource Person' in user_group and 'Organiser' in user_group:
       state_list = []
       rp_state = self.request.user.id
       a = ResourcePerson.objects.filter(user__id=rp_state)
