@@ -1766,7 +1766,7 @@ def test_list(request, role, status):
                 collectionSet = Test.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)), status = status_dict[status]).order_by('-tdate')
         elif is_organiser(user) and role == 'organiser':
             if status == 'ongoing': 
-                collectionSet = Test.objects.filter((Q(status = 2) | Q(status = 3)), organiser__user = user , tdate = datetime.datetime.now().strftime("%Y-%m-%d")).order_by('-tdate')
+                collectionSet = Test.objects.filter((Q(status = 2) | Q(status = 3)), organiser__user = user ,  tdate__lte = datetime.date.today().strftime("%Y-%m-%d")).order_by('-tdate')
             elif status == 'predated':
                 collectionSet = Test.objects.filter((Q(status = 0) | Q(status = 1) | Q(status = 2) | Q(status = 3)), organiser__user = user, tdate__lt=datetime.date.today()).order_by('-tdate')
             elif status == 'approved':
@@ -1775,7 +1775,7 @@ def test_list(request, role, status):
                 collectionSet = Test.objects.filter(organiser__user = user, status = status_dict[status]).order_by('-tdate')
         elif is_invigilator(user) and role == 'invigilator':
             if status == 'ongoing':
-                collectionSet = Test.objects.filter((Q(status = 2) | Q(status = 3)), tdate = datetime.date.today(), invigilator_id = user.invigilator.id).order_by('-tdate')
+                collectionSet = Test.objects.filter((Q(status = 2) | Q(status = 3)),  tdate__lte = datetime.date.today(), invigilator_id = user.invigilator.id).order_by('-tdate')
                 messages.info(request, "Click on the Attendance link below to see the participant list. To know more Click Here.")
             elif status == 'predated':
                 collectionSet = Test.objects.none()
