@@ -686,6 +686,72 @@ class TrainingCertificate():
 
     return response
 
+class SingleTrainingCertificate():
+  def custom_strftime(self, format, t):
+    return t.strftime(format).replace('{S}', str(t.day) + self.suffix(t.day))
+
+  def suffix(self, d):
+    return 'th' if 11<=d<=13 else {1:'st',2:'nd',3:'rd'}.get(d%10, 'th')
+  
+  def single_training_certificate(self, ta):
+    response = HttpResponse(content_type='application/pdf')
+    filename = (ta.firstname+'-'+ta.training.course.foss.foss+"-Participant-Certificate").replace(" ", "-");
+    
+    response['Content-Disposition'] = 'attachment; filename='+filename+'.pdf'
+    imgTemp = StringIO()
+    imgDoc = canvas.Canvas(imgTemp)
+
+    # Title 
+    imgDoc.setFont('Helvetica', 40, leading=None)
+    imgDoc.drawCentredString(415, 480, "Certificate of Learning")
+
+    #date
+    imgDoc.setFont('Helvetica', 18, leading=None)
+    imgDoc.drawCentredString(211, 115, self.custom_strftime('%B {S} %Y', ta.training.tdate)) 
+
+    #password
+    certificate_pass = ''
+    imgDoc.setFillColorRGB(211, 211, 211)
+    imgDoc.setFont('Helvetica', 10, leading=None)
+    imgDoc.drawString(10, 6, certificate_pass)
+
+    # Draw image on Canvas and save PDF in buffer
+    imgPath = settings.MEDIA_ROOT +"sign.jpg"
+    imgDoc.drawImage(imgPath, 600, 100, 150, 76)
+
+    #paragraphe
+    text = "This is to certify that <b>"+ta.firstname +" "+ta.lastname+"</b> participated in the <b>"+ta.training.course.foss.foss+"</b> training organized at <b>"+ ta.training.academic.institution_name+"</b> by  <b>"+ta.training.organiser.user.first_name + " "+ta.training.organiser.user.last_name+"</b> on <b>"+self.custom_strftime('%B {S} %Y', ta.training.tdate)+"</b> with course material provided by the Spoken Tutorial Project, IIT Bombay.<br /><br />A comprehensive set of topics pertaining to <b>"+ta.training.course.foss.foss+"</b> were covered in the workshop. This training is offered by the Spoken Tutorial Project, IIT Bombay, funded by National Mission on Education through ICT, MHRD, Govt. of India."
+    
+    centered = ParagraphStyle(name = 'centered',
+      fontSize = 16,  
+      leading = 30,  
+      alignment = 0,  
+      spaceAfter = 20
+    )
+
+    p = Paragraph(text, centered)
+    p.wrap(650, 200)
+    p.drawOn(imgDoc, 4.2 * cm, 7 * cm)
+
+    imgDoc.save()
+
+    # Use PyPDF to merge the image-PDF into the template
+    page = PdfFileReader(file(settings.MEDIA_ROOT +"Blank-Certificate.pdf","rb")).getPage(0)
+    overlay = PdfFileReader(StringIO(imgTemp.getvalue())).getPage(0)
+    page.mergePage(overlay)
+
+    #Save the result
+    output = PdfFileWriter()
+    output.addPage(page)
+    
+    #stream to browser
+    outputStream = response
+    output.write(response)
+    outputStream.close()
+
+    return response
+
+
 class OrganiserTrainingCertificateView(TrainingCertificate, View):
   template_name = ""
   @method_decorator(group_required("Organiser"))
@@ -702,6 +768,26 @@ class OrganiserTrainingCertificateView(TrainingCertificate, View):
 
     if ta and ta.training.training_planner.organiser == self.request.user.organiser:
       return self.training_certificate(ta)
+    else:
+      messages.error(self.request, "PermissionDenied!")
+    return HttpResponseRedirect("/")
+    
+class OrganiserSingleTrainingCertificateView(SingleTrainingCertificate, View):
+  template_name = ""
+  @method_decorator(group_required("Organiser"))
+  def dispatch(self, *args, **kwargs):
+    return super(OrganiserSingleTrainingCertificateView, self).dispatch(*args, **kwargs)
+
+  def get(self, request, *args, **kwargs):
+    ta = None
+    try:
+      ta = SingleTrainingAttendance.objects.get(pk=kwargs['taid'])
+    except ObjectDoesNotExist:
+      messages.error(self.request, "Record not found")
+      pass
+
+    if ta:
+      return self.single_training_certificate(ta)
     else:
       messages.error(self.request, "PermissionDenied!")
     return HttpResponseRedirect("/")
@@ -1027,6 +1113,14 @@ class SingleTrainingNewListView(ListView):
     if 'Administrator' in user_group:
       self.queryset = SingleTraining.objects.filter(Q(status=0)).order_by('-tdate')
       return super(SingleTrainingNewListView, self).dispatch(*args, **kwargs)
+    if 'Resource Person' in user_group and 'Organiser' in user_group:
+      state_list = []
+      rp_state = self.request.user.id
+      a = ResourcePerson.objects.filter(user__id=rp_state)
+      for i in a:
+        state_list.append(i.state_id)
+      self.queryset = SingleTraining.objects.filter(Q(status=0), academic__state__id__in = state_list).order_by('-tdate')
+      return super(SingleTrainingNewListView, self).dispatch(*args, **kwargs)
     elif 'Organiser' in user_group:
       rp_state = self.request.user.organiser.academic_id
       self.queryset = SingleTraining.objects.filter(Q(status=0), academic__id = rp_state).order_by('-tdate')
@@ -1066,6 +1160,14 @@ class SingletrainingApprovedListView(ListView):
     if 'Administrator' in user_group:
       self.queryset = SingleTraining.objects.filter(tdate__gt=datetime.today().date().isoformat(), status=2).order_by('-tdate')
       return super(SingletrainingApprovedListView, self).dispatch(*args, **kwargs)
+    if 'Resource Person' in user_group and 'Organiser' in user_group:
+      state_list = []
+      rp_state = self.request.user.id
+      a = ResourcePerson.objects.filter(user__id=rp_state)
+      for i in a:
+        state_list.append(i.state_id)
+      self.queryset = SingleTraining.objects.filter(tdate__gt=datetime.today().date().isoformat(),status=2, academic__state__id__in = state_list).order_by('-tdate')
+      return super(SingletrainingApprovedListView, self).dispatch(*args, **kwargs)
     elif 'Organiser' in user_group:
       rp_state = self.request.user.organiser.academic_id
       self.queryset = SingleTraining.objects.filter(status=2, academic__id = rp_state,tdate__gt=datetime.today().date().isoformat()).order_by('-tdate')
@@ -1103,6 +1205,14 @@ class SingletrainingRejectedListView(ListView):
     if 'Administrator' in user_group:
       self.queryset = SingleTraining.objects.filter(tdate__gt=datetime.today().date().isoformat(), status=5).order_by('-tdate')
       return super(SingletrainingRejectedListView, self).dispatch(*args, **kwargs)
+    if 'Resource Person' in user_group and 'Organiser' in user_group:
+      state_list = []
+      rp_state = self.request.user.id
+      a = ResourcePerson.objects.filter(user__id=rp_state)
+      for i in a:
+        state_list.append(i.state_id)
+      self.queryset = SingleTraining.objects.filter(tdate__gt=datetime.today().date().isoformat(),status=5, academic__state__id__in = state_list).order_by('-tdate')
+      return super(SingletrainingRejectedListView, self).dispatch(*args, **kwargs)
     elif 'Organiser' in user_group:
       rp_state = self.request.user.organiser.academic_id
       self.queryset = SingleTraining.objects.filter(status=5, academic__id = rp_state,tdate__gt=datetime.today().date().isoformat()).order_by('-tdate')
@@ -1138,6 +1248,14 @@ class SingletrainingOngoingListView(ListView):
     if 'Administrator' in user_group:
       self.queryset = SingleTraining.objects.filter(tdate=datetime.today().date().isoformat(), status=2).order_by('-tdate')
       return super(SingletrainingOngoingListView, self).dispatch(*args, **kwargs)
+    if 'Resource Person' in user_group and 'Organiser' in user_group:
+      state_list = []
+      rp_state = self.request.user.id
+      a = ResourcePerson.objects.filter(user__id=rp_state)
+      for i in a:
+        state_list.append(i.state_id)
+      self.queryset = SingleTraining.objects.filter(tdate=datetime.today().date().isoformat(), status=2).order_by('-tdate')
+      return super(SingletrainingOngoingListView, self).dispatch(*args, **kwargs)
     elif 'Organiser' in user_group:
       rp_state = self.request.user.organiser.academic_id
       self.queryset = SingleTraining.objects.filter(tdate=datetime.today().date().isoformat(), status=2).order_by('-tdate')
@@ -1168,6 +1286,14 @@ class SingletrainingCompletedListView(ListView):
     if 'Administrator' in user_group:
       self.queryset = SingleTraining.objects.filter(Q(status=4)).order_by('-tdate')
       return super(SingletrainingCompletedListView, self).dispatch(*args, **kwargs)
+    if 'Resource Person' in user_group and 'Organiser' in user_group:
+      state_list = []
+      rp_state = self.request.user.id
+      a = ResourcePerson.objects.filter(user__id=rp_state)
+      for i in a:
+        state_list.append(i.state_id)
+      self.queryset = SingleTraining.objects.filter(Q(status=4), academic__state__id__in = state_list).order_by('-tdate')
+      return super(SingletrainingCompletedListView, self).dispatch(*args, **kwargs)
     elif 'Organiser' in user_group:
       rp_state = self.request.user.organiser.academic_id
       self.queryset = SingleTraining.objects.filter(Q(status=4), academic__id = rp_state).order_by('-tdate')
@@ -1189,6 +1315,32 @@ class SingletrainingCompletedListView(ListView):
       grup.append(i.name)
     context['group'] = grup
     return context
+#$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$4444
+class SingleTrainingCertificateListView(ListView):
+  queryset = SingleTrainingAttendance.objects.none()
+  paginate_by = 500
+  template_name = ""
+  training_request = None
+  
+  def dispatch(self, *args, **kwargs):
+    self.training_request = SingleTraining.objects.get(pk=kwargs['tid'])
+    print self.training_request.id
+    self.queryset = SingleTrainingAttendance.objects.filter(training_id=self.training_request.id, status=1)
+    return super(SingleTrainingCertificateListView, self).dispatch(*args, **kwargs)
+
+  def get_context_data(self, **kwargs):
+    context = super(SingleTrainingCertificateListView, self).get_context_data(**kwargs)
+    context['training'] = self.training_request
+    languages = Language.objects.filter(
+        id__in = FossAvailableForWorkshop.objects.filter(
+          foss_id = self.training_request.course.foss_id
+        ).values_list('language_id')
+      )
+    #language
+    #for lang in languages:
+    context['languages'] = languages
+    return context
+
 
 ''' Pending Attendance '''
 class SingletrainingPendingAttendanceListView(ListView):
@@ -1202,6 +1354,14 @@ class SingletrainingPendingAttendanceListView(ListView):
       user_group.append(i.name)
     if 'Administrator' in user_group:
       self.queryset = SingleTraining.objects.filter(tdate__lt=datetime.today().date().isoformat(), status=2).order_by('-tdate')
+      return super(SingletrainingPendingAttendanceListView, self).dispatch(*args, **kwargs)
+    if 'Resource Person' in user_group and 'Organiser' in user_group:
+      state_list = []
+      rp_state = self.request.user.id
+      a = ResourcePerson.objects.filter(user__id=rp_state)
+      for i in a:
+        state_list.append(i.state_id)
+      self.queryset = SingleTraining.objects.filter(tdate__lt=datetime.today().date().isoformat(), status=6, academic__state_id__in=state_list).order_by('-tdate')
       return super(SingletrainingPendingAttendanceListView, self).dispatch(*args, **kwargs)
     elif 'Organiser' in user_group:
       org_inst = self.request.user.organiser.academic_id
