@@ -38,11 +38,11 @@ PASSWORD_HASHERS = (
 # email errors and 404
 SERVER_EMAIL = 'error-report@spoken-tutorial.org'
 ADMINS = (
-    ('Administrator', 'administrator@spoken-tutorial.org'),
+    ('Web Administrator', 'web-notify@spoken-tutorial.org'),
 )
 
 MANAGERS = (
-    ('Administrator', 'administrator@spoken-tutorial.org'),
+    ('Web Administrator', 'web-notify@spoken-tutorial.org'),
 )
 
 ADMINISTRATOR_EMAIL = ADMINISTRATOR_EMAIL
@@ -164,7 +164,7 @@ DATABASES = {
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'Asia/Calcutta'
+TIME_ZONE = 'Asia/Kolkata'
 
 USE_I18N = True
 
