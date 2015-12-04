@@ -1360,7 +1360,7 @@ class SingletrainingPendingAttendanceListView(ListView):
       a = ResourcePerson.objects.filter(user__id=rp_state)
       for i in a:
         state_list.append(i.state_id)
-      self.queryset = SingleTraining.objects.filter(tdate__lt=datetime.today().date().isoformat(), status=6, academic__state_id__in=state_list).order_by('-tdate')
+      self.queryset = SingleTraining.objects.filter(tdate__lt=datetime.today().date().isoformat(), status=2, academic__state_id__in=state_list).order_by('-tdate')
       return super(SingletrainingPendingAttendanceListView, self).dispatch(*args, **kwargs)
     if 'Resource Person' in user_group and 'Organiser' in user_group:
       state_list = []
