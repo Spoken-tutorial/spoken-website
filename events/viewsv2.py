@@ -1257,7 +1257,11 @@ class SingletrainingOngoingListView(ListView):
       self.queryset = SingleTraining.objects.filter(tdate=datetime.today().date().isoformat(), status=2).order_by('-tdate')
       return super(SingletrainingOngoingListView, self).dispatch(*args, **kwargs)
     elif 'Organiser' in user_group:
-      rp_state = self.request.user.organiser.academic_id
+      state_list = []
+      rp_state = self.request.user.id
+      a = Organiser.objects.filter(user__id=rp_state)
+      for i in a:
+        state_list.append(i.state_id)
       self.queryset = SingleTraining.objects.filter(tdate=datetime.today().date().isoformat(), status=2).order_by('-tdate')
       return super(SingletrainingOngoingListView, self).dispatch(*args, **kwargs)
     elif 'Resource Person' in user_group:

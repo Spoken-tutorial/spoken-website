@@ -65,10 +65,10 @@
                            {% elif request.path == '/software-training/single-training/rejected/' %}
                               <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }}</a></td>
                            {% elif request.path == '/software-training/single-training/ongoing/' %}
-                             <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }}</a></td>
+                             <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }} </a></td>
                            {% elif request.path == '/software-training/single-training/pendingattendance/' %}
-                             {% if 'Administrator' not in group and 'Resource Person' not in group and date > extn_date %}
-                             <td>{{ training.participant_count }} |<a href="{% url 'events:single_training_pending' training.id %}"> Request to mark attendance</a></td>
+                             {% if 'Administrator' not in group and 'Resource Person' not in group %}
+                             <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }} </a> |<a href="{% url 'events:single_training_pending' training.id %}"> Request to mark attendance</a></td>
                              {% else %}
                               <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }} </a></td>
                              {% endif %}
