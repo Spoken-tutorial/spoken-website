@@ -41,7 +41,7 @@
                         </div>
                     </div>
                 {% endif %}
-                {% if user|is_event_manager %}
+                {% if user|is_event_manager %}Sc
                     <div class="panel panel-primary">
                         <div class="panel-heading panel-heading-notif">Events Manager</div>
                         <div class="panel-body">
@@ -77,7 +77,7 @@
                             <h5>Training <b>(To Start the Training Go here)</b></h5>
                             <ul>
                                 <li><a href="/software-training/training-planner/">Semester Training Planner Summary (STPS)</a></li>
-				{% if institution_type.name == 'School' or institution_type.name == 'Vocational' or user.is_superuser  %}
+				{% if institution_type.name == 'School' or institution_type.name == 'Vocational' or institution_type.name == 'NGO - Training Centre' or institution_type.name == 'NGO' or user.is_superuser  %}
 					<li><a href="/software-training/single-training/pending/">School / Vocational Training request summary</a></li>
 				{% endif %}
                                 <!-- <li><a href="/software-training/training/organiser/request/">New Training Request and Participant List</a></li>
