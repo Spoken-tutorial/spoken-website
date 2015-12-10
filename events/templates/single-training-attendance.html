@@ -41,7 +41,7 @@
     <div id="approved" class="tab-pane fade in active">
      <form action="" method="post">
         {% csrf_token %}
-        {% if 'Administrator' in group  %}
+        {% if 'Administrator' in group and not training_status == 4 %}
           <div style="height:70px;">
                 <div style="width:200px;float:left;text-align:center;">
                   <p id="button-select">To select all participants</p> <input type=button class="btn btn-success"  value="Check All" onClick="this.value=check()"> 
@@ -58,7 +58,7 @@
                 <table class="table table-striped table-hover table-bordered">
                   <tr>
                     <th>#</th>
-                    {% if 'Administrator' in group  %}
+                    {% if 'Administrator' in group and not training_status == 4  %}
                       <th>Check</th>
                     {% elif 'Resource Person' in group and training_status == 6 %}
                          <th>Check</th>
@@ -71,7 +71,7 @@
                   {% for training in object_list %}
                     <tr >
                       <td>{{ forloop.counter }}</td>
-                      {% if 'Administrator' in group  %}
+                      {% if 'Administrator' in group and not training_status == 4 %}
                           <td><input type="checkbox" name="user" value="{{ training.id }}"/></td>
                       {% elif 'Resource Person' in group and training_status == 6 %}
                          <td><input type="checkbox" name="user" value="{{ training.id }}"/></td>
@@ -83,7 +83,7 @@
                     </tr>
                   {% endfor %}
                 </table>
-              {% if 'Administrator' in group  %}
+              {% if 'Administrator' in group  and not training_status == 4 %}
                 <input class="btn btn-primary" type="submit" value="Submit Attendance" />
              {% elif 'Resource Person' in group and training_status == 6 %}
            <input class="btn btn-primary" type="submit" value="Submit Attendance" />

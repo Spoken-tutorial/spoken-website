@@ -69,11 +69,11 @@
                            {% elif request.path == '/software-training/single-training/pending/' %}
                              <td>{{ training.participant_count }}</td>
                            {% elif request.path == '/software-training/single-training/completed/' %}
-                              <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }} | {{ training.total_participant_count }}</a>
+                              <td>
                               {% if training.is_singletraining_certificate_allowed %}
-                                <a href="{% url 'events:single-training-certificate' training.id %}" >Download Certificate</a>
+                                <a href="{% url 'events:single-training-certificate' training.id %}" >{{ training.participant_count }} | {{ training.total_participant_count }} Download Certificate</a>
                               {% elif not training.is_singletraining_certificate_allowed %}
-                                Training Completed
+                                {{ training.participant_count }} | {{ training.total_participant_count }} Training Completed
                               {% endif %}
                               </td>
                           {% endif %}
@@ -97,12 +97,11 @@
                               <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }} </a></td>
                              {% endif %}
                            {% elif request.path == '/software-training/single-training/completed/' %}
-
-                              <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }} | {{ training.total_participant_count }}</a>
+                              <td>
                               {% if training.is_singletraining_certificate_allowed %}
-                                <a href="{% url 'events:single-training-certificate' training.id %}" >Download Certificate</a>
+                                <a href="{% url 'events:single-training-certificate' training.id %}"> {{ training.participant_count }} | {{ training.total_participant_count }} Download Certificate</a>
                               {% elif not training.is_singletraining_certificate_allowed %}
-                                Training Completed
+                                {{ training.participant_count }} | {{ training.total_participant_count }} Training Completed
                               {% endif %}
                               </td>
                            {% endif %}
@@ -118,11 +117,11 @@
                            {% elif request.path == '/software-training/single-training/pending/' %}
                              <td>{{ training.participant_count }}</td>
                            {% elif request.path == '/software-training/single-training/completed/' %}
-                              <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }} | {{ training.total_participant_count }}</a>
+                              <td>
                               {% if training.is_singletraining_certificate_allowed %}
-                                <a href="{% url 'events:single-training-certificate' training.id %}" >Download Certificate</a>
+                                <a href="{% url 'events:single-training-certificate' training.id %}" > {{ training.participant_count }} | {{ training.total_participant_count }} Download Certificate</a>
                               {% elif not training.is_singletraining_certificate_allowed %}
-                                Training Completed
+                                {{ training.participant_count }} | {{ training.total_participant_count }} Training Completed
                               {% endif %}
                               </td>
                           {% endif %}
