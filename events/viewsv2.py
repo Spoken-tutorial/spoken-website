@@ -1435,7 +1435,7 @@ class SingletrainingCreateView(CreateView):
         messages.success(self.request, "Student Batch added successfully.")
         form_data.participant_count = student_count
         form_data.total_participant_count = student_count
-        form_data.save()
+      form_data.save()
         #SingleTraining.objects.get(id=form_data.id).update(total_participant_count=student_count)
     return HttpResponseRedirect(self.success_url)
 
