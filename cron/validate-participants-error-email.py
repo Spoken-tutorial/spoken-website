@@ -12,7 +12,7 @@ from events.models import Student
 
 # fetching students needs to be verified
 print 'Initializing ...'
-students = Student.objects.filter(error=True).order_by('-id')
+students = Student.objects.filter(error=True, verified__lt=3).order_by('-id')
 
 # opening log files to write success & error attempts
 today = time.strftime('%Y-%m-%d_%H-%M-%S')
@@ -32,10 +32,13 @@ for student in students:
         student.user.is_active = True
         student.user.save()
         student.error = False
+        student.verified = student.verified + 1
         student.save()
         status = 'Success'
         success_log_file_head.write(str(student.id)+','+str(student.user.id)+','+student.user.email+'\n')
       else:
+        student.verified = student.verified + 1
+        student.save()
         status = 'Not Available'
         error_log_file_head.write(str(student.id)+','+str(student.user.id)+','+student.user.email+'\n')
     except TimeoutError, e:
