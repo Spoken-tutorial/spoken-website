@@ -1426,17 +1426,18 @@ class SingletrainingCreateView(CreateView):
     else:
       form_data.save()
       student_exists, student_count, csv_data_list = self.create_singletraining_db(self.request.FILES['csv_file'], form_data.id, form_data.course.id)
-      if student_exists:
-        messages.error(self.request, "Batch added but Duplicate entries exist in CSV file")
-        form_data.participant_count = student_count
-      elif len(student_exists) == len(csv_data_list):
+      if len(student_exists) == len(csv_data_list):
         messages.error(self.request, "Batch not added: Batch already exists for the same course")
+      elif student_exists:
+        messages.error(self.request, "Batch added but Duplicate entries exist in CSV file")
       else:
         messages.success(self.request, "Student Batch added successfully.")
-        form_data.participant_count = student_count
-        form_data.total_participant_count = student_count
-        form_data.save()
         #SingleTraining.objects.get(id=form_data.id).update(total_participant_count=student_count)
+      form_data.participant_count = student_count
+      form_data.total_participant_count = student_count
+      form_data.save()
+      if not student_count:
+        form_data.delete()
     return HttpResponseRedirect(self.success_url)
 
   def email_validator(self, email):
