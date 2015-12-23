@@ -83,7 +83,10 @@
                            {% if request.path == '/software-training/single-training/approved/' %}
                              <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }}</a></td>
                            {% elif request.path == '/software-training/single-training/pending/' %}
-                              <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }}</a></td>
+                              <td>
+                                <a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }}</a>
+                                | <a href="{% url 'events:update-single-training' training.id %}">Edit</a>
+                              </td>
                            {% elif request.path == '/software-training/single-training/rejected/' %}
                               <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }}</a></td>
                            {% elif request.path == '/software-training/single-training/ongoing/' %}

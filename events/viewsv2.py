@@ -13,7 +13,8 @@ from django.utils.decorators import method_decorator
 from events.decorators import group_required
 from events.forms import StudentBatchForm, TrainingRequestForm, \
     TrainingRequestEditForm, CourseMapForm, SingleTrainingForm, \
-    OrganiserFeedbackForm, LatexWorkshopFileUploadForm, UserForm
+    OrganiserFeedbackForm, LatexWorkshopFileUploadForm, UserForm, \
+    SingleTrainingEditForm
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, render_to_response
 from django.core.validators import validate_email
@@ -1558,6 +1559,17 @@ class SingletrainingCreateView(CreateView):
          self.create_student_vocational(tr_id, batch_id, csv_data_list[j][0], csv_data_list[j][1], csv_data_list[j][2], csv_data_list[j][3])
       student_count = SingleTrainingAttendance.objects.filter(training_id=tr_id).count()
     return student_exists, student_count, csv_data_list
+
+'''
+SingleTrainingUpdateView will update a request for a existing One day workshop.
+
+'''
+
+class SingletrainingUpdateView(UpdateView):
+  model = SingleTraining
+  form_class = SingleTrainingEditForm
+  success_url = "/software-training/single-training/pending/"
+
 
 ''' SingleTrainingAttendance is used to (1) List the attendance view, (2) Mark the attendance ''' 
 

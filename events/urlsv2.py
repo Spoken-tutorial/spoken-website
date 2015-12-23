@@ -141,6 +141,11 @@ urlpatterns = [
       name="new-single-training"
     ),
     url(
+      r'^single-training/(?P<pk>\d+)/edit/$',
+     SingletrainingUpdateView.as_view(template_name="single-training-form.html"),
+      name="update-single-training"
+    ),
+    url(
       r'^single-training/(?P<tid>\d+)/certificate', 
       SingleTrainingCertificateListView.as_view(template_name=\
         "single-training-certificate.html"), 

@@ -203,7 +203,36 @@ class SingleTrainingForm(forms.ModelForm):
     if today.date() > tdate:
       raise forms.ValidationError("Invalid semester training date")
     return tdate
+
+class SingleTrainingEditForm(forms.ModelForm):
+  training_type = forms.ChoiceField(choices=[('', '---------'), (0, 'School'),(3,'Vocational'),(1,'Live workshop'),(2,'Pilot workshop')])
+  csv_file = forms.FileField(required = False)
+  class Meta:
+    model = SingleTraining
+    exclude = ['organiser', 'status', 'participant_count', 'total_participant_count']
+
+  def __init__(self, *args, **kwargs):
+    super(SingleTrainingEditForm, self).__init__(*args, **kwargs)
+    self.fields['academic'].required = False
+    self.fields['state'].required = False
+    self.fields['institution_type'].required = False
+
+  def clean(self):
+        #self.cleaned_data['csv_file']
+    if 'csv_file' in self.cleaned_data and self.cleaned_data['csv_file']:
+      if self.cleaned_data['csv_file'].name.split('.')[-1] == 'csv':
+        pass
+      else:
+        raise forms.ValidationError("Invalid file format.")
+    return self.cleaned_data
     
+  def clean_tdate(self):
+    today = datetime.datetime.now()
+    tdate = self.cleaned_data['tdate']
+    if today.date() > tdate:
+      raise forms.ValidationError("Invalid semester training date")
+    return tdate
+
 class OrganiserFeedbackForm(forms.ModelForm):
   offered_training_foss = forms.ModelMultipleChoiceField(queryset=FossCategory.objects.filter(status=1), widget=forms.CheckboxSelectMultiple)
   class Meta:
