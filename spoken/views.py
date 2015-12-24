@@ -1,4 +1,5 @@
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, \
+    HttpResponsePermanentRedirect
 from django.template import RequestContext
 from django.shortcuts import render
 from django.contrib import messages
@@ -26,6 +27,7 @@ from spoken.search import search_for_results
 from mdldjango.models import MdlUser
 from forums.models import Question
 from cms.forms import *
+from spoken.filters import NewsStateFilter
 
 from django.contrib.auth.models import User
 
@@ -319,20 +321,24 @@ def news(request, cslug):
         newstype = NewsType.objects.get(slug = cslug)
         collection = None
         latest = None
-        if request.GET and 'latest' in request.GET and int(request.GET.get('latest') == 0 and cslug == 'media-articles'):
-            collection = newstype.news_set.order_by('weight', '-created')
+        sortAllowedCategory = ['articles-on-university-tie-ups-workshops', 'articles-on-spoken-tutorial-project']
+        if request.GET and 'latest' in request.GET and int(request.GET.get('latest')) == 1 and (cslug in sortAllowedCategory):
+            collection = newstype.news_set.order_by('weight')
         else:
             collection = newstype.news_set.order_by('-created')
             latest = True
-            
+        collection = NewsStateFilter(request.GET, queryset=collection, news_type_slug=cslug)
+        form = collection.form
         if collection:
             page = request.GET.get('page')
             collection = get_page(collection, page)
         context = {
+            'form' : form,
             'collection' : collection,
             'category' : cslug,
             'newstype' : newstype,
             'latest' : latest,
+            'sortAllowedCategory' : sortAllowedCategory
         }
         context.update(csrf(request))
         return render(request, 'spoken/templates/news/index.html', context)
@@ -343,6 +349,14 @@ def news(request, cslug):
 
 def news_view(request, cslug, slug):
     try:
+        # 301 redirection. Enable this after categories all to new
+        """
+        if cslug == 'media-articles':
+            news = News.objects.get(slug = slug)
+            redirect_url = "/news/"+news.news_type.slug+"/"+news.slug
+            return HttpResponsePermanentRedirect(redirect_url)
+        """
+
         newstype = NewsType.objects.get(slug = cslug)
         news = News.objects.get(slug = slug)
         image_or_doc = None
