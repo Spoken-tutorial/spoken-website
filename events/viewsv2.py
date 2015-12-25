@@ -1570,6 +1570,28 @@ class SingletrainingUpdateView(UpdateView):
   form_class = SingleTrainingEditForm
   success_url = "/software-training/single-training/pending/"
 
+  def form_valid(self, form, **kwargs):
+    form_data = form.save(commit=False)
+    if 'csv_file' in self.request.FILES and self.request.FILES['csv_file']:
+      stcv = SingletrainingCreateView()
+      skipped, error, warning, write_flag = stcv.csv_email_validate(self.request.FILES['csv_file'], str(self.request.POST.get('training_type')))
+      context = {'error': error, 'warning': warning, 'batch': form_data}
+      csv_error_line_num = ''
+      if error or skipped:
+        for i in error:
+          csv_error_line_num = (csv_error_line_num+'%d, ')%(i+1)
+        messages.error(self.request, "You have error(s) in your CSV file on line numbers %s"%(csv_error_line_num))
+
+      else:
+        form_data.save()
+        student_exists, student_count, csv_data_list = stcv.create_singletraining_db(self.request.FILES['csv_file'], form_data.id, form_data.course.id)
+
+        form_data.participant_count = student_count
+        form_data.total_participant_count = student_count
+    form_data.save()
+    messages.success(self.request, "Student Batch updated successfully.")
+    return HttpResponseRedirect(self.success_url)
+
 
 ''' SingleTrainingAttendance is used to (1) List the attendance view, (2) Mark the attendance ''' 
 
