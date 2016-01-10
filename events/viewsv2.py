@@ -41,6 +41,9 @@ from reportlab.lib.enums import TA_CENTER
 from PyPDF2 import PdfFileWriter, PdfFileReader
 from StringIO import StringIO
 
+# import helpers
+from events.views import is_organiser, is_invigilator, is_resource_person, is_administrator
+
 class JSONResponseMixin(object):
   """
   A mixin that can be used to render a JSON response.
@@ -1089,6 +1092,7 @@ class TrainingRequestListView(ListView):
 
 ##############################  Single Training one day workshop ############################################################################# 
 
+"""
 ''' 
 SingleTrainingNewListView will list all the new/pending training requests in the single-training page pertaining to a specific user, i.e, Organiser or Resource Person.
 
@@ -1316,6 +1320,7 @@ class SingletrainingCompletedListView(ListView):
       grup.append(i.name)
     context['group'] = grup
     return context
+"""
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$4444
 class SingleTrainingCertificateListView(ListView):
   queryset = SingleTrainingAttendance.objects.none()
@@ -1342,7 +1347,7 @@ class SingleTrainingCertificateListView(ListView):
     context['languages'] = languages
     return context
 
-
+"""
 ''' Pending Attendance '''
 class SingletrainingPendingAttendanceListView(ListView):
   queryset = None
@@ -1394,6 +1399,7 @@ class SingletrainingPendingAttendanceListView(ListView):
     context['group'] = grup
     context['date'] = date_today
     return context
+"""
 
 '''
 SingleTrainingCreateView will create a request for a new One day workshop.
@@ -1592,6 +1598,80 @@ class SingletrainingUpdateView(UpdateView):
     messages.success(self.request, "Student Batch updated successfully.")
     return HttpResponseRedirect(self.success_url)
 
+''' 
+SingleTrainingListView will list all the new/pending training requests in the single-training page pertaining to a specific user, i.e, Organiser or Resource Person.
+
+'''
+
+class SingleTrainingListView(ListView):
+  queryset = None
+  paginate_by = 10
+  user = None
+  status = None
+
+  @method_decorator(group_required("Organiser", "Resource Person", "Administrator"))
+  def dispatch(self, *args, **kwargs):
+    user = self.request.user
+    status_list = {
+      'pending' : 0,
+      'approved' : 2,
+      'ongoing' : 3,
+      'completed' : 4,
+      'rejected' : 5,
+      'pendingattendance' : 6,
+    }
+    self.status = kwargs['status']
+    if not self.status in status_list : 
+      raise PermissionDenied()
+
+    if is_administrator(user):
+      self.queryset = SingleTraining.objects.filter(Q(status=status_list[self.status])).order_by('-tdate')
+      return super(SingleTrainingListView, self).dispatch(*args, **kwargs)
+
+    if is_resource_person(user) and is_organiser(user):
+      self.queryset = SingleTraining.objects.filter(Q(status=status_list[self.status]), academic__state = user.resource_person.filter(resourceperson__status=1)).order_by('-tdate')
+
+    elif is_organiser(user):
+      self.queryset = SingleTraining.objects.filter(Q(status=status_list[self.status]), academic__id = self.request.user.organiser.academic_id).order_by('-tdate')
+
+    elif is_resource_person(user):
+      self.queryset = SingleTraining.objects.filter(Q(status=status_list[self.status]), academic__state=user.resource_person.filter(resourceperson__status=1)).order_by('-tdate')
+    return super(SingleTrainingListView, self).dispatch(*args, **kwargs)
+
+  def get_context_data(self, **kwargs):
+    context = super(SingleTrainingListView, self).get_context_data(**kwargs)
+    context['status'] = self.status
+    return context
+
+
+'''
+SingletrainingMarkCompleteUpdateView will update ongoing to completed.
+'''
+#@method_decorator(group_required("Organiser", "Resource Person", "Administrator"))
+class SingletrainingMarkCompleteUpdateView(UpdateView):
+  model = SingleTraining
+  form_class = SingleTrainingEditForm
+  success_url = "/software-training/single-training/completed/"
+
+  def dispatch(self, *args, **kwargs):
+    st = SingleTraining.objects.get(pk=kwargs['pk'])
+    if not self.request.user.id == st.organiser.user_id:
+      return HttpResponseRedirect('/software-training/single-training/ongoing/')
+
+    if st.training_type in [1,2] and st.tdate <= datetime.today().date() and st.status == 3:
+      st.status = 4
+      st.save()
+      return HttpResponseRedirect(self.success_url)
+
+    date_extn = datetime.today().date() + timedelta(days=15)
+    if date_extn >= st.tdate or st.status != 3:
+      return HttpResponseRedirect('/software-training/single-training/ongoing/')
+
+    st.status = 4
+    st.save()
+    return HttpResponseRedirect(self.success_url)
+    return super(SingletrainingMarkCompleteUpdateView, self).dispatch(*args, **kwargs)
+
 
 ''' SingleTrainingAttendance is used to (1) List the attendance view, (2) Mark the attendance ''' 
 
@@ -1599,22 +1679,26 @@ class SingleTrainingAttendanceListView(ListView):
   queryset = SingleTrainingAttendance.objects.none()
   paginate_by = 500 
   template_name = ""
-  single_training_request = None
-
+  single_training = None
+  @method_decorator(group_required("Organiser", "Resource Person", "Administrator"))
   def dispatch(self, *args, **kwargs):
-    self.single_training_request = SingleTraining.objects.get(pk=kwargs['tid'])
-    if self.single_training_request.status == 2:
+    self.single_training = SingleTraining.objects.get(pk=kwargs['tid'])
+    # if status 4 redirect to download certificate page
+    if self.single_training.status == 4:
+      return HttpResponseRedirect('/software-training/single-training/completed/')
+
+    if self.single_training.status == 2 or self.single_training.status == 3:
 #     self.queryset = self.training_request.trainingattend_set.all()
-      self.queryset = SingleTrainingAttendance.objects.filter(training_id=self.single_training_request.id)
-    elif self.single_training_request.status == 4:
-      self.queryset = SingleTrainingAttendance.objects.filter(training_id=self.single_training_request.id, status=1)
+      self.queryset = SingleTrainingAttendance.objects.filter(training_id=self.single_training.id)
+    elif self.single_training.status == 4:
+      self.queryset = SingleTrainingAttendance.objects.filter(training_id=self.single_training.id, status=1)
     else:
-      self.queryset = SingleTrainingAttendance.objects.filter(training_id=self.single_training_request.id)
+      self.queryset = SingleTrainingAttendance.objects.filter(training_id=self.single_training.id)
     return super(SingleTrainingAttendanceListView, self).dispatch(*args, **kwargs)
 
   def get_context_data(self, **kwargs):
     context = super(SingleTrainingAttendanceListView, self).get_context_data(**kwargs)
-    date_today = datetime.today().date().isoformat()
+    """date_today = datetime.today().date().isoformat()
     participant_count = self.queryset[0].training.participant_count
     tr_date = self.queryset[0].training.tdate
     training_date = self.queryset[0].training.tdate.isoformat()
@@ -1646,7 +1730,18 @@ class SingleTrainingAttendanceListView(ListView):
     context['group'] = grup
     context['date'] = date_today
     context['training_date'] = training_date
-    context['training_status'] = training_status
+    context['training_status'] = training_status"""
+    attendance = self.single_training.singletrainingattendance_set.filter(status=True).count()
+    canComplete = False
+    if self.single_training.training_type in [1,2] and self.single_training.tdate <= datetime.today().date() and self.single_training.status == 3 and attendance:
+      canComplete = True
+
+    date_extn = datetime.today().date() - timedelta(days=15)
+    if date_extn <= self.single_training.tdate and self.single_training.status == 3 and is_resource_person(self.request.user) and attendance:
+      canComplete = True
+
+    context['single_training'] = self.single_training
+    context['canComplete'] = canComplete
     return context
 
   def post(self, request, *args, **kwargs):
@@ -1654,16 +1749,19 @@ class SingleTrainingAttendanceListView(ListView):
     if request.POST:
       if csrf.get_token(request) == request.POST['csrfmiddlewaretoken']:
         marked_student = request.POST.getlist('user',None)
+        if marked_student:
+          SingleTrainingAttendance.objects.filter(training_id=training_id).update(status=0)
         for record in marked_student:
-	  student = SingleTrainingAttendance.objects.get(id=record)
+          student = SingleTrainingAttendance.objects.get(id=record)
           student.status = 1
           training_id = student.training_id
           student.save()
         training_status = SingleTraining.objects.get(id=training_id)
-        training_status.status = 4
+        training_status.status = 3
         training_status.participant_count = len(marked_student)
         training_status.save()
-    return HttpResponseRedirect('/software-training/single-training/approved')
+    return HttpResponseRedirect('/software-training/single-training/'+str(self.
+    single_training.id)+'/attendance')
 
   '''
   def post(self, request, *args, **kwargs):

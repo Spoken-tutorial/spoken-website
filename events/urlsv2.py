@@ -105,36 +105,36 @@ urlpatterns = [
         "coursemap.html"), 
       name="coursemapupdate"
     ),
-    url(
-      r'^single-training/pending/$', 
-     SingleTrainingNewListView.as_view(template_name="single-training.html"), 
-      name="single-training-pending"
-    ),
-    url(
-      r'^single-training/approved/$', 
-     SingletrainingApprovedListView.as_view(template_name="single-training.html"), 
-      name="single-training-approved"
-    ),
-    url(
-      r'^single-training/rejected/$', 
-     SingletrainingRejectedListView.as_view(template_name="single-training.html"), 
-      name="single-training-rejected"
-    ),
-    url(
-      r'^single-training/ongoing/$', 
-     SingletrainingOngoingListView.as_view(template_name="single-training.html"), 
-      name="single-training-ongoing"
-    ),
-    url(
-      r'^single-training/pendingattendance/$', 
-     SingletrainingPendingAttendanceListView.as_view(template_name="single-training.html"), 
-      name="single-training-pendingattendance"
-    ),
-    url(
-      r'^single-training/completed/$', 
-     SingletrainingCompletedListView.as_view(template_name="single-training.html"), 
-      name="single-training-completed"
-    ),
+#    url(
+#      r'^single-training/pending/$', 
+#     SingleTrainingNewListView.as_view(template_name="single-training.html"), 
+#      name="single-training-pending"
+#    ),
+#    url(
+#      r'^single-training/approved/$', 
+#     SingletrainingApprovedListView.as_view(template_name="single-training.html"), 
+#      name="single-training-approved"
+#    ),
+#    url(
+#      r'^single-training/rejected/$', 
+#     SingletrainingRejectedListView.as_view(template_name="single-training.html"), 
+#      name="single-training-rejected"
+#    ),
+#    url(
+#      r'^single-training/ongoing/$', 
+#     SingletrainingOngoingListView.as_view(template_name="single-training.html"), 
+#      name="single-training-ongoing"
+#    ),
+#    url(
+#      r'^single-training/pendingattendance/$', 
+#     SingletrainingPendingAttendanceListView.as_view(template_name="single-training.html"), 
+#      name="single-training-pendingattendance"
+#    ),
+#    url(
+#      r'^single-training/completed/$', 
+#     SingletrainingCompletedListView.as_view(template_name="single-training.html"), 
+#      name="single-training-completed"
+#    ),
     url(
       r'^single-training/new/$', 
      SingletrainingCreateView.as_view(template_name="single-training-form.html"), 
@@ -144,6 +144,16 @@ urlpatterns = [
       r'^single-training/(?P<pk>\d+)/edit/$',
      SingletrainingUpdateView.as_view(template_name="single-training-form.html"),
       name="update-single-training"
+    ),
+    url(
+      r'^single-training/(?P<status>\w+)/$', 
+     SingleTrainingListView.as_view(template_name="single-training.html"), 
+      name="single-training-list"
+    ),
+    url(
+      r'^single-training/(?P<pk>\d+)/complete/$',
+     SingletrainingMarkCompleteUpdateView.as_view(template_name=""),
+      name="markcomplete-single-training"
     ),
     url(
       r'^single-training/(?P<tid>\d+)/certificate', 
