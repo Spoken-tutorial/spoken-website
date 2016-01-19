@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load eventsdata %}
+{% block title %}team{% endblock %}
+
+{% block heading %}
+<h3></h3>
+{% endblock %}
+{% block content %}
+  <div class="training-row">
+    {{ object_list }}
+  </div>
+{% endblock %}
