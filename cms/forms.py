@@ -86,8 +86,7 @@ class RegisterForm(forms.Form):
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
-        exclude = ['user', 'confirmation_code', 'street', 'location', \
-            'picture']
+        exclude = ['user', 'confirmation_code', 'street', 'location']
 
     # def clean_picture(self):
     #    if 'picture' in self.cleaned_data and not \
