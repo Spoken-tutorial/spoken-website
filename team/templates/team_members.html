@@ -17,13 +17,11 @@
       {% for record in object_list %}
       
         <div class="col-md-4 text-center">
-          <img class="img-circle" src="http://placehold.it/140x140">
+          <img class="img-circle" src="{% if profile.picture %} {{media_url }}{{ profile.picture }} {% else %}/static/spoken/images/no-profile-image.jpg{% endif %}">
           {% if request.path == '/team/contributor/' %}
-            <h4>{{ record.username }}</h2>
-            <p>contributor details</p>
+            <h4>{{temp}}{{ record.first_name}}</h2>
           {% elif request.path == '/team/domain-reviewer/' %}
-            <h4>{{ record.username }}</h2>
-            <p>domain reviewer details</p>
+            <h4>{{ record.first_name }} {{ record.last_name }}</h2>
           {% endif %}
         </div>
         {% if forloop.counter|divisibleby:3 %}
