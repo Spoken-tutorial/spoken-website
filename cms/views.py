@@ -242,6 +242,11 @@ def password_reset(request):
             user = User.objects.filter(email=request.POST['email']).first()
             user.set_password(password_string)
             user.save()
+
+            # change if any mdl user pass too
+            from mdldjango.views import changeMdlUserPassChange
+            changeMdlUserPassChange(request.POST['email'], password_string)
+
             print 'Username => ', user.username
             print 'New password => ', password_string
             #Send email
