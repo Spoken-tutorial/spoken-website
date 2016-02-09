@@ -78,8 +78,8 @@ def index(request):
         mdluser = MdlUser.objects.get(id=mdluserid)
     except:
         return HttpResponseRedirect('/participant/login')
-    
-    if str(mdluser.institution).isdigit():
+
+    if str(mdluser.institution.encode("utf8")).isdigit():
         academic = None
         try:
             academic = AcademicCenter.objects.get(id = mdluser.institution)
