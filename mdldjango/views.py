@@ -309,6 +309,7 @@ def forget_password(request):
             # reset auth user password
             mdluser, flag, authuser = get_or_create_user(user)
             authuser.set_password(password_string)
+            authuser.save()
             
             subject  = "Spoken Tutorial Online Test password reset"
             to = [user.email]
