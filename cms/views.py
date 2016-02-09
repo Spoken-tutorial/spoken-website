@@ -154,7 +154,7 @@ def account_login(request):
         context.update(csrf(request))
         if error_msg:
             messages.error(request, error_msg)
-        return render_to_response('cms/templates/login.html', context)
+        return render(request, 'cms/templates/login.html', context)
     return HttpResponseRedirect('/')
 
 @login_required
