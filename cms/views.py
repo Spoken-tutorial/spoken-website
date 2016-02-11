@@ -266,8 +266,14 @@ Your current login information is now:
    username: {1}
    password: {2}
 
-Please go to this page to change your password:
-   {3}
+With respect to change your password kindly flollow the steps written below :
+Step 1. Please visit spoken website and login using above username password.
+	{3}
+
+Step 2. Change password using below link
+	{4}
+
+Step 3.You can use this changed password for spoken forum login and in moodle login also.
 
 In most mail programs, this should appear as a blue link
 which you can just click on.  If that doesn't work,
