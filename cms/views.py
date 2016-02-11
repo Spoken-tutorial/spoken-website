@@ -244,8 +244,8 @@ def password_reset(request):
             user.save()
 
             # change if any mdl user pass too
-            from mdldjango.views import changeMdlUserPassChange
-            changeMdlUserPassChange(request.POST['email'], password_string)
+            from mdldjango.views import changeMdlUserPass
+            changeMdlUserPass(request.POST['email'], password_string)
 
             print 'Username => ', user.username
             print 'New password => ', password_string
@@ -305,6 +305,10 @@ def change_password(request):
             user = profile.user
             user.set_password(form.cleaned_data['new_password'])
             user.save()
+            # change if any mdl user pass too
+            from mdldjango.views import changeMdlUserPass
+            changeMdlUserPass(user.email, form.cleaned_data['new_password'])
+
             messages.success(request, "Your account password has been updated successfully!")
             return HttpResponseRedirect("/accounts/view-profile/" + user.username)
     context['form'] = form
