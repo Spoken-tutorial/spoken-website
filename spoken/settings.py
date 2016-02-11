@@ -82,6 +82,7 @@ INSTALLED_APPS = (
     'masquerade',
     'youtube',
     'reports',
+    'team',
 )
 
 MIDDLEWARE_CLASSES = (

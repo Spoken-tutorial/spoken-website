@@ -181,17 +181,17 @@ def account_profile(request, username):
             form_data = form.save(commit=False)
             form_data.user_id = user.id
             
-            # if 'picture-clear' in request.POST and request.POST['picture-clear']:
-            #     #if not old_file == new_file:
-            #     if os.path.isfile(old_file_path):
-            #         os.remove(old_file_path)
-            #
-            # if 'picture' in request.FILES:
-            #     form_data.picture = request.FILES['picture']
+            if 'picture-clear' in request.POST and request.POST['picture-clear']:
+               #if not old_file == new_file:
+               if os.path.isfile(old_file_path):
+                   os.remove(old_file_path)
+
+            if 'picture' in request.FILES:
+               form_data.picture = request.FILES['picture']
             
             form_data.save()
             
-            """if 'picture' in request.FILES:
+            if 'picture' in request.FILES:
                 size = 128, 128
                 filename = str(request.FILES['picture'])
                 ext = os.path.splitext(filename)[1]
@@ -203,9 +203,10 @@ def account_profile(request, username):
                     mimeType = ext.upper()
                     if mimeType == 'JPG':
                         mimeType = 'JPEG'
-                    im.save(settings.MEDIA_ROOT + "user/" + str(user.id) + "/" + str(user.id) + "-thumb." + ext, mimeType)
-                    form_data.thumb = 'user/' + str(user.id)+ '/' + str(user.id) + '-thumb.' + ext
-                    form_data.save()"""
+                    thumbName = 'user/' + str(user.id)+ '/' + str(user.id) + '-thumb.' + ext
+                    im.save(settings.MEDIA_ROOT + thumbName, mimeType)
+                    form_data.thumb = thumbName
+                    form_data.save()
             messages.success(request, "Your profile has been updated!")
             return HttpResponseRedirect("/accounts/view-profile/" + user.username)
         
