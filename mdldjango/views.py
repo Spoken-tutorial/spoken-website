@@ -352,3 +352,14 @@ Admin Spoken Tutorials
     }
     context.update(csrf(request))
     return render(request, 'mdl/templates/password_reset.html', context)
+
+### updated mdl pass when auth user pass change
+def changeMdlUserPass(email, password_string):
+    try:
+        user = MdlUser.objects.filter(email=email).first()
+        password_encript = encript_password(password_string)
+        user.password = password_encript
+        user.save()
+        return True
+    except:
+        return False
