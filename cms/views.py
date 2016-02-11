@@ -266,14 +266,12 @@ Your current login information is now:
    username: {1}
    password: {2}
 
-With respect to change your password kindly flollow the steps written below :
-Step 1. Please visit spoken website and login using above username password.
+With respect to change your password kindly follow the steps written below :
+
+Step 1. Visit below link to change the password. Provide temporary password given above in the place of Old Password field.
 	{3}
 
-Step 2. Change password using below link
-	{4}
-
-Step 3.You can use this changed password for spoken forum login and in moodle login also.
+Step 2.Use this changed password for spoken forum login and in moodle login also.
 
 In most mail programs, this should appear as a blue link
 which you can just click on.  If that doesn't work,
@@ -284,7 +282,7 @@ Best Wishes,
 Admin
 Spoken Tutorials
 IIT Bombay.
-'''.format(user.username, user.username, password_string,'http://www.spoken-tutorial.org/accounts/login/', changePassUrl)
+'''.format(user.username, user.username, password_string,changePassUrl)
 
             # send email
             email = EmailMultiAlternatives(
