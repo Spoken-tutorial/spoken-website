@@ -135,7 +135,7 @@ def account_login(request):
                             request.session.set_expiry(0)
                         try:
                             p = Profile.objects.get(user_id = user.id)
-                            if not user.first_name or not user.last_name or not p.country or not p.state or not p.district or not p.city  or not p.address or not p.pincode or not p.phone:# or not p.picture:
+                            if not user.first_name or not user.last_name or not p.state or not p.district or not p.city  or not p.address or not p.pincode or not p.phone:# or not p.picture:
                                 messages.success(request, "<ul><li>Please update your profile.</li><li>Please make sure you enter your First name, Last name both and with correct spelling.</li><li>It is recommended that you do upload the photo.</li></ul>")
                                 return HttpResponseRedirect('/accounts/profile/'+user.username)
                         except: 
@@ -154,7 +154,7 @@ def account_login(request):
         context.update(csrf(request))
         if error_msg:
             messages.error(request, error_msg)
-        return render_to_response('cms/templates/login.html', context)
+        return render(request, 'cms/templates/login.html', context)
     return HttpResponseRedirect('/')
 
 @login_required
@@ -243,8 +243,18 @@ def password_reset(request):
             user = User.objects.filter(email=request.POST['email']).first()
             user.set_password(password_string)
             user.save()
+
+            # change if any mdl user pass too
+            from mdldjango.views import changeMdlUserPass
+            changeMdlUserPass(request.POST['email'], password_string)
+
             print 'Username => ', user.username
             print 'New password => ', password_string
+
+            changePassUrl = "http://www.spoken-tutorial.org/accounts/change-password"
+            if request.GET and request.GET['next']:
+                changePassUrl = changePassUrl + "?auto=%s&username=%s&next=%s" % (user.profile_set.first().confirmation_code, user.username, request.GET['next'])
+
             #Send email
             subject  = "Spoken Tutorial password reset"
             to = [user.email]
@@ -257,8 +267,12 @@ Your current login information is now:
    username: {1}
    password: {2}
 
-Please go to this page to change your password:
-   {3}
+With respect to change your password kindly follow the steps written below :
+
+Step 1. Visit below link to change the password. Provide temporary password given above in the place of Old Password field.
+	{3}
+
+Step 2.Use this changed password for spoken forum login and in moodle login also.
 
 In most mail programs, this should appear as a blue link
 which you can just click on.  If that doesn't work,
@@ -269,7 +283,7 @@ Best Wishes,
 Admin
 Spoken Tutorials
 IIT Bombay.
-'''.format(user.username, user.username, password_string, 'http://www.spoken-tutorial.org/accounts/change-password/')
+'''.format(user.username, user.username, password_string,changePassUrl)
 
             # send email
             email = EmailMultiAlternatives(
@@ -279,8 +293,13 @@ IIT Bombay.
             )
 
             result = email.send(fail_silently=False)
+            # redirect to next url if there or redirect to login page
+            # use for forum password rest form
+            redirectNext = request.GET.get('next', False)
+            if redirectNext:
+                return HttpResponseRedirect(redirectNext)
             messages.success(request, "New password sent to your email "+user.email)
-            return HttpResponseRedirect('/accounts/login/')
+            return HttpResponseRedirect('/accounts/change-password/')
             
 
     context = {
@@ -290,8 +309,24 @@ IIT Bombay.
     return render(request, 'cms/templates/password_reset.html', context)
 
 
-@login_required
+#@login_required
 def change_password(request):
+    # chacking uselogin
+    pcode = request.GET.get('auto', False)
+    username = request.GET.get('username', False)
+    nextUrl = request.GET.get('next', False)
+    
+    # check pcode in profile page
+    if pcode and username and nextUrl:
+        user = User.objects.get(username=username)
+        profile = Profile.objects.get(user=user)
+        if profile.confirmation_code == pcode:
+            user.backend='django.contrib.auth.backends.ModelBackend' 
+            login(request,user)
+
+    if request.user.is_anonymous():
+        return HttpResponseRedirect('/accounts/login/?next=/accounts/change-password')
+
     context = {}
     form = ChangePasswordForm()
     if request.method == "POST":
@@ -301,6 +336,13 @@ def change_password(request):
             user = profile.user
             user.set_password(form.cleaned_data['new_password'])
             user.save()
+            # change if any mdl user pass too
+            from mdldjango.views import changeMdlUserPass
+            changeMdlUserPass(user.email, form.cleaned_data['new_password'])
+
+            if nextUrl:
+                return HttpResponseRedirect(nextUrl.split("?", 1)[0])
+
             messages.success(request, "Your account password has been updated successfully!")
             return HttpResponseRedirect("/accounts/view-profile/" + user.username)
     context['form'] = form

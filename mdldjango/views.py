@@ -78,8 +78,8 @@ def index(request):
         mdluser = MdlUser.objects.get(id=mdluserid)
     except:
         return HttpResponseRedirect('/participant/login')
-    
-    if str(mdluser.institution).isdigit():
+
+    if str(mdluser.institution.encode("utf8")).isdigit():
         academic = None
         try:
             academic = AcademicCenter.objects.get(id = mdluser.institution)
@@ -309,6 +309,7 @@ def forget_password(request):
             # reset auth user password
             mdluser, flag, authuser = get_or_create_user(user)
             authuser.set_password(password_string)
+            authuser.save()
             
             subject  = "Spoken Tutorial Online Test password reset"
             to = [user.email]
@@ -351,3 +352,14 @@ Admin Spoken Tutorials
     }
     context.update(csrf(request))
     return render(request, 'mdl/templates/password_reset.html', context)
+
+### updated mdl pass when auth user pass change
+def changeMdlUserPass(email, password_string):
+    try:
+        user = MdlUser.objects.filter(email=email).first()
+        password_encript = encript_password(password_string)
+        user.password = password_encript
+        user.save()
+        return True
+    except:
+        return False
