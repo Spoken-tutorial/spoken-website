@@ -9,18 +9,23 @@
 <ul class="nav nav-tabs">
   <li {% if request.path == "/team/contributor/" %}class="active" {% endif %}><a href="/team/contributor/">Contributor</a></li> 
   <li {% if request.path == "/team/domain-reviewer/" %}class="active" {% endif %}><a href="/team/domain-reviewer/">Domain-Reviewers</a></li>
+  <li {% if request.path == "/team/quality-reviewer/" %}class="active" {% endif %}><a href="/team/quality-reviewer/">Quality-Reviewers</a></li>
+  <li {% if request.path == "/team/external-contributor/" %}class="active" {% endif %}><a href="/team/external-contributor/">External-Contributor</a></li>
 </ul>
   
   <div class="tab-content">
     <div id="approved" class="tab-pane fade in active">
-    <div class="row">
+    <div class="row" >
       {% for record in object_list %}
-      
-        <div class="col-md-4 text-center">
-          <img class="img-circle" src="{% if profile.picture %} {{media_url }}{{ profile.picture }} {% else %}/static/spoken/images/no-profile-image.jpg{% endif %}">
+        <div class="col-md-4 text-center" style="margin-top:10px;height:200px;">
+          <img class="img-circle" src="{% if record.profile_set.first.picture %} /media/{{ record.profile_set.first.picture }} {% else %}/static/spoken/images/no-profile-image.jpg{% endif %}" width=45% height=75%>
           {% if request.path == '/team/contributor/' %}
-            <h4>{{temp}}{{ record.first_name}}</h2>
+            <h4>{{ record.first_name}} {{ record.last_name }}</h2>
           {% elif request.path == '/team/domain-reviewer/' %}
+            <h4>{{ record.first_name }} {{ record.last_name }}</h2>
+          {% elif request.path == '/team/quality-reviewer/' %}
+            <h4>{{ record.first_name }} {{ record.last_name }}</h2>
+          {% elif request.path == '/team/external-contributor/' %}
             <h4>{{ record.first_name }} {{ record.last_name }}</h2>
           {% endif %}
         </div>

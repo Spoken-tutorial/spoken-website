@@ -10,6 +10,16 @@ urlpatterns = [
   url(
     r'^domain-reviewer/$',
     TeamDomainListView.as_view(template_name="team_members.html"),
-    name="team-Domain"
+    name="team-domain"
+  ),
+  url(
+    r'^quality-reviewer/$',
+    TeamQualityReviewerListView.as_view(template_name="team_members.html"),
+    name="team-quality-reviewer"
+  ),
+  url(
+    r'^external-contributor/$',
+    TeamExternalContributorListView.as_view(template_name="team_members.html"),
+    name="team-external-contributor"
   ),
 ]
