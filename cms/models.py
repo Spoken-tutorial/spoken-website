@@ -7,12 +7,12 @@ import os
 def profile_picture(instance, filename):
     ext = os.path.splitext(filename)[1]
     ext = ext.lower()
-    return '/'.join(['user', str(instance.id), str(instance.id) + ext])
+    return '/'.join(['user', str(instance.user.id), str(instance.user.id) + ext])
 
 def profile_picture_thumb(instance, filename):
     ext = os.path.splitext(filename)[1]
     ext = ext.lower()
-    return '/'.join(['user', str(instance.id), str(instance.id) + "-thumb" + ext])
+    return '/'.join(['user', str(instance.user.id), str(instance.user.id) + "-thumb" + ext])
 
 class Profile(models.Model):
     user = models.ForeignKey(User)

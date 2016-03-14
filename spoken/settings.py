@@ -223,6 +223,11 @@ DATABASE_ROUTERS = [
 ]
 #AUTHENTICATION_BACKENDS = ( 'mdldjango.backend.MdlBackend', )
 
+# Login using username or email address
+AUTHENTICATION_BACKENDS = (
+    'cms.backends.EmailOrUsernameModelBackend',
+    'django.contrib.auth.backends.ModelBackend'
+)
 # Reports
 REPORT_BUILDER_INCLUDE = []
 REPORT_BUILDER_EXCLUDE = ['user'] # Allow all models except User to be accessed

@@ -4,11 +4,34 @@
 {% load eventsdata %}
 {% block title %}team{% endblock %}
 
-{% block heading %}
-<h3></h3>
-{% endblock %}
+
 {% block content %}
-  <div class="training-row">
-    {{ object_list }}
+<ul class="nav nav-tabs">
+  <li {% if role == "Contributor" %}class="active"{% endif %}><a href="/team/Contributor/">Contributor</a></li> 
+  <li {% if role == "Domain-Reviewer" %}class="active" {% endif %}><a href="/team/Domain-Reviewer/">Domain-Reviewers</a></li>
+  <li {% if role == "Quality-Reviewer" %}class="active" {% endif %}><a href="/team/Quality-Reviewer/">Quality-Reviewers</a></li>
+  <li {% if role == "External-Contributor" %}class="active" {% endif %}><a href="/team/External-Contributor/">External-Contributor</a></li>
+  <li {% if role == "Resource Person" %}class="active" {% endif %}><a href="/team/Resource Person/">Training Team</a></li>
+  <li {% if role == "Technical-Team" %}class="active" {% endif %}><a href="/team/Technical-Team/">Technical Team</a></li>
+  <li {% if role == "Creation-Team" %}class="active" {% endif %}><a href="/team/Creation-Team/">Creation Team</a></li>
+  <li {% if role == "Admin-Team" %}class="active" {% endif %}><a href="/team/Admin-Team/">Admin Team</a></li>
+</ul>
+  
+  <div class="tab-content">
+    <div id="approved" class="tab-pane fade in active">
+    <div class="row" >
+      {% for record in object_list %}
+        <div class="col-md-4 text-center" style="margin-top:10px;height:200px;">
+          <img class="img-circle" src="{% if record.profile_set.first.picture %} /media/{{ record.profile_set.first.picture }} {% else %}/static/spoken/images/no-profile-image.jpg{% endif %}" width=45% height=75%>
+          <h4>{{ record.first_name }} {{ record.last_name }}</h4>
+        </div>
+        {% if forloop.counter|divisibleby:3 %}
+          <br>
+        {% endif %}
+     
+       {% endfor %}
+       </div><!-- /.row -->
+    </div>
   </div>
+
 {% endblock %}

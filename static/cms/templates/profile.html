@@ -100,13 +100,14 @@
                         <small>Please enter your valid phone number.</small>
                     </div>
                 </div>
-                {# <div class="form-group"> #}
-                {#     <label class="col-sm-3 control-label" for="id_phone">Picture</label> #}
-                {#     <div class="col-sm-9"> #}
-                {#         {% render_field form.picture class+="form-control picture" tabindex="1" %} #}
-                {#         {{ form.picture.errors }} #}
-                {#     </div> #}
-                {# </div> #}
+                <div class="form-group">
+                    <label class="col-sm-3 control-label" for="id_phone">Picture</label>
+                    <div class="col-sm-9">
+                        {% render_field form.picture class+="form-control picture" tabindex="1" %}
+                        {{ form.picture.errors }}
+                        <small>Please provide ".png" foramt image only</small>
+                    </div>
+                </div>
                 <div class="form-group">
                     <div class="col-sm-offset-3 col-sm-9">
                         <input class="btn btn-primary" type="submit" value="Submit" />
