@@ -205,6 +205,16 @@ urlpatterns = [
       name="single_training_pending"
     ),
     url(
+      r'^markas/(?P<pk>\d+)/complete/$', 
+      'events.viewsv2.MarkAsComplete', 
+      name="mark_as_complete"
+    ),
+    url(
+      r'^mark/(?P<pk>\d+)/complete/$', 
+      'events.viewsv2.MarkComplete', 
+      name="mark_complete"
+    ),
+    url(
       r'^single-training/(?P<tid>\d+)/attendance', 
       SingleTrainingAttendanceListView.as_view(template_name=\
         "single-training-attendance.html"), 

@@ -534,7 +534,8 @@ class TrainingAttendanceListView(ListView):
   
   def dispatch(self, *args, **kwargs):
     self.training_request = TrainingRequest.objects.get(pk=kwargs['tid'])
-    if self.training_request.status:
+    print self.training_request.department
+    if self.training_request.status == 1:
       self.queryset = self.training_request.trainingattend_set.all()
     else:
       self.queryset = StudentMaster.objects.filter(batch_id=self.training_request.batch_id, moved=False)
@@ -543,6 +544,7 @@ class TrainingAttendanceListView(ListView):
   def get_context_data(self, **kwargs):
     context = super(TrainingAttendanceListView, self).get_context_data(**kwargs)
     context['training'] = self.training_request
+    context['department'] = self.training_request.department
     languages = Language.objects.filter(
         id__in = FossAvailableForWorkshop.objects.filter(
           foss_id = self.training_request.course.foss_id
@@ -997,15 +999,13 @@ class TrainingRequestListView(ListView):
   role = None
   status = None
 
-  @method_decorator(group_required("Resource Person"))
+  @method_decorator(group_required("Resource Person","Administrator"))
   def dispatch(self, *args, **kwargs):
-    print 'entered', '************************'
     if (not 'role' in kwargs) or (not 'status' in kwargs):
-      print 11111111
       raise PermissionDenied()
     self.role = kwargs['role']
     self.status = kwargs['status']
-    status_list = {'pending': 0, 'completed': 1}
+    status_list = {'pending': 0, 'completed': 1, 'markcomplete':2}
     roles = ['rp', 'em']
     self.user = self.request.user
     if self.role in roles and self.status in status_list:
@@ -1017,10 +1017,10 @@ class TrainingRequestListView(ListView):
               resourceperson__status=1
             )
           ).values_list('id'), 
-          status=True,
+          status=1,
           participants__gt=0
         ).order_by('-updated')
-      else:
+      elif self.status == 'pending':
         self.queryset = TrainingRequest.objects.filter(
           training_planner__academic_id__in=AcademicCenter.objects.filter(
             state__in = State.objects.filter(
@@ -1028,8 +1028,21 @@ class TrainingRequestListView(ListView):
               resourceperson__status=1
             )
           ).values_list('id'), 
-          status=False
+          status=0
         ).order_by('-updated')
+      elif self.status == 'markcomplete':
+        if is_administrator(self.user):
+          self.queryset = TrainingRequest.objects.filter(status=2).order_by('-updated')
+        else:
+          self.queryset = TrainingRequest.objects.filter(
+            training_planner__academic_id__in=AcademicCenter.objects.filter(
+              state__in = State.objects.filter(
+                resourceperson__user_id=self.user, 
+                resourceperson__status=1
+              )
+            ).values_list('id'), 
+            status=2
+          ).order_by('-updated')
 
       self.header = {
         1: SortableHeader('#', False),
@@ -1073,8 +1086,10 @@ class TrainingRequestListView(ListView):
       )
       if self.status == 'completed':
         self.queryset = TrainingRequestFilter(self.request.GET, queryset=self.queryset, user=self.user, rp_completed=True)
-      else:
+      elif self.status == 'pending':
         self.queryset = TrainingRequestFilter(self.request.GET, queryset=self.queryset, user=self.user, rp_ongoing=True)
+      elif self.status == 'markcomplete':
+        self.queryset = TrainingRequestFilter(self.request.GET, queryset=self.queryset, user=self.user, rp_markcomplete=True)
     else:
       print 222222
       raise PermissionDenied()
@@ -1825,6 +1840,7 @@ def SingleTrainingReject(request, pk):
     print "Error"
   return HttpResponseRedirect("/software-training/single-training/approved/")
 
+#using in stp mark attendance also
 def SingleTrainingPendingAttendance(request, pk):
   st = SingleTraining.objects.get(pk=pk)
   if st:
@@ -1833,6 +1849,30 @@ def SingleTrainingPendingAttendance(request, pk):
   else:
     print "Error"
   return HttpResponseRedirect("/software-training/single-training/pending/")
+
+def MarkAsComplete(request, pk):
+  print '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+  #pk =0
+  st = TrainingRequest.objects.get(pk=pk)
+  if st:
+    st.status = 2 #request mark to complete
+    st.save()
+    messages.success(request, 'Request to mark training complete successfully sent')
+  else:
+    print "Error"
+  return HttpResponseRedirect("/software-training/training-planner/")
+  
+def MarkComplete(request, pk):
+  print '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1'
+  #pk =0
+  st = TrainingRequest.objects.get(pk=pk)
+  if st and st.status == 2:
+    st.status = 1 #mark to complete
+    st.save()
+    messages.success(request, 'Training Marked as complete.')
+  else:
+    print "Error"
+  return HttpResponseRedirect("/software-training/training-request/rp/markcomplete/")
 
 class OldTrainingListView(ListView):
   queryset = Training.objects.none()
