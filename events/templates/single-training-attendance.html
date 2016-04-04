@@ -25,44 +25,55 @@
 <div class="bs-callout bs-callout-info">
 <dl class="dl-horizontal">
 <dt>Institute name</dt>
-<dd>{{ institute.institution_name }}</dd>
+<dd>{{ single_training.academic.institution_name }}</dd>
 <dt>FOSS</dt>
-<dd>{{ foss }}</dd>
+<dd>{{ single_training.course.foss.foss }}</dd>
 <dt>Date</dt>
-<dd>{{ tdate }}</dd>
+<dd>{{ single_training.tdate }}</dd>
 <dt>Participant count</dt>
-<dd>{{ pr_count }}</dd>
+<dd>{{ single_training.participant_count }}</dd>
 <dt>Organiser</dt>
-<dd>{{ organiser_name }}</dd>
+<dd>{{ single_training.organiser.user.first_name }}</dd>
+<dt>Training Type</dt>
+<dd>
+    {% if training.training_type == 0 %}
+        School
+    {% elif training.training_type == 1 %}
+        Live workshop
+    {% elif training.training_type == 2 %}
+        Pilot workshop
+    {% else %}
+        Vocational
+    {% endif %}
+</dd>
 </dl>
 </div>
-<br/><br/>
   <div class="tab-content">
     <div id="approved" class="tab-pane fade in active">
      <form action="" method="post">
         {% csrf_token %}
-        {% if 'Administrator' in group and not training_status == 4 %}
-          <div style="height:70px;">
+        {% if user.id == single_training.organiser.user_id and not training_status == 4 %}
+          <div style="height:70px;" class="pull-left">
                 <div style="width:200px;float:left;text-align:center;">
                   <p id="button-select">To select all participants</p> <input type=button class="btn btn-success"  value="Check All" onClick="this.value=check()"> 
                 </div> 
             </div>
-        {% elif 'Resource Person' in group and training_status == 6 %}
-          <div style="height:70px;">
-                <div style="width:200px;float:left;text-align:center;">
-                  <p id="button-select">To select all participants</p> <input type=button class="btn btn-success"  value="Check All" onClick="this.value=check()"> 
-                </div> 
-            </div>
+            {% if canComplete %}
+                <div class="pull-right"><a class="btn btn-success" href="{% url 'events:markcomplete-single-training' single_training.id %}">Mark as Complete</a></div>
+            {% endif %}
         {% endif %}
+        <!-- ResourcePerson close training -->
+        {% if canComplete and user|is_resource_person %}
+            <div class="pull-right"><a class="btn btn-success" href="{% url 'events:markcomplete-single-training' single_training.id %}">Mark as Complete</a></div>
+        {% endif %}
+
        <div class="training-row">
                 <table class="table table-striped table-hover table-bordered">
                   <tr>
                     <th>#</th>
-                    {% if 'Administrator' in group and not training_status == 4  %}
-                      <th>Check</th>
-                    {% elif 'Resource Person' in group and training_status == 6 %}
-                         <th>Check</th>
-                      {% endif %}
+                    {% if user.id == single_training.organiser.user_id and not training_status == 4 %}
+                        <th>Check</th>
+                    {% endif %}
                     <th>First name</th>
                     <th>Last name</th>
                     <th>Email</th>
@@ -71,10 +82,8 @@
                   {% for training in object_list %}
                     <tr >
                       <td>{{ forloop.counter }}</td>
-                      {% if 'Administrator' in group and not training_status == 4 %}
-                          <td><input type="checkbox" name="user" value="{{ training.id }}"/></td>
-                      {% elif 'Resource Person' in group and training_status == 6 %}
-                         <td><input type="checkbox" name="user" value="{{ training.id }}"/></td>
+                      {% if user.id == single_training.organiser.user_id and not training_status == 4 %}
+                          <td><input type="checkbox" name="user" value="{{ training.id }}" {% if training.status == 1 %} checked {% endif %}/></td>
                       {% endif %}
                       <td>{{ training.firstname }} </td>
                       <td>{{ training.lastname }}</td>
@@ -83,11 +92,9 @@
                     </tr>
                   {% endfor %}
                 </table>
-              {% if 'Administrator' in group  and not training_status == 4 %}
-                <input class="btn btn-primary" type="submit" value="Submit Attendance" />
-             {% elif 'Resource Person' in group and training_status == 6 %}
-           <input class="btn btn-primary" type="submit" value="Submit Attendance" />
-            {% endif %}
+              {% if user.id == single_training.organiser.user_id and not training_status == 4 %}
+                  <input class="btn btn-primary" type="submit" value="Submit Attendance" />
+              {% endif %}
         </form>
               </div>
     </div>

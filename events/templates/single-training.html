@@ -24,10 +24,11 @@
   <br/><br/><br/><br/>
   <ul class="nav nav-tabs">
      <li {% if request.path == "/software-training/single-training/pending/" %}class="active" {% endif %}><a href="/software-training/single-training/pending/">
-      {% if 'Organiser' in group  %}
-         Pending approval
-       {% elif 'Resource Person' in group %}
+
+       {% if user|is_resource_person %}
          New
+       {% elif user|is_organiser %}
+         Pending approval
        {% endif %}
        </a></li> 
     <li {% if request.path == "/software-training/single-training/approved/" %}class="active" {% endif %}><a href="/software-training/single-training/approved/">Approved</a></li>
@@ -57,7 +58,7 @@
                       <td>{{ training.course.course_name }}</td>
                       <td>{{ training.language }}</td>
                       <td>{{ training.academic }}</td>
-		                  {% if 'Administrator' in group  %}
+		                  {% if user|is_administrator %}
                             {% if request.path == '/software-training/single-training/pendingattendance/' %}
                              <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }}</a></td>
                            {% elif request.path == '/software-training/single-training/approved/' %}
@@ -79,7 +80,7 @@
                           {% endif %}
 
 			  
-                       {% elif 'Organiser' in group  %}
+                       {% elif user|is_organiser %}
                            {% if request.path == '/software-training/single-training/approved/' %}
                              <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }}</a></td>
                            {% elif request.path == '/software-training/single-training/pending/' %}
@@ -90,7 +91,7 @@
                            {% elif request.path == '/software-training/single-training/rejected/' %}
                               <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }}</a></td>
                            {% elif request.path == '/software-training/single-training/ongoing/' %}
-                             <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }} </a></td>
+                             <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }} / {{ training.total_participant_count }} </a></td>
                            {% elif request.path == '/software-training/single-training/pendingattendance/' %}
 
                              {% if 'Administrator' not in group and 'Resource Person' not in group %}
@@ -108,7 +109,7 @@
                               {% endif %}
                               </td>
                            {% endif %}
-                       {% elif 'Resource Person' in group %}
+                       {% elif user|is_resource_person %}
                           {% if request.path == '/software-training/single-training/pendingattendance/' %}
                              <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }}</a></td>
                            {% elif request.path == '/software-training/single-training/approved/' %}
@@ -140,7 +141,7 @@
                           {% else %}
                             <td>Vocational </td>
                           {% endif %}
-                       {% if 'Resource Person' in group %}			
+                       {% if user|is_resource_person %}
 			{% if request.path == "/software-training/single-training/pending/" %} 
 		      <td><a href="{% url 'events:single-training-approve' training.id %}">Approve</a></td>
                       <td><a href="{% url 'events:single-training-reject' training.id %}">Reject</a></td>
