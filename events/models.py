@@ -492,7 +492,7 @@ class OrganiserNotification(models.Model):
 class Student(models.Model):
   user = models.OneToOneField(User)
   gender = models.CharField(max_length = 15)
-  verified = models.BooleanField(default=False)
+  verified = models.PositiveSmallIntegerField(default = 0)
   error = models.BooleanField(default=False)
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
@@ -740,12 +740,12 @@ class TrainingPlanner(models.Model):
       return datetime.strptime(
         str(int(self.year)+1)+'-01-01', '%Y-%m-%d'
       ).date(), datetime.strptime(
-        str(int(self.year)+1)+'-02-28', '%Y-%m-%d'
+        str(int(self.year)+1)+'-03-31', '%Y-%m-%d'
       ).date()
     return datetime.strptime(
       str(self.year)+'-07-01', '%Y-%m-%d'
     ).date(), datetime.strptime(
-      str(self.year)+'-8-31', '%Y-%m-%d'
+      str(self.year)+'-9-30', '%Y-%m-%d'
     ).date()
 
   class Meta:
@@ -757,7 +757,7 @@ class TestTrainingManager(models.Manager):
     return super(TestTrainingManager, self).get_queryset().filter(
       (
         Q(course__category=0) & 
-        Q(status=1) & 
+        #Q(status=1) & 
         Q(sem_start_date__lte=datetime.now()-timedelta(days=15))
       ) | 
       (
