@@ -775,7 +775,8 @@ class TrainingRequest(models.Model):
   course = models.ForeignKey(CourseMap)
   batch = models.ForeignKey(StudentBatch, null = True)
   participants = models.PositiveIntegerField(default=0)
-  status = models.BooleanField(default=False)
+  #status = models.BooleanField(default=False)
+  status = models.PositiveSmallIntegerField(default=0)
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
   #created = models.DateTimeField()
@@ -807,7 +808,7 @@ class TrainingRequest(models.Model):
   def can_mark_attendance(self):
     sem_start, sem_end = self.training_planner.get_current_semester_date_duration()
     today = date.today()
-    if self.status or today < self.sem_start_date or today > sem_end:
+    if self.status == 1 or today < self.sem_start_date or today > sem_end:
       return False
     #elif self.course.category == 0 and date.today() > self.sem_start_date:
       #return False
@@ -840,7 +841,7 @@ class TrainingRequest(models.Model):
     return '(%d / %d)' % (training_attend_count, student_master_count)
 
   def can_edit(self):
-    if self.status or TrainingAttend.objects.filter(
+    if self.status == 1 or TrainingAttend.objects.filter(
       training_id=self.id
     ).exists():
       return False
