@@ -161,7 +161,7 @@
         </form>
       {% endif %}
       
-      {% if user.organiser.academic.institution_type.name = "School" and  training.is_training_certificate_allowed  %}
+      {% if user.organiser.academic.institution_type.name == "School" and  training.is_training_certificate_allowed  %}
            <a class="btn btn-primary" href="{% url 'events:mark_as_complete' training.id %}"> Request to Mark Complete</a>
       {% endif %}
       
