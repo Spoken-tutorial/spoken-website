@@ -80,8 +80,16 @@
                       <div class='form-row'>
                         <div class='col-xs-12 form-group required'>
                           <label class='control-label'>Department</label>
-                          {% render_field form.department class+="form-control department" tabindex="1" %}
-                          {{ form.department.errors }}
+                            {% if user.organiser.academic.institution_type.name == "School" %}
+                              <select class="form-control department field-required" id="id_department" name="department" tabindex="1">
+                                <option value="" selected="selected">---------</option>
+                                <option value="24" >School</option>
+                              </select>
+                               {{ form.department.errors }}
+                            {% else %} 
+                              {% render_field form.department class+="form-control department" tabindex="1" %}
+                              {{ form.department.errors }}
+                            {% endif %}
                         </div>
                       </div>
                       

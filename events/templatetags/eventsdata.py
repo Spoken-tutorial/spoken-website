@@ -1,7 +1,7 @@
 from django import template
 from django.contrib.auth.models import User
 from events.models import *
-from events.views import is_organiser, is_invigilator, is_resource_person, is_event_manager, can_clone_training
+from events.views import is_organiser, is_invigilator, is_resource_person, is_event_manager, can_clone_training, is_administrator
 import datetime
 from django.conf import settings
 import datetime
@@ -173,6 +173,7 @@ register.filter('get_participant_status', get_participant_status)
 register.filter('can_upload_final_training_list', can_upload_final_training_list)
 register.filter('can_enter_test', can_enter_test)
 
+register.filter('is_administrator', is_administrator)
 register.filter('is_organiser', is_organiser)
 register.filter('is_invigilator', is_invigilator)
 register.filter('is_resource_person', is_resource_person)

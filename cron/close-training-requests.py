@@ -20,7 +20,7 @@ today = date.today()
 # fetching all training requests needs to closed
 training_requests = TrainingRequest.objects.filter(
   Q(sem_start_date__lte=datetime.now()-timedelta(days=150)), \
-  status=False
+  status=0
 )
 
 # opening log file to keep details of updated records
@@ -37,7 +37,7 @@ success_log_file_head.close()
 count = training_requests.count()
 
 #updating training request status
-training_requests.update(status=True)
+training_requests.update(status=1)
 
 print '*************************************'
 print ' Total records checked: ', count 

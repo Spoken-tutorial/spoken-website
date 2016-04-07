@@ -151,7 +151,7 @@ class TrainingRequestFilter(django_filters.FilterSet):
   course__foss = django_filters.ChoiceFilter(
     choices= [('', '---------')] + list(
       TrainingRequest.objects.filter(
-        status=True
+        status = 1
       ).order_by('course__foss__foss').values_list('course__foss__id', 'course__foss__foss').distinct()
     )
   )
@@ -194,6 +194,10 @@ class TrainingRequestFilter(django_filters.FilterSet):
     if 'rp_ongoing' in kwargs:
       rp_ongoing = kwargs['rp_ongoing']
       kwargs.pop('rp_ongoing')
+    rp_markcomplete = None
+    if 'rp_markcomplete' in kwargs:
+      rp_markcomplete = kwargs['rp_markcomplete']
+      kwargs.pop('rp_markcomplete')
     state = None
     if 'state' in kwargs:
       state = kwargs['state']
@@ -211,12 +215,17 @@ class TrainingRequestFilter(django_filters.FilterSet):
     if user:
       if rp_completed:
         foss_list = TrainingRequest.objects.filter(
-          status = True,
+          status = 1,
           training_planner__academic__state_id__in=user.resourceperson_set.all().values_list('state_id').distinct()
         ).order_by('course__foss__foss').values_list('course__foss__id', 'course__foss__foss').distinct()
       elif rp_ongoing:
         foss_list = TrainingRequest.objects.filter(
-          status = False,
+          status = 0,
+          training_planner__academic__state_id__in=user.resourceperson_set.all().values_list('state_id').distinct()
+        ).order_by('course__foss__foss').values_list('course__foss__id', 'course__foss__foss').distinct()
+      elif rp_markcomplete:
+        foss_list = TrainingRequest.objects.filter(
+          status = 2,
           training_planner__academic__state_id__in=user.resourceperson_set.all().values_list('state_id').distinct()
         ).order_by('course__foss__foss').values_list('course__foss__id', 'course__foss__foss').distinct()
       else:
