@@ -1860,6 +1860,7 @@ def MarkAsComplete(request, pk):
     messages.success(request, 'Request to mark training complete successfully sent')
   else:
     print "Error"
+    messages.error(request, 'Request not sent.Please try again.')
   return HttpResponseRedirect("/software-training/training-planner/")
   
 def MarkComplete(request, pk):
@@ -1871,7 +1872,7 @@ def MarkComplete(request, pk):
     st.save()
     messages.success(request, 'Training Marked as complete.')
   else:
-    print "Error"
+    messages.error(request, 'Something went wrong Please try again')
   return HttpResponseRedirect("/software-training/training-request/rp/markcomplete/")
 
 class OldTrainingListView(ListView):
