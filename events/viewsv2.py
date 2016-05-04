@@ -437,6 +437,14 @@ class TrainingRequestCreateView(CreateView):
   def get_form_kwargs(self):
     kwargs = super(TrainingRequestCreateView, self).get_form_kwargs()
     kwargs.update({'user' : self.request.user})
+    username = self.request.user
+    if username.organiser.academic.institution_type.id == 5 or username.organiser.academic.institution_type.id == 13 or username.organiser.academic.institution_type.id == 15:
+        kwargs.update({'course_type' :(('', '---------'), (0, 'Software Course outside lab hours'), (1, 'Software Course mapped in lab hours'), (2, ' Software Course unmapped in lab hours'), (3, ' EduEasy Software')) })
+    else:
+        kwargs.update({'course_type' :(('', '---------'), (0, 'Software Course outside lab hours'), (1, 'Software Course mapped in lab hours'), (2, ' Software Course unmapped in lab hours')) })
+    
+    
+    
     return kwargs
 
   def post(self, request, *args, **kwargs):
@@ -918,6 +926,7 @@ class SaveStudentView(JSONResponseMixin, View):
     return self.render_to_json_response(context)
 
 class GetCourseOptionView(JSONResponseMixin, View):
+  department_id = None
   @method_decorator(csrf_exempt)
   def dispatch(self, *args, **kwargs):
     return super(GetCourseOptionView, self).dispatch(*args, **kwargs)
@@ -926,22 +935,42 @@ class GetCourseOptionView(JSONResponseMixin, View):
     
     context = {}
     category = self.request.POST.get('course_type')
+    department_id = self.request.POST.get('department')
     tp = TrainingPlanner.objects.get(pk=self.request.POST.get('training_planner'))
-    if tp.is_course_full(category, self.request.POST.get('department'), self.request.POST.get('batch')):
-      context['is_full'] = True
+    
+    if department_id == '24':
+      print 'in school course number'
+      if tp.is_school_course_full(category, self.request.POST.get('department'), self.request.POST.get('batch')):
+        context['is_full'] = True
+      else:
+        courses = CourseMap.objects.filter(category=category)
+        course_option = "<option value=''>---------</option>"
+        for course in courses:
+          course_detail = '{0} ({1})'.format(course.foss.foss, course.course)
+          if course.course:
+            course_option += "<option value=" + str(course.id) + ">" + course_detail +  "</option>"
+          else:
+            course_option += "<option value=" + str(course.id) + ">" + course.foss.foss + "</option>"
+        context = {
+          'course_option' : course_option,
+          'is_full' : False
+        }
     else:
-      courses = CourseMap.objects.filter(category=category)
-      course_option = "<option value=''>---------</option>"
-      for course in courses:
-        course_detail = '{0} ({1})'.format(course.foss.foss, course.course)
-        if course.course:
-          course_option += "<option value=" + str(course.id) + ">" + course_detail +  "</option>"
-        else:
-          course_option += "<option value=" + str(course.id) + ">" + course.foss.foss + "</option>"
-      context = {
-        'course_option' : course_option,
-        'is_full' : False
-      }
+      if tp.is_course_full(category, self.request.POST.get('department'), self.request.POST.get('batch')):
+        context['is_full'] = True
+      else:
+        courses = CourseMap.objects.filter(category=category)
+        course_option = "<option value=''>---------</option>"
+        for course in courses:
+          course_detail = '{0} ({1})'.format(course.foss.foss, course.course)
+          if course.course:
+            course_option += "<option value=" + str(course.id) + ">" + course_detail +  "</option>"
+          else:
+            course_option += "<option value=" + str(course.id) + ">" + course.foss.foss + "</option>"
+        context = {
+          'course_option' : course_option,
+          'is_full' : False
+        }
     return self.render_to_json_response(context)
     
     
@@ -971,19 +1000,27 @@ class GetBatchOptionView(JSONResponseMixin, View):
 
 
 class GetBatchStatusView(JSONResponseMixin, View):
+  department_id = None
   @method_decorator(csrf_exempt)
   def dispatch(self, *args, **kwargs):
     return super(GetBatchStatusView, self).dispatch(*args, **kwargs)
   
   def post(self, request, *args, **kwargs):
-    department_id = self.request.POST.get('department')
+    department_id = self.request.POST.get('department') 
+    
     batch_id = self.request.POST.get('batch')
     tp = TrainingPlanner.objects.get(pk=self.request.POST.get('training_planner'))
     context = {}
 
     batch_status = True
-    if tp.is_full(department_id, batch_id):
-      batch_status = False
+    
+    if department_id == '24':
+      if tp.is_school_full(department_id, batch_id):
+        batch_status = False
+    else:
+      if tp.is_full(department_id, batch_id):
+        batch_status = False
+      
     context = {
       'batch_status' : batch_status,
     }
@@ -1091,7 +1128,6 @@ class TrainingRequestListView(ListView):
       elif self.status == 'markcomplete':
         self.queryset = TrainingRequestFilter(self.request.GET, queryset=self.queryset, user=self.user, rp_markcomplete=True)
     else:
-      print 222222
       raise PermissionDenied()
     return super(TrainingRequestListView, self).dispatch(*args, **kwargs)
 
@@ -1864,7 +1900,6 @@ def MarkAsComplete(request, pk):
   return HttpResponseRedirect("/software-training/training-planner/")
   
 def MarkComplete(request, pk):
-  print '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1'
   #pk =0
   st = TrainingRequest.objects.get(pk=pk)
   if st and st.status == 2:
@@ -1992,7 +2027,6 @@ class OldTrainingCloseView(CreateView):
     for ta in tas:
       student = self._get_student(ta)
       if not student:
-        print ta.id, '---------'
         continue
       if not TrainingAttend.objects.filter(training=tr, student=student).count():
         TrainingAttend.objects.create(training=tr, student=student, language=language)

@@ -157,12 +157,12 @@
 
       {% if can_mark_attendance %}
           
-          <input class="btn btn-primary" type="button" id="attendance_submit" value="Submit" />
-        </form>
+         Step 1: <input class="btn btn-primary" type="button" id="attendance_submit" value="Submit" />
+        </form><br>
       {% endif %}
       
-      {% if user.organiser.academic.institution_type.name == "School" and  training.is_training_certificate_allowed  %}
-           <a class="btn btn-primary" href="{% url 'events:mark_as_complete' training.id %}"> Request to Mark Complete</a>
+      {% if user.organiser.academic.institution_type.id == 5 or user.organiser.academic.institution_type.id == 13 or  user.organiser.academic.institution_type.id == 15  and  training.is_training_certificate_allowed  %}
+         Step 2:  <a class="btn btn-primary" href="{% url 'events:mark_as_complete' training.id %}"> Request to Mark Complete</a>
       {% endif %}
       
       

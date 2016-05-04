@@ -238,6 +238,7 @@
         });
         $('.course').html('<option>---------</option>');
         $('.course').prop('disabled', 'disabled');
+        
         if(course_type != '' && department != '' && batch != ''){
           $.ajax({
             url: "/software-training/get-course-option/",
@@ -267,6 +268,7 @@
           });
         }
       });
+      
       $('.batch').on('change', function() {
         batch = $(this).val();
         department = $('.department').val();
@@ -290,6 +292,14 @@
               // loading languages
               if(data && data['batch_status']) {
                 $('.course_type').prop('disabled', false);
+                if(department=='24')
+                {
+                  var newoption = document.createElement("option");
+                  newoption.text = "EduEasy";
+                  newoption.value = "3";
+                  $('.course_type').add(newoption);
+                }
+                
               } else {
                 $('.batch').val('');
                 alert('No. of training requests for selected batch exceeded.');
