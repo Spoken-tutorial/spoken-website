@@ -89,12 +89,6 @@ urlpatterns = [
         name="student_training_certificate"
     ),
     url(
-      r'^course-map/$', 
-      CourseMapCreateView.as_view(template_name=\
-        "coursemap.html"), 
-      name="coursemap"
-    ),
-    url(
       r'^course-map-list/$', 
       CourseMapListView.as_view(template_name="coursemap_list.html"), 
       name="coursemaplist"

@@ -90,7 +90,7 @@
             {% else %}
                 <td>
                 {% if training.status == 1 and not training.is_training_certificate_allowed %}
-                  | Training Completed</a> |
+                  | Training Completed |
                 {% elif training.status == 2 and training.is_training_certificate_allowed %}
                   |Request Sent for Mark As Complete|
                 {% else %}
