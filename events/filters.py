@@ -161,7 +161,8 @@ class TrainingRequestFilter(django_filters.FilterSet):
       ('', '---------'), 
       (0, 'Course outside lab hours'), 
       (1, 'Course mapped in lab hours'), 
-      (2, 'Course unmapped in lab hours')
+      (2, 'Course unmapped in lab hours'),
+      (3, 'EduEasy Software')
     ]
   )
 
