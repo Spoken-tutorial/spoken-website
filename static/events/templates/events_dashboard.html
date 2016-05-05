@@ -19,7 +19,9 @@
                             <ul>
                                 <li><a href="/software-training/training-request/rp/pending/">Pending / Ongoing Training Request</a></li>
                                 <li><a href="/software-training/training-request/rp/completed/">Completed Training Request</a></li>
-                                <li><a href="/software-training/single-training/pending/">School / Vocational Training request summary</a></li>
+                               <!--  <li><a href="/software-training/single-training/pending/">School / Vocational Training request summary</a></li> -->
+				<li><a href="#">School / Vocational Training request summary</a></li>
+
                             </ul>
                             <h5>Online Assessment Test</h5>
                             <ul>
@@ -78,7 +80,8 @@
                             <ul>
                                 <li><a href="/software-training/training-planner/">Semester Training Planner Summary (STPS)</a></li>
 				{% if institution_type.name == 'School' or institution_type.name == 'Vocational' or institution_type.name == 'NGO - Training Centre' or institution_type.name == 'NGO' or user.is_superuser  %}
-					<li><a href="/software-training/single-training/pending/">School / Vocational Training request summary</a></li>
+					<!-- <li><a href="/software-training/single-training/pending/">School / Vocational Training request summary</a></li> -->
+					<li><a href="#">School / Vocational Training request summary</a></li>
 				{% endif %}
                                 <!-- <li><a href="/software-training/training/organiser/request/">New Training Request and Participant List</a></li>
                                 <li><a href="/software-training/training/organiser/pending/">Pending Training</a></li>
