@@ -15,10 +15,16 @@ class TeamListView(ListView):
   def dispatch(self, *args, **kwargs):
     self.type = kwargs['role']
     print self.type
-    self.queryset = User.objects.filter(groups__name=kwargs['role']).order_by('first_name')
+    
+    if self.type == 'Creation-Team':
+      self.queryset = User.objects.filter(groups__name__in=['Contributor','Quality-Reviewers','Animation-Team']).order_by('first_name')
+    else:
+      self.queryset = User.objects.filter(groups__name=kwargs['role']).order_by('first_name')
+    
     return super(TeamListView, self).dispatch(*args, **kwargs)
     
   def get_context_data(self, **kwargs):
     context = super(TeamListView, self).get_context_data(**kwargs)
     context['role'] = self.type
     return context
+

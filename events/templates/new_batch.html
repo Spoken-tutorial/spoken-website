@@ -80,7 +80,7 @@
                       <div class='form-row'>
                         <div class='col-xs-12 form-group required'>
                           <label class='control-label'>Department</label>
-                            {% if user.organiser.academic.institution_type.name == "School" %}
+                            {% if user.organiser.academic.institution_type.id == 5 or  user.organiser.academic.institution_type.id == 13 or  user.organiser.academic.institution_type.id == 15 %}
                               <select class="form-control department field-required" id="id_department" name="department" tabindex="1">
                                 <option value="" selected="selected">---------</option>
                                 <option value="24" >School</option>
