@@ -695,6 +695,14 @@ class TrainingPlanner(models.Model):
     ).count() > 2:
       return True
     return False
+    
+  def is_school_full(self, department_id, batch_id):
+    if self.training_requests().filter(
+      department_id=department_id, 
+      batch_id=batch_id
+    ).count() > 11:
+      return True
+    return False
   
   # todo with test without test
   def is_course_full(self, category, department_id, batch_id):
@@ -711,6 +719,23 @@ class TrainingPlanner(models.Model):
       course__category = category, 
       course__test = False
     ).count() > 2:
+      return True
+    return False
+  
+  def is_school_course_full(self, category, department_id, batch_id):
+    if self.training_requests().filter(
+      department_id=department_id, 
+      batch_id=batch_id, 
+      course__category = category, 
+      course__test = True
+    ).count() > 1:
+      return True
+    elif self.training_requests().filter(
+      department_id=department_id, 
+      batch_id=batch_id, 
+      course__category = category, 
+      course__test = False
+    ).count() > 11:
       return True
     return False
 
@@ -1207,5 +1232,3 @@ def get_email_dir(instance, filename):
 class LatexWorkshopFileUpload(models.Model):
   email = models.EmailField()
   file_upload = models.FileField(upload_to=get_email_dir)
-
-
