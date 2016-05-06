@@ -292,15 +292,7 @@
               // loading languages
               if(data && data['batch_status']) {
                 $('.course_type').prop('disabled', false);
-                if(department=='24')
-                {
-                  var newoption = document.createElement("option");
-                  newoption.text = "EduEasy";
-                  newoption.value = "3";
-                  $('.course_type').add(newoption);
-                }
-                
-              } else {
+               } else {
                 $('.batch').val('');
                 alert('No. of training requests for selected batch exceeded.');
               }
