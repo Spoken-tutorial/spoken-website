@@ -600,7 +600,6 @@ class CourseMap(models.Model):
     if self.course_id:
       return '%s (%s)' % (self.foss.foss, self.course.name)
     return self.foss.foss
-
   def course_name(self):
     if self.course_id:
       return '%s - %s' % (self.course.name, self.foss.foss)
@@ -610,7 +609,9 @@ class CourseMap(models.Model):
     courses = {
       0 : 'Software Course outside lab hours',
       1 : 'Software Course mapped in lab hours',
-      2 : 'Software Course unmapped in lab hours'
+      2 : 'Software Course unmapped in lab hours',
+      3 : 'EduEasy Software',
+      4 : 'other'
     }
     return courses[self.category]
 
