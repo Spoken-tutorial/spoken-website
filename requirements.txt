@@ -22,7 +22,7 @@ gdata==2.0.18
 google-api-python-client==1.4.0
 html5lib==0.99999
 httplib2==0.9.1
-jdcal==1.0
+jdcal==1.2
 mechanize==0.2.5
 oauth2client==1.4.7
 openpyxl==2.2.2
