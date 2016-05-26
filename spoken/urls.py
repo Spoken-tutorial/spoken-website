@@ -9,6 +9,7 @@ urlpatterns = patterns('',
     (r'^sitemap\.xml$', TemplateView.as_view(template_name='sitemap.xml', content_type='text/xml')),
     url(r'^sitemap\.html$', 'spoken.views.sitemap', name='sitemap'),
     # Examples:
+    url(r'^addu/$', 'spoken.views.add_user', name='addu'),
     url(r'^tutorial-search/$', 'spoken.views.tutorial_search', name="tutorial-search"),
     url(r'^news/(?P<cslug>[\w-]+)/$', 'spoken.views.news', name="news"),
     url(r'^news/(?P<cslug>[\w-]+)/(?P<slug>[\w-]+)/$', 'spoken.views.news_view', name="news_view"),
@@ -51,6 +52,10 @@ urlpatterns = patterns('',
     url(r'^cdcontent/', include('cdcontent.urls', namespace='cdcontent')),
     url(r'^create_cd_content/', include('cdcontent.urls', namespace='cdcontent')),
     url(r'^statistics/', include('statistics.urls', namespace='statistics')),
+
+    # team
+    url(r'^team/', include('team.urls')),
+
     url(r'^creation/', include('creation.urls', namespace='creation')),
     url(r'^nicedit/', include('nicedit.urls')),
     #url(r'^migration/creation/', include('creationmigrate.urls', namespace='creationmigrate')),

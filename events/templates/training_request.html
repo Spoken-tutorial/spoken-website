@@ -1,3 +1,4 @@
+<!--This page gives interface to raise the training request -->
 {% extends 'spoken/templates/base.html' %}
 {% load widget_tweaks %}
 {% load static %}
@@ -5,22 +6,47 @@
 {% block compresscssblock %}
     <link rel="stylesheet" href="{% static 'spoken/css/jquery.datetimepicker.css' %}" type="text/css" media="screen" charset="utf-8" />
 {% endblock %}
+{% block cssblock %}
+  <style>
+  .alert-success{
+  display:none;
+  }
+  </style>
+{% endblock %} 
 {% block heading %}
   <i class="home-page-title-i">Training Planner Form</i>
-  <a class="btn btn-primary pull-right" data-toggle="modal" data-target="#myModal"><i class="fa fa-2 fa-question"></i> Help</a>
+  <a class="btn btn-primary pull-right" data-toggle="modal" data-target="#myModal"><i class="fa fa-2 fa-question"></i>  Instructions for STPF</a>
 {% endblock %}
 {% block search %}{% endblock %}
 {% block content %}
+{% for message in messages %}
+{% if message.tags == 'success' %}
+<div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" style="color:green;">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-body">
+         {{ message|safe }}
+      </div>
+      <div class="modal-footer"><a class="btn btn-primary" href="{% url 'events:training_planner' %}">OK</a></div>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endfor %}
         <!-- Modal -->
-        <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" >
           <div class="modal-dialog">
             <div class="modal-content">
               <div class="modal-body">
                  <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                  <ul>
+                    <li>For detailed instruction on Step 2 click here : <b> Semester Training Planner Form:</b> <a href ="  http://process.spoken-tutorial.org/images/b/bc/Semester_Training_Planner.pdf" target="_blank">  http://process.spoken-tutorial.org/images/b/bc/Semester_Training_Planner.pdf</a></li>
                     <li>It is best to select Software courses mapped to relevant courses being taught during this semester in the department.</li>
                     <li>You can also select Software courses which are unmapped with courses being taught during this semester in the department.</li>
                     <li>Unmapped Software courses can be planned during designated computer lab hours present in the time table during this semester.</li>
+                    <li><b>Please Note -</b> Not more than 2 courses with assessment test can be requested in one semester.</li>
+                    <li>Test are available for the following FOSS : <b>BASH, C, CPP, Advance CPP, Java, PHP & MySQL, Linux, LaTeX, Scilab, Python and PERL</b>.</li>
+                    
                     <!-- <li>See link for suggestions: ( Wiki  Time Table )</li> -->
                  </ul>
               </div>
@@ -106,23 +132,38 @@
 {% endblock %}
 {% block jsblock %}
   <script>
+    $(window).load(function(){
+        $('#myModal').modal('show');
+    });
+    
     var td = new Date();
     var y=td.getFullYear();
     var sem_type = "{{tp}}";
     var current_sem = "{{tp.is_current_planner}}";
+    var success="{{messages}}";
     var mind = 0 ; var maxd = 0;
     $(document).ready(function(){
+      if (success!="")
+      {
+         $('#successModal').modal({
+          backdrop: 'static',
+          keyboard: false,
+       });
+        $('#successModal').modal('show');
+      }
+     
       if($('.department').val() == '') {
         $('.course_type').val('');
         $('.course_type').prop('disabled', 'disabled');
         $('.course').html('<option>---------</option>');
+        $('.course').prop('disabled', 'disabled');
       }
       $('.course_type').on('change', function(){
         course_type = $(this).val();
         department = $('.department').val();
+        batch = $('.batch').val();
         if(course_type == 0)
         {
-          document.getElementById('sem_start_date').innerHTML ="Training Date";
           $('.sem_start_date').val('');
           if(sem_type == "Odd")
           {
@@ -153,7 +194,6 @@
         }
         else
         {
-          document.getElementById('sem_start_date').innerHTML ="Semester Start Date";
           $('.sem_start_date').val('');
           if(sem_type == "Odd")
           {
@@ -197,13 +237,16 @@
           timepicker:false,
         });
         $('.course').html('<option>---------</option>');
-        if(course_type != '' && department != ''){
+        $('.course').prop('disabled', 'disabled');
+        
+        if(course_type != '' && department != '' && batch != ''){
           $.ajax({
             url: "/software-training/get-course-option/",
             type: "POST",
             data: {
               course_type: course_type,
               department: department,
+              batch: batch,
               training_planner: $('.training-planner').val()
             },
             beforeSend: function() {
@@ -217,11 +260,46 @@
                     alert('No. of training requests for selected course type exceeded.');
                   }else{
                     $('.course').html(data['course_option']);
+                    $('.course').prop('disabled', false);
                   }
               }
               //$('.ajax-refresh-language').hide();
             }
           });
+        }
+      });
+      
+      $('.batch').on('change', function() {
+        batch = $(this).val();
+        department = $('.department').val();
+        $('.course_type').val('');
+        $('.course_type').prop('disabled', 'disabled');
+        $('.course').html('<option>---------</option>');
+        $('.course').prop('disabled', 'disabled');
+        if(department != '' && batch != '') {
+          $.ajax({
+            url: "/software-training/get-batch-course-status/",
+            type: "POST",
+            data: {
+              department: department,
+              batch: batch,
+              training_planner: $('.training-planner').val()
+            },
+            beforeSend: function() {
+              //$('.ajax-refresh-language').show();
+            },
+            success: function(data) {
+              // loading languages
+              if(data && data['batch_status']) {
+                $('.course_type').prop('disabled', false);
+               } else {
+                $('.batch').val('');
+                alert('No. of training requests for selected batch exceeded.');
+              }
+              //$('.ajax-refresh-language').hide();
+            }
+          });
+                
         }
       });
       $('.department').on('change', function(){
@@ -231,27 +309,21 @@
         $('.course_type').val('');
         $('.course_type').prop('disabled', 'disabled');
         $('.course').html('<option>---------</option>');
+        $('.course').prop('disabled', 'disabled');
         if(department != ''){
           $.ajax({
             url: "/software-training/get-batch-option/",
             type: "POST",
             data: {
               department: department,
-              training_planner: $('.training-planner').val()
             },
             beforeSend: function() {
               //$('.ajax-refresh-language').show();
             },
             success: function(data) {
               // loading languages
-              if(data) {
-                  if(data['is_full']){
-                    $(".department").val('');
-                    alert('No. of training requests for "' + department_name + '" department exceeded.');
-                  }else{
-                    $('.batch').html(data['batch_option']);
-                    $('.course_type').prop('disabled', false);
-                  }
+              if(data && data['batch_option']) {
+                  $('.batch').html(data['batch_option']);
               }
               //$('.ajax-refresh-language').hide();
             }

@@ -86,6 +86,11 @@ Admin Spoken Tutorials
 
 def get_or_create_participant(w, firstname, lastname, gender, email, category):
     mdluser = None
+    # Added category check as zero. Means the call is coming from new student
+    # batch upload interface. And category is/was not used.
+    if category == 0:
+        create_account(w, firstname, lastname, gender, email, category)
+        return True
     if w and w.organiser.academic.institution_type.name == 'School' and not email:
         ta = TrainingAttendance()
         ta.status = 1

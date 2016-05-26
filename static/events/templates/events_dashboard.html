@@ -19,7 +19,8 @@
                             <ul>
                                 <li><a href="/software-training/training-request/rp/pending/">Pending / Ongoing Training Request</a></li>
                                 <li><a href="/software-training/training-request/rp/completed/">Completed Training Request</a></li>
-                            </ul>
+                               <!--  <li><a href="/software-training/single-training/pending/">School / Vocational Training request summary</a></li> -->
+			   </ul>
                             <h5>Online Assessment Test</h5>
                             <ul>
                                 <li><a href="/software-training/test/rp/pending/">Approval Pending</a></li>
@@ -73,11 +74,12 @@
                     <div class="panel panel-primary">
                         <div class="panel-heading panel-heading-notif">Organiser</div>
                         <div class="panel-body">
-                            <h5>Training</h5>
+                            <h5>Training <b>(To Start the Training Go here)</b></h5>
                             <ul>
                                 <li><a href="/software-training/training-planner/">Semester Training Planner Summary (STPS)</a></li>
-                                <li><a href="/software-training/single-training/approved">School / Vocational workshop Training Planner Summary </a></li>
-                                <li><a href="/software-training/student-batch/">Master Batch Student List</a></li>
+				{% if institution_type.name == 'School' or institution_type.name == 'Vocational' or institution_type.name == 'NGO - Training Centre' or institution_type.name == 'NGO' or user.is_superuser  %}
+					<!-- <li><a href="/software-training/single-training/pending/">School / Vocational Training request summary</a></li> -->
+				{% endif %}
                                 <!-- <li><a href="/software-training/training/organiser/request/">New Training Request and Participant List</a></li>
                                 <li><a href="/software-training/training/organiser/pending/">Pending Training</a></li>
                                 <li><a href="/software-training/training/organiser/approved/">Approved Training</a></li>
@@ -92,7 +94,8 @@
                             <h5>Course</h5>
                             <ul>
                                 <li><a href="/software-training/course-map-list/">Course List</a></li>
-                                <li><a href="/software-training/course-map">Add New Course</a></li>
+                                
+                                <!-- <li><a href="/software-training/course-map">Add New Course</a></li> -->
                             </ul>
                         </div>
                     </div>

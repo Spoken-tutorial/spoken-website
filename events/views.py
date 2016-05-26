@@ -55,7 +55,7 @@ import string
 import random
 
 from  filters import *
-
+from cms.views import create_profile
 from cms.sortable import *
 from events_email import send_email
 import datetime
@@ -198,6 +198,11 @@ def is_organiser(user):
             return True
     except:
         pass
+
+def is_administrator(user):
+    """Check if the user is having resource person  rights"""
+    if user.groups.filter(name='Administrator').count() == 1:
+        return True
 
 def is_invigilator(user):
     """Check if the user is having invigilator rights"""
@@ -506,8 +511,12 @@ def events_dashboard(request):
     rp_workshop_notification = None
     rp_test_notification = None
     rp_training_notification = None
+    institute_name = None
     if is_organiser(user):
+	institution_type = AcademicCenter.objects.get(id=user.organiser.academic_id)
+        institute_name = InstituteType.objects.get(id=institution_type.institution_type_id)
         organiser_test_notification = EventsNotification.objects.filter((Q(status = 1) | Q(status = 2)), category = 1, academic_id = user.organiser.academic_id, categoryid__in = user.organiser.academic.test_set.filter(organiser_id = user.id).values_list('id')).order_by('-created')[:30]
+
         #organiser_training_notification = EventsNotification.objects.filter((Q(status = 1) | Q(status = 3)), category = 2, status = 1, academic_id = user.organiser.academic_id, categoryid__in = user.organiser.academic.workshop_set.filter(organiser_id = user.id).values_list('id')).order_by('-created')[:30]
 
     if is_resource_person(user):
@@ -516,8 +525,10 @@ def events_dashboard(request):
         rp_test_notification = EventsNotification.objects.filter((Q(status = 0) | Q(status = 4) | Q(status = 5) | Q(status = 8) | Q(status = 9)), category = 1, categoryid__in = (Training.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)))).values_list('id')).order_by('-created')[:30]
     if is_invigilator(user):
         invigilator_test_notification = EventsNotification.objects.filter((Q(status = 0) | Q(status = 1)), category = 1, academic_id = user.invigilator.academic_id, categoryid__in = user.invigilator.academic.test_set.filter(invigilator_id = user.id).values_list('id')).order_by('-created')[:30]
+
     context = {
         'roles' : roles,
+        'institution_type' : institute_name,
         'organiser_workshop_notification' : organiser_workshop_notification,
         'organiser_test_notification' : organiser_test_notification,
         'organiser_training_notification' : organiser_training_notification,
@@ -1558,8 +1569,8 @@ def training_participant_ceritificate(request, wid, participant_id):
             w = Training.objects.get(id = wid)
             # check if user can get certificate
             wa = TrainingAttendance.objects.get(training_id = w.id, id = participant_id)
-            if wa.status < 1:
-                raise PermissionDenied()
+            #if wa.status < 1:
+            #    raise PermissionDenied()
             if wa.password:
                 certificate_pass = wa.password
                 wa.count += 1
@@ -1584,11 +1595,11 @@ def training_participant_ceritificate(request, wid, participant_id):
 
     # Title 
     imgDoc.setFont('Helvetica', 40, leading=None)
-    imgDoc.drawCentredString(415, 480, "Certificate of Learning")
+    imgDoc.drawCentredString(415, 480, "Certificate of Appreciation")
     
     #date
     imgDoc.setFont('Helvetica', 18, leading=None)
-    imgDoc.drawCentredString(211, 115, custom_strftime('%B {S} %Y', w.tdate)) 
+    imgDoc.drawCentredString(211, 115, "29 August 2015") 
 
     #password
     imgDoc.setFillColorRGB(211, 211, 211)
@@ -1602,7 +1613,7 @@ def training_participant_ceritificate(request, wid, participant_id):
     imgDoc.drawImage(imgPath, 600, 100, 150, 76)    ## at (399,760) with size 160x160
 
     #paragraphe
-    text = "This is to certify that <b>"+wa.firstname +" "+wa.lastname+"</b> participated in the <b>"+w.foss.foss+"</b> training organized at <b>"+w.academic.institution_name+"</b> by  <b>"+w.organiser.user.first_name + " "+w.organiser.user.last_name+"</b> on <b>"+custom_strftime('%B {S} %Y', w.tdate)+"</b> with course material provided by the Talk To A Teacher project at IIT Bombay.<br /><br />A comprehensive set of topics pertaining to <b>"+w.foss.foss+"</b> were covered in the workshop. This training is offered by the Spoken Tutorial Project, IIT Bombay, funded by National Mission on Education through ICT, MHRD, Govt., of India."
+    text = "This is to certify that <b>"+wa.firstname +" "+wa.lastname+"</b> participated in the <b>"+w.foss.foss+"</b> workshop organized at <b>"+w.academic.institution_name+"</b> by  <b>Spoken Tutorial Project</b> on <b> 29 August 2015</b><br /><br />A comprehensive set of topics pertaining to <b>"+w.foss.foss+"</b> were covered in the workshop. <br />The Spoken Tutorial Project, IIT Bombay, funded by National Mission on Education <br />through ICT, MHRD, Govt. of India."
     
     centered = ParagraphStyle(name = 'centered',
         fontSize = 16,  
@@ -1680,7 +1691,10 @@ def test_request(request, role, rid = None):
                         mdluser = get_moodle_user(tra.training.training_planner.academic_id, user.first_name, user.last_name, tra.student.gender, tra.student.user.email)# if it create user rest password for django user too
                         if mdluser:
                             fossmdlcourse = FossMdlCourses.objects.get(foss_id = t.foss_id)
-                            instance = TestAttendance()
+                            try:
+                                instance = TestAttendance.objects.get(test_id=t.id, mdluser_id=mdluser.id)
+                            except:
+                                instance = TestAttendance()
                             instance.student = tra.student
                             instance.test_id = t.id
                             instance.mdluser_id = mdluser.id
@@ -1752,7 +1766,7 @@ def test_list(request, role, status):
                 collectionSet = Test.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)), status = status_dict[status]).order_by('-tdate')
         elif is_organiser(user) and role == 'organiser':
             if status == 'ongoing': 
-                collectionSet = Test.objects.filter((Q(status = 2) | Q(status = 3)), organiser__user = user , tdate = datetime.datetime.now().strftime("%Y-%m-%d")).order_by('-tdate')
+                collectionSet = Test.objects.filter((Q(status = 2) | Q(status = 3)), organiser__user = user ,  tdate__lte = datetime.date.today().strftime("%Y-%m-%d")).order_by('-tdate')
             elif status == 'predated':
                 collectionSet = Test.objects.filter((Q(status = 0) | Q(status = 1) | Q(status = 2) | Q(status = 3)), organiser__user = user, tdate__lt=datetime.date.today()).order_by('-tdate')
             elif status == 'approved':
@@ -1761,7 +1775,7 @@ def test_list(request, role, status):
                 collectionSet = Test.objects.filter(organiser__user = user, status = status_dict[status]).order_by('-tdate')
         elif is_invigilator(user) and role == 'invigilator':
             if status == 'ongoing':
-                collectionSet = Test.objects.filter((Q(status = 2) | Q(status = 3)), tdate = datetime.date.today(), invigilator_id = user.invigilator.id).order_by('-tdate')
+                collectionSet = Test.objects.filter((Q(status = 2) | Q(status = 3)),  tdate__lte = datetime.date.today(), invigilator_id = user.invigilator.id).order_by('-tdate')
                 messages.info(request, "Click on the Attendance link below to see the participant list. To know more Click Here.")
             elif status == 'predated':
                 collectionSet = Test.objects.none()
@@ -2228,7 +2242,13 @@ def organiser_invigilator_index(request, role, status):
             collection = {}
     else:
         raise PermissionDenied()
-            
+
+    for record in collection:
+        try:
+            record.user.profile_set.get()
+        except:
+            create_profile(record.user)
+
     context['header'] = header
     context['ordering'] = ordering
     context['collection'] = collection
@@ -2273,7 +2293,7 @@ def training_participant_feedback(request, training_id, participant_id):
 def training_participant_language_feedback(request, training_id, user_id):
     w = None
     try:
-        w = Training.objects.get(pk=training_id)
+        w = TrainingRequest.objects.get(pk=training_id)
         MdlUser.objects.get(id = user_id)
     except Exception, e:
         raise PermissionDenied()
@@ -2307,10 +2327,14 @@ def live_training(request, training_id=None):
     
     context = {}
     if not training_id:
-        context['training_list'] = Training.objects.filter(Q(training_type = 2) | Q(training_type = 3))
+        context['training_list'] = SingleTraining.objects.filter(
+          training_type = 2
+        )
     else:
         try:
-            context['training'] = TrainingLiveFeedback.objects.filter(training_id = training_id)
+            context['training'] = TrainingLiveFeedback.objects.filter(
+              training_id = training_id
+            )
         except Exception, e:
             print e
             raise PermissionDenied()
@@ -2322,7 +2346,7 @@ def training_participant_livefeedback(request, training_id):
     form = LiveFeedbackForm()
     w = None
     try:
-        w = Training.objects.get(pk=training_id)
+        w = SingleTraining.objects.get(pk=training_id)
     except Exception, e:
         raise PermissionDenied()
     if request.method == 'POST':
@@ -2336,7 +2360,7 @@ def training_participant_livefeedback(request, training_id):
                 return HttpResponseRedirect('/')
             except Exception, e:
                 print e
-                messages.success(request, "Thank you for your valuable feedback.")
+                messages.success(request, "Something went wrong, please contact site administrator.")
                 return HttpResponseRedirect('/')
     context = {
         'form' : form,
@@ -2439,7 +2463,34 @@ def ajax_ac_state(request):
                 data['university'] = tmp
         
         return HttpResponse(json.dumps(data), content_type='application/json')
-        
+
+@csrf_exempt
+def ajax_state_details(request):
+    """ Ajax: Get District, City based State selected """
+    if request.method == 'POST':
+        state = request.POST.get('state')
+        data = {}
+        if request.POST.get('fields[district]'):
+            district = District.objects.filter(state=state).order_by('name')
+            tmp = ''
+            for i in district:
+                tmp +='<option value='+str(i.id)+'>'+i.name+'</option>'
+            if(tmp):
+                data['district'] = '<option value=""> -- None -- </option>'+tmp
+            else:
+                data['district'] = tmp
+        if request.POST.get('fields[city]'):
+            city = City.objects.filter(state=state).order_by('name')
+            tmp = ''
+            for i in city:
+                tmp +='<option value='+str(i.id)+'>'+i.name+'</option>'
+            if(tmp):
+                data['city'] = '<option value=""> -- None -- </option>'+tmp
+            else:
+                data['city'] = tmp
+        return HttpResponse(json.dumps(data), content_type='application/json')
+
+
 @csrf_exempt
 def ajax_ac_location(request):
     """ Ajax: Get the location based on district selected """
@@ -2508,6 +2559,23 @@ def ajax_state_collage(request):
             for i in collages:
                 tmp +='<option value='+str(i.id)+'>'+i.institution_name+'</option>'
         return HttpResponse(json.dumps(tmp), content_type='application/json')
+
+
+@csrf_exempt
+def ajax_academic_center(request):
+    """Ajax: Get academic centers according to institute type and state"""
+    if request.method == 'POST':
+        state = request.POST.get('state')
+        itype = request.POST.get('itype')
+        center = AcademicCenter.objects.filter(state=state,
+            institution_type=itype).order_by('institution_name')
+	html = '<option value=None> --------- </option>'
+        if center:
+            for ac in center:
+                html += '<option value={0}>{1}</option>'.format(ac.id,
+                    ac.institution_name)
+    return HttpResponse(json.dumps(html), content_type='application/json')
+
 
 @csrf_exempt
 def ajax_dept_foss(request):

@@ -38,13 +38,11 @@ PASSWORD_HASHERS = (
 # email errors and 404
 SERVER_EMAIL = 'error-report@spoken-tutorial.org'
 ADMINS = (
-    ('Administrator', 'administrator@spoken-tutorial.org'),
-    ('vishnuraj', 'vishnukraj007@gmail.com'),
+    ('Web Administrator', 'web-notify@spoken-tutorial.org'),
 )
 
 MANAGERS = (
-    ('Administrator', 'administrator@spoken-tutorial.org'),
-    ('vishnuraj', 'vishnukraj007@gmail.com'),
+    ('Web Administrator', 'web-notify@spoken-tutorial.org'),
 )
 
 ADMINISTRATOR_EMAIL = ADMINISTRATOR_EMAIL
@@ -76,7 +74,6 @@ INSTALLED_APPS = (
     'compressor',
 
     'cms',
-    'cdeep',
     'creation',
     'statistics',
     'cdcontent',
@@ -85,6 +82,7 @@ INSTALLED_APPS = (
     'masquerade',
     'youtube',
     'reports',
+    'team',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -150,6 +148,15 @@ DATABASES = {
         'PASSWORD': WDB_PASS,
         'HOST': '',                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
         'PORT': '',                  # Set to empty string for default.
+    },
+    'forums': {
+        'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': FDB,                      # Or path to database file if using sqlite3.
+        # The following settings are not used with sqlite3:
+        'USER': FDB_USER,
+        'PASSWORD': FDB_PASS,
+        'HOST': '',                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+        'PORT': '',                  # Set to empty string for default.
     }
 }
 
@@ -158,7 +165,7 @@ DATABASES = {
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'Asia/Calcutta'
+TIME_ZONE = 'Asia/Kolkata'
 
 USE_I18N = True
 
@@ -208,9 +215,19 @@ INTERNAL_IPS = ('127.0.0.1',)
 
 #Moodle Auth
 #AUTH_USER_MODEL = 'mdldjango.Users'
-DATABASE_ROUTERS = ['mdldjango.router.MdlRouter', 'cdeep.router.CdeepRouter', 'workshop.router.WorkshopRouter']
+DATABASE_ROUTERS = [
+    'mdldjango.router.MdlRouter', 
+    'cdeep.router.CdeepRouter', 
+    'workshop.router.WorkshopRouter',
+    'forums.router.ForumsRouter'
+]
 #AUTHENTICATION_BACKENDS = ( 'mdldjango.backend.MdlBackend', )
 
+# Login using username or email address
+AUTHENTICATION_BACKENDS = (
+    'cms.backends.EmailOrUsernameModelBackend',
+    'django.contrib.auth.backends.ModelBackend'
+)
 # Reports
 REPORT_BUILDER_INCLUDE = []
 REPORT_BUILDER_EXCLUDE = ['user'] # Allow all models except User to be accessed

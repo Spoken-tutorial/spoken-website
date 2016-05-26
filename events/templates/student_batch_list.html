@@ -1,3 +1,4 @@
+<!-- This page will displays the list of all master batches and also gives edit batch , add student or display list option -->
 {% extends 'base.html' %}
 {% load widget_tweaks %}
 {% load static %}
@@ -10,8 +11,8 @@
   <div>
     <center>
       <a class="btn btn-success pull-left" href="{% url 'events:add_batch' %}">Add Batch</a>
-      <a class="btn btn-primary" data-toggle="modal" data-target="#myModal"><i class="fa fa-2 fa-question"></i> Help</a>
-      <a class="btn btn-success pull-right" href="{% url 'events:training_planner' %}">Back To Training Planner Summary</a>
+      <a class="btn btn-primary" data-toggle="modal" data-target="#myModal"><i class="fa fa-2 fa-question"></i>  Instructions for Master Batch</a>
+      <a class="btn btn-success pull-right" href="{% url 'events:training_planner' %}">Back To Semester Training Planner Summary</a>
     </center><br><br>
   </div>
   
@@ -22,15 +23,24 @@
         <div class="modal-body">
            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
            <ul>
-              <li>Please upload Master Batch of all students in that department and year in .csv file .</li>
-              <li>Use this Master Batch student list to select Participant List per Software <a href="http://process.spoken-tutorial.org/images/4/49/Upload_Select_Participant_list.pdf" traget="_blank"> Click Here</a>.</li>
+              <li>Create a spreadsheet in <b>LibreOffice Calc</b> or <b>MS Excel</b> of student with the following details: <b>First Name, Last Name, Email ID and Gender</b>.</li>
+              <li>Please upload <b>Master Batch</b> of all students in that department and year in .csv file .</li>
               <li>Please ensure that you fill in only the genuine Email ID's of the Participants/Students. If they don't have any, please help them to create one.</li>
-              <li>One Master batch must contain names from only one department. Departments must not be combined. But a college can have multiple Master batch lists. </li>
+              <li>One <b>Master Batch</b> must contain names from only one department. Departments must not be combined. But a college can have multiple <b>Master Batch</b> lists. </li>
+              <li>For additional students Add student details in the existing <b>Master Batch</b> of same year and department.</li>
            </ul>
         </div>
       </div>
     </div>
   </div>
+  
+{% if object_list %}
+<div class="alert alert-success alert-dismissable">
+  If you have completed adding <b>Master Batch/es</b>, kindly continue with Step 2 and Step 3 from <b>STP</b> Summary page.
+</div> 
+{% else %}
+  kindly add your master batches.
+{% endif %}
 
   {% if object_list %}
     <table class="paleblue table">
@@ -43,9 +53,7 @@
           <td>{{ record.year }}</td>
           <td>{{ record.student_count }}</td>
           <td>
-            {% if record.has_training %}
               <a href="{% url 'events:edit_student' record.id %}">Edit</a> | 
-            {% endif %}
             <a href="{% url 'events:list_student' record.id %}">Student List</a>
             {% if record|can_add_student:request.user %}
              | <a href="{% url 'events:add_student' record.id %}">Add Student</a>
@@ -57,5 +65,11 @@
   {% else %}
     <p class='no-record'>No record found!</p>
   {% endif %}
-  
+{% endblock %}
+{% block jsblock %}
+  <script>
+    $(window).load(function(){
+        $('#myModal').modal('show');
+    });
+  </script>
 {% endblock %}

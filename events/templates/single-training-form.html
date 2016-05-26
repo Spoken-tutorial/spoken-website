@@ -23,6 +23,7 @@
             {% else %}
                 {{ user.organiser.academic.state }} - {{ user.organiser.academic }}
             {% endif %}
+             
         </div>
         <div class="row well">
             <div class='col-sm-8'>
@@ -43,6 +44,32 @@
                             {{ form.training_type.errors }}
                         </div>
                     </div>
+                     <div>
+                          {% if user.is_superuser %}
+			<div class="form-group">
+				<label class="col-sm-3 control-label" for= "id_state">State</label>
+					<div class="col-sm-9">
+						{% render_field form.state class+="form-control state" tabindex="1" %}
+						{{ form.state.errors }}
+					</div>
+                        </div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label" for= "id_institution_type">Institution Type</label>
+					<div class="col-sm-9">
+						{% render_field form.institution_type class+="form-control intitution_type" tabindex="1" %}
+						{{ form.institution_type.errors }}
+					</div>
+                        </div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label" for= "id_academic">Academic Center</label>
+					<div class="col-sm-9">
+						{% render_field form.academic class+="form-control academic" tabindex="1" %}
+						{{ form.academic.errors }}
+					</div>
+                        </div>
+
+                          {% endif %}
+                      </div>
                     <div class="form-group">
                         <label class="col-sm-3 control-label" for="id_csv_file">Participant List (Upload CSV File)</label>
                         <div class="col-sm-9">
@@ -60,7 +87,7 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-sm-3 control-label" for= "id_tdate">Start Date</label>
+                        <label class="col-sm-3 control-label" for= "id_tdate">Training Date</label>
                         <div class="col-sm-9">
                             {% render_field form.tdate class+="form-control datetime" tabindex="1" data-placeholder="Enter date" %}
                             {{ form.tdate.errors }}
@@ -90,6 +117,7 @@
 {% endblock %}
 {% block compressinlinejsblock %}
     <script>
+	$(document).ready(function(){
         $college = $('#id_academic');
         $('#id_district').change(function() {
             var district = $(this).val();
@@ -148,5 +176,38 @@
             step:5,
             timepicker:false,
         });
+		$state = $('#id_state')
+		$itype = $('#id_institution_type')
+		$state.change(function(){
+			if ($itype.val() != "" && $state.val() != ""){
+				show_institute();
+			}
+		});
+		$itype.change(function(){
+			if ($itype.val() != "" && $state.val() != ""){
+				show_institute();
+			}
+		});
+		function show_institute(){
+			var state = $state.val();
+			var itype = $itype.val();
+			$.ajax({
+				url: "software-training/ajax-academic-center/",
+				type: "POST",
+				data: {
+					state: state,
+					itype: itype,
+					fields: {'academic_center': 'academic_center'}
+
+				},
+				success: function(html){
+				console.log(html)
+				$college.html(html);
+
+				}
+			});
+		}
+		
+	});
     </script>
 {% endblock %}

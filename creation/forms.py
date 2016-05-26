@@ -6,6 +6,12 @@ from django import forms
 
 from creation.models import *
 
+class FossAvailableForTestForm(forms.ModelForm):
+    foss = forms.ModelChoiceField(queryset = FossCategory.objects.filter(status=True).order_by('foss'))
+    class Meta:
+        model = FossAvailableForTest
+        exclude = ['created']
+
 class UploadPrerequisiteForm(forms.Form):
     foss_category = forms.ChoiceField(
         choices = [('', 'Select FOSS Category'),],

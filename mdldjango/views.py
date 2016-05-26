@@ -12,6 +12,7 @@ from xml.etree.ElementTree import ElementTree
 # Create your views here.
 import hashlib
 import csv, os, time
+from django.db.models import Q
 from django.core.exceptions import PermissionDenied
 from events.views import *
 from events.models import *
@@ -69,6 +70,7 @@ def mdl_login(request):
 def index(request):
     mdluserid = request.session.get('mdluserid')
     mdlusername = request.session.get('mdlusername')
+    p = 0
     if not mdluserid:
         return HttpResponseRedirect('/participant/login')
     
@@ -76,8 +78,8 @@ def index(request):
         mdluser = MdlUser.objects.get(id=mdluserid)
     except:
         return HttpResponseRedirect('/participant/login')
-    
-    if str(mdluser.institution).isdigit():
+
+    if str(mdluser.institution.encode("utf8")).isdigit():
         academic = None
         try:
             academic = AcademicCenter.objects.get(id = mdluser.institution)
@@ -94,8 +96,12 @@ def index(request):
             past_workshop = None
             past_test = None
             ongoing_test = None
-            #if category == 3:
-            #    upcoming_workshop = Training.objects.filter((Q(status = 0) | Q(status = 1) | Q(status = 2) | Q(status = 3)), academic_id=mdluser.institution, tdate__gte=datetime.date.today()).order_by('-tdate')
+            if category == 3:
+                upcoming_workshop = []
+                upcoming_workshop = Training.objects.filter((Q(status = 10) | Q(status = 11) | Q(status = 12) |Q(status = 3)), academic_id=mdluser.institution, tdate__lte=datetime.date.today()).order_by('-tdate')
+                #up = Training.objects.filter(id=23270)[0]
+                #upcoming_workshop.append(up)
+                #p = up.trainingattendance_set.get(mdluser_id=mdluser.id)
             if category == 5:
                 upcoming_test = Test.objects.filter(status=2, academic_id=mdluser.institution, tdate__gt=datetime.date.today()).order_by('-tdate')
             if category == 1:
@@ -103,9 +109,10 @@ def index(request):
             if category == 2:
                 past_test = Test.objects.filter(id__in = TestAttendance.objects.filter(mdluser_id = mdluser.id).values_list('test_id'), status = 4).order_by('-tdate')
             if category == 4:
-                ongoing_test = Test.objects.filter(status=3, academic_id=mdluser.institution, tdate = datetime.date.today()).order_by('-tdate')
+                ongoing_test = Test.objects.filter(Q(status=2)|Q(status=3), academic_id=mdluser.institution, tdate__lte=datetime.date.today()).order_by('-tdate')
             
             context = {
+                #'p': p,
                 'mdluserid' : mdluserid,
                 'mdlusername' : mdlusername,
                 'upcoming_workshop' : upcoming_workshop,
@@ -250,7 +257,13 @@ def feedback(request, wid):
         return HttpResponseRedirect('/participant/login')
     w = None
     try:
-        w = Training.objects.select_related().get(pk=wid)
+        w = TrainingRequest.objects.select_related().get(pk=wid)
+    except Exception, e:
+        #print e
+        messages.error(request, 'Invalid Training-Request ID passed')
+        return HttpResponseRedirect('/participant/index/?category=1')
+        #return PermissionDenied('Invalid Training-Request ID passed')
+    try:
         #check if feedback already exits
         TrainingFeedback.objects.get(training_id = wid, mdluser_id = mdluserid)
         messages.success(request, "We have already received your feedback. ")
@@ -267,16 +280,6 @@ def feedback(request, wid):
                 form_data.training_id = wid
                 form_data.mdluser_id = mdluserid
                 form_data.save()
-                try:
-                    wa = TrainingAttendance.objects.get(mdluser_id=mdluserid, training_id = wid)
-                    wa.status = 2
-                    wa.save()
-                except:
-                    wa = TrainingAttendance()
-                    wa.training_id = wid
-                    wa.mdluser_id = mdluserid
-                    wa.status = 1
-                    wa.save()
                 messages.success(request, "Thank you for your valuable feedback.")
                 return HttpResponseRedirect('/participant/index/?category=1')
             except Exception, e:
@@ -306,6 +309,7 @@ def forget_password(request):
             # reset auth user password
             mdluser, flag, authuser = get_or_create_user(user)
             authuser.set_password(password_string)
+            authuser.save()
             
             subject  = "Spoken Tutorial Online Test password reset"
             to = [user.email]
@@ -348,3 +352,14 @@ Admin Spoken Tutorials
     }
     context.update(csrf(request))
     return render(request, 'mdl/templates/password_reset.html', context)
+
+### updated mdl pass when auth user pass change
+def changeMdlUserPass(email, password_string):
+    try:
+        user = MdlUser.objects.filter(email=email).first()
+        password_encript = encript_password(password_string)
+        user.password = password_encript
+        user.save()
+        return True
+    except:
+        return False

@@ -1,0 +1,40 @@
+<!-- This page is used for change master batch year even after atch is used in STP-->
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block title %}Master Batch{% endblock %}
+{% block heading %}<i class="home-page-title-i">Master Batch</i><a class="btn btn-success pull-right" href="{% url 'events:batch_list' %}">Back to MB Master Batch</a>{% endblock %}
+{% block search %}{% endblock %}
+{% block content %}
+          <div class="row well">
+              <div class='col-sm-8'>
+                  <form action="{{ action }}" method="post" class='form-horizontal' enctype="multipart/form-data">{% csrf_token %}
+                      {% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
+                      {% if form.non_field_errors %}
+                      <ul>
+                        {% for error in form.non_field_errors %}
+                          <li>{{ error }}</li>
+                        {% endfor %}
+                      </ul>
+                      {% endif %}
+                      <div class='form-row'>
+                        <div class='col-xs-12 form-group required'>
+                          <label class='control-label'>Year</label>
+                          {% render_field form.year class+="form-control year" tabindex="1" %}
+                          {{ form.year.errors }}
+                        </div>
+                      </div>
+                      
+                      <div class="form-group">
+                          <div class="col-xs-12 form-group">
+                              <input class="btn btn-primary" type="submit" value="Update" />
+                              <a class="btn btn-danger" href="{% url 'events:batch_list' %}">Cancel</a>
+                          </div>
+                      </div>
+                      {% endwith %}
+                  </form>
+              </div>
+          </div>
+{% endblock %}
+{% block jsblock %}
+{% endblock %}

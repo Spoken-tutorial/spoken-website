@@ -7,10 +7,7 @@
 {% block content %}
 {% load cmsdata %}
 {% load student %}
-  <div class="row">
-    <a class="btn btn-success" href="{% url 'events:coursemap' %}">New Course Map</a>
-    <br>
-  </div>
+  
   <div class="row">
   {% if object_list %}
     <table class="paleblue table">

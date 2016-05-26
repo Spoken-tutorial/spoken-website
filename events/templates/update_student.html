@@ -1,0 +1,14 @@
+<!--This page gives the interface to edit student's first name , last name -->
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% load cmsdata %}
+{% load static %}
+{% block title %}Participant Details{% endblock %}
+{% block heading %}<i class="home-page-title-i">Participant Details :</i>{% endblock %}
+{% block search %}{% endblock %}
+{% block content %}
+<form action="" method="post">{% csrf_token %}
+{{ form.as_p }}
+<input type="submit" value="Update" class="btn btn-primary"/>
+</form>
+{% endblock %}

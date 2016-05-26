@@ -1,9 +1,10 @@
+<!-- this page gives inteface to mark the attendance of participants who all will attend the training -->
 {% extends 'base.html' %}
 {% load attendance %}
 {% load widget_tweaks %}
 {% load static %}
 {% block title %}Participant List{% endblock %}
-{% block heading %}<i class="home-page-title-i">Participant List</i>{% endblock %}
+{% block heading %}<i class="home-page-title-i">Participant List</i>{{department}} {{training.id}}{% endblock %}
 {% block cssblock %}
   <style>
     .invalid {
@@ -13,6 +14,37 @@
 {% endblock %}
 {% block search %}{% endblock %}
 {% block content %}
+<form action="{{ action }}" id="form-id" method="post">
+<!--modal starting -->
+<div class="modal fade" id="confirmModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" style=" color:#0052A3; font-size:15px;">
+          <div class="modal-dialog " >
+            <div class="modal-content" >
+              <div class="modal-body" >
+                Are you sure <b>Department,Year, Student count and Course</b> are mentioned correctly? Once the Participant List is selected no changes can be made.
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal" id="modal-no" onclick="confirmation();">NO</button>
+                <a type ="submit" class="btn btn-primary" onclick="document.forms['form-id'].submit();" %}">Yes</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="modal fade" id="alertModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="color:#0052A3; font-size:15px;">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-body">
+                 Make necessary corrections in <b>MB</b> or <b>STP</b>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal" id="modal-no">OK</button>
+              </div>
+            </div>
+          </div>
+        </div>
+          {% csrf_token %}
+<!--modal ending -->
+
   <div><a class="btn btn-success" href="{% url 'events:training_planner' %}">Go Back to Training Planner</a><br><br></div>
   {% if object_list %}
     {% with can_mark_attendance=training.can_mark_attendance %}
@@ -34,43 +66,47 @@
               </select>
             </div>
         </div>
-        <form action="{{ action }}" method="post">
-          {% csrf_token %}
       {% endif %}
-      <table class="table table-striped table-hover table-bordered">
-        <tr>
-          <th>#</th>
-          {% if can_mark_attendance %}
-            <th>Check</th>
-          {% endif %}
-          <th>Name</th>
-          <th>Email</th>
-          <th>Gender</th>
-          {% if can_mark_attendance %}
-            <th>Preffered Language
-            </th>
-          {% endif %}
-        {% for record in object_list %}
-          {% if not record.moved %}
-            {% with training_attendance=training|get_attendance:record.student %}
-            {% if can_mark_attendance or training_attendance %}
+
+<!--table of participants who can mark attendance -->
+  <table class="table table-striped table-hover table-bordered">
+    <tr>
+      <th>#</th>
+{% if can_mark_attendance %}
+      <th>Check</th>
+{% endif %}
+      <th>Name</th>
+      <th>Email</th>
+      <th>Gender</th>
+{% if can_mark_attendance %}
+      <th>Preffered Language
+{% endif %}
+      </th>
+    </tr>
+    {% for record in object_list %}
+      {% if not record.moved %}
+        {% with training_attendance=training|get_attendance:record.student %}
+          {% if can_mark_attendance or training_attendance %}
             {% with attendance_allowed=training|is_attendance_allowed:record.student %}
               <tr id="{{record.student.id}}" {% if not attendance_allowed and not training_attendance %}class="invalid"{% endif %}>
-                <td>{{ forloop.counter }}</td>
                 {% if can_mark_attendance and attendance_allowed %}
-                  <td>
-                    {% if training|is_attendance_marked:record.student %}
-                      <input type='checkbox' name="user" value="{{record.student.id}}" checked="checked">
-                    {% else %}
-                      <input type='checkbox' name="user" value="{{record.student.id}}">
-                    {% endif %}
-                  </td>
+                <td>{{ forloop.counter }}</td>
+                <td>
+                  {% if training|is_attendance_marked:record.student %}
+                    <input type='checkbox' name="user" value="{{record.student.id}}" checked="checked">
+                  {% else %}
+                    <input type='checkbox' name="user" value="{{record.student.id}}">
+                  {% endif %}
+                </td>
                 {% endif %}
+                {% if can_mark_attendance and attendance_allowed %}
                 <td>{{ record.student.student_fullname }}</td>
                 <td>{{ record.student.user.email }}</td>
                 <td>{{ record.student.gender }}</td>
+                {% endif %}
+                
                 {% if can_mark_attendance and attendance_allowed %}
-                  <td>
+                <td>
                   {% with lang_id=training|get_langid:record.student %}
                     <select name="{{record.student.id}}" class="selectall">
                       {% for lang in languages %}
@@ -82,25 +118,58 @@
                       {% endfor %}
                     </select>
                   {% endwith %}
-                  </td>
-                {% elif not attendance_allowed and not training_attendance %}
-                  <td>Already attended this course</td>
-                {% endif %}
                 </td>
-                {% if not can_mark_attendance and training_attendance and training_attendance.id %}
-                  <td><a href="{% url 'events:organiser_training_certificate' training_attendance.id %}">Download Certificate</a></td>
                 {% endif %}
               </tr>
             {% endwith %}
-            {% endif %}
-            {% endwith %}
           {% endif %}
-        {% endfor %}
-      </table>
-      {% if can_mark_attendance %}
-          <input class="btn btn-primary" type="submit" value="Submit Attendance" />
-        </form>
+        {% endwith %}
       {% endif %}
+    {% endfor %}
+  </table>
+<!--table end -->
+<!--table of participants who can not mark attendance -->
+<i class="home-page-title-i">Below Participants Already Attended the Foss : </i>
+<table class="table table-striped table-hover table-bordered">
+    <tr>
+      <th>#</th>
+      <th>Name</th>
+      <th>Email</th>
+      <th>Gender</th>
+    </tr>
+    {% for record in object_list %}
+      {% if not record.moved %}
+        {% with training_attendance=training|get_attendance:record.student %}
+            {% with attendance_allowed=training|is_attendance_allowed:record.student %}
+            {% if not attendance_allowed %}
+              <tr id="{{record.student.id}}" {% if not attendance_allowed and not training_attendance %}class="invalid"{% endif %}>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ record.student.student_fullname }}</td>
+                <td>{{ record.student.user.email }}</td>
+                <td>{{ record.student.gender }}</td>
+              </tr>
+              {% endif %}
+            {% endwith %}
+        {% endwith %}
+      {% endif %}
+    {% endfor %}
+  </table>
+
+      {% if can_mark_attendance %}
+          
+         Step 1: <input class="btn btn-primary" type="button" id="attendance_submit" value="Submit" />
+        </form><br>
+      {% endif %}
+      
+      {% if training.department.id == 24  and training.is_training_certificate_allowed  %}
+         Step 2:  <a class="btn btn-primary" href="{% url 'events:mark_as_complete' training.id %}"> Request to Mark Complete</a>
+      {% endif %}
+      
+      
+      
+      
+      
+      
     {% endwith %}
   {% endif %}
 {% endblock %}
@@ -124,11 +193,18 @@
       return "Check All";
     }
   }
+  function confirmation()
+  {
+    $('#alertModal').modal('show');
+  }
   $("#selectall").click(function () {
     var option=document.getElementsByClassName('selectall'); 
     for (i = 0; i < option.length; i++) {
      option[i].value = this.value;
     }
+  });
+  $("#attendance_submit").click(function () {
+    $('#confirmModal').modal('show');
   });
   </script>
 {% endblock %}

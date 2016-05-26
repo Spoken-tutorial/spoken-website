@@ -38,10 +38,12 @@ class NotificationAdmin(admin.ModelAdmin):
         obj.save()
 
 class NewsTypeAdmin(admin.ModelAdmin):
-    exclude = ('slug',)
-    list_display = ('name',)
+    #exclude = ('slug',)
+    list_display = ('name', 'slug',)
     def save_model(self, request, obj, form, change):
-        obj.slug = slugify(request.POST['name'])
+        # if not slug field will auto generate, otherwise it will use user input field
+        if not obj.slug:
+            obj.slug = slugify(request.POST['name'])
         obj.save()
 
 class NewsAdmin(admin.ModelAdmin):

@@ -46,6 +46,25 @@
         #page-wrapper #content-wrapper {
             margin-bottom: 0px;
         }
+        #news-state-filter {
+            padding: 7px;
+        }
+        .carousel{
+          margin-top:7%;
+        }
+        .carousel-inner > .item > img,
+        .carousel-inner > .item > a > img {
+            background:red;
+            width: 100%;
+            height:290px;
+        }
+        .carousel-inner > .item {
+          height:300px;
+        }
+        .carousel-caption{
+          color:#151515;
+          text-align:left;
+        }
     </style>
 {% endblock %}
 
@@ -58,28 +77,105 @@
 {% endblock %}
 {% block search %}{% endblock %}
 {% block content %}
-    {% if request.path == "/news/media-articles/" %}
-        <div class="news-filter">
-            <select class="select-news form-control news-category" data-max-options="2">
-                <option value="0"><a href="#most-important">View Most Important</option>
-                <option value="3"><a href="#most-important">View Latest</option>
-            </select>
+    {% if category = 'media-articles' %}
+      <div class='news-container news-landing-page'>
+        <ul>
+            <li><a href="/news/articles-on-spoken-tutorial-project">Articles on Spoken Tutorial project</a></li>
+            <li><a href="/news/articles-on-university-tie-ups-workshops">Articles on University tie-ups/workshops</a></li>
+        </ul>
+        </div>
+    {% else %}
+        {% if category = 'news-and-events' %}
+                <div id="myCarousel" class="carousel slide" data-ride="carousel">
+                  <!-- Indicators -->
+                  <ol class="carousel-indicators">
+                    <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
+                    <li data-target="#myCarousel" data-slide-to="1"></li>
+                    <li data-target="#myCarousel" data-slide-to="2"></li>
+                    <li data-target="#myCarousel" data-slide-to="3"></li>
+                  </ol>
+
+                  <!-- Wrapper for slides -->
+                  <div class="carousel-inner" role="listbox">
+                    <div class="item active">
+                      <img src="/static/spoken/images/news/workshops.jpg" alt="Chania" >
+                      <div class="carousel-caption">
+                        <h2></h2>
+                      </div>
+                    </div>
+                    
+
+                    <div class="item">
+                      <img src="/static/spoken/images/news/training.jpg" alt="Chania" >
+                      <div class="carousel-caption">
+                        <h2></h2>
+                      </div>
+                    </div>
+                  
+                    <div class="item">
+                      <img src="/static/spoken/images/news/DIW.jpg" alt="Flower">
+                      <div class="carousel-caption">
+                        <h2></h2>
+                      </div>
+                    </div>
+
+                    <div class="item">
+                      <img src="/static/spoken/images/news/Foss.jpg" alt="Flower" >
+                      <div class="carousel-caption">
+                        <h2></h2>
+                      </div>
+                    </div>
+                    
+                  </div>
+
+                  <!-- Left and right controls -->
+                  <a class="left carousel-control" href="#myCarousel" role="button" data-slide="prev">
+                    <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+                    <span class="sr-only">Previous</span>
+                  </a>
+                  <a class="right carousel-control" href="#myCarousel" role="button" data-slide="next">
+                    <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+                    <span class="sr-only">Next</span>
+                  </a>
+                </div>
+        {% endif %}
+        {% if category in sortAllowedCategory %}
+            <div class="news-filter">
+                <select class="select-news form-control news-category" data-max-options="2">
+                    <option value="3"><a href="#most-important">View Latest</option>
+                    <option value="1"><a href="#most-important">View Most Important</option>
+                </select>
+            </div>
+        {% endif %}
+
+        <div class= 'filters row' >
+            <form action="" method="get" class='form-horizontal pull-right' id="news-state-filter">
+                <div class="">
+                    <div class="form-group">
+                        <label for="id_state" class="col-sm-4 control-label">State</label>
+                        <div class="col-sm-8">
+                            {% render_field form.state class+="form-control state" tabindex="1" %}
+                            {{ form.state.errors }}
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        
+        <div class='news-container'>
+            {% if collection %}
+                {% for record in collection %}
+                    <div class="item {% cycle 'odd' 'even' %}">
+                        <h5><a href="/news/{{ category }}/{{ record.slug }}">{{ record.title }}</a></h5>
+                        <p>{{ record.body|len_cutter:150|safe }}</p>
+                        <h6>{{ record.created|date:"M d, Y" }}</h6>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p class="no-record"> No record found!</p>
+            {% endif %}
         </div>
     {% endif %}
-
-    <div class='news-container'>
-        {% if collection %}
-            {% for record in collection %}
-                <div class="item {% cycle 'odd' 'even' %}">
-                    <h5><a href="/news/{{ category }}/{{ record.slug }}">{{ record.title }}</a></h5>
-                    <p>{{ record.body|len_cutter:150|safe }}</p>
-                    <h6>{{ record.created|date:"M d, Y" }}</h6>
-                </div>
-            {% endfor %}
-        {% else %}
-            <p class="no-record"> No record found!</p>
-        {% endif %}
-    </div>
 {% endblock %}
 
 {% block compressinlinejsblock %}
@@ -98,6 +194,11 @@
                     window.location.href = location.protocol + '//' + location.host + location.pathname
                 }
             });
+
+            $('#id_state').change(function(){
+                $("#news-state-filter").submit()
+            });
+            
         });
     </script>
 {% endblock %}

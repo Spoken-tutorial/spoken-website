@@ -15,10 +15,78 @@
   <i class="fa fa-list-ul"></i> Training <a href="{% url 'events:events_dashboard' %}" class='pull-right'>Dashboard</a>
 {% endblock %}
 {% block content %}
+  <div class= 'filters row' >
+    <form action="" method="get" class='form-horizontal'>
+      <div class="col-lg-4 col-md-4 col-sm-4">
+        <div class="form-group">
+          <label for="id_state" class="col-sm-4 control-label">State</label>
+          <div class="col-sm-8">
+            {% render_field form.training_planner__academic__state class+="form-control state academic_state" tabindex="1" %}
+            {{ form.training_planner__academic__state.errors }}
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="id_city" class="col-sm-4 control-label">City/Town</label>
+          <div class="col-sm-8">
+            {% render_field form.training_planner__academic__city class+="form-control city academic_city" tabindex="1" %}
+            {{ form.training_planner__academic__city.errors }}
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="id_academic_institution_type" class="col-sm-4 control-label">Institution Type</label>
+          <div class="col-sm-8">
+            {% render_field form.training_planner__academic__institution_type class+="form-control academic_institution_type" tabindex="1" %}
+            {{ form.training_planner__academic__institution_type.errors }}
+          </div>
+        </div>
+      </div>
+      
+      
+      <div class="col-lg-4 col-md-4 col-sm-4">
+        <div class="form-group">
+          <label for="id_resource_center" class="col-sm-4 control-label">Institution</label>
+          <div class="col-sm-8">
+            {% render_field form.training_planner__academic__institution_name class+="form-control chosen academic_institution_name" tabindex="1" %}
+            {{ form.training_planner__academic__institution_name.errors }}
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="id_training_type" class="col-sm-4 control-label">Type of Course</label>
+          <div class="col-sm-8">
+            {% render_field form.course__category class+="form-control training_type" tabindex="1" %}
+            {{ form.course__category.errors }}
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="id_state" class="col-sm-4 control-label">Foss</label>
+          <div class="col-sm-8">
+            {% render_field form.course__foss class+="form-control foss" tabindex="1" %}
+            {{ form.course__foss.errors }}
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4 col-md-4 col-sm-4">
+        <div class="form-group">
+          <label for="id_tdate" class="col-sm-4 control-label">Date Range</label>
+          <div class="col-sm-8">
+            {% render_field form.sem_start_date class+="form-control tdate date" tabindex="1" %}
+            {{ form.sem_start_date.errors }}
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="col-sm-offset-4 col-sm-8">
+           <input class="btn btn-success" type="submit" value="Filter" />
+           <a class="btn btn-success" href="{{request.path}}?{{ request.GET|reset_get_values}}">Reset Filter</a>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
   <!-- Nav tabs -->
   <ul class="tabs nav nav-tabs">
     <li {% if status == 'pending' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/training-request/{{role}}/pending/">Pending / Ongoing</a></li>
     <li {% if status == 'completed' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/training-request/{{role}}/completed/">Completed</a></li>
+    <li {% if status == 'markcomplete' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/training-request/{{role}}/markcomplete/">Mark as complete</a></li>
   </ul>
   <!-- Tab panes -->
   <div class="tab-content">
@@ -32,12 +100,33 @@
             <td>{{ record.training_planner.academic.state }}</td>
             <td>{{ record.training_planner.academic.academic_code }}</td>
             <td>{{ record.training_planner.academic.institution_name }}</td>
-            <td>{{ record.course.foss.foss }}</td>
-            <td>{{ record.course.course }}</td>
+            <td>{{ record.batch }}</td>
+            <td>{{ record.course.foss.foss }}{% if record.course.course %}<br />({{ record.course.course }}){% endif %}</td>
             <td>{{ record.get_course_type }}</td>
             <td>{{ record.training_planner.organiser.user.first_name }}</td>
             <td>{{ record.sem_start_date }}</td>
-            <td>{{ record.participants }}</td>
+            <td>
+              {% with attendance_count=record.get_partipants_from_attendance %}
+                {% if record.batch %}
+                  {% if attendance_count %}
+                    <a href="{% url 'statistics:statistics_training_participants' record.id %}" target="_blank">
+                    {% if user|is_administrator and status == 'markcomplete'%}
+                      <a href="{% url 'events:mark_complete' record.id %}">Mark Complete</a><br>
+                      -------------
+                      <br>
+                      <a href="{% url 'statistics:statistics_training_participants' record.id %}" target="_blank">
+                    {% endif %}
+                  {% endif %}
+                  {% if attendance_count == record.participants %}{{ attendance_count }}{% else %}{{ record.update_participants_count }}{% endif %}
+                  {% if record.get_partipants_from_batch %}/{{record.get_partipants_from_batch }}{% endif %}
+                  {% if attendance_count %}
+                    </a>
+                  {% endif %}
+                {% else %}
+                  {{ record.participants }}
+                {% endif %}
+              {% endwith %}
+            </td>
             <!-- actions based on roles -->
             <!--<td></td>-->
           </tr>
@@ -56,9 +145,27 @@
 {% endblock %}
 {% block compressjsblock %}
   <script src="{% static 'spoken/js/jquery.datetimepicker.js' %}"></script>
+   <script src="{% static 'spoken/js/events.js' %}"></script>
 {% endblock %}
 {% block compressinlinejsblock %}
   <script type="text/javascript">
+    $(".academic_state").change(function(){
+        ajaxStrateFillDatas('', 'city', '');
+    });
+    $(document).ready(function(){
+        $('.fancybox').click(function(){
+            $("#big_chart_div").css({'left' : 0, 'position' : 'relative'});
+        });
+        $(".fancybox").fancybox();
+        
+    });
+    $('.date').datetimepicker({
+        lang:'en',
+        timepicker:false,
+        format:'Y-m-d',
+        formatDate:'Y/m/d',
+        maxDate:'+1970/06/31', // tommorow date with in 6 month
+    });
     /*$(document).ready(function(){
       $(".fancybox").fancybox({
         maxWidth  : 600,

@@ -1,0 +1,141 @@
+<!-- This page is used to display organisers feed back to spoken managers -->
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load eventsdata %}
+{% block title %}Organiser Feedbacks{% endblock %}
+{% block compressinlinecssblock %}
+<style>
+#search-wrapper {
+  display : none;
+}
+</style>
+{% endblock %}
+{% block heading %}
+<h3>Feedbacks : <font color="blue">{{ count }}</font></h3>
+{% endblock %}
+{% block content %}
+<div class="training-row">
+  <table class="table table-striped table-hover table-bordered">
+    <tr>
+      <th>#</th>
+      <th> name  </th>
+      <th> email </th>
+      <th> gender </th>
+      <th> age </th>
+      <th> state </th>
+      <th> district </th>
+      <th> city  </th>
+      <th> university </th>
+      <th> designation </th>
+      <th> medium_of_instruction </th>
+      <th> student_stream </th>
+      <th> student_education_language </th>
+      <th> student_gender  </th>
+      <th> student_location </th>
+      <th> offered_training_foss </th>
+      <th> duration_of_tutorial </th>
+      <th> language </th>
+      <th> side_by_side_yes_no </th>
+      <th> side_by_side_method_is </th>
+      <th> in_side_by_side_method  </th>
+      <th> good_investment </th>
+      <th> helpful_for </th>
+      <th> is_comfortable_self_learning  </th>
+      <th> is_classroom_better </th>
+      <th> is_student_expectations </th>
+      <th> is_help_get_interview </th>
+      <th> is_help_get_job </th>
+      <th> is_got_job </th>
+      <th> relevance  </th>
+      <th> information_content </th>
+      <th> audio_video_quality </th>
+      <th> presentation_quality </th>
+      <th> overall_rating </th>
+      <th> trained_foss </th>
+      <th> is_training_benefited </th>
+      <th> testimonial </th>
+      <th> any_other_suggestions </th>
+      <th> can_contact </th>
+    </tr>
+
+    {% for organiserfeedback in object_list %}
+    <tr >
+      <td>{{ forloop.counter }}</td>
+      <td>{{ organiserfeedback.name }} </td>
+      <td>{{ organiserfeedback.email }}</td>
+      <td>{{ organiserfeedback.gender }}</td>
+      <td>{{ organiserfeedback.age }}</td>
+      <td>{{ organiserfeedback.state }}</td>
+      <td>{{ organiserfeedback.district }}</td>
+      <td>{{ organiserfeedback.city }} </td>
+      <td>{{ organiserfeedback.university }}</td>
+      <td>{{ organiserfeedback.designation }}</td>
+      <td>{{ organiserfeedback.medium_of_instruction }}</td>
+	    <td>{% for stream in  organiserfeedback.student_stream.all %}
+	      <li>{{ stream }}</li>
+		    {% endfor %}
+	    </td>
+      <td>{{ organiserfeedback.student_education_language }}</td>
+      <td>{{ organiserfeedback.student_gender }} </td>
+      <td>{{ organiserfeedback.student_location }}</td>
+      <td>{% for foss in organiserfeedback.offered_training_foss.all %}
+        <li>{{ foss }}</li>
+        {% endfor %}
+      </td>
+      <td>{{ organiserfeedback.duration_of_tutorial }}</td>
+      <td>{% for language in organiserfeedback.language.all %}
+        <li>{{ language }}</li>
+        {% endfor %}
+      </td>
+      <td>{{ organiserfeedback.side_by_side_yes_no }}</td>
+      <td>{% if organiserfeedback.side_by_side_method_is == '0'%}
+            Explaining the video to a neighbor
+          {% elif organiserfeedback.side_by_side_method_is == '1'%}
+            Waiting for mentors explanation
+          {% elif organiserfeedback.side_by_side_method_is == '2'%}
+            Watching and practicing simultaneously
+          {% else %}
+            Dont know what this method is
+          {% endif %}
+      </td>
+      <td>{% if organiserfeedback.in_side_by_side_method == '0'%} 
+            The video has to be maximized
+          {% elif organiserfeedback.in_side_by_side_method == '1'%} 
+            The software has to be maximized
+          {% elif organiserfeedback.in_side_by_side_method == '2'%} 
+            Both software and video are maximized
+          {% else %} 
+            None of the above are maximized
+          {% endif %}
+      </td>
+      <td>{{ organiserfeedback.good_investment }}</td>
+      <td>{% for helpful in organiserfeedback.helpful_for.all %}
+        <li>{{ helpful }}</li>
+        {% endfor %}
+      </td>
+      <td>{{ organiserfeedback.is_comfortable_self_learning }} </td>
+      <td>{{ organiserfeedback.is_classroom_better }}</td>
+      <td>{{ organiserfeedback.is_student_expectations }}</td>
+      <td>{{ organiserfeedback.is_help_get_interview }}</td>
+      <td>{{ organiserfeedback.is_help_get_job }}</td>
+      <td>{{ organiserfeedback.is_got_job }}</td>
+      <td>{{ organiserfeedback.relevance }} </td>
+      <td>{{ organiserfeedback.information_content }}</td>
+      <td>{{ organiserfeedback.audio_video_quality }}</td>
+      <td>{{ organiserfeedback.presentation_quality }}</td>
+      <td>{{ organiserfeedback.overall_rating }}</td>
+      <td>{% for trained in organiserfeedback.trained_foss.all %}
+        <li>{{ trained }}</li>
+        {% endfor %}
+      </td>
+      <td>{{ organiserfeedback.is_training_benefited }}</td>
+      <td>{{ organiserfeedback.testimonial }}</td>
+      <td>{{ organiserfeedback.any_other_suggestions }}</td>
+      <td>{{ organiserfeedback.can_contact }}</td>
+      
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}

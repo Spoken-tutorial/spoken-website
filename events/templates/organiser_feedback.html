@@ -1,0 +1,528 @@
+<!-- This page is used to collect organisers feed back -->
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load eventsdata %}
+{% block title %}Organiser Feedback{% endblock %}
+{% block compressinlinecssblock %}
+<style>
+        .common-search{
+        display : none;
+        }
+        table tr td, table tr th{
+            padding: 4px 0px 0px 5px;
+        }
+    .tablest td input[type='radio']{
+            margin: 0px 23px !important;
+        }
+        .rowcolor{
+            background-color: #D1F0FF;
+        }
+        .rowborder{
+            background-color: #D1F0FF;
+        }
+    .bgcolor{
+            background-color: #D1F0FF;
+            padding: 3px 15px;
+        }
+    .tabhead{
+        text-align: center;
+        border-style: inset;
+        background-color: #D1F0FF;
+    }
+    .highlight{
+        width:100%;
+        background-color: #D1F0FF;
+    }
+    .highlight textarea{
+       height:110px;
+    }
+    .tablest textarea ,textarea.form-control{
+       height:110px;
+    }
+    </style>
+{% endblock %}
+{% block content %}
+{{Success}}
+<div style="text-align:center; color:#52A3CC;"><h3>Organiser Feedback Form</h3></div>
+<div class="row well" style="background-color:#F0FFFF">
+  <div class='col-sm-15'>
+    <form action="/software-training/organiser-feedback/" method="post" class='form-horizontal' enctype="multipart/form-data" >{% csrf_token %}
+      {% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
+      {% if form.non_field_errors %}
+        <ul>
+        {% for error in form.non_field_errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+      <div class='form-horizontal' style="clear:both;">
+        <div class="col-sm-8">
+          <div class="form-group">
+            <label class="col-sm-3 control-label" for= "id_name">Name </label>
+            <div class="col-sm-9">
+              {% render_field form.name class+="form-control name" tabindex="1" %}
+              {{ form.name.errors }}
+            </div>
+          </div>
+          
+          <div class="form-group email">
+            <label class="col-sm-3 control-label" for= "id_email">Email-Id </label>
+            <div class="col-sm-9">
+              {% render_field form.email class+="form-control email" tabindex="1" %}
+              {{ form.email.errors }}
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="col-sm-3 control-label" for= "id_age">Gender </label>
+            <div class="col-sm-9">
+              {% render_field form.gender class+="form-control gender" tabindex="1" %}
+              {{ form.gender.errors }}
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="col-sm-3 control-label" for= "id_age">Age </label>
+            <div class="col-sm-9">
+              {% render_field form.age class+="form-control age" tabindex="1" %}
+              {{ form.age.errors }}
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="col-sm-3 control-label" for= "id_state">State </label>
+            <div class="col-sm-9">
+              {% render_field form.state class+="form-control state" tabindex="1" %}
+              {{ form.state.errors }}
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="col-sm-3 control-label" for= "id_district">District </label>
+            <div class="col-sm-9">
+              {% render_field form.district class+="form-control district" tabindex="1" %}
+              {{ form.district.errors }}
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="col-sm-3 control-label" for= "id_city">City </label>
+            <div class="col-sm-9">
+              {% render_field form.city class+="form-control city" tabindex="1" %}
+              {{ form.city.errors }}
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="col-sm-3 control-label" for= "id_university">Institution / Oraganization </label>
+            <div class="col-sm-9">
+              {% render_field form.university class+="form-control university" tabindex="1" %}
+              {{ form.university.errors }}
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="col-sm-3 control-label" for= "id_designation">Designation </label>
+            <div class="col-sm-9">
+              {% render_field form.designation class+="form-control designation" tabindex="1" %}
+              {{ form.designation.errors }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="col-sm-3 control-label" for= "id_medium_of_instruction">Medium of Instruction </label>
+            <div class="col-sm-9">
+              {% render_field form.medium_of_instruction class+="form-control medium_of_instruction" tabindex="1" %}
+              {{ form.medium_of_instruction.errors }}
+            </div>
+          </div><br><br>
+          
+         
+          <table class="highlight form-group">
+            <tr>
+              <td>
+                <label class="col-sm-12 control-label" for= "id_student_stream" style="text-align:justify;">The students' whom you trained through Spoken Tutorials belonged to one or more of the following streams/discplines</label>
+              </td>
+            </tr>
+            {{ form.student_stream.errors }}
+             {% for choice in form.student_stream %}
+              <tr>
+                <td class="col-sm-9 " style="margin-left:50px;">{{ choice.tag }} &nbsp;&nbsp;&nbsp;&nbsp;{{ choice.choice_label }}</td>
+              </tr>
+            {% endfor %}
+            <tr>
+            </tr>
+          </table>
+          
+          <br><br>
+          
+          <div class="form-group">
+            <label class="col-sm-3 control-label" for= "id_student_education_language">Your students would have had their school education in this language</label>
+            <div class="col-sm-9">
+              {% render_field form.student_education_language class+="form-control student_education_language" tabindex="1" %}
+              {{ form.student_education_language.errors }}
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="col-sm-3 control-label" for= "id_student_gender">The students whom you trained through Spoken Tutorials are </label>
+            <div class="col-sm-9">
+              {% render_field form.student_gender class+="form-control student_gender" tabindex="1" %}
+              {{ form.student_gender.errors }}
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="col-sm-3 control-label" for= "id_student_location">The students whom you trained through Spoken Tutorials come from: </label>
+            <div class="col-sm-9">
+              {% render_field form.student_location class+="form-control student_location" tabindex="1" %}
+              {{ form.student_location.errors }}
+            </div>
+          </div><br><br>
+          
+          <table class="highlight form-group">
+            <tr>
+              <td>
+                <label class="col-sm-12 control-label" for= "id_offered_training_foss" style="text-align:justify;">List all Spoken Tutorials that were offered during the Training</label>
+              </td>
+            </tr>
+            {{ form.offered_training_foss.errors }}
+             {% for choice in form.offered_training_foss %}
+              <tr>
+                <td class="col-sm-9 " style="margin-left:50px;">{{ choice.tag }} &nbsp;&nbsp;&nbsp;&nbsp;{{ choice.choice_label }}</td>
+              </tr>
+            {% endfor %}
+            <tr>
+            </tr>
+          </table>
+          <br><br>
+          
+          <div class="form-group">
+            <label class="col-sm-3 control-label" for= "id_duration_of_tutorial">What is the duration of viewing all the tutorials?</label>
+            <div class="col-sm-9">
+              {% render_field form.duration_of_tutorial class+="form-control duration_of_tutorial" tabindex="1" %}
+              {{ form.duration_of_tutorial.errors }}
+            </div>
+          </div>
+          
+          <table class="highlight form-group">
+            <tr>
+              <td>
+                <label class="col-sm-12 control-label" for= "id_language" style="text-align:justify;">Tick all languages in which the Training was delivered</label>
+              </td>
+            </tr>
+            {{ form.language.errors }}
+             {% for choice in form.language %}
+              <tr>
+                <td class="col-sm-9 " style="margin-left:50px;">{{ choice.tag }} &nbsp;&nbsp;&nbsp;&nbsp;{{ choice.choice_label }}</td>
+              </tr>
+            {% endfor %}
+            <tr>
+            </tr>
+          </table>
+          <br><br>
+          
+          <div class="form-group">
+            <label class="col-sm-9 control-label" for= "id_side_by_side_yes_no">Did the Training follow the side-by-side method, while watching Spoken Tutorials?</label>
+            <div class="col-sm-3">
+              {% render_field form.side_by_side_yes_no class+="form-control side_by_side_yes_no" tabindex="1" %}
+              {{ form.side_by_side_yes_no.errors }}
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="col-sm-4 control-label" for= "id_side_by_side_method_is">Side-by-side method is</label>
+            <div class="col-sm-8">
+              {% render_field form.side_by_side_method_is class+="form-control side_by_side_method_is" tabindex="1" %}
+              {{ form.side_by_side_method_is.errors }}
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="col-sm-4 control-label" for= "id_in_side_by_side_method">In side-by-side method,</label>
+            <div class="col-sm-8">
+              {% render_field form.in_side_by_side_method class+="form-control in_side_by_side_method" tabindex="1" %}
+              {{ form.in_side_by_side_method.errors }}
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="col-sm-10 control-label" for= "id_good_investment">Do you consider Spoken Tutorial Training to be a good investment of time and effort? </label>
+            <div class="col-sm-2">
+              {% render_field form.good_investment class+="form-control good_investment" tabindex="1" %}
+              {{ form.good_investment.errors }}
+            </div>
+          </div><br><br>
+          
+          <table class="highlight form-group">
+            <tr>
+              <td>
+                <label class="col-sm-12 control-label" for= "id_helpful_for" style="text-align:justify;">Spoken Tutorial Training was helpful for (Click all applicable boxes)</label>
+              </td>
+            </tr>
+            {{ form.helpful_for.errors }}
+             {% for choice in form.helpful_for %}
+              <tr>
+                <td class="col-sm-9 " style="margin-left:50px;">{{ choice.tag }} &nbsp;&nbsp;&nbsp;&nbsp;{{ choice.choice_label }}</td>
+              </tr>
+            {% endfor %}
+            <tr>
+            </tr>
+          </table>
+          <br><br>
+          
+          <table style="width:100%; border:1px solid #000;" class="tablest"> 
+            <tr>
+              <th class="tabhead">Are Spoken Tutorials helpful? Kindly rate:</th>
+              <th class="bgcolor">Strongly Agree</th>
+              <th class="bgcolor">Agree</th>
+              <th class="bgcolor">Neutral</th>
+              <th class="bgcolor">Disagree</th>
+              <th class="bgcolor">Strongly Disagree</th>
+              <th class="bgcolor">No idea</th>
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_is_comfortable_self_learning">Students were comfortable with self learning method using Spoken Tutorials</label>{{ form.is_comfortable_self_learning.errors }}</td>
+                {% for choice in form.is_comfortable_self_learning %}
+                  {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_is_classroom_better">Classroom lectures are a better way than Spoken Tutorials to learn a topic</label>{{ form.is_classroom_better.errors }}</td>
+                {% for choice in form.is_classroom_better %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_is_student_expectations">Spoken Tutorial based training did not meet student expectations</label>{{ form.is_student_expectations.errors }}</td>
+                {% for choice in form.is_student_expectations %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_is_help_get_interview">Spoken Tutorial Training helped students get a job interview</label>{{ form.is_help_get_interview.errors }}</td>
+                {% for choice in form.is_help_get_interview %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+          
+          <tr class="rowcolor">
+              <td><label for="id_is_help_get_job">Spoken Tutorial Training helped students also to get a job</label>{{ form.is_help_get_job.errors }}</td>
+                {% for choice in form.is_help_get_job %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_is_got_job">At least some students got better jobs because of Spoken Tutorial Training</label>{{ form.is_got_job.errors }}</td>
+                {% for choice in form.is_got_job %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+          </table><br><br>
+          
+          <table style="width:100%;border:1px solid #000;" class="tablest"> 
+            <tr>
+              <th class="tabhead">How would you overall rate Spoken Tutorials on the following parameters?</th>
+              <th class="bgcolor">Excellent</th>
+              <th class="bgcolor">Good</th>
+              <th class="bgcolor">Fair</th>
+              <th class="bgcolor">Bad</th>
+              <th class="bgcolor">Very bad</th>
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_relevance">Relevance</label>{{ form.relevance.errors }}</td>
+                {% for choice in form.relevance %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_information_content">Information Content</label>{{ form.information_content.errors }}</td>
+                {% for choice in form.information_content %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_audio_video_quality">Audio Video Quality</label>{{ form.audio_video_quality.errors }}</td>
+                {% for choice in form.audio_video_quality %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_presentation_quality">Presentation Quality</label>{{ form.presentation_quality.errors }}</td>
+                {% for choice in form.presentation_quality %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+          </table><br><br>
+                
+          <table style="width:100%;border:1px solid #000;" class="tablest"> 
+            <tr>
+              <th class="tabhead">What is your overall rating on Spoken Tutorial Training courses?</th>
+              <th class="bgcolor">Excellent</th>
+              <th class="bgcolor">Good</th>
+              <th class="bgcolor">Fair</th>
+              <th class="bgcolor">Bad</th>
+              <th class="bgcolor">Very bad</th>
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_overall_rating"></label></td>
+                {% for choice in form.overall_rating %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            {{ form.overall_rating.errors }}
+          </table><br><br>
+          
+          <table class="highlight form-group">
+            <tr>
+              <td>
+                <label class="col-sm-12 control-label" for= "id_trained_foss" style="text-align:justify;">In which of the following, have you been trained through Spoken Tutorials? </label>
+              </td>
+            </tr>
+            {{ form.trained_foss.errors }}
+             {% for choice in form.trained_foss %}
+              <tr>
+                <td class="col-sm-9 " style="margin-left:50px;">{{ choice.tag }} &nbsp;&nbsp;&nbsp;&nbsp;{{ choice.choice_label }}</td>
+              </tr>
+            {% endfor %}
+            <tr>
+            </tr>
+          </table>
+          <div class="highlight form-group">
+            <label class="col-sm-5 control-label" for= "id_is_training_benefited">Has this Training benefited you?</label>
+            <div class="col-sm-7">
+              {% render_field form.is_training_benefited class+="form-control is_training_benefited" tabindex="1" %}
+              {{ form.is_training_benefited.errors }}
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="col-sm-12 control-label" for= "id_testimonial" style="text-align:justify;">We want you to spare a few minutes and give a testimonial about the Spoken Tutorial methodology. This feedback will help us deliver better products in the future. </label>
+            <div class="col-sm-9">
+              {% render_field form.testimonial class+="form-control testimonial" tabindex="1" %}
+              {{ form.testimonial.errors }}
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="col-sm-9 control-label" for= "id_any_other_suggestions " style="text-align:justify;">Any other feedback/suggestions (Optional)</label>
+            <div class="col-sm-9">
+              {% render_field form.any_other_suggestions class+="form-control any_other_suggestions " tabindex="1" %}
+              {{ form.any_other_suggestions.errors }}
+            </div>
+          </div><br>
+          
+          <div class="form-group">
+            <label class="col-sm-7 control-label" for= "id_can_contact">Can we get in touch with you after one year to check the usefulness of Spoken Tutorial Training courses?</label>
+            <div class="col-sm-3">
+              {% render_field form.can_contact class+="form-control can_contact" tabindex="1" %}
+              {{ form.can_contact.errors }}
+            </div>
+          </div>
+          
+          <br><br>
+          
+          <div class="form-group">
+            <div class="col-sm-offset-8 col-sm-9">
+              <input class="btn btn-primary" type="submit" id="submit_button" value="Submit" />
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endwith %}
+     </form>
+   </div>
+ </div>
+{% endblock %}
+{% block compressinlinejsblock %}
+  <script>
+  $( document ).ready(function() {
+  
+    $district = $('#id_district');
+    $city = $('#id_city');
+    $('#id_state').change(function(){
+      var state = $(this).val();
+      $.ajax({
+        url: "/software-training/ajax_state_details/",
+        type: "POST",
+        data: {
+          state : state,
+          fields: {'district':'district' , 'city':'city' },
+        },
+        success: function(data) {
+          if(data.district){
+            console.log(data.district);
+            $district.html(data.district);
+            $district.removeAttr("disabled");
+          } else{
+            $district.attr("disabled", "disabled");
+            alert('No district found for this state!!');
+          }
+          if(data.city){
+            console.log(data.city);
+            $city.html(data.city);
+            $city.removeAttr("disabled");
+          } else{
+            $city.attr("disabled", "disabled");
+            alert('No city found for this state!!');
+          }
+        }
+      });
+    });
+    $college = $('#id_university');
+      $('#id_district').change(function() {
+        var district = $(this).val();
+        $.ajax({
+          url: "/software-training/ajax-district-collage/",
+          type: "POST",
+          data: {
+             district : district
+          },
+          success: function(data) {
+            if(data){
+              $college.html(data);
+              $college.removeAttr("disabled");
+            } else{
+            $college.attr("disabled", "disabled");
+            alert('No college found for this district!!');
+            }
+          }
+        });
+      });
+    
+  });
+  </script>
+{% endblock %}

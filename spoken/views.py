@@ -1,4 +1,5 @@
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, \
+    HttpResponsePermanentRedirect
 from django.template import RequestContext
 from django.shortcuts import render
 from django.contrib import messages
@@ -24,6 +25,11 @@ from cms.models import SiteFeedback, Event, NewsType, News, Notification
 from events.views import get_page
 from spoken.search import search_for_results
 from mdldjango.models import MdlUser
+from forums.models import Question
+from cms.forms import *
+from spoken.filters import NewsStateFilter
+
+from django.contrib.auth.models import User
 
 def is_resource_person(user):
     """Check if the user is having resource person  rights"""
@@ -66,10 +72,10 @@ def home(request):
     testimonials = Testimonials.objects.all().order_by('?')[:2]
     context['testimonials'] = testimonials
     
-    notifications = Notification.objects.filter(Q(start_date__lte=datetime.datetime.today()) & Q(expiry_date__gte=datetime.datetime.today())).order_by('expiry_date')
+    notifications = Notification.objects.filter(Q(start_date__lte=datetime.today()) & Q(expiry_date__gte=datetime.today())).order_by('expiry_date')
     context['notifications'] = notifications
     
-    events = Event.objects.filter(event_date__gte=datetime.datetime.today()).order_by('event_date')[:2]
+    events = Event.objects.filter(event_date__gte=datetime.today()).order_by('event_date')[:2]
     context['events'] = events
     return render(request, 'spoken/templates/home.html', context)
 
@@ -156,6 +162,7 @@ def watch_tutorial(request, foss, tutorial, lang):
         td_rec = TutorialDetail.objects.get(foss__foss = foss, tutorial = tutorial)
         tr_rec = TutorialResource.objects.select_related().get(tutorial_detail = td_rec, language = Language.objects.get(name = lang))
         tr_recs = TutorialResource.objects.select_related('tutorial_detail').filter(Q(status = 1) | Q(status = 2), tutorial_detail__foss = tr_rec.tutorial_detail.foss, language = tr_rec.language).order_by('tutorial_detail__foss__foss', 'tutorial_detail__level', 'tutorial_detail__order', 'language__name')
+        questions = Question.objects.filter(category=td_rec.foss.foss.replace(' ', '-'), tutorial=td_rec.tutorial.replace(' ', '-')).order_by('-date_created')
     except Exception, e:
         messages.error(request, str(e))
         return HttpResponseRedirect('/')
@@ -164,6 +171,7 @@ def watch_tutorial(request, foss, tutorial, lang):
     context = {
         'tr_rec': tr_rec,
         'tr_recs': tr_recs,
+        'questions': questions,
         'video_info': video_info,
         'media_url': settings.MEDIA_URL,
         'media_path': settings.MEDIA_ROOT,
@@ -313,20 +321,24 @@ def news(request, cslug):
         newstype = NewsType.objects.get(slug = cslug)
         collection = None
         latest = None
-        if request.GET and 'latest' in request.GET and int(request.GET.get('latest') == 0 and cslug == 'media-articles'):
-            collection = newstype.news_set.order_by('weight', '-created')
+        sortAllowedCategory = ['articles-on-university-tie-ups-workshops', 'articles-on-spoken-tutorial-project']
+        if request.GET and 'latest' in request.GET and int(request.GET.get('latest')) == 1 and (cslug in sortAllowedCategory):
+            collection = newstype.news_set.order_by('weight')
         else:
             collection = newstype.news_set.order_by('-created')
             latest = True
-            
+        collection = NewsStateFilter(request.GET, queryset=collection, news_type_slug=cslug)
+        form = collection.form
         if collection:
             page = request.GET.get('page')
             collection = get_page(collection, page)
         context = {
+            'form' : form,
             'collection' : collection,
             'category' : cslug,
             'newstype' : newstype,
             'latest' : latest,
+            'sortAllowedCategory' : sortAllowedCategory
         }
         context.update(csrf(request))
         return render(request, 'spoken/templates/news/index.html', context)
@@ -337,6 +349,14 @@ def news(request, cslug):
 
 def news_view(request, cslug, slug):
     try:
+        # 301 redirection. Enable this after categories all to new
+        """
+        if cslug == 'media-articles':
+            news = News.objects.get(slug = slug)
+            redirect_url = "/news/"+news.news_type.slug+"/"+news.slug
+            return HttpResponsePermanentRedirect(redirect_url)
+        """
+
         newstype = NewsType.objects.get(slug = cslug)
         news = News.objects.get(slug = slug)
         image_or_doc = None
@@ -392,3 +412,26 @@ def create_subtitle_files(request, overwrite = True):
 
 def sitemap(request):
     return render(request, 'sitemap.html', {})
+
+
+def add_user(request):
+    username = None
+    password = None
+    email = None
+    count = 1
+    f = open('/websites_dir/django_spoken/spoken/spoken/users', 'r')
+    ulist = f.read().splitlines()
+    f.close()
+    for data in ulist:
+        username = data
+        password = data
+        email = data
+        try:
+            user = User.objects.create_user(username, email, password)
+            user.save()
+            profile = Profile(user=user, confirmation_code='12345')
+            profile.save()
+            count += 1
+        except Exception, e:
+            print e
+    return HttpResponse("success")

@@ -1,3 +1,4 @@
+<!-- This page is used to edit the STP training request details -->
 {% extends 'spoken/templates/base.html' %}
 {% load widget_tweaks %}
 {% load static %}
@@ -77,6 +78,7 @@
             data: {
               course_type: course_type,
               department: "{{training.department_id}}",
+              batch: "{{training.batch_id}}",
               training_planner: "{{training.training_planner_id}}"
             },
             beforeSend: function() {

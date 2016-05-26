@@ -133,7 +133,7 @@ class TestFilter(django_filters.FilterSet):
     if state:
       choices = list(City.objects.filter(state=state).order_by('name').values_list('id', 'name')) + [('189', 'Uncategorised')]
     else:
-      choices = list(City.objects.none())
+      choices = list(City.objects.order_by('name').values_list('id', 'name'))
     choices.insert(0, ('', '---------'),)
     self.filters['academic__city'].extra.update({'choices' : choices})
     
@@ -150,9 +150,9 @@ class TrainingRequestFilter(django_filters.FilterSet):
 
   course__foss = django_filters.ChoiceFilter(
     choices= [('', '---------')] + list(
-      FossAvailableForWorkshop.objects.filter(
-        status=1
-      ).order_by('foss__foss').values_list('foss__id', 'foss__foss').distinct()
+      TrainingRequest.objects.filter(
+        status = 1
+      ).order_by('course__foss__foss').values_list('course__foss__id', 'course__foss__foss').distinct()
     )
   )
 
@@ -161,13 +161,14 @@ class TrainingRequestFilter(django_filters.FilterSet):
       ('', '---------'), 
       (0, 'Course outside lab hours'), 
       (1, 'Course mapped in lab hours'), 
-      (2, 'Course unmapped in lab hours')
+      (2, 'Course unmapped in lab hours'),
+      (3, 'EduEasy Software')
     ]
   )
 
   training_planner__academic__institution_type = django_filters.ChoiceFilter(
     choices=[('', '---------')] + list(
-      InstituteType.objects.values_list('id', 'name').distinct()
+      InstituteType.objects.all().values_list('id', 'name').distinct()
     )
   )
 
@@ -186,7 +187,18 @@ class TrainingRequestFilter(django_filters.FilterSet):
     if 'user' in kwargs:
       user = kwargs['user']
       kwargs.pop('user')
-    
+    rp_completed = None
+    if 'rp_completed' in kwargs:
+      rp_completed = kwargs['rp_completed']
+      kwargs.pop('rp_completed')
+    rp_ongoing = None
+    if 'rp_ongoing' in kwargs:
+      rp_ongoing = kwargs['rp_ongoing']
+      kwargs.pop('rp_ongoing')
+    rp_markcomplete = None
+    if 'rp_markcomplete' in kwargs:
+      rp_markcomplete = kwargs['rp_markcomplete']
+      kwargs.pop('rp_markcomplete')
     state = None
     if 'state' in kwargs:
       state = kwargs['state']
@@ -202,6 +214,29 @@ class TrainingRequestFilter(django_filters.FilterSet):
         pass
     choices = None
     if user:
+      if rp_completed:
+        foss_list = TrainingRequest.objects.filter(
+          status = 1,
+          training_planner__academic__state_id__in=user.resourceperson_set.all().values_list('state_id').distinct()
+        ).order_by('course__foss__foss').values_list('course__foss__id', 'course__foss__foss').distinct()
+      elif rp_ongoing:
+        foss_list = TrainingRequest.objects.filter(
+          status = 0,
+          training_planner__academic__state_id__in=user.resourceperson_set.all().values_list('state_id').distinct()
+        ).order_by('course__foss__foss').values_list('course__foss__id', 'course__foss__foss').distinct()
+      elif rp_markcomplete:
+        foss_list = TrainingRequest.objects.filter(
+          status = 2,
+          training_planner__academic__state_id__in=user.resourceperson_set.all().values_list('state_id').distinct()
+        ).order_by('course__foss__foss').values_list('course__foss__id', 'course__foss__foss').distinct()
+      else:
+        foss_list = TrainingRequest.objects.filter(
+          training_planner__academic__state_id__in=user.resourceperson_set.all().values_list('state_id').distinct()
+        ).order_by('course__foss__foss').values_list('course__foss__id', 'course__foss__foss').distinct()
+      choices = [('', '---------')] + list(foss_list)
+      self.filters['course__foss'].extra.update(
+        {'choices' : choices}
+      )
       choices = list(
         State.objects.filter(
           resourceperson__user_id=user, 
@@ -227,7 +262,7 @@ class TrainingRequestFilter(django_filters.FilterSet):
         ).order_by('name').values_list('id', 'name')
       ) + [('189', 'Uncategorised')]
     else:
-      choices = list(City.objects.none())
+      choices = list(City.objects.order_by('name').values_list('id', 'name'))
     choices.insert(0, ('', '---------'),)
     self.filters['training_planner__academic__city'].extra.update(
       {'choices' : choices}

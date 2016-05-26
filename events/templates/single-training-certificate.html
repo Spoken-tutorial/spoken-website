@@ -1,0 +1,54 @@
+<!--This page gives interface to download the certificates in school interface-->
+{% extends 'base.html' %}
+{% load attendance %}
+{% load widget_tweaks %}
+{% load static %}
+{% block title %}Student List{% endblock %}
+{% block heading %}<i class="home-page-title-i">Participant List</i>{% endblock %}
+{% block cssblock %}
+  <style>
+    .invalid {
+      color: red;
+    }
+  </style>
+{% endblock %}
+{% block search %}{% endblock %}
+{% block content %}
+<form action="{{ action }}" id="form-id" method="post">
+<div><a class="btn btn-success" href="/software-training/single-training/completed/">Go Back to Training List</a><br><br></div>
+<div class="bs-callout bs-callout-info">
+<dl class="dl-horizontal">
+<dt>Institute name</dt>
+<dd>{{ training.academic.institution_name }}</dd>
+<dt>FOSS</dt>
+<dd>{{ training.course.foss.foss }}</dd>
+<dt>Date</dt>
+<dd>{{ training.tdate }}</dd>
+<dt>Participant count</dt>
+<dd>{{ training.participant_count }}</dd>
+<dt>Organiser</dt>
+<dd>{{ training.organiser.user.first_name }}</dd>
+</dl>
+</div>
+{% if object_list %}
+  <table class="table table-striped table-hover table-bordered">
+    <tr>
+      <th>#</th>
+      <th>Name</th>
+      <th>Email</th>
+      <th>Gender</th>
+      <th>Certificate</th>
+    </tr>
+    {% for record in object_list %}
+              <tr id="{{record.student.id}}">
+                <td>{{ forloop.counter }}</td>
+                <td>{{ record.firstname }}  {{ record.lastname }}</td>
+                <td>{{ record.email }}</td>
+                <td>{{ record.gender }}</td>
+                <td><a href="{% url 'events:organiser_singletraining_certificate' record.id %}">  Download Certificate</a></td>
+              </tr>
+    {% endfor %}
+  </table>
+  {% endif %}
+</form>
+{% endblock %}

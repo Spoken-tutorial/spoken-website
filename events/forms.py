@@ -281,7 +281,13 @@ class TestForm(forms.ModelForm):
             try:
                 self.fields['invigilator'].queryset = Invigilator.objects.filter(academic = user.organiser.academic, status=1).exclude(user_id = user.id)
                 trainings = TrainingRequest.test_training.filter(training_planner__academic = user.organiser.academic, training_planner__organiser=user.organiser)
-                trchoices = [(training.id, training.training_name()) for training in trainings]
+                trchoices = []
+                for training in trainings:
+                  if training.batch:
+                    if training.get_partipants_from_attendance():
+                      trchoices.append((training.id, training.training_name()))
+                  else:
+                    trchoices.append((training.id, training.training_name()))
                 trchoices.insert(0, ('', '-------'))
                 if instance:
                     trchoices.insert(0, (instance.training_id, instance.training.training_name()))
@@ -385,7 +391,7 @@ class LiveFeedbackForm(forms.ModelForm):
 
 class TrainingLanguageFeedbackForm(forms.ModelForm):
     fiveChoice = ((1, ''), (2, ''), (3, ''), (4, ''), (5, ''))
-    name = forms.CharField()
+    #name = forms.CharField()
     age = forms.CharField()
     
     medium_of_instruction = forms.ChoiceField(widget=forms.RadioSelect, choices = ((0, 'English'), (1, "Vernacular Medium")) )
@@ -440,7 +446,7 @@ class TrainingLanguageFeedbackForm(forms.ModelForm):
     
     class Meta:
         model = TrainingLanguageFeedback
-        exclude = ['training', 'mdluser_id']
+        exclude = ['name', 'training', 'mdluser_id']
         
     def __init__(self, *args, **kwargs):
         training = None
