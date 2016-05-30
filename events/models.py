@@ -23,30 +23,30 @@ from creation.models import FossCategory, Language, \
 # Create your models here.
 class State(models.Model):
   users = models.ManyToManyField(
-    User, 
-    related_name="resource_person", 
+    User,
+    related_name="resource_person",
     through='ResourcePerson'
   )
   code = models.CharField(max_length=3)
   name = models.CharField(max_length=50)
   slug = models.CharField(max_length = 100)
   latitude = models.DecimalField(
-    null=True, 
-    max_digits=10, 
-    decimal_places=4, 
+    null=True,
+    max_digits=10,
+    decimal_places=4,
     blank=True
   )
   longtitude = models.DecimalField(
-    null=True, 
-    max_digits=10, 
-    decimal_places=4, 
+    null=True,
+    max_digits=10,
+    decimal_places=4,
     blank=True
   )
   img_map_area = models.TextField()
   has_map = models.BooleanField(default=1)
   created = models.DateTimeField(auto_now_add = True, null=True)
   updated = models.DateTimeField(auto_now = True, null=True)
-  
+
   def __unicode__(self):
     return self.name
 
@@ -60,7 +60,7 @@ class District(models.Model):
   name = models.CharField(max_length=200)
   created = models.DateTimeField(auto_now_add = True, null=True)
   updated = models.DateTimeField(auto_now = True, null=True)
-  
+
   def __unicode__(self):
     return self.name
 
@@ -74,10 +74,10 @@ class City(models.Model):
   name = models.CharField(max_length=200)
   created = models.DateTimeField(auto_now_add = True, null=True)
   updated = models.DateTimeField(auto_now = True, null=True)
-  
+
   def __unicode__(self):
     return self.name
-  
+
   class Meta:
     unique_together = (("name","state"),)
 
@@ -88,10 +88,10 @@ class Location(models.Model):
   pincode = models.PositiveIntegerField()
   created = models.DateTimeField(auto_now_add = True, null=True)
   updated = models.DateTimeField(auto_now = True)
-  
+
   def __unicode__(self):
     return self.name
-  
+
   class Meta:
     unique_together = (("name","district","pincode"),)
 
@@ -170,13 +170,13 @@ class AcademicCenter(models.Model):
   class Meta:
     verbose_name = "Academic Center"
     #unique_together = (
-    #  ("institution_name","district"), 
+    #  ("institution_name","district"),
     #  ("institution_name","university")
     #)
 
   def __unicode__(self):
     return self.institution_name
-  
+
   def get_training_count(self):
     return TrainingRequest.objects.filter(
       training_planner__academic_id=self.id,
@@ -196,9 +196,9 @@ class AcademicCenter(models.Model):
 class Organiser(models.Model):
   user = models.OneToOneField(User, related_name = 'organiser')
   appoved_by = models.ForeignKey(
-    User, 
-    related_name = 'organiser_approved_by', 
-    blank=True, 
+    User,
+    related_name = 'organiser_approved_by',
+    blank=True,
     null=True
   )
   academic = models.ForeignKey(AcademicCenter, blank=True, null=True)
@@ -213,9 +213,9 @@ class Organiser(models.Model):
 class Invigilator(models.Model):
   user = models.OneToOneField(User)
   appoved_by = models.ForeignKey(
-    User, 
-    related_name = 'invigilator_approved_by', 
-    blank=True, 
+    User,
+    related_name = 'invigilator_approved_by',
+    blank=True,
     null=True
   )
   academic = models.ForeignKey(AcademicCenter)
@@ -263,8 +263,8 @@ class TrainingExtraFields(models.Model):
 class Training(models.Model):
   organiser = models.ForeignKey(Organiser)
   appoved_by = models.ForeignKey(
-    User, 
-    related_name = 'training_approved_by', 
+    User,
+    related_name = 'training_approved_by',
     null=True
   )
   academic = models.ForeignKey(AcademicCenter)
@@ -278,7 +278,7 @@ class Training(models.Model):
   ttime = models.TimeField()
   skype = models.PositiveSmallIntegerField(default=0)
   status = models.PositiveSmallIntegerField(default=0)
-  # 0:request done, 1: attendance submit, 2: training manger approved, 
+  # 0:request done, 1: attendance submit, 2: training manger approved,
   # 3: mark attenda done, 4: complete, 5: rejected
   extra_fields = models.OneToOneField(TrainingExtraFields, null = True)
   participant_count = models.PositiveIntegerField(default=0)
@@ -325,7 +325,7 @@ class TestCategory(models.Model):
   status = models.BooleanField(default = 0)
   created = models.DateTimeField(auto_now_add = True, null=True)
   updated = models.DateTimeField(auto_now = True, null=True)
-  
+
   def __unicode__(self):
     return self.name
 
@@ -333,17 +333,17 @@ class TestCategory(models.Model):
 class Test(models.Model):
   organiser = models.ForeignKey(Organiser, related_name = 'test_organiser')
   test_category = models.ForeignKey(
-    TestCategory, 
+    TestCategory,
     related_name = 'test_category'
   )
   appoved_by = models.ForeignKey(
-    User, 
-    related_name = 'test_approved_by', 
+    User,
+    related_name = 'test_approved_by',
     null=True
   )
   invigilator = models.ForeignKey(
-    Invigilator, 
-    related_name = 'test_invigilator', 
+    Invigilator,
+    related_name = 'test_invigilator',
     null=True
   )
   academic = models.ForeignKey(AcademicCenter)
@@ -364,7 +364,7 @@ class Test(models.Model):
 
   def get_test_attendance_count(self):
     return TestAttendance.objects.filter(
-      test_id=self.id, 
+      test_id=self.id,
       status__gte=2
     ).count()
 
@@ -397,11 +397,11 @@ class TestLog(models.Model):
   user = models.ForeignKey(User)
   test = models.ForeignKey(Test)
   academic = models.ForeignKey(AcademicCenter)
-  role = models.PositiveSmallIntegerField(default=0) 
+  role = models.PositiveSmallIntegerField(default=0)
   # {0:'organiser', 1:'invigilator', 2:'ResourcePerson', 3: 'Event Manager'}
-  status = models.PositiveSmallIntegerField(default=0) 
-  # {0:'new', 1:'RP-approved', 2:'Inv-approved', 3: 'ongoing', 4:'completed', 
-  # 5:'Rp-rejected', 6:'Inv-rejected', 7:'Update', 
+  status = models.PositiveSmallIntegerField(default=0)
+  # {0:'new', 1:'RP-approved', 2:'Inv-approved', 3: 'ongoing', 4:'completed',
+  # 5:'Rp-rejected', 6:'Inv-rejected', 7:'Update',
   # 8:'Attendance submited', 9:'Marked Attendance'}
   created = models.DateTimeField(auto_now_add = True)
 
@@ -419,27 +419,27 @@ class Permission(models.Model):
   user = models.ForeignKey(User, related_name = 'permission_user')
   state = models.ForeignKey(State, related_name = 'permission_state')
   district = models.ForeignKey(
-    District, 
-    related_name = 'permission_district', 
+    District,
+    related_name = 'permission_district',
     null=True
   )
   university = models.ForeignKey(
-    University, 
-    related_name = 'permission_iniversity', 
+    University,
+    related_name = 'permission_iniversity',
     null=True
   )
   institute_type = models.ForeignKey(
-    InstituteType, 
-    related_name = 'permission_institution_type', 
+    InstituteType,
+    related_name = 'permission_institution_type',
     null=True
   )
   institute = models.ForeignKey(
-    AcademicCenter, 
-    related_name = 'permission_district', 
+    AcademicCenter,
+    related_name = 'permission_district',
     null=True
   )
   assigned_by = models.ForeignKey(
-    User, 
+    User,
     related_name = 'permission_assigned_by'
   )
   created = models.DateTimeField(auto_now_add = True)
@@ -454,14 +454,14 @@ class FossMdlCourses(models.Model):
 
 class EventsNotification(models.Model):
   user = models.ForeignKey(User)
-  role = models.PositiveSmallIntegerField(default=0) 
+  role = models.PositiveSmallIntegerField(default=0)
   # {0:'organiser', 1:'invigilator', 2:'ResourcePerson', 3: 'Event Manager'}
   academic = models.ForeignKey(AcademicCenter)
-  category = models.PositiveSmallIntegerField(default=0) 
+  category = models.PositiveSmallIntegerField(default=0)
   # {'workshop', 'training', 'test'}
   categoryid = models.PositiveIntegerField(default=0)
-  status = models.PositiveSmallIntegerField(default=0) 
-  # {0:'new', 1:'update', 2:'approved', 3:'attendance', 
+  status = models.PositiveSmallIntegerField(default=0)
+  # {0:'new', 1:'update', 2:'approved', 3:'attendance',
   # 4: 'completed', 5:'rejected'}
   message = models.CharField(max_length = 255)
   created = models.DateTimeField(auto_now_add = True)
@@ -499,7 +499,7 @@ class Student(models.Model):
 
   def __unicode__(self):
     return self.user.first_name
-  
+
   def student_fullname(self):
     if self.user.first_name:
       return '%s %s' % (self.user.first_name, self.user.last_name)
@@ -523,7 +523,7 @@ class StudentBatch(models.Model):
 
   def __unicode__(self):
     return '%s, %s Batch' % (self.department.name, self.year)
-  
+
   def get_batch_info(self):
     return '%s, %s, %s Batch' % (self.academic, self.department.name, self.year)
 
@@ -540,12 +540,12 @@ class StudentBatch(models.Model):
     self.stcount = StudentMaster.objects.filter(batch_id = self.id).count()
     self.save()
     return self.stcount
-  
+
   def is_foss_batch_acceptable(self, course_id):
     sm = StudentMaster.objects.filter(batch_id=self.id)
     for s in sm:
       if not TrainingAttend.objects.filter(
-        student_id=s.student_id, 
+        student_id=s.student_id,
         training__course_id=course_id
       ).exists():
         return True
@@ -604,7 +604,7 @@ class CourseMap(models.Model):
     if self.course_id:
       return '%s - %s' % (self.course.name, self.foss.foss)
     return self.foss
-  
+
   def category_name(self):
     courses = {
       0 : 'Software Course outside lab hours',
@@ -651,9 +651,9 @@ class TrainingPlanner(models.Model):
     year, sem = self.get_current_year_and_sem()
     try:
       ctp = TrainingPlanner.objects.get(
-        year=year, 
-        semester=sem, 
-        organiser=self.organiser, 
+        year=year,
+        semester=sem,
+        organiser=self.organiser,
         academic=self.academic
       )
       year = int(ctp.year)
@@ -691,50 +691,50 @@ class TrainingPlanner(models.Model):
 
   def is_full(self, department_id, batch_id):
     if self.training_requests().filter(
-      department_id=department_id, 
+      department_id=department_id,
       batch_id=batch_id
     ).count() > 2:
       return True
     return False
-    
+
   def is_school_full(self, department_id, batch_id):
     if self.training_requests().filter(
-      department_id=department_id, 
+      department_id=department_id,
       batch_id=batch_id
     ).count() > 11:
       return True
     return False
-  
+
   # todo with test without test
   def is_course_full(self, category, department_id, batch_id):
     if self.training_requests().filter(
-      department_id=department_id, 
-      batch_id=batch_id, 
-      course__category = category, 
+      department_id=department_id,
+      batch_id=batch_id,
+      course__category = category,
       course__test = True
     ).count() > 1:
       return True
     elif self.training_requests().filter(
-      department_id=department_id, 
-      batch_id=batch_id, 
-      course__category = category, 
+      department_id=department_id,
+      batch_id=batch_id,
+      course__category = category,
       course__test = False
     ).count() > 2:
       return True
     return False
-  
+
   def is_school_course_full(self, category, department_id, batch_id):
     if self.training_requests().filter(
-      department_id=department_id, 
-      batch_id=batch_id, 
-      course__category = category, 
+      department_id=department_id,
+      batch_id=batch_id,
+      course__category = category,
       course__test = True
     ).count() > 1:
       return True
     elif self.training_requests().filter(
-      department_id=department_id, 
-      batch_id=batch_id, 
-      course__category = category, 
+      department_id=department_id,
+      batch_id=batch_id,
+      course__category = category,
       course__test = False
     ).count() > 11:
       return True
@@ -742,7 +742,7 @@ class TrainingPlanner(models.Model):
 
   def is_unmapped_course_full(self, department_id):
     if self.training_requests().filter(
-      department_id=department_id, 
+      department_id=department_id,
       course__category = 2
     ).count() > 4:
       return True
@@ -782,12 +782,12 @@ class TestTrainingManager(models.Manager):
   def get_queryset(self):
     return super(TestTrainingManager, self).get_queryset().filter(
       (
-        Q(course__category=0) & 
-        #Q(status=1) & 
+        Q(course__category=0) &
+        #Q(status=1) &
         Q(sem_start_date__lte=datetime.now()-timedelta(days=15))
-      ) | 
+      ) |
       (
-        Q(course__category__gt=0) & 
+        Q(course__category__gt=0) &
         Q(sem_start_date__lte=datetime.now()-timedelta(days=30))
       ),
       participants__gt=0
@@ -807,7 +807,7 @@ class TrainingRequest(models.Model):
   updated = models.DateTimeField(auto_now = True)
   #created = models.DateTimeField()
   #updated = models.DateTimeField()
-  
+
   # managers
   objects = models.Manager() # The default manager.
   test_training = TestTrainingManager()
@@ -824,7 +824,7 @@ class TrainingRequest(models.Model):
 
   def is_training_certificate_allowed(self):
     if not FossAvailableForTest.objects.filter(
-      foss=self.course.foss, 
+      foss=self.course.foss,
       foss__status=True
     ).count():
       return True
@@ -872,7 +872,7 @@ class TrainingRequest(models.Model):
     ).exists():
       return False
     return True
-  
+
   def training_name(self):
     if self.batch:
       return 'WC-%d, %s, %s - %s - %s' % (self.id, self.course, self.batch, \
@@ -910,7 +910,7 @@ class TrainingFeedback(models.Model):
   training = models.ForeignKey(TrainingRequest)
   mdluser_id = models.PositiveIntegerField()
   rate_workshop = models.PositiveSmallIntegerField()
-  
+
   content = models.PositiveSmallIntegerField()
   sequence = models.PositiveSmallIntegerField()
   clarity = models.PositiveSmallIntegerField()
@@ -918,7 +918,7 @@ class TrainingFeedback(models.Model):
   appropriate_example = models.PositiveSmallIntegerField()
   instruction_sheet = models.PositiveSmallIntegerField()
   assignment = models.PositiveSmallIntegerField()
-  
+
   pace_of_tutorial = models.PositiveSmallIntegerField()
   workshop_learnt = models.TextField()
   weakness_workshop = models.BooleanField()
@@ -928,7 +928,7 @@ class TrainingFeedback(models.Model):
   tutorial_language = models.PositiveSmallIntegerField()
   apply_information = models.PositiveSmallIntegerField()
   if_apply_information_yes = models.TextField()
-  
+
   setup_learning = models.PositiveSmallIntegerField()
   computers_lab = models.PositiveSmallIntegerField()
   audio_quality = models.PositiveSmallIntegerField()
@@ -945,7 +945,7 @@ class TrainingFeedback(models.Model):
   interested_helping = models.PositiveSmallIntegerField()
   executed_workshop = models.PositiveSmallIntegerField()
   workshop_improved = models.TextField()
-  
+
   recommend_workshop = models.PositiveSmallIntegerField()
   reason_why = models.TextField()
   other_comments = models.TextField()
@@ -973,7 +973,7 @@ class TrainingLanguageFeedback(models.Model):
   similar_tutorial_with_other_content = models.PositiveIntegerField()
   foss_tutorial_was_mentally_demanding = models.PositiveIntegerField()
   side_by_side_method_is_understood = models.PositiveIntegerField(default=0)
-  
+
   compfortable_learning_in_language = models.PositiveIntegerField()
   confidence_level_in_language = models.PositiveIntegerField()
   preferred_language = models.PositiveIntegerField()
@@ -984,7 +984,7 @@ class TrainingLanguageFeedback(models.Model):
   side_by_side_method_is_beneficial = models.PositiveIntegerField()
   side_by_side_method_is_beneficial_reason = models.TextField()
   limitations_of_side_by_side_method = models.TextField()
-  
+
   content_information_flow = models.PositiveIntegerField()
   content_appropriate_examples = models.PositiveIntegerField()
   content_ease_of_understanding = models.PositiveIntegerField()
@@ -992,22 +992,22 @@ class TrainingLanguageFeedback(models.Model):
   content_ease_of_performing_assignment = models.PositiveIntegerField()
   content_best_features = models.TextField()
   content_areas_of_improvement = models.TextField()
-  
+
   video_audio_video_synchronization = models.PositiveIntegerField()
   video_attractive_color_features = models.PositiveIntegerField()
   video_text_readable = models.PositiveIntegerField()
   video_best_features = models.TextField()
   video_areas_of_improvement = models.TextField()
-  
+
   audio_pleasant_speech_and_accent = models.PositiveIntegerField()
   audio_soothing_and_friendly_tone = models.PositiveIntegerField()
   audio_understandable_and_clear_speech = models.PositiveIntegerField()
   audio_best_features = models.TextField()
   audio_areas_of_improvement = models.TextField()
-  
+
   side_by_side_method_is_effective = models.PositiveIntegerField(default=0)
   side_by_side_method_is = models.PositiveIntegerField(default=0)
-  
+
   created = models.DateTimeField(auto_now_add = True)
   class Meta:
     unique_together = (("training", "mdluser_id"))
@@ -1033,10 +1033,10 @@ class SingleTraining(models.Model):
   updated = models.DateTimeField(auto_now = True)
   #created = models.DateTimeField()
   #updated = models.DateTimeField()
-  
+
   def is_singletraining_certificate_allowed(self):
     if not FossAvailableForTest.objects.filter(
-      foss=self.course.foss, 
+      foss=self.course.foss,
       foss__status=True
     ).count():
       return True
@@ -1110,7 +1110,7 @@ class TrainingLiveFeedback(models.Model):
   interested_helping = models.PositiveSmallIntegerField()
   executed_workshop = models.PositiveSmallIntegerField()
   workshop_improved = models.TextField()
-  
+
   recommend_workshop = models.PositiveSmallIntegerField()
   reason_why = models.TextField()
   other_comments = models.TextField()
@@ -1129,23 +1129,23 @@ class StudentStream(models.Model):
   ('4', 'Commerce and Business Studies'),('5', 'ITI'),('6', 'Other')
   )
   student_stream = models.CharField(max_length =50, choices = STUDENT_STREAM_CHOICES)
-  
+
   def __unicode__(self):
         return self.student_stream
-        
+
 class HelpfulFor(models.Model):
   HELPFUL_FOR_CHOICES = (
   ('0', 'Academic Performance'), ('1', 'Project Assignments'), ('2', 'To get job interviews'),('3', 'To get jobs'),
   ('4', 'All of the above')
   )
   helpful_for = models.CharField(max_length = 50, choices = HELPFUL_FOR_CHOICES)
-  
+
   def __unicode__(self):
         return self.helpful_for
 
 class OrganiserFeedback(models.Model):
   IS_SPOKEN_HELPFUL_CHOICES = (
-    ('','-----'), ('StronglyAgree', 'Strongly Agree'), ('Agree', 'Agree'), ('Neutral', 'Neutral'), ('Disagree', 'Disagree'), 
+    ('','-----'), ('StronglyAgree', 'Strongly Agree'), ('Agree', 'Agree'), ('Neutral', 'Neutral'), ('Disagree', 'Disagree'),
     ('StronglyDisagree', 'Strongly Disagree'), ('Noidea', 'No idea'))
   RATE_SPOKEN_CHOICES = (
     ('','-----'), ('Excellent', 'Excellent'), ('Good', 'Good'), ('Fair', 'Fair'), ('Bad', 'Bad'), ('Verybad', 'Very bad'))
@@ -1185,7 +1185,7 @@ class OrganiserFeedback(models.Model):
   GOOD_INVESTMENT_CHOICES = (
     ('', '-----'), ('Yes', 'Yes'), ('No', 'No'), ('Notsure', 'Not sure')
   )
-  
+
   name = models.CharField(max_length = 100)
   email = models.EmailField(max_length = 100)
   gender = models.CharField(max_length = 10, choices = GENDER_CHOICES)
@@ -1200,7 +1200,7 @@ class OrganiserFeedback(models.Model):
   student_education_language = models.CharField(max_length =50, choices = STUDENT_EDUCATION_LANGUAGE_CHOICES)
   student_gender =  models.CharField(max_length =50 ,choices = STUDENT_GENDER_CHOICES)
   student_location =  models.CharField(max_length =50,  choices = STUDENT_LOCATION_CHOICES)
-  offered_training_foss = models.ManyToManyField(FossCategory , related_name = 'events_FossCategory_related') 
+  offered_training_foss = models.ManyToManyField(FossCategory , related_name = 'events_FossCategory_related')
   duration_of_tutorial =  models.CharField(max_length =50 ,choices = DURATION_OF_TUTORIAL_CHOICES)
   language = models.ManyToManyField(Language , related_name = 'events_Language_related')
   side_by_side_yes_no = models.CharField(max_length = 50, choices = YES_NO_CHOICES)
@@ -1229,7 +1229,7 @@ def get_email_dir(instance, filename):
   email_dir = instance.email.replace('.','_')
   email_dir = email_dir.replace('@','on')
   return "latex/%s/%s" %(email_dir, filename)
-  
+
 class LatexWorkshopFileUpload(models.Model):
   email = models.EmailField()
   file_upload = models.FileField(upload_to=get_email_dir)
