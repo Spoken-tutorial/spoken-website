@@ -529,12 +529,8 @@ def old_training_attendance_upload(request, wid):
 @login_required
 def events_dashboard(request):
     user = request.user
-    user_roles = user.groups.all()
-    roles = []
     events_roles = ['Resource Person', 'Organiser', 'Invigilator']
-    for role in user_roles:
-        if role.name in events_roles:
-            roles.append(role.name)
+    roles = user.groups.filter(name__in=events_roles).values_list('name', flat=True)
 
     organiser_workshop_notification = None
     organiser_test_notification = None
