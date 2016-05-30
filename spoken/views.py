@@ -180,6 +180,36 @@ def watch_tutorial(request, foss, tutorial, lang):
     }
     return render(request, 'spoken/templates/watch_tutorial.html', context)
 
+#link to watch what is spoken tutorial video in english
+
+def what_is_spoken_tutorial(request):
+    try:
+        foss = unquote_plus("Spoken+Tutorial+Technology")
+        tutorial = unquote_plus('What+is+a+Spoken+Tutorial')
+        td_rec = TutorialDetail.objects.get(foss__foss = foss, tutorial = tutorial)
+        tr_rec = TutorialResource.objects.select_related().get(tutorial_detail = td_rec, language = Language.objects.get(name = 'English'))
+        tr_recs = TutorialResource.objects.select_related('tutorial_detail').filter(Q(status = 1) | Q(status = 2), tutorial_detail__foss = tr_rec.tutorial_detail.foss, language = tr_rec.language).order_by('tutorial_detail__foss__foss', 'tutorial_detail__level', 'tutorial_detail__order', 'language__name')
+        questions = Question.objects.filter(category=td_rec.foss.foss.replace(' ', '-'), tutorial=td_rec.tutorial.replace(' ', '-')).order_by('-date_created')
+    except Exception, e:
+        messages.error(request, str(e))
+        return HttpResponseRedirect('/')
+    video_path = settings.MEDIA_ROOT + "videos/" + str(tr_rec.tutorial_detail.foss_id) + "/" + str(tr_rec.tutorial_detail_id) + "/" + tr_rec.video
+    video_info = get_video_info(video_path)
+    context = {
+        'tr_rec': tr_rec,
+        'tr_recs': tr_recs,
+        'questions': questions,
+        'video_info': video_info,
+        'media_url': settings.MEDIA_URL,
+        'media_path': settings.MEDIA_ROOT,
+        'tutorial_path': str(tr_rec.tutorial_detail.foss_id) + '/' + str(tr_rec.tutorial_detail_id) + '/',
+        'script_base': settings.SCRIPT_URL
+    }
+    return render(request, 'spoken/templates/watch_tutorial.html', context)
+
+
+
+
 @csrf_exempt
 def get_language(request):
     output = ''
