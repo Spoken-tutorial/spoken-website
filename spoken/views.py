@@ -351,7 +351,7 @@ def news(request, cslug):
         newstype = NewsType.objects.get(slug = cslug)
         collection = None
         latest = None
-        sortAllowedCategory = ['articles-on-university-tie-ups-workshops', 'articles-on-spoken-tutorial-project']
+        sortAllowedCategory = ['articles-on-university-tie-ups-workshops', 'articles-on-spoken-tutorial-project','events-from-iitb','events-across-india']
         if request.GET and 'latest' in request.GET and int(request.GET.get('latest')) == 1 and (cslug in sortAllowedCategory):
             collection = newstype.news_set.order_by('weight')
         else:
