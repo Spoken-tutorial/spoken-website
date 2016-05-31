@@ -2,6 +2,7 @@ import csv
 from datetime import datetime, timedelta
 from StringIO import StringIO
 
+from base.views import JSONResponseMixin
 from cms.sortable import *
 from creation.models import FossAvailableForWorkshop
 from django.contrib import messages
@@ -9,7 +10,7 @@ from django.contrib.auth.models import Group, User
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.core.validators import validate_email
 from django.db import IntegrityError
-from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.middleware import csrf
 from django.shortcuts import render, render_to_response
 from django.template import RequestContext, loader
@@ -35,31 +36,6 @@ from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import cm
 from reportlab.pdfgen import canvas
 from reportlab.platypus import Paragraph
-
-
-class JSONResponseMixin(object):
-    """
-    A mixin that can be used to render a JSON response.
-    """
-
-    def render_to_json_response(self, context, **response_kwargs):
-        """
-        Returns a JSON response, transforming 'context' to make the payload.
-        """
-        return JsonResponse(
-            self.get_data(context),
-            **response_kwargs
-        )
-
-    def get_data(self, context):
-        """
-        Returns an object that will be serialized as JSON by json.dumps().
-        """
-        # Note: This is *EXTREMELY* naive; in reality, you'll need
-        # to do much more complex handling to ensure that arbitrary
-        # objects -- such as Django model instances or querysets
-        # -- can be serialized as JSON.
-        return context
 
 
 class TrainingPlannerListView(ListView):
