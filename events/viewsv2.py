@@ -1,10 +1,9 @@
+# Standard Library
 import csv
 from datetime import datetime, timedelta
 from StringIO import StringIO
 
-from base.views import JSONResponseMixin
-from cms.sortable import *
-from creation.models import FossAvailableForWorkshop
+# Third Party Stuff
 from django.contrib import messages
 from django.contrib.auth.models import Group, User
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
@@ -12,30 +11,37 @@ from django.core.validators import validate_email
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.middleware import csrf
-from django.shortcuts import render, render_to_response
-from django.template import RequestContext, loader
+from django.shortcuts import render
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import ListView, View
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
-from events.decorators import group_required
-from events.filters import TrainingRequestFilter
-from events.forms import (CourseMapForm, LatexWorkshopFileUploadForm,
-                          OrganiserFeedbackForm, SingleTrainingEditForm,
-                          SingleTrainingForm, StudentBatchForm,
-                          TrainingRequestEditForm, TrainingRequestForm,
-                          UserForm)
-from events.models import *
-from events.views import (is_administrator, is_invigilator, is_organiser,
-                          is_resource_person)
-from mdldjango.get_or_create_participant import get_or_create_participant
 from PyPDF2 import PdfFileReader, PdfFileWriter
-from reportlab.lib.enums import TA_CENTER
-from reportlab.lib.pagesizes import landscape, letter
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import cm
 from reportlab.pdfgen import canvas
 from reportlab.platypus import Paragraph
+
+# Spoken Tutorial Stuff
+from base.views import JSONResponseMixin
+from cms.sortable import *
+from creation.models import FossAvailableForWorkshop
+from mdldjango.get_or_create_participant import get_or_create_participant
+
+from .decorators import group_required
+from .filters import TrainingRequestFilter
+from .forms import (
+    CourseMapForm,
+    LatexWorkshopFileUploadForm,
+    OrganiserFeedbackForm,
+    SingleTrainingEditForm,
+    SingleTrainingForm,
+    TrainingRequestEditForm,
+    TrainingRequestForm,
+    UserForm
+)
+from .models import *
+from .views import is_administrator, is_organiser, is_resource_person
 
 
 class TrainingPlannerListView(ListView):

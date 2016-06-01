@@ -1,69 +1,47 @@
-from django.core.context_processors import csrf
-from django.core.exceptions import PermissionDenied
+from __future__ import absolute_import
 
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import Group
-from django.contrib import messages
-
-from django.shortcuts import render, render_to_response
-from django.template import RequestContext
-from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import get_object_or_404
-
-from django.views.decorators.csrf import csrf_exempt
-
-from django.http import Http404
-from django.db.models import Q
-from django.db import IntegrityError
-
-from urlparse import urlparse
-
-from BeautifulSoup import BeautifulSoup
-
-import xml.etree.cElementTree as etree
-from django.conf import settings
+# Standard Library
+import datetime
 import json
 import os
-import time
-import csv
+import os.path
 import random
 import string
-from validate_email import validate_email
-
-import os.path
-import urllib
-import urllib2
-
-from events.models import *
-from cms.models import Profile
-from mdldjango.forms import OfflineDataForm
-
-from forms import *
-from django.utils import formats
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from mdldjango.get_or_create_participant import get_or_create_participant, check_csvfile, update_participants_count, clone_participant
-from mdldjango.helper import get_moodle_user
-from django.template.defaultfilters import slugify
-
-# pdf generate
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import letter, landscape
-from reportlab.platypus import Paragraph
-from reportlab.lib.styles import ParagraphStyle
-from reportlab.lib.units import cm
-from reportlab.lib.enums import TA_CENTER
-from PyPDF2 import PdfFileWriter, PdfFileReader
+import time
 from StringIO import StringIO
 
-# randon string
-import string
-import random
+# Third Party Stuff
+from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import Group
+from django.core.context_processors import csrf
+from django.core.exceptions import PermissionDenied
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
+from django.db import IntegrityError
+from django.db.models import Q
+from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import get_object_or_404, render
+from django.template.defaultfilters import slugify
+from django.views.decorators.csrf import csrf_exempt
+from PyPDF2 import PdfFileReader, PdfFileWriter
+from reportlab.lib.styles import ParagraphStyle
+from reportlab.lib.units import cm
+from reportlab.pdfgen import canvas
+from reportlab.platypus import Paragraph
 
-from filters import *
-from cms.views import create_profile
+# Spoken Tutorial Stuff
+from cms.models import Profile
 from cms.sortable import *
-from events_email import send_email
-import datetime
+from cms.views import create_profile
+from mdldjango.forms import OfflineDataForm
+from mdldjango.get_or_create_participant import check_csvfile, clone_participant, update_participants_count
+from mdldjango.helper import get_moodle_user
+
+from .events_email import send_email
+from .filters import *
+from .forms import *
+from .models import *
 
 
 def can_clone_training(training):
