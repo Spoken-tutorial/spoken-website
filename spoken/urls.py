@@ -29,7 +29,7 @@ urlpatterns = patterns('',
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
     # Uncomment the next line to enable the admin:
-    url(r'^admin/', include(admin.site.urls)),
+    url(r'^control', include(admin.site.urls)),
     
     #evens old url
     url(r'^workshops/college/view_college/(\d+)/$', 'workshop.views.view_college', name='view_college'),
