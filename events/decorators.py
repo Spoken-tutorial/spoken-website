@@ -1,20 +1,24 @@
+# Standard Library
 from functools import wraps
+
+# Third Party Stuff
 from django.conf import settings
 from django.contrib import messages
+from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.shortcuts import resolve_url
 from django.utils.decorators import available_attrs
-from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.utils.six.moves.urllib.parse import urlparse
+
 
 default_message = "You don't have enough permission to view this page."
 
-def user_passes_test(test_func, login_url=None, \
-    redirect_field_name=REDIRECT_FIELD_NAME):
+
+def user_passes_test(test_func, login_url=None, redirect_field_name=REDIRECT_FIELD_NAME):
 
     def decorator(view_func):
         @wraps(view_func, assigned=available_attrs(view_func))
         def _wrapped_view(request, *args, **kwargs):
-            if test_func(request): 
+            if test_func(request):
                 return view_func(request, *args, **kwargs)
             path = request.build_absolute_uri()
             resolved_login_url = resolve_url(login_url or settings.LOGIN_URL)
@@ -28,8 +32,9 @@ def user_passes_test(test_func, login_url=None, \
             from django.contrib.auth.views import redirect_to_login
             return redirect_to_login(
                 path, resolved_login_url, redirect_field_name)
-        return _wrapped_view 
+        return _wrapped_view
     return decorator
+
 
 def group_required(*group_names):
     def in_groups(request):
