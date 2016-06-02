@@ -280,21 +280,34 @@ class TestForm(forms.ModelForm):
         if user:
             try:
                 self.fields['invigilator'].queryset = Invigilator.objects.filter(academic = user.organiser.academic, status=1).exclude(user_id = user.id)
-                trainings = TrainingRequest.test_training.filter(training_planner__academic = user.organiser.academic, training_planner__organiser=user.organiser)
-                trchoices = []
-                for training in trainings:
-                  if training.batch:
-                    if training.get_partipants_from_attendance():
-                      trchoices.append((training.id, training.training_name()))
-                  else:
-                    trchoices.append((training.id, training.training_name()))
-                trchoices.insert(0, ('', '-------'))
                 if instance:
-                    trchoices.insert(0, (instance.training_id, instance.training.training_name()))
-                self.fields['training'].choices = trchoices
+                  if instance.test_category.id == 2:              
+		    trainings = TrainingRequest.test_training.filter(training_planner__academic = user.organiser.academic, training_planner__organiser=user.organiser)
+                    trchoices = []
+                    for training in trainings:
+                      if training.batch:
+                        if training.get_partipants_from_attendance():
+                          trchoices.append((training.id, training.training_name()))
+                      else:
+                        trchoices.append((training.id, training.training_name()))
+                    trchoices.insert(0, ('', '-------'))
+                    if instance:
+                        trchoices.insert(0, (instance.training_id, instance.training.training_name()))
+                    self.fields['training'].choices = trchoices
+                
+                #Add code for School/Vocational
+	          elif instance.test_category.id == 4:
+                    single_training = SingleTraining.objects.filter(organiser_id=user.organiser.id, status=4)
+                    trchoices = []
+                    for training in single_training:
+                      tr.choices.append((training.id))
+                    trchoices.insert(0,('','---------'))
+                    if instance:
+                      trchoices.insert(0, (instance.training.id))
+                    self.fileds['training'].choices = trchoices 
             except:
                 pass
-            
+             
         if instance:
             self.fields['invigilator'].queryset = Invigilator.objects.filter(academic  = instance.organiser.academic, status=1).exclude(user_id = user.id)
             self.fields['invigilator'].initial = instance.invigilator
@@ -303,6 +316,8 @@ class TestForm(forms.ModelForm):
             self.fields['tdate'].initial = str(instance.tdate) + " " + str(instance.ttime)[0:5]
             self.fields['department'].initial = instance.department.all().values_list('id', flat=True)
             if instance.test_category.id == 2:
+                self.fields['training'].initial = instance.training_id
+	    elif instance.test_category.id == 4:
                 self.fields['training'].initial = instance.training_id
 
 class TrainingScanCopyForm(forms.Form):
