@@ -1,18 +1,22 @@
-DB = 'test_spoken'
-DB_USER = 'root'
-DB_PASS = ''
-MDB = 'test_spoken'
-MDB_USER = 'root'
-MDB_PASS = ''
-FDB = 'test_spoken'
-FDB_USER = 'root'
-FDB_PASS = ''
-CDB = 'test_spoken'
-CDB_USER = 'root'
-CDB_PASS = ''
-WDB = 'test_spoken'
-WDB_USER = ''
-WDB_PASS = ''
+dbname = "your_database_name_here"
+dbuser = "your_database_user_here"
+dbpassword = "your_database_password_here"
+
+DB = dbname
+DB_USER = dbuser
+DB_PASS = dbpassword
+MDB = dbname
+MDB_USER = dbuser
+MDB_PASS = dbpassword
+FDB = dbname
+FDB_USER = dbuser
+FDB_PASS = dbpassword
+CDB = dbname
+CDB_USER = dbuser
+CDB_PASS = dbpassword
+WDB = dbname
+WDB_USER = dbuser
+WDB_PASS = dbpassword
 
 ONLINE_TEST_URL = "http://10.177.6.252/moodle/"
 STVIDEOS_PATH = "/websites_dir/st_drupal/sites/default/files/"
