@@ -1,0 +1,11 @@
+-r requirements.txt
+
+# Debugging
+# -------------------------------------
+django-debug-toolbar==1.4
+ipdb==0.10.0
+
+# Testing
+# -------------------------------------
+flake8==2.5.4
+autopep8==1.2.4

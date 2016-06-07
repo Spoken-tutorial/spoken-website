@@ -1,5 +1,6 @@
+Django==1.8.13
+
 BeautifulSoup==3.2.1
-Django==1.8.1
 MySQL-python==1.2.5
 Pillow==2.8.1
 PyPDF2==1.24
@@ -12,7 +13,7 @@ django-compressor==1.5
 django-extensions==1.5.3
 https://github.com/sanmugamk/django-filter/archive/develop.zip
 django-htmlmin==0.7.0
-https://github.com/sanmugamk/django-nicedit/archive/master.zip
+django-nicedit==1.1.1
 django-recaptcha==1.0.4
 django-report-builder==3.1.6
 django-report-utils==0.3.4
@@ -22,7 +23,7 @@ gdata==2.0.18
 google-api-python-client==1.4.0
 html5lib==0.99999
 httplib2==0.9.1
-jdcal==1.0
+jdcal==1.2
 mechanize==0.2.5
 oauth2client==1.4.7
 openpyxl==2.2.2
@@ -37,7 +38,7 @@ rsa==3.1.4
 simplejson==3.6.5
 six==1.9.0
 sqlparse==0.1.15
-uWSGI==2.0.10
+uWSGI==2.0.13.1
 uritemplate==0.6
 pydns==2.3.6
 validate-email==1.3
