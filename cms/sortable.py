@@ -1,8 +1,12 @@
+# Third Party Stuff
 from django.contrib import messages
+
+# Spoken Tutorial Stuff
 from creation.models import *
 
+
 class SortableHeader():
-    def __init__(self, name, sortable, verbose_name = '', class_name = '', attribs = ''):
+    def __init__(self, name, sortable, verbose_name='', class_name='', attribs=''):
         self.name = name
         self.sortable = sortable
         self.verbose_name = verbose_name
@@ -13,6 +17,7 @@ class SortableHeader():
         self.order = 0
         self.attribs = attribs
 
+
 def get_field_index(raw_get_data):
     if raw_get_data:
         field_index = []
@@ -22,6 +27,7 @@ def get_field_index(raw_get_data):
         if field_index:
             return field_index
     return None
+
 
 def get_sorted_list(request, obj, fields_list, raw_get_data):
     field_index = get_field_index(raw_get_data)
@@ -49,6 +55,7 @@ def get_sorted_list(request, obj, fields_list, raw_get_data):
             messages.error(request, 'Invalid field name passed for sorting!')
     return obj
 
+
 def get_ordering(ordering, unsigned_index, signed_index, sign_to_add):
     order_string = ''
     flag = 1
@@ -74,6 +81,7 @@ def get_ordering(ordering, unsigned_index, signed_index, sign_to_add):
         order_string = sign_to_add + str(unsigned_index) + order_string
         removable = None
     return order_string, removable
+
 
 def get_sortable_header(header, ordering, getValue):
     descending_list = []
