@@ -15,7 +15,7 @@ indent_size = 4
 [*.py]
 # https://github.com/timothycrosley/isort/wiki/isort-Settings
 line_length=120
-known_first_party=base,team,test,workshop,youtube,statistics,spoken,reports,cdcontent,cms,creation,cron,events,forums,mail,masquerade,mdldjango,reports
+known_first_party=base,cdeep,team,test,workshop,youtube,statistics,spoken,reports,cdcontent,cms,creation,cron,events,forums,mail,masquerade,mdldjango,reports
 multi_line_output=3
 default_section=THIRDPARTY
 import_heading_stdlib=Standard Library
