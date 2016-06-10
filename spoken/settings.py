@@ -8,10 +8,11 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.6/ref/settings/
 """
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-from os.path import *
-from config import *
+# Standard Library
 import os
+from config import *
+from os.path import *
+
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 SCRIPT_URL = SCRIPT_URL
@@ -86,7 +87,7 @@ INSTALLED_APPS = (
 )
 
 MIDDLEWARE_CLASSES = (
-    #'django.middleware.cache.UpdateCacheMiddleware',
+    # 'django.middleware.cache.UpdateCacheMiddleware',
     'htmlmin.middleware.HtmlMinifyMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -97,7 +98,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.common.BrokenLinkEmailsMiddleware',
     'masquerade.middleware.MasqueradeMiddleware',
     'django.contrib.redirects.middleware.RedirectFallbackMiddleware',
-    #'django.middleware.cache.FetchFromCacheMiddleware',
+    # 'django.middleware.cache.FetchFromCacheMiddleware',
     'htmlmin.middleware.MarkRequestMiddleware',
 )
 
@@ -119,43 +120,48 @@ DATABASES = {
         # The following settings are not used with sqlite3:
         'USER': DB_USER,
         'PASSWORD': DB_PASS,
-        'HOST': '',                            # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+        # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+        'HOST': '',
         'PORT': '',                            # Set to empty string for default.
     },
     'moodle': {
-        'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'ENGINE': 'django.db.backends.mysql',  # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
         'NAME': MDB,                      # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
         'USER': MDB_USER,
         'PASSWORD': MDB_PASS,
-        'HOST': '',                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+        # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+        'HOST': '',
         'PORT': '',                  # Set to empty string for default.
     },
     'cdeep': {
-        'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'ENGINE': 'django.db.backends.mysql',  # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
         'NAME': CDB,                      # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
         'USER': CDB_USER,
         'PASSWORD': CDB_PASS,
-        'HOST': '',                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+        # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+        'HOST': '',
         'PORT': '',                  # Set to empty string for default.
     },
     'workshop_info': {
-        'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'ENGINE': 'django.db.backends.mysql',  # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
         'NAME': WDB,                      # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
         'USER': WDB_USER,
         'PASSWORD': WDB_PASS,
-        'HOST': '',                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+        # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+        'HOST': '',
         'PORT': '',                  # Set to empty string for default.
     },
     'forums': {
-        'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'ENGINE': 'django.db.backends.mysql',  # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
         'NAME': FDB,                      # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
         'USER': FDB_USER,
         'PASSWORD': FDB_PASS,
-        'HOST': '',                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+        # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+        'HOST': '',
         'PORT': '',                  # Set to empty string for default.
     }
 }
@@ -173,12 +179,12 @@ USE_L10N = True
 
 USE_TZ = TZ_STATUS
 
-#events settings
+# events settings
 ONLINE_TEST_URL = ONLINE_TEST_URL
 KEEP_LOGGED_DURATION = 604800
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/var/www/example.com/media/"
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media/') # Absolute path to the media.
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')  # Absolute path to the media.
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
@@ -206,22 +212,22 @@ STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    #BASE_DIR + '/static/',
+    # BASE_DIR + '/static/',
 )
 
-#debugging 
-#INSTALLED_APPS = INSTALLED_APPS + ('debug_toolbar',)
+# debugging
+# INSTALLED_APPS = INSTALLED_APPS + ('debug_toolbar',)
 INTERNAL_IPS = ('127.0.0.1',)
 
-#Moodle Auth
-#AUTH_USER_MODEL = 'mdldjango.Users'
+# Moodle Auth
+# AUTH_USER_MODEL = 'mdldjango.Users'
 DATABASE_ROUTERS = [
-    'mdldjango.router.MdlRouter', 
-    'cdeep.router.CdeepRouter', 
+    'mdldjango.router.MdlRouter',
+    'cdeep.router.CdeepRouter',
     'workshop.router.WorkshopRouter',
     'forums.router.ForumsRouter'
 ]
-#AUTHENTICATION_BACKENDS = ( 'mdldjango.backend.MdlBackend', )
+# AUTHENTICATION_BACKENDS = ( 'mdldjango.backend.MdlBackend', )
 
 # Login using username or email address
 AUTHENTICATION_BACKENDS = (
@@ -230,9 +236,9 @@ AUTHENTICATION_BACKENDS = (
 )
 # Reports
 REPORT_BUILDER_INCLUDE = []
-REPORT_BUILDER_EXCLUDE = ['user'] # Allow all models except User to be accessed
+REPORT_BUILDER_EXCLUDE = ['user']  # Allow all models except User to be accessed
 REPORT_BUILDER_ASYNC_REPORT = False
-#template
+# template
 TEMPLATE_CONTEXT_PROCESSORS = (
     "django.contrib.auth.context_processors.auth",
     "django.core.context_processors.debug",
