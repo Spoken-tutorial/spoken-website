@@ -1,9 +1,9 @@
-from django.contrib.auth.models import User
-from django.db.models import Q
+# Third Party Stuff
 from django import forms
+
 
 class MasqueradeHomeForm(forms.Form):
     username_email = forms.CharField(
-        required = True,
-        error_messages = {'required': 'username/email is required.'},
+        required=True,
+        error_messages={'required': 'username/email is required.'},
     )
