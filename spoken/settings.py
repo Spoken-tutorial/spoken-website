@@ -1,17 +1,14 @@
+# -*- coding: utf-8 -*-
 """
 Django settings for spoken project.
 
 For more information on this file, see
-https://docs.djangoproject.com/en/1.6/topics/settings/
-
-For the full list of settings and their values, see
-https://docs.djangoproject.com/en/1.6/ref/settings/
+https://docs.djangoproject.com/en/1.8/topics/settings/
 """
 
 # Standard Library
 import os
 from config import *
-from os.path import *
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
