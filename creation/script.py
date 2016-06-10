@@ -1,29 +1,17 @@
-import os
-import re
-import json
-import time
-import subprocess
-from decimal import Decimal
-from urllib import urlopen, quote, unquote_plus
-from django.conf import settings
-from django.views import generic
-from django.contrib import messages
-from django.core.urlresolvers import reverse
-from django.contrib.auth.models import Group
-from django.views.decorators.http import require_POST
+# Standard Library
+from urllib import urlopen
 
-from django import forms
-from django.template import RequestContext
-from django.core.context_processors import csrf
-from django.core.mail import EmailMultiAlternatives
-from django.core.exceptions import PermissionDenied
-from django.views.decorators.csrf import csrf_exempt
-from django.shortcuts import render, render_to_response
+# Third Party Stuff
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse, HttpResponseRedirect
-from creation.views import is_administrator
+from django.core.exceptions import PermissionDenied
 from django.db.models import Q
+
+# Spoken Tutorial Stuff
 from creation.models import *
+from creation.views import is_administrator
+
+
 @login_required
 def list_missing_script(request):
     if not is_administrator(request.user):
@@ -39,7 +27,10 @@ def list_missing_script(request):
             except Exception, e:
                 code = e.code
             if not (int(code) == 200):
-                print '{0},{1},{2},{3},{4},{5}'.format(code, tr_rec.id,tr_rec.tutorial_detail.foss, tr_rec.language, tr_rec.tutorial_detail.tutorial, script_path)
-        except Exception, e:
-            print e
-        #break
+                print '{0},{1},{2},{3},{4},{5}'.format(code, tr_rec.id,
+                                                       tr_rec.tutorial_detail.foss,
+                                                       tr_rec.language,
+                                                       tr_rec.tutorial_detail.tutorial,
+                                                       script_path)
+        except Exception as e:
+            print(e)

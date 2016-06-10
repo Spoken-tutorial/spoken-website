@@ -1,16 +1,23 @@
+# Standard Library
 import os
+
+# Third Party Stuff
 from django.conf import settings
 from django.contrib import admin
 
-from creation.models import *
+# Spoken Tutorial Stuff
 from creation.forms import *
+from creation.models import *
+
 
 class LanguageAdmin(admin.ModelAdmin):
     exclude = ('user',)
     list_display = ('name', 'created', 'updated', 'user')
+
     def save_model(self, request, obj, form, change):
         obj.user = request.user
         obj.save()
+
 
 class FossCategoryAdmin(admin.ModelAdmin):
     exclude = ('user',)
@@ -40,11 +47,13 @@ class FossCategoryAdmin(admin.ModelAdmin):
     mark_foss_pending.short_description = "Mark selected FOSS categories as pending"
     actions = [mark_foss_completed, mark_foss_pending]
 
+
 class TutorialDetailAdmin(admin.ModelAdmin):
     form = AvailableFossForm
     exclude = ('user',)
     list_display = ('foss', 'tutorial', 'level', 'order', 'updated', 'user')
     list_filter = ('updated', 'level', 'foss')
+
     def save_model(self, request, obj, form, change):
         obj.user = request.user
         obj.tutorial = obj.tutorial.strip()
@@ -54,6 +63,7 @@ class TutorialDetailAdmin(admin.ModelAdmin):
             os.makedirs(foss_dir)
         except:
             print "Tutorial directories already exists..."
+
 
 class ContributorRoleAdmin(admin.ModelAdmin):
     form = ContributorRoleForm
@@ -79,6 +89,7 @@ class ContributorRoleAdmin(admin.ModelAdmin):
     mark_contributor_disabled.short_description = "Mark selected contributor roles as disabled"
     actions = ['mark_contributor_active', 'mark_contributor_disabled']
 
+
 class DomainReviewerRoleAdmin(admin.ModelAdmin):
     form = DomainReviewerRoleForm
     list_display = ('user', 'foss_category', 'language', 'status', 'created', 'updated')
@@ -102,6 +113,7 @@ class DomainReviewerRoleAdmin(admin.ModelAdmin):
     mark_domain_reviewer_active.short_description = "Mark selected domain reviewer roles as active"
     mark_domain_reviewer_disabled.short_description = "Mark selected domain reviewer roles as disabled"
     actions = ['mark_domain_reviewer_active', 'mark_domain_reviewer_disabled']
+
 
 class QualityReviewerRoleAdmin(admin.ModelAdmin):
     form = QualityReviewerRoleForm
@@ -127,11 +139,13 @@ class QualityReviewerRoleAdmin(admin.ModelAdmin):
     mark_quality_reviewer_disabled.short_description = "Mark selected quality reviewer roles as disabled"
     actions = ['mark_quality_reviewer_active', 'mark_quality_reviewer_disabled']
 
+
 class FossAvailableForTestAdmin(admin.ModelAdmin):
     form = FossAvailableForTestForm
     fields = ['foss', 'language', 'status']
     list_display = ('foss', 'language', 'status', 'created')
     list_filter = ('language',)
+
 
 class FossAvailableForWorkshopAdmin(admin.ModelAdmin):
     fields = ['foss', 'language', 'status']
