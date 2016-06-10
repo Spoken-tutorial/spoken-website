@@ -37,4 +37,3 @@ describe('global methods', function () {
        });
     });
 });
-

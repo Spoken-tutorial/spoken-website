@@ -166,7 +166,7 @@
                                 </select>
                                 <br />
                             <video id="st_video" class="video-js vjs-default-skin" controls preload="auto" width="auto" height="auto" data-setup="{}">
-                                
+
                                 <source src="../Side_by_Side-Method-English.ogv" type="video/ogg" />
                             </video>
 
@@ -247,9 +247,9 @@
                     language = ($(this).val()).trim();
 		    mp = videojs('st_video');
                     mp.src({ type: "video/ogg", src: '../Side_by_Side-Method-'+language+'.ogv' });
-	            mp.play();                    
+	            mp.play();
 	 	    mp.volume(0.2);
-   
+
                 });
 
                 $('.search-btn').on("click", function(){

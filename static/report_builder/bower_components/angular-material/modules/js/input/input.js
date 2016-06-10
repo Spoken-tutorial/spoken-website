@@ -30,7 +30,7 @@ angular.module('material.components.input', [
  * @description
  * `<md-input-container>` is the parent of any input or textarea element.
  *
- * Input and textarea elements will not behave properly unless the md-input-container 
+ * Input and textarea elements will not behave properly unless the md-input-container
  * parent is provided.
  *
  * @usage
@@ -106,7 +106,7 @@ function labelDirective() {
  * @module material.components.input
  *
  * @description
- * Must be placed as a child of an `<md-input-container>`. 
+ * Must be placed as a child of an `<md-input-container>`.
  *
  * Behaves like the [AngularJS input directive](https://docs.angularjs.org/api/ng/directive/input).
  *
@@ -141,7 +141,7 @@ function labelDirective() {
  * @module material.components.input
  *
  * @description
- * Must be placed as a child of an `<md-input-container>`. 
+ * Must be placed as a child of an `<md-input-container>`.
  *
  * Behaves like the [AngularJS input directive](https://docs.angularjs.org/api/ng/directive/textarea).
  *
@@ -174,7 +174,7 @@ function inputTextareaDirective($mdUtil, $window, $compile, $animate) {
     require: ['^?mdInputContainer', '?ngModel'],
     compile: compile,
   };
-  
+
   function compile(element) {
     element.addClass('md-input');
     return postLink;
@@ -198,8 +198,8 @@ function inputTextareaDirective($mdUtil, $window, $compile, $animate) {
       setupTextarea();
     }
 
-    var isEmpty = ngModelCtrl ? 
-      ngModelCtrl.$isEmpty : 
+    var isEmpty = ngModelCtrl ?
+      ngModelCtrl.$isEmpty :
       function() { return ('' + element.val()).length === 0; };
 
     // When the input value changes, check if it "has" a value, and
@@ -208,7 +208,7 @@ function inputTextareaDirective($mdUtil, $window, $compile, $animate) {
       scope.$watch(function() {
         return ngModelCtrl.$dirty && ngModelCtrl.$invalid;
       }, containerCtrl.setInvalid);
-      
+
       ngModelCtrl.$formatters.push(checkHasValue);
       ngModelCtrl.$parsers.push(checkHasValue);
     } else {
@@ -294,7 +294,7 @@ function mdMaxlengthDirective() {
     var containerCtrl = ctrls[1];
     var charCountEl = angular.element('<div class="md-char-counter">');
 
-    // Stop model from trimming. This makes it so whitespace 
+    // Stop model from trimming. This makes it so whitespace
     // over the maxlength still counts as invalid.
     attr.$set('ngTrim', 'false');
     containerCtrl.element.append(charCountEl);
@@ -307,7 +307,7 @@ function mdMaxlengthDirective() {
       maxlength = value;
       if (angular.isNumber(value) && value > 0) {
         if (!charCountEl.parent().length) {
-          $animate.enter(charCountEl, containerCtrl.element, 
+          $animate.enter(charCountEl, containerCtrl.element,
                          angular.element(containerCtrl.element[0].lastElementChild));
         }
         renderCharCount();

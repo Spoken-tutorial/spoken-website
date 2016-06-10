@@ -29,7 +29,7 @@ etc. where appropriate. Also include steps to reproduce the bug.
 
 ## Pull requests
 
-1. Changes must be done in `/src` files, never just the compiled files. Also, don't 
+1. Changes must be done in `/src` files, never just the compiled files. Also, don't
 commit the compiled files.
 
 2. Try not to pollute your pull request with unintended changes. Keep them simple

@@ -383,7 +383,7 @@
 						datepicker.addClass('active');
 					else
 						datepicker.removeClass('active');
-						
+
 					if( options.timepicker )
 						timepicker.addClass('active');
 					else

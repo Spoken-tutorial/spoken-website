@@ -230,7 +230,7 @@ h1.page-title, h4.page-title {
     width: 34px;
     height: 13px;
     background:url('/static/spoken/images/caret.png');
-    
+
 }
 #testimonials .user-details{
     padding: 20px;
@@ -346,7 +346,7 @@ media="screen"
 
 /* video search page */
 .search-result {
-    
+
 }
 .search-result .result-record{
     margin: 25px 0px;
@@ -366,7 +366,7 @@ media="screen"
     margin-top: 0px;
 }
 .Basic{
-    
+
 }
 /* video search page end */
 .no-record{

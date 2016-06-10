@@ -137,7 +137,7 @@
         $acstate = $('.state');
         //$ac_district = $(".district");
         $college = $(".college");
-        
+
         $acstate.change(function() {
 			var state = $(this).val();
 			if(state){
@@ -188,7 +188,7 @@
                 }
             });
         });
-        
+
         $ac_district.change(function() {
             var district = $(this).val();
             $.ajax({
@@ -211,4 +211,3 @@
     });
 </script>
 {% endblock %}
-

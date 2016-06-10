@@ -16,7 +16,7 @@
         <!--<li class="{% if category == 3 %} active {% endif %}"><a href="{% url 'mdldjango:mdl_index' %}?category=3">Upcoming Training</a></li>-->
         <li class="{% if category == 4 %} active {% endif %}"><a href="{% url 'mdldjango:mdl_index' %}?category=4">Ongoing Test</a></li>
         <li class="{% if category == 5 %} active {% endif %}"><a href="{% url 'mdldjango:mdl_index' %}?category=5">Upcoming Test</a></li>
-	
+
         <li class="{% if category == 3 %} active {% endif %}"><a href="{% url 'mdldjango:mdl_index' %}?category=3">Live Workshop</a></li>
     </ul>
     <!-- Tab panes -->
@@ -37,7 +37,7 @@
                         <td>{{ record.training.course }}</td>
                         <td>{{ record.training.sem_start_date }}</td>
                         <td>
-                            | <a href="{% url 'mdldjango:feedback' record.training.id %}">Feedback</a> | 
+                            | <a href="{% url 'mdldjango:feedback' record.training.id %}">Feedback</a> |
                             <a href="{% url 'events:training_participant_language_feedback' record.training.id mdluserid %}">Language Feedback</a> |
                             {% if record.training.is_training_certificate_allowed %}
                               <a href="{% url 'events:student_training_certificate' record.id %}">Certificate</a> |
@@ -109,7 +109,7 @@
                         <td>
                                      <a href="{% url 'events:training_participant_ceritificate' record.id p.id %}">Certificate</a>
 <!--
-			 <a href="{% url 'mdldjango:feedback' record.id %}">Feedback</a> | 
+			 <a href="{% url 'mdldjango:feedback' record.id %}">Feedback</a> |
                             <a href="{% url 'events:training_participant_language_feedback' record.id mdluserid %}">Language Feedback</a>
                             {% with result=mdluserid|can_download_workshop_certificate:record %}
                                 {% if result %}

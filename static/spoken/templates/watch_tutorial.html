@@ -279,18 +279,18 @@
 
 <div id="content">
     <ul id="tabs" class="nav nav-tabs" data-tabs="tabs">
-     
+
         <li style="width:190px" class="active" ><a href="#forums" data-toggle="tab">Questions posted on Forums</a></li>
                 <li style="width:180px;" ><a style= "min-height: 60px;padding-top: 12px;" href="#tutorials" data-toggle="tab">{{tr_rec.tutorial_detail.foss}} Tutorials - {{tr_rec.language}} </a></li>
      <div id="my-tab-content" class="tab-content">
 
 <div class="tab-pane active" id="forums" >
 <div id="forums_Q" class='ScrollStyle' style="width: 32%; " >
- 
+
   {% if questions %}
         <h4 style="font-family: Menlo;font-size: 16px; padding-left: 8px; ">Questions posted on ST Forums: </h4>
         <ul class="forum-questions" id="forum_Q" style="padding : 6px ">
-     
+
         {% for question in questions %}
 
         <li class="question" id="{{ question.id }}">
@@ -309,7 +309,7 @@
        </p>
     <hr class="hline-inner" style="margin-top: 18px;margin-bottom: 4px;" />
            </li>
-      
+
         {% endfor %}
         </ul>
         {% else %}
@@ -318,10 +318,10 @@
         </div>
 
         </div>
-    
+
         <div class="tab-pane " id="tutorials" >
             <div class='playlist col-lg-4 col-md-4 col-sm-4' style="width: 32%">
-           
+
         <div class='playlist-controls'>
             <span class='backward'></span>
         <span class=" video-count pull-right" style="color: #ffffff;" >{{tr_recs|length}}</span>
@@ -344,7 +344,7 @@
         </ul>
         </div>
         </div>
-     
+
 
     </div>
 </div>
@@ -354,7 +354,7 @@
     jQuery(document).ready(function ($) {
        $("#tabs").tab();
     });
-</script> 
+</script>
 </div> <!-- container -->
 
         </div>
@@ -385,13 +385,13 @@
                     <li><a href="/creation/report-missing-component/{{ tr_rec.id}}" class="fancybox fancybox.iframe"> Report Missing Component</a></li>
 
                     <li><a id="text" target="_blank" href="" class="forum-post">Post your Question on the Forum</a></li>
-         <!--<li><p id="playerHolder"></p></li> 
+         <!--<li><p id="playerHolder"></p></li>
 	<li><p id="playerHolder1"></p></li> !-->
 
                 </ol>
                 <hr class="hline" />
                 <pre class="custom-jumbotron"><h3><b>Outline:</b></h3><p>{{ tr_rec.outline }}</p></pre>
-            
+
 
             </div>
         </div>
@@ -545,7 +545,7 @@
     tag = document.createElement('script'),
     firstScriptTag = document.getElementsByTagName('script')[0];
     var flag= false;
-  
+
 
     tag.src = "https://www.youtube.com/iframe_api";
     firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
@@ -568,7 +568,7 @@
                 ik_player.addEventListener("onReady",       "onReady");
                 ik_player.addEventListener("onStateChange", "onStateChange");
             }
-  
+
         function formatTime(time){
         time = Math.round(time);
         var minutes = Math.floor(time / 60),
@@ -589,8 +589,8 @@
         }else{
         trigger(cur_time, duration);
         }
-       
-            
+
+
 
         return cur_time
         }
@@ -598,7 +598,7 @@
         $("#text").click(function(e){
 						ik_player.pauseVideo()
          		setForum(logDuration())
-           
+
         });
 
 
@@ -623,22 +623,22 @@
             lower = min_split[0]+"."+sec_split[0];
             upper = min_split[1]+"."+sec_split[1];
             var div = document.getElementById( '{{ q.id }}' );
-          
-            if((parseFloat(cur_time)).between(parseFloat(lower.toString()),parseFloat(upper.toString()))) 
+
+            if((parseFloat(cur_time)).between(parseFloat(lower.toString()),parseFloat(upper.toString())))
             {
-        
+
           bgColor = $("#"+'{{ q.id }}').css('background-color')
           if($("#"+'{{ q.id }}').css("background-color")=="rgb(205, 205, 205)"){
          //alert("outt2")
           }else{
           var el = document.getElementById('forums_Q');
           el.scrollTop = 0;
-       
+
           }
-       
+
           $("#"+'{{ q.id }}').prependTo("#forum_Q");
           div.style.backgroundColor = "#cdcdcd";
-           
+
            }else{
               div.style.backgroundColor = "#ffffff";
            }
@@ -657,15 +657,15 @@
 							$("#text").click(function(e){
 							trackedPlayer.pause()
 		       		setForum(cur_time)
-		         
+
 		      		});
-			
+
             });
- 
-  		
+
+
 				function setForum(cur_time)
 				{
-					 
+
 						var time_split = cur_time.split(".")
 						var minute = parseFloat(time_split[0]);
 						var min_range = minute+"-"+(minute+parseFloat(1))
@@ -682,7 +682,7 @@
 						}else {
 									sec_range = "50-60"
 						}
-		
+
 						 var url = "http://forums.spoken-tutorial.org/new-question/?category={{ tr_rec.tutorial_detail.foss.foss }}&tutorial={{ tr_rec.tutorial_detail.tutorial }}&minute_range="+min_range+"&second_range="+sec_range;
 						$("#text").attr("href", url);
 				}
@@ -695,4 +695,3 @@
     <script src="https://apis.google.com/js/platform.js"></script>
         <script type="text/javascript" src="http://www.youtube.com/iframe_api"></script>
 {% endblock %}
-

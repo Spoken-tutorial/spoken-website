@@ -50,7 +50,7 @@
 	</div>
 	<div class='table-responsive'>
 		{% if collection %}
-		    
+
 			<table class="paleblue table table-bordered table-hover table-striped">
 				{% get_sortable_header header ordering request.GET %}
 				{% for record in collection %}
@@ -61,7 +61,7 @@
 						<td>{{ record.institution_name }}</td>
 						<td>{{ record.university }}</td>
 						<td>{{ record.institution_type }}</td>
-						<td><a href="{% url 'events:edit_ac' record.id %}" target="_blank">Edit</a> | 
+						<td><a href="{% url 'events:edit_ac' record.id %}" target="_blank">Edit</a> |
 						<a href="{% url 'events:academic_center' record.id %}" target="_blank">View</a></td>
 					</tr>
 				{% endfor %}

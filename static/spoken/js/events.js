@@ -6,7 +6,7 @@ function ajaxStrateFillDatas(district, city, university){
 	$ac_city = $(".city");
 	$ac_location = $(".location");
 	$ac_pincode = $(".pincode");
-	
+
 	$district = district || "";
 	$city = city || "";
 	$university = university || "";

@@ -130,7 +130,7 @@
                             {% endif %}
 
                         {% endif %}
-                        
+
                         {% if role == 'organiser' %}
                             {% if status == 'pending' or status == 'approved' or status == 'predated' or status == 'waitingforinvigilator' %}
                                 <a href="{% url 'events:test_request' role record.id %}">Edit</a>
@@ -142,11 +142,11 @@
                                 <a href="{% url 'events:test_request' role record.id %}">Edit</a>
                             {% endif %}
                         {% endif %}
-                        
+
                         {% if role == 'invigilator' %}
                             {% if status == 'waitingforinvigilator' %}
-                                <a href="{% url 'events:test_approvel' role record.id %}?status=invigilatoraccept">Accept</a> | 
-                                <a href="{% url 'events:test_approvel' role record.id %}?status=invigilatorreject">Reject</a> | 
+                                <a href="{% url 'events:test_approvel' role record.id %}?status=invigilatoraccept">Accept</a> |
+                                <a href="{% url 'events:test_approvel' role record.id %}?status=invigilatorreject">Reject</a> |
                                 <a href="{% url 'events:test_request' role record.id %}">Edit</a>
                             {% endif %}
                             {% if status == 'approved' and todaytest %}
@@ -164,7 +164,7 @@
                                 {% endwith %}
                             {% endif %}
                         {% endif %}
-                        
+
                         </td>
                     </tr>
                 {% endfor %}

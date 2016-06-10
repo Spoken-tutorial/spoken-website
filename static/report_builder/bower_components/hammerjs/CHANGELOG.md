@@ -6,8 +6,8 @@
 - Added experimental [single-user Touch input handler](src/input/singletouch.js). This to improve performance/ux when only a single user has to be supported. Plans are to release 2.1 with this as default, and a settings to enable the multi-user handler.
 
 ### 2.0.3, 2014-09-10
-- Manager.set improvements. 
-- Fix requireFailure() call in Manager.options.recognizers. 
+- Manager.set improvements.
+- Fix requireFailure() call in Manager.options.recognizers.
 - Make DIRECTION_ALL for pan and swipe gestures less blocking.
 - Fix Swipe recognizer threshold option.
 - Expose the Input classes.

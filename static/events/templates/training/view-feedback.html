@@ -41,107 +41,107 @@
     <table class="paleblue table table-striped table-hover table-bordered">
         <tr><td class='boldy'>Content</td>
         <td>{{ feedback.content|feedback_status_good }}</td></tr>
-        
+
         <tr><td class='boldy'>Sequence of tutorials</td>
         <td>{{ feedback.sequence|feedback_status_good }}</td></tr>
-        
+
         <tr><td class='boldy'>Clarity of explanation</td>
         <td>{{ feedback.clarity|feedback_status_good }}</td></tr>
-        
+
         <tr><td class='boldy'>Interesting</td>
         <td>{{ feedback.interesting|feedback_status_good }}</td></tr>
-        
-        
+
+
         <tr><td class='boldy'>Use of appropriate examples</td>
         <td>{{ feedback.appropriate_example|feedback_status_moderately }}</td></tr>
-        
+
         <tr><td class='boldy'>Instruction Sheet</td>
         <td>{{ feedback.instruction_sheet|feedback_status_moderately }}</td></tr>
-        
+
         <tr><td class='boldy'>Assignemnt</td>
         <td>{{ feedback.assignment|feedback_status_moderately }}</td></tr>
-        
+
         <tr><td class='boldy'>Pace of the tutorial</td>
         <td>{{ feedback.pace_of_tutorial|feedback_status_appropriate }}</td></tr>
-        
+
         <tr><td class='boldy'>How would you rate this workshop overall?</td>
         <td>{{ feedback.rate_workshop|feedback_status_satisfactory }}</td></tr>
-        
+
         <tr><td class='boldy'>What was the most useful thing you learnt in this workshop?</td>
         <td>{{ feedback.workshop_learnt }}</td></tr>
-        
+
         <tr><td class='boldy'>What were the weaknesses of this workshop?</td>
         <td>
             {% if feedback.weakness_workshop %} Duration of the workshop is less. {% endif %}
             {% if feedback.weakness_narration %} Pace of the narration in the tutorials was very fast. {% endif %}
             {% if feedback.wweakness_understand %} Had to listen more than two times to understand the commands. {% endif %}
         </td></tr>
-        
+
         <tr><td class='boldy'>Any other weakness ?</td>
         <td>{{ feedback.other_weakness }}</td></tr>
-        
+
         <tr><td class='boldy'>In which language did you watch the tutorials?</td>
         <td>{{ feedback.tutorial_language }}</td></tr>
-        
+
         <tr><td class='boldy'>To what extent do you think you can apply the information you <br>received today to your work/study?</td>
         <td><br>{{ feedback.apply_information|feedback_status_somewhat }}</td></tr>
-        
+
         <tr><td class='boldy'>If so, how do you plan to use the information?</td>
         <td>{{ feedback.if_apply_information_yes }}</td></tr>
-        
+
         <tr><td colspan="2" class="boldy title">How would you rate the workshop on the following?</td>
         </tr>
         <tr><td class='boldy'>Setup for learning</td>
         <td>{{ feedback.setup_learning|feedback_status_average }}</td></tr>
-        
+
         <tr><td class='boldy'>Computers in the lab</td>
         <td>{{ feedback.computers_lab|feedback_status_average }}</td></tr>
-        
+
         <tr><td class='boldy'>Audio quality</td>
         <td>{{ feedback.audio_quality|feedback_status_average }}</td></tr>
-        
+
         <tr><td class='boldy'>Video quality</td>
         <td>{{ feedback.video_quality|feedback_status_average }}</td></tr>
-        
+
         <tr><td colspan="2" class="boldy title">How would you rate the Workshop Organiser from your college, in terms of the following:</td>
         </tr>
-        
+
         <tr><td class='boldy'>Organisation of the workshop</td>
         <td>{{ feedback.workshop_orgainsation|feedback_status_good }}</td></tr>
-        
+
         <tr><td class='boldy'>Ability to facilitate learning</td>
         <td>{{ feedback.faciliate_learning|feedback_status_good }}</td></tr>
-        
+
         <tr><td class='boldy'>Ability to motivate the learners</td>
         <td>{{ feedback.motivate_learners|feedback_status_good }}</td></tr>
-        
+
         <tr><td class='boldy'>Time management</td>
         <td>{{ feedback.time_management|feedback_status_good }}</td></tr>
-        
+
         <tr><td colspan="2" class="boldy title">How would you rate the IITB Resource person, in terms of the following?</td>
         </tr>
-        
+
         <tr><td class='boldy'>Sufficient knowledge about the software</td>
         <td>{{ feedback.knowledge_about_software|feedback_status_neutral }}</td></tr>
-        
+
         <tr><td class='boldy'>Provided clear explanations</td>
         <td>{{ feedback.provide_clear_explanation|feedback_status_neutral }}</td></tr>
-        
+
         <tr><td class='boldy'>Answered questions clearly</td>
         <td>{{ feedback.answered_questions|feedback_status_neutral }}</td></tr>
-        
+
         <tr><td class='boldy'>Was interested in helping me learn</td>
         <td>{{ feedback.interested_helping|feedback_status_neutral }}</td></tr>
-        
+
         <tr><td class='boldy'>Executed the workshop efficiently</td>
         <td>{{ feedback.executed_workshop|feedback_status_neutral }}</td></tr>
-        
+
         <tr><td class='boldy'>How can the workshop be improved ?</td>
         <td>{{ feedback.workshop_improved }}</td></tr>
-        
+
         <tr><td class='boldy'>Would you recommend this workshop, Spoken Tutorial Project and its activities to others?</td>
         <td>{{ feedback.recommend_workshop|feedback_status_likely }}</td></tr>
-        
+
         <tr><td class='boldy'>Reason why?</td>
         <td>{{ feedback.reason_why }}</td></tr>
         <tr><td class='boldy'>Any other comments?</td>

@@ -17,7 +17,7 @@
                       {% endfor %}
                     </ul>
                     {% endif %}
-        
+
                     <div class="form-group">
                         <label for="id_state" class="col-sm-3 control-label">State</label>
                         <div class="col-sm-9">
@@ -61,7 +61,7 @@
         $acstate = $('.state');
         //$ac_district = $(".district");
         $college = $(".college");
-        
+
         $acstate.change(function() {
             var state = $(this).val();
             if(state){
@@ -91,4 +91,3 @@
     });
 </script>
 {% endblock %}
-

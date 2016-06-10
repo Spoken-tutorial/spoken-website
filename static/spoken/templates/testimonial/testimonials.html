@@ -85,7 +85,7 @@
                         {% else %}
                             {% if record.source_link %}
                                 <p>
-                                    <i class="fa fa-link fa-1"></i> 
+                                    <i class="fa fa-link fa-1"></i>
                                     <a href="{{ record.source_link }}" target="_blank">
                                         {% if record.source_title %}
                                             {{ record.source_title }}
@@ -130,7 +130,7 @@
                             {{ record.actual_content|format_raw_data|safe }}
                             {% if record.source_link %}
                                 <p>
-                                    <i class="fa fa-link fa-1"></i> 
+                                    <i class="fa fa-link fa-1"></i>
                                     <a href="{{ record.source_link }}" target="_blank">
                                         {% if record.source_title %}
                                             {{ record.source_title }}
@@ -152,4 +152,3 @@
         {% endfor %}
     </div>
 {% endblock %}
-

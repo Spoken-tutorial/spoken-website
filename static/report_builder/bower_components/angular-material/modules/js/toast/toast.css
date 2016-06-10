@@ -88,7 +88,7 @@ md-toast {
 @media (min-width: 600px) {
   md-toast {
     min-width: 288px;
-    /* 
+    /*
      * When the toast doesn't take up the whole screen,
      * make it rotate when the user swipes it away
      */ }
