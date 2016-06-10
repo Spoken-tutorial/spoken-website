@@ -10,7 +10,7 @@
 
 {% block cssblock %}
   <style>
-    
+
     /*.tp .training-row{
         display: none;
     }*/
@@ -21,7 +21,7 @@
       padding: 5px;
     }
     ul.tp .yeardesc.active-planner{
-      
+
     }
     .pull-center{
       text-align: center;
@@ -45,37 +45,37 @@
     <td >
       <center class="pull-left"><font size=3 color="#FF6705"><b>STEP 1 :</b></font> Upload students <b>Master Batch Student List</b> :</center>
     </td>
-    
+
     <td>
       <center><a class="btn btn-success steps-btn" href="{% url 'events:batch_list' %}">MB Master Batch Student List</a></center>
     </td>
-      
+
   </tr>
-  
+
   <tr>
     <td>
       <center class="pull-left"> <font size=3 color="#FF6705"><b>STEP 2 : </b></font> Complete the <b>STPF</b> :</center>
     </td>
-    
+
     <td>
       <center><a class="btn btn-success steps-btn"  data-toggle="modal" data-target="#plannerModal"> STPF – Semester Training Planner Form</a></center>
     </td>
-      
+
   </tr>
-  
+
   <tr>
     <td>
       <center class="pull-left"> <font size=3 color="#FF6705"><b>STEP 3 : </b></font> Select <b>Participant List</b> :</center>
     </td>
-    
+
     <td>
       <center><a class="btn btn-success steps-btn" href="{% url 'events:select_participants' %}"> Select Participant List</a></center>
     </td>
-      
+
   </tr>
 </table>
-</center>  
-  
+</center>
+
   <!-- Modal -->
   <center>
   <div class="modal fade" id="plannerModal" tabindex="-1" role="dialog" aria-labelledby="plannerModalLabel" aria-hidden="true">
@@ -90,7 +90,7 @@
                 <li>Select Jul-Dec for 1st, 3rd, 5th, 7th semesters</li>
               </ul>
             </div>
-            <i>In case your semester begins <b>mid-June</b> onwards, please choose July-Dec semester 
+            <i>In case your semester begins <b>mid-June</b> onwards, please choose July-Dec semester
             <br/>and select 1 July as Semester Start Date.</i>
           </div><br />
           <a class="btn btn-primary " href="{% url 'events:training_request' current_planner.id %}">Current Semester: {{current_planner.get_semester}}</a>
@@ -100,7 +100,7 @@
     </div>
   </div>
   </center>
-  
+
   <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -165,7 +165,7 @@
         {% endif %}
       </div>
     </li>
-    
+
     {% if next_planner %}
     <li class="semester future-planner"><br>
     <div class="semdesc">
@@ -249,7 +249,7 @@
 
 {% block jsblock %}
   <!--<script>
-  
+
     $('.tp>li>.yeardesc').click(function(e){
       if( $(this).parent('li').hasClass('active') ){
           $(this).parent('li').removeClass('active').children('.training-row').slideUp();
@@ -261,6 +261,6 @@
           e.stopPropagation();
       }
     });
-    
+
   </script> -->
 {% endblock %}

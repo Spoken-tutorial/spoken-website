@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+from __future__ import absolute_import, unicode_literals
+
 # Standard Library
 import csv
 from datetime import datetime, timedelta
@@ -475,7 +478,6 @@ class TrainingRequestCreateView(CreateView):
         except:
             messages.error(self.request, 'Something went wrong, Contact site administrator.')
             return self.form_invalid(form)
-        context = {}
         messages.success(self.request, ('STP has been added successfully. Now continue with step 3 '
                                         '"Select Participants" on STPS page. Select the participants from the Master '
                                         'Batch Student List for any one course that you are starting with. This is '
@@ -524,7 +526,6 @@ class TrainingRequestEditView(CreateView):
             print(e)
             messages.error(self.request, 'Something went wrong, Contact site administrator.')
             return self.form_invalid(form)
-        context = {}
         return HttpResponseRedirect('/software-training/training-planner/')
 
     def post(self, request, *args, **kwargs):
@@ -753,15 +754,20 @@ class SingleTrainingCertificate():
         imgDoc.drawImage(imgPath, 600, 100, 150, 76)
 
         # paragraphe
-        text = "This is to certify that <b>" + ta.firstname + " " + ta.lastname + "</b> participated in the <b>" + ta.training.course.foss.foss + "</b> training organized at <b>" + ta.training.academic.institution_name + "</b> by  <b>" + ta.training.organiser.user.first_name + " " + ta.training.organiser.user.last_name + "</b> on <b>" + self.custom_strftime(
-            '%B {S} %Y', ta.training.tdate) + "</b> with course material provided by the Spoken Tutorial Project, IIT Bombay.<br /><br />A comprehensive set of topics pertaining to <b>" + ta.training.course.foss.foss + "</b> were covered in the workshop. This training is offered by the Spoken Tutorial Project, IIT Bombay, funded by National Mission on Education through ICT, MHRD, Govt. of India."
+        text = ("This is to certify that <b>{name}</b> participated in the <b>{foss}</b> "
+                "training organized at <b>{institute}</b> by <b>{organiser_name}</b> on "
+                "<b>{training_date}</b> with course material provided by the Spoken Tutorial "
+                "Project, IIT Bombay.<br><br>"
+                "A comprehensive set of topics pertaining to <b>{foss}</b> were covered in the "
+                "workshop. This training is offered by the Spoken Tutorial Project, IIT Bombay, "
+                "funded by National Mission on Education through ICT, MHRD, Govt. of India.").format(
+                    name=ta.firstname + " " + ta.lastname,
+                    foss=ta.training.course.foss.foss,
+                    institute=ta.training.academic.institution_name,
+                    organiser_name=ta.training.organiser.user.first_name + " " + ta.training.organiser.user.last_name,
+                    training_date=self.custom_strftime('%B {S} %Y', ta.training.tdate))
 
-        centered = ParagraphStyle(name='centered',
-                                  fontSize=16,
-                                  leading=30,
-                                  alignment=0,
-                                  spaceAfter=20
-                                  )
+        centered = ParagraphStyle(name='centered', fontSize=16, leading=30, alignment=0, spaceAfter=20)
 
         p = Paragraph(text, centered)
         p.wrap(650, 200)
@@ -850,7 +856,7 @@ class StudentTrainingCertificateView(TrainingCertificate, View):
             mdluser = MdlUser.objects.get(id=mdluserid)
             if ta and ta.student.user.email == mdluser.email:
                 return self.training_certificate(ta)
-        except Exception as e:
+        except Exception:
             messages.error(self.request, "PermissionDenied!")
         return HttpResponseRedirect("/")
 
@@ -896,7 +902,7 @@ class CourseMapListView(ListView):
         }
         self.queryset = CourseMap.objects.exclude(category=0)
         self.raw_get_data = self.request.GET.get('o', None)
-        collection = get_sorted_list(self.request, self.queryset, self.header, self.raw_get_data)
+        get_sorted_list(self.request, self.queryset, self.header, self.raw_get_data)
         return super(CourseMapListView, self).dispatch(*args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -972,7 +978,6 @@ class GetCourseOptionView(JSONResponseMixin, View):
         tp = TrainingPlanner.objects.get(pk=self.request.POST.get('training_planner'))
 
         if department_id == '24':
-            print 'in school course number'
             if tp.is_school_course_full(category, self.request.POST.get('department'), self.request.POST.get('batch')):
                 context['is_full'] = True
             else:
@@ -1074,7 +1079,7 @@ class TrainingRequestListView(ListView):
 
     @method_decorator(group_required("Resource Person", "Administrator"))
     def dispatch(self, *args, **kwargs):
-        if (not 'role' in kwargs) or (not 'status' in kwargs):
+        if ('role' not in kwargs) or ('status' not in kwargs):
             raise PermissionDenied()
         self.role = kwargs['role']
         self.status = kwargs['status']
@@ -1180,11 +1185,12 @@ class TrainingRequestListView(ListView):
         return context
 
 
-##############################  Single Training one day workshop #########
+# #############################  Single Training one day workshop #########
 
 """
 '''
-SingleTrainingNewListView will list all the new/pending training requests in the single-training page pertaining to a specific user, i.e, Organiser or Resource Person.
+SingleTrainingNewListView will list all the new/pending training requests in the
+single-training page pertaining to a specific user, i.e, Organiser or Resource Person.
 
 '''
 class SingleTrainingNewListView(ListView):
@@ -1214,7 +1220,8 @@ class SingleTrainingNewListView(ListView):
       a = ResourcePerson.objects.filter(user__id=rp_state)
       for i in a:
         state_list.append(i.state_id)
-      self.queryset = SingleTraining.objects.filter(Q(status=0), academic__state__id__in = state_list).order_by('-tdate')
+      self.queryset = SingleTraining.objects.filter(Q(status=0),
+            academic__state__id__in = state_list).order_by('-tdate')
       return super(SingleTrainingNewListView, self).dispatch(*args, **kwargs)
     elif 'Organiser' in user_group:
       rp_state = self.request.user.organiser.academic_id
@@ -1226,7 +1233,8 @@ class SingleTrainingNewListView(ListView):
       a = ResourcePerson.objects.filter(user__id=rp_state)
       for i in a:
         state_list.append(i.state_id)
-      self.queryset = SingleTraining.objects.filter(Q(status=0), academic__state__id__in = state_list).order_by('-tdate')
+      self.queryset = SingleTraining.objects.filter(Q(status=0),
+                academic__state__id__in = state_list).order_by('-tdate')
       return super(SingleTrainingNewListView, self).dispatch(*args, **kwargs)
 
 
@@ -1253,7 +1261,8 @@ class SingletrainingApprovedListView(ListView):
     for i in user_groups_object:
       user_group.append(i.name)
     if 'Administrator' in user_group:
-      self.queryset = SingleTraining.objects.filter(tdate__gt=datetime.today().date().isoformat(), status=2).order_by('-tdate')
+      self.queryset = SingleTraining.objects.filter(tdate__gt=datetime.today().date().isoformat(),
+        status=2).order_by('-tdate')
       return super(SingletrainingApprovedListView, self).dispatch(*args, **kwargs)
     if 'Resource Person' in user_group and 'Organiser' in user_group:
       state_list = []
@@ -1261,11 +1270,13 @@ class SingletrainingApprovedListView(ListView):
       a = ResourcePerson.objects.filter(user__id=rp_state)
       for i in a:
         state_list.append(i.state_id)
-      self.queryset = SingleTraining.objects.filter(tdate__gt=datetime.today().date().isoformat(),status=2, academic__state__id__in = state_list).order_by('-tdate')
+      self.queryset = SingleTraining.objects.filter(tdate__gt=datetime.today().date().isoformat(),status=2,
+                               academic__state__id__in = state_list).order_by('-tdate')
       return super(SingletrainingApprovedListView, self).dispatch(*args, **kwargs)
     elif 'Organiser' in user_group:
       rp_state = self.request.user.organiser.academic_id
-      self.queryset = SingleTraining.objects.filter(status=2, academic__id = rp_state,tdate__gt=datetime.today().date().isoformat()).order_by('-tdate')
+      self.queryset = SingleTraining.objects.filter(status=2,
+        academic__id = rp_state,tdate__gt=datetime.today().date().isoformat()).order_by('-tdate')
       return super(SingletrainingApprovedListView, self).dispatch(*args, **kwargs)
     elif 'Resource Person' in user_group:
       state_list = []
@@ -1273,7 +1284,8 @@ class SingletrainingApprovedListView(ListView):
       a = ResourcePerson.objects.filter(user__id=rp_state)
       for i in a:
         state_list.append(i.state_id)
-      self.queryset = SingleTraining.objects.filter(tdate__gt=datetime.today().date().isoformat(),status=2, academic__state__id__in = state_list).order_by('-tdate')
+      self.queryset = SingleTraining.objects.filter(tdate__gt=datetime.today().date().isoformat(),
+                            status=2, academic__state__id__in = state_list).order_by('-tdate')
       return super(SingletrainingApprovedListView, self).dispatch(*args, **kwargs)
 
 '''
@@ -1298,7 +1310,8 @@ class SingletrainingRejectedListView(ListView):
     for i in user_groups_object:
       user_group.append(i.name)
     if 'Administrator' in user_group:
-      self.queryset = SingleTraining.objects.filter(tdate__gt=datetime.today().date().isoformat(), status=5).order_by('-tdate')
+      self.queryset = SingleTraining.objects.filter(tdate__gt=datetime.today().date().isoformat(),
+                                                    status=5).order_by('-tdate')
       return super(SingletrainingRejectedListView, self).dispatch(*args, **kwargs)
     if 'Resource Person' in user_group and 'Organiser' in user_group:
       state_list = []
@@ -1306,11 +1319,13 @@ class SingletrainingRejectedListView(ListView):
       a = ResourcePerson.objects.filter(user__id=rp_state)
       for i in a:
         state_list.append(i.state_id)
-      self.queryset = SingleTraining.objects.filter(tdate__gt=datetime.today().date().isoformat(),status=5, academic__state__id__in = state_list).order_by('-tdate')
+      self.queryset = SingleTraining.objects.filter(tdate__gt=datetime.today().date().isoformat(),
+                                                    status=5, academic__state__id__in = state_list).order_by('-tdate')
       return super(SingletrainingRejectedListView, self).dispatch(*args, **kwargs)
     elif 'Organiser' in user_group:
       rp_state = self.request.user.organiser.academic_id
-      self.queryset = SingleTraining.objects.filter(status=5, academic__id = rp_state,tdate__gt=datetime.today().date().isoformat()).order_by('-tdate')
+      self.queryset = SingleTraining.objects.filter(status=5,
+                    academic__id = rp_state,tdate__gt=datetime.today().date().isoformat()).order_by('-tdate')
       return super(SingletrainingRejectedListView, self).dispatch(*args, **kwargs)
     elif 'Resource Person' in user_group:
       state_list = []
@@ -1318,7 +1333,8 @@ class SingletrainingRejectedListView(ListView):
       a = ResourcePerson.objects.filter(user__id=rp_state)
       for i in a:
         state_list.append(i.state_id)
-      self.queryset = SingleTraining.objects.filter(tdate__gt=datetime.today().date().isoformat(),status=5, academic__state__id__in = state_list).order_by('-tdate')
+      self.queryset = SingleTraining.objects.filter(tdate__gt=datetime.today().date().isoformat(),
+                                                    status=5, academic__state__id__in = state_list).order_by('-tdate')
       return super(SingletrainingRejectedListView, self).dispatch(*args, **kwargs)
 
 ''' SingletrainingOngoingListView displays the workshops going on that particular day '''
@@ -1341,7 +1357,8 @@ class SingletrainingOngoingListView(ListView):
     for i in user_groups_object:
       user_group.append(i.name)
     if 'Administrator' in user_group:
-      self.queryset = SingleTraining.objects.filter(tdate=datetime.today().date().isoformat(), status=2).order_by('-tdate')
+      self.queryset = SingleTraining.objects.filter(tdate=datetime.today().date().isoformat(),
+                                                    status=2).order_by('-tdate')
       return super(SingletrainingOngoingListView, self).dispatch(*args, **kwargs)
     if 'Resource Person' in user_group and 'Organiser' in user_group:
       state_list = []
@@ -1349,11 +1366,13 @@ class SingletrainingOngoingListView(ListView):
       a = ResourcePerson.objects.filter(user__id=rp_state)
       for i in a:
         state_list.append(i.state_id)
-      self.queryset = SingleTraining.objects.filter(tdate=datetime.today().date().isoformat(), status=2, academic__state__id__in = state_list).order_by('-tdate')
+      self.queryset = SingleTraining.objects.filter(tdate=datetime.today().date().isoformat(),
+                                                    status=2, academic__state__id__in = state_list).order_by('-tdate')
       return super(SingletrainingOngoingListView, self).dispatch(*args, **kwargs)
     elif 'Organiser' in user_group:
       rp_state = self.request.user.organiser.academic_id
-      self.queryset = SingleTraining.objects.filter(tdate=datetime.today().date().isoformat(), status=2, academic__id = rp_state).order_by('-tdate')
+      self.queryset = SingleTraining.objects.filter(tdate=datetime.today().date().isoformat(),
+                                                    status=2, academic__id = rp_state).order_by('-tdate')
       return super(SingletrainingOngoingListView, self).dispatch(*args, **kwargs)
     elif 'Resource Person' in user_group:
       state_list = []
@@ -1361,7 +1380,8 @@ class SingletrainingOngoingListView(ListView):
       a = ResourcePerson.objects.filter(user__id=rp_state)
       for i in a:
         state_list.append(i.state_id)
-      self.queryset = SingleTraining.objects.filter(tdate=datetime.today().date().isoformat(), status=2, academic__state__id__in = state_list).order_by('-tdate')
+      self.queryset = SingleTraining.objects.filter(tdate=datetime.today().date().isoformat(),
+                                                    status=2, academic__state__id__in = state_list).order_by('-tdate')
       return super(SingletrainingOngoingListView, self).dispatch(*args, **kwargs)
 
 '''
@@ -1387,7 +1407,8 @@ class SingletrainingCompletedListView(ListView):
       a = ResourcePerson.objects.filter(user__id=rp_state)
       for i in a:
         state_list.append(i.state_id)
-      self.queryset = SingleTraining.objects.filter(Q(status=4), academic__state__id__in = state_list).order_by('-tdate')
+      self.queryset = SingleTraining.objects.filter(Q(status=4),
+                                                    academic__state__id__in = state_list).order_by('-tdate')
       return super(SingletrainingCompletedListView, self).dispatch(*args, **kwargs)
     elif 'Organiser' in user_group:
       rp_state = self.request.user.organiser.academic_id
@@ -1399,7 +1420,8 @@ class SingletrainingCompletedListView(ListView):
       a = ResourcePerson.objects.filter(user__id=rp_state)
       for i in a:
         state_list.append(i.state_id)
-      self.queryset = SingleTraining.objects.filter(Q(status=4), academic__state__id__in = state_list).order_by('-tdate')
+      self.queryset = SingleTraining.objects.filter(Q(status=4),
+                                                    academic__state__id__in = state_list).order_by('-tdate')
       return super(SingletrainingCompletedListView, self).dispatch(*args, **kwargs)
 
   def get_context_data(self, **kwargs):
@@ -1411,7 +1433,7 @@ class SingletrainingCompletedListView(ListView):
     context['group'] = grup
     return context
 """
-#$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$4444
+# $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
 
 class SingleTrainingCertificateListView(ListView):
@@ -1422,7 +1444,6 @@ class SingleTrainingCertificateListView(ListView):
 
     def dispatch(self, *args, **kwargs):
         self.training_request = SingleTraining.objects.get(pk=kwargs['tid'])
-        print self.training_request.id
         self.queryset = SingleTrainingAttendance.objects.filter(training_id=self.training_request.id, status=1)
         return super(SingleTrainingCertificateListView, self).dispatch(*args, **kwargs)
 
@@ -1451,14 +1472,16 @@ class SingletrainingPendingAttendanceListView(ListView):
     for i in user_groups_object:
       user_group.append(i.name)
     if 'Administrator' in user_group:
-     # self.queryset = SingleTraining.objects.filter(tdate__lt=datetime.today().date().isoformat(), status=2).order_by('-tdate')
+     # self.queryset = SingleTraining.objects.filter(tdate__lt=datetime.today().date().isoformat(),
+                                                     status=2).order_by('-tdate')
      # return super(SingletrainingPendingAttendanceListView, self).dispatch(*args, **kwargs)
       state_list = []
       rp_state = self.request.user.id
       a = ResourcePerson.objects.filter(user__id=rp_state)
       for i in a:
         state_list.append(i.state_id)
-      self.queryset = SingleTraining.objects.filter(tdate__lt=datetime.today().date().isoformat(), status=2,).order_by('-tdate')
+      self.queryset = SingleTraining.objects.filter(tdate__lt=datetime.today().date().isoformat(),
+                                                    status=2,).order_by('-tdate')
       return super(SingletrainingPendingAttendanceListView, self).dispatch(*args, **kwargs)
     if 'Resource Person' in user_group and 'Organiser' in user_group:
       state_list = []
@@ -1466,11 +1489,13 @@ class SingletrainingPendingAttendanceListView(ListView):
       a = ResourcePerson.objects.filter(user__id=rp_state)
       for i in a:
         state_list.append(i.state_id)
-      self.queryset = SingleTraining.objects.filter(tdate__lt=datetime.today().date().isoformat(), status=6, academic__state_id__in=state_list).order_by('-tdate')
+      self.queryset = SingleTraining.objects.filter(tdate__lt=datetime.today().date().isoformat(), status=6,
+                                                    academic__state_id__in=state_list).order_by('-tdate')
       return super(SingletrainingPendingAttendanceListView, self).dispatch(*args, **kwargs)
     elif 'Organiser' in user_group:
       org_inst = self.request.user.organiser.academic_id
-      self.queryset = SingleTraining.objects.filter(tdate__lt=datetime.today().date().isoformat(), status=2, academic__id=org_inst).order_by('-tdate')
+      self.queryset = SingleTraining.objects.filter(tdate__lt=datetime.today().date().isoformat(), status=2,
+                                                    academic__id=org_inst).order_by('-tdate')
       return super(SingletrainingPendingAttendanceListView, self).dispatch(*args, **kwargs)
     elif 'Resource Person' in user_group:
       state_list = []
@@ -1478,7 +1503,8 @@ class SingletrainingPendingAttendanceListView(ListView):
       a = ResourcePerson.objects.filter(user__id=rp_state)
       for i in a:
         state_list.append(i.state_id)
-      self.queryset = SingleTraining.objects.filter(tdate__lt=datetime.today().date().isoformat(), status=6, academic__state_id__in=state_list).order_by('-tdate')
+      self.queryset = SingleTraining.objects.filter(tdate__lt=datetime.today().date().isoformat(),
+                                                    status=6, academic__state_id__in=state_list).order_by('-tdate')
       return super(SingletrainingPendingAttendanceListView, self).dispatch(*args, **kwargs)
 
   def get_context_data(self, **kwargs):
@@ -1512,10 +1538,8 @@ class SingletrainingCreateView(CreateView):
             form_data.academic = self.request.user.organiser.academic
 
         form_data.organiser = self.request.user.organiser
-        student = None
-        skipped, error, warning, write_flag = self.csv_email_validate(
-            self.request.FILES['csv_file'], str(self.request.POST.get('training_type')))
-        context = {'error': error, 'warning': warning, 'batch': form_data}
+        skipped, error, warning, write_flag = self.csv_email_validate(self.request.FILES['csv_file'],
+                                                                      str(self.request.POST.get('training_type')))
         csv_error_line_num = ''
 
         if error or skipped:
@@ -1552,12 +1576,11 @@ class SingletrainingCreateView(CreateView):
                 pass
         return False
 
-    '''
-  get_student_vocational() will fetch the student object having the email id passed to it as an argument.
-
-  '''
-
     def get_student_vocational(self, batch_id, email):
+        """
+        get_student_vocational() will fetch the student object having the
+        email id passed to it as an argument.
+        """
         if email and email.strip():
             email = email.strip().lower()
             try:
@@ -1567,15 +1590,12 @@ class SingletrainingCreateView(CreateView):
                 pass
         return False
 
-    '''
-  create_student_vocational() will add the database entry for the student
-
-  '''
-
     def create_student_vocational(self, training_id, fossid, fname, lname, email, gender):
+        """
+        create_student_vocational() will add the database entry for the student
+        """
         if not fname or not lname or not email or not gender:
             return False
-        user = None
         fname = fname.strip().upper()
         lname = lname.strip().upper()
         email = email.strip().lower()
@@ -1591,12 +1611,11 @@ class SingletrainingCreateView(CreateView):
             return student
         return False
 
-    '''
-  csv_email_validate() will validate the email field, from the CSV file, for the School and Vocational training type.
-
-  '''
-
     def csv_email_validate(self, file_path, ttype):
+        """
+        csv_email_validate() will validate the email field, from the CSV file,
+        for the School and Vocational training type.
+        """
         skipped = []
         error = []
         warning = []
@@ -1645,15 +1664,13 @@ class SingletrainingCreateView(CreateView):
 
         return skipped, error, warning, write_flag
 
-    '''
-  This will call the create_student_vocational() method to create the student entry, from the  CSV file, in the SingleTraining database.
-
-  '''
-
     def create_singletraining_db(self, file_path, tr_id, batch_id):
+        """
+        This will call the create_student_vocational() method to create
+        the student entry, from the  CSV file, in the SingleTraining database.
+        """
         csv_data_list = []
         student_exists = []
-        count = 0
         csvdata = csv.reader(file_path, delimiter=',', quotechar='|')
         for i in csvdata:
             csv_data_list.append(i)
@@ -1667,13 +1684,11 @@ class SingletrainingCreateView(CreateView):
             student_count = SingleTrainingAttendance.objects.filter(training_id=tr_id).count()
         return student_exists, student_count, csv_data_list
 
-'''
-SingleTrainingUpdateView will update a request for a existing One day workshop.
-
-'''
-
 
 class SingletrainingUpdateView(UpdateView):
+    """
+    SingleTrainingUpdateView will update a request for a existing One day workshop.
+    """
     model = SingleTraining
     form_class = SingleTrainingEditForm
     success_url = "/software-training/single-training/pending/"
@@ -1684,7 +1699,6 @@ class SingletrainingUpdateView(UpdateView):
             stcv = SingletrainingCreateView()
             skipped, error, warning, write_flag = stcv.csv_email_validate(
                 self.request.FILES['csv_file'], str(self.request.POST.get('training_type')))
-            context = {'error': error, 'warning': warning, 'batch': form_data}
             csv_error_line_num = ''
             if error or skipped:
                 for i in error:
@@ -1703,13 +1717,13 @@ class SingletrainingUpdateView(UpdateView):
         messages.success(self.request, "Student Batch updated successfully.")
         return HttpResponseRedirect(self.success_url)
 
-'''
-SingleTrainingListView will list all the new/pending training requests in the single-training page pertaining to a specific user, i.e, Organiser or Resource Person.
-
-'''
-
 
 class SingleTrainingListView(ListView):
+    """
+    SingleTrainingListView will list all the new/pending training requests in
+    the single-training page pertaining to a specific user,
+    i.e, Organiser or Resource Person.
+    """
     queryset = None
     paginate_by = 10
     user = None
@@ -1727,7 +1741,7 @@ class SingleTrainingListView(ListView):
             'pendingattendance': 6,
         }
         self.status = kwargs['status']
-        if not self.status in status_list:
+        if self.status not in status_list:
             raise PermissionDenied()
 
         if is_administrator(user):
@@ -1736,15 +1750,18 @@ class SingleTrainingListView(ListView):
 
         if is_resource_person(user) and is_organiser(user):
             self.queryset = SingleTraining.objects.filter(
-                Q(status=status_list[self.status]), academic__state=user.resource_person.filter(resourceperson__status=1)).order_by('-tdate')
+                Q(status=status_list[self.status]),
+                academic__state=user.resource_person.filter(resourceperson__status=1)).order_by('-tdate')
 
         elif is_organiser(user):
             self.queryset = SingleTraining.objects.filter(
-                Q(status=status_list[self.status]), academic__id=self.request.user.organiser.academic_id).order_by('-tdate')
+                Q(status=status_list[self.status]),
+                academic__id=self.request.user.organiser.academic_id).order_by('-tdate')
 
         elif is_resource_person(user):
             self.queryset = SingleTraining.objects.filter(
-                Q(status=status_list[self.status]), academic__state=user.resource_person.filter(resourceperson__status=1)).order_by('-tdate')
+                Q(status=status_list[self.status]),
+                academic__state=user.resource_person.filter(resourceperson__status=1)).order_by('-tdate')
         return super(SingleTrainingListView, self).dispatch(*args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -1753,13 +1770,10 @@ class SingleTrainingListView(ListView):
         return context
 
 
-'''
-SingletrainingMarkCompleteUpdateView will update ongoing to completed.
-'''
-#@method_decorator(group_required("Organiser", "Resource Person", "Administrator"))
-
-
 class SingletrainingMarkCompleteUpdateView(UpdateView):
+    '''
+    SingletrainingMarkCompleteUpdateView will update ongoing to completed.
+    '''
     model = SingleTraining
     form_class = SingleTrainingEditForm
     success_url = "/software-training/single-training/completed/"
@@ -1784,10 +1798,10 @@ class SingletrainingMarkCompleteUpdateView(UpdateView):
         return super(SingletrainingMarkCompleteUpdateView, self).dispatch(*args, **kwargs)
 
 
-''' SingleTrainingAttendance is used to (1) List the attendance view, (2) Mark the attendance '''
-
-
 class SingleTrainingAttendanceListView(ListView):
+    """
+    SingleTrainingAttendance is used to (1) List the attendance view, (2) Mark the attendance
+    """
     queryset = SingleTrainingAttendance.objects.none()
     paginate_by = 500
     template_name = ""
@@ -1846,11 +1860,16 @@ class SingleTrainingAttendanceListView(ListView):
     context['training_status'] = training_status"""
         attendance = self.single_training.singletrainingattendance_set.filter(status=True).count()
         canComplete = False
-        if self.single_training.training_type in [1, 2] and self.single_training.tdate <= datetime.today().date() and self.single_training.status == 3 and attendance:
+        if (self.single_training.training_type in [1, 2] and
+                self.single_training.tdate <= datetime.today().date() and
+                self.single_training.status == 3 and attendance):
             canComplete = True
 
         date_extn = datetime.today().date() - timedelta(days=15)
-        if date_extn <= self.single_training.tdate and self.single_training.status == 3 and is_resource_person(self.request.user) and attendance:
+        if (date_extn <= self.single_training.tdate and
+                self.single_training.status == 3 and
+                is_resource_person(self.request.user) and
+                attendance):
             canComplete = True
 
         context['single_training'] = self.single_training
@@ -1924,7 +1943,7 @@ def SingleTrainingApprove(request, pk):
         st.save()
         # Send Emails from here
     else:
-        print "Error"
+        print("Error")
     return HttpResponseRedirect('/software-training/single-training/approved/')
 
 
@@ -1934,13 +1953,12 @@ def SingleTrainingReject(request, pk):
     and change the status of the SingleTraining batch, in the database, from
     pending to rejected
     """
-
     st = SingleTraining.objects.get(pk=pk)
     if st:
         st.status = 5
         st.save()
     else:
-        print "Error"
+        print("Error")
     return HttpResponseRedirect("/software-training/single-training/approved/")
 
 # using in stp mark attendance also
@@ -1952,7 +1970,7 @@ def SingleTrainingPendingAttendance(request, pk):
         st.status = 6
         st.save()
     else:
-        print "Error"
+        print("Error")
     return HttpResponseRedirect("/software-training/single-training/pending/")
 
 
@@ -1963,7 +1981,6 @@ def MarkAsComplete(request, pk):
         st.save()
         messages.success(request, 'Request to mark training complete successfully sent')
     else:
-        print "Error"
         messages.error(request, 'Request not sent.Please try again.')
     return HttpResponseRedirect("/software-training/training-planner/")
 
@@ -2067,7 +2084,7 @@ class OldTrainingCloseView(CreateView):
                 tp.updated = created
                 tp.save()
             except Exception as e:
-                print e
+                print(e)
         return tp
 
     def _get_student(self, ta):
@@ -2197,17 +2214,6 @@ def LatexWorkshopFileUpload(request):
     if request.method == 'POST':
         form = LatexWorkshopFileUploadForm(request.POST, request.FILES)
         if form.is_valid():
-            uploaded_file = request.FILES['file_upload']
-            '''
-      email = request.POST['email']
-      email = email.replace('.', '_')
-      email = email.replace('@', '_')
-      print email
-      f = open('media/latex/{0}/{1}'.format(email, uploaded_file), 'wb+')
-      for data in uploaded_file.chunks():
-          f.write(data)
-      f.close()
-      '''
             form.save()
             form = LatexWorkshopFileUploadForm()
             context = {'form': form, 'success': True}

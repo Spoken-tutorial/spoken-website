@@ -7,7 +7,7 @@
      <p> You have successfully uploaded the assignment. </p>
    {% endif %}
    <div class="form-group" >
-    <label  class="col-sm-3 control-label">Email: </label> 
+    <label  class="col-sm-3 control-label">Email: </label>
     <div class="col-sm-9">
       {{ form.email }} {{ form.email.errors }}
     </div>
@@ -16,7 +16,7 @@
    <br />
    <div class="form-group">
      <label  class="col-sm-3 control-label">Upload file:</label>
-      <div class="col-sm-9"> 
+      <div class="col-sm-9">
          {{ form.file_upload }} {{ form.file_upload.errors }}
       </div>
    </div>
@@ -25,4 +25,3 @@
 
   </form>
 {% endblock content %}
-

@@ -13,7 +13,7 @@
   text-decoration: underline;
   }
   </style>
-{% endblock %} 
+{% endblock %}
 {% block heading %}
 <table  class="header-table">
   <tr>
@@ -52,7 +52,7 @@
           </div>
          </div>
        </div>
-       
+
        <div class="modal fade" id="csvModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"style=" color:#0052A3; font-size:15px;" aria-hidden="true">
     	 <div class="modal-dialog">
           <div class="modal-content">
@@ -86,13 +86,13 @@
                                 <option value="24" >School</option>
                               </select>
                                {{ form.department.errors }}
-                            {% else %} 
+                            {% else %}
                               {% render_field form.department class+="form-control department" tabindex="1" %}
                               {{ form.department.errors }}
                             {% endif %}
                         </div>
                       </div>
-                      
+
                       <div class='form-row'>
                         <div class='col-xs-12 form-group required'>
                           <label class='control-label'>Year of Joining </label><small> (Academic Joining year of students)</small>
@@ -100,7 +100,7 @@
                           {{ form.year.errors }}
                         </div>
                       </div>
-                      
+
                       <div class='form-row'>
                         <div class='col-xs-12 form-group required'>
                           <label class='control-label'>Master Batch Student List - Csv File</label>&nbsp;&nbsp;<small>(Please upload your CSV file here.)<br> Click Browse to select the spreadsheet containing student details.</small>
@@ -109,7 +109,7 @@
 			  <small>If you have used MS-EXCEL to create the CSV file please make sure that you have saved it with csv(ms-dos) file extention.</small>
                         </div>
                       </div>
-              
+
                        <div class="modal fade" id="confirmModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" style="color:#0052A3; font-size:15px;">
                         <div class="modal-dialog ">
                           <div class="modal-content">

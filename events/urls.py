@@ -10,7 +10,8 @@ urlpatterns = [
     url(r'^fix-date-for-first-training/$', 'events.views.fix_date_for_first_training',
         name='fix_date_for_first_training'),
     # url(r'^training-gentle-reminder/$', 'events.views.training_gentle_reminder', name='training_gentle_reminder'),
-    # url(r'^training-completion-reminder/$', 'events.views.training_completion_reminder', name='training_completion_reminder'),
+    # url(r'^training-completion-reminder/$', 'events.views.training_completion_reminder',
+    #     name='training_completion_reminder'),
     url(r'^close-predated-ongoing-workshop/$', 'events.views.close_predated_ongoing_workshop',
         name='close_predated_ongoing_workshop'),
     url(r'^close-predated-ongoing-test/$', 'events.views.close_predated_ongoing_test',
@@ -29,9 +30,10 @@ urlpatterns = [
     url(r'^training/old-training-attendance/$', 'events.views.old_training_attendance', name='old_training_attendance'),
     url(r'^training/old-training-attendance-upload/(\d+)/$',
         'events.views.old_training_attendance_upload', name='old_training_attendance_upload'),
-
-    url(r'^(?P<role>\w+)/(?P<status>\w+)/$', 'events.views.organiser_invigilator_index', name='organiser_invigilator_index'),
-    url(r'^organiser/(?P<status>\w+)/(?P<code>\w+)/(?P<userid>\d+)/$', 'events.views.rp_organiser', name='rp_organiser'),
+    url(r'^(?P<role>\w+)/(?P<status>\w+)/$', 'events.views.organiser_invigilator_index',
+        name='organiser_invigilator_index'),
+    url(r'^organiser/(?P<status>\w+)/(?P<code>\w+)/(?P<userid>\d+)/$', 'events.views.rp_organiser',
+        name='rp_organiser'),
 
     url(r"^organiser/request/(?P<username>[\w. @-]+)/$", 'events.views.organiser_request', name='organiser_request'),
     url(r"^organiser/(?P<username>[\w. @-]+)/edit/$", 'events.views.organiser_edit', name='organiser_edit'),
@@ -63,7 +65,8 @@ urlpatterns = [
         'events.views.training_participant_livefeedback', name='training_participant_livefeedback'),
 
     # language Feedback
-    #url(r'^training/participant/language-feedback/(\d+)/(\d+)/$', 'events.views.training_participant_view_language_feedback', name='training_participant_viewlivefeedback'),
+    # url(r'^training/participant/language-feedback/(\d+)/(\d+)/$',
+    #     'events.views.training_participant_view_language_feedback', name='training_participant_viewlivefeedback'),
     url(r'^training/participant/language-feedback/(\d+)/(\d+)/$',
         'events.views.training_participant_language_feedback', name='training_participant_language_feedback'),
 
@@ -73,7 +76,8 @@ urlpatterns = [
     url(r'^training/(?P<role>\w+)/(?P<status>\w+)/$', 'events.views.training_list', name='training_list'),
     url(r'^training/(?P<role>\w+)/(?P<rid>\d+)/edit/$', 'events.views.training_request', name='training_edit'),
     url(r'^training/(?P<role>\w+)/(?P<rid>\d+)/clone/$', 'events.views.training_clone', name='training_clone'),
-    # url(r'^training/training-completion/(?P<rid>\d+)/$', 'events.views.training_completion', name="training_completion"),
+    # url(r'^training/training-completion/(?P<rid>\d+)/$', 'events.views.training_completion',
+    #     name="training_completion"),
     url(r'^training/view/training-completion/(?P<rid>\d+)/$',
         'events.views.view_training_completion', name="view_training_completion"),
 

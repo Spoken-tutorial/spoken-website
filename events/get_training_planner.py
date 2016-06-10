@@ -10,6 +10,7 @@ from .models import Semester, TrainingPlanner
 
 
 class CurrentTrainingPlanner():
+
     def is_even_sem(self, month):
         # 0 => odd sem, 1 => even sem
         if month > 6 and month < 13:
