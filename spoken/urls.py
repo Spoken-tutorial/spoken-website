@@ -7,8 +7,8 @@ from django.views.generic import TemplateView
 admin.autodiscover()
 
 urlpatterns = [
-    (r'^robots\.txt$', TemplateView.as_view(template_name='robots.txt', content_type='text/plain')),
-    (r'^sitemap\.xml$', TemplateView.as_view(template_name='sitemap.xml', content_type='text/xml')),
+    url(r'^robots\.txt$', TemplateView.as_view(template_name='robots.txt', content_type='text/plain')),
+    url(r'^sitemap\.xml$', TemplateView.as_view(template_name='sitemap.xml', content_type='text/xml')),
     url(r'^sitemap\.html$', 'spoken.views.sitemap', name='sitemap'),
     # Examples:
     url(r'^addu/$', 'spoken.views.add_user', name='addu'),
