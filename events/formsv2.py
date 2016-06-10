@@ -5,6 +5,7 @@ import datetime
 from django import forms
 
 # Spoken Tutorial Stuff
+from creation.models import FossAvailableForWorkshop
 from events.helpers import get_academic_years
 from events.models import *
 

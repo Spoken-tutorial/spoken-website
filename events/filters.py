@@ -3,6 +3,7 @@ import django_filters
 from django.core.exceptions import ObjectDoesNotExist
 
 # Spoken Tutorial Stuff
+from creation.models import FossAvailableForWorkshop
 from events.models import *
 
 
