@@ -3,7 +3,7 @@ spoken-website
 
 Spoken tutorial website in django
 
-## Getting Started 
+## Getting Started
 
 Make sure you have virtualenv and mysql server running locally.
 
