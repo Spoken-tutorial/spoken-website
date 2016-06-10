@@ -36,7 +36,7 @@ if sys.version_info[0] < 3:
     bytes_type = str
     unichr = unichr
     from urllib import urlretrieve
-    
+
     def byte(num):
         return chr(num)
 
@@ -83,7 +83,7 @@ else:
     bytes_type = bytes
     unichr = chr
     from urllib.request import urlretrieve
-    
+
     def byte(num):
         return bytes((num,))
 

@@ -708,7 +708,3 @@ def add_suffix(dfa, nodes, last, downto, seen):
         # Add the node's transitions to the DFA
         for label, dest in iteritems(node.arcs):
             dfa.add_transition(this, label, dest)
-
-
-
-

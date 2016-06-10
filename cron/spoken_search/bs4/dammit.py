@@ -299,7 +299,7 @@ class EncodingDetector:
         else:
             xml_endpos = 1024
             html_endpos = max(2048, int(len(markup) * 0.05))
-            
+
         declared_encoding = None
         declared_encoding_match = xml_encoding_re.search(markup, endpos=xml_endpos)
         if not declared_encoding_match and is_html:
@@ -658,7 +658,7 @@ class UnicodeDammit:
         0x9c : b'\xc5\x93',     # œ
         0x9e : b'\xc5\xbe',     # ž
         0x9f : b'\xc5\xb8',     # Ÿ
-        0xa0 : b'\xc2\xa0',     #  
+        0xa0 : b'\xc2\xa0',     #
         0xa1 : b'\xc2\xa1',     # ¡
         0xa2 : b'\xc2\xa2',     # ¢
         0xa3 : b'\xc2\xa3',     # £
@@ -826,4 +826,3 @@ class UnicodeDammit:
             # Store the final chunk.
             byte_chunks.append(in_bytes[chunk_start:])
         return b''.join(byte_chunks)
-

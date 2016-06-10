@@ -128,8 +128,3 @@ class RegexBuilder(object):
 
     def question(self, n):
         return self.choice(n, self.epsilon())
-
-
-
-
-

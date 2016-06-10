@@ -372,4 +372,3 @@ def clockface_lru_cache(maxsize=100):
         wrapper.cache_clear = cache_clear
         return wrapper
     return decorating_function
-

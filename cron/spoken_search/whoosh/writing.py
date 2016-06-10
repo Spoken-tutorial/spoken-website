@@ -92,7 +92,7 @@ def MERGE_SMALL(writer, segments):
             unchanged_segments.append(seg)
         else:  # look for a merge point
             segments_to_merge.append((seg, i)) # merge every segment up to the merge point
-            if i > 3 and total_docs < fib(i + 5):  
+            if i > 3 and total_docs < fib(i + 5):
                 merge_point_found = True
 
     if merge_point_found and len(segments_to_merge) > 1:

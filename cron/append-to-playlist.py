@@ -25,12 +25,12 @@ except gdata.service.BadAuthentication:
 
 # fetching tutorial resource records
 rows = TutorialResource.objects.filter(
-  Q(status=1)|Q(status=2), 
+  Q(status=1)|Q(status=2),
   video_id__isnull=False,
   playlist_item_id__isnull=True
 ).order_by(
-  'tutorial_detail__foss__foss', 
-  'tutorial_detail__level_id', 
+  'tutorial_detail__foss__foss',
+  'tutorial_detail__level_id',
   'tutorial_detail__order'
 )
 
@@ -50,7 +50,7 @@ success_log_file_head = open(
 for row in rows:
   # fetching playlist record
   playlist = PlaylistInfo.objects.filter(
-    language_id=row.language_id, 
+    language_id=row.language_id,
     foss_id=row.tutorial_detail.foss.id
   ).first()
 

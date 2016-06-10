@@ -704,4 +704,3 @@ class TOC(object):
 
         # Rename temporary file to the proper filename
         storage.rename_file(tempfilename, tocfilename, safe=True)
-

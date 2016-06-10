@@ -335,4 +335,3 @@ class PathTokenizer(Tokenizer):
                  token.pos = pos
                  pos += 1
              yield token
-

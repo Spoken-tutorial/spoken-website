@@ -67,8 +67,8 @@ def convert_to_html(rawdata):
         245: '&otilde;',
         246: '&ouml;',
         223: '&szlig;',
-        254: '&thorn;', 
-        250: '&uacute;', 
+        254: '&thorn;',
+        250: '&uacute;',
         251: '&ucirc;',
         249: '&ugrave;',
         252: '&uuml;',
@@ -87,7 +87,7 @@ def convert_to_html(rawdata):
         elif ch > 127:
             c = ch;
             a4 = int(c % 16);
-            c = math.floor(c / 16); 
+            c = math.floor(c / 16);
             a3 = int(c % 16);
             c = math.floor(c / 16);
             a2 = int(c % 16);
