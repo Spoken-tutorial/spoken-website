@@ -41,7 +41,7 @@
                 {{ form.district.errors }}
             </div>
         </div>
-        
+
         <div class="form-university-group">
             <div class="form-group">
                 <label for="id_state">University</label>
@@ -49,7 +49,7 @@
                 {{ form.university.errors }}
             </div>
         </div>
-        
+
         <div class="form-institutiontype-group">
             <div class="form-group">
                 <label for="id_state">Institute Type</label>
@@ -58,7 +58,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="form-institute-group">
             <div class="form-group">
                 <label for="id_institute">Institute</label>
@@ -66,7 +66,7 @@
                 {{ form.institute.errors }}
             </div>
         </div>
-        
+
     <input class="btn btn-primary" type="submit" value="Submit" />
     {% endwith %}
 </form>
@@ -115,12 +115,12 @@
             $('.form-institutiontype-group').css('display','none');
             $('.form-institute-group').css('display','none');
         }
-        
+
         function showState(){
             $('.form-state-group .state').attr("disabled", false);
             $('.form-state-group').css('display','block');
         }
-        
+
         disableAllInput();
         $('.permissiontype').change(function(){
             $district = $('#id_district');
@@ -158,7 +158,7 @@
                 })
             }
         });
-        
+
         $('.district').change(function(){
             //ajaxDistrictFillDatas('', 'institute', $('.district').val());
             console.log($('.district').val());

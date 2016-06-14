@@ -185,7 +185,7 @@ header h2 {
 }
 
 /*feature table*/
-.features-table { 
+.features-table {
 
     width: 88%;
     margin: 1 auto;
@@ -194,9 +194,9 @@ header h2 {
 
     color: #2a2a2a;
     margin-left: 50px;
-    background: #fafafa;  
+    background: #fafafa;
     background-image: -moz-linear-gradient(top, #fff, #eaeaea, #fff); /* Firefox 3.6 */
-    background-image: -webkit-gradient(linear,center bottom,center top,from(#fff),color-stop(0.5, #eaeaea),to(#fff)); 
+    background-image: -webkit-gradient(linear,center bottom,center top,from(#fff),color-stop(0.5, #eaeaea),to(#fff));
 }
 
 .features-table td {
@@ -231,7 +231,7 @@ header h2 {
 
 .features-table td:nth-child(4)
 {
-    background: #d0d0d0;  
+    background: #d0d0d0;
     background: rgba(184,243,85,0.3);
 }
 
@@ -249,9 +249,9 @@ tr:nth-child(odd) {
 }
 /*Footer*/
 .features-table tfoot td {
-    font: bold 1.4em Georgia;  
+    font: bold 1.4em Georgia;
     -moz-border-radius-bottomright: 10px;
-    -moz-border-radius-bottomleft: 10px; 
+    -moz-border-radius-bottomleft: 10px;
     border-bottom-right-radius: 10px;
     border-bottom-left-radius: 10px;
     border-bottom: 1px solid #dadada;

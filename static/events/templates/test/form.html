@@ -161,7 +161,7 @@
                 $('.workshop_group .workshop').attr('disabled', 'disabled');
             }
         }
-        
+
         $category = $('#id_test_category');
         hide_input();
         $workshop = $('#id_workshop');
@@ -170,7 +170,7 @@
         $category.change(function(){
             hide_input();
         });
-        
+
         $college = $('#id_academic');
         $('#id_district').change(function() {
             var district = $(this).val();
@@ -191,20 +191,20 @@
                 }
             });
         });
-        
+
         $workshop = $('#id_workshop');
         $training = $('#id_training');
         $department = $('#id_department');
         $foss = $('#id_foss');
-        
+
         $workshop.change(function() {
             ajaxFossDeptFillDatas('foss', 'dept', 0);
         });
-        
+
         $training.change(function() {
             ajaxFossDeptFillDatas('foss', 'dept', 1);
         });
-        
+
         function ajaxFossDeptFillDatas(foss, dept, type){
             $afoss = $('#id_foss');
             $adepartment = $('#id_department');
@@ -213,7 +213,7 @@
             } else {
                 var workshop = $(".workshop").val();
             }
-            
+
             $foss = foss || "";
             $department = dept || "";
             $type = type;

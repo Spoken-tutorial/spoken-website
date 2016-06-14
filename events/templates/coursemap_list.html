@@ -7,7 +7,7 @@
 {% block content %}
 {% load cmsdata %}
 {% load student %}
-  
+
   <div class="row">
   {% if object_list %}
     <table class="paleblue table">
@@ -19,7 +19,7 @@
           <td>{{ record.test }}</td>
           <td>{{ record.category_name }}</td>
           <td><a href="{% url 'events:coursemapupdate' record.id %}">Edit</a></td>
-          
+
         </tr>
       {% endfor %}
     </table>
@@ -27,5 +27,5 @@
     <p class='no-record'>No record found!</p>
   {% endif %}
   </div>
-  
+
 {% endblock %}

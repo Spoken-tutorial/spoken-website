@@ -136,7 +136,7 @@ module.exports = function(grunt) {
   grunt.registerTask('test', ['karma:build', 'karma:buildUnderscore']);
 
   grunt.registerTask('test-debug', ['karma:debug']);
-  
+
   grunt.registerTask('travis', ['karma:travis', 'karma:travisUnderscore']);
 
   // Provides the "bump" task.

@@ -699,5 +699,3 @@ class MultiIdSet(DocIdSet):
     def __contains__(self, item):
         idset, n = self._set_and_docnum(item)
         return n in idset
-
-

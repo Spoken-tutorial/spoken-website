@@ -12,7 +12,7 @@
   display:none;
   }
   </style>
-{% endblock %} 
+{% endblock %}
 {% block heading %}
   <i class="home-page-title-i">Training Planner Form</i>
   <a class="btn btn-primary pull-right" data-toggle="modal" data-target="#myModal"><i class="fa fa-2 fa-question"></i>  Instructions for STPF</a>
@@ -46,7 +46,7 @@
                     <li>Unmapped Software courses can be planned during designated computer lab hours present in the time table during this semester.</li>
                     <li><b>Please Note -</b> Not more than 2 courses with assessment test can be requested in one semester.</li>
                     <li>Test are available for the following FOSS : <b>BASH, C, CPP, Advance CPP, Java, PHP & MySQL, Linux, LaTeX, Scilab, Python and PERL</b>.</li>
-                    
+
                     <!-- <li>See link for suggestions: ( Wiki  Time Table )</li> -->
                  </ul>
               </div>
@@ -73,7 +73,7 @@
                           {{ form.department.errors }}
                         </div>
                       </div>
-                      
+
                       <div class='form-row'>
                         <div class='col-xs-12 form-group required'>
                           <label class='control-label'>Batch</label>
@@ -81,7 +81,7 @@
                           {{ form.batch.errors }}
                         </div>
                       </div>
-                      
+
                       <div class='form-row'>
                         <div class='col-xs-12 form-group required'>
                           <label class='control-label'>Training Type</label>
@@ -89,7 +89,7 @@
                           {{ form.course_type.errors }}
                         </div>
                       </div>
-                      
+
                       <div class='form-row'>
                         <div class='col-xs-12 form-group required'>
                           <label class='control-label' id="sem_start_date">Semester Start Date</label>
@@ -98,7 +98,7 @@
                           <small>Odd Semester July to Aug, Even Semester Jan to Feb </small>
                         </div>
                       </div>
-                      
+
                       <div class='form-row'>
                         <div class='col-xs-12 form-group required'>
                           <label class='control-label'>Software Course </label>
@@ -106,7 +106,7 @@
                           {{ form.course.errors }}
                         </div>
                       </div>
-                      
+
                       <!-- <div class='form-row'>
                         <div class='col-xs-12 form-group required'>
                           <label class='control-label'>Language </label>
@@ -114,7 +114,7 @@
                           {{ form.language.errors }}
                         </div>
                       </div> -->
-                      
+
                       <div class="form-group">
                           <div class="col-xs-12 form-group">
                               <input class="btn btn-primary" type="submit" value="Submit" />
@@ -135,7 +135,7 @@
     $(window).load(function(){
         $('#myModal').modal('show');
     });
-    
+
     var td = new Date();
     var y=td.getFullYear();
     var sem_type = "{{tp}}";
@@ -151,7 +151,7 @@
        });
         $('#successModal').modal('show');
       }
-     
+
       if($('.department').val() == '') {
         $('.course_type').val('');
         $('.course_type').prop('disabled', 'disabled');
@@ -230,7 +230,7 @@
           lang:'en',
           format:'Y-m-d',
           formatDate:'Y/m/d',
-          minDate:mind, 
+          minDate:mind,
           weekends:[],
           maxDate:maxd,
           step:5,
@@ -238,7 +238,7 @@
         });
         $('.course').html('<option>---------</option>');
         $('.course').prop('disabled', 'disabled');
-        
+
         if(course_type != '' && department != '' && batch != ''){
           $.ajax({
             url: "/software-training/get-course-option/",
@@ -268,7 +268,7 @@
           });
         }
       });
-      
+
       $('.batch').on('change', function() {
         batch = $(this).val();
         department = $('.department').val();
@@ -299,7 +299,7 @@
               //$('.ajax-refresh-language').hide();
             }
           });
-                
+
         }
       });
       $('.department').on('change', function(){

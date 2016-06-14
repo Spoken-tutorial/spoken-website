@@ -1,18 +1,23 @@
-from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render, render_to_response, get_object_or_404
-from django.core.context_processors import csrf
-from django.template import RequestContext
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth import authenticate, login, logout
-from django.core.mail import EmailMultiAlternatives
-from django.contrib import messages
-from django.utils import timezone
+# Standard Library
+import random
+import string
+
+# Third Party Stuff
 from django.conf import settings
-from django.http import Http404
-from cms.models import *
-from cms.forms import *
+from django.contrib import messages
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.core.context_processors import csrf
+from django.core.mail import EmailMultiAlternatives
+from django.http import HttpResponseRedirect
+from django.shortcuts import get_object_or_404, render, render_to_response
+from django.template import RequestContext
 from PIL import Image
-import random, string
+
+# Spoken Tutorial Stuff
+from cms.forms import *
+from cms.models import *
+
 
 def dispatcher(request, permalink=''):
     if permalink == '':
@@ -28,11 +33,14 @@ def dispatcher(request, permalink=''):
     }
     return render(request, 'cms/templates/page.html', context)
 
+
 def create_profile(user):
-    confirmation_code = ''.join(random.choice(string.ascii_uppercase + string.digits + string.ascii_lowercase) for x in range(33))
+    confirmation_code = ''.join(random.choice(string.ascii_uppercase + string.digits +
+                                              string.ascii_lowercase) for x in range(33))
     profile = Profile(user=user, confirmation_code=confirmation_code)
     profile.save()
     return profile
+
 
 def account_register(request):
     context = {}
@@ -51,8 +59,8 @@ def account_register(request):
                 Please confirm your registration by clicking on the activation link which has been sent to your registered email id.
             """)
             return HttpResponseRedirect('/')
-        context = {'form':form}
-        return render_to_response('cms/templates/register.html', context, context_instance = RequestContext(request))
+        context = {'form': form}
+        return render_to_response('cms/templates/register.html', context, context_instance=RequestContext(request))
     else:
         form = RegisterForm()
         context = {
@@ -61,9 +69,9 @@ def account_register(request):
         context.update(csrf(request))
         return render_to_response('cms/templates/register.html', context)
 
+
 def send_registration_confirmation(user):
     p = Profile.objects.get(user=user)
-    #user.email = "k.sanmugam2@gmail.com"
     # Sending email when an answer is posted
     subject = 'Account Active Notification'
     message = """Dear {0},
@@ -83,34 +91,37 @@ IIT Bombay.
 
     email = EmailMultiAlternatives(
         subject, message, 'no-reply@spoken-tutorial.org',
-        to = [user.email], bcc = [], cc = [],
-        headers={'Reply-To': 'no-reply@spoken-tutorial.org', "Content-type":"text/html;charset=iso-8859-1"}
+        to=[user.email], bcc=[], cc=[],
+        headers={'Reply-To': 'no-reply@spoken-tutorial.org', "Content-type": "text/html;charset=iso-8859-1"}
     )
 
-    #email.attach_alternative(message, "text/html")
     try:
-        result = email.send(fail_silently=False)
+        email.send(fail_silently=False)
     except:
         pass
+
 
 def confirm(request, confirmation_code, username):
     try:
         user = User.objects.get(username=username)
         profile = Profile.objects.get(user=user)
-        #if profile.confirmation_code == confirmation_code and user.date_joined > (timezone.now()-timezone.timedelta(days=1)):
+        # if profile.confirmation_code == confirmation_code and user.date_joined >
+        # (timezone.now()-timezone.timedelta(days=1)):
         if profile.confirmation_code == confirmation_code:
             user.is_active = True
             user.save()
-            user.backend='django.contrib.auth.backends.ModelBackend' 
-            login(request,user)
-            messages.success(request, "Your account has been activated!. Please update your profile to complete your registration")
-            return HttpResponseRedirect('/accounts/profile/'+user.username)
+            user.backend = 'django.contrib.auth.backends.ModelBackend'
+            login(request, user)
+            messages.success(
+                request, "Your account has been activated!. Please update your profile to complete your registration")
+            return HttpResponseRedirect('/accounts/profile/' + user.username)
         else:
             messages.success(request, "Something went wrong!. Please try again!")
             return HttpResponseRedirect('/')
-    except Exception, e:
+    except Exception:
         messages.success(request, "Your account not activated!. Please try again!")
         return HttpResponseRedirect('/')
+
 
 def account_login(request):
     user = request.user
@@ -118,7 +129,7 @@ def account_login(request):
     if request.user.is_anonymous():
         form = LoginForm()
         context = {
-            'form' : form
+            'form': form
         }
         if request.method == 'POST':
             username = request.POST.get('username', None)
@@ -134,11 +145,12 @@ def account_login(request):
                         else:
                             request.session.set_expiry(0)
                         try:
-                            p = Profile.objects.get(user_id = user.id)
-                            if not user.first_name or not user.last_name or not p.state or not p.district or not p.city  or not p.address or not p.pincode or not p.phone:# or not p.picture:
-                                messages.success(request, "<ul><li>Please update your profile.</li><li>Please make sure you enter your First name, Last name both and with correct spelling.</li><li>It is recommended that you do upload the photo.</li></ul>")
-                                return HttpResponseRedirect('/accounts/profile/'+user.username)
-                        except: 
+                            p = Profile.objects.get(user_id=user.id)
+                            if not user.first_name or not user.last_name or not p.state or not p.district or not p.city or not p.address or not p.pincode or not p.phone:  # or not p.picture:
+                                messages.success(
+                                    request, "<ul><li>Please update your profile.</li><li>Please make sure you enter your First name, Last name both and with correct spelling.</li><li>It is recommended that you do upload the photo.</li></ul>")
+                                return HttpResponseRedirect('/accounts/profile/' + user.username)
+                        except:
                             pass
                         if request.GET and request.GET['next']:
                             return HttpResponseRedirect(request.GET['next'])
@@ -157,40 +169,40 @@ def account_login(request):
         return render(request, 'cms/templates/login.html', context)
     return HttpResponseRedirect('/')
 
+
 @login_required
 def account_logout(request):
-    context = RequestContext(request)
     logout(request)
     return HttpResponseRedirect('/')
+
 
 @login_required
 def account_profile(request, username):
     user = request.user
     try:
-      profile = Profile.objects.get(user_id=user.id)
+        profile = Profile.objects.get(user_id=user.id)
     except:
-      profile = create_profile(user)
+        profile = create_profile(user)
     old_file_path = settings.MEDIA_ROOT + str(profile.picture)
-    new_file_path = None
     if request.method == 'POST':
-        form = ProfileForm(user, request.POST, request.FILES, instance = profile)
+        form = ProfileForm(user, request.POST, request.FILES, instance=profile)
         if form.is_valid():
             user.first_name = request.POST['first_name']
             user.last_name = request.POST['last_name']
             user.save()
             form_data = form.save(commit=False)
             form_data.user_id = user.id
-            
+
             if 'picture-clear' in request.POST and request.POST['picture-clear']:
-               #if not old_file == new_file:
-               if os.path.isfile(old_file_path):
-                   os.remove(old_file_path)
+                # if not old_file == new_file:
+                if os.path.isfile(old_file_path):
+                    os.remove(old_file_path)
 
             if 'picture' in request.FILES:
-               form_data.picture = request.FILES['picture']
-            
+                form_data.picture = request.FILES['picture']
+
             form_data.save()
-            
+
             if 'picture' in request.FILES:
                 size = 128, 128
                 filename = str(request.FILES['picture'])
@@ -199,39 +211,41 @@ def account_profile(request, username):
                     im = Image.open(settings.MEDIA_ROOT + str(form_data.picture))
                     im.thumbnail(size, Image.ANTIALIAS)
                     ext = ext[1:]
-                    
+
                     mimeType = ext.upper()
                     if mimeType == 'JPG':
                         mimeType = 'JPEG'
-                    thumbName = 'user/' + str(user.id)+ '/' + str(user.id) + '-thumb.' + ext
+                    thumbName = 'user/' + str(user.id) + '/' + str(user.id) + '-thumb.' + ext
                     im.save(settings.MEDIA_ROOT + thumbName, mimeType)
                     form_data.thumb = thumbName
                     form_data.save()
             messages.success(request, "Your profile has been updated!")
             return HttpResponseRedirect("/accounts/view-profile/" + user.username)
-        
-        context = {'form':form}
+
+        context = {'form': form}
         return render(request, 'cms/templates/profile.html', context)
     else:
         context = {}
         context.update(csrf(request))
         instance = Profile.objects.get(user_id=user.id)
-        context['form'] = ProfileForm(user, instance = instance)
+        context['form'] = ProfileForm(user, instance=instance)
         return render(request, 'cms/templates/profile.html', context)
+
 
 @login_required
 def account_view_profile(request, username):
-    user = User.objects.get(username = username)
+    user = User.objects.get(username=username)
     profile = None
     try:
-      profile = Profile.objects.get(user = user)
+        profile = Profile.objects.get(user=user)
     except:
-      profile = create_profile(user)
+        profile = create_profile(user)
     context = {
-        'profile' : profile,
-        'media_url' : settings.MEDIA_URL,
+        'profile': profile,
+        'media_url': settings.MEDIA_URL,
     }
     return render(request, 'cms/templates/view-profile.html', context)
+
 
 def password_reset(request):
     context = {}
@@ -248,15 +262,14 @@ def password_reset(request):
             from mdldjango.views import changeMdlUserPass
             changeMdlUserPass(request.POST['email'], password_string)
 
-            print 'Username => ', user.username
-            print 'New password => ', password_string
-
             changePassUrl = "http://www.spoken-tutorial.org/accounts/change-password"
             if request.GET and request.GET['next']:
-                changePassUrl = changePassUrl + "?auto=%s&username=%s&next=%s" % (user.profile_set.first().confirmation_code, user.username, request.GET['next'])
+                changePassUrl = changePassUrl + \
+                    "?auto=%s&username=%s&next=%s" % (user.profile_set.first(
+                    ).confirmation_code, user.username, request.GET['next'])
 
-            #Send email
-            subject  = "Spoken Tutorial password reset"
+            # Send email
+            subject = "Spoken Tutorial password reset"
             to = [user.email]
             message = '''Hi {0},
 
@@ -270,7 +283,7 @@ Your current login information is now:
 With respect to change your password kindly follow the steps written below :
 
 Step 1. Visit below link to change the password. Provide temporary password given above in the place of Old Password field.
-	{3}
+    {3}
 
 Step 2.Use this changed password for spoken forum login and in moodle login also.
 
@@ -283,24 +296,23 @@ Best Wishes,
 Admin
 Spoken Tutorials
 IIT Bombay.
-'''.format(user.username, user.username, password_string,changePassUrl)
+'''.format(user.username, user.username, password_string, changePassUrl)
 
             # send email
             email = EmailMultiAlternatives(
                 subject, message, 'no-reply@spoken-tutorial.org',
-                to = to, bcc = [], cc = [],
-                headers={'Reply-To': 'no-reply@spoken-tutorial.org', "Content-type":"text/html;charset=iso-8859-1"}
+                to=to, bcc=[], cc=[],
+                headers={'Reply-To': 'no-reply@spoken-tutorial.org', "Content-type": "text/html;charset=iso-8859-1"}
             )
 
-            result = email.send(fail_silently=False)
+            email.send(fail_silently=False)
             # redirect to next url if there or redirect to login page
             # use for forum password rest form
             redirectNext = request.GET.get('next', False)
             if redirectNext:
                 return HttpResponseRedirect(redirectNext)
-            messages.success(request, "New password sent to your email "+user.email)
+            messages.success(request, "New password sent to your email " + user.email)
             return HttpResponseRedirect('/accounts/change-password/')
-            
 
     context = {
         'form': form
@@ -309,20 +321,20 @@ IIT Bombay.
     return render(request, 'cms/templates/password_reset.html', context)
 
 
-#@login_required
+# @login_required
 def change_password(request):
     # chacking uselogin
     pcode = request.GET.get('auto', False)
     username = request.GET.get('username', False)
     nextUrl = request.GET.get('next', False)
-    
+
     # check pcode in profile page
     if pcode and username and nextUrl:
         user = User.objects.get(username=username)
         profile = Profile.objects.get(user=user)
         if profile.confirmation_code == pcode:
-            user.backend='django.contrib.auth.backends.ModelBackend' 
-            login(request,user)
+            user.backend = 'django.contrib.auth.backends.ModelBackend'
+            login(request, user)
 
     if request.user.is_anonymous():
         return HttpResponseRedirect('/accounts/login/?next=/accounts/change-password')
@@ -332,7 +344,8 @@ def change_password(request):
     if request.method == "POST":
         form = ChangePasswordForm(request.POST)
         if form.is_valid():
-            profile = Profile.objects.get(user_id = form.cleaned_data['userid'], confirmation_code = form.cleaned_data['code'])
+            profile = Profile.objects.get(user_id=form.cleaned_data['userid'],
+                                          confirmation_code=form.cleaned_data['code'])
             user = profile.user
             user.set_password(form.cleaned_data['new_password'])
             user.save()

@@ -20,7 +20,7 @@
 <h1 class="page-title">
 <i class="fa fa-list-ul"></i>
    One Day Workshop/Training Participants
-</h1> 
+</h1>
 <br/>
 <div class="bs-callout bs-callout-info">
 <dl class="dl-horizontal">
@@ -55,8 +55,8 @@
         {% if user.id == single_training.organiser.user_id and not training_status == 4 %}
           <div style="height:70px;" class="pull-left">
                 <div style="width:200px;float:left;text-align:center;">
-                  <p id="button-select">To select all participants</p> <input type=button class="btn btn-success"  value="Check All" onClick="this.value=check()"> 
-                </div> 
+                  <p id="button-select">To select all participants</p> <input type=button class="btn btn-success"  value="Check All" onClick="this.value=check()">
+                </div>
             </div>
             {% if canComplete %}
                 <div class="pull-right"><a class="btn btn-success" href="{% url 'events:markcomplete-single-training' single_training.id %}">Mark as Complete</a></div>
@@ -99,13 +99,13 @@
               </div>
     </div>
   </div>
-    
+
 {% endblock %}
 {% block jsblock %}
   <script type="text/javascript">
   var checkflag = "false";
   function check() {
-  var field=document.getElementsByName('user'); 
+  var field=document.getElementsByName('user');
     if (checkflag == "false") {
       for (i = 0; i < field.length; i++) {
         field[i].checked = true;

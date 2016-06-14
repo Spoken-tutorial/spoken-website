@@ -2,7 +2,7 @@ MySQLdb1
 ========
 
 This is the legacy (1.x) version of MySQLdb. While it is still being
-maintained, there will not be a lot of new feature development. 
+maintained, there will not be a lot of new feature development.
 
 [![Build Status](https://secure.travis-ci.org/farcepest/MySQLdb1.png)](http://travis-ci.org/farcepest/MySQLdb1)
 

@@ -13,9 +13,9 @@ silently fail.  Decide carefully whether this is what you want.
 ## Tests
 
 The tests are written with the Jasmine BDD test framework.
-To run the tests, navigate to <root-folder>/tests/. 
+To run the tests, navigate to <root-folder>/tests/.
 
-In order to run against the shim-code, the tests attempt to kill the current 
+In order to run against the shim-code, the tests attempt to kill the current
 implementation of the missing methods. This happens in <root-folder>/tests/helpers/h-kill.js.
 So in order to run the tests against the built-in methods, invalidate that file somehow
 (comment-out, delete the file, delete the script-tag, etc.).
@@ -152,4 +152,3 @@ So in order to run the tests against the built-in methods, invalidate that file 
     fine unless you are depending on the safety and security
     provisions of this method, which you cannot possibly
     obtain in legacy engines.
-

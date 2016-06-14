@@ -72,11 +72,11 @@ $scope.db.items = [
   //more items go here
 ];
 ```
-  
+
 ## Directives and attributes specification
 
 All **Handsontable** options listed [here](https://github.com/handsontable/jquery-handsontable/wiki) should be supported
-  
+
  Directive                       | Attribute&nbsp;&nbsp;&nbsp; | Description
  --------------------------------|-----------------------------|-------------
  **&lt;div hot-table&gt;**       |                             | Defines the grid container. Can also be declared as element `<ui-handsontable>`

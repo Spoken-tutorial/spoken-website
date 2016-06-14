@@ -1,6 +1,6 @@
 # Handsontable [![Build Status](https://travis-ci.org/handsontable/handsontable.png?branch=master)](https://travis-ci.org/handsontable/handsontable)
 
-Handsontable is a minimalist approach to Excel-like table editor (datagrid/data grid) in HTML & JavaScript. 
+Handsontable is a minimalist approach to Excel-like table editor (datagrid/data grid) in HTML & JavaScript.
 
 Runs in IE 10+, Firefox, Chrome, Safari and Opera.
 
@@ -26,7 +26,7 @@ Then, create a new `Handsontable` object, passing a reference to an empty div as
     ["2009", 20, 11, 14, 13],
     ["2010", 30, 15, 12, 13]
   ];
-  
+
   var container = document.getElementById('hot');
   var hot = new Handsontable(container,
     {

@@ -29,5 +29,5 @@ Change the value to "false", this step is mandatory to load the web fonts offlin
 
 
 If you are using chrome, Please close all opened chrome's windows.
-Open chrome via command prompt with "--allow-file-access-from-files" flag 
+Open chrome via command prompt with "--allow-file-access-from-files" flag
 to access subtitle option.

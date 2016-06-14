@@ -6,36 +6,36 @@
 {% block compressinlinecssblock %}
     <style>
        a.back-to-top {
-	      display: none;
-	      width: 60px;
-	      height: 60px;
-	      position: fixed;
-	      z-index: 999;
-	      right: 20px;
-	      bottom: 80px;
-	      text-align:center;
-	      background: #337ab7 url("/static/spoken/images/up-arrow.png") no-repeat center;
-	      -webkit-border-radius: 30px;
-	      -moz-border-radius: 30px;
-	      border-radius: 30px;
-      } 
+        display: none;
+        width: 60px;
+        height: 60px;
+        position: fixed;
+        z-index: 999;
+        right: 20px;
+        bottom: 80px;
+        text-align:center;
+        background: #337ab7 url("/static/spoken/images/up-arrow.png") no-repeat center;
+        -webkit-border-radius: 30px;
+        -moz-border-radius: 30px;
+        border-radius: 30px;
+      }
     </style>
 {% endblock %}
 
 {% block content %}
 <div class="container" id="top">
 <ul class="nav nav-tabs">
-  <!--<li {% if role == "Contributor" %}class="active"{% endif %}><a href="/team/Contributor/">Contributor</a></li> 
+  <!--<li {% if role == "Contributor" %}class="active"{% endif %}><a href="/team/Contributor/">Contributor</a></li>
   <li {% if role == "Domain-Reviewer" %}class="active" {% endif %}><a href="/team/Domain-Reviewer/">Domain-Reviewers</a></li>
   <li {% if role == "Quality-Reviewer" %}class="active" {% endif %}><a href="/team/Quality-Reviewer/">Quality-Reviewers</a></li>-->
 
-  <li {% if role == "Creation-Team" %}class="active" {% endif %}><a href="/team/Creation-Team/">Creation Team</a></li>  
+  <li {% if role == "Creation-Team" %}class="active" {% endif %}><a href="/team/Creation-Team/">Creation Team</a></li>
   <li {% if role == "Resource Person" %}class="active" {% endif %}><a href="/team/Resource Person/">Training Team</a></li>
   <li {% if role == "Technical-Team" %}class="active" {% endif %}><a href="/team/Technical-Team/">Technical Team</a></li>
   <li {% if role == "External-Contributor" %}class="active" {% endif %}><a href="/team/External-Contributor/">External-Contributor</a></li>
   <li {% if role == "Admin-Team" %}class="active" {% endif %}><a href="/team/Admin-Team/">Admin Team</a></li>
 </ul>
-  
+
   <div class="tab-content">
     <div id="approved" class="tab-pane fade in active">
     <div class="row" style=" width:95%;">
@@ -51,13 +51,13 @@
         {% if forloop.counter|divisibleby:3 %}
           <br>
         {% endif %}
-     
+
        {% endfor %}
         <a href="#" class="back-to-top"></a><!-- /top-link-block -->
        </div><!-- /.row -->
-       
+
     </div>
-    
+
   </div>
 
 </div>
@@ -68,18 +68,18 @@
   var amountScrolled = 300;
 
 $(window).scroll(function() {
-	if ( $(window).scrollTop() > amountScrolled ) {
-		$('a.back-to-top').fadeIn('slow');
-	} else {
-		$('a.back-to-top').fadeOut('slow');
-	}
+  if ( $(window).scrollTop() > amountScrolled ) {
+    $('a.back-to-top').fadeIn('slow');
+  } else {
+    $('a.back-to-top').fadeOut('slow');
+  }
 });
 
 $('a.back-to-top').click(function() {
-	$('html, body').animate({
-		scrollTop: 0
-	}, 700);
-	return false;
+  $('html, body').animate({
+    scrollTop: 0
+  }, 700);
+  return false;
 });
   </script>
 {% endblock %}

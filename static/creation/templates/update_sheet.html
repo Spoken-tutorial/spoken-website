@@ -12,7 +12,7 @@
             {{ form.foss.errors }}
         </div>
         <div class="form-group">
-            <label for="id_language">Language 
+            <label for="id_language">Language
                 <span class='ajax-refresh ajax-refresh-language'>
                     <i class="fa fa-2 fa-refresh fa-spin"></i>
                 </span>
@@ -38,7 +38,7 @@
         $(document).ready(
             function() {
                 var sheetType = '{{ sheet_type }}';
-                $('.foss').on("change", 
+                $('.foss').on("change",
                     function() {
                         var foss = $(this).val();
                         $('.language').html('<option value="" selected="selected">-- Select Language --</option>');
@@ -65,7 +65,7 @@
                     }
                 );
 
-                $('.language').on("change", 
+                $('.language').on("change",
                     function() {
                         var foss = $('.foss').val();
                         var language = $('.language').val();

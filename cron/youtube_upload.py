@@ -104,7 +104,7 @@ def post(url, files_params, extra_params, show_progressbar=True):
         bar = None
     else:
         bar = None
-        
+
     body_container = StringIO.StringIO()
     headers_container = StringIO.StringIO()
     c.setopt(c.WRITEFUNCTION, body_container.write)
@@ -112,7 +112,7 @@ def post(url, files_params, extra_params, show_progressbar=True):
     c.perform()
     http_code = c.getinfo(pycurl.HTTP_CODE)
     c.close()
-    
+
     if bar:
         bar.finish()
     headers = dict([s.strip() for s in line.split(":", 1)] for line in
@@ -210,11 +210,11 @@ class Youtube:
         return self.service.CheckUploadStatus(video_id=video_id)
 
     def _get_feed_from_video_id(self, video_id):
-        template = 'http://gdata.youtube.com/feeds/api/users/default/uploads/%s' 
+        template = 'http://gdata.youtube.com/feeds/api/users/default/uploads/%s'
         return self.service.GetYouTubeVideoEntry(template % video_id)
 
     def get_feed_from_video_id(self, video_id):
-        template = 'http://gdata.youtube.com/feeds/api/users/default/uploads/%s' 
+        template = 'http://gdata.youtube.com/feeds/api/users/default/uploads/%s'
         return self.service.GetYouTubeVideoEntry(template % video_id)
 
     def _create_video_entry(self, title, description, category, keywords=None,
@@ -318,8 +318,8 @@ def upload_video(youtube, options, video_path):
         entry = data["entry"]
         #debug("Start upload using a HTTP post: %s -> %s" % (video_path, \
             #data["post_url"]))
-        http_code, headers, body = post(data["post_url"], 
-            {"file": video_path}, {"token": data["token"]}, 
+        http_code, headers, body = post(data["post_url"],
+            {"file": video_path}, {"token": data["token"]},
             show_progressbar = True)
         if http_code != 302:
             raise UnsuccessfulHTTPResponseCode(

@@ -67,7 +67,7 @@ function MdToastDirective() {
 /**
  * @ngdoc method
  * @name $mdToast#showSimple
- * 
+ *
  * @description
  * Convenience method which builds and shows a simple toast.
  *
@@ -95,7 +95,7 @@ function MdToastDirective() {
 /**
  * @ngdoc method
  * @name $mdToast#updateContent
- * 
+ *
  * @description
  * Updates the content of an existing toast. Useful for updating things like counts, etc.
  *

@@ -1,18 +1,33 @@
-import zipfile
-from urllib import urlopen, quote_plus
-from django import template
-from django.contrib.auth.models import User
-from django.conf import settings
-from creation.models import *
+# Standard Library
 import os
+import zipfile
+from urllib import quote_plus, urlopen
+
+# Third Party Stuff
+from django import template
+from django.conf import settings
+from django.contrib.auth.models import User
 from django.db.models import Q
-from creation.views import is_contributor, is_internal_contributor, is_external_contributor, is_videoreviewer, is_domainreviewer, is_qualityreviewer, is_administrator
+
+# Spoken Tutorial Stuff
+from creation.models import *
+from creation.views import (
+    is_administrator,
+    is_contributor,
+    is_domainreviewer,
+    is_external_contributor,
+    is_internal_contributor,
+    is_qualityreviewer,
+    is_videoreviewer
+)
 from spoken.forms import TutorialSearchForm
 
 register = template.Library()
 
+
 def get_url_name(name):
     return quote_plus(name)
+
 
 def get_zip_content(path):
     file_names = None
@@ -20,8 +35,9 @@ def get_zip_content(path):
         zf = zipfile.ZipFile(path, 'r')
         file_names = zf.namelist()
         return file_names
-    except Exception, e:
+    except Exception:
         return False
+
 
 def is_script_available(path):
     try:
@@ -32,32 +48,45 @@ def is_script_available(path):
         return True
     return False
 
+
 def get_review_status_list(key):
-	status_list = ['Pending', 'Waiting for Admin Review', 'Waiting for Domain Review', 'Waiting for Quality Review', 'Accepted', 'Need Improvement', 'Not Required']
-	return status_list[key];
+    status_list = ['Pending', 'Waiting for Admin Review', 'Waiting for Domain Review',
+                   'Waiting for Quality Review', 'Accepted', 'Need Improvement', 'Not Required']
+    return status_list[key]
+
 
 def get_review_status_class(key):
-	status_list = ['danger', 'active', 'warning', 'info', 'success', 'danger', 'success']
-	return status_list[key];
+    status_list = ['danger', 'active', 'warning', 'info', 'success', 'danger', 'success']
+    return status_list[key]
+
 
 def get_review_status_symbol(key):
-	status_list = ['fa fa-1 fa-minus-circle review-pending-upload', 'fa fa-1 fa-check-circle review-admin-review', 'fa fa-1 fa-check-circle review-domain-review', 'fa fa-1 fa-check-circle review-quality-review', 'fa fa-1 fa-check-circle review-accepted', 'fa fa-1 fa-times-circle review-pending-upload', 'fa fa-1 fa-ban review-accepted']
-	return status_list[key];
+    status_list = ['fa fa-1 fa-minus-circle review-pending-upload',
+                   'fa fa-1 fa-check-circle review-admin-review',
+                   'fa fa-1 fa-check-circle review-domain-review',
+                   'fa fa-1 fa-check-circle review-quality-review',
+                   'fa fa-1 fa-check-circle review-accepted',
+                   'fa fa-1 fa-times-circle review-pending-upload',
+                   'fa fa-1 fa-ban review-accepted']
+    return status_list[key]
+
 
 def get_username(key):
-	user = User.objects.get(pk = key)
-	return user.username
+    user = User.objects.get(pk=key)
+    return user.username
+
 
 def get_last_video_upload_time(key):
-	rec = None
-	try:
-		rec = ContributorLog.objects.filter(tutorial_resource_id = key.id).order_by('-created')[0]
-		tmpdt = key.updated
-		for tmp in rec:
-			tmpdt = rec.created
-		return tmpdt
-	except:
-		return key.updated
+    rec = None
+    try:
+        rec = ContributorLog.objects.filter(tutorial_resource_id=key.id).order_by('-created')[0]
+        tmpdt = key.updated
+        for tmp in rec:
+            tmpdt = rec.created
+        return tmpdt
+    except:
+        return key.updated
+
 
 def get_component_name(comp):
     comps = {
@@ -75,8 +104,9 @@ def get_component_name(comp):
         pass
     return key.title()
 
+
 def get_missing_component_reply(mcid):
-    rows = TutorialMissingComponentReply.objects.filter(missing_component_id = mcid)
+    rows = TutorialMissingComponentReply.objects.filter(missing_component_id=mcid)
     replies = ''
     for row in rows:
         replies += '<p>' + row.reply_message + '<b> -' + row.user.username + '</b></p>'
@@ -84,81 +114,104 @@ def get_missing_component_reply(mcid):
         replies = '<br /><b>Replies:</b>' + replies
     return replies
 
+
 def instruction_sheet(foss, lang):
-    file_path = settings.MEDIA_ROOT + 'videos/' + str(foss.id) + '/' + foss.foss.replace(' ', '-') + '-Instruction-Sheet-' + lang.name + '.pdf'
+    file_path = settings.MEDIA_ROOT + 'videos/' + \
+        str(foss.id) + '/' + foss.foss.replace(' ', '-') + '-Instruction-Sheet-' + lang.name + '.pdf'
     if lang.name != 'English':
         if os.path.isfile(file_path):
-            file_path = settings.MEDIA_URL + 'videos/' + str(foss.id) + '/' + foss.foss.replace(' ', '-') + '-Instruction-Sheet-' + lang.name + '.pdf'
+            file_path = settings.MEDIA_URL + 'videos/' + \
+                str(foss.id) + '/' + foss.foss.replace(' ', '-') + '-Instruction-Sheet-' + lang.name + '.pdf'
             return file_path
-    
-    file_path = settings.MEDIA_ROOT + 'videos/' + str(foss.id) + '/' + foss.foss.replace(' ', '-') + '-Instruction-Sheet-English.pdf'
+
+    file_path = settings.MEDIA_ROOT + 'videos/' + \
+        str(foss.id) + '/' + foss.foss.replace(' ', '-') + '-Instruction-Sheet-English.pdf'
     if os.path.isfile(file_path):
-            file_path = settings.MEDIA_URL + 'videos/' + str(foss.id) + '/' + foss.foss.replace(' ', '-') + '-Instruction-Sheet-English.pdf'
-            return file_path
+        file_path = settings.MEDIA_URL + 'videos/' + \
+            str(foss.id) + '/' + foss.foss.replace(' ', '-') + '-Instruction-Sheet-English.pdf'
+        return file_path
     return False
+
 
 def installation_sheet(foss, lang):
-    file_path = settings.MEDIA_ROOT + 'videos/' + str(foss.id) + '/' + foss.foss.replace(' ', '-') + '-Installation-Sheet-' + lang.name + '.pdf'
+    file_path = settings.MEDIA_ROOT + 'videos/' + \
+        str(foss.id) + '/' + foss.foss.replace(' ', '-') + '-Installation-Sheet-' + lang.name + '.pdf'
     if lang.name != 'English':
         if os.path.isfile(file_path):
-            file_path = settings.MEDIA_URL + 'videos/' + str(foss.id) + '/' + foss.foss.replace(' ', '-') + '-Installation-Sheet-' + lang.name + '.pdf'
+            file_path = settings.MEDIA_URL + 'videos/' + \
+                str(foss.id) + '/' + foss.foss.replace(' ', '-') + '-Installation-Sheet-' + lang.name + '.pdf'
             return file_path
-    
-    file_path = settings.MEDIA_ROOT + 'videos/' + str(foss.id) + '/' + foss.foss.replace(' ', '-') + '-Installation-Sheet-English.pdf'
+
+    file_path = settings.MEDIA_ROOT + 'videos/' + \
+        str(foss.id) + '/' + foss.foss.replace(' ', '-') + '-Installation-Sheet-English.pdf'
     if os.path.isfile(file_path):
-            file_path = settings.MEDIA_URL + 'videos/' + str(foss.id) + '/' + foss.foss.replace(' ', '-') + '-Installation-Sheet-English.pdf'
-            return file_path
+        file_path = settings.MEDIA_URL + 'videos/' + \
+            str(foss.id) + '/' + foss.foss.replace(' ', '-') + '-Installation-Sheet-English.pdf'
+        return file_path
     return False
 
+
 def get_thumb_path(row, append_str):
-    path = settings.MEDIA_URL + 'videos/' + str(row.foss_id) + '/' + str(row.id) + '/' + row.tutorial.replace(' ', '-') + '-' + append_str + '.png'
+    path = settings.MEDIA_URL + 'videos/' + str(row.foss_id) + '/' + str(row.id) + \
+        '/' + row.tutorial.replace(' ', '-') + '-' + append_str + '.png'
     return path
+
 
 def get_srt_path(tr):
     data = ''
-    english_srt = settings.MEDIA_ROOT + 'videos/' + str(tr.tutorial_detail.foss_id) + '/' + str(tr.tutorial_detail_id) + '/' + tr.tutorial_detail.tutorial.replace(' ', '-') + '-English.srt'
+    english_srt = settings.MEDIA_ROOT + 'videos/' + str(tr.tutorial_detail.foss_id) + '/' + str(
+        tr.tutorial_detail_id) + '/' + tr.tutorial_detail.tutorial.replace(' ', '-') + '-English.srt'
     if os.path.isfile(english_srt):
-        data = '<track kind="captions" src="'+ settings.MEDIA_URL + 'videos/' + str(tr.tutorial_detail.foss_id) + '/' + str(tr.tutorial_detail_id) + '/' + tr.tutorial_detail.tutorial.replace(' ', '-') + '-English.srt' + '" srclang="en" label="English"></track>'
+        data = '<track kind="captions" src="' + settings.MEDIA_URL + 'videos/' + str(tr.tutorial_detail.foss_id) + '/' + str(
+            tr.tutorial_detail_id) + '/' + tr.tutorial_detail.tutorial.replace(' ', '-') + '-English.srt' + '" srclang="en" label="English"></track>'
     if tr.language.name != 'English':
-        native_srt = settings.MEDIA_ROOT + 'videos/' + str(tr.tutorial_detail.foss_id) + '/' + str(tr.tutorial_detail_id) + '/' + tr.tutorial_detail.tutorial.replace(' ', '-') + '-' + tr.language.name +'.srt'
+        native_srt = settings.MEDIA_ROOT + 'videos/' + str(tr.tutorial_detail.foss_id) + '/' + str(
+            tr.tutorial_detail_id) + '/' + tr.tutorial_detail.tutorial.replace(' ', '-') + '-' + tr.language.name + '.srt'
         print native_srt
         if os.path.isfile(native_srt):
-            data += '<track kind="captions" src="'+ settings.MEDIA_URL + 'videos/' + str(tr.tutorial_detail.foss_id) + '/' + str(tr.tutorial_detail_id) + '/' + tr.tutorial_detail.tutorial.replace(' ', '-') + '-' + tr.language.name + '.srt' + '" srclang="en" label="' + tr.language.name + '"></track>'
+            data += '<track kind="captions" src="' + settings.MEDIA_URL + 'videos/' + str(tr.tutorial_detail.foss_id) + '/' + str(
+                tr.tutorial_detail_id) + '/' + tr.tutorial_detail.tutorial.replace(' ', '-') + '-' + tr.language.name + '.srt' + '" srclang="en" label="' + tr.language.name + '"></track>'
     return data
+
 
 def get_video_visits(tr):
     tr.hit_count = tr.hit_count + 1
     tr.save()
     return tr.hit_count
 
+
 def get_prerequisite(tr, td):
     print tr, td
     try:
-        tr_rec = TutorialResource.objects.get(Q(status = 1) | Q(status = 2), tutorial_detail = td, language_id = tr.language_id)
+        tr_rec = TutorialResource.objects.get(Q(status=1) | Q(status=2), tutorial_detail=td, language_id=tr.language_id)
         return get_url_name(td.foss.foss) + '/' + get_url_name(td.tutorial) + '/' + tr_rec.language.name
     except Exception, e:
         print e
         if tr.language.name != 'English':
             try:
-                tr_rec = TutorialResource.objects.get(Q(status = 1) | Q(status = 2), tutorial_detail = td, language__name = 'English')
+                tr_rec = TutorialResource.objects.get(Q(status=1) | Q(
+                    status=2), tutorial_detail=td, language__name='English')
                 return get_url_name(td.foss.foss) + '/' + get_url_name(td.tutorial) + '/English'
             except:
                 return None
         pass
     return None
 
+
 def get_prerequisite_from_td(td, lang):
     try:
-        tr_rec = TutorialResource.objects.get(Q(status = 1) | Q(status = 2), tutorial_detail = td, language_id = lang.id)
+        tr_rec = TutorialResource.objects.get(Q(status=1) | Q(status=2), tutorial_detail=td, language_id=lang.id)
         return tr_rec.id
     except:
         if lang.name != 'English':
             try:
-                tr_rec = TutorialResource.objects.get(Q(status = 1) | Q(status = 2), tutorial_detail = td, language__name = 'English')
+                tr_rec = TutorialResource.objects.get(Q(status=1) | Q(
+                    status=2), tutorial_detail=td, language__name='English')
                 return tr_rec.id
             except:
                 pass
     return None
+
 
 def get_timed_script(script_path, timed_script_path):
     if timed_script_path:
@@ -182,6 +235,7 @@ def get_timed_script(script_path, timed_script_path):
         return timed_script
     return ''
 
+
 def tutorialsearch():
     context = {
         'form': TutorialSearchForm()
@@ -190,7 +244,7 @@ def tutorialsearch():
     return context
 
 register.inclusion_tag('spoken/templates/tutorial_search_form.html')(tutorialsearch)
-#register.filter('tutorialsearch', tutorialsearch)
+# register.filter('tutorialsearch', tutorialsearch)
 register.filter('get_timed_script', get_timed_script)
 register.filter('get_prerequisite_from_td', get_prerequisite_from_td)
 register.filter('get_prerequisite', get_prerequisite)

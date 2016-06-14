@@ -64,14 +64,14 @@ g}
 }
 
 .col_format {
-  min-width: 5em; 
+  min-width: 5em;
 }
 
 .col_filter_type {
   min-width: 14em;
 }
 input[type="text"] {
-  width: 100%; 
+  width: 100%;
   box-sizing: border-box;
   -webkit-box-sizing:border-box;
   -moz-box-sizing: border-box;
@@ -92,7 +92,7 @@ body {
 
 .fullscreen:fullscreen {
   display: none;
-} 
+}
 
 .caps {
   text-transform: capitalize;

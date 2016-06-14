@@ -583,7 +583,7 @@ class TrainingPlanner(models.Model):
             if int(self.year) == year and bool(self.semester.even) == even:
                 return True
         except Exception as e:
-            print e
+            print(e)
         return False
 
     def get_current_year_and_sem(self):

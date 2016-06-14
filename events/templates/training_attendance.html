@@ -29,7 +29,7 @@
             </div>
           </div>
         </div>
-        
+
         <div class="modal fade" id="alertModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="color:#0052A3; font-size:15px;">
           <div class="modal-dialog">
             <div class="modal-content">
@@ -51,9 +51,9 @@
       {% if can_mark_attendance %}
         <div style="height:70px;">
             <div style="width:200px;float:left;text-align:center;">
-              <p id="button-select">To select all participants</p> <input type=button class="btn btn-success"  value="Check All" onClick="this.value=check()"> 
-            </div> 
-            <div style="width:250px; text-align:center; float:right;"> 
+              <p id="button-select">To select all participants</p> <input type=button class="btn btn-success"  value="Check All" onClick="this.value=check()">
+            </div>
+            <div style="width:250px; text-align:center; float:right;">
               <p>To select language for all participants</p>
               <select name="selectall" id="selectall" style="height:30px;">
               {% for lang in languages %}
@@ -104,7 +104,7 @@
                 <td>{{ record.student.user.email }}</td>
                 <td>{{ record.student.gender }}</td>
                 {% endif %}
-                
+
                 {% if can_mark_attendance and attendance_allowed %}
                 <td>
                   {% with lang_id=training|get_langid:record.student %}
@@ -156,20 +156,20 @@
   </table>
 
       {% if can_mark_attendance %}
-          
+
          Step 1: <input class="btn btn-primary" type="button" id="attendance_submit" value="Submit" />
         </form><br>
       {% endif %}
-      
+
       {% if training.department.id == 24  and training.is_training_certificate_allowed  %}
          Step 2:  <a class="btn btn-primary" href="{% url 'events:mark_as_complete' training.id %}"> Request to Mark Complete</a>
       {% endif %}
-      
-      
-      
-      
-      
-      
+
+
+
+
+
+
     {% endwith %}
   {% endif %}
 {% endblock %}
@@ -177,7 +177,7 @@
   <script type="text/javascript">
   var checkflag = "false";
   function check() {
-  var field=document.getElementsByName('user'); 
+  var field=document.getElementsByName('user');
     if (checkflag == "false") {
       for (i = 0; i < field.length; i++) {
         field[i].checked = true;
@@ -198,7 +198,7 @@
     $('#alertModal').modal('show');
   }
   $("#selectall").click(function () {
-    var option=document.getElementsByClassName('selectall'); 
+    var option=document.getElementsByClassName('selectall');
     for (i = 0; i < option.length; i++) {
      option[i].value = this.value;
     }

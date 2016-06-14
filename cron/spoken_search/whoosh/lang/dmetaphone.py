@@ -412,4 +412,3 @@ def double_metaphone(text):
         return (primary, None)
     else:
         return (primary, secondary)
-

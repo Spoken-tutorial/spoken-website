@@ -1,26 +1,41 @@
-from HTMLParser import HTMLParser
-import time, mechanize, cookielib, datetime
+# Standard Library
+import datetime
+import re
+import subprocess
+from decimal import Decimal
+
+# Third Party Stuff
+import cookielib
+import mechanize
 from BeautifulSoup import BeautifulSoup
+from HTMLParser import HTMLParser
+
 
 class MLStripper(HTMLParser):
+
     def __init__(self):
         self.reset()
         self.fed = []
+
     def handle_data(self, d):
         self.fed.append(d)
+
     def get_data(self):
         return ''.join(self.fed)
+
 
 def strip_tags(html):
     s = MLStripper()
     s.feed(html)
     return str(s.get_data())
 
+
 def readUrl(url):
     # print "Reading :", url
     b = getNewBrowser()
-    b.open(url, timeout = 30.0)
+    b.open(url, timeout=30.0)
     return BeautifulSoup(b.response())
+
 
 def getNewBrowser():
     # create browser instance
@@ -35,7 +50,7 @@ def getNewBrowser():
 
     # handle some other stuff
     b.set_handle_equiv(True)
-    #b.set_handle_gzip(True)
+    # b.set_handle_gzip(True)
     b.set_handle_redirect(True)
     b.set_handle_referer(True)
 
@@ -43,13 +58,14 @@ def getNewBrowser():
     b.set_handle_refresh(mechanize._http.HTTPRefreshProcessor(), max_time=1)
 
     # want debugging messages?
-    #b.set_debug_http(True)
-    #b.set_debug_redirects(True)
-    #b.set_debug_responses(True)
+    # b.set_debug_http(True)
+    # b.set_debug_redirects(True)
+    # b.set_debug_responses(True)
 
     # User-Agent
     b.addheaders = [('User-agent', 'Mozilla/5.0 (X11; Linux x86_64) Gecko/20100101 Firefox/31.0')]
     return b
+
 
 def generate_subtitle(srt_url, srt_file_path):
     soup = readUrl(srt_url)
@@ -72,7 +88,7 @@ def generate_subtitle(srt_url, srt_file_path):
                     break
                 if flag:
                     flag = 0
-                    if previous_script_data == None:
+                    if previous_script_data is None:
                         previous_script_data = get_formatted_script(col)
                         continue
                     if time_error:
@@ -84,7 +100,7 @@ def generate_subtitle(srt_url, srt_file_path):
                     flag = 1
                     formatted_time = get_formatted_time(col.text.replace('.', ':').replace('-', ':').replace('/', ':'))
                     if formatted_time:
-                        if previous_time == None:
+                        if previous_time is None:
                             previous_time = formatted_time
                             continue
                         srt_data += str(counter) + '\n'
@@ -93,7 +109,7 @@ def generate_subtitle(srt_url, srt_file_path):
                         previous_time = formatted_time
                     else:
                         time_error = 1
-                #print col.text
+                # print col.text
         duration_info = get_duration_info(rreplace(srt_file_path, 'srt', 'ogv', 1))
         if srt_data:
             if previous_script_data:
@@ -101,17 +117,17 @@ def generate_subtitle(srt_url, srt_file_path):
                 if duration_info:
                     srt_data += previous_time + ' --> ' + duration_info + '\n'
                 else:
-                    srt_data += previous_time + ' --> ' + str((datetime.datetime.strptime(\
-                        previous_time, "%H:%M:%S") + datetime.timedelta(seconds = 5)).time()) + '\n'
+                    srt_data += previous_time + ' --> ' + str((datetime.datetime.strptime(
+                        previous_time, "%H:%M:%S") + datetime.timedelta(seconds=5)).time()) + '\n'
                 srt_data += previous_script_data
-            file_head = open(srt_file_path,"w")
+            file_head = open(srt_file_path, "w")
             file_head.write(srt_data.encode("utf-8"))
             file_head.close()
-           #print srt_data
-    except Exception, e:
-        #print e
+    except Exception:
+        # print e
         return False
     return True
+
 
 def get_formatted_time(raw_time_string):
     raw_time_parts = raw_time_string.split(':')
@@ -141,33 +157,37 @@ def get_formatted_time(raw_time_string):
         return raw_time_parts[0] + ':' + raw_time_parts[1] + ':' + raw_time_parts[2]
     return None
 
+
 def get_formatted_script(script):
     if script.string:
         return script.text.strip('\n').strip() + '\n\n'
     else:
-        return strip_tags(str(script.renderContents())\
-        .replace('&amp;', '&').replace('&quot;', '"')\
-        .replace('&gt;', '>').replace('&lt;', '<')).decode('utf-8').strip('\n').strip() + '\n\n'
+        return strip_tags(str(script.renderContents())
+                          .replace('&amp;', '&').replace('&quot;', '"')
+                          .replace('&gt;', '>').replace('&lt;', '<')).decode('utf-8').strip('\n').strip() + '\n\n'
+
 
 def rreplace(s, old, new, occurrence):
     li = s.rsplit(old, occurrence)
     return new.join(li)
 
 # returns video duration info using ffmpeg
+
+
 def get_duration_info(path):
     """Uses ffmpeg to determine information about a video."""
-    info_m = {}
     try:
         process = subprocess.Popen(['/usr/bin/ffmpeg', '-i', path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         stdout, stderr = process.communicate()
-        duration_m = re.search(r"Duration:\s{1}(?P<hours>\d+?):(?P<minutes>\d+?):(?P<seconds>\d+\.\d+?)", stdout, re.DOTALL).groupdict()
+        duration_m = re.search(
+            r"Duration:\s{1}(?P<hours>\d+?):(?P<minutes>\d+?):(?P<seconds>\d+\.\d+?)", stdout, re.DOTALL).groupdict()
 
         seconds = Decimal(duration_m['seconds'])
         tmp_seconds = str(int(seconds))
         if seconds < 10:
             tmp_seconds = "0" + tmp_seconds
 
-        duration =  duration_m['hours'] + ':' + duration_m['minutes'] + ":" + tmp_seconds
+        duration = duration_m['hours'] + ':' + duration_m['minutes'] + ":" + tmp_seconds
     except:
         duration = None
     return duration

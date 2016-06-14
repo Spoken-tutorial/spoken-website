@@ -149,7 +149,7 @@ If a tree is empty, there will be an empty place hoder which is used to drop nod
 - `true` (default): display an empty place holder if the tree is empty
 - `false`: do not display an empty place hoder
 
-##### Example 
+##### Example
 - turn on/off drag and drop.
 - Limit depth to 5
 - 500 milliseconds delay

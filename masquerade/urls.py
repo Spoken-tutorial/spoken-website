@@ -1,7 +1,8 @@
-from django.conf.urls import patterns, url
+# Third Party Stuff
+from django.conf.urls import url
 
-urlpatterns = patterns('',
+urlpatterns = [
     url(r'^$', 'masquerade.views.masquerade_home', name="masquerade_home"),
     url(r'^mask/(\d+)/$', 'masquerade.views.mask', name="mask"),
     url(r'^unmask/$', 'masquerade.views.unmask'),
-)
+]

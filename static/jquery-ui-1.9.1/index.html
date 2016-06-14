@@ -8,11 +8,11 @@
 	<script src="js/jquery-ui-1.9.1.custom.js"></script>
 	<script>
 	$(function() {
-		
-		$( "#accordion" ).accordion();
-		
 
-		
+		$( "#accordion" ).accordion();
+
+
+
 		var availableTags = [
 			"ActionScript",
 			"AppleScript",
@@ -40,18 +40,18 @@
 		$( "#autocomplete" ).autocomplete({
 			source: availableTags
 		});
-		
 
-		
+
+
 		$( "#button" ).button();
 		$( "#radioset" ).buttonset();
-		
 
-		
+
+
 		$( "#tabs" ).tabs();
-		
 
-		
+
+
 		$( "#dialog" ).dialog({
 			autoOpen: false,
 			width: 400,
@@ -76,26 +76,26 @@
 			$( "#dialog" ).dialog( "open" );
 			event.preventDefault();
 		});
-		
 
-		
+
+
 		$( "#datepicker" ).datepicker({
 			inline: true
 		});
-		
 
-		
+
+
 		$( "#slider" ).slider({
 			range: true,
 			values: [ 17, 67 ]
 		});
-		
 
-		
+
+
 		$( "#progressbar" ).progressbar({
 			value: 20
 		});
-		
+
 
 		// Hover states on the static widgets
 		$( "#dialog-link, #icons li" ).hover(

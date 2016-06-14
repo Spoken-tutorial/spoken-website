@@ -63,7 +63,7 @@
                                         Spoken <span class='title'>Tutorial</span>
                                     </a>
                             </div>
-                            
+
                             <div class="collapse navbar-collapse" id="main-nav">
                                     <ul class="nav navbar-nav">
                                         <li class="dropdown">
@@ -159,7 +159,7 @@
                                         </li>
                                         {% get_cms_nav %}
                                     </ul>
-                                    
+
                                     <ul class="nav navbar-nav navbar-right">
                                         {% block userdetails%}
                                             {% if user.is_authenticated %}
@@ -262,29 +262,29 @@
                                             {% if collection.has_previous %}
                                                 <li><a href="?{{ request.GET|combine_get_values }}page=1">&laquo; <small>First</small></a></li>
                                                 <li><a href="?{{ request.GET|combine_get_values }}page={{ collection.previous_page_number }}">&laquo; <small>Prev</small></a></li>
-                                            {% else %} 
+                                            {% else %}
                                                 <li class="disabled"><a href="#">&laquo;</a></li>
                                             {% endif %}
                                             {% for num in collection.paginator.page_range|paginator_page_cutter:collection.number %}
-                                                {% ifequal num collection.number %} 
+                                                {% ifequal num collection.number %}
                                                     <li class="active"><a href="#">{{ num }}<span class="sr-only">(current)</span></a></li>
-                                                {% else %} 
+                                                {% else %}
                                                     <li><a href="?{{ request.GET|combine_get_values }}page={{ num }}">{{ num }}</a></li>
-                                                {% endifequal %} 
-                                            {% endfor %} 
-                                            {% if collection.has_next %} 
+                                                {% endifequal %}
+                                            {% endfor %}
+                                            {% if collection.has_next %}
                                                 <li><a href="?{{ request.GET|combine_get_values }}page={{ collection.next_page_number }}"><small>Next</small> &raquo;</a></li>
                                                 {% if collection.paginator.page_range|length > 10 %}
                                                     <li><a href="?{{ request.GET|combine_get_values }}page={{ collection.paginator.num_pages }}"><small>Last</small> &raquo;</a></li>
                                                 {% endif %}
-                                            {% else %} 
+                                            {% else %}
                                                 <li class="disabled"><a href="#">&raquo;</a></li>
                                                 <li class="disabled"><a href="?{{ request.GET|combine_get_values }}page={{ collection.paginator.num_pages }}"><small>Last</small> &raquo;</a></li>
                                             {% endif %}
                                         {% endif %}
                                     <ul>
                                 {% endif %}
-                            {% endblock %} 
+                            {% endblock %}
                         </div>
                     </div>
                 </div><!-- /#content-inner .container -->

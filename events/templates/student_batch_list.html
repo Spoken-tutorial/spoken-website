@@ -15,7 +15,7 @@
       <a class="btn btn-success pull-right" href="{% url 'events:training_planner' %}">Back To Semester Training Planner Summary</a>
     </center><br><br>
   </div>
-  
+
   <!-- Modal -->
   <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -33,11 +33,11 @@
       </div>
     </div>
   </div>
-  
+
 {% if object_list %}
 <div class="alert alert-success alert-dismissable">
   If you have completed adding <b>Master Batch/es</b>, kindly continue with Step 2 and Step 3 from <b>STP</b> Summary page.
-</div> 
+</div>
 {% else %}
   kindly add your master batches.
 {% endif %}
@@ -53,11 +53,11 @@
           <td>{{ record.year }}</td>
           <td>{{ record.student_count }}</td>
           <td>
-              <a href="{% url 'events:edit_student' record.id %}">Edit</a> | 
+              <a href="{% url 'events:edit_student' record.id %}">Edit</a> |
             <a href="{% url 'events:list_student' record.id %}">Student List</a>
             {% if record|can_add_student:request.user %}
              | <a href="{% url 'events:add_student' record.id %}">Add Student</a>
-            {% endif %} 
+            {% endif %}
           </td>
         </tr>
       {% endfor %}

@@ -1,4 +1,4 @@
-/* Author: 
+/* Author:
 
 */
 
@@ -6,7 +6,7 @@
 /* Video player START */
 $generatePlayers = function () {
 	var generatedPlayers = new Array();
-	$(".video-js").each(function(){ 
+	$(".video-js").each(function(){
 				generatedPlayers.push($(this).attr('id'));
 	});
 	var aspectRatio = 264/640;
@@ -18,19 +18,19 @@ $generatePlayers = function () {
         });
     }
 
-    // Loop through all the players and resize them 
+    // Loop through all the players and resize them
     function resizeVideos() {
         for (var i = 0; i < generatedPlayers.length; i ++) {
             var player = videojs('#' + generatedPlayers[i]);
             resizeVideoJS(player);
-        }           
+        }
     }
 
     // Resize a single player
     function resizeVideoJS(player){
         // Get the parent element's actual width
         var width = $(".videoContainerProtocol").innerWidth();
-		
+
         // Set width to fill parent element, Set height
         player.width(width).height( width * aspectRatio );
     }
@@ -40,21 +40,21 @@ $generatePlayers = function () {
 
 $callMovies = function () {
 
-$(".videoContainerProtocol").each(function ()										  
+$(".videoContainerProtocol").each(function ()
 	{
 	if (!$(this).hasClass("protocolsRun")) {
 	$(this).addClass("protocolsRun");
 	var number = 1 + Math.floor(Math.random() * 1000);
-	
+
 	$(this).click(function ()
 	{
-		
+
 		var theID = $(this).find(".videoInfo").attr("data-video-id");
 		var videoSRC = $(this).find(".videoInfo").attr("data-source-video");
 		var posterSRC = $(this).find(".posterInfo").attr("src");
-		
+
 		$(this).append("<video id='"+theID+""+number+"' class='video-js vjs-default-skin' controls='' preload='auto' poster='"+posterSRC+"' data-setup='{}'><source src='"+videoSRC+"' type='video/mp4'></source></video>");
-		
+
 		$(this).find(".playButtonContainer").remove();
 		$(this).find(".videoInfo").remove();
 		$(this).find(".posterInfo").remove();
@@ -87,13 +87,8 @@ $(".videoContainerProtocol").each(function ()
 
 $(document).ready(function () {
 	$callMovies();
-	$("#loadInMovieButton").click(function (e)										  
+	$("#loadInMovieButton").click(function (e)
 	{
 		e.preventDefault();
   	});
 });
-
-
-
-
-

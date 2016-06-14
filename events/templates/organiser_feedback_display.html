@@ -99,13 +99,13 @@
             Dont know what this method is
           {% endif %}
       </td>
-      <td>{% if organiserfeedback.in_side_by_side_method == '0'%} 
+      <td>{% if organiserfeedback.in_side_by_side_method == '0'%}
             The video has to be maximized
-          {% elif organiserfeedback.in_side_by_side_method == '1'%} 
+          {% elif organiserfeedback.in_side_by_side_method == '1'%}
             The software has to be maximized
-          {% elif organiserfeedback.in_side_by_side_method == '2'%} 
+          {% elif organiserfeedback.in_side_by_side_method == '2'%}
             Both software and video are maximized
-          {% else %} 
+          {% else %}
             None of the above are maximized
           {% endif %}
       </td>
@@ -133,7 +133,7 @@
       <td>{{ organiserfeedback.testimonial }}</td>
       <td>{{ organiserfeedback.any_other_suggestions }}</td>
       <td>{{ organiserfeedback.can_contact }}</td>
-      
+
     </tr>
     {% endfor %}
   </table>

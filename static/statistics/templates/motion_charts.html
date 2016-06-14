@@ -60,7 +60,7 @@
             chartOptions['state'] ='{"playDuration":15000,"xZoomedIn":false,"xZoomedDataMax":49,"sizeOption":"2","duration":{"multiplier":1,"timeUnit":"Y"},"yLambda":0,"nonSelectedAlpha":0.4,"iconKeySettings":[],"dimensions":{"iconDimensions":["dim0"]},"xAxisOption":"2","time":"notime","yZoomedDataMin":10,"yZoomedIn":false,"orderedByX":false,"colorOption":"_UNIQUE_COLOR","uniColorForNonSelected":false,"xZoomedDataMin":1,"showTrails":true,"orderedByY":false,"xLambda":1,"iconType":"BUBBLE","yZoomedDataMax":4242,"yAxisOption":"3"}';
             chartOptions['width'] = 780;
             chartOptions['height'] = 560;
-            
+
             /* Static workshop chart */
             var workshopStaticData = new google.visualization.DataTable();
             workshopStaticData.addColumn('string', 'State');
@@ -70,7 +70,7 @@
             workshopStaticData.addRows([{{ static_workshop_data|safe }}]);
             var workshopStaticChart = new google.visualization.MotionChart(document.getElementById('workshop-static-chart'));
             workshopStaticChart.draw(workshopStaticData, chartOptions);
-            
+
             /* Interactive workshop chart */
             var workshopInteractiveData = new google.visualization.DataTable();
             workshopInteractiveData.addColumn('string', 'State');
@@ -85,7 +85,7 @@
         google.setOnLoadCallback(drawVisualization);
 
         function changeTimeUnits(value) {
-            timeUnits = parseInt(value, 10);  
+            timeUnits = parseInt(value, 10);
             drawVisualization();
         }
     </script>

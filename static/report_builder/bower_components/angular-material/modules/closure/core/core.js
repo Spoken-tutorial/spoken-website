@@ -509,7 +509,7 @@ angular.module('material.core')
 
   return Util = {
     now: window.performance ?
-      angular.bind(window.performance, window.performance.now) : 
+      angular.bind(window.performance, window.performance.now) :
       Date.now,
 
     clientRect: function(element, offsetParent, isOffsetRect) {
@@ -520,7 +520,7 @@ angular.module('material.core')
       // The user can ask for an offsetRect: a rect relative to the offsetParent,
       // or a clientRect: a rect relative to the page
       var offsetRect = isOffsetRect ?
-        offsetParent.getBoundingClientRect() : 
+        offsetParent.getBoundingClientRect() :
         { left: 0, top: 0, width: 0, height: 0 };
       return {
         left: nodeRect.left - offsetRect.left + offsetParent.scrollLeft,
@@ -898,11 +898,11 @@ function mdCompilerService($q, $http, $injector, $compile, $controller, $templat
     *      * `key` - `{string}`: a name of a dependency to be injected into the controller.
     *      * `factory` - `{string|function}`: If `string` then it is an alias for a service.
     *        Otherwise if function, then it is injected and the return value is treated as the
-    *        dependency. If the result is a promise, it is resolved before its value is 
+    *        dependency. If the result is a promise, it is resolved before its value is
     *        injected into the controller.
     *
     * @returns {object=} promise A promise, which will be resolved with a `compileData` object.
-    * `compileData` has the following properties: 
+    * `compileData` has the following properties:
     *
     *   - `element` - `{element}`: an uncompiled element matching the provided template.
     *   - `link` - `{function(scope)}`: A link function, which, when called, will compile
@@ -921,7 +921,7 @@ function mdCompilerService($q, $http, $injector, $compile, $controller, $templat
     var transformTemplate = options.transformTemplate || angular.identity;
     var bindToController = options.bindToController;
 
-    // Take resolve values and invoke them.  
+    // Take resolve values and invoke them.
     // Resolves can either be a string (value: 'MyRegisteredAngularConst'),
     // or an invokable 'factory' of sorts: (value: function ValueGetter($dependency) {})
     angular.forEach(resolve, function(value, key) {
@@ -1741,7 +1741,7 @@ function InterimElementProvider() {
           show: function() {
             var compilePromise;
             if (options.skipCompile) {
-              compilePromise = $q(function(resolve) { 
+              compilePromise = $q(function(resolve) {
                 resolve({
                   locals: {},
                   link: function() { return options.element; }
@@ -2935,7 +2935,7 @@ function ThemingProvider($mdColorPalette) {
 
       self.foregroundPalette = self.isDark ? LIGHT_FOREGROUND : DARK_FOREGROUND;
       self.foregroundShadow = self.isDark ? DARK_SHADOW : LIGHT_SHADOW;
-      
+
       // Light and dark themes have different default hues.
       // Go through each existing color type for this theme, and for every
       // hue value that is still the default hue value from the previous light/dark setting,
@@ -3253,12 +3253,12 @@ function generateThemes($injector) {
           if (darkColors.indexOf(hueName) > -1) {
             return DARK_CONTRAST_COLOR;
           } else {
-            return strongLightColors.indexOf(hueName) > -1 ? STRONG_LIGHT_CONTRAST_COLOR 
+            return strongLightColors.indexOf(hueName) > -1 ? STRONG_LIGHT_CONTRAST_COLOR
               : LIGHT_CONTRAST_COLOR;
           }
         } else {
           if (lightColors.indexOf(hueName) > -1) {
-            return strongLightColors.indexOf(hueName) > -1 ? STRONG_LIGHT_CONTRAST_COLOR 
+            return strongLightColors.indexOf(hueName) > -1 ? STRONG_LIGHT_CONTRAST_COLOR
               : LIGHT_CONTRAST_COLOR;
           } else {
             return DARK_CONTRAST_COLOR;

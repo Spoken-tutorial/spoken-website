@@ -55,7 +55,7 @@ function MdSubheaderDirective($mdSticky, $compile, $mdTheming) {
     restrict: 'E',
     replace: true,
     transclude: true,
-    template: 
+    template:
       '<h2 class="md-subheader">' +
         '<span class="md-subheader-content"></span>' +
       '</h2>',

@@ -30,7 +30,7 @@
        {% elif user|is_organiser %}
          Pending approval
        {% endif %}
-       </a></li> 
+       </a></li>
     <li {% if request.path == "/software-training/single-training/approved/" %}class="active" {% endif %}><a href="/software-training/single-training/approved/">Approved</a></li>
     <li {% if request.path == "/software-training/single-training/rejected/" %}class="active" {% endif %}><a href="/software-training/single-training/rejected/">Rejected</a></li>
     <li {% if request.path == "/software-training/single-training/ongoing/" %}class="active" {% endif %}><a href="/software-training/single-training/ongoing/">Ongoing</a></li>
@@ -79,7 +79,7 @@
                               </td>
                           {% endif %}
 
-			  
+
                        {% elif user|is_organiser %}
                            {% if request.path == '/software-training/single-training/approved/' %}
                              <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }}</a></td>
@@ -142,7 +142,7 @@
                             <td>Vocational </td>
                           {% endif %}
                        {% if user|is_resource_person %}
-			{% if request.path == "/software-training/single-training/pending/" %} 
+			{% if request.path == "/software-training/single-training/pending/" %}
 		      <td><a href="{% url 'events:single-training-approve' training.id %}">Approve</a></td>
                       <td><a href="{% url 'events:single-training-reject' training.id %}">Reject</a></td>
                         {% endif %}
@@ -153,7 +153,7 @@
               </div>
     </div>
   </div>
-    
+
 {% endblock %}
 {% block compressinlinejsblock %}
   <script>

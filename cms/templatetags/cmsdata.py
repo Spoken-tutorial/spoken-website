@@ -1,13 +1,18 @@
+# Third Party Stuff
 from django import template
-from cms.models import Block, Nav, SubNav
 from django.conf import settings
+
+# Spoken Tutorial Stuff
+from cms.models import Block, Nav
 from cms.sortable import *
 
 register = template.Library()
 
+
 def len_cutter(srting, limit):
     return srting[:limit] + (srting[limit:] and '..')
-    
+
+
 def get_cms_sidebar():
     block = Block.objects.all().filter(block_location_id=3, visible__exact=1).order_by('position')
     context = {
@@ -15,6 +20,7 @@ def get_cms_sidebar():
     }
 
     return context
+
 
 def get_cms_nav():
     nav = Nav.objects.all().filter(visible__exact=1).order_by('position')
@@ -24,14 +30,17 @@ def get_cms_nav():
 
     return context
 
+
 def get_cms_subnavs(src_subnav):
     subnavs = src_subnav.all().filter(visible__exact=1).order_by('position')
 
     return subnavs
 
+
 @register.filter
 def sort_by(queryset, order):
     return queryset.filter(visible__exact=1).order_by('position')
+
 
 def get_cms_footer():
     block = Block.objects.all().filter(block_location_id=2, visible__exact=1).order_by('position')
@@ -40,6 +49,7 @@ def get_cms_footer():
     }
 
     return context
+
 
 def get_cms_header():
     block = Block.objects.all().filter(block_location_id=1, visible__exact=1).order_by('position')
@@ -50,58 +60,65 @@ def get_cms_header():
     return context
 
 ''' excludes: will exclude excludes's values '''
-def combine_get_values(getValue, excludes = ['page']):
+
+
+def combine_get_values(getValue, excludes=['page']):
     values = ''
-    for k,v in getValue.iteritems():
+    for k, v in getValue.iteritems():
         if k not in excludes:
-            values += k+'='+v+'&'
+            values += k + '=' + v + '&'
     return values
 
 ''' includes: will include include's values '''
-def reset_get_values(getValue, includes = ['page']):
+
+
+def reset_get_values(getValue, includes=['page']):
     values = ''
-    for k,v in getValue.iteritems():
+    for k, v in getValue.iteritems():
         if k in includes:
-            values += k+'='+v+'&'
+            values += k + '=' + v + '&'
     return values
 
 ''' includes: will include include's values '''
-def reset_get_value(getValue, exclude_key = None):
+
+
+def reset_get_value(getValue, exclude_key=None):
     values = ''
-    for k,v in getValue.iteritems():
+    for k, v in getValue.iteritems():
         if k != exclude_key:
             if values:
                 values += '&'
             values += k + '=' + v
     return values
 
+
 def get_or_create_csrf_token(request):
     from django.middleware import csrf
     token = None
     try:
         token = request.META.get('CSRF_COOKIE', None)
-    except Exception, e:
-        print e
+    except Exception as e:
+        print(e)
         pass
     if token is None:
         token = csrf._get_new_csrf_key()
         try:
             request.META['CSRF_COOKIE'] = token
             request.META['CSRF_COOKIE_USED'] = True
-        except Exception, e:
-            print e
+        except Exception as e:
+            print(e)
             pass
-    print token
     return token
+
 
 def paginator_page_cutter(page_range, current_page):
     page_count = len(page_range)
     if page_count <= 11:
         return page_range
-    
+
     start_page = current_page - 5
     end_page = current_page + 5
-    
+
     if current_page <= 11:
         if current_page < 6:
             start_page = 1
@@ -110,13 +127,14 @@ def paginator_page_cutter(page_range, current_page):
             tmp = current_page - 5
             start_page = tmp
             end_page = current_page + 5
-    
+
     if page_count < end_page:
         end_page = page_count
         tmp = end_page - current_page
-        start_page =  start_page - (5 - tmp)
-    
-    return range(start_page, end_page+1)
+        start_page = start_page - (5 - tmp)
+
+    return range(start_page, end_page + 1)
+
 
 def get_analytics_code():
     context = {
@@ -124,6 +142,7 @@ def get_analytics_code():
     }
 
     return context
+
 
 def format_raw_data(raw_data):
     str_rows = raw_data.split('\n')

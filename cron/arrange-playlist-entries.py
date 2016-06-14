@@ -28,12 +28,12 @@ except gdata.service.BadAuthentication:
 ldb = MySQLdb.connect(
   host = DB_HOST,
   user = DB_USER,
-  passwd = DB_PASS, 
+  passwd = DB_PASS,
   db = 'cron_logs'
 )
 lcur = ldb.cursor()
 
-# fetching all foss 
+# fetching all foss
 rows = FossCategory.objects.all().order_by('foss')
 
 for row in rows:
@@ -73,7 +73,7 @@ for row in rows:
         "WHERE trid=" + str(tutorial.id))
       tr_log = lcur.fetchone()
 
-      # skip tutorial_resource(tutorial) if log entry count > 0 
+      # skip tutorial_resource(tutorial) if log entry count > 0
       if tr_log and int(tr_log[0]):
         print tutorial.id, '-- Skipping...'
         counter += 1

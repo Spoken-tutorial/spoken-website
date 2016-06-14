@@ -6,7 +6,7 @@ npm install
 grunt
 ```
 
-Be sure to have PhantomJS installed as Karma tests use it. Otherwise, in mac just run 
+Be sure to have PhantomJS installed as Karma tests use it. Otherwise, in mac just run
 
 ```
 brew install phantomjs

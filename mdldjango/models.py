@@ -1,19 +1,20 @@
 from django.db import models
 
+
 class MdlUser(models.Model):
     id = models.BigIntegerField(primary_key=True)
     auth = models.CharField(max_length=60)
     confirmed = models.IntegerField()
-    #policyagreed = models.IntegerField()
-    #deleted = models.IntegerField()
+    # policyagreed = models.IntegerField()
+    # deleted = models.IntegerField()
     gender = models.CharField(max_length=100, null=True, blank=True, default='0')
     age_range = models.CharField(max_length=100, null=True, blank=True, default='0')
     academic_code = models.CharField(max_length=100, null=True, blank=True, default='0')
     organizer = models.CharField(max_length=100, null=True, blank=True, default='0')
     invigilator = models.CharField(max_length=100, null=True, blank=True, default='0')
     flag = models.CharField(max_length=100, null=True, blank=True, default='0')
-    
-    #suspended = models.IntegerField()
+
+    # suspended = models.IntegerField()
     mnethostid = models.BigIntegerField(unique=True)
     username = models.CharField(unique=True, max_length=255)
     password = models.CharField(max_length=96)
@@ -21,7 +22,7 @@ class MdlUser(models.Model):
     firstname = models.CharField(max_length=300)
     lastname = models.CharField(max_length=300)
     email = models.CharField(max_length=300)
-    #emailstop = models.IntegerField()
+    # emailstop = models.IntegerField()
     icq = models.CharField(max_length=45)
     skype = models.CharField(max_length=150)
     yahoo = models.CharField(max_length=150)
@@ -34,40 +35,44 @@ class MdlUser(models.Model):
     address = models.CharField(max_length=210)
     city = models.CharField(max_length=360)
     country = models.CharField(max_length=6)
-    #lang = models.CharField(max_length=90)
+    # lang = models.CharField(max_length=90)
     theme = models.CharField(max_length=150)
     timezone = models.CharField(max_length=300)
-    #firstaccess = models.BigIntegerField()
-    #lastaccess = models.BigIntegerField()
-    #lastlogin = models.BigIntegerField()
-    #currentlogin = models.BigIntegerField()
+    # firstaccess = models.BigIntegerField()
+    # lastaccess = models.BigIntegerField()
+    # lastlogin = models.BigIntegerField()
+    # currentlogin = models.BigIntegerField()
     lastip = models.CharField(max_length=135)
     secret = models.CharField(max_length=45)
-    #picture = models.BigIntegerField()
+    # picture = models.BigIntegerField()
     url = models.CharField(max_length=765)
     description = models.TextField(blank=True)
-    #descriptionformat = models.IntegerField()
-    #mailformat = models.IntegerField()
-    #maildigest = models.IntegerField()
-    #maildisplay = models.IntegerField()
-    #htmleditor = models.IntegerField()
-    #autosubscribe = models.IntegerField()
-    #trackforums = models.IntegerField()
-    #timecreated = models.BigIntegerField()
-    #timemodified = models.BigIntegerField()
-    #trustbitmask = models.BigIntegerField()
+    # descriptionformat = models.IntegerField()
+    # mailformat = models.IntegerField()
+    # maildigest = models.IntegerField()
+    # maildisplay = models.IntegerField()
+    # htmleditor = models.IntegerField()
+    # autosubscribe = models.IntegerField()
+    # trackforums = models.IntegerField()
+    # timecreated = models.BigIntegerField()
+    # timemodified = models.BigIntegerField()
+    # trustbitmask = models.BigIntegerField()
     imagealt = models.CharField(max_length=765, blank=True)
+
     class Meta:
         db_table = u'mdl_user'
-        
+
+
 class MdlQuizGrades(models.Model):
     id = models.BigIntegerField(primary_key=True)
     quiz = models.BigIntegerField()
     userid = models.BigIntegerField()
     grade = models.DecimalField(max_digits=12, decimal_places=5)
     timemodified = models.BigIntegerField()
+
     class Meta:
         db_table = u'mdl_quiz_grades'
+
 
 class MdlQuizAttempts(models.Model):
     id = models.BigIntegerField(primary_key=True)
@@ -85,8 +90,10 @@ class MdlQuizAttempts(models.Model):
     timecheckstate = models.BigIntegerField(null=True, blank=True)
     sumgrades = models.DecimalField(null=True, max_digits=12, decimal_places=5, blank=True)
     needsupgradetonewqe = models.IntegerField()
+
     class Meta:
         db_table = u'mdl_quiz_attempts'
+
 
 class MdlUserEnrolments(models.Model):
     id = models.BigIntegerField(primary_key=True)
@@ -98,8 +105,10 @@ class MdlUserEnrolments(models.Model):
     modifierid = models.BigIntegerField()
     timecreated = models.BigIntegerField()
     timemodified = models.BigIntegerField()
+
     class Meta:
         db_table = u'mdl_user_enrolments'
+
 
 class MdlEnrol(models.Model):
     id = models.BigIntegerField(primary_key=True)
@@ -137,8 +146,10 @@ class MdlEnrol(models.Model):
     customtext4 = models.TextField(blank=True)
     timecreated = models.BigIntegerField()
     timemodified = models.BigIntegerField()
+
     class Meta:
         db_table = u'mdl_enrol'
+
 
 class MdlRoleAssignments(models.Model):
     id = models.BigIntegerField(primary_key=True)
@@ -150,6 +161,6 @@ class MdlRoleAssignments(models.Model):
     component = models.CharField(max_length=300)
     itemid = models.BigIntegerField()
     sortorder = models.BigIntegerField()
+
     class Meta:
         db_table = u'mdl_role_assignments'
-

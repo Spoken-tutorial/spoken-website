@@ -17,7 +17,7 @@ class test_MySQLdb(dbapi20.DatabaseAPI20Test):
     test for an exception if the statement cannot return a
     result set. MySQL always returns a result set; it's just that
     some things return empty result sets."""
-    
+
     def test_fetchall(self):
         con = self._connect()
         try:
@@ -63,10 +63,10 @@ class test_MySQLdb(dbapi20.DatabaseAPI20Test):
                 'cursor.fetchall should return an empty list if '
                 'a select query returns no rows'
                 )
-            
+
         finally:
             con.close()
-                
+
     def test_fetchone(self):
         con = self._connect()
         try:
@@ -145,7 +145,7 @@ class test_MySQLdb(dbapi20.DatabaseAPI20Test):
 
     def help_nextset_setUp(self,cur):
         ''' Should create a procedure called deleteme
-            that returns two result sets, first the 
+            that returns two result sets, first the
 	    number of rows in booze then "name from booze"
         '''
         sql="""
@@ -197,6 +197,6 @@ class test_MySQLdb(dbapi20.DatabaseAPI20Test):
         finally:
             con.close()
 
-    
+
 if __name__ == '__main__':
     unittest.main()

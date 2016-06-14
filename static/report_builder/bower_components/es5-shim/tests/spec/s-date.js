@@ -154,7 +154,7 @@ describe('Date', function () {
         it('should return the isoString when stringified', function () {
             var date = new Date();
             expect(JSON.stringify(date.toISOString())).toBe(JSON.stringify(date));
-        }) 
+        })
     });
 
 });
