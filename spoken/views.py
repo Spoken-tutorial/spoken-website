@@ -1,5 +1,5 @@
 # Standard Library
-import datetime
+import datetime as dt
 import json
 import os
 from urllib import quote, unquote_plus, urlopen
@@ -74,11 +74,11 @@ def home(request):
     testimonials = Testimonials.objects.all().order_by('?')[:2]
     context['testimonials'] = testimonials
 
-    notifications = Notification.objects.filter(Q(start_date__lte=datetime.today()) & Q(
-        expiry_date__gte=datetime.today())).order_by('expiry_date')
+    notifications = Notification.objects.filter(Q(start_date__lte=dt.datetime.today()) & Q(
+        expiry_date__gte=dt.datetime.today())).order_by('expiry_date')
     context['notifications'] = notifications
 
-    events = Event.objects.filter(event_date__gte=datetime.today()).order_by('event_date')[:2]
+    events = Event.objects.filter(event_date__gte=dt.datetime.today()).order_by('event_date')[:2]
     context['events'] = events
     return render(request, 'spoken/templates/home.html', context)
 
