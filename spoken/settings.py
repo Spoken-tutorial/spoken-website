@@ -71,6 +71,7 @@ INSTALLED_APPS = (
     'report_builder',
     'compressor',
 
+    'base',
     'cms',
     'creation',
     'statistics',
