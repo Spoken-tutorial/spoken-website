@@ -2860,9 +2860,9 @@ def ajax_manual_language(request):
                     language.name + '.pdf'
                 if os.path.isfile(settings.MEDIA_ROOT + sheet_path):
                     data = '<a href="' + settings.MEDIA_URL + sheet_path + \
-                        '" target="_blank"> Click here to view the currently \
-                    available instruction sheet for the tutorial selected \
-                    above</a>'
+                        '" target="_blank"> Click here to view the currently ' \
+                        'available instruction sheet for the tutorial selected' \
+                        'above</a>'
             except Exception, e:
                 print e
                 pass
