@@ -152,12 +152,19 @@ def installation_sheet(foss, lang):
 
 
 def get_thumb_path(row, append_str):
-    path = settings.MEDIA_URL + 'videos/' + str(row.foss_id) + '/' + str(row.id) + \
-        '/' + row.tutorial.replace(' ', '-') + '-' + append_str + '.png'
-    return path
+    if not (row or hasattr(row, 'foss_id')):
+        return ''
+    url = 'videos/{foss_id}/{row_id}/{tutorial_slug}-{append_str}.png'.format(
+        foss_id=row.foss_id,
+        row_id=row.id,
+        tutorial_slug=row.tutorial.replace(' ', '-'),
+        append_str=append_str)
+    return settings.MEDIA_URL + url
 
 
 def get_srt_path(tr):
+    if not (tr or hasattr(tr, 'tutorial_detail')):
+        return ''
     data = ''
     english_srt = settings.MEDIA_ROOT + 'videos/' + str(tr.tutorial_detail.foss_id) + '/' + str(
         tr.tutorial_detail_id) + '/' + tr.tutorial_detail.tutorial.replace(' ', '-') + '-English.srt'
