@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.db import models, migrations
+from django.db import migrations, models
 from django.conf import settings
 
 
@@ -282,7 +282,7 @@ class Migration(migrations.Migration):
                 ('status', models.PositiveSmallIntegerField(default=0)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
-                ('approved_user', models.ForeignKey(related_name='approved_user', to=settings.AUTH_USER_MODEL, null=True, blank=True)),
+                ('approved_user', models.ForeignKey(null=True, blank=True, related_name='approved_user', to=settings.AUTH_USER_MODEL)),
                 ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL, related_name='user')),
             ],
         ),
@@ -409,12 +409,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='tutorialmissingcomponent',
             name='user',
-            field=models.ForeignKey(related_name='raised_user', to=settings.AUTH_USER_MODEL, null=True, blank=True),
+            field=models.ForeignKey(null=True, blank=True, related_name='raised_user', to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
             model_name='tutorialcommoncontent',
             name='prerequisite',
-            field=models.ForeignKey(related_name='prerequisite', to='creation.TutorialDetail', null=True, blank=True),
+            field=models.ForeignKey(null=True, blank=True, related_name='prerequisite', to='creation.TutorialDetail'),
         ),
         migrations.AddField(
             model_name='tutorialcommoncontent',

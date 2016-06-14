@@ -14,8 +14,7 @@ from mdldjango.models import MdlUser
 
 
 class Command(BaseCommand):
-    help = 'Migrates user from django to moodle.\n\
-            Send user credentials via email.'
+    help = 'Migrates user from django to moodle. Send user credentials via email.'
     FROM = 'administrator@spoken-tutorial.org'
     SUBJECT = "Spoken Tutorial Online Test password"
     HEADERS = {'Reply-To': 'no-replay@spoken-tutorial.org',
