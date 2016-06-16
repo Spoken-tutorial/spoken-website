@@ -36,9 +36,6 @@ class RegisterForm(forms.Form):
                                ('Male', 'Male'), ('Female', 'Female')], required=True)
     password = forms.CharField(widget=forms.PasswordInput())
     password_confirm = forms.CharField(widget=forms.PasswordInput())
-    choices = list(Course.objects.order_by('name').values_list('id', 'name'))
-    choices.insert(0, ('', '-- None --'),)
-    course = forms.ChoiceField(choices=choices)
     year = forms.ChoiceField(choices=(('', '-- None --'),
                                       (1, '1st Year'),
                                       (2, '2nd year'),
@@ -91,6 +88,9 @@ class RegisterForm(forms.Form):
             del kwargs["instance"]
 
         super(RegisterForm, self).__init__(*args, **kwargs)
+        self.fields['course'] = forms.ChoiceField(
+            choices=[('', '-- None --')] + list(Course.objects.order_by('name').values_list('id', 'name')))
+
         # load the choices
         state_list = list(State.objects.exclude(name='Uncategorised').order_by('name').values_list('id', 'name'))
         state_list.insert(0, ('', '-- None --'))
