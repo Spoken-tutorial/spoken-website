@@ -1,7 +1,11 @@
 language: python
 sudo: false
+
 python:
 - 2.7.11
+
+services:
+  - mysql
 
 cache:
   directories:
@@ -15,6 +19,14 @@ install:
   - pip install pip-accel
   - pip-accel install python-coveralls
   - pip-accel install -r requirements-dev.txt
+
+before_script:
+  - cp config.sample.py config.py
+  - mysql -e 'create database spoken_test_db;'
+  - sed -i "s/your_database_name_here/spoken_test_db/g" config.py
+  - sed -i "s/your_database_user_here/root/g" config.py
+  - sed -i "s/your_database_password_here//g" config.py
+
 
 script:
 - flake8
