@@ -2177,7 +2177,7 @@ class OldTrainingCloseView(CreateView):
 class OrganiserFeedbackCreateView(CreateView):
     form_class = OrganiserFeedbackForm
     template_name = "organiser_feedback.html"
-    success_url = "/home"
+    success_url = "/"
 
     @method_decorator(group_required("Organiser"))
     def get(self, request, *args, **kwargs):

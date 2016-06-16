@@ -4,13 +4,15 @@ from django.conf.urls import include, url
 from django.contrib import admin
 from django.views.generic import TemplateView
 
-admin.autodiscover()
+from . import views as spoken_views
 
 urlpatterns = [
+    url(r'^$', spoken_views.home, name='home'),
+
     url(r'^robots\.txt$', TemplateView.as_view(template_name='robots.txt', content_type='text/plain')),
     url(r'^sitemap\.xml$', TemplateView.as_view(template_name='sitemap.xml', content_type='text/xml')),
-    url(r'^sitemap\.html$', 'spoken.views.sitemap', name='sitemap'),
-    # Examples:
+    url(r'^sitemap\.html$', spoken_views.sitemap, name='sitemap'),
+
     url(r'^addu/$', 'spoken.views.add_user', name='addu'),
     url(r'^tutorial-search/$', 'spoken.views.tutorial_search', name="tutorial-search"),
     url(r'^news/(?P<cslug>[\w-]+)/$', 'spoken.views.news', name="news"),
@@ -26,8 +28,6 @@ urlpatterns = [
         'spoken.views.admin_testimonials_edit', name="admin_testimonials_edit"),
     url(r'^admin/testimonials/(?P<rid>\d+)/delete/$',
         'spoken.views.admin_testimonials_delete', name="admin_testimonials_delete"),
-    url(r'^$', 'spoken.views.home', name='home'),
-    url(r'^home/$', 'spoken.views.home', name='home'),
     url(r'^site-feedback/$', 'spoken.views.site_feedback', name='site_feedback'),
     # url(r'^spoken/', include('spoken.foo.urls')),
     # Uncomment the admin/doc line below to enable admin documentation:
