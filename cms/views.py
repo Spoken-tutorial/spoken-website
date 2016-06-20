@@ -10,8 +10,8 @@ from django.contrib.auth.decorators import login_required
 from django.core.context_processors import csrf
 from django.core.mail import EmailMultiAlternatives
 from django.http import HttpResponseRedirect
-from django.shortcuts import get_object_or_404, render, render_to_response
-from django.template import RequestContext
+from django.shortcuts import get_object_or_404, render
+from django.utils.translation import ugettext_lazy as _
 from PIL import Image
 
 # Spoken Tutorial Stuff
@@ -43,7 +43,6 @@ def create_profile(user):
 
 
 def account_register(request):
-    context = {}
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
@@ -55,19 +54,18 @@ def account_register(request):
             user.save()
             create_profile(user)
             send_registration_confirmation(user)
-            messages.success(request, """
-                Please confirm your registration by clicking on the activation link which has been sent to your registered email id.
-            """)
+            msg = _("Please confirm your registration by clicking on the activation link which has been sent to "
+                    "your registered email id.")
+            messages.success(request, msg)
             return HttpResponseRedirect('/')
         context = {'form': form}
-        return render_to_response('cms/templates/register.html', context, context_instance=RequestContext(request))
+        return render(request, 'cms/templates/register.html', context)
     else:
         form = RegisterForm()
         context = {
             'form': form
         }
-        context.update(csrf(request))
-        return render_to_response('cms/templates/register.html', context)
+        return render(request, 'cms/templates/register.html', context)
 
 
 def send_registration_confirmation(user):
