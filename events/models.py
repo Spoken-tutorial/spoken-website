@@ -60,6 +60,8 @@ class City(models.Model):
         return self.name
 
     class Meta:
+        verbose_name = 'city'
+        verbose_name_plural = 'cities'
         unique_together = (("name", "state"),)
 
 
