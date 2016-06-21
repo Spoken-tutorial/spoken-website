@@ -660,67 +660,62 @@ def has_profile_data(request, user):
 
 
 @login_required
-def organiser_request(request, username):
-    """ request to bacome a new organiser """
+def organiser_request(request):
+    """Request to become a new organiser.
+    """
     user = request.user
-    if not user.is_authenticated():
-        raise PermissionDenied()
 
-    if username == request.user.username:
-        user = User.objects.get(username=username)
-        if request.method == 'POST':
-            form = OrganiserForm(request.POST)
-            if form.is_valid():
-                user.groups.add(Group.objects.get(name='Organiser'))
-                organiser = Organiser()
-                organiser.user_id = request.user.id
-                organiser.academic_id = request.POST['college']
-                try:
-                    organiser.save()
-                except:
-                    organiser = Organiser.objects.get(user=user)
-                    organiser.academic_id = request.POST['college']
-                    organiser.save()
-                messages.success(request, (
-                    "<ul><li>Thank you. Your request has been sent for Training Manager's "
-                    "approval.</li><li>You will get the approval with in 24 hours. Once the "
-                    "request is approved, you can request for the Training. </li><li>For more details <a "
-                    "target='_blank' href='http://process.spoken-tutorial.org/images/1/1f/Training-Request-Sheet.pdf'>"
-                    "Click Here</a></li></ul>"))
-                return HttpResponseRedirect("/software-training/organiser/view/" + user.username + "/")
-            messages.error(request, "Please fill the following details")
-            context = {'form': form}
-            return render(request, 'events/templates/organiser/form.html', context)
-        else:
+    if request.method == 'POST':
+        form = OrganiserForm(request.POST)
+        if form.is_valid():
+            user.groups.add(Group.objects.get(name='Organiser'))
+            organiser = Organiser()
+            organiser.user_id = request.user.id
+            organiser.academic_id = request.POST['college']
             try:
-                organiser = Organiser.objects.get(user=user)
-                if not is_organiser(organiser):
-                    messages.info(request, "Please fill the following details")
-                    context = {}
-                    context.update(csrf(request))
-                    context['form'] = OrganiserForm()
-                    return render(request, 'events/templates/organiser/form.html', context)
-                if organiser.status:
-                    messages.error(request, "You are already an Organiser ")
-                    return HttpResponseRedirect("/software-training/organiser/view/" + user.username + "/")
-                else:
-                    messages.info(request, (
-                        "Your Organiser request is yet to be approved. Please contact the Resource person of your "
-                        "State. For more details "
-                        "<a href='http://process.spoken-tutorial.org/images/5/5d/Create-New-Account.pdf' "
-                        "target='_blank'>Click Here</a>"))
-
-                    return HttpResponseRedirect("/software-training/organiser/view/" + user.username + "/")
+                organiser.save()
             except:
-                pass
-
-            messages.info(request, "Please fill the following details")
-            context = {}
-            context.update(csrf(request))
-            context['form'] = OrganiserForm()
-            return render(request, 'events/templates/organiser/form.html', context)
+                organiser = Organiser.objects.get(user=user)
+                organiser.academic_id = request.POST['college']
+                organiser.save()
+            messages.success(request, (
+                "<ul><li>Thank you. Your request has been sent for Training Manager's "
+                "approval.</li><li>You will get the approval with in 24 hours. Once the "
+                "request is approved, you can request for the Training. </li><li>For more details <a "
+                "target='_blank' href='http://process.spoken-tutorial.org/images/1/1f/Training-Request-Sheet.pdf'>"
+                "Click Here</a></li></ul>"))
+            return HttpResponseRedirect("/software-training/organiser/view/" + user.username + "/")
+        messages.error(request, "Please fill the following details")
+        context = {'form': form}
+        return render(request, 'events/templates/organiser/form.html', context)
     else:
-        raise PermissionDenied()
+        try:
+            organiser = Organiser.objects.get(user=user)
+            if not is_organiser(organiser):
+                messages.info(request, "Please fill the following details")
+                context = {}
+                context.update(csrf(request))
+                context['form'] = OrganiserForm()
+                return render(request, 'events/templates/organiser/form.html', context)
+            if organiser.status:
+                messages.error(request, "You are already an Organiser ")
+                return HttpResponseRedirect("/software-training/organiser/view/" + user.username + "/")
+            else:
+                messages.info(request, (
+                    "Your Organiser request is yet to be approved. Please contact the Resource person of your "
+                    "State. For more details "
+                    "<a href='http://process.spoken-tutorial.org/images/5/5d/Create-New-Account.pdf' "
+                    "target='_blank'>Click Here</a>"))
+
+                return HttpResponseRedirect("/software-training/organiser/view/" + user.username + "/")
+        except:
+            pass
+
+        messages.info(request, "Please fill the following details")
+        context = {}
+        context.update(csrf(request))
+        context['form'] = OrganiserForm()
+        return render(request, 'events/templates/organiser/form.html', context)
 
 
 @login_required

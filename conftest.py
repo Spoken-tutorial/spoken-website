@@ -33,7 +33,7 @@ def client():
     from django.test.client import Client
 
     class _Client(Client):
-        def login(self, user=None, backend="hackathon.backends.MyCustomBackend", **credentials):
+        def login(self, user=None, backend="django.contrib.auth.backends.ModelBackend", **credentials):
             if user is None:
                 return super(_Client, self).login(**credentials)
 
