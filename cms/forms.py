@@ -87,21 +87,19 @@ class ProfileForm(forms.ModelForm):
     #        self.cleaned_data['picture']:
     #         raise forms.ValidationError("Profile picture required!")
 
-    first_name = forms.CharField()
-    last_name = forms.CharField()
-    state = forms.ModelChoiceField(label='State', cache_choices=True,
-                                   widget=forms.Select(attrs={'class': 'ac-state'}),
-                                   queryset=State.objects.order_by('name'),
+    first_name = forms.CharField(max_length=30)
+    last_name = forms.CharField(max_length=30)
+    state = forms.ModelChoiceField(label='State', widget=forms.Select(attrs={'class': 'ac-state'}),
+                                   queryset=State.objects.all().order_by('name'),
                                    empty_label="--- None ---",
-                                   help_text="",
                                    error_messages={'required': 'State field required.'})
 
-    district = forms.ModelChoiceField(label='Dist', cache_choices=True,
+    district = forms.ModelChoiceField(label='Dist',
                                       widget=forms.Select(attrs={'class': 'ac-district'}),
                                       queryset=District.objects.none(), empty_label="--- None ---",
                                       help_text="", error_messages={'required': 'District Type field required.'})
 
-    city = forms.ModelChoiceField(label='City', cache_choices=True,
+    city = forms.ModelChoiceField(label='City',
                                   widget=forms.Select(attrs={'class': 'ac-city'}),
                                   queryset=City.objects.none(), empty_label="--- None ---",
                                   help_text="", error_messages={'required': 'City Type field required.'})
