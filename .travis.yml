@@ -22,10 +22,11 @@ install:
 
 before_script:
   - cp config.sample.py config.py
-  - mysql -e 'create database spoken_test_db;'
+  - mysql -e 'create database test_spoken_test_db;'
   - sed -i "s/your_database_name_here/spoken_test_db/g" config.py
   - sed -i "s/your_database_user_here/root/g" config.py
   - sed -i "s/your_database_password_here//g" config.py
+  - sed -i "s/addopts = --reuse-db//g" setup.cfg
 
 
 script:
