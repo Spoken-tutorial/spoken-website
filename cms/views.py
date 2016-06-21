@@ -179,7 +179,7 @@ def account_profile(request, username):
     user = request.user
     try:
         profile = Profile.objects.get(user_id=user.id)
-    except:
+    except Profile.DoesNotExist:
         profile = create_profile(user)
     old_file_path = settings.MEDIA_ROOT + str(profile.picture)
     if request.method == 'POST':
