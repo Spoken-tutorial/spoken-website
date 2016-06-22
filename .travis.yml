@@ -26,12 +26,10 @@ before_script:
   - sed -i "s/your_database_name_here/spoken_test_db/g" config.py
   - sed -i "s/your_database_user_here/root/g" config.py
   - sed -i "s/your_database_password_here//g" config.py
-  - sed -i "s/addopts = --reuse-db//g" setup.cfg
-
 
 script:
 - flake8
-- py.test --cov -v --tb=native
+- py.test --create-db --cov -v --tb=native
 
 after_success:
   - coveralls
