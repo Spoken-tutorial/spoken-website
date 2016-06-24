@@ -7,6 +7,8 @@ from django.contrib.auth.models import User
 from events.formsv2 import *
 from events.models import *
 
+EMPTY_OPTION = [('', '-- None --')]
+
 
 class RpForm(forms.ModelForm):
     user = forms.ModelChoiceField(queryset=User.objects.filter(groups__name='Resource Person'))
@@ -81,7 +83,8 @@ class AcademicForm(forms.ModelForm):
 
 class OrganiserForm(forms.Form):
     state = forms.ChoiceField(required=True, error_messages={'required': 'State field is required.'})
-    college = forms.ChoiceField(required=True, error_messages={'required': 'College Name field is required.'})
+    college = forms.ChoiceField(choices=EMPTY_OPTION, required=True,
+                                error_messages={'required': 'College Name field is required.'})
 
     def __init__(self, *args, **kwargs):
         initial = ''
@@ -92,7 +95,6 @@ class OrganiserForm(forms.Form):
         super(OrganiserForm, self).__init__(*args, **kwargs)
 
         # load the choices
-        EMPTY_OPTION = [('', '-- None --')]
         state_qs = State.objects.all().order_by('name')
         academic_qs = AcademicCenter.objects.all()
 

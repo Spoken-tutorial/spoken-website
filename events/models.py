@@ -144,6 +144,8 @@ class AcademicCenter(models.Model):
     district = models.ForeignKey(District)
     location = models.ForeignKey(Location, null=True)
     city = models.ForeignKey('events.City')
+
+    # FIXME: university already has state, we might not need it here.
     state = models.ForeignKey('events.State')
     address = models.TextField()
     pincode = models.PositiveIntegerField()
