@@ -14,7 +14,6 @@ from django.db.models.signals import pre_delete
 # Spoken Tutorial Stuff
 from creation.models import FossAvailableForTest, FossCategory, Language
 from events.signals import revoke_student_permission
-from mdldjango.models import *
 
 
 class State(models.Model):
