@@ -11,7 +11,30 @@ from django.core.management.base import BaseCommand
 from django.db import transaction as tx
 
 # Spoken Tutorial Stuff
-from events.models import City, District, Location, State
+from events.models import City, District, InstituteCategory, InstituteType, Location, State, University
+
+INSTITUTE_TYPES = [
+    "College",
+    "Polytechnic",
+    "ITI",
+    "Vocational",
+    "School",
+    "Uncategorised",
+    "Engineering",
+    "University",
+    "Management",
+    "NGO - Training Centre",
+    "NGO",
+    "Ekal Vidyalaya",
+    "Pharmacy",
+]
+
+INSTITUTE_CATEGORIES = [
+    "Govt",
+    "Private",
+    "NGO",
+    "Uncategorised",
+]
 
 
 class Command(BaseCommand):
@@ -19,6 +42,9 @@ class Command(BaseCommand):
     districts = []
     cities = []
     locations = []
+    institutetypes = []
+    institutecategories = []
+    universites = []
 
     @tx.atomic
     def handle(self, *args, **options):
@@ -35,7 +61,12 @@ class Command(BaseCommand):
                                            is_active=True, is_staff=True)
         print('>> Creating States')
         for i in range(1, 15):
-            self.states.append(self.create_state(counter=i))
+            state = self.create_state(counter=i)
+            self.states.append(state)
+
+            print('>> Creating Universites in %s' % state)
+            for i in range(1, random.randint(1, 8)):
+                self.universites.append(self.create_university(counter=i, state=state))
 
         print('>> Creating Districts')
         for i in range(1, 90):
@@ -49,8 +80,23 @@ class Command(BaseCommand):
         for i in range(1, 90):
             self.locations.append(self.create_location(counter=i))
 
+        print('>> Creating Institute Types')
+        for name in INSTITUTE_TYPES:
+            self.institutetypes.append(InstituteType.objects.get_or_create(name=name))
+
+        print('>> Creating Institute Categories')
+        for name in INSTITUTE_CATEGORIES:
+            self.institutecategories.append(InstituteCategory.objects.get_or_create(name=name))
+
     # Helpers / Factories
     # =========================================================================
+    def create_university(self, counter=None, state=None):
+        state = state if state else random.choice(self.states)
+        obj, _ = University.objects.get_or_create(name="University %s%s" % (counter, state.id),
+                                                  state=state,
+                                                  user=self.super_user)
+        return obj
+
     def create_state(self, counter=None):
         s, _ = State.objects.get_or_create(name='State %s' % counter,
                                            code='s%s' % counter,

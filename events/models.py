@@ -96,6 +96,7 @@ class University(models.Model):
     name = models.CharField(max_length=200)
     state = models.ForeignKey(State)
     user = models.ForeignKey(User)
+
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
@@ -103,6 +104,8 @@ class University(models.Model):
         return self.name
 
     class Meta:
+        verbose_name = 'university'
+        verbose_name_plural = 'universities'
         unique_together = (("name", "state"),)
 
 
@@ -132,22 +135,26 @@ class InstituteType(models.Model):
 
 class AcademicCenter(models.Model):
     user = models.ForeignKey(User)
-    state = models.ForeignKey(State)
-    institution_type = models.ForeignKey(InstituteType)
-    institute_category = models.ForeignKey(InstituteCategory)
-    university = models.ForeignKey(University)
-    academic_code = models.CharField(max_length=100, unique=True)
+
     institution_name = models.CharField(max_length=200)
+    institution_type = models.ForeignKey('events.InstituteType')
+    institute_category = models.ForeignKey('events.InstituteCategory')
+    university = models.ForeignKey('events.University')
+    academic_code = models.CharField(max_length=100, unique=True)
+
     district = models.ForeignKey(District)
     location = models.ForeignKey(Location, null=True)
-    city = models.ForeignKey(City)
+    city = models.ForeignKey('events.City')
+    state = models.ForeignKey('events.State')
     address = models.TextField()
     pincode = models.PositiveIntegerField()
     resource_center = models.BooleanField()
     rating = models.PositiveSmallIntegerField()
     contact_person = models.TextField()
+
     remarks = models.TextField()
     status = models.BooleanField()
+
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
@@ -698,12 +705,9 @@ class TrainingRequest(models.Model):
     course = models.ForeignKey(CourseMap)
     batch = models.ForeignKey(StudentBatch, null=True)
     participants = models.PositiveIntegerField(default=0)
-    # status = models.BooleanField(default=False)
     status = models.PositiveSmallIntegerField(default=0)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-    # created = models.DateTimeField()
-    # updated = models.DateTimeField()
 
     # managers
     objects = models.Manager()  # The default manager.
