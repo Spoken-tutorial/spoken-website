@@ -146,11 +146,6 @@ class StudentBatchCreateView(CreateView):
                 self.batch = sb.first()
         return super(StudentBatchCreateView, self).dispatch(*args, **kwargs)
 
-    # def get_form_kwargs(self):
-    #  kwargs = super(StudentBatchCreateView, self).get_form_kwargs()
-    #  kwargs.update({'user' : self.request.user})
-    #  return kwargs
-
     def get_context_data(self, **kwargs):
         context = super(StudentBatchCreateView, self).get_context_data(**kwargs)
         if self.batch:
@@ -195,14 +190,6 @@ class StudentBatchCreateView(CreateView):
             return render(request, self.template_name, context)
         #    messages.success(self.request, "Student Batch added successfully.")
         return HttpResponseRedirect('/software-training/student-batch/%s/new/' % (str(form_data.id)))
-
-#  def get(self, request, *args, **kwargs):
-#    self.user = request.user
-#    form_class = self.get_form_class()
-#    form = self.get_form(form_class)
-#    context = {}
-#    context['form'] = form
-#    return self.render_to_response(context)
 
     def email_validator(self, email):
         if email and email.strip():
