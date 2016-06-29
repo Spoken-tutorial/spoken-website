@@ -84,7 +84,7 @@ class Command(BaseCommand):
         print('>> Creating Groups')
         for name in GROUPS:
             group, _ = Group.objects.get_or_create(name=name)
-            self.institutetypes.append(group)
+            self.groups.append(group)
 
         print('>> Creating Institute Types')
         for name in INSTITUTE_TYPES:
@@ -98,6 +98,7 @@ class Command(BaseCommand):
 
         print('>> Creating States')
         for i in range(1, 15):
+            _districts = []
             state = self.create_state(counter=i)
             self.states.append(state)
 
@@ -106,8 +107,9 @@ class Command(BaseCommand):
                 self.cities.append(self.create_city(counter=i, state=state))
 
             print('>>> Creating districts in %s' % state)
-            for i in range(1, random.randint(1, 6)):
+            for i in range(1, random.randint(2, 6)):
                 district = self.create_district(counter=i, state=state)
+                _districts.append(district)
                 self.districts.append(district)
 
                 print('>>>> Creating Locations in %s' % district)
@@ -122,15 +124,16 @@ class Command(BaseCommand):
 
                 print('>> Creating academic centers in %s' % university)
                 for i in range(1, random.randint(1, 4)):
-                    academic_center = self.create_academic_center(counter=i, university=university)
+                    academic_center = self.create_academic_center(counter=i, university=university,
+                                                                  districts=_districts)
                     self.academic_centers.append(academic_center)
 
     # Helpers / Factories
     # =========================================================================
-    def create_academic_center(self, counter=None, university=None):
+    def create_academic_center(self, counter, university, districts):
         university = university if university else random.choice(self.universites)
         state = university.state
-        district = District.objects.filter(state=state).order_by('?').first()
+        district = random.choice(districts)
         location = Location.objects.filter(district=district).order_by('?').first()
         city = City.objects.filter(state=state).order_by('?').first()
         academic_code = "%s%s" % (university.id, counter)
