@@ -721,19 +721,16 @@ def organiser_request(request):
 @login_required
 def organiser_view(request, username):
     """view organiser details."""
-    user = request.user
-    if not (username == request.user.username or is_event_manager(user) or is_resource_person(user)):
+    try:
+        organiser = Organiser.objects.get(user=request.user)
+    except Organiser.DoesNotExist:
         raise PermissionDenied()
 
-    context = {}
-    try:
-        user = User.objects.get(username=username)
-        organiser = Organiser.objects.get(user=user)
-        context['record'] = organiser
-        context['profile'] = organiser.user.profile_set.get(user=user)
-    except Exception:
-        raise PermissionDenied()
-    return render(request, 'events/templates/organiser/view.html', context)
+    ctx = {
+        'record': organiser,
+        'profile': organiser.user.profile_set.all().first()
+    }
+    return render(request, 'events/templates/organiser/view.html', ctx)
 
 
 @login_required
