@@ -1,8 +1,12 @@
+from __future__ import absolute_import, unicode_literals
+
 # Third Party Stuff
 from django.conf.urls import include, url
 
+from . import views
+
 urlpatterns = [
-    url(r'^$', 'events.views.events_dashboard', name='events_dashboard'),
+    url(r'^$', views.events_dashboard, name='events_dashboard'),
     url(r'^init/$', 'events.views.init_events_app', name='init_events_app'),
 
     # cron job
@@ -24,8 +28,8 @@ urlpatterns = [
     url(r'^ac/(\d+)/edit/$', 'events.views.edit_ac', name='edit_ac'),
 
     url(r"^organiser/request/$", 'events.views.organiser_request', name='organiser_request'),
-    url(r"^organiser/(?P<username>[\w. @-]+)/edit/$", 'events.views.organiser_edit', name='organiser_edit'),
-    url(r"^organiser/view/(?P<username>[\w. @-]+)/$", 'events.views.organiser_view', name='organiser_view'),
+    url(r"^organiser/(?P<username>[\w. @-]+)/edit/$", views.organiser_edit, name='organiser_edit'),
+    url(r"^organiser/view/(?P<username>[\w. @-]+)/$", views.organiser_view, name='organiser_view'),
 
     url(r'^invigilator/(?P<status>\w+)/(?P<code>\w+)/(?P<userid>\d+)/$',
         'events.views.rp_invigilator', name='rp_invigilator'),
