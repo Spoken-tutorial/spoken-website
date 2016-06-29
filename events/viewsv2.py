@@ -56,7 +56,6 @@ class TrainingPlannerListView(ListView):
     template_name = None
 
     @method_decorator(group_required("Organiser"))
-    # following function is only applicable to organiser login
     def dispatch(self, *args, **kwargs):
         self.user = self.request.user
         self.get_current_planner()
@@ -140,6 +139,7 @@ class StudentBatchCreateView(CreateView):
 
     @method_decorator(group_required("Organiser"))
     def dispatch(self, *args, **kwargs):
+        # Check if provided batch id exist and save it for later user
         if 'bid' in kwargs:
             sb = StudentBatch.objects.filter(pk=kwargs['bid'])
             if sb.exists():
