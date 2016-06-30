@@ -17,6 +17,11 @@ from django.conf import settings
 from django_dynamic_fixture import G
 
 
+def create_group(**kwargs):
+    model_cls = apps.get_model('auth', 'Group')
+    return G(model_cls, **kwargs)
+
+
 def create_user(**kwargs):
     """Create an user along with their dependencies."""
     User = apps.get_model(settings.AUTH_USER_MODEL)
