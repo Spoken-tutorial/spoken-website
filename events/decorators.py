@@ -30,8 +30,7 @@ def user_passes_test(test_func, login_url=None, redirect_field_name=REDIRECT_FIE
                     (not login_netloc or login_netloc == current_netloc)):
                 path = request.get_full_path()
             from django.contrib.auth.views import redirect_to_login
-            return redirect_to_login(
-                path, resolved_login_url, redirect_field_name)
+            return redirect_to_login(path, resolved_login_url, redirect_field_name)
         return _wrapped_view
     return decorator
 

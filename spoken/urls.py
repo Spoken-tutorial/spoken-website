@@ -21,13 +21,15 @@ urlpatterns = [
     url(r'^watch/([0-9a-zA-Z-+%\(\) ]+)/([0-9a-zA-Z-+%\(\) ]+)/([a-zA-Z-]+)/$',
         'spoken.views.watch_tutorial', name="watch_tutorial"),
     url(r'^get-language/$', 'spoken.views.get_language', name="get_language"),
-    url(r'^testimonials/$', 'spoken.views.testimonials', name="testimonials"),
-    url(r'^testimonials/new/$', 'spoken.views.testimonials_new', name="testimonials_new"),
-    url(r'^admin/testimonials/$', 'spoken.views.admin_testimonials', name="admin_testimonials"),
+
+    url(r'^testimonials/$', spoken_views.testimonials, name="testimonials"),
+    url(r'^testimonials/new/$', spoken_views.testimonials_new, name="testimonials_new"),
+    url(r'^admin/testimonials/$', spoken_views.admin_testimonials, name="admin_testimonials"),
     url(r'^admin/testimonials/(?P<rid>\d+)/edit/$',
-        'spoken.views.admin_testimonials_edit', name="admin_testimonials_edit"),
+        spoken_views.admin_testimonials_edit, name="admin_testimonials_edit"),
     url(r'^admin/testimonials/(?P<rid>\d+)/delete/$',
-        'spoken.views.admin_testimonials_delete', name="admin_testimonials_delete"),
+        spoken_views.admin_testimonials_delete, name="admin_testimonials_delete"),
+
     url(r'^site-feedback/$', 'spoken.views.site_feedback', name='site_feedback'),
     # url(r'^spoken/', include('spoken.foo.urls')),
     # Uncomment the admin/doc line below to enable admin documentation:
