@@ -1,5 +1,4 @@
 # Third Party Stuff
-import validate_email
 from captcha.fields import ReCaptchaField
 from django import forms
 from django.contrib.auth.models import User
@@ -8,8 +7,9 @@ from django.utils.translation import ugettext_lazy as _
 from nicedit.widgets import NicEditWidget
 
 # Spoken Tutorial Stuff
-from cms.models import *
 from events.models import *
+
+from .models import *
 
 
 class LoginForm(forms.Form):
@@ -59,6 +59,7 @@ class RegisterForm(forms.Form):
     def clean_email(self):
         email = self.cleaned_data['email']
         try:
+            import validate_email
             if not validate_email.validate_email(email):
                 raise forms.ValidationError(u'%s is not valid email.' % email)
         except:

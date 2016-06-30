@@ -7,7 +7,6 @@ import string
 # Third Party Stuff
 from django.core.mail import EmailMultiAlternatives
 from models import MdlUser
-from validate_email import validate_email
 
 # Spoken Tutorial Stuff
 from events.models import *
@@ -214,7 +213,7 @@ def check_csvfile(user, file_path, w=None, flag=0, **kwargs):
                         continue
                     if row_length > 3 and email:
                         if not flag:
-                            # print "firstname => ", firstname
+                            from validate_email import validate_email
                             if not validate_email(email, verify=True):
                                 csv_file_error, error_line_no, invalid_emails = store_error(
                                     error_line_no, count, invalid_emails, email)
