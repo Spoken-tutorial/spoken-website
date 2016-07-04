@@ -103,7 +103,7 @@ class Command(BaseCommand):
             self.states.append(state)
 
             print('>>> Creating cities in %s' % state)
-            for i in range(1, random.randint(1, 12)):
+            for i in range(1, random.randint(2, 12)):
                 self.cities.append(self.create_city(counter=i, state=state))
 
             print('>>> Creating districts in %s' % state)
@@ -113,17 +113,17 @@ class Command(BaseCommand):
                 self.districts.append(district)
 
                 print('>>>> Creating Locations in %s' % district)
-                for i in range(1, random.randint(1, 6)):
+                for i in range(1, random.randint(2, 6)):
                     location = self.create_location(counter=i, district=district)
                     self.locations.append(location)
 
             print('>> Creating Universites in %s' % state)
-            for i in range(1, random.randint(1, 8)):
+            for i in range(1, random.randint(2, 8)):
                 university = self.create_university(counter=i, state=state)
                 self.universites.append(university)
 
                 print('>> Creating academic centers in %s' % university)
-                for i in range(1, random.randint(1, 4)):
+                for i in range(1, random.randint(2, 5)):
                     academic_center = self.create_academic_center(counter=i, university=university,
                                                                   districts=_districts)
                     self.academic_centers.append(academic_center)
