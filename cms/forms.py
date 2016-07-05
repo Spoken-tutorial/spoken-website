@@ -5,11 +5,11 @@ from django.contrib.auth.models import User
 from django.core.validators import RegexValidator
 from django.utils.translation import ugettext_lazy as _
 from nicedit.widgets import NicEditWidget
-from validate_email import validate_email
 
 # Spoken Tutorial Stuff
-from cms.models import *
 from events.models import *
+
+from .models import *
 
 
 class LoginForm(forms.Form):
@@ -26,8 +26,7 @@ class RegisterForm(forms.Form):
         validators=[
             RegexValidator(
                 regex='^[a-zA-Z0-9-_+.]*$',
-                message='Username required. 30 characters or fewer. \
-                    Letters, digits and ./+/-/_ only.',
+                message='Username required. 30 characters or fewer. Letters, digits and ./+/-/_ only.',
                 code='invalid_username'
             ),
         ]
@@ -60,7 +59,8 @@ class RegisterForm(forms.Form):
     def clean_email(self):
         email = self.cleaned_data['email']
         try:
-            if not validate_email(email):
+            import validate_email
+            if not validate_email.validate_email(email):
                 raise forms.ValidationError(u'%s is not valid email.' % email)
         except:
             raise forms.ValidationError(u'%s is not valid email.' % email)
@@ -88,21 +88,19 @@ class ProfileForm(forms.ModelForm):
     #        self.cleaned_data['picture']:
     #         raise forms.ValidationError("Profile picture required!")
 
-    first_name = forms.CharField()
-    last_name = forms.CharField()
-    state = forms.ModelChoiceField(label='State', cache_choices=True,
-                                   widget=forms.Select(attrs={'class': 'ac-state'}),
-                                   queryset=State.objects.order_by('name'),
+    first_name = forms.CharField(max_length=30)
+    last_name = forms.CharField(max_length=30)
+    state = forms.ModelChoiceField(label='State', widget=forms.Select(attrs={'class': 'ac-state'}),
+                                   queryset=State.objects.all().order_by('name'),
                                    empty_label="--- None ---",
-                                   help_text="",
                                    error_messages={'required': 'State field required.'})
 
-    district = forms.ModelChoiceField(label='Dist', cache_choices=True,
+    district = forms.ModelChoiceField(label='Dist',
                                       widget=forms.Select(attrs={'class': 'ac-district'}),
                                       queryset=District.objects.none(), empty_label="--- None ---",
                                       help_text="", error_messages={'required': 'District Type field required.'})
 
-    city = forms.ModelChoiceField(label='City', cache_choices=True,
+    city = forms.ModelChoiceField(label='City',
                                   widget=forms.Select(attrs={'class': 'ac-city'}),
                                   queryset=City.objects.none(), empty_label="--- None ---",
                                   help_text="", error_messages={'required': 'City Type field required.'})
@@ -167,24 +165,14 @@ class PasswordResetForm(forms.Form):
 
 
 class ChangePasswordForm(forms.Form):
-    old_password = forms.CharField(
-        widget=forms.PasswordInput(render_value=False),
-        # min_length=8,
-    )
+    old_password = forms.CharField(widget=forms.PasswordInput(render_value=False))
     code = forms.CharField()
     userid = forms.CharField()
-    new_password = forms.CharField(
-        widget=forms.PasswordInput(render_value=False),
-        min_length=8,
-    )
-    confirm_new_password = forms.CharField(
-        widget=forms.PasswordInput(render_value=False),
-        min_length=8,
-    )
+    new_password = forms.CharField(widget=forms.PasswordInput(render_value=False), min_length=8)
+    confirm_new_password = forms.CharField(widget=forms.PasswordInput(render_value=False), min_length=8)
 
     def clean(self):
-        profile = Profile.objects.get(user_id=self.cleaned_data['userid'],
-                                      confirmation_code=self.cleaned_data['code'])
+        profile = Profile.objects.get(user_id=self.cleaned_data['userid'], confirmation_code=self.cleaned_data['code'])
         user = profile.user
         if 'old_password' in self.cleaned_data:
             if not user.check_password(self.cleaned_data['old_password']):

@@ -4,7 +4,18 @@ from django.core.exceptions import ObjectDoesNotExist
 
 # Spoken Tutorial Stuff
 from creation.models import FossAvailableForWorkshop
-from events.models import *
+
+from .models import (
+    AcademicCenter,
+    City,
+    InstituteType,
+    Invigilator,
+    Organiser,
+    State,
+    Test,
+    Training,
+    TrainingRequest
+)
 
 
 class AcademicCenterFilter(django_filters.FilterSet):
@@ -71,15 +82,11 @@ class InvigilatorFilter(django_filters.FilterSet):
 
 class TrainingFilter(django_filters.FilterSet):
     academic__state = django_filters.ChoiceFilter(choices=State.objects.none())
-    foss = django_filters.ChoiceFilter(choices=[('', '---------')] + list(FossAvailableForWorkshop.objects.filter(
-        status=1).order_by('foss__foss').values_list('foss__id', 'foss__foss').distinct()))
-    language = django_filters.ChoiceFilter(
-        choices=[('', '---------')] + list(FossAvailableForWorkshop.objects.values_list(
-            'language__id', 'language__name').order_by('language__name').distinct()))
+    foss = django_filters.ChoiceFilter(choices=[])
+    language = django_filters.ChoiceFilter(choices=[])
     training_type = django_filters.ChoiceFilter(
         choices=[('', '---------'), (0, 'Training'), (1, 'Workshop'), (2, 'Live Workshop'), (3, 'Pilot Workshop')])
-    academic__institution_type = django_filters.ChoiceFilter(
-        choices=[('', '---------')] + list(InstituteType.objects.values_list('id', 'name').distinct()))
+    academic__institution_type = django_filters.ChoiceFilter(choices=[])
     academic__city = django_filters.ChoiceFilter(choices=State.objects.none())
     tdate = django_filters.DateRangeCompareFilter()
     academic__institution_name = django_filters.CharSearchFilter()
@@ -100,6 +107,23 @@ class TrainingFilter(django_filters.FilterSet):
                 state = State.objects.get(pk=args[0]['academic__state'])
             except ObjectDoesNotExist:
                 pass
+        choices = None
+        choices = list(FossAvailableForWorkshop.objects.filter(
+            status=1).order_by('foss__foss').values_list('foss__id', 'foss__foss').distinct())
+        choices.insert(0, ('', '---------'),)
+        self.filters['foss'].extra.update({'choices': choices})
+
+        choices = None
+        choices = list(FossAvailableForWorkshop.objects.values_list(
+            'language__id', 'language__name').order_by('language__name').distinct())
+        choices.insert(0, ('', '---------'),)
+        self.filters['language'].extra.update({'choices': choices})
+
+        choices = None
+        choices = list(InstituteType.objects.values_list('id', 'name').distinct())
+        choices.insert(0, ('', '---------'),)
+        self.filters['academic__institution_type'].extra.update({'choices': choices})
+
         choices = None
         if user:
             choices = list(State.objects.filter(resourceperson__user_id=user,
@@ -125,12 +149,10 @@ class TrainingFilter(django_filters.FilterSet):
 
 class TestFilter(django_filters.FilterSet):
     academic__state = django_filters.ChoiceFilter(choices=State.objects.none())
-    foss = django_filters.ChoiceFilter(choices=[('', '---------')] + list(FossAvailableForTest.objects.filter(
-        status=1).order_by('foss__foss').values_list('foss__id', 'foss__foss').distinct()))
+    foss = django_filters.ChoiceFilter(choices=[])
     test_category = django_filters.ChoiceFilter(
         choices=[('', '---------'), (1, 'Training'), (2, 'Workshop'), (3, 'Others'), (3, 'Pilot Workshop')])
-    academic__institution_type = django_filters.ChoiceFilter(
-        choices=[('', '---------')] + list(InstituteType.objects.values_list('id', 'name').distinct()))
+    academic__institution_type = django_filters.ChoiceFilter(choices=[])
     academic__city = django_filters.ChoiceFilter(choices=State.objects.none())
     tdate = django_filters.DateRangeCompareFilter()
     academic__institution_name = django_filters.CharSearchFilter()
@@ -151,6 +173,17 @@ class TestFilter(django_filters.FilterSet):
                 state = State.objects.get(pk=args[0]['academic__state'])
             except ObjectDoesNotExist:
                 pass
+        choices = None
+        choices = list(FossAvailableForWorkshop.objects.filter(
+            status=1).order_by('foss__foss').values_list('foss__id', 'foss__foss').distinct())
+        choices.insert(0, ('', '---------'),)
+        self.filters['foss'].extra.update({'choices': choices})
+
+        choices = None
+        choices = list(InstituteType.objects.values_list('id', 'name').distinct())
+        choices.insert(0, ('', '---------'),)
+        self.filters['academic__institution_type'].extra.update({'choices': choices})
+
         choices = None
         if user:
             choices = list(State.objects.filter(resourceperson__user_id=user,
@@ -180,13 +213,7 @@ class TrainingRequestFilter(django_filters.FilterSet):
         choices=State.objects.none()
     )
 
-    course__foss = django_filters.ChoiceFilter(
-        choices=[('', '---------')] + list(
-            TrainingRequest.objects.filter(
-                status=1
-            ).order_by('course__foss__foss').values_list('course__foss__id', 'course__foss__foss').distinct()
-        )
-    )
+    course__foss = django_filters.ChoiceFilter(choices=[])
 
     course__category = django_filters.ChoiceFilter(
         choices=[
@@ -198,11 +225,7 @@ class TrainingRequestFilter(django_filters.FilterSet):
         ]
     )
 
-    training_planner__academic__institution_type = django_filters.ChoiceFilter(
-        choices=[('', '---------')] + list(
-            InstituteType.objects.all().values_list('id', 'name').distinct()
-        )
-    )
+    training_planner__academic__institution_type = django_filters.ChoiceFilter(choices=[])
 
     training_planner__academic__city = django_filters.ChoiceFilter(
         choices=State.objects.none()
@@ -210,8 +233,7 @@ class TrainingRequestFilter(django_filters.FilterSet):
 
     sem_start_date = django_filters.DateRangeCompareFilter()
 
-    training_planner__academic__institution_name = \
-        django_filters.CharSearchFilter()
+    training_planner__academic__institution_name = django_filters.CharSearchFilter()
 
     def __init__(self, *args, **kwargs):
         user = None
@@ -243,6 +265,17 @@ class TrainingRequestFilter(django_filters.FilterSet):
                 )
             except ObjectDoesNotExist:
                 pass
+        choices = None
+        choices = list(TrainingRequest.objects.filter(
+            status=1).order_by('course__foss__foss').values_list('course__foss__id', 'course__foss__foss').distinct())
+        choices.insert(0, ('', '---------'),)
+        self.filters['course__foss'].extra.update({'choices': choices})
+
+        choices = None
+        choices = list(InstituteType.objects.values_list('id', 'name').distinct())
+        choices.insert(0, ('', '---------'),)
+        self.filters['training_planner__academic__institution_type'].extra.update({'choices': choices})
+
         choices = None
         if user:
             if rp_completed:

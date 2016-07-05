@@ -1,8 +1,12 @@
+from __future__ import absolute_import, unicode_literals
+
 # Third Party Stuff
 from django.conf.urls import include, url
 
+from . import views
+
 urlpatterns = [
-    url(r'^$', 'events.views.events_dashboard', name='events_dashboard'),
+    url(r'^$', views.events_dashboard, name='events_dashboard'),
     url(r'^init/$', 'events.views.init_events_app', name='init_events_app'),
 
     # cron job
@@ -23,6 +27,17 @@ urlpatterns = [
     url(r'^ac/new/$', 'events.views.new_ac', name='new_ac'),
     url(r'^ac/(\d+)/edit/$', 'events.views.edit_ac', name='edit_ac'),
 
+    url(r"^organiser/request/$", 'events.views.organiser_request', name='organiser_request'),
+    url(r"^organiser/(?P<username>[\w. @-]+)/edit/$", views.organiser_edit, name='organiser_edit'),
+    url(r"^organiser/view/(?P<username>[\w. @-]+)/$", views.organiser_view, name='organiser_view'),
+
+    url(r'^invigilator/(?P<status>\w+)/(?P<code>\w+)/(?P<userid>\d+)/$',
+        'events.views.rp_invigilator', name='rp_invigilator'),
+    url(r"^invigilator/request/(?P<username>[\w. @-]+)/$",
+        'events.views.invigilator_request', name='invigilator_request'),
+    url(r"^invigilator/(?P<username>[\w. @-]+)/edit/$", 'events.views.invigilator_edit', name='invigilator_edit'),
+    url(r"^invigilator/view/(?P<username>[\w. @-]+)/$", 'events.views.invigilator_view', name='invigilator_view'),
+
     # url(r'^xmlparse/$', 'events.views.xmlparse', name='xmlparse'),
     # url(r'^pdf/$', 'events.views.pdf', name='pdf'),
     url(r'^training/permission/$', 'events.views.training_permission', name='training_permission'),
@@ -34,17 +49,6 @@ urlpatterns = [
         name='organiser_invigilator_index'),
     url(r'^organiser/(?P<status>\w+)/(?P<code>\w+)/(?P<userid>\d+)/$', 'events.views.rp_organiser',
         name='rp_organiser'),
-
-    url(r"^organiser/request/(?P<username>[\w. @-]+)/$", 'events.views.organiser_request', name='organiser_request'),
-    url(r"^organiser/(?P<username>[\w. @-]+)/edit/$", 'events.views.organiser_edit', name='organiser_edit'),
-    url(r"^organiser/view/(?P<username>[\w. @-]+)/$", 'events.views.organiser_view', name='organiser_view'),
-
-    url(r'^invigilator/(?P<status>\w+)/(?P<code>\w+)/(?P<userid>\d+)/$',
-        'events.views.rp_invigilator', name='rp_invigilator'),
-    url(r"^invigilator/request/(?P<username>[\w. @-]+)/$",
-        'events.views.invigilator_request', name='invigilator_request'),
-    url(r"^invigilator/(?P<username>[\w. @-]+)/edit/$", 'events.views.invigilator_edit', name='invigilator_edit'),
-    url(r"^invigilator/view/(?P<username>[\w. @-]+)/$", 'events.views.invigilator_view', name='invigilator_view'),
 
     # live feedback
     url(r'^training/live/list/$', 'events.views.live_training', name='live_training'),

@@ -7,6 +7,8 @@ from django.contrib.auth.models import User
 from events.formsv2 import *
 from events.models import *
 
+EMPTY_OPTION = [('', '-- None --')]
+
 
 class RpForm(forms.ModelForm):
     user = forms.ModelChoiceField(queryset=User.objects.filter(groups__name='Resource Person'))
@@ -80,10 +82,9 @@ class AcademicForm(forms.ModelForm):
 
 
 class OrganiserForm(forms.Form):
-    state = forms.ChoiceField(choices=[('', '-- None --'), ], widget=forms.Select(attrs={}),
-                              required=True, error_messages={'required': 'State field is required.'})
-    college = forms.ChoiceField(choices=[('', '-- None --'), ], widget=forms.Select(attrs={}),
-                                required=True, error_messages={'required': 'College Name field is required.'})
+    state = forms.ChoiceField(required=True, error_messages={'required': 'State field is required.'})
+    college = forms.ChoiceField(choices=EMPTY_OPTION, required=True,
+                                error_messages={'required': 'College Name field is required.'})
 
     def __init__(self, *args, **kwargs):
         initial = ''
@@ -92,21 +93,23 @@ class OrganiserForm(forms.Form):
             del kwargs["instance"]
 
         super(OrganiserForm, self).__init__(*args, **kwargs)
+
         # load the choices
-        state_list = list(State.objects.exclude().order_by('name').values_list('id', 'name'))
-        state_list.insert(0, ('', '-- None --'))
-        self.fields['state'].choices = state_list
-        if args:
-            if 'state' in args[0]:
-                if args[0]['state'] and args[0]['state'] != '' and args[0]['state'] != 'None':
-                    choices = list(AcademicCenter.objects.filter(state_id=args[0][
-                                   'state']).values_list('id', 'institution_name'))
-                    choices.insert(0, ('', '-- None --'))
-                    self.fields['college'].choices = choices
-                    self.fields['college'].widget.attrs = {}
+        state_qs = State.objects.all().order_by('name')
+        academic_qs = AcademicCenter.objects.all()
+
+        self.fields['state'].choices = EMPTY_OPTION + list(state_qs.values_list('id', 'name'))
+
+        if args and 'state' in args[0]:
+            state_id = args[0]['state']
+            if state_id and state_id != 'None':
+                self.fields['college'].choices = EMPTY_OPTION + list(
+                    academic_qs.filter(state_id=state_id).values_list('id', 'institution_name'))
+                self.fields['college'].widget.attrs = {}
+
         if initial:
             self.fields['state'].initial = initial.academic.state_id
-            self.fields['college'].choices = AcademicCenter.objects.filter(
+            self.fields['college'].choices = academic_qs.filter(
                 district_id=initial.academic.district_id).values_list('id', 'institution_name')
             # initial data
             self.fields['college'].initial = initial.academic_id

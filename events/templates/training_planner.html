@@ -1,11 +1,13 @@
 <!--this the the main planner page, here it displays the complete STP planning of particular college by the organiser -->
 {% extends 'spoken/templates/base.html' %}
 {% block title %}Semester Training Planner Summary{% endblock %}
+
 {% block heading %}
   <i class="home-page-title-i">Semester Training Planner Summary (STPS)</i>
-  <a href="/software-training" class='pull-right go-back'>Dashboard</a>
+  <a href="{% url 'events:events_dashboard' %}" class='pull-right go-back'>Dashboard</a>
   <center><a class="btn btn-primary" data-toggle="modal" data-target="#myModal"><i class="fa fa-2 fa-question"></i> Instructions</a></center>
 {% endblock %}
+
 {% block search %}{% endblock %}
 
 {% block cssblock %}

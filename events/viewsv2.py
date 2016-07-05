@@ -56,7 +56,6 @@ class TrainingPlannerListView(ListView):
     template_name = None
 
     @method_decorator(group_required("Organiser"))
-    # following function is only applicable to organiser login
     def dispatch(self, *args, **kwargs):
         self.user = self.request.user
         self.get_current_planner()
@@ -140,16 +139,12 @@ class StudentBatchCreateView(CreateView):
 
     @method_decorator(group_required("Organiser"))
     def dispatch(self, *args, **kwargs):
+        # Check if provided batch id exist and save it for later user
         if 'bid' in kwargs:
             sb = StudentBatch.objects.filter(pk=kwargs['bid'])
             if sb.exists():
                 self.batch = sb.first()
         return super(StudentBatchCreateView, self).dispatch(*args, **kwargs)
-
-    # def get_form_kwargs(self):
-    #  kwargs = super(StudentBatchCreateView, self).get_form_kwargs()
-    #  kwargs.update({'user' : self.request.user})
-    #  return kwargs
 
     def get_context_data(self, **kwargs):
         context = super(StudentBatchCreateView, self).get_context_data(**kwargs)
@@ -195,14 +190,6 @@ class StudentBatchCreateView(CreateView):
             return render(request, self.template_name, context)
         #    messages.success(self.request, "Student Batch added successfully.")
         return HttpResponseRedirect('/software-training/student-batch/%s/new/' % (str(form_data.id)))
-
-#  def get(self, request, *args, **kwargs):
-#    self.user = request.user
-#    form_class = self.get_form_class()
-#    form = self.get_form(form_class)
-#    context = {}
-#    context['form'] = form
-#    return self.render_to_response(context)
 
     def email_validator(self, email):
         if email and email.strip():
@@ -2177,7 +2164,7 @@ class OldTrainingCloseView(CreateView):
 class OrganiserFeedbackCreateView(CreateView):
     form_class = OrganiserFeedbackForm
     template_name = "organiser_feedback.html"
-    success_url = "/home"
+    success_url = "/"
 
     @method_decorator(group_required("Organiser"))
     def get(self, request, *args, **kwargs):

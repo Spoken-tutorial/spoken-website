@@ -77,18 +77,19 @@ class DepartmentAdmin(admin.ModelAdmin):
 class PermissionTypeAdmin(admin.ModelAdmin):
     fields = ['name']
 
-admin.site.register(Course, CourseAdmin)
-admin.site.register(University, UniversityAdmin)
-admin.site.register(InstituteType, InstituteTypeAdmin)
-admin.site.register(InstituteCategory, InstituteCategoryAdmin)
-admin.site.register(TestCategory, TestCategoryAdmin)
-admin.site.register(State, StateAdmin)
-admin.site.register(ResourcePerson, RpRoleAdmin)
-admin.site.register(Department, DepartmentAdmin)
-admin.site.register(PermissionType, PermissionTypeAdmin)
-admin.site.register(District, DistrictAdmin)
 admin.site.register(City, CityAdmin)
+admin.site.register(Course, CourseAdmin)
+admin.site.register(Department, DepartmentAdmin)
+admin.site.register(District, DistrictAdmin)
 admin.site.register(FossMdlCourses, FossMdlCoursesAdmin)
+admin.site.register(InstituteCategory, InstituteCategoryAdmin)
+admin.site.register(InstituteType, InstituteTypeAdmin)
+admin.site.register(Location)
+admin.site.register(PermissionType, PermissionTypeAdmin)
+admin.site.register(ResourcePerson, RpRoleAdmin)
+admin.site.register(State, StateAdmin)
+admin.site.register(TestCategory, TestCategoryAdmin)
+admin.site.register(University, UniversityAdmin)
 
 
 # EVENTS V2

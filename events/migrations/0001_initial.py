@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.db import models, migrations
+from django.db import migrations, models
 from django.conf import settings
+import events.models
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('creation', '__first__'),
+        ('creation', '0001_initial'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
@@ -16,7 +17,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='AcademicCenter',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
                 ('academic_code', models.CharField(unique=True, max_length=100)),
                 ('institution_name', models.CharField(max_length=200)),
                 ('address', models.TextField()),
@@ -36,7 +37,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='City',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
                 ('name', models.CharField(max_length=200)),
                 ('created', models.DateTimeField(auto_now_add=True, null=True)),
                 ('updated', models.DateTimeField(auto_now=True, null=True)),
@@ -45,7 +46,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Course',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
                 ('name', models.CharField(max_length=200)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
@@ -54,7 +55,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='CourseMap',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
                 ('test', models.BooleanField(default=False)),
                 ('category', models.PositiveIntegerField(default=0)),
                 ('created', models.DateTimeField(auto_now_add=True)),
@@ -67,7 +68,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Department',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
                 ('name', models.CharField(max_length=200)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
@@ -79,7 +80,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='District',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
                 ('code', models.CharField(max_length=3)),
                 ('name', models.CharField(max_length=200)),
                 ('created', models.DateTimeField(auto_now_add=True, null=True)),
@@ -89,7 +90,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='EventsNotification',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
                 ('role', models.PositiveSmallIntegerField(default=0)),
                 ('category', models.PositiveSmallIntegerField(default=0)),
                 ('categoryid', models.PositiveIntegerField(default=0)),
@@ -103,16 +104,23 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='FossMdlCourses',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
                 ('mdlcourse_id', models.PositiveIntegerField()),
                 ('mdlquiz_id', models.PositiveIntegerField()),
                 ('foss', models.ForeignKey(to='creation.FossCategory')),
             ],
         ),
         migrations.CreateModel(
+            name='HelpfulFor',
+            fields=[
+                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
+                ('helpful_for', models.CharField(choices=[('0', 'Academic Performance'), ('1', 'Project Assignments'), ('2', 'To get job interviews'), ('3', 'To get jobs'), ('4', 'All of the above')], max_length=50)),
+            ],
+        ),
+        migrations.CreateModel(
             name='InstituteCategory',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
                 ('name', models.CharField(max_length=200)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
@@ -124,7 +132,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='InstituteType',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
                 ('name', models.CharField(max_length=200)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
@@ -133,28 +141,36 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Invigilator',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
                 ('status', models.PositiveSmallIntegerField(default=0)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
                 ('academic', models.ForeignKey(to='events.AcademicCenter')),
-                ('appoved_by', models.ForeignKey(related_name='invigilator_approved_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('appoved_by', models.ForeignKey(null=True, blank=True, related_name='invigilator_approved_by', to=settings.AUTH_USER_MODEL)),
                 ('user', models.OneToOneField(to=settings.AUTH_USER_MODEL)),
             ],
         ),
         migrations.CreateModel(
             name='LabCourse',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
                 ('name', models.CharField(max_length=200)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
             ],
         ),
         migrations.CreateModel(
+            name='LatexWorkshopFileUpload',
+            fields=[
+                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
+                ('email', models.EmailField(max_length=254)),
+                ('file_upload', models.FileField(upload_to=events.models.get_email_dir)),
+            ],
+        ),
+        migrations.CreateModel(
             name='Location',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
                 ('name', models.CharField(max_length=200)),
                 ('pincode', models.PositiveIntegerField()),
                 ('created', models.DateTimeField(auto_now_add=True, null=True)),
@@ -165,38 +181,78 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Organiser',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
                 ('status', models.PositiveSmallIntegerField(default=0)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
-                ('academic', models.ForeignKey(blank=True, to='events.AcademicCenter', null=True)),
-                ('appoved_by', models.ForeignKey(related_name='organiser_approved_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('academic', models.ForeignKey(null=True, blank=True, to='events.AcademicCenter')),
+                ('appoved_by', models.ForeignKey(null=True, blank=True, related_name='organiser_approved_by', to=settings.AUTH_USER_MODEL)),
                 ('user', models.OneToOneField(related_name='organiser', to=settings.AUTH_USER_MODEL)),
+            ],
+        ),
+        migrations.CreateModel(
+            name='OrganiserFeedback',
+            fields=[
+                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
+                ('name', models.CharField(max_length=100)),
+                ('email', models.EmailField(max_length=100)),
+                ('gender', models.CharField(choices=[('', '-----'), ('Male', 'Male'), ('Female', 'Female')], max_length=10)),
+                ('age', models.CharField(choices=[('', '-----'), ('<25', '<25 years'), ('25-35', '25-35 years'), ('35+', '35 years and above')], max_length=20)),
+                ('designation', models.CharField(choices=[('', '-----'), ('Student', 'Student'), ('Faculty', 'Faculty'), ('Staff', 'Staff'), ('Admin', 'Admin')], max_length=20)),
+                ('medium_of_instruction', models.CharField(choices=[('', '-----'), ('English', 'English'), ('Vernacular', 'Vernacular'), ('Mixed', 'Mixed')], max_length=50)),
+                ('student_education_language', models.CharField(choices=[('', '-----'), ('English', 'Mostly English'), ('Vernacular', 'Mostly Vernacular'), ('Mixed', 'Mostly Mixed')], max_length=50)),
+                ('student_gender', models.CharField(choices=[('', '-----'), ('Male', 'Mostly Male'), ('Female', 'Mostly Female'), ('Mixed', 'Mixed')], max_length=50)),
+                ('student_location', models.CharField(choices=[('', '-----'), ('Urban', 'Mainly Urban'), ('Rural', 'Mainly Rural'), ('Mixed', 'Mixed'), ('Notsure', 'Not sure')], max_length=50)),
+                ('duration_of_tutorial', models.CharField(choices=[('', '-----'), ('<0.5', 'Less than 0.5 hour'), ('0.5-2', '0.5 - 2 hour'), ('2-10', '2-10 hours'), ('10+', 'Above 10 hours'), ('NA', 'Not applicable')], max_length=50)),
+                ('side_by_side_yes_no', models.CharField(choices=[('', '-----'), ('Yes', 'Yes'), ('No', 'No')], max_length=50)),
+                ('side_by_side_method_is', models.CharField(choices=[('', '-----'), ('0', 'Explaining the video to a neighbor'), ('1', 'Waiting for mentors explanation'), ('2', 'Watching and practicing simultaneously'), ('3', 'Dont know what this method is')], max_length=50)),
+                ('in_side_by_side_method', models.CharField(choices=[('', '-----'), ('0', 'The video has to be maximized'), ('1', 'The software has to be maximized'), ('2', 'Both software and video are maximized'), ('3', 'None of the above are maximized')], max_length=50)),
+                ('good_investment', models.CharField(choices=[('', '-----'), ('Yes', 'Yes'), ('No', 'No'), ('Notsure', 'Not sure')], max_length=50)),
+                ('is_comfortable_self_learning', models.CharField(choices=[('', '-----'), ('StronglyAgree', 'Strongly Agree'), ('Agree', 'Agree'), ('Neutral', 'Neutral'), ('Disagree', 'Disagree'), ('StronglyDisagree', 'Strongly Disagree'), ('Noidea', 'No idea')], max_length=50)),
+                ('is_classroom_better', models.CharField(choices=[('', '-----'), ('StronglyAgree', 'Strongly Agree'), ('Agree', 'Agree'), ('Neutral', 'Neutral'), ('Disagree', 'Disagree'), ('StronglyDisagree', 'Strongly Disagree'), ('Noidea', 'No idea')], max_length=50)),
+                ('is_student_expectations', models.CharField(choices=[('', '-----'), ('StronglyAgree', 'Strongly Agree'), ('Agree', 'Agree'), ('Neutral', 'Neutral'), ('Disagree', 'Disagree'), ('StronglyDisagree', 'Strongly Disagree'), ('Noidea', 'No idea')], max_length=50)),
+                ('is_help_get_interview', models.CharField(choices=[('', '-----'), ('StronglyAgree', 'Strongly Agree'), ('Agree', 'Agree'), ('Neutral', 'Neutral'), ('Disagree', 'Disagree'), ('StronglyDisagree', 'Strongly Disagree'), ('Noidea', 'No idea')], max_length=50)),
+                ('is_help_get_job', models.CharField(choices=[('', '-----'), ('StronglyAgree', 'Strongly Agree'), ('Agree', 'Agree'), ('Neutral', 'Neutral'), ('Disagree', 'Disagree'), ('StronglyDisagree', 'Strongly Disagree'), ('Noidea', 'No idea')], max_length=50)),
+                ('is_got_job', models.CharField(choices=[('', '-----'), ('StronglyAgree', 'Strongly Agree'), ('Agree', 'Agree'), ('Neutral', 'Neutral'), ('Disagree', 'Disagree'), ('StronglyDisagree', 'Strongly Disagree'), ('Noidea', 'No idea')], max_length=50)),
+                ('relevance', models.CharField(choices=[('', '-----'), ('Excellent', 'Excellent'), ('Good', 'Good'), ('Fair', 'Fair'), ('Bad', 'Bad'), ('Verybad', 'Very bad')], max_length=50)),
+                ('information_content', models.CharField(choices=[('', '-----'), ('Excellent', 'Excellent'), ('Good', 'Good'), ('Fair', 'Fair'), ('Bad', 'Bad'), ('Verybad', 'Very bad')], max_length=50)),
+                ('audio_video_quality', models.CharField(choices=[('', '-----'), ('Excellent', 'Excellent'), ('Good', 'Good'), ('Fair', 'Fair'), ('Bad', 'Bad'), ('Verybad', 'Very bad')], max_length=50)),
+                ('presentation_quality', models.CharField(choices=[('', '-----'), ('Excellent', 'Excellent'), ('Good', 'Good'), ('Fair', 'Fair'), ('Bad', 'Bad'), ('Verybad', 'Very bad')], max_length=50)),
+                ('overall_rating', models.CharField(choices=[('', '-----'), ('Excellent', 'Excellent'), ('Good', 'Good'), ('Fair', 'Fair'), ('Bad', 'Bad'), ('Verybad', 'Very bad')], max_length=50)),
+                ('is_training_benefited', models.CharField(choices=[('', '-----'), ('Yes', 'Yes'), ('No', 'No'), ('Notsure', 'Not sure')], max_length=50)),
+                ('testimonial', models.CharField(max_length=500)),
+                ('any_other_suggestions', models.CharField(max_length=500)),
+                ('can_contact', models.CharField(choices=[('', '-----'), ('Yes', 'Yes'), ('No', 'No')], max_length=50)),
+                ('city', models.ForeignKey(to='events.City')),
+                ('district', models.ForeignKey(to='events.District')),
+                ('helpful_for', models.ManyToManyField(related_name='events_HelpfulFor_related', to='events.HelpfulFor')),
+                ('language', models.ManyToManyField(related_name='events_Language_related', to='creation.Language')),
+                ('offered_training_foss', models.ManyToManyField(related_name='events_FossCategory_related', to='creation.FossCategory')),
             ],
         ),
         migrations.CreateModel(
             name='OrganiserNotification',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
                 ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
             ],
         ),
         migrations.CreateModel(
             name='Permission',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
-                ('assigned_by', models.ForeignKey(related_name='permission_assigned_by', to=settings.AUTH_USER_MODEL)),
-                ('district', models.ForeignKey(related_name='permission_district', to='events.District', null=True)),
-                ('institute', models.ForeignKey(related_name='permission_district', to='events.AcademicCenter', null=True)),
-                ('institute_type', models.ForeignKey(related_name='permission_institution_type', to='events.InstituteType', null=True)),
+                ('assigned_by', models.ForeignKey(to=settings.AUTH_USER_MODEL, related_name='permission_assigned_by')),
+                ('district', models.ForeignKey(null=True, related_name='permission_district', to='events.District')),
+                ('institute', models.ForeignKey(null=True, related_name='permission_district', to='events.AcademicCenter')),
+                ('institute_type', models.ForeignKey(null=True, related_name='permission_institution_type', to='events.InstituteType')),
             ],
         ),
         migrations.CreateModel(
             name='PermissionType',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
                 ('name', models.CharField(max_length=200)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
@@ -205,7 +261,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='ResourcePerson',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
                 ('assigned_by', models.PositiveIntegerField()),
                 ('status', models.BooleanField()),
                 ('created', models.DateTimeField(auto_now_add=True)),
@@ -218,7 +274,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Semester',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
                 ('name', models.CharField(max_length=50)),
                 ('even', models.BooleanField(default=True)),
             ],
@@ -226,16 +282,18 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='SingleTraining',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
                 ('training_type', models.PositiveIntegerField(default=0)),
                 ('tdate', models.DateField()),
-                ('ttime', models.TimeField()),
+                ('ttime', models.TimeField(null=True, blank=True)),
                 ('status', models.PositiveSmallIntegerField(default=0)),
                 ('participant_count', models.PositiveIntegerField(default=0)),
-                ('created', models.DateTimeField()),
-                ('updated', models.DateTimeField()),
+                ('total_participant_count', models.PositiveIntegerField(default=0)),
+                ('created', models.DateTimeField(auto_now_add=True)),
+                ('updated', models.DateTimeField(auto_now=True)),
                 ('academic', models.ForeignKey(to='events.AcademicCenter')),
                 ('course', models.ForeignKey(to='events.CourseMap')),
+                ('institution_type', models.ForeignKey(null=True, to='events.InstituteType')),
                 ('language', models.ForeignKey(to='creation.Language')),
                 ('organiser', models.ForeignKey(to='events.Organiser')),
             ],
@@ -243,29 +301,31 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='SingleTrainingAttendance',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('firstname', models.CharField(max_length=100, null=True)),
-                ('lastname', models.CharField(max_length=100, null=True)),
-                ('gender', models.CharField(max_length=10, null=True)),
-                ('email', models.EmailField(max_length=254, null=True)),
-                ('password', models.CharField(max_length=100, null=True)),
+                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
+                ('foss', models.PositiveIntegerField(default=0)),
+                ('firstname', models.CharField(null=True, max_length=100)),
+                ('lastname', models.CharField(null=True, max_length=100)),
+                ('gender', models.CharField(null=True, max_length=10)),
+                ('email', models.EmailField(null=True, max_length=254)),
+                ('password', models.CharField(null=True, max_length=100)),
                 ('count', models.PositiveSmallIntegerField(default=0)),
                 ('status', models.PositiveSmallIntegerField(default=0)),
-                ('created', models.DateTimeField()),
-                ('updated', models.DateTimeField()),
+                ('created', models.DateTimeField(auto_now_add=True)),
+                ('updated', models.DateTimeField(auto_now=True)),
                 ('training', models.ForeignKey(to='events.SingleTraining')),
             ],
         ),
         migrations.CreateModel(
             name='State',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
                 ('code', models.CharField(max_length=3)),
                 ('name', models.CharField(max_length=50)),
                 ('slug', models.CharField(max_length=100)),
-                ('latitude', models.DecimalField(null=True, max_digits=10, decimal_places=4, blank=True)),
-                ('longtitude', models.DecimalField(null=True, max_digits=10, decimal_places=4, blank=True)),
+                ('latitude', models.DecimalField(null=True, blank=True, decimal_places=4, max_digits=10)),
+                ('longtitude', models.DecimalField(null=True, blank=True, decimal_places=4, max_digits=10)),
                 ('img_map_area', models.TextField()),
+                ('has_map', models.BooleanField(default=1)),
                 ('created', models.DateTimeField(auto_now_add=True, null=True)),
                 ('updated', models.DateTimeField(auto_now=True, null=True)),
                 ('users', models.ManyToManyField(related_name='resource_person', through='events.ResourcePerson', to=settings.AUTH_USER_MODEL)),
@@ -274,9 +334,9 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Student',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
                 ('gender', models.CharField(max_length=15)),
-                ('verified', models.BooleanField(default=False)),
+                ('verified', models.PositiveSmallIntegerField(default=0)),
                 ('error', models.BooleanField(default=False)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
@@ -286,7 +346,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='StudentBatch',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
                 ('year', models.PositiveIntegerField()),
                 ('stcount', models.PositiveIntegerField(default=0)),
                 ('academic', models.ForeignKey(to='events.AcademicCenter')),
@@ -297,18 +357,28 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='StudentMaster',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
                 ('moved', models.BooleanField(default=False)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
                 ('batch', models.ForeignKey(to='events.StudentBatch')),
                 ('student', models.ForeignKey(to='events.Student')),
             ],
+            options={
+                'ordering': ['student__user__first_name'],
+            },
+        ),
+        migrations.CreateModel(
+            name='StudentStream',
+            fields=[
+                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
+                ('student_stream', models.CharField(choices=[('0', 'Engineering'), ('1', 'Science'), ('2', 'Arts and Humanities'), ('3', 'Polytechnic/ Diploma programs'), ('4', 'Commerce and Business Studies'), ('5', 'ITI'), ('6', 'Other')], max_length=50)),
+            ],
         ),
         migrations.CreateModel(
             name='Test',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
                 ('test_code', models.CharField(max_length=100)),
                 ('tdate', models.DateField()),
                 ('ttime', models.TimeField()),
@@ -317,11 +387,11 @@ class Migration(migrations.Migration):
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
                 ('academic', models.ForeignKey(to='events.AcademicCenter')),
-                ('appoved_by', models.ForeignKey(related_name='test_approved_by', to=settings.AUTH_USER_MODEL, null=True)),
+                ('appoved_by', models.ForeignKey(null=True, related_name='test_approved_by', to=settings.AUTH_USER_MODEL)),
                 ('department', models.ManyToManyField(to='events.Department')),
                 ('foss', models.ForeignKey(to='creation.FossCategory')),
-                ('invigilator', models.ForeignKey(related_name='test_invigilator', to='events.Invigilator', null=True)),
-                ('organiser', models.ForeignKey(related_name='test_organiser', to='events.Organiser')),
+                ('invigilator', models.ForeignKey(null=True, related_name='test_invigilator', to='events.Invigilator')),
+                ('organiser', models.ForeignKey(to='events.Organiser', related_name='test_organiser')),
             ],
             options={
                 'verbose_name': 'Test Categorie',
@@ -330,18 +400,19 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='TestAttendance',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
                 ('mdluser_firstname', models.CharField(max_length=100)),
                 ('mdluser_lastname', models.CharField(max_length=100)),
                 ('mdluser_id', models.PositiveIntegerField()),
                 ('mdlcourse_id', models.PositiveIntegerField(default=0)),
                 ('mdlquiz_id', models.PositiveIntegerField(default=0)),
                 ('mdlattempt_id', models.PositiveIntegerField(default=0)),
-                ('password', models.CharField(max_length=100, null=True)),
+                ('password', models.CharField(null=True, max_length=100)),
                 ('count', models.PositiveSmallIntegerField(default=0)),
                 ('status', models.PositiveSmallIntegerField(default=0)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
+                ('student', models.ForeignKey(null=True, to='events.Student')),
                 ('test', models.ForeignKey(to='events.Test')),
             ],
             options={
@@ -351,7 +422,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='TestCategory',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
                 ('name', models.CharField(max_length=200)),
                 ('status', models.BooleanField(default=0)),
                 ('created', models.DateTimeField(auto_now_add=True, null=True)),
@@ -361,24 +432,24 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Testimonials',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
                 ('user_name', models.CharField(max_length=200)),
                 ('actual_content', models.TextField()),
                 ('minified_content', models.TextField()),
                 ('short_description', models.TextField()),
-                ('source_title', models.CharField(max_length=200, null=True)),
+                ('source_title', models.CharField(null=True, max_length=200)),
                 ('source_link', models.URLField(null=True)),
                 ('status', models.PositiveSmallIntegerField(default=0)),
                 ('created', models.DateTimeField(auto_now_add=True, null=True)),
                 ('updated', models.DateTimeField(auto_now=True, null=True)),
-                ('approved_by', models.ForeignKey(related_name='testimonial_approved_by', to=settings.AUTH_USER_MODEL, null=True)),
-                ('user', models.ForeignKey(related_name='testimonial_created_by', to=settings.AUTH_USER_MODEL)),
+                ('approved_by', models.ForeignKey(null=True, related_name='testimonial_approved_by', to=settings.AUTH_USER_MODEL)),
+                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL, related_name='testimonial_created_by')),
             ],
         ),
         migrations.CreateModel(
             name='TestLog',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
                 ('role', models.PositiveSmallIntegerField(default=0)),
                 ('status', models.PositiveSmallIntegerField(default=0)),
                 ('created', models.DateTimeField(auto_now_add=True)),
@@ -390,9 +461,9 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Training',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
                 ('training_type', models.PositiveIntegerField(default=0)),
-                ('training_code', models.CharField(max_length=100, null=True)),
+                ('training_code', models.CharField(null=True, max_length=100)),
                 ('tdate', models.DateField()),
                 ('ttime', models.TimeField()),
                 ('skype', models.PositiveSmallIntegerField(default=0)),
@@ -402,7 +473,7 @@ class Migration(migrations.Migration):
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
                 ('academic', models.ForeignKey(to='events.AcademicCenter')),
-                ('appoved_by', models.ForeignKey(related_name='training_approved_by', to=settings.AUTH_USER_MODEL, null=True)),
+                ('appoved_by', models.ForeignKey(null=True, related_name='training_approved_by', to=settings.AUTH_USER_MODEL)),
                 ('course', models.ForeignKey(to='events.Course')),
                 ('department', models.ManyToManyField(to='events.Department')),
             ],
@@ -410,23 +481,23 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='TrainingAttend',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
-                ('language', models.ForeignKey(default=None, to='creation.Language')),
+                ('language', models.ForeignKey(to='creation.Language', default=None)),
                 ('student', models.ForeignKey(to='events.Student')),
             ],
         ),
         migrations.CreateModel(
             name='TrainingAttendance',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
                 ('mdluser_id', models.PositiveIntegerField(null=True, blank=True)),
-                ('firstname', models.CharField(max_length=100, null=True)),
-                ('lastname', models.CharField(max_length=100, null=True)),
-                ('gender', models.CharField(max_length=10, null=True)),
-                ('email', models.EmailField(max_length=254, null=True)),
-                ('password', models.CharField(max_length=100, null=True)),
+                ('firstname', models.CharField(null=True, max_length=100)),
+                ('lastname', models.CharField(null=True, max_length=100)),
+                ('gender', models.CharField(null=True, max_length=10)),
+                ('email', models.EmailField(null=True, max_length=254)),
+                ('password', models.CharField(null=True, max_length=100)),
                 ('count', models.PositiveSmallIntegerField(default=0)),
                 ('status', models.PositiveSmallIntegerField(default=0)),
                 ('created', models.DateTimeField(auto_now_add=True)),
@@ -440,8 +511,8 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='TrainingCertificate',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('password', models.CharField(max_length=255, null=True)),
+                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
+                ('password', models.CharField(null=True, max_length=255)),
                 ('count', models.PositiveSmallIntegerField(default=0)),
                 ('updated', models.DateTimeField()),
                 ('student', models.ForeignKey(to='events.Student')),
@@ -450,20 +521,20 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='TrainingExtraFields',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
                 ('paper_name', models.CharField(max_length=200)),
                 ('approximate_hour', models.PositiveIntegerField(default=0)),
                 ('online_test', models.PositiveIntegerField(default=0)),
                 ('is_tutorial_useful', models.BooleanField(default=0)),
                 ('future_training', models.BooleanField(default=0)),
                 ('recommend_to_others', models.BooleanField(default=0)),
-                ('no_of_lab_session', models.CharField(max_length=30, null=True)),
+                ('no_of_lab_session', models.CharField(null=True, max_length=30)),
             ],
         ),
         migrations.CreateModel(
             name='TrainingFeedback',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
                 ('mdluser_id', models.PositiveIntegerField()),
                 ('rate_workshop', models.PositiveSmallIntegerField()),
                 ('content', models.PositiveSmallIntegerField()),
@@ -500,15 +571,14 @@ class Migration(migrations.Migration):
                 ('reason_why', models.TextField()),
                 ('other_comments', models.TextField()),
                 ('created', models.DateTimeField(auto_now_add=True)),
-                ('training', models.ForeignKey(to='events.Training')),
             ],
         ),
         migrations.CreateModel(
             name='TrainingLanguageFeedback',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
                 ('mdluser_id', models.PositiveIntegerField()),
-                ('name', models.CharField(max_length=100)),
+                ('name', models.CharField(null=True, default=None, max_length=100)),
                 ('age', models.PositiveIntegerField()),
                 ('medium_of_instruction', models.PositiveIntegerField()),
                 ('gender', models.BooleanField()),
@@ -553,14 +623,13 @@ class Migration(migrations.Migration):
                 ('side_by_side_method_is_effective', models.PositiveIntegerField(default=0)),
                 ('side_by_side_method_is', models.PositiveIntegerField(default=0)),
                 ('created', models.DateTimeField(auto_now_add=True)),
-                ('language_prefered', models.ForeignKey(to='creation.Language', null=True)),
-                ('training', models.ForeignKey(to='events.Training')),
+                ('language_prefered', models.ForeignKey(null=True, to='creation.Language')),
             ],
         ),
         migrations.CreateModel(
             name='TrainingLiveFeedback',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
                 ('rate_workshop', models.PositiveSmallIntegerField()),
                 ('name', models.CharField(max_length=100)),
                 ('email', models.EmailField(max_length=254)),
@@ -600,13 +669,13 @@ class Migration(migrations.Migration):
                 ('reason_why', models.TextField()),
                 ('other_comments', models.TextField()),
                 ('created', models.DateTimeField(auto_now_add=True)),
-                ('training', models.ForeignKey(to='events.Training')),
+                ('training', models.ForeignKey(to='events.SingleTraining')),
             ],
         ),
         migrations.CreateModel(
             name='TrainingLog',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
                 ('role', models.PositiveSmallIntegerField()),
                 ('status', models.PositiveSmallIntegerField()),
                 ('created', models.DateTimeField(auto_now_add=True)),
@@ -618,7 +687,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='TrainingPlanner',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
                 ('year', models.CharField(max_length=50)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
@@ -630,13 +699,13 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='TrainingRequest',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
                 ('sem_start_date', models.DateField()),
                 ('participants', models.PositiveIntegerField(default=0)),
-                ('status', models.BooleanField(default=0)),
+                ('status', models.PositiveSmallIntegerField(default=0)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
-                ('batch', models.ForeignKey(to='events.StudentBatch', null=True)),
+                ('batch', models.ForeignKey(null=True, to='events.StudentBatch')),
                 ('course', models.ForeignKey(to='events.CourseMap')),
                 ('department', models.ForeignKey(to='events.Department')),
                 ('training_planner', models.ForeignKey(to='events.TrainingPlanner')),
@@ -645,13 +714,23 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='University',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
                 ('name', models.CharField(max_length=200)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
                 ('state', models.ForeignKey(to='events.State')),
                 ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
             ],
+        ),
+        migrations.AddField(
+            model_name='traininglanguagefeedback',
+            name='training',
+            field=models.ForeignKey(to='events.TrainingRequest'),
+        ),
+        migrations.AddField(
+            model_name='trainingfeedback',
+            name='training',
+            field=models.ForeignKey(to='events.TrainingRequest'),
         ),
         migrations.AddField(
             model_name='trainingcertificate',
@@ -686,12 +765,17 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='test',
             name='test_category',
-            field=models.ForeignKey(related_name='test_category', to='events.TestCategory'),
+            field=models.ForeignKey(to='events.TestCategory', related_name='test_category'),
         ),
         migrations.AddField(
             model_name='test',
             name='training',
-            field=models.ForeignKey(to='events.Training', null=True),
+            field=models.ForeignKey(null=True, to='events.TrainingRequest'),
+        ),
+        migrations.AddField(
+            model_name='singletraining',
+            name='state',
+            field=models.ForeignKey(null=True, to='events.State'),
         ),
         migrations.AddField(
             model_name='resourceperson',
@@ -711,17 +795,37 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='permission',
             name='state',
-            field=models.ForeignKey(related_name='permission_state', to='events.State'),
+            field=models.ForeignKey(to='events.State', related_name='permission_state'),
         ),
         migrations.AddField(
             model_name='permission',
             name='university',
-            field=models.ForeignKey(related_name='permission_iniversity', to='events.University', null=True),
+            field=models.ForeignKey(null=True, related_name='permission_iniversity', to='events.University'),
         ),
         migrations.AddField(
             model_name='permission',
             name='user',
-            field=models.ForeignKey(related_name='permission_user', to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(to=settings.AUTH_USER_MODEL, related_name='permission_user'),
+        ),
+        migrations.AddField(
+            model_name='organiserfeedback',
+            name='state',
+            field=models.ForeignKey(to='events.State'),
+        ),
+        migrations.AddField(
+            model_name='organiserfeedback',
+            name='student_stream',
+            field=models.ManyToManyField(related_name='events_StudentStream_related', to='events.StudentStream'),
+        ),
+        migrations.AddField(
+            model_name='organiserfeedback',
+            name='trained_foss',
+            field=models.ManyToManyField(to='creation.FossCategory'),
+        ),
+        migrations.AddField(
+            model_name='organiserfeedback',
+            name='university',
+            field=models.ForeignKey(to='events.AcademicCenter'),
         ),
         migrations.AlterUniqueTogether(
             name='institutetype',
@@ -735,7 +839,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='coursemap',
             name='course',
-            field=models.ForeignKey(blank=True, to='events.LabCourse', null=True),
+            field=models.ForeignKey(null=True, blank=True, to='events.LabCourse'),
         ),
         migrations.AddField(
             model_name='coursemap',
@@ -774,7 +878,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='academiccenter',
             name='location',
-            field=models.ForeignKey(to='events.Location', null=True),
+            field=models.ForeignKey(null=True, to='events.Location'),
         ),
         migrations.AddField(
             model_name='academiccenter',

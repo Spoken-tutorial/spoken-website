@@ -48,39 +48,33 @@ def site_feedback(request):
 
 
 def home(request):
-    tr_rec = ''
+    t_resource_qs = TutorialResource.objects.filter(Q(status=1) | Q(status=2))
+    foss = t_resource_qs.order_by('?').values_list('tutorial_detail__foss_id', flat=True).distinct()[:9]
 
-    foss = list(TutorialResource.objects.filter(Q(status=1) | Q(status=2)).order_by(
-        '?').values_list('tutorial_detail__foss_id').distinct()[:9])
     random_tutorials = []
     # eng_lang = Language.objects.get(name='English')
     for f in foss:
-        tcount = TutorialResource.objects.filter(Q(status=1) | Q(
-            status=2), tutorial_detail__foss_id=f, language__name='English').order_by('tutorial_detail__order').count()
-        tutorial = TutorialResource.objects.filter(Q(status=1) | Q(status=2))
-        tutorial = tutorial.filter(tutorial_detail__foss_id=f, language__name='English')
-        tutorial = tutorial.order_by('tutorial_detail__order')[:1].first()
+        qs = t_resource_qs.filter(tutorial_detail__foss_id=f, language__name='English')
+        tcount = qs.count()
+        tutorial = qs.first()
         random_tutorials.append((tcount, tutorial))
-    try:
-        tr_rec = TutorialResource.objects.filter(Q(status=1) | Q(status=2)).order_by('?')[:1].first()
-    except Exception as e:
-        messages.error(request, str(e))
-    context = {
+
+    tr_rec = t_resource_qs.order_by('?').first()
+
+    ctx = {
         'tr_rec': tr_rec,
         'media_url': settings.MEDIA_URL,
         'random_tutorials': random_tutorials,
     }
 
-    testimonials = Testimonials.objects.all().order_by('?')[:2]
-    context['testimonials'] = testimonials
+    ctx['testimonials'] = Testimonials.objects.all().order_by('?')[:2]
 
-    notifications = Notification.objects.filter(Q(start_date__lte=dt.datetime.today()) & Q(
-        expiry_date__gte=dt.datetime.today())).order_by('expiry_date')
-    context['notifications'] = notifications
+    today = dt.datetime.today()
+    ctx['notifications'] = Notification.objects.filter(Q(start_date__lte=today) & Q(expiry_date__gte=today)
+                                                       ).order_by('expiry_date')
 
-    events = Event.objects.filter(event_date__gte=dt.datetime.today()).order_by('event_date')[:2]
-    context['events'] = events
-    return render(request, 'spoken/templates/home.html', context)
+    ctx['events'] = Event.objects.filter(event_date__gte=dt.datetime.today()).order_by('event_date')[:2]
+    return render(request, 'spoken/templates/home.html', ctx)
 
 
 def get_or_query(terms, search_fields):

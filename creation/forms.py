@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 # Third Party Stuff
 from django import forms
 from django.contrib.auth.models import User
@@ -820,23 +822,11 @@ class AvailableFossForm(forms.ModelForm):
 
 
 class UpdatePrerequisiteForm(forms.Form):
-    source_foss = forms.ChoiceField(
-        choices=[('', '-- Select Foss --'), ] +
-        list(FossCategory.objects.filter(status=1).values_list('id', 'foss').order_by('foss')),
-        required=True,
-        error_messages={'required': 'FOSS category field is required.'}
-    )
     source_tutorial = forms.ChoiceField(
         choices=[('', '-- Select Tutorial --'), ],
         widget=forms.Select(attrs={'disabled': 'disabled'}),
         required=True,
         error_messages={'required': 'Tutorial Name field is required.'}
-    )
-    destination_foss = forms.ChoiceField(
-        choices=[('', '-- Select Foss --'), ('0', '-- Not Required --'), ] +
-        list(FossCategory.objects.filter(status=1).values_list('id', 'foss').order_by('foss')),
-        required=True,
-        error_messages={'required': 'FOSS category field is required.'}
     )
     destination_tutorial = forms.ChoiceField(
         choices=[('', '-- Select Tutorial --'), ('0', '-- Not Required --'), ],
@@ -847,6 +837,18 @@ class UpdatePrerequisiteForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super(UpdatePrerequisiteForm, self).__init__(*args, **kwargs)
+        self.fields['source_foss'] = forms.ChoiceField(
+            choices=[('', '-- Select Foss --'), ] +
+            list(FossCategory.objects.filter(status=1).values_list('id', 'foss').order_by('foss')),
+            required=True,
+            error_messages={'required': 'FOSS category field is required.'}
+        )
+        self.fields['destination_foss'] = forms.ChoiceField(
+            choices=[('', '-- Select Foss --'), ('0', '-- Not Required --'), ] +
+            list(FossCategory.objects.filter(status=1).values_list('id', 'foss').order_by('foss')),
+            required=True,
+            error_messages={'required': 'FOSS category field is required.'}
+        )
         if args:
             if 'source_foss' in args[0]:
                 if args[0]['source_foss'] and args[0]['source_foss'] != '' and args[0]['source_foss'] != 'None':
@@ -896,12 +898,6 @@ class UpdatePrerequisiteForm(forms.Form):
 
 
 class UpdateKeywordsForm(forms.Form):
-    foss = forms.ChoiceField(
-        choices=[('', '-- Select Foss --'), ] +
-        list(FossCategory.objects.filter(status=1).values_list('id', 'foss').order_by('foss')),
-        required=True,
-        error_messages={'required': 'FOSS category field is required.'}
-    )
     tutorial = forms.ChoiceField(
         choices=[('', '-- Select Tutorial --'), ],
         widget=forms.Select(attrs={'disabled': 'disabled'}),
@@ -916,6 +912,13 @@ class UpdateKeywordsForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super(UpdateKeywordsForm, self).__init__(*args, **kwargs)
+        self.fields['foss'] = forms.ChoiceField(
+            choices=[('', '-- Select Foss --'), ] +
+            list(FossCategory.objects.filter(status=1).values_list('id', 'foss').order_by('foss')),
+            required=True,
+            error_messages={'required': 'FOSS category field is required.'}
+        )
+
         if args:
             if 'foss' in args[0] and args[0]['foss']:
                 initial_data = ''
@@ -931,12 +934,6 @@ class UpdateKeywordsForm(forms.Form):
 
 
 class UpdateSheetsForm(forms.Form):
-    foss = forms.ChoiceField(
-        choices=[('', '-- Select Foss --'), ] + list(TutorialResource.objects.filter(Q(status=1) | Q(status=2), language__name='English')
-                                                     .values_list('tutorial_detail__foss_id', 'tutorial_detail__foss__foss').order_by('tutorial_detail__foss__foss').distinct()),
-        required=True,
-        error_messages={'required': 'FOSS category field is required.'}
-    )
     language = forms.ChoiceField(
         choices=[('', '-- Select Language --'), ],
         widget=forms.Select(attrs={'disabled': 'disabled'}),
@@ -960,7 +957,14 @@ class UpdateSheetsForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super(UpdateSheetsForm, self).__init__(*args, **kwargs)
-
+        self.fields['foss'] = forms.ChoiceField(
+            choices=[('', '-- Select Foss --'), ] + list(
+                TutorialResource.objects.filter(Q(status=1) | Q(status=2), language__name='English').values_list(
+                    'tutorial_detail__foss_id', 'tutorial_detail__foss__foss').order_by(
+                    'tutorial_detail__foss__foss').distinct()),
+            required=True,
+            error_messages={'required': 'FOSS category field is required.'}
+        )
         if args:
             if 'foss' in args[0] and args[0]['foss']:
                 initial_lang = ''

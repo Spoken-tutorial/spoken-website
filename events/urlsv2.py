@@ -22,9 +22,8 @@ urlpatterns = [
         name="select_participants"
     ),
     url(
-        r'^student-batch/new/$',
-        StudentBatchCreateView.as_view(template_name="new_batch.html",
-                                       form_class=StudentBatchForm),
+        r'^student-batch/new/$', StudentBatchCreateView.as_view(template_name="new_batch.html",
+                                                                form_class=StudentBatchForm),
         name="add_batch"
     ),
     url(
@@ -187,16 +186,8 @@ urlpatterns = [
         'events.viewsv2.SingleTrainingPendingAttendance',
         name="single_training_pending"
     ),
-    url(
-        r'^markas/(?P<pk>\d+)/complete/$',
-        'events.viewsv2.MarkAsComplete',
-        name="mark_as_complete"
-    ),
-    url(
-        r'^mark/(?P<pk>\d+)/complete/$',
-        'events.viewsv2.MarkComplete',
-        name="mark_complete"
-    ),
+    url(r'^markas/(?P<pk>\d+)/complete/$', 'events.viewsv2.MarkAsComplete', name="mark_as_complete"),
+    url(r'^mark/(?P<pk>\d+)/complete/$', 'events.viewsv2.MarkComplete', name="mark_complete"),
     url(
         r'^single-training/(?P<tid>\d+)/attendance',
         SingleTrainingAttendanceListView.as_view(template_name="single-training-attendance.html"),

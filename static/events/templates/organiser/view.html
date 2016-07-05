@@ -4,7 +4,7 @@
 {% load eventsdata %}
 {% block title %}Organiser Details{% endblock %}
 {% block heading %}
-    <i class="fa fa-list-ul"></i> Organiser Details <a href="/software-training" class='pull-right go-back'>Dashboard</a>
+    <i class="fa fa-list-ul"></i> Organiser Details <a href="{% url 'events:events_dashboard' %}" class='pull-right go-back'>Dashboard</a>
 {% endblock %}
 {% block content %}
     {% if user|is_resource_person %}
