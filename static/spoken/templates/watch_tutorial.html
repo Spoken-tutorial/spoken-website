@@ -263,15 +263,11 @@
     <row>
         <div class='container playlist-container col-lg-12 col-md-12 col-sm-12'>
             <div class="video-container col-lg-8 col-md-8 col-sm-8">
-                    {% if tr_rec.video_id and tr_rec.video_id != None and tr_rec.video_id != '0' %}
-                       <iframe id="player" width="100%" height="420px" src="//www.youtube.com/embed/{{ tr_rec.video_id }}?enablejsapi=1&rel=0&modestbranding=1&iv_load_policy=1" frameborder="0" allowfullscreen></iframe>
-                    {% else %}
                         <video id="st_video" class="video-js vjs-default-skin" controls preload="none" poster="{{ tr_rec.tutorial_detail|get_thumb_path:'Big' }}" width="auto" height="auto" data-setup="{}">
                             <!-- <source src="/static/spoken/images/Overview-and-Installation-of-Git-English.ogv" type="video/ogg" /> -->
 			    <source src="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ tr_rec.video }}" type="video/ogg" />
                             {{ tr_rec|get_srt_path|safe }}
                         </video>
-                    {% endif %}
             </div>
 
 

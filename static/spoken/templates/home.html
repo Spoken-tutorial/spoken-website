@@ -21,6 +21,61 @@
       .abt{
         background-color:#000;
       }
+      .banner-img-container {
+          position: relative;
+      }
+      .banner-img-container .awards ul {
+          list-style: none;
+          padding: 0;
+          overflow: hidden;
+          margin: 0;
+      }
+      .banner-img-container .awards{
+          position: absolute;
+          top: 0;
+          width: 100%;
+          padding: 10px 0;
+          background: rgba(0, 0, 0, 0.4) none repeat scroll 0% 0%;
+      }
+      .banner-img-container .awards .awards-item {
+          font-size: 20px;
+          color: white;
+          font-weight: bold;
+          text-align: center;
+      }
+      .banner-img-container .awards .awards-item a.blink {
+          -webkit-animation: color_change 1s infinite alternate;
+          -moz-animation: color_change 1s infinite alternate;  
+          -ms-animation: color_change 1s infinite alternate;  
+          -o-animation: color_change 1s infinite alternate;  
+          animation: color_change 1s infinite alternate;  
+      }
+      .banner-img-container .awards .awards-item a {
+          color: white;
+      }
+      .banner-img-container .awards .awards-item a:hover {
+          color: #F89021
+      }
+      @-webkit-keyframes color_change {
+          from {color: white; }
+          to {color: #F89021; }
+      }
+      @-moz-keyframes color_change {
+          from {color: white; }
+          to {color: #F89021; }
+      }
+      @-ms-keyframes color_change {
+          from {color: white; }
+          to {color: #F89021; }
+      }
+      @-o-keyframes color_change {
+          from {color: white; }
+          to {color: #F89021; }
+      }
+      @keyframes color_change {
+          from {color: white; }
+          to {color: #F89021; }
+      }
       </style>
 {% endblock %}
 {% block title %}Home{% endblock %}
@@ -81,6 +136,13 @@
                 <img class="col-lg-12 col-md-12 col-sm-12 col-xs-12 banner-img" alt="banner image" src="/static/spoken/images/home-banner.jpg">
                 <div class='go'>
                     <a href="/tutorial-search/" title="Search videos"><img class='go-image' alt="rounded arrow" src="/static/spoken/images/rounded-arrow.png"></a>
+                </div>
+                <div class="awards">
+                    <ul>
+                        <li class="awards-item col-sm-4 col-md-4"><a class="" href="http://googleresearch.blogspot.in/2015/03/announcing-google-mooc-focused-research.html" target="_blank">Google MOOCs <br>Research Award</a></li>
+                        <li class="awards-item col-sm-4 col-md-4"><a class="blink" href="/ht-for-mumbai-nomination">Nomination for <br>HT for Mumbai Awards 2015  </a></li>
+                        <li class="awards-item col-sm-4 col-md-4"><a class="" href="http://www.reimagine-education.com/the-winners-individual/2015/132/2193b0ae3841f24da1464d4b6b70ee0f/Indian+Institute+of+Technology+Bombay" target="_blank">Reimagine Education <br>Award</a></li>
+                    </ul>
                 </div>
             </div>
             <div class="banner-items col-lg-offset-2 col-md-offset-2 col-sm-offset-2 col-xs-offset-2 col-lg-8 col-md-8 col-sm-8 col-xs-8">

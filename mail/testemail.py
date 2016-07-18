@@ -58,7 +58,7 @@ IIT Bombay.'''
 
 
 for organiser in organisers:
-    to  = organiser.user.email
+    #to  = organiser.user.email
     to = ['k.sanmugam2@gmail.com']
     email = EmailMultiAlternatives(
         subject, text_content, 'administrator@spoken-tutorial.org',
