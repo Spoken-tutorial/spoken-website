@@ -168,7 +168,7 @@ def convert_template_to_html_file(archive, filename, request, template, ctx):
 
 
 def collect_common_files(tr_rec, common_files):
-    common_files_path = 'videos/{}/{}/resources'.format(key, tr_rec.tutorial_detail_id)
+    common_files_path = 'videos/{}/{}/resources'.format(tr_rec.tutorial_detail.foss_id, tr_rec.tutorial_detail_id)
 
     if tr_rec.common_content.slide_status > 0:
         common_files.add('{}/{}'.format(common_files_path, tr_rec.common_content.slide))
@@ -249,7 +249,7 @@ def home(request):
                         add_srt_file(archive, rec, filepath, eng_flag, srt_files)
 
                         # collect common files
-                        collect_common_files(tr_rec, common_files)
+                        collect_common_files(rec, common_files)
 
                         tutorial_path = '{}/{}/'.format(rec.tutorial_detail.foss_id, rec.tutorial_detail_id)
                         filepath = 'spoken/videos/{}show-video-{}.html'.format(tutorial_path, rec.language.name)
