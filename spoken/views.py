@@ -465,3 +465,7 @@ def add_user(request):
         except Exception, e:
             print e
     return HttpResponse("success")
+    
+def ViewBrochures(request):
+    template_name = 'spoken/templates/brochures.html'
+    return render(request, template_name)
