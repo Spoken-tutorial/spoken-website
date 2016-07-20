@@ -19,11 +19,10 @@
     display: none; /* Hidden by default */
     position: fixed; /* Stay in place */
     z-index: 1; /* Sit on top */
-    padding-top: 100px; /* Location of the box */
-    left: 0;
-    margin-top: 2%;
+    padding-top: 70px; /* Location of the box */
+    margin-top: 20px;
     width: 100%; /* Full width */
-    height: 100%; /* Full height */
+    height :hidden; /* Full height */
     overflow: auto; /* Enable scroll if needed */
     background-color: rgb(0,0,0); /* Fallback color */
     background-color: rgba(0,0,0,0.9); /* Black w/ opacity */
@@ -31,10 +30,10 @@
 
 /* Modal Content (image) */
 .modal-content {
-    margin: auto;
     display: block;
-    width: 90%;
-    height :90%;
+    width: 100%;
+    height :150%;
+    overflow:auto;
 }
 
 /* Caption of Modal Image */
@@ -70,17 +69,17 @@
 /* The Close Button */
 .close {
     position: absolute;
-    top: 15px;
+    top: 25px;
     right: 35px;
     color: #f1f1f1;
-    font-size: 40px;
+    font-size: 45px;
     font-weight: bold;
     transition: 0.3s;
 }
 
 .close:hover,
 .close:focus {
-    color: #bbb;
+    color: #fff;
     text-decoration: none;
     cursor: pointer;
 }
@@ -109,6 +108,7 @@
 {% endblock %}
 
 {% block content %}
+<body id="body">
 <div>
 <h4 class="topic">Programming Software</h4>
   <div>
@@ -409,13 +409,14 @@
   <img class="modal-content" id="img01">
 </div>
 
-
+</body>
 {% endblock %}
 
 {% block compressinlinejsblock %}
 <script>
 var modal = document.getElementById('myModal');
 function show(im){
+    document.getElementById("body").style.overflow="hidden";
     var img = document.getElementById(im.id);
     var modalImg = document.getElementById("img01");
     modal.style.display = "block";
@@ -428,6 +429,7 @@ var span = document.getElementsByClassName("close")[0];
 // When the user clicks on <span> (x), close the modal
 span.onclick = function() { 
     modal.style.display = "none";
+    document.getElementById("body").style.overflow="auto";
 }
 
 </script>
