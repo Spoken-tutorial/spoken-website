@@ -251,7 +251,7 @@ class StudentBatchCreateView(CreateView):
         warning = []
         write_flag = False
         try:
-            csvdata = csv.reader(file_path, delimiter=',', quotechar='|')
+            csvdata = csv.reader(file_path, delimiter=b',', quotechar=b'|')
             for row in csvdata:
                 if len(row) < 4:
                     skipped.append(row)
