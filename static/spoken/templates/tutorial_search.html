@@ -89,6 +89,13 @@
     Installation Sheet</a></li>
                         {% endif %}
                     {% endwith %}
+                    
+                    {% with link=collection.0.tutorial_detail.foss|brochure:collection.0.language %}
+                        {% if link %}
+                            <li><a class="download-insl-sheet" href="{{ link }}" target="_blank"><i class="fa fa-2 fa-download"></i>
+ Brochures</a></li>
+                        {% endif %}
+                    {% endwith %}
             </ol>
             {% if current_foss and current_foss == 'Spoken Tutorial Technology' %}
                 <div style="float: right; font-size: 16px;"><i><a href="/side-by-side-method/" target="_blank">Click here</a></i> to view <b>Side by Side method</b> video.</div>
