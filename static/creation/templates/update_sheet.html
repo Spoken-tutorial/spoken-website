@@ -2,7 +2,13 @@
 {% load widget_tweaks %}
 {% load static %}
 {% block title %}Upload {{ sheet_type|title }} Sheet{% endblock %}
-{% block heading %}Upload {{ sheet_type|title }} Sheet{% endblock %}
+{% block heading %}
+  {% if sheet_type == "brochure" %}
+    Upload {{ sheet_type|title }}
+  {% else %} 
+    Upload {{ sheet_type|title }} Sheet
+  {% endif %}
+{% endblock %}
 {% block content %}
     <form role="form" method="post" enctype="multipart/form-data" action="">
         {% csrf_token %}
@@ -22,7 +28,13 @@
         </div>
         <div class="well">
 		    <fieldset>
-		        <label for="id_comp">{{ sheet_type|title }} Sheet</label>
+		        <label for="id_comp">
+		        {% if sheet_type == "brochure" %}
+		          {{ sheet_type|title }}
+		        {% else %} 
+              {{ sheet_type|title }} Sheet
+            {% endif %}
+		        </label>
                 {% render_field form.comp class+="manual-upload comp" tabindex="4" %}
                 {{ form.comp.errors }}
             </fieldset>

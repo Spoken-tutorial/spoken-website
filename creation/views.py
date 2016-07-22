@@ -2609,7 +2609,7 @@ def update_keywords(request):
 
 @login_required
 def update_sheet(request, sheet_type):
-    sheet_types = ['instruction', 'installation']
+    sheet_types = ['instruction', 'installation','brochure']
     if not is_administrator(request.user) and not is_contributor(request.user)\
      or not sheet_type in sheet_types:
         raise PermissionDenied()
@@ -2622,7 +2622,12 @@ def update_sheet(request, sheet_type):
                 foss = FossCategory.objects.get(pk = foss_id)
                 language_id = request.POST.get('language')
                 language = Language.objects.get(pk = language_id)
-                sheet_path = 'videos/' + str(foss.id) + '/' + \
+                if sheet_type == 'brochure':
+                  sheet_path = 'videos/' + str(foss.id) + '/' + \
+                    foss.foss.replace(' ', '-') + '-' + sheet_type.title() + \
+                    '-' + language.name + '.pdf'
+                else:
+                  sheet_path = 'videos/' + str(foss.id) + '/' + \
                     foss.foss.replace(' ', '-') + '-' + sheet_type.title() + \
                     '-Sheet-' + language.name + '.pdf'
                 fout = open(settings.MEDIA_ROOT + sheet_path, 'wb+')
