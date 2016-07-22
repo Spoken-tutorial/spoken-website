@@ -109,6 +109,19 @@ def installation_sheet(foss, lang):
             file_path = settings.MEDIA_URL + 'videos/' + str(foss.id) + '/' + foss.foss.replace(' ', '-') + '-Installation-Sheet-English.pdf'
             return file_path
     return False
+    
+def brochure(foss, lang):
+    file_path = settings.MEDIA_ROOT + 'videos/' + str(foss.id) + '/' + foss.foss.replace(' ', '-') + '-Brochure-' + lang.name + '.pdf'
+    if lang.name != 'English':
+        if os.path.isfile(file_path):
+            file_path = settings.MEDIA_URL + 'videos/' + str(foss.id) + '/' + foss.foss.replace(' ', '-') + '-Brochure-' + lang.name + '.pdf'
+            return file_path
+    
+    file_path = settings.MEDIA_ROOT + 'videos/' + str(foss.id) + '/' + foss.foss.replace(' ', '-') + '-Brochure-English.pdf'
+    if os.path.isfile(file_path):
+            file_path = settings.MEDIA_URL + 'videos/' + str(foss.id) + '/' + foss.foss.replace(' ', '-') + '-Brochure-English.pdf'
+            return file_path
+    return False
 
 def get_thumb_path(row, append_str):
     path = settings.MEDIA_URL + 'videos/' + str(row.foss_id) + '/' + str(row.id) + '/' + row.tutorial.replace(' ', '-') + '-' + append_str + '.png'
@@ -215,3 +228,4 @@ register.filter('get_review_status_class', get_review_status_class)
 register.filter('get_username', get_username)
 register.filter('instruction_sheet', instruction_sheet)
 register.filter('installation_sheet', installation_sheet)
+register.filter('brochure', brochure)
