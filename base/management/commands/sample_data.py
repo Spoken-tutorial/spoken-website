@@ -12,7 +12,8 @@ from django.core.management.base import BaseCommand
 from django.db import transaction as tx
 
 # Spoken Tutorial Stuff
-from events.models import AcademicCenter, City, District, InstituteCategory, InstituteType, Location, State, University
+from events.models import (AcademicCenter, City, District, InstituteCategory, InstituteType, Location, State,
+                           University, ResourcePerson, Semester)
 
 GROUPS = [
     "Admin-Team",
@@ -86,6 +87,17 @@ class Command(BaseCommand):
             group, _ = Group.objects.get_or_create(name=name)
             self.groups.append(group)
 
+        print('>> Creating resource person with username=resource_person and password=123123123')
+        self.resource_person = self.create_user(is_superuser=False,
+                                                username='resource_person',
+                                                email='resource_person@example.com',
+                                                is_active=True, is_staff=False)
+        self.resource_person.groups.add(Group.objects.get(name='Resource Person'))
+
+        print('>> Create even/odd semester types')
+        Semester.objects.get_or_create(name="Even Semester", even=True)
+        Semester.objects.get_or_create(name="Odd Semester", even=False)
+
         print('>> Creating Institute Types')
         for name in INSTITUTE_TYPES:
             institute_type, _ = InstituteType.objects.get_or_create(name=name)
@@ -101,6 +113,10 @@ class Command(BaseCommand):
             _districts = []
             state = self.create_state(counter=i)
             self.states.append(state)
+
+            print('>>> Add a resource person for %s' % state)
+            ResourcePerson.objects.get_or_create(user=self.resource_person, assigned_by=self.super_user.id,
+                                                 state=state, status=True)
 
             print('>>> Creating cities in %s' % state)
             for i in range(1, random.randint(2, 12)):
@@ -137,10 +153,11 @@ class Command(BaseCommand):
         location = Location.objects.filter(district=district).order_by('?').first()
         city = City.objects.filter(state=state).order_by('?').first()
         academic_code = "%s%s" % (university.id, counter)
+        institution_type = random.choice(self.institutetypes)
         params = {
             'user': self.super_user,
-            'institution_name': "Institute %s" % academic_code,
-            'institution_type': random.choice(self.institutetypes),
+            'institution_name': "Institute %s %s" % (institution_type, academic_code),
+            'institution_type': institution_type,
             'institute_category': random.choice(self.institutecategories),
             'university': university,
             'academic_code': academic_code,

@@ -33,9 +33,14 @@ echo "${green}>> Replacing provided MySQL creds in config.py.${reset}"
 sed -i "s/your_database_name_here/$db_name/g" config.py
 sed -i "s/your_database_user_here/$db_user/g" config.py
 sed -i "s/your_database_password_here/$db_pass/g" config.py
+echo "[django] Setting DJANGO_SETTINGS_MODULE='spoken.settings_dev'"
+export DJANGO_SETTINGS_MODULE='spoken.settings_dev'
 
 echo "${green}Running database migrations.${reset}"
 python manage.py migrate
+
+echo "${green}Creating initial data.${reset}"
+python manage.py initial_data
 
 echo "${green}Creating sample data.${reset}"
 python manage.py sample_data
