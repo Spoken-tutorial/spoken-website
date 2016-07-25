@@ -25,8 +25,6 @@
   </tr>
 </table>
 
-
-
 {% endblock %}
 {% block search %}{% endblock %}
 {% block content %}
@@ -80,10 +78,10 @@
                       <div class='form-row'>
                         <div class='col-xs-12 form-group required'>
                           <label class='control-label'>Department</label>
-                            {% if user.organiser.academic.institution_type.id == 5 or  user.organiser.academic.institution_type.id == 13 or  user.organiser.academic.institution_type.id == 15 %}
+                            {% if user.organiser.academic.institution_type == institute_type_school %}
                               <select class="form-control department field-required" id="id_department" name="department" tabindex="1">
                                 <option value="" selected="selected">---------</option>
-                                <option value="24" >School</option>
+                                <option value="{{ department_school.id }}" >{{ department_school.name }}</option>
                               </select>
                                {{ form.department.errors }}
                             {% else %}
@@ -91,9 +89,7 @@
                               {{ form.department.errors }}
                             {% endif %}
                         </div>
-                      </div>
-
-                      <div class='form-row'>
+                        <div class='form-row'>
                         <div class='col-xs-12 form-group required'>
                           <label class='control-label'>Year of Joining </label><small> (Academic Joining year of students)</small>
                           {% render_field form.year class+="form-control year" tabindex="1" %}
