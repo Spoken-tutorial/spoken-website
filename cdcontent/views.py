@@ -194,8 +194,8 @@ def add_srt_file(archive, tr_rec, filepath, eng_flag, srt_files):
         archive.write(settings.MEDIA_ROOT + filepath, 'spoken/' + filepath)
 
     if eng_flag:
-        filepath = 'videos/{}/{}/{}-English.srt'.format(key, rec.tutorial_detail_id,
-                                                        rec.tutorial_detail.tutorial.replace(' ', '-'))
+        filepath = 'videos/{}/{}/{}-English.srt'.format(tr_rec.tutorial_detail.foss_id, tr_rec.tutorial_detail_id,
+                                                        tr_rec.tutorial_detail.tutorial.replace(' ', '-'))
 
         if os.path.isfile(settings.MEDIA_ROOT + filepath) and filepath not in srt_files:
             srt_files.add(filepath)
