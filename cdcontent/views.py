@@ -416,6 +416,7 @@ def ajax_show_added_foss(request):
         data += '<tr><td>{}</td><td>{}</td><td>{}</td></tr>'.format(foss.foss, langs, humansize(fsize))
 
     fsize = 0.0
+    languages.add(eng_rec.name)
 
     # calculate size for side-by-side tutorials
     for language in languages:
