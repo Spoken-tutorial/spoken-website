@@ -63,7 +63,8 @@
             </table>
           {% endif %}
         {% else %}
-              <h4><center>{{ batch.get_batch_info }}</center></h4>
+          <h4><center>{{ batch.get_batch_info }}</center></h4>
+          {% if error %}
           <form action="{{ action }}" method="post" class='form-horizontal' enctype="multipart/form-data">{% csrf_token %}
             <h5>Errors <span class="pull-right review-accepted">Note: Click on the email to correct email format</span></h5>
             <div class="row well">
@@ -85,19 +86,19 @@
               </table>
             </div>
           </form>
+          {% endif %}
         {% endif %}
         {% if warning %}
-
-          <h5>Warning <span class="pull-right review-accepted">Note: Click on the email to correct email format</span></h5>
-            <div class="row well">
+          <div class="row">
+            <h5>Warnings:</h5>
               <table class="table">
-                <tr>
+                <thead>
                   <th>#</th>
                   <th>Full name</th>
                   <th>Email</th>
                   <th>Gender</th>
                   <th></th>
-                </tr>
+                </thead>
               {% for e in warning %}
                 <tr id="error{{forloop.counter}}">
                   <td>{{ forloop.counter }}</td>
@@ -105,11 +106,13 @@
                   <td>{{ e.2 }}</td>
                   <td>{{ e.3 }}</td>
                   <td>
+                    <span class="label label-warning">
                     {% if e.4 %}
                       Already exists in this batch.
                     {% else %}
                       Already exists in another batch.
                     {% endif %}
+                    </span>
                   </td>
                 </tr>
               {% endfor %}

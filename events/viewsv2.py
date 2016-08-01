@@ -148,6 +148,8 @@ class StudentBatchCreateView(CreateView):
 
     def get_context_data(self, **kwargs):
         context = super(StudentBatchCreateView, self).get_context_data(**kwargs)
+        context['institute_type_school'], _ = InstituteType.objects.get_or_create(name='School')
+        context['department_school'], _ = Department.objects.get_or_create(name='School')
         if self.batch:
             existing_student = Student.objects.filter(
                 id__in=StudentMaster.objects.filter(batch_id=self.batch.id, moved=False).values_list('student_id')
@@ -187,7 +189,7 @@ class StudentBatchCreateView(CreateView):
         context = {'error': error, 'warning': warning, 'batch': form_data}
 
         if error or warning:
-            return render(request, self.template_name, context)
+            return render(self.request, self.template_name, context)
         #    messages.success(self.request, "Student Batch added successfully.")
         return HttpResponseRedirect('/software-training/student-batch/%s/new/' % (str(form_data.id)))
 
