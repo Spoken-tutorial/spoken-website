@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load eventsdata %}
+{% block title %}Certificates{% endblock %}
+{% block compressinlinecssblock %}
+  <style>
+    .links {
+      font-size:20px;
+      text-align:center;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <div class= "container">
+    <ul class="nav">
+      <li class = "links">Thank you for attending workshop</li>
+      <li class = "links"><a href="{% url 'certificate:drupal_workshop_download' %}" >Download Certificate for <font color="red">Drupal Workshop 2016</font> here.</a></li>
+      <!--<li class = "links"><a href="{% url 'certificate:drupal_feedback' %}" >Drupal Camp Mumbai 2015</a></li>-->
+    </ul>
+  </div>
+{% endblock %}
+
