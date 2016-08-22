@@ -57,6 +57,9 @@ urlpatterns = patterns('',
 
     # team
     url(r'^team/', include('team.urls')),
+    
+    # certificate
+    url(r'^certificate/', include('certificate.urls', namespace='certificate')),
 
     url(r'^creation/', include('creation.urls', namespace='creation')),
     url(r'^nicedit/', include('nicedit.urls')),

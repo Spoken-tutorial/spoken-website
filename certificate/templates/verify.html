@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block header%}
+    <h1> Certificate Verification </h1>
+{% endblock %}
+{% block content %}
+{% if serial_key %}
+<div>
+    <table class="table table-bordered" align="center" style="width:50%">
+    {% if intern_ship %}
+        <caption>Internship Details</caption>
+     {% else %} 
+        <caption>Participation Details</caption> 
+     {% endif %}    
+        <tbody>
+            {% for key, value in detail.items %}
+            <tr>
+                <td>{{ key }}</td>
+                <td>{{ value }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+  <div style="width:40%"><a href="{% url 'certificate:verify' %}" >&lt Back</a></div>
+</div>
+{% else %}
+    <div class="modal fade" id="invalidModal" tabindex="-1" role="dialog" aria-labelledby="invalidModalLabel" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title" id="invalidModalLabel">Invalid Serial Number</h4>
+                  </div>
+                  <div class="modal-body">
+                    Sorry ! The serial number you entered seems to be invalid. Please try again !
+                  </div>
+                </div>
+              </div>
+          </div>
+          <p><b> Enter the alphanumeric characters below the QR code<br> OR <br>Enter the serial number you received while scanning the QR code on certificate</p>
+    <hr>
+    <form action="{% url 'certificate:verify'  %}" method="post">
+        {{ detail }}
+        {% csrf_token %}
+        <div class="input-group" style="width:340px;text-align:center;margin:0 auto;">
+            <input class="form-control input-lg" placeholder="Enter the serial number" type="text" name=serial_no>
+              <span class="input-group-btn"><button class="btn btn-lg btn-primary" type="submit">Verify</button></span>
+        </div>
+{% endif %}
+    </form>
+    <hr>
+    <center><h4>Problem in verfying details ? write to us at <a href="mailto:workshops@spoken-tutorial.org">workshops[at]spoken-tutorial[dot]org</a></h4>
+{% endblock %}
+
+{% block javascript %}
+<script>
+invalid_serial = {{ invalidserial }}
+$( document ).ready(function() {
+    if(invalid_serial == 1)
+    {
+        $("#invalidModal").modal(); 
+    }
+});
+</script>
+{% endblock %}
+
