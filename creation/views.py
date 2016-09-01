@@ -89,6 +89,12 @@ def is_administrator(user):
     if user.groups.filter(name='Administrator').count():
         return True
     return False
+    
+def is_contenteditor(user):
+    """Check if the user is having Content-Editor rights"""
+    if user.groups.filter(name='Content-Editor').count():
+        return True
+    return False
 
 def get_filesize(path):
     filesize_bytes = os.path.getsize(path)
@@ -2610,7 +2616,7 @@ def update_keywords(request):
 @login_required
 def update_sheet(request, sheet_type):
     sheet_types = ['instruction', 'installation','brochure']
-    if not is_administrator(request.user) and not is_contributor(request.user)\
+    if not is_administrator(request.user) and not is_contributor(request.user) and not is_contenteditor(request.user)\
      or not sheet_type in sheet_types:
         raise PermissionDenied()
     form = UpdateSheetsForm()

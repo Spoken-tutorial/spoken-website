@@ -6,7 +6,7 @@ from django.conf import settings
 from creation.models import *
 import os
 from django.db.models import Q
-from creation.views import is_contributor, is_internal_contributor, is_external_contributor, is_videoreviewer, is_domainreviewer, is_qualityreviewer, is_administrator
+from creation.views import is_contributor, is_internal_contributor, is_external_contributor, is_videoreviewer, is_domainreviewer, is_qualityreviewer, is_administrator , is_contenteditor
 from spoken.forms import TutorialSearchForm
 
 register = template.Library()
@@ -229,3 +229,4 @@ register.filter('get_username', get_username)
 register.filter('instruction_sheet', instruction_sheet)
 register.filter('installation_sheet', installation_sheet)
 register.filter('brochure', brochure)
+register.filter('get_contenteditor', is_contenteditor)
