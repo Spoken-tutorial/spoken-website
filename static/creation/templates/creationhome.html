@@ -20,10 +20,19 @@
                                 <li><a target="_blank" href="/creation/upload/needimprovement/">Tutorials under Need Improvement state</a></li>
                                 <li><a target="_blank" href="/creation/update-manual/installation/">Upload / Update Installation Sheet</a></li>
                                 <li><a target="_blank" href="/creation/update-manual/instruction/">Upload / Update Instruction Sheet</a></li>
-                                <li><a target="_blank" href="/creation/update-manual/brochure/">Upload / Update Brochure</a></li>
                                 <li><a target="_blank" href="/creation/upload-publish-outline/">Upload Published Tutorial Outline</a></li>
                                 <li><a target="_blank" href="/creation/upload/contributed/">Tutorials contributed</a></li>
                                 <li><a target="_blank" href="/creation/report-missing-component/list/">Component Missing Notifications</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                {% endif %}
+                {% if user|get_contenteditor %}
+                    <div class="panel panel-info">
+                        <div class="panel-heading panel-heading-notif">Content Editor</div>
+                        <div class="panel-body">
+                            <ul>
+                                <li><a target="_blank" href="/creation/update-manual/brochure/">Upload / Update Brochure</a></li>
                             </ul>
                         </div>
                     </div>
