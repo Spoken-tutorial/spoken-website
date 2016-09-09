@@ -1261,7 +1261,8 @@ def admin_reviewed_video(request):
             10: SortableHeader('Assignment', False, '', 'col-center'),
             11: SortableHeader('Prerequisite', False, '', 'col-center'),
             12: SortableHeader('Keywords', False, '', 'col-center'),
-            13: SortableHeader('Status', False)
+            13: SortableHeader('Status', False),
+            14: SortableHeader('created', True, 'Date')
         }
         collection = TutorialResource.objects.filter(id__in = AdminReviewLog.objects.filter(user = request.user).values_list('tutorial_resource_id').distinct())
         raw_get_data = request.GET.get('o', None)
@@ -1498,7 +1499,8 @@ def domain_reviewed_tutorials(request):
             10: SortableHeader('Assignment', False, '', 'col-center'),
             11: SortableHeader('Prerequisite', False, '', 'col-center'),
             12: SortableHeader('Keywords', False, '', 'col-center'),
-            13: SortableHeader('Status', False, '', 'col-center')
+            13: SortableHeader('Status', False, '', 'col-center'),
+            14: SortableHeader('created', True, 'Date')
         }
         collection = TutorialResource.objects.filter(id__in = DomainReviewLog.objects.filter(user = request.user).values_list('tutorial_resource_id').distinct())
         collection = get_sorted_list(request, collection, header, raw_get_data)
