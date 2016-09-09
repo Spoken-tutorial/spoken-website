@@ -10,6 +10,10 @@ import datetime
 class StudentBatchForm(forms.ModelForm):
   year = forms.ChoiceField(choices = get_academic_years())
   csv_file = forms.FileField(required = True)
+  department = forms.ModelChoiceField(
+        queryset = Department.objects.filter(~Q(name='others'))
+  )
+
   class Meta:
     model = StudentBatch
     exclude = ['academic', 'stcount', 'organiser']
@@ -23,6 +27,9 @@ class NewStudentBatchForm(forms.ModelForm):
 
 class UpdateStudentBatchForm(forms.ModelForm):
   year = forms.ChoiceField(choices = get_academic_years())
+  department = forms.ModelChoiceField(
+        queryset = Department.objects.filter(~Q(name='others'))
+  )
   class Meta:
     model = StudentBatch
     exclude = ['academic', 'stcount', 'organiser']
