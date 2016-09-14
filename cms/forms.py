@@ -164,14 +164,23 @@ class PasswordResetForm(forms.Form):
     def clean_email(self):
         email = self.cleaned_data['email']
         error = 1
+        er_msg = None
         try:
             user = User.objects.filter(email=email).first()
             if user:
+              if user.is_active:
+                print user.is_active
                 error = 0
+              else:
+                error = 1
+                er_msg = "Your account is not activated. Kindly activate the account by clicking on the activation link which has been sent to your registered email id."
+            else:
+              error = 1
+              er_msg= 'Email: %s not exists' % email
         except Exception, e:
             print e
         if error:
-            raise forms.ValidationError( u'Email: %s not exists' % email )
+            raise forms.ValidationError( er_msg )
 
 
 class ChangePasswordForm(forms.Form):
