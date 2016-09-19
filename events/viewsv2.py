@@ -212,7 +212,7 @@ class StudentBatchCreateView(CreateView):
       print e
       return HttpResponseRedirect("/software-training/student-batch/")
     skipped, error, warning, write_flag = \
-      self.csv_email_validate(self.request.FILES['csv_file'], form_data.id)
+      self.csv_email_validate(self.request.FILES['csv_file'], form_data.id , studentcount)
     context = {'error' : error, 'warning' : warning, 'batch':form_data}
     
     if error or warning:
@@ -282,7 +282,7 @@ class StudentBatchCreateView(CreateView):
         return student
     return False
 
-  def csv_email_validate(self, file_path, batch_id):
+  def csv_email_validate(self, file_path, batch_id , studentcount):
     skipped = []
     error = []
     warning = []
@@ -290,9 +290,13 @@ class StudentBatchCreateView(CreateView):
     try:
       rowcsv = csv.reader(file_path, delimiter=',', quotechar='|')
       rowcount = len(list(rowcsv))
+      gencount = studentcount + rowcount
+      print 'gencount',gencount
       print 'printing csv length',rowcount
       if rowcount > 500:
         messages.warning(self.request, "MB will accept only 500 students, if number is more than 500, divide the batch and upload under different departments eg. Chemistry1 & Chemistry2")
+      if gencount > 500:
+        messages.warning(self.request, "Total number of students per Master Batch exceeding. Masterbatch can accept maximum 500 students.")
       else :
         csvdata = csv.reader(file_path, delimiter=',', quotechar='|')
         for row in csvdata:
