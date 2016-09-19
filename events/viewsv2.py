@@ -199,6 +199,11 @@ class StudentBatchCreateView(CreateView):
     try:
       if 'bid' in self.kwargs:
         form_data = StudentBatch.objects.get(pk=self.kwargs['bid'])
+        studentcount = form_data.stcount
+        print 'students present',studentcount
+        if studentcount == 500 :
+          messages.error(self.request, 'Can not add more than 500 students in one batch.')
+          return self.form_invalid(form)
       else:
         form_data = StudentBatch.objects.get(year=form_data.year, academic=form_data.academic, department=form_data.department)
     except ObjectDoesNotExist:
@@ -283,30 +288,36 @@ class StudentBatchCreateView(CreateView):
     warning = []
     write_flag = False
     try:
-      csvdata = csv.reader(file_path, delimiter=',', quotechar='|')
-      for row in csvdata:
-        if len(row) < 4:
-          skipped.append(row)
-          continue
-        if not self.email_validator(row[2]):
-          error.append(row)
-          continue
-        student = self.get_student(row[2])
-        if not student:
-          student = self.create_student(row[0], row[1], row[2], row[3])
-        if student:
-          try:
-            smrec = StudentMaster.objects.get(student=student, moved=False)
-            if int(batch_id) == int(smrec.batch_id):
-              row.append(1)
-            else:
-              row.append(0)
-            warning.append(row)
+      rowcsv = csv.reader(file_path, delimiter=',', quotechar='|')
+      rowcount = len(list(rowcsv))
+      print 'printing csv length',rowcount
+      if rowcount > 500:
+        messages.warning(self.request, "MB will accept only 500 students, if number is more than 500, divide the batch and upload under different departments eg. Chemistry1 & Chemistry2")
+      else :
+        csvdata = csv.reader(file_path, delimiter=',', quotechar='|')
+        for row in csvdata:
+          if len(row) < 4:
+            skipped.append(row)
             continue
-          except ObjectDoesNotExist:
-            StudentMaster.objects.create(student=student, batch_id=batch_id)
-            write_flag = True
-      StudentBatch.objects.get(pk=batch_id).update_student_count()
+          if not self.email_validator(row[2]):
+            error.append(row)
+            continue
+          student = self.get_student(row[2])
+          if not student:
+            student = self.create_student(row[0], row[1], row[2], row[3])
+          if student:
+            try:
+              smrec = StudentMaster.objects.get(student=student, moved=False)
+              if int(batch_id) == int(smrec.batch_id):
+                row.append(1)
+              else:
+                row.append(0)
+              warning.append(row)
+              continue
+            except ObjectDoesNotExist:
+              StudentMaster.objects.create(student=student, batch_id=batch_id)
+              write_flag = True
+        StudentBatch.objects.get(pk=batch_id).update_student_count()
     except Exception, e:
       print e
       messages.warning(self.request, "The file you uploaded is not a valid CSV file, please add a valid CSV file")
