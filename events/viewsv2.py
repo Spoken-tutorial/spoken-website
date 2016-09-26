@@ -196,6 +196,7 @@ class StudentBatchCreateView(CreateView):
     form_data.academic = self.user.organiser.academic
     self.organiser = self.user.organiser
     form_data.organiser = self.user.organiser
+    studentcount = 0
     try:
       if 'bid' in self.kwargs:
         form_data = StudentBatch.objects.get(pk=self.kwargs['bid'])
