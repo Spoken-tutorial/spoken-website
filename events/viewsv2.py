@@ -344,6 +344,7 @@ class StudentBatchUpdateView(UpdateView):
           pass
       return super(StudentBatchUpdateView, self).dispatch(*args, **kwargs)
       
+      
 class StudentBatchYearUpdateView(UpdateView):
     model = StudentBatch
     success_url = "/software-training/student-batch/"
@@ -1046,18 +1047,21 @@ class GetBatchStatusView(JSONResponseMixin, View):
 
 class GetDepartmentOrganiserStatusView(JSONResponseMixin, View):
   department_id = None
+  year = None
   @method_decorator(csrf_exempt)
   def dispatch(self, *args, **kwargs):
     return super(GetDepartmentOrganiserStatusView, self).dispatch(*args, **kwargs)
   
   def post(self, request, *args, **kwargs):
     department_id = self.request.POST.get('department') 
+    year = self.request.POST.get('year')
     context = {}
     dept_status = True
     
     resultdata = StudentBatch.objects.filter(
       academic_id=request.user.organiser.academic.id,
       department_id=department_id,
+      year = year
     )
   
     if resultdata:
