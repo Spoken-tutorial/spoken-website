@@ -1043,6 +1043,32 @@ class GetBatchStatusView(JSONResponseMixin, View):
     }
     return self.render_to_json_response(context)
 
+
+class GetDepartmentOrganiserStatusView(JSONResponseMixin, View):
+  department_id = None
+  @method_decorator(csrf_exempt)
+  def dispatch(self, *args, **kwargs):
+    return super(GetDepartmentOrganiserStatusView, self).dispatch(*args, **kwargs)
+  
+  def post(self, request, *args, **kwargs):
+    department_id = self.request.POST.get('department') 
+    context = {}
+    dept_status = True
+    
+    resultdata = StudentBatch.objects.filter(
+      academic_id=request.user.organiser.academic.id,
+      department_id=department_id,
+    )
+  
+    if resultdata:
+      dept_status = False
+      
+    context = {
+      'dept_status' : dept_status,
+    }
+    return self.render_to_json_response(context)
+
+
 class TrainingRequestListView(ListView):
   queryset = None
   paginate_by = 20

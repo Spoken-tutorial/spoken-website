@@ -238,5 +238,36 @@
       var r = new RegExp("[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?");
       return (v.match(r) == null) ? false : true;
   }
+  
+  $('.department').on('change', function() {
+        department = $(this).val();
+        $('.year').val('');
+        $('.year').prop('disabled', 'disabled');
+        $('#upload_button').attr('disabled', true);
+        if(department != '') {
+          $.ajax
+          ({
+            url: "/software-training/get-department-organiser-status/",
+            type: "POST",
+            data: {
+              department: department,
+            },
+            beforeSend: function() {
+              //$('.ajax-refresh-language').show();
+            },
+            success: function(data) {
+              // loading languages
+              if(data && data['dept_status']) {
+                $('.year').prop('disabled', false);
+                $('#upload_button').attr('disabled', false);
+               } else {
+                alert('This department is already chosen by another Organiser in your College. ');
+              }
+              //$('.ajax-refresh-language').hide();
+            }
+          });
+                
+        }
+      });
   </script>
 {% endblock %}
