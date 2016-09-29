@@ -178,6 +178,10 @@ urlpatterns = [
       GetBatchStatusView.as_view()
     ),
     url(
+      r'^get-department-organiser-status/', 
+      GetDepartmentOrganiserStatusView.as_view()
+    ),
+    url(
       r'^training-request/(?P<role>\w+)/(?P<status>\w+)/$', 
       TrainingRequestListView.as_view(template_name='training_list.html'), 
       name='training_list'
