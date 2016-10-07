@@ -829,6 +829,11 @@ class TrainingRequest(models.Model):
     ).count():
       return True
     return False
+    
+  def is_certificate_not_allowed(self):
+    if self.course.foss.id in [3,4,12,34,35,76]:
+      return True
+    return False
 
   # restrict the month to rise a training request
   def can_mark_attendance(self):

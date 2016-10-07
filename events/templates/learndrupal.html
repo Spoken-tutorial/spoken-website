@@ -1,0 +1,75 @@
+﻿{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load eventsdata %}
+{% block title %} Feedback{% endblock %}
+{% block compressinlinecssblock %}
+<style>
+.links {
+      font-size:15px;
+    }
+a:hover {
+    background-color: #F5DA81;
+}
+h3{
+color : #FE9A2E
+}
+p{
+fontSize : 20px;
+}
+</style>
+{% endblock %}
+{% block search %}
+{% endblock %}
+{% block content %}
+<div class="panel panel-warning">
+  <div class="panel-heading">
+    <h3 class="panel-title">Drupal Content:</h3>
+  </div>
+  <div class="panel-body">
+    <a href="http://spoken-tutorial.org/tutorial-search/?search_foss=Drupal&search_language=English" target="_blank">http://spoken-tutorial.org/tutorial-search/Drupal</a>
+  </div>
+</div>
+
+
+<div class="panel panel-info">
+  <div class="panel-heading">
+    <h3 class="panel-title">Contacts for Training:</h3>
+  </div>
+  <div class="panel-body">
+    <p class="links">Do you want help in organising workshops in your college?  Do you want to use Drupal as a part of a curriculum in your lab?  We at IIT Bombay provide help for both.  For more details, please visit, 
+    <br><a href="http://process.spoken-tutorial.org/index.php/Software-Training#Contacts_For_Training" target="_blank">http://process.spoken-tutorial.org/index.php/Software-Training#Contacts_For_Training</a></p>
+  </div>
+</div>
+
+<div class="panel panel-warning">
+  <div class="panel-heading">
+    <h3 class="panel-title">Forums:</h3>
+  </div>
+  <div class="panel-body">
+    <p class="links">Do you have questions in any Spoken Tutorial?  Note down the minute and second where you have the doubt. You may post them at this link:
+    <br><a href="http://forums.spoken-tutorial.org/" target="_blank">http://forums.spoken-tutorial.org/</a></p>
+  </div>
+</div>
+
+<div class="panel panel-info">
+  <div class="panel-heading">
+    <h3 class="panel-title">Feedback:</h3>
+  </div>
+  <div class="panel-body">
+    <p class="links">Wouldn’t you want to help us spread Drupal Training to many more people?  Kindly submit your feedback on the Drupal series at the following link:  
+    <br><a href="http://localhost:8001/software-training/drupal-feedback/" target="_blank">http://spoken-tutorial.org/software-training/drupal-feedback/</a></p>
+  </div>
+</div>
+
+<div class="panel panel-warning">
+  <div class="panel-heading">
+    <h3 class="panel-title">Email:</h3>
+  </div>
+  <div class="panel-body">
+    <p class="links">General enquiries: contact@spoken-tutorial.org
+    <br>Phone: 022-25764229</p>
+  </div>
+</div>
+
+{% endblock %}
