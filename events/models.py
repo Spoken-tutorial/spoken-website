@@ -831,7 +831,7 @@ class TrainingRequest(models.Model):
     return False
     
   def is_certificate_not_allowed(self):
-    if self.course.foss.id in [3,4,12,34,35,76]:
+    if self.course.foss.id in [4,12,34,35,76]:
       return True
     return False
 
