@@ -2278,9 +2278,6 @@ class STWorkshopFeedbackPostCreateView(CreateView):
       print "saved"
       messages.success(self.request, "Thank you for completing this feedback form. We appreciate your input and valuable suggestions.")
       return HttpResponseRedirect(self.success_url)
-      
-def learndrupal(request):
-    return render_to_response('learndrupal.html')
-    
+
 def drupalfeedback(request):
     return render_to_response('drupalfeedback.html')

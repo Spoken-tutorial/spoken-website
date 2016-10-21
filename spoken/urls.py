@@ -26,6 +26,8 @@ urlpatterns = patterns('',
     url(r'^$', 'spoken.views.home', name='home'),
     url(r'^home/$', 'spoken.views.home', name='home'),
     url(r'^site-feedback/$', 'spoken.views.site_feedback', name='site_feedback'),
+    url(r'^learn-Drupal/$', 'spoken.views.learndrupal', name='learndrupal'),
+    url(r'^learn-Drupal./$', 'spoken.views.learndrupal', name='learndrupal'),
     # url(r'^spoken/', include('spoken.foo.urls')),
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),

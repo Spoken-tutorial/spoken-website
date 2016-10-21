@@ -469,3 +469,6 @@ def add_user(request):
 def ViewBrochures(request):
     template_name = 'spoken/templates/brochures.html'
     return render(request, template_name)
+    
+def learndrupal(request):
+    return render(request, 'spoken/templates/learndrupal.html')
