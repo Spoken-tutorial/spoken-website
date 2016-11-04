@@ -462,4 +462,30 @@ class STWorkshopFeedbackFormPost(forms.ModelForm):
               'suggestions' : forms.Textarea,
               }
               
-
+class LearnDrupalFeedback(forms.ModelForm):
+  class Meta:
+    model = LearnDrupalFeedback
+    fields = '__all__'
+    widgets = {
+              'feedback' : forms.Textarea,
+              }
+              
+  def __init__(self, *args, **kwargs):
+    super(LearnDrupalFeedback, self).__init__(*args, **kwargs)
+    self.fields['name'].required = False
+    self.fields['phonemob'].required = False
+    self.fields['affiliation'].required = False
+    self.fields['place'].required = False
+    self.fields['agegroup'].required = False
+    self.fields['currentstatus_other'].required = False
+    self.fields['is_drupal_in_curriculum'].required = False
+    self.fields['need_help_in_organizing'].required = False
+    self.fields['when_plan_to_conduct'].required = False
+    self.fields['did_undergo_st_training'].required = False
+    self.fields['rate_spoken'].required = False
+    self.fields['useful_for_placement_for_students'].required = False
+    self.fields['useful_for_placement'].required = False
+    self.fields['like_to_learn_other_foss'].required = False
+    self.fields['mention_foss'].required = False
+    self.fields['like_to_give_testimonial'].required = False
+    self.fields['testimonial'].required = False

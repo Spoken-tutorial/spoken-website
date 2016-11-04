@@ -1481,3 +1481,45 @@ class STWorkshopFeedbackPost(models.Model):
   how_make_better = models.CharField(max_length = 500)
   experience = models.CharField(max_length = 500)
   suggestions = models.CharField(max_length = 500)
+  
+class LearnDrupalFeedback(models.Model):
+  YES_NO_CHOICES =(
+    ('','-----'), ('Yes', 'Yes'), ('No', 'No'),('NotApplicable ', 'Not Applicable '),
+  )
+  YES_NO = (
+  ('','-----'), ('Yes', 'Yes'), ('No', 'No')
+  )
+  AGE =(
+    ('','-----'),('below25', 'below 25'), ('25to34', '25 to 34'), ('35to44', '35 to 44'),('45to54', '45 to 54'),('55to64', '55 to 64'),('65andabove', '65 and above') 
+  )
+  CURRENT_STATUS =(
+  ('','-----'), ('Student', 'Student'), ('Individuallearner', 'Individual learner'), ('Workingprofessional', 'Working professional'), ('Teacher', 'Teacher'), ('Administrator', 'Administrator'), ('Others', 'Others')
+  )
+  PLAN_TO_CONDUCT = (
+  ('','-----'), ('within3months', 'within 3 months'), ('within6months', 'within 6 months'), ('within1year', 'within 1 year'), ('notyetplanned', 'not yet planned')
+  )
+  LANGUAGE = (
+  ('','-----'),('Hindi','Hindi'),('English','English'),('Marathi','Marathi'),('Urdu','Urdu'),('Kannanda','Kannanda'),('Bangali','Bangali'),('Malyalum','Malyalum'),('Tamil','Tamil'),('Telugu','Telugu'),('Oriya','Oriya'),('Assamese','Assamese'),('Gujrati','Gujrati'),
+  )
+  
+  name = models.CharField(max_length = 100)
+  phonemob = models.CharField(max_length = 100)
+  email = models.EmailField(max_length = 100)
+  affiliation = models.CharField(max_length = 100)
+  place = models.CharField(max_length = 100)
+  agegroup = models.CharField(max_length = 50, choices = AGE)
+  currentstatus = models.CharField(max_length = 50, choices = CURRENT_STATUS)
+  currentstatus_other = models.CharField(max_length = 50)
+  is_drupal_in_curriculum = models.CharField(max_length = 50, choices = YES_NO_CHOICES)
+  need_help_in_organizing = models.CharField(max_length = 50, choices = YES_NO_CHOICES)
+  when_plan_to_conduct = models.CharField(max_length = 50, choices = PLAN_TO_CONDUCT)
+  language = models.CharField(max_length = 50, choices = LANGUAGE)
+  did_undergo_st_training = models.CharField(max_length = 50, choices = YES_NO_CHOICES)
+  rate_spoken = models.CharField(max_length = 20)
+  useful_for_placement = models.CharField(max_length = 50, choices = YES_NO_CHOICES)
+  useful_for_placement_for_students = models.CharField(max_length = 50, choices = YES_NO_CHOICES)
+  feedback = models.CharField(max_length = 500)
+  like_to_learn_other_foss = models.CharField(max_length = 50, choices = YES_NO)
+  mention_foss = models.CharField(max_length = 100)
+  like_to_give_testimonial = models.CharField(max_length = 50, choices = YES_NO)
+  testimonial = models.CharField(max_length = 100)

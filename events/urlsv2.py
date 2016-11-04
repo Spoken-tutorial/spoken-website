@@ -270,5 +270,8 @@ urlpatterns = [
       name='stworkshop_feedback_post'
     ),
     url(
-      r'^drupal-feedback/','events.viewsv2.drupalfeedback', name='drupalfeedback'),
+      r'^learn-drupal-feedback/', 
+      LearnDrupalFeedbackCreateView.as_view(template_name='learndrupalfeedback.html'), 
+      name='learndrupalfeedback'
+    ),
 ]
