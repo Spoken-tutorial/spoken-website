@@ -564,7 +564,7 @@ class TrainingAttendanceListView(ListView):
     if self.training_request.status == 1:
       self.queryset = self.training_request.trainingattend_set.all()
     else:
-      self.queryset = StudentMaster.objects.filter(batch_id=self.training_request.batch_id, moved=False)
+      self.queryset = StudentMaster.objects.filter(batch_id=self.training_request.batch_id,student__verified = 1, moved=False)
     return super(TrainingAttendanceListView, self).dispatch(*args, **kwargs)
 
   def get_context_data(self, **kwargs):
