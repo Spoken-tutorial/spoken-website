@@ -229,11 +229,11 @@ def get_formatted_time(raw_time_string):
 
 db = MySQLdb.connect(host = DB_HOST, user = DB_USER, passwd = DB_PASS, db = DB_NAME)
 cur = db.cursor()
-cur.execute("SELECT * FROM creation_tutorialresource where status = 1 or status = 2")
+cur.execute("SELECT * FROM creation_tutorialresource where status = 1 or status = 2 order by updated desc")
 rows = cur.fetchall()
 overwrite = False
-if 'False' in sys.argv:
-    overwrite = False
+if 'replace' in sys.argv:
+    overwrite = True
 error_log_file_head = open(LOG_ROOT + 'srt-error-log.txt',"w")
 success_log_file_head = open(LOG_ROOT + 'srt-success-log.txt',"w")
 for row in rows:
