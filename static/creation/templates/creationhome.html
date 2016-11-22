@@ -27,6 +27,16 @@
                         </div>
                     </div>
                 {% endif %}
+                {% if user|get_contenteditor %}
+                    <div class="panel panel-info">
+                        <div class="panel-heading panel-heading-notif">Content Editor</div>
+                        <div class="panel-body">
+                            <ul>
+                                <li><a target="_blank" href="/creation/update-manual/brochure/">Upload / Update Brochure</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                {% endif %}
                 {% if user|get_videoreviewer %}
                     <div class="panel panel-info">
                         <div class="panel-heading panel-heading-notif">Admin Reviewer</div>

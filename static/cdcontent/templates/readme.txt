@@ -20,7 +20,7 @@ Steps for learning from the tutorials (for Learners)
 Note:
 ------
 
-Subtitle option.will work only on Firefox.
+Subtitle option will work only on Firefox.
 
 If you are using Firefox, then type "about:config" on address bar.
 Once the config page is loaded, then click on "I'll be more careful, I promise!" button.
@@ -28,6 +28,5 @@ Then search for the option "security.fileuri.strict_origin_policy".
 Change the value to "false", this step is mandatory to load the web fonts offline.
 
 
-If you are using chrome, Please close all opened chrome's windows.
-Open chrome via command prompt with "--allow-file-access-from-files" flag 
-to access subtitle option.
+If you are using Chrome, please close all the open Chrome windows.
+Open Chrome via command prompt with "--allow-file-access-from-files" flag to access subtitle option.

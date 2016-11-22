@@ -89,6 +89,12 @@ def is_administrator(user):
     if user.groups.filter(name='Administrator').count():
         return True
     return False
+    
+def is_contenteditor(user):
+    """Check if the user is having Content-Editor rights"""
+    if user.groups.filter(name='Content-Editor').count():
+        return True
+    return False
 
 def get_filesize(path):
     filesize_bytes = os.path.getsize(path)
@@ -1255,7 +1261,8 @@ def admin_reviewed_video(request):
             10: SortableHeader('Assignment', False, '', 'col-center'),
             11: SortableHeader('Prerequisite', False, '', 'col-center'),
             12: SortableHeader('Keywords', False, '', 'col-center'),
-            13: SortableHeader('Status', False)
+            13: SortableHeader('Status', False),
+            14: SortableHeader('created', True, 'Date')
         }
         collection = TutorialResource.objects.filter(id__in = AdminReviewLog.objects.filter(user = request.user).values_list('tutorial_resource_id').distinct())
         raw_get_data = request.GET.get('o', None)
@@ -1492,7 +1499,8 @@ def domain_reviewed_tutorials(request):
             10: SortableHeader('Assignment', False, '', 'col-center'),
             11: SortableHeader('Prerequisite', False, '', 'col-center'),
             12: SortableHeader('Keywords', False, '', 'col-center'),
-            13: SortableHeader('Status', False, '', 'col-center')
+            13: SortableHeader('Status', False, '', 'col-center'),
+            14: SortableHeader('created', True, 'Date')
         }
         collection = TutorialResource.objects.filter(id__in = DomainReviewLog.objects.filter(user = request.user).values_list('tutorial_resource_id').distinct())
         collection = get_sorted_list(request, collection, header, raw_get_data)
@@ -2609,8 +2617,8 @@ def update_keywords(request):
 
 @login_required
 def update_sheet(request, sheet_type):
-    sheet_types = ['instruction', 'installation']
-    if not is_administrator(request.user) and not is_contributor(request.user)\
+    sheet_types = ['instruction', 'installation','brochure']
+    if not is_administrator(request.user) and not is_contributor(request.user) and not is_contenteditor(request.user)\
      or not sheet_type in sheet_types:
         raise PermissionDenied()
     form = UpdateSheetsForm()
@@ -2622,7 +2630,12 @@ def update_sheet(request, sheet_type):
                 foss = FossCategory.objects.get(pk = foss_id)
                 language_id = request.POST.get('language')
                 language = Language.objects.get(pk = language_id)
-                sheet_path = 'videos/' + str(foss.id) + '/' + \
+                if sheet_type == 'brochure':
+                  sheet_path = 'videos/' + str(foss.id) + '/' + \
+                    foss.foss.replace(' ', '-') + '-' + sheet_type.title() + \
+                    '-' + language.name + '.pdf'
+                else:
+                  sheet_path = 'videos/' + str(foss.id) + '/' + \
                     foss.foss.replace(' ', '-') + '-' + sheet_type.title() + \
                     '-Sheet-' + language.name + '.pdf'
                 fout = open(settings.MEDIA_ROOT + sheet_path, 'wb+')

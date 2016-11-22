@@ -1233,3 +1233,246 @@ def get_email_dir(instance, filename):
 class LatexWorkshopFileUpload(models.Model):
   email = models.EmailField()
   file_upload = models.FileField(upload_to=get_email_dir)
+  
+class STWorkshopFeedback(models.Model):
+  YES_NO_CHOICES =(
+    ('','-----'), ('Yes', 'Yes'), ('No', 'No'),
+  )
+  OPINION =(
+    ('','-----'),('StronglyAgree', 'Strongly Agree'), ('Agree', 'Agree'), ('Neutral', 'Neutral'), ('Disagree', 'Disagree'), 
+    ('StronglyDisagree', 'Strongly Disagree'), ('Noidea', 'No idea')
+  )
+  RATE_SPOKEN_CHOICES = (
+    ('','-----'), ('Excellent', 'Excellent'), ('Good', 'Good'), ('Fair', 'Fair'), ('Bad', 'Bad'), ('Extremelybad', 'Extremely bad')
+  )
+  GENDER_CHOICES =(
+    ('', '-----'), ('Male', 'Male'), ('Female', 'Female'),
+  )
+  
+  name1 = models.CharField(max_length = 100)
+  email = models.EmailField(max_length = 100)
+  gender = models.CharField(max_length = 10, choices = GENDER_CHOICES)
+  age = models.CharField(max_length = 20)
+  affiliation = models.CharField(max_length = 100)
+  total_tutorials1 = models.CharField(max_length = 20)
+  installed = models.CharField(max_length = 50, choices = YES_NO_CHOICES)
+  installation_difficulties = models.CharField(max_length = 300)
+  acquired_knowledge =  models.CharField(max_length = 50, choices = OPINION)
+  suff_instruction = models.CharField(max_length = 50, choices = OPINION)
+  diff_instruction = models.CharField(max_length = 50, choices = OPINION)
+  method_easy = models.CharField(max_length = 50, choices = OPINION)
+  time_sufficient =models.CharField(max_length = 50, choices = OPINION)
+  desired_objective = models.CharField(max_length = 50, choices = OPINION)
+  recommend = models.CharField(max_length = 50, choices = OPINION)
+  like_to_part = models.CharField(max_length = 50, choices = OPINION)
+  side_by_side_effective = models.CharField(max_length = 50, choices = OPINION)
+  not_self_explanatory = models.CharField(max_length = 50, choices = OPINION)
+  logical_sequence = models.CharField(max_length = 50, choices = OPINION)
+  examples_help = models.CharField(max_length = 50, choices = OPINION)
+  other_language = models.CharField(max_length = 50, choices = OPINION)
+  instructions_easy_to_follow = models.CharField(max_length = 50, choices = OPINION)
+  useful_learning = models.CharField(max_length = 50, choices = OPINION)
+  help_improve_performance = models.CharField(max_length = 50, choices = OPINION)
+  plan_to_use_future = models.CharField(max_length = 50, choices = OPINION)
+  confident = models.CharField(max_length = 50, choices = OPINION)
+  difficult_simultaneously = models.CharField(max_length = 50, choices = OPINION)
+  interface_comfortable = models.CharField(max_length = 50, choices = OPINION)
+  satisfied = models.CharField(max_length = 50, choices = OPINION)
+  self_learning_intrest = models.CharField(max_length = 50, choices = OPINION)
+  ws_quality = models.CharField(max_length = 50, choices = RATE_SPOKEN_CHOICES)
+  overall_content_quality = models.CharField(max_length = 50, choices = RATE_SPOKEN_CHOICES)
+  clarity_of_explanation = models.CharField(max_length = 50, choices = RATE_SPOKEN_CHOICES)
+  flow = models.CharField(max_length = 50, choices = RATE_SPOKEN_CHOICES)
+  relevance = models.CharField(max_length = 50, choices = RATE_SPOKEN_CHOICES)
+  guidelines = models.CharField(max_length = 50, choices = RATE_SPOKEN_CHOICES)
+  overall_video_quality = models.CharField(max_length = 50, choices = RATE_SPOKEN_CHOICES)
+  text_readability = models.CharField(max_length = 50, choices = RATE_SPOKEN_CHOICES)
+  clarity_of_speech = models.CharField(max_length = 50, choices = RATE_SPOKEN_CHOICES)
+  visual_presentation = models.CharField(max_length = 50, choices = RATE_SPOKEN_CHOICES)
+  pace_of_tutorial = models.CharField(max_length = 50, choices = RATE_SPOKEN_CHOICES)
+  arrangement = models.CharField(max_length = 50, choices = RATE_SPOKEN_CHOICES)
+  network = models.CharField(max_length = 50, choices = RATE_SPOKEN_CHOICES)
+  installation_help = models.CharField(max_length = 50, choices = RATE_SPOKEN_CHOICES)
+  time_management = models.CharField(max_length = 50, choices = RATE_SPOKEN_CHOICES)
+  experience_of_learning = models.CharField(max_length = 50, choices = RATE_SPOKEN_CHOICES)
+  overall_arrangement = models.CharField(max_length = 50, choices = RATE_SPOKEN_CHOICES)
+  interaction_using_forum = models.CharField(max_length = 50, choices = RATE_SPOKEN_CHOICES)
+  like_abt_ws = models.CharField(max_length = 500)
+  how_make_better = models.CharField(max_length = 500)
+  experience = models.CharField(max_length = 500)
+  suggestions = models.CharField(max_length = 500)
+  
+class STWorkshopFeedbackPre(models.Model):
+  FEELINGS =(
+    ('','-----'),('Notconfidentatall', 'Not confident at all'), ('Unconfident', 'Unconfident'), ('Neitherconfidentnorunconfident', 'Neither confident nor unconfident'), ('Confident', 'Confident'), 
+    ('Absolutelyconfident', 'Absolutely confident'),('NotApplicable', 'Not Applicable'))
+  GENDER_CHOICES =(
+    ('', '-----'), ('Male', 'Male'), ('Female', 'Female'),
+  )
+  user = models.ForeignKey(User)
+  email = models.EmailField(max_length = 100)
+  gender = models.CharField(max_length = 10, choices = GENDER_CHOICES)
+  age = models.CharField(max_length = 20)
+  content_management = models.CharField(max_length = 50, choices = FEELINGS)
+  configuration_management = models.CharField(max_length = 50, choices = FEELINGS)
+  creating_basic_content = models.CharField(max_length = 50, choices = FEELINGS)
+  edit_existing_content = models.CharField(max_length = 50, choices = FEELINGS)
+  create_new_content = models.CharField(max_length = 50, choices = FEELINGS)
+  grp_entity_ref = models.CharField(max_length = 50, choices = FEELINGS)
+  taxonomy = models.CharField(max_length = 50, choices = FEELINGS)
+  managing_content = models.CharField(max_length = 50, choices = FEELINGS)
+  creating_dummy_content = models.CharField(max_length = 50, choices = FEELINGS)
+  modify_display_content = models.CharField(max_length = 50, choices = FEELINGS)
+  contents_using_view = models.CharField(max_length = 50, choices = FEELINGS)
+  table_of_fields_with_views = models.CharField(max_length = 50, choices = FEELINGS)
+  control_display_images = models.CharField(max_length = 50, choices = FEELINGS)
+  adding_func = models.CharField(max_length = 50, choices = FEELINGS)
+  finding_modules = models.CharField(max_length = 50, choices = FEELINGS)
+  modifying_page_layout = models.CharField(max_length = 50, choices = FEELINGS)
+  menu_endpoints = models.CharField(max_length = 50, choices = FEELINGS)
+  styling_using_themes = models.CharField(max_length = 50, choices = FEELINGS)
+  installig_ad_themes = models.CharField(max_length = 50, choices = FEELINGS)
+  people_management = models.CharField(max_length = 50, choices = FEELINGS)
+  site_management = models.CharField(max_length = 50, choices = FEELINGS)
+  
+
+class STWorkshopFeedbackPost(models.Model):
+  YES_NO_CHOICES =(
+    ('','-----'), ('Yes', 'Yes'), ('No', 'No'),
+  )
+  OPINION =(
+    ('','-----'),('StronglyAgree', 'Strongly Agree'), ('Agree', 'Agree'), ('Neutral', 'Neutral'), ('Disagree', 'Disagree'), 
+    ('StronglyDisagree', 'Strongly Disagree'), ('Noidea', 'No idea')
+  )
+  RATE_SPOKEN_CHOICES = (
+    ('','-----'), ('Excellent', 'Excellent'), ('Good', 'Good'), ('Fair', 'Fair'), ('Bad', 'Bad'), ('Extremelybad', 'Extremely bad')
+  )
+  GENDER_CHOICES =(
+    ('', '-----'), ('Male', 'Male'), ('Female', 'Female'),
+  )
+  FEELINGS =(
+    ('','-----'),('Notconfidentatall', 'Not confident at all'), ('Unconfident', 'Unconfident'), ('Neitherconfidentnorunconfident', 'Neither confident nor unconfident'), ('Confident', 'Confident'), 
+    ('Absolutelyconfident', 'Absolutely confident'),('NotApplicable', 'Not Applicable'))
+    
+  FEES =(
+    ('', '-----'), ('below250', 'Below Rs.250/-'), 
+    ('between251to500', 'Between Rs.251 to Rs.500/-'),
+    ('between501to1000', 'Between Rs.501 to Rs.1000/-'),
+    ('between1001to2000', 'Between Rs.1001 to Rs.2000/-'),
+    ('above2000', 'Above Rs. 2000/-'),
+  )
+  
+  NUM_OF_EXPERTS =(
+    ('','-----'), ('1to10', '1 to 10'), ('11to20', '11 to 20'),('21to30', '21 to 30'),('31to40', '31 to 40'),('above40', 'Above 40'),
+  )
+  user = models.ForeignKey(User)  
+  email = models.EmailField(max_length = 100)
+  gender = models.CharField(max_length = 10, choices = GENDER_CHOICES)
+  age = models.CharField(max_length = 20)
+  participated_before = models.CharField(max_length = 50, choices = YES_NO_CHOICES)
+  foss_where = models.CharField(max_length = 200)
+  install_own = models.CharField(max_length = 50, choices = YES_NO_CHOICES)
+  explain = models.CharField(max_length = 300)
+  used_sw_before = models.CharField(max_length = 50, choices = YES_NO_CHOICES)
+  sim_framework_before = models.CharField(max_length = 50, choices = YES_NO_CHOICES)
+  total_tutorials1 = models.CharField(max_length = 20)
+  purpose_of_attending = models.CharField(max_length = 300)
+  
+  
+  spfriendly = models.CharField(max_length = 50, choices = OPINION)
+  diff_watch_practice = models.CharField(max_length = 50, choices = OPINION)
+  satisfied_with_learning_experience = models.CharField(max_length = 50, choices = OPINION)
+  confident = models.CharField(max_length = 50, choices = OPINION)
+  side_by_side_hold_intrest = models.CharField(max_length = 50, choices = OPINION)
+  ws_not_useful = models.CharField(max_length = 50, choices = OPINION)
+  can_learn_other = models.CharField(max_length = 50, choices = OPINION)
+  wantto_conduct_incollege = models.CharField(max_length = 50, choices = OPINION)
+  esy_to_conduct_own = models.CharField(max_length = 50, choices = OPINION)
+  ask_student_to_use =  models.CharField(max_length = 50, choices = OPINION)
+  possible_to_use_therotical = models.CharField(max_length = 50, choices = OPINION)
+  
+  
+  not_self_explanatory = models.CharField(max_length = 50, choices = OPINION)
+  logical_sequence = models.CharField(max_length = 50, choices = OPINION)
+  examples_help = models.CharField(max_length = 50, choices = OPINION)
+  other_language = models.CharField(max_length = 50, choices = OPINION)
+  instructions_easy_to_follow = models.CharField(max_length = 50, choices = OPINION)
+  language_complicated = models.CharField(max_length = 50, choices = OPINION)
+  
+  
+  acquired_knowledge =  models.CharField(max_length = 50, choices = OPINION)
+  suff_instruction_by_prof = models.CharField(max_length = 50, choices = OPINION)
+  suff_instruction_by_staff = models.CharField(max_length = 50, choices = OPINION)
+  method_easy = models.CharField(max_length = 50, choices = OPINION)
+  desired_objective = models.CharField(max_length = 50, choices = OPINION)
+  recommend = models.CharField(max_length = 50, choices = OPINION)
+  like_to_part = models.CharField(max_length = 50, choices = OPINION)
+  learn_other_side_by_side = models.CharField(max_length = 50, choices = OPINION)
+  
+  
+  referred_forums = models.CharField(max_length = 50, choices = OPINION)
+  referred_forums_after = models.CharField(max_length = 50, choices = OPINION)
+  asked_ques_forums = models.CharField(max_length = 50, choices = OPINION)
+  not_answer_doubts = models.CharField(max_length = 50, choices = OPINION)
+  forum_helpful = models.CharField(max_length = 50, choices = OPINION)
+  doubts_solved_fast = models.CharField(max_length = 50, choices = OPINION)
+  need_not_post = models.CharField(max_length = 50, choices = OPINION)
+  faster_on_forums = models.CharField(max_length = 50, choices = OPINION)
+  not_have_to_wait = models.CharField(max_length = 50, choices = OPINION)
+  not_like_method_forums = models.CharField(max_length = 50, choices = OPINION)
+  helpful_pre_ans_ques = models.CharField(max_length = 50, choices = OPINION)
+  not_like_reveal_identity = models.CharField(max_length = 50, choices = OPINION)
+  forum_motivated = models.CharField(max_length = 50, choices = OPINION)
+  per_asked_ques_before_tuts = models.CharField(max_length = 50, choices = OPINION)
+  
+  
+  content_management = models.CharField(max_length = 50, choices = FEELINGS)
+  configuration_management = models.CharField(max_length = 50, choices = FEELINGS)
+  creating_basic_content = models.CharField(max_length = 50, choices = FEELINGS)
+  edit_existing_content = models.CharField(max_length = 50, choices = FEELINGS)
+  create_new_content = models.CharField(max_length = 50, choices = FEELINGS)
+  grp_entity_ref = models.CharField(max_length = 50, choices = FEELINGS)
+  taxonomy = models.CharField(max_length = 50, choices = FEELINGS)
+  managing_content = models.CharField(max_length = 50, choices = FEELINGS)
+  creating_dummy_content = models.CharField(max_length = 50, choices = FEELINGS)
+  
+  modify_display_content = models.CharField(max_length = 50, choices = FEELINGS)
+  contents_using_view = models.CharField(max_length = 50, choices = FEELINGS)
+  table_of_fields_with_views = models.CharField(max_length = 50, choices = FEELINGS)
+  control_display_images = models.CharField(max_length = 50, choices = FEELINGS)
+  adding_func = models.CharField(max_length = 50, choices = FEELINGS)
+  finding_modules = models.CharField(max_length = 50, choices = FEELINGS)
+  modifying_page_layout = models.CharField(max_length = 50, choices = FEELINGS)
+  menu_endpoints = models.CharField(max_length = 50, choices = FEELINGS)
+  styling_using_themes = models.CharField(max_length = 50, choices = FEELINGS)
+  installig_ad_themes = models.CharField(max_length = 50, choices = FEELINGS)
+  people_management = models.CharField(max_length = 50, choices = FEELINGS)
+  site_management = models.CharField(max_length = 50, choices = FEELINGS)
+  
+  ws_quality = models.CharField(max_length = 50, choices = RATE_SPOKEN_CHOICES)
+  relevance = models.CharField(max_length = 50, choices = RATE_SPOKEN_CHOICES)
+  guidelines = models.CharField(max_length = 50, choices = RATE_SPOKEN_CHOICES)
+  overall_video_quality = models.CharField(max_length = 50, choices = RATE_SPOKEN_CHOICES)
+  text_readability = models.CharField(max_length = 50, choices = RATE_SPOKEN_CHOICES)
+  clarity_of_speech = models.CharField(max_length = 50, choices = RATE_SPOKEN_CHOICES)
+  visual_presentation = models.CharField(max_length = 50, choices = RATE_SPOKEN_CHOICES)
+  pace_of_tutorial = models.CharField(max_length = 50, choices = RATE_SPOKEN_CHOICES)
+  arrangement = models.CharField(max_length = 50, choices = RATE_SPOKEN_CHOICES)
+  network = models.CharField(max_length = 50, choices = RATE_SPOKEN_CHOICES)
+  installation_help = models.CharField(max_length = 50, choices = RATE_SPOKEN_CHOICES)
+  time_for_handson = models.CharField(max_length = 50, choices = RATE_SPOKEN_CHOICES)
+  experience_of_learning = models.CharField(max_length = 50, choices = RATE_SPOKEN_CHOICES)
+  overall_arrangement = models.CharField(max_length = 50, choices = RATE_SPOKEN_CHOICES)
+  
+  
+  
+  like_to_create_st = models.CharField(max_length = 50, choices = YES_NO_CHOICES)
+  like_to_create_st_details = models.CharField(max_length = 300)
+  num_of_experts_req = models.CharField(max_length = 50, choices = NUM_OF_EXPERTS)
+  fees = models.CharField(max_length = 50, choices = FEES)
+  
+  
+  like_abt_ws = models.CharField(max_length = 500)
+  how_make_better = models.CharField(max_length = 500)
+  experience = models.CharField(max_length = 500)
+  suggestions = models.CharField(max_length = 500)

@@ -57,6 +57,9 @@
                     <td class="col-center">
                         {% if tr_rec.status == 0 %} Pending {% elif tr_rec.status == 1 %} Accepted {% else %} Public Review {% endif %}
                     </td>
+                    <td class="col-center">
+                            {{ tr_rec.adminreviewlog_set.last.created }}
+                        </td>
                 </tr>
             {% endfor %}
             </tbody>

@@ -1,0 +1,436 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load cmsdata %}
+{% load creationdata %}
+
+{% block compressinlinecssblock %}
+    <style>
+      #myImg {
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+#myImg:hover {opacity: 0.7;}
+
+/* The Modal (background) */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    padding-top: 70px; /* Location of the box */
+    margin-top: 20px;
+    width: 100%; /* Full width */
+    height :hidden; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.9); /* Black w/ opacity */
+}
+
+/* Modal Content (image) */
+.modal-content {
+    display: block;
+    width: 100%;
+    height :150%;
+    overflow:auto;
+}
+
+/* Caption of Modal Image */
+#caption {
+    margin: auto;
+    display: block;
+    width: 80%;
+    max-width: 700px;
+    text-align: center;
+    color: #ccc;
+    padding: 10px 0;
+    height: 150px;
+}
+
+/* Add Animation */
+.modal-content, #caption {    
+    -webkit-animation-name: zoom;
+    -webkit-animation-duration: 0.6s;
+    animation-name: zoom;
+    animation-duration: 0.6s;
+}
+
+@-webkit-keyframes zoom {
+    from {-webkit-transform:scale(0)} 
+    to {-webkit-transform:scale(1)}
+}
+
+@keyframes zoom {
+    from {transform:scale(0)} 
+    to {transform:scale(1)}
+}
+
+/* The Close Button */
+.close {
+    position: absolute;
+    top: 25px;
+    right: 35px;
+    color: #f1f1f1;
+    font-size: 45px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.close:hover,
+.close:focus {
+    color: #fff;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* 100% Image Width on Smaller Screens */
+@media only screen and (max-width: 700px){
+    .modal-content {
+        width: 100%;
+    }
+}
+.floating-box {
+    display: inline-block;
+    width: 325px;
+    height: 205px;
+    margin: 10px;
+    border: 3px solid #73AD21;  
+}
+.topic {
+    background-color: #FACC2E;
+    padding: 0.01em 16px;
+    border-left: 6px solid #ffeb3b;
+    margin: 20px 0;
+    text-align:center;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<body id="body">
+<div>
+<h4 class="topic">Programming Software</h4>
+  <div>
+<h4>C & CPP</h4>
+<ul class="row">
+  <li class="floating-box">
+    <img id="Ccpp1" src="/static/spoken/images/brochures/C CPP-page-001.jpg"  width="320" height="200" onclick="show(this)">
+  </li>
+  
+  <li class="floating-box">
+    <img id="Ccpp2" src="/static/spoken/images/brochures/C CPP-page-002.jpg"  width="320" height="200" onclick="show(this)">
+  </li>
+  
+</ul>
+</div>
+
+<div>
+<h4>Java</h4>
+<ul class="row">
+  <li class="floating-box">
+    <img id="Java1" src="/static/spoken/images/brochures/Java-page-001.jpg"  width="320" height="200" onclick="show(this)">
+  </li>
+  
+  <li class="floating-box">
+    <img id="Java2" src="/static/spoken/images/brochures/Java-page-002.jpg"  width="320" height="200" onclick="show(this)">
+  </li>
+  
+</ul>
+</div>
+
+<div>
+<h4>NetBeans</h4>
+<ul class="row">
+  <li class="floating-box">
+    <img id="NetBeans1" src="/static/spoken/images/brochures/NetBeans-page-001.jpg"  width="320" height="200" onclick="show(this)">
+  </li>
+  
+  <li class="floating-box">
+    <img id="NetBeans2" src="/static/spoken/images/brochures/NetBeans-page-002.jpg"  width="320" height="200" onclick="show(this)">
+  </li>
+  
+</ul>
+</div>
+
+<div>
+<h4>PHP & MySQL</h4>
+<ul class="row">
+  <li class="floating-box">
+    <img id="PHP&MySQL1" src="/static/spoken/images/brochures/PHP&MySQL-page-001.jpg"  width="320" height="200" onclick="show(this)">
+  </li>
+  
+  <li class="floating-box">
+    <img id="PHP&MySQL2" src="/static/spoken/images/brochures/PHP&MySQL-page-002.jpg"  width="320" height="200" onclick="show(this)">
+  </li>
+  
+</ul>
+</div>
+
+<div>
+<h4>Python</h4> 
+<ul class="row">
+  <li class="floating-box">
+    <img id="Python1" src="/static/spoken/images/brochures/Python -page-001.jpg"  width="320" height="200" onclick="show(this)">
+  </li>
+  
+  <li class="floating-box">
+    <img id="Python2" src="/static/spoken/images/brochures/Python -page-002.jpg"  width="320" height="200" onclick="show(this)">
+  </li>
+  
+</ul>
+</div>
+
+</div>
+
+<div>
+<h4 class="topic">Chemistry ­Related Software</h4>
+<div>
+<h4>Avogadro</h4>
+<ul class="row">
+  <li class="floating-box">
+    <img id="Avogadro1" src="/static/spoken/images/brochures/Avogadro-page-001.jpg"  width="320" height="200" onclick="show(this)">
+  </li>
+  
+  <li class="floating-box">
+    <img id="Avogadro2" src="/static/spoken/images/brochures/Avogadro-page-002.jpg"  width="320" height="200" onclick="show(this)">
+  </li>
+  
+</ul>
+</div>
+
+<div>
+<h4>GChemPaint</h4>
+<ul class="row">
+  <li class="floating-box">
+    <img id="GChemPaint1" src="/static/spoken/images/brochures/GChemPaint-page-001.jpg"  width="320" height="200" onclick="show(this)">
+  </li>
+  
+  <li class="floating-box">
+    <img id="GChemPaint2" src="/static/spoken/images/brochures/GChemPaint-page-002.jpg"  width="320" height="200" onclick="show(this)">
+  </li>
+  
+</ul>
+</div>
+
+<div>
+<h4>Jmol</h4>
+<ul class="row">
+  <li class="floating-box">
+    <img id="Jmol1" src="/static/spoken/images/brochures/Jmol-page-001.jpg"  width="320" height="200" onclick="show(this)">
+  </li>
+  
+  <li class="floating-box">
+    <img id="Jmol2" src="/static/spoken/images/brochures/Jmol-page-002.jpg"  width="320" height="200" onclick="show(this)">
+  </li>
+  
+</ul>
+</div>
+
+</div>
+
+<div>
+<h4 class="topic">Biochemistry Related Software</h4>
+<div>
+<h4>CellDesigner</h4>
+<ul class="row">
+  <li class="floating-box">
+    <img id="CellDesigner1" src="/static/spoken/images/brochures/CellDesigner-page-001.jpg"  width="320" height="200" onclick="show(this)">
+  </li>
+  
+  <li class="floating-box">
+    <img id="CellDesigner2" src="/static/spoken/images/brochures/CellDesigner-page-002.jpg"  width="320" height="200" onclick="show(this)">
+  </li>
+  
+</ul>
+</div>
+
+<div>
+<h4>UCSFChimera</h4>
+<ul class="row">
+  <li class="floating-box">
+    <img id="UCSFChimera1" src="/static/spoken/images/brochures/UCSFChimera-page-001.jpg"  width="320" height="200" onclick="show(this)">
+  </li>
+  
+  <li class="floating-box">
+    <img id="UCSFChimera2" src="/static/spoken/images/brochures/UCSFChimera-page-002.jpg"  width="320" height="200" onclick="show(this)">
+  </li>
+  
+</ul>
+</div>
+
+</div>
+
+<div>
+<h4 class="topic">Computational Software</h4>
+<div>
+<h4>Scilab</h4>
+<ul class="row">
+  <li class="floating-box">
+    <img id="Scilab1" src="/static/spoken/images/brochures/Scilab-page-001.jpg"  width="320" height="200" onclick="show(this)">
+  </li>
+  
+  <li class="floating-box">
+    <img id="Scilab2" src="/static/spoken/images/brochures/Scilab-page-002.jpg"  width="320" height="200" onclick="show(this)">
+  </li>
+  
+</ul>
+</div>
+</div>
+
+<div>
+<h4 class="topic">Animation and Graphics Software</h4>
+<div>
+<h4>Blender</h4>
+<ul class="row">
+  <li class="floating-box">
+    <img id="Blender1" src="/static/spoken/images/brochures/Blender-page-001.jpg"  width="320" height="200" onclick="show(this)">
+  </li>
+  
+  <li class="floating-box">
+    <img id="Blender2" src="/static/spoken/images/brochures/Blender-page-002.jpg"  width="320" height="200" onclick="show(this)">
+  </li>
+  
+</ul>
+</div>
+
+<div>
+<h4>Inkscape</h4>
+<ul class="row">
+  <li class="floating-box">
+    <img id="Inkscape1" src="/static/spoken/images/brochures/Inkscape-page-001.jpg"  width="320" height="200" onclick="show(this)">
+  </li>
+  
+  <li class="floating-box">
+    <img id="Inkscape2" src="/static/spoken/images/brochures/Inkscape-page-002.jpg"  width="320" height="200" onclick="show(this)">
+  </li>
+  
+</ul>
+</div>
+
+</div>
+
+<div>
+<h4 class="topic">Software for Schools</h4>
+<div>
+<h4>GeoGebra</h4>
+<ul class="row">
+  <li class="floating-box">
+    <img id="GeoGebra1" src="/static/spoken/images/brochures/GeoGebra-page-001.jpg"  width="320" height="200" onclick="show(this)">
+  </li>
+  
+  <li class="floating-box">
+    <img id="GeoGebra2" src="/static/spoken/images/brochures/GeoGebra-page-002.jpg"  width="320" height="200" onclick="show(this)">
+  </li>
+  
+</ul>
+</div>
+
+<div>
+<h4>Kturtle</h4>
+<ul class="row">
+  <li class="floating-box">
+    <img id="Kturtle1" src="/static/spoken/images/brochures/Kturtle-page-001.jpg"  width="320" height="200" onclick="show(this)">
+  </li>
+  
+  <li class="floating-box">
+    <img id="Kturtle2" src="/static/spoken/images/brochures/Kturtle-page-002.jpg"  width="320" height="200" onclick="show(this)">
+  </li>
+  
+</ul>
+</div>
+
+<div>
+<h4>Basic IT Skills</h4>
+<ul class="row">
+  <li class="floating-box">
+    <img id="BasicITSkills1" src="/static/spoken/images/brochures/BasicITSkills-page-001.jpg"  width="320" height="200" onclick="show(this)">
+  </li>
+  
+  <li class="floating-box">
+    <img id="BasicITSkills2" src="/static/spoken/images/brochures/BasicITSkills-page-002.jpg"  width="320" height="200" onclick="show(this)">
+  </li>
+  
+</ul>
+</div>
+
+<div>
+<h4>LibreOffice</h4>
+<ul class="row">
+  <li class="floating-box">
+    <img id="LibreOffice1" src="/static/spoken/images/brochures/LibreOffice-page-001.jpg"  width="320" height="200" onclick="show(this)">
+  </li>
+  
+  <li class="floating-box">
+    <img id="LibreOffice2" src="/static/spoken/images/brochures/LibreOffice-page-002.jpg"  width="320" height="200" onclick="show(this)">
+  </li>
+  
+</ul>
+</div>
+</div>
+
+<div>
+<h4 class="topic">Utility Software</h4>
+<div>
+<h4>Latex</h4>
+<ul class="row">
+  <li class="floating-box">
+    <img id="Latex1" src="/static/spoken/images/brochures/Latex-page-001.jpg"  width="320" height="200" onclick="show(this)">
+  </li>
+  
+  <li class="floating-box">
+    <img id="Latex2" src="/static/spoken/images/brochures/Latex-page-002.jpg"  width="320" height="200" onclick="show(this)">
+  </li>
+  
+</ul>
+</div>
+
+</div>
+
+<div>
+<h4 class="topic">Biogas Plant</h4>
+<div>
+<h4>Biogas</h4>
+<ul class="row">
+  <li class="floating-box">
+    <img id="Biogas1" src="/static/spoken/images/brochures/Biogas-page-001.jpg"  width="320" height="200" onclick="show(this)">
+  </li>
+  
+  <li class="floating-box">
+    <img id="Biogas2" src="/static/spoken/images/brochures/Biogas-page-002.jpg"  width="320" height="200" onclick="show(this)">
+  </li>
+  
+</ul>
+</div>
+</div>
+<!-- The Modal -->
+<div id="myModal" class="modal">
+  <span class="close">×</span>
+  <img class="modal-content" id="img01">
+</div>
+
+</body>
+{% endblock %}
+
+{% block compressinlinejsblock %}
+<script>
+var modal = document.getElementById('myModal');
+function show(im){
+    document.getElementById("body").style.overflow="hidden";
+    var img = document.getElementById(im.id);
+    var modalImg = document.getElementById("img01");
+    modal.style.display = "block";
+    modalImg.src = img.src;
+}
+
+ // Get the <span> element that closes the modal
+var span = document.getElementsByClassName("close")[0];
+
+// When the user clicks on <span> (x), close the modal
+span.onclick = function() { 
+    modal.style.display = "none";
+    document.getElementById("body").style.overflow="auto";
+}
+
+</script>
+{% endblock %}
