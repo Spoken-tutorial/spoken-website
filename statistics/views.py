@@ -288,12 +288,17 @@ def academic_center_view(request, academic_id = None, slug = None):
 
 
 def motion_chart(request):
-  collection = Training.objects.filter(status = 4, participant_count__gt=0).values('academic__state__name', 'tdate').annotate(tcount=Count('tdate'), pcount=Sum('participant_count'))
+  collection = TrainingRequest.objects.filter(
+      participants__gt=0, sem_start_date__lte=datetime.now()
+    ).values(
+      'training_planner__academic__state__name', 'sem_start_date'
+    ).annotate(tcount=Count('sem_start_date'), pcount=Sum('participants'))
+
   interactive_workshop_data = ""
   static_workshop_data = ""
   states = {}
   for row in collection:
-    curr_state = str(row['academic__state__name'])
+    curr_state = str(row['training_planner__academic__state__name'])
     if curr_state in states:
       states[curr_state]['tcount'] += int(row['tcount'])
       states[curr_state]['pcount'] += int(row['pcount'])
@@ -301,18 +306,21 @@ def motion_chart(request):
       states[curr_state] = {}
       states[curr_state]['tcount'] = int(row['tcount'])
       states[curr_state]['pcount'] = int(row['pcount'])
-    js_date = 'new Date(' + str(row['tdate'].year) + ', ' + str(int(row['tdate'].month) - 1) + ', ' + str(row['tdate'].day) + ')'
-    interactive_workshop_data += "['" + curr_state + "', " + js_date + ", " + str(row['tcount']) + ", " + str(row['pcount']) + "],"
-  
+    js_date = 'new Date(' + str(row['sem_start_date'].year) + ', ' + \
+      str(int(row['sem_start_date'].month) - 1) + ', ' + str(row['sem_start_date'].day) + ')'
+    interactive_workshop_data += "['" + curr_state + "', " + js_date + \
+      ", " + str(row['tcount']) + ", " + str(row['pcount']) + "],"
+
   for key, value in states.iteritems():
     curr_year = str(datetime.now().year)
-    static_workshop_data += "['" + key + "', " + curr_year + ", " + str(value['tcount']) + ", " + str(value['pcount']) + "],"
-  
+    static_workshop_data += "['" + key + "', " + curr_year + ", " + \
+      str(value['tcount']) + ", " + str(value['pcount']) + "],"
+
   context = {
     'interactive_workshop_data': interactive_workshop_data,
     'static_workshop_data': static_workshop_data,
   }
-  
+
   return render(request, 'statistics/templates/motion_charts.html', context)
 
 
