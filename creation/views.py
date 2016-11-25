@@ -2212,7 +2212,7 @@ def ajax_publish_to_pending(request):
             lang = ''
         if foss and lang:
             td_list = TutorialDetail.objects.filter(foss_id = foss).values_list('id')
-            tutorials = TutorialResource.objects.filter(tutorial_detail_id__in = td_list, language_id = lang, status = 1).distinct().order_by('tutorial_detail__tutorial')
+            tutorials = TutorialResource.objects.filter(tutorial_detail_id__in = td_list, language_id = lang, status = 1).distinct().order_by('tutorial_detail__level_id','tutorial_detail__order')
             for tutorial in tutorials:
                 data += '<option value="' + str(tutorial.tutorial_detail.id) + '">' + tutorial.tutorial_detail.tutorial + '</option>'
             if data:
