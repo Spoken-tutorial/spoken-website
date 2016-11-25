@@ -2557,7 +2557,7 @@ def ajax_state_collage(request):
         tmp = '<option value = None> --------- </option>'
         if collages:
             for i in collages:
-                tmp +='<option value='+str(i.id)+'>'+i.institution_name+'</option>'
+                tmp +='<option value='+str(i.id)+'>'+i.institution_name+', '+i.academic_code+'</option>'
         return HttpResponse(json.dumps(tmp), content_type='application/json')
 
 

@@ -8,6 +8,7 @@ from django.forms import ModelForm
 from events.models import *
 from events.formsv2 import *
 from django.contrib.auth.models import User, Group
+from django.db.models.functions import Concat
 
 class RpForm(forms.ModelForm):
     user = forms.ModelChoiceField(queryset = User.objects.filter(groups__name='Resource Person'))
@@ -89,13 +90,17 @@ class OrganiserForm(forms.Form):
         if args:
             if 'state' in args[0]:
                 if args[0]['state'] and args[0]['state'] != '' and args[0]['state'] != 'None':
-                    choices = list(AcademicCenter.objects.filter(state_id = args[0]['state']).values_list('id', 'institution_name'))
+                    #choices = list(AcademicCenter.objects.filter(state_id = args[0]['state']).values_list('id', 'institution_name'))
+                    
+                    choices = list(AcademicCenter.objects.filter(state_id = args[0]['state']).annotate(combine=Concat('institution_name','academic_code')).values_list('id', 'combine'))
+                    
                     choices.insert(0, ('', '-- None --'))
                     self.fields['college'].choices = choices
                     self.fields['college'].widget.attrs = {}
         if initial:
             self.fields['state'].initial = initial.academic.state_id
-            self.fields['college'].choices = AcademicCenter.objects.filter(district_id =initial.academic.district_id).values_list('id', 'institution_name')
+            self.fields['college'].choices = AcademicCenter.objects.filter(district_id =initial.academic.district_id).annotate(combine=Concat('institution_name','academic_code')).values_list('id', 'combine')
+            
             #initial data
             self.fields['college'].initial = initial.academic_id
 
