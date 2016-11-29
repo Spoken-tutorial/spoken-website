@@ -353,7 +353,7 @@ def news(request, cslug):
         latest = None
         sortAllowedCategory = ['articles-on-university-tie-ups-workshops', 'articles-on-spoken-tutorial-project','events-from-iitb','events-across-india']
         if request.GET and 'latest' in request.GET and int(request.GET.get('latest')) == 1 and (cslug in sortAllowedCategory):
-            collection = newstype.news_set.order_by('weight')
+            collection = newstype.news_set.order_by('weight','-created')
         else:
             collection = newstype.news_set.order_by('-created')
             latest = True
@@ -465,3 +465,10 @@ def add_user(request):
         except Exception, e:
             print e
     return HttpResponse("success")
+    
+def ViewBrochures(request):
+    template_name = 'spoken/templates/brochures.html'
+    return render(request, template_name)
+    
+def learndrupal(request):
+    return render(request, 'spoken/templates/learndrupal.html')

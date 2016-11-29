@@ -178,6 +178,10 @@ urlpatterns = [
       GetBatchStatusView.as_view()
     ),
     url(
+      r'^get-department-organiser-status/', 
+      GetDepartmentOrganiserStatusView.as_view()
+    ),
+    url(
       r'^training-request/(?P<role>\w+)/(?P<status>\w+)/$', 
       TrainingRequestListView.as_view(template_name='training_list.html'), 
       name='training_list'
@@ -250,4 +254,24 @@ urlpatterns = [
        UpdateStudentName.as_view(template_name="update_student.html"),
        name="update_student"
        ),
+    url(
+      r'^stworkshop-feedback/', 
+      STWorkshopFeedbackCreateView.as_view(template_name='stworkshop_feedback.html'), 
+      name='stworkshop_feedback'
+    ),
+    url(
+      r'^stworkshop-feedback-pre/', 
+      STWorkshopFeedbackPreCreateView.as_view(template_name='stworkshop_feedback_pre.html'), 
+      name='stworkshop_feedback_pre'
+    ),
+    url(
+      r'^stworkshop-feedback-post/', 
+      STWorkshopFeedbackPostCreateView.as_view(template_name='stworkshop_feedback_post.html'), 
+      name='stworkshop_feedback_post'
+    ),
+    url(
+      r'^learn-drupal-feedback/', 
+      LearnDrupalFeedbackCreateView.as_view(template_name='learndrupalfeedback.html'), 
+      name='learndrupalfeedback'
+    ),
 ]

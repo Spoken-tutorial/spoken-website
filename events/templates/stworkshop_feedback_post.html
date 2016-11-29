@@ -1,0 +1,1015 @@
+﻿{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load eventsdata %}
+{% block title %} Feedback{% endblock %}
+{% block compressinlinecssblock %}
+<style>
+        .common-search{
+        display : none;
+        }
+        table tr td, table tr th{
+            padding: 4px 0px 0px 5px;
+        }
+    .tablest td input[type=radio]{
+            margin: 0px 23px !important;
+        }
+        .rowcolor{
+            background-color: #fff;
+        }
+        .rowborder{
+            background-color: #e74c3c;
+        }
+    .bgcolor{
+            background-color: #e74c3c;
+            padding: 3px 15px;
+        }
+    .tabhead{
+        text-align: center;
+        border-style: inset;
+        background-color: #e74c3c;
+    }
+    .highlight{
+        width:100%;
+        background-color: #e74c3c;
+    }
+    .highlight textarea{
+       height:110px;
+    }
+    .tablest textarea ,textarea.form-control{
+       height:110px;
+    }
+    </style>
+{% endblock %}
+{% block content %}
+{{Success}}
+<div style="text-align:center; color:#52A3CC;"><h3>Workshop Feedback Form</h3></div>
+<div style="color:#52A3CC;"><p>Dear Respondent,<br> 
+Your valuable feedback about the Workshop and Self-Learning experience is appreciated and will help us to improve the quality of work we do.  Kindly put a tick-mark for the response that describes your views using the key given below.  Your response will be kept highly confidential.
+</p></div>
+<div class="row well" style="background-color:#fad7a0"><!--main div 1-->
+  <div class='col-sm-15'><!--main div 2-->
+    <form action="/software-training/stworkshop-feedback-post/" method="post" class='form-horizontal' enctype="multipart/form-data" >{% csrf_token %}
+      {% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
+      {% if form.non_field_errors %}
+        <ul>
+        {% for error in form.non_field_errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+      <div class='form-horizontal' style="clear:both;">
+        <div class="col-sm-11">
+        
+          <div class="form-group email">
+            <label class="col-sm-3 control-label" for= "id_email">Email-Id </label>
+            <div class="col-sm-9">
+              {% render_field form.email class+="form-control email" tabindex="2" %}
+              {{ form.email.errors }}
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="col-sm-3 control-label" for= "id_gender">Gender </label>
+            <div class="col-sm-9">
+              {% render_field form.gender class+="form-control gender" tabindex="3" %}
+              {{ form.gender.errors }}
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="col-sm-3 control-label" for= "id_age">Age </label>
+            <div class="col-sm-9">
+              {% render_field form.age class+="form-control age" tabindex="4" %}
+              {{ form.age.errors }}
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="col-sm-3 control-label" for= "id_participated_before">Have you participated in any of the Spoken Tutorial workshops before? </label>
+            <div class="col-sm-9">
+              {% render_field form.participated_before class+="form-control participated_before" tabindex="6" %}
+              {{ form.participated_before.errors }}
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="col-sm-3 control-label" for= "id_foss_where">If yes, which FOSS and where: </label>
+            <div class="col-sm-9">
+              {% render_field form.foss_where class+="form-control foss_where" tabindex="6" %}
+              {{ form.total_foss_where.errors }}
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="col-sm-3 control-label" for= "id_install_own">Were you able to install Drupal 8 on your own ? </label>
+            <div class="col-sm-9">
+              {% render_field form.install_own class+="form-control install_own" tabindex="1" %}
+              {{ form.install_own.errors }} 
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="col-sm-3 control-label" for= "id_explain">If No, please explain: </label>
+            <div class="col-sm-9">
+              {% render_field form.explain class+="form-control explain" tabindex="6" %}
+              {{ form.explain.errors }}
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="col-sm-3 control-label" for= "id_used_sw_before">Have you used Drupal before? </label>
+            <div class="col-sm-9">
+              {% render_field form.used_sw_before class+="form-control used_sw_before" tabindex="6" %}
+              {{ form.used_sw_before.errors }}
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="col-sm-3 control-label" for= "id_sim_framework_before">Have you used any similar framework before?</label>
+            <div class="col-sm-9">
+              {% render_field form.sim_framework_before class+="form-control sim_framework_before" tabindex="6" %}
+              {{ form.sim_framework_before.errors }}
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="col-sm-3 control-label" for="id_total_tutorials1">Total Tutorials completed during the workshop </label>
+            <div class="col-sm-9">
+              {% render_field form.total_tutorials1 class+="form-control total_tutorials1" tabindex="6" %}
+              {{ form.total_tutorials1.errors }}
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="col-sm-3 control-label" for= "id_purpose_of_attending">What was your purpose for attending this workshop? </label>
+            <div class="col-sm-9">
+              {% render_field form.purpose_of_attending class+="form-control purpose_of_attending" tabindex="6" %}
+              {{ form.purpose_of_attending.errors }}
+            </div>
+          </div>
+          
+          
+          
+          <table style="width:100%; border:1px solid #000;" class="tablest"> 
+            <tr>
+              <th class="tabhead">Learning Experience</th>
+              <th class="bgcolor">Strongly Agree</th>
+              <th class="bgcolor">Agree</th>
+              <th class="bgcolor">Neutral</th>
+              <th class="bgcolor">Disagree</th>
+              <th class="bgcolor">Strongly Disagree</th>
+              <th class="bgcolor">Not applicable</th>
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_spfriendly">I found the user interface of Spoken Tutorial website user friendly.</label>{{ form.spfriendly.errors }}</td>
+                {% for choice in form.spfriendly %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            
+            <tr class="rowcolor">
+              <td><label for="id_diff_watch_practice">It was difficult to watch the video tutorial and practice the steps simultaneously.</label>{{ form.diff_watch_practice.errors }}</td>
+                {% for choice in form.diff_watch_practice %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_satisfied_with_learning_experience">I am satisfied with the self-learning experience using spoken tutorials.</label>{{ form.satisfied_with_learning_experience.errors }}</td>
+                {% for choice in form.satisfied_with_learning_experience %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_confident">I am confident that I will be able to apply the knowledge of Drupal 8 after this workshop.</label>{{ form.confident.errors }}</td>
+                {% for choice in form.confident %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_side_by_side_hold_intrest">The side-by-side methodology was able to hold my interest for learning Drupal 8 during the entire workshop.</label>{{ form.side_by_side_hold_intrest.errors }}</td>
+                {% for choice in form.side_by_side_hold_intrest %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_ws_not_useful">The workshop was not at all useful to learn Drupal 8.</label>{{ form.ws_not_useful.errors }}</td>
+                {% for choice in form.ws_not_useful %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_can_learn_other">I can learn other software also using the side-by-side method and Spoken Tutorials.</label>{{ form.can_learn_other.errors }}</td>
+                {% for choice in form.can_learn_other %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_wantto_conduct_incollege">I want to conduct this Drupal workshop in my college.</label>{{ form.wantto_conduct_incollege.errors }}</td>
+                {% for choice in form.wantto_conduct_incollege %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_esy_to_conduct_own ">It is easy to conduct such a workshop on my own</label>{{ form.esy_to_conduct_own.errors }}</td>
+                {% for choice in form.esy_to_conduct_own  %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_ask_student_to_use">I will ask my students to use spoken tutorials to learn other software.</label>{{ form.ask_student_to_use.errors }}</td>
+                {% for choice in form.ask_student_to_use %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_possible_to_use_therotical">It is possible to use this spoken tutorial method for theoretical topics also.</label>{{ form.possible_to_use_therotical.errors }}</td>
+                {% for choice in form.possible_to_use_therotical %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+          </table><br><br>
+
+          <table style="width:100%; border:1px solid #000;" class="tablest"> 
+            <tr>
+              <th class="tabhead">Content Material</th>
+              <th class="bgcolor">Strongly Agree</th>
+              <th class="bgcolor">Agree</th>
+              <th class="bgcolor">Neutral</th>
+              <th class="bgcolor">Disagree</th>
+              <th class="bgcolor">Strongly Disagree</th>
+              <th class="bgcolor">Not applicable</th>
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_not_self_explanatory">The video tutorials were not self-explanatory. </label>{{ form.not_self_explanatory.errors }}</td>
+                {% for choice in form.not_self_explanatory %}
+                  {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_logical_sequence">The content in the tutorials was presented in a logical sequence. </label>{{ form.logical_sequence.errors }}</td>
+                {% for choice in form.logical_sequence %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_examples_help">The examples in tutorials helped me in better understanding of Drupal 8. </label>{{ form.examples_help.errors }}</td>
+                {% for choice in form.examples_help %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_other_language">These tutorials should be translated in other Indian languages to help others. </label>{{ form.other_language.errors }}</td>
+                {% for choice in form.other_language %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+          
+          <tr class="rowcolor">
+              <td><label for="id_instructions_easy_to_follow">The instructions on the instruction sheet were easy to follow. </label>{{ form.instructions_easy_to_follow.errors }}</td>
+                {% for choice in form.instructions_easy_to_follow %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_language_complicated">The language used in the video tutorials
+was complicated and difficult to follow </label>{{ form.language_complicated.errors }}</td>
+                {% for choice in form.language_complicated %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+
+          </table><br><br>
+          
+          <table style="width:100%; border:1px solid #000;" class="tablest"> 
+            <tr>
+              <th class="tabhead">Training Methodology</th>
+              <th class="bgcolor">Strongly Agree</th>
+              <th class="bgcolor">Agree</th>
+              <th class="bgcolor">Neutral</th>
+              <th class="bgcolor">Disagree</th>
+              <th class="bgcolor">Strongly Disagree</th>
+              <th class="bgcolor">Not applicable</th>
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_acquired_knowledge">I have acquired new knowledge about Drupal 8, by participating in the workshop.</label>{{ form.acquired_knowledge.errors }}</td>
+                {% for choice in form.acquired_knowledge %}
+                  {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_suff_instruction_by_prof">I found the initial instructions given by Prof. Kannan sufficient and helpful.</label>{{ form.suff_instruction_by_prof.errors }}</td>
+                {% for choice in form.suff_instruction_by_prof %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_suff_instruction_by_staff">I found the initial instructions given by the staff of Spoken Tutorial team sufficient and helpful.</label>{{ form.suff_instruction_by_staff.errors }}</td>
+                {% for choice in form.suff_instruction_by_staff %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_method_easy">The method used for learning Drupal 8 was simple and easy to follow.</label>{{ form.method_easy.errors }}</td>
+                {% for choice in form.method_easy %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_desired_objective">The workshop met my objectives.</label>{{ form.desired_objective.errors }}</td>
+                {% for choice in form.desired_objective %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_recommend">I will recommend this workshop to my peers and colleagues.</label>{{ form.recommend.errors }}</td>
+                {% for choice in form.recommend %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_like_to_part">I would like to take part in other spoken tutorial workshops too.</label>{{ form.like_to_part.errors }}</td>
+                {% for choice in form.like_to_part %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+          
+          <tr class="rowcolor">
+              <td><label for="id_learn_other_side_by_side">I can learn other software also, using
+the side by side method and spoken tutorials. </label>{{ form.learn_other_side_by_side.errors }}</td>
+                {% for choice in form.learn_other_side_by_side %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+          </table>
+          <br><br>
+          
+         <table style="width:100%; border:1px solid #000;" class="tablest"> 
+            <tr>
+              <th class="tabhead">Using Q­n­A  Forum</th>
+              <th class="bgcolor">Strongly Agree</th>
+              <th class="bgcolor">Agree</th>
+              <th class="bgcolor">Neutral</th>
+              <th class="bgcolor">Disagree</th>
+              <th class="bgcolor">Strongly Disagree</th>
+              <th class="bgcolor">Not applicable</th>
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_referred_forums">I referred to the forum  while going through the tutorial </label>{{ form.referred_forums.errors }}</td>
+                {% for choice in form.referred_forums %}
+                  {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_referred_forums_after">I referred to the forum  discussion after I completed the tutorial
+ </label>{{ form.referred_forums_after.errors }}</td>
+                {% for choice in form.referred_forums_after %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="asked_ques_forums">I asked/posted questions in the forum. </label>{{ form.asked_ques_forums.errors }}</td>
+                {% for choice in form.asked_ques_forums %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_not_answer_doubts">I felt that the forum responses did
+not answer my doubts at all. </label>{{ form.not_answer_doubts.errors }}</td>
+                {% for choice in form.not_answer_doubts %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+          
+          <tr class="rowcolor">
+              <td><label for="id_forum_helpful">The forum was very helpful as I
+usually hesitate to ask my doubts in front of an audience.
+ </label>{{ form.forum_helpful.errors }}</td>
+                {% for choice in form.forum_helpful %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_doubts_solved_fast">I feel doubts of several participants
+got clarified simultaneously and very fast owing to the forum </label>{{ form.doubts_solved_fast.errors }}</td>
+                {% for choice in form.doubts_solved_fast %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_need_not_post">I did not need to post my doubts
+on the forum as my doubts were already answered.
+ </label>{{ form.need_not_post.errors }}</td>
+                {% for choice in form.need_not_post %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            
+             <tr class="rowcolor">
+              <td><label for="id_faster_on_forums">My doubts can get answered faster
+in the forum compared to a conventional workshop of equal size. </label>{{ form.faster_on_forums.errors }}</td>
+                {% for choice in form.faster_on_forums %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_not_have_to_wait">Owing to the forum I did not have
+to wait to have my doubts answered.
+ </label>{{ form.not_have_to_wait.errors }}</td>
+                {% for choice in form.not_have_to_wait %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            
+            <tr class="rowcolor">
+              <td><label for="id_not_like_method_forums">I did not like the method of asking
+questions by minutes and seconds.
+ </label>{{ form.not_like_method_forums.errors }}</td>
+                {% for choice in form.not_like_method_forums %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            
+            <tr class="rowcolor">
+              <td><label for="id_helpful_pre_ans_ques">It was very helpful to go through the previously answered questions.
+ </label>{{ form.helpful_pre_ans_ques.errors }}</td>
+                {% for choice in form.helpful_pre_ans_ques %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            
+            <tr class="rowcolor">
+              <td><label for="id_not_like_reveal_identity">I do not like to reveal my identity
+on such online forum.
+ </label>{{ form.not_like_reveal_identity.errors }}</td>
+                {% for choice in form.not_like_reveal_identity %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            
+            <tr class="rowcolor">
+              <td><label for="forum_motivated">The use of a online forum
+motivated me to ask more
+questions.
+ </label>{{ form.forum_motivated.errors }}</td>
+                {% for choice in form.forum_motivated %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="per_asked_ques_before_tuts">If previously asked questions were
+available on the forum, I would see
+them before practicing the
+tutorials
+ </label>{{ form.per_asked_ques_before_tuts.errors }}</td>
+                {% for choice in form.per_asked_ques_before_tuts %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+			</table><br><br>
+          <table style="width:100%; border:1px solid #000;" class="tablest"> 
+            <tr>
+              <th class="tabhead">Drupal Tutorial Name</th>
+              <th class="bgcolor">Not confident at all</th>
+              <th class="bgcolor">Unconfident</th>
+              <th class="bgcolor">Neither confident nor unconfident</th>
+              <th class="bgcolor">Confident</th>
+              <th class="bgcolor">Absolutely confident</th>
+              <th class="bgcolor">Not Applicable</th>
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_content_management">Content Management in Admin Interface </label>{{ form.content_management.errors }}</td>
+                {% for choice in form.content_management %}
+                  {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_configuration_management">Configuration Management in Admin Interface</label>{{ form.configuration_management.errors }}</td>
+                {% for choice in form.configuration_management %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_creating_basic_content">Creating Basic Content</label>{{ form.creating_basic_content.errors }}</td>
+                {% for choice in form.creating_basic_content %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_edit_existing_content">Editing Existing Content</label>{{ form.edit_existing_content.errors }}</td>
+                {% for choice in form.edit_existing_content %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_create_new_content">Creating New Content Types</label>{{ form.create_new_content.errors }}</td>
+                {% for choice in form.create_new_content %}
+                  {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_grp_entity_ref">User group and Entity Reference</label>{{ form.grp_entity_ref.errors }}</td>
+                {% for choice in form.grp_entity_ref %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_taxonomy">Taxonomy </label>{{ form.taxonomy.errors }}</td>
+                {% for choice in form.taxonomy %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_managing_content">Managing Content</label>{{ form.managing_content.errors }}</td>
+                {% for choice in form.managing_content %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+          
+          <tr class="rowcolor">
+              <td><label for="id_creating_dummy_content">Creating Dummy Content</label>{{ form.creating_dummy_content.errors }}</td>
+                {% for choice in form.creating_dummy_content %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_modify_display_content">Modifying the Display of Content
+ </label>{{ form.modify_display_content.errors }}</td>
+                {% for choice in form.modify_display_content %}
+                  {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_contents_using_view"> Displaying Contents using Views</label>{{ form.contents_using_view.errors }}</td>
+                {% for choice in form.contents_using_view %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_table_of_fields_with_views">Table of Fields with Views </label>{{ form.table_of_fields_with_views.errors }}</td>
+                {% for choice in form.table_of_fields_with_views %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_control_display_images">Controlling Display of Images</label>{{ form.control_display_images.errors }}</td>
+                {% for choice in form.control_display_images %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+          
+          <tr class="rowcolor">
+              <td><label for="id_adding_func">Adding Functionalities using Modules</label>{{ form.adding_func.errors }}</td>
+                {% for choice in form.adding_func %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            
+            
+            <tr class="rowcolor">
+              <td><label for="id_finding_modules">Finding and Evaluating Modules</label>{{ form.finding_modules.errors }}</td>
+                {% for choice in form.finding_modules %}
+                  {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_modifying_page_layout">Modifying the Page Layout</label>{{ form.modifying_page_layout.errors }}</td>
+                {% for choice in form.modifying_page_layout %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_menu_endpoints">Menu and Endpoints</label>{{ form.menu_endpoints.errors }}</td>
+                {% for choice in form.menu_endpoints %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_styling_using_themes">Styling a Page using Themes</label>{{ form.styling_using_themes.errors }}</td>
+                {% for choice in form.styling_using_themes %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_installig_ad_themes"> Installing an Advanced Theme</label>{{ form.installig_ad_themes.errors }}</td>
+                {% for choice in form.installig_ad_themes %}
+                  {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_people_management">People Management</label>{{ form.people_management.errors }}</td>
+                {% for choice in form.people_management %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_site_management">Drupal Site Management</label>{{ form.site_management.errors }}</td>
+                {% for choice in form.site_management %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+          </table><br><br>
+
+          
+          
+          <table style="width:100%;border:1px solid #000;" class="tablest"> 
+            <tr>
+              <th class="tabhead">Kindly Rate the following </th>
+              <th class="bgcolor">Excellent</th>
+              <th class="bgcolor">Good</th>
+              <th class="bgcolor">Fair</th>
+              <th class="bgcolor">Bad</th>
+              <th class="bgcolor">Extremely bad</th>
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_ws_quality">Workshop Quality</label>{{ form.ws_quality.errors }}</td>
+                {% for choice in form.ws_quality %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            
+            <tr class="rowcolor">
+              <td><label for="id_relevance">Relevance of the end-of-tutorial assignment in the tutorials</label>{{ form.relevance.errors }}</td>
+                {% for choice in form.relevance %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_guidelines">Guidelines on the instruction sheet </label>{{ form.guidelines.errors }}</td>
+                {% for choice in form.guidelines %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_overall_video_quality">Overall Video Quality of the tutorial</label>{{ form.overall_video_quality.errors }}</td>
+                {% for choice in form.overall_video_quality %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_text_readability">Text readability </label>{{ form.text_readability.errors }}</td>
+                {% for choice in form.text_readability %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_clarity_of_speech">Clarity of Speech</label>{{ form.clarity_of_speech.errors }}</td>
+                {% for choice in form.clarity_of_speech %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_visual_presentation">Visual Presentation of content</label>{{ form.visual_presentation.errors }}</td>
+                {% for choice in form.visual_presentation %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_pace_of_tutorial">Pace of the tutorial</label>{{ form.pace_of_tutorial.errors }}</td>
+                {% for choice in form.pace_of_tutorial %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_arrangement">Arrangement </label>{{ form.arrangement.errors }}</td>
+                {% for choice in form.arrangement %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_network">Network Connectivity</label>{{ form.network.errors }}</td>
+                {% for choice in form.network %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_installation_help">Installation help</label>{{ form.installation_help.errors }}</td>
+                {% for choice in form.installation_help %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_time_for_handson">Time allotted for hands on experience
+ </label>{{ form.time_for_handson.errors }}</td>
+                {% for choice in form.time_for_handson %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_experience_of_learning">Experience of learning Drupal 8 using side-by-side method</label>{{ form.experience_of_learning.errors }}</td>
+                {% for choice in form.experience_of_learning %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+            <tr class="rowcolor">
+              <td><label for="id_overall_arrangement">Overall Workshop Arrangement</label>{{ form.overall_arrangement.errors }}</td>
+                {% for choice in form.overall_arrangement %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            
+          </table><br><br>
+          
+          <div class="form-group">
+            <label class="col-sm-9 control-label" for= "id_like_to_create_st " style="text-align:justify;">I would like to create spoken tutorials on the software I have expertise in. </label>
+            <div class="col-sm-9">
+              {% render_field form.like_to_create_st class+="form-control like_to_create_st " tabindex="1" %}
+              {{ form.like_to_create_st.errors }}
+            </div>
+          </div><br>
+          
+          <div class="form-group">
+            <label class="col-sm-9 control-label" for= "id_like_to_create_st_details " style="text-align:justify;">Please mention the details</label>
+            <div class="col-sm-9">
+              {% render_field form.like_to_create_st_details class+="form-control like_to_create_st_details " tabindex="1" %}
+              {{ form.like_to_create_st_details.errors }}
+            </div>
+          </div><br>
+          
+          <div class="form-group">
+            <label class="col-sm-9 control-label" for= "id_num_of_experts_req " style="text-align:justify;">To answer your questions at a reasonable speed in a conventional workshop of equal size, the number of  experts required are:</label>
+            <div class="col-sm-9">
+              {% render_field form.num_of_experts_req class+="form-control num_of_experts_req " tabindex="1" %}
+              {{ form.num_of_experts_req.errors }}
+            </div>
+          </div><br>
+          
+          <div class="form-group">
+            <label class="col-sm-9 control-label" for= "id_fees " style="text-align:justify;">How much will you be prepared to pay for such a workshop:</label>
+            <div class="col-sm-9">
+              {% render_field form.fees class+="form-control fees " tabindex="1" %}
+              {{ form.fees.errors }}
+            </div>
+          </div><br>
+          
+          <div class="form-group">
+            <label class="col-sm-9 control-label" for= "id_like_abt_ws " style="text-align:justify;">What did you like about the workshop?</label>
+            <div class="col-sm-9">
+              {% render_field form.like_abt_ws class+="form-control like_abt_ws " tabindex="1" %}
+              {{ form.like_abt_ws.errors }}
+            </div>
+          </div><br>
+          
+          <div class="form-group">
+            <label class="col-sm-9 control-label" for= "id_how_make_better " style="text-align:justify;">How can we  make the workshop better?</label>
+            <div class="col-sm-9">
+              {% render_field form.how_make_better class+="form-control how_make_better " tabindex="1" %}
+              {{ form.how_make_better.errors }}
+            </div>
+          </div><br>
+          
+          <div class="form-group">
+            <label class="col-sm-9 control-label" for= "id_experience " style="text-align:justify;">Experiences that you will take with you:</label>
+            <div class="col-sm-9">
+              {% render_field form.experience class+="form-control experience " tabindex="1" %}
+              {{ form.experience.errors }}
+            </div>
+          </div><br>
+          
+          <div class="form-group">
+            <label class="col-sm-9 control-label" for= "id_suggestions " style="text-align:justify;">Any other feedback/suggestions </label>
+            <div class="col-sm-9">
+              {% render_field form.suggestions class+="form-control suggestions " tabindex="1" %}
+              {{ form.suggestions.errors }}
+            </div>
+          </div><br>
+          
+          
+          
+          
+          <div class="form-group">
+            <div class="col-sm-offset-5 col-sm-9">
+              <input class="btn btn-primary" style="background-color:#e74c3c; width:200px;" type="submit" id="submit_button" value="Submit" />
+            </div>
+          </div>
+
+
+
+        </div>
+      </div>
+      {% endwith %}
+    </form>
+  </div><!--main div 2 close -->
+</div><!--main div 1 close -->
+{% endblock %}

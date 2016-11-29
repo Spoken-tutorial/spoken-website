@@ -22,9 +22,12 @@ urlpatterns = patterns('',
     url(r'^admin/testimonials/$', 'spoken.views.admin_testimonials', name="admin_testimonials"),
     url(r'^admin/testimonials/(?P<rid>\d+)/edit/$', 'spoken.views.admin_testimonials_edit', name="admin_testimonials_edit"),
     url(r'^admin/testimonials/(?P<rid>\d+)/delete/$', 'spoken.views.admin_testimonials_delete', name="admin_testimonials_delete"),
+    url(r'^brochures/$', 'spoken.views.ViewBrochures', name="view_brochures"),
     url(r'^$', 'spoken.views.home', name='home'),
     url(r'^home/$', 'spoken.views.home', name='home'),
     url(r'^site-feedback/$', 'spoken.views.site_feedback', name='site_feedback'),
+    url(r'^learn-Drupal/$', 'spoken.views.learndrupal', name='learndrupal'),
+    url(r'^learn-Drupal./$', 'spoken.views.learndrupal', name='learndrupal'),
     # url(r'^spoken/', include('spoken.foo.urls')),
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
@@ -56,6 +59,9 @@ urlpatterns = patterns('',
 
     # team
     url(r'^team/', include('team.urls')),
+    
+    # certificate
+    url(r'^certificate/', include('certificate.urls', namespace='certificate')),
 
     url(r'^creation/', include('creation.urls', namespace='creation')),
     url(r'^nicedit/', include('nicedit.urls')),

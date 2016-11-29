@@ -36,7 +36,7 @@
                       
                       <div class="form-group">
                           <div class="col-xs-12 form-group">
-                              <input class="btn btn-primary" type="submit" value="Update" />
+                              <input class="btn btn-primary" id="update" type="submit" value="Update" />
                               <a class="btn btn-danger" href="{% url 'events:batch_list' %}">Cancel</a>
                           </div>
                       </div>
@@ -44,101 +44,70 @@
                   </form>
               </div>
           </div>
-        {% else %}
-          <h4><center>{{ batch.get_batch_info }}</center></h4>
-          <form action="{{ action }}" method="post" class='form-horizontal' enctype="multipart/form-data">{% csrf_token %}
-            <h5>Errors <span class="pull-right review-accepted">Note: Click on the email to correct email format</span></h5>
-            <div class="row well">
-              <table class="table">
-                <tr>
-                  <th>#</th>
-                  <th>Full name</th>
-                  <th>Email</th>
-                  <th>Gender</th>
-                </tr>
-              {% for e in error %}
-                <tr id="error{{forloop.counter}}">
-                  <td>{{ forloop.counter }}</td>
-                  <td>{{ e.0 }} {{ e.1 }}</td>
-                  <td><div row="{{forloop.counter}}" data="{{ e.0 }},{{ e.1 }},{{ e.3 }}" class="editable" id="div_1">{{ e.2 }}</div></td>
-                  <td>{{ e.3 }}</td>
-                </tr>
-              {% endfor %}
-              </table>
-            </div>
-          </form>
-        {% endif %}
-        {% if warning %}
-          <h5>Warning <span class="pull-right review-accepted">Note: Click on the email to correct email format</span></h5>
-            <div class="row well">
-              <table class="table">
-                <tr>
-                  <th>#</th>
-                  <th>Full name</th>
-                  <th>Email</th>
-                  <th>Gender</th>
-                  <th></th>
-                </tr>
-              {% for e in warning %}
-                <tr id="error{{forloop.counter}}">
-                  <td>{{ forloop.counter }}</td>
-                  <td>{{ e.0 }} {{ e.1 }}</td>
-                  <td>{{ e.2 }}</td>
-                  <td>{{ e.3 }}</td>
-                  <td>
-                    {% if e.4 %}
-                      Already exists in this batch.
-                    {% else %}
-                      Already exists in another batch.
-                    {% endif %}
-                  </td>
-                </tr>
-              {% endfor %}
-              </table>
-            </div>
-        {% endif %}
+          {% endif %}
 {% endblock %}
 {% block jsblock %}
-  <script src="{% static 'spoken/js/jquery.jeditable.js' %}"></script>
   <script>
-    $('.editable').editable(function(value, settings) {
-       thisData = $(this);
-       message = '';
-       if (validEmail(value)){
-          $.ajax({
-            url: "/software-training/save-student/",
+  $('.department').on('change', function() {
+        department = $('.department').val();
+        year = $('.year').val();
+        $('#update').attr('disabled', true);
+        if(department != '' && year != '') {
+          $.ajax
+          ({
+            url: "/software-training/get-department-organiser-status/",
             type: "POST",
             data: {
-                student_details: $(this).attr("data"),
-                email: value,
-                batch: "{{batch.id}}"
+              department: department,
+              year: year,
+            },
+            beforeSend: function() {
+              //$('.ajax-refresh-language').show();
             },
             success: function(data) {
-              currentRow = $("#" + thisData.attr('row'))
-              if(data.code == 2){
-                currentRow.html('<td colspan="2" class="alert alert-danger"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> ' + value + ': ' + data.message + '</td>');
-              }else if(data.code == 1){
-                currentRow.html('<td colspan="2" class="alert alert-warning"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> ' + value + ': ' + data.message + '</td>');
-              }else if(data.code == 4){
-                alert(value + " " + data.message);
-              }else{
-                currentRow.html('<td colspan="2" class="alert alert-success"> ' + value + ': Student record added successfully</td>');
+              // loading languages
+              if(data && data['dept_status']) {
+                $('#update').attr('disabled', false);
+               } else {
+                alert('This department with selected year is already chosen by another Organiser in your College. ');
               }
+              //$('.ajax-refresh-language').hide();
             }
-        });
-       }else{
-         $(this).css({'color': 'red'});
-       }
-       return(value);
-    }, {
-       type    : 'text',
-       submit  : 'OK',
-       indicator : '<i class="fa fa-spinner fa-spin"></i>',
-       tooltip   : 'Click to edit...',
-   });
-   function validEmail(v) {
-      var r = new RegExp("[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?");
-      return (v.match(r) == null) ? false : true;
-  }
+          });
+                
+        }
+      });
+  $('.year').on('change', function() {
+        department = $('.department').val();
+        year = $('.year').val();
+        $('#update').attr('disabled', true);
+        if(department != '' && year != '') {
+          $.ajax
+          ({
+            url: "/software-training/get-department-organiser-status/",
+            type: "POST",
+            data: {
+              department: department,
+              year: year,
+            },
+            beforeSend: function() {
+              //$('.ajax-refresh-language').show();
+            },
+            success: function(data) {
+              // loading languages
+              if(data && data['dept_status']) {
+                $('#update').attr('disabled', false);
+               } else {
+                alert('This department with selected year is already chosen by another Organiser in your College. ');
+              }
+              //$('.ajax-refresh-language').hide();
+            }
+          });
+                
+        }
+      });
+  
+  
+  
   </script>
 {% endblock %}

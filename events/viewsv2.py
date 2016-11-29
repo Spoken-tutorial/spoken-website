@@ -13,7 +13,7 @@ from django.utils.decorators import method_decorator
 from events.decorators import group_required
 from events.forms import StudentBatchForm, TrainingRequestForm, \
     TrainingRequestEditForm, CourseMapForm, SingleTrainingForm, \
-    OrganiserFeedbackForm, LatexWorkshopFileUploadForm, UserForm, \
+    OrganiserFeedbackForm,STWorkshopFeedbackForm,STWorkshopFeedbackFormPre,STWorkshopFeedbackFormPost,LearnDrupalFeedback, LatexWorkshopFileUploadForm, UserForm, \
     SingleTrainingEditForm
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, render_to_response
@@ -30,6 +30,7 @@ from cms.sortable import *
 from django.contrib import messages
 from django.template import RequestContext, loader
 from mdldjango.get_or_create_participant import get_or_create_participant
+from django.contrib.auth.decorators import login_required
 
 #pdf generate
 from reportlab.pdfgen import canvas
@@ -195,9 +196,15 @@ class StudentBatchCreateView(CreateView):
     form_data.academic = self.user.organiser.academic
     self.organiser = self.user.organiser
     form_data.organiser = self.user.organiser
+    studentcount = 0
     try:
       if 'bid' in self.kwargs:
         form_data = StudentBatch.objects.get(pk=self.kwargs['bid'])
+        studentcount = form_data.stcount
+        print 'students present',studentcount
+        if studentcount == 500 :
+          messages.error(self.request, 'Can not add more than 500 students in one batch.')
+          return self.form_invalid(form)
       else:
         form_data = StudentBatch.objects.get(year=form_data.year, academic=form_data.academic, department=form_data.department)
     except ObjectDoesNotExist:
@@ -206,7 +213,7 @@ class StudentBatchCreateView(CreateView):
       print e
       return HttpResponseRedirect("/software-training/student-batch/")
     skipped, error, warning, write_flag = \
-      self.csv_email_validate(self.request.FILES['csv_file'], form_data.id)
+      self.csv_email_validate(self.request.FILES['csv_file'], form_data.id , studentcount)
     context = {'error' : error, 'warning' : warning, 'batch':form_data}
     
     if error or warning:
@@ -276,36 +283,46 @@ class StudentBatchCreateView(CreateView):
         return student
     return False
 
-  def csv_email_validate(self, file_path, batch_id):
+  def csv_email_validate(self, file_path, batch_id , studentcount):
     skipped = []
     error = []
     warning = []
     write_flag = False
     try:
-      csvdata = csv.reader(file_path, delimiter=',', quotechar='|')
-      for row in csvdata:
-        if len(row) < 4:
-          skipped.append(row)
-          continue
-        if not self.email_validator(row[2]):
-          error.append(row)
-          continue
-        student = self.get_student(row[2])
-        if not student:
-          student = self.create_student(row[0], row[1], row[2], row[3])
-        if student:
-          try:
-            smrec = StudentMaster.objects.get(student=student, moved=False)
-            if int(batch_id) == int(smrec.batch_id):
-              row.append(1)
-            else:
-              row.append(0)
-            warning.append(row)
+      rowcsv = csv.reader(file_path, delimiter=',', quotechar='|')
+      rowcount = len(list(rowcsv))
+      gencount = studentcount + rowcount
+      print 'gencount',gencount
+      print 'printing csv length',rowcount
+      if rowcount > 500:
+        messages.warning(self.request, "MB will accept only 500 students, if number is more than 500, divide the batch and upload under different departments eg. Chemistry1 & Chemistry2")
+      if gencount > 500:
+        messages.warning(self.request, "Total number of students per Master Batch exceeding. Masterbatch can accept maximum 500 students.")
+      else :
+        csvdata = csv.reader(file_path, delimiter=',', quotechar='|')
+        for row in csvdata:
+          if len(row) < 4:
+            skipped.append(row)
             continue
-          except ObjectDoesNotExist:
-            StudentMaster.objects.create(student=student, batch_id=batch_id)
-            write_flag = True
-      StudentBatch.objects.get(pk=batch_id).update_student_count()
+          if not self.email_validator(row[2]):
+            error.append(row)
+            continue
+          student = self.get_student(row[2])
+          if not student:
+            student = self.create_student(row[0], row[1], row[2], row[3])
+          if student:
+            try:
+              smrec = StudentMaster.objects.get(student=student, moved=False)
+              if int(batch_id) == int(smrec.batch_id):
+                row.append(1)
+              else:
+                row.append(0)
+              warning.append(row)
+              continue
+            except ObjectDoesNotExist:
+              StudentMaster.objects.create(student=student, batch_id=batch_id)
+              write_flag = True
+        StudentBatch.objects.get(pk=batch_id).update_student_count()
     except Exception, e:
       print e
       messages.warning(self.request, "The file you uploaded is not a valid CSV file, please add a valid CSV file")
@@ -326,6 +343,7 @@ class StudentBatchUpdateView(UpdateView):
         except:
           pass
       return super(StudentBatchUpdateView, self).dispatch(*args, **kwargs)
+      
       
 class StudentBatchYearUpdateView(UpdateView):
     model = StudentBatch
@@ -546,7 +564,7 @@ class TrainingAttendanceListView(ListView):
     if self.training_request.status == 1:
       self.queryset = self.training_request.trainingattend_set.all()
     else:
-      self.queryset = StudentMaster.objects.filter(batch_id=self.training_request.batch_id, moved=False)
+      self.queryset = StudentMaster.objects.filter(batch_id=self.training_request.batch_id,student__verified = 1, moved=False)
     return super(TrainingAttendanceListView, self).dispatch(*args, **kwargs)
 
   def get_context_data(self, **kwargs):
@@ -1025,6 +1043,35 @@ class GetBatchStatusView(JSONResponseMixin, View):
       'batch_status' : batch_status,
     }
     return self.render_to_json_response(context)
+
+
+class GetDepartmentOrganiserStatusView(JSONResponseMixin, View):
+  department_id = None
+  year = None
+  @method_decorator(csrf_exempt)
+  def dispatch(self, *args, **kwargs):
+    return super(GetDepartmentOrganiserStatusView, self).dispatch(*args, **kwargs)
+  
+  def post(self, request, *args, **kwargs):
+    department_id = self.request.POST.get('department') 
+    year = self.request.POST.get('year')
+    context = {}
+    dept_status = True
+    
+    resultdata = StudentBatch.objects.filter(
+      academic_id=request.user.organiser.academic.id,
+      department_id=department_id,
+      year = year
+    )
+  
+    if resultdata:
+      dept_status = False
+      
+    context = {
+      'dept_status' : dept_status,
+    }
+    return self.render_to_json_response(context)
+
 
 class TrainingRequestListView(ListView):
   queryset = None
@@ -2144,3 +2191,119 @@ class UpdateStudentName(UpdateView):
   def dispatch(self, *args, **kwargs):
     self.success_url="/software-training/student-batch/"+str(kwargs['bid'])+"/view"
     return super(UpdateStudentName, self).dispatch(*args, **kwargs)
+    
+class STWorkshopFeedbackCreateView(CreateView):
+    form_class = STWorkshopFeedbackForm
+    template_name = "stworkshop_feedback.html"
+    success_url = "/home"
+
+    @method_decorator(login_required)
+    def get(self, request, *args, **kwargs):
+	    return render_to_response(self.template_name, {'form': self.form_class()}, 
+	      context_instance=RequestContext(self.request))
+
+    def post(self,  request, *args, **kwargs):
+      self.object = None
+      form = self.get_form(self.get_form_class())
+      if form.is_valid():
+        form.save()
+        messages.success(self.request, "Thank you for completing this feedback form. We appreciate your input and valuable suggestions.")
+        return HttpResponseRedirect(self.success_url)
+      else:
+        return self.form_invalid(form)
+        
+class STWorkshopFeedbackPreCreateView(CreateView):
+    form_class = STWorkshopFeedbackFormPre
+    template_name = "stworkshop_feedback_pre.html"
+    success_url = "/home"
+    user= None
+
+    @method_decorator(login_required)
+    def get(self, request, *args, **kwargs):
+	    return render_to_response(self.template_name, {'form': self.form_class()}, 
+	      context_instance=RequestContext(self.request))
+
+    def post(self,  request, *args, **kwargs):
+      self.object = None
+      self.user = self.request.user.id
+      print self.user
+      form = self.get_form(self.get_form_class())
+      if form.is_valid():
+        #form.save()
+        return self.form_valid(form)
+        #messages.success(self.request, "Thank you for completing this feedback form. We appreciate your input and valuable suggestions.")
+        #return HttpResponseRedirect(self.success_url)
+      else:
+        print form.errors
+        return self.form_invalid(form)
+        
+    def form_valid(self, form, **kwargs):
+      form_data = form.save(commit=False)
+      form_data.user = self.request.user
+      form_data.save()
+      print "saved"
+      messages.success(self.request, "Thank you for completing this feedback form. We appreciate your input and valuable suggestions.")
+      return HttpResponseRedirect(self.success_url)
+    
+        
+        
+        
+        
+class STWorkshopFeedbackPostCreateView(CreateView):
+    form_class = STWorkshopFeedbackFormPost
+    template_name = "stworkshop_feedback_post.html"
+    success_url = "/home"
+
+    @method_decorator(login_required)
+    def get(self, request, *args, **kwargs):
+	    return render_to_response(self.template_name, {'form': self.form_class()}, 
+	      context_instance=RequestContext(self.request))
+
+    def post(self,  request, *args, **kwargs):
+      self.object = None
+      form = self.get_form(self.get_form_class())
+      if form.is_valid():
+        return self.form_valid(form)
+        #form.save()
+        #messages.success(self.request, "Thank you for completing this feedback form. We appreciate your input and valuable suggestions.")
+        return HttpResponseRedirect(self.success_url)
+      else:
+        print form.errors
+        return self.form_invalid(form)
+        
+    def form_valid(self, form, **kwargs):
+      form_data = form.save(commit=False)
+      form_data.user = self.request.user
+      form_data.save()
+      print "saved"
+      messages.success(self.request, "Thank you for completing this feedback form. We appreciate your input and valuable suggestions.")
+      return HttpResponseRedirect(self.success_url)
+
+class LearnDrupalFeedbackCreateView(CreateView):
+  form_class = LearnDrupalFeedback
+  template_name = "learndrupalfeedback.html"
+  success_url = "/home"
+  
+  def get(self, request, *args, **kwargs):
+	    return render_to_response(self.template_name, {'form': self.form_class()}, 
+	      context_instance=RequestContext(self.request))
+  
+  def post(self,  request, *args, **kwargs):
+      self.object = None
+      form = self.get_form(self.get_form_class())
+      if form.is_valid():
+        return self.form_valid(form)
+        #form.save()
+        #messages.success(self.request, "Thank you for completing this feedback form. We appreciate your input and valuable suggestions.")
+        return HttpResponseRedirect(self.success_url)
+      else:
+        print form.errors
+        return self.form_invalid(form)
+        
+  def form_valid(self, form, **kwargs):
+      form_data = form.save(commit=False)
+      form_data.user = self.request.user
+      form_data.save()
+      print "saved"
+      messages.success(self.request, "Thank you for completing this feedback form. We appreciate your input and valuable suggestions.")
+      return HttpResponseRedirect(self.success_url)

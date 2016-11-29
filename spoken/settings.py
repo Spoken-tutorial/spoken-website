@@ -83,6 +83,7 @@ INSTALLED_APPS = (
     'youtube',
     'reports',
     'team',
+    'certificate',
 )
 
 MIDDLEWARE_CLASSES = (
