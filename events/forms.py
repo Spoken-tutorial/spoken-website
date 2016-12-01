@@ -90,17 +90,19 @@ class OrganiserForm(forms.Form):
         if args:
             if 'state' in args[0]:
                 if args[0]['state'] and args[0]['state'] != '' and args[0]['state'] != 'None':
-                    #choices = list(AcademicCenter.objects.filter(state_id = args[0]['state']).values_list('id', 'institution_name'))
-                    
-                    choices = list(AcademicCenter.objects.filter(state_id = args[0]['state']).annotate(combine=Concat('institution_name','academic_code')).values_list('id', 'combine'))
-                    
-                    choices.insert(0, ('', '-- None --'))
-                    self.fields['college'].choices = choices
+                    code_list = list(AcademicCenter.objects.filter(state_id = args[0]['state']).values_list('id', 'institution_name','academic_code'))
+                    info = []
+                    for code in code_list:
+                      info.append((code[0],code[1]+","+code[2]))
+                    self.fields['college'].choices = info
                     self.fields['college'].widget.attrs = {}
         if initial:
             self.fields['state'].initial = initial.academic.state_id
-            self.fields['college'].choices = AcademicCenter.objects.filter(district_id =initial.academic.district_id).annotate(combine=Concat('institution_name','academic_code')).values_list('id', 'combine')
-            
+            code_list = AcademicCenter.objects.filter(district_id =initial.academic.district_id).values_list('id', 'institution_name','academic_code')
+            info = []
+            for code in code_list:
+              info.append((code[0],code[1]+","+code[2]))
+            self.fields['college'].choices = info
             #initial data
             self.fields['college'].initial = initial.academic_id
 
