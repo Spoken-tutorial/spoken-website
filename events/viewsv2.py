@@ -481,13 +481,18 @@ class TrainingRequestCreateView(CreateView):
       form_data = form.save(commit=False)
       sb = StudentBatch.objects.get(pk=form_data.batch.id)
       if sb.student_count():
-        if sb.is_foss_batch_acceptable(form_data.course.id):
-          form_data.training_planner_id = self.kwargs['tpid']
-          # form_data.participants = StudentMaster.objects.filter(batch_id = form_data.batch_id).count()
-          form_data.save()
-        else:
-          messages.error(self.request, 'This student batch already taken the selected course.')
+        # checking if requested batch already have training request in requsted course
+        is_batch_has_course = TrainingRequest.objects.filter(
+          batch_id = form_data.batch.id,
+          course_id = form_data.course.id
+        ).count()
+        if is_batch_has_course:
+          messages.error(self.request, 'This "%s" already taken/requested the selected "%s" course.' % (form_data.batch, form_data.course))
           return self.form_invalid(form)
+        else:
+          form_data.training_planner_id = self.kwargs['tpid']
+          form_data.save()
+
       else:
         sb.update_student_count()
         messages.error(self.request, 'There is no student present in this batch.')

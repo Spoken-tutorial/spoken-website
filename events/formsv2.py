@@ -42,9 +42,9 @@ class UpdateStudentYearBatchForm(forms.ModelForm):
 
 class TrainingRequestForm(forms.ModelForm):
   department = forms.ModelChoiceField(empty_label='---------', queryset=CourseMap.objects.none())
-  course_type = forms.ChoiceField(required=True)
+  #course_type = forms.ChoiceField(required=True)
   
-  #course_type = forms.ChoiceField(choices=[('', '---------'), (0, 'Software Course outside lab hours'), (1, 'Software Course mapped in lab hours'), (2, ' Software Course unmapped in lab hours')])
+  course_type = forms.ChoiceField(choices=[('', '---------'), (0, 'Software Course outside lab hours'), (1, 'Software Course mapped in lab hours'), (2, ' Software Course unmapped in lab hours')])
   course = forms.ModelChoiceField(empty_label='---------', queryset=CourseMap.objects.none())
   batch = forms.ModelChoiceField(empty_label='---------', queryset=StudentBatch.objects.none())
   training_planner = forms.CharField()
@@ -95,11 +95,11 @@ class TrainingRequestForm(forms.ModelForm):
     if kwargs and 'data' in kwargs:
       # Generating course list based on course type
       if 'course_type' in kwargs['data'] and kwargs['data']['course_type'] != '':
-        courses = CourseMap.objects.filter(category=kwargs['data']['course_type'])
+        courses = CourseMap.objects.filter(category=0)
         choices = [('', '---------'),]
         for course in courses:
           choices.append((course.id, course.course_name()))
-        self.fields['course'].queryset = CourseMap.objects.filter(category=kwargs['data']['course_type'])
+        self.fields['course'].queryset = CourseMap.objects.filter(category=0)
         self.fields['course'].choices = choices
         self.fields['course'].initial = kwargs['data']['course']
       # Generating students batch list based on department
