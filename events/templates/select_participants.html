@@ -71,6 +71,7 @@
             <th>Semester State Date</th>
             <th>Software Course</th>
             <th>Department</th>
+            <th>Batch Year</th>
             <th>Participant List Status</th>
             <th>Action</th>
           </tr>
@@ -80,6 +81,7 @@
             <td>{{ training.sem_start_date }} </td>
             <td>{{ training.course.course_name }}</td>
             <td>{{ training.department }}</td>
+            <td>{{training.batch.year}}</td>
             <td>{{ training.attendance_summery }}</td>
             {% if training.department.id == 24 %}
             <td>
@@ -144,6 +146,7 @@
         <th>Semester State Date</th>
         <th>Software Course</th>
         <th>Department</th>
+        <th>Batch Year</th>
         <th>Participant List Status</th>
         <th>Action</th>
         </tr>
@@ -153,6 +156,7 @@
           <td>{{ training.sem_start_date }} </td>
           <td>{{ training.course.course_name }}</td>
           <td>{{ training.department }}</td>
+          <td>{{training.batch.year}}</td>
           <td>{{ training.attendance_summery }}</td>
           <td>
           {% if training.can_mark_attendance %}
