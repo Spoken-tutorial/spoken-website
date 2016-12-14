@@ -363,12 +363,14 @@ def drupal_workshop_download(request):
         if certificate[1]:
             _clean_certificate_certificate(certificate_path, file_name)
             context['error'] = True
+            context['err'] = err
             return render_to_response('drupal_workshop_download.html', context, ci)
     context['message'] = ''
     return render_to_response('drupal_workshop_download.html', context, ci)
 
 def create_drupal_workshop_certificate(certificate_path, name, qrcode, type, paper, workshop, file_name):
     error = False
+    err = None
     try:
         download_file_name = None
         template = 'template_DRP2016Pcertificate'
@@ -399,5 +401,6 @@ def create_drupal_workshop_certificate(certificate_path, name, qrcode, type, pap
             error = True
     except Exception, e:
         error = True
-    return [None, error]
+        err = e
+    return [err, error]
 
