@@ -236,46 +236,13 @@
           step:5,
           timepicker:false,
         });
-        $('.course').html('<option>---------</option>');
-        $('.course').prop('disabled', 'disabled');
-        
-        if(course_type != '' && department != '' && batch != ''){
-          $.ajax({
-            url: "/software-training/get-course-option/",
-            type: "POST",
-            data: {
-              course_type: course_type,
-              department: department,
-              batch: batch,
-              training_planner: $('.training-planner').val()
-            },
-            beforeSend: function() {
-              //$('.ajax-refresh-language').show();
-            },
-            success: function(data) {
-              // loading languages
-              if(data) {
-                  if(data['is_full']){
-                    $(".course_type").val('');
-                    alert('No. of training requests for selected course type exceeded.');
-                  }else{
-                    $('.course').html(data['course_option']);
-                    $('.course').prop('disabled', false);
-                  }
-              }
-              //$('.ajax-refresh-language').hide();
-            }
-          });
-        }
       });
-      
+
       $('.batch').on('change', function() {
         batch = $(this).val();
         department = $('.department').val();
         $('.course_type').val('');
         $('.course_type').prop('disabled', 'disabled');
-        $('.course').html('<option>---------</option>');
-        $('.course').prop('disabled', 'disabled');
         if(department != '' && batch != '') {
           $.ajax({
             url: "/software-training/get-batch-course-status/",
@@ -299,8 +266,38 @@
               //$('.ajax-refresh-language').hide();
             }
           });
-                
         }
+
+        // When chnages the departmnt loading course
+        if(department != '' && batch != ''){
+          $.ajax({
+            url: "/software-training/get-course-option/",
+            type: "POST",
+            data: {
+              course_type: 0, // loading all foss courses
+              department: department,
+              batch: batch,
+              training_planner: $('.training-planner').val()
+            },
+            beforeSend: function() {
+              //$('.ajax-refresh-language').show();
+            },
+            success: function(data) {
+              // loading languages
+              if(data) {
+                  if(data['is_full']){
+                    $(".course_type").val('');
+                    alert('No. of training requests for selected course type exceeded.');
+                  }else{
+                    $('.course').html(data['course_option']);
+                    $('.course').prop('disabled', false);
+                  }
+              }
+              //$('.ajax-refresh-language').hide();
+            }
+          });
+        }
+
       });
       $('.department').on('change', function(){
         department = $(this).val();
@@ -308,8 +305,6 @@
         $('.batch').html('<option>---------</option>');
         $('.course_type').val('');
         $('.course_type').prop('disabled', 'disabled');
-        $('.course').html('<option>---------</option>');
-        $('.course').prop('disabled', 'disabled');
         if(department != ''){
           $.ajax({
             url: "/software-training/get-batch-option/",
