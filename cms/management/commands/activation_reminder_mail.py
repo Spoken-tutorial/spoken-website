@@ -9,6 +9,7 @@ from __future__ import absolute_import, print_function, unicode_literals
 from django.core.management.base import BaseCommand
 from django.db import transaction as tx
 from django.contrib.auth.models import User
+from cms.models import Profile
 from config import *
 
 import time
