@@ -10,7 +10,8 @@ from django.core.management.base import BaseCommand
 from django.db import transaction as tx
 from django.contrib.auth.models import User
 from cms.models import Profile
-from config import *
+from django.conf import settings
+
 
 import time
 from datetime import datetime, date, timedelta
@@ -52,10 +53,10 @@ class Command(BaseCommand):
             to  = [user.email]
             #to = ['kirti@cse.iitb.ac.in']
             email = EmailMultiAlternatives(
-                subject, message, NO_REPLY_MAIL,
+                subject, message, settings.NO_REPLY_EMAIL,
                 to = to,
                 headers = {
-                 "Content-type" : "text/html"
+                 "Content-type" : "text/plain"
                 }
             )
             count = count + 1
@@ -64,16 +65,14 @@ class Command(BaseCommand):
                 sent += 1
                 user.reminder_last_sent = today
                 user.save()
-                print str(user.id),',', str(user.email),',', str(1)
-                if sent%100 == 0:
-                    time.sleep(10)
+                print(str(user.id),',', str(user.email),',', str(1))
             except smtplib.SMTPException:
-                print "Error: Unable to send email"
+                print('Error: Unable to send email')
                 notsent += 1
-                print str(user.id),',', str(user.email),',', str(0)
+                print(str(user.id),',', str(user.email),',', str(0))
             #break
-        print "--------------------------------"
-        print "Date : ",today
-        print "Total sent mails:", sent
-        print "Total not sent mails:", notsent
-        print "--------------------------------"
+        print('--------------------------------')
+        print('Date : ', today)
+        print('Total sent mails: ', sent)
+        print('Total not sent mails: ', notsent)
+        print('--------------------------------')
