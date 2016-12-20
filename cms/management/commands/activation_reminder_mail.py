@@ -22,7 +22,7 @@ class Command(BaseCommand):
 
     @tx.atomic
     def handle(self, *args, **options):
-        users = User.objects.filter(is_active = False, date_joined__gte = (datetime.now() - timedelta(days = 180)), reminder_last_sent__lte = (datetime.now() - timedelta(days = 7)) )
+        users = User.objects.filter(is_active = False, date_joined__gte = (datetime.now() - timedelta(days = 180)))
         today = datetime.now()
         sent = 0
         notsent = 0
@@ -63,8 +63,6 @@ class Command(BaseCommand):
             try:
                 result = email.send(fail_silently=False)
                 sent += 1
-                user.reminder_last_sent = today
-                user.save()
                 print(str(user.id),',', str(user.email),',', str(1))
             except smtplib.SMTPException:
                 print('Error: Unable to send email')
