@@ -39,6 +39,7 @@
                 <th>#</th>
 				<th>First Name</th>
 				<th>Last Name</th>
+				<th>Email Id</th>
 				<th>Score</th>
 			</tr>
 			{% for record in collection %}
@@ -58,6 +59,9 @@
 					        {% else %}
 					            {{ mdluser.lastname }}
 					        {% endif %}
+					    </td>
+					    <td>
+					      {{ mdluser.email }}
 					    </td>
 					    <td>
 					        {% if record.status > 2 %}
