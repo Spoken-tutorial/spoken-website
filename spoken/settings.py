@@ -47,6 +47,8 @@ MANAGERS = (
 
 ADMINISTRATOR_EMAIL = ADMINISTRATOR_EMAIL
 
+NO_REPLY_EMAIL = 'no-reply@spoken-tutorial.org'
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = DEBUG_MODE
 COMPRESS_ENABLED = True
