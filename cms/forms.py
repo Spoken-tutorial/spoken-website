@@ -88,10 +88,15 @@ class ProfileForm(forms.ModelForm):
         model = Profile
         exclude = ['user', 'confirmation_code', 'street', 'location']
 
-    # def clean_picture(self):
+    def clean_picture(self):
     #    if 'picture' in self.cleaned_data and not \
     #        self.cleaned_data['picture']:
     #         raise forms.ValidationError("Profile picture required!")
+        content_types = ['jpg', 'jpeg', 'png']
+        filename = str(self.cleaned_data['picture'])
+        ext = os.path.splitext(filename)[1].lower()
+        if ext[1:] not in content_types:
+            raise forms.ValidationError("Wrong format:Profile picture should be in \"png/jpg\" format only!")
 
     first_name = forms.CharField()
     last_name = forms.CharField()
