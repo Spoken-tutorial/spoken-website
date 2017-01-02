@@ -274,4 +274,9 @@ urlpatterns = [
       LearnDrupalFeedbackCreateView.as_view(template_name='learndrupalfeedback.html'), 
       name='learndrupalfeedback'
     ),
+    url(
+      r'^verify_email/', 
+      'events.viewsv2.verify_email',
+      name='verify_email'
+    ),
 ]

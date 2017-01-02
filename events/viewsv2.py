@@ -3,7 +3,7 @@ from datetime import datetime
 from datetime import timedelta
 
 # Create your views here.
-from django.views.generic import View, ListView
+from django.views.generic import View, ListView, TemplateView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from events.models import *
 from events.filters import TrainingRequestFilter
@@ -2312,3 +2312,41 @@ class LearnDrupalFeedbackCreateView(CreateView):
       print "saved"
       messages.success(self.request, "Thank you for completing this feedback form. We appreciate your input and valuable suggestions.")
       return HttpResponseRedirect(self.success_url)
+      
+  
+def verify_email(request):
+  template_name = 'verify_email.html'
+  context = {}
+  ci = RequestContext(request)
+  if request.method == 'POST':
+    email = request.POST.get('email').strip()
+    try:
+      user = User.objects.get(email = email)
+    except ObjectDoesNotExist:
+      context["notregistered"] = 1
+      return render_to_response(template_name, context, ci)
+    try:
+      student = Student.objects.get(user_id = user.id)
+      if student and student.verified:
+        messages.success(request, 'User is already verified')
+        return HttpResponseRedirect('/home')
+      if student and not student.verified and validate_email(student.user.email):
+        print "validating"
+        student.verified = True
+        student.user.is_active = True
+        student.user.save()
+        student.error = False
+        student.save()
+        messages.success(request, 'Student Email Id verified and account is activated.')
+    except ObjectDoesNotExist:
+      #not a student so only user
+      if not user.is_active :
+        if validate_email(user.email):
+          user.is_active = 1
+          user.save()
+          messages.success(request, 'User account activated successfully')
+          return HttpResponseRedirect('/home')
+      else:
+       messages.success(request, 'User is already activated')
+       return HttpResponseRedirect('/home')
+  return render_to_response(template_name, context, ci)
