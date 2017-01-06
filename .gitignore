@@ -1,6 +1,9 @@
 *~
 *.swp
 *.pyc
+*.log
+*.pid
+celerybeat-schedule
 config.py
 cron/config.py
 cron/youtube-oauth.storage
