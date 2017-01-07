@@ -966,7 +966,28 @@ def upload_component(request, trid, component):
                         comp_log.save()
                         add_domainreviewer_notification(tr_rec, comp_title, component.title() + ' waiting for domain review')
                         response_msg = 'Assignment file uploaded successfully!'
+                    elif component == 'additional_material':
+                        file_name, file_extension = os.path.splitext(request.FILES['comp'].name)
+                        file_name =  tr_rec.tutorial_detail.tutorial.replace(' ', '-') + '-Additionalmaterial' + file_extension
+                        file_path = settings.MEDIA_ROOT + 'videos/' + str(tr_rec.tutorial_detail.foss_id) + '/' + str(tr_rec.tutorial_detail.id) + '/resources/' + file_name
+                        fout = open(file_path, 'wb+')
+                        f = request.FILES['comp']
+                        # Iterate through the chunks.
+                        for chunk in f.chunks():
+                            fout.write(chunk)
+                        fout.close()
+                        comp_log.status = tr_rec.common_content.assignment_status
+                        tr_rec.common_content.additional_material = file_name
+                        tr_rec.common_content.additional_material_status = 2
+                        tr_rec.common_content.additional_material_user = request.user
+                        tr_rec.common_content.save()
+                        comp_log.save()
+                        add_domainreviewer_notification(
+                            tr_rec, comp_title,
+                            '{} waiting for domain review'.format(component.replace('_', ' ').title()))
+                        response_msg = 'Additional material uploaded successfully!'
                 except Exception, e:
+                    print e
                     error_msg = 'Something went wrong, please try again later.'
                 form = ComponentForm(component)
                 if response_msg:
@@ -976,7 +997,7 @@ def upload_component(request, trid, component):
                 context = {
                     'form': form,
                     'tr': tr_rec,
-                    'title': component,
+                    'title': component.replace('_', ' '),
                 }
                 context.update(csrf(request))
                 return render(request, 'creation/templates/upload_component.html', context)
@@ -984,7 +1005,7 @@ def upload_component(request, trid, component):
                 context = {
                     'form': form,
                     'tr': tr_rec,
-                    'title': component,
+                    'title': component.replace('_', ' '),
                 }
                 context.update(csrf(request))
                 return render(request, 'creation/templates/upload_component.html', context)
@@ -993,7 +1014,7 @@ def upload_component(request, trid, component):
     context = {
         'form': form,
         'tr': tr_rec,
-        'title': component,
+        'title': component.replace('_', ' '),
     }
     context.update(csrf(request))
     return render(request, 'creation/templates/upload_component.html', context)
@@ -1086,9 +1107,10 @@ def tutorials_contributed(request):
                 8: SortableHeader('Video', False, '', 'col-center'),
                 9: SortableHeader('Codefiles', False, '', 'col-center'),
                 10: SortableHeader('Assignment', False, '', 'col-center'),
-                11: SortableHeader('Prerequisite', False, '', 'col-center'),
-                12: SortableHeader('Keywords', False, '', 'col-center'),
-                13: SortableHeader('Status', False)
+                11: SortableHeader('Additional material', False, '', 'col-center'),
+                12: SortableHeader('Prerequisite', False, '', 'col-center'),
+                13: SortableHeader('Keywords', False, '', 'col-center'),
+                14: SortableHeader('Status', False)
             }
             tmp_recs = get_sorted_list(request, tmp_recs, header, raw_get_data)
             ordering = get_field_index(raw_get_data)
@@ -1131,9 +1153,10 @@ def tutorials_pending(request):
                 8: SortableHeader('Video', False, '', 'col-center'),
                 9: SortableHeader('Codefiles', False, '', 'col-center'),
                 10: SortableHeader('Assignment', False, '', 'col-center'),
-                11: SortableHeader('Prerequisite', False, '', 'col-center'),
-                12: SortableHeader('Keywords', False, '', 'col-center'),
-                13: SortableHeader('Status', False)
+                11: SortableHeader('Additional material', False, '', 'col-center'),
+                12: SortableHeader('Prerequisite', False, '', 'col-center'),
+                13: SortableHeader('Keywords', False, '', 'col-center'),
+                14: SortableHeader('Status', False)
             }
             tmp_recs = get_sorted_list(request, tmp_recs, header, raw_get_data)
             ordering = get_field_index(raw_get_data)
@@ -1259,10 +1282,11 @@ def admin_reviewed_video(request):
             8: SortableHeader('Video', False, '', 'col-center'),
             9: SortableHeader('Codefiles', False, '', 'col-center'),
             10: SortableHeader('Assignment', False, '', 'col-center'),
-            11: SortableHeader('Prerequisite', False, '', 'col-center'),
-            12: SortableHeader('Keywords', False, '', 'col-center'),
-            13: SortableHeader('Status', False),
-            14: SortableHeader('created', True, 'Date')
+            11: SortableHeader('Additional material', False, '', 'col-center'),
+            12: SortableHeader('Prerequisite', False, '', 'col-center'),
+            13: SortableHeader('Keywords', False, '', 'col-center'),
+            14: SortableHeader('Status', False),
+            15: SortableHeader('created', True, 'Date')
         }
         collection = TutorialResource.objects.filter(id__in = AdminReviewLog.objects.filter(user = request.user).values_list('tutorial_resource_id').distinct())
         raw_get_data = request.GET.get('o', None)
@@ -1313,9 +1337,10 @@ def tutorials_needimprovement(request):
             8: SortableHeader('Video', False, '', 'col-center'),
             9: SortableHeader('Codefiles', False, '', 'col-center'),
             10: SortableHeader('Assignment', False, '', 'col-center'),
-            11: SortableHeader('Prerequisite', False, '', 'col-center'),
-            12: SortableHeader('Keywords', False, '', 'col-center'),
-            13: SortableHeader('Status', False)
+            11: SortableHeader('Additional material', False, '', 'col-center'),
+            12: SortableHeader('Prerequisite', False, '', 'col-center'),
+            13: SortableHeader('Keywords', False, '', 'col-center'),
+            14: SortableHeader('Status', False)
         }
         tmp_recs = get_sorted_list(request, tmp_recs, header, raw_get_data)
         ordering = get_field_index(raw_get_data)
@@ -1342,7 +1367,9 @@ def domain_review_index(request):
         for tr_rec in tr_recs:
             flag = 1
             if tr_rec.language.name == 'English':
-                if tr_rec.common_content.slide_status != 2 and tr_rec.common_content.code_status != 2 and tr_rec.common_content.assignment_status != 2 and tr_rec.common_content.prerequisite_status != 2 and tr_rec.common_content.keyword_status != 2:
+                if tr_rec.common_content.slide_status != 2 and tr_rec.common_content.code_status != 2 and \
+                   tr_rec.common_content.assignment_status != 2 and tr_rec.common_content.prerequisite_status != 2 and \
+                   tr_rec.common_content.keyword_status != 2 and tr_rec.common_content.additional_material_status != 2:
                     flag = 0
             else:
                 flag = 0
@@ -1364,9 +1391,10 @@ def domain_review_index(request):
             8: SortableHeader('Video', False, '', 'col-center'),
             9: SortableHeader('Codefiles', False, '', 'col-center'),
             10: SortableHeader('Assignment', False, '', 'col-center'),
-            11: SortableHeader('Prerequisite', False, '', 'col-center'),
-            12: SortableHeader('Keywords', False, '', 'col-center'),
-            13: SortableHeader('<span title="" data-original-title="" class="fa fa-cogs fa-2"></span>', False, '', 'col-center')
+            11: SortableHeader('Additional material', False, '', 'col-center'),
+            12: SortableHeader('Prerequisite', False, '', 'col-center'),
+            13: SortableHeader('Keywords', False, '', 'col-center'),
+            14: SortableHeader('<span title="" data-original-title="" class="fa fa-cogs fa-2"></span>', False, '', 'col-center')
         }
         collection = TutorialResource.objects.filter(id__in = tmp_ids)
         collection = get_sorted_list(request, collection, header, raw_get_data)
@@ -1440,7 +1468,7 @@ def domain_review_component(request, trid, component):
                     if execFlag:
                         DomainReviewLog.objects.create(status = 3, component = component, user = request.user, tutorial_resource = tr)
                         add_qualityreviewer_notification(tr, comp_title, component.title() + ' waiting for Quality review')
-                        add_contributor_notification(tr, comp_title, component.title() + ' accepted by Domain reviewer')
+                        add_contributor_notification(tr, comp_title, component.replace('_', ' ').title() + ' accepted by Domain reviewer')
                         response_msg = 'Review status updated successfully!'
                     else:
                         error_msg = 'Something went wrong, please try again later.'
@@ -1497,10 +1525,11 @@ def domain_reviewed_tutorials(request):
             8: SortableHeader('Video', False, '', 'col-center'),
             9: SortableHeader('Codefiles', False, '', 'col-center'),
             10: SortableHeader('Assignment', False, '', 'col-center'),
-            11: SortableHeader('Prerequisite', False, '', 'col-center'),
-            12: SortableHeader('Keywords', False, '', 'col-center'),
-            13: SortableHeader('Status', False, '', 'col-center'),
-            14: SortableHeader('created', True, 'Date')
+            11: SortableHeader('Additional material', False, '', 'col-center'),
+            12: SortableHeader('Prerequisite', False, '', 'col-center'),
+            13: SortableHeader('Keywords', False, '', 'col-center'),
+            14: SortableHeader('Status', False, '', 'col-center'),
+            15: SortableHeader('created', True, 'Date')
         }
         collection = TutorialResource.objects.filter(id__in = DomainReviewLog.objects.filter(user = request.user).values_list('tutorial_resource_id').distinct())
         collection = get_sorted_list(request, collection, header, raw_get_data)
@@ -1617,6 +1646,20 @@ def accept_all(request, review, trid):
             add_contributor_notification(tr, comp_title, comp_message)
             flag = 1
 
+        if tr.common_content.additional_material_status > 0 and tr.common_content.additional_material_status == current_status:
+            tr.common_content.additional_material_status = status_flag[review]
+            if review == 'quality':
+                QualityReviewLog.objects.create(status = status_flag[review], component = 'additional_material',
+                                                user = request.user, tutorial_resource = tr)
+                comp_message = 'Additional material accepted by Quality reviewer'
+            else:
+                DomainReviewLog.objects.create(status = status_flag[review], component = 'additional_material',
+                                               user = request.user, tutorial_resource = tr)
+                add_qualityreviewer_notification(tr, comp_title, 'Additional material waiting for Quality review')
+                comp_message = 'Additional material accepted by Domain reviewer'
+            add_contributor_notification(tr, comp_title, comp_message)
+            flag = 1
+
         if tr.common_content.prerequisite_status > 0 and tr.common_content.prerequisite_status == current_status:
             tr.common_content.prerequisite_status = status_flag[review]
             if review == 'quality':
@@ -1655,7 +1698,7 @@ def quality_review_index(request):
     qr_roles =  QualityReviewerRole.objects.filter(user_id = request.user.id, status = 1)
     for rec in qr_roles:
         if rec.language.name == 'English':
-            tr_recs = TutorialResource.objects.filter(Q(outline_status = 3) | Q(script_status = 3) | Q(video_status = 3) | Q(common_content__slide_status = 3) | Q(common_content__code_status = 3) | Q(common_content__assignment_status = 3) | Q(common_content__keyword_status = 3) | Q(common_content__prerequisite_status = 3), Q(tutorial_detail__foss_id = rec.foss_category_id) & Q(language_id = rec.language_id) & Q(status = 0))
+            tr_recs = TutorialResource.objects.filter(Q(outline_status = 3) | Q(script_status = 3) | Q(video_status = 3) | Q(common_content__slide_status = 3) | Q(common_content__code_status = 3) | Q(common_content__assignment_status = 3) | Q(common_content__keyword_status = 3) | Q(common_content__prerequisite_status = 3) | Q(common_content__additional_material_status = 3), Q(tutorial_detail__foss_id = rec.foss_category_id) & Q(language_id = rec.language_id) & Q(status = 0))
         else:
             tr_recs = TutorialResource.objects.filter(Q(outline_status=3)|Q(script_status=3)|Q(video_status=3), Q(tutorial_detail__foss_id = rec.foss_category_id) & Q(language_id = rec.language_id) & Q(status = 0)).order_by('updated')
 
@@ -1678,9 +1721,10 @@ def quality_review_index(request):
             8: SortableHeader('Video', False, '', 'col-center'),
             9: SortableHeader('Codefiles', False, '', 'col-center'),
             10: SortableHeader('Assignment', False, '', 'col-center'),
-            11: SortableHeader('Prerequisite', False, '', 'col-center'),
-            12: SortableHeader('Keywords', False, '', 'col-center'),
-            13: SortableHeader('<span title="" data-original-title="" class="fa fa-cogs fa-2"></span>', False, '', 'col-center')
+            11: SortableHeader('Additional material', False, '', 'col-center'),
+            12: SortableHeader('Prerequisite', False, '', 'col-center'),
+            13: SortableHeader('Keywords', False, '', 'col-center'),
+            14: SortableHeader('<span title="" data-original-title="" class="fa fa-cogs fa-2"></span>', False, '', 'col-center')
         }
         collection = TutorialResource.objects.filter(id__in = tmp_ids)
         collection = get_sorted_list(request, collection, header, raw_get_data)
@@ -1727,9 +1771,10 @@ def publish_tutorial_index(request):
             8: SortableHeader('Video', False, '', 'col-center'),
             9: SortableHeader('Codefiles', False, '', 'col-center'),
             10: SortableHeader('Assignment', False, '', 'col-center'),
-            11: SortableHeader('Prerequisite', False, '', 'col-center'),
-            12: SortableHeader('Keywords', False, '', 'col-center'),
-            13: SortableHeader('<span title="" data-original-title="" class="fa fa-cogs fa-2"></span>', False, '', 'col-center')
+            11: SortableHeader('Additional material', False, '', 'col-center'),
+            12: SortableHeader('Prerequisite', False, '', 'col-center'),
+            13: SortableHeader('Keywords', False, '', 'col-center'),
+            14: SortableHeader('<span title="" data-original-title="" class="fa fa-cogs fa-2"></span>', False, '', 'col-center')
         }
         collection = TutorialResource.objects.filter(id__in = tmp_ids)
         collection = get_sorted_list(request, collection, header, raw_get_data)
@@ -1776,9 +1821,10 @@ def public_review_tutorial_index(request):
                 8: SortableHeader('Video', False, '', 'col-center'),
                 9: SortableHeader('Codefiles', False, '', 'col-center'),
                 10: SortableHeader('Assignment', False, '', 'col-center'),
-                11: SortableHeader('Prerequisite', False, '', 'col-center'),
-                12: SortableHeader('Keywords', False, '', 'col-center'),
-                13: SortableHeader('<span title="" data-original-title="" class="fa fa-cogs fa-2"></span>', False, '', 'col-center')
+                11: SortableHeader('Additional material', False, '', 'col-center'),
+                12: SortableHeader('Prerequisite', False, '', 'col-center'),
+                13: SortableHeader('Keywords', False, '', 'col-center'),
+                14: SortableHeader('<span title="" data-original-title="" class="fa fa-cogs fa-2"></span>', False, '', 'col-center')
             }
             collection = TutorialResource.objects.filter(id__in = tmp_ids)
             collection = get_sorted_list(request, collection, header, raw_get_data)
@@ -1822,9 +1868,10 @@ def public_review_list(request):
                 8: SortableHeader('Video', False, '', 'col-center'),
                 9: SortableHeader('Codefiles', False, '', 'col-center'),
                 10: SortableHeader('Assignment', False, '', 'col-center'),
-                11: SortableHeader('Prerequisite', False, '', 'col-center'),
-                12: SortableHeader('Keywords', False, '', 'col-center'),
-                13: SortableHeader('<span title="" data-original-title="" class="fa fa-cogs fa-2"></span>', False, '', 'col-center', 'colspan=2')
+                11: SortableHeader('Additional material', False, '', 'col-center'),
+                12: SortableHeader('Prerequisite', False, '', 'col-center'),
+                13: SortableHeader('Keywords', False, '', 'col-center'),
+                14: SortableHeader('<span title="" data-original-title="" class="fa fa-cogs fa-2"></span>', False, '', 'col-center', 'colspan=2')
             }
             collection = TutorialResource.objects.filter(id__in = tmp_ids)
             collection = get_sorted_list(request, collection, header, raw_get_data)
@@ -2022,6 +2069,7 @@ def quality_review_component(request, trid, component):
         'form': form,
         'tr': tr,
         'component': component,
+        'component_title': component.replace('_', ' ').title(),
     }
 
     return render(request, 'creation/templates/quality_review_component.html', context)
@@ -2060,7 +2108,7 @@ def publish_tutorial(request, trid):
         raise PermissionDenied()
     flag = 0
     if tr_rec.language.name == 'English':
-        if tr_rec.common_content.slide_status == 4 and (tr_rec.common_content.code_status == 4 or tr_rec.common_content.code_status == 6) and (tr_rec.common_content.assignment_status == 4 or tr_rec.common_content.assignment_status == 6) and tr_rec.common_content.keyword_status == 4 and (tr_rec.common_content.prerequisite_status == 4 or tr_rec.common_content.prerequisite_status == 6):
+        if tr_rec.common_content.slide_status == 4 and (tr_rec.common_content.code_status == 4 or tr_rec.common_content.code_status == 6) and (tr_rec.common_content.assignment_status == 4 or tr_rec.common_content.assignment_status == 6) and tr_rec.common_content.keyword_status == 4 and (tr_rec.common_content.prerequisite_status == 4 or tr_rec.common_content.prerequisite_status == 6) and (tr_rec.common_content.additional_material_status == 4 or tr_rec.common_content.additional_material_status == 6):
             flag = 1
     else:
         flag = 1
@@ -2092,10 +2140,11 @@ def quality_reviewed_tutorials(request):
             8: SortableHeader('Video', False, '', 'col-center'),
             9: SortableHeader('Codefiles', False, '', 'col-center'),
             10: SortableHeader('Assignment', False, '', 'col-center'),
-            11: SortableHeader('Prerequisite', False, '', 'col-center'),
-            12: SortableHeader('Keywords', False, '', 'col-center'),
-            13: SortableHeader('Status', False, '', 'col-center'),
-            14: SortableHeader('publishtutoriallog__created', True, 'Date')
+            11: SortableHeader('Additional material', False, '', 'col-center'),
+            12: SortableHeader('Prerequisite', False, '', 'col-center'),
+            13: SortableHeader('Keywords', False, '', 'col-center'),
+            14: SortableHeader('Status', False, '', 'col-center'),
+            15: SortableHeader('publishtutoriallog__created', True, 'Date')
         }
         collection = TutorialResource.objects.filter(id__in = QualityReviewLog.objects.filter(user = request.user).values_list('tutorial_resource_id').distinct())
         collection = get_sorted_list(request, collection, header, raw_get_data)

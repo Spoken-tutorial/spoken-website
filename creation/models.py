@@ -99,6 +99,10 @@ class TutorialCommonContent(models.Model):
     prerequisite_user = models.ForeignKey(User, related_name='prerequisite')
     prerequisite_status = models.PositiveSmallIntegerField(default = 0)
 
+    additional_material = models.CharField(max_length = 255, blank=True, null=True)
+    additional_material_user = models.ForeignKey(User, related_name='additional_material', null=True, default=None)
+    additional_material_status = models.PositiveSmallIntegerField(default = 0)
+
     keyword = models.TextField()
     keyword_user = models.ForeignKey(User, related_name='keywords')
     keyword_status = models.PositiveSmallIntegerField(default = 0)

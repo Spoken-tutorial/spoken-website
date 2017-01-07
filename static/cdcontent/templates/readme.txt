@@ -44,3 +44,4 @@ For Chrome web browser on Linux OS
 7. Hover on the "CC" icon to see the list of languages.
 8. Choose the language as per your choice.
 9. Steps 2 and 3 need to be done only for the first time.  Chrome will remember this setup.
+
