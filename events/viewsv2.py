@@ -45,7 +45,7 @@ from StringIO import StringIO
 
 # import helpers
 from events.views import is_organiser, is_invigilator, is_resource_person, is_administrator
-
+from events.helpers import get_prev_semester_duration
 class JSONResponseMixin(object):
   """
   A mixin that can be used to render a JSON response.
@@ -566,8 +566,7 @@ class TrainingAttendanceListView(ListView):
   
   def dispatch(self, *args, **kwargs):
     self.training_request = TrainingRequest.objects.get(pk=kwargs['tid'])
-    print self.training_request.department
-    if self.training_request.status == 1:
+    if self.training_request.status == 1 and not self.training_request.participants == 0:
       self.queryset = self.training_request.trainingattend_set.all()
     else:
       self.queryset = StudentMaster.objects.filter(batch_id=self.training_request.batch_id,student__verified = 1, moved=False)
@@ -582,8 +581,6 @@ class TrainingAttendanceListView(ListView):
           foss_id = self.training_request.course.foss_id
         ).values_list('language_id')
       )
-    #language
-    #for lang in languages:
     context['languages'] = languages
     return context
 
@@ -610,7 +607,10 @@ class TrainingAttendanceListView(ListView):
     else:
       TrainingAttend.objects.filter(training_id =training_id).delete()
     self.training_request.update_participants_count()
-    return HttpResponseRedirect('/software-training/training-planner')
+    if self.training_request.status == 1:
+      return HttpResponseRedirect('/software-training/training-request/rp/pendingattendance')
+    else:
+      return HttpResponseRedirect('/software-training/training-planner')
 
 class TrainingCertificateListView(ListView):
   queryset = StudentMaster.objects.none()
@@ -1088,14 +1088,28 @@ class TrainingRequestListView(ListView):
   raw_get_data = None
   role = None
   status = None
-
+  now= datetime.now()
+  year = now.year
+  month =now.month
+  
+  current_sem_type_even = 0 #odd
+  if month < 6:
+    current_sem_type_even = 1 #even
+  
+  prev_sem_type = 'even'
+  prev_sem_year = year
+  if current_sem_type_even:
+    prev_sem_type = 'odd'
+    prev_sem_year = (year - 1)
+  prev_sem_start_date, prev_sem_end_date = get_prev_semester_duration(prev_sem_type, prev_sem_year)
+  
   @method_decorator(group_required("Resource Person","Administrator"))
   def dispatch(self, *args, **kwargs):
     if (not 'role' in kwargs) or (not 'status' in kwargs):
       raise PermissionDenied()
     self.role = kwargs['role']
     self.status = kwargs['status']
-    status_list = {'pending': 0, 'completed': 1, 'markcomplete':2}
+    status_list = {'pending': 0, 'completed': 1, 'markcomplete':2, 'pendingattendance':3}
     roles = ['rp', 'em']
     self.user = self.request.user
     if self.role in roles and self.status in status_list:
@@ -1133,6 +1147,16 @@ class TrainingRequestListView(ListView):
             ).values_list('id'), 
             status=2
           ).order_by('-updated')
+      elif self.status == 'pendingattendance':
+        self.queryset = TrainingRequest.objects.filter(
+          training_planner__academic_id__in=AcademicCenter.objects.filter(
+            state__in = State.objects.filter(
+              resourceperson__user_id=self.user, 
+              resourceperson__status=1,
+            )
+          ).values_list('id'), 
+          status = 1, participants = 0, training_planner__semester__name = self.prev_sem_type , sem_start_date__gte = self.prev_sem_start_date
+        )
 
       self.header = {
         1: SortableHeader('#', False),
@@ -1180,6 +1204,8 @@ class TrainingRequestListView(ListView):
         self.queryset = TrainingRequestFilter(self.request.GET, queryset=self.queryset, user=self.user, rp_ongoing=True)
       elif self.status == 'markcomplete':
         self.queryset = TrainingRequestFilter(self.request.GET, queryset=self.queryset, user=self.user, rp_markcomplete=True)
+      elif self.status == 'pendingattendance':
+        self.queryset = TrainingRequestFilter(self.request.GET, queryset=self.queryset, user=self.user, rp_pendingattendance=True)  
     else:
       raise PermissionDenied()
     return super(TrainingRequestListView, self).dispatch(*args, **kwargs)

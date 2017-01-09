@@ -87,6 +87,7 @@
     <li {% if status == 'pending' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/training-request/{{role}}/pending/">Pending / Ongoing</a></li>
     <li {% if status == 'completed' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/training-request/{{role}}/completed/">Completed</a></li>
     <li {% if status == 'markcomplete' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/training-request/{{role}}/markcomplete/">Mark as complete</a></li>
+    <li {% if status == 'pendingattendance' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/training-request/{{role}}/pendingattendance/">Pending Attendance</a></li>
   </ul>
   <!-- Tab panes -->
   <div class="tab-content">
@@ -107,24 +108,22 @@
             <td>{{ record.sem_start_date }}</td>
             <td>
               {% with attendance_count=record.get_partipants_from_attendance %}
-                {% if record.batch %}
-                  {% if attendance_count %}
-                    <a href="{% url 'statistics:statistics_training_participants' record.id %}" target="_blank">
-                    {% if user|is_administrator and status == 'markcomplete'%}
-                      <a href="{% url 'events:mark_complete' record.id %}">Mark Complete</a><br>
-                      -------------
-                      <br>
-                      <a href="{% url 'statistics:statistics_training_participants' record.id %}" target="_blank">
-                    {% endif %}
-                  {% endif %}
+              {% if record.batch %}
+                {% if user|is_administrator and status == 'markcomplete'%}
+                  <a href="{% url 'events:mark_complete' record.id %}">Mark Complete</a><br>
+                  -------------<br>
+                {% endif %}
+                {% if status == 'pendingattendance'%}
+                  <a href="{% url 'events:previous_training_attendance' record.id %}">
+                {% else %}
+                  <a href="{% url 'statistics:statistics_training_participants' record.id %}" target="_blank">
+                {% endif %}
                   {% if attendance_count == record.participants %}{{ attendance_count }}{% else %}{{ record.update_participants_count }}{% endif %}
                   {% if record.get_partipants_from_batch %}/{{record.get_partipants_from_batch }}{% endif %}
-                  {% if attendance_count %}
-                    </a>
-                  {% endif %}
-                {% else %}
-                  {{ record.participants }}
-                {% endif %}
+                </a>
+                
+                
+              {% endif %}
               {% endwith %}
             </td>
             <!-- actions based on roles -->

@@ -276,8 +276,14 @@ urlpatterns = [
       name='learndrupalfeedback'
     ),
     url(
+      r'^(?P<tid>\d+)/oldattendance', 
+      TrainingAttendanceListView.as_view(template_name=\
+        "mark_prev_attendance.html"), 
+      name="previous_training_attendance"
+    ),
+    url(
       r'^verify/', 
       'events.viewsv2.verify_email',
       name='verify_email'
-    ),
+      ),
 ]
