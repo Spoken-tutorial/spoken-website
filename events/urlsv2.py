@@ -4,6 +4,7 @@ from events.viewsv2 import *
 from events.decorators import *
 from events.formsv2 import *
 from events.urls import *
+
 urlpatterns = [
     url(
       r'^training-planner/', 
@@ -275,7 +276,7 @@ urlpatterns = [
       name='learndrupalfeedback'
     ),
     url(
-      r'^verify_email/', 
+      r'^verify/', 
       'events.viewsv2.verify_email',
       name='verify_email'
     ),

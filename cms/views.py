@@ -111,6 +111,61 @@ def confirm(request, confirmation_code, username):
     except Exception, e:
         messages.success(request, "Your account not activated!. Please try again!")
         return HttpResponseRedirect('/')
+        
+def send_student_confirmation(user):
+    #p = Profile.objects.get(user=user)
+    s= Student.objects.get(user=user)
+    #user.email = "k.sanmugam2@gmail.com"
+    # Sending email when an answer is posted
+    subject = 'Account Active Notification'
+    message = """Dear {0},
+
+Thank you for registering at {1}. You may activate your account by clicking on this link or copying and pasting it in your browser
+{2}
+
+Regards,
+Admin
+Spoken Tutorials
+IIT Bombay.
+    """.format(
+        user.username,
+        "http://spoken-tutorial.org",
+        "http://spoken-tutorial.org/accounts/confirm_student/" + str(s.id) + "/" + user.username
+    )
+
+    email = EmailMultiAlternatives(
+        subject, message, 'no-reply@spoken-tutorial.org',
+        to = [user.email], bcc = [], cc = [],
+        headers={'Reply-To': 'no-reply@spoken-tutorial.org', "Content-type":"text/html;charset=iso-8859-1"}
+    )
+
+    #email.attach_alternative(message, "text/html")
+    try:
+        result = email.send(fail_silently=False)
+    except:
+        pass
+
+def confirm_student(request, student_id, username):
+    try:
+        user = User.objects.get(username=username)
+        student = Student.objects.get(user=user)
+        #if profile.confirmation_code == confirmation_code and user.date_joined > (timezone.now()-timezone.timedelta(days=1)):
+        if student.id == student_id:
+            student.verified = True
+            student.user.is_active = True
+            student.user.save()
+            student.error = False
+            student.save()
+            user.backend='django.contrib.auth.backends.ModelBackend' 
+            login(request,user)
+            messages.success(request, "Your account has been activated!. Please update your profile to complete your registration")
+            return HttpResponseRedirect('/accounts/login/')
+        else:
+            messages.success(request, "Something went wrong!. Please try again!")
+            return HttpResponseRedirect('/')
+    except Exception, e:
+        messages.success(request, "Your account not activated!. Please try again!")
+        return HttpResponseRedirect('/')
 
 def account_login(request):
     user = request.user

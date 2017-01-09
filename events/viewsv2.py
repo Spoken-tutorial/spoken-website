@@ -13,7 +13,7 @@ from django.utils.decorators import method_decorator
 from events.decorators import group_required
 from events.forms import StudentBatchForm, TrainingRequestForm, \
     TrainingRequestEditForm, CourseMapForm, SingleTrainingForm, \
-    OrganiserFeedbackForm,STWorkshopFeedbackForm,STWorkshopFeedbackFormPre,STWorkshopFeedbackFormPost,LearnDrupalFeedback, LatexWorkshopFileUploadForm, UserForm, \
+    OrganiserFeedbackForm,STWorkshopFeedbackForm,STWorkshopFeedbackFormPre,STWorkshopFeedbackFormPost,LearnDrupalFeedback, VerifyForm, LatexWorkshopFileUploadForm, UserForm, \
     SingleTrainingEditForm
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, render_to_response
@@ -31,6 +31,7 @@ from django.contrib import messages
 from django.template import RequestContext, loader
 from mdldjango.get_or_create_participant import get_or_create_participant
 from django.contrib.auth.decorators import login_required
+from cms.views import send_registration_confirmation, confirm, send_student_confirmation, confirm_student
 
 #pdf generate
 from reportlab.pdfgen import canvas
@@ -2317,36 +2318,38 @@ class LearnDrupalFeedbackCreateView(CreateView):
 def verify_email(request):
   template_name = 'verify_email.html'
   context = {}
-  ci = RequestContext(request)
   if request.method == 'POST':
-    email = request.POST.get('email').strip()
-    try:
-      user = User.objects.get(email = email)
-    except ObjectDoesNotExist:
-      context["notregistered"] = 1
-      return render_to_response(template_name, context, ci)
-    try:
-      student = Student.objects.get(user_id = user.id)
-      if student and student.verified:
-        messages.success(request, 'User is already verified')
-        return HttpResponseRedirect('/home')
-      if student and not student.verified and validate_email(student.user.email):
-        print "validating"
-        student.verified = True
-        student.user.is_active = True
-        student.user.save()
-        student.error = False
-        student.save()
-        messages.success(request, 'Student Email Id verified and account is activated.')
-    except ObjectDoesNotExist:
-      #not a student so only user
-      if not user.is_active :
-        if validate_email(user.email):
-          user.is_active = 1
-          user.save()
-          messages.success(request, 'User account activated successfully')
+    form = VerifyForm(request.POST)
+    #email = request.POST.get('email').strip()
+    if form.is_valid():
+      email = form.cleaned_data['email']
+      try:
+        user = User.objects.get(email = email)
+      except ObjectDoesNotExist:
+        context["notregistered"] = 1
+        return render(request, template_name, context)
+      try:
+        student = Student.objects.get(user_id = user.id)
+        if student and student.verified:
+          messages.success(request, 'User is already verified')
+          return HttpResponseRedirect('/login')
+        if student and not student.verified:
+          print "validating"
+          #send email with username if email sent then
+          send_student_confirmation(user)
+          messages.success(request, 'Please confirm your verification by clicking on the activation link which has been sent to your registered email id.')
           return HttpResponseRedirect('/home')
-      else:
-       messages.success(request, 'User is already activated')
-       return HttpResponseRedirect('/home')
-  return render_to_response(template_name, context, ci)
+          #send email with username
+      except ObjectDoesNotExist:
+        #not a student so only user
+        if not user.is_active :
+          #send user activation link mail
+          send_registration_confirmation(user)
+          messages.success(request, 'Please confirm your verification by clicking on the activation link which has been sent to your registered email id.')
+          return HttpResponseRedirect('/home')
+        else:
+         messages.success(request, 'User is already activated')
+         return HttpResponseRedirect('/login')
+    else:
+      messages.error(request, 'Invalid Email ID')
+  return render(request, template_name, context)
