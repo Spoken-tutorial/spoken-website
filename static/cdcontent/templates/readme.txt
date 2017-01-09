@@ -37,7 +37,7 @@ For Chrome web browser on Linux OS
 
 1. If you have opened Chrome already, please close all the Chrome windows.
 2. Open terminal.
-3. Type "google-­chrome   ­­--allow­-file-­access-­from-­files" and press Enter key.
+3.Type "google-­chrome --allow­-file-­access-­from-­files" and press Enter key. (Please type the command manually, instead of copying)
 4. Now open the "index.html" file in Chrome browser.
 5. Go to the tutorial and play it.
 6. In the player, locate the "CC" icon on the bottom right side of the VCR control bar.
