@@ -274,4 +274,10 @@ urlpatterns = [
       LearnDrupalFeedbackCreateView.as_view(template_name='learndrupalfeedback.html'), 
       name='learndrupalfeedback'
     ),
+    url(
+      r'^(?P<tid>\d+)/oldattendance', 
+      TrainingAttendanceListView.as_view(template_name=\
+        "mark_prev_attendance.html"), 
+      name="previous_training_attendance"
+    ),
 ]
