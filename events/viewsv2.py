@@ -31,7 +31,7 @@ from django.contrib import messages
 from django.template import RequestContext, loader
 from mdldjango.get_or_create_participant import get_or_create_participant
 from django.contrib.auth.decorators import login_required
-from cms.views import send_registration_confirmation, confirm, send_student_confirmation, confirm_student
+from cms.views import send_registration_confirmation, confirm
 
 #pdf generate
 from reportlab.pdfgen import canvas
@@ -2346,7 +2346,6 @@ def verify_email(request):
   context = {}
   if request.method == 'POST':
     form = VerifyForm(request.POST)
-    #email = request.POST.get('email').strip()
     if form.is_valid():
       email = form.cleaned_data['email']
       try:
@@ -2360,12 +2359,17 @@ def verify_email(request):
           messages.success(request, 'User is already verified')
           return HttpResponseRedirect('/login')
         if student and not student.verified:
-          print "validating"
-          #send email with username if email sent then
-          send_student_confirmation(user)
-          messages.success(request, 'Please confirm your verification by clicking on the activation link which has been sent to your registered email id.')
+          #send email to students 
+          sb = StudentBatch.objects.get(id__in = StudentMaster.objects.filter(student=student).values_list('batch_id'))
+          mail_status = get_or_create_participant(sb.organiser, user.first_name, user.last_name, student.gender, user.email, 0)
+          if mail_status:
+            student.verified = True
+            student.user.is_active = True
+            student.user.save()
+            student.error = False
+            student.save()
+            messages.success(request, 'Please check your login details has been sent to your registered email id')
           return HttpResponseRedirect('/home')
-          #send email with username
       except ObjectDoesNotExist:
         #not a student so only user
         if not user.is_active :

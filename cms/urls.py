@@ -10,5 +10,4 @@ urlpatterns = patterns('',
 	url(r"^accounts/profile/(?P<username>[\w. @-]+)/$", 'cms.views.account_profile', name='profile'),
 	url(r"^accounts/view-profile/(?P<username>[\w. @-]+)/$", 'cms.views.account_view_profile', name='view_profile'),
 	url(r'^(?P<permalink>.+)/$', 'cms.views.dispatcher', name="dispatcher"),
-	url(r"^accounts/confirm_student/(?P<id>\w+)/(?P<username>[\w. @-]+)/$", 'cms.views.confirm_student', name='confirm_student'),
 )
