@@ -199,6 +199,10 @@ class TrainingRequestFilter(django_filters.FilterSet):
     if 'rp_markcomplete' in kwargs:
       rp_markcomplete = kwargs['rp_markcomplete']
       kwargs.pop('rp_markcomplete')
+    rp_pendingattendance = None
+    if 'rp_pendingattendance' in kwargs:
+      rp_pendingattendance = kwargs['rp_pendingattendance']
+      kwargs.pop('rp_pendingattendance')
     state = None
     if 'state' in kwargs:
       state = kwargs['state']
@@ -227,6 +231,11 @@ class TrainingRequestFilter(django_filters.FilterSet):
       elif rp_markcomplete:
         foss_list = TrainingRequest.objects.filter(
           status = 2,
+          training_planner__academic__state_id__in=user.resourceperson_set.all().values_list('state_id').distinct()
+        ).order_by('course__foss__foss').values_list('course__foss__id', 'course__foss__foss').distinct()
+      elif rp_pendingattendance:
+        foss_list = TrainingRequest.objects.filter(
+          status = 1,
           training_planner__academic__state_id__in=user.resourceperson_set.all().values_list('state_id').distinct()
         ).order_by('course__foss__foss').values_list('course__foss__id', 'course__foss__foss').distinct()
       else:
