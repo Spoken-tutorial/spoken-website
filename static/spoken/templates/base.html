@@ -190,7 +190,12 @@
                                                     <a href="/accounts/login">Login</a>
                                                 </li>
                                                 <li class="dropdown">
-                                                    <a href="/accounts/register">Register</a>
+                                                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">Register <b class="caret"></b></a>
+                                                     <ul class="dropdown-menu user-details">
+                                                      <li><a href="/accounts/register">Register as General User</a></li>
+                                                      <li class="divider"></li>
+                                                      <li><a href="/participant/register/">Register as Student</a></li>
+                                                     </ul>
                                                 </li>
                                             {% endif %}
                                         {% endblock %}
