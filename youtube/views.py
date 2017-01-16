@@ -1,22 +1,24 @@
+# Standard Library
 import os
 
+# Third Party Stuff
 from django.conf import settings
 from django.contrib import messages
-from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.context_processors import csrf
 from django.core.exceptions import PermissionDenied
-from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse, HttpResponseRedirect
-from django.http import HttpResponseBadRequest
 from django.db.models import Q
+from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
+from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
 
+# Spoken Tutorial Stuff
+from creation.models import *
+from creation.views import is_administrator, is_qualityreviewer
 from youtube.ajax import *
 from youtube.core import *
 from youtube.forms import *
-from creation.models import *
-from creation.views import is_administrator, is_qualityreviewer
 
 
 @login_required

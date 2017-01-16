@@ -1,14 +1,13 @@
-import pickle
+# Standard Library
 import base64
+import pickle
 
-from django.db import models
+# Third Party Stuff
 from django.contrib.auth.models import User
-
-from oauth2client.django_orm import FlowField
-from oauth2client.django_orm import CredentialsField
+from django.db import models
+from oauth2client.django_orm import CredentialsField, FlowField
 
 
 class CredentialsModel(models.Model):
     id = models.OneToOneField(User, primary_key=True)
     credential = CredentialsField()
-
