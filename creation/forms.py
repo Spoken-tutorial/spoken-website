@@ -458,7 +458,12 @@ class ComponentForm(forms.Form):
             'video': 'video/ogg',
             'slide': ['application/zip', 'application/x-zip-compressed'],
             'code': ['application/zip', 'application/x-zip-compressed'],
-            'assignment': ['text/plain', 'application/pdf']
+            'assignment': ['text/plain', 'application/pdf'],
+            'additional_material': ['text/plain', 'application/pdf',
+                                            'application/zip', 'application/x-zip-compressed',
+                                            'application/vnd.oasis.opendocument.text',
+                                            'application/vnd.oasis.opendocument.spreadsheet',
+                                            'application/vnd.oasis.opendocument.presentation']
         }
         component = ''
         if 'comp' in self.cleaned_data:

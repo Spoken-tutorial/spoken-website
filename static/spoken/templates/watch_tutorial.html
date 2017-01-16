@@ -489,7 +489,13 @@
                             </a>
                         </div>
                     {% endif %}
-
+                    {% if tr_rec.common_content.additional_material_status and tr_rec.common_content.additional_material_status != 6 %}
+                        <div  class="list-group-item-container">
+                            <a href="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/resources/{{ tr_rec.common_content.additional_material }}" target="_blank" class="list-group-item">
+                                <h4 class="list-group-item-heading"><i class="fa fa-1 fa-file-text"></i>&nbsp; Additional reading material</h4>
+                            </a>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
