@@ -1,13 +1,19 @@
-from django.shortcuts import render
+# Standard Library
 import csv
-from django.http import HttpResponse, HttpResponseForbidden
-from django.template.defaultfilters import slugify
-from django.db.models.loading import get_model
-from django.db.models import ForeignKey
-from events.views import *
-from creation.views import *
+import datetime
+
+# Third Party Stuff
 from django.conf import settings
-import time, datetime
+from django.db.models import ForeignKey
+from django.db.models.loading import get_model
+from django.http import HttpResponse
+from django.shortcuts import render
+from django.template.defaultfilters import slugify
+
+# Spoken Tutorial Stuff
+from creation.views import *
+from events.views import *
+
 
 def get_fk_model(model, fieldname):
     '''returns None if not foreignkey, otherswise the relevant model'''
@@ -17,8 +23,10 @@ def get_fk_model(model, fieldname):
         return field_object.rel.to
     return None
 
+
 def get_m2m_model_value(obj, field):
     return ", ".join([s.__unicode__() for s in getattr(obj, field).all()])
+
 
 def get_all_field_names(obj):
     fields = []
@@ -26,12 +34,14 @@ def get_all_field_names(obj):
         fields.append(field.name)
     return fields.sort()
 
+
 def get_all_field_names(model):
     fields = []
     model_fields = model._meta.fields
     for field in model_fields:
         fields.append(field.name)
     return fields
+
 
 def export(qs, fields=None):
     model = qs.model
@@ -70,6 +80,7 @@ def export(qs, fields=None):
     # Return CSV file to browser as download
     return response
 
+
 def export_csv(request, model_name="None", app_label="None", queryset=None, fields=None, list_display=True):
     """
     Put the following line in your urls.py BEFORE your admin include
@@ -91,10 +102,7 @@ def export_csv(request, model_name="None", app_label="None", queryset=None, fiel
                     filters[key[0] + '__lte'] = str(value)
                 else:
                     filters[str(key)] = str(value)
-        
-        #print "*****************"
-        #print filters
-        #print "*****************"
+
         if len(filters):
             queryset = queryset.filter(**filters)
     if not fields:
@@ -150,8 +158,8 @@ def elibrary(request):
         videourl = "http://spoken-tutorial.org/watch/" + tr.tutorial_detail.foss.foss + "/" + tr.tutorial_detail.tutorial + "/" + tr.language.name
         #writer.writerow([outline])
         #print "___________________________"
-        
-        #writer.writerow(['File Name with Extension', 'dc.contributor.author', 'dc.contributor.illustrator', 'dc.creator', 'dc.contributor.editor', 'dc.date.created', 'dc.date.copyright', 'dc.date.accessioned', 'dc.date.available', 'dc.identifier.uri', 'dc.identifier.isbn', 'dc.identifier.issn', 'dc.identifier.citation', 'dc.description.abstract', 'dc.description.tableofcontents', 'dc.format.extent', 'dc.format.mimetype', 'dc.language.iso', 'dc.relation.ispartof', 'dc.relation.ispartofseries', 'dc.relation.haspart', 'dc.source', 'dc.subject'             , 'dc.subject.ddc', 'dc.subject.lcc', 'dc.title'                 , 'dc.title.alternative', 'dc.publisher', 'dc.type', 'dcterms.educationLevel', 'dc.subject.pedagogicobjective', 'dc.coverage.board', 'dc.format.typicallearningtime', 'dc.format.difficultylevel', 'dc.type.typeoflearningmaterial', 'dc.creator.researcher', 'dc.subject.authorkeyword', 'dc.contributor.advisor', 'dc.publisher.place', 'dc.publisher.institution', 'dc.date.awarded', 'dc.type.degree', 'dc.publisher.department', 'dc.rights.uri', 'dc.rights.rightsholder']) 
+
+        #writer.writerow(['File Name with Extension', 'dc.contributor.author', 'dc.contributor.illustrator', 'dc.creator', 'dc.contributor.editor', 'dc.date.created', 'dc.date.copyright', 'dc.date.accessioned', 'dc.date.available', 'dc.identifier.uri', 'dc.identifier.isbn', 'dc.identifier.issn', 'dc.identifier.citation', 'dc.description.abstract', 'dc.description.tableofcontents', 'dc.format.extent', 'dc.format.mimetype', 'dc.language.iso', 'dc.relation.ispartof', 'dc.relation.ispartofseries', 'dc.relation.haspart', 'dc.source', 'dc.subject'             , 'dc.subject.ddc', 'dc.subject.lcc', 'dc.title'                 , 'dc.title.alternative', 'dc.publisher', 'dc.type', 'dcterms.educationLevel', 'dc.subject.pedagogicobjective', 'dc.coverage.board', 'dc.format.typicallearningtime', 'dc.format.difficultylevel', 'dc.type.typeoflearningmaterial', 'dc.creator.researcher', 'dc.subject.authorkeyword', 'dc.contributor.advisor', 'dc.publisher.place', 'dc.publisher.institution', 'dc.date.awarded', 'dc.type.degree', 'dc.publisher.department', 'dc.rights.uri', 'dc.rights.rightsholder'])
         writer.writerow( [         tr.video         ,       user_name        ,      domain_reviewer        , 'NMEICT'    ,             ''         ,     tr.created   ,       ''           ,          ''          ,    publish_date    ,       videourl     ,            ''       ,         ''          ,            ''           ,        tr.outline        ,                  ''             ,     vdurwithsize  ,      'video/ogg'    , tr.language.name ,           ''          , tr.tutorial_detail.foss.foss,            ''        ,      ''    , tr.common_content.keyword,         ''      ,         ''      , tr.tutorial_detail.tutorial,           ''          ,        ''     ,  'Video' ,     education_level      ,                 ''            ,     edu_board      ,       tutorial_duration        ,               tlevel       ,  'Audio-Video Lecture/Tutorial' ,            ''          ,              ''           ,            ''           ,            ''       ,            ''             ,         ''       ,         ''      ,              ''          , 'CC BY SA'     ,          'NMEICT'       ])
         #break
     return response
@@ -188,20 +196,23 @@ def formated_publish_date(tr):
     except:
         return tr.updated
 
+
 def video_duration_with_filesize(tr):
     video_path = settings.MEDIA_ROOT + "videos/" + str(tr.tutorial_detail.foss_id) + "/" + str(tr.tutorial_detail_id) + "/" + tr.video
     video_info = get_video_info(video_path)
     return video_info['duration'], video_info['size']
 
+
 def get_level(tr):
     level = {
-        'Basic' : 'Easy',
-        'Intermediate' : 'Medium',
-        'Advanced' : 'Difficult'
+        'Basic': 'Easy',
+        'Intermediate': 'Medium',
+        'Advanced': 'Difficult'
     }
     return level[tr.tutorial_detail.level.level]
 
-def time_plus_ten_min(tr,vtime):
+
+def time_plus_ten_min(tr, vtime):
     try:
         delta = datetime.timedelta(minutes=10)
         vtime = datetime.datetime.strptime(vtime, '%H:%M:%S') + delta
