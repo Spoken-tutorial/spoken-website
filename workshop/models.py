@@ -1,5 +1,6 @@
+# Third Party Stuff
 from django.db import models
-from cdeep.models import Users, FossCategories, TutorialLanguages
+
 
 class WStates(models.Model):
     id = models.IntegerField(primary_key=True)
@@ -8,8 +9,10 @@ class WStates(models.Model):
     latitude = models.CharField(max_length=100)
     longitude = models.CharField(max_length=100)
     image_map_area = models.TextField()
+
     class Meta:
         db_table = 'states'
+
 
 class WAcademicCenter(models.Model):
     id = models.IntegerField(primary_key=True)
@@ -26,14 +29,18 @@ class WAcademicCenter(models.Model):
     remarks = models.TextField()
     created_at = models.DateTimeField()
     updated_at = models.DateTimeField()
+
     class Meta:
         db_table = 'academic_center'
+
 
 class WDepartments(models.Model):
     id = models.IntegerField(primary_key=True)
     name = models.CharField(unique=True, max_length=200)
+
     class Meta:
         db_table = 'departments'
+
 
 class WInvigilator(models.Model):
     id = models.IntegerField(primary_key=True)
@@ -46,8 +53,10 @@ class WInvigilator(models.Model):
     status = models.IntegerField()
     created_at = models.DateTimeField()
     updated_at = models.DateTimeField()
+
     class Meta:
         db_table = 'invigilator'
+
 
 class WLiveWorkshopParticipants(models.Model):
     id = models.IntegerField(primary_key=True)
@@ -93,8 +102,10 @@ class WLiveWorkshopParticipants(models.Model):
     reason_why = models.TextField()
     general_comment = models.TextField()
     updated_at = models.DateTimeField()
+
     class Meta:
         db_table = 'live_workshop_participants'
+
 
 class WOrganiser(models.Model):
     id = models.IntegerField(primary_key=True)
@@ -107,8 +118,10 @@ class WOrganiser(models.Model):
     status = models.IntegerField()
     created_at = models.DateTimeField()
     updated_at = models.DateTimeField()
+
     class Meta:
         db_table = 'organiser'
+
 
 class WResourcePerson(models.Model):
     id = models.IntegerField(primary_key=True)
@@ -117,8 +130,10 @@ class WResourcePerson(models.Model):
     phone = models.CharField(max_length=20)
     states = models.CommaSeparatedIntegerField(max_length=200)
     state_code = models.CommaSeparatedIntegerField(max_length=200)
+
     class Meta:
         db_table = 'resource_person'
+
 
 class WStudentDetail(models.Model):
     id = models.IntegerField(primary_key=True)
@@ -126,8 +141,10 @@ class WStudentDetail(models.Model):
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     gender = models.CharField(max_length=30)
+
     class Meta:
         db_table = 'student_detail'
+
 
 class WTestDetails(models.Model):
     id = models.IntegerField(primary_key=True)
@@ -136,8 +153,10 @@ class WTestDetails(models.Model):
     no_of_participants = models.IntegerField()
     invigilator = models.CharField(max_length=200)
     updated_at = models.DateTimeField()
+
     class Meta:
         db_table = 'test_details'
+
 
 class WTestRequests(models.Model):
     id = models.IntegerField(primary_key=True)
@@ -155,30 +174,36 @@ class WTestRequests(models.Model):
     workshop_code = models.CharField(max_length=10)
     created_at = models.DateTimeField()
     updated_at = models.DateTimeField()
+
     class Meta:
         db_table = 'test_requests'
+
 
 class WAttendanceRegister(models.Model):
     id = models.IntegerField(primary_key=True)
     moodle_uid = models.IntegerField()
     test_code = models.CharField(max_length=10)
     status = models.IntegerField()
+
     class Meta:
         db_table = 'attendance_register'
+
 
 class WWorkshopDetails(models.Model):
     id = models.IntegerField(primary_key=True)
     workshop_code = models.CharField(max_length=10)
     no_of_participants = models.IntegerField()
     updated_at = models.DateTimeField()
+
     class Meta:
         db_table = 'workshop_details'
+
 
 class WWorkshopFeedback(models.Model):
     id = models.IntegerField(primary_key=True)
     user_id = models.IntegerField()
     workshop_code = models.CharField(max_length=10)
-    #foss_category = models.CharField(max_length=100)
+    # foss_category = models.CharField(max_length=100)
     rate_workshop = models.IntegerField()
     rate_workshop_why = models.TextField()
     content = models.IntegerField()
@@ -215,8 +240,10 @@ class WWorkshopFeedback(models.Model):
     reason_why = models.TextField()
     general_comment = models.TextField()
     updated_at = models.DateTimeField()
+
     class Meta:
         db_table = 'workshop_feedback'
+
 
 class WWorkshopRequests(models.Model):
     id = models.IntegerField(primary_key=True)
@@ -235,6 +262,6 @@ class WWorkshopRequests(models.Model):
     created_at = models.DateTimeField()
     updated_at = models.DateTimeField()
     school_standard = models.IntegerField()
+
     class Meta:
         db_table = 'workshop_requests'
-
