@@ -1,13 +1,19 @@
-import random, string, hashlib, csv
-from models import MdlUser
-from events.models import *
-from django.core.mail import EmailMultiAlternatives
-from validate_email import validate_email
+import csv
+import hashlib
+import random
+import string
 from datetime import datetime
 
+from django.core.mail import EmailMultiAlternatives
+from events.models import *
+from models import MdlUser
+from validate_email import validate_email
+
+
 def update_participants_count(training):
-    training.participant_count = TrainingAttendance.objects.filter(training = training, status__gte = 1).count()
+    training.participant_count = TrainingAttendance.objects.filter(training=training, status__gte=1).count()
     training.save()
+
 
 def _is_organiser(user):
     try:
@@ -15,9 +21,12 @@ def _is_organiser(user):
             return True
     except:
         pass
+
+
 def encript_password(password):
-    password = hashlib.md5(password+'VuilyKd*PmV?D~lO19jL(Hy4V/7T^G>p').hexdigest()
+    password = hashlib.md5(password + 'VuilyKd*PmV?D~lO19jL(Hy4V/7T^G>p').hexdigest()
     return password
+
 
 def create_account(w, firstname, lastname, gender, email, category):
     password_string = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(8))
@@ -27,13 +36,13 @@ def create_account(w, firstname, lastname, gender, email, category):
     username = email
     mdluser = None
     try:
-        mdluser = MdlUser.objects.filter(email = email).first()
+        mdluser = MdlUser.objects.filter(email=email).first()
         mdluser.institution = w.academic_id
         mdluser.firstname = firstname
         mdluser.lastname = lastname
         mdluser.gender = gender
         mdluser.save()
-    except Exception, e:
+    except Exception as e:
         mdluser = MdlUser()
         mdluser.auth = 'manual'
         mdluser.firstname = firstname
@@ -46,10 +55,10 @@ def create_account(w, firstname, lastname, gender, email, category):
         mdluser.mnethostid = 1
         mdluser.gender = gender
         mdluser.save()
-        mdluser = MdlUser.objects.filter(email = email, firstname= firstname, username=username, password=password).first()
-        
+        mdluser = MdlUser.objects.filter(email=email, firstname=firstname, username=username, password=password).first()
+
         # send password to email
-        subject  = "Spoken Tutorial Online Test password"
+        subject = "Spoken Tutorial Online Test password"
         to = [mdluser.email]
         message = '''Hi {0},
 
@@ -75,14 +84,15 @@ Admin Spoken Tutorials
         # send email
         email = EmailMultiAlternatives(
             subject, message, 'administrator@spoken-tutorial.org',
-            to = to, bcc = [], cc = [],
-            headers={'Reply-To': 'no-replay@spoken-tutorial.org', "Content-type":"text/html;charset=iso-8859-1"}
+            to=to, bcc=[], cc=[],
+            headers={'Reply-To': 'no-replay@spoken-tutorial.org', "Content-type": "text/html;charset=iso-8859-1"}
         )
         try:
             result = email.send(fail_silently=False)
         except:
             pass
     return mdluser
+
 
 def get_or_create_participant(w, firstname, lastname, gender, email, category):
     mdluser = None
@@ -103,7 +113,7 @@ def get_or_create_participant(w, firstname, lastname, gender, email, category):
         return True
     else:
         mdluser = create_account(w, firstname, lastname, gender, email, category)
-        if TrainingAttendance.objects.filter(training_id=w.id, mdluser_id = mdluser.id).exists():
+        if TrainingAttendance.objects.filter(training_id=w.id, mdluser_id=mdluser.id).exists():
             return True
         ta = TrainingAttendance()
         ta.mdluser_id = mdluser.id
@@ -116,6 +126,7 @@ def get_or_create_participant(w, firstname, lastname, gender, email, category):
         ta.save()
         return True
     return False
+
 
 def store_error(error_line_no, count, invalid_emails=None, email=None):
     if not email:
@@ -131,6 +142,7 @@ def store_error(error_line_no, count, invalid_emails=None, email=None):
     csv_file_error = 1
     return csv_file_error, error_line_no, invalid_emails
 
+
 def can_allow_participant_to_attend(more_then_two_per_day_list, tdate, email):
     """ restrict participating more then 2 training per day """
     if tdate:
@@ -144,9 +156,11 @@ def can_allow_participant_to_attend(more_then_two_per_day_list, tdate, email):
             more_then_two_per_day_list = more_then_two_per_day_list + ',<br>' + email
         return more_then_two_per_day_list
 
+
 def is_new_participant(reattempt_list, foss, email):
     """  check weather already participated in particular software """
-    training_count = TrainingAttendance.objects.filter(email=email, training__foss_id = foss, training__status__lte=4, status=1).count()
+    training_count = TrainingAttendance.objects.filter(email=email, training__foss_id=foss, training__status__lte=4,
+                                                       status=1).count()
     if training_count == 0:
         return reattempt_list
     if not reattempt_list:
@@ -154,6 +168,7 @@ def is_new_participant(reattempt_list, foss, email):
     else:
         reattempt_list = reattempt_list + ',<br>' + email
     return reattempt_list
+
 
 def check_csvfile(user, file_path, w=None, flag=0, **kwargs):
     tdate = None
@@ -168,14 +183,14 @@ def check_csvfile(user, file_path, w=None, flag=0, **kwargs):
     if kwargs and 'tdate' in kwargs['form_data'] and 'foss' in kwargs['form_data']:
         tdate = kwargs['form_data']['tdate']
         foss = kwargs['form_data']['foss']
-    
+
     csv_file_error = 0
     error_line_no = ''
     invalid_emails = ''
     reattempt_list = ''
     more_then_two_per_day_list = ''
     with open(file_path, 'rbU') as csvfile:
-        count  = 0
+        count = 0
         csvdata = csv.reader(csvfile, delimiter=',', quotechar='|')
         try:
             for row in csvdata:
@@ -196,7 +211,6 @@ def check_csvfile(user, file_path, w=None, flag=0, **kwargs):
                         continue
                     if row_length > 3 and email:
                         if not flag:
-                            #print "firstname => ", firstname
                             if not validate_email(email, verify=True):
                                 csv_file_error, error_line_no, invalid_emails = store_error(error_line_no, count, invalid_emails, email)
                                 continue
@@ -264,7 +278,7 @@ def check_csvfile(user, file_path, w=None, flag=0, **kwargs):
             """.format(more_then_two_per_day_list)
         if reattempt_list:
             if w:
-		tps = w.trainingattendance_set.values_list('email')
+        tps = w.trainingattendance_set.values_list('email')
                 for p in tps:
                     email = str(p[0])
                     reattempt_list = reattempt_list.replace(','+email, '').replace(email+',', '').replace(email, '')
