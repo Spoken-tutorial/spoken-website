@@ -11,6 +11,9 @@ from spoken.forms import TutorialSearchForm
 
 register = template.Library()
 
+def format_component_title(name):
+    return name.replace('_', ' ').capitalize()
+
 def get_url_name(name):
     return quote_plus(name)
 
@@ -230,3 +233,4 @@ register.filter('instruction_sheet', instruction_sheet)
 register.filter('installation_sheet', installation_sheet)
 register.filter('brochure', brochure)
 register.filter('get_contenteditor', is_contenteditor)
+register.filter('format_component_title', format_component_title)

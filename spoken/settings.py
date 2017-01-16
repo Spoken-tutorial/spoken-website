@@ -9,7 +9,6 @@ https://docs.djangoproject.com/en/1.6/ref/settings/
 """
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-from datetime import timedelta
 from os.path import *
 from config import *
 import os
@@ -74,10 +73,8 @@ INSTALLED_APPS = (
     'captcha',
     'nicedit',
     'report_builder',
-    'compressor'
-)
+    'compressor',
 
-CUSTOM_APPS = (
     'cms',
     'creation',
     'statistics',
@@ -88,10 +85,8 @@ CUSTOM_APPS = (
     'youtube',
     'reports',
     'team',
-    'certificate'
+    'certificate',
 )
-
-INSTALLED_APPS += CUSTOM_APPS
 
 MIDDLEWARE_CLASSES = (
     #'django.middleware.cache.UpdateCacheMiddleware',
@@ -274,59 +269,3 @@ RECAPTCHA_PUBLIC_KEY = '6Le8qf8SAAAAABV9wYBW99Jotv-EygJXIhMa_n54'
 RECAPTCHA_PRIVATE_KEY = '6Le8qf8SAAAAAF9CkucURPapw2vaDPrU4qMzfg73'
 RECAPTCHA_USE_SSL = True
 ACADEMIC_DURATION = 5
-
-# Logging.
-LOG_HANDLER = 'logging.handlers.RotatingFileHandler'
-LOG_MAX_BYTES = 1000000
-LOG_BACKUP_FILE_COUNT = 20
-
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'verbose': {
-            'format': "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
-            'datefmt': "%d/%b/%Y %H:%M:%S"
-        },
-        'simple': {
-            'format': '%(levelname)s %(message)s'
-        },
-    },
-    'handlers': {
-        'file': {
-            'level': 'DEBUG',
-            'filename': 'spoken.log',
-            'formatter': 'verbose',
-            'class': LOG_HANDLER,
-            'maxBytes': LOG_MAX_BYTES,
-            'backupCount': LOG_BACKUP_FILE_COUNT,
-        },
-    },
-    'loggers': {}
-}
-
-# Adding loggers for all custom apps
-CUSTOM_LOGGERS = {}
-
-for app in CUSTOM_APPS:
-    LOGGING['loggers'][app] = {
-        'handlers': ['file'],
-        'level': 'DEBUG',
-        'propagate': True,
-    }
-
-# Celery settings
-BROKER_URL = 'amqp://guest:guest@localhost:5672//'
-CELERY_SEND_EVENTS = True
-
-CELERY_ROUTES = {
-    'test_scheduled_task': {'queue': 'scheduled_tasks'},
-}
-
-CELERYBEAT_SCHEDULE = {
-    'test-scheduled-task': {
-        'task': 'test_scheduled_task',
-        'schedule': timedelta(minutes=1),
-    },
-}
-

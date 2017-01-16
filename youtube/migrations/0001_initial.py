@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.db import migrations, models
-from django.conf import settings
+# Third Party Stuff
 import oauth2client.django_orm
+from django.conf import settings
+from django.db import migrations, models
 
 
 class Migration(migrations.Migration):

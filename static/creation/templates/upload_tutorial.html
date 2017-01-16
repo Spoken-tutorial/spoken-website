@@ -197,8 +197,35 @@
                     {% endif %}
                     </td>
                 </tr>
-                <tr class="{{ tr.common_content.prerequisite_status|get_review_status_class }}">
+                <tr class="{{ tr.common_content.additional_material_status|get_review_status_class }}">
                     <td>7</td>
+                    <td>Additional material</td>
+                    <td>{{ tr.common_content.additional_material_status|get_review_status_list }}</td>
+                    {% if tr.common_content.additional_material_status %}
+                        <td>{{ tr.common_content.additional_material_user_id|get_username }}</td>
+                    {% else %}
+                        <td class="col-center">-</td>
+                    {% endif %}
+                    <td>
+                    {% if tr.common_content.additional_material_status <= 2 or tr.common_content.additional_material_status == 5 %}
+                        <a class="btn btn-primary fancybox fancybox.iframe" href="/creation/upload/component/{{ tr.id }}/additional_material/" title="Upload additional material">
+                            <span title="" data-original-title="" class="fa fa-upload fa-2"></span>
+                        </a>
+                    {% endif %}
+                    {% if not tr.common_content.additional_material_status %}
+                        <a class="btn btn-primary" href="/creation/mark/notrequired/{{ tr.id }}/{{ tr.common_content.id }}/additional_material/" title="Mark additional material as &quot;Not Required&quot;">
+                            <span title="" data-original-title="" class="fa fa-ban fa-2"></span>
+                        </a>
+                    {% endif %}
+                    {% if tr.common_content.additional_material_status and tr.common_content.additional_material_status != 6 %}
+                        <a class="btn btn-primary" href="/media/videos/{{ tr.tutorial_detail.foss_id }}/{{ tr.tutorial_detail_id }}/resources/{{ tr.common_content.additional_material }}" title="Download additional material" target="_blank">
+                            <span title="" data-original-title="" class="fa fa-file-text-o fa-2"></span>
+                        </a>
+                    {% endif %}
+                    </td>
+                </tr>
+                <tr class="{{ tr.common_content.prerequisite_status|get_review_status_class }}">
+                    <td>8</td>
                     <td>Prerequisite</td>
                     <td>{{ tr.common_content.prerequisite_status|get_review_status_list }}</td>
                     {% if tr.common_content.prerequisite_status %}
@@ -229,7 +256,7 @@
                     </td>
                 </tr>
                 <tr class="{{ tr.common_content.keyword_status|get_review_status_class }}">
-                    <td>8</td>
+                    <td>9</td>
                     <td>Keywords</td>
                     <td>{{ tr.common_content.keyword_status|get_review_status_list }}</td>
                     {% if tr.common_content.keyword_status %}
@@ -267,7 +294,7 @@
                         </div>
                     </div>
                     <div class="review-data">
-                        <pre><b>Component: {{ log_rec.component | title }}</b>
+                        <pre><b>Component: {{ log_rec.component | format_component_title }}</b>
                         <p>{{ log_rec.comment }}</p></pre>
                     </div>
                 </div>
@@ -288,7 +315,7 @@
             {% for log_rec in contrib_log %}
                 <tr>
                     <td>{{ forloop.counter }}</td>
-                    <td>{{ log_rec.component | title }}</td>
+                    <td>{{ log_rec.component | format_component_title }}</td>
                     <td>{{ log_rec.user.username }}</td>
                     <td>{{ log_rec.status | get_review_status_list }}</td>
                     <td>{{ log_rec.created }}</td>

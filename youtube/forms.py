@@ -1,10 +1,10 @@
-from django.contrib.sessions.models import Session
-from django.contrib.auth.models import User
-from django.conf import settings
-from django.db.models import Q
+# Third Party Stuff
 from django import forms
+from django.db.models import Q
 
+# Spoken Tutorial Stuff
 from creation.models import *
+
 
 class YoutubeVideoSelectForm(forms.Form):
     foss_category = forms.ChoiceField(

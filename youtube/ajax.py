@@ -1,10 +1,14 @@
+# Standard Library
 import json
 
+# Third Party Stuff
 from django.db.models import Q
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
+# Spoken Tutorial Stuff
 from creation.models import *
+
 
 @csrf_exempt
 def ajax_foss_based_language_tutorial(request):

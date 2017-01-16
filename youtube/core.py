@@ -1,13 +1,16 @@
+# Standard Library
 import os
-import httplib2
 
-from oauth2client import xsrfutil
+# Third Party Stuff
+import httplib2
 from apiclient.discovery import build
 from apiclient.http import MediaFileUpload
-from oauth2client.django_orm import Storage
-from oauth2client.client import flow_from_clientsecrets
 from django.conf import settings
+from oauth2client import xsrfutil
+from oauth2client.client import flow_from_clientsecrets
+from oauth2client.django_orm import Storage
 
+# Spoken Tutorial Stuff
 from youtube.models import *
 
 scope_urls = {
