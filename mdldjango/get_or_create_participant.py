@@ -278,7 +278,7 @@ def check_csvfile(user, file_path, w=None, flag=0, **kwargs):
             """.format(more_then_two_per_day_list)
         if reattempt_list:
             if w:
-        tps = w.trainingattendance_set.values_list('email')
+                tps = w.trainingattendance_set.values_list('email')
                 for p in tps:
                     email = str(p[0])
                     reattempt_list = reattempt_list.replace(','+email, '').replace(email+',', '').replace(email, '')
