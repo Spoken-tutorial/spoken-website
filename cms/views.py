@@ -10,9 +10,13 @@ from django.utils import timezone
 from django.conf import settings
 from django.http import Http404
 from cms.models import *
+from events.models import Student
+from mdldjango.models import MdlUser
 from cms.forms import *
 from PIL import Image
 import random, string
+from cms.services import *
+from mdldjango.urls import *
 
 def dispatcher(request, permalink=''):
     if permalink == '':
@@ -348,3 +352,38 @@ def change_password(request):
     context['form'] = form
     context.update(csrf(request))
     return render(request, 'cms/templates/change_password.html', context)
+    
+def confirm_student(request, password, mdlid):
+    try:
+        mdluser = MdlUser.objects.filter(id=mdlid).first()
+        user = User.objects.filter(email=mdluser.email)
+        student = Student.objects.filter(user_id = user.id)
+        #if profile.confirmation_code == confirmation_code and user.date_joined > (timezone.now()-timezone.timedelta(days=1)):
+        if mdluser.password == password:
+            user.is_active = True
+            user.save()
+            
+            student.verified = True
+            student.error = False
+            student.save()
+            
+            messages.success(request, "Your account has been activated!. Please login to continue.")
+            return HttpResponseRedirect('http://spoken-tutorial.org/participant/login/')
+        else:
+            messages.error(request, "Something went wrong!. Please try again!")
+            return HttpResponseRedirect('/')
+    except Exception, e:
+        messages.error(request, "Your account not activated!. Please try again!")
+        return HttpResponseRedirect('/')
+
+def verify_email(request):
+  context = {}
+  if request.method == 'POST':
+    form = VerifyForm(request.POST)
+    if form.is_valid():
+      email = form.cleaned_data['email']
+      #send verification mail as per the criteria check
+      send_veriy_email(request,email)
+    else:
+      messages.error(request, 'Invalid Email ID')
+  return render(request, "cms/templates/verify_email.html", context)

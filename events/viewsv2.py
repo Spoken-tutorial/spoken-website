@@ -3,7 +3,7 @@ from datetime import datetime
 from datetime import timedelta
 
 # Create your views here.
-from django.views.generic import View, ListView, TemplateView
+from django.views.generic import View, ListView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from events.models import *
 from events.filters import TrainingRequestFilter
@@ -13,7 +13,7 @@ from django.utils.decorators import method_decorator
 from events.decorators import group_required
 from events.forms import StudentBatchForm, TrainingRequestForm, \
     TrainingRequestEditForm, CourseMapForm, SingleTrainingForm, \
-    OrganiserFeedbackForm,STWorkshopFeedbackForm,STWorkshopFeedbackFormPre,STWorkshopFeedbackFormPost,LearnDrupalFeedback, VerifyForm, LatexWorkshopFileUploadForm, UserForm, \
+    OrganiserFeedbackForm,STWorkshopFeedbackForm,STWorkshopFeedbackFormPre,STWorkshopFeedbackFormPost,LearnDrupalFeedback, LatexWorkshopFileUploadForm, UserForm, \
     SingleTrainingEditForm
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, render_to_response
@@ -31,7 +31,6 @@ from django.contrib import messages
 from django.template import RequestContext, loader
 from mdldjango.get_or_create_participant import get_or_create_participant
 from django.contrib.auth.decorators import login_required
-from cms.views import send_registration_confirmation, confirm
 
 #pdf generate
 from reportlab.pdfgen import canvas
@@ -2339,47 +2338,4 @@ class LearnDrupalFeedbackCreateView(CreateView):
       print "saved"
       messages.success(self.request, "Thank you for completing this feedback form. We appreciate your input and valuable suggestions.")
       return HttpResponseRedirect(self.success_url)
-      
-  
-def verify_email(request):
-  template_name = 'verify_email.html'
-  context = {}
-  if request.method == 'POST':
-    form = VerifyForm(request.POST)
-    if form.is_valid():
-      email = form.cleaned_data['email']
-      try:
-        user = User.objects.get(email = email)
-      except ObjectDoesNotExist:
-        context["notregistered"] = 1
-        return render(request, template_name, context)
-      try:
-        student = Student.objects.get(user_id = user.id)
-        if student and student.verified:
-          messages.success(request, 'User is already verified')
-          return HttpResponseRedirect('/login')
-        if student and not student.verified:
-          #send email to students 
-          sb = StudentBatch.objects.get(id__in = StudentMaster.objects.filter(student=student).values_list('batch_id'))
-          mail_status = get_or_create_participant(sb.organiser, user.first_name, user.last_name, student.gender, user.email, 0)
-          if mail_status:
-            student.verified = True
-            student.user.is_active = True
-            student.user.save()
-            student.error = False
-            student.save()
-            messages.success(request, 'Please check your login details has been sent to your registered email id')
-          return HttpResponseRedirect('/home')
-      except ObjectDoesNotExist:
-        #not a student so only user
-        if not user.is_active :
-          #send user activation link mail
-          send_registration_confirmation(user)
-          messages.success(request, 'Please confirm your verification by clicking on the activation link which has been sent to your registered email id.')
-          return HttpResponseRedirect('/home')
-        else:
-         messages.success(request, 'User is already activated')
-         return HttpResponseRedirect('/login')
-    else:
-      messages.error(request, 'Invalid Email ID')
-  return render(request, template_name, context)
+

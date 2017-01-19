@@ -489,6 +489,3 @@ class LearnDrupalFeedback(forms.ModelForm):
     self.fields['mention_foss'].required = False
     self.fields['like_to_give_testimonial'].required = False
     self.fields['testimonial'].required = False
-    
-class VerifyForm(forms.Form):
-  email = forms.EmailField(required=True)

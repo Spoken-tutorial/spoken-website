@@ -235,3 +235,6 @@ class NewsAdditionaFieldAdmin(forms.ModelForm):
                 raise forms.ValidationError(_('Please choose image file format.'))
             return content
 '''    
+
+class VerifyForm(forms.Form):
+  email = forms.EmailField(required=True)

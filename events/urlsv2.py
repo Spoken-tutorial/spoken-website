@@ -281,9 +281,4 @@ urlpatterns = [
         "mark_prev_attendance.html"), 
       name="previous_training_attendance"
     ),
-    url(
-      r'^verify/', 
-      'events.viewsv2.verify_email',
-      name='verify_email'
-      ),
 ]
