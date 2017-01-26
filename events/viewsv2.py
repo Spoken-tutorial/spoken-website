@@ -84,7 +84,7 @@ class TrainingPlannerListView(ListView):
         academic_id = self.request.user.organiser.academic.id,
       ).order_by('-year')
     return super(TrainingPlannerListView, self).dispatch(*args, **kwargs)
-  
+
   def get_context_data(self, **kwargs):
     # Call the base implementation first to get a context
     context = super(TrainingPlannerListView, self).get_context_data(**kwargs)
@@ -165,7 +165,7 @@ class StudentBatchCreateView(CreateView):
   #  kwargs = super(StudentBatchCreateView, self).get_form_kwargs()
   #  kwargs.update({'user' : self.request.user})
   #  return kwargs
-  
+
   def get_context_data(self, **kwargs):
     context = super(StudentBatchCreateView, self).get_context_data(**kwargs)
     if self.batch:
@@ -180,7 +180,7 @@ class StudentBatchCreateView(CreateView):
       context['batch'] = self.batch
       context['existing_student'] = existing_student
     return context
-    
+
   def post(self, request, *args, **kwargs):
     self.object = None
     self.user = request.user
@@ -215,7 +215,7 @@ class StudentBatchCreateView(CreateView):
     skipped, error, warning, write_flag = \
       self.csv_email_validate(self.request.FILES['csv_file'], form_data.id , studentcount)
     context = {'error' : error, 'warning' : warning, 'batch':form_data}
-    
+
     if error or warning:
       return render_to_response(self.template_name, context, context_instance=RequestContext(self.request))
 #    messages.success(self.request, "Student Batch added successfully.")
@@ -343,8 +343,8 @@ class StudentBatchUpdateView(UpdateView):
         except:
           pass
       return super(StudentBatchUpdateView, self).dispatch(*args, **kwargs)
-      
-      
+
+
 class StudentBatchYearUpdateView(UpdateView):
     model = StudentBatch
     success_url = "/software-training/student-batch/"
@@ -369,7 +369,7 @@ class StudentBatchListView(ListView):
     self.raw_get_data = self.request.GET.get('o', None)
     self.queryset = get_sorted_list(self.request, self.queryset, self.header, self.raw_get_data)
     return super(StudentBatchListView, self).dispatch(*args, **kwargs)
-    
+
   def get_context_data(self, **kwargs):
     context = super(StudentBatchListView, self).get_context_data(**kwargs)
     context['header'] = self.header
@@ -412,7 +412,7 @@ class StudentListView(ListView):
     self.raw_get_data = self.request.GET.get('o', None)
     self.queryset = get_sorted_list(self.request, self.queryset, self.header, self.raw_get_data)
     return super(StudentListView, self).dispatch(*args, **kwargs)
-    
+
   def get_context_data(self, **kwargs):
     context = super(StudentListView, self).get_context_data(**kwargs)
     context['header'] = self.header
@@ -460,9 +460,9 @@ class TrainingRequestCreateView(CreateView):
         kwargs.update({'course_type' :(('', '---------'), (0, 'Software Course outside lab hours'), (1, 'Software Course mapped in lab hours'), (2, ' Software Course unmapped in lab hours'), (3, ' EduEasy Software')) })
     else:
         kwargs.update({'course_type' :(('', '---------'), (0, 'Software Course outside lab hours'), (1, 'Software Course mapped in lab hours'), (2, ' Software Course unmapped in lab hours')) })
-    
-    
-    
+
+
+
     return kwargs
 
   def post(self, request, *args, **kwargs):
@@ -506,6 +506,80 @@ class TrainingRequestCreateView(CreateView):
     #return render_to_response(self.template_name, context, context_instance=RequestContext(self.request))
 
 class TrainingRequestEditView(CreateView):
+  form_class = TrainingRequestEditForm
+  user = None
+  training = None
+  @method_decorator(group_required("Organiser"))
+  def dispatch(self, *args, **kwargs):
+    if 'pk' in self.kwargs:
+      self.training = TrainingRequest.objects.get(pk=self.kwargs['pk'])
+    if not self.training.can_edit():
+      messages.error(self.request, "Training has attendance, edit is not permitted for training.")
+      return HttpResponseRedirect('/software-training/training-planner/')
+    return super(TrainingRequestEditView, self).dispatch(*args, **kwargs)
+
+  def get_form_kwargs(self):
+    kwargs = super(TrainingRequestEditView, self).get_form_kwargs()
+    kwargs.update({'training' : self.training})
+    kwargs.update({'user' : self.request.user})
+    return kwargs
+
+  def get_context_data(self, **kwargs):
+    context = super(TrainingRequestEditView, self).get_context_data(**kwargs)
+    context['training'] = self.training
+    return context
+
+  def form_valid(self, form, **kwargs):
+    # Check if all student participate in selected foss
+    try:
+      # Check if batch has student?
+      sb = StudentBatch.objects.get(pk=form.cleaned_data['batch'].id)
+      if not sb.student_count():
+        messages.error(self.request, 'There is no student present in this batch.')
+        return self.form_invalid(form)
+
+      # Check if batch has already has same foss course?
+      if not ( (form.cleaned_data['batch'] == self.training.batch) and (form.cleaned_data['course'] == self.training.course)):
+        is_batch_has_course = TrainingRequest.objects.filter(
+          batch = form.cleaned_data['batch'],
+          course = form.cleaned_data['course']
+        ).count()
+        if is_batch_has_course:
+          messages.error(self.request, 'This "%s" already taken/requested the selected "%s" course.' % (form.cleaned_data['batch'], form.cleaned_data['course']))
+          return self.form_invalid(form)
+
+      # Assigning values
+      self.training.department = form.cleaned_data['department']
+      self.training.batch = form.cleaned_data['batch']
+      self.training.course_type = form.cleaned_data['course_type']
+
+      if self.training.batch.is_foss_batch_acceptable(form.cleaned_data['course']):
+        self.training.sem_start_date = form.cleaned_data['sem_start_date']
+        self.training.course_id = form.cleaned_data['course']
+      else:
+        messages.error(self.request, 'This student batch already taken the selected course.')
+        return self.form_invalid(form)
+      # save form
+      self.training.save()
+
+    except:
+      return self.form_invalid(form)
+    context = {}
+    return HttpResponseRedirect('/software-training/select-participants/')
+
+  def post(self, request, *args, **kwargs):
+    self.object = None
+    self.user = request.user
+    form_class = self.get_form_class()
+    form = self.get_form(form_class)
+
+    if form.is_valid():
+      return self.form_valid(form)
+    else:
+      return self.form_invalid(form)
+    return HttpResponseRedirect('/software-training/select-participants/')
+
+"""class TrainingRequestEditView(CreateView):
   form_class = TrainingRequestEditForm
   template_name = None
   user = None
@@ -555,14 +629,14 @@ class TrainingRequestEditView(CreateView):
     if form.is_valid():
       return self.form_valid(form)
     else:
-      return self.form_invalid(form)
+      return self.form_invalid(form)"""
 
 class TrainingAttendanceListView(ListView):
   queryset = StudentMaster.objects.none()
   paginate_by = 500
   template_name = ""
   training_request = None
-  
+
   def dispatch(self, *args, **kwargs):
     self.training_request = TrainingRequest.objects.get(pk=kwargs['tid'])
     if self.training_request.status == 1 and not self.training_request.participants == 0:
@@ -616,7 +690,7 @@ class TrainingCertificateListView(ListView):
   paginate_by = 500
   template_name = ""
   training_request = None
-  
+
   def dispatch(self, *args, **kwargs):
     self.training_request = TrainingRequest.objects.get(pk=kwargs['tid'])
     if self.training_request.status:
@@ -699,18 +773,18 @@ class TrainingCertificate():
   def training_certificate(self, ta):
     response = HttpResponse(content_type='application/pdf')
     filename = (ta.student.user.first_name+'-'+ta.training.course.foss.foss+"-Participant-Certificate").replace(" ", "-");
-    
+
     response['Content-Disposition'] = 'attachment; filename='+filename+'.pdf'
     imgTemp = StringIO()
     imgDoc = canvas.Canvas(imgTemp)
 
-    # Title 
+    # Title
     imgDoc.setFont('Helvetica', 40, leading=None)
     imgDoc.drawCentredString(415, 480, "Certificate of Learning")
 
     #date
     imgDoc.setFont('Helvetica', 18, leading=None)
-    imgDoc.drawCentredString(211, 115, self.custom_strftime('%B {S} %Y', ta.training.sem_start_date)) 
+    imgDoc.drawCentredString(211, 115, self.custom_strftime('%B {S} %Y', ta.training.sem_start_date))
 
     #password
     certificate_pass = ''
@@ -724,11 +798,11 @@ class TrainingCertificate():
 
     #paragraphe
     text = "This is to certify that <b>"+ta.student.user.first_name +" "+ta.student.user.last_name+"</b> participated in the <b>"+ta.training.course.foss.foss+"</b> training organized at <b>"+ta.training.training_planner.academic.institution_name+"</b> by  <b>"+ta.training.training_planner.organiser.user.first_name + " "+ta.training.training_planner.organiser.user.last_name+"</b> on <b>"+self.custom_strftime('%B {S} %Y', ta.training.sem_start_date)+"</b> with course material provided by the Spoken Tutorial Project, IIT Bombay.<br /><br />A comprehensive set of topics pertaining to <b>"+ta.training.course.foss.foss+"</b> were covered in the training. This training is offered by the Spoken Tutorial Project, IIT Bombay, funded by National Mission on Education through ICT, MHRD, Govt. of India."
-    
+
     centered = ParagraphStyle(name = 'centered',
-      fontSize = 16,  
-      leading = 30,  
-      alignment = 0,  
+      fontSize = 16,
+      leading = 30,
+      alignment = 0,
       spaceAfter = 20
     )
 
@@ -746,7 +820,7 @@ class TrainingCertificate():
     #Save the result
     output = PdfFileWriter()
     output.addPage(page)
-    
+
     #stream to browser
     outputStream = response
     output.write(response)
@@ -760,22 +834,22 @@ class SingleTrainingCertificate():
 
   def suffix(self, d):
     return 'th' if 11<=d<=13 else {1:'st',2:'nd',3:'rd'}.get(d%10, 'th')
-  
+
   def single_training_certificate(self, ta):
     response = HttpResponse(content_type='application/pdf')
     filename = (ta.firstname+'-'+ta.training.course.foss.foss+"-Participant-Certificate").replace(" ", "-");
-    
+
     response['Content-Disposition'] = 'attachment; filename='+filename+'.pdf'
     imgTemp = StringIO()
     imgDoc = canvas.Canvas(imgTemp)
 
-    # Title 
+    # Title
     imgDoc.setFont('Helvetica', 40, leading=None)
     imgDoc.drawCentredString(415, 480, "Certificate of Learning")
 
     #date
     imgDoc.setFont('Helvetica', 18, leading=None)
-    imgDoc.drawCentredString(211, 115, self.custom_strftime('%B {S} %Y', ta.training.tdate)) 
+    imgDoc.drawCentredString(211, 115, self.custom_strftime('%B {S} %Y', ta.training.tdate))
 
     #password
     certificate_pass = ''
@@ -789,11 +863,11 @@ class SingleTrainingCertificate():
 
     #paragraphe
     text = "This is to certify that <b>"+ta.firstname +" "+ta.lastname+"</b> participated in the <b>"+ta.training.course.foss.foss+"</b> training organized at <b>"+ ta.training.academic.institution_name+"</b> by  <b>"+ta.training.organiser.user.first_name + " "+ta.training.organiser.user.last_name+"</b> on <b>"+self.custom_strftime('%B {S} %Y', ta.training.tdate)+"</b> with course material provided by the Spoken Tutorial Project, IIT Bombay.<br /><br />A comprehensive set of topics pertaining to <b>"+ta.training.course.foss.foss+"</b> were covered in the workshop. This training is offered by the Spoken Tutorial Project, IIT Bombay, funded by National Mission on Education through ICT, MHRD, Govt. of India."
-    
+
     centered = ParagraphStyle(name = 'centered',
-      fontSize = 16,  
-      leading = 30,  
-      alignment = 0,  
+      fontSize = 16,
+      leading = 30,
+      alignment = 0,
       spaceAfter = 20
     )
 
@@ -811,7 +885,7 @@ class SingleTrainingCertificate():
     #Save the result
     output = PdfFileWriter()
     output.addPage(page)
-    
+
     #stream to browser
     outputStream = response
     output.write(response)
@@ -839,7 +913,7 @@ class OrganiserTrainingCertificateView(TrainingCertificate, View):
     else:
       messages.error(self.request, "PermissionDenied!")
     return HttpResponseRedirect("/")
-    
+
 class OrganiserSingleTrainingCertificateView(SingleTrainingCertificate, View):
   template_name = ""
   @method_decorator(group_required("Organiser"))
@@ -873,7 +947,7 @@ class StudentTrainingCertificateView(TrainingCertificate, View):
     except ObjectDoesNotExist:
       messages.error(self.request, "Record not found")
       pass
-    
+
     try:
         mdluserid = request.session.get('mdluserid', None)
         mdluser = MdlUser.objects.get(id=mdluserid)
@@ -892,7 +966,7 @@ class CourseMapCreateView(CreateView):
   def get_context_data(self, **kwargs):
     context = super(CourseMapCreateView, self).get_context_data(**kwargs)
     return context
-  
+
   def form_valid(self, form, **kwargs):
     # Check if all student participate in selected foss
     try:
@@ -950,7 +1024,7 @@ class SaveStudentView(JSONResponseMixin, View):
     if sb.email_validator(email):
       student = sb.get_student(email)
       batch = self.request.POST.get('batch')
-     
+
       if not student:
         sdetails = self.request.POST.get('student_details').split(',')
         student = sb.create_student(sdetails[0], sdetails[1], email, sdetails[2])
@@ -972,7 +1046,7 @@ class SaveStudentView(JSONResponseMixin, View):
     else:
       code = 4
       message = "Invalid email address"
-    
+
     context = {
       'code' : code,
       'message' : message
@@ -984,14 +1058,14 @@ class GetCourseOptionView(JSONResponseMixin, View):
   @method_decorator(csrf_exempt)
   def dispatch(self, *args, **kwargs):
     return super(GetCourseOptionView, self).dispatch(*args, **kwargs)
-  
+
   def post(self, request, *args, **kwargs):
-    
+
     context = {}
     category = self.request.POST.get('course_type')
     department_id = self.request.POST.get('department')
     tp = TrainingPlanner.objects.get(pk=self.request.POST.get('training_planner'))
-    
+
     if department_id == '24':
       print 'in school course number'
       if tp.is_school_course_full(category, self.request.POST.get('department'), self.request.POST.get('batch')):
@@ -1026,15 +1100,15 @@ class GetCourseOptionView(JSONResponseMixin, View):
           'is_full' : False
         }
     return self.render_to_json_response(context)
-    
-    
+
+
     return render(request, 'course_select.html', context)
 
 class GetBatchOptionView(JSONResponseMixin, View):
   @method_decorator(csrf_exempt)
   def dispatch(self, *args, **kwargs):
     return super(GetBatchOptionView, self).dispatch(*args, **kwargs)
-  
+
   def post(self, request, *args, **kwargs):
     department_id = self.request.POST.get('department')
     context = {}
@@ -1058,23 +1132,23 @@ class GetBatchStatusView(JSONResponseMixin, View):
   @method_decorator(csrf_exempt)
   def dispatch(self, *args, **kwargs):
     return super(GetBatchStatusView, self).dispatch(*args, **kwargs)
-  
+
   def post(self, request, *args, **kwargs):
-    department_id = self.request.POST.get('department') 
-    
+    department_id = self.request.POST.get('department')
+
     batch_id = self.request.POST.get('batch')
     tp = TrainingPlanner.objects.get(pk=self.request.POST.get('training_planner'))
     context = {}
 
     batch_status = True
-    
+
     if department_id == '24':
       if tp.is_school_full(department_id, batch_id):
         batch_status = False
     else:
       if tp.is_full(department_id, batch_id):
         batch_status = False
-      
+
     context = {
       'batch_status' : batch_status,
     }
@@ -1087,22 +1161,22 @@ class GetDepartmentOrganiserStatusView(JSONResponseMixin, View):
   @method_decorator(csrf_exempt)
   def dispatch(self, *args, **kwargs):
     return super(GetDepartmentOrganiserStatusView, self).dispatch(*args, **kwargs)
-  
+
   def post(self, request, *args, **kwargs):
-    department_id = self.request.POST.get('department') 
+    department_id = self.request.POST.get('department')
     year = self.request.POST.get('year')
     context = {}
     dept_status = True
-    
+
     resultdata = StudentBatch.objects.filter(
       academic_id=request.user.organiser.academic.id,
       department_id=department_id,
       year = year
     )
-  
+
     if resultdata:
       dept_status = False
-      
+
     context = {
       'dept_status' : dept_status,
     }
@@ -1121,18 +1195,18 @@ class TrainingRequestListView(ListView):
   now= datetime.now()
   year = now.year
   month =now.month
-  
+
   current_sem_type_even = 0 #odd
   if month < 6:
     current_sem_type_even = 1 #even
-  
+
   prev_sem_type = 'even'
   prev_sem_year = year
   if current_sem_type_even:
     prev_sem_type = 'odd'
     prev_sem_year = (year - 1)
   prev_sem_start_date, prev_sem_end_date = get_prev_semester_duration(prev_sem_type, prev_sem_year)
-  
+
   @method_decorator(group_required("Resource Person","Administrator"))
   def dispatch(self, *args, **kwargs):
     if (not 'role' in kwargs) or (not 'status' in kwargs):
@@ -1147,10 +1221,10 @@ class TrainingRequestListView(ListView):
         self.queryset = TrainingRequest.objects.filter(
           training_planner__academic_id__in=AcademicCenter.objects.filter(
             state__in = State.objects.filter(
-              resourceperson__user_id=self.user, 
+              resourceperson__user_id=self.user,
               resourceperson__status=1
             )
-          ).values_list('id'), 
+          ).values_list('id'),
           status=1,
           participants__gt=0
         ).order_by('-updated')
@@ -1158,10 +1232,10 @@ class TrainingRequestListView(ListView):
         self.queryset = TrainingRequest.objects.filter(
           training_planner__academic_id__in=AcademicCenter.objects.filter(
             state__in = State.objects.filter(
-              resourceperson__user_id=self.user, 
+              resourceperson__user_id=self.user,
               resourceperson__status=1
             )
-          ).values_list('id'), 
+          ).values_list('id'),
           status=0
         ).order_by('-updated')
       elif self.status == 'markcomplete':
@@ -1171,51 +1245,51 @@ class TrainingRequestListView(ListView):
           self.queryset = TrainingRequest.objects.filter(
             training_planner__academic_id__in=AcademicCenter.objects.filter(
               state__in = State.objects.filter(
-                resourceperson__user_id=self.user, 
+                resourceperson__user_id=self.user,
                 resourceperson__status=1
               )
-            ).values_list('id'), 
+            ).values_list('id'),
             status=2
           ).order_by('-updated')
       elif self.status == 'pendingattendance':
         self.queryset = TrainingRequest.objects.filter(
           training_planner__academic_id__in=AcademicCenter.objects.filter(
             state__in = State.objects.filter(
-              resourceperson__user_id=self.user, 
+              resourceperson__user_id=self.user,
               resourceperson__status=1,
             )
-          ).values_list('id'), 
+          ).values_list('id'),
           status = 1, participants = 0, training_planner__semester__name = self.prev_sem_type , sem_start_date__gte = self.prev_sem_start_date
         )
 
       self.header = {
         1: SortableHeader('#', False),
         2: SortableHeader(
-          'training_planner__academic__state__name', 
-          True, 
+          'training_planner__academic__state__name',
+          True,
           'State'
         ),
         3: SortableHeader(
-          'training_planner__academic__academic_code', 
-          True, 
+          'training_planner__academic__academic_code',
+          True,
           'Code'
         ),
         4: SortableHeader(
-          'training_planner__academic__institution_name', 
-          True, 
+          'training_planner__academic__institution_name',
+          True,
           'Institution'
         ),
         5: SortableHeader('batch__department__name', True, 'Department / Batch'),
         6: SortableHeader('course__foss__foss', True, 'Course Name'),
         7: SortableHeader('course__category', True, 'Course Type'),
         8: SortableHeader(
-          'training_planner__organiser__user__first_name', 
-          True, 
+          'training_planner__organiser__user__first_name',
+          True,
           'Organiser'
         ),
         9: SortableHeader(
-          'sem_start_date', 
-          True, 
+          'sem_start_date',
+          True,
           'Sem Start Date / Training Date'
         ),
         10: SortableHeader('participants', True, 'Participants'),
@@ -1223,9 +1297,9 @@ class TrainingRequestListView(ListView):
       }
       self.raw_get_data = self.request.GET.get('o', None)
       self.queryset = get_sorted_list(
-        self.request, 
-        self.queryset, 
-        self.header, 
+        self.request,
+        self.queryset,
+        self.header,
         self.raw_get_data
       )
       if self.status == 'completed':
@@ -1235,7 +1309,7 @@ class TrainingRequestListView(ListView):
       elif self.status == 'markcomplete':
         self.queryset = TrainingRequestFilter(self.request.GET, queryset=self.queryset, user=self.user, rp_markcomplete=True)
       elif self.status == 'pendingattendance':
-        self.queryset = TrainingRequestFilter(self.request.GET, queryset=self.queryset, user=self.user, rp_pendingattendance=True)  
+        self.queryset = TrainingRequestFilter(self.request.GET, queryset=self.queryset, user=self.user, rp_pendingattendance=True)
     else:
       raise PermissionDenied()
     return super(TrainingRequestListView, self).dispatch(*args, **kwargs)
@@ -1250,10 +1324,10 @@ class TrainingRequestListView(ListView):
     return context
 
 
-##############################  Single Training one day workshop ############################################################################# 
+##############################  Single Training one day workshop #############################################################################
 
 """
-''' 
+'''
 SingleTrainingNewListView will list all the new/pending training requests in the single-training page pertaining to a specific user, i.e, Organiser or Resource Person.
 
 '''
@@ -1269,7 +1343,7 @@ class SingleTrainingNewListView(ListView):
       grup.append(i.name)
     context['group'] = grup
     return context
-  
+
   def dispatch(self, *args, **kwargs):
     user_groups_object = self.request.user.groups.all()
     user_group = []
@@ -1316,7 +1390,7 @@ class SingletrainingApprovedListView(ListView):
       grup.append(i.name)
     context['group'] = grup
     return context
-  
+
   def dispatch(self, *args, **kwargs):
     user_groups_object = self.request.user.groups.all()
     user_group = []
@@ -1347,7 +1421,7 @@ class SingletrainingApprovedListView(ListView):
       return super(SingletrainingApprovedListView, self).dispatch(*args, **kwargs)
 
 '''
- SingletrainingRejectedListView displays the workshop requests which have been rejected 
+ SingletrainingRejectedListView displays the workshop requests which have been rejected
 '''
 class SingletrainingRejectedListView(ListView):
   queryset = None
@@ -1361,7 +1435,7 @@ class SingletrainingRejectedListView(ListView):
       grup.append(i.name)
     context['group'] = grup
     return context
-  
+
   def dispatch(self, *args, **kwargs):
     user_groups_object = self.request.user.groups.all()
     user_group = []
@@ -1404,7 +1478,7 @@ class SingletrainingOngoingListView(ListView):
       grup.append(i.name)
     context['group'] = grup
     return context
-  
+
   def dispatch(self, *args, **kwargs):
     user_groups_object = self.request.user.groups.all()
     user_group = []
@@ -1441,8 +1515,8 @@ SingleTrainingCompletedListView will list all the completed training requests in
 class SingletrainingCompletedListView(ListView):
   queryset = None
   paginate_by = 10
-  
-  
+
+
   def dispatch(self, *args, **kwargs):
     user_groups_object = self.request.user.groups.all()
     user_group = []
@@ -1487,7 +1561,7 @@ class SingleTrainingCertificateListView(ListView):
   paginate_by = 500
   template_name = ""
   training_request = None
-  
+
   def dispatch(self, *args, **kwargs):
     self.training_request = SingleTraining.objects.get(pk=kwargs['tid'])
     print self.training_request.id
@@ -1512,7 +1586,7 @@ class SingleTrainingCertificateListView(ListView):
 class SingletrainingPendingAttendanceListView(ListView):
   queryset = None
   paginate_by = 10
-  
+
   def dispatch(self, *args, **kwargs):
     user_groups_object = self.request.user.groups.all()
     user_group = []
@@ -1538,7 +1612,7 @@ class SingletrainingPendingAttendanceListView(ListView):
       return super(SingletrainingPendingAttendanceListView, self).dispatch(*args, **kwargs)
     elif 'Organiser' in user_group:
       org_inst = self.request.user.organiser.academic_id
-      self.queryset = SingleTraining.objects.filter(tdate__lt=datetime.today().date().isoformat(), status=2, academic__id=org_inst).order_by('-tdate')  
+      self.queryset = SingleTraining.objects.filter(tdate__lt=datetime.today().date().isoformat(), status=2, academic__id=org_inst).order_by('-tdate')
       return super(SingletrainingPendingAttendanceListView, self).dispatch(*args, **kwargs)
     elif 'Resource Person' in user_group:
       state_list = []
@@ -1570,7 +1644,7 @@ class SingletrainingCreateView(CreateView):
   form_class = SingleTrainingForm
   template_name = ""
   success_url = "/software-training/single-training/pending/"
-  
+
   def form_valid(self, form, **kwargs):
     form_data = form.save(commit=False)
     if 'academic' not in self.request.POST:
@@ -1583,13 +1657,13 @@ class SingletrainingCreateView(CreateView):
     skipped, error, warning, write_flag = self.csv_email_validate(self.request.FILES['csv_file'], str(self.request.POST.get('training_type')))
     context = {'error': error, 'warning': warning, 'batch': form_data}
     csv_error_line_num = ''
-    
+
     if error or skipped:
       messages.error(self.request, "Batch not added: Error in CSV file")
       for i in error:
         csv_error_line_num = (csv_error_line_num+'%d, ')%(i+1)
       messages.error(self.request, "You have error(s) in your CSV file on line numbers %s"%(csv_error_line_num))
-      
+
     else:
       form_data.save()
       student_exists, student_count, csv_data_list = self.create_singletraining_db(self.request.FILES['csv_file'], form_data.id, form_data.course.id)
@@ -1632,7 +1706,7 @@ class SingletrainingCreateView(CreateView):
     return False
 
   '''
-  create_student_vocational() will add the database entry for the student 
+  create_student_vocational() will add the database entry for the student
 
   '''
   def create_student_vocational(self, training_id, fossid, fname, lname, email, gender):
@@ -1656,7 +1730,7 @@ class SingletrainingCreateView(CreateView):
   '''
   csv_email_validate() will validate the email field, from the CSV file, for the School and Vocational training type.
 
-  '''  
+  '''
   def csv_email_validate(self, file_path, ttype):
     skipped = []
     error = []
@@ -1682,7 +1756,7 @@ class SingletrainingCreateView(CreateView):
         if csv_data[j][3] == '':
           error.append(j)
           continue
-      
+
     #Vocational
     else:
       for i in csvdata:
@@ -1708,8 +1782,8 @@ class SingletrainingCreateView(CreateView):
 
   '''
   This will call the create_student_vocational() method to create the student entry, from the  CSV file, in the SingleTraining database.
-  
-  '''  
+
+  '''
   def create_singletraining_db(self, file_path, tr_id, batch_id):
     csv_data_list = []
     student_exists = []
@@ -1758,7 +1832,7 @@ class SingletrainingUpdateView(UpdateView):
     messages.success(self.request, "Student Batch updated successfully.")
     return HttpResponseRedirect(self.success_url)
 
-''' 
+'''
 SingleTrainingListView will list all the new/pending training requests in the single-training page pertaining to a specific user, i.e, Organiser or Resource Person.
 
 '''
@@ -1781,7 +1855,7 @@ class SingleTrainingListView(ListView):
       'pendingattendance' : 6,
     }
     self.status = kwargs['status']
-    if not self.status in status_list : 
+    if not self.status in status_list :
       raise PermissionDenied()
 
     if is_administrator(user):
@@ -1833,11 +1907,11 @@ class SingletrainingMarkCompleteUpdateView(UpdateView):
     return super(SingletrainingMarkCompleteUpdateView, self).dispatch(*args, **kwargs)
 
 
-''' SingleTrainingAttendance is used to (1) List the attendance view, (2) Mark the attendance ''' 
+''' SingleTrainingAttendance is used to (1) List the attendance view, (2) Mark the attendance '''
 
 class SingleTrainingAttendanceListView(ListView):
   queryset = SingleTrainingAttendance.objects.none()
-  paginate_by = 500 
+  paginate_by = 500
   template_name = ""
   single_training = None
   @method_decorator(group_required("Organiser", "Resource Person", "Administrator"))
@@ -1947,9 +2021,9 @@ class SingleTrainingAttendanceListView(ListView):
     else:
       TrainingAttend.objects.filter(training_id =training_id).delete()
     self.training_request.update_participants_count()
-    return HttpResponseRedirect('/software-training/training-planner') 
+    return HttpResponseRedirect('/software-training/training-planner')
   '''
-  
+
 
 ''' SingleTrainingApprove will take an argument(primary key of a training batch) and change the status of the SingleTraining batch, in the SingleTraining database, from pending to approved.
 
@@ -1963,7 +2037,7 @@ Status code:
 6 - PendingAttendanceMark
 
 '''
-def SingleTrainingApprove(request, pk):     
+def SingleTrainingApprove(request, pk):
   st = SingleTraining.objects.get(pk=pk)
   if st:
     st.status = 2
@@ -2007,7 +2081,7 @@ def MarkAsComplete(request, pk):
     print "Error"
     messages.error(request, 'Request not sent.Please try again.')
   return HttpResponseRedirect("/software-training/training-planner/")
-  
+
 def MarkComplete(request, pk):
   #pk =0
   st = TrainingRequest.objects.get(pk=pk)
@@ -2040,7 +2114,7 @@ class OldTrainingListView(ListView):
     self.raw_get_data = self.request.GET.get('o', None)
     self.queryset = get_sorted_list(self.request, self.queryset, self.header, self.raw_get_data)
     return super(OldTrainingListView, self).dispatch(*args, **kwargs)
-    
+
   def get_context_data(self, **kwargs):
     context = super(OldTrainingListView, self).get_context_data(**kwargs)
     context['header'] = self.header
@@ -2068,7 +2142,7 @@ class OldStudentListView(ListView):
     self.raw_get_data = self.request.GET.get('o', None)
     self.queryset = get_sorted_list(self.request, self.queryset, self.header, self.raw_get_data)
     return super(OldStudentListView, self).dispatch(*args, **kwargs)
-    
+
   def get_context_data(self, **kwargs):
     context = super(OldStudentListView, self).get_context_data(**kwargs)
     context['header'] = self.header
@@ -2193,7 +2267,7 @@ class OrganiserFeedbackCreateView(CreateView):
 
     @method_decorator(group_required("Organiser"))
     def get(self, request, *args, **kwargs):
-	    return render_to_response(self.template_name, {'form': self.form_class()}, 
+	    return render_to_response(self.template_name, {'form': self.form_class()},
 	      context_instance=RequestContext(self.request))
 
     def post(self,  request, *args, **kwargs):
@@ -2209,11 +2283,11 @@ class OrganiserFeedbackCreateView(CreateView):
 class OrganiserFeedbackListView(ListView):
   queryset = None
   paginate_by = 10
-  
+
   def dispatch(self, *args, **kwargs):
     self.queryset = OrganiserFeedback.objects.all()
     return super(OrganiserFeedbackListView, self).dispatch(*args, **kwargs)
-  
+
   def get_context_data(self, **kwargs):
     context = super(OrganiserFeedbackListView, self).get_context_data(**kwargs)
     context['count'] = OrganiserFeedback.objects.all().count()
@@ -2223,7 +2297,7 @@ def LatexWorkshopFileUpload(request):
   template_name = 'latex_workshop_file_upload.html'
   if request.method == 'POST':
     form = LatexWorkshopFileUploadForm(request.POST, request.FILES)
-    if form.is_valid(): 
+    if form.is_valid():
       uploaded_file = request.FILES['file_upload']
       '''
       email = request.POST['email']
@@ -2246,14 +2320,14 @@ def LatexWorkshopFileUpload(request):
     form = LatexWorkshopFileUploadForm()
     context=RequestContext(request, {'form':form})
   return render_to_response(template_name, context)
-  
+
 class UpdateStudentName(UpdateView):
   model = User
   form_class = UserForm
   def dispatch(self, *args, **kwargs):
     self.success_url="/software-training/student-batch/"+str(kwargs['bid'])+"/view"
     return super(UpdateStudentName, self).dispatch(*args, **kwargs)
-    
+
 class STWorkshopFeedbackCreateView(CreateView):
     form_class = STWorkshopFeedbackForm
     template_name = "stworkshop_feedback.html"
@@ -2261,7 +2335,7 @@ class STWorkshopFeedbackCreateView(CreateView):
 
     @method_decorator(login_required)
     def get(self, request, *args, **kwargs):
-	    return render_to_response(self.template_name, {'form': self.form_class()}, 
+	    return render_to_response(self.template_name, {'form': self.form_class()},
 	      context_instance=RequestContext(self.request))
 
     def post(self,  request, *args, **kwargs):
@@ -2273,7 +2347,7 @@ class STWorkshopFeedbackCreateView(CreateView):
         return HttpResponseRedirect(self.success_url)
       else:
         return self.form_invalid(form)
-        
+
 class STWorkshopFeedbackPreCreateView(CreateView):
     form_class = STWorkshopFeedbackFormPre
     template_name = "stworkshop_feedback_pre.html"
@@ -2282,7 +2356,7 @@ class STWorkshopFeedbackPreCreateView(CreateView):
 
     @method_decorator(login_required)
     def get(self, request, *args, **kwargs):
-	    return render_to_response(self.template_name, {'form': self.form_class()}, 
+	    return render_to_response(self.template_name, {'form': self.form_class()},
 	      context_instance=RequestContext(self.request))
 
     def post(self,  request, *args, **kwargs):
@@ -2298,7 +2372,7 @@ class STWorkshopFeedbackPreCreateView(CreateView):
       else:
         print form.errors
         return self.form_invalid(form)
-        
+
     def form_valid(self, form, **kwargs):
       form_data = form.save(commit=False)
       form_data.user = self.request.user
@@ -2306,11 +2380,11 @@ class STWorkshopFeedbackPreCreateView(CreateView):
       print "saved"
       messages.success(self.request, "Thank you for completing this feedback form. We appreciate your input and valuable suggestions.")
       return HttpResponseRedirect(self.success_url)
-    
-        
-        
-        
-        
+
+
+
+
+
 class STWorkshopFeedbackPostCreateView(CreateView):
     form_class = STWorkshopFeedbackFormPost
     template_name = "stworkshop_feedback_post.html"
@@ -2318,7 +2392,7 @@ class STWorkshopFeedbackPostCreateView(CreateView):
 
     @method_decorator(login_required)
     def get(self, request, *args, **kwargs):
-	    return render_to_response(self.template_name, {'form': self.form_class()}, 
+	    return render_to_response(self.template_name, {'form': self.form_class()},
 	      context_instance=RequestContext(self.request))
 
     def post(self,  request, *args, **kwargs):
@@ -2332,7 +2406,7 @@ class STWorkshopFeedbackPostCreateView(CreateView):
       else:
         print form.errors
         return self.form_invalid(form)
-        
+
     def form_valid(self, form, **kwargs):
       form_data = form.save(commit=False)
       form_data.user = self.request.user
@@ -2345,11 +2419,11 @@ class LearnDrupalFeedbackCreateView(CreateView):
   form_class = LearnDrupalFeedback
   template_name = "learndrupalfeedback.html"
   success_url = "/home"
-  
+
   def get(self, request, *args, **kwargs):
-	    return render_to_response(self.template_name, {'form': self.form_class()}, 
+	    return render_to_response(self.template_name, {'form': self.form_class()},
 	      context_instance=RequestContext(self.request))
-  
+
   def post(self,  request, *args, **kwargs):
       self.object = None
       form = self.get_form(self.get_form_class())
@@ -2361,7 +2435,7 @@ class LearnDrupalFeedbackCreateView(CreateView):
       else:
         print form.errors
         return self.form_invalid(form)
-        
+
   def form_valid(self, form, **kwargs):
       form_data = form.save(commit=False)
       form_data.user = self.request.user

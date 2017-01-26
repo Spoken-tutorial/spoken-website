@@ -67,7 +67,7 @@ urlpatterns = [
       name="training_certificate"
     ),
     url(
-      r'^training-request/(?P<trid>\d+)/$', 
+      r'^training-request/(?P<pk>\d+)/$',
       TrainingRequestEditView.as_view(template_name=\
         "edit_training_request.html"), 
       name="edit_training_request"

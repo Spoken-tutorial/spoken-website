@@ -43,7 +43,7 @@ class UpdateStudentYearBatchForm(forms.ModelForm):
 class TrainingRequestForm(forms.ModelForm):
   department = forms.ModelChoiceField(empty_label='---------', queryset=CourseMap.objects.none())
   #course_type = forms.ChoiceField(required=True)
-  
+
   course_type = forms.ChoiceField(choices=[('', '---------'), (0, 'Software Course outside lab hours'), (1, 'Software Course mapped in lab hours'), (2, ' Software Course unmapped in lab hours')])
   course = forms.ModelChoiceField(empty_label='---------', queryset=CourseMap.objects.none())
   batch = forms.ModelChoiceField(empty_label='---------', queryset=StudentBatch.objects.none())
@@ -77,7 +77,7 @@ class TrainingRequestForm(forms.ModelForm):
         if 'course_type' in self.cleaned_data and self.cleaned_data['course_type']:
           if tp.is_course_full(self.cleaned_data['course_type'], self.cleaned_data['department'], self.cleaned_data['batch']):
             raise forms.ValidationError("No. of training requests for selected course type exceeded")'''
-      
+
       # Date restriction
       if self.cleaned_data and 'sem_start_date' in self.cleaned_data and self.cleaned_data['sem_start_date']:
         start_date, end_date =tp.get_current_semester_date_duration_new()
@@ -85,13 +85,13 @@ class TrainingRequestForm(forms.ModelForm):
         if not (self.cleaned_data['sem_start_date'] <= end_date and self.cleaned_data['sem_start_date'] >= start_date):
           raise forms.ValidationError("Invalid semester start date")
     return self.cleaned_data
-  
+
   def __init__(self, *args, **kwargs):
     user = kwargs.pop('user')
     course_type = kwargs.pop('course_type')
     super(TrainingRequestForm, self).__init__(*args, **kwargs)
     self.fields['course_type'].choices = course_type
-    
+
     if kwargs and 'data' in kwargs:
       # Generating course list based on course type
       if 'course_type' in kwargs['data'] and kwargs['data']['course_type'] != '':
@@ -112,18 +112,19 @@ class TrainingRequestForm(forms.ModelForm):
 
 class TrainingRequestEditForm(forms.ModelForm):
   course_type = forms.ChoiceField(choices=[('', '---------'), (0, 'Software Course outside lab hours'), (1, 'Software Course mapped in lab hours'), (2, ' Software Course unmapped in lab hours')])
-  course = forms.ModelChoiceField(empty_label='---------', queryset=CourseMap.objects.none())
   training_planner = forms.CharField()
+  department = forms.ModelChoiceField(empty_label='---------', queryset=CourseMap.objects.none())
+  batch = forms.ModelChoiceField(empty_label='---------', queryset=StudentBatch.objects.none())
+  course = forms.ModelChoiceField(empty_label='---------', queryset=CourseMap.objects.filter(category=0))
   class Meta:
     model = TrainingRequest
-    exclude = ['participants', 'status', 'training_planner', 'department', 'batch']
-  
+    exclude = ['participants', 'status', 'training_planner']
+
   def clean(self):
     # Date restriction
     if self.cleaned_data and 'sem_start_date' in self.cleaned_data and self.cleaned_data['sem_start_date']:
       tp = TrainingPlanner.objects.get(pk=self.cleaned_data['training_planner'])
       start_date, end_date =tp.get_current_semester_date_duration_new()
-      print start_date, end_date, self.cleaned_data['sem_start_date']
       if not (self.cleaned_data['sem_start_date'] <= end_date and self.cleaned_data['sem_start_date'] >= start_date):
         raise forms.ValidationError("Invalid semester start date")
     return self.cleaned_data
@@ -134,20 +135,9 @@ class TrainingRequestEditForm(forms.ModelForm):
     super(TrainingRequestEditForm, self).__init__(*args, **kwargs)
     flag = True
     data = kwargs.pop('data', None)
-    if data and 'course_type' in data:
-      if data['course_type']:
-        print 1
-        self.fields['course'].queryset = CourseMap.objects.filter(category=data['course_type'])
-        if 'course' in data and data['course']:
-          self.fields['course'].initial = data['course']
-      else:
-        print 2
-        flag = False
-    else:
-      print 3
-      flag = False
+
     if not flag and training:
-      self.fields['course_type'].initial = training.course.category
+      self.fields['course_type'].initial = training.course_type
       self.fields['course'].queryset = CourseMap.objects.filter(category=training.course.category)
       self.fields['course'].initial = training.course_id
     flag = True
@@ -160,6 +150,28 @@ class TrainingRequestEditForm(forms.ModelForm):
       flag = False
     if not flag and training:
       self.fields['sem_start_date'].initial = training.sem_start_date
+
+    self.fields['course_type'].initial = training.course_type
+    self.fields['course'].initial = training.course_id
+    #department
+    self.fields['department'].queryset = Department.objects.filter(id__in=StudentBatch.objects.filter(academic=user.organiser.academic, stcount__gt=0).values_list('department_id'))
+    self.fields['department'].initial = training.department
+
+    #overwrite choice
+    self.fields['batch'].queryset = StudentBatch.objects.filter(
+      academic_id=user.organiser.academic.id,
+      stcount__gt=0,
+      department_id=training.department.id
+    )
+    self.fields['batch'].initial = training.batch
+
+    # update form choice when check is_valid
+    if data and 'department' in data:
+        self.fields['batch'].queryset = StudentBatch.objects.filter(
+          academic_id=user.organiser.academic.id,
+          stcount__gt=0,
+          department_id=data['department']
+        )
 
 class CourseMapForm(forms.ModelForm):
   category = forms.ChoiceField(choices=[('', '---------'), (1, 'Software Course mapped in lab hours'), (2, ' Software Course unmapped in lab hours')])
@@ -177,12 +189,12 @@ class CourseMapForm(forms.ModelForm):
 
   def __init__(self, *args, **kwargs):
     super(CourseMapForm, self).__init__(*args, **kwargs)
-    
+
 class UserForm(forms.ModelForm):
   class Meta:
     model = User
     exclude = ['password','last_login','is_superuser','username','is_staff','is_active','date_joined','groups','user_permissions','email']
-  
+
   def __init__(self, *args, **kwargs):
     super(UserForm, self).__init__(*args, **kwargs)
 
@@ -199,14 +211,14 @@ class SingleTrainingForm(forms.ModelForm):
     self.fields['state'].required = False
     self.fields['institution_type'].required = False
 
-  def clean(self): 
+  def clean(self):
         #self.cleaned_data['csv_file']
     if self.cleaned_data['csv_file'].name.split('.')[-1] == 'csv':
       pass
     else:
         raise forms.ValidationError("Invalid file format.")
     return self.cleaned_data
-    
+
   def clean_tdate(self):
     today = datetime.datetime.now()
     tdate = self.cleaned_data['tdate']
@@ -235,7 +247,7 @@ class SingleTrainingEditForm(forms.ModelForm):
       else:
         raise forms.ValidationError("Invalid file format.")
     return self.cleaned_data
-    
+
   def clean_tdate(self):
     today = datetime.datetime.now()
     tdate = self.cleaned_data['tdate']
@@ -249,21 +261,21 @@ class OrganiserFeedbackForm(forms.ModelForm):
     model = OrganiserFeedback
     fields = '__all__'
     widgets = {'student_stream': forms.CheckboxSelectMultiple,
-              'language' : forms.CheckboxSelectMultiple, 
-              'trained_foss' : forms.CheckboxSelectMultiple, 
+              'language' : forms.CheckboxSelectMultiple,
+              'trained_foss' : forms.CheckboxSelectMultiple,
               'helpful_for' : forms.CheckboxSelectMultiple ,
-              'is_comfortable_self_learning' : forms.RadioSelect , 
-              'is_classroom_better' : forms.RadioSelect , 
-              'is_student_expectations' : forms.RadioSelect , 
-              'is_help_get_interview' : forms.RadioSelect , 
-              'is_help_get_job' : forms.RadioSelect , 
-              'is_got_job' : forms.RadioSelect , 
-              'relevance' : forms.RadioSelect, 
-              'information_content' : forms.RadioSelect, 
-              'audio_video_quality' : forms.RadioSelect, 
-              'presentation_quality' : forms.RadioSelect , 
+              'is_comfortable_self_learning' : forms.RadioSelect ,
+              'is_classroom_better' : forms.RadioSelect ,
+              'is_student_expectations' : forms.RadioSelect ,
+              'is_help_get_interview' : forms.RadioSelect ,
+              'is_help_get_job' : forms.RadioSelect ,
+              'is_got_job' : forms.RadioSelect ,
+              'relevance' : forms.RadioSelect,
+              'information_content' : forms.RadioSelect,
+              'audio_video_quality' : forms.RadioSelect,
+              'presentation_quality' : forms.RadioSelect ,
               'overall_rating' : forms.RadioSelect ,
-              'testimonial' : forms.Textarea , 
+              'testimonial' : forms.Textarea ,
               'any_other_suggestions' : forms.Textarea}
 
 class LatexWorkshopFileUploadForm(forms.ModelForm):
@@ -285,23 +297,23 @@ class MapCourseWithFossForm(forms.ModelForm):
     class Meta:
         model = CourseMap
         exclude = ()
-        
+
 class STWorkshopFeedbackForm(forms.ModelForm):
   class Meta:
     model = STWorkshopFeedback
     fields = '__all__'
     widgets = {
-              'acquired_knowledge' : forms.RadioSelect , 
-              'suff_instruction' : forms.RadioSelect , 
-              'diff_instruction' : forms.RadioSelect , 
-              'method_easy' : forms.RadioSelect , 
-              'time_sufficient' : forms.RadioSelect , 
+              'acquired_knowledge' : forms.RadioSelect ,
+              'suff_instruction' : forms.RadioSelect ,
+              'diff_instruction' : forms.RadioSelect ,
+              'method_easy' : forms.RadioSelect ,
+              'time_sufficient' : forms.RadioSelect ,
               'desired_objective': forms.RadioSelect ,
-              'recommend' : forms.RadioSelect , 
-              'like_to_part' : forms.RadioSelect, 
-              'side_by_side_effective' : forms.RadioSelect, 
-              'not_self_explanatory' : forms.RadioSelect, 
-              'logical_sequence' : forms.RadioSelect , 
+              'recommend' : forms.RadioSelect ,
+              'like_to_part' : forms.RadioSelect,
+              'side_by_side_effective' : forms.RadioSelect,
+              'not_self_explanatory' : forms.RadioSelect,
+              'logical_sequence' : forms.RadioSelect ,
               'examples_help' : forms.RadioSelect ,
               'other_language' : forms.RadioSelect ,
               'instructions_easy_to_follow' : forms.RadioSelect ,
@@ -332,9 +344,9 @@ class STWorkshopFeedbackForm(forms.ModelForm):
               'overall_arrangement' : forms.RadioSelect ,
               'interaction_using_forum' : forms.RadioSelect ,
               'installation_difficulties' : forms.Textarea ,
-              'like_abt_ws' : forms.Textarea , 
+              'like_abt_ws' : forms.Textarea ,
               'how_make_better' : forms.Textarea,
-              'experience' : forms.Textarea , 
+              'experience' : forms.Textarea ,
               'suggestions' : forms.Textarea
               }
   def __init__(self, *args, **kwargs):
@@ -368,9 +380,9 @@ class STWorkshopFeedbackFormPre(forms.ModelForm):
               'installig_ad_themes' : forms.RadioSelect ,
               'people_management' : forms.RadioSelect ,
               'site_management' : forms.RadioSelect ,
-               
+
               }
-              
+
 
 class STWorkshopFeedbackFormPost(forms.ModelForm):
   class Meta:
@@ -456,12 +468,12 @@ class STWorkshopFeedbackFormPost(forms.ModelForm):
               'foss_where' : forms.Textarea ,
               'explain' : forms.Textarea ,
               'purpose_of_attending' : forms.Textarea ,
-              'like_abt_ws' : forms.Textarea , 
+              'like_abt_ws' : forms.Textarea ,
               'how_make_better' : forms.Textarea,
-              'experience' : forms.Textarea , 
+              'experience' : forms.Textarea ,
               'suggestions' : forms.Textarea,
               }
-              
+
 class LearnDrupalFeedback(forms.ModelForm):
   class Meta:
     model = LearnDrupalFeedback
@@ -469,7 +481,7 @@ class LearnDrupalFeedback(forms.ModelForm):
     widgets = {
               'feedback' : forms.Textarea,
               }
-              
+
   def __init__(self, *args, **kwargs):
     super(LearnDrupalFeedback, self).__init__(*args, **kwargs)
     self.fields['name'].required = False
