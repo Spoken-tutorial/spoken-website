@@ -11,55 +11,69 @@ import smtplib
 import hashlib
 import random
 import string
+from hashids import Hashids
 
-def send_veriy_email(request,email):
+def get_user_email(email):
   try:
-    user = User.objects.get(email = email)
+    user = User.objects.filter(email__iexact=email)
+    if len(user) == 1:
+      return user[0]
+    return User.objects.get(email=email).first()
   except ObjectDoesNotExist:
-    messages.error(request, "User not registerd in the system")
-    return render(request, "cms/templates/verify_email.html")
-  
+    return None
+
+def send_verify_email(request,email):
+  message = None
+  user_login = "http://spoken-tutorial.org/accounts/login/"
+  student_login = "http://spoken-tutorial.org/participant/login/"
+  user = get_user_email(email)
+  if not user:
+    message = "User "+email+" not registerd in the system."
+    return False, message
   try:
-    student = Student.objects.get(user_id = user.id)
+    student = Student.objects.get(user_id = user)
   except ObjectDoesNotExist:
     #not a student so only user
     if not user.is_active :
       #send user activation link mail
       send_registration_confirmation(user)
-      messages.success(request, 'Please confirm your verification by clicking on the activation link which has been sent to your registered email id.')
-      return render(request, "cms/templates/verify_email.html")
+      message = 'Please confirm your verification by clicking on the activation link which has been sent to your registered email id '+email+'.'
+      return True, message
     else:
-      messages.success(request, 'User is already activated')
-      return render(request, "cms/templates/verify_email.html")
+      message = 'User '+email+' is already activated. Kindly visit <a href = '+user_login+' >login</a> page to continue.'
+      return True, message
   #is student so proceed with following,
   if student.verified:
-    messages.success(request, 'User is already verified')
-    return render(request, "cms/templates/verify_email.html")
+    message = 'Student '+email+' is already verified. Kindly visit <a href = '+student_login+' >login</a> page to continue.'
+    return True, message
   else:
-    #send email to students 
-    #sb = StudentBatch.objects.get(id__in = StudentMaster.objects.filter(student=student).values_list('batch_id'))
-    if send_student_mail(email):
-      messages.success(request, 'Please check your login details that has been sent to your registered email id')
+    #send email to students
+    student_mail_status = send_student_mail(email)
+    if student_mail_status:
+      message = 'Please check your login details that has been sent to your registered email id.'
+      return True, message
     else:
-      messages.error(request, 'Something went wrong!. Please try again!')
-    return render(request, "cms/templates/verify_email.html")
+      message = 'Something went wrong!. Please try again later!'
+      #notify to admin via mail
+      return False, message
       
 def send_student_mail(email):
   mdluser = MdlUser.objects.filter(email=email).first()
   mdl_username = email
   
   password_string = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(8))
-  password_encript = encript_password(password_string)
-  mdl_new_password = password_encript
+  mdl_new_password = encript_password(password_string)
   
   mdluser.password = mdl_new_password
   mdluser.save()
+  
+  user_hashid = Hashids(salt = settings.SPOKEN_HASH_SALT)
+  mdlid = user_hashid.encode(mdluser.id)
   
   #send mail to student_mail
   subject = "Spoken Tutorial Online Test password"
   to = [mdluser.email]
   message = '''Hi {0},
-
 Your account password at 'Spoken Tutorials Online Test as follows'
 
 Your current login information is now:
@@ -77,7 +91,7 @@ line at the top of your web browser window.
 Cheers from the 'Spoken Tutorials Online Test Center' administrator,
 
 Admin Spoken Tutorials
-'''.format(mdluser.firstname, mdluser.username, password_string, "http://spoken-tutorial.org/accounts/confirm_student/" + mdl_new_password + "/" + mdluser.id)
+'''.format(mdluser.firstname, mdluser.username, password_string, "http://spoken-tutorial.org/accounts/confirm_student/" + mdlid)
 
   # send email
   email = EmailMultiAlternatives(

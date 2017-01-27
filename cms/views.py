@@ -17,6 +17,7 @@ from PIL import Image
 import random, string
 from cms.services import *
 from mdldjango.urls import *
+from hashids import Hashids
 
 def dispatcher(request, permalink=''):
     if permalink == '':
@@ -353,13 +354,14 @@ def change_password(request):
     context.update(csrf(request))
     return render(request, 'cms/templates/change_password.html', context)
     
-def confirm_student(request, password, mdlid):
+def confirm_student(request, mdlid):
+    user_hashid = Hashids(salt = settings.SPOKEN_HASH_SALT)
+    mdluserid = user_hashid.decode(mdlid)
     try:
-        mdluser = MdlUser.objects.filter(id=mdlid).first()
-        user = User.objects.filter(email=mdluser.email)
-        student = Student.objects.filter(user_id = user.id)
-        #if profile.confirmation_code == confirmation_code and user.date_joined > (timezone.now()-timezone.timedelta(days=1)):
-        if mdluser.password == password:
+        mdluser = MdlUser.objects.filter(pk=mdluserid[0]).first()
+        user = User.objects.get(email=mdluser.email)
+        student = Student.objects.get(user_id = user.id)
+        if mdluser:
             user.is_active = True
             user.save()
             
@@ -370,9 +372,11 @@ def confirm_student(request, password, mdlid):
             messages.success(request, "Your account has been activated!. Please login to continue.")
             return HttpResponseRedirect('http://spoken-tutorial.org/participant/login/')
         else:
-            messages.error(request, "Something went wrong!. Please try again!")
+            print 'can not match record'
+            messages.error(request, "Your account not activated!. Please try again!")
             return HttpResponseRedirect('/')
     except Exception, e:
+        print e
         messages.error(request, "Your account not activated!. Please try again!")
         return HttpResponseRedirect('/')
 
@@ -383,7 +387,11 @@ def verify_email(request):
     if form.is_valid():
       email = form.cleaned_data['email']
       #send verification mail as per the criteria check
-      send_veriy_email(request,email)
+      status, msg = send_verify_email(request,email)
+      if status:
+        messages.success(request, msg, extra_tags='success')
+      else:
+        messages.error(request, msg, extra_tags='error')
     else:
-      messages.error(request, 'Invalid Email ID')
+      messages.error(request, 'Invalid Email ID', extra_tags='error')
   return render(request, "cms/templates/verify_email.html", context)
