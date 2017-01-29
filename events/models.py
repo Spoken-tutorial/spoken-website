@@ -568,6 +568,12 @@ class StudentMaster(models.Model):
     unique_together = ("batch", "student")
     ordering = ["student__user__first_name"]
 
+  def is_student_has_attendance(self):
+    tids = TrainingRequest.objects.filter(batch=self.batch_id).values('id')
+    if TrainingAttend.objects.filter(training_id__in=tids, student_id=self.student_id).exists():
+      return True
+    return False
+
 
 class Semester(models.Model):
   name = models.CharField(max_length = 50)
