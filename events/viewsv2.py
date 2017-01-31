@@ -2369,3 +2369,4 @@ class LearnDrupalFeedbackCreateView(CreateView):
       print "saved"
       messages.success(self.request, "Thank you for completing this feedback form. We appreciate your input and valuable suggestions.")
       return HttpResponseRedirect(self.success_url)
+
