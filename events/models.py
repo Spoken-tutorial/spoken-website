@@ -1,6 +1,7 @@
 from django.db import models
 from datetime import datetime, date, timedelta
-from django.db.models.signals import pre_delete
+from django.db.models.signals import pre_delete, post_delete
+from django.dispatch import receiver
 from django.db.models import Q, Count, Sum, Min
 
 #import auth user models
@@ -573,6 +574,11 @@ class StudentMaster(models.Model):
     if TrainingAttend.objects.filter(training_id__in=tids, student_id=self.student_id).exists():
       return True
     return False
+
+# Update student count in batch when delete student from batch
+@receiver(post_delete, sender=StudentMaster, dispatch_uid='update_batch_count')
+def update_batch_count(sender, instance, **kwargs):
+  instance.batch.update_student_count()
 
 
 class Semester(models.Model):
