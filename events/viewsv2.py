@@ -639,6 +639,9 @@ class TrainingCertificateListView(ListView):
     return context
 
 
+"""
+Delete Student
+"""
 class StudentDeleteView(DeleteView):
   model=Student
   def dispatch(self, *args, **kwargs):
@@ -657,6 +660,34 @@ class StudentDeleteView(DeleteView):
     except:
       pass
     return super(StudentDeleteView, self).dispatch(*args, **kwargs)
+
+
+"""
+Delete StudentMaster if student not having attendance
+args['pk'] - student id
+args['bid'] - batch id
+"""
+class StudentMasterDeleteView(DeleteView):
+  model=StudentMaster
+
+  def dispatch(self, *args, **kwargs):
+    self.success_url="/software-training/student-batch/"+str(kwargs['bid'])+"/view"
+    sm = super(StudentMasterDeleteView, self).get_object()
+    student = sm.student
+    if sm.is_student_has_attendance():
+      messages.error(self.request,
+	"You do not have permission to delete {0}\
+	 because you have marked the attendance".format(student.student_fullname()))
+      return HttpResponseRedirect(self.success_url)
+    try:
+      sm = StudentMaster.objects.get(student=student, moved=False)
+      if not sm.batch.organiser.academic_id == self.request.user.organiser.academic_id:
+        messages.error(self.request, "You do not have permission to delete " + student.student_fullname())
+        return HttpResponseRedirect(self.success_url)
+    except:
+      pass
+    return super(StudentMasterDeleteView, self).dispatch(*args, **kwargs)
+
 
 class TrainingCertificate():
   def custom_strftime(self, format, t):

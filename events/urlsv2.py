@@ -75,7 +75,7 @@ urlpatterns = [
     ),
     url(
       r'^(?P<bid>\d+)/student-delete/(?P<pk>\d+)/$', 
-      StudentDeleteView.as_view(template_name="student_delete.html", \
+      StudentMasterDeleteView.as_view(template_name="student_delete_masterbatch.html", \
         success_url="/software-training/student-batch"), 
       name="student_delete"
     ),
