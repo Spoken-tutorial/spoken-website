@@ -10,14 +10,9 @@ from django.utils import timezone
 from django.conf import settings
 from django.http import Http404
 from cms.models import *
-from events.models import Student
-from mdldjango.models import MdlUser
 from cms.forms import *
 from PIL import Image
 import random, string
-from cms.services import *
-from mdldjango.urls import *
-from hashids import Hashids
 
 def dispatcher(request, permalink=''):
     if permalink == '':
@@ -353,45 +348,3 @@ def change_password(request):
     context['form'] = form
     context.update(csrf(request))
     return render(request, 'cms/templates/change_password.html', context)
-    
-def confirm_student(request, mdlid):
-    user_hashid = Hashids(salt = settings.SPOKEN_HASH_SALT)
-    mdluserid = user_hashid.decode(mdlid)
-    try:
-        mdluser = MdlUser.objects.filter(pk=mdluserid[0]).first()
-        user = User.objects.get(email=mdluser.email)
-        student = Student.objects.get(user_id = user.id)
-        if mdluser:
-            user.is_active = True
-            user.save()
-            
-            student.verified = True
-            student.error = False
-            student.save()
-            
-            messages.success(request, "Your account has been activated!. Please login to continue.")
-            return HttpResponseRedirect('http://spoken-tutorial.org/participant/login/')
-        else:
-            print 'can not match record'
-            messages.error(request, "Your account not activated!. Please try again!")
-            return HttpResponseRedirect('/')
-    except Exception, e:
-        print e
-        messages.error(request, "Your account not activated!. Please try again!")
-        return HttpResponseRedirect('/')
-
-def verify_email(request):
-  context = {}
-  if request.method == 'POST':
-    form = VerifyForm(request.POST)
-    if form.is_valid():
-      email = form.cleaned_data['email']
-      #send verification mail as per the criteria check
-      status, msg = send_verify_email(request,email)
-      if status:
-        messages.success(request, msg, extra_tags='success')
-      else:
-        messages.error(request, msg, extra_tags='error')
-    else:
-      messages.error(request, 'Invalid Email ID', extra_tags='error')
-  return render(request, "cms/templates/verify_email.html", context)

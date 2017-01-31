@@ -1,4 +1,3 @@
-from mdldjango.urls import *
 from django.conf.urls import patterns, url, include
 urlpatterns = patterns('',
 
@@ -10,7 +9,5 @@ urlpatterns = patterns('',
 	url(r"^accounts/change-password/$", 'cms.views.change_password', name='change_password'),
 	url(r"^accounts/profile/(?P<username>[\w. @-]+)/$", 'cms.views.account_profile', name='profile'),
 	url(r"^accounts/view-profile/(?P<username>[\w. @-]+)/$", 'cms.views.account_view_profile', name='view_profile'),
-	url(r'^accounts/verify/$', 'cms.views.verify_email', name='verify_email'),
-	url(r'^accounts/confirm_student/(?P<mdlid>\w+)/$', 'cms.views.confirm_student', name='confirm_student'),
 	url(r'^(?P<permalink>.+)/$', 'cms.views.dispatcher', name="dispatcher"),
 )
