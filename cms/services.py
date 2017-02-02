@@ -22,6 +22,40 @@ def get_user_email(email):
   except ObjectDoesNotExist:
     return None
 
+def send_user_registration_confirmation(user):
+    p = Profile.objects.get(user=user)
+    #user.email = "k.sanmugam2@gmail.com"
+    # Sending email when an answer is posted
+    subject = 'Account Active Notification'
+    message = """Dear {0},
+
+Thank you for registering at {1}. You may activate your account by clicking on this link or copying and pasting it in your browser
+{2}
+
+Regards,
+Admin
+Spoken Tutorials
+IIT Bombay.
+    """.format(
+        user.username,
+        "http://spoken-tutorial.org",
+        "http://spoken-tutorial.org/accounts/confirm/" + str(p.confirmation_code) + "/" + user.username
+    )
+
+    email = EmailMultiAlternatives(
+        subject, message, 'no-reply@spoken-tutorial.org',
+        to = [user.email], bcc = [], cc = [],
+        headers={'Reply-To': 'no-reply@spoken-tutorial.org', "Content-type":"text/html;charset=iso-8859-1"}
+    )
+
+    #email.attach_alternative(message, "text/html")
+    try:
+      result = email.send(fail_silently=False)
+      return True
+    except smtplib.SMTPException:
+      print "Failed to send email to user"
+      return False
+
 def send_verify_email(request,email):
   message = None
   user_login = "http://spoken-tutorial.org/accounts/login/"
@@ -36,9 +70,14 @@ def send_verify_email(request,email):
     #not a student so only user
     if not user.is_active :
       #send user activation link mail
-      send_registration_confirmation(user)
-      message = 'Please confirm your verification by clicking on the activation link which has been sent to your registered email id '+email+'.'
-      return True, message
+      user_mail_status = send_user_registration_confirmation(user)
+      if user_mail_status:
+        message = 'Please confirm your verification by clicking on the activation link which has been sent to your registered email id '+email+'.'
+        return True, message
+      else:
+        message = 'Something went wrong!. Please try again later!'
+        #notify to admin via mail
+        return False, message  
     else:
       message = 'User '+email+' is already activated. Kindly visit <a href = '+user_login+' >login</a> page to continue.'
       return True, message
