@@ -63,7 +63,9 @@
             {% endif %}
           </td>
           <td>
-            <a class="btn btn-default" href="{% url 'events:student_delete' batch.id record.id %}">Delete</a>
+            {% with student_master=batch.id|get_student_master:record.id %}
+              <a class="btn btn-default" href="{% url 'events:student_delete' batch.id student_master.id %}">Delete</a>
+            {% endwith %}
           </td>
         </tr>
         {% endif %}
