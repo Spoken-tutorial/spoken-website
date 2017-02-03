@@ -106,8 +106,8 @@ def send_student_mail(email):
   mdluser.password = mdl_new_password
   mdluser.save()
   
-  user_hashid = Hashids(salt = settings.SPOKEN_HASH_SALT)
-  mdlid = user_hashid.encode(mdluser.id)
+  token = Hashids(salt = settings.SPOKEN_HASH_SALT).encode(mdluser.id)
+  print mdluser.id,token
   
   #send mail to student_mail
   subject = "Spoken Tutorial Online Test password"
@@ -130,7 +130,7 @@ line at the top of your web browser window.
 Cheers from the 'Spoken Tutorials Online Test Center' administrator,
 
 Admin Spoken Tutorials
-'''.format(mdluser.firstname, mdluser.username, password_string, "http://spoken-tutorial.org/accounts/confirm_student/" + mdlid)
+'''.format(mdluser.firstname, mdluser.username, password_string, "http://spoken-tutorial.org/accounts/confirm_student/" + token)
 
   # send email
   email = EmailMultiAlternatives(

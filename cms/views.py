@@ -354,11 +354,10 @@ def change_password(request):
     context.update(csrf(request))
     return render(request, 'cms/templates/change_password.html', context)
     
-def confirm_student(request, mdlid):
-    user_hashid = Hashids(salt = settings.SPOKEN_HASH_SALT)
-    mdluserid = user_hashid.decode(mdlid)
+def confirm_student(request, token):
+    mdluserid = Hashids(salt = settings.SPOKEN_HASH_SALT).decode(token)[0]
     try:
-        mdluser = MdlUser.objects.filter(pk=mdluserid[0]).first()
+        mdluser = MdlUser.objects.filter(pk=mdluserid).first()
         user = User.objects.get(email=mdluser.email)
         student = Student.objects.get(user_id = user.id)
         if mdluser:
@@ -375,8 +374,7 @@ def confirm_student(request, mdlid):
             print 'can not match record'
             messages.error(request, "Your account not activated!. Please try again!")
             return HttpResponseRedirect('/')
-    except Exception, e:
-        print e
+    except ObjectDoesNotExist:
         messages.error(request, "Your account not activated!. Please try again!")
         return HttpResponseRedirect('/')
 
