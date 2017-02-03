@@ -83,7 +83,7 @@ IIT Bombay.
     """.format(
         user.username,
         "http://spoken-tutorial.org",
-        "http://localhost:8000/accounts/confirm/" + str(p.confirmation_code) + "/" + user.username
+        "http://spoken-tutorial.org/accounts/confirm/" + str(p.confirmation_code) + "/" + user.username
     )
 
     email = EmailMultiAlternatives(
