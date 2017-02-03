@@ -31,7 +31,7 @@ urlpatterns = [
       r'^student-batch/(?P<pk>\d+)/$', 
       StudentBatchUpdateView.as_view(template_name="edit_batch.html", \
         form_class=UpdateStudentBatchForm), 
-      name="edit_student"
+      name="edit_batch"
     ),
     url(
       r'^student-batch/edit/(?P<pk>\d+)/$', 

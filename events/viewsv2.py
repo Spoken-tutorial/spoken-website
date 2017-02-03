@@ -331,19 +331,40 @@ class StudentBatchCreateView(CreateView):
 class StudentBatchUpdateView(UpdateView):
     model = StudentBatch
     success_url = "/software-training/student-batch/"
+    sb = None
     @method_decorator(group_required("Organiser"))
     def dispatch(self, *args, **kwargs):
-      #trainingrequest_set.all()
-      if 'pk' in kwargs:
-        try:
-          sb = StudentBatch.objects.get(pk=kwargs['pk'])
-          if sb.trainingrequest_set.exists():
-            #messages.warning(self.request, 'This Student Batch has Training. You can not edit this batch.')
-            return HttpResponseRedirect('/software-training/student-batch/edit/'+str(kwargs['pk']))
-        except:
-          pass
+      self.sb = StudentBatch.objects.get(pk=kwargs['pk'])
       return super(StudentBatchUpdateView, self).dispatch(*args, **kwargs)
 
+    def get_context_data(self, **kwargs):
+      context = super(StudentBatchUpdateView, self).get_context_data(**kwargs)
+      context['sb'] = self.sb
+      return context
+
+    def form_valid(self, form, **kwargs):
+      # Check if all student participate in selected foss
+      try:
+        if str(self.sb.year) == str(form.cleaned_data['year']) and str(self.sb.department) == str(form.cleaned_data['department']):
+          return HttpResponseRedirect(self.success_url)
+
+        sb = StudentBatch.objects.filter(
+          academic_id=self.request.user.organiser.academic.id,
+          department=form.cleaned_data['department'],
+          year = form.cleaned_data['year']
+        )
+        if (sb.exists()):
+          sb = sb.first()
+          messages.warning(self.request, "%s - %s Batch is already chosen by Organiser %s in your College." % (sb.department, sb.year, sb.organiser))
+          return self.form_invalid(form)
+        # Not sure do we wnat this option
+        # if sb.trainingrequest_set.exists():
+        #   messages.warning(self.request, '%s - %s Batch has Training. You can not edit this batch'% (sb.department, sb.year))
+        form.save()
+
+      except:
+        pass
+      return HttpResponseRedirect(self.success_url)
 
 class StudentBatchYearUpdateView(UpdateView):
     model = StudentBatch

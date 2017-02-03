@@ -25,7 +25,7 @@
                           {{ form.department.errors }}
                         </div>
                       </div>
-                      
+
                       <div class='form-row'>
                         <div class='col-xs-12 form-group required'>
                           <label class='control-label'>Year</label>
@@ -33,7 +33,7 @@
                           {{ form.year.errors }}
                         </div>
                       </div>
-                      
+
                       <div class="form-group">
                           <div class="col-xs-12 form-group">
                               <input class="btn btn-primary" id="update" type="submit" value="Update" />
@@ -48,6 +48,8 @@
 {% endblock %}
 {% block jsblock %}
   <script>
+  var defaultDept = $('#id_department').val();
+  var defaultYear = $('#id_year').val();
   $('.department').on('change', function() {
         department = $('.department').val();
         year = $('.year').val();
@@ -61,20 +63,18 @@
               department: department,
               year: year,
             },
-            beforeSend: function() {
-              //$('.ajax-refresh-language').show();
-            },
             success: function(data) {
               // loading languages
               if(data && data['dept_status']) {
                 $('#update').attr('disabled', false);
                } else {
+                $('#id_department').val(defaultDept);
+                $('#id_year').val(defaultYear);
                 alert('This department with selected year is already chosen by another Organiser in your College. ');
               }
-              //$('.ajax-refresh-language').hide();
             }
           });
-                
+
         }
       });
   $('.year').on('change', function() {
@@ -90,24 +90,22 @@
               department: department,
               year: year,
             },
-            beforeSend: function() {
-              //$('.ajax-refresh-language').show();
-            },
             success: function(data) {
               // loading languages
               if(data && data['dept_status']) {
                 $('#update').attr('disabled', false);
                } else {
+                $('#id_department').val(defaultDept);
+                $('#id_year').val(defaultYear);
                 alert('This department with selected year is already chosen by another Organiser in your College. ');
               }
-              //$('.ajax-refresh-language').hide();
             }
           });
-                
+
         }
       });
-  
-  
-  
+
+
+
   </script>
 {% endblock %}
