@@ -191,12 +191,24 @@ class CourseMapForm(forms.ModelForm):
     super(CourseMapForm, self).__init__(*args, **kwargs)
 
 class UserForm(forms.ModelForm):
+  gender = forms.ChoiceField(choices=[('Male', 'Male'),('Female','Female')])
   class Meta:
     model = User
-    exclude = ['password','last_login','is_superuser','username','is_staff','is_active','date_joined','groups','user_permissions','email']
+    exclude = ['password','last_login','is_superuser','username','is_staff','is_active','date_joined','groups','user_permissions']
+
+  # def clean_email(self):
+  #   email = self.cleaned_data['email']
+  #   try:
+  #     if not validate_email(email):
+  #       raise forms.ValidationError(u'%s is not valid email.' % email )
+  #   except:
+  #     raise forms.ValidationError(u'%s is not valid email.' % email )
 
   def __init__(self, *args, **kwargs):
     super(UserForm, self).__init__(*args, **kwargs)
+    if 'instance' in kwargs:
+      self.fields['gender'].initial = kwargs['instance'].student.gender
+
 
 class SingleTrainingForm(forms.ModelForm):
   training_type = forms.ChoiceField(choices=[('', '---------'), (0, 'School'),(3,'Vocational'),(1,'Live workshop'),(2,'Pilot workshop')])

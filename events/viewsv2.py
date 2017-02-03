@@ -2345,9 +2345,42 @@ def LatexWorkshopFileUpload(request):
 class UpdateStudentName(UpdateView):
   model = User
   form_class = UserForm
+  user = None
   def dispatch(self, *args, **kwargs):
+    self.user = User.objects.get(pk=kwargs['pk'])
     self.success_url="/software-training/student-batch/"+str(kwargs['bid'])+"/view"
     return super(UpdateStudentName, self).dispatch(*args, **kwargs)
+
+  def get_context_data(self, **kwargs):
+    context = super(UpdateStudentName, self).get_context_data(**kwargs)
+    context['user'] = self.user
+    return context
+
+  def form_valid(self, form, **kwargs):
+    try:
+      email = form.cleaned_data['email']
+      self.user.student.gender = form.cleaned_data['gender']
+      self.user.student.save()
+      self.user.first_name = form.cleaned_data['first_name']
+      self.user.last_name = form.cleaned_data['last_name']
+      if self.user.email != email:
+        try:
+          user = User.objects.get(email = email)
+          messages.error(self.request, "%s  already exists." % (email))
+          return self.form_invalid(form)
+        except User.DoesNotExist:
+          pass
+        # Set verify as false
+        self.user.is_active = 0
+        self.user.student.verified = 0
+        self.user.student.error = 0
+        # Save student
+        self.user.student.save()
+        self.user.email = email
+      self.user.save()
+    except Exception:
+      pass
+    return HttpResponseRedirect(self.success_url)
 
 class STWorkshopFeedbackCreateView(CreateView):
     form_class = STWorkshopFeedbackForm
