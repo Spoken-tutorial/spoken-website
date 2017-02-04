@@ -197,6 +197,22 @@ class StudentBatchCreateView(CreateView):
     self.organiser = self.user.organiser
     form_data.organiser = self.user.organiser
     studentcount = 0
+    # one organiser for one department
+    # It will check only the new department batch upload
+    # Will allow to upload if organiser already having batch for that department
+    try:
+      department = StudentBatch.objects.filter(
+        department=form.cleaned_data['department'],
+        academic=self.user.organiser.academic
+      )
+      this_organiser_dept = department.filter(organiser=self.request.user.organiser);
+      if not this_organiser_dept.exists() and department.exists():
+        messages.error(self.request, "%s department is already assigened to organiser %s in your College." % (form.cleaned_data['department'], department.first().organiser))
+        return self.form_invalid(form)
+
+    except Exception, e:
+      return self.form_invalid(form)
+
     try:
       if 'bid' in self.kwargs:
         form_data = StudentBatch.objects.get(pk=self.kwargs['bid'])
