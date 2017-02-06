@@ -107,7 +107,6 @@ def send_student_mail(email):
   mdluser.save()
   
   token = Hashids(salt = settings.SPOKEN_HASH_SALT).encode(mdluser.id)
-  print mdluser.id,token
   
   #send mail to student_mail
   subject = "Spoken Tutorial Online Test password"
