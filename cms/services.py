@@ -82,8 +82,8 @@ def send_verify_email(request,email):
       message = 'User '+email+' is already activated. Kindly visit <a href = '+user_login+' >login</a> page to continue.'
       return True, message
   #is student so proceed with following,
-  if student.verified:
-    message = 'Student '+email+' is already verified. Kindly visit <a href = '+student_login+' >login</a> page to continue.'
+  if student.verified and user.is_active:
+    message = 'Participant '+email+' is already verified. Kindly visit <a href = '+student_login+' >login</a> page to continue.'
     return True, message
   else:
     #send email to students
