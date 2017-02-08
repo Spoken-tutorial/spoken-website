@@ -1,31 +1,35 @@
-# Standard Library
-from datetime import datetime
-import json
-import os
-from urllib import quote, unquote_plus, urlopen
-
-# Third Party Stuff
-from django.conf import settings
-from django.contrib import messages
-from django.contrib.auth.models import User
-from django.core.context_processors import csrf
-from django.core.exceptions import PermissionDenied
-from django.db.models import Q
-from django.http import Http404, HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, \
+    HttpResponsePermanentRedirect
+from django.template import RequestContext
 from django.shortcuts import render
+from django.contrib import messages
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.core.context_processors import csrf
 from django.views.decorators.csrf import csrf_exempt
+from django.core.mail import EmailMultiAlternatives
+from django.db.models import Q
+from django.conf import settings
 from forms import *
-
-# Spoken Tutorial Stuff
-from cms.forms import *
-from cms.models import Event, News, NewsType, Notification, SiteFeedback
-from creation.models import Language, TutorialDetail, TutorialResource
+import os
+from django.http import Http404
+from django.core.exceptions import PermissionDenied
+from urllib import urlopen, quote, unquote_plus
+import json
+import datetime
+from dateutil.relativedelta import relativedelta
 from creation.subtitles import *
-from creation.views import get_video_info
+from creation.views import get_video_info, is_administrator
+from creation.models import TutorialCommonContent, TutorialDetail, TutorialResource, Language
+from cms.models import SiteFeedback, Event, NewsType, News, Notification
 from events.views import get_page
-from forums.models import Question
-from spoken.filters import NewsStateFilter
 from spoken.search import search_for_results
+from mdldjango.models import MdlUser
+from forums.models import Question
+from cms.forms import *
+from spoken.filters import NewsStateFilter
+
+from django.contrib.auth.models import User
 
 
 def is_resource_person(user):
