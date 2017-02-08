@@ -5,13 +5,10 @@ import os
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
-from django.core.context_processors import csrf
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
 from django.shortcuts import render
-from django.views.decorators.csrf import csrf_exempt
 
 # Spoken Tutorial Stuff
 from creation.models import *
