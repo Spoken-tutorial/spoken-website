@@ -1,3 +1,4 @@
+# Third Party Stuff
 from django.db import models
 
 events = (

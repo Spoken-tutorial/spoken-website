@@ -1,13 +1,18 @@
+# Standard Library
+import hashlib
+import os
+import subprocess
+from collections import OrderedDict
+from string import Template
+
+# Third Party Stuff
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from django.template import RequestContext
-from certificate.models import Drupal_WS, Question, Answer, FeedBack, Drupal_camp, Certificate
-import subprocess
-import os
-from string import Template
-import hashlib
+
+# Spoken Tutorial Stuff
 from certificate.forms import FeedBackForm
-from collections import OrderedDict
+from certificate.models import Answer, Certificate, Drupal_camp, Drupal_WS, FeedBack, Question
 
 
 def index(request):
