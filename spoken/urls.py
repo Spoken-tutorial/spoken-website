@@ -1,7 +1,9 @@
-from django.conf.urls import patterns, include, url
-from django.views.generic import TemplateView
+# Third Party Stuff
 import settings
+from django.conf.urls import include, patterns, url
 from django.contrib import admin
+from django.views.generic import TemplateView
+
 admin.autodiscover()
 
 urlpatterns = patterns('',
@@ -34,12 +36,12 @@ urlpatterns = patterns('',
 
     # Uncomment the next line to enable the admin:
     url(r'^admin/', include(admin.site.urls)),
-    
-    #evens old url
+
+    # evens old url
     url(r'^workshops/college/view_college/(\d+)/$', 'workshop.views.view_college', name='view_college'),
     url(r'^workshops/resource_center_view_college/(\d+)/$', 'workshop.views.view_college', name='view_college'),
     url(r'^resource_center_view_college_map_details/(\d+)/$', 'workshop.views.view_college', name='view_college'),
-    #url(r'^software-training/academic-center/(\d+)/([a-zA-Z-]+)/$', 'workshop.views.view_college', name='view_college'),
+    # url(r'^software-training/academic-center/(\d+)/([a-zA-Z-]+)/$', 'workshop.views.view_college', name='view_college'),
     url(r'^completed_workshops_list/(?P<state_code>[\w-]+)/$', 'workshop.views.training_list', name='training_list'),
     url(r'^view_completed_workshop/(\d+)/$', 'workshop.views.view_training', name='view_training'),
     url(r'^feedback_list/(?P<code>.+)/$', 'workshop.views.training_feedback', name='training_feedback'),
@@ -48,9 +50,9 @@ urlpatterns = patterns('',
     url(r'^workshops/academic_details/(?P<state>.+)/$', 'workshop.views.academic_details_state', name='academic_details_state'),
     url(r'^resource_center_map_details/(?P<state>.+)/$', 'workshop.views.academic_details_state', name='academic_details_state'),
     url(r'^workshops/resource_center_details/$', 'workshop.views.view_college', name='view_college'),
-    #url(r'^statistics/training/$', 'workshop.views.statistics_training', name='statistics_training'),
-    
-    #events urls
+    # url(r'^statistics/training/$', 'workshop.views.statistics_training', name='statistics_training'),
+
+    # events urls
     url(r'^software-training/', include('events.urls', namespace='events')),
     url(r'^participant/', include('mdldjango.urls', namespace='mdldjango')),
     url(r'^cdcontent/', include('cdcontent.urls', namespace='cdcontent')),
@@ -59,39 +61,39 @@ urlpatterns = patterns('',
 
     # team
     url(r'^team/', include('team.urls')),
-    
+
     # certificate
     url(r'^certificate/', include('certificate.urls', namespace='certificate')),
 
     url(r'^creation/', include('creation.urls', namespace='creation')),
     url(r'^nicedit/', include('nicedit.urls')),
-    #url(r'^migration/creation/', include('creationmigrate.urls', namespace='creationmigrate')),
-    #url(r'^migration/events/', include('eventsmigration.urls', namespace='eventsmigration')),
-    url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT, 'show_indexes':False}),
+    # url(r'^migration/creation/', include('creationmigrate.urls', namespace='creationmigrate')),
+    # url(r'^migration/events/', include('eventsmigration.urls', namespace='eventsmigration')),
+    url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT, 'show_indexes': False}),
 
     # Old url adjustments
     url(r'^list_videos/$', 'cdeep.views.list_videos', name='list_videos'),
     url(r'^show_video/$', 'cdeep.views.show_video', name='show_video'),
     url(r'^search/node/([0-9a-zA-Z-+%\(\)]+)/$', 'cdeep.views.search_node', name='search_node'),
-    
+
     # Masquerade user
     url(r'^masquerade/', include('masquerade.urls', namespace='masquerade')),
-    
+
     # Cron links
     url(r'^cron/subtitle-files/create/$', 'spoken.views.create_subtitle_files', name='create_subtitle_files'),
-    
+
     # reports
     url(r'^report_builder/', include('report_builder.urls')),
-    
+
     # Youtube API V3
     url(r'^youtube/', include('youtube.urls', namespace='youtube')),
-    
+
     # reports
     url(r'^reports/', include('reports.urls', namespace='reports')),
-    
-    #events2
-    #url(r'^events2/', include('events2.urls', namespace='events2')),
-    
-    #cms
+
+    # events2
+    # url(r'^events2/', include('events2.urls', namespace='events2')),
+
+    # cms
     url(r'^', include('cms.urls', namespace='cms')),
 )
