@@ -7,7 +7,7 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
 # Spoken Tutorial Stuff
-from creation.models import *
+from creation.models import Language, TutorialDetail, TutorialResource
 
 
 @csrf_exempt

@@ -89,7 +89,7 @@ INSTALLED_APPS = (
 )
 
 MIDDLEWARE_CLASSES = (
-    #'django.middleware.cache.UpdateCacheMiddleware',
+    # 'django.middleware.cache.UpdateCacheMiddleware',
     'htmlmin.middleware.HtmlMinifyMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -100,7 +100,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.common.BrokenLinkEmailsMiddleware',
     'masquerade.middleware.MasqueradeMiddleware',
     'django.contrib.redirects.middleware.RedirectFallbackMiddleware',
-    #'django.middleware.cache.FetchFromCacheMiddleware',
+    # 'django.middleware.cache.FetchFromCacheMiddleware',
     'htmlmin.middleware.MarkRequestMiddleware',
 )
 
@@ -212,15 +212,15 @@ STATICFILES_DIRS = (
     #BASE_DIR + '/static/',
 )
 
-#debugging 
+#debugging
 #INSTALLED_APPS = INSTALLED_APPS + ('debug_toolbar',)
 INTERNAL_IPS = ('127.0.0.1',)
 
 #Moodle Auth
 #AUTH_USER_MODEL = 'mdldjango.Users'
 DATABASE_ROUTERS = [
-    'mdldjango.router.MdlRouter', 
-    'cdeep.router.CdeepRouter', 
+    'mdldjango.router.MdlRouter',
+    'cdeep.router.CdeepRouter',
     'workshop.router.WorkshopRouter',
     'forums.router.ForumsRouter'
 ]
@@ -233,9 +233,9 @@ AUTHENTICATION_BACKENDS = (
 )
 # Reports
 REPORT_BUILDER_INCLUDE = []
-REPORT_BUILDER_EXCLUDE = ['user'] # Allow all models except User to be accessed
+REPORT_BUILDER_EXCLUDE = ['user']  # Allow all models except User to be accessed
 REPORT_BUILDER_ASYNC_REPORT = False
-#template
+
 TEMPLATE_CONTEXT_PROCESSORS = (
     "django.contrib.auth.context_processors.auth",
     "django.core.context_processors.debug",

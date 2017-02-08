@@ -1,10 +1,6 @@
-# urls.py
 from django.conf.urls import url
-from team.views import *
+from .views import TeamListView
+
 urlpatterns = [
-  url(
-    r'^(?P<role>[-\w ]+)/$',
-    TeamListView.as_view(template_name="team_members.html"),
-    name="team"
-  ),
+    url(r'^(?P<role>[-\w ]+)/$', TeamListView.as_view(template_name="team_members.html"), name="team"),
 ]
