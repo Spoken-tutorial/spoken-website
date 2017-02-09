@@ -462,7 +462,7 @@ class STWorkshopFeedbackFormPost(forms.ModelForm):
               'suggestions' : forms.Textarea,
               }
               
-class LearnDrupalFeedback(forms.ModelForm):
+class LearnDrupalFeedbackForm(forms.ModelForm):
   class Meta:
     model = LearnDrupalFeedback
     fields = '__all__'
@@ -471,7 +471,7 @@ class LearnDrupalFeedback(forms.ModelForm):
               }
               
   def __init__(self, *args, **kwargs):
-    super(LearnDrupalFeedback, self).__init__(*args, **kwargs)
+    super(LearnDrupalFeedbackForm, self).__init__(*args, **kwargs)
     self.fields['name'].required = False
     self.fields['phonemob'].required = False
     self.fields['affiliation'].required = False
