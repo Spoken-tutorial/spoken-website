@@ -34,6 +34,9 @@ class RegisterForm(forms.Form):
             ),
         ]
     )
+    first_name = forms.CharField()
+    last_name = forms.CharField()
+    phone = forms.CharField(max_length=20)
     password = forms.CharField(
         label = _("Password"),
         widget = forms.PasswordInput(render_value = False),
