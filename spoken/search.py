@@ -56,7 +56,6 @@ def search_for_results(userquery, corrected_flag=True):
                     corrected_string = corrected.string
 
             results = searcher.search(q, terms=True, limit=None)
-            ##############################################################################################
 
             # printing the no.of videos found and their title of the video
             print "%d Videos Found for %s " % (results.scored_length(), userquery)
