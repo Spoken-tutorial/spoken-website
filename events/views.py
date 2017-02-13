@@ -2103,14 +2103,14 @@ def test_participant_ceritificate(request, wid, participant_id):
 
     # Draw image on Canvas and save PDF in buffer
     imgPath = settings.MEDIA_ROOT +"sign.jpg"
-    imgDoc.drawImage(imgPath, 600, 100, 150, 76)    ## at (399,760) with size 160x160
+    imgDoc.drawImage(imgPath, 600, 80, 150, 76)    ## at (399,760) with size 160x160
     
     #paragraphe
     text = "This is to certify that <b>"+ta.mdluser_firstname +" "+ta.mdluser_lastname+"</b> has successfully completed <b>"+w.foss.foss+"</b> test organized at <b>"+w.academic.institution_name+"</b> by <b>"+w.organiser.user.first_name + " " + w.organiser.user.last_name+"</b>  with course material provided by the Talk To A Teacher project at IIT Bombay.  <br /><br /><p>Passing an online exam, conducted remotely from IIT Bombay, is a pre-requisite for completing this training. <b>"+w.invigilator.user.first_name + " "+w.invigilator.user.last_name+"</b> at <b>"+w.academic.institution_name+"</b> invigilated this examination. This training is offered by the <b>Spoken Tutorial Project, IIT Bombay, funded by National Mission on Education through ICT, MHRD, Govt., of India.</b></p>"
     
     centered = ParagraphStyle(name = 'centered',
         fontSize = 16,  
-        leading = 30,  
+        leading = 24,  
         alignment = 0,  
         spaceAfter = 20)
 
