@@ -461,8 +461,6 @@ class TrainingRequestCreateView(CreateView):
     else:
         kwargs.update({'course_type' :(('', '---------'), (0, 'Software Course outside lab hours'), (1, 'Software Course mapped in lab hours'), (2, ' Software Course unmapped in lab hours')) })
 
-
-
     return kwargs
 
   def post(self, request, *args, **kwargs):
@@ -489,9 +487,20 @@ class TrainingRequestCreateView(CreateView):
         if is_batch_has_course:
           messages.error(self.request, 'This "%s" already taken/requested the selected "%s" course.' % (form_data.batch, form_data.course))
           return self.form_invalid(form)
-        else:
-          form_data.training_planner_id = self.kwargs['tpid']
-          form_data.save()
+
+        training_planner = TrainingPlanner.objects.get(pk=self.tpid)
+        # Check if course is full for this semester
+        if training_planner.is_full(form_data.department.id, form_data.batch.id):
+          messages.error(self.request, 'No. of training requests exceeded for this semester.')
+          return self.form_invalid(form)
+
+        # Check if course is full for test or without test
+        if training_planner.is_course_full(form_data.course.id, form_data.department.id, form_data.batch.id):
+          messages.error(self.request, 'No. of training requests for selected course type exceeded.')
+          return self.form_invalid(form)
+
+        form_data.training_planner_id = self.kwargs['tpid']
+        form_data.save()
 
       else:
         sb.update_student_count()
@@ -503,7 +512,6 @@ class TrainingRequestCreateView(CreateView):
     context = {}
     messages.success(self.request,'STP has been added successfully. Now continue with step 3 "Select Participants " on STPS page. Select the participants from the Master Batch Student List for any one course that you are starting with. This is necessary for receiving certificates.')
     return HttpResponseRedirect('/software-training/{0}/training-request/'.format(self.tpid))
-    #return render_to_response(self.template_name, context, context_instance=RequestContext(self.request))
 
 class TrainingRequestEditView(CreateView):
   form_class = TrainingRequestEditForm
@@ -1010,7 +1018,7 @@ class GetCourseOptionView(JSONResponseMixin, View):
           'is_full' : False
         }
     else:
-      if tp.is_course_full(category, self.request.POST.get('department'), self.request.POST.get('batch')):
+      if tp.is_course_full(self.request.POST.get('course'), self.request.POST.get('department'), self.request.POST.get('batch')):
         context['is_full'] = True
       else:
         courses = CourseMap.objects.filter(category=category)

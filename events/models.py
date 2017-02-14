@@ -704,7 +704,8 @@ class TrainingPlanner(models.Model):
   def is_full(self, department_id, batch_id):
     if self.training_requests().filter(
       department_id=department_id,
-      batch_id=batch_id
+      batch_id=batch_id,
+      training_planner__semester=self.semester
     ).count() > 2:
       return True
     return False
@@ -718,19 +719,23 @@ class TrainingPlanner(models.Model):
     return False
 
   # todo with test without test
-  def is_course_full(self, category, department_id, batch_id):
+  def is_course_full(self, course, department_id, batch_id):
+    course = CourseMap.objects.get(pk=course)
+    if course.test:
+      if self.training_requests().filter(
+        department_id=department_id,
+        batch_id=batch_id,
+        #course__category = category,
+        course__test = True,
+        training_planner__semester = self.semester
+        ).count() > 1:
+          return True
     if self.training_requests().filter(
       department_id=department_id,
       batch_id=batch_id,
-      course__category = category,
-      course__test = True
-    ).count() > 1:
-      return True
-    elif self.training_requests().filter(
-      department_id=department_id,
-      batch_id=batch_id,
-      course__category = category,
-      course__test = False
+      #course__category = category,
+      course__test = False,
+      training_planner__semester = self.semester
     ).count() > 2:
       return True
     return False
@@ -739,26 +744,26 @@ class TrainingPlanner(models.Model):
     if self.training_requests().filter(
       department_id=department_id,
       batch_id=batch_id,
-      course__category = category,
+      #course__category = category,
       course__test = True
     ).count() > 1:
       return True
     elif self.training_requests().filter(
       department_id=department_id,
       batch_id=batch_id,
-      course__category = category,
+      #course__category = category,
       course__test = False
     ).count() > 11:
       return True
     return False
 
-  def is_unmapped_course_full(self, department_id):
-    if self.training_requests().filter(
-      department_id=department_id,
-      course__category = 2
-    ).count() > 4:
-      return True
-    return False
+  # def is_unmapped_course_full(self, department_id):
+  #   if self.training_requests().filter(
+  #     department_id=department_id,
+  #     course__category = 2
+  #   ).count() > 4:
+  #     return True
+  #   return False
 
   def get_current_semester_date_duration(self):
     if self.semester.even:
