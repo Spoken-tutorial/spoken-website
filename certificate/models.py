@@ -1,11 +1,10 @@
+# Third Party Stuff
 from django.db import models
-from django.contrib.auth.models import User
-# Create your models here.
 
 events = (
-            ('DCM', 'DrupalCamp Mumbai'),
-            ('DRP', 'Drupal Workshop'),
-        )
+    ('DCM', 'DrupalCamp Mumbai'),
+    ('DRP', 'Drupal Workshop'),
+)
 
 
 class Event(models.Model):
@@ -14,10 +13,11 @@ class Event(models.Model):
     end_date = models.DateTimeField()
     # other details
 
+
 class Certificate(models.Model):
     name = models.CharField(max_length=100)
     email = models.CharField(max_length=50, null=True, blank=True)
-    serial_no = models.CharField(max_length=50) #purpose+uin+1stletter
+    serial_no = models.CharField(max_length=50)  # purpose+uin+1stletter
     counter = models.IntegerField()
     workshop = models.CharField(max_length=100, null=True, blank=True)
     paper = models.CharField(max_length=100, null=True, blank=True)
@@ -46,9 +46,11 @@ class Question(models.Model):
     question = models.CharField(max_length=500)
     purpose = models.CharField(max_length=10, default='SLC')
 
+
 class Answer(models.Model):
     question = models.ForeignKey(Question)
     answer = models.CharField(max_length=1000)
+
 
 class Drupal_camp(models.Model):
     firstname = models.CharField(max_length=200)
@@ -59,6 +61,7 @@ class Drupal_camp(models.Model):
     role = models.CharField(max_length=100, null=True, blank=True)
     purpose = models.CharField(max_length=10, default='DCM')
     is_student = models.IntegerField(default=0)
+
 
 class Drupal_WS(models.Model):
     name = models.CharField(max_length=200)

@@ -13,7 +13,7 @@ from django.utils.decorators import method_decorator
 from events.decorators import group_required
 from events.forms import StudentBatchForm, TrainingRequestForm, \
     TrainingRequestEditForm, CourseMapForm, SingleTrainingForm, \
-    OrganiserFeedbackForm,STWorkshopFeedbackForm,STWorkshopFeedbackFormPre,STWorkshopFeedbackFormPost,LearnDrupalFeedback, LatexWorkshopFileUploadForm, UserForm, \
+    OrganiserFeedbackForm,STWorkshopFeedbackForm,STWorkshopFeedbackFormPre,STWorkshopFeedbackFormPost,LearnDrupalFeedbackForm, LatexWorkshopFileUploadForm, UserForm, \
     SingleTrainingEditForm
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, render_to_response
@@ -2337,35 +2337,30 @@ class STWorkshopFeedbackPostCreateView(CreateView):
       form_data = form.save(commit=False)
       form_data.user = self.request.user
       form_data.save()
-      print "saved"
       messages.success(self.request, "Thank you for completing this feedback form. We appreciate your input and valuable suggestions.")
       return HttpResponseRedirect(self.success_url)
 
 class LearnDrupalFeedbackCreateView(CreateView):
-  form_class = LearnDrupalFeedback
+  form_class = LearnDrupalFeedbackForm
   template_name = "learndrupalfeedback.html"
   success_url = "/home"
   
   def get(self, request, *args, **kwargs):
-	    return render_to_response(self.template_name, {'form': self.form_class()}, 
-	      context_instance=RequestContext(self.request))
+    # import ipdb; ipdb.set_trace()
+    return render_to_response(self.template_name, {'form': self.form_class()},context_instance=RequestContext(self.request))
   
   def post(self,  request, *args, **kwargs):
       self.object = None
       form = self.get_form(self.get_form_class())
       if form.is_valid():
         return self.form_valid(form)
-        #form.save()
-        #messages.success(self.request, "Thank you for completing this feedback form. We appreciate your input and valuable suggestions.")
-        return HttpResponseRedirect(self.success_url)
       else:
         print form.errors
         return self.form_invalid(form)
         
   def form_valid(self, form, **kwargs):
       form_data = form.save(commit=False)
-      form_data.user = self.request.user
       form_data.save()
-      print "saved"
       messages.success(self.request, "Thank you for completing this feedback form. We appreciate your input and valuable suggestions.")
       return HttpResponseRedirect(self.success_url)
+
