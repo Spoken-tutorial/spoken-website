@@ -10,9 +10,14 @@ from django.utils import timezone
 from django.conf import settings
 from django.http import Http404
 from cms.models import *
+from events.models import Student
+from mdldjango.models import MdlUser
 from cms.forms import *
 from PIL import Image
 import random, string
+from cms.services import *
+from mdldjango.urls import *
+from hashids import Hashids
 
 def dispatcher(request, permalink=''):
     if permalink == '':
@@ -28,9 +33,9 @@ def dispatcher(request, permalink=''):
     }
     return render(request, 'cms/templates/page.html', context)
 
-def create_profile(user):
+def create_profile(user, phone):
     confirmation_code = ''.join(random.choice(string.ascii_uppercase + string.digits + string.ascii_lowercase) for x in range(33))
-    profile = Profile(user=user, confirmation_code=confirmation_code)
+    profile = Profile(user=user, confirmation_code=confirmation_code, phone=phone)
     profile.save()
     return profile
 
@@ -42,10 +47,15 @@ def account_register(request):
             username = request.POST['username']
             password = request.POST['password']
             email = request.POST['email']
-            user = User.objects.create_user(username, email, password)
+            first_name = request.POST['first_name']
+            last_name = request.POST['last_name']
+            phone = request.POST['phone']
+            user = User.objects.create_user(username,email,password)
+            user.first_name = first_name
+            user.last_name = last_name
             user.is_active = False
             user.save()
-            create_profile(user)
+            create_profile(user, phone)
             send_registration_confirmation(user)
             messages.success(request, """
                 Please confirm your registration by clicking on the activation link which has been sent to your registered email id.
@@ -103,8 +113,8 @@ def confirm(request, confirmation_code, username):
             user.save()
             user.backend='django.contrib.auth.backends.ModelBackend' 
             login(request,user)
-            messages.success(request, "Your account has been activated!. Please update your profile to complete your registration")
-            return HttpResponseRedirect('/accounts/profile/'+user.username)
+            messages.success(request, "Your account has been activated!. Please update your profile.")
+            return HttpResponseRedirect('/')
         else:
             messages.success(request, "Something went wrong!. Please try again!")
             return HttpResponseRedirect('/')
@@ -348,3 +358,43 @@ def change_password(request):
     context['form'] = form
     context.update(csrf(request))
     return render(request, 'cms/templates/change_password.html', context)
+    
+def confirm_student(request, token):
+    mdluserid = Hashids(salt = settings.SPOKEN_HASH_SALT).decode(token)[0]
+    try:
+        mdluser = MdlUser.objects.filter(pk=mdluserid).first()
+        user = User.objects.get(email=mdluser.email)
+        student = Student.objects.get(user_id = user.id)
+        if mdluser:
+            user.is_active = True
+            user.save()
+            
+            student.verified = True
+            student.error = False
+            student.save()
+            
+            messages.success(request, "Your account has been activated!. Please login to continue.")
+            return HttpResponseRedirect('http://spoken-tutorial.org/participant/login/')
+        else:
+            print 'can not match record'
+            messages.error(request, "Your account not activated!. Please try again!")
+            return HttpResponseRedirect('/')
+    except ObjectDoesNotExist:
+        messages.error(request, "Your account not activated!. Please try again!")
+        return HttpResponseRedirect('/')
+
+def verify_email(request):
+  context = {}
+  if request.method == 'POST':
+    form = VerifyForm(request.POST)
+    if form.is_valid():
+      email = form.cleaned_data['email']
+      #send verification mail as per the criteria check
+      status, msg = send_verify_email(request,email)
+      if status:
+        messages.success(request, msg, extra_tags='success')
+      else:
+        messages.error(request, msg, extra_tags='error')
+    else:
+      messages.error(request, 'Invalid Email ID', extra_tags='error')
+  return render(request, "cms/templates/verify_email.html", context)

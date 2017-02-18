@@ -40,8 +40,8 @@
           </div>
         </div>
       </div>
-      
-      
+
+
       <div class="col-lg-4 col-md-4 col-sm-4">
         <div class="form-group">
           <label for="id_resource_center" class="col-sm-4 control-label">Institution</label>
@@ -53,8 +53,8 @@
         <div class="form-group">
           <label for="id_training_type" class="col-sm-4 control-label">Type of Course</label>
           <div class="col-sm-8">
-            {% render_field form.course__category class+="form-control training_type" tabindex="1" %}
-            {{ form.course__category.errors }}
+            {% render_field form.course_type class+="form-control training_type" tabindex="1" %}
+            {{ form.course_type.errors }}
           </div>
         </div>
         <div class="form-group">
@@ -121,8 +121,8 @@
                   {% if attendance_count == record.participants %}{{ attendance_count }}{% else %}{{ record.update_participants_count }}{% endif %}
                   {% if record.get_partipants_from_batch %}/{{record.get_partipants_from_batch }}{% endif %}
                 </a>
-                
-                
+
+
               {% endif %}
               {% endwith %}
             </td>
@@ -156,7 +156,7 @@
             $("#big_chart_div").css({'left' : 0, 'position' : 'relative'});
         });
         $(".fancybox").fancybox();
-        
+
     });
     $('.date').datetimepicker({
         lang:'en',

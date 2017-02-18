@@ -42,10 +42,8 @@ class UpdateStudentYearBatchForm(forms.ModelForm):
 
 class TrainingRequestForm(forms.ModelForm):
   department = forms.ModelChoiceField(empty_label='---------', queryset=CourseMap.objects.none())
-  #course_type = forms.ChoiceField(required=True)
-
   course_type = forms.ChoiceField(choices=[('', '---------'), (0, 'Software Course outside lab hours'), (1, 'Software Course mapped in lab hours'), (2, ' Software Course unmapped in lab hours')])
-  course = forms.ModelChoiceField(empty_label='---------', queryset=CourseMap.objects.none())
+  course = forms.ModelChoiceField(empty_label='---------', queryset=CourseMap.objects.filter(category=0))
   batch = forms.ModelChoiceField(empty_label='---------', queryset=StudentBatch.objects.none())
   training_planner = forms.CharField()
   class Meta:
@@ -66,17 +64,6 @@ class TrainingRequestForm(forms.ModelForm):
         uniq_batch_id.append(j)
       #
       tp = TrainingPlanner.objects.get(pk=self.cleaned_data['training_planner'])
-      '''if 'department' in self.cleaned_data and self.cleaned_data['department'] \
-        and 'batch' in self.cleaned_data and self.cleaned_data['batch']:
-        if tp.is_full(self.cleaned_data['department'], self.cleaned_data['batch']):
-          raise forms.ValidationError("No. of training requests for this department exceeded.")
-
-        if self.cleaned_data['batch'].id in uniq_batch_id:
-          raise forms.ValidationError("You cannot add selected Master Batch prior to 48 hours of requesting STP.")
-
-        if 'course_type' in self.cleaned_data and self.cleaned_data['course_type']:
-          if tp.is_course_full(self.cleaned_data['course_type'], self.cleaned_data['department'], self.cleaned_data['batch']):
-            raise forms.ValidationError("No. of training requests for selected course type exceeded")'''
 
       # Date restriction
       if self.cleaned_data and 'sem_start_date' in self.cleaned_data and self.cleaned_data['sem_start_date']:
@@ -93,15 +80,6 @@ class TrainingRequestForm(forms.ModelForm):
     self.fields['course_type'].choices = course_type
 
     if kwargs and 'data' in kwargs:
-      # Generating course list based on course type
-      if 'course_type' in kwargs['data'] and kwargs['data']['course_type'] != '':
-        courses = CourseMap.objects.filter(category=0)
-        choices = [('', '---------'),]
-        for course in courses:
-          choices.append((course.id, course.course_name()))
-        self.fields['course'].queryset = CourseMap.objects.filter(category=0)
-        self.fields['course'].choices = choices
-        self.fields['course'].initial = kwargs['data']['course']
       # Generating students batch list based on department
       if kwargs['data']['department'] != '':
         department = kwargs['data']['department']
@@ -486,7 +464,7 @@ class STWorkshopFeedbackFormPost(forms.ModelForm):
               'suggestions' : forms.Textarea,
               }
 
-class LearnDrupalFeedback(forms.ModelForm):
+class LearnDrupalFeedbackForm(forms.ModelForm):
   class Meta:
     model = LearnDrupalFeedback
     fields = '__all__'
@@ -495,7 +473,7 @@ class LearnDrupalFeedback(forms.ModelForm):
               }
 
   def __init__(self, *args, **kwargs):
-    super(LearnDrupalFeedback, self).__init__(*args, **kwargs)
+    super(LearnDrupalFeedbackForm, self).__init__(*args, **kwargs)
     self.fields['name'].required = False
     self.fields['phonemob'].required = False
     self.fields['affiliation'].required = False

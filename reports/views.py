@@ -86,7 +86,7 @@ def export_csv(request, model_name="None", app_label="None", queryset=None, fiel
     Put the following line in your urls.py BEFORE your admin include
     (r'^admin/(?P<app_label>[\d\w]+)/(?P<model_name>[\d\w]+)/csv/', 'util.csv_view.admin_list_export'),
     """
-    #if not request.user.is_staff:
+    # if not request.user.is_staff:
     #    return HttpResponseForbidden()
     if not queryset:
         model = get_model(app_label, model_name)
@@ -123,16 +123,18 @@ def export_csv(request, model_name="None", app_label="None", queryset=None, fiel
     {% endblock %}
     """
 
+
 def report_filter(request, model_name="None", app_label="None", queryset=None, fields=None, list_display=True):
     model = get_model(app_label, model_name)
     fields = get_all_field_names(model)
     if request.POST:
         fields = None
         fields = request.POST.getlist('column_name')
-        return export_csv(request, model_name = model_name, app_label= app_label, queryset = queryset, fields = fields, list_display=True)
-    context = {'fields' : fields }
+        return export_csv(request, model_name=model_name, app_label=app_label, queryset=queryset, fields=fields, list_display=True)
+    context = {'fields': fields}
     context.update(csrf(request))
     return render(request, 'reports/templates/index.html', context)
+
 
 def elibrary(request):
     # Create the HttpResponse object with the appropriate CSV header.
@@ -140,8 +142,10 @@ def elibrary(request):
     response['Content-Disposition'] = 'attachment; filename="E-library-data.csv"'
 
     writer = csv.writer(response)
-    writer.writerow(['FileNamewithExtension', 'dc.contributor.author', 'dc.contributor.illustrator', 'dc.creator', 'dc.contributor.editor', 'dc.date.created', 'dc.date.copyright', 'dc.date.accessioned', 'dc.date.available', 'dc.identifier.uri', 'dc.identifier.isbn', 'dc.identifier.issn', 'dc.identifier.citation', 'dc.description.abstract', 'dc.description.tableofcontents', 'dc.format.extent', 'dc.format.mimetype', 'dc.language.iso', 'dc.relation.ispartof', 'dc.relation.ispartofseries', 'dc.relation.haspart', 'dc.source', 'dc.subject', 'dc.subject.ddc', 'dc.subject.lcc', 'dc.title', 'dc.title.alternative', 'dc.publisher', 'dc.type', 'dcterms.educationLevel', 'dc.subject.pedagogicobjective', 'dc.coverage.board', 'dc.format.typicallearningtime', 'dc.format.difficultylevel', 'dc.type.typeoflearningmaterial', 'dc.creator.researcher', 'dc.subject.authorkeyword', 'dc.contributor.advisor', 'dc.publisher.place', 'dc.publisher.institution', 'dc.date.awarded', 'dc.type.degree', 'dc.publisher.department', 'dc.rights.uri', 'dc.rights.rightsholder'])
-    trs = TutorialResource.objects.filter(Q(status=1) | Q(status=2), language__name='English').all().order_by('tutorial_detail__foss__foss')
+    writer.writerow(['FileNamewithExtension', 'dc.contributor.author', 'dc.contributor.illustrator', 'dc.creator', 'dc.contributor.editor', 'dc.date.created', 'dc.date.copyright', 'dc.date.accessioned', 'dc.date.available', 'dc.identifier.uri', 'dc.identifier.isbn', 'dc.identifier.issn', 'dc.identifier.citation', 'dc.description.abstract', 'dc.description.tableofcontents', 'dc.format.extent', 'dc.format.mimetype', 'dc.language.iso', 'dc.relation.ispartof', 'dc.relation.ispartofseries', 'dc.relation.haspart', 'dc.source',
+                     'dc.subject', 'dc.subject.ddc', 'dc.subject.lcc', 'dc.title', 'dc.title.alternative', 'dc.publisher', 'dc.type', 'dcterms.educationLevel', 'dc.subject.pedagogicobjective', 'dc.coverage.board', 'dc.format.typicallearningtime', 'dc.format.difficultylevel', 'dc.type.typeoflearningmaterial', 'dc.creator.researcher', 'dc.subject.authorkeyword', 'dc.contributor.advisor', 'dc.publisher.place', 'dc.publisher.institution', 'dc.date.awarded', 'dc.type.degree', 'dc.publisher.department', 'dc.rights.uri', 'dc.rights.rightsholder'])
+    trs = TutorialResource.objects.filter(Q(status=1) | Q(
+        status=2), language__name='English').all().order_by('tutorial_detail__foss__foss')
     education_level = '"Class-XI;Class-XII;Under Graduate;Post Graduate"'
     edu_board = '"CBSE;ICSE;State Board;University"'
     domain_reviewer = "Nancy Varkey"
@@ -153,16 +157,19 @@ def elibrary(request):
         publish_date = formated_publish_date(tr)
         duration, filesize = video_duration_with_filesize(tr)
         vdurwithsize = '"' + str(duration) + ";" + str(filesize) + '"'
-        tutorial_duration = time_plus_ten_min(tr,duration)
+        tutorial_duration = time_plus_ten_min(tr, duration)
         tlevel = get_level(tr)
-        videourl = "http://spoken-tutorial.org/watch/" + tr.tutorial_detail.foss.foss + "/" + tr.tutorial_detail.tutorial + "/" + tr.language.name
-        #writer.writerow([outline])
-        #print "___________________________"
+        videourl = "http://spoken-tutorial.org/watch/" + tr.tutorial_detail.foss.foss + \
+            "/" + tr.tutorial_detail.tutorial + "/" + tr.language.name
+        # writer.writerow([outline])
+        # print "___________________________"
 
-        #writer.writerow(['File Name with Extension', 'dc.contributor.author', 'dc.contributor.illustrator', 'dc.creator', 'dc.contributor.editor', 'dc.date.created', 'dc.date.copyright', 'dc.date.accessioned', 'dc.date.available', 'dc.identifier.uri', 'dc.identifier.isbn', 'dc.identifier.issn', 'dc.identifier.citation', 'dc.description.abstract', 'dc.description.tableofcontents', 'dc.format.extent', 'dc.format.mimetype', 'dc.language.iso', 'dc.relation.ispartof', 'dc.relation.ispartofseries', 'dc.relation.haspart', 'dc.source', 'dc.subject'             , 'dc.subject.ddc', 'dc.subject.lcc', 'dc.title'                 , 'dc.title.alternative', 'dc.publisher', 'dc.type', 'dcterms.educationLevel', 'dc.subject.pedagogicobjective', 'dc.coverage.board', 'dc.format.typicallearningtime', 'dc.format.difficultylevel', 'dc.type.typeoflearningmaterial', 'dc.creator.researcher', 'dc.subject.authorkeyword', 'dc.contributor.advisor', 'dc.publisher.place', 'dc.publisher.institution', 'dc.date.awarded', 'dc.type.degree', 'dc.publisher.department', 'dc.rights.uri', 'dc.rights.rightsholder'])
-        writer.writerow( [         tr.video         ,       user_name        ,      domain_reviewer        , 'NMEICT'    ,             ''         ,     tr.created   ,       ''           ,          ''          ,    publish_date    ,       videourl     ,            ''       ,         ''          ,            ''           ,        tr.outline        ,                  ''             ,     vdurwithsize  ,      'video/ogg'    , tr.language.name ,           ''          , tr.tutorial_detail.foss.foss,            ''        ,      ''    , tr.common_content.keyword,         ''      ,         ''      , tr.tutorial_detail.tutorial,           ''          ,        ''     ,  'Video' ,     education_level      ,                 ''            ,     edu_board      ,       tutorial_duration        ,               tlevel       ,  'Audio-Video Lecture/Tutorial' ,            ''          ,              ''           ,            ''           ,            ''       ,            ''             ,         ''       ,         ''      ,              ''          , 'CC BY SA'     ,          'NMEICT'       ])
-        #break
+        # writer.writerow(['File Name with Extension', 'dc.contributor.author', 'dc.contributor.illustrator', 'dc.creator', 'dc.contributor.editor', 'dc.date.created', 'dc.date.copyright', 'dc.date.accessioned', 'dc.date.available', 'dc.identifier.uri', 'dc.identifier.isbn', 'dc.identifier.issn', 'dc.identifier.citation', 'dc.description.abstract', 'dc.description.tableofcontents', 'dc.format.extent', 'dc.format.mimetype', 'dc.language.iso', 'dc.relation.ispartof', 'dc.relation.ispartofseries', 'dc.relation.haspart', 'dc.source', 'dc.subject'             , 'dc.subject.ddc', 'dc.subject.lcc', 'dc.title'                 , 'dc.title.alternative', 'dc.publisher', 'dc.type', 'dcterms.educationLevel', 'dc.subject.pedagogicobjective', 'dc.coverage.board', 'dc.format.typicallearningtime', 'dc.format.difficultylevel', 'dc.type.typeoflearningmaterial', 'dc.creator.researcher', 'dc.subject.authorkeyword', 'dc.contributor.advisor', 'dc.publisher.place', 'dc.publisher.institution', 'dc.date.awarded', 'dc.type.degree', 'dc.publisher.department', 'dc.rights.uri', 'dc.rights.rightsholder'])
+        writer.writerow([tr.video, user_name, domain_reviewer, 'NMEICT', '', tr.created, '', '', publish_date, videourl, '', '', '', tr.outline, '', vdurwithsize, 'video/ogg', tr.language.name, '', tr.tutorial_detail.foss.foss, '', '', tr.common_content.keyword,
+                        '', '', tr.tutorial_detail.tutorial, '', '', 'Video', education_level, '', edu_board, tutorial_duration, tlevel, 'Audio-Video Lecture/Tutorial', '', '', '', '', '', '', '', '', 'CC BY SA', 'NMEICT'])
+        # break
     return response
+
 
 def find_tutorial_user(tr):
     if tr.tutorial_detail.foss.foss == "Python" or tr.tutorial_detail.foss.foss == "Python Old Version":
@@ -177,7 +184,7 @@ def find_tutorial_user(tr):
             for row in csvdata:
                 try:
                     if row[1] == tr.tutorial_detail.foss.foss and row[0] == tr.tutorial_detail.tutorial and not row[8] == tr.video_user.username:
-                        user = User.objects.get(username = row[8])
+                        user = User.objects.get(username=row[8])
                         if user.first_name:
                             return user.first_name + " " + user.last_name
                         else:
@@ -188,17 +195,19 @@ def find_tutorial_user(tr):
         return str(tr.video_user.first_name) + " " + str(tr.video_user.last_name)
     return str(tr.video_user.username)
 
+
 def formated_publish_date(tr):
     print tr.id
     try:
-        pt = PublishTutorialLog.objects.filter(tutorial_resource_id = tr.id).last()
+        pt = PublishTutorialLog.objects.filter(tutorial_resource_id=tr.id).last()
         return pt.created
     except:
         return tr.updated
 
 
 def video_duration_with_filesize(tr):
-    video_path = settings.MEDIA_ROOT + "videos/" + str(tr.tutorial_detail.foss_id) + "/" + str(tr.tutorial_detail_id) + "/" + tr.video
+    video_path = settings.MEDIA_ROOT + "videos/" + \
+        str(tr.tutorial_detail.foss_id) + "/" + str(tr.tutorial_detail_id) + "/" + tr.video
     video_info = get_video_info(video_path)
     return video_info['duration'], video_info['size']
 

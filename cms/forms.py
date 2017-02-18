@@ -34,6 +34,9 @@ class RegisterForm(forms.Form):
             ),
         ]
     )
+    first_name = forms.CharField()
+    last_name = forms.CharField()
+    phone = forms.CharField(max_length=20)
     password = forms.CharField(
         label = _("Password"),
         widget = forms.PasswordInput(render_value = False),
@@ -235,3 +238,6 @@ class NewsAdditionaFieldAdmin(forms.ModelForm):
                 raise forms.ValidationError(_('Please choose image file format.'))
             return content
 '''    
+
+class VerifyForm(forms.Form):
+  email = forms.EmailField(required=True)
