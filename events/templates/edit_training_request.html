@@ -60,7 +60,7 @@
                         </div>
                       </div>
 
-                      <div class="form-group">
+                      <div class="form-row">
                           <div class="col-xs-12 form-group">
                               <input class="btn btn-primary" type="submit" value="Submit" />
                               <a class="btn btn-default" href="{% url 'events:select_participants' %}">Cancel</a>
@@ -72,13 +72,9 @@
           </div>
         {% endif %}
 {% endblock %}
-{% block compressjsblock %}
-    <script src="{% static 'spoken/js/jquery.datetimepicker.js' %}"></script>
-{% endblock %}
 {% block jsblock %}
   <script>
     $(document).ready(function(){
-
       // getting available batches for selected department
       $('.department').on('change', function(){
         department = $(this).val();
@@ -100,94 +96,6 @@
           });
         }
       });
-
-      // Check if batch is full or not
-      $('.batch').on('change', function() {
-        batch = $(this).val();
-        department = $('.department').val();
-        if(department != '' && batch != '') {
-          $.ajax({
-            url: "/software-training/get-batch-course-status/",
-            type: "POST",
-            data: {
-              department: department,
-              batch: batch,
-              training_planner: $('.training-planner').val()
-            },
-            success: function(data) {
-              if(!data && !data['batch_status']) {
-                $('.batch').val('');
-                alert('No. of training requests for selected batch exceeded.');
-              }
-            }
-          });
-        }
-      });
-
-      // checking if course is full or not
-      $('.course_type').on('change', function(){
-        course_type = $(this).val();
-        //$('.course').html('<option>---------</option>');
-        if(course_type != ''){
-          $.ajax({
-            url: "/software-training/get-course-option/",
-            type: "POST",
-            data: {
-              course_type: course_type,
-              department: "{{training.department_id}}",
-              batch: "{{training.batch_id}}",
-              training_planner: "{{training.training_planner_id}}"
-            },
-            success: function(data) {
-              // loading languages
-              if(data) {
-                  if(data['is_full']){
-                    $(".course_type").val('');
-                    $('.course').val('');
-                    alert('No. of training requests for selected course type exceeded.');
-                  }
-              }
-            }
-          });
-        }
-      });
-
-        // date trigger
-        // var sem_type = "{{tp}}";
-        // var mind = 0 ; var maxd = 0;
-        // if(sem_type == "Odd") {
-        //   if(current_sem == "True") {
-        //     mind = y+'/07/01';
-        //     maxd = y+'/09/30';
-        //   }
-        //   else if(current_sem == "False") {
-        //     mind = y+'/07/01';
-        //     maxd = y+'/09/30';
-        //   }
-        // } else if(sem_type == "Even") {
-        //   if(current_sem == "True") {
-        //     mind = y+'/01/01';
-        //     maxd = y+'/03/30';
-        //   } else if(current_sem == "False") {
-        //     mind = (y+1)+'/01/01';
-        //     maxd = (y+1)+'/03/30';
-        //   }
-        // }
-        //
-        // $('#id_sem_start_date').datetimepicker({
-        //   onGenerate:function( ct ){
-        //       $(this).find('.xdsoft_day_of_week0')
-        //           .addClass('xdsoft_disabled');
-        //   },
-        //   lang:'en',
-        //   format:'Y-m-d',
-        //   formatDate:'Y/m/d',
-        //   minDate:mind,
-        //   weekends:[],
-        //   maxDate:maxd,
-        //   step:5,
-        //   timepicker:false,
-        // });
     });
 
   </script>

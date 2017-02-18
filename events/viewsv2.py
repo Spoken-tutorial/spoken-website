@@ -579,28 +579,44 @@ class TrainingRequestEditView(CreateView):
     try:
       # Check if batch has student?
       sb = StudentBatch.objects.get(pk=form.cleaned_data['batch'].id)
+      selectedBatch = form.cleaned_data['batch']
+      selectedDept = form.cleaned_data['department']
+      selectedCourse = form.cleaned_data['course']
       if not sb.student_count():
         messages.error(self.request, 'There is no student present in this batch.')
         return self.form_invalid(form)
 
       # Check if batch has already has same foss course?
-      if not ( (form.cleaned_data['batch'] == self.training.batch) and (form.cleaned_data['course'] == self.training.course)):
+      if not ( (selectedBatch == self.training.batch) and (selectedCourse == self.training.course)):
         is_batch_has_course = TrainingRequest.objects.filter(
-          batch = form.cleaned_data['batch'],
-          course = form.cleaned_data['course']
+          batch = selectedBatch,
+          course = selectedCourse
         ).count()
         if is_batch_has_course:
-          messages.error(self.request, 'This "%s" already taken/requested the selected "%s" course.' % (form.cleaned_data['batch'], form.cleaned_data['course']))
+          messages.error(self.request, 'This "%s" already taken/requested the selected "%s" course.' % (selectedBatch, selectedCourse))
+          return self.form_invalid(form)
+
+      training_planner = self.training.training_planner
+      # Check if course is full for this semester
+      if not ( (selectedBatch == self.training.batch) and (selectedDept == self.training.department)):
+        if training_planner.is_full(selectedDept.id, selectedBatch.id):
+          messages.error(self.request, 'No. of training requests exceeded for this semester.')
+          return self.form_invalid(form)
+
+      # Check if course is full for test or without test
+      if not ( (selectedCourse == self.training.course) and (selectedBatch == self.training.batch) and (selectedDept == self.training.department)):
+        if training_planner.is_course_full(selectedCourse.id, selectedDept.id, selectedBatch.id):
+          messages.error(self.request, 'No. of training requests for selected course type exceeded.')
           return self.form_invalid(form)
 
       # Assigning values
-      self.training.department = form.cleaned_data['department']
-      self.training.batch = form.cleaned_data['batch']
+      self.training.department = selectedDept
+      self.training.batch = selectedBatch
       self.training.course_type = form.cleaned_data['course_type']
 
-      if self.training.batch.is_foss_batch_acceptable(form.cleaned_data['course']):
+      if self.training.batch.is_foss_batch_acceptable(selectedCourse):
         self.training.sem_start_date = form.cleaned_data['sem_start_date']
-        self.training.course_id = form.cleaned_data['course']
+        self.training.course_id = selectedCourse
       else:
         messages.error(self.request, 'This student batch already taken the selected course.')
         return self.form_invalid(form)
