@@ -59,7 +59,7 @@ def participant_count(objects, category):
                 return objects.training.participant_count
             return count
         except Exception, e:
-            return 0
+            return 'N/A'
 
 def can_close_test(testcode):
     try:
