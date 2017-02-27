@@ -4,6 +4,7 @@ from events.models import *
 from events.views import is_organiser, is_invigilator, is_resource_person, is_event_manager, can_clone_training, is_administrator
 import datetime
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 import datetime
 from dateutil.relativedelta import relativedelta
 import os
@@ -53,13 +54,13 @@ def participant_count(objects, category):
         except Exception, e:
             return 0
     elif category == 'Test':
-        try:
             count = objects.testattendance_set.all().count()
             if  not count:
-                return objects.training.participant_count
+                    if objects.training:
+                        return objects.training.participants
+                    else:
+                        return 'N/A'
             return count
-        except Exception, e:
-            return 'N/A'
 
 def can_close_test(testcode):
     try:
