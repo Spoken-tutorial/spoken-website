@@ -11,7 +11,7 @@ class AcademicCenterFilter(django_filters.FilterSet):
     if 'user' in kwargs:
       user = kwargs['user']
       kwargs.pop('user')
-      
+
     super(AcademicCenterFilter, self).__init__(*args, **kwargs)
     choices = None
     if user:
@@ -66,7 +66,7 @@ class TrainingFilter(django_filters.FilterSet):
     if 'user' in kwargs:
       user = kwargs['user']
       kwargs.pop('user')
-    
+
     state = None
     if 'state' in kwargs:
       state = kwargs['state']
@@ -84,7 +84,7 @@ class TrainingFilter(django_filters.FilterSet):
       choices = list(State.objects.exclude(name='Uncategorised').order_by('name').values_list('id', 'name'))
     choices.insert(0, ('', '---------'),)
     self.filters['academic__state'].extra.update({'choices' : choices})
-    
+
     choices = None
     if state:
       choices = list(City.objects.filter(state=state).order_by('name').values_list('id', 'name')) + [('189', 'Uncategorised')]
@@ -92,7 +92,7 @@ class TrainingFilter(django_filters.FilterSet):
       choices = list(City.objects.none())
     choices.insert(0, ('', '---------'),)
     self.filters['academic__city'].extra.update({'choices' : choices})
-    
+
   class Meta:
     model = Training
     fields = ['academic__state', 'foss']
@@ -110,7 +110,7 @@ class TestFilter(django_filters.FilterSet):
     if 'user' in kwargs:
       user = kwargs['user']
       kwargs.pop('user')
-    
+
     state = None
     if 'state' in kwargs:
       state = kwargs['state']
@@ -128,7 +128,7 @@ class TestFilter(django_filters.FilterSet):
       choices = list(State.objects.exclude(name='Uncategorised').order_by('name').values_list('id', 'name'))
     choices.insert(0, ('', '---------'),)
     self.filters['academic__state'].extra.update({'choices' : choices})
-    
+
     choices = None
     if state:
       choices = list(City.objects.filter(state=state).order_by('name').values_list('id', 'name')) + [('189', 'Uncategorised')]
@@ -136,7 +136,7 @@ class TestFilter(django_filters.FilterSet):
       choices = list(City.objects.order_by('name').values_list('id', 'name'))
     choices.insert(0, ('', '---------'),)
     self.filters['academic__city'].extra.update({'choices' : choices})
-    
+
   class Meta:
     model = Test
     fields = ['academic__state', 'foss']
@@ -156,11 +156,11 @@ class TrainingRequestFilter(django_filters.FilterSet):
     )
   )
 
-  course__category = django_filters.ChoiceFilter(
+  course_type = django_filters.ChoiceFilter(
     choices= [
-      ('', '---------'), 
-      (0, 'Course outside lab hours'), 
-      (1, 'Course mapped in lab hours'), 
+      ('', '---------'),
+      (0, 'Course outside lab hours'),
+      (1, 'Course mapped in lab hours'),
       (2, 'Course unmapped in lab hours'),
       (3, 'EduEasy Software')
     ]
@@ -248,7 +248,7 @@ class TrainingRequestFilter(django_filters.FilterSet):
       )
       choices = list(
         State.objects.filter(
-          resourceperson__user_id=user, 
+          resourceperson__user_id=user,
           resourceperson__status=1
         ).values_list('id', 'name')
       )
@@ -276,7 +276,7 @@ class TrainingRequestFilter(django_filters.FilterSet):
     self.filters['training_planner__academic__city'].extra.update(
       {'choices' : choices}
     )
-    
+
   class Meta:
     model = TrainingRequest
     fields = ['training_planner__academic__state', 'course__foss']
