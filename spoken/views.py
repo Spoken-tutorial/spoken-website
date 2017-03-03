@@ -514,3 +514,59 @@ def ViewBrochures(request):
 
 def learndrupal(request):
     return render(request, 'spoken/templates/learndrupal.html')
+
+def dynamicBrochure(request):
+    template_name = 'spoken/templates/dynamic_brochure.html'
+    
+    filepath = settings.MEDIA_ROOT+'brochures/'
+    
+    lstdict = []
+    for root, dirs, files in os.walk(filepath):
+        for directory in dirs:
+            filepath_dir = filepath+directory+'/'
+                 
+            newlist = []
+            for files in os.listdir(filepath_dir):
+                for file in files:
+                    newlist.append(files)
+
+            broch_files = []
+            broch_name = []
+            list_final = []
+            broch_list = []
+
+            for i in newlist:
+                if i not in broch_files:
+                    broch_files.append(i)
+                    broch_files.sort()
+
+            for j in broch_files:
+                name0 = j.split('-')
+                name1 = name0[0]
+                if name1 not in broch_name:
+                    broch_name.append(name1)
+                    broch_name.sort()
+
+            for i in broch_name:
+                for j in broch_files:
+                    if i in j:
+                        list_final.append({"type":i,"brurl":j})
+
+            broch_list.append(broch_name)
+            broch_list.append(broch_files)                            
+
+            lstdict.append({"category_type":directory,"url":list_final})
+            lstdict.sort()            
+    
+    new_path = filepath
+    newer_path = new_path.split('/media')
+    filepath_img = '/media'+newer_path[1]
+
+    context = {
+    'filepath_img':filepath_img,
+    'list_final':list_final,
+    'lstdict':lstdict
+    }
+
+    context.update(csrf(request))
+    return render(request, template_name, context)

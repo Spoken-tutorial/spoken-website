@@ -1,0 +1,125 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load cmsdata %}
+{% load creationdata %}
+
+{% block compressinlinecssblock %}
+    <style>
+/* The Modal (background) */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    padding-top: 3%; /* Location of the box */
+    padding-left: 15%;
+    padding-right: 10%;
+    margin-top: 2%;
+    width: 100%; /* Full width */
+    height :hidden; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.9); /* Black w/ opacity */
+}
+
+/* Modal Content (image) */
+.modal-content {
+    display: block;
+    width: 90%;
+    height: 97.5%;
+    overflow:auto;
+}
+
+/* The Close Button */
+.close {
+    position: absolute;
+    top: 5%;
+    right: 4%;
+    color: #f1f1f1;
+    font-size: 500%;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.close:hover,
+.close:focus {
+    color: #fff;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* 100% Image Width on Smaller Screens */
+@media only screen and (max-width: 700px){
+    .modal-content {
+        width: 100%;
+    }
+}
+
+.topic {
+    background-color: #e6e6fa;
+    padding: 0.01em 16px;
+    border-left: 6px solid #e6e6fa;
+    margin: 20px 0;
+    text-align:center;
+}
+</style>
+{% endblock %}
+
+
+{% block content %}
+<body id="body">
+<div>
+
+<ul class="row">
+{% for i in lstdict %}
+    <h4 class="topic"><b>{{ i.category_type }}</b></h4>
+    
+    {% regroup i.url by type as type_list %}
+    <ul>
+    {% for type in type_list %}
+        <li><h4>{{ type.grouper }}</h4>
+        {% with filepath_img|add:i.category_type|add:"/" as brpath %}
+        <ul>
+            {% for item in type.list %}
+              <img id="{{item.brurl}}" style="border:1px solid black;" hspace=2.5 src="{{brpath|add:item.brurl}}" style="display: inline" width="40%" height="100%" onclick="show(this)">    
+            {% endfor %}
+        </ul>
+        {% endwith %}
+        </li>
+    {% endfor %}
+    <hr>
+    </ul>
+{% endfor %}
+</ul>
+
+</div>
+
+<!-- The Modal -->
+<div id="myModal" class="modal">
+  <span class="close">×</span>
+  <img class="modal-content" id="img01">
+</div>
+
+</body>
+{% endblock %}
+
+{% block compressinlinejsblock %}
+<script>
+var modal = document.getElementById('myModal');
+function show(im){
+    document.getElementById("body").style.overflow="hidden";
+    var img = document.getElementById(im.id);
+    var modalImg = document.getElementById("img01");
+    modal.style.display = "block";
+    modalImg.src = img.src;
+}
+ // Get the <span> element that closes the modal
+var span = document.getElementsByClassName("close")[0];
+
+// When the user clicks on <span> (x), close the modal
+span.onclick = function() { 
+    modal.style.display = "none";
+    document.getElementById("body").style.overflow="auto";
+}
+</script>
+{% endblock %}
