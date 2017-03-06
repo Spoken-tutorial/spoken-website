@@ -1,13 +1,8 @@
-from django.http import HttpResponse, HttpResponseRedirect, \
-    HttpResponsePermanentRedirect
-from django.template import RequestContext
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.contrib import messages
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
 from django.core.context_processors import csrf
 from django.views.decorators.csrf import csrf_exempt
-from django.core.mail import EmailMultiAlternatives
 from django.db.models import Q
 from django.conf import settings
 from forms import *
@@ -17,14 +12,12 @@ from django.core.exceptions import PermissionDenied
 from urllib import urlopen, quote, unquote_plus
 import json
 import datetime
-from dateutil.relativedelta import relativedelta
 from creation.subtitles import *
-from creation.views import get_video_info, is_administrator
-from creation.models import TutorialCommonContent, TutorialDetail, TutorialResource, Language
+from creation.views import get_video_info
+from creation.models import TutorialDetail, TutorialResource, Language
 from cms.models import SiteFeedback, Event, NewsType, News, Notification
 from events.views import get_page
 from spoken.search import search_for_results
-from mdldjango.models import MdlUser
 from forums.models import Question
 from cms.forms import *
 from spoken.filters import NewsStateFilter
@@ -515,16 +508,15 @@ def ViewBrochures(request):
 def learndrupal(request):
     return render(request, 'spoken/templates/learndrupal.html')
 
+
 def dynamicBrochure(request):
     template_name = 'spoken/templates/dynamic_brochure.html'
+    base_dir = settings.MEDIA_ROOT + 'brochures/'
     
-    filepath = settings.MEDIA_ROOT+'brochures/'
-    
-    lstdict = []
-    for root, dirs, files in os.walk(filepath):
+    brochure_items = []
+    for root, dirs, files in os.walk(base_dir):
         for directory in dirs:
-            filepath_dir = filepath+directory+'/'
-                 
+            filepath_dir = os.path.join(base_dir, directory)
             newlist = []
             for files in os.listdir(filepath_dir):
                 for file in files:
@@ -550,22 +542,19 @@ def dynamicBrochure(request):
             for i in broch_name:
                 for j in broch_files:
                     if i in j:
-                        list_final.append({"type":i,"brurl":j})
+                        list_final.append({"type": i, "brurl": j})
 
             broch_list.append(broch_name)
-            broch_list.append(broch_files)                            
-
-            lstdict.append({"category_type":directory,"url":list_final})
-            lstdict.sort()            
-    
-    new_path = filepath
-    newer_path = new_path.split('/media')
-    filepath_img = '/media'+newer_path[1]
+            broch_list.append(broch_files)
+            brochure_items.append({"category_type": directory, "url": list_final})
+            brochure_items.sort()
+    new_path = base_dir.split('/media')
+    img_dir = '/media' + new_path[1]
 
     context = {
-    'filepath_img':filepath_img,
-    'list_final':list_final,
-    'lstdict':lstdict
+        'img_dir': img_dir,
+        'list_final': list_final,
+        'brochure_items': brochure_items
     }
 
     context.update(csrf(request))

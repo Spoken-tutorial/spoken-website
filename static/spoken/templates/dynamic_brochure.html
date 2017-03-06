@@ -71,17 +71,17 @@
 <div>
 
 <ul class="row">
-{% for i in lstdict %}
+{% for i in brochure_items %}
     <h4 class="topic"><b>{{ i.category_type }}</b></h4>
     
     {% regroup i.url by type as type_list %}
     <ul>
     {% for type in type_list %}
         <li><h4>{{ type.grouper }}</h4>
-        {% with filepath_img|add:i.category_type|add:"/" as brpath %}
+        {% with img_dir|add:i.category_type|add:"/" as brpath %}
         <ul>
             {% for item in type.list %}
-              <img id="{{item.brurl}}" style="border:1px solid black;" hspace=2.5 src="{{brpath|add:item.brurl}}" style="display: inline" width="40%" height="100%" onclick="show(this)">    
+              <img id="{{item.brurl}}" style="border:1px solid black; margin-right:20px" src="{{brpath|add:item.brurl}}" style="display: inline" width="40%" height="100%" onclick="show(this)">    
             {% endfor %}
         </ul>
         {% endwith %}
