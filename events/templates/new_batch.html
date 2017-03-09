@@ -192,10 +192,13 @@
 {% endblock %}
 {% block jsblock %}
   <script src="{% static 'spoken/js/jquery.jeditable.js' %}"></script>
+  <script src="{% static 'spoken/js/jquery.cookie.js' %}"></script>
   <script>
     $(window).load(function(){
         $('#myModal').modal('show');
     });
+
+    
     $('#upload_button').on('click', function(){
       $('#confirmModal').modal('show');
     });
