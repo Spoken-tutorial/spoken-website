@@ -54,13 +54,13 @@ def participant_count(objects, category):
         except Exception, e:
             return 0
     elif category == 'Test':
-            count = objects.testattendance_set.all().count()
-            if  not count:
-                    if objects.training:
-                        return objects.training.participants
-                    else:
-                        return 'N/A'
-            return count
+        count = objects.testattendance_set.all().count()
+        if  not count:
+            if objects.training:
+                return objects.training.participants
+            else:
+                return 'N/A'
+        return count
 
 def can_close_test(testcode):
     try:
