@@ -195,7 +195,9 @@
   <script src="{% static 'spoken/js/jquery.cookie.js' %}"></script>
   <script>
     $(window).load(function(){
+       if ($.cookie('new_batch_modal_status') != '1') {
         $('#myModal').modal('show');
+        $.cookie('new_batch_modal_status', '1',{ expires: null}); }
     });
 
     
