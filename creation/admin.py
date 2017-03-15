@@ -5,12 +5,19 @@ from django.contrib import admin
 from creation.models import *
 from creation.forms import *
 
+
 class LanguageAdmin(admin.ModelAdmin):
     exclude = ('user',)
     list_display = ('name', 'created', 'updated', 'user')
+
     def save_model(self, request, obj, form, change):
         obj.user = request.user
         obj.save()
+
+
+class FossSuperCategoryAdmin(admin.ModelAdmin):
+    list_display = ('category', 'created', 'updated')
+
 
 class FossCategoryAdmin(admin.ModelAdmin):
     exclude = ('user',)
@@ -26,7 +33,8 @@ class FossCategoryAdmin(admin.ModelAdmin):
             message_bit = "1 FOSS category was"
         else:
             message_bit = "%s FOSS categories were" % rows_updated
-        self.message_user(request, "%s successfully marked as completed." % message_bit)
+        self.message_user(
+            request, "%s successfully marked as completed." % message_bit)
 
     def mark_foss_pending(self, request, queryset):
         rows_updated = queryset.update(status=0)
@@ -34,30 +42,36 @@ class FossCategoryAdmin(admin.ModelAdmin):
             message_bit = "1 FOSS category was"
         else:
             message_bit = "%s FOSS categories were" % rows_updated
-        self.message_user(request, "%s successfully marked as pending." % message_bit)
+        self.message_user(
+            request, "%s successfully marked as pending." % message_bit)
 
     mark_foss_completed.short_description = "Mark selected FOSS as completed"
     mark_foss_pending.short_description = "Mark selected FOSS categories as pending"
     actions = [mark_foss_completed, mark_foss_pending]
+
 
 class TutorialDetailAdmin(admin.ModelAdmin):
     form = AvailableFossForm
     exclude = ('user',)
     list_display = ('foss', 'tutorial', 'level', 'order', 'updated', 'user')
     list_filter = ('updated', 'level', 'foss')
+
     def save_model(self, request, obj, form, change):
         obj.user = request.user
         obj.tutorial = obj.tutorial.strip()
         obj.save()
         try:
-            foss_dir = settings.MEDIA_ROOT + '/videos/' + str(obj.foss_id) + '/' + str(obj.id) + '/resources'
+            foss_dir = settings.MEDIA_ROOT + '/videos/' + \
+                str(obj.foss_id) + '/' + str(obj.id) + '/resources'
             os.makedirs(foss_dir)
         except:
             print "Tutorial directories already exists..."
 
+
 class ContributorRoleAdmin(admin.ModelAdmin):
     form = ContributorRoleForm
-    list_display = ('user', 'foss_category', 'language', 'status', 'created', 'updated')
+    list_display = ('user', 'foss_category', 'language',
+                    'status', 'created', 'updated')
     list_filter = ('updated', 'language', 'foss_category')
 
     def mark_contributor_disabled(self, request, queryset):
@@ -79,9 +93,11 @@ class ContributorRoleAdmin(admin.ModelAdmin):
     mark_contributor_disabled.short_description = "Mark selected contributor roles as disabled"
     actions = ['mark_contributor_active', 'mark_contributor_disabled']
 
+
 class DomainReviewerRoleAdmin(admin.ModelAdmin):
     form = DomainReviewerRoleForm
-    list_display = ('user', 'foss_category', 'language', 'status', 'created', 'updated')
+    list_display = ('user', 'foss_category', 'language',
+                    'status', 'created', 'updated')
     list_filter = ('updated', 'language', 'foss_category')
 
     def mark_domain_reviewer_disabled(self, request, queryset):
@@ -103,9 +119,11 @@ class DomainReviewerRoleAdmin(admin.ModelAdmin):
     mark_domain_reviewer_disabled.short_description = "Mark selected domain reviewer roles as disabled"
     actions = ['mark_domain_reviewer_active', 'mark_domain_reviewer_disabled']
 
+
 class QualityReviewerRoleAdmin(admin.ModelAdmin):
     form = QualityReviewerRoleForm
-    list_display = ('user', 'foss_category', 'language', 'status', 'created', 'updated')
+    list_display = ('user', 'foss_category', 'language',
+                    'status', 'created', 'updated')
     list_filter = ('updated', 'language', 'foss_category')
 
     def mark_quality_reviewer_disabled(self, request, queryset):
@@ -125,7 +143,9 @@ class QualityReviewerRoleAdmin(admin.ModelAdmin):
         self.message_user(request, "%s successfully activated." % message_bit)
     mark_quality_reviewer_active.short_description = "Mark selected quality reviewer roles as active"
     mark_quality_reviewer_disabled.short_description = "Mark selected quality reviewer roles as disabled"
-    actions = ['mark_quality_reviewer_active', 'mark_quality_reviewer_disabled']
+    actions = ['mark_quality_reviewer_active',
+               'mark_quality_reviewer_disabled']
+
 
 class FossAvailableForTestAdmin(admin.ModelAdmin):
     form = FossAvailableForTestForm
@@ -133,13 +153,16 @@ class FossAvailableForTestAdmin(admin.ModelAdmin):
     list_display = ('foss', 'language', 'status', 'created')
     list_filter = ('language',)
 
+
 class FossAvailableForWorkshopAdmin(admin.ModelAdmin):
     fields = ['foss', 'language', 'status']
     list_display = ('foss', 'language', 'status', 'created')
     list_filter = ('language',)
 
+
 admin.site.register(Language, LanguageAdmin)
 admin.site.register(FossCategory, FossCategoryAdmin)
+admin.site.register(FossSuperCategory, FossSuperCategoryAdmin)
 admin.site.register(TutorialDetail, TutorialDetailAdmin)
 admin.site.register(ContributorRole, ContributorRoleAdmin)
 admin.site.register(DomainReviewerRole, DomainReviewerRoleAdmin)
