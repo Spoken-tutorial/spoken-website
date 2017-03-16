@@ -18,16 +18,16 @@ class Language(models.Model):
 
 
 class FossSuperCategory(models.Model):
-    category = models.CharField(max_length=255, unique=True)
+    name = models.CharField(max_length=255, unique=True)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name = 'FOSS Super Category'
-        ordering = ('category',)
+        verbose_name_plural = 'FOSS Category'
+        ordering = ('name',)
 
     def __unicode__(self):
-        return self.category
+        return self.name
 
 
 class FossCategory(models.Model):
@@ -40,7 +40,7 @@ class FossCategory(models.Model):
     updated = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name = 'FOSS Categorie'
+        verbose_name_plural = 'FOSS'
         ordering = ('foss',)
 
     def __unicode__(self):

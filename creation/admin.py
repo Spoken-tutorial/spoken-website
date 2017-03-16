@@ -16,12 +16,13 @@ class LanguageAdmin(admin.ModelAdmin):
 
 
 class FossSuperCategoryAdmin(admin.ModelAdmin):
-    list_display = ('category', 'created', 'updated')
+    list_display = ('name', 'created', 'updated')
 
 
 class FossCategoryAdmin(admin.ModelAdmin):
     exclude = ('user',)
     list_display = ('foss', 'id', 'status', 'created', 'updated', 'user')
+    filter_horizontal = ['category']
 
     def save_model(self, request, obj, form, change):
         obj.user = request.user
