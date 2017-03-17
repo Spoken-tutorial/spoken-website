@@ -23,7 +23,8 @@ class FossSuperCategory(models.Model):
     updated = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name_plural = 'FOSS Category'
+        verbose_name = 'FOSS Category'
+        verbose_name_plural = 'FOSS Categories'
         ordering = ('name',)
 
     def __unicode__(self):
@@ -40,7 +41,8 @@ class FossCategory(models.Model):
     updated = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name_plural = 'FOSS'
+        verbose_name = 'FOSS'
+        verbose_name_plural = 'FOSSes'
         ordering = ('foss',)
 
     def __unicode__(self):
