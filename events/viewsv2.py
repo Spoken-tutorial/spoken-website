@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from datetime import datetime
 from datetime import timedelta
+import re
 
 # Create your views here.
 from django.views.generic import View, ListView
@@ -705,6 +706,11 @@ class TrainingCertificate():
     return 'th' if 11<=d<=13 else {1:'st',2:'nd',3:'rd'}.get(d%10, 'th')
 
   def training_certificate(self, ta):
+    semsplit = re.split('-|, ',ta.training.training_planner.get_semester())
+    sem_start = semsplit[0]+semsplit[2]
+
+    training_end = ta.training.sem_start_date+timedelta(days=60)
+
     response = HttpResponse(content_type='application/pdf')
     filename = (ta.student.user.first_name+'-'+ta.training.course.foss.foss+"-Participant-Certificate").replace(" ", "-");
 
@@ -718,7 +724,7 @@ class TrainingCertificate():
 
     #date
     imgDoc.setFont('Helvetica', 18, leading=None)
-    imgDoc.drawCentredString(211, 115, self.custom_strftime('%B {S} %Y', ta.training.sem_start_date))
+    imgDoc.drawCentredString(211, 115, self.custom_strftime('%B {S} %Y', training_end))
 
     #password
     certificate_pass = ''
@@ -731,7 +737,7 @@ class TrainingCertificate():
     imgDoc.drawImage(imgPath, 600, 100, 150, 76)
 
     #paragraphe
-    text = "This is to certify that <b>"+ta.student.user.first_name +" "+ta.student.user.last_name+"</b> participated in the <b>"+ta.training.course.foss.foss+"</b> training organized at <b>"+ta.training.training_planner.academic.institution_name+"</b> by  <b>"+ta.training.training_planner.organiser.user.first_name + " "+ta.training.training_planner.organiser.user.last_name+"</b> on <b>"+self.custom_strftime('%B {S} %Y', ta.training.sem_start_date)+"</b> with course material provided by the Spoken Tutorial Project, IIT Bombay.<br /><br />A comprehensive set of topics pertaining to <b>"+ta.training.course.foss.foss+"</b> were covered in the training. This training is offered by the Spoken Tutorial Project, IIT Bombay, funded by National Mission on Education through ICT, MHRD, Govt. of India."
+    text = "This is to certify that <b>"+ta.student.user.first_name +" "+ta.student.user.last_name+"</b> participated in the <b>"+ta.training.course.foss.foss+"</b> training organized at <b>"+ta.training.training_planner.academic.institution_name+"</b> in <b>"+sem_start+"</b> semester, with course material provided by the Spoken Tutorial Project, IIT Bombay.<br /><br />A comprehensive set of topics pertaining to <b>"+ta.training.course.foss.foss+"</b> were covered in the training. This training is offered by the Spoken Tutorial Project, IIT Bombay, funded by the National Mission on Education through ICT, MHRD, Govt. of India."
 
     centered = ParagraphStyle(name = 'centered',
       fontSize = 16,

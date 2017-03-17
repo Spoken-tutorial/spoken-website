@@ -1,5 +1,6 @@
 <!-- This page is to list all planned training requests of current and next semester, to proceed for attendance or edit training request -->
 {% extends 'spoken/templates/base.html' %}
+{% load static %}
 {% block title %}Semester Training Planner Summary{% endblock %}
 {% block heading %}
   <i class="home-page-title-i">Select participant List</i>
@@ -178,26 +179,16 @@
   </li>
   {% endif %}
 {% endblock %}
-
+{% block compressjsblock %}
+<script src="{% static 'spoken/js/jquery.cookie.js' %}"></script>
+{% endblock %}
 {% block jsblock %}
 <script>
+
 $(window).load(function(){
-        $('#myModal').modal('show');
+   if ($.cookie('modal_status') != '1') {
+    $('#myModal').modal('show');
+    $.cookie('modal_status', '1',{ expires: null}); }
 });
-  
- /* <!--<script>
-  
-    $('.tp>li>.yeardesc').click(function(e){
-      if( $(this).parent('li').hasClass('active') ){
-          $(this).parent('li').removeClass('active').children('.training-row').slideUp();
-          e.stopPropagation();
-      }
-      else{
-          $('.tp').find('li').removeClass('active').children('.training-row').slideUp();
-          $(this).parent('li').addClass('active').children('.training-row').slideDown();
-          e.stopPropagation();
-      }
-    });
-  --> */ 
   </script> 
 {% endblock %}

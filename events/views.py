@@ -2247,7 +2247,7 @@ def organiser_invigilator_index(request, role, status):
         try:
             record.user.profile_set.get()
         except:
-            create_profile(record.user)
+            create_profile(record.user, None)
 
     context['header'] = header
     context['ordering'] = ordering
