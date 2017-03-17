@@ -2742,38 +2742,3 @@ def ajax_manual_language(request):
             if data:
                 data = '<option value="">-- Select Language --</option>' + data
     return HttpResponse(json.dumps(data), content_type='application/json')
-
-
-'''@login_required'''
-def upload_brochure(request):
-    print "********abcdxyz********"
-    '''if not is_administrator(request.user) and not is_contributor(request.user) \
-       and not is_contenteditor(request.user):
-        raise PermissionDenied()'''
-    form = UploadBrochurebyCategory()
-    if request.method == 'POST':
-        form = UploadBrochurebyCategory(request.POST, request.FILES)
-        if form.is_valid():
-            try:
-                category_id = request.POST.get('name')
-                category = FossSuperCategory.objects.get(pk=category_id)
-                foss_id = request.POST.get('foss')
-                foss = FossCategory.objects.get(pk=foss_id)
-                language_id = request.POST.get('language')
-                language = Language.objects.get(pk=language_id)
-                brochure_path = 'brochures/' + str(category.name) + '/' + str(foss.id) + '.jpg'
-                fout = open(settings.MEDIA_ROOT + brochure_path, 'wb+')
-                f = request.FILES['comp']
-                # Iterate through the chunks.
-                for chunk in f.chunks():
-                    fout.write(chunk)
-                fout.close()
-                messages.success(request, 'brochure uploaded successfully!')
-                form = UploadBrochurebyCategory()
-            except Exception, e:
-                print e
-    context = {
-        'form': form
-    }
-    context.update(csrf(request))
-    return render(request, 'creation/templates/upload_brochure.html', context)
