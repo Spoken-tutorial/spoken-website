@@ -66,10 +66,17 @@
     <p class='no-record'>No record found!</p>
   {% endif %}
 {% endblock %}
-{% block jsblock %}
-  <script>
-    $(window).load(function(){
-        $('#myModal').modal('show');
-    });
-  </script>
+{% block compressjsblock %}
+<script src="{% static 'spoken/js/jquery.cookie.js' %}"></script>
 {% endblock %}
+{% block jsblock %}
+<script>
+$(window).load(function(){
+   if ($.cookie('modal_status') != '1') {
+    //show popup here
+    $('#myModal').modal('show');
+    $.cookie('modal_status', '1',{ expires: null}); }
+});
+</script>
+{% endblock %}
+
