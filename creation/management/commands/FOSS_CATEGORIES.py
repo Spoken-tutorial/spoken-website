@@ -1,7 +1,7 @@
 # Code to create category table
 # To run this file please follow below instructions:
 # 1. Go to project directory
-# 2. run "python manage.py initial_data"
+# 2. run "python manage.py FOSS_CATEGORIES"
 
 from __future__ import absolute_import, print_function, unicode_literals
 
