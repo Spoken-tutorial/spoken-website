@@ -1,3 +1,4 @@
+import os
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -419,3 +420,9 @@ class Collaborate(models.Model):
     language = models.ForeignKey(Language)
     lead_st = models.BooleanField()
     created = models.DateTimeField(auto_now_add=True)
+
+
+class BrochureDocument(models.Model):
+    destination = os.path.join(settings.MEDIA_ROOT, 'brochures')
+    document = models.FileField(upload_to=destination)
+    uploaded_at = models.DateTimeField(auto_now_add=True)

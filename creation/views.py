@@ -2666,7 +2666,7 @@ def update_keywords(request):
 
 @login_required
 def update_sheet(request, sheet_type):
-    sheet_types = ['instruction', 'installation','brochure']
+    sheet_types = ['instruction', 'installation', 'brochure']
     if not is_administrator(request.user) and not is_contributor(request.user) and not is_contenteditor(request.user)\
      or not sheet_type in sheet_types:
         raise PermissionDenied()
@@ -2676,9 +2676,9 @@ def update_sheet(request, sheet_type):
         if form.is_valid():
             try:
                 foss_id = request.POST.get('foss')
-                foss = FossCategory.objects.get(pk = foss_id)
+                foss = FossCategory.objects.get(pk=foss_id)
                 language_id = request.POST.get('language')
-                language = Language.objects.get(pk = language_id)
+                language = Language.objects.get(pk=language_id)
                 if sheet_type == 'brochure':
                   sheet_path = 'videos/' + str(foss.id) + '/' + \
                     foss.foss.replace(' ', '-') + '-' + sheet_type.title() + \
@@ -2694,7 +2694,7 @@ def update_sheet(request, sheet_type):
                     fout.write(chunk)
                 fout.close()
                 messages.success(request, sheet_type.title() + \
-                    ' sheet uploaded successfully!')
+                    'sheet uploaded successfully!')
                 form = UpdateSheetsForm()
             except Exception, e:
                 print e
@@ -2715,8 +2715,8 @@ def ajax_manual_language(request):
         sheet_type = request.POST.get('sheet_type', '')
         if foss_id and language_id and sheet_type:
             try:
-                foss = FossCategory.objects.get(pk = foss_id)
-                language = Language.objects.get(pk = language_id)
+                foss = FossCategory.objects.get(pk=foss_id)
+                language = Language.objects.get(pk=language_id)
                 sheet_path = 'videos/' + str(foss.id) + '/' + \
                     foss.foss + '-' + sheet_type.title() + '-Sheet-' + \
                     language.name + '.pdf'
@@ -2730,8 +2730,8 @@ def ajax_manual_language(request):
                 pass
         elif foss_id:
             tutorials = TutorialResource.objects.filter(
-                Q(status = 1) | Q(status = 2),
-                tutorial_detail__foss_id = foss_id
+                Q(status=1) | Q(status=2),
+                tutorial_detail__foss_id=foss_id
             ).values_list(
                 'language_id',
                 'language__name'
@@ -2742,3 +2742,45 @@ def ajax_manual_language(request):
             if data:
                 data = '<option value="">-- Select Language --</option>' + data
     return HttpResponse(json.dumps(data), content_type='application/json')
+
+
+@login_required
+def upload_brochure(request):
+    brochure_template = 'creation/templates/upload_brochure.html'
+    if not is_administrator(request.user) and not is_contributor(request.user) \
+       and not is_contenteditor(request.user):
+        raise PermissionDenied()
+    form = UploadBrochurebyCategory()
+    if request.method == 'POST':
+        form = UploadBrochurebyCategory(request.POST, request.FILES)
+        if form.is_valid():
+            try:
+                f = request.FILES['fields']
+                # Iterate through the chunks.
+                for chunk in f.chunks():
+                    fout.write(chunk)
+                fout.close()
+                form.save()
+                messages.success(request, 'brochure uploaded successfully!')
+
+                '''for filename, file in request.FILES.iteritems():
+                    # uploaded_filename = request.FILES[filename].name
+                    # fout = open(uploaded_filename, 'wb+')
+                    with open('file', 'wb+') as destination:
+                        for chunk in f.chunks():
+                            destination.write(chunk)
+
+                for chunk in f.chunks():
+                    fout.write(chunk)
+                fout.close()
+                messages.success(request, 'brochure uploaded successfully!')'''
+
+                form = UploadBrochurebyCategory()
+            except Exception, e:
+                print e
+
+    context = {
+        'form': form,
+    }
+    context.update(csrf(request))
+    return render(request, brochure_template, context)

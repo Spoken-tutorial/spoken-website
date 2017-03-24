@@ -25,6 +25,7 @@ urlpatterns = patterns('',
     url(r'^ajax-upload-prerequisite/$', 'creation.views.ajax_upload_prerequisite', name="ajax_upload_prerequisite"),
     url(r'^ajax-upload-timed-script/$', 'creation.views.ajax_upload_timed_script', name="ajax_upload_timed_script"),
     url(r'^ajax-get-keywords/$', 'creation.views.ajax_get_keywords', name="ajax_get_keywords"),
+    url(r'^upload_brochure/$', 'creation.views.upload_brochure', name="upload_brochure"),
 
     # Admin Reviewer part
     url(r'^admin-review/$', 'creation.views.admin_review_index', name="admin_review_index"),
