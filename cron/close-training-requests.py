@@ -30,6 +30,7 @@ success_log_file_head = open(LOG_ROOT+'close-training-requests-success-log-'+tod
 for training_request in training_requests:
   # updating participant's count
   participant_count = training_request.update_participants_count()
+  # Training close automatically if participant count exists
   if participant_count:
     training_request.status = 1
     training_request.save()
