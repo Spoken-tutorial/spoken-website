@@ -32,7 +32,7 @@
               </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal" id="modal-no">NO</button>
-                <a type ="submit" class="btn btn-primary" onclick="document.forms['form-id'].submit();" %}">Yes</a>
+                <a type ="submit" class="btn btn-primary" onclick="document.forms['form-id'].submit();">Yes</a>
               </div>
             </div>
           </div>
@@ -43,9 +43,9 @@
   {% if object_list %}
         <div id="main_all">
             <div id="selectall_button">
-              <p id="button-select">To select all participants</p> <input type=button class="btn btn-success"  value="Check All" onClick="this.value=check()"> 
-            </div> 
-            <div style="" id="lang"> 
+              <p id="button-select">To select all participants</p> <input type=button class="btn btn-success"  value="Check All" onClick="this.value=check()">
+            </div>
+            <div style="" id="lang">
               <p>To select language for all participants</p>
               <select name="selectall" id="selectall">
               {% for lang in languages %}
@@ -138,7 +138,7 @@
   <script type="text/javascript">
   var checkflag = "false";
   function check() {
-  var field=document.getElementsByName('user'); 
+  var field=document.getElementsByName('user');
     if (checkflag == "false") {
       for (i = 0; i < field.length; i++) {
         field[i].checked = true;
@@ -155,7 +155,7 @@
     }
   }
   $("#selectall").click(function () {
-    var option=document.getElementsByClassName('selectall'); 
+    var option=document.getElementsByClassName('selectall');
     for (i = 0; i < option.length; i++) {
      option[i].value = this.value;
     }
