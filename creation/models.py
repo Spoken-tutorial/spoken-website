@@ -37,7 +37,7 @@ class FossCategory(models.Model):
     description = models.TextField()
     status = models.BooleanField(max_length=2)
     user = models.ForeignKey(User)
-    category = models.ManyToManyField(FossSuperCategory, null=True)
+    category = models.ManyToManyField(FossSuperCategory)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 

@@ -648,6 +648,13 @@ class TrainingPlanner(models.Model):
       training_planner_id = self.id
     ).exclude(Q(participants=0)&Q(status=1))
 
+  # Select all training which has no attendance
+  def training_with_no_attend(self):
+    return TrainingRequest.objects.filter(
+      (Q(participants=0, status=0) | Q(participants=0, status=1)),
+      training_planner_id = self.id
+    )
+
   def get_semester(self):
     if self.semester.even:
       return 'January - June, %s' % (int(self.year) + 1)
