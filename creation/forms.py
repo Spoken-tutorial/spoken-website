@@ -889,6 +889,7 @@ class UpdateKeywordsForm(forms.Form):
                 self.fields['tutorial'].widget.attrs = {}
                 self.fields['tutorial'].initial = initial_data
 
+
 class UpdateSheetsForm(forms.Form):
     foss = forms.ChoiceField(
         choices = [('', '-- Select Foss --'),] + list(TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), language__name='English').values_list('tutorial_detail__foss_id', 'tutorial_detail__foss__foss').order_by('tutorial_detail__foss__foss').distinct()),
@@ -896,13 +897,12 @@ class UpdateSheetsForm(forms.Form):
         error_messages = {'required':'FOSS category field is required.'}
     )
     language = forms.ChoiceField(
-        choices = [('', '-- Select Language --'),],
-        widget=forms.Select(attrs = {'disabled': 'disabled'}),
-        required = True,
-        error_messages = {'required': 'Language field is required.'}
+        choices=[('', '-- Select Language --'), ],
+        widget=forms.Select(attrs={'disabled': 'disabled'}),
+        required=True,
+        error_messages={'required': 'Language field is required.'}
     )
-    comp = forms.FileField(required = False)
-
+    comp = forms.FileField(required=False)
 
     def clean(self):
         super(UpdateSheetsForm, self).clean()
@@ -917,7 +917,6 @@ class UpdateSheetsForm(forms.Form):
             self._errors["comp"] = self.error_class(["This field is required."])
         return component
 
-
     def __init__(self, *args, **kwargs):
         super(UpdateSheetsForm, self).__init__(*args, **kwargs)
 
@@ -930,68 +929,3 @@ class UpdateSheetsForm(forms.Form):
                 self.fields['language'].choices =  [('', '-- Select Language --'),] + list(choices)
                 self.fields['language'].widget.attrs = {}
                 self.fields['language'].initial = initial_lang
-
-
-class UploadBrochurebyCategory(forms.ModelForm):
-    category = forms.ChoiceField(
-        choices=[('', '-- Select Foss Category--'), ] + list(FossSuperCategory.objects.all().values_list('id', 'name')),
-        required=True,
-        error_messages={'required': 'FOSS category type is required.'}
-    )
-    foss = forms.ChoiceField(
-        choices=[('', '-- Select Foss --'),] + list(TutorialResource.objects.filter(Q(status=1) | Q(status=2), language__name='English').values_list('tutorial_detail__foss_id', 'tutorial_detail__foss__foss').order_by('tutorial_detail__foss__foss').distinct()),
-        required=True,
-        error_messages={'required': 'FOSS category field is required.'}
-    )
-    language = forms.ChoiceField(
-        choices=[('', '-- Select Language --'), ],
-        widget=forms.Select(attrs={'disabled': 'disabled'}),
-        required=True,
-        error_messages={'required': 'Language field is required.'}
-    )
-
-    class Meta:
-        model = BrochureDocument
-        fields = ('document', )
-
-    '''def clean(self):
-        super(UploadBrochurebyCategory, self).clean()
-        file_types = ['jpg/jpeg']
-        component = ''
-        if 'comp' in self.cleaned_data:
-            component = self.cleaned_data['comp']
-
-        if component:
-            if component.content_type not in file_types:
-                self._errors["comp"] = self.error_class(["Not a valid file format."])
-        else:
-            self._errors["comp"] = self.error_class(["This field is required."])
-        return component
-
-        # raise an error when the uploaded file has the same name\
-        # ...as a previously stored file in system.
-        if os.path.isfile(destination + component.name):
-            raise forms.ValidationError('A file with the name "' + component.name + '"\
-             already exists. Please rename your file and try again.')
-        else:
-            return component'''
-
-    def __init__(self, *args, **kwargs):
-        super(UploadBrochurebyCategory, self).__init__(*args, **kwargs)
-        if args:
-            if 'category' in args[0] and args[0]['category']:
-                pri_category = args[0]['category']
-                pri_foss = ''
-                if 'foss' in args[0] and args[0]['foss']:
-                    pri_foss = args[0]['foss']
-                    initial_lang = ''
-                    if 'language' in args[0] and args[0]['language']:
-                        initial_lang = args[0]['language']
-                    choices = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss_id=args[0]['foss']).values_list('language_id', 'language__name').order_by('language__name').distinct()
-                    self.fields['language'].choices = [('', '-- Select Language --'), ] + list(choices)
-                    self.fields['language'].widget.attrs = {}
-                    self.fields['language'].initial = initial_lang
-                foss_choices = TutorialResource.objects.filter(Q(status=1) | Q(status=2), language__name='English').values_list('tutorial_detail__foss_id', 'tutorial_detail__foss__foss').order_by('tutorial_detail__foss__foss').distinct()
-                self.fields['foss'].choices = [('', '-- Select foss --'), ] + list(foss_choices)
-                self.fields['foss'].widget.attrs = {}
-                self.fields['foss'].initial = pri_foss

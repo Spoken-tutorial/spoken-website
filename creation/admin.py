@@ -51,6 +51,10 @@ class FossCategoryAdmin(admin.ModelAdmin):
     actions = [mark_foss_completed, mark_foss_pending]
 
 
+class BrochureDocumentAdmin(admin.ModelAdmin):
+    list_display = ('foss_course', 'foss_language', 'document')
+
+
 class TutorialDetailAdmin(admin.ModelAdmin):
     form = AvailableFossForm
     exclude = ('user',)
@@ -170,3 +174,4 @@ admin.site.register(DomainReviewerRole, DomainReviewerRoleAdmin)
 admin.site.register(QualityReviewerRole, QualityReviewerRoleAdmin)
 admin.site.register(FossAvailableForTest, FossAvailableForTestAdmin)
 admin.site.register(FossAvailableForWorkshop, FossAvailableForWorkshopAdmin)
+admin.site.register(BrochureDocument, BrochureDocumentAdmin)

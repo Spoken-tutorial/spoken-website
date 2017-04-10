@@ -22,11 +22,13 @@ from django.shortcuts import render, render_to_response
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.db.models import Count
 
 from cms.sortable import *
 from creation.forms import *
 from creation.models import *
 from creation.subtitles import *
+from . import services
 
 def humansize(nbytes):
     suffixes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
@@ -2608,6 +2610,7 @@ def collaborate(request):
     context.update(csrf(request))
     return render(request, 'creation/templates/collaborate.html', context)
 
+
 @login_required
 def update_prerequisite(request):
     if not is_administrator(request.user):
@@ -2738,49 +2741,17 @@ def ajax_manual_language(request):
             ).order_by('language__name').distinct()
             for tutorial in tutorials:
                 data += '<option value="' + str(tutorial[0]) + '">' + \
-                str(tutorial[1]) + '</option>'
+                    str(tutorial[1]) + '</option>'
             if data:
                 data = '<option value="">-- Select Language --</option>' + data
     return HttpResponse(json.dumps(data), content_type='application/json')
 
 
 @login_required
-def upload_brochure(request):
-    brochure_template = 'creation/templates/upload_brochure.html'
-    if not is_administrator(request.user) and not is_contributor(request.user) \
-       and not is_contenteditor(request.user):
-        raise PermissionDenied()
-    form = UploadBrochurebyCategory()
-    if request.method == 'POST':
-        form = UploadBrochurebyCategory(request.POST, request.FILES)
-        if form.is_valid():
-            try:
-                f = request.FILES['fields']
-                # Iterate through the chunks.
-                for chunk in f.chunks():
-                    fout.write(chunk)
-                fout.close()
-                form.save()
-                messages.success(request, 'brochure uploaded successfully!')
-
-                '''for filename, file in request.FILES.iteritems():
-                    # uploaded_filename = request.FILES[filename].name
-                    # fout = open(uploaded_filename, 'wb+')
-                    with open('file', 'wb+') as destination:
-                        for chunk in f.chunks():
-                            destination.write(chunk)
-
-                for chunk in f.chunks():
-                    fout.write(chunk)
-                fout.close()
-                messages.success(request, 'brochure uploaded successfully!')'''
-
-                form = UploadBrochurebyCategory()
-            except Exception, e:
-                print e
-
+def view_brochure(request):
+    template = 'creation/templates/view_brochure.html'
+    my_dict = services.get_data_for_brochure_display()
     context = {
-        'form': form,
+        'my_dict': my_dict
     }
-    context.update(csrf(request))
-    return render(request, brochure_template, context)
+    return render(request, template, context)

@@ -44,10 +44,22 @@ class FossCategory(models.Model):
     class Meta:
         verbose_name = 'FOSS'
         verbose_name_plural = 'FOSSes'
-        ordering = ('foss',)
+        ordering = ('foss', )
 
     def __unicode__(self):
         return self.foss
+
+
+class BrochureDocument(models.Model):
+    foss_course = models.ForeignKey(FossCategory)
+    foss_language = models.ForeignKey(Language)
+    document = models.FileField(upload_to='brochures/')
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'FOSS Brochure'
+        verbose_name_plural = 'FOSS Brochures'
 
 
 class PlaylistInfo(models.Model):
@@ -420,9 +432,3 @@ class Collaborate(models.Model):
     language = models.ForeignKey(Language)
     lead_st = models.BooleanField()
     created = models.DateTimeField(auto_now_add=True)
-
-
-class BrochureDocument(models.Model):
-    destination = os.path.join(settings.MEDIA_ROOT, 'brochures')
-    document = models.FileField(upload_to=destination)
-    uploaded_at = models.DateTimeField(auto_now_add=True)
