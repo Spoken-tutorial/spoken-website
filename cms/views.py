@@ -111,7 +111,7 @@ def confirm(request, confirmation_code, username):
         if profile.confirmation_code == confirmation_code:
             user.is_active = True
             user.save()
-            user.backend='django.contrib.auth.backends.ModelBackend' 
+            user.backend='django.contrib.auth.backends.ModelBackend'
             login(request,user)
             messages.success(request, "Your account has been activated!. Please update your profile.")
             return HttpResponseRedirect('/')
@@ -145,10 +145,10 @@ def account_login(request):
                             request.session.set_expiry(0)
                         try:
                             p = Profile.objects.get(user_id = user.id)
-                            if not user.first_name or not user.last_name or not p.state or not p.district or not p.city  or not p.address or not p.pincode or not p.phone:# or not p.picture:
+                            if not user.first_name or not user.last_name or not p.state or not p.district or not p.city or not p.address or not p.phone:# or not p.pincode or not p.picture:
                                 messages.success(request, "<ul><li>Please update your profile.</li><li>Please make sure you enter your First name, Last name both and with correct spelling.</li><li>It is recommended that you do upload the photo.</li></ul>")
                                 return HttpResponseRedirect('/accounts/profile/'+user.username)
-                        except: 
+                        except:
                             pass
                         if request.GET and request.GET['next']:
                             return HttpResponseRedirect(request.GET['next'])
@@ -190,7 +190,7 @@ def account_profile(request, username):
             user.save()
             form_data = form.save(commit=False)
             form_data.user_id = user.id
-            
+
             if 'picture-clear' in request.POST and request.POST['picture-clear']:
                #if not old_file == new_file:
                if os.path.isfile(old_file_path):
@@ -198,9 +198,9 @@ def account_profile(request, username):
 
             if 'picture' in request.FILES:
                form_data.picture = request.FILES['picture']
-            
+
             form_data.save()
-            
+
             if 'picture' in request.FILES:
                 size = 128, 128
                 filename = str(request.FILES['picture'])
@@ -209,7 +209,7 @@ def account_profile(request, username):
                     im = Image.open(settings.MEDIA_ROOT + str(form_data.picture))
                     im.thumbnail(size, Image.ANTIALIAS)
                     ext = ext[1:]
-                    
+
                     mimeType = ext.upper()
                     if mimeType == 'JPG':
                         mimeType = 'JPEG'
@@ -219,7 +219,7 @@ def account_profile(request, username):
                     form_data.save()
             messages.success(request, "Your profile has been updated!")
             return HttpResponseRedirect("/accounts/view-profile/" + user.username)
-        
+
         context = {'form':form}
         return render(request, 'cms/templates/profile.html', context)
     else:
@@ -310,7 +310,7 @@ IIT Bombay.
                 return HttpResponseRedirect(redirectNext)
             messages.success(request, "New password sent to your email "+user.email)
             return HttpResponseRedirect('/accounts/change-password/')
-            
+
 
     context = {
         'form': form
@@ -325,13 +325,13 @@ def change_password(request):
     pcode = request.GET.get('auto', False)
     username = request.GET.get('username', False)
     nextUrl = request.GET.get('next', False)
-    
+
     # check pcode in profile page
     if pcode and username and nextUrl:
         user = User.objects.get(username=username)
         profile = Profile.objects.get(user=user)
         if profile.confirmation_code == pcode:
-            user.backend='django.contrib.auth.backends.ModelBackend' 
+            user.backend='django.contrib.auth.backends.ModelBackend'
             login(request,user)
 
     if request.user.is_anonymous():
@@ -358,7 +358,7 @@ def change_password(request):
     context['form'] = form
     context.update(csrf(request))
     return render(request, 'cms/templates/change_password.html', context)
-    
+
 def confirm_student(request, token):
     mdluserid = Hashids(salt = settings.SPOKEN_HASH_SALT).decode(token)[0]
     try:
@@ -368,11 +368,11 @@ def confirm_student(request, token):
         if mdluser:
             user.is_active = True
             user.save()
-            
+
             student.verified = True
             student.error = False
             student.save()
-            
+
             messages.success(request, "Your account has been activated!. Please login to continue.")
             return HttpResponseRedirect('http://spoken-tutorial.org/participant/login/')
         else:
