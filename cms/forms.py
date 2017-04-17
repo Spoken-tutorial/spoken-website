@@ -92,14 +92,13 @@ class ProfileForm(forms.ModelForm):
         exclude = ['user', 'confirmation_code', 'street', 'location']
 
     def clean_picture(self):
-    #    if 'picture' in self.cleaned_data and not \
-    #        self.cleaned_data['picture']:
-    #         raise forms.ValidationError("Profile picture required!")
-        content_types = ['jpg', 'jpeg', 'png']
-        filename = str(self.cleaned_data['picture'])
-        ext = os.path.splitext(filename)[1].lower()
-        if ext[1:] not in content_types:
-            raise forms.ValidationError("Wrong format:Profile picture should be in \"png/jpg\" format only!")
+       if 'picture' in self.cleaned_data and \
+           self.cleaned_data['picture']:
+            content_types = ['jpg', 'jpeg', 'png']
+            filename = str(self.cleaned_data['picture'])
+            ext = os.path.splitext(filename)[1].lower()
+            if ext[1:] not in content_types:
+                raise forms.ValidationError("Wrong format:Profile picture should be in \"png/jpg\" format only!")
 
     first_name = forms.CharField()
     last_name = forms.CharField()
@@ -127,7 +126,7 @@ class ProfileForm(forms.ModelForm):
         if 'user' in kwargs:
             user = kwargs["user"]
             del kwargs["user"]
-            
+
         super(ProfileForm, self).__init__(*args, **kwargs)
         self.fields['first_name'].initial = user.first_name
         self.fields['last_name'].initial = user.last_name
@@ -137,7 +136,7 @@ class ProfileForm(forms.ModelForm):
                 District.objects.filter(state__id = initial.state_id)
             self.fields["city"].queryset = \
                 City.objects.filter(state__id = initial.state_id)
-            
+
         if args:
             if 'state' in args[0]:
                 if args[0]['state'] != '' and args[0]['state'] != 'None':
@@ -215,7 +214,7 @@ class ChangePasswordForm(forms.Form):
         if 'old_password' in self.cleaned_data:
             if not user.check_password(self.cleaned_data['old_password']):
                 raise forms.ValidationError("Old password did not match")
-        
+
         new_password = self.cleaned_data.get('new_password')
         confirm_new_password = self.cleaned_data.get('confirm_new_password')
         if confirm_new_password and new_password != new_password:
@@ -237,7 +236,7 @@ class NewsAdditionaFieldAdmin(forms.ModelForm):
             else:
                 raise forms.ValidationError(_('Please choose image file format.'))
             return content
-'''    
+'''
 
 class VerifyForm(forms.Form):
   email = forms.EmailField(required=True)
