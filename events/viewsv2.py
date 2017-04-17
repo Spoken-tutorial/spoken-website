@@ -615,10 +615,7 @@ class TrainingAttendanceListView(ListView):
     else:
       TrainingAttend.objects.filter(training_id =training_id).delete()
     self.training_request.update_participants_count()
-    if self.training_request.status == 1:
-      return HttpResponseRedirect('/software-training/training-request/rp/pendingattendance')
-    else:
-      return HttpResponseRedirect('/software-training/training-planner')
+    return HttpResponseRedirect('/software-training/training-planner')
 
 class TrainingCertificateListView(ListView):
   queryset = StudentMaster.objects.none()
