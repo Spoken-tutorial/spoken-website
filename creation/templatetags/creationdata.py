@@ -205,6 +205,14 @@ def tutorialsearch():
 
     return context
 
+def get_mp4_video(tr):
+    tname, text = tr.video.split('.')
+    path = settings.MEDIA_ROOT + 'videos/' + str(tr.tutorial_detail.foss_id) + '/' + str(tr.tutorial_detail_id) + '/' + tname + '.mp4'
+    if os.path.isfile(path):
+        return 'videos/' + str(tr.tutorial_detail.foss_id) + '/' + str(tr.tutorial_detail_id) + '/' + tname + '.mp4'
+    return False
+
+
 register.inclusion_tag('spoken/templates/tutorial_search_form.html')(tutorialsearch)
 #register.filter('tutorialsearch', tutorialsearch)
 register.filter('get_timed_script', get_timed_script)
@@ -234,3 +242,4 @@ register.filter('installation_sheet', installation_sheet)
 register.filter('brochure', brochure)
 register.filter('get_contenteditor', is_contenteditor)
 register.filter('format_component_title', format_component_title)
+register.filter('get_mp4_video', get_mp4_video)
