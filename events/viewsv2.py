@@ -197,37 +197,38 @@ class StudentBatchCreateView(CreateView):
     self.organiser = self.user.organiser
     form_data.organiser = self.user.organiser
     studentcount = 0
-    # one organiser for one department
-    # It will check only the new department batch upload
-    # Will allow to upload if organiser already having batch for that department
-    try:
-      department = StudentBatch.objects.filter(
-        department=form.cleaned_data['department'],
-        academic=self.user.organiser.academic
-      )
+    
+
+    if 'bid' in self.kwargs:
+      try:
+        form_data = StudentBatch.objects.get(pk=self.kwargs['bid'])
+      except StudentBatch.DoesNotExist:
+        messages.error(self.request, 'Invalid Batch Id')
+        return self.form_invalid(form)
+      studentcount = form_data.stcount
+      if studentcount >= 500 :
+        messages.error(self.request, 'Can not add more than 500 students in one batch.')
+        return self.form_invalid(form)
+    else:
+      # new MB
+      # one organiser for one department
+      # It will check only the new department batch upload
+      # Will allow to upload if organiser already having batch for that department
+      
+      department = StudentBatch.objects.filter(department=form.cleaned_data['department'], academic=self.user.organiser.academic )
       this_organiser_dept = department.filter(organiser=self.request.user.organiser);
+      
       if not this_organiser_dept.exists() and department.exists():
         messages.error(self.request, "%s department is already assigened to organiser %s in your College." % (form.cleaned_data['department'], department.first().organiser))
+        print "form invalid: dept present "
         return self.form_invalid(form)
-
-    except Exception, e:
-      return self.form_invalid(form)
-
-    try:
-      if 'bid' in self.kwargs:
-        form_data = StudentBatch.objects.get(pk=self.kwargs['bid'])
-        studentcount = form_data.stcount
-        print 'students present',studentcount
-        if studentcount == 500 :
-          messages.error(self.request, 'Can not add more than 500 students in one batch.')
-          return self.form_invalid(form)
-      else:
+      try:
         form_data = StudentBatch.objects.get(year=form_data.year, academic=form_data.academic, department=form_data.department)
-    except ObjectDoesNotExist:
-      form_data.save()
-    except Exception, e:
-      print e
-      return HttpResponseRedirect("/software-training/student-batch/")
+        print " batch already exist"
+      except StudentBatch.DoesNotExist:
+        form_data.save()
+    
+
     skipped, error, warning, write_flag = \
       self.csv_email_validate(self.request.FILES['csv_file'], form_data.id , studentcount)
     context = {'error' : error, 'warning' : warning, 'batch':form_data}
@@ -1228,18 +1229,22 @@ class GetDepartmentOrganiserStatusView(JSONResponseMixin, View):
     year = self.request.POST.get('year')
     context = {}
     dept_status = True
+    msg = ""
 
-    resultdata = StudentBatch.objects.filter(
+    resultdata = StudentBatch.objects.get(
       academic_id=request.user.organiser.academic.id,
       department_id=department_id,
       year = year
     )
-
+    org_name = resultdata.organiser.user.first_name+" "+resultdata.organiser.user.last_name
+    
     if resultdata:
       dept_status = False
+      msg = "This department with selected year is already chosen by another Organiser "+org_name+" in your College."
 
     context = {
       'dept_status' : dept_status,
+      'msg' : msg
     }
     return self.render_to_json_response(context)
 
@@ -2531,3 +2536,4 @@ class LearnDrupalFeedbackCreateView(CreateView):
       form_data.save()
       messages.success(self.request, "Thank you for completing this feedback form. We appreciate your input and valuable suggestions.")
       return HttpResponseRedirect(self.success_url)
+

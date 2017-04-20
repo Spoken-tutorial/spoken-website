@@ -50,7 +50,7 @@
   <script>
   var defaultDept = $('#id_department').val();
   var defaultYear = $('#id_year').val();
-  $('.department').on('change', function() {
+  $('.department, .year').on('change', function() {
         department = $('.department').val();
         year = $('.year').val();
         $('#update').attr('disabled', true);
@@ -70,42 +70,14 @@
                } else {
                 $('#id_department').val(defaultDept);
                 $('#id_year').val(defaultYear);
-                alert('This department with selected year is already chosen by another Organiser in your College. ');
+                alert(data.msg);
               }
             }
           });
 
         }
       });
-  $('.year').on('change', function() {
-        department = $('.department').val();
-        year = $('.year').val();
-        $('#update').attr('disabled', true);
-        if(department != '' && year != '') {
-          $.ajax
-          ({
-            url: "/software-training/get-department-organiser-status/",
-            type: "POST",
-            data: {
-              department: department,
-              year: year,
-            },
-            success: function(data) {
-              // loading languages
-              if(data && data['dept_status']) {
-                $('#update').attr('disabled', false);
-               } else {
-                $('#id_department').val(defaultDept);
-                $('#id_year').val(defaultYear);
-                alert('This department with selected year is already chosen by another Organiser in your College. ');
-              }
-            }
-          });
-
-        }
-      });
-
-
 
   </script>
 {% endblock %}
+
