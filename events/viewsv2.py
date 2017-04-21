@@ -197,7 +197,7 @@ class StudentBatchCreateView(CreateView):
     self.organiser = self.user.organiser
     form_data.organiser = self.user.organiser
     studentcount = 0
-    
+
 
     if 'bid' in self.kwargs:
       try:
@@ -214,10 +214,10 @@ class StudentBatchCreateView(CreateView):
       # one organiser for one department
       # It will check only the new department batch upload
       # Will allow to upload if organiser already having batch for that department
-      
+
       department = StudentBatch.objects.filter(department=form.cleaned_data['department'], academic=self.user.organiser.academic )
       this_organiser_dept = department.filter(organiser=self.request.user.organiser);
-      
+
       if not this_organiser_dept.exists() and department.exists():
         messages.error(self.request, "%s department is already assigened to organiser %s in your College." % (form.cleaned_data['department'], department.first().organiser))
         print "form invalid: dept present "
@@ -227,7 +227,7 @@ class StudentBatchCreateView(CreateView):
         print " batch already exist"
       except StudentBatch.DoesNotExist:
         form_data.save()
-    
+
 
     skipped, error, warning, write_flag = \
       self.csv_email_validate(self.request.FILES['csv_file'], form_data.id , studentcount)
@@ -1231,16 +1231,17 @@ class GetDepartmentOrganiserStatusView(JSONResponseMixin, View):
     dept_status = True
     msg = ""
 
-    resultdata = StudentBatch.objects.get(
-      academic_id=request.user.organiser.academic.id,
-      department_id=department_id,
-      year = year
-    )
-    org_name = resultdata.organiser.user.first_name+" "+resultdata.organiser.user.last_name
-    
-    if resultdata:
+    try:
+      resultdata = StudentBatch.objects.get(
+        academic_id=request.user.organiser.academic.id,
+        department_id=department_id,
+        year = year
+      )
       dept_status = False
+      org_name = resultdata.organiser.user.first_name+" "+resultdata.organiser.user.last_name
       msg = "This department with selected year is already chosen by another Organiser "+org_name+" in your College."
+    except ObjectDoesNotExist:
+      pass
 
     context = {
       'dept_status' : dept_status,
@@ -2536,4 +2537,3 @@ class LearnDrupalFeedbackCreateView(CreateView):
       form_data.save()
       messages.success(self.request, "Thank you for completing this feedback form. We appreciate your input and valuable suggestions.")
       return HttpResponseRedirect(self.success_url)
-
