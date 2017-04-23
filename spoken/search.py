@@ -1,14 +1,16 @@
-# Standard Library
+# import Required Libraries
 import os
-
-# Third Party Stuff
 from django.conf import settings
-from whoosh import qparser
-# from whoosh.fields import *
+from whoosh.index import create_in
+from whoosh.fields import *
+from whoosh.qparser import QueryParser
 from whoosh.index import open_dir
+from whoosh.qparser import MultifieldParser
+from whoosh import qparser
+from whoosh.analysis import StandardAnalyzer
+from whoosh.spelling import Corrector
+from whoosh import highlight
 from whoosh.lang.porter import stem
-
-# Spoken Tutorial Stuff
 from creation.models import TutorialResource
 
 
