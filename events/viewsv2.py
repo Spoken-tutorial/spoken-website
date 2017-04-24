@@ -2423,6 +2423,22 @@ class UpdateStudentName(UpdateView):
         self.user.student.save()
         self.user.email = email
       self.user.save()
+       #save testattendance table
+      test_attendance = TestAttendance.objects.filter(student_id = self.user.student.id)
+      if not test_attendance:
+        mdluser = MdlUser.objects.get(email=self.user.email)
+        test_attendance = TestAttendance.objects.filter(mdluser_id=mdluser.id)
+        if not test_attendance:
+          return HttpResponseRedirect(self.success_url)
+        for test in test_attendance:
+          test.mdluser_firstname = form.cleaned_data['first_name']
+          test.mdluser_lastname = form.cleaned_data['last_name']
+          test.save() 
+      else:
+        for test in test_attendance:
+            test.mdluser_firstname = form.cleaned_data['first_name']
+            test.mdluser_lastname = form.cleaned_data['last_name']
+            test.save()
     except Exception:
       pass
     return HttpResponseRedirect(self.success_url)
