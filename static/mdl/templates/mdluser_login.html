@@ -5,6 +5,7 @@
 {% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
 {% block search %}{% endblock %}
 {% block content %}
+{{ message|safe }}
     <div class="row">
         <div class="col-sm-6 col-sm-offset-3 well">
             <h4 style="text-align:center;"class='page-title'>Participant/Student Sign In</h4>
