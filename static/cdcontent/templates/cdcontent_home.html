@@ -107,6 +107,10 @@
                         $('.download-link').html(message);
                     }
                 });
+                posting.fail(function() {
+                    var message = 'Something went wrong! please refresh the page and try again.'
+                    $('.download-link').html(message);
+                });
             });
 
             $('.level').on("change", function(){
