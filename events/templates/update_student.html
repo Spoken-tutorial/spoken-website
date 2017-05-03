@@ -3,12 +3,84 @@
 {% load widget_tweaks %}
 {% load cmsdata %}
 {% load static %}
+{% block cssblock %}
+  <style>
+    .disabled { cursor: not-allowed; background-color: #eee; pointer-events: none;
+    tab-index: -1; }
+  </style>
+{% endblock %}
 {% block title %}Participant Details{% endblock %}
 {% block heading %}<i class="home-page-title-i">Participant Details :</i>{% endblock %}
 {% block search %}{% endblock %}
 {% block content %}
-<form action="" method="post">{% csrf_token %}
-{{ form.as_p }}
-<input type="submit" value="Update" class="btn btn-primary"/>
-</form>
+{% if form %}
+<div class="row well">
+  <div class='col-sm-8'>
+      <form action="{{ action }}" method="post" class='form-horizontal' enctype="multipart/form-data">{% csrf_token %}
+          {% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
+          {% if form.non_field_errors %}
+          <ul>
+            {% for error in form.non_field_errors %}
+              <li>{{ error }}</li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+          <div class='form-row'>
+            <div class='col-xs-12 form-group required'>
+              <label class='control-label'>First Name</label>
+              {% render_field form.first_name class+="form-control first_name" tabindex="1" %}
+              {{ form.first_name.errors }}
+            </div>
+          </div>
+
+          <div class='form-row'>
+            <div class='col-xs-12 form-group required'>
+              <label class='control-label'>Last Name</label>
+              {% render_field form.last_name class+="form-control last_name" tabindex="1" %}
+              {{ form.last_name.errors }}
+            </div>
+          </div>
+
+          <div class='form-row'>
+            <div class='col-xs-12 form-group required'>
+              <label class='control-label'>Email </label>
+              {% if user.is_active %}
+                ( Email is verified. <a href="#" class="edit-valid-email">Click here</a> to change )
+                {% render_field form.email class+="form-control email disabled" tabindex="1" %}
+              {% else %}
+                {% render_field form.email class+="form-control email" tabindex="1" %}
+              {% endif %}
+              {{ form.email.errors }}
+            </div>
+          </div>
+
+          <div class='form-row'>
+            <div class='col-xs-12 form-group required'>
+              <label class='control-label'>Gender</label>
+              {% render_field form.gender class+="form-control gender" tabindex="1" %}
+              {{ form.gender.errors }}
+            </div>
+          </div>
+
+          <div class="form-group">
+              <div class="col-xs-12 form-group">
+                  <input class="btn btn-primary" id="update" type="submit" value="Update" />
+                  <a class="btn btn-danger" href="{% url 'events:batch_list' %}">Cancel</a>
+              </div>
+          </div>
+          {% endwith %}
+      </form>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+{% block jsblock %}
+  <script>
+    $(document).ready(function(){
+      $('.edit-valid-email').click(function(event){
+        event.preventDefault();
+        $('.email').toggleClass('disabled');
+      });
+    });
+  </script>
 {% endblock %}

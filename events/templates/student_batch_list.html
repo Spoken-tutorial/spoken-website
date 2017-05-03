@@ -53,7 +53,7 @@
           <td>{{ record.year }}</td>
           <td>{{ record.student_count }}</td>
           <td>
-              <a href="{% url 'events:edit_student' record.id %}">Edit</a> | 
+              <a href="{% url 'events:edit_batch' record.id %}">Edit</a> |
             <a href="{% url 'events:list_student' record.id %}">Student List</a>
             {% if record|can_add_student:request.user %}
              | <a href="{% url 'events:add_student' record.id %}">Add Student</a>

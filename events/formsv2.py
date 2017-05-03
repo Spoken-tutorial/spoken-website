@@ -90,18 +90,19 @@ class TrainingRequestForm(forms.ModelForm):
 
 class TrainingRequestEditForm(forms.ModelForm):
   course_type = forms.ChoiceField(choices=[('', '---------'), (0, 'Software Course outside lab hours'), (1, 'Software Course mapped in lab hours'), (2, ' Software Course unmapped in lab hours')])
-  course = forms.ModelChoiceField(empty_label='---------', queryset=CourseMap.objects.none())
   training_planner = forms.CharField()
+  department = forms.ModelChoiceField(empty_label='---------', queryset=CourseMap.objects.none())
+  batch = forms.ModelChoiceField(empty_label='---------', queryset=StudentBatch.objects.none())
+  course = forms.ModelChoiceField(empty_label='---------', queryset=CourseMap.objects.filter(category=0))
   class Meta:
     model = TrainingRequest
-    exclude = ['participants', 'status', 'training_planner', 'department', 'batch']
+    exclude = ['participants', 'status', 'training_planner']
 
   def clean(self):
     # Date restriction
     if self.cleaned_data and 'sem_start_date' in self.cleaned_data and self.cleaned_data['sem_start_date']:
       tp = TrainingPlanner.objects.get(pk=self.cleaned_data['training_planner'])
       start_date, end_date =tp.get_current_semester_date_duration_new()
-      print start_date, end_date, self.cleaned_data['sem_start_date']
       if not (self.cleaned_data['sem_start_date'] <= end_date and self.cleaned_data['sem_start_date'] >= start_date):
         raise forms.ValidationError("Invalid semester start date")
     return self.cleaned_data
@@ -112,20 +113,9 @@ class TrainingRequestEditForm(forms.ModelForm):
     super(TrainingRequestEditForm, self).__init__(*args, **kwargs)
     flag = True
     data = kwargs.pop('data', None)
-    if data and 'course_type' in data:
-      if data['course_type']:
-        print 1
-        self.fields['course'].queryset = CourseMap.objects.filter(category=data['course_type'])
-        if 'course' in data and data['course']:
-          self.fields['course'].initial = data['course']
-      else:
-        print 2
-        flag = False
-    else:
-      print 3
-      flag = False
+
     if not flag and training:
-      self.fields['course_type'].initial = training.course.category
+      self.fields['course_type'].initial = training.course_type
       self.fields['course'].queryset = CourseMap.objects.filter(category=training.course.category)
       self.fields['course'].initial = training.course_id
     flag = True
@@ -138,6 +128,28 @@ class TrainingRequestEditForm(forms.ModelForm):
       flag = False
     if not flag and training:
       self.fields['sem_start_date'].initial = training.sem_start_date
+
+    self.fields['course_type'].initial = training.course_type
+    self.fields['course'].initial = training.course_id
+    #department
+    self.fields['department'].queryset = Department.objects.filter(id__in=StudentBatch.objects.filter(academic=user.organiser.academic, stcount__gt=0).values_list('department_id'))
+    self.fields['department'].initial = training.department
+
+    #overwrite choice
+    self.fields['batch'].queryset = StudentBatch.objects.filter(
+      academic_id=user.organiser.academic.id,
+      stcount__gt=0,
+      department_id=training.department.id
+    )
+    self.fields['batch'].initial = training.batch
+
+    # update form choice when check is_valid
+    if data and 'department' in data:
+        self.fields['batch'].queryset = StudentBatch.objects.filter(
+          academic_id=user.organiser.academic.id,
+          stcount__gt=0,
+          department_id=data['department']
+        )
 
 class CourseMapForm(forms.ModelForm):
   category = forms.ChoiceField(choices=[('', '---------'), (1, 'Software Course mapped in lab hours'), (2, ' Software Course unmapped in lab hours')])
@@ -157,12 +169,24 @@ class CourseMapForm(forms.ModelForm):
     super(CourseMapForm, self).__init__(*args, **kwargs)
 
 class UserForm(forms.ModelForm):
+  gender = forms.ChoiceField(choices=[('Male', 'Male'),('Female','Female')])
   class Meta:
     model = User
-    exclude = ['password','last_login','is_superuser','username','is_staff','is_active','date_joined','groups','user_permissions','email']
+    exclude = ['password','last_login','is_superuser','username','is_staff','is_active','date_joined','groups','user_permissions']
+
+  # def clean_email(self):
+  #   email = self.cleaned_data['email']
+  #   try:
+  #     if not validate_email(email):
+  #       raise forms.ValidationError(u'%s is not valid email.' % email )
+  #   except:
+  #     raise forms.ValidationError(u'%s is not valid email.' % email )
 
   def __init__(self, *args, **kwargs):
     super(UserForm, self).__init__(*args, **kwargs)
+    if 'instance' in kwargs:
+      self.fields['gender'].initial = kwargs['instance'].student.gender
+
 
 class SingleTrainingForm(forms.ModelForm):
   training_type = forms.ChoiceField(choices=[('', '---------'), (0, 'School'),(3,'Vocational'),(1,'Live workshop'),(2,'Pilot workshop')])
