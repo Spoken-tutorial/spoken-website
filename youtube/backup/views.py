@@ -7,10 +7,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
-from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect, HttpResponseForbidden
+from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
 from django.shortcuts import render
-
-import oauth2client
 
 # Spoken Tutorial Stuff
 from creation.models import *
@@ -20,38 +18,21 @@ from youtube.core import *
 from youtube.forms import *
 
 
-YOUTUBE_UPLOAD_SCOPE = ["https://www.googleapis.com/auth/youtube.upload", "https://www.googleapis.com/auth/youtube"]
-
-
 @login_required
 def home(request):
     return HttpResponse('YouTube API V3 Implementation')
 
 
-def auth_return(request):
-    if not oauth2client.xsrfutil.validate_token(settings.SECRET_KEY, request.REQUEST['state'], 1):
-        return HttpResponseForbidden('Access Denied!')
-
-    code = request.GET.get('code', '')
-    error = request.GET.get('error', 'Something went wrong!')
-
-    if code:
-        try:
-            store_youtube_credential(code)
-            return HttpResponse('Youtube auth token updated successfully!')
-        except Exception as e:
-            error = str(e)
-
-    return HttpResponse(error)
-
-
 @login_required
 def delete_all_videos(request):
-    service = get_youtube_credential()
-
-    if service is None:
-        return HttpResponse("Youtube auth token expired! We've sent an email with URL to update auth token.")
-
+    flow, credential = get_storage_flow_secret('manage')
+    if credential is None or credential.invalid is True:
+        flow.params['state'] = xsrfutil.generate_token(settings.SECRET_KEY, scope_users['manage'])
+        authorize_url = flow.step1_get_authorize_url()
+        return HttpResponseRedirect(authorize_url)
+    http = httplib2.Http()
+    http = credential.authorize(http)
+    service = build(settings.YOUTUBE_API_SERVICE_NAME, settings.YOUTUBE_API_VERSION, http=http)
     rows = TutorialResource.objects.all().exclude(Q(video_id=None) | Q(video_id=''))
     for row in rows:
         result = delete_video(service, row.video_id)
@@ -62,6 +43,23 @@ def delete_all_videos(request):
         else:
             print row.video_id, 'not deleted'
     return HttpResponse('Videos deletion process completed!!!')
+
+
+@login_required
+def auth_return(request, scope):
+    if scope not in scope_urls:
+        return HttpResponseBadRequest()
+    if not xsrfutil.validate_token(settings.SECRET_KEY, request.REQUEST['state'], scope_users[scope]):
+        return HttpResponseBadRequest()
+    flow = flow_from_clientsecrets(
+        scope_secret,
+        scope=scope_urls[scope],
+        redirect_uri=settings.YOUTUBE_REDIRECT_URL + scope,
+    )
+    credential = flow.step2_exchange(request.REQUEST)
+    storage = Storage(CredentialsModel, 'id', scope_users[scope], 'credential')
+    storage.put(credential)
+    return HttpResponseRedirect('/youtube/')
 
 
 @login_required
@@ -91,15 +89,15 @@ def remove_video_entry(request, tdid, lgid):
     try:
         tr_rec = TutorialResource.objects.get(tutorial_detail_id=tdid, language_id=lgid)
         if tr_rec.video_id:
-            service = get_youtube_credential()
-
-            if service is None:
-                messages.error(
-                    "Youtube auth token expired! We've sent an email with URL to update auth token.")
-                return HttpResponseRedirect('/youtube/remove-youtube-video/')
-
+            flow, credential = get_storage_flow_secret('manage')
+            if credential is None or credential.invalid is True:
+                flow.params['state'] = xsrfutil.generate_token(settings.SECRET_KEY, scope_users['manage'])
+                authorize_url = flow.step1_get_authorize_url()
+                return HttpResponseRedirect(authorize_url)
+            http = httplib2.Http()
+            http = credential.authorize(http)
+            service = build(settings.YOUTUBE_API_SERVICE_NAME, settings.YOUTUBE_API_VERSION, http=http)
             result = delete_video(service, tr_rec.video_id)
-
             if result:
                 tr_rec.video_id = None
                 if tr_rec.playlist_item_id:
