@@ -288,21 +288,16 @@ class TestForm(forms.ModelForm):
                 if not training.is_training_certificate_allowed():
                     trchoices.append((training.id, training.training_name()))
 
-            # if instance:
-            #     trchoices.insert(0, (instance.training_id, instance.training.training_name()))
             self.fields['training'].choices = trchoices
             self.fields['invigilator'].queryset = Invigilator.objects.filter(academic = user.organiser.academic, status=1).exclude(user_id = user.id)
 
-
-        # if instance:
-        #     self.fields['invigilator'].queryset = Invigilator.objects.filter(academic  = instance.organiser.academic, status=1).exclude(user_id = user.id)
-        #     self.fields['invigilator'].initial = instance.invigilator
-        #     self.fields['test_category'].initial = instance.test_category
-        #     self.fields['foss'].initial = instance.foss
-        #     self.fields['tdate'].initial = str(instance.tdate) + " " + str(instance.ttime)[0:5]
-        #     self.fields['department'].initial = instance.department.all().values_list('id', flat=True)
-        #     if instance.test_category.id == 2:
-        #         self.fields['training'].initial = instance.training_id
+        if instance:
+            self.fields['invigilator'].queryset = Invigilator.objects.filter(academic  = instance.organiser.academic, status=1).exclude(user_id = user.id)
+            self.fields['invigilator'].initial = instance.invigilator
+            self.fields['test_category'].initial = instance.test_category
+            self.fields['tdate'].initial = str(instance.tdate) + " " + str(instance.ttime)[0:5]
+            if instance.test_category.id == 2:
+                self.fields['training'].initial = instance.training_id
 
 class TrainingScanCopyForm(forms.Form):
     scan_copy = forms.FileField(label = 'Select a Scaned copy', required = True)

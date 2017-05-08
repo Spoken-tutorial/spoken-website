@@ -1674,8 +1674,7 @@ def test_request(request, role, rid = None):
                 t.training_id = request.POST['training']
             if int(request.POST['test_category']) == 3:
                 t.training_id = None
-            
-            test_trainings = request.POST['training']
+                
             test_training_dept = t.training.department_id
 
             t.invigilator_id = request.POST['invigilator']
@@ -1717,7 +1716,6 @@ def test_request(request, role, rid = None):
             
             if not error:
                 t.department.clear()
-                # for dept in form.cleaned_data.get('department'):
                 t.department.add(test_training_dept)
                 
                 #update logs
