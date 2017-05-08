@@ -281,4 +281,9 @@ urlpatterns = [
         "mark_prev_attendance.html"), 
       name="previous_training_attendance"
     ),
+    url(
+      r'^(?P<pk>\d+)/reopen-training/$', 
+      'events.viewsv2.ReOpenTraining', 
+      name="re-open-training"
+    ),
 ]

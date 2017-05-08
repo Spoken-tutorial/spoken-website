@@ -2140,7 +2140,6 @@ def SingleTrainingPendingAttendance(request, pk):
   return HttpResponseRedirect("/software-training/single-training/pending/")
 
 def MarkAsComplete(request, pk):
-  print '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
   #pk =0
   st = TrainingRequest.objects.get(pk=pk)
   if st:
@@ -2556,3 +2555,13 @@ class LearnDrupalFeedbackCreateView(CreateView):
       form_data.save()
       messages.success(self.request, "Thank you for completing this feedback form. We appreciate your input and valuable suggestions.")
       return HttpResponseRedirect(self.success_url)
+
+def ReOpenTraining(request, pk):
+  st = TrainingRequest.objects.get(pk=pk)
+  if st:
+    st.status = 0
+    st.save()
+    messages.success(request, 'Training is now open to mark further attendance.')
+  else:
+    messages.error(request, 'Request to re-open training is not sent.Please try again.')
+  return HttpResponseRedirect("/software-training/select-participants/")

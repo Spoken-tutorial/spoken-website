@@ -87,13 +87,13 @@
             {% if training.department.id == 24 %}
             <td>
               {% if training.status == 1 and not training.is_training_certificate_allowed %}
-                | Training Completed |
+                | Training Completed | <a href="{% url 'events:re-open-training' training.id %}"> Re-Open</a> |
               {% endif %}
               {% if training.status == 1 and training.is_training_certificate_allowed and training.get_partipants_from_attendance %}
-                | <a href="{% url 'events:training_certificate' training.id %}">Download Certificate</a> |
+                | <a href="{% url 'events:training_certificate' training.id %}">Download Certificate</a> | <a href="{% url 'events:re-open-training' training.id %}"> Re-Open</a> |
               {% endif %}
               {% if training.status == 2 and training.is_training_certificate_allowed %}
-                |Request Sent for Mark As Complete|
+                |Request Sent for Mark As Complete| <a href="{% url 'events:re-open-training' training.id %}"> Re-Open</a> |
               {% endif %}
 
               {% if training.status == 0  %}
@@ -106,13 +106,13 @@
             {% else %}
             <td>
               {% if training.status == 1 and not training.is_training_certificate_allowed %}
-                | Training Completed |
+                | Training Completed | <a href="{% url 'events:re-open-training' training.id %}"> Re-Open</a> |
               {% endif %}
               {% if training.status == 1 and training.is_training_certificate_allowed and training.is_certificate_not_allowed %}
-                | Training Completed. No Certificates |
+                | Training Completed. No Certificates | <a href="{% url 'events:re-open-training' training.id %}"> Re-Open</a> |
               {% endif %}
               {% if training.status == 1 and training.is_training_certificate_allowed and not training.is_certificate_not_allowed and training.get_partipants_from_attendance %}
-                | <a href="{% url 'events:training_certificate' training.id %}">Download Certificate</a> |
+                | <a href="{% url 'events:training_certificate' training.id %}">Download Certificate</a> | <a href="{% url 'events:re-open-training' training.id %}"> Re-Open</a> |
               {% endif %}
               {% if training.status == 0 %}
                 | <a href="{% url 'events:training_attendance' training.id %}">Participant List</a> |
