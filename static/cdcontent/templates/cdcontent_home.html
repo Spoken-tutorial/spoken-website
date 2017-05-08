@@ -15,7 +15,7 @@
 {% block heading %}CD Content Creation{% endblock %}
 {% block search %} {% endblock %}
 {% block content %}
-    <form role="form" method="post" enctype="multipart/form-data" action="" class="form-horizontal">
+    <form role="form" method="post" enctype="multipart/form-data" class="cdcontentform form-horizontal">
         <div class="row well bs-component">
             <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
                 <div class="alert alert-danger" role="alert">
@@ -68,6 +68,7 @@
                     <table class="added-foss table table-condensed table-bordered table-hover">
                     </table>
                 </div>
+                <div class="download-link"></div>
             </div>
         </div>
     </form>
@@ -89,6 +90,29 @@
                     $('.level').removeAttr('disabled');
                 }
             });
+
+            $(".cdcontentform").on( "submit", function(event) {
+                event.preventDefault();
+                var url = $(location).attr('href');
+                $('.download-link').html('<i class="fa fa-circle-o-notch fa-spin fa-3x fa-fw"></i><span class="sr-only">Loading...</span> please do not refresh the page, we are preparing your download link');
+                var posting = $.post(url, $(this).serialize());
+
+                posting.done(function(data) {
+                    console.log(data.status);
+                    if(data.status) {
+                        var downloadLink = '<a href="' + data.path + '" title="Download cd content zip">Click here</a> to download the cd content zip file';
+                        $('.download-link').html(downloadLink);
+                    } else {
+                        var message = 'Something went wrong! please refresh the page and try again.'
+                        $('.download-link').html(message);
+                    }
+                });
+                posting.fail(function() {
+                    var message = 'Something went wrong! please refresh the page and try again.'
+                    $('.download-link').html(message);
+                });
+            });
+
             $('.level').on("change", function(){
                 var foss = $('.foss_category').val();
                 var level = $(this).val();
