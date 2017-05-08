@@ -244,7 +244,7 @@
       return (v.match(r) == null) ? false : true;
   }
   
-  $('.department').on('change', function() {
+  $('.department, .year').on('change', function() {
         department = $('.department').val();
         year = $('.year').val();
         $('#upload_button').attr('disabled', true);
@@ -265,7 +265,7 @@
               if(data && data['dept_status']) {
                 $('#upload_button').attr('disabled', false);
                } else {
-                alert('This department with selected year is already chosen by another Organiser in your College. ');
+                alert(data.msg);
               }
               //$('.ajax-refresh-language').hide();
             }
@@ -273,34 +273,7 @@
                 
         }
       });
-  $('.year').on('change', function() {
-        department = $('.department').val();
-        year = $('.year').val();
-        $('#upload_button').attr('disabled', true);
-        if(department != '' && year != '') {
-          $.ajax
-          ({
-            url: "/software-training/get-department-organiser-status/",
-            type: "POST",
-            data: {
-              department: department,
-              year: year,
-            },
-            beforeSend: function() {
-              //$('.ajax-refresh-language').show();
-            },
-            success: function(data) {
-              // loading languages
-              if(data && data['dept_status']) {
-                $('#upload_button').attr('disabled', false);
-               } else {
-                alert('This department with selected year is already chosen by another Organiser in your College. ');
-              }
-              //$('.ajax-refresh-language').hide();
-            }
-          });
-                
-        }
-      });
+
   </script>
 {% endblock %}
+

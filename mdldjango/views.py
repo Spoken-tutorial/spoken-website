@@ -41,12 +41,11 @@ def mdl_logout(request):
     return HttpResponseRedirect('/participant/login')
     
 def mdl_login(request):
-    messages = {}
     if request.POST:
         email = request.POST["username"]
         password = request.POST["password"]
         if not email or not password:
-            messages['error'] = "Please enter valide Username and Password!"
+            messages.error(request,'Please enter valide Username and Password!')
             #return HttpResponseRedirect('/participant/login')
         user = authenticate(email = email, password = password)
         if user:
@@ -57,13 +56,13 @@ def mdl_login(request):
             request.session.save()
             request.session.modified = True
         else:
-            messages['error'] = "Username or Password Doesn't match!"
+            messages.error(request, 'Username or Password Doesnt match!')
 
     if request.session.get('mdluserid'):
-        #print "Current user is ", request.session.get('mdluserid')
+        # print "Current user is ", request.session.get('mdluserid')
         return HttpResponseRedirect('/participant/index')
         
-    context = {'message':messages}
+    context = {}
     context.update(csrf(request))
     return render(request, 'mdl/templates/mdluser_login.html', context)
 
