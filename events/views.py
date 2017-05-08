@@ -1674,21 +1674,13 @@ def test_request(request, role, rid = None):
                 t.training_id = request.POST['training']
             if int(request.POST['test_category']) == 3:
                 t.training_id = None
-<<<<<<< HEAD
-=======
-            
             test_trainings = request.POST['training']
->>>>>>> commiting changes in views
             test_training_dept = t.training.department_id
 
             t.invigilator_id = request.POST['invigilator']
             t.foss_id = t.training.course.foss_id
             t.tdate = dateTime[0]
             t.ttime = dateTime[1]
-<<<<<<< HEAD
-=======
-            
->>>>>>> commiting changes in views
             error = 0
             try:
                 t.save()
