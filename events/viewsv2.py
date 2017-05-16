@@ -332,9 +332,9 @@ class StudentBatchCreateView(CreateView):
             try:
               smrec = StudentMaster.objects.get(student=student, moved=False)
               if int(batch_id) == int(smrec.batch_id):
-                row.append(1)
+                row.append('Already exists in this batch.')
               else:
-                row.append(0)
+                row.append('Already exists in %s, %s' % (smrec.batch, smrec.batch.academic))
               warning.append(row)
               continue
             except ObjectDoesNotExist:
@@ -2436,7 +2436,7 @@ class UpdateStudentName(UpdateView):
         for test in test_attendance:
           test.mdluser_firstname = form.cleaned_data['first_name']
           test.mdluser_lastname = form.cleaned_data['last_name']
-          test.save() 
+          test.save()
       else:
         for test in test_attendance:
             test.mdluser_firstname = form.cleaned_data['first_name']
