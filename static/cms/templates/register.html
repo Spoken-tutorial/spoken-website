@@ -78,10 +78,7 @@
             </div>
             <div class="form-group">
                 <div class="col-xs-12">
-                    <div class="input-group captcha-group">
-                        {% render_field form.captcha class+="form-control captcha" placeholder="Enter Captcha" %}
-                    </div>
-                    {{ form.captcha.errors }}
+                    <div class="g-recaptcha" data-sitekey="{{SITE_KEY}}"></div>
                 </div>
             </div>
             <div class="form-group formSubmit">
@@ -96,23 +93,5 @@
     </div>
 {% endblock %}
 {% block uncompressjsblock %}
-    <script>
-    $(function() {
-    // Add refresh button after field (this can be done in the template as well)
-
-        // Click-handler for the refresh-link
-        $('.captcha-refresh').click(function(){
-            var $form = $(this).parents('form');
-            var url = location.protocol + "//" + window.location.hostname + ":"+ location.port + "/captcha/refresh/";
-
-            // Make the AJAX-call
-            $.getJSON(url, {}, function(json) {
-                $form.find('input[name="captcha_0"]').val(json.key);
-                $form.find('img.captcha').attr('src', json.image_url);
-            });
-
-            return false;
-        });
-    });
-    </script>
+    <script src='https://www.google.com/recaptcha/api.js'></script>
 {% endblock %}
