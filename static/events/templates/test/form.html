@@ -45,22 +45,6 @@
                       {% endfor %}
                     </ul>
                     {% endif %}
-                    <!--
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label" for= "id_state">State</label>
-                        {% render_field form.state class+="form-control state" tabindex="1" data-placeholder="Enter state name" %}
-                        {{ form.state.errors }}
-                    </div>
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label" for= "id_district">District</label>
-                        {% render_field form.district class+="form-control district" tabindex="1" data-placeholder="Enter district name" %}
-                        {{ form.district.errors }}
-                    </div>
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label" for= "id_academic">Academic name</label>
-                        {% render_field form.academic class+="form-control academic" tabindex="1" data-placeholder="Enter academic name" %}
-                        {{ form.name.errors }}
-                    </div>-->
                     {{ form.errors }}
                     <div class="form-group">
                         <label class="col-sm-3 control-label" for= "id_test_category">Test Category</label>
@@ -94,35 +78,11 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-sm-3 control-label" for= "id_department">Department</label>
-                        <div class="col-sm-9">
-                            {% render_field form.department class+="form-control department" tabindex="1" data-placeholder="Enter department" %}
-                            {{ form.department.errors }}
-                            <small>Please select the department of participants. <b>&lt;CTRL&gt; + Click</b> for multiple selections.</small>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
                         <label class="col-sm-3 control-label" for= "id_tdate">Date</label>
                         <div class="col-sm-9">
                             {% render_field form.tdate class+="form-control tdate datetime" tabindex="1" data-placeholder="Enter date" %}
                             {{ form.tdate.errors }}
                             <small>Please select a preferred date for conducting the Test.</small>
-                        </div>
-                    </div>
-                    <!--
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label" for= "id_date">Time</label>
-                        {% render_field form.time class+="form-control time" tabindex="1" data-placeholder="Enter time" %}
-                        {{ form.time.errors }}
-                    </div>
-                    -->
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label" for= "id_foss">Foss</label>
-                        <div class="col-sm-9">
-                            {% render_field form.foss class+="form-control foss" tabindex="1" data-placeholder="Enter foss" %}
-                            {{ form.foss.errors }}
-                            <small>Please select a FOSS catgegory.</small>
                         </div>
                     </div>
                     <div class="form-group">
@@ -194,67 +154,6 @@
         
         $workshop = $('#id_workshop');
         $training = $('#id_training');
-        $department = $('#id_department');
-        $foss = $('#id_foss');
-        
-        $workshop.change(function() {
-            ajaxFossDeptFillDatas('foss', 'dept', 0);
-        });
-        
-        $training.change(function() {
-            ajaxFossDeptFillDatas('foss', 'dept', 1);
-        });
-        
-        function ajaxFossDeptFillDatas(foss, dept, type){
-            $afoss = $('#id_foss');
-            $adepartment = $('#id_department');
-            if(type){
-                var workshop = $(".training").val();
-            } else {
-                var workshop = $(".workshop").val();
-            }
-            
-            $foss = foss || "";
-            $department = dept || "";
-            $type = type;
-            fields = {}
-            fields['type'] = type;
-            if($foss) {
-                fields['foss'] = 'foss';
-            }
-            if($department) {
-                fields['dept'] = 'dept';
-            }
-            /* see thread-user.js */
-            $.ajax({
-                url: "/software-training/ajax-dept-foss/",
-                type: "POST",
-                data: {
-                    workshop: workshop,
-                    fields: fields,
-                },
-                success: function(data) {
-                    console.log(data);
-                    if(data.foss){
-                        $afoss.html(data.foss);
-                        $afoss.removeAttr("disabled");
-                    }else{
-                        $ac_institute.html('<option>-- None -- </option>')
-                        $ac_institute.attr("disabled", "disabled");
-                        //alert('No City found for this State!!');
-                    }
-                    if(data.dept){
-                        $adepartment.html(data.dept);
-                        $adepartment.removeAttr("disabled");
-                    }else{
-                        $adepartment.html('<option>-- None -- </option>')
-                        $adepartment.attr("disabled", "disabled");
-                        //alert('No Location found for this District!!');
-                    }
-                    console.log(data);
-                }
-            });
-        }
 
         $('.datetime').datetimepicker({
             onGenerate:function( ct ){

@@ -1674,13 +1674,12 @@ def test_request(request, role, rid = None):
                 t.training_id = request.POST['training']
             if int(request.POST['test_category']) == 3:
                 t.training_id = None
+            test_training_dept = t.training.department_id
 
             t.invigilator_id = request.POST['invigilator']
-            t.foss_id = request.POST['foss']
+            t.foss_id = t.training.course.foss_id
             t.tdate = dateTime[0]
             t.ttime = dateTime[1]
-
-
             error = 0
             try:
                 t.save()
@@ -1715,9 +1714,7 @@ def test_request(request, role, rid = None):
 
             if not error:
                 t.department.clear()
-                for dept in form.cleaned_data.get('department'):
-                    t.department.add(dept)
-
+                t.department.add(test_training_dept)
                 #update logs
                 message = t.academic.institution_name+" has made a test request for "+t.foss.foss+" on "+t.tdate
                 if rid:
