@@ -1,3 +1,4 @@
+import os
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -43,10 +44,22 @@ class FossCategory(models.Model):
     class Meta:
         verbose_name = 'FOSS'
         verbose_name_plural = 'FOSSes'
-        ordering = ('foss',)
+        ordering = ('foss', )
 
     def __unicode__(self):
         return self.foss
+
+
+class BrochureDocument(models.Model):
+    foss_course = models.ForeignKey(FossCategory)
+    foss_language = models.ForeignKey(Language)
+    document = models.FileField(upload_to='brochures/')
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'FOSS Brochure'
+        verbose_name_plural = 'FOSS Brochures'
 
 
 class PlaylistInfo(models.Model):
