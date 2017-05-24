@@ -364,6 +364,7 @@ def tutorial_content(request, template='statistics/templates/statistics_content.
     tutorials = CreationStatisticsFilter(request.GET, queryset=tutorials)
 
     context = {}
+
     context['form'] = tutorials.form
 
     # display information table across multiple pages
