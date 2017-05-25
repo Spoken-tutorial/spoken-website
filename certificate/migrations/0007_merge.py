@@ -8,7 +8,6 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('certificate', '0005_auto_20160827_2323'),
-        ('certificate', '0006_merge'),
     ]
 
     operations = [
