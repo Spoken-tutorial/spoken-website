@@ -1,3 +1,5 @@
+*.log
+celerybeat-schedule
 *~
 *.swp
 *.pyc
