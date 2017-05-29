@@ -15,14 +15,7 @@
 {% block content %}    
   <div class= 'filters row' >
     <form action="" method="get" class='form-horizontal'>
-      <div class="col-lg-4 col-md-4 col-sm-4">          
-          <div class="form-group">                            
-              <label for="id_name" class="col-sm-4 control-label">FOSS Category</label>
-              <div class="col-sm-8">
-                {% render_field form.tutorial_detail__foss__category class+="form-control name" size="1" tabindex="1" %}
-                {{ form.tutorial_detail__foss.errors }}                      
-              </div>
-          </div>                                          
+      <div class="col-lg-4 col-md-4 col-sm-4">                                                              
           <div class="form-group">
               <label for="id_foss" class="col-sm-4 control-label">FOSS Course</label>
               <div class="col-sm-8">
