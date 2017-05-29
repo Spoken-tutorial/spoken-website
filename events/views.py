@@ -32,7 +32,7 @@ import urllib,urllib2
 from events.models import *
 from cms.models import Profile
 from mdldjango.forms import OfflineDataForm
-    
+
 from forms import *
 from django.utils import formats
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -100,7 +100,7 @@ def _mark_all_training_participants_to_zero(training):
     #    SchoolTrainingAttendance.objects.filter(training = training).update(status = 0)
     #else:
     TrainingAttendance.objects.filter(training = training).update(status = 0)
-    
+
 @login_required
 def init_events_app(request):
     try:
@@ -111,7 +111,7 @@ def init_events_app(request):
             Group.objects.create(name = 'Organiser')
         if Group.objects.filter(name = 'Invigilator').count() == 0:
             Group.objects.create(name = 'Invigilator')
-        
+
         #testcategory
         try:
             TestCategory.objects.get_or_create(name= 'Workshop')
@@ -119,7 +119,7 @@ def init_events_app(request):
             TestCategory.objects.get_or_create(name= 'Others')
         except Exception, e:
             print e, "test_category"
-        
+
         try:
             InstituteType.objects.get_or_create(name= 'Workshop')
             InstituteType.objects.get_or_create(name= 'Training')
@@ -129,7 +129,7 @@ def init_events_app(request):
             InstituteType.objects.get_or_create(name= 'Uncategorised')
         except Exception, e:
             print e, "institute_type"
-        
+
         #institutecategory
         try:
             InstituteCategory.objects.get_or_create(name= 'Govt')
@@ -138,7 +138,7 @@ def init_events_app(request):
             InstituteCategory.objects.get_or_create(name= 'Uncategorised')
         except Exception, e:
             print e, "InstituteCategory"
-            
+
         #permissiontype
         try:
             PermissionType.objects.get_or_create(name= 'State')
@@ -148,7 +148,7 @@ def init_events_app(request):
             PermissionType.objects.get_or_create(name= 'Institution')
         except Exception, e:
              print e, "PermissionType"
-        
+
         #state
         state = None
         try:
@@ -160,19 +160,19 @@ def init_events_app(request):
             District.objects.get_or_create(name= 'Uncategorised', state_id = state[0].id)
         except Exception, e:
              print e, "District"
-        
+
         #City
         try:
             City.objects.get_or_create(name= 'Uncategorised', state_id = state[0].id)
         except Exception, e:
              print e, "City"
-        
+
         #University
         try:
             University.objects.get_or_create(name= 'Uncategorised', state_id = state[0].id, user_id = 1)
         except Exception, e:
              print e, "University"
-             
+
         messages.success(request, 'Events application initialised successfully!')
     except Exception, e:
         messages.error(request, str(e))
@@ -185,12 +185,12 @@ def is_event_manager(user):
     """Check if the user is having event manger  rights"""
     if user.groups.filter(name='Event Manager').count() == 1:
         return True
-        
+
 def is_resource_person(user):
     """Check if the user is having resource person  rights"""
     if user.groups.filter(name='Resource Person').count() == 1:
         return True
-        
+
 def is_organiser(user):
     """Check if the user is having organiser rights"""
     try:
@@ -231,7 +231,7 @@ def search_participant(form):
         if not onlinetest_user:
             onlinetest_user = 'None'
         return onlinetest_user
-        
+
 def add_participant(request, cid, category ):
     userid = request.POST['userid']
     if userid:
@@ -266,7 +266,7 @@ def add_participant(request, cid, category ):
                 wa.save()
                 messages.success(request, "User has added in the attendance list")
                 print wa.id, " => Inserted"
-                
+
         elif category == 'Test':
             try:
                 wa = TestAttendance.objects.get(mdluser_id = userid, test_id = cid)
@@ -380,13 +380,13 @@ def get_academic_code(state):
         #print "This is first record"
         ac = None
         academic_code = 1
-        
+
     if ac:
         code_range = int(ac.academic_code.split('-')[1])
         available_code_range = []
         for i in range(code_range):
             available_code_range.insert(i, i+1)
-        
+
         #find the existing numbers
         ac = AcademicCenter.objects.filter(state = state).order_by('-academic_code')
         for record in ac:
@@ -408,11 +408,11 @@ def get_academic_code(state):
         ac_code = '00'+str(academic_code)
     elif academic_code <= 9999:
         ac_code = '0'+str(academic_code)
-    
+
     #get state code
     state_code = State.objects.get(pk = state.id).code
     return state_code +'-'+ ac_code
-    
+
 @login_required
 def old_training_attendance(request):
     user = request.user
@@ -434,16 +434,16 @@ def old_training_attendance(request):
         9: SortableHeader('Participants', False),
         10: SortableHeader('Action', False)
     }
-    
+
     raw_get_data = request.GET.get('o', None)
     collection = get_sorted_list(request, collectionSet, header, raw_get_data)
     ordering = get_field_index(raw_get_data)
     collection = TrainingFilter(request.GET, user = user, queryset=collection)
     context['form'] = collection.form
-    
+
     page = request.GET.get('page')
     collection = get_page(collection, page)
-    
+
     context['collection'] = collection
     context['header'] = header
     context['ordering'] = ordering
@@ -490,7 +490,7 @@ def old_training_attendance_upload(request, wid):
     }
     if enable_form:
         messages.info(request, """
-            Please upload the CSV file which you have generated. 
+            Please upload the CSV file which you have generated.
         To know more <a href="http://process.spoken-tutorial.org/images/9/96/Upload_Attendance.pdf" target="_blank">Click here</a>.
         <br><b>Note: Participant list should not be exced {0}</b>
         """.format(training.participant_count))
@@ -583,23 +583,23 @@ def new_ac(request):
     user = request.user
     if not (user.is_authenticated() and (is_event_manager(user) or is_resource_person(user))):
         raise PermissionDenied()
-        
+
     if request.method == 'POST':
         form = AcademicForm(user, request.POST)
         if form.is_valid():
             form_data = form.save(commit=False)
             form_data.user_id = user.id
-            
+
             state = form.cleaned_data['state']
             academic_code = get_academic_code(state)
-            
+
             form_data.academic_code = academic_code
             ic = InstituteCategory.objects.get(name = 'Uncategorised')
             form_data.institute_category = ic
             form_data.save()
             messages.success(request, form_data.institution_name+" has been added")
             return HttpResponseRedirect("/software-training/ac/")
-        
+
         context = {'form':form}
         return render(request, 'events/templates/ac/form.html', context)
     else:
@@ -614,7 +614,7 @@ def edit_ac(request, rid = None):
     user = request.user
     if not (user.is_authenticated() and (is_event_manager(user) or is_resource_person(user))):
         raise PermissionDenied()
-        
+
     if request.method == 'POST':
         academic = AcademicCenter.objects.get(id = rid)
         form = AcademicForm(request.user, request.POST, instance=academic)
@@ -645,7 +645,7 @@ def ac(request):
     user = request.user
     if not (user.is_authenticated() and (is_event_manager(user) or is_resource_person(user))):
         raise PermissionDenied()
-        
+
     context = {}
     header = {
         1: SortableHeader('#', False),
@@ -656,22 +656,22 @@ def ac(request):
         6: SortableHeader('institution_type__name', True, 'Institute Type'),
         7: SortableHeader('Action', False)
     }
-    
+
     collectionSet = AcademicCenter.objects.filter(state = user.resource_person.filter(resourceperson__status=1))
     raw_get_data = request.GET.get('o', None)
     collection = get_sorted_list(request, collectionSet, header, raw_get_data)
     ordering = get_field_index(raw_get_data)
-    
+
     collection = AcademicCenterFilter(request.GET, user = user, queryset=collection)
     context['form'] = collection.form
-    
+
     page = request.GET.get('page')
     collection = get_page(collection, page)
-    
+
     context['collection'] = collection
     context['header'] = header
     context['ordering'] = ordering
-    
+
     context.update(csrf(request))
     return render(request, 'events/templates/ac/index.html', context)
     return HttpResponse('RP')
@@ -682,7 +682,7 @@ def has_profile_data(request, user):
         profile = Profile.objects.filter(user=user).first()
         if not profile:
             return HttpResponseRedirect("/accounts/profile/"+user.username+"/")
-    
+
         for field in profile._meta.get_all_field_names():
             if not getattr(profile, field, None):
                 return HttpResponseRedirect("/accounts/profile/"+user.username+"/")
@@ -693,7 +693,7 @@ def organiser_request(request, username):
     user = request.user
     if not user.is_authenticated():
         raise PermissionDenied()
-        
+
     if username == request.user.username:
         user = User.objects.get(username=username)
         if request.method == 'POST':
@@ -709,7 +709,7 @@ def organiser_request(request, username):
                     organiser = Organiser.objects.get(user = user)
                     organiser.academic_id=request.POST['college']
                     organiser.save()
-                messages.success(request, "<ul><li>Thank you. Your request has been sent for Training Manager's approval.</li><li>You will get the approval with in 24 hours.Once the request is approved, you can request for the Training. </li><li>For more details <a target='_blank' href='http://process.spoken-tutorial.org/images/1/1f/Training-Request-Sheet.pdf'> Click Here</a></li></ul>")
+                messages.success(request, "<ul><li>Thank you. Your request has been sent for Training Manager's approval.</li><li>You will get the approval with in 24 hours. Once the request is approved, you can request for the Training. </li><li>For more details <a target='_blank' href='http://process.spoken-tutorial.org/images/1/1f/Training-Request-Sheet.pdf'> Click Here</a></li></ul>")
                 return HttpResponseRedirect("/software-training/organiser/view/"+user.username+"/")
             messages.error(request, "Please fill the following details")
             context = {'form':form}
@@ -732,7 +732,7 @@ def organiser_request(request, username):
                     return HttpResponseRedirect("/software-training/organiser/view/"+user.username+"/")
             except:
                 pass
-                
+
             messages.info(request, "Please fill the following details")
             context = {}
             context.update(csrf(request))
@@ -747,7 +747,7 @@ def organiser_view(request, username):
     user = request.user
     if not (user.is_authenticated() and (username == request.user.username or is_event_manager(user) or is_resource_person(user))):
         raise PermissionDenied()
-    
+
     context = {}
     try:
         user = User.objects.get(username=username)
@@ -766,7 +766,7 @@ def organiser_edit(request, username):
     user = request.user
     if not (user.is_authenticated() and (username == request.user.username or is_event_manager(user) or is_resource_person(user))):
         raise PermissionDenied()
-        
+
     user = User.objects.get(username=username)
     if request.method == 'POST':
         form = OrganiserForm(request.POST)
@@ -834,7 +834,7 @@ def invigilator_request(request, username):
                     invigilator = Invigilator.objects.get(user = user)
                     invigilator.academic_id=request.POST['college']
                     invigilator.save()
-                
+
                 messages.success(request, "Thank you. Your request has been sent for Training Manager's approval. You will get the approval with in 24 hours. Once the request is approved, you can request for the workshop. For more details Click Here")
                 return HttpResponseRedirect("/software-training/invigilator/view/"+user.username+"/")
             messages.error(request, "Please fill the following details")
@@ -850,7 +850,7 @@ def invigilator_request(request, username):
                     context.update(csrf(request))
                     context['form'] = InvigilatorForm()
                     return render(request, 'events/templates/invigilator/form.html', context)
-                    
+
                 if invigilator.status:
                     messages.success(request, "You have already  invigilator role ")
                     return HttpResponseRedirect("/software-training/invigilator/view/"+user.username+"/")
@@ -872,7 +872,7 @@ def invigilator_view(request, username):
     user = request.user
     if not (user.is_authenticated() and (username == request.user.username or is_event_manager(user) or is_resource_person(user))):
         raise PermissionDenied()
-    
+
     context = {}
     try:
         user = User.objects.get(username=username)
@@ -883,14 +883,14 @@ def invigilator_view(request, username):
         print e
         raise PermissionDenied()
     return render(request, 'events/templates/invigilator/view.html', context)
-    
+
 @login_required
 def invigilator_edit(request, username):
     """ Invigilator edit page """
     user = request.user
     if not (user.is_authenticated() and (username == request.user.username or is_event_manager(user) or is_resource_person(user))):
         raise PermissionDenied()
-        
+
     user = User.objects.get(username=username)
     if request.method == 'POST':
         form = InvigilatorForm(request.POST)
@@ -959,15 +959,15 @@ def training_request(request, role, rid = None):
             wid = 1
             f = None
             file_path = settings.MEDIA_ROOT +'training/' + str(wid) + str(time.time())
-            if 'xml_file' in request.FILES: 
+            if 'xml_file' in request.FILES:
                 f = request.FILES['xml_file']
-                
+
             if f:
                 fout = open(file_path, 'wb+')
                 for chunk in f.chunks():
                     fout.write(chunk)
                 fout.close()
-                
+
                 #validate file
                 csv_file_error, error_line_no = check_csvfile(user, file_path, form_data = request.POST)
                 #return
@@ -990,7 +990,7 @@ def training_request(request, role, rid = None):
                 w.tdate = dateTime[0]
                 w.ttime = '00:00'
                 w.skype = request.POST['skype']
-                
+
                 error = 0
                 try:
                     w.save()
@@ -1002,7 +1002,7 @@ def training_request(request, role, rid = None):
                 except:
                     messages.error(request, "Sorry, Something went wrong. try again!")
                     error = 1
-                
+
                 if not error:
                     w.training_code = "WC-"+str(w.id)
                     w.department.clear()
@@ -1034,7 +1034,7 @@ def training_request(request, role, rid = None):
                     if f:
                         csv_file_error, error_line_no = check_csvfile(user, file_path, w, flag=1)
                         os.unlink(file_path)
-                        
+
                         #file the participant count
                         w.participant_count = TrainingAttendance.objects.filter(training = w, status__gte = 1).count()
                         w.save()
@@ -1042,16 +1042,16 @@ def training_request(request, role, rid = None):
                         '''messages.success(request, """
                             <ul>
                                 <li>
-                                    Before the Training/Workshop date upload the Participants name 
+                                    Before the Training/Workshop date upload the Participants name
                                     list. It is necessary for approving your Training/Workshop request.
                                 </li>
                                 <li>
                                     Please click on <b>Upload Participant Data</b> and upload the <b>
-                                    CSV </b>(.csv) file which you have generated (using LibreOffice 
+                                    CSV </b>(.csv) file which you have generated (using LibreOffice
                                     Calc / MS Excel) and click <b>Submit</b>.
                                 </li>
                                 <li>
-                                    For more details on how to create the .csv file. 
+                                    For more details on how to create the .csv file.
                                     Please <a href="http://process.spoken-tutorial.org/images/9/96/Upload_Attendance.pdf" target="_blank">Click here</a>
                                 </li>
                             </ul>
@@ -1068,10 +1068,10 @@ def training_request(request, role, rid = None):
                             message = w.academic.institution_name+" has made a training request for "+w.foss.foss+" on dated "+w.tdate
                         else:
                             message = w.academic.institution_name+" has made a Workshop request for "+w.foss.foss+" on dated "+w.tdate
-                        
+
                     update_events_log(user_id = user.id, role = 0, category = 0, category_id = w.id, academic = w.academic_id, status = 0)
                     update_events_notification(user_id = user.id, role = 0, category = 0, category_id = w.id, academic = w.academic_id, status = 0, message = message)
-                    
+
                     if role == 'organiser' and not rid:
                         return HttpResponseRedirect("/software-training/training/" + str(w.id) + "/attendance/?clone=1")
                     return HttpResponseRedirect("/software-training/training/" + role + "/pending/")
@@ -1094,10 +1094,10 @@ def training_request(request, role, rid = None):
         """)
     if rid and not form:
         form = TrainingForm(instance = Training.objects.get(pk = rid), user = request.user)
-        
+
     if not form:
          form = TrainingForm(user = request.user)
-         
+
     context['form'] = form
     context['role'] = role
     context.update(csrf(request))
@@ -1189,7 +1189,7 @@ def training_list(request, role, status):
     user = request.user
     if not (user.is_authenticated() and ( is_organiser(user) or is_resource_person(user) or is_event_manager(user))):
         raise PermissionDenied()
-        
+
     status_dict = {'pending': 0, 'approved' : 2, 'completed' : 4, 'rejected' : 5, 'reschedule' : 2, 'ongoing': 2, 'predated' : ''}
     if status in status_dict:
         context = {}
@@ -1205,7 +1205,7 @@ def training_list(request, role, status):
                 collectionSet = Training.objects.filter((Q(status = 2) | Q(status = 3)), academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)), tdate__lte=datetime.date.today()).order_by('-tdate')
             elif status =='pending':
                 collectionSet = Training.objects.filter((Q(status = 0) | Q(status = 1)), academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)), tdate__gte = datetime.date.today()).order_by('-tdate')
-                
+
             else:
                 collectionSet = Training.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)), status = status_dict[status]).order_by('-tdate')
         elif is_organiser(user) and role == 'organiser':
@@ -1220,7 +1220,7 @@ def training_list(request, role, status):
                 #print collectionSet
             else:
                 collectionSet = Training.objects.filter(organiser__user = user, status = status_dict[status]).order_by('-tdate')
-        
+
         if collectionSet == None:
             raise PermissionDenied()
 
@@ -1236,17 +1236,17 @@ def training_list(request, role, status):
             9: SortableHeader('participant_count', True, 'Participants'),
             10: SortableHeader('Action', False)
         }
-        
+
         raw_get_data = request.GET.get('o', None)
         collection = get_sorted_list(request, collectionSet, header, raw_get_data)
         ordering = get_field_index(raw_get_data)
-        
+
         collection = TrainingFilter(request.GET, user = user, queryset=collection)
         context['form'] = collection.form
-        
+
         page = request.GET.get('page')
         collection = get_page(collection, page)
-        
+
         context['collection'] = collection
         context['header'] = header
         context['ordering'] = ordering
@@ -1321,7 +1321,7 @@ def training_permission(request):
     user = request.user
     if not (user.is_authenticated() and (is_resource_person(user) or is_event_manager(user))):
         raise PermissionDenied()
-        
+
     permissions = Permission.objects.select_related().all()
     form = TrainingPermissionForm()
     if request.method == 'POST':
@@ -1342,7 +1342,7 @@ def training_permission(request):
                 wp.university_id = form.cleaned_data['university']
             wp.save()
             return HttpResponseRedirect("/software-training/training/permission/")
-    
+
     context = {}
     context.update(csrf(request))
     context['form'] = form
@@ -1354,7 +1354,7 @@ def training_completion(request, rid):
     user = request.user
     if not (user.is_authenticated() and is_organiser(user)):
         raise PermissionDenied()
-        
+
     context = {}
     form = TrainingCompletionForm(user = user)
     if request.method == 'POST':
@@ -1367,7 +1367,7 @@ def training_completion(request, rid):
             t.extra_fields.future_training = int(form.cleaned_data['future_training'])
             t.extra_fields.recommend_to_others = int(form.cleaned_data['recommend_to_others'])
             t.extra_fields.save()
-            
+
             t.participant_count = t.trainingattendance_set.filter(status__gte = 1).count()
             t.status = 4
             t.save()
@@ -1397,7 +1397,7 @@ def accessrole(request):
     university = list(AcademicCenter.objects.filter(university__in = Permission.objects.filter(user=user, permissiontype_id=3, university_id__gt=0).values_list('university_id')).values_list('id'))
     institution_type = list(AcademicCenter.objects.filter(institution_type__in = Permission.objects.filter(user=user, permissiontype_id=4, institute_type_id__gt=0).values_list('institute_type_id')). values_list('id'))
     institute = list(AcademicCenter.objects.filter(id__in = Permission.objects.filter(user=user, permissiontype_id=5, institute_id__gt=0).values_list('institute_id')).values_list('id'))
-    all_academic_ids = list(set(state) | set(district) | set(university) | set(institution_type) | set(institute)) 
+    all_academic_ids = list(set(state) | set(district) | set(university) | set(institution_type) | set(institute))
     workshops = Training.objects.filter(academic__in = all_academic_ids)
     context = {'collection':workshops}
     return render(request, 'events/templates/accessrole/workshop_accessrole.html', context)
@@ -1411,7 +1411,7 @@ def training_attendance(request, wid):
     if not (user.is_authenticated() and (is_organiser(user))):
         raise PermissionDenied()
     try:
-        training = Training.objects.get(pk = wid) 
+        training = Training.objects.get(pk = wid)
         if training.status == 4:
             return HttpResponseRedirect("/software-training/training/" + str(training.id) + "/participant/")
     except Exception, e:
@@ -1432,11 +1432,11 @@ def training_attendance(request, wid):
                         _mark_training_attendance(training, users[u])
                 #update participant
                 #update_participants_count(training)
-                
+
                 message = training.academic.institution_name+" has submited training attendance"
                 update_events_log(user_id = user.id, role = 2, category = 0, category_id = training.id, academic = training.academic_id,  status = 6)
                 update_events_notification(user_id = user.id, role = 2, category = 0, category_id = training.id, academic = training.academic_id, status = 6, message = message)
-                
+
                 messages.success(request, """
                 <ul>
                     <li>Thank you for uploading the Attendance. Now make sure that you cross check and verify the details before submiting.</li>
@@ -1447,14 +1447,14 @@ def training_attendance(request, wid):
         if 'search-participant' in request.POST:
             psform = ParticipantSearchForm(request.POST)
             onlinetest_user = search_participant(psform)
-        
+
         if 'add-participant' in request.POST:
             add_participant(request, wid, 'Training')
-        
+
         if 'submit-attendance' in request.POST:
             training.status = 1
             training.save()
-        
+
         if 'submit-scaned-copy' in request.POST:
                 form = TrainingScanCopyForm(request.POST, request.FILES)
                 file_type = ['application/pdf']
@@ -1482,28 +1482,28 @@ def training_attendance(request, wid):
                         messages.success(request, "Choose a PDF File")
                 else:
                     messages.success(request, "Choose a PDF File.")
-    
+
     wp = _get_training_participant(training)
-    
+
     if not show_success_message:
         messages.success(request, """
             <ul>
                 <li>
-                    Before the Training/Workshop date upload the Participants name 
+                    Before the Training/Workshop date upload the Participants name
                     list. It is necessary for approving your Training/Workshop request.
                 </li>
                 <li>
                     Please click on <b>Upload Participant Data</b> and upload the <b>
-                    CSV </b>(.csv) file which you have generated (using LibreOffice 
+                    CSV </b>(.csv) file which you have generated (using LibreOffice
                     Calc / MS Excel) and click <b>Submit</b>.
                 </li>
                 <li>
-                    For more details on how to create the .csv file. 
+                    For more details on how to create the .csv file.
                     Please <a href="http://process.spoken-tutorial.org/images/9/96/Upload_Attendance.pdf" target="_blank">Click here</a>
                 </li>
             </ul>
         """)
-    
+
     context = {}
     context['psform'] = psform
     context['sform'] = sform
@@ -1545,8 +1545,8 @@ def suffix(d):
 
 def custom_strftime(format, t):
     return t.strftime(format).replace('{S}', str(t.day) + suffix(t.day))
-    
-    
+
+
 def training_participant_ceritificate(request, wid, participant_id):
     #response = HttpResponse(content_type='application/pdf')
     #response['Content-Disposition'] = 'attachment; filename="somefilename.pdf"'
@@ -1563,9 +1563,9 @@ def training_participant_ceritificate(request, wid, participant_id):
     #p.save()
     #return response
     # Using ReportLab to insert image into PDF
-    
+
     #store Certificate details
-    
+
     certificate_pass = ''
     if wid and participant_id:
         try:
@@ -1588,28 +1588,28 @@ def training_participant_ceritificate(request, wid, participant_id):
         except Exception, e:
             print e
             raise PermissionDenied()
-        
+
     response = HttpResponse(content_type='application/pdf')
     filename = (wa.firstname+'-'+w.foss.foss+"-Participant-Certificate").replace(" ", "-");
-    
+
     response['Content-Disposition'] = 'attachment; filename='+filename+'.pdf'
     imgTemp = StringIO()
     imgDoc = canvas.Canvas(imgTemp)
 
-    # Title 
+    # Title
     imgDoc.setFont('Helvetica', 40, leading=None)
     imgDoc.drawCentredString(415, 480, "Certificate of Appreciation")
-    
+
     #date
     imgDoc.setFont('Helvetica', 18, leading=None)
-    imgDoc.drawCentredString(211, 115, "29 August 2015") 
+    imgDoc.drawCentredString(211, 115, "29 August 2015")
 
     #password
     imgDoc.setFillColorRGB(211, 211, 211)
     imgDoc.setFont('Helvetica', 10, leading=None)
     imgDoc.drawString(10, 6, certificate_pass)
     #imgDoc.drawString(100, 100, 'transparent')
-    
+
 
     # Draw image on Canvas and save PDF in buffer
     imgPath = settings.MEDIA_ROOT +"sign.jpg"
@@ -1617,11 +1617,11 @@ def training_participant_ceritificate(request, wid, participant_id):
 
     #paragraphe
     text = "This is to certify that <b>"+wa.firstname +" "+wa.lastname+"</b> participated in the <b>"+w.foss.foss+"</b> workshop organized at <b>"+w.academic.institution_name+"</b> by  <b>Spoken Tutorial Project</b> on <b> 29 August 2015</b><br /><br />A comprehensive set of topics pertaining to <b>"+w.foss.foss+"</b> were covered in the workshop. <br />The Spoken Tutorial Project, IIT Bombay, funded by National Mission on Education <br />through ICT, MHRD, Govt. of India."
-    
+
     centered = ParagraphStyle(name = 'centered',
-        fontSize = 16,  
-        leading = 30,  
-        alignment = 0,  
+        fontSize = 16,
+        leading = 30,
+        alignment = 0,
         spaceAfter = 20)
 
     p = Paragraph(text, centered)
@@ -1638,14 +1638,14 @@ def training_participant_ceritificate(request, wid, participant_id):
     #Save the result
     output = PdfFileWriter()
     output.addPage(page)
-    
+
     #stream to browser
     outputStream = response
     output.write(response)
     outputStream.close()
 
     return response
-    
+
 @login_required
 def test_request(request, role, rid = None):
     ''' Test request by organiser '''
@@ -1670,20 +1670,19 @@ def test_request(request, role, rid = None):
                 t.organiser_id = user.organiser.id
                 t.academic = user.organiser.academic
             t.test_category_id = request.POST['test_category']
-            
+
             """if int(request.POST['test_category']) == 1:
                 t.training_id = request.POST['workshop']"""
             if int(request.POST['test_category']) == 2:
                 t.training_id = request.POST['training']
             if int(request.POST['test_category']) == 3:
                 t.training_id = None
-            
+            test_training_dept = t.training.department_id
+
             t.invigilator_id = request.POST['invigilator']
-            t.foss_id = request.POST['foss']
+            t.foss_id = t.training.course.foss_id
             t.tdate = dateTime[0]
             t.ttime = dateTime[1]
-            
-            
             error = 0
             try:
                 t.save()
@@ -1715,19 +1714,17 @@ def test_request(request, role, rid = None):
                 print e
                 messages.error(request, "Sorry, Something went wrong. try again!")
                 error = 1
-            
+
             if not error:
                 t.department.clear()
-                for dept in form.cleaned_data.get('department'):
-                    t.department.add(dept)
-                
+                t.department.add(test_training_dept)
                 #update logs
                 message = t.academic.institution_name+" has made a test request for "+t.foss.foss+" on "+t.tdate
                 if rid:
                     message = t.academic.institution_name+" has updated test for "+t.foss.foss+" on  dated "+t.tdate
                 update_events_log(user_id = user.id, role = 0, category = 1, category_id = t.id, academic = t.academic_id, status = 0)
                 update_events_notification(user_id = user.id, role = 0, category = 1, category_id = t.id, academic = t.academic_id, status = 0, message = message)
-                
+
                 return HttpResponseRedirect("/software-training/test/"+role+"/pending/")
         messages.info(request, """
             <ul>
@@ -1749,7 +1746,7 @@ def test_list(request, role, status):
     user = request.user
     if not (user.is_authenticated() and ( is_organiser(user) or is_invigilator(user) or is_resource_person(user) or is_event_manager(user))):
         raise PermissionDenied()
-        
+
     status_dict = {'pending': 0, 'waitingforinvigilator': 1, 'approved' : 2, 'ongoing': 3, 'completed' : 4, 'rejected' : 5, 'reschedule' : 2, 'predated' : ''}
     if status in status_dict:
         context = {}
@@ -1768,7 +1765,7 @@ def test_list(request, role, status):
             else:
                 collectionSet = Test.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)), status = status_dict[status]).order_by('-tdate')
         elif is_organiser(user) and role == 'organiser':
-            if status == 'ongoing': 
+            if status == 'ongoing':
                 collectionSet = Test.objects.filter((Q(status = 2) | Q(status = 3)), organiser__user = user ,  tdate__lte = datetime.date.today().strftime("%Y-%m-%d")).order_by('-tdate')
             elif status == 'predated':
                 collectionSet = Test.objects.filter((Q(status = 0) | Q(status = 1) | Q(status = 2) | Q(status = 3)), organiser__user = user, tdate__lt=datetime.date.today()).order_by('-tdate')
@@ -1787,10 +1784,10 @@ def test_list(request, role, status):
             else:
                 todaytest = datetime.datetime.now().strftime("%Y-%m-%d")
                 collectionSet = Test.objects.filter(invigilator_id=user.invigilator.id, status = status_dict[status]).order_by('-tdate')
-        
+
         if collectionSet == None:
             raise PermissionDenied()
-            
+
         header = {
             1: SortableHeader('#', False),
             2: SortableHeader('academic__state', True, 'State'),
@@ -1805,17 +1802,17 @@ def test_list(request, role, status):
         raw_get_data = request.GET.get('o', None)
         collection = get_sorted_list(request, collectionSet, header, raw_get_data)
         ordering = get_field_index(raw_get_data)
-        
+
         collection = TestFilter(request.GET, user = user, queryset=collection)
         context['form'] = collection.form
-        
+
         page = request.GET.get('page')
         collection = get_page(collection, page)
-        
+
         context['collection'] = collection
         context['header'] = header
         context['ordering'] = ordering
-        
+
         context['status'] = status
         context['role'] = role
         context['todaytest'] = todaytest
@@ -1871,7 +1868,7 @@ def test_approvel(request, role, rid):
     except Exception, e:
         print e
         raise PermissionDenied()
-        
+
     #if status = 2:
     #    if not (user.is_authenticated() and w.academic.state in State.objects.filter(resourceperson__user_id=user, resourceperson__status=1) and ( is_event_manager(user) or is_resource_person(user))):
     #        raise PermissionDenied('You are not allowed to view this page')
@@ -1888,7 +1885,7 @@ def test_approvel(request, role, rid):
 
     t.status = status
     t.save()
-    
+
     #events log
     #message = user.first_name+" "+user.last_name+" has accepted your "+t.foss.foss+" Test"
     update_events_log(user_id = user.id, role = logrole, category = 1, category_id = t.id, academic = t.academic_id, status = status)
@@ -1908,7 +1905,7 @@ def test_attendance(request, tid):
         test = Test.objects.get(pk=tid)
         if test.status == 4 or test.status == 1:
             return HttpResponseRedirect('/software-training/test/' + str(test.id) + '/participant/')
-            
+
         test.status = 3
         test.save()
     except:
@@ -1954,7 +1951,7 @@ def test_attendance(request, tid):
                             except Exception, e:
                                 print "MdlEnrol => ", e
                                 print "No self enrolement for this course"
-                            
+
                             #if mdlenrol:
                             #    try:
                             #        MdlUserEnrolments.objects.get(enrolid = mdlenrol.id, userid = ta.mdluser_id)
@@ -1964,14 +1961,14 @@ def test_attendance(request, tid):
                             #        print "MdlUserEnrolments => ", e
                             #        MdlRoleAssignments.objects.create(roleid = 5, contextid = 16, userid = ta.mdluser_id, timemodified = datetime.datetime.now().strftime("%s"), modifierid = ta.mdluser_id, itemid = 0, sortorder = 0)
                             #        MdlUserEnrolments.objects.create(enrolid = mdlenrol.id, userid = ta.mdluser_id, status = 0, timestart = datetime.datetime.now().strftime("%s"), timeend = 0, modifierid = ta.mdluser_id, timecreated = datetime.datetime.now().strftime("%s"), timemodified = datetime.datetime.now().strftime("%s"))
-            
+
             if 'search-participant' in request.POST:
                 form = ParticipantSearchForm(request.POST)
                 onlinetest_user = search_participant(form)
-                        
+
             if 'add-participant' in request.POST:
                 add_participant(request, tid, 'Test')
-            
+
             message = test.academic.institution_name+" has submited Test attendance dated "+test.tdate.strftime("%Y-%m-%d")
             update_events_log(user_id = user.id, role = 1, category = 1, category_id = test.id, academic = test.academic_id, status = 8)
             update_events_notification(user_id = user.id, role = 1, category = 1, category_id = test.id, academic = test.academic_id, status = 8, message = message)
@@ -1987,7 +1984,7 @@ def test_attendance(request, tid):
     online_participant_ids = list(TestAttendance.objects.filter(test_id = test.id).values_list('mdluser_id'))
     for k in online_participant_ids:
         mdlids.append(k[0])
-        
+
     if test.test_category_id == 1:
         participant_ids = list(TrainingAttendance.objects.filter(training_id = test.training_id).values_list('mdluser_id'))
     elif test.test_category_id == 2:
@@ -2024,7 +2021,7 @@ def test_participant(request, tid=None):
             t = Test.objects.get(id=tid)
         except:
             raise PermissionDenied()
-        
+
         if t.status == 4:
             test_mdlusers = TestAttendance.objects.filter(test_id=tid, status__gte=2)
         else:
@@ -2056,9 +2053,9 @@ def test_participant_ceritificate(request, wid, participant_id):
     #p.save()
     #return response
     # Using ReportLab to insert image into PDF
-    
+
     #store Certificate details
-    
+
     certificate_pass = ''
     if wid and participant_id:
         try:
@@ -2068,15 +2065,15 @@ def test_participant_ceritificate(request, wid, participant_id):
             mdlgrade = MdlQuizGrades.objects.get(quiz = ta.mdlquiz_id, userid = participant_id)
             if ta.status < 1 or round(mdlgrade.grade, 1) < 40 or not w.invigilator:
                 raise PermissionDenied()
-                
+
             if ta.password:
-                certificate_pass = ta.password 
+                certificate_pass = ta.password
                 ta.count += 1
                 ta.status = 4
-                ta.save() 
-            else: 
+                ta.save()
+            else:
                 certificate_pass = str(mdluser.id)+id_generator(10-len(str(mdluser.id)))
-                ta.password = certificate_pass 
+                ta.password = certificate_pass
                 ta.status = 4
                 ta.count += 1
                 ta.save()
@@ -2085,49 +2082,49 @@ def test_participant_ceritificate(request, wid, participant_id):
             raise PermissionDenied()
     response = HttpResponse(content_type='application/pdf')
     filename = (ta.mdluser_firstname+'-'+ta.mdluser_lastname+"-Participant-Certificate").replace(" ", "-");
-    
+
     response['Content-Disposition'] = 'attachment; filename='+filename+'.pdf'
     imgTemp = StringIO()
     imgDoc = canvas.Canvas(imgTemp)
 
-    # Title 
+    # Title
     #imgDoc.setFont('Helvetica', 40, leading=None)
     #imgDoc.drawCentredString(415, 480, "Certificate for Completion of c ")
-    
+
     imgDoc.setFont('Helvetica', 18, leading=None)
     imgDoc.drawCentredString(211, 115, custom_strftime('%B {S} %Y', w.tdate))
-    
+
     #password
     imgDoc.setFillColorRGB(211, 211, 211)
     imgDoc.setFont('Helvetica', 10, leading=None)
     imgDoc.drawString(10, 6, certificate_pass)
     #imgDoc.drawString(100, 100, 'transparent')
-    
+
 
     # Draw image on Canvas and save PDF in buffer
     imgPath = settings.MEDIA_ROOT +"sign.jpg"
     imgDoc.drawImage(imgPath, 600, 80, 150, 76)    ## at (399,760) with size 160x160
-    
+
     #paragraphe
     text = "This is to certify that <b>"+ta.mdluser_firstname +" "+ta.mdluser_lastname+"</b> has successfully completed <b>"+w.foss.foss+"</b> test organized at <b>"+w.academic.institution_name+"</b> by <b>"+w.organiser.user.first_name + " " + w.organiser.user.last_name+"</b>  with course material provided by the Talk To A Teacher project at IIT Bombay.  <br /><br /><p>Passing an online exam, conducted remotely from IIT Bombay, is a pre-requisite for completing this training. <b>"+w.invigilator.user.first_name + " "+w.invigilator.user.last_name+"</b> at <b>"+w.academic.institution_name+"</b> invigilated this examination. This training is offered by the <b>Spoken Tutorial Project, IIT Bombay, funded by National Mission on Education through ICT, MHRD, Govt., of India.</b></p>"
-    
+
     centered = ParagraphStyle(name = 'centered',
-        fontSize = 16,  
-        leading = 24,  
-        alignment = 0,  
+        fontSize = 16,
+        leading = 24,
+        alignment = 0,
         spaceAfter = 20)
 
     p = Paragraph(text, centered)
     p.wrap(700, 200)
     p.drawOn(imgDoc, 4.2 * cm, 6 * cm)
-    
+
     #paragraphe
     text = "Certificate for Completion of "+w.foss.foss+" Training"
-    
+
     centered = ParagraphStyle(name = 'centered',
-        fontSize = 40,  
-        leading = 50,  
-        alignment = 1,  
+        fontSize = 40,
+        leading = 50,
+        alignment = 1,
         spaceAfter = 20)
 
     p = Paragraph(text, centered)
@@ -2144,7 +2141,7 @@ def test_participant_ceritificate(request, wid, participant_id):
     #Save the result
     output = PdfFileWriter()
     output.addPage(page)
-    
+
     #stream to browser
     outputStream = response
     output.write(response)
@@ -2176,7 +2173,7 @@ def training_subscribe(request, events, eventid = None, mdluser_id = None):
             raise PermissionDenied()
     except:
         raise PermissionDenied()
-    
+
     return HttpResponseRedirect('/participant/index/')
 
 @login_required
@@ -2196,7 +2193,7 @@ def organiser_invigilator_index(request, role, status):
         status = 2
     else:
         raise PermissionDenied()
-        
+
     user = User.objects.get(pk=user.id)
 
     header = {
@@ -2209,18 +2206,18 @@ def organiser_invigilator_index(request, role, status):
         7: SortableHeader('Phone', False),
         8: SortableHeader('Action', False)
     }
-    
+
     if role == 'organiser':
         try:
             collectionSet = Organiser.objects.select_related().filter(academic=AcademicCenter.objects.filter(state=State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)), status=status)
-            
+
             raw_get_data = request.GET.get('o', None)
             collection = get_sorted_list(request, collectionSet, header, raw_get_data)
             ordering = get_field_index(raw_get_data)
-            
+
             collection = OrganiserFilter(request.GET, user = user, queryset=collection)
             context['form'] = collection.form
-            
+
             page = request.GET.get('page')
             collection = get_page(collection, page)
         except Exception, e:
@@ -2229,14 +2226,14 @@ def organiser_invigilator_index(request, role, status):
     elif role == 'invigilator':
         try:
             collectionSet = Invigilator.objects.select_related().filter(academic=AcademicCenter.objects.filter(state=State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)), status=status)
-            
+
             raw_get_data = request.GET.get('o', None)
             collection = get_sorted_list(request, collectionSet, header, raw_get_data)
             ordering = get_field_index(raw_get_data)
-            
+
             collection = InvigilatorFilter(request.GET, user = user, queryset=collection)
             context['form'] = collection.form
-            
+
             page = request.GET.get('page')
             collection = get_page(collection, page)
 
@@ -2260,7 +2257,7 @@ def organiser_invigilator_index(request, role, status):
     context.update(csrf(request))
     return render(request, 'events/templates/organiser_invigilator_index.html', context)
 
-        
+
 def update_events_log(user_id, role, category, category_id, academic, status):
     if category == 0:
         try:
@@ -2274,7 +2271,7 @@ def update_events_log(user_id, role, category, category_id, academic, status):
             print "Test Log => ",e
     else:
         print "************ Error in events log ***********"
-        
+
 def update_events_notification(user_id, role, category, category_id, status, academic, message):
     try:
         EventsNotification.objects.create(user_id = user_id, role = role, category = category, categoryid = category_id, academic_id = academic, status = status, message = message)
@@ -2320,14 +2317,14 @@ def training_participant_language_feedback(request, training_id, user_id):
         'form' : form,
         'w' : w
     }
-    
-    
+
+
     context = {}
     context['form'] = form
     return render(request, 'events/templates/training/language_feedback.html', context)
 
 def live_training(request, training_id=None):
-    
+
     context = {}
     if not training_id:
         context['training_list'] = SingleTraining.objects.filter(
@@ -2341,7 +2338,7 @@ def live_training(request, training_id=None):
         except Exception, e:
             print e
             raise PermissionDenied()
-            
+
     context.update(csrf(request))
     return render(request, 'events/templates/training/live-feedback-list.html', context)
 
@@ -2394,23 +2391,23 @@ def resource_center(request, slug = None):
         5: SortableHeader('Contact Person', False),
         6: SortableHeader('Action', False)
     }
-    
+
     collection = None
     if slug:
         collection = AcademicCenter.objects.filter(resource_center = 1, state__slug = slug).order_by('state__name', 'institution_name')
     else:
         collection = AcademicCenter.objects.filter(resource_center = 1).order_by('state__name', 'institution_name')
-    
+
     raw_get_data = request.GET.get('o', None)
     collection = get_sorted_list(request, collection, header, raw_get_data)
     ordering = get_field_index(raw_get_data)
-    
+
     collection = AcademicCenterFilter(request.GET, queryset=collection)
     context['form'] = collection.form
-    
+
     page = request.GET.get('page')
     collection = get_page(collection, page)
-    
+
     context['collection'] = collection
     context['header'] = header
     context['ordering'] = ordering
@@ -2438,23 +2435,23 @@ def ajax_ac_state(request):
             tmp = ''
             for i in district:
                 tmp +='<option value='+str(i.id)+'>'+i.name+'</option>'
-                
+
             if(tmp):
                 data['district'] = '<option value=""> -- None -- </option>'+tmp
             else:
                 data['district'] = tmp
-            
+
         if request.POST.get('fields[city]'):
             city = City.objects.filter(state=state).order_by('name')
             tmp = ''
             for i in city:
                 tmp +='<option value='+str(i.id)+'>'+i.name+'</option>'
-                
+
             if(tmp):
                 data['city'] = '<option value=""> -- None -- </option>'+tmp
             else:
                 data['city'] = tmp
-        
+
         if request.POST.get('fields[university]'):
             university = University.objects.filter(state=state).order_by('name')
             tmp = ''
@@ -2464,7 +2461,7 @@ def ajax_ac_state(request):
                 data['university'] = '<option value=""> -- None -- </option>'+tmp
             else:
                 data['university'] = tmp
-        
+
         return HttpResponse(json.dumps(data), content_type='application/json')
 
 @csrf_exempt
@@ -2519,7 +2516,7 @@ def ajax_district_data(request):
                 for i in location:
                     tmp +='<option value='+str(i.id)+'>'+i.name+'</option>'
                 data['location'] = tmp
-        
+
         if request.POST.get('fields[institute]'):
             collages = AcademicCenter.objects.filter(district=district).order_by('institution_name')
             if collages:
@@ -2527,7 +2524,7 @@ def ajax_district_data(request):
                 for i in collages:
                     tmp +='<option value='+str(i.id)+'>'+i.institution_name+'</option>'
                 data['institute'] = tmp
-        
+
     return HttpResponse(json.dumps(data), content_type='application/json')
 
 @csrf_exempt
@@ -2597,7 +2594,7 @@ def ajax_dept_foss(request):
                 for i in dept:
                     tmp +='<option value='+str(i.id)+'>'+i.name+'</option>'
                 data['dept'] = tmp
-            
+
             if request.POST.get('fields[foss]'):
                 training = Training.objects.filter(pk=training).order_by('name')
                 tmp = '<option value = None> -- None -- </option>'
@@ -2611,7 +2608,7 @@ def ajax_dept_foss(request):
                 for i in dept:
                     tmp +='<option value='+str(i.id)+'>'+i.name+'</option>'
                 data['dept'] = tmp
-            
+
             if request.POST.get('fields[foss]'):
                 workshop = Training.objects.filter(pk=workshop)
                 tmp = '<option value = None> -- None -- </option>'
@@ -2623,7 +2620,7 @@ def ajax_dept_foss(request):
             for i in dept:
                 tmp +='<option value='+str(i.id)+'>'+i.name+'</option>'
             data['dept'] = tmp
-            
+
             tmp = '<option value = None> -- None -- </option>'
             foss = FossCategory.objects.all(status = 1)
             for i in foss:
@@ -2642,7 +2639,7 @@ def ajax_language(request):
             for i in language:
                 tmp +='<option value='+str(i.language.id)+'>'+i.language.name+'</option>'
         return HttpResponse(json.dumps(tmp), content_type='application/json')
-        
+
 @csrf_exempt
 def test(request):
     academics = AcademicCenter.objects.filter(Q(institution_name__icontains="Engineering")).exclude(Q(institution_type__name="Engineering") | Q(institution_type__name="Polytechnic") | Q(institution_type__name="ITI") | Q(institution_type__name="University"))

@@ -2,11 +2,10 @@
 {% extends 'spoken/templates/base.html' %}
 {% load widget_tweaks %}
 {% load static %}
-{% block title %}Training Planner Form{% endblock %}
+{% block title %}Training Planner Edit{% endblock %}
 {% block heading %}<i class="home-page-title-i">Training Planner Form</i>{% endblock %}
 {% block search %}{% endblock %}
 {% block content %}
-        {{training.department}}
         {% if form %}
           <div class="row well">
               <div class='col-sm-8'>
@@ -20,11 +19,27 @@
                         {% endfor %}
                       </ul>
                       {% endif %}
-                      
+
+                      <div class='form-row'>
+                        <div class='col-xs-12 form-group required'>
+                          <label class='control-label'>Department</label>
+                          {% render_field form.department class+="form-control department" tabindex="1" %}
+                          {{ form.department.errors }}
+                        </div>
+                      </div>
+
+                      <div class='form-row'>
+                        <div class='col-xs-12 form-group required'>
+                          <label class='control-label'>Batch</label>
+                          {% render_field form.batch class+="form-control batch" tabindex="1" %}
+                          {{ form.batch.errors }}
+                        </div>
+                      </div>
+
                       <div class='form-row'>
                         <div class='col-xs-12 form-group required'>
                           <label class='control-label'>Semester Start Date</label>
-                          {% render_field form.sem_start_date class+="form-control sem_start_date" tabindex="1" %}
+                          {% render_field form.sem_start_date class+="form-control sem_start_date date" tabindex="1" %}
                           {{ form.sem_start_date.errors }}
                         </div>
                       </div>
@@ -36,7 +51,7 @@
                           {{ form.course_type.errors }}
                         </div>
                       </div>
-                      
+
                       <div class='form-row'>
                         <div class='col-xs-12 form-group required'>
                           <label class='control-label'>Software Course </label>
@@ -44,19 +59,11 @@
                           {{ form.course.errors }}
                         </div>
                       </div>
-                      
-                      <!-- <div class='form-row'>
-                        <div class='col-xs-12 form-group required'>
-                          <label class='control-label'>Language </label>
-                          {% render_field form.language class+="form-control language" tabindex="1" %}
-                          {{ form.language.errors }}
-                        </div>
-                      </div> -->
-                      
-                      <div class="form-group">
+
+                      <div class="form-row">
                           <div class="col-xs-12 form-group">
                               <input class="btn btn-primary" type="submit" value="Submit" />
-                              <a class="btn btn-default" href="{% url 'events:training_planner' %}">Cancel</a>
+                              <a class="btn btn-default" href="{% url 'events:select_participants' %}">Cancel</a>
                           </div>
                       </div>
                       {% endwith %}
@@ -68,38 +75,28 @@
 {% block jsblock %}
   <script>
     $(document).ready(function(){
-      $('.course_type').on('change', function(){
-        course_type = $(this).val();
-        $('.course').html('<option>---------</option>');
-        if(course_type != ''){
+      // getting available batches for selected department
+      $('.department').on('change', function(){
+        department = $(this).val();
+        department_name = $(this).children("option").filter(":selected").text()
+        $('.batch').html('<option>---------</option>');
+        if(department != ''){
           $.ajax({
-            url: "/software-training/get-course-option/",
+            url: "/software-training/get-batch-option/",
             type: "POST",
             data: {
-              course_type: course_type,
-              department: "{{training.department_id}}",
-              batch: "{{training.batch_id}}",
-              training_planner: "{{training.training_planner_id}}"
-            },
-            beforeSend: function() {
-              //$('.ajax-refresh-language').show();
+              department: department,
             },
             success: function(data) {
-              // loading languages
-              if(data) {
-                  if(data['is_full']){
-                    $(".course_type").val('');
-                    alert('No. of training requests for selected course type exceeded.');
-                  }else{
-                    $('.course').html(data['course_option']);
-                  }
+              // loading bach options
+              if(data && data['batch_option']) {
+                  $('.batch').html(data['batch_option']);
               }
-              //$('.ajax-refresh-language').hide();
             }
           });
         }
       });
     });
-    
+
   </script>
 {% endblock %}

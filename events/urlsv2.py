@@ -32,7 +32,7 @@ urlpatterns = [
       r'^student-batch/(?P<pk>\d+)/$', 
       StudentBatchUpdateView.as_view(template_name="edit_batch.html", \
         form_class=UpdateStudentBatchForm), 
-      name="edit_student"
+      name="edit_batch"
     ),
     url(
       r'^student-batch/edit/(?P<pk>\d+)/$', 
@@ -68,7 +68,7 @@ urlpatterns = [
       name="training_certificate"
     ),
     url(
-      r'^training-request/(?P<trid>\d+)/$', 
+      r'^training-request/(?P<pk>\d+)/$',
       TrainingRequestEditView.as_view(template_name=\
         "edit_training_request.html"), 
       name="edit_training_request"
@@ -280,5 +280,10 @@ urlpatterns = [
       TrainingAttendanceListView.as_view(template_name=\
         "mark_prev_attendance.html"), 
       name="previous_training_attendance"
+    ),
+    url(
+      r'^(?P<pk>\d+)/reopen-training/$', 
+      'events.viewsv2.ReOpenTraining', 
+      name="re-open-training"
     ),
 ]

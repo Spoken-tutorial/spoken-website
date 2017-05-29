@@ -198,21 +198,38 @@ class StudentBatchCreateView(CreateView):
     self.organiser = self.user.organiser
     form_data.organiser = self.user.organiser
     studentcount = 0
-    try:
-      if 'bid' in self.kwargs:
+
+
+    if 'bid' in self.kwargs:
+      try:
         form_data = StudentBatch.objects.get(pk=self.kwargs['bid'])
-        studentcount = form_data.stcount
-        print 'students present',studentcount
-        if studentcount == 500 :
-          messages.error(self.request, 'Can not add more than 500 students in one batch.')
-          return self.form_invalid(form)
-      else:
+      except StudentBatch.DoesNotExist:
+        messages.error(self.request, 'Invalid Batch Id')
+        return self.form_invalid(form)
+      studentcount = form_data.stcount
+      if studentcount >= 500 :
+        messages.error(self.request, 'Can not add more than 500 students in one batch.')
+        return self.form_invalid(form)
+    else:
+      # new MB
+      # one organiser for one department
+      # It will check only the new department batch upload
+      # Will allow to upload if organiser already having batch for that department
+
+      department = StudentBatch.objects.filter(department=form.cleaned_data['department'], academic=self.user.organiser.academic )
+      this_organiser_dept = department.filter(organiser=self.request.user.organiser);
+
+      if not this_organiser_dept.exists() and department.exists():
+        messages.error(self.request, "%s department is already assigened to organiser %s in your College." % (form.cleaned_data['department'], department.first().organiser))
+        print "form invalid: dept present "
+        return self.form_invalid(form)
+      try:
         form_data = StudentBatch.objects.get(year=form_data.year, academic=form_data.academic, department=form_data.department)
-    except ObjectDoesNotExist:
-      form_data.save()
-    except Exception, e:
-      print e
-      return HttpResponseRedirect("/software-training/student-batch/")
+        print " batch already exist"
+      except StudentBatch.DoesNotExist:
+        form_data.save()
+
+
     skipped, error, warning, write_flag = \
       self.csv_email_validate(self.request.FILES['csv_file'], form_data.id , studentcount)
     context = {'error' : error, 'warning' : warning, 'batch':form_data}
@@ -315,9 +332,9 @@ class StudentBatchCreateView(CreateView):
             try:
               smrec = StudentMaster.objects.get(student=student, moved=False)
               if int(batch_id) == int(smrec.batch_id):
-                row.append(1)
+                row.append('Already exists in this batch.')
               else:
-                row.append(0)
+                row.append('Already exists in %s, %s' % (smrec.batch, smrec.batch.academic))
               warning.append(row)
               continue
             except ObjectDoesNotExist:
@@ -332,19 +349,40 @@ class StudentBatchCreateView(CreateView):
 class StudentBatchUpdateView(UpdateView):
     model = StudentBatch
     success_url = "/software-training/student-batch/"
+    sb = None
     @method_decorator(group_required("Organiser"))
     def dispatch(self, *args, **kwargs):
-      #trainingrequest_set.all()
-      if 'pk' in kwargs:
-        try:
-          sb = StudentBatch.objects.get(pk=kwargs['pk'])
-          if sb.trainingrequest_set.exists():
-            #messages.warning(self.request, 'This Student Batch has Training. You can not edit this batch.')
-            return HttpResponseRedirect('/software-training/student-batch/edit/'+str(kwargs['pk']))
-        except:
-          pass
+      self.sb = StudentBatch.objects.get(pk=kwargs['pk'])
       return super(StudentBatchUpdateView, self).dispatch(*args, **kwargs)
 
+    def get_context_data(self, **kwargs):
+      context = super(StudentBatchUpdateView, self).get_context_data(**kwargs)
+      context['sb'] = self.sb
+      return context
+
+    def form_valid(self, form, **kwargs):
+      # Check if all student participate in selected foss
+      try:
+        if str(self.sb.year) == str(form.cleaned_data['year']) and str(self.sb.department) == str(form.cleaned_data['department']):
+          return HttpResponseRedirect(self.success_url)
+
+        sb = StudentBatch.objects.filter(
+          academic_id=self.request.user.organiser.academic.id,
+          department=form.cleaned_data['department'],
+          year = form.cleaned_data['year']
+        )
+        if (sb.exists()):
+          sb = sb.first()
+          messages.warning(self.request, "%s - %s Batch is already chosen by Organiser %s in your College." % (sb.department, sb.year, sb.organiser))
+          return self.form_invalid(form)
+        # Not sure do we wnat this option
+        # if sb.trainingrequest_set.exists():
+        #   messages.warning(self.request, '%s - %s Batch has Training. You can not edit this batch'% (sb.department, sb.year))
+        form.save()
+
+      except:
+        pass
+      return HttpResponseRedirect(self.success_url)
 
 class StudentBatchYearUpdateView(UpdateView):
     model = StudentBatch
@@ -516,6 +554,96 @@ class TrainingRequestCreateView(CreateView):
 
 class TrainingRequestEditView(CreateView):
   form_class = TrainingRequestEditForm
+  user = None
+  training = None
+  @method_decorator(group_required("Organiser"))
+  def dispatch(self, *args, **kwargs):
+    if 'pk' in self.kwargs:
+      self.training = TrainingRequest.objects.get(pk=self.kwargs['pk'])
+    if not self.training.can_edit():
+      messages.error(self.request, "Training has attendance, edit is not permitted for training.")
+      return HttpResponseRedirect('/software-training/training-planner/')
+    return super(TrainingRequestEditView, self).dispatch(*args, **kwargs)
+
+  def get_form_kwargs(self):
+    kwargs = super(TrainingRequestEditView, self).get_form_kwargs()
+    kwargs.update({'training' : self.training})
+    kwargs.update({'user' : self.request.user})
+    return kwargs
+
+  def get_context_data(self, **kwargs):
+    context = super(TrainingRequestEditView, self).get_context_data(**kwargs)
+    context['training'] = self.training
+    return context
+
+  def form_valid(self, form, **kwargs):
+    # Check if all student participate in selected foss
+    try:
+      # Check if batch has student?
+      sb = StudentBatch.objects.get(pk=form.cleaned_data['batch'].id)
+      selectedBatch = form.cleaned_data['batch']
+      selectedDept = form.cleaned_data['department']
+      selectedCourse = form.cleaned_data['course']
+      if not sb.student_count():
+        messages.error(self.request, 'There is no student present in this batch.')
+        return self.form_invalid(form)
+
+      # Check if batch has already has same foss course?
+      if not ( (selectedBatch == self.training.batch) and (selectedCourse == self.training.course)):
+        is_batch_has_course = TrainingRequest.objects.filter(
+          batch = selectedBatch,
+          course = selectedCourse
+        ).count()
+        if is_batch_has_course:
+          messages.error(self.request, 'This "%s" already taken/requested the selected "%s" course.' % (selectedBatch, selectedCourse))
+          return self.form_invalid(form)
+
+      training_planner = self.training.training_planner
+      # Check if course is full for this semester
+      if not ( (selectedBatch == self.training.batch) and (selectedDept == self.training.department)):
+        if training_planner.is_full(selectedDept.id, selectedBatch.id):
+          messages.error(self.request, 'No. of training requests exceeded for this semester.')
+          return self.form_invalid(form)
+
+      # Check if course is full for test or without test
+      if not ( (selectedCourse == self.training.course) and (selectedBatch == self.training.batch) and (selectedDept == self.training.department)):
+        if training_planner.is_course_full(selectedCourse.id, selectedDept.id, selectedBatch.id):
+          messages.error(self.request, 'No. of training requests for selected course type exceeded.')
+          return self.form_invalid(form)
+
+      # Assigning values
+      self.training.department = selectedDept
+      self.training.batch = selectedBatch
+      self.training.course_type = form.cleaned_data['course_type']
+
+      if self.training.batch.is_foss_batch_acceptable(selectedCourse):
+        self.training.sem_start_date = form.cleaned_data['sem_start_date']
+        self.training.course_id = selectedCourse
+      else:
+        messages.error(self.request, 'This student batch already taken the selected course.')
+        return self.form_invalid(form)
+      # save form
+      self.training.save()
+
+    except:
+      return self.form_invalid(form)
+    context = {}
+    return HttpResponseRedirect('/software-training/select-participants/')
+
+  def post(self, request, *args, **kwargs):
+    self.object = None
+    self.user = request.user
+    form_class = self.get_form_class()
+    form = self.get_form(form_class)
+
+    if form.is_valid():
+      return self.form_valid(form)
+    else:
+      return self.form_invalid(form)
+    return HttpResponseRedirect('/software-training/select-participants/')
+
+"""class TrainingRequestEditView(CreateView):
+  form_class = TrainingRequestEditForm
   template_name = None
   user = None
   training = None
@@ -564,7 +692,7 @@ class TrainingRequestEditView(CreateView):
     if form.is_valid():
       return self.form_valid(form)
     else:
-      return self.form_invalid(form)
+      return self.form_invalid(form)"""
 
 class TrainingAttendanceListView(ListView):
   queryset = StudentMaster.objects.none()
@@ -615,10 +743,7 @@ class TrainingAttendanceListView(ListView):
     else:
       TrainingAttend.objects.filter(training_id =training_id).delete()
     self.training_request.update_participants_count()
-    if self.training_request.status == 1:
-      return HttpResponseRedirect('/software-training/training-request/rp/pendingattendance')
-    else:
-      return HttpResponseRedirect('/software-training/training-planner')
+    return HttpResponseRedirect('/software-training/training-planner')
 
 class TrainingCertificateListView(ListView):
   queryset = StudentMaster.objects.none()
@@ -1107,18 +1232,23 @@ class GetDepartmentOrganiserStatusView(JSONResponseMixin, View):
     year = self.request.POST.get('year')
     context = {}
     dept_status = True
+    msg = ""
 
-    resultdata = StudentBatch.objects.filter(
-      academic_id=request.user.organiser.academic.id,
-      department_id=department_id,
-      year = year
-    )
-
-    if resultdata:
+    try:
+      resultdata = StudentBatch.objects.get(
+        academic_id=request.user.organiser.academic.id,
+        department_id=department_id,
+        year = year
+      )
       dept_status = False
+      org_name = resultdata.organiser.user.first_name+" "+resultdata.organiser.user.last_name
+      msg = "This department with selected year is already chosen by another Organiser "+org_name+" in your College."
+    except ObjectDoesNotExist:
+      pass
 
     context = {
       'dept_status' : dept_status,
+      'msg' : msg
     }
     return self.render_to_json_response(context)
 
@@ -2010,7 +2140,6 @@ def SingleTrainingPendingAttendance(request, pk):
   return HttpResponseRedirect("/software-training/single-training/pending/")
 
 def MarkAsComplete(request, pk):
-  print '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
   #pk =0
   st = TrainingRequest.objects.get(pk=pk)
   if st:
@@ -2264,9 +2393,58 @@ def LatexWorkshopFileUpload(request):
 class UpdateStudentName(UpdateView):
   model = User
   form_class = UserForm
+  user = None
   def dispatch(self, *args, **kwargs):
+    self.user = User.objects.get(pk=kwargs['pk'])
     self.success_url="/software-training/student-batch/"+str(kwargs['bid'])+"/view"
     return super(UpdateStudentName, self).dispatch(*args, **kwargs)
+
+  def get_context_data(self, **kwargs):
+    context = super(UpdateStudentName, self).get_context_data(**kwargs)
+    context['user'] = self.user
+    return context
+
+  def form_valid(self, form, **kwargs):
+    try:
+      email = form.cleaned_data['email']
+      self.user.student.gender = form.cleaned_data['gender']
+      self.user.student.save()
+      self.user.first_name = form.cleaned_data['first_name']
+      self.user.last_name = form.cleaned_data['last_name']
+      if self.user.email != email:
+        try:
+          user = User.objects.get(email = email)
+          messages.error(self.request, "%s  already exists." % (email))
+          return self.form_invalid(form)
+        except User.DoesNotExist:
+          pass
+        # Set verify as false
+        self.user.is_active = 0
+        self.user.student.verified = 0
+        self.user.student.error = 0
+        # Save student
+        self.user.student.save()
+        self.user.email = email
+      self.user.save()
+       #save testattendance table
+      test_attendance = TestAttendance.objects.filter(student_id = self.user.student.id)
+      if not test_attendance:
+        mdluser = MdlUser.objects.get(email=self.user.email)
+        test_attendance = TestAttendance.objects.filter(mdluser_id=mdluser.id)
+        if not test_attendance:
+          return HttpResponseRedirect(self.success_url)
+        for test in test_attendance:
+          test.mdluser_firstname = form.cleaned_data['first_name']
+          test.mdluser_lastname = form.cleaned_data['last_name']
+          test.save()
+      else:
+        for test in test_attendance:
+            test.mdluser_firstname = form.cleaned_data['first_name']
+            test.mdluser_lastname = form.cleaned_data['last_name']
+            test.save()
+    except Exception:
+      pass
+    return HttpResponseRedirect(self.success_url)
 
 class STWorkshopFeedbackCreateView(CreateView):
     form_class = STWorkshopFeedbackForm
@@ -2377,3 +2555,13 @@ class LearnDrupalFeedbackCreateView(CreateView):
       form_data.save()
       messages.success(self.request, "Thank you for completing this feedback form. We appreciate your input and valuable suggestions.")
       return HttpResponseRedirect(self.success_url)
+
+def ReOpenTraining(request, pk):
+  st = TrainingRequest.objects.get(pk=pk)
+  if st:
+    st.status = 0
+    st.save()
+    messages.success(request, 'Training is now open to mark further attendance.')
+  else:
+    messages.error(request, 'Request to re-open training is not sent.Please try again.')
+  return HttpResponseRedirect("/software-training/select-participants/")
