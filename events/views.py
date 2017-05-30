@@ -2658,9 +2658,12 @@ def ajax_check_foss(request):
     training = request.GET.get('training',None)
     trid = TrainingRequest.objects.get(pk=training)
     foss_name = trid.course.foss.foss
+    data = {
+    'is_c_and_cpp' : ''
+    }
     if 'C and Cpp' in foss_name:
         data = {
-        'is_c_and_app': 'True'
+        'is_c_and_cpp': 'True'
         }
     return JsonResponse(data)
 

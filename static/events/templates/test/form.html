@@ -71,9 +71,9 @@
                     </div>
 
                     <div class="form-group training_category_group" id = "batch_foss">
-                        <label class="col-sm-3 control-label" for= "id_foss">foss</label>
+                        <label class="col-sm-3 control-label" for= "id_foss">Foss</label>
                         <div class="col-sm-9">
-                        <select id="id_foss" name="id_foss">
+                        <select id="id_foss" name="id_foss" class="form-control">
                             <option value selected="selected">---------</option>
                             <option value="56">C</option>
                             <option value="57">Cpp</option>
@@ -175,6 +175,7 @@
         $batch_foss = $('#batch_foss');
         $("#id_training").change(function () {
           var training = $(this).val();
+          alert(training)
           $.ajax({
             url: '/software-training/ajax-check-foss/',
             data: {
@@ -182,9 +183,13 @@
             },
             dataType: 'json',
             success: function (data) {
-                if (data.is_c_and_app) {
-                $('#batch_foss').show();
-              }
+                alert(data.is_c_and_cpp)
+                if (data.is_c_and_cpp) {
+                    $('#batch_foss').show();
+                }
+                else{
+                    $('#batch_foss').hide();
+                }
             }
           });
 
