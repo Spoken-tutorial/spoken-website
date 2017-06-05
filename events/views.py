@@ -59,6 +59,8 @@ from cms.views import create_profile
 from cms.sortable import *
 from events_email import send_email
 import datetime
+from django.http import JsonResponse
+
 
 def can_clone_training(training):
     if training.tdate > datetime.datetime.strptime('01-02-2015', "%d-%m-%Y").date() and training.organiser.academic.institution_type.name != 'School':
@@ -1678,9 +1680,13 @@ def test_request(request, role, rid = None):
             if int(request.POST['test_category']) == 3:
                 t.training_id = None
             test_training_dept = t.training.department_id
+            if request.POST['id_foss']:
+                test_foss = request.POST['id_foss']
+            else:
+                test_foss = t.training.course.foss_id
 
             t.invigilator_id = request.POST['invigilator']
-            t.foss_id = t.training.course.foss_id
+            t.foss_id = test_foss
             t.tdate = dateTime[0]
             t.ttime = dateTime[1]
             error = 0
@@ -2648,4 +2654,19 @@ def test(request):
         academic.institution_type = InstituteType.objects.get(name='Engineering')
         academic.save()
     return HttpResponsei("Done!")
+
+@csrf_exempt
+def ajax_check_foss(request):
+    """ Ajax: Get the get the foss name of selected batch """
+    training = request.GET.get('training',None)
+    trid = TrainingRequest.objects.get(pk=training)
+    foss_name = trid.course.foss.foss
+    data = {
+    'is_c_and_cpp' : ''
+    }
+    if 'C and Cpp' in foss_name:
+        data = {
+        'is_c_and_cpp': 'True'
+        }
+    return JsonResponse(data)
 

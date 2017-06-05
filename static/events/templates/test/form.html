@@ -29,11 +29,11 @@
     <div class='tab-content'>
         <div class="bs-callout bs-callout-info">
             {% if instance %}
-	            {{ instance.academic.state }} - {{ instance.academic }}
-	        {% else %}
-	            {{ user.organiser.academic.state }} - {{ user.organiser.academic }}
-	        {% endif %}
-	    </div>
+                {{ instance.academic.state }} - {{ instance.academic }}
+            {% else %}
+                {{ user.organiser.academic.state }} - {{ user.organiser.academic }}
+            {% endif %}
+        </div>
         <div class="row well">
             <div class='col-sm-8'>
                 <form action="{{ action }}" method="post" class='form-horizontal'>{% csrf_token %}
@@ -69,6 +69,18 @@
                             <small>Please select the participants Batch for training.</small>
                         </div>
                     </div>
+
+                    <div class="form-group training_category_group" id = "batch_foss">
+                        <label class="col-sm-3 control-label" for= "id_foss">Foss</label>
+                        <div class="col-sm-9">
+                        <select id="id_foss" name="id_foss" class="form-control">
+                            <option value selected="selected">---------</option>
+                            <option value="56">C</option>
+                            <option value="57">Cpp</option>
+                        </select>
+                        </div>
+                    </div>
+
                     <div class="form-group">
                         <label class="col-sm-3 control-label" for= "id_academic">Invigilator</label>
                         <div class="col-sm-9">
@@ -108,17 +120,20 @@
                 $('.training_category_group .training').attr('disabled', 'disabled');
                 $('.workshop_group').css({'display':'black'});
                 $('.workshop_group .workshop').removeAttr('disabled');
+                $('#batch_foss').hide();
             } else if ($category.val() == 2){
                 $('.workshop_group').css({'display':'none'});
                 $('.workshop_group .workshop').attr('disabled', 'disabled');
                 $('.training_category_group').css({'display':'black'});
                 $('.training_category_group .training').removeAttr('disabled');
+                $('#batch_foss').hide();
             }else {
                 //ajaxFossDeptFillDatas('foss', 'dept', 2);
                 $('.training_category_group').css({'display':'none'});
                 $('.workshop_group').css({'display':'none'});
                 $('.training_category_group .training').attr('disabled', 'disabled');
                 $('.workshop_group .workshop').attr('disabled', 'disabled');
+                $('#batch_foss').hide();
             }
         }
         
@@ -130,28 +145,7 @@
         $category.change(function(){
             hide_input();
         });
-        
-        $college = $('#id_academic');
-        $('#id_district').change(function() {
-            var district = $(this).val();
-            $.ajax({
-                url: "/software-training/ajax-district-collage/",
-                type: "POST",
-                data: {
-                    district : district
-                },
-                success: function(data) {
-                    if(data){
-                        $college.html(data);
-                        $college.removeAttr("disabled");
-                    } else{
-                        $college.attr("disabled", "disabled");
-                        alert('No college found for this district!!');
-                    }
-                }
-            });
-        });
-        
+
         $workshop = $('#id_workshop');
         $training = $('#id_training');
 
@@ -177,5 +171,29 @@
             formatDate:'Y/m/d',
             maxDate:'+1970/06/31', // tommorow date with in 6 month
         });
+
+        $batch_foss = $('#batch_foss');
+        $("#id_training").change(function () {
+          var training = $(this).val();
+          alert(training)
+          $.ajax({
+            url: '/software-training/ajax-check-foss/',
+            data: {
+              'training': training,
+            },
+            dataType: 'json',
+            success: function (data) {
+                alert(data.is_c_and_cpp)
+                if (data.is_c_and_cpp) {
+                    $('#batch_foss').show();
+                }
+                else{
+                    $('#batch_foss').hide();
+                }
+            }
+          });
+
+        });
+
     </script>
 {% endblock %}
