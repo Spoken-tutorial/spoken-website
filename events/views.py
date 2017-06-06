@@ -1676,6 +1676,7 @@ def test_request(request, role, rid = None):
                 t.training_id = request.POST['training']
             if int(request.POST['test_category']) == 3:
                 t.training_id = None
+            test_trainings = request.POST['training']
             test_training_dept = t.training.department_id
             if request.POST['id_foss']:
                 test_foss = request.POST['id_foss']
