@@ -26,8 +26,8 @@
           <div class="form-group">
               <label for="id__date" class="col-sm-4 control-label">Date Range</label>
               <div class="col-sm-8">
-                 {% render_field form.tutorial_detail__updated class+="form-control updated date" tabindex="1" %}
-                 {{ form.tutorial_detail__updated.errors }} 
+                 {% render_field form.tutorial_detail__created class+="form-control created date" tabindex="1" %}
+                 {{ form.tutorial_detail__created.errors }} 
               </div>
           </div>
       </div>
@@ -74,7 +74,7 @@
           <td>{{ record.tutorial_detail.foss.foss }}</td>
           <td>{{ record.tutorial_detail.level }}</td>
           <td>{{ record.language.name }}</td>
-          <td>{{ record.updated|date:"d M Y" }}</td>
+          <td>{{ record.created|date:"Y M d" }}</td>
         </tr>
       {% endfor %}      
     </table>
@@ -103,13 +103,6 @@
     <script src="{% static 'spoken/js/jquery.datetimepicker.js' %}"></script>
     <script src="{% static 'spoken/js/jquery.fancybox.pack.js' %}"></script>
     <script type="text/javascript">        
-        $(document).ready(function(){                      
-            $('.fancybox').click(function(){
-                $("#big_chart_div").css({'left' : 0, 'position' : 'relative'});
-            });
-            $(".fancybox").fancybox();
-
-        });
         $('.date').datetimepicker({
             lang:'en',
             timepicker:false,
