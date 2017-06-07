@@ -855,6 +855,24 @@ class TrainingRequest(models.Model):
       return True
     return False
 
+  def is_learners_allowed(self):
+    if FossCategory.objects.filter(
+    id = self.course.foss.id, 
+    is_learners_allowed=True,).count():
+      return True
+    return False
+
+  def have_test(self):
+    if FossAvailableForTest.objects.filter(foss=self.course.foss, foss__status=True).count():
+      return True
+    return False
+
+  def is_training_before_july2017(self):
+    d = date(2017,6,30)
+    if self.sem_start_date < d:
+      return True
+    return False
+
   def is_certificate_not_allowed(self):
     if self.course.foss.id in [4,12,34,35,76]:
       return True

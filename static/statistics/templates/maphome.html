@@ -63,7 +63,10 @@
         <img src="{% static 'statistics/images/map-of-india.gif' %}" alt="" usemap="#states-and-territories-map-of-india" style="border-style:none" />
         <map id="states-and-territories-map-of-india" name="states-and-territories-map-of-india">
             {% for state in states %}
+            {% if state.img_map_area %}
                 {{ state.img_map_area|safe }} href="/statistics/get-state-info/{{ state.code }}/" class="fancybox fancybox.iframe" title="{{ state.name }}" />
+            
+            {% endif %}
             {% endfor %}
         </map>
     </div>
