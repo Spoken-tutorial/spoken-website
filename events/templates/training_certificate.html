@@ -15,7 +15,7 @@
       <th>Name</th>
       <th>Email</th>
       <th>Gender</th>
-      {% if training.is_training_certificate_allowed %}
+      {% if training.is_training_before_july2017 and training.is_learners_allowed %}
         <th>Certificate</th>
       {% endif %}
     </tr>
