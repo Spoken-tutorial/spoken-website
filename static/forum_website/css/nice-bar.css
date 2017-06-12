@@ -1,0 +1,40 @@
+.nice-bar {
+    display: none;
+    width: 100%;
+    background: #0074D9;
+    border-bottom: 3px solid #ffffff;
+    font-size: 0.85em;
+}
+.nice-bar .nice-text {
+    width: 960px;
+    margin: 0 auto;
+    padding: 12px 0;
+    color: #ffffff;
+    font-weight: bold;
+}
+.nice-bar .nice-button {
+    padding: 2px 5px;
+    background: #111111;
+    color: #ffffff;
+    margin: 0 0 0 10px;
+
+    -webkit-border-radius: 3px;
+       -moz-border-radius: 3px;
+         -o-border-radius: 3px;
+            border-radius: 3px;
+}
+.nice-bar .nice-close {
+    float: right;
+    padding: 1px 7px 2px 7px;
+    background: #111111;
+    -webkit-border-radius: 3px;
+       -moz-border-radius: 3px;
+         -o-border-radius: 3px;
+            border-radius: 3px;
+}
+.nice-bar .nice-close:hover {
+    cursor: pointer;
+}
+.nice-bar span.ext{
+    display: none;
+}
