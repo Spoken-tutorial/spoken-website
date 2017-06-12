@@ -43,7 +43,7 @@ class TutorialSearchForm(forms.Form):
 
         search_foss = forms.ChoiceField(
             choices=choices,
-            widget=forms.Select(),
+            widget=forms.GroupedSelect(),
             required=False,
         )
         lang_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2)).values('language__name').annotate(
