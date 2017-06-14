@@ -2747,7 +2747,6 @@ def ajax_manual_language(request):
     return HttpResponse(json.dumps(data), content_type='application/json')
 
 
-@login_required
 def view_brochure(request):
     template = 'creation/templates/view_brochure.html'
     my_dict = services.get_data_for_brochure_display()
