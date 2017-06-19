@@ -3,6 +3,9 @@
 {% load static %}
 {% load eventsdata %}
 {% block title %} Feedback{% endblock %}
+{% block compresscssblock %}
+    <link rel="stylesheet" href="{% static 'spoken/css/jquery.datetimepicker.css' %}" type="text/css" media="screen" charset="utf-8" />
+{% endblock %}
 {% block compressinlinecssblock %}
 <style>
         .common-search{
@@ -10,41 +13,36 @@
         }
         table tr td, table tr th{
             padding: 4px 0px 0px 5px;
+            font-style: italic;
         }
     .tablest td input[type='radio']{
             margin: 0px 23px !important;
         }
         .rowcolor{
-            background-color: #fff;
+            background-color: ;
         }
-        .rowborder{
-            background-color: #e74c3c;
-        }
+        
     .bgcolor{
-            background-color: #e74c3c;
+            /*background-color: #23f0d0;*/
             padding: 3px 15px;
         }
     .tabhead{
         text-align: center;
         border-style: inset;
-        background-color: #e74c3c;
-    }
-    .highlight{
-        width:100%;
-        background-color: #e74c3c;
-    }
-    .highlight textarea{
-       height:110px;
+        background-color: #23f0d0  ;
     }
     .tablest textarea ,textarea.form-control{
        height:110px;
+    }
+    .row{
+      font-style: italic;
     }
     </style>
 {% endblock %}
 {% block content %}
 {{Success}}
 <div style="text-align:center; color:#52A3CC;"><h3>Workshop Feedback Form</h3></div>
-<div class="row well" style="background-color:#fad7a0"><!--main div 1-->
+<div class="row " ><!--main div 1 style="background-color:#fad7a0"-->
   <div class='col-sm-15'><!--main div 2-->
     <form action="/software-training/stworkshop-feedback/" method="post" class='form-horizontal' enctype="multipart/form-data" >{% csrf_token %}
       {% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
@@ -59,10 +57,10 @@
         <div class="col-sm-11">
         
           <div class="form-group">
-            <label class="col-sm-3 control-label" for= "id_name1">Name </label>
+            <label class="col-sm-3 control-label" for= "id_name">Name </label>
             <div class="col-sm-9">
-              {% render_field form.name1 class+="form-control name1" tabindex="1" %}
-              {{ form.name1.errors }}
+              {% render_field form.name class+="form-control name" tabindex="1" %}
+              {{ form.name.errors }}
             </div>
           </div>
           
@@ -97,33 +95,39 @@
               {{ form.affiliation.errors }}
             </div>
           </div>
+
+          <div class="form-group">
+            <label class="col-sm-3 control-label" for= "id_foss">Foss </label>
+            <div class="col-sm-9">
+              {% render_field form.foss class+="form-control foss" tabindex="1" %}
+              {{ form.foss.errors }} 
+            </div>
+          </div>
           
+          <div class="form-group">
+            <label class="col-sm-3 control-label" for= "id_venue">Venue </label>
+            <div class="col-sm-9">
+              {% render_field form.venue class+="form-control venue" tabindex="1" %}
+              {{ form.venue.errors }} 
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="col-sm-3 control-label " id="id_workshop_date">Workshop Date</label>
+            <div class="col-sm-9">
+            {% render_field form.workshop_date class+="form-control workshop_date" tabindex="1" readonly='true' style="cursor:pointer"%}
+            {{ form.workshop_date.errors }}
+            </div>
+          </div>
+
           <div class="form-group">
             <label class="col-sm-3 control-label" for= "id_total_tutorials1">Total Tutorials completed during the workshop </label>
             <div class="col-sm-9">
               {% render_field form.total_tutorials1 class+="form-control total_tutorials1" tabindex="6" %}
               {{ form.total_tutorials1.errors }}
             </div>
-          </div>
-          
-          
-          <div class="form-group">
-            <label class="col-sm-3 control-label" for= "id_installed">Were you able to install <label id= "fossname"></label> on your own ? </label>
-            <div class="col-sm-9">
-              {% render_field form.installed class+="form-control installed" tabindex="1" %}
-              {{ form.installed.errors }} 
-            </div>
-          </div>
-          
-          <div class="form-group">
-            <label class="col-sm-3 control-label" for= "id_installation_difficulties " style="text-align:justify;">If no, what were the difficulties you faced while installing the software </label>
-            <div class="col-sm-9">
-              {% render_field form.installation_difficulties class+="form-control installation_difficulties " tabindex="1" %}
-              {{ form.installation_difficulties.errors }}
-            </div>
-          </div>
-          
-          <table style="width:100%; border:1px solid #000;" class="tablest"> 
+          </div><br><br>
+          <table style="width:100%;" class="table tablest"> 
             <tr>
               <th class="tabhead">Training Methodology</th>
               <th class="bgcolor">Strongly Agree</th>
@@ -131,11 +135,10 @@
               <th class="bgcolor">Neutral</th>
               <th class="bgcolor">Disagree</th>
               <th class="bgcolor">Strongly Disagree</th>
-              <th class="bgcolor">Any Comment</th>
             </tr>
             
             <tr class="rowcolor">
-              <td><label for="id_acquired_knowledge">I have acquired new knowledge about Drupal 8, by participating in the workshop.</label>{{ form.acquired_knowledge.errors }}</td>
+              <td><label for="id_acquired_knowledge">I have acquired new knowledge about the software by participating in the workshop.</label>{{ form.acquired_knowledge.errors }}</td>
                 {% for choice in form.acquired_knowledge %}
                   {% if not forloop.counter == 1 %}
                     <td>{{ choice.tag }}</td>
@@ -162,7 +165,7 @@
             </tr>
             
             <tr class="rowcolor">
-              <td><label for="id_method_easy">The method used for learning Drupal 8 was simple and easy to follow.</label>{{ form.method_easy.errors }}</td>
+              <td><label for="id_method_easy">The method used for learning the software was simple and easy to follow.</label>{{ form.method_easy.errors }}</td>
                 {% for choice in form.method_easy %}
                 {% if not forloop.counter == 1 %}
                     <td>{{ choice.tag }}</td>
@@ -207,7 +210,7 @@
             </tr>
           
           <tr class="rowcolor">
-              <td><label for="id_side_by_side_effective">Side-by-side method used for this workshop was effective as it allowed me to see the video and practice Drupal 8 simultaneously. </label>{{ form.side_by_side_effective.errors }}</td>
+              <td><label for="id_side_by_side_effective">Side-by-side method used for this workshop was effective as it allowed me to see the video and practice the software simultaneously. </label>{{ form.side_by_side_effective.errors }}</td>
                 {% for choice in form.side_by_side_effective %}
                 {% if not forloop.counter == 1 %}
                     <td>{{ choice.tag }}</td>
@@ -216,9 +219,15 @@
             </tr>
             
           </table>
-          <br><br>
+          <div class="form-group">
+            <label class="col-sm-9 control-label" for= "id_training_any_comment " style="text-align:justify;">Any comment: </label>
+            <div class="col-sm-9">
+              {% render_field form.training_any_comment class+="form-control training_any_comment " tabindex="1" %}
+              {{ form.training_any_comment.errors }}
+            </div>
+          </div><br>
           
-          <table style="width:100%; border:1px solid #000;" class="tablest"> 
+          <table style="width:100%;" class="table tablest"> 
             <tr>
               <th class="tabhead">Content Material</th>
               <th class="bgcolor">Strongly Agree</th>
@@ -226,7 +235,6 @@
               <th class="bgcolor">Neutral</th>
               <th class="bgcolor">Disagree</th>
               <th class="bgcolor">Strongly Disagree</th>
-              <th class="bgcolor">Any Comment</th>
             </tr>
             
             <tr class="rowcolor">
@@ -248,7 +256,7 @@
             </tr>
             
             <tr class="rowcolor">
-              <td><label for="id_examples_help">The examples in tutorials helped me in better understanding of Drupal 8. </label>{{ form.examples_help.errors }}</td>
+              <td><label for="id_examples_help">The examples in tutorials helped me in better understanding of the software. </label>{{ form.examples_help.errors }}</td>
                 {% for choice in form.examples_help %}
                 {% if not forloop.counter == 1 %}
                     <td>{{ choice.tag }}</td>
@@ -257,15 +265,6 @@
             </tr>
             
             <tr class="rowcolor">
-              <td><label for="id_other_language">These tutorials should be translated in other Indian languages to help others. </label>{{ form.other_language.errors }}</td>
-                {% for choice in form.other_language %}
-                {% if not forloop.counter == 1 %}
-                    <td>{{ choice.tag }}</td>
-                  {% endif %}
-                {% endfor %}
-            </tr>
-          
-          <tr class="rowcolor">
               <td><label for="id_instructions_easy_to_follow">The instructions on the instruction sheet were easy to follow. </label>{{ form.instructions_easy_to_follow.errors }}</td>
                 {% for choice in form.instructions_easy_to_follow %}
                 {% if not forloop.counter == 1 %}
@@ -273,9 +272,17 @@
                   {% endif %}
                 {% endfor %}
             </tr>
-          </table><br><br>
+          </table>
+
+          <div class="form-group">
+            <label class="col-sm-9 control-label" for= "id_content_any_comment " style="text-align:justify;">Any comment:</label>
+            <div class="col-sm-9">
+              {% render_field form.content_any_comment class+="form-control content_any_comment " tabindex="1" %}
+              {{ form.content_any_comment.errors }}
+            </div>
+          </div><br>
           
-          <table style="width:100%; border:1px solid #000;" class="tablest"> 
+          <table style="width:100%;" class="table tablest"> 
             <tr>
               <th class="tabhead">Learning Experience</th>
               <th class="bgcolor">Strongly Agree</th>
@@ -283,11 +290,10 @@
               <th class="bgcolor">Neutral</th>
               <th class="bgcolor">Disagree</th>
               <th class="bgcolor">Strongly Disagree</th>
-              <th class="bgcolor">Any Comment</th>
             </tr>
             
             <tr class="rowcolor">
-              <td><label for="id_useful_learning">The workshop was useful in learning Drupal 8.</label>{{ form.useful_learning.errors }}</td>
+              <td><label for="id_useful_learning">The workshop was useful in learning the software.</label>{{ form.useful_learning.errors }}</td>
                 {% for choice in form.useful_learning %}
                   {% if not forloop.counter == 1 %}
                     <td>{{ choice.tag }}</td>
@@ -305,17 +311,8 @@
             </tr>
             
             <tr class="rowcolor">
-              <td><label for="id_plan_to_use_future">I plan to use Drupal 8 in future after taking part in this workshop.</label>{{ form.plan_to_use_future.errors }}</td>
+              <td><label for="id_plan_to_use_future">I plan to use the software in future after taking part in this workshop.</label>{{ form.plan_to_use_future.errors }}</td>
                 {% for choice in form.plan_to_use_future %}
-                {% if not forloop.counter == 1 %}
-                    <td>{{ choice.tag }}</td>
-                  {% endif %}
-                {% endfor %}
-            </tr>
-            
-            <tr class="rowcolor">
-              <td><label for="id_confident">I am confident that I will be able to apply the knowledge of Drupal 8 after this workshop.</label>{{ form.confident.errors }}</td>
-                {% for choice in form.confident %}
                 {% if not forloop.counter == 1 %}
                     <td>{{ choice.tag }}</td>
                   {% endif %}
@@ -350,16 +347,52 @@
             </tr>
             
             <tr class="rowcolor">
-              <td><label for="id_self_learning_intrest">The self learning methodology was able to hold my interest for learning Drupal 8 during the entire workshop.</label>{{ form.self_learning_intrest.errors }}</td>
+              <td><label for="id_self_learning_intrest">The self learning methodology was able to hold my interest for learning the software during the entire workshop.</label>{{ form.self_learning_intrest.errors }}</td>
                 {% for choice in form.self_learning_intrest %}
                 {% if not forloop.counter == 1 %}
                     <td>{{ choice.tag }}</td>
                   {% endif %}
                 {% endfor %}
             </tr>
-          </table><br><br>
-          
-          <table style="width:100%;border:1px solid #000;" class="tablest"> 
+
+            <tr class="rowcolor">
+              <td><label for="id_not_like_method_forums">I did not like the method of asking questions by minutes and seconds on the Forum.</label>{{ form.not_like_method_forums.errors }}</td>
+                {% for choice in form.not_like_method_forums %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+
+            <tr class="rowcolor">
+              <td><label for="id_forum_helpful">The Forum was very helpful as I usually hesitate to ask my doubts in front of an audience.</label>{{ form.forum_helpful.errors }}</td>
+                {% for choice in form.forum_helpful %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+
+            <tr class="rowcolor">
+              <td><label for="id_owing_to_forums">Owing to the Forums, I did not have to wait to have my doubts answered.</label>{{ form.owing_to_forums.errors }}</td>
+                {% for choice in form.owing_to_forums %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+
+          </table>
+          <div class="form-group">
+            <label class="col-sm-9 control-label" for= "id_learning_any_comment " style="text-align:justify;">Any comment:</label>
+            <div class="col-sm-9">
+              {% render_field form.learning_any_comment class+="form-control learning_any_comment " tabindex="1" %}
+              {{ form.learning_any_comment.errors }}
+            </div>
+          </div><br>
+
+          <table style="width:100%" class="table tablest"> 
+            <thead class="thead-inverse">
             <tr>
               <th class="tabhead">Kindly Rate the following </th>
               <th class="bgcolor">Excellent</th>
@@ -368,9 +401,9 @@
               <th class="bgcolor">Bad</th>
               <th class="bgcolor">Extremely bad</th>
             </tr>
-            
+            </thead>
             <tr class="rowcolor">
-              <td><label for="id_ws_quality">Workshop Quality</label>{{ form.ws_quality.errors }}</td>
+              <td><label for="id_ws_quality">Workshop quality</label>{{ form.ws_quality.errors }}</td>
                 {% for choice in form.ws_quality %}
                 {% if not forloop.counter == 1 %}
                     <td>{{ choice.tag }}</td>
@@ -379,7 +412,7 @@
             </tr>
             
             <tr class="rowcolor">
-              <td><label for="id_overall_content_quality">Overall Content Quality of tutorials</label>{{ form.overall_content_quality.errors }}</td>
+              <td><label for="id_overall_content_quality">Overall content quality of tutorials</label>{{ form.overall_content_quality.errors }}</td>
                 {% for choice in form.overall_content_quality %}
                 {% if not forloop.counter == 1 %}
                     <td>{{ choice.tag }}</td>
@@ -388,7 +421,7 @@
             </tr>
             
             <tr class="rowcolor">
-              <td><label for="id_clarity_of_explanation">Clarity of explanation in tutorials</label>{{ form.clarity_of_explanation.errors }}</td>
+              <td><label for="id_clarity_of_explanation">&nbsp;&nbsp;- Clarity of explanation in tutorials</label>{{ form.clarity_of_explanation.errors }}</td>
                 {% for choice in form.clarity_of_explanation %}
                 {% if not forloop.counter == 1 %}
                     <td>{{ choice.tag }}</td>
@@ -397,7 +430,7 @@
             </tr>
             
             <tr class="rowcolor">
-              <td><label for="id_flow">Information flow of the content in tutorials</label>{{ form.flow.errors }}</td>
+              <td><label for="id_flow">&nbsp;&nbsp;- Information flow of the content in tutorials</label>{{ form.flow.errors }}</td>
                 {% for choice in form.flow %}
                 {% if not forloop.counter == 1 %}
                     <td>{{ choice.tag }}</td>
@@ -406,7 +439,7 @@
             </tr>
             
             <tr class="rowcolor">
-              <td><label for="id_relevance">Relevance of the end-of-tutorial assignment in the tutorials</label>{{ form.relevance.errors }}</td>
+              <td><label for="id_relevance">&nbsp;&nbsp;- Relevance of the end-of-tutorial assignment in the tutorials</label>{{ form.relevance.errors }}</td>
                 {% for choice in form.relevance %}
                 {% if not forloop.counter == 1 %}
                     <td>{{ choice.tag }}</td>
@@ -415,7 +448,7 @@
             </tr>
             
             <tr class="rowcolor">
-              <td><label for="id_guidelines">Guidelines on the instruction sheet </label>{{ form.guidelines.errors }}</td>
+              <td><label for="id_guidelines">&nbsp;&nbsp;- Guidelines on the instruction sheet </label>{{ form.guidelines.errors }}</td>
                 {% for choice in form.guidelines %}
                 {% if not forloop.counter == 1 %}
                     <td>{{ choice.tag }}</td>
@@ -424,7 +457,7 @@
             </tr>
             
             <tr class="rowcolor">
-              <td><label for="id_overall_video_quality">Overall Video Quality of the tutorial</label>{{ form.overall_video_quality.errors }}</td>
+              <td><label for="id_overall_video_quality">Overall video quality of the tutorial</label>{{ form.overall_video_quality.errors }}</td>
                 {% for choice in form.overall_video_quality %}
                 {% if not forloop.counter == 1 %}
                     <td>{{ choice.tag }}</td>
@@ -433,7 +466,7 @@
             </tr>
             
             <tr class="rowcolor">
-              <td><label for="id_text_readability">Text readability </label>{{ form.text_readability.errors }}</td>
+              <td><label for="id_text_readability">&nbsp;&nbsp;- Text readability </label>{{ form.text_readability.errors }}</td>
                 {% for choice in form.text_readability %}
                 {% if not forloop.counter == 1 %}
                     <td>{{ choice.tag }}</td>
@@ -442,7 +475,7 @@
             </tr>
             
             <tr class="rowcolor">
-              <td><label for="id_clarity_of_speech">Clarity of Speech</label>{{ form.clarity_of_speech.errors }}</td>
+              <td><label for="id_clarity_of_speech">&nbsp;&nbsp;- Clarity of speech</label>{{ form.clarity_of_speech.errors }}</td>
                 {% for choice in form.clarity_of_speech %}
                 {% if not forloop.counter == 1 %}
                     <td>{{ choice.tag }}</td>
@@ -451,7 +484,7 @@
             </tr>
             
             <tr class="rowcolor">
-              <td><label for="id_visual_presentation">Visual Presentation of content</label>{{ form.visual_presentation.errors }}</td>
+              <td><label for="id_visual_presentation">&nbsp;&nbsp;- Visual presentation of content</label>{{ form.visual_presentation.errors }}</td>
                 {% for choice in form.visual_presentation %}
                 {% if not forloop.counter == 1 %}
                     <td>{{ choice.tag }}</td>
@@ -460,7 +493,7 @@
             </tr>
             
             <tr class="rowcolor">
-              <td><label for="id_pace_of_tutorial">Pace of the tutorial</label>{{ form.pace_of_tutorial.errors }}</td>
+              <td><label for="id_pace_of_tutorial">&nbsp;&nbsp;- Pace of the tutorial</label>{{ form.pace_of_tutorial.errors }}</td>
                 {% for choice in form.pace_of_tutorial %}
                 {% if not forloop.counter == 1 %}
                     <td>{{ choice.tag }}</td>
@@ -469,34 +502,7 @@
             </tr>
             
             <tr class="rowcolor">
-              <td><label for="id_arrangement">Arrangement </label>{{ form.arrangement.errors }}</td>
-                {% for choice in form.arrangement %}
-                {% if not forloop.counter == 1 %}
-                    <td>{{ choice.tag }}</td>
-                  {% endif %}
-                {% endfor %}
-            </tr>
-            
-            <tr class="rowcolor">
-              <td><label for="id_network">Network Connectivity</label>{{ form.network.errors }}</td>
-                {% for choice in form.network %}
-                {% if not forloop.counter == 1 %}
-                    <td>{{ choice.tag }}</td>
-                  {% endif %}
-                {% endfor %}
-            </tr>
-            
-            <tr class="rowcolor">
-              <td><label for="id_installation_help">Installation help</label>{{ form.installation_help.errors }}</td>
-                {% for choice in form.installation_help %}
-                {% if not forloop.counter == 1 %}
-                    <td>{{ choice.tag }}</td>
-                  {% endif %}
-                {% endfor %}
-            </tr>
-            
-            <tr class="rowcolor">
-              <td><label for="id_time_management">Time Management </label>{{ form.time_management.errors }}</td>
+              <td><label for="id_time_management">Time management </label>{{ form.time_management.errors }}</td>
                 {% for choice in form.time_management %}
                 {% if not forloop.counter == 1 %}
                     <td>{{ choice.tag }}</td>
@@ -505,7 +511,7 @@
             </tr>
             
             <tr class="rowcolor">
-              <td><label for="id_experience_of_learning">Experience of learning Drupal 8 using side-by-side method</label>{{ form.experience_of_learning.errors }}</td>
+              <td><label for="id_experience_of_learning">Experience of learning the software using side-by-side method</label>{{ form.experience_of_learning.errors }}</td>
                 {% for choice in form.experience_of_learning %}
                 {% if not forloop.counter == 1 %}
                     <td>{{ choice.tag }}</td>
@@ -514,23 +520,14 @@
             </tr>
             
             <tr class="rowcolor">
-              <td><label for="id_overall_arrangement">Overall Workshop Arrangement</label>{{ form.overall_arrangement.errors }}</td>
+              <td><label for="id_overall_arrangement">Overall workshop arrangement</label>{{ form.overall_arrangement.errors }}</td>
                 {% for choice in form.overall_arrangement %}
                 {% if not forloop.counter == 1 %}
                     <td>{{ choice.tag }}</td>
                   {% endif %}
                 {% endfor %}
             </tr>
-            
-            <tr class="rowcolor">
-              <td><label for="id_interaction_using_forum">Interaction using Forum</label>{{ form.interaction_using_forum.errors }}</td>
-                {% for choice in form.interaction_using_forum %}
-                {% if not forloop.counter == 1 %}
-                    <td>{{ choice.tag }}</td>
-                  {% endif %}
-                {% endfor %}
-            </tr>
-          </table><br><br>
+          </table>
           
           <div class="form-group">
             <label class="col-sm-9 control-label" for= "id_like_abt_ws " style="text-align:justify;">What did you like about the workshop?</label>
@@ -549,7 +546,7 @@
           </div><br>
           
           <div class="form-group">
-            <label class="col-sm-9 control-label" for= "id_experience " style="text-align:justify;">Experiences that you will take with you:</label>
+            <label class="col-sm-9 control-label" for= "id_experience " style="text-align:justify;">Any experiences that you will take with you:</label>
             <div class="col-sm-9">
               {% render_field form.experience class+="form-control experience " tabindex="1" %}
               {{ form.experience.errors }}
@@ -566,7 +563,7 @@
           
           <div class="form-group">
             <div class="col-sm-offset-5 col-sm-9">
-              <input class="btn btn-primary" style="background-color:#e74c3c; width:200px;" type="submit" id="submit_button" value="Submit" />
+              <input class="btn btn-warning btn-lg" type="submit" id="submit_button" value="Submit" />
             </div>
           </div>
 
@@ -579,10 +576,20 @@
   </div><!--main div 2 close -->
 </div><!--main div 1 close -->
 {% endblock %}
+{% block compressjsblock %}
+    <script src="{% static 'spoken/js/jquery.datetimepicker.js' %}"></script>
+{% endblock %}
 {% block compressinlinejsblock %}
   <script>
   $( document ).ready(function() {
-    document.getElementById('fossname').innerHTML = 'Drupal 8';
+    $('.workshop_date').datetimepicker({
+          lang:'en',
+          format:'Y-m-d',
+          formatDate:'Y/m/d',
+          step:5,
+          maxDate: 0,
+          timepicker:false,
+        });
   });
   </script>
 {% endblock %}
