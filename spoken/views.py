@@ -187,6 +187,15 @@ def watch_tutorial(request, foss, tutorial, lang):
     video_path = settings.MEDIA_ROOT + "videos/" + \
         str(tr_rec.tutorial_detail.foss_id) + "/" + str(tr_rec.tutorial_detail_id) + "/" + tr_rec.video
     video_info = get_video_info(video_path)
+    audio=tr_rec.video
+    lang1=str(tr_rec.language)
+    length=len(lang1)
+    video=audio[:-(length+1)]
+    tr_list=TutorialResource.objects.filter(tutorial_detail=tr_rec.tutorial_detail_id)
+    list=[lang1]
+    for i in tr_list:
+        if str(i.language) not in lang1:
+            list.append(i.language)
     context = {
         'tr_rec': tr_rec,
         'tr_recs': tr_recs,
@@ -195,7 +204,11 @@ def watch_tutorial(request, foss, tutorial, lang):
         'media_url': settings.MEDIA_URL,
         'media_path': settings.MEDIA_ROOT,
         'tutorial_path': str(tr_rec.tutorial_detail.foss_id) + '/' + str(tr_rec.tutorial_detail_id) + '/',
-        'script_base': settings.SCRIPT_URL
+        'script_base': settings.SCRIPT_URL,
+        'video':video,
+        'lang':lang1,
+        'concept':foss,
+        'list':list
     }
     return render(request, 'spoken/templates/watch_tutorial.html', context)
 
