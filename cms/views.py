@@ -19,11 +19,6 @@ from cms.services import *
 from mdldjango.urls import *
 from hashids import Hashids
 
-import urllib
-import urllib2
-import json
-
-
 def dispatcher(request, permalink=''):
     if permalink == '':
         return HttpResponseRedirect('/')
@@ -45,30 +40,20 @@ def create_profile(user, phone):
     return profile
 
 def account_register(request):
+
+    # import recaptcha validate function
+    from cms.recaptcha import recaptcha_valdation, get_recaptcha_context
+
     #reCAPTCHA Site key
-    context = { 'SITE_KEY' : settings.GOOGLE_RECAPTCHA_SITE_KEY }
+    context = get_recaptcha_context()
 
     if request.method == 'POST':
 
-        ''' Begin reCAPTCHA validation '''
-        recaptcha_response = request.POST.get('g-recaptcha-response')
-        url = settings.GOOGLE_RECAPTCHA_SITEVERIFY
-        values = {
-            'secret': settings.GOOGLE_RECAPTCHA_SECRET_KEY,
-            'response': recaptcha_response
-        }
-        data = urllib.urlencode(values)
-        req = urllib2.Request(url, data)
-        response = urllib2.urlopen(req)
-        recaptcha_result = json.load(response)
-
-        ''' End reCAPTCHA validation '''
-
-        if not recaptcha_result['success']:
-            messages.error(request, 'Invalid reCAPTCHA. Please try again.')
+        # verify recaptcha
+        recaptcha_result = recaptcha_valdation(request)
 
         form = RegisterForm(request.POST)
-        if recaptcha_result['success'] and form.is_valid():
+        if recaptcha_result and form.is_valid():
             username = request.POST['username']
             password = request.POST['password']
             email = request.POST['email']

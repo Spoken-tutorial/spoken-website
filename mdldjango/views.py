@@ -24,10 +24,6 @@ from get_or_create_participant import get_or_create_participant, encript_passwor
 from events.signals import get_or_create_user
 import datetime
 
-import urllib
-import urllib2
-import json
-
 def authenticate(email = None, password = None):
     try:
         password = encript_password(password)
@@ -220,30 +216,19 @@ def offline_details(request, wid, category):
 def mdl_register(request):
     form = RegisterForm()
 
+    # import recaptcha validate function
+    from cms.recaptcha import recaptcha_valdation, get_recaptcha_context
+
     #reCAPTCHA Site key
-    context = { 'SITE_KEY' : settings.GOOGLE_RECAPTCHA_SITE_KEY }
+    context = get_recaptcha_context()
 
     if request.method == "POST":
 
-        ''' Begin reCAPTCHA validation '''
-        recaptcha_response = request.POST.get('g-recaptcha-response')
-        url = settings.GOOGLE_RECAPTCHA_SITEVERIFY
-        values = {
-            'secret': settings.GOOGLE_RECAPTCHA_SECRET_KEY,
-            'response': recaptcha_response
-        }
-        data = urllib.urlencode(values)
-        req = urllib2.Request(url, data)
-        response = urllib2.urlopen(req)
-        recaptcha_result = json.load(response)
-
-        ''' End reCAPTCHA validation '''
-
-        if not recaptcha_result['success']:
-            messages.error(request, 'Invalid reCAPTCHA. Please try again.')
+        # verify recaptcha
+        recaptcha_result = recaptcha_valdation(request)
 
         form = RegisterForm(request.POST)
-        if recaptcha_result['success'] and form.is_valid():
+        if recaptcha_result and form.is_valid():
             #Email exits
             try:
                 user = MdlUser.objects.filter(email=request.POST['email']).first().id
