@@ -43,6 +43,9 @@
                         {{ form.training_planner__academic__institution_name.errors }}
                     </div>
                 </div>
+                {% if user|is_resource_person or user|get_administrator %}
+                    <a target="_blank" class="pull-right btn btn-default " href="{% url 'reports:events_training_csv' %}{% if request.GET %}?{{ request.GET.urlencode }}&status={{ status_code }}{% else %}?status={{ status_code }} {% endif %}" class="addlink">Export to CSV</a>
+                {% endif %}
             </div>
 
 
