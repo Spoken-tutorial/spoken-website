@@ -352,7 +352,7 @@ def tutorial_content(request, template='statistics/templates/statistics_content.
         3: SortableHeader('tutorial_detail__foss__foss', True, 'FOSS Course'),
         4: SortableHeader('Level', False),
         5: SortableHeader('language__name', False, 'Language'),
-        6: SortableHeader('tutorial_detail__created', False, 'Date Published')
+        6: SortableHeader('created', False, 'Date Published')
     }
 
     published_tutorials_set = TutorialResource.objects.filter(status__gte=1)

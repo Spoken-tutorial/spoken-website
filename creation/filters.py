@@ -4,8 +4,8 @@ from creation.models import TutorialResource
 
 class CreationStatisticsFilter(django_filters.FilterSet):
 
-    tutorial_detail__created = django_filters.DateRangeCompareFilter()
+    created = django_filters.DateRangeCompareFilter()
 
     class Meta:
         model = TutorialResource
-        fields = ['tutorial_detail__foss', 'tutorial_detail__created', 'language', 'tutorial_detail__level']
+        fields = ['tutorial_detail__foss', 'created', 'language', 'tutorial_detail__level']
