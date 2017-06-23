@@ -18,9 +18,6 @@
     .tablest td input[type='radio']{
             margin: 0px 23px !important;
         }
-        .rowcolor{
-            background-color: ;
-        }
         
     .bgcolor{
             /*background-color: #23f0d0;*/
@@ -59,7 +56,7 @@
           <div class="form-group">
             <label class="col-sm-3 control-label" for= "id_name">Name </label>
             <div class="col-sm-9">
-              {% render_field form.name class+="form-control name" tabindex="1" %}
+              {% render_field form.name class+="form-control name" %}
               {{ form.name.errors }}
             </div>
           </div>
@@ -67,7 +64,7 @@
           <div class="form-group email">
             <label class="col-sm-3 control-label" for= "id_email">Email-Id </label>
             <div class="col-sm-9">
-              {% render_field form.email class+="form-control email" tabindex="2" %}
+              {% render_field form.email class+="form-control email"%}
               {{ form.email.errors }}
             </div>
           </div>
@@ -75,7 +72,7 @@
           <div class="form-group">
             <label class="col-sm-3 control-label" for= "id_age">Gender </label>
             <div class="col-sm-9">
-              {% render_field form.gender class+="form-control gender" tabindex="3" %}
+              {% render_field form.gender class+="form-control gender" %}
               {{ form.gender.errors }}
             </div>
           </div>
@@ -83,7 +80,7 @@
           <div class="form-group">
             <label class="col-sm-3 control-label" for= "id_age">Age </label>
             <div class="col-sm-9">
-              {% render_field form.age class+="form-control age" tabindex="4" %}
+              {% render_field form.age class+="form-control age" %}
               {{ form.age.errors }}
             </div>
           </div>
@@ -91,7 +88,7 @@
           <div class="form-group ">
             <label class="col-sm-3 control-label" for= "id_affiliation">Affiliation </label>
             <div class="col-sm-9">
-              {% render_field form.affiliation class+="form-control affiliation" tabindex="5" %}
+              {% render_field form.affiliation class+="form-control affiliation" %}
               {{ form.affiliation.errors }}
             </div>
           </div>
@@ -99,7 +96,7 @@
           <div class="form-group">
             <label class="col-sm-3 control-label" for= "id_foss">Foss </label>
             <div class="col-sm-9">
-              {% render_field form.foss class+="form-control foss" tabindex="1" %}
+              {% render_field form.foss class+="form-control foss"  %}
               {{ form.foss.errors }} 
             </div>
           </div>
@@ -107,7 +104,7 @@
           <div class="form-group">
             <label class="col-sm-3 control-label" for= "id_venue">Venue </label>
             <div class="col-sm-9">
-              {% render_field form.venue class+="form-control venue" tabindex="1" %}
+              {% render_field form.venue class+="form-control venue"  %}
               {{ form.venue.errors }} 
             </div>
           </div>
@@ -115,7 +112,7 @@
           <div class="form-group">
             <label class="col-sm-3 control-label " id="id_workshop_date">Workshop Date</label>
             <div class="col-sm-9">
-            {% render_field form.workshop_date class+="form-control workshop_date" tabindex="1" readonly='true' style="cursor:pointer"%}
+            {% render_field form.workshop_date class+="form-control workshop_date"  readonly='true' style="cursor:pointer"%}
             {{ form.workshop_date.errors }}
             </div>
           </div>
@@ -123,7 +120,7 @@
           <div class="form-group">
             <label class="col-sm-3 control-label" for= "id_total_tutorials1">Total Tutorials completed during the workshop </label>
             <div class="col-sm-9">
-              {% render_field form.total_tutorials1 class+="form-control total_tutorials1" tabindex="6" %}
+              {% render_field form.total_tutorials1 class+="form-control total_tutorials1" %}
               {{ form.total_tutorials1.errors }}
             </div>
           </div><br><br>
@@ -137,7 +134,7 @@
               <th class="bgcolor">Strongly Disagree</th>
             </tr>
             
-            <tr class="rowcolor">
+            <tr >
               <td><label for="id_acquired_knowledge">I have acquired new knowledge about the software by participating in the workshop.</label>{{ form.acquired_knowledge.errors }}</td>
                 {% for choice in form.acquired_knowledge %}
                   {% if not forloop.counter == 1 %}
@@ -146,7 +143,7 @@
                 {% endfor %}
             </tr>
             
-            <tr class="rowcolor">
+            <tr >
               <td><label for="id_suff_instruction">The organizer gave sufficient instructions at the beginning of the workshop.</label>{{ form.suff_instruction.errors }}</td>
                 {% for choice in form.suff_instruction %}
                 {% if not forloop.counter == 1 %}
@@ -155,7 +152,7 @@
                 {% endfor %}
             </tr>
             
-            <tr class="rowcolor">
+            <tr >
               <td><label for="id_diff_instruction">I found it difficult to follow the instructions given during the workshop.</label>{{ form.diff_instruction.errors }}</td>
                 {% for choice in form.diff_instruction %}
                 {% if not forloop.counter == 1 %}
@@ -164,7 +161,7 @@
                 {% endfor %}
             </tr>
             
-            <tr class="rowcolor">
+            <tr >
               <td><label for="id_method_easy">The method used for learning the software was simple and easy to follow.</label>{{ form.method_easy.errors }}</td>
                 {% for choice in form.method_easy %}
                 {% if not forloop.counter == 1 %}
@@ -173,7 +170,7 @@
                 {% endfor %}
             </tr>
             
-            <tr class="rowcolor">
+            <tr >
               <td><label for="id_time_sufficient">The time allotted for workshop was sufficient.</label>{{ form.time_sufficient.errors }}</td>
                 {% for choice in form.time_sufficient %}
                   {% if not forloop.counter == 1 %}
@@ -182,7 +179,7 @@
                 {% endfor %}
             </tr>
             
-            <tr class="rowcolor">
+            <tr >
               <td><label for="id_desired_objective">The workshop met its desired objectives.</label>{{ form.desired_objective.errors }}</td>
                 {% for choice in form.desired_objective %}
                 {% if not forloop.counter == 1 %}
@@ -191,7 +188,7 @@
                 {% endfor %}
             </tr>
             
-            <tr class="rowcolor">
+            <tr >
               <td><label for="id_recommend">I will recommend this workshop to my peers and colleagues.</label>{{ form.recommend.errors }}</td>
                 {% for choice in form.recommend %}
                 {% if not forloop.counter == 1 %}
@@ -200,7 +197,7 @@
                 {% endfor %}
             </tr>
             
-            <tr class="rowcolor">
+            <tr >
               <td><label for="id_like_to_part">I would like to take part in other spoken tutorial workshops too.</label>{{ form.like_to_part.errors }}</td>
                 {% for choice in form.like_to_part %}
                 {% if not forloop.counter == 1 %}
@@ -209,7 +206,7 @@
                 {% endfor %}
             </tr>
           
-          <tr class="rowcolor">
+          <tr >
               <td><label for="id_side_by_side_effective">Side-by-side method used for this workshop was effective as it allowed me to see the video and practice the software simultaneously. </label>{{ form.side_by_side_effective.errors }}</td>
                 {% for choice in form.side_by_side_effective %}
                 {% if not forloop.counter == 1 %}
@@ -222,7 +219,7 @@
           <div class="form-group">
             <label class="col-sm-9 control-label" for= "id_training_any_comment " style="text-align:justify;">Any comment: </label>
             <div class="col-sm-9">
-              {% render_field form.training_any_comment class+="form-control training_any_comment " tabindex="1" %}
+              {% render_field form.training_any_comment class+="form-control training_any_comment "  %}
               {{ form.training_any_comment.errors }}
             </div>
           </div><br>
@@ -237,7 +234,7 @@
               <th class="bgcolor">Strongly Disagree</th>
             </tr>
             
-            <tr class="rowcolor">
+            <tr >
               <td><label for="id_not_self_explanatory">The video tutorials were not self-explanatory. </label>{{ form.not_self_explanatory.errors }}</td>
                 {% for choice in form.not_self_explanatory %}
                   {% if not forloop.counter == 1 %}
@@ -246,7 +243,7 @@
                 {% endfor %}
             </tr>
             
-            <tr class="rowcolor">
+            <tr >
               <td><label for="id_logical_sequence">The content in the tutorials was presented in a logical sequence. </label>{{ form.logical_sequence.errors }}</td>
                 {% for choice in form.logical_sequence %}
                 {% if not forloop.counter == 1 %}
@@ -255,7 +252,7 @@
                 {% endfor %}
             </tr>
             
-            <tr class="rowcolor">
+            <tr >
               <td><label for="id_examples_help">The examples in tutorials helped me in better understanding of the software. </label>{{ form.examples_help.errors }}</td>
                 {% for choice in form.examples_help %}
                 {% if not forloop.counter == 1 %}
@@ -264,7 +261,7 @@
                 {% endfor %}
             </tr>
             
-            <tr class="rowcolor">
+            <tr >
               <td><label for="id_instructions_easy_to_follow">The instructions on the instruction sheet were easy to follow. </label>{{ form.instructions_easy_to_follow.errors }}</td>
                 {% for choice in form.instructions_easy_to_follow %}
                 {% if not forloop.counter == 1 %}
@@ -277,7 +274,7 @@
           <div class="form-group">
             <label class="col-sm-9 control-label" for= "id_content_any_comment " style="text-align:justify;">Any comment:</label>
             <div class="col-sm-9">
-              {% render_field form.content_any_comment class+="form-control content_any_comment " tabindex="1" %}
+              {% render_field form.content_any_comment class+="form-control content_any_comment "  %}
               {{ form.content_any_comment.errors }}
             </div>
           </div><br>
@@ -292,7 +289,7 @@
               <th class="bgcolor">Strongly Disagree</th>
             </tr>
             
-            <tr class="rowcolor">
+            <tr >
               <td><label for="id_useful_learning">The workshop was useful in learning the software.</label>{{ form.useful_learning.errors }}</td>
                 {% for choice in form.useful_learning %}
                   {% if not forloop.counter == 1 %}
@@ -301,7 +298,7 @@
                 {% endfor %}
             </tr>
             
-            <tr class="rowcolor">
+            <tr >
               <td><label for="id_help_improve_performance">The self-learning experience will help improve my performance and grades.</label>{{ form.help_improve_performance.errors }}</td>
                 {% for choice in form.help_improve_performance %}
                 {% if not forloop.counter == 1 %}
@@ -310,7 +307,7 @@
                 {% endfor %}
             </tr>
             
-            <tr class="rowcolor">
+            <tr >
               <td><label for="id_plan_to_use_future">I plan to use the software in future after taking part in this workshop.</label>{{ form.plan_to_use_future.errors }}</td>
                 {% for choice in form.plan_to_use_future %}
                 {% if not forloop.counter == 1 %}
@@ -319,7 +316,7 @@
                 {% endfor %}
             </tr>
           
-          <tr class="rowcolor">
+          <tr >
               <td><label for="id_difficult_simultaneously">It was difficult to watch the video tutorial and practice the steps simultaneously. </label>{{ form.difficult_simultaneously.errors }}</td>
                 {% for choice in form.difficult_simultaneously %}
                 {% if not forloop.counter == 1 %}
@@ -328,7 +325,7 @@
                 {% endfor %}
             </tr>
             
-            <tr class="rowcolor">
+            <tr >
               <td><label for="id_interface_comfortable">I found the user interface of Spoken Tutorial comfortable to interact.</label>{{ form.interface_comfortable.errors }}</td>
                 {% for choice in form.interface_comfortable %}
                 {% if not forloop.counter == 1 %}
@@ -337,7 +334,7 @@
                 {% endfor %}
             </tr>
             
-            <tr class="rowcolor">
+            <tr >
               <td><label for="id_satisfied">I am satisfied with the self-learning experience using spoken tutorials.</label>{{ form.satisfied.errors }}</td>
                 {% for choice in form.satisfied %}
                 {% if not forloop.counter == 1 %}
@@ -346,7 +343,7 @@
                 {% endfor %}
             </tr>
             
-            <tr class="rowcolor">
+            <tr >
               <td><label for="id_self_learning_intrest">The self learning methodology was able to hold my interest for learning the software during the entire workshop.</label>{{ form.self_learning_intrest.errors }}</td>
                 {% for choice in form.self_learning_intrest %}
                 {% if not forloop.counter == 1 %}
@@ -355,7 +352,7 @@
                 {% endfor %}
             </tr>
 
-            <tr class="rowcolor">
+            <tr >
               <td><label for="id_not_like_method_forums">I did not like the method of asking questions by minutes and seconds on the Forum.</label>{{ form.not_like_method_forums.errors }}</td>
                 {% for choice in form.not_like_method_forums %}
                 {% if not forloop.counter == 1 %}
@@ -364,7 +361,7 @@
                 {% endfor %}
             </tr>
 
-            <tr class="rowcolor">
+            <tr >
               <td><label for="id_forum_helpful">The Forum was very helpful as I usually hesitate to ask my doubts in front of an audience.</label>{{ form.forum_helpful.errors }}</td>
                 {% for choice in form.forum_helpful %}
                 {% if not forloop.counter == 1 %}
@@ -373,7 +370,7 @@
                 {% endfor %}
             </tr>
 
-            <tr class="rowcolor">
+            <tr >
               <td><label for="id_owing_to_forums">Owing to the Forums, I did not have to wait to have my doubts answered.</label>{{ form.owing_to_forums.errors }}</td>
                 {% for choice in form.owing_to_forums %}
                 {% if not forloop.counter == 1 %}
@@ -386,7 +383,7 @@
           <div class="form-group">
             <label class="col-sm-9 control-label" for= "id_learning_any_comment " style="text-align:justify;">Any comment:</label>
             <div class="col-sm-9">
-              {% render_field form.learning_any_comment class+="form-control learning_any_comment " tabindex="1" %}
+              {% render_field form.learning_any_comment class+="form-control learning_any_comment "  %}
               {{ form.learning_any_comment.errors }}
             </div>
           </div><br>
@@ -402,7 +399,7 @@
               <th class="bgcolor">Extremely bad</th>
             </tr>
             </thead>
-            <tr class="rowcolor">
+            <tr >
               <td><label for="id_ws_quality">Workshop quality</label>{{ form.ws_quality.errors }}</td>
                 {% for choice in form.ws_quality %}
                 {% if not forloop.counter == 1 %}
@@ -411,7 +408,7 @@
                 {% endfor %}
             </tr>
             
-            <tr class="rowcolor">
+            <tr >
               <td><label for="id_overall_content_quality">Overall content quality of tutorials</label>{{ form.overall_content_quality.errors }}</td>
                 {% for choice in form.overall_content_quality %}
                 {% if not forloop.counter == 1 %}
@@ -420,7 +417,7 @@
                 {% endfor %}
             </tr>
             
-            <tr class="rowcolor">
+            <tr >
               <td><label for="id_clarity_of_explanation">&nbsp;&nbsp;- Clarity of explanation in tutorials</label>{{ form.clarity_of_explanation.errors }}</td>
                 {% for choice in form.clarity_of_explanation %}
                 {% if not forloop.counter == 1 %}
@@ -429,7 +426,7 @@
                 {% endfor %}
             </tr>
             
-            <tr class="rowcolor">
+            <tr >
               <td><label for="id_flow">&nbsp;&nbsp;- Information flow of the content in tutorials</label>{{ form.flow.errors }}</td>
                 {% for choice in form.flow %}
                 {% if not forloop.counter == 1 %}
@@ -438,7 +435,7 @@
                 {% endfor %}
             </tr>
             
-            <tr class="rowcolor">
+            <tr >
               <td><label for="id_relevance">&nbsp;&nbsp;- Relevance of the end-of-tutorial assignment in the tutorials</label>{{ form.relevance.errors }}</td>
                 {% for choice in form.relevance %}
                 {% if not forloop.counter == 1 %}
@@ -447,7 +444,7 @@
                 {% endfor %}
             </tr>
             
-            <tr class="rowcolor">
+            <tr >
               <td><label for="id_guidelines">&nbsp;&nbsp;- Guidelines on the instruction sheet </label>{{ form.guidelines.errors }}</td>
                 {% for choice in form.guidelines %}
                 {% if not forloop.counter == 1 %}
@@ -456,7 +453,7 @@
                 {% endfor %}
             </tr>
             
-            <tr class="rowcolor">
+            <tr >
               <td><label for="id_overall_video_quality">Overall video quality of the tutorial</label>{{ form.overall_video_quality.errors }}</td>
                 {% for choice in form.overall_video_quality %}
                 {% if not forloop.counter == 1 %}
@@ -465,7 +462,7 @@
                 {% endfor %}
             </tr>
             
-            <tr class="rowcolor">
+            <tr >
               <td><label for="id_text_readability">&nbsp;&nbsp;- Text readability </label>{{ form.text_readability.errors }}</td>
                 {% for choice in form.text_readability %}
                 {% if not forloop.counter == 1 %}
@@ -474,7 +471,7 @@
                 {% endfor %}
             </tr>
             
-            <tr class="rowcolor">
+            <tr >
               <td><label for="id_clarity_of_speech">&nbsp;&nbsp;- Clarity of speech</label>{{ form.clarity_of_speech.errors }}</td>
                 {% for choice in form.clarity_of_speech %}
                 {% if not forloop.counter == 1 %}
@@ -483,7 +480,7 @@
                 {% endfor %}
             </tr>
             
-            <tr class="rowcolor">
+            <tr >
               <td><label for="id_visual_presentation">&nbsp;&nbsp;- Visual presentation of content</label>{{ form.visual_presentation.errors }}</td>
                 {% for choice in form.visual_presentation %}
                 {% if not forloop.counter == 1 %}
@@ -492,7 +489,7 @@
                 {% endfor %}
             </tr>
             
-            <tr class="rowcolor">
+            <tr >
               <td><label for="id_pace_of_tutorial">&nbsp;&nbsp;- Pace of the tutorial</label>{{ form.pace_of_tutorial.errors }}</td>
                 {% for choice in form.pace_of_tutorial %}
                 {% if not forloop.counter == 1 %}
@@ -501,7 +498,7 @@
                 {% endfor %}
             </tr>
             
-            <tr class="rowcolor">
+            <tr >
               <td><label for="id_time_management">Time management </label>{{ form.time_management.errors }}</td>
                 {% for choice in form.time_management %}
                 {% if not forloop.counter == 1 %}
@@ -510,7 +507,7 @@
                 {% endfor %}
             </tr>
             
-            <tr class="rowcolor">
+            <tr >
               <td><label for="id_experience_of_learning">Experience of learning the software using side-by-side method</label>{{ form.experience_of_learning.errors }}</td>
                 {% for choice in form.experience_of_learning %}
                 {% if not forloop.counter == 1 %}
@@ -519,7 +516,7 @@
                 {% endfor %}
             </tr>
             
-            <tr class="rowcolor">
+            <tr >
               <td><label for="id_overall_arrangement">Overall workshop arrangement</label>{{ form.overall_arrangement.errors }}</td>
                 {% for choice in form.overall_arrangement %}
                 {% if not forloop.counter == 1 %}
@@ -532,7 +529,7 @@
           <div class="form-group">
             <label class="col-sm-9 control-label" for= "id_like_abt_ws " style="text-align:justify;">What did you like about the workshop?</label>
             <div class="col-sm-9">
-              {% render_field form.like_abt_ws class+="form-control like_abt_ws " tabindex="1" %}
+              {% render_field form.like_abt_ws class+="form-control like_abt_ws "  %}
               {{ form.like_abt_ws.errors }}
             </div>
           </div><br>
@@ -540,7 +537,7 @@
           <div class="form-group">
             <label class="col-sm-9 control-label" for= "id_how_make_better " style="text-align:justify;">How can we  make the workshop better?</label>
             <div class="col-sm-9">
-              {% render_field form.how_make_better class+="form-control how_make_better " tabindex="1" %}
+              {% render_field form.how_make_better class+="form-control how_make_better "  %}
               {{ form.how_make_better.errors }}
             </div>
           </div><br>
@@ -548,7 +545,7 @@
           <div class="form-group">
             <label class="col-sm-9 control-label" for= "id_experience " style="text-align:justify;">Any experiences that you will take with you:</label>
             <div class="col-sm-9">
-              {% render_field form.experience class+="form-control experience " tabindex="1" %}
+              {% render_field form.experience class+="form-control experience "  %}
               {{ form.experience.errors }}
             </div>
           </div><br>
@@ -556,7 +553,7 @@
           <div class="form-group">
             <label class="col-sm-9 control-label" for= "id_suggestions " style="text-align:justify;">Any other feedback/suggestions </label>
             <div class="col-sm-9">
-              {% render_field form.suggestions class+="form-control suggestions " tabindex="1" %}
+              {% render_field form.suggestions class+="form-control suggestions "  %}
               {{ form.suggestions.errors }}
             </div>
           </div><br>
