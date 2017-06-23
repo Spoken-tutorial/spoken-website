@@ -9,6 +9,9 @@ urlpatterns = patterns('',  # noqa
     url(r'^training-onlinetest/$', 'statistics.views.training', name="statistics_training"),
     url(r'^training/$', 'statistics.views.training', name="statistic_training"),
     url(r'^tutorial-content/$', 'statistics.views.tutorial_content', name="statistics_content"),
+
+    url(r'^bidding-module/$', 'statistics.views.bidding_module', name="bidding_module"),
+
     url(r'^training/(?P<rid>\d+)/participants/$', 'statistics.views.training_participant',
         name="statistics_training_participants"),
     url(r'^online-test/$', 'statistics.views.online_test', name="statistics_online_test"),

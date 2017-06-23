@@ -385,3 +385,48 @@ def tutorial_content(request, template='statistics/templates/statistics_content.
     context['ordering'] = ordering
 
     return render(request, template, context)
+
+
+def bidding_module(request, template='statistics/templates/bidding_module.html'):
+    header = {
+        1: SortableHeader('# ', False),
+        2: SortableHeader('tutorial_detail__foss__foss', True, 'FOSS Course'),
+        3: SortableHeader('Tutorial', False),
+        4: SortableHeader('language__name', False, 'Language'),
+        5: SortableHeader('timed_script', False, 'English Timed Script'),
+        6: SortableHeader('script_status', False, 'Script Status'),
+        7: SortableHeader('Bid', False),
+        8: SortableHeader('Bid Date', False),
+        9: SortableHeader('Submission Date', False)
+    }
+
+    context = {}
+
+    pub_tutorials_set = TutorialResource.objects.filter(status__gte=1)
+
+    raw_get_data = request.GET.get('o', None)
+    tutorials = get_sorted_list(request, pub_tutorials_set, header, raw_get_data)
+    ordering = get_field_index(raw_get_data)
+
+    tutorials = CreationStatisticsFilter(request.GET, queryset=tutorials)
+
+    context['form'] = tutorials.form
+
+    # display information table across multiple pages
+    paginator = Paginator(tutorials, 100)
+    page = request.GET.get('page')
+    try:
+        tutorials = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+        tutorials = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range (e.g. 9999), deliver last page of results.
+        tutorials = paginator.page(paginator.num_pages)
+
+    context['tutorials'] = tutorials
+    context['tutorial_num'] = tutorials.paginator.count
+    context['header'] = header
+    context['ordering'] = ordering
+
+    return render(request, template, context)
