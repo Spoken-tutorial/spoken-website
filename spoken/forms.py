@@ -13,7 +13,7 @@ class KeywordSearchForm(forms.Form):
 
 class TutorialSearchForm(forms.Form):
     try:
-        all_tests = FossAvailableForTest.objects.filter(status=1)
+        all_tests = FossAvailableForTest.objects.all()
         test_list = []
         for item in all_tests:
             test_list.append(item.foss.foss)
