@@ -2453,8 +2453,7 @@ class STWorkshopFeedbackCreateView(CreateView):
     form_class = STWorkshopFeedbackForm
     template_name = "stworkshop_feedback.html"
     success_url = "/home"
-
-    @method_decorator(login_required)
+    
     def get(self, request, *args, **kwargs):
 	    return render_to_response(self.template_name, {'form': self.form_class()},
 	      context_instance=RequestContext(self.request))
