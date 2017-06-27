@@ -184,13 +184,14 @@ def watch_tutorial(request, foss, tutorial, lang):
     except Exception, e:
         messages.error(request, str(e))
         return HttpResponseRedirect('/')
+    lang=str(tr_rec.language)
+    length=len(lang)+5
+    video=tr_rec.video
+    video=video[:-(length)]
+    
     video_path = settings.MEDIA_ROOT + "videos/" + \
-        str(tr_rec.tutorial_detail.foss_id) + "/" + str(tr_rec.tutorial_detail_id) + "/" + tr_rec.video
+        str(tr_rec.tutorial_detail.foss_id) + "/" + str(tr_rec.tutorial_detail_id) + "/" +video+".webm"
     video_info = get_video_info(video_path)
-    audio=tr_rec.video
-    lang1=str(tr_rec.language)
-    length=len(lang1)
-    video=audio[:-(length+1)]
     tr_list=TutorialResource.objects.filter(tutorial_detail=tr_rec.tutorial_detail_id)
     list=[lang1]
     for i in tr_list:
@@ -206,7 +207,7 @@ def watch_tutorial(request, foss, tutorial, lang):
         'tutorial_path': str(tr_rec.tutorial_detail.foss_id) + '/' + str(tr_rec.tutorial_detail_id) + '/',
         'script_base': settings.SCRIPT_URL,
         'video':video,
-        'lang':lang1,
+        'lang':lang,
         'concept':foss,
         'list':list
     }
@@ -229,8 +230,13 @@ def what_is_spoken_tutorial(request):
     except Exception, e:
         messages.error(request, str(e))
         return HttpResponseRedirect('/')
+    lang=str(tr_rec.language)
+    length=len(lang)+5
+    video=tr_rec.video
+    video=video[:-(length)]
+    
     video_path = settings.MEDIA_ROOT + "videos/" + \
-        str(tr_rec.tutorial_detail.foss_id) + "/" + str(tr_rec.tutorial_detail_id) + "/" + tr_rec.video
+        str(tr_rec.tutorial_detail.foss_id) + "/" + str(tr_rec.tutorial_detail_id) + "/" +video+".webm"
     video_info = get_video_info(video_path)
     context = {
         'tr_rec': tr_rec,
@@ -240,7 +246,9 @@ def what_is_spoken_tutorial(request):
         'media_url': settings.MEDIA_URL,
         'media_path': settings.MEDIA_ROOT,
         'tutorial_path': str(tr_rec.tutorial_detail.foss_id) + '/' + str(tr_rec.tutorial_detail_id) + '/',
-        'script_base': settings.SCRIPT_URL
+        'script_base': settings.SCRIPT_URL,
+        'video':video,
+        'lang':lang
     }
     return render(request, 'spoken/templates/watch_tutorial.html', context)
 

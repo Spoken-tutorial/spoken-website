@@ -2,30 +2,10 @@
 {% load widget_tweaks %}
 {% load static %}
 {% block uncompresscssblock %}
-	<link href="{% static 'spoken/css/video-js.min.css' %}" rel="stylesheet" type="text/css">
+	<link href="{% static 'spoken/css/avs.player.css' %}" rel="stylesheet" type="text/css">
 {% endblock %}
 {% block compressinlinecssblock %}
 	<style type="text/css">
-		.video-js {
-            padding-top: 56.25%
-        }
-        .vjs-fullscreen {
-            padding-top: 0px;
-        }
-        
-        .video-js .vjs-tech{
-            position:absolute;
-            top:0;
-            left:0;
-            width:100%;
-            height:100%;
-        }
-        .vjs-tt-cue {
-            font-size: 16px;
-        }
-        .video-js .vjs-text-track {
-            background-color: rgba(0, 0, 0, 0.7);
-        }
         .video-visits {
             text-align: right;
             font-weight: bold;
@@ -58,9 +38,12 @@
     </table>
 
 	<div class="video-container col-lg-12 col-md-12 col-sm-12">
-		<video id="st_video" class="video-js vjs-default-skin" controls preload="auto" width="auto" height="auto" data-setup="{}">
-			<source src="{{ media_url }}videos/{{ tr.tutorial_detail.foss_id }}/{{ tr.tutorial_detail_id }}/{{ tr.video }}" type="video/ogg" />
+		<video id="st_video" preload="auto" width="100%" height="430" data-setup="{}">
+			<source src="{{ media_url }}videos/{{ tr.tutorial_detail.foss_id }}/{{ tr.tutorial_detail_id }}/{{ video }}.webm" type="video/webm" />
 		</video>
+		<audio id="st_audio">
+			<source src="{{ media_url }}videos/{{ tr.tutorial_detail.foss_id }}/{{ tr.tutorial_detail_id }}/{{ video }}-{{lang}}.mp3" type="audio/mp3">
+		</audio>
 	</div>
 	<form role="form" method="post" enctype="multipart/form-data" action="">
 		{% csrf_token %}
@@ -78,9 +61,14 @@
 	</form>
 {% endblock %}
 {% block uncompressjsblock %}
-    <script src="{% static 'spoken/js/video.min.js' %}"></script>
+    <script src="{% static 'spoken/js/avs.player.min.js' %}"></script>
 {% endblock %}
 {% block compressinlinejsblock %}
+	<script type="text/javascript">
+		(function(){
+			new syncAudioVideo("st_video","st_audio");
+		})();
+	</script>
 	<script type="text/javascript">
 		$(document).ready(
 		    function() {
