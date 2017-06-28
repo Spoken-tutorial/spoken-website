@@ -1064,7 +1064,7 @@ def view_component(request, trid, component):
         }
     elif component == 'video':
         lang=str(tr_rec.language)
-        length=len(lang)+5
+        length=len(lang)+1
         video=tr_rec.video
         video=video[:-(length)]
         video_path = settings.MEDIA_ROOT + "videos/" + str(tr_rec.tutorial_detail.foss_id) + "/" + str(tr_rec.tutorial_detail_id) + "/" +video+".webm"
@@ -1259,7 +1259,7 @@ def admin_review_video(request, trid):
     else:
         form = ReviewVideoForm()
     lang=str(tr_rec.language)
-    length=len(lang)+5
+    length=len(lang)+1
     video=tr_rec.video
     video=video[:-(length)]
     video_path = settings.MEDIA_ROOT + "videos/" + str(tr.tutorial_detail.foss_id) + "/" + str(tr.tutorial_detail_id) + "/" +video+".webm"
@@ -2223,7 +2223,7 @@ def creation_view_tutorial(request, foss, tutorial, lang):
         messages.error(request, str(e))
         return HttpResponseRedirect('/')
     lang=str(tr_rec.language)
-    length=len(lang)+5
+    length=len(lang)+1
     video=tr_rec.video
     video=video[:-(length)]
     video_path = settings.MEDIA_ROOT + "videos/" + str(tr_rec.tutorial_detail.foss_id) + "/" + str(tr_rec.tutorial_detail_id) + "/" + video+".webm"

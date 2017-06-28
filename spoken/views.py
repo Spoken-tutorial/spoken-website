@@ -185,7 +185,7 @@ def watch_tutorial(request, foss, tutorial, lang):
         messages.error(request, str(e))
         return HttpResponseRedirect('/')
     lang=str(tr_rec.language)
-    length=len(lang)+5
+    length=len(lang)+1
     video=tr_rec.video
     video=video[:-(length)]
     
@@ -231,7 +231,7 @@ def what_is_spoken_tutorial(request):
         messages.error(request, str(e))
         return HttpResponseRedirect('/')
     lang=str(tr_rec.language)
-    length=len(lang)+5
+    length=len(lang)+1
     video=tr_rec.video
     video=video[:-(length)]
     
