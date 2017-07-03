@@ -192,7 +192,7 @@ def watch_tutorial(request, foss, tutorial, lang):
     video_path = settings.MEDIA_ROOT + "videos/" + \
         str(tr_rec.tutorial_detail.foss_id) + "/" + str(tr_rec.tutorial_detail_id) + "/" +video+".webm"
     video_info = get_video_info(video_path)
-    tr_list=TutorialResource.objects.filter(tutorial_detail=tr_rec.tutorial_detail_id)
+    tr_list=TutorialResource.objects.filter(tutorial_detail=tr_rec.tutorial_detail_id,status=1)
     list=[lang1]
     for i in tr_list:
         if str(i.language) not in lang1:
