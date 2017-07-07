@@ -24,14 +24,19 @@
 	            </div>
             </div>
         {% endif %}
-		{% if title == "video" and tr.video_status > 0 %}
+		{% if title == "video" or title == "audio" and tr.video_status > 0 %}
 		    <div class="form-group">
 		        <label for="id_isarchive">What to do with old video?</label>
 			    {% render_field form.isarchive class+="form-control" %}
 			    {{ form.isarchive.errors }}
 		    </div>
+		    
 	    {% endif %}
 		{% render_field form.comptype %}
-		<input type="submit" class="btn btn-primary" value="Upload"  tabindex="4" />
+		{% if title == "video" %}
+		<center><sub>The upload might take some time as we perform some quality checks on the video.</sub></center>
+		{% endif %}
+		
+		<div style="margin-top:5px"><center><input type="submit" class="btn btn-primary" value="Upload"  tabindex="4" /></center></div>
 	</form>
 {% endblock %}

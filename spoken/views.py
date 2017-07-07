@@ -173,8 +173,13 @@ def tutorial_search(request):
 
 def watch_tutorial(request, foss, tutorial, lang):
     try:
-        foss = unquote_plus(foss)
         tutorial = unquote_plus(tutorial)
+        print "============="
+        print foss
+        print tutorial
+        print lang
+        print "------------"
+        foss = unquote_plus(foss)
         td_rec = TutorialDetail.objects.get(foss__foss=foss, tutorial=tutorial)
         tr_rec = TutorialResource.objects.select_related().get(tutorial_detail=td_rec, language=Language.objects.get(name=lang))
         tr_recs = TutorialResource.objects.select_related('tutorial_detail').filter(Q(status=1) | Q(status=2), tutorial_detail__foss=tr_rec.tutorial_detail.foss, language=tr_rec.language).order_by(
@@ -184,9 +189,21 @@ def watch_tutorial(request, foss, tutorial, lang):
     except Exception, e:
         messages.error(request, str(e))
         return HttpResponseRedirect('/')
+    lang=str(tr_rec.language)
+    length=len(lang)+1
+    video=tr_rec.video
+    video=video[:-(length)]
     video_path = settings.MEDIA_ROOT + "videos/" + \
-        str(tr_rec.tutorial_detail.foss_id) + "/" + str(tr_rec.tutorial_detail_id) + "/" + tr_rec.video
+        str(tr_rec.tutorial_detail.foss_id) + "/" + str(tr_rec.tutorial_detail_id) + "/" + video+'webm"'
     video_info = get_video_info(video_path)
+    tr_list=TutorialResource.objects.filter(tutorial_detail=tr_rec.tutorial_detail_id)
+    list=[lang]
+    for  i in tr_list:
+        if str(i.language) not in lang:
+            list.append(i.language)
+    print "------------------------------------"
+    print tutorial
+    print "-----------------------------------"
     context = {
         'tr_rec': tr_rec,
         'tr_recs': tr_recs,
@@ -195,7 +212,11 @@ def watch_tutorial(request, foss, tutorial, lang):
         'media_url': settings.MEDIA_URL,
         'media_path': settings.MEDIA_ROOT,
         'tutorial_path': str(tr_rec.tutorial_detail.foss_id) + '/' + str(tr_rec.tutorial_detail_id) + '/',
-        'script_base': settings.SCRIPT_URL
+        'script_base': settings.SCRIPT_URL,
+        'video':video,
+        'lang':lang,
+        'concept':foss,
+        'list':list
     }
     return render(request, 'spoken/templates/watch_tutorial.html', context)
 
@@ -216,8 +237,12 @@ def what_is_spoken_tutorial(request):
     except Exception, e:
         messages.error(request, str(e))
         return HttpResponseRedirect('/')
+    lang=str(tr_rec.language)
+    length=len(lang)+1
+    video=tr_rec.video
+    video=video[:-(length)]
     video_path = settings.MEDIA_ROOT + "videos/" + \
-        str(tr_rec.tutorial_detail.foss_id) + "/" + str(tr_rec.tutorial_detail_id) + "/" + tr_rec.video
+        str(tr_rec.tutorial_detail.foss_id) + "/" + str(tr_rec.tutorial_detail_id) + "/" +video+".webm"
     video_info = get_video_info(video_path)
     context = {
         'tr_rec': tr_rec,
@@ -227,7 +252,9 @@ def what_is_spoken_tutorial(request):
         'media_url': settings.MEDIA_URL,
         'media_path': settings.MEDIA_ROOT,
         'tutorial_path': str(tr_rec.tutorial_detail.foss_id) + '/' + str(tr_rec.tutorial_detail_id) + '/',
-        'script_base': settings.SCRIPT_URL
+        'script_base': settings.SCRIPT_URL,
+        'video':video,
+        'lang':lang
     }
     return render(request, 'spoken/templates/watch_tutorial.html', context)
 

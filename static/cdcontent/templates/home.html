@@ -9,7 +9,7 @@
         <link rel="stylesheet" href="../includes/css/bootstrap.min.css" type="text/css" media="screen" charset="utf-8">
         <link rel="stylesheet" href="../includes/css/font-awesome.min.css" type="text/css" media="screen" charset="utf-8">
         <link rel="stylesheet" href="../includes/css/main.css" type="text/css" media="screen" charset="utf-8">
-        <link href="../includes/css/video-js.min.css" rel="stylesheet" type="text/css">
+        <link href="../includes/css/avs.player.css" rel="stylesheet" type="text/css">
         <style>
             .tutorial-search-form{
                 margin-top: 20px;
@@ -102,7 +102,7 @@
                 height:100%;
             }
         </style>
-        <script src="../includes/js/video.js"></script>
+        <script src="../includes/js/avs.player.js"></script>
     </head>
     <body>
         <div id="page-wrapper">
@@ -158,16 +158,21 @@
                         </div><!-- .row well tab-content tutorial-search-form -->
                         <hr />
                         <div class="video-container col-lg-8 col-md-8 col-sm-8 col-lg-offset-2 col-md-offset-2">
-                            <select class="form-control languages" id="id_languages" name="languages" tabindex="1" value="">
+                            <select class="form-control languages" id="id_languages" name="languages" tabindex="1" onchange="report(this.value)">
                                 <option value="English">Select Language for Side-by-Side method video</option>
                                 {% for language in languages %}
                                 <option value="{{ language }}">{{ language }}</option>
                                 {% endfor %}
                             </select>
                                 <br />
-                            <video id="st_video" class="video-js vjs-default-skin" controls preload="auto" width="auto" height="auto" data-setup="{}">
-                                <source src="./Side-by-Side-Method-English.ogv" type="video/ogg" />
+                            <video id="video1" preload="none" width="100%" height="430" data-setup="{}">
+                            <!-- <source src="/static/spoken/images/Overview-and-Installation-of-Git-English.ogv" type="video/ogg" /> -->
+                             <source src="./Side-by-Side-Method.webm" type="video/webm" />
                             </video>
+                            <audio id="audio1" preload="none">
+                                <source id="audio" src="./Side-by-Side-Method-English.mp3" type="audio/mpeg">
+                            </audio>
+            
 
                         </div>
                     </div>
@@ -228,10 +233,50 @@
         <script src="../includes/js/jquery-1.11.0.min.js"></script>
         <script src="../includes/js/bootstrap.min.js"></script>
         <script>
+        (function() {
+                new syncAudioVideo('video1', 'audio1');
+                var vid=document.getElementById('video1');
+            })();
+        </script>
+        <script>
+        /*window.onload=function1();
+
+        function function1 () {
+            alert("ASDAD");
+            var lan=localStorage.getItem("lan");
+            alert(lan);
+            if(lan==null)
+            {
+                $("#audio").attr("src", "./Side-by-Side-Method-English.mp3");
+            }
+            else
+               $("#audio").attr("src", "./Side-by-Side-Method"+lan+".mp3");
+       }   */ 
+        function report(language){
+            // /alert(language);
+            var audio=document.getElementById('audio1');            
+            var video=document.getElementById('video1');
+            //video.pause();
+            //audio.pause();
+            alert(language);
+            var lan=language
+            localStorage.setItem("lan",lan);
+            location.reload();
+
+
+        }
             $(document).ready(function(){
-                // set video player volume by 20%
-                var myPlayer = videojs('st_video');
-                myPlayer.volume(0.2);
+            var lan=localStorage.getItem("lan");
+                alert(lan+"ASDAD");
+                if(lan==null)
+                {
+                    $("#audio").attr("src", "./Side-by-Side-Method-English.mp3");
+                }
+                else
+                   {$("#audio").attr("src", "./Side-by-Side-Method-"+lan+".mp3");
+                        }
+                localStorage.clear();
+                                   //var mp=document.getElementById('audio1')
                 var fossList = [];
                 fossList[0] = '';
 
@@ -246,10 +291,9 @@
 
                 $('.languages').on("change", function(){
                     language = ($(this).val()).trim();
-        		    mp = videojs('st_video');
                     mp.src({ type: "video/ogg", src: './Side-by-Side-Method-'+language+'.ogv' });
                     mp.play();
-        	 	    mp.volume(0.2);
+        	 	    
 
                 });
 
@@ -261,6 +305,7 @@
                         parent.frame1.location.href = "./" + foss + '/list-videos-' + lang_name + ".html";
                     }
                 });
+
             });
         </script>
     </body>

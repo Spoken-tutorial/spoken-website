@@ -17,10 +17,34 @@ from youtube.ajax import *
 from youtube.core import *
 from youtube.forms import *
 
+import MySQLdb
+import time
+from config import *
+#from youtube_upload import *
+from config import *
+
 
 @login_required
 def home(request):
-    return HttpResponse('YouTube API V3 Implementation')
+    db = MySQLdb.connect(host = '127.0.0.1', user = 'root', passwd = '12345', \
+        db = 'spoken', charset='utf8')
+    cur = db.cursor()
+    cur.execute("SELECT ctr.id, ctr.tutorial_detail_id, ctr.common_content_id, \
+        ctr.language_id, ctr.outline, ctr.video, ctr.video_id, \
+        ctr.playlist_item_id, ctd.foss_id, ctd.tutorial, ctd.level_id, ctd.order, \
+        ctc.keyword, clg.name FROM creation_tutorialresource ctr INNER JOIN \
+        creation_tutorialdetail ctd ON (ctr.tutorial_detail_id = ctd.id) \
+        INNER JOIN creation_fosscategory cfc ON (ctd.foss_id = cfc.id) INNER JOIN \
+        creation_tutorialcommoncontent ctc ON (ctr.common_content_id = ctc.id) \
+        INNER JOIN creation_language clg ON (ctr.language_id = clg.id) WHERE \
+        ((ctr.status = 1 OR ctr.status = 2) AND ctr.video_id IS NULL) ORDER BY \
+        cfc.foss, ctd.level_id, ctd.order ASC")
+    rows = cur.fetchall()
+    for row in rows:
+        #  ogv_video_path = MEDIA_ROOT + 'videos/' + str(row[8]) + '/' + str(row[1]) + '/' + str(row[5])
+        print row[1]
+    return HttpResponse(row[5])
+
 
 
 @login_required

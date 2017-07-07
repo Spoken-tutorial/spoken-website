@@ -210,18 +210,15 @@ def is_invigilator(user):
     """Check if the user is having invigilator rights"""
     if user.groups.filter(name='Invigilator').count() == 1 and user.invigilator and user.invigilator.status == 1:
         return True
-
-
 def get_page(resource, page, limit=20):
     paginator = Paginator(resource, limit)
     try:
-        resource = paginator.page(page)
+        resource =  paginator.page(page)
     except PageNotAnInteger:
-        resource = paginator.page(1)
+        resource =  paginator.page(1)
     except EmptyPage:
         resource = paginator.page(paginator.num_pages)
     return resource
-
 
 def search_participant(form):
     if form.is_valid():
@@ -1679,7 +1676,6 @@ def test_request(request, role, rid = None):
                 t.training_id = request.POST['training']
             if int(request.POST['test_category']) == 3:
                 t.training_id = None
-            test_trainings = request.POST['training']
             test_training_dept = t.training.department_id
             if request.POST['id_foss']:
                 test_foss = request.POST['id_foss']
@@ -2662,11 +2658,12 @@ def ajax_check_foss(request):
     training = request.GET.get('training',None)
     trid = TrainingRequest.objects.get(pk=training)
     foss_name = trid.course.foss.foss
-    is_c_and_cpp = False
-    if 'C and Cpp' in foss_name:
-        is_c_and_cpp = True
     data = {
-    "is_c_and_cpp": is_c_and_cpp
+    'is_c_and_cpp' : ''
     }
+    if 'C and Cpp' in foss_name:
+        data = {
+        'is_c_and_cpp': 'True'
+        }
     return JsonResponse(data)
 

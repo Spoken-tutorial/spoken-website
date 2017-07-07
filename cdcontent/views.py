@@ -13,7 +13,8 @@ from django.conf import settings
 from django.db.models import Q
 from creation.models import *
 from cdcontent.forms import *
-
+from forums.models import Question,Answer
+abcdef=[]
 
 # Create your views here.
 def zipdir(src_path, dst_path, archive):
@@ -80,16 +81,26 @@ def get_all_foss_details(selectedfoss):
 
 
 def add_side_by_side_tutorials(archive, languages):
+    
     languages.add('English')
+    print languages,"in add"
     available_langs = set()
 
     for language in languages:
-        filepath = '{}videos/32/714/Side-by-Side-Method-{}.ogv'.format(settings.MEDIA_ROOT, language)
-
-        if os.path.isfile(filepath):
+        videofilepath = '{}videos/32/714/Side-by-Side-Method.webm'.format(settings.MEDIA_ROOT)
+        audiofilepath = '{}videos/32/714/Side-by-Side-Method-{}.mp3'.format(settings.MEDIA_ROOT, language)
+        print videofilepath,audiofilepath
+        if os.path.isfile(audiofilepath) and language is not 'English':
             available_langs.add(language)
-            archive.write(filepath, 'spoken/videos/Side-by-Side-Method-{}.ogv'.format(language))
-
+            print "1"
+            archive.write(videofilepath, 'spoken/videos/Side-by-Side-Method.webm')
+            archive.write(audiofilepath, 'spoken/videos/Side-by-Side-Method-{}.mp3'.format(language))
+            print"2"
+        if os.path.isfile(audiofilepath) and language is 'English':
+            available_langs.add(language)
+            archive.write(audiofilepath, 'spoken/videos/Side-by-Side-Method-{}.mp3'.format(language))
+            archive.write(videofilepath, 'spoken/videos/Side-by-Side-Method.webm')
+    print available_langs,"sdad"
     return available_langs
 
 
@@ -98,18 +109,25 @@ def get_static_files():
         '/static/spoken/css/bootstrap.min.css': 'spoken/includes/css/bootstrap.min.css',
         '/static/spoken/css/font-awesome.min.css': 'spoken/includes/css/font-awesome.min.css',
         '/static/spoken/css/main.css': 'spoken/includes/css/main.css',
-        '/static/spoken/css/video-js.min.css': 'spoken/includes/css/video-js.min.css',
+        '/static/spoken/css/avs.player.css': 'spoken/includes/css/avs.player.css',
         '/static/spoken/images/favicon.ico': 'spoken/includes/images/favicon.ico',
         '/static/spoken/images/logo.png': 'spoken/includes/images/logo.png',
         '/static/spoken/js/jquery-1.11.0.min.js': 'spoken/includes/js/jquery-1.11.0.min.js',
         '/static/spoken/js/bootstrap.min.js': 'spoken/includes/js/bootstrap.min.js',
-        '/static/spoken/js/video.js': 'spoken/includes/js/video.js',
+        '/static/spoken/js/avs.player.js': 'spoken/includes/js/avs.player.js',
         '/static/spoken/images/thumb-even.png': 'spoken/includes/images/thumb-even.png',
         '/static/spoken/images/Basic.png': 'spoken/includes/images/Basic.png',
         '/static/spoken/images/Intermediate.png': 'spoken/includes/images/Intermediate.png',
         '/static/spoken/images/Advanced.png': 'spoken/includes/images/Advanced.png',
         '/static/cdcontent/templates/readme.txt': 'spoken/README.txt',
-        '/static/cdcontent/templates/index.html': 'spoken/index.html'
+        '/static/cdcontent/templates/index.html': 'spoken/index.html',
+        '/static/forum_website/css/bootstrap.min.css': 'spoken/includes/css/bootstrap_forum.min.css',
+        '/static/forum_website/css/main.css': 'spoken/includes/css/main_forum.css',
+        '/static/forum_website/css/nice-bar.css': 'spoken/includes/css/nice-bar.css',
+        '/static/forum_website/css/theme.blue.css': 'spoken/includes/css/theme.blue.css',
+        '/static/forum_website/slick/slick.css': 'spoken/includes/css/slick.css',
+        '/static/forum_website/images/cc-logo-88x31.png': 'spoken/includes/images/cc-logo-88x31.png'
+
     }
 
 
@@ -164,7 +182,6 @@ def add_static_files(archive):
 def convert_template_to_html_file(archive, filename, request, template, ctx):
     html_string = str(render(request, template, ctx))
     html_string = html_string.replace('Content-Type: text/html; charset=utf-8', '').strip("\n")
-
     archive.writestr(filename, html_string)
 
 
@@ -241,25 +258,41 @@ def home(request):
                             'tutorial_detail__level', 'tutorial_detail__order', 'language__name')
 
                         languages.add(language.name)
-
                         for rec in tr_recs:
-                            filepath = 'videos/{}/{}/{}'.format(key, rec.tutorial_detail_id, rec.video)
+                            webmvideo=rec.video[:-8]
+                            videofilepath = 'videos/{}/{}/{}'.format(key, rec.tutorial_detail_id, webmvideo+".webm")
+                            audiofilepath = 'videos/{}/{}/{}'.format(key, rec.tutorial_detail_id, rec.video+".mp3")
+                             # get list of questions of a particular tutorial
+                            question_s = Question.objects.filter(category=foss_rec.foss.replace(' ','-'),tutorial=rec.tutorial_detail.tutorial.replace(' ','-')).order_by('-date_created')
 
-                            if os.path.isfile(settings.MEDIA_ROOT + filepath):
-                                archive.write(settings.MEDIA_ROOT + filepath, 'spoken/' + filepath)
-
+                            print abcdef
+                            print  "------213-13-1-"
+                            if os.path.isfile(settings.MEDIA_ROOT + videofilepath):
+                                archive.write(settings.MEDIA_ROOT + videofilepath, 'spoken/' + videofilepath)
+                            if os.path.isfile(settings.MEDIA_ROOT + audiofilepath):
+                                archive.write(settings.MEDIA_ROOT + audiofilepath, 'spoken/' + audiofilepath)
                             # add srt file to archive
-                            add_srt_file(archive, rec, filepath, eng_flag, srt_files)
+                            add_srt_file(archive, rec, videofilepath, eng_flag, srt_files)
 
                             # collect common files
                             collect_common_files(rec, common_files)
 
+
                             tutorial_path = '{}/{}/'.format(rec.tutorial_detail.foss_id, rec.tutorial_detail_id)
                             filepath = 'spoken/videos/{}show-video-{}.html'.format(tutorial_path, rec.language.name)
-                            ctx = {'tr_rec': rec, 'tr_recs': tr_recs,
-                                   'media_path': settings.MEDIA_ROOT, 'tutorial_path': tutorial_path}
+                            ctx = {'tr_rec': rec, 'tr_recs': tr_recs,'video':webmvideo,'audio':rec.video,
+                                   'media_path': settings.MEDIA_ROOT, 'tutorial_path': tutorial_path,'question_s': question_s,'llist':abcdef}
                             convert_template_to_html_file(archive, filepath, request,
                                                           "cdcontent/templates/watch_tutorial.html", ctx)
+                            # for each question find the answers
+                            for question in question_s:
+                                answer=Answer.objects.filter(question=question)
+                                ctx = {'question': question, 'answer': answer}
+                                filepath = 'spoken/videos/' + str(foss_rec.id) + '/' + str(rec.tutorial_detail_id) + '/answer-to-question-' + str(question.id) + '.html'
+                                convert_template_to_html_file(archive, filepath, request, "cdcontent/templates/answer_to_question.html", ctx)
+
+
+                       
 
                         filepath = 'spoken/videos/' + str(foss_rec.id) + '/list-videos-' + language.name + '.html'
                         ctx = {'collection': tr_recs, 'foss_details': all_foss_details,
@@ -269,14 +302,22 @@ def home(request):
 
                     # add common files for current foss
                     add_common_files(archive, common_files)
+                print languages
+                print "-------------1---"
 
                 # add side-by-side tutorials for selected languages
                 languages = add_side_by_side_tutorials(archive, languages)
+                print languages
+                print 'foss_details',all_foss_details
+                print 'fodd',foss_rec.id
+                print  'lang',language.id
 
                 ctx = {'foss_details': all_foss_details, 'foss': foss_rec.id,
                        'lang': language.id, 'languages': languages}
                 convert_template_to_html_file(archive, 'spoken/videos/home.html', request,
                                               "cdcontent/templates/home.html", ctx)
+                
+                
 
                 # add all required static files to archive
                 add_static_files(archive)
@@ -330,6 +371,8 @@ def ajax_add_foss(request):
     selectedfoss = {}
     try:
         langs = json.loads(request.POST.get('langs', []))
+        print langs
+        print"!@#$#$%$%"
     except:
         langs = []
     try:
@@ -339,7 +382,6 @@ def ajax_add_foss(request):
     if foss and langs:
         selectedfoss[foss] = [langs, level]
     data = json.dumps(selectedfoss)
-
     return HttpResponse(json.dumps(data), content_type='application/json')
 
 

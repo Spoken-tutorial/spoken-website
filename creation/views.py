@@ -1,5 +1,12 @@
 import os
 import re
+import math
+from scipy.io import wavfile
+from scipy.stats import signaltonoise
+import numpy 
+import numpy 
+import wave
+import subprocess
 import json
 import time
 import subprocess
@@ -29,6 +36,9 @@ from creation.forms import *
 from creation.models import *
 from creation.subtitles import *
 from . import services
+
+from os import listdir
+from os.path import isfile, join
 
 def humansize(nbytes):
     suffixes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
@@ -150,6 +160,7 @@ def create_thumbnail(row, attach_str, thumb_time, thumb_size):
     filepath = settings.MEDIA_ROOT + 'videos/' + str(row.tutorial_detail.foss_id) + '/' + str(row.tutorial_detail_id) + '/'
     filename = row.tutorial_detail.tutorial.replace(' ', '-') + '-' + attach_str + '.png'
     try:
+
         #process = subprocess.Popen(['/usr/bin/ffmpeg', '-i ' + filepath + row.video + ' -r ' + str(30) + ' -ss ' + str(thumb_time) + ' -s ' + thumb_size + ' -vframes ' + str(1) + ' -f ' + 'image2 ' + filepath + filename], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         process = subprocess.Popen(['/usr/bin/ffmpeg', '-i', filepath + row.video, '-r', str(30), '-ss', str(thumb_time), '-s', thumb_size, '-vframes', str(1), '-f', 'image2', filepath + filename], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         stdout, stderr = process.communicate()
@@ -860,6 +871,11 @@ def upload_keywords(request, trid):
 @login_required
 def upload_component(request, trid, component):
     tr_rec = None
+    #to store the status of the video being uploaded..
+    #check_status=1 if the video is uploaded successfull without any errors of noise or loudness
+    #check_status=2 if the video is too noisy or too loud
+   
+    check_status=0
     try:
         tr_rec = TutorialResource.objects.get(pk = trid, status = 0)
         ContributorRole.objects.get(user_id = request.user.id, foss_category_id = tr_rec.tutorial_detail.foss_id, language_id = tr_rec.language_id, status = 1)
@@ -882,10 +898,14 @@ def upload_component(request, trid, component):
                     comp_log.tutorial_resource = tr_rec
                     comp_log.component = component
                     if component == 'video':
+                        #if the component being uploaded is a video find the file path and the full path upto the video in the media folder 
                         file_name, file_extension = os.path.splitext(request.FILES['comp'].name)
-                        file_name =  tr_rec.tutorial_detail.tutorial.replace(' ', '-') + '-' + tr_rec.language.name + file_extension
+                        print os.path.splitext(request.FILES['comp'].name)
+                        print tr_rec.tutorial_detail.tutorial
+                        file_name = tr_rec.tutorial_detail.tutorial.replace(' ', '-') + '-' + tr_rec.language.name 
                         file_path = settings.MEDIA_ROOT + 'videos/' + str(tr_rec.tutorial_detail.foss_id) + '/' + str(tr_rec.tutorial_detail.id) + '/'
                         full_path = file_path + file_name
+                        #full path gives the exact name of the file
                         if os.path.isfile(file_path + tr_rec.video) and tr_rec.video_status > 0:
                             if 'isarchive' in request.POST and int(request.POST.get('isarchive', 0)) > 0:
                                 archived_file = 'Archived-' + str(request.user.id) + '-' + str(int(time.time())) + '-' + tr_rec.video
@@ -900,20 +920,198 @@ def upload_component(request, trid, component):
                             fout.write(chunk)
                         fout.close()
                         comp_log.status = tr_rec.video_status
+                        #updating in the database
+
                         tr_rec.video = file_name
                         tr_rec.video_user = request.user
                         tr_rec.video_status = 1
                         if not tr_rec.version:
                             tr_rec.version = 1
                         tr_rec.video_thumbnail_time = '00:' + request.POST.get('thumb_mins', '00') + ':' + request.POST.get('thumb_secs', '00')
-                        tr_rec.save()
+                        ratio=0
+                        #--------------------------------------                   
+                        if check_status is 0:   
+                            #delete the already present thumbnails as it was giving some error while replacing the video
+                            onlyfiles = [f for f in listdir(file_path) if isfile(join(file_path, f))]  
+                            for i in onlyfiles:
+                                if i.endswith(".png"):
+                                    command="rm "+file_path+i
+                                    subprocess.call(command,shell=True)                                                       
+                            #to make separate folder for editing files
+                            cmd="mkdir "+file_path+"video_edit"
+                            subprocess.call(cmd,shell=True)
+                            #to extract audio from the video in .wav format
+                            command ="ffmpeg -y -i "+full_path+" -ab 160k -ac 2 -ar 44100 -vn "+file_path+"video_edit/sample.wav"
+                            subprocess.call(command,shell=True)
+                            # to find the signal to noise ratio
+                            samplerate, data =wavfile.read(file_path+"video_edit/sample.wav")
+                            try:
+                                samplerate=numpy.sum(data,axis=1)
+                            except:
+                                pass
+                            norm=samplerate/ (max(numpy.amax(samplerate), -1*numpy.amin(samplerate)))
+                            ratio=signaltonoise(norm,axis=None)
+                            ratio=(ratio+2)/(4)
+                            if(ratio<0):
+                                ratio=0
+                            # to check the ampllitude of the uploaded video
+                            sampFreq, snd = wavfile.read(file_path+"video_edit/sample.wav")
+                            snd=snd / (2.**15)
+                            s1=snd[:,0]
+                            mean=numpy.sqrt(numpy.mean(numpy.square(s1)))
+                            print ratio, mean
+                            # noise check
+                            if(ratio<0.5 and mean<0.20):
+                                #creating the noisefree wav file 
+                                command ="bash "+settings.MEDIA_ROOT+"noNoise/noNoise.sh "+file_path+"video_edit/sample.wav "+ str(ratio)
+                                subprocess.call(command,shell=True)
+                                print "Noise has been removed and created a noNoise.wav file"
+
+                                #the video is fine to be uploaded
+                                check_status=1
+
+                                #converting noisefree wav to mp3
+                                command="ffmpeg -y -i /tmp/noisefree.wav "+full_path+".mp3"
+                                subprocess.call(command,shell=True)
+                                print 'noNoise.wav file converted to the "NAME OF ORIGNAL FILE".mp3'
+
+                                #remoing the audio from the original video
+                                command="ffmpeg -y -i "+full_path+" -an -codec copy "+file_path+"noaudio.mov"
+                                subprocess.call(command,shell=True)
+
+                                #converting the silent video in mov to webm
+                                command="ffmpeg -y -i "+file_path+"noaudio.mov -vcodec libvpx -cpu-used -5 -deadline realtime "+full_path[:-8]+".webm"
+                                subprocess.call(command,shell=True)
+                                
+                                # to remove extra files
+                                cmd="rm -r "+file_path+"video_edit"
+                                subprocess.call(cmd,shell=True)
+                                
+                                
+                                
+                                cmd="rm /tmp/noisefree.wav" 
+                                subprocess.call(cmd,shell=True)
+                                
+                                cmd="rm "+file_path+"noaudio.mov"
+                                subprocess.call(cmd,shell=True)
+                                
+                            else:
+                                #the video is either too noisy or loud
+                                check_status=2
+
+                        print tr_rec.language.name 
+                        
                         if tr_rec.language.name == 'English':
+                            #to create the thumbnails
                             create_thumbnail(tr_rec, 'Big', tr_rec.video_thumbnail_time, '700:500')
                             create_thumbnail(tr_rec, 'Small', tr_rec.video_thumbnail_time, '170:127')
+                            thumb_status=1
+                            cmd="rm "+full_path
+                            subprocess.call(cmd,shell=True)
                         comp_log.save()
                         comp_title = tr_rec.tutorial_detail.foss.foss + ': ' + tr_rec.tutorial_detail.tutorial + ' - ' + tr_rec.language.name
+                        
                         add_adminreviewer_notification(tr_rec, comp_title, 'Video waiting for admin review')
-                        response_msg = 'Video uploaded successfully!'
+                        if(check_status==1):
+                            response_msg="video uploaded!!!"
+                            tr_rec.save()
+                        elif(check_status==2):
+                            if(ratio>0.5):
+                                error_msg="video quality is poor..too much noise...Please try another video!!"
+                            if(mean>0.2):
+                                error_msg="video quality is poor...too loud...Please try with another video!!!"
+                            cmd="rm "+file_path+"*"
+                            subprocess.call(cmd,shell=True)
+                            cmd="rm -r "+file_path+"video_edit"
+                            subprocess.call(cmd,shell=True)
+                    elif component == 'audio':
+                        file_name, file_extension = os.path.splitext(request.FILES['comp'].name)
+                        file_name =  tr_rec.tutorial_detail.tutorial.replace(' ', '-') + '-' + tr_rec.language.name 
+                        file_path = settings.MEDIA_ROOT + 'videos/' + str(tr_rec.tutorial_detail.foss_id) + '/' + str(tr_rec.tutorial_detail.id) + '/'
+                        full_path = file_path + file_name+".mp3"
+                        fout = open(full_path, 'wb+')
+                        f = request.FILES['comp']
+                        # Iterate through the chunks.
+                        for chunk in f.chunks():
+                            fout.write(chunk)
+                        fout.close()
+
+                        comp_log.status = tr_rec.video_status
+                        tr_rec.video = file_name
+                        tr_rec.video_user = request.user
+                        tr_rec.video_status = 1
+
+                        cmd="mkdir "+file_path+"video_edit"
+                        subprocess.call(cmd,shell=True)
+
+                        command ="ffmpeg -y -i "+full_path+" "+file_path+"video_edit/sample.wav"
+                        subprocess.call(command,shell=True)
+
+                        samplerate, data =wavfile.read(file_path+"video_edit/sample.wav")
+                        try:
+                            samplerate=numpy.sum(data,axis=1)
+                        except:
+                            pass
+
+                        norm=samplerate/ (max(numpy.amax(samplerate), -1*numpy.amin(samplerate)))
+                        ratio=signaltonoise(norm,axis=None)
+                        ratio=(ratio+2)/(4)
+                        if(ratio<0):
+                            ratio=0
+                        # to check the ampllitude of the uploaded video
+                        sampFreq, snd = wavfile.read(file_path+"video_edit/sample.wav")
+                        snd=snd / (2.**15)
+                        s1=snd[:,0]
+                    
+                        mean=numpy.sqrt(numpy.mean(numpy.square(s1)))
+                        print ratio, mean
+                        # noise check
+                        if(ratio<0.5 and mean<0.20):
+                            #creating the noisefree wav file 
+                            command ="bash "+settings.MEDIA_ROOT+"noNoise/noNoise.sh "+file_path+"video_edit/sample.wav "+ str(ratio)
+                            subprocess.call(command,shell=True)
+                            print "Noise has been removed and created a noNoise.wav file"
+
+                            #the video is fine to be uploaded
+                            check_status=1
+                            cmd="rm "+full_path
+                            subprocess.call(cmd,shell=True)
+                            
+                            #converting the wav file to .mp3
+                            command="ffmpeg -y -i /tmp/noisefree.wav "+full_path
+                            subprocess.call(command,shell=True)
+                            
+                            cmd="rm -r "+file_path+"video_edit"
+                            subprocess.call(cmd,shell=True)
+
+                            cmd="rm /tmp/noisefree.wav" 
+                            subprocess.call(cmd,shell=True)
+                            #converting noisefree wav to mp3
+                            print 'noNoise.wav file converted to the "NAME OF ORIGNAL FILE".mp3'
+                        else:
+                            #if the video is too loud or too noisy
+                            check_status=2
+
+                        
+                        #tr_rec.save()
+                        comp_log.save()
+                        comp_title = tr_rec.tutorial_detail.foss.foss + ': ' + tr_rec.tutorial_detail.tutorial + ' - ' + tr_rec.language.name
+                        add_adminreviewer_notification(tr_rec, comp_title, 'audio waiting for admin review')
+                        #response_msg = 'Audio uploaded successfully!'
+
+                        if(check_status==1):
+                            response_msg="Audio uploaded!!!"
+                            tr_rec.save()
+                        elif(check_status==2):
+                            if(ratio>0.5):
+                                error_msg="Audio quality is poor..too much noise...Please try another audio!!"
+                            if(mean>0.2):
+                                error_msg="Audio quality is poor...too loud...Please try with another audio!!!"
+                            cmd="rm "+file_path+"*"
+                            subprocess.call(cmd,shell=True)
+                            cmd="rm -r "+file_path+"video_edit"
+                            subprocess.call(cmd,shell=True)
+
                     elif component == 'slide':
                         file_name, file_extension = os.path.splitext(request.FILES['comp'].name)
                         file_name =  tr_rec.tutorial_detail.tutorial.replace(' ', '-') + '-Slides' + file_extension
@@ -992,14 +1190,20 @@ def upload_component(request, trid, component):
                     print e
                     error_msg = 'Something went wrong, please try again later.'
                 form = ComponentForm(component)
-                if response_msg:
-                    messages.success(request, response_msg)
+
+                #rendering the error or success message
+                
                 if error_msg:
                     messages.error(request, error_msg)
+
+                elif response_msg:
+                    messages.success(request, response_msg)
+                
                 context = {
                     'form': form,
                     'tr': tr_rec,
                     'title': component.replace('_', ' '),
+                    'check_status':check_status,
                 }
                 context.update(csrf(request))
                 return render(request, 'creation/templates/upload_component.html', context)
@@ -1008,6 +1212,7 @@ def upload_component(request, trid, component):
                     'form': form,
                     'tr': tr_rec,
                     'title': component.replace('_', ' '),
+                    'check_status':check_status,
                 }
                 context.update(csrf(request))
                 return render(request, 'creation/templates/upload_component.html', context)
@@ -1063,13 +1268,21 @@ def view_component(request, trid, component):
             'component_data': tr_rec.common_content.keyword
         }
     elif component == 'video':
-        video_path = settings.MEDIA_ROOT + "videos/" + str(tr_rec.tutorial_detail.foss_id) + "/" + str(tr_rec.tutorial_detail_id) + "/" + tr_rec.video
+        lang=str(tr_rec.language)
+        length=len(lang)+1
+        video=tr_rec.video
+        video=video[:-(length)]
+
+        video_path = settings.MEDIA_ROOT + "videos/" + str(tr_rec.tutorial_detail.foss_id) + "/" + str(tr_rec.tutorial_detail_id) + "/" + video+".webm"
         video_info = get_video_info(video_path)
+        print video,video_path,video_info
         context = {
-            'tr': tr_rec,
+            'tr_rec': tr_rec,
             'component': component,
             'video_info': video_info,
-            'media_url': settings.MEDIA_URL
+            'media_url': settings.MEDIA_URL,
+            'video':video,
+            'lang':lang,
         }
     else:
         messages.error(request, 'Invalid component passed as argument!')
@@ -1252,17 +1465,23 @@ def admin_review_video(request, trid):
                 error_msg = 'Invalid status code!'
     else:
         form = ReviewVideoForm()
-    video_path = settings.MEDIA_ROOT + "videos/" + str(tr.tutorial_detail.foss_id) + "/" + str(tr.tutorial_detail_id) + "/" + tr.video
+    lang=str(tr.language)
+    length=len(lang)+1
+    video=tr.video
+    video=video[:-(length)]
+    video_path = settings.MEDIA_ROOT + "videos/" + str(tr.tutorial_detail.foss_id) + "/" + str(tr.tutorial_detail_id) + "/" + video+".webm"
     video_info = get_video_info(video_path)
     if error_msg:
         messages.error(request, error_msg)
     if response_msg:
         messages.success(request, response_msg)
     context = {
-        'tr': tr,
+        'tr_rec': tr,
         'form': form,
         'media_url': settings.MEDIA_URL,
         'video_info': video_info,
+        'video':video,
+        'lang':lang
     }
     context.update(csrf(request))
     return render(request, 'creation/templates/admin_review_video.html', context)
@@ -2210,7 +2429,11 @@ def creation_view_tutorial(request, foss, tutorial, lang):
     except Exception, e:
         messages.error(request, str(e))
         return HttpResponseRedirect('/')
-    video_path = settings.MEDIA_ROOT + "videos/" + str(tr_rec.tutorial_detail.foss_id) + "/" + str(tr_rec.tutorial_detail_id) + "/" + tr_rec.video
+    lang=str(tr_rec.language)
+    length=len(lang)+1
+    video=tr_rec.video
+    video=video[:-(length)]
+    video_path = settings.MEDIA_ROOT + "videos/" + str(tr_rec.tutorial_detail.foss_id) + "/" + str(tr_rec.tutorial_detail_id) + "/" + video+ ".webm"
     video_info = get_video_info(video_path)
     context = {
         'tr_rec': tr_rec,
@@ -2220,7 +2443,9 @@ def creation_view_tutorial(request, foss, tutorial, lang):
         'media_url': settings.MEDIA_URL,
         'media_path': settings.MEDIA_ROOT,
         'tutorial_path': str(tr_rec.tutorial_detail.foss_id) + '/' + str(tr_rec.tutorial_detail_id) + '/',
-        'script_base': settings.SCRIPT_URL
+        'script_base': settings.SCRIPT_URL,
+        'video':video,
+        'lang':lang
     }
     return render(request, 'creation/templates/creation_view_tutorial.html', context)
 
@@ -2747,6 +2972,7 @@ def ajax_manual_language(request):
     return HttpResponse(json.dumps(data), content_type='application/json')
 
 
+@login_required
 def view_brochure(request):
     template = 'creation/templates/view_brochure.html'
     my_dict = services.get_data_for_brochure_display()

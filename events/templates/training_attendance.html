@@ -161,7 +161,7 @@
         </form><br>
       {% endif %}
 
-      {% if training.department.id == 24  and training.is_training_before_july2017 and training.is_learners_allowed  %}
+      {% if training.department.id == 24  and training.is_training_certificate_allowed  %}
          Step 2:  <a class="btn btn-primary" href="{% url 'events:mark_as_complete' training.id %}"> Request to Mark Complete</a>
       {% endif %}
 

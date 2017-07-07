@@ -1,0 +1,157 @@
+<video id="st_video" class="video-js vjs-default-skin" controls preload="none" poster="{{ tr_rec.tutorial_detail|get_thumb_path:'Big' }}" width="auto" height="auto" data-setup="{}">
+                            <!-- <source src="/static/spoken/images/Overview-and-Installation-of-Git-English.ogv" type="video/ogg" /> -->
+          <source src="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ tr_rec.video }}" type="video/ogg" />
+                             {% with has_mp4=tr_rec|get_mp4_video %}
+                                 {% if has_mp4 %}
+                                     <source src="{{ media_url }}{{ has_mp4 }}" type="video/mp4" />
+                                 {% endif %}
+                             {% endwith %}
+                            {{ tr_rec|get_srt_path|safe }}
+                        </video>
+
+
+var player,
+    tag = document.createElement('script'),
+    firstScriptTag = document.getElementsByTagName('script')[0];
+    var flag= false;
+  
+
+    tag.src = "https://www.youtube.com/iframe_api";
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+    function onPlaybackQualityChange(event) {
+        console.log(event);
+    }
+
+    Number.prototype.between = function (min, max) {
+        return this >= min && this <= max;
+    };
+
+            var ik_player;
+            //this function is called by the API
+            function onYouTubeIframeAPIReady() {
+                //creates the player object
+                ik_player = new YT.Player('player');
+                //Holds a reference to the YouTube player
+                //subscribe to events
+                ik_player.addEventListener("onReady",       "onReady");
+                ik_player.addEventListener("onStateChange", "onStateChange");
+            }
+  
+        function formatTime(time){
+        time = Math.round(time);
+        var minutes = Math.floor(time / 60),
+        seconds = time - minutes * 60;
+        seconds = seconds < 10 ? '0' + seconds : seconds;
+        return minutes + "." + seconds;
+        }
+
+    function onReady(event) {
+        function logDuration() {
+
+         window.setTimeout(logDuration,1000);
+         var cur_time = formatTime(ik_player.getCurrentTime()).toString();
+         var duration=  formatTime(ik_player.getDuration()).toString();
+
+        if(parseFloat(cur_time) == parseFloat(duration.toString())){
+         $('.ScrollStyle').find('.question').css("background-color", "white");
+        }else{
+        trigger(cur_time, duration);
+        }
+       
+            
+
+        return cur_time
+        }
+        logDuration();
+        $("#text").click(function(e){
+						ik_player.pauseVideo()
+         		setForum(logDuration())
+           
+        });
+
+
+    //var title = $('#text').html("Post your Question on the Forum");
+       // $("#text").click(function(e){
+     // e.preventDefault();
+         // alert(logDuration());
+            //title.html('new title'+logDuration());
+       // });
+        }
+
+      function trigger(cur_time, duration){
+      //$("#playerHolder").text("dura"+duration);
+        {% for q in questions %}
+            min_range = '{{ q.minute_range }}'
+            sec_range = '{{ q.second_range }}'
+
+            id = '{{ q.id }}'
+
+            min_split = min_range.split("-")
+            sec_split = sec_range.split("-")
+            lower = min_split[0]+"."+sec_split[0];
+            upper = min_split[1]+"."+sec_split[1];
+            var div = document.getElementById( '{{ q.id }}' );
+          
+            if((parseFloat(cur_time)).between(parseFloat(lower.toString()),parseFloat(upper.toString()))) 
+            {
+        
+          bgColor = $("#"+'{{ q.id }}').css('background-color')
+          if($("#"+'{{ q.id }}').css("background-color")=="rgb(205, 205, 205)"){
+         //alert("outt2")
+          }else{
+          var el = document.getElementById('forums_Q');
+          el.scrollTop = 0;
+       
+          }
+       
+          $("#"+'{{ q.id }}').prependTo("#forum_Q");
+          div.style.backgroundColor = "#cdcdcd";
+           
+           }else{
+              div.style.backgroundColor = "#ffffff";
+           }
+           {% endfor %}
+           }
+                        //for videojs trigger
+            var trackedPlayer = videojs('st_video');
+            var previousTime = 0;
+            var currentTime = 0;
+            trackedPlayer.on('timeupdate', function() {
+            previousTime = currentTime;
+            currentTime = trackedPlayer.currentTime();
+            var cur_time = formatTime(currentTime).toString();
+
+           	trigger( cur_time);
+							$("#text").click(function(e){
+							trackedPlayer.pause()
+		       		setForum(cur_time)
+		         
+		      		});
+			
+            });
+ 
+  		
+				function setForum(cur_time)
+				{
+					 
+						var time_split = cur_time.split(".")
+						var minute = parseFloat(time_split[0]);
+						var min_range = minute+"-"+(minute+parseFloat(1))
+						if(parseInt(time_split[1]).between(parseInt(0),parseInt(9))){
+									sec_range = "0-10"
+						}else if(parseFloat(time_split[1]).between(parseFloat(10),parseFloat(19))){
+									sec_range = "10-20"
+						}else if(parseFloat(time_split[1]).between(parseFloat(20),parseFloat(29))){
+									sec_range = "20-30"
+						}else if(parseFloat(time_split[1]).between(parseFloat(30),parseFloat(39))){
+									sec_range = "30-40"
+						}else if(parseFloat(time_split[1]).between(parseFloat(40),parseFloat(49))){
+									sec_range = "40-50"
+						}else {
+									sec_range = "50-60"
+						}
+		
+						 var url = "http://forums.spoken-tutorial.org/new-question/?category={{ tr_rec.tutorial_detail.foss.foss }}&tutorial={{ tr_rec.tutorial_detail.tutorial }}&minute_range="+min_range+"&second_range="+sec_range;
+						$("#text").attr("href", url);
+				}

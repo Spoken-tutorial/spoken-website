@@ -98,6 +98,7 @@
                 var posting = $.post(url, $(this).serialize());
 
                 posting.done(function(data) {
+                    alert(data.path);
                     console.log(data.status);
                     if(data.status) {
                         var downloadLink = '<a href="' + data.path + '" title="Download cd content zip">Click here</a> to download the cd content zip file';

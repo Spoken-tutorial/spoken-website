@@ -9,7 +9,7 @@
         <link rel="stylesheet" href="../../../includes/css/bootstrap.min.css" type="text/css" media="screen" charset="utf-8">
         <link rel="stylesheet" href="../../../includes/css/font-awesome.min.css" type="text/css" media="screen" charset="utf-8">
         <link rel="stylesheet" href="../../../includes/css/main.css" type="text/css" media="screen" charset="utf-8">
-        <link href="../../../includes/css/video-js.min.css" rel="stylesheet" type="text/css">
+        <link href="../../../includes/css/avs.player.css" rel="stylesheet" type="text/css">
         <style type="text/css">
             .video-js {
                 padding-top: 56.25%
@@ -98,9 +98,147 @@
                 width:100%;
                 height:100%;
             }
+        .vjs-tt-cue {
+            font-size: 16px;
+        }
+        .video-js .vjs-text-track {
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+        .custom-jumbotron {
+            background-color: white !important;
+            border: none;
+            padding: 0px !important;
+        }
+        .custom-jumbotron p {
+            padding-left: 20px;
+        }
+        .custom-jumbotron h3 {
+            margin-top: 10px;
+        }
+        .video-visits {
+            text-align: right;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .container.playlist-container.col-lg-12.col-md-12.col-sm-12 {
+            margin-bottom: 10px;
+        }
+        .col-lg-5.col-md-5.col-sm-5.no-padding-right.right-bar {
+            margin-top: 5px;
+        }
+        .video-info{
+            display: none;
+        }
+        .breadcrumb {
+            background: white;
+            margin: 0px;
+        }
+        .list-group-item{
+            border-top: none;
+            padding-top: 0px;
+        }
+        .list-group-item:first-child {
+            padding-top: 10px;
+            border-top: 1px solid #ddd;
+        }
+        .hline {
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+        .video-share {
+            margin-bottom: 10px;
+        }
+        .inner-shadow {
+            padding: 15px;
+            /*-webkit-box-shadow: 0px 0px 10px 0px rgba(84, 70, 70, 0.87);
+            -moz-box-shadow: 0px 0px 10px 0px rgba(84, 70, 70, 0.87);
+            box-shadow: 0px 0px 10px 0px rgba(84, 70, 70, 0.87);*/
+            border: 1px solid #ddd;
+        }
+        .inner-sidebar {
+            padding-left: 15px;
+            padding-top: 5px;
+        }
+        .inner-content-body {
+            margin-top: 5px;
+        }
+        .video-info-show-more, .list-group-item-container, .panel {
+            margin-bottom: 14px;
+        }
+        a.list-group-item .list-group-item-heading {
+            color: #337AB7;
+        }
+        .panel-body-heading {
+            font-size: 16px;
+            margin-bottom: 0px;
+            color: #337AB7;
+        }
+        .panel-body .hline {
+            margin-bottom: 8px;
+        }
+        .forum-questions h4 {
+            font-family: Menlo,Monaco,Consolas,"Courier New",monospace;
+            font-size: 18px;
+            font-weight: bold;
+        }
+       .forum-questions .question {
+         padding-left: 5px;
+         padding-right: 5px;
+             padding-top: 5px;
+            clear: both;
+        }
+        .forum-questions .question a {
+            font-weight: bold;
+        }
+        .forum-questions .question p {
+            font-weight: normal;
+            padding: 5px;
+            font-size: 13px !important;
+            font-family: Verdana, Arial, Helvetica, sans-serif !important;
+            color: rgb(85, 85, 85) !important;
+            line-height: 18px !important;
+        }
+        .forum-questions .question p span, .forum-questions .question p div {
+            font-size: 13px !important;
+            font-family: Verdana, Arial, Helvetica, sans-serif !important;
+            color: rgb(85, 85, 85) !important;
+            line-height: 18px !important;
+        }
+        .hline-inner {
+            clear: both;
+        }
+        small {
+            padding: 3px 5px;
+            margin: 0 5px 0 0;
+            -webkit-border-radius: 3px;
+            -moz-border-radius: 3px;
+            -o-border-radius: 3px;
+            border-radius: 3px;
+            background: #424242;
+            color: #ffffff;
+            width: 100px;
+            overflow: hidden;
+        }
+        small.timing {
+            background: #a26dc8;
+        }
+        .forum-post {
+            color: #4F8811;
+        }
+
+    .ScrollStyle
+    {
+        max-height: 370px;
+         min-height: 370px;
+        overflow:scroll;
+
+        float: left;
+        background: white;
+    }
+
             .video-js.vjs-fullscreen .vjs-tt-cue { font-size: 22px; }
         </style>
-        <script src="../../../includes/js/video.js"></script>
+        <script src="../../../includes/js/avs.player.js"></script>
     </head>
     <body>
         <div id="page-wrapper">
@@ -126,41 +264,105 @@
                 </nav>
             </div> <!-- /#header-wrapper -->
             <!-- header end -->
+
+
+
+
             <div id="content-wrapper">
                 <div id="content-inner" class="container">
                     <div id="content" class="col-lg-12 col-md-12 col-sm-12">
-                        <h4 class="page-title">{{ tr_rec.tutorial_detail.tutorial }} - {{ tr_rec.language.name }}</h4>
+                     <b><h4 class="page-title">{{ tr_rec.tutorial_detail.tutorial }} - {{ tr_rec.language.name }}</h4></b>
+                     <SELECT id="language" onchange="report(this.value)">
+                    {% for i in llist %}
+                        <OPTION value="{{ i }}">{{ i }}
+                        </OPTION>
+                    {% endfor %}
+                    </SELECT>
                         <row>
                             <div class='container playlist-container col-lg-12 col-md-12 col-sm-12'>
                                 <div class="video-container col-lg-8 col-md-8 col-sm-8">
-                                    <video id="st_video" class="video-js vjs-default-skin" controls preload="auto" width="auto" height="auto" data-setup="{}">
-                                        <source src="./{{ tr_rec.video }}" type="video/ogg" />
-                                        {{ tr_rec|get_srt_files|safe }}
+                                    <video id="video1" preload="none" width="100%" height="430"  poster="{{ tr_rec.tutorial_detail|get_thumb_path:'Big' }}" data-setup="{}">
+                                        <!-- <source src="/static/spoken/images/Overview-and-Installation-of-Git-English.ogv" type="video/ogg" /> -->
+                                         <source src="./{{ video }}.webm" type="video/webm" />
+                                        {{ tr_rec|get_srt_path|safe }}
+
                                     </video>
+                                    <audio id="audio1" preload="none">
+                                        <source id="audio" src="./{{ audio }}.mp3" type="audio/mpeg">
+                                        
+                                    </audio>
                                 </div>
-                                <div class='playlist col-lg-4 col-md-4 col-sm-4'>
-                                    <div class='playlist-info'>
-                                        <h5>{{tr_rec.tutorial_detail.foss}} Tutorials - {{tr_rec.language}} <span class="video-count pull-right">{{tr_recs|length}}</span></h5>
-                                    </div>
-                                    <div class='playlist-controls'>
-                                        <span class='backward'></span>
-                                        <span class='forward'></span>
-                                    </div>
-                                    <ul>
-                                        {% for rec in tr_recs %}
-                                            <li class="playlist-item{% if tr_rec.id == rec.id %} active{% endif %}"{% if tr_rec.id == rec.id %} data="{{ forloop.counter }}"{% endif %}>
-                                                <a href="../../{{ rec.tutorial_detail.foss_id }}/{{ rec.tutorial_detail_id }}/show-video-{{ rec.language.name }}.html">
-                                                    <div class='pull-left thumb'>
-                                                        <span class='order'>{% if tr_rec.id == rec.id %}<i class="fa fa-play"></i>{% else %}{{ forloop.counter }}{% endif %}</span>
-                                                        <img src="../../../includes/images/thumb-even.png" width=70 >
+                                <div class="container">
+                                    <div id="content">
+                                        <ul id="tabs" class="nav nav-tabs" data-tabs="tabs">
+                                            <li style="width:190px" class="active" ><a href="#forums" data-toggle="tab">Questions posted on Forums</a></li>
+                                            <li style="width:180px;" ><a style= "min-height: 60px;padding-top: 12px;" href="#tutorials" data-toggle="tab">{{tr_rec.tutorial_detail.foss}} Tutorials - {{tr_rec.language}} </a></li>
+                                            <div id="my-tab-content" class="tab-content">
+                                                <div class="tab-pane active" id="forums" >
+                                                    <div id="forums_Q" class='ScrollStyle' style="width: 32%; " >
+ 
+                                                        {% if question_s %}
+                                                        <h4 style="font-family: Menlo;font-size: 16px; padding-left: 8px; ">Questions posted on ST Forums: </h4>
+                                                        <ul class="forum-questions" id="forum_Q" style="padding : 6px ">
+     
+                                                        {% for question in question_s %}
+
+                                                        <li class="question" id="{{ question.id }}">
+                                                        <a href="../../{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/answer-to-question-{{ question.id }}.html" target="_blank" class="{{ question.id }}">{{question.title }}</a>
+                                                        <p>{{ question.body|striptags|safe }}
+                                                        <div class="timing pull-left">
+                                                            {% if not question.minute_range == 'None' %}<small class="timing">{{ question.minute_range }}M</small>{% endif %}
+                                                            {% if not question.second_range == 'None' %}<small class="timing">{{ question.second_range }}S</small>{% endif %}
+                                                        </div>
+                                                            <div class="user pull-right">
+                                                                <span>{{ question.date_modified }}</span>
+                                                                {% if not question.user == "" %}
+                                                                    <small>{{ question.user }}</small>
+                                                                    {% endif %}
+                                                            </div>
+                                                            </p>
+                                                            <hr class="hline-inner" style="margin-top: 18px;margin-bottom: 4px;" />
+                                                            </li>
+      
+                                                            {% endfor %}
+                                                            </ul>
+                                                            {% else %}
+                                                            <p style=" text-align: center; padding: 40px"> No questions yet</p>
+                                                            {% endif %}
                                                     </div>
-                                                    <div class='description'>
-                                                        {{rec.tutorial_detail.tutorial}}
+
+                                                </div>
+                                                <div class="tab-pane " id="tutorials" >
+                                                    <div class='playlist col-lg-4 col-md-4 col-sm-4'>
+                                                        <div class='playlist-controls'>
+                                                            <span class='backward'></span>
+                                                            <span class='forward'></span>
+                                                        </div>
+                                                        <ul>
+                                                        {% for rec in tr_recs %}
+                                                        <li class="playlist-item{% if tr_rec.id == rec.id %} active{% endif %}"{% if tr_rec.id == rec.id %} data="{{ forloop.counter }}"{% endif %}>
+                                                        <a href="../../{{ rec.tutorial_detail.foss_id }}/{{ rec.tutorial_detail_id }}/show-video-{{ rec.language.name }}.html">
+                                                        <div class='pull-left thumb'>
+                                                            <span class='order'>{% if tr_rec.id == rec.id %}<i class="fa fa-play"></i>{% else %}{{ forloop.counter }}{% endif %}</span>
+                                                            <img src="../../../includes/images/thumb-even.png" width=70 >
+                                                        </div>
+                                                        <div class='description'>
+                                                            {{rec.tutorial_detail.tutorial}}
+                                                        </div>
+                                                        </a>
+                                                        </li>
+                                                        {% endfor %}
+                                                        </ul>
                                                     </div>
-                                                </a>
-                                            </li>
-                                        {% endfor %}
-                                    </ul>
+                                                </div>
+                                            </div>
+                                        </ul>
+                                    </div>
+                                    <script type="text/javascript">
+                                    jQuery(document).ready(function ($) {
+                                    $("#tabs").tab();
+                                    });
+                                    </script> 
                                 </div>
                             </div>
                         </row>
@@ -241,6 +443,11 @@
                     </div>
                 </div><!-- /#content-inner .container -->
             </div><!-- /#content-wrapper -->
+
+
+
+
+
             <div id="footer-wrapper">
                 <div class="container-inner sans-serif">
                     <div class="container">
@@ -290,30 +497,176 @@
             </div>
         </div><!-- /#page-wrapper -->
         <!-- Placed at the end of the document so the pages load faster -->
+         <script src="../../../includes/js/avs.player.min.js"></script>
         <script src="../../../includes/js/jquery-1.11.0.min.js"></script>
         <script src="../../../includes/js/bootstrap.min.js"></script>
         
-        <script>
-            // set video player volume by 20%
-            var myPlayer = videojs('st_video');
-            myPlayer.volume(0.2);
-            currentVideo = $('.playlist-item.active');
-            nextVideo = currentVideo.next('li');
-            prevVideo = currentVideo.prev('li');
-            var tmpHtml = currentVideo.attr('data') + '/' + $('.video-count').html()
-            $('.video-count').html(tmpHtml)
-            if(nextVideo.length){
-                //console.log(nextVideo.children('a').attr('href'));
-                $('.forward').html('<a href="'+nextVideo.children('a').attr('href')+'"><i class="fa fa-1 fa-fast-forward"></i></a>');
-            } else {
-                $('.forward').html('<i class="fa fa-1 fa-fast-forward"></i>');
+        <script type="text/javascript">
+        function report(language){
+            var array="{{video}}".split('-');
+            var data=array.join('%2B');
+            $("#myform").attr("action", "http://localhost:8000/watch/{{ concept }}/"+data+"/"+language);
+        }
+</script>
+<script>
+(function() {
+        new syncAudioVideo('video1', 'audio1');
+        var vid=document.getElementById('video1');
+    })();
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function()
+    {
+        currentVideo = $('.playlist-item.active');
+        nextVideo = currentVideo.next('li');
+        prevVideo = currentVideo.prev('li');
+        var tmpHtml = currentVideo.attr('data') + '/' + $('.video-count').html()
+        $('.video-count').html(tmpHtml)
+        if(nextVideo.length)
+        {
+           //console.log(nextVideo.children('a').attr('href'));
+            $('.forward').html('<a href="'+nextVideo.children('a').attr('href')+'"><i class="fa fa-1 fa-fast-forward"></i></a>');
+        } 
+        else 
+        {
+            $('.forward').html('<i class="fa fa-1 fa-fast-forward"></i>');
+        }
+        if(prevVideo.length)
+        {
+            //console.log(prevVideo.children('a').attr('href'));
+            $('.backward').html('<a href="'+prevVideo.children('a').attr('href')+'"><i class="fa fa-1 fa-fast-backward"></i></a>');
+        } 
+        else
+        {
+            $('.backward').html('<i class="fa fa-1 fa-fast-backward"></i>');
+        }
+        
+    });
+</script>
+
+<script>
+    var player,
+    tag = document.createElement('script'),
+    firstScriptTag = document.getElementsByTagName('script')[0];
+    var flag= false;
+  
+
+    tag.src = "https://www.youtube.com/iframe_api";
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+    function onPlaybackQualityChange(event) 
+    {
+        console.log(event);
+    }
+
+    Number.prototype.between = function (min, max) 
+    {
+        return this >= min && this <= max;
+    };
+
+    var ik_player;
+    //this function is called by the API
+    function onYouTubeIframeAPIReady() 
+    {
+        //creates the player object
+        ik_player = new YT.Player('player');
+        //Holds a reference to the YouTube player
+        //subscribe to events
+        ik_player.addEventListener("onReady",       "onReady");
+        ik_player.addEventListener("onStateChange", "onStateChange");
+    }
+  
+       
+    function formatTime(time)
+    {
+        time = Math.round(time);
+        var minutes = Math.floor(time / 60),
+        seconds = time - minutes * 60;
+        seconds = seconds < 10 ? '0' + seconds : seconds;
+        return minutes + "." + seconds;
+    }
+
+    
+
+    function trigger(cur_time){
+      //$("#playerHolder").text("dura"+duration);
+
+        {% for q in question_s %}
+            min_range = '{{ q.minute_range }}'
+            sec_range = '{{ q.second_range }}'
+            id = '{{ q.id }}'
+
+            min_split = min_range.split("-")
+            sec_split = sec_range.split("-")
+            lower = min_split[0]+"."+sec_split[0];
+            upper = min_split[1]+"."+sec_split[1];
+            var div = document.getElementById( '{{ q.id }}' );
+            //alert(parseFloat(upper.toString()));
+            if((parseFloat(cur_time))>=parseFloat(lower.toString()) && (parseFloat(cur_time))<(parseFloat(upper.toString()))) 
+            {                    
+                bgColor = $("#"+'{{ q.id }}').css('background-color')
+                if($("#"+'{{ q.id }}').css("background-color")=="rgb(205, 205, 205)")
+                {
+
+             //alert("outt2")
+                }
+                else{
+                    var el = document.getElementById('forums_Q');
+                    el.scrollTop = 0;
+                }
+       
+                $("#"+'{{ q.id }}').prependTo("#forum_Q");
+                div.style.backgroundColor = "#cdcdcd";
+           
             }
-            if(prevVideo.length){
-                //console.log(prevVideo.children('a').attr('href'));
-                $('.backward').html('<a href="'+prevVideo.children('a').attr('href')+'"><i class="fa fa-1 fa-fast-backward"></i></a>');
-            } else {
-                $('.backward').html('<i class="fa fa-1 fa-fast-backward"></i>');
+            else{
+                  div.style.backgroundColor = "#ffffff";
+                }
+        {% endfor %}
+    }
+    var trackedPlayer =document.getElementById('video1');
+    var currentTime = trackedPlayer.currentTime;
+    var cur_time = formatTime(currentTime).toString();
+    trigger(cur_time);
+    window.setInterval(function(){trigger(formatTime(trackedPlayer.currentTime).toString());},1000);
+               
+    $("#text").click(function(e){
+        var trackaudio=document.getElementById('audio1');
+        var trackedvideo = document.getElementById('video1');
+        var currentTime = trackedvideo.currentTime;
+        var cur_time = formatTime(currentTime).toString();
+        trackaudio.pause();
+        trackedvideo.pause();
+        $('#video1-play-control').removeClass("avs-playing");
+        $('#video1-play-control').addClass("avs-paused");
+        //bigPlayButton('#video1','video1','audio1');   
+        setForum(cur_time);
+    });
+
+    function setForum(cur_time)
+    {
+         
+            var time_split = cur_time.split(".")
+            var minute = parseFloat(time_split[0]);
+            var min_range = minute+"-"+(minute+parseFloat(1))
+            if(parseInt(time_split[1]).between(parseInt(0),parseInt(9))){
+                        sec_range = "0-10"
+            }else if(parseFloat(time_split[1]).between(parseFloat(10),parseFloat(19))){
+                        sec_range = "10-20"
+            }else if(parseFloat(time_split[1]).between(parseFloat(20),parseFloat(29))){
+                        sec_range = "20-30"
+            }else if(parseFloat(time_split[1]).between(parseFloat(30),parseFloat(39))){
+                        sec_range = "30-40"
+            }else if(parseFloat(time_split[1]).between(parseFloat(40),parseFloat(49))){
+                        sec_range = "40-50"
+            }else {
+                        sec_range = "50-60"
             }
-        </script>
+
+             var url = "http://forums.spoken-tutorial.org/new-question/?category={{ tr_rec.tutorial_detail.foss.foss }}&tutorial={{ tr_rec.tutorial_detail.tutorial }}&minute_range="+min_range+"&second_range="+sec_range;
+            $("#text").attr("href", url);
+    }
+    </script>
     </body>
 </html>

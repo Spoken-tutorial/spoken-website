@@ -36,7 +36,6 @@ class FossCategory(models.Model):
     foss = models.CharField(unique=True, max_length=255)
     description = models.TextField()
     status = models.BooleanField(max_length=2)
-    is_learners_allowed = models.BooleanField(max_length=2,default=0 )
     user = models.ForeignKey(User)
     category = models.ManyToManyField(FossSuperCategory)
     created = models.DateTimeField(auto_now_add=True)
@@ -54,25 +53,13 @@ class FossCategory(models.Model):
 class BrochureDocument(models.Model):
     foss_course = models.ForeignKey(FossCategory)
     foss_language = models.ForeignKey(Language)
+    document = models.FileField(upload_to='brochures/')
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name = 'FOSS Brochure'
         verbose_name_plural = 'FOSS Brochures'
-
-    def __unicode__(self):
-        return self.foss_course.foss
-
-
-class BrochurePage(models.Model):
-    brochure = models.ForeignKey(BrochureDocument, related_name='pages')
-    page = models.FileField(upload_to='brochures/')
-    page_no = models.PositiveIntegerField()
-
-    class Meta:
-        ordering = ('page_no', )
-        unique_together = (('brochure', 'page_no'),)
 
 
 class PlaylistInfo(models.Model):

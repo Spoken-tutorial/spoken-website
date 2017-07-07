@@ -8,7 +8,6 @@ urlpatterns = patterns('',  # noqa
     url(r'^get-state-info/(\w+)/$', 'statistics.views.get_state_info', name="get_state_info"),
     url(r'^training-onlinetest/$', 'statistics.views.training', name="statistics_training"),
     url(r'^training/$', 'statistics.views.training', name="statistic_training"),
-    url(r'^tutorial-content/$', 'statistics.views.tutorial_content', name="statistics_content"),
     url(r'^training/(?P<rid>\d+)/participants/$', 'statistics.views.training_participant',
         name="statistics_training_participants"),
     url(r'^online-test/$', 'statistics.views.online_test', name="statistics_online_test"),

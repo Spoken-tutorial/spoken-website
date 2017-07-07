@@ -175,6 +175,7 @@
         $batch_foss = $('#batch_foss');
         $("#id_training").change(function () {
           var training = $(this).val();
+          alert(training)
           $.ajax({
             url: '/software-training/ajax-check-foss/',
             data: {
@@ -182,6 +183,7 @@
             },
             dataType: 'json',
             success: function (data) {
+                alert(data.is_c_and_cpp)
                 if (data.is_c_and_cpp) {
                     $('#batch_foss').show();
                 }

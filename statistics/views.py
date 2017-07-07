@@ -3,7 +3,6 @@ from datetime import datetime
 
 # Third Party Stuff
 from django.core.exceptions import PermissionDenied
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Count, Min, Q, Sum
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
@@ -14,8 +13,6 @@ from django.utils.timezone import now
 from cms.sortable import *
 from events.filters import AcademicCenterFilter, TestFilter, TrainingRequestFilter
 from events.models import *
-from creation.models import TutorialResource
-from creation.filters import CreationStatisticsFilter
 from events.views import get_page
 from .forms import LearnerForm
 
@@ -343,45 +340,3 @@ def learners(request):
                 messages.success(request, "Sorry, something went wrong, Please try again!")
     context['form'] = form
     return render(request, 'statistics/templates/learners.html', context)
-
-
-def tutorial_content(request, template='statistics/templates/statistics_content.html'):
-    header = {
-        1: SortableHeader('# ', False),
-        2: SortableHeader('Tutorial', False),
-        3: SortableHeader('tutorial_detail__foss__foss', True, 'FOSS Course'),
-        4: SortableHeader('Level', False),
-        5: SortableHeader('language__name', False, 'Language'),
-        6: SortableHeader('created', False, 'Date Published')
-    }
-
-    published_tutorials_set = TutorialResource.objects.filter(status__gte=1)
-
-    raw_get_data = request.GET.get('o', None)
-    tutorials = get_sorted_list(request, published_tutorials_set, header, raw_get_data)
-    ordering = get_field_index(raw_get_data)
-
-    tutorials = CreationStatisticsFilter(request.GET, queryset=tutorials)
-
-    context = {}
-
-    context['form'] = tutorials.form
-
-    # display information table across multiple pages
-    paginator = Paginator(tutorials, 100)
-    page = request.GET.get('page')
-    try:
-        tutorials = paginator.page(page)
-    except PageNotAnInteger:
-        # If page is not an integer, deliver first page.
-        tutorials = paginator.page(1)
-    except EmptyPage:
-        # If page is out of range (e.g. 9999), deliver last page of results.
-        tutorials = paginator.page(paginator.num_pages)
-
-    context['tutorials'] = tutorials
-    context['tutorial_num'] = tutorials.paginator.count
-    context['header'] = header
-    context['ordering'] = ordering
-
-    return render(request, template, context)

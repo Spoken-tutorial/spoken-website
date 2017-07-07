@@ -15,7 +15,7 @@ class FossAvailableForTestForm(forms.ModelForm):
         model = FossAvailableForTest
         exclude = ['created']
 
-class UploadPrerequisiteForm(forms.Form):
+class PrerequisiteForm(forms.Form):
     foss_category = forms.ChoiceField(
         choices = [('', 'Select FOSS Category'),],
         required = True,
@@ -458,7 +458,8 @@ class ComponentForm(forms.Form):
     def clean(self):
         super(ComponentForm, self).clean()
         file_types = {
-            'video': 'video/ogg',
+            'video': 'video/quicktime',
+            'audio':'audio/mp3',
             'slide': ['application/zip', 'application/x-zip-compressed'],
             'code': ['application/zip', 'application/x-zip-compressed'],
             'assignment': ['text/plain', 'application/pdf'],
@@ -502,6 +503,7 @@ class ComponentForm(forms.Form):
                 widget=forms.Select(),
                 required = True,
             )
+        if comptype=='audio' or comptype=='video':    
             self.fields['isarchive'] = forms.ChoiceField(
                 choices = [(0, 'Replace old video'), (1, 'Archive old video as Correction'), (2, 'Archive old video as Version')],
                 widget=forms.Select(),

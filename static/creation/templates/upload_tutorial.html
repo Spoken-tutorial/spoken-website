@@ -116,12 +116,10 @@
                     </td>
                 </tr>
             {% endif %}
+            {% if tr.language.name == 'English' %}
                 <tr class="{{ tr.video_status|get_review_status_class }}">
-                {% if tr.language.name == 'English' %}
                     <td>4</td>
-                {% else %}
-                    <td>3</td>
-                {% endif %}
+
                     <td>Video</td>
                     <td>{{ tr.video_status | get_review_status_list }}</td>
                     {% if tr.video_status %}
@@ -142,6 +140,30 @@
                     {% endif %}
                     </td>
                 </tr>
+            {% else %}
+                <tr class="{{ tr.video_status|get_review_status_class }}">
+                    <td>3</td>
+                    <td>Audio</td>
+                    <td>{{ tr.video_status | get_review_status_list }}</td>
+                    {% if tr.video_status %}
+                        <td>{{ tr.video_user_id | get_username }}</td>
+                    {% else %}
+                        <td class="col-center">-</td>
+                    {% endif %}
+                    <td>
+                    {% if tr.video_status <= 1 or tr.video_status == 5 %}
+                        <a class="btn btn-primary fancybox-outline fancybox.iframe" href="/creation/upload/component/{{ tr.id }}/audio/" title="Upload Video">
+                            <span title="" data-original-title="" class="fa fa-upload fa-2"></span>
+                        </a>
+                    {% endif %}
+                    {% if tr.video_status %}
+                            <a class="btn btn-primary fancybox-outline fancybox.iframe" href="/creation/view/component/{{ tr.id }}/video/" title="View/Download video">
+                                <span title="" data-original-title="" class="fa fa-film fa-2"></span>
+                            </a>
+                    {% endif %}
+                    </td>
+                </tr>
+            {% endif %}
             {% if tr.language.name == 'English' %}
                 <tr class="{{ tr.common_content.code_status|get_review_status_class }}">
                     <td>5</td>

@@ -3,7 +3,7 @@
 {% load static %}
 {% load creationdata %}
 {% block uncompresscssblock %}
-    <link href="{% static 'spoken/css/video-js.min.css' %}" rel="stylesheet" type="text/css">
+    <link href="{% static 'spoken/css/avs.player.css' %}" rel="stylesheet" type="text/css">
 {% endblock %}
 {% block compressinlinecssblock %}
     <style type="text/css">
@@ -111,9 +111,14 @@
         <div class='container playlist-container col-lg-12 col-md-12 col-sm-12'>
             <div class="video-container col-lg-8 col-md-8 col-sm-8">
                 {% if tr_rec.video_status %}
-                <video id="st_video" class="video-js vjs-default-skin" controls preload="auto" width="auto" height="auto" data-setup="{}">
-                    <source src="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ tr_rec.video }}" type="video/ogg" />
+                <video id="video1" preload="none" width="100%" height="430"  data-setup="{}">
+                            <!-- <source src="/static/spoken/images/Overview-and-Installation-of-Git-English.ogv" type="video/ogg" /> -->
+                 <source src="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{video}}.webm" type="video/webm" />
                 </video>
+                <audio id="audio1" preload="none">
+                    <source id="audio" src="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{video}}-{{lang}}.mp3" type="audio/mpeg">
+                    
+                </audio>
                 {% else %}
                     <p>Video missing...</p>
                 {% endif %}
@@ -278,10 +283,14 @@
     </row>
 {% endblock %}
 {% block uncompressjsblock %}
-    <script src="{% static 'spoken/js/video.min.js' %}"></script>
+    <script src="{% static 'spoken/js/avs.player.min.js' %}"></script>
 {% endblock %}
 {% block compressinlinejsblock %}
     <script type="text/javascript">
+    (function() {
+        new syncAudioVideo('video1', 'audio1');
+        var vid=document.getElementById('video1');
+    })();
         currentVideo = $('.playlist-item.active');
         nextVideo = currentVideo.next('li');
         prevVideo = currentVideo.prev('li');

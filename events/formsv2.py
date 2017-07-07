@@ -305,19 +305,16 @@ class STWorkshopFeedbackForm(forms.ModelForm):
               'not_self_explanatory' : forms.RadioSelect,
               'logical_sequence' : forms.RadioSelect ,
               'examples_help' : forms.RadioSelect ,
+              'other_language' : forms.RadioSelect ,
               'instructions_easy_to_follow' : forms.RadioSelect ,
-              
               'useful_learning' : forms.RadioSelect ,
               'help_improve_performance' : forms.RadioSelect ,
               'plan_to_use_future' : forms.RadioSelect ,
+              'confident' : forms.RadioSelect ,
               'difficult_simultaneously' : forms.RadioSelect ,
               'interface_comfortable' : forms.RadioSelect ,
               'satisfied' : forms.RadioSelect ,
               'self_learning_intrest' : forms.RadioSelect ,
-              'not_like_method_forums' : forms.RadioSelect ,
-              'forum_helpful' : forms.RadioSelect ,
-              'owing_to_forums' : forms.RadioSelect ,
-              
               'ws_quality' : forms.RadioSelect ,
               'overall_content_quality' : forms.RadioSelect ,
               'clarity_of_explanation' : forms.RadioSelect ,
@@ -329,28 +326,22 @@ class STWorkshopFeedbackForm(forms.ModelForm):
               'clarity_of_speech' : forms.RadioSelect ,
               'visual_presentation' : forms.RadioSelect ,
               'pace_of_tutorial' : forms.RadioSelect ,
+              'arrangement' : forms.RadioSelect ,
+              'network' : forms.RadioSelect ,
+              'installation_help' : forms.RadioSelect ,
               'time_management' : forms.RadioSelect ,
               'experience_of_learning' : forms.RadioSelect ,
               'overall_arrangement' : forms.RadioSelect ,
+              'interaction_using_forum' : forms.RadioSelect ,
+              'installation_difficulties' : forms.Textarea ,
               'like_abt_ws' : forms.Textarea ,
               'how_make_better' : forms.Textarea,
               'experience' : forms.Textarea ,
-              'suggestions' : forms.Textarea,
-              'training_any_comment' : forms.Textarea,
-              'content_any_comment' : forms.Textarea,
-              'learning_any_comment': forms.Textarea,
+              'suggestions' : forms.Textarea
               }
   def __init__(self, *args, **kwargs):
     super(STWorkshopFeedbackForm, self).__init__(*args, **kwargs)
-    self.fields['like_abt_ws'].required = False
-    self.fields['how_make_better'].required = False
-    self.fields['experience'].required = False
-    self.fields['suggestions'].required = False
-    self.fields['name'].required = False
-    self.fields['email'].required = False
-    self.fields['training_any_comment'].required = False
-    self.fields['content_any_comment'].required = False
-    self.fields['learning_any_comment'].required = False
+    self.fields['installation_difficulties'].required = False
 
 class STWorkshopFeedbackFormPre(forms.ModelForm):
   class Meta:
