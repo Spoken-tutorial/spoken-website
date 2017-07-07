@@ -263,12 +263,7 @@
                         <video id="video1" preload="none" width="100%" height="430"  poster="{{ tr_rec.tutorial_detail|get_thumb_path:'Big' }}" data-setup="{}">
                             <!-- <source src="/static/spoken/images/Overview-and-Installation-of-Git-English.ogv" type="video/ogg" /> -->
                              <source src="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{video}}.webm" type="video/webm" />
-                             {% with has_mp4=tr_rec|get_mp4_video %}
-                                 {% if has_mp4 %}
-                                     <source src="{{ media_url }}{{ has_mp4 }}" type="video/mp4" />
-                                 {% endif %}
-                             {% endwith %}
-                            {{ tr_rec|get_srt_path|safe }}
+                             {{ tr_rec|get_srt_path|safe }}
 
                         </video>
                         <audio id="audio1" preload="none">

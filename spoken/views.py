@@ -193,9 +193,9 @@ def watch_tutorial(request, foss, tutorial, lang):
         str(tr_rec.tutorial_detail.foss_id) + "/" + str(tr_rec.tutorial_detail_id) + "/" +video+".webm"
     video_info = get_video_info(video_path)
     tr_list=TutorialResource.objects.filter(tutorial_detail=tr_rec.tutorial_detail_id,status=1)
-    list=[lang1]
+    list=[lang]
     for i in tr_list:
-        if str(i.language) not in lang1:
+        if str(i.language) not in lang:
             list.append(i.language)
     context = {
         'tr_rec': tr_rec,
