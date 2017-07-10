@@ -239,7 +239,7 @@
 {% block search %}{% endblock %}
 <row>
 <div class="col-sm-4">
-{% block heading %}{{ tr_rec.tutorial_detail.tutorial }} -
+{% block heading %}{{ tr_rec.tutorial_detail.tutorial }} - {{ tr_rec.language.name }}
 </div>
 <div class="col-sm-4"> 
    <form id="myform" action="" method="GET">
@@ -263,11 +263,6 @@
                         <video id="video1" preload="none" width="100%" height="430"  poster="{{ tr_rec.tutorial_detail|get_thumb_path:'Big' }}" data-setup="{}">
                             <!-- <source src="/static/spoken/images/Overview-and-Installation-of-Git-English.ogv" type="video/ogg" /> -->
                              <source src="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{video}}.webm" type="video/webm" />
-                             {% with has_mp4=tr_rec|get_mp4_video %}
-                                 {% if has_mp4 %}
-                                     <source src="{{ media_url }}{{ has_mp4 }}" type="video/mp4" />
-                                 {% endif %}
-                             {% endwith %}
                             {{ tr_rec|get_srt_path|safe }}
 
                         </video>
@@ -511,7 +506,6 @@
 <script>
 (function() {
         new syncAudioVideo('video1', 'audio1');
-        var vid=document.getElementById('video1');
     })();
 </script>
 
@@ -671,122 +665,8 @@
              var url = "http://forums.spoken-tutorial.org/new-question/?category={{ tr_rec.tutorial_detail.foss.foss }}&tutorial={{ tr_rec.tutorial_detail.tutorial }}&minute_range="+min_range+"&second_range="+sec_range;
             $("#text").attr("href", url);
     }
-</script>
-<!--
-<script>
-    var player,
-    tag = document.createElement('script'),
-    firstScriptTag = document.getElementsByTagName('script')[0];
-    var flag= false;
-  
-    tag.src = "https://www.youtube.com/iframe_api";
-    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-    function onPlaybackQualityChange(event) 
-    {
-        console.log(event);
-    }
-    Number.prototype.between = function (min, max) 
-    {
-        return this >= min && this <= max;
-    };
-    var ik_player;
-    //this function is called by the API
-    function onYouTubeIframeAPIReady() 
-    {
-        //creates the player object
-        ik_player = new YT.Player('player');
-        //Holds a reference to the YouTube player
-        //subscribe to events
-        ik_player.addEventListener("onReady",       "onReady");
-        ik_player.addEventListener("onStateChange", "onStateChange");
-    }
-  
-       
-    function formatTime(time)
-    {
-        time = Math.round(time);
-        var minutes = Math.floor(time / 60),
-        seconds = time - minutes * 60;
-        seconds = seconds < 10 ? '0' + seconds : seconds;
-        return minutes + "." + seconds;
-    }
-    
-    function trigger(cur_time){
-      //$("#playerHolder").text("dura"+duration);
-        {% for q in questions %}
-            min_range = '{{ q.minute_range }}'
-            sec_range = '{{ q.second_range }}'
-            id = '{{ q.id }}'
-            min_split = min_range.split("-")
-            sec_split = sec_range.split("-")
-            lower = min_split[0]+"."+sec_split[0];
-            upper = min_split[1]+"."+sec_split[1];
-            var div = document.getElementById( '{{ q.id }}' );
-            //alert(parseFloat(upper.toString()));
-            if((parseFloat(cur_time))>=parseFloat(lower.toString()) && (parseFloat(cur_time))<(parseFloat(upper.toString()))) 
-            {                    
-                bgColor = $("#"+'{{ q.id }}').css('background-color')
-                if($("#"+'{{ q.id }}').css("background-color")=="rgb(205, 205, 205)")
-                {
-             //alert("outt2")
-                }
-                else{
-                    var el = document.getElementById('forums_Q');
-                    el.scrollTop = 0;
-                }
-       
-                $("#"+'{{ q.id }}').prependTo("#forum_Q");
-                div.style.backgroundColor = "#cdcdcd";
-           
-            }
-            else{
-                  div.style.backgroundColor = "#ffffff";
-                }
-        {% endfor %}
-    }
-    var trackedPlayer =document.getElementById('video1');
-    var currentTime = trackedPlayer.currentTime;
-    var cur_time = formatTime(currentTime).toString();
-    //alert(cur_time);
-    trigger(cur_time);
-    window.setInterval(function(){trigger(formatTime(trackedPlayer.currentTime).toString());},1000);
-               
-    $("#text").click(function(e){
-        var trackaudio=document.getElementById('audio1');
-        var trackedvideo = document.getElementById('video1');
-        var currentTime = trackedvideo.currentTime;
-        var cur_time = formatTime(currentTime).toString();
-        trackaudio.pause();
-        trackedvideo.pause();
-        $('#video1-play-control').removeClass("avs-playing");
-        $('#video1-play-control').addClass("avs-paused");
-        //bigPlayButton('#video1','video1','audio1');   
-        setForum(cur_time);
-    });
-    function setForum(cur_time)
-    {
-         
-            var time_split = cur_time.split(".")
-            var minute = parseFloat(time_split[0]);
-            var min_range = minute+"-"+(minute+parseFloat(1))
-            if(parseInt(time_split[1]).between(parseInt(0),parseInt(9))){
-                        sec_range = "0-10"
-            }else if(parseFloat(time_split[1]).between(parseFloat(10),parseFloat(19))){
-                        sec_range = "10-20"
-            }else if(parseFloat(time_split[1]).between(parseFloat(20),parseFloat(29))){
-                        sec_range = "20-30"
-            }else if(parseFloat(time_split[1]).between(parseFloat(30),parseFloat(39))){
-                        sec_range = "30-40"
-            }else if(parseFloat(time_split[1]).between(parseFloat(40),parseFloat(49))){
-                        sec_range = "40-50"
-            }else {
-                        sec_range = "50-60"
-            }
-             var url = "http://forums.spoken-tutorial.org/new-question/?category={{ tr_rec.tutorial_detail.foss.foss }}&tutorial={{ tr_rec.tutorial_detail.tutorial }}&minute_range="+min_range+"&second_range="+sec_range;
-            $("#text").attr("href", url);
-    }
     </script>
--->
+
 {% endblock %}
 {% block uncompressjsblock %}
     <script src="{% static 'spoken/js/avs.player.min.js' %}"></script>

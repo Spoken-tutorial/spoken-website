@@ -1,0 +1,28 @@
+path="/home/jaarvis/Videos/"
+    def access(path):
+        files=listdir(path)
+        for i in files:
+            if(isdir(path+i)==True):
+                access(path+i)
+            else:
+                if(i.endswith(".mov") or i.endswith(".MOV")):
+                    i =i.replace(" ", "-")
+                    j=i[:-4]
+                    if("English" in i):
+                        j=j[:-8]
+                        k=j.replace("-"," ")
+                        abc = list(TutorialDetail.objects.filter(tutorial=k).values_list('foss','id').distinct())
+                        #abc=TutorialDetail.objects.filter(Q(tutorial=k)).values('foss')
+                        print "---------------------------------"
+                        print abc
+                        print "---------------------------------"
+                        #mute the video
+                        cmd="ffmpeg -i "+path+i+" -c copy -an "+path+"silent_"+i
+                        subprocess.call(cmd,shell=True)
+                        #conversion to .webm
+                        cmd="ffmpeg -i "+path+"silent_"+i+" -vcodec libvpx -cpu-used -5 -deadline realtime /home/jaarvis/dev/spoken/media/videos/"+str(abc[0][0])+"/"+str(abc[0][1])+"/"+j+".webm"
+                        subprocess.call(cmd,shell=True)
+                        #remove .mov    
+                        cmd="rm "+path+"silent_"+i
+                        subprocess.call(cmd,shell=True)
+    access(path)
