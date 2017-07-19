@@ -36,7 +36,7 @@ for row in rows:
     mp4_video_path, file_extn = os.path.splitext(ogv_video_path)
     mp4_video_path = mp4_video_path + '.mp4'''
     vid=row[5]
-    vid=vid[:-4]
+    #vid=vid[:-4]
     mp3file=vid+".mp3"
     lan=row[13]
     lanlen=len(lan)
@@ -67,7 +67,7 @@ for row in rows:
         video_id = upload_video(youtube, options, webm_video_path)
     except:
         video_id = None'''
-    '''if not video_id:
+    if not video_id:
         options = {
             'title': str(row[9]) + ' - ' + str(row[13]),
             'description': row[4],
@@ -91,5 +91,4 @@ for row in rows:
         print error_string
     time.sleep(1)
 error_log_file_head.close()
-success_log_file_head.close()'''
-Contact GitHub 
+success_log_file_head.close()
