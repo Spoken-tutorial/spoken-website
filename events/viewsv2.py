@@ -216,7 +216,7 @@ class StudentBatchCreateView(CreateView):
       # It will check only the new department batch upload
       # Will allow to upload if organiser already having batch for that department
 
-      department = StudentBatch.objects.filter(department=form.cleaned_data['department'], academic=self.user.organiser.academic )
+      department = StudentBatch.objects.filter(department=form.cleaned_data['department'],year=form.cleaned_data['year'], academic=self.user.organiser.academic )
       this_organiser_dept = department.filter(organiser=self.request.user.organiser);
 
       if not this_organiser_dept.exists() and department.exists():
