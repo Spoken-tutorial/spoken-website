@@ -339,7 +339,35 @@ def admin_testimonials_edit(request, rid):
     if request.method == 'POST':
         form = TestimonialsForm(request.POST, request.FILES, instance=instance)
         if form.is_valid():
-            form.save()
+            form_data = form.save(commit=False)
+            form_data.user_id = user.id
+            form_data.save()
+            file_type = ['application/pdf','image/jpeg','image/png']
+            if 'scan_copy' in request.FILES:
+                if request.FILES['scan_copy'].content_type in file_type:
+                    file_path = settings.MEDIA_ROOT + 'testimonial/'
+                    try:
+                        os.mkdir(file_path)
+                    except Exception, e:
+                        print e
+                    file_path = settings.MEDIA_ROOT + 'testimonial/' + str(rid) + '/'
+                    try:
+                        os.mkdir(file_path)
+                    except Exception, e:
+                        print e
+                    f = request.FILES['scan_copy']
+                    filename = str(f)
+                    ext = os.path.splitext(filename)[1].lower()
+                    full_path = file_path + str(rid) + ext
+                    fout = open(full_path, 'wb+')
+                    
+                    # Iterate through the chunks.
+                    for chunk in f.chunks():
+                        fout.write(chunk)
+                    fout.close()
+
+            messages.success(request, 'Testimonial updated successfully!')
+            return HttpResponseRedirect('/')
 
     form = TestimonialsForm(instance=instance)
     context['form'] = form

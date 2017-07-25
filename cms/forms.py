@@ -2,7 +2,6 @@ from django import forms
 from cms.models import *
 from events.models import *
 from django.contrib.auth.models import User
-from captcha.fields import ReCaptchaField
 from nicedit.widgets import NicEditWidget
 from django.utils.translation import ugettext_lazy as _
 from django.core.validators import MinLengthValidator, MinValueValidator, \
@@ -52,7 +51,6 @@ class RegisterForm(forms.Form):
         widget = forms.TextInput(),
         required=True
     )
-    captcha = ReCaptchaField()
 
 
     def clean_username(self):

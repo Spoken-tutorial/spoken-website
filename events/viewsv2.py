@@ -216,7 +216,7 @@ class StudentBatchCreateView(CreateView):
       # It will check only the new department batch upload
       # Will allow to upload if organiser already having batch for that department
 
-      department = StudentBatch.objects.filter(department=form.cleaned_data['department'], academic=self.user.organiser.academic )
+      department = StudentBatch.objects.filter(department=form.cleaned_data['department'],year=form.cleaned_data['year'], academic=self.user.organiser.academic )
       this_organiser_dept = department.filter(organiser=self.request.user.organiser);
 
       if not this_organiser_dept.exists() and department.exists():
@@ -529,14 +529,14 @@ class TrainingRequestCreateView(CreateView):
 
         training_planner = TrainingPlanner.objects.get(pk=self.tpid)
         # Check if course is full for this semester
-        if training_planner.is_full(form_data.department.id, form_data.batch.id):
-          messages.error(self.request, 'No. of training requests exceeded for this semester.')
-          return self.form_invalid(form)
-
-        # Check if course is full for test or without test
-        if training_planner.is_course_full(form_data.course.id, form_data.department.id, form_data.batch.id):
-          messages.error(self.request, 'No. of training requests for selected course type exceeded.')
-          return self.form_invalid(form)
+        if form_data.department.id == 24:
+          if training_planner.is_school_full(form_data.department.id, form_data.batch.id):
+            messages.error(self.request, 'No. of training requests exceeded for this semester.')
+            return self.form_invalid(form)
+        else:
+          if training_planner.is_full(form_data.department.id, form_data.batch.id):
+            messages.error(self.request, 'No. of training requests exceeded for this semester.')
+            return self.form_invalid(form)
 
         form_data.training_planner_id = self.kwargs['tpid']
         form_data.save()
@@ -603,12 +603,6 @@ class TrainingRequestEditView(CreateView):
       if not ( (selectedBatch == self.training.batch) and (selectedDept == self.training.department)):
         if training_planner.is_full(selectedDept.id, selectedBatch.id):
           messages.error(self.request, 'No. of training requests exceeded for this semester.')
-          return self.form_invalid(form)
-
-      # Check if course is full for test or without test
-      if not ( (selectedCourse == self.training.course) and (selectedBatch == self.training.batch) and (selectedDept == self.training.department)):
-        if training_planner.is_course_full(selectedCourse.id, selectedDept.id, selectedBatch.id):
-          messages.error(self.request, 'No. of training requests for selected course type exceeded.')
           return self.form_invalid(form)
 
       # Assigning values
@@ -1121,57 +1115,6 @@ class SaveStudentView(JSONResponseMixin, View):
     }
     return self.render_to_json_response(context)
 
-class GetCourseOptionView(JSONResponseMixin, View):
-  department_id = None
-  @method_decorator(csrf_exempt)
-  def dispatch(self, *args, **kwargs):
-    return super(GetCourseOptionView, self).dispatch(*args, **kwargs)
-
-  def post(self, request, *args, **kwargs):
-
-    context = {}
-    category = self.request.POST.get('course_type')
-    department_id = self.request.POST.get('department')
-    tp = TrainingPlanner.objects.get(pk=self.request.POST.get('training_planner'))
-
-    if department_id == '24':
-      print 'in school course number'
-      if tp.is_school_course_full(category, self.request.POST.get('department'), self.request.POST.get('batch')):
-        context['is_full'] = True
-      else:
-        courses = CourseMap.objects.filter(category=category)
-        course_option = "<option value=''>---------</option>"
-        for course in courses:
-          course_detail = '{0} ({1})'.format(course.foss.foss, course.course)
-          if course.course:
-            course_option += "<option value=" + str(course.id) + ">" + course_detail +  "</option>"
-          else:
-            course_option += "<option value=" + str(course.id) + ">" + course.foss.foss + "</option>"
-        context = {
-          'course_option' : course_option,
-          'is_full' : False
-        }
-    else:
-      if tp.is_course_full(self.request.POST.get('course'), self.request.POST.get('department'), self.request.POST.get('batch')):
-        context['is_full'] = True
-      else:
-        courses = CourseMap.objects.filter(category=category)
-        course_option = "<option value=''>---------</option>"
-        for course in courses:
-          course_detail = '{0} ({1})'.format(course.foss.foss, course.course)
-          if course.course:
-            course_option += "<option value=" + str(course.id) + ">" + course_detail +  "</option>"
-          else:
-            course_option += "<option value=" + str(course.id) + ">" + course.foss.foss + "</option>"
-        context = {
-          'course_option' : course_option,
-          'is_full' : False
-        }
-    return self.render_to_json_response(context)
-
-
-    return render(request, 'course_select.html', context)
-
 class GetBatchOptionView(JSONResponseMixin, View):
   @method_decorator(csrf_exempt)
   def dispatch(self, *args, **kwargs):
@@ -1203,7 +1146,6 @@ class GetBatchStatusView(JSONResponseMixin, View):
 
   def post(self, request, *args, **kwargs):
     department_id = self.request.POST.get('department')
-
     batch_id = self.request.POST.get('batch')
     tp = TrainingPlanner.objects.get(pk=self.request.POST.get('training_planner'))
     context = {}
@@ -2453,8 +2395,7 @@ class STWorkshopFeedbackCreateView(CreateView):
     form_class = STWorkshopFeedbackForm
     template_name = "stworkshop_feedback.html"
     success_url = "/home"
-
-    @method_decorator(login_required)
+    
     def get(self, request, *args, **kwargs):
 	    return render_to_response(self.template_name, {'form': self.form_class()},
 	      context_instance=RequestContext(self.request))

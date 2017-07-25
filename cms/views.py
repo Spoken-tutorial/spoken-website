@@ -40,10 +40,20 @@ def create_profile(user, phone):
     return profile
 
 def account_register(request):
-    context = {}
+
+    # import recaptcha validate function
+    from cms.recaptcha import recaptcha_valdation, get_recaptcha_context
+
+    #reCAPTCHA Site key
+    context = get_recaptcha_context()
+
     if request.method == 'POST':
+
+        # verify recaptcha
+        recaptcha_result = recaptcha_valdation(request)
+
         form = RegisterForm(request.POST)
-        if form.is_valid():
+        if recaptcha_result and form.is_valid():
             username = request.POST['username']
             password = request.POST['password']
             email = request.POST['email']
@@ -57,17 +67,18 @@ def account_register(request):
             user.save()
             create_profile(user, phone)
             send_registration_confirmation(user)
-            messages.success(request, """
-                Please confirm your registration by clicking on the activation link which has been sent to your registered email id.
-            """)
+            messages.success(request, 
+                "Thank you for registering.\
+                Please confirm your registration by clicking on the activation link which has been sent to your registered email %s.<br>\
+                In case if you do not receive any activation mail kindly verify and activate your account from below link :<br>\
+                <a href='http://spoken-tutorial.org/accounts/verify/'>http://spoken-tutorial.org/accounts/verify/</a>" 
+                 % (email))
             return HttpResponseRedirect('/')
-        context = {'form':form}
+        context['form'] = form
         return render_to_response('cms/templates/register.html', context, context_instance = RequestContext(request))
     else:
         form = RegisterForm()
-        context = {
-            'form': form
-        }
+        context['form'] = form
         context.update(csrf(request))
         return render_to_response('cms/templates/register.html', context)
 
@@ -154,7 +165,10 @@ def account_login(request):
                             return HttpResponseRedirect(request.GET['next'])
                         return HttpResponseRedirect('/')
                     else:
-                        error_msg = 'Your account is disabled.'
+                        error_msg = "Your account is disabled.<br>\
+                        Kindly activate your account by clicking on the activation link which has been sent to your registered email %s.<br>\
+                        In case if you do not receive any activation mail kindly verify and activate your account from below link :<br>\
+                        <a href='http://spoken-tutorial.org/accounts/verify/'>http://spoken-tutorial.org/accounts/verify/</a>"% (user.email)
                 else:
                     error_msg = 'Invalid username / password'
             else:
