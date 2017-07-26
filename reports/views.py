@@ -178,6 +178,44 @@ def events_training_csv(request):
 
     return response
 
+# export statistics test data as csv
+def events_test_csv(request):
+
+    from datetime import datetime
+    collectionSet = None
+    state = None
+
+    collectionSet = Test.objects.filter(status=4, participant_count__gt=0).order_by('-tdate')
+
+    # find state id
+    if 'training_planner__academic__state' in request.GET and request.GET['training_planner__academic__state']:
+        state = State.objects.get(id=request.GET['training_planner__academic__state'])
+
+    collection = TestFilter(request.GET, queryset=collectionSet, state=state)
+
+    # Create the HttpResponse object with the appropriate CSV header.
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="test-statistics-data.csv"'
+
+    writer = csv.writer(response)
+
+    # header
+    writer.writerow(['State', 'City', 'Institution', 'FOSS', 'Organiser', 'Date', 'Participants'])
+
+    # records
+    for record in collection:
+        writer.writerow([
+            record.academic.state.name,
+            record.academic.city.name,
+            record.academic.institution_name.encode('utf-8'),
+            record.foss.foss,
+            record.organiser.user.first_name.encode('utf-8'),
+            record.tdate,
+            record.participant_count
+        ])
+
+    return response
+
 
 def elibrary(request):
     # Create the HttpResponse object with the appropriate CSV header.
