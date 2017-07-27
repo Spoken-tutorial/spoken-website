@@ -523,9 +523,6 @@ class TrainingRequestCreateView(CreateView):
           batch_id = form_data.batch.id,
           course_id = form_data.course.id
         ).count()
-        if is_batch_has_course:
-          messages.error(self.request, 'This "%s" already taken/requested the selected "%s" course.' % (form_data.batch, form_data.course))
-          return self.form_invalid(form)
 
         training_planner = TrainingPlanner.objects.get(pk=self.tpid)
         # Check if course is full for this semester
@@ -594,9 +591,6 @@ class TrainingRequestEditView(CreateView):
           batch = selectedBatch,
           course = selectedCourse
         ).count()
-        if is_batch_has_course:
-          messages.error(self.request, 'This "%s" already taken/requested the selected "%s" course.' % (selectedBatch, selectedCourse))
-          return self.form_invalid(form)
 
       training_planner = self.training.training_planner
       # Check if course is full for this semester
