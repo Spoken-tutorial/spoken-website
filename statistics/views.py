@@ -1,5 +1,7 @@
 # Standard Library
 from datetime import datetime
+import itertools
+
 
 # Third Party Stuff
 from django.core.exceptions import PermissionDenied
@@ -14,10 +16,12 @@ from django.utils.timezone import now
 from cms.sortable import *
 from events.filters import AcademicCenterFilter, TestFilter, TrainingRequestFilter
 from events.models import *
-from creation.models import TutorialResource
+from creation.models import TutorialResource, TutorialDetail
+from creation.views import is_contributor
 from creation.filters import CreationStatisticsFilter
 from events.views import get_page
 from .forms import LearnerForm
+from statistics import services
 
 
 # Create your views here.
@@ -58,7 +62,9 @@ def get_state_info(request, code):
                 sem_start_date__lte=datetime.now()
             ).values_list('training_planner__academic_id').distinct()
         ).count()
-        # workshop_details = Training.objects.filter(academic_id__in = academic_list, status = 4).aggregate(Sum('participant_count'), Count('id'), Min('tdate'))
+        # workshop_details = Training.objects.filter(academic_id__in =
+        # academic_list, status = 4).aggregate(Sum('participant_count'),
+        # Count('id'), Min('tdate'))
         workshop_details = TrainingRequest.objects.filter(
             participants__gt=0,
             sem_start_date__lte=datetime.now(),
@@ -387,31 +393,81 @@ def tutorial_content(request, template='statistics/templates/statistics_content.
     return render(request, template, context)
 
 
-def bidding_module(request, template='statistics/templates/bidding_module.html'):
-    header = {
-        1: SortableHeader('# ', False),
-        2: SortableHeader('tutorial_detail__foss__foss', True, 'FOSS Course'),
-        3: SortableHeader('Tutorial', False),
-        4: SortableHeader('language__name', False, 'Language'),
-        5: SortableHeader('timed_script', False, 'English Timed Script'),
-        6: SortableHeader('script_status', False, 'Script Status'),
-        7: SortableHeader('Bid', False),
-        8: SortableHeader('Bid Date', False),
-        9: SortableHeader('Submission Date', False)
-    }
-
+def allocate_tutorial(request, status):
     context = {}
 
-    pub_tutorials_set = TutorialResource.objects.filter(status__gte=1)
+    user = request.user
+    if not (user.is_authenticated() and (is_contributor(user))):
+        raise PermissionDenied()
 
+    active = status
+    final_query = None
+    fosses = []
+
+    if status == 'completed':
+        header = {
+            1: SortableHeader('# ', False),
+            2: SortableHeader('tutorial_detail__foss__foss', True, 'FOSS Course'),
+            3: SortableHeader('Tutorial', False),
+            4: SortableHeader('language__name', False, 'Language'),
+            5: SortableHeader('created', False, 'Date Created'),
+            6: SortableHeader('script_user_id', False, 'User Details'),
+        }
+
+        status = 4
+        final_query = TutorialResource.objects.filter(script_status=status)
+
+    elif status == 'available':
+        header = {
+            1: SortableHeader('# ', False),
+            2: SortableHeader('tutorial_detail__foss__foss', True, 'FOSS Course'),
+            3: SortableHeader('Tutorial', False),
+            4: SortableHeader('language__name', False, 'Language'),
+            5: SortableHeader('Bid', False),
+        }
+
+        all_tuts = TutorialDetail.objects.all()
+
+        foss_to_allocate = {}
+        for tutorial in all_tuts:
+            if services.check_english_timed_script_available(tutorial):
+                a_l = services.get_available_languages(tutorial)
+                foss_name = str(tutorial.foss.foss)
+                foss_to_allocate = [foss_name, tutorial, a_l]
+                fosses.append(foss_to_allocate)
+
+    elif status == 'ongoing':
+        header = {
+            1: SortableHeader('# ', False),
+            2: SortableHeader('tutorial_detail__foss__foss', True, 'FOSS Course'),
+            3: SortableHeader('Tutorial', False),
+            4: SortableHeader('language__name', False, 'Language'),
+            5: SortableHeader('script_user_id', False, 'User ID'),
+            6: SortableHeader('Bid Date', False),
+            7: SortableHeader('Submission Date', False)
+        }
+
+        status = 4
+        final_query = TutorialResource.objects.filter(script_status__lt=status).exclude(language_id=22)
+
+    else:
+        raise PermissionDenied()
+
+    available_tutorials_count = 0
+    for item in fosses:
+        available_tutorials_count = available_tutorials_count + len(item[2])
+
+    user = User.objects.get(pk=user.id)
+
+    pub_tutorials_set = final_query
     raw_get_data = request.GET.get('o', None)
     tutorials = get_sorted_list(request, pub_tutorials_set, header, raw_get_data)
     ordering = get_field_index(raw_get_data)
-
     tutorials = CreationStatisticsFilter(request.GET, queryset=tutorials)
 
     context['form'] = tutorials.form
 
+    # if active == 'completed' or active == 'ongoing':
     # display information table across multiple pages
     paginator = Paginator(tutorials, 100)
     page = request.GET.get('page')
@@ -426,7 +482,41 @@ def bidding_module(request, template='statistics/templates/bidding_module.html')
 
     context['tutorials'] = tutorials
     context['tutorial_num'] = tutorials.paginator.count
+
     context['header'] = header
     context['ordering'] = ordering
+    context['status'] = active
+    context['fosses'] = fosses
+    context['available_tutorials_count'] = available_tutorials_count
+    context['counter'] = itertools.count(1)
 
-    return render(request, template, context)
+    return render(request, 'statistics/templates/allocate_tutorial.html', context)
+
+
+def allocate(request, tdid, lid):
+    user = request.user
+
+    tut = TutorialDetail.objects.get(pk=tdid)
+    if not ContributorRole.objects.filter(
+            foss_category_id=tut.foss_id, user_id=user.id, language_id=lid):
+        contributor_role = ContributorRole()
+        contributor_role.foss_category_id = tut.foss_id
+        contributor_role.user_id = user.id
+        contributor_role.language_id = lid
+        contributor_role.status = True
+        contributor_role.save()
+
+    common_content = TutorialCommonContent.objects.get(tutorial_detail_id=tdid)
+
+    tutorial_resource = TutorialResource()
+    tutorial_resource.tutorial_detail_id = tdid
+    tutorial_resource.common_content_id = common_content.id
+    tutorial_resource.language_id = lid
+    tutorial_resource.outline_user = user
+    tutorial_resource.script_user = user
+    tutorial_resource.video_user = user
+    tutorial_resource.script_status = 0
+    # tutorial_resource.bid_date = datetime.now()
+    tutorial_resource.save()
+
+    return HttpResponseRedirect('/statistics/allocate_tutorial/ongoing/')

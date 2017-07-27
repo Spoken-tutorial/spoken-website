@@ -10,7 +10,8 @@ urlpatterns = patterns('',  # noqa
     url(r'^training/$', 'statistics.views.training', name="statistic_training"),
     url(r'^tutorial-content/$', 'statistics.views.tutorial_content', name="statistics_content"),
 
-    url(r'^bidding-module/$', 'statistics.views.bidding_module', name="bidding_module"),
+    url(r'^allocate_tutorial/(?P<status>\w+)/$', 'statistics.views.allocate_tutorial', name="allocate_tutorial"),
+    url(r'^allocate/(?P<tdid>\w+)/(?P<lid>\w+)/$', 'statistics.views.allocate', name="allocate"),
 
     url(r'^training/(?P<rid>\d+)/participants/$', 'statistics.views.training_participant',
         name="statistics_training_participants"),
