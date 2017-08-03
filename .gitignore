@@ -1,3 +1,5 @@
+*.log
+celerybeat-schedule
 *~
 *.swp
 *.pyc
@@ -12,10 +14,13 @@ media/*
 !media/videos/
 !media/training/
 !media/cms/
+!media/cdimage/
 media/videos/*
 media/training/*
+media/cdimage/*
 !media/training/README
 !media/videos/README
+!media/cdimage/README
 !media/README
 media/cms/*
 !media/cms/images/

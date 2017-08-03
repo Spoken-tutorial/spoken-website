@@ -51,6 +51,14 @@ class FossCategoryAdmin(admin.ModelAdmin):
     actions = [mark_foss_completed, mark_foss_pending]
 
 
+class BrochurePageInline(admin.TabularInline):
+    model = BrochurePage
+
+
+class BrochureDocumentAdmin(admin.ModelAdmin):
+    inlines = [BrochurePageInline, ]
+
+
 class TutorialDetailAdmin(admin.ModelAdmin):
     form = AvailableFossForm
     exclude = ('user',)
@@ -170,3 +178,4 @@ admin.site.register(DomainReviewerRole, DomainReviewerRoleAdmin)
 admin.site.register(QualityReviewerRole, QualityReviewerRoleAdmin)
 admin.site.register(FossAvailableForTest, FossAvailableForTestAdmin)
 admin.site.register(FossAvailableForWorkshop, FossAvailableForWorkshopAdmin)
+admin.site.register(BrochureDocument, BrochureDocumentAdmin)

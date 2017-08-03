@@ -23,6 +23,7 @@ from validate_email import validate_email
 from get_or_create_participant import get_or_create_participant, encript_password, check_csvfile
 from events.signals import get_or_create_user
 import datetime
+
 def authenticate(email = None, password = None):
     try:
         password = encript_password(password)
@@ -39,7 +40,7 @@ def mdl_logout(request):
         request.session.save()
     #print "logout !!"
     return HttpResponseRedirect('/participant/login')
-    
+
 def mdl_login(request):
     if request.POST:
         email = request.POST["username"]
@@ -61,7 +62,7 @@ def mdl_login(request):
     if request.session.get('mdluserid'):
         # print "Current user is ", request.session.get('mdluserid')
         return HttpResponseRedirect('/participant/index')
-        
+
     context = {}
     context.update(csrf(request))
     return render(request, 'mdl/templates/mdluser_login.html', context)
@@ -72,7 +73,7 @@ def index(request):
     p = 0
     if not mdluserid:
         return HttpResponseRedirect('/participant/login')
-    
+
     try:
         mdluser = MdlUser.objects.get(id=mdluserid)
     except:
@@ -84,12 +85,12 @@ def index(request):
             academic = AcademicCenter.objects.get(id = mdluser.institution)
         except:
             pass
-            
+
         if academic:
             category = int(request.GET.get('category', 4))
             if not (category > 0 and category < 6):
                 return HttpResponseRedirect('/participant/index/?category=4')
-                
+
             upcoming_workshop = None
             upcoming_test = None
             past_workshop = None
@@ -109,7 +110,7 @@ def index(request):
                 past_test = Test.objects.filter(id__in = TestAttendance.objects.filter(mdluser_id = mdluser.id).values_list('test_id'), status = 4).order_by('-tdate')
             if category == 4:
                 ongoing_test = Test.objects.filter(Q(status=2)|Q(status=3), academic_id=mdluser.institution, tdate__lte=datetime.date.today()).order_by('-tdate')
-            
+
             context = {
                 #'p': p,
                 'mdluserid' : mdluserid,
@@ -125,7 +126,7 @@ def index(request):
             }
             context.update(csrf(request))
             return render(request, 'mdl/templates/mdluser_index.html', context)
-    
+
     form  = OrganiserForm()
     if request.method == 'POST':
         form = OrganiserForm(request.POST)
@@ -156,7 +157,7 @@ def offline_details(request, wid, category):
             raise PermissionDenied('You are not allowed to view this page!')
     except Exception, e:
         raise PermissionDenied('You are not allowed to view this page!')
-        
+
     if request.method == 'POST':
         form = OfflineDataForm(request.POST, request.FILES)
         try:
@@ -168,7 +169,7 @@ def offline_details(request, wid, category):
                 raise PermissionDenied('You are not allowed to view this page!')
         except:
             raise PermissionDenied('You are not allowed to view this page!')
-                    
+
         if form.is_valid():
             file_path = settings.MEDIA_ROOT + 'training/' + str(wid) + str(time.time())
             f = request.FILES['xml_file']
@@ -176,14 +177,14 @@ def offline_details(request, wid, category):
             for chunk in f.chunks():
                 fout.write(chunk)
             fout.close()
-            
+
             error_line_no = ''
             csv_file_error = 0
             csv_file_error, error_line_no = check_csvfile(user, file_path, w, flag=1)
             os.unlink(file_path)
             #update participant count
             update_participants_count(w)
-            
+
             if error_line_no:
                 messages.error(request, error_line_no)
             #update logs
@@ -201,22 +202,33 @@ def offline_details(request, wid, category):
                 if not error_line_no:
                     messages.success(request, "Thank you for uploading the Attendance. Now make sure that you cross check and verify the details before submiting.")
                 return HttpResponseRedirect('/software-training/training/'+str(wid)+'/attendance/')
-        messages.error(request, "Please Upload CSV file !") 
+        messages.error(request, "Please Upload CSV file !")
     context = {
         'form': form,
     }
     messages.info(request, """
-        Please upload the CSV file which you have generated. 
+        Please upload the CSV file which you have generated.
         To know more <a href="http://process.spoken-tutorial.org/images/9/96/Upload_Attendance.pdf" target="_blank">Click here</a>.
-    """) 
+    """)
     context.update(csrf(request))
     return render(request, 'mdl/templates/offline_details.html', context)
 
 def mdl_register(request):
     form = RegisterForm()
+
+    # import recaptcha validate function
+    from cms.recaptcha import recaptcha_valdation, get_recaptcha_context
+
+    #reCAPTCHA Site key
+    context = get_recaptcha_context()
+
     if request.method == "POST":
+
+        # verify recaptcha
+        recaptcha_result = recaptcha_valdation(request)
+
         form = RegisterForm(request.POST)
-        if form.is_valid():
+        if recaptcha_result and form.is_valid():
             #Email exits
             try:
                 user = MdlUser.objects.filter(email=request.POST['email']).first().id
@@ -238,18 +250,17 @@ def mdl_register(request):
                 get_or_create_user(mdluser, form.cleaned_data['password'])
                 messages.success(request, "User " + form.cleaned_data['firstname'] +" "+form.cleaned_data['lastname']+" Created!. Please click <a href='http://www.spoken-tutorial.org/participant/login/'>here </a>to login")
                 return HttpResponseRedirect('/participant/register/')
-            
-    context = {}
+
     context['form'] = form
     context.update(csrf(request))
     return render(request, 'mdl/templates/register.html', context)
-    
+
 def feedback(request, wid):
     mdluserid = request.session.get('mdluserid')
     mdlusername = request.session.get('mdlusername')
     if not mdluserid:
         return HttpResponseRedirect('/participant/login')
-        
+
     form = FeedbackForm()
     mdluserid = request.session.get('mdluserid')
     if not mdluserid:
@@ -270,7 +281,7 @@ def feedback(request, wid):
     except Exception, e:
         #print e
         pass
-    
+
     if request.method == 'POST':
         form = FeedbackForm(request.POST)
         if form.is_valid():
@@ -309,7 +320,7 @@ def forget_password(request):
             mdluser, flag, authuser = get_or_create_user(user)
             authuser.set_password(password_string)
             authuser.save()
-            
+
             subject  = "Spoken Tutorial Online Test password reset"
             to = [user.email]
             message = '''Hi {0},
@@ -344,7 +355,7 @@ Admin Spoken Tutorials
             result = email.send(fail_silently=False)
             messages.success(request, "New password sent to your email "+user.email)
             return HttpResponseRedirect('/participant/login/')
-            
+
 
     context = {
         'form': form

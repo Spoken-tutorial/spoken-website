@@ -1,0 +1,159 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block title %}View Brochure{% endblock %}
+{% block compressinlinecssblock %}
+	<style>
+	button.accordion {
+	    background-color: #ff944d;
+	    color: #000;
+	    cursor: pointer;
+	    padding: 1%;
+	    width: 50%;
+	    border: none;
+	    text-align: center;
+	    outline: none;
+	    font-size: 110%;
+	    transition: 0.4s;
+	}
+
+	button.accordion.active, button.accordion:hover {
+	    background-color: #ff8000;
+	}
+
+	button.accordion:after {
+	    content: '\002B';
+	    padding: 0 2px;
+	    color: #777;
+	    font-weight: bold;
+	    float: left;
+	    margin-left: 5px;
+	}
+
+	button.accordion.active:after {
+	    content: "\2212";
+	}
+
+	div.panel {
+	    padding: 0 0 0 10%;
+	    background-color: white;
+	    max-height: 0;
+	    overflow: hidden;
+	    transition: max-height 0.2s ease-out;
+	}
+	.home-page-title-i{
+		font-size: 27px;
+	}
+	/* The Modal (background) */
+	.modal {
+	    display: none; /* Hidden by default */
+	    position: fixed; /* Stay in place */
+	    z-index: 1; /* Sit on top */
+	    padding-top: 3%; /* Location of the box */
+	    padding-left: 15%;
+	    padding-right: 10%;
+	    margin-top: 2%;
+	    width: 100%; /* Full width */
+	    height :hidden; /* Full height */
+	    overflow: auto; /* Enable scroll if needed */
+	    background-color: rgb(0,0,0); /* Fallback color */
+	    background-color: rgba(0,0,0,0.9); /* Black w/ opacity */
+	}
+
+	/* Modal Content (image) */
+	.modal-content {
+	    display: block;
+	    width: 90%;
+	    height: 97.5%;
+	    overflow:auto;
+	}
+
+	/* The Close Button */
+	.close {
+	    position: absolute;
+	    top: 5%;
+	    right: 4%;
+	    color: #f1f1f1;
+	    font-size: 500%;
+	    font-weight: bold;
+	    transition: 0.3s;
+	}
+
+	.close:hover,
+	.close:focus {
+	    color: #fff;
+	    text-decoration: none;
+	    cursor: pointer;
+	}
+
+	/* 100% Image Width on Smaller Screens */
+	@media only screen and (max-width: 700px){
+	    .modal-content {
+	        width: 100%;
+	    }
+	}
+	</style>
+{% endblock %}
+
+{% block heading %}<i class="home-page-title-i">Brochures</i>{% endblock %}
+{% block content %}
+<body id="body">    
+    {% for key, value in my_dict.items %}
+    <button class="accordion" style="margin-left: 25%">{{ key }}</button>
+	    <div class="panel">
+	    {% regroup value by foss_name as value_list %}
+		<ul>
+		{% for foss_name in value_list %}
+		    <h4>{{ foss_name.grouper }}</h4>
+		    <ul>
+		        {% for item in foss_name.list %}
+		          <img id="{{item.cover_image}}" style="border:1px solid black; margin-right:20px" src="{{item.cover_image}}" style="display: inline" width="40%" height="100%" onclick="show(this)">
+		        {% endfor %}
+		    </ul>
+		{% endfor %}
+		</ul>
+		</div>
+    {% endfor %}
+	<!-- The Modal -->
+	<div id="myModal" class="modal">
+	  <span class="close">×</span>
+	  <img class="modal-content" id="img01">
+	</div>    
+</body>
+{% endblock %}
+
+{% block compressinlinejsblock %}
+	<script>
+	var acc = document.getElementsByClassName("accordion");
+	var i;
+	for (i = 0; i < acc.length; i++) {
+	  acc[i].onclick = function() {
+	    this.classList.toggle("active");
+
+	    var panel = this.nextElementSibling;
+	    if (panel.style.maxHeight){
+	      panel.style.maxHeight = null;
+	    } else {
+	      panel.style.maxHeight = panel.scrollHeight + "px";
+	    } 
+	    acc.not(this).accordion('activate', false);
+	  }
+	}
+	var modal = document.getElementById('myModal');
+	function show(im){
+	    document.getElementById("body").style.overflow="hidden";
+	    var img = document.getElementById(im.id);
+	    var modalImg = document.getElementById("img01");
+	    modal.style.display = "block";
+	    modalImg.src = img.src;
+	}
+	// Get the <span> element that closes the modal
+	var span = document.getElementsByClassName("close")[0];
+
+	// When the user clicks on <span> (x), close the modal
+	span.onclick = function() { 
+	    modal.style.display = "none";
+	    document.getElementById("body").style.overflow="auto";
+	}
+	</script>
+{% endblock %}

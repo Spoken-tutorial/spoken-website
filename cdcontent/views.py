@@ -3,6 +3,7 @@ import json
 import zipfile
 import tempfile
 
+from datetime import datetime
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.core.servers.basehttp import FileWrapper
@@ -12,6 +13,7 @@ from django.conf import settings
 from django.db.models import Q
 from creation.models import *
 from cdcontent.forms import *
+from forums.models import Question,Answer
 
 
 # Create your views here.
@@ -108,7 +110,14 @@ def get_static_files():
         '/static/spoken/images/Intermediate.png': 'spoken/includes/images/Intermediate.png',
         '/static/spoken/images/Advanced.png': 'spoken/includes/images/Advanced.png',
         '/static/cdcontent/templates/readme.txt': 'spoken/README.txt',
-        '/static/cdcontent/templates/index.html': 'spoken/index.html'
+        '/static/cdcontent/templates/index.html': 'spoken/index.html',
+        '/static/forum_website/css/bootstrap.min.css': 'spoken/includes/css/bootstrap_forum.min.css',
+        '/static/forum_website/css/main.css': 'spoken/includes/css/main_forum.css',
+        '/static/forum_website/css/nice-bar.css': 'spoken/includes/css/nice-bar.css',
+        '/static/forum_website/css/theme.blue.css': 'spoken/includes/css/theme.blue.css',
+        '/static/forum_website/slick/slick.css': 'spoken/includes/css/slick.css',
+        '/static/forum_website/images/cc-logo-88x31.png': 'spoken/includes/images/cc-logo-88x31.png'
+
     }
 
 
@@ -163,7 +172,6 @@ def add_static_files(archive):
 def convert_template_to_html_file(archive, filename, request, template, ctx):
     html_string = str(render(request, template, ctx))
     html_string = html_string.replace('Content-Type: text/html; charset=utf-8', '').strip("\n")
-
     archive.writestr(filename, html_string)
 
 
@@ -207,84 +215,102 @@ def home(request):
         form = CDContentForm(request.POST)
 
         if form.is_valid():
-            temp = tempfile.TemporaryFile()
-            archive = zipfile.ZipFile(temp, 'w', zipfile.ZIP_DEFLATED, allowZip64=True)
-            selectedfoss = json.loads(request.POST.get('selected_foss', {}))
-            all_foss_details = get_all_foss_details(selectedfoss)
-            eng_rec = Language.objects.get(name="English")
-            languages = set()
+            try:
+                zipfile_name = '{}.zip'.format(datetime.now().strftime('%Y%m%d%H%M%S%f'))
+                file_obj = open('{}cdimage/{}'.format(settings.MEDIA_ROOT, zipfile_name), 'w')
+                archive = zipfile.ZipFile(file_obj, 'w', zipfile.ZIP_DEFLATED, allowZip64=True)
+                selectedfoss = json.loads(request.POST.get('selected_foss', {}))
+                all_foss_details = get_all_foss_details(selectedfoss)
+                eng_rec = Language.objects.get(name="English")
+                languages = set()
 
-            for key, values in selectedfoss.iteritems():
-                foss_rec = FossCategory.objects.get(pk=key)
-                level = int(values[1])
-                eng_flag = True
-                srt_files = set()
-                common_files = set()
+                for key, values in selectedfoss.iteritems():
+                    foss_rec = FossCategory.objects.get(pk=key)
+                    level = int(values[1])
+                    eng_flag = True
+                    srt_files = set()
+                    common_files = set()
 
-                if str(eng_rec.id) in values[0]:
-                    eng_flag = False
+                    if str(eng_rec.id) in values[0]:
+                        eng_flag = False
 
-                t_resource_qs = TutorialResource.objects.filter(Q(status=1) | Q(status=2),
-                                                                tutorial_detail__foss_id=key)
+                    t_resource_qs = TutorialResource.objects.filter(Q(status=1) | Q(status=2),
+                                                                    tutorial_detail__foss_id=key)
 
-                if level:
-                    t_resource_qs = t_resource_qs.filter(tutorial_detail__level_id=level)
+                    if level:
+                        t_resource_qs = t_resource_qs.filter(tutorial_detail__level_id=level)
 
-                for value in values[0]:
-                    language = Language.objects.get(pk=value)
-                    add_sheets(archive, foss_rec, language)
+                    for value in values[0]:
+                        language = Language.objects.get(pk=value)
+                        add_sheets(archive, foss_rec, language)
 
-                    tr_recs = t_resource_qs.filter(language_id=value).order_by(
-                        'tutorial_detail__level', 'tutorial_detail__order', 'language__name')
+                        tr_recs = t_resource_qs.filter(language_id=value).order_by(
+                            'tutorial_detail__level', 'tutorial_detail__order', 'language__name')
 
-                    languages.add(language.name)
+                        languages.add(language.name)
 
-                    for rec in tr_recs:
-                        filepath = 'videos/{}/{}/{}'.format(key, rec.tutorial_detail_id, rec.video)
+                        for rec in tr_recs:
+                            filepath = 'videos/{}/{}/{}'.format(key, rec.tutorial_detail_id, rec.video)
+                             # get list of questions of a particular tutorial
+                            question_s = Question.objects.filter(category=foss_rec.foss.replace(' ','-'),tutorial=rec.tutorial_detail.tutorial.replace(' ','-')).order_by('-date_created')
 
-                        if os.path.isfile(settings.MEDIA_ROOT + filepath):
-                            archive.write(settings.MEDIA_ROOT + filepath, 'spoken/' + filepath)
 
-                        # add srt file to archive
-                        add_srt_file(archive, rec, filepath, eng_flag, srt_files)
+                            if os.path.isfile(settings.MEDIA_ROOT + filepath):
+                                archive.write(settings.MEDIA_ROOT + filepath, 'spoken/' + filepath)
 
-                        # collect common files
-                        collect_common_files(rec, common_files)
+                            # add srt file to archive
+                            add_srt_file(archive, rec, filepath, eng_flag, srt_files)
 
-                        tutorial_path = '{}/{}/'.format(rec.tutorial_detail.foss_id, rec.tutorial_detail_id)
-                        filepath = 'spoken/videos/{}show-video-{}.html'.format(tutorial_path, rec.language.name)
-                        ctx = {'tr_rec': rec, 'tr_recs': tr_recs,
-                               'media_path': settings.MEDIA_ROOT, 'tutorial_path': tutorial_path}
+                            # collect common files
+                            collect_common_files(rec, common_files)
+
+                            tutorial_path = '{}/{}/'.format(rec.tutorial_detail.foss_id, rec.tutorial_detail_id)
+                            filepath = 'spoken/videos/{}show-video-{}.html'.format(tutorial_path, rec.language.name)
+                            ctx = {'tr_rec': rec, 'tr_recs': tr_recs,
+                                   'media_path': settings.MEDIA_ROOT, 'tutorial_path': tutorial_path,'question_s': question_s}
+                            convert_template_to_html_file(archive, filepath, request,
+                                                          "cdcontent/templates/watch_tutorial.html", ctx)
+                            # for each question find the answers
+                            for question in question_s:
+                                answer=Answer.objects.filter(question=question)
+                                ctx = {'question': question, 'answer': answer}
+                                filepath = 'spoken/videos/' + str(foss_rec.id) + '/' + str(rec.tutorial_detail_id) + '/answer-to-question-' + str(question.id) + '.html'
+                                convert_template_to_html_file(archive, filepath, request, "cdcontent/templates/answer_to_question.html", ctx)
+
+
+                       
+
+                        filepath = 'spoken/videos/' + str(foss_rec.id) + '/list-videos-' + language.name + '.html'
+                        ctx = {'collection': tr_recs, 'foss_details': all_foss_details,
+                               'foss': foss_rec.id, 'lang': language.id}
                         convert_template_to_html_file(archive, filepath, request,
-                                                      "cdcontent/templates/watch_tutorial.html", ctx)
+                                                      "cdcontent/templates/tutorial_search.html", ctx)
 
-                    filepath = 'spoken/videos/' + str(foss_rec.id) + '/list-videos-' + language.name + '.html'
-                    ctx = {'collection': tr_recs, 'foss_details': all_foss_details,
-                           'foss': foss_rec.id, 'lang': language.id}
-                    convert_template_to_html_file(archive, filepath, request,
-                                                  "cdcontent/templates/tutorial_search.html", ctx)
+                    # add common files for current foss
+                    add_common_files(archive, common_files)
 
-                # add common files for current foss
-                add_common_files(archive, common_files)
+                # add side-by-side tutorials for selected languages
+                languages = add_side_by_side_tutorials(archive, languages)
 
-            # add side-by-side tutorials for selected languages
-            languages = add_side_by_side_tutorials(archive, languages)
+                ctx = {'foss_details': all_foss_details, 'foss': foss_rec.id,
+                       'lang': language.id, 'languages': languages}
+                convert_template_to_html_file(archive, 'spoken/videos/home.html', request,
+                                              "cdcontent/templates/home.html", ctx)
 
-            ctx = {'foss_details': all_foss_details, 'foss': foss_rec.id,
-                   'lang': language.id, 'languages': languages}
-            convert_template_to_html_file(archive, 'spoken/videos/home.html', request,
-                                          "cdcontent/templates/home.html", ctx)
+                # add all required static files to archive
+                add_static_files(archive)
+                archive.close()
 
-            # add all required static files to archive
-            add_static_files(archive)
-            archive.close()
-
-            temp.seek(0)
-            wrapper = FileWrapper(temp)
-            response = HttpResponse(wrapper, content_type='application/zip')
-            response['Content-Disposition'] = 'attachment; filename=spoken-tutorial-cdcontent.zip'
-            response['Content-Length'] = temp.tell()
-            return response
+                file_obj.close()
+                # wrapper = FileWrapper(temp)
+                # response = HttpResponse(wrapper, content_type='application/zip')
+                # response['Content-Disposition'] = 'attachment; filename=spoken-tutorial-cdcontent.zip'
+                # response['Content-Length'] = temp.tell()
+                # return response
+                context = {'path': '/media/cdimage/{}'.format(zipfile_name), 'status': True}
+            except Exception:
+                context = {'path': '', 'status': False}
+        return HttpResponse(json.dumps(context), content_type='application/json')
     else:
         form = CDContentForm()
     context = {

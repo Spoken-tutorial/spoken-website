@@ -22,11 +22,13 @@ from django.shortcuts import render, render_to_response
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.db.models import Count
 
 from cms.sortable import *
 from creation.forms import *
 from creation.models import *
 from creation.subtitles import *
+from . import services
 
 def humansize(nbytes):
     suffixes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
@@ -2608,6 +2610,7 @@ def collaborate(request):
     context.update(csrf(request))
     return render(request, 'creation/templates/collaborate.html', context)
 
+
 @login_required
 def update_prerequisite(request):
     if not is_administrator(request.user):
@@ -2666,7 +2669,7 @@ def update_keywords(request):
 
 @login_required
 def update_sheet(request, sheet_type):
-    sheet_types = ['instruction', 'installation','brochure']
+    sheet_types = ['instruction', 'installation', 'brochure']
     if not is_administrator(request.user) and not is_contributor(request.user) and not is_contenteditor(request.user)\
      or not sheet_type in sheet_types:
         raise PermissionDenied()
@@ -2676,9 +2679,9 @@ def update_sheet(request, sheet_type):
         if form.is_valid():
             try:
                 foss_id = request.POST.get('foss')
-                foss = FossCategory.objects.get(pk = foss_id)
+                foss = FossCategory.objects.get(pk=foss_id)
                 language_id = request.POST.get('language')
-                language = Language.objects.get(pk = language_id)
+                language = Language.objects.get(pk=language_id)
                 if sheet_type == 'brochure':
                   sheet_path = 'videos/' + str(foss.id) + '/' + \
                     foss.foss.replace(' ', '-') + '-' + sheet_type.title() + \
@@ -2694,7 +2697,7 @@ def update_sheet(request, sheet_type):
                     fout.write(chunk)
                 fout.close()
                 messages.success(request, sheet_type.title() + \
-                    ' sheet uploaded successfully!')
+                    'sheet uploaded successfully!')
                 form = UpdateSheetsForm()
             except Exception, e:
                 print e
@@ -2715,8 +2718,8 @@ def ajax_manual_language(request):
         sheet_type = request.POST.get('sheet_type', '')
         if foss_id and language_id and sheet_type:
             try:
-                foss = FossCategory.objects.get(pk = foss_id)
-                language = Language.objects.get(pk = language_id)
+                foss = FossCategory.objects.get(pk=foss_id)
+                language = Language.objects.get(pk=language_id)
                 sheet_path = 'videos/' + str(foss.id) + '/' + \
                     foss.foss + '-' + sheet_type.title() + '-Sheet-' + \
                     language.name + '.pdf'
@@ -2730,15 +2733,24 @@ def ajax_manual_language(request):
                 pass
         elif foss_id:
             tutorials = TutorialResource.objects.filter(
-                Q(status = 1) | Q(status = 2),
-                tutorial_detail__foss_id = foss_id
+                Q(status=1) | Q(status=2),
+                tutorial_detail__foss_id=foss_id
             ).values_list(
                 'language_id',
                 'language__name'
             ).order_by('language__name').distinct()
             for tutorial in tutorials:
                 data += '<option value="' + str(tutorial[0]) + '">' + \
-                str(tutorial[1]) + '</option>'
+                    str(tutorial[1]) + '</option>'
             if data:
                 data = '<option value="">-- Select Language --</option>' + data
     return HttpResponse(json.dumps(data), content_type='application/json')
+
+
+def view_brochure(request):
+    template = 'creation/templates/view_brochure.html'
+    my_dict = services.get_data_for_brochure_display()
+    context = {
+        'my_dict': my_dict
+    }
+    return render(request, template, context)

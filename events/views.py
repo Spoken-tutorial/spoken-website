@@ -59,6 +59,8 @@ from cms.views import create_profile
 from cms.sortable import *
 from events_email import send_email
 import datetime
+from django.http import JsonResponse
+
 
 def can_clone_training(training):
     if training.tdate > datetime.datetime.strptime('01-02-2015', "%d-%m-%Y").date() and training.organiser.academic.institution_type.name != 'School':
@@ -208,15 +210,18 @@ def is_invigilator(user):
     """Check if the user is having invigilator rights"""
     if user.groups.filter(name='Invigilator').count() == 1 and user.invigilator and user.invigilator.status == 1:
         return True
+
+
 def get_page(resource, page, limit=20):
     paginator = Paginator(resource, limit)
     try:
-        resource =  paginator.page(page)
+        resource = paginator.page(page)
     except PageNotAnInteger:
-        resource =  paginator.page(1)
+        resource = paginator.page(1)
     except EmptyPage:
         resource = paginator.page(paginator.num_pages)
     return resource
+
 
 def search_participant(form):
     if form.is_valid():
@@ -1674,13 +1679,17 @@ def test_request(request, role, rid = None):
                 t.training_id = request.POST['training']
             if int(request.POST['test_category']) == 3:
                 t.training_id = None
+            test_trainings = request.POST['training']
+            test_training_dept = t.training.department_id
+            if request.POST['id_foss']:
+                test_foss = request.POST['id_foss']
+            else:
+                test_foss = t.training.course.foss_id
 
             t.invigilator_id = request.POST['invigilator']
-            t.foss_id = request.POST['foss']
+            t.foss_id = test_foss
             t.tdate = dateTime[0]
             t.ttime = dateTime[1]
-
-
             error = 0
             try:
                 t.save()
@@ -1715,9 +1724,7 @@ def test_request(request, role, rid = None):
 
             if not error:
                 t.department.clear()
-                for dept in form.cleaned_data.get('department'):
-                    t.department.add(dept)
-
+                t.department.add(test_training_dept)
                 #update logs
                 message = t.academic.institution_name+" has made a test request for "+t.foss.foss+" on "+t.tdate
                 if rid:
@@ -2648,4 +2655,18 @@ def test(request):
         academic.institution_type = InstituteType.objects.get(name='Engineering')
         academic.save()
     return HttpResponsei("Done!")
+
+@csrf_exempt
+def ajax_check_foss(request):
+    """ Ajax: Get the get the foss name of selected batch """
+    training = request.GET.get('training',None)
+    trid = TrainingRequest.objects.get(pk=training)
+    foss_name = trid.course.foss.foss
+    is_c_and_cpp = False
+    if 'C and Cpp' in foss_name:
+        is_c_and_cpp = True
+    data = {
+    "is_c_and_cpp": is_c_and_cpp
+    }
+    return JsonResponse(data)
 

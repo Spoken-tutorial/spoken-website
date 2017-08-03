@@ -166,10 +166,10 @@ urlpatterns = [
       r'^save-student/', 
       SaveStudentView.as_view()
     ),
-    url(
-      r'^get-course-option/', 
-      GetCourseOptionView.as_view()
-    ),
+    # url(
+    #   r'^get-course-option/', 
+    #   GetCourseOptionView.as_view()
+    # ),
     url(
       r'^get-batch-option/', 
       GetBatchOptionView.as_view()
@@ -280,5 +280,10 @@ urlpatterns = [
       TrainingAttendanceListView.as_view(template_name=\
         "mark_prev_attendance.html"), 
       name="previous_training_attendance"
+    ),
+    url(
+      r'^(?P<pk>\d+)/reopen-training/$', 
+      'events.viewsv2.ReOpenTraining', 
+      name="re-open-training"
     ),
 ]

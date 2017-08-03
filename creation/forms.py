@@ -1,3 +1,5 @@
+import os.path
+from django.conf import settings
 from django.core.validators import RegexValidator
 from django.contrib.sessions.models import Session
 from django.contrib.auth.models import User
@@ -5,6 +7,7 @@ from django.db.models import Q
 from django import forms
 
 from creation.models import *
+from creation.models import BrochureDocument
 
 class FossAvailableForTestForm(forms.ModelForm):
     foss = forms.ModelChoiceField(queryset = FossCategory.objects.filter(status=True).order_by('foss'))
@@ -886,6 +889,7 @@ class UpdateKeywordsForm(forms.Form):
                 self.fields['tutorial'].widget.attrs = {}
                 self.fields['tutorial'].initial = initial_data
 
+
 class UpdateSheetsForm(forms.Form):
     foss = forms.ChoiceField(
         choices = [('', '-- Select Foss --'),] + list(TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), language__name='English').values_list('tutorial_detail__foss_id', 'tutorial_detail__foss__foss').order_by('tutorial_detail__foss__foss').distinct()),
@@ -893,13 +897,12 @@ class UpdateSheetsForm(forms.Form):
         error_messages = {'required':'FOSS category field is required.'}
     )
     language = forms.ChoiceField(
-        choices = [('', '-- Select Language --'),],
-        widget=forms.Select(attrs = {'disabled': 'disabled'}),
-        required = True,
-        error_messages = {'required': 'Language field is required.'}
+        choices=[('', '-- Select Language --'), ],
+        widget=forms.Select(attrs={'disabled': 'disabled'}),
+        required=True,
+        error_messages={'required': 'Language field is required.'}
     )
-    comp = forms.FileField(required = False)
-
+    comp = forms.FileField(required=False)
 
     def clean(self):
         super(UpdateSheetsForm, self).clean()
@@ -914,10 +917,9 @@ class UpdateSheetsForm(forms.Form):
             self._errors["comp"] = self.error_class(["This field is required."])
         return component
 
-
     def __init__(self, *args, **kwargs):
         super(UpdateSheetsForm, self).__init__(*args, **kwargs)
-        
+
         if args:
             if 'foss' in args[0] and args[0]['foss']:
                 initial_lang = ''
@@ -927,4 +929,3 @@ class UpdateSheetsForm(forms.Form):
                 self.fields['language'].choices =  [('', '-- Select Language --'),] + list(choices)
                 self.fields['language'].widget.attrs = {}
                 self.fields['language'].initial = initial_lang
-

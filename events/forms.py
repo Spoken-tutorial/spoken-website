@@ -248,7 +248,7 @@ class TrainingPermissionForm(forms.Form):
 class TestForm(forms.ModelForm):
     class Meta:
         model = Test
-        exclude = ['status', 'participant_count', 'organiser', 'academic', 'test_code', 'ttime', 'training', 'workshop', 'appoved_by']
+        exclude = ['status', 'participant_count', 'organiser', 'academic', 'test_code', 'ttime', 'training', 'workshop', 'appoved_by','department','foss']
 
     def clean_workshop(self):
         super(TestForm, self).clean()
@@ -265,9 +265,6 @@ class TestForm(forms.ModelForm):
     tdate = forms.DateTimeField(required = True, error_messages = {'required':'Date field is required.'})
     #workshop = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = False, error_messages = {'required':'Workshop field is required.'})
     training = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = False, error_messages = {'required':'Training field is required.'})
-    foss = forms.ModelChoiceField(label='Foss', cache_choices=True, widget = forms.Select(attrs = {}), queryset = FossCategory.objects.filter(id__in = FossAvailableForTest.objects.filter(status=1).values_list('foss').distinct()).order_by('foss')
-, help_text = "", error_messages = {'required':'Foss field required.'})
-    department = forms.ModelMultipleChoiceField(label='Department', cache_choices=True, widget = forms.SelectMultiple(attrs = {}), queryset = Department.objects.exclude(name='Uncategorised').order_by('name'), help_text = "", error_messages = {'required':'Department field required.'})
 
     def __init__(self, *args, **kwargs):
         user = ''
@@ -279,32 +276,26 @@ class TestForm(forms.ModelForm):
             instance = kwargs["instance"]
             del kwargs["instance"]
         super(TestForm, self).__init__(*args, **kwargs)
-
+        
+        def get_trainings_for_organiser(user) :
+            trainings = TrainingRequest.test_training.filter(training_planner__academic = user.organiser.academic, training_planner__organiser=user.organiser)
+            return trainings
+        
         if user:
-            try:
-                self.fields['invigilator'].queryset = Invigilator.objects.filter(academic = user.organiser.academic, status=1).exclude(user_id = user.id)
-                trainings = TrainingRequest.test_training.filter(training_planner__academic = user.organiser.academic, training_planner__organiser=user.organiser)
-                trchoices = []
-                for training in trainings:
-                  if training.batch:
-                    if training.get_partipants_from_attendance():
-                      trchoices.append((training.id, training.training_name()))
-                  else:
+            trainings = get_trainings_for_organiser(user)
+            trchoices = [('', '-------')]
+            for training in trainings:
+                if not training.is_training_certificate_allowed():
                     trchoices.append((training.id, training.training_name()))
-                trchoices.insert(0, ('', '-------'))
-                if instance:
-                    trchoices.insert(0, (instance.training_id, instance.training.training_name()))
-                self.fields['training'].choices = trchoices
-            except:
-                pass
+
+            self.fields['training'].choices = trchoices
+            self.fields['invigilator'].queryset = Invigilator.objects.filter(academic = user.organiser.academic, status=1).exclude(user_id = user.id)
 
         if instance:
             self.fields['invigilator'].queryset = Invigilator.objects.filter(academic  = instance.organiser.academic, status=1).exclude(user_id = user.id)
             self.fields['invigilator'].initial = instance.invigilator
             self.fields['test_category'].initial = instance.test_category
-            self.fields['foss'].initial = instance.foss
             self.fields['tdate'].initial = str(instance.tdate) + " " + str(instance.ttime)[0:5]
-            self.fields['department'].initial = instance.department.all().values_list('id', flat=True)
             if instance.test_category.id == 2:
                 self.fields['training'].initial = instance.training_id
 
