@@ -13,31 +13,14 @@ class KeywordSearchForm(forms.Form):
 
 class TutorialSearchForm(forms.Form):
     try:
-        all_tests = FossAvailableForTest.objects.all()
-        test_list = []
-        for item in all_tests:
-            test_list.append(item.foss.foss)
-
         foss_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), language__name='English').values('tutorial_detail__foss__foss').annotate(
             Count('id')).order_by('tutorial_detail__foss__foss').values_list('tutorial_detail__foss__foss', 'id__count').distinct()
-
-        all_courses = [('', '-- All Courses --')]
-        test_choices = []
-        no_test_choices = []
+        choices = [('', '-- All Courses --'), ]
 
         for foss_row in foss_list:
-            if foss_row[0] in test_list:
-                test_choices.append((str(foss_row[0]), str(foss_row[0]) + ' (' + str(foss_row[1]) + ')'))
-
-        for foss_row in foss_list:
-            if foss_row[0] not in test_list:
-                no_test_choices.append((str(foss_row[0]), str(foss_row[0]) + ' (' + str(foss_row[1]) + ')'))
-
-        all_choices = (('', all_courses), ('', ''), ('FOSS Courses available for tests', tuple(test_choices)),
-                       ('', ''), ('FOSS Courses NOT available for tests', tuple(no_test_choices)))
-
+            choices.append((str(foss_row[0]), str(foss_row[0]) + ' (' + str(foss_row[1]) + ')'))
         search_foss = forms.ChoiceField(
-            choices=all_choices,
+            choices=choices,
             widget=forms.Select(),
             required=False,
         )
