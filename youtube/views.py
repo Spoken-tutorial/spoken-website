@@ -10,7 +10,7 @@ from django.db.models import Q
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import render
 
-import oauth2client
+from oauth2client import xsrfutil
 
 # Spoken Tutorial Stuff
 from creation.models import *
@@ -29,8 +29,9 @@ def home(request):
 
 
 def auth_return(request):
-    if not oauth2client.xsrfutil.validate_token(settings.SECRET_KEY, request.REQUEST['state'], 1):
-        return HttpResponseForbidden('Access Denied!')
+    # print request.REQUEST['state']
+    # if not xsrfutil.validate_token(settings.SECRET_KEY, request.REQUEST['state'], 0):
+    #     return HttpResponseForbidden('Access Denied!')
 
     code = request.GET.get('code', '')
     error = request.GET.get('error', 'Something went wrong!')

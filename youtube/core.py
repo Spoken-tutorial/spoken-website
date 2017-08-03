@@ -1,7 +1,10 @@
+import os
+import locale
 import httplib2
 import oauth2client
 import googleapiclient.discovery
 
+from oauth2client import xsrfutil
 from apiclient.http import MediaFileUpload
 from django.conf import settings
 
@@ -22,7 +25,7 @@ def to_utf8(s):
 def get_flow():
     flow = oauth2client.client.flow_from_clientsecrets(client_secrets_file, scope=youtube_scope_urls)
     flow.redirect_uri = settings.YOUTUBE_REDIRECT_URL
-    flow.params['state'] = oauth2client.xsrfutil.generate_token(settings.SECRET_KEY, 1)
+    flow.params['state'] = xsrfutil.generate_token(settings.SECRET_KEY, 0)
     return flow
 
 
@@ -45,7 +48,7 @@ def get_youtube_credential():
     return None
 
 
-def get_auth_url()
+def get_auth_url():
     flow = get_flow()
     return flow.step1_get_authorize_url()
 
@@ -58,33 +61,51 @@ def store_youtube_credential(code):
     # credential.set_store(storage)
 
 
-def upload_video(service, options):
-    body = dict(
-        snippet=dict(
-            title=to_utf8(options.get('title')),
-            description=to_utf8(options.get('description') or "").decode("string-escape"),
-            tags=options.get('tags'),
-            categoryId=27
-        ),
-        status=dict(
-            privacyStatus='public'
-        )
-    )
-    insert_request = youtube.videos().insert(
-        part=",".join(body.keys()),
-        body=body,
-        media_body=MediaFileUpload(
-            options.get('file'),
-            chunksize=-1,
-            resumable=False
-        )
-    )
+def resumable_upload(insert_request):
     response = None
+    error = None
+    retry = 0
 
+    while response is None:
+        try:
+            print "Sending video file..."
+            status, response = insert_request.next_chunk()
+            if response is not None:
+                return response
+        except Exception as e:
+            print e
+            return {'error': str(e)}
+
+    return {'error': 'something went wrong'}
+
+
+def upload_video(service, options):
     try:
-        status, response = insert_request.next_chunk()
+        body = dict(
+            snippet=dict(
+                title=to_utf8(options.get('title')),
+                description=to_utf8(options.get('description') or "").decode("string-escape"),
+                tags=options.get('tags'),
+                categoryId=27
+            ),
+            status=dict(
+                privacyStatus='public'
+            )
+        )
+        insert_request = service.videos().insert(
+            part=",".join(body.keys()),
+            body=body,
+            media_body=MediaFileUpload(
+                options.get('file'),
+                chunksize=-1,
+                resumable=True
+            )
+        )
+        response = resumable_upload(insert_request)
+
         if 'id' in response:
             return response['id']
+
     except Exception as e:
         print e
 
@@ -102,7 +123,7 @@ def create_playlist(service, title, description):
                 privacyStatus="private"
             )
         )
-        playlist = youtube.playlists().insert(
+        playlist = service.playlists().insert(
             part=",".join(body.keys()),
             body=body
         ).execute()
@@ -120,14 +141,43 @@ def add_to_playlist(service, video_id, playlist_id, position=0):
         body = dict(
             snippet=dict(
                 playlistId=playlist_id,
-                resourceId=video_id
+                resourceId=dict(
+                    kind="youtube#video",
+                    videoId=video_id
+                )
             )
         )
 
         if position:
-            body['snippet']['position'] = position
+            body["snippet"]["position"] = position
 
-        playlist_item = youtube.playlistItems().insert(
+        playlist_item = service.playlistItems().insert(
+            part=",".join(body.keys()),
+            body=body
+        ).execute()
+
+        if playlist_item and 'id' in playlist_item:
+            return playlist_item['id']
+    except Exception as e:
+        print e
+
+    return None
+
+
+def update_playlistitem_position(service, item_id, video_id, playlist_id, position):
+    try:
+        body = dict(
+            id=item_id,
+            snippet=dict(
+                playlistId=playlist_id,
+                resourceId=dict(
+                    kind="youtube#video",
+                    videoId=video_id),
+                position=position
+            )
+        )
+
+        playlist_item = service.playlistItems().update(
             part=",".join(body.keys()),
             body=body
         ).execute()
