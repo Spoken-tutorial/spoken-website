@@ -3,6 +3,8 @@ celerybeat-schedule
 *~
 *.swp
 *.pyc
+.client_secrets.json
+.youtube-upload-credentials.json
 config.py
 cron/config.py
 cron/youtube-oauth.storage
