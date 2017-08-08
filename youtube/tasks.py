@@ -75,7 +75,7 @@ def create_playlists():
             Q(status=1) | Q(status=2),
             tutorial_detail__foss_id=foss_obj.id).values_list('language_id').distinct()
         lang_list = Language.objects.filter(id__in=tr_lang_list).exclude(
-            id__in=PlaylistInfo.objects.filter(foss_id=foss_obj.id))
+            id__in=PlaylistInfo.objects.filter(foss_id=foss_obj.id).values_list('language_id').distinct())
 
         for lang_obj in lang_list:
             title = '{} - {}'.format(foss_obj.foss, lang_obj.name)
