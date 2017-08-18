@@ -38,13 +38,13 @@ def upload_videos():
 
             options = {
                 'title': title_string,
-                'description': tresource.outline,
+                'description': title_string,#tresource.outline.encode('utf-8').strip(),
                 'tags': tresource.common_content.keyword.split(','),
                 'file': mp4_video_path
             }
 
             # try:
-            print 'uploading video', tresource.tutorial_detail.tutorial, '-', tresource.tutorial_detail.foss.foss
+            print 'uploading video', tresource.id, '-', tresource.tutorial_detail.tutorial, '-', tresource.tutorial_detail.foss.foss, '-', tresource.language.name
             video_id = upload_video(service, options)
             # except:
             #     video_id = None
