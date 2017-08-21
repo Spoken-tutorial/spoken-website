@@ -110,7 +110,7 @@
 
                       <div class='form-row'>
                         <div class='col-xs-12 form-group required'>
-                          <label class='control-label'>Software Course </label>
+                          <label class='control-label' id="course_label">Software Course </label>
                           {% render_field form.course class+="form-control course" tabindex="1" %}
                           {{ form.course.errors }}
                         </div>
@@ -308,10 +308,10 @@
           });
         }
       });
-
+      $('.course').html('<option>---------</option>');
       $('.foss_category').on('change', function(){
         foss_category = $(this).val();
-        $('.course').html('<option>---------</option>');
+        document.getElementById('course_label').innerHTML = 'Course list loading ...'
         if(foss_category != ''){
           $.ajax({
             url: "/software-training/get-course-option/",
@@ -323,6 +323,7 @@
               //$('.ajax-refresh-language').show();
             },
             success: function(data) {
+              document.getElementById('course_label').innerHTML = 'Software Course'
               // loading languages
               if(data && data['course_option']) {
                   $('.course').html(data['course_option']);

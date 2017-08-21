@@ -494,7 +494,7 @@ class TrainingRequestCreateView(CreateView):
   def get_form_kwargs(self):
     kwargs = super(TrainingRequestCreateView, self).get_form_kwargs()
     kwargs.update({'user' : self.request.user})
-    # kwargs.update({'foss_category' :(('', '---------'), (0, 'Foss available only for Training'), (1, 'Foss available for Training and Test')) })
+    kwargs.update({'foss_category' :(('', '---------'), (0, 'Foss available only for Training'), (1, 'Foss available for Training and Test')) })
     username = self.request.user
     if username.organiser.academic.institution_type.id == 5 or username.organiser.academic.institution_type.id == 13 or username.organiser.academic.institution_type.id == 15:
         kwargs.update({'course_type' :(('', '---------'), (0, 'Software Course outside lab hours'), (1, 'Software Course mapped in lab hours'), (2, ' Software Course unmapped in lab hours'), (3, ' EduEasy Software')) })
