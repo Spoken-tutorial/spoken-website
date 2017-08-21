@@ -518,16 +518,16 @@ class TrainingRequestCreateView(CreateView):
       form_data = form.save(commit=False)
       sb = StudentBatch.objects.get(pk=form_data.batch.id)
       if sb.student_count():
+        training_planner = TrainingPlanner.objects.get(pk=self.tpid)
         # checking if requested batch already have training request in requsted course
         is_batch_has_course = TrainingRequest.objects.filter(
           batch_id = form_data.batch.id,
-          course_id = form_data.course.id
+          course_id = form_data.course.id,
+          training_planner_id = training_planner.id
         ).count()
         if is_batch_has_course:
-          messages.error(self.request, 'This "%s" already taken/requested the selected "%s" course.' % (form_data.batch, form_data.course))
+          messages.error(self.request, 'This "%s" already taken/requested the selected "%s" course in current semester.' % (form_data.batch, form_data.course))
           return self.form_invalid(form)
-
-        training_planner = TrainingPlanner.objects.get(pk=self.tpid)
         # Check if course is full for this semester
         if form_data.department.id == 24:
           if training_planner.is_school_full(form_data.department.id, form_data.batch.id):
@@ -587,18 +587,18 @@ class TrainingRequestEditView(CreateView):
       if not sb.student_count():
         messages.error(self.request, 'There is no student present in this batch.')
         return self.form_invalid(form)
+      training_planner = self.training.training_planner
 
       # Check if batch has already has same foss course?
       if not ( (selectedBatch == self.training.batch) and (selectedCourse == self.training.course)):
         is_batch_has_course = TrainingRequest.objects.filter(
           batch = selectedBatch,
-          course = selectedCourse
+          course = selectedCourse,
+          training_planner_id = training_planner.id
         ).count()
         if is_batch_has_course:
-          messages.error(self.request, 'This "%s" already taken/requested the selected "%s" course.' % (selectedBatch, selectedCourse))
+          messages.error(self.request, 'This "%s" already taken/requested the selected "%s" course in current semester.' % (selectedBatch, selectedCourse))
           return self.form_invalid(form)
-
-      training_planner = self.training.training_planner
       # Check if course is full for this semester
       if not ( (selectedBatch == self.training.batch) and (selectedDept == self.training.department)):
         if training_planner.is_full(selectedDept.id, selectedBatch.id):
