@@ -51,10 +51,18 @@
                           {{ form.course_type.errors }}
                         </div>
                       </div>
+                      <div class='form-row'>
+                        <div class='col-xs-12 form-group required'>
+                          <label class='control-label'>Foss Category</label>
+                          {% render_field form.foss_category class+="form-control foss_category" tabindex="1" %}
+                          {{ form.foss_category.errors }}
+                          <small>No certificates will be provided for <b>"Foss available only for Training"</b></small>
+                        </div>
+                      </div>
 
                       <div class='form-row'>
                         <div class='col-xs-12 form-group required'>
-                          <label class='control-label'>Software Course </label>
+                          <label class='control-label' id="course_label">Software Course </label>
                           {% render_field form.course class+="form-control course" tabindex="1" %}
                           {{ form.course.errors }}
                         </div>
@@ -96,6 +104,33 @@
           });
         }
       });
+
+      $('.course').html('<option>---------</option>');
+      $('.foss_category').on('change', function(){
+        foss_category = $(this).val();
+        document.getElementById('course_label').innerHTML = 'Course list loading ...'
+        if(foss_category != ''){
+          $.ajax({
+            url: "/software-training/get-course-option/",
+            type: "POST",
+            data: {
+              foss_category: foss_category,
+            },
+            beforeSend: function() {
+              //$('.ajax-refresh-language').show();
+            },
+            success: function(data) {
+              document.getElementById('course_label').innerHTML = 'Software Course'
+              // loading languages
+              if(data && data['course_option']) {
+                  $('.course').html(data['course_option']);
+              }
+              //$('.ajax-refresh-language').hide();
+            }
+          });
+        }
+      });
+
     });
 
   </script>

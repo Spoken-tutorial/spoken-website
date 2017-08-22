@@ -77,10 +77,8 @@ class TrainingRequestForm(forms.ModelForm):
   def __init__(self, *args, **kwargs):
     user = kwargs.pop('user')
     course_type = kwargs.pop('course_type')
-    foss_category = kwargs.pop('foss_category')
     super(TrainingRequestForm, self).__init__(*args, **kwargs)
     self.fields['course_type'].choices = course_type
-    self.fields['foss_category'].choices = foss_category
 
 
     if kwargs and 'data' in kwargs:
@@ -89,13 +87,6 @@ class TrainingRequestForm(forms.ModelForm):
         department = kwargs['data']['department']
         self.fields['batch'].queryset = StudentBatch.objects.filter(academic_id=user.organiser.academic.id, stcount__gt=0, department_id=department)
         self.fields['batch'].initial =  kwargs['data']['batch']
-
-      if kwargs['data']['foss_category'] != '':
-        print "######################################"
-        foss_category = kwargs['data']['foss_category']
-        self.fields['course'].queryset = CourseMap.objects.filter(category=0, test=foss_category)
-        # self.fields['course'].initial =  kwargs['data']['course']
-
     # overwrite department choices
     self.fields['department'].queryset = Department.objects.filter(id__in=StudentBatch.objects.filter(academic=user.organiser.academic, stcount__gt=0).values_list('department_id'))
 
@@ -104,6 +95,7 @@ class TrainingRequestEditForm(forms.ModelForm):
   training_planner = forms.CharField()
   department = forms.ModelChoiceField(empty_label='---------', queryset=CourseMap.objects.none())
   batch = forms.ModelChoiceField(empty_label='---------', queryset=StudentBatch.objects.none())
+  foss_category = forms.ChoiceField(choices=[('', '---------'), (0, 'Foss available only for Training'), (1, 'Foss available for Training and Test')])
   course = forms.ModelChoiceField(empty_label='---------', queryset=CourseMap.objects.filter(category=0))
   class Meta:
     model = TrainingRequest
@@ -127,7 +119,7 @@ class TrainingRequestEditForm(forms.ModelForm):
 
     if not flag and training:
       self.fields['course_type'].initial = training.course_type
-      self.fields['course'].queryset = CourseMap.objects.filter(category=training.course.category)
+      self.fields['course'].queryset = CourseMap.objects.filter(category=0)
       self.fields['course'].initial = training.course_id
     flag = True
     if data and 'sem_start_date' in data:
