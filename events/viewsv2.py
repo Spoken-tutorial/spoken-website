@@ -32,6 +32,7 @@ from django.contrib import messages
 from django.template import RequestContext, loader
 from mdldjango.get_or_create_participant import get_or_create_participant
 from django.contrib.auth.decorators import login_required
+from mdldjango.models import MdlUser
 
 #pdf generate
 from reportlab.pdfgen import canvas
@@ -2352,6 +2353,7 @@ class UpdateStudentName(UpdateView):
   def form_valid(self, form, **kwargs):
     try:
       email = form.cleaned_data['email']
+      old_email = self.user.email
       self.user.student.gender = form.cleaned_data['gender']
       self.user.student.save()
       self.user.first_name = form.cleaned_data['first_name']
@@ -2370,11 +2372,19 @@ class UpdateStudentName(UpdateView):
         # Save student
         self.user.student.save()
         self.user.email = email
+        self.user.username = email
       self.user.save()
+      mdluser = MdlUser.objects.get(email=old_email)
+      mdluser.email = email
+      mdluser.username = email
+      mdluser.firstname = form.cleaned_data['first_name']
+      mdluser.lastname = form.cleaned_data['last_name']
+      mdluser.gender = form.cleaned_data['gender']
+      mdluser.save()
        #save testattendance table
       test_attendance = TestAttendance.objects.filter(student_id = self.user.student.id)
       if not test_attendance:
-        mdluser = MdlUser.objects.get(email=self.user.email)
+        # mdluser = MdlUser.objects.get(email=old_email)
         test_attendance = TestAttendance.objects.filter(mdluser_id=mdluser.id)
         if not test_attendance:
           return HttpResponseRedirect(self.success_url)
