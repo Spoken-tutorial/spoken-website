@@ -348,11 +348,11 @@ def learners(request):
 def tutorial_content(request, template='statistics/templates/statistics_content.html'):
     header = {
         1: SortableHeader('# ', False),
-        2: SortableHeader('Tutorial', False),
+        2: SortableHeader('tutorial_detail__tutorial', True, 'Tutorial'),
         3: SortableHeader('tutorial_detail__foss__foss', True, 'FOSS Course'),
-        4: SortableHeader('Level', False),
-        5: SortableHeader('language__name', False, 'Language'),
-        6: SortableHeader('created', False, 'Date Published')
+        4: SortableHeader('tutorial_detail__level', True, 'Level'),
+        5: SortableHeader('language__name', True, 'Language'),
+        6: SortableHeader('updated', True, 'Date Published')
     }
 
     published_tutorials_set = TutorialResource.objects.filter(status__gte=1)
