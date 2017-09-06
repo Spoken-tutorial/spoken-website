@@ -311,7 +311,7 @@
       $('.course').html('<option>---------</option>');
       $('.foss_category').on('change', function(){
         foss_category = $(this).val();
-        document.getElementById('course_label').innerHTML = 'Course list loading ...'
+        $('#course_label').html("Course list loading...");
         if(foss_category != ''){
           $.ajax({
             url: "/software-training/get-course-option/",
