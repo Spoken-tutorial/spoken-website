@@ -1138,6 +1138,24 @@ class GetBatchOptionView(JSONResponseMixin, View):
     }
     return self.render_to_json_response(context)
 
+class GetCourseOptionView(JSONResponseMixin, View):
+  @method_decorator(csrf_exempt)
+  def dispatch(self, *args, **kwargs):
+    return super(GetCourseOptionView, self).dispatch(*args, **kwargs)
+
+  def post(self, request, *args, **kwargs):
+    foss_category = self.request.POST.get('foss_category')
+    context = {}
+
+    course_option = "<option value=''>---------</option>"
+    courses = CourseMap.objects.filter(category=0, test=foss_category)
+
+    for course in courses:
+      course_option += "<option value=" + str(course.id) + ">" + str(course) + "</option>"
+    context = {
+      'course_option' : course_option,
+    }
+    return self.render_to_json_response(context)
 
 class GetBatchStatusView(JSONResponseMixin, View):
   department_id = None

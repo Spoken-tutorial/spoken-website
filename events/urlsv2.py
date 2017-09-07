@@ -175,6 +175,10 @@ urlpatterns = [
       GetBatchOptionView.as_view()
     ),
     url(
+      r'^get-course-option/', 
+      GetCourseOptionView.as_view()
+    ),
+    url(
       r'^get-batch-course-status/', 
       GetBatchStatusView.as_view()
     ),

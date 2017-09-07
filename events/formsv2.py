@@ -43,6 +43,7 @@ class UpdateStudentYearBatchForm(forms.ModelForm):
 class TrainingRequestForm(forms.ModelForm):
   department = forms.ModelChoiceField(empty_label='---------', queryset=CourseMap.objects.none())
   course_type = forms.ChoiceField(choices=[('', '---------'), (0, 'Software Course outside lab hours'), (1, 'Software Course mapped in lab hours'), (2, ' Software Course unmapped in lab hours')])
+  foss_category = forms.ChoiceField(choices=[('', '---------'), (0, 'Foss available only for Training'), (1, 'Foss available for Training and Test')])
   course = forms.ModelChoiceField(empty_label='---------', queryset=CourseMap.objects.filter(category=0))
   batch = forms.ModelChoiceField(empty_label='---------', queryset=StudentBatch.objects.none())
   training_planner = forms.CharField()
@@ -79,6 +80,7 @@ class TrainingRequestForm(forms.ModelForm):
     super(TrainingRequestForm, self).__init__(*args, **kwargs)
     self.fields['course_type'].choices = course_type
 
+
     if kwargs and 'data' in kwargs:
       # Generating students batch list based on department
       if kwargs['data']['department'] != '':
@@ -93,6 +95,7 @@ class TrainingRequestEditForm(forms.ModelForm):
   training_planner = forms.CharField()
   department = forms.ModelChoiceField(empty_label='---------', queryset=CourseMap.objects.none())
   batch = forms.ModelChoiceField(empty_label='---------', queryset=StudentBatch.objects.none())
+  foss_category = forms.ChoiceField(choices=[('', '---------'), (0, 'Foss available only for Training'), (1, 'Foss available for Training and Test')])
   course = forms.ModelChoiceField(empty_label='---------', queryset=CourseMap.objects.filter(category=0))
   class Meta:
     model = TrainingRequest
@@ -116,7 +119,7 @@ class TrainingRequestEditForm(forms.ModelForm):
 
     if not flag and training:
       self.fields['course_type'].initial = training.course_type
-      self.fields['course'].queryset = CourseMap.objects.filter(category=training.course.category)
+      self.fields['course'].queryset = CourseMap.objects.filter(category=0)
       self.fields['course'].initial = training.course_id
     flag = True
     if data and 'sem_start_date' in data:
