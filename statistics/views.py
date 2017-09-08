@@ -92,11 +92,12 @@ def training(request):
         3: SortableHeader('training_planner__academic__city__name', True, 'City'),
         4: SortableHeader('training_planner__academic__institution_name', True, 'Institution'),
         5: SortableHeader('course__foss__foss', True, 'FOSS'),
-        6: SortableHeader('course__category', True, 'Type'),
-        7: SortableHeader('training_planner__organiser__user__first_name', True, 'Organiser'),
-        8: SortableHeader('sem_start_date', True, 'Date'),
-        9: SortableHeader('participants', 'True', 'Participants'),
-        10: SortableHeader('Action', False)
+        6: SortableHeader('department', True, 'Department'),
+        7: SortableHeader('course__category', True, 'Type'),
+        8: SortableHeader('training_planner__organiser__user__first_name', True, 'Organiser'),
+        9: SortableHeader('sem_start_date', True, 'Date'),
+        10: SortableHeader('participants', 'True', 'Participants'),
+        11: SortableHeader('Action', False)
     }
 
     raw_get_data = request.GET.get('o', None)

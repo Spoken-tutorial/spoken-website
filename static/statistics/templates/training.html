@@ -122,6 +122,7 @@
             <td>{{ record.training_planner.academic.city }}</td>
             <td>{{ record.training_planner.academic }}</td>
             <td>{{ record.course.foss }}</td>
+            <td>{{ record.department }}</td>
             <td>{% if record.course_type == 1 %}Mapped{% elif record.course_type == 2 %}Unmapped{% else %}Outside{% endif %}</td>
             <td>{{ record.training_planner.organiser.user.first_name }}</td>
             <td>{{ record.sem_start_date|date:"d M Y" }}</td>
