@@ -43,6 +43,15 @@
                         {{ form.training_planner__academic__institution_name.errors }}
                     </div>
                 </div>
+
+                <div class="form-group">
+                    <label for="id_academic_institution_type" class="col-sm-4 control-label">Department</label>
+                    <div class="col-sm-8">
+                        {% render_field form.department class+="form-control department" tabindex="1" %}
+                        {{ form.department.errors }}
+                    </div>
+              </div>
+
                 {% if user|is_resource_person or user|get_administrator %}
                     <a target="_blank" class="pull-right btn btn-default " href="{% url 'reports:events_training_csv' %}{% if request.GET %}?{{ request.GET.urlencode }}&status={{ status_code }}{% else %}?status={{ status_code }} {% endif %}" class="addlink">Export to CSV</a>
                 {% endif %}
