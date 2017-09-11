@@ -129,6 +129,59 @@ def training(request):
     context['model'] = 'Workshop/Training'
     return render(request, 'statistics/templates/training.html', context)
 
+def fdp_training(request):
+    """ Organiser index page """
+    collectionSet = None
+    state = None
+
+    collectionSet = TrainingRequest.objects.filter(
+        participants__gt=0,
+        department=169,
+        sem_start_date__lte=datetime.now()
+    ).order_by('-sem_start_date')
+    header = {
+        1: SortableHeader('#', False),
+        2: SortableHeader('training_planner__academic__state__name', True, 'State'),
+        3: SortableHeader('training_planner__academic__city__name', True, 'City'),
+        4: SortableHeader('training_planner__academic__institution_name', True, 'Institution'),
+        5: SortableHeader('course__foss__foss', True, 'FOSS'),
+        6: SortableHeader('department', True, 'Department'),
+        7: SortableHeader('course__category', True, 'Type'),
+        8: SortableHeader('training_planner__organiser__user__first_name', True, 'Organiser'),
+        9: SortableHeader('sem_start_date', True, 'Date'),
+        10: SortableHeader('participants', 'True', 'Participants'),
+        11: SortableHeader('Action', False)
+    }
+
+    raw_get_data = request.GET.get('o', None)
+    collection = get_sorted_list(request, collectionSet, header, raw_get_data)
+    ordering = get_field_index(raw_get_data)
+
+    # find state id
+    if 'training_planner__academic__state' in request.GET and request.GET['training_planner__academic__state']:
+        state = State.objects.get(id=request.GET['training_planner__academic__state'])
+
+    collection = TrainingRequestFilter(request.GET, queryset=collection, state=state)
+    # find participants count
+    participants = collection.qs.aggregate(Sum('participants'))
+    #
+    chart_query_set = collection.qs.extra(select={'year': "EXTRACT(year FROM sem_start_date)"}).values('year').order_by(
+        '-year').annotate(total_training=Count('sem_start_date'), total_participant=Sum('participants'))
+    chart_data = ''
+    for data in chart_query_set:
+        chart_data += "['" + str(data['year']) + "', " + str(data['total_participant']) + "],"
+    context = {}
+    context['form'] = collection.form
+    context['chart_data'] = chart_data
+    page = request.GET.get('page')
+    collection = get_page(collection, page)
+    context['collection'] = collection
+    context['header'] = header
+    context['ordering'] = ordering
+    context['participants'] = participants
+    context['model'] = 'Workshop/Training'
+    return render(request, 'statistics/templates/pmmm_stats.html', context)
+
 
 def training_participant(request, rid):
     context = {}
