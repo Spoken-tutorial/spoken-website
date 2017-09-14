@@ -4,6 +4,7 @@ celerybeat-schedule
 *.swp
 *.pyc
 .client_secrets.json
+certificate/fa_workshop_template/template_FAW2017Pcertificate
 .youtube-upload-credentials.json
 config.py
 cron/config.py
