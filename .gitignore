@@ -75,3 +75,5 @@ nosetests.xml
 .mr.developer.cfg
 .project
 .pydevproject
+
+cron/nohup.out
