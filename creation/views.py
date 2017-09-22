@@ -2331,7 +2331,7 @@ def ajax_change_component_status(request):
                 compValue = getattr(tr_rec.common_content, comp + '_status')
             if compValue:
                 data += '<option value="5">Need Improvement</option>'
-                if comp in ['code', 'assignment']:
+                if comp in ['code', 'assignment','additional_material']:
                     data += '<option value="6">Not Required</option>'
         elif foss and lang:
             data = ['', '']
@@ -2343,7 +2343,7 @@ def ajax_change_component_status(request):
             for tutorial in tutorials:
                 data[0] += '<option value="' + str(tutorial.tutorial_detail.id) + '">' + tutorial.tutorial_detail.tutorial + '</option>'
             if lang_rec.name == 'English':
-                data[1] += '<option value="slide">Slides</option><option value="video">Video</option><option value="code">Codefiles</option><option value="assignment">Assignment</option><option value="prerequisite">Prerequisite</option><option value="keyword">Keywords</option>'
+                data[1] += '<option value="slide">Slides</option><option value="video">Video</option><option value="code">Codefiles</option><option value="assignment">Assignment</option><option value="prerequisite">Prerequisite</option><option value="keyword">Keywords</option><option value="additional_material">Additional material</option>'
             else:
                 data[1] += '<option value="video">Video</option>'
             data[1] = '<option value="">Select Component</option>' + data[1]

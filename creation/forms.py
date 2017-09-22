@@ -175,7 +175,7 @@ class ChangeComponentStatusForm(forms.Form):
                             if args[0]['component']:
                                 comp_init_data = args[0]['component']
                         if lang.name == 'English':
-                            choices = [('outline', 'Outline'), ('script', 'Script'), ('slide', 'Slides'), ('video', 'Video'), ('code', 'Codefiles'), ('assignment', 'Assignment'), ('prerequisite', 'Prerequisite'), ('keyword', 'Keywords')]
+                            choices = [('outline', 'Outline'), ('script', 'Script'), ('slide', 'Slides'), ('video', 'Video'), ('code', 'Codefiles'), ('assignment', 'Assignment'), ('prerequisite', 'Prerequisite'), ('keyword', 'Keywords'), ('additional_material', 'Additional Material')]
                         else:
                             choices = [('outline', 'Outline'), ('script', 'Script'), ('video', 'Video')]
                         if len(choices):
@@ -197,7 +197,7 @@ class ChangeComponentStatusForm(forms.Form):
                                 compValue = getattr(tr_rec.common_content, comp_init_data + '_status')
                             if compValue:
                                 choices.append(("5", 'Need Improvement'))
-                                if comp_init_data in ['code', 'assignment']:
+                                if comp_init_data in ['code', 'assignment','additional_material']:
                                     choices.append(("6", 'Not Required'))
                             if len(choices):
                                 self.fields['status'].widget.attrs = {}
