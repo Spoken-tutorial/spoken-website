@@ -184,9 +184,11 @@
             success: function (data) {
                 if (data.is_c_and_cpp) {
                     $('#batch_foss').show();
+                    $("#id_foss").prop('required',true);
                 }
                 else{
                     $('#batch_foss').hide();
+                    $("#id_foss").prop('required',false);
                 }
             }
           });
