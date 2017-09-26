@@ -73,7 +73,7 @@
                     <div class="form-group training_category_group" id = "batch_foss">
                         <label class="col-sm-3 control-label" for= "id_foss">Foss</label>
                         <div class="col-sm-9">
-                        <select id="id_foss" name="id_foss" class="form-control">
+                        <select id="id_foss" name="id_foss" class="form-control" >
                             <option value selected="selected">---------</option>
                             <option value="56">C</option>
                             <option value="57">Cpp</option>
@@ -184,9 +184,11 @@
             success: function (data) {
                 if (data.is_c_and_cpp) {
                     $('#batch_foss').show();
+                    $("#id_foss").prop('required',true);
                 }
                 else{
                     $('#batch_foss').hide();
+                    $("#id_foss").prop('required',false);
                 }
             }
           });
