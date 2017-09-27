@@ -3,8 +3,15 @@ import re
 import json
 import time
 import subprocess
+from scipy.io import wavfile
+import wave
+import math
+import numpy
+from os import listdir
+from os.path import isfile,join
 from decimal import Decimal
 from urllib import urlopen, quote, unquote_plus
+from scipy.stats import signaltonoise
 from django.conf import settings
 from django.views import generic
 from django.contrib import messages
@@ -154,6 +161,7 @@ def create_thumbnail(row, attach_str, thumb_time, thumb_size):
         process = subprocess.Popen(['/usr/bin/ffmpeg', '-i', filepath + row.video, '-r', str(30), '-ss', str(thumb_time), '-s', thumb_size, '-vframes', str(1), '-f', 'image2', filepath + filename], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         stdout, stderr = process.communicate()
         if stderr:
+            print "-----------------------------------"
             print filepath + filename
             print stderr
     except Exception, e:
@@ -860,6 +868,11 @@ def upload_keywords(request, trid):
 @login_required
 def upload_component(request, trid, component):
     tr_rec = None
+    #to store the status of the video being uploaded..
+    #check_status=1 if the video is uploaded successfull without any errors of noise or loudness
+    #check_status=2 if the video is too noisy or too loud
+   
+    check_status=0
     try:
         tr_rec = TutorialResource.objects.get(pk = trid, status = 0)
         ContributorRole.objects.get(user_id = request.user.id, foss_category_id = tr_rec.tutorial_detail.foss_id, language_id = tr_rec.language_id, status = 1)
@@ -882,6 +895,7 @@ def upload_component(request, trid, component):
                     comp_log.tutorial_resource = tr_rec
                     comp_log.component = component
                     if component == 'video':
+                        #if the component being uploaded is a video find the file path and the full path upto the video in the media folder 
                         file_name, file_extension = os.path.splitext(request.FILES['comp'].name)
                         file_name =  tr_rec.tutorial_detail.tutorial.replace(' ', '-') + '-' + tr_rec.language.name + file_extension
                         file_path = settings.MEDIA_ROOT + 'videos/' + str(tr_rec.tutorial_detail.foss_id) + '/' + str(tr_rec.tutorial_detail.id) + '/'
@@ -906,13 +920,99 @@ def upload_component(request, trid, component):
                         if not tr_rec.version:
                             tr_rec.version = 1
                         tr_rec.video_thumbnail_time = '00:' + request.POST.get('thumb_mins', '00') + ':' + request.POST.get('thumb_secs', '00')
-                        tr_rec.save()
+                        ratio=0
+                        #--------------------------------------                   
+                        if check_status is 0:   
+                            #delete the already present thumbnails as it was giving some error while replacing the video
+                            onlyfiles = [f for f in listdir(file_path) if isfile(join(file_path, f))]  
+                            for i in onlyfiles:
+                                if i.endswith(".png"):
+                                    command="rm "+file_path+i
+                                    subprocess.call(command,shell=True)                                                       
+                            #to make separate folder for editing files
+                            cmd="mkdir "+file_path+"video_edit"
+                            subprocess.call(cmd,shell=True)
+                            #to extract audio from the video in .wav format
+                            command ="ffmpeg -y -i "+full_path+" -ab 160k -ac 2 -ar 44100 -vn "+file_path+"video_edit/sample.wav"
+                            subprocess.call(command,shell=True)
+                            # to find the signal to noise ratio
+                            samplerate, data =wavfile.read(file_path+"video_edit/sample.wav")
+                            try:
+                                samplerate=numpy.sum(data,axis=1)
+                            except:
+                                pass
+                            norm=samplerate/ (max(numpy.amax(samplerate), -1*numpy.amin(samplerate)))
+                            ratio=signaltonoise(norm,axis=None)
+                            ratio=(ratio+2)/(4)
+                            if(ratio<0):
+                                ratio=0
+                            # to check the ampllitude of the uploaded video
+                            sampFreq, snd = wavfile.read(file_path+"video_edit/sample.wav")
+                            snd=snd / (2.**15)
+                            s1=snd[:,0]
+                            mean=numpy.sqrt(numpy.mean(numpy.square(s1)))
+                            # noise check
+                            # if(ratio>0)&(ratio<1):
+                            # to reduce the noise from the audio
+                            if(ratio<0.5 and mean<0.20):
+                                #creating the noisefree wav file 
+                                command ="bash "+settings.MEDIA_ROOT+"noNoise/noNoise.sh "+file_path+"video_edit/sample.wav "+ str(ratio)
+                                subprocess.call(command,shell=True)
+
+                                #the video is fine to be uploaded
+                                check_status=1
+
+                                #converting noisefree wav to mp3
+                                command="ffmpeg -y -i /tmp/noisefree.wav "+full_path[:-4]+".mp3"
+                                subprocess.call(command,shell=True)
+
+                                #remoing the audio from the original video
+                                command="ffmpeg -y -i "+full_path+" -an -codec copy "+file_path+"noaudio.mov"
+                                subprocess.call(command,shell=True)
+
+                                #converting the silent video in mov to webm
+                                command="ffmpeg -y -i "+file_path+"noaudio.mov -vcodec libvpx -cpu-used -5 -deadline realtime "+full_path[:-12]+".webm"
+                                subprocess.call(command,shell=True)
+                                
+                                # to remove extra files
+                                cmd="rm -r "+file_path+"video_edit"
+                                subprocess.call(cmd,shell=True)
+                                
+                                cmd="rm /tmp/noisefree.wav" 
+                                subprocess.call(cmd,shell=True)
+                                
+                                cmd="rm "+file_path+"noaudio.mov"
+                                subprocess.call(cmd,shell=True)
+                                
+                                
+                            else:
+                                #the video is either too noisy or loud
+                                check_status=2
+
+                        print tr_rec.language.name 
+                        
                         if tr_rec.language.name == 'English':
+                            #to create the thumbnails
                             create_thumbnail(tr_rec, 'Big', tr_rec.video_thumbnail_time, '700:500')
                             create_thumbnail(tr_rec, 'Small', tr_rec.video_thumbnail_time, '170:127')
+                            thumb_status=1
+                            cmd="rm "+full_path
+                            subprocess.call(cmd,shell=True)
                         comp_log.save()
                         comp_title = tr_rec.tutorial_detail.foss.foss + ': ' + tr_rec.tutorial_detail.tutorial + ' - ' + tr_rec.language.name
+                        
                         add_adminreviewer_notification(tr_rec, comp_title, 'Video waiting for admin review')
+                        #response_msg = 'Video uploaded successfully!'
+                        '''   else:
+                                response_msg = 'Noise can not removed from video .. Upload Again!'
+                        else:
+                            if(db<20):
+                                response_msg = 'Audio not audible enough .. Upload Again!'
+                            else:
+                                response_msg = 'audio level can harm the ears .. Upload Again!'''
+                        #-----------------------------------------
+
+                        tr_rec.save()
                         response_msg = 'Video uploaded successfully!'
                     elif component == 'slide':
                         file_name, file_extension = os.path.splitext(request.FILES['comp'].name)
@@ -992,14 +1092,34 @@ def upload_component(request, trid, component):
                     print e
                     error_msg = 'Something went wrong, please try again later.'
                 form = ComponentForm(component)
-                if response_msg:
-                    messages.success(request, response_msg)
+                #---------------------------------------------------
+                if(check_status==1):
+                    response_msg="video uploaded!!!"
+                    tr_rec.save()
+                elif(check_status==2):
+                    if(ratio>0.5):
+                        error_msg="video quality is poor..too much noise...Please try another video!!"
+                    if(mean>0.2):
+                        error_msg="video quality is poor...too loud...Please try with another video!!!"
+                    cmd="rm "+file_path+"*"
+                    subprocess.call(cmd,shell=True)
+                    cmd="rm -r "+file_path+"video_edit"
+                    subprocess.call(cmd,shell=True)
+
+                #elif(check_status==3):
+                    #response_msg="video uploaded successfully"
+
                 if error_msg:
                     messages.error(request, error_msg)
+
+                elif response_msg:
+                    messages.success(request, response_msg)
+
                 context = {
                     'form': form,
                     'tr': tr_rec,
                     'title': component.replace('_', ' '),
+                    'check_status':check_status,
                 }
                 context.update(csrf(request))
                 return render(request, 'creation/templates/upload_component.html', context)
@@ -1008,6 +1128,7 @@ def upload_component(request, trid, component):
                     'form': form,
                     'tr': tr_rec,
                     'title': component.replace('_', ' '),
+                    'check_status':check_status,
                 }
                 context.update(csrf(request))
                 return render(request, 'creation/templates/upload_component.html', context)

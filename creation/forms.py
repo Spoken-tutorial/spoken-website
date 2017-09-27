@@ -458,7 +458,7 @@ class ComponentForm(forms.Form):
     def clean(self):
         super(ComponentForm, self).clean()
         file_types = {
-            'video': 'video/ogg',
+            'video': 'video/quicktime',
             'slide': ['application/zip', 'application/x-zip-compressed'],
             'code': ['application/zip', 'application/x-zip-compressed'],
             'assignment': ['text/plain', 'application/pdf'],
