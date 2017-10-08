@@ -1,7 +1,10 @@
+# Third Party Stuff
 from django import template
 from django.contrib.auth.models import User
+
+# Spoken Tutorial Stuff
+from events.models import TestAttendance, TrainingAttendance
 from mdldjango.models import *
-from events.models import TrainingAttendance, TestAttendance
 
 register = template.Library()
 

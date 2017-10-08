@@ -7,9 +7,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
-from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect, HttpResponseForbidden
+from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseForbidden, HttpResponseRedirect
 from django.shortcuts import render
-
 from oauth2client import xsrfutil
 
 # Spoken Tutorial Stuff
@@ -18,7 +17,6 @@ from creation.views import is_administrator, is_qualityreviewer
 from youtube.ajax import *
 from youtube.core import *
 from youtube.forms import *
-
 
 YOUTUBE_UPLOAD_SCOPE = ["https://www.googleapis.com/auth/youtube.upload", "https://www.googleapis.com/auth/youtube"]
 

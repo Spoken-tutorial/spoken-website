@@ -1,12 +1,14 @@
-import os
+# Standard Library
 import locale
+import os
+
+# Third Party Stuff
+import googleapiclient.discovery
 import httplib2
 import oauth2client
-import googleapiclient.discovery
-
-from oauth2client import xsrfutil
 from apiclient.http import MediaFileUpload
 from django.conf import settings
+from oauth2client import xsrfutil
 
 # Spoken Tutorial Stuff
 from youtube.models import *

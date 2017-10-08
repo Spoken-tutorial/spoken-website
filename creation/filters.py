@@ -1,5 +1,8 @@
+# Third Party Stuff
 import django_filters
-from creation.models import TutorialResource, PublishTutorialLog
+
+# Spoken Tutorial Stuff
+from creation.models import TutorialResource
 
 
 class CreationStatisticsFilter(django_filters.FilterSet):
@@ -8,4 +11,4 @@ class CreationStatisticsFilter(django_filters.FilterSet):
 
     class Meta:
         model = TutorialResource
-        fields = ['tutorial_detail__foss','language', 'tutorial_detail__level']
+        fields = ['tutorial_detail__foss', 'language', 'tutorial_detail__level']

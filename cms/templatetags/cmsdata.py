@@ -1,6 +1,9 @@
+# Third Party Stuff
 from django import template
-from cms.models import Block, Nav, SubNav
 from django.conf import settings
+
+# Spoken Tutorial Stuff
+from cms.models import Block, Nav, SubNav
 from cms.sortable import *
 
 register = template.Library()

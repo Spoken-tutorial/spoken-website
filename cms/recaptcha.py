@@ -1,8 +1,11 @@
-from django.conf import settings
-from django.contrib import messages
+# Standard Library
+import json
 import urllib
 import urllib2
-import json
+
+# Third Party Stuff
+from django.conf import settings
+from django.contrib import messages
 
 ''' reCAPTCHA validation '''
 def recaptcha_valdation(request):

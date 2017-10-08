@@ -1,23 +1,28 @@
-from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render, render_to_response, get_object_or_404
-from django.core.context_processors import csrf
-from django.template import RequestContext
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth import authenticate, login, logout
-from django.core.mail import EmailMultiAlternatives
-from django.contrib import messages
-from django.utils import timezone
+# Standard Library
+import random
+import string
+
+# Third Party Stuff
 from django.conf import settings
-from django.http import Http404
+from django.contrib import messages
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.core.context_processors import csrf
+from django.core.mail import EmailMultiAlternatives
+from django.http import HttpResponseRedirect
+from django.shortcuts import get_object_or_404, render, render_to_response
+from django.template import RequestContext
+from hashids import Hashids
+from PIL import Image
+
+# Spoken Tutorial Stuff
+from cms.forms import *
 from cms.models import *
+from cms.services import *
 from events.models import Student
 from mdldjango.models import MdlUser
-from cms.forms import *
-from PIL import Image
-import random, string
-from cms.services import *
 from mdldjango.urls import *
-from hashids import Hashids
+
 
 def dispatcher(request, permalink=''):
     if permalink == '':
@@ -33,18 +38,19 @@ def dispatcher(request, permalink=''):
     }
     return render(request, 'cms/templates/page.html', context)
 
+
 def create_profile(user, phone):
     confirmation_code = ''.join(random.choice(string.ascii_uppercase + string.digits + string.ascii_lowercase) for x in range(33))
     profile = Profile(user=user, confirmation_code=confirmation_code, phone=phone)
     profile.save()
     return profile
 
-def account_register(request):
 
+def account_register(request):
     # import recaptcha validate function
     from cms.recaptcha import recaptcha_valdation, get_recaptcha_context
 
-    #reCAPTCHA Site key
+    # reCAPTCHA Site key
     context = get_recaptcha_context()
 
     if request.method == 'POST':
@@ -60,18 +66,18 @@ def account_register(request):
             first_name = request.POST['first_name']
             last_name = request.POST['last_name']
             phone = request.POST['phone']
-            user = User.objects.create_user(username,email,password)
+            user = User.objects.create_user(username, email, password)
             user.first_name = first_name
             user.last_name = last_name
             user.is_active = False
             user.save()
             create_profile(user, phone)
             send_registration_confirmation(user)
-            messages.success(request, 
+            messages.success(request,
                 "Thank you for registering.\
                 Please confirm your registration by clicking on the activation link which has been sent to your registered email %s.<br>\
                 In case if you do not receive any activation mail kindly verify and activate your account from below link :<br>\
-                <a href='http://spoken-tutorial.org/accounts/verify/'>http://spoken-tutorial.org/accounts/verify/</a>" 
+                <a href='http://spoken-tutorial.org/accounts/verify/'>http://spoken-tutorial.org/accounts/verify/</a>"
                  % (email))
             return HttpResponseRedirect('/')
         context['form'] = form
@@ -82,9 +88,10 @@ def account_register(request):
         context.update(csrf(request))
         return render_to_response('cms/templates/register.html', context)
 
+
 def send_registration_confirmation(user):
     p = Profile.objects.get(user=user)
-    #user.email = "k.sanmugam2@gmail.com"
+    # user.email = "k.sanmugam2@gmail.com"
     # Sending email when an answer is posted
     subject = 'Account Active Notification'
     message = """Dear {0},
@@ -181,11 +188,12 @@ def account_login(request):
         return render(request, 'cms/templates/login.html', context)
     return HttpResponseRedirect('/')
 
+
 @login_required
 def account_logout(request):
-    context = RequestContext(request)
     logout(request)
     return HttpResponseRedirect('/')
+
 
 @login_required
 def account_profile(request, username):
@@ -373,8 +381,9 @@ def change_password(request):
     context.update(csrf(request))
     return render(request, 'cms/templates/change_password.html', context)
 
+
 def confirm_student(request, token):
-    mdluserid = Hashids(salt = settings.SPOKEN_HASH_SALT).decode(token)[0]
+    mdluserid = Hashids(salt=settings.SPOKEN_HASH_SALT).decode(token)[0]
     try:
         mdluser = MdlUser.objects.filter(pk=mdluserid).first()
         user = User.objects.get(email=mdluser.email)
@@ -396,6 +405,7 @@ def confirm_student(request, token):
     except ObjectDoesNotExist:
         messages.error(request, "Your account not activated!. Please try again!")
         return HttpResponseRedirect('/')
+
 
 def verify_email(request):
   context = {}

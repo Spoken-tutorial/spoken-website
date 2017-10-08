@@ -1,5 +1,9 @@
+# Third Party Stuff
+from django.conf.urls import include, patterns, url
+
+# Spoken Tutorial Stuff
 from mdldjango.urls import *
-from django.conf.urls import patterns, url, include
+
 urlpatterns = patterns('',
 
 	url(r'^accounts/register/$', 'cms.views.account_register', name='register'),

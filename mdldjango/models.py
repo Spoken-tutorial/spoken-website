@@ -1,4 +1,6 @@
+# Third Party Stuff
 from django.db import models
+
 
 class MdlUser(models.Model):
     id = models.BigIntegerField(primary_key=True)
@@ -152,4 +154,3 @@ class MdlRoleAssignments(models.Model):
     sortorder = models.BigIntegerField()
     class Meta:
         db_table = u'mdl_role_assignments'
-

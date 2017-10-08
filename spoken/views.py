@@ -1,35 +1,32 @@
-from django.http import HttpResponse, HttpResponseRedirect, \
-    HttpResponsePermanentRedirect
-from django.template import RequestContext
-from django.shortcuts import render
-from django.contrib import messages
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
-from django.core.context_processors import csrf
-from django.views.decorators.csrf import csrf_exempt
-from django.core.mail import EmailMultiAlternatives
-from django.db.models import Q
-from django.conf import settings
-from forms import *
-import os
-from django.http import Http404
-from django.core.exceptions import PermissionDenied
-from urllib import urlopen, quote, unquote_plus
-import json
+# Standard Library
 import datetime
-from dateutil.relativedelta import relativedelta
-from creation.subtitles import *
-from creation.views import get_video_info, is_administrator
-from creation.models import TutorialCommonContent, TutorialDetail, TutorialResource, Language
-from cms.models import SiteFeedback, Event, NewsType, News, Notification
-from events.views import get_page
-from spoken.search import search_for_results
-from mdldjango.models import MdlUser
-from forums.models import Question
-from cms.forms import *
-from spoken.filters import NewsStateFilter
+import json
+import os
+from urllib import quote, unquote_plus, urlopen
 
+# Third Party Stuff
+from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth.models import User
+from django.core.context_processors import csrf
+from django.core.exceptions import PermissionDenied
+from django.db.models import Q
+from django.http import Http404, HttpResponse, HttpResponseRedirect
+from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
+
+# Spoken Tutorial Stuff
+from cms.forms import *
+from cms.models import Event, News, NewsType, Notification, SiteFeedback
+from creation.models import Language, TutorialDetail, TutorialResource
+from creation.subtitles import *
+from creation.views import get_video_info
+from events.views import get_page
+from forums.models import Question
+
+from .filters import NewsStateFilter
+from .forms import *
+from .search import search_for_results
 
 
 def is_resource_person(user):
@@ -360,7 +357,7 @@ def admin_testimonials_edit(request, rid):
                     ext = os.path.splitext(filename)[1].lower()
                     full_path = file_path + str(rid) + ext
                     fout = open(full_path, 'wb+')
-                    
+
                     # Iterate through the chunks.
                     for chunk in f.chunks():
                         fout.write(chunk)

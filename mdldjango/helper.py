@@ -1,11 +1,18 @@
-from models import MdlUser
-from events.models import *
-from django.core.mail import EmailMultiAlternatives
+# Standard Library
 import hashlib
 
+# Third Party Stuff
+from django.core.mail import EmailMultiAlternatives
+from models import MdlUser
+
+# Spoken Tutorial Stuff
+from events.models import *
+
+
 def encript_password(password):
-    password = hashlib.md5(password+'VuilyKd*PmV?D~lO19jL(Hy4V/7T^G>p').hexdigest()
+    password = hashlib.md5(password + 'VuilyKd*PmV?D~lO19jL(Hy4V/7T^G>p').hexdigest()
     return password
+
 
 def get_moodle_user(academic_id, firstname, lastname, gender, email):
     username = email
@@ -41,7 +48,7 @@ def get_moodle_user(academic_id, firstname, lastname, gender, email):
         mdluser.gender = gender
         mdluser.save()
         mdluser = MdlUser.objects.filter(email = email, firstname= firstname, username=username, password=password).first()
-        
+
         # send password to email
         subject  = "Spoken Tutorial Online Test password"
         to = [mdluser.email]

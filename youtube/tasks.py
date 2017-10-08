@@ -1,9 +1,12 @@
+# Standard Library
 import os
 import time
 
-from django.db.models import Q
+# Third Party Stuff
 from django.conf import settings
+from django.db.models import Q
 
+# Spoken Tutorial Stuff
 from creation.models import *
 from youtube.core import *
 from youtube.utils import *
