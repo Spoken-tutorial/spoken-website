@@ -1,5 +1,5 @@
 # Standard Library
-import datetime
+import datetime as dt
 import os
 import time
 
@@ -99,18 +99,18 @@ def index(request):
             ongoing_test = None
             if category == 3:
                 upcoming_workshop = []
-                upcoming_workshop = Training.objects.filter((Q(status = 10) | Q(status = 11) | Q(status = 12) |Q(status = 3)), academic_id=mdluser.institution, tdate__lte=datetime.date.today()).order_by('-tdate')
+                upcoming_workshop = Training.objects.filter((Q(status = 10) | Q(status = 11) | Q(status = 12) |Q(status = 3)), academic_id=mdluser.institution, tdate__lte=dt.datetime.date.today()).order_by('-tdate')
                 #up = Training.objects.filter(id=23270)[0]
                 #upcoming_workshop.append(up)
                 #p = up.trainingattendance_set.get(mdluser_id=mdluser.id)
             if category == 5:
-                upcoming_test = Test.objects.filter(status=2, academic_id=mdluser.institution, tdate__gt=datetime.date.today()).order_by('-tdate')
+                upcoming_test = Test.objects.filter(status=2, academic_id=mdluser.institution, tdate__gt=dt.datetime.date.today()).order_by('-tdate')
             if category == 1:
                 past_workshop = TrainingAttend.objects.filter(student__user__email = mdluser.email).order_by('-training__sem_start_date')
             if category == 2:
                 past_test = Test.objects.filter(id__in = TestAttendance.objects.filter(mdluser_id = mdluser.id).values_list('test_id'), status = 4).order_by('-tdate')
             if category == 4:
-                ongoing_test = Test.objects.filter(Q(status=2)|Q(status=3), academic_id=mdluser.institution, tdate__lte=datetime.date.today()).order_by('-tdate')
+                ongoing_test = Test.objects.filter(Q(status=2)|Q(status=3), academic_id=mdluser.institution, tdate__lte=dt.datetime.date.today()).order_by('-tdate')
 
             context = {
                 #'p': p,
