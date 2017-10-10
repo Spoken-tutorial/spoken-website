@@ -1,6 +1,12 @@
+# Standard Library
+import cookielib
+import datetime
 from HTMLParser import HTMLParser
-import time, mechanize, cookielib, datetime
+
+# Third Party Stuff
+import mechanize
 from BeautifulSoup import BeautifulSoup
+
 
 class MLStripper(HTMLParser):
     def __init__(self):

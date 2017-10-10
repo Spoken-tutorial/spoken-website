@@ -1,19 +1,19 @@
-import os.path
-from django.conf import settings
-from django.core.validators import RegexValidator
-from django.contrib.sessions.models import Session
+# Third Party Stuff
+from django import forms
 from django.contrib.auth.models import User
 from django.db.models import Q
-from django import forms
 
+# Spoken Tutorial Stuff
 from creation.models import *
-from creation.models import BrochureDocument
+
 
 class FossAvailableForTestForm(forms.ModelForm):
-    foss = forms.ModelChoiceField(queryset = FossCategory.objects.filter(status=True).order_by('foss'))
+    foss = forms.ModelChoiceField(queryset=FossCategory.objects.filter(status=True).order_by('foss'))
+
     class Meta:
         model = FossAvailableForTest
         exclude = ['created']
+
 
 class UploadPrerequisiteForm(forms.Form):
     foss_category = forms.ChoiceField(
@@ -727,6 +727,7 @@ class SuggestTopicForm(forms.ModelForm):
         required = True,
         error_messages = {'required': 'Please select Yes or No for this option'}
     )
+
     class Meta:
         model = SuggestTopic
         exclude = ['user', 'created']
@@ -782,7 +783,7 @@ class AvailableFossForm(forms.ModelForm):
         help_text = "",
         error_messages = {'required': 'FOSS category field required.'}
     )
-    
+
 class UpdatePrerequisiteForm(forms.Form):
     source_foss = forms.ChoiceField(
         choices = [('', '-- Select Foss --'),] + list(FossCategory.objects.filter(status=1).values_list('id', 'foss').order_by('foss')),

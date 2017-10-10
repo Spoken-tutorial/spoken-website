@@ -1,7 +1,6 @@
-import os
-from django.db import models
-from django.conf import settings
+# Third Party Stuff
 from django.contrib.auth.models import User
+from django.db import models
 
 
 class Language(models.Model):

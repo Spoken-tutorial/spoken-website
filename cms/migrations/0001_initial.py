@@ -1,10 +1,15 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.db import models, migrations
+# Standard Library
 import datetime
-import cms.models
+
+# Third Party Stuff
 from django.conf import settings
+from django.db import migrations, models
+
+# Spoken Tutorial Stuff
+import cms.models
 
 
 class Migration(migrations.Migration):

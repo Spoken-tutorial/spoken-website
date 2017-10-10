@@ -1,19 +1,21 @@
-import os
+# Standard Library
 import json
+import os
 import zipfile
-import tempfile
-
 from datetime import datetime
-from django.http import HttpResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.core.servers.basehttp import FileWrapper
-from django.core.context_processors import csrf
-from django.shortcuts import render
+
+# Third Party Stuff
 from django.conf import settings
+from django.core.context_processors import csrf
 from django.db.models import Q
-from creation.models import *
+from django.http import HttpResponse
+from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
+
+# Spoken Tutorial Stuff
 from cdcontent.forms import *
-from forums.models import Question,Answer
+from creation.models import *
+from forums.models import Answer, Question
 
 
 # Create your views here.
@@ -31,7 +33,7 @@ def humansize(nbytes):
 
     i = 0
 
-    while nbytes >= 1024 and i < len(suffixes)-1:
+    while nbytes >= 1024 and i < len(suffixes) - 1:
         nbytes /= 1024.
         i += 1
 
@@ -278,7 +280,7 @@ def home(request):
                                 convert_template_to_html_file(archive, filepath, request, "cdcontent/templates/answer_to_question.html", ctx)
 
 
-                       
+
 
                         filepath = 'spoken/videos/' + str(foss_rec.id) + '/list-videos-' + language.name + '.html'
                         ctx = {'collection': tr_recs, 'foss_details': all_foss_details,

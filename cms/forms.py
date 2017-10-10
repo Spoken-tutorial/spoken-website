@@ -1,22 +1,20 @@
+# Third Party Stuff
 from django import forms
-from cms.models import *
-from events.models import *
 from django.contrib.auth.models import User
-from nicedit.widgets import NicEditWidget
+from django.core.validators import RegexValidator
 from django.utils.translation import ugettext_lazy as _
-from django.core.validators import MinLengthValidator, MinValueValidator, \
-    RegexValidator, URLValidator
-from django.template.defaultfilters import filesizeformat
+from nicedit.widgets import NicEditWidget
 from validate_email import validate_email
 
+# Spoken Tutorial Stuff
+from cms.models import *
+from events.models import *
+
+
 class LoginForm(forms.Form):
-    username = forms.CharField(
-        required = True
-    )
-    password = forms.CharField(
-        widget = forms.PasswordInput,
-        required=True
-    )
+    username = forms.CharField(required=True)
+    password = forms.CharField(widget=forms.PasswordInput, required=True)
+
 
 class RegisterForm(forms.Form):
     username = forms.CharField(
@@ -74,7 +72,6 @@ class RegisterForm(forms.Form):
         except User.DoesNotExist:
             return email
         raise forms.ValidationError(u'%s already exists' % email )
-
 
     def clean(self):
         password = self.cleaned_data.get('password')
@@ -236,5 +233,6 @@ class NewsAdditionaFieldAdmin(forms.ModelForm):
             return content
 '''
 
+
 class VerifyForm(forms.Form):
-  email = forms.EmailField(required=True)
+    email = forms.EmailField(required=True)

@@ -14,7 +14,7 @@ from django.utils.timezone import now
 from cms.sortable import *
 from events.filters import AcademicCenterFilter, TestFilter, TrainingRequestFilter
 from events.models import *
-from creation.models import TutorialResource, PublishTutorialLog
+from creation.models import TutorialResource
 from creation.filters import CreationStatisticsFilter
 from events.views import get_page
 from .forms import LearnerForm

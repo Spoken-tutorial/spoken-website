@@ -8,6 +8,8 @@ from __future__ import absolute_import, print_function, unicode_literals
 # Third Party Stuff
 from django.core.management.base import BaseCommand
 from django.db import transaction as tx
+
+# Spoken Tutorial Stuff
 from creation.models import FossSuperCategory
 
 all_categories = [

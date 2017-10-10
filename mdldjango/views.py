@@ -1,30 +1,31 @@
-from django.shortcuts import render
-from django.views.decorators.csrf import csrf_exempt
-from django.core.context_processors import csrf
-from models import MdlUser
-from events.models import TrainingAttendance
-from django.http import HttpResponse, HttpResponseRedirect
-from django.contrib.auth.decorators import login_required
-from forms import *
-from django.contrib import messages
-import xml.etree.cElementTree as etree
-from xml.etree.ElementTree import ElementTree
-# Create your views here.
-import hashlib
-import csv, os, time
-from django.db.models import Q
-from django.core.exceptions import PermissionDenied
-from events.views import *
-from events.models import *
-from django.conf import settings
-from events.forms import OrganiserForm
-from django.core.mail import EmailMultiAlternatives
-from validate_email import validate_email
-from get_or_create_participant import get_or_create_participant, encript_password, check_csvfile
-from events.signals import get_or_create_user
+# Standard Library
 import datetime
+import os
+import time
 
-def authenticate(email = None, password = None):
+# Third Party Stuff
+from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.core.context_processors import csrf
+from django.core.exceptions import PermissionDenied
+from django.core.mail import EmailMultiAlternatives
+from django.db.models import Q
+from django.http import HttpResponseRedirect
+from django.shortcuts import render
+
+# Spoken Tutorial Stuff
+from events.forms import OrganiserForm
+from events.models import *
+from events.signals import get_or_create_user
+from events.views import *
+
+from .forms import *
+from .get_or_create_participant import check_csvfile, encript_password
+from .models import MdlUser
+
+
+def authenticate(email=None, password=None):
     try:
         password = encript_password(password)
         user = MdlUser.objects.filter(email=email, password=password).last()
@@ -356,20 +357,20 @@ Admin Spoken Tutorials
             messages.success(request, "New password sent to your email "+user.email)
             return HttpResponseRedirect('/participant/login/')
 
-
     context = {
         'form': form
     }
     context.update(csrf(request))
     return render(request, 'mdl/templates/password_reset.html', context)
 
-### updated mdl pass when auth user pass change
+
 def changeMdlUserPass(email, password_string):
+    # updated mdl pass when auth user pass change
     try:
         user = MdlUser.objects.filter(email=email).first()
         password_encript = encript_password(password_string)
         user.password = password_encript
         user.save()
         return True
-    except:
+    except Exception:
         return False

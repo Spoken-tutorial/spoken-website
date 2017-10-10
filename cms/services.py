@@ -1,17 +1,23 @@
-from django.shortcuts import render
-from cms.models import *
-from events.models import Student, StudentBatch
-from mdldjango.models import MdlUser
-from django.contrib import messages
-from mdldjango.get_or_create_participant import get_or_create_participant, encript_password
-from django.core.exceptions import ObjectDoesNotExist
-from django.conf import settings
-from django.core.mail import EmailMultiAlternatives
-import smtplib
+# Standard Library
 import hashlib
 import random
+import smtplib
 import string
+
+# Third Party Stuff
+from django.conf import settings
+from django.contrib import messages
+from django.core.exceptions import ObjectDoesNotExist
+from django.core.mail import EmailMultiAlternatives
+from django.shortcuts import render
 from hashids import Hashids
+
+# Spoken Tutorial Stuff
+from cms.models import *
+from events.models import Student, StudentBatch
+from mdldjango.get_or_create_participant import encript_password, get_or_create_participant
+from mdldjango.models import MdlUser
+
 
 def get_user_email(email):
   try:

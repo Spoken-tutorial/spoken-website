@@ -1,4 +1,6 @@
+# Third Party Stuff
 from django.contrib.auth.models import User
+
 
 class MasqueradeMiddleware(object):
     def process_request(self, request):

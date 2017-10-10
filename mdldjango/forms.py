@@ -1,13 +1,13 @@
-
+# Third Party Stuff
 from django import forms
-#import Model form
+from django.contrib.auth.models import Group, User
 from django.forms import ModelForm
-
-#import events models
-from events.models import *
-from django.contrib.auth.models import User, Group
-from events.signals import get_or_create_user
 from get_or_create_participant import encript_password
+
+# Spoken Tutorial Stuff
+from events.models import *
+from events.signals import get_or_create_user
+
 
 class OfflineDataForm(forms.Form):
     xml_file  = forms.FileField(required=True)

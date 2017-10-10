@@ -1,34 +1,33 @@
+# Standard Library
+import json
 import os
 import re
-import json
-import time
 import subprocess
+import time
 from decimal import Decimal
-from urllib import urlopen, quote, unquote_plus
+from urllib import quote, unquote_plus, urlopen
+
+# Third Party Stuff
 from django.conf import settings
-from django.views import generic
 from django.contrib import messages
-from django.core.urlresolvers import reverse
-from django.contrib.auth.models import Group
-from django.views.decorators.http import require_POST
-
-from django import forms
-from django.template import RequestContext
-from django.core.context_processors import csrf
-from django.core.mail import EmailMultiAlternatives
-from django.core.exceptions import PermissionDenied
-from django.views.decorators.csrf import csrf_exempt
-from django.shortcuts import render, render_to_response
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import Group
+from django.core.context_processors import csrf
+from django.core.exceptions import PermissionDenied
+from django.core.mail import EmailMultiAlternatives
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.http import HttpResponse, HttpResponseRedirect
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.db.models import Count
+from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import render
 
+# Spoken Tutorial Stuff
 from cms.sortable import *
 from creation.forms import *
 from creation.models import *
 from creation.subtitles import *
+
 from . import services
+
 
 def humansize(nbytes):
     suffixes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
@@ -91,7 +90,7 @@ def is_administrator(user):
     if user.groups.filter(name='Administrator').count():
         return True
     return False
-    
+
 def is_contenteditor(user):
     """Check if the user is having Content-Editor rights"""
     if user.groups.filter(name='Content-Editor').count():
@@ -1011,7 +1010,7 @@ def upload_component(request, trid, component):
                 }
                 context.update(csrf(request))
                 return render(request, 'creation/templates/upload_component.html', context)
-        
+
     form = ComponentForm(component)
     context = {
         'form': form,
@@ -2633,7 +2632,7 @@ def update_prerequisite(request):
                     messages.success(request, 'Prerequisite <b>' + destination_tutorial.tutorial + '</b> updated to <b>' + source_tutorial.tutorial + '</b>.')
                 tcc.save()
                 return HttpResponseRedirect('/creation/update-prerequisite/')
-            except Exception, e:
+            except Exception:
                 pass
     context = {
         'form': form

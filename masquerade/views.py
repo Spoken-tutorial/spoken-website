@@ -1,23 +1,23 @@
-from urllib import unquote
-from django.db.models import Q
+# Third Party Stuff
 from django.conf import settings
-from django.shortcuts import render
 from django.contrib import messages
-from django.contrib.auth.models import User
-from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect
-from django.core.context_processors import csrf
-from masquerade.signals import mask_on, mask_off
-from django.core.validators import validate_email
-from django.core.exceptions import PermissionDenied
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+from django.core.context_processors import csrf
+from django.core.exceptions import PermissionDenied
+from django.core.validators import validate_email
+from django.db.models import Q
+from django.http import HttpResponseRedirect
+from django.shortcuts import render
 
+# Spoken Tutorial Stuff
 from masquerade.forms import *
+from masquerade.signals import mask_off, mask_on
 
 MASQUERADE_REDIRECT_URL = getattr(settings, 'MASQUERADE_REDIRECT_URL', '/')
 
-MASQUERADE_REQUIRE_SUPERUSER = getattr(settings, \
-'MASQUERADE_REQUIRE_SUPERUSER', True)
+MASQUERADE_REQUIRE_SUPERUSER = getattr(settings, 'MASQUERADE_REQUIRE_SUPERUSER', True)
+
 
 def masquerade_home(request):
     rows = None
@@ -62,7 +62,7 @@ def mask(request, uid):
 def unmask(request):
     try:
         mask_username = request.session['mask_user']
-        del(request.session['mask_user']) 
+        del(request.session['mask_user'])
         mask_off.send(sender = object(), mask_username = mask_username)
     except:
         pass

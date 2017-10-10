@@ -1,13 +1,16 @@
+# Standard Library
 import csv
 import hashlib
 import random
 import string
-from datetime import datetime
 
+# Third Party Stuff
 from django.core.mail import EmailMultiAlternatives
-from events.models import *
 from models import MdlUser
 from validate_email import validate_email
+
+# Spoken Tutorial Stuff
+from events.models import *
 
 
 def update_participants_count(training):

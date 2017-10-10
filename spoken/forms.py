@@ -3,7 +3,7 @@ from django import forms
 from django.db.models import Count, Q
 
 # Spoken Tutorial Stuff
-from creation.models import TutorialResource, FossAvailableForTest
+from creation.models import TutorialResource
 from events.models import Testimonials
 
 
@@ -34,7 +34,7 @@ class TutorialSearchForm(forms.Form):
             widget=forms.Select(),
             required=False,
         )
-    except:
+    except Exception:
         pass
 
 
