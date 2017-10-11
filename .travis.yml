@@ -16,9 +16,8 @@ before_cache:
   - rm -f $HOME/.cache/pip/log/debug.log
 
 install:
-  - pip install pip-accel
-  - pip-accel install python-coveralls
-  - pip-accel install -r requirements-dev.txt
+  # - pip install python-coveralls
+  - pip install -r requirements-dev.txt
 
 before_script:
   # - cp config.sample.py config.py
@@ -28,11 +27,11 @@ before_script:
   # - sed -i "s/your_database_password_here//g" config.py
 
 script:
-- flake8
+- ./lint.sh
 # - py.test --create-db --cov -v --tb=native
 
 after_success:
-  - coveralls
+  # - coveralls
 
 notifications:
   email:
