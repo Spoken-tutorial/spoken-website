@@ -1,10 +1,9 @@
+import datetime as dt
+
 from django import forms
-from django.forms import ModelForm
-from django.forms.models import BaseModelFormSet
+
 from events.models import *
-from datetime import datetime, date
 from events.helpers import get_academic_years
-import datetime
 
 
 class StudentBatchForm(forms.ModelForm):
@@ -57,13 +56,12 @@ class TrainingRequestForm(forms.ModelForm):
       batch_id_list = []
       sm_batch_all = StudentMaster.objects.all()
       for i in sm_batch_all:
-        if datetime.datetime.today().isoformat() < (i.created+datetime.timedelta(days=2)).isoformat():
+        if dt.datetime.today().isoformat() < (i.created + dt.timedelta(days=2)).isoformat():
           batch_id_list.append(i.batch_id)
       batch_id_set = set(batch_id_list)
       uniq_batch_id = []
       for j in batch_id_set:
         uniq_batch_id.append(j)
-      #
       tp = TrainingPlanner.objects.get(pk=self.cleaned_data['training_planner'])
 
       # Date restriction
@@ -213,7 +211,7 @@ class SingleTrainingForm(forms.ModelForm):
     return self.cleaned_data
 
   def clean_tdate(self):
-    today = datetime.datetime.now()
+    today = dt.datetime.now()
     tdate = self.cleaned_data['tdate']
     if today.date() > tdate:
       raise forms.ValidationError("Invalid semester training date")
@@ -242,7 +240,7 @@ class SingleTrainingEditForm(forms.ModelForm):
     return self.cleaned_data
 
   def clean_tdate(self):
-    today = datetime.datetime.now()
+    today = dt.datetime.now()
     tdate = self.cleaned_data['tdate']
     if today.date() > tdate:
       raise forms.ValidationError("Invalid semester training date")
@@ -309,7 +307,7 @@ class STWorkshopFeedbackForm(forms.ModelForm):
               'logical_sequence' : forms.RadioSelect ,
               'examples_help' : forms.RadioSelect ,
               'instructions_easy_to_follow' : forms.RadioSelect ,
-              
+
               'useful_learning' : forms.RadioSelect ,
               'help_improve_performance' : forms.RadioSelect ,
               'plan_to_use_future' : forms.RadioSelect ,
@@ -320,7 +318,7 @@ class STWorkshopFeedbackForm(forms.ModelForm):
               'not_like_method_forums' : forms.RadioSelect ,
               'forum_helpful' : forms.RadioSelect ,
               'owing_to_forums' : forms.RadioSelect ,
-              
+
               'ws_quality' : forms.RadioSelect ,
               'overall_content_quality' : forms.RadioSelect ,
               'clarity_of_explanation' : forms.RadioSelect ,
