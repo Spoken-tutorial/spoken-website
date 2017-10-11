@@ -1,5 +1,5 @@
 # Standard Library
-from datetime import datetime
+import datetime as dt
 
 # Third Party Stuff
 from django import template
@@ -15,7 +15,7 @@ def get_valid_statistics(academic_center, model_name):
         return TrainingRequest.objects.filter(
             training_planner__academic=academic_center,
             participants__gt=0,
-            sem_start_date__lte=datetime.now()
+            sem_start_date__lte=dt.datetime.now()
         ).order_by('-sem_start_date')
     return academic_center.filter(participant_count__gt=0, status=4).order_by('-tdate')
 

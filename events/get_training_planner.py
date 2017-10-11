@@ -1,6 +1,11 @@
+# Standard Library
 import datetime as dt
-from events.models import TrainingPlanner, Semester
+
+# Third Party Stuff
 from django.core.exceptions import ObjectDoesNotExist
+
+# Spoken Tutorial Stuff
+from events.models import Semester, TrainingPlanner
 
 
 class CurrentTrainingPlanner():

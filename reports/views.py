@@ -1,6 +1,6 @@
 # Standard Library
 import csv
-import datetime
+import datetime as dt
 
 # Third Party Stuff
 from django.conf import settings
@@ -138,14 +138,12 @@ def report_filter(request, model_name="None", app_label="None", queryset=None, f
 
 # export statistics training data as csv
 def events_training_csv(request):
-
-    from datetime import datetime
     collectionSet = None
     state = None
 
     collection = TrainingRequest.objects.filter(
         participants__gt=0,
-        sem_start_date__lte=datetime.now()
+        sem_start_date__lte=dt.datetime.now()
     ).order_by('-sem_start_date')
 
     # find state id
@@ -180,8 +178,6 @@ def events_training_csv(request):
 
 # export statistics test data as csv
 def events_test_csv(request):
-
-    from datetime import datetime
     collectionSet = None
     state = None
 
@@ -304,8 +300,8 @@ def get_level(tr):
 
 def time_plus_ten_min(tr, vtime):
     try:
-        delta = datetime.timedelta(minutes=10)
-        vtime = datetime.datetime.strptime(vtime, '%H:%M:%S') + delta
+        delta = dt.timedelta(minutes=10)
+        vtime = dt.datetime.strptime(vtime, '%H:%M:%S') + delta
         return vtime.strftime("%H:%M:%S")
     except:
         pass
