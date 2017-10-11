@@ -37,7 +37,7 @@ rsa==3.1.4
 simplejson==3.6.5
 six==1.9.0
 sqlparse==0.1.15
-uWSGI==2.0.10
+uWSGI==2.0.15
 uritemplate==0.6
 pydns==2.3.6
 validate-email==1.3
