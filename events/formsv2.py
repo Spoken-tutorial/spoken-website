@@ -247,7 +247,28 @@ class SingleTrainingEditForm(forms.ModelForm):
     return tdate
 
 class OrganiserFeedbackForm(forms.ModelForm):
-  offered_training_foss = forms.ModelMultipleChoiceField(queryset=FossCategory.objects.filter(status=1), widget=forms.CheckboxSelectMultiple)
+  offered_training_foss = forms.ModelMultipleChoiceField(
+    # queryset=FossCategory.objects.filter(status=1), 
+    queryset=FossCategory.objects.filter(
+      id__in=CourseMap.objects.filter(
+          category=0,
+          test__lte=2
+        ).values_list(
+          'foss_id'
+        )
+      ),
+    widget=forms.CheckboxSelectMultiple)
+  trained_foss = forms.ModelMultipleChoiceField(
+    # queryset=FossCategory.objects.filter(status=1), 
+    queryset=FossCategory.objects.filter(
+      id__in=CourseMap.objects.filter(
+          category=0,
+          test__lte=2
+        ).values_list(
+          'foss_id'
+        )
+      ),
+    widget=forms.CheckboxSelectMultiple)
   class Meta:
     model = OrganiserFeedback
     fields = '__all__'
