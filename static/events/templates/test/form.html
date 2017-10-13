@@ -112,88 +112,114 @@
     <script src="{% static 'spoken/js/jquery.datetimepicker.js' %}"></script>
 {% endblock %}
 {% block compressinlinejsblock %}
-    <script type="text/javascript">
-        function hide_input() {
-            $category = $('#id_test_category');
-            if($category.val() == 1){
-                $('.training_category_group').css({'display':'none'});
-                $('.training_category_group .training').attr('disabled', 'disabled');
-                $('.workshop_group').css({'display':'black'});
-                $('.workshop_group .workshop').removeAttr('disabled');
+<script type="text/javascript">
+    $(function() {
+        var training = $('#id_training').val();
+        if (training != '')
+        {
+            $.ajax({
+                url: '/software-training/ajax-check-foss/',
+                data: {
+                    'training': training,
+                },
+                dataType: 'json',
+                success: function (data) {
+                    if (data.is_c_and_cpp) {
+                        $('#batch_foss').show();
+                        $("#id_foss").prop('required',true);
+                    }
+                    else{
+                        $('#batch_foss').hide();
+                        $("#id_foss").prop('required',false);
+                    }
+                }
+            });
+        }
+
+
+    });
+
+    function hide_input() {
+        $category = $('#id_test_category');
+        if($category.val() == 1){
+            $('.training_category_group').css({'display':'none'});
+            $('.training_category_group .training').attr('disabled', 'disabled');
+            $('.workshop_group').css({'display':'black'});
+            $('.workshop_group .workshop').removeAttr('disabled');
+            $('#batch_foss').hide();
+        } else if ($category.val() == 2){
+            $('.workshop_group').css({'display':'none'});
+            $('.workshop_group .workshop').attr('disabled', 'disabled');
+            $('.training_category_group').css({'display':'black'});
+            $('.training_category_group .training').removeAttr('disabled');
+            $('#batch_foss').hide();
+        }else {
+            //ajaxFossDeptFillDatas('foss', 'dept', 2);
+            $('.training_category_group').css({'display':'none'});
+            $('.workshop_group').css({'display':'none'});
+            $('.training_category_group .training').attr('disabled', 'disabled');
+            $('.workshop_group .workshop').attr('disabled', 'disabled');
+            $('#batch_foss').hide();
+        }
+    }
+        
+    $category = $('#id_test_category');
+    hide_input();
+    $workshop = $('#id_workshop');
+    $training = $('#id_training');
+    console.log($category.val());
+    $category.change(function(){
+        hide_input();
+    });
+
+    $workshop = $('#id_workshop');
+    $training = $('#id_training');
+
+    $('.datetime').datetimepicker({
+        onGenerate:function( ct ){
+            $(this).find('.xdsoft_day_of_week0')
+                .addClass('xdsoft_disabled');
+        },
+        lang:'en',
+        format:'Y-m-d H:i',
+        formatDate:'Y/m/d',
+        minDate:0, // yesterday is minimum date
+        weekends:[],
+        maxDate:'+1970/06/31', // tommorow date with in 6 month
+        step:5,
+        minTime:'08:00',
+        maxTime:'18:00',
+    });
+    $('.date').datetimepicker({
+        lang:'en',
+        timepicker:false,
+        format:'Y-m-d',
+        formatDate:'Y/m/d',
+        maxDate:'+1970/06/31', // tommorow date with in 6 month
+    });
+
+    $batch_foss = $('#batch_foss');
+    $("#id_training").change(function () {
+      var training = $(this).val();
+      $.ajax({
+        url: '/software-training/ajax-check-foss/',
+        data: {
+          'training': training,
+        },
+        dataType: 'json',
+        success: function (data) {
+            if (data.is_c_and_cpp) {
+                $('#batch_foss').show();
+                $("#id_foss").prop('required',true);
+            }
+            else{
                 $('#batch_foss').hide();
-            } else if ($category.val() == 2){
-                $('.workshop_group').css({'display':'none'});
-                $('.workshop_group .workshop').attr('disabled', 'disabled');
-                $('.training_category_group').css({'display':'black'});
-                $('.training_category_group .training').removeAttr('disabled');
-                $('#batch_foss').hide();
-            }else {
-                //ajaxFossDeptFillDatas('foss', 'dept', 2);
-                $('.training_category_group').css({'display':'none'});
-                $('.workshop_group').css({'display':'none'});
-                $('.training_category_group .training').attr('disabled', 'disabled');
-                $('.workshop_group .workshop').attr('disabled', 'disabled');
-                $('#batch_foss').hide();
+                $("#id_foss").prop('required',false);
             }
         }
-        
-        $category = $('#id_test_category');
-        hide_input();
-        $workshop = $('#id_workshop');
-        $training = $('#id_training');
-        console.log($category.val());
-        $category.change(function(){
-            hide_input();
-        });
+      });
 
-        $workshop = $('#id_workshop');
-        $training = $('#id_training');
+    });
 
-        $('.datetime').datetimepicker({
-            onGenerate:function( ct ){
-                $(this).find('.xdsoft_day_of_week0')
-                    .addClass('xdsoft_disabled');
-            },
-            lang:'en',
-            format:'Y-m-d H:i',
-            formatDate:'Y/m/d',
-            minDate:0, // yesterday is minimum date
-            weekends:[],
-            maxDate:'+1970/06/31', // tommorow date with in 6 month
-            step:5,
-            minTime:'08:00',
-            maxTime:'18:00',
-        });
-        $('.date').datetimepicker({
-            lang:'en',
-            timepicker:false,
-            format:'Y-m-d',
-            formatDate:'Y/m/d',
-            maxDate:'+1970/06/31', // tommorow date with in 6 month
-        });
-
-        $batch_foss = $('#batch_foss');
-        $("#id_training").change(function () {
-          var training = $(this).val();
-          $.ajax({
-            url: '/software-training/ajax-check-foss/',
-            data: {
-              'training': training,
-            },
-            dataType: 'json',
-            success: function (data) {
-                if (data.is_c_and_cpp) {
-                    $('#batch_foss').show();
-                    $("#id_foss").prop('required',true);
-                }
-                else{
-                    $('#batch_foss').hide();
-                    $("#id_foss").prop('required',false);
-                }
-            }
-          });
-
-        });
-
-    </script>
+</script>
 {% endblock %}
