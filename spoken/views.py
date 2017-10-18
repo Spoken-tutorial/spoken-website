@@ -539,3 +539,9 @@ def ViewBrochures(request):
 
 def learndrupal(request):
     return render(request, 'spoken/templates/learndrupal.html')
+
+def induction_2017(request):
+    return render(request, 'spoken/templates/induction_2017.html')
+
+def expression_of_intrest(request):
+    return render(request, 'spoken/templates/expression_of_intrest.html')
