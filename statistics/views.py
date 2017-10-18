@@ -79,13 +79,26 @@ def get_state_info(request, code):
 
 def training(request):
     """ Organiser index page """
-    collectionSet = None
-    state = None
-
     collectionSet = TrainingRequest.objects.filter(
-        participants__gt=0,
-        sem_start_date__lte=datetime.now()
-    ).order_by('-sem_start_date')
+            sem_start_date__lte=datetime.now()
+        ).order_by('-sem_start_date')
+    state = None
+    TRAINING_COMPLETED = '1'
+    TRAINING_PENDING = '0'
+
+    if request.method == 'GET':
+        print "@@@@@@@@@@@@@@@@@@"
+        status = request.GET.get('status')
+        if status not in [TRAINING_COMPLETED, TRAINING_PENDING]:
+            status = TRAINING_COMPLETED
+
+        print status
+
+    if status == TRAINING_PENDING:
+        collectionSet = collectionSet.filter(participants=0)
+    else:
+        collectionSet = collectionSet.filter(participants__gt=0)
+
     header = {
         1: SortableHeader('#', False),
         2: SortableHeader('training_planner__academic__state__name', True, 'State'),
@@ -127,6 +140,7 @@ def training(request):
     context['ordering'] = ordering
     context['participants'] = participants
     context['model'] = 'Workshop/Training'
+    context['status']=status
     return render(request, 'statistics/templates/training.html', context)
 
 def fdp_training(request):
