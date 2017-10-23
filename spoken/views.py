@@ -543,11 +543,11 @@ def learndrupal(request):
 def induction_2017(request):
     return render(request, 'spoken/templates/induction_2017.html')
 
+# def expression_of_intrest(request):
+#     return render(request, 'spoken/templates/expression_of_intrest_old.html')
+
+
 def expression_of_intrest(request):
-    return render(request, 'spoken/templates/expression_of_intrest.html')
-
-
-def expression_of_intrest_1(request):
     form = ExpressionForm()
     if request.method == 'POST':
         form = ExpressionForm(request.POST)
@@ -568,4 +568,4 @@ def expression_of_intrest_1(request):
 
     context = {}
     context['form'] = form
-    return render(request, 'spoken/templates/expression_of_intrest_1.html', context)
+    return render(request, 'spoken/templates/expression_of_intrest.html', context)
