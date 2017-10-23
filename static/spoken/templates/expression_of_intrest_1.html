@@ -42,7 +42,7 @@
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
         </button>
-        <a class="navbar-brand" href="{% url 'induction_2017' %}">Faculty Induction Programme<small>conducted by the Spoken Tutorial Project, under the aegis of Pandit Madan Mohan Malaviya National Mission on Teachers and Teaching (PMMMNMTT).</small></a>
+        <a class="navbar-brand" href="{% url 'induction_2017' %}">Induction Training Programme<small>conducted by the Spoken Tutorial Project, under the aegis of Pandit Madan Mohan Malaviya National Mission on Teachers and Teaching (PMMMNMTT).</small></a>
       </div>
     </div>
   </nav>
@@ -110,6 +110,14 @@ I am happy to invite your Expression of Interest to the proposed induction progr
             <div class="col-sm-7">
               {% render_field form.mother_tongue class+="form-control mother_tongue" %}
               {{ form.mother_tongue.errors }}
+            </div>
+          </div>
+
+          <div class="form-group" id="other_language">
+            <label class="col-sm-5 control-label" for= "id_other_language">Other Mother tongue *</label>
+            <div class="col-sm-7">
+              {% render_field form.other_language class+="form-control other_language" %}
+              {{ form.other_language.errors }}
             </div>
           </div>
 
@@ -247,7 +255,7 @@ I am happy to invite your Expression of Interest to the proposed induction progr
 
           
           <div class="form-group">
-            <label class="col-sm-10 " for= "id_do_agree">By selecting "yes", I agree with ALL of the following: (1) I have read the invitation letter from Prof. Kannan Moudgalya (2) I have gone through the course outline (3) I am interested in attending this course (4) The proposed dates are convenient to me (5) I understand that because of logistic reasons, this course is initially offered for entry level faculty members, at the start of their teaching career.(6) If permitted by my management, I am ready to pay Rs. 1,000, the nonrefundable course deposit, and subsequently attend the course. *</label>
+            <label class="col-sm-10 " for= "id_do_agree">By selecting "yes", I agree with ALL of the following: (1) I have read the invitation letter from Prof. Kannan Moudgalya (2) I have gone through the course outline (3) I am interested in attending this course (4) The proposed dates are convenient to me (5) I understand that because of logistic reasons, this course is initially offered for entry level faculty members at the start of their teaching career (6) If permitted by my management, I am ready to pay Rs. 1,000, the nonrefundable course deposit, and subsequently attend the course. *</label>
             <div class="col-sm-2">
               {% render_field form.do_agree class+="form-control do_agree"  %}
               {{ form.do_agree.errors }}
@@ -286,6 +294,15 @@ I am happy to invite your Expression of Interest to the proposed induction progr
 </body>
 <script>
 $(window).load(function(){
+  mother_tongue = $('.mother_tongue').val();
+  if (mother_tongue == 'Other'){
+    document.getElementById('other_language').style.display = '';
+    
+  }
+  else{
+  document.getElementById('other_language').style.display = 'none';
+  }
+
   medium = $('.medium_of_studies').val();
   if (medium == 'Other'){
     document.getElementById('other_medium').style.display = '';
@@ -340,6 +357,17 @@ designation = $('.designation').val();
 });
 ///////////////////////////////////////////////////////////////
 
+$('.mother_tongue').on('change', function() {
+  mother_tongue = $('.mother_tongue').val();
+  if (mother_tongue == 'Other'){
+    document.getElementById('other_language').style.display = '';
+    
+  }
+  else{
+  document.getElementById('other_language').style.display = 'none';
+  }
+
+});
 
 $('.medium_of_studies').on('change', function() {
   medium = $('.medium_of_studies').val();

@@ -58,11 +58,13 @@ class ExpressionForm(forms.ModelForm):
               'other_education' : forms.Textarea,
               'other_specialisation' : forms.Textarea,
               'other_designation' : forms.Textarea,
+              'other_language': forms.Textarea,
               }
 
   def __init__(self, *args, **kwargs):
     super(ExpressionForm, self).__init__(*args, **kwargs)
     self.fields['other_comments'].required = False
+    self.fields['other_language'].required = False
     self.fields['other_medium'].required = False
     self.fields['other_education'].required = False
     self.fields['other_specialisation'].required = False
@@ -71,6 +73,10 @@ class ExpressionForm(forms.ModelForm):
 
   def clean(self):
    cleaned_data = super(ExpressionForm, self).clean()
+   try:
+    mother_tongue = cleaned_data['mother_tongue']
+   except KeyError:
+     mother_tongue = ''
    try:
     medium = cleaned_data['medium_of_studies']
    except KeyError:
@@ -96,12 +102,10 @@ class ExpressionForm(forms.ModelForm):
    except KeyError:
     bring_laptop = ''
 
-   
-    
-   # specialisation = cleaned_data['specialisation']
-   # designation = cleaned_data['designation']
-   # medium = cleaned_data['medium_of_studies']
-   # bring_laptop = cleaned_data['bring_laptop']
+
+   other_language = cleaned_data['other_language']
+   if mother_tongue.lower() == 'other' and not other_language:
+       self.add_error('other_language','Other mother tongue is required.')
 
    other_education = cleaned_data['other_education']
    if education.lower() == 'other' and not other_education:

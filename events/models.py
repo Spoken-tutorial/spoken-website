@@ -1536,8 +1536,12 @@ class InductionInterest(models.Model):
   GENDER_CHOICES =(
     ('', '-----'), ('Male', 'Male'), ('Female', 'Female'),
   )
-  MEDIUM_OF_INSTRUCTION_CHOICES = (
-    ('', '-----'), ('English', 'English'), ('Other','Other'),
+  languages = (
+    ('', '-----'), ('Assamese','Assamese'), ('Bengali', 'Bengali'), ('Bhojpuri', 'Bhojpuri'), ('Bodo', 'Bodo'), ('English', 'English'), ('Gujarati', 'Gujarati'),
+    ('Hindi', 'Hindi'), ('Kannada', 'Kannada'), ('Kashmiri', 'Kashmiri'), ('Khasi', 'Khasi'), ('Konkani', 'Konkani'), ('Maithili', 'Maithili'),
+    ('Malayalam', 'Malayalam'), ('Manipuri', 'Manipuri'), ('Marathi', 'Marathi'), ('Nepali', 'Nepali'),('Oriya', 'Oriya'), ('Punjabi', 'Punjabi'),
+    ('Rajasthani', 'Rajasthani'), ('Sanskrit', 'Sanskrit'), ('Santhali', 'Santhali'), ('Sindhi', 'Sindhi'), ('Tamil', 'Tamil'), ('Telugu', 'Telugu'),
+    ('Urdu', 'Urdu'), ('Other', 'Other'),
   )
   AGE =(
     ('','-----'),('20to25', '20 to 25 years'), ('26to30', '26 to 30 years'),('31to35', '31 to 35 years'),('35andabove', 'Above 35 years')
@@ -1576,9 +1580,10 @@ class InductionInterest(models.Model):
   phonemob = models.CharField(max_length = 100)  
   age = models.CharField(max_length = 100, choices = AGE)
   gender = models.CharField(max_length = 50, choices = GENDER_CHOICES)
-  mother_tongue = models.CharField(max_length = 100)
+  mother_tongue = models.CharField(max_length = 100, choices = languages)
+  other_language = models.CharField(max_length = 100, default = None)
 
-  medium_of_studies = models.CharField(max_length = 100, choices = MEDIUM_OF_INSTRUCTION_CHOICES)
+  medium_of_studies = models.CharField(max_length = 100, choices = languages)
   other_medium = models.CharField(max_length = 100)
 
   education = models.CharField(max_length = 100, choices = education)
