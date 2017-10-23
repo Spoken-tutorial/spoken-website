@@ -1491,9 +1491,6 @@ class LearnDrupalFeedback(models.Model):
   YES_NO = (
   ('','-----'), ('Yes', 'Yes'), ('No', 'No')
   )
-  yes_option=(
-    ('','-----'), ('Yes', 'Yes'),
-    )
   AGE =(
     ('','-----'),('below25', 'below 25'), ('25to34', '25 to 34'), ('35to44', '35 to 44'),('45to54', '45 to 54'),('55to64', '55 to 64'),('65andabove', '65 and above')
   )
@@ -1533,7 +1530,9 @@ class InductionInterest(models.Model):
   YES_NO =(
     ('','-----'), ('Yes', 'Yes'), ('No', 'No'),
   )
-  
+  yes_option=(
+    ('','-----'), ('Yes', 'Yes'),
+    )
   GENDER_CHOICES =(
     ('', '-----'), ('Male', 'Male'), ('Female', 'Female'),
   )
