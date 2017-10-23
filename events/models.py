@@ -1571,21 +1571,21 @@ class InductionInterest(models.Model):
 
   email = models.EmailField(max_length = 100)
   name = models.CharField(max_length = 100)
-  phonemob = models.CharField(max_length = 20)  
-  age = models.CharField(max_length = 20, choices = AGE)
-  gender = models.CharField(max_length = 10, choices = GENDER_CHOICES)
+  phonemob = models.CharField(max_length = 100)  
+  age = models.CharField(max_length = 100, choices = AGE)
+  gender = models.CharField(max_length = 50, choices = GENDER_CHOICES)
   mother_tongue = models.CharField(max_length = 100)
 
-  medium_of_studies = models.CharField(max_length = 50, choices = MEDIUM_OF_INSTRUCTION_CHOICES)
+  medium_of_studies = models.CharField(max_length = 100, choices = MEDIUM_OF_INSTRUCTION_CHOICES)
   other_medium = models.CharField(max_length = 100)
 
   education = models.CharField(max_length = 100, choices = education)
   other_education = models.CharField(max_length = 100)
 
-  specialisation = models.CharField(max_length = 50, choices = specialisation)
+  specialisation = models.CharField(max_length = 100, choices = specialisation)
   other_specialisation = models.CharField(max_length = 100)
 
-  designation = models.CharField(max_length = 50, choices = designation)
+  designation = models.CharField(max_length = 100, choices = designation)
   other_designation = models.CharField(max_length = 100)
 
   college = models.CharField(max_length = 100)
@@ -1593,7 +1593,7 @@ class InductionInterest(models.Model):
   state = models.ForeignKey(State)
   city = models.ForeignKey(City)
   pincode = models.PositiveIntegerField()
-  experience_in_college = models.CharField(max_length = 20, choices = years_of_experience)
+  experience_in_college = models.CharField(max_length = 100, choices = years_of_experience)
   
   bring_laptop = models.CharField(max_length = 50, choices = YES_NO)
   borrow_laptop = models.CharField(max_length = 50, choices = YES_NO)
