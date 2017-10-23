@@ -545,3 +545,27 @@ def induction_2017(request):
 
 def expression_of_intrest(request):
     return render(request, 'spoken/templates/expression_of_intrest.html')
+
+
+def expression_of_intrest_1(request):
+    form = ExpressionForm()
+    if request.method == 'POST':
+        form = ExpressionForm(request.POST)
+        if form.is_valid():
+            try:
+                form_data = form.save(commit=False)
+                form_data.save()
+                messages.success(request, "Thank you for showing your interest.")
+                return HttpResponseRedirect('/induction')
+            except Exception, e:
+                print e
+                messages.error(request, "Sorry, something went wrong, Please try again!")
+                # return HttpResponseRedirect('/induction')
+    context = {
+        'form' : form,
+    }
+
+
+    context = {}
+    context['form'] = form
+    return render(request, 'spoken/templates/expression_of_intrest_1.html', context)
