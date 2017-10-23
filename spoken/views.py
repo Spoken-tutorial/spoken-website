@@ -555,7 +555,7 @@ def expression_of_intrest_1(request):
             try:
                 form_data = form.save(commit=False)
                 form_data.save()
-                messages.success(request, "Thank you for showing your interest.")
+                messages.success(request, "Your response has been recorded. Thanks for giving your inputs. In case there are more than 120 eligible applicants, we will get back to you about a selection criterion.")
                 return HttpResponseRedirect('/induction')
             except Exception, e:
                 print e
