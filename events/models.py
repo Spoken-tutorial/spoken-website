@@ -1581,7 +1581,7 @@ class InductionInterest(models.Model):
   age = models.CharField(max_length = 100, choices = AGE)
   gender = models.CharField(max_length = 50, choices = GENDER_CHOICES)
   mother_tongue = models.CharField(max_length = 100, choices = languages)
-  other_language = models.CharField(max_length = 100, default = None)
+  other_language = models.CharField(max_length = 100)
 
   medium_of_studies = models.CharField(max_length = 100, choices = languages)
   other_medium = models.CharField(max_length = 100)
@@ -1598,7 +1598,7 @@ class InductionInterest(models.Model):
   college = models.CharField(max_length = 100)
   college_address = models.CharField(max_length = 500)
   state = models.ForeignKey(State)
-  city = models.ForeignKey(City)
+  city = models.CharField(max_length = 100)
   pincode = models.PositiveIntegerField()
   experience_in_college = models.CharField(max_length = 100, choices = years_of_experience)
   

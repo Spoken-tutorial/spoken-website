@@ -357,31 +357,6 @@ designation = $('.designation').val();
 });
 ///////////////////////////////////////////////////////////////
 
-$('.city').html('<option>---------</option>');
-      $('.state').on('change', function(){
-        state = $(this).val();
-        if(state != ''){
-          $.ajax({
-            url: "/induction/get-city-option/",
-            type: "POST",
-            data: {
-              state: state,
-            },
-            beforeSend: function() {
-              //$('.ajax-refresh-language').show();
-            },
-            success: function(data) {
-              // loading languages
-              if(data && data['city_option']) {
-                  $('.city').html(data['city_option']);
-              }
-              //$('.ajax-refresh-language').hide();
-            }
-          });
-        }
-      }); 
-
-
 $('.mother_tongue').on('change', function() {
   mother_tongue = $('.mother_tongue').val();
   if (mother_tongue == 'Other'){

@@ -547,18 +547,6 @@ def expression_of_intrest(request):
     return render(request, 'spoken/templates/expression_of_intrest.html')
 
 
-@csrf_exempt
-def GetAjaxCity(request):
-    if request.method == 'POST':
-        state = request.POST.get('state')
-        data = {}
-        city_option = "<option value=''>---------</option>"
-        city = City.objects.filter(state=state).order_by('name')
-        for i in city:
-            city_option += '<option value='+str(i.id)+'>'+i.name+'</option>'
-        data['city_option'] = city_option
-    return HttpResponse(json.dumps(data), content_type='application/json')
-
 def expression_of_intrest_1(request):
     form = ExpressionForm()
     if request.method == 'POST':
