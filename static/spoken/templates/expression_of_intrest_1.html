@@ -154,7 +154,7 @@ I am happy to invite your Expression of Interest to the proposed induction progr
           </div>
 
           <div class="form-group ">
-            <label class="col-sm-5 control-label" for= "id_specialisation">Your field of specialisation (please click the closest) *</label>
+            <label class="col-sm-5 control-label" for= "id_specialisation">Your field of specialisation (please select the closest) *</label>
             <div class="col-sm-7">
               {% render_field form.specialisation class+="form-control specialisation" %}
               {{ form.specialisation.errors }}
@@ -196,7 +196,7 @@ I am happy to invite your Expression of Interest to the proposed induction progr
           </div>
 
           <div class="form-group ">
-            <label class="col-sm-5 control-label" for= "id_college_address">Give the address of your institution. City and pincode are to be given separately, in subsequent questions. *</label>
+            <label class="col-sm-5 control-label" for= "id_college_address">Give the address of your institution. State, city and pincode are to be given separately, in subsequent questions *</label>
             <div class="col-sm-7">
               {% render_field form.college_address class+="form-control college_address" %}
               {{ form.college_address.errors }}
@@ -220,7 +220,7 @@ I am happy to invite your Expression of Interest to the proposed induction progr
           </div>
 
           <div class="form-group">
-            <label class="col-sm-5 control-label" for= "id_pincode">Give the pin code of the city where your institution is located. *</label>
+            <label class="col-sm-5 control-label" for= "id_pincode">Give the pin code of the city where your institution is located *</label>
             <div class="col-sm-7">
               {% render_field form.pincode class+="form-control pincode"  %}
               {{ form.pincode.errors }}
@@ -356,6 +356,31 @@ designation = $('.designation').val();
 
 });
 ///////////////////////////////////////////////////////////////
+
+$('.city').html('<option>---------</option>');
+      $('.state').on('change', function(){
+        state = $(this).val();
+        if(state != ''){
+          $.ajax({
+            url: "/induction/get-city-option/",
+            type: "POST",
+            data: {
+              state: state,
+            },
+            beforeSend: function() {
+              //$('.ajax-refresh-language').show();
+            },
+            success: function(data) {
+              // loading languages
+              if(data && data['city_option']) {
+                  $('.city').html(data['city_option']);
+              }
+              //$('.ajax-refresh-language').hide();
+            }
+          });
+        }
+      }); 
+
 
 $('.mother_tongue').on('change', function() {
   mother_tongue = $('.mother_tongue').val();

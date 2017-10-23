@@ -59,6 +59,7 @@ class ExpressionForm(forms.ModelForm):
               'other_specialisation' : forms.Textarea,
               'other_designation' : forms.Textarea,
               'other_language': forms.Textarea,
+              'college_address' : forms.Textarea,
               }
 
   def __init__(self, *args, **kwargs):
