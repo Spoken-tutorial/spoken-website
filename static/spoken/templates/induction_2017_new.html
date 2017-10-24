@@ -1,0 +1,450 @@
+{% load widget_tweaks %}
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Induction Programme 2017</title>
+  <link rel="stylesheet" href="{% static 'spoken/css/bootstrap.min.css' %}" type="text/css" media="screen" charset="utf-8" />
+  <link rel="stylesheet" href="{% static 'spoken/css/font-awesome.min.css' %}" type="text/css" media="screen" charset="utf-8" />
+  <script src="{% static 'spoken/js/jquery-1.11.0.min.js' %}"></script>
+  <script src="{% static 'spoken/js/bootstrap.min.js' %}"></script>
+</head>
+<style type="text/css">
+.navbar-default {
+    background-color: #26C281;
+    height: 60px;
+    }
+.navbar-default .navbar-brand {
+    color: black;
+}
+.navbar-brand small {
+  display:block;
+  font-size:12px;
+}
+.back_grey {
+  background-color: #EEEEEE;
+}
+.row {
+  margin-bottom: 20px;
+}
+  .banner{
+  background: url('{% static 'spoken/images/forum.jpg' %}') no-repeat center top;
+    background-size: cover;
+  min-height: 480px;
+    position: relative;
+    margin-top: 2%;
+}
+.bg-color{
+  background-color: RGBA(12, 11, 11, 0.82);
+  min-height: 480px;
+}
+.intro-para{
+  font-family: 'Alegreya Sans', sans-serif;
+  font-size: 35px;
+  color: #fff;
+  margin-top: 5%;
+}
+
+/***********************************
+Features
+************************************/
+h2{
+  font-size: 24px;
+  padding-bottom: 15px;
+}
+.bottom-line{
+  width: 25px;
+  height: 3px;
+  background-color: rgb(99, 122, 145);
+}
+.fea{
+  margin-top: 25px;
+}
+.fea-img {
+  width: 20%;
+}
+.heading {
+    width: 80%;
+}
+.fea i {
+    font-size: 39px;
+    color: #5FCF80;
+    margin-top: 7px;
+}
+.heading h4 {
+    font-size: 17px;
+    line-height: 1.25;
+    font-weight: 700;
+    color: #000;
+    margin: 10px 0px;
+    text-align: left;
+}
+.heading p {
+  text-align: left;
+}
+
+/***********************************
+Price Table
+************************************/
+.price-table {
+    box-shadow: 0px 0px 1px 0px RGBA(0, 0, 0, 0.4);
+    position: relative;
+}
+.price-table .pricing-head {
+    background: #fff;
+    padding: 40px;
+    text-align: center;
+}
+.price-table .pricing-head h4 {
+    font-size: 22px;
+    color: #232c3b;
+    margin-top: 0px;
+    letter-spacing: 1px;
+    border-bottom: 1px solid #232c3b;
+    padding-bottom: 20px;
+}
+.pricing-head .amount {
+    font-size: 60px;
+    font-weight: bold;
+}
+.pricing-head .curency {
+    display: inline-block;
+    position: relative;
+    top: -30px;
+    font-size: 20px;
+}
+.price-in {
+    background: #fff;
+    text-align: center;
+}
+.btn-bg {
+    border: 0px;
+    border-radius: 0px;
+    color: #fff !important;
+    padding: 20px 0px;
+    font-weight: bold !important;
+    font-size: 14px;
+    background-color: #5fcf80;
+}
+
+/***********************************
+Cta
+************************************/
+.cta{
+    padding: 120px 0;
+}
+.cta-2-txt {
+    font-size: 24px;
+    padding-bottom: 15px;
+    text-align: center;
+    margin: 0 auto;
+    line-height: 34px !important;
+}
+
+
+</style>
+<body>
+<!--Navigation bar-->
+  <nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="#">Induction Training Programme <small>conducted by the Spoken Tutorial Project, under the aegis of Pandit Madan Mohan Malaviya National Mission on Teachers and Teaching (PMMMNMTT).</small></a>
+      </div>
+      <div class="collapse navbar-collapse" id="myNavbar">
+        <ul class="nav navbar-nav navbar-right">
+          <li><a href="#feature">Features</a></li>
+          <li><a href="#pricing">Pricing</a></li>
+          <li class="btn-trial"><a href="#interest">Interest</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!--/ Navigation bar-->
+  <!--Modal box-->
+  <div class="modal fade" id="accomodation" role="dialog">
+    <div class="modal-dialog modal-md">
+
+      <!-- Modal content no 1-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title text-center form-title">ACCOMODATION</h4>
+        </div>
+        <div class="modal-body padtrbl">
+
+          <div class="login-box-body">
+            <p class="login-box-msg">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Laudantium enim repellat sapiente quos architecto<br>Laudantium enim repellat sapiente quos architecto</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="modal fade" id="travel" role="dialog">
+    <div class="modal-dialog modal-md">
+
+      <!-- Modal content no 1-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title text-center form-title">TRAVEL ALLOWANCE</h4>
+        </div>
+        <div class="modal-body padtrbl">
+
+          <div class="login-box-body">
+            <p class="login-box-msg">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Laudantium enim repellat sapiente quos architecto<br>Laudantium enim repellat sapiente quos architecto</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="modal fade" id="deposit" role="dialog">
+    <div class="modal-dialog modal-md">
+
+      <!-- Modal content no 1-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title text-center form-title">DEPOSIT</h4>
+        </div>
+        <div class="modal-body padtrbl">
+
+          <div class="login-box-body">
+            <p class="login-box-msg">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Laudantium enim repellat sapiente quos architecto<br>Laudantium enim repellat sapiente quos architecto</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <!--/ Modal box-->
+<!--Banner-->
+  <div class="banner">
+    <div class="bg-color">
+      <div class="container">
+        <div class="row">
+          <div class="banner-text text-center">
+            <div class="intro-para text-center">
+              <p >Learning Today . . . Leading Tomorrow.</p>
+              <p >Lorem ipsum dolor sit amet, consectetur adipisicing elit. Laudantium enim repellat sapiente quos architecto<br>Laudantium enim repellat sapiente quos architecto</p>
+              <a href="#footer" class="btn get-quote">KNOW MORE</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!--/ Banner-->
+<!--Feature-->
+  <section id="feature" class="section-padding">
+    <div class="container">
+      <div class="row">
+        <div class="header-section text-center">
+          <h2>Features</h2>
+          <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Exercitationem nesciunt vitae,<br> maiores, magni dolorum aliquam.</p>
+          <hr class="bottom-line">
+        </div>
+        <div class="feature-info">
+          <div class="fea">
+            <div class="col-md-4">
+              <div class="heading pull-right">
+                <h4>Latest Technologies</h4>
+                <p>Donec et lectus bibendum dolor dictum auctor in ac erat. Vestibulum egestas sollicitudin metus non urna in eros tincidunt convallis id id nisi in interdum.</p>
+              </div>
+              <div class="fea-img pull-left">
+                <i class="fa fa-css3"></i>
+              </div>
+            </div>
+          </div>
+          <div class="fea">
+            <div class="col-md-4">
+              <div class="heading pull-right">
+                <h4>Toons Background</h4>
+                <p>Donec et lectus bibendum dolor dictum auctor in ac erat. Vestibulum egestas sollicitudin metus non urna in eros tincidunt convallis id id nisi in interdum.</p>
+              </div>
+              <div class="fea-img pull-left">
+                <i class="fa fa-drupal"></i>
+              </div>
+            </div>
+          </div>
+          <div class="fea">
+            <div class="col-md-4">
+              <div class="heading pull-right">
+                <h4>Award Winning Design</h4>
+                <p>Donec et lectus bibendum dolor dictum auctor in ac erat. Vestibulum egestas sollicitudin metus non urna in eros tincidunt convallis id id nisi in interdum.</p>
+              </div>
+              <div class="fea-img pull-left">
+                <i class="fa fa-trophy"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!--/ feature-->
+  <!--Pricing-->
+  <section id="pricing" class="section-padding back_grey">
+    <div class="container">
+      <div class="row">
+        <div class="header-section text-center">
+          <h2>Our Pricing</h2>
+          <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Exercitationem nesciunt vitae,<br> maiores, magni dolorum aliquam.</p>
+          <hr class="bottom-line">
+        </div>
+        <div class="col-md-4 col-sm-4">
+          <div class="price-table">
+            <!-- Plan  -->
+            <div class="pricing-head">
+              <h4>ACCOMODATION</h4>
+              <span class="fa fa-inr curency"></span> <span class="amount">1000*</span>
+            </div>
+
+            <!-- Plean Detail -->
+            <div class="price-in mart-15">
+              <a href="#" data-target="#accomodation" data-toggle="modal" class="btn btn-bg green btn-block">KNOW MORE</a>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4 col-sm-4">
+          <div class="price-table">
+            <!-- Plan  -->
+            <div class="pricing-head">
+              <h4>TRAVEL ALLOWANCE</h4>
+              <span class="fa fa-inr curency"></span> <span class="amount">2000*</span>
+            </div>
+
+            <!-- Plean Detail -->
+            <div class="price-in mart-15">
+              <a href="#" data-target="#travel" data-toggle="modal" class="btn btn-bg yellow btn-block">KNOW MORE</a>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4 col-sm-4">
+          <div class="price-table">
+            <!-- Plan  -->
+            <div class="pricing-head">
+              <h4>DEPOSIT</h4>
+              <span class="fa fa-inr curency"></span> <span class="amount">1000</span>
+            </div>
+
+            <!-- Plean Detail -->
+            <div class="price-in mart-15">
+              <a href="#" data-target="#deposit" data-toggle="modal" class="btn btn-bg red btn-block">KNOW MORE</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!--/ Pricing-->
+  <!--Cta-->
+  <section id="interest" class="cta">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <h2 class="text-center">Expression of Interest</h2>
+          <p class="cta-2-txt">Fill up the application form to KNOW you are interested</p>
+          <div class="cta-2-form text-center">
+            <a  href="{% url 'expression_of_intrest' %}" class="btn btn-success btn-lg  ">SHOW FORM</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!--/ Cta-->
+  <!--Cta-->
+  <section id="selection" class="cta back_grey">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <h2 class="text-center">Selection Process</h2>
+          <p class="cta-2-txt">Canidate will undergo selection process in the case of overwhelming response</p>
+          <div class="cta-2-form text-center">
+            <a href="#" data-target="#deposit" data-toggle="modal" class="btn btn-success btn-lg  ">KNOW MORE</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!--/ Cta-->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h2> Induction Training of Faculty</h2>
+<h5>conducted by the Spoken Tutorial Project, under the aegis of  Pandit Madan Mohan Malaviya National Mission on Teachers and Teaching (PMMMNMTT).</h5>
+
+<br><br>
+<div class="panel panel-warning" style="text-align:center;">
+  <div class="panel-heading">
+    <h3 class="panel-title">
+    <a href="http://spoken-tutorial.org/media/induction/Tentative-Programme.pdf" target="_blank"><u>Click here to view &nbsp;<b>Tentative Programme Details</b></u></a></p>
+    </h3>
+  </div>
+</div>
+
+<div class="panel panel-warning" style="text-align:center;">
+  <div class="panel-heading">
+    <h3 class="panel-title">
+    <a href="http://spoken-tutorial.org/media/induction/Invitation-Letter.pdf" target="_blank"><u>Click here to view &nbsp;<b>Invitation Letter</b></u></a></p>
+    </h3>
+  </div>
+</div>
+
+<div class="panel panel-warning" style="text-align:center;">
+  <div class="panel-heading">
+    <h3 class="panel-title">
+    <a href="http://spoken-tutorial.org/induction/expression_of_intrest" target="_blank"><u><b>Expression of Interest</b></u></a></p>
+    </h3>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

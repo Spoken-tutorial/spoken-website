@@ -547,6 +547,10 @@ def induction_2017(request):
     return render(request, 'spoken/templates/induction_2017.html', context)
 
 
+def induction_2017_new(request):
+    return render(request, 'spoken/templates/induction_2017_new.html')
+
+
 def expression_of_intrest(request):
     form = ExpressionForm()
     if request.method == 'POST':
