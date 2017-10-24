@@ -541,10 +541,10 @@ def learndrupal(request):
     return render(request, 'spoken/templates/learndrupal.html')
 
 def induction_2017(request):
-    return render(request, 'spoken/templates/induction_2017.html')
-
-# def expression_of_intrest(request):
-#     return render(request, 'spoken/templates/expression_of_intrest_old.html')
+    EOI_count = InductionInterest.objects.all().count()
+    context = {'EOI_count': EOI_count}
+    context.update(csrf(request))
+    return render(request, 'spoken/templates/induction_2017.html', context)
 
 
 def expression_of_intrest(request):
