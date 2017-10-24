@@ -17,41 +17,45 @@ from cms.models import *
 from events.models import Organiser
 
 #here fetch all organisers in user
-organisers = Organiser.objects.filter(status=1)
+organisers = Organiser.objects.all().exclude(academic__institution_type__id__in=[15,13,5])
 sent = 0
 notsent = 0
 count = 0
 tot_count = len(organisers)
 
-subject = '"IITBombayX MOOCs course on "Basic 3D animation using Blender"'
+subject = '"Invitation for Induction Training Programme"'
 
-success_log_file_head = open(LOG_ROOT+'animation-org-email-log.txt',"w")
+success_log_file_head = open(LOG_ROOT+'org-email-log.txt',"w")
 for organiser in organisers:
     message = '''
+Dear Sir/ Madam,
 
-Dear Organiser,
+We are pleased to invite you to attend a 20-day residential programme for "Induction Training of Faculty" at IIT Bombay, from 28 November 2017 to 20 December 2017, between 9:00 am and 6:00 pm.
 
-IITBombayX is offering a new MOOCs course on "Basic 3D animation using Blender". 
-Please forward this poster to the students/faculty who would benefit!
+The Spoken Tutorial Project, under the aegis of Pandit Madan Mohan Malaviya National Mission on Teachers and Teaching (PMMMNMTT), is organising this residential programme to train 120 Teachers from Universities/Colleges/ Institutes, on various aspects of teaching and learning.  As per the decision by a Group of Secretaries of the Central Government, this is expected to become a mandatory training programme for new college teachers.
 
-Also attached is a letter from Prof. Phatak, IIT Bombay, explaining what is a MOOC.
+Please find enclosed our official invite letter. Request you to kindly circulate this amongst your friends and colleagues so that maximum no. of teachers can avail this opportunity.  
 
-Regards
-Spoken Tutorial Team
-IIT Bombay'''.format(organiser.user.username)
+For more information please visit the following link.  
+http://spoken-tutorial.org/induction
+
+Thanks and regards,
+Prof Kannan Moudgalya
+IIT Bombay
+
+'''.format(organiser.user.username)
 
     to  = [organiser.user.email]
-    #to = ['k.sanmugam2@gmail.com', 'kirti3192@gmail.com', 'nancyvarkey@gmail.com']
+    # to = ['ganeshmohite96@gmail.com','nancyvarkey@gmail.com']
     email = EmailMultiAlternatives(
-        subject, message, 'administrator@spoken-tutorial.org',
+        subject, message, 'workshops@spoken-tutorial.org',
         to = to,
         headers = {
          "Content-type" : "text/html"
         }
     )
     #email.attach_alternative(html_content, "text/html")
-    email.attach_file('/websites_dir/django_spoken/spoken/cron/SKANI_Letter_DBP.pdf')
-    email.attach_file('/websites_dir/django_spoken/spoken/cron/SKANI_Jan2016_Poster.pdf')
+    email.attach_file('/websites_dir/django_spoken/spoken/cron/Letter_for_training_faculty.pdf')
     count = count + 1
     try:
         result = email.send(fail_silently=False)
@@ -64,7 +68,7 @@ IIT Bombay'''.format(organiser.user.username)
         print e
         #print to," => not sent (",count,"/",tot_count,")"
         success_log_file_head.write(str(organiser.id)+','+str(0)+'\n')
-    #break
+    # break
 print "--------------------------------"
 print "Total sent mails:", sent
 print "Total not sent mails:", notsent
