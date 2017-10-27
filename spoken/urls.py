@@ -33,7 +33,7 @@ urlpatterns = patterns('',
     # url(r'^induction/$', 'spoken.views.induction_2017', name='induction_2017'),
     url(r'^induction/$', 'spoken.views.induction_2017_new', name='induction_2017_new'),
     # url(r'^induction/expression_of_intrest/$', 'spoken.views.expression_of_intrest', name='expression_of_intrest'),
-    url(r'^induction/expression_of_intrest/$', 'spoken.views.expression_of_intrest', name='expression_of_intrest'),
+    # url(r'^induction/expression_of_intrest/$', 'spoken.views.expression_of_intrest', name='expression_of_intrest'),
     # url(r'^spoken/', include('spoken.foo.urls')),
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
