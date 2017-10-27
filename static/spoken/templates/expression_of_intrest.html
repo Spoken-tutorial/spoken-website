@@ -31,9 +31,15 @@
   display:block;
   font-size:12px;
 }
+.footer{
+      background: #303030;
+      color:#fff;
+      text-align: center;
+    }
 </style>
 <body>
-<!--Navigation bar-->
+
+<!-- Navigation bar-->
   <nav class="navbar navbar-default navbar-fixed-top">
     <div class="container">
       <div class="navbar-header">
@@ -42,14 +48,20 @@
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
         </button>
-        <a class="navbar-brand" href="{% url 'induction_2017' %}">Induction Training Programme<small>conducted by the Spoken Tutorial Project, under the aegis of Pandit Madan Mohan Malaviya National Mission on Teachers and Teaching (PMMMNMTT).</small></a>
+        <a class="navbar-brand" href="{% url 'induction_2017_new' %}">Induction Training Programme<small>conducted by the Spoken Tutorial Project, under the aegis of Pandit Madan Mohan Malaviya National Mission on Teachers and Teaching (PMMMNMTT).</small></a>
       </div>
     </div>
   </nav>
   <!--/ Navigation bar-->
-<div class="container form_container">
-<h1>Induction Programme of PMMMNMTT <br> Expression of Interest</h1>
-<p>Dear Colleague, <br>
+<div class="container form_container" style="text-align: center;">
+<h1 > Expression of Interest is now closed <br><br>
+We thank the 1,038 candidates who have expressed an interest</h1>
+<br><h4> For any questions/doubts please email us at : <span class="fa fa-2 fa-envelope"></span> workshops [at] spoken-tutorial [dot] org </h4>
+</div>
+
+</body>
+
+<!-- <p>Dear Colleague, <br>
 I am happy to invite your Expression of Interest to the proposed induction programme for college teachers, to be organised at IIT Bombay, under the aegis of the Teaching Learning Centre (ICT), funded by the Pandit Madan Mohan Malaviya National Mission on Teachers and Teaching, an initiative of MHRD.  All details about this course are available at <a href="http://spoken-tutorial.org/induction/">http://spoken-tutorial.org/induction/</a>.  Your inputs to this survey will be useful for the following: (1) shortlisting candidates, in case there are many applicants (2) deciding the number of rooms to be provided in boys or girls hostels (3) deciding the experts to invite and examples to include, depending on the background of participants.  We shall also use this for research purposes, so as to improve such training programmes.</p>
 <p style="color: red;">* fields are mandetory.</p>
 <div class="form-horizontal col-sm-12 back_grey ">
@@ -290,145 +302,7 @@ I am happy to invite your Expression of Interest to the proposed induction progr
       {% endwith %}
     </form>
 </div>
-</div>
-</body>
-<script>
-$(window).load(function(){
-  mother_tongue = $('.mother_tongue').val();
-  if (mother_tongue == 'Other'){
-    document.getElementById('other_language').style.display = '';
-    
-  }
-  else{
-  document.getElementById('other_language').style.display = 'none';
-  }
-
-  medium = $('.medium_of_studies').val();
-  if (medium == 'Other'){
-    document.getElementById('other_medium').style.display = '';
-    
-  }
-  else{
-  document.getElementById('other_medium').style.display = 'none';
-  }
-
-
-
-  education = $('.education').val();
-  if (education == 'Other'){
-    document.getElementById('other_education').style.display = '';
-    
-  }
-  else{
-  document.getElementById('other_education').style.display = 'none';
-  }
-
-
-
- specialisation = $('.specialisation').val();
-  if (specialisation == 'Other'){
-    document.getElementById('other_specialisation').style.display = '';
-    
-  }
-  else{
-  document.getElementById('other_specialisation').style.display = 'none';
-  }
-
-
-
-designation = $('.designation').val();
-  if (designation == 'Other'){
-    document.getElementById('other_designation').style.display = '';
-    
-  }
-  else{
-  document.getElementById('other_designation').style.display = 'none';
-  }
-
-  bring_laptop = $('.bring_laptop').val();
-  if (bring_laptop == 'No'){
-    document.getElementById('borrow_laptop').style.display = '';
-    
-  }
-  else{
-  document.getElementById('borrow_laptop').style.display = 'none';
-  }
-
-});
-///////////////////////////////////////////////////////////////
-
-$('.mother_tongue').on('change', function() {
-  mother_tongue = $('.mother_tongue').val();
-  if (mother_tongue == 'Other'){
-    document.getElementById('other_language').style.display = '';
-    
-  }
-  else{
-  document.getElementById('other_language').style.display = 'none';
-  }
-
-});
-
-$('.medium_of_studies').on('change', function() {
-  medium = $('.medium_of_studies').val();
-  if (medium == 'Other'){
-    document.getElementById('other_medium').style.display = '';
-    
-  }
-  else{
-  document.getElementById('other_medium').style.display = 'none';
-
-  }
-
-
-
-});
-
-$('.education').on('change', function() {
-  education = $('.education').val();
-  if (education == 'Other'){
-    document.getElementById('other_education').style.display = '';
-    
-  }
-  else{
-  document.getElementById('other_education').style.display = 'none';
-  }
-
-});
-
-$('.specialisation').on('change', function() {
-  specialisation = $('.specialisation').val();
-  if (specialisation == 'Other'){
-    document.getElementById('other_specialisation').style.display = '';
-    
-  }
-  else{
-  document.getElementById('other_specialisation').style.display = 'none';
-  }
-
-});
-
-$('.designation').on('change', function() {
-  designation = $('.designation').val();
-  if (designation == 'Other'){
-    document.getElementById('other_designation').style.display = '';
-    
-  }
-  else{
-  document.getElementById('other_designation').style.display = 'none';
-  }
-
-});
-$('.bring_laptop').on('change', function() {
-bring_laptop = $('.bring_laptop').val();
-  if (bring_laptop == 'No'){
-    document.getElementById('borrow_laptop').style.display = '';
-    
-  }
-  else{
-  document.getElementById('borrow_laptop').style.display = 'none';
-  }
-});
-</script>
+</div> 
+ -->
 
 </html>

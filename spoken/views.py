@@ -550,6 +550,9 @@ def induction_2017(request):
 def induction_2017_new(request):
     return render(request, 'spoken/templates/induction_2017_new.html')
 
+def expression_of_intrest(request):
+    return render(request, 'spoken/templates/expression_of_intrest.html')
+
 
 # def expression_of_intrest(request):
 #     form = ExpressionForm()
@@ -570,6 +573,6 @@ def induction_2017_new(request):
 #     }
 
 
-    context = {}
-    context['form'] = form
-    return render(request, 'spoken/templates/expression_of_intrest.html', context)
+    # context = {}
+    # context['form'] = form
+    # return render(request, 'spoken/templates/expression_of_intrest.html', context)
