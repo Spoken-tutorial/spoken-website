@@ -11,8 +11,9 @@
 </head>
 <style type="text/css">
 body {
-    padding-top: 4%;
+    padding-top: 10%;
   }
+
 .navbar-default {
     background-color: #26C281;
     height: auto;
@@ -41,7 +42,7 @@ body {
   min-height: 280px;
   position: relative;
   padding: 4%;
-}
+
 .bg-color{
   background-color: RGBA(12, 11, 11, 0.82);
   min-height: 280px;
@@ -50,8 +51,7 @@ body {
   font-family: 'Alegreya Sans', sans-serif;
   font-size: 20px;
   color: #fff;
-  margin-top: 5%;
-}
+  margin-top: -2%;
 
 /***********************************
 Features
@@ -340,10 +340,10 @@ Cta
       text-align: center;
     }
 </style>
-<body>
 <!--Navigation bar-->
   <nav class="navbar navbar-default navbar-fixed-top">
     <div class="container">
+    <h2 class = "page-header" style="color: #D35400; text-shadow: 2px 2px 8px #fff;  text-align:center; margin-top: -10px;"><b>Pandit Madan Mohan Malaviya National Mission on Teachers and Teaching</b></h2>
       <div class="navbar-header">
         <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
           <span class="icon-bar"></span>
@@ -375,6 +375,7 @@ Cta
   <!--/ Navigation bar-->
   <!--Modal box-->
 
+<body>
   <div class="modal fade" id="selection_modal" role="dialog">
     <div class="modal-dialog modal-md">
 
@@ -387,7 +388,7 @@ Cta
         <div class="modal-body padtrbl">
 
           <div class="login-box-body">
-            <p class="login-box-msg">Here Knack instructions will be displayed.</p>
+            <p class="login-box-msg">Instructios for the assignment will be displayed here</p>
           </div>
 
         </div>
@@ -404,15 +405,21 @@ Cta
         <div class="row">
           <div class="banner-text text-center">
             <div class="intro-para text-center">
-              <p>28 November to 20 December 2017</p>
-              <p >The Spoken Tutorial Project, under the aegis of  Pandit Madan Mohan Malaviya National Mission on Teachers and Teaching (PMMMNMTT) is organising a 20-day residential programme to train 120 Teachers from Universities/Colleges/ Institutes, on various aspects of teaching and learning.  As per the decision by a Group of Secretaries of the Central Government, this is expected to become a mandatory training programme for new college teachers.</p>
+
+              <div class = "page-header" style="color: orange;">28 November to 20 December 2017</div>
+              <p >The Spoken Tutorial Project, under the aegis of Pandit Madan Mohan Malaviya National Mission on Teachers and Teaching (PMMMNMTT) is organising a 20-day residential programme to train 120 new teachers from Universities/Colleges/ Institutes, on various aspects of teaching and learning  
+              <br>As per the decision by a Group of Secretaries of the Central Government, this is expected to become a mandatory training programme for new college teachers.</p>
             </div>
+          </div>
+          <div class="alert alert-warning" role="alert" style="text-align:center;">
+            <a href="http://spoken-tutorial.org/media/induction/Secretaries-framework.pdf" class="alert-link" target="_blank">Click here to view the programme as envisioned by the Group of Secretaries</a>
           </div>
           <div class="alert alert-warning" role="alert" style="text-align:center;">
             <a href="http://spoken-tutorial.org/media/induction/Tentative-Programme.pdf" class="alert-link" target="_blank">Click here to view &nbsp;<b>Tentative Programme Details</a>
           </div>
           <div class="alert alert-warning" role="alert" style="text-align:center;">
-            <a href="http://spoken-tutorial.org/media/induction/Invitation-Letter.pdf" class="alert-link" target="_blank">Click here to view &nbsp;<b>Invitation Letter</a>
+            <a href="http://spoken-tutorial.org/media/induction/Invitation-Letter.pdf" class="alert-link" target="_blank">Click here to view the &nbsp;<b>Invitation Letter</a>
+
           </div>
 
         </div>
@@ -448,7 +455,9 @@ Cta
             <div class="col-md-4">
               <div class="heading pull-right">
                 <h4>120 Participants</h4>
-                <p>Selection criterion will be announced on Monday 30 October 2017.<br>Selection mechanism will assess on the basis of desirable qualities of a teacher</p>
+
+                <p>Selection criterion will be announced on Monday, 30 October 2017<br>Selection mechanism will assess on the basis of desirable qualities of a teacher</p>
+
               </div>
               
             </div>
@@ -458,7 +467,9 @@ Cta
             <div class="col-md-4">
               <div class="heading pull-right">
                 <h4>Laptop</h4>
-                <p>Every participant should bring a laptop to benefit the most from the course.<br>
+
+                <p>Every participant should bring a laptop to benefit the most from the course<br>
+
                 For example: some of the activities such as creating video lectures, require a laptop</p>
               </div>
               
@@ -504,7 +515,9 @@ Cta
             <!-- Plan  -->
             <div class="pricing-head">
               <h4>DEPOSIT</h4>
-              <p>All selected candidates will have to pay Rs.1000 as a non-refundable deposit</p>
+
+              <p>All selected candidates will have to pay Rs. 1,000 as a non-refundable course fees</p>
+
               
             </div>
 
@@ -520,9 +533,11 @@ Cta
       <div class="row">
         <div class="col-lg-12">
           <h1 class="text-center"><b>Expression of Interest</b></h1>
-          <p class="cta-2-txt">Fill up the application form to let us know you are interested.<br>Last date to fill the form is 27 October 2017 (before 5 p.m.)</p>
+
+          <p class="cta-2-txt">Fill up the application form to let us know that you are interested<br>Last date to fill the form is 27 October 2017 (before 5 p.m.)</p>
           <div class="cta-2-form text-center">
-            <a  href="{% url 'expression_of_intrest' %}" class="btn btn-success btn-lg  ">SHOW FORM</a>
+            <a  href="{% url 'expression_of_intrest' %}" class="btn btn-success btn-lg  " target="_blank">SHOW FORM</a>
+
           </div>
         </div>
       </div>
@@ -535,7 +550,8 @@ Cta
       <div class="row">
         <div class="col-lg-12">
           <h1 class="text-center"><b>Selection Process</b></h1>
-          <p class="cta-2-txt">Candidates will undergo selection process in case the number of applications exceeds 120.</p>
+          <p class="cta-2-txt">Candidates will undergo selection process in case the number of applications exceeds 120</p>
+
           <div class="cta-2-form text-center">
             <a href="#" data-target="#selection_modal" data-toggle="modal" class="btn btn-success btn-lg  ">KNOW MORE</a>
           </div>
@@ -555,20 +571,25 @@ Cta
 </div>
   <div class="time_container left">
     <div class="content disable_link" >
-       <h2><b>27 October2017</b> <small class="text-muted">till <i class="glyphicon glyphicon-time"></i> 5 P.M.</small></h2>
+
+       <h2><b>27 October 2017</b> <small class="text-muted">till <i class="glyphicon glyphicon-time"></i> 5 P.M.</small></h2>
+
       <p>Last date to fill the Expression of Interest form</p>
     </div>
   </div>
   <div class="time_container right">
     <div class="content active_back">
-      <h2><b>30 October2017</b></h2>
-      <p>Announcement of selection criterion </p>
+
+      <h2><b>30 October 2017</b></h2>
+      <p>Announcement of selection criterion through an assignment</p>
+
     </div>
   </div>
   <div class="time_container right">
     <div class="content upcoming">
       <h2><b>3 November 2017</b></h2>
-      <p>Last date to submit game</p>
+      <p>Last date to submit the assignment</p>
+
     </div>
   </div>
   <div class="time_container right">
@@ -585,8 +606,9 @@ Cta
   </div>
   <div class="time_container right">
     <div class="content upcoming">
-      <h2><b>10 November 2017</b></h2>
-      <p>Last date to submit registration form</p>
+      <h2><b>9 November 2017</b></h2>
+      <p>Last date to submit registration form and pay the course fees of <br>Rs. 1,000</p>
+
     </div>
   </div>
 </div>
