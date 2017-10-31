@@ -26,23 +26,25 @@ notsent = 0
 count = 0
 tot_count = len(users)
 
-subject = '"Details of assignment"'
+subject = '"Method to select 120 participants for the Induction Training Programme"'
 
-success_log_file_head = open(LOG_ROOT+'induction_particiants_test.txt',"w")
+success_log_file_head = open(LOG_ROOT+'induction_particiants.txt',"w")
 for user in users:
     message = '''
 Hello,
 
 Thank you for your interest in participating in the Induction Training Programme, organised under the aegis of the Pandit Madan Mohan Malaviya National Mission on Teachers and Teaching.  You have made it to the first shortlist.  We invite you to offer yourself to be selected in the top 120 people. 
 
-Shortlisting from amongst the teachers, for a training programme, is a tricky one.  It may not make sense to select on the basis of marks one scored in a qualifying degree, for example.  Selection based on metric, such as perseverance, motivating others, teaching others through personal examples, etc., would make a lot more sense.  This is precisely what Knack promises to do!  Developed by Dr. Guy Halftec, Knack helps identify the level of skills/talents, etc., of the player of a game, called a knack.  We hope to use these scores to shortlist people for the next stage.
+Shortlisting from amongst the teachers, for a training programme, is a tricky one.  It may not make sense to select on the basis of marks one scored in a qualifying degree, for example.  Selection based on metric, such as perseverance, motivating others, teaching others through personal examples, etc., would make a lot more sense.  This is precisely what the Knack promises to do!  Developed by Dr. Guy Halftec, the Knack helps identify the level of skills/talents, etc., of the player of a game, called a knack.  We hope to use these scores to shortlist people for the next stage.
 
-Please follow this link on your phone to download and play the games - knack.it/bbddmm. Sign up and login using the same e-mail address that you shared with us. Please enter xepw as the Knack Code, when prompted. Attached are the screenshots for your convenience.  
+Please follow this link on your phone to download and play the games - knack.it/bbddmm.  Sign up and login using the same e-mail address that you shared with us - if you use some other email address, you may NOT be shortlisted.  Please enter xepw as the Knack Code (optional), when prompted.  Please do exactly as suggested above.  Attached are the screenshots for your convenience. 
 
-As soon as you complete playing, we shall get your score from Knack. Please complete this activity before the due date of 3 November 2017, 5pm.
+Please ensure that you have about 45 minutes of time, your phone is fully charged, etc., before starting to play.  Scores obtained from the first time of play only will be considered.  You may play again, but those scores will NOT be considered.  This is how the game engine is built, and it cannot be changed for any reason.
+
+As soon as you complete playing, we shall automatically get your score from the Knack game.  Please complete this activity before the due date of 3 November 2017, 5pm.
 
 Thanks and regards,
-Prof Kannan Moudgalya
+Prof. Kannan Moudgalya
 IIT Bombay
 
 '''.format(user)
