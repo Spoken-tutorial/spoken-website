@@ -1612,3 +1612,11 @@ class InductionInterest(models.Model):
   class Meta:
     ordering = ('city',)
 
+class InductionFinalList(models.Model):
+  email = models.EmailField(max_length = 200)
+  eoi_id = models.ForeignKey(InductionInterest, default=None)
+  code = models.CharField(max_length=255, default=None)
+  # batch_code should be in form of year+month+batch_number e.g. 20171101 = [year 2017,month 11, batch 01]
+  batch_code = models.PositiveIntegerField()
+  created = models.DateTimeField(auto_now_add = True)
+
