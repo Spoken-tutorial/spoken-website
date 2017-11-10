@@ -30,7 +30,9 @@ for user in users:
     message = '''
 Dear Candidate,
 
-This email is a reminder for you to upload the certificate requested in our last email and make the payment of non-refundable course fees of Rs.1000.  Both of these tasks should be completed by 13 November 2017, 10 a.m.  
+Dear Candidate,
+
+This email is a reminder for you to upload the certificate requested in our last email and make the payment of non-refundable course fees of Rs.1000.  Both of these tasks should be completed by 13 November 2017, 10 a.m.  The certificate should be on the College Letterhead and should be exactly as per the proforma, which we sent as an attachment in the previous email.
 
 We would appreciate your urgent attention to this matter and look forward to receiving the same, no later than the date mentioned above.   So, kindly do so at the earliest.  
 
