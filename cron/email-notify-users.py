@@ -17,35 +17,69 @@ from cms.models import *
 from events.models import InductionInterest, InductionFinalList
 
 #here fetch all user
-users = InductionFinalList.objects.all()
+users = InductionFinalList.objects.filter(batch_code='20171103')
 sent = 0
 notsent = 0
 count = 0
 tot_count = len(users)
 
-subject = ' Reminder: "Instructions for uploading the college letter and paying the registration fee" '
+subject = ' "Instructions for uploading the college letter and paying the registration fee" '
 
-success_log_file_head = open(LOG_ROOT+'induction_particiants_shortlist.txt',"w")
+success_log_file_head = open(LOG_ROOT+'induction_particiants_thirdshortlist.txt',"w")
 for user in users:
     message = '''
 Dear Candidate,
 
-Dear Candidate,
+As mentioned in the previous email, you have to upload a scanned copy of the certificate from your Principal/Director/VC, stating that you are in the first two years of service as a teacher.
+The format for this certificate is in the attachment.
 
-This email is a reminder for you to upload the certificate requested in our last email and make the payment of non-refundable course fees of Rs.1000.  Both of these tasks should be completed by 13 November 2017, 10 a.m.  The certificate should be on the College Letterhead and should be exactly as per the proforma, which we sent as an attachment in the previous email.
+Instructions to upload the certificate:
 
-We would appreciate your urgent attention to this matter and look forward to receiving the same, no later than the date mentioned above.   So, kindly do so at the earliest.  
+Click on this link http://induction.spoken-tutorial.org/mod/assign/view.php?id=1&action=editsubmission
+Login using your registered email id.  The password is "student", without quotes.
+You will be directed to a page that prompts you to change your password.
 
-After the stipulated deadline, we will have to release your seat for the candidates in the second shortlist, if our records show that you have not done either of the above.
+After doing this, you will be taken to a page with the title "Upload college letter".
+Drag-and-drop the soft-copy of the college letter, in the space provided.
+Click on "Save Changes" button at the bottom of the page.
+A confirmation screen will appear.  Click on "Submit assignment" button, which is at the bottom.
+A second confirmation screen will appear.  Here click on "Continue" button.
+You will see a message "Submitted for grading" in green, in the centre of the page.
+Your certificate has now been uploaded.
+You may now logout.
+You will have to submit the original letter at our Registration Desk on arrival at IIT Bombay.
 
 
-If you have already completed both the above steps, kindly ignore this mail.
+The second step is to pay the non-refundable course fees of Rs.1,000 through online transfer.
+Click on this link http://induction-training-programme.doattend.com
+On this page, it will prompt you to type the secret-code/password.  Pls type "pm3nmt2", without quotes, in the textbox provided.
+You will be directed to a page that prompts you to purchase tickets.  You have to select 1 ticket from the drop-down box.  Then click on "Register" button.
+Now, you will be taken to the Registration page where you have to provide your email id.  Pls type your registered email id in the textbox provided.
+Then click on "Continue" button.
+It will take you to another page, where you have to
+    1. fill your personal details.
+    2. accept the terms and conditions.
+    3. select any one online payment option.
+    4. fill your billing details and complete the payment.
+Please give the exact same details as given in the "Expression of Interest" form, wherever applicable.
 
+Lastly, click on "Continue" button at the bottom of the page.
 
-Thanks and rgds,
-Organising Team
-PMMMNMTT Induction Training Programme
+Once you complete the payment formalities, you will receive an e-ticket, with a unique ticket number.
+Please take a printout and carry the same with you for submission at our Registration Desk on arrival at IIT Bombay.
+
+The last date to complete the above two activities is now extended to Monday, 16 November 2017. After this date, all unfilled seats will be released to people on the waitlist.
+
+Please do not share the above information with anyone else. Candidates who are not selected would not get this mail.  If they still pay using the above information, they will not get a refund, nor will they be admitted to the Training Programme.
+
+Look forward to meeting you.
+
+Best Wishes,
+Prof Kannan Moudgalya
+PI, PMMMNMTT
 IIT Bombay
+
+
 
 
 '''.format(user.email)
@@ -60,7 +94,7 @@ IIT Bombay
         }
     )
     #email.attach_alternative(html_content, "text/html")
-    # email.attach_file('/websites_dir/django_spoken/spoken/cron/collegeletter.pdf')
+    email.attach_file('/websites_dir/django_spoken/spoken/cron/collegeletter.pdf')
     count = count + 1
     try:
         result = email.send(fail_silently=False)
