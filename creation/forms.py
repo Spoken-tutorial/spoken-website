@@ -197,7 +197,7 @@ class ChangeComponentStatusForm(forms.Form):
                                 compValue = getattr(tr_rec.common_content, comp_init_data + '_status')
                             if compValue:
                                 choices.append(("5", 'Need Improvement'))
-                                if comp_init_data in ['code', 'assignment','additional_material']:
+                            if comp_init_data in ['code', 'assignment','additional_material']:
                                     choices.append(("6", 'Not Required'))
                             if len(choices):
                                 self.fields['status'].widget.attrs = {}
