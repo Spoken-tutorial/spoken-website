@@ -554,25 +554,25 @@ def expression_of_intrest(request):
     return render(request, 'spoken/templates/expression_of_intrest.html')
 
 
-# def expression_of_intrest(request):
-#     form = ExpressionForm()
-#     if request.method == 'POST':
-#         form = ExpressionForm(request.POST)
-#         if form.is_valid():
-#             try:
-#                 form_data = form.save(commit=False)
-#                 form_data.save()
-#                 messages.success(request, "Your response has been recorded. Thanks for giving your inputs. In case there are more than 120 eligible applicants, we will get back to you about a selection criterion.")
-#                 return HttpResponseRedirect('/induction')
-#             except Exception, e:
-#                 print e
-#                 messages.error(request, "Sorry, something went wrong, Please try again!")
-#                 # return HttpResponseRedirect('/induction')
-#     context = {
-#         'form' : form,
-#     }
+def expression_of_intrest_new(request):
+    form = ExpressionForm()
+    if request.method == 'POST':
+        form = ExpressionForm(request.POST)
+        if form.is_valid():
+            try:
+                form_data = form.save(commit=False)
+                form_data.save()
+                messages.success(request, "Your response has been recorded. Thanks for giving your inputs. In case there are more than 120 eligible applicants, we will get back to you about a selection criterion.")
+                return HttpResponseRedirect('/induction')
+            except Exception, e:
+                print e
+                messages.error(request, "Sorry, something went wrong, Please try again!")
+                # return HttpResponseRedirect('/induction')
+    context = {
+        'form' : form,
+    }
 
 
-    # context = {}
-    # context['form'] = form
-    # return render(request, 'spoken/templates/expression_of_intrest.html', context)
+    context = {}
+    context['form'] = form
+    return render(request, 'spoken/templates/expression_of_intrest_old.html', context)
