@@ -87,12 +87,9 @@ def training(request):
     TRAINING_PENDING = '0'
 
     if request.method == 'GET':
-        print "@@@@@@@@@@@@@@@@@@"
         status = request.GET.get('status')
         if status not in [TRAINING_COMPLETED, TRAINING_PENDING]:
             status = TRAINING_COMPLETED
-
-        print status
 
     if status == TRAINING_PENDING:
         collectionSet = collectionSet.filter(participants=0)
@@ -128,6 +125,12 @@ def training(request):
     collection = get_sorted_list(request, collectionSet, header, raw_get_data)
     ordering = get_field_index(raw_get_data)
 
+    #get ongoing participant count
+    ongoing_trainings = TrainingRequest.objects.filter(status=0)
+    ongoing_participants_count = 0
+    for a in ongoing_trainings:
+        ongoing_participants_count+=a.batch.stcount
+
     # find state id
     if 'training_planner__academic__state' in request.GET and request.GET['training_planner__academic__state']:
         state = State.objects.get(id=request.GET['training_planner__academic__state'])
@@ -149,7 +152,10 @@ def training(request):
     context['collection'] = collection
     context['header'] = header
     context['ordering'] = ordering
-    context['participants'] = participants
+    if status == TRAINING_PENDING:
+        context['participants'] = ongoing_participants_count
+    else:
+        context['participants'] = participants
     context['model'] = 'Workshop/Training'
     context['status']=status
     return render(request, 'statistics/templates/training.html', context)
