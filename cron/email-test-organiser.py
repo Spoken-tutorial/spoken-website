@@ -14,52 +14,71 @@ from django.template import Context
 
 from config import *
 from cms.models import *
-from events.models import InductionInterest
+from events.models import Organiser
 
-#here fetch all user
-users = InductionInterest.objects.filter(
-    (Q(age ='20to25') | Q(age = '26to30') | Q(age = '31to35')),
-    (Q(experience_in_college = 'Lessthan1year') | Q(experience_in_college = 'Morethan1yearbutlessthan2years'))
-    ).exclude(designation = 'Other').values_list('email',flat=True).distinct()
+organisers = Organiser.objects.filter(status=1)
 sent = 0
 notsent = 0
 count = 0
-tot_count = len(users)
+tot_count = len(organisers)
 
-subject = '"Method to select 120 participants for the Induction Training Programme"'
+subject = 'Reminder Mail _ Spoken Tutorials IIT Bombay | Timely marking of the Participant List (PL)'
 
-success_log_file_head = open(LOG_ROOT+'induction_particiants.txt',"w")
-for user in users:
+success_log_file_head = open(LOG_ROOT+'organiser_pl_marking_reminder_log.txt',"w")
+for organiser in organisers:
     message = '''
-Hello,
 
-Thank you for your interest in participating in the Induction Training Programme, organised under the aegis of the Pandit Madan Mohan Malaviya National Mission on Teachers and Teaching.  You have made it to the first shortlist.  We invite you to offer yourself to be selected in the top 120 people. 
+Dear Faculty Organisers,
 
-Shortlisting from amongst the teachers, for a training programme, is a tricky one.  It may not make sense to select on the basis of marks one scored in a qualifying degree, for example.  Selection based on metric, such as perseverance, motivating others, teaching others through personal examples, etc., would make a lot more sense.  This is precisely what the Knack promises to do!  Developed by Dr. Guy Halftec, the Knack helps identify the level of skills/talents, etc., of the player of a game, called a knack.  We hope to use these scores to shortlist people for the next stage.
+The Spoken Tutorial team can see that you are very good in systematically planning and conducting the training session for your students.
 
-Please follow this link on your phone to download and play the games - knack.it/bbddmm.  Sign up and login using the same e-mail address that you shared with us - if you use some other email address, you may NOT be shortlisted.  Please enter xepw as the Knack Code (optional), when prompted.  Please do exactly as suggested above.  Attached are the screenshots for your convenience. 
+You have followed all the regular processes till date namely by -
 
-Please ensure that you have about 45 minutes of time, your phone is fully charged, etc., before starting to play.  Scores obtained from the first time of play only will be considered.  You may play again, but those scores will NOT be considered.  This is how the game engine is built, and it cannot be changed for any reason.
+1.uploading your student nominal roll (i.e) Master Batche(s),
+2.selected appropriate courses by filling the semester training planner (STP) through your organiser login on http://spoken-tutorial.org
 
-As soon as you complete playing, we shall automatically get your score from the Knack game.  Please complete this activity before the due date of 3 November 2017, 5pm.
+IMPORTANT- Now, it is time for you to mark attendance (i.e) complete STEP 3 of the Semester Training Planner Summary (STPS); "Mark the Participant List (PL)" to complete the process.
 
-Thanks and regards,
-Prof. Kannan Moudgalya
-IIT Bombay
 
-'''.format(user)
 
-    to  = [user]
+This is your next immediate activity (to be completed by December 29, 2017)...
+Log-on to http://spoken-tutorial.org
+Goto 'Software Training' >> 'Training Dashboard' >> 'Semester Training Planner Summary' >> 'STEP 3 : Select Participant List' --- mark attendance for all batches listed one by one.
+for more details:http://process.spoken-tutorial.org/images/1/1c/Select_Participantlist.pdf
+
+
+
+Why Mark PL?
+
+Any course that your student take for which (MB) batches are enrolled and courses marked (STP), has to be formally endorsed by you as an Organiser. Without completing PL, the students won't be able to take any Online Test or receive any Certificate(s).
+
+
+So hurry ! last date for marking the PL (for the selected courses) has been extended till December 29, 2017.
+
+
+Here's wishing you the best and guaranteeing our continued support for offering the Spoken Tutorial Software training to all. If you have questions, please contact the Training Coordinator of your respective state.
+
+
+Best wishes,
+
+Shyama Iyer
+National Coordinator - Training
+Spoken Tutorial, IIT Bombay
+
+
+'''.format(organiser.user.email)
+
+    to  = [organiser.user.email]
     # to = ['ganeshmohite96@gmail.com','nancyvarkey@gmail.com']
     email = EmailMultiAlternatives(
-        subject, message, 'workshops@spoken-tutorial.org',
+        subject, message, 'administrator@spoken-tutorial.org',
         to = to,
         headers = {
          "Content-type" : "text/html"
         }
     )
     #email.attach_alternative(html_content, "text/html")
-    email.attach_file('/websites_dir/django_spoken/spoken/cron/Knack-user-flow.pdf')
+    # email.attach_file('/websites_dir/django_spoken/spoken/cron/Knack-user-flow.pdf')
     count = count + 1
     try:
         result = email.send(fail_silently=False)
@@ -67,11 +86,11 @@ IIT Bombay
         if sent%100 == 0:
             time.sleep(10)
         #print to," => sent (", str(count),"/",str(tot_count),")"
-        success_log_file_head.write(str(user)+','+str(1)+'\n')
+        success_log_file_head.write(str(organiser.user.email)+','+str(1)+'\n')
     except Exception, e:
         print e
         #print to," => not sent (",count,"/",tot_count,")"
-        success_log_file_head.write(str(user)+','+str(0)+'\n')
+        success_log_file_head.write(str(organiser.user.email)+','+str(0)+'\n')
     # break
 print "--------------------------------"
 print "Total sent mails:", sent
