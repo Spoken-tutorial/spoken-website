@@ -1,6 +1,6 @@
 # Standard Library
 from datetime import datetime
-
+import collections
 # Third Party Stuff
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -103,7 +103,8 @@ def training(request):
             7: SortableHeader('course__category', True, 'Type'),
             8: SortableHeader('training_planner__organiser__user__first_name', True, 'Organiser'),
             9: SortableHeader('sem_start_date', True, 'Date'),
-            10: SortableHeader('participants', 'True', 'Participants')
+            10: SortableHeader('participants', 'True', 'Participants'),
+            11: SortableHeader('Action', False)
         }
     else:
         collectionSet = collectionSet.filter(participants__gt=0)
@@ -125,25 +126,55 @@ def training(request):
     collection = get_sorted_list(request, collectionSet, header, raw_get_data)
     ordering = get_field_index(raw_get_data)
 
-    #get ongoing participant count
-    ongoing_trainings = TrainingRequest.objects.filter(status=0)
-    ongoing_participants_count = 0
-    for a in ongoing_trainings:
-        ongoing_participants_count+=a.batch.stcount
-
+    
     # find state id
     if 'training_planner__academic__state' in request.GET and request.GET['training_planner__academic__state']:
         state = State.objects.get(id=request.GET['training_planner__academic__state'])
 
     collection = TrainingRequestFilter(request.GET, queryset=collection, state=state)
     # find participants count
+    
     participants = collection.qs.aggregate(Sum('participants'))
-    #
+
     chart_query_set = collection.qs.extra(select={'year': "EXTRACT(year FROM sem_start_date)"}).values('year').order_by(
-        '-year').annotate(total_training=Count('sem_start_date'), total_participant=Sum('participants'))
+            '-year').annotate(total_training=Count('sem_start_date'), total_participant=Sum('participants'))
     chart_data = ''
-    for data in chart_query_set:
-        chart_data += "['" + str(data['year']) + "', " + str(data['total_participant']) + "],"
+    
+
+
+# Students with Training not completed
+    ongoing_trainings = TrainingRequest.objects.filter( status=0).values('batch_id')
+    print "OGT",ongoing_trainings
+    ongoing_participants_count = 0
+    year_data_all={}
+    all_keys =[]
+
+    # Pending / Ongoing Trainings Radio Button
+    if status == TRAINING_PENDING:               
+        # Fetch all students' count for every batch found above
+        for a in ongoing_trainings:
+            # get the student count its year
+            get_year = StudentBatch.objects.filter(id = a['batch_id']).values('year','stcount')[0]
+            d_key = get_year['year']
+            all_keys.append(d_key)
+            d_value = get_year['stcount']
+            if d_key in year_data_all:
+                year_data_all[d_key]+=d_value
+            else:
+                year_data_all[d_key] = get_year['stcount']
+        # Descending order
+        all_keys = sorted(set(all_keys),reverse = True)
+        for a_key in all_keys: 
+            for data in chart_query_set:
+                if data['year'] == a_key:
+                    data['total_participant'] = year_data_all[a_key]
+                #get ongoing participant count
+                    ongoing_participants_count += year_data_all[a_key]
+                    chart_data += "['" + str(data['year']) + "', " + str(data['total_participant']) + "],"        
+    else:
+        for data in chart_query_set:
+            chart_data += "['" + str(data['year']) + "', " + str(data['total_participant']) + "],"
+    
     context = {}
     context['form'] = collection.form
     context['chart_data'] = chart_data
@@ -158,6 +189,8 @@ def training(request):
         context['participants'] = participants
     context['model'] = 'Workshop/Training'
     context['status']=status
+
+    
     return render(request, 'statistics/templates/training.html', context)
 
 def fdp_training(request):
@@ -220,6 +253,22 @@ def training_participant(request, rid):
         context['model_label'] = 'Workshop / Training'
         context['model'] = TrainingRequest.objects.get(id=rid)
         context['collection'] = TrainingAttend.objects.filter(training_id=rid)
+    except Exception, e:
+        print e
+        raise PermissionDenied()
+    return render(request, 'statistics/templates/training_participant.html', context)
+
+def studentmaster_ongoing(request, rid):
+    
+    context = {}
+    try:
+        context['model_label'] = 'Workshop / Training'
+        context['model'] = TrainingRequest.objects.get(id=rid)
+        current_batch = TrainingRequest.objects.filter(id=rid)
+        for ab in current_batch:
+            row_data = StudentMaster.objects.filter(batch_id=ab.batch_id)
+        context['collection'] = row_data
+
     except Exception, e:
         print e
         raise PermissionDenied()
