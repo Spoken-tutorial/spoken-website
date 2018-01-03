@@ -79,30 +79,57 @@ def get_state_info(request, code):
 
 def training(request):
     """ Organiser index page """
-    collectionSet = None
-    state = None
-
     collectionSet = TrainingRequest.objects.filter(
-        participants__gt=0,
-        sem_start_date__lte=datetime.now()
-    ).order_by('-sem_start_date')
-    header = {
-        1: SortableHeader('#', False),
-        2: SortableHeader('training_planner__academic__state__name', True, 'State'),
-        3: SortableHeader('training_planner__academic__city__name', True, 'City'),
-        4: SortableHeader('training_planner__academic__institution_name', True, 'Institution'),
-        5: SortableHeader('course__foss__foss', True, 'FOSS'),
-        6: SortableHeader('department', True, 'Department'),
-        7: SortableHeader('course__category', True, 'Type'),
-        8: SortableHeader('training_planner__organiser__user__first_name', True, 'Organiser'),
-        9: SortableHeader('sem_start_date', True, 'Date'),
-        10: SortableHeader('participants', 'True', 'Participants'),
-        11: SortableHeader('Action', False)
-    }
+            sem_start_date__lte=datetime.now()
+        ).order_by('-sem_start_date')
+    state = None
+    TRAINING_COMPLETED = '1'
+    TRAINING_PENDING = '0'
+
+    if request.method == 'GET':
+        status = request.GET.get('status')
+        if status not in [TRAINING_COMPLETED, TRAINING_PENDING]:
+            status = TRAINING_COMPLETED
+
+    if status == TRAINING_PENDING:
+        collectionSet = collectionSet.filter(participants=0)
+        header = {
+            1: SortableHeader('#', False),
+            2: SortableHeader('training_planner__academic__state__name', True, 'State'),
+            3: SortableHeader('training_planner__academic__city__name', True, 'City'),
+            4: SortableHeader('training_planner__academic__institution_name', True, 'Institution'),
+            5: SortableHeader('course__foss__foss', True, 'FOSS'),
+            6: SortableHeader('department', True, 'Department'),
+            7: SortableHeader('course__category', True, 'Type'),
+            8: SortableHeader('training_planner__organiser__user__first_name', True, 'Organiser'),
+            9: SortableHeader('sem_start_date', True, 'Date'),
+            10: SortableHeader('participants', 'True', 'Participants')
+        }
+    else:
+        collectionSet = collectionSet.filter(participants__gt=0)
+        header = {
+            1: SortableHeader('#', False),
+            2: SortableHeader('training_planner__academic__state__name', True, 'State'),
+            3: SortableHeader('training_planner__academic__city__name', True, 'City'),
+            4: SortableHeader('training_planner__academic__institution_name', True, 'Institution'),
+            5: SortableHeader('course__foss__foss', True, 'FOSS'),
+            6: SortableHeader('department', True, 'Department'),
+            7: SortableHeader('course__category', True, 'Type'),
+            8: SortableHeader('training_planner__organiser__user__first_name', True, 'Organiser'),
+            9: SortableHeader('sem_start_date', True, 'Date'),
+            10: SortableHeader('participants', 'True', 'Participants'),
+            11: SortableHeader('Action', False)
+        }
 
     raw_get_data = request.GET.get('o', None)
     collection = get_sorted_list(request, collectionSet, header, raw_get_data)
     ordering = get_field_index(raw_get_data)
+
+    #get ongoing participant count
+    ongoing_trainings = TrainingRequest.objects.filter(status=0)
+    ongoing_participants_count = 0
+    for a in ongoing_trainings:
+        ongoing_participants_count+=a.batch.stcount
 
     # find state id
     if 'training_planner__academic__state' in request.GET and request.GET['training_planner__academic__state']:
@@ -125,8 +152,12 @@ def training(request):
     context['collection'] = collection
     context['header'] = header
     context['ordering'] = ordering
-    context['participants'] = participants
+    if status == TRAINING_PENDING:
+        context['participants'] = ongoing_participants_count
+    else:
+        context['participants'] = participants
     context['model'] = 'Workshop/Training'
+    context['status']=status
     return render(request, 'statistics/templates/training.html', context)
 
 def fdp_training(request):
