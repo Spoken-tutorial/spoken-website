@@ -415,14 +415,17 @@ def tutorial_content(request, template='statistics/templates/statistics_content.
     tutorials = get_sorted_list(request, published_tutorials_set, header, raw_get_data)
     ordering = get_field_index(raw_get_data)
 
-    tutorials = CreationStatisticsFilter(request.GET, queryset=tutorials)
+    tutorials_filter = CreationStatisticsFilter(request.GET, queryset=tutorials)
+    # whenever publish date filter is applied there is a table join, resulting a duplicate entry for tutorials 
+    # because single tutorial might have multiple pushish objects
+    qs = tutorials_filter.qs.distinct()
 
     context = {}
 
-    context['form'] = tutorials.form
+    context['form'] = tutorials_filter.form
 
     # display information table across multiple pages
-    paginator = Paginator(tutorials, 100)
+    paginator = Paginator(qs, 100)
     page = request.GET.get('page')
     try:
         tutorials = paginator.page(page)
@@ -432,7 +435,6 @@ def tutorial_content(request, template='statistics/templates/statistics_content.
     except EmptyPage:
         # If page is out of range (e.g. 9999), deliver last page of results.
         tutorials = paginator.page(paginator.num_pages)
-
     context['tutorials'] = tutorials
     context['tutorial_num'] = tutorials.paginator.count
     context['header'] = header
