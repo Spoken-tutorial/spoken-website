@@ -11,7 +11,7 @@ urlpatterns = patterns('',  # noqa
     url(r'^tutorial-content/$', 'statistics.views.tutorial_content', name="statistics_content"),
     url(r'^training/(?P<rid>\d+)/participants/$', 'statistics.views.training_participant',
         name="statistics_training_participants"),
-    url(r'^training/(?P<rid>\d+)/participant/$', 'statistics.views.studentmaster_ongoing',
+    url(r'^training/(?P<rid>\d+)/participant/students/$', 'statistics.views.studentmaster_ongoing',
         name="statistics_studentmaster_ongoing"),
     
     url(r'^online-test/$', 'statistics.views.online_test', name="statistics_online_test"),

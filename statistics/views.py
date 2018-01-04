@@ -2,7 +2,7 @@
 from datetime import datetime
 import collections
 # Third Party Stuff
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied,ObjectDoesNotExist
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Count, Min, Q, Sum
 from django.http import HttpResponse, HttpResponseRedirect
@@ -93,34 +93,22 @@ def training(request):
 
     if status == TRAINING_PENDING:
         collectionSet = collectionSet.filter(participants=0)
-        header = {
-            1: SortableHeader('#', False),
-            2: SortableHeader('training_planner__academic__state__name', True, 'State'),
-            3: SortableHeader('training_planner__academic__city__name', True, 'City'),
-            4: SortableHeader('training_planner__academic__institution_name', True, 'Institution'),
-            5: SortableHeader('course__foss__foss', True, 'FOSS'),
-            6: SortableHeader('department', True, 'Department'),
-            7: SortableHeader('course__category', True, 'Type'),
-            8: SortableHeader('training_planner__organiser__user__first_name', True, 'Organiser'),
-            9: SortableHeader('sem_start_date', True, 'Date'),
-            10: SortableHeader('participants', 'True', 'Participants'),
-            11: SortableHeader('Action', False)
-        }
+        
     else:
         collectionSet = collectionSet.filter(participants__gt=0)
-        header = {
-            1: SortableHeader('#', False),
-            2: SortableHeader('training_planner__academic__state__name', True, 'State'),
-            3: SortableHeader('training_planner__academic__city__name', True, 'City'),
-            4: SortableHeader('training_planner__academic__institution_name', True, 'Institution'),
-            5: SortableHeader('course__foss__foss', True, 'FOSS'),
-            6: SortableHeader('department', True, 'Department'),
-            7: SortableHeader('course__category', True, 'Type'),
-            8: SortableHeader('training_planner__organiser__user__first_name', True, 'Organiser'),
-            9: SortableHeader('sem_start_date', True, 'Date'),
-            10: SortableHeader('participants', 'True', 'Participants'),
-            11: SortableHeader('Action', False)
-        }
+    header = {
+        1: SortableHeader('#', False),
+        2: SortableHeader('training_planner__academic__state__name', True, 'State'),
+        3: SortableHeader('training_planner__academic__city__name', True, 'City'),
+        4: SortableHeader('training_planner__academic__institution_name', True, 'Institution'),
+        5: SortableHeader('course__foss__foss', True, 'FOSS'),
+        6: SortableHeader('department', True, 'Department'),
+        7: SortableHeader('course__category', True, 'Type'),
+        8: SortableHeader('training_planner__organiser__user__first_name', True, 'Organiser'),
+        9: SortableHeader('sem_start_date', True, 'Date'),
+        10: SortableHeader('participants', 'True', 'Participants'),
+        11: SortableHeader('Action', False)
+    }
 
     raw_get_data = request.GET.get('o', None)
     collection = get_sorted_list(request, collectionSet, header, raw_get_data)
@@ -142,13 +130,12 @@ def training(request):
     
 
 
-# Students with Training not completed
+    # Students with Training not completed
     ongoing_trainings = TrainingRequest.objects.filter( status=0).values('batch_id')
-    print "OGT",ongoing_trainings
+    get_year = []
     ongoing_participants_count = 0
     year_data_all={}
     all_keys =[]
-
     # Pending / Ongoing Trainings Radio Button
     if status == TRAINING_PENDING:               
         # Fetch all students' count for every batch found above
@@ -162,13 +149,15 @@ def training(request):
                 year_data_all[d_key]+=d_value
             else:
                 year_data_all[d_key] = get_year['stcount']
+        
+
         # Descending order
         all_keys = sorted(set(all_keys),reverse = True)
         for a_key in all_keys: 
             for data in chart_query_set:
                 if data['year'] == a_key:
                     data['total_participant'] = year_data_all[a_key]
-                #get ongoing participant count
+                    #get ongoing participant count
                     ongoing_participants_count += year_data_all[a_key]
                     chart_data += "['" + str(data['year']) + "', " + str(data['total_participant']) + "],"        
     else:
@@ -271,7 +260,7 @@ def studentmaster_ongoing(request, rid):
 
     except Exception, e:
         print e
-        raise PermissionDenied()
+        raise ObjectDoesNotExist()
     return render(request, 'statistics/templates/training_participant.html', context)
 
 
