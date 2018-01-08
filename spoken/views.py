@@ -136,7 +136,6 @@ def tutorial_search(request):
     form = TutorialSearchForm()
     foss_get = ''
     if request.method == 'GET' and request.GET:
-        print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
         form = TutorialSearchForm(request.GET)
         if form.is_valid():
             foss_get = request.GET.get('search_foss', '')
@@ -154,7 +153,6 @@ def tutorial_search(request):
                 collection = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = 1, tutorial_detail__foss__id__in=FossCategory.objects.values(
                     'id'), language__id__in=Language.objects.values('id')).order_by('tutorial_detail__foss__foss', 'language__name', 'tutorial_detail__level', 'tutorial_detail__order')
     else:
-        print "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
         foss = TutorialResource.objects.filter(Q(status=1) | Q(status=2), language__name='English', tutorial_detail__foss__show_on_homepage = 1).values(
             'tutorial_detail__foss__foss').annotate(Count('id')).values_list('tutorial_detail__foss__foss').distinct().order_by('?')[:1].first()
         collection = TutorialResource.objects.filter(Q(status=1) | Q(
@@ -169,6 +167,14 @@ def tutorial_search(request):
     context['current_foss'] = foss_get
     return render(request, 'spoken/templates/tutorial_search.html', context)
 
+def other_foss(request, category):
+    form = OtherTutorialSearchForm()
+    print category
+    form.category = category
+    context = {}
+    context['form'] = form
+    return render(request, 'spoken/templates/other_foss_list.html', context)
+
 @csrf_exempt
 def other_tutorial_search(request):
     context = {}
@@ -176,7 +182,6 @@ def other_tutorial_search(request):
     form = OtherTutorialSearchForm()
     foss_get = ''
     if request.method == 'GET' and request.GET:
-        print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
         form = OtherTutorialSearchForm(request.GET)
         if form.is_valid():
             foss_get = request.GET.get('search_foss', '')
@@ -194,7 +199,6 @@ def other_tutorial_search(request):
                 collection = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = 0, tutorial_detail__foss__id__in=FossCategory.objects.values(
                     'id'), language__id__in=Language.objects.values('id')).order_by('tutorial_detail__foss__foss', 'language__name', 'tutorial_detail__level', 'tutorial_detail__order')
     else:
-        print "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
         foss = TutorialResource.objects.filter(Q(status=1) | Q(status=2), language__name='English', tutorial_detail__foss__show_on_homepage = 0).values(
             'tutorial_detail__foss__foss').annotate(Count('id')).values_list('tutorial_detail__foss__foss').distinct().order_by('?')[:1].first()
         collection = TutorialResource.objects.filter(Q(status=1) | Q(

@@ -13,6 +13,7 @@ urlpatterns = patterns('',
     # Examples:
     url(r'^addu/$', 'spoken.views.add_user', name='addu'),
     url(r'^tutorial-search/$', 'spoken.views.tutorial_search', name="tutorial-search"),
+    url(r'^series/(?P<category>[\w-]+)/$', 'spoken.views.other_foss', name="series"),
     url(r'^other_tutorial-search/$', 'spoken.views.other_tutorial_search', name="other_tutorial-search"),
     url(r'^news/(?P<cslug>[\w-]+)/$', 'spoken.views.news', name="news"),
     url(r'^news/(?P<cslug>[\w-]+)/(?P<slug>[\w-]+)/$', 'spoken.views.news_view', name="news_view"),

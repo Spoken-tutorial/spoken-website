@@ -39,6 +39,7 @@ class TutorialSearchForm(forms.Form):
 
 class OtherTutorialSearchForm(forms.Form):
     try:
+        category = None
         foss_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), language__name='English', tutorial_detail__foss__show_on_homepage = 0).values('tutorial_detail__foss__foss').annotate(
             Count('id')).order_by('tutorial_detail__foss__foss').values_list('tutorial_detail__foss__foss', 'id__count').distinct()
         choices = [('', '-- All Courses --'), ]
@@ -50,7 +51,7 @@ class OtherTutorialSearchForm(forms.Form):
             widget=forms.Select(),
             required=False,
         )
-        lang_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2)).values('language__name').annotate(
+        lang_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = 0).values('language__name').annotate(
             Count('id')).order_by('language').values_list('language__name', 'id__count').distinct()
         choices = [('', '-- All Languages --'), ]
         for lang_row in lang_list:
