@@ -86,8 +86,8 @@
 
                       <input type="radio" name="status" value="1" {% if status == '1' %}checked {% endif %} ><b>Completed Trainings</b>
                     </label>
-                    <label class="col-sm-5 control-label radio-inline">
-                      <input type="radio" name="status" value="0" {% if status == '0' %}checked {% endif %} ><b>Pending/Ongoing Trainings</b>
+                    <label class="col-sm-6 control-label radio-inline">
+                      <input type="radio" name="status" value="0" {% if status == '0' %}checked {% endif %} ><b>Pending Attendance Trainings</b>
                 </div>
 
                 <div class="form-group">
@@ -112,12 +112,12 @@
                         {% endif %}
                     </tr>
                 </table>
-                
+                {% if status == '1'%}
                 <div style="min-height:100px;">
                     <div id="chart_div"></div>
                     <a target='_blank' href="#inline" class="fancybox pull-right" style="bottom: 30px; right:20px; position: absolute;" ><i class="fa fa-1 fa-search-plus"></i> Enlarge chart</a>
                 </div>
-                
+                {% endif %}
             </div>
         </form>
     </div>

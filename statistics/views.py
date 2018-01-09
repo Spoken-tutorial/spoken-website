@@ -92,7 +92,7 @@ def training(request):
             status = TRAINING_COMPLETED
 
     if status == TRAINING_PENDING:
-        collectionSet = collectionSet.filter(participants=0)
+        collectionSet = collectionSet.filter(participants=0, status=TRAINING_COMPLETED)
         
     else:
         collectionSet = collectionSet.filter(participants__gt=0)
@@ -128,39 +128,18 @@ def training(request):
             '-year').annotate(total_training=Count('sem_start_date'), total_participant=Sum('participants'))
     chart_data = ''
     
-
-
-    # Students with Training not completed
-    ongoing_trainings = TrainingRequest.objects.filter( status=0).values('batch_id')
     get_year = []
-    ongoing_participants_count = 0
+    pending_attendance_participant_count = 0
     year_data_all={}
     all_keys =[]
-    # Pending / Ongoing Trainings Radio Button
-    if status == TRAINING_PENDING:               
-        # Fetch all students' count for every batch found above
-        for a in ongoing_trainings:
-            # get the student count its year
-            get_year = StudentBatch.objects.filter(id = a['batch_id']).values('year','stcount')[0]
-            d_key = get_year['year']
-            all_keys.append(d_key)
-            d_value = get_year['stcount']
-            if d_key in year_data_all:
-                year_data_all[d_key]+=d_value
-            else:
-                year_data_all[d_key] = get_year['stcount']
-        
-
-        # Descending order
-        all_keys = sorted(set(all_keys),reverse = True)
-        for a_key in all_keys: 
-            for data in chart_query_set:
-                if data['year'] == a_key:
-                    data['total_participant'] = year_data_all[a_key]
-                    #get ongoing participant count
-                    ongoing_participants_count += year_data_all[a_key]
-                    chart_data += "['" + str(data['year']) + "', " + str(data['total_participant']) + "],"        
-    else:
+    if status == TRAINING_PENDING:
+        pending_attendance_student_batches = StudentBatch.objects.filter(
+            id__in=(collection.qs.filter(status=TRAINING_COMPLETED,participants=0,batch_id__gt=0).values('batch_id'))
+            )
+        for batch in pending_attendance_student_batches:
+            pending_attendance_participant_count += batch.stcount
+    
+    if status == TRAINING_COMPLETED:
         for data in chart_query_set:
             chart_data += "['" + str(data['year']) + "', " + str(data['total_participant']) + "],"
     
@@ -173,7 +152,7 @@ def training(request):
     context['header'] = header
     context['ordering'] = ordering
     if status == TRAINING_PENDING:
-        context['participants'] = ongoing_participants_count
+        context['participants'] = pending_attendance_participant_count
     else:
         context['participants'] = participants
     context['model'] = 'Workshop/Training'
