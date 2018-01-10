@@ -130,18 +130,33 @@ def training(request):
     
     get_year = []
     pending_attendance_participant_count = 0
-    year_data_all={}
-    all_keys =[]
+    year_data_all=dict()
+    visited=dict()
     if status == TRAINING_PENDING:
+
         pending_attendance_student_batches = StudentBatch.objects.filter(
             id__in=(collection.qs.filter(status=TRAINING_COMPLETED,participants=0,batch_id__gt=0).values('batch_id'))
             )
+        pending_attendance_training = collection.qs.filter(batch_id__in = pending_attendance_student_batches.filter().values('id')).distinct()
+
         for batch in pending_attendance_student_batches:
             pending_attendance_participant_count += batch.stcount
-    
+        for a_traning in pending_attendance_training:
+            if a_traning.batch_id not in visited:
+                if a_traning.sem_start_date.year in year_data_all:
+                    visited[a_traning.batch_id] = [a_traning.batch_id]
+                    year_data_all[a_traning.sem_start_date.year] +=  a_traning.batch.stcount
+                else:
+                    visited[a_traning.batch_id] = [a_traning.batch_id]
+                    year_data_all[a_traning.sem_start_date.year] =  a_traning.batch.stcount
+
+
     if status == TRAINING_COMPLETED:
         for data in chart_query_set:
             chart_data += "['" + str(data['year']) + "', " + str(data['total_participant']) + "],"
+    else:
+        for year,count in year_data_all.iteritems():
+            chart_data += "['" + str(year) + "', " + str(count) + "],"
     
     context = {}
     context['form'] = collection.form
