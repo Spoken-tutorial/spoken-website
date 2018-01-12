@@ -2,6 +2,7 @@ from django.shortcuts import render
 from datetime import datetime
 from datetime import timedelta
 import re
+from django.conf import settings
 
 # Create your views here.
 from django.views.generic import View, ListView

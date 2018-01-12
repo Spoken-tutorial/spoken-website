@@ -1525,3 +1525,98 @@ class LearnDrupalFeedback(models.Model):
   mention_foss = models.CharField(max_length = 100)
   like_to_give_testimonial = models.CharField(max_length = 50, choices = YES_NO)
   testimonial = models.CharField(max_length = 100)
+
+class InductionInterest(models.Model):
+  YES_NO =(
+    ('','-----'), ('Yes', 'Yes'), ('No', 'No'),
+  )
+  yes_option=(
+    ('','-----'), ('Yes', 'Yes'),
+    )
+  GENDER_CHOICES =(
+    ('', '-----'), ('Male', 'Male'), ('Female', 'Female'),
+  )
+  languages = (
+    ('', '-----'), ('Assamese','Assamese'), ('Bengali', 'Bengali'), ('Bhojpuri', 'Bhojpuri'), ('Bodo', 'Bodo'), ('English', 'English'), ('Gujarati', 'Gujarati'),
+    ('Hindi', 'Hindi'), ('Kannada', 'Kannada'), ('Kashmiri', 'Kashmiri'), ('Khasi', 'Khasi'), ('Konkani', 'Konkani'), ('Maithili', 'Maithili'),
+    ('Malayalam', 'Malayalam'), ('Manipuri', 'Manipuri'), ('Marathi', 'Marathi'), ('Nepali', 'Nepali'),('Oriya', 'Oriya'), ('Punjabi', 'Punjabi'),
+    ('Rajasthani', 'Rajasthani'), ('Sanskrit', 'Sanskrit'), ('Santhali', 'Santhali'), ('Sindhi', 'Sindhi'), ('Tamil', 'Tamil'), ('Telugu', 'Telugu'),
+    ('Urdu', 'Urdu'), ('Other', 'Other'),
+  )
+  AGE =(
+    ('','-----'),('20to25', '20 to 25 years'), ('26to30', '26 to 30 years'),('31to35', '31 to 35 years'),('35andabove', 'Above 35 years')
+  )
+  specialisation =(
+     ('','-----'),('Arts', 'Arts'),('Science', 'Science'),('Commerce', 'Commerce'),
+     ('EngineeringorComputerScience ', 'Engineering or Computer Science'),('Management', 'Management'), 
+     ('Other', 'Other'),
+    )
+  education =(
+    ('','-----'), ('3yeargraduatedegree(BABScB.Cometc)','3 year graduate degree (BA, BSc, B.Com, etc.)'),
+    ('Professionaldegree(BEBTechetc)', 'Professional degree (BE, B.Tech, etc.)'),
+    ('2yearMasters(MAMScMCometc)', '2 year Masters (MA, MSc, MCom, etc.)'),
+    ('2yearprofessionalMasters(MEMTechMBAMPhiletc)', '2 year professional Masters (ME, MTech, MBA, MPhil, etc.)'),
+    ('PhD', 'PhD'),
+    ('Other','Other'),
+    )
+  designation = (
+    ('','-----'),
+    ('Lecturer','Lecturer'),
+    ('AssistantProfessor','Assistant Professor'),
+    ('AssociateProfessor','Associate Professor'),
+    ('Professor','Professor'),
+    ('Other','Other'),
+    )
+  years_of_experience = (
+    ('','-----'),
+    ('Lessthan1year','Less than 1 year'),
+    ('Morethan1yearbutlessthan2years','More than 1 year, but less than 2 years'),
+    ('Morethan2yearsbutlessthan5years','More than 2 years but less than 5 years'),
+    ('Morethan5years','More than 5 years'),
+    )
+
+  email = models.EmailField(max_length = 100)
+  name = models.CharField(max_length = 100)
+  phonemob = models.CharField(max_length = 100)  
+  age = models.CharField(max_length = 100, choices = AGE)
+  gender = models.CharField(max_length = 50, choices = GENDER_CHOICES)
+  mother_tongue = models.CharField(max_length = 100, choices = languages)
+  other_language = models.CharField(max_length = 100)
+
+  medium_of_studies = models.CharField(max_length = 100, choices = languages)
+  other_medium = models.CharField(max_length = 100)
+
+  education = models.CharField(max_length = 100, choices = education)
+  other_education = models.CharField(max_length = 100)
+
+  specialisation = models.CharField(max_length = 100, choices = specialisation)
+  other_specialisation = models.CharField(max_length = 100)
+
+  designation = models.CharField(max_length = 100, choices = designation)
+  other_designation = models.CharField(max_length = 100)
+
+  college = models.CharField(max_length = 100)
+  college_address = models.CharField(max_length = 500)
+  state = models.ForeignKey(State)
+  city = models.CharField(max_length = 100)
+  pincode = models.PositiveIntegerField()
+  experience_in_college = models.CharField(max_length = 100, choices = years_of_experience)
+  
+  bring_laptop = models.CharField(max_length = 50, choices = YES_NO)
+  borrow_laptop = models.CharField(max_length = 50, choices = YES_NO)
+  
+  do_agree = models.CharField(max_length = 50, choices = yes_option)  
+  no_objection = models.CharField(max_length = 50, choices = yes_option)
+  other_comments = models.CharField(max_length = 500)
+
+  class Meta:
+    ordering = ('city',)
+
+class InductionFinalList(models.Model):
+  email = models.EmailField(max_length = 200)
+  eoi_id = models.ForeignKey(InductionInterest, default=None)
+  code = models.CharField(max_length=255, default=None)
+  # batch_code should be in form of year+month+batch_number e.g. 20171101 = [year 2017,month 11, batch 01]
+  batch_code = models.PositiveIntegerField()
+  created = models.DateTimeField(auto_now_add = True)
+

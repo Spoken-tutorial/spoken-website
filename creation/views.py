@@ -2330,7 +2330,7 @@ def ajax_change_component_status(request):
                 compValue = getattr(tr_rec.common_content, comp + '_status')
             if compValue:
                 data += '<option value="5">Need Improvement</option>'
-                if comp in ['code', 'assignment','additional_material']:
+            if comp in ['code', 'assignment','additional_material']:
                     data += '<option value="6">Not Required</option>'
         elif foss and lang:
             data = ['', '']
