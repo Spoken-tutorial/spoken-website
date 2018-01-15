@@ -5,6 +5,8 @@
 {% load creationdata %}
 {% block search %}{% endblock %}
 {% block content %}
+<div class="well tab-content tutorial-search-form col-lg-offset-1 col-md-offset-1 col-lg-10 col-md-10 col-sm-12 col-xs-12">
+<div class="col-sm-12">
 <form action=" {% url 'other_tutorial-search' %} " method="GET" class='form-horizontal'>
     {% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
         {% if form.non_field_errors %}
@@ -17,19 +19,22 @@
         {{ form.category}}
         <div class="form-group">
             <div class="col-sm-5 add-padding">
-                <span class='ajax-search-refresh ajax-refresh-search-foss'><i class="fa fa-2 fa-refresh fa-spin"></i></span>
-                {% render_field form.search_foss class+="form-control search-foss" tabindex="1" value=keywords %}
-                {{ form.search_foss.errors }}
+                <span class='ajax-search-refresh ajax-refresh-search-otherfoss'><i class="fa fa-2 fa-refresh fa-spin"></i></span>
+                {% render_field form.search_otherfoss class+="form-control search-otherfoss" tabindex="1" value=keywords %}
+                {{ form.search_otherfoss.errors }}
             </div>
             <div class="col-sm-5 add-padding">
-                <span class='ajax-search-refresh ajax-refresh-search-language'><i class="fa fa-2 fa-refresh fa-spin"></i></span>
-                {% render_field form.search_language class+="form-control search-language" tabindex="1" value=keywords %}
-                {{ form.search_language.errors }}
+                <span class='ajax-search-refresh ajax-refresh-search-otherlanguage'><i class="fa fa-2 fa-refresh fa-spin"></i></span>
+                {% render_field form.search_otherlanguage class+="form-control search-otherlanguage" tabindex="1" value=keywords %}
+                {{ form.search_otherlanguage.errors }}
             </div>
             <div class="col-sm-2 add-padding">
                 <input class="btn btn-primary" type="submit" value="Search" />
+                <a href="{% url 'series'%}" class='pull-left'>Reset dropdowns</a>
             </div>
         </div>
     {% endwith %}
 </form>
+</div>
+</div>
 {% endblock %}

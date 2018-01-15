@@ -45,18 +45,18 @@
                     {% endif %}
                     <div class="form-group">
                         <div class="col-sm-5">
-                            <span class='ajax-search-refresh ajax-refresh-search-foss'><i class="fa fa-2 fa-refresh fa-spin"></i></span>
-                            {% render_field form.search_foss class+="form-control search-foss" tabindex="1" %}
-                            {{ form.search_foss.errors }}
+                            <span class='ajax-search-refresh ajax-refresh-search-otherfoss'><i class="fa fa-2 fa-refresh fa-spin"></i></span>
+                            {% render_field form.search_otherfoss class+="form-control search-otherfoss" tabindex="1" %}
+                            {{ form.search_otherfoss.errors }}
                         </div>
                         <div class="col-sm-5">
-                            <span class='ajax-search-refresh ajax-refresh-search-language'><i class="fa fa-2 fa-refresh fa-spin"></i></span>
-                            {% render_field form.search_language class+="form-control search-language" tabindex="2" %}
-                            {{ form.search_language.errors }}
+                            <span class='ajax-search-refresh ajax-refresh-search-otherlanguage'><i class="fa fa-2 fa-refresh fa-spin"></i></span>
+                            {% render_field form.search_otherlanguage class+="form-control search-otherlanguage" tabindex="2" %}
+                            {{ form.search_otherlanguage.errors }}
                         </div>
                         <div class="col-sm-2">
                             <input class="btn btn-primary" type="submit" value="Submit" />
-                            <a href="{% url 'series' 'health'%}" class='pull-left'>Reset dropdowns</a>
+                            <a href="{% url 'series'%}" class='pull-left'>Reset dropdowns</a>
                         </div>
                     </div>
                 {% endwith %}

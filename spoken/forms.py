@@ -24,7 +24,7 @@ class TutorialSearchForm(forms.Form):
             widget=forms.Select(),
             required=False,
         )
-        lang_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2)).values('language__name').annotate(
+        lang_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = 1).values('language__name').annotate(
             Count('id')).order_by('language').values_list('language__name', 'id__count').distinct()
         choices = [('', '-- All Languages --'), ]
         for lang_row in lang_list:
@@ -39,14 +39,13 @@ class TutorialSearchForm(forms.Form):
 
 class OtherTutorialSearchForm(forms.Form):
     try:
-        category = None
         foss_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), language__name='English', tutorial_detail__foss__show_on_homepage = 0).values('tutorial_detail__foss__foss').annotate(
             Count('id')).order_by('tutorial_detail__foss__foss').values_list('tutorial_detail__foss__foss', 'id__count').distinct()
         choices = [('', '-- All Courses --'), ]
 
         for foss_row in foss_list:
             choices.append((str(foss_row[0]), str(foss_row[0]) + ' (' + str(foss_row[1]) + ')'))
-        search_foss = forms.ChoiceField(
+        search_otherfoss = forms.ChoiceField(
             choices=choices,
             widget=forms.Select(),
             required=False,
@@ -56,7 +55,7 @@ class OtherTutorialSearchForm(forms.Form):
         choices = [('', '-- All Languages --'), ]
         for lang_row in lang_list:
             choices.append((str(lang_row[0]), str(lang_row[0]) + ' (' + str(lang_row[1]) + ')'))
-        search_language = forms.ChoiceField(
+        search_otherlanguage = forms.ChoiceField(
             choices=choices,
             widget=forms.Select(),
             required=False,

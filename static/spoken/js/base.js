@@ -5,7 +5,7 @@ $("#id_search_foss, #id_search_language").change(
         if ((foss == '' || lang == '') && ($(this).val() != '')){
             $.ajax(
                 {
-                    url: "/get-language/",
+                    url: "/get-language/main/", 
                     type: "POST",
                     data: {
                         foss : foss,
@@ -36,6 +36,44 @@ $("#id_search_foss, #id_search_language").change(
         }
     }
 );
+$("#id_search_otherfoss, #id_search_otherlanguage").change(
+    function() {
+        var foss = $('#id_search_otherfoss').val();
+        var lang = $('#id_search_otherlanguage').val();
+        if ((foss == '' || lang == '') && ($(this).val() != '')){
+            $.ajax(
+                {
+                    url: "/get-language/other/",
+                    type: "POST",
+                    data: {
+                        foss : foss,
+                        lang : lang,
+                    },
+                    beforeSend: function() {
+                        if(foss == '')
+                            $('.ajax-refresh-search-otherfoss').show();
+                        if(lang == '')
+                            $('.ajax-refresh-search-otherlanguage').show();
+                    },
+                    success: function(data) {
+                        if(data[0] == 'foss'){
+                            $('#id_search_otherlanguage').html(data[1]);
+                        } else if(data[0] == 'lang'){
+                            $('#id_search_otherfoss').html(data[1]);
+                        } else if(data[0] == 'reset') {
+                            $('#id_search_otherlanguage').html(data[1]);
+                            $('#id_search_otherfoss').html(data[2]);
+                        }
+                        if(foss == '')
+                            $('.ajax-refresh-search-otherfoss').hide();
+                        if(lang == '')
+                            $('.ajax-refresh-search-otherlanguage').hide();
+                    }
+                }
+            );
+        }
+    }
+);
 $('.reset-filter').click(
     function(evt) {
         evt.preventDefault();
@@ -43,7 +81,7 @@ $('.reset-filter').click(
         $('#id_search_language').val('');
         $.ajax(
             {
-                url: "/get-language/",
+                url: "/get-language/main/",
                 type: "POST",
                 data: {
                     foss : '',
