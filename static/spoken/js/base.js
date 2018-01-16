@@ -43,7 +43,7 @@ $("#id_search_otherfoss, #id_search_otherlanguage").change(
         if ((foss == '' || lang == '') && ($(this).val() != '')){
             $.ajax(
                 {
-                    url: "/get-language/other/",
+                    url: "/get-language/series/",
                     type: "POST",
                     data: {
                         foss : foss,

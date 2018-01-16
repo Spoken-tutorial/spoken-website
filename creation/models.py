@@ -40,7 +40,7 @@ class FossCategory(models.Model):
     category = models.ManyToManyField(FossSuperCategory)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-    show_on_homepage = models.BooleanField(max_length=2,default=1 )
+    show_on_homepage = models.BooleanField(default=True )
 
     class Meta:
         verbose_name = 'FOSS'

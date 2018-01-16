@@ -135,28 +135,26 @@ def tutorial_search(request):
     collection = None
     form = TutorialSearchForm()
     foss_get = ''
+    show_on_homepage = True;
+    queryset = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = show_on_homepage)
+
     if request.method == 'GET' and request.GET:
         form = TutorialSearchForm(request.GET)
         if form.is_valid():
             foss_get = request.GET.get('search_foss', '')
             language_get = request.GET.get('search_language', '')
             if foss_get and language_get:
-                collection = TutorialResource.objects.filter(Q(status=1) | Q(
-                    status=2), tutorial_detail__foss__show_on_homepage = 1,tutorial_detail__foss__foss=foss_get, language__name=language_get).order_by('tutorial_detail__level', 'tutorial_detail__order')
+                collection = queryset.filter(tutorial_detail__foss__foss=foss_get, language__name=language_get).order_by('tutorial_detail__level', 'tutorial_detail__order')
+
             elif foss_get:
-                collection = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = 1, tutorial_detail__foss__foss=foss_get).order_by(
-                    'tutorial_detail__level', 'tutorial_detail__order', 'language__name')
+                collection = queryset.filter(tutorial_detail__foss__foss=foss_get).order_by('tutorial_detail__level', 'tutorial_detail__order', 'language__name')
             elif language_get:
-                collection = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = 1,language__name=language_get).order_by(
-                    'tutorial_detail__foss__foss', 'tutorial_detail__level', 'tutorial_detail__order')
+                collection = queryset.filter(language__name=language_get).order_by('tutorial_detail__foss__foss', 'tutorial_detail__level', 'tutorial_detail__order')
             else:
-                collection = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = 1, tutorial_detail__foss__id__in=FossCategory.objects.values(
-                    'id'), language__id__in=Language.objects.values('id')).order_by('tutorial_detail__foss__foss', 'language__name', 'tutorial_detail__level', 'tutorial_detail__order')
+                collection = queryset.filter(tutorial_detail__foss__id__in=FossCategory.objects.values('id'), language__id__in=Language.objects.values('id')).order_by('tutorial_detail__foss__foss', 'language__name', 'tutorial_detail__level', 'tutorial_detail__order')
     else:
-        foss = TutorialResource.objects.filter(Q(status=1) | Q(status=2), language__name='English', tutorial_detail__foss__show_on_homepage = 1).values(
-            'tutorial_detail__foss__foss').annotate(Count('id')).values_list('tutorial_detail__foss__foss').distinct().order_by('?')[:1].first()
-        collection = TutorialResource.objects.filter(Q(status=1) | Q(
-            status=2), tutorial_detail__foss__foss=foss[0], language__name='English', tutorial_detail__foss__show_on_homepage = 1)
+        foss = queryset.filter(language__name='English').values('tutorial_detail__foss__foss').annotate(Count('id')).values_list('tutorial_detail__foss__foss').distinct().order_by('?')[:1].first()
+        collection = queryset.filter(tutorial_detail__foss__foss=foss[0], language__name='English')
         foss_get = foss[0]
     if collection:
         page = request.GET.get('page')
@@ -179,28 +177,26 @@ def other_tutorial_search(request):
     collection = None
     form = OtherTutorialSearchForm()
     foss_get = ''
+    show_on_homepage = False;
+    queryset = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = show_on_homepage)
+    
     if request.method == 'GET' and request.GET:
         form = OtherTutorialSearchForm(request.GET)
         if form.is_valid():
             foss_get = request.GET.get('search_otherfoss', '')
             language_get = request.GET.get('search_otherlanguage', '')
             if foss_get and language_get:
-                collection = TutorialResource.objects.filter(Q(status=1) | Q(
-                    status=2), tutorial_detail__foss__show_on_homepage = 0,tutorial_detail__foss__foss=foss_get, language__name=language_get).order_by('tutorial_detail__level', 'tutorial_detail__order')
+                collection = queryset.filter(tutorial_detail__foss__foss=foss_get, language__name=language_get).order_by('tutorial_detail__level', 'tutorial_detail__order')
+
             elif foss_get:
-                collection = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = 0, tutorial_detail__foss__foss=foss_get).order_by(
-                    'tutorial_detail__level', 'tutorial_detail__order', 'language__name')
+                collection = queryset.filter(tutorial_detail__foss__foss=foss_get).order_by('tutorial_detail__level', 'tutorial_detail__order', 'language__name')
             elif language_get:
-                collection = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = 0,language__name=language_get).order_by(
-                    'tutorial_detail__foss__foss', 'tutorial_detail__level', 'tutorial_detail__order')
+                collection = queryset.filter(language__name=language_get).order_by('tutorial_detail__foss__foss', 'tutorial_detail__level', 'tutorial_detail__order')
             else:
-                collection = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = 0, tutorial_detail__foss__id__in=FossCategory.objects.values(
-                    'id'), language__id__in=Language.objects.values('id')).order_by('tutorial_detail__foss__foss', 'language__name', 'tutorial_detail__level', 'tutorial_detail__order')
+                collection = queryset.filter(tutorial_detail__foss__id__in=FossCategory.objects.values('id'), language__id__in=Language.objects.values('id')).order_by('tutorial_detail__foss__foss', 'language__name', 'tutorial_detail__level', 'tutorial_detail__order')
     else:
-        foss = TutorialResource.objects.filter(Q(status=1) | Q(status=2), language__name='English', tutorial_detail__foss__show_on_homepage = 0).values(
-            'tutorial_detail__foss__foss').annotate(Count('id')).values_list('tutorial_detail__foss__foss').distinct().order_by('?')[:1].first()
-        collection = TutorialResource.objects.filter(Q(status=1) | Q(
-            status=2), tutorial_detail__foss__foss=foss[0], language__name='English')
+        foss = queryset.filter(language__name='English').values('tutorial_detail__foss__foss').annotate(Count('id')).values_list('tutorial_detail__foss__foss').distinct().order_by('?')[:1].first()
+        collection = queryset.filter(tutorial_detail__foss__foss=foss[0], language__name='English')
         foss_get = foss[0]
     if collection:
         page = request.GET.get('page')
@@ -274,11 +270,11 @@ def what_is_spoken_tutorial(request):
 
 
 @csrf_exempt
-def get_language(request, type):
+def get_language(request, tutorial_type):
     output = ''
-    show_on_homepage = 1
-    if type== "other":
-        show_on_homepage = 0
+    show_on_homepage = True
+    if tutorial_type== "series":
+        show_on_homepage = False
 
     if request.method == "POST":
         foss = request.POST.get('foss')
