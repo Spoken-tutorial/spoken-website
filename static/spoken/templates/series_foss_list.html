@@ -7,7 +7,7 @@
 {% block content %}
 <div class="well tab-content tutorial-search-form col-lg-offset-1 col-md-offset-1 col-lg-10 col-md-10 col-sm-12 col-xs-12">
 <div class="col-sm-12">
-<form action=" {% url 'other_tutorial-search' %} " method="GET" class='form-horizontal'>
+<form action=" {% url 'series-tutorial-search' %} " method="GET" class='form-horizontal'>
     {% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
         {% if form.non_field_errors %}
         <ul>

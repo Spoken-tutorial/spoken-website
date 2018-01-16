@@ -37,7 +37,7 @@ class TutorialSearchForm(forms.Form):
     except Exception:
         pass
 
-class OtherTutorialSearchForm(forms.Form):
+class SeriesTutorialSearchForm(forms.Form):
     try:
         foss_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), language__name='English', tutorial_detail__foss__show_on_homepage = 0).values('tutorial_detail__foss__foss').annotate(
             Count('id')).order_by('tutorial_detail__foss__foss').values_list('tutorial_detail__foss__foss', 'id__count').distinct()

@@ -165,23 +165,23 @@ def tutorial_search(request):
     context['current_foss'] = foss_get
     return render(request, 'spoken/templates/tutorial_search.html', context)
 
-def other_foss(request):
-    form = OtherTutorialSearchForm()
+def series_foss(request):
+    form = SeriesTutorialSearchForm()
     context = {}
     context['form'] = form
-    return render(request, 'spoken/templates/other_foss_list.html', context)
+    return render(request, 'spoken/templates/series_foss_list.html', context)
 
 @csrf_exempt
-def other_tutorial_search(request):
+def series_tutorial_search(request):
     context = {}
     collection = None
-    form = OtherTutorialSearchForm()
+    form = SeriesTutorialSearchForm()
     foss_get = ''
     show_on_homepage = False;
     queryset = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = show_on_homepage)
     
     if request.method == 'GET' and request.GET:
-        form = OtherTutorialSearchForm(request.GET)
+        form = SeriesTutorialSearchForm(request.GET)
         if form.is_valid():
             foss_get = request.GET.get('search_otherfoss', '')
             language_get = request.GET.get('search_otherlanguage', '')
@@ -205,7 +205,7 @@ def other_tutorial_search(request):
     context['collection'] = collection
     context['SCRIPT_URL'] = settings.SCRIPT_URL
     context['current_foss'] = foss_get
-    return render(request, 'spoken/templates/other_tutorial_search.html', context)
+    return render(request, 'spoken/templates/series_tutorial_search.html', context)
 
 
 def watch_tutorial(request, foss, tutorial, lang):
