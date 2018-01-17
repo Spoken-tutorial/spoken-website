@@ -1,7 +1,7 @@
 # Third Party Stuff
 from django.contrib.auth.models import User
 from django.db import models
-
+from django.utils import timezone
 
 class Language(models.Model):
     name = models.CharField(max_length=255, unique=True)
@@ -196,6 +196,7 @@ class TutorialResource(models.Model):
     hit_count = models.PositiveIntegerField(default=0)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
+    publish_date = models.DateTimeField(null=True)
 
     class Meta:
         unique_together = (('tutorial_detail', 'language',),)

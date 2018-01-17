@@ -4,6 +4,7 @@ import os
 import re
 import subprocess
 import time
+from datetime import datetime
 from decimal import Decimal
 from urllib import quote, unquote_plus, urlopen
 
@@ -2114,9 +2115,11 @@ def publish_tutorial(request, trid):
     else:
         flag = 1
     if flag and tr_rec.outline_status == 4 and tr_rec.script_status == 4 and tr_rec.video_status == 4:
-        tr_rec.status = 1
+        tr_rec.status = 1 
+        tr_rec.publish_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         tr_rec.save()
         PublishTutorialLog.objects.create(user = request.user, tutorial_resource = tr_rec)
+
         add_contributor_notification(tr_rec, comp_title, 'This tutorial is published now')
         messages.success(request, 'The selected tutorial is published successfully')
     else:
