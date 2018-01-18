@@ -19,11 +19,11 @@ with open(LOG_ROOT+'publish_date_log.txt',"w") as success_log_file_head:
 	for tutorial in tutorials:
 		count = count + 1
 		try:
-			latest_publish_date = PublishTutorialLog.objects.filter(tutorial_resource_id = tutorial.id).order_by('-id').first()
-			if latest_publish_date:
-				tutorial.publish_date = latest_publish_date.created
+			log_obj = PublishTutorialLog.objects.filter(tutorial_resource_id = tutorial.id, created__isnull=False).order_by('-id').first()
+			if log_obj:
+				tutorial.publish_at = log_obj.created
 			else :
-				tutorial.publish_date = tutorial.created
+				tutorial.publish_at = tutorial.created
 			tutorial.save()		
 			success_log_file_head.write(str(tutorial.id)+','+str(1)+'\n')
 		except Exception, e:
