@@ -15,7 +15,7 @@ class TutorialSearchForm(forms.Form):
     search_foss = forms.ChoiceField(
         choices = [],
         widget=forms.Select(),
-        required = True,
+        required = False,
         )
     search_language = forms.ChoiceField(
             choices=[],
@@ -46,7 +46,7 @@ class SeriesTutorialSearchForm(forms.Form):
     search_otherfoss = forms.ChoiceField(
         choices = [],
         widget=forms.Select(),
-        required = True,
+        required = False,
         )
     search_otherlanguage = forms.ChoiceField(
             choices=[],
