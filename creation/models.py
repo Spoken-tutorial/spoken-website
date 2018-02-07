@@ -40,6 +40,7 @@ class FossCategory(models.Model):
     category = models.ManyToManyField(FossSuperCategory)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
+    show_on_homepage = models.BooleanField(default=True, help_text ='If unchecked, this foss will be displayed on series page, instead of home page' )
 
     class Meta:
         verbose_name = 'FOSS'
