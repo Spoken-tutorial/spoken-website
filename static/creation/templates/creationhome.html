@@ -4,6 +4,7 @@
 {% load creationdata %}
 {% block title %}Creation Dashboard{% endblock %}
 {% block content %}
+   
     <div class="panel panel-primary">
         <div class="panel-heading">
             <h4 class="panel-title"><i class="fa fa-desktop"></i> Creation Dashboard</h4>
@@ -101,35 +102,71 @@
                 {% endif %}
                 <div class="panel panel-info">
                     <div class="panel-heading panel-heading-notif">Creation Roles</div>
-                    <div class="panel-body">
-                        <ul>
+                    <div class="panel-body " id="role_selected_id" >
+                        <ul > 
                             {% if user|get_internal_contributor %}
-                                <li><a href="/creation/role/revoke/contributor">Revoke Contributor Role</a></li>
+                                <li><a href="#" onClick= "callModal(this)" id = "revoke_contributor" >Revoke Contributor Role</a><br>
+                                    </li>
                             {% else %}
-                                <li><a href="/creation/role/add/contributor">Add me as Contributor</a></li>
+                                <li><a href="#" onClick= "callModal(this)" id = "add_contributor" > Add me as Contributor</a><br>
+                                </li>
                             {% endif %}
                             {% if user|get_external_contributor %}
-                                <li><a href="/creation/role/revoke/external-contributor">Revoke External Contributor Role</a></li>
+                                <li >
+                                    <a href="#" onClick= "callModal(this)" id = "revoke_external_contributor" >Revoke External Contributor Role</a><br>
                             {% else %}
-                                <li><a href="/creation/role/add/external-contributor">Add me as External Contributor</a></li>
+                                <li  class = "role_selected">
+                                    <a href="#" onClick= "callModal(this)" id = "add_external_contributor" >Add me as External Contributor</a><br>
                             {% endif %}
                             {% if user|get_videoreviewer %}
-                                <li><a href="/creation/role/revoke/video-reviewer">Revoke Admin Reviewer Role</a></li>
+                                <li>
+                                    <a href="#" onClick= "callModal(this)" id = "revoke_admin">Revoke Admin Reviewer Role</a><br>
                             {% else %}
-                                <li><a href="/creation/role/add/video-reviewer">Add me as Admin Reviewer</a></li>
+                                <li>
+                                    <a href="#" onClick= "callModal(this)" id = "add_admin">Add me as Admin Reviewer</a><br>
                             {% endif %}
                             {% if user|get_domainreviewer %}
-                                <li><a href="/creation/role/revoke/domain-reviewer">Revoke Domain Reviewer Role</a></li>
+                                <li>
+                                    <a href="#" onClick= "callModal(this)" id = "add_domain">Revoke Domain Reviewer Role</a><br>
                             {% else %}
-                                <li><a href="/creation/role/add/domain-reviewer">Add me as Domain Reviewer</a></li>
+                                <li>
+                                    <a href="#" onClick= "callModal(this)" id = "add_domain">Add me as Domain Reviewer</a><br>
                             {% endif %}
                             {% if user|get_qualityreviewer %}
-                                <li><a href="/creation/role/revoke/quality-reviewer">Revoke Quality Reviewer role</a></li>
+                                <li>
+                                    <a href="#" onClick= "callModal(this)" id = "revoke_quality">Revoke Quality Reviewer role</a><br>
                             {% else %}
-                                <li><a href="/creation/role/add/quality-reviewer">Add me as Quality Reviewer</a></li>
+                                <li>
+                                    <a href="#" onClick= "callModal(this)" id = "add_quality">Add me as Quality Reviewer</a><br>
                             {% endif %}
-                            
                         </ul>
+                        <div>
+                                        <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                        <div class="modal-content">
+                                        <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                        <h4 class="modal-title" id="myModalLabel">Confirm Delete</h4>
+                                        </div>
+                                        <div class="modal-body">
+                                        <select multiple = "multiple" class="form-control search-language" id="id_search_language_new" name="search_language" tabindex="1" value="">
+                                            <div>
+                                                {% for record in language %}
+                                                    <option>{{record.name}}</option>
+
+                                                {% endfor %}      
+                                            </div>
+                                        </select>
+                                        </div>
+                                        <div id = "abc">Something here</div>
+                                        <div class="modal-footer">
+                                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                                        <button class="btn btn-primary btn-ok" onClick = "printer()" > Confirm</button>
+                                        </div>
+                                        </div>
+                                        </div>
+                                        </div>
+
                     </div>
                 </div>
             </div>
@@ -213,4 +250,93 @@
             </div>
         </div>
     </div>
+
+
+<script type= "text/javascript" >
+
+direction = "";
+
+function callModal(curr){
+    var currele = curr.id;
+    alert(currele);
+
+    switch (currele){
+
+        case "add_contributor":
+        {
+            $("#myModal").modal('show');
+            document.getElementById("abc").innerHTML = currele;
+            direction = "/creation/role/revoke/contributor";
+            break;
+        }
+        case "revoke_contributor":
+        {
+             direction ="/creation/role/revoke/contributor";   
+             break;
+        }
+        case "add_external_contributor":
+        {
+            $("#myModal").modal('show');
+            direction ="/creation/role/add/external-contributor";      
+            break;
+        }
+        case "revoke_external_contributor":
+        {
+            direction ="/creation/role/revoke/external-contributor";   
+            break;
+        }
+
+        case "add_admin":
+        {
+         
+            location.href ="/creation/role/add/video-reviewer";      
+            break;
+        }
+        case "revoke_admin":
+        {
+            location.href ="/creation/role/revoke/video-reviewer";   
+            break;
+        }
+        
+        case "add_domain":
+        {
+            $("#myModal").modal('show');
+            direction ="/creation/role/add/domain-reviewer";      
+            break;
+        }
+        case "revoke_domain":
+        {
+            direction ="/creation/role/revoke/domain-reviewer";   
+            break;
+        }
+
+        case "add_quality":
+        {
+            $("#myModal").modal('show');
+            direction ="/creation/role/add/quality-reviewer";      
+            break;
+        }
+
+        case "revoke_quality":
+        {
+            direction ="/creation/role/revoke/quality-reviewer";   
+            break;
+        }
+    }
+}
+    
+
+
+function printer()
+{
+
+    var abc = document.getElementById("add_contributor").id;
+    var language = $("#id_search_language_new :selected").text();
+    document.getElementById("abc").innerHTML = abc;
+    alert("You have selected :"+ language +"You will be directed to : " + direction );
+    location.href =  direction; 
+}
+
+</script>
+
 {% endblock %}
