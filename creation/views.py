@@ -30,6 +30,11 @@ from creation.models import *
 from creation.subtitles import *
 from . import services
 
+
+
+from django.utils import timezone
+print "timezone: ", timezone
+
 def humansize(nbytes):
     suffixes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
     if nbytes == 0: return '0 B'

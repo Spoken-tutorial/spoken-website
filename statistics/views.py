@@ -435,6 +435,7 @@ def allocate_tutorial(request, status):
                 foss_name = str(tutorial.foss.foss)
                 foss_to_allocate = [foss_name, tutorial, a_l]
                 fosses.append(foss_to_allocate)
+                
 
     elif status == 'ongoing':
         header = {
@@ -444,7 +445,7 @@ def allocate_tutorial(request, status):
             4: SortableHeader('language__name', False, 'Language'),
             5: SortableHeader('script_user_id', False, 'User ID'),
             6: SortableHeader('Bid Date', False),
-            7: SortableHeader('Submission Date', False)
+            7: SortableHeader('Submission Date',False)
         }
 
         status = 4
@@ -466,6 +467,8 @@ def allocate_tutorial(request, status):
     tutorials = CreationStatisticsFilter(request.GET, queryset=tutorials)
 
     context['form'] = tutorials.form
+    for a in tutorials:
+        a.updated = a.created + timedelta(days=10)
 
     # if active == 'completed' or active == 'ongoing':
     # display information table across multiple pages
@@ -480,6 +483,8 @@ def allocate_tutorial(request, status):
         # If page is out of range (e.g. 9999), deliver last page of results.
         tutorials = paginator.page(paginator.num_pages)
 
+        
+
     context['tutorials'] = tutorials
     context['tutorial_num'] = tutorials.paginator.count
 
@@ -489,7 +494,7 @@ def allocate_tutorial(request, status):
     context['fosses'] = fosses
     context['available_tutorials_count'] = available_tutorials_count
     context['counter'] = itertools.count(1)
-
+   # context['submission_date'] = submission_date
     return render(request, 'statistics/templates/allocate_tutorial.html', context)
 
 

@@ -118,8 +118,8 @@
           {% else %}
               <td>{{ record.script_user.username }}</td>
           {% endif %}    
-          <td>{{ record.created|date:"Y M" }}</td>
-          <td>{{ record.created|date:"Y M" }}</td>
+          <td>{{ record.created|date:"Y M d" }}</td>
+          <td>{{ record.updated|date:"Y M d" }}</td>
           </tr>
           {% endfor %}
       {% endif %}
@@ -131,7 +131,7 @@
           <td>{{ record.tutorial_detail.foss.foss }}</td>
           <td>{{ record.tutorial_detail.tutorial }}</td>
           <td>{{ record.language.name }}</td>
-          <td>{{ record.created|date:"Y M" }}</td>
+          <td>{{ record.created|date:"Y M d" }}</td>
           <td>{{ record.script_user.first_name }}</td>
           </tr>
           {% endfor %}
