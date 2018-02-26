@@ -105,18 +105,20 @@
                     <div class="panel-body " id="role_selected_id" >
                         <ul > 
                             {% if user|get_internal_contributor %}
-                                <li><a href="#" onClick= "callModal(this)" id = "revoke_contributor" >Revoke Contributor Role</a><br>
+                                <li>
+                                <a href="#" onClick= "callModal(this)" id = "add_contributor" > Add me as Contributor  |  </a> 
+                                <a href="#" onClick= "callModal(this)" id = "revoke_contributor" > Revoke Contributor</a>
                                     </li>
                             {% else %}
-                                <li><a href="#" onClick= "callModal(this)" id = "add_contributor" > Add me as Contributor</a><br>
+                                <li><a href="#" onClick= "callModal(this)" id = "add_contributor" > Add me as Contributor</a>
                                 </li>
                             {% endif %}
                             {% if user|get_external_contributor %}
                                 <li >
-                                    <a href="#" onClick= "callModal(this)" id = "revoke_external_contributor" >Revoke External Contributor Role</a><br>
+                                    <a href="#" onClick= "callModal(this)" id = "add_external_contributor" >Add me as External Contributor  |  </a><a href="#" onClick= "callModal(this)" id = "revoke_external_contributor" >Revoke External Contributor Role</a>
                             {% else %}
                                 <li  class = "role_selected">
-                                    <a href="#" onClick= "callModal(this)" id = "add_external_contributor" >Add me as External Contributor</a><br>
+                                    <a href="#" onClick= "callModal(this)" id = "add_external_contributor" >Add me as External Contributor</a>
                             {% endif %}
                             {% if user|get_videoreviewer %}
                                 <li>
@@ -127,46 +129,25 @@
                             {% endif %}
                             {% if user|get_domainreviewer %}
                                 <li>
-                                    <a href="#" onClick= "callModal(this)" id = "add_domain">Revoke Domain Reviewer Role</a><br>
+                                    <a href="#" onClick= "callModal(this)" id = "add_domain">Add me as Domain Reviewer  |  </a><a href="#" onClick= "callModal(this)" id = "revoke_domain">Revoke Domain Reviewer Role</a>
                             {% else %}
                                 <li>
                                     <a href="#" onClick= "callModal(this)" id = "add_domain">Add me as Domain Reviewer</a><br>
                             {% endif %}
                             {% if user|get_qualityreviewer %}
                                 <li>
-                                    <a href="#" onClick= "callModal(this)" id = "revoke_quality">Revoke Quality Reviewer role</a><br>
+                                    <a href="#" onClick= "callModal(this)" id = "add_quality">Add me as Quality Reviewer  |  </a>
+                                    <a href="#" onClick= "callModal(this)" id = "revoke_quality">Revoke Quality Reviewer role</a>
                             {% else %}
                                 <li>
                                     <a href="#" onClick= "callModal(this)" id = "add_quality">Add me as Quality Reviewer</a><br>
                             {% endif %}
                         </ul>
-                        <div>
-                                        <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-                                        <div class="modal-dialog">
-                                        <div class="modal-content">
-                                        <div class="modal-header">
-                                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                                        <h4 class="modal-title" id="myModalLabel">Confirm Delete</h4>
-                                        </div>
-                                        <div class="modal-body">
-                                        <select multiple = "multiple" class="form-control search-language" id="id_search_language_new" name="search_language" tabindex="1" value="">
-                                            <div>
-                                                {% for record in language %}
-                                                    <option>{{record.name}}</option>
+                        </div>
+                        </div>
 
-                                                {% endfor %}      
-                                            </div>
-                                        </select>
-                                        </div>
-                                        <div id = "abc">Something here</div>
-                                        <div class="modal-footer">
-                                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                                        <button class="btn btn-primary btn-ok" onClick = "printer()" > Confirm</button>
-                                        </div>
-                                        </div>
-                                        </div>
-                                        </div>
-
+                                        {% include "creation/templates/template2.html" %}
+                                        
                     </div>
                 </div>
             </div>
@@ -254,8 +235,10 @@
 
 <script type= "text/javascript" >
 
-direction = "";
-
+var direction = "";
+var language = "";
+var select1 = "";
+    
 function callModal(curr){
     var currele = curr.id;
     alert(currele);
@@ -264,62 +247,92 @@ function callModal(curr){
 
         case "add_contributor":
         {
-            $("#myModal").modal('show');
-            document.getElementById("abc").innerHTML = currele;
-            direction = "/creation/role/revoke/contributor";
+            $("#myModal_con").modal('show');
+            document.getElementById("myModalLabel_c").innerHTML = "Add Contributor";
+            direction = "/creation/role/add/contributor";
+            language = $("#id_search_lang_c:selected").text();
+            select1 = document.getElementById("id_search_lang_c");
+
             break;
         }
         case "revoke_contributor":
         {
-             direction ="/creation/role/revoke/contributor";   
-             break;
+            $("#myModal_con_revoke").modal('show');
+            document.getElementById("myModalLabel_c_revoke").innerHTML = "Revoke Contributor";
+            direction ="/creation/role/revoke/contributor";
+            language = $("#id_search_lang_c_revoke:selected").text();
+            select1 = document.getElementById("id_search_lang_c_revoke");
+            break;
         }
         case "add_external_contributor":
         {
-            $("#myModal").modal('show');
-            direction ="/creation/role/add/external-contributor";      
+            $("#myModal_ext_con").modal('show');
+            document.getElementById("myModalLabel_ec").innerHTML = "Add External Contributor";
+            direction ="/creation/role/add/external-contributor";
+            language = $("#id_search_language_new_ec :selected").text();
+            select1 = document.getElementById("id_search_language_new_ec");
+      
             break;
         }
         case "revoke_external_contributor":
         {
-            direction ="/creation/role/revoke/external-contributor";   
+            $("#myModal_ext_con_revoke").modal('show');
+            document.getElementById("myModalLabel_ec_revoke").innerHTML = "Revoke External Contributor";
+            direction ="/creation/role/revoke/external-contributor";
+            language = $("#id_search_lang_ec_revoke :selected").text();
+            select1 = document.getElementById("id_search_lang_ec_revoke");
             break;
         }
 
         case "add_admin":
-        {
-         
-            location.href ="/creation/role/add/video-reviewer";      
+        {         
+            location.href ="/creation/role/add/video-reviewer/0";      
             break;
         }
         case "revoke_admin":
         {
-            location.href ="/creation/role/revoke/video-reviewer";   
+            location.href ="/creation/role/revoke/video-reviewer/0";   
             break;
         }
         
         case "add_domain":
         {
-            $("#myModal").modal('show');
+            $("#myModal_dom_rev").modal('show');
+            document.getElementById("myModalLabel_dr").innerHTML = "Add Domain Reviewer";
             direction ="/creation/role/add/domain-reviewer";      
+            language = $("#id_search_language_new_dr :selected").text();
+            select1 = document.getElementById("id_search_language_new_dr");
+
             break;
         }
         case "revoke_domain":
         {
-            direction ="/creation/role/revoke/domain-reviewer";   
+            $("#myModal_dom_revoke").modal('show');
+            document.getElementById("myModalLabel_dr_revoke").innerHTML = "Revoke Domain Reviewer";
+            direction ="/creation/role/revoke/domain-reviewer";
+            language = $("#id_search_lang_dr_revoke :selected").text();
+            select1 = document.getElementById("id_search_lang_dr_revoke");
             break;
         }
 
         case "add_quality":
         {
-            $("#myModal").modal('show');
+            $("#myModal_q_rev").modal('show');
+            document.getElementById("myModalLabel_qr").innerHTML = "Add Quality Reviewer";
             direction ="/creation/role/add/quality-reviewer";      
+            language = $("#id_search_language_new_qr:selected").text();
+            select1 = document.getElementById("id_search_language_new_qr");
+
             break;
         }
 
         case "revoke_quality":
         {
-            direction ="/creation/role/revoke/quality-reviewer";   
+            $("#myModal_q_revoke").modal('show');
+            document.getElementById("myModalLabel_qr_revoke").innerHTML = "Revoke Quality Reviewer";   
+            direction ="/creation/role/revoke/quality-reviewer";
+            language = $("#id_search_lang_qr_revoke:selected").text();
+            select1 = document.getElementById("id_search_lang_qr_revoke");
             break;
         }
     }
@@ -330,11 +343,19 @@ function callModal(curr){
 function printer()
 {
 
-    var abc = document.getElementById("add_contributor").id;
-    var language = $("#id_search_language_new :selected").text();
-    document.getElementById("abc").innerHTML = abc;
-    alert("You have selected :"+ language +"You will be directed to : " + direction );
+    var selected1 = [];
+    
+    for (var i = 0; i < select1.length; i++) {
+        if (select1.options[i].selected)
+        {   
+            //selected1.push(select1.options[i].id);
+            direction += "/"+select1[i].id;
+        }
+    }
+    alert(direction);
+
     location.href =  direction; 
+    
 }
 
 </script>

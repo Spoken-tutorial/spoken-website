@@ -1294,7 +1294,6 @@ class Results(object):
     def filter(self, results):
         """Removes any hits that are not also in the other results object.
         """
-
         if not len(results):
             return
 

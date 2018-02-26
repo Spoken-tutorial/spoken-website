@@ -1,0 +1,200 @@
+<!-- Contributor -->
+  
+    <div class="modal fade" id="myModal_con_revoke" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+    <div class="modal-content">
+    <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+    <h4 class="modal-title" id="myModalLabel_c_revoke">Confirm Delete</h4>
+    </div>
+    <div class="modal-body">
+    <select multiple = "multiple" class="form-control " id="id_search_lang_c_revoke" name="search_language" tabindex="1" value="">
+        <div>
+            {% for record in is_contributor_language %}
+                <option id = {{record.id}}>{{record.name}}</option>
+            {% endfor %}      
+        </div>
+    </select>
+    </div>
+    <div class="modal-footer">
+    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+    <button class="btn btn-primary btn-ok" onClick = "printer()" > Confirm</button>
+    </div>
+    </div>
+    </div>
+    </div>
+
+    <div class="modal fade" id="myModal_con" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+    <div class="modal-content">
+    <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+    <h4 class="modal-title" id="myModalLabel_c">Confirm Delete</h4>
+    </div>
+    <div class="modal-body">
+    <select multiple = "multiple" class="form-control" id="id_search_lang_c" name="search_language" tabindex="1" value="">
+    <div>
+        {% for record in contributor_language %}
+            <option id = {{record.id}}>{{record.name}}</option>
+        {% endfor %}      
+    </div>
+    </select>
+    </div>
+    <div class="modal-footer">
+    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+    <button class="btn btn-primary btn-ok" onClick = "printer()" > Confirm</button>
+    </div>
+    </div>
+    </div>
+    </div>
+
+<!-- Ext Contributor-->
+
+    <div class="modal fade" id="myModal_ext_con_revoke" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+    <div class="modal-content">
+    <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+    <h4 class="modal-title" id="myModalLabel_ec_revoke">Confirm Delete</h4>
+    </div>
+    <div class="modal-body">
+    <select multiple = "multiple" class="form-control " id="id_search_lang_ec_revoke" tabindex="1" value="">
+        <div>
+            {% for record in is_external_contributor_language %}
+                <option id = {{record.id}}>{{record.name}}</option>
+            {% endfor %}      
+        </div>
+    </select>
+    </div>
+    <div class="modal-footer">
+    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+    <button class="btn btn-primary btn-ok" onClick = "printer()" > Confirm</button>
+    </div>
+    </div>
+    </div>
+    </div>
+
+    <div class="modal fade" id="myModal_ext_con" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+    <div class="modal-content">
+    <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+    <h4 class="modal-title" id="myModalLabel_ec">Confirm Delete</h4>
+    </div>
+    <div class="modal-body">
+    <select multiple = "multiple" class="form-control search-language" id="id_search_language_new_ec" name="search_language" tabindex="1" value="">
+        <div>
+            {% for record in external_contributor_language %}
+                <option id = {{record.id}}>{{record.name}}</option>
+            {% endfor %}      
+        </div>
+    </select>
+    </div>
+    <div class="modal-footer">
+    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+    <button class="btn btn-primary btn-ok" onClick = "printer()" > Confirm</button>
+    </div>
+    </div>
+    </div>
+    </div>
+
+<!-- Domain Reviewer -->
+    <div class="modal fade" id="myModal_dom_revoke" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+    <div class="modal-content">
+    <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+    <h4 class="modal-title" id="myModalLabel_dr_revoke">Confirm Delete</h4>
+    </div>
+    <div class="modal-body">
+    <select multiple = "multiple" class="form-control " id="id_search_lang_dr_revoke"  tabindex="1" value="">
+        <div>
+            {% for record in is_domain_reviewer_language %}
+                <option id = {{record.id}}>{{record.name}}</option>
+            {% endfor %}      
+        </div>
+    </select>
+    </div>
+    <div class="modal-footer">
+    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+    <button class="btn btn-primary btn-ok" onClick = "printer()" > Confirm</button>
+    </div>
+    </div>
+    </div>
+    </div>
+
+
+    <div class="modal fade" id="myModal_dom_rev" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+    <div class="modal-content">
+    <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+    <h4 class="modal-title" id="myModalLabel_dr">Confirm Delete</h4>
+    </div>
+    <div class="modal-body">
+    <select multiple = "multiple" class="form-control search-language" id="id_search_language_new_dr" tabindex="1" value="">
+        <div>
+            {% for record in domain_reviewer_language %}
+                <option id = {{record.id}}>{{record.name}}</option>
+            {% endfor %}      
+        </div>
+    </select>
+    </div>
+    <div class="modal-footer">
+    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+    <button class="btn btn-primary btn-ok" onClick = "printer()" > Confirm</button>
+    </div>
+    </div>
+    </div>
+    </div>
+
+<!-- Quality Reviewer-->
+    <div class="modal fade" id="myModal_q_revoke" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+    <div class="modal-content">
+    <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+    <h4 class="modal-title" id="myModalLabel_qr_revoke">Confirm Delete</h4>
+    </div>
+    <div class="modal-body">
+    <select multiple = "multiple" class="form-control " id="id_search_lang_qr_revoke"  tabindex="1" value="">
+        <div>
+            {% for record in is_quality_reviewer_language %}
+                <option id = {{record.id}}>{{record.name}}</option>
+            {% endfor %}      
+        </div>
+    </select>
+    </div>
+    <div class="modal-footer">
+    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+    <button class="btn btn-primary btn-ok" onClick = "printer()" > Confirm</button>
+    </div>
+    </div>
+    </div>
+    </div>
+
+
+    <div class="modal fade" id="myModal_q_rev" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+    <div class="modal-content">
+    <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+    <h4 class="modal-title" id="myModalLabel_qr">Confirm Delete</h4>
+    </div>
+    <div class="modal-body">
+    <select multiple = "multiple" class="form-control search-language" id="id_search_language_new_qr" name="search_language" tabindex="1" value="">
+        <div>
+            {% for record in quality_reviewer_language %}
+                <option id = {{record.id}}>{{record.name}}</option>
+            {% endfor %}      
+        </div>
+    </select>
+    </div>
+    <div class="modal-footer">
+    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+    <button class="btn btn-primary btn-ok" onClick = "printer()" > Confirm</button>
+    </div>
+    </div>
+    </div>
+    </div>
+
