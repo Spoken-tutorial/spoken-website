@@ -169,8 +169,8 @@
                         <td><a >{{ quality_rec.language }} </a></td>
                         <td><a href="mailto:{{ quality_rec.user.email }}">{{ quality_rec.user.email }}</a></td>
                         <td>{{ quality_rec.created }}</td>
-                        <td class="col-center"><a href="/creation/role/accept/{{ quality_rec.id }}/{{ quality_rec.language_id }}" class="spin-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Accept</a></td>
-                        <td class="col-center"><a href="/creation/role/reject/{{ quality_rec.id }}/{{ quality_rec.language_id }}" class="spin-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Reject</a></td>
+                        <td class="col-center"><a href="{% url 'creation:creation_accept_role_request'  quality_rec.id quality_rec.language_id %}" class="spin-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Accept</a></td>
+                        <td class="col-center"><a href="/creation/role/reject/{{ quality_rec.id }}/{{ quality_rec.language_id }}/" class="spin-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Reject</a></td>
                     </tr>
                 {% endfor %}
             {% endif %}

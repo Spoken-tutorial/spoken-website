@@ -326,11 +326,11 @@ def creation_revoke_role_request(request, role_type,langid):
 @login_required
 def creation_list_role_requests(request, tabid = 'contributor'):
     if is_administrator:
-        contrib_recs = RoleRequest.objects.filter(role_type = 0, status = 0).order_by('-updated')
-        ext_contrib_recs = RoleRequest.objects.filter(role_type = 1, status = 0).order_by('-updated')
-        admin_recs = RoleRequest.objects.filter(role_type = 2, status = 0).order_by('-updated')
-        domain_recs = RoleRequest.objects.filter(role_type = 3, status = 0).order_by('-updated')
-        quality_recs = RoleRequest.objects.filter(role_type = 4, status = 0).order_by('-updated')
+        contrib_recs = RoleRequest.objects.filter(role_type = 0, status = 0,language_id__gte = 0).order_by('-updated')
+        ext_contrib_recs = RoleRequest.objects.filter(role_type = 1, status = 0,language_id__gte = 0).order_by('-updated')
+        admin_recs = RoleRequest.objects.filter(role_type = 2, status = 0 ).order_by('-updated')
+        domain_recs = RoleRequest.objects.filter(role_type = 3, status = 0, language_id__gte = 0 ).order_by('-updated')
+        quality_recs = RoleRequest.objects.filter(role_type = 4, status = 0 , language_id__gte = 0 ).order_by('-updated')
         context = {
             'tabid': tabid,
             'contrib_recs': contrib_recs,
