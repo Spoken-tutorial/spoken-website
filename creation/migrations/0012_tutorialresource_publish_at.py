@@ -7,7 +7,7 @@ from django.db import models, migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('creation', '0010_fosscategory_show_on_homepage'),
+        ('creation', '0011_auto_20180119_1257'),
     ]
 
     operations = [
