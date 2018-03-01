@@ -54,7 +54,6 @@ urlpatterns = patterns('',
     url(r'^public-review/list/$', 'creation.views.public_review_list', name="public_review_list"),
 
     # Administrator part
-    url(r'^role/lang/([a-zA-Z-]+)/$', 'creation.views.creation_accept_revoke', name="creation_accept_revoke"),
     url(r'^role/requests/$', 'creation.views.creation_list_role_requests', name="creation_list_role_requests"),
     url(r'^update-prerequisite/$', 'creation.views.update_prerequisite', name="update_prerequisite"),
     url(r'^update-keywords/$', 'creation.views.update_keywords', name="update_keywords"),

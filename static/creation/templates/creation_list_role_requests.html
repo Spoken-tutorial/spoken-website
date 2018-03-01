@@ -55,8 +55,8 @@
                         <td><a >{{contrib_rec.language}} </a></td>
                         <td><a href="mailto:{{ contrib_rec.user.email }}">{{ contrib_rec.user.email }}</a></td>
                         <td>{{ contrib_rec.created }}</td>
-                        <td class="col-center"><a href="/creation/role/accept/{{ contrib_rec.id }}/{{contrib_rec.language_id}}/" class="spin-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Accept</a></td>
-                        <td class="col-center"><a href="/creation/role/reject/{{ contrib_rec.id }}/{{contrib_rec.language_id}}/" class="spin-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Reject</a></td>
+                        <td class="col-center"><a href="{% url 'creation:creation_accept_role_request'  contrib_rec.id contrib_rec.language_id %}" class="spin-btn js-accept-btn" ><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Accept</a></td>
+                        <td class="col-center"><a href="{% url 'creation:creation_reject_role_request'  contrib_rec.id contrib_rec.language_id %}" class="spin-btn js-accept-btn" ><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Reject</a></td>
                     </tr>
                 {% endfor %}
             {% endif %}
@@ -84,8 +84,8 @@
                         <td><a >{{contrib_rec.language}} </a></td>
                         <td><a href="mailto:{{ contrib_rec.user.email }}">{{ contrib_rec.user.email }}</a></td>
                         <td>{{ contrib_rec.created }}</td>
-                        <td class="col-center"><a href="/creation/role/accept/{{ contrib_rec.id }}/{{contrib_rec.language_id}}/" class="spin-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Accept</a></td>
-                        <td class="col-center"><a href="/creation/role/reject/{{ contrib_rec.id }}/{{contrib_rec.language_id}}/" class="spin-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Reject</a></td>
+                        <td class="col-center"><a href="{% url 'creation:creation_accept_role_request'  contrib_rec.id contrib_rec.language_id %}" class="spin-btn js-accept-btn" ><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Accept</a></td>
+                        <td class="col-center"><a href="{% url 'creation:creation_reject_role_request'  contrib_rec.id contrib_rec.language_id %}" class="spin-btn js-accept-btn" ><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Reject</a></td>
                     </tr>
                 {% endfor %}
             {% endif %}
@@ -140,8 +140,8 @@
                         <td><a > {{domain_rec.language}} </a></td>
                         <td><a href="mailto:{{ domain_rec.user.email }}">{{ domain_rec.user.email }}</a></td>
                         <td>{{ domain_rec.created }}</td>
-                        <td class="col-center"><a href="/creation/role/accept/{{ domain_rec.id }}/{{domain_rec.language_id}}" class="spin-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Accept</a></td>
-                        <td class="col-center"><a href="/creation/role/reject/{{ domain_rec.id }}/{{domain_rec.language_id}}" class="spin-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Reject</a></td>
+                        <td class="col-center"><a href="{% url 'creation:creation_accept_role_request'  domain_rec.id domain_rec.language_id %}" class="spin-btn js-accept-btn" ><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Accept</a></td>
+                        <td class="col-center"><a href="{% url 'creation:creation_reject_role_request'  domain_rec.id domain_rec.language_id %}" class="spin-btn js-accept-btn" ><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Reject</a></td>
                     </tr>
                 {% endfor %}
             {% endif %}
@@ -169,8 +169,8 @@
                         <td><a >{{ quality_rec.language }} </a></td>
                         <td><a href="mailto:{{ quality_rec.user.email }}">{{ quality_rec.user.email }}</a></td>
                         <td>{{ quality_rec.created }}</td>
-                        <td class="col-center"><a href="{% url 'creation:creation_accept_role_request'  quality_rec.id quality_rec.language_id %}" class="spin-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Accept</a></td>
-                        <td class="col-center"><a href="/creation/role/reject/{{ quality_rec.id }}/{{ quality_rec.language_id }}/" class="spin-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Reject</a></td>
+                        <td class="col-center"><a href="{% url 'creation:creation_accept_role_request'  quality_rec.id quality_rec.language_id %}" class="spin-btn js-accept-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Accept</a></td>
+                        <td class="col-center"><a href="{% url 'creation:creation_reject_role_request'  quality_rec.id quality_rec.language_id %}" class="spin-btn js-accept-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Reject</a></td>
                     </tr>
                 {% endfor %}
             {% endif %}
@@ -193,6 +193,29 @@
                         $(this).children(0).removeClass("fa-spin");
                     }
                 );
+                $('.js-accept-btn').click(function(e){
+                    console.log($(this).attr('href') + " clicked at " + new Date());
+                    // allow this link to be clicked only once, disable subsiquent clicks.
+                    var url = $(this).attr('href');
+                    var el = $(this);
+                    el.html('processing...');
+                    el.attr('href', '');
+
+                    
+                    var request = $.get(url, function(){
+                        console.log("making request for " + url);
+                    });
+                    request.done(function(data){
+                        console.log("success");
+                        el.parent().html(data);
+
+                    });
+                    request.fail(function(){
+                        console.log('failed');
+                        el.attr('href', url);
+                    });
+                    e.preventDefault();
+                });
             }
         );
     </script>
