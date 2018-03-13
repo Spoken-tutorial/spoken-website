@@ -1,35 +1,32 @@
-from django.http import HttpResponse, HttpResponseRedirect, \
-    HttpResponsePermanentRedirect
-from django.template import RequestContext
-from django.shortcuts import render
-from django.contrib import messages
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
-from django.core.context_processors import csrf
-from django.views.decorators.csrf import csrf_exempt
-from django.core.mail import EmailMultiAlternatives
-from django.db.models import Q
-from django.conf import settings
-from forms import *
-import os
-from django.http import Http404
-from django.core.exceptions import PermissionDenied
-from urllib import urlopen, quote, unquote_plus
+# Standard Library
+import datetime as dt
 import json
-import datetime
-from dateutil.relativedelta import relativedelta
-from creation.subtitles import *
-from creation.views import get_video_info, is_administrator
-from creation.models import TutorialCommonContent, TutorialDetail, TutorialResource, Language
-from cms.models import SiteFeedback, Event, NewsType, News, Notification
-from events.views import get_page
-from spoken.search import search_for_results
-from mdldjango.models import MdlUser
-from forums.models import Question
-from cms.forms import *
-from spoken.filters import NewsStateFilter
+import os
+from urllib import quote, unquote_plus, urlopen
 
+# Third Party Stuff
+from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth.models import User
+from django.core.context_processors import csrf
+from django.core.exceptions import PermissionDenied
+from django.db.models import Q
+from django.http import Http404, HttpResponse, HttpResponseRedirect
+from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
+
+# Spoken Tutorial Stuff
+from cms.forms import *
+from cms.models import Event, News, NewsType, Notification, SiteFeedback
+from creation.models import Language, TutorialDetail, TutorialResource
+from creation.subtitles import *
+from creation.views import get_video_info
+from events.views import get_page
+from forums.models import Question
+
+from .filters import NewsStateFilter
+from .forms import *
+from .search import search_for_results
 
 
 def is_resource_person(user):
@@ -78,11 +75,11 @@ def home(request):
     testimonials = Testimonials.objects.all().order_by('?')[:2]
     context['testimonials'] = testimonials
 
-    notifications = Notification.objects.filter(Q(start_date__lte=datetime.today()) & Q(
-        expiry_date__gte=datetime.today())).order_by('expiry_date')
+    notifications = Notification.objects.filter(Q(start_date__lte=dt.datetime.today()) & Q(
+        expiry_date__gte=dt.datetime.today())).order_by('expiry_date')
     context['notifications'] = notifications
 
-    events = Event.objects.filter(event_date__gte=datetime.today()).order_by('event_date')[:2]
+    events = Event.objects.filter(event_date__gte=dt.datetime.today()).order_by('event_date')[:2]
     context['events'] = events
     return render(request, 'spoken/templates/home.html', context)
 
@@ -138,28 +135,26 @@ def tutorial_search(request):
     collection = None
     form = TutorialSearchForm()
     foss_get = ''
+    show_on_homepage = True;
+    queryset = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = show_on_homepage)
+
     if request.method == 'GET' and request.GET:
         form = TutorialSearchForm(request.GET)
         if form.is_valid():
             foss_get = request.GET.get('search_foss', '')
             language_get = request.GET.get('search_language', '')
             if foss_get and language_get:
-                collection = TutorialResource.objects.filter(Q(status=1) | Q(
-                    status=2), tutorial_detail__foss__foss=foss_get, language__name=language_get).order_by('tutorial_detail__level', 'tutorial_detail__order')
+                collection = queryset.filter(tutorial_detail__foss__foss=foss_get, language__name=language_get).order_by('tutorial_detail__level', 'tutorial_detail__order')
+
             elif foss_get:
-                collection = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__foss=foss_get).order_by(
-                    'tutorial_detail__level', 'tutorial_detail__order', 'language__name')
+                collection = queryset.filter(tutorial_detail__foss__foss=foss_get).order_by('tutorial_detail__level', 'tutorial_detail__order', 'language__name')
             elif language_get:
-                collection = TutorialResource.objects.filter(Q(status=1) | Q(status=2), language__name=language_get).order_by(
-                    'tutorial_detail__foss__foss', 'tutorial_detail__level', 'tutorial_detail__order')
+                collection = queryset.filter(language__name=language_get).order_by('tutorial_detail__foss__foss', 'tutorial_detail__level', 'tutorial_detail__order')
             else:
-                collection = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__id__in=FossCategory.objects.values(
-                    'id'), language__id__in=Language.objects.values('id')).order_by('tutorial_detail__foss__foss', 'language__name', 'tutorial_detail__level', 'tutorial_detail__order')
+                collection = queryset.filter(tutorial_detail__foss__id__in=FossCategory.objects.values('id'), language__id__in=Language.objects.values('id')).order_by('tutorial_detail__foss__foss', 'language__name', 'tutorial_detail__level', 'tutorial_detail__order')
     else:
-        foss = TutorialResource.objects.filter(Q(status=1) | Q(status=2), language__name='English').values(
-            'tutorial_detail__foss__foss').annotate(Count('id')).values_list('tutorial_detail__foss__foss').distinct().order_by('?')[:1].first()
-        collection = TutorialResource.objects.filter(Q(status=1) | Q(
-            status=2), tutorial_detail__foss__foss=foss[0], language__name='English')
+        foss = queryset.filter(language__name='English').values('tutorial_detail__foss__foss').annotate(Count('id')).values_list('tutorial_detail__foss__foss').distinct().order_by('?')[:1].first()
+        collection = queryset.filter(tutorial_detail__foss__foss=foss[0], language__name='English')
         foss_get = foss[0]
     if collection:
         page = request.GET.get('page')
@@ -169,6 +164,48 @@ def tutorial_search(request):
     context['SCRIPT_URL'] = settings.SCRIPT_URL
     context['current_foss'] = foss_get
     return render(request, 'spoken/templates/tutorial_search.html', context)
+
+def series_foss(request):
+    form = SeriesTutorialSearchForm()
+    context = {}
+    context['form'] = form
+    return render(request, 'spoken/templates/series_foss_list.html', context)
+
+@csrf_exempt
+def series_tutorial_search(request):
+    context = {}
+    collection = None
+    form = SeriesTutorialSearchForm()
+    foss_get = ''
+    show_on_homepage = False;
+    queryset = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = show_on_homepage)
+    
+    if request.method == 'GET' and request.GET:
+        form = SeriesTutorialSearchForm(request.GET)
+        if form.is_valid():
+            foss_get = request.GET.get('search_otherfoss', '')
+            language_get = request.GET.get('search_otherlanguage', '')
+            if foss_get and language_get:
+                collection = queryset.filter(tutorial_detail__foss__foss=foss_get, language__name=language_get).order_by('tutorial_detail__level', 'tutorial_detail__order')
+
+            elif foss_get:
+                collection = queryset.filter(tutorial_detail__foss__foss=foss_get).order_by('tutorial_detail__level', 'tutorial_detail__order', 'language__name')
+            elif language_get:
+                collection = queryset.filter(language__name=language_get).order_by('tutorial_detail__foss__foss', 'tutorial_detail__level', 'tutorial_detail__order')
+            else:
+                collection = queryset.filter(tutorial_detail__foss__id__in=FossCategory.objects.values('id'), language__id__in=Language.objects.values('id')).order_by('tutorial_detail__foss__foss', 'language__name', 'tutorial_detail__level', 'tutorial_detail__order')
+    else:
+        foss = queryset.filter(language__name='English').values('tutorial_detail__foss__foss').annotate(Count('id')).values_list('tutorial_detail__foss__foss').distinct().order_by('?')[:1].first()
+        collection = queryset.filter(tutorial_detail__foss__foss=foss[0], language__name='English')
+        foss_get = foss[0]
+    if collection:
+        page = request.GET.get('page')
+        collection = get_page(collection, page)
+    context['form'] = form
+    context['collection'] = collection
+    context['SCRIPT_URL'] = settings.SCRIPT_URL
+    context['current_foss'] = foss_get
+    return render(request, 'spoken/templates/series_tutorial_search.html', context)
 
 
 def watch_tutorial(request, foss, tutorial, lang):
@@ -233,13 +270,17 @@ def what_is_spoken_tutorial(request):
 
 
 @csrf_exempt
-def get_language(request):
+def get_language(request, tutorial_type):
     output = ''
+    show_on_homepage = True
+    if tutorial_type== "series":
+        show_on_homepage = False
+
     if request.method == "POST":
         foss = request.POST.get('foss')
         lang = request.POST.get('lang')
         if not lang and foss:
-            lang_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__foss=foss).values(
+            lang_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = show_on_homepage, tutorial_detail__foss__foss=foss).values(
                 'language__name').annotate(Count('id')).order_by('language__name').values_list('language__name', 'id__count').distinct()
             tmp = '<option value = ""> -- All Languages -- </option>'
             for lang_row in lang_list:
@@ -247,7 +288,7 @@ def get_language(request):
                     str(lang_row[0]) + ' (' + str(lang_row[1]) + ')</option>'
             output = ['foss', tmp]
         elif lang and not foss:
-            foss_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), language__name=lang).values('tutorial_detail__foss__foss').annotate(
+            foss_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = show_on_homepage, language__name=lang).values('tutorial_detail__foss__foss').annotate(
                 Count('id')).order_by('tutorial_detail__foss__foss').values_list('tutorial_detail__foss__foss', 'id__count').distinct()
             tmp = '<option value = ""> -- All Courses -- </option>'
             for foss_row in foss_list:
@@ -257,13 +298,13 @@ def get_language(request):
         elif foss and lang:
             pass
         else:
-            lang_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2)).values('language__name').annotate(
+            lang_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = show_on_homepage).values('language__name').annotate(
                 Count('id')).order_by('language__name').values_list('language__name', 'id__count').distinct()
             tmp1 = '<option value = ""> -- All Languages -- </option>'
             for lang_row in lang_list:
                 tmp1 += '<option value="' + str(lang_row[0]) + '">' + \
                     str(lang_row[0]) + ' (' + str(lang_row[1]) + ')</option>'
-            foss_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), language__name='English').values('tutorial_detail__foss__foss').annotate(
+            foss_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = show_on_homepage,language__name='English').values('tutorial_detail__foss__foss').annotate(
                 Count('id')).order_by('tutorial_detail__foss__foss').values_list('tutorial_detail__foss__foss', 'id__count').distinct()
             tmp2 = '<option value = ""> -- All Courses -- </option>'
             for foss_row in foss_list:
@@ -339,7 +380,35 @@ def admin_testimonials_edit(request, rid):
     if request.method == 'POST':
         form = TestimonialsForm(request.POST, request.FILES, instance=instance)
         if form.is_valid():
-            form.save()
+            form_data = form.save(commit=False)
+            form_data.user_id = user.id
+            form_data.save()
+            file_type = ['application/pdf','image/jpeg','image/png']
+            if 'scan_copy' in request.FILES:
+                if request.FILES['scan_copy'].content_type in file_type:
+                    file_path = settings.MEDIA_ROOT + 'testimonial/'
+                    try:
+                        os.mkdir(file_path)
+                    except Exception, e:
+                        print e
+                    file_path = settings.MEDIA_ROOT + 'testimonial/' + str(rid) + '/'
+                    try:
+                        os.mkdir(file_path)
+                    except Exception, e:
+                        print e
+                    f = request.FILES['scan_copy']
+                    filename = str(f)
+                    ext = os.path.splitext(filename)[1].lower()
+                    full_path = file_path + str(rid) + ext
+                    fout = open(full_path, 'wb+')
+
+                    # Iterate through the chunks.
+                    for chunk in f.chunks():
+                        fout.write(chunk)
+                    fout.close()
+
+            messages.success(request, 'Testimonial updated successfully!')
+            return HttpResponseRedirect('/')
 
     form = TestimonialsForm(instance=instance)
     context['form'] = form
@@ -514,3 +583,40 @@ def ViewBrochures(request):
 
 def learndrupal(request):
     return render(request, 'spoken/templates/learndrupal.html')
+
+def induction_2017(request):
+    EOI_count = InductionInterest.objects.all().count()
+    context = {'EOI_count': EOI_count}
+    context.update(csrf(request))
+    return render(request, 'spoken/templates/induction_2017.html', context)
+
+
+def induction_2017_new(request):
+    return render(request, 'spoken/templates/induction_2017_new.html')
+
+def expression_of_intrest(request):
+    return render(request, 'spoken/templates/expression_of_intrest.html')
+
+
+def expression_of_intrest_new(request):
+    form = ExpressionForm()
+    if request.method == 'POST':
+        form = ExpressionForm(request.POST)
+        if form.is_valid():
+            try:
+                form_data = form.save(commit=False)
+                form_data.save()
+                messages.success(request, "Your response has been recorded. Thanks for giving your inputs. In case there are more than 120 eligible applicants, we will get back to you about a selection criterion.")
+                return HttpResponseRedirect('/induction')
+            except Exception, e:
+                print e
+                messages.error(request, "Sorry, something went wrong, Please try again!")
+                # return HttpResponseRedirect('/induction')
+    context = {
+        'form' : form,
+    }
+
+
+    context = {}
+    context['form'] = form
+    return render(request, 'spoken/templates/expression_of_intrest_old.html', context)

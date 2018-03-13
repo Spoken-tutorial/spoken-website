@@ -1,0 +1,439 @@
+{% load widget_tweaks %}
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Induction Programme 2017</title>
+  <link rel="stylesheet" href="{% static 'spoken/css/bootstrap.min.css' %}" type="text/css" media="screen" charset="utf-8" />
+  <link rel="stylesheet" href="{% static 'spoken/css/font-awesome.min.css' %}" type="text/css" media="screen" charset="utf-8" />
+  <script src="{% static 'spoken/js/jquery-1.11.0.min.js' %}"></script>
+  <script src="{% static 'spoken/js/bootstrap.min.js' %}"></script>
+
+
+
+</head>
+<style type="text/css">
+.back_grey {
+  background-color: #EEEEEE;
+}
+
+.form_container{
+  margin-top: 5%;
+}
+.navbar-default {
+    background-color: #26C281;
+    height: 60px;
+}
+.navbar-default .navbar-brand {
+    color: black;
+}
+.navbar-brand small {
+  display:block;
+  font-size:12px;
+}
+.footer{
+      background: #303030;
+      color:#fff;
+      text-align: center;
+    }
+</style>
+<body>
+<!--Navigation bar-->
+  <nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="{% url 'induction_2017_new' %}">Induction Training Programme<small>conducted by the Spoken Tutorial Project, under the aegis of Pandit Madan Mohan Malaviya National Mission on Teachers and Teaching (PMMMNMTT).</small></a>
+      </div>
+    </div>
+  </nav>
+  <!--/ Navigation bar-->
+<div class="container form_container">
+<h1>Induction Programme of PMMMNMTT <br> Expression of Interest</h1>
+<p>Dear Colleague, <br>
+I am happy to invite your Expression of Interest to the proposed induction programme for college teachers, to be organised at IIT Bombay, under the aegis of the Teaching Learning Centre (ICT), funded by the Pandit Madan Mohan Malaviya National Mission on Teachers and Teaching, an initiative of MHRD.  All details about this course are available at <a href="http://spoken-tutorial.org/induction/">http://spoken-tutorial.org/induction/</a>.  Your inputs to this survey will be useful for the following: (1) shortlisting candidates, in case there are many applicants (2) deciding the number of rooms to be provided in boys or girls hostels (3) deciding the experts to invite and examples to include, depending on the background of participants.  We shall also use this for research purposes, so as to improve such training programmes.</p>
+<p style="color: red;">* fields are mandetory.</p>
+<div class="form-horizontal col-sm-12 back_grey ">
+<form action="/induction/eoi/" method="post" class='form-horizontal' enctype="multipart/form-data" >{% csrf_token %}
+      {% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
+      {% if form.non_field_errors %}
+        <ul>
+        {% for error in form.non_field_errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+      
+        
+          <div class="form-group email">
+            <label class="col-sm-5 control-label" for= "id_email">Email address *</label>
+            <div class="col-sm-7">
+              {% render_field form.email class+="form-control email"%}
+              {{ form.email.errors }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="col-sm-5 control-label" for= "id_name">Name *</label>
+            <div class="col-sm-7">
+              {% render_field form.name class+="form-control name" %}
+              {{ form.name.errors }}
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="col-sm-5 control-label" for= "id_phonemob">Mobile no./ Phone no. *</label>
+            <div class="col-sm-7">
+              {% render_field form.phonemob class+="form-control phonemob"  %}
+              {{ form.phonemob.errors }}
+              <small> (please enter this and your email address properly - we may have to use either of the two to contact you, possibly urgently. If you do not give both information correctly, there is a possibility that you will miss important communications from us)</small>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="col-sm-5 control-label" for= "id_age">Age *</label>
+            <div class="col-sm-7">
+              {% render_field form.age class+="form-control age" %}
+              {{ form.age.errors }}
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="col-sm-5 control-label" for= "id_age">Gender *</label>
+            <div class="col-sm-7">
+              {% render_field form.gender class+="form-control gender" %}
+              {{ form.gender.errors }}
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="col-sm-5 control-label" for= "id_mother_tongue">Mother tongue *</label>
+            <div class="col-sm-7">
+              {% render_field form.mother_tongue class+="form-control mother_tongue" %}
+              {{ form.mother_tongue.errors }}
+            </div>
+          </div>
+
+          <div class="form-group" id="other_language">
+            <label class="col-sm-5 control-label" for= "id_other_language">Other Mother tongue *</label>
+            <div class="col-sm-7">
+              {% render_field form.other_language class+="form-control other_language" %}
+              {{ form.other_language.errors }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="col-sm-5 control-label" for= "id_medium_of_studies">Medium of instruction in which you studied in school *</label>
+            <div class="col-sm-7">
+              {% render_field form.medium_of_studies class+="form-control medium_of_studies"  %}
+              {{ form.medium_of_studies.errors }}
+            </div>
+          </div>
+
+          <div class="form-group" id="other_medium">
+            <label class="col-sm-5 control-label" for= "id_other_medium">Other medium of instruction *</label>
+            <div class="col-sm-7">
+              {% render_field form.other_medium class+="form-control other_medium"  %}
+              {{ form.other_medium.errors }}
+            </div>
+          </div>
+
+          <div class="form-group ">
+            <label class="col-sm-5 control-label" for= "id_education">Education *</label>
+            <div class="col-sm-7">
+              {% render_field form.education class+="form-control education" %}
+              {{ form.education.errors }}
+            </div>
+          </div> 
+
+          <div class="form-group " id="other_education">
+            <label class="col-sm-5 control-label" for= "id_other_education">Other education </label>
+            <div class="col-sm-7">
+              {% render_field form.other_education class+="form-control other_education" %}
+              {{ form.other_education.errors }}
+            </div>
+          </div>
+
+          <div class="form-group ">
+            <label class="col-sm-5 control-label" for= "id_specialisation">Your field of specialisation (please select the closest) *</label>
+            <div class="col-sm-7">
+              {% render_field form.specialisation class+="form-control specialisation" %}
+              {{ form.specialisation.errors }}
+            </div>
+          </div> 
+
+          <div class="form-group " id="other_specialisation">
+            <label class="col-sm-5 control-label" for= "id_other_specialisation">Other specialisation </label>
+            <div class="col-sm-7">
+              {% render_field form.other_specialisation class+="form-control other_specialisation" %}
+              {{ form.other_specialisation.errors }}
+            </div>
+          </div>
+
+          <div class="form-group ">
+            <label class="col-sm-5 control-label" for= "id_designation">Current designation * </label>
+            <div class="col-sm-7">
+              {% render_field form.designation class+="form-control designation" %}
+              {{ form.designation.errors }}
+            </div>
+          </div> 
+
+          <div class="form-group " id="other_designation">
+            <label class="col-sm-5 control-label" for= "id_other_designation">Other designation </label>
+            <div class="col-sm-7">
+              {% render_field form.other_designation class+="form-control other_designation" %}
+              {{ form.other_designation.errors }}
+            </div>
+          </div>
+
+
+          
+          <div class="form-group ">
+            <label class="col-sm-5 control-label" for= "id_college">In which institution do you currently work? * </label>
+            <div class="col-sm-7">
+              {% render_field form.college class+="form-control college" %}
+              {{ form.college.errors }}
+            </div>
+          </div>
+
+          <div class="form-group ">
+            <label class="col-sm-5 control-label" for= "id_college_address">Give the address of your institution. State, city and pincode are to be given separately, in subsequent questions *</label>
+            <div class="col-sm-7">
+              {% render_field form.college_address class+="form-control college_address" %}
+              {{ form.college_address.errors }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="col-sm-5 control-label" for= "id_state">Give the state in which your institution is located * </label>
+            <div class="col-sm-7">
+              {% render_field form.state class+="form-control state"  %}
+              {{ form.state.errors }}
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="col-sm-5 control-label" for= "id_city">In which city is your institution located? *</label>
+            <div class="col-sm-7">
+              {% render_field form.city class+="form-control city"  %}
+              {{ form.city.errors }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="col-sm-5 control-label" for= "id_pincode">Give the pin code of the city where your institution is located *</label>
+            <div class="col-sm-7">
+              {% render_field form.pincode class+="form-control pincode"  %}
+              {{ form.pincode.errors }}
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="col-sm-5 control-label" for= "id_experience_in_college">Number of years of experience as a college teacher *</label>
+            <div class="col-sm-7">
+              {% render_field form.experience_in_college class+="form-control experience_in_college"  %}
+              {{ form.experience_in_college.errors }}
+            </div>
+          </div>
+
+          
+
+          <div class="form-group">
+            <label class="col-sm-5 control-label" for= "id_bring_laptop">Every participant has to have a laptop to get the best out of the course. Will you be able to bring a laptop? *</label>
+            <div class="col-sm-7">
+              {% render_field form.bring_laptop class+="form-control bring_laptop"  %}
+              {{ form.bring_laptop.errors }}
+            </div>
+          </div>
+
+          <div class="form-group" id="borrow_laptop">
+            <label class="col-sm-10 " for= "id_borrow_laptop">All lectures will be delivered in a hall with a plug point available to each participant, and NOT in a separate "computer room". Every participant should have a laptop to benefit the most from the course. Although we will try to lend a laptop to those who don't have one, it will not be a good one, as we only have low cost laptops for this purpose, and some of the activities required for the course, such as creating video lectures, cannot be done on it. In view of the above, can you please borrow a laptop and bring it with you, in case you do not own one? *</label>
+            <div class="col-sm-2">
+              {% render_field form.borrow_laptop class+="form-control borrow_laptop"  %}
+              {{ form.borrow_laptop.errors }}
+            </div>
+          </div>
+
+          
+          <div class="form-group">
+            <label class="col-sm-10 " for= "id_do_agree">By selecting "yes", I agree with ALL of the following: (1) I have read the invitation letter from Prof. Kannan Moudgalya (2) I have gone through the course outline (3) I am interested in attending this course (4) The proposed dates are convenient to me (5) I understand that because of logistic reasons, this course is initially offered for entry level faculty members at the start of their teaching career (6) If permitted by my management, I am ready to pay Rs. 1,000, the nonrefundable course deposit, and subsequently attend the course. *</label>
+            <div class="col-sm-2">
+              {% render_field form.do_agree class+="form-control do_agree"  %}
+              {{ form.do_agree.errors }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="col-sm-10 " for= "id_no_objection">By selecting "yes", I also agree to release in open source the content I contribute to this course in the form of questions, answers, discussions and other forms, so that the PMMMNMTT Team at IIT Bombay can distribute the contents of the course to the public. *</label>
+            <div class="col-sm-2">
+              {% render_field form.no_objection class+="form-control no_objection"  %}
+              {{ form.no_objection.errors }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="col-sm-10 " for= "id_other_comments">Any other feedback you would like to give. Thanks a lot for taking time to fill this questionnaire. Your inputs will be most useful to effectivley organise the proposed induction programme under the Pandit Madan Mohan Malaviya National Mission on Teachers and Teaching, an initiative of the Ministry of Human Resource Development.</label>
+            <div class="col-sm-7">
+              {% render_field form.other_comments class+="form-control other_comments"  %}
+              {{ form.other_comments.errors }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="col-sm-offset-5 col-sm-7">
+              <input class="btn btn-success btn-lg" type="submit" id="submit_button" value="Submit" />
+            </div>
+          </div>
+
+
+
+        
+      {% endwith %}
+    </form>
+</div>
+</div>
+</body>
+<script>
+$(window).load(function(){
+  mother_tongue = $('.mother_tongue').val();
+  if (mother_tongue == 'Other'){
+    document.getElementById('other_language').style.display = '';
+    
+  }
+  else{
+  document.getElementById('other_language').style.display = 'none';
+  }
+
+  medium = $('.medium_of_studies').val();
+  if (medium == 'Other'){
+    document.getElementById('other_medium').style.display = '';
+    
+  }
+  else{
+  document.getElementById('other_medium').style.display = 'none';
+  }
+
+
+
+  education = $('.education').val();
+  if (education == 'Other'){
+    document.getElementById('other_education').style.display = '';
+    
+  }
+  else{
+  document.getElementById('other_education').style.display = 'none';
+  }
+
+
+
+ specialisation = $('.specialisation').val();
+  if (specialisation == 'Other'){
+    document.getElementById('other_specialisation').style.display = '';
+    
+  }
+  else{
+  document.getElementById('other_specialisation').style.display = 'none';
+  }
+
+
+
+designation = $('.designation').val();
+  if (designation == 'Other'){
+    document.getElementById('other_designation').style.display = '';
+    
+  }
+  else{
+  document.getElementById('other_designation').style.display = 'none';
+  }
+
+  bring_laptop = $('.bring_laptop').val();
+  if (bring_laptop == 'No'){
+    document.getElementById('borrow_laptop').style.display = '';
+    
+  }
+  else{
+  document.getElementById('borrow_laptop').style.display = 'none';
+  }
+
+});
+///////////////////////////////////////////////////////////////
+
+$('.mother_tongue').on('change', function() {
+  mother_tongue = $('.mother_tongue').val();
+  if (mother_tongue == 'Other'){
+    document.getElementById('other_language').style.display = '';
+    
+  }
+  else{
+  document.getElementById('other_language').style.display = 'none';
+  }
+
+});
+
+$('.medium_of_studies').on('change', function() {
+  medium = $('.medium_of_studies').val();
+  if (medium == 'Other'){
+    document.getElementById('other_medium').style.display = '';
+    
+  }
+  else{
+  document.getElementById('other_medium').style.display = 'none';
+
+  }
+
+
+
+});
+
+$('.education').on('change', function() {
+  education = $('.education').val();
+  if (education == 'Other'){
+    document.getElementById('other_education').style.display = '';
+    
+  }
+  else{
+  document.getElementById('other_education').style.display = 'none';
+  }
+
+});
+
+$('.specialisation').on('change', function() {
+  specialisation = $('.specialisation').val();
+  if (specialisation == 'Other'){
+    document.getElementById('other_specialisation').style.display = '';
+    
+  }
+  else{
+  document.getElementById('other_specialisation').style.display = 'none';
+  }
+
+});
+
+$('.designation').on('change', function() {
+  designation = $('.designation').val();
+  if (designation == 'Other'){
+    document.getElementById('other_designation').style.display = '';
+    
+  }
+  else{
+  document.getElementById('other_designation').style.display = 'none';
+  }
+
+});
+$('.bring_laptop').on('change', function() {
+bring_laptop = $('.bring_laptop').val();
+  if (bring_laptop == 'No'){
+    document.getElementById('borrow_laptop').style.display = '';
+    
+  }
+  else{
+  document.getElementById('borrow_laptop').style.display = 'none';
+  }
+});
+</script>
+
+</html>

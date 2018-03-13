@@ -43,9 +43,13 @@
                         {{ form.academic__institution_name.errors }}
                     </div>
                 </div>
+
+                {% if user|is_resource_person or user|get_administrator %}
+                    <a target="_blank" class="pull-right btn btn-default " href="{% url 'reports:events_test_csv' %}{% if request.GET %}?{{ request.GET.urlencode }}&status={{ status_code }}{% else %}?status={{ status_code }} {% endif %}" class="addlink">Export to CSV</a>
+                {% endif %}
             </div>
-            
-            
+
+
             <div class="col-lg-4 col-md-4 col-sm-4">
               <div class="form-group">
                     <label for="id_state" class="col-sm-4 control-label">Foss</label>
@@ -134,7 +138,7 @@
                 $("#big_chart_div").css({'left' : 0, 'position' : 'relative'});
             });
             $(".fancybox").fancybox();
-            
+
         });
         $('.date').datetimepicker({
             lang:'en',

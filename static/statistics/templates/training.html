@@ -13,7 +13,7 @@
 {% block search %}{% endblock %}
 {% block content %}
     <div class= 'filters row' >
-        <form action="" method="get" class='form-horizontal'>
+        <form action=""  method="get" class='form-horizontal'>
             <div class="col-lg-4 col-md-4 col-sm-4">
                 <div class="form-group">
                     <label for="id_state" class="col-sm-4 control-label">State</label>
@@ -43,6 +43,18 @@
                         {{ form.training_planner__academic__institution_name.errors }}
                     </div>
                 </div>
+
+                <div class="form-group">
+                    <label for="id_academic_institution_type" class="col-sm-4 control-label">Department</label>
+                    <div class="col-sm-8">
+                        {% render_field form.department class+="form-control department" tabindex="1" %}
+                        {{ form.department.errors }}
+                    </div>
+              </div>
+
+                {% if user|is_resource_person or user|get_administrator %}
+                    <a target="_blank" class="pull-right btn btn-default " href="{% url 'reports:events_training_csv' %}{% if request.GET %}?{{ request.GET.urlencode }}&status={{ status_code }}{% else %}?status={{ status_code }} {% endif %}" class="addlink">Export to CSV</a>
+                {% endif %}
             </div>
 
 
@@ -68,6 +80,16 @@
                         {{ form.sem_start_date.errors }}
                     </div>
                 </div>
+
+                <div class="form-group">
+                    <label class="col-sm-5 control-label radio-inline ">
+
+                      <input type="radio" name="status" value="1" {% if status == '1' %}checked {% endif %} ><b>Completed Trainings</b>
+                    </label>
+                    <label class="col-sm-6 control-label radio-inline">
+                      <input type="radio" name="status" value="0" {% if status == '0' %}checked {% endif %} ><b>Pending Attendance Trainings</b>
+                </div>
+
                 <div class="form-group">
                   <div class="col-sm-offset-4 col-sm-8">
                      <input class="btn btn-success" type="submit" value="Filter" />
@@ -83,13 +105,19 @@
                     </tr>
                     <tr>
                         <th>Participants Count</th>
-                        <td>{{ participants.participants__sum }}</td>
+                        {% if status == '1'%}
+                          <td>{{ participants.participants__sum }}</td>
+                        {% else%}
+                          <td>{{ participants }}</td>
+                        {% endif %}
                     </tr>
                 </table>
+
                 <div style="min-height:100px;">
                     <div id="chart_div"></div>
                     <a target='_blank' href="#inline" class="fancybox pull-right" style="bottom: 30px; right:20px; position: absolute;" ><i class="fa fa-1 fa-search-plus"></i> Enlarge chart</a>
-                </div>
+                </div>                
+                
             </div>
         </form>
     </div>
@@ -110,16 +138,27 @@
             <td>{{ record.training_planner.academic.city }}</td>
             <td>{{ record.training_planner.academic }}</td>
             <td>{{ record.course.foss }}</td>
-            <td>{% if record.course.category == 1 %}Mapped{% elif record.course.category == 2 %}Unmapped{% else %}Outside{% endif %}</td>
+            <td>{{ record.department }}</td>
+            <td>{% if record.course_type == 1 %}Mapped{% elif record.course_type == 2 %}Unmapped{% else %}Outside{% endif %}</td>
             <td>{{ record.training_planner.organiser.user.first_name }}</td>
             <td>{{ record.sem_start_date|date:"d M Y" }}</td>
-            <td>{{ record.participants }}</td>
+            {% if status == '1' %}
+              <td>
+                {{ record.participants }}
+              </td>
+              <td>
+                {% if record.get_partipants_from_attendance %}
+                  <a href="{% url 'statistics:statistics_training_participants' record.id %}" target="_blank">View Participants</a>
+                {% endif %}
+              </td>
+            {% elif status == '0' %}
+              <td>
+                {{ record.participants }}/{{record.batch.stcount}}
+              </td>
+              <td><a href="{% url 'statistics:statistics_studentmaster_ongoing' record.id %}" target="_blank">View Participants</a></td>
+            {% endif %}
             <!-- actions based on roles -->
-            <td>
-              {% if record.get_partipants_from_attendance %}
-                <a href="{% url 'statistics:statistics_training_participants' record.id %}" target="_blank">View Participants</a>
-              {% endif %}
-            </td>
+            
           </tr>
         {% endfor %}
       </table>

@@ -1,11 +1,10 @@
-import os, tempfile, zipfile
-from django.db.models import Q
-from django.http import HttpResponse
-from django.contrib.auth.models import User
-from django.core.servers.basehttp import FileWrapper
-
+# Third Party Stuff
 from django import forms
+from django.db.models import Q
+
+# Spoken Tutorial Stuff
 from creation.models import *
+
 
 class CDContentForm(forms.Form):
     foss_list = list(TutorialResource.objects.filter(Q(status = 1)|Q(status = 2)).values_list('tutorial_detail__foss_id', 'tutorial_detail__foss__foss').order_by('tutorial_detail__foss__foss').distinct())

@@ -725,53 +725,6 @@ class TrainingPlanner(models.Model):
       return True
     return False
 
-  # todo with test without test
-  def is_course_full(self, course, department_id, batch_id):
-    course = CourseMap.objects.get(pk=course)
-    if course.test:
-      if self.training_requests().filter(
-        department_id=department_id,
-        batch_id=batch_id,
-        #course__category = category,
-        course__test = True,
-        training_planner__semester = self.semester
-        ).count() > 1:
-          return True
-    if self.training_requests().filter(
-      department_id=department_id,
-      batch_id=batch_id,
-      #course__category = category,
-      course__test = False,
-      training_planner__semester = self.semester
-    ).count() > 2:
-      return True
-    return False
-
-  def is_school_course_full(self, category, department_id, batch_id):
-    if self.training_requests().filter(
-      department_id=department_id,
-      batch_id=batch_id,
-      #course__category = category,
-      course__test = True
-    ).count() > 1:
-      return True
-    elif self.training_requests().filter(
-      department_id=department_id,
-      batch_id=batch_id,
-      #course__category = category,
-      course__test = False
-    ).count() > 11:
-      return True
-    return False
-
-  # def is_unmapped_course_full(self, department_id):
-  #   if self.training_requests().filter(
-  #     department_id=department_id,
-  #     course__category = 2
-  #   ).count() > 4:
-  #     return True
-  #   return False
-
   def get_current_semester_date_duration(self):
     if self.semester.even:
       return datetime.strptime(
@@ -923,9 +876,9 @@ class TrainingRequest(models.Model):
 
   def training_name(self):
     if self.batch:
-      return 'WC-%d, %s, %s - %s - %s' % (self.id, self.course, self.batch, \
+      return 'WC-{0}, {1}, {2} - {3} - {4}'.format(self.id, self.course, self.batch, \
         self.training_planner.year, int(self.training_planner.year)+1)
-    return 'WC-%d, %s, %s - %s' % (self.id, self.course, \
+    return 'WC-{0}, {1}, {2} - {3}'.format(self.id, self.course, \
       self.training_planner.year, int(self.training_planner.year)+1)
 
 
@@ -1288,7 +1241,7 @@ class STWorkshopFeedback(models.Model):
   )
   OPINION =(
     ('','-----'),('StronglyAgree', 'Strongly Agree'), ('Agree', 'Agree'), ('Neutral', 'Neutral'), ('Disagree', 'Disagree'),
-    ('StronglyDisagree', 'Strongly Disagree'), ('Noidea', 'No idea')
+    ('StronglyDisagree', 'Strongly Disagree')
   )
   RATE_SPOKEN_CHOICES = (
     ('','-----'), ('Excellent', 'Excellent'), ('Good', 'Good'), ('Fair', 'Fair'), ('Bad', 'Bad'), ('Extremelybad', 'Extremely bad')
@@ -1297,14 +1250,16 @@ class STWorkshopFeedback(models.Model):
     ('', '-----'), ('Male', 'Male'), ('Female', 'Female'),
   )
 
-  name1 = models.CharField(max_length = 100)
+  name = models.CharField(max_length = 100)
   email = models.EmailField(max_length = 100)
-  gender = models.CharField(max_length = 10, choices = GENDER_CHOICES)
+  gender = models.CharField(max_length = 10)
   age = models.CharField(max_length = 20)
   affiliation = models.CharField(max_length = 100)
+  foss = models.ForeignKey(FossCategory)
+  venue = models.CharField(max_length = 100)
+  workshop_date = models.DateField()
   total_tutorials1 = models.CharField(max_length = 20)
-  installed = models.CharField(max_length = 50, choices = YES_NO_CHOICES)
-  installation_difficulties = models.CharField(max_length = 300)
+  
   acquired_knowledge =  models.CharField(max_length = 50, choices = OPINION)
   suff_instruction = models.CharField(max_length = 50, choices = OPINION)
   diff_instruction = models.CharField(max_length = 50, choices = OPINION)
@@ -1314,19 +1269,26 @@ class STWorkshopFeedback(models.Model):
   recommend = models.CharField(max_length = 50, choices = OPINION)
   like_to_part = models.CharField(max_length = 50, choices = OPINION)
   side_by_side_effective = models.CharField(max_length = 50, choices = OPINION)
+  training_any_comment = models.CharField(max_length = 100)
+  
   not_self_explanatory = models.CharField(max_length = 50, choices = OPINION)
   logical_sequence = models.CharField(max_length = 50, choices = OPINION)
   examples_help = models.CharField(max_length = 50, choices = OPINION)
-  other_language = models.CharField(max_length = 50, choices = OPINION)
   instructions_easy_to_follow = models.CharField(max_length = 50, choices = OPINION)
+  content_any_comment = models.CharField(max_length = 100)
+  
   useful_learning = models.CharField(max_length = 50, choices = OPINION)
   help_improve_performance = models.CharField(max_length = 50, choices = OPINION)
   plan_to_use_future = models.CharField(max_length = 50, choices = OPINION)
-  confident = models.CharField(max_length = 50, choices = OPINION)
   difficult_simultaneously = models.CharField(max_length = 50, choices = OPINION)
   interface_comfortable = models.CharField(max_length = 50, choices = OPINION)
   satisfied = models.CharField(max_length = 50, choices = OPINION)
   self_learning_intrest = models.CharField(max_length = 50, choices = OPINION)
+  not_like_method_forums = models.CharField(max_length = 50, choices = OPINION)
+  forum_helpful = models.CharField(max_length = 50, choices = OPINION)
+  owing_to_forums = models.CharField(max_length = 50, choices = OPINION)
+  learning_any_comment = models.CharField(max_length = 100)
+  
   ws_quality = models.CharField(max_length = 50, choices = RATE_SPOKEN_CHOICES)
   overall_content_quality = models.CharField(max_length = 50, choices = RATE_SPOKEN_CHOICES)
   clarity_of_explanation = models.CharField(max_length = 50, choices = RATE_SPOKEN_CHOICES)
@@ -1338,17 +1300,14 @@ class STWorkshopFeedback(models.Model):
   clarity_of_speech = models.CharField(max_length = 50, choices = RATE_SPOKEN_CHOICES)
   visual_presentation = models.CharField(max_length = 50, choices = RATE_SPOKEN_CHOICES)
   pace_of_tutorial = models.CharField(max_length = 50, choices = RATE_SPOKEN_CHOICES)
-  arrangement = models.CharField(max_length = 50, choices = RATE_SPOKEN_CHOICES)
-  network = models.CharField(max_length = 50, choices = RATE_SPOKEN_CHOICES)
-  installation_help = models.CharField(max_length = 50, choices = RATE_SPOKEN_CHOICES)
   time_management = models.CharField(max_length = 50, choices = RATE_SPOKEN_CHOICES)
   experience_of_learning = models.CharField(max_length = 50, choices = RATE_SPOKEN_CHOICES)
   overall_arrangement = models.CharField(max_length = 50, choices = RATE_SPOKEN_CHOICES)
-  interaction_using_forum = models.CharField(max_length = 50, choices = RATE_SPOKEN_CHOICES)
   like_abt_ws = models.CharField(max_length = 500)
   how_make_better = models.CharField(max_length = 500)
   experience = models.CharField(max_length = 500)
   suggestions = models.CharField(max_length = 500)
+  created = models.DateTimeField(auto_now_add = True)
 
 class STWorkshopFeedbackPre(models.Model):
   FEELINGS =(
@@ -1566,3 +1525,98 @@ class LearnDrupalFeedback(models.Model):
   mention_foss = models.CharField(max_length = 100)
   like_to_give_testimonial = models.CharField(max_length = 50, choices = YES_NO)
   testimonial = models.CharField(max_length = 100)
+
+class InductionInterest(models.Model):
+  YES_NO =(
+    ('','-----'), ('Yes', 'Yes'), ('No', 'No'),
+  )
+  yes_option=(
+    ('','-----'), ('Yes', 'Yes'),
+    )
+  GENDER_CHOICES =(
+    ('', '-----'), ('Male', 'Male'), ('Female', 'Female'),
+  )
+  languages = (
+    ('', '-----'), ('Assamese','Assamese'), ('Bengali', 'Bengali'), ('Bhojpuri', 'Bhojpuri'), ('Bodo', 'Bodo'), ('English', 'English'), ('Gujarati', 'Gujarati'),
+    ('Hindi', 'Hindi'), ('Kannada', 'Kannada'), ('Kashmiri', 'Kashmiri'), ('Khasi', 'Khasi'), ('Konkani', 'Konkani'), ('Maithili', 'Maithili'),
+    ('Malayalam', 'Malayalam'), ('Manipuri', 'Manipuri'), ('Marathi', 'Marathi'), ('Nepali', 'Nepali'),('Oriya', 'Oriya'), ('Punjabi', 'Punjabi'),
+    ('Rajasthani', 'Rajasthani'), ('Sanskrit', 'Sanskrit'), ('Santhali', 'Santhali'), ('Sindhi', 'Sindhi'), ('Tamil', 'Tamil'), ('Telugu', 'Telugu'),
+    ('Urdu', 'Urdu'), ('Other', 'Other'),
+  )
+  AGE =(
+    ('','-----'),('20to25', '20 to 25 years'), ('26to30', '26 to 30 years'),('31to35', '31 to 35 years'),('35andabove', 'Above 35 years')
+  )
+  specialisation =(
+     ('','-----'),('Arts', 'Arts'),('Science', 'Science'),('Commerce', 'Commerce'),
+     ('EngineeringorComputerScience ', 'Engineering or Computer Science'),('Management', 'Management'), 
+     ('Other', 'Other'),
+    )
+  education =(
+    ('','-----'), ('3yeargraduatedegree(BABScB.Cometc)','3 year graduate degree (BA, BSc, B.Com, etc.)'),
+    ('Professionaldegree(BEBTechetc)', 'Professional degree (BE, B.Tech, etc.)'),
+    ('2yearMasters(MAMScMCometc)', '2 year Masters (MA, MSc, MCom, etc.)'),
+    ('2yearprofessionalMasters(MEMTechMBAMPhiletc)', '2 year professional Masters (ME, MTech, MBA, MPhil, etc.)'),
+    ('PhD', 'PhD'),
+    ('Other','Other'),
+    )
+  designation = (
+    ('','-----'),
+    ('Lecturer','Lecturer'),
+    ('AssistantProfessor','Assistant Professor'),
+    ('AssociateProfessor','Associate Professor'),
+    ('Professor','Professor'),
+    ('Other','Other'),
+    )
+  years_of_experience = (
+    ('','-----'),
+    ('Lessthan1year','Less than 1 year'),
+    ('Morethan1yearbutlessthan2years','More than 1 year, but less than 2 years'),
+    ('Morethan2yearsbutlessthan5years','More than 2 years but less than 5 years'),
+    ('Morethan5years','More than 5 years'),
+    )
+
+  email = models.EmailField(max_length = 100)
+  name = models.CharField(max_length = 100)
+  phonemob = models.CharField(max_length = 100)  
+  age = models.CharField(max_length = 100, choices = AGE)
+  gender = models.CharField(max_length = 50, choices = GENDER_CHOICES)
+  mother_tongue = models.CharField(max_length = 100, choices = languages)
+  other_language = models.CharField(max_length = 100)
+
+  medium_of_studies = models.CharField(max_length = 100, choices = languages)
+  other_medium = models.CharField(max_length = 100)
+
+  education = models.CharField(max_length = 100, choices = education)
+  other_education = models.CharField(max_length = 100)
+
+  specialisation = models.CharField(max_length = 100, choices = specialisation)
+  other_specialisation = models.CharField(max_length = 100)
+
+  designation = models.CharField(max_length = 100, choices = designation)
+  other_designation = models.CharField(max_length = 100)
+
+  college = models.CharField(max_length = 100)
+  college_address = models.CharField(max_length = 500)
+  state = models.ForeignKey(State)
+  city = models.CharField(max_length = 100)
+  pincode = models.PositiveIntegerField()
+  experience_in_college = models.CharField(max_length = 100, choices = years_of_experience)
+  
+  bring_laptop = models.CharField(max_length = 50, choices = YES_NO)
+  borrow_laptop = models.CharField(max_length = 50, choices = YES_NO)
+  
+  do_agree = models.CharField(max_length = 50, choices = yes_option)  
+  no_objection = models.CharField(max_length = 50, choices = yes_option)
+  other_comments = models.CharField(max_length = 500)
+
+  class Meta:
+    ordering = ('city',)
+
+class InductionFinalList(models.Model):
+  email = models.EmailField(max_length = 200)
+  eoi_id = models.ForeignKey(InductionInterest, default=None)
+  code = models.CharField(max_length=255, default=None)
+  # batch_code should be in form of year+month+batch_number e.g. 20171101 = [year 2017,month 11, batch 01]
+  batch_code = models.PositiveIntegerField()
+  created = models.DateTimeField(auto_now_add = True)
+

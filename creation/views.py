@@ -1,39 +1,34 @@
+# Standard Library
+import json
 import os
 import re
-import json
-import time
 import subprocess
+import time
+from django.utils import timezone
 from decimal import Decimal
-from urllib import urlopen, quote, unquote_plus
+from urllib import quote, unquote_plus, urlopen
+
+# Third Party Stuff
 from django.conf import settings
-from django.views import generic
 from django.contrib import messages
-from django.core.urlresolvers import reverse
-from django.contrib.auth.models import Group
-from django.views.decorators.http import require_POST
-
-from django import forms
-from django.template import RequestContext
-from django.core.context_processors import csrf
-from django.core.mail import EmailMultiAlternatives
-from django.core.exceptions import PermissionDenied
-from django.views.decorators.csrf import csrf_exempt
-from django.shortcuts import render, render_to_response
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import Group
+from django.core.context_processors import csrf
+from django.core.exceptions import PermissionDenied
+from django.core.mail import EmailMultiAlternatives
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.http import HttpResponse, HttpResponseRedirect
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.db.models import Count
+from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import render
 
+# Spoken Tutorial Stuff
 from cms.sortable import *
 from creation.forms import *
 from creation.models import *
 from creation.subtitles import *
+
 from . import services
 
-
-
-from django.utils import timezone
-print "timezone: ", timezone
 
 def humansize(nbytes):
     suffixes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
@@ -96,7 +91,7 @@ def is_administrator(user):
     if user.groups.filter(name='Administrator').count():
         return True
     return False
-    
+
 def is_contenteditor(user):
     """Check if the user is having Content-Editor rights"""
     if user.groups.filter(name='Content-Editor').count():
@@ -1016,7 +1011,7 @@ def upload_component(request, trid, component):
                 }
                 context.update(csrf(request))
                 return render(request, 'creation/templates/upload_component.html', context)
-        
+
     form = ComponentForm(component)
     context = {
         'form': form,
@@ -2120,9 +2115,11 @@ def publish_tutorial(request, trid):
     else:
         flag = 1
     if flag and tr_rec.outline_status == 4 and tr_rec.script_status == 4 and tr_rec.video_status == 4:
-        tr_rec.status = 1
+        tr_rec.status = 1 
+        tr_rec.publish_at = timezone.now()
         tr_rec.save()
         PublishTutorialLog.objects.create(user = request.user, tutorial_resource = tr_rec)
+
         add_contributor_notification(tr_rec, comp_title, 'This tutorial is published now')
         messages.success(request, 'The selected tutorial is published successfully')
     else:
@@ -2336,7 +2333,7 @@ def ajax_change_component_status(request):
                 compValue = getattr(tr_rec.common_content, comp + '_status')
             if compValue:
                 data += '<option value="5">Need Improvement</option>'
-                if comp in ['code', 'assignment']:
+            if comp in ['code', 'assignment','additional_material']:
                     data += '<option value="6">Not Required</option>'
         elif foss and lang:
             data = ['', '']
@@ -2348,7 +2345,7 @@ def ajax_change_component_status(request):
             for tutorial in tutorials:
                 data[0] += '<option value="' + str(tutorial.tutorial_detail.id) + '">' + tutorial.tutorial_detail.tutorial + '</option>'
             if lang_rec.name == 'English':
-                data[1] += '<option value="slide">Slides</option><option value="video">Video</option><option value="code">Codefiles</option><option value="assignment">Assignment</option><option value="prerequisite">Prerequisite</option><option value="keyword">Keywords</option>'
+                data[1] += '<option value="slide">Slides</option><option value="video">Video</option><option value="code">Codefiles</option><option value="assignment">Assignment</option><option value="prerequisite">Prerequisite</option><option value="keyword">Keywords</option><option value="additional_material">Additional material</option>'
             else:
                 data[1] += '<option value="video">Video</option>'
             data[1] = '<option value="">Select Component</option>' + data[1]
@@ -2638,7 +2635,7 @@ def update_prerequisite(request):
                     messages.success(request, 'Prerequisite <b>' + destination_tutorial.tutorial + '</b> updated to <b>' + source_tutorial.tutorial + '</b>.')
                 tcc.save()
                 return HttpResponseRedirect('/creation/update-prerequisite/')
-            except Exception, e:
+            except Exception:
                 pass
     context = {
         'form': form
@@ -2752,7 +2749,6 @@ def ajax_manual_language(request):
     return HttpResponse(json.dumps(data), content_type='application/json')
 
 
-@login_required
 def view_brochure(request):
     template = 'creation/templates/view_brochure.html'
     my_dict = services.get_data_for_brochure_display()

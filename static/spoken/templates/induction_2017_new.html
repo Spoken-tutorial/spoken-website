@@ -1,0 +1,709 @@
+{% load widget_tweaks %}
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Induction Programme 2017</title>
+  <link rel="stylesheet" href="{% static 'spoken/css/bootstrap.min.css' %}" type="text/css" media="screen" charset="utf-8" />
+  <link rel="stylesheet" href="{% static 'spoken/css/font-awesome.min.css' %}" type="text/css" media="screen" charset="utf-8" />
+  <script src="{% static 'spoken/js/jquery-1.11.0.min.js' %}"></script>
+  <script src="{% static 'spoken/js/bootstrap.min.js' %}"></script>
+</head>
+<style type="text/css">
+body {
+    padding-top: 10%;
+  }
+
+.navbar-default {
+    background-color: #26C281;
+    height: auto;
+    padding: 2%;
+    }
+.navbar-default .navbar-brand {
+    color: black;
+    font-size:200%;
+}
+.navbar-default .navbar-nav>li>a {
+    color: black;
+}
+.navbar-brand small {
+  display:block;
+  font-size:45%;
+}
+.back_grey {
+  background-color: #EEEEEE;
+}
+.row {
+  margin-bottom: 20px;
+}
+  .banner{
+  background: url('{% static 'spoken/images/forum.jpg' %}') no-repeat center top;
+  background-size: cover;
+  min-height: 280px;
+  position: relative;
+  padding: 4%;
+  }
+
+.bg-color{
+  background-color: RGBA(12, 11, 11, 0.82);
+  min-height: 280px;
+}
+.intro-para{
+  font-family: 'Alegreya Sans', sans-serif;
+  font-size: 20px;
+  color: #fff;
+  margin-top: -2%;
+  }
+
+/***********************************
+Features
+************************************/
+h2{
+  font-size: 24px;
+  padding-bottom: 15px;
+}
+.bottom-line{
+  width: 25px;
+  height: 3px;
+  background-color: rgb(99, 122, 145);
+}
+.fea{
+  margin-top: 25px;
+}
+.heading {
+    width: 80%;
+}
+
+.heading h4 {
+    font-size: 17px;
+    line-height: 1.25;
+    font-weight: 700;
+    color: #000;
+    margin: 10px 0px;
+    text-align: left;
+}
+.heading p {
+  text-align: left;
+}
+
+/***********************************
+Price Table
+************************************/
+.price-table {
+    box-shadow: 0px 0px 1px 0px RGBA(0, 0, 0, 0.4);
+    position: relative;
+}
+.price-table .pricing-head {
+    background: #fff;
+    padding: 40px;
+    text-align: center;
+}
+.price-table .pricing-head h4 {
+    font-size: 22px;
+    color: #232c3b;
+    margin-top: 0px;
+    letter-spacing: 1px;
+    border-bottom: 1px solid #232c3b;
+    padding-bottom: 20px;
+}
+.pricing-head .amount {
+    font-size: 60px;
+    font-weight: bold;
+}
+.pricing-head .curency {
+    display: inline-block;
+    position: relative;
+    top: -30px;
+    font-size: 20px;
+}
+.price-in {
+    background: #fff;
+    text-align: center;
+}
+.btn-bg {
+    border: 0px;
+    border-radius: 0px;
+    color: #fff !important;
+    padding: 20px 0px;
+    font-weight: bold !important;
+    font-size: 14px;
+    background-color: #5fcf80;
+}
+
+/***********************************
+Cta
+************************************/
+.cta{
+    padding: 30px 0;
+}
+.cta-2-txt {
+    font-size: 24px;
+    padding-bottom: 15px;
+    text-align: center;
+    margin: 0 auto;
+    line-height: 34px !important;
+}
+/**********************************
+/* Timeline */
+/* The actual timeline (the vertical ruler) */
+.timeline {
+    position: relative;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* The actual timeline (the vertical ruler) */
+.timeline::after {
+    content: '';
+    position: absolute;
+    width: 6px;
+    background-color: black;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    margin-left: -3px;
+}
+
+/* Container around content */
+.time_container {
+    padding: 10px 40px;
+    position: relative;
+    background-color: inherit;
+    width: 50%;
+}
+
+/* The circles on the timeline */
+.time_container::after {
+    content: '';
+    position: absolute;
+    width: 25px;
+    height: 25px;
+    right: -17px;
+    background-color: white;
+    border: 4px solid #FF9F55;
+    top: 15px;
+    border-radius: 50%;
+    z-index: 1;
+}
+
+/* Place the container to the left */
+.left {
+    left: 0;
+}
+
+/* Place the container to the right */
+.right {
+    left: 50%;
+}
+
+/* Add arrows to the left container (pointing right) */
+.left::before {
+    content: " ";
+    height: 0;
+    position: absolute;
+    top: 22px;
+    width: 0;
+    z-index: 1;
+    right: 30px;
+    border: medium solid white;
+    border-width: 10px 0 10px 10px;
+    border-color: transparent transparent transparent white;
+}
+
+/* Add arrows to the right container (pointing left) */
+.right::before {
+    content: " ";
+    height: 0;
+    position: absolute;
+    top: 22px;
+    width: 0;
+    z-index: 1;
+    left: 30px;
+    border: medium solid white;
+    border-width: 10px 10px 10px 0;
+    border-color: transparent white transparent transparent;
+}
+
+/* Fix the circle for containers on the right side */
+.right::after {
+    left: -16px;
+}
+
+/* The actual content */
+.content {
+    padding: 20px 30px;
+    background-color: white;
+    position: relative;
+    border-radius: 6px;
+}
+
+/* Media queries - Responsive timeline on screens less than 600px wide */
+@media all and (max-width: 600px) {
+  /* Place the timelime to the left */
+  .timeline::after {
+    left: 31px;
+  }
+  
+  /* Full-width containers */
+  .time_container {
+    width: 100%;
+    padding-left: 70px;
+    padding-right: 25px;
+  }
+  
+  /* Make sure that all arrows are pointing leftwards */
+  .time_container::before {
+    left: 60px;
+    border: medium solid white;
+    border-width: 10px 10px 10px 0;
+    border-color: transparent white transparent transparent;
+  }
+
+  /* Make sure all circles are at the same spot */
+  .left::after, .right::after {
+    left: 15px;
+  }
+  
+  /* Make all right containers behave like the left ones */
+  .right {
+    left: 0%;
+  }
+}
+.active_back {
+  background: #5cb85c;
+}
+.disable_link {
+  background: #A9A9A9;
+  
+}
+.upcoming{
+  background: #FEAF3F;
+}
+/*************************************************/
+
+.location .explore {
+        padding: 0 4px;
+        font-size: 16px;
+        font-weight: 500;
+        border-radius: 5px;
+        overflow: hidden;
+        height: 420px;
+        text-align: center;
+        color: #e73955;
+    }
+    .location .explore .heading {
+        padding: 10px 10px;
+        color: dimgray;
+        text-align: left;
+        font-size: 18px;
+        font-weight: 500;
+    }
+    .location .explore .routes ul {
+        list-style-type: none;
+        text-align: left;
+        padding-left: 0px;
+    }
+    .location .explore .routes ul li {
+        color: #033298;
+        border-bottom: 1px solid #e7e7e7;
+        text-indent: 10px;
+        line-height: 40px;
+    }
+    .location .explore .routes ul li a {
+        display: block;
+        color: inherit;
+        text-align: left;
+        font-size: 12px;
+        font-weight: 500;
+        font-family: "Ubuntu", Helvetica, Arial, sans-serif;
+    }
+    .location .explore .routes ul li:hover {
+        color: whitesmoke;
+        background: #3063A5
+    }
+    .location .map {
+        height: 420px;
+        border-radius: 4px;
+        border: 1px solid #F1F2F3;
+        overflow: hidden;
+        position: relative;
+        overflow: hidden;
+        -webkit-transform: translateZ(0px);
+        background-color: #e7e7e7;
+    }
+    .when-where, .location {
+        padding: 20px;
+        padding-left: 10%;
+
+    }
+    .footer{
+      background: #303030;
+      color:#fff;
+      text-align: center;
+    }
+</style>
+<!--Navigation bar-->
+  <nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+    <h2 class = "page-header" style="color: #D35400; text-shadow: 2px 2px 8px #fff;  text-align:center; margin-top: -10px;"><b>Pandit Madan Mohan Malaviya National Mission on Teachers and Teaching</b></h2>
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="#">Induction Training Programme 
+        </a>
+      </div>
+      <div class="collapse navbar-collapse" id="myNavbar">
+        <ul class="nav navbar-nav navbar-right">
+          <li><a href="#feature">Features</a></li>
+          <li><a href="#pricing">Pricing</a></li>
+          <li class="btn-trial"><a href="#interest">Interest</a></li>
+          <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Announcements <span class="caret"></span></a>
+          <ul class="dropdown-menu">
+            <li><a href="#selection">Selection Process</a></li>
+            <li role="separator" class="divider"></li>
+            <li><a href="#dates">Important Dates</a></li>
+            <li role="separator" class="divider"></li>
+            <li><a href="#">Schedule</a></li>
+          </ul>
+        </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!--/ Navigation bar-->
+  <!--Modal box-->
+
+<body>
+  <div class="modal fade" id="selection_modal" role="dialog">
+    <div class="modal-dialog modal-md">
+
+      <!-- Modal content no 1-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title text-center form-title">Selection Process</h4>
+        </div>
+        <div class="modal-body padtrbl">
+
+          <div class="login-box-body">
+            <p class="login-box-msg">All 500+ shortlisted candidates have been sent an email explaining the selection process. They should check their registered email address.</p>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="modal fade" id="shortlist_modal" role="dialog">
+    <div class="modal-dialog modal-md">
+
+      <!-- Modal content no 1-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title text-center form-title">Registration Process</h4>
+        </div>
+        <div class="modal-body padtrbl">
+
+          <div class="login-box-body">
+            <p class="login-box-msg">All 120 shortlisted candidates were sent an email on 6 Nov. 2017, stating that they were selected.
+            <br>
+            Subsequently on 7 Nov. 2017, another email with instructions for uploading a certificate from their institution and completing the registration formalities, has been sent.
+            <br>
+            All selected candidates should check their registered email address.
+            </p>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <!--/ Modal box-->
+<!--Banner-->
+<br>
+  <div class="banner">
+    <div class="bg-color">
+      <div class="container">
+        <div class="row">
+          <div class="banner-text text-center">
+            <div class="intro-para text-center">
+
+              <div class = "page-header" style="color: orange;">28 November to 20 December 2017</div>
+              <p >The Spoken Tutorial Project, under the aegis of Pandit Madan Mohan Malaviya National Mission on Teachers and Teaching (PMMMNMTT), is organising a 20-day residential programme to train 120 new teachers from Universities/Colleges/ Institutes, on various aspects of teaching and learning  
+              <br>As per the decision by a Group of Secretaries of the Central Government, this is expected to become a mandatory training programme for new college teachers</p>
+            </div>
+          </div>
+          <div class="alert alert-warning" role="alert" style="text-align:center;">
+            <a href="http://spoken-tutorial.org/media/induction/Secretaries-framework.pdf" class="alert-link" target="_blank">Click here to view the programme as envisioned by the Group of Secretaries</a>
+          </div>
+          <div class="alert alert-warning" role="alert" style="text-align:center;">
+            <a href="http://spoken-tutorial.org/media/induction/schedule.pdf" class="alert-link" target="_blank">Click here to view &nbsp;<b>Programme Schedule</a>
+          </div>
+          <div class="alert alert-warning" role="alert" style="text-align:center;">
+            <a href="http://spoken-tutorial.org/media/induction/Invitation-Letter.pdf" class="alert-link" target="_blank">Click here to view the &nbsp;<b>Invitation Letter</a>
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+  <!--/ Banner-->
+  <br>
+  
+
+
+<!--Feature-->
+  <section id="feature" class="section-padding">
+    <div class="container">
+      <div class="row">
+        <div class="header-section text-center">
+          <h1><b>Eligibility Criteria</b></h1>
+          <h4>New faculty members who are in the first year of their teaching profession</h4>
+          <hr class="bottom-line">
+        </div>
+        <div class="feature-info">
+          <div class="fea">
+            <div class="col-md-4">
+              <div class="heading pull-right">
+                <h4>Open To</h4>
+                <p>Teachers of engineering colleges, degree colleges, polytechnic colleges and university departments</p>
+              </div>
+              
+            </div>
+          </div>
+
+          <div class="fea">
+            <div class="col-md-4">
+              <div class="heading pull-right">
+                <h4>120 Participants</h4>
+
+                <p>Selection criterion will be announced on Monday, 30 October 2017<br>Selection mechanism will assess on the basis of desirable qualities of a teacher</p>
+
+              </div>
+              
+            </div>
+          </div>
+
+          <div class="fea">
+            <div class="col-md-4">
+              <div class="heading pull-right">
+                <h4>Laptop</h4>
+
+                <p>Every participant should bring a laptop to benefit the most from the course<br>
+
+                For example: some of the activities such as creating video lectures, require a laptop</p>
+              </div>
+              
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!--/ feature-->
+  <!--Pricing-->
+  <section id="pricing" class="section-padding back_grey">
+    <div class="container">
+      <div class="row">
+        <div class="header-section text-center">
+          <h1><b>Our Pricing</b></h1>
+          <hr class="bottom-line">
+        </div>
+        <div class="col-md-4 col-sm-4">
+          <div class="price-table">
+            <!-- Plan  -->
+            <div class="pricing-head">
+              <h4>ACCOMMODATION & FOOD</h4>
+              <p>Double sharing hostel accommodation and food, will be provided within IIT Bombay for all participants, free of cost, only from <font color="#D35400">28 Nov. to 20 Dec. 2017</font>
+              </p>
+            </div>
+
+            <!-- Plean Detail -->
+          </div>
+        </div>
+        <div class="col-md-4 col-sm-4">
+          <div class="price-table">
+            <!-- Plan  -->
+            <div class="pricing-head">
+              <h4>TRAVEL ALLOWANCE</h4>
+              <p>Sleeper class fare will be reimbursed to the participants</p>
+
+            </div>
+
+          </div>
+        </div>
+        <div class="col-md-4 col-sm-4">
+          <div class="price-table">
+            <!-- Plan  -->
+            <div class="pricing-head">
+              <h4>DEPOSIT</h4>
+
+              <p>All selected candidates will have to pay Rs. 1,000 as <font color="#D35400">non-refundable</font> course fees</p>
+
+              
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!--/ Pricing-->
+  <!--Cta-->
+  <section id="interest" class="cta">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <h1 class="text-center"><b>Expression of Interest</b></h1>
+
+          <p class="cta-2-txt" style="color: #D35400;">Expression of Interest is now closed</p>
+          <p class="cta-2-txt" style="color: green;">1,038 applications received</p>
+          <div class="cta-2-form text-center">
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!--/ Cta-->
+  <!--Cta-->
+  <section id="selection" class="cta back_grey">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <h1 class="text-center"><b>Selection Process</b></h1>
+          <p class="cta-2-txt">Candidates will undergo a selection process, in case the number of applications exceeds 120</p>
+
+          <div class="cta-2-form text-center">
+            <a href="#" data-target="#selection_modal" data-toggle="modal" class="btn btn-success btn-lg  ">KNOW MORE</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!--/ Cta-->
+<section id="dates" >
+<h1 class="text-center"><b>Important Dates</b></h1>
+<br>
+<div class="timeline back_grey">
+<div style="margin-left:90%; ">
+  <span class="label label-success">Currently active</span><br>
+  <span class="label label-warning">Upcoming</span><br>
+  <span class="label label-default">Expired</span>
+</div>
+  <div class="time_container left">
+    <div class="content disable_link" >
+
+       <h2 style="text-decoration: line-through;"><b>27 October 2017</b> <small class="text-muted">till <i class="glyphicon glyphicon-time"></i> 5 P.M.</small></h2>
+
+      <p style="text-decoration: line-through;">Last date to fill the Expression of Interest form</p>
+      <p style="color: #fff;">We thank the 1,038 candidates who have expressed an interest</p>
+    </div>
+
+  </div>
+  <div class="time_container left">
+    <div class="content disable_link">
+
+      <h2 style="text-decoration: line-through;"><b>30 October 2017</b></h2>
+      <p style="color: #fff;">Although we received 1,000+ expressions of interest, only about 900 of them are from unique teachers.
+We have shortlisted, in the first instance, teachers of age less than 35 years and with less than two years of experience, for the proposed induction programme.  There are about 500 of them, out of whom we shall select 120 candidates, through an assignment, details of which will be released on 31 Oct. 2017</p>
+
+    </div>
+  </div>
+  <div class="time_container left">
+    <div class="content disable_link" style="text-decoration: line-through;">
+
+      <h2><b>31 October 2017</b></h2>
+      <p>Announcement of selection criterion through an assignment to select 120 candidates</p>
+
+    </div>
+  </div>
+  <div class="time_container left">
+    <div class="content disable_link">
+      <h2 style="text-decoration: line-through;"><b>3 November 2017 <small class="text-muted">till <i class="glyphicon glyphicon-time"></i> 5 P.M.</small></b></h2>
+      <p style="text-decoration: line-through;">Last date to submit the assignment</p>
+      <p style="color: #fff;">We thank all candidates who completed the assignment<br>All attempts submitted after the due date and time will be discarded automatically</p>
+
+    </div>
+  </div>
+  <div class="time_container left">
+    <div class="content disable_link">
+      <h2 style="text-decoration: line-through;"><b>Shortlisting in process...</b></h2>
+    </div>
+  </div>
+  <div class="time_container left">
+    <div class="content disable_link">
+      <h2 style="text-decoration: line-through;"><b>6 November 2017</b></h2>
+      <p style="text-decoration: line-through;">Announcement of shortlisted candidates</p>
+      <p style="color: #fff;">Emails have been sent to all the selected candidates. Kindly check your registered email id.</p>
+    </div>
+  </div>
+  <div class="time_container left">
+    <div class="content disable_link" style="text-decoration: line-through;">
+      <h2><b>7 November 2017</b></h2>
+      <p>Selected candidates should register now. &nbsp;&nbsp;&nbsp;<a href="#" data-target="#shortlist_modal" data-toggle="modal" class="btn btn-warning btn-md  ">Know More</a></p>
+    </div>
+  </div>
+  <div class="time_container left">
+    <div class="content disable_link" style="text-decoration: line-through;">
+      <h2><b>13 November 2017</b></h2>
+      <p>Last date to submit registration form and pay the course fees of <br>Rs. 1,000</p>
+
+    </div>
+  </div>
+</div>
+</section>
+
+<section id="reg_close" class="cta back_grey">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <h1 class="text-center"><b>Registration is now closed</b></h1>
+          <p class="cta-2-txt">We look forward to welcome 125 participants in IIT Bombay</p>
+
+        </div>
+      </div>
+    </div>
+  </section>
+  
+<section id="map" class="cta">
+<h1 class="text-center"><b>A quick guide</b></h1>
+<div class="row location container" id="explore">  
+  <div class="col-lg-5 col-md-5 direction-col">
+  <p>Powai is an eastern suburb in North-Eastern part of Mumbai.</p>
+    <div class="explore">
+      <div class="heading">Directions</div>
+      <div class="routes">
+        <ul>
+          <li class="active"><a href="https://www.google.com/maps/embed?pb=%211m29%211m12%211m3%211d60317.08385719556%212d72.84749036445493%213d19.115649971789658%212m3%211f0%212f0%213f0%213m2%211i1024%212i768%214f13.1%214m14%211i0%213e6%214m5%211s0x3be7c85099bd2947%3A0x1ecc1a60c474a8ae%212sChhatrapati+Shivaji+International+Airport%2C+Mumbai%2C+Maharashtra+400099%213m2%211d19.090177%212d72.86873899999999%214m5%211s0x3be7c7f2279eca5d%3A0x802e14519ecbcb59%212sIIT+Main+Gate%2C+IIT+Area%2C+Powai%2C+Mumbai%2C+Maharashtra%213m2%211d19.125273999999997%212d72.916602%215e0%213m2%211sen%212sin%214v1413785408044#frc" target="map" id="airport"><i class="fa fa-plane"></i>&nbsp;&nbsp; From Airport</a></li>
+          <li><a href="https://www.google.com/maps/embed?pb=%211m29%211m12%211m3%211d241399.4487405205%212d73.01275866424207%213d19.025608463914345%212m3%211f0%212f0%213f0%213m2%211i1024%212i768%214f13.1%214m14%211i0%213e6%214m5%211s0x3be7cedcbfb4871d%3A0x2326e3e6409936d9%212sDadar%2C+Dadar+West%2C+Dadar%2C+Mumbai%2C+Maharashtra+400028%213m2%211d19.016339%212d72.840289%214m5%211s0x3be7c7f2279eca5d%3A0x802e14519ecbcb59%212sIIT+Main+Gate%2C+IIT+Area%2C+Powai%2C+Mumbai%2C+Maharashtra%213m2%211d19.125273999999997%212d72.916602%215e0%213m2%211sen%212sin%214v1413785236748#frc" target="map" id="dadar"><i class="fa fa-car"></i>&nbsp; From Dadar Station</a></li>
+          <li><a href="https://www.google.com/maps/embed?pb=%211m29%211m12%211m3%211d60299.156950328965%212d72.91689031522807%213d19.164722586394745%212m3%211f0%212f0%213f0%213m2%211i1024%212i768%214f13.1%214m14%211i0%213e6%214m5%211s0x3be7b8df51719ccf%3A0x3b3afba7961341f8%212sThane+Junction%2C+Station+Rd%2C+Shivaji+Nagar%2C+Thane+West%2C+Thane%2C+Maharashtra+400601%213m2%211d19.186065%212d72.97595199999999%214m5%211s0x3be7c7f2279eca5d%3A0x802e14519ecbcb59%212sIIT+Main+Gate%2C+IIT+Area%2C+Powai%2C+Mumbai%2C+Maharashtra%213m2%211d19.125273999999997%212d72.916602%215e0%213m2%211sen%212sin%214v1413785553786#frc" target="map" id="thane"><i class="fa fa-car"></i>&nbsp; From Thane Station</a></li>
+          <li><a href="https://www.google.com/maps/embed?pb=%211m29%211m12%211m3%211d60323.470700406935%212d72.84118451437205%213d19.0981374832322%212m3%211f0%212f0%213f0%213m2%211i1024%212i768%214f13.1%214m14%211i0%213e6%214m5%211s0x3be7c919c72bb2b7%3A0x751375af3cbd1a7d%212sBandra+Terminus%2C+Naupada%2C+Bandra+East%2C+Mumbai%2C+Maharashtra+400051%213m2%211d19.062369999999998%212d72.84102399999999%214m5%211s0x3be7c7f2279eca5d%3A0x802e14519ecbcb59%212sIIT+Main+Gate%2C+IIT+Area%2C+Powai%2C+Mumbai%2C+Maharashtra%213m2%211d19.125273999999997%212d72.916602%215e0%213m2%211sen%212sin%214v1413785651936#frc" target="map" id="bandra"><i class="fa fa-car"></i>&nbsp; From Bandra Terminus</a></li>
+          <li><a href="https://www.google.com/maps/embed?pb=%211m29%211m12%211m3%211d60323.92457625284%212d72.87668816436619%213d19.09689238404547%212m3%211f0%212f0%213f0%213m2%211i1024%212i768%214f13.1%214m14%211i0%213e6%214m5%211s0x3be7c89be8e89fdb%3A0x66694e36862ff3a1%212sLokmanya+Tilak+Terminus%2C+Pipeline+Rd%2C+Kurla+West%2C+Mumbai%2C+Maharashtra+400089%213m2%211d19.069699%212d72.89160799999999%214m5%211s0x3be7c7f2279eca5d%3A0x802e14519ecbcb59%212sIIT+Main+Gate%2C+IIT+Area%2C+Powai%2C+Mumbai%2C+Maharashtra%213m2%211d19.125273999999997%212d72.916602%215e0%213m2%211sen%212sin%214v1413785819499#frc" target="map" id="tilak"><i class="fa fa-car"></i>&nbsp; From Lokmanya Tilak Terminus</a></li>
+          <li> <a href="https://www.google.com/maps/embed?pb=%211m29%211m12%211m3%211d120686.36851963839%212d72.80471859141556%213d19.043985857528995%212m3%211f0%212f0%213f0%213m2%211i1024%212i768%214f13.1%214m14%211i0%213e6%214m5%211s0x3be7ce6e85a4d6c1%3A0x100690de66141545%212sMumbai+Central%2C+Arya+Nagar%2C+Tulsiwadi%2C+Mumbai%2C+Maharashtra%213m2%211d18.970715%212d72.81942099999999%214m5%211s0x3be7c7f2279eca5d%3A0x802e14519ecbcb59%212sIIT+Main+Gate%2C+IIT+Area%2C+Powai%2C+Mumbai%2C+Maharashtra%213m2%211d19.125273999999997%212d72.916602%215e0%213m2%211sen%212sin%214v1413785921908#frc" target="map" id="central"><i class="fa fa-car"></i>&nbsp; From Mumbai Central</a></li>
+          <li class="last"><a href="https://www.google.com/maps/embed?pb=%211m29%211m12%211m3%211d120693.24362908115%212d72.81121499123424%213d19.034527972952493%212m3%211f0%212f0%213f0%213m2%211i1024%212i768%214f13.1%214m14%211i0%213e6%214m5%211s0x3be7d1d8c547f833%3A0x766844a933a779b1%212sCST%2C+Dadabhai+Naoroji+Rd%2C+Dhobi+Talao%2C+Chhatrapati+Shivaji+Terminus+Area%2C+Fort%2C+Mumbai%2C+Maharashtra+400001%213m2%211d18.940970999999998%212d72.834654%214m5%211s0x3be7c7f2279eca5d%3A0x802e14519ecbcb59%212sIIT+Main+Gate%2C+IIT+Area%2C+Powai%2C+Mumbai%2C+Maharashtra%213m2%211d19.125273999999997%212d72.916602%215e0%213m2%211sen%212sin%214v1413785988064#frc" target="map" id="shivaji"><i class="fa fa-car"></i>&nbsp; From Chhatrapati Shivaji Terminus</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-7 col-md-7 map-col">
+  <div class="map">
+  <iframe style="height: 100%; width: 100%;" name="map" id="frc" src="https://www.google.com/maps/embed?pb=%211m29%211m12%211m3%211d60317.08385719556%212d72.84749036445493%213d19.115649971789658%212m3%211f0%212f0%213f0%213m2%211i1024%212i768%214f13.1%214m14%211i0%213e6%214m5%211s0x3be7c85099bd2947%3A0x1ecc1a60c474a8ae%212sChhatrapati+Shivaji+International+Airport%2C+Mumbai%2C+Maharashtra+400099%213m2%211d19.090177%212d72.86873899999999%214m5%211s0x3be7c7f2279eca5d%3A0x802e14519ecbcb59%212sIIT+Main+Gate%2C+IIT+Area%2C+Powai%2C+Mumbai%2C+Maharashtra%213m2%211d19.125273999999997%212d72.916602%215e0%213m2%211sen%212sin%214v1413785408044#frc" frameborder="0"></iframe>
+  </div>
+  </div>
+</div><!-- map part end -->
+</section>
+
+<section class="cta footer">
+  <p> For any questions/doubts please email us at : <span class="fa fa-2 fa-envelope"></span> workshops [at] spoken-tutorial [dot] org </p>
+</section>
+
+</body>
+</html>

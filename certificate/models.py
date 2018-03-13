@@ -4,6 +4,7 @@ from django.db import models
 events = (
     ('DCM', 'DrupalCamp Mumbai'),
     ('DRP', 'Drupal Workshop'),
+    ('FAW', 'FrontAccounting Workshop'),
 )
 
 
@@ -67,3 +68,8 @@ class Drupal_WS(models.Model):
     name = models.CharField(max_length=200)
     email = models.EmailField()
     purpose = models.CharField(max_length=10, default='DRP')
+
+class FA_WS(models.Model):
+    name = models.CharField(max_length=200)
+    email = models.EmailField()
+    purpose = models.CharField(max_length=10, default='FAW')

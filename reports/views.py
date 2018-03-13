@@ -1,6 +1,6 @@
 # Standard Library
 import csv
-import datetime
+import datetime as dt
 
 # Third Party Stuff
 from django.conf import settings
@@ -136,6 +136,83 @@ def report_filter(request, model_name="None", app_label="None", queryset=None, f
     return render(request, 'reports/templates/index.html', context)
 
 
+# export statistics training data as csv
+def events_training_csv(request):
+    collectionSet = None
+    state = None
+
+    collection = TrainingRequest.objects.filter(
+        participants__gt=0,
+        sem_start_date__lte=dt.datetime.now()
+    ).order_by('-sem_start_date')
+
+    # find state id
+    if 'training_planner__academic__state' in request.GET and request.GET['training_planner__academic__state']:
+        state = State.objects.get(id=request.GET['training_planner__academic__state'])
+
+    collection = TrainingRequestFilter(request.GET, queryset=collection, state=state)
+
+    # Create the HttpResponse object with the appropriate CSV header.
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="training-statistics-data.csv"'
+
+    writer = csv.writer(response)
+
+    # header
+    writer.writerow(['State', 'City', 'Institution', 'FOSS', 'Type', 'Organiser', 'Date', 'Participants'])
+
+    # records
+    for record in collection:
+        writer.writerow([
+            record.training_planner.academic.state,
+            record.training_planner.academic.city,
+            record.training_planner.academic.institution_name.encode('utf-8'),
+            record.course.foss.foss,
+            record.course.category,
+            record.training_planner.organiser.user.first_name.encode('utf-8'),
+            record.sem_start_date,
+            record.participants
+        ])
+
+    return response
+
+# export statistics test data as csv
+def events_test_csv(request):
+    collectionSet = None
+    state = None
+
+    collectionSet = Test.objects.filter(status=4, participant_count__gt=0).order_by('-tdate')
+
+    # find state id
+    if 'training_planner__academic__state' in request.GET and request.GET['training_planner__academic__state']:
+        state = State.objects.get(id=request.GET['training_planner__academic__state'])
+
+    collection = TestFilter(request.GET, queryset=collectionSet, state=state)
+
+    # Create the HttpResponse object with the appropriate CSV header.
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="test-statistics-data.csv"'
+
+    writer = csv.writer(response)
+
+    # header
+    writer.writerow(['State', 'City', 'Institution', 'FOSS', 'Organiser', 'Date', 'Participants'])
+
+    # records
+    for record in collection:
+        writer.writerow([
+            record.academic.state.name,
+            record.academic.city.name,
+            record.academic.institution_name.encode('utf-8'),
+            record.foss.foss,
+            record.organiser.user.first_name.encode('utf-8'),
+            record.tdate,
+            record.participant_count
+        ])
+
+    return response
+
+
 def elibrary(request):
     # Create the HttpResponse object with the appropriate CSV header.
     response = HttpResponse(content_type='text/csv')
@@ -223,8 +300,8 @@ def get_level(tr):
 
 def time_plus_ten_min(tr, vtime):
     try:
-        delta = datetime.timedelta(minutes=10)
-        vtime = datetime.datetime.strptime(vtime, '%H:%M:%S') + delta
+        delta = dt.timedelta(minutes=10)
+        vtime = dt.datetime.strptime(vtime, '%H:%M:%S') + delta
         return vtime.strftime("%H:%M:%S")
     except:
         pass

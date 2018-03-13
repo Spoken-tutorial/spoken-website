@@ -15,6 +15,9 @@ urlpatterns = patterns('',  # noqa
 
     url(r'^training/(?P<rid>\d+)/participants/$', 'statistics.views.training_participant',
         name="statistics_training_participants"),
+    url(r'^training/(?P<rid>\d+)/participant/students/$', 'statistics.views.studentmaster_ongoing',
+        name="statistics_studentmaster_ongoing"),
+    
     url(r'^online-test/$', 'statistics.views.online_test', name="statistics_online_test"),
     url(r'^onlinetest/(?P<rid>\d+)/participants/$', 'statistics.views.test_participant',
         name="statistics_test_participants"),
@@ -24,4 +27,5 @@ urlpatterns = patterns('',  # noqa
     url(r'^academic-center/(?P<academic_id>\d+)/(?P<slug>[\w-]+)/$', 'statistics.views.academic_center_view',
         name="academic_center_view"),
     url(r'^learners/$', 'statistics.views.learners', name="learners"),
+    url(r'^pmmmnmtt/fdp/$', 'statistics.views.fdp_training', name="fdp_training"),
 )

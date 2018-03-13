@@ -26,8 +26,8 @@
           <div class="form-group">
               <label for="id__date" class="col-sm-4 control-label">Date Range</label>
               <div class="col-sm-8">
-                 {% render_field form.tutorial_detail__created class+="form-control created date" tabindex="1" %}
-                 {{ form.tutorial_detail__created.errors }} 
+                 {% render_field form.publish_at class+="form-control publish_at date" tabindex="1" %}
+                 {{ form.publish_at.errors }} 
               </div>
           </div>
       </div>
@@ -75,7 +75,7 @@
           <td>{{ record.tutorial_detail.foss.foss }}</td>
           <td>{{ record.tutorial_detail.level }}</td>
           <td>{{ record.language.name }}</td>
-          <td>{{ record.created|date:"Y M d" }}</td>
+          <td>{{ record.publish_at|date:"Y M d" }}</td>
         </tr>
       {% endfor %}      
     </table>

@@ -10,7 +10,7 @@ https://docs.djangoproject.com/en/1.6/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 from os.path import *
-from config import *
+from .config import *
 import os
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
@@ -267,6 +267,12 @@ COMPRESS_CSS_FILTERS = (
 HTML_MINIFY = HTML_MINIFY
 RECAPTCHA_PUBLIC_KEY = '6Le8qf8SAAAAABV9wYBW99Jotv-EygJXIhMa_n54'
 RECAPTCHA_PRIVATE_KEY = '6Le8qf8SAAAAAF9CkucURPapw2vaDPrU4qMzfg73'
+
+#RECAPTCHA V2
+GOOGLE_RECAPTCHA_SITE_KEY = GOOGLE_RECAPTCHA_SITE_KEY
+GOOGLE_RECAPTCHA_SECRET_KEY = GOOGLE_RECAPTCHA_SECRET_KEY
+GOOGLE_RECAPTCHA_SITEVERIFY = GOOGLE_RECAPTCHA_SITEVERIFY
+
 RECAPTCHA_USE_SSL = True
 ACADEMIC_DURATION = 5
 SPOKEN_HASH_SALT = 'change this value'

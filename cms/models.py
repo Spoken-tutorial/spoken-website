@@ -1,8 +1,14 @@
-from django.db import models
-from django.contrib.auth.models import User
-from events.models import State, District, City, Location
-from datetime import datetime
+# Standard Library
 import os
+from datetime import datetime
+
+# Third Party Stuff
+from django.contrib.auth.models import User
+from django.db import models
+
+# Spoken Tutorial Stuff
+from events.models import City, District, Location, State
+
 
 def profile_picture(instance, filename):
     ext = os.path.splitext(filename)[1]

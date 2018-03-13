@@ -1,12 +1,26 @@
-import zipfile
-from urllib import urlopen, quote_plus
-from django import template
-from django.contrib.auth.models import User
-from django.conf import settings
-from creation.models import *
+# Standard Library
 import os
+import zipfile
+from urllib import quote_plus, urlopen
+
+# Third Party Stuff
+from django import template
+from django.conf import settings
+from django.contrib.auth.models import User
 from django.db.models import Q
-from creation.views import is_contributor, is_internal_contributor, is_external_contributor, is_videoreviewer, is_domainreviewer, is_qualityreviewer, is_administrator , is_contenteditor
+
+# Spoken Tutorial Stuff
+from creation.models import *
+from creation.views import (
+    is_administrator,
+    is_contenteditor,
+    is_contributor,
+    is_domainreviewer,
+    is_external_contributor,
+    is_internal_contributor,
+    is_qualityreviewer,
+    is_videoreviewer
+)
 from spoken.forms import TutorialSearchForm
 
 register = template.Library()

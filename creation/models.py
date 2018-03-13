@@ -1,8 +1,6 @@
-import os
-from django.db import models
-from django.conf import settings
+# Third Party Stuff
 from django.contrib.auth.models import User
-
+from django.db import models
 
 class Language(models.Model):
     name = models.CharField(max_length=255, unique=True)
@@ -41,6 +39,7 @@ class FossCategory(models.Model):
     category = models.ManyToManyField(FossSuperCategory)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
+    show_on_homepage = models.BooleanField(default=True, help_text ='If unchecked, this foss will be displayed on series page, instead of home page' )
 
     class Meta:
         verbose_name = 'FOSS'
@@ -54,13 +53,25 @@ class FossCategory(models.Model):
 class BrochureDocument(models.Model):
     foss_course = models.ForeignKey(FossCategory)
     foss_language = models.ForeignKey(Language)
-    document = models.FileField(upload_to='brochures/')
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name = 'FOSS Brochure'
         verbose_name_plural = 'FOSS Brochures'
+
+    def __unicode__(self):
+        return self.foss_course.foss
+
+
+class BrochurePage(models.Model):
+    brochure = models.ForeignKey(BrochureDocument, related_name='pages')
+    page = models.FileField(upload_to='brochures/')
+    page_no = models.PositiveIntegerField()
+
+    class Meta:
+        ordering = ('page_no', )
+        unique_together = (('brochure', 'page_no'),)
 
 
 class PlaylistInfo(models.Model):
@@ -185,6 +196,7 @@ class TutorialResource(models.Model):
     hit_count = models.PositiveIntegerField(default=0)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
+    publish_at = models.DateTimeField(null=True)
 
     class Meta:
         unique_together = (('tutorial_detail', 'language',),)

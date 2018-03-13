@@ -1783,7 +1783,7 @@ def test_list(request, role, status):
         elif is_invigilator(user) and role == 'invigilator':
             if status == 'ongoing':
                 collectionSet = Test.objects.filter((Q(status = 2) | Q(status = 3)),  tdate__lte = datetime.date.today(), invigilator_id = user.invigilator.id).order_by('-tdate')
-                messages.info(request, "Click on the Attendance link below to see the participant list. To know more Click Here.")
+                messages.info(request, "Click on the Attendance link below to see the participant list.")
             elif status == 'predated':
                 collectionSet = Test.objects.none()
             elif status == 'approved':

@@ -1,19 +1,19 @@
-import os.path
-from django.conf import settings
-from django.core.validators import RegexValidator
-from django.contrib.sessions.models import Session
+# Third Party Stuff
+from django import forms
 from django.contrib.auth.models import User
 from django.db.models import Q
-from django import forms
 
+# Spoken Tutorial Stuff
 from creation.models import *
-from creation.models import BrochureDocument
+
 
 class FossAvailableForTestForm(forms.ModelForm):
-    foss = forms.ModelChoiceField(queryset = FossCategory.objects.filter(status=True).order_by('foss'))
+    foss = forms.ModelChoiceField(queryset=FossCategory.objects.filter(status=True).order_by('foss'))
+
     class Meta:
         model = FossAvailableForTest
         exclude = ['created']
+
 
 class UploadPrerequisiteForm(forms.Form):
     foss_category = forms.ChoiceField(
@@ -175,7 +175,7 @@ class ChangeComponentStatusForm(forms.Form):
                             if args[0]['component']:
                                 comp_init_data = args[0]['component']
                         if lang.name == 'English':
-                            choices = [('outline', 'Outline'), ('script', 'Script'), ('slide', 'Slides'), ('video', 'Video'), ('code', 'Codefiles'), ('assignment', 'Assignment'), ('prerequisite', 'Prerequisite'), ('keyword', 'Keywords')]
+                            choices = [('outline', 'Outline'), ('script', 'Script'), ('slide', 'Slides'), ('video', 'Video'), ('code', 'Codefiles'), ('assignment', 'Assignment'), ('prerequisite', 'Prerequisite'), ('keyword', 'Keywords'), ('additional_material', 'Additional Material')]
                         else:
                             choices = [('outline', 'Outline'), ('script', 'Script'), ('video', 'Video')]
                         if len(choices):
@@ -197,7 +197,7 @@ class ChangeComponentStatusForm(forms.Form):
                                 compValue = getattr(tr_rec.common_content, comp_init_data + '_status')
                             if compValue:
                                 choices.append(("5", 'Need Improvement'))
-                                if comp_init_data in ['code', 'assignment']:
+                            if comp_init_data in ['code', 'assignment','additional_material']:
                                     choices.append(("6", 'Not Required'))
                             if len(choices):
                                 self.fields['status'].widget.attrs = {}
@@ -727,6 +727,7 @@ class SuggestTopicForm(forms.ModelForm):
         required = True,
         error_messages = {'required': 'Please select Yes or No for this option'}
     )
+
     class Meta:
         model = SuggestTopic
         exclude = ['user', 'created']
@@ -782,7 +783,7 @@ class AvailableFossForm(forms.ModelForm):
         help_text = "",
         error_messages = {'required': 'FOSS category field required.'}
     )
-    
+
 class UpdatePrerequisiteForm(forms.Form):
     source_foss = forms.ChoiceField(
         choices = [('', '-- Select Foss --'),] + list(FossCategory.objects.filter(status=1).values_list('id', 'foss').order_by('foss')),

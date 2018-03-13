@@ -1,6 +1,7 @@
 
-from django.views.generic import ListView
+# Third Party Stuff
 from django.contrib.auth.models import User
+from django.views.generic import ListView
 
 
 class TeamListView(ListView):

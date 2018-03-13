@@ -166,13 +166,17 @@ urlpatterns = [
       r'^save-student/', 
       SaveStudentView.as_view()
     ),
-    url(
-      r'^get-course-option/', 
-      GetCourseOptionView.as_view()
-    ),
+    # url(
+    #   r'^get-course-option/', 
+    #   GetCourseOptionView.as_view()
+    # ),
     url(
       r'^get-batch-option/', 
       GetBatchOptionView.as_view()
+    ),
+    url(
+      r'^get-course-option/', 
+      GetCourseOptionView.as_view()
     ),
     url(
       r'^get-batch-course-status/', 

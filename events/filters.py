@@ -176,6 +176,10 @@ class TrainingRequestFilter(django_filters.FilterSet):
     choices=State.objects.none()
   )
 
+  department = django_filters.ModelChoiceFilter(
+    queryset=Department.objects.all()
+  )
+
   sem_start_date = django_filters.DateRangeCompareFilter()
 
   training_planner__academic__institution_name = \

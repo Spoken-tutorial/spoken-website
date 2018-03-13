@@ -115,10 +115,7 @@
                     <div class="form-group">
                         <label class="col-sm-3 control-label" for= ""></label>
                         <div class="col-sm-9">
-                            <div class="input-group captcha-group">
-                                {% render_field form.captcha class+="form-control captcha" placeholder="Enter Captcha" %}
-                            </div>
-                            {{ form.captcha.errors }}
+                            <div class="g-recaptcha" data-sitekey="{{SITE_KEY}}"></div>
                         </div>
                     </div>
                     <div class="form-group">
@@ -137,7 +134,7 @@
         $acstate = $('.state');
         //$ac_district = $(".district");
         $college = $(".college");
-        
+
         $acstate.change(function() {
 			var state = $(this).val();
 			if(state){
@@ -188,7 +185,7 @@
                 }
             });
         });
-        
+
         $ac_district.change(function() {
             var district = $(this).val();
             $.ajax({
@@ -212,3 +209,6 @@
 </script>
 {% endblock %}
 
+{% block uncompressjsblock %}
+    <script src='https://www.google.com/recaptcha/api.js'></script>
+{% endblock %}

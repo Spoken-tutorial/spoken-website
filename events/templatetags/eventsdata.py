@@ -5,7 +5,6 @@ from events.views import is_organiser, is_invigilator, is_resource_person, is_ev
 import datetime
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
-import datetime
 from dateutil.relativedelta import relativedelta
 import os
 import os.path
@@ -30,13 +29,13 @@ def get_trainingstatus(key, training):
     except Exception, e:
         print e
         return ''
-    
+
     if wa.status == 1:
         return 'checked'
-    
+
     if wa.status > 1:
         return 'disabled=disabled checked'
-    
+
     return ''
 
 def get_trainingparticipant_status(key, wcode):
@@ -74,13 +73,13 @@ def get_status(key, testcode):
         ta = TestAttendance.objects.get(mdluser_id=key, test_id=testcode)
     except:
         return 'error'
-    
+
     if ta.status == 1:
         return 'checked'
-    
+
     if ta.status > 1:
         return 'disabled=disabled checked'
-    
+
     return ''
 
 def get_participant_status(key, testcode):
@@ -131,7 +130,7 @@ def is_feedback_exits(w, record):
     except Exception, e:
         print e
         return False
-    
+
 def feedback_status_good(status):
     status_dict = {0 : 'Very Bad', 1 : 'Very Bad', 2 : 'Bad', 3 : 'Fair', 4 : 'Good', 5 : 'Very Good'}
     return status_dict[status]

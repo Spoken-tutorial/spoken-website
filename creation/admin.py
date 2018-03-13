@@ -1,9 +1,13 @@
+# Standard Library
 import os
+
+# Third Party Stuff
 from django.conf import settings
 from django.contrib import admin
 
-from creation.models import *
+# Spoken Tutorial Stuff
 from creation.forms import *
+from creation.models import *
 
 
 class LanguageAdmin(admin.ModelAdmin):
@@ -51,8 +55,12 @@ class FossCategoryAdmin(admin.ModelAdmin):
     actions = [mark_foss_completed, mark_foss_pending]
 
 
+class BrochurePageInline(admin.TabularInline):
+    model = BrochurePage
+
+
 class BrochureDocumentAdmin(admin.ModelAdmin):
-    list_display = ('foss_course', 'foss_language', 'document')
+    inlines = [BrochurePageInline, ]
 
 
 class TutorialDetailAdmin(admin.ModelAdmin):

@@ -1,10 +1,10 @@
 # Standard Library
 from datetime import datetime
 import itertools
-
+import collections
 
 # Third Party Stuff
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied,ObjectDoesNotExist
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Count, Min, Q, Sum
 from django.http import HttpResponse, HttpResponseRedirect
@@ -85,11 +85,112 @@ def get_state_info(request, code):
 
 def training(request):
     """ Organiser index page """
+    collectionSet = TrainingRequest.objects.filter(
+            sem_start_date__lte=datetime.now()
+        ).order_by('-sem_start_date')
+    state = None
+    TRAINING_COMPLETED = '1'
+    TRAINING_PENDING = '0'
+
+    if request.method == 'GET':
+        status = request.GET.get('status')
+        if status not in [TRAINING_COMPLETED, TRAINING_PENDING]:
+            status = TRAINING_COMPLETED
+
+    if status == TRAINING_PENDING:
+        collectionSet = collectionSet.filter(participants=0, status=TRAINING_COMPLETED)
+        
+    else:
+        collectionSet = collectionSet.filter(participants__gt=0)
+    header = {
+        1: SortableHeader('#', False),
+        2: SortableHeader('training_planner__academic__state__name', True, 'State'),
+        3: SortableHeader('training_planner__academic__city__name', True, 'City'),
+        4: SortableHeader('training_planner__academic__institution_name', True, 'Institution'),
+        5: SortableHeader('course__foss__foss', True, 'FOSS'),
+        6: SortableHeader('department', True, 'Department'),
+        7: SortableHeader('course__category', True, 'Type'),
+        8: SortableHeader('training_planner__organiser__user__first_name', True, 'Organiser'),
+        9: SortableHeader('sem_start_date', True, 'Date'),
+        10: SortableHeader('participants', 'True', 'Participants'),
+        11: SortableHeader('Action', False)
+    }
+
+    raw_get_data = request.GET.get('o', None)
+    collection = get_sorted_list(request, collectionSet, header, raw_get_data)
+    ordering = get_field_index(raw_get_data)
+
+    
+    # find state id
+    if 'training_planner__academic__state' in request.GET and request.GET['training_planner__academic__state']:
+        state = State.objects.get(id=request.GET['training_planner__academic__state'])
+
+    collection = TrainingRequestFilter(request.GET, queryset=collection, state=state)
+    # find participants count
+    
+    participants = collection.qs.aggregate(Sum('participants'))
+
+    chart_query_set = collection.qs.extra(select={'year': "EXTRACT(year FROM sem_start_date)"}).values('year').order_by(
+            '-year').annotate(total_training=Count('sem_start_date'), total_participant=Sum('participants'))
+    chart_data = ''
+    
+    get_year = []
+    pending_attendance_participant_count = 0
+
+    year_data_all=dict()
+    visited=dict()
+    if status == TRAINING_PENDING:
+
+        pending_attendance_student_batches = StudentBatch.objects.filter(
+            id__in=(collection.qs.filter(status=TRAINING_COMPLETED,participants=0,batch_id__gt=0).values('batch_id'))
+            )
+        pending_attendance_training = collection.qs.filter(batch_id__in = pending_attendance_student_batches.filter().values('id')).distinct()
+
+        for batch in pending_attendance_student_batches:
+            pending_attendance_participant_count += batch.stcount
+        for a_traning in pending_attendance_training:
+            if a_traning.batch_id not in visited:
+                if a_traning.sem_start_date.year in year_data_all:
+                    visited[a_traning.batch_id] = [a_traning.batch_id]
+                    year_data_all[a_traning.sem_start_date.year] +=  a_traning.batch.stcount
+                else:
+                    visited[a_traning.batch_id] = [a_traning.batch_id]
+                    year_data_all[a_traning.sem_start_date.year] =  a_traning.batch.stcount
+
+
+    if status == TRAINING_COMPLETED:
+        for data in chart_query_set:
+            chart_data += "['" + str(data['year']) + "', " + str(data['total_participant']) + "],"
+    else:
+        for year,count in year_data_all.iteritems():
+            chart_data += "['" + str(year) + "', " + str(count) + "],"
+    
+    context = {}
+    context['form'] = collection.form
+    context['chart_data'] = chart_data
+    page = request.GET.get('page')
+    collection = get_page(collection, page)
+    context['collection'] = collection
+    context['header'] = header
+    context['ordering'] = ordering
+    if status == TRAINING_PENDING:
+        context['participants'] = pending_attendance_participant_count
+    else:
+        context['participants'] = participants
+    context['model'] = 'Workshop/Training'
+    context['status']=status
+
+    
+    return render(request, 'statistics/templates/training.html', context)
+
+def fdp_training(request):
+    """ Organiser index page """
     collectionSet = None
     state = None
 
     collectionSet = TrainingRequest.objects.filter(
         participants__gt=0,
+        department=169,
         sem_start_date__lte=datetime.now()
     ).order_by('-sem_start_date')
     header = {
@@ -98,11 +199,12 @@ def training(request):
         3: SortableHeader('training_planner__academic__city__name', True, 'City'),
         4: SortableHeader('training_planner__academic__institution_name', True, 'Institution'),
         5: SortableHeader('course__foss__foss', True, 'FOSS'),
-        6: SortableHeader('course__category', True, 'Type'),
-        7: SortableHeader('training_planner__organiser__user__first_name', True, 'Organiser'),
-        8: SortableHeader('sem_start_date', True, 'Date'),
-        9: SortableHeader('participants', 'True', 'Participants'),
-        10: SortableHeader('Action', False)
+        6: SortableHeader('department', True, 'Department'),
+        7: SortableHeader('course__category', True, 'Type'),
+        8: SortableHeader('training_planner__organiser__user__first_name', True, 'Organiser'),
+        9: SortableHeader('sem_start_date', True, 'Date'),
+        10: SortableHeader('participants', 'True', 'Participants'),
+        11: SortableHeader('Action', False)
     }
 
     raw_get_data = request.GET.get('o', None)
@@ -132,7 +234,7 @@ def training(request):
     context['ordering'] = ordering
     context['participants'] = participants
     context['model'] = 'Workshop/Training'
-    return render(request, 'statistics/templates/training.html', context)
+    return render(request, 'statistics/templates/pmmm_stats.html', context)
 
 
 def training_participant(request, rid):
@@ -144,6 +246,22 @@ def training_participant(request, rid):
     except Exception, e:
         print e
         raise PermissionDenied()
+    return render(request, 'statistics/templates/training_participant.html', context)
+
+def studentmaster_ongoing(request, rid):
+    
+    context = {}
+    try:
+        context['model_label'] = 'Workshop / Training'
+        context['model'] = TrainingRequest.objects.get(id=rid)
+        current_batch = TrainingRequest.objects.filter(id=rid)
+        for ab in current_batch:
+            row_data = StudentMaster.objects.filter(batch_id=ab.batch_id)
+        context['collection'] = row_data
+
+    except Exception, e:
+        print e
+        raise ObjectDoesNotExist()
     return render(request, 'statistics/templates/training_participant.html', context)
 
 
@@ -354,11 +472,11 @@ def learners(request):
 def tutorial_content(request, template='statistics/templates/statistics_content.html'):
     header = {
         1: SortableHeader('# ', False),
-        2: SortableHeader('Tutorial', False),
+        2: SortableHeader('tutorial_detail__tutorial', True, 'Tutorial'),
         3: SortableHeader('tutorial_detail__foss__foss', True, 'FOSS Course'),
-        4: SortableHeader('Level', False),
-        5: SortableHeader('language__name', False, 'Language'),
-        6: SortableHeader('tutorial_detail__created', False, 'Date Published')
+        4: SortableHeader('tutorial_detail__level', True, 'Level'),
+        5: SortableHeader('language__name', True, 'Language'),
+        6: SortableHeader('publish_at', True, 'Date Published')
     }
 
     published_tutorials_set = TutorialResource.objects.filter(status__gte=1)
@@ -367,14 +485,17 @@ def tutorial_content(request, template='statistics/templates/statistics_content.
     tutorials = get_sorted_list(request, published_tutorials_set, header, raw_get_data)
     ordering = get_field_index(raw_get_data)
 
-    tutorials = CreationStatisticsFilter(request.GET, queryset=tutorials)
+    tutorials_filter = CreationStatisticsFilter(request.GET, queryset=tutorials)
+    # whenever publish date filter is applied there is a table join, resulting a duplicate entry for tutorials 
+    # because single tutorial might have multiple pushish objects
+    qs = tutorials_filter.qs.distinct()
 
     context = {}
 
-    context['form'] = tutorials.form
+    context['form'] = tutorials_filter.form
 
     # display information table across multiple pages
-    paginator = Paginator(tutorials, 100)
+    paginator = Paginator(qs, 100)
     page = request.GET.get('page')
     try:
         tutorials = paginator.page(page)
@@ -384,7 +505,6 @@ def tutorial_content(request, template='statistics/templates/statistics_content.
     except EmptyPage:
         # If page is out of range (e.g. 9999), deliver last page of results.
         tutorials = paginator.page(paginator.num_pages)
-
     context['tutorials'] = tutorials
     context['tutorial_num'] = tutorials.paginator.count
     context['header'] = header

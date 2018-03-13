@@ -1,5 +1,9 @@
+# Third Party Stuff
 from django.contrib import messages
+
+# Spoken Tutorial Stuff
 from creation.models import *
+
 
 class SortableHeader():
     def __init__(self, name, sortable, verbose_name = '', class_name = '', attribs = ''):

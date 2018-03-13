@@ -5,18 +5,22 @@
 
 from __future__ import absolute_import, print_function, unicode_literals
 
+# Standard Library
+import smtplib
+import time
+from datetime import date, datetime, timedelta
+
 # Third Party Stuff
+from django.conf import settings
+from django.contrib.auth.models import User
+from django.core.exceptions import ObjectDoesNotExist
+from django.core.mail import EmailMultiAlternatives
 from django.core.management.base import BaseCommand
 from django.db import transaction as tx
-from django.contrib.auth.models import User
-from cms.models import Profile
-from django.conf import settings
 
-import time
-from datetime import datetime, date, timedelta
-from django.core.mail import EmailMultiAlternatives
-import smtplib
-from django.core.exceptions import ObjectDoesNotExist
+# Spoken Tutorial Stuff
+from cms.models import Profile
+
 
 class Command(BaseCommand):
 

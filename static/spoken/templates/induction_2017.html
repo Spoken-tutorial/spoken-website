@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% load widget_tweaks %}
+{% load static %}
+{% block title %}Induction Programme 2017{% endblock %}
+{% block compressinlinecssblock %}
+<style>
+.links {
+      font-size:15px;
+    }
+a:hover {
+    background-color: #F5DA81;
+}
+h3{
+color : #FE9A2E
+}
+p{
+fontSize : 20px;
+}
+</style>
+{% endblock %}
+{% block search %}
+{% endblock %}
+
+{% block content %}
+<h2> Induction Training Programme</h2>
+<h5>for new faculty conducted by the Spoken Tutorial Project, under the aegis of  Pandit Madan Mohan Malaviya National Mission on Teachers and Teaching (PMMMNMTT).</h5>
+
+<br><br>
+<div class="panel panel-warning" style="text-align:center;">
+  <div class="panel-heading">
+    <h3 class="panel-title">
+    <a href="http://spoken-tutorial.org/media/induction/Tentative-Programme.pdf" target="_blank"><u>Click here to view &nbsp;<b>Tentative Programme Details</b></u></a></p>
+    </h3>
+  </div>
+</div>
+
+<div class="panel panel-warning" style="text-align:center;">
+  <div class="panel-heading">
+    <h3 class="panel-title">
+    <a href="http://spoken-tutorial.org/media/induction/Invitation-Letter.pdf" target="_blank"><u>Click here to view &nbsp;<b>Invitation Letter</b></u></a></p>
+    </h3>
+  </div>
+</div>
+
+<div class="panel panel-warning" style="text-align:center;">
+  <div class="panel-heading">
+    <h3 class="panel-title">
+    <a href="#" target="_blank"><u><b>Expression of Interest</b></u></a>
+    &nbsp;&nbsp;<span class="label label-success"> {{EOI_count}} received</span> 
+    </h3>
+  </div>
+</div>
+
+<div class="panel panel-warning" style="text-align:center;">
+  <div class="panel-heading">
+    <h3 class="panel-title">
+    For any questions/doubts please email us at : <span class="fa fa-2 fa-envelope"></span> workshops [at] spoken-tutorial [dot] org 
+    </h3>
+  </div>
+</div>
+
+
+{% endblock %}

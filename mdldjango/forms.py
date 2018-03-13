@@ -1,14 +1,13 @@
-
+# Third Party Stuff
 from django import forms
-from captcha.fields import ReCaptchaField
-#import Model form
+from django.contrib.auth.models import Group, User
 from django.forms import ModelForm
-
-#import events models
-from events.models import *
-from django.contrib.auth.models import User, Group
-from events.signals import get_or_create_user
 from get_or_create_participant import encript_password
+
+# Spoken Tutorial Stuff
+from events.models import *
+from events.signals import get_or_create_user
+
 
 class OfflineDataForm(forms.Form):
     xml_file  = forms.FileField(required=True)
@@ -36,8 +35,7 @@ class RegisterForm(forms.Form):
     choices.insert(0, ('', '-- None --'),)
     course = forms.ChoiceField(choices = choices)
     year = forms.ChoiceField(choices = (('', '-- None --'), (1, '1st Year'), (2, '2nd year'), (3, '3rd year'), (4, '4th year'), (5, '5th year'), (6, '6th year'),(7, 'Others'),))
-    captcha = ReCaptchaField()
-    
+
     def clean_username(self):
         username = self.cleaned_data['username']
         error = 0
@@ -48,7 +46,7 @@ class RegisterForm(forms.Form):
             return username
         if error:
             raise forms.ValidationError(u'Username: %s already exists' % username )
-        
+
     def clean_email(self):
         email = self.cleaned_data['email'].lower()
         error = 0
@@ -66,20 +64,20 @@ class RegisterForm(forms.Form):
             return email
         if error:
             raise forms.ValidationError( u'Email: %s already exists' % email )
-        
+
     def clean(self):
         password = self.cleaned_data.get('password')
         password_confirm = self.cleaned_data.get('password_confirm')
         if password and password != password_confirm:
             raise forms.ValidationError("Passwords don't match")
         return self.cleaned_data
-        
+
     def __init__(self, *args, **kwargs):
         initial = ''
         if 'instance' in kwargs:
             initial = kwargs["instance"]
             del kwargs["instance"]
-            
+
         super(RegisterForm, self).__init__(*args, **kwargs)
         #load the choices
         state_list = list(State.objects.exclude(name = 'Uncategorised').order_by('name').values_list('id', 'name'))
@@ -110,7 +108,7 @@ class FeedbackForm(forms.ModelForm):
     appropriate_example = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
     instruction_sheet = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
     assignment = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
-    
+
     pace_of_tutorial = forms.ChoiceField(widget=forms.RadioSelect, choices = threeChoice )
     rate_workshop = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
     workshop_learnt = forms.CharField(widget=forms.Textarea(attrs={'rows': 2}))
@@ -122,7 +120,7 @@ class FeedbackForm(forms.ModelForm):
     tutorial_language = forms.ChoiceField(widget=forms.RadioSelect, choices = threeChoice )
     apply_information = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
     if_apply_information_yes = forms.CharField(widget=forms.Textarea(attrs={'rows': 2}))
-    
+
     setup_learning = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
     computers_lab = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
     audio_quality = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
@@ -138,7 +136,7 @@ class FeedbackForm(forms.ModelForm):
     answered_questions = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
     interested_helping = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
     executed_workshop = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
-    
+
     recommend_workshop = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
     reason_why = forms.CharField(widget=forms.Textarea(attrs={'rows': 2}))
     other_comments = forms.CharField(widget=forms.Textarea(attrs={'rows': 2}))

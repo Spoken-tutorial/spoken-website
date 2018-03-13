@@ -1,10 +1,9 @@
+import datetime as dt
+
 from django import forms
-from django.forms import ModelForm
-from django.forms.models import BaseModelFormSet
+
 from events.models import *
-from datetime import datetime, date
 from events.helpers import get_academic_years
-import datetime
 
 
 class StudentBatchForm(forms.ModelForm):
@@ -43,6 +42,7 @@ class UpdateStudentYearBatchForm(forms.ModelForm):
 class TrainingRequestForm(forms.ModelForm):
   department = forms.ModelChoiceField(empty_label='---------', queryset=CourseMap.objects.none())
   course_type = forms.ChoiceField(choices=[('', '---------'), (0, 'Software Course outside lab hours'), (1, 'Software Course mapped in lab hours'), (2, ' Software Course unmapped in lab hours')])
+  foss_category = forms.ChoiceField(choices=[('', '---------'), (0, 'Foss available only for Training'), (1, 'Foss available for Training and Test')])
   course = forms.ModelChoiceField(empty_label='---------', queryset=CourseMap.objects.filter(category=0))
   batch = forms.ModelChoiceField(empty_label='---------', queryset=StudentBatch.objects.none())
   training_planner = forms.CharField()
@@ -56,13 +56,12 @@ class TrainingRequestForm(forms.ModelForm):
       batch_id_list = []
       sm_batch_all = StudentMaster.objects.all()
       for i in sm_batch_all:
-        if datetime.datetime.today().isoformat() < (i.created+datetime.timedelta(days=2)).isoformat():
+        if dt.datetime.today().isoformat() < (i.created + dt.timedelta(days=2)).isoformat():
           batch_id_list.append(i.batch_id)
       batch_id_set = set(batch_id_list)
       uniq_batch_id = []
       for j in batch_id_set:
         uniq_batch_id.append(j)
-      #
       tp = TrainingPlanner.objects.get(pk=self.cleaned_data['training_planner'])
 
       # Date restriction
@@ -79,6 +78,7 @@ class TrainingRequestForm(forms.ModelForm):
     super(TrainingRequestForm, self).__init__(*args, **kwargs)
     self.fields['course_type'].choices = course_type
 
+
     if kwargs and 'data' in kwargs:
       # Generating students batch list based on department
       if kwargs['data']['department'] != '':
@@ -93,6 +93,7 @@ class TrainingRequestEditForm(forms.ModelForm):
   training_planner = forms.CharField()
   department = forms.ModelChoiceField(empty_label='---------', queryset=CourseMap.objects.none())
   batch = forms.ModelChoiceField(empty_label='---------', queryset=StudentBatch.objects.none())
+  foss_category = forms.ChoiceField(choices=[('', '---------'), (0, 'Foss available only for Training'), (1, 'Foss available for Training and Test')])
   course = forms.ModelChoiceField(empty_label='---------', queryset=CourseMap.objects.filter(category=0))
   class Meta:
     model = TrainingRequest
@@ -116,7 +117,7 @@ class TrainingRequestEditForm(forms.ModelForm):
 
     if not flag and training:
       self.fields['course_type'].initial = training.course_type
-      self.fields['course'].queryset = CourseMap.objects.filter(category=training.course.category)
+      self.fields['course'].queryset = CourseMap.objects.filter(category=0)
       self.fields['course'].initial = training.course_id
     flag = True
     if data and 'sem_start_date' in data:
@@ -210,7 +211,7 @@ class SingleTrainingForm(forms.ModelForm):
     return self.cleaned_data
 
   def clean_tdate(self):
-    today = datetime.datetime.now()
+    today = dt.datetime.now()
     tdate = self.cleaned_data['tdate']
     if today.date() > tdate:
       raise forms.ValidationError("Invalid semester training date")
@@ -239,14 +240,35 @@ class SingleTrainingEditForm(forms.ModelForm):
     return self.cleaned_data
 
   def clean_tdate(self):
-    today = datetime.datetime.now()
+    today = dt.datetime.now()
     tdate = self.cleaned_data['tdate']
     if today.date() > tdate:
       raise forms.ValidationError("Invalid semester training date")
     return tdate
 
 class OrganiserFeedbackForm(forms.ModelForm):
-  offered_training_foss = forms.ModelMultipleChoiceField(queryset=FossCategory.objects.filter(status=1), widget=forms.CheckboxSelectMultiple)
+  offered_training_foss = forms.ModelMultipleChoiceField(
+    # queryset=FossCategory.objects.filter(status=1), 
+    queryset=FossCategory.objects.filter(
+      id__in=CourseMap.objects.filter(
+          category=0,
+          test__lte=2
+        ).values_list(
+          'foss_id'
+        )
+      ),
+    widget=forms.CheckboxSelectMultiple)
+  trained_foss = forms.ModelMultipleChoiceField(
+    # queryset=FossCategory.objects.filter(status=1), 
+    queryset=FossCategory.objects.filter(
+      id__in=CourseMap.objects.filter(
+          category=0,
+          test__lte=2
+        ).values_list(
+          'foss_id'
+        )
+      ),
+    widget=forms.CheckboxSelectMultiple)
   class Meta:
     model = OrganiserFeedback
     fields = '__all__'
@@ -305,16 +327,19 @@ class STWorkshopFeedbackForm(forms.ModelForm):
               'not_self_explanatory' : forms.RadioSelect,
               'logical_sequence' : forms.RadioSelect ,
               'examples_help' : forms.RadioSelect ,
-              'other_language' : forms.RadioSelect ,
               'instructions_easy_to_follow' : forms.RadioSelect ,
+
               'useful_learning' : forms.RadioSelect ,
               'help_improve_performance' : forms.RadioSelect ,
               'plan_to_use_future' : forms.RadioSelect ,
-              'confident' : forms.RadioSelect ,
               'difficult_simultaneously' : forms.RadioSelect ,
               'interface_comfortable' : forms.RadioSelect ,
               'satisfied' : forms.RadioSelect ,
               'self_learning_intrest' : forms.RadioSelect ,
+              'not_like_method_forums' : forms.RadioSelect ,
+              'forum_helpful' : forms.RadioSelect ,
+              'owing_to_forums' : forms.RadioSelect ,
+
               'ws_quality' : forms.RadioSelect ,
               'overall_content_quality' : forms.RadioSelect ,
               'clarity_of_explanation' : forms.RadioSelect ,
@@ -326,22 +351,28 @@ class STWorkshopFeedbackForm(forms.ModelForm):
               'clarity_of_speech' : forms.RadioSelect ,
               'visual_presentation' : forms.RadioSelect ,
               'pace_of_tutorial' : forms.RadioSelect ,
-              'arrangement' : forms.RadioSelect ,
-              'network' : forms.RadioSelect ,
-              'installation_help' : forms.RadioSelect ,
               'time_management' : forms.RadioSelect ,
               'experience_of_learning' : forms.RadioSelect ,
               'overall_arrangement' : forms.RadioSelect ,
-              'interaction_using_forum' : forms.RadioSelect ,
-              'installation_difficulties' : forms.Textarea ,
               'like_abt_ws' : forms.Textarea ,
               'how_make_better' : forms.Textarea,
               'experience' : forms.Textarea ,
-              'suggestions' : forms.Textarea
+              'suggestions' : forms.Textarea,
+              'training_any_comment' : forms.Textarea,
+              'content_any_comment' : forms.Textarea,
+              'learning_any_comment': forms.Textarea,
               }
   def __init__(self, *args, **kwargs):
     super(STWorkshopFeedbackForm, self).__init__(*args, **kwargs)
-    self.fields['installation_difficulties'].required = False
+    self.fields['like_abt_ws'].required = False
+    self.fields['how_make_better'].required = False
+    self.fields['experience'].required = False
+    self.fields['suggestions'].required = False
+    self.fields['name'].required = False
+    self.fields['email'].required = False
+    self.fields['training_any_comment'].required = False
+    self.fields['content_any_comment'].required = False
+    self.fields['learning_any_comment'].required = False
 
 class STWorkshopFeedbackFormPre(forms.ModelForm):
   class Meta:

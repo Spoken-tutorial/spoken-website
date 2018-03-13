@@ -1,10 +1,16 @@
-from django.template.defaultfilters import slugify
-from django.contrib import admin
-from cms.models import *
+# Standard Library
+import os
+
+# Third Party Stuff
 from django.conf import settings
+from django.contrib import admin
+from django.template.defaultfilters import slugify
 from PIL import Image
-import glob, os
+
+# Spoken Tutorial Stuff
 from cms.forms import *
+from cms.models import *
+
 
 class SubNavInline(admin.TabularInline):
     model = SubNav
@@ -57,11 +63,11 @@ class NewsAdmin(admin.ModelAdmin):
         obj.picture = None
         obj.slug = slugify(request.POST['title'])
         obj.save()
-        
+
         if 'picture' in request.FILES and request.FILES['picture']:
             obj.picture = request.FILES['picture']
         obj.save()
-        
+
         size = 128, 128
         filename = str(obj.picture)
         file, ext = os.path.splitext(filename)
@@ -73,7 +79,8 @@ class NewsAdmin(admin.ModelAdmin):
             if mimeType == 'JPG':
                 mimeType = 'JPEG'
             im.save(settings.MEDIA_ROOT + "news/" + str(obj.id) + "/" + str(obj.id) + "-thumb." + ext, mimeType)
-        
+
+
 admin.site.register(Block, BlockAdmin)
 admin.site.register(Nav, NavAdmin)
 admin.site.register(Page, PageAdmin)
