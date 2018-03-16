@@ -2129,7 +2129,7 @@ def test_participant_ceritificate(request, wid, participant_id):
     text = "Certificate for Completion of "+w.foss.foss+" Training"
 
     centered = ParagraphStyle(name = 'centered',
-        fontSize = 35,
+        fontSize = 30,
         leading = 50,
         alignment = 1,
         spaceAfter = 15)
