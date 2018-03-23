@@ -2019,6 +2019,23 @@ def test_attendance(request, tid):
     messages.info(request, "Instruct the students to Register and Login on the Online Test link of Spoken Tutorial. Click on the checkbox so that usernames of all the students who are present for the test are marked, then click the submit button. Students can now proceed for the Test.")
     return render(request, 'events/templates/test/attendance.html', context)
 
+
+@login_required
+def request_advance_test(request, test_id):
+    test = get_object_or_404(Test, id=test_id)
+    toppers = test.get_top_performers()
+    advance_batch = AdvanceTestBatch()
+    advance_batch.preliminary_test = test
+    return HttpResponse("Under Construction") 
+
+@login_required
+def get_top_performers(request, test_id):
+    test = get_object_or_404(Test, id=test_id)
+    toppers = test.get_top_performers()
+    context = {'toppers': toppers, 'test': test}
+    return render(request, 'events/templates/test/show_top_performers.html', context)
+
+
 @login_required
 def test_participant(request, tid=None):
     user = request.user

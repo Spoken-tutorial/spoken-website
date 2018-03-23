@@ -66,6 +66,8 @@ urlpatterns = patterns('',
     
     #url(r'^test/subscribe/(\d+)/(\d+)/$', 'events.views.test_student_subscribe', name='test_student_subscribe'),
     url(r'^test/(\d+)/participant/$', 'events.views.test_participant', name='test_participant'),
+    url(r'^test/(?P<test_id>\d+)/top_performers/$', 'events.views.get_top_performers', name='top_performers'),
+    url(r'^test/(?P<test_id>\d+)/request_advance_test/$', 'events.views.request_advance_test', name='request_advance_test'),
     url(r'^test/participant/certificate/(\d+)/(\d+)/$', 'events.views.test_participant_ceritificate', name='test_participant_ceritificate'),
     url(r'^test/(\d+)/attendance/$', 'events.views.test_attendance', name='test_attendance'),
     url(r'^test/(?P<role>\w+)/request/$', 'events.views.test_request', name='test_request'),

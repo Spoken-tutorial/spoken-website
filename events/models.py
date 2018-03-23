@@ -374,6 +374,15 @@ class Test(models.Model):
     self.save()
     return self
 
+  def get_top_performers(self):
+    attendees = self.testattendance_set.all()
+    top_performers = []
+    for attendee in attendees:
+        if attendee.is_top_performer():
+            top_performers.append(attendee)
+    print(top_performers)
+    return top_performers
+
 
 class TestAttendance(models.Model):
   test = models.ForeignKey(Test)
@@ -389,6 +398,18 @@ class TestAttendance(models.Model):
   status = models.PositiveSmallIntegerField(default=0)
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
+
+  def is_top_performer(self):
+    mdlquizgrades = MdlQuizGrades.objects.filter(quiz=self.mdlquiz_id,
+                                      userid=self.mdluser_id)
+    if mdlquizgrades.exists():
+        mdlquizgrade = mdlquizgrades.first()
+    else:
+        return False
+    qualifying_marks = AdvanceTest.objects.get(foss=self.test.foss).qualifying_marks
+    # catch if does not exists
+    return mdlquizgrade.grade >= qualifying_marks
+
   class Meta:
     verbose_name = "Test Attendance"
     unique_together = (("test", "mdluser_id"))
@@ -1620,3 +1641,33 @@ class InductionFinalList(models.Model):
   batch_code = models.PositiveIntegerField()
   created = models.DateTimeField(auto_now_add = True)
 
+
+class AdvanceTest(models.Model):
+    foss = models.ForeignKey(FossCategory, related_name='advance_test_foss')
+    link = models.URLField(null=True)
+    active = models.BooleanField(default=True)
+    qualifying_marks = models.DecimalField(decimal_places=2, max_digits=5, default=90)
+
+class AdvanceTestBatch(models.Model):
+    test = models.ForeignKey(AdvanceTest, related_name='advance_test')
+    preliminary_test = models.ForeignKey(Test, related_name='pretest')
+    batch = models.ForeignKey(StudentBatch, null=True, related_name='advance_batch')
+    students = models.ManyToManyField('Student', null=True, related_name='advance_students')
+    is_open = models.BooleanField(default=False)
+
+    def is_batch_eligible(self):
+        # Check whether batch can go for the advance test
+        #self.batch.training_request.status = 1
+        # self.training_request.test.status = 4
+        # currentyear - year of joining = 3
+        # self.batch.trainingrequest.coursemap.foss = test.foss
+	pass
+
+    def add_student(self, student):
+        self.students.add(student)
+
+    def set_advance_students(self):
+        students = self.batch.get_students()
+        for student in students:
+            if is_student_advance(student):
+                add_student(student)
