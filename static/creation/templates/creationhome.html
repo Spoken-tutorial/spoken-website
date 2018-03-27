@@ -106,46 +106,46 @@
                         <ul > 
                             {% if user|get_internal_contributor %}
                                 <li>
-                                <a href="#" onClick= "callModal(this)" id = "add_contributor" > Add me as Contributor  |  </a> 
-                                <a href="#" onClick= "callModal(this)" id = "revoke_contributor" > Revoke Contributor</a>
+                                <a href="#" onClick= "show_modal(this)" id = "add_contributor" > Add me as Contributor  |  </a> 
+                                <a href="#" onClick= "show_modal(this)" id = "revoke_contributor" > Revoke Contributor</a>
                                     </li>
                             {% else %}
-                                <li><a href="#" onClick= "callModal(this)" id = "add_contributor" > Add me as Contributor</a>
+                                <li><a href="#" onClick= "show_modal(this)" id = "add_contributor" > Add me as Contributor</a>
                                 </li>
                             {% endif %}
                             {% if user|get_external_contributor %}
                                 <li >
-                                    <a href="#" onClick= "callModal(this)" id = "add_external_contributor" >Add me as External Contributor  |  </a><a href="#" onClick= "callModal(this)" id = "revoke_external_contributor" >Revoke External Contributor Role</a>
+                                    <a href="#" onClick= "show_modal(this)" id = "add_external_contributor" >Add me as External Contributor  |  </a><a href="#" onClick= "show_modal(this)" id = "revoke_external_contributor" >Revoke External Contributor Role</a>
                                 </li>
                             {% else %}
                                 <li>
-                                    <a href="#" onClick= "callModal(this)" id = "add_external_contributor" >Add me as External Contributor</a></li>
+                                    <a href="#" onClick= "show_modal(this)" id = "add_external_contributor" >Add me as External Contributor</a></li>
                             {% endif %}
                             {% if user|get_videoreviewer %}
                                 <li>
-                                    <a href="#" onClick= "callModal(this)" id = "revoke_admin">Revoke Admin Reviewer Role</a></li>
+                                    <a href="#" onClick= "show_modal(this)" id = "revoke_admin">Revoke Admin Reviewer Role</a></li>
                             {% else %}
                                 <li>
-                                    <a href="#" onClick= "callModal(this)" id = "add_admin">Add me as Admin Reviewer</a></li>
+                                    <a href="#" onClick= "show_modal(this)" id = "add_admin">Add me as Admin Reviewer</a></li>
                             {% endif %}
                             {% if user|get_domainreviewer %}
                                 <li>
-                                    <a href="#" onClick= "callModal(this)" id = "add_domain">Add me as Domain Reviewer  |  </a>
-                                    <a href="#" onClick= "callModal(this)" id = "revoke_domain">Revoke Domain Reviewer Role</a>
+                                    <a href="#" onClick= "show_modal(this)" id = "add_domain">Add me as Domain Reviewer  |  </a>
+                                    <a href="#" onClick= "show_modal(this)" id = "revoke_domain">Revoke Domain Reviewer Role</a>
                                 </li>
                             {% else %}
                                 <li>
-                                    <a href="#" onClick= "callModal(this)" id = "add_domain">Add me as Domain Reviewer</a>
+                                    <a href="#" onClick= "show_modal(this)" id = "add_domain">Add me as Domain Reviewer</a>
                                 </li>
                             {% endif %}
                             {% if user|get_qualityreviewer %}
                                 <li>
-                                    <a href="#" onClick= "callModal(this)" id = "add_quality">Add me as Quality Reviewer  |  </a>
-                                    <a href="#" onClick= "callModal(this)" id = "revoke_quality">Revoke Quality Reviewer role</a>
+                                    <a href="#" onClick= "show_modal(this)" id = "add_quality">Add me as Quality Reviewer  |  </a>
+                                    <a href="#" onClick= "show_modal(this)" id = "revoke_quality">Revoke Quality Reviewer role</a>
                                 </li>
                             {% else %}
                                 <li>
-                                    <a href="#" onClick= "callModal(this)" id = "add_quality">Add me as Quality Reviewer</a><br>
+                                    <a href="#" onClick= "show_modal(this)" id = "add_quality">Add me as Quality Reviewer</a><br>
                                 </li>
                             {% endif %}
                         </ul>
@@ -245,7 +245,7 @@ var language = "";
 var id = "";
 
 // Call the respective modal as per he role request
-function callModal(curr){
+function show_modal(curr){
     var currele = curr.id;
     //$(".modal-height").css({height:'10px'});   
     switch (currele){

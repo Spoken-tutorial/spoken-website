@@ -85,7 +85,7 @@
                         <td><a href="mailto:{{ contrib_rec.user.email }}">{{ contrib_rec.user.email }}</a></td>
                         <td>{{ contrib_rec.created }}</td>
                         <td class="col-center"><a href="{% url 'creation:creation_accept_role_request'  contrib_rec.id contrib_rec.language_id %}" class="spin-btn js-accept-btn" ><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Accept</a></td>
-                        <td class="col-center"><a href="{% url 'creation:creation_reject_role_request'  contrib_rec.id contrib_rec.language_id %}" class="spin-btn js-accept-btn" ><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Reject</a></td>
+                        <td class="col-center"><a href="{% url 'creation:creation_reject_role_request'  contrib_rec.id contrib_rec.language_id %}" class="spin-btn js-reject-btn" ><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Reject</a></td>
                     </tr>
                 {% endfor %}
             {% endif %}
@@ -193,7 +193,7 @@
                         $(this).children(0).removeClass("fa-spin");
                     }
                 );
-                $('.js-accept-btn').click(function(e){
+                $('.js-accept-btn','.js-reject-btn').click(function(e){
                     console.log($(this).attr('href') + " clicked at " + new Date());
                     // allow this link to be clicked only once, disable subsiquent clicks.
                     var url = $(this).attr('href');
