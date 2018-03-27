@@ -6,7 +6,7 @@ import collections
 # Third Party Stuff
 from django.core.exceptions import PermissionDenied,ObjectDoesNotExist
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.db.models import Count, Min, Q, Sum
+from django.db.models import Count, Min, Q, Sum, F
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.template.defaultfilters import slugify
@@ -479,7 +479,7 @@ def tutorial_content(request, template='statistics/templates/statistics_content.
         6: SortableHeader('publish_at', True, 'Date Published')
     }
 
-    published_tutorials_set = TutorialResource.objects.filter(status__gte=1)
+    published_tutorials_set = TutorialResource.objects.filter(status__gte=1, status__lt = 3)
 
     raw_get_data = request.GET.get('o', None)
     tutorials = get_sorted_list(request, published_tutorials_set, header, raw_get_data)
@@ -512,10 +512,10 @@ def tutorial_content(request, template='statistics/templates/statistics_content.
 
     return render(request, template, context)
 
-
 def allocate_tutorial(request, status):
     context = {}
-
+    print "request : ", request 
+    print "status : ", status
     user = request.user
     if not (user.is_authenticated() and (is_contributor(user))):
         raise PermissionDenied()
@@ -523,6 +523,7 @@ def allocate_tutorial(request, status):
     active = status
     final_query = None
     fosses = []
+    lang_qs = None
 
     if status == 'completed':
         header = {
@@ -539,24 +540,19 @@ def allocate_tutorial(request, status):
 
     elif status == 'available':
         header = {
-            1: SortableHeader('# ', False),
-            2: SortableHeader('tutorial_detail__foss__foss', True, 'FOSS Course'),
+            1: SortableHeader('Tutorial Level',False),
+            2: SortableHeader('Order Id', False),
+            #3: SortableHeader('tutorial_detail__foss__foss', True, 'FOSS Course'),
             3: SortableHeader('Tutorial', False),
-            4: SortableHeader('language__name', False, 'Language'),
+            4: SortableHeader('language__name', True, 'Language'),
             5: SortableHeader('Bid', False),
         }
 
-        all_tuts = TutorialDetail.objects.all()
-
-        foss_to_allocate = {}
-        for tutorial in all_tuts:
-            if services.check_english_timed_script_available(tutorial):
-                a_l = services.get_available_languages(tutorial)
-                foss_name = str(tutorial.foss.foss)
-                foss_to_allocate = [foss_name, tutorial, a_l]
-                fosses.append(foss_to_allocate)
-                
-
+        lang_qs = Language.objects.filter(id__in= RoleRequest.objects.filter(user = request.user ,status=1, role_type = 0).values('language'))
+        status = 4 
+        final_query = TutorialsAvailable.objects.filter(language__in = lang_qs).order_by('tutorial_detail__foss__foss','tutorial_detail__level','language','tutorial_detail__order')
+        unique_foss = TutorialsAvailable.objects.filter(language__in = lang_qs).distinct()
+        
     elif status == 'ongoing':
         header = {
             1: SortableHeader('# ', False),
@@ -565,63 +561,58 @@ def allocate_tutorial(request, status):
             4: SortableHeader('language__name', False, 'Language'),
             5: SortableHeader('script_user_id', False, 'User ID'),
             6: SortableHeader('Bid Date', False),
-            7: SortableHeader('Submission Date',False)
+            7: SortableHeader('Submission Date',False),
+            8: SortableHeader('Extension',False)
         }
 
         status = 4
-        final_query = TutorialResource.objects.filter(script_status__lt=status).exclude(language_id=22)
+        final_query = TutorialResource.objects.filter(video_user = request.user.id , script_status__lt=status).exclude(language_id=22)
 
     else:
         raise PermissionDenied()
 
-    available_tutorials_count = 0
-    for item in fosses:
-        available_tutorials_count = available_tutorials_count + len(item[2])
-
-    user = User.objects.get(pk=user.id)
-
+    extension = []
     pub_tutorials_set = final_query
+    context['datetoday'] = datetime.now()
     raw_get_data = request.GET.get('o', None)
     tutorials = get_sorted_list(request, pub_tutorials_set, header, raw_get_data)
     ordering = get_field_index(raw_get_data)
     tutorials = CreationStatisticsFilter(request.GET, queryset=tutorials)
 
-    context['form'] = tutorials.form
-    for a in tutorials:
-        a.updated = a.created + timedelta(days=10)
-
-    # if active == 'completed' or active == 'ongoing':
-    # display information table across multiple pages
-    paginator = Paginator(tutorials, 100)
-    page = request.GET.get('page')
-    try:
-        tutorials = paginator.page(page)
-    except PageNotAnInteger:
-        # If page is not an integer, deliver first page.
-        tutorials = paginator.page(1)
-    except EmptyPage:
-        # If page is out of range (e.g. 9999), deliver last page of results.
-        tutorials = paginator.page(paginator.num_pages)
-
+    form = tutorials.form
+    
+    if lang_qs: 
+        form.fields['language'].queryset = lang_qs
+    
+    context['form'] = form
         
+    # Pagination
+    paginator = Paginator(tutorials, 50)
+    try:
+        page = int(request.GET.get('page','1'))
+    except:
+        page = int(request.GET.get('page'))
 
-    context['tutorials'] = tutorials
-    context['tutorial_num'] = tutorials.paginator.count
+    try:
+        posts = paginator.page(page)
+        print "Posts : ", posts.paginator.num_pages
+    except(EmptyPage,PageNotAnInteger):
+        posts = paginator.page(paginator.num_pages)
+    print "PAGES : ", dir(posts.paginator)    
 
+    context['tutorial_num'] = posts
     context['header'] = header
     context['ordering'] = ordering
     context['status'] = active
-    context['fosses'] = fosses
-    context['available_tutorials_count'] = available_tutorials_count
     context['counter'] = itertools.count(1)
-   # context['submission_date'] = submission_date
     return render(request, 'statistics/templates/allocate_tutorial.html', context)
 
 
 def allocate(request, tdid, lid):
     user = request.user
-
-    tut = TutorialDetail.objects.get(pk=tdid)
+    print "TDID : ",tdid
+    tut = TutorialDetail.objects.get(id=tdid)
+    print "Tutorial : ", tut
     if not ContributorRole.objects.filter(
             foss_category_id=tut.foss_id, user_id=user.id, language_id=lid):
         contributor_role = ContributorRole()
@@ -632,16 +623,36 @@ def allocate(request, tdid, lid):
         contributor_role.save()
 
     common_content = TutorialCommonContent.objects.get(tutorial_detail_id=tdid)
-
     tutorial_resource = TutorialResource()
     tutorial_resource.tutorial_detail_id = tdid
-    tutorial_resource.common_content_id = common_content.id
     tutorial_resource.language_id = lid
+    tutorial_resource.assignment_status=1
+    tutorial_resource.common_content_id = common_content.id
     tutorial_resource.outline_user = user
     tutorial_resource.script_user = user
     tutorial_resource.video_user = user
-    tutorial_resource.script_status = 0
-    # tutorial_resource.bid_date = datetime.now()
-    tutorial_resource.save()
-
+    # assignment_status - 
+    # 0 : Not Assigned , 1 : Work in Progress , 2 : Completed
+    tutorial_resource.assignment_status = 1
+    tutorial_resource.submissiondate = datetime.now() + timedelta(days=10)
+    try :
+        tutorial_resource.save()
+    except:
+        print "Already saved"
+    TutorialsAvailable.objects.get(tutorial_detail = tdid,language = lid).delete()
     return HttpResponseRedirect('/statistics/allocate_tutorial/ongoing/')
+
+
+def extend_submission_date(request,tutorial):
+    print "Tutorial : ",tutorial
+    tutorial_resource = TutorialResource.objects.get(id = tutorial)
+    tutorial_resource.submissiondate = datetime.now() + timedelta(days = 10 )
+    tutorial_resource.extension_status +=1
+    tutorial_resource.save()
+    return HttpResponseRedirect('/statistics/allocate_tutorial/ongoing/')
+
+def allocate_foss(request,tdid,lid):
+    print "Tutorial  : ",tdid ,lid
+    context = { }
+    context['tutorial'] = tdid
+    return render(request, 'statistics/templates/allocate_tutorial.html', context)

@@ -335,11 +335,13 @@ def init_creation_app(request):
 # Creation app dashboard
 @login_required
 def creationhome(request):
+    languages = Language.objects.filter().values('name')
     if is_contributor(request.user) or is_domainreviewer(request.user) or is_videoreviewer(request.user) or is_qualityreviewer(request.user):
         contrib_notifs = []
         admin_notifs = []
         domain_notifs = []
         quality_notifs = []
+
         if is_contributor(request.user):
             contrib_notifs = ContributorNotification.objects.filter(user = request.user).order_by('-created')
         if is_videoreviewer(request.user):
@@ -353,13 +355,19 @@ def creationhome(request):
             'admin_notifs': admin_notifs,
             'domain_notifs': domain_notifs,
             'quality_notifs': quality_notifs,
-            'is_creation_role': True
+            'is_creation_role': True,
+            'language': languages
         }
         context.update(csrf(request))
         return render(request, 'creation/templates/creationhome.html', context)
     else:
+        
+        print "Languages : ",languages
+        
         context = {
-            'is_creation_role': False
+            'is_creation_role': False,
+            'language': languages
+
         }
         return render(request, 'creation/templates/creationhome.html', context)
 

@@ -69,47 +69,33 @@
       <a href="{% url 'statistics:allocate_tutorial' 'completed' %}"><i class="fa fa-list-ul"></i> Completed </a></li>
       <li {% if status == 'available' %}{{ 'class="active"'}}{% endif %}>
       <a href="{% url 'statistics:allocate_tutorial' 'available' %}"><i class="fa fa-list-ul"></i> Available </a></li>
-      <li {% if status == 'ongoing' %}{{ 'class="active"'}}{% endif %}>
+      <li {% if status == 'ongoing' %}{{ 'class="active"'}}{% endif %} onClick="compare()" id="ongoing">
       <a href="{% url 'statistics:allocate_tutorial' 'ongoing' %}"><i class="fa fa-list-ul"></i> Ongoing </a></li>
   </ul>
 
   <div class="tab-content">
   <div class="tab-pane active" id="pending">
-  
+  {% if tutorial_num.object_list %}
     <table class="paleblue table table-striped table-hover table-bordered">
+    {% get_sortable_header header ordering request.GET %}              
       {% if status == 'available' %}
           {% for record in tutorial_num.object_list %}
               <tr>
-              <td class="btn btn-primary" data-toggle="collapse" href="#{{tutorial_num.start_index|add:forloop.counter|add:-1}}" role="button" aria-expanded="false" aria-controls="multiCollapseExample1">{{ record.tutorial_detail.foss }}
-              </td>
-              <td>
-              <a href="{% url 'statistics:allocate_foss' record.tutorial_detail.id record.language_id %}">Allocate</a> 
-              </td>
-              </tr>
-
-          {% with record.language.name as lang %}
-            <tr id = "{{tutorial_num.start_index|add:forloop.counter|add:-1}}">
-              {% if lang == record.language.name %}
-              <td>{{ record.tutorial_detail.level }}</td>       
+              <td class ="btn btn-link" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">{{ record.tutorial_detail.level }}</td>       
               <td>{{ record.tutorial_detail.order }}</td>
+              <td>{{ record.tutorial_detail.foss.foss }}</td>
               <td>{{ record.tutorial_detail.tutorial }}</td>
+
               <td>{{ record.language.name }}</td>
-
-              <td> <a href="{% url 'statistics:allocate' record.tutorial_detail.id record.language_id %}">Allocate</a> 
-              </td>                        
-              {% endif %}
-              {% endwith %}
-              
-              {% endfor %}
-              {% endif %}
-
-      </tr>
-
+              <td> <a href="{% url 'statistics:allocate' record.tutorial_detail.id record.language_id %}">Allocate</a> </td>                        
+              </tr>
+          {% endfor %}
+      {% endif %}
+          
       {% if status == 'ongoing' %}
           {% for record in tutorial_num.object_list %}
           <tr>
-          <td>{{ tutorial_num.start_index|add:forloop.counter|add:-1 }}
-          </td>
+          <td>{{ tutorial_num.start_index|add:forloop.counter|add:-1 }}<input type="hidden" value="{{ record.id }}"></td>
           <td>{{ record.tutorial_detail.foss.foss }}</td>
           <td>{{ record.tutorial_detail }}</td>
           <td>{{ record.language.name }}</td>
@@ -118,25 +104,20 @@
           {% else %}
               <td>{{ record.script_user.username }}</td>
           {% endif %}    
-          <td >{{ record.updated|date:"d M Y" }}</td>
+          <td id = "rc">{{ record.updated|date:"d M Y" }}</td>
       {% if record.submissiondate|date:"Y" == '2000' %}
-          <td >{{datetoday|date:"d M Y"}} </td>
-
+          <td id = "submissiondate" >Not Applicable </td>
       {% else %}
-          <td >{{record.submissiondate|date:"d M Y" }}</td>
+          <td id = "submissiondate" >{{record.submissiondate|date:"d M Y" }}</td>
       {% endif%}      
 
-          <td align="center">
-          
-              {% if datetoday|date:"Y m d"  > record.submissiondate|date:"Y m d" %} 
-                <a class="btn btn-danger" href="{% url 'statistics:extend_submission_date' record.id %}"> 
+          <td>
+            {% if record.submissiondate|date:"Y" != '2000' %}
+              {% if datetoday|date:"d M Y"  > record.submissiondate|date:"d M Y" %} 
+              <a class="btn btn-danger" href="{% url 'statistics:extend_submission_date' record.id %}"> 
               Extend </a>
-              {% else%}
-              {% if record.extension_status == 1  %}
-                {{ record.extension_status}}
               {% endif %}
-              {% endif %}
-          
+            {% endif %}
           </td>
 
           </tr>
@@ -161,7 +142,7 @@
           {% endfor %}
       {% endif %}            
     </table>
-  
+  {% endif %}
   
   
       <div>
@@ -173,8 +154,18 @@
                 <li> <a href="?page={{ tutorial_num.previous_page_number }}"><b>Previous</b></a> </li>
           {% endif %}
         
+        {% if status == 'completed' %}
           <li> <a>{{ tutorial_num.number }} of  {{ tutorial_num.paginator.num_pages }}</a></li>
-        
+        {% else %}
+          {% for pg in tutorial_num.paginator.page_range %}
+            {% if tutorial_num.number == pg %}
+                <li class="active">  <a href="?page={{ pg }}">{{ pg }}</a> </li>
+            {% else %}
+                <li> <a  href="?page={{ pg }}">{{ pg }}</a> </li>
+            {% endif %}
+          {% endfor %}    
+        {% endif %}
+
           {% if tutorial_num.has_next %}
               <li> <a href="?page={{ tutorial_num.next_page_number }}" ><b>Next</b></a> </li>
               <li> <a href="?page={{ tutorial_num.paginator.num_pages }}"><b>Last</b></a> </li>
@@ -199,6 +190,12 @@
             maxDate:'+1987/06/14',
         });
 
-
+function compare()
+{
+  alert("Entry 1 ");
+  var select1 = document.getElementById("rc").val; 
+  alert("Universe is "+select1);
+  
+} 
     </script>
 {% endblock %}
