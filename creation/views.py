@@ -394,6 +394,8 @@ def creationhome(request):
 
         # Languages can be revoked when he is approved to be a contributor/.. , passed with "is_" variables
         # and for those he is not a contributor/.. , passed with "not_" variables
+        print "COntributor Languages : ", is_contributor_langs
+        print "Domain Reviewer Langs ",is_domain_reviewer_langs
         context = {
             'contrib_notifs': contrib_notifs,
             'admin_notifs': admin_notifs,

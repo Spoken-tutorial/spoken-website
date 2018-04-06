@@ -144,6 +144,7 @@
                         <td class="col-center"><a href="{% url 'creation:creation_reject_role_request'  domain_rec.id domain_rec.language_id %}" class="spin-btn js-accept-btn" ><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Reject</a></td>
                     </tr>
                 {% endfor %}
+
             {% endif %}
             </table>
         </div>
@@ -182,7 +183,7 @@
     <script src="{% static 'spoken/js/jquery.mousewheel-3.0.6.pack.js' %}"></script>
 {% endblock %}
 {% block compressinlinejsblock %}
-    <script type="text/javascript">
+<script type="text/javascript">
         $(document).ready(
             function(){
                 $(".spin-btn").hover(
@@ -193,14 +194,13 @@
                         $(this).children(0).removeClass("fa-spin");
                     }
                 );
-                $('.js-accept-btn','.js-reject-btn').click(function(e){
+                $('.js-accept-btn').click(function(e){
                     console.log($(this).attr('href') + " clicked at " + new Date());
                     // allow this link to be clicked only once, disable subsiquent clicks.
                     var url = $(this).attr('href');
                     var el = $(this);
                     el.html('processing...');
                     el.attr('href', '');
-
                     
                     var request = $.get(url, function(){
                         console.log("making request for " + url);
@@ -208,7 +208,6 @@
                     request.done(function(data){
                         console.log("success");
                         el.parent().html(data);
-
                     });
                     request.fail(function(){
                         console.log('failed');
@@ -219,4 +218,4 @@
             }
         );
     </script>
-{% endblock %}
+    {% endblock %}

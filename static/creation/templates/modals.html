@@ -109,9 +109,13 @@
     <div class="modal-body">
     <select multiple = "multiple" class="form-control modal-height" id="id_search_lang_revoke_dr"  tabindex="1" value="">
         <div>
-            {% for record in is_domain_reviewer_language %}
-                <option id = {{record.id}}>{{record.name}}</option>
-            {% endfor %}      
+            {% if is_domain_reviewer_language %}
+                {% for record in is_domain_reviewer_language %}
+                    <option id = {{record.id}}>{{record.name}}</option>
+                {% endfor %}      
+            {% else %}
+                <label>You are domain reviewer of English , which cannot be revokable </label>
+            {% endif %}
         </div>
     </select>
     </div>
