@@ -12,7 +12,8 @@ class TutorialDetailSerializer(serializers.ModelSerializer):
 class VideoSerializer(serializers.ModelSerializer):
     tutorial_level = serializers.CharField(source='tutorial_detail.level', read_only=True)
     tutorial_order = serializers.CharField(source='tutorial_detail.order', read_only=True)
+    tutorial_name = serializers.CharField(source='tutorial_detail.tutorial', read_only=True)
     class Meta:
         model = TutorialResource
-        fields = ('id','video_id','tutorial_level','tutorial_order')
+        fields = ('id','tutorial_name','video_id','tutorial_level','tutorial_order')
 

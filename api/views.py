@@ -32,7 +32,7 @@ def get_tutorial_list(request, fossid, langid):
     Retrieve, update or delete a code snippet.
     """
     try:
-        tuts = TutorialResource.objects.filter(language_id=langid, tutorial_detail_id__foss=fossid)
+        tuts = TutorialResource.objects.filter(language_id=langid, tutorial_detail_id__foss=fossid,status=1)
     except ObjectDoesNotExist:
         return HttpResponse(status=404)
     
