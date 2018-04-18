@@ -276,3 +276,9 @@ GOOGLE_RECAPTCHA_SITEVERIFY = GOOGLE_RECAPTCHA_SITEVERIFY
 RECAPTCHA_USE_SSL = True
 ACADEMIC_DURATION = 5
 SPOKEN_HASH_SALT = 'change this value'
+
+#Email support
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_HOST = 'localhost'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True

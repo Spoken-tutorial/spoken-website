@@ -460,3 +460,12 @@ class TutorialsAvailable(models.Model):
 
     class Meta:
         unique_together = (('tutorial_detail', 'language'),)
+
+class ContributorRating(models.Model):
+    user = models.ForeignKey(User)
+    choices = ((1,1),(2,2),(3,3),(4,4),(5,5))
+    rating = models.PositiveIntegerField(choices=choices)
+    language = models.ForeignKey(Language)
+
+    class Meta:
+        unique_together = (('user', 'language'),)

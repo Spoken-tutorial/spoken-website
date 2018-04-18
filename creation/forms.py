@@ -930,3 +930,108 @@ class UpdateSheetsForm(forms.Form):
                 self.fields['language'].choices =  [('', '-- Select Language --'),] + list(choices)
                 self.fields['language'].widget.attrs = {}
                 self.fields['language'].initial = initial_lang
+
+
+
+class ContributorRatingForm_old(forms.ModelForm):
+    user = forms.CharField(
+        required = True,
+        error_messages = {'required':'Username field required'},
+        help_text = "(Read-only)",    
+    )
+
+    language = forms.ChoiceField(
+        choices=[('', '-- Select Language --'), ],
+        required=True,
+        error_messages={'required': 'Language field is required.'}
+    )   
+
+    def __init__(self, *args, **kwargs):
+        super(ContributorRatingForm, self).__init__(*args, **kwargs)
+        print "ARGS : ", args
+        self.fields['user'].widget.attrs['readonly'] = True
+        
+        languages = Language.objects.filter(id__in= ContributorRole.objects.filter(
+            Q(status = 1) ,Q(user_id = kwargs['instance'].user_id)).values('language_id'))
+
+        user = User.objects.filter(username=kwargs['instance'].user)
+        print kwargs['instance'].user
+        print "#####################"
+        print user
+        u1 = User()
+        u1 = user
+        #user = User.objects.filter(username= kwargs['instance'].user).values_list('id','username')
+        print "User : ",type(user)
+        print dir(user)
+        print user.values('email')
+
+        #self.fields['user'].widget = forms.Select(choices=u1)
+        self.fields['user'].initial = forms.CharField(widget=user)
+
+
+        self.fields['language'] =  forms.ModelChoiceField(queryset=languages)
+
+        #self.fields['language'].widget.attrs = {}
+        #self.fields['language'].initial = initial_lang
+
+class ContributorRatingForm(forms.ModelForm):
+    user = forms.ChoiceField(
+        choices = [('', '-- Select User --'),] + list(
+         User.objects.filter(groups__id=4).values_list('id','username')),
+        required = True,
+        error_messages = {'required':'user field is required.'}
+    )
+    language = forms.ChoiceField(
+        choices=[('', '-- Select Language --'), ],
+        
+        widget=forms.Select(attrs={'disabled': 'disabled'}),
+        required=True,
+        error_messages={'required': 'Language field is required.'}
+    ) 
+
+    def __init__(self, *args, **kwargs):
+        super(ContributorRatingForm, self).__init__(*args, **kwargs)
+        
+        print "ARGS  : ",args,"--"
+        self.fields['rating'].help_text = ''' 1 : Loser<br>
+        2 : Just a Contributor <br>
+        3 : Fair <br>
+        4 : Good <br>
+        5 : God Like <br>
+        ''' 
+        if args:
+            
+            if 'user' in args[0] and args[0]['user']:
+                initial_lang = ''
+                if 'language' in args[0] and args[0]['language']:
+                    initial_lang = args[0]['language']
+
+                lang = Language.objects.filter(id__in= ContributorRole.objects.filter(
+                Q(status = 1) ,Q(user_id = args[0]['user'])).values('language_id'))
+                print "Selected : ", dir(lang)
+                
+                user_1 = User.objects.filter(groups__id=4)
+                self.fields['user'] =  forms.ModelChoiceField(queryset=user_1)
+                self.fields['language'] =  forms.ModelChoiceField(queryset=lang)
+        else:
+            all_langs = Language.objects.all()
+            self.fields['language'] =  forms.ModelChoiceField(queryset=all_langs)
+
+        if kwargs:
+            key= kwargs.keys()
+            print "key : ", key[0]
+            print "kk : ", kwargs[key[0]]
+            if kwargs[key[0]]:
+                if kwargs[key[0]].user:
+                    initial_lang = ''
+                    if kwargs['instance'].language:
+                        initial_lang = kwargs['instance'].language
+
+                    lang = Language.objects.filter(id__in= ContributorRole.objects.filter(
+                    Q(status = 1) ,Q(user_id = kwargs['instance'].user_id)).values('language_id'))
+                    print "Selected : ", dir(lang)
+                    
+                    user_1 = User.objects.filter(groups__id=4)
+                    self.fields['user'] =  forms.ModelChoiceField(queryset=user_1)
+                    self.fields['language'] =  forms.ModelChoiceField(queryset=lang)
+                    
