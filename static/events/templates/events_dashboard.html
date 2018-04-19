@@ -109,8 +109,28 @@
                         </div>
                     </div>
                 {% endif %}
-            </div>
 
+
+            {% if user|is_resource_person or user|is_resource_person or user|is_event_manager or user|is_organiser %}
+		
+                    <div class="panel panel-primary">
+                        <div class="panel-heading panel-heading-notif"> Advance Online Test</div>
+                        <div class="panel-body">
+                            <ul>
+                                {% if user|is_resource_person %}
+                                    <li><a href="/software-training/yaksh/advance_tests/as_rp/">Advance Tests As A Resource Person</a></li>
+                                {% endif %}
+                                {% if user|is_resource_person %}
+                                    <li><a href="/software-training/yaksh/advance_tests/as_iv/">Advance Tests As An Invigilator </a></li>
+                                {% endif %}
+                                {% if user|is_organiser %}
+                                    <li><a href="/software-training/yaksh/advance_tests/as_org/">Advance Tests As An Organiser </a></li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+            {% endif %}
+            </div>
             <div class="creation-notifications col-lg-6 col-md-6 col-sm-6">
                 <!-- {% if organiser_workshop_notification %}
                     <div class="panel panel-primary">

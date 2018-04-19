@@ -1,0 +1,64 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block title %}Advance Online Test{% endblock %}
+{% block heading %}
+        <i class="fa fa-list-ul"></i> Advance Online Test As An Invigilator<a href="{% url 'events:events_dashboard' %}" class='pull-right'>Dashboard</a>
+{% endblock %}
+{% block content %}
+<ul>
+    <li><a href="{% url 'events:advance_tests_iv' 2 %}"> Requested </a></li>
+    <li><a href="{% url 'events:advance_tests_iv' 3 %}"> Approved </a></li>
+    <li><a href="{% url 'events:advance_tests_iv' 4 %}"> Inprogress/Invigilated </a></li>
+    <li><a href="{% url 'events:advance_tests_iv' 5 %}"> Completed </a></li>
+    <li><a href="{% url 'events:advance_tests_iv' 30 %}"> Rejected </a></li>
+</ul>
+{% if status == 2 %}
+<b>Requested</b>
+{% elif status == 3 %}
+<b> Approved</b>
+{% elif status == 4 %}
+<b> Inprogress/Invigilated </b>
+{% elif status == 5 %}
+<b> Completed </b>
+{% elif status == 30 %}
+<b> Rejected </b>
+{% endif %}
+    <table class="paleblue table table-striped table-hover table-bordered">
+        {% for test in advance_tests %}
+            <tr>
+                <td>{{ forloop.counter }}
+                <td>{{ test.organiser.state }}</td>
+                <td>{{ test.organiser.academic.academic_code}}</td>
+                <td>{{ test.organiser.academic }}</td>
+                <td>{{ test.organiser.user.first_name }}</td>
+                <td>{{ test.test.foss.foss }}</td>
+                <td>{{ test.date_time|date:"d M Y" }}</td>
+                <td>{{ test.get_students_count }}</td>
+                        View Participant
+                {% if status == 2 %}
+                    <td>
+                        <a href="{% url 'events:advance_test_approve_iv' test.id %}">Accept</a> |
+                        <a href="{% url 'events:advance_test_reject_iv' test.id %}">Reject</a>
+                    </td>
+                {% elif status == 3%}
+                    <td>
+                        <a href="{% url 'events:advance_test_reject_iv' test.id %}">Reject</a>
+                    </td>
+                {% elif status == 4 %}
+                    <td>
+                        Inprogress
+                    </td>
+                {% elif status == 5 %}
+                    <td>
+                        Completed
+                    </td>
+                {% elif status == 30 %}
+                    <td>
+                        <a href="{% url 'events:advance_test_approve_iv' test.id %}">Accept</a>
+                    </td>
+                {% endif %}
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block title %}Advance Online Test{% endblock %}
+{% block heading %}
+        <i class="fa fa-list-ul"></i> Advance Online Test As An Organiser <a href="{% url 'events:events_dashboard' %}" class='pull-right'>Dashboard</a>
+{% endblock %}
+{% block content %}
+<ul>
+    <li><a href="{% url 'events:advance_tests_org' 1 %}"> Requested </a></li>
+    <li><a href="{% url 'events:advance_tests_org' 2 %}"> Approved by Resource Person</a></li>
+    <li><a href="{% url 'events:advance_tests_org' 3 %}"> Approved by Invigilator </a></li>
+    <li><a href="{% url 'events:advance_tests_org' 4 %}"> Inprogress/Invigilated </a></li>
+    <li><a href="{% url 'events:advance_tests_org' 5 %}"> Completed </a></li>
+    <li><a href="{% url 'events:advance_tests_org' 20 %}"> Rejected by Resource Person</a></li>
+    <li><a href="{% url 'events:advance_tests_org' 30 %}"> Rejected by Invigilator </a></li>
+</ul>
+{% if status == 1 %}
+<b>Requested</b>
+{% elif status == 2 %}
+<b> Approved</b>
+{% elif status == 3 %}
+<b> Approved by Invigilator </b>
+{% elif status == 4 %}
+<b> Inprogress/Invigilated </b>
+{% elif status == 5 %}
+<b> Completed </b>
+{% elif status == 20 %}
+<b> Rejected </b>
+{% elif status == 30 %}
+<b> Rejected by Invigilator </b>
+{% endif %}
+    <table class="paleblue table table-striped table-hover table-bordered">
+        {% for test in advance_tests %}
+            <tr>
+                <td>{{ forloop.counter }}
+                <td>{{ test.organiser.state }}</td>
+                <td>{{ test.organiser.academic.academic_code}}</td>
+                <td>{{ test.organiser.academic }}</td>
+                <td>{{ test.organiser.user.first_name }}</td>
+                <td>{{ test.test.foss.foss }}</td>
+                <td>{{ test.date_time|date:"d M Y" }}</td>
+                <td>{{ test.get_students_count }}</td>
+                <td>
+                    View Participant
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

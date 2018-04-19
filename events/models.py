@@ -3,6 +3,7 @@ from datetime import datetime, date, timedelta
 from django.db.models.signals import pre_delete, post_delete
 from django.dispatch import receiver
 from django.db.models import Q, Count, Sum, Min
+from django.utils import timezone
 
 #import auth user models
 from django.contrib.auth.models import User
@@ -20,6 +21,16 @@ from events.signals import revoke_student_permission
 from creation.models import FossCategory, Language, \
   FossAvailableForWorkshop, FossAvailableForTest
 
+
+ADVANCE_TEST_STATUS = (
+    (1, 'Requested'),
+    (2, 'Resoure Person Approved'),
+    (3, 'Invigilator Approved'),
+    (4, 'Invigilated'),
+    (5, 'Completed'),
+    (20, 'Resoure Person Rejected'),
+    (30, 'Invigilator Rejected'),
+)
 
 # Create your models here.
 class State(models.Model):
@@ -380,7 +391,6 @@ class Test(models.Model):
     for attendee in attendees:
         if attendee.is_top_performer():
             top_performers.append(attendee)
-    print(top_performers)
     return top_performers
 
 
@@ -1643,17 +1653,54 @@ class InductionFinalList(models.Model):
 
 
 class AdvanceTest(models.Model):
-    foss = models.ForeignKey(FossCategory, related_name='advance_test_foss')
+    foss = models.OneToOneField(FossCategory, on_delete=models.CASCADE,
+                                related_name='advance_test_foss')
     link = models.URLField(null=True)
     active = models.BooleanField(default=True)
     qualifying_marks = models.DecimalField(decimal_places=2, max_digits=5, default=90)
 
+
 class AdvanceTestBatch(models.Model):
-    test = models.ForeignKey(AdvanceTest, related_name='advance_test')
+    organiser = models.ForeignKey(Organiser, related_name='advance_test_organiser')
+    approved_by = models.ForeignKey(User, null=True,
+                                   related_name='advance_test_approved_by')
+    invigilator = models.ForeignKey(Invigilator, null=True,
+                                    related_name='advance_test_invigilator')
+    test = models.OneToOneField(AdvanceTest, related_name='advance_test')
     preliminary_test = models.ForeignKey(Test, related_name='pretest')
-    batch = models.ForeignKey(StudentBatch, null=True, related_name='advance_batch')
     students = models.ManyToManyField('Student', null=True, related_name='advance_students')
+    date_time = models.DateTimeField(null=True)
+    status = models.IntegerField(default=1, choices=ADVANCE_TEST_STATUS)
     is_open = models.BooleanField(default=False)
+
+    def invigilator_approve(self):
+        self.status = 3
+        self.save()
+
+    def invigilator_reject(self):
+        self.status = 30
+        self.save()
+
+    def resource_person_approve(self):
+        self.status = 2
+        self.save()
+
+    def resource_person_reject(self):
+        self.status = 20 
+        self.save()
+
+    def invigilated(self):
+        self.status = 4
+        self.save()
+
+    def close(self):
+        self.is_open = False
+
+    def open(self):
+        self.is_open = True
+
+    def get_status(self):
+        return self.status
 
     def is_batch_eligible(self):
         # Check whether batch can go for the advance test
@@ -1666,8 +1713,5 @@ class AdvanceTestBatch(models.Model):
     def add_student(self, student):
         self.students.add(student)
 
-    def set_advance_students(self):
-        students = self.batch.get_students()
-        for student in students:
-            if is_student_advance(student):
-                add_student(student)
+    def get_students_count(self):
+        return self.students.count()
