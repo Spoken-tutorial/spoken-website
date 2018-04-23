@@ -4,6 +4,7 @@ import os
 import re
 import subprocess
 import time
+from django.utils import timezone
 from decimal import Decimal
 from urllib import quote, unquote_plus, urlopen
 
@@ -1752,7 +1753,7 @@ def accept_all(request, review, trid):
 
         tr.common_content.save()
     if not flag:
-        messages.warning(request, 'There is no component available for Domain reviewr to accept.')
+        messages.warning(request, 'There is no component available for Domain reviewer to accept.')
 
     return HttpResponseRedirect('/creation/' + review + '-review/tutorial/' + str(tr.id) + '/')
 
@@ -2179,9 +2180,11 @@ def publish_tutorial(request, trid):
     else:
         flag = 1
     if flag and tr_rec.outline_status == 4 and tr_rec.script_status == 4 and tr_rec.video_status == 4:
-        tr_rec.status = 1
+        tr_rec.status = 1 
+        tr_rec.publish_at = timezone.now()
         tr_rec.save()
         PublishTutorialLog.objects.create(user = request.user, tutorial_resource = tr_rec)
+
         add_contributor_notification(tr_rec, comp_title, 'This tutorial is published now')
         messages.success(request, 'The selected tutorial is published successfully')
     else:

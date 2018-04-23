@@ -12,54 +12,56 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
 from django.template import Context
 
-from config import *
+from config import * 
 from cms.models import *
-from events.models import InductionInterest, InductionFinalList
+from events.models import Drupal2018_email
 
 #here fetch all user
-users = InductionFinalList.objects.filter(batch_code='20171103')
+users = Drupal2018_email.objects.all()
 sent = 0
 notsent = 0
 count = 0
 tot_count = len(users)
 
-subject = ' Reminder: "Instructions for uploading the college letter and paying the registration fee" '
+subject = ' Invitation to attend "Drupal in a Day" workshop'
 
-success_log_file_head = open(LOG_ROOT+'induction_particiants_thirdshortlist.txt',"w")
+success_log_file_head = open(LOG_ROOT+'drupal2018_org_invitation.txt',"w")
 for user in users:
     message = '''
-Dear Candidate,
+<p>Dear Future Professionals,</p>
 
-This email is a reminder for you to upload the certificate requested in our last email and make the payment of non-refundable course fees of Rs.1000.  Both of these tasks should be completed by 16 November 2017. The certificate should be on the College Letterhead and should be exactly as per the proforma, which we sent as an attachment in the previous email.
+<p>Spoken Tutorial in association with FOSSEE, IIT Bombay, is hosting "Drupal-in-a-Day" workshop alongside Drupal Camp Mumbai 2018 at IIT Bombay. We invite you to attend this workshop and learn Drupal, the world\'s leading open source content management framework, for developing websites and web based applications (for desktop and mobile). On successful completion of the surprise activity, you also stand a good chance to get a free participation ticket to attend two days of Drupal Camp on 28 and 29 April 2018.</p>
 
-We would appreciate your urgent attention to this matter and look forward to receiving the same, no later than the date mentioned above.   So, kindly do so at the earliest.  
+<p>Drupal Camp Mumbai is one of the largest Drupal community gatherings in India. The purpose of this event is to bring students, developers, architects, managers, businesses and organisations on a singular platform to network, interact and share openly with each other, and help strengthen the community at large.</p>
 
-After the stipulated deadline, we will have to release your seat for the candidates in the next shortlist, if our records show that you have not done either of the above.
+<p>The training workshop is focused self-learning and real time practising model, where each student will be provided with high quality video tutorials developed by Spoken Tutorial projcet and at the end of the workshop the student should be able to build a full fledged Drupal-based website.</p>
 
-If you have already completed both the above steps, kindly ignore this mail.
+<p>Come learn, be a part of the largest open source community for web content management, and hone your skills to an exciting career in web applications.</p>
 
+<p><b>When:-</b> 27 April 2018 <br>
 
-Thanks and rgds,
-Organising Team
-PMMMNMTT Induction Training Programme
-IIT Bombay
+<b>Venue:-</b> Seminar Room, Ground Floor, Aero Annex Building, Below HSS Department, IIT Bombay, Mumbai 400076.
 
+<br><b>To know more and Register:-</b> <a href="http://spoken-tutorial.org/workshop/drupal2018/" target="_blank">Click Here</a></p>
 
-
+<p>Thanks and rgds,<br>
+Tejas Shah, Organising Team<br>
+Spoken Tutorial, FOSSEE and DCM<br>
+IIT Bombay</p>
 
 '''.format(user.email)
 
     to  = [user.email]
-    # to = ['ganeshmohite96@gmail.com','nancyvarkey@gmail.com']
+    #to = ['ganeshmohite96@gmail.com','nancyvarkey.iitb@gmail.com']
     email = EmailMultiAlternatives(
-        subject, message, 'workshops@spoken-tutorial.org',
+        subject, message, 'tejas.shah@iitb.ac.in',
         to = to,
         headers = {
          "Content-type" : "text/html"
         }
     )
-    #email.attach_alternative(html_content, "text/html")
-    email.attach_file('/websites_dir/django_spoken/spoken/cron/collegeletter.pdf')
+    email.attach_alternative(message, "text/html")
+    # email.attach_file('/websites_dir/django_spoken/spoken/cron/collegeletter.pdf')
     count = count + 1
     try:
         result = email.send(fail_silently=False)
@@ -72,8 +74,9 @@ IIT Bombay
         print e
         #print to," => not sent (",count,"/",tot_count,")"
         success_log_file_head.write(str(user.email)+','+str(0)+'\n')
-    # break
+    #break
 print "--------------------------------"
+print tot_count
 print "Total sent mails:", sent
 print "Total not sent mails:", notsent
 print "--------------------------------"

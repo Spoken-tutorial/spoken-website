@@ -876,9 +876,9 @@ class TrainingRequest(models.Model):
 
   def training_name(self):
     if self.batch:
-      return 'WC-%d, %s, %s - %s - %s' % (self.id, self.course, self.batch, \
+      return 'WC-{0}, {1}, {2} - {3} - {4}'.format(self.id, self.course, self.batch, \
         self.training_planner.year, int(self.training_planner.year)+1)
-    return 'WC-%d, %s, %s - %s' % (self.id, self.course, \
+    return 'WC-{0}, {1}, {2} - {3}'.format(self.id, self.course, \
       self.training_planner.year, int(self.training_planner.year)+1)
 
 
@@ -1619,4 +1619,7 @@ class InductionFinalList(models.Model):
   # batch_code should be in form of year+month+batch_number e.g. 20171101 = [year 2017,month 11, batch 01]
   batch_code = models.PositiveIntegerField()
   created = models.DateTimeField(auto_now_add = True)
+
+class Drupal2018_email(models.Model):
+  email = models.EmailField(max_length = 200)
 
