@@ -1623,3 +1623,7 @@ class InductionFinalList(models.Model):
 class Drupal2018_email(models.Model):
   email = models.EmailField(max_length = 200)
 
+class MumbaiStudents(models.Model):
+  stuid = models.ForeignKey('Student')
+  bid = models.ForeignKey('StudentBatch')
+

@@ -14,10 +14,11 @@ from django.template import Context
 
 from config import * 
 from cms.models import *
-from events.models import Drupal2018_email
+from events.models import Drupal2018_email, MumbaiStudents
 
 #here fetch all user
-users = Drupal2018_email.objects.all()
+# users = Drupal2018_email.objects.all()
+users = MumbaiStudents.objects.all().order_by('bid')
 sent = 0
 notsent = 0
 count = 0
@@ -49,9 +50,9 @@ Tejas Shah, Organising Team<br>
 Spoken Tutorial, FOSSEE and DCM<br>
 IIT Bombay</p>
 
-'''.format(user.email)
+'''.format(user.stuid.user.email)
 
-    to  = [user.email]
+    to  = [user.stuid.user.email]
     #to = ['ganeshmohite96@gmail.com','nancyvarkey.iitb@gmail.com']
     email = EmailMultiAlternatives(
         subject, message, 'tejas.shah@iitb.ac.in',
@@ -69,11 +70,11 @@ IIT Bombay</p>
         if sent%100 == 0:
             time.sleep(10)
         #print to," => sent (", str(count),"/",str(tot_count),")"
-        success_log_file_head.write(str(user.email)+','+str(1)+'\n')
+        success_log_file_head.write(str(user.stuid.user.email)+','+str(1)+'\n')
     except Exception, e:
         print e
         #print to," => not sent (",count,"/",tot_count,")"
-        success_log_file_head.write(str(user.email)+','+str(0)+'\n')
+        success_log_file_head.write(str(user.stuid.user.email)+','+str(0)+'\n')
     #break
 print "--------------------------------"
 print tot_count
