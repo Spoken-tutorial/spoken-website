@@ -475,6 +475,11 @@ class TrainingReUseForm(forms.Form):
         self.user = kwargs.pop('user', None)
         super(TrainingReUseForm, self).__init__(*args, **kwargs)
 
+class AdvanceTestForm(forms.ModelForm):
+    class Meta:
+        model = AdvanceTest
+        fields = '__all__'
+
 class AdvanceTestBatchForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):

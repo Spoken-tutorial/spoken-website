@@ -1,0 +1,67 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load eventsdata %}
+{% block title %}Advance Test Attendance Sheet{% endblock %}
+{% block heading %}
+        <i class="fa fa-list-ul"></i> Advance Test Attendance Sheet <a href="{% url 'events:events_dashboard' %}" class='pull-right'>Dashboard</a>
+{% endblock %}
+{% block content %}
+    </div>
+    <!-- Tab panes -->
+    <div class="tab-content">
+        <div class="tab-pane active" id="pending">
+            {% if students %}
+                <h4 class='step'><span class="label label-default">Step 1</span></h4>
+                <form action="{% url 'events:advance_test_mark_attendance' advance_test.id %}" method="POST">{% csrf_token %}
+                    <table class="table table-striped table-hover table-bordered">
+                        <tr>
+                            <th>#</th>
+                            <th>Select</th>
+                            <th>Name</th>
+                            <th>Email Id</th>
+                            <th>Status</th>
+                        </tr>
+                        {% for student in students %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td><input type='checkbox' name="students" value="{{ student.id }}"></td>
+                                <td>{{ student.user.first_name|lower|title }} {{ student.user.last_name|lower|title }}</td>
+                                <td>{{ student.user.email}}</td>
+                                <td>
+                                    Waiting for attendance
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                    <input name="submit-attendance" class="btn btn-primary" type="submit" value="Submit" />
+                  {% endif %}
+                    <br /> <br />
+                  {% if attendees %}
+                    <table class="table table-striped table-hover table-bordered">
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Email Id</th>
+                            <th>Status</th>
+                        </tr>
+                        {% for student in attendees %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ student.user.first_name|lower|title }} {{ student.user.last_name|lower|title }}</td>
+                                <td>{{ student.user.email}}</td>
+                                <td>
+                                    Ready for Test
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                  {% endif %}
+                </form>
+                    <h4 class='step'><span class="label label-default">Step 2</span></h4>
+                    <div class="bs-callout bs-callout-info">
+                        <p>Please make sure that you want to close the test. Then click <b><a class='btn btn-primary' href="{% url 'events:close_advance_test' advance_test.id%}">Close the Test</a> to end the test.</p>
+                    </div>
+        </div>
+    </div>
+{% endblock %}

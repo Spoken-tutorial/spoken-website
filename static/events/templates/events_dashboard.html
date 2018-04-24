@@ -111,16 +111,19 @@
                 {% endif %}
 
 
-            {% if user|is_resource_person or user|is_resource_person or user|is_event_manager or user|is_organiser %}
+            {% if user|is_resource_person or user|is_resource_person or user|is_event_manager or user|is_organiser or user|is_administrator %}
 		
                     <div class="panel panel-primary">
                         <div class="panel-heading panel-heading-notif"> Advance Online Test</div>
                         <div class="panel-body">
                             <ul>
+                                {% if user|is_administrator %}
+                                <li><a href="{% url 'events:add_advance_test' %}"> Add Advance Test For A FOSS</a></li>
+                                {% endif %}
                                 {% if user|is_resource_person %}
                                     <li><a href="/software-training/yaksh/advance_tests/as_rp/">Advance Tests As A Resource Person</a></li>
                                 {% endif %}
-                                {% if user|is_resource_person %}
+                                {% if user|is_invigilator %}
                                     <li><a href="/software-training/yaksh/advance_tests/as_iv/">Advance Tests As An Invigilator </a></li>
                                 {% endif %}
                                 {% if user|is_organiser %}

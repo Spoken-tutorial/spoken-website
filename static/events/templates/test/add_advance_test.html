@@ -1,0 +1,14 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load eventsdata %}
+{% block title %} Add/Edit Advance Test {% endblock %}
+{% block heading %}
+        <i class="fa fa-list-ul"></i> Add/Edit Advance Test  <a href="{% url 'events:events_dashboard' %}" class='pull-right'>Dashboard</a>
+{% endblock %}
+{% block content %}
+    <form action="{{ action }}" method="post">{% csrf_token %}
+        {{ form.as_p }}
+        <input class="btn btn-primary" type="submit" value="Submit" />
+    </form>
+{% endblock %}

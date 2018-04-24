@@ -1749,8 +1749,9 @@ def test_request(request, role, rid = None):
 
 def _get_advance_tests_rp(user, status=1):
     states = user.resource_person.all()
-    return AdvanceTestBatch.objects.filter(status=status,
-                                           organiser__academic__state__in=states)
+    return AdvanceTestBatch.objects.filter(
+        status=status, organiser__academic__state__in=states
+    )
 
 def _get_advance_tests_iv(user, status=1):
     return AdvanceTestBatch.objects.filter(status=status,
@@ -1759,6 +1760,11 @@ def _get_advance_tests_iv(user, status=1):
 def _get_advance_tests_org(user, status=1):
     return AdvanceTestBatch.objects.filter(status=status,
                                            organiser=user.organiser)
+
+def _check_advance_tests_today(advance_test_batches):
+    for batch in advance_test_batches:
+        if batch.is_today() and batch.status == 3:
+            batch.invigilated()
 
 @login_required
 def advance_test_approve_rp(request, test_id):
@@ -1819,22 +1825,25 @@ def advance_tests_rp(request, status=1):
     user = request.user
     if is_resource_person(user):
         advance_tests = _get_advance_tests_rp(user, status=status)
+        _check_advance_tests_today(advance_tests)
     else:
         raise PermissionDenied()
     context = {'advance_tests': advance_tests, 'status': int(status)}
-    return render(request, 'events/templates/test/advance_tests_rp.html', context)
-
+    return render(request, 'events/templates/test/advance_tests_rp.html',
+                  context)
 
 @login_required
-def advance_tests_iv(request, status=1):
+def advance_tests_iv(request, status=2):
     '''Advance tests shown to Invigilator '''
     user = request.user
     if is_invigilator(user):
         advance_tests = _get_advance_tests_iv(user, status=status)
+        _check_advance_tests_today(advance_tests)
     else:
         raise PermissionDenied()
     context = {'advance_tests': advance_tests, 'status': int(status)}
-    return render(request, 'events/templates/test/advance_tests_iv.html', context)
+    return render(request, 'events/templates/test/advance_tests_iv.html',
+                  context)
 
 @login_required
 def advance_tests_org(request, status=1):
@@ -1842,10 +1851,88 @@ def advance_tests_org(request, status=1):
     user = request.user
     if is_organiser(user):
         advance_tests = _get_advance_tests_org(user, status=status)
+        _check_advance_tests_today(advance_tests)
     else:
         raise PermissionDenied()
     context = {'advance_tests': advance_tests, 'status': int(status)}
-    return render(request, 'events/templates/test/advance_tests_org.html', context)
+    return render(request, 'events/templates/test/advance_tests_org.html',
+                  context)
+
+def advance_tests_student(request, status=1):
+    '''Advance tests shown to a student '''
+    mdluserid = request.session.get('mdluserid')
+    mdlusername = request.session.get('mdlusername')
+    if not mdluserid:
+        return HttpResponseRedirect('/participant/login')
+    try:
+        mdluser = MdlUser.objects.get(id=mdluserid)
+    except:
+        return HttpResponseRedirect('/participant/login')
+    user = get_object_or_404(User, email=mdluser.email)
+    status = int(status)
+    if hasattr(user, 'student'):
+        student = user.student
+        if status == 1:
+            advance_tests_available = student.advance_attendees.all()
+            context = {'tests': advance_tests_available, 'status': status}
+        elif status == 0:
+            advance_tests_completed = student.advance_appeared.all()
+            context = {'tests': advance_tests_completed, 'status': status}
+        elif status == 2:
+            advance_tests_enrolled = student.advance_students.exclude(
+                id__in=advance_tests_available
+            )
+            context = {'tests': advance_tests_enrolled, 'status': status}
+        return render(request,
+                      'events/templates/test/advance_tests_student.html',
+                      context)
+    else:
+        raise PermissionDenied()
+
+@login_required
+def close_advance_test(request, test_id):
+    user = request.user
+    if is_invigilator(user):
+        advance_test_batch = get_object_or_404(AdvanceTestBatch, id=test_id)
+        if advance_test_batch.invigilator != user.invigilator:
+            raise PermissionDenied()
+        advance_test_batch.close()
+        return advance_tests_iv(request, status=5)
+    else:
+        raise PermissionDenied()
+
+@login_required
+def advance_test_mark_attendance(request, test_id):
+    user = request.user
+    if is_invigilator(user):
+        advance_test_batch = get_object_or_404(AdvanceTestBatch, id=test_id)
+        if advance_test_batch.invigilator != user.invigilator:
+            raise PermissionDenied()
+        if request.method == 'POST':
+            student_ids = request.POST.getlist('students')
+            advance_test_batch.attendees.add(*student_ids)
+        students = advance_test_batch.get_students_for_attendance()
+        attendees = advance_test_batch.get_attendees()
+        context = {'advance_test': advance_test_batch, 'students': students,
+                   'attendees': attendees}
+        return render(request, 'events/templates/test/advance_test_attendance.html', context)
+    else:
+        raise PermissionDenied()
+
+@login_required
+def add_advance_test(request, test_id=None):
+    user = request.user
+    if test_id:
+        test = get_object_or_404(AdvanceTest, id=test_id)
+    else:
+        test = None
+    if is_administrator(user):
+        test_form = AdvanceTestForm(instance=test)
+        context = {'form': test_form}
+        return render(request, 'events/templates/test/add_advance_test.html',
+                      context)
+    else:
+        raise PermissionDenied()
 
 @login_required
 def test_list(request, role, status):

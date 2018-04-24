@@ -1657,20 +1657,27 @@ class AdvanceTest(models.Model):
                                 related_name='advance_test_foss')
     link = models.URLField(null=True)
     active = models.BooleanField(default=True)
-    qualifying_marks = models.DecimalField(decimal_places=2, max_digits=5, default=90)
+    qualifying_marks = models.DecimalField(decimal_places=2, max_digits=5,
+                                           default=90)
 
 
 class AdvanceTestBatch(models.Model):
-    organiser = models.ForeignKey(Organiser, related_name='advance_test_organiser')
+    organiser = models.ForeignKey(Organiser,
+                                  related_name='advance_test_organiser')
     approved_by = models.ForeignKey(User, null=True,
-                                   related_name='advance_test_approved_by')
+                                    related_name='advance_test_approved_by')
     invigilator = models.ForeignKey(Invigilator, null=True,
                                     related_name='advance_test_invigilator')
-    test = models.OneToOneField(AdvanceTest, related_name='advance_test')
+    test = models.ForeignKey(AdvanceTest, related_name='advance_test')
     preliminary_test = models.ForeignKey(Test, related_name='pretest')
-    students = models.ManyToManyField('Student', null=True, related_name='advance_students')
+    students = models.ManyToManyField('Student',
+                                      related_name='advance_students')
     date_time = models.DateTimeField(null=True)
     status = models.IntegerField(default=1, choices=ADVANCE_TEST_STATUS)
+    attendees = models.ManyToManyField('Student',
+                                       related_name='advance_attendees')
+    appeared = models.ManyToManyField('Student',
+                                      related_name='advance_appeared')
     is_open = models.BooleanField(default=False)
 
     def invigilator_approve(self):
@@ -1695,9 +1702,16 @@ class AdvanceTestBatch(models.Model):
 
     def close(self):
         self.is_open = False
+        if self.status == 4:
+            self.status = 5
+        self.save()
 
     def open(self):
         self.is_open = True
+        self.save()
+
+    def is_today(self):
+        return self.date_time.date() == timezone.datetime.today().date()
 
     def get_status(self):
         return self.status
@@ -1708,10 +1722,19 @@ class AdvanceTestBatch(models.Model):
         # self.training_request.test.status = 4
         # currentyear - year of joining = 3
         # self.batch.trainingrequest.coursemap.foss = test.foss
-	pass
+	    pass
 
     def add_student(self, student):
         self.students.add(student)
 
     def get_students_count(self):
         return self.students.count()
+
+    def get_students(self):
+        return self.students.all()
+
+    def get_students_for_attendance(self):
+        return self.students.all().exclude(id__in=self.attendees.all())
+
+    def get_attendees(self):
+        return self.attendees.all()
