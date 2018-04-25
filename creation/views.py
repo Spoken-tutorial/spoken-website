@@ -250,6 +250,7 @@ def creation_accept_role_request(request, recid,langid):
             role_rec.status = 1
             role_rec.language_id = langid
             role_rec.save()
+
             return HttpResponse("Accepted")
         except:
             return HttpResponse("Failed: Invalid Role")
@@ -311,12 +312,10 @@ def creation_revoke_role_request(request, role_type,langid):
                     elif role_rec.role_type == 4:
                         QualityReviewerRole.objects.filter(user = role_rec.user).update(status = 0)
                     rec_check = RoleRequest.objects.filter(user = request.user, role_type = roles[role_type],status=1)
-                    print "rec_check",len(rec_check.values('status'))
-                    if len(rec_check.values('status')):
-                        role_rec.status = 2
-                        role_rec.save()
-                    else:    
-                        role_rec.user.groups.remove(Group.objects.get(name = role_type.title()))
+                    
+                    role_rec.status = 2
+                    role_rec.save()
+                
                     lang_show = Language.objects.get(id = a_language)
                     messages.success(request, role_type.title() + ' role has been revoked from ' + role_rec.user.username+' for the language '+ lang_show.name)
             except:

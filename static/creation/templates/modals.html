@@ -9,6 +9,7 @@
     </div>
     <div class="modal-body">
     <select multiple = "multiple" class="form-control modal-height modal-height" id="id_search_lang_revoke_c" name="search_language" tabindex="1" value="">
+        
         <div>
             {% for record in is_contributor_language %}
                 <option id = {{record.id}}>{{record.name}}</option>

@@ -106,16 +106,22 @@
                         <ul > 
                             {% if user|get_internal_contributor %}
                                 <li>
-                                <a href="#" onClick= "show_modal(this)" id = "add_contributor" > Add me as Contributor  |  </a> 
-                                <a href="#" onClick= "show_modal(this)" id = "revoke_contributor" > Revoke Contributor</a>
+                                <a href="#" onClick= "show_modal(this)" id = "add_contributor" > Add me as Contributor   </a>
+                                {% if is_contributor_language %}
+                                <a href="#" onClick= "show_modal(this)" id = "revoke_contributor" >| Revoke Contributor</a>
+                                {% endif %}
                                     </li>
+                                
                             {% else %}
                                 <li><a href="#" onClick= "show_modal(this)" id = "add_contributor" > Add me as Contributor</a>
                                 </li>
                             {% endif %}
                             {% if user|get_external_contributor %}
                                 <li >
-                                    <a href="#" onClick= "show_modal(this)" id = "add_external_contributor" >Add me as External Contributor  |  </a><a href="#" onClick= "show_modal(this)" id = "revoke_external_contributor" >Revoke External Contributor Role</a>
+                                    <a href="#" onClick= "show_modal(this)" id = "add_external_contributor" >Add me as External Contributor  </a>
+                                    {% if is_external_contributor_language %}
+                                    <a href="#" onClick= "show_modal(this)" id = "revoke_external_contributor" >| Revoke External Contributor Role</a>
+                                    {% endif %}
                                 </li>
                             {% else %}
                                 <li>
@@ -130,8 +136,10 @@
                             {% endif %}
                             {% if user|get_domainreviewer %}
                                 <li>
-                                    <a href="#" onClick= "show_modal(this)" id = "add_domain">Add me as Domain Reviewer  |  </a>
-                                    <a href="#" onClick= "show_modal(this)" id = "revoke_domain">Revoke Domain Reviewer Role</a>
+                                    <a href="#" onClick= "show_modal(this)" id = "add_domain">Add me as Domain Reviewer  </a>
+                                    {% if is_domain_reviewer_language %}
+                                    <a href="#" onClick= "show_modal(this)" id = "revoke_domain">| Revoke Domain Reviewer Role</a>
+                                    {% endif %}
                                 </li>
                             {% else %}
                                 <li>
@@ -140,8 +148,10 @@
                             {% endif %}
                             {% if user|get_qualityreviewer %}
                                 <li>
-                                    <a href="#" onClick= "show_modal(this)" id = "add_quality">Add me as Quality Reviewer  |  </a>
-                                    <a href="#" onClick= "show_modal(this)" id = "revoke_quality">Revoke Quality Reviewer role</a>
+                                    <a href="#" onClick= "show_modal(this)" id = "add_quality">Add me as Quality Reviewer  </a>
+                                    {% if is_quality_reviewer_language %}
+                                    <a href="#" onClick= "show_modal(this)" id = "revoke_quality">| Revoke Quality Reviewer role</a>
+                                    {% endif %}
                                 </li>
                             {% else %}
                                 <li>
