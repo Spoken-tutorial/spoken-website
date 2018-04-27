@@ -171,9 +171,6 @@ def list_videos(request):
     context['form'] = form
     return render(request, 'spoken/templates/list_videos_form.html', context)
 
-    # return HttpResponseRedirect('/tutorial-search/')
-
-
 def series_foss(request):
     form = SeriesTutorialSearchForm()
     context = {}
