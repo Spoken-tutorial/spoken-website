@@ -640,7 +640,7 @@ def allocate_tutorial(request, status):
     context['counter'] = itertools.count(1)
     return render(request, 'statistics/templates/allocate_tutorial.html', context)
 
-submissiondate = datetime.date(datetime.now()+timedelta(days=10))
+submissiondate = datetime.date(datetime.now()+timedelta(days=3))
 
 def allocate(request, tdid, lid):
     user = request.user
@@ -685,9 +685,8 @@ def allocate(request, tdid, lid):
         print "submissiondate : ", submissiondate
         tutorial_resource.submissiondate = submissiondate
         try :
-            #tutorial_resource.save()
-            #TutorialsAvailable.objects.filter(tutorial_detail = tdid,language = lid).delete()
-            abc = 1
+            tutorial_resource.save()
+            TutorialsAvailable.objects.filter(tutorial_detail = tdid,language = lid).delete()
         except:
             print "Already saved"
         return HttpResponseRedirect('/statistics/allocate_tutorial/ongoing/')
