@@ -1702,7 +1702,7 @@ def accept_all(request, review, trid):
 
         tr.common_content.save()
     if not flag:
-        messages.warning(request, 'There is no component available for Domain reviewr to accept.')
+        messages.warning(request, 'There is no component available for Domain reviewer to accept.')
 
     return HttpResponseRedirect('/creation/' + review + '-review/tutorial/' + str(tr.id) + '/')
 
