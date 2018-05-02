@@ -165,6 +165,12 @@ def tutorial_search(request):
     context['current_foss'] = foss_get
     return render(request, 'spoken/templates/tutorial_search.html', context)
 
+def list_videos(request):
+    form = TutorialSearchForm()
+    context = {}
+    context['form'] = form
+    return render(request, 'spoken/templates/list_videos_form.html', context)
+
 def series_foss(request):
     form = SeriesTutorialSearchForm()
     context = {}
