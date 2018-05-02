@@ -76,7 +76,11 @@ def is_videoreviewer(user):
 
 def is_domainreviewer(user):
     """Check if the user is having domain reviewer rights"""
+<<<<<<< HEAD
     if user.groups.filter(name='Domain-Reviewer').exists() :
+=======
+    if user.groups.filter(name='Domain-Reviewer').exists():
+>>>>>>> bidding_auto
         return True
     return False
 
@@ -95,6 +99,12 @@ def is_administrator(user):
 def is_contenteditor(user):
     """Check if the user is having Content-Editor rights"""
     if user.groups.filter(name='Content-Editor').exists():
+        return True
+    return False
+
+def is_manager(user):
+    """Check if the user is having Content-Editor rights"""
+    if user.groups.filter(name='Manager').exists():
         return True
     return False
 
@@ -377,11 +387,14 @@ def creationhome(request):
     not_external_contributor_langs = Language.objects.exclude(id__in = is_external_contributor_langs.values('id')).values('id','name')
     not_domain_reviewer_langs = Language.objects.exclude(id__in = is_domain_reviewer_langs.values('id')).values('id','name')
     not_quality_reviewer_langs = Language.objects.exclude(id__in = is_quality_reviewer_langs.values('id')).values('id','name')
+
+    languages = Language.objects.filter().values('name')
     if is_contributor(request.user) or is_domainreviewer(request.user) or is_videoreviewer(request.user) or is_qualityreviewer(request.user):
         contrib_notifs = []
         admin_notifs = []
         domain_notifs = []
         quality_notifs = []
+
         if is_contributor(request.user):
             contrib_notifs = ContributorNotification.objects.filter(user = request.user).order_by('-created')
         if is_videoreviewer(request.user):
@@ -408,20 +421,23 @@ def creationhome(request):
             'contributor_language': not_contributor_langs,
             'external_contributor_language': not_external_contributor_langs,
             'domain_reviewer_language': not_domain_reviewer_langs,
-            'quality_reviewer_language': not_quality_reviewer_langs
-            
+            'quality_reviewer_language': not_quality_reviewer_langs,
+            'language': languages
         }
 
         context.update(csrf(request))
         return render(request, 'creation/templates/creationhome.html', context)
     else:
+        
+        print "Languages : ",languages
+        
         context = {
             'is_creation_role': False,
             'contributor_language': not_contributor_langs,
             'external_contributor_language': not_external_contributor_langs,
             'domain_reviewer_language': not_domain_reviewer_langs,
-            'quality_reviewer_language': not_quality_reviewer_langs
-            
+            'quality_reviewer_language': not_quality_reviewer_langs,
+            'language': languages
         }
         return render(request, 'creation/templates/creationhome.html', context)
 

@@ -77,6 +77,7 @@ class TutorialDetailAdmin(admin.ModelAdmin):
             foss_dir = settings.MEDIA_ROOT + '/videos/' + \
                 str(obj.foss_id) + '/' + str(obj.id) + '/resources'
             os.makedirs(foss_dir)
+            print "FOSS DIR : ",foss_dir
         except:
             print "Tutorial directories already exists..."
 
@@ -173,6 +174,12 @@ class FossAvailableForWorkshopAdmin(admin.ModelAdmin):
     list_filter = ('language',)
 
 
+class ContributorRatingAdmin(admin.ModelAdmin):
+    form = ContributorRatingForm
+    fields = ['user', 'rating','language']
+    list_display = ('user', 'language','rating')
+    list_filter = ('rating',)
+
 admin.site.register(Language, LanguageAdmin)
 admin.site.register(FossCategory, FossCategoryAdmin)
 admin.site.register(FossSuperCategory, FossSuperCategoryAdmin)
@@ -183,3 +190,4 @@ admin.site.register(QualityReviewerRole, QualityReviewerRoleAdmin)
 admin.site.register(FossAvailableForTest, FossAvailableForTestAdmin)
 admin.site.register(FossAvailableForWorkshop, FossAvailableForWorkshopAdmin)
 admin.site.register(BrochureDocument, BrochureDocumentAdmin)
+admin.site.register(ContributorRating, ContributorRatingAdmin)
