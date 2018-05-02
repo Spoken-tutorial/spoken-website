@@ -10,7 +10,7 @@ from django.core.management.base import BaseCommand
 from django.db import transaction as tx
 
 # Spoken Tutorial Stuff
-from creation.models import TutorialResource, PublishTutorialLog
+from creation.models import TutorialResource, PublishTutorialLog,PublicReviewLog
 
 class Command(BaseCommand):
 
@@ -18,10 +18,10 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         print('>> adding publish dates in TutorialResource')
         count =0
-        tutorials = TutorialResource.objects.filter(status__gt=0)
+        tutorials = TutorialResource.objects.filter(status =2)
         for tutorial in tutorials:
             count = count + 1
-            log_obj = PublishTutorialLog.objects.filter(tutorial_resource_id = tutorial.id, created__isnull=False).order_by('-id').first()
+            log_obj = PublicReviewLog.objects.filter(tutorial_resource_id = tutorial.id, created__isnull=False).order_by('-id').first()
             if log_obj:
                 tutorial.publish_at = log_obj.created
             else :

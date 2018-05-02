@@ -2,6 +2,7 @@
 from django.contrib.auth.models import User
 from django.db import models
 
+
 class Language(models.Model):
     name = models.CharField(max_length=255, unique=True)
     user = models.ForeignKey(User)
@@ -197,9 +198,14 @@ class TutorialResource(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     publish_at = models.DateTimeField(null=True)
-
+    # the last submission date for the tutorial
+    submissiondate = models.DateTimeField(default = '2000-01-02' ,blank = True)
+    # 0 - Not Assigned to anyone , 1 - Assigned & work in progress , 2 - Completed (= published / PR )
+    assignment_status = models.PositiveSmallIntegerField(default=0)
+    # 0 - Not Extended , 1 - Extended , 2 - Tutorial Terminated from user
+    extension_status = models.PositiveIntegerField(default = 0)
     class Meta:
-        unique_together = (('tutorial_detail', 'language',),)
+        unique_together = ('tutorial_detail', 'assignment_status','language',)
 
 
 class ArchivedVideo(models.Model):
@@ -339,13 +345,14 @@ class RoleRequest(models.Model):
     user = models.ForeignKey(User, related_name='user')
     role_type = models.IntegerField(default=0)
     status = models.PositiveSmallIntegerField(default=0)
+    language = models.ForeignKey(Language,null=True)
     approved_user = models.ForeignKey(
         User, related_name='approved_user', null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
     class Meta:
-        unique_together = (('user', 'role_type',),)
+        unique_together = (('user', 'role_type','language'),)
 
 
 class FossAvailableForWorkshop(models.Model):
@@ -445,3 +452,20 @@ class Collaborate(models.Model):
     language = models.ForeignKey(Language)
     lead_st = models.BooleanField()
     created = models.DateTimeField(auto_now_add=True)
+
+
+class TutorialsAvailable(models.Model):
+    tutorial_detail = models.ForeignKey(TutorialDetail)
+    language = models.ForeignKey(Language)
+
+    class Meta:
+        unique_together = (('tutorial_detail', 'language'),)
+
+class ContributorRating(models.Model):
+    user = models.ForeignKey(User)
+    choices = ((1,1),(2,2),(3,3),(4,4),(5,5))
+    rating = models.PositiveIntegerField(choices=choices)
+    language = models.ForeignKey(Language)
+
+    class Meta:
+        unique_together = (('user', 'language'),)

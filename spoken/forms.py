@@ -3,8 +3,9 @@ from django import forms
 from django.db.models import Count, Q
 
 # Spoken Tutorial Stuff
-from creation.models import TutorialResource
+from creation.models import TutorialResource, FossAvailableForTest
 from events.models import Testimonials, InductionInterest
+
 
 
 class KeywordSearchForm(forms.Form):
@@ -21,18 +22,39 @@ class TutorialSearchForm(forms.Form):
             choices=[],
             widget=forms.Select(),
             required=False,
-        ) 
+        )
 
     def __init__(self, *args, **kwargs):
       super(TutorialSearchForm, self).__init__(*args, **kwargs)
-      foss_list_choices = [('', '-- All Courses --'),]
+      
       lang_list_choices =[('', '-- All Languages --'),]
 
       foss_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), language__name='English', tutorial_detail__foss__show_on_homepage = True).values('tutorial_detail__foss__foss').annotate(
             Count('id')).order_by('tutorial_detail__foss__foss').values_list('tutorial_detail__foss__foss', 'id__count').distinct()
-      
+
+      # divide the foss list into test and no-test categories.
+      all_tests = FossAvailableForTest.objects.filter(status=1)
+      test_list = []
+      for item in all_tests:
+        test_list.append(item.foss.foss)
+
+      test_choices = []
+      no_test_choices = []
+
       for foss_row in foss_list:
-            foss_list_choices.append((str(foss_row[0]), str(foss_row[0]) + ' (' + str(foss_row[1]) + ')'))
+          if foss_row[0] in test_list:
+              test_choices.append((str(foss_row[0]), str(foss_row[0]) + ' (' + str(foss_row[1]) + ')'))
+          else:
+              no_test_choices.append((str(foss_row[0]), str(foss_row[0]) + ' (' + str(foss_row[1]) + ')'))
+
+      # prepare final foss list for display 
+      foss_list_choices = (('', [('', '-- All Courses --'),]), ('', ''), ('FOSS Courses available for tests', tuple(test_choices)),
+                     ('', ''), ('FOSS Courses NOT available for tests', tuple(no_test_choices)))
+
+      # Choices without test/no test categorisation.    
+      # foss_list_choices = [('', '-- All Courses --'),]
+      # for foss_row in foss_list:
+      #  foss_list_choices.append((str(foss_row[0]), str(foss_row[0]) + ' (' + str(foss_row[1]) + ')'))
 
       lang_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = True).values('language__name').annotate(
       Count('id')).order_by('language').values_list('language__name', 'id__count').distinct()
@@ -41,6 +63,7 @@ class TutorialSearchForm(forms.Form):
 
       self.fields['search_foss'].choices = foss_list_choices
       self.fields['search_language'].choices = lang_list_choices
+
 
 class SeriesTutorialSearchForm(forms.Form):
     search_otherfoss = forms.ChoiceField(

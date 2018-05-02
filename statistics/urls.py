@@ -9,6 +9,11 @@ urlpatterns = patterns('',  # noqa
     url(r'^training-onlinetest/$', 'statistics.views.training', name="statistics_training"),
     url(r'^training/$', 'statistics.views.training', name="statistic_training"),
     url(r'^tutorial-content/$', 'statistics.views.tutorial_content', name="statistics_content"),
+
+    url(r'^allocate_tutorial/(?P<status>\w+)/$', 'statistics.views.allocate_tutorial', name="allocate_tutorial"),
+    url(r'^extend/(\w+)/$', 'statistics.views.extend_submission_date', name="extend_submission_date"),
+    url(r'^allocate/(?P<tdid>\w+)/(?P<lid>\w+)/$', 'statistics.views.allocate', name="allocate"),
+    url(r'^allocate_foss/(?P<fid>\w+)/$', 'statistics.views.allocate_foss', name="allocate_foss"),
     url(r'^training/(?P<rid>\d+)/participants/$', 'statistics.views.training_participant',
         name="statistics_training_participants"),
     url(r'^training/(?P<rid>\d+)/participant/students/$', 'statistics.views.studentmaster_ongoing',
