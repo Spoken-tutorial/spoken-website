@@ -20,7 +20,8 @@ from creation.views import (
     is_internal_contributor,
     is_qualityreviewer,
     is_videoreviewer,
-    is_manager
+    is_manager,
+    is_language_manager
 )
 from spoken.forms import TutorialSearchForm
 
@@ -259,3 +260,4 @@ register.filter('get_contenteditor', is_contenteditor)
 register.filter('format_component_title', format_component_title)
 register.filter('get_mp4_video', get_mp4_video)
 register.filter('get_manager',is_manager)
+register.filter('get_language_manager',is_language_manager)

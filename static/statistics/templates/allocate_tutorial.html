@@ -82,6 +82,7 @@
       <a href="{% url 'statistics:allocate_tutorial' 'available' %}"><i class="fa fa-list-ul"></i> Available </a></li>
       <li {% if status == 'ongoing' %}{{ 'class="active"'}}{% endif %}>
       <a href="{% url 'statistics:allocate_tutorial' 'ongoing' %}"><i class="fa fa-list-ul"></i> Ongoing </a></li>
+      <li class = "pull-right"><a href="#" data-toggle="tooltip" title="Click this for latest list of Tutorials">Refresh list of Tutorials here</a></li>
   </ul>
 
   <div class="tab-content">
@@ -95,19 +96,11 @@
         {% for top_level_group in foss_list %}
     
         <tr>
-          {% if user|get_manager %}
           <td class="btn btn-primary" data-toggle="collapse" href="#{{tutorial_num.start_index|add:forloop.counter|add:-1}}" role="button" aria-expanded="false" aria-controls="multiCollapseExample1">{{ top_level_group.grouper }}{#{{ record.tutorial_detail.foss }}#}
           </td>
-          {% endif %}
-          <td>
-          <a href="{% url 'statistics:allocate_foss' top_level_group.grouper.id %}">Allocate</a>
-          </td>
-        </tr>
-
+      
     {% get_sortable_header header ordering request.GET %}  
           {% for record in top_level_group.list %}
-                
-      <tr id = "{{record.start_index|add:forloop.counter|add:-1}}">   
                   
                   <td>{{ record.tutorial_detail.level }}</td>       
                   <td>{{ record.tutorial_detail.order }}</td>

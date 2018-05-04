@@ -76,11 +76,7 @@ def is_videoreviewer(user):
 
 def is_domainreviewer(user):
     """Check if the user is having domain reviewer rights"""
-<<<<<<< HEAD
     if user.groups.filter(name='Domain-Reviewer').exists() :
-=======
-    if user.groups.filter(name='Domain-Reviewer').exists():
->>>>>>> bidding_auto
         return True
     return False
 
@@ -105,6 +101,12 @@ def is_contenteditor(user):
 def is_manager(user):
     """Check if the user is having Content-Editor rights"""
     if user.groups.filter(name='Manager').exists():
+        return True
+    return False
+
+def is_language_manager(user):
+    """ Check if the logged in user is Language Manager"""
+    if user.groups.filter(name='Language-Manager').exists():
         return True
     return False
 
@@ -539,6 +541,7 @@ def ajax_upload_foss(request):
         except:
             foss = ''
             lang = ''
+        
         if foss and lang and publish:
             lang_rec = Language.objects.get(pk = int(lang))
             if lang_rec.name == 'English':
@@ -564,8 +567,10 @@ def ajax_upload_foss(request):
                 data = '<option value="">Select Tutorial</option>' + data
         elif foss and lang:
             lang_rec = Language.objects.get(pk = int(lang))
+            print "lang_rec : ",lang_rec
             if lang_rec.name == 'English':
                 td_list = TutorialDetail.objects.filter(foss_id = foss).values_list('id')
+                print "td_list", td_list
                 tutorials = TutorialDetail.objects.filter(
                     id__in = td_list
                 ).exclude(
@@ -579,7 +584,9 @@ def ajax_upload_foss(request):
                 )
             else:
                 eng_rec = Language.objects.get(name = 'English')
-                td_list = TutorialDetail.objects.filter(foss_id = foss).values_list('id')
+                print "User : ",request.user.id," foss : ",foss,lang_rec
+                td_list = ContributorRole.objects.filter(foss_category_id = foss,user_id = request.user.id,language_id=lang_rec).values_list('tutorial_detail')
+                print "td_list", td_list
                 tutorials = TutorialDetail.objects.filter(
                     id__in = TutorialResource.objects.filter(
                         tutorial_detail_id__in = td_list,

@@ -220,6 +220,7 @@ class ArchivedVideo(models.Model):
 
 class ContributorRole(models.Model):
     foss_category = models.ForeignKey(FossCategory)
+    tutorial_detail = models.ForeignKey(TutorialDetail,null = True)
     language = models.ForeignKey(Language)
     user = models.ForeignKey(User)
     status = models.BooleanField()

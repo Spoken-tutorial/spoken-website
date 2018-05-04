@@ -11,6 +11,7 @@ urlpatterns = patterns('',  # noqa
     url(r'^tutorial-content/$', 'statistics.views.tutorial_content', name="statistics_content"),
 
     url(r'^allocate_tutorial/(?P<status>\w+)/$', 'statistics.views.allocate_tutorial', name="allocate_tutorial"),
+    url(r'^allocate_tutorial_manager/(?P<status>\w+)/$', 'statistics.views.allocate_tutorial', name="allocate_tutorial"),
     url(r'^extend/(\w+)/$', 'statistics.views.extend_submission_date', name="extend_submission_date"),
     url(r'^allocate/(?P<tdid>\w+)/(?P<lid>\w+)/$', 'statistics.views.allocate', name="allocate"),
     url(r'^allocate_foss/(?P<fid>\w+)/$', 'statistics.views.allocate_foss', name="allocate_foss"),

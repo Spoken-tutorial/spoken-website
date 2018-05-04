@@ -570,7 +570,7 @@ def allocate_tutorial(request, status):
             5: SortableHeader('Bid', False),
         }
 
-        lang_qs = Language.objects.filter(id__in= RoleRequest.objects.filter(user = request.user ,status=1, role_type = 0).values('language'))
+        lang_qs = Language.objects.filter(id__in= RoleRequest.objects.filter(user = request.user ,status=1, role_type = 0).exclude(language_id=22).values('language'))
         status = 4 
         final_query = TutorialsAvailable.objects.filter(language__in = lang_qs).order_by('tutorial_detail__foss__foss','tutorial_detail__level','language','tutorial_detail__order')
         unique_foss = TutorialsAvailable.objects.filter(language__in = lang_qs).values('tutorial_detail__foss__foss','language','tutorial_detail__level').distinct()
@@ -601,12 +601,12 @@ def allocate_tutorial(request, status):
     tutorials = get_sorted_list(request, pub_tutorials_set, header, raw_get_data)
     ordering = get_field_index(raw_get_data)
     tutorials = CreationStatisticsFilter(request.GET, queryset=tutorials)
-    bid_count = TutorialResource.objects.filter(video_user=request.user,assignment_status=1).count()
+    bid_count = TutorialResource.objects.filter(video_user=request.user,assignment_status=1).exclude(language_id=22).count()
     print "_________________________",bid_count
     context['bid_count'] = bid_count
     context['tutorials_count'] = final_query.count()
-    context['perc'] = float(bid_count *100) / float(final_query.count())  
-    print "Perc : ",float(bid_count *100) / float(final_query.count())
+    if final_query.count() > 0 :
+        context['perc'] = float(bid_count *100) / float(final_query.count())  
     form = tutorials.form
     #form.fields['tutorial_detail__foss'].queryset = final_query
     #print "Currect FOSSES : ", unique_foss.tutorial_detail_id
@@ -653,6 +653,7 @@ def allocate(request, tdid, lid):
         contributor_role.foss_category_id = tut.foss_id
         contributor_role.user_id = user.id
         contributor_role.language_id = lid
+        contributor_role.tutorial_detail = tut
         contributor_role.status = True
         contributor_role.save()
 
