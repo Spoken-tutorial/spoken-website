@@ -1,0 +1,111 @@
+%% Certificate template
+\documentclass[landscape]{article}
+\usepackage{wallpaper}
+\usepackage{xcolor}
+\usepackage{ulem}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{fourier}
+\usepackage[T1]{fontenc}
+\usepackage{setspace}
+%% package to execute bash commands
+%% \usepackage{bashful}
+
+%% generate QR code
+\usepackage{pst-barcode}
+\usepackage{auto-pst-pdf}
+
+\geometry{tmargin=.2cm,bmargin=.2cm,
+  lmargin=.2cm, rmargin=1cm}
+
+\usepackage{multicol}
+\setlength{\columnseprule}{1pt}
+\columnwidth=0.6\textwidth
+
+\begin{document}
+
+\TileWallPaper{28cm}{22cm}{../images/cer_bg4.png}
+\scalebox{3.1}
+{
+
+\color{brown!30!brown!60}
+\begin{minipage}{.33\textwidth}
+
+
+{\centering
+	\vspace{0.6cm}
+	\textcolor{black!90}
+	{\fontsize{5.5}{5.5} \selectfont 
+	\textbf
+	{Pandit Madan Mohan Malaviya National Mission on Teachers and Teaching\\
+	Ministry of Human Resource Development, Government of India\\}
+	}
+	
+	\vspace{0.2cm}
+	\textcolor{red!60!black!100}
+	{\fontsize{7}{7} \selectfont
+	\textbf
+	{Certificate of Participation\\}
+	}
+
+	\vspace{0.2cm}
+	\begin{doublespace}
+	\textcolor{black!100}
+	{\fontsize{5}{6} \selectfont 
+		This is to certify that 
+		\underline{
+			\textit{
+				\textcolor{red!30!black!90}{\fontsize{6}{7} \selectfont {$name}}
+			}
+		}\\
+		from \underline{
+			\textit{
+			\textcolor{red!30!black!90}{\fontsize{6}{7} \selectfont{Department Of Civil Engineering, Anjuman I Islam's  Kalsekar Technical Campus, Panvel}}
+			}
+		}\\
+		successfully completed the one month residential Induction Training Programme\\
+		conducted by Teaching Learning Centre,Indian Institute of Technology Bombay,\\
+		from 28 November 2017 to 20 December 2017.\\
+	}
+	\end{doublespace}
+	\vspace{0.4cm}
+	{\color{black!100}
+		\scalebox{.6}
+		{
+		 \begin{tabular}{c c c c}
+		    \small{\includegraphics[height=0.6cm]{../images/kannan-moudgalya-sign.png}}  &  &  & \small{\includegraphics[height=0.6cm]{../images/kannan-moudgalya-sign.png}} \\ 
+
+		    {\scriptsize  Prof. Preeti Rao } &  &  & 
+		    {\scriptsize Prof. Kannan Moudgalya} \\
+
+		    {\scriptsize  PIC, CEP, IIT Bombay} &  &  & 
+		    {\scriptsize Project Coordinator, Teaching Learning Centre,} \\
+
+		    {\scriptsize } & & & {\scriptsize PMMMNMTT, IIT Bombay} \\
+
+		  \end{tabular}
+		}
+	}
+
+	\vspace{0.2cm}
+	\begin{pspicture}(0.09cm,0.09cm)  
+		\psbarcode{$qr_code}{eclevel=L width=0.25 height=0.20}{qrcode}
+	\end{pspicture}\\
+
+	{\color{black!60}
+	\tiny{\texttt{$serial_key}\\}
+	}
+	% \includegraphics[height=0.105cm]{../images/bottom_line.png}
+
+}
+\end{minipage}
+}
+\newpage
+\TileWallPaper{28cm}{22cm}{../images/cer_bg3.png}
+\begin{minipage}{.33\textwidth}
+
+\end{minipage}
+
+
+\end{document}
+
