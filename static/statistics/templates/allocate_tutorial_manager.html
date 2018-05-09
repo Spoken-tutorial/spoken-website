@@ -12,6 +12,7 @@
 {% block heading %} <i class="fa fa-list-ul"></i> Bidding Interface {% endblock %}
 {% block search %}{% endblock %}
 {% block content %}
+
   <div class='filters row' >
     <form action="" method="get" class='form-horizontal'>
       <div class="col-lg-4 col-md-4 col-sm-4">                                                              
@@ -96,10 +97,10 @@
         {% for top_level_group in foss_list %}
     
         <tr>
-          {% if user|get_language_manager %}
-          <td class="btn btn-primary" data-toggle="collapse" href="#{{tutorial_num.start_index|add:forloop.counter|add:-1}}" role="button" aria-expanded="false" aria-controls="multiCollapseExample1">{{ top_level_group.grouper }}{#{{ record.tutorial_detail.foss }}#}
+          
+          <td class="btn btn-primary" data-toggle="collapse" href="#{{tutorial_num.start_index|add:forloop.counter|add:-1}}" role="button" aria-expanded="false" aria-controls="multiCollapseExample1">{{ top_level_group.grouper }}
           </td>
-          {% endif %}
+          
           <td>
           <a href="{% url 'statistics:allocate_foss' top_level_group.grouper.id %}">Allocate</a>
           </td>
@@ -158,6 +159,10 @@
           
           </td>
 
+          <td>
+            <a class="btn btn-danger" href="{% url 'statistics:revoke_allocated_tutorial' record.tutorial_detail.foss.id record.language_id record.tutorial_detail_id record.id %}"> 
+              Revoke </a>
+          </td>
           </tr>
           {% endfor %}
           </tr>

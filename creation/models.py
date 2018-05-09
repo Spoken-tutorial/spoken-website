@@ -219,16 +219,16 @@ class ArchivedVideo(models.Model):
 
 
 class ContributorRole(models.Model):
+    language = models.ForeignKey(Language)
     foss_category = models.ForeignKey(FossCategory)
     tutorial_detail = models.ForeignKey(TutorialDetail,null = True)
-    language = models.ForeignKey(Language)
     user = models.ForeignKey(User)
     status = models.BooleanField()
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
     class Meta:
-        unique_together = (('user', 'foss_category', 'language',),)
+        unique_together = (('user', 'foss_category', 'language','tutorial_detail'),)
         verbose_name = 'Contributor Role'
 
 

@@ -566,6 +566,11 @@ class ContributorRoleForm(forms.ModelForm):
     )
     status = forms.BooleanField(required = False)
 
+    def __init__(self, *args, **kwargs):
+        super(ContributorRoleForm, self).__init__(*args, **kwargs)
+        print "\n\n\n===",args
+        #print "\n\n\n----args----",forms.cleaned_data.get('user')
+
     class Meta:
         model = ContributorRole
         exclude = ['created', 'updated']

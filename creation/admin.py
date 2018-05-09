@@ -84,7 +84,7 @@ class TutorialDetailAdmin(admin.ModelAdmin):
 
 class ContributorRoleAdmin(admin.ModelAdmin):
     form = ContributorRoleForm
-    list_display = ('user', 'foss_category', 'language',
+    list_display = ('user', 'foss_category', 'tutorial_detail','language',
                     'status', 'created', 'updated')
     list_filter = ('updated', 'language', 'foss_category')
 

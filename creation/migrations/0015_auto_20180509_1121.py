@@ -16,4 +16,8 @@ class Migration(migrations.Migration):
             name='tutorial_detail',
             field=models.ForeignKey(to='creation.TutorialDetail', null=True),
         ),
+        migrations.AlterUniqueTogether(
+            name='contributorrole',
+            unique_together=set([('user', 'foss_category', 'language', 'tutorial_detail')]),
+        ),
     ]
