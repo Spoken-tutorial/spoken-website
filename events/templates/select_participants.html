@@ -102,12 +102,12 @@
               {% if training.status == 1 and not training.is_training_before_july2017 and training.have_test %}
                   | Training Completed. Proceed for Test | <a href="{% url 'events:re-open-training' training.id %}"> Re-Open</a> |
               {% endif %}
-              {% if training.status == 2 and training.is_learners_allowed and training.is_training_before_july2017 %}
-                |Request Sent for Mark As Complete| <a href="{% url 'events:re-open-training' training.id %}"> Re-Open</a> |
-              {% endif %}
-              {% if training.status == 1 and not training.is_learners_allowed and not training.have_test%}
+              {% if training.status == 1 and not training.is_training_before_july2017 and not training.have_test%}
                   | Training Completed. No Certificates | <a href="{% url 'events:re-open-training' training.id %}"> Re-Open</a> |
                 {% endif %}
+	       {% if training.status == 2 and training.is_learners_allowed and training.is_training_before_july2017 %}
+                |Request Sent for Mark As Complete| <a href="{% url 'events:re-open-training' training.id %}"> Re-Open</a> |
+              {% endif %}
 
 
             </td>
@@ -133,7 +133,7 @@
                   | Training Completed. Proceed for Test | <a href="{% url 'events:re-open-training' training.id %}"> Re-Open</a> |
                 {% endif %}
 
-                {% if not training.is_learners_allowed and not training.have_test%}
+                {% if not training.is_training_before_july2017 and not training.have_test%}
                   | Training Completed. No Certificates | <a href="{% url 'events:re-open-training' training.id %}"> Re-Open</a> |
                 {% endif %}
               {% endif %}
