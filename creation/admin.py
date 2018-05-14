@@ -107,6 +107,11 @@ class ContributorRoleAdmin(admin.ModelAdmin):
     mark_contributor_disabled.short_description = "Mark selected contributor roles as disabled"
     actions = ['mark_contributor_active', 'mark_contributor_disabled']
 
+    class Media :
+        from django.conf import settings
+        media_url = getattr(settings,'MEDIA_URL','/cms/js/ajax-contributor.js')
+        print "media_url : ",media_url
+
 
 class DomainReviewerRoleAdmin(admin.ModelAdmin):
     form = DomainReviewerRoleForm
@@ -175,10 +180,15 @@ class FossAvailableForWorkshopAdmin(admin.ModelAdmin):
 
 
 class ContributorRatingAdmin(admin.ModelAdmin):
+    call_js = 'creation/templates/ajax-contributor.js'
+    change_list_template = 'creation/templates/change_list.html'
     form = ContributorRatingForm
     fields = ['user', 'rating','language']
     list_display = ('user', 'language','rating')
     list_filter = ('rating',)
+
+    class Media:
+        js = 'creation/templates/ajax-contributor.js'
 
 admin.site.register(Language, LanguageAdmin)
 admin.site.register(FossCategory, FossCategoryAdmin)

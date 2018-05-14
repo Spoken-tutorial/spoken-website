@@ -2,7 +2,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.db.models import Q
-
+from django.conf import settings
 # Spoken Tutorial Stuff
 from creation.models import *
 
@@ -567,10 +567,12 @@ class ContributorRoleForm(forms.ModelForm):
     status = forms.BooleanField(required = False)
 
     def __init__(self, *args, **kwargs):
+        language = kwargs.get('language', None)
+        print "language",kwargs
         super(ContributorRoleForm, self).__init__(*args, **kwargs)
         print "\n\n\n===",args
         #print "\n\n\n----args----",forms.cleaned_data.get('user')
-
+        #self.fields['destination_tutorial'].choices = choices
     class Meta:
         model = ContributorRole
         exclude = ['created', 'updated']
@@ -961,14 +963,13 @@ class ContributorRatingForm_old(forms.ModelForm):
 
         user = User.objects.filter(username=kwargs['instance'].user)
         print kwargs['instance'].user
-        print "#####################"
-        print user
+        print "User : ",user
         u1 = User()
         u1 = user
         #user = User.objects.filter(username= kwargs['instance'].user).values_list('id','username')
         print "User : ",type(user)
-        print dir(user)
-        print user.values('email')
+        print "DIR : ",dir(user)
+        print "EMAIL : ",user.values('email')
 
         #self.fields['user'].widget = forms.Select(choices=u1)
         self.fields['user'].initial = forms.CharField(widget=user)
@@ -980,10 +981,12 @@ class ContributorRatingForm_old(forms.ModelForm):
         #self.fields['language'].initial = initial_lang
 
 class ContributorRatingForm(forms.ModelForm):
+    
     user = forms.ChoiceField(
         choices = [('', '-- Select User --'),] + list(
          User.objects.filter(groups__id=4).values_list('id','username')),
         required = True,
+        widget=forms.Select(attrs={"onChange":'getCity()'}),
         error_messages = {'required':'user field is required.'}
     )
     language = forms.ChoiceField(
@@ -996,13 +999,14 @@ class ContributorRatingForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(ContributorRatingForm, self).__init__(*args, **kwargs)
-        
+        print("I am in INIT ")
+        js = 'creation/templates/ajax-contributor.js'
         print "ARGS  : ",args,"--"
         self.fields['rating'].help_text = ''' 1 : Loser<br>
         2 : Just a Contributor <br>
         3 : Fair <br>
         4 : Good <br>
-        5 : God Like <br>
+        5 : God Likee <br>
         ''' 
         if args:
             
@@ -1040,3 +1044,5 @@ class ContributorRatingForm(forms.ModelForm):
                     self.fields['user'] =  forms.ModelChoiceField(queryset=user_1)
                     self.fields['language'] =  forms.ModelChoiceField(queryset=lang)
                     
+    class Media:
+        js = 'creation/templates/ajax-contributor.js'
