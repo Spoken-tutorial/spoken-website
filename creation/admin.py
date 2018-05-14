@@ -77,13 +77,14 @@ class TutorialDetailAdmin(admin.ModelAdmin):
             foss_dir = settings.MEDIA_ROOT + '/videos/' + \
                 str(obj.foss_id) + '/' + str(obj.id) + '/resources'
             os.makedirs(foss_dir)
+            print "FOSS DIR : ",foss_dir
         except:
             print "Tutorial directories already exists..."
 
 
 class ContributorRoleAdmin(admin.ModelAdmin):
     form = ContributorRoleForm
-    list_display = ('user', 'foss_category', 'language',
+    list_display = ('user', 'foss_category', 'tutorial_detail','language',
                     'status', 'created', 'updated')
     list_filter = ('updated', 'language', 'foss_category')
 
@@ -105,6 +106,11 @@ class ContributorRoleAdmin(admin.ModelAdmin):
     mark_contributor_active.short_description = "Mark selected contributor roles as active"
     mark_contributor_disabled.short_description = "Mark selected contributor roles as disabled"
     actions = ['mark_contributor_active', 'mark_contributor_disabled']
+
+    class Media :
+        from django.conf import settings
+        media_url = getattr(settings,'MEDIA_URL','/cms/js/ajax-contributor.js')
+        print "media_url : ",media_url
 
 
 class DomainReviewerRoleAdmin(admin.ModelAdmin):
@@ -173,6 +179,17 @@ class FossAvailableForWorkshopAdmin(admin.ModelAdmin):
     list_filter = ('language',)
 
 
+class ContributorRatingAdmin(admin.ModelAdmin):
+    call_js = 'creation/templates/ajax-contributor.js'
+    change_list_template = 'creation/templates/change_list.html'
+    form = ContributorRatingForm
+    fields = ['user', 'rating','language']
+    list_display = ('user', 'language','rating')
+    list_filter = ('rating',)
+
+    class Media:
+        js = 'creation/templates/ajax-contributor.js'
+
 admin.site.register(Language, LanguageAdmin)
 admin.site.register(FossCategory, FossCategoryAdmin)
 admin.site.register(FossSuperCategory, FossSuperCategoryAdmin)
@@ -183,3 +200,4 @@ admin.site.register(QualityReviewerRole, QualityReviewerRoleAdmin)
 admin.site.register(FossAvailableForTest, FossAvailableForTestAdmin)
 admin.site.register(FossAvailableForWorkshop, FossAvailableForWorkshopAdmin)
 admin.site.register(BrochureDocument, BrochureDocumentAdmin)
+admin.site.register(ContributorRating, ContributorRatingAdmin)
