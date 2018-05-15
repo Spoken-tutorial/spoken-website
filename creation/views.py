@@ -2748,6 +2748,25 @@ def ajax_manual_language(request):
                 data = '<option value="">-- Select Language --</option>' + data
     return HttpResponse(json.dumps(data), content_type='application/json')
 
+@csrf_exempt
+def ajax_get_tutorials(request):
+    data = ''
+    if request.method == 'POST':
+        foss_id = request.POST.get('foss', '')
+        if foss_id:
+            tutorials = TutorialResource.objects.filter(
+                Q(status=1) | Q(status=2),
+                tutorial_detail__foss_id=foss_id
+            ).values_list(
+                'tutorial_detail_id',
+                'tutorial_detail__tutorial'
+            ).order_by('tutorial_detail__tutorial').distinct()
+            for tutorial in tutorials:
+                data += '<option value="' + str(tutorial[0]) + '">' + \
+                    str(tutorial[1]) + '</option>'
+            if data:
+                data = '<option value="">-- Select Tutorial --</option>' + data
+    return HttpResponse(json.dumps(data), content_type='application/json')
 
 def view_brochure(request):
     template = 'creation/templates/view_brochure.html'
@@ -2756,3 +2775,38 @@ def view_brochure(request):
         'my_dict': my_dict
     }
     return render(request, template, context)
+
+@login_required
+def update_assignment(request):
+    if not is_administrator(request.user):
+        raise PermissionDenied()
+    form = UpdateAssignmentForm()
+    if request.method == 'POST':
+        form = UpdateAssignmentForm(request.POST, request.FILES)
+        if form.is_valid():
+            try:
+                foss_id = request.POST.get('foss')
+                foss = FossCategory.objects.get(pk=foss_id)
+
+                tutorial_detail_id = request.POST.get('tutorial')
+                tutorial = TutorialDetail.objects.get(pk=tutorial_detail_id)
+                file_name, file_extension = os.path.splitext(request.FILES['comp'].name)
+                file_name =  tutorial.tutorial.replace(' ', '-') + '-Assignment' + file_extension
+                file_path = settings.MEDIA_ROOT + 'videos/' + str(foss_id) + '/' + str(tutorial_detail_id) + '/resources/' + file_name
+            
+                fout = open(file_path, 'wb+')
+                f = request.FILES['comp']
+                # Iterate through the chunks.
+                for chunk in f.chunks():
+                    fout.write(chunk)
+                fout.close()
+                messages.success(request, 'Assignment updated successfully!')
+                form = UpdateAssignmentForm()
+            except Exception, e:
+                print e
+    context = {
+        'form': form,
+    }
+    context.update(csrf(request))
+    return render(request, 'creation/templates/update_assignment.html', context)
+
