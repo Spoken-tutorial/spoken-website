@@ -2800,6 +2800,15 @@ def update_assignment(request):
                 for chunk in f.chunks():
                     fout.write(chunk)
                 fout.close()
+
+                tr_res = TutorialResource.objects.get(tutorial_detail=tutorial_detail_id, language_id = 22)
+                tr_res.common_content.assignment = file_name
+                tr_res.common_content.assignment_status = 4
+                tr_res.common_content.assignment_user = request.user
+                tr_res.common_content.save()
+
+
+
                 messages.success(request, 'Assignment updated successfully!')
                 form = UpdateAssignmentForm()
             except Exception, e:
