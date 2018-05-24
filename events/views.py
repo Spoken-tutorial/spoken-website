@@ -1922,13 +1922,24 @@ def advance_test_mark_attendance(request, test_id):
 @login_required
 def add_advance_test(request, test_id=None):
     user = request.user
+    advance_tests = AdvanceTest.objects.all()
     if test_id:
         test = get_object_or_404(AdvanceTest, id=test_id)
     else:
         test = None
     if is_administrator(user):
+        if request.method == 'POST':
+            test_form = AdvanceTestForm(request.POST, instance=test)
+            if test_form.is_valid():
+                test_form.save()
+            else:
+                context = {'form': test_form, 'advance_tests': advance_tests}
+                return render(request,
+                              'events/templates/test/add_advance_test.html',
+                              context)
         test_form = AdvanceTestForm(instance=test)
-        context = {'form': test_form}
+        context = {'form': test_form, 'advance_tests': advance_tests,
+                   'test': test}
         return render(request, 'events/templates/test/add_advance_test.html',
                       context)
     else:
@@ -2011,6 +2022,13 @@ def test_list(request, role, status):
         context['role'] = role
         context['todaytest'] = todaytest
         context['can_manage'] = user.groups.filter(Q(name="Event Manager") |  Q(name="Resource Person"))
+        available_for_advance = []
+        if status == 'completed':
+            foss_ids = AdvanceTest.objects.values_list('foss', flat=True)
+            for test in collection:
+                if test.foss.id in foss_ids:
+                    available_for_advance.append(test)
+        context['available_for_advance'] = available_for_advance
         context.update(csrf(request))
         return render(request, 'events/templates/test/index.html', context)
     else:
@@ -2212,7 +2230,7 @@ def request_advance_test(request, test_id):
     test = get_object_or_404(Test, id=test_id)
     if AdvanceTestBatch.objects.filter(preliminary_test=test).exists():
         messages.success(request, "Already requested!")
-        return HttpResponseRedirect('/participant/index/')
+        return advance_tests_org(request)
 
     user = request.user
     advance_batch_form = AdvanceTestBatchForm(user=user)
@@ -2228,10 +2246,11 @@ def request_advance_test(request, test_id):
             advance_batch.save()
             toppers = test.get_top_performers()
             for topper in toppers:
-                advance_batch.students.add(topper.student)
+                if topper.student is not None:
+                    advance_batch.students.add(topper.student)
             advance_batch.save()
             messages.success(request, "Your request has been submitted successfully")
-            return HttpResponseRedirect('/participant/index/')
+            return advance_tests_org(request) 
     context = {'test': test, 'advance_batch_form': advance_batch_form}
     return render(request, 'events/templates/test/advance_test_request.html', context)
 

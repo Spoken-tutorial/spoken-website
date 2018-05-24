@@ -7,8 +7,36 @@
         <i class="fa fa-list-ul"></i> Add/Edit Advance Test  <a href="{% url 'events:events_dashboard' %}" class='pull-right'>Dashboard</a>
 {% endblock %}
 {% block content %}
-    <form action="{{ action }}" method="post">{% csrf_token %}
+    {% if not test %}
+    <form action="{% url 'events:add_advance_test' %}" method="post">{% csrf_token %}
+    {% else %}
+    <form action="{% url 'events:edit_advance_test' test.id %}" method="post">{% csrf_token %}
+    {% endif %}
         {{ form.as_p }}
         <input class="btn btn-primary" type="submit" value="Submit" />
+        <a class="btn btn-primary" href="{% url 'events:add_advance_test' %}"> Clear </a>
     </form>
+    <br />
+    <div>
+        <table class="paleblue table table-striped table-hover table-bordered">
+            <tr>
+                <th> # </th>
+                <th> FOSS </th>
+                <th> Link </th>
+                <th> Active </th>
+                <th> Qualifying Marks </th>
+            </tr>
+
+            {% for advance_test in advance_tests %}
+                <tr>
+                    <td> {{ forloop.counter }} </td>
+                    <td> {{ advance_test.foss }} </td>
+                    <td> {{ advance_test.link }} </td>
+                    <td> {{ advance_test.active }} </td>
+                    <td> {{ advance_test.qualifying_marks }} </td>
+                    <td> <a href="{% url 'events:edit_advance_test' advance_test.id %}"> Edit </a></td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
 {% endblock %}
