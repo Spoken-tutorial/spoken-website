@@ -2819,3 +2819,58 @@ def update_assignment(request):
     context.update(csrf(request))
     return render(request, 'creation/templates/update_assignment.html', context)
 
+def list_all_published_tutorials(request):
+    form = PublishedTutorialFilterForm(request.GET)
+    tr_pub = TutorialResource.objects.filter(status = 1).order_by('-publish_at')
+    tr_pub = TutorialResource.objects.filter(status = 1).order_by('-publish_at')
+    if form.is_valid():
+        start_date = form.cleaned_data['start_date']
+        end_date = form.cleaned_data['end_date']
+        contributor = form.cleaned_data['contributor']
+        foss = form.cleaned_data['foss']
+        language = form.cleaned_data['language']
+        if start_date:
+            tr_pub = tr_pub.filter(publish_at__gte = start_date)
+        if end_date:
+            tr_pub = tr_pub.filter(publish_at__lte = end_date)
+        if contributor:
+            tr_pub = tr_pub.filter(script_user = contributor)
+        if foss:
+            tr_pub = tr_pub.filter(tutorial_detail__foss_id = foss)
+        if language:
+            tr_pub = tr_pub.filter(language = language)
+    tr_pub_count = tr_pub.count() # counting number of tutorial published
+    page = request.GET.get('page')
+    tr_pub = get_page(tr_pub, page, 10)
+    form.cleaned_data['contributor'] = 7
+    context = {
+        'published_tutorials': tr_pub,
+        'media_url': settings.MEDIA_URL,
+        'count_of_published_tutorials': tr_pub_count,
+        'form': form,
+        'collection': tr_pub, # for pagination
+    }
+    return render(request, 'creation/templates/list_all_published_tutorials.html', context)
+
+#Views for ajax response to payment view
+def load_languages(request):
+    foss_id = request.GET.get('foss')
+    user_id = request.GET.get('contributor')
+    existing_language = request.GET.get('language')
+    if foss_id == "":
+        language_list = Language.objects.distinct().values_list('id','name')
+    elif user_id == "":
+        language_list = TutorialResource.objects.filter(tutorial_detail__foss_id = foss_id).values_list('language','language__name').distinct()
+    else:
+        language_list = TutorialResource.objects.filter(tutorial_detail__foss_id = foss_id, script_user = user_id).values_list('language','language__name').distinct()
+    return render(request,'creation/templates/language_dropdown_list_options.html',{'language_list':language_list, 'existing_language': existing_language})
+
+def load_fosses(request):
+    user_id = request.GET.get('contributor')
+    existing_foss = request.GET.get('foss')
+    if user_id == "":
+        foss_list = FossCategory.objects.distinct().values_list('id','foss')
+    else:
+        foss_id_list = TutorialResource.objects.filter(script_user = user_id).values_list('tutorial_detail__foss_id').distinct()
+        foss_list = FossCategory.objects.filter(id__in = foss_id_list).values_list('id','foss')
+    return render(request, 'creation/templates/foss_dropdown_list_options.html',{'foss_list': foss_list, 'existing_foss': existing_foss})

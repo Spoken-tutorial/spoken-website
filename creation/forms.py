@@ -969,3 +969,59 @@ class UpdateAssignmentForm(forms.Form):
                 self.fields['tutorial'].choices =  [('', '-- Select tutorial --'),] + list(choices)
                 self.fields['tutorial'].widget.attrs = {}
                 self.fields['tutorial'].initial = initial_tut
+
+
+class PublishedTutorialFilterForm(forms.Form):
+    contributor = forms.ChoiceField(
+        choices = ['','--- Select Contributor ---'],
+        required = False,
+        # widget = forms.Select(attrs={'class': 'form-control'})
+    )
+    foss = forms.ChoiceField(
+        choices = ['','--- Select FOSS ---'],
+        required = False,
+    )
+    language = forms.ChoiceField(
+        choices = ['','--- Select Language ---'],
+        required = False,
+    )
+    start_date = forms.DateField(
+        required=False,
+        widget = forms.DateInput(attrs={'placeholder': 'yyyy-mm-dd'}),
+    )
+    end_date = forms.DateField(
+        required=False,
+        widget = forms.DateInput(attrs={'placeholder': 'yyyy-mm-dd'}),
+    )
+
+    def __init__(self, *args, **kwargs):
+        super(PublishedTutorialFilterForm, self).__init__(*args, **kwargs)
+        #populating contributor select choices
+        contributor_list = list(TutorialResource.objects.distinct()
+            .values_list('script_user', 'script_user__first_name', 'script_user__last_name')
+        )
+        contributor_list = [(contributor[0], contributor[1]+" "+contributor[2]) for contributor in contributor_list]        
+        contributor_list.insert(0, ('', '--- Select Contributor ---'))
+        self.fields['contributor'].choices = contributor_list
+
+        #populating FOSS select choices
+        foss_list = list(FossCategory.objects.distinct().
+            values_list('id','foss')
+        )
+        foss_list.insert(0, ('', '--- Select FOSS ---'))
+        self.fields['foss'].choices = foss_list
+
+        #Populating Language select choices
+        language_list = list(Language.objects.distinct().
+            values_list('id','name')
+        )
+        language_list.insert(0, ('', '--- Select Language ---'))
+        self.fields['language'].choices = language_list
+
+    def clean(self):
+        super(PublishedTutorialFilterForm, self).clean()
+        s_date = self.cleaned_data.get('start_date')
+        e_date = self.cleaned_data.get('end_date')
+        if s_date > e_date:
+            raise forms.ValidationError('End date must be later')
+

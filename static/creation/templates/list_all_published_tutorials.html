@@ -1,0 +1,163 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load cmsdata %}
+{% load creationdata %}
+{% block title %}Tutorials Published{% endblock %}
+{% block uncompresscssblock %}
+    <link rel="stylesheet" href="{% static 'spoken/css/flip-scroll.min.css' %}" type="text/css" media="screen" charset="utf-8" />
+{% endblock %}
+{% block heading %}<i class="fa fa-list-ul"></i> Tutorials Published{% endblock %}
+{% block content %}
+    <!-- form -->
+    <div class="row">
+        <form class="form-horizontal">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="id_contributor" class="col-sm-4 control-label">Contributor</label>
+                    <div class="col-sm-8">
+                        {% render_field form.contributor class+="form-control" tabindex="1" %}
+                        {{ form.contributor.errors }}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="id_foss" class="col-sm-4 control-label">FOSS</label>
+                    <div class="col-sm-8">
+                        {% render_field form.foss class+="form-control" tabindex="1" %}
+                        {{ form.foss.errors }}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="id_language" class="col-sm-4 control-label">Language</label>
+                    <div class="col-sm-8">
+                        {% render_field form.language class+="form-control" tabindex="1" %}
+                        {{ form.language.errors }}
+                    </div>
+                </div>
+               
+            </div>
+            <div class="col-md-4">
+                {% for error in form.non_field_errors %}
+                <div class="alert alert-danger">
+                    {{ error }}
+                </div>
+            {% endfor %}
+                <div class="form-group">
+                    <label for="id_start_date" class="col-sm-4 control-label">Start Date</label>
+                    <div class="col-sm-8">
+                        {% render_field form.start_date class+="form-control " tabindex="1" %}
+                        {{ form.start_date.errors }}
+                    </div>
+                </div>
+                 <div class="form-group">
+                    <label for="id_end_date" class="col-sm-4 control-label">End Date</label>
+                    <div class="col-sm-8">
+                        {% render_field form.end_date class+="form-control" tabindex="1" %}
+                        {{ form.end_date.errors }}
+                    </div>
+                </div>
+                 <input type="submit" value="Filter" class="btn btn-success">
+                <a href="?"  class="btn btn-primary">Clear</a>
+            </div>
+        </form>
+        <div class="col-md-4">
+            <table class="table table-bordered bg-info">
+                <tbody>
+                    <tr>
+                        <th>Tutorials Published</th>
+                        <td>{{ count_of_published_tutorials }}</td>
+                    </tr>
+                    
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <!-- //form -->
+
+    <!-- content table -->
+    <div id="flip-scroll" class="table-responsive">
+        <table class="paleblue table table-condensed table-bordered table-hover table-striped">
+        {% if not published_tutorials|length %}
+            <tr>
+                <td colspan="5" class="col-center">List is empty!</td>
+            </tr>
+        {% else %}
+            <thead>
+                <th>#</th>
+                <th>FOSS</th>
+                <th>Language</th>
+                <th>Tutorial Title</th>
+                <th>Contributor</th>
+                <th>Published At</th>
+            </thead>
+            <tbody>
+            {% for tutorial in published_tutorials %}
+                <tr class="{% cycle 'odd' 'even' %}">
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ tutorial.tutorial_detail.foss }}</td>
+                    <td>{{ tutorial.language }}</td>
+                    <td>{{ tutorial.tutorial_detail.tutorial }}
+                    <td>{{ tutorial.script_user.first_name }} {{ tutorial.script_user.last_name }}</td>
+                    <td>{{ tutorial.publish_at }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        {% endif %}
+        </table>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="{% static 'spoken/js/jquery.datetimepicker.js' %}"></script>
+    <script>
+        // to dynamically get languages
+        function load_languages(){
+            var url = 'creation/payment/ajax/languages';
+            var foss = $('#id_foss').val();
+            var contributor = $('#id_contributor').val(); 
+            var current_language = $('#id_language').val();
+            $.ajax({
+                url: url,
+                data: {
+                    'foss' : foss,
+                    'contributor': contributor,
+                    'language': current_language,
+                },
+                success: function(data){
+                    $('#id_language').html(data);
+                }
+            });
+        }
+        // to dynamically get fossee list for contributor
+        function load_fosses(){
+            var url = '/creation/payment/ajax/fosses';
+            var contributor = $('#id_contributor').val();
+            var foss = $('#id_foss').val();
+            $.ajax({
+                url: url,
+                data: {
+                    'contributor': contributor,
+                    'foss': foss,
+                },
+                success: function(data){
+                    $('#id_foss').html(data);
+                },
+            });
+        }
+        // for initialization 
+        $(document).ready(function(){
+            contributor = $('#id_contributor').val();
+            var foss = $('#id_foss').val();
+            language = $('#id_language').val();
+            load_fosses();
+            load_languages();
+        });
+        // on changing any params it will call ajax
+        $('#id_contributor').change(function(){
+            load_fosses();
+        });
+        $('#id_foss').change(function(){
+            load_languages();
+        });
+    </script>
+
+{% endblock %}
