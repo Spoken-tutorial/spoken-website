@@ -1783,7 +1783,7 @@ def test_list(request, role, status):
         elif is_invigilator(user) and role == 'invigilator':
             if status == 'ongoing':
                 collectionSet = Test.objects.filter((Q(status = 2) | Q(status = 3)),  tdate__lte = datetime.date.today(), invigilator_id = user.invigilator.id).order_by('-tdate')
-                messages.info(request, "Click on the Attendance link below to see the participant list. To know more Click Here.")
+                messages.info(request, "Click on the Attendance link below to see the participant list.")
             elif status == 'predated':
                 collectionSet = Test.objects.none()
             elif status == 'approved':
@@ -2129,14 +2129,15 @@ def test_participant_ceritificate(request, wid, participant_id):
     text = "Certificate for Completion of "+w.foss.foss+" Training"
 
     centered = ParagraphStyle(name = 'centered',
-        fontSize = 40,
+        fontSize = 30,
         leading = 50,
         alignment = 1,
-        spaceAfter = 20)
+        spaceAfter = 15)
 
     p = Paragraph(text, centered)
-    p.wrap(500, 200)
+    p.wrap(500,50)
     p.drawOn(imgDoc, 6.2 * cm, 16 * cm)
+
 
     imgDoc.save()
 

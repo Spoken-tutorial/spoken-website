@@ -65,7 +65,7 @@ urlpatterns = patterns('',
     url(r'^cdcontent/', include('cdcontent.urls', namespace='cdcontent')),
     url(r'^create_cd_content/', include('cdcontent.urls', namespace='cdcontent')),
     url(r'^statistics/', include('statistics.urls', namespace='statistics')),
-
+    url(r'^list_videos/$', 'spoken.views.list_videos', name='list_videos'),
     # team
     url(r'^team/', include('team.urls')),
 
@@ -82,7 +82,7 @@ urlpatterns = patterns('',
     url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT, 'show_indexes': False}),
 
     # Old url adjustments
-    url(r'^list_videos/$', 'cdeep.views.list_videos', name='list_videos'),
+    # url(r'^list_videos/$', 'cdeep.views.list_videos', name='list_videos'),
     url(r'^show_video/$', 'cdeep.views.show_video', name='show_video'),
     url(r'^search/node/([0-9a-zA-Z-+%\(\)]+)/$', 'cdeep.views.search_node', name='search_node'),
 

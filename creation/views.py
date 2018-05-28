@@ -4,6 +4,7 @@ import os
 import re
 import subprocess
 import time
+from django.utils import timezone
 from decimal import Decimal
 from urllib import quote, unquote_plus, urlopen
 
@@ -1687,7 +1688,7 @@ def accept_all(request, review, trid):
 
         tr.common_content.save()
     if not flag:
-        messages.warning(request, 'There is no component available for Domain reviewr to accept.')
+        messages.warning(request, 'There is no component available for Domain reviewer to accept.')
 
     return HttpResponseRedirect('/creation/' + review + '-review/tutorial/' + str(tr.id) + '/')
 
@@ -2114,9 +2115,11 @@ def publish_tutorial(request, trid):
     else:
         flag = 1
     if flag and tr_rec.outline_status == 4 and tr_rec.script_status == 4 and tr_rec.video_status == 4:
-        tr_rec.status = 1
+        tr_rec.status = 1 
+        tr_rec.publish_at = timezone.now()
         tr_rec.save()
         PublishTutorialLog.objects.create(user = request.user, tutorial_resource = tr_rec)
+
         add_contributor_notification(tr_rec, comp_title, 'This tutorial is published now')
         messages.success(request, 'The selected tutorial is published successfully')
     else:
@@ -2745,6 +2748,25 @@ def ajax_manual_language(request):
                 data = '<option value="">-- Select Language --</option>' + data
     return HttpResponse(json.dumps(data), content_type='application/json')
 
+@csrf_exempt
+def ajax_get_tutorials(request):
+    data = ''
+    if request.method == 'POST':
+        foss_id = request.POST.get('foss', '')
+        if foss_id:
+            tutorials = TutorialResource.objects.filter(
+                Q(status=1) | Q(status=2),
+                tutorial_detail__foss_id=foss_id
+            ).values_list(
+                'tutorial_detail_id',
+                'tutorial_detail__tutorial'
+            ).order_by('tutorial_detail__tutorial').distinct()
+            for tutorial in tutorials:
+                data += '<option value="' + str(tutorial[0]) + '">' + \
+                    str(tutorial[1]) + '</option>'
+            if data:
+                data = '<option value="">-- Select Tutorial --</option>' + data
+    return HttpResponse(json.dumps(data), content_type='application/json')
 
 def view_brochure(request):
     template = 'creation/templates/view_brochure.html'
@@ -2753,3 +2775,47 @@ def view_brochure(request):
         'my_dict': my_dict
     }
     return render(request, template, context)
+
+@login_required
+def update_assignment(request):
+    if not is_administrator(request.user):
+        raise PermissionDenied()
+    form = UpdateAssignmentForm()
+    if request.method == 'POST':
+        form = UpdateAssignmentForm(request.POST, request.FILES)
+        if form.is_valid():
+            try:
+                foss_id = request.POST.get('foss')
+                foss = FossCategory.objects.get(pk=foss_id)
+
+                tutorial_detail_id = request.POST.get('tutorial')
+                tutorial = TutorialDetail.objects.get(pk=tutorial_detail_id)
+                file_name, file_extension = os.path.splitext(request.FILES['comp'].name)
+                file_name =  tutorial.tutorial.replace(' ', '-') + '-Assignment' + file_extension
+                file_path = settings.MEDIA_ROOT + 'videos/' + str(foss_id) + '/' + str(tutorial_detail_id) + '/resources/' + file_name
+            
+                fout = open(file_path, 'wb+')
+                f = request.FILES['comp']
+                # Iterate through the chunks.
+                for chunk in f.chunks():
+                    fout.write(chunk)
+                fout.close()
+
+                tr_res = TutorialResource.objects.get(tutorial_detail=tutorial_detail_id, language_id = 22)
+                tr_res.common_content.assignment = file_name
+                tr_res.common_content.assignment_status = 4
+                tr_res.common_content.assignment_user = request.user
+                tr_res.common_content.save()
+
+
+
+                messages.success(request, 'Assignment updated successfully!')
+                form = UpdateAssignmentForm()
+            except Exception, e:
+                print e
+    context = {
+        'form': form,
+    }
+    context.update(csrf(request))
+    return render(request, 'creation/templates/update_assignment.html', context)
+

@@ -2,7 +2,6 @@
 from django.contrib.auth.models import User
 from django.db import models
 
-
 class Language(models.Model):
     name = models.CharField(max_length=255, unique=True)
     user = models.ForeignKey(User)
@@ -197,6 +196,7 @@ class TutorialResource(models.Model):
     hit_count = models.PositiveIntegerField(default=0)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
+    publish_at = models.DateTimeField(null=True)
 
     class Meta:
         unique_together = (('tutorial_detail', 'language',),)
