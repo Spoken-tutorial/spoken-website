@@ -61,48 +61,76 @@
             </div>
         </form>
         <div class="col-md-4">
-            <table class="table table-bordered bg-info">
+            <table class="table table-bordered ">
                 <tbody>
                     <tr>
                         <th>Tutorials Published</th>
                         <td>{{ count_of_published_tutorials }}</td>
                     </tr>
+                    <tr>
+                        <th>No. of Contributors</th>
+                        <td>{{ count_of_contributors }}</td>
+                    </tr>
                     
                 </tbody>
             </table>
+            <div class="view-buttons">
+                <button class="btn btn-warning" id="button-to-show-details">Show Details</button>
+                <button class="btn btn-info" id="button-to-show-summary">Show Summary</button>
+            </div>
         </div>
     </div>
     <!-- //form -->
 
-    <!-- content table -->
-    <div id="flip-scroll" class="table-responsive">
+    <!-- content table details section -->
+    <div id="details-section">
+        <div id="flip-scroll" class="table-responsive">
+            <table class="paleblue table table-condensed table-bordered table-hover table-striped">
+            {% if not published_tutorials|length %}
+                <tr>
+                    <td colspan="5" class="col-center">List is empty!</td>
+                </tr>
+            {% else %}
+                <thead>
+                    <th>#</th>
+                    <th>FOSS</th>
+                    <th>Language</th>
+                    <th>Tutorial Title</th>
+                    <th>Contributor</th>
+                    <th>Published At</th>
+                </thead>
+                <tbody>
+                {% for tutorial in published_tutorials %}
+                    <tr class="{% cycle 'odd' 'even' %}">
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ tutorial.tutorial_detail.foss }}</td>
+                        <td>{{ tutorial.language }}</td>
+                        <td>{{ tutorial.tutorial_detail.tutorial }}
+                        <td>{{ tutorial.script_user.first_name }} {{ tutorial.script_user.last_name }}</td>
+                        <td>{{ tutorial.publish_at }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            {% endif %}
+            </table>
+        </div>
+    </div>
+    <div id="summary-section">
         <table class="paleblue table table-condensed table-bordered table-hover table-striped">
-        {% if not published_tutorials|length %}
-            <tr>
-                <td colspan="5" class="col-center">List is empty!</td>
-            </tr>
-        {% else %}
-            <thead>
+            <thead >
                 <th>#</th>
-                <th>FOSS</th>
-                <th>Language</th>
-                <th>Tutorial Title</th>
                 <th>Contributor</th>
-                <th>Published At</th>
+                <th>Tutorials Done</th>
             </thead>
             <tbody>
-            {% for tutorial in published_tutorials %}
-                <tr class="{% cycle 'odd' 'even' %}">
+                {% for pay in payment_summary %}
+                <tr>
                     <td>{{ forloop.counter }}</td>
-                    <td>{{ tutorial.tutorial_detail.foss }}</td>
-                    <td>{{ tutorial.language }}</td>
-                    <td>{{ tutorial.tutorial_detail.tutorial }}
-                    <td>{{ tutorial.script_user.first_name }} {{ tutorial.script_user.last_name }}</td>
-                    <td>{{ tutorial.publish_at }}</td>
+                    <td>{{ pay.script_user__first_name|capfirst }} {{ pay.script_user__last_name|capfirst }}</td>
+                    <td>{{ pay.published_tuorial }}</td>
                 </tr>
-            {% endfor %}
+                {% endfor %}
             </tbody>
-        {% endif %}
         </table>
     </div>
 
@@ -158,6 +186,26 @@
         $('#id_foss').change(function(){
             load_languages();
         });
+
+        // --------------------------------------------------
+        // to switch between summary and details
+        $(document).ready(function(){
+            //initialization
+            $('#details-section').show();
+            $('#summary-section').hide();
+
+            $('#button-to-show-summary').on('click',function(){
+                $('#details-section').hide();
+                $('#summary-section').show();
+                $('.pagination').hide(); // hide pagination
+            });
+            $('#button-to-show-details').on('click',function(){
+                $('#details-section').show();
+                $('#summary-section').hide();
+                $('.pagination').show(); // show pagination
+            });
+        });
+        
     </script>
 
 {% endblock %}

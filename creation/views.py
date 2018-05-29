@@ -20,6 +20,7 @@ from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.http import HttpResponse, HttpResponseRedirect
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render
+from django.db.models import Count
 
 # Spoken Tutorial Stuff
 from cms.sortable import *
@@ -2821,8 +2822,7 @@ def update_assignment(request):
 
 def list_all_published_tutorials(request):
     form = PublishedTutorialFilterForm(request.GET)
-    tr_pub = TutorialResource.objects.filter(status = 1).order_by('-publish_at')
-    tr_pub = TutorialResource.objects.filter(status = 1).order_by('-publish_at')
+    tr_pub = TutorialResource.objects.filter(status = 1)
     if form.is_valid():
         start_date = form.cleaned_data['start_date']
         end_date = form.cleaned_data['end_date']
@@ -2839,16 +2839,23 @@ def list_all_published_tutorials(request):
             tr_pub = tr_pub.filter(tutorial_detail__foss_id = foss)
         if language:
             tr_pub = tr_pub.filter(language = language)
+    #generating summary out of filtered tutorials
+    payment_summary = tr_pub.values('script_user', 'script_user__first_name', 'script_user__last_name').annotate(published_tuorial = Count('script_user'))
     tr_pub_count = tr_pub.count() # counting number of tutorial published
+    payment_summary_count = payment_summary.count() # number of contributors
+    
+    tr_pub = tr_pub.order_by('-publish_at') # ordering latest first
+    #pagination
     page = request.GET.get('page')
     tr_pub = get_page(tr_pub, page, 10)
-    form.cleaned_data['contributor'] = 7
     context = {
         'published_tutorials': tr_pub,
         'media_url': settings.MEDIA_URL,
         'count_of_published_tutorials': tr_pub_count,
+        'count_of_contributors': payment_summary_count,
         'form': form,
         'collection': tr_pub, # for pagination
+        'payment_summary': payment_summary,
     }
     return render(request, 'creation/templates/list_all_published_tutorials.html', context)
 
