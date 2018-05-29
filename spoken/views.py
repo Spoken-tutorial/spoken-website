@@ -626,3 +626,6 @@ def expression_of_intrest_new(request):
     context = {}
     context['form'] = form
     return render(request, 'spoken/templates/expression_of_intrest_old.html', context)
+
+def nmeict_intro(request):
+    return render(request, 'spoken/templates/nmeict_intro.html')
