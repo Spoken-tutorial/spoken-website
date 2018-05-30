@@ -251,6 +251,7 @@
         background: white;
     }
     .video-js.vjs-fullscreen .vjs-tt-cue { font-size: 22px; }
+    .vjs-modal-dialog-content select {color:#1a1a1a;}
     </style>
 {% endblock %}
 {% load creationdata %}
@@ -262,16 +263,33 @@
     <row>
         <div class='container playlist-container col-lg-12 col-md-12 col-sm-12'>
             <div class="video-container col-lg-8 col-md-8 col-sm-8">
-                        <video id="st_video" class="video-js vjs-default-skin" controls preload="none" poster="{{ tr_rec.tutorial_detail|get_thumb_path:'Big' }}" width="auto" height="auto" data-setup="{}">
-                            <!-- <source src="/static/spoken/images/Overview-and-Installation-of-Git-English.ogv" type="video/ogg" /> -->
-			    <source src="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ tr_rec.video }}" type="video/ogg" />
-                             {% with has_mp4=tr_rec|get_mp4_video %}
-                                 {% if has_mp4 %}
-                                     <source src="{{ media_url }}{{ has_mp4 }}" type="video/mp4" />
-                                 {% endif %}
-                             {% endwith %}
-                            {{ tr_rec|get_srt_path|safe }}
-                        </video>
+               
+               
+               
+               
+                <video id="st_video" class='video-js vjs-default-skin vjs-big-play-centered' autobuffer controls poster="{{ tr_rec.tutorial_detail|get_thumb_path:'Big' }}" data-setup='{ "playbackRates": [0.5, 1, 1.5, 2] }'>
+                    <script>
+                        </script>
+                    <source src="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ current_rec }}Video.webm" type="video/webm">
+                    {% with has_mp4=tr_rec|get_mp4_video %}
+                        {% if has_mp4 %}
+                            <source src="{{ media_url }}{{ has_mp4 }}" type="video/mp4" />
+                        {% endif %}
+                    {% endwith %}
+
+                    <track kind="captions" src="/media/videos/63/613/{{ current_rec }}English.vtt" label="English"></track>
+                    <track kind="captions" src="/media/videos/63/613/{{ current_rec }}{{ tr_rec.language }}.srt" label="{{tr_rec.language }}"></track>
+                </video>
+            
+                <audio id="audioTracks" class='d-none'>
+                    {% for language in tr_rec_language_list %}
+                        <source id="{{ language.language__name }}-audio-track" data-value="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ current_rec }}{{ language.language__name }}.ogg" type="audio/ogg">{{ language.language__name }}</source>
+                    {% endfor %}
+                </audio>
+            
+            
+                <audio id="audio" class='d-none'>
+                    <source id="audioSource" src="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ current_rec }}{{tr_rec.language }}.ogg"></audio>
             </div>
 
 
@@ -292,7 +310,6 @@
         <ul class="forum-questions" id="forum_Q" style="padding : 6px ">
      
         {% for question in questions %}
-
         <li class="question" id="{{ question.id }}">
             <a href="http://forums.spoken-tutorial.org/question/{{ question.id }}/{{ question.get_slugified_title }}" target="_blank" class="{{ question.id }}">{{ question.title }}</a>
             <p>{{ question.body|striptags|safe }}
@@ -350,11 +367,6 @@
 </div>
     </ul>
 
-<script type="text/javascript">
-    jQuery(document).ready(function ($) {
-       $("#tabs").tab();
-    });
-</script> 
 </div> <!-- container -->
 
         </div>
@@ -506,8 +518,268 @@
         </div>
     </row>
 {% endblock %}
+{% block uncompressjsblock %}
+    <script src="{% static 'spoken/js/popcorn.min.js' %}"></script>
+    <script src="{% static 'spoken/js/video.min.js' %}"></script>
+    <script src="{% static 'spoken/js/jquery.fancybox.pack.js' %}"></script>
+    <script src="{% static 'spoken/js/jquery.mousewheel-3.0.6.pack.js' %}"></script>
+    <script src="https://apis.google.com/js/platform.js"></script>
+        <script type="text/javascript" src="http://www.youtube.com/iframe_api"></script>
+{% endblock %}
 {% block compressinlinejsblock %}
     <script type="text/javascript">
+
+
+    init_popcorn("#st_video", "#audio");
+    function init_popcorn(VIDEO, AUDIO) {
+        var medias = {
+            video: Popcorn(VIDEO),
+            audio: Popcorn(AUDIO)
+        },
+            loadCount = 0,
+            events = "play pause timeupdate seeking".split(/\s+/g);
+
+        // iterate both media sources
+        Popcorn.forEach(medias, function (media, type) {
+
+            // when each is ready... 
+            media.on("canplayall", function () {
+
+                // trigger a custom"sync" event
+                this.emit("sync");
+
+                // Listen for the custom sync event...    
+            }).on("sync", function () {
+
+                // Once both items are loaded, sync events
+                if (++loadCount == 2) {
+                    // Uncomment this line to silence the audio
+                    //medias.audio.mute();
+
+                    // Iterate all events and trigger them on the audio 
+                    // whenever they occur on the video
+                    events.forEach(function (event) {
+
+                        medias.video.on(event, function () {
+
+                            // Avoid overkill events, trigger timeupdate manually
+                            if (event === "timeupdate") {
+
+                                if (!this.media.paused) {
+                                    return;
+                                }
+                                medias.audio.emit("timeupdate");
+                                return;
+                            }
+
+                            if (event === "seeking") {
+                                medias.audio.currentTime(this.currentTime());
+                            }
+
+                            if (event === "play" || event === "pause") {
+                                medias.audio[event]();
+                            }
+                        });
+                    });
+                }
+            });
+        });
+    }
+
+
+    // Video.js Player Global Variables
+    var trackedPlayer = videojs('st_video');
+    var trackedAudio = document.getElementById("audio");
+    var trackedAudioFlag = trackedVideoFlag = 0;
+    var timesTried = 0;
+    var requestedPlay = 0;
+    var seekedFlag = 0;
+
+    // Helping Function
+
+    function checkTimeAndPause() {
+        // Fixing a bug on Firefox, Remove when irrelevent.
+        if (trackedAudio.readyState == 4 && trackedAudioFlag == 0) {
+            trackedAudio.load();
+        }        
+        if (trackedPlayer.readyState() == 4 && trackedVideoFlag == 0) {
+            trackedPlayer.load();
+        }
+
+        if (trackedAudio.currentTime - trackedPlayer.currentTime() + 0.5 < 0 || trackedAudio.currentTime - trackedPlayer.currentTime() - 0.5 > 0) {
+            // When client changes video from video list on the page, trackedAudio needs to be played from the code manually! 
+            if (trackedAudio.paused && !trackedPlayer.paused()) {
+                trackedAudio.play()
+            }
+            // Set Audio / Video to same currentTime
+            trackedAudio.currentTime = trackedPlayer.currentTime();
+            checkBufferedState();
+            return;
+        }
+    }
+    setInterval(checkTimeAndPause, 1000);
+
+    function checkMediaAndPause() {
+        if (trackedPlayer.paused() == 0) {
+            var videoPlayPromise = trackedPlayer.play();
+            if (videoPlayPromise !== undefined) {
+                videoPlayPromise.then(_ => {
+                    trackedPlayer.addClass("vjs-waiting");
+                    trackedPlayer.pause();
+                })
+            }
+        }
+        if (trackedAudio.paused == 0) {
+            var audioPlayPromise = trackedAudio.play();
+            if (audioPlayPromise !== undefined) {
+                audioPlayPromise.then(_ => {
+                    trackedPlayer.addClass("vjs-waiting");
+                    trackedAudio.pause();
+                })
+            }
+        }
+    }
+
+    function checkMediaAndPlay() {
+        var videoPlayPromise = trackedPlayer.play();
+        if (videoPlayPromise !== undefined) {
+            videoPlayPromise.then(_ => {
+                if (trackedPlayer.paused())
+                    trackedPlayer.play();
+                if (!trackedAudio.paused)
+                    trackedPlayer.removeClass("vjs-waiting");
+            })
+        }
+
+        if (trackedAudio.paused) {
+            var audioPlayPromise = trackedAudio.play();
+            if (audioPlayPromise !== undefined) {
+                audioPlayPromise.then(_ => {
+                    trackedPlayer.removeClass("vjs-waiting");
+                    trackedAudio.play();
+                })
+            }
+        }
+    }
+
+    // Code to Invoke checkBufferState()
+    var playButton = document.getElementsByClassName("vjs-big-play-button")[0];
+    var playControllerButton = document.getElementsByClassName("vjs-play-control")[0];
+    var playPlayerController = document.getElementsByClassName("vjs-tech")[0];
+
+    playPlayerController.addEventListener("click", function () {
+        checkBufferedState();
+    });
+    playControllerButton.addEventListener("click", function () {
+        checkBufferedState();
+    });
+    playButton.addEventListener("click", function () {
+        checkBufferedState();
+    });
+
+    // Code to check if playable
+    trackedAudio.oncanplaythrough = function () {
+        trackedAudioFlag = 1;
+    };
+    trackedPlayer.on("canplaythrough", function () {
+        trackedVideoFlag = 1;
+    });
+    trackedPlayer.on("waiting", function () {
+        trackedVideoFlag = 0;
+        checkBufferedState();
+    });
+
+    trackedAudio.onwaiting = function () {
+        trackedAudioFlag = 0;
+        checkBufferedState();
+    };
+
+    // Check if audio or video is buffering, if buffering keep the other one paused, else, play them when play is requested.
+    function checkBufferedState() {
+        if (trackedAudioFlag == 0 || trackedVideoFlag == 0) {
+            checkMediaAndPause();
+            if (timesTried < 6) {
+                setTimeout(checkBufferedState, 5000);
+                return;
+            }
+            else {
+                alert("Buffered Failed, Download course or refresh to try again.");
+                return;
+            }
+        }
+        else if (requestedPlay || seekedFlag) {
+            timesTried = 0;
+            seekedFlag = 0;
+            checkMediaAndPlay();
+        }
+    }
+
+    trackedPlayer.on("seeked", function () {
+        seekedFlag = 1;
+    });
+
+    trackedPlayer.on("play", function () {
+        requestedPlay = 0;
+    });
+
+    trackedPlayer.on("pause", function () {
+        requestedPlay = 1;
+    });
+
+    // Set Volume 
+    trackedPlayer.on("volumechange", function () {
+        trackedAudio.volume = trackedPlayer.volume();
+        if (trackedPlayer.muted())
+            trackedAudio.muted = true;
+        else
+            trackedAudio.muted = false;
+    });
+    // Set Playback Rate
+    trackedPlayer.on("ratechange", function () {
+        trackedAudio.playbackRate = trackedPlayer.playbackRate();
+    });
+
+    // Add Audio Track
+    {% for language in tr_rec_language_list %}
+    var track = new videojs.AudioTrack({
+        id: '{{ language.language__name }}-audio-track',
+        label: '{{ language.language__name }}'
+    });
+    trackedPlayer.audioTracks().addTrack(track);
+    {% endfor %}
+
+    // Get the current trackedPlayer's AudioTrackList object.
+    var audioTrackList = trackedPlayer.audioTracks();
+
+    // Listen to the "change" event.
+    audioTrackList.addEventListener('change', function () {
+
+        // Log the currently enabled AudioTrack label.
+        for (var i = 0; i < audioTrackList.length; i++) {
+            var track = audioTrackList[i];
+
+            if (track.enabled) {
+                var source = document.getElementById(track.id);
+                var target = document.getElementById("audioSource");
+                var current_time = trackedPlayer.currentTime();
+                target.src = source.getAttribute('data-value');
+                trackedPlayer = videojs('st_video');
+                trackedPlayer.addClass("vjs-waiting");
+                trackedAudio.load(); //call this to just preload the audio without playing
+                trackedAudio.currentTime = current_time;
+                trackedAudio.volume = trackedPlayer.volume();
+                if (trackedPlayer.muted())
+                trackedAudio.muted = true;
+                else
+                trackedAudio.muted = false;
+                trackedAudio.playbackRate = trackedPlayer.playbackRate();
+                trackedPlayer.currentTime(current_time);
+                trackedPlayer.removeClass("vjs-waiting");
+                return;
+            }
+        }
+    });
+
         $(document).ready(function(){
 
             currentVideo = $('.playlist-item.active');
@@ -564,41 +836,36 @@
         return this >= min && this <= max;
     };
 
-            var ik_player;
-            //this function is called by the API
-            function onYouTubeIframeAPIReady() {
-                //creates the player object
-                ik_player = new YT.Player('player');
-                //Holds a reference to the YouTube player
-                //subscribe to events
-                ik_player.addEventListener("onReady",       "onReady");
-                ik_player.addEventListener("onStateChange", "onStateChange");
-            }
-  
-        function formatTime(time){
+    var ik_player;
+    //this function is called by the API
+    function onYouTubeIframeAPIReady() {
+        //creates the player object
+        ik_player = new YT.Player('player');
+        //Holds a reference to the YouTube player
+        //subscribe to events
+        ik_player.addEventListener("onReady",       "onReady");
+        ik_player.addEventListener("onStateChange", "onStateChange");
+    }
+
+    function formatTime(time){
         time = Math.round(time);
         var minutes = Math.floor(time / 60),
         seconds = time - minutes * 60;
         seconds = seconds < 10 ? '0' + seconds : seconds;
         return minutes + "." + seconds;
-        }
+    }
 
     function onReady(event) {
         function logDuration() {
-
-         window.setTimeout(logDuration,1000);
-         var cur_time = formatTime(ik_player.getCurrentTime()).toString();
-         var duration=  formatTime(ik_player.getDuration()).toString();
-
-        if(parseFloat(cur_time) == parseFloat(duration.toString())){
-         $('.ScrollStyle').find('.question').css("background-color", "white");
-        }else{
-        trigger(cur_time, duration);
-        }
-       
-            
-
-        return cur_time
+            window.setTimeout(logDuration,1000);
+            var cur_time = formatTime(ik_player.getCurrentTime()).toString();
+            var duration=  formatTime(ik_player.getDuration()).toString();
+            if(parseFloat(cur_time) == parseFloat(duration.toString())) {
+                $('.ScrollStyle').find('.question').css("background-color", "white");
+            } else {
+               trigger(cur_time, duration);
+            }
+            return cur_time
         }
         logDuration();
         $("#text").click(function(e){
@@ -607,13 +874,12 @@
            
         });
 
-
-    //var title = $('#text').html("Post your Question on the Forum");
-       // $("#text").click(function(e){
-     // e.preventDefault();
-         // alert(logDuration());
-            //title.html('new title'+logDuration());
-       // });
+        // var title = $('#text').html("Post your Question on the Forum");
+        //     $("#text").click(function(e) {
+        //         e.preventDefault();
+        //         alert(logDuration());
+        //         title.html('new title'+logDuration());
+        //     });
         }
 
       function trigger(cur_time, duration){
@@ -650,7 +916,7 @@
            }
            {% endfor %}
            }
-                        //for videojs trigger
+            //for videojs trigger
             var trackedPlayer = videojs('st_video');
             var previousTime = 0;
             var currentTime = 0;
@@ -660,45 +926,38 @@
             var cur_time = formatTime(currentTime).toString();
 
            	trigger( cur_time);
-							$("#text").click(function(e){
-							trackedPlayer.pause()
-		       		setForum(cur_time)
-		         
-		      		});
-			
+			$("#text").click(function(e){
+				trackedPlayer.pause()
+		       	setForum(cur_time) 
+                });
             });
  
   		
-				function setForum(cur_time)
-				{
-					 
-						var time_split = cur_time.split(".")
-						var minute = parseFloat(time_split[0]);
-						var min_range = minute+"-"+(minute+parseFloat(1))
-						if(parseInt(time_split[1]).between(parseInt(0),parseInt(9))){
-									sec_range = "0-10"
-						}else if(parseFloat(time_split[1]).between(parseFloat(10),parseFloat(19))){
-									sec_range = "10-20"
-						}else if(parseFloat(time_split[1]).between(parseFloat(20),parseFloat(29))){
-									sec_range = "20-30"
-						}else if(parseFloat(time_split[1]).between(parseFloat(30),parseFloat(39))){
-									sec_range = "30-40"
-						}else if(parseFloat(time_split[1]).between(parseFloat(40),parseFloat(49))){
-									sec_range = "40-50"
-						}else {
-									sec_range = "50-60"
-						}
-		
-						 var url = "http://forums.spoken-tutorial.org/new-question/?category={{ tr_rec.tutorial_detail.foss.foss }}&tutorial={{ tr_rec.tutorial_detail.tutorial }}&minute_range="+min_range+"&second_range="+sec_range;
-						$("#text").attr("href", url);
-				}
-    </script>
-{% endblock %}
-{% block uncompressjsblock %}
-    <script src="{% static 'spoken/js/video.min.js' %}"></script>
-    <script src="{% static 'spoken/js/jquery.fancybox.pack.js' %}"></script>
-    <script src="{% static 'spoken/js/jquery.mousewheel-3.0.6.pack.js' %}"></script>
-    <script src="https://apis.google.com/js/platform.js"></script>
-        <script type="text/javascript" src="http://www.youtube.com/iframe_api"></script>
-{% endblock %}
+    function setForum(cur_time) {
+            
+            var time_split = cur_time.split(".")
+            var minute = parseFloat(time_split[0]);
+            var min_range = minute+"-"+(minute+parseFloat(1))
+            if(parseInt(time_split[1]).between(parseInt(0),parseInt(9))){
+                        sec_range = "0-10"
+            }else if(parseFloat(time_split[1]).between(parseFloat(10),parseFloat(19))){
+                        sec_range = "10-20"
+            }else if(parseFloat(time_split[1]).between(parseFloat(20),parseFloat(29))){
+                        sec_range = "20-30"
+            }else if(parseFloat(time_split[1]).between(parseFloat(30),parseFloat(39))){
+                        sec_range = "30-40"
+            }else if(parseFloat(time_split[1]).between(parseFloat(40),parseFloat(49))){
+                        sec_range = "40-50"
+            }else {
+                        sec_range = "50-60"
+            }
 
+                var url = "http://forums.spoken-tutorial.org/new-question/?category={{ tr_rec.tutorial_detail.foss.foss }}&tutorial={{ tr_rec.tutorial_detail.tutorial }}&minute_range="+min_range+"&second_range="+sec_range;
+            $("#text").attr("href", url);
+    }
+                
+    jQuery(document).ready(function ($) {
+       $("#tabs").tab();
+    });
+	</script>
+{% endblock %}
