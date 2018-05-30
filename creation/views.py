@@ -1063,13 +1063,19 @@ def view_component(request, trid, component):
             'component_data': tr_rec.common_content.keyword
         }
     elif component == 'video':
-        video_path = settings.MEDIA_ROOT + "videos/" + str(tr_rec.tutorial_detail.foss_id) + "/" + str(tr_rec.tutorial_detail_id) + "/" + tr_rec.video
+        lang=str(tr_rec.language)
+        length=len(lang)+1
+        video=tr_rec.video
+        video=video[:-(length)]
+        video_path = settings.MEDIA_ROOT + "videos/" + str(tr_rec.tutorial_detail.foss_id) + "/" + str(tr_rec.tutorial_detail_id) + "/" +video+".webm"
         video_info = get_video_info(video_path)
         context = {
             'tr': tr_rec,
             'component': component,
             'video_info': video_info,
-            'media_url': settings.MEDIA_URL
+            'media_url': settings.MEDIA_URL,
+            'video':video,
+            'lang':lang
         }
     else:
         messages.error(request, 'Invalid component passed as argument!')
@@ -1252,7 +1258,11 @@ def admin_review_video(request, trid):
                 error_msg = 'Invalid status code!'
     else:
         form = ReviewVideoForm()
-    video_path = settings.MEDIA_ROOT + "videos/" + str(tr.tutorial_detail.foss_id) + "/" + str(tr.tutorial_detail_id) + "/" + tr.video
+    lang=str(tr_rec.language)
+    length=len(lang)+1
+    video=tr_rec.video
+    video=video[:-(length)]
+    video_path = settings.MEDIA_ROOT + "videos/" + str(tr.tutorial_detail.foss_id) + "/" + str(tr.tutorial_detail_id) + "/" +video+".webm"
     video_info = get_video_info(video_path)
     if error_msg:
         messages.error(request, error_msg)
@@ -1263,6 +1273,8 @@ def admin_review_video(request, trid):
         'form': form,
         'media_url': settings.MEDIA_URL,
         'video_info': video_info,
+        'video':video,
+        'lang':lang
     }
     context.update(csrf(request))
     return render(request, 'creation/templates/admin_review_video.html', context)
@@ -2212,7 +2224,11 @@ def creation_view_tutorial(request, foss, tutorial, lang):
     except Exception, e:
         messages.error(request, str(e))
         return HttpResponseRedirect('/')
-    video_path = settings.MEDIA_ROOT + "videos/" + str(tr_rec.tutorial_detail.foss_id) + "/" + str(tr_rec.tutorial_detail_id) + "/" + tr_rec.video
+    lang=str(tr_rec.language)
+    length=len(lang)+1
+    video=tr_rec.video
+    video=video[:-(length)]
+    video_path = settings.MEDIA_ROOT + "videos/" + str(tr_rec.tutorial_detail.foss_id) + "/" + str(tr_rec.tutorial_detail_id) + "/" + video+".webm"
     video_info = get_video_info(video_path)
     context = {
         'tr_rec': tr_rec,
@@ -2222,7 +2238,9 @@ def creation_view_tutorial(request, foss, tutorial, lang):
         'media_url': settings.MEDIA_URL,
         'media_path': settings.MEDIA_ROOT,
         'tutorial_path': str(tr_rec.tutorial_detail.foss_id) + '/' + str(tr_rec.tutorial_detail_id) + '/',
-        'script_base': settings.SCRIPT_URL
+        'script_base': settings.SCRIPT_URL,
+        'video':video,
+        'lang':lang
     }
     return render(request, 'creation/templates/creation_view_tutorial.html', context)
 
