@@ -4,9 +4,11 @@ import os
 import re
 import subprocess
 import time
+import datetime
 from django.utils import timezone
 from decimal import Decimal
 from urllib import quote, unquote_plus, urlopen
+from itertools import islice, chain
 
 # Third Party Stuff
 from django.conf import settings
@@ -20,7 +22,11 @@ from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.http import HttpResponse, HttpResponseRedirect
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render
-from django.db.models import Count
+from django.db.models import Count, F, Q
+from django.views.generic.list import ListView
+from django.core.urlresolvers import reverse
+from django.db import IntegrityError
+
 
 # Spoken Tutorial Stuff
 from cms.sortable import *
@@ -30,6 +36,42 @@ from creation.subtitles import *
 
 from . import services
 
+
+class QuerySetChain(object):
+    """
+    Chains multiple subquerysets (possibly of different models) and behaves as
+    one queryset.  Supports minimal methods needed for use with
+    django.core.paginator.
+    """
+    #Reference - https://stackoverflow.com/questions/431628/how-to-combine-2-or-more-querysets-in-a-django-view
+
+    def __init__(self, *subquerysets):
+        self.querysets = subquerysets
+
+    def count(self):
+        """
+        Performs a .count() for all subquerysets and returns the number of
+        records as an integer.
+        """
+        return sum(qs.count() for qs in self.querysets)
+
+    def _clone(self):
+        "Returns a clone of this queryset chain"
+        return self.__class__(*self.querysets)
+
+    def _all(self):
+        "Iterates records in all subquerysets"
+        return chain(*self.querysets)
+
+    def __getitem__(self, ndx):
+        """
+        Retrieves an item or slice from the chained set of results from all
+        subquerysets.
+        """
+        if type(ndx) is slice:
+            return list(islice(self._all(), ndx.start, ndx.stop, ndx.step or 1))
+        else:
+            return islice(self._all(), ndx, ndx+1).next()
 
 def humansize(nbytes):
     suffixes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
@@ -1779,7 +1821,8 @@ def publish_tutorial_index(request):
             13: SortableHeader('Keywords', False, '', 'col-center'),
             14: SortableHeader('<span title="" data-original-title="" class="fa fa-cogs fa-2"></span>', False, '', 'col-center')
         }
-        collection = TutorialResource.objects.filter(id__in = tmp_ids)
+        # collection = TutorialResource.objects.filter(id__in = tmp_ids)
+        collection = TutorialResource.objects.all() # testing_mohit
         collection = get_sorted_list(request, collection, header, raw_get_data)
         ordering = get_field_index(raw_get_data)
         page = request.GET.get('page')
@@ -2100,6 +2143,8 @@ def public_review_tutorial(request, trid):
 
 @login_required
 def publish_tutorial(request, trid):
+    tr_rec = TutorialResource.objects.get(id = trid)
+    create_payment_instance(request, tr_rec) # testing_mohit
     if not is_qualityreviewer(request.user):
         raise PermissionDenied()
     try:
@@ -2120,11 +2165,12 @@ def publish_tutorial(request, trid):
         tr_rec.publish_at = timezone.now()
         tr_rec.save()
         PublishTutorialLog.objects.create(user = request.user, tutorial_resource = tr_rec)
-
+        # create_payment_instance(tr_rec) # create instance of tutorial payment
         add_contributor_notification(tr_rec, comp_title, 'This tutorial is published now')
         messages.success(request, 'The selected tutorial is published successfully')
     else:
         messages.error(request, 'The selected tutorial cannot be marked as Public review')
+    create_payment_instance(request, tr_rec) # testing_mohit
     return HttpResponseRedirect('/creation/quality-review/tutorial/publish/index/')
 
 @login_required
@@ -2822,7 +2868,8 @@ def update_assignment(request):
 
 def list_all_published_tutorials(request):
     form = PublishedTutorialFilterForm(request.GET)
-    tr_pub = TutorialResource.objects.filter(status = 1)
+    # status = 1 for published and script_user__groups = 5 for external contributors
+    tr_pub = TutorialResource.objects.filter(status = 1, script_user__groups__in = [5,]) 
     if form.is_valid():
         start_date = form.cleaned_data['start_date']
         end_date = form.cleaned_data['end_date']
@@ -2881,3 +2928,105 @@ def load_fosses(request):
         foss_id_list = TutorialResource.objects.filter(script_user = user_id).values_list('tutorial_detail__foss_id').distinct()
         foss_list = FossCategory.objects.filter(id__in = foss_id_list).values_list('id','foss')
     return render(request, 'creation/templates/foss_dropdown_list_options.html',{'foss_list': foss_list, 'existing_foss': existing_foss})
+
+def list_all_due_tutorials(request):
+    # initiate payment process for selected tutorials
+    if request.method == "POST":
+        initiate_payment(request)
+
+    tr_due = TutorialPayment.objects.filter(status = 1).order_by('user')
+    # pagination
+    page = request.GET.get('page')
+    tr_due = get_page(tr_due, page, 500)
+    context = {
+        'due_tutorials': tr_due,
+        'collection': tr_due, # for pagination
+    }
+    return render(request, 'creation/templates/list_all_due_tutorials.html', context)
+
+def mark_tutorial_as_payment_initiated(tr_id):
+    tr_obj = TutorialResource.objects.get(id = tr_id)
+    tr_obj.payment_status = 1
+    # send notification and mail
+    tr_obj.save()
+    print("success")
+
+def get_video_info_random(filepath):
+    '''
+        testing 
+        temporary function to get video time using its name
+    '''
+    video_time = 0
+    for ch in filepath:
+        video_time += ord(ch)
+    sec = 500 + video_time%500
+    td = datetime.timedelta(seconds = sec)
+    return td.seconds
+
+def initiate_payment(request):
+    user_id = request.POST.get('user')
+    tr_pay_ids = request.POST.getlist('selected_tutorialpayments')
+    user = User.objects.get(id = user_id)
+    if len(tr_pay_ids) > 0:
+        challan = PaymentChallan.objects.create(status = 1)
+        amount = 0
+        for tr_pay_id in tr_pay_ids:
+            tr_pay = TutorialPayment.objects.get(id = tr_pay_id)
+            tr_pay.status = 2 # from 1 --> 2 i.e due --> initiated
+            tr_pay.save()
+            tr_pay.payment_challan = challan
+        return HttpResponseRedirect(reverse('creation:payment-due-tutorials'))
+
+class TutorialPaymentList(ListView):
+    model = TutorialPayment
+    template_name = 'creation/templates/tutorialpayment_list.html'
+
+    def gettt_queryset(self):
+        return TutorialPayment.objects.filter(id__gte = 20)
+
+def create_payment_instance(request, tr_res):
+    '''
+    When an object got published it creates instance for payment.
+    Input -> TutorialResourceObject
+    Do -> Create TutorialPayment objects
+    '''
+    # getting video time 
+    '''
+    # actual production call to get time
+    tr_video_path = settings.MEDIA_ROOT + "videos/" + str(tr.tutorial_detail.foss_id) + "/" + str(tr.tutorial_detail_id) + "/" + tr.video
+    tr_video_info = get_video_info(tr_video_path)
+    tr_video_duration = tr_video_info.get('total',0)
+    '''
+    tr_video_duration = get_video_info_random(tr_res.video)
+    try:
+        if tr_res.script_user == tr_res.video_user:
+            if is_external_contributor(tr_res.script_user):
+                tp = TutorialPayment.objects.create(
+                    user = tr_res.script_user,
+                    tutorial_resource = tr_res,
+                    user_type = 3,
+                    seconds = tr_video_duration,
+                    # payment_challan = None,
+                )
+                tp.save()
+        else:
+            if is_external_contributor(tr_res.script_user):
+                tp = TutorialPayment.objects.create(
+                    user = tr_res.script_user,
+                    tutorial_resource = tr_res,
+                    user_type = 1,
+                    seconds = tr_video_duration,
+                    # payment_challan = None,
+                )
+                tp.save()
+            if is_external_contributor(tr_res.video_user):
+                tp = TutorialPayment.objects.create(
+                    user = tr_res.video_user,
+                    tutorial_resource = tr_res,
+                    user_type = 2,
+                    seconds = tr_video_duration,
+                    # payment_challan = None,
+                )
+                tp.save()
+    except IntegrityError as e:
+        messages.error(request, " Tutorial already in payment process. Error Detail -- "+str(e))

@@ -1,0 +1,40 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load cmsdata %}
+{% load creationdata %}
+{% block title %}Initiated Payments {% endblock %}
+{% block uncompresscssblock %}
+    <link rel="stylesheet" href="{% static 'spoken/css/flip-scroll.min.css' %}" type="text/css" media="screen" charset="utf-8" />
+{% endblock %}
+{% block heading %}<i class="fa fa-list-ul"></i> Initiated Payments {% endblock %}
+{% block content %}
+	<table class="paleblue table table-condensed table-bordered table-hover table-striped">
+		<tr>
+			<th>Contributor</th>
+			<th>Tutorials</th>
+			<th>Total Time</th>
+			<th>Total Amount</th>
+			<th>Payment Initiated At</th>
+			<th>Options</th>
+		</tr>
+	{% for p in tutorialpayment_list %}
+		<tr>
+			<td>{{ p.user }}</td>
+			<td>
+				<ul>
+				{% for tutorial in p.tutorial.all %}
+					<li>{{ tutorial.tutorial_detail }}</li>
+				{% endfor %}
+				</ul>
+			</td>
+			<td>{{ p.time }} secs</td>
+			<td>{{ p.amount }}</td>
+			<td>{{ p.updated }}</td>
+			<td>
+				<button class="btn btn-primary btn-sm " style="margin-bottom: 3px;">Generate Reciept</button><br>
+				<button class="btn btn-success btn-xs">Mark as Forwarded</button>
+			</td>
+	{% endfor %}
+	</table>
+{% endblock %}

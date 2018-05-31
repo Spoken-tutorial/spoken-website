@@ -1,6 +1,30 @@
 # Third Party Stuff
+from datetime import datetime, timedelta
+
 from django.contrib.auth.models import User
 from django.db import models
+
+PAY_PER_SEC = [0,2.16, 1.16, 3.33]
+
+PAYMENT_STATUS = (
+    (0, 'Payment Cancelled'),
+    (1, 'Payment Due'),
+    (2, 'Payment Initiated'),
+)
+
+USER_TYPE = (
+    (1, 'Script User'),
+    (2, 'Video User'),
+    (3, 'Script & Video User'),
+)
+
+CHALLAN_STATUS = (
+    (1, 'In Process'),
+    (2, 'Forwarded'),
+    (3, 'Completed'),
+    (4, 'Confirmed'),
+)
+
 
 class Language(models.Model):
     name = models.CharField(max_length=255, unique=True)
@@ -190,7 +214,6 @@ class TutorialResource(models.Model):
     video_thumbnail_time = models.TimeField(default='00:00:00')
     video_user = models.ForeignKey(User, related_name='videos')
     video_status = models.PositiveSmallIntegerField(default=0)
-
     status = models.PositiveSmallIntegerField(default=0)
     version = models.PositiveSmallIntegerField(default=0)
     hit_count = models.PositiveIntegerField(default=0)
@@ -198,8 +221,41 @@ class TutorialResource(models.Model):
     updated = models.DateTimeField(auto_now=True)
     publish_at = models.DateTimeField(null=True)
 
+
     class Meta:
         unique_together = (('tutorial_detail', 'language',),)
+
+
+class TutorialPayment(models.Model):
+    user = models.ForeignKey(User, related_name="contributor",)
+    tutorial_resource = models.ForeignKey(TutorialResource)
+    payment_challan = models.ForeignKey('PaymentChallan', null = True, blank = True, on_delete = models.SET_NULL )
+    user_type = models.PositiveSmallIntegerField(default = 3, choices = USER_TYPE)
+    seconds = models.PositiveIntegerField(default = 0, help_text="Tutorial duration in seconds")
+    amount = models.DecimalField(max_digits = 9, decimal_places = 2, default = 0)
+    status = models.PositiveSmallIntegerField(default = 1, choices = PAYMENT_STATUS)   
+
+    class Meta:
+        unique_together = (('tutorial_resource', 'user'),)
+
+    def get_duration(self):
+        return str(timedelta(seconds = self.seconds))
+
+    def save(self, *args, **kwargs):
+
+        try:
+            pps = PAY_PER_SEC[self.user_type]
+            self.amount = pps * self.seconds
+        except:
+            print("An Error Occured. User_Type is beyond 3 causing list index out of range")
+        super(TutorialPayment, self).save(*args, **kwargs)
+
+
+class PaymentChallan(models.Model):
+    code = models.CharField(max_length = 255, null = True, blank = True, unique = True)
+    # amount = models.DecimalField(max_digits = 9, decimal_places = 2, default = 0)
+    doc = models.FileField(null = True, blank = True)
+    status = models.PositiveSmallIntegerField(default = 1, choices = CHALLAN_STATUS)
 
 
 class ArchivedVideo(models.Model):

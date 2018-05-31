@@ -61,6 +61,18 @@ def get_review_status_symbol(key):
 	status_list = ['fa fa-1 fa-minus-circle review-pending-upload', 'fa fa-1 fa-check-circle review-admin-review', 'fa fa-1 fa-check-circle review-domain-review', 'fa fa-1 fa-check-circle review-quality-review', 'fa fa-1 fa-check-circle review-accepted', 'fa fa-1 fa-times-circle review-pending-upload', 'fa fa-1 fa-ban review-accepted']
 	return status_list[key];
 
+def get_payment_status_list(key):
+    status_list = ['Canceled','Due','Initiated','Completed','Confirmed']
+    return status_list[key];
+
+def get_payment_status_color(key):
+    status_list = ['danger','warning', 'muted', 'primary', 'success']
+    return status_list[key]
+
+def get_payment_status_symbol(key):
+    status_list = ['fa fa-1 fa-times-circle','fa fa-1 fa-minus-circle', 'fa fa-1 fa-check-circle', 'fa fa-1 fa-check-circle', 'fa fa-1 fa-check-circle', ]
+    return status_list[key]
+
 def get_username(key):
 	user = User.objects.get(pk = key)
 	return user.username
@@ -250,6 +262,10 @@ register.filter('get_last_video_upload_time', get_last_video_upload_time)
 register.filter('get_review_status_list', get_review_status_list)
 register.filter('get_review_status_symbol', get_review_status_symbol)
 register.filter('get_review_status_class', get_review_status_class)
+
+register.filter('get_payment_status_list', get_payment_status_list)
+register.filter('get_payment_status_symbol', get_payment_status_symbol)
+register.filter('get_payment_status_color', get_payment_status_color)
 register.filter('get_username', get_username)
 register.filter('instruction_sheet', instruction_sheet)
 register.filter('installation_sheet', installation_sheet)

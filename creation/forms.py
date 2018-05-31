@@ -997,7 +997,7 @@ class PublishedTutorialFilterForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super(PublishedTutorialFilterForm, self).__init__(*args, **kwargs)
         #populating contributor select choices
-        contributor_list = list(TutorialResource.objects.distinct()
+        contributor_list = list(TutorialResource.objects.filter(script_user__groups__in = [5,]).distinct()
             .values_list('script_user', 'script_user__first_name', 'script_user__last_name')
         )
         contributor_list = [(contributor[0], contributor[1]+" "+contributor[2]) for contributor in contributor_list]        
