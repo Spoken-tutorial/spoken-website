@@ -64,12 +64,15 @@ def home(request):
         random_tutorials.append((tcount, tutorial))
     try:
         tr_rec = TutorialResource.objects.filter(Q(status=1) | Q(status=2)).order_by('?')[:1].first()
+        tr_rec_language_list = TutorialResource.objects.filter(tutorial_detail__id=tr_rec.tutorial_detail_id).values('language__name').distinct()
     except Exception as e:
         messages.error(request, str(e))
     context = {
         'tr_rec': tr_rec,
         'media_url': settings.MEDIA_URL,
         'random_tutorials': random_tutorials,
+        'current_rec': tr_rec.video.rsplit(str(tr_rec.language), 1)[0],
+        'tr_rec_language_list': tr_rec_language_list,
     }
 
     testimonials = Testimonials.objects.all().order_by('?')[:2]
@@ -225,7 +228,6 @@ def watch_tutorial(request, foss, tutorial, lang):
         tr_rec = TutorialResource.objects.select_related().get(tutorial_detail=td_rec, language=Language.objects.get(name=lang))
         tr_recs = TutorialResource.objects.select_related('tutorial_detail').filter(Q(status=1) | Q(status=2), tutorial_detail__foss=tr_rec.tutorial_detail.foss, language=tr_rec.language).order_by(
             'tutorial_detail__foss__foss', 'tutorial_detail__level', 'tutorial_detail__order', 'language__name')
-        tr_rec_language_list = TutorialResource.objects.filter(tutorial_detail__foss_id=tr_rec.tutorial_detail.foss_id).values('language__name').distinct()
 
         questions = Question.objects.filter(category=td_rec.foss.foss.replace(
             ' ', '-'), tutorial=td_rec.tutorial.replace(' ', '-')).order_by('-date_created')
@@ -239,7 +241,6 @@ def watch_tutorial(request, foss, tutorial, lang):
         'tr_rec': tr_rec,
         'tr_recs': tr_recs,
         'current_rec': tr_rec.video.rsplit(str(tr_rec.language), 1)[0],
-        'tr_rec_language_list': tr_rec_language_list,
         'questions': questions,
         'video_info': video_info,
         'media_url': settings.MEDIA_URL,
@@ -634,6 +635,7 @@ def expression_of_intrest_new(request):
     context = {}
     context['form'] = form
     return render(request, 'spoken/templates/expression_of_intrest_old.html', context)
+
 
 def nmeict_intro(request):
     return render(request, 'spoken/templates/nmeict_intro.html')

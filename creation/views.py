@@ -1065,11 +1065,15 @@ def view_component(request, trid, component):
     elif component == 'video':
         video_path = settings.MEDIA_ROOT + "videos/" + str(tr_rec.tutorial_detail.foss_id) + "/" + str(tr_rec.tutorial_detail_id) + "/" + tr_rec.video
         video_info = get_video_info(video_path)
+        current_rec = tr_rec.video.rsplit(tr_rec.language.name)[0]
+        print video_info
         context = {
             'tr': tr_rec,
             'component': component,
             'video_info': video_info,
-            'media_url': settings.MEDIA_URL
+            'media_url': settings.MEDIA_URL,
+            'current_rec': current_rec,
+
         }
     else:
         messages.error(request, 'Invalid component passed as argument!')
@@ -1235,7 +1239,8 @@ def admin_review_video(request, trid):
                     add_contributor_notification(tr, tut_title, 'Video accepted by Admin reviewer')
                     add_domainreviewer_notification(tr, tut_title, 'Video waiting for Domain review')
                     response_msg = 'Review status updated successfully!'
-                except Exception, e:
+                except Exception as error:
+                    print error
                     error_msg = 'Something went wrong, please try again later.'
             elif request.POST['video_status'] == '5':
                 try:
@@ -1246,13 +1251,15 @@ def admin_review_video(request, trid):
                     AdminReviewLog.objects.create(status = tr.video_status, user = request.user, tutorial_resource = tr)
                     add_contributor_notification(tr, tut_title, 'Video is under Need Improvement state')
                     response_msg = 'Review status updated successfully!'
-                except Exception, e:
+                except Exception as error:
+                    print error
                     error_msg = 'Something went wrong, please try again later.'
             else:
                 error_msg = 'Invalid status code!'
     else:
         form = ReviewVideoForm()
-    video_path = settings.MEDIA_ROOT + "videos/" + str(tr.tutorial_detail.foss_id) + "/" + str(tr.tutorial_detail_id) + "/" + tr.video
+    current_rec = tr.video.rsplit(tr.language.name)[0]
+    video_path = settings.MEDIA_ROOT + "videos/" + str(tr.tutorial_detail.foss_id) + "/" + str(tr.tutorial_detail_id) + "/" + current_rec +"Video.webm"
     video_info = get_video_info(video_path)
     if error_msg:
         messages.error(request, error_msg)
@@ -1263,6 +1270,7 @@ def admin_review_video(request, trid):
         'form': form,
         'media_url': settings.MEDIA_URL,
         'video_info': video_info,
+        'current_rec': current_rec,
     }
     context.update(csrf(request))
     return render(request, 'creation/templates/admin_review_video.html', context)
@@ -2209,10 +2217,11 @@ def creation_view_tutorial(request, foss, tutorial, lang):
         td_rec = TutorialDetail.objects.get(foss = FossCategory.objects.get(foss = foss), tutorial = tutorial)
         tr_rec = TutorialResource.objects.get(tutorial_detail = td_rec, language = Language.objects.get(name = lang))
         tr_recs = TutorialResource.objects.filter(tutorial_detail__in = TutorialDetail.objects.filter(foss = tr_rec.tutorial_detail.foss).order_by('order').values_list('id'), language = tr_rec.language)
-    except Exception, e:
+    except Exception as e:
         messages.error(request, str(e))
         return HttpResponseRedirect('/')
-    video_path = settings.MEDIA_ROOT + "videos/" + str(tr_rec.tutorial_detail.foss_id) + "/" + str(tr_rec.tutorial_detail_id) + "/" + tr_rec.video
+    current_rec = tr_rec.video.rsplit(tr_rec.language.name)[0]
+    video_path = settings.MEDIA_ROOT + "videos/" + str(tr_rec.tutorial_detail.foss_id) + "/" + str(tr_rec.tutorial_detail_id) + "/" + current_rec + "Video.webm"
     video_info = get_video_info(video_path)
     context = {
         'tr_rec': tr_rec,
@@ -2222,7 +2231,8 @@ def creation_view_tutorial(request, foss, tutorial, lang):
         'media_url': settings.MEDIA_URL,
         'media_path': settings.MEDIA_ROOT,
         'tutorial_path': str(tr_rec.tutorial_detail.foss_id) + '/' + str(tr_rec.tutorial_detail_id) + '/',
-        'script_base': settings.SCRIPT_URL
+        'script_base': settings.SCRIPT_URL,
+        'current_rec': current_rec,
     }
     return render(request, 'creation/templates/creation_view_tutorial.html', context)
 
