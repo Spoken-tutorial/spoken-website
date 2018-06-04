@@ -547,8 +547,7 @@ def create_subtitle_files(request, overwrite=True):
                 continue
         srt_file_path = settings.MEDIA_ROOT + 'videos/' + \
             str(row.tutorial_detail.foss_id) + '/' + str(row.tutorial_detail_id) + '/'
-        srt_file_name = row.tutorial_detail.tutorial.replace(' ', '-') + '-' + row.language.name + '.srt'
-        # print srt_file_name
+        srt_file_name = row.tutorial_detail.tutorial.replace(' ', '-') + '-' + row.language.name + '.vtt'
         if not overwrite and os.path.isfile(srt_file_path + srt_file_name):
             continue
         try:

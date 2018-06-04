@@ -727,7 +727,7 @@ def save_timed_script(request, tdid):
                 if(int(code) == 200):
                     tr_rec.timed_script = storage_path
                     tr_rec.save()
-                    srt_file_path = settings.MEDIA_ROOT + 'videos/' + str(tr_rec.tutorial_detail.foss_id) + '/' + str(tr_rec.tutorial_detail_id) + '/' + tr_rec.tutorial_detail.tutorial.replace(' ', '-') + '-English.srt'
+                    srt_file_path = settings.MEDIA_ROOT + 'videos/' + str(tr_rec.tutorial_detail.foss_id) + '/' + str(tr_rec.tutorial_detail_id) + '/' + tr_rec.tutorial_detail.tutorial.replace(' ', '-') + '-English.vtt'
                     minified_script_url = settings.SCRIPT_URL.strip('/') + '?title=' + quote(storage_path) + '&printable=yes'
                     if generate_subtitle(minified_script_url, srt_file_path):
                         messages.success(request, 'Timed script updated and subtitle file generated successfully!')

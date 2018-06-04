@@ -272,10 +272,7 @@
                             <source src="{{ media_url }}{{ has_mp4 }}" type="video/mp4" />
                         {% endif %}
                     {% endwith %}
-                    {% if 'English' != tr_rec.language.name %}
-                        <track kind="captions" src="/media/videos/63/613/{{ current_rec }}English.vtt" label="English"></track>
-                    {% endif %}
-                    <track kind="captions" src="/media/videos/63/613/{{ current_rec }}{{ tr_rec.language.name }}.srt" label="{{tr_rec.language.name }}"></track>
+                    {{ tr_rec|get_srt_path|safe }}
                 </video>
             
                 <audio id="audioTracks" class='d-none'>
@@ -541,7 +538,7 @@
         label: 'English'
     });
     trackedPlayer.audioTracks().addTrack(track);
-    {% endif    %}
+    {% endif %}
     // Get the current trackedPlayer's AudioTrackList object.
     var audioTrackList = trackedPlayer.audioTracks();
 

@@ -64,10 +64,8 @@
     var requestedPlay = 0;
     var seekedFlag = 0;
 
-    // Helping Function
-
-    function checkTimeAndPause() {
-        // Fixing a bug on Firefox, Remove when irrelevent.
+    // Fixing a bug on Firefox, remove when irrelevent.
+    function checkLoadAndPlay() {
         if (trackedAudio.readyState == 4 && trackedAudioFlag == 0) {
             trackedAudio.load();
         }        
@@ -75,7 +73,11 @@
         if (trackedPlayer.readyState() == 4 && trackedVideoFlag == 0) {
             trackedPlayer.load();
         }
-
+    }
+    setTimeout(checkLoadAndPlay, 1500);
+    
+    // Check sync currenTime
+    function checkTimeAndPause() {
         if (trackedAudio.currentTime - trackedPlayer.currentTime() + 0.5 < 0 || trackedAudio.currentTime - trackedPlayer.currentTime() - 0.5 > 0) {
             // When client changes video from video list on the page, trackedAudio needs to be played from the code manually! 
             if (trackedAudio.paused && !trackedPlayer.paused()) {
@@ -83,13 +85,13 @@
             }
             // Set Audio / Video to same currentTime
             trackedAudio.currentTime = trackedPlayer.currentTime();
-            if (trackedAudio.readyState != 4 || trackedPlayer.readyState() != 4) {
+            // Check If buffered State is as desired
+            if (trackedAudioFlag == 0 || trackedVideoFlag == 0) {
                 checkBufferedState();
             }
-        }
-        return;
+        }    
     }
-    setInterval(checkTimeAndPause, 1000);
+    setInterval(checkTimeAndPause, 5000);
 
     function checkMediaAndPause() {
         if (trackedPlayer.paused() == 0) {

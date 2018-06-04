@@ -91,10 +91,15 @@ def add_side_by_side_tutorials(archive, languages):
         archive.write(filepath, 'spoken/videos/Side-by-Side-Method-Video.webm')
 
     for language in languages:
-        filepath = '{}videos/32/714/Side-by-Side-Method-{}.ogg'.format(settings.MEDIA_ROOT, language)
-        if os.path.isfile(filepath):
+        audiofilepath = '{}videos/32/714/Side-by-Side-Method-{}.ogg'.format(settings.MEDIA_ROOT, language)
+        scriptfilepath = '{}videos/32/714/Side-by-Side-Method-{}.vtt'.format(settings.MEDIA_ROOT, language)
+        
+        if os.path.isfile(audiofilepath):
             available_langs.add(language)
-            archive.write(filepath, 'spoken/videos/Side-by-Side-Method-{}.ogg'.format(language))
+            archive.write(audiofilepath, 'spoken/videos/Side-by-Side-Method-{}.ogg'.format(language))
+        
+        if os.path.isfile(scriptfilepath):
+            archive.write(scriptfilepath, 'spoken/videos/Side-by-Side-Method-{}.vtt'.format(language))
 
     return available_langs
 
@@ -198,21 +203,6 @@ def add_common_files(archive, common_files):
             archive.write(settings.MEDIA_ROOT + filepath, 'spoken/' + filepath)
 
 
-def add_srt_file(archive, tr_rec, filepath, eng_flag, srt_files):
-    ptr = filepath.rfind(".")
-    filepath = filepath[:ptr] + '.srt'
-
-    if os.path.isfile(settings.MEDIA_ROOT + filepath):
-        archive.write(settings.MEDIA_ROOT + filepath, 'spoken/' + filepath)
-
-    if eng_flag:
-        filepath = 'videos/{}/{}/{}-English.srt'.format(tr_rec.tutorial_detail.foss_id, tr_rec.tutorial_detail_id, tr_rec.tutorial_detail.tutorial.replace(' ', '-'))
-
-        if os.path.isfile(settings.MEDIA_ROOT + filepath) and filepath not in srt_files:
-            srt_files.add(filepath)
-            archive.write(settings.MEDIA_ROOT + filepath, 'spoken/' + filepath)
-
-
 def home(request):
     if request.method == 'POST':
         form = CDContentForm(request.POST)
@@ -239,7 +229,6 @@ def home(request):
                     srt_files = set()
                     video_files = set()
                     common_files = set()
-
                     if str(eng_rec.id) in values[0]:
                         eng_flag = False
 
@@ -248,7 +237,10 @@ def home(request):
 
                     if level:
                         t_resource_qs = t_resource_qs.filter(tutorial_detail__level_id=level)
-
+                    
+                    if eng_flag:
+                        add_sheets(archive, foss_rec, Language.objects.get(name="English"))
+                    
                     for value in values[0]:
                         language = Language.objects.get(pk=value)
                         add_sheets(archive, foss_rec, language)
@@ -261,21 +253,35 @@ def home(request):
                         for rec in tr_recs:
                             tr_rec_language_avaiable_list = []
                             tr_rec_language_avaiable_list = TutorialResource.objects.filter(tutorial_detail__id=rec.tutorial_detail_id).values('language__name').distinct()
-
+                            
+                            # Add Audio / Video / Script for the Langauges Selected
                             videofilepath = 'videos/{}/{}/{}'.format(key, rec.tutorial_detail_id, rec.video.rsplit(rec.language.name)[0] + "Video.webm")
+                            
                             audiofilepath = 'videos/{}/{}/{}'.format(key, rec.tutorial_detail_id, rec.video[:-4] + ".ogg")
-
+                            
+                            scriptfilepath = 'videos/{}/{}/{}'.format(key, rec.tutorial_detail_id, rec.video[:-4] + ".vtt")
+                            
                             if os.path.isfile(settings.MEDIA_ROOT + videofilepath) and videofilepath not in video_files:
                                 archive.write(settings.MEDIA_ROOT + videofilepath, 'spoken/' + videofilepath)
                                 video_files.add(videofilepath)
+                                
+                            if os.path.isfile(settings.MEDIA_ROOT + scriptfilepath) and scriptfilepath not in srt_files:
+                                archive.write(settings.MEDIA_ROOT + scriptfilepath, 'spoken/' + scriptfilepath)
+                            
                             if os.path.isfile(settings.MEDIA_ROOT + audiofilepath):
                                 archive.write(settings.MEDIA_ROOT + audiofilepath, 'spoken/' + audiofilepath)
-
+                           
+                            # Adding the English .vtt file (To Select even when english is not selected)
+                            if eng_flag:
+                                scriptfilepath = 'videos/{}/{}/{}'.format(key, rec.tutorial_detail_id, 
+                                rec.video.rsplit(language.name)[0]  + "English.vtt")
+                                
+                                if os.path.isfile(settings.MEDIA_ROOT + scriptfilepath) and scriptfilepath not in srt_files:
+                                    archive.write(settings.MEDIA_ROOT + scriptfilepath, 'spoken/' + scriptfilepath)
+                                    srt_files.add(scriptfilepath)
+                            
                             # Get list of questions of a particular tutorial
                             question_s = Question.objects.filter(category=foss_rec.foss.replace(' ', '-'), tutorial=rec.tutorial_detail.tutorial.replace(' ', '-')).order_by('-date_created')
-
-                            # Add srt file to archive
-                            add_srt_file(archive, rec, videofilepath, eng_flag, srt_files)
 
                             # Collect common files
                             collect_common_files(rec, common_files)
@@ -283,6 +289,7 @@ def home(request):
                             tutorial_path = '{}/{}/'.format(rec.tutorial_detail.foss_id, rec.tutorial_detail_id)
                             filepath = 'spoken/videos/{}show-video-{}.html'.format(tutorial_path, rec.language.name)
                             ctx = {
+                                'eng_flag': eng_flag,
                                 'tr_rec': rec,
                                 'tr_recs': tr_recs,
                                 'current_rec': rec.video.rsplit(str(rec.language), 1)[0],
@@ -330,13 +337,13 @@ def home(request):
                 # add side-by-side tutorials for selected languages
                 languages = add_side_by_side_tutorials(archive, languages)
                 ctx = {
+                    'eng_flag': eng_flag,
                     'foss_details': all_foss_details, 
                     'foss': foss_rec.id,
                     'lang': language.id,
                     'languages': languages,
                     'tr_rec_language_list': tr_rec_language_list, 
                 }
-                
                 try:
                     convert_template_to_html_file(archive, 'spoken/videos/home.html', request,"cdcontent/templates/home.html", ctx)
                 except Exception as Error:
@@ -458,14 +465,14 @@ def ajax_show_added_foss(request):
                     fsize += os.path.getsize(settings.MEDIA_ROOT + audioFilepath)
 
                 # calculate srt file size
-                scriptFilepath = 'videos/{}/{}/{}'.format(key, rec.tutorial_detail_id, rec.video[:-4] + ".srt")
+                scriptFilepath = 'videos/{}/{}/{}'.format(key, rec.tutorial_detail_id, rec.video[:-4] + ".vtt")
 
                 if os.path.isfile(settings.MEDIA_ROOT + scriptFilepath):
                     srt_files.add(scriptFilepath)
                     fsize += os.path.getsize(settings.MEDIA_ROOT + scriptFilepath)
 
                 if eng_flag:
-                    scriptFilepath = 'videos/{}/{}/{}-English.srt'.format(
+                    scriptFilepath = 'videos/{}/{}/{}-English.vtt'.format(
                         key, rec.tutorial_detail_id, rec.tutorial_detail.tutorial.replace(' ', '-'))
 
                     if os.path.isfile(settings.MEDIA_ROOT + scriptFilepath) and scriptFilepath not in srt_files:

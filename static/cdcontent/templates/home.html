@@ -101,6 +101,8 @@
                 width:100%;
                 height:100%;
             }
+            .video-js.vjs-fullscreen .vjs-tt-cue { font-size: 22px; }
+            .vjs-modal-dialog-content select {color:#1a1a1a;}
         </style>
     </head>
     <body>
@@ -160,10 +162,12 @@
                                 <video id="st_video" class='video-js vjs-default-skin vjs-big-play-centered' autobuffer controls data-setup='{ "playbackRates": [0.5, 1, 1.5, 2] }'>
                                     <source src="./Side-by-Side-Method-Video.webm"
                                         type="video/webm">
-                                    {% if 'English' != tr_rec.language.name %}
+                                    {% if eng_flag %}
                                         <track kind="captions" src="./Side-by-Side-Method-English.vtt" label="English"></track>
                                     {% endif %}
-                                    <track kind="captions" src="./Side-by-Side-Method-{{ tr_rec.language.name }}.vtt" label="{{tr_rec.language.name }}"></track>
+                                    {% for language in tr_rec_language_list %}
+                                        <track kind="captions" src="./Side-by-Side-Method-{{ language.language__name }}.vtt" label="{{ language.language__name }}"></track>
+                                    {% endfor %}
                                 </video>
 
                                 <audio id="audioTracks" class='d-none'>

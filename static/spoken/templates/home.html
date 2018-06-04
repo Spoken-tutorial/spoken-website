@@ -215,11 +215,7 @@
                     {% else %}
                         <video id="st_video" class='video-js vjs-default-skin vjs-big-play-centered' autobuffer controls data-setup='{ "playbackRates": [0.5, 1, 1.5, 2] }'>
                             <source src="{{ media_url }}/videos/75/692/Introduction-to-Biopython-Video.webm" type="video/webm">
-                            <!-- <source src="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ current_rec }}Video.webm" type="video/webm"> -->
-                            {% if 'English' != tr_rec.language.name %}
-                                <track kind="captions" src="/media/videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ current_rec }}English.vtt" label="English"></track>
-                            {% endif %}
-                                <track kind="captions" src="/media/videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ current_rec }}{{ tr_rec.language }}.srt" label="{{tr_rec.language }}"></track>
+                            {{ tr_rec|get_srt_path|safe }}
                         </video>
 
                         <audio id="audio" class='d-none'>

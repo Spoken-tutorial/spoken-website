@@ -235,8 +235,8 @@
         float: left;
         background: white;
     }
-
-            .video-js.vjs-fullscreen .vjs-tt-cue { font-size: 22px; }
+    .video-js.vjs-fullscreen .vjs-tt-cue { font-size: 22px; }
+    .vjs-modal-dialog-content select {color:#1a1a1a;}
         </style>
     </head>
     <body>
@@ -277,10 +277,12 @@
                                     <video id="st_video" class='video-js vjs-default-skin vjs-big-play-centered' autobuffer controls data-setup='{ "playbackRates": [0.5, 1, 1.5, 2] }'>
                                         <source src="./{{ current_rec }}Video.webm"
                                             type="video/webm">
-                                        {% if 'English' != tr_rec.language.name %}
+                                        {% if eng_flag %}
                                             <track kind="captions" src="./{{ current_rec }}English.vtt" label="English"></track>
                                         {% endif %}
-                                        <track kind="captions" src="./{{ current_rec }}{{ tr_rec.language.name }}.vtt" label="{{tr_rec.language.name }}"></track>
+                                        {% for language in tr_rec_language_list %}
+                                            <track kind="captions" src="./{{ current_rec }}{{ language.language__name }}.vtt" label="{{ language.language__name }}"></track>
+                                        {% endfor %}
                                     </video>
 
                                     <audio id="audioTracks" class='d-none'>
@@ -291,7 +293,7 @@
                                     </audio>
 
                                     <audio id="audio" class='d-none'>
-                                        <source id="audioSource" src="./{{ current_rec }}{{tr_rec.language }}.ogg">
+                                        <source id="audioSource" src="./{{ current_rec }}{{ tr_rec.language }}.ogg">
                                     </audio>
                                 </div>
                                 <div class="container">

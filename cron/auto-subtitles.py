@@ -76,7 +76,7 @@ def generate_subtitle(srt_url, srt_file_path):
     try:
         rows = table[0].findAll("tr")
         counter = 1
-        srt_data = ''
+        srt_data = 'WEBVTT\n\n'
         previous_time = None
         previous_script_data = None
         for row in rows:
@@ -104,22 +104,22 @@ def generate_subtitle(srt_url, srt_file_path):
                             previous_time = formatted_time
                             continue
                         srt_data += str(counter) + '\n'
-                        srt_data += previous_time + ' --> ' + str((datetime.datetime.strptime(\
-                                                formatted_time, "%H:%M:%S") - datetime.timedelta(seconds = 1)).time()) + '\n'
+                        srt_data += previous_time + '.000' + ' --> ' + str((datetime.datetime.strptime(\
+                                                formatted_time, "%H:%M:%S") - datetime.timedelta(seconds = 1)).time()) + '.001\n'
                         counter += 1
                         previous_time = formatted_time
                     else:
                         time_error = 1
                 #print col.text
-        video_info = get_video_info(rreplace(srt_file_path, 'srt', 'ogv', 1))
+        video_info = get_video_info(rreplace(srt_file_path, 'vtt', 'ogv', 1))
         if srt_data:
             if previous_script_data:
                 srt_data += str(counter) + '\n'
                 if video_info['duration']:
-                    srt_data += previous_time + ' --> ' + video_info['duration'] + '\n'
+                    srt_data += previous_time + '.000' + ' --> ' + video_info['duration'] + '.001\n'
                 else:
-                    srt_data += previous_time + ' --> ' + str((datetime.datetime.strptime(\
-                        previous_time, "%H:%M:%S") + datetime.timedelta(seconds = 5)).time()) + '\n'
+                    srt_data += previous_time + '.000' + ' --> ' + str((datetime.datetime.strptime(\
+                        previous_time, "%H:%M:%S") + datetime.timedelta(seconds = 5)).time()) + '.001\n'
                 srt_data += previous_script_data
             file_head = open(srt_file_path,"w")
             file_head.write(srt_data.encode("utf-8"))
@@ -257,8 +257,8 @@ for row in rows:
         else:
             continue
     srt_file_path = MEDIA_ROOT + 'videos/' + str(tutorial_detail[1]) + '/' + str(tutorial_detail[0]) + '/'
-    srt_file_name = tutorial_detail[2].replace(' ', '-') + '-' + language[1] + '.srt'
-    # print srt_file_name
+    srt_file_name = tutorial_detail[2].replace(' ', '-') + '-' + language[1] + '.vtt'
+
     if not overwrite and os.path.isfile(srt_file_path + srt_file_name):
         continue
     try:
