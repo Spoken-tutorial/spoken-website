@@ -1025,3 +1025,38 @@ class PublishedTutorialFilterForm(forms.Form):
         if s_date > e_date:
             raise forms.ValidationError('End date must be later')
 
+class PaymentHonorariumFilterForm(forms.Form):
+    contributor = forms.ChoiceField(
+        choices = ['','--- Select Contributor ---'],
+        required = False,
+        # widget = forms.Select(attrs={'class': 'form-control'})
+    )
+    status = forms.ChoiceField(
+        choices = (
+            ['','--- Select Status ---'],
+            [1, 'In Process'],
+            [2, 'Forwarded'],
+            [3, 'Completed'],
+            [4, 'Confirmed'],
+        ),
+        required = False,
+        # widget = forms.Select(attrs={'class': 'form-control'})
+    )
+    start_date = forms.DateField(
+        required=False,
+        widget = forms.DateInput(attrs={'placeholder': 'yyyy-mm-dd'}),
+    )
+    end_date = forms.DateField(
+        required=False,
+        widget = forms.DateInput(attrs={'placeholder': 'yyyy-mm-dd'}),
+    )    
+
+    def __init__(self, *args, **kwargs):
+        super(PaymentHonorariumFilterForm, self).__init__(*args, **kwargs)
+        #populating contributor select choices
+        contributor_list = list(TutorialPayment.objects.filter(status = 2).distinct()
+            .values_list('user', 'user__first_name', 'user__last_name')
+        )
+        contributor_list = [(contributor[0], contributor[1]+" "+contributor[2]) for contributor in contributor_list]        
+        contributor_list.insert(0, ('', '--- Select Contributor ---'))
+        self.fields['contributor'].choices = contributor_list

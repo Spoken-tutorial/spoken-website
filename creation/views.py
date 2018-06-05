@@ -8,7 +8,7 @@ import datetime
 from django.utils import timezone
 from decimal import Decimal
 from urllib import quote, unquote_plus, urlopen
-from itertools import islice, chain
+from itertools import islice
 
 # Third Party Stuff
 from django.conf import settings
@@ -35,43 +35,6 @@ from creation.models import *
 from creation.subtitles import *
 
 from . import services
-
-
-class QuerySetChain(object):
-    """
-    Chains multiple subquerysets (possibly of different models) and behaves as
-    one queryset.  Supports minimal methods needed for use with
-    django.core.paginator.
-    """
-    #Reference - https://stackoverflow.com/questions/431628/how-to-combine-2-or-more-querysets-in-a-django-view
-
-    def __init__(self, *subquerysets):
-        self.querysets = subquerysets
-
-    def count(self):
-        """
-        Performs a .count() for all subquerysets and returns the number of
-        records as an integer.
-        """
-        return sum(qs.count() for qs in self.querysets)
-
-    def _clone(self):
-        "Returns a clone of this queryset chain"
-        return self.__class__(*self.querysets)
-
-    def _all(self):
-        "Iterates records in all subquerysets"
-        return chain(*self.querysets)
-
-    def __getitem__(self, ndx):
-        """
-        Retrieves an item or slice from the chained set of results from all
-        subquerysets.
-        """
-        if type(ndx) is slice:
-            return list(islice(self._all(), ndx.start, ndx.stop, ndx.step or 1))
-        else:
-            return islice(self._all(), ndx, ndx+1).next()
 
 def humansize(nbytes):
     suffixes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
@@ -2933,27 +2896,21 @@ def list_all_due_tutorials(request):
     # initiate payment process for selected tutorials
     if request.method == "POST":
         initiate_payment(request)
-
+        # to aviod form resubmit
+        return HttpResponseRedirect(reverse('creation:payment-due-tutorials'))
     tr_due = TutorialPayment.objects.filter(status = 1).order_by('user')
     # pagination
     page = request.GET.get('page')
-    tr_due = get_page(tr_due, page, 500)
+    tr_due = get_page(tr_due, page, 100)
     context = {
         'due_tutorials': tr_due,
         'collection': tr_due, # for pagination
     }
     return render(request, 'creation/templates/list_all_due_tutorials.html', context)
 
-def mark_tutorial_as_payment_initiated(tr_id):
-    tr_obj = TutorialResource.objects.get(id = tr_id)
-    tr_obj.payment_status = 1
-    # send notification and mail
-    tr_obj.save()
-    print("success")
-
 def get_video_info_random(filepath):
     '''
-        testing 
+        testing mohit
         temporary function to get video time using its name
     '''
     video_time = 0
@@ -2968,21 +2925,19 @@ def initiate_payment(request):
     tr_pay_ids = request.POST.getlist('selected_tutorialpayments')
     user = User.objects.get(id = user_id)
     if len(tr_pay_ids) > 0:
-        challan = PaymentChallan.objects.create(status = 1)
+        honorarium = PaymentHonorarium.objects.create(status = 1)
         amount = 0
         for tr_pay_id in tr_pay_ids:
             tr_pay = TutorialPayment.objects.get(id = tr_pay_id)
             tr_pay.status = 2 # from 1 --> 2 i.e due --> initiated
+            tr_pay.payment_honorarium = honorarium
+            amount += tr_pay.amount
             tr_pay.save()
-            tr_pay.payment_challan = challan
-        return HttpResponseRedirect(reverse('creation:payment-due-tutorials'))
-
-class TutorialPaymentList(ListView):
-    model = TutorialPayment
-    template_name = 'creation/templates/tutorialpayment_list.html'
-
-    def gettt_queryset(self):
-        return TutorialPayment.objects.filter(id__gte = 20)
+        honorarium.amount = amount
+        honorarium.save()
+        messages.success(request,"Payment Honorarium ("+str(honorarium.code)+") worth Rs. \
+            "+str(amount)+" for contributor "+user.first_name+" "+user.last_name+" initiated for \
+            "+str(len(tr_pay_ids))+" tutorials")
 
 def create_payment_instance(request, tr_res):
     '''
@@ -2997,7 +2952,7 @@ def create_payment_instance(request, tr_res):
     tr_video_info = get_video_info(tr_video_path)
     tr_video_duration = tr_video_info.get('total',0)
     '''
-    tr_video_duration = get_video_info_random(tr_res.video)
+    tr_video_duration = get_video_info_random(tr_res.video) # testing_mohit
     try:
         if tr_res.script_user == tr_res.video_user:
             if is_external_contributor(tr_res.script_user):
@@ -3006,7 +2961,7 @@ def create_payment_instance(request, tr_res):
                     tutorial_resource = tr_res,
                     user_type = 3,
                     seconds = tr_video_duration,
-                    # payment_challan = None,
+                    # payment_honorarium = None,
                 )
                 tp.save()
         else:
@@ -3016,7 +2971,7 @@ def create_payment_instance(request, tr_res):
                     tutorial_resource = tr_res,
                     user_type = 1,
                     seconds = tr_video_duration,
-                    # payment_challan = None,
+                    # payment_honorarium = None,
                 )
                 tp.save()
             if is_external_contributor(tr_res.video_user):
@@ -3025,8 +2980,63 @@ def create_payment_instance(request, tr_res):
                     tutorial_resource = tr_res,
                     user_type = 2,
                     seconds = tr_video_duration,
-                    # payment_challan = None,
+                    # payment_honorarium = None,
                 )
                 tp.save()
     except IntegrityError as e:
         messages.error(request, " Tutorial already in payment process. Error Detail -- "+str(e))
+
+def list_payment_honorarium(request):
+    '''
+    to display list of all payment honorariums
+    '''
+    # updating honorarium status
+    if request.method == "POST":
+        if "change_status" in request.POST:
+            try:
+                msg_end = ''
+                honorarium_id = request.POST.get('id',0)
+                honorarium = PaymentHonorarium.objects.get(id = honorarium_id)
+                hr_st = honorarium.status
+                if hr_st == 1:
+                    honorarium.status = 2
+                    msg_end = 'marked as forwarded.'
+                elif hr_st == 2:
+                    honorarium.status = 3
+                    msg_end = 'marked as completed'
+                messages.success(request,'Payment Honorarium ('+str(honorarium.code)+') worth Rs. '+str(honorarium.amount)+' '+msg_end)
+                honorarium.save()
+            except:
+                messages.warning(request, "Something went wrong. Couldn't complete your request")
+            # to avoid form resubmission
+            return HttpResponseRedirect(reverse('creation:payment-honorarium-list'))
+
+    honorariums = PaymentHonorarium.objects.order_by('status','-updated')
+    # filtering honorarium result         
+    form = PaymentHonorariumFilterForm(request.GET)
+    if request.method == "GET":
+        if form.is_valid():
+            contributor = form.cleaned_data['contributor']
+            status = form.cleaned_data['status']
+            s_date = form.cleaned_data['start_date']
+            e_date = form.cleaned_data['end_date']
+            if contributor:
+                tr_pay = TutorialPayment.objects.filter(status = 2, user = contributor)
+                pay_honorarium_ids = tr_pay.values_list('payment_honorarium', flat = True).distinct()
+                honorariums = honorariums.filter(id__in = pay_honorarium_ids)
+            if status:
+                honorariums = honorariums.filter(status = status)
+            if s_date:
+                honorariums = honorariums.filter(updated__gte = s_date)
+            if e_date:
+                honorariums = honorariums.filter(updated__lte = e_date)
+
+    #pagination
+    page = request.GET.get('page')
+    honorariums = get_page(honorariums, page, 50)
+    context = {
+        'honorariums': honorariums,
+        'collection': honorariums, # for pagination
+        'form':form
+    }
+    return render(request, "creation/templates/list_all_payment_honorarium.html",context)

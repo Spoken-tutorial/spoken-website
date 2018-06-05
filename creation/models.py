@@ -1,5 +1,7 @@
 # Third Party Stuff
-from datetime import datetime, timedelta
+import uuid
+
+from datetime import datetime, timedelta, date
 
 from django.contrib.auth.models import User
 from django.db import models
@@ -18,7 +20,7 @@ USER_TYPE = (
     (3, 'Script & Video User'),
 )
 
-CHALLAN_STATUS = (
+HONORARIUM_STATUS = (
     (1, 'In Process'),
     (2, 'Forwarded'),
     (3, 'Completed'),
@@ -226,36 +228,52 @@ class TutorialResource(models.Model):
         unique_together = (('tutorial_detail', 'language',),)
 
 
+class PaymentHonorarium(models.Model):
+    amount = models.DecimalField(max_digits = 9, decimal_places = 2, default = 0)
+    code = models.CharField(max_length=20, editable = False)
+    doc = models.FileField(null = True, blank = True)
+    status = models.PositiveSmallIntegerField(default = 1, choices = HONORARIUM_STATUS)
+    updated = models.DateTimeField(auto_now = True)
+
+    def save(self, *args, **kwargs):
+        """
+        Generating custom Honorarium code
+        """
+        if not self.id:
+            try:
+                last_id = PaymentHonorarium.objects.order_by('-id')[0].id
+            except IndexError:
+                last_id = 0
+            unique_id = last_id+1
+            today = date.today()
+            self.code = "#PH/{year}/{month:02n}/{unique_id:05n}".format(year=today.year, month=today.month, unique_id=unique_id)
+        super(self.__class__, self).save(*args, **kwargs)
+
+
 class TutorialPayment(models.Model):
     user = models.ForeignKey(User, related_name="contributor",)
     tutorial_resource = models.ForeignKey(TutorialResource)
-    payment_challan = models.ForeignKey('PaymentChallan', null = True, blank = True, on_delete = models.SET_NULL )
+    payment_honorarium = models.ForeignKey('PaymentHonorarium', related_name = "tutorials", null = True, blank = True, on_delete = models.SET_NULL )
     user_type = models.PositiveSmallIntegerField(default = 3, choices = USER_TYPE)
     seconds = models.PositiveIntegerField(default = 0, help_text="Tutorial duration in seconds")
     amount = models.DecimalField(max_digits = 9, decimal_places = 2, default = 0)
     status = models.PositiveSmallIntegerField(default = 1, choices = PAYMENT_STATUS)   
 
+    
     class Meta:
         unique_together = (('tutorial_resource', 'user'),)
 
     def get_duration(self):
+        """Displays time from seconds to hh:mm:ss format"""
         return str(timedelta(seconds = self.seconds))
 
     def save(self, *args, **kwargs):
-
         try:
             pps = PAY_PER_SEC[self.user_type]
             self.amount = pps * self.seconds
         except:
             print("An Error Occured. User_Type is beyond 3 causing list index out of range")
         super(TutorialPayment, self).save(*args, **kwargs)
-
-
-class PaymentChallan(models.Model):
-    code = models.CharField(max_length = 255, null = True, blank = True, unique = True)
-    # amount = models.DecimalField(max_digits = 9, decimal_places = 2, default = 0)
-    doc = models.FileField(null = True, blank = True)
-    status = models.PositiveSmallIntegerField(default = 1, choices = CHALLAN_STATUS)
 
 
 class ArchivedVideo(models.Model):

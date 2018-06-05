@@ -56,7 +56,7 @@
                         {{ form.end_date.errors }}
                     </div>
                 </div>
-                 <input type="submit" value="Filter" class="btn btn-success">
+                <input type="submit" value="Filter" class="btn btn-success">
                 <a href="?"  class="btn btn-danger">Clear</a>
             </div>
         </form>
@@ -96,9 +96,9 @@
                     <th>FOSS</th>
                     <th>Language</th>
                     <th>Tutorial Title</th>
-                    <th>Contributor</th>
+                    <th>Script Contributor</th>
+                    <th>Video Contributor</th>
                     <th>Published At</th>
-                    <th>Payment Status</th>
                 </thead>
                 <tbody>
                 {% for tutorial in published_tutorials %}
@@ -107,8 +107,8 @@
                         <td>{{ tutorial.tutorial_detail.foss }}</td>
                         <td>{{ tutorial.language }}</td>
                         <td>{{ tutorial.tutorial_detail.tutorial }}
-                        <td>{{ tutorial.script_user.first_name }} {{ tutorial.script_user.last_name }} {{ tutorial.script_user.groups.all }}</td>
-                        <td>{{ tutorial.video_user.first_name }} {{ tutorial.video_user.last_name }}{{ tutorial.video_user.groups.all }}</td>
+                        <td>{{ tutorial.script_user.first_name }} {{ tutorial.script_user.last_name }} </td>
+                        <td>{{ tutorial.video_user.first_name }} {{ tutorial.video_user.last_name }}</td>
                         <td>{{ tutorial.publish_at }}</td>
                         
                     </tr>

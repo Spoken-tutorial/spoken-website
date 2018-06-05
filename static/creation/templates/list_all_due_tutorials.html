@@ -10,50 +10,8 @@
 {% block heading %}<i class="fa fa-list-ul"></i> Payment Due Tutorials{% endblock %}
 {% block content %}
 <button id="expand_all" class="btn btn-primary">Expand All</button>
+<button id="hide_all" class="btn btn-primary" style="display:none">Hide All</button>
 <br><br>
-    <!-- <div id="flip-scroll" class="table-responsive">
-        <form method="post">
-            {% csrf_token %}
-            <table class="paleblue table table-condensed table-bordered table-hover table-striped">
-            {% if not due_tutorials|length %}
-                <tr>
-                    <td colspan="5" class="col-center">List is empty!</td>
-                </tr>
-            {% else %}
-                <thead>
-                    <th><input type="checkbox" class="all_tutorial_checkbox" name="select_all" title="Select All Tutorials"></th>
-                    <th>FOSS {{ due_tutorials|length }}</th>
-                    <th>Language</th>
-                    <th>Tutorial Title</th>
-                    <th>Script Contributor</th> 
-                    <th>Video Contributor</th>
-                    <th>Published At</th>    
-                </thead>
-                <tbody>
-                {% for tutorial in due_tutorials %}
-                    <tr class="{% cycle 'odd' 'even' %}">
-                        <td><input type="checkbox" class="tutorial_select_checkbox" name="selected_tutorials" value="{{ tutorial.id }}"></td>
-                        <td>{{ tutorial.tutorial_detail.foss }}</td>
-                        <td>{{ tutorial.language }}</td>
-                        <td>{{ tutorial.tutorial_detail.tutorial }}
-                        <td {% if tutorial.script_user.groups.all.0.name == "External-Contributor" %}class="bg-success" {% endif %}>
-                            {{ tutorial.script_user.first_name }} {{ tutorial.script_user.last_name }} 
-                        </td>
-                        <td {% if tutorial.video_user.groups.all.0.name == "External-Contributor" %}class="bg-success" {% endif %}>{{ tutorial.video_user.first_name }} {{ tutorial.video_user.last_name }}</td>
-                        <td>{{ tutorial.publish_at }}</td>
-                        
-                    </tr>
-                {% endfor %}
-                    <tr>
-                        <td colspan="6" class="text-center">
-                            <input type="submit" class="btn btn-primary" value="Initiate Payment"> 
-                        </td>
-                    </tr>
-                </tbody>
-            {% endif %}
-            </table>
-        </form>
-    </div> -->
     {% regroup collection by user  as contributor_list %}
     <div class="panel-group">
         {% for contributor in contributor_list %}
@@ -117,70 +75,6 @@
         </div>
         {% endfor %}
     </div>
-    <!-- {% for user in unpaid_contributors %}
-    <div class="panel-group">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h4 class="panel-title">
-                    <a data-toggle="collapse" href="#collapse-{{ user.0 }}">
-                        {{ user.1 }} {{ user.2 }}
-                        {% if user.1 == '' and user.2 == '' %}
-                            {{ user.3 }}
-                        {% endif %}
-                    </a>
-                </h4>
-            </div>
-            <div id="collapse-{{ user.0 }}" class="panel-collapse collapse">
-                <div class="panel-body">
-                <form method="POST">
-                    {% csrf_token %}
-                    <input type="hidden" name="user" value="{{ user.0 }}" />
-                    <table class="paleblue table table-condensed table-bordered table-hover table-striped">
-                        <thead>
-                            <th><input type="checkbox" class="all_tutorial_checkbox" name="select_all" title="Select All Tutorials"></th>
-                            <th>Tutorial Title</th>
-                            <th>FOSS</th>
-                            <th>Language</th>
-                            <th>Script</th>
-                            <th>Video</th>                      
-                            <th>Published At</th>    
-                        </thead>
-                         <tbody>
-                    {% for tutorial in due_tutorials %}
-                        {% if tutorial.script_user.id == user.0 or tutorial.video_user.id == user.0 %}
-                            <tr>
-                                <td><input type="checkbox" class="tutorial_select_checkbox" name="selected_tutorials" value="{{ tutorial.id }}"></td> 
-                                <td>{{ tutorial.tutorial_detail.tutorial }}</td>
-                                <td>{{ tutorial.tutorial_detail.foss }}</td>
-                                <td>{{ tutorial.language }}</td>
-                                <td class="text-center text-success">
-                                    {% if tutorial.script_user.id == user.0 %}
-                                        <span class="fa fa-1 fa-check-circle"></span>
-                                    {% endif %}
-                                </td>
-                                <td class="text-center text-success">
-                                    {% if tutorial.video_user.id == user.0 %}
-                                        <span class="fa fa-1 fa-check-circle"></span>
-                                    {% endif %}
-                                </td>
-                                <td>{{ tutorial.publish_at }}</td>
-                            </tr>
-                        
-                        {% endif %}
-                    {% endfor %}
-                            <tr>
-                                <td colspan="7" class="text-right">
-                                    <input type="submit" class="btn btn-primary" value="Initiate Payment"> 
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </form>
-                </div>
-            </div>
-        </div>
-    </div>
-    {% endfor %} -->
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 
     <script>
@@ -189,9 +83,17 @@
             $('.all_tutorial_checkbox').click(function(){
                 $(this.form.elements).filter('.tutorial_select_checkbox').prop('checked',$(this).prop('checked'));
             });
+            $('#hide_all').hide();
         });
         $('#expand_all').click(function(){
-            $('.panel-collapse').collapse('toggle');
+            $('.panel-collapse').collapse('show');
+            $('#expand_all').hide();
+            $('#hide_all').show();
+        });
+        $('#hide_all').click(function(){
+            $('.panel-collapse').collapse('hide');
+            $('#hide_all').hide();
+            $('#expand_all').show();
         });
     </script>
 {% endblock %}      
