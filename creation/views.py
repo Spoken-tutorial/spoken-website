@@ -951,28 +951,24 @@ def upload_component(request, trid, component):
                     comp_log.component = component
 
                     if component == "temp":
-			print "why"
                         file_name, file_extension = os.path.splitext(request.FILES['comp'].name)
                         file_name =  tr_rec.tutorial_detail.tutorial.replace(' ', '-') + '-' + tr_rec.language.name + file_extension
-                        print "file name ",file_name
                         file_path = settings.MEDIA_ROOT + 'temp/'
                         full_path = file_path + file_name
-                        print "full path ",full_path
-			fout = open(full_path, 'wb+')
+                        fout = open(full_path, 'wb+')
                         f = request.FILES['comp']
                         for chunk in f.chunks():
                             fout.write(chunk)
                         fout.close()
-			comp_log.status = tr_rec.video_status
+                        comp_log.status = tr_rec.video_status
                         tr_rec.video = file_name
                         tr_rec.video_user = request.user
                         tr_rec.video_status = 0
-			print "1"
                         if not tr_rec.version:
                             tr_rec.version = 1
-			tr_rec.save()
-			subprocess.Popen(["python","/home/abhinav/Desktop/Spoken-Tutorial/site/spoken-website/creation/sox.py",full_path])	
-			response_msg = component+' uploaded successfully!'
+                        tr_rec.save()
+                        subprocess.Popen(["python", settings.BASE_DIR + "/creation/sox.py",full_path])	
+                        response_msg = component+' uploaded successfully!'
                     if component == 'video' or component== 'audio':
                         file_name, file_extension = os.path.splitext(request.FILES['comp'].name)
                         file_name =  tr_rec.tutorial_detail.tutorial.replace(' ', '-') + '-' + tr_rec.language.name + file_extension
@@ -993,45 +989,30 @@ def upload_component(request, trid, component):
                         for chunk in f.chunks():
                             fout.write(chunk)
                         fout.close()
-			if component=="video":
-			    print "inside"
-			    print full_path[0:-4]+".webm"
-			    if os.path.isfile(full_path[0:-4]+".webm"):
-				subprocess.Popen(["rm",full_path[0:-4]+".webm"])
-			    p=subprocess.Popen(["ffmpeg","-i",full_path,"-an",full_path[:-4]+".webm"],stdout=subprocess.PIPE)
-			    while p.poll() is None:
-				print "#"
-				time.sleep(0.5)
-			    print "Finish:"
-			    if os.path.isfile(full_path[0:-4]+".ogg"):
-				subprocess.Popen(["rm",full_path[0:-4]+".ogg"])
-			    subprocess.Popen(["ffmpeg","-i",full_path,"-vn",full_path[:-4]+".ogg"])
-			    print "outside"
-			if component=="audio":
-			    subprocess.Popen(["python","/home/abhinav/Desktop/Spoken-Tutorial/site/spoken-website/creation/sox.py",full_path])
-			    print "done"
-                        comp_log.status = tr_rec.video_status
+                        if component=="video":
+                            if os.path.isfile(full_path[0:-4]+".webm"):
+                                subprocess.Popen(["rm",full_path[0:-4]+".webm"])
+                            subprocess.Popen(["/usr/bin/ffmpeg","-y","-i",full_path,"-vcodec","libvpx","-af","'volume=0.0'","-max_muxing_queue_size","1024","-f","webm",full_path[:-4]+"-Video.webm"],stdout=subprocess.PIPE)
+                            if os.path.isfile(full_path[0:-4]+".ogg"):
+                                subprocess.Popen(["rm",full_path[0:-4]+".ogg"])
+                            subprocess.Popen(["/usr/bin/ffmpeg","-y","-i",full_path,"-vn","-acodec","libvorbis",full_path[:-4]+".ogg"])
+                        elif component=="audio":
+                            subprocess.Popen(["python", settings.BASE_DIR + "/creation/sox.py",full_path])	
+                            comp_log.status = tr_rec.video_status
                         tr_rec.video = file_name
                         tr_rec.video_user = request.user
                         tr_rec.video_status = 1
-			print "1"
                         if not tr_rec.version:
                             tr_rec.version = 1
                         tr_rec.video_thumbnail_time = '00:' + request.POST.get('thumb_mins', '00') + ':' + request.POST.get('thumb_secs', '00')
-			print "thumb "
-			print tr_rec.video_thumbnail_time
                         tr_rec.save()
-			print "1"
                         if tr_rec.language.name == 'English':
-			    print "dome"
                             create_thumbnail(tr_rec, 'Big', tr_rec.video_thumbnail_time, '700:500')
                             create_thumbnail(tr_rec, 'Small', tr_rec.video_thumbnail_time, '170:127')
                         comp_log.save()
-			print "1"
                         comp_title = tr_rec.tutorial_detail.foss.foss + ': ' + tr_rec.tutorial_detail.tutorial + ' - ' + tr_rec.language.name
                         add_adminreviewer_notification(tr_rec, comp_title, component+' waiting for admin review')
                         response_msg = component+' uploaded successfully!'
-			print "1"			
                     elif component == 'slide':
                         file_name, file_extension = os.path.splitext(request.FILES['comp'].name)
                         file_name =  tr_rec.tutorial_detail.tutorial.replace(' ', '-') + '-Slides' + file_extension
@@ -1109,7 +1090,6 @@ def upload_component(request, trid, component):
                     print e
                     error_msg = 'Something went wrong, please try again later.'
                 form = ComponentForm(component)
-		print "here"
                 if response_msg:
                     messages.success(request, response_msg)
                 if error_msg:
