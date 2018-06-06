@@ -70,6 +70,9 @@ urlpatterns = patterns('',
     # team
     url(r'^team/', include('team.urls')),
 
+    #api
+    url(r'^api/', include('api.urls', namespace='api')),
+
     # certificate
     url(r'^certificate/', include('certificate.urls', namespace='certificate')),
 
@@ -104,4 +107,6 @@ urlpatterns = patterns('',
 
     # cms
     url(r'^', include('cms.urls', namespace='cms')),
+
+
 )

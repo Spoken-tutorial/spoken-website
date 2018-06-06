@@ -3,6 +3,7 @@ import json
 import os
 import re
 import subprocess
+import progressbar
 import time
 from django.utils import timezone
 from decimal import Decimal
@@ -679,6 +680,7 @@ def upload_script(request, trid):
     error_msg = ''
     storage_path = tr_rec.tutorial_detail.foss.foss.replace(' ', '-') + '/' + tr_rec.tutorial_detail.level.code + '/' + tr_rec.tutorial_detail.tutorial.replace(' ', '-') + '/' + tr_rec.language.name
     script_path = settings.SCRIPT_URL + storage_path
+    print script_path
     if request.method == 'POST':
         form = UploadScriptForm(script_path, request.POST)
         if form.is_valid():
@@ -898,16 +900,41 @@ def upload_keywords(request, trid):
     context.update(csrf(request))
     return render(request, 'creation/templates/upload_keywords.html', context)
 
+
 @login_required
 def upload_component(request, trid, component):
     tr_rec = None
+    print component
     try:
         tr_rec = TutorialResource.objects.get(pk = trid, status = 0)
         ContributorRole.objects.get(user_id = request.user.id, foss_category_id = tr_rec.tutorial_detail.foss_id, language_id = tr_rec.language_id, status = 1)
         comp_title = tr_rec.tutorial_detail.foss.foss + ': ' + tr_rec.tutorial_detail.tutorial + ' - ' + tr_rec.language.name
+	contrib_log = ContributorLog.objects.filter(tutorial_resource_id = tr_rec.id).order_by('-created')
+        review_log = NeedImprovementLog.objects.filter(tutorial_resource_id = tr_rec.id).order_by('-created')
     except Exception, e:
         raise PermissionDenied()
-    if component == 'video' and getattr(tr_rec, component + '_status') == 4:
+    if "_" in component:
+	print "is it so"
+        file_name =  component.replace('_', '-') +".ogg"
+        print "file name ",file_name
+	file_path_src = settings.MEDIA_ROOT + 'temp/'
+	full_path_src = file_path_src + file_name
+        file_path_dest = settings.MEDIA_ROOT + 'videos/' + str(tr_rec.tutorial_detail.foss_id) + '/' + str(tr_rec.tutorial_detail.id) + '/'
+        if "nonoise" in file_name:
+	    file_name = file_name[:-12] + ".ogg"
+        full_path_dest = file_path_dest + file_name
+	subprocess.Popen(["mv",full_path_src,full_path_dest])
+	tr_rec.video_status = 1
+	tr_rec.save()
+	context = {
+	    'tr': tr_rec,
+	    'contrib_log': contrib_log,
+	    'review_log': review_log,
+	    'script_base': settings.SCRIPT_URL,
+    	}
+	context.update(csrf(request))
+        return render(request, 'creation/templates/upload_tutorial.html', context)
+    if (component == 'video' or component == 'audio') and getattr(tr_rec, 'video' + '_status') == 4:
         raise PermissionDenied()
     elif (component == 'slide' or component == 'code' or component == 'assignment') and getattr(tr_rec.common_content, component + '_status') == 4:
         raise PermissionDenied()
@@ -922,11 +949,37 @@ def upload_component(request, trid, component):
                     comp_log.user = request.user
                     comp_log.tutorial_resource = tr_rec
                     comp_log.component = component
-                    if component == 'video':
+
+                    if component == "temp":
+			print "why"
                         file_name, file_extension = os.path.splitext(request.FILES['comp'].name)
                         file_name =  tr_rec.tutorial_detail.tutorial.replace(' ', '-') + '-' + tr_rec.language.name + file_extension
+                        print "file name ",file_name
+                        file_path = settings.MEDIA_ROOT + 'temp/'
+                        full_path = file_path + file_name
+                        print "full path ",full_path
+			fout = open(full_path, 'wb+')
+                        f = request.FILES['comp']
+                        for chunk in f.chunks():
+                            fout.write(chunk)
+                        fout.close()
+			comp_log.status = tr_rec.video_status
+                        tr_rec.video = file_name
+                        tr_rec.video_user = request.user
+                        tr_rec.video_status = 0
+			print "1"
+                        if not tr_rec.version:
+                            tr_rec.version = 1
+			tr_rec.save()
+			subprocess.Popen(["python","/home/abhinav/Desktop/Spoken-Tutorial/site/spoken-website/creation/sox.py",full_path])	
+			response_msg = component+' uploaded successfully!'
+                    if component == 'video' or component== 'audio':
+                        file_name, file_extension = os.path.splitext(request.FILES['comp'].name)
+                        file_name =  tr_rec.tutorial_detail.tutorial.replace(' ', '-') + '-' + tr_rec.language.name + file_extension
+                        print "file name ",file_name
                         file_path = settings.MEDIA_ROOT + 'videos/' + str(tr_rec.tutorial_detail.foss_id) + '/' + str(tr_rec.tutorial_detail.id) + '/'
                         full_path = file_path + file_name
+                        print "full path ",tr_rec.video
                         if os.path.isfile(file_path + tr_rec.video) and tr_rec.video_status > 0:
                             if 'isarchive' in request.POST and int(request.POST.get('isarchive', 0)) > 0:
                                 archived_file = 'Archived-' + str(request.user.id) + '-' + str(int(time.time())) + '-' + tr_rec.video
@@ -940,28 +993,51 @@ def upload_component(request, trid, component):
                         for chunk in f.chunks():
                             fout.write(chunk)
                         fout.close()
+			if component=="video":
+			    print "inside"
+			    print full_path[0:-4]+".webm"
+			    if os.path.isfile(full_path[0:-4]+".webm"):
+				subprocess.Popen(["rm",full_path[0:-4]+".webm"])
+			    p=subprocess.Popen(["ffmpeg","-i",full_path,"-an",full_path[:-4]+".webm"],stdout=subprocess.PIPE)
+			    while p.poll() is None:
+				print "#"
+				time.sleep(0.5)
+			    print "Finish:"
+			    if os.path.isfile(full_path[0:-4]+".ogg"):
+				subprocess.Popen(["rm",full_path[0:-4]+".ogg"])
+			    subprocess.Popen(["ffmpeg","-i",full_path,"-vn",full_path[:-4]+".ogg"])
+			    print "outside"
+			if component=="audio":
+			    subprocess.Popen(["python","/home/abhinav/Desktop/Spoken-Tutorial/site/spoken-website/creation/sox.py",full_path])
+			    print "done"
                         comp_log.status = tr_rec.video_status
                         tr_rec.video = file_name
                         tr_rec.video_user = request.user
                         tr_rec.video_status = 1
+			print "1"
                         if not tr_rec.version:
                             tr_rec.version = 1
                         tr_rec.video_thumbnail_time = '00:' + request.POST.get('thumb_mins', '00') + ':' + request.POST.get('thumb_secs', '00')
+			print "thumb "
+			print tr_rec.video_thumbnail_time
                         tr_rec.save()
+			print "1"
                         if tr_rec.language.name == 'English':
+			    print "dome"
                             create_thumbnail(tr_rec, 'Big', tr_rec.video_thumbnail_time, '700:500')
                             create_thumbnail(tr_rec, 'Small', tr_rec.video_thumbnail_time, '170:127')
                         comp_log.save()
+			print "1"
                         comp_title = tr_rec.tutorial_detail.foss.foss + ': ' + tr_rec.tutorial_detail.tutorial + ' - ' + tr_rec.language.name
-                        add_adminreviewer_notification(tr_rec, comp_title, 'Video waiting for admin review')
-                        response_msg = 'Video uploaded successfully!'
+                        add_adminreviewer_notification(tr_rec, comp_title, component+' waiting for admin review')
+                        response_msg = component+' uploaded successfully!'
+			print "1"			
                     elif component == 'slide':
                         file_name, file_extension = os.path.splitext(request.FILES['comp'].name)
                         file_name =  tr_rec.tutorial_detail.tutorial.replace(' ', '-') + '-Slides' + file_extension
                         file_path = settings.MEDIA_ROOT + 'videos/' + str(tr_rec.tutorial_detail.foss_id) + '/' + str(tr_rec.tutorial_detail.id) + '/resources/' + file_name
                         fout = open(file_path, 'wb+')
                         f = request.FILES['comp']
-                        # Iterate through the chunks.
                         for chunk in f.chunks():
                             fout.write(chunk)
                         fout.close()
@@ -1033,6 +1109,7 @@ def upload_component(request, trid, component):
                     print e
                     error_msg = 'Something went wrong, please try again later.'
                 form = ComponentForm(component)
+		print "here"
                 if response_msg:
                     messages.success(request, response_msg)
                 if error_msg:
@@ -1052,7 +1129,6 @@ def upload_component(request, trid, component):
                 }
                 context.update(csrf(request))
                 return render(request, 'creation/templates/upload_component.html', context)
-
     form = ComponentForm(component)
     context = {
         'form': form,
@@ -1103,7 +1179,41 @@ def view_component(request, trid, component):
             'component': component,
             'component_data': tr_rec.common_content.keyword
         }
-    elif component == 'video':
+    elif component == 'video' or component == 'audio':
+        video_path = settings.MEDIA_ROOT + "videos/" + str(tr_rec.tutorial_detail.foss_id) + "/" + str(tr_rec.tutorial_detail_id) + "/" + tr_rec.video
+        video_info = get_video_info(video_path)
+	print video_path
+        context = {
+            'tr': tr_rec,
+	    'video_mod':tr_rec.video[:-4].replace("-","_")+"_nonoise",
+	    'original': tr_rec.video[:-4].replace("-","_"),
+            'component': component,
+            'media_url': settings.MEDIA_URL
+        }
+    else:
+        messages.error(request, 'Invalid component passed as argument!')
+        return HttpResponseRedirect(request.META['HTTP_REFERER'])
+    return render(request, 'creation/templates/view_component.html', context)
+
+def view_component_audtype(request, trid, component, aud_type):
+    tr_rec = None
+    context = {}
+    try:
+        tr_rec = TutorialResource.objects.get(pk = trid)
+    except Exception, e:
+        print e
+        raise PermissionDenied()
+    if component == 'outline':
+        context = {
+            'component': component,
+            'component_data': tr_rec.outline
+        }
+    elif component == 'keyword':
+        context = {
+            'component': component,
+            'component_data': tr_rec.common_content.keyword
+        }
+    elif component == 'video' or component == 'audio':
         video_path = settings.MEDIA_ROOT + "videos/" + str(tr_rec.tutorial_detail.foss_id) + "/" + str(tr_rec.tutorial_detail_id) + "/" + tr_rec.video
         audio_path = settings.MEDIA_ROOT + "videos/" + str(tr.tutorial_detail.foss_id) + "/" + str(tr.tutorial_detail_id) + "/" + tr.audio
         eng_audio_path = False
@@ -1114,11 +1224,15 @@ def view_component(request, trid, component):
         eng_audio_info = get_audio_info(eng_audio_path)
         context = {
             'tr': tr_rec,
+	    'video_mod':tr_rec.video[:-4].replace("-","_")+"_nonoise",
+	    'filtered': tr_rec.video[:-4] + "-nonoise", 
             'component': component,
             'video_info': video_info,
             'media_url': settings.MEDIA_URL,
             'audio_info': audio_info,
             'eng_audio_info': eng_audio_info,
+	        'original': tr_rec.audio[:-4].replace("-","_"),
+	        'aud_type':aud_type,
         }
     else:
         messages.error(request, 'Invalid component passed as argument!')

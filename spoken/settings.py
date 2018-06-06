@@ -86,6 +86,8 @@ INSTALLED_APPS = (
     'reports',
     'team',
     'certificate',
+    'api',
+    'rest_framework',
 )
 
 MIDDLEWARE_CLASSES = (
