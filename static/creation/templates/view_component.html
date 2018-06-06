@@ -2,7 +2,7 @@
 {% load widget_tweaks %}
 {% load static %}
 {% block uncompresscssblock %}
-    {% if component == "video" %}
+    {% if component == "video" or component == "audio"%}
     <link href="{% static 'spoken/css/video-js.min.css' %}" rel="stylesheet" type="text/css">
     {% endif %}
 {% endblock %}
@@ -66,11 +66,35 @@
                 <th>Size:</th><td>{{video_info.size}}</td>
             </tr>
         </table>
+      {% if aud_type == "f" %}
+	{{ video_mod }}
         <div class="video-container">
             <video id="st_video" class="video-js vjs-default-skin" controls preload="auto" width="auto" height="auto" data-setup="{}">
-                <source src="{{ media_url }}videos/{{ tr.tutorial_detail.foss_id }}/{{ tr.tutorial_detail_id }}/{{ tr.video }}" type="video/ogg" />
+                <source src="{{ media_url }}temp/{{ filtered }}.ogg" type="video/mp4" />
             </video>
         </div>
+        <a class="btn btn-primary " href="/creation/view/component/{{ tr.id }}/video/o" title="View/Download Audio">
+                 <span title="" data-original-title="" >Preview Original</span>
+        </a>
+      {% elif aud_type == "o" %}
+	{{ tr.video }}
+	<div class="video-container">
+            <video id="st_video" class="video-js vjs-default-skin" controls preload="auto" width="auto" height="auto" data-setup="{}">
+                <source src="{{ media_url }}temp/{{ tr.video }}" type="video/mp4" />
+            </video>
+        </div>
+	<a class="btn btn-primary " href="/creation/view/component/{{ tr.id }}/video/f" title="View/Download Audio">
+                 <span title="" data-original-title="" >Preview filtered</span></a>
+      {% else %}
+	<div class="video-container">
+            <video id="st_video" class="video-js vjs-default-skin" controls preload="auto" width="auto" height="auto" data-setup="{}">
+                <source src="{{ media_url }}videos/{{ tr.tutorial_detail.foss_id }}/{{ tr.tutorial_detail_id }}/{{ tr.video }}" type="video/mp4" />
+            </video>
+        </div>
+      {% endif %}
+	
+	
+	
     {% else %}
         <form role="form" method="post" enctype="multipart/form-data" action="">
             <div class="form-group">
@@ -78,6 +102,18 @@
             </div>
         </form>
     {% endif %}
+	{% if aud_type == "f" %}
+	<a class="btn btn-primary " href="/creation/upload/component/{{ tr.id }}/{{ video_mod }}/" title="Accept">
+                 <span title="" data-original-title="" >Accept this submission</span></a>
+	<a class="btn btn-primary " href="/creation/upload/tutorial/{{ tr.id }}/" title="Accept">
+                 <span title="" data-original-title="" >Reject and Re-record</span></a>
+	{% elif aud_type == "o" %}
+	<a class="btn btn-primary " href="/creation/upload/component/{{ tr.id }}/{{ original }}/" title="Accept">
+                 <span title="" data-original-title="" >Accept this submission</span></a>
+	<a class="btn btn-primary " href="/creation/upload/tutorial/{{ tr.id }}/" title="Accept">
+                 <span title="" data-original-title="" >Reject and Re-record</span></a>
+	{% endif %}
+
 {% endblock %}
 {% block uncompressjsblock %}
     {% if component == "video" %}

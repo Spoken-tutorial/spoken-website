@@ -344,6 +344,7 @@ class UploadPublishTutorialForm(forms.Form):
                         self.fields['tutorial_name'].widget.attrs = {'disabled': 'disabled'}
 
 class UploadTutorialForm(forms.Form):
+    print "what"
     tutorial_name = forms.ChoiceField(
         choices = [('', 'Select Tutorial'),],
         widget=forms.Select(attrs = {'disabled': 'disabled'}),
@@ -369,6 +370,7 @@ class UploadTutorialForm(forms.Form):
             ).values_list('id', 'foss')
         )
         foss_list.insert(0, ('', 'Select FOSS category'))
+        #foss_list.insert(1, ('', 'Abhinav'))
         self.fields['foss_category'] = forms.ChoiceField(
             choices = foss_list,
             error_messages = {'required':'FOSS category field is required.'}
@@ -454,11 +456,12 @@ class ComponentForm(forms.Form):
         error_messages = {'required': 'component type is required.'},
         widget=forms.HiddenInput()
     )
-
     def clean(self):
         super(ComponentForm, self).clean()
         file_types = {
-            'video': 'video/ogg',
+            'video': 'video/mp4',
+            'audio': 'video/ogg',
+            'temp' : 'video/ogg',
             'slide': ['application/zip', 'application/x-zip-compressed'],
             'code': ['application/zip', 'application/x-zip-compressed'],
             'assignment': ['text/plain', 'application/pdf'],
@@ -473,6 +476,7 @@ class ComponentForm(forms.Form):
             component = self.cleaned_data['comp']
         component_type = self.cleaned_data['comptype']
         if component and component_type:
+            print component.content_type
             if not component.content_type in file_types[component_type]:
                 self._errors["comp"] = self.error_class(["Not a valid file format."])
         else:
@@ -504,6 +508,12 @@ class ComponentForm(forms.Form):
             )
             self.fields['isarchive'] = forms.ChoiceField(
                 choices = [(0, 'Replace old video'), (1, 'Archive old video as Correction'), (2, 'Archive old video as Version')],
+                widget=forms.Select(),
+                required = False,
+            )
+        elif comptype == 'audio':
+            self.fields['isarchive'] = forms.ChoiceField(
+                choices = [(0, 'Replace old audio'), (1, 'Archive old audio as Correction'), (2, 'Archive old audio as Version')],
                 widget=forms.Select(),
                 required = False,
             )
