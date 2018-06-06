@@ -183,6 +183,7 @@ class TutorialResource(models.Model):
     timed_script = models.URLField(max_length=255)
 
     video = models.CharField(max_length=255)
+    audio = models.CharField(max_length=255, default=None)
     video_id = models.CharField(
         max_length=255, null=True, blank=True, default=None)
     playlist_item_id = models.CharField(

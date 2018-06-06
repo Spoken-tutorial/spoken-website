@@ -101,8 +101,9 @@
                 width:100%;
                 height:100%;
             }
+            .video-js.vjs-fullscreen .vjs-tt-cue { font-size: 22px; }
+            .vjs-modal-dialog-content select {color:#1a1a1a;}
         </style>
-        <script src="../includes/js/video.js"></script>
     </head>
     <body>
         <div id="page-wrapper">
@@ -158,16 +159,32 @@
                         </div><!-- .row well tab-content tutorial-search-form -->
                         <hr />
                         <div class="video-container col-lg-8 col-md-8 col-sm-8 col-lg-offset-2 col-md-offset-2">
-                            <select class="form-control languages" id="id_languages" name="languages" tabindex="1" value="">
-                                <option value="English">Select Language for Side-by-Side method video</option>
-                                {% for language in languages %}
-                                <option value="{{ language }}">{{ language }}</option>
-                                {% endfor %}
-                            </select>
-                                <br />
-                            <video id="st_video" class="video-js vjs-default-skin" controls preload="auto" width="auto" height="auto" data-setup="{}">
-                                <source src="./Side-by-Side-Method-English.ogv" type="video/ogg" />
-                            </video>
+                                <video id="st_video" class='video-js vjs-default-skin vjs-big-play-centered' autobuffer controls data-setup='{ "playbackRates": [0.5, 1, 1.5, 2] }'>
+                                    <source src="./Side-by-Side-Method-Video.webm"
+                                        type="video/webm">
+                                    {% if eng_flag %}
+                                        <track kind="captions" src="./Side-by-Side-Method-English.vtt" label="English"></track>
+                                    {% endif %}
+                                    <script>
+                                        {% for language in languages %}
+                                        {{ language }}
+                                        {% endfor %}
+                                    </script>
+                                    {% for language in languages %}
+                                        <track kind="captions" src="./Side-by-Side-Method-{{ language }}.vtt" label="{{ language }}"></track>
+                                    {% endfor %}
+                                </video>
+
+                                <audio id="audioTracks" class='d-none'>
+                                    {% for language in languages %}
+                                    <source id="{{ language }}-audio-track" data-value="./Side-by-Side-Method-{{ language }}.ogg"
+                                        type="audio/ogg">{{ language }}</source>
+                                    {% endfor %}
+                                </audio>
+
+                                <audio id="audio" class='d-none'>
+                                    <source id="audioSource" src="./Side-by-Side-Method-English.ogg">
+                                </audio>
 
                         </div>
                     </div>
@@ -227,6 +244,51 @@
         <!-- Placed at the end of the document so the pages load faster -->
         <script src="../includes/js/jquery-1.11.0.min.js"></script>
         <script src="../includes/js/bootstrap.min.js"></script>
+        <script src="../includes/js/popcorn.min.js"></script>
+        <script src="../includes/js/video.min.js"></script>
+        <script src="../includes/js/video.settings.js"></script>
+        <script type="text/javascript">
+            // Add Audio Track
+            {% for language in languages %}
+            var track = new videojs.AudioTrack({
+                id: '{{ language }}-audio-track',
+                label: '{{ language }}'
+            });
+            trackedPlayer.audioTracks().addTrack(track);
+            {% endfor %}
+    
+            // Get the current trackedPlayer's AudioTrackList object.
+            var audioTrackList = trackedPlayer.audioTracks();
+    
+            // Listen to the "change" event.
+            audioTrackList.addEventListener('change', function () {
+    
+                // Log the currently enabled AudioTrack label.
+                for (var i = 0; i < audioTrackList.length; i++) {
+                    var track = audioTrackList[i];
+    
+                    if (track.enabled) {
+                        var source = document.getElementById(track.id);
+                        var target = document.getElementById("audioSource");
+                        var current_time = trackedPlayer.currentTime();
+                        target.src = source.getAttribute('data-value');
+                        trackedPlayer = videojs('st_video');
+                        trackedPlayer.addClass("vjs-waiting");
+                        trackedAudio.load(); //call this to just preload the audio without playing
+                        trackedAudio.currentTime = current_time;
+                        trackedAudio.volume = trackedPlayer.volume();
+                        if (trackedPlayer.muted())
+                            trackedAudio.muted = true;
+                        else
+                            trackedAudio.muted = false;
+                        trackedAudio.playbackRate = trackedPlayer.playbackRate();
+                        trackedPlayer.currentTime(current_time);
+                        trackedPlayer.removeClass("vjs-waiting");
+                        return;
+                    }
+                }
+            });
+        </script>
         <script>
             $(document).ready(function(){
                 // set video player volume by 20%

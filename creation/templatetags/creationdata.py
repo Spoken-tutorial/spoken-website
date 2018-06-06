@@ -146,20 +146,22 @@ def get_thumb_path(row, append_str):
 
 def get_srt_path(tr):
     data = ''
-    english_srt = settings.MEDIA_ROOT + 'videos/' + str(tr.tutorial_detail.foss_id) + '/' + str(tr.tutorial_detail_id) + '/' + tr.tutorial_detail.tutorial.replace(' ', '-') + '-English.srt'
+    english_srt = settings.MEDIA_ROOT + 'videos/' + str(tr.tutorial_detail.foss_id) + '/' + str(tr.tutorial_detail_id) + '/' + tr.tutorial_detail.tutorial.replace(' ', '-') + '-English.vtt'    
     if os.path.isfile(english_srt):
-        data = '<track kind="captions" src="'+ settings.MEDIA_URL + 'videos/' + str(tr.tutorial_detail.foss_id) + '/' + str(tr.tutorial_detail_id) + '/' + tr.tutorial_detail.tutorial.replace(' ', '-') + '-English.srt' + '" srclang="en" label="English"></track>'
+        data = '<track kind="captions" src="'+ settings.MEDIA_URL + 'videos/' + str(tr.tutorial_detail.foss_id) + '/' + str(tr.tutorial_detail_id) + '/' + tr.tutorial_detail.tutorial.replace(' ', '-') + '-English.vtt' + '" srclang="en" label="English"></track>'
     if tr.language.name != 'English':
-        native_srt = settings.MEDIA_ROOT + 'videos/' + str(tr.tutorial_detail.foss_id) + '/' + str(tr.tutorial_detail_id) + '/' + tr.tutorial_detail.tutorial.replace(' ', '-') + '-' + tr.language.name +'.srt'
-        print native_srt
+        native_srt = settings.MEDIA_ROOT + 'videos/' + str(tr.tutorial_detail.foss_id) + '/' + str(tr.tutorial_detail_id) + '/' + tr.tutorial_detail.tutorial.replace(' ', '-') + '-' + tr.language.name +'.vtt'
         if os.path.isfile(native_srt):
-            data += '<track kind="captions" src="'+ settings.MEDIA_URL + 'videos/' + str(tr.tutorial_detail.foss_id) + '/' + str(tr.tutorial_detail_id) + '/' + tr.tutorial_detail.tutorial.replace(' ', '-') + '-' + tr.language.name + '.srt' + '" srclang="en" label="' + tr.language.name + '"></track>'
+            data += '<track kind="captions" src="'+ settings.MEDIA_URL + 'videos/' + str(tr.tutorial_detail.foss_id) + '/' + str(tr.tutorial_detail_id) + '/' + tr.tutorial_detail.tutorial.replace(' ', '-') + '-' + tr.language.name + '.vtt' + '" srclang="en" label="' + tr.language.name + '"></track>'
     return data
 
 def get_video_visits(tr):
     tr.hit_count = tr.hit_count + 1
     tr.save()
     return tr.hit_count
+
+def rsplitpart (video):
+    return video.rsplit("Video")[0]
 
 def get_prerequisite(tr, td):
     print tr, td
@@ -220,7 +222,7 @@ def tutorialsearch():
     return context
 
 def get_mp4_video(tr):
-    tname, text = tr.video.split('.')
+    tname, text = tr.audio.split('.')
     path = settings.MEDIA_ROOT + 'videos/' + str(tr.tutorial_detail.foss_id) + '/' + str(tr.tutorial_detail_id) + '/' + tname + '.mp4'
     if os.path.isfile(path):
         return 'videos/' + str(tr.tutorial_detail.foss_id) + '/' + str(tr.tutorial_detail_id) + '/' + tname + '.mp4'
@@ -234,6 +236,7 @@ register.filter('get_prerequisite_from_td', get_prerequisite_from_td)
 register.filter('get_prerequisite', get_prerequisite)
 register.filter('get_video_visits', get_video_visits)
 register.filter('get_srt_path', get_srt_path)
+register.filter('rsplitpart', rsplitpart)
 register.filter('get_thumb_path', get_thumb_path)
 register.filter('get_missing_component_reply', get_missing_component_reply)
 register.filter('get_component_name', get_component_name)

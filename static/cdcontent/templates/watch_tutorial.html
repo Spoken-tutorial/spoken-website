@@ -235,10 +235,9 @@
         float: left;
         background: white;
     }
-
-            .video-js.vjs-fullscreen .vjs-tt-cue { font-size: 22px; }
+    .video-js.vjs-fullscreen .vjs-tt-cue { font-size: 22px; }
+    .vjs-modal-dialog-content select {color:#1a1a1a;}
         </style>
-        <script src="../../../includes/js/video.js"></script>
     </head>
     <body>
         <div id="page-wrapper">
@@ -275,10 +274,27 @@
                         <row>
                             <div class='container playlist-container col-lg-12 col-md-12 col-sm-12'>
                                 <div class="video-container col-lg-8 col-md-8 col-sm-8">
-                                    <video id="st_video" class="video-js vjs-default-skin" controls preload="auto" width="auto" height="auto" data-setup="{}">
-                                        <source src="./{{ tr_rec.video }}" type="video/ogg" />
-                                        {{ tr_rec|get_srt_files|safe }}
+                                    <video id="st_video" class='video-js vjs-default-skin vjs-big-play-centered' autobuffer controls data-setup='{ "playbackRates": [0.5, 1, 1.5, 2] }'>
+                                        <source src="./{{tr_rec.video }}"
+                                            type="video/webm">
+                                        {% if eng_flag %}
+                                            <track kind="captions" src="./{{ tr_rec.video|rsplitpart|safe }}English.vtt" label="English"></track>
+                                        {% endif %}
+                                        {% for language in tr_rec_language_list %}
+                                            <track kind="captions" src="./{{ tr_rec.video|rsplitpart|safe }}{{ language.language__name }}.vtt" label="{{ language.language__name }}"></track>
+                                        {% endfor %}
                                     </video>
+
+                                    <audio id="audioTracks" class='vjs-hidden video-js'>
+                                        {% for language in tr_rec_language_list %}
+                                        <source id="{{ language.language__name }}-audio-track" data-value="./{{ tr_rec.video|rsplitpart|safe }}{{ language.language__name }}.ogg"
+                                            type="audio/ogg">{{ language.language__name }}</source>
+                                        {% endfor %}
+                                    </audio>
+
+                                    <audio id="audio" class='d-none'>
+                                        <source id="audioSource" src="./{{ tr_rec.video|rsplitpart|safe }}{{ tr_rec.language }}.ogg">
+                                    </audio>
                                 </div>
                                 <div class="container">
                                     <div id="content">
@@ -346,11 +362,6 @@
                                             </div>
                                         </ul>
                                     </div>
-                                    <script type="text/javascript">
-                                    jQuery(document).ready(function ($) {
-                                    $("#tabs").tab();
-                                    });
-                                    </script> 
                                 </div>
                             </div>
                         </row>
@@ -487,8 +498,56 @@
         <!-- Placed at the end of the document so the pages load faster -->
         <script src="../../../includes/js/jquery-1.11.0.min.js"></script>
         <script src="../../../includes/js/bootstrap.min.js"></script>
+        <script src="../../../includes/js/popcorn.min.js"></script>
+        <script src="../../../includes/js/video.min.js"></script>
+        <script src="../../../includes/js/video.settings.js"></script>
         
+       <script type="text/javascript">
+        // Add Audio Track
+        {% for language in tr_rec_language_list %}
+        var track = new videojs.AudioTrack({
+            id: '{{ language.language__name }}-audio-track',
+            label: '{{ language.language__name }}'
+        });
+        trackedPlayer.audioTracks().addTrack(track);
+        {% endfor %}
+
+        // Get the current trackedPlayer's AudioTrackList object.
+        var audioTrackList = trackedPlayer.audioTracks();
+
+        // Listen to the "change" event.
+        audioTrackList.addEventListener('change', function () {
+
+            // Log the currently enabled AudioTrack label.
+            for (var i = 0; i < audioTrackList.length; i++) {
+                var track = audioTrackList[i];
+
+                if (track.enabled) {
+                    var source = document.getElementById(track.id);
+                    var target = document.getElementById("audioSource");
+                    var current_time = trackedPlayer.currentTime();
+                    target.src = source.getAttribute('data-value');
+                    trackedPlayer = videojs('st_video');
+                    trackedPlayer.addClass("vjs-waiting");
+                    trackedAudio.load(); //call this to just preload the audio without playing
+                    trackedAudio.currentTime = current_time;
+                    trackedAudio.volume = trackedPlayer.volume();
+                    if (trackedPlayer.muted())
+                        trackedAudio.muted = true;
+                    else
+                        trackedAudio.muted = false;
+                    trackedAudio.playbackRate = trackedPlayer.playbackRate();
+                    trackedPlayer.currentTime(current_time);
+                    trackedPlayer.removeClass("vjs-waiting");
+                    return;
+                }
+            }
+        });
+    </script>
         <script>
+            jQuery(document).ready(function ($) {
+                $("#tabs").tab();
+            });
             // set video player volume by 20%
             var myPlayer = videojs('st_video');
             myPlayer.volume(0.2);

@@ -13,7 +13,6 @@ from os.path import *
 from .config import *
 import os
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-
 SCRIPT_URL = SCRIPT_URL
 
 STVIDEOS_DIR = STVIDEOS_PATH
@@ -86,6 +85,8 @@ INSTALLED_APPS = (
     'reports',
     'team',
     'certificate',
+    'api',
+    'rest_framework',
 )
 
 MIDDLEWARE_CLASSES = (

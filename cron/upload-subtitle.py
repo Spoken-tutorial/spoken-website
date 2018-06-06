@@ -116,7 +116,7 @@ if __name__ == "__main__":
         video_title = str(row[6].replace(' ', '-'))
         video_path = config.MEDIA_ROOT + 'videos/' + str(row[5]) + '/' + \
             str(row[3]) + '/'
-        english_srt = video_path + video_title + '-English.srt'
+        english_srt = video_path + video_title + '-English.vtt'
         status_flag = False
         file_missing = False
         print ''
@@ -128,7 +128,7 @@ if __name__ == "__main__":
             ldb_cursor.execute("select * from srt_pending_uploads where trid=" \
                 + str(row[0]) + " and native_or_english=0")
             esrt_row = ldb_cursor.fetchone()
-            #print 'e------------', esrt_row, '----------'
+
             if esrt_row is None:
                 caption.set_caption_language_title('en')
                 message, status_flag = caption.upload_translated_captions(\
@@ -145,14 +145,14 @@ if __name__ == "__main__":
                 overall_status = 1
         else:
             file_missing = True
-            print row[4], '- English -', 'SRT File Missing'
+            print row[4], '- English -', 'VTT File Missing'
         if language[1] != 'English':
-            native_srt = video_path + video_title + '-' + language[1] + '.srt'
+            native_srt = video_path + video_title + '-' + language[1] + '.vtt'
             if os.path.isfile(native_srt):
                 ldb_cursor.execute("select * from srt_pending_uploads where \
                 trid=" + str(row[0]) + " and native_or_english=1")
                 nsrt_row = ldb_cursor.fetchone()
-                #print 'n------------', nsrt_row, '----------'
+                
                 if nsrt_row is None:
                     file_missing = False
                     language_title = ''
@@ -173,7 +173,7 @@ if __name__ == "__main__":
                     status_flag = True
             else:
                 file_missing = True
-                print row[4], '-', language[1], '-', 'SRT File Missing'
+                print row[4], '-', language[1], '-', 'VTT File Missing'
                 status_flag = False
         if status_flag and overall_status:
             ldb_cursor.execute("insert into srt_uploads (trid) values(%s)", \
