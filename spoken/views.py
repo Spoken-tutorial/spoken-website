@@ -71,7 +71,6 @@ def home(request):
         'tr_rec': tr_rec,
         'media_url': settings.MEDIA_URL,
         'random_tutorials': random_tutorials,
-        'current_rec': tr_rec.video.rsplit(str(tr_rec.language), 1)[0],
         'tr_rec_language_list': tr_rec_language_list,
     }
 
@@ -240,7 +239,6 @@ def watch_tutorial(request, foss, tutorial, lang):
     context = {
         'tr_rec': tr_rec,
         'tr_recs': tr_recs,
-        'current_rec': tr_rec.video.rsplit(str(tr_rec.language), 1)[0],
         'questions': questions,
         'video_info': video_info,
         'media_url': settings.MEDIA_URL,

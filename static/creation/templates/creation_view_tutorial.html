@@ -1,4 +1,5 @@
 {% extends 'spoken/templates/base.html' %}
+{% load cdcontentdata %}
 {% load widget_tweaks %}
 {% load static %}
 {% load creationdata %}
@@ -113,11 +114,11 @@
                 {% if tr_rec.video_status %}
 
                 <video id="st_video" class='video-js vjs-default-skin vjs-big-play-centered' autobuffer controls data-setup='{ "playbackRates": [0.5, 1, 1.5, 2] }'>
-                    <source src="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ current_rec }}Video.webm" type="video/webm">
+                    <source src="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ tr_rec.video|rsplitpart|safe }}" type="video/webm">
                 </video>
     
                 <audio id="audio" class='d-none'>
-                    <source id="audioSource" src="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ current_rec }}{{tr_rec.language }}.ogg">
+                    <source id="audioSource" src="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ tr_rec.video|rsplitpart|safe }}{{tr_rec.language }}.ogg">
                 </audio>
 
                 {% else %}

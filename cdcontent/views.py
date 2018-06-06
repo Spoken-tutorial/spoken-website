@@ -255,11 +255,9 @@ def home(request):
                             tr_rec_language_avaiable_list = TutorialResource.objects.filter(tutorial_detail__id=rec.tutorial_detail_id).values('language__name').distinct()
                             
                             # Add Audio / Video / Script for the Langauges Selected
-                            videofilepath = 'videos/{}/{}/{}'.format(key, rec.tutorial_detail_id, rec.video.rsplit(rec.language.name)[0] + "Video.webm")
-                            
-                            audiofilepath = 'videos/{}/{}/{}'.format(key, rec.tutorial_detail_id, rec.video[:-4] + ".ogg")
-                            
-                            scriptfilepath = 'videos/{}/{}/{}'.format(key, rec.tutorial_detail_id, rec.video[:-4] + ".vtt")
+                            videofilepath = 'videos/{}/{}/{}'.format(key, rec.tutorial_detail_id, rec.video)
+                            audiofilepath = 'videos/{}/{}/{}'.format(key, rec.tutorial_detail_id, rec.audio)
+                            scriptfilepath = 'videos/{}/{}/{}'.format(key, rec.tutorial_detail_id, rec.audio[:-4] + ".vtt")
                             
                             if os.path.isfile(settings.MEDIA_ROOT + videofilepath) and videofilepath not in video_files:
                                 archive.write(settings.MEDIA_ROOT + videofilepath, 'spoken/' + videofilepath)
@@ -274,7 +272,7 @@ def home(request):
                             # Adding the English .vtt file (To Select even when english is not selected)
                             if eng_flag:
                                 scriptfilepath = 'videos/{}/{}/{}'.format(key, rec.tutorial_detail_id, 
-                                rec.video.rsplit(language.name)[0]  + "English.vtt")
+                                rec.audio.rsplit(language.name)[0]  + "English.vtt")
                                 
                                 if os.path.isfile(settings.MEDIA_ROOT + scriptfilepath) and scriptfilepath not in srt_files:
                                     archive.write(settings.MEDIA_ROOT + scriptfilepath, 'spoken/' + scriptfilepath)
@@ -292,7 +290,6 @@ def home(request):
                                 'eng_flag': eng_flag,
                                 'tr_rec': rec,
                                 'tr_recs': tr_recs,
-                                'current_rec': rec.video.rsplit(str(rec.language), 1)[0],
                                 'tr_rec_language_list': [value for value in tr_rec_language_avaiable_list if value in tr_rec_language_list],
                                 'media_path': settings.MEDIA_ROOT,
                                 'media_url': settings.MEDIA_URL,
@@ -341,8 +338,7 @@ def home(request):
                     'foss_details': all_foss_details, 
                     'foss': foss_rec.id,
                     'lang': language.id,
-                    'languages': languages,
-                    'tr_rec_language_list': tr_rec_language_list, 
+                    'languages': languages
                 }
                 try:
                     convert_template_to_html_file(archive, 'spoken/videos/home.html', request,"cdcontent/templates/home.html", ctx)
@@ -452,20 +448,20 @@ def ajax_show_added_foss(request):
                 languages.add(rec.language.name)
 
                 # Calculate Video Size
-                videoFilepath = 'videos/{}/{}/{}'.format(key, rec.tutorial_detail_id, rec.video.rsplit(rec.language.name)[0] + "Video.webm")
+                videoFilepath = 'videos/{}/{}/{}'.format(key, rec.tutorial_detail_id, rec.video)
 
                 if os.path.isfile(settings.MEDIA_ROOT + videoFilepath) and videoFilepath not in video_files:
                     video_files.add(videoFilepath)
                     fsize += os.path.getsize(settings.MEDIA_ROOT + videoFilepath)
 
                 # Calculate Audio Size
-                audioFilepath = 'videos/{}/{}/{}'.format(key, rec.tutorial_detail_id, rec.video[:-4] + ".ogg")
+                audioFilepath = 'videos/{}/{}/{}'.format(key, rec.tutorial_detail_id, rec.audio)
 
                 if os.path.isfile(settings.MEDIA_ROOT + audioFilepath):
                     fsize += os.path.getsize(settings.MEDIA_ROOT + audioFilepath)
 
                 # calculate srt file size
-                scriptFilepath = 'videos/{}/{}/{}'.format(key, rec.tutorial_detail_id, rec.video[:-4] + ".vtt")
+                scriptFilepath = 'videos/{}/{}/{}'.format(key, rec.tutorial_detail_id, rec.audio[:-4] + ".vtt")
 
                 if os.path.isfile(settings.MEDIA_ROOT + scriptFilepath):
                     srt_files.add(scriptFilepath)

@@ -165,15 +165,20 @@
                                     {% if eng_flag %}
                                         <track kind="captions" src="./Side-by-Side-Method-English.vtt" label="English"></track>
                                     {% endif %}
-                                    {% for language in tr_rec_language_list %}
-                                        <track kind="captions" src="./Side-by-Side-Method-{{ language.language__name }}.vtt" label="{{ language.language__name }}"></track>
+                                    <script>
+                                        {% for language in languages %}
+                                        {{ language }}
+                                        {% endfor %}
+                                    </script>
+                                    {% for language in languages %}
+                                        <track kind="captions" src="./Side-by-Side-Method-{{ language }}.vtt" label="{{ language }}"></track>
                                     {% endfor %}
                                 </video>
 
                                 <audio id="audioTracks" class='d-none'>
-                                    {% for language in tr_rec_language_list %}
-                                    <source id="{{ language.language__name }}-audio-track" data-value="./Side-by-Side-Method-{{ language.language__name }}.ogg"
-                                        type="audio/ogg">{{ language.language__name }}</source>
+                                    {% for language in languages %}
+                                    <source id="{{ language }}-audio-track" data-value="./Side-by-Side-Method-{{ language }}.ogg"
+                                        type="audio/ogg">{{ language }}</source>
                                     {% endfor %}
                                 </audio>
 
@@ -244,10 +249,10 @@
         <script src="../includes/js/video.settings.js"></script>
         <script type="text/javascript">
             // Add Audio Track
-            {% for language in tr_rec_language_list %}
+            {% for language in languages %}
             var track = new videojs.AudioTrack({
-                id: '{{ language.language__name }}-audio-track',
-                label: '{{ language.language__name }}'
+                id: '{{ language }}-audio-track',
+                label: '{{ language }}'
             });
             trackedPlayer.audioTracks().addTrack(track);
             {% endfor %}

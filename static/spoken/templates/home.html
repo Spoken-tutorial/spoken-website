@@ -1,5 +1,6 @@
 {% extends 'spoken/templates/base.html' %}
 {% load cmsdata %}
+{% load cdcontentdata %}
 {% load static %}
 {% load creationdata %}
 {% block uncompresscssblock %}
@@ -214,12 +215,12 @@
                         <iframe width="100%" height="420px" src="//www.youtube.com/embed/{{ tr_rec.video_id }}?rel=0&modestbranding=1&iv_load_policy=1" frameborder="0" allowfullscreen></iframe>
                     {% else %}
                         <video id="st_video" class='video-js vjs-default-skin vjs-big-play-centered' autobuffer controls data-setup='{ "playbackRates": [0.5, 1, 1.5, 2] }'>
-                            <source src="{{ media_url }}/videos/75/692/Introduction-to-Biopython-Video.webm" type="video/webm">
+                            <source src="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ tr_rec.video }}" type="video/webm">
                             {{ tr_rec|get_srt_path|safe }}
                         </video>
 
                         <audio id="audio" class='d-none'>
-                            <source id="audioSource" src="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ current_rec }}{{tr_rec.language }}.ogg">
+                            <source id="audioSource" src="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ tr_rec.video|rsplitpart|safe }}{{tr_rec.language }}.ogg">
                         </audio>
                         {% endif %}
                 </div>

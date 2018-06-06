@@ -275,25 +275,25 @@
                             <div class='container playlist-container col-lg-12 col-md-12 col-sm-12'>
                                 <div class="video-container col-lg-8 col-md-8 col-sm-8">
                                     <video id="st_video" class='video-js vjs-default-skin vjs-big-play-centered' autobuffer controls data-setup='{ "playbackRates": [0.5, 1, 1.5, 2] }'>
-                                        <source src="./{{ current_rec }}Video.webm"
+                                        <source src="./{{tr_rec.video }}"
                                             type="video/webm">
                                         {% if eng_flag %}
-                                            <track kind="captions" src="./{{ current_rec }}English.vtt" label="English"></track>
+                                            <track kind="captions" src="./{{ tr_rec.video|rsplitpart|safe }}English.vtt" label="English"></track>
                                         {% endif %}
                                         {% for language in tr_rec_language_list %}
-                                            <track kind="captions" src="./{{ current_rec }}{{ language.language__name }}.vtt" label="{{ language.language__name }}"></track>
+                                            <track kind="captions" src="./{{ tr_rec.video|rsplitpart|safe }}{{ language.language__name }}.vtt" label="{{ language.language__name }}"></track>
                                         {% endfor %}
                                     </video>
 
-                                    <audio id="audioTracks" class='d-none'>
+                                    <audio id="audioTracks" class='vjs-hidden video-js'>
                                         {% for language in tr_rec_language_list %}
-                                        <source id="{{ language.language__name }}-audio-track" data-value="./{{ current_rec }}{{ language.language__name }}.ogg"
+                                        <source id="{{ language.language__name }}-audio-track" data-value="./{{ tr_rec.video|rsplitpart|safe }}{{ language.language__name }}.ogg"
                                             type="audio/ogg">{{ language.language__name }}</source>
                                         {% endfor %}
                                     </audio>
 
                                     <audio id="audio" class='d-none'>
-                                        <source id="audioSource" src="./{{ current_rec }}{{ tr_rec.language }}.ogg">
+                                        <source id="audioSource" src="./{{ tr_rec.video|rsplitpart|safe }}{{ tr_rec.language }}.ogg">
                                     </audio>
                                 </div>
                                 <div class="container">

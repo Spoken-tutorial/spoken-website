@@ -60,24 +60,19 @@
     var trackedPlayer = videojs('st_video');
     var trackedAudio = document.getElementById("audio");
     var trackedAudioFlag = trackedVideoFlag = 0;
-    var timesTried = 0;
-    var requestedPlay = 0;
-    var seekedFlag = 0;
+    var timesTried = requestedPlay = seekedFlag = 0
+    var userPause = false;
 
-    // Fixing a bug on Firefox, remove when irrelevent.
-    function checkLoadAndPlay() {
+
+    function checkTimeAndPause() {
+        // Fixing a bug on Firefox, remove when irrelevent.
         if (trackedAudio.readyState == 4 && trackedAudioFlag == 0) {
             trackedAudio.load();
         }        
-        
         if (trackedPlayer.readyState() == 4 && trackedVideoFlag == 0) {
             trackedPlayer.load();
         }
-    }
-    setTimeout(checkLoadAndPlay, 1500);
-    
-    // Check sync currenTime
-    function checkTimeAndPause() {
+        // Check sync currenTime
         if (trackedAudio.currentTime - trackedPlayer.currentTime() + 0.5 < 0 || trackedAudio.currentTime - trackedPlayer.currentTime() - 0.5 > 0) {
             // When client changes video from video list on the page, trackedAudio needs to be played from the code manually! 
             if (trackedAudio.paused && !trackedPlayer.paused()) {
@@ -85,20 +80,22 @@
             }
             // Set Audio / Video to same currentTime
             trackedAudio.currentTime = trackedPlayer.currentTime();
+            if (trackedAudio.currentTime - trackedPlayer.currentTime() + 0.5 < 0 || trackedAudio.currentTime - trackedPlayer.currentTime() - 0.5 > 0) {
+                location.reload();
+            }
             // Check If buffered State is as desired
             if (trackedAudioFlag == 0 || trackedVideoFlag == 0) {
                 checkBufferedState();
             }
         }    
     }
-    setInterval(checkTimeAndPause, 5000);
+    setInterval(checkTimeAndPause, 1500);
 
     function checkMediaAndPause() {
         if (trackedPlayer.paused() == 0) {
             var videoPlayPromise = trackedPlayer.play();
             if (videoPlayPromise !== undefined) {
                 videoPlayPromise.then(_ => {
-                    trackedPlayer.addClass("vjs-waiting");
                     trackedPlayer.pause();
                 })
             }
@@ -107,7 +104,6 @@
             var audioPlayPromise = trackedAudio.play();
             if (audioPlayPromise !== undefined) {
                 audioPlayPromise.then(_ => {
-                    trackedPlayer.addClass("vjs-waiting");
                     trackedAudio.pause();
                 })
             }
@@ -120,8 +116,6 @@
             videoPlayPromise.then(_ => {
                 if (trackedPlayer.paused())
                     trackedPlayer.play();
-                if (!trackedAudio.paused)
-                    trackedPlayer.removeClass("vjs-waiting");
             })
         }
 
@@ -129,7 +123,6 @@
             var audioPlayPromise = trackedAudio.play();
             if (audioPlayPromise !== undefined) {
                 audioPlayPromise.then(_ => {
-                    trackedPlayer.removeClass("vjs-waiting");
                     trackedAudio.play();
                 })
             }
@@ -142,12 +135,15 @@
     var playPlayerController = document.getElementsByClassName("vjs-tech")[0];
 
     playPlayerController.addEventListener("click", function () {
+        userPause = true;
         checkBufferedState();
     });
     playControllerButton.addEventListener("click", function () {
+        userPause = true;
         checkBufferedState();
     });
     playButton.addEventListener("click", function () {
+        userPause = true;
         checkBufferedState();
     });
 
@@ -173,7 +169,7 @@
         if (trackedAudioFlag == 0 || trackedVideoFlag == 0) {
             checkMediaAndPause();
             if (timesTried < 6) {
-                setTimeout(checkBufferedState, 5000);
+                setTimeout(checkBufferedState, 1000);
                 return;
             }
             else {
@@ -194,10 +190,18 @@
 
     trackedPlayer.on("play", function () {
         requestedPlay = 0;
+        if (trackedAudioFlag) {
+            trackedPlayer.removeClass("vjs-waiting");
+        }
     });
 
     trackedPlayer.on("pause", function () {
         requestedPlay = 1;
+        if (userPause == false) {
+            console.log(userPause);
+            trackedPlayer.addClass("vjs-waiting");
+        }
+        userPause = false;
     });
 
     // Set Volume 
@@ -208,6 +212,7 @@
         else
             trackedAudio.muted = false;
     });
+
     // Set Playback Rate
     trackedPlayer.on("ratechange", function () {
         trackedAudio.playbackRate = trackedPlayer.playbackRate();

@@ -36,6 +36,10 @@ def cd_instruction_sheet(foss, lang):
     return False
 
 
+def rsplitpart (video):
+    return video.rsplit("Video")[0]
+
+
 def cd_installation_sheet(foss, lang):
     file_path = settings.MEDIA_ROOT + 'videos/' + str(foss.id) + '/' + foss.foss.replace(' ', '-') + '-Installation-Sheet-' + lang.name + '.pdf'
     if lang.name != 'English':
@@ -50,6 +54,7 @@ def cd_installation_sheet(foss, lang):
     return False
 
 
+register.filter('rsplitpart', rsplitpart)
 register.filter('get_foss_name', get_foss_name)
 register.filter('get_lang_details', get_lang_details)
 register.filter('cd_instruction_sheet', cd_instruction_sheet)

@@ -50,6 +50,7 @@ def get_page(resource, page, page_count = 20):
         resource = paginator.page(paginator.num_pages)
     return resource
 
+
 def is_contributor(user):
     """Check if the user is having contributor rights"""
     if user.groups.filter(Q(name='Contributor')|Q(name='External-Contributor')).count():
@@ -102,7 +103,44 @@ def get_filesize(path):
     filesize_bytes = os.path.getsize(path)
     return humansize(filesize_bytes)
 
-# returns video meta info using ffmpeg
+
+def get_audio_info(path):
+    """Uses ffmpeg to determine information about an audio file"""
+    info_m = {}
+    try:
+        process = subprocess.Popen(['/usr/bin/ffmpeg', '-i', path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        stdout, stderr = process.communicate()
+        duration_m = re.search(r"Duration:\s{1}(?P<hours>\d+?):(?P<minutes>\d+?):(?P<seconds>\d+\.\d+?)", stdout, re.DOTALL).groupdict()
+        info_m = re.search(r": Audio: (?P<codec>.*?), (?P<profile>.*?)", stdout, re.DOTALL).groupdict()
+        
+        hours = Decimal(duration_m['hours'])
+        minutes = Decimal(duration_m['minutes'])
+        seconds = Decimal(duration_m['seconds'])
+
+        total = 0
+        total += 60 * 60 * hours
+        total += 60 * minutes
+        total += seconds
+
+        info_m['hours'] = hours
+        info_m['minutes'] = minutes
+        info_m['seconds'] = seconds
+        tmp_seconds = str(int(seconds))
+        if seconds < 10:
+            tmp_seconds = "0" + tmp_seconds
+        info_m['duration'] = duration_m['hours'] + ':' + duration_m['minutes'] + ":" + tmp_seconds
+        info_m['total'] = int(total)
+        info_m['size'] = get_filesize(path)
+    except:
+        info_m['hours'] = 0
+        info_m['minutes'] = 0
+        info_m['seconds'] = 0
+        info_m['duration'] = 0
+        info_m['total'] = 0
+        info_m['size'] = 0
+    return info_m
+
+
 def get_video_info(path):
     """Uses ffmpeg to determine information about a video."""
     info_m = {}
@@ -145,13 +183,15 @@ def get_video_info(path):
         info_m['height'] = 0
         info_m['size'] = 0
     return info_m
-#create_thumbnail(tr_rec, 'Big', tr_rec.video_thumbnail_time, '700:500')
+
+
+#create_thumbnail(tr_rec, 'Big', tr_rec.audio_thumbnail_time, '700:500')
 def create_thumbnail(row, attach_str, thumb_time, thumb_size):
     filepath = settings.MEDIA_ROOT + 'videos/' + str(row.tutorial_detail.foss_id) + '/' + str(row.tutorial_detail_id) + '/'
     filename = row.tutorial_detail.tutorial.replace(' ', '-') + '-' + attach_str + '.png'
     try:
-        #process = subprocess.Popen(['/usr/bin/ffmpeg', '-i ' + filepath + row.video + ' -r ' + str(30) + ' -ss ' + str(thumb_time) + ' -s ' + thumb_size + ' -vframes ' + str(1) + ' -f ' + 'image2 ' + filepath + filename], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        process = subprocess.Popen(['/usr/bin/ffmpeg', '-i', filepath + row.video, '-r', str(30), '-ss', str(thumb_time), '-s', thumb_size, '-vframes', str(1), '-f', 'image2', filepath + filename], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        #process = subprocess.Popen(['/usr/bin/ffmpeg', '-i ' + filepath + row.audio + ' -r ' + str(30) + ' -ss ' + str(thumb_time) + ' -s ' + thumb_size + ' -vframes ' + str(1) + ' -f ' + 'image2 ' + filepath + filename], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        process = subprocess.Popen(['/usr/bin/ffmpeg', '-i', filepath + row.audio, '-r', str(30), '-ss', str(thumb_time), '-s', thumb_size, '-vframes', str(1), '-f', 'image2', filepath + filename], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         stdout, stderr = process.communicate()
         if stderr:
             print filepath + filename
@@ -159,6 +199,7 @@ def create_thumbnail(row, attach_str, thumb_time, thumb_size):
     except Exception, e:
         print 1, e
         pass
+
 
 def add_qualityreviewer_notification(tr_rec, comp_title, message):
     dr_roles = QualityReviewerRole.objects.filter(foss_category = tr_rec.tutorial_detail.foss, language = tr_rec.language, status = 1)
@@ -1064,16 +1105,20 @@ def view_component(request, trid, component):
         }
     elif component == 'video':
         video_path = settings.MEDIA_ROOT + "videos/" + str(tr_rec.tutorial_detail.foss_id) + "/" + str(tr_rec.tutorial_detail_id) + "/" + tr_rec.video
+        audio_path = settings.MEDIA_ROOT + "videos/" + str(tr.tutorial_detail.foss_id) + "/" + str(tr.tutorial_detail_id) + "/" + tr.audio
+        eng_audio_path = False
+        if tr.language.name != "English":
+            eng_audio_path = settings.MEDIA_ROOT + "videos/" + str(tr.tutorial_detail.foss_id) + "/" + str(tr.tutorial_detail_id) + "/" + tr.audio.rsplit(tr.language.name)[0] + "English.ogg"
         video_info = get_video_info(video_path)
-        current_rec = tr_rec.video.rsplit(tr_rec.language.name)[0]
-        print video_info
+        audio_info = get_audio_info(audio_path)
+        eng_audio_info = get_audio_info(eng_audio_path)
         context = {
             'tr': tr_rec,
             'component': component,
             'video_info': video_info,
             'media_url': settings.MEDIA_URL,
-            'current_rec': current_rec,
-
+            'audio_info': audio_info,
+            'eng_audio_info': eng_audio_info,
         }
     else:
         messages.error(request, 'Invalid component passed as argument!')
@@ -1258,9 +1303,14 @@ def admin_review_video(request, trid):
                 error_msg = 'Invalid status code!'
     else:
         form = ReviewVideoForm()
-    current_rec = tr.video.rsplit(tr.language.name)[0]
-    video_path = settings.MEDIA_ROOT + "videos/" + str(tr.tutorial_detail.foss_id) + "/" + str(tr.tutorial_detail_id) + "/" + current_rec +"Video.webm"
+    video_path = settings.MEDIA_ROOT + "videos/" + str(tr.tutorial_detail.foss_id) + "/" + str(tr.tutorial_detail_id) + "/" + tr.video
+    audio_path = settings.MEDIA_ROOT + "videos/" + str(tr.tutorial_detail.foss_id) + "/" + str(tr.tutorial_detail_id) + "/" + tr.audio
+    eng_audio_path = False
+    if tr.language.name != "English":
+        eng_audio_path = settings.MEDIA_ROOT + "videos/" + str(tr.tutorial_detail.foss_id) + "/" + str(tr.tutorial_detail_id) + "/" + tr.audio.rsplit(tr.language.name)[0] + "English.ogg"
     video_info = get_video_info(video_path)
+    audio_info = get_audio_info(audio_path)
+    eng_audio_info = get_audio_info(eng_audio_path)
     if error_msg:
         messages.error(request, error_msg)
     if response_msg:
@@ -1270,7 +1320,8 @@ def admin_review_video(request, trid):
         'form': form,
         'media_url': settings.MEDIA_URL,
         'video_info': video_info,
-        'current_rec': current_rec,
+        'audio_info': audio_info,
+        'eng_audio_info': eng_audio_info,
     }
     context.update(csrf(request))
     return render(request, 'creation/templates/admin_review_video.html', context)
@@ -2220,8 +2271,7 @@ def creation_view_tutorial(request, foss, tutorial, lang):
     except Exception as e:
         messages.error(request, str(e))
         return HttpResponseRedirect('/')
-    current_rec = tr_rec.video.rsplit(tr_rec.language.name)[0]
-    video_path = settings.MEDIA_ROOT + "videos/" + str(tr_rec.tutorial_detail.foss_id) + "/" + str(tr_rec.tutorial_detail_id) + "/" + current_rec + "Video.webm"
+    video_path = settings.MEDIA_ROOT + "videos/" + str(tr_rec.tutorial_detail.foss_id) + "/" + str(tr_rec.tutorial_detail_id) + "/" + tr_rec.video
     video_info = get_video_info(video_path)
     context = {
         'tr_rec': tr_rec,
@@ -2232,7 +2282,6 @@ def creation_view_tutorial(request, foss, tutorial, lang):
         'media_path': settings.MEDIA_ROOT,
         'tutorial_path': str(tr_rec.tutorial_detail.foss_id) + '/' + str(tr_rec.tutorial_detail_id) + '/',
         'script_base': settings.SCRIPT_URL,
-        'current_rec': current_rec,
     }
     return render(request, 'creation/templates/creation_view_tutorial.html', context)
 

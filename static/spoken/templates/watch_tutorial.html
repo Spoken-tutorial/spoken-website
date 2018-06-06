@@ -1,7 +1,7 @@
 {% extends 'spoken/templates/base.html' %}
+{% load creationdata %}
 {% load widget_tweaks %}
 {% load static %}
-{% load creationdata %}
 {% block main_meta %}
     <meta name="title" content="{{ tr_rec.tutorial_detail.tutorial }} - {{ tr_rec.language.name }}">
     <meta name="description" content="{{ tr_rec.tutorial_detail.foss.description }}">
@@ -266,24 +266,24 @@
                
                 <video id="st_video" class='video-js vjs-default-skin vjs-big-play-centered' autobuffer controls poster="{{ tr_rec.tutorial_detail|get_thumb_path:'Big' }}" data-setup='{ "playbackRates": [0.5, 1, 1.5, 2] }'>
                     
-                    <source src="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ current_rec }}Video.webm" type="video/webm">
+                    <source src="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ tr_rec.video }}" type="video/webm">
                     {% with has_mp4=tr_rec|get_mp4_video %}
                         {% if has_mp4 %}
-                            <source src="{{ media_url }}{{ has_mp4 }}" type="video/mp4" />
+                        <source src="{{ media_url }}{{ has_mp4 }}" type="video/mp4" />
                         {% endif %}
                     {% endwith %}
                     {{ tr_rec|get_srt_path|safe }}
                 </video>
-            
-                <audio id="audioTracks" class='d-none'>
-                        <source id="{{ tr_rec.language.name  }}-audio-track" data-value="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ current_rec }}{{ tr_rec.language.name  }}.ogg" type="audio/ogg">{{ tr_rec.language.name  }}</source>
-                        {% if tr_rec.language.name != 'English' %}
-                            <source id="English-audio-track" data-value="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ current_rec }}English.ogg" type="audio/ogg">English</source>
-                        {% endif %}
-                </audio>
 
                 <audio id="audio" class='d-none'>
-                    <source id="audioSource" src="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ current_rec }}{{tr_rec.language }}.ogg">
+                    <source id="audioSource" src="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ tr_rec.video|rsplitpart|safe }}{{tr_rec.language }}.ogg">
+                </audio>
+            
+                <audio id="audioTracks" class='d-none'>
+                        <source id="{{ tr_rec.language.name  }}-audio-track" data-value="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ tr_rec.video|rsplitpart|safe }}{{ tr_rec.language.name  }}.ogg" type="audio/ogg">{{ tr_rec.language.name  }}</source>
+                        {% if tr_rec.language.name != 'English' %}
+                            <source id="English-audio-track" data-value="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ tr_rec.video|rsplitpart|safe }}English.ogg" type="audio/ogg">English</source>
+                        {% endif %}
                 </audio>
 
             </div>
