@@ -1,7 +1,7 @@
 {% extends 'spoken/templates/base.html' %}
+{% load creationdata %}
 {% load widget_tweaks %}
 {% load static %}
-{% load creationdata %}
 {% block main_meta %}
     <meta name="title" content="{{ tr_rec.tutorial_detail.tutorial }} - {{ tr_rec.language.name }}">
     <meta name="description" content="{{ tr_rec.tutorial_detail.foss.description }}">
@@ -251,6 +251,7 @@
         background: white;
     }
     .video-js.vjs-fullscreen .vjs-tt-cue { font-size: 22px; }
+    .vjs-modal-dialog-content select {color:#1a1a1a;}
     </style>
 {% endblock %}
 {% load creationdata %}
@@ -262,16 +263,29 @@
     <row>
         <div class='container playlist-container col-lg-12 col-md-12 col-sm-12'>
             <div class="video-container col-lg-8 col-md-8 col-sm-8">
-                        <video id="st_video" class="video-js vjs-default-skin" controls preload="none" poster="{{ tr_rec.tutorial_detail|get_thumb_path:'Big' }}" width="auto" height="auto" data-setup="{}">
-                            <!-- <source src="/static/spoken/images/Overview-and-Installation-of-Git-English.ogv" type="video/ogg" /> -->
-			    <source src="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ tr_rec.video }}" type="video/ogg" />
-                             {% with has_mp4=tr_rec|get_mp4_video %}
-                                 {% if has_mp4 %}
-                                     <source src="{{ media_url }}{{ has_mp4 }}" type="video/mp4" />
-                                 {% endif %}
-                             {% endwith %}
-                            {{ tr_rec|get_srt_path|safe }}
-                        </video>
+               
+                <video id="st_video" class='video-js vjs-default-skin vjs-big-play-centered' autobuffer controls poster="{{ tr_rec.tutorial_detail|get_thumb_path:'Big' }}" data-setup='{ "playbackRates": [0.5, 1, 1.5, 2] }'>
+                    
+                    <source src="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ tr_rec.video }}" type="video/webm">
+                    {% with has_mp4=tr_rec|get_mp4_video %}
+                        {% if has_mp4 %}
+                        <source src="{{ media_url }}{{ has_mp4 }}" type="video/mp4" />
+                        {% endif %}
+                    {% endwith %}
+                    {{ tr_rec|get_srt_path|safe }}
+                </video>
+
+                <audio id="audio" class='d-none'>
+                    <source id="audioSource" src="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ tr_rec.video|rsplitpart|safe }}{{tr_rec.language }}.ogg">
+                </audio>
+            
+                <audio id="audioTracks" class='d-none'>
+                        <source id="{{ tr_rec.language.name  }}-audio-track" data-value="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ tr_rec.video|rsplitpart|safe }}{{ tr_rec.language.name  }}.ogg" type="audio/ogg">{{ tr_rec.language.name  }}</source>
+                        {% if tr_rec.language.name != 'English' %}
+                            <source id="English-audio-track" data-value="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ tr_rec.video|rsplitpart|safe }}English.ogg" type="audio/ogg">English</source>
+                        {% endif %}
+                </audio>
+
             </div>
 
 
@@ -292,7 +306,6 @@
         <ul class="forum-questions" id="forum_Q" style="padding : 6px ">
      
         {% for question in questions %}
-
         <li class="question" id="{{ question.id }}">
             <a href="http://forums.spoken-tutorial.org/question/{{ question.id }}/{{ question.get_slugified_title }}" target="_blank" class="{{ question.id }}">{{ question.title }}</a>
             <p>{{ question.body|striptags|safe }}
@@ -350,11 +363,6 @@
 </div>
     </ul>
 
-<script type="text/javascript">
-    jQuery(document).ready(function ($) {
-       $("#tabs").tab();
-    });
-</script> 
 </div> <!-- container -->
 
         </div>
@@ -506,8 +514,63 @@
         </div>
     </row>
 {% endblock %}
+{% block uncompressjsblock %}
+    <script src="{% static 'spoken/js/popcorn.min.js' %}"></script>
+    <script src="{% static 'spoken/js/video.min.js' %}"></script>
+    <script src="{% static 'spoken/js/video.settings.js' %}"></script>
+    <script src="{% static 'spoken/js/jquery.fancybox.pack.js' %}"></script>
+    <script src="{% static 'spoken/js/jquery.mousewheel-3.0.6.pack.js' %}"></script>
+    <script src="https://apis.google.com/js/platform.js"></script>
+    <script type="text/javascript" src="http://www.youtube.com/iframe_api"></script>
+{% endblock %}
 {% block compressinlinejsblock %}
-    <script type="text/javascript">
+<script type="text/javascript">
+    
+    // Add Audio Tracks
+    var track = new videojs.AudioTrack({
+        id: '{{ tr_rec.language.name  }}-audio-track',
+        label: '{{ tr_rec.language.name  }}'
+    });
+    {% if tr_rec.language.name != 'English' %}
+    trackedPlayer.audioTracks().addTrack(track);
+    var track = new videojs.AudioTrack({
+        id: 'English-audio-track',
+        label: 'English'
+    });
+    trackedPlayer.audioTracks().addTrack(track);
+    {% endif %}
+    // Get the current trackedPlayer's AudioTrackList object.
+    var audioTrackList = trackedPlayer.audioTracks();
+
+    // Listen to the "change" event.
+    audioTrackList.addEventListener('change', function () {
+
+        // Log the currently enabled AudioTrack label.
+        for (var i = 0; i < audioTrackList.length; i++) {
+            var track = audioTrackList[i];
+
+            if (track.enabled) {
+                var source = document.getElementById(track.id);
+                var target = document.getElementById("audioSource");
+                var current_time = trackedPlayer.currentTime();
+                target.src = source.getAttribute('data-value');
+                trackedPlayer = videojs('st_video');
+                trackedPlayer.addClass("vjs-waiting");
+                trackedAudio.load(); //call this to just preload the audio without playing
+                trackedAudio.currentTime = current_time;
+                trackedAudio.volume = trackedPlayer.volume();
+                if (trackedPlayer.muted())
+                trackedAudio.muted = true;
+                else
+                trackedAudio.muted = false;
+                trackedAudio.playbackRate = trackedPlayer.playbackRate();
+                trackedPlayer.currentTime(current_time);
+                trackedPlayer.removeClass("vjs-waiting");
+                return;
+            }
+        }
+    });
+
         $(document).ready(function(){
 
             currentVideo = $('.playlist-item.active');
@@ -543,12 +606,16 @@
                 $(this).text( $(this).text() == 'Show video info' ? "Hide video info" : "Show video info");
             });
         });
-    </script>
 
-    <script>
 
-    var player,
-    tag = document.createElement('script'),
+
+                    
+    jQuery(document).ready(function ($) {
+        $("#tabs").tab();
+    });
+    
+    var player, 
+    tag = document.createElement('script'), 
     firstScriptTag = document.getElementsByTagName('script')[0];
     var flag= false;
   
@@ -564,41 +631,36 @@
         return this >= min && this <= max;
     };
 
-            var ik_player;
-            //this function is called by the API
-            function onYouTubeIframeAPIReady() {
-                //creates the player object
-                ik_player = new YT.Player('player');
-                //Holds a reference to the YouTube player
-                //subscribe to events
-                ik_player.addEventListener("onReady",       "onReady");
-                ik_player.addEventListener("onStateChange", "onStateChange");
-            }
-  
-        function formatTime(time){
+    var ik_player;
+    //this function is called by the API
+    function onYouTubeIframeAPIReady() {
+        //creates the player object
+        ik_player = new YT.Player('player');
+        //Holds a reference to the YouTube player
+        //subscribe to events
+        ik_player.addEventListener("onReady",       "onReady");
+        ik_player.addEventListener("onStateChange", "onStateChange");
+    }
+
+    function formatTime(time){
         time = Math.round(time);
         var minutes = Math.floor(time / 60),
         seconds = time - minutes * 60;
         seconds = seconds < 10 ? '0' + seconds : seconds;
         return minutes + "." + seconds;
-        }
+    }
 
     function onReady(event) {
         function logDuration() {
-
-         window.setTimeout(logDuration,1000);
-         var cur_time = formatTime(ik_player.getCurrentTime()).toString();
-         var duration=  formatTime(ik_player.getDuration()).toString();
-
-        if(parseFloat(cur_time) == parseFloat(duration.toString())){
-         $('.ScrollStyle').find('.question').css("background-color", "white");
-        }else{
-        trigger(cur_time, duration);
-        }
-       
-            
-
-        return cur_time
+            window.setTimeout(logDuration,1000);
+            var cur_time = formatTime(ik_player.getCurrentTime()).toString();
+            var duration=  formatTime(ik_player.getDuration()).toString();
+            if(parseFloat(cur_time) == parseFloat(duration.toString())) {
+                $('.ScrollStyle').find('.question').css("background-color", "white");
+            } else {
+               trigger(cur_time, duration);
+            }
+            return cur_time
         }
         logDuration();
         $("#text").click(function(e){
@@ -607,13 +669,12 @@
            
         });
 
-
-    //var title = $('#text').html("Post your Question on the Forum");
-       // $("#text").click(function(e){
-     // e.preventDefault();
-         // alert(logDuration());
-            //title.html('new title'+logDuration());
-       // });
+        // var title = $('#text').html("Post your Question on the Forum");
+        //     $("#text").click(function(e) {
+        //         e.preventDefault();
+        //         alert(logDuration());
+        //         title.html('new title'+logDuration());
+        //     });
         }
 
       function trigger(cur_time, duration){
@@ -650,7 +711,7 @@
            }
            {% endfor %}
            }
-                        //for videojs trigger
+            //for videojs trigger
             var trackedPlayer = videojs('st_video');
             var previousTime = 0;
             var currentTime = 0;
@@ -660,45 +721,34 @@
             var cur_time = formatTime(currentTime).toString();
 
            	trigger( cur_time);
-							$("#text").click(function(e){
-							trackedPlayer.pause()
-		       		setForum(cur_time)
-		         
-		      		});
-			
+			$("#text").click(function(e){
+				trackedPlayer.pause()
+		       	setForum(cur_time) 
+                });
             });
  
   		
-				function setForum(cur_time)
-				{
-					 
-						var time_split = cur_time.split(".")
-						var minute = parseFloat(time_split[0]);
-						var min_range = minute+"-"+(minute+parseFloat(1))
-						if(parseInt(time_split[1]).between(parseInt(0),parseInt(9))){
-									sec_range = "0-10"
-						}else if(parseFloat(time_split[1]).between(parseFloat(10),parseFloat(19))){
-									sec_range = "10-20"
-						}else if(parseFloat(time_split[1]).between(parseFloat(20),parseFloat(29))){
-									sec_range = "20-30"
-						}else if(parseFloat(time_split[1]).between(parseFloat(30),parseFloat(39))){
-									sec_range = "30-40"
-						}else if(parseFloat(time_split[1]).between(parseFloat(40),parseFloat(49))){
-									sec_range = "40-50"
-						}else {
-									sec_range = "50-60"
-						}
-		
-						 var url = "http://forums.spoken-tutorial.org/new-question/?category={{ tr_rec.tutorial_detail.foss.foss }}&tutorial={{ tr_rec.tutorial_detail.tutorial }}&minute_range="+min_range+"&second_range="+sec_range;
-						$("#text").attr("href", url);
-				}
-    </script>
-{% endblock %}
-{% block uncompressjsblock %}
-    <script src="{% static 'spoken/js/video.min.js' %}"></script>
-    <script src="{% static 'spoken/js/jquery.fancybox.pack.js' %}"></script>
-    <script src="{% static 'spoken/js/jquery.mousewheel-3.0.6.pack.js' %}"></script>
-    <script src="https://apis.google.com/js/platform.js"></script>
-        <script type="text/javascript" src="http://www.youtube.com/iframe_api"></script>
-{% endblock %}
+    function setForum(cur_time) {
+            
+            var time_split = cur_time.split(".")
+            var minute = parseFloat(time_split[0]);
+            var min_range = minute+"-"+(minute+parseFloat(1))
+            if(parseInt(time_split[1]).between(parseInt(0),parseInt(9))){
+                        sec_range = "0-10"
+            }else if(parseFloat(time_split[1]).between(parseFloat(10),parseFloat(19))){
+                        sec_range = "10-20"
+            }else if(parseFloat(time_split[1]).between(parseFloat(20),parseFloat(29))){
+                        sec_range = "20-30"
+            }else if(parseFloat(time_split[1]).between(parseFloat(30),parseFloat(39))){
+                        sec_range = "30-40"
+            }else if(parseFloat(time_split[1]).between(parseFloat(40),parseFloat(49))){
+                        sec_range = "40-50"
+            }else {
+                        sec_range = "50-60"
+            }
 
+                var url = "http://forums.spoken-tutorial.org/new-question/?category={{ tr_rec.tutorial_detail.foss.foss }}&tutorial={{ tr_rec.tutorial_detail.tutorial }}&minute_range="+min_range+"&second_range="+sec_range;
+            $("#text").attr("href", url);
+    }
+    </script>
+    {% endblock %}

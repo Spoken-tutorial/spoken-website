@@ -66,7 +66,7 @@ def generate_subtitle(srt_url, srt_file_path):
     try:
         rows = table[0].findAll("tr")
         counter = 1
-        srt_data = ''
+        srt_data = 'WEBVTT\n\n'
         previous_time = None
         previous_script_data = None
         for row in rows:
@@ -94,21 +94,21 @@ def generate_subtitle(srt_url, srt_file_path):
                             previous_time = formatted_time
                             continue
                         srt_data += str(counter) + '\n'
-                        srt_data += previous_time + ' --> ' + formatted_time + '\n'
+                        srt_data += previous_time + '.000' + ' --> ' + formatted_time + '.001\n'
                         counter += 1
                         previous_time = formatted_time
                     else:
                         time_error = 1
                 #print col.text
-        duration_info = get_duration_info(rreplace(srt_file_path, 'srt', 'ogv', 1))
+        duration_info = get_duration_info(rreplace(srt_file_path, 'vtt', 'ogv', 1))
         if srt_data:
             if previous_script_data:
                 srt_data += str(counter) + '\n'
                 if duration_info:
-                    srt_data += previous_time + ' --> ' + duration_info + '\n'
+                    srt_data += previous_time + '.000' + ' --> ' + duration_info + '.001\n'
                 else:
-                    srt_data += previous_time + ' --> ' + str((datetime.datetime.strptime(\
-                        previous_time, "%H:%M:%S") + datetime.timedelta(seconds = 5)).time()) + '\n'
+                    srt_data += previous_time + '.000' + ' --> ' + str((datetime.datetime.strptime(\
+                        previous_time, "%H:%M:%S") + datetime.timedelta(seconds = 5)).time()) + '.001\n'
                 srt_data += previous_script_data
             file_head = open(srt_file_path,"w")
             file_head.write(srt_data.encode("utf-8"))

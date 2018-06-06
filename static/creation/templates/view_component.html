@@ -1,8 +1,9 @@
 {% extends 'spoken/templates/popup-base.html' %}
 {% load widget_tweaks %}
+{% load cdcontentdata %}
 {% load static %}
 {% block uncompresscssblock %}
-    {% if component == "video" %}
+    {% if component == "video" or component == "audio"%}
     <link href="{% static 'spoken/css/video-js.min.css' %}" rel="stylesheet" type="text/css">
     {% endif %}
 {% endblock %}
@@ -51,26 +52,83 @@
     {% endif %}
 {% endblock %}
 {% block content %}
-    {% if component == "video" %}4
+    {% if component == "video" %}
+    Video:
+    <table class="table table-bordered table-hover">
+        <tr>
+            <th>Codec:</th><td>{{video_info.codec}}</td>
+            <th>Profile:</th><td>{{video_info.profile}}</td>
+        </tr>
+        <tr>
+            <th>Width:</th><td>{{video_info.width}}</td>
+            <th>Height:</th><td>{{video_info.height}}</td>
+        </tr>
+        <tr>
+            <th>Duration:</th><td>{{video_info.duration}}</td>
+            <th>Size:</th><td>{{video_info.size}}</td>
+        </tr>
+    </table>
+    Audio:
         <table class="table table-bordered table-hover">
             <tr>
-                <th>Codec:</th><td>{{video_info.codec}}</td>
-                <th>Profile:</th><td>{{video_info.profile}}</td>
-            </tr>
-            <tr>
-                <th>Width:</th><td>{{video_info.width}}</td>
-                <th>Height:</th><td>{{video_info.height}}</td>
-            </tr>
-            <tr>
-                <th>Duration:</th><td>{{video_info.duration}}</td>
-                <th>Size:</th><td>{{video_info.size}}</td>
+                <th>Codec:</th><td>{{audio_info.codec}}</td>
+                <th>Duration:</th><td>{{audio_info.duration}}</td>
+                <th>Size:</th><td>{{audio_info.size}}</td>
             </tr>
         </table>
+    {% if eng_audio_info.size > 0 and eng_audio_info.duration > 0 %}
+    English Audio:
+        <table class="table table-bordered table-hover">
+            <tr>
+                <th>Codec:</th><td>{{ eng_audio_info.codec }}</td>
+                <th>Duration:</th><td>{{ eng_audio_info.duration }}</td>
+                <th>Size:</th><td>{{ eng_audio_info.size }}</td>
+            </tr>
+        </table>
+      {% if aud_type == "f" %}
+	{{ video_mod }}
         <div class="video-container">
-            <video id="st_video" class="video-js vjs-default-skin" controls preload="auto" width="auto" height="auto" data-setup="{}">
-                <source src="{{ media_url }}videos/{{ tr.tutorial_detail.foss_id }}/{{ tr.tutorial_detail_id }}/{{ tr.video }}" type="video/ogg" />
-            </video>
+
+                <video id="st_video" class='video-js vjs-default-skin vjs-big-play-centered' autobuffer controls data-setup='{ "playbackRates": [0.5, 1, 1.5, 2] }'>
+                        <source src="{{ media_url }}videos/{{ tr.tutorial_detail.foss_id }}/{{ tr.tutorial_detail_id }}/{{ tr_rec.video|rsplitpart|safe }}" type="video/webm">
+                </video>
+    
+                <audio id="audio" class='d-none'>
+                        <source id="audioSource" src="{{ media_url }}temp/{{ filtered }}.ogg">
+                </audio>
+
         </div>
+        <a class="btn btn-primary " href="/creation/view/component/{{ tr.id }}/video/o" title="View/Download Audio">
+                 <span title="" data-original-title="" >Preview Original</span>
+        </a>
+        {% elif aud_type == "o" %}
+	    {{ tr.video }}
+	    <div class="video-container">
+
+            <video id="st_video" class='video-js vjs-default-skin vjs-big-play-centered' autobuffer controls data-setup='{ "playbackRates": [0.5, 1, 1.5, 2] }'>
+                    <source src="{{ media_url }}videos/{{ tr.tutorial_detail.foss_id }}/{{ tr.tutorial_detail_id }}/{{ tr_rec.video|rsplitpart|safe }}" type="video/webm">
+            </video>
+
+            <audio id="audio" class='d-none'>
+                    <source id="audioSource" src="{{ media_url }}temp/{{ original }}.ogg">
+            </audio>
+
+        </div>
+	<a class="btn btn-primary " href="/creation/view/component/{{ tr.id }}/video/f" title="View/Download Audio">
+                 <span title="" data-original-title="" >Preview filtered</span></a>
+      {% else %}
+	<div class="video-container">
+            <video id="st_video" class='video-js vjs-default-skin vjs-big-play-centered' autobuffer controls data-setup='{ "playbackRates": [0.5, 1, 1.5, 2] }'>
+                    <source src="{{ media_url }}videos/{{ tr.tutorial_detail.foss_id }}/{{ tr.tutorial_detail_id }}/{{ tr_rec.video|rsplitpart|safe }}" type="video/webm">
+            </video>
+            <audio id="audio" class='d-none'>
+                    <source id="audioSource" src="{{ media_url }}videos/{{ tr.tutorial_detail.foss_id }}/{{ tr.tutorial_detail_id }}/{{ tr_rec.video|rsplitpart|safe }}{{ tr.language.name }}.ogg">
+            </audio>    
+        </div>
+      {% endif %}
+	
+	
+	
     {% else %}
         <form role="form" method="post" enctype="multipart/form-data" action="">
             <div class="form-group">
@@ -78,9 +136,23 @@
             </div>
         </form>
     {% endif %}
+	{% if aud_type == "f" %}
+	<a class="btn btn-primary " href="/creation/upload/component/{{ tr.id }}/{{ video_mod }}/" title="Accept">
+                 <span title="" data-original-title="" >Accept this submission</span></a>
+	<a class="btn btn-primary " href="/creation/upload/tutorial/{{ tr.id }}/" title="Accept">
+                 <span title="" data-original-title="" >Reject and Re-record</span></a>
+	{% elif aud_type == "o" %}
+	<a class="btn btn-primary " href="/creation/upload/component/{{ tr.id }}/{{ original }}/" title="Accept">
+                 <span title="" data-original-title="" >Accept this submission</span></a>
+	<a class="btn btn-primary " href="/creation/upload/tutorial/{{ tr.id }}/" title="Accept">
+                 <span title="" data-original-title="" >Reject and Re-record</span></a>
+	{% endif %}
+
 {% endblock %}
 {% block uncompressjsblock %}
     {% if component == "video" %}
+        <script src="{% static 'spoken/js/popcorn.min.js' %}"></script>
         <script src="{% static 'spoken/js/video.min.js' %}"></script>
+        <script src="{% static 'spoken/js/video.settings.js' %}"></script>
     {% endif %}
 {% endblock %}
