@@ -85,68 +85,52 @@
                 <th>Size:</th><td>{{ eng_audio_info.size }}</td>
             </tr>
         </table>
+    
+    {% endif %}
       {% if aud_type == "f" %}
-	{{ video_mod }}
+	{{ filtered }}
         <div class="video-container">
-<<<<<<< HEAD
-            <video id="st_video" class="video-js vjs-default-skin" controls preload="auto" width="auto" height="auto" data-setup="{}">
-                <source src="{{ media_url }}temp/{{ filtered }}.ogg" type="video/mp4" />
-            </video>
-=======
 
                 <video id="st_video" class='video-js vjs-default-skin vjs-big-play-centered' autobuffer controls data-setup='{ "playbackRates": [0.5, 1, 1.5, 2] }'>
-                        <source src="{{ media_url }}videos/{{ tr.tutorial_detail.foss_id }}/{{ tr.tutorial_detail_id }}/{{ tr_rec.video|rsplitpart|safe }}" type="video/webm">
+                        <source src="{{ media_url }}videos/{{ tr.tutorial_detail.foss_id }}/{{ tr.tutorial_detail_id }}/{{ tr.video }}" type="video/webm">
                 </video>
     
                 <audio id="audio" class='d-none'>
                         <source id="audioSource" src="{{ media_url }}temp/{{ filtered }}.ogg">
                 </audio>
 
->>>>>>> 409b72748ca9d828154db84b75bb44f6f429f760
         </div>
         <a class="btn btn-primary " href="/creation/view/component/{{ tr.id }}/video/o" title="View/Download Audio">
                  <span title="" data-original-title="" >Preview Original</span>
         </a>
-<<<<<<< HEAD
-      {% elif aud_type == "o" %}
-	{{ tr.video }}
-	<div class="video-container">
-            <video id="st_video" class="video-js vjs-default-skin" controls preload="auto" width="auto" height="auto" data-setup="{}">
-                <source src="{{ media_url }}temp/{{ tr.video }}" type="video/mp4" />
-            </video>
-=======
         {% elif aud_type == "o" %}
-	    {{ tr.video }}
+	    {{ tr.audio }}
+        {{ original }}
+        {{ filtered }}
 	    <div class="video-container">
 
             <video id="st_video" class='video-js vjs-default-skin vjs-big-play-centered' autobuffer controls data-setup='{ "playbackRates": [0.5, 1, 1.5, 2] }'>
-                    <source src="{{ media_url }}videos/{{ tr.tutorial_detail.foss_id }}/{{ tr.tutorial_detail_id }}/{{ tr_rec.video|rsplitpart|safe }}" type="video/webm">
+                    <source src="{{ media_url }}videos/{{ tr.tutorial_detail.foss_id }}/{{ tr.tutorial_detail_id }}/{{ tr.video }}" type="video/webm">
             </video>
 
             <audio id="audio" class='d-none'>
                     <source id="audioSource" src="{{ media_url }}temp/{{ original }}.ogg">
             </audio>
 
->>>>>>> 409b72748ca9d828154db84b75bb44f6f429f760
         </div>
 	<a class="btn btn-primary " href="/creation/view/component/{{ tr.id }}/video/f" title="View/Download Audio">
                  <span title="" data-original-title="" >Preview filtered</span></a>
       {% else %}
 	<div class="video-container">
-<<<<<<< HEAD
-            <video id="st_video" class="video-js vjs-default-skin" controls preload="auto" width="auto" height="auto" data-setup="{}">
-                <source src="{{ media_url }}videos/{{ tr.tutorial_detail.foss_id }}/{{ tr.tutorial_detail_id }}/{{ tr.video }}" type="video/mp4" />
-=======
+
             <video id="st_video" class='video-js vjs-default-skin vjs-big-play-centered' autobuffer controls data-setup='{ "playbackRates": [0.5, 1, 1.5, 2] }'>
-                    <source src="{{ media_url }}videos/{{ tr.tutorial_detail.foss_id }}/{{ tr.tutorial_detail_id }}/{{ tr_rec.video|rsplitpart|safe }}" type="video/webm">
->>>>>>> 409b72748ca9d828154db84b75bb44f6f429f760
+                    <source src="{{ media_url }}videos/{{ tr.tutorial_detail.foss_id }}/{{ tr.tutorial_detail_id }}/{{ tr.video }}" type="video/webm">
             </video>
             <audio id="audio" class='d-none'>
-                    <source id="audioSource" src="{{ media_url }}videos/{{ tr.tutorial_detail.foss_id }}/{{ tr.tutorial_detail_id }}/{{ tr_rec.video|rsplitpart|safe }}{{ tr.language.name }}.ogg">
+                    <source id="audioSource" src="{{ media_url }}videos/{{ tr.tutorial_detail.foss_id }}/{{ tr.tutorial_detail_id }}/{{ tr.video|rsplitpart|safe }}{{ tr.language.name }}.ogg">
             </audio>    
         </div>
       {% endif %}
-	
 	
 	
     {% else %}
@@ -157,14 +141,14 @@
         </form>
     {% endif %}
 	{% if aud_type == "f" %}
-	<a class="btn btn-primary " href="/creation/upload/component/{{ tr.id }}/{{ video_mod }}/" title="Accept">
+	<a class="btn btn-primary " href="/creation/upload/component/{{ tr.id }}/{{ audio_modified }}/" title="Accept">
                  <span title="" data-original-title="" >Accept this submission</span></a>
-	<a class="btn btn-primary " href="/creation/upload/tutorial/{{ tr.id }}/" title="Accept">
+	<a class="btn btn-primary " href="/creation/upload/tutorial/{{ tr.id }}/" title="Reject">
                  <span title="" data-original-title="" >Reject and Re-record</span></a>
 	{% elif aud_type == "o" %}
-	<a class="btn btn-primary " href="/creation/upload/component/{{ tr.id }}/{{ original }}/" title="Accept">
+	<a class="btn btn-primary " href="/creation/upload/component/{{ tr.id }}/{{ audio_original }}/" title="Accept">
                  <span title="" data-original-title="" >Accept this submission</span></a>
-	<a class="btn btn-primary " href="/creation/upload/tutorial/{{ tr.id }}/" title="Accept">
+	<a class="btn btn-primary " href="/creation/upload/tutorial/{{ tr.id }}/" title="Reject">
                  <span title="" data-original-title="" >Reject and Re-record</span></a>
 	{% endif %}
 
