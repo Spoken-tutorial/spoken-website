@@ -267,11 +267,7 @@
                 <video id="st_video" class='video-js vjs-default-skin vjs-big-play-centered' autobuffer controls poster="{{ tr_rec.tutorial_detail|get_thumb_path:'Big' }}" data-setup='{ "playbackRates": [0.5, 1, 1.5, 2] }'>
                     
                     <source src="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ tr_rec.video }}" type="video/webm">
-                    {% with has_mp4=tr_rec|get_mp4_video %}
-                        {% if has_mp4 %}
-                        <source src="{{ media_url }}{{ has_mp4 }}" type="video/mp4" />
-                        {% endif %}
-                    {% endwith %}
+                    
                     {{ tr_rec|get_srt_path|safe }}
                 </video>
 

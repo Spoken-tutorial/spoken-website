@@ -191,8 +191,8 @@ def create_thumbnail(row, attach_str, thumb_time, thumb_size):
     filepath = settings.MEDIA_ROOT + 'videos/' + str(row.tutorial_detail.foss_id) + '/' + str(row.tutorial_detail_id) + '/'
     filename = row.tutorial_detail.tutorial.replace(' ', '-') + '-' + attach_str + '.png'
     try:
-        #process = subprocess.Popen(['/usr/bin/ffmpeg', '-i ' + filepath + row.audio + ' -r ' + str(30) + ' -ss ' + str(thumb_time) + ' -s ' + thumb_size + ' -vframes ' + str(1) + ' -f ' + 'image2 ' + filepath + filename], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        process = subprocess.Popen(['/usr/bin/ffmpeg', '-i', filepath + row.audio, '-r', str(30), '-ss', str(thumb_time), '-s', thumb_size, '-vframes', str(1), '-f', 'image2', filepath + filename], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        #process = subprocess.Popen(['/usr/bin/ffmpeg', '-i ' + filepath + row.video + ' -r ' + str(30) + ' -ss ' + str(thumb_time) + ' -s ' + thumb_size + ' -vframes ' + str(1) + ' -f ' + 'image2 ' + filepath + filename], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        process = subprocess.Popen(['ffmpeg', '-i', filepath + row.video, '-r', str(30), '-ss', str(thumb_time), '-s', thumb_size, '-vframes', str(1), '-f', 'image2', filepath + filename], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         stdout, stderr = process.communicate()
         if stderr:
             print filepath + filename
@@ -434,6 +434,7 @@ def upload_index(request):
                 tutorial_resource.outline_user = request.user
                 tutorial_resource.script_user = request.user
                 tutorial_resource.video_user = request.user
+                tutorial_resource.audio = "Blank"
                 tutorial_resource.save()
 
             return HttpResponseRedirect('/creation/upload/tutorial/' + str(tutorial_resource.id) + '/')
@@ -598,6 +599,10 @@ def upload_tutorial(request, trid):
     except Exception, e:
         print e
         raise PermissionDenied()
+    file_path = settings.MEDIA_ROOT + 'videos/' + str(tr_rec.tutorial_detail.foss_id) + '/' + str(tr_rec.tutorial_detail.id) + '/' + tr_rec.audio
+    if os.path.isfile(file_path) == False:
+        tr_rec.audio = "Blank"
+        tr_rec.save()
     context = {
         'tr': tr_rec,
         'contrib_log': contrib_log,
@@ -904,35 +909,32 @@ def upload_keywords(request, trid):
 @login_required
 def upload_component(request, trid, component):
     tr_rec = None
-    print component
     try:
         tr_rec = TutorialResource.objects.get(pk = trid, status = 0)
         ContributorRole.objects.get(user_id = request.user.id, foss_category_id = tr_rec.tutorial_detail.foss_id, language_id = tr_rec.language_id, status = 1)
         comp_title = tr_rec.tutorial_detail.foss.foss + ': ' + tr_rec.tutorial_detail.tutorial + ' - ' + tr_rec.language.name
-	contrib_log = ContributorLog.objects.filter(tutorial_resource_id = tr_rec.id).order_by('-created')
+        contrib_log = ContributorLog.objects.filter(tutorial_resource_id = tr_rec.id).order_by('-created')
         review_log = NeedImprovementLog.objects.filter(tutorial_resource_id = tr_rec.id).order_by('-created')
     except Exception, e:
         raise PermissionDenied()
     if "_" in component:
-	print "is it so"
         file_name =  component.replace('_', '-') +".ogg"
-        print "file name ",file_name
-	file_path_src = settings.MEDIA_ROOT + 'temp/'
-	full_path_src = file_path_src + file_name
+        file_path_src = settings.MEDIA_ROOT + 'temp/'
+        full_path_src = file_path_src + file_name
         file_path_dest = settings.MEDIA_ROOT + 'videos/' + str(tr_rec.tutorial_detail.foss_id) + '/' + str(tr_rec.tutorial_detail.id) + '/'
         if "nonoise" in file_name:
-	    file_name = file_name[:-12] + ".ogg"
+            file_name = file_name[:-12] + ".ogg"
         full_path_dest = file_path_dest + file_name
-	subprocess.Popen(["mv",full_path_src,full_path_dest])
-	tr_rec.video_status = 1
-	tr_rec.save()
-	context = {
-	    'tr': tr_rec,
-	    'contrib_log': contrib_log,
-	    'review_log': review_log,
-	    'script_base': settings.SCRIPT_URL,
-    	}
-	context.update(csrf(request))
+        subprocess.Popen(["mv",full_path_src,full_path_dest])
+        tr_rec.video_status = 1
+        tr_rec.save()
+        context = {
+            'tr': tr_rec,
+            'contrib_log': contrib_log,
+            'review_log': review_log,
+            'script_base': settings.SCRIPT_URL,
+        }
+        context.update(csrf(request))
         return render(request, 'creation/templates/upload_tutorial.html', context)
     if (component == 'video' or component == 'audio') and getattr(tr_rec, 'video' + '_status') == 4:
         raise PermissionDenied()
@@ -942,6 +944,7 @@ def upload_component(request, trid, component):
         if request.method == 'POST':
             response_msg = ''
             error_msg = ''
+	    
             form = ComponentForm(component, request.POST, request.FILES)
             if form.is_valid():
                 try:
@@ -950,7 +953,7 @@ def upload_component(request, trid, component):
                     comp_log.tutorial_resource = tr_rec
                     comp_log.component = component
 
-                    if component == "temp":
+                    if component == "audio":
                         file_name, file_extension = os.path.splitext(request.FILES['comp'].name)
                         file_name =  tr_rec.tutorial_detail.tutorial.replace(' ', '-') + '-' + tr_rec.language.name + file_extension
                         file_path = settings.MEDIA_ROOT + 'temp/'
@@ -960,22 +963,20 @@ def upload_component(request, trid, component):
                         for chunk in f.chunks():
                             fout.write(chunk)
                         fout.close()
-                        comp_log.status = tr_rec.video_status
-                        tr_rec.video = file_name
+                        tr_rec.audio = file_name
+                        tr_rec.video = tr_rec.tutorial_detail.tutorial.replace(' ', '-') + '-Video' + '.webm'
                         tr_rec.video_user = request.user
                         tr_rec.video_status = 0
                         if not tr_rec.version:
                             tr_rec.version = 1
                         tr_rec.save()
-                        subprocess.Popen(["python", settings.BASE_DIR + "/creation/sox.py",full_path])	
+                        subprocess.Popen(["python",settings.BASE_DIR+"/creation/sox.py",full_path])	
                         response_msg = component+' uploaded successfully!'
-                    if component == 'video' or component== 'audio':
+                    elif component == 'video':
                         file_name, file_extension = os.path.splitext(request.FILES['comp'].name)
-                        file_name =  tr_rec.tutorial_detail.tutorial.replace(' ', '-') + '-' + tr_rec.language.name + file_extension
-                        print "file name ",file_name
+                        file_name = tr_rec.tutorial_detail.tutorial.replace(' ', '-') + '-Video' + file_extension
                         file_path = settings.MEDIA_ROOT + 'videos/' + str(tr_rec.tutorial_detail.foss_id) + '/' + str(tr_rec.tutorial_detail.id) + '/'
                         full_path = file_path + file_name
-                        print "full path ",tr_rec.video
                         if os.path.isfile(file_path + tr_rec.video) and tr_rec.video_status > 0:
                             if 'isarchive' in request.POST and int(request.POST.get('isarchive', 0)) > 0:
                                 archived_file = 'Archived-' + str(request.user.id) + '-' + str(int(time.time())) + '-' + tr_rec.video
@@ -989,28 +990,22 @@ def upload_component(request, trid, component):
                         for chunk in f.chunks():
                             fout.write(chunk)
                         fout.close()
-                        if component=="video":
-                            if os.path.isfile(full_path[0:-4]+".webm"):
-                                subprocess.Popen(["rm",full_path[0:-4]+".webm"])
-                            subprocess.Popen(["/usr/bin/ffmpeg","-y","-i",full_path,"-vcodec","libvpx","-af","'volume=0.0'","-max_muxing_queue_size","1024","-f","webm",full_path[:-4]+"-Video.webm"],stdout=subprocess.PIPE)
-                            if os.path.isfile(full_path[0:-4]+".ogg"):
-                                subprocess.Popen(["rm",full_path[0:-4]+".ogg"])
-                            subprocess.Popen(["/usr/bin/ffmpeg","-y","-i",full_path,"-vn","-acodec","libvorbis",full_path[:-4]+".ogg"])
-                        elif component=="audio":
-                            subprocess.Popen(["python", settings.BASE_DIR + "/creation/sox.py",full_path])	
-                            comp_log.status = tr_rec.video_status
-                        tr_rec.video = file_name
+                        subprocess.Popen(["ffmpeg","-i",full_path,"-an",full_path[:-4]+".webm"])
+                        subprocess.Popen(["ffmpeg","-i",full_path,"-vn",full_path[:-9]+tr_rec.language.name+".ogg"])
+                        comp_log.status = tr_rec.video_status
+                        tr_rec.video = file_name[:-4]+".webm"
+                        tr_rec.audio = tr_rec.tutorial_detail.tutorial.replace(' ', '-') + '-' + 'English' + '.ogg'
                         tr_rec.video_user = request.user
                         tr_rec.video_status = 1
                         if not tr_rec.version:
                             tr_rec.version = 1
                         tr_rec.video_thumbnail_time = '00:' + request.POST.get('thumb_mins', '00') + ':' + request.POST.get('thumb_secs', '00')
-                        tr_rec.save()
-                        if tr_rec.language.name == 'English':
-                            create_thumbnail(tr_rec, 'Big', tr_rec.video_thumbnail_time, '700:500')
-                            create_thumbnail(tr_rec, 'Small', tr_rec.video_thumbnail_time, '170:127')
+    	                tr_rec.save()
+    	                if tr_rec.language.name == 'English':
+    	                    create_thumbnail(tr_rec, 'Big', tr_rec.video_thumbnail_time, '700:500')
+                            create_thumbnail(tr_rec, 'Small', tr_rec.video_thumbnail_time,'170:127')
                         comp_log.save()
-                        comp_title = tr_rec.tutorial_detail.foss.foss + ': ' + tr_rec.tutorial_detail.tutorial + ' - ' + tr_rec.language.name
+    	                comp_title = tr_rec.tutorial_detail.foss.foss + ': ' + tr_rec.tutorial_detail.tutorial + ' - ' + tr_rec.language.name
                         add_adminreviewer_notification(tr_rec, comp_title, component+' waiting for admin review')
                         response_msg = component+' uploaded successfully!'
                     elif component == 'slide':
@@ -1157,16 +1152,15 @@ def view_component(request, trid, component):
     elif component == 'keyword':
         context = {
             'component': component,
-            'component_data': tr_rec.common_content.keyword
+            'component_data': trup_rec.common_content.keyword
         }
     elif component == 'video' or component == 'audio':
         video_path = settings.MEDIA_ROOT + "videos/" + str(tr_rec.tutorial_detail.foss_id) + "/" + str(tr_rec.tutorial_detail_id) + "/" + tr_rec.video
         video_info = get_video_info(video_path)
-	print video_path
         context = {
             'tr': tr_rec,
-	    'video_mod':tr_rec.video[:-4].replace("-","_")+"_nonoise",
-	    'original': tr_rec.video[:-4].replace("-","_"),
+	        'video_mod':tr_rec.video[:-4].replace("-","_")+"_nonoise",
+	        'original': tr_rec.video[:-4].replace("-","_"),
             'component': component,
             'media_url': settings.MEDIA_URL
         }
@@ -1174,6 +1168,7 @@ def view_component(request, trid, component):
         messages.error(request, 'Invalid component passed as argument!')
         return HttpResponseRedirect(request.META['HTTP_REFERER'])
     return render(request, 'creation/templates/view_component.html', context)
+
 
 def view_component_audtype(request, trid, component, aud_type):
     tr_rec = None
@@ -1195,23 +1190,24 @@ def view_component_audtype(request, trid, component, aud_type):
         }
     elif component == 'video' or component == 'audio':
         video_path = settings.MEDIA_ROOT + "videos/" + str(tr_rec.tutorial_detail.foss_id) + "/" + str(tr_rec.tutorial_detail_id) + "/" + tr_rec.video
-        audio_path = settings.MEDIA_ROOT + "videos/" + str(tr.tutorial_detail.foss_id) + "/" + str(tr.tutorial_detail_id) + "/" + tr.audio
+        audio_path = settings.MEDIA_ROOT + "videos/" + str(tr_rec.tutorial_detail.foss_id) + "/" + str(tr_rec.tutorial_detail_id) + "/" + tr_rec.audio
         eng_audio_path = False
-        if tr.language.name != "English":
-            eng_audio_path = settings.MEDIA_ROOT + "videos/" + str(tr.tutorial_detail.foss_id) + "/" + str(tr.tutorial_detail_id) + "/" + tr.audio.rsplit(tr.language.name)[0] + "English.ogg"
+        if tr_rec.language.name != "English":
+            eng_audio_path = settings.MEDIA_ROOT + "videos/" + str(tr_rec.tutorial_detail.foss_id) + "/" + str(tr_rec.tutorial_detail_id) + "/" + tr_rec.audio.rsplit(tr_rec.language.name)[0] + "English.ogg"
         video_info = get_video_info(video_path)
         audio_info = get_audio_info(audio_path)
         eng_audio_info = get_audio_info(eng_audio_path)
         context = {
             'tr': tr_rec,
-	    'video_mod':tr_rec.video[:-4].replace("-","_")+"_nonoise",
-	    'filtered': tr_rec.video[:-4] + "-nonoise", 
+	        'audio_modified':tr_rec.video[:-10].replace("-","_")+tr_rec.language.name+"_nonoise",
+            'audio_original':tr_rec.video[:-10].replace("-","_")+tr_rec.language.name,
+	        'filtered': tr_rec.video[:-10]+tr_rec.language.name+ "-nonoise", 
             'component': component,
             'video_info': video_info,
             'media_url': settings.MEDIA_URL,
             'audio_info': audio_info,
             'eng_audio_info': eng_audio_info,
-	        'original': tr_rec.audio[:-4].replace("-","_"),
+	        'original': tr_rec.video[:-10]+tr_rec.language.name,
 	        'aud_type':aud_type,
         }
     else:

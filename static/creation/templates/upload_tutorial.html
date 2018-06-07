@@ -149,11 +149,11 @@
                     {% endif %}
                     <td>
                     {% if tr.video_status <= 1 or tr.video_status == 5 %}
-                        <a class="btn btn-primary " href="/creation/upload/component/{{ tr.id }}/temp/" title="Upload Audio">
+                        <a class="btn btn-primary " href="/creation/upload/component/{{ tr.id }}/audio/" title="Upload Audio">
                             <span title="" data-original-title="" class="fa fa-upload fa-2"></span>
                         </a>
                     {% endif %}
-                    {% if tr.video_status %}
+                    {% if tr.audio != "Blank" %}
                             <a class="btn btn-primary fancybox-outline fancybox.iframe" href="/creation/view/component/{{ tr.id }}/video/" title="View/Download Audio">
                                 <span title="" data-original-title="" class="fa fa-film fa-2"></span>
                             </a>

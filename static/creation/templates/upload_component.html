@@ -31,8 +31,9 @@
 			    {{ form.isarchive.errors }}
 		    </div>
 	    {% endif %}
+
 		{% render_field form.comptype %}
-		{% if tr.video_status and x %}
+		{% if tr.audio != "Blank" %}
                             <a class="btn btn-primary " href="/creation/view/component/{{ tr.id }}/video/o" title="View/Download Audio">
                                 <span title="" data-original-title="" >Preview</span>
                             </a>
