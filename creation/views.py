@@ -957,6 +957,7 @@ def upload_component(request, trid, component):
                         file_name, file_extension = os.path.splitext(request.FILES['comp'].name)
                         file_name =  tr_rec.tutorial_detail.tutorial.replace(' ', '-') + '-' + tr_rec.language.name + file_extension
                         file_path = settings.MEDIA_ROOT + 'temp/'
+                        t = subprocess.Popen(["mkdir","-p",file_path])
                         full_path = file_path + file_name
                         fout = open(full_path, 'wb+')
                         f = request.FILES['comp']
