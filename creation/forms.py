@@ -344,7 +344,6 @@ class UploadPublishTutorialForm(forms.Form):
                         self.fields['tutorial_name'].widget.attrs = {'disabled': 'disabled'}
 
 class UploadTutorialForm(forms.Form):
-    print "what"
     tutorial_name = forms.ChoiceField(
         choices = [('', 'Select Tutorial'),],
         widget=forms.Select(attrs = {'disabled': 'disabled'}),
@@ -370,7 +369,6 @@ class UploadTutorialForm(forms.Form):
             ).values_list('id', 'foss')
         )
         foss_list.insert(0, ('', 'Select FOSS category'))
-        #foss_list.insert(1, ('', 'Abhinav'))
         self.fields['foss_category'] = forms.ChoiceField(
             choices = foss_list,
             error_messages = {'required':'FOSS category field is required.'}
@@ -460,8 +458,8 @@ class ComponentForm(forms.Form):
         super(ComponentForm, self).clean()
         file_types = {
             'video': 'video/mp4',
-            'audio': 'video/ogg',
-            'temp' : 'video/ogg',
+            'audio': 'audio/ogg',
+            'temp' : 'audio/ogg',
             'slide': ['application/zip', 'application/x-zip-compressed'],
             'code': ['application/zip', 'application/x-zip-compressed'],
             'assignment': ['text/plain', 'application/pdf'],
@@ -476,7 +474,6 @@ class ComponentForm(forms.Form):
             component = self.cleaned_data['comp']
         component_type = self.cleaned_data['comptype']
         if component and component_type:
-            print component.content_type
             if not component.content_type in file_types[component_type]:
                 self._errors["comp"] = self.error_class(["Not a valid file format."])
         else:

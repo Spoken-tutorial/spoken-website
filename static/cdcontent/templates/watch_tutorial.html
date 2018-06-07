@@ -235,8 +235,6 @@
         float: left;
         background: white;
     }
-    .video-js.vjs-fullscreen .vjs-tt-cue { font-size: 22px; }
-    .vjs-modal-dialog-content select {color:#1a1a1a;}
         </style>
     </head>
     <body>
@@ -274,7 +272,7 @@
                         <row>
                             <div class='container playlist-container col-lg-12 col-md-12 col-sm-12'>
                                 <div class="video-container col-lg-8 col-md-8 col-sm-8">
-                                    <video id="st_video" class='video-js vjs-default-skin vjs-big-play-centered' autobuffer controls data-setup='{ "playbackRates": [0.5, 1, 1.5, 2] }'>
+                                    <video id="st_video" class='video-js vjs-default-skin vjs-big-play-centered' autobuffer controls data-setup='{ "playbackRates": [0.5, 0.75,1, 1.25, 1.5, 2] }'>
                                         <source src="./{{tr_rec.video }}"
                                             type="video/webm">
                                         {% if eng_flag %}

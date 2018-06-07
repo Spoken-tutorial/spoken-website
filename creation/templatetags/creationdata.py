@@ -51,15 +51,15 @@ def is_script_available(path):
 
 def get_review_status_list(key):
 	status_list = ['Pending', 'Waiting for Admin Review', 'Waiting for Domain Review', 'Waiting for Quality Review', 'Accepted', 'Need Improvement', 'Not Required']
-	return status_list[key];
+	return status_list[key]
 
 def get_review_status_class(key):
 	status_list = ['danger', 'active', 'warning', 'info', 'success', 'danger', 'success']
-	return status_list[key];
+	return status_list[key]
 
 def get_review_status_symbol(key):
 	status_list = ['fa fa-1 fa-minus-circle review-pending-upload', 'fa fa-1 fa-check-circle review-admin-review', 'fa fa-1 fa-check-circle review-domain-review', 'fa fa-1 fa-check-circle review-quality-review', 'fa fa-1 fa-check-circle review-accepted', 'fa fa-1 fa-times-circle review-pending-upload', 'fa fa-1 fa-ban review-accepted']
-	return status_list[key];
+	return status_list[key]
 
 def get_username(key):
 	user = User.objects.get(pk = key)

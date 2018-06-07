@@ -3,7 +3,6 @@ import json
 import os
 import re
 import subprocess
-import progressbar
 import time
 from django.utils import timezone
 from decimal import Decimal
@@ -192,7 +191,7 @@ def create_thumbnail(row, attach_str, thumb_time, thumb_size):
     filename = row.tutorial_detail.tutorial.replace(' ', '-') + '-' + attach_str + '.png'
     try:
         #process = subprocess.Popen(['/usr/bin/ffmpeg', '-i ' + filepath + row.video + ' -r ' + str(30) + ' -ss ' + str(thumb_time) + ' -s ' + thumb_size + ' -vframes ' + str(1) + ' -f ' + 'image2 ' + filepath + filename], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        process = subprocess.Popen(['ffmpeg', '-i', filepath + row.video, '-r', str(30), '-ss', str(thumb_time), '-s', thumb_size, '-vframes', str(1), '-f', 'image2', filepath + filename], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        process = subprocess.Popen(['/usr/bin/ffmpeg', '-i', filepath + row.video, '-r', str(30), '-ss', str(thumb_time), '-s', thumb_size, '-vframes', str(1), '-f', 'image2', filepath + filename], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         stdout, stderr = process.communicate()
         if stderr:
             print filepath + filename
@@ -685,7 +684,6 @@ def upload_script(request, trid):
     error_msg = ''
     storage_path = tr_rec.tutorial_detail.foss.foss.replace(' ', '-') + '/' + tr_rec.tutorial_detail.level.code + '/' + tr_rec.tutorial_detail.tutorial.replace(' ', '-') + '/' + tr_rec.language.name
     script_path = settings.SCRIPT_URL + storage_path
-    print script_path
     if request.method == 'POST':
         form = UploadScriptForm(script_path, request.POST)
         if form.is_valid():
@@ -804,6 +802,9 @@ def ajax_upload_timed_script(request):
         for row in rows:
             data += '<option value="' + str(row.id) + '">' + row.tutorial + '</option>'
     return HttpResponse(json.dumps(data), content_type='application/json')
+
+def upload_tutorial_action(request):
+    pass
 
 @login_required
 def upload_prerequisite(request, trid):
@@ -993,15 +994,12 @@ def upload_component(request, trid, component):
                         fout.close()
                         if os.path.isfile(full_path[0:-4]+".webm"):
                            subprocess.Popen(["rm",full_path[0:-4]+".webm"])
-                        subprocess.Popen(["ffmpeg","-i",full_path,"-an",full_path[:-4]+".webm"])
-                        
-                        #subprocess.Popen(["/usr/bin/ffmpeg","-y","-i",full_path,"-vcodec","libvpx","-af","'volume=0.0'","-max_muxing_queue_size","1024","-f","webm",full_path[:-4]+"-Video.webm"],stdout=subprocess.PIPE)
+                        subprocess.Popen(["/usr/bin/ffmpeg","-y","-i",full_path,"-vcodec","libvpx","-af","volume=0.0","-max_muxing_queue_size","1024","-f","webm",full_path[:-4]+".webm"],stdout=subprocess.PIPE)
+                        # subprocess.Popen(["ffmpeg","-i",full_path,"-an",full_path[:-4]+".webm"])
                         if os.path.isfile(full_path[:-9]+tr_rec.language.name+".ogg"):
                             subprocess.Popen(["rm",full_path[:-9]+tr_rec.language.name+".ogg"])
-                        #subprocess.Popen(["/usr/bin/ffmpeg","-y","-i",full_path,"-vn","-acodec","libvorbis",full_path[:-4]+".ogg"])
-                       
-                        
-                        subprocess.Popen(["ffmpeg","-i",full_path,"-vn",full_path[:-9]+tr_rec.language.name+".ogg"])
+                        subprocess.Popen(["/usr/bin/ffmpeg","-y","-i",full_path,"-vn","-acodec","libvorbis",full_path[:-9]+tr_rec.language.name+".ogg"])
+                        # subprocess.Popen(["ffmpeg","-i",full_path,"-vn",full_path[:-9]+tr_rec.language.name+".ogg"])
                         comp_log.status = tr_rec.video_status
                         tr_rec.video = file_name[:-4]+".webm"
                         tr_rec.audio = tr_rec.tutorial_detail.tutorial.replace(' ', '-') + '-' + 'English' + '.ogg'
@@ -1162,9 +1160,17 @@ def view_component(request, trid, component):
     elif component == 'keyword':
         context = {
             'component': component,
-            'component_data': trup_rec.common_content.keyword
+            'component_data': tr_rec.common_content.keyword
         }
     elif component == 'video' or component == 'audio':
+        video_path = settings.MEDIA_ROOT + "videos/" + str(tr_rec.tutorial_detail.foss_id) + "/" + str(tr_rec.tutorial_detail_id) + "/" + tr_rec.video
+        audio_path = settings.MEDIA_ROOT + "videos/" + str(tr_rec.tutorial_detail.foss_id) + "/" + str(tr_rec.tutorial_detail_id) + "/" + tr_rec.audio
+        eng_audio_path = False
+        if tr_rec.language.name != "English":
+            eng_audio_path = settings.MEDIA_ROOT + "videos/" + str(tr_rec.tutorial_detail.foss_id) + "/" + str(tr_rec.tutorial_detail_id) + "/" + tr_rec.audio.rsplit(tr_rec.language.name)[0] + "English.ogg"
+        video_info = get_video_info(video_path)
+        audio_info = get_audio_info(audio_path)
+        eng_audio_info = get_audio_info(eng_audio_path) 
         video_path = settings.MEDIA_ROOT + "videos/" + str(tr_rec.tutorial_detail.foss_id) + "/" + str(tr_rec.tutorial_detail_id) + "/" + tr_rec.video
         video_info = get_video_info(video_path)
         context = {
@@ -1172,6 +1178,9 @@ def view_component(request, trid, component):
 	        'video_mod':tr_rec.video[:-4].replace("-","_")+"_nonoise",
 	        'original': tr_rec.video[:-4].replace("-","_"),
             'component': component,
+            'video_info': video_info,
+            'eng_audio_info': eng_audio_info,
+            'audio_info': audio_info,
             'media_url': settings.MEDIA_URL
         }
     else:
@@ -1200,7 +1209,12 @@ def view_component_audtype(request, trid, component, aud_type):
         }
     elif component == 'video' or component == 'audio':
         video_path = settings.MEDIA_ROOT + "videos/" + str(tr_rec.tutorial_detail.foss_id) + "/" + str(tr_rec.tutorial_detail_id) + "/" + tr_rec.video
-        audio_path = settings.MEDIA_ROOT + "videos/" + str(tr_rec.tutorial_detail.foss_id) + "/" + str(tr_rec.tutorial_detail_id) + "/" + tr_rec.audio
+        
+        if aud_type == 'o':
+            audio_path = settings.MEDIA_ROOT + "temp/" + tr_rec.audio 
+        else:
+            audio_path = settings.MEDIA_ROOT + "temp/" + tr_rec.audio[:-4] + "-nonoise.ogg"
+        
         eng_audio_path = False
         if tr_rec.language.name != "English":
             eng_audio_path = settings.MEDIA_ROOT + "videos/" + str(tr_rec.tutorial_detail.foss_id) + "/" + str(tr_rec.tutorial_detail_id) + "/" + tr_rec.audio.rsplit(tr_rec.language.name)[0] + "English.ogg"
@@ -1209,16 +1223,16 @@ def view_component_audtype(request, trid, component, aud_type):
         eng_audio_info = get_audio_info(eng_audio_path)
         context = {
             'tr': tr_rec,
-	        'audio_modified':tr_rec.video[:-10].replace("-","_")+tr_rec.language.name+"_nonoise",
+            'audio_modified':tr_rec.video[:-10].replace("-","_")+tr_rec.language.name+"_nonoise",
             'audio_original':tr_rec.video[:-10].replace("-","_")+tr_rec.language.name,
-	        'filtered': tr_rec.video[:-10]+tr_rec.language.name+ "-nonoise", 
+            'filtered': tr_rec.video[:-10]+tr_rec.language.name+ "-nonoise", 
             'component': component,
             'video_info': video_info,
-            'media_url': settings.MEDIA_URL,
             'audio_info': audio_info,
+            'media_url': settings.MEDIA_URL,
             'eng_audio_info': eng_audio_info,
-	        'original': tr_rec.video[:-10]+tr_rec.language.name,
-	        'aud_type':aud_type,
+            'original': tr_rec.video[:-10]+tr_rec.language.name,
+            'aud_type':aud_type,
         }
     else:
         messages.error(request, 'Invalid component passed as argument!')

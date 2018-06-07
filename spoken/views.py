@@ -239,7 +239,7 @@ def watch_tutorial(request, foss, tutorial, lang):
     context = {
         'tr_rec': tr_rec,
         'tr_recs': tr_recs,
-       # 'questions': questions,
+       'questions': questions,
         'video_info': video_info,
         'media_url': settings.MEDIA_URL,
         'media_path': settings.MEDIA_ROOT,

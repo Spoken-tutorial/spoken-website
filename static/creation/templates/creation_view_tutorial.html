@@ -113,7 +113,7 @@
             <div class="video-container col-lg-8 col-md-8 col-sm-8">
                 {% if tr_rec.video_status %}
 
-                <video id="st_video" class='video-js vjs-default-skin vjs-big-play-centered' autobuffer controls data-setup='{ "playbackRates": [0.5, 1, 1.5, 2] }'>
+                <video id="st_video" class='video-js vjs-default-skin vjs-big-play-centered' autobuffer controls data-setup='{ "playbackRates": [0.5, 0.75,1, 1.25, 1.5, 2] }'>
                     <source src="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ tr_rec.video }}" type="video/webm">
                 </video>
     
