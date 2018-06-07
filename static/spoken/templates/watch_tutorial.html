@@ -276,7 +276,7 @@
                 </video>
 
                 <audio id="audio" class='d-none'>
-                    <source id="audioSource" src="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ tr_rec.video|rsplitpart|safe }}{{tr_rec.language }}.ogg">
+                    <source id="audioSource" src="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ tr_rec.video|rsplitpart|safe }}{{tr_rec.language }}.ogg" type="audio/ogg">
                 </audio>
             
                 <audio id="audioTracks" class='d-none'>

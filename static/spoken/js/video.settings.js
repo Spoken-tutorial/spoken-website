@@ -76,7 +76,9 @@
         if (trackedAudio.currentTime - trackedPlayer.currentTime() + 0.5 < 0 || trackedAudio.currentTime - trackedPlayer.currentTime() - 0.5 > 0) {
             // When client changes video from video list on the page, trackedAudio needs to be played from the code manually! 
             if (trackedAudio.paused && !trackedPlayer.paused()) {
-                trackedAudio.play()
+                pauseTrackedMedia();
+                playTrackedMedia();
+                checkBufferedState();
             }
             // Set Audio / Video to same currentTime
             trackedAudio.currentTime = trackedPlayer.currentTime();
@@ -91,40 +93,49 @@
     }
     setInterval(checkTimeAndPause, 1500);
 
-    function checkMediaAndPause() {
-        if (trackedPlayer.paused() == 0) {
-            var videoPlayPromise = trackedPlayer.play();
-            if (videoPlayPromise !== undefined) {
-                videoPlayPromise.then(_ => {
-                    trackedPlayer.pause();
-                })
-            }
-        }
-        if (trackedAudio.paused == 0) {
-            var audioPlayPromise = trackedAudio.play();
-            if (audioPlayPromise !== undefined) {
-                audioPlayPromise.then(_ => {
-                    trackedAudio.pause();
-                })
-            }
-        }
-    }
-
-    function checkMediaAndPlay() {
+    function pauseTrackedMedia() {
         var videoPlayPromise = trackedPlayer.play();
         if (videoPlayPromise !== undefined) {
             videoPlayPromise.then(_ => {
-                if (trackedPlayer.paused())
-                    trackedPlayer.play();
-            })
+                // Can Successfully Pause
+                trackedPlayer.pause();
+            }).catch(error => {
+                console.log(error);
+            });
+        }
+        var audioPlayPromise = trackedAudio.play();
+        if (audioPlayPromise !== undefined) {
+            audioPlayPromise.then(_ => {
+                // Can Successfully Pause
+                trackedAudio.pause();
+            }).catch(error => {
+                console.log(error);
+            });
+        }
+    }
+    
+    function  playTrackedMedia() {
+        var videoPlayPromise = trackedPlayer.play();
+        if (videoPlayPromise !== undefined) {
+            videoPlayPromise.then(_ => {
+                // Can Successfully Play
+            }).catch(error => {
+                console.log(error);
+                pauseTrackedMedia();
+                checkBufferedState();
+            });
         }
 
         if (trackedAudio.paused) {
             var audioPlayPromise = trackedAudio.play();
             if (audioPlayPromise !== undefined) {
                 audioPlayPromise.then(_ => {
-                    trackedAudio.play();
-                })
+                    // Can Successfully Play
+                }).catch(error => {
+                    console.log(error);
+                    pauseTrackedMedia();
+                    checkBufferedState();
+                });
             }
         }
     }
@@ -167,20 +178,20 @@
     // Check if audio or video is buffering, if buffering keep the other one paused, else, play them when play is requested.
     function checkBufferedState() {
         if (trackedAudioFlag == 0 || trackedVideoFlag == 0) {
-            checkMediaAndPause();
+            pauseTrackedMedia();
             if (timesTried < 6) {
                 setTimeout(checkBufferedState, 1000);
                 return;
             }
             else {
-                alert("Buffered Failed, Download course or refresh to try again.");
+                alert("Bufferign Failed, Download video or refresh to try again.");
                 return;
             }
         }
         else if (requestedPlay || seekedFlag) {
             timesTried = 0;
             seekedFlag = 0;
-            checkMediaAndPlay();
+             playTrackedMedia();
         }
     }
 
@@ -198,7 +209,6 @@
     trackedPlayer.on("pause", function () {
         requestedPlay = 1;
         if (userPause == false) {
-            console.log(userPause);
             trackedPlayer.addClass("vjs-waiting");
         }
         userPause = false;
