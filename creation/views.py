@@ -19,7 +19,7 @@ from django.core.context_processors import csrf
 from django.core.exceptions import PermissionDenied
 from django.core.mail import EmailMultiAlternatives
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render
 from django.db.models import Count, F, Q
@@ -188,6 +188,9 @@ def add_contributor_notification(tr_rec, comp_title, message):
 
     for con in con_roles:
         ContributorNotification.objects.create(user = con.user, title = comp_title, message = message, tutorial_resource = tr_rec)
+
+def add_payment_notification(user, tr_rec, comp_title, message):
+    ContributorNotification.objects.create(user = user, title = comp_title, message = message, tutorial_resource = tr_rec)
 
 @login_required
 def creation_add_role(request, role_type):
@@ -1118,7 +1121,8 @@ def tutorials_contributed(request):
                 11: SortableHeader('Additional material', False, '', 'col-center'),
                 12: SortableHeader('Prerequisite', False, '', 'col-center'),
                 13: SortableHeader('Keywords', False, '', 'col-center'),
-                14: SortableHeader('Status', False)
+                14: SortableHeader('Status', False),
+                15: SortableHeader('Payment Status', False, '','col-center'),
             }
             tmp_recs = get_sorted_list(request, tmp_recs, header, raw_get_data)
             ordering = get_field_index(raw_get_data)
@@ -1164,7 +1168,7 @@ def tutorials_pending(request):
                 11: SortableHeader('Additional material', False, '', 'col-center'),
                 12: SortableHeader('Prerequisite', False, '', 'col-center'),
                 13: SortableHeader('Keywords', False, '', 'col-center'),
-                14: SortableHeader('Status', False)
+                14: SortableHeader('Status', False),
             }
             tmp_recs = get_sorted_list(request, tmp_recs, header, raw_get_data)
             ordering = get_field_index(raw_get_data)
@@ -1174,7 +1178,7 @@ def tutorials_pending(request):
                     print counter, tmp_rec.tutorial_detail.tutorial
                 counter += 1
             page = request.GET.get('page')
-            tmp_recs = get_page(tmp_recs, page, 50)
+            tmp_recs = get_page(tmp_recs, page, 300) #testing mohit
         except Exception, e:
             print e
             pass
@@ -2892,8 +2896,11 @@ def load_fosses(request):
         foss_list = FossCategory.objects.filter(id__in = foss_id_list).values_list('id','foss')
     return render(request, 'creation/templates/foss_dropdown_list_options.html',{'foss_list': foss_list, 'existing_foss': existing_foss})
 
+@login_required
 def list_all_due_tutorials(request):
     # initiate payment process for selected tutorials
+    if not is_qualityreviewer(request.user):
+        raise PermissionDenied()
     if request.method == "POST":
         initiate_payment(request)
         # to aviod form resubmit
@@ -2986,10 +2993,13 @@ def create_payment_instance(request, tr_res):
     except IntegrityError as e:
         messages.error(request, " Tutorial already in payment process. Error Detail -- "+str(e))
 
+@login_required
 def list_payment_honorarium(request):
     '''
     to display list of all payment honorariums
     '''
+    if not is_qualityreviewer(request.user):
+        raise PermissionDenied()
     # updating honorarium status
     if request.method == "POST":
         if "change_status" in request.POST:
@@ -3004,10 +3014,18 @@ def list_payment_honorarium(request):
                 elif hr_st == 2:
                     honorarium.status = 3
                     msg_end = 'marked as completed'
+                    add_payment_notification(
+                        honorarium.tutorials.all()[0].user,
+                        honorarium.tutorials.all()[0].tutorial_resource,
+                        "Tutorials Payment Credited", # title
+                        "Honorarium ("+honorarium.code+") worth Rs. "\
+                        +str(honorarium.amount)+" for "+str(len(honorarium.tutorials.all())) \
+                        +" tutorials credited. Kindly Confirm"
+                    )
                 messages.success(request,'Payment Honorarium ('+str(honorarium.code)+') worth Rs. '+str(honorarium.amount)+' '+msg_end)
                 honorarium.save()
-            except:
-                messages.warning(request, "Something went wrong. Couldn't complete your request")
+            except Exception as e:
+                messages.warning(request, "Something went wrong. Couldn't complete your request")  
             # to avoid form resubmission
             return HttpResponseRedirect(reverse('creation:payment-honorarium-list'))
 
@@ -3040,3 +3058,27 @@ def list_payment_honorarium(request):
         'form':form
     }
     return render(request, "creation/templates/list_all_payment_honorarium.html",context)
+
+def detail_payment_honorarium(request, hr_id):
+    try:
+        hr = PaymentHonorarium.objects.get(id=hr_id,)
+    except PaymentHonorarium.DoesNotExist:
+        # invalid pay_hr id in url
+        raise Http404
+
+    if hr.tutorials.all()[0].user == request.user:
+        if request.method == "POST":
+            if "confirm" in request.POST:
+                hr.status = 4
+                hr.save()
+                messages.success(request,"Payment Honorarium ("+hr.code+") confirmed as recieved.")
+                next_url = request.GET.get("next",reverse('creation:creationhome'))
+                return HttpResponseRedirect(next_url)
+        context = {
+            'pay_hr': hr,
+        }
+        return render(request,'creation/templates/detail_payment_honorarium.html',context)
+    else:
+        # user not associated with pay_hr
+        raise PermissionDenied()
+
