@@ -990,7 +990,16 @@ def upload_component(request, trid, component):
                         for chunk in f.chunks():
                             fout.write(chunk)
                         fout.close()
+                        if os.path.isfile(full_path[0:-4]+".webm"):
+                           subprocess.Popen(["rm",full_path[0:-4]+".webm"])
                         subprocess.Popen(["ffmpeg","-i",full_path,"-an",full_path[:-4]+".webm"])
+                        
+                        #subprocess.Popen(["/usr/bin/ffmpeg","-y","-i",full_path,"-vcodec","libvpx","-af","'volume=0.0'","-max_muxing_queue_size","1024","-f","webm",full_path[:-4]+"-Video.webm"],stdout=subprocess.PIPE)
+                        if os.path.isfile(full_path[:-9]+tr_rec.language.name+".ogg"):
+                            subprocess.Popen(["rm",full_path[:-9]+tr_rec.language.name+".ogg"])
+                        #subprocess.Popen(["/usr/bin/ffmpeg","-y","-i",full_path,"-vn","-acodec","libvorbis",full_path[:-4]+".ogg"])
+                       
+                        
                         subprocess.Popen(["ffmpeg","-i",full_path,"-vn",full_path[:-9]+tr_rec.language.name+".ogg"])
                         comp_log.status = tr_rec.video_status
                         tr_rec.video = file_name[:-4]+".webm"
