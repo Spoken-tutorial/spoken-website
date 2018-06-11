@@ -458,8 +458,8 @@ class ComponentForm(forms.Form):
         super(ComponentForm, self).clean()
         file_types = {
             'video': 'video/mp4',
-            'audio': 'audio/ogg',
-            'temp' : 'audio/ogg',
+            'audio': ['audio/ogg', 'video/ogg'],
+            'temp' : ['audio/ogg', 'video/ogg'],
             'slide': ['application/zip', 'application/x-zip-compressed'],
             'code': ['application/zip', 'application/x-zip-compressed'],
             'assignment': ['text/plain', 'application/pdf'],
