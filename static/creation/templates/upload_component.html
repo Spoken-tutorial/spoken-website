@@ -35,13 +35,13 @@
 
 		{% render_field form.comptype %}
 		{% if title == "audio" %}
-		{% if tr.audio != "Blank" %}
+		{% if tr.audio != "Unavailable" %}
                             <a class="btn btn-primary" href="{% url 'creation:view_component_audtype' trid=tr.id component='video' aud_type='o' %}" title="View/Download Audio">
                                 <span title="" data-original-title="" >Preview</span>
                             </a>
 					{% endif %}
 		{% elif title == "video" %}
-		{% if tr.audio != "Blank" %}
+		{% if tr.audio != "Unavailable" %}
 							<a class="btn btn-primary" href="{% url 'creation:creationhome' %}" title="Done">
 								<span title="Done" data-original-title="" >Done</span>
 							</a>

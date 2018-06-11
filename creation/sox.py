@@ -21,11 +21,11 @@ def execute(cli,filename):
     return    
 
 def checkVolume(filename):
-    print "checking volume"
+    #print "checking volume"
     y, sr = librosa.load(filename)
     y_s = 2* y/(np.max(np.abs(y)))
     output_file = filename[:-4]+"s.wav"
-    print output_file
+    #print output_file
     librosa.output.write_wav(output_file,y_s,sr)
 
 def CommandsForOGV(filename):
@@ -72,7 +72,7 @@ if __name__ == '__main__':
         else:
             execute(ConvertToWAV(argv[1]),s)
             filen=argv[1][:-3]+'wav'
-            print "filen: ",filen
+            #print "filen: ",filen
             cli = CommandsForWAV(filen)
             execute(cli,filen[:-4]+'-nonoise.wav')
 
