@@ -284,6 +284,7 @@
                                     </video>
 
                                     <audio id="audioTracks" class='vjs-hidden video-js'>
+                                        <!-- Add all the options of the audio tracks -->
                                         {% for language in tr_rec_language_list %}
                                         <source id="{{ language.language__name }}-audio-track" data-value="./{{ tr_rec.video|rsplitpart|safe }}{{ language.language__name }}.ogg"
                                             type="audio/ogg">{{ language.language__name }}</source>
@@ -291,6 +292,7 @@
                                     </audio>
 
                                     <audio id="audio" class='d-none'>
+                                        <!-- Put the selected audio file to be played with the video on page load -->
                                         <source id="audioSource" src="./{{ tr_rec.video|rsplitpart|safe }}{{ tr_rec.language }}.ogg">
                                     </audio>
                                 </div>

@@ -105,7 +105,10 @@ def get_filesize(path):
 
 
 def get_audio_info(path):
-    """Uses ffmpeg to determine information about an audio file"""
+    """
+    Uses FFmpeg to determine information about an audio file.
+    Information displayed on admin_review page is generated from here.
+    """
     info_m = {}
     try:
         process = subprocess.Popen(['/usr/bin/ffmpeg', '-i', path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
@@ -142,7 +145,10 @@ def get_audio_info(path):
 
 
 def get_video_info(path):
-    """Uses ffmpeg to determine information about a video."""
+    """
+    Uses ffmpeg to determine information about a video.
+    Information displayed on admin_review page is generated from here.
+    """
     info_m = {}
     try:
         process = subprocess.Popen(['/usr/bin/ffmpeg', '-i', path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
@@ -803,8 +809,6 @@ def ajax_upload_timed_script(request):
             data += '<option value="' + str(row.id) + '">' + row.tutorial + '</option>'
     return HttpResponse(json.dumps(data), content_type='application/json')
 
-def upload_tutorial_action(request):
-    pass
 
 @login_required
 def upload_prerequisite(request, trid):
@@ -1167,6 +1171,9 @@ def view_component(request, trid, component):
         audio_path = settings.MEDIA_ROOT + "videos/" + str(tr_rec.tutorial_detail.foss_id) + "/" + str(tr_rec.tutorial_detail_id) + "/" + tr_rec.audio
         eng_audio_path = False
         if tr_rec.language.name != "English":
+            # If audio is not english `eng_audio_path` will 
+            # keep information of the english audio file for 
+            # comparision with the audio file of the other language.
             eng_audio_path = settings.MEDIA_ROOT + "videos/" + str(tr_rec.tutorial_detail.foss_id) + "/" + str(tr_rec.tutorial_detail_id) + "/" + tr_rec.audio.rsplit(tr_rec.language.name)[0] + "English.ogg"
         video_info = get_video_info(video_path)
         audio_info = get_audio_info(audio_path)

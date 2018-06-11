@@ -220,6 +220,7 @@
                         </video>
 
                         <audio id="audio" class='d-none'>
+                            <!-- Put the selected audio file to be played with the video on page load -->
                             <source id="audioSource" src="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ tr_rec.video|rsplitpart|safe }}{{tr_rec.language }}.ogg">
                         </audio>
                         {% endif %}

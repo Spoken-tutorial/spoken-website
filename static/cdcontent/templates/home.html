@@ -174,6 +174,7 @@
                                 </video>
 
                                 <audio id="audioTracks" class='d-none'>
+                                    <!-- Add all the options of the audio tracks -->
                                     {% for language in languages %}
                                     <source id="{{ language }}-audio-track" data-value="./Side-by-Side-Method-{{ language }}.ogg"
                                         type="audio/ogg">{{ language }}</source>
@@ -181,6 +182,7 @@
                                 </audio>
 
                                 <audio id="audio" class='d-none'>
+                                    <!-- Put the selected audio file to be played with the video on page load -->
                                     <source id="audioSource" src="./Side-by-Side-Method-English.ogg">
                                 </audio>
 
@@ -246,7 +248,7 @@
         <script src="../includes/js/video.min.js"></script>
         <script src="../includes/js/video.settings.js"></script>
         <script type="text/javascript">
-            // Add Audio Track
+            // Add Audio Track in the video.js UI
             {% for language in languages %}
             var track = new videojs.AudioTrack({
                 id: '{{ language }}-audio-track',
@@ -286,6 +288,7 @@
                     }
                 }
             });
+            // End: Add Audio Track in the video.js UI
         </script>
         <script>
             $(document).ready(function(){

@@ -83,6 +83,10 @@ def get_all_foss_details(selectedfoss):
 
 
 def add_side_by_side_tutorials(archive, languages):
+    '''
+    Used to add side-by-side method videos in the home page
+    of the downloaded site image and returns all available languages
+    '''
     languages.add('English')
     available_langs = set()
 
@@ -93,11 +97,11 @@ def add_side_by_side_tutorials(archive, languages):
     for language in languages:
         audiofilepath = '{}videos/32/714/Side-by-Side-Method-{}.ogg'.format(settings.MEDIA_ROOT, language)
         scriptfilepath = '{}videos/32/714/Side-by-Side-Method-{}.vtt'.format(settings.MEDIA_ROOT, language)
-        
+
         if os.path.isfile(audiofilepath):
             available_langs.add(language)
             archive.write(audiofilepath, 'spoken/videos/Side-by-Side-Method-{}.ogg'.format(language))
-        
+
         if os.path.isfile(scriptfilepath):
             archive.write(scriptfilepath, 'spoken/videos/Side-by-Side-Method-{}.vtt'.format(language))
 
@@ -105,6 +109,9 @@ def add_side_by_side_tutorials(archive, languages):
 
 
 def get_static_files():
+    '''
+    Returns the list of all static files required for the website.
+    '''
     return {
         '/static/spoken/css/bootstrap.min.css': 'spoken/includes/css/bootstrap.min.css',
         '/static/spoken/css/font-awesome.min.css': 'spoken/includes/css/font-awesome.min.css',
@@ -178,6 +185,7 @@ def add_static_files(archive):
         if os.path.isfile(filepath):
             archive.write(filepath, value)
 
+
 def convert_template_to_html_file(archive, filename, request, template, ctx):
     html_string = str(render(request, template, ctx))
     html_string = html_string.replace('Content-Type: text/html; charset=utf-8', '').strip("\n")
@@ -204,6 +212,11 @@ def add_common_files(archive, common_files):
 
 
 def home(request):
+    '''
+    Function called when user clicks on `Create ZIP file` on 
+    `cdcontent` page. It is suppose to create a ZIP file requested 
+    and respond with the link to download the ZIP files. 
+    '''
     if request.method == 'POST':
         form = CDContentForm(request.POST)
 
@@ -217,11 +230,11 @@ def home(request):
                 eng_rec = Language.objects.get(name="English")
                 languages = set()
                 files_archived = set()
-                
+
                 for key, values in selectedfoss.iteritems():
                     tr_rec_language_list = []
                     for selected_language in selectedfoss.get(key)[0]:
-                        tr_rec_language_list.append({"language__name":Language.objects.get(pk=selected_language).name })
+                        tr_rec_language_list.append({"language__name": Language.objects.get(pk=selected_language).name})
 
                     foss_rec = FossCategory.objects.get(pk=key)
                     level = int(values[1])
@@ -237,10 +250,10 @@ def home(request):
 
                     if level:
                         t_resource_qs = t_resource_qs.filter(tutorial_detail__level_id=level)
-                    
+
                     if eng_flag:
                         add_sheets(archive, foss_rec, Language.objects.get(name="English"))
-                    
+
                     for value in values[0]:
                         language = Language.objects.get(pk=value)
                         add_sheets(archive, foss_rec, language)
@@ -249,35 +262,36 @@ def home(request):
                             'tutorial_detail__level', 'tutorial_detail__order', 'language__name')
 
                         languages.add(language.name)
-                        
+
                         for rec in tr_recs:
+                            # Create the
                             tr_rec_language_avaiable_list = []
                             tr_rec_language_avaiable_list = TutorialResource.objects.filter(tutorial_detail__id=rec.tutorial_detail_id).values('language__name').distinct()
-                            
+
                             # Add Audio / Video / Script for the Langauges Selected
                             videofilepath = 'videos/{}/{}/{}'.format(key, rec.tutorial_detail_id, rec.video)
                             audiofilepath = 'videos/{}/{}/{}'.format(key, rec.tutorial_detail_id, rec.audio)
                             scriptfilepath = 'videos/{}/{}/{}'.format(key, rec.tutorial_detail_id, rec.audio[:-4] + ".vtt")
-                            
+
                             if os.path.isfile(settings.MEDIA_ROOT + videofilepath) and videofilepath not in video_files:
                                 archive.write(settings.MEDIA_ROOT + videofilepath, 'spoken/' + videofilepath)
                                 video_files.add(videofilepath)
-                                
+
                             if os.path.isfile(settings.MEDIA_ROOT + scriptfilepath) and scriptfilepath not in srt_files:
                                 archive.write(settings.MEDIA_ROOT + scriptfilepath, 'spoken/' + scriptfilepath)
-                            
+
                             if os.path.isfile(settings.MEDIA_ROOT + audiofilepath):
                                 archive.write(settings.MEDIA_ROOT + audiofilepath, 'spoken/' + audiofilepath)
-                           
+
                             # Adding the English .vtt file (To Select even when english is not selected)
                             if eng_flag:
-                                scriptfilepath = 'videos/{}/{}/{}'.format(key, rec.tutorial_detail_id, 
-                                rec.audio.rsplit(language.name)[0]  + "English.vtt")
-                                
+                                scriptfilepath = 'videos/{}/{}/{}'.format(key, rec.tutorial_detail_id,
+                                                                          rec.audio.rsplit(language.name)[0] + "English.vtt")
+
                                 if os.path.isfile(settings.MEDIA_ROOT + scriptfilepath) and scriptfilepath not in srt_files:
                                     archive.write(settings.MEDIA_ROOT + scriptfilepath, 'spoken/' + scriptfilepath)
                                     srt_files.add(scriptfilepath)
-                            
+
                             # Get list of questions of a particular tutorial
                             question_s = Question.objects.filter(category=foss_rec.foss.replace(' ', '-'), tutorial=rec.tutorial_detail.tutorial.replace(' ', '-')).order_by('-date_created')
 
@@ -317,15 +331,15 @@ def home(request):
 
                         filepath = 'spoken/videos/' + str(foss_rec.id) + '/list-videos-' + language.name + '.html'
                         ctx = {
-                            'collection': tr_recs, 
+                            'collection': tr_recs,
                             'foss_details': all_foss_details,
-                            'foss': foss_rec.id, 
+                            'foss': foss_rec.id,
                             'lang': language.id
                         }
                         try:
                             if filepath not in files_archived:
                                 files_archived.add(filepath)
-                                convert_template_to_html_file(archive, filepath, request,"cdcontent/templates/tutorial_search.html", ctx)
+                                convert_template_to_html_file(archive, filepath, request, "cdcontent/templates/tutorial_search.html", ctx)
                         except Exception as Error:
                             print Error
 
@@ -335,13 +349,13 @@ def home(request):
                 languages = add_side_by_side_tutorials(archive, languages)
                 ctx = {
                     'eng_flag': eng_flag,
-                    'foss_details': all_foss_details, 
+                    'foss_details': all_foss_details,
                     'foss': foss_rec.id,
                     'lang': language.id,
                     'languages': languages
                 }
                 try:
-                    convert_template_to_html_file(archive, 'spoken/videos/home.html', request,"cdcontent/templates/home.html", ctx)
+                    convert_template_to_html_file(archive, 'spoken/videos/home.html', request, "cdcontent/templates/home.html", ctx)
                 except Exception as Error:
                     print Error
 
@@ -371,6 +385,9 @@ def home(request):
 
 @csrf_exempt
 def ajax_fill_languages(request):
+    '''
+    Reponds the languages for which the selected foss is available.
+    '''
     data = ''
     fossid = request.POST.get('foss', '')
     levelid = int(request.POST.get('level', 0))
@@ -412,6 +429,9 @@ def ajax_add_foss(request):
 
 @csrf_exempt
 def ajax_show_added_foss(request):
+    '''
+    Reponds with an approximate size for the selected foss.
+    '''
     try:
         tmp = json.loads(request.POST.get('selectedfoss', {}))
     except:

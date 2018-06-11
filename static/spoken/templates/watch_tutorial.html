@@ -270,6 +270,7 @@
                 </video>
 
                 <audio id="audio" class='d-none'>
+                    <!-- Put the selected audio file to be played with the video on page load -->
                     <source id="audioSource" src="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ tr_rec.video|rsplitpart|safe }}{{tr_rec.language }}.ogg" type="audio/ogg">
                 </audio>
             
@@ -520,7 +521,7 @@
 {% block compressinlinejsblock %}
 <script type="text/javascript">
     
-    // Add Audio Tracks
+    // Add Audio Track in the video.js UI
     var track = new videojs.AudioTrack({
         id: '{{ tr_rec.language.name  }}-audio-track',
         label: '{{ tr_rec.language.name  }}'
@@ -564,7 +565,7 @@
             }
         }
     });
-
+    // End - Add Audio Track in the video.js UI
         $(document).ready(function(){
 
             currentVideo = $('.playlist-item.active');

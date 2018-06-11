@@ -1,4 +1,7 @@
 
+    /* popcorn.js init fuction to enable a basic synchronization between the 
+    audio / video file. */
+
     init_popcorn("#st_video", "#audio");
     function init_popcorn(VIDEO, AUDIO) {
         var medias = {
@@ -55,6 +58,8 @@
         });
     }
 
+    /* Synchronization at times of buffering or other related network faults.
+    Set audio volume and playback speed. */
 
     // Video.js Player Global Variables
     var trackedPlayer = videojs('st_video');

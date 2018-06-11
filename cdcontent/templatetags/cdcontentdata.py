@@ -35,8 +35,11 @@ def cd_instruction_sheet(foss, lang):
             return file_path
     return False
 
-
 def rsplitpart (video):
+    '''
+    Takes arguement (example: ABC-Video.webm)
+    and returns a trimmed version of it. (example: ABC-)
+    ''' 
     return video.rsplit("Video")[0]
 
 
