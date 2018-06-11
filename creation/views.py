@@ -439,7 +439,7 @@ def upload_index(request):
                 tutorial_resource.outline_user = request.user
                 tutorial_resource.script_user = request.user
                 tutorial_resource.video_user = request.user
-                tutorial_resource.audio = "Blank"
+                tutorial_resource.audio = "Unavailable"
                 tutorial_resource.save()
 
             return HttpResponseRedirect('/creation/upload/tutorial/' + str(tutorial_resource.id) + '/')
@@ -606,7 +606,7 @@ def upload_tutorial(request, trid):
         raise PermissionDenied()
     file_path = settings.MEDIA_ROOT + 'videos/' + str(tr_rec.tutorial_detail.foss_id) + '/' + str(tr_rec.tutorial_detail.id) + '/' + tr_rec.audio
     if os.path.isfile(file_path) == False:
-        tr_rec.audio = "Blank"
+        tr_rec.audio = "Unavailable"
         tr_rec.save()
     context = {
         'tr': tr_rec,
