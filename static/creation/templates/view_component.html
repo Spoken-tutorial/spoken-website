@@ -89,35 +89,35 @@
     {% endif %}
       {% if aud_type == "f" %}
         <div class="video-container">
-            <video id="st_video" class='video-js vjs-default-skin vjs-big-play-centered' autobuffer controls data-setup='{ "playbackRates": [0.5, 1, 1.5, 2] }'>
+            <video id="st_video" class='video-js vjs-default-skin vjs-big-play-centered' autobuffer controls data-setup='{ "playbackRates": [0.5, 0.75,1, 1.25, 1.5, 2] }'>
                     <source src="{{ media_url }}videos/{{ tr.tutorial_detail.foss_id }}/{{ tr.tutorial_detail_id }}/{{ tr.video }}" type="video/webm">
             </video>
-
             <audio id="audio" class='d-none'>
                     <source id="audioSource" src="{{ media_url }}temp/{{ filtered }}.ogg" type='audio/ogg'>
             </audio>
+            <br>
         </div>
         <a class="btn btn-primary " href="/creation/view/component/{{ tr.id }}/video/o" title="View/Download Audio">
-                 <span title="" data-original-title="" >Preview Original</span>
+            <span title="" data-original-title="" >Preview Original</span>
         </a>
         {% elif aud_type == "o" %}
 	    <div class="video-container">
 
-            <video id="st_video" class='video-js vjs-default-skin vjs-big-play-centered' autobuffer controls data-setup='{ "playbackRates": [0.5, 1, 1.5, 2] }'>
+            <video id="st_video" class='video-js vjs-default-skin vjs-big-play-centered' autobuffer controls data-setup='{ "playbackRates": [0.5, 0.75,1, 1.25, 1.5, 2] }'>
                     <source src="{{ media_url }}videos/{{ tr.tutorial_detail.foss_id }}/{{ tr.tutorial_detail_id }}/{{ tr.video }}" type="video/webm">
             </video>
 
             <audio id="audio" class='d-none'>
                     <source id="audioSource" src="{{ media_url }}temp/{{ original }}.ogg" type='audio/ogg'>
             </audio>
-
+            <br>
         </div>
 	<a class="btn btn-primary " href="/creation/view/component/{{ tr.id }}/video/f" title="View/Download Audio">
                  <span title="" data-original-title="" >Preview filtered</span></a>
       {% else %}
 	<div class="video-container">
 
-            <video id="st_video" class='video-js vjs-default-skin vjs-big-play-centered' autobuffer controls data-setup='{ "playbackRates": [0.5, 1, 1.5, 2] }'>
+            <video id="st_video" class='video-js vjs-default-skin vjs-big-play-centered' autobuffer controls data-setup='{ "playbackRates": [0.5, 0.75,1, 1.25, 1.5, 2] }'>
                     <source src="{{ media_url }}videos/{{ tr.tutorial_detail.foss_id }}/{{ tr.tutorial_detail_id }}/{{ tr.video }}" type="video/webm">
             </video>
             <audio id="audio" class='d-none'>

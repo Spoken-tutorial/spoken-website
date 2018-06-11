@@ -34,11 +34,22 @@
 	    {% endif %}
 
 		{% render_field form.comptype %}
+		{% if title == "audio" %}
 		{% if tr.audio != "Blank" %}
-                            <a class="btn btn-primary " href="/creation/view/component/{{ tr.id }}/video/o" title="View/Download Audio">
+                            <a class="btn btn-primary" href="{% url 'creation:view_component_audtype' trid=tr.id component='video' aud_type='o' %}" title="View/Download Audio">
                                 <span title="" data-original-title="" >Preview</span>
                             </a>
-                    {% endif %}
+					{% endif %}
+		{% elif title == "video" %}
+		{% if tr.audio != "Blank" %}
+							<a class="btn btn-primary" href="{% url 'creation:creationhome' %}" title="Done">
+								<span title="Done" data-original-title="" >Done</span>
+							</a>
+                            <a class="btn btn-primary" href="{% url 'creation:view_component' trid=tr.id component='video' %}" title="View/Download Audio">
+                                <span title="" data-original-title="" >Preview</span>
+                            </a>
+					{% endif %}
+					{% endif %}
 		<input type="submit" class="btn btn-primary" value="Upload"  tabindex="4"/>
 	</form>
 {% endblock %}
