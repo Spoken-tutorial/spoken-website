@@ -229,7 +229,7 @@ class TutorialResource(models.Model):
 
 
 class PaymentHonorarium(models.Model):
-    amount = models.DecimalField(max_digits = 9, decimal_places = 2, default = 0)
+    amount = models.IntegerField(default = 0)
     code = models.CharField(max_length=20, editable = False)
     doc = models.FileField(null = True, blank = True)
     status = models.PositiveSmallIntegerField(default = 1, choices = HONORARIUM_STATUS)
@@ -246,7 +246,7 @@ class PaymentHonorarium(models.Model):
                 last_id = 0
             unique_id = last_id+1
             today = date.today()
-            self.code = "#PH/{year}/{month:02n}/{unique_id:05n}".format(year=today.year, month=today.month, unique_id=unique_id)
+            self.code = "PH-{year}-{month:02n}-{unique_id:05n}".format(year=today.year, month=today.month, unique_id=unique_id)
         super(self.__class__, self).save(*args, **kwargs)
 
 
@@ -256,7 +256,7 @@ class TutorialPayment(models.Model):
     payment_honorarium = models.ForeignKey('PaymentHonorarium', related_name = "tutorials", null = True, blank = True, on_delete = models.SET_NULL )
     user_type = models.PositiveSmallIntegerField(default = 3, choices = USER_TYPE)
     seconds = models.PositiveIntegerField(default = 0, help_text="Tutorial duration in seconds")
-    amount = models.DecimalField(max_digits = 9, decimal_places = 2, default = 0)
+    amount = models.IntegerField(default = 0)
     status = models.PositiveSmallIntegerField(default = 1, choices = PAYMENT_STATUS)   
 
     
@@ -270,7 +270,7 @@ class TutorialPayment(models.Model):
     def save(self, *args, **kwargs):
         try:
             pps = PAY_PER_SEC[self.user_type]
-            self.amount = pps * self.seconds
+            self.amount = int(round(pps * self.seconds))
         except:
             print("An Error Occured. User_Type is beyond 3 causing list index out of range")
         super(TutorialPayment, self).save(*args, **kwargs)

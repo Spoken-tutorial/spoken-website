@@ -87,9 +87,9 @@ urlpatterns = patterns('',
 
     # Additional Views Created for Payment Module
     url(r'payment/tutorials/$', 'creation.views.list_all_published_tutorials', name="list_all_published_tutorials"),
-    url(r'payment/ajax/languages/$', 'creation.views.load_languages', name="load-languages"),
-    url(r'payment/ajax/fosses/$', 'creation.views.load_fosses', name="load-fosses"),
-    url(r'payment/due/$', 'creation.views.list_all_due_tutorials', name="payment-due-tutorials"),
-    url(r'payment/honorarium/$', 'creation.views.list_payment_honorarium', name="payment-honorarium-list"),
-    url(r'payment/honorarium/detail/(\d+)/$', 'creation.views.detail_payment_honorarium', name="payment-honorarium-detail")
+    url(r'payment/ajax/languages/$', 'creation.views.load_languages', name="load_languages"),
+    url(r'payment/ajax/fosses/$', 'creation.views.load_fosses', name="load_fosses"),
+    url(r'payment/due/$', 'creation.views.list_all_due_tutorials', name="payment_due_tutorials"),
+    url(r'payment/honorarium/$', 'creation.views.list_payment_honorarium', name="payment_honorarium_list"),
+    url(r'payment/honorarium/detail/(\d+)/$', 'creation.views.detail_payment_honorarium', name="payment_honorarium_detail")
 )

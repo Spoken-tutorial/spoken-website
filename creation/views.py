@@ -9,6 +9,8 @@ from django.utils import timezone
 from decimal import Decimal
 from urllib import quote, unquote_plus, urlopen
 from itertools import islice
+from docx import Document
+from docx.enum.text import WD_ALIGN_PARAGRAPH
 
 # Third Party Stuff
 from django.conf import settings
@@ -2833,6 +2835,7 @@ def update_assignment(request):
     context.update(csrf(request))
     return render(request, 'creation/templates/update_assignment.html', context)
 
+@login_required
 def list_all_published_tutorials(request):
     form = PublishedTutorialFilterForm(request.GET)
     # status = 1 for published and script_user__groups = 5 for external contributors
@@ -2875,6 +2878,9 @@ def list_all_published_tutorials(request):
 
 #Views for ajax response to payment view
 def load_languages(request):
+    """
+    Dynamicly loads language list for all published tutorial filterset
+    """
     foss_id = request.GET.get('foss')
     user_id = request.GET.get('contributor')
     existing_language = request.GET.get('language')
@@ -2887,6 +2893,9 @@ def load_languages(request):
     return render(request,'creation/templates/language_dropdown_list_options.html',{'language_list':language_list, 'existing_language': existing_language})
 
 def load_fosses(request):
+    """
+    Dynamicly loads foss list for all published tutorial filterset
+    """
     user_id = request.GET.get('contributor')
     existing_foss = request.GET.get('foss')
     if user_id == "":
@@ -2898,13 +2907,15 @@ def load_fosses(request):
 
 @login_required
 def list_all_due_tutorials(request):
-    # initiate payment process for selected tutorials
+    """
+    Display all publshed tutorials for whom payment is due and can initiate payment process for selected tutorials
+    """
     if not is_qualityreviewer(request.user):
         raise PermissionDenied()
     if request.method == "POST":
         initiate_payment(request)
         # to aviod form resubmit
-        return HttpResponseRedirect(reverse('creation:payment-due-tutorials'))
+        return HttpResponseRedirect(reverse('creation:payment_due_tutorials'))
     tr_due = TutorialPayment.objects.filter(status = 1).order_by('user')
     # pagination
     page = request.GET.get('page')
@@ -2926,25 +2937,6 @@ def get_video_info_random(filepath):
     sec = 500 + video_time%500
     td = datetime.timedelta(seconds = sec)
     return td.seconds
-
-def initiate_payment(request):
-    user_id = request.POST.get('user')
-    tr_pay_ids = request.POST.getlist('selected_tutorialpayments')
-    user = User.objects.get(id = user_id)
-    if len(tr_pay_ids) > 0:
-        honorarium = PaymentHonorarium.objects.create(status = 1)
-        amount = 0
-        for tr_pay_id in tr_pay_ids:
-            tr_pay = TutorialPayment.objects.get(id = tr_pay_id)
-            tr_pay.status = 2 # from 1 --> 2 i.e due --> initiated
-            tr_pay.payment_honorarium = honorarium
-            amount += tr_pay.amount
-            tr_pay.save()
-        honorarium.amount = amount
-        honorarium.save()
-        messages.success(request,"Payment Honorarium ("+str(honorarium.code)+") worth Rs. \
-            "+str(amount)+" for contributor "+user.first_name+" "+user.last_name+" initiated for \
-            "+str(len(tr_pay_ids))+" tutorials")
 
 def create_payment_instance(request, tr_res):
     '''
@@ -2993,10 +2985,36 @@ def create_payment_instance(request, tr_res):
     except IntegrityError as e:
         messages.error(request, " Tutorial already in payment process. Error Detail -- "+str(e))
 
+def initiate_payment(request):
+    user_id = request.POST.get('user')
+    tr_pay_ids = request.POST.getlist('selected_tutorialpayments')
+    user = User.objects.get(id = user_id)
+    if len(tr_pay_ids) > 0:
+        honorarium = PaymentHonorarium.objects.create(status = 1)
+        amount = 0
+        tutorials = [] # arr of arr['tut_title','tut_time']
+        for tr_pay_id in tr_pay_ids:
+            tr_pay = TutorialPayment.objects.get(id = tr_pay_id)
+            tutorials.append([tr_pay.tutorial_resource.tutorial_detail.tutorial, tr_pay.get_duration()])
+            tr_pay.status = 2 # from 1 --> 2 i.e due --> initiated
+            tr_pay.payment_honorarium = honorarium
+            amount += tr_pay.amount
+            tr_pay.save()
+        honorarium.amount = amount
+        honorarium.save()
+        # generating honorarium receipt
+        contributor = str(user.first_name+" "+user.last_name)
+        foss = tr_pay.tutorial_resource.tutorial_detail.foss.foss
+        manager = request.user.first_name+" "+request.user.last_name # currrent logged in user - manager
+        generate_honorarium_receipt(honorarium.code, contributor, foss, honorarium.amount, manager, tutorials)
+        messages.success(request,"Payment Honorarium (#"+str(honorarium.code)+") worth Rs. \
+            "+str(amount)+" for contributor "+user.first_name+" "+user.last_name+" initiated for \
+            "+str(len(tr_pay_ids))+" tutorials")
+
 @login_required
 def list_payment_honorarium(request):
     '''
-    to display list of all payment honorariums
+    to display list of all payment honorariums and update their status
     '''
     if not is_qualityreviewer(request.user):
         raise PermissionDenied()
@@ -3018,16 +3036,16 @@ def list_payment_honorarium(request):
                         honorarium.tutorials.all()[0].user,
                         honorarium.tutorials.all()[0].tutorial_resource,
                         "Tutorials Payment Credited", # title
-                        "Honorarium ("+honorarium.code+") worth Rs. "\
+                        "Honorarium (#"+honorarium.code+") worth Rs. "\
                         +str(honorarium.amount)+" for "+str(len(honorarium.tutorials.all())) \
                         +" tutorials credited. Kindly Confirm"
                     )
-                messages.success(request,'Payment Honorarium ('+str(honorarium.code)+') worth Rs. '+str(honorarium.amount)+' '+msg_end)
+                messages.success(request,'Payment Honorarium (#'+str(honorarium.code)+') worth Rs. '+str(honorarium.amount)+' '+msg_end)
                 honorarium.save()
             except Exception as e:
                 messages.warning(request, "Something went wrong. Couldn't complete your request")  
             # to avoid form resubmission
-            return HttpResponseRedirect(reverse('creation:payment-honorarium-list'))
+            return HttpResponseRedirect(reverse('creation:payment_honorarium_list'))
 
     honorariums = PaymentHonorarium.objects.order_by('status','-updated')
     # filtering honorarium result         
@@ -3051,7 +3069,7 @@ def list_payment_honorarium(request):
 
     #pagination
     page = request.GET.get('page')
-    honorariums = get_page(honorariums, page, 50)
+    honorariums = get_page(honorariums, page, 20)
     context = {
         'honorariums': honorariums,
         'collection': honorariums, # for pagination
@@ -3060,6 +3078,9 @@ def list_payment_honorarium(request):
     return render(request, "creation/templates/list_all_payment_honorarium.html",context)
 
 def detail_payment_honorarium(request, hr_id):
+    """
+    Contributor can view and confirm his honorarium details
+    """
     try:
         hr = PaymentHonorarium.objects.get(id=hr_id,)
     except PaymentHonorarium.DoesNotExist:
@@ -3071,7 +3092,7 @@ def detail_payment_honorarium(request, hr_id):
             if "confirm" in request.POST:
                 hr.status = 4
                 hr.save()
-                messages.success(request,"Payment Honorarium ("+hr.code+") confirmed as recieved.")
+                messages.success(request,"Payment Honorarium (#"+hr.code+") confirmed as recieved.")
                 next_url = request.GET.get("next",reverse('creation:creationhome'))
                 return HttpResponseRedirect(next_url)
         context = {
@@ -3081,4 +3102,79 @@ def detail_payment_honorarium(request, hr_id):
     else:
         # user not associated with pay_hr
         raise PermissionDenied()
+
+
+def money_as_text(amount):
+    """
+    Display numerical money in text format
+    12345 --> tweleve thousand three hundred forty five only
+    """
+    ans = ""
+    small_arr = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 
+    'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Forteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Ninteen']
+    large_arr = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety']
+
+    if amount>100000 or amount<1:
+        return "Invalid Amount"
+    if amount//1000:
+        value = amount//1000
+        if value < 20:
+            ans += small_arr[value]
+        if value>=20 and value <100:
+            large_val = value//10
+            small_val = value%10
+            ans += large_arr[large_val]+" "+small_arr[small_val]
+        ans += " Thousand "
+        amount %= 1000
+
+    if amount//100:
+        value = amount//100
+        ans += small_arr[value]+" Hundred "
+        amount %= 100
+
+    if amount >19:
+        value = amount//10
+        ans += large_arr[value]+" "
+        amount %= 10
+
+    if amount < 20:
+        ans += small_arr[amount]+" "
+    ans += "Only"
+    return ans
+
+def generate_honorarium_receipt(code, contributor, foss, amount, manager, tutorials):
+    """
+        Generates honorarium receipts in docx format based on existing template using python-docx 0.8.6 ( https://python-docx.readthedocs.io/en/stable/ )
+    """
+    doc = Document('media/hr-receipts/honorarium-receipt-template.docx')
+    for table in doc.tables:
+        for index, tut in enumerate(tutorials, 1):
+            row_cells = table.add_row().cells
+            row_cells[0].text = str(index)
+            row_cells[1].text = tut[0]
+            row_cells[2].text = tut[1]
+            row_cells[2].paragraphs[0].paragraph_format.alignment=WD_ALIGN_PARAGRAPH.CENTER
+            
+    for paragraph in doc.paragraphs:
+        if '{{date}}' in paragraph.text:
+            curr_dt = datetime.datetime.now()
+            formated_dt =  curr_dt.strftime("%d %B, %Y") # 01 January, 2018
+            paragraph.text = ""
+            paragraph.add_run("Date : ")
+            paragraph.add_run(formated_dt)
+
+        if '{{contributor}}' in paragraph.text:
+            paragraph.text = ""
+            paragraph.add_run("I request you to kindly approve the honorarium of ")
+            paragraph.add_run("Rs. "+str(amount)+" /-").bold = True
+            paragraph.add_run(" (Rupees "+money_as_text(amount) +" )")
+            paragraph.add_run(" for ")
+            paragraph.add_run(contributor).bold = True
+            paragraph.add_run(", for the creation of the following spoken tutorials on ")
+            paragraph.add_run(foss+".").bold = True
+
+        if '{{manager}}' in paragraph.text:
+            paragraph.text = ""
+            paragraph.add_run(manager)
+    doc.save('media/hr-receipts/'+code+'.docx')
 
