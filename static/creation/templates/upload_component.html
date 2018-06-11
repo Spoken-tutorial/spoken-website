@@ -3,6 +3,7 @@
 {% block heading %}
 	Upload {{ title }} file
 {% endblock %}
+
 {% block content %}
 	<form role="form" method="post" enctype="multipart/form-data" action="">
 		{% csrf_token %}
