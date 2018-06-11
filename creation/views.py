@@ -1148,6 +1148,35 @@ def mark_notrequired(request, trid, tcid, component):
         messages.error(request, 'Something went wrong, please try after some time.')
     return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
+
+def preview_check_avaiable(request, trid, component):
+    '''
+    When Audio / Video is uploaded, the frontend needs to check if 
+    the preview is ready, this function is called by the `upload_component`
+    and a response of `done` and `not-done` is send accordingly.
+    '''
+    tr_rec = None
+    try:
+        tr_rec = TutorialResource.objects.get(pk = trid)
+    except Exception, e:
+        print e
+        raise PermissionDenied()
+    if component == 'video':
+        video_path = settings.MEDIA_ROOT + "videos/" + str(tr_rec.tutorial_detail.foss_id) + "/" + str(tr_rec.tutorial_detail_id) + "/" + tr_rec.video
+        audio_path = settings.MEDIA_ROOT + "videos/" + str(tr_rec.tutorial_detail.foss_id) + "/" + str(tr_rec.tutorial_detail_id) + "/" + tr_rec.audio
+        video_info = get_video_info(video_path)
+        audio_info = get_audio_info(audio_path)
+        if video_info['duration'] != 0 and video_info['size'] != 0 and audio_info['duration'] != 0 and audio_info['size'] != 0:
+            return HttpResponse("done") 
+        return HttpResponse("not-done")
+    if component == 'audio':
+        audio_path = settings.MEDIA_ROOT + "temp/" + tr_rec.video[:-10]+tr_rec.language.name+"-nonoise.ogg"
+        audio_info = get_audio_info(audio_path)
+        if audio_info['duration'] != 0 and audio_info['size'] != 0:
+            return HttpResponse("done") 
+        return HttpResponse("not-done")
+
+
 def view_component(request, trid, component):
     tr_rec = None
     context = {}
