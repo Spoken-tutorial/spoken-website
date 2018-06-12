@@ -2,7 +2,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.db.models import Q
-
+from django.conf import settings
 # Spoken Tutorial Stuff
 from creation.models import *
 
@@ -405,6 +405,7 @@ class UploadTutorialForm(forms.Form):
                         if 'tutorial_name' in args[0]:
                             if args[0]['tutorial_name'] and args[0]['tutorial_name'] != '' and args[0]['tutorial_name'] != 'None':
                                 tut_init_data = args[0]['tutorial_name']
+                                print "args[0]['tutorial_name']",args[0]['tutorial_name']
                         if lang_rec.name == 'English':
                             td_list = TutorialDetail.objects.filter(foss_id = args[0]['foss_category']).values_list('id')
                             choices = list(TutorialDetail.objects.filter(
@@ -566,6 +567,10 @@ class ContributorRoleForm(forms.ModelForm):
     )
     status = forms.BooleanField(required = False)
 
+    def __init__(self, *args, **kwargs):
+        language = kwargs.get('language', None)
+        super(ContributorRoleForm, self).__init__(*args, **kwargs)
+        
     class Meta:
         model = ContributorRole
         exclude = ['created', 'updated']
@@ -931,41 +936,70 @@ class UpdateSheetsForm(forms.Form):
                 self.fields['language'].widget.attrs = {}
                 self.fields['language'].initial = initial_lang
 
-class UpdateAssignmentForm(forms.Form):
-    foss = forms.ChoiceField(
-        choices = [('', '-- Select Foss --'),] + list(TutorialResource.objects.filter(Q(status = 1) | 
-            Q(status = 2), language__name='English').values_list(
-            'tutorial_detail__foss_id', 'tutorial_detail__foss__foss').order_by(
-            'tutorial_detail__foss__foss').distinct()),
-        required = True,
-        error_messages = {'required':'FOSS category field is required.'}
-    )
-    tutorial = forms.ChoiceField(
-        choices=[('', '-- Select Tutorial --'), ],
-        widget=forms.Select(attrs={'disabled': 'disabled'}),
-        required=True,
-        error_messages={'required': 'Tutorial field is required.'}
-    )
-    comp = forms.FileField(required=False)
 
-    def clean(self):
-        super(UpdateAssignmentForm, self).clean()
-        component = ''
-        if 'comp' in self.cleaned_data:
-            component = self.cleaned_data['comp']
-        if not component:
-            self._errors["comp"] = self.error_class(["This field is required."])
-        return component
+class ContributorRatingForm(forms.ModelForm):
+    
+    user = forms.ChoiceField(
+        choices = [('', '-- Select User --'),] + list(
+        User.objects.filter(groups__id=4).values_list('id','username')),
+        required = True,
+        #widget=forms.Select(attrs={"onChange":'getCity()'}),
+        error_messages = {'required':'user field is required.'}
+    )
+    language = forms.ChoiceField(
+        choices=[('', '-- Select Language --'), ],
+        
+        #widget=forms.Select(attrs={'disabled': 'disabled'}),
+        required=True,
+        error_messages={'required': 'Language field is required.'}
+    ) 
 
     def __init__(self, *args, **kwargs):
-        super(UpdateAssignmentForm, self).__init__(*args, **kwargs)
+        super(ContributorRatingForm, self).__init__(*args, **kwargs)
 
+        print "ARGS  : ",args,"--"
+        self.fields['rating'].help_text = ''' 1 : Loser<br>
+        2 : Just a Contributor <br>
+        3 : Fair <br>
+        4 : Good <br>
+        5 : God Likee <br>
+        ''' 
         if args:
-            if 'foss' in args[0] and args[0]['foss']:
-                initial_tut = ''
-                if 'tutorial' in args[0] and args[0]['tutorial']:
-                    initial_tut = args[0]['tutorial']
-                choices = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), tutorial_detail__foss_id = args[0]['foss']).values_list('tutorial_detail_id', 'tutorial_detail__tutorial').order_by('tutorial_detail__tutorial').distinct()
-                self.fields['tutorial'].choices =  [('', '-- Select tutorial --'),] + list(choices)
-                self.fields['tutorial'].widget.attrs = {}
-                self.fields['tutorial'].initial = initial_tut
+            
+            if 'user' in args[0] and args[0]['user']:
+                initial_lang = ''
+                if 'language' in args[0] and args[0]['language']:
+                    initial_lang = args[0]['language']
+
+                lang = Language.objects.filter(id__in= RoleRequest.objects.filter(
+                status = 1 ,user_id = args[0]['user'] , role_type = 0).exclude(language_id =22).values('language_id'))
+
+                print "Selected : ", lang
+                
+                user_1 = User.objects.filter(groups__id=4)
+                self.fields['user'] =  forms.ModelChoiceField(queryset=user_1)
+                self.fields['language'] =  forms.ModelChoiceField(queryset=lang)
+
+        else:
+            all_langs = Language.objects.all()
+            self.fields['language'] =  forms.ModelChoiceField(queryset=all_langs)
+
+        if kwargs:
+            print "kwargs['instance'].user : ",kwargs
+            key= kwargs.keys()
+            print "key : ", key[0]
+            print "kk : ", kwargs[key[0]]
+            if kwargs[key[0]]:
+                if kwargs[key[0]].user:
+                    initial_lang = ''
+                    if kwargs['instance'].language:
+                        initial_lang = kwargs['instance'].language
+
+                    lang = Language.objects.filter(id__in= RoleRequest.objects.filter(
+                    status = 1 ,user_id = kwargs['instance'].user_id, role_type = 0).values('language_id'))
+                    print "Selected : ", dir(lang)
+                    
+                    user_1 = User.objects.filter(groups__id=4)
+                    self.fields['user'] =  forms.ModelChoiceField(queryset=user_1)
+                    self.fields['language'] =  forms.ModelChoiceField(queryset=lang)
+                    
