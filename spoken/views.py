@@ -327,6 +327,34 @@ def testimonials(request):
     return render(request, 'spoken/templates/testimonial/testimonials.html', context)
 
 
+def testimonials_new_video(request):
+    ''' new video testimonials '''
+    user = request.user
+    context = {}
+    form = VideoTestimonialForm()
+    if (not user.is_authenticated()) or ((not user.has_perm('events.add_testimonials'))):
+        raise PermissionDenied()
+
+    if request.method == 'POST':
+        form = VideoTestimonialForm(request.POST, request.FILES)
+        if form.is_valid():
+            file_name =  request.POST['attestant_name']  + '-admin-' + str(user) + '-' + dt.datetime.now().strftime("%Y-%m-%d-%H-%M-%S") + ".mp4"
+            file_path = settings.MEDIA_ROOT + 'testimonials/' 
+            full_path = file_path + file_name
+            user_file_name, user_file_extension = os.path.splitext(request.FILES['video'].name)
+            fout = open(full_path, 'wb+')
+            f = request.FILES['video']
+            # Iterate through the chunks.
+            for chunk in f.chunks():
+                fout.write(chunk)
+            fout.close()
+            messages.success(request, 'Testimonial has posted successfully!')
+            return HttpResponseRedirect('/')
+    context['form'] = form
+    context.update(csrf(request))
+    return render(request, 'spoken/templates/testimonial/videoform.html', context)
+
+
 def testimonials_new(request):
     ''' new testimonials '''
     user = request.user

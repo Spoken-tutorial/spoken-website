@@ -74,6 +74,15 @@ class SeriesTutorialSearchForm(forms.Form):
       self.fields['search_otherlanguage'].choices = lang_list_choices
 
 
+class VideoTestimonialForm(forms.Form):
+    video = forms.FileField(label = 'Select an mp4 file', required = True)
+    attestant_name = forms.CharField(label = 'attestant', required = True)
+
+    def clean(self):
+        super(VideoTestimonialForm, self).clean()
+        if self.cleaned_data['video'].content_type != 'video/mp4':
+            self._errors["video"] = self.error_class(["Not a valid file format."])
+        return self.cleaned_data['video']
 
 
 class TestimonialsForm(forms.ModelForm):

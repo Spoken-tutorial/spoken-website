@@ -1,0 +1,19 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load creationdata %}
+{% block title %} Add/Edit Testimonial {% endblock %}
+{% block heading %}Add / Edit Testimonial {% endblock %}
+{% block search %}{% endblock %}
+{% block content %}
+    <div class="row well">
+        <div class='col-sm-8'>
+            <form action="{{ action }}" method="post" class='form-horizontal' enctype="multipart/form-data">
+                {% csrf_token %}
+                <!-- Django will take care of spiting the form. -->
+                {{ form.as_p }}
+                <input class="btn btn-primary" type="submit" value="Submit" />
+            </form>
+        </div>
+    </div>
+{% endblock %}
