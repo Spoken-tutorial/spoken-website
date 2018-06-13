@@ -389,5 +389,17 @@
     {% compress js %}{% block compressjsblock %}{% endblock %}{% endcompress %}
     {% compress js %}{% block compressinlinejsblock %}{% endblock %}{% endcompress %}
     {% block jsblock %}{% endblock %}
+    <script>
+    // ServiceWorker & Push Register
+    if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+        navigator.serviceWorker.register("{% static 'spoken/js/sw.js' %}").then(function(registration) {
+            return registration;
+            }).catch(function(Error) {
+                console.log('ServiceWorker registration failed: ', Error);
+            });
+        });
+    }
+    </script>
     </body>
 </html>
