@@ -922,25 +922,6 @@ def upload_component(request, trid, component):
         review_log = NeedImprovementLog.objects.filter(tutorial_resource_id = tr_rec.id).order_by('-created')
     except Exception, e:
         raise PermissionDenied()
-    if "_" in component:
-        file_name =  component.replace('_', '-') +".ogg"
-        file_path_src = settings.MEDIA_ROOT + 'temp/'
-        full_path_src = file_path_src + file_name
-        file_path_dest = settings.MEDIA_ROOT + 'videos/' + str(tr_rec.tutorial_detail.foss_id) + '/' + str(tr_rec.tutorial_detail.id) + '/'
-        if "nonoise" in file_name:
-            file_name = file_name[:-12] + ".ogg"
-        full_path_dest = file_path_dest + file_name
-        subprocess.Popen(["mv",full_path_src,full_path_dest])
-        tr_rec.video_status = 1
-        tr_rec.save()
-        context = {
-            'tr': tr_rec,
-            'contrib_log': contrib_log,
-            'review_log': review_log,
-            'script_base': settings.SCRIPT_URL,
-        }
-        context.update(csrf(request))
-        return render(request, 'creation/templates/upload_tutorial.html', context)
     if (component == 'video' or component == 'audio') and getattr(tr_rec, 'video' + '_status') == 4:
         raise PermissionDenied()
     elif (component == 'slide' or component == 'code' or component == 'assignment') and getattr(tr_rec.common_content, component + '_status') == 4:
@@ -957,13 +938,16 @@ def upload_component(request, trid, component):
                     comp_log.user = request.user
                     comp_log.tutorial_resource = tr_rec
                     comp_log.component = component
-
                     if component == "audio":
                         file_name, file_extension = os.path.splitext(request.FILES['comp'].name)
                         file_name =  tr_rec.tutorial_detail.tutorial.replace(' ', '-') + '-' + tr_rec.language.name + file_extension
                         file_path = settings.MEDIA_ROOT + 'temp/'
                         t = subprocess.Popen(["mkdir","-p",file_path])
                         full_path = file_path + file_name
+                        if os.path.isfile(full_path):
+                            p=subprocess.Popen(["rm","-rf",full_path,full_path[:-4]+"-nonoise.ogg"])
+                            while p.poll() == None:
+                                pass
                         fout = open(full_path, 'wb+')
                         f = request.FILES['comp']
                         for chunk in f.chunks():
@@ -1209,6 +1193,10 @@ def view_component(request, trid, component):
         eng_audio_info = get_audio_info(eng_audio_path) 
         video_path = settings.MEDIA_ROOT + "videos/" + str(tr_rec.tutorial_detail.foss_id) + "/" + str(tr_rec.tutorial_detail_id) + "/" + tr_rec.video
         video_info = get_video_info(video_path)
+        aud_present = 1
+        if os.path.isfile(audio_path) == False:
+            aud_present = 0
+            messages.error(request,"No File Present")
         context = {
             'tr': tr_rec,
 	        'video_mod':tr_rec.video[:-4].replace("-","_")+"_nonoise",
@@ -1217,7 +1205,8 @@ def view_component(request, trid, component):
             'video_info': video_info,
             'eng_audio_info': eng_audio_info,
             'audio_info': audio_info,
-            'media_url': settings.MEDIA_URL
+            'media_url': settings.MEDIA_URL,
+            'aud_present': aud_present
         }
     else:
         messages.error(request, 'Invalid component passed as argument!')
@@ -1247,10 +1236,24 @@ def view_component_audtype(request, trid, component, aud_type):
         video_path = settings.MEDIA_ROOT + "videos/" + str(tr_rec.tutorial_detail.foss_id) + "/" + str(tr_rec.tutorial_detail_id) + "/" + tr_rec.video
         
         if aud_type == 'o':
-            audio_path = settings.MEDIA_ROOT + "temp/" + tr_rec.audio 
-        else:
+            audio_path = settings.MEDIA_ROOT + "temp/" + tr_rec.audio
+        elif aud_type == 'f':
             audio_path = settings.MEDIA_ROOT + "temp/" + tr_rec.audio[:-4] + "-nonoise.ogg"
-        
+        else:
+            print "test"
+            file_name =  aud_type.replace('_', '-') +".ogg"
+            file_path_src = settings.MEDIA_ROOT + 'temp/'
+            full_path_src = file_path_src + file_name
+            file_path_dest = settings.MEDIA_ROOT + 'videos/' + str(tr_rec.tutorial_detail.foss_id) + '/' + str(tr_rec.tutorial_detail.id) + '/'
+            if "nonoise" in file_name:
+                file_name = file_name[:-12] + ".ogg"
+            full_path_dest = file_path_dest + file_name
+            subprocess.Popen(["mv",full_path_src,full_path_dest])
+            tr_rec.video_status = 1
+            tr_rec.audio = file_name
+            tr_rec.save()
+            messages.success(request, "Your submission has been accepted")
+            audio_path = settings.MEDIA_ROOT + "videos/" + str(tr_rec.tutorial_detail.foss_id) + "/" + str(tr_rec.tutorial_detail_id) + "/" + tr_rec.audio
         eng_audio_path = False
         if tr_rec.language.name != "English":
             eng_audio_path = settings.MEDIA_ROOT + "videos/" + str(tr_rec.tutorial_detail.foss_id) + "/" + str(tr_rec.tutorial_detail_id) + "/" + tr_rec.audio.rsplit(tr_rec.language.name)[0] + "English.ogg"

@@ -42,7 +42,9 @@
         </style>
     {% endif %}
 {% endblock %}
+
 {% block heading %}
+
     {% if component == "video" %}
         {{ tr.tutorial_detail.tutorial }}
     {% elif component == "keyword" %}
@@ -52,7 +54,11 @@
     {% endif %}
 {% endblock %}
 {% block content %}
+{% if not aud_present %}
+<p style="text-align:right;"><a href="/creation/upload/tutorial/{{ tr.id }}/">&lt;&lt; Back</a></p>
+{% endif %}
     {% if component == "video" %}
+    
     Video:
     <table class="table table-bordered table-hover">
         <tr>
@@ -138,12 +144,12 @@
         </form>
     {% endif %}
 	{% if aud_type == "f" %}
-	<a class="btn btn-primary " href="/creation/upload/component/{{ tr.id }}/{{ audio_modified }}/" title="Accept">
+	<a class="btn btn-primary " href="/creation/view/component/{{ tr.id }}/video/{{ audio_modified }}" title="Accept">
                  <span title="" data-original-title="" >Accept this submission</span></a>
 	<a class="btn btn-primary " href="/creation/upload/tutorial/{{ tr.id }}/" title="Reject">
                  <span title="" data-original-title="" >Reject and Re-record</span></a>
 	{% elif aud_type == "o" %}
-	<a class="btn btn-primary " href="/creation/upload/component/{{ tr.id }}/{{ audio_original }}/" title="Accept">
+	<a class="btn btn-primary " href="/creation/view/component/{{ tr.id }}/video/{{ audio_original }}" title="Accept">
                  <span title="" data-original-title="" >Accept this submission</span></a>
 	<a class="btn btn-primary " href="/creation/upload/tutorial/{{ tr.id }}/" title="Reject">
                  <span title="" data-original-title="" >Reject and Re-record</span></a>
