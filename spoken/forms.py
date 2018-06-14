@@ -1,9 +1,10 @@
 # Third Party Stuff
 from django import forms
 from django.db.models import Count, Q
+from django.core.exceptions import ValidationError
 
 # Spoken Tutorial Stuff
-from creation.models import TutorialResource
+from creation.models import TutorialResource, VideoTestimonial
 from events.models import Testimonials, InductionInterest
 
 
@@ -74,16 +75,6 @@ class SeriesTutorialSearchForm(forms.Form):
       self.fields['search_otherlanguage'].choices = lang_list_choices
 
 
-class VideoTestimonialForm(forms.Form):
-    video = forms.FileField(label = 'Select an mp4 file', required = True)
-    attestant_name = forms.CharField(label = 'attestant', required = True)
-
-    def clean(self):
-        super(VideoTestimonialForm, self).clean()
-        if self.cleaned_data['video'].content_type != 'video/mp4':
-            self._errors["video"] = self.error_class(["Not a valid file format."])
-        return self.cleaned_data['video']
-
 
 class TestimonialsForm(forms.ModelForm):
     source_title = forms.CharField(required=False)
@@ -94,6 +85,42 @@ class TestimonialsForm(forms.ModelForm):
     class Meta:
         model = Testimonials
         exclude = ['approved_by', 'user']
+
+
+def file_size(value):
+    if value.size > 104857600:
+        raise ValidationError('File too large. Size should not exceed 100 MiB.')
+
+class VideoTestimonialForm(forms.Form):
+
+    def __init__(self, *args, **kwargs):
+        on_home_page = kwargs.pop('on_home_page')
+        super(VideoTestimonialForm, self).__init__(*args, **kwargs)
+        foss_list_choices = [('', '-- All Courses --'),]
+        foss_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), language__name='English', tutorial_detail__foss__show_on_homepage = on_home_page).values('tutorial_detail__foss__foss').annotate(
+            Count('id')).order_by('tutorial_detail__foss__foss').values_list('tutorial_detail__foss__foss', 'id__count').distinct()
+        for foss_row in foss_list:
+            foss_list_choices.append((str(foss_row[0]), str(foss_row[0]) + ' (' + str(foss_row[1]) + ')'))
+
+        self.fields['foss'].choices = foss_list_choices
+        self.fields['foss'].widget.attrs['class'] = 'form-control'
+        self.fields['video'].widget.attrs['class'] = 'form-control'
+        self.fields['location'].widget.attrs['class'] = 'form-control'
+    
+    foss = forms.ChoiceField(
+        choices = [],
+        widget=forms.Select()
+        )
+        
+    video = forms.FileField(label = 'Select an mp4 file less than 100MB', validators=[file_size], required = False)
+    location = forms.CharField(label = 'or paste embedable link', required = False)
+
+    def clean(self):
+        super(VideoTestimonialForm, self).clean()
+        if self.cleaned_data['video'] and self.cleaned_data['video'].content_type != 'video/mp4':
+            self._errors["video"] = self.error_class(["Not a valid file format."])
+        return self.cleaned_data['video']
+
 
 class ExpressionForm(forms.ModelForm):
   class Meta:

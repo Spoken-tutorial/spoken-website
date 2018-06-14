@@ -108,6 +108,7 @@ class UploadTimedScriptForm(forms.Form):
                     self.fields['tutorial_name'].widget.attrs = {}
                     self.fields['tutorial_name'].initial = initial_data
 
+
 class ChangeComponentStatusForm(forms.Form):
     foss_category = forms.ChoiceField(
         choices = [('', ''),],
@@ -205,6 +206,7 @@ class ChangeComponentStatusForm(forms.Form):
                             self.fields['status'].choices =choices
                             self.fields['status'].initial = status_init_data
 
+
 class PublishToPending(forms.Form):
     foss_category = forms.ChoiceField(
         widget=forms.Select(),
@@ -254,6 +256,7 @@ class PublishToPending(forms.Form):
                         choices.insert(0, ('', 'Select Tutorial'))
                         self.fields['tutorial_name'].choices = choices
                         self.fields['tutorial_name'].initial = tut_init_data
+
 
 class UploadPublishTutorialForm(forms.Form):
     tutorial_name = forms.ChoiceField(
@@ -521,6 +524,7 @@ class UploadOutlineForm(forms.Form):
         if outline_rec.outline:
             self.fields['outline'].initial = outline_rec.outline
 
+
 class UploadScriptForm(forms.Form):
     scriptpath = forms.CharField(
         required = True,
@@ -530,6 +534,7 @@ class UploadScriptForm(forms.Form):
     def __init__(self, path, *args, **kwargs):
         super(UploadScriptForm, self).__init__(*args, **kwargs)
         self.fields['scriptpath'].initial = path
+
 
 class UploadKeywordsForm(forms.Form):
     keywords = forms.CharField(
@@ -569,6 +574,7 @@ class ContributorRoleForm(forms.ModelForm):
     class Meta:
         model = ContributorRole
         exclude = ['created', 'updated']
+
 
 class DomainReviewerRoleForm(forms.ModelForm):
     user = forms.ModelChoiceField(
@@ -633,6 +639,7 @@ class ReviewVideoForm(forms.Form):
         required = False
     )
 
+
 class DomainReviewComponentForm(forms.Form):
     component_status = forms.ChoiceField(
         choices = [('', '------'), (3, 'Accept'), (5, 'Need improvement')],
@@ -644,6 +651,7 @@ class DomainReviewComponentForm(forms.Form):
         required = False
     )
 
+
 class QualityReviewComponentForm(forms.Form):
     component_status = forms.ChoiceField(
         choices = [('', '------'), (4, 'Accept'), (5, 'Need improvement')],
@@ -654,6 +662,7 @@ class QualityReviewComponentForm(forms.Form):
         widget = forms.Textarea,
         required = False
     )
+
 
 class TutorialMissingComponentForm(forms.Form):
     component = forms.ChoiceField(
