@@ -80,4 +80,16 @@ urlpatterns = patterns('',
     url(r'^report-missing-component/(\d+)/$', 'creation.views.report_missing_component', name="report_missing_component"),
     url(r'^report-missing-component/reply/(\d+)/$', 'creation.views.report_missing_component_reply', name="report_missing_component_reply"),
     url(r'^report-missing-component/list/$', 'creation.views.report_missing_component_list', name="report_missing_component_list"),
+
+    #Bidding Module
+    url(r'^allocate_tutorial/(?P<sel_status>\w+)/$', 'creation.views.allocate_tutorial', name="allocate_tutorial"),
+    url(r'^allocate_tutorial_manager/(?P<sel_status>\w+)/$', 'creation.views.allocate_tutorial', name="allocate_tutorial"),
+    url(r'^revoke_allocated_tutorial/(?P<uid>\w+)/(?P<lid>\w+)/(?P<tdid>\w+)/(?P<taid>\w+)/(?P<reason>\d+)$', 'creation.views.revoke_allocated_tutorial', name="revoke_allocated_tutorial"),
+    url(r'^extend/(\w+)/$', 'creation.views.extend_submission_date', name="extend_submission_date"),
+    url(r'^allocate/(?P<tdid>\d+)/(?P<lid>\d+)/(?P<uid>\d+)$', 'creation.views.allocate', name="allocate"),
+    url(r'^allocate_foss/(?P<fid>\d+)/(?P<lang>\w+)/(?P<uid>\d+)/$', 'creation.views.allocate_foss', name="allocate_foss"),
+    url(r'^refresh_contributors/$', 'creation.views.refresh_contributors', name="refresh_contributors"),
+    url(r'^get_languages/(?P<uid>\w+)$', 'creation.views.get_languages', name="get_languages"),
+    url(r'^get_tutorials/(?P<fid>\w+)$', 'creation.views.get_tutorials', name="get_tutorials"),
+    url(r'^refresh_tutorials/$','creation.views.refresh_tutorials',name = "refresh_tutorials")
 )

@@ -107,10 +107,8 @@ class ContributorRoleAdmin(admin.ModelAdmin):
     mark_contributor_disabled.short_description = "Mark selected contributor roles as disabled"
     actions = ['mark_contributor_active', 'mark_contributor_disabled']
 
-    class Media :
-        from django.conf import settings
-        media_url = getattr(settings,'MEDIA_URL','/cms/js/ajax-contributor.js')
-        print "media_url : ",media_url
+    class Media:
+        js = ('admin/js/ajax-contributor.js',)
 
 
 class DomainReviewerRoleAdmin(admin.ModelAdmin):

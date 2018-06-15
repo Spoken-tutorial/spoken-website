@@ -219,10 +219,10 @@ class ArchivedVideo(models.Model):
 
 
 class ContributorRole(models.Model):
+    user = models.ForeignKey(User)
     language = models.ForeignKey(Language)
     foss_category = models.ForeignKey(FossCategory)
     tutorial_detail = models.ForeignKey(TutorialDetail,null = True)
-    user = models.ForeignKey(User)
     status = models.BooleanField()
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
