@@ -18,7 +18,7 @@ from django.views.decorators.csrf import csrf_exempt
 # Spoken Tutorial Stuff
 from cms.forms import *
 from cms.models import Event, News, NewsType, Notification, SiteFeedback
-from creation.models import Language, TutorialDetail, TutorialResource, VideoTestimonial
+from creation.models import Language, TutorialDetail, TutorialResource
 from creation.subtitles import *
 from creation.views import get_video_info
 from events.views import get_page
@@ -163,7 +163,7 @@ def tutorial_search(request):
     context['collection'] = collection
     context['SCRIPT_URL'] = settings.SCRIPT_URL
     context['current_foss'] = foss_get
-    return render(request, 'spokenSeriesTutorialSearchForm/templates/tutorial_search.html', context)
+    return render(request, 'spoken/templates/tutorial_search.html', context)
 
 def list_videos(request):
     form = TutorialSearchForm()
@@ -173,13 +173,12 @@ def list_videos(request):
 
 def series_foss(request):
     form = SeriesTutorialSearchForm()
-    foss_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), language__name='English', tutorial_detail__foss__show_on_homepage = False).values('tutorial_detail__foss__id','tutorial_detail__foss__id' ).annotate().distinct()
-    testimonial_display = []
-    for foss in foss_list:
-        testimonial_display.append(VideoTestimonial.objects.filter(foss__id=foss['tutorial_detail__foss__id']).exclude(location__exact='').values_list('foss__foss', 'location','embed'))
+    # Get all the video / audio testimonials in series
+    foss_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), language__name='English', tutorial_detail__foss__show_on_homepage = False).values_list('tutorial_detail__foss__id').annotate().distinct()
+    testimonials =  MediaTestimonials.objects.filter(foss__id__in=foss_list).values("foss__foss", "content", "created", "foss", "foss_id", "id", "path", "user").order_by('-created')
     context = {}
     context['form'] = form
-    context['td'] = testimonial_display
+    context['testimonials'] = testimonials
     context['media_url'] = settings.MEDIA_URL
     return render(request, 'spoken/templates/series_foss_list.html', context)
 
@@ -189,7 +188,7 @@ def series_tutorial_search(request):
     collection = None
     form = SeriesTutorialSearchForm()
     foss_get = ''
-    show_on_homepage = False;
+    show_on_homepage = False
     queryset = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = show_on_homepage)
     
     if request.method == 'GET' and request.GET:
@@ -327,63 +326,62 @@ def get_language(request, tutorial_type):
 
 
 def testimonials(request):
-    testimonials = Testimonials.objects.all()
-    context = {'testimonials': testimonials}
+    testimonials = []
+    # Take all the text testimonials
+    testimonials.extend(list(Testimonials.objects.all().values().order_by('-created')))
+    # Take all the video / audio testimonials
+    testimonials.extend(list(MediaTestimonials.objects.all().values("foss__foss", "content", "created", "foss", "foss_id", "id", "path", "user").order_by('-created')))
+    # sort both by date created
+    testimonials.sort(key=lambda x: x['created'], reverse=True)
+    context = {
+        'testimonials': testimonials,
+        'media_url': settings.MEDIA_URL,
+    }
     context.update(csrf(request))
     return render(request, 'spoken/templates/testimonial/testimonials.html', context)
 
 
-def testimonials_new_video(request, type):
+def testimonials_new_media(request, type):
     ''' new video testimonials '''
     user = request.user
     context = {}
     if type == 'series':
-        form = VideoTestimonialForm(on_home_page=False)
+        form = MediaTestimonialForm(on_home_page=False)
     else:
-        form = VideoTestimonialForm(on_home_page=True)
+        form = MediaTestimonialForm(on_home_page=True)
     if (not user.is_authenticated()) or ((not user.has_perm('events.add_testimonials'))):
         raise PermissionDenied()
 
     if request.method == 'POST':
         if type == 'series':
-            form = VideoTestimonialForm(request.POST, request.FILES, on_home_page=False)
+            form = MediaTestimonialForm(request.POST, request.FILES, on_home_page=False)
         else:
-            form = VideoTestimonialForm(request.POST, request.FILES, on_home_page=True)
+            form = MediaTestimonialForm(request.POST, request.FILES, on_home_page=True)
         if form.is_valid():
             foss = FossCategory.objects.get(foss=request.POST.get('foss'))
-            file_location = request.POST.get('location')
-            if not request.FILES and not file_location:
+            if not request.FILES:
                 messages.error(request, 'Nothing uploaded. Choose a file for paste a link')
-            elif request.FILES:
+            else:
+                file_container = request.FILES['media']
                 # Put the uploaded file in the desired location.
-                file_name = str(user) + '-' + dt.datetime.now().strftime("%Y-%m-%d-%H-%M-%S") + ".mp4"
+                file_name = str(user) + '-' + dt.datetime.now().strftime("%Y-%m-%d-%H-%M-%S") + file_container.name[-4:]
                 file_path = settings.MEDIA_ROOT + 'testimonials/' + str(foss.id) + '/' 
                 from_media_path =  'testimonials/' + str(foss.id) + '/' + file_name
                 os.system("mkdir -p %s" % file_path)
                 full_path = file_path + file_name
                 fout = open(full_path, 'wb+')
-                f = request.FILES['video']
                 # Iterate through the chunks.
-                for chunk in f.chunks():
+                for chunk in file_container.chunks():
                     fout.write(chunk)
                 fout.close()
                 # Save in database
-                data = VideoTestimonial(foss=foss, location=from_media_path, embed=False)
+                data = MediaTestimonials(foss=foss, path=from_media_path, user=request.POST.get('name'), content= request.POST.get('content'))
                 messages.success(request, 'Testimonial has posted successfully!')
                 data.save()
-            else:
-                # Save in database
-                try:
-                    VideoTestimonial.objects.get(location=file_location)
-                    messages.error(request, 'Testimonial already uploaded')
-                except:
-                    data = VideoTestimonial(foss=foss, location=file_location, embed=True)
-                    messages.success(request, 'Testimonial has posted successfully!')
-                    data.save()
             return HttpResponseRedirect('/')
     context['form'] = form
     context.update(csrf(request))
-    return render(request, 'spoken/templates/testimonial/videoform.html', context)
+    return render(request, 'spoken/templates/testimonial/mediaform.html', context)
 
 
 def testimonials_new(request):

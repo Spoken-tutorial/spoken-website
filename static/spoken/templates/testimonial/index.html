@@ -17,7 +17,10 @@
 {% block search %}{% endblock %}
 {% block content %}
     <div class='add-new'>
-	    <a class="btn btn-primary" href="{% url 'testimonials_new' %}">Add New</a>
+        <a class="btn btn-primary" href="{% url 'testimonials_new' %}">Add New</a>
+        <a class="btn btn-primary" href="{% url 'testimonials_new_media' type='tutorial' %}">Upload Media Testimonial</a>
+        <a class="btn btn-primary" href="{% url 'testimonials_new_media' type='series' %}">Upload Series Testimonial</a>
+
 	</div>
 	<div class='table-responsive'>
 		{% if collection %}		    

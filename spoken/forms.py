@@ -4,8 +4,8 @@ from django.db.models import Count, Q
 from django.core.exceptions import ValidationError
 
 # Spoken Tutorial Stuff
-from creation.models import TutorialResource, VideoTestimonial
-from events.models import Testimonials, InductionInterest
+from creation.models import TutorialResource
+from events.models import Testimonials, InductionInterest, MediaTestimonials
 
 
 class KeywordSearchForm(forms.Form):
@@ -91,11 +91,11 @@ def file_size(value):
     if value.size > 104857600:
         raise ValidationError('File too large. Size should not exceed 100 MiB.')
 
-class VideoTestimonialForm(forms.Form):
+class MediaTestimonialForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         on_home_page = kwargs.pop('on_home_page')
-        super(VideoTestimonialForm, self).__init__(*args, **kwargs)
+        super(MediaTestimonialForm, self).__init__(*args, **kwargs)
         foss_list_choices = [('', '-- All Courses --'),]
         foss_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), language__name='English', tutorial_detail__foss__show_on_homepage = on_home_page).values('tutorial_detail__foss__foss').annotate(
             Count('id')).order_by('tutorial_detail__foss__foss').values_list('tutorial_detail__foss__foss', 'id__count').distinct()
@@ -103,23 +103,29 @@ class VideoTestimonialForm(forms.Form):
             foss_list_choices.append((str(foss_row[0]), str(foss_row[0]) + ' (' + str(foss_row[1]) + ')'))
 
         self.fields['foss'].choices = foss_list_choices
+        
         self.fields['foss'].widget.attrs['class'] = 'form-control'
-        self.fields['video'].widget.attrs['class'] = 'form-control'
-        self.fields['location'].widget.attrs['class'] = 'form-control'
+        self.fields['media'].widget.attrs['class'] = 'form-control'
+        self.fields['name'].widget.attrs['class'] = 'form-control'
+        self.fields['content'].widget.attrs['class'] = 'form-control'
     
     foss = forms.ChoiceField(
         choices = [],
         widget=forms.Select()
         )
         
-    video = forms.FileField(label = 'Select an mp4 file less than 100MB', validators=[file_size], required = False)
-    location = forms.CharField(label = 'or paste embedable link', required = False)
+    name = forms.CharField(label = 'Name', required=True)
+    media = forms.FileField(label = 'File(Select an mp4/mp3 file less than 100MB)', required=True)
+    content = forms.CharField(label = 'Short Discription', widget=forms.Textarea, required=True)
 
     def clean(self):
-        super(VideoTestimonialForm, self).clean()
-        if self.cleaned_data['video'] and self.cleaned_data['video'].content_type != 'video/mp4':
-            self._errors["video"] = self.error_class(["Not a valid file format."])
-        return self.cleaned_data['video']
+        if 'media' not in self.cleaned_data:
+            raise ValidationError({'media': ['No file or empty file given',]})
+        super(MediaTestimonialForm, self).clean()
+        formats = ['mp4','mp3']
+        if self.cleaned_data['media'].name[-3:] not in formats:
+            self._errors["media"] = self.error_class(["Not a valid file format."])
+        return self.cleaned_data['media']
 
 
 class ExpressionForm(forms.ModelForm):

@@ -50,19 +50,6 @@ class FossCategory(models.Model):
         return self.foss
 
 
-class VideoTestimonial(models.Model):
-    foss = models.ForeignKey(FossCategory)
-    location = models.CharField(max_length=255, unique=True)
-    embed = models.BooleanField()
-
-    class Meta:
-        verbose_name = 'Video Testimonial'
-        verbose_name_plural = 'Video Testimonials'
-
-    def __unicode__(self):
-        return self.location
-
-
 class BrochureDocument(models.Model):
     foss_course = models.ForeignKey(FossCategory)
     foss_language = models.ForeignKey(Language)
