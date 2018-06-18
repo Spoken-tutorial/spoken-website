@@ -2,12 +2,15 @@
 from __future__ import unicode_literals
 
 from django.db import models, migrations
+import datetime
+from django.utils.timezone import utc
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('creation', '0014_auto_20180613_1349'),
+        ('creation', '0012_tutorialresource_publish_at'),
+        ('events', '0029_mumbaistudents'),
     ]
 
     operations = [
@@ -18,6 +21,7 @@ class Migration(migrations.Migration):
                 ('path', models.CharField(max_length=255)),
                 ('user', models.CharField(max_length=255)),
                 ('content', models.CharField(max_length=255)),
+                ('created', models.DateTimeField(auto_now_add=True)),
                 ('foss', models.ForeignKey(to='creation.FossCategory')),
             ],
             options={
@@ -25,11 +29,10 @@ class Migration(migrations.Migration):
                 'verbose_name_plural': 'Media Testimonials',
             },
         ),
-        migrations.RemoveField(
-            model_name='videotestimonial',
-            name='foss',
-        ),
-        migrations.DeleteModel(
-            name='VideoTestimonial',
+        migrations.AlterField(
+            model_name='testimonials',
+            name='created',
+            field=models.DateTimeField(default=datetime.datetime(2018, 6, 18, 8, 19, 20, 294272, tzinfo=utc), auto_now_add=True),
+            preserve_default=False,
         ),
     ]
