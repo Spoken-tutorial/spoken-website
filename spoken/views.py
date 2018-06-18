@@ -172,6 +172,10 @@ def list_videos(request):
     return render(request, 'spoken/templates/list_videos_form.html', context)
 
 def series_foss(request):
+    '''
+    Get all the media testimonials which are set to not 
+    show on home page and display along the form to display the tutorials.
+    '''
     form = SeriesTutorialSearchForm()
     # Get all the video / audio testimonials in series
     foss_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), language__name='English', tutorial_detail__foss__show_on_homepage = False).values_list('tutorial_detail__foss__id').annotate().distinct()
@@ -326,6 +330,10 @@ def get_language(request, tutorial_type):
 
 
 def testimonials(request):
+    '''
+    Responds with `/testimonial` page to display all the 
+    text / video / audio template.
+    '''
     testimonials = []
     # Take all the text testimonials
     testimonials.extend(list(Testimonials.objects.all().values().order_by('-created')))
@@ -342,7 +350,11 @@ def testimonials(request):
 
 
 def testimonials_new_media(request, type):
-    ''' new video testimonials '''
+    '''
+    Responds with form for video/audio testimonials 
+    to be uploaded and POST request checks and stores 
+    the response in file system and database.
+    '''
     user = request.user
     context = {}
     if type == 'series':
@@ -385,7 +397,11 @@ def testimonials_new_media(request, type):
 
 
 def testimonials_new(request):
-    ''' new testimonials '''
+    ''' 
+    Responds with form for text testimonials 
+    to be uploaded and POST request checks and stores 
+    the response in the database.
+    '''
     user = request.user
     context = {}
     form = TestimonialsForm()

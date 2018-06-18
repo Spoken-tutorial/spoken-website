@@ -482,6 +482,11 @@ class Testimonials(models.Model):
   updated = models.DateTimeField(auto_now = True, null=True)
 
 class MediaTestimonials(models.Model):
+    '''
+    This model is required for storing audio / video testimonials
+    * path contains the location of the file,
+    * user is the person who has send the testimonial.
+    '''
     foss = models.ForeignKey(FossCategory)
     path = models.CharField(max_length=255)
     user = models.CharField(max_length=255)

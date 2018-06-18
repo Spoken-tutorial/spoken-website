@@ -88,11 +88,19 @@ class TestimonialsForm(forms.ModelForm):
 
 
 def file_size(value):
+    '''
+    Checks if the size is greater than the fixed 
+    limit & raises an error if the size is greater. 
+    100 MB = 104857600 B
+    '''
     if value.size > 104857600:
         raise ValidationError('File too large. Size should not exceed 100 MiB.')
 
 class MediaTestimonialForm(forms.Form):
-
+    '''
+    Form to take in the values for the media testimonials 
+    and save in the MediaTestimonials table.
+    '''
     def __init__(self, *args, **kwargs):
         on_home_page = kwargs.pop('on_home_page')
         super(MediaTestimonialForm, self).__init__(*args, **kwargs)

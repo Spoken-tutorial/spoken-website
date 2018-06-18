@@ -155,6 +155,7 @@
         </h4>
         {% for record in testimonials %}
             {% if record.path %}
+            <!-- formatismp4 checks if the format is mp4, returns True for mp4 and false for all others -->
                 {% if record.path|formatismp4 %}
                 <div class="testimonial-item">
                     <div class="row testimonial-content">

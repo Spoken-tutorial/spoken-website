@@ -104,6 +104,11 @@ def get_missing_component_reply(mcid):
 
 
 def formatismp4(path):
+    '''
+    ** Registered to be used in jinja template **
+    Function takes in a file name and checks if the 
+    last 3 characters are `mp4`.
+    '''
     return path[-3:] == 'mp4'
 
 
