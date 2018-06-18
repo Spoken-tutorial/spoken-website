@@ -10,18 +10,19 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('creation', '0023_auto_20180604_2049'),
+        ('creation', '0012_tutorialresource_publish_at'),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='PaymentChallan',
+            name='PaymentHonorarium',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('challan_code', models.CharField(max_length=255, unique=True, null=True, blank=True)),
-                ('amount', models.DecimalField(default=0, max_digits=9, decimal_places=2)),
-                ('challan_doc', models.FileField(upload_to=b'')),
-                ('challan_status', models.PositiveSmallIntegerField(default=1, choices=[(1, b'In Process'), (2, b'Forwarded'), (3, b'Completed'), (4, b'Confirmed')])),
+                ('amount', models.IntegerField(default=0)),
+                ('code', models.CharField(max_length=20, editable=False)),
+                ('doc', models.FileField(null=True, upload_to=b'', blank=True)),
+                ('status', models.PositiveSmallIntegerField(default=1, choices=[(1, b'In Process'), (2, b'Forwarded'), (3, b'Completed'), (4, b'Confirmed')])),
+                ('updated', models.DateTimeField(auto_now=True)),
             ],
         ),
         migrations.CreateModel(
@@ -29,9 +30,10 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('user_type', models.PositiveSmallIntegerField(default=3, choices=[(1, b'Script User'), (2, b'Video User'), (3, b'Script & Video User')])),
-                ('duration', models.DurationField(default=0)),
-                ('amount', models.DecimalField(default=0, max_digits=9, decimal_places=2)),
-                ('payment_challan', models.ForeignKey(on_delete=django.db.models.deletion.SET_NULL, blank=True, to='creation.PaymentChallan', null=True)),
+                ('seconds', models.PositiveIntegerField(default=0, help_text=b'Tutorial duration in seconds')),
+                ('amount', models.IntegerField(default=0)),
+                ('status', models.PositiveSmallIntegerField(default=1, choices=[(0, b'Payment Cancelled'), (1, b'Payment Due'), (2, b'Payment Initiated')])),
+                ('payment_honorarium', models.ForeignKey(related_name='tutorials', on_delete=django.db.models.deletion.SET_NULL, blank=True, to='creation.PaymentHonorarium', null=True)),
                 ('tutorial_resource', models.ForeignKey(to='creation.TutorialResource')),
                 ('user', models.ForeignKey(related_name='contributor', to=settings.AUTH_USER_MODEL)),
             ],

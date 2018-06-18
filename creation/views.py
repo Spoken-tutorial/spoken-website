@@ -1180,7 +1180,7 @@ def tutorials_pending(request):
                     print counter, tmp_rec.tutorial_detail.tutorial
                 counter += 1
             page = request.GET.get('page')
-            tmp_recs = get_page(tmp_recs, page, 300) #testing mohit
+            tmp_recs = get_page(tmp_recs, page, 300)  # testing mohit
         except Exception, e:
             print e
             pass
@@ -2113,7 +2113,7 @@ def public_review_tutorial(request, trid):
 @login_required
 def publish_tutorial(request, trid):
     tr_rec = TutorialResource.objects.get(id = trid)
-    create_payment_instance(request, tr_rec) # testing_mohit
+    create_payment_instance(request, tr_rec) # testing_mohit, remove this line in production
     if not is_qualityreviewer(request.user):
         raise PermissionDenied()
     try:
@@ -2134,12 +2134,12 @@ def publish_tutorial(request, trid):
         tr_rec.publish_at = timezone.now()
         tr_rec.save()
         PublishTutorialLog.objects.create(user = request.user, tutorial_resource = tr_rec)
-        # create_payment_instance(tr_rec) # create instance of tutorial payment
+        # create_payment_instance(request, tr_rec) # testing mohit, create instance of tutorial payment
         add_contributor_notification(tr_rec, comp_title, 'This tutorial is published now')
         messages.success(request, 'The selected tutorial is published successfully')
     else:
         messages.error(request, 'The selected tutorial cannot be marked as Public review')
-    create_payment_instance(request, tr_rec) # testing_mohit
+
     return HttpResponseRedirect('/creation/quality-review/tutorial/publish/index/')
 
 @login_required
@@ -2951,7 +2951,7 @@ def create_payment_instance(request, tr_res):
     tr_video_info = get_video_info(tr_video_path)
     tr_video_duration = tr_video_info.get('total',0)
     '''
-    tr_video_duration = get_video_info_random(tr_res.video) # testing_mohit
+    tr_video_duration = get_video_info_random(tr_res.video) # testing_mohit, uncomment above call and remove it
     try:
         if tr_res.script_user == tr_res.video_user:
             if is_external_contributor(tr_res.script_user):
@@ -2983,7 +2983,7 @@ def create_payment_instance(request, tr_res):
                 )
                 tp.save()
     except IntegrityError as e:
-        messages.error(request, " Tutorial already in payment process. Error Detail -- "+str(e))
+        messages.error(request, " Tutorial already in payment process.")
 
 def initiate_payment(request):
     user_id = request.POST.get('user')
@@ -3077,6 +3077,7 @@ def list_payment_honorarium(request):
     }
     return render(request, "creation/templates/list_all_payment_honorarium.html",context)
 
+@login_required
 def detail_payment_honorarium(request, hr_id):
     """
     Contributor can view and confirm his honorarium details

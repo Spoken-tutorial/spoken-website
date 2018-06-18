@@ -64,7 +64,7 @@
                     </td>
                     <td class="col-center">
                         {% for tr_pay in tr_rec.tutorialpayment_set.all %}
-                            {% if tr_pay.user == tr_rec.script_user or tr_pay.user == tr_rec.video_user %}
+                            {% if tr_pay.user == request.user %}
                                 <!-- cancelled -->
                                 {% if tr_pay.status == 0 %}
                                     <span class="text-danger fa fa-1 fa-minus-circle" title="Cancelled"></span>

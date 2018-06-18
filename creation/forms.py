@@ -1060,3 +1060,10 @@ class PaymentHonorariumFilterForm(forms.Form):
         contributor_list = [(contributor[0], contributor[1]+" "+contributor[2]) for contributor in contributor_list]        
         contributor_list.insert(0, ('', '--- Select Contributor ---'))
         self.fields['contributor'].choices = contributor_list
+
+    def clean(self):
+        super(PaymentHonorariumFilterForm, self).clean()
+        s_date = self.cleaned_data.get('start_date')
+        e_date = self.cleaned_data.get('end_date')
+        if s_date > e_date:
+            self.add_error('end_date', "End date must be later than start date.")

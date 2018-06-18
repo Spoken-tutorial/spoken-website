@@ -6,6 +6,8 @@
 {% block title %}Tutorials Published{% endblock %}
 {% block uncompresscssblock %}
     <link rel="stylesheet" href="{% static 'spoken/css/flip-scroll.min.css' %}" type="text/css" media="screen" charset="utf-8" />
+    <link rel="stylesheet" href="{% static 'spoken/css/jquery.datetimepicker.css' %}" type="text/css" media="screen" charset="utf-8" />
+    <link rel="stylesheet" href="{% static 'spoken/css/flip-scroll.min.css' %}" type="text/css" media="screen" charset="utf-8" />
 {% endblock %}
 {% block heading %}<i class="fa fa-list-ul"></i> Tutorials Published{% endblock %}
 {% block content %}
@@ -51,15 +53,15 @@
                 <div class="form-group">
                     <label for="id_start_date" class="col-sm-4 control-label">Start Date</label>
                     <div class="col-sm-8">
-                        {% render_field form.start_date class+="form-control " tabindex="1" %}
+                        {% render_field form.start_date class+="form-control date" tabindex="1" %}
                         {{ form.start_date.errors }}
                     </div>
                 </div>
                  <div class="form-group">
                     <label for="id_end_date" class="col-sm-4 control-label">End Date</label>
                     <div class="col-sm-8">
-                        {% render_field form.end_date class+="form-control" tabindex="1" %}
-                        {{ form.end_date.errors }}
+                        {% render_field form.end_date class+="form-control date" tabindex="1" %}
+                        <div class="text-danger">{{ form.end_date.errors }}</div>
                     </div>
                 </div>
                 <input type="submit" value="Filter" class="btn btn-success">
@@ -144,7 +146,6 @@
     </div>
 
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-    <script src="{% static 'spoken/js/jquery.datetimepicker.js' %}"></script>
     <script>
         // to dynamically get languages
         function load_languages(){
@@ -217,4 +218,19 @@
         
     </script>
 
+{% endblock %}
+{% block compressjsblock %}
+    <script src="{% static 'spoken/js/events.js' %}"></script>
+    <script src="{% static 'spoken/js/jquery.datetimepicker.js' %}"></script>
+    <script src="{% static 'spoken/js/jquery.fancybox.pack.js' %}"></script>
+    <script type="text/javascript">        
+        console.log("testing_mohit")
+        $('.date').datetimepicker({
+            lang:'en',
+            timepicker:false,
+            format:'Y-m-d',
+            formatDate:'Y/m/d',
+            maxDate:'+1987/06/14',
+        });
+    </script>
 {% endblock %}

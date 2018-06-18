@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/1.6/ref/settings/
 from os.path import *
 from .config import *
 import os
+
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 SCRIPT_URL = SCRIPT_URL
