@@ -1,4 +1,3 @@
-# Code to add publish date in tutorialresource table
 # To run this file please follow below instructions:
 # 1. Go to project directory
 # 2. run "python manage.py creation_audio_data"

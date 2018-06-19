@@ -189,7 +189,7 @@
                 return;
             }
             else {
-                alert("Bufferign Failed, Download video or refresh to try again.");
+                alert("Buffering Failed, Download video or refresh to try again.");
                 return;
             }
         }
