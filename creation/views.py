@@ -887,6 +887,7 @@ def upload_component(request, trid, component):
                         file_path = settings.MEDIA_ROOT + 'videos/' + str(tr_rec.tutorial_detail.foss_id) + '/' + str(tr_rec.tutorial_detail.id) + '/'
                         full_path = file_path + file_name
                         if os.path.isfile(file_path + tr_rec.video) and tr_rec.video_status > 0:
+			    print "her"
                             if 'isarchive' in request.POST and int(request.POST.get('isarchive', 0)) > 0:
                                 archived_file = 'Archived-' + str(request.user.id) + '-' + str(int(time.time())) + '-' + tr_rec.video
                                 os.rename(file_path + tr_rec.video, file_path + archived_file)
@@ -2103,6 +2104,7 @@ def publish_tutorial(request, trid):
         raise PermissionDenied()
     try:
         tr_rec = TutorialResource.objects.get(pk = trid, status = 0)
+        #pl_info = PlaylistInfo.objects.all()
         comp_title = tr_rec.tutorial_detail.foss.foss + ': ' + tr_rec.tutorial_detail.tutorial + ' - ' + tr_rec.language.name
     except:
         raise PermissionDenied()
@@ -2119,12 +2121,61 @@ def publish_tutorial(request, trid):
         tr_rec.publish_at = timezone.now()
         tr_rec.save()
         PublishTutorialLog.objects.create(user = request.user, tutorial_resource = tr_rec)
+        file_path = settings.MEDIA_ROOT + 'videos/' + str(tr_rec.tutorial_detail.foss_id) + '/' + str(tr_rec.tutorial_detail.id) + '/'
+        vid_name = file_path + tr_rec.tutorial_detail.tutorial.replace(' ', '-') + '-' + str(tr_rec.language.name) + '.ogv'
 
         add_contributor_notification(tr_rec, comp_title, 'This tutorial is published now')
         messages.success(request, 'The selected tutorial is published successfully')
+        if not os.path.isfile(vid_name[:-3]+"mp4"):
+            process = subprocess.Popen(["ffmpeg","-y","-i",vid_name,"-max_muxing_queue_size","500",vid_name[:-3]+"mp4"])
+            while process.poll() == None:
+                pass
+        youtube_upload_dir = settings.BASE_DIR + '/youtube/comb.py'
+        print youtube_upload_dir
+        #print tr_rec.tutorial_detail.foss+"-"+tr_rec.language.name
+        proc = subprocess.Popen(["python",youtube_upload_dir,"--file",vid_name[:-3]+'mp4',"--title",str(tr_rec.tutorial_detail.tutorial)+" - "+str(tr_rec.language.name),"--description",tr_rec.tutorial_detail.foss.description,"--playlist",str(tr_rec.tutorial_detail.foss)+" - "+str(tr_rec.language.name)],stdout=subprocess.PIPE)
+        #out = process.stdout.readlines()
+        playlistId = "None"
+        playlistitemId = "None"
+        videoId = "None"
+        while True:
+            line = proc.stdout.readline()
+            if line != '':
+                print line
+                l = line.split(" ")
+                if l[0]=="playlistId":
+                    playlistId = l[1]
+                elif l[0]=="playlistitemId":
+                    playlistitemId = l[1]
+                elif l[0]=="videoId":
+                    videoId = l[1] 
+            else:
+                break
+        if videoId != "None":
+            tr_rec.video_id=videoId
+        if playlistId != "None":
+            try:
+                pl = PlaylistInfo.objects.get(playlist_id = playlistId)
+            except PlaylistInfo.DoesNotExist:
+                pl = PlaylistInfo(foss_id = tr_rec.tutorial_detail.foss_id, language_id = tr_rec.language_id, playlist_id = playlistId)
+                pl.save()
+            if playlistitemId != "None":
+                tr_rec.playlist_item_id = playlistitemId
+                pl_item = PlaylistItem(playlist_id = pl.id , item_id = playlistitemId)
+                pl_item.save()
+        tr_rec.save()
+        
+        #print videoId
+        #print playlistId
+        #print playlistitemId
+
     else:
         messages.error(request, 'The selected tutorial cannot be marked as Public review')
     return HttpResponseRedirect('/creation/quality-review/tutorial/publish/index/')
+    #context = {
+    #   'trid' : trid
+    #}
+    #return render(request, 'creation/templates/publish_tutorial.html', context)
 
 @login_required
 def quality_reviewed_tutorials(request):
