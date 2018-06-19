@@ -124,7 +124,8 @@ class MediaTestimonialForm(forms.Form):
         
     name = forms.CharField(label = 'Name', required=True)
     media = forms.FileField(label = 'File(Select an mp4/mp3 file less than 100MB)', required=True)
-    content = forms.CharField(label = 'Short Discription', widget=forms.Textarea, required=True)
+    content = forms.CharField(label = 'Short Discription', widget=forms.Textarea, required=True,
+    max_length = 255)
 
     def clean(self):
         if 'media' not in self.cleaned_data:
@@ -215,5 +216,3 @@ class ExpressionForm(forms.ModelForm):
    borrow_laptop = cleaned_data['borrow_laptop']
    if bring_laptop.lower() == 'no' and not borrow_laptop:
        self.add_error('borrow_laptop','field is required.')
-
-

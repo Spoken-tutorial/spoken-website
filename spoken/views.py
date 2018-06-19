@@ -356,13 +356,14 @@ def testimonials_new_media(request, type):
     the response in file system and database.
     '''
     user = request.user
+    if not user.has_perm('events.add_testimonials'):
+        raise PermissionDenied()
+    
     context = {}
     if type == 'series':
         form = MediaTestimonialForm(on_home_page=False)
     else:
         form = MediaTestimonialForm(on_home_page=True)
-    if (not user.is_authenticated()) or ((not user.has_perm('events.add_testimonials'))):
-        raise PermissionDenied()
 
     if request.method == 'POST':
         if type == 'series':
@@ -404,10 +405,10 @@ def testimonials_new(request):
     '''
     user = request.user
     context = {}
-    form = TestimonialsForm()
-    if (not user.is_authenticated()) or ((not user.has_perm('events.add_testimonials'))):
+    if not user.has_perm('events.add_testimonials'):
         raise PermissionDenied()
-
+    
+    form = TestimonialsForm()
     if request.method == 'POST':
         form = TestimonialsForm(request.POST, request.FILES)
         if form.is_valid():
@@ -448,7 +449,7 @@ def admin_testimonials_edit(request, rid):
     context = {}
     form = TestimonialsForm()
     instance = ''
-    if (not user.is_authenticated()) or ((not user.has_perm('events.change_testimonials'))):
+    if not user.has_perm('events.change_testimonials'):
         raise PermissionDenied()
     try:
         instance = Testimonials.objects.get(pk=rid)
@@ -500,7 +501,7 @@ def admin_testimonials_delete(request, rid):
     user = request.user
     context = {}
     instance = ''
-    if (not user.is_authenticated()) or ((not user.has_perm('events.delete_testimonials'))):
+    if not user.has_perm('events.delete_testimonials'):
         raise PermissionDenied()
     try:
         instance = Testimonials.objects.get(pk=rid)
@@ -521,7 +522,7 @@ def admin_testimonials(request):
     ''' admin testimonials '''
     user = request.user
     context = {}
-    if (not user.is_authenticated()) or (not user.has_perm('events.add_testimonials') and (not user.has_perm('events.change_testimonials'))):
+    if not user.has_perm('events.add_testimonials') and not user.has_perm('events.change_testimonials'):
         raise PermissionDenied()
     collection = Testimonials.objects.all()
     context['collection'] = collection
@@ -694,8 +695,6 @@ def expression_of_intrest_new(request):
     context = {
         'form' : form,
     }
-
-
     context = {}
     context['form'] = form
     return render(request, 'spoken/templates/expression_of_intrest_old.html', context)
