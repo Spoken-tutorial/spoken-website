@@ -6,6 +6,8 @@
 \usepackage{graphicx}
 \usepackage{geometry}
 \usepackage{fourier}
+\usepackage{arydshln}
+\usepackage{multirow}
 \usepackage[T1]{fontenc}
 \usepackage{setspace}
 %% package to execute bash commands
@@ -24,8 +26,8 @@
 
 \begin{document}
 
-\TileWallPaper{28cm}{22cm}{../images/cer_bg4.png}
-\scalebox{3.1}
+\TileWallPaper{28cm}{21.6cm}{../images/cer_itpfront.png}
+\scalebox{3}
 {
 
 \color{brown!30!brown!60}
@@ -33,25 +35,25 @@
 
 
 {\centering
-	\vspace{0.6cm}
+	\vspace{0.7cm}
 	\textcolor{black!90}
-	{\fontsize{5.5}{5.5} \selectfont 
+	{\fontsize{6.5}{6.5} \selectfont 
 	\textbf
 	{Pandit Madan Mohan Malaviya National Mission on Teachers and Teaching\\
 	Ministry of Human Resource Development, Government of India\\}
 	}
 	
-	\vspace{0.2cm}
+	\vspace{0.35cm}
 	\textcolor{red!60!black!100}
-	{\fontsize{7}{7} \selectfont
+	{\fontsize{9}{8} \selectfont
 	\textbf
 	{Certificate of Participation\\}
 	}
 
-	\vspace{0.2cm}
+	\vspace{0.35cm}
 	\begin{doublespace}
 	\textcolor{black!100}
-	{\fontsize{5}{6} \selectfont 
+	{\fontsize{6}{6} \selectfont 
 		This is to certify that 
 		\underline{
 			\textit{
@@ -60,7 +62,7 @@
 		}\\
 		from \underline{
 			\textit{
-			\textcolor{red!30!black!90}{\fontsize{6}{7} \selectfont{Department Of Civil Engineering, Anjuman I Islam's  Kalsekar Technical Campus, Panvel}}
+			\textcolor{red!30!black!90}{\fontsize{6}{7} \selectfont{$college}}
 			}
 		}\\
 		successfully completed the one month residential Induction Training Programme\\
@@ -70,38 +72,38 @@
 	\end{doublespace}
 	\vspace{0.4cm}
 	{\color{black!100}
-		\scalebox{.6}
+		\scalebox{.8}
 		{
-		 \begin{tabular}{c c c c}
-		    \small{\includegraphics[height=0.6cm]{../images/kannan-moudgalya-sign.png}}  &  &  & \small{\includegraphics[height=0.6cm]{../images/kannan-moudgalya-sign.png}} \\ 
+				\begin{tabular}{ | l | c | c | c | c | c | l | }
+					\small{\includegraphics[height=0.6cm]{../images/prao-sign.png}} & & & & & & \small{\includegraphics[height=0.6cm]{../images/kannan-moudgalya-sign.png}} \\ 
 
-		    {\scriptsize  Prof. Preeti Rao } &  &  & 
-		    {\scriptsize Prof. Kannan Moudgalya} \\
+					{\scriptsize  Prof. Preeti Rao } & & &
+					\multirow{2}{*}{\begin{tabular}[c]{@{}l@{}}
+					\begin{pspicture}
+						\psbarcode{$qr_code}{eclevel=L width=0.30 height=0.30}{qrcode}
+					\end{pspicture}					
+					\end{tabular}} & & & {\scriptsize Prof. Kannan M. Moudgalya} \\ 
 
-		    {\scriptsize  PIC, CEP, IIT Bombay} &  &  & 
-		    {\scriptsize Project Coordinator, Teaching Learning Centre,} \\
+					{\fontsize{5}{3} \selectfont  {Professor-in-Charge}} & & & & & & {\fontsize{5}{3} \selectfont {Project Coordinator }} \\ 
 
-		    {\scriptsize } & & & {\scriptsize PMMMNMTT, IIT Bombay} \\
+					{\fontsize{5}{3} \selectfont  {Continuing Education (CE)}} & & &\tiny{\texttt{$serial_key}} &  & & {\fontsize{5}{3} \selectfont {Teaching Learning Centre }}  \\ 
 
-		  \end{tabular}
+
+				\end{tabular}
 		}
+		\scalebox{.8}
+		{
+				\begin{tabular}{ |l|l|l|l|r|l|}
+					{\fontsize{5}{5} \selectfont  {Quality Improvement Programmes (QIP), IIT Bombay}} & & & &{\fontsize{5}{5} \selectfont {   PMMMNMTT, IIT Bombay }} &
+				\end{tabular}
+		}		
 	}
-
-	\vspace{0.2cm}
-	\begin{pspicture}(0.09cm,0.09cm)  
-		\psbarcode{$qr_code}{eclevel=L width=0.25 height=0.20}{qrcode}
-	\end{pspicture}\\
-
-	{\color{black!60}
-	\tiny{\texttt{$serial_key}\\}
-	}
-	% \includegraphics[height=0.105cm]{../images/bottom_line.png}
 
 }
 \end{minipage}
 }
 \newpage
-\TileWallPaper{28cm}{22cm}{../images/cer_bg3.png}
+\TileWallPaper{28cm}{21.6cm}{../images/cer_itpback.png}
 \begin{minipage}{.33\textwidth}
 
 \end{minipage}
