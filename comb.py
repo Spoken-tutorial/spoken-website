@@ -4,6 +4,9 @@ import os
 import sys
 import random
 import time
+import django
+
+
 
 from apiclient.discovery import build
 from apiclient.errors import HttpError
@@ -13,6 +16,19 @@ from apiclient.http import MediaFileUpload
 from oauth2client.tools import argparser, run_flow
 
 
+from django.core.wsgi import get_wsgi_application
+
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "spoken.settings")
+application = get_wsgi_application()
+
+'''from spoken import settings
+from django.core.management import setup_environ
+setup_environ(settings)'''
+
+from creation.models import *
+
+
 httplib2.RETRIES = 1
 MAX_RETRIES = 10
 RETRIABLE_EXCEPTIONS = (httplib2.HttpLib2Error, IOError, httplib.NotConnected,
@@ -20,7 +36,7 @@ RETRIABLE_EXCEPTIONS = (httplib2.HttpLib2Error, IOError, httplib.NotConnected,
   httplib.CannotSendRequest, httplib.CannotSendHeader,
   httplib.ResponseNotReady, httplib.BadStatusLine)
 RETRIABLE_STATUS_CODES = [500, 502, 503, 504]
-CLIENT_SECRETS_FILE = "/home/abhinav/Desktop/youtube_api/spoken-website/youtube/client_secret.json"
+CLIENT_SECRETS_FILE = "/home/abhinav/Desktop/youtube_work/spoken-website/client_secret.json"
 YOUTUBE_READ_WRITE_SCOPE = "https://www.googleapis.com/auth/youtube"
 YOUTUBE_UPLOAD_SCOPE = "https://www.googleapis.com/auth/youtube.upload"
 YOUTUBE_API_SERVICE_NAME = "youtube"
@@ -76,7 +92,7 @@ def resumable_upload(insert_request):
     retry = 0
     while response is None:
         try:
-            #print "Uploading file..."
+            print "Uploading file..."
             status, response = insert_request.next_chunk()
             if response is not None:
                 if 'id' in response:
@@ -128,9 +144,9 @@ def check_playlist(youtube,playlist):
 
 
 def add_playlist(youtube, playlist):
-    #print "adding playlist"
+    print "adding playlist"
     playlist_id, position = check_playlist(youtube,playlist)
-    #print "playlist",playlist_id
+    print "playlist",playlist_id
     if playlist_id:
         print "playlist already exists"
         return playlist_id, position
@@ -149,7 +165,7 @@ def add_playlist(youtube, playlist):
     return playlists_insert_response["id"], 0
 
 def add_to_playlist(youtube,playlist_id,video_id,position):
-    #print "adding to playlist"
+    print "adding to playlist"
     response = youtube.playlistItems().insert(
         part="snippet",
         body=dict(
@@ -161,11 +177,13 @@ def add_to_playlist(youtube,playlist_id,video_id,position):
         )
     ).execute()
     print "playlistitemId",response['id']
+    return response['id']
 
 
 
 
 if __name__ == '__main__':
+    argparser.add_argument("--trid", required=True, help="Tutorial Id to upload")
     argparser.add_argument("--file", required=True, help="Video file to upload")
     argparser.add_argument("--title", help="Video title", default="Test Title")
     argparser.add_argument("--description", help="Video description",
@@ -182,15 +200,28 @@ if __name__ == '__main__':
 
     if not os.path.exists(args.file):
         exit("Error : Please specify a valid file using the --file= parameter.")
-    #print "hi"
+    tr_rec = TutorialResource.objects.get(pk = args.trid)
     youtube = get_authenticated_service(args)
-    #print youtube
     try:
+        print "hi"
         initialize_upload(youtube, args)
         print "videoId",video_id
-        if args.playlist != "Extra":
-            playlist_id, position = add_playlist(youtube,args.playlist)
-            print "playlistId",playlist_id
-            add_to_playlist(youtube,playlist_id,video_id,position)
+        if video_id != "NULL":
+            tr_rec.video_id= video_id
+            if args.playlist != "Extra":
+                playlist_id, position = add_playlist(youtube,args.playlist)
+                print "playlistId",playlist_id
+                playlistitemId = add_to_playlist(youtube,playlist_id,video_id,position)
+                try:
+                    pl = PlaylistInfo.objects.get(foss_id = tr_rec.tutorial_detail.foss_id, language_id = tr_rec.language_id)
+                    pl.playlist_id = playlist_id
+                    pl.save()
+                except PlaylistInfo.DoesNotExist:
+                    pl = PlaylistInfo(foss_id = tr_rec.tutorial_detail.foss_id, language_id = tr_rec.language_id, playlist_id = playlist_id)
+                    pl.save()
+                tr_rec.playlist_item_id = playlistitemId
+                pl_item = PlaylistItem(playlist_id = pl.id , item_id = playlistitemId)
+                pl_item.save()
+            tr_rec.save()
     except HttpError, e:
         print "Error : An HTTP error %d occurred:\n%s" % (e.resp.status, e.content)

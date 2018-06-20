@@ -8,6 +8,8 @@
 {% block content %}
     <!-- Nav tabs -->
     <div class="custom-alert"></div>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <ul class="breadcrumb">
         <li>
             <a href="/creation/quality-review/">
@@ -75,20 +77,55 @@
                         <td class="col-center" title="{{ tr_rec.common_content.keyword_status | get_review_status_list }}">
                             <span class="{{ tr_rec.common_content.keyword_status | get_review_status_symbol }}"></span>
                         </td>
-                        <td class="col-center"><a href="/creation/quality-review/tutorial/publish/{{ tr_rec.id }}" class="review-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Publish</a></td>
+                        <td class="col-center"> 
+                            <div class="review-btn">
+                                <button id="{{ tr_rec.id }}" style = "background: transparent; outline: none; border: none; height: 30px; color: teal;" onclick="move(this)" class="fa fa-cog fa-2">
+                                </button>
+                                Publish
+                            </div>
+                        </td>
                     </tr>
                 {% endfor %}
             </tbody>
         {% endif %}
         </table>
     </div>
+        <div id="load">
+        </div>
+
+    <script>
+         function move(element){ 
+            var id = element.id;
+            var load = document.getElementById("load");
+            var ele = document.getElementById("non-spin");
+            load.innerHTML = '<div id="spinner" class="fa fa-spinner fa-spin" style="font-size:48px;color:teal;"></div> The selected video is published on site. Uploading to youtube...';
+            var str = "../";
+            var string = str.concat(id);
+            location.href = string;
+        }
+          
+    </script>
+
+    
+
+
+
+
+          
 {% endblock %}
 {% block uncompressjsblock %}
     <script src="{% static 'spoken/js/jquery.fancybox.pack.js' %}"></script>
     <script src="{% static 'spoken/js/jquery.mousewheel-3.0.6.pack.js' %}"></script>
 {% endblock %}
 {% block compressinlinejsblock %}
-    <script type="text/javascript">
+
+
+
+
+
+
+<script type="text/javascript">
+    
         $(document).ready(function(){
             $(".review-btn").hover(
                 function () {
@@ -99,5 +136,6 @@
                 }
             );
         });
+
     </script>
 {% endblock %}

@@ -2125,50 +2125,16 @@ def publish_tutorial(request, trid):
         vid_name = file_path + tr_rec.tutorial_detail.tutorial.replace(' ', '-') + '-' + str(tr_rec.language.name) + '.ogv'
 
         add_contributor_notification(tr_rec, comp_title, 'This tutorial is published now')
-        messages.success(request, 'The selected tutorial is published successfully')
+        messages.success(request, 'Great! The selected tutorial is published successfully.')
         if not os.path.isfile(vid_name[:-3]+"mp4"):
             process = subprocess.Popen(["ffmpeg","-y","-i",vid_name,"-max_muxing_queue_size","500",vid_name[:-3]+"mp4"])
             while process.poll() == None:
                 pass
-        youtube_upload_dir = settings.BASE_DIR + '/youtube/comb.py'
+        youtube_upload_dir = settings.BASE_DIR + '/comb.py'
         print youtube_upload_dir
-        #print tr_rec.tutorial_detail.foss+"-"+tr_rec.language.name
-        proc = subprocess.Popen(["python",youtube_upload_dir,"--file",vid_name[:-3]+'mp4',"--title",str(tr_rec.tutorial_detail.tutorial)+" - "+str(tr_rec.language.name),"--description",tr_rec.tutorial_detail.foss.description,"--playlist",str(tr_rec.tutorial_detail.foss)+" - "+str(tr_rec.language.name)],stdout=subprocess.PIPE)
-        #out = process.stdout.readlines()
-        playlistId = "None"
-        playlistitemId = "None"
-        videoId = "None"
-        while True:
-            line = proc.stdout.readline()
-            if line != '':
-                print line
-                l = line.split(" ")
-                if l[0]=="playlistId":
-                    playlistId = l[1]
-                elif l[0]=="playlistitemId":
-                    playlistitemId = l[1]
-                elif l[0]=="videoId":
-                    videoId = l[1] 
-            else:
-                break
-        if videoId != "None":
-            tr_rec.video_id=videoId
-        if playlistId != "None":
-            try:
-                pl = PlaylistInfo.objects.get(playlist_id = playlistId)
-            except PlaylistInfo.DoesNotExist:
-                pl = PlaylistInfo(foss_id = tr_rec.tutorial_detail.foss_id, language_id = tr_rec.language_id, playlist_id = playlistId)
-                pl.save()
-            if playlistitemId != "None":
-                tr_rec.playlist_item_id = playlistitemId
-                pl_item = PlaylistItem(playlist_id = pl.id , item_id = playlistitemId)
-                pl_item.save()
-        tr_rec.save()
-        
-        #print videoId
-        #print playlistId
-        #print playlistitemId
-
+        proc = subprocess.Popen(["python",youtube_upload_dir,"--trid",trid,"--file",vid_name[:-3]+'mp4',"--title",str(tr_rec.tutorial_detail.tutorial)+" - "+str(tr_rec.language.name),"--description",tr_rec.tutorial_detail.foss.description,"--playlist",str(tr_rec.tutorial_detail.foss)+" - "+str(tr_rec.language.name)])
+        while proc.poll() == None:
+            pass
     else:
         messages.error(request, 'The selected tutorial cannot be marked as Public review')
     return HttpResponseRedirect('/creation/quality-review/tutorial/publish/index/')
