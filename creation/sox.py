@@ -4,8 +4,8 @@ from os   import system, path, listdir, chdir, mkdir
 from sys  import argv
 from time import sleep
 import subprocess
-import numpy as np
-import librosa
+# import numpy as np
+# import librosa
 from subprocess import Popen, PIPE
   
 
@@ -16,13 +16,13 @@ def execute(cli):
         sleep(0.2)
     return    
 
-def checkVolume(filename):
-    #print "checking volume"
-    y, sr = librosa.load(filename)
-    y_s = 2* y/(np.max(np.abs(y)))
-    output_file = filename[:-4]+".wav"
-    #print output_file
-    librosa.output.write_wav(output_file,y_s,sr)
+# def checkVolume(filename):
+#     #print "checking volume"
+#     y, sr = librosa.load(filename)
+#     y_s = 2* y/(np.max(np.abs(y)))
+#     output_file = filename[:-4]+".wav"
+#     #print output_file
+#     librosa.output.write_wav(output_file,y_s,sr)
 
 def CommandsForOGV(filename):
      cli = [None]*6
@@ -65,7 +65,7 @@ if __name__ == '__main__':
             execute(CommandsForWAV(s))
         else:
             #execute(ConvertToWAV(argv[1]),s)
-            checkVolume(s)
+            # checkVolume(s)
             filen=s[:-3]+'wav'
             cli = CommandsForWAV(filen)
             execute(cli)
