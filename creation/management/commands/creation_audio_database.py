@@ -11,6 +11,7 @@ from django.db import transaction as tx
 # Spoken Tutorial Stuff
 from creation.models import TutorialResource
 
+
 class Command(BaseCommand):
 
     @tx.atomic
@@ -25,10 +26,11 @@ class Command(BaseCommand):
             field_exist_check = TutorialResource._meta.get_field('audio')
             existing_video_list = TutorialResource.objects.filter(video__gt="").values_list("pk", "video", "language_id__name")
             for row in existing_video_list:
-                audio_name  = row[1].rsplit('.')[0]
+                audio_name = row[1].rsplit('.')[0]
                 # To ensure database is not corrupted on running this script again by mistake.
-                if audio_name.rsplit('-',1)[1] != "Video":
-                    TutorialResource.objects.filter(pk=row[0]).update(audio=audio_name+".ogg", video=audio_name.rsplit(row[2])[0]+"Video.webm")
+                if audio_name.rsplit('-', 1)[1] != "Video":
+                    TutorialResource.objects.filter(pk=row[0]).update(audio=audio_name + ".ogg", video=audio_name.rsplit(row[2])[0] + "Video.webm")
+            print ("Done!")
         except FieldDoesNotExist:
             print ("1001: No changes have occured, check if migration is done properly", error)
         except Exception as error:

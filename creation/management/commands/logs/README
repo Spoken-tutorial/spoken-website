@@ -1,0 +1,4 @@
+This folder contains logs file for the parent folder, please don't delete the folder as currently the following scripts are dependant on it:
+- spoken-website/creation/management/commands/create_webvtt.py
+- spoken-website/creation/management/commands/modify_media_ovma.py
+- spoken-website/creation/management/commands/create_mp4.py

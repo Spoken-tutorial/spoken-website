@@ -1,6 +1,6 @@
 # To run this file please follow below instructions:
 # 1. Go to project directory
-# 2. run "python manage.py modify_media_ovma"
+# 2. run "python manage.py create_mp4"
 
 from __future__ import absolute_import, print_function, unicode_literals
 import os
@@ -41,18 +41,9 @@ class Command(BaseCommand):
         bashCommand = "mkdir -p " + DESIRED_PATH + object + "/" + innerObject + "/"
 
         # Make the file
-        if videoObject[-11:] == "English.mp4":
-            if not os.path.isfile(DESIRED_FILE[:-8].replace("\(", "(").replace("\)", ")") + "-Video.webm") or not os.path.isfile(DESIRED_FILE.replace("\(", "(").replace("\)", ")") + ".ogg"):
-                # Save audio and video seperately for English Version
-                bashCommand = bashCommand + ";\nffmpeg -y -i " + fileToConvert + \
-                    " -vcodec libvpx -af 'volume=0.0' -max_muxing_queue_size 1024 -f webm " \
-                    + DESIRED_FILE[:-8] + "-Video.webm\nffmpeg -y -i " + fileToConvert + \
-                    " -vn -acodec libvorbis " + DESIRED_FILE + ".ogg"
-        else:
-            if not os.path.isfile(DESIRED_FILE.replace("\(", "(").replace("\)", ")") + ".ogg"):
-                # Save audio for Non-English Version
-                bashCommand = bashCommand + ";\nffmpeg -y -i " + fileToConvert + \
-                    " -vn -acodec libvorbis " + DESIRED_FILE + ".ogg"
+        if not os.path.isfile(DESIRED_FILE.replace("\(", "(").replace("\)", ")") + ".mp4"):
+            bashCommand = bashCommand + ";\nffmpeg -i " + fileToConvert + " -vcodec libx264 -max_muxing_queue_size 1024 -f mp4 " + DESIRED_FILE + ".mp4"
+        # print (bashCommand)
         os.system(bashCommand)
 
     def createLogFiles(self, log_file_path, original, converted):
@@ -101,11 +92,11 @@ class Command(BaseCommand):
                         os.chdir(innerObject)
                         videoList = os.listdir('.')
                         for videoObject in videoList:
-                            if videoObject.endswith(".mp4"):
+                            if videoObject.endswith(".ogv"):
                                 videoObject = videoObject.replace("(", "\(").replace(")", "\)")
                                 self.MakeModedFiles(object, innerObject, videoObject)
                         os.chdir("..")
                 os.chdir("..")
         # Create Log files
-        self.createLogFiles(os.path.dirname(os.path.realpath(__file__)) + '/logs/modify_media_ovma.log', '.ogg', '.mp4')
+        self.createLogFiles(os.path.dirname(os.path.realpath(__file__)) + '/logs/create_mp4.log', '.ogv', '.mp4')
         print ("Completed!")

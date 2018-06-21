@@ -1,9 +1,10 @@
 # To run this file please follow below instructions:
 # 1. Go to project directory
-# 2. run "python manage.py modify_media_ovma"
+# 2. run "python manage.py create_webvtt"
 
 from __future__ import absolute_import, print_function, unicode_literals
 import os
+import io
 import datetime
 
 # Third Party Stuff
@@ -20,40 +21,44 @@ DESIRED_PATH = settings.MEDIA_ROOT + 'videos/'
 
 class Command(BaseCommand):
 
-    def MakeModedFiles(self, object, innerObject, videoObject):
+    def MakeModedFiles(self, object, innerObject, scriptObject):
         '''
-        Arguements:
+        PATH: Input folder path
+        DESIRED_PATH: Output folder path
+        Arguments:
             object: Course Code
-            innerObject: Video Code
-            VideoObject: Video Object to Convert
-        This function makes the directories required and converts a file.
+            innerObject: script Code
+            scriptObject: script Object to Convert
+        This function makes VTT from SRT Files.
         '''
-
-        fileToConvert = os.path.join(os.getcwd(), videoObject)
         # Input File
         FILE = PATH + object + "/" + \
-            innerObject + "/" + videoObject[:-4]
-        # Output File
-        DESIRED_FILE = DESIRED_PATH + object + "/" + \
-            innerObject + "/" + videoObject[:-4]
+            innerObject + "/" + scriptObject
 
         # Make required Directories
-        bashCommand = "mkdir -p " + DESIRED_PATH + object + "/" + innerObject + "/"
+        if not os.path.isfile(FILE[:-4] + ".vtt"):
+            bashCommand = "mkdir -p " + DESIRED_PATH + object + "/" + innerObject + "/"
+            os.system(bashCommand)
 
-        # Make the file
-        if videoObject[-11:] == "English.mp4":
-            if not os.path.isfile(DESIRED_FILE[:-8].replace("\(", "(").replace("\)", ")") + "-Video.webm") or not os.path.isfile(DESIRED_FILE.replace("\(", "(").replace("\)", ")") + ".ogg"):
-                # Save audio and video seperately for English Version
-                bashCommand = bashCommand + ";\nffmpeg -y -i " + fileToConvert + \
-                    " -vcodec libvpx -af 'volume=0.0' -max_muxing_queue_size 1024 -f webm " \
-                    + DESIRED_FILE[:-8] + "-Video.webm\nffmpeg -y -i " + fileToConvert + \
-                    " -vn -acodec libvorbis " + DESIRED_FILE + ".ogg"
-        else:
-            if not os.path.isfile(DESIRED_FILE.replace("\(", "(").replace("\)", ")") + ".ogg"):
-                # Save audio for Non-English Version
-                bashCommand = bashCommand + ";\nffmpeg -y -i " + fileToConvert + \
-                    " -vn -acodec libvorbis " + DESIRED_FILE + ".ogg"
-        os.system(bashCommand)
+            # Make the file
+            output = "WEBVTT\n\n"
+            with io.open(FILE, encoding='utf8') as fout:
+                line = fout.readline()
+
+                while line:
+                    if "-->" in line:
+                        output = output + line[:8] + ".000 --> "
+                        output = output + line[13:21]
+                        output = output + ".000" + "\n"
+                    else:
+                        output = output + line
+                    line = fout.readline()
+
+            with io.open(FILE[:-4] + ".vtt", "a", encoding='utf8') as fout:
+                objectList = output.split("\n")
+                for object in objectList:
+                    fout.write(object)
+                    fout.write('\n')
 
     def createLogFiles(self, log_file_path, original, converted):
         '''
@@ -86,9 +91,11 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         '''
-        Batch MP4 to Silent videos & OGG converter
-        > MP4 to WEBM -af
-        > MP4 to OGG -vn
+        SRT to WEBVTT
+        ---
+        Usage: 
+        Requires input folder path in PATH variable
+        Requires output folder path in DESIRED_PATH variable
         '''
         os.chdir(PATH)
         list = os.listdir('.')
@@ -99,13 +106,12 @@ class Command(BaseCommand):
                 for innerObject in innerList:
                     if innerObject.isdigit():
                         os.chdir(innerObject)
-                        videoList = os.listdir('.')
-                        for videoObject in videoList:
-                            if videoObject.endswith(".mp4"):
-                                videoObject = videoObject.replace("(", "\(").replace(")", "\)")
-                                self.MakeModedFiles(object, innerObject, videoObject)
+                        scriptList = os.listdir('.')
+                        for scriptObject in scriptList:
+                            if scriptObject.endswith(".srt"):
+                                self.MakeModedFiles(object, innerObject, scriptObject)
                         os.chdir("..")
                 os.chdir("..")
         # Create Log files
-        self.createLogFiles(os.path.dirname(os.path.realpath(__file__)) + '/logs/modify_media_ovma.log', '.ogg', '.mp4')
+        self.createLogFiles(os.path.dirname(os.path.realpath(__file__)) + '/logs/create_webvtt.log', '.srt', '.vtt')
         print ("Completed!")
