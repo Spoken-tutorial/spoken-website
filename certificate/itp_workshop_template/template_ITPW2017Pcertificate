@@ -72,31 +72,31 @@
 	\end{doublespace}
 	\vspace{0.4cm}
 	{\color{black!100}
-		\scalebox{.8}
+		\scalebox{.75}
 		{
-				\begin{tabular}{ | l | c | c | c | c | c | l | }
-					\small{\includegraphics[height=0.6cm]{../images/prao-sign.png}} & & & & & & \small{\includegraphics[height=0.6cm]{../images/kannan-moudgalya-sign.png}} \\ 
-
-					{\scriptsize  Prof. Preeti Rao } & & &
-					\multirow{2}{*}{\begin{tabular}[c]{@{}l@{}}
+				\begin{tabular}{  l  c  c  c  l }
+					\small{\includegraphics[height=0.6cm]{../images/prao-sign.png}} & 
+					\multirow{2}{*}{
 					\begin{pspicture}
 						\psbarcode{$qr_code}{eclevel=L width=0.30 height=0.30}{qrcode}
-					\end{pspicture}					
-					\end{tabular}} & & & {\scriptsize Prof. Kannan M. Moudgalya} \\ 
+					\end{pspicture}	} & & & 
+					\small{\includegraphics[height=0.6cm]{../images/kannan-moudgalya-sign.png}} \\ [-0.7em]
 
-					{\fontsize{5}{3} \selectfont  {Professor-in-Charge}} & & & & & & {\fontsize{5}{3} \selectfont {Project Coordinator }} \\ 
 
-					{\fontsize{5}{3} \selectfont  {Continuing Education (CE)}} & & &\tiny{\texttt{$serial_key}} &  & & {\fontsize{5}{3} \selectfont {Teaching Learning Centre }}  \\ 
+					{\scriptsize  Prof. Preeti Rao } & & & & 
+					{\scriptsize Prof. Kannan M. Moudgalya} \\ [-0.5em]
 
+					{\fontsize{6}{5} \selectfont{Professor-in-Charge}} & & & & 
+					{\fontsize{6}{5} \selectfont{Project Coordinator }} \\ [-0.6em]
+
+					{\fontsize{6}{5} \selectfont{Continuing Education (CE)}} & \tiny{\texttt{$serial_key}} & & & 
+					{\fontsize{6}{5} \selectfont{Teaching Learning Centre }}  \\ [-0.6em]
+
+					{\fontsize{6}{5} \selectfont{Quality Improvement Programmes (QIP), IIT Bombay}} &  & & & {\fontsize{6}{5} \selectfont{PMMMNMTT, IIT Bombay }}
 
 				\end{tabular}
 		}
-		\scalebox{.8}
-		{
-				\begin{tabular}{ |l|l|l|l|r|l|}
-					{\fontsize{5}{5} \selectfont  {Quality Improvement Programmes (QIP), IIT Bombay}} & & & &{\fontsize{5}{5} \selectfont {   PMMMNMTT, IIT Bombay }} &
-				\end{tabular}
-		}		
+		
 	}
 
 }

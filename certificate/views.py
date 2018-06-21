@@ -40,7 +40,7 @@ def verification(serial, _type):
                                           ('Days', '12 August'), ('Year', year)])
                 elif purpose == 'Induction Training Programme':
                     detail = OrderedDict([('Name', name), ('Event', purpose),
-                                          ('Days', '20 December'), ('Year', year)])
+                                          ('Days', ' 28 November 2017 to 20 December'), ('Year', year)])
                 elif purpose == 'DrupalCamp Mumbai':
                     drupal_user = Drupal_camp.objects.get(email=certificate.email)
                     DAY = drupal_user.attendance
@@ -550,7 +550,7 @@ def itp_workshop_download(request):
         file_name = file_name.replace('.', '')
         try:
             old_user = Certificate.objects.get(email=email, serial_no=serial_no)
-            qrcode = 'Verify at: http://spoken-tutorial.org/certificate/verify/{0} '.format(old_user.short_key)
+            qrcode = 'http://spoken-tutorial.org/certificate/verify/{0} '.format(old_user.short_key)
             details = {'name': name, 'serial_key': old_user.short_key, 'college':college}
             certificate = create_itp_workshop_certificate(certificate_path, details,
                                                              qrcode, type, paper, workshop, file_name)
@@ -568,7 +568,7 @@ def itp_workshop_download(request):
                     uniqueness = True
                 else:
                     num += 1
-            qrcode = 'Verify at: http://spoken-tutorial.org/certificate/verify/{0} '.format(short_key)
+            qrcode = 'http://spoken-tutorial.org/certificate/verify/{0} '.format(short_key)
             details = {'name': name, 'serial_key': short_key, 'college': college}
             certificate = create_itp_workshop_certificate(certificate_path, details,
                                                              qrcode, type, paper, workshop, file_name)
