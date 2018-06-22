@@ -12,6 +12,7 @@ from django.db import transaction as tx
 # Spoken Tutorial Stuff
 from creation.models import FossSuperCategory
 
+
 all_categories = [
     "Animation and Graphics",
     "Application Software",

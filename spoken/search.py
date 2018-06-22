@@ -12,9 +12,11 @@ from whoosh.lang.porter import stem
 from creation.models import TutorialResource
 
 
-# Function used to search the query in the index table and display search results and related searches for the user
-
 def search_for_results(userquery, corrected_flag=True):
+    '''
+    Function used to search the query in the index table and 
+    display search results and related searches for the user
+    '''
     try:
         if os.path.exists(settings.SEARCH_INDEX_DIR):
             # open index directory and create object for searcher class

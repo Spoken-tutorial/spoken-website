@@ -1,10 +1,9 @@
 Spoken-Website
 ==============
 
-Spoken tutorial website in django (http://spoken-tutorial.org)
+Spoken tutorial website in django [http://spoken-tutorial.org](http://spoken-tutorial.org)
 
-
-```
+```bash
 pip install -r requirements-dev.txt
 ```
 

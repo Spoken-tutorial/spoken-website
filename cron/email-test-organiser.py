@@ -1,5 +1,6 @@
 import time
-import os, sys
+import os
+import sys
 from django.db.models import Q
 
 # setting django environment
@@ -22,9 +23,10 @@ notsent = 0
 count = 0
 tot_count = len(organisers)
 
+
 subject = 'Reminder Mail _ Spoken Tutorials IIT Bombay | Timely marking of the Participant List (PL)'
 
-success_log_file_head = open(LOG_ROOT+'organiser_pl_marking_reminder_log.txt',"w")
+success_log_file_head = open(LOG_ROOT + 'organiser_pl_marking_reminder_log.txt', "w")
 for organiser in organisers:
     message = '''
 
@@ -68,13 +70,13 @@ Spoken Tutorial, IIT Bombay
 
 '''.format(organiser.user.email)
 
-    to  = [organiser.user.email]
+    to = [organiser.user.email]
     # to = ['ganeshmohite96@gmail.com','nancyvarkey@gmail.com']
     email = EmailMultiAlternatives(
         subject, message, 'administrator@spoken-tutorial.org',
-        to = to,
-        headers = {
-         "Content-type" : "text/html"
+        to=to,
+        headers={
+            "Content-type": "text/html"
         }
     )
     #email.attach_alternative(html_content, "text/html")
@@ -83,17 +85,16 @@ Spoken Tutorial, IIT Bombay
     try:
         result = email.send(fail_silently=False)
         sent += 1
-        if sent%100 == 0:
+        if sent % 100 == 0:
             time.sleep(10)
         #print to," => sent (", str(count),"/",str(tot_count),")"
-        success_log_file_head.write(str(organiser.user.email)+','+str(1)+'\n')
+        success_log_file_head.write(str(organiser.user.email) + ',' + str(1) + '\n')
     except Exception, e:
         print e
         #print to," => not sent (",count,"/",tot_count,")"
-        success_log_file_head.write(str(organiser.user.email)+','+str(0)+'\n')
+        success_log_file_head.write(str(organiser.user.email) + ',' + str(0) + '\n')
     # break
 print "--------------------------------"
 print "Total sent mails:", sent
 print "Total not sent mails:", notsent
 print "--------------------------------"
-

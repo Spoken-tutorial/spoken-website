@@ -13,8 +13,8 @@ except gdata.service.BadAuthentication:
     raise BadAuthentication("Authentication failed")
 
 
-db = MySQLdb.connect(host = DB_HOST, user = DB_USER, passwd = DB_PASS, \
-    db = DB_NAME, charset='utf8')
+db = MySQLdb.connect(host=DB_HOST, user=DB_USER, passwd=DB_PASS,
+                     db=DB_NAME, charset='utf8')
 cur = db.cursor()
 cur.execute("SELECT ctr.id, ctr.tutorial_detail_id, ctr.common_content_id, \
     ctr.language_id, ctr.outline, ctr.video, ctr.video_id, \
@@ -27,15 +27,15 @@ cur.execute("SELECT ctr.id, ctr.tutorial_detail_id, ctr.common_content_id, \
     ((ctr.status = 1 OR ctr.status = 2) AND ctr.video_id IS NULL) ORDER BY \
     cfc.foss, ctd.level_id, ctd.order ASC")
 rows = cur.fetchall()
-error_log_file_head = open(LOG_ROOT + 'video-error-log.txt',"w")
-success_log_file_head = open(LOG_ROOT + 'video-success-log.txt',"w")
+error_log_file_head = open(LOG_ROOT + 'video-error-log.txt', "w")
+success_log_file_head = open(LOG_ROOT + 'video-success-log.txt', "w")
 for row in rows:
     ogv_video_path = MEDIA_ROOT + 'videos/' + str(row[8]) + '/' + str(row[1]) + '/' + str(row[5])
     mp4_video_path, file_extn = os.path.splitext(ogv_video_path)
     mp4_video_path = mp4_video_path + '.mp4'
     if not os.path.isfile(mp4_video_path):
-         print row[9] + ' - ' + row[13] + ' -- MP4 video missing'
-         continue
+        print row[9] + ' - ' + row[13] + ' -- MP4 video missing'
+        continue
     options = {
         'title': str(row[9]) + ' - ' + str(row[13]),
         'description': row[4],

@@ -26,22 +26,29 @@ def zipdir(src_path, dst_path, archive):
 
 
 def humansize(nbytes):
+    '''
+    Takes in number of bytes as arguements and returns 
+    size in human readable format.
+    '''
     suffixes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
-
     if nbytes == 0:
         return '0 B'
-
     i = 0
-
     while nbytes >= 1024 and i < len(suffixes) - 1:
         nbytes /= 1024.
         i += 1
-
     f = ('%.1f' % nbytes).rstrip('0').rstrip('.')
     return '%s %s' % (f, suffixes[i])
 
 
 def add_sheets(archive, foss, lang):
+    '''
+    Add sheets to the selected tutorials to be downloaded
+    Arguements:
+     archive: Archieve file in which content is to stored
+     foss: foss for which the content is to be added
+     lang: language for which the foss is to be added
+    '''
     instruction_file = 'videos/{}/{}-Instruction-Sheet-{}.pdf'.format(foss.id,
                                                                       foss.foss.replace(' ', '-'),
                                                                       lang.name)
@@ -62,6 +69,12 @@ def add_sheets(archive, foss, lang):
 
 
 def get_all_foss_details(selectedfoss):
+    '''
+    Ruturns a list of foss details
+    Arguements:
+     selectedfoss: list of all the selected foss
+    '''
+
     all_foss_details = {}
 
     for key, values in selectedfoss.iteritems():
@@ -86,6 +99,9 @@ def add_side_by_side_tutorials(archive, languages):
     '''
     Used to add side-by-side method videos in the home page
     of the downloaded site image and returns all available languages
+    Arguements:
+     archive: Archieve file in which content is to stored
+     languages: languages for the side_by_side videos are to be added
     '''
     languages.add('English')
     available_langs = set()
@@ -140,6 +156,9 @@ def get_static_files():
 
 
 def calculate_directory_size(dir_path):
+    '''
+    Returns the size of the folder
+    '''
     folder_size = 0.0
     try:
         if os.path.isdir(dir_path):
@@ -155,6 +174,10 @@ def calculate_directory_size(dir_path):
 
 
 def calculate_static_file_size():
+    '''
+    Returns the combined size for all the static 
+    files that are required to run the site offline.
+    '''
     fsize = 0.0
 
     try:
@@ -176,6 +199,11 @@ def calculate_static_file_size():
 
 
 def add_static_files(archive):
+    '''
+    Add static files in archieve
+    Arguements:
+        archive: Archieve file in which content is to stored
+    '''
     zipdir(settings.BASE_DIR + '/static/spoken/fonts', 'spoken/includes/fonts/', archive)
     static_files = get_static_files()
 

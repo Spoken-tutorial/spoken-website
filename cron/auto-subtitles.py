@@ -1,5 +1,8 @@
 from HTMLParser import HTMLParser
-import time, mechanize, cookielib, datetime
+import time
+import mechanize
+import cookielib
+import datetime
 from BeautifulSoup import BeautifulSoup
 from urllib import urlopen, quote
 import MySQLdb
@@ -14,8 +17,10 @@ class MLStripper(HTMLParser):
     def __init__(self):
         self.reset()
         self.fed = []
+
     def handle_data(self, d):
         self.fed.append(d)
+
     def get_data(self):
         return ''.join(self.fed)
 
@@ -33,7 +38,7 @@ def strip_tags(html):
 def readUrl(url):
     # print "Reading :", url
     b = getNewBrowser()
-    b.open(url, timeout = 30.0)
+    b.open(url, timeout=30.0)
     return BeautifulSoup(b.response())
 
 
@@ -50,7 +55,7 @@ def getNewBrowser():
 
     # handle some other stuff
     b.set_handle_equiv(True)
-    #b.set_handle_gzip(True)
+    # b.set_handle_gzip(True)
     b.set_handle_redirect(True)
     b.set_handle_referer(True)
 
@@ -58,9 +63,9 @@ def getNewBrowser():
     b.set_handle_refresh(mechanize._http.HTTPRefreshProcessor(), max_time=1)
 
     # want debugging messages?
-    #b.set_debug_http(True)
-    #b.set_debug_redirects(True)
-    #b.set_debug_responses(True)
+    # b.set_debug_http(True)
+    # b.set_debug_redirects(True)
+    # b.set_debug_responses(True)
 
     # User-Agent
     b.addheaders = [('User-agent', 'Mozilla/5.0 (X11; Linux x86_64) Gecko/20100101 Firefox/31.0')]
@@ -104,8 +109,8 @@ def generate_subtitle(srt_url, srt_file_path):
                             previous_time = formatted_time
                             continue
                         srt_data += str(counter) + '\n'
-                        srt_data += previous_time + '.000' + ' --> ' + str((datetime.datetime.strptime(\
-                                                formatted_time, "%H:%M:%S") - datetime.timedelta(seconds = 1)).time()) + '.001\n'
+                        srt_data += previous_time + '.000' + ' --> ' + str((datetime.datetime.strptime(
+                            formatted_time, "%H:%M:%S") - datetime.timedelta(seconds=1)).time()) + '.001\n'
                         counter += 1
                         previous_time = formatted_time
                     else:
@@ -118,10 +123,10 @@ def generate_subtitle(srt_url, srt_file_path):
                 if video_info['duration']:
                     srt_data += previous_time + '.000' + ' --> ' + video_info['duration'] + '.001\n'
                 else:
-                    srt_data += previous_time + '.000' + ' --> ' + str((datetime.datetime.strptime(\
-                        previous_time, "%H:%M:%S") + datetime.timedelta(seconds = 5)).time()) + '.001\n'
+                    srt_data += previous_time + '.000' + ' --> ' + str((datetime.datetime.strptime(
+                        previous_time, "%H:%M:%S") + datetime.timedelta(seconds=5)).time()) + '.001\n'
                 srt_data += previous_script_data
-            file_head = open(srt_file_path,"w")
+            file_head = open(srt_file_path, "w")
             file_head.write(srt_data.encode("utf-8"))
             file_head.close()
     except Exception, e:
@@ -179,9 +184,9 @@ def get_formatted_script(script):
     if script.string:
         return script.text.strip('\n').strip() + '\n\n'
     else:
-        return strip_tags(str(script.renderContents())\
-        .replace('&amp;', '&').replace('&quot;', '"')\
-        .replace('&gt;', '>').replace('&lt;', '<')).decode('utf-8').strip('\n').strip() + '\n\n'
+        return strip_tags(str(script.renderContents())
+                          .replace('&amp;', '&').replace('&quot;', '"')
+                          .replace('&gt;', '>').replace('&lt;', '<')).decode('utf-8').strip('\n').strip() + '\n\n'
 
 
 def rreplace(s, old, new, occurrence):
@@ -227,15 +232,15 @@ def get_formatted_time(raw_time_string):
     return None
 
 
-db = MySQLdb.connect(host = DB_HOST, user = DB_USER, passwd = DB_PASS, db = DB_NAME)
+db = MySQLdb.connect(host=DB_HOST, user=DB_USER, passwd=DB_PASS, db=DB_NAME)
 cur = db.cursor()
 cur.execute("SELECT * FROM creation_tutorialresource where status = 1 or status = 2 order by updated desc")
 rows = cur.fetchall()
 overwrite = False
 if 'replace' in sys.argv:
     overwrite = True
-error_log_file_head = open(LOG_ROOT + 'srt-error-log.txt',"w")
-success_log_file_head = open(LOG_ROOT + 'srt-success-log.txt',"w")
+error_log_file_head = open(LOG_ROOT + 'srt-error-log.txt', "w")
+success_log_file_head = open(LOG_ROOT + 'srt-success-log.txt', "w")
 for row in rows:
     code = 0
     cur.execute('select * from creation_tutorialdetail where id = ' + str(row[1]))

@@ -5,6 +5,7 @@ from django.conf.urls import (
     url
 )
 
+
 urlpatterns = patterns('',
         # Main pages dispatcher
         url(r'^$', 'creation.views.creationhome', name="creationhome"),

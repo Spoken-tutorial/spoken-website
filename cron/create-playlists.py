@@ -16,13 +16,13 @@ except gdata.service.BadAuthentication:
     raise BadAuthentication("Authentication failed")
 
 
-db = MySQLdb.connect(host = DB_HOST, user = DB_USER, passwd = DB_PASS, \
-    db = DB_NAME)
+db = MySQLdb.connect(host=DB_HOST, user=DB_USER, passwd=DB_PASS,
+                     db=DB_NAME)
 cur = db.cursor()
 cur.execute("SELECT * FROM creation_fosscategory ORDER BY foss")
 rows = cur.fetchall()
-error_log_file_head = open(LOG_ROOT + 'playlist-error-log.txt',"w")
-success_log_file_head = open(LOG_ROOT + 'playlist-success-log.txt',"w")
+error_log_file_head = open(LOG_ROOT + 'playlist-error-log.txt', "w")
+success_log_file_head = open(LOG_ROOT + 'playlist-success-log.txt', "w")
 for row in rows:
     cur.execute("SELECT creation_language.id, creation_language.name FROM \
         creation_language WHERE (creation_language.id IN (SELECT DISTINCT \

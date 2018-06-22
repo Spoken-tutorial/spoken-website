@@ -1,5 +1,6 @@
 import time
-import os, sys
+import os
+import sys
 from django.db.models import Q
 
 # setting django environment
@@ -12,11 +13,11 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
 from django.template import Context
 
-from config import * 
+from config import *
 from cms.models import *
 from events.models import Drupal2018_email, MumbaiStudents
 
-#here fetch all user
+# here fetch all user
 # users = Drupal2018_email.objects.all()
 users = MumbaiStudents.objects.all().order_by('bid')
 sent = 0
@@ -24,9 +25,10 @@ notsent = 0
 count = 0
 tot_count = len(users)
 
+
 subject = ' Invitation to attend "Drupal in a Day" workshop'
 
-success_log_file_head = open(LOG_ROOT+'drupal2018_org_invitation.txt',"w")
+success_log_file_head = open(LOG_ROOT + 'drupal2018_org_invitation.txt', "w")
 for user in users:
     message = '''
 <p>Dear Future Professionals,</p>
@@ -52,13 +54,13 @@ IIT Bombay</p>
 
 '''.format(user.stuid.user.email)
 
-    to  = [user.stuid.user.email]
+    to = [user.stuid.user.email]
     #to = ['ganeshmohite96@gmail.com','nancyvarkey.iitb@gmail.com']
     email = EmailMultiAlternatives(
         subject, message, 'tejas.shah@iitb.ac.in',
-        to = to,
-        headers = {
-         "Content-type" : "text/html"
+        to=to,
+        headers={
+            "Content-type": "text/html"
         }
     )
     email.attach_alternative(message, "text/html")
@@ -67,15 +69,15 @@ IIT Bombay</p>
     try:
         result = email.send(fail_silently=False)
         sent += 1
-        if sent%100 == 0:
+        if sent % 100 == 0:
             time.sleep(10)
         #print to," => sent (", str(count),"/",str(tot_count),")"
-        success_log_file_head.write(str(user.stuid.user.email)+','+str(1)+'\n')
+        success_log_file_head.write(str(user.stuid.user.email) + ',' + str(1) + '\n')
     except Exception, e:
         print e
         #print to," => not sent (",count,"/",tot_count,")"
-        success_log_file_head.write(str(user.stuid.user.email)+','+str(0)+'\n')
-    #break
+        success_log_file_head.write(str(user.stuid.user.email) + ',' + str(0) + '\n')
+    # break
 print "--------------------------------"
 print tot_count
 print "Total sent mails:", sent
