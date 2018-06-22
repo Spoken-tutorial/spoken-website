@@ -12,7 +12,7 @@ try:
 except gdata.service.BadAuthentication:
     raise BadAuthentication("Authentication failed")
 
-ldb = MySQLdb.connect(host = DB_HOST, user = 'stadmin', passwd = 'Listdb*4321sT', \
+ldb = MySQLdb.connect(host = DB_HOST, user = '', passwd = '', \
     db = 'cron_logs')
 lcur = ldb.cursor()
 
