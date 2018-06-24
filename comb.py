@@ -39,6 +39,7 @@ RETRIABLE_STATUS_CODES = [500, 502, 503, 504]
 CLIENT_SECRETS_FILE = "/home/abhinav/Desktop/youtube_work/spoken-website/client_secret.json"
 YOUTUBE_READ_WRITE_SCOPE = "https://www.googleapis.com/auth/youtube"
 YOUTUBE_UPLOAD_SCOPE = "https://www.googleapis.com/auth/youtube.upload"
+YOUTUBE_SCOPE=[YOUTUBE_READ_WRITE_SCOPE,YOUTUBE_UPLOAD_SCOPE]
 YOUTUBE_API_SERVICE_NAME = "youtube"
 YOUTUBE_API_VERSION = "v3"
 MISSING_CLIENT_SECRETS_MESSAGE = ""
@@ -50,7 +51,7 @@ video_id = "NULL"
 
 def get_authenticated_service(args):
     flow = flow_from_clientsecrets(CLIENT_SECRETS_FILE,
-        scope=YOUTUBE_UPLOAD_SCOPE,
+        scope=YOUTUBE_SCOPE,
         message=MISSING_CLIENT_SECRETS_MESSAGE)
 
     storage = Storage("%s-oauth2.json" % sys.argv[0])
@@ -60,6 +61,7 @@ def get_authenticated_service(args):
 
     return build(YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VERSION,
         http=credentials.authorize(httplib2.Http()))
+
 
 def initialize_upload(youtube, options):
     tags = None
@@ -179,49 +181,63 @@ def add_to_playlist(youtube,playlist_id,video_id,position):
     print "playlistitemId",response['id']
     return response['id']
 
+def delete_video(youtube,videoId):
+    print "deleting video"
+    response = youtube.videos().delete(
+        id=videoId
+    ).execute()
+    print "deleted"
+
+
+
 
 
 
 if __name__ == '__main__':
-    argparser.add_argument("--trid", required=True, help="Tutorial Id to upload")
-    argparser.add_argument("--file", required=True, help="Video file to upload")
-    argparser.add_argument("--title", help="Video title", default="Test Title")
-    argparser.add_argument("--description", help="Video description",
-        default="Test Description")
-    argparser.add_argument("--playlist", default="Extra")
-    argparser.add_argument("--category", default="22",
-        help="Numeric video category. " +
-        "See https://developers.google.com/youtube/v3/docs/videoCategories/list")
-    argparser.add_argument("--keywords", help="Video keywords, comma separated",
-        default="")
-    argparser.add_argument("--privacyStatus", choices=VALID_PRIVACY_STATUSES,
-        default=VALID_PRIVACY_STATUSES[0], help="Video privacy status.")
-    args = argparser.parse_args()
 
-    if not os.path.exists(args.file):
-        exit("Error : Please specify a valid file using the --file= parameter.")
+    # Taking arguments as input: only trid, file is required. Rest optional.
+
+    argparser.add_argument("--trid", default=1, help="Tutorial Id to upload")
+    argparser.add_argument("--file", help="Video file to upload")
+    argparser.add_argument("--delete", default="no")
+    argparser.add_argument("--title", help="Video title", default="Test Title")
+    argparser.add_argument("--description", help="Video description",default="Test Description")
+    argparser.add_argument("--playlist", default="Extra")
+    argparser.add_argument("--category", default="22",help="Numeric video category. " + "See https://developers.google.com/youtube/v3/docs/videoCategories/list")
+    argparser.add_argument("--keywords", help="Video keywords, comma separated",default="")
+    argparser.add_argument("--privacyStatus", choices=VALID_PRIVACY_STATUSES,default=VALID_PRIVACY_STATUSES[0], help="Video privacy status.")
+    args = argparser.parse_args()
     tr_rec = TutorialResource.objects.get(pk = args.trid)
-    youtube = get_authenticated_service(args)
+    youtube = get_authenticated_service(args)           # Gets authentication entity. Will create oAuth2.0 json credentials (if not present) using client secrets json
     try:
         print "hi"
-        initialize_upload(youtube, args)
-        print "videoId",video_id
-        if video_id != "NULL":
-            tr_rec.video_id= video_id
-            if args.playlist != "Extra":
-                playlist_id, position = add_playlist(youtube,args.playlist)
-                print "playlistId",playlist_id
-                playlistitemId = add_to_playlist(youtube,playlist_id,video_id,position)
-                try:
-                    pl = PlaylistInfo.objects.get(foss_id = tr_rec.tutorial_detail.foss_id, language_id = tr_rec.language_id)
-                    pl.playlist_id = playlist_id
-                    pl.save()
-                except PlaylistInfo.DoesNotExist:
-                    pl = PlaylistInfo(foss_id = tr_rec.tutorial_detail.foss_id, language_id = tr_rec.language_id, playlist_id = playlist_id)
-                    pl.save()
-                tr_rec.playlist_item_id = playlistitemId
-                pl_item = PlaylistItem(playlist_id = pl.id , item_id = playlistitemId)
-                pl_item.save()
-            tr_rec.save()
+        if args.delete == "yes":
+            if tr_rec.video_id:
+                delete_video(youtube,tr_rec.video_id)
+            else:
+                print "no such video"
+        else:
+            if not os.path.exists(args.file):
+                exit("Error : Please specify a valid file using the --file= parameter.")
+            
+            initialize_upload(youtube, args)
+            print "videoId",video_id
+            if video_id != "NULL":
+                tr_rec.video_id= video_id
+                if args.playlist != "Extra":
+                    playlist_id, position = add_playlist(youtube,args.playlist)
+                    print "playlistId",playlist_id
+                    playlistitemId = add_to_playlist(youtube,playlist_id,video_id,position)
+                    try:
+                        pl = PlaylistInfo.objects.get(foss_id = tr_rec.tutorial_detail.foss_id, language_id = tr_rec.language_id)
+                        pl.playlist_id = playlist_id
+                        pl.save()
+                    except PlaylistInfo.DoesNotExist:
+                        pl = PlaylistInfo(foss_id = tr_rec.tutorial_detail.foss_id, language_id = tr_rec.language_id, playlist_id = playlist_id)
+                        pl.save()
+                    tr_rec.playlist_item_id = playlistitemId
+                    pl_item = PlaylistItem(playlist_id = pl.id , item_id = playlistitemId)
+                    pl_item.save()
+                tr_rec.save()
     except HttpError, e:
         print "Error : An HTTP error %d occurred:\n%s" % (e.resp.status, e.content)
