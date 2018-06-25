@@ -1,0 +1,4 @@
+This folder can be used to create any required temporary file,
+files inside this folder are cleared periodically by cron/delete_old_temp.py file.
+This folder is current in use by:
+- The audio filter on upload module.

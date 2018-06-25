@@ -99,24 +99,9 @@
     setInterval(checkTimeAndPause, 1500);
 
     function pauseTrackedMedia() {
-        var videoPlayPromise = trackedPlayer.play();
-        if (videoPlayPromise !== undefined) {
-            videoPlayPromise.then(_ => {
-                // Can Successfully Pause
-                trackedPlayer.pause();
-            }).catch(error => {
-                console.log(error);
-            });
-        }
-        var audioPlayPromise = trackedAudio.play();
-        if (audioPlayPromise !== undefined) {
-            audioPlayPromise.then(_ => {
-                // Can Successfully Pause
-                trackedAudio.pause();
-            }).catch(error => {
-                console.log(error);
-            });
-        }
+            trackedPlayer.addClass("vjs-waiting");
+            trackedPlayer.pause();
+            trackedAudio.pause();
     }
     
     function  playTrackedMedia() {
