@@ -177,13 +177,23 @@ def series_foss(request):
     show on home page and display along the form to display the tutorials.
     '''
     form = SeriesTutorialSearchForm()
+    collection = None
     # Get all the video / audio testimonials in series
     foss_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), language__name='English', tutorial_detail__foss__show_on_homepage = False).values_list('tutorial_detail__foss__id').annotate().distinct()
-    testimonials =  MediaTestimonials.objects.filter(foss__id__in=foss_list).values("foss__foss", "content", "created", "foss", "foss_id", "id", "path", "user").order_by('-created')
+    collection =  MediaTestimonials.objects.filter(foss__id__in=foss_list).values("foss__foss", "content", "created", "foss", "foss_id", "id", "path", "user").order_by('-created')
+    
+    if collection:
+        page = request.GET.get('page')
+        collection = get_page(collection, page, limit=6)
+    
+    add_button_show= False
+    if request.user.has_perm('events.add_testimonials'):
+        add_button_show= True
     context = {}
     context['form'] = form
-    context['testimonials'] = testimonials
+    context['collection'] = collection
     context['media_url'] = settings.MEDIA_URL
+    context['add_button_show'] = add_button_show
     return render(request, 'spoken/templates/series_foss_list.html', context)
 
 @csrf_exempt
@@ -329,22 +339,25 @@ def get_language(request, tutorial_type):
     return HttpResponse(json.dumps(output), content_type='application/json')
 
 
-def testimonials(request):
+def testimonials(request, type="text"):
     '''
     Responds with `/testimonial` page to display all the 
     text / video / audio template.
     '''
-    testimonials = []
-    # Take all the text testimonials
-    testimonials.extend(list(Testimonials.objects.all().values().order_by('-created')))
-    # Take all the video / audio testimonials
-    testimonials.extend(list(MediaTestimonials.objects.all().values("foss__foss", "content", "created", "foss", "foss_id", "id", "path", "user").order_by('-created')))
-    # sort both by date created
-    testimonials.sort(key=lambda x: x['created'], reverse=True)
-    context = {
-        'testimonials': testimonials,
-        'media_url': settings.MEDIA_URL,
-    }
+    collection = None
+    if type == "text":
+        collection = Testimonials.objects.all().values().order_by('-created')
+    else:
+        collection = MediaTestimonials.objects.all().values("foss__foss", "content", "created", "foss", "foss_id", "id", "path", "user").order_by('-created')
+
+    if collection:
+        page = request.GET.get('page')
+        collection = get_page(collection, page, limit=6)
+
+    context = {}
+    context['collection'] = collection
+    context['media_url'] = settings.MEDIA_URL
+    context['testimonial_type'] = type
     context.update(csrf(request))
     return render(request, 'spoken/templates/testimonial/testimonials.html', context)
 

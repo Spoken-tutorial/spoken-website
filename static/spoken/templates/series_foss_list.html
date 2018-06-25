@@ -152,8 +152,11 @@
     <div class="testimonial-container col-sm-offset-2 col-md-offset-2 col-lg-offset-2 col-lg-8 col-md-8 col-sm-8 ">
         <h4 class="page-title">
             <i class="fa fa-list-ul"></i> Testimonials
+            {% if add_button_show %}
+            <a class="btn btn-primary pull-right" href="{% url 'testimonials_new_media' type='series' %}">Upload Series Testimonial</a>
+            {% endif %}
         </h4>
-        {% for record in testimonials %}
+        {% for record in collection %}
             {% if record.path %}
             <!-- formatismp4 checks if the format is mp4, returns True for mp4 and false for all others -->
                 {% if record.path|formatismp4 %}
@@ -202,25 +205,5 @@
             {% endif %}
         {% endfor %}
     </div>
-
-
-
-
-<!-- <div class="row">
-    {% for td_row in td %}
-        <div class='col-xs-12' id='st_video_title'> {{ td_row.0.0 }}</div>
-        {% for td_row_elements in td_row %}
-            <div class='col-sm-6'>
-                {% if td_row_elements.2 == False %}
-                <video id="st_video" title='{{ td_row_elements.0 }}' controls preload data-setup="{}">
-                        <source src="{{ media_url }}/{{ td_row_elements.1 }}" type="video/mp4" />
-                </video>
-                {% else %}
-                <iframe id='st_video' src="{{ td_row_elements.1 }}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-                {% endif %}
-            </div>
-        {% endfor %}
-    {% endfor %}
-</div> -->
 
 {% endblock %}

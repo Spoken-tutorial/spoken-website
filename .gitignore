@@ -1,4 +1,8 @@
+# Logs
 *.log
+!static/report_builder/bower_components/handsontable/sauce_connect.log
+!certificate/drupal_workshop_template/missfont.log
+
 celerybeat-schedule
 *~
 *.swp
@@ -11,6 +15,8 @@ cron/config.py
 cron/youtube-oauth.storage
 cron/logs/*
 youtube/secrets/*
+
+# Media Folder
 media/*
 !media/videos/
 !media/training/
@@ -37,6 +43,7 @@ media/cms/js/*
 !media/cms/documents/README
 !media/cms/css/README
 !media/cms/js/README
+
 uwsgi-master.pid
 static/CACHE/*
 *.py[cod]

@@ -122,7 +122,16 @@
         <h4 class="page-title">
             <i class="fa fa-list-ul"></i> Testimonials
         </h4>
-        {% for record in testimonials %}
+        <ul class="nav nav-tabs">
+            {% if testimonial_type == "text" %}
+            <li class="active"><a href="{% url 'testimonials' type='text' %}">Text</a></li>
+            <li><a href="{% url 'testimonials' type='media' %}">Media</a></li>
+            {% else %}
+            <li><a href="{% url 'testimonials' type='text' %}">Text</a></li>
+            <li class="active"><a href="{% url 'testimonials' type='media' %}">Media</a></li>
+            {% endif %}
+        </ul>
+        {% for record in collection %}
             {% if record.path %}
             <!-- formatismp4 checks if the format is mp4, returns True for mp4 and false for all others -->
                 {% if record.path|formatismp4 %}
