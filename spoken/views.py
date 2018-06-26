@@ -14,6 +14,7 @@ from django.db.models import Q
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
+from django.core.urlresolvers import reverse
 
 # Spoken Tutorial Stuff
 from cms.forms import *
@@ -525,20 +526,47 @@ def admin_testimonials_delete(request, rid):
         instance = Testimonials.objects.get(pk=rid)
         instance.delete()
         messages.success(request, 'Testimonial deleted successfully')
-        return HttpResponseRedirect('/admin/testimonials')
+        return HttpResponseRedirect(reverse('admin_testimonials'))
     context['instance'] = instance
     context.update(csrf(request))
     return render(request, 'spoken/templates/testimonial/form.html', context)
 
 
+def admin_testimonials_media_delete(request, rid):
+    user = request.user
+    context = {}
+    instance = ''
+    if not user.has_perm('events.delete_testimonials'):
+        raise PermissionDenied()
+    try:
+        instance = MediaTestimonials.objects.get(pk=rid)
+    except Exception as error:
+        print error
+        raise Http404('Page not found')
+    if request.method == 'POST':
+        instance = MediaTestimonials.objects.get(pk=rid)
+        instance.delete()
+        messages.success(request, 'Testimonial deleted successfully')
+        return HttpResponseRedirect(reverse('admin_testimonials'))
+    context['instance'] = instance
+    context.update(csrf(request))
+    return render(request, 'spoken/templates/testimonial/mediaform.html', context)
+
+
 def admin_testimonials(request):
-    ''' admin testimonials '''
+    ''' 
+    admin testimonials:
+        Page for administrators to view / add / edit / delete testimonials.
+    '''
     user = request.user
     context = {}
     if not user.has_perm('events.add_testimonials') and not user.has_perm('events.change_testimonials'):
         raise PermissionDenied()
     collection = Testimonials.objects.all()
+    mediacollection = MediaTestimonials.objects.all()
     context['collection'] = collection
+    context['mediacollection'] = mediacollection
+    context['media_url'] = settings.MEDIA_URL
     context.update(csrf(request))
     return render(request, 'spoken/templates/testimonial/index.html', context)
 

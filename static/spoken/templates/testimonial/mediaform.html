@@ -8,12 +8,31 @@
 {% block content %}
     <div class="row well">
         <div class='col-sm-8'>
+            {% if form %}
             <form action="{{ action }}" method="post" class='form-horizontal' enctype="multipart/form-data">
                 {% csrf_token %}
                 <!-- Django will take care of spiting the form. -->
                 {{ form.as_p }}
                 <input class="btn btn-primary" type="submit" value="Submit" />
             </form>
+            {% else %}
+                <h3>Are you sure you want to delete the testimonial?</h3>
+                <p>
+                    <dl>
+                        <dt> User Name: </dt>
+                        <dd> {{ instance.user }} </dd>
+                        <dt> Short Description: </dt>
+                        <dd> {{ instance.content }} </dd>
+                        <dt> Created: </dt>
+                        <dd> {{ instance.created }} </dd>
+                    </dl>
+                    <form action="{% url 'admin_testimonials_media_delete' instance.id %}" method="POST"> 
+                        {% csrf_token %}
+                        <input class="btn btn-danger" type="submit" value="Delete">
+                        <a class="btn btn-default" href="{% url  'admin_testimonials'  %}">Cancel</a>
+                    </form>
+                </p>
+            {% endif%}
         </div>
     </div>
 {% endblock %}
