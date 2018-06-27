@@ -26,7 +26,7 @@ from cms.sortable import *
 from creation.forms import *
 from creation.models import *
 from creation.subtitles import *
-
+from creation import sox
 from . import services
 
 
@@ -129,7 +129,7 @@ def get_audio_info(path):
     """
     info_m = {}
     try:
-        process = subprocess.Popen(['/usr/bin/ffmpeg', '-i', path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        process = subprocess.Popen([settings.FFMPEG_VP8_PATH, '-i', path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         stdout, stderr = process.communicate()
         duration_m = re.search(r"Duration:\s{1}(?P<hours>\d+?):(?P<minutes>\d+?):(?P<seconds>\d+\.\d+?)", stdout, re.DOTALL).groupdict()
         info_m = re.search(r": Audio: (?P<codec>.*?), (?P<profile>.*?)", stdout, re.DOTALL).groupdict()
@@ -169,7 +169,7 @@ def get_video_info(path):
     """
     info_m = {}
     try:
-        process = subprocess.Popen(['/usr/bin/ffmpeg', '-i', path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        process = subprocess.Popen([settings.FFMPEG_VP8_PATH, '-i', path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         stdout, stderr = process.communicate()
         duration_m = re.search(r"Duration:\s{1}(?P<hours>\d+?):(?P<minutes>\d+?):(?P<seconds>\d+\.\d+?)", stdout, re.DOTALL).groupdict()
         info_m = re.search(r": Video: (?P<codec>.*?), (?P<profile>.*?), (?P<width>.*?)x(?P<height>.*?), ", stdout, re.DOTALL).groupdict()
@@ -214,8 +214,8 @@ def create_thumbnail(row, attach_str, thumb_time, thumb_size):
     filepath = settings.MEDIA_ROOT + 'videos/' + str(row.tutorial_detail.foss_id) + '/' + str(row.tutorial_detail_id) + '/'
     filename = row.tutorial_detail.tutorial.replace(' ', '-') + '-' + attach_str + '.png'
     try:
-        #process = subprocess.Popen(['/usr/bin/ffmpeg', '-i ' + filepath + row.video + ' -r ' + str(30) + ' -ss ' + str(thumb_time) + ' -s ' + thumb_size + ' -vframes ' + str(1) + ' -f ' + 'image2 ' + filepath + filename], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        process = subprocess.Popen(['/usr/bin/ffmpeg', '-i', filepath + row.video, '-r', str(30), '-ss', str(thumb_time), '-s', thumb_size, '-vframes', str(1), '-f', 'image2', filepath + filename], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        #process = subprocess.Popen([settings.FFMPEG_VP8_PATH, '-i ' + filepath + row.video + ' -r ' + str(30) + ' -ss ' + str(thumb_time) + ' -s ' + thumb_size + ' -vframes ' + str(1) + ' -f ' + 'image2 ' + filepath + filename], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        process = subprocess.Popen([settings.FFMPEG_VP8_PATH, '-i', filepath + row.video, '-r', str(30), '-ss', str(thumb_time), '-s', thumb_size, '-vframes', str(1), '-f', 'image2', filepath + filename], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         stdout, stderr = process.communicate()
         if stderr:
             print filepath + filename
@@ -997,11 +997,12 @@ def upload_component(request, trid, component):
     tr_rec = None
     try:
         tr_rec = TutorialResource.objects.get(pk=trid, status=0)
-        ContributorRole.objects.get(user_id=request.user.id, foss_category_id=tr_rec.tutorial_detail.foss_id, language_id=tr_rec.language_id, status=1)
+        ContributorRole.objects.get(user_id=request.user.id,foss_category_id=tr_rec.tutorial_detail.foss_id, language_id=tr_rec.language_id, status=1)
         comp_title = tr_rec.tutorial_detail.foss.foss + ': ' + tr_rec.tutorial_detail.tutorial + ' - ' + tr_rec.language.name
         contrib_log = ContributorLog.objects.filter(tutorial_resource_id=tr_rec.id).order_by('-created')
         review_log = NeedImprovementLog.objects.filter(tutorial_resource_id=tr_rec.id).order_by('-created')
-    except Exception, e:
+    except Exception as error:
+        print error
         raise PermissionDenied()
     if (component == 'video' or component == 'audio') and getattr(tr_rec, 'video' + '_status') == 4:
         raise PermissionDenied()
@@ -1041,7 +1042,7 @@ def upload_component(request, trid, component):
                         if not tr_rec.version:
                             tr_rec.version = 1
                         tr_rec.save()
-                        subprocess.Popen(["python", settings.BASE_DIR + "/creation/sox.py", full_path])
+                        sox.soxAudioManipulation(full_path)
                         response_msg = component + ' uploaded successfully!'
                     elif component == 'video':
                         file_name, file_extension = os.path.splitext(request.FILES['comp'].name)
@@ -1063,12 +1064,12 @@ def upload_component(request, trid, component):
                         fout.close()
                         if os.path.isfile(full_path[0:-4] + ".webm"):
                             subprocess.Popen(["rm", full_path[0:-4] + ".webm"])
-                        subprocess.Popen(["/usr/bin/ffmpeg", "-y", "-i", full_path, "-vcodec", "libvpx", "-af", "volume=0.0", "-max_muxing_queue_size", "1024", "-f", "webm", full_path[:-4] + ".webm"], stdout=subprocess.PIPE)
-                        # subprocess.Popen(["ffmpeg","-i",full_path,"-an",full_path[:-4]+".webm"])
+                        subprocess.Popen([settings.FFMPEG_VP8_PATH, "-y", "-i", full_path, "-vcodec", "libvpx", "-af", "volume=0.0", "-max_muxing_queue_size", "1024", "-f", "webm", full_path[:-4] + ".webm"], stdout=subprocess.PIPE)
+                        # subprocess.Popen([settings.FFMPEG_VP8_PATH,"-i",full_path,"-an",full_path[:-4]+".webm"])
                         if os.path.isfile(full_path[:-9] + tr_rec.language.name + ".ogg"):
                             subprocess.Popen(["rm", full_path[:-9] + tr_rec.language.name + ".ogg"])
-                        subprocess.Popen(["/usr/bin/ffmpeg", "-y", "-i", full_path, "-vn", "-acodec", "libvorbis", full_path[:-9] + tr_rec.language.name + ".ogg"])
-                        # subprocess.Popen(["ffmpeg","-i",full_path,"-vn",full_path[:-9]+tr_rec.language.name+".ogg"])
+                        subprocess.Popen([settings.FFMPEG_VP8_PATH, "-y", "-i", full_path, "-vn", "-acodec", "libvorbis", full_path[:-9] + tr_rec.language.name + ".ogg"])
+                        # subprocess.Popen([settings.FFMPEG_VP8_PATH,"-i",full_path,"-vn",full_path[:-9]+tr_rec.language.name+".ogg"])
                         comp_log.status = tr_rec.video_status
                         tr_rec.video = file_name[:-4] + ".webm"
                         tr_rec.audio = tr_rec.tutorial_detail.tutorial.replace(' ', '-') + '-' + 'English' + '.ogg'

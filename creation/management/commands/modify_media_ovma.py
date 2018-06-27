@@ -44,15 +44,15 @@ class Command(BaseCommand):
         if videoObject[-11:] == "English.mp4":
             if not os.path.isfile(DESIRED_FILE[:-8].replace("\(", "(").replace("\)", ")") + "-Video.webm") or not os.path.isfile(DESIRED_FILE.replace("\(", "(").replace("\)", ")") + ".ogg"):
                 # Save audio and video seperately for English Version
-                bashCommand = bashCommand + ";\nffmpeg -y -i " + fileToConvert + \
-                    " -vcodec libvpx -af 'volume=0.0' -max_muxing_queue_size 1024 -f webm " \
-                    + DESIRED_FILE[:-8] + "-Video.webm\nffmpeg -y -i " + fileToConvert + \
-                    " -vn -acodec libvorbis " + DESIRED_FILE + ".ogg"
+                bashCommand = bashCommand + ";\n" + settings.FFMPEG_VP8_PATH + " -y -i " \
+                + fileToConvert + " -vcodec libvpx -af 'volume=0.0' -max_muxing_queue_size 1024 -f webm " \
+                + DESIRED_FILE[:-8] + "-Video.webm\n" + settings.FFMPEG_VP8_PATH + " -y -i " + fileToConvert + \
+                " -vn -acodec libvorbis " + DESIRED_FILE + ".ogg"
         else:
             if not os.path.isfile(DESIRED_FILE.replace("\(", "(").replace("\)", ")") + ".ogg"):
                 # Save audio for Non-English Version
-                bashCommand = bashCommand + ";\nffmpeg -y -i " + fileToConvert + \
-                    " -vn -acodec libvorbis " + DESIRED_FILE + ".ogg"
+                bashCommand = bashCommand + ";\n" + settings.FFMPEG_VP8_PATH + " -y -i " \
+                + fileToConvert + " -vn -acodec libvorbis " + DESIRED_FILE + ".ogg"
         os.system(bashCommand)
 
     def createLogFiles(self, log_file_path, original, converted):

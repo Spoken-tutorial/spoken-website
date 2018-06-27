@@ -6,7 +6,7 @@ from HTMLParser import HTMLParser
 # Third Party Stuff
 import mechanize
 from BeautifulSoup import BeautifulSoup
-
+from django.conf import settings
 
 class MLStripper(HTMLParser):
     def __init__(self):
@@ -175,7 +175,7 @@ def get_duration_info(path):
     """Uses ffmpeg to determine information about a video."""
     info_m = {}
     try:
-        process = subprocess.Popen(['/usr/bin/ffmpeg', '-i', path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        process = subprocess.Popen([settings.FFMPEG_VP8_PATH, '-i', path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         stdout, stderr = process.communicate()
         duration_m = re.search(r"Duration:\s{1}(?P<hours>\d+?):(?P<minutes>\d+?):(?P<seconds>\d+\.\d+?)", stdout, re.DOTALL).groupdict()
 

@@ -42,7 +42,7 @@ class Command(BaseCommand):
 
         # Make the file
         if not os.path.isfile(DESIRED_FILE.replace("\(", "(").replace("\)", ")") + ".mp4"):
-            bashCommand = bashCommand + ";\nffmpeg -i " + fileToConvert + " -vcodec libx264 -max_muxing_queue_size 1024 -f mp4 " + DESIRED_FILE + ".mp4"
+            bashCommand = bashCommand + ";\n" + settings.FFMPEG_VP8_PATH + " -i " + fileToConvert + " -vcodec libx264 -max_muxing_queue_size 1024 -f mp4 " + DESIRED_FILE + ".mp4"
         # print (bashCommand)
         os.system(bashCommand)
 
