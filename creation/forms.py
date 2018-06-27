@@ -3,6 +3,8 @@ from django import forms
 from django.contrib.auth.models import User
 from django.db.models import Q
 
+import datetime
+
 # Spoken Tutorial Stuff
 from creation.models import *
 
@@ -997,10 +999,16 @@ class PublishedTutorialFilterForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super(PublishedTutorialFilterForm, self).__init__(*args, **kwargs)
         #populating contributor select choices
-        contributor_list = list(TutorialResource.objects.filter(script_user__groups__in = [5,]).distinct()
+        contributor_list = list(TutorialResource.objects.filter(script_user__groups__in = [5,]).order_by('script_user__first_name').distinct()
             .values_list('script_user', 'script_user__first_name', 'script_user__last_name')
         )
-        contributor_list = [(contributor[0], contributor[1]+" "+contributor[2]) for contributor in contributor_list]        
+        c_list = []
+        for contributor in contributor_list:
+            if contributor[1] == '':
+                c_list.append((contributor[0], contributor[0]))
+            else:
+                c_list.append((contributor[0], contributor[1]+" "+contributor[2]))
+        contributor_list = c_list
         contributor_list.insert(0, ('', '--- Select Contributor ---'))
         self.fields['contributor'].choices = contributor_list
 
@@ -1022,7 +1030,7 @@ class PublishedTutorialFilterForm(forms.Form):
         super(PublishedTutorialFilterForm, self).clean()
         s_date = self.cleaned_data.get('start_date')
         e_date = self.cleaned_data.get('end_date')
-        if s_date > e_date:
+        if s_date and e_date and s_date > e_date:
             raise forms.ValidationError('End date must be later')
 
 class PaymentHonorariumFilterForm(forms.Form):
@@ -1065,5 +1073,5 @@ class PaymentHonorariumFilterForm(forms.Form):
         super(PaymentHonorariumFilterForm, self).clean()
         s_date = self.cleaned_data.get('start_date')
         e_date = self.cleaned_data.get('end_date')
-        if s_date > e_date:
+        if s_date and e_date and s_date > e_date:
             self.add_error('end_date', "End date must be later than start date.")

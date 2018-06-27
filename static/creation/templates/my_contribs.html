@@ -78,7 +78,7 @@
                                         <span class="text-info fa fa-1 fa-check-circle" title="Forwarded to Accounts Section"></span>
                                     <!-- Completed -->
                                     {% elif tr_pay.payment_honorarium.status == 3 %}
-                                        <a href="{% url 'creation:payment_honorarium_detail' tr_pay.payment_honorarium.id %}?next={{ request.get_full_path }}" class="btn btn-primary btn-sm" title="Confirm that honorarium Recieved">Confirm</a>   
+                                        <a href="{% url 'creation:payment_honorarium_detail' tr_pay.payment_honorarium.id %}?next={{ request.get_full_path }}" class="btn btn-primary btn-sm" title="Confirm that honorarium recieved">Confirm</a>   
                                     <!-- Confirmed -->
                                     {% elif tr_pay.payment_honorarium.status == 4 %}
                                         <span class="text-success fa fa-1 fa-check-circle" title="Confirmed by You"></span>

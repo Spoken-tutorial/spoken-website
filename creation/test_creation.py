@@ -104,25 +104,35 @@ class PaymentTestClass(TestCase):
 
     # Test for money_as_text function
     def test_money_as_text_for_negative_value(self):
-        res = money_as_text(-4)
+        res = money_as_text(-4.00)
         self.assertEquals(res, "Invalid Amount")
 
     def test_money_as_text_for_zero_value(self):
-        res = money_as_text(0)
+        res = money_as_text(0.00)
         self.assertEquals(res, "Invalid Amount")
 
     def test_money_as_text_for_large_value(self):
         """
         testing for amount larger than 1lakh
         """
-        res = money_as_text(987654)
+        res = money_as_text(987654.00)
         self.assertEquals(res, "Invalid Amount")
 
-    def test_money_as_text_for_normal_value(self):
-        res = money_as_text(97531)
+    def test_money_as_text_for_integer_value(self):
+        """
+        testing for only integer value
+        """
+        res = money_as_text(13579)
         self.assertEquals(
             res,
-            "Ninety Seven Thousand Five Hundred Thirty One Only"
+            "Thirteen Thousand Five Hundred Seventy Nine Only"
+        )
+
+    def test_money_as_text_for_normal_value(self):
+        res = money_as_text(97531.48)
+        self.assertEquals(
+            res,
+            "Ninety Seven Thousand Five Hundred Thirty One And Forty Eight Paise Only"
         )
 
     def test_hr_receipt_template_file_exists(self):

@@ -1180,7 +1180,7 @@ def tutorials_pending(request):
                     print counter, tmp_rec.tutorial_detail.tutorial
                 counter += 1
             page = request.GET.get('page')
-            tmp_recs = get_page(tmp_recs, page, 300)  # testing mohit
+            tmp_recs = get_page(tmp_recs, page, 50)
         except Exception, e:
             print e
             pass
@@ -1790,8 +1790,7 @@ def publish_tutorial_index(request):
             13: SortableHeader('Keywords', False, '', 'col-center'),
             14: SortableHeader('<span title="" data-original-title="" class="fa fa-cogs fa-2"></span>', False, '', 'col-center')
         }
-        # collection = TutorialResource.objects.filter(id__in = tmp_ids)
-        collection = TutorialResource.objects.all() # testing_mohit
+        collection = TutorialResource.objects.filter(id__in = tmp_ids)
         collection = get_sorted_list(request, collection, header, raw_get_data)
         ordering = get_field_index(raw_get_data)
         page = request.GET.get('page')
@@ -2113,7 +2112,6 @@ def public_review_tutorial(request, trid):
 @login_required
 def publish_tutorial(request, trid):
     tr_rec = TutorialResource.objects.get(id = trid)
-    create_payment_instance(request, tr_rec) # testing_mohit, remove this line in production
     if not is_qualityreviewer(request.user):
         raise PermissionDenied()
     try:
@@ -2134,7 +2132,7 @@ def publish_tutorial(request, trid):
         tr_rec.publish_at = timezone.now()
         tr_rec.save()
         PublishTutorialLog.objects.create(user = request.user, tutorial_resource = tr_rec)
-        # create_payment_instance(request, tr_rec) # testing mohit, create instance of tutorial payment
+        create_payment_instance(request, tr_rec) # create instance of tutorial payment
         add_contributor_notification(tr_rec, comp_title, 'This tutorial is published now')
         messages.success(request, 'The selected tutorial is published successfully')
     else:
@@ -2926,17 +2924,6 @@ def list_all_due_tutorials(request):
     }
     return render(request, 'creation/templates/list_all_due_tutorials.html', context)
 
-def get_video_info_random(filepath):
-    '''
-        testing mohit
-        temporary function to get video time using its name
-    '''
-    video_time = 0
-    for ch in filepath:
-        video_time += ord(ch)
-    sec = 500 + video_time%500
-    td = datetime.timedelta(seconds = sec)
-    return td.seconds
 
 def create_payment_instance(request, tr_res):
     '''
@@ -2945,13 +2932,9 @@ def create_payment_instance(request, tr_res):
     Do -> Create TutorialPayment objects
     '''
     # getting video time 
-    '''
-    # actual production call to get time
-    tr_video_path = settings.MEDIA_ROOT + "videos/" + str(tr.tutorial_detail.foss_id) + "/" + str(tr.tutorial_detail_id) + "/" + tr.video
+    tr_video_path = settings.MEDIA_ROOT + "videos/" + str(tr_res.tutorial_detail.foss_id) + "/" + str(tr_res.tutorial_detail_id) + "/" + tr_res.video
     tr_video_info = get_video_info(tr_video_path)
     tr_video_duration = tr_video_info.get('total',0)
-    '''
-    tr_video_duration = get_video_info_random(tr_res.video) # testing_mohit, uncomment above call and remove it
     try:
         if tr_res.script_user == tr_res.video_user:
             if is_external_contributor(tr_res.script_user):
@@ -3038,7 +3021,7 @@ def list_payment_honorarium(request):
                         "Tutorials Payment Credited", # title
                         "Honorarium (#"+honorarium.code+") worth Rs. "\
                         +str(honorarium.amount)+" for "+str(len(honorarium.tutorials.all())) \
-                        +" tutorials credited. Kindly Confirm"
+                        +" tutorials credited. Kindly confirm in tutorials contributed section."
                     )
                 messages.success(request,'Payment Honorarium (#'+str(honorarium.code)+') worth Rs. '+str(honorarium.amount)+' '+msg_end)
                 honorarium.save()
@@ -3110,38 +3093,58 @@ def money_as_text(amount):
     Display numerical money in text format
     12345 --> tweleve thousand three hundred forty five only
     """
+    try:
+        rupee, paise = list(map(int, str(amount).split('.')))
+    except:
+        rupee = amount
+        paise = 0
     ans = ""
-    small_arr = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 
+    small_arr = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine',
     'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Forteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Ninteen']
     large_arr = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety']
 
-    if amount>100000 or amount<1:
+    """ Calculating for Rupee """
+    if rupee > 100000 or rupee < 1:
         return "Invalid Amount"
-    if amount//1000:
-        value = amount//1000
+    if rupee // 1000:
+        value = rupee // 1000
         if value < 20:
             ans += small_arr[value]
-        if value>=20 and value <100:
-            large_val = value//10
-            small_val = value%10
-            ans += large_arr[large_val]+" "+small_arr[small_val]
+        if value >= 20 and value < 100:
+            large_val = value // 10
+            small_val = value % 10
+            ans += large_arr[large_val] + " " + small_arr[small_val]
         ans += " Thousand "
-        amount %= 1000
+        rupee %= 1000
 
-    if amount//100:
-        value = amount//100
-        ans += small_arr[value]+" Hundred "
-        amount %= 100
+    if rupee // 100:
+        value = rupee // 100
+        ans += small_arr[value] + " Hundred "
+        rupee %= 100
 
-    if amount >19:
-        value = amount//10
-        ans += large_arr[value]+" "
-        amount %= 10
+    if rupee > 19:
+        value = rupee // 10
+        ans += large_arr[value] + " "
+        rupee %= 10
 
-    if amount < 20:
-        ans += small_arr[amount]+" "
+    if rupee < 20:
+        ans += small_arr[rupee] + " "
+
+    """ calculating for paise"""
+    if paise != 0:
+        ans += "And "
+        if paise > 19:
+            value = paise // 10
+            ans += large_arr[value] + " "
+            paise %= 10
+
+        if paise < 20:
+            ans += small_arr[paise] + " "
+        ans += "Paise "
+
     ans += "Only"
     return ans
+
 
 def generate_honorarium_receipt(code, contributor, foss, amount, manager, tutorials):
     """
