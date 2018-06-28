@@ -61,6 +61,8 @@ from events_email import send_email
 import datetime
 from django.http import JsonResponse
 
+from yaksh.models import Course as YakshCourse
+from yaksh.models import Profile as YakshProfile
 
 def can_clone_training(training):
     if training.tdate > datetime.datetime.strptime('01-02-2015', "%d-%m-%Y").date() and training.organiser.academic.institution_type.name != 'School':
@@ -1872,8 +1874,8 @@ def advance_tests_student(request, status=1):
     status = int(status)
     if hasattr(user, 'student'):
         student = user.student
+        advance_tests_available = student.advance_attendees.all()
         if status == 1:
-            advance_tests_available = student.advance_attendees.all()
             context = {'tests': advance_tests_available, 'status': status}
         elif status == 0:
             advance_tests_completed = student.advance_appeared.all()
@@ -1911,6 +1913,15 @@ def advance_test_mark_attendance(request, test_id):
         if request.method == 'POST':
             student_ids = request.POST.getlist('students')
             advance_test_batch.attendees.add(*student_ids)
+            yaksh_course = advance_test_batch.test.yaksh_course
+            for stu_id in student_ids:
+                user = User.objects.get(student__id=stu_id)
+                yaksh_course.students.add(user.id)
+                yaksh_course.save()
+                if not hasattr(user, 'yaksh_profile'):
+                    YakshProfile.objects.create(user=user, roll_number=user.id,
+                                                is_email_verified=True,
+                                                position='Student')
         students = advance_test_batch.get_students_for_attendance()
         attendees = advance_test_batch.get_attendees()
         context = {'advance_test': advance_test_batch, 'students': students,

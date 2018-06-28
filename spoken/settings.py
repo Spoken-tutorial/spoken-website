@@ -86,6 +86,11 @@ INSTALLED_APPS = (
     'reports',
     'team',
     'certificate',
+    'yaksh',
+    'taggit',
+    'grades',
+    'social.apps.django_app.default',
+    'attendance',
 )
 
 MIDDLEWARE_CLASSES = (

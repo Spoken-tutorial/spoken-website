@@ -3,7 +3,7 @@ from django import template
 from django.contrib.auth.models import User
 
 # Spoken Tutorial Stuff
-from events.models import TestAttendance, TrainingAttendance
+from events.models import TestAttendance, TrainingAttendance, Test
 from mdldjango.models import *
 
 register = template.Library()
@@ -29,6 +29,15 @@ def check_test_enrole(rid, mdluser_id):
         return True
     except:
         return False
+
+def get_secondlevel_mark(test_id, student):
+    t = Test.objects.get(id=test_id)
+    adv = t.pretest.get()
+    if student is not None:
+        percentage = adv.get_percentage(student.user)
+        return percentage
+    else:
+        return 'NA'
 
 def get_participant_mark(rid, mdluser_id):
     try:
@@ -67,6 +76,7 @@ def get_mdluser_details(mdluser_id):
     
 register.filter('get_participant_score', get_participant_score)
 register.filter('get_participant_mark', get_participant_mark)
+register.filter('get_secondlevel_mark', get_secondlevel_mark)
 register.filter('check_training_enrole', check_training_enrole)
 register.filter('check_test_enrole', check_test_enrole)
 register.filter('get_moodle_courseid', get_moodle_courseid)

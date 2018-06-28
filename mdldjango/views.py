@@ -13,7 +13,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
-
+from django.contrib.auth import login, authenticate as django_authenticate
 # Spoken Tutorial Stuff
 from events.forms import OrganiserForm
 from events.models import *
@@ -50,6 +50,10 @@ def mdl_login(request):
             messages.error(request,'Please enter valide Username and Password!')
             #return HttpResponseRedirect('/participant/login')
         user = authenticate(email = email, password = password)
+        duser = User.objects.get(email=user.email)
+        django_user = django_authenticate(username=duser.username,
+                                          password=password)
+        login(request, django_user)
         if user:
             request.session['mdluserid'] = user.id
             request.session['mdluseremail'] = user.email

@@ -31,7 +31,7 @@
                 <td>{{ test.date_time|date:"d M Y" }}</td>
                 {% if status == 1 %}
                     <td>
-                        <a href="{{ test.test.link }}">Attempt</a>
+                        <a href="{{ test.test.link }}" target="_blank">Attempt</a>
                     </td>
                 {% endif %}
                 {% if status == 0 %}

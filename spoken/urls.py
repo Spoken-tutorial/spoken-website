@@ -99,6 +99,10 @@ urlpatterns = patterns('',
     # events2
     # url(r'^events2/', include('events2.urls', namespace='events2')),
 
+    url(r'^exam/', include('yaksh.urls', namespace='yaksh', app_name='yaksh')), 
+    url(r'^exam/reset/', include('yaksh.urls_password_reset')),                 
+    url(r'^grades/', include('grades.urls', namespace='grades', app_name='grades')),
     # cms
     url(r'^', include('cms.urls', namespace='cms')),
+    url(r'^', include('social.apps.django_app.urls', namespace='social')),      
 )

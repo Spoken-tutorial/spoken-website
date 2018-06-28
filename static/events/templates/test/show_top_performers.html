@@ -42,6 +42,7 @@
 				<th>Last Name</th>
 				<th>Email Id</th>
 				<th>Score</th>
+				<th> Second Level Score</th>
 			</tr>
 			{% for topper in toppers %}
 			    {% with mdluser=topper.mdluser_id|get_mdluser_details %}
@@ -59,6 +60,13 @@
 					    <td>
 					        {{ test.id|get_participant_mark:topper.mdluser_id }}
                         		    </td>
+					    <td>
+                            {% if test.pretest.all.exists %}
+					            {{ test.id|get_secondlevel_mark:topper.student }}
+                            {% else %}
+                                NA
+                            {% endif %}
+                         </td>
 		        </tr>
 				{% endwith %}
 			{% endfor %}

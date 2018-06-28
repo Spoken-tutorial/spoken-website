@@ -21,6 +21,8 @@ from events.signals import revoke_student_permission
 from creation.models import FossCategory, Language, \
   FossAvailableForWorkshop, FossAvailableForTest
 
+from yaksh.models import Course as YakshCourse
+from yaksh.models import AnswerPaper
 
 ADVANCE_TEST_STATUS = (
     (1, 'Requested'),
@@ -1656,6 +1658,7 @@ class AdvanceTest(models.Model):
     foss = models.OneToOneField(FossCategory, on_delete=models.CASCADE,
                                 related_name='advance_test_foss')
     link = models.URLField(null=True)
+    yaksh_course = models.OneToOneField(YakshCourse, on_delete=models.CASCADE)
     active = models.BooleanField(default=True)
     qualifying_marks = models.DecimalField(decimal_places=2, max_digits=5,
                                            default=90)
@@ -1680,6 +1683,14 @@ class AdvanceTestBatch(models.Model):
                                       related_name='advance_appeared')
     is_open = models.BooleanField(default=False)
 
+    def get_percentage(self, user):
+        qp = self.test.yaksh_course.learning_module.get().learning_unit.get().quiz.questionpaper_set.get()
+        answerpapers = AnswerPaper.objects.filter(question_paper=qp, user=user)
+        if answerpapers.exists():
+            return answerpapers.last().percent
+        else:
+            return 'NA'
+
     def invigilator_approve(self):
         self.status = 3
         self.save()
@@ -1699,6 +1710,7 @@ class AdvanceTestBatch(models.Model):
     def invigilated(self):
         self.status = 4
         self.save()
+        self.open()
 
     def close(self):
         self.is_open = False
