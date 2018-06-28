@@ -573,7 +573,7 @@ def itp_workshop_download(request):
             certificate = create_itp_workshop_certificate(certificate_path, details,
                                                              qrcode, type, paper, workshop, file_name)
             if not certificate[1]:
-                certi_obj = Certificate(name=name, email=email, college=college,
+                certi_obj = Certificate(name=name, email=email,
                                         serial_no=serial_no, counter=1, workshop=workshop,
                                         paper=paper, serial_key=serial_key, short_key=short_key)
                 certi_obj.save()
