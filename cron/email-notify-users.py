@@ -14,48 +14,56 @@ from django.template import Context
 
 from config import * 
 from cms.models import *
-from events.models import Drupal2018_email, MumbaiStudents
+from events.models import Organiser
 
 #here fetch all user
-# users = Drupal2018_email.objects.all()
-users = MumbaiStudents.objects.all().order_by('bid')
+users = Organiser.objects.filter(status=1)
 sent = 0
 notsent = 0
 count = 0
 tot_count = len(users)
 
-subject = ' Invitation to attend "Drupal in a Day" workshop'
+subject = ' Spoken Tutorial, IIT Bombay - Change in Training Policy'
 
-success_log_file_head = open(LOG_ROOT+'drupal2018_org_invitation.txt',"w")
+success_log_file_head = open(LOG_ROOT+'organiser_charge_list.txt',"w")
 for user in users:
     message = '''
-<p>Dear Future Professionals,</p>
+<p>
+Dear Faculty Organiser,
+</p>
 
-<p>Spoken Tutorial in association with FOSSEE, IIT Bombay, is hosting "Drupal-in-a-Day" workshop alongside Drupal Camp Mumbai 2018 at IIT Bombay. We invite you to attend this workshop and learn Drupal, the world\'s leading open source content management framework, for developing websites and web based applications (for desktop and mobile). On successful completion of the surprise activity, you also stand a good chance to get a free participation ticket to attend two days of Drupal Camp on 28 and 29 April 2018.</p>
+<p>
+We are truly happy to be associated with you as a Knowledge Partner for the past few years.  We provided Spoken Tutorial Software/ IT Courses training in your college and have grown together. The team at IIT Bombay has continued to offer new and exotic courses of world class quality, so essential for our students to get an employability worthy Skill Set. 
+</p>
 
-<p>Drupal Camp Mumbai is one of the largest Drupal community gatherings in India. The purpose of this event is to bring students, developers, architects, managers, businesses and organisations on a singular platform to network, interact and share openly with each other, and help strengthen the community at large.</p>
+<p>
+The new academic year will start soon - this is the right time to plan. You have already submitted planners & calendars in advance, covering the next 2 semesters. Be assured we will be with you all the way guiding, enabling & enhancing the quality of our delivery. In this connection, I wish to inform you of a policy change that has come to us from MHRD Govt. Of India. <u>Effective July, 2018 we are expected to charge a nominal annual amount from the colleges we are working with.</u> This decision has been driven by the fact that we are a mature and successful program, therefore from now on need to generate revenue and sustain our Project financially, on our own. The amount is <b><i>Rs. 25,000 per year</i></b> to be paid by colleges for an unlimited number of Training Workshops & Certification Tests taken by any number of their students & staff. There is no upper limit. Note also, we will not charge anything to colleges who have just come into the program and might train less than 100 students in a year.
+</p>
 
-<p>The training workshop is focused self-learning and real time practising model, where each student will be provided with high quality video tutorials developed by Spoken Tutorial projcet and at the end of the workshop the student should be able to build a full fledged Drupal-based website.</p>
+<p>
+We did extensive enquiries with our Engg., as well as Arts, Science, Commerce colleges and found out pleasantly that this amount was very manageable. In fact, considering a simple calculation for providing Basic Computer Skills - say getting our LibreOffice package training with Certificates of Word Processing, Spreadsheet & Slide presentation  at Rs.200/ student - just for 125 students the amount works out to a total of Rs. 25000/year/college. Most of you will be training 100s of students as you move to additional courses and more departments. You will roll out our Drupal, OpenFOAM, Java, C/C++, PHP, Linux, GIT and many other lucrative courses. Certainly it is tremendous value for money. At the outset, this news could come as a surprise, as till now, the Spoken Tutorial training programs were free of cost. But it is my belief that this move will be accepted in a positive way. 
+</p>
 
-<p>Come learn, be a part of the largest open source community for web content management, and hone your skills to an exciting career in web applications.</p>
+<p><b>The Information Module & Payment Link on our website will be live in July</b>, and we will keep you informed. In the meanwhile - 
+<ol>
+    <li>Please discuss with your management Principal/ Director/ VC et al. about the policy change.</li>
+    <li>After approval/permission, please send us the name & contact details of the point person in your college who will access the payment link and take care of the financial transaction. This person will mostly be from the Accounts/Finance section of your college.</li>
+</ol></p>
+<p>Do drop a mail immediately to your respective state Training Coordinator, informing them of your college's decision, so we can proceed with the training. We guarantee our continued high quality services to all. If you have questions, don't hesitate to contact the Training Coordinator of your respective state.</p>
+<p>Yours Sincerely, <br><br>
 
-<p><b>When:-</b> 27 April 2018 <br>
+Shyama Iyer<br>
+National Coordinator - Training<br>
+Spoken Tutorial, IIT Bombay<br>
+NMEICT, MHRD, Govt. Of India<br>
+</p>
 
-<b>Venue:-</b> Seminar Room, Ground Floor, Aero Annex Building, Below HSS Department, IIT Bombay, Mumbai 400076.
+'''.format(organiser.user.email)
 
-<br><b>To know more and Register:-</b> <a href="http://spoken-tutorial.org/workshop/drupal2018/" target="_blank">Click Here</a></p>
-
-<p>Thanks and rgds,<br>
-Tejas Shah, Organising Team<br>
-Spoken Tutorial, FOSSEE and DCM<br>
-IIT Bombay</p>
-
-'''.format(user.stuid.user.email)
-
-    to  = [user.stuid.user.email]
+    to  = [organiser.user.email]
     #to = ['ganeshmohite96@gmail.com','nancyvarkey.iitb@gmail.com']
     email = EmailMultiAlternatives(
-        subject, message, 'tejas.shah@iitb.ac.in',
+        subject, message, 'administrator@spoken-tutorial.org',
         to = to,
         headers = {
          "Content-type" : "text/html"
@@ -70,11 +78,11 @@ IIT Bombay</p>
         if sent%100 == 0:
             time.sleep(10)
         #print to," => sent (", str(count),"/",str(tot_count),")"
-        success_log_file_head.write(str(user.stuid.user.email)+','+str(1)+'\n')
+        success_log_file_head.write(str(organiser.user.email)+','+str(1)+'\n')
     except Exception, e:
         print e
         #print to," => not sent (",count,"/",tot_count,")"
-        success_log_file_head.write(str(user.stuid.user.email)+','+str(0)+'\n')
+        success_log_file_head.write(str(organiser.user.email)+','+str(0)+'\n')
     #break
 print "--------------------------------"
 print tot_count
