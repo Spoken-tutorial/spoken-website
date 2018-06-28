@@ -36,7 +36,10 @@
         </li>
         <li class="active">Upload to Youtube</li>
     </ul>
-    <button>Upload All</button>
+    <button id="publishAll" class="btn btn-primary" onclick="startupload(this)">Upload All</button>
+</div>
+<div id="load">
+</div>
     <div id="flip-scroll" class="table-responsive">
         <table class="paleblue table table-bordered table-condensed table-hover">
             {% if not collection|length %}
@@ -49,6 +52,7 @@
                 </thead>
                 <tbody>
                     {% for tr_rec in collection %}
+                        
                         <tr>
                             <td>{{ forloop.counter }}</td>
                             <td>{{ tr_rec.tutorial_detail.foss.foss }}</td>
@@ -82,10 +86,8 @@
                                 <span class="{{ tr_rec.common_content.keyword_status | get_review_status_symbol }}"></span>
                             </td>
                             <td class="col-center"> 
-                                <div class="review-btn">
-                                    <button id="{{ tr_rec.id }}" style = "background: transparent; outline: none; border: none; height: 30px; color: teal;" onclick="move(this)" class="fa fa-cog fa-2">
-                                    </button>
-                                    Publish
+                                <div id="{{ tr_rec.id }}" >
+                                 &#x274C
                                 </div>
                             </td>
                         </tr>
@@ -93,20 +95,54 @@
                 </tbody>
             {% endif %}
             </table>
-        </div>
-            <div id="load">
-            </div>
+        
     
         <script>
-             function move(element){ 
-                var id = element.id;
-                var load = document.getElementById("load");
-                var ele = document.getElementById("non-spin");
-                load.innerHTML = '<div id="spinner" class="fa fa-spinner fa-spin" style="font-size:48px;color:teal;"></div> The selected video is published on site. Uploading to youtube...';
-                var str = "../";
-                var string = str.concat(id);
-                location.href = string;
+            function startupload(element){
+                var st;
+                fol = [];
+                {% for t in collection  %}
+                    fol.push({{ t.id }});
+                {% endfor %}
+                    var i=0;
+                    var check = false;
+                while(i<fol.length){
+                    
+                    var id = fol[i];
+                    
+                    if(i== fol.length-1){
+                        check=true;
+                    }
+					get(id,check);
+                    i++;
+                }
+                
+
             }
+
+            function get(id,check){
+            var xhttp = new XMLHttpRequest();
+            var str = "../";
+            var string = str.concat(id);
+                                    //load.innerHTML=id;
+						xhttp.onreadystatechange = function() {
+							if (this.readyState == 4 && this.status == 200) {
+								var response = xhttp.responseText;
+								if (response == "done") {
+                                    var ele = document.getElementById(id);
+                                    ele.innerHTML='&#x2705';
+                                    if(check){
+                                        console.log("hi");
+                                        location.reload(true);
+                                    }
+                                   // location.reload();
+								}
+							}
+						};
+						xhttp.open("GET", string);
+						xhttp.send();
+            }
+
         </script>
 
 

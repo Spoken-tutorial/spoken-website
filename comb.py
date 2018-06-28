@@ -133,7 +133,7 @@ def check_playlist(youtube,playlist):
     maxResults = 50
     requests = youtube.playlists().list(
         part='snippet,contentDetails',
-        channelId = 'UCVOkruY6srz5vL6sFzvokoA',
+        channelId = 'UCg1uGZFAp-oW3RiSp5h9ZQw',
         maxResults = maxResults
     )
     while requests:
@@ -181,10 +181,14 @@ def add_to_playlist(youtube,playlist_id,video_id,position):
     print "playlistitemId",response['id']
     return response['id']
 
-def delete_video(youtube,videoId):
+def delete_video(youtube,videoID,playlistitemID):
     print "deleting video"
     response = youtube.videos().delete(
-        id=videoId
+        id=videoID
+    ).execute()
+    print "deleting from playlist"
+    response_playlistitem = youtube.playlistItems().delete(
+        id=playlistitemID
     ).execute()
     print "deleted"
 
@@ -196,26 +200,28 @@ def delete_video(youtube,videoId):
 if __name__ == '__main__':
 
     # Taking arguments as input: only trid, file is required. Rest optional.
-
+    argparser.add_argument("--first", default="no")
     argparser.add_argument("--trid", default=1, help="Tutorial Id to upload")
     argparser.add_argument("--file", help="Video file to upload")
     argparser.add_argument("--delete", default="no")
     argparser.add_argument("--title", help="Video title", default="Test Title")
     argparser.add_argument("--description", help="Video description",default="Test Description")
-    argparser.add_argument("--playlist", default="Extra")
+    argparser.add_argument("--playlist", default="Extras")
     argparser.add_argument("--category", default="22",help="Numeric video category. " + "See https://developers.google.com/youtube/v3/docs/videoCategories/list")
     argparser.add_argument("--keywords", help="Video keywords, comma separated",default="")
     argparser.add_argument("--privacyStatus", choices=VALID_PRIVACY_STATUSES,default=VALID_PRIVACY_STATUSES[0], help="Video privacy status.")
     args = argparser.parse_args()
     tr_rec = TutorialResource.objects.get(pk = args.trid)
     youtube = get_authenticated_service(args)           # Gets authentication entity. Will create oAuth2.0 json credentials (if not present) using client secrets json
+    if args.first == "yes":
+        exit("Authentication done")
     try:
-        print "hi"
+        #print "hi"
         if args.delete == "yes":
             if tr_rec.video_id:
-                delete_video(youtube,tr_rec.video_id)
+                delete_video(youtube,tr_rec.video_id,tr_rec.playlist_item_id)
             else:
-                print "no such video"
+                exit("no video available")
         else:
             if not os.path.exists(args.file):
                 exit("Error : Please specify a valid file using the --file= parameter.")
@@ -226,7 +232,7 @@ if __name__ == '__main__':
                 tr_rec.video_id= video_id
                 if args.playlist != "Extra":
                     playlist_id, position = add_playlist(youtube,args.playlist)
-                    print "playlistId",playlist_id
+                    #print "playlistId",playlist_id
                     playlistitemId = add_to_playlist(youtube,playlist_id,video_id,position)
                     try:
                         pl = PlaylistInfo.objects.get(foss_id = tr_rec.tutorial_detail.foss_id, language_id = tr_rec.language_id)

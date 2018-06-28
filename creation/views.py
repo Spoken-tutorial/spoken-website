@@ -40,7 +40,7 @@ def humansize(nbytes):
     f = ('%.1f' % nbytes).rstrip('0').rstrip('.')
     return '%s %s' % (f, suffixes[i])
 
-def get_page(resource, page, page_count = 20):
+def get_page(resource, page, page_count = 5):
     paginator = Paginator(resource, page_count)
     try:
         resource =  paginator.page(page)
@@ -1757,7 +1757,6 @@ def publish_tutorial_index(request):
 
         for tr_rec in tr_recs:
             tmp_ids.append(tr_rec.id)
-
     collection = None
     header = ''
     ordering = ''
@@ -1780,6 +1779,7 @@ def publish_tutorial_index(request):
             14: SortableHeader('<span title="" data-original-title="" class="fa fa-cogs fa-2"></span>', False, '', 'col-center')
         }
         collection = TutorialResource.objects.filter(id__in = tmp_ids)
+        print "id",collection[0].id
         collection = get_sorted_list(request, collection, header, raw_get_data)
         ordering = get_field_index(raw_get_data)
         page = request.GET.get('page')
@@ -2103,7 +2103,7 @@ def publish_tutorial(request, trid):
     if not is_qualityreviewer(request.user):
         raise PermissionDenied()
     try:
-        tr_rec = TutorialResource.objects.get(pk = trid, status = 0)
+        tr_rec = TutorialResource.objects.get(pk = trid)
         comp_title = tr_rec.tutorial_detail.foss.foss + ': ' + tr_rec.tutorial_detail.tutorial + ' - ' + tr_rec.language.name
     except:
         raise PermissionDenied()
@@ -2126,16 +2126,14 @@ def publish_tutorial(request, trid):
         add_contributor_notification(tr_rec, comp_title, 'This tutorial is published now')
         messages.success(request, 'Great! The selected tutorial is published successfully.')
         if not os.path.isfile(vid_name[:-3]+"mp4"):
-            process = subprocess.Popen(["ffmpeg","-y","-i",vid_name,"-max_muxing_queue_size","500",vid_name[:-3]+"mp4"])
-            while process.poll() == None:
-                pass
+            os.system("ffmpeg -y -i "+vid_name+" -max_muxing_queue_size 1024c"+vid_name[:-3]+"mp4")
         youtube_upload_dir = settings.BASE_DIR + '/comb.py'
-        proc = subprocess.Popen(["python",youtube_upload_dir,"--trid",trid,"--file",vid_name[:-3]+'mp4',"--title",str(tr_rec.tutorial_detail.tutorial)+" - "+str(tr_rec.language.name),"--description",tr_rec.tutorial_detail.foss.description,"--playlist",str(tr_rec.tutorial_detail.foss)+" - "+str(tr_rec.language.name)])
+        proc = subprocess.Popen(["python",youtube_upload_dir,"--trid",trid,"--file",vid_name[:-3]+'mp4',"--title",str(tr_rec.tutorial_detail.tutorial)+" - "+str(tr_rec.language.name),"--description",tr_rec.outline,"--playlist",str(tr_rec.tutorial_detail.foss)+" - "+str(tr_rec.language.name)])
         while proc.poll() == None:
             pass
     else:
         messages.error(request, 'The selected tutorial cannot be marked as Public review')
-    return HttpResponseRedirect('/creation/quality-review/tutorial/publish/index/')
+    return HttpResponse("done")
     #context = {
     #   'trid' : trid
     #}
@@ -2146,7 +2144,7 @@ def publish_tutorial_youtube(request):
     if not is_qualityreviewer(request.user):
         raise PermissionDenied()
     tmp_ids = []
-    qr_roles =  QualityReviewerRole.objects.filter(status = 1)
+    qr_roles =  QualityReviewerRole.objects.filter(user_id = request.user.id,status = 1)
     for rec in qr_roles:
         if rec.language.name == 'English':
             tr_recs = TutorialResource.objects.filter(Q(common_content__code_status = 4) | Q(common_content__code_status = 6), Q(common_content__assignment_status = 4) | Q(common_content__assignment_status = 6), Q(common_content__prerequisite_status = 4) | Q(common_content__prerequisite_status = 6), Q(outline_status = 4) & Q(script_status = 4) & Q(video_status = 4) & Q(common_content__slide_status = 4) & Q(common_content__keyword_status = 4) & Q(tutorial_detail__foss_id = rec.foss_category_id) & Q(language_id = rec.language_id) & Q(status = 1) & Q(video_id__isnull = True))
@@ -2304,9 +2302,10 @@ def creation_change_published_to_pending(request):
                 comp_title = row.tutorial_detail.foss.foss + ': ' + row.tutorial_detail.tutorial + ' - ' + row.language.name
                 row.status = 0
                 youtube_upload_dir = settings.BASE_DIR + '/comb.py'
-                proc_del=subprocess.Popen(["python",youtube_upload_dir,"--trid",str(row.id),"--delete", "yes","--file","nofile"])
-                while proc_del == None:
-                    pass
+                os.system("python "+youtube_upload_dir+" --trid "+str(row.id)+" --delete yes --file nofile")
+                PlaylistItem.objects.filter(item_id = row.playlist_item_id).delete()
+                row.video_id = None
+                row.playlist_item_id = None
                 row.save()
                 add_contributor_notification(row, comp_title, 'This tutorial is unpublished for corrections.')
                 messages.success(request, 'Tutorial unpublished successfully!')
