@@ -73,3 +73,9 @@ class FA_WS(models.Model):
     name = models.CharField(max_length=200)
     email = models.EmailField()
     purpose = models.CharField(max_length=10, default='FAW')
+
+class ITP_WS(models.Model):
+    name = models.CharField(max_length=200)
+    email = models.EmailField()
+    college= models.CharField(max_length=500)
+    purpose = models.CharField(max_length=10, default='ITP')

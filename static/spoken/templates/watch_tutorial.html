@@ -302,7 +302,7 @@
      
         {% for question in questions %}
         <li class="question" id="{{ question.id }}">
-            <a href="http://forums.spoken-tutorial.org/question/{{ question.id }}/{{ question.get_slugified_title }}" target="_blank" class="{{ question.id }}">{{ question.title }}</a>
+            <a href="https://forums.spoken-tutorial.org/question/{{ question.id }}/{{ question.get_slugified_title }}" target="_blank" class="{{ question.id }}">{{ question.title }}</a>
             <p>{{ question.body|striptags|safe }}
             <div class="timing pull-left">
             {% if not question.minute_range == 'None' %}<small class="timing">{{ question.minute_range }}M</small>{% endif %}
@@ -516,7 +516,7 @@
     <script src="{% static 'spoken/js/jquery.fancybox.pack.js' %}"></script>
     <script src="{% static 'spoken/js/jquery.mousewheel-3.0.6.pack.js' %}"></script>
     <script src="https://apis.google.com/js/platform.js"></script>
-    <script type="text/javascript" src="http://www.youtube.com/iframe_api"></script>
+    <script type="text/javascript" src="https://www.youtube.com/iframe_api"></script>
 {% endblock %}
 {% block compressinlinejsblock %}
 <script type="text/javascript">
@@ -659,9 +659,8 @@
         }
         logDuration();
         $("#text").click(function(e){
-						ik_player.pauseVideo()
-         		setForum(logDuration())
-           
+		    ik_player.pauseVideo()
+            setForum(logDuration())
         });
 
         // var title = $('#text').html("Post your Question on the Forum");
@@ -716,34 +715,32 @@
             var cur_time = formatTime(currentTime).toString();
 
            	trigger( cur_time);
-			$("#text").click(function(e){
+			$("#text").click(function(e) {
 				trackedPlayer.pause()
 		       	setForum(cur_time) 
                 });
             });
  
   		
-    function setForum(cur_time) {
-            
-            var time_split = cur_time.split(".")
-            var minute = parseFloat(time_split[0]);
-            var min_range = minute+"-"+(minute+parseFloat(1))
-            if(parseInt(time_split[1]).between(parseInt(0),parseInt(9))){
-                        sec_range = "0-10"
-            }else if(parseFloat(time_split[1]).between(parseFloat(10),parseFloat(19))){
-                        sec_range = "10-20"
-            }else if(parseFloat(time_split[1]).between(parseFloat(20),parseFloat(29))){
-                        sec_range = "20-30"
-            }else if(parseFloat(time_split[1]).between(parseFloat(30),parseFloat(39))){
-                        sec_range = "30-40"
-            }else if(parseFloat(time_split[1]).between(parseFloat(40),parseFloat(49))){
-                        sec_range = "40-50"
-            }else {
-                        sec_range = "50-60"
+            function setForum(cur_time) {
+                var time_split = cur_time.split(".")
+                var minute = parseFloat(time_split[0]);
+                var min_range = minute+"-"+(minute+parseFloat(1))
+                if(parseInt(time_split[1]).between(parseInt(0),parseInt(9))){
+                            sec_range = "0-10"
+                }else if(parseFloat(time_split[1]).between(parseFloat(10),parseFloat(19))){
+                            sec_range = "10-20"
+                }else if(parseFloat(time_split[1]).between(parseFloat(20),parseFloat(29))){
+                            sec_range = "20-30"
+                }else if(parseFloat(time_split[1]).between(parseFloat(30),parseFloat(39))){
+                            sec_range = "30-40"
+                }else if(parseFloat(time_split[1]).between(parseFloat(40),parseFloat(49))){
+                            sec_range = "40-50"
+                }else {
+                            sec_range = "50-60"
+                }
+                var url = "https://forums.spoken-tutorial.org/new-question/?category={{ tr_rec.tutorial_detail.foss.foss }}&tutorial={{ tr_rec.tutorial_detail.tutorial }}&minute_range="+min_range+"&second_range="+sec_range;
+                $("#text").attr("href", url);
             }
-
-                var url = "http://forums.spoken-tutorial.org/new-question/?category={{ tr_rec.tutorial_detail.foss.foss }}&tutorial={{ tr_rec.tutorial_detail.tutorial }}&minute_range="+min_range+"&second_range="+sec_range;
-            $("#text").attr("href", url);
-    }
     </script>
-    {% endblock %}
+{% endblock %}
