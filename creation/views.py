@@ -991,6 +991,113 @@ def upload_keywords(request, trid):
     context.update(csrf(request))
     return render(request, 'creation/templates/upload_keywords.html', context)
 
+@csrf_exempt
+def ajax_upload_component(request, trid, component):
+    tr_rec = None
+    try:
+        tr_rec = TutorialResource.objects.get(pk=trid, status=0)
+        ContributorRole.objects.get(user_id=request.user.id,foss_category_id=tr_rec.tutorial_detail.foss_id, language_id=tr_rec.language_id, status=1)
+        comp_title = tr_rec.tutorial_detail.foss.foss + ': ' + tr_rec.tutorial_detail.tutorial + ' - ' + tr_rec.language.name
+        contrib_log = ContributorLog.objects.filter(tutorial_resource_id=tr_rec.id).order_by('-created')
+        review_log = NeedImprovementLog.objects.filter(tutorial_resource_id=tr_rec.id).order_by('-created')
+    except Exception as error:
+        print error
+        raise PermissionDenied()
+    if request.method == 'POST':
+        response_msg = ''
+        error_msg = ''
+        form = ComponentForm(component, request.POST, request.FILES)
+        if form.is_valid():
+            try:
+                comp_log = ContributorLog()
+                comp_log.user = request.user
+                comp_log.tutorial_resource = tr_rec
+                comp_log.component = component
+                if component == 'video':
+                    file_name, file_extension = os.path.splitext(request.FILES['comp'].name)
+                    file_name = tr_rec.tutorial_detail.tutorial.replace(' ', '-') + '-Video' + file_extension
+                    file_path = settings.MEDIA_ROOT + 'videos/' + str(tr_rec.tutorial_detail.foss_id) + '/' + str(tr_rec.tutorial_detail.id) + '/'
+                    full_path = file_path + file_name
+                    if os.path.isfile(file_path + tr_rec.video) and tr_rec.video_status > 0:
+                        if 'isarchive' in request.POST and int(request.POST.get('isarchive', 0)) > 0:
+                            archived_file = 'Archived-' + str(request.user.id) + '-' + str(int(time.time())) + '-' + tr_rec.video
+                            os.rename(file_path + tr_rec.video, file_path + archived_file)
+                            ArchivedVideo.objects.create(tutorial_resource=tr_rec, user=request.user, version=tr_rec.version, video=archived_file, atype=tr_rec.video_status)
+                            if int(request.POST.get('isarchive', 0)) == 2:
+                                tr_rec.version += 1
+                    fout = open(full_path, 'wb+')
+                    f = request.FILES['comp']
+                    for chunk in f.chunks():
+                        fout.write(chunk)
+                    fout.close()
+                    if os.path.isfile(full_path[0:-4] + ".webm"):
+                        os.remove(full_path[0:-4] + ".webm")
+                    os.system(settings.FFMPEG_VP8_PATH+" -y -i "+full_path+" -vcodec libvpx -af volume=0.0 -max_muxing_queue_size 1024 -f webm "+ full_path[:-4] + ".webm")
+                    #os.system(settings.FFMPEG_VP8_PATH+" -i "+full_path+" -an "+full_path[:-4]+".webm")
+                    if os.path.isfile(full_path[:-9] + tr_rec.language.name + ".ogg"):
+                        os.remove(full_path[:-9] + tr_rec.language.name + ".ogg")
+                    os.system(settings.FFMPEG_VP8_PATH+ " -y -i "+ full_path+ " -vn -acodec libvorbis "+ full_path[:-9] + tr_rec.language.name + ".ogg")
+                    #os.system(settings.FFMPEG_VP8_PATH+" -i "+full_path+" -vn "+full_path[:-9]+tr_rec.language.name+".ogg")
+                    comp_log.status = tr_rec.video_status
+                    tr_rec.video = file_name[:-4] + ".webm"
+                    tr_rec.audio = tr_rec.tutorial_detail.tutorial.replace(' ', '-') + '-' + 'English' + '.ogg'
+                    print "audio,",tr_rec.audio
+                    tr_rec.video_user = request.user
+                    tr_rec.video_status = 1
+                    if not tr_rec.version:
+                        tr_rec.version = 1
+                    tr_rec.video_thumbnail_time = '00:' + request.POST.get('thumb_mins', '00') + ':' + request.POST.get('thumb_secs', '00')
+                    tr_rec.save()
+                    if tr_rec.language.name == 'English':
+                        create_thumbnail(tr_rec, 'Big', tr_rec.video_thumbnail_time, '700:500')
+                        create_thumbnail(tr_rec, 'Small', tr_rec.video_thumbnail_time, '170:127')
+                    comp_log.save()
+                    comp_title = tr_rec.tutorial_detail.foss.foss + ': ' + tr_rec.tutorial_detail.tutorial + ' - ' + tr_rec.language.name
+                    add_adminreviewer_notification(tr_rec, comp_title, component + ' waiting for admin review')
+                    return HttpResponse("done")
+                elif component == "audio":
+                    file_name, file_extension = os.path.splitext(request.FILES['comp'].name)
+                    file_name = tr_rec.tutorial_detail.tutorial.replace(' ', '-') + '-' + tr_rec.language.name + file_extension
+                    file_path = settings.MEDIA_ROOT + 'temp/'
+                    if not os.path.exists(file_path):
+                        os.makedirs(file_path)
+                    full_path = file_path + file_name
+                    if os.path.isfile(full_path):
+                        os.remove(full_path)
+                        os.remove(full_path[:-4]+"-nonoise.ogg")
+                    fout = open(full_path, 'wb+')
+                    f = request.FILES['comp']
+                    for chunk in f.chunks():
+                        fout.write(chunk)
+                    fout.close()
+                    tr_rec.audio = file_name
+                    tr_rec.video = tr_rec.tutorial_detail.tutorial.replace(' ', '-') + '-Video' + '.webm'
+                    tr_rec.video_user = request.user
+                    tr_rec.video_status = 0
+                    if not tr_rec.version:
+                        tr_rec.version = 1
+                    tr_rec.save()
+                    sox.soxAudioManipulation(full_path)
+                    response_msg = component + ' uploaded successfully!'
+                    messages.success(request, response_msg)
+                    return HttpResponse('done')
+            except:
+                pass
+        else:
+            context = {
+                'form': form,
+                'tr': tr_rec,
+                'title': component.replace('_', ' '),
+                'component': component,
+            }
+            context.update(csrf(request))
+            return HttpResponse('no')
+    return HttpResponse('not done')
+
+
+
+
+
 
 @login_required
 def upload_component(request, trid, component):
@@ -1009,10 +1116,11 @@ def upload_component(request, trid, component):
     elif (component == 'slide' or component == 'code' or component == 'assignment') and getattr(tr_rec.common_content, component + '_status') == 4:
         raise PermissionDenied()
     else:
+        print request.method
         if request.method == 'POST':
             response_msg = ''
             error_msg = ''
-
+            print "hello"
             form = ComponentForm(component, request.POST, request.FILES)
             if form.is_valid():
                 try:
@@ -1065,11 +1173,11 @@ def upload_component(request, trid, component):
                         if os.path.isfile(full_path[0:-4] + ".webm"):
                             subprocess.Popen(["rm", full_path[0:-4] + ".webm"])
                         subprocess.Popen([settings.FFMPEG_VP8_PATH, "-y", "-i", full_path, "-vcodec", "libvpx", "-af", "volume=0.0", "-max_muxing_queue_size", "1024", "-f", "webm", full_path[:-4] + ".webm"], stdout=subprocess.PIPE)
-                        # subprocess.Popen([settings.FFMPEG_VP8_PATH,"-i",full_path,"-an",full_path[:-4]+".webm"])
+                        #subprocess.Popen([settings.FFMPEG_VP8_PATH,"-i",full_path,"-an",full_path[:-4]+".webm"])
                         if os.path.isfile(full_path[:-9] + tr_rec.language.name + ".ogg"):
                             subprocess.Popen(["rm", full_path[:-9] + tr_rec.language.name + ".ogg"])
                         subprocess.Popen([settings.FFMPEG_VP8_PATH, "-y", "-i", full_path, "-vn", "-acodec", "libvorbis", full_path[:-9] + tr_rec.language.name + ".ogg"])
-                        # subprocess.Popen([settings.FFMPEG_VP8_PATH,"-i",full_path,"-vn",full_path[:-9]+tr_rec.language.name+".ogg"])
+                        #subprocess.Popen([settings.FFMPEG_VP8_PATH,"-i",full_path,"-vn",full_path[:-9]+tr_rec.language.name+".ogg"])
                         comp_log.status = tr_rec.video_status
                         tr_rec.video = file_name[:-4] + ".webm"
                         tr_rec.audio = tr_rec.tutorial_detail.tutorial.replace(' ', '-') + '-' + 'English' + '.ogg'
@@ -1171,6 +1279,7 @@ def upload_component(request, trid, component):
                     'form': form,
                     'tr': tr_rec,
                     'title': component.replace('_', ' '),
+                    'component': component,
                 }
                 context.update(csrf(request))
                 return render(request, 'creation/templates/upload_component.html', context)
@@ -1178,6 +1287,7 @@ def upload_component(request, trid, component):
                 context = {
                     'form': form,
                     'tr': tr_rec,
+                    'component': component,
                     'title': component.replace('_', ' '),
                 }
                 context.update(csrf(request))
@@ -1186,6 +1296,7 @@ def upload_component(request, trid, component):
     context = {
         'form': form,
         'tr': tr_rec,
+        'component': component,
         'title': component.replace('_', ' '),
     }
     context.update(csrf(request))
@@ -1242,6 +1353,9 @@ def preview_check_avaiable(request, trid, component):
         if audio_info['duration'] != 0 and audio_info['size'] != 0:
             return HttpResponse("done")
         return HttpResponse("not-done")
+
+
+
 
 
 def view_component(request, trid, component):

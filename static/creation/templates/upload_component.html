@@ -10,7 +10,7 @@
 		margin: 5px;
 	}
 </style>
-	<form role="form" method="post" enctype="multipart/form-data" action="">
+	<form id="form_id" role="form" method="post" enctype="multipart/form-data" onsubmit="return mov()">
 		{% csrf_token %}
 		<div class="well">
 		    <fieldset>
@@ -41,63 +41,54 @@
 		{% render_field form.comptype %}
 		{% if title == "audio" %}
 		{% if tr.audio != "Unavailable" %}
-			<!-- Show loading while the video is processed -->
-			<div id="preview-link">
-					<i class="fa fa-circle-o-notch fa-spin fa-3x fa-fw"></i>
-					<span class="sr-only">Loading...</span> 
-					We are preparing a preview. This may take some minutes.
-			</div>
-			<script>
-				var check_interval = setInterval(preview_avaiable_check, 3000);
-					function preview_avaiable_check() {
-						var xhttp = new XMLHttpRequest();
-						xhttp.onreadystatechange = function() {
-							if (this.readyState == 4 && this.status == 200) {
-								var response = xhttp.responseText;
-								if (response == "done") {
-									previewBtn = document.getElementById('preview-link'); 
-									previewBtn.innerHTML = "<a class='btn btn-primary' href='{% url 'creation:view_component_audtype' trid=tr.id component='video' aud_type='f' %}' title='View/Download Audio'><span title='Preview' data-original-title=''>Preview</span></a>";
-									clearInterval(check_interval);
-								}
-							}
-						};
-						xhttp.open("GET", "{% url 'creation:preview_check_avaiable' trid=tr.id component='audio' %}", true);
-						xhttp.send();		
-					}
-			</script>
+			<a class="btn btn-primary" href="{% url 'creation:creationhome' %}" title="Done">
+				<span title="Done" data-original-title="" >Done</span>
+			</a>
+			
 		{% endif %}
+		<div id="preview-link">
+		</div>
 		{% elif title == "video" %}
 		{% if tr.audio != "Unavailable" %}
 			<a class="btn btn-primary" href="{% url 'creation:creationhome' %}" title="Done">
-				<span title="Done" onclick='preview_avaiable_check()' data-original-title="" >Done</span>
+				<span title="Done" data-original-title="" >Done</span>
 			</a>
-			<!-- Show loading while the video is processed -->
-			<div id="preview-link">
-				<i class="fa fa-circle-o-notch fa-spin fa-3x fa-fw"></i>
-				<span class="sr-only">Loading...</span> 
-				We are preparing a preview. This may take some minutes.
-			</div>
-			<script>
-				var check_interval = setInterval(preview_avaiable_check, 3000);
-					function preview_avaiable_check() {
-						var xhttp = new XMLHttpRequest();
+			
+		{% endif %}
+		<div id="preview-link">
+				
+		</div>
+		{% endif %}
+		<input type="submit" class="btn btn-primary" value="Upload"  tabindex="4" />
+	</form>
+	<script>
+		function mov(){
+			//alert("done");
+			var form = document.getElementById('form_id');
+			var formData = new FormData(form);
+			var xhttp = new XMLHttpRequest();
+			var url
+			previewBtn = document.getElementById('preview-link');
+			previewBtn.innerHTML='<i class="fa fa-circle-o-notch fa-spin fa-3x fa-fw"></i><span class="sr-only">Loading...</span>We are preparing a preview. This may take some minutes.'
 						xhttp.onreadystatechange = function() {
 							if (this.readyState == 4 && this.status == 200) {
 								var response = xhttp.responseText;
 								if (response == "done") {
 									previewBtn = document.getElementById('preview-link'); 
+									alert("done");
+									{% if component == 'video' %}
 									previewBtn.innerHTML = "<a class='btn btn-primary' href='{% url 'creation:view_component' trid=tr.id component='video' %}' title='View/Download Audio'><span title='Preview' data-original-title=''>Preview</span></a>";
-									clearInterval(check_interval);
+								//	clearInterval(check_interval);
+								{% else %}
+								previewBtn.innerHTML = "<a class='btn btn-primary' href='{% url 'creation:view_component_audtype' trid=tr.id component='video' aud_type='f' %}' title='View/Download Audio'><span title='Preview' data-original-title=''>Preview</span></a>";
+								{% endif %}
 								}
 							}
 						};
-						xhttp.open("GET", "{% url 'creation:preview_check_avaiable' trid=tr.id component='video' %}", true);
-						xhttp.send();		
-					}
-			</script>
-		{% endif %}
-		{% endif %}
-		<input type="submit" class="btn btn-primary" value="Upload"  tabindex="4"/>
-	</form>
+						xhttp.open("POST","{% url 'creation:ajax_upload_component' tr.id component %}", true);
+						xhttp.send(formData);
+			return false;
+		}
+	</script>
 
 {% endblock %}
