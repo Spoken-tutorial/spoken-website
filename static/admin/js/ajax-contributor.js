@@ -5,7 +5,7 @@ $(document).ready(function(){
    	var u_name  = $('#id_user').val();	
    	$.ajax({
                 type : "POST",
-                url:"/statistics/get_languages/"+u_name,
+                url:"/creation/get_languages/"+u_name,
                 dataType : "json",
                 success: function(data)
                 {	
@@ -18,7 +18,7 @@ $(document).ready(function(){
     var fid  = $('#id_foss_category').val(); 
     $.ajax({
                 type : "POST",
-                url:"/statistics/get_tutorials/"+fid,
+                url:"/creation/get_tutorials/"+fid,
                 dataType : "json",                
                 success: function(data)
                 { 

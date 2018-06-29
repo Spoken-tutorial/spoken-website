@@ -50,13 +50,12 @@
             </tr>
 
             <tr>
-                <th>Tutorial Count</th><td>{{ tutorials_count.id__count }}</td>
+                <th>Tutorial Count</th><td>{{ tutorials_count }}</td>
             </tr>
            
               <div class="progress">
                 <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow= (40/50)*100
                 aria-valuemin="0" aria-valuemax="5" style=width:{{perc}}%>
-                  Something                 
                 </div>
               </div>
         </table>    
@@ -101,7 +100,7 @@
                   <td>{{ record.tutorial_detail.order }}</td>
                   <td>{{ record.tutorial_detail.tutorial }}</td>
                   <td>{{ record.language.name }}</td>
-                <td><a href="{% url 'creation:allocate' record.tutorial_detail.id record.language_id request.user %}">Allocate</a>
+                <td><a href="{% url 'creation:allocate' record.tutorial_detail.id record.language_id request.user.id 7 %}">Allocate</a>
                 </td>
       </tr>
 

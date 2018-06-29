@@ -181,7 +181,7 @@ class ContributorRatingAdmin(admin.ModelAdmin):
     form = ContributorRatingForm
     fields = ['user', 'rating','language']
     list_display = ('user', 'language','rating')
-    list_filter = ('rating',)
+    list_filter = ('rating','language')
 
     class Media:
         js = ('admin/js/ajax-contributor.js',)

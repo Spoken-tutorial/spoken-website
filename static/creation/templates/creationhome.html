@@ -24,16 +24,34 @@
                                 <li><a target="_blank" href="/creation/upload-publish-outline/">Upload Published Tutorial Outline</a></li>
                                 <li><a target="_blank" href="/creation/upload/contributed/">Tutorials contributed</a></li>
                                 <li><a target="_blank" href="/creation/report-missing-component/list/">Component Missing Notifications</a></li>
-                                <li>
-                                    {% if user|get_language_manager %}
-                                    <a target="_blank" href="/creation/allocate_tutorial_manager/available/">Allocate a FOSS's Tutorial</a></li>
-                                    {% else%}
-                                    <a target="_blank" href="/creation/allocate_tutorial/available/">Request for a FOSS's Tutorial</a></li>
-                                    {% endif %}
-                            </ul>
+                                {% if not user|get_language_manager %}
+                                <li>    
+                                    <a target="_blank" href="/creation/allocate_tutorial/available/">Request for a FOSS's Tutorial</a>
+                                </li>
+                                {% endif %}
+                                </ul>
                         </div>
                     </div>
+                
                 {% endif %}
+                
+                {% if user|get_language_manager %}
+                    <div class="panel panel-info">
+                    <div class="panel-heading panel-heading-notif">Language Manager</div>
+                    <div class="panel-body">
+                        <ul>
+                            <li>
+                                <a target="_blank" href="/creation/rate_contributors/">Rate Contributors</a></li>
+                            </li>
+                            <li>
+                                <a target="_blank" href="/creation/allocate_tutorial_manager/available/">Allocate a FOSS's Tutorial </a>
+                            </li>   
+                        </ul>
+                    </div>
+                </div>
+            
+                {% endif %}
+            
                 {% if user|get_contenteditor %}
                     <div class="panel panel-info">
                         <div class="panel-heading panel-heading-notif">Content Editor</div>
@@ -250,9 +268,7 @@
             {% endif %}
             </div>
         </div>
-    </div>
-
-
+</div>
 <script type= "text/javascript" >
 
 var direction = "";

@@ -37,8 +37,11 @@ from django.utils import timezone
 from datetime import datetime,timedelta
 from django.utils.timezone import now
 from django.db.models import Count, Min, Q, Sum, F
-from creation.filters import CreationStatisticsFilter
+from creation.filters import CreationStatisticsFilter,ContributorRatingFilter
 import itertools
+from django.middleware import csrf
+from django.core.urlresolvers import reverse
+from django.utils.html import format_html
 
 def humansize(nbytes):
     suffixes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
@@ -437,7 +440,7 @@ def creationhome(request):
             'language': languages
         }
 
-        context.update(csrf(request))
+        #context.update(csrf(request))
         return render(request, 'creation/templates/creationhome.html', context)
     else:
         
@@ -2860,7 +2863,7 @@ def send_mail_to_contributor(contributor_id, tdid,lid,reason):
     tutorial_details = TutorialResource.objects.filter(
         tutorial_detail_id = tdid, language = lid).values(
         'tutorial_detail__tutorial','language__name','submissiondate')
-    print "tutorial details : ", tutorial_details[0]['tutorial_detail__tutorial']
+    
           # revoke symbols
           # 10 - include submission date
           # 01 - include quality reason
@@ -2869,13 +2872,15 @@ def send_mail_to_contributor(contributor_id, tdid,lid,reason):
     mail_submission_date = reason[0:1]
     mail_quality = reason[1:2]
 
-    if mail_submission_date:
+    if mail_submission_date ==1:
         message_sub_date = "\n   - "+"Your submission date was : "+str(tutorial_details[0]['submissiondate'])+ ", but you could'nt complete before that."
 
-    if mail_quality:
+    if mail_quality ==1:
         messages_audio_quality = "\n   - "+ "Your audio quality was not in acceptable limits."        
-    user_details =  User.objects.filter(id=contributor_id).values('username','email')
     
+    
+    user_details =  User.objects.filter(id=contributor_id).values('username','email')
+    print "email id : ",user_details[0]['email']
     subject = "Spoken Tutorials"
     message = "Hello "+str(user_details[0]['username'])+",\n\n "+"I am sorry to say that the tutorial,"+tutorial_details[0]['tutorial_detail__tutorial']+" has been removed from your tally for the following reasons : "+str(message_sub_date)+str(messages_audio_quality)
     print "messages : ", message
@@ -2920,7 +2925,6 @@ def allocate_tutorial(request, sel_status):
     if not (user.is_authenticated() and is_contributor(user)):    
         raise PermissionDenied()
         
-    #if is_language_manager(user):
     active = sel_status
     final_query = None
     fosses = []
@@ -2930,12 +2934,11 @@ def allocate_tutorial(request, sel_status):
     contributors_list = User.objects.filter(id__in= RoleRequest.objects.filter(role_type = 0,status = 1,language__in=lang_qs).values('user_id').distinct())
     if request.user.groups.filter(Q(name='Language-Manager')).exists():
         final_query = TutorialResource.objects.filter(language__in = lang_qs , assignment_status =1).exclude(language_id=22)
-        bid_count = TutorialResource.objects.filter(language__in = lang_qs ,assignment_status=1
+        bid_count = ContributorRole.objects.filter(language__in = lang_qs ,status=1
             ).exclude(language_id=22).aggregate(Count('id'))
     else:
-        bid_count = TutorialResource.objects.filter(video_user = user.id ,assignment_status=1).exclude(language_id=22).count()          
         final_query = TutorialResource.objects.filter(video_user = user.id , assignment_status =1).exclude(language_id=22)
-
+        bid_count = ContributorRole.objects.filter(user_id = user.id ,status=1).exclude(language_id=22).aggregate(Count('id'))
 
     if sel_status == 'completed':
         header = {
@@ -2948,7 +2951,10 @@ def allocate_tutorial(request, sel_status):
         }
 
         status = 4
-        final_query = TutorialResource.objects.filter(script_status=status)
+        if request.user.groups.filter(Q(name='Language-Manager')).exists():
+            final_query = TutorialResource.objects.filter(script_status=status,language__in = lang_qs )
+        else:
+            final_query = TutorialResource.objects.filter(script_status=status,script_user_id = request.user.id )
 
     elif sel_status == 'available':
         header = {
@@ -2956,7 +2962,8 @@ def allocate_tutorial(request, sel_status):
             2: SortableHeader('Order Id', False),
             3: SortableHeader('Tutorial', False),
             4: SortableHeader('language__name', True, 'Language'),
-            5: SortableHeader('Bid', False),
+            5: SortableHeader('Days',False),
+            6: SortableHeader('Bid', False),
         }
 
         
@@ -2973,7 +2980,7 @@ def allocate_tutorial(request, sel_status):
                 5: SortableHeader('language__name', False, 'Language'),
                 6: SortableHeader('script_user_id', True, 'User ID'),
                 7: SortableHeader('tutorial_detail_id__tutorialresource__updated', True,'Bid Date'),
-                8: SortableHeader('Submission Date',False),
+                8: SortableHeader('submissiondate',True,'Submission Date'),
                 9: SortableHeader('Extension',False),
                 10: SortableHeader('Revoke ',False)
             }
@@ -2986,49 +2993,41 @@ def allocate_tutorial(request, sel_status):
                 5: SortableHeader('language__name', False, 'Language'),
                 6: SortableHeader('script_user_id', True, 'User ID'),
                 7: SortableHeader('tutorial_detail_id__tutorialresource__updated', True,'Bid Date'),
-                8: SortableHeader('Submission Date',False),
+                8: SortableHeader('submissiondate',True,'Submission Date'),
                 9: SortableHeader('Extension',False),
-            }
-        
+            }        
         status = 4
         
-        print "contributors_list : ", contributors_list,"\n\n\nlang_qs :",lang_qs
-        #Send email to contributor if he is nearing deadline
-        # stale_tuts = check_stale_tuts(request,final_query)
     else:
         raise PermissionDenied()
-
+    
     extension = []
     pub_tutorials_set = final_query
     context['datetoday'] = datetime.now()
     raw_get_data = request.GET.get('o', None)
     tutorials_sorted = get_sorted_list(request, pub_tutorials_set, header, raw_get_data)
+    
     ordering = get_field_index(raw_get_data)
     tutorials = CreationStatisticsFilter(request.GET, queryset=tutorials_sorted)
-
-    context['tutorials_count'] = tutorials.qs.aggregate(Count('id'))
+    
+    context['tutorials_count'] = bid_count['id__count'] + tutorials.qs.aggregate(Count('id'))['id__count']    
     try:
         context['bid_count__count'] = bid_count['id__count']
         if sel_status == 'ongoing':
-            context['perc'] =  float(tutorials.qs.aggregate(Count('id'))['id__count']) * 100 / float(bid_count['id__count'] )  
+            context['perc'] =  bid_count['id__count'] * 100 / (bid_count['id__count'] + tutorials.qs.aggregate(Count('id'))['id__count'])
         else:
-            context['perc'] = float(bid_count['id__count'] *100) / float(tutorials.qs.aggregate(Count('id'))['id__count'])
+            context['perc'] = float(bid_count['id__count'] *100) / float(tutorials.qs.aggregate(Count('id'))['id__count'] + bid_count['id__count'])
     except:
         context['bid_count__count'] = 0
-
-        
+        context['perc'] = 0
+    
     form = tutorials.form
     
     if lang_qs: 
         form.fields['language'].queryset = lang_qs
 
     if contributors_list:
-        try:
-            form.fields['script_user'].queryset = contributors_list
-            print "PASSED"
-        except :
-            print "Hello "
-       
+            form.fields['script_user'].queryset = contributors_list       
     
     context['form'] = form
         
@@ -3056,15 +3055,17 @@ def allocate_tutorial(request, sel_status):
     else:
         return render(request, 'creation/templates/allocate_tutorial.html', context)
 
-submissiondate = datetime.date(datetime.now() + timedelta(days = 3 ))
+
+#submissiondate = datetime.date(datetime.now() )
+
+
 
 @login_required
-def allocate(request, tdid, lid,uid):
+def allocate(request, tdid, lid,uid,days):
 
     user = User.objects.get(id=uid)
     tut = TutorialDetail.objects.get(id=tdid)
-    global success_message
-    success_message = 'NO'
+
     if not ContributorRole.objects.filter(
             foss_category_id=tut.foss_id, user_id=user.id, language_id=lid):
         contributor_role = ContributorRole()
@@ -3088,14 +3089,13 @@ def allocate(request, tdid, lid,uid):
         difficulty_level_minus_one =level_name[int(final_query.tutorial_detail.level_id) - 1]
         messages.error(request,str(difficulty_level_minus_one)+" level of "+str(tut.foss)+" is available. Please complete it first.")
         if user.groups.filter(Q(name='Language-Manager')):
-            return HttpResponseRedirect("/creation/allocate_tutorial_manager/available/?"+global_req.META['QUERY_STRING'])
+            return HttpResponseRedirect(request.META['HTTP_REFERER'])
         else:
-            return HttpResponseRedirect("/creation/allocate_tutorial/available/?"+global_req.META['QUERY_STRING'])
+            return HttpResponseRedirect(request.META['HTTP_REFERER'])
         
     else:        
         common_content = TutorialCommonContent.objects.get(tutorial_detail_id=tdid)
         try:
-
             tutorial_resource = TutorialResource()
             tutorial_resource.tutorial_detail_id = tdid
             tutorial_resource.language_id = lid
@@ -3103,24 +3103,27 @@ def allocate(request, tdid, lid,uid):
             tutorial_resource.outline_user = user
             tutorial_resource.script_user = user
             tutorial_resource.video_user = user
-            print "submissiondate : ", submissiondate
             # assignment_status - 
             # 0 : Not Assigned , 1 : Work in Progress , 2 : Completed
             tutorial_resource.assignment_status = 1
+            if days != 1 :
+                print "TImezone : ", dir(timezone.localtime(timezone.now()))
+                submissiondate = datetime.date(timezone.localtime(timezone.now()) + timezone.timedelta(days = int(days) ))
             tutorial_resource.submissiondate = submissiondate
             tutorial_resource.save()
             
-
+            messages.success(request,"Successfully alloted to "+str(user)+" : "+str(submissiondate))
+        
         except :
-            tutorial_resource = TutorialResource.objects.filter(tutorial_detail_id = tdid, language_id = lid).update(
-                outline_user = user,
-                script_user = user,
-                video_user = user,
-                submissiondate = submissiondate,
-                assignment_status=1,
-                )
-
-        messages.success(request,"Successfully alloted to "+str(user))
+            tutorial_resource = TutorialResource.objects.filter(tutorial_detail_id = tdid, language_id = lid)
+            tutorial_resource.outline_user = user
+            tutorial_resource.script_user = user
+            tutorial_resource.video_user = user
+            tutorial_resource.submissiondate = submissiondate
+            tutorial_resource.assignment_status=1
+            tutorial_resource.update()
+            messages.success(request,"Successfully updated to "+str(user)+" : "+str(submissiondate))
+        
  
         try :
             contributor_create = ContributorRole()            
@@ -3140,69 +3143,73 @@ def allocate(request, tdid, lid,uid):
             TutorialsAvailable.objects.filter(tutorial_detail = tdid,language = lid).delete()
         except:
             print "Tutorial not found in TutorialsAvailable, should be already present in TutorialResource"
-        
-        success_message = 'YES'
 
     if user.groups.filter(Q(name='Language-Manager')):
-        return HttpResponseRedirect("/creation/allocate_tutorial_manager/ongoing/?"+global_req.META['QUERY_STRING'])
+        return HttpResponseRedirect(request.META['HTTP_REFERER'])
     else:
-        return HttpResponseRedirect("/creation/allocate_tutorial/ongoing/?"+global_req.META['QUERY_STRING'])
+        return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
 
 
 def extend_submission_date(request,tutorial):
-    print "\n\n\n\n ==================== Tutorial : ",tutorial
+    
     tutorial_resource = TutorialResource.objects.get(id = tutorial)
     if tutorial_resource.extension_status>1:
         messages.error(request,"You have exceeded the no of extensions")
     else:    
-        tutorial_resource.submissiondate = datetime.now() + timedelta(days = 3 )
+        tutorial_resource.submissiondate = datetime.date(datetime.now() + timedelta(days = 3 ))
         tutorial_resource.extension_status +=1
         tutorial_resource.save()
 
-    if request.user.groups.filter(Q(name='Language-Manager')):
-        return HttpResponseRedirect("/creation/allocate_tutorial_manager/ongoing/?"+global_req.META['QUERY_STRING'])
-    else:
-        return HttpResponseRedirect("/creation/allocate_tutorial/ongoing/?"+global_req.META['QUERY_STRING'])
-
-
-def allocate_foss(request,fid,lang,uid):
-
-    total_days = datetime.now()
     
-    if lang:
-        
-        tdids = TutorialDetail.objects.filter(foss_id=fid).values('id')
-        language = Language.objects.get(name = lang)
-        for a_tdid in tdids:
-            tdid_available = TutorialsAvailable.objects.filter(tutorial_detail_id = a_tdid['id'], language = language)
-            for available in  tdid_available:
-                print "TDID : ", available
-                print "a_tdid : ",a_tdid
-                total_days += timedelta(days=3)
-        
-            global submissiondate
-            submissiondate = datetime.date(total_days)
+    return HttpResponseRedirect(request.META['HTTP_REFERER'])
+   
+
+def allocate_foss(request,fid,lang,uid,level,date):
+
+    
+    language = Language.objects.get(name = lang)
+    contrib = ContributorRating.objects.filter(user_id=uid,language=language).values('rating')
+    check = check_contributor_eligibility(request, contrib)
+
+    if check:        
+        print "level :",level
+        tdids = TutorialDetail.objects.filter(foss_id=fid, level__level = level).values('id')
+        if contrib[0]['rating']<3:
+            bid_count = ContributorRole.objects.filter(user_id = uid,language_id = lid ,status=1
+                ).exclude(language_id=22).aggregate(Count('id'))
             
-        for a_tdid in tdids:
-            tdid_available = TutorialsAvailable.objects.filter(tutorial_detail_id = a_tdid['id'], language =language)    
-            for available in  tdid_available:
-                allocate(request,a_tdid['id'],language.id,uid)
-        
-        #Cumulative submission date
-        if success_message == 'YES':               
+            if bid_count['id__count'] > 3 :
+                if user.groups.filter(Q(name='Language-Manager')):
+                    messages.error(request, "You cannot allocate more than 3 tutorials to a contributor of rating less than 3")
+                else:
+                    messages.error(request,"You cannot allocate more than 3 tutorials ")
+                return HttpResponseRedirect(request.META['HTTP_REFERER'])
+            else:
+                counter = 0
+                for a_tdid in tdids:
+                    if counter <4:
+                        allocate(request,a_tdid['id'],language.id,uid,1)
+                        counter +=1
+                username = User.objects.filter(id = uid).values('username')
+                messages.warning(request,username[0]['username'] +" is not having rating above 3 , so alloted only 3 tutorials")                    
+        else:
+            
+            
+            global submissiondate
+            submissiondate = date
+            
+            for a_tdid in tdids:
+                tdid_available = TutorialsAvailable.objects.filter(tutorial_detail_id = a_tdid['id'], language =language)    
+                for available in  tdid_available:
+                    check = allocate(request,a_tdid['id'],language.id,uid)
+                    abc =1
+            #Cumulative submission date
             messages.success(request,"Submission Date is : "+str(submissiondate))
             
-            if request.user.groups.filter(Q(name='Language-Manager')):
-                return HttpResponseRedirect("/creation/allocate_tutorial_manager/ongoing/?"+global_req.META['QUERY_STRING'])
-            else:
-                return HttpResponseRedirect("/creation/allocate_tutorial/ongoing/?"+global_req.META['QUERY_STRING'])
-        else:
-            if request.user.groups.filter(Q(name='Language-Manager')):
-                return HttpResponseRedirect("/creation/allocate_tutorial_manager/available/?"+global_req.META['QUERY_STRING'])
-            else:
-                return HttpResponseRedirect("/creation/allocate_tutorial/available/?"+global_req.META['QUERY_STRING'])
+    return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
+        
 
 def revoke_allocated_tutorial(request,uid,lid,tdid,taid,reason):
     print "revoke_allocated_tutorial",uid,lid,tdid,taid
@@ -3224,55 +3231,48 @@ def revoke_allocated_tutorial(request,uid,lid,tdid,taid,reason):
         tutorialresourceobj.assignment_status = 0 
         tutorialresourceobj.save()
 
-    
-    tutorialsavailableobj = TutorialsAvailable(id = taid)
-    tutorialsavailableobj.language_id = lid
-    tutorialsavailableobj.tutorial_detail_id = tdid
-    tutorialsavailableobj.save()
-    
+    try:
+        tutorialsavailableobj = TutorialsAvailable(id = taid)
+        tutorialsavailableobj.language_id = lid
+        tutorialsavailableobj.tutorial_detail_id = tdid
+        tutorialsavailableobj.save()
+        messages.success(request,"Tutorial Revoked" )
     #Send email to contributor if he is nearing deadline
-    stale_tuts = send_mail_to_contributor(uid,tdid,lid,reason)
+        
 
-    if global_req.META['QUERY_STRING']:
-        if request.user.groups.filter(Q(name='Language-Manager')):
-            return HttpResponseRedirect("/creation/allocate_tutorial_manager/ongoing/?"+global_req.META['QUERY_STRING'])
-        else:
-            return HttpResponseRedirect("/creation/allocate_tutorial/ongoing/?"+global_req.META['QUERY_STRING'])
-    else:
-        if request.user.groups.filter(Q(name='Language-Manager')):
-            return HttpResponseRedirect("/creation/allocate_tutorial_manager/ongoing/?")
-        else:
-            return HttpResponseRedirect("/creation/allocate_tutorial/ongoing/?")
+    except :
+        stale_tuts = send_mail_to_contributor(uid,tdid,lid,reason)
+    
+    return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
 def refresh_tutorials(request):
     count = 0
-    tutorials = TutorialResource.objects.filter(script_status =4,language = 22).exclude(assignment_status =2)
-
+    tutorials = TutorialResource.objects.filter(script_status =4,language = 22)
+    
     for tutorial in tutorials:
-        sam = Language.objects.exclude(id__in = TutorialResource.objects.filter(assignment_status__gte = 1,tutorial_detail = tutorial.tutorial_detail).values('language'))
-        print "Exisiting languages : ", sam
+        print "Tutorials : ", tutorial.tutorial_detail.id
+        this_tut_langs = TutorialResource.objects.filter(assignment_status = 0 ,tutorial_detail_id = tutorial.tutorial_detail.id).values('language').distinct()
+        sam = Language.objects.filter(id__in = this_tut_langs).exclude(id=22)
         for a_lang in sam:
-                already_present = TutorialsAvailable.objects.filter(tutorial_detail=tutorial.tutorial_detail.id,language=a_lang ).exists()
-                if already_present:
-                    print(a_lang," present : ", already_present)
-                else:
-                    print("Adding to TutorialsAvailable : ",tutorial.tutorial_detail.id," : ",a_lang )
-                    tutorialsavailable =  TutorialsAvailable()
-                    tutorialsavailable.tutorial_detail = tutorial.tutorial_detail
-                    tutorialsavailable.language =  a_lang
-                    count +=1
-                    tutorialsavailable.save()
-                
+
+            already_present = TutorialsAvailable.objects.filter(tutorial_detail_id=tutorial.tutorial_detail.id,language=a_lang).exists()
+            if already_present:
+                print(a_lang," present : ", already_present)
+            else:
+                print("Adding to TutorialsAvailable : ",tutorial.tutorial_detail.id," : ",a_lang )
+                tutorialsavailable =  TutorialsAvailable()
+                tutorialsavailable.tutorial_detail = tutorial.tutorial_detail
+                tutorialsavailable.language =  a_lang
+                count +=1
+                tutorialsavailable.save()
+
 
     if count>0:
         messages.success(request,str(count)+' tutorials added')
     else:
         messages.warning(request, "No tutorials updated")
 
-    if request.user.groups.filter(Q(name='Language-Manager')):
-        return HttpResponseRedirect("/creation/allocate_tutorial_manager/available/?"+global_req.META['QUERY_STRING'])
-    else:
-        return HttpResponseRedirect("/creation/allocate_tutorial/available/?"+global_req.META['QUERY_STRING'])
+    return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
 import json
 @csrf_exempt
@@ -3282,17 +3282,95 @@ def refresh_contributors(request):
 
     if request.is_ajax():
         context['contributors'] = 'TutorialResource'    
-        language_id = request.POST.get('language', '')
+        language_id = request.POST.get('language')
         print "language_id = :",language_id
         
         contributors_updated = RoleRequest.objects.filter(role_type = 0,
             status = 1,language=language_id).values_list('user__id','user__username').distinct();
         
-
         for a_contributor in contributors_updated:
             print "contributors : ", a_contributor[0]
             data += '<option id = '+str(a_contributor[0])+'>' + str(a_contributor[1]) + '</option>'
         return HttpResponse(json.dumps(data), content_type='application/json')
     else:
         return HttpResponse(json.dumps(" "),content_type='application/json')    
+
+@login_required
+def rate_contributors(request):
+    lang_qs = Language.objects.filter(id__in = RoleRequest.objects.filter(user_id = request.user.id ,status=1, role_type = 0).values(
+        'language'))
+    print "lang_ qs  : ", lang_qs
+    context ={}
+    header = {
+                1: SortableHeader('Check', False),
+                2: SortableHeader('user', True, 'User'),
+                3: SortableHeader('language', True, 'Language'),
+                4: SortableHeader('rating', False, 'Rating'),                
+            }
+
+    raw_get_data_language = request.GET.get('language')
+    rated_contributors = ContributorRating.objects.filter(language_id=raw_get_data_language).values('user__username','rating').order_by('-rating')
+    context['rated_contributors'] = rated_contributors
+    contributors = ContributorRole.objects.filter(
+            status=1, language_id=raw_get_data_language).exclude(
+            language=22).values(
+            'language__name','user__username').distinct()
+    for a_contributor in rated_contributors: 
+        print "Rated COntributors : ", a_contributor['user__username']," : ",a_contributor['rating']
+        contributors = contributors.exclude(user__username= a_contributor['user__username'])
+            
+    tutorials_sorted = get_sorted_list(request, contributors, header, raw_get_data_language)
+    ordering = get_field_index(raw_get_data_language)
+    contributor_list = ContributorRatingFilter(request.GET, queryset=tutorials_sorted)
+    form = contributor_list.form
+
+    if lang_qs: 
+        form.fields['language'].queryset = lang_qs
+        
+
+    context['header'] = header
+    context['contributors'] = tutorials_sorted  
+    context['form'] = form
+    context['ordering'] = ordering
+
+
+    rating_list = request.GET.getlist('rating')
+    rating_list = [x for x in rating_list if x != '0']
+    
+    try:
+        for i in range(len(request.GET.getlist('contri'))):
+            print request.GET.getlist('contri')[i],' \t :',rating_list[i]
+            user_obj = User.objects.get(username = request.GET.getlist('contri')[i])
+            lang = Language.objects.get(id = request.GET.get('language'))
+            try:
+                contrib = ContributorRating.objects.filter(user=user_obj,language_id=lang)        
+                contrib.update(rating= rating_list[i])
+                contrib.save()
+                messages.success(request,"Ratings Updated Successfully Hoola")
+            except:
+                contrib = ContributorRating()
+                contrib.language = lang
+                contrib.rating = rating_list[i]
+                contrib.user = user_obj
+                contrib.save()
+                messages.success(request,"Ratings Saved Successfully")
+        
+    except :
+        #messages.success(request,"Contributor Rating already saved")
+        print "Already saved"
+                
+    return render(request, 'creation/templates/rate_contributors.html', context)
+
+def check_contributor_eligibility(request,contrib_rating):
+    try:
+        print contrib_rating[0]['rating']
+        return True
+    except :
+        if request.user.groups.filter(name='Language-Manager').exists():    
+            message = format_html("No Rating found. Please visit this "+"<a href='{}' >  Rate Contributor </a>",reverse('creation:rate_contributors'))            
+        else:
+            message = format_html("Your Language Manager needs to enable you according to our new system. <b>Please contact your Language Manager</b></a>",reverse('creation:rate_contributors'))
+        messages.error(request,message)
+        return False
+
 # --------------- Bidding Module [END] ---------------------------------------

@@ -943,13 +943,10 @@ class ContributorRatingForm(forms.ModelForm):
         choices = [('', '-- Select User --'),] + list(
         User.objects.filter(groups__id=4).values_list('id','username')),
         required = True,
-        #widget=forms.Select(attrs={"onChange":'getCity()'}),
         error_messages = {'required':'user field is required.'}
     )
     language = forms.ChoiceField(
         choices=[('', '-- Select Language --'), ],
-        
-        #widget=forms.Select(attrs={'disabled': 'disabled'}),
         required=True,
         error_messages={'required': 'Language field is required.'}
     ) 

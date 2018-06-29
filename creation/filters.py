@@ -2,17 +2,19 @@
 import django_filters
 
 # Spoken Tutorial Stuff
-from creation.models import TutorialResource, RoleRequest
+from creation.models import TutorialResource, RoleRequest,ContributorRating
 from django import forms
 
 class CreationStatisticsFilter(django_filters.FilterSet):
 
     publish_at = django_filters.DateRangeCompareFilter()
-    #script_user_id = django_filters.ChoiceFilter( name='user__username')
-
 
     class Meta:
         model = TutorialResource
-        fields = ['tutorial_detail__foss', 'language', 'tutorial_detail__level', 'publish_at','script_user']
+        fields = ['tutorial_detail__foss', 'language', 'tutorial_detail__level', 'publish_at','script_user','submissiondate']
 
-	
+class ContributorRatingFilter(django_filters.FilterSet):
+
+	class Meta:
+		model = ContributorRating
+		fields = ['language', 'user']

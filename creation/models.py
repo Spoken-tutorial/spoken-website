@@ -198,14 +198,14 @@ class TutorialResource(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     publish_at = models.DateTimeField(null=True)
-    # the last submission date for the tutorial
+        # the last submission date for the tutorial
     submissiondate = models.DateTimeField(default = '2000-01-02' ,blank = True)
     # 0 - Not Assigned to anyone , 1 - Assigned & work in progress , 2 - Completed (= published / PR )
     assignment_status = models.PositiveSmallIntegerField(default=0)
     # 0 - Not Extended , 1 - Extended , 2 - Tutorial Terminated from user
     extension_status = models.PositiveIntegerField(default = 0)
     class Meta:
-        unique_together = ('tutorial_detail', 'assignment_status','language',)
+        unique_together = ('tutorial_detail','language',)
 
 
 class ArchivedVideo(models.Model):
