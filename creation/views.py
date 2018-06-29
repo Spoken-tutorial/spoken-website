@@ -215,14 +215,13 @@ def create_thumbnail(row, attach_str, thumb_time, thumb_size):
     filename = row.tutorial_detail.tutorial.replace(' ', '-') + '-' + attach_str + '.png'
     try:
         #process = subprocess.Popen([settings.FFMPEG_VP8_PATH, '-i ' + filepath + row.video + ' -r ' + str(30) + ' -ss ' + str(thumb_time) + ' -s ' + thumb_size + ' -vframes ' + str(1) + ' -f ' + 'image2 ' + filepath + filename], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        process = subprocess.Popen([settings.FFMPEG_VP8_PATH, '-i', filepath + row.video, '-r', str(30), '-ss', str(thumb_time), '-s', thumb_size, '-vframes', str(1), '-f', 'image2', filepath + filename], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        process = subprocess.Popen([settings.FFMPEG_VP8_PATH,'-y','-i', filepath + row.video, '-r', str(30), '-ss', str(thumb_time), '-s', thumb_size, '-vframes', str(1), '-f', 'image2', filepath + filename], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         stdout, stderr = process.communicate()
         if stderr:
             print filepath + filename
             print stderr
-    except Exception, e:
+    except Exception as e:
         print 1, e
-        pass
 
 
 def add_qualityreviewer_notification(tr_rec, comp_title, message):
@@ -1082,21 +1081,23 @@ def ajax_upload_component(request, trid, component):
                     messages.success(request, response_msg)
                     return HttpResponse('done')
             except:
-                pass
+                context = {
+                    'form': form,
+                    'tr': tr_rec,
+                    'component': component,
+                    'title': component.replace('_', ' '),
+                }
+                context.update(csrf(request))
+                return render(request, 'creation/templates/upload_component.html', context)
         else:
             context = {
                 'form': form,
                 'tr': tr_rec,
-                'title': component.replace('_', ' '),
                 'component': component,
+                'title': component.replace('_', ' '),
             }
             context.update(csrf(request))
-            return HttpResponse('no')
-    return HttpResponse('not done')
-
-
-
-
+            return render(request, 'creation/templates/upload_component.html', context)
 
 
 @login_required
@@ -1116,11 +1117,9 @@ def upload_component(request, trid, component):
     elif (component == 'slide' or component == 'code' or component == 'assignment') and getattr(tr_rec.common_content, component + '_status') == 4:
         raise PermissionDenied()
     else:
-        print request.method
         if request.method == 'POST':
             response_msg = ''
             error_msg = ''
-            print "hello"
             form = ComponentForm(component, request.POST, request.FILES)
             if form.is_valid():
                 try:
@@ -1173,11 +1172,11 @@ def upload_component(request, trid, component):
                         if os.path.isfile(full_path[0:-4] + ".webm"):
                             subprocess.Popen(["rm", full_path[0:-4] + ".webm"])
                         subprocess.Popen([settings.FFMPEG_VP8_PATH, "-y", "-i", full_path, "-vcodec", "libvpx", "-af", "volume=0.0", "-max_muxing_queue_size", "1024", "-f", "webm", full_path[:-4] + ".webm"], stdout=subprocess.PIPE)
-                        #subprocess.Popen([settings.FFMPEG_VP8_PATH,"-i",full_path,"-an",full_path[:-4]+".webm"])
+                        # subprocess.Popen([settings.FFMPEG_VP8_PATH,"-i",full_path,"-an",full_path[:-4]+".webm"])
                         if os.path.isfile(full_path[:-9] + tr_rec.language.name + ".ogg"):
                             subprocess.Popen(["rm", full_path[:-9] + tr_rec.language.name + ".ogg"])
                         subprocess.Popen([settings.FFMPEG_VP8_PATH, "-y", "-i", full_path, "-vn", "-acodec", "libvorbis", full_path[:-9] + tr_rec.language.name + ".ogg"])
-                        #subprocess.Popen([settings.FFMPEG_VP8_PATH,"-i",full_path,"-vn",full_path[:-9]+tr_rec.language.name+".ogg"])
+                        # subprocess.Popen([settings.FFMPEG_VP8_PATH,"-i",full_path,"-vn",full_path[:-9]+tr_rec.language.name+".ogg"])
                         comp_log.status = tr_rec.video_status
                         tr_rec.video = file_name[:-4] + ".webm"
                         tr_rec.audio = tr_rec.tutorial_detail.tutorial.replace(' ', '-') + '-' + 'English' + '.ogg'
@@ -1353,9 +1352,6 @@ def preview_check_avaiable(request, trid, component):
         if audio_info['duration'] != 0 and audio_info['size'] != 0:
             return HttpResponse("done")
         return HttpResponse("not-done")
-
-
-
 
 
 def view_component(request, trid, component):

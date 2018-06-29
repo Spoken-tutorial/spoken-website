@@ -283,4 +283,4 @@ SPOKEN_HASH_SALT = 'change this value'
 # FFmpeg - currently there are multiple versions of FFmpeg on server,
 # Hence, these variables are used to make sure there is no conflict.
 FFMPEG_PATH = FFMPEG_PATH
-FFMPEG_VP8_PATH =  FFMPEG_VP8_PATH 
+FFMPEG_VP8_PATH = FFMPEG_VP8_PATH 
