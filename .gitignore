@@ -25,12 +25,15 @@ media/*
 !media/training/
 !media/cms/
 !media/cdimage/
+!media/testimonials/
 media/videos/*
 media/training/*
 media/cdimage/*
+media/testimonials/*
 !media/training/README
 !media/videos/README
 !media/cdimage/README
+!media/testimonials/README
 !media/README
 media/cms/*
 !media/cms/images/
