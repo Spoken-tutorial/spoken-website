@@ -505,3 +505,14 @@ def tutorial_content(request, template='statistics/templates/statistics_content.
     context['ordering'] = ordering
 
     return render(request, template, context)
+
+def activate_academic(request, pk):
+  #pk =0
+  st = TrainingRequest.objects.get(pk=pk)
+  if st and st.status == 2:
+    st.status = 1 #mark to complete
+    st.save()
+    messages.success(request, 'Training Marked as complete.')
+  else:
+    messages.error(request, 'Something went wrong Please try again')
+  return HttpResponseRedirect("/software-training/training-request/rp/markcomplete/")
