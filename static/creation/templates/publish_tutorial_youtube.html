@@ -36,7 +36,9 @@
         </li>
         <li class="active">Upload to Youtube</li>
     </ul>
-    <button id="publishAll" class="btn btn-primary" onclick="startupload(this)">Upload All</button>
+    <div id='publishAll'>
+    <button id="pub" class="btn btn-primary" onclick="startupload(this)">Upload All</button>
+</div>
 </div>
 <div id="load">
 </div>
@@ -98,42 +100,42 @@
         
     
         <script>
+             var count = 0;
             function startupload(element){
                 var st;
                 fol = [];
+                pub = document.getElementById('publishAll');
+                pub.innerHTML = '<div id="spinner" class="fa fa-spinner fa-spin" style="font-size:48px;color:teal;"></div> Uploading the videos to youtube. This might take few minutes..';
+           
                 {% for t in collection  %}
                     fol.push({{ t.id }});
                 {% endfor %}
                     var i=0;
-                    var check = false;
+                    var l = fol.length;
                 while(i<fol.length){
                     
                     var id = fol[i];
                     
-                    if(i== fol.length-1){
-                        check=true;
-                    }
-					get(id,check);
+					get(id,l);
                     i++;
                 }
                 
 
             }
 
-            function get(id,check){
+            function get(id,l){
             var xhttp = new XMLHttpRequest();
             var str = "../";
             var string = str.concat(id);
-                                    //load.innerHTML=id;
 						xhttp.onreadystatechange = function() {
 							if (this.readyState == 4 && this.status == 200) {
 								var response = xhttp.responseText;
 								if (response == "done") {
                                     var ele = document.getElementById(id);
                                     ele.innerHTML='&#x2705';
-                                    if(check){
-                                        console.log("hi");
-                                        location.reload(true);
+                                    count++;
+                                    if(count == l){
+                                        location.reload();
                                     }
                                    // location.reload();
 								}
