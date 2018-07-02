@@ -53,12 +53,9 @@
 		{% render_field form.comptype %}
 		<div id="preview-btn">
 		{% if title == "video" %}
-		{% if tr.audio != "Unavailable" %}
-			
-				<a class='btn btn-primary' target='_blank' href="{% url 'creation:view_component' trid=tr.id component='video' %}" title='Preview your uploaded file'> Preview </a> <strong>Preview your uploaded file!</strong> 
-
-			
-		{% endif %}
+			{% if tr.audio != "Unavailable" %}
+				<a class='btn btn-primary' target='_blank' href="{% url 'creation:view_component' trid=tr.id component='video' %}" title='Preview your uploaded file'> Preview </a> <strong>Preview your uploaded file!</strong> 			
+			{% endif %}
 		{% endif %}
 		</div>
 		<input type="submit" class="btn btn-primary" id="upload-btn" value="Upload" title="Upload your file" tabindex="4" />
@@ -83,7 +80,9 @@
 				var response = xhttp.responseText;
 				if (response == "done") {
 					{% if title == "audio" %}
-						location.href="{% url 'creation:view_component_audtype' trid=tr.id component='video' aud_type='f' %}";
+						URL = "{% url 'creation:view_component_audtype' trid=tr.id component='video' aud_type='f' %}";
+						
+						document.getElementById("preview-link").innerHTML = "<a class='btn btn-primary' onclick='removeLinkBtn();' target='_blank' href="+ URL + " title='Preview your uploaded file'> Preview </a> <strong>Preview your uploaded file!</strong>";
 					{% else %}
 						location.reload();
 					{% endif %}
@@ -97,6 +96,9 @@
 		xhttp.open("POST","{% url 'creation:ajax_upload_component' tr.id title %}", true);
 		xhttp.send(formData);
 		return false;
+	}
+	function removeLinkBtn() {
+		document.getElementById("preview-link").innerHTML = '';
 	}
 </script>
 {% endblock %}

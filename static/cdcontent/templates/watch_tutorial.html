@@ -684,12 +684,11 @@
             var cur_time = formatTime(currentTime).toString();
 
             trigger( cur_time);
-                            $("#text").click(function(e){
-                            trackedPlayer.pause()
-                    setForum(cur_time)
-                 
-                    });
-            
+            $("#text").click(function(e) {
+                userPause = true;
+                trackedPlayer.pause()
+                setForum(cur_time)
+                });
             });
  
         
@@ -712,8 +711,8 @@
                         }else {
                                     sec_range = "50-60"
                         }
-        
-                         var url = "http://forums.spoken-tutorial.org/new-question/?category={{ tr_rec.tutorial_detail.foss.foss }}&tutorial={{ tr_rec.tutorial_detail.tutorial }}&minute_range="+min_range+"&second_range="+sec_range;
+                        
+                        var url = "http://forums.spoken-tutorial.org/new-question/?category={{ tr_rec.tutorial_detail.foss.foss }}&tutorial={{ tr_rec.tutorial_detail.tutorial }}&minute_range="+min_range+"&second_range="+sec_range;
                         $("#text").attr("href", url);
                 }
         </script>
