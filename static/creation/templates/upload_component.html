@@ -55,7 +55,7 @@
 		{% if title == "video" %}
 		{% if tr.audio != "Unavailable" %}
 			
-				<a class='btn btn-primary' href="{% url 'creation:view_component' trid=tr.id component='video' %}" title='Preview your uploaded file'> Preview </a> <strong>Preview your uploaded file!</strong> 
+				<a class='btn btn-primary' target='_blank' href="{% url 'creation:view_component' trid=tr.id component='video' %}" title='Preview your uploaded file'> Preview </a> <strong>Preview your uploaded file!</strong> 
 
 			
 		{% endif %}

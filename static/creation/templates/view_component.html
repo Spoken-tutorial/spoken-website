@@ -48,7 +48,7 @@
 {% endblock %}
 
 {% block heading %}
-
+<p style="text-align:right;"><a href="/creation/upload/component/{{ tr.id }}/{{ component }}">&lt;&lt; Back</a></p>
     {% if component == "video" %}
         {{ tr.tutorial_detail.tutorial }}
     {% elif component == "keyword" %}
