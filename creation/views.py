@@ -1032,11 +1032,11 @@ def ajax_upload_component(request, trid, component):
                     if os.path.isfile(full_path[0:-4] + ".webm"):
                         os.remove(full_path[0:-4] + ".webm")
                     os.system(settings.FFMPEG_VP8_PATH+" -y -i "+full_path+" -vcodec libvpx -af volume=0.0 -max_muxing_queue_size 1024 -f webm "+ full_path[:-4] + ".webm")
-                    #os.system(settings.FFMPEG_VP8_PATH+" -i "+full_path+" -an "+full_path[:-4]+".webm")
+                    # os.system(settings.FFMPEG_VP8_PATH+" -y -i "+full_path+" -an "+full_path[:-4]+".webm")
                     if os.path.isfile(full_path[:-9] + tr_rec.language.name + ".ogg"):
                         os.remove(full_path[:-9] + tr_rec.language.name + ".ogg")
-                    os.system(settings.FFMPEG_VP8_PATH+ " -y -i "+ full_path+ " -vn -acodec libvorbis "+ full_path[:-9] + tr_rec.language.name + ".ogg")
-                    #os.system(settings.FFMPEG_VP8_PATH+" -i "+full_path+" -vn "+full_path[:-9]+tr_rec.language.name+".ogg")
+                    os.system(settings.FFMPEG_VP8_PATH + " -y -i " + full_path + " -vn -acodec libvorbis " + full_path[:-9] + tr_rec.language.name + ".ogg")
+                    # os.system(settings.FFMPEG_VP8_PATH + " -y -i " + full_path+" -vn "+full_path[:-9]+tr_rec.language.name+".ogg")
                     comp_log.status = tr_rec.video_status
                     tr_rec.video = file_name[:-4] + ".webm"
                     tr_rec.audio = tr_rec.tutorial_detail.tutorial.replace(' ', '-') + '-' + 'English' + '.ogg'
@@ -1053,6 +1053,8 @@ def ajax_upload_component(request, trid, component):
                     comp_log.save()
                     comp_title = tr_rec.tutorial_detail.foss.foss + ': ' + tr_rec.tutorial_detail.tutorial + ' - ' + tr_rec.language.name
                     add_adminreviewer_notification(tr_rec, comp_title, component + ' waiting for admin review')
+                    response_msg = component + ' uploaded successfully!'
+                    messages.success(request, response_msg)
                     return HttpResponse("done")
                 elif component == "audio":
                     file_name, file_extension = os.path.splitext(request.FILES['comp'].name)
@@ -1063,6 +1065,7 @@ def ajax_upload_component(request, trid, component):
                     full_path = file_path + file_name
                     if os.path.isfile(full_path):
                         os.remove(full_path)
+                    if os.path.isfile(full_path[:-4]+"-nonoise.ogg"):
                         os.remove(full_path[:-4]+"-nonoise.ogg")
                     fout = open(full_path, 'wb+')
                     f = request.FILES['comp']
@@ -1072,7 +1075,10 @@ def ajax_upload_component(request, trid, component):
                     tr_rec.audio = file_name
                     tr_rec.video = tr_rec.tutorial_detail.tutorial.replace(' ', '-') + '-Video' + '.webm'
                     tr_rec.video_user = request.user
-                    tr_rec.video_status = 0
+                    if os.path.isfile(settings.MEDIA_ROOT+'videos/'+str(tr_rec.tutorial_detail.foss_id) + '/' + str(tr_rec.tutorial_detail.id) + '/' + file_name):
+                        tr_rec.video_status = 1
+                    else:
+                        tr_rec.video_status = 0
                     if not tr_rec.version:
                         tr_rec.version = 1
                     tr_rec.save()
@@ -1080,12 +1086,12 @@ def ajax_upload_component(request, trid, component):
                     response_msg = component + ' uploaded successfully!'
                     messages.success(request, response_msg)
                     return HttpResponse('done')
-            except:
+            except :
                 context = {
                     'form': form,
                     'tr': tr_rec,
                     'component': component,
-                    'title': component.replace('_', ' '),
+                    'title': component.replace('_', ' ')
                 }
                 context.update(csrf(request))
                 return render(request, 'creation/templates/upload_component.html', context)
@@ -1145,7 +1151,8 @@ def upload_component(request, trid, component):
                         tr_rec.audio = file_name
                         tr_rec.video = tr_rec.tutorial_detail.tutorial.replace(' ', '-') + '-Video' + '.webm'
                         tr_rec.video_user = request.user
-                        tr_rec.video_status = 0
+                        if  not tr_rec.video_status:
+                            tr_rec.video_status = 0
                         if not tr_rec.version:
                             tr_rec.version = 1
                         tr_rec.save()
@@ -1395,14 +1402,13 @@ def view_component(request, trid, component):
         eng_audio_info = get_audio_info(eng_audio_path)
         video_path = settings.MEDIA_ROOT + "videos/" + str(tr_rec.tutorial_detail.foss_id) + "/" + str(tr_rec.tutorial_detail_id) + "/" + tr_rec.video
         video_info = get_video_info(video_path)
-        aud_present = 1
+        aud_present = 0
         if os.path.isfile(audio_path) == False:
-            aud_present = 0
+            aud_present = 1
             messages.error(request, "No File Present")
         context = {
             'tr': tr_rec,
-            'video_mod': tr_rec.video[:-4].replace("-", "_") + "_nonoise",
-            'original': tr_rec.video[:-4].replace("-", "_"),
+            'original': tr_rec.video[:-5].replace("-", "_"),
             'component': component,
             'video_info': video_info,
             'eng_audio_info': eng_audio_info,
@@ -1457,7 +1463,6 @@ def view_component_audtype(request, trid, component, aud_type):
         elif aud_type == 'f':
             audio_path = settings.MEDIA_ROOT + "temp/" + tr_rec.audio[:-4] + "-nonoise.ogg"
         else:
-            print "test"
             file_name = aud_type.replace('_', '-') + ".ogg"
             file_path_src = settings.MEDIA_ROOT + 'temp/'
             full_path_src = file_path_src + file_name

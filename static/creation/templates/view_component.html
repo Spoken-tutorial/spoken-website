@@ -39,12 +39,16 @@
                 clear: both;
                 padding-top: 10px;
             }
+            .info {
+                background-color: #e7f3fe;
+                border-left: 6px solid #2196F3;
+            }
         </style>
     {% endif %}
 {% endblock %}
 
 {% block heading %}
-
+<p style="text-align:right;"><a href="/creation/upload/component/{{ tr.id }}/{{ component }}">&lt;&lt; Back</a></p>
     {% if component == "video" %}
         {{ tr.tutorial_detail.tutorial }}
     {% elif component == "keyword" %}
@@ -54,9 +58,14 @@
     {% endif %}
 {% endblock %}
 {% block content %}
-{% if not aud_present %}
-<p style="text-align:right;"><a href="/creation/upload/tutorial/{{ tr.id }}/">&lt;&lt; Back</a></p>
-{% endif %}
+        {% if aud_type == 'o' or aud_type == 'f' %}
+
+        <div class="info">
+            <p><strong>Info!  </strong> We processed your audio file. Please accept the file that you want to send further for review. </p>
+          </div>
+        {% endif %}          
+
+
     {% if component == "video" %}
     
     Video:
@@ -74,7 +83,7 @@
             <th>Size:</th><td>{{video_info.size}}</td>
         </tr>
     </table>
-    Audio:
+    {{ tr.language.name }} Audio:
         <table class="table table-bordered table-hover">
             <tr>
                 <th>Codec:</th><td>{{audio_info.codec}}</td>
@@ -104,7 +113,7 @@
             </audio>
             <br>
         </div>
-        <a class="btn btn-primary " href="/creation/view/component/{{ tr.id }}/video/o" title="View/Download Audio">
+        <a class="btn btn-primary " href="/creation/view/component/{{ tr.id }}/video/o" title="Preview Original File">
             <span title="" data-original-title="" >Preview Original</span>
         </a>
         {% elif aud_type == "o" %}
@@ -120,7 +129,7 @@
             </audio>
             <br>
         </div>
-	<a class="btn btn-primary " href="/creation/view/component/{{ tr.id }}/video/f" title="View/Download Audio">
+	<a class="btn btn-primary " href="/creation/view/component/{{ tr.id }}/video/f" title="Preview Filtered File">
                  <span title="" data-original-title="" >Preview filtered</span></a>
       {% else %}
 	<div class="video-container">
@@ -145,14 +154,14 @@
     {% endif %}
 	{% if aud_type == "f" %}
 	<a class="btn btn-primary " href="/creation/view/component/{{ tr.id }}/video/{{ audio_modified }}" title="Accept">
-                 <span title="" data-original-title="" >Accept this submission</span></a>
-	<a class="btn btn-primary " href="/creation/upload/tutorial/{{ tr.id }}/" title="Reject">
-                 <span title="" data-original-title="" >Reject and Re-record</span></a>
+                 <span title="" data-original-title="" >Accept</span></a>
+	<a class="btn btn-primary " href="/creation/upload/component/{{ tr.id }}/audio/" title="Reject">
+                 <span title="" data-original-title="" >Reject</span></a>
 	{% elif aud_type == "o" %}
 	<a class="btn btn-primary " href="/creation/view/component/{{ tr.id }}/video/{{ audio_original }}" title="Accept">
-                 <span title="" data-original-title="" >Accept this submission</span></a>
-	<a class="btn btn-primary " href="/creation/upload/tutorial/{{ tr.id }}/" title="Reject">
-                 <span title="" data-original-title="" >Reject and Re-record</span></a>
+                 <span title="" data-original-title="" >Accept</span></a>
+	<a class="btn btn-primary " href="/creation/upload/component/{{ tr.id }}/audio/" title="Reject">
+                 <span title="" data-original-title="" >Reject</span></a>
 	{% endif %}
 
 {% endblock %}

@@ -9,8 +9,14 @@
 	.btn {
 		margin: 5px;
 	}
+	.preview-btn {
+    background-color: #e7f3fe;
+    border: 6px solid #2196F3;
+}
 </style>
-	{% if component == 'video' or component == 'audio' %}
+
+
+	{% if title == 'video' or title == 'audio' %}
 	<form id="form_id" role="form" method="post" enctype="multipart/form-data" onsubmit="return mov()">
 	{% else %}
 	<form id="form_id" role="form" method="post" enctype="multipart/form-data">
@@ -41,28 +47,21 @@
 			    {{ form.isarchive.errors }}
 		    </div>
 	    {% endif %}
-
+		<div id="preview-link">
+			
+		</div>
 		{% render_field form.comptype %}
-		{% if title == "audio" %}
+		<div id="preview-btn">
+		{% if title == "video" %}
 		{% if tr.audio != "Unavailable" %}
-			<a class="btn btn-primary" href="{% url 'creation:creationhome' %}" title="Done">
-				<span title="Done" data-original-title="" >Done</span>
-			</a>
-			<div id="preview-link">
-				<a class='btn btn-primary' href="{% url 'creation:view_component_audtype' trid=tr.id component='video' aud_type='f' %}" title='View/Download Audio'><span title='Preview' data-original-title=''>Preview</span></a>
-			</div>
-		{% endif %}
-		{% elif title == "video" %}
-		{% if tr.audio != "Unavailable" %}
-			<a class="btn btn-primary" href="{% url 'creation:creationhome' %}" title="Done">
-				<span title="Done" data-original-title="" >Done</span>
-			</a>
-			<div id="preview-link">
-				<a class='btn btn-primary' href="{% url 'creation:view_component' trid=tr.id component='video' %}" title='View/Download Video'><span title='Preview' data-original-title=''>Preview</span></a>
-			</div>
+			
+				<a class='btn btn-primary' target='_blank' href="{% url 'creation:view_component' trid=tr.id component='video' %}" title='Preview your uploaded file'> Preview </a> <strong>Preview your uploaded file!</strong> 
+
+			
 		{% endif %}
 		{% endif %}
-		<input type="submit" class="btn btn-primary" value="Upload"  tabindex="4" />
+		</div>
+		<input type="submit" class="btn btn-primary" id="upload-btn" value="Upload" title="Upload your file" tabindex="4" />
 	</form>
 {% endblock %}
 {% block jsblock %}
@@ -70,16 +69,24 @@
 <script>
 	function mov(){
 		//alert("done");
+		previewBtn = document.getElementById('preview-link');
 		var form = document.getElementById('form_id');
 		var formData = new FormData(form);
 		var xhttp = new XMLHttpRequest();
-		previewBtn = document.getElementById('preview-link');
+		//alert("hi");
+		var prv = document.getElementById('preview-btn');
+		prv.innerHTML = '';
 		previewBtn.innerHTML='<i class="fa fa-circle-o-notch fa-spin fa-3x fa-fw"></i><span class="sr-only">Loading...</span>We are preparing a preview. This may take some minutes.'
+		document.getElementById('upload-btn').disabled=true;
 		xhttp.onreadystatechange = function() {
 			if (this.readyState == 4 && this.status == 200) {
 				var response = xhttp.responseText;
 				if (response == "done") {
-					location.reload();
+					{% if title == "audio" %}
+						location.href="{% url 'creation:view_component_audtype' trid=tr.id component='video' aud_type='f' %}";
+					{% else %}
+						location.reload();
+					{% endif %}
 				}
 				else {
 					body = document.getElementsByTagName("body")[0];
@@ -87,7 +94,7 @@
 				}
 			}
 		};
-		xhttp.open("POST","{% url 'creation:ajax_upload_component' tr.id component %}", true);
+		xhttp.open("POST","{% url 'creation:ajax_upload_component' tr.id title %}", true);
 		xhttp.send(formData);
 		return false;
 	}
