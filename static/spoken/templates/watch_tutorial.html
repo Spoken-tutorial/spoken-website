@@ -367,10 +367,18 @@
         <div class="inner-content-body col-lg-8 col-md-8 col-sm-8 no-padding">
             <div class="inner-shadow">
                 <div class="row video-share">
-                    <div class="ysubscribe pull-left col-lg-9 col-md-9 col-sm-9">
+                    <div class="ysubscribe pull-left col-lg-8 col-md-8 col-sm-8">
                         <div class="g-ytsubscribe" data-channel="SpokenTutorialIITB" data-layout="full" data-count="default" data-onytevent="onYtEvent"></div>
                     </div>
-                    <p class="video-visits pull-right col-lg-3 col-md-3 col-sm-3">{{ tr_rec|get_video_visits }} visits</p>
+                    <p class="video-visits pull-right col-lg-4 col-md-4 col-sm-4">{{ tr_rec|get_video_visits }} visits
+                        {% with has_mp4=tr_rec|get_mp4_video %}
+                            {% if has_mp4 %}
+                                <a href="{{ media_url }}{{ has_mp4 }}" download>
+                                    <button class="btn btn-primary" type="button">Download Video</button>
+                                </a>
+                            {% endif %}
+                        {% endwith %} 
+                    </p>
                 </div>
                 <hr class="hline" />
                 <ol class="breadcrumb">
