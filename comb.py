@@ -7,7 +7,7 @@ import time
 import django
 
 
-
+from django.conf import settings
 from apiclient.discovery import build
 from apiclient.errors import HttpError
 from oauth2client.client import flow_from_clientsecrets
@@ -36,7 +36,7 @@ RETRIABLE_EXCEPTIONS = (httplib2.HttpLib2Error, IOError, httplib.NotConnected,
   httplib.CannotSendRequest, httplib.CannotSendHeader,
   httplib.ResponseNotReady, httplib.BadStatusLine)
 RETRIABLE_STATUS_CODES = [500, 502, 503, 504]
-CLIENT_SECRETS_FILE = "/home/abhinav/Desktop/youtube_work/spoken-website/client_secret.json"
+CLIENT_SECRETS_FILE = settings.BASE_DIR+"/client_secret.json"
 YOUTUBE_READ_WRITE_SCOPE = "https://www.googleapis.com/auth/youtube"
 YOUTUBE_UPLOAD_SCOPE = "https://www.googleapis.com/auth/youtube.upload"
 YOUTUBE_SCOPE=[YOUTUBE_READ_WRITE_SCOPE,YOUTUBE_UPLOAD_SCOPE]
@@ -221,10 +221,12 @@ if __name__ == '__main__':
             if tr_rec.video_id:
                 delete_video(youtube,tr_rec.video_id,tr_rec.playlist_item_id)
             else:
-                exit("no video available")
+                print "no video available"
+                exit()
         else:
             if not os.path.exists(args.file):
-                exit("Error : Please specify a valid file using the --file= parameter.")
+                print "Error : Please specify a valid file using the --file= parameter."
+                exit()
             
             initialize_upload(youtube, args)
             print "videoId",video_id
@@ -232,7 +234,6 @@ if __name__ == '__main__':
                 tr_rec.video_id= video_id
                 if args.playlist != "Extra":
                     playlist_id, position = add_playlist(youtube,args.playlist)
-                    #print "playlistId",playlist_id
                     playlistitemId = add_to_playlist(youtube,playlist_id,video_id,position)
                     try:
                         pl = PlaylistInfo.objects.get(foss_id = tr_rec.tutorial_detail.foss_id, language_id = tr_rec.language_id)

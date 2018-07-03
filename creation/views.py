@@ -2128,11 +2128,15 @@ def publish_tutorial(request, trid):
         if not os.path.isfile(vid_name[:-3]+"mp4"):
             os.system("ffmpeg -y -i "+vid_name+" -max_muxing_queue_size 1024 "+vid_name[:-3]+"mp4")
         youtube_upload_dir = settings.BASE_DIR + '/comb.py'
-        proc = subprocess.Popen(["python",youtube_upload_dir,"--trid",trid,"--file",vid_name[:-3]+'mp4',"--title",str(tr_rec.tutorial_detail.tutorial)+" - "+str(tr_rec.language.name),"--description",tr_rec.outline,"--playlist",str(tr_rec.tutorial_detail.foss)+" - "+str(tr_rec.language.name)])
+        proc = subprocess.Popen(["python",youtube_upload_dir,"--trid",trid,"--file",vid_name[:-3]+'mp4',"--title",str(tr_rec.tutorial_detail.tutorial)+" - "+str(tr_rec.language.name),"--description",tr_rec.outline,"--playlist",str(tr_rec.tutorial_detail.foss)+" - "+str(tr_rec.language.name)], stdout=subprocess.PIPE)
         while proc.poll() == None:
             pass
+        tr_rec = TutorialResource.objects.get(pk = trid)
+        if tr_rec.video_id == None:
+            return HttpResponse("not done")
     else:
         messages.error(request, 'The selected tutorial cannot be marked as Public review')
+        return HttpResponse("not done")
     return HttpResponse("done")
     #context = {
     #   'trid' : trid

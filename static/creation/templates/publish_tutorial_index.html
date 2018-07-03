@@ -38,7 +38,8 @@
             </a>
         </li>
     </ul>
-    
+    <div id="load">
+    </div>
     <div id="flip-scroll" class="table-responsive">
         <table class="paleblue table table-bordered table-condensed table-hover">
         {% if not collection|length %}
@@ -96,8 +97,7 @@
         {% endif %}
         </table>
     </div>
-        <div id="load">
-        </div>
+        
 
     <script>
          function move(element){ 
@@ -116,6 +116,9 @@
                                     load.innerHTML=''; 
                                     location.reload();
 								}
+                                else if (response == "not done"){
+                                    load.innerHTML = 'Some Error Occurred ! Please check the file availability or try after few minutes.';
+                                }
 							}
 						};
 						xhttp.open("GET", string, true);

@@ -135,10 +135,21 @@
                                     ele.innerHTML='&#x2705';
                                     count++;
                                     if(count == l){
+                                       // pub = document.getElementById('publishAll');
+                                       // pub.innerHTML = 'Files Uploaded to Youtube';
                                         location.reload();
                                     }
-                                   // location.reload();
 								}
+                                else if(response == "not done"){
+                                    var ele = document.getElementById(id);
+                                    ele.innerHTML='&#x2757';
+                                    count++;
+                                    if(count == l){
+                                       // pub = document.getElementById('publishAll');
+                                       // pub.innerHTML = 'Files Uploaded to Youtube';
+                                        location.reload();
+                                    }
+                                }
 							}
 						};
 						xhttp.open("GET", string);
