@@ -152,19 +152,34 @@
         </form>
     {% endif %}
 	{% if aud_type == "f" %}
-	<a class="btn btn-primary " href="/creation/view/component/{{ tr.id }}/video/{{ audio_modified }}" title="Accept">
+	<a class="btn btn-primary " title="Accept" onclick="mov('filtered')"
                  <span title="" data-original-title="" >Accept</span></a>
 	<a class="btn btn-primary " href="/creation/upload/component/{{ tr.id }}/audio/" title="Reject">
                  <span title="" data-original-title="" >Reject</span></a>
 	{% elif aud_type == "o" %}
-	<a class="btn btn-primary " href="/creation/view/component/{{ tr.id }}/video/{{ audio_original }}" title="Accept">
+	<a class="btn btn-primary " title="Accept" onclick="mov('original')">
                  <span title="" data-original-title="" >Accept</span></a>
 	<a class="btn btn-primary " href="/creation/upload/component/{{ tr.id }}/audio/" title="Reject">
                  <span title="" data-original-title="" >Reject</span></a>
 	{% endif %}
-
+        
 {% endblock %}
 {% block uncompressjsblock %}
+<script>
+    function mov(st){
+        if(st == "original"){
+            if((confirm('Are you sure you want to accept the original audio?'))){
+                location.href ="/creation/view/component/{{ tr.id }}/video/{{ audio_modified }}";
+            }
+        }
+        else{
+            if((confirm('Are you sure you want to accept the filtered audio?'))){
+                location.href="/creation/view/component/{{ tr.id }}/video/{{ audio_original }}";
+            }
+            
+        }
+    }
+</script>
     {% if component == "video" %}
         <script src="{% static 'spoken/js/popcorn.min.js' %}"></script>
         <script src="{% static 'spoken/js/video.min.js' %}"></script>
