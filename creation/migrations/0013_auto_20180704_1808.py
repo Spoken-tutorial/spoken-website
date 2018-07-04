@@ -15,10 +15,23 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
+            name='BankDetail',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('account_number', models.CharField(max_length=17)),
+                ('ifsc', models.CharField(max_length=11)),
+                ('bank', models.CharField(max_length=30)),
+                ('branch', models.CharField(max_length=100)),
+                ('created', models.DateTimeField(auto_now_add=True)),
+                ('updated', models.DateTimeField(auto_now=True)),
+                ('user', models.OneToOneField(to=settings.AUTH_USER_MODEL)),
+            ],
+        ),
+        migrations.CreateModel(
             name='PaymentHonorarium',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('amount', models.IntegerField(default=0)),
+                ('amount', models.DecimalField(default=0, max_digits=7, decimal_places=2)),
                 ('code', models.CharField(max_length=20, editable=False)),
                 ('doc', models.FileField(null=True, upload_to=b'', blank=True)),
                 ('status', models.PositiveSmallIntegerField(default=1, choices=[(1, b'In Process'), (2, b'Forwarded'), (3, b'Completed'), (4, b'Confirmed')])),
@@ -31,7 +44,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('user_type', models.PositiveSmallIntegerField(default=3, choices=[(1, b'Script User'), (2, b'Video User'), (3, b'Script & Video User')])),
                 ('seconds', models.PositiveIntegerField(default=0, help_text=b'Tutorial duration in seconds')),
-                ('amount', models.IntegerField(default=0)),
+                ('amount', models.DecimalField(default=0, max_digits=7, decimal_places=2)),
                 ('status', models.PositiveSmallIntegerField(default=1, choices=[(0, b'Payment Cancelled'), (1, b'Payment Due'), (2, b'Payment Initiated')])),
                 ('payment_honorarium', models.ForeignKey(related_name='tutorials', on_delete=django.db.models.deletion.SET_NULL, blank=True, to='creation.PaymentHonorarium', null=True)),
                 ('tutorial_resource', models.ForeignKey(to='creation.TutorialResource')),
