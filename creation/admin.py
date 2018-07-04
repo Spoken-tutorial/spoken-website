@@ -173,6 +173,9 @@ class FossAvailableForWorkshopAdmin(admin.ModelAdmin):
     list_filter = ('language',)
 
 
+class BankDetailAdmin(admin.ModelAdmin):
+    fields = ['user', 'account_number', 'ifsc', 'bank', 'branch']
+
 admin.site.register(Language, LanguageAdmin)
 admin.site.register(FossCategory, FossCategoryAdmin)
 admin.site.register(FossSuperCategory, FossSuperCategoryAdmin)
@@ -183,3 +186,4 @@ admin.site.register(QualityReviewerRole, QualityReviewerRoleAdmin)
 admin.site.register(FossAvailableForTest, FossAvailableForTestAdmin)
 admin.site.register(FossAvailableForWorkshop, FossAvailableForWorkshopAdmin)
 admin.site.register(BrochureDocument, BrochureDocumentAdmin)
+admin.site.register(BankDetail, BankDetailAdmin)

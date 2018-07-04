@@ -5,6 +5,7 @@ from datetime import timedelta, date
 
 from django.contrib.auth.models import User
 from django.db import models
+from django.db.models import Q
 '''
 payment rate
 script user == 1300 per 10 min
@@ -278,6 +279,23 @@ class TutorialPayment(models.Model):
         except:
             print("An Error Occured. User_Type is beyond 3 causing list index out of range")
         super(TutorialPayment, self).save(*args, **kwargs)
+
+
+class BankDetail(models.Model):
+    """
+        To store bank account details of external contributor
+    """
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        limit_choices_to=Q(groups__name='External-Contributor')
+    )
+    account_number = models.CharField(max_length=17)
+    ifsc = models.CharField(max_length=11)
+    bank = models.CharField(max_length=30)
+    branch = models.CharField(max_length=100)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
 
 
 class ArchivedVideo(models.Model):
