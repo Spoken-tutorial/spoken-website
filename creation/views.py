@@ -1031,12 +1031,12 @@ def ajax_upload_component(request, trid, component):
                     fout.close()
                     if os.path.isfile(full_path[0:-4] + ".webm"):
                         os.remove(full_path[0:-4] + ".webm")
-                    os.system(settings.FFMPEG_VP8_PATH+" -y -i "+full_path+" -vcodec libvpx -af volume=0.0 -max_muxing_queue_size 1024 -f webm "+ full_path[:-4] + ".webm")
-                    # os.system(settings.FFMPEG_VP8_PATH+" -y -i "+full_path+" -an "+full_path[:-4]+".webm")
+                    #os.system(settings.FFMPEG_VP8_PATH+" -y -i "+full_path+" -vcodec libvpx -af volume=0.0 -max_muxing_queue_size 1024 -f webm "+ full_path[:-4] + ".webm")
+                    os.system(settings.FFMPEG_VP8_PATH+" -y -i "+full_path+" -an "+full_path[:-4]+".webm")
                     if os.path.isfile(full_path[:-9] + tr_rec.language.name + ".ogg"):
                         os.remove(full_path[:-9] + tr_rec.language.name + ".ogg")
-                    os.system(settings.FFMPEG_VP8_PATH + " -y -i " + full_path + " -vn -acodec libvorbis " + full_path[:-9] + tr_rec.language.name + ".ogg")
-                    # os.system(settings.FFMPEG_VP8_PATH + " -y -i " + full_path+" -vn "+full_path[:-9]+tr_rec.language.name+".ogg")
+                    #os.system(settings.FFMPEG_VP8_PATH + " -y -i " + full_path + " -vn -acodec libvorbis " + full_path[:-9] + tr_rec.language.name + ".ogg")
+                    os.system(settings.FFMPEG_VP8_PATH + " -y -i " + full_path+" -vn "+full_path[:-9]+tr_rec.language.name+".ogg")
                     comp_log.status = tr_rec.video_status
                     tr_rec.video = file_name[:-4] + ".webm"
                     tr_rec.audio = tr_rec.tutorial_detail.tutorial.replace(' ', '-') + '-' + 'English' + '.ogg'

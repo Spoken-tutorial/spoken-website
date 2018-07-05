@@ -82,7 +82,7 @@
 					{% if title == "audio" %}
 						URL = "{% url 'creation:view_component_audtype' trid=tr.id component='video' aud_type='f' %}";
 						
-						document.getElementById("preview-link").innerHTML = "<a class='btn btn-primary' onclick='removeLinkBtn();' target='_blank' href="+ URL + " title='Preview your uploaded file'> Preview </a> <strong>Preview your uploaded file!</strong>";
+						document.getElementById("preview-link").innerHTML = "<a class='btn btn-primary' target='_blank' onclick='removeLinkBtn();' target='_blank' href="+ URL + " title='Preview your uploaded file'> Preview </a> <strong>Preview your uploaded file!</strong>";
 					{% else %}
 						location.reload();
 					{% endif %}

@@ -36,7 +36,7 @@
                         </td>
                         <td>{{ tr_rec | get_last_video_upload_time }}</td>
                         {% if tr_rec.video_status == 1 or tr_rec.video_status == 2 %}
-                            <td class="col-center"><a href="/creation/admin-review/video/{{ tr_rec.id }}" class="fancybox fancybox.iframe"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Review</a></td>
+                            <td class="col-center"><a href="/creation/admin-review/video/{{ tr_rec.id }}" target="_blank" class=""><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Review</a></td>
                         {% endif %}
                     </tr>
                 {% endfor %}
