@@ -68,6 +68,9 @@
     var timesTried = requestedPlay = seekedFlag = 0
     var userPause = false;
 
+    // Ensure that loading starts.
+    trackedAudio.load();
+    trackedPlayer.load();
 
     function checkTimeAndPause() {
         // Fixing a bug on Firefox, remove when irrelevent.

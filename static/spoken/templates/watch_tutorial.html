@@ -262,7 +262,7 @@
         <div class='container playlist-container col-lg-12 col-md-12 col-sm-12'>
             <div class="video-container col-lg-8 col-md-8 col-sm-8">
                
-                <video id="st_video" class='video-js vjs-default-skin vjs-big-play-centered' preload="auto" autobuffer controls poster="{{ tr_rec.tutorial_detail|get_thumb_path:'Big' }}" data-setup='{ "playbackRates": [0.5, 0.75,1, 1.25, 1.5, 2] }'>
+                <video id="st_video" class='video-js vjs-default-skin vjs-big-play-centered' controls poster="{{ tr_rec.tutorial_detail|get_thumb_path:'Big' }}" data-setup='{ "playbackRates": [0.5, 0.75,1, 1.25, 1.5, 2] }'>
                     
                     <source src="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ tr_rec.video }}" type="video/webm">
                     
@@ -367,10 +367,18 @@
         <div class="inner-content-body col-lg-8 col-md-8 col-sm-8 no-padding">
             <div class="inner-shadow">
                 <div class="row video-share">
-                    <div class="ysubscribe pull-left col-lg-9 col-md-9 col-sm-9">
+                    <div class="ysubscribe pull-left col-lg-8 col-md-8 col-sm-8">
                         <div class="g-ytsubscribe" data-channel="SpokenTutorialIITB" data-layout="full" data-count="default" data-onytevent="onYtEvent"></div>
                     </div>
-                    <p class="video-visits pull-right col-lg-3 col-md-3 col-sm-3">{{ tr_rec|get_video_visits }} visits</p>
+                    <p class="video-visits pull-right col-lg-4 col-md-4 col-sm-4">{{ tr_rec|get_video_visits }} visits
+                        {% with has_mp4=tr_rec|get_mp4_video %}
+                            {% if has_mp4 %}
+                                <a id='st_download' href="{{ media_url }}{{ has_mp4 }}" download>
+                                    <button class="btn btn-primary" type="button">Download Video</button>
+                                </a>
+                            {% endif %}
+                        {% endwith %} 
+                    </p>
                 </div>
                 <hr class="hline" />
                 <ol class="breadcrumb">
@@ -536,7 +544,8 @@
     {% endif %}
     // Get the current trackedPlayer's AudioTrackList object.
     var audioTrackList = trackedPlayer.audioTracks();
-
+    // Stores half path to the file in server, required for changing download button link when changing the audio selected.
+    var pathToTrack = "{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ tr_rec.video|rsplitpart|safe }}";
     // Listen to the "change" event.
     audioTrackList.addEventListener('change', function () {
 
@@ -552,6 +561,8 @@
                 trackedPlayer = videojs('st_video');
                 trackedPlayer.addClass("vjs-waiting");
                 trackedAudio.load(); //call this to just preload the audio without playing
+                source_id = source.getAttribute('id').slice(0, -12);
+                document.getElementById('st_download').href = pathToTrack + source_id + '.mp4';
                 trackedAudio.currentTime = current_time;
                 trackedAudio.volume = trackedPlayer.volume();
                 if (trackedPlayer.muted())
@@ -699,8 +710,7 @@
        
           $("#"+'{{ q.id }}').prependTo("#forum_Q");
           div.style.backgroundColor = "#cdcdcd";
-           
-           }else{
+           } else {
               div.style.backgroundColor = "#ffffff";
            }
            {% endfor %}
