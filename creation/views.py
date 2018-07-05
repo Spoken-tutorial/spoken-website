@@ -2578,7 +2578,6 @@ def publish_tutorial(request, trid):
         vid_name = file_path + tr_rec.tutorial_detail.tutorial.replace(' ', '-') + '-' + str(tr_rec.language.name) + '.ogv'
 
         add_contributor_notification(tr_rec, comp_title, 'This tutorial is published now')
-        messages.success(request, 'Great! The selected tutorial is published successfully.')
         if not os.path.isfile(vid_name[:-3]+"mp4"):
             os.system("ffmpeg -i "+vid_name[:-9]+"Video.webm -i "+vid_name[:-3]+".ogg -c:v libx264 -c:a aac -map 0:v:0 -map 1:a:0 "+vid_name[:-3]+"mp4")
         youtube_upload_dir = settings.BASE_DIR + '/comb.py'
@@ -2587,7 +2586,10 @@ def publish_tutorial(request, trid):
             pass
         tr_rec = TutorialResource.objects.get(pk = trid)
         if tr_rec.video_id == None:
+            messages.error(request, "Some error occurred!")
             return HttpResponse("not done")
+        else:
+            messages.success(request, 'Great! The tutorial is published successfully.')
     else:
         messages.error(request, 'The selected tutorial cannot be marked as Public review')
         return HttpResponse("not done")

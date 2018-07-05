@@ -133,7 +133,7 @@ def check_playlist(youtube,playlist):
     maxResults = 50
     requests = youtube.playlists().list(
         part='snippet,contentDetails',
-        channelId = 'UCg1uGZFAp-oW3RiSp5h9ZQw',
+        channelId = 'UCcLQJOfR-MCcI5RtIHFl6Ww',
         maxResults = maxResults
     )
     while requests:
@@ -193,13 +193,55 @@ def delete_video(youtube,videoID,playlistitemID):
     print "deleted"
 
 
+def update_entries(youtube):
+    maxResults = 50
+    requests = youtube.playlists().list(
+        part='snippet,contentDetails',
+        channelId = 'UCcLQJOfR-MCcI5RtIHFl6Ww',
+        maxResults = maxResults
+    )
+    arr = []
+    while requests:
+        response = requests.execute()
+        for i in range(0,len(response["items"])):
+            arr.append(response["items"][i]["id"])
+        requests = youtube.playlists().list_next(requests, response)
+    brr = {}
+    for i in arr:
+        requests = youtube.playlistItems().list(
+            part='snippet,contentDetails',
+            maxResults=50,
+            playlistId=i
+        )
+        while requests:
+            response = requests.execute()
+            for i in range(0,len(response["items"])):
+                brr[response["items"][i]["snippet"]["resourceId"]["videoId"]] = response["items"][i]["id"]
+            requests = youtube.playlistItems().list_next(requests, response)
+    for i in brr.keys():
+        try:
+            tr_rec = TutorialResource.objects.filter(video_id = i)
+        except:
+            pass
+        for j in tr_rec:
+            if j.playlist_item_id != brr[i]:
+                pl_item = PlaylistItem.objects.filter(item_id = j.playlist_item_id)
+                for k in pl_item:
+                    k.item_id = brr[i]
+                    k.save()
+                j.playlist_item_id = brr[i]
+                j.save()
+            else:
+                pass
+
+
+
 
 
 
 
 if __name__ == '__main__':
 
-    # Taking arguments as input: only trid, file is required. Rest optional.
     argparser.add_argument("--first", default="no")
     argparser.add_argument("--trid", default=1, help="Tutorial Id to upload")
     argparser.add_argument("--file", help="Video file to upload")
@@ -207,12 +249,16 @@ if __name__ == '__main__':
     argparser.add_argument("--title", help="Video title", default="Test Title")
     argparser.add_argument("--description", help="Video description",default="Test Description")
     argparser.add_argument("--playlist", default="Extras")
+    argparser.add_argument("--update-entries", default="no")
     argparser.add_argument("--category", default="22",help="Numeric video category. " + "See https://developers.google.com/youtube/v3/docs/videoCategories/list")
     argparser.add_argument("--keywords", help="Video keywords, comma separated",default="")
     argparser.add_argument("--privacyStatus", choices=VALID_PRIVACY_STATUSES,default=VALID_PRIVACY_STATUSES[0], help="Video privacy status.")
     args = argparser.parse_args()
     tr_rec = TutorialResource.objects.get(pk = args.trid)
     youtube = get_authenticated_service(args)           # Gets authentication entity. Will create oAuth2.0 json credentials (if not present) using client secrets json
+    if args.update_entries == "yes":
+        update_entries(youtube)
+        exit("done updating")
     if args.first == "yes":
         exit("Authentication done")
     try:
