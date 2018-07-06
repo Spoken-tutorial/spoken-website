@@ -2579,7 +2579,7 @@ def publish_tutorial(request, trid):
 
         add_contributor_notification(tr_rec, comp_title, 'This tutorial is published now')
         if not os.path.isfile(vid_name[:-3]+"mp4"):
-            os.system("ffmpeg -i "+vid_name[:-9]+"Video.webm -i "+vid_name[:-3]+".ogg -c:v libx264 -c:a aac -map 0:v:0 -map 1:a:0 "+vid_name[:-3]+"mp4")
+            os.system(settings.FFMPEG_VP8_PATH + " -i "+ file_path + tr_rec.tutorial_detail.tutorial.replace(' ', '-') + "-Video.webm -i "+ vid_name[:-3]+ "ogg -c:v libx264 -c:a aac -map 0:v:0 -map 1:a:0 " + vid_name[:-3] + "mp4")
         youtube_upload_dir = settings.BASE_DIR + '/comb.py'
         proc = subprocess.Popen(["python",youtube_upload_dir,"--trid",trid,"--file",vid_name[:-3]+'mp4',"--title",str(tr_rec.tutorial_detail.tutorial)+" - "+str(tr_rec.language.name),"--description",tr_rec.outline,"--playlist",str(tr_rec.tutorial_detail.foss)+" - "+str(tr_rec.language.name)], stdout=subprocess.PIPE)
         while proc.poll() == None:

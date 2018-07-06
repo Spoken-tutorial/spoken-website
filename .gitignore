@@ -83,3 +83,6 @@ nosetests.xml
 .pydevproject
 
 cron/nohup.out
+
+# Json Files
+*.json

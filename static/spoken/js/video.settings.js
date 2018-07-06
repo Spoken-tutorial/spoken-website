@@ -184,7 +184,8 @@
         else if (requestedPlay || seekedFlag) {
             timesTried = 0;
             seekedFlag = 0;
-             playTrackedMedia();
+            if (userPause == false)
+                playTrackedMedia();
         }
     }
 
