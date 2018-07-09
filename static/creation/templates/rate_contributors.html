@@ -28,7 +28,9 @@
          
       </div>          
   <div>
-
+    <div class="form-group pull-right">
+     <a href="{% url 'creation:get_latest_contributors'  %}"> <input class="btn btn-primary" type="button" value="Click me "></a>
+    </div>
       
       <div class="form-group col-sm-12">
         <div class="col-sm-offset-4 col-sm-8">
@@ -38,17 +40,25 @@
       </div>
   </div>
 
-  <div class="tab-content">
-  <div class="tab-pane active">
+
   
-    <table class="paleblue table table-striped table-hover table-bordered">
     
-            
-      
-      {% get_sortable_header header ordering request.GET %}  
+    
+    <ul class="tabs nav nav-tabs">
+      <li {% if status == 'rate' %}{{ 'class="rate"'}}{% endif %}>
+      <a href="{% url 'creation:rate_contributors' 'rate' %}"><i class="fa fa-list-ul"></i> Contributors </a></li>
+      <li {% if status == 'rated' %}{{ 'class="rated"'}}{% endif %}>
+      <a href="{% url 'creation:rate_contributors' 'rated' %}"><i class="fa fa-list-ul"></i> Rated </a></li>
+      </ul>
+        <div class="tab-content">
+        <div class="tab-pane active">
+          {% if status == 'rate' %}
           
-          <tr class="pull-right">
-            <input type = "submit" class="btn btn-primary pull-right"  value="Save" >
+          <table class="paleblue table table-striped table-hover table-bordered ">
+            {% get_sortable_header header ordering request.GET %}  
+          <tr class="pull-right ">
+
+            <input type = "submit" class=" btn btn-primary pull-right"  value="Save" >
           </tr>
 
           {% for record in contributors %}
@@ -58,7 +68,7 @@
           <label for = "{{ record.user__username }}">
           <td>{{ record.user__username }}</td>       
           </label>
-          <td>{{ record.language__name }}</td>
+          
           <td>
           <div class="form-group">
             <label for="sel1"></label>
@@ -76,19 +86,14 @@
           </tr > 
           {% endfor %}
     </table>
-      
-<hr>
+{% endif %}
+
+  {% if status == 'rated' %}
     <table class="paleblue table table-striped table-hover table-bordered">
-      
-      
           <tr> <th> Rated Contributors </th>
             <th></th></tr>
-            <th>
-              User
-            </th>
-            <th>
-            Rating
-          </th>
+            <th>User</th>
+            <th>Rating</th>
       {%for rates in rated_contributors %}    
           <tr>
             <td> {{rates.user__username}}</td>
@@ -96,11 +101,10 @@
           </tr>
           {% endfor %}
     </table>
-
-  
+ 
+  {% endif %}
   </div>
-  </div>
-{% endblock %}
+  </div> 
 {% block compressjsblock %}
     <script src="{% static 'spoken/js/events.js' %}"></script>
     <script src="{% static 'spoken/js/jquery.datetimepicker.js' %}"></script>
@@ -116,4 +120,5 @@
 
         
     </script>
+{% endblock %}  
 {% endblock %}  

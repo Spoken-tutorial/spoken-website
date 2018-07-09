@@ -473,14 +473,3 @@ class ContributorRating(models.Model):
     class Meta:
         unique_together = (('user', 'language'),)
 
-
-class LanguageManager(models.Model):
-    user = models.ForeignKey(User)
-    language = models.ForeignKey(Language)
-    created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        unique_together = (('user', 'language'),)
-
-    

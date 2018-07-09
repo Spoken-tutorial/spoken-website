@@ -999,4 +999,4 @@ class ContributorRatingForm(forms.ModelForm):
                     user_1 = User.objects.filter(groups__id=4)
                     self.fields['user'] =  forms.ModelChoiceField(queryset=user_1)
                     self.fields['language'] =  forms.ModelChoiceField(queryset=lang)
-                    
+

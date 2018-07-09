@@ -106,10 +106,10 @@
     {% if status == 'available' %}
       
       
-        <div class="col-lg-4 col-md-4 col-sm-4 " style="z-index:100; position:sticky; top:0;">
+        <div class="col-lg-4 col-md-4 col-sm-4 " style="z-index:100; position:sticky; top:8%; padding:1%; width:100%; background-color:#ffe0b2">
           <div class="form-group">
               <label for="id_foss" class="col-sm-4 control-label">Contributors</label>
-              <div class="col-sm-8"> 
+              <div class="col-sm-4"> 
               <select class="form-control get_contributrs" tabindex="1" id="contributors">
                 <option id = "default_con">
                   <label >--- Select a Contributor ---</label>
@@ -119,14 +119,14 @@
           </div>
 
         
-          <div class="form-group">
+          
               <label for="id_foss" class="col-sm-4 control-label">Submission Date</label>
-              <div class="col-sm-8"> 
+              <div class="col-sm-4"> 
               <input class="form-control datepicker" type="text" id="datepicker">
               <span class="add-on"><i class="icon-th"></i></span>
-             </div>        
-          </div>
-        </div>
+             </div> 
+             
+        
       <tr>
          {% regroup tutorial_num.object_list by tutorial_detail.foss as foss_list %}
         {% for top_level_group in foss_list %}
@@ -165,7 +165,8 @@
           <tr>
           <td>{{ tutorial_num.start_index|add:forloop.counter|add:-1 }}
           </td>
-          <td>{{ record.tutorial_detail.level }}</td>       
+          <td>{{ record.tutorial_detail.level }}</td>
+          <td>{{ record.tutorial_detail.order }}</td>      
           <td>{{ record.tutorial_detail.foss.foss }}</td>
           <td>{{ record.tutorial_detail }}</td>
           <td>{{ record.language.name }}</td>
@@ -286,12 +287,11 @@
                 }
               });
 
-                  $('.datepicker').datetimepicker({
-                      format: "Y-m-d",
-                       //This is the default date format Django will accept, it also disables the time in the datepicker.
-              });
-
-              });
+               $('.datepicker').datetimepicker({
+                format: "Y-m-d",
+               });
+      
+});
         
         function allocate(var_a,var_b,var_c)
         {
@@ -302,11 +302,8 @@
           var language = $(".language option:selected").text();
           var level = $(".level option:selected").text();
           var contributor_text = contributor_option.text();
-          var date_id = document.getElementById(var_a);
-          var date = date_id.options[date_id.selectedIndex].value;
-          var foss_date = document.getElementById("datepicker").value;
+     
 
-          alert("date : "+date);
           if(var_c == 'foss' && level.match(/---.*/))
           {
             alert(" PLease select a level");
@@ -321,12 +318,29 @@
             {
               if (var_c=='tutorial')
                 {
-                
+                var date_id = document.getElementById(var_a);
+                var date = date_id.options[date_id.selectedIndex].value;
+                alert("date : "+date);
                 location.href =  '/creation/allocate/'+var_a+'/'+var_b+'/'+contributor_option.attr('id')+'/'+date;
                 } 
                 if (var_c=='foss') 
                 {
-                location.href =  '/creation/allocate_foss/'+var_a+'/'+language+'/'+contributor_option.attr('id')+'/'+level+'/'+foss_date;
+                  var today = new Date();
+                  var foss_date = document.getElementById("datepicker").value;
+                  var subDate = new Date(foss_date);
+                  var diff = subDate - today;
+                  var days = Math.round(diff / (1000 * 60 * 60 * 24));
+                  
+                  if (!days)
+                  {
+                    alert("Please select a submission date for the FOSS")
+                  }
+                  else
+                  {
+                  alert("Days : "+days);
+                  location.href =  '/creation/allocate_foss/'+var_a+'/'+language+'/'+contributor_option.attr('id')+'/'+level+'/'+days;
+                  }
+                  
                 }
             }
           }
