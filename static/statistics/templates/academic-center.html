@@ -86,7 +86,14 @@
 						<td>{{ record.get_training_count }}</td>
 						<td>{{ record.get_training_participant_count }}</td>
 						<td><a href="{% url 'statistics:academic_center_view' record.id %}" target="_blank">View</a></td>
-            <td><a href="{% url 'statistics:activate_academic' record.id %}" target="_blank">Activate</a></td>
+            <td>
+              {% if record.status == 3 %}
+              <a href="{% url 'statistics:activate_academic' record.id %}">Activate</a>
+              
+              {% else %}
+              | Activated |
+              {% endif %}
+            </td>
 					</tr>
 				{% endfor %}
 			</table>

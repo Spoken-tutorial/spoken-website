@@ -506,13 +506,22 @@ def tutorial_content(request, template='statistics/templates/statistics_content.
 
     return render(request, template, context)
 
-def activate_academic(request, pk):
-  #pk =0
-  st = TrainingRequest.objects.get(pk=pk)
-  if st and st.status == 2:
-    st.status = 1 #mark to complete
-    st.save()
-    messages.success(request, 'Training Marked as complete.')
-  else:
-    messages.error(request, 'Something went wrong Please try again')
-  return HttpResponseRedirect("/software-training/training-request/rp/markcomplete/")
+def activate_academic(request, academic_id):
+    ac = AcademicCenter.objects.get(id=academic_id)
+    deactivate_status = 3
+    if ac:
+        #check if college paid the subscription fees
+        #activate all organiser fom this college
+        organisers_from_academic = Organiser.objects.filter(status=deactivate_status, academic_id=ac.id)
+        for organiser in organisers_from_academic:
+            #all the organisers from this academic are activated here.
+            organiser.status = 1 
+            organiser.save()
+        #Activate that collge
+        ac.status = 1
+        ac.save()
+        messages.success(request, 'Academic center activated.')
+    else:
+        messages.error(request, 'No records found.')
+    
+    return HttpResponseRedirect("/statistics/academic-center/")
