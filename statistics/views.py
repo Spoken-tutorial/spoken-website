@@ -91,6 +91,13 @@ def training(request):
         if status not in [TRAINING_COMPLETED, TRAINING_PENDING]:
             status = TRAINING_COMPLETED
 
+        lang= request.GET.get('lang')
+        if status == TRAINING_COMPLETED:
+            if lang and '---------' not in lang:
+                training_attend_lang = TrainingAttend.objects.filter(language__name=lang).values_list('training_id').distinct()
+                collectionSet= collectionSet.filter(id__in=training_attend_lang)
+        
+        
     if status == TRAINING_PENDING:
         collectionSet = collectionSet.filter(participants=0, status=TRAINING_COMPLETED)
         
@@ -173,8 +180,7 @@ def training(request):
         context['participants'] = participants
     context['model'] = 'Workshop/Training'
     context['status']=status
-
-    
+    context['language'] = Language.objects.values('id','name')
     return render(request, 'statistics/templates/training.html', context)
 
 def fdp_training(request):

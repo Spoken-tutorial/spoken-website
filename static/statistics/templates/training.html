@@ -81,13 +81,25 @@
                     </div>
                 </div>
 
+                <div class="form-group" id="lang_div">
+                    <label for="id_language" class="col-sm-4 control-label">Language</label>
+                    <div class="col-sm-8">
+                        <select class="form-control lang" id="lang" name="lang">
+                        <option id="0">---------</option>
+                        {%for a_lang in language%}
+                        <option id="{{a_lang.name}}" >{{a_lang.name}}</option>
+                        {% endfor %}
+
+                    </select>
+                    </div>
+                </div>
                 <div class="form-group">
                     <label class="col-sm-5 control-label radio-inline ">
 
-                      <input type="radio" name="status" value="1" {% if status == '1' %}checked {% endif %} ><b>Completed Trainings</b>
+                      <input type="radio" name="status" id="completed" value="1" {% if status == '1' %}checked {% endif %} ><b>Completed Trainings</b>
                     </label>
                     <label class="col-sm-6 control-label radio-inline">
-                      <input type="radio" name="status" value="0" {% if status == '0' %}checked {% endif %} ><b>Pending Attendance Trainings</b>
+                      <input type="radio" name="status" id="pending" value="0" {% if status == '0' %}checked {% endif %} ><b>Pending Attendance Trainings</b>
                 </div>
 
                 <div class="form-group">
@@ -181,8 +193,20 @@
                 $("#big_chart_div").css({'left' : 0, 'position' : 'relative'});
             });
             $(".fancybox").fancybox();
-
+            window.onload = set_language;
+            if(document.getElementById('pending').checked) {
+            document.getElementById("lang_div").style.visibility = "hidden";
+            }
         });
+        function set_language(){
+            var sring = window.location.search;
+            var split = sring.split(['&lang=']);
+            var split_split = split[1].split('&status')
+            $("#"+split_split[0]).prop('selected', true);
+            
+            
+        };
+
         $('.date').datetimepicker({
             lang:'en',
             timepicker:false,
