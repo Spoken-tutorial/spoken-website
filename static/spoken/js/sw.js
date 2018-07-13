@@ -6,10 +6,10 @@ var urlsToCache = [
     '/static/spoken/css/bootstrap.min.css',
     '/static/spoken/css/font-awesome.min.css',
     '/static/spoken/css/main.css',
-    '/static/spoken/css/video-js.min.css',
+    '/static/spoken/css/videojs.min.css',
     '/static/spoken/js/jquery-1.11.0.min.js',
     '/static/spoken/js/bootstrap.min.js',
-    '/static/spoken/js/video.min.js',
+    '/static/spoken/js/videojs.min.js',
     '/static/spoken/js/popcorn.min.js',
     '/static/spoken/js/video.settings.js',
 ];

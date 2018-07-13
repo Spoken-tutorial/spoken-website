@@ -4,7 +4,7 @@
 {% load static %}
 {% block uncompresscssblock %}
     {% if component == "video" or component == "audio"%}
-    <link href="{% static 'spoken/css/video-js.min.css' %}" rel="stylesheet" type="text/css">
+    <link href="{% static 'spoken/css/videojs.min.css' %}" rel="stylesheet" type="text/css">
     {% endif %}
 {% endblock %}
 {% block compressinlinecssblock %}
@@ -182,7 +182,7 @@
 </script>
     {% if component == "video" %}
         <script src="{% static 'spoken/js/popcorn.min.js' %}"></script>
-        <script src="{% static 'spoken/js/video.min.js' %}"></script>
+        <script src="{% static 'spoken/js/videojs.min.js' %}"></script>
         <script src="{% static 'spoken/js/video.settings.js' %}"></script>
     {% endif %}
 {% endblock %}
