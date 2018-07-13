@@ -1,0 +1,178 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load cmsdata %}
+{% load creationdata %}
+{% block title %}Tutorials Quality Review Index{% endblock %}
+{% block heading %}<i class="fa fa-list-ul"></i> Upload To Youtube{% endblock %}
+{% block content %}
+
+<div class="custom-alert"></div>
+    <ul class="breadcrumb">
+        <li>
+            <a href="/creation/quality-review/">
+                Waiting for review
+            </a>
+        </li>
+        <li>
+            <a href="/creation/public-review/tutorial/index/">
+                Ready for Public review
+            </a>
+        </li>
+        <li>
+            <a href="/creation/quality-review/tutorial/publish/index/">
+                Ready to publish
+            </a>
+        </li>
+        <li>
+            <a href="/creation/public-review/list/">
+                Under Public review
+            </a>
+        </li>
+        <li>
+            <a href="/creation/quality-review/reviewed/">
+                Reviewed
+            </a>
+        </li>
+        <li class="active">Upload to Youtube</li>
+    </ul>
+    <div id='publishAll'>
+    <button id="pub" class="btn btn-primary" onclick="startupload(this)">Upload All</button>
+</div>
+</div>
+<div id="load">
+</div>
+    <div id="flip-scroll" class="table-responsive">
+        <table class="paleblue table table-bordered table-condensed table-hover">
+            {% if not collection|length %}
+                <tr>
+                    <td colspan="11" class="col-center">List is empty</td>
+                </tr>
+            {% else %}
+            <thead>
+                    {% get_sortable_header header ordering request.GET %}
+                </thead>
+                <tbody>
+                    {% for tr_rec in collection %}
+                        
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ tr_rec.tutorial_detail.foss.foss }}</td>
+                            <td><a href="/creation/tutorial/view/{{ tr_rec.tutorial_detail.foss.foss|get_url_name }}/{{ tr_rec.tutorial_detail.tutorial|get_url_name }}/{{ tr_rec.language.name }}/" target="_blank">{{ tr_rec.tutorial_detail.tutorial }}</a></td>
+                            <td>{{ tr_rec.language.name }}</td>
+                            <td class="col-center" title="{{ tr_rec.outline_status | get_review_status_list }}">
+                                <span class="{{ tr_rec.outline_status | get_review_status_symbol }}"></span>
+                            </td>
+                            <td class="col-center" title="{{ tr_rec.script_status | get_review_status_list }}">
+                                <span class="{{ tr_rec.script_status | get_review_status_symbol }}"></span>
+                            </td>
+                            <td class="col-center" title="{{ tr_rec.common_content.slide_status | get_review_status_list }}">
+                                <span class="{{ tr_rec.common_content.slide_status | get_review_status_symbol }}"></span>
+                            </td>
+                            <td class="col-center" title="{{ tr_rec.video_status | get_review_status_list }}">
+                                <span class="{{ tr_rec.video_status | get_review_status_symbol }}"></span>
+                            </td>
+                            <td class="col-center" title="{{ tr_rec.common_content.code_status | get_review_status_list }}">
+                                <span class="{{ tr_rec.common_content.code_status | get_review_status_symbol }}"></span>
+                            </td>
+                            <td class="col-center" title="{{ tr_rec.common_content.assignment_status | get_review_status_list }}">
+                                <span class="{{ tr_rec.common_content.assignment_status | get_review_status_symbol }}"></span>
+                            </td>
+                            <td class="col-center" title="{{ tr_rec.common_content.additional_material_status | get_review_status_list }}">
+                                <span class="{{ tr_rec.common_content.additional_material_status | get_review_status_symbol }}"></span>
+                            </td>
+                            <td class="col-center" title="{{ tr_rec.common_content.prerequisite_status | get_review_status_list }}">
+                                <span class="{{ tr_rec.common_content.prerequisite_status | get_review_status_symbol }}"></span>
+                            </td>
+                            <td class="col-center" title="{{ tr_rec.common_content.keyword_status | get_review_status_list }}">
+                                <span class="{{ tr_rec.common_content.keyword_status | get_review_status_symbol }}"></span>
+                            </td>
+                            <td class="col-center"> 
+                                <div id="{{ tr_rec.id }}" >
+                                 &#x274C
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            {% endif %}
+            </table>
+        
+    
+        <script>
+            var count = 0;
+            function startupload(element){
+                var st;
+                fol = [];
+                pub = document.getElementById('publishAll');
+                pub.innerHTML = '<div id="spinner" class="fa fa-spinner fa-spin" style="font-size:48px;color:teal;"></div> Uploading the videos to youtube. This might take few minutes..';
+           
+                {% for t in collection  %}
+                    fol.push({{ t.id }});
+                {% endfor %}
+                    var i=0;
+                    var l = fol.length;
+                while(i<fol.length){
+                    
+                    var id = fol[i];
+                    
+					get(id,l);
+                    i++;
+                }
+                
+
+            }
+
+            function get(id,l){
+            var xhttp = new XMLHttpRequest();
+            var str = "../";
+            var string = str.concat(id);
+						xhttp.onreadystatechange = function() {
+							if (this.readyState == 4 && this.status == 200) {
+								var response = xhttp.responseText;
+								if (response == "done") {
+                                    var ele = document.getElementById(id);
+                                    ele.innerHTML='&#x2705';
+                                    count++;
+                                    if(count == l){
+                                       // pub = document.getElementById('publishAll');
+                                       // pub.innerHTML = 'Files Uploaded to Youtube';
+                                        location.reload();
+                                    }
+								}
+                                else if(response == "not done"){
+                                    var ele = document.getElementById(id);
+                                    ele.innerHTML='&#x2757';
+                                    count++;
+                                    if(count == l){
+                                       // pub = document.getElementById('publishAll');
+                                       // pub.innerHTML = 'Files Uploaded to Youtube';
+                                        location.reload();
+                                    }
+                                }
+							}
+						};
+						xhttp.open("GET", string);
+						xhttp.send();
+            }
+
+        </script>         
+{% endblock %}
+{% block uncompressjsblock %}
+    <script src="{% static 'spoken/js/jquery.fancybox.pack.js' %}"></script>
+    <script src="{% static 'spoken/js/jquery.mousewheel-3.0.6.pack.js' %}"></script>
+{% endblock %}
+{% block compressinlinejsblock %}
+<script type="text/javascript">
+    $(document).ready(function(){
+        $(".review-btn").hover(
+            function () {
+                $(this).children(0).addClass("fa-spin");
+            },
+            function () {
+                $(this).children(0).removeClass("fa-spin");
+            }
+        );
+    });
+</script>
+{% endblock %}

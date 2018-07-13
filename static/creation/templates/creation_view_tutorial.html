@@ -1,9 +1,10 @@
 {% extends 'spoken/templates/base.html' %}
+{% load cdcontentdata %}
 {% load widget_tweaks %}
 {% load static %}
 {% load creationdata %}
 {% block uncompresscssblock %}
-    <link href="{% static 'spoken/css/video-js.min.css' %}" rel="stylesheet" type="text/css">
+    <link href="{% static 'spoken/css/videojs.min.css' %}" rel="stylesheet" type="text/css">
 {% endblock %}
 {% block compressinlinecssblock %}
     <style type="text/css">
@@ -111,9 +112,16 @@
         <div class='container playlist-container col-lg-12 col-md-12 col-sm-12'>
             <div class="video-container col-lg-8 col-md-8 col-sm-8">
                 {% if tr_rec.video_status %}
-                <video id="st_video" class="video-js vjs-default-skin" controls preload="auto" width="auto" height="auto" data-setup="{}">
-                    <source src="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ tr_rec.video }}" type="video/ogg" />
+
+                <video id="st_video" class='video-js vjs-default-skin vjs-big-play-centered' controls data-setup='{ "playbackRates": [0.5, 0.75,1, 1.25, 1.5, 2] }'>
+                    <source src="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ tr_rec.video }}" type="video/webm">
                 </video>
+    
+                <audio id="audio" class='d-none'>
+                    <!-- Put the selected audio file to be played with the video on page load -->
+                    <source id="audioSource" src="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ tr_rec.video|rsplitpart|safe }}{{tr_rec.language }}.ogg">
+                </audio>
+
                 {% else %}
                     <p>Video missing...</p>
                 {% endif %}
@@ -278,7 +286,9 @@
     </row>
 {% endblock %}
 {% block uncompressjsblock %}
-    <script src="{% static 'spoken/js/video.min.js' %}"></script>
+    <script src="{% static 'spoken/js/popcorn.min.js' %}"></script>
+    <script src="{% static 'spoken/js/videojs.min.js' %}"></script>
+    <script src="{% static 'spoken/js/video.settings.js' %}"></script>
 {% endblock %}
 {% block compressinlinejsblock %}
     <script type="text/javascript">

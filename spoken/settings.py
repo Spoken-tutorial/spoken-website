@@ -13,7 +13,6 @@ from os.path import *
 from .config import *
 import os
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-
 SCRIPT_URL = SCRIPT_URL
 
 STVIDEOS_DIR = STVIDEOS_PATH
@@ -128,7 +127,7 @@ DATABASES = {
         'PORT': '',                            # Set to empty string for default.
     },
     'moodle': {
-        'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'ENGINE': 'django.db.backends.mysql',  # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
         'NAME': MDB,                      # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
         'USER': MDB_USER,
@@ -137,7 +136,7 @@ DATABASES = {
         'PORT': '',                  # Set to empty string for default.
     },
     'cdeep': {
-        'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'ENGINE': 'django.db.backends.mysql',  # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
         'NAME': CDB,                      # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
         'USER': CDB_USER,
@@ -146,7 +145,7 @@ DATABASES = {
         'PORT': '',                  # Set to empty string for default.
     },
     'workshop_info': {
-        'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'ENGINE': 'django.db.backends.mysql',  # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
         'NAME': WDB,                      # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
         'USER': WDB_USER,
@@ -155,7 +154,7 @@ DATABASES = {
         'PORT': '',                  # Set to empty string for default.
     },
     'forums': {
-        'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'ENGINE': 'django.db.backends.mysql',  # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
         'NAME': FDB,                      # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
         'USER': FDB_USER,
@@ -178,12 +177,12 @@ USE_L10N = True
 
 USE_TZ = TZ_STATUS
 
-#events settings
+# events settings
 ONLINE_TEST_URL = ONLINE_TEST_URL
 KEEP_LOGGED_DURATION = 604800
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/var/www/example.com/media/"
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media/') # Absolute path to the media.
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')  # Absolute path to the media.
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
@@ -214,11 +213,11 @@ STATICFILES_DIRS = (
     #BASE_DIR + '/static/',
 )
 
-#debugging
+# debugging
 #INSTALLED_APPS = INSTALLED_APPS + ('debug_toolbar',)
 INTERNAL_IPS = ('127.0.0.1',)
 
-#Moodle Auth
+# Moodle Auth
 #AUTH_USER_MODEL = 'mdldjango.Users'
 DATABASE_ROUTERS = [
     'mdldjango.router.MdlRouter',
@@ -270,11 +269,18 @@ HTML_MINIFY = HTML_MINIFY
 RECAPTCHA_PUBLIC_KEY = '6Le8qf8SAAAAABV9wYBW99Jotv-EygJXIhMa_n54'
 RECAPTCHA_PRIVATE_KEY = '6Le8qf8SAAAAAF9CkucURPapw2vaDPrU4qMzfg73'
 
-#RECAPTCHA V2
+# RECAPTCHA V2
 GOOGLE_RECAPTCHA_SITE_KEY = GOOGLE_RECAPTCHA_SITE_KEY
 GOOGLE_RECAPTCHA_SECRET_KEY = GOOGLE_RECAPTCHA_SECRET_KEY
 GOOGLE_RECAPTCHA_SITEVERIFY = GOOGLE_RECAPTCHA_SITEVERIFY
 
+
 RECAPTCHA_USE_SSL = True
 ACADEMIC_DURATION = 5
 SPOKEN_HASH_SALT = 'change this value'
+
+
+# FFmpeg - currently there are multiple versions of FFmpeg on server,
+# Hence, these variables are used to make sure there is no conflict.
+FFMPEG_PATH = FFMPEG_PATH
+FFMPEG_VP8_PATH = FFMPEG_VP8_PATH 

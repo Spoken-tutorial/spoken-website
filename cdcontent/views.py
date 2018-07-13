@@ -26,22 +26,29 @@ def zipdir(src_path, dst_path, archive):
 
 
 def humansize(nbytes):
+    '''
+    Takes in number of bytes as arguements and returns 
+    size in human readable format.
+    '''
     suffixes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
-
     if nbytes == 0:
         return '0 B'
-
     i = 0
-
     while nbytes >= 1024 and i < len(suffixes) - 1:
         nbytes /= 1024.
         i += 1
-
     f = ('%.1f' % nbytes).rstrip('0').rstrip('.')
     return '%s %s' % (f, suffixes[i])
 
 
 def add_sheets(archive, foss, lang):
+    '''
+    Add sheets to the selected tutorials to be downloaded
+    Arguements:
+     archive: Archieve file in which content is to stored
+     foss: foss for which the content is to be added
+     lang: language for which the foss is to be added
+    '''
     instruction_file = 'videos/{}/{}-Instruction-Sheet-{}.pdf'.format(foss.id,
                                                                       foss.foss.replace(' ', '-'),
                                                                       lang.name)
@@ -62,6 +69,12 @@ def add_sheets(archive, foss, lang):
 
 
 def get_all_foss_details(selectedfoss):
+    '''
+    Ruturns a list of foss details
+    Arguements:
+     selectedfoss: list of all the selected foss
+    '''
+
     all_foss_details = {}
 
     for key, values in selectedfoss.iteritems():
@@ -83,30 +96,50 @@ def get_all_foss_details(selectedfoss):
 
 
 def add_side_by_side_tutorials(archive, languages):
+    '''
+    Used to add side-by-side method videos in the home page
+    of the downloaded site image and returns all available languages
+    Arguements:
+     archive: Archieve file in which content is to stored
+     languages: languages for the side_by_side videos are to be added
+    '''
     languages.add('English')
     available_langs = set()
 
-    for language in languages:
-        filepath = '{}videos/32/714/Side-by-Side-Method-{}.ogv'.format(settings.MEDIA_ROOT, language)
+    filepath = '{}videos/32/714/Side-by-Side-Method-Video.webm'.format(settings.MEDIA_ROOT)
+    if os.path.isfile(filepath):
+        archive.write(filepath, 'spoken/videos/Side-by-Side-Method-Video.webm')
 
-        if os.path.isfile(filepath):
+    for language in languages:
+        audiofilepath = '{}videos/32/714/Side-by-Side-Method-{}.ogg'.format(settings.MEDIA_ROOT, language)
+        scriptfilepath = '{}videos/32/714/Side-by-Side-Method-{}.vtt'.format(settings.MEDIA_ROOT, language)
+
+        if os.path.isfile(audiofilepath):
             available_langs.add(language)
-            archive.write(filepath, 'spoken/videos/Side-by-Side-Method-{}.ogv'.format(language))
+            archive.write(audiofilepath, 'spoken/videos/Side-by-Side-Method-{}.ogg'.format(language))
+
+        if os.path.isfile(scriptfilepath):
+            archive.write(scriptfilepath, 'spoken/videos/Side-by-Side-Method-{}.vtt'.format(language))
 
     return available_langs
 
 
 def get_static_files():
+    '''
+    Returns the list of all static files required for the website.
+    '''
     return {
         '/static/spoken/css/bootstrap.min.css': 'spoken/includes/css/bootstrap.min.css',
         '/static/spoken/css/font-awesome.min.css': 'spoken/includes/css/font-awesome.min.css',
         '/static/spoken/css/main.css': 'spoken/includes/css/main.css',
-        '/static/spoken/css/video-js.min.css': 'spoken/includes/css/video-js.min.css',
+        '/static/spoken/css/videojs.min.css': 'spoken/includes/css/videojs.min.css',
         '/static/spoken/images/favicon.ico': 'spoken/includes/images/favicon.ico',
         '/static/spoken/images/logo.png': 'spoken/includes/images/logo.png',
         '/static/spoken/js/jquery-1.11.0.min.js': 'spoken/includes/js/jquery-1.11.0.min.js',
         '/static/spoken/js/bootstrap.min.js': 'spoken/includes/js/bootstrap.min.js',
-        '/static/spoken/js/video.js': 'spoken/includes/js/video.js',
+        '/static/spoken/js/videojs.min.js': 'spoken/includes/js/videojs.min.js',
+        '/static/spoken/js/popcorn.min.js': 'spoken/includes/js/popcorn.min.js',
+        '/static/spoken/js/video.settings.js': 'spoken/includes/js/video.settings.js',
         '/static/spoken/images/thumb-even.png': 'spoken/includes/images/thumb-even.png',
         '/static/spoken/images/Basic.png': 'spoken/includes/images/Basic.png',
         '/static/spoken/images/Intermediate.png': 'spoken/includes/images/Intermediate.png',
@@ -119,13 +152,14 @@ def get_static_files():
         '/static/forum_website/css/theme.blue.css': 'spoken/includes/css/theme.blue.css',
         '/static/forum_website/slick/slick.css': 'spoken/includes/css/slick.css',
         '/static/forum_website/images/cc-logo-88x31.png': 'spoken/includes/images/cc-logo-88x31.png'
-
     }
 
 
 def calculate_directory_size(dir_path):
+    '''
+    Returns the size of the folder
+    '''
     folder_size = 0.0
-
     try:
         if os.path.isdir(dir_path):
             for (path, dirs, files) in os.walk(dir_path):
@@ -140,6 +174,10 @@ def calculate_directory_size(dir_path):
 
 
 def calculate_static_file_size():
+    '''
+    Returns the combined size for all the static 
+    files that are required to run the site offline.
+    '''
     fsize = 0.0
 
     try:
@@ -161,6 +199,11 @@ def calculate_static_file_size():
 
 
 def add_static_files(archive):
+    '''
+    Add static files in archieve
+    Arguements:
+        archive: Archieve file in which content is to stored
+    '''
     zipdir(settings.BASE_DIR + '/static/spoken/fonts', 'spoken/includes/fonts/', archive)
     static_files = get_static_files()
 
@@ -196,23 +239,12 @@ def add_common_files(archive, common_files):
             archive.write(settings.MEDIA_ROOT + filepath, 'spoken/' + filepath)
 
 
-def add_srt_file(archive, tr_rec, filepath, eng_flag, srt_files):
-    ptr = filepath.rfind(".")
-    filepath = filepath[:ptr] + '.srt'
-
-    if os.path.isfile(settings.MEDIA_ROOT + filepath):
-        archive.write(settings.MEDIA_ROOT + filepath, 'spoken/' + filepath)
-
-    if eng_flag:
-        filepath = 'videos/{}/{}/{}-English.srt'.format(tr_rec.tutorial_detail.foss_id, tr_rec.tutorial_detail_id,
-                                                        tr_rec.tutorial_detail.tutorial.replace(' ', '-'))
-
-        if os.path.isfile(settings.MEDIA_ROOT + filepath) and filepath not in srt_files:
-            srt_files.add(filepath)
-            archive.write(settings.MEDIA_ROOT + filepath, 'spoken/' + filepath)
-
-
 def home(request):
+    '''
+    Function called when user clicks on `Create ZIP file` on 
+    `cdcontent` page. It is suppose to create a ZIP file requested 
+    and respond with the link to download the ZIP files. 
+    '''
     if request.method == 'POST':
         form = CDContentForm(request.POST)
 
@@ -225,14 +257,19 @@ def home(request):
                 all_foss_details = get_all_foss_details(selectedfoss)
                 eng_rec = Language.objects.get(name="English")
                 languages = set()
+                files_archived = set()
 
                 for key, values in selectedfoss.iteritems():
+                    tr_rec_language_list = []
+                    for selected_language in selectedfoss.get(key)[0]:
+                        tr_rec_language_list.append({"language__name": Language.objects.get(pk=selected_language).name})
+
                     foss_rec = FossCategory.objects.get(pk=key)
                     level = int(values[1])
                     eng_flag = True
                     srt_files = set()
+                    video_files = set()
                     common_files = set()
-
                     if str(eng_rec.id) in values[0]:
                         eng_flag = False
 
@@ -241,6 +278,9 @@ def home(request):
 
                     if level:
                         t_resource_qs = t_resource_qs.filter(tutorial_detail__level_id=level)
+
+                    if eng_flag:
+                        add_sheets(archive, foss_rec, Language.objects.get(name="English"))
 
                     for value in values[0]:
                         language = Language.objects.get(pk=value)
@@ -252,52 +292,100 @@ def home(request):
                         languages.add(language.name)
 
                         for rec in tr_recs:
-                            filepath = 'videos/{}/{}/{}'.format(key, rec.tutorial_detail_id, rec.video)
-                             # get list of questions of a particular tutorial
-                            question_s = Question.objects.filter(category=foss_rec.foss.replace(' ','-'),tutorial=rec.tutorial_detail.tutorial.replace(' ','-')).order_by('-date_created')
+                            # Create the
+                            tr_rec_language_avaiable_list = []
+                            tr_rec_language_avaiable_list = TutorialResource.objects.filter(tutorial_detail__id=rec.tutorial_detail_id).values('language__name').distinct()
 
+                            # Add Audio / Video / Script for the Langauges Selected
+                            videofilepath = 'videos/{}/{}/{}'.format(key, rec.tutorial_detail_id, rec.video)
+                            audiofilepath = 'videos/{}/{}/{}'.format(key, rec.tutorial_detail_id, rec.audio)
+                            scriptfilepath = 'videos/{}/{}/{}'.format(key, rec.tutorial_detail_id, rec.audio[:-4] + ".vtt")
 
-                            if os.path.isfile(settings.MEDIA_ROOT + filepath):
-                                archive.write(settings.MEDIA_ROOT + filepath, 'spoken/' + filepath)
+                            if os.path.isfile(settings.MEDIA_ROOT + videofilepath) and videofilepath not in video_files:
+                                archive.write(settings.MEDIA_ROOT + videofilepath, 'spoken/' + videofilepath)
+                                video_files.add(videofilepath)
 
-                            # add srt file to archive
-                            add_srt_file(archive, rec, filepath, eng_flag, srt_files)
+                            if os.path.isfile(settings.MEDIA_ROOT + scriptfilepath) and scriptfilepath not in srt_files:
+                                archive.write(settings.MEDIA_ROOT + scriptfilepath, 'spoken/' + scriptfilepath)
 
-                            # collect common files
+                            if os.path.isfile(settings.MEDIA_ROOT + audiofilepath):
+                                archive.write(settings.MEDIA_ROOT + audiofilepath, 'spoken/' + audiofilepath)
+
+                            # Adding the English .vtt file (To Select even when english is not selected)
+                            if eng_flag:
+                                scriptfilepath = 'videos/{}/{}/{}'.format(key, rec.tutorial_detail_id,
+                                                                          rec.audio.rsplit(language.name)[0] + "English.vtt")
+
+                                if os.path.isfile(settings.MEDIA_ROOT + scriptfilepath) and scriptfilepath not in srt_files:
+                                    archive.write(settings.MEDIA_ROOT + scriptfilepath, 'spoken/' + scriptfilepath)
+                                    srt_files.add(scriptfilepath)
+
+                            # Get list of questions of a particular tutorial
+                            question_s = Question.objects.filter(category=foss_rec.foss.replace(' ', '-'), tutorial=rec.tutorial_detail.tutorial.replace(' ', '-')).order_by('-date_created')
+
+                            # Collect common files
                             collect_common_files(rec, common_files)
 
                             tutorial_path = '{}/{}/'.format(rec.tutorial_detail.foss_id, rec.tutorial_detail_id)
                             filepath = 'spoken/videos/{}show-video-{}.html'.format(tutorial_path, rec.language.name)
-                            ctx = {'tr_rec': rec, 'tr_recs': tr_recs,
-                                   'media_path': settings.MEDIA_ROOT, 'tutorial_path': tutorial_path,'question_s': question_s}
-                            convert_template_to_html_file(archive, filepath, request,
-                                                          "cdcontent/templates/watch_tutorial.html", ctx)
-                            # for each question find the answers
+                            ctx = {
+                                'eng_flag': eng_flag,
+                                'tr_rec': rec,
+                                'tr_recs': tr_recs,
+                                'tr_rec_language_list': [value for value in tr_rec_language_avaiable_list if value in tr_rec_language_list],
+                                'media_path': settings.MEDIA_ROOT,
+                                'media_url': settings.MEDIA_URL,
+                                'tutorial_path': tutorial_path,
+                                'questions': question_s,
+                                'script_base': settings.SCRIPT_URL,
+                            }
+                            try:
+                                if filepath not in files_archived:
+                                    files_archived.add(filepath)
+                                    convert_template_to_html_file(archive, filepath, request, "cdcontent/templates/watch_tutorial.html", ctx)
+                            except Exception as Error:
+                                print Error
+                            # For each question find the answers
                             for question in question_s:
-                                answer=Answer.objects.filter(question=question)
+                                answer = Answer.objects.filter(question=question)
                                 ctx = {'question': question, 'answer': answer}
                                 filepath = 'spoken/videos/' + str(foss_rec.id) + '/' + str(rec.tutorial_detail_id) + '/answer-to-question-' + str(question.id) + '.html'
-                                convert_template_to_html_file(archive, filepath, request, "cdcontent/templates/answer_to_question.html", ctx)
-
-
-
+                            try:
+                                if filepath not in files_archived:
+                                    files_archived.add(filepath)
+                                    convert_template_to_html_file(archive, filepath, request, "cdcontent/templates/answer_to_question.html", ctx)
+                            except Exception as Error:
+                                print Error
 
                         filepath = 'spoken/videos/' + str(foss_rec.id) + '/list-videos-' + language.name + '.html'
-                        ctx = {'collection': tr_recs, 'foss_details': all_foss_details,
-                               'foss': foss_rec.id, 'lang': language.id}
-                        convert_template_to_html_file(archive, filepath, request,
-                                                      "cdcontent/templates/tutorial_search.html", ctx)
+                        ctx = {
+                            'collection': tr_recs,
+                            'foss_details': all_foss_details,
+                            'foss': foss_rec.id,
+                            'lang': language.id
+                        }
+                        try:
+                            if filepath not in files_archived:
+                                files_archived.add(filepath)
+                                convert_template_to_html_file(archive, filepath, request, "cdcontent/templates/tutorial_search.html", ctx)
+                        except Exception as Error:
+                            print Error
 
                     # add common files for current foss
                     add_common_files(archive, common_files)
-
                 # add side-by-side tutorials for selected languages
                 languages = add_side_by_side_tutorials(archive, languages)
-
-                ctx = {'foss_details': all_foss_details, 'foss': foss_rec.id,
-                       'lang': language.id, 'languages': languages}
-                convert_template_to_html_file(archive, 'spoken/videos/home.html', request,
-                                              "cdcontent/templates/home.html", ctx)
+                ctx = {
+                    'eng_flag': eng_flag,
+                    'foss_details': all_foss_details,
+                    'foss': foss_rec.id,
+                    'lang': language.id,
+                    'languages': languages
+                }
+                try:
+                    convert_template_to_html_file(archive, 'spoken/videos/home.html', request, "cdcontent/templates/home.html", ctx)
+                except Exception as Error:
+                    print Error
 
                 # add all required static files to archive
                 add_static_files(archive)
@@ -325,6 +413,9 @@ def home(request):
 
 @csrf_exempt
 def ajax_fill_languages(request):
+    '''
+    Reponds the languages for which the selected foss is available.
+    '''
     data = ''
     fossid = request.POST.get('foss', '')
     levelid = int(request.POST.get('level', 0))
@@ -366,6 +457,9 @@ def ajax_add_foss(request):
 
 @csrf_exempt
 def ajax_show_added_foss(request):
+    '''
+    Reponds with an approximate size for the selected foss.
+    '''
     try:
         tmp = json.loads(request.POST.get('selectedfoss', {}))
     except:
@@ -379,8 +473,7 @@ def ajax_show_added_foss(request):
     for key, values in tmp.iteritems():
         langs_list = list(values[0])
         foss, level = FossCategory.objects.get(pk=key), int(values[1])
-        langs = ', '.join(list(
-            Language.objects.filter(id__in=list(values[0])).order_by('name').values_list('name', flat=True)))
+        langs = ', '.join(list(Language.objects.filter(id__in=list(values[0])).order_by('name').values_list('name', flat=True)))
 
         if level:
             tr_recs = TutorialResource.objects.filter(Q(status=1) | Q(
@@ -392,6 +485,7 @@ def ajax_show_added_foss(request):
         fsize = 0.0
         eng_flag = True
         srt_files = set()
+        video_files = set()
         common_files = set()
 
         if str(eng_rec.id) in langs_list:
@@ -401,29 +495,37 @@ def ajax_show_added_foss(request):
             try:
                 languages.add(rec.language.name)
 
-                # calculate video size
-                filepath = 'videos/{}/{}/{}'.format(foss.id, rec.tutorial_detail_id, rec.video)
+                # Calculate Video Size
+                videoFilepath = 'videos/{}/{}/{}'.format(key, rec.tutorial_detail_id, rec.video)
 
-                if os.path.isfile(settings.MEDIA_ROOT + filepath):
-                    fsize += os.path.getsize(settings.MEDIA_ROOT + filepath)
+                if os.path.isfile(settings.MEDIA_ROOT + videoFilepath) and videoFilepath not in video_files:
+                    video_files.add(videoFilepath)
+                    fsize += os.path.getsize(settings.MEDIA_ROOT + videoFilepath)
 
-                # calculate str file size
-                ptr = filepath.rfind(".")
-                filepath = filepath[:ptr] + '.srt'
-                if os.path.isfile(settings.MEDIA_ROOT + filepath):
-                    fsize += os.path.getsize(settings.MEDIA_ROOT + filepath)
+                # Calculate Audio Size
+                audioFilepath = 'videos/{}/{}/{}'.format(key, rec.tutorial_detail_id, rec.audio)
+
+                if os.path.isfile(settings.MEDIA_ROOT + audioFilepath):
+                    fsize += os.path.getsize(settings.MEDIA_ROOT + audioFilepath)
+
+                # calculate srt file size
+                scriptFilepath = 'videos/{}/{}/{}'.format(key, rec.tutorial_detail_id, rec.audio[:-4] + ".vtt")
+
+                if os.path.isfile(settings.MEDIA_ROOT + scriptFilepath):
+                    srt_files.add(scriptFilepath)
+                    fsize += os.path.getsize(settings.MEDIA_ROOT + scriptFilepath)
 
                 if eng_flag:
-                    filepath = 'videos/{}/{}/{}-English.srt'.format(
+                    scriptFilepath = 'videos/{}/{}/{}-English.vtt'.format(
                         key, rec.tutorial_detail_id, rec.tutorial_detail.tutorial.replace(' ', '-'))
 
-                    if os.path.isfile(settings.MEDIA_ROOT + filepath) and filepath not in srt_files:
-                        fsize += os.path.getsize(settings.MEDIA_ROOT + filepath)
+                    if os.path.isfile(settings.MEDIA_ROOT + scriptFilepath) and scriptFilepath not in srt_files:
+                        srt_files.add(scriptFilepath)
+                        fsize += os.path.getsize(settings.MEDIA_ROOT + scriptFilepath)
 
                 # append common files path to list
                 common_files_path = '{}videos/{}/{}/resources'.format(settings.MEDIA_ROOT, key,
                                                                       rec.tutorial_detail_id)
-
                 if rec.common_content.slide_status > 0:
                     common_files.add('{}/{}'.format(common_files_path, rec.common_content.slide))
 
@@ -432,7 +534,8 @@ def ajax_show_added_foss(request):
 
                 if rec.common_content.code_status > 0 and rec.common_content.code_status != 6:
                     common_files.add('{}/{}'.format(common_files_path, rec.common_content.code))
-            except Exception:
+            except Exception as Error:
+                print Error
                 continue
 
         # calculate common files size
@@ -447,11 +550,18 @@ def ajax_show_added_foss(request):
     languages.add(eng_rec.name)
 
     # calculate size for side-by-side tutorials
-    for language in languages:
-        filepath = '{}videos/32/714/Side-by-Side-Method-{}.ogv'.format(settings.MEDIA_ROOT, language)
+    filepath = '{}videos/32/714/Side-by-Side-Method-Video.webm'.format(settings.MEDIA_ROOT)
+    if os.path.isfile(filepath):
+        fsize += os.path.getsize(filepath)
 
-        if os.path.isfile(filepath):
-            fsize += os.path.getsize(filepath)
+    for language in languages:
+        if eng_flag and language == "English":
+            continue
+        else:
+            filepath = '{}videos/32/714/Side-by-Side-Method-{}.ogg'.format(settings.MEDIA_ROOT, language)
+
+            if os.path.isfile(filepath):
+                fsize += os.path.getsize(filepath)
 
     # calculate static file size
     fsize += calculate_static_file_size()

@@ -53,7 +53,7 @@ $(".videoContainerProtocol").each(function ()
 		var videoSRC = $(this).find(".videoInfo").attr("data-source-video");
 		var posterSRC = $(this).find(".posterInfo").attr("src");
 		
-		$(this).append("<video id='"+theID+""+number+"' class='video-js vjs-default-skin' controls='' preload='auto' poster='"+posterSRC+"' data-setup='{}'><source src='"+videoSRC+"' type='video/mp4'></source></video>");
+		$(this).append("<video id='"+theID+""+number+"' class='video-js vjs-default-skin' controls preload='auto' autobuffer poster='"+posterSRC+"' data-setup='{}'><source src='"+videoSRC+"' type='video/mp4'></source></video>");
 		
 		$(this).find(".playButtonContainer").remove();
 		$(this).find(".videoInfo").remove();

@@ -13,9 +13,9 @@ class Command(BaseCommand):
     help = 'Migrates user from django to moodle.\n\
             Send user credentials via email.'
     FROM = 'administrator@spoken-tutorial.org'
-    SUBJECT  = "Spoken Tutorial Online Test password"
+    SUBJECT = "Spoken Tutorial Online Test password"
     HEADERS = {'Reply-To': 'no-replay@spoken-tutorial.org',
-            "Content-type":"text/html;charset=iso-8859-1"}
+               "Content-type": "text/html;charset=iso-8859-1"}
 
     rmsg = 'Report {0}\n'.format(datetime.now())
     cmsg = 'Completed {0}\n'.format(datetime.now())
@@ -25,7 +25,7 @@ class Command(BaseCommand):
         users = self.get_spoken_user()
         self.log('Total users: {0}'.format(users.count()), 'r')
         count = 0
-        ncount= 0
+        ncount = 0
 
         for user in users:
             self.log('\n###############\n', 'i')
@@ -34,15 +34,15 @@ class Command(BaseCommand):
                 self.log(user, 'c')
                 if not self. is_moodle_user(user):
                     try:
-                      self.log('email: {0} not in moodle'.format(user.email.encode('utf8')), 'c')
+                        self.log('email: {0} not in moodle'.format(user.email.encode('utf8')), 'c')
                     except:
-                      print user.email
-                      pass
+                        print user.email
+                        pass
                     academy = self.get_academy(user)
                     if academy:
                         self.log('Academy {0}'.format(academy), 'c')
                         password = self.get_raw_password()
-                        self.log('Password '+password, 'c')
+                        self.log('Password ' + password, 'c')
                         mdluser = self.add_moodle_user(user, password, academy)
                         if mdluser:
                             self.log("Added to moodle", 'c')
@@ -55,7 +55,7 @@ class Command(BaseCommand):
                                 break
                             count += 1
                         else:
-                            self.log("user not added" , 'i')
+                            self.log("user not added", 'i')
                             ncount += 1
                     else:
                         self.log("no academy", 'i')
@@ -79,8 +79,7 @@ class Command(BaseCommand):
             self.stdout.write(self.rmsg)
 
     def get_spoken_user(self):
-        return User.objects.filter(id = 333224)
-
+        return User.objects.filter(id=333224)
 
     def is_student(self, user):
         try:
@@ -88,7 +87,6 @@ class Command(BaseCommand):
                 return True
         except Exception:
             return False
-
 
     def is_moodle_user(self, user):
         try:
@@ -102,13 +100,11 @@ class Command(BaseCommand):
             print e
             return True
 
-
     def get_academy(self, user):
         try:
             return user.student.studentmaster_set.all().first().batch.organiser.academic
         except AttributeError:
             return None
-
 
     def add_moodle_user(self, user, password, academy):
         ''' Creates moodle account and sends email'''
@@ -127,17 +123,14 @@ class Command(BaseCommand):
             mdluser.save()
             return mdluser
         except Exception, e:
-           print e
-           return None
-
+            print e
+            return None
 
     def get_raw_password(self):
-        return  ''.join(sample(ascii_uppercase + digits, 8))
-
+        return ''.join(sample(ascii_uppercase + digits, 8))
 
     def encrypt_password(self, password):
-        return md5(password+'VuilyKd*PmV?D~lO19jL(Hy4V/7T^G>p').hexdigest()
-
+        return md5(password + 'VuilyKd*PmV?D~lO19jL(Hy4V/7T^G>p').hexdigest()
 
     def send_email(self, user, password):
         result = None
@@ -164,7 +157,7 @@ Admin Spoken Tutorials
         message = message.format(user.firstname.encode('utf8'), user.username.encode('utf8'), password)
         self.log(message, 'c')
         email = EmailMultiAlternatives(self.SUBJECT, message, self.FROM,
-            to = [user.email], bcc = [], cc = [], headers=self.HEADERS)
+                                       to=[user.email], bcc=[], cc=[], headers=self.HEADERS)
         self.log(email, 'c')
         try:
             result = email.send(fail_silently=False)
@@ -172,17 +165,16 @@ Admin Spoken Tutorials
         except Exception, e:
             return e, result
 
-
     def log(self, data, _type):
-      try:
-        if _type == 'c':
-            self.cmsg = '{0} {1}\n'.format(self.cmsg,data)
-        if _type == 'i':
-            self.imsg = '{0} {1}\n'.format(self.imsg,data)
-        if _type == 'r':
-            self.rmsg = '{0} {1}\n'.format(self.rmsg,data)
-      except:
-        print e
+        try:
+            if _type == 'c':
+                self.cmsg = '{0} {1}\n'.format(self.cmsg, data)
+            if _type == 'i':
+                self.imsg = '{0} {1}\n'.format(self.imsg, data)
+            if _type == 'r':
+                self.rmsg = '{0} {1}\n'.format(self.rmsg, data)
+        except:
+            print e
 
     def create_log_file(self, data, _type):
         try:
@@ -197,4 +189,3 @@ Admin Spoken Tutorials
             _file.close()
         except Exception, e:
             return e
-

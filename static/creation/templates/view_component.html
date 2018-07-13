@@ -1,9 +1,10 @@
 {% extends 'spoken/templates/popup-base.html' %}
 {% load widget_tweaks %}
+{% load cdcontentdata %}
 {% load static %}
 {% block uncompresscssblock %}
-    {% if component == "video" %}
-    <link href="{% static 'spoken/css/video-js.min.css' %}" rel="stylesheet" type="text/css">
+    {% if component == "video" or component == "audio"%}
+    <link href="{% static 'spoken/css/videojs.min.css' %}" rel="stylesheet" type="text/css">
     {% endif %}
 {% endblock %}
 {% block compressinlinecssblock %}
@@ -38,9 +39,14 @@
                 clear: both;
                 padding-top: 10px;
             }
+            .info {
+                background-color: #e7f3fe;
+                border-left: 6px solid #2196F3;
+            }
         </style>
     {% endif %}
 {% endblock %}
+
 {% block heading %}
     {% if component == "video" %}
         {{ tr.tutorial_detail.tutorial }}
@@ -51,26 +57,93 @@
     {% endif %}
 {% endblock %}
 {% block content %}
-    {% if component == "video" %}4
+        {% if aud_type == 'o' or aud_type == 'f' %}
+
+        <div class="info">
+            <p><strong>Info!  </strong> We processed your audio file. Please accept the file that you want to send further for review. </p>
+          </div>
+        {% endif %}          
+
+
+    {% if component == "video" %}
+    
+    Video:
+    <table class="table table-bordered table-hover">
+        <tr>
+            <th>Codec:</th><td>{{video_info.codec}}</td>
+            <th>Profile:</th><td>{{video_info.profile}}</td>
+        </tr>
+        <tr>
+            <th>Width:</th><td>{{video_info.width}}</td>
+            <th>Height:</th><td>{{video_info.height}}</td>
+        </tr>
+        <tr>
+            <th>Duration:</th><td>{{video_info.duration}}</td>
+            <th>Size:</th><td>{{video_info.size}}</td>
+        </tr>
+    </table>
+    {{ tr.language.name }} Audio:
         <table class="table table-bordered table-hover">
             <tr>
-                <th>Codec:</th><td>{{video_info.codec}}</td>
-                <th>Profile:</th><td>{{video_info.profile}}</td>
-            </tr>
-            <tr>
-                <th>Width:</th><td>{{video_info.width}}</td>
-                <th>Height:</th><td>{{video_info.height}}</td>
-            </tr>
-            <tr>
-                <th>Duration:</th><td>{{video_info.duration}}</td>
-                <th>Size:</th><td>{{video_info.size}}</td>
+                <th>Codec:</th><td>{{audio_info.codec}}</td>
+                <th>Duration:</th><td>{{audio_info.duration}}</td>
+                <th>Size:</th><td>{{audio_info.size}}</td>
             </tr>
         </table>
+    {% if eng_audio_info.size > 0 and eng_audio_info.duration > 0 %}
+    English Audio:
+        <table class="table table-bordered table-hover">
+            <tr>
+                <th>Codec:</th><td>{{ eng_audio_info.codec }}</td>
+                <th>Duration:</th><td>{{ eng_audio_info.duration }}</td>
+                <th>Size:</th><td>{{ eng_audio_info.size }}</td>
+            </tr>
+        </table>
+    
+    {% endif %}
+      {% if aud_type == "f" %}
         <div class="video-container">
-            <video id="st_video" class="video-js vjs-default-skin" controls preload="auto" width="auto" height="auto" data-setup="{}">
-                <source src="{{ media_url }}videos/{{ tr.tutorial_detail.foss_id }}/{{ tr.tutorial_detail_id }}/{{ tr.video }}" type="video/ogg" />
+            <video id="st_video" class='video-js vjs-default-skin vjs-big-play-centered' controls data-setup='{ "playbackRates": [0.5, 0.75,1, 1.25, 1.5, 2] }'>
+                    <source src="{{ media_url }}videos/{{ tr.tutorial_detail.foss_id }}/{{ tr.tutorial_detail_id }}/{{ tr.video }}" type="video/webm">
             </video>
+            <audio id="audio" class='d-none'>
+                    <!-- Put the selected audio file to be played with the video on page load -->
+                    <source id="audioSource" src="{{ media_url }}temp/{{ filtered }}.ogg" type='audio/ogg'>
+            </audio>
+            <br>
         </div>
+        <a class="btn btn-primary " href="/creation/view/component/{{ tr.id }}/video/o" title="Preview Original File">
+            <span title="" data-original-title="" >Preview Original</span>
+        </a>
+        {% elif aud_type == "o" %}
+	    <div class="video-container">
+
+            <video id="st_video" class='video-js vjs-default-skin vjs-big-play-centered' controls data-setup='{ "playbackRates": [0.5, 0.75,1, 1.25, 1.5, 2] }'>
+                    <source src="{{ media_url }}videos/{{ tr.tutorial_detail.foss_id }}/{{ tr.tutorial_detail_id }}/{{ tr.video }}" type="video/webm">
+            </video>
+
+            <audio id="audio" class='d-none'>
+                <!-- Put the selected audio file to be played with the video on page load -->
+                <source id="audioSource" src="{{ media_url }}temp/{{ original }}.ogg" type='audio/ogg'>
+            </audio>
+            <br>
+        </div>
+	<a class="btn btn-primary " href="/creation/view/component/{{ tr.id }}/video/f" title="Preview Filtered File">
+                 <span title="" data-original-title="" >Preview filtered</span></a>
+      {% else %}
+	<div class="video-container">
+
+            <video id="st_video" class='video-js vjs-default-skin vjs-big-play-centered' controls data-setup='{ "playbackRates": [0.5, 0.75,1, 1.25, 1.5, 2] }'>
+                    <source src="{{ media_url }}videos/{{ tr.tutorial_detail.foss_id }}/{{ tr.tutorial_detail_id }}/{{ tr.video }}" type="video/webm">
+            </video>
+            <audio id="audio" class='d-none'>
+                    <!-- Put the selected audio file to be played with the video on page load -->
+                    <source id="audioSource" src="{{ media_url }}videos/{{ tr.tutorial_detail.foss_id }}/{{ tr.tutorial_detail_id }}/{{ tr.video|rsplitpart|safe }}{{ tr.language.name }}.ogg">
+            </audio>    
+        </div>
+      {% endif %}
+	
+	
     {% else %}
         <form role="form" method="post" enctype="multipart/form-data" action="">
             <div class="form-group">
@@ -78,9 +151,38 @@
             </div>
         </form>
     {% endif %}
+	{% if aud_type == "f" %}
+	<a class="btn btn-primary " title="Accept" onclick="mov('filtered')"
+                 <span title="" data-original-title="" >Accept</span></a>
+	<a class="btn btn-primary " href="/creation/upload/component/{{ tr.id }}/audio/" title="Reject">
+                 <span title="" data-original-title="" >Reject</span></a>
+	{% elif aud_type == "o" %}
+	<a class="btn btn-primary " title="Accept" onclick="mov('original')">
+                 <span title="" data-original-title="" >Accept</span></a>
+	<a class="btn btn-primary " href="/creation/upload/component/{{ tr.id }}/audio/" title="Reject">
+                 <span title="" data-original-title="" >Reject</span></a>
+	{% endif %}
+        
 {% endblock %}
 {% block uncompressjsblock %}
+<script>
+    function mov(st){
+        if(st == "original"){
+            if((confirm('Are you sure you want to accept the original audio?'))){
+                location.href ="/creation/view/component/{{ tr.id }}/video/{{ audio_modified }}";
+            }
+        }
+        else{
+            if((confirm('Are you sure you want to accept the filtered audio?'))){
+                location.href="/creation/view/component/{{ tr.id }}/video/{{ audio_original }}";
+            }
+            
+        }
+    }
+</script>
     {% if component == "video" %}
-        <script src="{% static 'spoken/js/video.min.js' %}"></script>
+        <script src="{% static 'spoken/js/popcorn.min.js' %}"></script>
+        <script src="{% static 'spoken/js/videojs.min.js' %}"></script>
+        <script src="{% static 'spoken/js/video.settings.js' %}"></script>
     {% endif %}
 {% endblock %}

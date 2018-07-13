@@ -3,6 +3,7 @@ import time
 from youtube_upload import *
 from config import *
 
+
 # creating youtube object
 youtube = Youtube(DEVELOPER_KEY)
 debug("Login to Youtube API: email='%s', password='%s'" %
@@ -12,8 +13,8 @@ try:
 except gdata.service.BadAuthentication:
     raise BadAuthentication("Authentication failed")
 
-db = MySQLdb.connect(host = DB_HOST, user = DB_USER, passwd = DB_PASS, \
-    db = DB_NAME)
+db = MySQLdb.connect(host=DB_HOST, user=DB_USER, passwd=DB_PASS,
+                     db=DB_NAME)
 cur = db.cursor()
 cur.execute("SELECT ctr.id, ctr.tutorial_detail_id, ctr.common_content_id, \
     ctr.language_id, ctr.outline, ctr.video, ctr.video_id, \
@@ -27,7 +28,7 @@ cur.execute("SELECT ctr.id, ctr.tutorial_detail_id, ctr.common_content_id, \
     ORDER BY cfc.foss, ctd.level_id, ctd.order ASC")
 
 rows = cur.fetchall()
-error_log_file_head = open(LOG_ROOT + 'check-video-description-error-log.txt',"w")
+error_log_file_head = open(LOG_ROOT + 'check-video-description-error-log.txt', "w")
 for row in rows:
     video_id = row[6]
     try:

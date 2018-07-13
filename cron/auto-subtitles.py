@@ -1,12 +1,13 @@
 from HTMLParser import HTMLParser
-import time, mechanize, cookielib, datetime
+import time
+import mechanize
+import cookielib
+import datetime
 from BeautifulSoup import BeautifulSoup
 from urllib import urlopen, quote
 import MySQLdb
 import sys
 import os
-#sys.path.insert(0, '../spoken')
-#sys.path.insert(0, '../../spoken')
 from config import *
 
 
@@ -14,8 +15,10 @@ class MLStripper(HTMLParser):
     def __init__(self):
         self.reset()
         self.fed = []
+
     def handle_data(self, d):
         self.fed.append(d)
+
     def get_data(self):
         return ''.join(self.fed)
 
@@ -33,7 +36,7 @@ def strip_tags(html):
 def readUrl(url):
     # print "Reading :", url
     b = getNewBrowser()
-    b.open(url, timeout = 30.0)
+    b.open(url, timeout=30.0)
     return BeautifulSoup(b.response())
 
 
@@ -50,7 +53,7 @@ def getNewBrowser():
 
     # handle some other stuff
     b.set_handle_equiv(True)
-    #b.set_handle_gzip(True)
+    # b.set_handle_gzip(True)
     b.set_handle_redirect(True)
     b.set_handle_referer(True)
 
@@ -58,9 +61,9 @@ def getNewBrowser():
     b.set_handle_refresh(mechanize._http.HTTPRefreshProcessor(), max_time=1)
 
     # want debugging messages?
-    #b.set_debug_http(True)
-    #b.set_debug_redirects(True)
-    #b.set_debug_responses(True)
+    # b.set_debug_http(True)
+    # b.set_debug_redirects(True)
+    # b.set_debug_responses(True)
 
     # User-Agent
     b.addheaders = [('User-agent', 'Mozilla/5.0 (X11; Linux x86_64) Gecko/20100101 Firefox/31.0')]
@@ -76,7 +79,7 @@ def generate_subtitle(srt_url, srt_file_path):
     try:
         rows = table[0].findAll("tr")
         counter = 1
-        srt_data = ''
+        srt_data = 'WEBVTT\n\n'
         previous_time = None
         previous_script_data = None
         for row in rows:
@@ -104,24 +107,24 @@ def generate_subtitle(srt_url, srt_file_path):
                             previous_time = formatted_time
                             continue
                         srt_data += str(counter) + '\n'
-                        srt_data += previous_time + ' --> ' + str((datetime.datetime.strptime(\
-                                                formatted_time, "%H:%M:%S") - datetime.timedelta(seconds = 1)).time()) + '\n'
+                        srt_data += previous_time + '.000' + ' --> ' + str((datetime.datetime.strptime(
+                            formatted_time, "%H:%M:%S") - datetime.timedelta(seconds=1)).time()) + '.001\n'
                         counter += 1
                         previous_time = formatted_time
                     else:
                         time_error = 1
                 #print col.text
-        video_info = get_video_info(rreplace(srt_file_path, 'srt', 'ogv', 1))
+        video_info = get_video_info(rreplace(srt_file_path, 'vtt', 'ogv', 1))
         if srt_data:
             if previous_script_data:
                 srt_data += str(counter) + '\n'
                 if video_info['duration']:
-                    srt_data += previous_time + ' --> ' + video_info['duration'] + '\n'
+                    srt_data += previous_time + '.000' + ' --> ' + video_info['duration'] + '.001\n'
                 else:
-                    srt_data += previous_time + ' --> ' + str((datetime.datetime.strptime(\
-                        previous_time, "%H:%M:%S") + datetime.timedelta(seconds = 5)).time()) + '\n'
+                    srt_data += previous_time + '.000' + ' --> ' + str((datetime.datetime.strptime(
+                        previous_time, "%H:%M:%S") + datetime.timedelta(seconds=5)).time()) + '.001\n'
                 srt_data += previous_script_data
-            file_head = open(srt_file_path,"w")
+            file_head = open(srt_file_path, "w")
             file_head.write(srt_data.encode("utf-8"))
             file_head.close()
     except Exception, e:
@@ -135,7 +138,7 @@ def get_video_info(path):
     """Uses ffmpeg to determine information about a video."""
     info_m = {}
     try:
-        process = subprocess.Popen(['/usr/bin/ffmpeg', '-i', path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        process = subprocess.Popen([FFMPEG_VP8_PATH, '-i', path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         stdout, stderr = process.communicate()
         duration_m = re.search(r"Duration:\s{1}(?P<hours>\d+?):(?P<minutes>\d+?):(?P<seconds>\d+\.\d+?)", stdout, re.DOTALL).groupdict()
         info_m = re.search(r": Video: (?P<codec>.*?), (?P<profile>.*?), (?P<width>.*?)x(?P<height>.*?), ", stdout, re.DOTALL).groupdict()
@@ -179,9 +182,9 @@ def get_formatted_script(script):
     if script.string:
         return script.text.strip('\n').strip() + '\n\n'
     else:
-        return strip_tags(str(script.renderContents())\
-        .replace('&amp;', '&').replace('&quot;', '"')\
-        .replace('&gt;', '>').replace('&lt;', '<')).decode('utf-8').strip('\n').strip() + '\n\n'
+        return strip_tags(str(script.renderContents())
+                          .replace('&amp;', '&').replace('&quot;', '"')
+                          .replace('&gt;', '>').replace('&lt;', '<')).decode('utf-8').strip('\n').strip() + '\n\n'
 
 
 def rreplace(s, old, new, occurrence):
@@ -227,15 +230,15 @@ def get_formatted_time(raw_time_string):
     return None
 
 
-db = MySQLdb.connect(host = DB_HOST, user = DB_USER, passwd = DB_PASS, db = DB_NAME)
+db = MySQLdb.connect(host=DB_HOST, user=DB_USER, passwd=DB_PASS, db=DB_NAME)
 cur = db.cursor()
 cur.execute("SELECT * FROM creation_tutorialresource where status = 1 or status = 2 order by updated desc")
 rows = cur.fetchall()
 overwrite = False
 if 'replace' in sys.argv:
     overwrite = True
-error_log_file_head = open(LOG_ROOT + 'srt-error-log.txt',"w")
-success_log_file_head = open(LOG_ROOT + 'srt-success-log.txt',"w")
+error_log_file_head = open(LOG_ROOT + 'srt-error-log.txt', "w")
+success_log_file_head = open(LOG_ROOT + 'srt-success-log.txt', "w")
 for row in rows:
     code = 0
     cur.execute('select * from creation_tutorialdetail where id = ' + str(row[1]))
@@ -257,8 +260,8 @@ for row in rows:
         else:
             continue
     srt_file_path = MEDIA_ROOT + 'videos/' + str(tutorial_detail[1]) + '/' + str(tutorial_detail[0]) + '/'
-    srt_file_name = tutorial_detail[2].replace(' ', '-') + '-' + language[1] + '.srt'
-    # print srt_file_name
+    srt_file_name = tutorial_detail[2].replace(' ', '-') + '-' + language[1] + '.vtt'
+
     if not overwrite and os.path.isfile(srt_file_path + srt_file_name):
         continue
     try:

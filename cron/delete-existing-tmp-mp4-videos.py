@@ -4,8 +4,8 @@ import os
 import time
 from config import *
 
-db = MySQLdb.connect(host = DB_HOST, user = DB_USER, passwd = DB_PASS, \
-    db = DB_NAME)
+db = MySQLdb.connect(host=DB_HOST, user=DB_USER, passwd=DB_PASS,
+                     db=DB_NAME)
 cur = db.cursor()
 cur.execute("SELECT ctr.id, ctr.tutorial_detail_id, ctr.common_content_id, \
     ctr.language_id, ctr.outline, ctr.video, ctr.video_id, \
@@ -17,6 +17,7 @@ cur.execute("SELECT ctr.id, ctr.tutorial_detail_id, ctr.common_content_id, \
     INNER JOIN creation_language clg ON (ctr.language_id = clg.id) WHERE \
     ((ctr.status = 1 OR ctr.status = 2) AND ctr.video_id IS NULL) \
     ORDER BY cfc.foss, ctd.level_id, ctd.order ASC")
+
 
 rows = cur.fetchall()
 for row in rows:

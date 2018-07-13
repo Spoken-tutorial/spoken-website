@@ -1,10 +1,9 @@
 import MySQLdb
 import time
 import sys
-#sys.path.insert(0, '../spoken')
-#sys.path.insert(0, '../../spoken')
 from youtube_upload import *
 from config import *
+
 
 def convert_video(path):
     file_name, file_extension = os.path.splitext(path)
@@ -14,7 +13,7 @@ def convert_video(path):
         new_path = new_path + '.mp4'
         process = subprocess.Popen(
             [
-                '/usr/bin/ffmpeg',
+                FFMPEG_PATH,
                 '-i', path,
                 '-acodec', 'libfaac',
                 '-ac', '2',

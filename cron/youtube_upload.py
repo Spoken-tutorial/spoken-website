@@ -36,9 +36,9 @@ from gdata.media import YOUTUBE_NAMESPACE
 from atom import ExtensionElement
 
 # http://pycurl.sourceforge.net/
-#try:
+# try:
 import pycurl
-#except ImportError:
+# except ImportError:
 #pycurl = None
 
 # http://code.google.com/p/python-progressbar (>= 2.3)
@@ -47,36 +47,62 @@ try:
 except ImportError:
     progressbar = None
 
-class InvalidCategory(Exception): pass
-class VideoArgumentMissing(Exception): pass
-class OptionsMissing(Exception): pass
-class BadAuthentication(Exception): pass
-class ParseError(Exception): pass
-class VideoNotFound(Exception): pass
-class UnsuccessfulHTTPResponseCode(Exception): pass
+
+class InvalidCategory(Exception):
+    pass
+
+
+class VideoArgumentMissing(Exception):
+    pass
+
+
+class OptionsMissing(Exception):
+    pass
+
+
+class BadAuthentication(Exception):
+    pass
+
+
+class ParseError(Exception):
+    pass
+
+
+class VideoNotFound(Exception):
+    pass
+
+
+class UnsuccessfulHTTPResponseCode(Exception):
+    pass
+
 
 def to_utf8(s):
     """Re-encode string from the default system encoding to UTF-8."""
     current = locale.getpreferredencoding()
     return (s.decode(current).encode("UTF-8") if s and current != "UTF-8" else s)
 
+
 def debug(obj, fd=sys.stderr):
     """Write obj to standard error."""
     string = str(obj.encode(get_encoding(fd), "backslashreplace")
-        if isinstance(obj, unicode) else obj)
+                 if isinstance(obj, unicode) else obj)
     fd.write(string + "\n")
+
 
 def get_encoding(fd):
     """Guess terminal encoding."""
     return fd.encoding or locale.getpreferredencoding()
 
+
 def compact(it):
     """Filter false (in the truth sense) elements in iterator."""
     return filter(bool, it)
 
+
 def first(it):
     """Return first element in iterable."""
     return it.next()
+
 
 def post(url, files_params, extra_params, show_progressbar=True):
     """Post files to a given URL."""
@@ -104,7 +130,7 @@ def post(url, files_params, extra_params, show_progressbar=True):
         bar = None
     else:
         bar = None
-        
+
     body_container = StringIO.StringIO()
     headers_container = StringIO.StringIO()
     c.setopt(c.WRITEFUNCTION, body_container.write)
@@ -112,22 +138,23 @@ def post(url, files_params, extra_params, show_progressbar=True):
     c.perform()
     http_code = c.getinfo(pycurl.HTTP_CODE)
     c.close()
-    
+
     if bar:
         bar.finish()
     headers = dict([s.strip() for s in line.split(":", 1)] for line in
-      headers_container.getvalue().splitlines() if ":" in line)
+                   headers_container.getvalue().splitlines() if ":" in line)
     return http_code, headers, body_container.getvalue()
+
 
 class Youtube:
     """Interface the Youtube API."""
     CATEGORIES_SCHEME = "http://gdata.youtube.com/schemas/2007/categories.cat"
 
     def __init__(self, developer_key, source="spoken-youtube_upload",
-            client_id="spoken-youtube_upload"):
+                 client_id="spoken-youtube_upload"):
         """Login and preload available categories."""
         service = gdata.youtube.service.YouTubeService()
-        service.ssl = False # SSL is not yet supported by the API
+        service.ssl = False  # SSL is not yet supported by the API
         service.source = source
         service.developer_key = developer_key
         service.client_id = client_id
@@ -150,22 +177,22 @@ class Youtube:
         playlist = self.service.AddPlaylist(title, description, private)
         playlistid = None
         try:
-            playlistid = first(el.text for el in playlist._ToElementTree() \
-                if "playlistId" in el.tag)
+            playlistid = first(el.text for el in playlist._ToElementTree()
+                               if "playlistId" in el.tag)
         except:
             pass
         return playlistid
 
-    def add_video_to_playlist(self, video_id, playlist_id, title=None, \
-        description=None):
+    def add_video_to_playlist(self, video_id, playlist_id, title=None,
+                              description=None):
         """Add video to playlist."""
         expected = r"http://gdata.youtube.com/feeds/api/playlists/"
         playlist_uri = expected + playlist_id
         playlist_video_entry = self.service.AddPlaylistVideoEntryToPlaylist(
             playlist_uri, video_id, title, description)
         try:
-            playlist_video_entry = str(first(el.text for el in \
-                playlist_video_entry._ToElementTree() if "id" in el.tag))
+            playlist_video_entry = str(first(el.text for el in
+                                             playlist_video_entry._ToElementTree() if "id" in el.tag))
             playlist_video_entry = playlist_video_entry\
                 .replace(playlist_uri, '').strip('/')
         except:
@@ -180,8 +207,8 @@ class Youtube:
             entry.media.title = gdata.media.Title(text=title)
         if description:
             entry.media.description = \
-                gdata.media.Description(description_type='plain', \
-                    text=description)
+                gdata.media.Description(description_type='plain',
+                                        text=description)
         return self.service.UpdateVideoEntry(entry)
 
     def delete_video_from_playlist(self, video_id, playlist_id):
@@ -194,12 +221,12 @@ class Youtube:
             url, entry_id = get_entry_info(entry)
             if video_id == entry_id:
                 playlist_video_entry_id = entry.id.text.split('/')[-1]
-                self.service.DeletePlaylistVideoEntry(playlist_uri, \
-                    playlist_video_entry_id)
+                self.service.DeletePlaylistVideoEntry(playlist_uri,
+                                                      playlist_video_entry_id)
                 break
         else:
-            raise VideoNotFound("Video %s not found in playlist %s" % \
-                (video_id, playlist_uri))
+            raise VideoNotFound("Video %s not found in playlist %s" %
+                                (video_id, playlist_uri))
 
     def check_upload_status(self, video_id):
         """
@@ -210,24 +237,24 @@ class Youtube:
         return self.service.CheckUploadStatus(video_id=video_id)
 
     def _get_feed_from_video_id(self, video_id):
-        template = 'http://gdata.youtube.com/feeds/api/users/default/uploads/%s' 
+        template = 'http://gdata.youtube.com/feeds/api/users/default/uploads/%s'
         return self.service.GetYouTubeVideoEntry(template % video_id)
 
     def get_feed_from_video_id(self, video_id):
-        template = 'http://gdata.youtube.com/feeds/api/users/default/uploads/%s' 
+        template = 'http://gdata.youtube.com/feeds/api/users/default/uploads/%s'
         return self.service.GetYouTubeVideoEntry(template % video_id)
 
     def _create_video_entry(self, title, description, category, keywords=None,
-            location=None, private=False, unlisted=False):
+                            location=None, private=False, unlisted=False):
         self.categories = self.get_categories()
         if category not in self.categories:
             valid = " ".join(self.categories.keys())
-            raise InvalidCategory("Invalid category '%s' (valid: %s)" % \
-                (category, valid))
+            raise InvalidCategory("Invalid category '%s' (valid: %s)" %
+                                  (category, valid))
         media_group = gdata.media.Group(
             title=gdata.media.Title(text=title),
-            description=gdata.media.Description(description_type='plain', \
-                text=description),
+            description=gdata.media.Description(description_type='plain',
+                                                text=description),
             keywords=gdata.media.Keywords(text=keywords),
             category=gdata.media.Category(
                 text=category,
@@ -244,18 +271,18 @@ class Youtube:
             "namespace": YOUTUBE_NAMESPACE,
             "attributes": {'action': 'list', 'permission': 'denied'},
         }
-        extension = ([ExtensionElement('accessControl', **kwargs)] \
-            if unlisted else None)
+        extension = ([ExtensionElement('accessControl', **kwargs)]
+                     if unlisted else None)
         return gdata.youtube.YouTubeVideoEntry(media=media_group, geo=where,
-            extension_elements=extension)
+                                               extension_elements=extension)
 
     @classmethod
     def get_categories(cls):
         """Return categories dictionary with pairs (term, label)."""
         def get_pair(element):
             """Return pair (term, label) for a (non-deprecated) XML element."""
-            if all(not(str(x.tag).endswith("deprecated")) for x in \
-                element.getchildren()):
+            if all(not(str(x.tag).endswith("deprecated")) for x in
+                   element.getchildren()):
                 return (element.get("term"), element.get("label"))
         xmldata = str(urllib.urlopen(cls.CATEGORIES_SCHEME).read())
         xml = ElementTree.XML(xmldata)
@@ -270,26 +297,29 @@ def get_video_id_from_url(url):
             , but got '%s'" % url)
     return match.group(1)
 
+
 def get_entry_info(entry):
     """Return pair (url, id) for video entry."""
     url = entry.GetHtmlLink().href.replace("&feature=youtube_gdata", "")
     video_id = get_video_id_from_url(url)
     return url, video_id
 
+
 def parse_location(string):
     """Return tuple (long, latitude) from string with coordinates."""
     if string and string.strip():
         return map(float, string.split(",", 1))
+
 
 def wait_processing(youtube_obj, video_id):
     """Wait until a video id recently uploaded has been procesed."""
     debug("waiting until video is processed")
     while 1:
         try:
-          response = youtube_obj.check_upload_status(video_id)
+            response = youtube_obj.check_upload_status(video_id)
         except socket.gaierror as msg:
-          debug("non-fatal network error: %s" % msg)
-          continue
+            debug("non-fatal network error: %s" % msg)
+            continue
         if not response:
             debug("video is processed")
             break
@@ -299,6 +329,7 @@ def wait_processing(youtube_obj, video_id):
             break
         time.sleep(5)
 
+
 def upload_video(youtube, options, video_path):
     """Upload video with index (for split videos)."""
     title = to_utf8(options['title'])
@@ -306,9 +337,9 @@ def upload_video(youtube, options, video_path):
     args = [video_path, title, description,
             options['category'], options['keywords']]
     kwargs = {
-      "private": options['private'],
-      "location": parse_location(options['location']),
-      "unlisted": options['unlisted'],
+        "private": options['private'],
+        "location": parse_location(options['location']),
+        "unlisted": options['unlisted'],
     }
 
     # upload with curl
@@ -316,17 +347,17 @@ def upload_video(youtube, options, video_path):
     try:
         data = youtube.get_upload_form_data(*args, **kwargs)
         entry = data["entry"]
-        #debug("Start upload using a HTTP post: %s -> %s" % (video_path, \
-            #data["post_url"]))
-        http_code, headers, body = post(data["post_url"], 
-            {"file": video_path}, {"token": data["token"]}, 
-            show_progressbar = True)
+        # debug("Start upload using a HTTP post: %s -> %s" % (video_path, \
+        # data["post_url"]))
+        http_code, headers, body = post(data["post_url"],
+                                        {"file": video_path}, {"token": data["token"]},
+                                        show_progressbar=True)
         if http_code != 302:
             raise UnsuccessfulHTTPResponseCode(
                 "HTTP code on upload: %d (expected 302)" % http_code)
-        params = dict(s.split("=", 1) for s in headers["Location"]\
-            .split("?", 1)[1].split("&"))
-        if params["status"] !=  "200":
+        params = dict(s.split("=", 1) for s in headers["Location"]
+                      .split("?", 1)[1].split("&"))
+        if params["status"] != "200":
             raise UnsuccessfulHTTPResponseCode(
                 "HTTP status on upload link: %s (expected 200)" % params["status"])
         video_id = params["id"]

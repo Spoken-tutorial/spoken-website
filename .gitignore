@@ -16,14 +16,17 @@ cron/logs/*
 youtube/secrets/*
 media/*
 !media/videos/
+!media/temp/
 !media/training/
 !media/cms/
 !media/cdimage/
+media/temp/*
 media/videos/*
 media/training/*
 media/cdimage/*
 !media/training/README
 !media/videos/README
+!media/temp/README
 !media/cdimage/README
 !media/README
 media/cms/*
@@ -80,3 +83,6 @@ nosetests.xml
 .pydevproject
 
 cron/nohup.out
+
+# Json Files
+*.json

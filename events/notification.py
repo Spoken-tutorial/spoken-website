@@ -4,22 +4,24 @@ from django.template import Context
 from events.models import *
 from django.http import HttpResponse, HttpResponseRedirect
 import time
-def nemail(request):
-  
-  plaintext = get_template('email-template/email-template.txt')
-  htmly     = get_template('email-template/email-template.html')
-  d = Context({ 'username': 'username' })
-  text_content = plaintext.render(d)
-  html_content = htmly.render(d)
-  organisers = Organiser.objects.filter(status=1).exclude(user_id__in=OrganiserNotification.objects.all().values_list('user_id'))
-  sent = 0
-  notsent = 0
-  count = 0
-  tot_count = organisers.count()
 
-  subject = "Spoken Tutorial Software Training Program"
-  message = '''Dear Organiser,
-          
+
+def nemail(request):
+
+    plaintext = get_template('email-template/email-template.txt')
+    htmly = get_template('email-template/email-template.html')
+    d = Context({'username': 'username'})
+    text_content = plaintext.render(d)
+    html_content = htmly.render(d)
+    organisers = Organiser.objects.filter(status=1).exclude(user_id__in=OrganiserNotification.objects.all().values_list('user_id'))
+    sent = 0
+    notsent = 0
+    count = 0
+    tot_count = organisers.count()
+
+    subject = "Spoken Tutorial Software Training Program"
+    message = '''Dear Organiser,
+
   <b>Many </b>thanks to you and your Institute for being a part of the Spoken Tutorial Software training program and contributing towards making it such a mega success. This is to inform you that we have introduced a separate interface in the Training Dashboard of our website, namely the Semester Training Planner (STP), that has to be completed prior to raising the Training Request. This ensures that all the batches belonging to the different departments and the specific semesters are able to take training in maximum possible relevant FOSS.The Institute will
 
       1. Appoint Faculty coordinator/s (FC) - so as to cover maximum departments in the Institute.
@@ -58,32 +60,31 @@ def nemail(request):
   Spoken Tutorial Team,
   IIT Bombay.'''
 
-
-  for organiser in organisers:
-      to  = [organiser.user.email]
-      #to = ['k.sanmugam2@gmail.com', 'sanmugam@iitb.ac.in']
-      email = EmailMultiAlternatives(
-          subject, text_content, 'no-reply@spoken-tutorial.org',
-          to = to,
-          headers = {
-           "Content-type" : "text/html"
-          }
-      )
-      email.attach_alternative(html_content, "text/html")
-      count = count + 1
-      try:
-          result = email.send(fail_silently=False)
-          sent += 1
-          OrganiserNotification.objects.create(user=organiser.user)
-          if sent%10 == 0:
-              time.sleep(5)
-          print to," => sent (", str(count),"/",str(tot_count),")"
-      except Exception, e:
-          print e
-          print to," => not sent (",count,"/",tot_count,")"
-      #break
-  print "--------------------------------"
-  print "Total sent mails:", sent
-  print "Total not sent mails:", notsent
-  print "--------------------------------"
-  return HttpResponse("Done!")
+    for organiser in organisers:
+        to = [organiser.user.email]
+        #to = ['k.sanmugam2@gmail.com', 'sanmugam@iitb.ac.in']
+        email = EmailMultiAlternatives(
+            subject, text_content, 'no-reply@spoken-tutorial.org',
+            to=to,
+            headers={
+                "Content-type": "text/html"
+            }
+        )
+        email.attach_alternative(html_content, "text/html")
+        count = count + 1
+        try:
+            result = email.send(fail_silently=False)
+            sent += 1
+            OrganiserNotification.objects.create(user=organiser.user)
+            if sent % 10 == 0:
+                time.sleep(5)
+            print to, " => sent (", str(count), "/", str(tot_count), ")"
+        except Exception, e:
+            print e
+            print to, " => not sent (", count, "/", tot_count, ")"
+        # break
+    print "--------------------------------"
+    print "Total sent mails:", sent
+    print "Total not sent mails:", notsent
+    print "--------------------------------"
+    return HttpResponse("Done!")

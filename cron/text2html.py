@@ -1,5 +1,6 @@
 import math
 
+
 def convert_to_html(rawdata):
     splchars = {
         39: '&#39;',
@@ -67,8 +68,8 @@ def convert_to_html(rawdata):
         245: '&otilde;',
         246: '&ouml;',
         223: '&szlig;',
-        254: '&thorn;', 
-        250: '&uacute;', 
+        254: '&thorn;',
+        250: '&uacute;',
         251: '&ucirc;',
         249: '&ugrave;',
         252: '&uuml;',
@@ -76,7 +77,7 @@ def convert_to_html(rawdata):
         255: '&yuml;',
         162: '&cent;',
     }
-    hex_data = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f']
+    hex_data = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f']
     result_data = ''
     for rch in rawdata:
         ch = ord(rch)
@@ -85,14 +86,14 @@ def convert_to_html(rawdata):
         elif ch in splchars:
             result_data = result_data + splchars[ch]
         elif ch > 127:
-            c = ch;
-            a4 = int(c % 16);
-            c = math.floor(c / 16); 
-            a3 = int(c % 16);
-            c = math.floor(c / 16);
-            a2 = int(c % 16);
-            c = math.floor(c / 16);
-            a1 = int(c % 16);
+            c = ch
+            a4 = int(c % 16)
+            c = math.floor(c / 16)
+            a3 = int(c % 16)
+            c = math.floor(c / 16)
+            a2 = int(c % 16)
+            c = math.floor(c / 16)
+            a1 = int(c % 16)
             tmp_hex = '&#x' + hex_data[a1] + hex_data[a2] + hex_data[a3] + hex_data[a4] + ';'
             result_data = result_data + tmp_hex
         else:

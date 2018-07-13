@@ -2,6 +2,7 @@
 from django.contrib.auth.models import User
 from django.db import models
 
+
 class Language(models.Model):
     name = models.CharField(max_length=255, unique=True)
     user = models.ForeignKey(User)
@@ -34,12 +35,12 @@ class FossCategory(models.Model):
     foss = models.CharField(unique=True, max_length=255)
     description = models.TextField()
     status = models.BooleanField(max_length=2)
-    is_learners_allowed = models.BooleanField(max_length=2,default=0 )
+    is_learners_allowed = models.BooleanField(max_length=2, default=0)
     user = models.ForeignKey(User)
     category = models.ManyToManyField(FossSuperCategory)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-    show_on_homepage = models.BooleanField(default=True, help_text ='If unchecked, this foss will be displayed on series page, instead of home page' )
+    show_on_homepage = models.BooleanField(default=True, help_text='If unchecked, this foss will be displayed on series page, instead of home page')
 
     class Meta:
         verbose_name = 'FOSS'
@@ -183,6 +184,7 @@ class TutorialResource(models.Model):
     timed_script = models.URLField(max_length=255)
 
     video = models.CharField(max_length=255)
+    audio = models.CharField(max_length=255, default=None)
     video_id = models.CharField(
         max_length=255, null=True, blank=True, default=None)
     playlist_item_id = models.CharField(

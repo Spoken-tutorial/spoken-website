@@ -1,5 +1,6 @@
 import time
-import os, sys
+import os
+import sys
 from django.db.models import Q
 
 # setting django environment
@@ -12,7 +13,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
 from django.template import Context
 
-from config import * 
+from config import *
 from cms.models import *
 from events.models import Organiser
 
@@ -75,7 +76,7 @@ NMEICT, MHRD, Govt. Of India<br>
     try:
         result = email.send(fail_silently=False)
         sent += 1
-        if sent%100 == 0:
+        if sent % 100 == 0:
             time.sleep(10)
         #print to," => sent (", str(count),"/",str(tot_count),")"
         success_log_file_head.write(str(organiser.user.email)+','+str(1)+'\n')

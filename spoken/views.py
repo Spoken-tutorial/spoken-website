@@ -42,7 +42,7 @@ def site_feedback(request):
         try:
             SiteFeedback.objects.create(name=data['name'], email=data['email'], message=data['message'])
             data = True
-        except Exception, e:
+        except Exception as e:
             print e
             data = False
 
@@ -64,12 +64,14 @@ def home(request):
         random_tutorials.append((tcount, tutorial))
     try:
         tr_rec = TutorialResource.objects.filter(Q(status=1) | Q(status=2)).order_by('?')[:1].first()
-    except Exception, e:
+        tr_rec_language_list = TutorialResource.objects.filter(tutorial_detail__id=tr_rec.tutorial_detail_id).values('language__name').distinct()
+    except Exception as e:
         messages.error(request, str(e))
     context = {
         'tr_rec': tr_rec,
         'media_url': settings.MEDIA_URL,
         'random_tutorials': random_tutorials,
+        'tr_rec_language_list': tr_rec_language_list,
     }
 
     testimonials = Testimonials.objects.all().order_by('?')[:2]
@@ -135,8 +137,8 @@ def tutorial_search(request):
     collection = None
     form = TutorialSearchForm()
     foss_get = ''
-    show_on_homepage = True;
-    queryset = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = show_on_homepage)
+    show_on_homepage = True
+    queryset = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage=show_on_homepage)
 
     if request.method == 'GET' and request.GET:
         form = TutorialSearchForm(request.GET)
@@ -165,11 +167,13 @@ def tutorial_search(request):
     context['current_foss'] = foss_get
     return render(request, 'spoken/templates/tutorial_search.html', context)
 
+
 def list_videos(request):
     form = TutorialSearchForm()
     context = {}
     context['form'] = form
     return render(request, 'spoken/templates/list_videos_form.html', context)
+
 
 def series_foss(request):
     form = SeriesTutorialSearchForm()
@@ -177,15 +181,16 @@ def series_foss(request):
     context['form'] = form
     return render(request, 'spoken/templates/series_foss_list.html', context)
 
+
 @csrf_exempt
 def series_tutorial_search(request):
     context = {}
     collection = None
     form = SeriesTutorialSearchForm()
     foss_get = ''
-    show_on_homepage = False;
-    queryset = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = show_on_homepage)
-    
+    show_on_homepage = False
+    queryset = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage=show_on_homepage)
+
     if request.method == 'GET' and request.GET:
         form = SeriesTutorialSearchForm(request.GET)
         if form.is_valid():
@@ -222,9 +227,10 @@ def watch_tutorial(request, foss, tutorial, lang):
         tr_rec = TutorialResource.objects.select_related().get(tutorial_detail=td_rec, language=Language.objects.get(name=lang))
         tr_recs = TutorialResource.objects.select_related('tutorial_detail').filter(Q(status=1) | Q(status=2), tutorial_detail__foss=tr_rec.tutorial_detail.foss, language=tr_rec.language).order_by(
             'tutorial_detail__foss__foss', 'tutorial_detail__level', 'tutorial_detail__order', 'language__name')
+
         questions = Question.objects.filter(category=td_rec.foss.foss.replace(
             ' ', '-'), tutorial=td_rec.tutorial.replace(' ', '-')).order_by('-date_created')
-    except Exception, e:
+    except Exception as e:
         messages.error(request, str(e))
         return HttpResponseRedirect('/')
     video_path = settings.MEDIA_ROOT + "videos/" + \
@@ -242,6 +248,7 @@ def watch_tutorial(request, foss, tutorial, lang):
     }
     return render(request, 'spoken/templates/watch_tutorial.html', context)
 
+
 # link to watch what is spoken tutorial video in english
 
 
@@ -256,7 +263,7 @@ def what_is_spoken_tutorial(request):
             'tutorial_detail__foss__foss', 'tutorial_detail__level', 'tutorial_detail__order', 'language__name')
         questions = Question.objects.filter(category=td_rec.foss.foss.replace(
             ' ', '-'), tutorial=td_rec.tutorial.replace(' ', '-')).order_by('-date_created')
-    except Exception, e:
+    except Exception as e:
         messages.error(request, str(e))
         return HttpResponseRedirect('/')
     video_path = settings.MEDIA_ROOT + "videos/" + \
@@ -279,14 +286,14 @@ def what_is_spoken_tutorial(request):
 def get_language(request, tutorial_type):
     output = ''
     show_on_homepage = True
-    if tutorial_type== "series":
+    if tutorial_type == "series":
         show_on_homepage = False
 
     if request.method == "POST":
         foss = request.POST.get('foss')
         lang = request.POST.get('lang')
         if not lang and foss:
-            lang_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = show_on_homepage, tutorial_detail__foss__foss=foss).values(
+            lang_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage=show_on_homepage, tutorial_detail__foss__foss=foss).values(
                 'language__name').annotate(Count('id')).order_by('language__name').values_list('language__name', 'id__count').distinct()
             tmp = '<option value = ""> -- All Languages -- </option>'
             for lang_row in lang_list:
@@ -294,7 +301,7 @@ def get_language(request, tutorial_type):
                     str(lang_row[0]) + ' (' + str(lang_row[1]) + ')</option>'
             output = ['foss', tmp]
         elif lang and not foss:
-            foss_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = show_on_homepage, language__name=lang).values('tutorial_detail__foss__foss').annotate(
+            foss_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage=show_on_homepage, language__name=lang).values('tutorial_detail__foss__foss').annotate(
                 Count('id')).order_by('tutorial_detail__foss__foss').values_list('tutorial_detail__foss__foss', 'id__count').distinct()
             tmp = '<option value = ""> -- All Courses -- </option>'
             for foss_row in foss_list:
@@ -304,13 +311,13 @@ def get_language(request, tutorial_type):
         elif foss and lang:
             pass
         else:
-            lang_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = show_on_homepage).values('language__name').annotate(
+            lang_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage=show_on_homepage).values('language__name').annotate(
                 Count('id')).order_by('language__name').values_list('language__name', 'id__count').distinct()
             tmp1 = '<option value = ""> -- All Languages -- </option>'
             for lang_row in lang_list:
                 tmp1 += '<option value="' + str(lang_row[0]) + '">' + \
                     str(lang_row[0]) + ' (' + str(lang_row[1]) + ')</option>'
-            foss_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = show_on_homepage,language__name='English').values('tutorial_detail__foss__foss').annotate(
+            foss_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage=show_on_homepage, language__name='English').values('tutorial_detail__foss__foss').annotate(
                 Count('id')).order_by('tutorial_detail__foss__foss').values_list('tutorial_detail__foss__foss', 'id__count').distinct()
             tmp2 = '<option value = ""> -- All Courses -- </option>'
             for foss_row in foss_list:
@@ -348,12 +355,12 @@ def testimonials_new(request):
                     file_path = settings.MEDIA_ROOT + 'testimonial/'
                     try:
                         os.mkdir(file_path)
-                    except Exception, e:
+                    except Exception as e:
                         print e
                     file_path = settings.MEDIA_ROOT + 'testimonial/' + str(rid) + '/'
                     try:
                         os.mkdir(file_path)
-                    except Exception, e:
+                    except Exception as e:
                         print e
                     full_path = file_path + str(rid) + ".pdf"
                     fout = open(full_path, 'wb+')
@@ -379,7 +386,7 @@ def admin_testimonials_edit(request, rid):
         raise PermissionDenied()
     try:
         instance = Testimonials.objects.get(pk=rid)
-    except Exception, e:
+    except Exception as e:
         raise Http404('Page not found')
         print e
 
@@ -389,18 +396,18 @@ def admin_testimonials_edit(request, rid):
             form_data = form.save(commit=False)
             form_data.user_id = user.id
             form_data.save()
-            file_type = ['application/pdf','image/jpeg','image/png']
+            file_type = ['application/pdf', 'image/jpeg', 'image/png']
             if 'scan_copy' in request.FILES:
                 if request.FILES['scan_copy'].content_type in file_type:
                     file_path = settings.MEDIA_ROOT + 'testimonial/'
                     try:
                         os.mkdir(file_path)
-                    except Exception, e:
+                    except Exception as e:
                         print e
                     file_path = settings.MEDIA_ROOT + 'testimonial/' + str(rid) + '/'
                     try:
                         os.mkdir(file_path)
-                    except Exception, e:
+                    except Exception as e:
                         print e
                     f = request.FILES['scan_copy']
                     filename = str(f)
@@ -431,7 +438,7 @@ def admin_testimonials_delete(request, rid):
         raise PermissionDenied()
     try:
         instance = Testimonials.objects.get(pk=rid)
-    except Exception, e:
+    except Exception as e:
         raise Http404('Page not found')
         print e
     if request.method == 'POST':
@@ -484,7 +491,7 @@ def news(request, cslug):
         context.update(csrf(request))
         return render(request, 'spoken/templates/news/index.html', context)
 
-    except Exception, e:
+    except Exception as e:
         print e
         raise Http404('You are not allowed to view this page')
 
@@ -515,7 +522,7 @@ def news_view(request, cslug, slug):
         context.update(csrf(request))
         return render(request, 'spoken/templates/news/view-news.html', context)
 
-    except Exception, e:
+    except Exception as e:
         print e
         raise Http404('You are not allowed to view this page')
 
@@ -539,13 +546,12 @@ def create_subtitle_files(request, overwrite=True):
                 continue
         srt_file_path = settings.MEDIA_ROOT + 'videos/' + \
             str(row.tutorial_detail.foss_id) + '/' + str(row.tutorial_detail_id) + '/'
-        srt_file_name = row.tutorial_detail.tutorial.replace(' ', '-') + '-' + row.language.name + '.srt'
-        # print srt_file_name
+        srt_file_name = row.tutorial_detail.tutorial.replace(' ', '-') + '-' + row.language.name + '.vtt'
         if not overwrite and os.path.isfile(srt_file_path + srt_file_name):
             continue
         try:
             code = urlopen(script_path).code
-        except Exception, e:
+        except Exception as e:
             code = e.code
         if(int(code) == 200):
             if generate_subtitle(script_path, srt_file_path + srt_file_name):
@@ -577,7 +583,7 @@ def add_user(request):
             profile = Profile(user=user, confirmation_code='12345')
             profile.save()
             count += 1
-        except Exception, e:
+        except Exception as e:
             print e
     return HttpResponse("success")
 
@@ -590,6 +596,7 @@ def ViewBrochures(request):
 def learndrupal(request):
     return render(request, 'spoken/templates/learndrupal.html')
 
+
 def induction_2017(request):
     EOI_count = InductionInterest.objects.all().count()
     context = {'EOI_count': EOI_count}
@@ -599,6 +606,7 @@ def induction_2017(request):
 
 def induction_2017_new(request):
     return render(request, 'spoken/templates/induction_2017_new.html')
+
 
 def expression_of_intrest(request):
     return render(request, 'spoken/templates/expression_of_intrest.html')
@@ -614,18 +622,18 @@ def expression_of_intrest_new(request):
                 form_data.save()
                 messages.success(request, "Your response has been recorded. Thanks for giving your inputs. In case there are more than 120 eligible applicants, we will get back to you about a selection criterion.")
                 return HttpResponseRedirect('/induction')
-            except Exception, e:
+            except Exception as e:
                 print e
                 messages.error(request, "Sorry, something went wrong, Please try again!")
                 # return HttpResponseRedirect('/induction')
     context = {
-        'form' : form,
+        'form': form,
     }
-
 
     context = {}
     context['form'] = form
     return render(request, 'spoken/templates/expression_of_intrest_old.html', context)
+
 
 def nmeict_intro(request):
     return render(request, 'spoken/templates/nmeict_intro.html')
