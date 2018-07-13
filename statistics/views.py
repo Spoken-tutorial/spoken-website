@@ -85,7 +85,6 @@ def training(request):
     state = None
     TRAINING_COMPLETED = '1'
     TRAINING_PENDING = '0'
-
     if request.method == 'GET':
         status = request.GET.get('status')
         if status not in [TRAINING_COMPLETED, TRAINING_PENDING]:
@@ -129,7 +128,13 @@ def training(request):
     collection = TrainingRequestFilter(request.GET, queryset=collection, state=state)
     # find participants count
     
-    participants = collection.qs.aggregate(Sum('participants'))
+    participants = collection.qs.aggregate(Sum('participants')) 
+
+    if lang == 'English':
+        participants = participants['participants__sum']+294593
+
+    else:
+        participants = participants['participants__sum']
 
     chart_query_set = collection.qs.extra(select={'year': "EXTRACT(year FROM sem_start_date)"}).values('year').order_by(
             '-year').annotate(total_training=Count('sem_start_date'), total_participant=Sum('participants'))
