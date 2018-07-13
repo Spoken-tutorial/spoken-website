@@ -6,6 +6,11 @@
 {% block heading %}Add / Edit Testimonial {% endblock %}
 {% block search %}{% endblock %}
 {% block content %}
+<style>
+audio, canvas, progress, video {
+    display: none;
+}
+</style>
     <div class="row well">
         <div class='col-sm-8'>
             {% if form %}
@@ -13,7 +18,9 @@
                 {% csrf_token %}
                 <!-- Django will take care of spiting the form. -->
                 {{ form.as_p }}
-                <input class="btn btn-primary" type="submit" value="Submit" />
+                <div id='submit_btn'>
+                    <input class="btn btn-primary" type="submit" value="Submit" />
+                </div>
             </form>
             {% else %}
                 <h3>Are you sure you want to delete the testimonial?</h3>
@@ -34,5 +41,24 @@
                 </p>
             {% endif%}
         </div>
-    </div>
+        <video class='d-none' id="st_video">
+            <source src="" />
+        </video>
+    <script>
+        var media_element_container = document.getElementById('media_element');
+        var hidden_video_container = document.getElementById('st_video');
+        var submit_btn_container = document.getElementById('submit_btn');
+        media_element_container.onchange = function () {
+            hidden_video_container.src = URL.createObjectURL(this.files[0]);
+            hidden_video_container.load();
+        };
+        hidden_video_container.onloadedmetadata = function() {
+            // To change the allowed duration of the testimonial, please manipulate the variable below(seconds). 
+            var allowed_duration = 180;
+            if (hidden_video_container.duration > allowed_duration + 5)
+                submit_btn_container.innerHTML = 'Testimonial duration should be less than ' + allowed_duration + ' seconds.'
+            else
+                submit_btn_container.innerHTML = '<input class="btn btn-primary" type="submit" value="Submit" />'
+        };
+    </script> 
 {% endblock %}
