@@ -43,6 +43,7 @@
                 <tr class="active">
                     <th>S.No</th>
                     <th>User</th>
+                    <th>Language</th>
                     <th>Email</th>
                     <th>Date &amp; Time</th>
                     <th class="col-center" colspan="2"><span title="" data-original-title="" class="fa fa-cogs fa-2"></span></th>
@@ -51,10 +52,11 @@
                     <tr>
                         <td>{{ forloop.counter }}</td>
                         <td><a href="/accounts/view-profile/{{ contrib_rec.user }}" target="_blank">{{ contrib_rec.user }}</a</td>
+                        <td><a >{{contrib_rec.language}} </a></td>
                         <td><a href="mailto:{{ contrib_rec.user.email }}">{{ contrib_rec.user.email }}</a></td>
                         <td>{{ contrib_rec.created }}</td>
-                        <td class="col-center"><a href="/creation/role/accept/{{ contrib_rec.id }}/" class="spin-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Accept</a></td>
-                        <td class="col-center"><a href="/creation/role/reject/{{ contrib_rec.id }}/" class="spin-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Reject</a></td>
+                        <td class="col-center"><a href="{% url 'creation:creation_accept_role_request'  contrib_rec.id contrib_rec.language_id %}" class="spin-btn js-accept-btn" ><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Accept</a></td>
+                        <td class="col-center"><a href="{% url 'creation:creation_reject_role_request'  contrib_rec.id contrib_rec.language_id %}" class="spin-btn js-accept-btn" ><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Reject</a></td>
                     </tr>
                 {% endfor %}
             {% endif %}
@@ -70,6 +72,7 @@
                 <tr class="active">
                     <th>S.No</th>
                     <th>User</th>
+                    <th>Language</th>
                     <th>Email</th>
                     <th>Date &amp; Time</th>
                     <th class="col-center" colspan="2"><span title="" data-original-title="" class="fa fa-cogs fa-2"></span></th>
@@ -78,10 +81,11 @@
                     <tr>
                         <td>{{ forloop.counter }}</td>
                         <td><a href="/accounts/view-profile/{{ contrib_rec.user }}" target="_blank">{{ contrib_rec.user }}</a</td>
+                        <td><a >{{contrib_rec.language}} </a></td>
                         <td><a href="mailto:{{ contrib_rec.user.email }}">{{ contrib_rec.user.email }}</a></td>
                         <td>{{ contrib_rec.created }}</td>
-                        <td class="col-center"><a href="/creation/role/accept/{{ contrib_rec.id }}/" class="spin-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Accept</a></td>
-                        <td class="col-center"><a href="/creation/role/reject/{{ contrib_rec.id }}/" class="spin-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Reject</a></td>
+                        <td class="col-center"><a href="{% url 'creation:creation_accept_role_request'  contrib_rec.id contrib_rec.language_id %}" class="spin-btn js-accept-btn" ><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Accept</a></td>
+                        <td class="col-center"><a href="{% url 'creation:creation_reject_role_request'  contrib_rec.id contrib_rec.language_id %}" class="spin-btn js-reject-btn" ><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Reject</a></td>
                     </tr>
                 {% endfor %}
             {% endif %}
@@ -124,6 +128,7 @@
                 <tr class="active">
                     <th>S.No</th>
                     <th>User</th>
+                    <th>Language</th>
                     <th>Email</th>
                     <th>Date &amp; Time</th>
                     <th class="col-center" colspan="2"><span title="" data-original-title="" class="fa fa-cogs fa-2"></span></th>
@@ -132,12 +137,14 @@
                     <tr>
                         <td>{{ forloop.counter }}</td>
                         <td><a href="/accounts/view-profile/{{ domain_rec.user }}" target="_blank">{{ domain_rec.user }}</a</td>
+                        <td><a > {{domain_rec.language}} </a></td>
                         <td><a href="mailto:{{ domain_rec.user.email }}">{{ domain_rec.user.email }}</a></td>
                         <td>{{ domain_rec.created }}</td>
-                        <td class="col-center"><a href="/creation/role/accept/{{ domain_rec.id }}/" class="spin-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Accept</a></td>
-                        <td class="col-center"><a href="/creation/role/reject/{{ domain_rec.id }}/" class="spin-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Reject</a></td>
+                        <td class="col-center"><a href="{% url 'creation:creation_accept_role_request'  domain_rec.id domain_rec.language_id %}" class="spin-btn js-accept-btn" ><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Accept</a></td>
+                        <td class="col-center"><a href="{% url 'creation:creation_reject_role_request'  domain_rec.id domain_rec.language_id %}" class="spin-btn js-accept-btn" ><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Reject</a></td>
                     </tr>
                 {% endfor %}
+
             {% endif %}
             </table>
         </div>
@@ -151,6 +158,7 @@
                 <tr class="active">
                     <th>S.No</th>
                     <th>User</th>
+                    <th>Language</th>
                     <th>Email</th>
                     <th>Date &amp; Time</th>
                     <th class="col-center" colspan="2"><span title="" data-original-title="" class="fa fa-cogs fa-2"></span></th>
@@ -159,10 +167,11 @@
                     <tr>
                         <td>{{ forloop.counter }}</td>
                         <td><a href="/accounts/view-profile/{{ quality_rec.user }}" target="_blank">{{ quality_rec.user }}</a</td>
+                        <td><a >{{ quality_rec.language }} </a></td>
                         <td><a href="mailto:{{ quality_rec.user.email }}">{{ quality_rec.user.email }}</a></td>
                         <td>{{ quality_rec.created }}</td>
-                        <td class="col-center"><a href="/creation/role/accept/{{ quality_rec.id }}/" class="spin-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Accept</a></td>
-                        <td class="col-center"><a href="/creation/role/reject/{{ quality_rec.id }}/" class="spin-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Reject</a></td>
+                        <td class="col-center"><a href="{% url 'creation:creation_accept_role_request'  quality_rec.id quality_rec.language_id %}" class="spin-btn js-accept-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Accept</a></td>
+                        <td class="col-center"><a href="{% url 'creation:creation_reject_role_request'  quality_rec.id quality_rec.language_id %}" class="spin-btn js-accept-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Reject</a></td>
                     </tr>
                 {% endfor %}
             {% endif %}
@@ -174,7 +183,7 @@
     <script src="{% static 'spoken/js/jquery.mousewheel-3.0.6.pack.js' %}"></script>
 {% endblock %}
 {% block compressinlinejsblock %}
-    <script type="text/javascript">
+<script type="text/javascript">
         $(document).ready(
             function(){
                 $(".spin-btn").hover(
@@ -185,7 +194,28 @@
                         $(this).children(0).removeClass("fa-spin");
                     }
                 );
+                $('.js-accept-btn').click(function(e){
+                    console.log($(this).attr('href') + " clicked at " + new Date());
+                    // allow this link to be clicked only once, disable subsiquent clicks.
+                    var url = $(this).attr('href');
+                    var el = $(this);
+                    el.html('processing...');
+                    el.attr('href', '');
+                    
+                    var request = $.get(url, function(){
+                        console.log("making request for " + url);
+                    });
+                    request.done(function(data){
+                        console.log("success");
+                        el.parent().html(data);
+                    });
+                    request.fail(function(){
+                        console.log('failed');
+                        el.attr('href', url);
+                    });
+                    e.preventDefault();
+                });
             }
         );
     </script>
-{% endblock %}
+    {% endblock %}

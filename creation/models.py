@@ -338,14 +338,15 @@ class QualityReviewerNotification(models.Model):
 class RoleRequest(models.Model):
     user = models.ForeignKey(User, related_name='user')
     role_type = models.IntegerField(default=0)
+    language = models.ForeignKey(Language,null=True)
     status = models.PositiveSmallIntegerField(default=0)
     approved_user = models.ForeignKey(
-        User, related_name='approved_user', null=True, blank=True)
+        User, related_name='approved_user', null=True, blank =True)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
     class Meta:
-        unique_together = (('user', 'role_type',),)
+        unique_together = (('user', 'role_type','language'),)
 
 
 class FossAvailableForWorkshop(models.Model):
@@ -445,3 +446,6 @@ class Collaborate(models.Model):
     language = models.ForeignKey(Language)
     lead_st = models.BooleanField()
     created = models.DateTimeField(auto_now_add=True)
+
+
+
