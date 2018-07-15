@@ -516,3 +516,33 @@ def tutorial_content(request, template='statistics/templates/statistics_content.
     context['ordering'] = ordering
 
     return render(request, template, context)
+
+def payment_init(request):
+    state = State.objects.all()
+    context={}
+    context['state'] = state
+    return render(request, 'statistics/templates/payment.html', context)
+
+import  json
+from django.views.decorators.csrf import csrf_exempt
+@csrf_exempt
+def ajax_city(request):
+    messages.success(request,"Okkay")
+    state = request.POST.get('state', False)
+    city = request.POST.get('city', False)
+    print "City-----",city
+    data = ''
+    if request.method == 'POST':
+        cities = City.objects.filter(state__name=state).order_by('name')
+        cities_json = ''
+        academic_centers_json = ''
+        for i in cities:
+            cities_json +='<option id='+str(i.id)+'>'+i.name+'</option>'
+        if city:
+            academic_center= AcademicCenter.objects.filter(state__name=state,city__name=city,status = 1 )
+            for j in academic_center:
+                academic_centers_json+= '<option id='+str(j.id)+'>'+j.institution_name+'</option>'
+        data = {"city":cities_json,"academic_center":academic_centers_json,}
+        print "data :",data
+        
+    return HttpResponse(json.dumps(data), content_type='application/json')
