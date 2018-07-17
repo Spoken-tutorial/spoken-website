@@ -2538,3 +2538,11 @@ def ReOpenTraining(request, pk):
   else:
     messages.error(request, 'Request to re-open training is not sent.Please try again.')
   return HttpResponseRedirect("/software-training/select-participants/")
+
+def payment_home(request):
+  #to get - College name & College Type based on login user
+  academic_center = AcademicCenter.objects.filter(user_id = request.user).values('id','institution_name','institution_type_id')
+  print "academic_center",academic_center
+  context ={}
+  context['academic_center'] = academic_center
+  return render(request, 'creation/templates/payment_home.html', context)
