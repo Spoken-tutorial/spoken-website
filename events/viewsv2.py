@@ -2546,8 +2546,12 @@ def payment_home(request):
   academic_center = AcademicCenter.objects.filter(user_id = request.user).values('id','institution_name','institution_type_id')
   
   if request.method == 'POST':
-    #request.POST.get('institution_name')
-    messages.success(request,"I am in POST")
+    institution_name = str(request.POST.get('institution_name'))
+    print "institution_name : ",institution_name, type(institution_name)
+    from events import sha
+    s = sha.sha512(str(institution_name))
+    s.update(institution_name)
+    messages.success(request,s.hexdigest())
   context ={}
   context['academic_center'] = academic_center
   

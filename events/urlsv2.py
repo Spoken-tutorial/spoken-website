@@ -291,7 +291,7 @@ urlpatterns = [
       name="re-open-training"
     ),
     url(
-      r'^payment_home/$', 
+      r'^payment-home/$', 
       'events.viewsv2.payment_home', 
       name="payment_home"
     ),
