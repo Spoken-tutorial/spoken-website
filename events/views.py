@@ -193,6 +193,14 @@ def is_resource_person(user):
     if user.groups.filter(name='Resource Person').count() == 1:
         return True
 
+def is_accountexecutive(user):
+    """Check if the user is having accountexecutive rights"""
+    try:
+        if user.groups.filter(name='Account Executive').exist() and user.accountexecutive.status == 1:
+            return True
+    except:
+        pass
+
 def is_organiser(user):
     """Check if the user is having organiser rights"""
     try:
@@ -688,6 +696,108 @@ def has_profile_data(request, user):
         for field in profile._meta.get_all_field_names():
             if not getattr(profile, field, None):
                 return HttpResponseRedirect("/accounts/profile/"+user.username+"/")
+
+
+@login_required
+def accountexecutive_request(request, username):
+    """ request to bacome a new accountexecutive """
+    user = request.user
+    if not user.is_authenticated():
+        raise PermissionDenied()
+
+    if username == request.user.username:
+        user = User.objects.get(username=username)
+        if request.method == 'POST':
+            form = AccountexecutiveForm(request.POST)
+            if form.is_valid():
+                user.groups.add(Group.objects.get(name='Account Executive'))
+                accountexecutive = Accountexecutive()
+                accountexecutive.user_id=request.user.id
+                accountexecutive.academic_id=request.POST['college']
+                try:
+                    accountexecutive.save()
+                except:
+                    accountexecutive = accountexecutive.objects.get(user = user)
+                    accountexecutive.academic_id=request.POST['college']
+                    accountexecutive.save()
+                messages.success(request, "<ul><li>Thank you. Your request has been sent for Training Manager's approval.</li><li>You will get the approval with in 24 hours. Once the request is approved, you can proceed with the payment. </li></ul>")
+                return HttpResponseRedirect("/software-training/accountexecutive/view/"+user.username+"/")
+            messages.error(request, "Please fill the following details")
+            context = {'form':form}
+            return render(request, 'events/templates/accountexecutive/form.html', context)
+        else:
+            try:
+                accountexecutive = accountexecutive.objects.get(user=user)
+                if not is_accountexecutive(accountexecutive):
+                    messages.info(request, "Please fill the following details")
+                    context = {}
+                    context.update(csrf(request))
+                    context['form'] = AccountexecutiveForm()
+                    return render(request, 'events/templates/accountexecutive/form.html', context)
+                if accountexecutive.status:
+                    messages.error(request, "You are already an accountexecutive ")
+                    return HttpResponseRedirect("/software-training/accountexecutive/view/"+user.username+"/")
+                else:
+                    messages.info(request, "Your Account Executive request is yet to be approved. Please contact the Resource person of your State. For more details <a href='http://process.spoken-tutorial.org/images/5/5d/Create-New-Account.pdf' target='_blank'> Click Here</a> ")
+                    print "Accountexecutive not yet approve "
+                    return HttpResponseRedirect("/software-training/accountexecutive/view/"+user.username+"/")
+            except:
+                pass
+
+            messages.info(request, "Please fill the following details")
+            context = {}
+            context.update(csrf(request))
+            context['form'] = AccountexecutiveForm()
+            return render(request, 'events/templates/accountexecutive/form.html', context)
+    else:
+        raise PermissionDenied()
+
+@login_required
+def accountexecutive_view(request, username):
+    """ view accountexecutive details """
+    user = request.user
+    if not (user.is_authenticated() and (username == request.user.username or is_event_manager(user) or is_resource_person(user))):
+        raise PermissionDenied()
+
+    context = {}
+    try:
+        user = User.objects.get(username=username)
+        accountexecutive = Accountexecutive.objects.get(user=user)
+        context['record'] = accountexecutive
+        context['profile'] = accountexecutive.user.profile_set.get(user= user)
+    except Exception, e:
+        print e
+        raise PermissionDenied()
+    return render(request, 'events/templates/accountexecutive/view.html', context)
+
+#@login_required
+def accountexecutive_edit(request, username):
+    """ view accountexecutive details """
+    #todo: confirm event_manager and resource_center can edit accountexecutive details
+    user = request.user
+    if not (user.is_authenticated() and (username == request.user.username or is_event_manager(user) or is_resource_person(user))):
+        raise PermissionDenied()
+
+    user = User.objects.get(username=username)
+    if request.method == 'POST':
+        form = AccountexecutiveForm(request.POST)
+        if form.is_valid():
+            accountexecutive = Accountexecutive.objects.get(user=user)
+            #accountexecutive.user_id=request.user.id
+            accountexecutive.academic_id=request.POST['college']
+            accountexecutive.save()
+            messages.success(request, "Details has been updated")
+            return HttpResponseRedirect("/software-training/accountexecutive/view/"+user.username+"/")
+        context = {'form':form}
+        return render(request, 'events/templates/accountexecutive/form.html', context)
+    else:
+            #todo : if any training and test under this accountexecutive disable the edit
+            record = Accountexecutive.objects.get(user=user)
+            context = {}
+            context['form'] = AccountexecutiveForm(instance = record)
+            context.update(csrf(request))
+            return render(request, 'events/templates/accountexecutive/form.html', context)
+
 
 @login_required
 def organiser_request(request, username):

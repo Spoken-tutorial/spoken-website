@@ -193,6 +193,22 @@ class AcademicCenter(models.Model):
     ).aggregate(Sum('participants'))
     return training['participants__sum']
 
+class Accountexecutive(models.Model):
+  user = models.OneToOneField(User, related_name = 'accountexecutive')
+  appoved_by = models.ForeignKey(
+    User,
+    related_name = 'accountexecutive_approved_by',
+    blank=True,
+    null=True
+  )
+  academic = models.ForeignKey(AcademicCenter, blank=True, null=True)
+  status = models.PositiveSmallIntegerField(default=0)
+  created = models.DateTimeField(auto_now_add = True)
+  updated = models.DateTimeField(auto_now = True)
+
+  def __unicode__(self):
+    return self.user.username
+
 
 class Organiser(models.Model):
   user = models.OneToOneField(User, related_name = 'organiser')
