@@ -31,6 +31,7 @@ urlpatterns = patterns('',
     url(r"^accountexecutive/request/(?P<username>[\w. @-]+)/$", 'events.views.accountexecutive_request', name='accountexecutive_request'),
     url(r"^accountexecutive/view/(?P<username>[\w. @-]+)/$", 'events.views.accountexecutive_view', name='accountexecutive_view'),
     url(r"^accountexecutive/(?P<username>[\w. @-]+)/edit/$", 'events.views.accountexecutive_edit', name='accountexecutive_edit'),
+    url(r'^accountexecutive/(?P<status>\w+)/(?P<code>\w+)/(?P<userid>\d+)/$', 'events.views.rp_accountexecutive', name='rp_accountexecutive'),
     
     url(r"^organiser/request/(?P<username>[\w. @-]+)/$", 'events.views.organiser_request', name='organiser_request'),
     url(r"^organiser/(?P<username>[\w. @-]+)/edit/$", 'events.views.organiser_edit', name='organiser_edit'),

@@ -196,7 +196,7 @@ def is_resource_person(user):
 def is_accountexecutive(user):
     """Check if the user is having accountexecutive rights"""
     try:
-        if user.groups.filter(name='Account Executive').exist() and user.accountexecutive.status == 1:
+        if user.groups.filter(name='Account Executive').count() == 1 and user.accountexecutive.status == 1:
             return True
     except:
         pass
@@ -717,7 +717,7 @@ def accountexecutive_request(request, username):
                 try:
                     accountexecutive.save()
                 except:
-                    accountexecutive = accountexecutive.objects.get(user = user)
+                    accountexecutive = Accountexecutive.objects.get(user = user)
                     accountexecutive.academic_id=request.POST['college']
                     accountexecutive.save()
                 messages.success(request, "<ul><li>Thank you. Your request has been sent for Training Manager's approval.</li><li>You will get the approval with in 24 hours. Once the request is approved, you can proceed with the payment. </li></ul>")
@@ -727,7 +727,7 @@ def accountexecutive_request(request, username):
             return render(request, 'events/templates/accountexecutive/form.html', context)
         else:
             try:
-                accountexecutive = accountexecutive.objects.get(user=user)
+                accountexecutive = Accountexecutive.objects.get(user=user)
                 if not is_accountexecutive(accountexecutive):
                     messages.info(request, "Please fill the following details")
                     context = {}
@@ -1046,6 +1046,32 @@ def rp_invigilator(request, status, code, userid):
             raise PermissionDenied()
     except:
         raise PermissionDenied('You are not allowed to view this page')
+
+@login_required
+def rp_accountexecutive(request, status, code, userid):
+    """ Resource person: active accountexecutive """
+    user = request.user
+    accountexecutive_in_rp_state = Accountexecutive.objects.filter(user_id=userid, academic=AcademicCenter.objects.filter(state=State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)))
+    if not (user.is_authenticated() and accountexecutive_in_rp_state and ( is_event_manager(user) or is_resource_person(user) or (status == 'active' or status == 'block'))):
+        raise PermissionDenied('You are not allowed to view this page')
+
+    try:
+        if User.objects.get(pk=userid).profile_set.get().confirmation_code == code:
+            accountexecutive = Accountexecutive.objects.get(user_id = userid)
+            accountexecutive.appoved_by_id = request.user.id
+            accountexecutive.status = 1
+            message = "accepted"
+            if status == 'block':
+                accountexecutive.status = 2
+                message = "blocked"
+            accountexecutive.save()
+            messages.success(request, "Accountexecutive has "+message)
+            return HttpResponseRedirect('/software-training/accountexecutive/inactive/')
+        else:
+            raise PermissionDenied()
+    except:
+        raise PermissionDenied('You are not allowed to view this page')
+
 
 @login_required
 def training_request(request, role, rid = None):
@@ -2358,6 +2384,23 @@ def organiser_invigilator_index(request, role, status):
         except Exception, e:
             print e
             collection = {}
+    elif role == 'accountexecutive':
+        try:
+            collectionSet = Accountexecutive.objects.select_related().filter(academic=AcademicCenter.objects.filter(state=State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)), status=status)
+
+            raw_get_data = request.GET.get('o', None)
+            collection = get_sorted_list(request, collectionSet, header, raw_get_data)
+            ordering = get_field_index(raw_get_data)
+
+            collection = AccountexecutiveFilter(request.GET, user = user, queryset=collection)
+            context['form'] = collection.form
+
+            page = request.GET.get('page')
+            collection = get_page(collection, page)
+
+        except Exception, e:
+            print e
+            collection = {}    
     else:
         raise PermissionDenied()
 

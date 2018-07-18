@@ -52,6 +52,20 @@ class InvigilatorFilter(django_filters.FilterSet):
     model = Invigilator
     fields = ['academic__state', 'academic__institution_type', 'academic__institute_category']
 
+class AccountexecutiveFilter(django_filters.FilterSet):
+  academic__state = django_filters.ChoiceFilter(choices=State.objects.none())
+  academic__institution_name = django_filters.CharSearchFilter()
+  def __init__(self, *args, **kwargs):
+    user = kwargs['user']
+    kwargs.pop('user')
+    super(AccountexecutiveFilter, self).__init__(*args, **kwargs)
+    choices = list(State.objects.filter(resourceperson__user_id=user, resourceperson__status=1).values_list('id', 'name'))
+    choices.insert(0, ('', '---------'),)
+    self.filters['academic__state'].extra.update({'choices' : choices})
+  class Meta:
+    model = Accountexecutive
+    fields = ['academic__state', 'academic__institution_type', 'academic__institute_category']
+
 class TrainingFilter(django_filters.FilterSet):
   academic__state = django_filters.ChoiceFilter(choices=State.objects.none())
   foss = django_filters.ChoiceFilter(choices= [('', '---------')] + list(FossAvailableForWorkshop.objects.filter(status=1).order_by('foss__foss').values_list('foss__id', 'foss__foss').distinct()))
