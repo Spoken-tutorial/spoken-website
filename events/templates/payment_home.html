@@ -13,44 +13,42 @@
 {% block search %}{% endblock %}
 {% block content %}
     <div class= 'filters row' >
-        <form action=""  method="get" class='form-horizontal'>
+
+        <form action=""  method="post" class='form-horizontal'>{%csrf_token%}
             <div class="col-lg-4 col-md-4 col-sm-4">
                 <div class="form-group">
-                    <label for="id_state" class="col-sm-4 control-label">State</label>
-                     <select class="form-control lang" id="lang" name="lang">
+                    <label for="id_state" class="col-sm-4 control-label">Institution Name</label>
+                     <select class="form-control lang" id="lang" name="institution_name">
                         <option id="0">---------</option>
                           <div class="col-sm-8">
                             {%for a_college in academic_center%}
                               <option id="{{a_college.id }}" >{{a_college.institution_name}}</option>
                             {%endfor%}
+                        </div>
                     </select>
+                        </div>
                     </div>
-                    </div>
+
                     <div class="form-group">
                       <label for="id_state" class="col-sm-4 control-label">{{a_college.institution_type_id}}</label>
                     </div>
+                
+
+                <div class="form-group">
+                  <div class="col-sm-offset-4 col-sm-8">
+                     <input class="btn btn-success" type="submit" value="Submit" />
                 </div>
-          </div>
-  </div>
+            </div>
+        </form>
+    </div>
+          
+  
+
 {% endblock %}
 {% block compressjsblock %}
     <script src="{% static 'spoken/js/events.js' %}"></script>
-    <script src="{% static 'spoken/js/jquery.datetimepicker.js' %}"></script>
-    <script src="{% static 'spoken/js/jquery.fancybox.pack.js' %}"></script>
     <script type="text/javascript">
-        $(".academic_state").change(function(){
-            ajaxStrateFillDatas('', 'city', '');
-        });
-        $(document).ready(function(){
-            
-        });
 
-        };
-
-    </script>
-{% endblock %}
-{% block uncompressjsblock %}
-    <script type="text/javascript">
 
     </script>
 {% endblock %}
