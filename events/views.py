@@ -726,25 +726,25 @@ def accountexecutive_request(request, username):
             context = {'form':form}
             return render(request, 'events/templates/accountexecutive/form.html', context)
         else:
-            try:
-                accountexecutive = Accountexecutive.objects.get(user=user)
-                if not is_accountexecutive(accountexecutive):
-                    messages.info(request, "Please fill the following details")
-                    context = {}
-                    context.update(csrf(request))
-                    context['form'] = AccountexecutiveForm()
-                    return render(request, 'events/templates/accountexecutive/form.html', context)
-                if accountexecutive.status:
+            accountexecutive = Accountexecutive.objects.get(user=user)
+
+            if accountexecutive:
+                if accountexecutive.status == 1:
                     messages.error(request, "You are already an accountexecutive ")
                     return HttpResponseRedirect("/software-training/accountexecutive/view/"+user.username+"/")
                 else:
                     messages.info(request, "Your Account Executive request is yet to be approved. Please contact the Resource person of your State. For more details <a href='http://process.spoken-tutorial.org/images/5/5d/Create-New-Account.pdf' target='_blank'> Click Here</a> ")
                     print "Accountexecutive not yet approve "
                     return HttpResponseRedirect("/software-training/accountexecutive/view/"+user.username+"/")
-            except:
-                pass
+            else:
+                messages.error(request, "Please fill the following details")
+                context = {}
+                context.update(csrf(request))
+                context['form'] = AccountexecutiveForm()
+                return render(request, 'events/templates/accountexecutive/form.html', context)
 
-            messages.info(request, "Please fill the following details")
+
+            messages.info(request, "Please fill the following details.")
             context = {}
             context.update(csrf(request))
             context['form'] = AccountexecutiveForm()
