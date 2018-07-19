@@ -295,4 +295,9 @@ urlpatterns = [
       'events.viewsv2.payment_home', 
       name="payment_home"
     ),
+      url(
+      r'^payment-status/$', 
+      'events.viewsv2.payment_status', 
+      name="payment_status"
+    ),
 ]

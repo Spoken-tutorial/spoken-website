@@ -13,7 +13,7 @@ config.py
 cron/config.py
 cron/youtube-oauth.storage
 cron/logs/*
-events/sha.py
+events/display.py
 youtube/secrets/*
 media/*
 !media/videos/

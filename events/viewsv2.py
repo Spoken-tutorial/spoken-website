@@ -17,8 +17,9 @@ from events.forms import StudentBatchForm, TrainingRequestForm, \
     TrainingRequestEditForm, CourseMapForm, SingleTrainingForm, \
     OrganiserFeedbackForm,STWorkshopFeedbackForm,STWorkshopFeedbackFormPre,STWorkshopFeedbackFormPost,LearnDrupalFeedbackForm, LatexWorkshopFileUploadForm, UserForm, \
     SingleTrainingEditForm
+
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render, render_to_response
+from django.shortcuts import render, render_to_response, redirect
 from django.core.validators import validate_email
 from django.contrib.auth.models import Group, User
 from django.template import RequestContext
@@ -2541,18 +2542,44 @@ def ReOpenTraining(request, pk):
   return HttpResponseRedirect("/software-training/select-participants/")
 
 @csrf_protect
+@login_required
 def payment_home(request):
   #to get - College name & College Type based on login user
-  academic_center = AcademicCenter.objects.filter(user_id = request.user).values('id','institution_name','institution_type_id')
-  
-  if request.method == 'POST':
-    institution_name = str(request.POST.get('institution_name'))
-    print "institution_name : ",institution_name, type(institution_name)
-    from events import sha
-    s = sha.sha512(str(institution_name))
-    s.update(institution_name)
-    messages.success(request,s.hexdigest())
+  user = User.objects.get(id = request.user.id)
+  accountexecutive = Accountexecutive.objects.filter(user_id = user,status=1).values('id','academic_id__institution_name','academic_id__institution_type_id')
+  amount = 0
+  if accountexecutive[0]['academic_id__institution_type_id'] == 5:
+      amount = 5000
+  else:
+      amount = 25000
+
+  print "institution_name : ", user.id,accountexecutive[0]['academic_id__institution_type_id']
+    
+    
   context ={}
-  context['academic_center'] = academic_center
+  context['accountexecutive'] = accountexecutive
+  context['random'] = amount
+  context['user'] = user.id
+  context['username'] = user
+
+  data = ''
+  data = str(user.id)+str(user)+str(amount)+"Subscription"+"SOLO"
+  from events import display
+  s = display.value(str(data))
+  messages.success(request,s.hexdigest())
+  if request.method == 'POST':
+    import requests
+    r = requests.post('http://10.129.155.101:8084/esospg/initpayment', data = {'userId':user.id,'name':user,'amount':amount,'purpose':'Subscription','channelId':'SOLO','random':s.hexdigest()})
+    print "success123"
+    return HttpResponseRedirect("/software-training/payment-status/")
+    messages.success(request,"success")
+
   
   return render(request, 'payment_home.html', context)
+
+@csrf_protect
+@login_required
+def payment_status(request):
+  context ={}
+  return render(request, 'payment_status.html', context)  
+  

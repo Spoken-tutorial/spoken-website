@@ -1643,3 +1643,11 @@ class MumbaiStudents(models.Model):
   stuid = models.ForeignKey('Student')
   bid = models.ForeignKey('StudentBatch')
 
+class PaymentDetails(models.Model):
+    name = models.CharField(max_length=20, null=True)
+    userId = models.CharField(max_length=20, null=True)
+    amount = models.PositiveIntegerField()
+    purpose = models.CharField(max_length=20, null=True)
+    channelId = models.CharField(max_length=20, null=True)
+    status = models.PositiveIntegerField()
+    description = models.CharField(max_length=20, null=True)
