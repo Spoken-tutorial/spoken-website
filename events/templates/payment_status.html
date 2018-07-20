@@ -12,16 +12,27 @@
 {% block heading %} <i class="fa fa-list-ul"></i> {{ model }} Statistics {% endblock %}
 {% block search %}{% endblock %}
 {% block content %}
+<body onload="loading()">
     <div class= 'filters row' >
-
-        <form action=""  method="post" class='form-horizontal' action="/creationhome">{%csrf_token%}
-            <div class="col-lg-6 col-md-2">
-                <div class="form-group">
-                    <label class="col-sm-4 control-label">Institution Name</label>
-                    <label for="id_institution_name" class="col-sm-4 control-label disabled" name="institution_name" value="hello">{{accountexecutive.0.academic_id__institution_name}} </label>
-                        </div>
-                    
-            </div>
+        <h3>You are getting redirected to external payment gateway!!</h3>
+        <form action="http://10.129.155.117:8084/esospg/initpayment" name="test" method="post" class='form-horizontal' >
+            <input type="hidden" name="userId" value="{{userId}}" />
+            <input type="hidden" name="name" value="{{name}}" />
+            <input type="hidden" name="amount" value="{{amount}}" />
+            <input type="hidden" name="purpose" value="{{purpose}}" />
+            <input type="hidden" name="channelId" value="{{channelId}}" />
+            <input type="hidden" name="random" value="{{random}}" />
         </form>
 </div>
+</body>
+{% endblock %}
+{% block jsblock %}
+<script type="text/javascript">
+    function loading()
+    {
+        
+        window.document.test.submit();
+        return;
+    }
+</script>
 {% endblock %}

@@ -1644,10 +1644,15 @@ class MumbaiStudents(models.Model):
   bid = models.ForeignKey('StudentBatch')
 
 class PaymentDetails(models.Model):
-    name = models.CharField(max_length=20, null=True)
-    userId = models.CharField(max_length=20, null=True)
+    user = models.ForeignKey(User)
+    academic_id = models.ForeignKey(AcademicCenter)
     amount = models.PositiveIntegerField()
     purpose = models.CharField(max_length=20, null=True)
-    channelId = models.CharField(max_length=20, null=True)
     status = models.PositiveIntegerField()
     description = models.CharField(max_length=20, null=True)
+    gstno = models.CharField(max_length=15,null=True)
+    created = models.DateTimeField(auto_now_add = True)
+    updated = models.DateTimeField(auto_now_add = True) 
+    
+    class Meta:
+      unique_together = ('academic_id',)

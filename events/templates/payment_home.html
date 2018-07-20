@@ -14,29 +14,57 @@
 {% block content %}
     <div class= 'filters row' >
 
-        <form action=""  method="post" class='form-horizontal' action="/creationhome">{%csrf_token%}
+        <form method="post" class='form-horizontal' action="/software-training/payment-status/">
             <div class="col-lg-6 col-md-2">
                 <div class="form-group">
                     <label class="col-sm-4 control-label">Institution Name</label>
-                    <label for="id_institution_name" class="col-sm-4 control-label disabled" name="institution_name" value="hello">{{accountexecutive.0.academic_id__institution_name}} </label>
+                    <label for="id_institution_name" class="col-sm-4 control-label disabled" name="id_institution_name" value="hello">{{accountexecutive.academic.institution_name}} </label>
                         </div>
                     
 
                     <div class="form-group">
                       <label class="col-sm-4 control-label">Institution Type</label>
-                      <label for="id_state" class="col-sm-4 control-label">{{accountexecutive.0.academic_id__institution_type_id}}</label>
+                      <label for="id_institution_type" class="col-sm-4 control-label">{{accountexecutive.academic.institution_type_id}}</label>
                     </div>
                 
                     <div class="form-group">
                       <label class="col-sm-4 control-label">Amount Payable</label>
-                      <label for="id_state" class="col-sm-4 control-label">{{random}}</label>
+                      <label for="id_amount" class="col-sm-4 control-label">{{amount}}</label>
                     </div>
+
+                    <div class="form-group ">
+                      <label class="col-sm-4 control-label">GSTN</label>
+                      <input type="checkbox" name="gst_enable" class="col-sm-4 "/> 
+                      <small>Not Mandatory</small>
+                    </div>
+
+                    <div class="form-group" id="gst_div">
+                      <label class="col-sm-4 control-label">GSTN</label>
+                      <input type="text" name="id_gstin" for="id_gstin" id="id_gstin" class="col-sm-4 "/> 
+                      <small>Not Mandatory</small>
+                    </div>
+
 
                 <div class="form-group">
                   <div class="col-sm-offset-4 col-sm-8">
-                     <input class="btn btn-success" type="submit" onsubmit="callNMIECT()" value="Proceed for payment" />
+                     <input class="btn btn-success" type="submit" value="Proceed for payment" />
                 </div>
             </div>
         </form>
 </div>
+{% endblock %}
+{% block jsblock %}
+<script type="text/javascript">
+$(document).ready(function(){
+  $("#gst_div").hide();
+});
+
+$("#id_gstin").change(function(){
+  if($(this).is(":checked")) {
+
+    alert('hello');
+      $("#gst_div").show();
+    }
+  });
+</script>
 {% endblock %}
