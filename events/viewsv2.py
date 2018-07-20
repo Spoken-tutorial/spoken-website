@@ -17,13 +17,15 @@ from events.forms import StudentBatchForm, TrainingRequestForm, \
     TrainingRequestEditForm, CourseMapForm, SingleTrainingForm, \
     OrganiserFeedbackForm,STWorkshopFeedbackForm,STWorkshopFeedbackFormPre,STWorkshopFeedbackFormPost,LearnDrupalFeedbackForm, LatexWorkshopFileUploadForm, UserForm, \
     SingleTrainingEditForm
+
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render, render_to_response
+from django.shortcuts import render, render_to_response, redirect
 from django.core.validators import validate_email
 from django.contrib.auth.models import Group, User
 from django.template import RequestContext
 from django.views.decorators.csrf import csrf_exempt
 from django.middleware import csrf
+from django.views.decorators.csrf import csrf_protect
 from django.http import JsonResponse
 from django.core.exceptions import PermissionDenied
 from creation.models import FossAvailableForWorkshop
@@ -2538,3 +2540,66 @@ def ReOpenTraining(request, pk):
   else:
     messages.error(request, 'Request to re-open training is not sent.Please try again.')
   return HttpResponseRedirect("/software-training/select-participants/")
+
+
+@login_required
+def payment_home(request):
+  #to get - College name & College Type based on login user
+  user = User.objects.get(id = request.user.id)
+  accountexecutive = Accountexecutive.objects.get(user_id = user,status=1)
+  amount = 0
+  print "request ",request.GET.get('id_gstin')
+  if accountexecutive.academic.institution_type_id == 5:
+      amount = 5000
+  else:
+      amount = 25000
+
+  context ={}
+  context['accountexecutive'] = accountexecutive
+  context['amount'] = amount
+  context['user'] = user.id
+  context['username'] = user
+  return render(request, 'payment_home.html', context)
+
+@csrf_exempt
+@login_required
+def payment_status(request):
+  context ={}
+  if request.method == 'POST':
+    print "Holla , I am in POST"
+    user = User.objects.get(id = request.user.id)
+    print "\n\n\n =================== :",request.POST['id_gstin']
+    print user.id
+    accountexecutive = Accountexecutive.objects.get(user_id = user,status=1)
+    amount = 0
+    if accountexecutive.academic.institution_type_id == 5:
+        amount = 5000
+    else:
+        amount = 25000
+    STdata = ''
+    STdata = str(user.id)+str(user)+str(amount)+"Subscription"+"SOLO"+"302c7a1c3f14c9847888f3e912b12a"
+    from events import display
+    s = display.value(str(STdata))
+    messages.success(request,s.hexdigest())
+    
+    data = {'userId':user.id,'name':user,'amount':amount,'purpose':'Subscription','channelId':'SOLO','random':s.hexdigest()}
+    
+
+    try:
+        paymentdetails = PaymentDetails()
+        paymentdetails.user = user
+        paymentdetails.amount = amount
+        paymentdetails.purpose = "Subscription"
+        paymentdetails.status = 0
+        paymentdetails.description = "Payment Initiated"
+        paymentdetails.academic_id = accountexecutive.academic
+        paymentdetails.gstno = request.POST['id_gstin']
+        paymentdetails.save()
+        
+        # paymentdetails.gstno = null
+    except Exception as e:
+        raise e
+    return render(request,'payment_status.html',data)
+  else:
+    return HttpResponseRedirect('/software-training')
+     

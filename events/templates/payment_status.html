@@ -1,0 +1,38 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load eventsdata %}
+{% load cmsdata %}
+{% load creationdata %}
+{% block title %} {{ model }} Statistics {% endblock %}
+{% block compresscssblock %}
+    <link rel="stylesheet" href="{% static 'spoken/css/jquery.fancybox.css' %}" type="text/css" media="screen" charset="utf-8" />
+    <link rel="stylesheet" href="{% static 'spoken/css/jquery.datetimepicker.css' %}" type="text/css" media="screen" charset="utf-8" />
+{% endblock %}
+{% block heading %} <i class="fa fa-list-ul"></i> {{ model }} Statistics {% endblock %}
+{% block search %}{% endblock %}
+{% block content %}
+<body onload="loading()">
+    <div class= 'filters row' >
+        <h3>You are getting redirected to external payment gateway!!</h3>
+        <form action="http://10.129.155.117:8084/esospg/initpayment" name="test" method="post" class='form-horizontal' >
+            <input type="hidden" name="userId" value="{{userId}}" />
+            <input type="hidden" name="name" value="{{name}}" />
+            <input type="hidden" name="amount" value="{{amount}}" />
+            <input type="hidden" name="purpose" value="{{purpose}}" />
+            <input type="hidden" name="channelId" value="{{channelId}}" />
+            <input type="hidden" name="random" value="{{random}}" />
+        </form>
+</div>
+</body>
+{% endblock %}
+{% block jsblock %}
+<script type="text/javascript">
+    function loading()
+    {
+        
+        window.document.test.submit();
+        return;
+    }
+</script>
+{% endblock %}
