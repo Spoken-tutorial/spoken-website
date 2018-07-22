@@ -2557,8 +2557,9 @@ def payment_home(request):
   context ={}
   context['accountexecutive'] = accountexecutive
   context['amount'] = amount
-  context['user'] = user.id
-  context['username'] = user
+  context['user_id'] = user.id
+  context['user'] = user
+  context['username'] = user.username
   return render(request, 'payment_home.html', context)
 
 @csrf_exempt
@@ -2566,10 +2567,7 @@ def payment_home(request):
 def payment_status(request):
   context ={}
   if request.method == 'POST':
-    print "Holla , I am in POST"
     user = User.objects.get(id = request.user.id)
-    print "\n\n\n =================== :",request.POST['id_gstin']
-    print user.id
     accountexecutive = Accountexecutive.objects.get(user_id = user,status=1)
     amount = 0
     if accountexecutive.academic.institution_type_id == 5:
@@ -2596,7 +2594,6 @@ def payment_status(request):
         paymentdetails.gstno = request.POST['id_gstin']
         paymentdetails.save()
         
-        # paymentdetails.gstno = null
     except Exception as e:
         raise e
     return render(request,'payment_status.html',data)

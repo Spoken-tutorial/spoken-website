@@ -3,68 +3,72 @@
 {% load static %}
 {% load eventsdata %}
 {% load cmsdata %}
-{% load creationdata %}
-{% block title %} {{ model }} Statistics {% endblock %}
-{% block compresscssblock %}
-    <link rel="stylesheet" href="{% static 'spoken/css/jquery.fancybox.css' %}" type="text/css" media="screen" charset="utf-8" />
-    <link rel="stylesheet" href="{% static 'spoken/css/jquery.datetimepicker.css' %}" type="text/css" media="screen" charset="utf-8" />
-{% endblock %}
-{% block heading %} <i class="fa fa-list-ul"></i> {{ model }} Statistics {% endblock %}
+{% block title %} pay here {% endblock %}
+{% block heading %} <i class="fa fa-list-ul"></i> Pay here{% endblock %}
 {% block search %}{% endblock %}
 {% block content %}
-    <div class= 'filters row' >
+<div class="row well col-md-offset-1 col-md-10">
 
-        <form method="post" class='form-horizontal' action="/software-training/payment-status/">
-            <div class="col-lg-6 col-md-2">
-                <div class="form-group">
-                    <label class="col-sm-4 control-label">Institution Name</label>
-                    <label for="id_institution_name" class="col-sm-4 control-label disabled" name="id_institution_name" value="hello">{{accountexecutive.academic.institution_name}} </label>
-                        </div>
-                    
+<form method="post" class='form-horizontal' action="/software-training/payment-status/">
+<div class=" ">
+<table class="table table-bordered" style="text-align: center;">
+  <tr class="info">
+    <td class=" col-md-4 "><h5><b>Institution Name</b></h5></td>
+    <td class=" col-md-4 "><h5><b>{{accountexecutive.academic.institution_name}}</b></h5></td>
+  </tr>
 
-                    <div class="form-group">
-                      <label class="col-sm-4 control-label">Institution Type</label>
-                      <label for="id_institution_type" class="col-sm-4 control-label">{{accountexecutive.academic.institution_type_id}}</label>
-                    </div>
-                
-                    <div class="form-group">
-                      <label class="col-sm-4 control-label">Amount Payable</label>
-                      <label for="id_amount" class="col-sm-4 control-label">{{amount}}</label>
-                    </div>
+  <tr class="info">
+    <td class=" col-md-4 "><h5>Institution Type</h5></td>
+    <td class=" col-md-4 "><h5>{{accountexecutive.academic.institution_type}}</h5></td>
+  </tr>
 
-                    <div class="form-group ">
-                      <label class="col-sm-4 control-label">GSTN</label>
-                      <input type="checkbox" name="gst_enable" class="col-sm-4 "/> 
-                      <small>Not Mandatory</small>
-                    </div>
+  <tr class="info">
+    <td class=" col-md-4 "><h5>Amount Payable</h5></td>
+    <td class=" col-md-4 "><h5>{{amount}}</h5></td>
+  </tr>
 
-                    <div class="form-group" id="gst_div">
-                      <label class="col-sm-4 control-label">GSTN</label>
-                      <input type="text" name="id_gstin" for="id_gstin" id="id_gstin" class="col-sm-4 "/> 
-                      <small>Not Mandatory</small>
-                    </div>
+  <tr class="info" id="gstcheckdiv">
+    <td class=" col-md-4 "><h5>Claim GST benefits?</h5></td>
+    <td class=" col-md-4 ">
+      <label class="radio-inline">
+        <input type="radio" name="optradio" value="Yes">Yes
+      </label>
+      <label class="radio-inline">
+        <input type="radio" name="optradio" value="No" checked>No
+      </label>
+    </td>
+  </tr>
 
+  <tr class="info" id="gst_div" hidden>
+    <td class=" col-md-4 "><h5>GSTIN</h5></td>
+    <td class=" col-md-4 ">
+      <input type="text" name="id_gstin" for="id_gstin"/> <br>
+      <small>Not a mandatory field</small>
+    </td>
+  </tr>
 
-                <div class="form-group">
-                  <div class="col-sm-offset-4 col-sm-8">
-                     <input class="btn btn-success" type="submit" value="Proceed for payment" />
-                </div>
-            </div>
-        </form>
+</table>
+
+<div class="col-md-offset-5 col-md-4">
+     <input class="btn btn-success" type="submit" value="Proceed for payment" />
+</div>
+
+</div>
+</form>
 </div>
 {% endblock %}
 {% block jsblock %}
 <script type="text/javascript">
-$(document).ready(function(){
-  $("#gst_div").hide();
-});
-
-$("#id_gstin").change(function(){
-  if($(this).is(":checked")) {
-
-    alert('hello');
-      $("#gst_div").show();
+$(document).ready(function () {
+  $('input[type=radio][name=optradio]').change(function() {
+    if (this.value == 'Yes') {
+        $("#gst_div").show();
+    }
+    else if (this.value == 'No') {
+        $("#gst_div").hide();
     }
   });
+});
+
 </script>
 {% endblock %}
