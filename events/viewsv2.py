@@ -2612,8 +2612,6 @@ def payment_success(request):
 
   context['user'] = user
   if request.method == 'POST':
-    
-
      # requestType    // I/R/J  (I - Immediate response,R- Reconciled & J - Transaction rejected)
     # userId;        // Id of the user
     # amount;        // amount which is to be paid
@@ -2648,7 +2646,7 @@ def payment_success(request):
       #save transaction details in db
       pd = PaymentDetails.objects.get(user = user.id, academic_id = accountexecutive.academic.id)
       print pd.id
-      
+
       try:
         transactiondetails = PaymentTransactionDetails()
         transactiondetails.paymentdetail_id  =  pd.id
@@ -2663,11 +2661,16 @@ def payment_success(request):
         transactiondetails.msg  =  msg
         transactiondetails.save()
       except Exception as e:
-        messages.error(request, 'This college has aready initiated the payment.')
+        messages.error(request, 'This college has aready initiated the payment.....')
         return HttpResponseRedirect('/software-training/payment-home')
 
 
-      pd.status = 1
+      if status == 'S':
+        pd.status = 1
+        pd.description = 'Payment successfull'
+      elif status == 'F':
+        pd.status = 2
+        pd.description = 'Payment fail'
       pd.save()
 
       print transId      
