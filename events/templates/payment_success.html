@@ -1,0 +1,21 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load eventsdata %}
+{% load cmsdata %}
+{% load creationdata %}
+{% block search %}{% endblock %}
+{% block content %}
+<body >
+    <div class= 'filters row' style="text-align: center;">
+        <h2>Thank you {{user.first_name}} for subscription</h2>
+        <img src="{% static 'spoken/images/thankyou.png' %}" ><br>
+        <a href="/">Print Receipt for Transaction Id : {{transId}}</a>
+</div>
+</body>
+{% endblock %}
+{% block jsblock %}
+<script type="text/javascript">
+    
+</script>
+{% endblock %}

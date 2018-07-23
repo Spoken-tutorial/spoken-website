@@ -7,7 +7,7 @@
 {% block search %}{% endblock %}
 {% block content %}
 <body onload="loading()">
-    <div class= 'filters row' >
+    <div class= 'filters row' style="text-align: center;">
         <h3>You are getting redirected to external payment gateway!!</h3>
         <form action="http://10.129.155.117:8084/esospg/initpayment" name="test" method="post" class='form-horizontal' >
             <input type="hidden" name="userId" value="{{userId}}" />
@@ -23,8 +23,7 @@
 {% block jsblock %}
 <script type="text/javascript">
     function loading()
-    {
-        
+    {        
         window.document.test.submit();
         return;
     }

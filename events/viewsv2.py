@@ -4,6 +4,7 @@ from datetime import timedelta
 import re
 from django.conf import settings
 
+from config import CHANNEL_KEY
 # Create your views here.
 from django.views.generic import View, ListView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
@@ -13,6 +14,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
 from django.utils.decorators import method_decorator
 from events.decorators import group_required
+from events import display
 from events.forms import StudentBatchForm, TrainingRequestForm, \
     TrainingRequestEditForm, CourseMapForm, SingleTrainingForm, \
     OrganiserFeedbackForm,STWorkshopFeedbackForm,STWorkshopFeedbackFormPre,STWorkshopFeedbackFormPost,LearnDrupalFeedbackForm, LatexWorkshopFileUploadForm, UserForm, \
@@ -2548,7 +2550,6 @@ def payment_home(request):
   user = User.objects.get(id = request.user.id)
   accountexecutive = Accountexecutive.objects.get(user_id = user,status=1)
   amount = 0
-  print "request ",request.GET.get('id_gstin')
   if accountexecutive.academic.institution_type_id == 5:
       amount = 5000
   else:
@@ -2570,15 +2571,15 @@ def payment_status(request):
     user = User.objects.get(id = request.user.id)
     accountexecutive = Accountexecutive.objects.get(user_id = user,status=1)
     amount = 0
+    
     if accountexecutive.academic.institution_type_id == 5:
         amount = 5000
     else:
         amount = 25000
+    
     STdata = ''
-    STdata = str(user.id)+str(user)+str(amount)+"Subscription"+"SOLO"+"302c7a1c3f14c9847888f3e912b12a"
-    from events import display
+    STdata = str(user.id)+str(user)+str(amount)+"Subscription"+"SOLO"+CHANNEL_KEY
     s = display.value(str(STdata))
-    messages.success(request,s.hexdigest())
     
     data = {'userId':user.id,'name':user,'amount':amount,'purpose':'Subscription','channelId':'SOLO','random':s.hexdigest()}
     
@@ -2595,8 +2596,91 @@ def payment_status(request):
         paymentdetails.save()
         
     except Exception as e:
-        raise e
+        messages.error(request, 'This college has aready initiated the payment.')
+        return HttpResponseRedirect('/software-training/payment-home')
+    
     return render(request,'payment_status.html',data)
   else:
     return HttpResponseRedirect('/software-training')
+
+@csrf_exempt
+@login_required
+def payment_success(request):
+  context = {}
+  user = User.objects.get(id = request.user.id) 
+  accountexecutive = Accountexecutive.objects.get(user_id = user,status=1)
+
+  context['user'] = user
+  if request.method == 'POST':
+    
+
+     # requestType    // I/R/J  (I - Immediate response,R- Reconciled & J - Transaction rejected)
+    # userId;        // Id of the user
+    # amount;        // amount which is to be paid
+    # reqId;         // Unique request id of the transaction
+    # transId;       // Unique transaction id of IITB Payment gateway
+    # refNo;         // Bank transaction reference number
+    # provId;        // Payment method like Credit Card/Net Banking etc..
+    # status;        // S/F (Status of the transaction)
+    # msg;           // Detailed transaction message
+    # random;        // Hash string
+
+
+    requestType = request.POST.get('requestType')
+    userId = request.POST.get('userId')
+    amount = request.POST.get('amount')
+    reqId = request.POST.get('reqId')
+    transId = request.POST.get('transId')
+    refNo = request.POST.get('refNo')
+    provId = request.POST.get('provId')
+    status = request.POST.get('status')
+    msg = request.POST.get('msg')
+    random = request.POST.get('random') 
+
+   
+    STresponsedata = ''
+    STresponsedata = str(user.id)+transId+refNo+amount+status+msg+CHANNEL_KEY
+    s = display.value(str(STresponsedata))
+    STresponsedata_hexa = s.hexdigest()
+    print random,":-----------:",STresponsedata_hexa
+
+    if STresponsedata_hexa == random:
+      #save transaction details in db
+      pd = PaymentDetails.objects.get(user = user.id, academic_id = accountexecutive.academic.id)
+      print pd.id
+      
+      try:
+        transactiondetails = PaymentTransactionDetails()
+        transactiondetails.paymentdetail_id  =  pd.id
+        transactiondetails.requestType  =  requestType
+        transactiondetails.userId_id  =  userId
+        transactiondetails.amount  =  amount
+        transactiondetails.reqId  = reqId 
+        transactiondetails.transId  = transId 
+        transactiondetails.refNo  =  refNo
+        transactiondetails.provId  =  provId
+        transactiondetails.status  =  status
+        transactiondetails.msg  =  msg
+        transactiondetails.save()
+      except Exception as e:
+        messages.error(request, 'This college has aready initiated the payment.')
+        return HttpResponseRedirect('/software-training/payment-home')
+
+
+      pd.status = 1
+      pd.save()
+
+      print transId      
+      context['transId'] = transId
+      return render(request,'payment_success.html',context)
+    else:
+      messages.error(request, 'Invalid Transaction')
+      return HttpResponseRedirect('/software-training')
+  else:
+    # return HttpResponseRedirect('/software-training')
+    return render(request,'payment_success.html',context)
+
+
+
+
      
