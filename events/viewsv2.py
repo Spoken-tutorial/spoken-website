@@ -2592,10 +2592,22 @@ def payment_status(request):
         paymentdetails.status = 0
         paymentdetails.description = "Payment Initiated"
         paymentdetails.academic_id = accountexecutive.academic
+        paymentdetails.academic_year = 2018
         paymentdetails.gstno = request.POST['id_gstin']
         paymentdetails.save()
         
     except Exception as e:
+        try:
+          paymentdetails = PaymentDetails.objects.get(user_id = user, academic_id = accountexecutive.academic.id)
+        except:
+          return HttpResponseRedirect('/software-training/payment-home')
+
+        if paymentdetails.status == 2:
+          return render(request,'payment_status.html',data)
+        if paymentdetails.status == 1:
+          messages.error(request, 'This college has aready completed the payment.')
+          return HttpResponseRedirect('/software-training/payment-home')
+
         messages.error(request, 'This college has aready initiated the payment.')
         return HttpResponseRedirect('/software-training/payment-home')
     

@@ -1646,6 +1646,7 @@ class MumbaiStudents(models.Model):
 class PaymentDetails(models.Model):
     user = models.ForeignKey(User)
     academic_id = models.ForeignKey(AcademicCenter)
+    academic_year = models.PositiveIntegerField()
     amount = models.PositiveIntegerField()
     purpose = models.CharField(max_length=20, null=True)
     status = models.PositiveIntegerField()
@@ -1655,7 +1656,7 @@ class PaymentDetails(models.Model):
     updated = models.DateTimeField(auto_now_add = True) 
     
     class Meta:
-      unique_together = ('academic_id',)
+      unique_together = ('academic_id','academic_year',)
 
 class PaymentTransactionDetails(models.Model):
     paymentdetail = models.ForeignKey(PaymentDetails)
