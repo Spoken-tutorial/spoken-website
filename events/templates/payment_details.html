@@ -1,0 +1,155 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load eventsdata %}
+{% load cmsdata %}
+{% block title %} pay here {% endblock %}
+{% block heading %} <i class="fa fa-list-ul"></i> Pay here{% endblock %}
+{% block search %}{% endblock %}
+{% block content %}
+
+
+<div class="container mt-3">
+  <h2>{{college}}</h2>
+  <br>
+  <!-- Nav tabs -->
+    <ul class="nav nav-tabs" >
+        <li{% if tabid == 'completed' %} class="active"{% endif %} >
+            <a href="/software-training/payment-details/completed">
+                <i class="fa fa-list-ul"></i> Completed
+            </a>
+        </li>
+        <li{% if tabid == 'failed' %} class="active"{% endif %} >
+            <a href="/software-training/payment-details/failed">
+                <i class="fa fa-list-ul"></i> Failed
+            </a>
+        </li>
+        <li{% if tabid == 'ongoing' %} class="active"{% endif %}>
+            <a href="/software-training/payment-details/ongoing">
+                <i class="fa fa-list-ul"></i> Ongoing
+            </a>
+        </li>
+    </ul>
+
+  <div class="tab-content">
+                </table>
+                <div class="tab-pane{% if tabid == 'completed' %} active{% endif %} table-responsive" id="completed">
+                  <table class="table table-bordered table-hover">
+                  {% if completed == 0 %}      
+                  <tr>
+                      <td colspan="6" class="col-center">List is empty</td>
+                  </tr>
+                </table>
+                 {% else %}
+                    
+                  <tr class="active">
+                      <th>User</th>
+                     <th>Academic Year</th>
+                      <th>Completion Date &amp; Time</th>
+                      <th >Amount</th>
+                      <th>Payed through</th>
+                  </tr>
+        
+                    {% for detail in paymentdetails %}
+                    {% if detail.status == 1 %}
+                      
+                      <tr>
+                        <td><a href="/accounts/view-profile/{{ detail.user }}" target="_blank">{{ detail.user }}</a></td>
+                        <td>{{ detail.academic_year }}</td>
+                        <td>{{ detail.created }}</td>
+                        <td class="col-center">{{detail.amount}}</td>
+                        <td>{{provId}}</td>
+                      </tr>
+                      
+                      {% endif %}
+                    {% endfor %}
+                    </table>
+                    {% endif %} 
+                  </div>
+
+                    
+                <div class="tab-pane{% if tabid == 'failed' %} active{% endif %} table-responsive" id="failed">
+<table class="table table-bordered table-hover">
+                  {% if failed == 0 %}      
+                  <tr>
+                      <td colspan="6" class="col-center">List is empty</td>
+                  </tr>
+                </table>
+                 {% else %}
+                    
+                  <tr class="active">
+                      <th>User</th>
+                      <th>Academic Year</th>
+                      <th>Failed Date &amp; Time</th>
+                      <th >Status</th>
+                  </tr>
+        
+                    {% for detail in paymentdetails %}
+                    {% if detail.status == 2 %}
+                      
+                      <tr>
+                        <td><a href="/accounts/view-profile/{{ detail.user }}" target="_blank">{{ detail.user }}</a></td>
+                        <td>{{ detail.academic_year }}</td>
+                        <td>{{ detail.created }}</td>
+                        <td class="col-center">{{detail.status}}</td>
+                      </tr>
+                      
+                      {% endif %}
+                    {% endfor %}
+                    </table>
+                {% endif %} 
+                  </div>
+                   
+                <div class="tab-pane{% if tabid == 'ongoing' %} active{% endif %} table-responsive" id="ongoing">
+                  <table class="table table-bordered table-hover">
+                  {% if ongoing == 0 %}      
+                  <tr>
+                      <td colspan="6" class="col-center">List is empty</td>
+                  </tr>
+                </table>
+                 {% else %}
+                    
+                  <tr class="active">
+                      <th>User</th>
+                     <th>Academic Year</th>
+                      <th>Commenced Date &amp; Time</th>
+                      <th >Status</th>
+                  </tr>
+        
+                    {% for detail in paymentdetails %}
+                    {% if detail.status == 0 %}
+                      
+                      <tr>
+                        <td><a href="/accounts/view-profile/{{ detail.user }}" target="_blank">{{ detail.user }}</a></td>
+                       <td>{{ detail.academic_year }}</td>
+                        <td>{{ detail.created }}</td>
+                        <td class="col-center">{{detail.status}}</td>
+                      </tr>
+                      {% endif %}
+                    {% endfor %}
+                    </table>
+                {% endif %} 
+                  </div>
+                </div>
+
+
+
+
+
+
+{% endblock %}
+{% block jsblock %}
+<script type="text/javascript">
+$(document).ready(function () {
+  $('input[type=radio][name=optradio]').change(function() {
+    if (this.value == 'Yes') {
+        $("#gst_div").show();
+    }
+    else if (this.value == 'No') {
+        $("#gst_div").hide();
+    }
+  });
+});
+
+</script>
+{% endblock %}

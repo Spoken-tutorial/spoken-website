@@ -2709,6 +2709,22 @@ def payment_success(request):
   else:
     return HttpResponseRedirect('/software-training')
 
+def payment_details(request,choice):
+  academic_id = Accountexecutive.objects.filter(user = request.user).values('academic_id','academic_id__institution_name')
+  paymentdetails = PaymentDetails.objects.filter(academic_id=academic_id[0]['academic_id'])
+  paymenttransactionetails = PaymentTransactionDetails.objects.filter(paymentdetail_id = paymentdetails)
+  user = User.objects.get(id = request.user.id)
+  print "Count : ",paymentdetails.filter(status=1).count(),paymentdetails.filter(status=0).count(),paymentdetails.filter(status=2).count()
+  print "paymenttransactionetails : ",paymenttransactionetails.values('status','provId','amount')
+  context ={}
+  context['user'] = user
+  context['completed'] = paymentdetails.filter(status=1).count()
+  context['failed'] = paymentdetails.filter(status=2).count()
+  context['ongoing'] = paymentdetails.filter(status=0).count()
+  context['paymentdetails'] = paymentdetails
+  context['tabid'] = choice
+  context['college'] = academic_id[0]['academic_id__institution_name']
+  return render(request,'payment_details.html',context)     
 
 
 

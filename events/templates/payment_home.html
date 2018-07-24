@@ -47,18 +47,57 @@
     </td>
   </tr>
 
+<tr >
+  <td><input type="checkbox" class="checkbox" />
+    <button type="button" class="btn btn-info" data-toggle="modal" data-target="#myModal">Terms  Conditions</button>
+  <br><small >Click to agree</small></td>
+</tr>
 </table>
 
-<div class="col-md-offset-5 col-md-4">
+<div class="col-md-offset-5 col-md-4" id="pay_button">
      <input class="btn btn-success" type="submit" value="Proceed for payment" />
 </div>
-
 </form>
 </div>
+
+
+<div class="container">
+  
+
+  <!-- Modal -->
+  <div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog">
+    
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Terms & Conditions</h4>
+        </div>
+        <div class="modal-body">
+          <p>
+            <ul>
+            <li>No money will be refunded</li>  
+            <li>This is an annual subscription. Hence the subscription will end on 31st July '19</li>
+            <li>Any no of students can train in a college</li>  
+          </ul>
+        </p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+  
+</div>
+
 {% endblock %}
 {% block jsblock %}
 <script type="text/javascript">
 $(document).ready(function () {
+  document.getElementById("pay_button").style.display='none';
   $('input[type=radio][name=optradio]').change(function() {
     if (this.value == 'Yes') {
         $("#gst_div").show();
@@ -67,7 +106,19 @@ $(document).ready(function () {
         $("#gst_div").hide();
     }
   });
+
+
+  $(".checkbox").change(function() {
+    if(this.checked) {
+        document.getElementById("pay_button").style.display='block';
+    }
+    else{
+      document.getElementById("pay_button").style.display='none';
+    }
 });
 
+});
+
+  
 </script>
 {% endblock %}

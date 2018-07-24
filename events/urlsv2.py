@@ -306,4 +306,10 @@ urlpatterns = [
       name="payment_success"
     ),
 
+    url(
+      r'^payment-details/(?P<choice>\w+)/$', 
+      'events.viewsv2.payment_details', 
+      name="payment_details"
+    ),
+
 ]
