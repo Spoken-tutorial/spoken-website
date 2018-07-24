@@ -26,10 +26,11 @@ class Migration(migrations.Migration):
                 ('updated', models.DateTimeField(auto_now_add=True)),
                 ('academic_id', models.ForeignKey(to='events.AcademicCenter')),
                 ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
+                ('academic_year', models.PositiveIntegerField()),
             ],
         ),
         migrations.AlterUniqueTogether(
             name='paymentdetails',
-            unique_together=set([('academic_id',)]),
+            unique_together=set([('academic_id','academic_year')]),
         ),
     ]

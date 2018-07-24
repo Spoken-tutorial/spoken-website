@@ -50,7 +50,7 @@ from PyPDF2 import PdfFileWriter, PdfFileReader
 from StringIO import StringIO
 
 # import helpers
-from events.views import is_organiser, is_invigilator, is_resource_person, is_administrator
+from events.views import is_organiser, is_invigilator, is_resource_person, is_administrator, is_accountexecutive
 from events.helpers import get_prev_semester_duration
 class JSONResponseMixin(object):
   """
@@ -2548,7 +2548,12 @@ def ReOpenTraining(request, pk):
 def payment_home(request):
   #to get - College name & College Type based on login user
   user = User.objects.get(id = request.user.id)
-  accountexecutive = Accountexecutive.objects.get(user_id = user,status=1)
+  try:
+    accountexecutive = Accountexecutive.objects.get(user_id = user,status=1)
+  except:
+    messages.error(request, 'Permission denied. You are not an Account Executive.')
+    return HttpResponseRedirect('/software-training')
+  
   amount = 0
   if accountexecutive.academic.institution_type_id == 5:
       amount = 5000
@@ -2567,9 +2572,15 @@ def payment_home(request):
 @login_required
 def payment_status(request):
   context ={}
+  academic_year = 2018
+
   if request.method == 'POST':
     user = User.objects.get(id = request.user.id)
-    accountexecutive = Accountexecutive.objects.get(user_id = user,status=1)
+    try:
+      accountexecutive = Accountexecutive.objects.get(user_id = user,status=1)
+    except:
+      messages.error(request, 'Permission denied. You are not an Account Executive.')
+      return HttpResponseRedirect('/software-training')
     amount = 0
     
     if accountexecutive.academic.institution_type_id == 5:
@@ -2578,10 +2589,11 @@ def payment_status(request):
         amount = 25000
     
     STdata = ''
-    STdata = str(user.id)+str(user)+str(amount)+"Subscription"+"SOLO"+CHANNEL_KEY
+    STdata = str(user.id)+str(user)+str(amount)+"Subscription"+"SOLOSTW"+CHANNEL_KEY
+    print STdata
     s = display.value(str(STdata))
     
-    data = {'userId':user.id,'name':user,'amount':amount,'purpose':'Subscription','channelId':'SOLO','random':s.hexdigest()}
+    data = {'userId':user.id,'name':user,'amount':amount,'purpose':'Subscription','channelId':'SOLOSTW','random':s.hexdigest()}
     
 
     try:
@@ -2592,13 +2604,13 @@ def payment_status(request):
         paymentdetails.status = 0
         paymentdetails.description = "Payment Initiated"
         paymentdetails.academic_id = accountexecutive.academic
-        paymentdetails.academic_year = 2018
+        paymentdetails.academic_year = academic_year
         paymentdetails.gstno = request.POST['id_gstin']
         paymentdetails.save()
         
     except Exception as e:
         try:
-          paymentdetails = PaymentDetails.objects.get(user_id = user, academic_id = accountexecutive.academic.id)
+          paymentdetails = PaymentDetails.objects.get(academic_id = accountexecutive.academic.id, academic_year = academic_year)
         except:
           return HttpResponseRedirect('/software-training/payment-home')
 
@@ -2612,6 +2624,7 @@ def payment_status(request):
         return HttpResponseRedirect('/software-training/payment-home')
     
     return render(request,'payment_status.html',data)
+  #not post
   else:
     return HttpResponseRedirect('/software-training')
 
@@ -2620,7 +2633,11 @@ def payment_status(request):
 def payment_success(request):
   context = {}
   user = User.objects.get(id = request.user.id) 
-  accountexecutive = Accountexecutive.objects.get(user_id = user,status=1)
+  try:
+    accountexecutive = Accountexecutive.objects.get(user_id = user,status=1)
+  except:
+    messages.error(request, 'Permission denied. You are not an Account Executive.')
+    return HttpResponseRedirect('/software-training')
 
   context['user'] = user
   if request.method == 'POST':
@@ -2652,12 +2669,11 @@ def payment_success(request):
     STresponsedata = str(user.id)+transId+refNo+amount+status+msg+CHANNEL_KEY
     s = display.value(str(STresponsedata))
     STresponsedata_hexa = s.hexdigest()
-    print random,":-----------:",STresponsedata_hexa
 
     if STresponsedata_hexa == random:
       #save transaction details in db
       pd = PaymentDetails.objects.get(user = user.id, academic_id = accountexecutive.academic.id)
-      print pd.id
+      print 'pd id',pd.id
 
       try:
         transactiondetails = PaymentTransactionDetails()
@@ -2685,15 +2701,13 @@ def payment_success(request):
         pd.description = 'Payment fail'
       pd.save()
 
-      print transId      
       context['transId'] = transId
       return render(request,'payment_success.html',context)
     else:
       messages.error(request, 'Invalid Transaction')
       return HttpResponseRedirect('/software-training')
   else:
-    # return HttpResponseRedirect('/software-training')
-    return render(request,'payment_success.html',context)
+    return HttpResponseRedirect('/software-training')
 
 
 
