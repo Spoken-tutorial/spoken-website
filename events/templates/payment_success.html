@@ -8,9 +8,26 @@
 {% block content %}
 <body >
     <div class= 'filters row' style="text-align: center;">
-        <h2>Thank you {{user.first_name}} for subscription</h2>
+        <h2>Thank you {{user.first_name}}</h2><br>
+        <h2>{{status}}</h2><br>
+        <h2>{{msg}}</h2>
+
         <img src="{% static 'spoken/images/thankyou.png' %}" ><br>
-        <a href="/">Print Receipt for Transaction Id : {{transId}}</a>
+        <table class="table" style="text-align: center;">
+            <tr class="info">
+                <td class=" col-md-4 "><h5><b>Transaction Id :</b></h5></td>
+                <td class=" col-md-4 "><h5><b>{{transId}}</b></h5></td>
+            </tr>
+            <tr class="info">
+                <td class=" col-md-4 "><h5><b>Reference No. :</b></h5></td>
+                <td class=" col-md-4 "><h5><b>{{refNo}}</b></h5></td>
+            </tr>
+            <tr class="info">
+                <td class=" col-md-4 "><h5><b>Status message :</b></h5></td>
+                <td class=" col-md-4 "><h5><b>{{msg}}</b></h5></td>
+            </tr>
+
+        </table>
 </div>
 </body>
 {% endblock %}

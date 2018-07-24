@@ -108,7 +108,7 @@
                         </div>
                     </div>
                 {% endif %}
-                {% if not user|is_organiser or not user|is_invigilator %}
+                {% if not user|is_organiser or not user|is_invigilator or not user|is_accountexecutive %}
                     <div class="panel panel-primary">
                         <div class="panel-heading panel-heading-notif">Join with Us</div>
                         <div class="panel-body">

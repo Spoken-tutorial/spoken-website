@@ -2554,11 +2554,11 @@ def payment_home(request):
     messages.error(request, 'Permission denied. You are not an Account Executive.')
     return HttpResponseRedirect('/software-training')
   
-  amount = 0
+  amount = "0"
   if accountexecutive.academic.institution_type_id == 5:
-      amount = 5000
+      amount = "1"
   else:
-      amount = 25000
+      amount = "1"
 
   context ={}
   context['accountexecutive'] = accountexecutive
@@ -2581,12 +2581,12 @@ def payment_status(request):
     except:
       messages.error(request, 'Permission denied. You are not an Account Executive.')
       return HttpResponseRedirect('/software-training')
-    amount = 0
+    amount = "0"
     
     if accountexecutive.academic.institution_type_id == 5:
-        amount = 5000
+        amount = "1"
     else:
-        amount = 25000
+        amount = "1"
     
     STdata = ''
     STdata = str(user.id)+str(user)+str(amount)+"Subscription"+"SOLOSTW"+CHANNEL_KEY
@@ -2702,6 +2702,9 @@ def payment_success(request):
       pd.save()
 
       context['transId'] = transId
+      context['refNo'] = refNo
+      context['msg'] = msg
+      context['status'] = status
       return render(request,'payment_success.html',context)
     else:
       messages.error(request, 'Invalid Transaction')
