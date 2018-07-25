@@ -57,8 +57,8 @@
   </tr>
 </table>
 
-<div class="col-md-offset-5 col-md-4" id="pay_button">
-     <input class="btn btn-success" type="submit" value="Proceed for payment" />
+<div class="col-md-offset-5 col-md-4">
+     <input class="btn btn-success"  id="pay_button" type="submit" value="Proceed for payment" disabled />
 </div>
 </form>
 </div>
@@ -100,7 +100,6 @@
 {% block jsblock %}
 <script type="text/javascript">
 $(document).ready(function () {
-  document.getElementById("pay_button").style.display='none';
   $('input[type=radio][name=optradio]').change(function() {
     if (this.value == 'Yes') {
         $("#gst_div").show();
@@ -113,10 +112,10 @@ $(document).ready(function () {
 
   $("#agreement").change(function() {
     if(this.checked) {
-        document.getElementById("pay_button").style.display='block';
+      document.getElementById("pay_button").disabled = false;        
     }
     else{
-      document.getElementById("pay_button").style.display='none';
+      document.getElementById("pay_button").disabled = true;
     }
 });
 

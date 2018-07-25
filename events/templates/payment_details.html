@@ -3,7 +3,7 @@
 {% load static %}
 {% load eventsdata %}
 {% load cmsdata %}
-{% block title %} pay here {% endblock %}
+{% block title %} Payment Details {% endblock %}
 {% block heading %} <i class="fa fa-list-ul"></i> Transaction Details{% endblock %}
 {% block search %}{% endblock %}
 {% block content %}
@@ -56,7 +56,7 @@
                     {% if detail.status == 'S' %}
                       
                       <tr>
-                        <td><a href="/accounts/view-profile/{{ detail.user }}" target="_blank">{{ user }}</a></td>
+                        <td><a href="/accounts/view-profile/{{ user }}" target="_blank">{{ user }}</a></td>
                         <td>{{ detail.paymentdetail_id__academic_year }}</td>
                         <td>{{ detail.created }}</td>
                         <td>{{detail.paymentdetail_id__amount}}</td>
@@ -96,7 +96,7 @@
                     {% if detail.status == 'F' %}
                       
                       <tr>
-                        <td><a href="/accounts/view-profile/{{ detail.user }}" target="_blank">{{ user }}</a></td>
+                        <td><a href="/accounts/view-profile/{{ user }}" target="_blank">{{ user }}</a></td>
                         <td>{{ detail.paymentdetail_id__academic_year }}</td>
                         <td>{{ detail.created }}</td>
                         <td>{{detail.paymentdetail_id__amount}}</td>
@@ -145,7 +145,7 @@
                     {% if detail.status != 'S' and detail.status != 'F'   %}
                       
                        <tr>
-                        <td><a href="/accounts/view-profile/{{ detail.user }}" target="_blank">{{ user }}</a></td>
+                        <td><a href="/accounts/view-profile/{{user}}/" target="_blank">{{ user }}</a></td>
                         <td>{{ detail.paymentdetail_id__academic_year }}</td>
                         <td>{{ detail.created }}</td>
                         <td>{{detail.paymentdetail_id__amount}}</td>
