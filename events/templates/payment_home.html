@@ -47,11 +47,14 @@
     </td>
   </tr>
 
-<tr >
-  <td class="col-md-4"><input type="checkbox" class="checkbox" />
-    <button type="button" class="btn btn-info class="col-md-4" data-toggle="modal" data-target="#myModal">Terms  Conditions</button>
-  <br><small class=" col-md-3 ">Click to agree</small></td>
-</tr>
+  <tr class="default">
+    <td class="col-md-4">
+      <h5><input type="checkbox" id="agreement"/><span> Click to agree</span></h5>
+    </td>
+    <td class="col-md-4 ">
+      <button type="button" class="btn btn-info col-md-4 col-md-offset-4" data-toggle="modal" data-target="#myModal">Terms & Conditions</button>
+    </td>
+  </tr>
 </table>
 
 <div class="col-md-offset-5 col-md-4" id="pay_button">
@@ -79,7 +82,7 @@
             <ul>
             <li>No money will be refunded</li>  
             <li>This is an annual subscription. Hence the subscription will end on 31st July '19</li>
-            <li>Any no of students can train in a college</li>  
+            <li>Any number of students can train in a college</li>  
           </ul>
         </p>
         </div>
@@ -108,7 +111,7 @@ $(document).ready(function () {
   });
 
 
-  $(".checkbox").change(function() {
+  $("#agreement").change(function() {
     if(this.checked) {
         document.getElementById("pay_button").style.display='block';
     }
