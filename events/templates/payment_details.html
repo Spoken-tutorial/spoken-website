@@ -141,17 +141,17 @@
                   </tr>
         
         
-                    {% for detail in paymentdetails %}
-                    {% if detail.status != 'S' and detail.status != 'F'   %}
+                    {% for detail in ongoing_details %}
+                    {% if detail.status == 0   %}
                       
                        <tr>
                         <td><a href="/accounts/view-profile/{{user}}/" target="_blank">{{ user }}</a></td>
-                        <td>{{ detail.paymentdetail_id__academic_year }}</td>
+                        <td>{{ detail.academic_year }}</td>
                         <td>{{ detail.created }}</td>
-                        <td>{{detail.paymentdetail_id__amount}}</td>
-                        <td>{{detail.transId}}</td>
-                        <td><i>Transaction Ongoing</i></td>
-                        <td>{{detail.paymentdetail_id__description}}</td>
+                        <td>{{detail.amount}}</td>
+                        <td>Transaction Ongoing</td>
+                        <td>Not Generated</td>
+                        <td>{{detail.description}}</td>
                       </tr>
 
                       {% endif %}

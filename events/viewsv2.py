@@ -2722,9 +2722,10 @@ def payment_details(request,choice):
   context['user'] = user
   context['completed'] = paymenttransactionetails.filter(status='S').count()
   context['failed'] = paymenttransactionetails.filter(status='F').count()
-  context['ongoing'] = paymenttransactionetails.filter(status=0).count()
+  context['ongoing'] = paymentdetails.filter(status=0).count()
   context['paymentdetails'] = paymenttransactionetails.values('msg','refNo','transId','provId','status',
     'created','paymentdetail_id__amount','paymentdetail_id__academic_year','paymentdetail_id__description')
+  context['ongoing_details'] = paymentdetails
   context['tabid'] = choice
   context['college'] = academic_id[0]['academic_id__institution_name']
   return render(request,'payment_details.html',context)     
