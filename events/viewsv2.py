@@ -2717,14 +2717,14 @@ def payment_details(request,choice):
   paymentdetails = PaymentDetails.objects.filter(academic_id=academic_id[0]['academic_id'])
   paymenttransactionetails = PaymentTransactionDetails.objects.filter(paymentdetail_id = paymentdetails)
   user = User.objects.get(id = request.user.id)
-  print "Count : ",paymentdetails.filter(status=1).count(),paymentdetails.filter(status=0).count(),paymentdetails.filter(status=2).count()
-  print "paymenttransactionetails : ",paymenttransactionetails.values('status','provId','amount')
+  print "paymenttransactionetails : ",paymenttransactionetails.filter(status='S').count()
   context ={}
   context['user'] = user
-  context['completed'] = paymentdetails.filter(status=1).count()
-  context['failed'] = paymentdetails.filter(status=2).count()
-  context['ongoing'] = paymentdetails.filter(status=0).count()
-  context['paymentdetails'] = paymentdetails
+  context['completed'] = paymenttransactionetails.filter(status='S').count()
+  context['failed'] = paymenttransactionetails.filter(status='F').count()
+  context['ongoing'] = paymenttransactionetails.filter(status=0).count()
+  context['paymentdetails'] = paymenttransactionetails.values('msg','refNo','transId','provId','status',
+    'created','paymentdetail_id__amount','paymentdetail_id__academic_year','paymentdetail_id__description')
   context['tabid'] = choice
   context['college'] = academic_id[0]['academic_id__institution_name']
   return render(request,'payment_details.html',context)     
