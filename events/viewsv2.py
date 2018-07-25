@@ -2689,8 +2689,8 @@ def payment_success(request):
         transactiondetails.msg  =  msg
         transactiondetails.save()
       except Exception as e:
-        messages.error(request, 'This college has aready initiated the payment.....')
-        return HttpResponseRedirect('/software-training/payment-home')
+        messages.error(request, 'Something went wrong. Can not collect your transaction details. Kindly contact your state resource person.')
+        return HttpResponseRedirect('/software-training')
 
 
       if status == 'S':
