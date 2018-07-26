@@ -24,4 +24,6 @@ urlpatterns = patterns('',  # noqa
         name="academic_center_view"),
     url(r'^learners/$', 'statistics.views.learners', name="learners"),
     url(r'^pmmmnmtt/fdp/$', 'statistics.views.fdp_training', name="fdp_training"),
+    url(r'^payment/$','statistics.views.payment_init',name="payment"),
+    url(r'^payment/ajax-city/$','statistics.views.ajax_city',name="ajax_city")
 )
