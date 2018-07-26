@@ -1,0 +1,142 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load eventsdata %}
+{% load cmsdata %}
+{% load creationdata %}
+{% block title %} {{ model }} Academic Transactions {% endblock %}
+{% block compresscssblock %}
+    <link rel="stylesheet" href="{% static 'spoken/css/jquery.fancybox.css' %}" type="text/css" media="screen" charset="utf-8" />
+    <link rel="stylesheet" href="{% static 'spoken/css/jquery.datetimepicker.css' %}" type="text/css" media="screen" charset="utf-8" />
+{% endblock %}
+{% block heading %} <i class="fa fa-list-ul"></i> {{ model }} Academic Transactions {% endblock %}
+{% block search %}{% endblock %}
+{% block content %}
+    <div class= 'filters row' >
+      {%csrf_token%}
+        <form action=""  method="get" class='form-horizontal'>
+            <div class="col-md-4 col-md-4 col-sm-4">
+                <div class="form-group">
+                    <label for="id_state" class="col-sm-4 control-label">State</label>
+                    <div class="col-sm-8">
+                      <select class="form-control state" name="state" id="state" onchange="get_instituition_details()">
+                        <option id="0">---------</option>
+                        {%for a_state in state%}
+                        <option id="{{a_state.id}}" >{{a_state.name}}</option>
+                        {% endfor %}
+                    </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="id_city" class="col-sm-4 control-label">City/Town</label>
+                    <div class="col-sm-8">
+                        <select class="form-control city" name="city" id="city" onchange="get_instituition_details()">
+                        <option id="0">---------</option>
+                    </select>
+                    </div>
+                </div>
+                
+              <div class="form-group">
+                    <label for="id_resource_center" class="col-sm-4 control-label">Institution</label>
+                    <div class="col-sm-8">
+                    <select class="form-control institue" id="institue" name="academic_center">
+                        <option value="0">---------</option>
+                    </select>
+                    </div>
+                </div>
+                <div class="form-group ">
+                    <label for="id_academic_institution_type" class="col-sm-4 control-label">Status</label>
+                    <div class="col-sm-8">
+                    <select class="form-control" id="institue" name="status">
+                        <option value="0">---------</option>
+                        <option value="S">Successfull</option>
+                        <option value="F">Failed</option>
+                        <option value="O">Ongoing</option>
+                    </select>
+                    </div>
+              </div>
+
+            
+
+                <div class="form-group">
+                  <div class="col-sm-offset-4 col-sm-8">
+                     <input class="btn btn-success" type="submit" value="Filter" />
+                  </div>
+                  <div class="col-sm-offset-4 col-sm-8">
+                    <a class="btn btn-success" href="{{request.path}}?{{ request.GET|reset_get_values}}">Reset Filter</a>
+                  </div>
+            </div>
+          </div>
+        </form>
+
+    </div>
+<div>
+    <table class="table table-bordered table-hover">
+      <tr class="active">
+                      <th>User</th>
+                     <th>Academic Year</th>
+                     <th>College Name</th>
+                     <th>College Id</th>
+                      <th>Completion Date &amp; Time</th>
+                      <th >Amount</th>
+                      <th>Transaction ID</th>
+                      <th>Reference No</th>
+                      <th>Status</th>
+                  </tr>
+      {%for a_academic in transactiondetails%}
+      <tr>
+                        <td><a href="/accounts/view-profile/{{ user }}" target="_blank">{{ user }}</a></td>
+                        <td>{{ a_academic.paymentdetail.academic_year }}</td>
+                        <td>{{ a_academic.paymentdetail.academic_id.institution_name}}</td>
+                        <td>{{ a_academic.paymentdetail.academic_id.academic_code}}</td>
+                        <td>{{ a_academic.created }}</td>
+                        <td>{{a_academic.paymentdetail.amount}}</td>
+                        <td>{{a_academic.transId}}</td>
+                        <td>{{a_academic.refNo}}</td>
+                        <td>{{a_academic.msg}}</td>
+                      </tr>
+      {%endfor%}
+    </table>
+  </div>
+  
+  
+{% endblock %}
+{% block compressjsblock %}
+    <script src="{% static 'spoken/js/events.js' %}"></script>
+    <script type="text/javascript">
+        function get_instituition_details(){
+          var state = $("#state").val();
+          alert(state);
+          var city = $("#city").val();
+
+
+            if(state != ''){
+                  $.ajax({
+                        url: "/software-training/payment/ajax-city/",
+                        type: "POST",
+                        dataType : "json",
+                        data: {
+                            "state": state,
+                            "city" : city,
+                        },
+                        success: function(data) {
+                            if(data['city'] && data['academic_center'] == ''){
+                              
+                                $('.city').html(data['city']);
+                                $('.city').attr('disabled');
+                            }
+                            if(data['city'] && data['academic_center']){
+                              $('.institue').html(data['academic_center']);
+                            }
+                        }
+                    })
+                }
+
+};
+        </script>
+{% endblock %}
+{% block uncompressjsblock %}
+    
+    <script type="text/javascript">
+    </script>
+{% endblock %}

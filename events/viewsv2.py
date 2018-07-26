@@ -2730,6 +2730,70 @@ def payment_details(request,choice):
   context['college'] = academic_id[0]['academic_id__institution_name']
   return render(request,'payment_details.html',context)     
 
+def academic_transactions(request):
+    # Check if the logged in person is a Training State Manager 
+    state = State.objects.all()
+    context={}
+    context['state'] = state
+    state = request.GET.get('state')
+    city = request.GET.get('city')
+    
+    num_status ={
+    'S' : 1,
+    'F' : 2,
+    'O' : 0,
+    }
+    
+    academic_center = ''
+    try:
+      academic_center = int(request.GET.get('academic_center'))
+      status = int(request.GET.get('status'))
+      paymentdetails = 0
+      if academic_center != 0:
+        paymentdetails = PaymentDetails.objects.filter(academic_id=academic_center)
+        print "Academic id"
+      else:
+        if state !='---------':
+          if city !='---------':
+            academic_centers = AcademicCenter.objects.filter(state=state,city=city)
+            paymentdetails = PaymentDetails.objects.filter(academic_id__in=academic_centers)
+          else:
+            academic_centers = AcademicCenter.objects.filter(state__name=state)
+            paymentdetails = PaymentDetails.objects.filter(academic_id__in=academic_centers)
+        else:
+          paymentdetails = PaymentDetails.objects.all()
 
+      
+      if status != 0:
+        paymentdetails.filter(status=num_status[status])
+      else:
+        pass
 
-     
+      paymenttransactionetails = PaymentTransactionDetails.objects.filter(paymentdetail_id__in = paymentdetails)
+      context['transactiondetails'] = paymenttransactionetails
+    except :
+      print "Nothing selected"
+    
+    return render(request, 'payment.html', context)
+
+import  json
+from django.views.decorators.csrf import csrf_exempt
+@csrf_exempt
+def ajax_city(request):
+    state = request.POST.get('state', False)
+    city = request.POST.get('city', False)
+    data = ''
+    if request.method == 'POST':
+        cities = City.objects.filter(state__name=state).order_by('name')
+        cities_json = '<option id=0>---------</option>'
+        academic_centers_json = ''
+        for i in cities:
+            cities_json +='<option id='+str(i.id)+'>'+i.name+'</option>'
+        if city:
+            academic_center= AcademicCenter.objects.filter(state__name=state,city__name=city,status = 1 )
+            for j in academic_center:
+                academic_centers_json+= '<option value='+str(j.id)+'>'+j.institution_name+'</option>'
+        data = {"city":cities_json,"academic_center":academic_centers_json,}
+        #print "data :",data
+        
+    return HttpResponse(json.dumps(data), content_type='application/json')

@@ -311,5 +311,10 @@ urlpatterns = [
       'events.viewsv2.payment_details', 
       name="payment_details"
     ),
+ 
+    
+    url(r'^academic-transactions/$','events.viewsv2.academic_transactions',name="payment"),
+    url(r'^payment/ajax-city/$','events.viewsv2.ajax_city',name="ajax_city"),
+
 
 ]
