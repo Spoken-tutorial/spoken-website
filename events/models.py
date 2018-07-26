@@ -34,6 +34,7 @@ ADVANCE_TEST_STATUS = (
     (30, 'ResourcePerson Rejected'),
 )
 
+
 # Create your models here.
 class State(models.Model):
   users = models.ManyToManyField(
@@ -413,7 +414,7 @@ class TestAttendance(models.Model):
 
   def is_top_performer(self):
     mdlquizgrades = MdlQuizGrades.objects.filter(quiz=self.mdlquiz_id,
-                                      userid=self.mdluser_id)
+                                                 userid=self.mdluser_id)
     if mdlquizgrades.exists():
         mdlquizgrade = mdlquizgrades.first()
     else:
@@ -1705,9 +1706,7 @@ class AdvanceTestBatch(models.Model):
     appeared = models.ManyToManyField('Student',
                                       related_name='advance_appeared')
     is_open = models.BooleanField(default=True)
-
     objects = AdvanceTestBatchManager()
-
 
     def __str__(self):
         return '{0} Test'.format(self.test.foss.foss)
@@ -1738,10 +1737,10 @@ class AdvanceTestBatch(models.Model):
         return answerpapers.exists()
 
     def check_student_progress(self, student):
-        progress = {state: 'NA', score:'NA'}
+        progress = {'state': 'NA', 'score': 'NA'}
         if self.check_attended(student.user):
-            progress[state] = self.get_answerpaper_status(student.user)
-            progress[score] = self.get_percentage(student.user)
+            progress['state'] = self.get_answerpaper_status(student.user)
+            progress['score'] = self.get_percentage(student.user)
         return progress
 
     def invigilator_approve(self):
@@ -1757,7 +1756,7 @@ class AdvanceTestBatch(models.Model):
         self.save()
 
     def resource_person_reject(self):
-        self.status = 30 
+        self.status = 30
         self.save()
 
     def invigilated(self):
@@ -1788,12 +1787,7 @@ class AdvanceTestBatch(models.Model):
         return self.status
 
     def is_batch_eligible(self):
-        # Check whether batch can go for the advance test
-        #self.batch.training_request.status = 1
-        # self.training_request.test.status = 4
-        # currentyear - year of joining = 3
-        # self.batch.trainingrequest.coursemap.foss = test.foss
-	    pass
+        pass
 
     def add_student(self, student):
         self.students.add(student)

@@ -164,6 +164,7 @@ def feedback_status_likely(status):
     status_dict = {0 : 'Not at All', 1 : 'Not at All', 2 : 'Maybe', 3 : 'Likely', 4 : 'Quite likely', 5 : 'Definitely'}
     return status_dict[status]
 
+
 def get_secondlevel_mark(test_id, student):
     t = Test.objects.get(id=test_id)
     adv = t.pretest.get()
@@ -172,6 +173,7 @@ def get_secondlevel_mark(test_id, student):
         return percentage
     else:
         return 'NA'
+
 
 def has_attempted(adv_test_id, student):
     adv_test = get_object_or_404(AdvanceTestBatch, id=adv_test_id)

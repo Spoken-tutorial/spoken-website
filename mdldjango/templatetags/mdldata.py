@@ -3,7 +3,7 @@ from django import template
 from django.contrib.auth.models import User
 
 # Spoken Tutorial Stuff
-from events.models import TestAttendance, TrainingAttendance, Test
+from events.models import TestAttendance, TrainingAttendance
 from mdldjango.models import *
 
 register = template.Library()

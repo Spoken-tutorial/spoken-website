@@ -475,10 +475,13 @@ class TrainingReUseForm(forms.Form):
         self.user = kwargs.pop('user', None)
         super(TrainingReUseForm, self).__init__(*args, **kwargs)
 
+
 class AdvanceTestForm(forms.ModelForm):
+
     class Meta:
         model = AdvanceTest
         fields = '__all__'
+
 
 class AdvanceTestBatchForm(forms.ModelForm):
 
@@ -487,8 +490,8 @@ class AdvanceTestBatchForm(forms.ModelForm):
         del kwargs['user']
         super(AdvanceTestBatchForm, self).__init__(*args, **kwargs)
         self.fields['invigilator'].queryset = Invigilator.objects.filter(
-            academic = user.organiser.academic, status=1
-        ).exclude(user_id = user.id)
+            academic=user.organiser.academic, status=1
+        ).exclude(user_id=user.id)
 
     class Meta:
         model = AdvanceTestBatch

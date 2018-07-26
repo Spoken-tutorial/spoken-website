@@ -110,13 +110,11 @@ urlpatterns = patterns('',
         'events.views.advance_tests_student', name='advance_tests_student'),
     url(r'^yaksh/advance_tests/student/(?P<status>\d+)/$',
         'events.views.advance_tests_student', name='advance_tests_student'),
-    url(r'^yaksh/advance_test/view_participants/(?P<advance_test_batch_id>\d+)/$','events.views.view_advance_participants', name='view_advance_participants'),
+    url(r'^yaksh/advance_test/view_participants/(?P<advance_test_batch_id>\d+)/$', 'events.views.view_advance_participants', name='view_advance_participants'),
     url(r'^delete-notification/(\w+)/(\d+)/$', 'events.views.delete_events_notification', name="delete_events_notification"),
     url(r'^clear-notifications/(\w+)/$', 'events.views.clear_events_notification', name="clear_events_notification"),
-    
     url(r'^resource-center/$', 'events.views.resource_center', name="resource_center"),
     url(r'^resource-center/(?P<slug>[\w-]+)/$', 'events.views.resource_center', name="resource_center"),
-    
     url(r'^academic-center/(?P<academic_id>\d+)/$', 'events.views.academic_center', name="academic_center"),
     url(r'^academic-center/(?P<academic_id>\d+)/(?P<slug>[\w-]+)/$', 'events.views.academic_center', name="academic_center"),
     
