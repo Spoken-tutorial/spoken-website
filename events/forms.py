@@ -68,6 +68,37 @@ class AcademicForm(forms.ModelForm):
         model = AcademicCenter
         exclude = ['user', 'academic_code', 'institute_category']
 
+class AccountexecutiveForm(forms.Form):
+    state = forms.ChoiceField(choices=[('', '-- None --'), ], widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'State field is required.'})
+    college = forms.ChoiceField(choices=[('', '-- None --'), ], widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'College Name field is required.'})
+
+    def __init__(self, *args, **kwargs):
+        initial = ''
+        if 'instance' in kwargs:
+            initial = kwargs["instance"]
+            del kwargs["instance"]
+
+        super(AccountexecutiveForm, self).__init__(*args, **kwargs)
+
+        # load the choices
+        state_list = list(State.objects.exclude().order_by('name').values_list('id', 'name'))
+        state_list.insert(0, ('', '-- None --'))
+        self.fields['state'].choices = state_list
+        if args:
+            if 'state' in args[0]:
+                if args[0]['state'] and args[0]['state'] != '' and args[0]['state'] != 'None':
+                    centre_qs = AcademicCenter.objects.filter(state_id=args[0]['state'])
+                    centre_choices = [(x.id, '%s, %s' % (x.institution_name, x.academic_code)) for x in centre_qs]
+                    self.fields['college'].choices = centre_choices
+                    self.fields['college'].widget.attrs = {}
+        if initial:
+            self.fields['state'].initial = initial.academic.state_id
+            centre_qs = AcademicCenter.objects.filter(district_id=initial.academic.district_id)
+            centre_choices = [(x.id, '%s, %s' % (x.institution_name, x.academic_code)) for x in centre_qs]
+            self.fields['college'].choices = centre_choices
+
+            # initial data
+            self.fields['college'].initial = initial.academic_id
 
 class OrganiserForm(forms.Form):
     state = forms.ChoiceField(choices=[('', '-- None --'), ], widget=forms.Select(attrs = {}), required = True, error_messages = {'required':'State field is required.'})

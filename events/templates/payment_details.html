@@ -1,0 +1,184 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load eventsdata %}
+{% load cmsdata %}
+{% block title %} Payment Details {% endblock %}
+{% block heading %} <i class="fa fa-list-ul"></i> Transaction Details{% endblock %}
+{% block search %}{% endblock %}
+{% block content %}
+
+
+<div class="container mt-3">
+  <h2>{{college}}</h2>
+  <br>
+  <!-- Nav tabs -->
+    <ul class="nav nav-tabs" >
+        <li{% if tabid == 'completed' %} class="active"{% endif %} >
+            <a href="/software-training/payment-details/completed">
+                <i class="fa fa-list-ul"></i> Completed
+            </a>
+        </li>
+        <li{% if tabid == 'failed' %} class="active"{% endif %} >
+            <a href="/software-training/payment-details/failed">
+                <i class="fa fa-list-ul"></i> Failed
+            </a>
+        </li>
+        <li{% if tabid == 'ongoing' %} class="active"{% endif %}>
+            <a href="/software-training/payment-details/ongoing">
+                <i class="fa fa-list-ul"></i> Ongoing
+            </a>
+        </li>
+    </ul>
+
+  <div class="tab-content">
+                </table>
+                <div class="tab-pane{% if tabid == 'completed' %} active{% endif %} table-responsive" id="completed">
+                  <table class="table table-bordered table-hover">
+                  {% if completed == 0 %}      
+                  <tr>
+                      <td colspan="6" class="col-center">List is empty</td>
+                  </tr>
+                </table>
+                 {% else %}
+                    
+                  <tr class="active">
+                      <th>User</th>
+                     <th>Academic Year</th>
+                      <th>Completion Date &amp; Time</th>
+                      <th >Amount</th>
+                      <th>Transaction ID</th>
+                      <th>Reference No</th>
+                      <th>Status</th>
+                  </tr>
+        
+                    {% for detail in paymentdetails %}
+                    {% if detail.status == 'S' %}
+                      
+                      <tr>
+                        <td><a href="/accounts/view-profile/{{ user }}" target="_blank">{{ user }}</a></td>
+                        <td>{{ detail.paymentdetail_id__academic_year }}</td>
+                        <td>{{ detail.created }}</td>
+                        <td>{{detail.paymentdetail_id__amount}}</td>
+                        <td>{{detail.transId}}</td>
+                        <td>{{detail.refNo}}</td>
+                        <td>{{detail.msg}}</td>
+                      </tr>
+                      
+                      {% endif %}
+                    {% endfor %}
+                    </table>
+                    {% endif %} 
+                  </div>
+
+                    
+                <div class="tab-pane{% if tabid == 'failed' %} active{% endif %} table-responsive" id="failed">
+<table class="table table-bordered table-hover">
+                  {% if failed == 0 %}      
+                  <tr>
+                      <td colspan="6" class="col-center">List is empty</td>
+                  </tr>
+                </table>
+                 {% else %}
+                    
+                  <tr class="active">
+                      <th>User</th>
+                     <th>Academic Year</th>
+                      <th>Completion Date &amp; Time</th>
+                      <th >Amount</th>
+                      <th>Transaction ID</th>
+                      <th>Reference No</th>
+                      <th>Status</th>
+                  </tr>
+        
+        
+                    {% for detail in paymentdetails %}
+                    {% if detail.status == 'F' %}
+                      
+                      <tr>
+                        <td><a href="/accounts/view-profile/{{ user }}" target="_blank">{{ user }}</a></td>
+                        <td>{{ detail.paymentdetail_id__academic_year }}</td>
+                        <td>{{ detail.created }}</td>
+                        <td>{{detail.paymentdetail_id__amount}}</td>
+                        <td>{{detail.transId}}</td>
+                        {% if detail.refNo != 'null'%}
+                        <td>{{detail.refNo}}</td>
+                        {%else%}
+                        <td>Not Generated</td>
+                        {% endif %}
+
+                        {% if detail.msg != 'null'%}
+                        <td>{{detail.msg}}</td>
+                        {%else%}
+                        <td>Failed</td>
+                        {% endif %}
+                        
+                      </tr>
+                      
+                      {% endif %}
+                    {% endfor %}
+                    </table>
+                {% endif %} 
+                  </div>
+                   
+                <div class="tab-pane{% if tabid == 'ongoing' %} active{% endif %} table-responsive" id="ongoing">
+                  <table class="table table-bordered table-hover">
+                  {% if ongoing == 0 %}      
+                  <tr>
+                      <td colspan="6" class="col-center">List is empty</td>
+                  </tr>
+                </table>
+                 {% else %}
+                    
+                  <tr class="active">
+                      <th>User</th>
+                     <th>Academic Year</th>
+                      <th>Completion Date &amp; Time</th>
+                      <th >Amount</th>
+                      <th>Transaction ID</th>
+                      <th>Reference No</th>
+                      <th>Status</th>
+                  </tr>
+        
+        
+                    {% for detail in ongoing_details %}
+                    {% if detail.status == 0   %}
+                      
+                       <tr>
+                        <td><a href="/accounts/view-profile/{{user}}/" target="_blank">{{ user }}</a></td>
+                        <td>{{ detail.academic_year }}</td>
+                        <td>{{ detail.created }}</td>
+                        <td>{{detail.amount}}</td>
+                        <td>Transaction Ongoing</td>
+                        <td>Not Generated</td>
+                        <td>{{detail.description}}</td>
+                      </tr>
+
+                      {% endif %}
+                    {% endfor %}
+                    </table>
+                {% endif %} 
+                  </div>
+                </div>
+
+
+
+
+
+
+{% endblock %}
+{% block jsblock %}
+<script type="text/javascript">
+$(document).ready(function () {
+  $('input[type=radio][name=optradio]').change(function() {
+    if (this.value == 'Yes') {
+        $("#gst_div").show();
+    }
+    else if (this.value == 'No') {
+        $("#gst_div").hide();
+    }
+  });
+});
+
+</script>
+{% endblock %}

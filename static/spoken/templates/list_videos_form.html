@@ -1,0 +1,48 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load cmsdata %}
+{% load creationdata %}
+{% block search %}{% endblock %}
+{% block content %}
+<div class="well tab-content tutorial-search-form col-lg-offset-1 col-md-offset-1 col-lg-10 col-md-10 col-sm-12 col-xs-12">
+<div class="col-sm-12">
+<form action="/tutorial-search" method="GET" class='form-horizontal'>
+    {% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
+        {% if form.non_field_errors %}
+        <ul>
+          {% for error in form.non_field_errors %}
+            <li>{{ error }}</li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+        <div class="form-group">
+            <div class="col-sm-5 add-padding">
+                <span class='ajax-search-refresh ajax-refresh-search-foss'><i class="fa fa-2 fa-refresh fa-spin"></i></span>
+                {% render_field form.search_foss class+="form-control search-foss" tabindex="1" value=keywords %}
+                {{ form.search_foss.errors }}
+            </div>
+            <div class="col-sm-5 add-padding">
+                <span class='ajax-search-refresh ajax-refresh-search-language'><i class="fa fa-2 fa-refresh fa-spin"></i></span>
+                {% render_field form.search_language class+="form-control search-language" tabindex="1" value=keywords %}
+                {{ form.search_language.errors }}
+            </div>
+            <div class="col-sm-2 add-padding">
+                <input class="btn btn-primary" type="submit" value="Search" />
+                <a href="{% url 'list_videos'%}" class='pull-left'>Reset dropdowns</a>
+            </div>
+        </div>
+    {% endwith %}
+    <div class="form-group">
+        <b>Instructions for selecting foss videos :</b>
+        <ul>
+            <li>Select the software course you want to learn from "All Courses" drop-down</li>
+            <li>Select the preferred language in which you want to learn from "All Languages" drop-down</li>
+            <li>Click on the "Search" button to get the list of spoken tutorials based on your selection</li>
+        </ul>
+
+    </div>
+</form>
+</div>
+</div>
+{% endblock %}

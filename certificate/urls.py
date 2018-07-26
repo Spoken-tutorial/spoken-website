@@ -13,4 +13,5 @@ urlpatterns = patterns('certificate.views',  # noqa
     url(r'^drupal_workshop_download/$', 'drupal_workshop_download',
         name='drupal_workshop_download'),
     url(r'^fa_workshop_download/$', 'fa_workshop_download', name='fa_workshop_download'),
+    url(r'^itp_workshop_certificate/$', 'itp_workshop_download', name='itp_workshop_download'),
 )

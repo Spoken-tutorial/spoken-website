@@ -12,13 +12,16 @@ urlpatterns = patterns('',
     url(r'^sitemap\.html$', 'spoken.views.sitemap', name='sitemap'),
     # Examples:
     url(r'^addu/$', 'spoken.views.add_user', name='addu'),
+    url(r'^NMEICT-Intro/$', 'spoken.views.nmeict_intro', name="nmeict_intro"),
     url(r'^tutorial-search/$', 'spoken.views.tutorial_search', name="tutorial-search"),
+    url(r'^series/$', 'spoken.views.series_foss', name="series"),
+    url(r'^series_tutorial-search/$', 'spoken.views.series_tutorial_search', name="series-tutorial-search"),
     url(r'^news/(?P<cslug>[\w-]+)/$', 'spoken.views.news', name="news"),
     url(r'^news/(?P<cslug>[\w-]+)/(?P<slug>[\w-]+)/$', 'spoken.views.news_view', name="news_view"),
     url(r'^keyword-search/$', 'spoken.views.keyword_search', name="keyword-search"),
     url(r'^watch/([0-9a-zA-Z-+%\(\). ]+)/([0-9a-zA-Z-+%\(\) ]+)/([a-zA-Z-]+)/$', 'spoken.views.watch_tutorial', name="watch_tutorial"),
     url(r'^What_is_a_Spoken_Tutorial/$', 'spoken.views.what_is_spoken_tutorial', name="what_is_spoken_tutorial"),
-    url(r'^get-language/$', 'spoken.views.get_language', name="get_language"),
+    url(r'^get-language/(?P<tutorial_type>[\w-]+)/$', 'spoken.views.get_language', name="get_language"),
     url(r'^testimonials/$', 'spoken.views.testimonials', name="testimonials"),
     url(r'^testimonials/new/$', 'spoken.views.testimonials_new', name="testimonials_new"),
     url(r'^admin/testimonials/$', 'spoken.views.admin_testimonials', name="admin_testimonials"),
@@ -63,9 +66,12 @@ urlpatterns = patterns('',
     url(r'^cdcontent/', include('cdcontent.urls', namespace='cdcontent')),
     url(r'^create_cd_content/', include('cdcontent.urls', namespace='cdcontent')),
     url(r'^statistics/', include('statistics.urls', namespace='statistics')),
-
+    url(r'^list_videos/$', 'spoken.views.list_videos', name='list_videos'),
     # team
     url(r'^team/', include('team.urls')),
+
+    #api
+    url(r'^api/', include('api.urls', namespace='api')),
 
     # certificate
     url(r'^certificate/', include('certificate.urls', namespace='certificate')),
@@ -77,7 +83,7 @@ urlpatterns = patterns('',
     url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT, 'show_indexes': False}),
 
     # Old url adjustments
-    url(r'^list_videos/$', 'cdeep.views.list_videos', name='list_videos'),
+    # url(r'^list_videos/$', 'cdeep.views.list_videos', name='list_videos'),
     url(r'^show_video/$', 'cdeep.views.show_video', name='show_video'),
     url(r'^search/node/([0-9a-zA-Z-+%\(\)]+)/$', 'cdeep.views.search_node', name='search_node'),
 
@@ -99,10 +105,6 @@ urlpatterns = patterns('',
     # events2
     # url(r'^events2/', include('events2.urls', namespace='events2')),
 
-    url(r'^exam/', include('yaksh.urls', namespace='yaksh', app_name='yaksh')), 
-    url(r'^exam/reset/', include('yaksh.urls_password_reset')),                 
-    url(r'^grades/', include('grades.urls', namespace='grades', app_name='grades')),
     # cms
     url(r'^', include('cms.urls', namespace='cms')),
-    url(r'^', include('social.apps.django_app.urls', namespace='social')),      
 )

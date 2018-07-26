@@ -19,7 +19,7 @@ def get_prev_semester_duration(semester_type, year):
         end = dt.datetime.strptime(str(year) + '-06-30', '%Y-%m-%d').date()
         return start, end
     if semester_type.lower() == 'odd':
-        start = dt.datetime.strptime(str(year) + '-07-01', '%Y-%m-%d').date(),
+        start = dt.datetime.strptime(str(year) + '-07-01', '%Y-%m-%d').date()
         end = dt.datetime.strptime(str(year) + '-12-31', '%Y-%m-%d').date()
         return start, end
     raise Exception("Invalid semester type, it must be either odd or even")

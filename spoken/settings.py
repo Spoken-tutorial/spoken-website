@@ -86,11 +86,8 @@ INSTALLED_APPS = (
     'reports',
     'team',
     'certificate',
-    'yaksh',
-    'taggit',
-    'grades',
-    'social.apps.django_app.default',
-    'attendance',
+    'api',
+    'rest_framework',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -277,7 +274,8 @@ RECAPTCHA_PRIVATE_KEY = '6Le8qf8SAAAAAF9CkucURPapw2vaDPrU4qMzfg73'
 GOOGLE_RECAPTCHA_SITE_KEY = GOOGLE_RECAPTCHA_SITE_KEY
 GOOGLE_RECAPTCHA_SECRET_KEY = GOOGLE_RECAPTCHA_SECRET_KEY
 GOOGLE_RECAPTCHA_SITEVERIFY = GOOGLE_RECAPTCHA_SITEVERIFY
-
+CHANNEL_KEY = CHANNEL_KEY
 RECAPTCHA_USE_SSL = True
 ACADEMIC_DURATION = 5
 SPOKEN_HASH_SALT = 'change this value'
+

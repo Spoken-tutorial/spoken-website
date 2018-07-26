@@ -2,7 +2,6 @@
 from django.contrib.auth.models import User
 from django.db import models
 
-
 class Language(models.Model):
     name = models.CharField(max_length=255, unique=True)
     user = models.ForeignKey(User)
@@ -40,6 +39,7 @@ class FossCategory(models.Model):
     category = models.ManyToManyField(FossSuperCategory)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
+    show_on_homepage = models.BooleanField(default=True, help_text ='If unchecked, this foss will be displayed on series page, instead of home page' )
 
     class Meta:
         verbose_name = 'FOSS'
@@ -196,6 +196,7 @@ class TutorialResource(models.Model):
     hit_count = models.PositiveIntegerField(default=0)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
+    publish_at = models.DateTimeField(null=True)
 
     class Meta:
         unique_together = (('tutorial_detail', 'language',),)

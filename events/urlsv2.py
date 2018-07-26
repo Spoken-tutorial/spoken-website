@@ -290,4 +290,26 @@ urlpatterns = [
       'events.viewsv2.ReOpenTraining', 
       name="re-open-training"
     ),
+    url(
+      r'^payment-home/$', 
+      'events.viewsv2.payment_home', 
+      name="payment_home"
+    ),
+      url(
+      r'^payment-status/$', 
+      'events.viewsv2.payment_status', 
+      name="payment_status"
+    ),
+      url(
+      r'^payment-success/$', 
+      'events.viewsv2.payment_success', 
+      name="payment_success"
+    ),
+
+    url(
+      r'^payment-details/(?P<choice>\w+)/$', 
+      'events.viewsv2.payment_details', 
+      name="payment_details"
+    ),
+
 ]

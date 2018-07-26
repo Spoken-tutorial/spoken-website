@@ -1,0 +1,48 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load eventsdata %}
+{% load cmsdata %}
+{% load creationdata %}
+{% block search %}{% endblock %}
+{% block content %}
+<body >
+    <div class= 'filters row col-md-offset-2 col-md-8' style="text-align: center;">
+        
+        {% if status == 'S'%}
+            <h2>Thank you {{user.first_name}}</h2>
+            <h2>Your Transaction is successful.</h2>
+        {% elif status == 'F' %}
+            <h2>Transaction failed. Kindly try again.</h2>
+        {% endif %}
+
+        <img src="{% static 'spoken/images/thankyou.png' %}" ><br>
+        <table class="table " style="text-align: center;">
+            <tr class="info">
+                <td class=" col-md-4 "><h5><b>Transaction Id :</b></h5></td>
+                <td class=" col-md-4 "><h5><b>{{transId}}</b></h5></td>
+            </tr>
+            {% if status == 'S'%}
+            <tr class="info">
+                <td class=" col-md-4 "><h5><b>Reference No. :</b></h5></td>
+                <td class=" col-md-4 "><h5><b>{{refNo}}</b></h5></td>
+            </tr>
+            <tr class="info">
+                <td class=" col-md-4 "><h5><b>Status message :</b></h5></td>
+                <td class=" col-md-4 "><h5><b>{{msg}}</b></h5></td>
+            </tr>
+            {% elif status == 'F' %}
+            <tr class="info">
+                <td class=" col-md-4 "><h5><b>Status message :</b></h5></td>
+                <td class=" col-md-4 "><h5><b>Transaction failed</b></h5></td>
+            </tr>
+            {% endif %}
+        </table>
+</div>
+</body>
+{% endblock %}
+{% block jsblock %}
+<script type="text/javascript">
+    
+</script>
+{% endblock %}

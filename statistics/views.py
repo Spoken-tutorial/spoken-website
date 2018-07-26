@@ -85,12 +85,18 @@ def training(request):
     state = None
     TRAINING_COMPLETED = '1'
     TRAINING_PENDING = '0'
-
     if request.method == 'GET':
         status = request.GET.get('status')
         if status not in [TRAINING_COMPLETED, TRAINING_PENDING]:
             status = TRAINING_COMPLETED
 
+        lang= request.GET.get('lang')
+        if status == TRAINING_COMPLETED:
+            if lang and '---------' not in lang:
+                training_attend_lang = TrainingAttend.objects.filter(language__name=lang).values_list('training_id').distinct()
+                collectionSet= collectionSet.filter(id__in=training_attend_lang)
+        
+        
     if status == TRAINING_PENDING:
         collectionSet = collectionSet.filter(participants=0, status=TRAINING_COMPLETED)
         
@@ -122,7 +128,13 @@ def training(request):
     collection = TrainingRequestFilter(request.GET, queryset=collection, state=state)
     # find participants count
     
-    participants = collection.qs.aggregate(Sum('participants'))
+    participants = collection.qs.aggregate(Sum('participants')) 
+
+    if lang == 'English':
+        participants = participants['participants__sum']+294593
+
+    else:
+        participants = participants['participants__sum']
 
     chart_query_set = collection.qs.extra(select={'year': "EXTRACT(year FROM sem_start_date)"}).values('year').order_by(
             '-year').annotate(total_training=Count('sem_start_date'), total_participant=Sum('participants'))
@@ -173,8 +185,7 @@ def training(request):
         context['participants'] = participants
     context['model'] = 'Workshop/Training'
     context['status']=status
-
-    
+    context['language'] = Language.objects.values('id','name')
     return render(request, 'statistics/templates/training.html', context)
 
 def fdp_training(request):
@@ -470,10 +481,10 @@ def tutorial_content(request, template='statistics/templates/statistics_content.
         3: SortableHeader('tutorial_detail__foss__foss', True, 'FOSS Course'),
         4: SortableHeader('tutorial_detail__level', True, 'Level'),
         5: SortableHeader('language__name', True, 'Language'),
-        6: SortableHeader('publishtutoriallog__created', True, 'Date Published')
+        6: SortableHeader('publish_at', True, 'Date Published')
     }
 
-    published_tutorials_set = TutorialResource.objects.filter(status__gte=1)
+    published_tutorials_set = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = True)
 
     raw_get_data = request.GET.get('o', None)
     tutorials = get_sorted_list(request, published_tutorials_set, header, raw_get_data)
