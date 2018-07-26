@@ -46,12 +46,18 @@
                             <th>Status</th>
                         </tr>
                         {% for student in attendees %}
+                <span style="visibility:hidden">{% has_attempted advance_test.id student %}</span>
                             <tr>
                                 <td>{{ forloop.counter }}</td>
                                 <td>{{ student.user.first_name|lower|title }} {{ student.user.last_name|lower|title }}</td>
                                 <td>{{ student.user.email}}</td>
                                 <td>
+                {% if student in advance_test.appeared.all %}
+                    Attempted Score: 
+                   {% get_secondlevel_mark advance_test.preliminary_test.id student %}
+                {% else %}
                                     Ready for Test
+                {% endif %}
                                 </td>
                             </tr>
                         {% endfor %}

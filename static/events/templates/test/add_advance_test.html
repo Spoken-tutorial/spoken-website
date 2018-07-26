@@ -22,7 +22,6 @@
             <tr>
                 <th> # </th>
                 <th> FOSS </th>
-                <th> Link </th>
                 <th> Active </th>
                 <th> Qualifying Marks </th>
             </tr>
@@ -31,7 +30,6 @@
                 <tr>
                     <td> {{ forloop.counter }} </td>
                     <td> {{ advance_test.foss }} </td>
-                    <td> {{ advance_test.link }} </td>
                     <td> {{ advance_test.active }} </td>
                     <td> {{ advance_test.qualifying_marks }} </td>
                     <td> <a href="{% url 'events:edit_advance_test' advance_test.id %}"> Edit </a></td>

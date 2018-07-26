@@ -26,12 +26,12 @@ from yaksh.models import AnswerPaper
 
 ADVANCE_TEST_STATUS = (
     (1, 'Requested'),
-    (2, 'Resoure Person Approved'),
-    (3, 'Invigilator Approved'),
+    (2, 'Invigilator Approved'),
+    (3, 'Resoure Person Approved'),
     (4, 'Invigilated'),
     (5, 'Completed'),
-    (20, 'Resoure Person Rejected'),
-    (30, 'Invigilator Rejected'),
+    (20, 'Invigilator Rejected'),
+    (30, 'ResourcePerson Rejected'),
 )
 
 # Create your models here.
@@ -1657,11 +1657,34 @@ class InductionFinalList(models.Model):
 class AdvanceTest(models.Model):
     foss = models.OneToOneField(FossCategory, on_delete=models.CASCADE,
                                 related_name='advance_test_foss')
-    link = models.URLField(null=True)
     yaksh_course = models.OneToOneField(YakshCourse, on_delete=models.CASCADE)
     active = models.BooleanField(default=True)
     qualifying_marks = models.DecimalField(decimal_places=2, max_digits=5,
                                            default=90)
+
+
+class AdvanceTestBatchManager(models.Manager):
+    def get_advance_tests_available(self, user):
+        advance_tests = user.student.advance_students.all()
+        open_tests = advance_tests.filter(is_open=True)
+        available_tests = []
+        for test in open_tests:
+            if test.is_today():
+                available_tests.append(test)
+        return available_tests
+
+    def get_advance_tests_completed(self, user):
+        advance_tests = user.student.advance_students.all()
+        return advance_tests.filter(is_open=False)
+
+    def get_advance_tests_upcoming(self, user):
+        advance_tests = user.student.advance_students.all()
+        open_tests = advance_tests.filter(is_open=True)
+        upcoming_tests = []
+        for test in open_tests:
+            if test.is_upcoming():
+                upcoming_tests.append(test)
+        return upcoming_tests
 
 
 class AdvanceTestBatch(models.Model):
@@ -1681,36 +1704,65 @@ class AdvanceTestBatch(models.Model):
                                        related_name='advance_attendees')
     appeared = models.ManyToManyField('Student',
                                       related_name='advance_appeared')
-    is_open = models.BooleanField(default=False)
+    is_open = models.BooleanField(default=True)
+
+    objects = AdvanceTestBatchManager()
+
+
+    def __str__(self):
+        return '{0} Test'.format(self.test.foss.foss)
+
+    def _get_answerpaper(self, user):
+        qp = self.test.yaksh_course.learning_module.get().learning_unit.first().quiz.questionpaper_set.get()
+        answerpapers = AnswerPaper.objects.filter(question_paper=qp, user=user)
+        return answerpapers
 
     def get_percentage(self, user):
-        qp = self.test.yaksh_course.learning_module.get().learning_unit.get().quiz.questionpaper_set.get()
-        answerpapers = AnswerPaper.objects.filter(question_paper=qp, user=user)
+        answerpapers = self._get_answerpaper(user)
         if answerpapers.exists():
             return answerpapers.last().percent
         else:
             return 'NA'
 
+    def get_answerpaper_status(self, user):
+        answerpapers = self._get_answerpaper(user)
+        if answerpapers.exists():
+            return answerpapers.last().status
+        else:
+            return 'NA'
+
+    def check_attended(self, user):
+        answerpapers = self._get_answerpaper(user)
+        if answerpapers.exists():
+            self.appeared.add(user.student)
+        return answerpapers.exists()
+
+    def check_student_progress(self, student):
+        progress = {state: 'NA', score:'NA'}
+        if self.check_attended(student.user):
+            progress[state] = self.get_answerpaper_status(student.user)
+            progress[score] = self.get_percentage(student.user)
+        return progress
+
     def invigilator_approve(self):
-        self.status = 3
-        self.save()
-
-    def invigilator_reject(self):
-        self.status = 30
-        self.save()
-
-    def resource_person_approve(self):
         self.status = 2
         self.save()
 
+    def invigilator_reject(self):
+        self.status = 20
+        self.save()
+
+    def resource_person_approve(self):
+        self.status = 3
+        self.save()
+
     def resource_person_reject(self):
-        self.status = 20 
+        self.status = 30 
         self.save()
 
     def invigilated(self):
         self.status = 4
         self.save()
-        self.open()
 
     def close(self):
         self.is_open = False
@@ -1720,10 +1772,17 @@ class AdvanceTestBatch(models.Model):
 
     def open(self):
         self.is_open = True
+        self.status = 1
         self.save()
 
     def is_today(self):
-        return self.date_time.date() == timezone.datetime.today().date()
+        return self.date_time.date() <= timezone.datetime.today().date() and self.is_open
+
+    def is_completed(self):
+        return self.date_time.date() <= timezone.datetime.today().date() and not self.is_open
+
+    def is_upcoming(self):
+        return self.date_time.date() >= timezone.datetime.today().date() and self.is_open and self.status < 4
 
     def get_status(self):
         return self.status

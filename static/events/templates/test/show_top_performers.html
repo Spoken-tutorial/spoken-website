@@ -2,6 +2,7 @@
 {% load widget_tweaks %}
 {% load static %}
 {% load mdldata %}
+{% load eventsdata %}
 {% block title %} Top Performers {% endblock %}
 {% block heading %}
         <i class="fa fa-list-ul"></i> Top Performers <a href="{% url 'events:events_dashboard' %}" class='pull-right'>Dashboard</a>
@@ -32,7 +33,8 @@
 
         </dl>
     </div>
-    <a href="{% url 'events:request_advance_test' test.id %}">Request Advance Test</a>
+    <a class="btn btn-primary" href="{% url 'events:request_advance_test' test.id %}">Request Advance Test</a>
+    <br></br>
 	<div class="" id="pending">
 		{% if toppers %}
 		<table class="table table-striped table-hover table-bordered">
@@ -62,7 +64,7 @@
                         		    </td>
 					    <td>
                             {% if test.pretest.all.exists %}
-					            {{ test.id|get_secondlevel_mark:topper.student }}
+					            {% get_secondlevel_mark test.id topper.student %}
                             {% else %}
                                 NA
                             {% endif %}

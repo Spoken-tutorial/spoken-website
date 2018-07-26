@@ -13,7 +13,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
-from django.contrib.auth import login, authenticate as django_authenticate
+from django.contrib.auth import login, logout, authenticate as django_authenticate
 # Spoken Tutorial Stuff
 from events.forms import OrganiserForm
 from events.models import *
@@ -29,7 +29,6 @@ def authenticate(email=None, password=None):
     try:
         password = encript_password(password)
         user = MdlUser.objects.filter(email=email, password=password).last()
-        print user
         if user:
             return user
     except Exception, e:
@@ -39,7 +38,7 @@ def mdl_logout(request):
     if 'mdluserid' in request.session:
         del request.session['mdluserid']
         request.session.save()
-    #print "logout !!"
+        logout(request)
     return HttpResponseRedirect('/participant/login')
 
 def mdl_login(request):
@@ -50,17 +49,20 @@ def mdl_login(request):
             messages.error(request,'Please enter valide Username and Password!')
             #return HttpResponseRedirect('/participant/login')
         user = authenticate(email = email, password = password)
-        duser = User.objects.get(email=user.email)
-        django_user = django_authenticate(username=duser.username,
-                                          password=password)
-        login(request, django_user)
         if user:
+            duser = User.objects.get(email=user.email)
+            duser.set_password(password)
+            duser.save()
+            django_user = django_authenticate(username=duser.username,
+                                              password=password)
             request.session['mdluserid'] = user.id
             request.session['mdluseremail'] = user.email
             request.session['mdlusername'] = user.email
             request.session['mdluserinstitution'] = user.institution
             request.session.save()
             request.session.modified = True
+            if django_user:
+                login(request, django_user)
         else:
             messages.error(request, 'Username or Password Doesnt match!')
 
