@@ -15,7 +15,7 @@
     <div class= 'filters row' >
       {%csrf_token%}
         <form action=""  method="get" class='form-horizontal'>
-            <div class="col-md-4 col-md-4 col-sm-4">
+            <div class="col-md-4 col-md-4">
                 <div class="form-group">
                     <label for="id_state" class="col-sm-4 control-label">State</label>
                     <div class="col-sm-8">
@@ -35,7 +35,8 @@
                     </select>
                     </div>
                 </div>
-                
+              </div>
+              <div class="col-md-4 col-md-4">
               <div class="form-group">
                     <label for="id_resource_center" class="col-sm-4 control-label">Institution</label>
                     <div class="col-sm-8">
@@ -57,16 +58,12 @@
               </div>
 
             
-
-                <div class="form-group">
-                  <div class="col-sm-offset-4 col-sm-8">
-                     <input class="btn btn-success" type="submit" value="Filter" />
+                <div class="form-group ">
+                  <div class="col-sm-8 ">
+                     <input class="btn btn-success " type="submit" value="Filter" />
+                    <a class="btn btn-success col-md-offset-3" href="{{request.path}}?{{ request.GET|reset_get_values}}">Reset Filter</a>
                   </div>
-                  <div class="col-sm-offset-4 col-sm-8">
-                    <a class="btn btn-success" href="{{request.path}}?{{ request.GET|reset_get_values}}">Reset Filter</a>
-                  </div>
-            </div>
-          </div>
+                </div>
         </form>
 
     </div>
@@ -83,6 +80,9 @@
                       <th>Reference No</th>
                       <th>Status</th>
                   </tr>
+
+      
+
       {%for a_academic in transactiondetails%}
       <tr>
                         <td><a href="/accounts/view-profile/{{ user }}" target="_blank">{{ user }}</a></td>
@@ -96,13 +96,28 @@
                         <td>{{a_academic.msg}}</td>
                       </tr>
       {%endfor%}
+      
+      {% for a_academic in ongoing_details %}
+      <tr>
+                        <td><a href="/accounts/view-profile/{{ user }}" target="_blank">{{ user }}</a></td>
+                        <td>{{ a_academic.academic_year }}</td>
+                        <td>{{ a_academic.academic_id.institution_name }}</td>
+                        <td>{{ a_academic.academic_id.academic_code }}</td>
+                        <td>{{ a_academic.created }}</td>
+                        <td>{{ a_academic.amount }}</td>
+                        <td><i>Not Generated</i></td>
+                        <td><i>Not Generated</i></td>
+                        <td>Ongoing</td>
+                      </tr>
+      {%endfor%}
+      
     </table>
   </div>
   
   
 {% endblock %}
 {% block compressjsblock %}
-    <script src="{% static 'spoken/js/events.js' %}"></script>
+    
     <script type="text/javascript">
         function get_instituition_details(){
           var state = $("#state").val();
@@ -138,5 +153,17 @@
 {% block uncompressjsblock %}
     
     <script type="text/javascript">
+      $(document).ready(function () {
+
+        var url = new URL(window.location.href);
+        var state = url.searchParams.get("state");
+        var city =  url.searchParams.get("city");
+        var institue =  url.searchParams.get("city");
+        var status =  url.searchParams.get("status");
+      $('.states').html(state);
+      $('.citys').html(city);
+      $('.institues').html(institue);
+      $('.statuss').html(status);
+    });
     </script>
 {% endblock %}

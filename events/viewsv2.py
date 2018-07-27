@@ -2741,38 +2741,36 @@ def academic_transactions(request):
     num_status ={
     'S' : 1,
     'F' : 2,
-    'O' : 0,
+    'O' : 0
     }
     
     academic_center = ''
-    try:
-      academic_center = int(request.GET.get('academic_center'))
-      status = int(request.GET.get('status'))
-      paymentdetails = 0
-      if academic_center != 0:
-        paymentdetails = PaymentDetails.objects.filter(academic_id=academic_center)
-        print "Academic id"
-      else:
-        if state !='---------':
-          if city !='---------':
-            academic_centers = AcademicCenter.objects.filter(state=state,city=city)
-            paymentdetails = PaymentDetails.objects.filter(academic_id__in=academic_centers)
-          else:
-            academic_centers = AcademicCenter.objects.filter(state__name=state)
-            paymentdetails = PaymentDetails.objects.filter(academic_id__in=academic_centers)
+  
+    academic_center = int(request.GET.get('academic_center'))
+    status = request.GET.get('status')
+    paymentdetails = 0
+    if academic_center != 0:
+      paymentdetails = PaymentDetails.objects.filter(academic_id=academic_center)
+      print "Academic id"
+    else:
+      if state !='---------':
+        if city !='---------':
+          academic_centers = AcademicCenter.objects.filter(state=state,city=city)
+          paymentdetails = PaymentDetails.objects.filter(academic_id__in=academic_centers)
         else:
-          paymentdetails = PaymentDetails.objects.all()
-
-      
-      if status != 0:
-        paymentdetails.filter(status=num_status[status])
+          academic_centers = AcademicCenter.objects.filter(state__name=state)
+          paymentdetails = PaymentDetails.objects.filter(academic_id__in=academic_centers)
       else:
-        pass
+        paymentdetails = PaymentDetails.objects.all()
 
-      paymenttransactionetails = PaymentTransactionDetails.objects.filter(paymentdetail_id__in = paymentdetails)
+    
+    if status == 'O':
+      paymentdetails = paymentdetails.filter(status=0)
+      context['ongoing_details'] = paymentdetails
+    else:
+      if status!= 0:
+        paymenttransactionetails = PaymentTransactionDetails.objects.filter(paymentdetail_id__in = paymentdetails, status=str(status))      
       context['transactiondetails'] = paymenttransactionetails
-    except :
-      print "Nothing selected"
     
     return render(request, 'payment.html', context)
 
