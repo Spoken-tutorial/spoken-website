@@ -2800,35 +2800,37 @@ def academic_transactions(request):
     'F' : 2,
     'O' : 0
     }
+    try:
+      academic_center = ''
     
-    academic_center = ''
-  
-    academic_center = int(request.GET.get('academic_center'))
-    status = request.GET.get('status')
-    paymentdetails = 0
-    if academic_center != 0:
-      paymentdetails = PaymentDetails.objects.filter(academic_id=academic_center)
-      print "Academic id"
-    else:
-      if state !='---------':
-        if city !='---------':
-          academic_centers = AcademicCenter.objects.filter(state=state,city=city)
-          paymentdetails = PaymentDetails.objects.filter(academic_id__in=academic_centers)
-        else:
-          academic_centers = AcademicCenter.objects.filter(state__name=state)
-          paymentdetails = PaymentDetails.objects.filter(academic_id__in=academic_centers)
+      academic_center = int(request.GET.get('academic_center'))
+      status = request.GET.get('status')
+      paymentdetails = 0
+      if academic_center != 0:
+        paymentdetails = PaymentDetails.objects.filter(academic_id=academic_center)
+        print "Academic id"
       else:
-        paymentdetails = PaymentDetails.objects.all()
+        if state !='---------':
+          if city !='---------':
+            academic_centers = AcademicCenter.objects.filter(state=state,city=city)
+            paymentdetails = PaymentDetails.objects.filter(academic_id__in=academic_centers)
+          else:
+            academic_centers = AcademicCenter.objects.filter(state__name=state)
+            paymentdetails = PaymentDetails.objects.filter(academic_id__in=academic_centers)
+        else:
+          paymentdetails = PaymentDetails.objects.all()
 
-    
-    if status == 'O':
-      paymentdetails = paymentdetails.filter(status=0)
-      context['ongoing_details'] = paymentdetails
-    else:
-      if status!= 0:
-        paymenttransactionetails = PaymentTransactionDetails.objects.filter(paymentdetail_id__in = paymentdetails, status=str(status))      
-      context['transactiondetails'] = paymenttransactionetails
-    
+      
+      if status == 'O':
+        paymentdetails = paymentdetails.filter(status=0)
+        context['ongoing_details'] = paymentdetails
+      else:
+        if status!= 0:
+          paymenttransactionetails = PaymentTransactionDetails.objects.filter(paymentdetail_id__in = paymentdetails, status=str(status))      
+        context['transactiondetails'] = paymenttransactionetails
+      
+    except Exception as e:
+      pass
     return render(request, 'payment.html', context)
 
 
@@ -2850,6 +2852,6 @@ def ajax_city(request):
             for j in academic_center:
                 academic_centers_json+= '<option value='+str(j.id)+'>'+j.institution_name+'</option>'
         data = {"city":cities_json,"academic_center":academic_centers_json,}
-        #print "data :",data
+        
         
     return HttpResponse(json.dumps(data), content_type='application/json')
