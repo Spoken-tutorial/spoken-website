@@ -2774,6 +2774,7 @@ def academic_transactions(request):
     
     return render(request, 'payment.html', context)
 
+
 import  json
 from django.views.decorators.csrf import csrf_exempt
 @csrf_exempt
@@ -2795,3 +2796,23 @@ def ajax_city(request):
         #print "data :",data
         
     return HttpResponse(json.dumps(data), content_type='application/json')
+
+def receipt(request):
+  data = {
+      'today': datetime.date.today(), 
+      'amount': 39.99,
+     'customer_name': 'Cooper Mann',
+     'order_id': 1233434,
+  }
+  pdf = render_to_pdf('pdf/invoice.html', data)
+  if pdf:
+    response = HttpResponse(pdf, content_type='application/pdf')
+    filename = "Invoice_%s.pdf" %("12341231")
+    content = "inline; filename='%s'" %(filename)
+    download = request.GET.get("download")
+    if download:
+      content = "attachment; filename='%s'" %(filename)
+    response['Content-Disposition'] = content
+    return response
+  return HttpResponse("Not found")
+  
