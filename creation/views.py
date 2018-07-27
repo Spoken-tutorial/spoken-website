@@ -440,9 +440,9 @@ def creationhome(request):
             'language': languages
         }
 
-        context.update(csrf(request))
-        #return render(request, 'creation/templates/creationhome.html', context)
-        context_instance=RequestContext(request)
+#        context.update(csrf(request))
+        return render(request, 'creation/templates/creationhome.html', context)
+        
     else:
         
         context = {
@@ -510,7 +510,7 @@ def upload_publish_outline(request):
     context = {
         'form': form,
     }
-    context.update(csrf(request))
+    #context.update(csrf(request))
     return render(request, 'creation/templates/upload-publish-script.html', context)
 
 @csrf_exempt
@@ -646,7 +646,7 @@ def upload_tutorial(request, trid):
     review_log = None
     try:
         tr_rec = TutorialResource.objects.get(pk = trid, status = 0)
-        ContributorRole.objects.get(user_id = request.user.id, foss_category_id = tr_rec.tutorial_detail.foss_id, language_id = tr_rec.language_id, tutorial_detail_id=tr_rec.tutorial_detail_id, status = 1)
+        ContributorRole.objects.get(user_id = request.user.id, tutorial_detail_id = tr_rec.tutorial_detail_id, language_id = tr_rec.language_id, status = 1)
         contrib_log = ContributorLog.objects.filter(tutorial_resource_id = tr_rec.id).order_by('-created')
         review_log = NeedImprovementLog.objects.filter(tutorial_resource_id = tr_rec.id).order_by('-created')
     except Exception, e:
@@ -658,7 +658,7 @@ def upload_tutorial(request, trid):
         'review_log': review_log,
         'script_base': settings.SCRIPT_URL,
     }
-    context.update(csrf(request))
+    #context.update(csrf(request))
     return render(request, 'creation/templates/upload_tutorial.html', context)
 
 @login_required
@@ -670,7 +670,7 @@ def upload_outline(request, trid):
         if publish:
             status = 1
         tr_rec = TutorialResource.objects.get(pk = trid, status = status)
-        ContributorRole.objects.get(user_id = request.user.id, foss_category_id = tr_rec.tutorial_detail.foss_id, language_id = tr_rec.language_id, status = 1)
+        ContributorRole.objects.get(user_id = request.user.id, tutorial_detail_id = tr_rec.tutorial_detail_id, language_id = tr_rec.language_id, status = 1)
     except Exception, e:
         raise PermissionDenied()
     if not publish and tr_rec.outline_status > 2 and tr_rec.outline_status != 5:
@@ -705,7 +705,7 @@ def upload_outline(request, trid):
             context = {
                 'form': form,
             }
-            context.update(csrf(request))
+            #context.update(csrf(request))
             return render(request, 'creation/templates/upload_outline.html', context)
     form = UploadOutlineForm(trid)
     if response_msg:
@@ -717,7 +717,7 @@ def upload_outline(request, trid):
     context = {
         'form': form,
     }
-    context.update(csrf(request))
+    #context.update(csrf(request))
     return render(request, 'creation/templates/upload_outline.html', context)
 
 @login_required
@@ -725,7 +725,8 @@ def upload_script(request, trid):
     tr_rec = None
     try:
         tr_rec = TutorialResource.objects.get(pk = trid, status = 0)
-        ContributorRole.objects.get(user_id = request.user.id, foss_category_id = tr_rec.tutorial_detail.foss_id, language_id = tr_rec.language_id, status = 1)
+        ContributorRole.objects.get(user_id = request.user.id, tutorial_detail_id = tr_rec.tutorial_detail_id, language_id = tr_rec.language_id, status = 1)
+
     except Exception, e:
         raise PermissionDenied()
     if tr_rec.script_status > 2 and tr_rec.script_status != 5:
@@ -763,7 +764,7 @@ def upload_script(request, trid):
                 'form': form,
                 'script_path': script_path,
             }
-            context.update(csrf(request))
+            #context.update(csrf(request))
             return render(request, 'creation/templates/upload_script.html', context)
     form = UploadScriptForm(script_path)
     if error_msg:
@@ -774,7 +775,7 @@ def upload_script(request, trid):
         'form': form,
         'script_path': script_path,
     }
-    context.update(csrf(request))
+    #context.update(csrf(request))
     return render(request, 'creation/templates/upload_script.html', context)
 
 @login_required
@@ -802,7 +803,7 @@ def save_timed_script(request, tdid):
         raise PermissionDenied()
     try:
         tr_rec = TutorialResource.objects.get(tutorial_detail_id = tdid, language__name = 'English')
-        ContributorRole.objects.get(user_id = request.user.id, foss_category_id = tr_rec.tutorial_detail.foss_id, language_id = tr_rec.language_id, status = 1)
+        ContributorRole.objects.get(user_id = request.user.id, tutorial_detail_id = tr_rec.tutorial_detail_id, language_id = tr_rec.language_id, status = 1)
     except Exception, e:
         print e
         raise PermissionDenied()
@@ -858,7 +859,7 @@ def upload_prerequisite(request, trid):
     tr_rec = None
     try:
         tr_rec = TutorialResource.objects.get(pk = trid, status = 0)
-        ContributorRole.objects.get(user_id = request.user.id, foss_category_id = tr_rec.tutorial_detail.foss_id, language_id = tr_rec.language_id, status = 1)
+        ContributorRole.objects.get(user_id = request.user.id, tutorial_detail_id = tr_rec.tutorial_detail_id, language_id = tr_rec.language_id, status = 1)
     except Exception, e:
         raise PermissionDenied()
     if tr_rec.common_content.prerequisite_status > 2 and tr_rec.common_content.prerequisite_status != 5:
@@ -888,7 +889,7 @@ def upload_prerequisite(request, trid):
             context = {
                 'form': form,
             }
-            context.update(csrf(request))
+            #context.update(csrf(request))
             return render(request, 'creation/templates/upload_prerequisite.html', context)
     form = UploadPrerequisiteForm(request.user)
     if response_msg:
@@ -900,7 +901,7 @@ def upload_prerequisite(request, trid):
     context = {
         'form': form,
     }
-    context.update(csrf(request))
+    #context.update(csrf(request))
     return render(request, 'creation/templates/upload_prerequisite.html', context)
 
 @login_required
@@ -908,7 +909,7 @@ def upload_keywords(request, trid):
     tr_rec = None
     try:
         tr_rec = TutorialResource.objects.get(pk = trid, status = 0)
-        ContributorRole.objects.get(user_id = request.user.id, foss_category_id = tr_rec.tutorial_detail.foss_id, language_id = tr_rec.language_id, status = 1)
+        ContributorRole.objects.get(user_id = request.user.id, tutorial_detail_id = tr_rec.tutorial_detail_id, language_id = tr_rec.language_id, status = 1)
     except Exception, e:
         raise PermissionDenied()
     if tr_rec.common_content.keyword_status > 2 and tr_rec.common_content.keyword_status != 5:
@@ -938,7 +939,7 @@ def upload_keywords(request, trid):
             context = {
                 'form': form,
             }
-            context.update(csrf(request))
+            #context.update(csrf(request))
             return render(request, 'creation/templates/upload_keywords.html', context)
     form = UploadKeywordsForm(trid)
     if response_msg:
@@ -950,7 +951,7 @@ def upload_keywords(request, trid):
     context = {
         'form': form,
     }
-    context.update(csrf(request))
+    #context.update(csrf(request))
     return render(request, 'creation/templates/upload_keywords.html', context)
 
 @login_required
@@ -958,7 +959,7 @@ def upload_component(request, trid, component):
     tr_rec = None
     try:
         tr_rec = TutorialResource.objects.get(pk = trid, status = 0)
-        ContributorRole.objects.get(user_id = request.user.id, foss_category_id = tr_rec.tutorial_detail.foss_id, language_id = tr_rec.language_id, status = 1)
+        ContributorRole.objects.get(user_id = request.user.id, tutorial_detail_id = tr_rec.tutorial_detail_id, language_id = tr_rec.language_id, status = 1)
         comp_title = tr_rec.tutorial_detail.foss.foss + ': ' + tr_rec.tutorial_detail.tutorial + ' - ' + tr_rec.language.name
     except Exception, e:
         raise PermissionDenied()
@@ -1097,7 +1098,7 @@ def upload_component(request, trid, component):
                     'tr': tr_rec,
                     'title': component.replace('_', ' '),
                 }
-                context.update(csrf(request))
+                #context.update(csrf(request))
                 return render(request, 'creation/templates/upload_component.html', context)
             else:
                 context = {
@@ -1105,7 +1106,7 @@ def upload_component(request, trid, component):
                     'tr': tr_rec,
                     'title': component.replace('_', ' '),
                 }
-                context.update(csrf(request))
+                #context.update(csrf(request))
                 return render(request, 'creation/templates/upload_component.html', context)
 
     form = ComponentForm(component)
@@ -1114,7 +1115,7 @@ def upload_component(request, trid, component):
         'tr': tr_rec,
         'title': component.replace('_', ' '),
     }
-    context.update(csrf(request))
+    #context.update(csrf(request))
     return render(request, 'creation/templates/upload_component.html', context)
 
 @login_required
@@ -1360,7 +1361,7 @@ def admin_review_video(request, trid):
         'media_url': settings.MEDIA_URL,
         'video_info': video_info,
     }
-    context.update(csrf(request))
+#    context.update(csrf(request))
     return render(request, 'creation/templates/admin_review_video.html', context)
 
 @login_required
@@ -2344,7 +2345,7 @@ def creation_change_published_to_pending(request):
     context = {
         'form': form
     }
-    context.update(csrf(request))
+    #context.update(csrf(request))
     return render(request, 'creation/templates/creation_change_published_to_pending.html', context)
 
 @csrf_exempt
@@ -2408,7 +2409,7 @@ def creation_change_component_status(request):
     context = {
         'form': form
     }
-    context.update(csrf(request))
+    #context.update(csrf(request))
     return render(request, 'creation/templates/creation_change_component_status.html', context)
 
 @csrf_exempt
@@ -2506,7 +2507,7 @@ def report_missing_component(request, trid):
                     context = {
                         'form': form,
                     }
-                    context.update(csrf(request))
+                    #context.update(csrf(request))
                     return render(request, 'creation/templates/report_missing_component.html', context)
             email = ''
             inform_me = request.POST.get('inform_me')
@@ -2537,7 +2538,7 @@ def report_missing_component(request, trid):
     context = {
         'form': form
     }
-    context.update(csrf(request))
+    #context.update(csrf(request))
     return render(request, 'creation/templates/report_missing_component.html', context)
 
 def get_and_query_for_contributor_roles(data_rows, fields):
@@ -2627,7 +2628,7 @@ Spoken Tutorial
         'form': form,
         'tmc_row': tmc_row
     }
-    context.update(csrf(request))
+    #context.update(csrf(request))
     return render(request, 'creation/templates/report_missing_component_reply.html', context)
 
 @login_required
@@ -2665,7 +2666,7 @@ def suggest_topic(request):
     context = {
         'form': form
     }
-    context.update(csrf(request))
+    #context.update(csrf(request))
     return render(request, 'creation/templates/suggest_topic.html', context)
 
 @login_required
@@ -2684,7 +2685,7 @@ def suggest_example(request):
     context = {
         'form': form
     }
-    context.update(csrf(request))
+    #context.update(csrf(request))
     return render(request, 'creation/templates/suggest_example.html', context)
 
 @login_required
@@ -2705,7 +2706,7 @@ def collaborate(request):
     context = {
         'form': form
     }
-    context.update(csrf(request))
+    #context.update(csrf(request))
     return render(request, 'creation/templates/collaborate.html', context)
 
 
@@ -2736,7 +2737,7 @@ def update_prerequisite(request):
     context = {
         'form': form
     }
-    context.update(csrf(request))
+    #context.update(csrf(request))
     return render(request, 'creation/templates/update_prerequisite.html', context)
 
 
@@ -2761,7 +2762,7 @@ def update_keywords(request):
     context = {
         'form': form
     }
-    context.update(csrf(request))
+    #context.update(csrf(request))
     return render(request, 'creation/templates/update_keywords.html', context)
 
 
@@ -2803,7 +2804,7 @@ def update_sheet(request, sheet_type):
         'form': form,
         'sheet_type': sheet_type
     }
-    context.update(csrf(request))
+    # context.update(csrf(request))
     return render(request, 'creation/templates/update_sheet.html', context)
 
 
@@ -2952,7 +2953,8 @@ def allocate_tutorial(request, sel_status):
             final_query = TutorialResource.objects.filter(script_status=status,script_user_id = request.user.id )
 
     elif sel_status == 'available':
-        header = {
+        if request.user.groups.filter(Q(name='Language-Manager')):
+            header = {
             1: SortableHeader('Tutorial Level',False),
             2: SortableHeader('Order Id', False),
             3: SortableHeader('Tutorial', False),
@@ -2960,8 +2962,15 @@ def allocate_tutorial(request, sel_status):
             5: SortableHeader('Days',False),
             6: SortableHeader('Bid', False),
         }
+        else:
+            header = {
+                1: SortableHeader('Tutorial Level',False),
+                2: SortableHeader('Order Id', False),
+                3: SortableHeader('Tutorial', False),
+                4: SortableHeader('language__name', True, 'Language'),
+                5: SortableHeader('Days',False),
+            }
 
-        
         status = 4 
         final_query = TutorialsAvailable.objects.filter(language__in = lang_qs).order_by('tutorial_detail__foss__foss','tutorial_detail__level','language','tutorial_detail__order')
 
@@ -3045,7 +3054,7 @@ def allocate_tutorial(request, sel_status):
     context['ordering'] = ordering
     context['status'] = active
     context['counter'] = itertools.count(1)
-    context.update(csrf(request))
+    #context.update(csrf(request))
     if request.user.groups.filter(Q(name='Language-Manager')).exists():
         return render(request, 'creation/templates/allocate_tutorial_manager.html', context)
     else:
@@ -3080,6 +3089,18 @@ def allocate(request, tdid, lid,uid,days):
     
     final_query = TutorialsAvailable.objects.get(tutorial_detail_id = tut.id ,language = lid)
     tuto = TutorialDetail.objects.filter(foss_id = final_query.tutorial_detail.foss_id,level_id = (final_query.tutorial_detail.level_id -1))
+    contrib = ContributorRating.objects.filter(user_id=uid,language_id=lid).values('rating')
+    if contrib[0]['rating']<3:
+            bid_count = TutorialResource.objects.filter(Q(script_user_id = uid)|Q(video_user_id=uid),language_id = lid ,status=0
+                ).exclude(language_id=22).aggregate(Count('id'))
+            print "bid_count['id__count'] :",bid_count['id__count']
+            if bid_count['id__count'] > 3 :
+                if user.groups.filter(Q(name='Language-Manager')):
+                    messages.error(request, "You cannot allocate more than 3 tutorials to a contributor of rating less than 3")
+                else:
+                    messages.error(request,"You cannot allocate more than 3 tutorials ")
+                return HttpResponseRedirect(request.META['HTTP_REFERER'])
+        
 
     if TutorialsAvailable.objects.filter(tutorial_detail_id__in = tuto).exists():
         difficulty_level_minus_one =level_name[int(final_query.tutorial_detail.level_id) - 1]
@@ -3088,6 +3109,9 @@ def allocate(request, tdid, lid,uid,days):
         
     else:        
         common_content = TutorialCommonContent.objects.get(tutorial_detail_id=tut.id)
+        if days != 1 :
+            global submissiondate
+            submissiondate = datetime.date(timezone.now() + timezone.timedelta(days = int(days) +1))
         try:
             tutorial_resource = TutorialResource()
             tutorial_resource.tutorial_detail_id = tut.id
@@ -3099,15 +3123,10 @@ def allocate(request, tdid, lid,uid,days):
             # assignment_status - 
             # 0 : Not Assigned , 1 : Work in Progress , 2 : Completed
             tutorial_resource.assignment_status = 1
-            if days != 1 :
-                global submissiondate
-                submissiondate = datetime.date(timezone.now() + timezone.timedelta(days = int(days) +1))
-                
-                
             tutorial_resource.submissiondate = submissiondate
             tutorial_resource.save()
             
-            messages.success(request,"Successfully alloted to "+str(user)+" : "+str(submissiondate))
+            messages.success(request,"Successfully alloted "+tut.tutorial+" to "+str(user)+" : "+str(submissiondate))
         
         except :
             tutorial_resource = TutorialResource.objects.filter(tutorial_detail_id = tut.id, language_id = lid).update(
@@ -3117,7 +3136,7 @@ def allocate(request, tdid, lid,uid,days):
             submissiondate = submissiondate,
             assignment_status=1
             )
-            messages.warning(request,"Successfully updated to "+str(user)+" : "+str(submissiondate ))
+            messages.warning(request,"Successfully updated "+tut.tutorial +" to "+str(user)+" : "+str(submissiondate))
         
  
         try :
@@ -3164,15 +3183,16 @@ def allocate_foss(request,fid,lang,uid,level,days):
     
     language = Language.objects.get(name = lang)
     contrib = ContributorRating.objects.filter(user_id=uid,language=language).values('rating')
+    print "contrib",contrib
     check = check_contributor_eligibility(request, contrib)
-    
-    
+    username = User.objects.filter(id = uid).values('username')
+    print "Check : ",check
     if check:        
         tdids = TutorialDetail.objects.filter(foss_id=fid, level__level = level).values('id')
         if contrib[0]['rating']<3:
             bid_count = ContributorRole.objects.filter(user_id = uid,language_id = lid ,status=1
                 ).exclude(language_id=22).aggregate(Count('id'))
-            
+            print "bid_count['id__count'] :",bid_count['id__count']
             if bid_count['id__count'] > 3 :
                 if user.groups.filter(Q(name='Language-Manager')):
                     messages.error(request, "You cannot allocate more than 3 tutorials to a contributor of rating less than 3")
@@ -3185,7 +3205,7 @@ def allocate_foss(request,fid,lang,uid,level,days):
                     if counter <4:
                         allocate(request,a_tdid['id'],language.id,uid,days)
                         counter +=1
-                username = User.objects.filter(id = uid).values('username')
+                
                 messages.warning(request,username[0]['username'] +" is not having rating above 3 , so alloted only 3 tutorials")                    
         else:
             
@@ -3197,7 +3217,8 @@ def allocate_foss(request,fid,lang,uid,level,days):
                 for available in  tdid_available:
                     check = allocate(request,a_tdid['id'],language.id,uid,days)
             #Cumulative submission date
-            messages.success(request,"Submission Date is : "+str(submissiondate))
+            if not submissiondate == datetime.date(timezone.now()):
+                messages.success(request,"Submission Date for "+username[0]['username']+" is : "+str(submissiondate))
             
     return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
@@ -3344,11 +3365,12 @@ def rate_contributors(request,sel_status):
             print "Already saved"
     else:
         raise PermissionDenied()
-    context.update(csrf(request))
+    #context.update(csrf(request))
     return render(request, 'creation/templates/rate_contributors.html', context)
 
 def check_contributor_eligibility(request,contrib_rating):
     try:
+        checker = contrib_rating[0]['rating']
         return True
     except :
         if request.user.groups.filter(name='Language-Manager').exists():    

@@ -14,7 +14,8 @@
 {% block content %}
   <div class='filters row' >
     <form action="" method="get" class='form-horizontal'>
-      <div class="col-lg-4 col-md-4 col-sm-4">                                                              
+      {% csrf_token %}
+      <div class="col-lg-4 col-md-4 col-sm-4">    
           <div class="form-group">
               <label for="id_foss" class="col-sm-4 control-label">FOSS Course</label>
               <div class="col-sm-8">
@@ -134,12 +135,14 @@
           <td align="center">
           
               {% if datetoday|date:"Y m d"  > record.submissiondate|date:"Y m d" %} 
+                {% if record.extension_status == 1  %}
                 <a class="btn btn-danger" href="{% url 'creation:extend_submission_date' record.id %}"> 
               Extend </a>
-              {% else%}
-              {% if record.extension_status == 1  %}
-                {{ record.extension_status}}
               {% endif %}
+              {% else%}
+              
+                {{ record.extension_status}}
+              
               {% endif %}
           
           </td>

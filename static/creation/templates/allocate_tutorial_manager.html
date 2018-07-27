@@ -15,7 +15,8 @@
 
   <div class='filters row' >
     <form action="" method="get" class='form-horizontal'>
-      <div class="col-lg-4 col-md-4 col-sm-4">                                                              
+      {% csrf_token %}
+      <div class="col-lg-4 col-md-4 col-sm-4">    
           <div class="form-group">
               <label for="id_foss" class="col-sm-4 control-label">FOSS Course</label>
               <div class="col-sm-8">
@@ -94,7 +95,7 @@
       <li {% if status == 'ongoing' %}{{ 'class="active"'}}{% endif %}>
       <a href="{% url 'creation:allocate_tutorial' 'ongoing' %}"><i class="fa fa-list-ul"></i> Ongoing </a></li>
       {% if status == 'available' %}
-      <li class = "pull-right"><a href="{% url 'creation:refresh_tutorials' %}" data-toggle="tooltip" title="Click this for latest list of Tutorials">Refresh list of Tutorials here</a></li>
+      <li class = "pull-right" ><a href="{% url 'creation:refresh_tutorials' %}" data-toggle="tooltip" title="Click this for latest list of Tutorials . This will take some time">Refresh list of Tutorials here</a></li>
       {% endif %}
   </ul>
 
@@ -120,7 +121,7 @@
 
         
           
-              <label for="id_foss" class="col-sm-4 control-label">Submission Date</label>
+              <label for="id_foss" class="col-sm-4 control-label">FOSS Submission Date</label>
               <div class="col-sm-4"> 
               <input class="form-control datepicker" type="text" id="datepicker">
               <span class="add-on"><i class="icon-th"></i></span>
@@ -182,14 +183,14 @@
           <td >{{record.submissiondate|date:"d M Y" }}</td>
       {% endif%}      
           <td align="center">         
-              {% if datetoday|date:"Y m d"  > record.submissiondate|date:"Y m d" %} 
+              
                 <a class="btn btn-danger" href="{% url 'creation:extend_submission_date' record.id %}"> 
               Extend </a>
-              {% else%}
-              {% if record.extension_status == 1  %}
-                {{ record.extension_status}}
-              {% endif %}
-              {% endif %}
+              
+              
+              {{ record.extension_status}}
+              
+              
           </td>
           <td>
             <div>
@@ -289,6 +290,9 @@
 
                $('.datepicker').datetimepicker({
                 format: "Y-m-d",
+                   minView: 2,
+                   maxView: 4,    
+                  autoclose: true
                });
       
 });
@@ -320,7 +324,6 @@
                 {
                 var date_id = document.getElementById(var_a);
                 var date = date_id.options[date_id.selectedIndex].value;
-                alert("date : "+date);
                 location.href =  '/creation/allocate/'+var_a+'/'+var_b+'/'+contributor_option.attr('id')+'/'+date;
                 } 
                 if (var_c=='foss') 
@@ -337,7 +340,6 @@
                   }
                   else
                   {
-                  alert("Days : "+days);
                   location.href =  '/creation/allocate_foss/'+var_a+'/'+language+'/'+contributor_option.attr('id')+'/'+level+'/'+days;
                   }
                   
