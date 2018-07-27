@@ -2556,9 +2556,9 @@ def payment_home(request):
   
   amount = "0"
   if accountexecutive.academic.institution_type_id == 5:
-      amount = "1"
+      amount = "10"
   else:
-      amount = "1"
+      amount = "10"
 
   context ={}
   context['accountexecutive'] = accountexecutive
@@ -2584,16 +2584,17 @@ def payment_status(request):
     amount = "0"
     
     if accountexecutive.academic.institution_type_id == 5:
-        amount = "1"
+        amount = "10"
     else:
-        amount = "1"
+        amount = "10"
     
     STdata = ''
-    STdata = str(user.id)+str(user)+str(amount)+"Subscription"+"SOLOSTW"+CHANNEL_KEY
+    user_name = user.first_name+' '+user.last_name
+    STdata = str(user.id)+str(user_name)+str(amount)+"Subscription"+"SOLOSTW"+CHANNEL_KEY
     print STdata
     s = display.value(str(STdata))
     
-    data = {'userId':user.id,'name':user,'amount':amount,'purpose':'Subscription','channelId':'SOLOSTW','random':s.hexdigest()}
+    data = {'userId':user.id,'name':user_name,'amount':amount,'purpose':'Subscription','channelId':'SOLOSTW','random':s.hexdigest()}
     
 
     try:
@@ -2730,6 +2731,59 @@ def payment_details(request,choice):
   context['college'] = academic_id[0]['academic_id__institution_name']
   return render(request,'payment_details.html',context)     
 
+@csrf_exempt
+def payment_reconciliation_update(request):
+  requestType = request.GET.get('requestType')
+  userId = request.GET.get('userId')
+  amount = request.GET.get('amount')
+  reqId = request.GET.get('reqId')
+  transId = request.GET.get('transId')
+  refNo = request.GET.get('refNo')
+  provId = request.GET.get('provId')
+  status = request.GET.get('status')
+  msg = request.GET.get('msg')
+  random = request.GET.get('random') 
 
+  STresponsedata = ''
+  STresponsedata = userId+transId+refNo+amount+status+msg+CHANNEL_KEY
+  s = display.value(str(STresponsedata))
+  STresponsedata_hexa = s.hexdigest()
 
+  if STresponsedata_hexa == random:
+    try:
+      accountexecutive = Accountexecutive.objects.get(user_id = userId,status_gt=0)
+    except:
+      pass
+    try:
+      pd = PaymentDetails.objects.get(user = userId, academic_id = accountexecutive.academic.id, status = 0)
+    except:
+      return HttpResponseRedirect("Failed")
+
+    try:
+      transactiondetails = PaymentTransactionDetails()
+      transactiondetails.paymentdetail_id  =  pd.id
+      transactiondetails.requestType  =  requestType
+      transactiondetails.userId_id  =  userId
+      transactiondetails.amount  =  amount
+      transactiondetails.reqId  = reqId 
+      transactiondetails.transId  = transId 
+      transactiondetails.refNo  =  refNo
+      transactiondetails.provId  =  provId
+      transactiondetails.status  =  status
+      transactiondetails.msg  =  msg
+      transactiondetails.save()
+      print "saved"
+    except:
+      return HttpResponseRedirect("Failed")
+    
+    if status == 'S':
+      pd.status = 1
+      pd.description = 'Payment successfull'
+    elif status == 'F':
+      pd.status = 2
+      pd.description = 'Payment fail'
+    pd.save()
+  else:
+    return HttpResponseRedirect("Invalid")
+  return HttpResponse("OK")
      
