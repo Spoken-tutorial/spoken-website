@@ -2712,6 +2712,7 @@ def payment_success(request):
       return HttpResponseRedirect('/software-training')
   else:
     return HttpResponseRedirect('/software-training')
+    # return render(request,'payment_success.html',context)
 
 def payment_details(request,choice):
   academic_id = Accountexecutive.objects.filter(user = request.user).values('academic_id','academic_id__institution_name')
