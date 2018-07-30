@@ -32,6 +32,7 @@
                                 <li><a href="/software-training/organiser/active/">Organiser List</a></li>
                                 <li><a href="/software-training/invigilator/active/">Invigilator List</a></li>
                                 <li><a href="/software-training/ac/">Institution List</a></li>
+                                <li><a href="/software-training/accountexecutive/active/">Account Executive List</a></li>
                             </ul>
                             <h5>Testimonials</h5>
                             <ul>
@@ -58,6 +59,23 @@
                         </div>
                     </div>
                 {% endif %}
+
+                {% if user|is_accountexecutive %}
+                    <div class="panel panel-primary">
+                        <div class="panel-heading panel-heading-notif">Account Executive</div>
+                        <div class="panel-body">
+                            <ul>
+                                <li><a href="/software-training/payment-home">Pay here to subscribe</a></li>
+                            </ul> 
+
+                            <ul>
+                                <li><a href="/software-training/payment-details/completed">Payment Details</a></li>
+                            </ul>                            
+                        </div>
+                    </div>
+                {% endif %}
+
+
                 {% if user|is_invigilator %}
                     <div class="panel panel-primary">
                         <div class="panel-heading panel-heading-notif">Invigilator</div>
@@ -94,7 +112,7 @@
                         </div>
                     </div>
                 {% endif %}
-                {% if not user|is_organiser or not user|is_invigilator %}
+                {% if not user|is_organiser or not user|is_invigilator or not user|is_accountexecutive %}
                     <div class="panel panel-primary">
                         <div class="panel-heading panel-heading-notif">Join with Us</div>
                         <div class="panel-body">
@@ -104,6 +122,9 @@
                                 {% endif %}
                                 {% if not user|is_invigilator %}
                                     <li><a href="/software-training/invigilator/request/{{user.username}}">Add me as Invigilator</a></li>
+                                {% endif %}
+                                {% if not user|is_accountexecutive %}
+                                    <li><a href="/software-training/accountexecutive/request/{{user.username}}">Add me as Account Executive</a></li>
                                 {% endif %}
                             </ul>
                         </div>

@@ -193,6 +193,22 @@ class AcademicCenter(models.Model):
     ).aggregate(Sum('participants'))
     return training['participants__sum']
 
+class Accountexecutive(models.Model):
+  user = models.OneToOneField(User, related_name = 'accountexecutive')
+  appoved_by = models.ForeignKey(
+    User,
+    related_name = 'accountexecutive_approved_by',
+    blank=True,
+    null=True
+  )
+  academic = models.ForeignKey(AcademicCenter, blank=True, null=True)
+  status = models.PositiveSmallIntegerField(default=0)
+  created = models.DateTimeField(auto_now_add = True)
+  updated = models.DateTimeField(auto_now = True)
+
+  def __unicode__(self):
+    return self.user.username
+
 
 class Organiser(models.Model):
   user = models.OneToOneField(User, related_name = 'organiser')
@@ -1627,3 +1643,31 @@ class MumbaiStudents(models.Model):
   stuid = models.ForeignKey('Student')
   bid = models.ForeignKey('StudentBatch')
 
+class PaymentDetails(models.Model):
+    user = models.ForeignKey(User)
+    academic_id = models.ForeignKey(AcademicCenter)
+    academic_year = models.PositiveIntegerField()
+    amount = models.CharField(max_length=20)
+    purpose = models.CharField(max_length=20, null=True)
+    status = models.PositiveIntegerField()
+    description = models.CharField(max_length=20, null=True)
+    gstno = models.CharField(max_length=15,null=True)
+    created = models.DateTimeField(auto_now_add = True)
+    updated = models.DateTimeField(auto_now_add = True) 
+    
+    class Meta:
+      unique_together = ('academic_id','academic_year',)
+
+class PaymentTransactionDetails(models.Model):
+    paymentdetail = models.ForeignKey(PaymentDetails)
+    requestType = models.CharField(max_length=2)
+    userId = models.ForeignKey(User)
+    amount = models.CharField(max_length=20)
+    reqId = models.CharField(max_length=50)
+    transId = models.CharField(max_length=100)
+    refNo = models.CharField(max_length=50)
+    provId = models.CharField(max_length=50)
+    status = models.CharField(max_length=2)
+    msg = models.CharField(max_length=100)
+    created = models.DateTimeField(auto_now_add = True)
+    updated = models.DateTimeField(auto_now_add = True) 
