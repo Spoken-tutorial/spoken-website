@@ -2556,9 +2556,9 @@ def payment_home(request):
   
   amount = "0"
   if accountexecutive.academic.institution_type_id == 5:
-      amount = "10"
+      amount = "1"
   else:
-      amount = "10"
+      amount = "1"
 
   context ={}
   context['accountexecutive'] = accountexecutive
@@ -2584,9 +2584,9 @@ def payment_status(request):
     amount = "0"
     
     if accountexecutive.academic.institution_type_id == 5:
-        amount = "10"
+        amount = "1"
     else:
-        amount = "10"
+        amount = "1"
     
     STdata = ''
     user_name = user.first_name+' '+user.last_name
