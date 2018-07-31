@@ -24,6 +24,24 @@ class AcademicCenterFilter(django_filters.FilterSet):
     model = AcademicCenter
     fields = ['state', 'institution_type', 'institute_category']
 
+class ActivateAcademicCenterFilter(django_filters.FilterSet):
+  state = django_filters.ChoiceFilter(choices=State.objects.none())  
+  institution_name = django_filters.CharSearchFilter()
+  def __init__(self, *args, **kwargs):
+    user = None
+    if 'user' in kwargs:
+      user = kwargs['user']
+      kwargs.pop('user')
+
+    super(ActivateAcademicCenterFilter, self).__init__(*args, **kwargs)
+    choices = None
+    choices = list(State.objects.values_list('id', 'name').order_by('name'))
+    choices.insert(0, ('', '---------'),)
+    self.filters['state'].extra.update({'choices' : choices})
+  class Meta:
+    model = AcademicCenter
+    fields = ['state', 'institution_type', 'institute_category']
+
 class OrganiserFilter(django_filters.FilterSet):
   academic__state = django_filters.ChoiceFilter(choices=State.objects.none())
   academic__institution_name = django_filters.CharSearchFilter()

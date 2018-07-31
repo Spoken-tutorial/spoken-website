@@ -2822,3 +2822,50 @@ def ajax_check_foss(request):
     }
     return JsonResponse(data)
 
+def activate_academics(request):
+    context = {}
+    collection = None
+    header = {
+        1: SortableHeader('#', False),
+        2: SortableHeader('State', False),
+        3: SortableHeader('institution_name', True, 'Institution Name'),
+        4: SortableHeader('Action', False)
+    }
+    collection = AcademicCenter.objects.filter(status=3).order_by('state__name', 'institution_name')
+    
+    raw_get_data = request.GET.get('o', None)
+    collection = get_sorted_list(request, collection, header, raw_get_data)
+    ordering = get_field_index(raw_get_data)
+
+    collection = ActivateAcademicCenterFilter(request.GET, queryset=collection)
+    context['form'] = collection.form
+    page = request.GET.get('page')
+    collection = get_page(collection, page)
+    context['collection'] = collection
+    context['header'] = header
+    context['ordering'] = ordering
+
+
+
+    return render(request, 'activate_academics.html', context)
+
+def activate_academic_org(request, academic_id):
+    ac = AcademicCenter.objects.get(id=academic_id)
+    deactivate_status = 3
+    if ac:
+        #check if college paid the subscription fees
+        #activate all organiser fom this college
+        organisers_from_academic = Organiser.objects.filter(status=deactivate_status, academic_id=ac.id)
+        for organiser in organisers_from_academic:
+            #all the organisers from this academic are activated here.
+            organiser.status = 1 
+            organiser.save()
+        #Activate that collge
+        ac.status = 1
+        ac.save()
+        messages.success(request, 'Academic center activated.')
+    else:
+        messages.error(request, 'No records found.')
+    
+    return HttpResponseRedirect("/activate_academics/")
+

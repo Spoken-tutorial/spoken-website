@@ -28,6 +28,8 @@ urlpatterns = patterns('',
     url(r'^(?P<role>\w+)/(?P<status>\w+)/$', 'events.views.organiser_invigilator_index', name='organiser_invigilator_index'),
     url(r'^organiser/(?P<status>\w+)/(?P<code>\w+)/(?P<userid>\d+)/$', 'events.views.rp_organiser', name='rp_organiser'),
     
+    url(r'^activate-academics/$', 'events.views.activate_academics', name='activate_academics'),
+
     url(r"^accountexecutive/request/(?P<username>[\w. @-]+)/$", 'events.views.accountexecutive_request', name='accountexecutive_request'),
     url(r"^accountexecutive/view/(?P<username>[\w. @-]+)/$", 'events.views.accountexecutive_view', name='accountexecutive_view'),
     url(r"^accountexecutive/(?P<username>[\w. @-]+)/edit/$", 'events.views.accountexecutive_edit', name='accountexecutive_edit'),
