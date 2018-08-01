@@ -18,7 +18,7 @@ from events import display
 from events.forms import StudentBatchForm, TrainingRequestForm, \
     TrainingRequestEditForm, CourseMapForm, SingleTrainingForm, \
     OrganiserFeedbackForm,STWorkshopFeedbackForm,STWorkshopFeedbackFormPre,STWorkshopFeedbackFormPost,LearnDrupalFeedbackForm, LatexWorkshopFileUploadForm, UserForm, \
-    SingleTrainingEditForm
+    SingleTrainingEditForm,TrainingManagerForm
 
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, render_to_response, redirect
@@ -2787,4 +2787,50 @@ def payment_reconciliation_update(request):
   else:
     return HttpResponseRedirect("Invalid")
   return HttpResponse("OK")
-     
+
+@csrf_protect
+@login_required
+def academic_transactions(request):
+    user = User.objects.get(id=request.user.id)
+    rp_states = ResourcePerson.objects.filter(status=1,user=user)
+    state = State.objects.filter(id__in=rp_states.values('state'))
+    academic_center = request.POST.get('college')
+    
+      
+    context = {}
+    context['user'] = user
+    if request.method == 'POST':
+      form = TrainingManagerForm(user,request.POST)
+      
+      # if form.is_valid():
+      #   form_data = form.cleaned_data
+      get_state = request.POST.get('state')
+      status = request.POST.get('choices')
+      if academic_center in ('None','0',0):  
+        academic_center = False
+      else:
+        academic_center = request.POST.get('college')
+        
+      if get_state:
+        academic_centers = AcademicCenter.objects.filter(state=get_state)
+        if academic_center :
+          paymentdetails = PaymentDetails.objects.filter(academic_id=academic_center)
+        else:
+          paymentdetails = PaymentDetails.objects.filter(academic_id__in=academic_centers)
+      else:
+        academic_centers = AcademicCenter.objects.filter(state__in=state)
+        paymentdetails = PaymentDetails.objects.filter(academic_id__in=academic_centers)
+
+      if status == 'O':
+        paymentdetails = paymentdetails.filter(status=0)
+        context['ongoing_details'] = paymentdetails
+
+      if status in ('S','F'):
+          paymenttransactiondetails = PaymentTransactionDetails.objects.filter(paymentdetail_id__in = paymentdetails, status=str(status))
+          context['transactiondetails'] = paymenttransactiondetails
+        
+    
+    else:
+      form = TrainingManagerForm(user=request.user)
+    context['form'] = form
+    return render(request, 'payment.html', context)
