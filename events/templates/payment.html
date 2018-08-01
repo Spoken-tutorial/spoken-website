@@ -71,7 +71,7 @@
 
       {%for a_academic in transactiondetails%}
       <tr>
-                        <td><a href="/accounts/view-profile/{{ user }}" target="_blank">{{ a_academic.userId }}</a></td>
+                        <td><a href="/accounts/view-profile/{{ a_academic.userId }}" target="_blank">{{ a_academic.userId }}</a></td>
                         <td>{{ a_academic.paymentdetail.academic_year }}</td>
                         <td>{{ a_academic.paymentdetail.academic_id.institution_name}}</td>
                         <td>{{ a_academic.paymentdetail.academic_id.academic_code}}</td>
@@ -85,7 +85,7 @@
 
       {% for a_academic in ongoing_details %}
       <tr>
-                        <td><a href="/accounts/view-profile/{{ user }}" target="_blank">{{ a_academic.user }}</a></td>
+                        <td><a href="/accounts/view-profile/{{ a_academic.user }}" target="_blank">{{ a_academic.user }}</a></td>
                         <td>{{ a_academic.academic_year }}</td>
                         <td>{{ a_academic.academic_id.institution_name }}</td>
                         <td>{{ a_academic.academic_id.academic_code }}</td>
