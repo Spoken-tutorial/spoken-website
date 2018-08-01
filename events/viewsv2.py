@@ -2801,8 +2801,6 @@ def academic_transactions(request):
     if request.method == 'POST':
       form = TrainingManagerForm(user,request.POST)
       
-      #print "FORM ",form
-      #form = AccountexecutiveForm(request.POST)
       # if form.is_valid():
       #   form_data = form.cleaned_data
       get_state = request.POST.get('state')
@@ -2812,17 +2810,11 @@ def academic_transactions(request):
       else:
         academic_center = request.POST.get('college')
         
-
-      print "State : ",get_state
-      print "College : ",academic_center
-      print "Status : ",status
       if get_state:
         academic_centers = AcademicCenter.objects.filter(state=get_state)
         if academic_center :
-          print "1"
           paymentdetails = PaymentDetails.objects.filter(academic_id=academic_center)
         else:
-          print "2"
           paymentdetails = PaymentDetails.objects.filter(academic_id__in=academic_centers)
       else:
         academic_centers = AcademicCenter.objects.filter(state__in=state)
@@ -2830,13 +2822,10 @@ def academic_transactions(request):
 
       if status == 'O':
         paymentdetails = paymentdetails.filter(status=0)
-        print "payment_details :",paymentdetails
         context['ongoing_details'] = paymentdetails
 
       if status in ('S','F'):
-          print "paymentdetails : ",paymentdetails.values('id','academic_id__institution_name')
           paymenttransactiondetails = PaymentTransactionDetails.objects.filter(paymentdetail_id__in = paymentdetails, status=str(status))
-          print "paymenttransactionetails :",paymenttransactiondetails
           context['transactiondetails'] = paymenttransactiondetails
         
     

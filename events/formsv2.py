@@ -525,8 +525,8 @@ class LearnDrupalFeedbackForm(forms.ModelForm):
       
 class TrainingManagerForm(forms.Form):
     state = forms.ChoiceField(choices=[('', '-- None --'), ], widget=forms.Select(attrs = {}), required = False)
-    college = forms.ChoiceField(choices=[('0', '---------'), ], widget=forms.Select(attrs = {}), required = False)
-    choices = forms.ChoiceField(choices=[('', '---------'), ('S', 'Successfull'), ('F', 'Failed'),('O','Ongoing')])
+    college = forms.ChoiceField(choices=[('0', '-- None --'), ], widget=forms.Select(attrs = {}), required = False)
+    choices = forms.ChoiceField(choices=[('', '-- None --'), ('S', 'Successfull'), ('F', 'Failed'),('O','Ongoing')])
     def __init__(self, user,*args, **kwargs):
         initial = ''
         if 'instance' in kwargs:
@@ -543,7 +543,7 @@ class TrainingManagerForm(forms.Form):
         rp_states = ResourcePerson.objects.filter(status=1,user=user)
         # load the choices
         state_list = list(State.objects.filter(id__in=rp_states.values('state')).order_by('name').values_list('id', 'name'))
-        state_list.insert(0, ('', '-- Nones --'))
+        state_list.insert(0, ('', '-- None --'))
         self.fields['state'].choices = state_list
         centre_choices =[]
         centre_choices.insert(0,(0,'All Colleges'))
