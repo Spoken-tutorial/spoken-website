@@ -2556,9 +2556,9 @@ def payment_home(request):
   
   amount = "0"
   if accountexecutive.academic.institution_type_id == 5:
-      amount = "10"
+      amount = "5000"
   else:
-      amount = "10"
+      amount = "25000"
 
   context ={}
   context['accountexecutive'] = accountexecutive
@@ -2584,9 +2584,9 @@ def payment_status(request):
     amount = "0"
     
     if accountexecutive.academic.institution_type_id == 5:
-        amount = "10"
+        amount = "5000"
     else:
-        amount = "10"
+        amount = "25000"
     
     STdata = ''
     user_name = user.first_name+' '+user.last_name
@@ -2712,6 +2712,7 @@ def payment_success(request):
       return HttpResponseRedirect('/software-training')
   else:
     return HttpResponseRedirect('/software-training')
+    # return render(request,'payment_success.html',context)
 
 def payment_details(request,choice):
   academic_id = Accountexecutive.objects.filter(user = request.user).values('academic_id','academic_id__institution_name')
