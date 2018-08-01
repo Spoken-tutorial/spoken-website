@@ -5,6 +5,7 @@
 {% block heading %}
     <i class="fa fa-list-ul"></i> Transaction Manager Dashboard <a href="/software-training" class='pull-right go-back'>Dashboard</a>
     {% endblock %}
+    {% block search %}{% endblock %}
 {% block content %}
     <div class="row well">
         <div class='col-sm-8'>
@@ -84,7 +85,7 @@
 
       {% for a_academic in ongoing_details %}
       <tr>
-                        <td><a href="/accounts/view-profile/{{ user }}" target="_blank">{{ a_academic.userId }}</a></td>
+                        <td><a href="/accounts/view-profile/{{ user }}" target="_blank">{{ a_academic.user }}</a></td>
                         <td>{{ a_academic.academic_year }}</td>
                         <td>{{ a_academic.academic_id.institution_name }}</td>
                         <td>{{ a_academic.academic_id.academic_code }}</td>
