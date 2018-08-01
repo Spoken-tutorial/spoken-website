@@ -522,3 +522,46 @@ class LearnDrupalFeedbackForm(forms.ModelForm):
     self.fields['mention_foss'].required = False
     self.fields['like_to_give_testimonial'].required = False
     self.fields['testimonial'].required = False
+      
+class TrainingManagerForm(forms.Form):
+    state = forms.ChoiceField(choices=[('', '-- None --'), ], widget=forms.Select(attrs = {}), required = False)
+    college = forms.ChoiceField(choices=[('0', '---------'), ], widget=forms.Select(attrs = {}), required = False)
+    choices = forms.ChoiceField(choices=[('', '---------'), ('S', 'Successfull'), ('F', 'Failed'),('O','Ongoing')])
+    def __init__(self, user,*args, **kwargs):
+        initial = ''
+        if 'instance' in kwargs:
+            initial = kwargs["instance"]
+            del kwargs["instance"]
+
+        if 'user' in kwargs:
+            user = kwargs["user"]
+            del kwargs["user"]
+
+        super(TrainingManagerForm, self).__init__(*args, **kwargs)
+        
+
+        rp_states = ResourcePerson.objects.filter(status=1,user=user)
+        # load the choices
+        state_list = list(State.objects.filter(id__in=rp_states.values('state')).order_by('name').values_list('id', 'name'))
+        state_list.insert(0, ('', '-- Nones --'))
+        self.fields['state'].choices = state_list
+        centre_choices =[]
+        centre_choices.insert(0,(0,'All Colleges'))
+        
+        if args:
+            if 'state' in args[0]:
+                if args[0]['state'] and args[0]['state'] != '' and args[0]['state'] != 'None':
+                    centre_qs = AcademicCenter.objects.filter(state_id=args[0]['state']).order_by('institution_name')
+                    centre_choices = [(x.id, '%s, %s' % (x.institution_name, x.academic_code)) for x in centre_qs]
+                    centre_choices.insert(0,(0,'All Colleges'))
+                    self.fields['college'].choices = centre_choices
+                    self.fields['college'].widget.attrs = {}
+        # if initial:
+        #     self.fields['state'].initial = initial.academic.state_id
+        #     centre_qs = AcademicCenter.objects.filter(district_id=initial.academic.district_id)
+        #     centre_choices = [(x.id, '%s, %s' % (x.institution_name, x.academic_code)) for x in centre_qs]
+        #     centre_choices.insert(0,(0,'All Colleges'))
+        #     self.fields['college'].choices = centre_choices
+
+        #     # initial data
+        #     self.fields['college'].initial = initial.academic_id

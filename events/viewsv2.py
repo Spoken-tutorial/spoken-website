@@ -18,7 +18,7 @@ from events import display
 from events.forms import StudentBatchForm, TrainingRequestForm, \
     TrainingRequestEditForm, CourseMapForm, SingleTrainingForm, \
     OrganiserFeedbackForm,STWorkshopFeedbackForm,STWorkshopFeedbackFormPre,STWorkshopFeedbackFormPost,LearnDrupalFeedbackForm, LatexWorkshopFileUploadForm, UserForm, \
-    SingleTrainingEditForm
+    SingleTrainingEditForm,TrainingManagerForm
 
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, render_to_response, redirect
@@ -2787,71 +2787,60 @@ def payment_reconciliation_update(request):
     return HttpResponseRedirect("Invalid")
   return HttpResponse("OK")
 
+@csrf_protect
+@login_required
 def academic_transactions(request):
-    # Check if the logged in person is a Training State Manager 
-    state = State.objects.all()
-    context={}
-    context['state'] = state
-    state = request.GET.get('state')
-    city = request.GET.get('city')
+    user = User.objects.get(id=request.user.id)
+    rp_states = ResourcePerson.objects.filter(status=1,user=user)
+    state = State.objects.filter(id__in=rp_states.values('state'))
+    academic_center = request.POST.get('college')
     
-    num_status ={
-    'S' : 1,
-    'F' : 2,
-    'O' : 0
-    }
-    try:
-      academic_center = ''
-    
-      academic_center = int(request.GET.get('academic_center'))
-      status = request.GET.get('status')
-      paymentdetails = 0
-      if academic_center != 0:
-        paymentdetails = PaymentDetails.objects.filter(academic_id=academic_center)
-        print "Academic id"
-      else:
-        if state !='---------':
-          if city !='---------':
-            academic_centers = AcademicCenter.objects.filter(state=state,city=city)
-            paymentdetails = PaymentDetails.objects.filter(academic_id__in=academic_centers)
-          else:
-            academic_centers = AcademicCenter.objects.filter(state__name=state)
-            paymentdetails = PaymentDetails.objects.filter(academic_id__in=academic_centers)
-        else:
-          paymentdetails = PaymentDetails.objects.all()
-
       
+    context = {}
+    context['user'] = user
+    if request.method == 'POST':
+      form = TrainingManagerForm(user,request.POST)
+      
+      #print "FORM ",form
+      #form = AccountexecutiveForm(request.POST)
+      # if form.is_valid():
+      #   form_data = form.cleaned_data
+      get_state = request.POST.get('state')
+      status = request.POST.get('choices')
+      if academic_center in ('None','0',0):  
+        academic_center = False
+      else:
+        academic_center = request.POST.get('college')
+        
+
+      print "State : ",get_state
+      print "College : ",academic_center
+      print "Status : ",status
+      if get_state:
+        academic_centers = AcademicCenter.objects.filter(state=get_state)
+        if academic_center :
+          print "1"
+          paymentdetails = PaymentDetails.objects.filter(academic_id=academic_center)
+        else:
+          print "2"
+          paymentdetails = PaymentDetails.objects.filter(academic_id__in=academic_centers)
+      else:
+        academic_centers = AcademicCenter.objects.filter(state__in=state)
+        paymentdetails = PaymentDetails.objects.filter(academic_id__in=academic_centers)
+
       if status == 'O':
         paymentdetails = paymentdetails.filter(status=0)
+        print "payment_details :",paymentdetails
         context['ongoing_details'] = paymentdetails
-      else:
-        if status!= 0:
-          paymenttransactionetails = PaymentTransactionDetails.objects.filter(paymentdetail_id__in = paymentdetails, status=str(status))      
-        context['transactiondetails'] = paymenttransactionetails
-      
-    except Exception as e:
-      pass
+
+      if status in ('S','F'):
+          print "paymentdetails : ",paymentdetails.values('id','academic_id__institution_name')
+          paymenttransactiondetails = PaymentTransactionDetails.objects.filter(paymentdetail_id__in = paymentdetails, status=str(status))
+          print "paymenttransactionetails :",paymenttransactiondetails
+          context['transactiondetails'] = paymenttransactiondetails
+        
+    
+    else:
+      form = TrainingManagerForm(user=request.user)
+    context['form'] = form
     return render(request, 'payment.html', context)
-
-
-import  json
-from django.views.decorators.csrf import csrf_exempt
-@csrf_exempt
-def ajax_city(request):
-    state = request.POST.get('state', False)
-    city = request.POST.get('city', False)
-    data = ''
-    if request.method == 'POST':
-        cities = City.objects.filter(state__name=state).order_by('name')
-        cities_json = '<option id=0>---------</option>'
-        academic_centers_json = ''
-        for i in cities:
-            cities_json +='<option id='+str(i.id)+'>'+i.name+'</option>'
-        if city:
-            academic_center= AcademicCenter.objects.filter(state__name=state,city__name=city,status = 1 )
-            for j in academic_center:
-                academic_centers_json+= '<option value='+str(j.id)+'>'+j.institution_name+'</option>'
-        data = {"city":cities_json,"academic_center":academic_centers_json,}
-        
-        
-    return HttpResponse(json.dumps(data), content_type='application/json')

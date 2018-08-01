@@ -1,73 +1,58 @@
 {% extends 'spoken/templates/base.html' %}
 {% load widget_tweaks %}
 {% load static %}
-{% load eventsdata %}
-{% load cmsdata %}
-{% load creationdata %}
-{% block title %} {{ model }} Academic Transactions {% endblock %}
-{% block compresscssblock %}
-    <link rel="stylesheet" href="{% static 'spoken/css/jquery.fancybox.css' %}" type="text/css" media="screen" charset="utf-8" />
-    <link rel="stylesheet" href="{% static 'spoken/css/jquery.datetimepicker.css' %}" type="text/css" media="screen" charset="utf-8" />
-{% endblock %}
-{% block heading %} <i class="fa fa-list-ul"></i> {{ model }} Academic Transactions {% endblock %}
-{% block search %}{% endblock %}
+{% block title %}Training Manager Dashboard{% endblock %}
+{% block heading %}
+    <i class="fa fa-list-ul"></i> Transaction Manager Dashboard <a href="/software-training" class='pull-right go-back'>Dashboard</a>
+    {% endblock %}
 {% block content %}
-    <div class= 'filters row' >
-      {%csrf_token%}
-        <form action=""  method="get" class='form-horizontal'>
-            <div class="col-md-4 col-md-4">
-                <div class="form-group">
-                    <label for="id_state" class="col-sm-4 control-label">State</label>
-                    <div class="col-sm-8">
-                      <select class="form-control state" name="state" id="state" onchange="get_instituition_details()">
-                        <option id="0">---------</option>
-                        {%for a_state in state%}
-                        <option id="{{a_state.id}}" >{{a_state.name}}</option>
-                        {% endfor %}
-                    </select>
+    <div class="row well">
+        <div class='col-sm-8'>
+            <form action="" method="post" class='form-horizontal'>{% csrf_token %}
+                {% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
+                    {% if form.non_field_errors %}
+                    <ul>
+                      {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                      {% endfor %}
+                    </ul>
+                    {% endif %}
+                    <div class="form-group">
+                        <label for="id_state" class="col-sm-3 control-label">State</label>
+                        <div class="col-sm-9">
+                            {% render_field form.state class+="form-control state" tabindex="1" data-placeholder="Choose State" %}
+                            {{ form.state.errors }}
+                        </div>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label for="id_city" class="col-sm-4 control-label">City/Town</label>
-                    <div class="col-sm-8">
-                        <select class="form-control city" name="city" id="city" onchange="get_instituition_details()">
-                        <option id="0">---------</option>
-                    </select>
-                    </div>
-                </div>
-              </div>
-              <div class="col-md-4 col-md-4">
-              <div class="form-group">
-                    <label for="id_resource_center" class="col-sm-4 control-label">Institution</label>
-                    <div class="col-sm-8">
-                    <select class="form-control institue" id="institue" name="academic_center">
-                        <option value="0">---------</option>
-                    </select>
-                    </div>
-                </div>
-                <div class="form-group ">
-                    <label for="id_academic_institution_type" class="col-sm-4 control-label">Status</label>
-                    <div class="col-sm-8">
-                    <select class="form-control" id="institue" name="status">
-                        <option value="0">---------</option>
-                        <option value="S">Successfull</option>
-                        <option value="F">Failed</option>
-                        <option value="O">Ongoing</option>
-                    </select>
-                    </div>
-              </div>
 
-            
-                <div class="form-group ">
-                  <div class="col-sm-8 ">
-                     <input class="btn btn-success " type="submit" value="Filter" />
-                    <a class="btn btn-success col-md-offset-3" href="{{request.path}}?{{ request.GET|reset_get_values}}">Reset Filter</a>
+                    <div class="form-group">
+                        <label for="id_college" class="col-sm-3 control-label">Institution <span class='ajax-refresh ajax-refresh-institution'><i class="fa fa-2 fa-refresh fa-spin"></i></span></label>
+                        <div class="col-sm-9">
+                            {% render_field form.college class+="form-control college" tabindex="1" data-placeholder="Choose Institution" %}
+                            
+                        </div>
+                    </div>
+
+            <div class="form-group ">
+                  <label for="id_academic_institution_type" class="col-sm-3 control-label">Status</label>
+                  <div class="col-sm-8">
+                  {% render_field form.choices class+="form-control choices" tabindex="1" %}
+                    {{ form.choices.errors }}
                   </div>
-                </div>
-        </form>
+            </div>
 
+                    <div class="form-group">
+                        <div class="col-sm-offset-3 col-sm-9">
+                            <input class="btn btn-primary" type="submit" value="Submit" />
+                            <a class="btn btn-success col-md-offset-3" href="/software-training/academic-transactions/">Reset Filter</a>
+                         </div>
+                     </div>
+                {% endwith %}
+            </form>
+        </div>
     </div>
-<div>
+
+    <div>
     <table class="table table-bordered table-hover">
       <tr class="active">
                       <th>User</th>
@@ -85,7 +70,7 @@
 
       {%for a_academic in transactiondetails%}
       <tr>
-                        <td><a href="/accounts/view-profile/{{ user }}" target="_blank">{{ user }}</a></td>
+                        <td><a href="/accounts/view-profile/{{ user }}" target="_blank">{{ a_academic.userId }}</a></td>
                         <td>{{ a_academic.paymentdetail.academic_year }}</td>
                         <td>{{ a_academic.paymentdetail.academic_id.institution_name}}</td>
                         <td>{{ a_academic.paymentdetail.academic_id.academic_code}}</td>
@@ -96,10 +81,10 @@
                         <td>{{a_academic.msg}}</td>
                       </tr>
       {%endfor%}
-      
+
       {% for a_academic in ongoing_details %}
       <tr>
-                        <td><a href="/accounts/view-profile/{{ user }}" target="_blank">{{ user }}</a></td>
+                        <td><a href="/accounts/view-profile/{{ user }}" target="_blank">{{ a_academic.userId }}</a></td>
                         <td>{{ a_academic.academic_year }}</td>
                         <td>{{ a_academic.academic_id.institution_name }}</td>
                         <td>{{ a_academic.academic_id.academic_code }}</td>
@@ -113,56 +98,43 @@
       
     </table>
   </div>
-  
-  
+
 {% endblock %}
-{% block compressjsblock %}
-    
-    <script type="text/javascript">
-        function get_instituition_details(){
-          var state = $("#state").val();
-          var city = $("#city").val();
 
-
-            if(state != ''){
-                  $.ajax({
-                        url: "/software-training/payment/ajax-city/",
-                        type: "POST",
-                        dataType : "json",
-                        data: {
-                            "state": state,
-                            "city" : city,
-                        },
-                        success: function(data) {
-                            if(data['city'] && data['academic_center'] == ''){
-                              
-                                $('.city').html(data['city']);
-                                $('.city').attr('disabled');
-                            }
-                            if(data['city'] && data['academic_center']){
-                              $('.institue').html(data['academic_center']);
-                            }
+{% block compressinlinejsblock %}
+<script>
+    $(document).ready(function(){
+        $acstate = $('.state');
+        //$ac_district = $(".district");
+        $college = $(".college");
+        
+        $acstate.change(function() {
+            var state = $(this).val();
+            if(state){
+                $.ajax({
+                    url: "/software-training/ajax-state-collage/",
+                    type: "POST",
+                    data: {
+                        state : state
+                    },
+                    beforeSend: function() {
+                        $('.ajax-refresh-institution').show();
+                    },
+                    success: function(data) {
+                        if(data){
+                            $college.html(data);
+                            $college.removeAttr("disabled");
+                            $('.ajax-refresh-institution').hide();
+                        } else{
+                            $college.attr("disabled", "disabled");
+                            $('.ajax-refresh-institution').hide();
+                            alert('No college found for this district!!');
                         }
-                    })
-                }
-
-};
-        </script>
-{% endblock %}
-{% block uncompressjsblock %}
-    
-    <script type="text/javascript">
-      $(document).ready(function () {
-
-        var url = new URL(window.location.href);
-        var state = url.searchParams.get("state");
-        var city =  url.searchParams.get("city");
-        var institue =  url.searchParams.get("city");
-        var status =  url.searchParams.get("status");
-      $('.states').html(state);
-      $('.citys').html(city);
-      $('.institues').html(institue);
-      $('.statuss').html(status);
+                    }
+                });
+            }
+        });
     });
-    </script>
+</script>
 {% endblock %}
+
