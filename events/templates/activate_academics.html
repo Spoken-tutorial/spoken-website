@@ -10,32 +10,43 @@
 {% endblock %}
 {% block search %}{% endblock %}
 {% block content %}
+{{message.tags}}
   <div class= 'filters row' >
     <form action="" method="get" class='form-horizontal'>
+
       <div class="col-lg-4 col-md-4 col-sm-4">
         <div class="form-group">
           <label for="id_state" class="col-sm-4 control-label">State</label>
           <div class="col-sm-8">
-            {% render_field form.state class+="form-control chosen state" tabindex="1" %}
+            {% render_field form.state class+="form-control state" tabindex="1" %}
             {{ form.state.errors }}
           </div>
         </div>
         <div class="form-group">
-          <label for="id_state" class="col-sm-4 control-label">Institution Type</label>
+          <label for="id_institution_type" class="col-sm-4 control-label">Institution Type</label>
           <div class="col-sm-8">
-            {% render_field form.institution_type class+="form-control chosen institution_type" tabindex="1" %}
+            {% render_field form.institution_type class+="form-control institution_type" tabindex="1" %}
             {{ form.institution_type.errors }}
           </div>
         </div>
       </div>
+
       <div class="col-lg-4 col-md-4 col-sm-4">
         <div class="form-group">
-          <label for="id_resource_center" class="col-sm-4 control-label">Institution</label>
+          <label for="id_institution_name" class="col-sm-4 control-label">Institution</label>
           <div class="col-sm-8">
             {% render_field form.institution_name class+="form-control institution_name" tabindex="1" %}
             {{ form.institution_name.errors }}
           </div>
         </div>
+         <div class="form-group">
+          <label for="id_state" class="col-sm-4 control-label">Status</label>
+          <div class="col-sm-8">
+            {% render_field form.status class+="form-control status" tabindex="1" %}
+            {{ form.status.errors }}
+          </div>
+        </div>
+
         <div class="form-group">
           <div class="col-sm-offset-4 col-sm-8">
            <input class="btn btn-success" type="submit" value="Filter" />
@@ -54,13 +65,18 @@
             <td>{{ forloop.counter }}
 						<td>{{ record.state }}</td>
 						<td>{{ record.institution_name }}</td>
-						<td><a href="{% url 'statistics:academic_center_view' record.id %}" target="_blank">View</a></td>
+						<td>|<a href="{% url 'statistics:academic_center_view' record.id %}" target="_blank">View</a>|
+              {% if record.status == 3 %}
+              <a href="#" onclick="activateorg({{record.id}},'activate');">Activate</a>|
+              {% else %}
+              <a href="#" onclick="activateorg({{record.id}},'deactivate');">Deactivate</a> |
+              {% endif %}
+            </td>
             <td>
               {% if record.status == 3 %}
-              <a href="{% url 'statistics:activate_academic' record.id %}">Activate</a>
-              
+              Deactivated 
               {% else %}
-              | Activated |
+              Activated 
               {% endif %}
             </td>
 					</tr>
@@ -71,6 +87,28 @@
 		{% endif %}
 	</div>
 {% endblock %}
-{% block compressjsblock %}
-  
+{% block jsblock %}
+<script type="text/javascript">
+
+  function activateorg(recordid,action){
+    $.ajax({
+         type:"POST",
+         url:"/software-training/activate-academics/",
+         data: {
+                'collegeid' : recordid,
+                'action' : action,
+                },
+         success: function(){
+            if(action == 'activate') {
+              alert("College Activated....");
+            }
+            if(action == 'deactivate') {
+              alert("College Deactivated....");
+            }
+             window.location.reload();
+         }
+    });
+        
+}
+</script>
 {% endblock %}

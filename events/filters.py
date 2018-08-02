@@ -26,6 +26,7 @@ class AcademicCenterFilter(django_filters.FilterSet):
 
 class ActivateAcademicCenterFilter(django_filters.FilterSet):
   state = django_filters.ChoiceFilter(choices=State.objects.none())  
+  status = django_filters.ChoiceFilter(choices= [('', '---------'), (1, 'Active'), (3, 'Deactive')])
   institution_name = django_filters.CharSearchFilter()
   def __init__(self, *args, **kwargs):
     user = None
