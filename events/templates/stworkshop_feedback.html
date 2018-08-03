@@ -93,6 +93,22 @@
             </div>
           </div>
 
+          <div class="form-group ">
+            <label class="col-sm-3 control-label" for= "id_designation">Designation </label>
+            <div class="col-sm-9">
+              {% render_field form.designation class+="form-control designation" %}
+              {{ form.designation.errors }}
+            </div>
+          </div>
+
+          <div class="form-group ">
+            <label class="col-sm-3 control-label" for= "id_educational_back">Educational Background </label>
+            <div class="col-sm-9">
+              {% render_field form.educational_back class+="form-control educational_back" %}
+              {{ form.educational_back.errors }}
+            </div>
+          </div>
+
           <div class="form-group">
             <label class="col-sm-3 control-label" for= "id_foss">Foss </label>
             <div class="col-sm-9">
@@ -123,7 +139,20 @@
               {% render_field form.total_tutorials1 class+="form-control total_tutorials1" %}
               {{ form.total_tutorials1.errors }}
             </div>
-          </div><br><br>
+          </div>
+
+          <div class="form-group">
+            <label class="col-sm-3 control-label" for= "id_language_of_tutorial">Language in which you watched the tutorials during the workshop</label>
+            <div class="col-sm-9">
+              {% render_field form.language_of_tutorial class+="form-control language_of_tutorial" %}
+              {{ form.language_of_tutorial.errors }}
+            </div>
+          </div>
+
+
+
+
+          <br><br>
           <table style="width:100%;" class="table tablest"> 
             <tr>
               <th class="tabhead">Training Methodology</th>
@@ -287,6 +316,16 @@
                   {% endif %}
                 {% endfor %}
             </tr>
+
+            <tr >
+              <td><label for="id_translate">These tutorials should be translated into various Indian languages to help others. </label>{{ form.translate.errors }}</td>
+                {% for choice in form.translate %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+
           </table>
 
           <div class="form-group">
@@ -346,6 +385,24 @@
           <tr >
               <td><label for="id_difficult_simultaneously">It was difficult to watch the video tutorial and practice the steps simultaneously. </label>{{ form.difficult_simultaneously.errors }}</td>
                 {% for choice in form.difficult_simultaneously %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+
+            <tr >
+              <td><label for="id_too_fast">I did not like the Spoken Tutorial workshop because the videos played too fast.</label>{{ form.too_fast.errors }}</td>
+                {% for choice in form.too_fast %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+
+            <tr >
+              <td><label for="id_too_slow">I did not like the Spoken Tutorial workshop because the videos played too slow.</label>{{ form.too_slow.errors }}</td>
+                {% for choice in form.too_slow %}
                 {% if not forloop.counter == 1 %}
                     <td>{{ choice.tag }}</td>
                   {% endif %}
