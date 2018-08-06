@@ -516,23 +516,3 @@ def tutorial_content(request, template='statistics/templates/statistics_content.
     context['ordering'] = ordering
 
     return render(request, template, context)
-
-def activate_academic(request, academic_id):
-    ac = AcademicCenter.objects.get(id=academic_id)
-    deactivate_status = 3
-    if ac:
-        #check if college paid the subscription fees
-        #activate all organiser fom this college
-        organisers_from_academic = Organiser.objects.filter(status=deactivate_status, academic_id=ac.id)
-        for organiser in organisers_from_academic:
-            #all the organisers from this academic are activated here.
-            organiser.status = 1 
-            organiser.save()
-        #Activate that collge
-        ac.status = 1
-        ac.save()
-        messages.success(request, 'Academic center activated.')
-    else:
-        messages.error(request, 'No records found.')
-    
-    return HttpResponseRedirect("/statistics/academic-center/")
