@@ -65,6 +65,7 @@
             <td>{{ forloop.counter }}
 						<td>{{ record.state }}</td>
 						<td>{{ record.institution_name }}</td>
+            <td>{{ record.academic_code }}</td>
 						<td>|<a href="{% url 'statistics:academic_center_view' record.id %}" target="_blank">View</a>|
               {% if record.status == 3 %}
               <a href="#" onclick="activateorg({{record.id}},'activate');">Activate</a>|

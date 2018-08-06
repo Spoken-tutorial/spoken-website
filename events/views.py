@@ -2830,8 +2830,9 @@ def activate_academics(request):
         1: SortableHeader('#', False),
         2: SortableHeader('State', False),
         3: SortableHeader('institution_name', True, 'Institution Name'),
-        4: SortableHeader('Action', False),
-        5: SortableHeader('Status', False)
+        4: SortableHeader('academic_code', True, 'Academic Code'),
+        5: SortableHeader('Action', False),
+        6: SortableHeader('Status', False)
     }
     print request
     if request.method == 'POST':
