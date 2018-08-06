@@ -164,7 +164,7 @@ class AcademicCenter(models.Model):
   rating = models.PositiveSmallIntegerField()
   contact_person = models.TextField()
   remarks = models.TextField()
-  status = models.BooleanField()
+  status = models.PositiveSmallIntegerField()
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
 
