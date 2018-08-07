@@ -54,6 +54,8 @@
                             <ul>
                                 <li><a href="/software-training/training-request/rp/pending/">Pending / Ongoing Training Request</a></li>
                                 <li><a href="/software-training/training-request/rp/completed/">Completed Training Request</a></li>
+                                <li><a href="/software-training/activate-academics/">Activate Academics</a></li>
+
                             </ul>
                             <h5>Online Assessment Test</h5>
                             <ul>
@@ -118,10 +120,10 @@
                         <div class="panel-heading panel-heading-notif">Join with Us</div>
                         <div class="panel-body">
                             <ul>
-                                {% if not user|is_organiser %}
+                                {% if not user|is_organiser and not user|is_organiser_deactivated %}
                                     <li><a href="/software-training/organiser/request/{{user.username}}">Add me as Organiser</a></li>
                                 {% endif %}
-                                {% if not user|is_invigilator %}
+                                {% if not user|is_invigilator and not user|is_invigilator_deactivated %}
                                     <li><a href="/software-training/invigilator/request/{{user.username}}">Add me as Invigilator</a></li>
                                 {% endif %}
                                 {% if not user|is_accountexecutive %}

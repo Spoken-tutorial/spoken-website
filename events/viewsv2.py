@@ -2752,13 +2752,15 @@ def payment_reconciliation_update(request):
 
   if STresponsedata_hexa == random:
     try:
-      accountexecutive = Accountexecutive.objects.get(user_id = userId,status_gt=0)
+      accountexecutive = Accountexecutive.objects.get(user_id = userId,status__gt=0)
     except:
+      print "no ac"
       pass
     try:
-      pd = PaymentDetails.objects.get(user = userId, academic_id = accountexecutive.academic.id, status = 0)
+      print userId, accountexecutive.academic_id
+      pd = PaymentDetails.objects.get(user_id = userId, academic_id_id = accountexecutive.academic_id)
     except:
-      return HttpResponseRedirect("Failed")
+      return HttpResponseRedirect("Failed1")
 
     try:
       transactiondetails = PaymentTransactionDetails()
@@ -2775,7 +2777,7 @@ def payment_reconciliation_update(request):
       transactiondetails.save()
       print "saved"
     except:
-      return HttpResponseRedirect("Failed")
+      return HttpResponseRedirect("Failed2")
     
     if status == 'S':
       pd.status = 1
