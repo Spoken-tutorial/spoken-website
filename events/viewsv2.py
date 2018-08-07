@@ -2756,7 +2756,7 @@ def payment_reconciliation_update(request):
     except:
       pass
     try:
-      pd = PaymentDetails.objects.get(user = userId, academic_id = accountexecutive.academic.id, status = 0)
+      pd = PaymentDetails.objects.get(user = userId, academic_id = accountexecutive.academic.id)
     except:
       return HttpResponseRedirect("Failed")
 
