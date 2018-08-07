@@ -65,6 +65,7 @@
     <ul class="tabs nav nav-tabs">
         <li {% if status == 'inactive' %}{{ 'class="active"'}}{% endif %}><a href="{% url 'events:organiser_invigilator_index' role 'inactive' %}"><i class="fa fa-list-ul"></i> New Requests</a></li>
         <li {% if status == 'active' %}{{ 'class="active"'}}{% endif %}><a href="{% url 'events:organiser_invigilator_index' role 'active' %}"><i class="fa fa-list-ul"></i> Existing</a></li>
+        <li {% if status == 'deactivated' %}{{ 'class="active"'}}{% endif %}><a href="{% url 'events:organiser_invigilator_index' role 'deactivated' %}"><i class="fa fa-list-ul"></i> Deactivated</a></li>
         <li {% if status == 'blocked' %}{{ 'class="active"'}}{% endif %}><a href="{% url 'events:organiser_invigilator_index' role 'blocked' %}"><i class="fa fa-list-ul"></i> Blocked</a></li>
     </ul>
     <div class='tab-content'>

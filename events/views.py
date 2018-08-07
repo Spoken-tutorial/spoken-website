@@ -201,6 +201,20 @@ def is_accountexecutive(user):
     except:
         pass
 
+def is_organiser_deactivated(user):
+    try:
+        if user.organiser and user.organiser.status == 3:
+            return True
+    except:
+        pass
+
+def is_invigilator_deactivated(user):
+    try:
+        if user.invigilator and user.invigilator.status == 3:
+            return True
+    except:
+        pass
+
 def is_organiser(user):
     """Check if the user is having organiser rights"""
     try:
@@ -2333,6 +2347,8 @@ def organiser_invigilator_index(request, role, status):
         status = 0
     elif status == 'blocked':
         status = 2
+    elif status == 'deactivated':
+        status = 3
     else:
         raise PermissionDenied()
 
