@@ -55,23 +55,25 @@
 
     <div>
     <table class="table table-bordered table-hover">
-      <tr class="active">
-                      <th>User</th>
-                     <th>Academic Year</th>
-                     <th>College Name</th>
-                     <th>College Id</th>
-                      <th>Completion Date &amp; Time</th>
-                      <th >Amount</th>
-                      <th>Transaction ID</th>
-                      <th>Reference No</th>
-                      <th>Status</th>
-                  </tr>
+    <tr class="active">
+      <th>User</th>
+      <th>User Id</th>
+      <th>Academic Year</th>
+      <th>College Name</th>
+      <th>College Id</th>
+      <th>Completion Date &amp; Time</th>
+      <th >Amount</th>
+      <th>Transaction ID</th>
+      <th>Reference No</th>
+      <th>Status</th>
+    </tr>
 
       
 
       {%for a_academic in transactiondetails%}
       <tr>
                         <td><a href="/accounts/view-profile/{{ a_academic.userId }}" target="_blank">{{ a_academic.userId }}</a></td>
+                        <td>{{ a_academic.userId_id }}</td>
                         <td>{{ a_academic.paymentdetail.academic_year }}</td>
                         <td>{{ a_academic.paymentdetail.academic_id.institution_name}}</td>
                         <td>{{ a_academic.paymentdetail.academic_id.academic_code}}</td>
@@ -86,6 +88,7 @@
       {% for a_academic in ongoing_details %}
       <tr>
                         <td><a href="/accounts/view-profile/{{ a_academic.user }}" target="_blank">{{ a_academic.user }}</a></td>
+                        <td>{{ a_academic.user_id }}</td>
                         <td>{{ a_academic.academic_year }}</td>
                         <td>{{ a_academic.academic_id.institution_name }}</td>
                         <td>{{ a_academic.academic_id.academic_code }}</td>
