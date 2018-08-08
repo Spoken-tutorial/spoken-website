@@ -2829,7 +2829,6 @@ def academic_transactions(request):
             paymentdetails = paymentdetails.filter(Q(created__gt=request.POST.get('fdate')) & Q(created__lt= request.POST.get('tdate')))
           else:
             paymentdetails = paymentdetails.filter(created__gt=request.POST.get('fdate'))
-            messages.success(request,"ongoing")
         context['ongoing_details'] = paymentdetails.order_by('created')
 
       if status in ('S','F'):
