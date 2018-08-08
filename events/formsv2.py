@@ -535,6 +535,8 @@ class TrainingManagerForm(forms.Form):
     state = forms.ChoiceField(choices=[('', '-- None --'), ], widget=forms.Select(attrs = {}), required = False)
     college = forms.ChoiceField(choices=[('0', '-- None --'), ], widget=forms.Select(attrs = {}), required = False)
     choices = forms.ChoiceField(choices=[('', '-- None --'), ('S', 'Successfull'), ('F', 'Failed'),('O','Ongoing')])
+    fdate = forms.DateTimeField(required = False)
+    tdate = forms.DateTimeField(required = False)
     def __init__(self, user,*args, **kwargs):
         initial = ''
         if 'instance' in kwargs:

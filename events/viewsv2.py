@@ -2719,7 +2719,7 @@ def payment_details(request,choice):
   paymentdetails = PaymentDetails.objects.filter(academic_id=academic_id[0]['academic_id'])
   paymenttransactionetails = PaymentTransactionDetails.objects.filter(paymentdetail_id = paymentdetails)
   user = User.objects.get(id = request.user.id)
-  print "paymenttransactionetails : ",paymenttransactionetails.filter(status='S').count()
+  
   context ={}
   context['user'] = user
   context['completed'] = paymenttransactionetails.filter(status='S').count()
@@ -2798,7 +2798,6 @@ def academic_transactions(request):
     state = State.objects.filter(id__in=rp_states.values('state'))
     academic_center = request.POST.get('college')
     
-      
     context = {}
     context['user'] = user
     if request.method == 'POST':
@@ -2824,12 +2823,25 @@ def academic_transactions(request):
         paymentdetails = PaymentDetails.objects.filter(academic_id__in=academic_centers)
 
       if status == 'O':
-        paymentdetails = paymentdetails.filter(status=0)
-        context['ongoing_details'] = paymentdetails
+        paymentdetails = paymentdetails.filter(status=0)        
+        if request.POST.get('fdate'):
+          if request.POST.get('tdate'):
+            paymentdetails = paymentdetails.filter(Q(created__gt=request.POST.get('fdate')) & Q(created__lt= request.POST.get('tdate')))
+          else:
+            paymentdetails = paymentdetails.filter(created__gt=request.POST.get('fdate'))
+            messages.success(request,"ongoing")
+        context['ongoing_details'] = paymentdetails.order_by('created')
 
       if status in ('S','F'):
-          paymenttransactiondetails = PaymentTransactionDetails.objects.filter(paymentdetail_id__in = paymentdetails, status=str(status))
-          context['transactiondetails'] = paymenttransactiondetails
+        paymenttransactiondetails = PaymentTransactionDetails.objects.filter(paymentdetail_id__in = paymentdetails, status=str(status))
+        if request.POST.get('fdate'):
+          if request.POST.get('tdate'):
+            paymenttransactiondetails = paymenttransactiondetails.filter(Q(created__gt=request.POST.get('fdate')) & Q(created__lt= request.POST.get('tdate')))
+          else:
+            paymenttransactiondetails = paymenttransactiondetails.filter(created__gt=request.POST.get('fdate'))            
+
+          
+        context['transactiondetails'] = paymenttransactiondetails
         
     
     else:
