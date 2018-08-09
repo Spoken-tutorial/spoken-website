@@ -2797,7 +2797,7 @@ def academic_transactions(request):
     rp_states = ResourcePerson.objects.filter(status=1,user=user)
     state = State.objects.filter(id__in=rp_states.values('state'))
     academic_center = request.POST.get('college')
-    
+    paymenttransactiondetails = ''
     context = {}
     context['user'] = user
     if request.method == 'POST':
@@ -2830,19 +2830,22 @@ def academic_transactions(request):
           else:
             paymentdetails = paymentdetails.filter(created__gt=request.POST.get('fdate'))
         context['ongoing_details'] = paymentdetails.order_by('created')
+      else:
+        if status in ('S','F'):
+          paymenttransactiondetails = PaymentTransactionDetails.objects.filter(paymentdetail_id__in = paymentdetails, status=str(status)).exclude(requestType='R')
+        if status == 'R':
+          paymenttransactiondetails = PaymentTransactionDetails.objects.filter(paymentdetail_id__in = paymentdetails, requestType='R')
 
-      if status in ('S','F'):
-        paymenttransactiondetails = PaymentTransactionDetails.objects.filter(paymentdetail_id__in = paymentdetails, status=str(status))
         if request.POST.get('fdate'):
           if request.POST.get('tdate'):
             paymenttransactiondetails = paymenttransactiondetails.filter(Q(created__gt=request.POST.get('fdate')) & Q(created__lt= request.POST.get('tdate')))
           else:
-            paymenttransactiondetails = paymenttransactiondetails.filter(created__gt=request.POST.get('fdate'))            
-
-          
+            paymenttransactiondetails = paymenttransactiondetails.filter(created__gt=request.POST.get('fdate'))
+      
         context['transactiondetails'] = paymenttransactiondetails
-        
-    
+        if status == 'R':
+          context['total'] = paymenttransactiondetails.aggregate(Sum('amount'))
+
     else:
       form = TrainingManagerForm(user=request.user)
     context['form'] = form
