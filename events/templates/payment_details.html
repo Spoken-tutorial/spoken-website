@@ -59,7 +59,7 @@
                         <td><a href="/accounts/view-profile/{{ user }}" target="_blank">{{ user }}</a></td>
                         <td>{{ detail.paymentdetail_id__academic_year }}</td>
                         <td>{{ detail.created }}</td>
-                        <td>{{detail.paymentdetail_id__amount}}</td>
+                        <td>{{detail.amount}}</td>
                         <td>{{detail.transId}}</td>
                         <td>{{detail.refNo}}</td>
                         <td>{{detail.msg}}</td>
@@ -99,7 +99,7 @@
                         <td><a href="/accounts/view-profile/{{ user }}" target="_blank">{{ user }}</a></td>
                         <td>{{ detail.paymentdetail_id__academic_year }}</td>
                         <td>{{ detail.created }}</td>
-                        <td>{{detail.paymentdetail_id__amount}}</td>
+                        <td>{{detail.amount}}</td>
                         <td>{{detail.transId}}</td>
                         {% if detail.refNo != 'null'%}
                         <td>{{detail.refNo}}</td>
