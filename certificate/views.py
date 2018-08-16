@@ -140,6 +140,8 @@ def _get_detail(serial_no):
         year = '2016'
     elif serial_no[3:5] == '17':
         year = '2017'
+    elif serial_no[3:5] == '18':
+        year = '2018'
     return purpose, year, serial_no[-1]
 
 
@@ -651,7 +653,7 @@ def koha_workshop_download(request):
         name = user.name
         college = user.college
         purpose = user.purpose
-        year = '17'
+        year = '18'
         id = int(user.id)
         hexa = hex(id).replace('0x', '').zfill(6).upper()
         serial_no = '{0}{1}{2}{3}'.format(purpose, year, hexa, type)
