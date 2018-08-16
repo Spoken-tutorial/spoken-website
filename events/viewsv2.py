@@ -52,6 +52,14 @@ from StringIO import StringIO
 # import helpers
 from events.views import is_organiser, is_invigilator, is_resource_person, is_administrator, is_accountexecutive
 from events.helpers import get_prev_semester_duration
+
+from subprocess import call
+from tempfile import mkdtemp, mkstemp
+from django.template.loader import render_to_string
+from string import Template
+import os
+
+
 class JSONResponseMixin(object):
   """
   A mixin that can be used to render a JSON response.
@@ -2799,6 +2807,7 @@ def academic_transactions(request):
     academic_center = request.POST.get('college')
     paymenttransactiondetails = ''
     context = {}
+    status = ''
     context['user'] = user
     if request.method == 'POST':
       form = TrainingManagerForm(user,request.POST)
@@ -2849,4 +2858,47 @@ def academic_transactions(request):
     else:
       form = TrainingManagerForm(user=request.user)
     context['form'] = form
+    context['status'] = status
     return render(request, 'payment.html', context)
+
+def academic_receipt(request,pay_tr_id):
+
+    payment_details = PaymentTransactionDetails.objects.get(id=pay_tr_id)
+    
+    # In a temporary folder, make a temporary file
+    cur_path = os.path.dirname(os.path.realpath(__file__))
+    dest_folder = cur_path+'/sample.pdf'
+    os.chdir(cur_path)
+    tmp_folder = mkdtemp('tex')
+    os.chdir(tmp_folder)        
+    texfile, texfilename = mkstemp(dir=tmp_folder)
+    tmp_folder =os.path.abspath(os.path.join(texfilename, os.pardir))
+    
+    s = Template('template_Billing.tex')
+    pdf_data ={}
+    pdf_data['tr_id']=payment_details.transId
+    pdf_data['college'] = payment_details.paymentdetail.academic_id
+    pdf_data['amount'] = payment_details.amount
+    pdf_data['created'] = payment_details.created
+    pdf_data['received'] = payment_details.updated
+    pdf_data['user'] = payment_details.paymentdetail.user
+    # Pass the TeX template through Django templating engine and into the temp file
+    os.write(texfile, render_to_string(s.template,pdf_data))
+    os.close(texfile)
+    # Compile the TeX file with PDFLaTeX
+    call(['pdflatex', texfilename])
+    # Move resulting PDF to a more permanent location
+    os.rename(texfilename + '.pdf', dest_folder)
+    # Remove intermediate files
+    os.remove(texfilename)
+    os.remove(texfilename + '.aux')
+    os.remove(texfilename + '.log')
+    os.rmdir(tmp_folder)
+
+    with open(dest_folder,'r') as pdf :
+      response = HttpResponse(content_type='application/pdf')
+      response['Content-Disposition'] = 'attachment; \
+                  filename=%s' % (str(payment_details.paymentdetail.academic_id)+" ST.pdf")
+      response.write(pdf.read())
+    os.remove(dest_folder)
+    return response

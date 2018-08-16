@@ -317,5 +317,5 @@ urlpatterns = [
     ),
     
     url(r'^academic-transactions/$','events.viewsv2.academic_transactions',name="payment"),
-
+    url(r'^academic-transactions/academic_receipt/(?P<pay_tr_id>\w+)/$', 'events.viewsv2.academic_receipt', name='academic_receipt'),
 ]
