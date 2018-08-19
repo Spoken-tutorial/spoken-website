@@ -27,6 +27,24 @@
                         </div>
                     </div>
                 {% endif %}
+                
+                {% if user|get_language_manager %}
+                    <div class="panel panel-info">
+                    <div class="panel-heading panel-heading-notif">Language Manager</div>
+                    <div class="panel-body">
+                        <ul>
+                            <li>
+                                <a target="_blank" href="/creation/rate_contributors/rate">Rate Contributors</a></li>
+                            </li>
+                            <li>
+                                <a target="_blank" href="/creation/allocate_tutorial_manager/available/">Allocate a FOSS's Tutorial </a>
+                            </li>   
+                        </ul>
+                    </div>
+                </div>
+            
+                {% endif %}
+
                 {% if user|get_contenteditor %}
                     <div class="panel panel-info">
                         <div class="panel-heading panel-heading-notif">Content Editor</div>
