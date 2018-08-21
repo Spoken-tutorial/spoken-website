@@ -227,7 +227,7 @@ class ContributorRole(models.Model):
     updated = models.DateTimeField(auto_now=True)
 
     class Meta:
-        unique_together = (('user', 'foss_category', 'language',),)
+        unique_together = (('user', 'tutorial_detail', 'language',),)
         verbose_name = 'Contributor Role'
 
 

@@ -256,7 +256,7 @@ def creation_accept_role_request(request, recid):
                     if role_rec.role_type ==2:
                         messages.success(request, roles[role_rec.role_type] +' role is added to '+role_rec.user.username)
                     else:
-                        messages.success(request, roles[role_rec.role_type] +' role is added to ' + role_rec.user.username + 'for the language '+role_rec.language.name)
+                        messages.success(request, roles[role_rec.role_type] +' role is added to ' + role_rec.user.username + ' for the language '+role_rec.language.name)
                 except:
                     messages.error(request, role_rec.user.username + ' is already having ' + roles[role_rec.role_type] + ' role.')
             else:
@@ -558,7 +558,11 @@ def ajax_upload_foss(request):
                 )
             else:
                 eng_rec = Language.objects.get(name = 'English')
-                td_list = TutorialDetail.objects.filter(foss_id = foss).values_list('id')
+                td_list = ContributorRole.objects.filter(
+                    foss_category_id = foss,
+                    user_id = request.user.id,
+                    language_id=lang_rec,
+                    status=1).values_list('tutorial_detail_id')
                 tutorials = TutorialDetail.objects.filter(
                     id__in = TutorialResource.objects.filter(
                         tutorial_detail_id__in = td_list,
@@ -608,7 +612,7 @@ def upload_tutorial(request, trid):
     review_log = None
     try:
         tr_rec = TutorialResource.objects.get(pk = trid, status = 0)
-        ContributorRole.objects.get(user_id = request.user.id, foss_category_id = tr_rec.tutorial_detail.foss_id, language_id = tr_rec.language_id, status = 1)
+        ContributorRole.objects.get(user_id = request.user.id, tutorial_detail_id = tr_rec.tutorial_detail_id, language_id = tr_rec.language_id, status = 1)
         contrib_log = ContributorLog.objects.filter(tutorial_resource_id = tr_rec.id).order_by('-created')
         review_log = NeedImprovementLog.objects.filter(tutorial_resource_id = tr_rec.id).order_by('-created')
     except Exception, e:
@@ -632,7 +636,7 @@ def upload_outline(request, trid):
         if publish:
             status = 1
         tr_rec = TutorialResource.objects.get(pk = trid, status = status)
-        ContributorRole.objects.get(user_id = request.user.id, foss_category_id = tr_rec.tutorial_detail.foss_id, language_id = tr_rec.language_id, status = 1)
+        ContributorRole.objects.get(user_id = request.user.id, tutorial_detail_id = tr_rec.tutorial_detail_id, language_id = tr_rec.language_id, status = 1)
     except Exception, e:
         raise PermissionDenied()
     if not publish and tr_rec.outline_status > 2 and tr_rec.outline_status != 5:
@@ -687,7 +691,7 @@ def upload_script(request, trid):
     tr_rec = None
     try:
         tr_rec = TutorialResource.objects.get(pk = trid, status = 0)
-        ContributorRole.objects.get(user_id = request.user.id, foss_category_id = tr_rec.tutorial_detail.foss_id, language_id = tr_rec.language_id, status = 1)
+        ContributorRole.objects.get(user_id = request.user.id, tutorial_detail_id = tr_rec.tutorial_detail_id, language_id = tr_rec.language_id, status = 1)
     except Exception, e:
         raise PermissionDenied()
     if tr_rec.script_status > 2 and tr_rec.script_status != 5:
@@ -764,7 +768,7 @@ def save_timed_script(request, tdid):
         raise PermissionDenied()
     try:
         tr_rec = TutorialResource.objects.get(tutorial_detail_id = tdid, language__name = 'English')
-        ContributorRole.objects.get(user_id = request.user.id, foss_category_id = tr_rec.tutorial_detail.foss_id, language_id = tr_rec.language_id, status = 1)
+        ContributorRole.objects.get(user_id = request.user.id, tutorial_detail_id = tr_rec.tutorial_detail_id, language_id = tr_rec.language_id, status = 1)
     except Exception, e:
         print e
         raise PermissionDenied()
@@ -820,7 +824,7 @@ def upload_prerequisite(request, trid):
     tr_rec = None
     try:
         tr_rec = TutorialResource.objects.get(pk = trid, status = 0)
-        ContributorRole.objects.get(user_id = request.user.id, foss_category_id = tr_rec.tutorial_detail.foss_id, language_id = tr_rec.language_id, status = 1)
+        ContributorRole.objects.get(user_id = request.user.id, tutorial_detail_id = tr_rec.tutorial_detail_id, language_id = tr_rec.language_id, status = 1)
     except Exception, e:
         raise PermissionDenied()
     if tr_rec.common_content.prerequisite_status > 2 and tr_rec.common_content.prerequisite_status != 5:
@@ -870,7 +874,7 @@ def upload_keywords(request, trid):
     tr_rec = None
     try:
         tr_rec = TutorialResource.objects.get(pk = trid, status = 0)
-        ContributorRole.objects.get(user_id = request.user.id, foss_category_id = tr_rec.tutorial_detail.foss_id, language_id = tr_rec.language_id, status = 1)
+        ContributorRole.objects.get(user_id = request.user.id, tutorial_detail_id = tr_rec.tutorial_detail_id, language_id = tr_rec.language_id, status = 1)
     except Exception, e:
         raise PermissionDenied()
     if tr_rec.common_content.keyword_status > 2 and tr_rec.common_content.keyword_status != 5:
@@ -920,7 +924,7 @@ def upload_component(request, trid, component):
     tr_rec = None
     try:
         tr_rec = TutorialResource.objects.get(pk = trid, status = 0)
-        ContributorRole.objects.get(user_id = request.user.id, foss_category_id = tr_rec.tutorial_detail.foss_id, language_id = tr_rec.language_id, status = 1)
+        ContributorRole.objects.get(user_id = request.user.id, tutorial_detail_id = tr_rec.tutorial_detail_id, language_id = tr_rec.language_id, status = 1)
         comp_title = tr_rec.tutorial_detail.foss.foss + ': ' + tr_rec.tutorial_detail.tutorial + ' - ' + tr_rec.language.name
     except Exception, e:
         raise PermissionDenied()
@@ -1084,7 +1088,7 @@ def mark_notrequired(request, trid, tcid, component):
     tcc = None
     try:
         tr_rec = TutorialResource.objects.get(pk = trid, status = 0)
-        ContributorRole.objects.get(user_id = request.user.id, foss_category_id = tr_rec.tutorial_detail.foss_id, language_id = tr_rec.language_id, status = 1)
+        ContributorRole.objects.get(user_id = request.user.id, tutorial_detail_id = tr_rec.tutorial_detail_id, language_id = tr_rec.language_id, status = 1)
     except Exception, e:
         raise PermissionDenied()
     try:
@@ -2952,7 +2956,6 @@ def rate_contributors(request,sel_status):
         ordering = get_field_index(raw_get_data)
         contributor_list = ContributorRatingFilter(request.GET, queryset=tutorials_sorted)
         form = contributor_list.form
-
         if lang_qs: 
             form.fields['language'].queryset = lang_qs
 
@@ -3152,16 +3155,15 @@ def allocate_tutorial(request, sel_status):
     # Pagination
     paginator = Paginator(tutorials, 50)
     try:
-        page = int(request.POST.get('page','1'))
+        page = int(request.GET.get('page','1'))
     except:
-        page = int(request.POST.get('page'))
+        page = int(request.GET.get('page'))
 
     try:
         posts = paginator.page(page)
         
     except(EmptyPage,PageNotAnInteger):
         posts = paginator.page(paginator.num_pages)
-    
     context['collection'] = posts
     context['header'] = header
     context['ordering'] = ordering
@@ -3187,12 +3189,12 @@ submissiondate = datetime.date(datetime.now())
 def refresh_tutorials(request):
     count = 0
     tutorials = TutorialResource.objects.filter(script_status =4,language = 22)
-    
+    contrib_langs = RoleRequest.objects.filter(status=1,user=request.user).values_list('language')
     for tutorial in tutorials:
         this_tut_langs = Language.objects.exclude(id__in= TutorialResource.objects.filter(
                     tutorial_detail_id = tutorial.tutorial_detail.id).values('language'))
         
-        sam = Language.objects.filter(id__in = this_tut_langs).exclude(id=22)
+        sam = Language.objects.filter(id__in = this_tut_langs).exclude(Q(id=22)&Q(id__in=contrib_langs))
         for a_lang in sam:
             already_present = TutorialsAvailable.objects.filter(tutorial_detail_id=tutorial.tutorial_detail.id,language=a_lang).exists()
             if not already_present:
@@ -3211,21 +3213,12 @@ def refresh_tutorials(request):
 
 
 @login_required
-def allocate(request, tdid, lid,uid,days):
-    print "allocate"
+@csrf_exempt
+def allocate(request,tdid,lid,uid,days):
+
     user = User.objects.get(id=uid)
     tut = TutorialDetail.objects.get(id=tdid)
     
-    if not ContributorRole.objects.filter(
-            foss_category_id=tut.foss_id, user_id=user.id, language_id=lid):
-        contributor_role = ContributorRole()
-        contributor_role.foss_category_id = tut.foss_id
-        contributor_role.user_id = user.id
-        contributor_role.language_id = lid
-        contributor_role.tutorial_detail = tut
-        contributor_role.status = True
-        contributor_role.save()
-
     level_name ={
     1:'Basic',
     2:'Intermediate',
@@ -3287,7 +3280,7 @@ def allocate(request, tdid, lid,uid,days):
                 )
                 messages.warning(request,"Successfully updated "+tut.tutorial +" to "+str(user)+" : "+str(submissiondate))
                 print "okay 1.5"
-            
+
             try :
                 contributor_create = ContributorRole()            
                 contributor_create.foss_category_id = tut.foss_id
@@ -3299,7 +3292,7 @@ def allocate(request, tdid, lid,uid,days):
                 print "okay 2"
             except:
                 contributor_update = ContributorRole.objects.filter(language_id = lid ,tutorial_detail_id = tut.id , user_id = user.id).update(
-                    status=1,foss_category_id=tut.foss_id)
+                    status=1)
                 print "okay 2.5"
 
             #Updates the available tutorials in the tutorials available table
@@ -3309,18 +3302,15 @@ def allocate(request, tdid, lid,uid,days):
             except:
                 messages.error(request, "Tutorial not found in TutorialsAvailable, should be already present in TutorialResource")
                 print "okay 3.5"
-
-    if user.groups.filter(Q(name='Language-Manager')):
-        return HttpResponseRedirect(request.META['HTTP_REFERER'])
-        print "okay 4"
-    else:
-        return HttpResponseRedirect(request.META['HTTP_REFERER'])
-        print "okay 4.5"
-
-
-
-def extend_submission_date(request,tutorial):
+    data = "Response"
+    return HttpResponse(json.dumps(data), content_type='application/json')
+    #return HttpResponseRedirect(request.META['HTTP_REFERER'])
     
+@csrf_exempt
+def extend_submission_date(request):
+    tutorial = request.POST.get('tutorial')
+    print "tutorial :",tutorial
+    data = "Extended"
     tutorial_resource = TutorialResource.objects.get(id = tutorial)
     if tutorial_resource.extension_status>1:
         messages.error(request,"You have exceeded the no of extensions")
@@ -3329,8 +3319,8 @@ def extend_submission_date(request,tutorial):
         tutorial_resource.extension_status +=1
         tutorial_resource.save()
 
-    
-    return redirect(request.META.get('HTTP_REFERER'))
+    return HttpResponse(json.dumps(data), content_type='application/json')
+    #return redirect(request.META.get('HTTP_REFERER'))
    
 
 def allocate_foss(request,fid,lang,uid,level,days):
@@ -3338,10 +3328,9 @@ def allocate_foss(request,fid,lang,uid,level,days):
     
     language = Language.objects.get(name = lang)
     contrib = ContributorRating.objects.filter(user_id=uid,language=language).values('rating')
-    print "contrib",contrib,days
     check = check_contributor_eligibility(request, contrib)
     user = User.objects.get(id = uid)
-    print "Check : ",check,user.username
+
     if check:        
         tdids = TutorialDetail.objects.filter(foss_id=fid, level__level = level).values('id')
         if contrib[0]['rating']<3:
@@ -3360,7 +3349,6 @@ def allocate_foss(request,fid,lang,uid,level,days):
                     ).exclude(language_id=22).aggregate(Count('id'))
                 counter = 0
                 for a_tdid in tdids:
-                    print "bid_count['id__count'] :",bid_count['id__count']
                     if bid_count['id__count'] < 4:
                         allocate(request,a_tdid['id'],language.id,user.id,days)
                 

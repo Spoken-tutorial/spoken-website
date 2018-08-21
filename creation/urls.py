@@ -92,7 +92,7 @@ urlpatterns = patterns('',
     url(r'^allocate_tutorial_manager/(?P<sel_status>\w+)/$', 'creation.views.allocate_tutorial', name="allocate_tutorial_manager"),
     url(r'^refresh_tutorials/$','creation.views.refresh_tutorials',name = "refresh_tutorials"),
     url(r'^revoke_allocated_tutorial/(?P<uid>\w+)/(?P<lid>\w+)/(?P<tdid>\w+)/(?P<taid>\w+)/(?P<reason>\w+)/$', 'creation.views.revoke_allocated_tutorial', name="revoke_allocated_tutorial"),
-    url(r'^extend/(\w+)/$', 'creation.views.extend_submission_date', name="extend_submission_date"),
+    url(r'^extend_submission_date/$', 'creation.views.extend_submission_date', name="extend_submission_date"),
     url(r'^allocate/(?P<tdid>\d+)/(?P<lid>\d+)/(?P<uid>\d+)/(?P<days>\d+)$', 'creation.views.allocate', name="allocate"),
     url(r'^allocate_foss/(?P<fid>\d+)/(?P<lang>\w+)/(?P<uid>\d+)/(?P<level>\w+)/(?P<days>\d+)/$', 'creation.views.allocate_foss', name="allocate_foss"),
 

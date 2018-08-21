@@ -51,6 +51,10 @@ class Migration(migrations.Migration):
             field=models.DateTimeField(default=b'2000-01-02', blank=True),
         ),
         migrations.AlterUniqueTogether(
+            name='contributorrole',
+            unique_together=set([('user', 'tutorial_detail', 'language')]),
+        ),
+        migrations.AlterUniqueTogether(
             name='tutorialsavailable',
             unique_together=set([('tutorial_detail', 'language')]),
         ),
