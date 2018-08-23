@@ -11,6 +11,37 @@ class KeywordSearchForm(forms.Form):
     q = forms.CharField(required=True)
 
 
+class AllTutorialSearchForm(forms.Form):
+    search_foss = forms.ChoiceField(
+        choices = [],
+        widget=forms.Select(),
+        required = False,
+        )
+    search_language = forms.ChoiceField(
+            choices=[],
+            widget=forms.Select(),
+            required=False,
+        ) 
+
+    def __init__(self, *args, **kwargs):
+      super(TutorialSearchForm, self).__init__(*args, **kwargs)
+      foss_list_choices = [('', '-- All Courses --'),]
+      lang_list_choices =[('', '-- All Languages --'),]
+
+      foss_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), language__name='English').values('tutorial_detail__foss__foss').annotate(
+            Count('id')).order_by('tutorial_detail__foss__foss').values_list('tutorial_detail__foss__foss', 'id__count').distinct()
+      
+      for foss_row in foss_list:
+            foss_list_choices.append((str(foss_row[0]), str(foss_row[0]) + ' (' + str(foss_row[1]) + ')'))
+
+      lang_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2)).values('language__name').annotate(
+      Count('id')).order_by('language').values_list('language__name', 'id__count').distinct()
+      for lang_row in lang_list:
+          lang_list_choices.append((str(lang_row[0]), str(lang_row[0]) + ' (' + str(lang_row[1]) + ')'))
+
+      self.fields['search_foss'].choices = foss_list_choices
+      self.fields['search_language'].choices = lang_list_choices
+
 class TutorialSearchForm(forms.Form):
     search_foss = forms.ChoiceField(
         choices = [],
