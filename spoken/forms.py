@@ -24,7 +24,7 @@ class AllTutorialSearchForm(forms.Form):
         ) 
 
     def __init__(self, *args, **kwargs):
-      super(TutorialSearchForm, self).__init__(*args, **kwargs)
+      super(AllTutorialSearchForm, self).__init__(*args, **kwargs)
       foss_list_choices = [('', '-- All Courses --'),]
       lang_list_choices =[('', '-- All Languages --'),]
 
