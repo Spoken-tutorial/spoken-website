@@ -4,6 +4,7 @@ from datetime import timedelta
 import re
 from django.conf import settings
 
+from config import CHANNEL_KEY
 # Create your views here.
 from django.views.generic import View, ListView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
@@ -13,17 +14,20 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
 from django.utils.decorators import method_decorator
 from events.decorators import group_required
+from events import display
 from events.forms import StudentBatchForm, TrainingRequestForm, \
     TrainingRequestEditForm, CourseMapForm, SingleTrainingForm, \
     OrganiserFeedbackForm,STWorkshopFeedbackForm,STWorkshopFeedbackFormPre,STWorkshopFeedbackFormPost,LearnDrupalFeedbackForm, LatexWorkshopFileUploadForm, UserForm, \
-    SingleTrainingEditForm
+    SingleTrainingEditForm,TrainingManagerForm
+
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render, render_to_response
+from django.shortcuts import render, render_to_response, redirect
 from django.core.validators import validate_email
 from django.contrib.auth.models import Group, User
 from django.template import RequestContext
 from django.views.decorators.csrf import csrf_exempt
 from django.middleware import csrf
+from django.views.decorators.csrf import csrf_protect
 from django.http import JsonResponse
 from django.core.exceptions import PermissionDenied
 from creation.models import FossAvailableForWorkshop
@@ -46,7 +50,7 @@ from PyPDF2 import PdfFileWriter, PdfFileReader
 from StringIO import StringIO
 
 # import helpers
-from events.views import is_organiser, is_invigilator, is_resource_person, is_administrator
+from events.views import is_organiser, is_invigilator, is_resource_person, is_administrator, is_accountexecutive
 from events.helpers import get_prev_semester_duration
 class JSONResponseMixin(object):
   """
@@ -2538,3 +2542,311 @@ def ReOpenTraining(request, pk):
   else:
     messages.error(request, 'Request to re-open training is not sent.Please try again.')
   return HttpResponseRedirect("/software-training/select-participants/")
+
+
+@login_required
+def payment_home(request):
+  #to get - College name & College Type based on login user
+  user = User.objects.get(id = request.user.id)
+  try:
+    accountexecutive = Accountexecutive.objects.get(user_id = user,status=1)
+  except:
+    messages.error(request, 'Permission denied. You are not an Account Executive.')
+    return HttpResponseRedirect('/software-training')
+  
+  amount = "0"
+  if accountexecutive.academic.institution_type_id == 5:
+      amount = "5000"
+  else:
+      amount = "25000"
+
+  context ={}
+  context['accountexecutive'] = accountexecutive
+  context['amount'] = amount
+  context['user_id'] = user.id
+  context['user'] = user
+  context['username'] = user.username
+  return render(request, 'payment_home.html', context)
+
+@csrf_exempt
+@login_required
+def payment_status(request):
+  context ={}
+  academic_year = 2018
+
+  if request.method == 'POST':
+    user = User.objects.get(id = request.user.id)
+    try:
+      accountexecutive = Accountexecutive.objects.get(user_id = user,status=1)
+    except:
+      messages.error(request, 'Permission denied. You are not an Account Executive.')
+      return HttpResponseRedirect('/software-training')
+    amount = "0"
+    
+    if accountexecutive.academic.institution_type_id == 5:
+        amount = "5000"
+    else:
+        amount = "25000"
+    
+    STdata = ''
+    user_name = user.first_name+' '+user.last_name
+    STdata = str(user.id)+str(user_name)+str(amount)+"Subscription"+"SOLOSTW"+CHANNEL_KEY
+    print STdata
+    s = display.value(str(STdata))
+    
+    data = {'userId':user.id,'name':user_name,'amount':amount,'purpose':'Subscription','channelId':'SOLOSTW','random':s.hexdigest()}
+    
+
+    try:
+        paymentdetails = PaymentDetails()
+        paymentdetails.user = user
+        paymentdetails.amount = amount
+        paymentdetails.purpose = "Subscription"
+        paymentdetails.status = 0
+        paymentdetails.description = "Payment Initiated"
+        paymentdetails.academic_id = accountexecutive.academic
+        paymentdetails.academic_year = academic_year
+        paymentdetails.gstno = request.POST['id_gstin']
+        paymentdetails.save()
+        
+    except Exception as e:
+        try:
+          paymentdetails = PaymentDetails.objects.get(academic_id = accountexecutive.academic.id, academic_year = academic_year)
+        except:
+          return HttpResponseRedirect('/software-training/payment-home')
+
+        if paymentdetails.status == 2:
+          return render(request,'payment_status.html',data)
+        if paymentdetails.status == 1:
+          messages.error(request, 'This college has aready completed the payment.')
+          return HttpResponseRedirect('/software-training/payment-home')
+
+        messages.error(request, 'This college has aready initiated the payment.')
+        return HttpResponseRedirect('/software-training/payment-home')
+    
+    return render(request,'payment_status.html',data)
+  #not post
+  else:
+    return HttpResponseRedirect('/software-training')
+
+@csrf_exempt
+@login_required
+def payment_success(request):
+  context = {}
+  user = User.objects.get(id = request.user.id) 
+  try:
+    accountexecutive = Accountexecutive.objects.get(user_id = user,status=1)
+  except:
+    messages.error(request, 'Permission denied. You are not an Account Executive.')
+    return HttpResponseRedirect('/software-training')
+
+  context['user'] = user
+  if request.method == 'POST':
+     # requestType    // I/R/J  (I - Immediate response,R- Reconciled & J - Transaction rejected)
+    # userId;        // Id of the user
+    # amount;        // amount which is to be paid
+    # reqId;         // Unique request id of the transaction
+    # transId;       // Unique transaction id of IITB Payment gateway
+    # refNo;         // Bank transaction reference number
+    # provId;        // Payment method like Credit Card/Net Banking etc..
+    # status;        // S/F (Status of the transaction)
+    # msg;           // Detailed transaction message
+    # random;        // Hash string
+
+
+    requestType = request.POST.get('requestType')
+    userId = request.POST.get('userId')
+    amount = request.POST.get('amount')
+    reqId = request.POST.get('reqId')
+    transId = request.POST.get('transId')
+    refNo = request.POST.get('refNo')
+    provId = request.POST.get('provId')
+    status = request.POST.get('status')
+    msg = request.POST.get('msg')
+    random = request.POST.get('random') 
+
+   
+    STresponsedata = ''
+    STresponsedata = str(user.id)+transId+refNo+amount+status+msg+CHANNEL_KEY
+    s = display.value(str(STresponsedata))
+    STresponsedata_hexa = s.hexdigest()
+
+    if STresponsedata_hexa == random:
+      #save transaction details in db
+      pd = PaymentDetails.objects.get(user = user.id, academic_id = accountexecutive.academic.id)
+      print 'pd id',pd.id
+
+      try:
+        transactiondetails = PaymentTransactionDetails()
+        transactiondetails.paymentdetail_id  =  pd.id
+        transactiondetails.requestType  =  requestType
+        transactiondetails.userId_id  =  userId
+        transactiondetails.amount  =  amount
+        transactiondetails.reqId  = reqId 
+        transactiondetails.transId  = transId 
+        transactiondetails.refNo  =  refNo
+        transactiondetails.provId  =  provId
+        transactiondetails.status  =  status
+        transactiondetails.msg  =  msg
+        transactiondetails.save()
+      except Exception as e:
+        messages.error(request, 'Something went wrong. Can not collect your transaction details. Kindly contact your state resource person.')
+        return HttpResponseRedirect('/software-training')
+
+
+      if status == 'S':
+        pd.status = 1
+        pd.description = 'Payment successfull'
+      elif status == 'F':
+        pd.status = 2
+        pd.description = 'Payment fail'
+      pd.save()
+
+      context['transId'] = transId
+      context['refNo'] = refNo
+      context['msg'] = msg
+      context['status'] = status
+      return render(request,'payment_success.html',context)
+    else:
+      messages.error(request, 'Invalid Transaction')
+      return HttpResponseRedirect('/software-training')
+  else:
+    return HttpResponseRedirect('/software-training')
+    # return render(request,'payment_success.html',context)
+
+def payment_details(request,choice):
+  academic_id = Accountexecutive.objects.filter(user = request.user).values('academic_id','academic_id__institution_name')
+  paymentdetails = PaymentDetails.objects.filter(academic_id=academic_id[0]['academic_id'])
+  paymenttransactionetails = PaymentTransactionDetails.objects.filter(paymentdetail_id = paymentdetails)
+  user = User.objects.get(id = request.user.id)
+  
+  context ={}
+  context['user'] = user
+  context['completed'] = paymenttransactionetails.filter(status='S').count()
+  context['failed'] = paymenttransactionetails.filter(status='F').count()
+  context['ongoing'] = paymentdetails.filter(status=0).count()
+  context['paymentdetails'] = paymenttransactionetails.values('msg','refNo','transId','provId','status',
+    'created','paymentdetail_id__amount','paymentdetail_id__academic_year','paymentdetail_id__description')
+  context['ongoing_details'] = paymentdetails
+  context['tabid'] = choice
+  context['college'] = academic_id[0]['academic_id__institution_name']
+  return render(request,'payment_details.html',context)     
+
+@csrf_exempt
+def payment_reconciliation_update(request):
+  requestType = request.GET.get('requestType')
+  userId = request.GET.get('userId')
+  amount = request.GET.get('amount')
+  reqId = request.GET.get('reqId')
+  transId = request.GET.get('transId')
+  refNo = request.GET.get('refNo')
+  provId = request.GET.get('provId')
+  status = request.GET.get('status')
+  msg = request.GET.get('msg')
+  random = request.GET.get('random') 
+
+  STresponsedata = ''
+  STresponsedata = userId+transId+refNo+amount+status+msg+CHANNEL_KEY
+  s = display.value(str(STresponsedata))
+  STresponsedata_hexa = s.hexdigest()
+
+  if STresponsedata_hexa == random:
+    try:
+      accountexecutive = Accountexecutive.objects.get(user_id = userId,status__gt=0)
+    except:
+      print "no ac"
+      pass
+    try:
+      print userId, accountexecutive.academic_id
+      pd = PaymentDetails.objects.get(user_id = userId, academic_id_id = accountexecutive.academic_id)
+    except:
+      return HttpResponseRedirect("Failed1")
+
+    try:
+      transactiondetails = PaymentTransactionDetails()
+      transactiondetails.paymentdetail_id  =  pd.id
+      transactiondetails.requestType  =  requestType
+      transactiondetails.userId_id  =  userId
+      transactiondetails.amount  =  amount
+      transactiondetails.reqId  = reqId 
+      transactiondetails.transId  = transId 
+      transactiondetails.refNo  =  refNo
+      transactiondetails.provId  =  provId
+      transactiondetails.status  =  status
+      transactiondetails.msg  =  msg
+      transactiondetails.save()
+      print "saved"
+    except:
+      return HttpResponseRedirect("Failed2")
+    
+    if status == 'S':
+      pd.status = 1
+      pd.description = 'Payment successfull'
+    elif status == 'F':
+      pd.status = 2
+      pd.description = 'Payment fail'
+    pd.save()
+  else:
+    return HttpResponseRedirect("Invalid")
+  return HttpResponse("OK")
+
+@csrf_protect
+@login_required
+def academic_transactions(request):
+    user = User.objects.get(id=request.user.id)
+    rp_states = ResourcePerson.objects.filter(status=1,user=user)
+    state = State.objects.filter(id__in=rp_states.values('state'))
+    academic_center = request.POST.get('college')
+    paymenttransactiondetails = ''
+    context = {}
+    context['user'] = user
+    if request.method == 'POST':
+      form = TrainingManagerForm(user,request.POST)
+      
+      # if form.is_valid():
+      #   form_data = form.cleaned_data
+      get_state = request.POST.get('state')
+      status = request.POST.get('choices')
+      if academic_center in ('None','0',0):  
+        academic_center = False
+      else:
+        academic_center = request.POST.get('college')
+        
+      if get_state:
+        academic_centers = AcademicCenter.objects.filter(state=get_state)
+        if academic_center :
+          paymentdetails = PaymentDetails.objects.filter(academic_id=academic_center)
+        else:
+          paymentdetails = PaymentDetails.objects.filter(academic_id__in=academic_centers)
+      else:
+        academic_centers = AcademicCenter.objects.filter(state__in=state)
+        paymentdetails = PaymentDetails.objects.filter(academic_id__in=academic_centers)
+
+      if status == 'O':
+        paymentdetails = paymentdetails.filter(status=0)        
+        if request.POST.get('fdate'):
+          if request.POST.get('tdate'):
+            paymentdetails = paymentdetails.filter(Q(created__gt=request.POST.get('fdate')) & Q(created__lt= request.POST.get('tdate')))
+          else:
+            paymentdetails = paymentdetails.filter(created__gt=request.POST.get('fdate'))
+        context['ongoing_details'] = paymentdetails.order_by('created')
+      else:
+        if status in ('S','F'):
+          paymenttransactiondetails = PaymentTransactionDetails.objects.filter(paymentdetail_id__in = paymentdetails, status=str(status)).exclude(requestType='R')
+        if status == 'R':
+          paymenttransactiondetails = PaymentTransactionDetails.objects.filter(paymentdetail_id__in = paymentdetails, requestType='R')
+
+        if request.POST.get('fdate'):
+          if request.POST.get('tdate'):
+            paymenttransactiondetails = paymenttransactiondetails.filter(Q(created__gt=request.POST.get('fdate')) & Q(created__lt= request.POST.get('tdate')))
+          else:
+            paymenttransactiondetails = paymenttransactiondetails.filter(created__gt=request.POST.get('fdate'))
+      
+        context['transactiondetails'] = paymenttransactiondetails
+        if status == 'R':
+          context['total'] = paymenttransactiondetails.aggregate(Sum('amount'))
+
+    else:
+      form = TrainingManagerForm(user=request.user)
+    context['form'] = form
+    return render(request, 'payment.html', context)

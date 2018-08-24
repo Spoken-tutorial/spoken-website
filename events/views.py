@@ -193,6 +193,28 @@ def is_resource_person(user):
     if user.groups.filter(name='Resource Person').count() == 1:
         return True
 
+def is_accountexecutive(user):
+    """Check if the user is having accountexecutive rights"""
+    try:
+        if user.groups.filter(name='Account Executive').count() == 1 and user.accountexecutive.status == 1:
+            return True
+    except:
+        pass
+
+def is_organiser_deactivated(user):
+    try:
+        if user.organiser and user.organiser.status == 3:
+            return True
+    except:
+        pass
+
+def is_invigilator_deactivated(user):
+    try:
+        if user.invigilator and user.invigilator.status == 3:
+            return True
+    except:
+        pass
+
 def is_organiser(user):
     """Check if the user is having organiser rights"""
     try:
@@ -689,6 +711,106 @@ def has_profile_data(request, user):
             if not getattr(profile, field, None):
                 return HttpResponseRedirect("/accounts/profile/"+user.username+"/")
 
+
+@login_required
+def accountexecutive_request(request, username):
+    """ request to bacome a new accountexecutive """
+    user = request.user
+    if not user.is_authenticated():
+        raise PermissionDenied()
+
+    if username == request.user.username:
+        user = User.objects.get(username=username)
+        
+
+
+        if request.method == 'POST':
+            form = AccountexecutiveForm(request.POST)
+            if form.is_valid():
+                user.groups.add(Group.objects.get(name='Account Executive'))
+                accountexecutive = Accountexecutive()
+                accountexecutive.user_id=request.user.id
+                accountexecutive.academic_id=request.POST['college']
+                try:
+                    accountexecutive.save()
+                except:
+                    accountexecutive = Accountexecutive.objects.get(user = user)
+                    accountexecutive.academic_id=request.POST['college']
+                    accountexecutive.save()
+                messages.success(request, "<ul><li>Thank you. Your request has been sent for Training Manager's approval.</li><li>You will get the approval with in 24 hours. Once the request is approved, you can proceed with the payment. </li></ul>")
+                return HttpResponseRedirect("/software-training/accountexecutive/view/"+user.username+"/")
+            messages.error(request, "Please fill the following details")
+            context = {'form':form}
+            return render(request, 'events/templates/accountexecutive/form.html', context)
+        
+        else:
+            try:
+                accountexecutive = Accountexecutive.objects.get(user=user)
+
+                if accountexecutive.status == 1:
+                    messages.error(request, "You are already an accountexecutive ")
+                    return HttpResponseRedirect("/software-training/accountexecutive/view/"+user.username+"/")
+                else:
+                    messages.info(request, "Your Account Executive request is yet to be approved. Please contact the Resource person of your State. For more details <a href='http://process.spoken-tutorial.org/images/5/5d/Create-New-Account.pdf' target='_blank'> Click Here</a> ")
+                    print "Accountexecutive not yet approve "
+                    return HttpResponseRedirect("/software-training/accountexecutive/view/"+user.username+"/")
+            except:
+                messages.info(request, "Please fill the following details")
+                context = {}
+                context.update(csrf(request))
+                context['form'] = AccountexecutiveForm()
+                return render(request, 'events/templates/accountexecutive/form.html', context)
+
+    else:
+        raise PermissionDenied()
+
+@login_required
+def accountexecutive_view(request, username):
+    """ view accountexecutive details """
+    user = request.user
+    if not (user.is_authenticated() and (username == request.user.username or is_event_manager(user) or is_resource_person(user))):
+        raise PermissionDenied()
+
+    context = {}
+    try:
+        user = User.objects.get(username=username)
+        accountexecutive = Accountexecutive.objects.get(user=user)
+        context['record'] = accountexecutive
+        context['profile'] = accountexecutive.user.profile_set.get(user= user)
+    except Exception, e:
+        print e
+        raise PermissionDenied()
+    return render(request, 'events/templates/accountexecutive/view.html', context)
+
+#@login_required
+def accountexecutive_edit(request, username):
+    """ view accountexecutive details """
+    #todo: confirm event_manager and resource_center can edit accountexecutive details
+    user = request.user
+    if not (user.is_authenticated() and (username == request.user.username or is_event_manager(user) or is_resource_person(user))):
+        raise PermissionDenied()
+
+    user = User.objects.get(username=username)
+    if request.method == 'POST':
+        form = AccountexecutiveForm(request.POST)
+        if form.is_valid():
+            accountexecutive = Accountexecutive.objects.get(user=user)
+            #accountexecutive.user_id=request.user.id
+            accountexecutive.academic_id=request.POST['college']
+            accountexecutive.save()
+            messages.success(request, "Details has been updated")
+            return HttpResponseRedirect("/software-training/accountexecutive/view/"+user.username+"/")
+        context = {'form':form}
+        return render(request, 'events/templates/accountexecutive/form.html', context)
+    else:
+            #todo : if any training and test under this accountexecutive disable the edit
+            record = Accountexecutive.objects.get(user=user)
+            context = {}
+            context['form'] = AccountexecutiveForm(instance = record)
+            context.update(csrf(request))
+            return render(request, 'events/templates/accountexecutive/form.html', context)
+
+
 @login_required
 def organiser_request(request, username):
     """ request to bacome a new organiser """
@@ -936,6 +1058,32 @@ def rp_invigilator(request, status, code, userid):
             raise PermissionDenied()
     except:
         raise PermissionDenied('You are not allowed to view this page')
+
+@login_required
+def rp_accountexecutive(request, status, code, userid):
+    """ Resource person: active accountexecutive """
+    user = request.user
+    accountexecutive_in_rp_state = Accountexecutive.objects.filter(user_id=userid, academic=AcademicCenter.objects.filter(state=State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)))
+    if not (user.is_authenticated() and accountexecutive_in_rp_state and ( is_event_manager(user) or is_resource_person(user) or (status == 'active' or status == 'block'))):
+        raise PermissionDenied('You are not allowed to view this page')
+
+    try:
+        if User.objects.get(pk=userid).profile_set.get().confirmation_code == code:
+            accountexecutive = Accountexecutive.objects.get(user_id = userid)
+            accountexecutive.appoved_by_id = request.user.id
+            accountexecutive.status = 1
+            message = "accepted"
+            if status == 'block':
+                accountexecutive.status = 2
+                message = "blocked"
+            accountexecutive.save()
+            messages.success(request, "Accountexecutive has "+message)
+            return HttpResponseRedirect('/software-training/accountexecutive/inactive/')
+        else:
+            raise PermissionDenied()
+    except:
+        raise PermissionDenied('You are not allowed to view this page')
+
 
 @login_required
 def training_request(request, role, rid = None):
@@ -2199,6 +2347,8 @@ def organiser_invigilator_index(request, role, status):
         status = 0
     elif status == 'blocked':
         status = 2
+    elif status == 'deactivated':
+        status = 3
     else:
         raise PermissionDenied()
 
@@ -2248,6 +2398,23 @@ def organiser_invigilator_index(request, role, status):
         except Exception, e:
             print e
             collection = {}
+    elif role == 'accountexecutive':
+        try:
+            collectionSet = Accountexecutive.objects.select_related().filter(academic=AcademicCenter.objects.filter(state=State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)), status=status)
+
+            raw_get_data = request.GET.get('o', None)
+            collection = get_sorted_list(request, collectionSet, header, raw_get_data)
+            ordering = get_field_index(raw_get_data)
+
+            collection = AccountexecutiveFilter(request.GET, user = user, queryset=collection)
+            context['form'] = collection.form
+
+            page = request.GET.get('page')
+            collection = get_page(collection, page)
+
+        except Exception, e:
+            print e
+            collection = {}    
     else:
         raise PermissionDenied()
 
@@ -2670,4 +2837,101 @@ def ajax_check_foss(request):
     "is_c_and_cpp": is_c_and_cpp
     }
     return JsonResponse(data)
+
+@csrf_exempt
+def activate_academics(request):
+    context = {}
+    collection = None
+    header = {
+        1: SortableHeader('#', False),
+        2: SortableHeader('State', False),
+        3: SortableHeader('institution_name', True, 'Institution Name'),
+        4: SortableHeader('academic_code', True, 'Academic Code'),
+        5: SortableHeader('Action', False),
+        6: SortableHeader('Status', False)
+    }
+    print request
+    if request.method == 'POST':
+        collegeid = request.POST.get('collegeid')
+        action = request.POST.get('action')
+        
+        if action == 'activate':
+            activate_academic_org(collegeid)
+
+        if action == 'deactivate':
+            deactivate_academic_org(collegeid)
+
+        return HttpResponseRedirect("/software-training/activate-academics/")
+    else:
+        status = request.GET.get('status')
+        if status:
+            collection = AcademicCenter.objects.filter(status=status).order_by('state__name', 'institution_name')
+        else:
+            collection = AcademicCenter.objects.filter(status=3).order_by('state__name', 'institution_name')
+        
+        raw_get_data = request.GET.get('o', None)
+        collection = get_sorted_list(request, collection, header, raw_get_data)
+        ordering = get_field_index(raw_get_data)
+
+        collection = ActivateAcademicCenterFilter(request.GET, queryset=collection)
+
+        context['form'] = collection.form
+        page = request.GET.get('page')
+        collection = get_page(collection, page)
+        
+
+    context['collection'] = collection
+    context['header'] = header
+    context['ordering'] = ordering
+
+
+
+    return render(request, 'activate_academics.html', context)
+
+def activate_academic_org(academic_id):
+    ac = AcademicCenter.objects.get(id=academic_id)
+    deactivate_status = 3
+    if ac:
+        #check if college paid the subscription fees
+        #activate all organiser fom this college
+        organisers_from_academic = Organiser.objects.filter(status=deactivate_status, academic_id=ac.id)
+        invigilators_from_academic = Invigilator.objects.filter(status=deactivate_status, academic_id=ac.id)
+
+        for organiser in organisers_from_academic:
+            #all the organisers from this academic are activated here.
+            organiser.status = 1 
+            organiser.save()
+        
+        for invigilator in invigilators_from_academic:
+            #all the organisers from this academic are activated here.
+            invigilator.status = 1 
+            invigilator.save()
+
+        #Activate that collge
+        ac.status = 1
+        ac.save()
+
+
+def deactivate_academic_org(academic_id):
+    ac = AcademicCenter.objects.get(id=academic_id)
+    activate_status = 1
+    if ac:
+        #check if college paid the subscription fees
+        #activate all organiser fom this college
+        organisers_from_academic = Organiser.objects.filter(status=activate_status, academic_id=ac.id)
+        invigilators_from_academic = Invigilator.objects.filter(status=activate_status, academic_id=ac.id)
+        for organiser in organisers_from_academic:
+            #all the organisers from this academic are activated here.
+            organiser.status = 3 
+            organiser.save()
+
+        for invigilator in invigilators_from_academic:
+            #all the organisers from this academic are activated here.
+            invigilator.status = 3
+            invigilator.save()
+
+        #Activate that collge
+        ac.status = 3
+        ac.save()
+
 
