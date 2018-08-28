@@ -17,7 +17,7 @@
     <form action="{{ action }}" method="get" class='form-horizontal'>
       {% csrf_token %}
   
-      <div class="col-lg-4 col-md-4 col-sm-4">
+      <div class="col-md-4 col-md-4 col-sm-4">
         
           <div class="form-group">
               <label for="id_language__name" class="col-sm-4 control-label">Language</label>
@@ -44,36 +44,33 @@
 
   
     
-    
+  <div class="col-sm-offset-1 col-lg-10">  
+
     <ul class="tabs nav nav-tabs">
       <li {% if status == 'rate' %}class="active"{% endif %}>
       <a href="{% url 'creation:rate_contributors' 'rate' %}"><i class="fa fa-list-ul"></i> Contributors </a></li>
       <li {% if status == 'rated' %}class="active"{% endif %}>
       <a href="{% url 'creation:rate_contributors' 'rated' %}"><i class="fa fa-list-ul"></i> Rated </a></li>
       </ul>
-        <div class="tab-content">
+        <div class="tab-content" >
         <div class="tab-pane active">
           {% if status == 'rate' %}
-          
           <table class="paleblue table table-striped table-hover table-bordered ">
             {% get_sortable_header header ordering request.GET %}  
           <tr class="pull-right ">
-
-            <input type = "submit" class=" btn btn-primary pull-right"  value="Save" >
+            <input type = "submit" class=" btn btn-primary pull-right"  value="Save" \>
           </tr>
 
           {% for record in contributors %}
-
-          <tr>
-          <td><input type="checkbox" name ="contri" value ="{{ record.user__username }}" ></td>
-          <label for = "{{ record.user__username }}">
-          <td>{{ record.user__username }}</td>       
+          <tr class="">
+          <td><input type="checkbox" name ="contri" value ="{{ record.user__username }}" class="col-md-10 "></td>
+          <td align="center" class="form-group">{{ record.user__username }}</td>       
           </label>
           
-          <td>
-          <div class="form-group">
+          <td >
+          <div align="center">
             <label for="sel1"></label>
-            <select class="form-control" name ="rating" id="sel1">
+            <select name ="rating" id="sel1" >
               <option>0</option>
               <option>1</option>
               <option>2</option>
@@ -91,7 +88,7 @@
 
   {% if status == 'rated' %}
     <table class="paleblue table table-striped table-hover table-bordered">
-          <tr> <th> Rated Contributors </th>
+          <tr> <th class="col-sm-offset-4"> Rated Contributors </th>
             <th></th></tr>
             <th>User</th>
             <th>Rating</th>
@@ -106,5 +103,5 @@
   {% endif %}
   </div>
   </div> 
-
+</div>
 {% endblock %}  

@@ -218,10 +218,10 @@ class ArchivedVideo(models.Model):
 
 
 class ContributorRole(models.Model):
-    foss_category = models.ForeignKey(FossCategory)
-    language = models.ForeignKey(Language)
-    tutorial_detail = models.ForeignKey(TutorialDetail,null = True)
     user = models.ForeignKey(User)
+    language = models.ForeignKey(Language)
+    foss_category = models.ForeignKey(FossCategory)
+    tutorial_detail = models.ForeignKey(TutorialDetail,null = True)
     status = models.BooleanField()
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -469,3 +469,16 @@ class TutorialsAvailable(models.Model):
 
     class Meta:
         unique_together = (('tutorial_detail', 'language'),)
+
+class LanguageManager(models.Model):
+
+    user = models.ForeignKey(User)
+    language = models.ForeignKey(Language)
+    status = models.BooleanField(default=0)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ('user','language')
+        unique_together = (('user', 'language'),)
+

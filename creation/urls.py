@@ -95,5 +95,8 @@ urlpatterns = patterns('',
     url(r'^extend_submission_date/$', 'creation.views.extend_submission_date', name="extend_submission_date"),
     url(r'^allocate/(?P<tdid>\d+)/(?P<lid>\d+)/(?P<uid>\d+)/(?P<days>\d+)$', 'creation.views.allocate', name="allocate"),
     url(r'^allocate_foss/(?P<fid>\d+)/(?P<lang>\w+)/(?P<uid>\d+)/(?P<level>\w+)/(?P<days>\d+)/$', 'creation.views.allocate_foss', name="allocate_foss"),
+    url(r'^get_languages/(?P<uid>\w+)$', 'creation.views.get_languages', name="get_languages"),
+    url(r'^get_tutorials/(?P<fid>\w+)$', 'creation.views.get_tutorials', name="get_tutorials"),
+    url(r'^get_other_languages/(?P<uid>\w+)$', 'creation.views.get_other_languages', name="get_other_languages"),
 
 )

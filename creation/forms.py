@@ -1072,3 +1072,22 @@ class ContributorRatingForm(forms.ModelForm):
                     self.fields['user'] =  forms.ModelChoiceField(queryset=user_1)
                     self.fields['language'] =  forms.ModelChoiceField(queryset=lang)
 
+class LanguageManagerForm(forms.ModelForm):
+    user = forms.ModelChoiceField(
+        cache_choices = True,
+        queryset = User.objects.filter(Q(groups__name = 'Contributor')|Q(groups__name = 'External-Contributor')).order_by('username'),
+        help_text = "",
+        error_messages = {'required': 'User field required.'}
+    )
+    language = forms.ModelChoiceField(
+        cache_choices =True,
+        queryset = Language.objects.order_by('name'),
+        empty_label = "----------",
+        help_text = "",
+        error_messages = {'required': 'Language field required.'}
+    )
+    status = forms.BooleanField(required = False)
+
+    class Meta:
+        model = LanguageManager
+        exclude = ['created', 'updated']

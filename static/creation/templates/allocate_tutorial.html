@@ -12,7 +12,7 @@
 {% block heading %} <i class="fa fa-list-ul"></i> Bidding Interface {% endblock %}
 {% block search %}{% endblock %}
 {% block content %}
-  <div class='filters row' >
+  <div class='row' >
     <form action="" method="post" class='form-horizontal'>
       {% csrf_token %}
       <div class="col-lg-4 col-md-4 col-sm-4">    
@@ -103,8 +103,13 @@
                   <td>{{ record.tutorial_detail.order }}</td>
                   <td>{{ record.tutorial_detail.tutorial }}</td>
                   <td>{{ record.language.name }}</td>
-                <td><a href="{% url 'creation:allocate' record.tutorial_detail.id record.language_id request.user.id 7 %}">Allocate</a>
-                </td>
+                  <td><select id="{{record.tutorial_detail.id}}" class = "form-control">
+                    {% for i in i|rjust:"15" %}
+                      <option >{{ forloop.counter }}</option>
+                    {% endfor %}
+                  </select></td>
+                  <td>
+                    <a href="#" onclick = allocate('{{record.tutorial_detail.id}}','{{record.language_id}}','{{request.user.id}}') >Allocate</a>
       </tr>
 
           {% endfor %}      
@@ -119,7 +124,7 @@
           </td>
           <td>{{ record.tutorial_detail.level }}</td>       
           <td>{{ record.tutorial_detail.foss.foss }}</td>
-          <td>{{ record.tutorial_detail }}</td>
+          <td>{{ record.tutorial_detail.id }}</td>
           <td>{{ record.language.name }}</td>
           {% if record.script_user.first_name %}
               <td>{{ record.script_user.first_name }}</td>             
@@ -191,6 +196,24 @@
             maxDate:'+1987/06/14',
         });
 
-        alert(form.language);
+
+        function allocate(var_a,var_b,var_c)
+        {       
+                var contributor_option = $("#contributors option:selected");
+                var contributor_text = contributor_option.text();
+                
+                var date_id = document.getElementById(var_a);
+                var days = date_id.options[date_id.selectedIndex].value;
+
+                $.ajax({
+                type : "GET",
+                url:'/creation/allocate/'+var_a+'/'+var_b+'/'+var_c+'/'+days,
+                dataType : "json",
+                success: function(data)
+                {
+                       location.reload();
+                }
+                });
+        }
     </script>
 {% endblock %}  

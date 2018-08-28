@@ -13,7 +13,7 @@
 {% block search %}{% endblock %}
 {% block content %}
 
-  <div class='filters row' >
+  <div class='row' >
     <form action="" method="post" class='form-horizontal'> {%csrf_token%}
       <div class="col-lg-4 col-md-4 col-sm-4">    
           <div class="form-group">
@@ -106,29 +106,33 @@
     {% if status == 'available' %}
 
       
-        <div class="col-lg-4 col-md-4 col-sm-4 " style="z-index:100; position:sticky; top:8%; padding:1%; width:100%; background-color:#424949">
+        <div class="col-lg-4 col-md-4 col-sm-4" style="z-index:100; position:sticky; top:8%; padding:1%; width:100%; background-color:#424949; color: #ffffff">
           <div class="form-group ">
-              <label for="id_foss" class="col-sm-4 control-label">Contributors</label>
+              <label for="id_foss" class="col-sm-4 control-label "><h5>Contributors</h5></label>
               <div class="col-sm-4"> 
               <select class="form-control get_contributrs" tabindex="1" id="contributors">
                 <option id = "0">
                   <label value="0">--- Select a Contributor ---</label>
                 </option>
                 {% for a_contributor in contributors %}
-                <option id="{{a_contributor.0}}" value="{{a_contributor.0}}">{{a_contributor.1}}</option>
+                {% if a_contributor.2 > 3 %}
+                <option id="{{a_contributor.0}}" style="color:green" value="{{a_contributor.1}}">{{a_contributor.1}}</option>
+                {%else%}
+                <option id="{{a_contributor.0}}" style="color:red" value="{{a_contributor.1}}">{{a_contributor.1}}</option>
+                {%endif%}
                 {% endfor %}
             </select>
-             </div>
-          </div>
-
-        
+</div>
+        </div>
           
-              <label for="id_foss" class="col-sm-4 control-label">FOSS Submission Date</label>
+              <label for="id_foss" class="col-sm-4 control-label "><h5>FOSS Submission Date</h5></label>
               <div class="col-sm-4"> 
               <input class="form-control datepicker" type="text" id="datepicker">
               <span class="add-on"><i class="icon-th"></i></span>
              </div> 
-             
+            </div>
+          </div>
+    
         
       <tr>
          {% regroup collection.object_list by tutorial_detail.foss as foss_list %}
@@ -171,7 +175,7 @@
           <td>{{ record.tutorial_detail.level }}</td>
           <td>{{ record.tutorial_detail.order }}</td>      
           <td>{{ record.tutorial_detail.foss.foss }}</td>
-          <td>{{ record.tutorial_detail.id }}</td>
+          <td>{{ record.tutorial_detail }}</td>
           <td>{{ record.language.name }}</td>
           {% if record.script_user.username %}
               <td>{{ record.script_user.username }}</td>             
@@ -279,8 +283,7 @@
           var language = $(".language option:selected").text();
           var level = $(".level option:selected").text();
           var contributor_text = contributor_option.text();
-     
-
+          
           if(var_c == 'foss' && level.match(/---.*/))
           {
             alert(" PLease select a level");
@@ -298,15 +301,9 @@
                 var date_id = document.getElementById(var_a);
                 var days = date_id.options[date_id.selectedIndex].value;
                 $.ajax({
-                type : "POST",
-                url:'/creation/allocate/',
+                type : "GET",
+                url:'/creation/allocate/'+var_a+'/'+var_b+'/'+contributor_option.attr('id')+'/'+days,
                 dataType : "json",
-                data:{
-                  tdid: var_a,
-                  lid:var_b,
-                  uid:contributor_option.attr('id'),
-                  days : days,
-                },
                 success: function(data)
                 {
                        location.reload();
@@ -332,18 +329,12 @@
                   // location.href =  '/creation/allocate_foss/'+var_a+'/'+language+'/'+contributor_option.attr('id')+'/'+level+'/'+days;
 
                   $.ajax({
-                type : "POST",
+                type : "GET",
                 url:'/creation/allocate_foss/'+var_a+'/'+language+'/'+contributor_option.attr('id')+'/'+level+'/'+days,
                 dataType : "json",
-                data:{
-                  fid: var_a,
-                  lang:language,
-                  uid:contributor_option.attr('id'),
-                  days : days,
-                },
                 success: function(data)
                 {
-                       location.reload();
+                  location.reload();
                 }
                 });
 
@@ -357,8 +348,16 @@
         function revoke_tutorials(user_id,language_id,tutorial_detail_id, tuto_available_id){
           var sub_date = document.getElementById("email_sub_date").checked;
         
-          location.href = '/creation/revoke_allocated_tutorial/'+user_id+'/'+language_id+'/'+tutorial_detail_id+'/'+tuto_available_id+'/'+sub_date
-          
+          // location.href = '/creation/revoke_allocated_tutorial/'+user_id+'/'+language_id+'/'+tutorial_detail_id+'/'+tuto_available_id+'/'+sub_date
+          $.ajax({
+                type : "GET",
+                url:'/creation/revoke_allocated_tutorial/'+user_id+'/'+language_id+'/'+tutorial_detail_id+'/'+tuto_available_id+'/'+sub_date,
+                dataType : "json",
+                success: function(data)
+                {
+                  location.reload();
+                }
+                });
         }
 
 

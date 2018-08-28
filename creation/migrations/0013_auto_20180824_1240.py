@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('creation', '0013_auto_20180818_0845'),
+        ('creation', '0012_tutorialresource_publish_at'),
     ]
 
     operations = [
@@ -23,6 +23,20 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.CreateModel(
+            name='LanguageManager',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('status', models.BooleanField(default=0)),
+                ('created', models.DateTimeField(auto_now_add=True)),
+                ('updated', models.DateTimeField(auto_now=True)),
+                ('language', models.ForeignKey(to='creation.Language')),
+                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
+            ],
+            options={
+                'ordering': ('user', 'language'),
+            },
+        ),
+        migrations.CreateModel(
             name='TutorialsAvailable',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
@@ -34,6 +48,11 @@ class Migration(migrations.Migration):
             model_name='contributorrole',
             name='tutorial_detail',
             field=models.ForeignKey(to='creation.TutorialDetail', null=True),
+        ),
+        migrations.AddField(
+            model_name='rolerequest',
+            name='language',
+            field=models.ForeignKey(to='creation.Language', null=True),
         ),
         migrations.AddField(
             model_name='tutorialresource',
@@ -55,8 +74,16 @@ class Migration(migrations.Migration):
             unique_together=set([('user', 'tutorial_detail', 'language')]),
         ),
         migrations.AlterUniqueTogether(
+            name='rolerequest',
+            unique_together=set([('user', 'role_type', 'language')]),
+        ),
+        migrations.AlterUniqueTogether(
             name='tutorialsavailable',
             unique_together=set([('tutorial_detail', 'language')]),
+        ),
+        migrations.AlterUniqueTogether(
+            name='languagemanager',
+            unique_together=set([('user', 'language')]),
         ),
         migrations.AlterUniqueTogether(
             name='contributorrating',
