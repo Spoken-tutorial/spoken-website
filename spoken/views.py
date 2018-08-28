@@ -109,7 +109,7 @@ def keyword_search(request):
     keyword = ''
     collection = None
     correction = None
-    form = TutorialSearchForm()
+    form = AllTutorialSearchForm()
     if request.method == 'GET' and 'q' in request.GET and request.GET['q'] != '':
         form = KeywordSearchForm(request.GET)
         if form.is_valid():
@@ -119,6 +119,7 @@ def keyword_search(request):
     if collection:
         page = request.GET.get('page')
         collection = get_page(collection, page)
+    
 
     context = {}
     context['form'] = KeywordSearchForm()
