@@ -3,7 +3,7 @@
 {% load static %}
 {% load eventsdata %}
 {% load cmsdata %}
-{% block title %} pay here {% endblock %}
+{% block title %} Pay here {% endblock %}
 {% block heading %} <i class="fa fa-list-ul"></i> Pay here{% endblock %}
 {% block search %}{% endblock %}
 {% block content %}
@@ -23,7 +23,7 @@
   </tr>
 
   <tr class="info">
-    <td class=" col-md-4 "><h5>Amount Payable</h5></td>
+    <td class=" col-md-4 "><h5>Amount Payable (INR)</h5></td>
     <td class=" col-md-4 "><h5>{{amount}}</h5></td>
   </tr>
 
@@ -48,12 +48,13 @@
   </tr>
 
   <tr class="default">
-    <td class="col-md-4">
-      <h5><input type="checkbox" id="agreement"/><span> Click to agree</span></h5>
-    </td>
     <td class="col-md-4 ">
       <button type="button" class="btn btn-info col-md-4 col-md-offset-4" data-toggle="modal" data-target="#myModal">Terms & Conditions</button>
     </td>
+    <td class="col-md-4">
+      <h5><input type="checkbox" id="agreement"/><span> Click to agree</span></h5>
+    </td>
+    
   </tr>
 </table>
 
@@ -80,9 +81,12 @@
         <div class="modal-body">
           <p>
             <ul>
-            <li>No money will be refunded</li>  
-            <li>This is an annual subscription. Hence the subscription will end on 31st July '19</li>
-            <li>Any number of students can train in a college</li>  
+            <li>This is an academic year subscription. Hence the subscription will end on 30 Jun 2019</li>  
+            <li>Money once paid, cannot be refunded in part or whole, for any reason</li>
+            <li>Payment to be made by 30 Sept 2018</li>
+            <li>Any number of students from your college can avail this training</li> 
+            <li>You can contact Training Managers 24/7 for any queries. If the transaction has failed and your account is debited, please contact your respective state manager</li>
+            <li>e-Certificates will have only the logo of Spoken Tutorial, IIT Bombay</li> 
           </ul>
         </p>
         </div>
