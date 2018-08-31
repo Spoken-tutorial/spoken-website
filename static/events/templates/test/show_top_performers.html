@@ -1,0 +1,80 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load mdldata %}
+{% load eventsdata %}
+{% block title %} Top Performers {% endblock %}
+{% block heading %}
+        <i class="fa fa-list-ul"></i> Top Performers <a href="{% url 'events:events_dashboard' %}" class='pull-right'>Dashboard</a>
+{% endblock %}
+{% block content %}
+    <div class="bs-callout bs-callout-info">
+        <dl class='dl-horizontal'>
+            <dt>Institution Name</dt>
+            <dd>{{ test.academic }}, {{ test.academic.state }}</dd>
+            <dt>Foss</dt>
+            <dd>{{ test.foss.foss }}</dd>
+            <dt>Date</dt>
+            <dd>{{ test.tdate }}</dd>
+            <dt>Participants Count</dt>
+            {% if test.participant_count %}
+                <dd>{{ test.participant_count }}</dd>
+            {% else %}
+                <dd>{{ collection|length }}</dd>
+            {% endif %}
+            <dt>Organiser</dt>
+            <dd>{{ test.organiser }}</dd>
+            <dt>Dept.</dt>
+            <dd>
+                {%  for dept in test.department.all %}
+                    {{ dept }}
+                {% endfor %}
+            </dd>
+
+        </dl>
+    </div>
+    <a class="btn btn-primary" href="{% url 'events:request_advance_test' test.id %}">Request Advance Test</a>
+    <br></br>
+	<div class="" id="pending">
+		{% if toppers %}
+		<table class="table table-striped table-hover table-bordered">
+			<tr>
+                		<th>#</th>
+				<th>First Name</th>
+				<th>Last Name</th>
+				<th>Email Id</th>
+				<th>Score</th>
+				<th> Second Level Score</th>
+			</tr>
+			{% for topper in toppers %}
+			    {% with mdluser=topper.mdluser_id|get_mdluser_details %}
+			<tr>
+                        		    <td>{{ forloop.counter }}</td>
+					    <td>
+					        {{ mdluser.firstname }}
+					    </td>
+					    <td>
+					        {{ mdluser.lastname }}
+					    </td>
+					    <td>
+					        {{ mdluser.email }}
+					    </td>
+					    <td>
+					        {{ test.id|get_participant_mark:topper.mdluser_id }}
+                        		    </td>
+					    <td>
+                            {% if test.pretest.all.exists %}
+					            {% get_secondlevel_mark test.id topper.student %}
+                            {% else %}
+                                NA
+                            {% endif %}
+                         </td>
+		        </tr>
+				{% endwith %}
+			{% endfor %}
+		</table>
+		{% else %}
+			<p class="no-record">No student found!</p>
+		{% endif %}
+	</div>	
+{% endblock %}

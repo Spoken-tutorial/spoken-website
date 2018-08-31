@@ -1,0 +1,60 @@
+{% extends 'mdl/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load mdldata %}
+{% load eventsdata %}
+{% block title %}Student Dashboard{% endblock %}
+{% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
+{% block heading %}
+        <i class="fa fa-list-ul"></i> Advance Online Test
+{% endblock %}
+{% block content %}
+    <a href="{% url 'mdldjango:mdl_index' %}" class='pull-right'> Dashboard </a>
+<ul class="tabs nav nav-tabs">
+    <li {% if status == 0 %} class="active" {% endif %}>
+        <a href="{% url 'events:advance_tests_student' 0 %}"> Completed </a>
+    </li>
+    <li {% if status == 1 %} class="active" {% endif %}>
+        <a href="{% url 'events:advance_tests_student' 1 %}"> Available </a>
+    </li>
+    <li {% if status == 2 %} class="active" {% endif %}>
+        <a href="{% url 'events:advance_tests_student' 2 %}"> Upcoming </a>
+    </li>
+</ul>
+    <table class="paleblue table table-striped table-hover table-bordered">
+        {% if tests %}
+            <tr>
+                <th> # </th> 
+                <th> Technology </th>
+                <th> Date </th> 
+                <th> Action </th> 
+            </tr>
+        {% endif %}
+        {% for test in tests %}
+            <tr>
+                <td>{{ forloop.counter }}
+                <td>{{ test.test.foss.foss }}</td>
+                <td>{{ test.date_time|date:"d M Y" }}</td>
+                <span style="visibility:hidden">{% has_attempted test.id user.student %}</span>
+                <td>
+                {% if user.student in test.appeared.all %}
+                    Attempted Score: 
+                   {% get_secondlevel_mark test.preliminary_test.id user.student %}
+                {% else %}
+                    {% if status == 1 %}
+                        {% if user.student in test.attendees.all %}
+                        <a href="{% url 'yaksh:view_module' test.test.yaksh_course.learning_module.first.id test.test.yaksh_course.id %}" target="_blank">Attempt</a>
+                        {% else %}
+                        <span>Wait for the invigilator to mark your attendance</span>
+                        {% endif %}
+                    {% elif status == 2 %}
+                        Will be available on {{ test.date_time|date:"d M Y"}} after the Training Team approves
+                    {% elif status == 0 %}
+                        Test Closed
+                    {% endif %}
+                {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

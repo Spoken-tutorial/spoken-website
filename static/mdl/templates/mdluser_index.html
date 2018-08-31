@@ -9,6 +9,7 @@
         <i class="fa fa-list-ul"></i> Student Dashboard
 {% endblock %}
 {% block content %}
+    <a href="{% url 'events:advance_tests_student' %}" class='pull-right'> View Advance Tests </a>
     <!-- Nav tabs -->
     <ul class="nav nav-tabs">
         <li class="{% if category == 1 %} active {% endif %}"><a href="{% url 'mdldjango:mdl_index' %}?category=1">Past Training</a></li>

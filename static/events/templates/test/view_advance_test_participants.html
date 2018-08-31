@@ -1,0 +1,68 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load mdldata %}
+{% load eventsdata %}
+{% block title %} Advance Test Participants {% endblock %}
+{% block heading %}
+        <i class="fa fa-list-ul"></i> Advance Test Participants <a href="{% url 'events:events_dashboard' %}" class='pull-right'>Dashboard</a>
+{% endblock %}
+{% block content %}
+    <div class="bs-callout bs-callout-info">
+        <dl class='dl-horizontal'>
+            <dt>Institution Name</dt>
+            <dd>{{ advance_test.preliminary_test.academic }}, {{ advance_test.preliminary_test.academic.state }}</dd>
+            <dt>Foss</dt>
+            <dd>{{ advance_test.preliminary_test.foss.foss }}</dd>
+            <dt>Date</dt>
+            <dd>{{ advance_test.date_time }}</dd>
+            <dt>Participants Count</dt>
+            <dd>{{ advance_test.students.all.count }}</dd>
+            <dt>Organiser</dt>
+            <dd>{{ advance_test.organiser }}</dd>
+            <dt>Dept.</dt>
+            <dd>
+                {%  for dept in advance_test.preliminary_test.department.all %}
+                    {{ dept }}
+                {% endfor %}
+            </dd>
+
+        </dl>
+    </div>
+	<div>
+	{% if advance_test.students.all %}
+		<table class="table table-striped table-hover table-bordered">
+			<tr>
+           		<th>#</th>
+				<th>First Name</th>
+				<th>Last Name</th>
+				<th>Email Id</th>
+				<th>Advance Test Score</th>
+			</tr>
+			{% for student in advance_test.students.all %}
+			<tr>
+                <td>{{ forloop.counter }}</td>
+                    <td>
+                        {{ student.user.first_name }}
+                    </td>
+                    <td>
+                        {{ student.user.last_name }}
+                    </td>
+                    <td>
+                        {{ student.user.email }}
+                    </td>
+                    <td>
+                        {% if advance_test %}
+                            {% get_secondlevel_mark advance_test.preliminary_test.id student %}
+                        {% else %}
+                            NA
+                        {% endif %}
+                     </td>
+            </tr>
+			{% endfor %}
+		</table>
+		{% else %}
+			<p class="no-record">No student found!</p>
+		{% endif %}
+	</div>	
+{% endblock %}

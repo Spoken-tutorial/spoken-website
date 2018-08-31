@@ -3,6 +3,7 @@ from datetime import datetime, date, timedelta
 from django.db.models.signals import pre_delete, post_delete
 from django.dispatch import receiver
 from django.db.models import Q, Count, Sum, Min
+from django.utils import timezone
 
 #import auth user models
 from django.contrib.auth.models import User
@@ -19,6 +20,19 @@ from events.signals import revoke_student_permission
 #creation app models
 from creation.models import FossCategory, Language, \
   FossAvailableForWorkshop, FossAvailableForTest
+
+from yaksh.models import Course as YakshCourse
+from yaksh.models import AnswerPaper
+
+ADVANCE_TEST_STATUS = (
+    (1, 'Requested'),
+    (2, 'Invigilator Approved'),
+    (3, 'Resoure Person Approved'),
+    (4, 'Invigilated'),
+    (5, 'Completed'),
+    (20, 'Invigilator Rejected'),
+    (30, 'ResourcePerson Rejected'),
+)
 
 
 # Create your models here.
@@ -390,6 +404,14 @@ class Test(models.Model):
     self.save()
     return self
 
+  def get_top_performers(self):
+    attendees = self.testattendance_set.all()
+    top_performers = []
+    for attendee in attendees:
+        if attendee.is_top_performer():
+            top_performers.append(attendee)
+    return top_performers
+
 
 class TestAttendance(models.Model):
   test = models.ForeignKey(Test)
@@ -405,6 +427,18 @@ class TestAttendance(models.Model):
   status = models.PositiveSmallIntegerField(default=0)
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
+
+  def is_top_performer(self):
+    mdlquizgrades = MdlQuizGrades.objects.filter(quiz=self.mdlquiz_id,
+                                                 userid=self.mdluser_id)
+    if mdlquizgrades.exists():
+        mdlquizgrade = mdlquizgrades.first()
+    else:
+        return False
+    qualifying_marks = AdvanceTest.objects.get(foss=self.test.foss).qualifying_marks
+    # catch if does not exists
+    return mdlquizgrade.grade >= qualifying_marks
+
   class Meta:
     verbose_name = "Test Attendance"
     unique_together = (("test", "mdluser_id"))
@@ -1646,12 +1680,165 @@ class InductionFinalList(models.Model):
   batch_code = models.PositiveIntegerField()
   created = models.DateTimeField(auto_now_add = True)
 
+
+class AdvanceTest(models.Model):
+    foss = models.OneToOneField(FossCategory, on_delete=models.CASCADE,
+                                related_name='advance_test_foss')
+    yaksh_course = models.OneToOneField(YakshCourse, on_delete=models.CASCADE)
+    active = models.BooleanField(default=True)
+    qualifying_marks = models.DecimalField(decimal_places=2, max_digits=5,
+                                           default=90)
+
+
+class AdvanceTestBatchManager(models.Manager):
+    def get_advance_tests_available(self, user):
+        advance_tests = user.student.advance_students.all()
+        open_tests = advance_tests.filter(is_open=True)
+        available_tests = []
+        for test in open_tests:
+            if test.is_today():
+                available_tests.append(test)
+        return available_tests
+
+    def get_advance_tests_completed(self, user):
+        advance_tests = user.student.advance_students.all()
+        return advance_tests.filter(is_open=False)
+
+    def get_advance_tests_upcoming(self, user):
+        advance_tests = user.student.advance_students.all()
+        open_tests = advance_tests.filter(is_open=True)
+        upcoming_tests = []
+        for test in open_tests:
+            if test.is_upcoming():
+                upcoming_tests.append(test)
+        return upcoming_tests
+
+
+class AdvanceTestBatch(models.Model):
+    organiser = models.ForeignKey(Organiser,
+                                  related_name='advance_test_organiser')
+    approved_by = models.ForeignKey(User, null=True,
+                                    related_name='advance_test_approved_by')
+    invigilator = models.ForeignKey(Invigilator, null=True,
+                                    related_name='advance_test_invigilator')
+    test = models.ForeignKey(AdvanceTest, related_name='advance_test')
+    preliminary_test = models.ForeignKey(Test, related_name='pretest')
+    students = models.ManyToManyField('Student',
+                                      related_name='advance_students')
+    date_time = models.DateTimeField(null=True)
+    status = models.IntegerField(default=1, choices=ADVANCE_TEST_STATUS)
+    attendees = models.ManyToManyField('Student',
+                                       related_name='advance_attendees')
+    appeared = models.ManyToManyField('Student',
+                                      related_name='advance_appeared')
+    is_open = models.BooleanField(default=True)
+    objects = AdvanceTestBatchManager()
+
+    def __str__(self):
+        return '{0} Test'.format(self.test.foss.foss)
+
+    def _get_answerpaper(self, user):
+        qp = self.test.yaksh_course.learning_module.get().learning_unit.first().quiz.questionpaper_set.get()
+        answerpapers = AnswerPaper.objects.filter(question_paper=qp, user=user)
+        return answerpapers
+
+    def get_percentage(self, user):
+        answerpapers = self._get_answerpaper(user)
+        if answerpapers.exists():
+            return answerpapers.last().percent
+        else:
+            return 'NA'
+
+    def get_answerpaper_status(self, user):
+        answerpapers = self._get_answerpaper(user)
+        if answerpapers.exists():
+            return answerpapers.last().status
+        else:
+            return 'NA'
+
+    def check_attended(self, user):
+        answerpapers = self._get_answerpaper(user)
+        if answerpapers.exists():
+            self.appeared.add(user.student)
+        return answerpapers.exists()
+
+    def check_student_progress(self, student):
+        progress = {'state': 'NA', 'score': 'NA'}
+        if self.check_attended(student.user):
+            progress['state'] = self.get_answerpaper_status(student.user)
+            progress['score'] = self.get_percentage(student.user)
+        return progress
+
+    def invigilator_approve(self):
+        self.status = 2
+        self.save()
+
+    def invigilator_reject(self):
+        self.status = 20
+        self.save()
+
+    def resource_person_approve(self):
+        self.status = 3
+        self.save()
+
+    def resource_person_reject(self):
+        self.status = 30
+        self.save()
+
+    def invigilated(self):
+        self.status = 4
+        self.save()
+
+    def close(self):
+        self.is_open = False
+        if self.status == 4:
+            self.status = 5
+        self.save()
+
+    def open(self):
+        self.is_open = True
+        self.status = 1
+        self.save()
+
+    def is_today(self):
+        return self.date_time.date() <= timezone.datetime.today().date() and self.is_open
+
+    def is_completed(self):
+        return self.date_time.date() <= timezone.datetime.today().date() and not self.is_open
+
+    def is_upcoming(self):
+        return self.date_time.date() >= timezone.datetime.today().date() and self.is_open and self.status < 4
+
+    def get_status(self):
+        return self.status
+
+    def is_batch_eligible(self):
+        pass
+
+    def add_student(self, student):
+        self.students.add(student)
+
+    def get_students_count(self):
+        return self.students.count()
+
+    def get_students(self):
+        return self.students.all()
+
+    def get_students_for_attendance(self):
+        return self.students.all().exclude(id__in=self.attendees.all())
+
+    def get_attendees(self):
+        return self.attendees.all()
+
+
 class Drupal2018_email(models.Model):
   email = models.EmailField(max_length = 200)
+
 
 class MumbaiStudents(models.Model):
   stuid = models.ForeignKey('Student')
   bid = models.ForeignKey('StudentBatch')
+
 
 class PaymentDetails(models.Model):
     user = models.ForeignKey(User)
@@ -1667,6 +1854,7 @@ class PaymentDetails(models.Model):
     
     class Meta:
       unique_together = ('academic_id','academic_year',)
+
 
 class PaymentTransactionDetails(models.Model):
     paymentdetail = models.ForeignKey(PaymentDetails)

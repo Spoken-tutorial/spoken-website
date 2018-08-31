@@ -1,0 +1,89 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block title %}Advance Test Request{% endblock %}
+{% block compresscssblock %}
+    <link rel="stylesheet" href="{% static 'spoken/css/jquery.datetimepicker.css' %}" type="text/css" media="screen" charset="utf-8" />
+{% endblock %}
+
+{% block heading %}
+        <i class="fa fa-list-ul"></i> Advance Test Request <a href="{% url 'events:events_dashboard' %}" class='pull-right'>Dashboard</a>
+{% endblock %}
+{% block content %}
+    <div class='tab-content'>
+        <div class="bs-callout bs-callout-info">
+            {% if test %}
+                {{ test.academic.state }} - {{ test.academic }}
+            {% else %}
+                {{ user.organiser.academic.state }} - {{ user.organiser.academic }}
+            {% endif %}
+        </div>
+        <div class="row well">
+            <div class='col-sm-8'>
+                <form action="{{ action }}" method="post" class='form-horizontal'>{% csrf_token %}
+                    {% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
+                    {% if form.non_field_errors %}
+                    <ul>
+                      {% for error in advance_batch_form.non_field_errors %}
+                        <li>{{ error }}</li>
+                      {% endfor %}
+                    </ul>
+                    {% endif %}
+                    {{ advance_batch_form.errors }}
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for= "id_academic">Invigilator</label>
+                        <div class="col-sm-9">
+                            {% render_field advance_batch_form.invigilator class+="form-control invigilator" tabindex="1" data-placeholder="Enter Invigilator Name" %}
+                            {{ advance_batch_form.invigilator.errors }}
+                            <small>Please select the invigilator of your choice.</small>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for= "id_tdate">Date</label>
+                        <div class="col-sm-9">
+                            {% render_field advance_batch_form.date_time class+="form-control tdate datetime" tabindex="1" data-placeholder="Enter date" %}
+                            {{ advance_batch_form.date_time.errors }}
+                            <small>Please select a preferred date for conducting the Test.</small>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-offset-3 col-sm-9">
+                            <input class="btn btn-primary" type="submit" value="Submit" />
+                        </div>
+                    </div>
+                    {% endwith %}
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block compressjsblock %}
+    <script src="{% static 'spoken/js/jquery.datetimepicker.js' %}"></script>
+{% endblock %}
+{% block compressinlinejsblock %}
+<script type="text/javascript">
+    $('.datetime').datetimepicker({
+        onGenerate:function( ct ){
+            $(this).find('.xdsoft_day_of_week0')
+                .addClass('xdsoft_disabled');
+        },
+        lang:'en',
+        format:'Y-m-d H:i',
+        formatDate:'Y/m/d',
+        minDate:0, // yesterday is minimum date
+        weekends:[],
+        maxDate:'+1970/06/31', // tommorow date with in 6 month
+        step:5,
+        minTime:'08:00',
+        maxTime:'18:00',
+    });
+    $('.date').datetimepicker({
+        lang:'en',
+        timepicker:false,
+        format:'Y-m-d',
+        formatDate:'Y/m/d',
+        maxDate:'+1970/06/31', // tommorow date with in 6 month
+    });
+
+</script>
+{% endblock %}

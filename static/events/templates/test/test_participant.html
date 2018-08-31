@@ -41,6 +41,7 @@
 				<th>Last Name</th>
 				<th>Email Id</th>
 				<th>Score</th>
+				<th>Top performer</th>
 			</tr>
 			{% for record in collection %}
 			    {% with mdluser=record.mdluser_id|get_mdluser_details %}
@@ -81,6 +82,9 @@
                                 {% endwith %}
                             {% endif %}
                         </td>
+					    <td>
+					      {{ record.is_top_performer }}
+					    </td>
 				    </tr>
 				{% endwith %}
 			{% endfor %}

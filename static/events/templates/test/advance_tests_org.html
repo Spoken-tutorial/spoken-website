@@ -1,0 +1,69 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block title %}Advance Online Test{% endblock %}
+{% block heading %}
+        <i class="fa fa-list-ul"></i> Advance Online Test As An Organiser <a href="{% url 'events:events_dashboard' %}" class='pull-right'>Dashboard</a>
+{% endblock %}
+{% block content %}
+<ul class="tabs nav nav-tabs">
+    <li {% if status == 1 %} class="active" {% endif %}>
+        <a href="{% url 'events:advance_tests_org' 1 %}"> Requested </a>
+    </li>
+    <li {% if status == 2 %} class="active" {% endif %}>
+        <a href="{% url 'events:advance_tests_org' 2 %}"> Approved by Invigilator </a>
+    </li>
+    <li {% if status == 3 %} class="active" {% endif %}>
+        <a href="{% url 'events:advance_tests_org' 3 %}"> Approved by Resource Person</a>
+    </li>
+    <li {% if status == 4 %} class="active" {% endif %}>
+        <a href="{% url 'events:advance_tests_org' 4 %}"> Inprogress/Invigilated </a>
+    </li>
+    <li {% if status == 5 %} class="active" {% endif %}>
+        <a href="{% url 'events:advance_tests_org' 5 %}"> Completed </a>
+    </li>
+    <li {% if status == 20 %} class="active" {% endif %}>
+        <a href="{% url 'events:advance_tests_org' 20 %}"> Rejected by Invigilator </a>
+    </li>
+    <li {% if status == 30 %} class="active" {% endif %}>
+        <a href="{% url 'events:advance_tests_org' 30 %}"> Rejected by Resource Person</a>
+    </li>
+</ul>
+    <table class="paleblue table table-striped table-hover table-bordered">
+        {% if advance_tests %}
+            <tr>
+                <th> # </th>
+                <th> State </th>
+                <th> Academic Code </th>
+                <th> Institution </th>
+                <th> Invigilator </th>
+                <th> FOSS </th>
+                <th> Date </th>
+                <th> Participants </th>
+                <th> View </th>
+                <th> Edit </th>
+            </tr>
+        {% else %}
+            <p> Nothing here right now. Check other tabs </p>
+        {% endif %}
+        {% for test in advance_tests %}
+            <tr>
+                <td>{{ forloop.counter }}
+                <td>{{ test.organiser.academic.state }}</td>
+                <td>{{ test.organiser.academic.academic_code}}</td>
+                <td>{{ test.organiser.academic }}</td>
+                <td>{{ test.invigilator.user.first_name }}</td>
+                <td>{{ test.test.foss.foss }}</td>
+                <td>{{ test.date_time|date:"d M Y" }}</td>
+                <td>{{ test.get_students_count }}</td>
+                <td><a href="{% url 'events:view_advance_participants' test.id %}"> Participants </a></td>
+                </td>
+                {% if status != 4 and status != 5 %}
+                    <td><a href="{% url 'events:edit_advance_test_batch' test.id %}"> {{ test }} </a></td>
+                {% else %}
+                    <td> Not allowed now </td>
+                {% endif %}
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

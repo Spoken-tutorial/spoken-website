@@ -8,6 +8,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from dateutil.relativedelta import relativedelta
 import os
 import os.path
+from django.shortcuts import get_object_or_404
 register = template.Library()
 
 
@@ -163,6 +164,24 @@ def feedback_status_likely(status):
     status_dict = {0 : 'Not at All', 1 : 'Not at All', 2 : 'Maybe', 3 : 'Likely', 4 : 'Quite likely', 5 : 'Definitely'}
     return status_dict[status]
 
+
+def get_secondlevel_mark(test_id, student):
+    t = Test.objects.get(id=test_id)
+    adv = t.pretest.get()
+    if student is not None:
+        percentage = adv.get_percentage(student.user)
+        return percentage
+    else:
+        return 'NA'
+
+
+def has_attempted(adv_test_id, student):
+    adv_test = get_object_or_404(AdvanceTestBatch, id=adv_test_id)
+    return adv_test.check_attended(student.user)
+
+
+register.simple_tag(has_attempted, name='has_attempted')
+register.simple_tag(get_secondlevel_mark, name='get_secondlevel_mark')
 register.filter('participant_picture', participant_picture)
 register.filter('get_trainingstatus', get_trainingstatus)
 register.filter('get_trainingparticipant_status', get_trainingparticipant_status)
