@@ -12,6 +12,7 @@ urlpatterns = patterns('',
     url(r'^sitemap\.html$', 'spoken.views.sitemap', name='sitemap'),
     # Examples:
     url(r'^addu/$', 'spoken.views.add_user', name='addu'),
+    url(r'^NMEICT-Intro/$', 'spoken.views.nmeict_intro', name="nmeict_intro"),
     url(r'^tutorial-search/$', 'spoken.views.tutorial_search', name="tutorial-search"),
     url(r'^series/$', 'spoken.views.series_foss', name="series"),
     url(r'^series_tutorial-search/$', 'spoken.views.series_tutorial_search', name="series-tutorial-search"),
@@ -69,6 +70,9 @@ urlpatterns = patterns('',
     # team
     url(r'^team/', include('team.urls')),
 
+    #api
+    url(r'^api/', include('api.urls', namespace='api')),
+
     # certificate
     url(r'^certificate/', include('certificate.urls', namespace='certificate')),
 
@@ -103,4 +107,6 @@ urlpatterns = patterns('',
 
     # cms
     url(r'^', include('cms.urls', namespace='cms')),
+
+
 )

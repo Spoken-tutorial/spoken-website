@@ -109,7 +109,7 @@ def keyword_search(request):
     keyword = ''
     collection = None
     correction = None
-    form = TutorialSearchForm()
+    form = AllTutorialSearchForm()
     if request.method == 'GET' and 'q' in request.GET and request.GET['q'] != '':
         form = KeywordSearchForm(request.GET)
         if form.is_valid():
@@ -119,6 +119,7 @@ def keyword_search(request):
     if collection:
         page = request.GET.get('page')
         collection = get_page(collection, page)
+    
 
     context = {}
     context['form'] = KeywordSearchForm()
@@ -626,3 +627,6 @@ def expression_of_intrest_new(request):
     context = {}
     context['form'] = form
     return render(request, 'spoken/templates/expression_of_intrest_old.html', context)
+
+def nmeict_intro(request):
+    return render(request, 'spoken/templates/nmeict_intro.html')

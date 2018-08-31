@@ -8,9 +8,9 @@ import datetime
 from django.utils import timezone
 from decimal import Decimal
 from urllib import quote, unquote_plus, urlopen
-from itertools import islice
-from docx import Document
-from docx.enum.text import WD_ALIGN_PARAGRAPH
+#from itertools import islice
+#from docx import Document
+#from docx.enum.text import WD_ALIGN_PARAGRAPH
 
 # Third Party Stuff
 from django.conf import settings
@@ -3181,4 +3181,46 @@ def generate_honorarium_receipt(code, contributor, foss, amount, manager, tutori
             paragraph.text = ""
             paragraph.add_run(manager)
     doc.save('media/hr-receipts/'+code+'.docx')
+
+def update_codefiles(request):
+    if not is_administrator(request.user):
+        raise PermissionDenied()
+    form = UpdateCodefilesForm()
+    if request.method == 'POST':
+        form = UpdateCodefilesForm(request.POST, request.FILES)
+        if form.is_valid():
+            try:
+                foss_id = request.POST.get('foss')
+                foss = FossCategory.objects.get(pk=foss_id)
+
+                tutorial_detail_id = request.POST.get('tutorial')
+                tutorial = TutorialDetail.objects.get(pk=tutorial_detail_id)
+                file_name, file_extension = os.path.splitext(request.FILES['comp'].name)
+                file_name =  tutorial.tutorial.replace(' ', '-') + '-Codefiles' + file_extension
+                file_path = settings.MEDIA_ROOT + 'videos/' + str(foss_id) + '/' + str(tutorial_detail_id) + '/resources/' + file_name
+            
+                fout = open(file_path, 'wb+')
+                f = request.FILES['comp']
+                # Iterate through the chunks.
+                for chunk in f.chunks():
+                    fout.write(chunk)
+                fout.close()
+
+                tr_res = TutorialResource.objects.get(tutorial_detail=tutorial_detail_id, language_id = 22)
+                tr_res.common_content.code = file_name
+                tr_res.common_content.code_status = 4
+                tr_res.common_content.code_user = request.user
+                tr_res.common_content.save()
+
+
+
+                messages.success(request, 'Codefiles updated successfully!')
+                form = UpdateCodefilesForm()
+            except Exception, e:
+                print e
+    context = {
+        'form': form,
+    }
+    context.update(csrf(request))
+    return render(request, 'creation/templates/update_codefiles.html', context)
 
