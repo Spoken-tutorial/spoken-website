@@ -2,15 +2,13 @@
 from __future__ import unicode_literals
 
 from django.db import models, migrations
-import datetime
-from django.utils.timezone import utc
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
         ('creation', '0012_tutorialresource_publish_at'),
-        ('events', '0029_mumbaistudents'),
+        ('events', '0035_auto_20180806_1709'),
     ]
 
     operations = [
@@ -32,7 +30,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='testimonials',
             name='created',
-            field=models.DateTimeField(default=datetime.datetime(2018, 6, 18, 8, 19, 20, 294272, tzinfo=utc), auto_now_add=True),
-            preserve_default=False,
+            field=models.DateTimeField(auto_now_add=True),
         ),
     ]
