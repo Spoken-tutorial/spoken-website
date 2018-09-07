@@ -14,6 +14,7 @@ from django.db.models import Q
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
+from django.core.urlresolvers import reverse
 
 # Spoken Tutorial Stuff
 from cms.forms import *
@@ -136,7 +137,7 @@ def tutorial_search(request):
     collection = None
     form = TutorialSearchForm()
     foss_get = ''
-    show_on_homepage = True;
+    show_on_homepage = True
     queryset = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = show_on_homepage)
 
     if request.method == 'GET' and request.GET:
@@ -173,9 +174,28 @@ def list_videos(request):
     return render(request, 'spoken/templates/list_videos_form.html', context)
 
 def series_foss(request):
+    '''
+    Get all the media testimonials which are set to not 
+    show on home page and display along the form to display the tutorials.
+    '''
     form = SeriesTutorialSearchForm()
+    collection = None
+    # Get all the video / audio testimonials in series
+    foss_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), language__name='English', tutorial_detail__foss__show_on_homepage = False).values_list('tutorial_detail__foss__id').annotate().distinct()
+    collection =  MediaTestimonials.objects.filter(foss__id__in=foss_list).values("foss__foss", "content", "created", "foss", "foss_id", "id", "path", "user").order_by('-created')
+    
+    if collection:
+        page = request.GET.get('page')
+        collection = get_page(collection, page, limit=6)
+    
+    add_button_show= False
+    if request.user.has_perm('events.add_testimonials'):
+        add_button_show= True
     context = {}
     context['form'] = form
+    context['collection'] = collection
+    context['media_url'] = settings.MEDIA_URL
+    context['add_button_show'] = add_button_show
     return render(request, 'spoken/templates/series_foss_list.html', context)
 
 @csrf_exempt
@@ -184,7 +204,7 @@ def series_tutorial_search(request):
     collection = None
     form = SeriesTutorialSearchForm()
     foss_get = ''
-    show_on_homepage = False;
+    show_on_homepage = False
     queryset = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = show_on_homepage)
     
     if request.method == 'GET' and request.GET:
@@ -321,21 +341,89 @@ def get_language(request, tutorial_type):
     return HttpResponse(json.dumps(output), content_type='application/json')
 
 
-def testimonials(request):
-    testimonials = Testimonials.objects.all()
-    context = {'testimonials': testimonials}
+def testimonials(request, type="text"):
+    '''
+    Responds with `/testimonial` page to display all the 
+    text / video / audio template.
+    '''
+    collection = None
+    if type == "text":
+        collection = Testimonials.objects.all().values().order_by('-created')
+    else:
+        collection = MediaTestimonials.objects.all().values("foss__foss", "content", "created", "foss", "foss_id", "id", "path", "user").order_by('-created')
+
+    if collection:
+        page = request.GET.get('page')
+        collection = get_page(collection, page, limit=6)
+
+    context = {}
+    context['collection'] = collection
+    context['media_url'] = settings.MEDIA_URL
+    context['testimonial_type'] = type
     context.update(csrf(request))
     return render(request, 'spoken/templates/testimonial/testimonials.html', context)
 
 
+def testimonials_new_media(request, type):
+    '''
+    Responds with form for video/audio testimonials 
+    to be uploaded and POST request checks and stores 
+    the response in file system and database.
+    '''
+    user = request.user
+    if not user.has_perm('events.add_testimonials'):
+        raise PermissionDenied()
+    
+    context = {}
+    if type == 'series':
+        form = MediaTestimonialForm(on_home_page=False)
+    else:
+        form = MediaTestimonialForm(on_home_page=True)
+
+    if request.method == 'POST':
+        if type == 'series':
+            form = MediaTestimonialForm(request.POST, request.FILES, on_home_page=False)
+        else:
+            form = MediaTestimonialForm(request.POST, request.FILES, on_home_page=True)
+        if form.is_valid():
+            foss = FossCategory.objects.get(foss=request.POST.get('foss'))
+            if not request.FILES:
+                messages.error(request, 'Nothing uploaded. Choose a file for paste a link')
+            else:
+                file_container = request.FILES['media']
+                # Put the uploaded file in the desired location.
+                file_name = str(user) + '-' + dt.datetime.now().strftime("%Y-%m-%d-%H-%M-%S") + file_container.name[-4:]
+                file_path = settings.MEDIA_ROOT + 'testimonials/' + str(foss.id) + '/' 
+                from_media_path =  'testimonials/' + str(foss.id) + '/' + file_name
+                os.system("mkdir -p %s" % file_path)
+                full_path = file_path + file_name
+                fout = open(full_path, 'wb+')
+                # Iterate through the chunks.
+                for chunk in file_container.chunks():
+                    fout.write(chunk)
+                fout.close()
+                # Save in database
+                data = MediaTestimonials(foss=foss, path=from_media_path, user=request.POST.get('name'), content= request.POST.get('content'))
+                messages.success(request, 'Testimonial has posted successfully!')
+                data.save()
+            return HttpResponseRedirect('/')
+    context['form'] = form
+    context.update(csrf(request))
+    return render(request, 'spoken/templates/testimonial/mediaform.html', context)
+
+
 def testimonials_new(request):
-    ''' new testimonials '''
+    ''' 
+    Responds with form for text testimonials 
+    to be uploaded and POST request checks and stores 
+    the response in the database.
+    '''
     user = request.user
     context = {}
-    form = TestimonialsForm()
-    if (not user.is_authenticated()) or ((not user.has_perm('events.add_testimonials'))):
+    if not user.has_perm('events.add_testimonials'):
         raise PermissionDenied()
-
+    
+    form = TestimonialsForm()
     if request.method == 'POST':
         form = TestimonialsForm(request.POST, request.FILES)
         if form.is_valid():
@@ -376,7 +464,7 @@ def admin_testimonials_edit(request, rid):
     context = {}
     form = TestimonialsForm()
     instance = ''
-    if (not user.is_authenticated()) or ((not user.has_perm('events.change_testimonials'))):
+    if not user.has_perm('events.change_testimonials'):
         raise PermissionDenied()
     try:
         instance = Testimonials.objects.get(pk=rid)
@@ -428,7 +516,7 @@ def admin_testimonials_delete(request, rid):
     user = request.user
     context = {}
     instance = ''
-    if (not user.is_authenticated()) or ((not user.has_perm('events.delete_testimonials'))):
+    if not user.has_perm('events.delete_testimonials'):
         raise PermissionDenied()
     try:
         instance = Testimonials.objects.get(pk=rid)
@@ -439,20 +527,47 @@ def admin_testimonials_delete(request, rid):
         instance = Testimonials.objects.get(pk=rid)
         instance.delete()
         messages.success(request, 'Testimonial deleted successfully')
-        return HttpResponseRedirect('/admin/testimonials')
+        return HttpResponseRedirect(reverse('admin_testimonials'))
     context['instance'] = instance
     context.update(csrf(request))
     return render(request, 'spoken/templates/testimonial/form.html', context)
 
 
-def admin_testimonials(request):
-    ''' admin testimonials '''
+def admin_testimonials_media_delete(request, rid):
     user = request.user
     context = {}
-    if (not user.is_authenticated()) or (not user.has_perm('events.add_testimonials') and (not user.has_perm('events.change_testimonials'))):
+    instance = ''
+    if not user.has_perm('events.delete_testimonials'):
+        raise PermissionDenied()
+    try:
+        instance = MediaTestimonials.objects.get(pk=rid)
+    except Exception as error:
+        print error
+        raise Http404('Page not found')
+    if request.method == 'POST':
+        instance = MediaTestimonials.objects.get(pk=rid)
+        instance.delete()
+        messages.success(request, 'Testimonial deleted successfully')
+        return HttpResponseRedirect(reverse('admin_testimonials'))
+    context['instance'] = instance
+    context.update(csrf(request))
+    return render(request, 'spoken/templates/testimonial/mediaform.html', context)
+
+
+def admin_testimonials(request):
+    ''' 
+    admin testimonials:
+        Page for administrators to view / add / edit / delete testimonials.
+    '''
+    user = request.user
+    context = {}
+    if not user.has_perm('events.add_testimonials') and not user.has_perm('events.change_testimonials'):
         raise PermissionDenied()
     collection = Testimonials.objects.all()
+    mediacollection = MediaTestimonials.objects.all()
     context['collection'] = collection
+    context['mediacollection'] = mediacollection
+    context['media_url'] = settings.MEDIA_URL
     context.update(csrf(request))
     return render(request, 'spoken/templates/testimonial/index.html', context)
 
@@ -622,8 +737,6 @@ def expression_of_intrest_new(request):
     context = {
         'form' : form,
     }
-
-
     context = {}
     context['form'] = form
     return render(request, 'spoken/templates/expression_of_intrest_old.html', context)

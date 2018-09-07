@@ -494,9 +494,27 @@ class Testimonials(models.Model):
   source_title = models.CharField(max_length=200, null=True)
   source_link = models.URLField(null = True)
   status = models.PositiveSmallIntegerField(default = 0)
-  created = models.DateTimeField(auto_now_add = True, null=True)
+  created = models.DateTimeField(auto_now_add=True)
   updated = models.DateTimeField(auto_now = True, null=True)
 
+class MediaTestimonials(models.Model):
+    '''
+    This model is required for storing audio / video testimonials
+    * path contains the location of the file,
+    * user is the person who has send the testimonial.
+    '''
+    foss = models.ForeignKey(FossCategory)
+    path = models.CharField(max_length=255)
+    user = models.CharField(max_length=255)
+    content = models.CharField(max_length=255)
+    created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Media Testimonials'
+        verbose_name_plural = 'Media Testimonials'
+
+    def __unicode__(self):
+        return self.path
 
 class OrganiserNotification(models.Model):
   user = models.ForeignKey(User)

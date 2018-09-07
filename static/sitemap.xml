@@ -86,7 +86,10 @@
         <loc>http://spoken-tutorial.org/creation/collaborate/</loc>
     </url>
     <url>
-        <loc>http://spoken-tutorial.org/testimonials/</loc>
+        <loc>http://spoken-tutorial.org/testimonials/text/</loc>
+    </url>
+    <url>
+        <loc>http://spoken-tutorial.org/testimonials/media/</loc>
     </url>
     <url>
         <loc>http://spoken-tutorial.org/news/media-articles/</loc>

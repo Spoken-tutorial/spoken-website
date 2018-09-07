@@ -1,9 +1,14 @@
+# Logs
 *.log
+!static/report_builder/bower_components/handsontable/sauce_connect.log
+!certificate/drupal_workshop_template/missfont.log
+
 celerybeat-schedule
 *~
 *.swp
 *.pyc
-.client_secrets.json
+comb.py-oauth2.json
+client_secrets.json
 certificate/fa_workshop_template/template_FAW2017Pcertificate
 certificate/itp_workshop_template/template_ITPW2017Pcertificate
 certificate/fa_workshop_template/template_KHW2018Pcertificate
@@ -16,17 +21,22 @@ cron/youtube-oauth.storage
 cron/logs/*
 events/display.py
 youtube/secrets/*
+
+# Media Folder
 media/*
 !media/videos/
 !media/training/
 !media/cms/
 !media/cdimage/
+!media/testimonials/
 media/videos/*
 media/training/*
 media/cdimage/*
+media/testimonials/*
 !media/training/README
 !media/videos/README
 !media/cdimage/README
+!media/testimonials/README
 !media/README
 media/cms/*
 !media/cms/images/
@@ -42,6 +52,7 @@ media/cms/js/*
 !media/cms/documents/README
 !media/cms/css/README
 !media/cms/js/README
+
 uwsgi-master.pid
 static/CACHE/*
 *.py[cod]
