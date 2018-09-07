@@ -3,7 +3,6 @@ import django_filters
 
 # Spoken Tutorial Stuff
 from creation.models import TutorialResource,ContributorRating
-from django import forms
 
 class CreationStatisticsFilter(django_filters.FilterSet):
 

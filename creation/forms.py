@@ -1009,68 +1009,6 @@ class UpdateCodefilesForm(forms.Form):
                 self.fields['tutorial'].widget.attrs = {}
                 self.fields['tutorial'].initial = initial_tut
 
-class ContributorRatingForm(forms.ModelForm):
-    
-    user = forms.ChoiceField(
-        choices = [('', '-- Select User --'),] + list(
-        User.objects.filter(groups__id=4).values_list('id','username')),
-        required = True,
-        error_messages = {'required':'user field is required.'}
-    )
-    language = forms.ChoiceField(
-        choices=[('', '-- Select Language --'), ],
-        required=True,
-        error_messages={'required': 'Language field is required.'}
-    ) 
-
-    def __init__(self, *args, **kwargs):
-        super(ContributorRatingForm, self).__init__(*args, **kwargs)
-
-        print "ARGS  : ",args,"--"
-        self.fields['rating'].help_text = ''' 1 : Loser<br>
-        2 : Just a Contributor <br>
-        3 : Fair <br>
-        4 : Good <br>
-        5 : God Likee <br>
-        ''' 
-        if args:
-            
-            if 'user' in args[0] and args[0]['user']:
-                initial_lang = ''
-                if 'language' in args[0] and args[0]['language']:
-                    initial_lang = args[0]['language']
-
-                lang = Language.objects.filter(id__in= RoleRequest.objects.filter(
-                status = 1 ,user_id = args[0]['user'] , role_type = 0).exclude(language_id =22).values('language_id'))
-
-                print "Selected : ", lang
-                
-                user_1 = User.objects.filter(groups__id=4)
-                self.fields['user'] =  forms.ModelChoiceField(queryset=user_1)
-                self.fields['language'] =  forms.ModelChoiceField(queryset=lang)
-
-        else:
-            all_langs = Language.objects.all()
-            self.fields['language'] =  forms.ModelChoiceField(queryset=all_langs)
-
-        if kwargs:
-            print "kwargs['instance'].user : ",kwargs
-            key= kwargs.keys()
-            print "key : ", key[0]
-            print "kk : ", kwargs[key[0]]
-            if kwargs[key[0]]:
-                if kwargs[key[0]].user:
-                    initial_lang = ''
-                    if kwargs['instance'].language:
-                        initial_lang = kwargs['instance'].language
-
-                    lang = Language.objects.filter(id__in= RoleRequest.objects.filter(
-                    status = 1 ,user_id = kwargs['instance'].user_id, role_type = 0).values('language_id'))
-                    print "Selected : ", dir(lang)
-                    
-                    user_1 = User.objects.filter(groups__id=4)
-                    self.fields['user'] =  forms.ModelChoiceField(queryset=user_1)
-                    self.fields['language'] =  forms.ModelChoiceField(queryset=lang)
 
 class LanguageManagerForm(forms.ModelForm):
     user = forms.ModelChoiceField(
