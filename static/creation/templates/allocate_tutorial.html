@@ -144,12 +144,12 @@
               {% if datetoday|date:"Y m d"  > record.submissiondate|date:"Y m d" %} 
                 
                 {% if record.extension_status < 2 %}
-                <a class="btn btn-danger" href="{% url 'creation:extend_submission_date' record.id %}"> 
+                <a class="btn btn-danger" href="#" onclick=extend('{{record.id}}') %}"> 
               Extend </a>
               {% endif %}
               {% else%}
                 {% if record.extension_status >= 1 %}
-                <a class="btn btn-danger" disabled  href="{% url 'creation:extend_submission_date' record.id %}"> Extend</a>
+                <a class="btn btn-danger" disabled  href="#" %}"> Extend</a>
                 {% endif %}    
               {% endif %}
           
@@ -214,6 +214,23 @@
                        location.reload();
                 }
                 });
+        }
+
+
+        function extend(tutorial)
+        {
+              $.ajax({
+                type : "POST",
+                url:"/creation/extend_submission_date/",
+                dataType : "json",
+                data:{
+                  tutorial: tutorial
+                },
+                success: function(data)
+                {
+                       location.reload();
+                }
+              });
         }
     </script>
 {% endblock %}  
