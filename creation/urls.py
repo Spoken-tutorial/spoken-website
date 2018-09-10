@@ -92,5 +92,7 @@ urlpatterns = patterns('',
     url(r'payment/ajax/fosses/$', 'creation.views.load_fosses', name="load_fosses"),
     url(r'payment/due/$', 'creation.views.list_all_due_tutorials', name="payment_due_tutorials"),
     url(r'payment/honorarium/$', 'creation.views.list_payment_honorarium', name="payment_honorarium_list"),
-    url(r'payment/honorarium/detail/(\d+)/$', 'creation.views.detail_payment_honorarium', name="payment_honorarium_detail")
+    url(r'payment/honorarium/detail/(\d+)/$', 'creation.views.detail_payment_honorarium', name="payment_honorarium_detail"),
+    url(r'payment/honorarium/download/(?P<hono_id>\d+)/$', 'creation.views.payment_honorarium_download', name="payment_honorarium_download")
+
 )

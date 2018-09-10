@@ -24,7 +24,7 @@ from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render
-from django.db.models import Count, F, Q
+from django.db.models import Count, F, Q, Sum
 from django.views.generic.list import ListView
 from django.core.urlresolvers import reverse
 from django.db import IntegrityError
@@ -2989,7 +2989,7 @@ def initiate_payment(request):
         contributor = str(user.first_name+" "+user.last_name)
         foss = tr_pay.tutorial_resource.tutorial_detail.foss.foss
         manager = request.user.first_name+" "+request.user.last_name # currrent logged in user - manager
-        generate_honorarium_receipt(honorarium.code, contributor, foss, honorarium.amount, manager, tutorials)
+        #generate_honorarium_receipt(honorarium.code, contributor, foss, honorarium.amount, manager, tutorials)
         messages.success(request,"Payment Honorarium (#"+str(honorarium.code)+") worth Rs. \
             "+str(amount)+" for contributor "+user.first_name+" "+user.last_name+" initiated for \
             "+str(len(tr_pay_ids))+" tutorials")
@@ -3224,3 +3224,65 @@ def update_codefiles(request):
     context.update(csrf(request))
     return render(request, 'creation/templates/update_codefiles.html', context)
 
+from subprocess import call
+from tempfile import mkdtemp, mkstemp
+from django.template.loader import render_to_string
+from string import Template
+import os
+import subprocess
+def payment_honorarium_download(request,hono_id):
+    print "hono_id :",hono_id
+    payment_details = TutorialPayment.objects.filter(payment_honorarium_id=hono_id)
+    print "payment_honorarium : ",payment_details
+    # In a temporary folder, make a temporary file
+    cur_path = os.path.dirname(os.path.realpath(__file__))
+    dest_folder = cur_path+'/sample.pdf'
+    os.chdir(cur_path)
+    tmp_folder = mkdtemp('tex')
+    os.chdir(tmp_folder)        
+    texfile, texfilename = mkstemp(dir=tmp_folder)
+    tmp_folder =os.path.abspath(os.path.join(texfilename, os.pardir))
+    tutorials = []
+    totalSecs = 0
+    s = Template('payment_honorarium.template')
+    for tr_pay_id in payment_details:
+            #tr_pay = TutorialPayment.objects.get(id = tr_pay_id)
+            tutorials.append([tr_pay_id.tutorial_resource.tutorial_detail.tutorial, tr_pay_id.get_duration()])
+            timeParts = [int(ss) for ss in tr_pay_id.get_duration().split(':')]
+            totalSecs += (timeParts[0] * 60 + timeParts[1]) * 60 + timeParts[2]
+            totalSecs, sec = divmod(totalSecs, 60)
+            hr, min = divmod(totalSecs, 60)
+            print "%d:%02d:%02d" % (hr, min, sec),
+
+    user = payment_details.distinct().values('user__username')
+
+    pdf_data ={}
+    amount = payment_details.aggregate(Sum('amount'))
+    foss = payment_details.distinct().values('tutorial_resource__tutorial_detail__foss__foss')
+    print "user",user,foss,'\n',tutorials,'\n',money_as_text(amount['amount__sum'])
+    pdf_data['amount'] = amount
+    pdf_data['contributor'] = user
+    pdf_data['foss'] = foss
+    pdf_data['money_as_text'] = money_as_text(amount['amount__sum'])
+    pdf_data['tutorials'] = tutorials
+    pdf_data['totalSecs'] = str(hr)+':'+str(min)+':'+str(sec)
+    # Pass the TeX template through Django templating engine and into the temp file
+    os.write(texfile, render_to_string(s.template,pdf_data))
+    os.close(texfile)
+    # Compile the TeX file with PDFLaTeX
+    call(['pdflatex', texfilename])
+    # Move resulting PDF to a more permanent location
+    os.rename(texfilename + '.pdf', dest_folder)
+    # Remove intermediate files
+    os.remove(texfilename)
+    os.remove(texfilename + '.aux')
+    os.remove(texfilename + '.log')
+    os.rmdir(tmp_folder)
+
+    with open(dest_folder,'r') as pdf :
+      response = HttpResponse(content_type='application/pdf')
+      response['Content-Disposition'] = 'attachment; \
+                  filename=%s' % (str(user[0]['user__username'])+" ST.pdf")
+      response.write(pdf.read())
+    os.remove(dest_folder)
+    return response

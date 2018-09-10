@@ -90,7 +90,7 @@
 			</td>
 			<td>₹ {{ honorarium.amount }}</td>
 			<td>{{ honorarium.updated }}</td>
-			<td class="text-center"><a class="btn btn-xs btn-link" href="/media/hr-receipts/{{ honorarium.code }}.docx" target="blank">View / Download</a></td>
+			<td class="text-center"><a class="btn btn-xs btn-link" href="{% url 'creation:payment_honorarium_download' honorarium.id %}"  target="blank">View / Download</a></td>
 			<td class="text-center">
 				<form method="POST">
 					{% csrf_token %}
