@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 from django.db import models, migrations
 from django.conf import settings
+import datetime
 
 
 class Migration(migrations.Migration):
@@ -67,7 +68,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='tutorialresource',
             name='submissiondate',
-            field=models.DateTimeField(default=b'2000-01-02', blank=True),
+            field=models.DateTimeField(default=datetime.datetime(2000, 1, 2, 12, 0), blank=True),
         ),
         migrations.AlterUniqueTogether(
             name='contributorrole',

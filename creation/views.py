@@ -107,9 +107,7 @@ def is_contenteditor(user):
 
 def is_language_manager(user):
     """ Check if the logged in user is Language Manager"""
-    if LanguageManager.objects.filter(user=user,status=1).exists():
-        return True
-    return False
+    return LanguageManager.objects.filter(user=user,status=1).exists()
 
 def get_filesize(path):
     filesize_bytes = os.path.getsize(path)

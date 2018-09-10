@@ -1,6 +1,7 @@
 # Third Party Stuff
 from django.contrib.auth.models import User
 from django.db import models
+import datetime
 
 class Language(models.Model):
     name = models.CharField(max_length=255, unique=True)
@@ -198,7 +199,8 @@ class TutorialResource(models.Model):
     updated = models.DateTimeField(auto_now=True)
     publish_at = models.DateTimeField(null=True)
         # the last submission date for the tutorial
-    submissiondate = models.DateTimeField(default = '2000-01-02' ,blank = True)
+
+    submissiondate = models.DateTimeField(default = datetime.datetime(2000, 01, 02, 12, 00) ,blank = True)
     # 0 - Not Assigned to anyone , 1 - Assigned & work in progress , 2 - Completed (= published / PR )
     assignment_status = models.PositiveSmallIntegerField(default=0)
     # 0 - Not Extended , 1 - Extended , 2 - Tutorial Terminated from user
@@ -346,7 +348,6 @@ class RoleRequest(models.Model):
     role_type = models.IntegerField(default=0)
     language = models.ForeignKey(Language,null=True)
     status = models.PositiveSmallIntegerField(default=0)
-    language = models.ForeignKey(Language,null=True)
     approved_user = models.ForeignKey(
         User, related_name='approved_user', null=True, blank =True)
     created = models.DateTimeField(auto_now_add=True)
