@@ -62,7 +62,7 @@
           </tr>
 
           {% for record in contributors %}
-          <tr class="">
+          <tr class="text-center">
           <td><input type="checkbox" name ="contri" value ="{{ record.user__username }}" class="col-md-10 "></td>
           <td align="center" class="form-group">{{ record.user__username }}</td>       
           </label>
@@ -70,7 +70,7 @@
           <td >
           <div align="center">
             <label for="sel1"></label>
-            <select name ="rating" id="sel1" >
+            <select name ="rating" id="sel1" class="form-horizontal form-control">
               <option>0</option>
               <option>1</option>
               <option>2</option>
@@ -79,6 +79,14 @@
               <option>5</option>
             </select>
           </div>
+          </td>
+          <td>
+            {%for a_contri in rated_contributors %}
+            {% if a_contri.user__username == record.user__username%}
+              {{a_contri.rating}}
+              {% endif %}
+              {% endfor %}
+ 
           </td>
           </tr>
           </tr > 

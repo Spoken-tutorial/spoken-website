@@ -1231,7 +1231,7 @@ class TrainingRequestListView(ListView):
   raw_get_data = None
   role = None
   status = None
-  now= datetime.now()
+  now= datetime.datetime.now()
   year = now.year
   month =now.month
 

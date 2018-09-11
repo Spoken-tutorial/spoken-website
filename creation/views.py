@@ -2948,7 +2948,12 @@ def update_codefiles(request):
 
 @login_required
 def rate_contributors(request,sel_status):
-    if is_language_manager(request.user):
+    # try:
+    lang_select = request.GET.get('language')
+    if lang_select == '' :
+        return HttpResponseRedirect(request.META['HTTP_REFERER'])    
+    
+    elif is_language_manager(request.user):
         lang_qs = Language.objects.filter(id__in= LanguageManager.objects.filter(user=request.user,status=1).values('language'))
         context ={}
         active = sel_status
@@ -2957,7 +2962,8 @@ def rate_contributors(request,sel_status):
             header = {
                         1: SortableHeader('Check', False),
                         2: SortableHeader('user__username', True, 'User'),
-                        3: SortableHeader('rating', False, 'Rating'),                
+                        3: SortableHeader('rating', False, 'Rating'), 
+                        4: SortableHeader('Previous Rating',False),              
                     }
 
 
