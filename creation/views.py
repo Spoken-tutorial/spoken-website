@@ -3229,11 +3229,9 @@ from tempfile import mkdtemp, mkstemp
 from django.template.loader import render_to_string
 from string import Template
 import os
-import subprocess
+
 def payment_honorarium_download(request,hono_id):
-    print "hono_id :",hono_id
     payment_details = TutorialPayment.objects.filter(payment_honorarium_id=hono_id)
-    print "payment_honorarium : ",payment_details
     # In a temporary folder, make a temporary file
     cur_path = os.path.dirname(os.path.realpath(__file__))
     dest_folder = cur_path+'/sample.pdf'
@@ -3259,7 +3257,7 @@ def payment_honorarium_download(request,hono_id):
     pdf_data ={}
     amount = payment_details.aggregate(Sum('amount'))
     foss = payment_details.distinct().values('tutorial_resource__tutorial_detail__foss__foss')
-    print "user",user,foss,'\n',tutorials,'\n',money_as_text(amount['amount__sum'])
+    
     pdf_data['amount'] = amount
     pdf_data['contributor'] = user
     pdf_data['foss'] = foss
