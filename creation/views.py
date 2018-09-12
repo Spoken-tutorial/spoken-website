@@ -3248,9 +3248,9 @@ def payment_honorarium_download(request,hono_id):
             tutorials.append([tr_pay_id.tutorial_resource.tutorial_detail.tutorial, tr_pay_id.get_duration()])
             timeParts = [int(ss) for ss in tr_pay_id.get_duration().split(':')]
             totalSecs += (timeParts[0] * 60 + timeParts[1]) * 60 + timeParts[2]
-            totalSecs, sec = divmod(totalSecs, 60)
-            hr, min = divmod(totalSecs, 60)
-            print "%d:%02d:%02d" % (hr, min, sec),
+    totalSecs, sec = divmod(totalSecs, 60)
+    hr, min = divmod(totalSecs, 60)
+    #print "%d:%02d:%02d" % (hr, min, sec),
 
     user = payment_details.distinct().values('user__username')
 
