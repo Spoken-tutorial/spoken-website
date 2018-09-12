@@ -363,6 +363,29 @@ def testimonials(request, type="text"):
     context.update(csrf(request))
     return render(request, 'spoken/templates/testimonial/testimonials.html', context)
 
+def foss_testimonials(request, foss):
+    '''
+    Responds with `/testimonial` page to display all the 
+    text / video / audio template.
+    '''
+    collection = None
+    collection = MediaTestimonials.objects.filter(foss__foss=foss).values("foss__foss", "content", "created", "foss", "foss_id", "id", "path", "user").order_by('-created')
+    if foss == "General":
+        #excludng biogas, koha and health series from the list
+        exclude_foss_list = [82,100,70]
+        collection = MediaTestimonials.objects.all().exclude(foss__id__in=exclude_foss_list).values("foss__foss", "content", "created", "foss", "foss_id", "id", "path", "user").order_by('-created')
+    
+    if collection:
+        page = request.GET.get('page')
+        collection = get_page(collection, page, limit=6)
+
+    context = {}
+    context['collection'] = collection
+    context['media_url'] = settings.MEDIA_URL
+    context['foss'] = foss
+    context.update(csrf(request))
+    return render(request, 'spoken/templates/testimonial/mediatestimonials.html', context)
+
 
 def testimonials_new_media(request, type):
     '''

@@ -1,0 +1,175 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load creationdata %}
+{% load cmsdata %}
+{% block title %} Testimonials {% endblock %}
+{% block compressinlinecssblock %}
+    <style type="text/css">
+        .testimonial-item{
+            clear: both;
+            margin: 40px 0;
+        }
+        .testimonial-content{
+            overflow: hidden;
+            padding: 20px;
+            border: 1px solid #cdd4b8;
+            line-height: 22px;
+            background: white;
+        }
+        .testimonial-content img{
+            float: left;
+        }
+        .testimonial-content .message{
+            margin-left: 120px;
+        }
+        .testimonials-caret{
+            position: absolute;
+            top: -1px;
+            left: 5px;
+            width: 50px;
+            height: 32px;
+            background:url('/static/spoken/images/testimonials-caret.png') no-repeat;
+        }
+        .testimonials-details{
+            position: relative;
+        }
+        .user-details{
+            padding-top: 16px;
+            padding-left: 70px;
+        }
+        .fa-quote-left, .fa-quote-right{
+            display: block;
+        }
+        .modal-dialog {
+            margin-top: 80px;
+        }
+        h4#myModalLabel {
+            font-size: 11px;
+            font-weight: bold;
+        }
+        .modal-body p {
+            text-align: justify;
+            line-height: 1.6em;
+        }
+        .fa-link {
+            color: lightseagreen;
+        }
+        .testimonial-content .message {
+            text-align: justify;
+        }
+        .modal-header button.close {
+            padding-left: 10px;
+        }
+        .st_video_container {
+            background: white;
+            width: 384px; /* Play with this value */
+            height: 216px;  /* Play with this value */
+            font-size: 0;
+            text-align: center;
+        }
+        .st_audio_container {
+            background: white;
+            width: 384px; /* Play with this value */
+            height: 50px;  /* Play with this value */
+            font-size: 0;
+            text-align: center;
+            margin-right: auto;
+            margin-left: auto;
+        }
+        .st_audio_container:before,.st_video_container:before {
+            content: "";
+            width: 1px;
+            height: 100%;
+            display: inline-block;
+            vertical-align: middle;
+            margin-left: -1px;
+        }
+        .st_audio_container .st_video {
+            max-width: 100%;
+            max-height: 100%;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .st_video_container .st_video {
+            max-width: 100%;
+            max-height: 100%;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .st_content_wrapper {
+            padding: 10px 25px;
+        }
+        @media all and (max-width: 500px) {
+            .st_video {
+                transform: translateX(calc((100vw * 0.416) - 225px));
+            }
+            .st_audio {
+                transform: translateX(calc((100vw * 0.416) - 209px));
+            }
+            .st_wrapper {
+                -webkit-box-align:center;
+                -webkit-box-pack:center;
+                display:-webkit-box;
+            }
+        }
+    </style>
+{% endblock %}
+{% block heading %}{% endblock %}
+{% block search %}{% endblock %}
+{% block content %}
+    <div class="testimonial-container col-sm-offset-2 col-md-offset-2 col-lg-offset-2 col-lg-8 col-md-8 col-sm-8 ">
+        <h4 class="page-title">
+            <i class="fa fa-list-ul"></i> Testimonials : {{foss}}
+        </h4>
+        {% for record in collection %}
+            {% if record.path %}
+            <!-- formatismp4 checks if the format is mp4, returns True for mp4 and false for all others -->
+                {% if record.path|formatismp4 %}
+                <div class="testimonial-item">
+                    <div class="row testimonial-content">
+                        <div class='st_wrapper col-xs-12 col-md-7'>
+                            <div class='st_video_container'>
+                                <video class="st_video" title='{{ record.foss_foss }}' controls preload data-setup="{}">
+                                <source src="{{ media_url }}{{ record.path }}" type="video/mp4" />
+                                </video>
+                            </div>
+                        </div>
+                        <div class='col-xs-12 col-md-4 col-lg-5 col-md-offset-1 col-lg-offset-0'>
+                            <i class="fa fa-quote-left" style="color:#e6e6e6;"></i>
+                            <p class='st_wrapper'> {{ record.content }} </p>
+                            <i class="fa fa-quote-right pull-right" style="color:#e6e6e6;"></i>
+                        </div>
+                    </div>
+                    <div class="testimonials-details">
+                        <div class="testimonials-caret"></div>
+                        <div class="user-details">{{ record.user }}</div>
+                    </div>
+                </div>
+                {% else %}
+                    <div class="testimonial-item">
+                        <div class="testimonial-content">
+                            <div class='st_content_wrapper row'>
+                                <i class="fa fa-quote-left" style="color:#e6e6e6;"></i>
+                                <p class='st_wrapper'> {{ record.content }} </p>
+                                <i class="fa fa-quote-right pull-right" style="color:#e6e6e6;"></i>
+                            </div>
+                            <div class='row'>
+                                <div class='st_audio_container'>
+                                    <audio class="st_audio" title='{{ record.foss_foss }}' controls preload data-setup="{}">
+                                    <source src="{{ media_url }}{{ record.path }}" type="video/mp4" />
+                                    </audio>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="testimonials-details">
+                            <div class="testimonials-caret"></div>
+                            <div class="user-details">{{ record.user }}</div>
+                        </div>
+                    </div>                
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+    </div>
+{% endblock %}
+

@@ -25,6 +25,8 @@ urlpatterns = patterns('',
     url(r'^testimonials/new/$', 'spoken.views.testimonials_new', name="testimonials_new"),
     url(r'^testimonials/$', 'spoken.views.testimonials', name="testimonials"),
     url(r'^testimonials/(?P<type>[\w]+)/$', 'spoken.views.testimonials', name="testimonials"),
+    url(r'^testimonials/media/(?P<foss>[\w ]+)/$', 'spoken.views.foss_testimonials', name="foss_testimonials"),
+    
     url(r'^admin/testimonials/$', 'spoken.views.admin_testimonials', name="admin_testimonials"),
     url(r'^admin/testimonials/(?P<rid>\d+)/edit/$', 'spoken.views.admin_testimonials_edit', name="admin_testimonials_edit"),
     url(r'^testimonials/new/media/(?P<type>[\w]+)/$', 'spoken.views.testimonials_new_media', name="testimonials_new_media"),
