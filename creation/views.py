@@ -29,6 +29,11 @@ from django.views.generic.list import ListView
 from django.core.urlresolvers import reverse
 from django.db import IntegrityError
 
+from subprocess import call
+from tempfile import mkdtemp, mkstemp
+from django.template.loader import render_to_string
+from string import Template
+import os
 
 # Spoken Tutorial Stuff
 from cms.sortable import *
@@ -3146,42 +3151,6 @@ def money_as_text(amount):
     return ans
 
 
-def generate_honorarium_receipt(code, contributor, foss, amount, manager, tutorials):
-    """
-        Generates honorarium receipts in docx format based on existing template using python-docx 0.8.6 ( https://python-docx.readthedocs.io/en/stable/ )
-    """
-    doc = Document('media/hr-receipts/honorarium-receipt-template.docx')
-    for table in doc.tables:
-        for index, tut in enumerate(tutorials, 1):
-            row_cells = table.add_row().cells
-            row_cells[0].text = str(index)
-            row_cells[1].text = tut[0]
-            row_cells[2].text = tut[1]
-            row_cells[2].paragraphs[0].paragraph_format.alignment=WD_ALIGN_PARAGRAPH.CENTER
-            
-    for paragraph in doc.paragraphs:
-        if '{{date}}' in paragraph.text:
-            curr_dt = datetime.datetime.now()
-            formated_dt =  curr_dt.strftime("%d %B, %Y") # 01 January, 2018
-            paragraph.text = ""
-            paragraph.add_run("Date : ")
-            paragraph.add_run(formated_dt)
-
-        if '{{contributor}}' in paragraph.text:
-            paragraph.text = ""
-            paragraph.add_run("I request you to kindly approve the honorarium of ")
-            paragraph.add_run("Rs. "+str(amount)+" /-").bold = True
-            paragraph.add_run(" (Rupees "+money_as_text(amount) +" )")
-            paragraph.add_run(" for ")
-            paragraph.add_run(contributor).bold = True
-            paragraph.add_run(", for the creation of the following spoken tutorials on ")
-            paragraph.add_run(foss+".").bold = True
-
-        if '{{manager}}' in paragraph.text:
-            paragraph.text = ""
-            paragraph.add_run(manager)
-    doc.save('media/hr-receipts/'+code+'.docx')
-
 def update_codefiles(request):
     if not is_administrator(request.user):
         raise PermissionDenied()
@@ -3224,11 +3193,7 @@ def update_codefiles(request):
     context.update(csrf(request))
     return render(request, 'creation/templates/update_codefiles.html', context)
 
-from subprocess import call
-from tempfile import mkdtemp, mkstemp
-from django.template.loader import render_to_string
-from string import Template
-import os
+
 
 def payment_honorarium_download(request,hono_id):
     payment_details = TutorialPayment.objects.filter(payment_honorarium_id=hono_id)
@@ -3257,13 +3222,19 @@ def payment_honorarium_download(request,hono_id):
     pdf_data ={}
     amount = payment_details.aggregate(Sum('amount'))
     foss = payment_details.distinct().values('tutorial_resource__tutorial_detail__foss__foss')
-    
+    user_type = payment_details.values('user_type')
+    rate = {
+    1 : 1300,
+    2 : 700,
+    3 : 2000,
+    }
     pdf_data['amount'] = amount
     pdf_data['contributor'] = user
     pdf_data['foss'] = foss
     pdf_data['money_as_text'] = money_as_text(amount['amount__sum'])
     pdf_data['tutorials'] = tutorials
     pdf_data['totalSecs'] = str(hr)+':'+str(min)+':'+str(sec)
+    pdf_data['rate'] = rate[user_type[0]['user_type']]
     # Pass the TeX template through Django templating engine and into the temp file
     os.write(texfile, render_to_string(s.template,pdf_data))
     os.close(texfile)
