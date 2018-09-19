@@ -90,7 +90,7 @@ class UploadTimedScriptForm(forms.Form):
                     language = lang_rec,
                     status = 1
                 ).values_list(
-                    'foss_category_id'
+                    'tutorial_detail__foss_id'
                 )
             ).values_list('id', 'foss')
         )
@@ -276,7 +276,7 @@ class UploadPublishTutorialForm(forms.Form):
                     user_id = user.id,
                     status = 1
                 ).values_list(
-                    'foss_category_id'
+                    'tutorial_detail__foss_id'
                 )
             ).values_list('id', 'foss')
         )
@@ -364,7 +364,7 @@ class UploadTutorialForm(forms.Form):
                     user_id = user.id,
                     status = 1
                 ).values_list(
-                    'foss_category_id'
+                    'tutorial_detail__foss_id'
                 )
             ).values_list('id', 'foss')
         )
@@ -385,7 +385,7 @@ class UploadTutorialForm(forms.Form):
                         Language.objects.filter(
                             id__in = ContributorRole.objects.filter(
                                 user_id = user.id,
-                                foss_category_id = args[0]['foss_category']
+                                tutorial_detail__foss_id = args[0]['foss_category']
                             ).values_list(
                                 'language_id'
                             )
@@ -550,7 +550,7 @@ class ContributorRoleForm(forms.ModelForm):
         help_text = "",
         error_messages = {'required': 'User field required.'}
     )
-    foss_category = forms.ModelChoiceField(
+    tutorial_detail__foss_category = forms.ModelChoiceField(
         cache_choices = True,
         queryset = FossCategory.objects.filter(status = 1).order_by('foss'),
         empty_label = "----------",

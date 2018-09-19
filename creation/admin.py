@@ -83,9 +83,9 @@ class TutorialDetailAdmin(admin.ModelAdmin):
 
 class ContributorRoleAdmin(admin.ModelAdmin):
     form = ContributorRoleForm
-    list_display = ('user', 'foss_category', 'language',
-                    'status', 'created', 'updated')
-    list_filter = ('updated', 'language', 'foss_category')
+    list_display = ('user', 'tutorial_detail', 'language',
+                    'status', 'created', 'updated',)
+    list_filter = ('updated', 'language', 'tutorial_detail')
 
     def mark_contributor_disabled(self, request, queryset):
         rows_updated = queryset.update(status=0)

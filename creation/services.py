@@ -26,6 +26,6 @@ def get_revokable_languages_for_role(user,role_type):
     'domain-reviewer': 3,
     'quality-reviewer': 4,
     }
-    set_languages = RoleRequest.objects.filter(user=user, status=1, role_type = roles[role_type]).values('language')
-    languages = Language.objects.filter(id__in = set_languages).values('name','id')
+    contrib_languages = RoleRequest.objects.filter(user=user, status=1, role_type = roles[role_type]).values('language')
+    languages = Language.objects.filter(id__in = contrib_languages).values('name','id')
     return languages
