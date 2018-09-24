@@ -175,14 +175,15 @@ class FossAvailableForWorkshopAdmin(admin.ModelAdmin):
     list_filter = ('language',)
 
 class LanguagManagerAdmin(admin.ModelAdmin):
-    form = LanguageManagerForm
-    fields = ['user','language','status']
-    list_display = ('user','language','status')
-    list_filter = ('language',)
 
+    form = LanguageManagerForm
+    fields = ['user', 'language', 'status']
+    list_display = ('user', 'language', 'status')
+    list_filter = ('language', )
 
     class Media:
-        js = ('admin/js/not_contributor_langs.js',)
+
+        js = ('admin/js/not_contributor_langs.js', )
 
 
 admin.site.register(Language, LanguageAdmin)

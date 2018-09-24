@@ -18,14 +18,17 @@ def get_data_for_brochure_display():
     return data_dict
 
 
-def get_revokable_languages_for_role(user,role_type):
+def get_revokable_languages_for_role(user, role_type):
     roles = {
-    'contributor': 0,
-    'external-contributor': 1,
-    'video-reviewer': 2,
-    'domain-reviewer': 3,
-    'quality-reviewer': 4,
-    }
-    contrib_languages = RoleRequest.objects.filter(user=user, status=1, role_type = roles[role_type]).values('language')
-    languages = Language.objects.filter(id__in = contrib_languages).values('name','id')
+        'contributor': 0,
+        'external-contributor': 1,
+        'video-reviewer': 2,
+        'domain-reviewer': 3,
+        'quality-reviewer': 4,
+        }
+    contrib_languages = RoleRequest.objects.filter(user=user, status=1,
+            role_type=roles[role_type]).values('language')
+    languages = \
+        Language.objects.filter(id__in=contrib_languages).values('name'
+            , 'id')
     return languages
