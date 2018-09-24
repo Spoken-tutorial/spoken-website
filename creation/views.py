@@ -3332,8 +3332,7 @@ def no_of_foss_gt_3(user, foss_or_tut_id, type_tut):
     all_foss = ContributorRole.objects.filter(user_id=user,status=1).values('foss_category')
     
     list_count = list({int(v['foss_category']) for v in all_foss})
-    print "fid : ",fid,"\n",list_count
-    
+
     if len(list_count) >=3 and fid not in list_count:
         return True
     return False
