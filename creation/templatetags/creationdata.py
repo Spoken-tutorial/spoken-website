@@ -220,7 +220,9 @@ def tutorialsearch():
     return context
 
 def get_mp4_video(tr):
-    tname, text = tr.video.split('.')
+    video_name = tr.video
+    splitat = -4
+    tname, text = video_name[:splitat], video_name[splitat:]
     path = settings.MEDIA_ROOT + 'videos/' + str(tr.tutorial_detail.foss_id) + '/' + str(tr.tutorial_detail_id) + '/' + tname + '.mp4'
     if os.path.isfile(path):
         return 'videos/' + str(tr.tutorial_detail.foss_id) + '/' + str(tr.tutorial_detail_id) + '/' + tname + '.mp4'
