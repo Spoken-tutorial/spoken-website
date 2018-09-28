@@ -54,7 +54,7 @@ audio, canvas, progress, video {
         };
         hidden_video_container.onloadedmetadata = function() {
             // To change the allowed duration of the testimonial, please manipulate the variable below(seconds). 
-            var allowed_duration = 180;
+            var allowed_duration = 600;
             if (hidden_video_container.duration > allowed_duration + 5)
                 submit_btn_container.innerHTML = 'Testimonial duration should be less than ' + allowed_duration + ' seconds.'
             else
