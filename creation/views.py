@@ -184,7 +184,7 @@ def add_contributor_notification(tr_rec, comp_title, message):
         ContributorNotification.objects.create(user = con.user, title = comp_title, message = message, tutorial_resource = tr_rec)
 
 @login_required
-def creation_add_role(request, role_type):
+def creation_add_role(request, role_type,langid):
     flag = 1
     roles = {
         'contributor': 0,
@@ -193,22 +193,33 @@ def creation_add_role(request, role_type):
         'domain-reviewer': 3,
         'quality-reviewer': 4,
     }
-    if role_type in roles:
-        try:
-            RoleRequest.objects.create(user = request.user, role_type = roles[role_type], status = 0)
-        except:
+    # Add multiple languages to the user 
+    langid  = langid.split('/')
+    for lang in langid:
+        if role_type in roles:
+            if role_type != 'video-reviewer':
+                lang_show = Language.objects.get(id = lang)
             try:
-                role_rec = RoleRequest.objects.get(user = request.user, role_type = roles[role_type], status = 2)
-                role_rec.status = 0
-                role_rec.save()
+                RoleRequest.objects.create(user = request.user, role_type = roles[role_type], status = 0,language_id = int(lang))
             except:
-                flag = 0
-                messages.warning(request, 'Request to the ' + role_type.title() + ' role is already waiting for admin approval!')
-    else:
-        flag = 0
-        messages.error(request, 'Invalid role argument!')
-    if flag:
-        messages.success(request, 'Request to the ' + role_type.title() + ' role has been sent for admin approval!')
+                try:
+                    role_rec = RoleRequest.objects.get(user = request.user, role_type = roles[role_type], status = 2,language_id= int(lang))
+                    role_rec.status = 0
+                    role_rec.save()
+                except:
+                    
+                    flag = 0
+                    if role_type == 'video-reviewer':
+                        messages.warning(request, 'Request to the ' + role_type.title() + ' role is already waiting for admin approval!')
+                    else:
+                        
+                        messages.warning(request, 'Request to the ' + role_type.title() + ' role'+ ' for ' + lang_show.name +' is already waiting for admin approval!')
+        else:
+            flag = 0
+            messages.error(request, 'Invalid role argument!')
+
+        if flag:
+            messages.success(request, 'Request to the ' + role_type.title() + ' role'+' for the language ' +lang_show.name+' has been sent for admin approval!')
     return HttpResponseRedirect('/creation/')
 
 @login_required
@@ -229,7 +240,10 @@ def creation_accept_role_request(request, recid):
                     role_rec.approved_user = request.user
                     role_rec.status = 1
                     role_rec.save()
-                    messages.success(request, roles[role_rec.role_type] + ' role is added to ' + role_rec.user.username)
+                    if role_rec.role_type ==2:
+                        messages.success(request, roles[role_rec.role_type] +' role is added to '+role_rec.user.username)
+                    else:
+                        messages.success(request, roles[role_rec.role_type] +' role is added to ' + role_rec.user.username + ' for the language '+role_rec.language.name)
                 except:
                     messages.error(request, role_rec.user.username + ' is already having ' + roles[role_rec.role_type] + ' role.')
             else:
@@ -243,7 +257,6 @@ def creation_accept_role_request(request, recid):
 @login_required
 def creation_reject_role_request(request, recid):
     if is_administrator:
-        print "test 2"
         roles = {
             0: 'Contributor',
             1: 'External-Contributor',
@@ -254,15 +267,15 @@ def creation_reject_role_request(request, recid):
         try:
             role_rec = RoleRequest.objects.get(pk = recid, status = 0)
             role_rec.delete()
-            messages.success(request, 'Selected role request has been deleted successfully!')
+            messages.success(request, roles[role_rec.role_type]+' role has been deleted successfully for '+role_rec.user.username)
         except:
-            messages.error(request, 'The given role request id is either invalid or it is already reject')
+            messages.error(request, 'The given role request id is either invalid or it is already rejected')
     else:
         raise PermissionDenied()
     return HttpResponseRedirect('/creation/role/requests/' + roles[role_rec.role_type].lower() + '/')
 
 @login_required
-def creation_revoke_role_request(request, role_type):
+def creation_revoke_role_request(request, role_type,langid):
     roles = {
         'contributor': 0,
         'external-contributor': 1,
@@ -270,24 +283,51 @@ def creation_revoke_role_request(request, role_type):
         'domain-reviewer': 3,
         'quality-reviewer': 4,
     }
-    if role_type in roles:
-        try:
-            role_rec = RoleRequest.objects.get(user = request.user, role_type = roles[role_type], status = 1)
-            if role_rec.role_type != 2:
-                if role_rec.role_type == 0 or role_rec.role_type == 1:
-                    ContributorRole.objects.filter(user = role_rec.user).update(status = 0)
-                elif role_rec.role_type == 3:
-                    DomainReviewerRole.objects.filter(user = role_rec.user).update(status = 0)
-                elif role_rec.role_type == 4:
-                    QualityReviewerRole.objects.filter(user = role_rec.user).update(status = 0)
-                role_rec.user.groups.remove(Group.objects.get(name = role_type.title()))
-                role_rec.status = 2
-                role_rec.save()
-                messages.success(request, role_type.title() + ' role has been revoked from ' + role_rec.user.username)
-        except:
-            raise PermissionDenied()
-    else:
-        messages.error(request, 'Invalid role type argument!')
+    
+    group_role_id = {
+            0: 'Contributor',
+            1: 'External-Contributor',
+            2: 'Video-Reviewer',
+            3: 'Domain-Reviewer',
+            4: 'Quality-Reviewer',
+        }
+
+    # Revoke multiple languages from the user
+    languages = langid.split('/')
+
+    for a_language in languages:
+
+        if role_type in roles:
+            try:
+                role_rec = RoleRequest.objects.get(user = request.user, role_type = roles[role_type], status = 1,language_id = a_language)
+                
+                
+                if role_rec.role_type != 2:
+                    if role_rec.role_type == 0 or role_rec.role_type == 1:
+                        ContributorRole.objects.filter(user = role_rec.user).update(status = 0)
+                                                    
+                    elif role_rec.role_type == 3:
+                        DomainReviewerRole.objects.filter(user = role_rec.user).update(status = 0)
+                    elif role_rec.role_type == 4:
+                        QualityReviewerRole.objects.filter(user = role_rec.user).update(status = 0)
+                    rec_check = RoleRequest.objects.filter(user = request.user, role_type = roles[role_type],status=1)                    
+                    role_rec.status = 2
+                    role_rec.save()
+                
+                    lang_show = Language.objects.get(id = a_language)
+                    messages.success(request, role_type.title() + ' role has been revoked from ' + role_rec.user.username+' for the language '+ lang_show.name)
+
+                    
+            except:
+                raise PermissionDenied()
+        else:
+            messages.error(request, 'Invalid role type argument!')
+
+    role_count = RoleRequest.objects.filter(user=request.user,role_type= roles[role_type],status=1).count()
+    
+    if not role_count:
+        role_rec.user.groups.remove(Group.objects.get(name = group_role_id[roles[role_type]]))
+        
     return HttpResponseRedirect('/creation/')
 
 @login_required
@@ -309,7 +349,7 @@ def creation_list_role_requests(request, tabid = 'contributor'):
         return render(request, 'creation/templates/creation_list_role_requests.html', context)
     else:
         raise PermissionDenied()
-
+        
 @login_required
 def init_creation_app(request):
     try:
@@ -335,6 +375,17 @@ def init_creation_app(request):
 # Creation app dashboard
 @login_required
 def creationhome(request):
+    # Get languages for he is an approved Contributor /..
+    is_contributor_langs             =   services.get_revokable_languages_for_role(request.user,'contributor')
+    is_external_contributor_langs    =   services.get_revokable_languages_for_role(request.user,'external-contributor')
+    is_domain_reviewer_langs         =   services.get_revokable_languages_for_role(request.user,'domain-reviewer')
+    is_quality_reviewer_langs        =   services.get_revokable_languages_for_role(request.user,'quality-reviewer')
+    not_contributor_langs = Language.objects.exclude(id__in = is_contributor_langs.values('id')).values('id','name')
+    not_external_contributor_langs = Language.objects.exclude(id__in = is_external_contributor_langs.values('id')).values('id','name')
+    not_domain_reviewer_langs = Language.objects.exclude(id__in = is_domain_reviewer_langs.values('id')).values('id','name')
+    not_quality_reviewer_langs = Language.objects.exclude(id__in = is_quality_reviewer_langs.values('id')).values('id','name')
+
+    languages = Language.objects.filter().values('name')
     if is_contributor(request.user) or is_domainreviewer(request.user) or is_videoreviewer(request.user) or is_qualityreviewer(request.user):
         contrib_notifs = []
         admin_notifs = []
@@ -348,21 +399,36 @@ def creationhome(request):
             domain_notifs = DomainReviewerNotification.objects.filter(user = request.user).order_by('-created')
         if is_qualityreviewer(request.user):
             quality_notifs = QualityReviewerNotification.objects.filter(user = request.user).order_by('-created')
+
         context = {
             'contrib_notifs': contrib_notifs,
             'admin_notifs': admin_notifs,
             'domain_notifs': domain_notifs,
             'quality_notifs': quality_notifs,
-            'is_creation_role': True
+            'is_creation_role': True,
+            'is_contributor_language': is_contributor_langs,
+            'is_external_contributor_language': is_external_contributor_langs,
+            'is_domain_reviewer_language': is_domain_reviewer_langs,
+            'is_quality_reviewer_language': is_quality_reviewer_langs,
+            'contributor_language': not_contributor_langs,
+            'external_contributor_language': not_external_contributor_langs,
+            'domain_reviewer_language': not_domain_reviewer_langs,
+            'quality_reviewer_language': not_quality_reviewer_langs,
+            'language': languages
         }
         context.update(csrf(request))
         return render(request, 'creation/templates/creationhome.html', context)
     else:
+    
         context = {
-            'is_creation_role': False
+            'is_creation_role': False,
+            'contributor_language': not_contributor_langs,
+            'external_contributor_language': not_external_contributor_langs,
+            'domain_reviewer_language': not_domain_reviewer_langs,
+            'quality_reviewer_language': not_quality_reviewer_langs,
+            'language': languages
         }
         return render(request, 'creation/templates/creationhome.html', context)
-
 # tutorial upload index page
 @login_required
 def upload_index(request):
