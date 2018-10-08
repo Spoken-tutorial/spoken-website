@@ -15,15 +15,15 @@ class RpForm(forms.ModelForm):
         exclude = ['assigned_by']
 
 class AcademicForm(forms.ModelForm):
-    state = forms.ModelChoiceField(label='State', cache_choices=True, widget = forms.Select(attrs = {'class' : 'ac-state'}), queryset = State.objects.order_by('name'), empty_label = "--- None ---", help_text = "", error_messages = {'required':'State field required.'})
+    state = forms.ModelChoiceField(label='State',   widget = forms.Select(attrs = {'class' : 'ac-state'}), queryset = State.objects.order_by('name'), empty_label = "--- None ---", help_text = "", error_messages = {'required':'State field required.'})
 
-    university = forms.ModelChoiceField(label='University', cache_choices=True, widget = forms.Select(attrs = {'class' : 'ac-university'}), queryset = University.objects.none(), empty_label = "--- None ---", help_text = "", error_messages = {'required':'University field required.'})
+    university = forms.ModelChoiceField(label='University',   widget = forms.Select(attrs = {'class' : 'ac-university'}), queryset = University.objects.none(), empty_label = "--- None ---", help_text = "", error_messages = {'required':'University field required.'})
 
-    district = forms.ModelChoiceField(label='Dist', cache_choices=True, widget = forms.Select(attrs = {'class' : 'ac-district'}), queryset = District.objects.none(), empty_label = "--- None ---", help_text = "", error_messages = {'required':'Institute Type field required.'})
+    district = forms.ModelChoiceField(label='Dist',   widget = forms.Select(attrs = {'class' : 'ac-district'}), queryset = District.objects.none(), empty_label = "--- None ---", help_text = "", error_messages = {'required':'Institute Type field required.'})
 
-    city = forms.ModelChoiceField(label='City', cache_choices=True, widget = forms.Select(attrs = {'class' : 'ac-city'}), queryset = City.objects.none(), empty_label = "--- None ---", help_text = "", error_messages = {'required':'City Type field required.'})
+    city = forms.ModelChoiceField(label='City',   widget = forms.Select(attrs = {'class' : 'ac-city'}), queryset = City.objects.none(), empty_label = "--- None ---", help_text = "", error_messages = {'required':'City Type field required.'})
 
-    location = forms.ModelChoiceField(label='Location', cache_choices=True, widget = forms.Select(attrs = {'class' : 'ac-location'}), queryset = Location.objects.none(), empty_label = "--- None ---", help_text = "", error_messages = {'required':'City Type field required.'}, required = False)
+    location = forms.ModelChoiceField(label='Location',   widget = forms.Select(attrs = {'class' : 'ac-location'}), queryset = Location.objects.none(), empty_label = "--- None ---", help_text = "", error_messages = {'required':'City Type field required.'}, required = False)
 
     contact_person = forms.CharField(widget = forms.Textarea(attrs = {'rows' : '5'}), required = False)
     remarks = forms.CharField(widget = forms.Textarea(attrs = {'rows' : '5'}), required = False)
@@ -190,12 +190,12 @@ class TrainingForm(forms.ModelForm):
     course_number = forms.CharField(required = True)
     no_of_lab_session = forms.ChoiceField(widget=forms.Select, choices = [('', '---------'), ('1', 'Semester I'), ('2', 'Semester II'),('3', 'Semester III'),('4', 'Semester IV'),('5', 'Semester V'),('6', 'Semester VI'),('7', 'Semester VII'),('8', 'Semester VIII')], required = True)
 
-    department = forms.ModelMultipleChoiceField(label='Department', cache_choices=True, widget = forms.SelectMultiple(attrs = {}), queryset = Department.objects.exclude(name='Uncategorised').order_by('name'), help_text = "", error_messages = {'required':'Department field required.'})
+    department = forms.ModelMultipleChoiceField(label='Department',   widget = forms.SelectMultiple(attrs = {}), queryset = Department.objects.exclude(name='Uncategorised').order_by('name'), help_text = "", error_messages = {'required':'Department field required.'})
 
-    foss = forms.ModelChoiceField(label='Foss', cache_choices=True, widget = forms.Select(attrs = {}), queryset = FossCategory.objects.filter(status = 1, id__in = FossAvailableForWorkshop.objects.filter(status=1).values_list('foss').distinct()).order_by('foss')
+    foss = forms.ModelChoiceField(label='Foss',   widget = forms.Select(attrs = {}), queryset = FossCategory.objects.filter(status = 1, id__in = FossAvailableForWorkshop.objects.filter(status=1).values_list('foss').distinct()).order_by('foss')
 , help_text = "", error_messages = {'required':'Foss field required.'})
 
-    language = forms.ModelChoiceField(label='Language', cache_choices=True, widget = forms.Select(attrs = {}), queryset = Language.objects.filter(id__in = FossAvailableForWorkshop.objects.all().values_list('language').distinct()).order_by('name'), help_text = "", error_messages = {'required':'Language field required.'})
+    language = forms.ModelChoiceField(label='Language',   widget = forms.Select(attrs = {}), queryset = Language.objects.filter(id__in = FossAvailableForWorkshop.objects.all().values_list('language').distinct()).order_by('name'), help_text = "", error_messages = {'required':'Language field required.'})
 
     tdate = forms.DateTimeField(required = True, error_messages = {'required':'Timing field is required.'})
     skype = forms.ChoiceField(widget=forms.RadioSelect, choices=[(0, 'No'),(1, 'Yes')], required = True)
@@ -422,7 +422,7 @@ class TrainingLanguageFeedbackForm(forms.ModelForm):
     medium_of_instruction = forms.ChoiceField(widget=forms.RadioSelect, choices = ((0, 'English'), (1, "Vernacular Medium")) )
     gender = forms.ChoiceField(widget=forms.RadioSelect, choices = ((0, 'Male'), (1, "Female")) )
 
-    language_prefered = forms.ModelChoiceField(cache_choices=True, widget = forms.Select(attrs = {}), queryset = Language.objects.order_by('name'), empty_label = "--- None ---", error_messages = {'required':'Language field required.'})
+    language_prefered = forms.ModelChoiceField(  widget = forms.Select(attrs = {}), queryset = Language.objects.order_by('name'), empty_label = "--- None ---", error_messages = {'required':'Language field required.'})
 
     tutorial_was_useful = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice)
     learning_experience = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice)
@@ -486,10 +486,10 @@ class TrainingLanguageFeedbackForm(forms.ModelForm):
 
 class TrainingReUseForm(forms.Form):
     user = None
-    foss = forms.ModelChoiceField(label='Foss', cache_choices=True, widget = forms.Select(attrs = {}), queryset = FossCategory.objects.filter(status = 1, id__in = FossAvailableForWorkshop.objects.filter(status=1).values_list('foss').distinct()).order_by('foss')
+    foss = forms.ModelChoiceField(label='Foss',   widget = forms.Select(attrs = {}), queryset = FossCategory.objects.filter(status = 1, id__in = FossAvailableForWorkshop.objects.filter(status=1).values_list('foss').distinct()).order_by('foss')
 , help_text = "", error_messages = {'required':'Foss field required.'})
 
-    language = forms.ModelChoiceField(label='Language', cache_choices=True, widget = forms.Select(attrs = {}), queryset = Language.objects.filter(id__in = FossAvailableForWorkshop.objects.all().values_list('language').distinct()).order_by('name'), help_text = "", error_messages = {'required':'Language field required.'})
+    language = forms.ModelChoiceField(label='Language',   widget = forms.Select(attrs = {}), queryset = Language.objects.filter(id__in = FossAvailableForWorkshop.objects.all().values_list('language').distinct()).order_by('name'), help_text = "", error_messages = {'required':'Language field required.'})
 
     tdate = forms.DateTimeField(required = True, error_messages = {'required':'Timing field is required.'})
 

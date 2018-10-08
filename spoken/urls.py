@@ -3,7 +3,7 @@ import settings
 from django.conf.urls import include, patterns, url
 from django.contrib import admin
 from django.views.generic import TemplateView
-
+app_name = 'spoken'
 admin.autodiscover()
 
 urlpatterns = patterns('',

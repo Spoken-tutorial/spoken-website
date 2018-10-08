@@ -1,5 +1,5 @@
 from django.conf.urls import patterns, url, include
-
+app_name = 'events'
 urlpatterns = patterns('',
     url(r'^$', 'events.views.events_dashboard', name='events_dashboard'),
     url(r'^init/$', 'events.views.init_events_app', name='init_events_app'),

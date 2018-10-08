@@ -1,6 +1,6 @@
 # Third Party Stuff
 from django.conf.urls import patterns, url
-
+app_name = 'cdcontent'
 urlpatterns = patterns('',
     # Main pages dispatcher
     url(r'^$', 'cdcontent.views.home', name="cdcontenthome"),

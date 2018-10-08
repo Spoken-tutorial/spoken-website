@@ -1,6 +1,6 @@
 # Third Party Stuff
 from django.conf.urls import patterns, url
-
+app_name = 'youtube'
 urlpatterns = patterns('',  # noqa
     url(r'^$', 'youtube.views.home', name="home"),
     url(r'^delete-videos/$', 'youtube.views.delete_all_videos', name="delete_all_videos"),

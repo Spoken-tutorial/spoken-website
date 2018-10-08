@@ -43,10 +43,10 @@ if sys.version_info[0] < 3:
     def u(s):
         return unicode(s, "unicode_escape")
 
-    def with_metaclass(meta, base=object):
-        class _WhooshBase(base):
-            __metaclass__ = meta
-        return _WhooshBase
+    # def with_metaclass(meta, base=object):
+    #     class _WhooshBase(base):
+    #         __metaclass__ = meta
+    #     return _WhooshBase
 
     xrange = xrange
     zip_ = zip

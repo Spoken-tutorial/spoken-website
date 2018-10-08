@@ -1,6 +1,6 @@
 # Third Party Stuff
 from django.conf.urls import patterns, url
-
+app_name = 'statistics'
 urlpatterns = patterns('',  # noqa
     url(r'^$', 'statistics.views.maphome', name="maphome"),
     url(r'^india-map/$', 'statistics.views.maphome', name="maphome"),

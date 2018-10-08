@@ -3,7 +3,7 @@ from django.conf.urls import patterns, url
 from django.contrib import admin
 
 admin.autodiscover()
-
+app_name = 'certificate'
 urlpatterns = patterns('certificate.views',  # noqa
     url(r'^$', 'index', name='index'),
     url(r'^verify/$', 'verify', name='verify'),
