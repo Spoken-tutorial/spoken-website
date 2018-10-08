@@ -1,6 +1,6 @@
 import os
 from django.test import TestCase
-from django.urls import reverse
+from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User, Group, Permission
 from spoken.forms import TestimonialsForm
 
