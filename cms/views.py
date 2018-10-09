@@ -136,7 +136,7 @@ def confirm(request, confirmation_code, username):
         else:
             messages.success(request, "Something went wrong!. Please try again!")
             return HttpResponseRedirect('/')
-    except Exception, e:
+    except Exception as e:
         messages.success(request, "Your account not activated!. Please try again!")
         return HttpResponseRedirect('/')
 

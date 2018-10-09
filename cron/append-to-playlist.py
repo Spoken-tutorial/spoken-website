@@ -58,14 +58,14 @@ for row in rows:
   if not playlist:
     error_string = str(row.tutorial_detail.foss.id) + ',' + str(row.language_id) + ',Playlist-Missing'
     error_log_file_head.write(error_string + '\n')
-    print error_string
+    print (e)rror_string
     continue
 
   # adding video to playlist
   try:
     item_id = youtube.add_video_to_playlist(row.video_id, playlist.playlist_id)
-  except Exception, e:
-    print e
+  except Exception as e:
+    print (e)
     time.sleep(1)
     continue
 
@@ -86,7 +86,7 @@ for row in rows:
     # generating failure message
     error_string = row.tutorial_detail.tutorial + ',' + row.language.name + ',Failed'
     error_log_file_head.write(error_string + '\n')
-    print error_string
+    print (e)rror_string
   time.sleep(1)
 error_log_file_head.close()
 success_log_file_head.close()

@@ -59,7 +59,7 @@ class YoutubeCaption(object):
         try:
             self.authenticate()
             self.setup_http_request_object()
-        except Exception, e:
+        except Exception as e:
              raise Error("Error while authenticating: %s" % str(e))
         self.headers["Content-Type"] = self.CAPTIONS_CONTENT_TYPE
         self.headers["Content-Language"] = self.CAPTIONS_LANGUAGE_CODE

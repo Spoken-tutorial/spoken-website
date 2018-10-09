@@ -32,7 +32,7 @@ def authenticate(email=None, password=None):
         print user
         if user:
             return user
-    except Exception, e:
+    except Exception as e:
         return None
 
 def mdl_logout(request):
@@ -156,7 +156,7 @@ def offline_details(request, wid, category):
             Training.objects.get(pk=wid, status__lt=4)
         else:
             raise PermissionDenied('You are not allowed to view this page!')
-    except Exception, e:
+    except Exception as e:
         raise PermissionDenied('You are not allowed to view this page!')
 
     if request.method == 'POST':
@@ -234,7 +234,7 @@ def mdl_register(request):
             try:
                 user = MdlUser.objects.filter(email=request.POST['email']).first().id
                 messages.success(request, "Email : "+request.POST['email']+" already registered on this website. Please click <a href='http://www.spoken-tutorial.org/participant/login/'>here </a>to login")
-            except Exception, e:
+            except Exception as e:
                 mdluser = MdlUser()
                 mdluser.auth = 'manual'
                 mdluser.institution = form.cleaned_data['college']
@@ -269,8 +269,8 @@ def feedback(request, wid):
     w = None
     try:
         w = TrainingRequest.objects.select_related().get(pk=wid)
-    except Exception, e:
-        #print e
+    except Exception as e:
+        #print (e)
         messages.error(request, 'Invalid Training-Request ID passed')
         return HttpResponseRedirect('/participant/index/?category=1')
         #return PermissionDenied('Invalid Training-Request ID passed')
@@ -279,8 +279,8 @@ def feedback(request, wid):
         TrainingFeedback.objects.get(training_id = wid, mdluser_id = mdluserid)
         messages.success(request, "We have already received your feedback. ")
         return HttpResponseRedirect('/participant/index/?category=1')
-    except Exception, e:
-        #print e
+    except Exception as e:
+        #print (e)
         pass
 
     if request.method == 'POST':
@@ -293,8 +293,8 @@ def feedback(request, wid):
                 form_data.save()
                 messages.success(request, "Thank you for your valuable feedback.")
                 return HttpResponseRedirect('/participant/index/?category=1')
-            except Exception, e:
-                print e
+            except Exception as e:
+                print (e)
                 pass
                 #return HttpResponseRedirect('/participant/index/')
     context = {

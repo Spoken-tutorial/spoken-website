@@ -37,13 +37,13 @@ def get_zip_content(path):
         zf = zipfile.ZipFile(path, 'r')
         file_names = zf.namelist()
         return file_names
-    except Exception, e:
+    except Exception as e:
         return False
 
 def is_script_available(path):
     try:
         code = urlopen(script_path).code
-    except Exception, e:
+    except Exception as e:
         code = e.code
     if(int(code) == 200):
         return True
@@ -177,8 +177,8 @@ def get_prerequisite(tr, td):
     try:
         tr_rec = TutorialResource.objects.get(Q(status = 1) | Q(status = 2), tutorial_detail = td, language_id = tr.language_id)
         return get_url_name(td.foss.foss) + '/' + get_url_name(td.tutorial) + '/' + tr_rec.language.name
-    except Exception, e:
-        print e
+    except Exception as e:
+        print (e)
         if tr.language.name != 'English':
             try:
                 tr_rec = TutorialResource.objects.get(Q(status = 1) | Q(status = 2), tutorial_detail = td, language__name = 'English')
@@ -210,13 +210,13 @@ def get_timed_script(script_path, timed_script_path):
     code = 0
     try:
         code = urlopen(timed_script).code
-    except Exception, e:
+    except Exception as e:
         timed_script = settings.SCRIPT_URL + \
             script_path.replace(' ', '-').replace('_', '-') + '-timed'
         print timed_script
         try:
             code = urlopen(timed_script).code
-        except Exception, e:
+        except Exception as e:
             print code, '----', e
             code = 0
     if(int(code) == 200):

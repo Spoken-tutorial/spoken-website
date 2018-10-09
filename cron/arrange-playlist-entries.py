@@ -54,7 +54,7 @@ for row in rows:
     # throw error if the playlist entry is not available
     if not playlist:
       error_string = row.foss + ' - ' + lang.name + ' -- Playlist Missing'
-      print error_string
+      print (e)rror_string
       continue
 
     # fetch tutorial_resource records based on foss and language
@@ -91,11 +91,11 @@ for row in rows:
             playlist_uri, tutorial.playlist_item_id, entry.media.title.text,
             entry.media.description.text, counter
           )
-        except Exception, e:
+        except Exception as e:
           # throw error if api call is not success
-          print e
+          print (e)
           error_string = str(tutorial.id) + ' - ' + str(playlist.playlist_id) + ' -- Error...'
-          print error_string
+          print (e)rror_string
           time.sleep(2)
           continue
 
@@ -115,7 +115,7 @@ for row in rows:
       else:
         # throw error if video entry is not available
         error_string = str(tutorial.id) + ' -- Failed to get video entry'
-        print error_string
+        print (e)rror_string
       time.sleep(1)
     #time.sleep(1)
   #time.sleep(1)

@@ -38,13 +38,13 @@ for row in rows:
     if not playlist:
         error_string = row[8] + ' - ' + row[3] + ' -- Playlist Missing'
         error_log_file_head.write(error_string + '\n')
-        print error_string
+        print (e)rror_string
         continue
     video_id = row[6]
     try:
         item_id = youtube.add_video_to_playlist(video_id, playlist[3])
-    except Exception, e:
-        print e
+    except Exception as e:
+        print (e)
         time.sleep(1)
         continue
     if item_id:
@@ -61,7 +61,7 @@ for row in rows:
     else:
         error_string = row[9] + ' - ' + row[13] + ' -- Failed'
         error_log_file_head.write(error_string + '\n')
-        print error_string
+        print (e)rror_string
     time.sleep(1)
 error_log_file_head.close()
 success_log_file_head.close()

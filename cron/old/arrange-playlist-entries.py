@@ -41,7 +41,7 @@ for row in rows:
         if not playlist:
             error_string = row[1] + ' - ' + lang[1] + ' -- Playlist Missing'
             error_log_file_head.write(error_string + '\n')
-            print error_string
+            print (e)rror_string
             continue
 
         cur.execute("SELECT ctr.id, ctr.tutorial_detail_id, \
@@ -77,7 +77,7 @@ for row in rows:
                 except:
                     error_string = str(tutorial[0]) + str(playlist[3]) + ' -- Error...'
                     error_log_file_head.write(error_string + '\n')
-                    print error_string
+                    print (e)rror_string
                     time.sleep(2)
                     continue
                 counter += 1
@@ -87,7 +87,7 @@ for row in rows:
             else:
                 error_string = str(tutorial[0]) + ' -- Failed to get video entry'
                 error_log_file_head.write(error_string + '\n')
-                print error_string
+                print (e)rror_string
             time.sleep(1)
         #time.sleep(1)
     #time.sleep(1)

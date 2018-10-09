@@ -116,7 +116,7 @@ IIT Bombay.
     
     try:
         result = email.send(fail_silently=True)
-    except Exception, e:
+    except Exception as e:
         print "*******************************************************"
         print message
         print "*******************************************************"

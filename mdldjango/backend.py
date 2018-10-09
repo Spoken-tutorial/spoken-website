@@ -38,14 +38,14 @@ class MdlBackend:
                 #try:
                 #   user = User.objects.get(username=username)
                 #   return user
-                #except Exception, e:
+                #except Exception as e:
                 #   new_user=User(id=uid, username=username, password=pwd, first_name=firstname, last_name=lastname, email=email)
                 #   #new_user.save()
                 #   print "No user here"
                 #   #return new_user
                 return user
-        except Exception, e:
-            print e
+        except Exception as e:
+            print (e)
             print "except ---"
             return None
 

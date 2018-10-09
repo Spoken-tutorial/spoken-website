@@ -28,8 +28,8 @@ def show_video(request):
             foss = tr.tutorial_detail.foss_category.replace('+', 'p').replace('-', ' ')
             tutorial = tr.tutorial_detail.tutorial_name.replace('+', 'p').replace('-', ' ')
             return HttpResponseRedirect('/watch/' + quote_plus(foss) + '/' + quote_plus(tutorial) + '/' + tr.language + '/')
-        except Exception, e:
-            print e
+        except Exception as e:
+            print (e)
             pass
     return HttpResponseRedirect('/tutorial-search/')
 

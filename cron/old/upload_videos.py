@@ -67,7 +67,7 @@ for row in rows:
     if not playlist:
         error_string = row[8] + ' - ' + row[3] + ' -- Playlist Missing'
         error_log_file_head.write(error_string + '\n')
-        print error_string
+        print (e)rror_string
         continue
     video_path = MEDIA_ROOT + 'videos/' + str(row[8]) + '/' + str(row[1]) + '/' + row[5]
     video_path = convert_video(video_path)
@@ -101,6 +101,6 @@ for row in rows:
     else:
         error_string = row[9] + ' - ' + row[13] + ' -- Failed'
         error_log_file_head.write(error_string + '\n')
-        print error_string
+        print (e)rror_string
 error_log_file_head.close()
 success_log_file_head.close()

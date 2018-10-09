@@ -143,7 +143,7 @@ creation_tutorialresource.language_id=22 AND
 				
 				# Finally Commit() save the added documents to index
 				writer.commit()
-			except Exception, e:
+			except Exception as e:
 				print "Write exception: ", e
 				break
 	
@@ -152,5 +152,5 @@ creation_tutorialresource.language_id=22 AND
 		
 # Handling Exception		
 except Exception as e:
-	print e
+	print (e)
 

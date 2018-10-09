@@ -60,7 +60,7 @@ class RegisterForm(forms.Form):
             	mdluser.password = encript_password(mdluser.firstname)
             	mdluser.save()
             	# send email along with password
-        except Exception, e:
+        except Exception as e:
             return email
         if error:
             raise forms.ValidationError( u'Email: %s already exists' % email )
@@ -153,7 +153,7 @@ class PasswordResetForm(forms.Form):
             user = MdlUser.objects.filter(email=email).first()
             if user:
                 error = 0
-        except Exception, e:
-            print e
+        except Exception as e:
+            print (e)
         if error:
             raise forms.ValidationError( u'Email: %s not exists' % email )

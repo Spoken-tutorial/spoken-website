@@ -49,7 +49,7 @@ for row in rows:
         else:
             error_string = row[1] + ' - ' + langrow[1] + ' -- FAILED'
             error_log_file_head.write(error_string + '\n')
-            print error_string
+            print (e)rror_string
         time.sleep(2)
 error_log_file_head.close()
 success_log_file_head.close()

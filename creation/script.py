@@ -24,9 +24,9 @@ def list_missing_script(request):
             code = 0
             try:
                 code = urlopen(script_path).code
-            except Exception, e:
+            except Exception as e:
                 code = e.code
             if not (int(code) == 200):
                 print '{0},{1},{2},{3},{4},{5}'.format(code, tr_rec.id, tr_rec.tutorial_detail.foss, tr_rec.language, tr_rec.tutorial_detail.tutorial, script_path)
-        except Exception, e:
-            print e
+        except Exception as e:
+            print (e)

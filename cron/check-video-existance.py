@@ -36,7 +36,7 @@ for row in rows:
         url, new_video_id = get_entry_info(entry)
         success_log_file_head.write(row[9] + ' - ' + row[13] + ',' + video_id + '\n')
         print video_id, 'Success!!!'
-    except Exception, e:
+    except Exception as e:
         print video_id, e
         error_log_file_head.write(str(row[0]) + ',' + video_id + '\n')
 error_log_file_head.close()

@@ -54,7 +54,7 @@ def mask(request, uid):
         user = User.objects.get(pk = uid)
         request.session['mask_user'] = user.username
         mask_on.send(sender = object(), mask_username = request.session['mask_user'])
-    except Exception, e:
+    except Exception as e:
         messages.error(request, '1) ' + str(e))
     return HttpResponseRedirect(MASQUERADE_REDIRECT_URL)
 

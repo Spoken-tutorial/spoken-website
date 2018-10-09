@@ -156,7 +156,7 @@ def create_thumbnail(row, attach_str, thumb_time, thumb_size):
         if stderr:
             print filepath + filename
             print stderr
-    except Exception, e:
+    except Exception as e:
         print 1, e
         pass
 
@@ -328,7 +328,7 @@ def init_creation_app(request):
         if Group.objects.filter(name = 'Administrator').count() == 0:
             Group.objects.create(name = 'Administrator')
         messages.success(request, 'Creation application initialised successfully!')
-    except Exception, e:
+    except Exception as e:
         messages.error(request, str(e))
     return HttpResponseRedirect('/creation/')
 
@@ -539,7 +539,7 @@ def ajax_get_keywords(request):
             tutorial_detail_id = int(request.POST.get('tutorial_detail'))
             tcc = TutorialCommonContent.objects.get(tutorial_detail_id = tutorial_detail_id)
             data = tcc.keyword
-        except Exception, e:
+        except Exception as e:
             pass
     return HttpResponse(json.dumps(data), content_type='application/json')
 
@@ -553,8 +553,8 @@ def upload_tutorial(request, trid):
         ContributorRole.objects.get(user_id = request.user.id, foss_category_id = tr_rec.tutorial_detail.foss_id, language_id = tr_rec.language_id, status = 1)
         contrib_log = ContributorLog.objects.filter(tutorial_resource_id = tr_rec.id).order_by('-created')
         review_log = NeedImprovementLog.objects.filter(tutorial_resource_id = tr_rec.id).order_by('-created')
-    except Exception, e:
-        print e
+    except Exception as e:
+        print (e)
         raise PermissionDenied()
     context = {
         'tr': tr_rec,
@@ -575,7 +575,7 @@ def upload_outline(request, trid):
             status = 1
         tr_rec = TutorialResource.objects.get(pk = trid, status = status)
         ContributorRole.objects.get(user_id = request.user.id, foss_category_id = tr_rec.tutorial_detail.foss_id, language_id = tr_rec.language_id, status = 1)
-    except Exception, e:
+    except Exception as e:
         raise PermissionDenied()
     if not publish and tr_rec.outline_status > 2 and tr_rec.outline_status != 5:
         raise PermissionDenied()
@@ -602,8 +602,8 @@ def upload_outline(request, trid):
                 comp_title = tr_rec.tutorial_detail.foss.foss + ': ' + tr_rec.tutorial_detail.tutorial + ' - ' + tr_rec.language.name
                 add_domainreviewer_notification(tr_rec, comp_title, 'Outline waiting for Domain review')
                 response_msg = 'Outline status updated successfully!'
-            except Exception, e:
-                print e
+            except Exception as e:
+                print (e)
                 error_msg = 'Something went wrong, please try again later.'
         else:
             context = {
@@ -630,7 +630,7 @@ def upload_script(request, trid):
     try:
         tr_rec = TutorialResource.objects.get(pk = trid, status = 0)
         ContributorRole.objects.get(user_id = request.user.id, foss_category_id = tr_rec.tutorial_detail.foss_id, language_id = tr_rec.language_id, status = 1)
-    except Exception, e:
+    except Exception as e:
         raise PermissionDenied()
     if tr_rec.script_status > 2 and tr_rec.script_status != 5:
         raise PermissionDenied()
@@ -645,7 +645,7 @@ def upload_script(request, trid):
                 code = 0
                 try:
                     code = urlopen(script_path).code
-                except Exception, e:
+                except Exception as e:
                     code = e.code
                 if(int(code) == 200):
                     prev_state = tr_rec.script_status
@@ -659,8 +659,8 @@ def upload_script(request, trid):
                     response_msg = 'Script status updated successfully'
                 else:
                     error_msg = 'Please update the script to wiki before pressing the submit button.'
-            except Exception, e:
-                print e
+            except Exception as e:
+                print (e)
                 error_msg = 'Something went wrong, please try again later.'
         else:
             context = {
@@ -692,7 +692,7 @@ def upload_timed_script(request):
         if form.is_valid():
             try:
                 return HttpResponseRedirect('/creation/upload/timed-script/' + request.POST.get('tutorial_name') + '/save/')
-            except Exception, e:
+            except Exception as e:
                 messages.error(request, str(e))
     context = {
         'form': form
@@ -707,8 +707,8 @@ def save_timed_script(request, tdid):
     try:
         tr_rec = TutorialResource.objects.get(tutorial_detail_id = tdid, language__name = 'English')
         ContributorRole.objects.get(user_id = request.user.id, foss_category_id = tr_rec.tutorial_detail.foss_id, language_id = tr_rec.language_id, status = 1)
-    except Exception, e:
-        print e
+    except Exception as e:
+        print (e)
         raise PermissionDenied()
     response_msg = ''
     error_msg = ''
@@ -722,7 +722,7 @@ def save_timed_script(request, tdid):
                 code = 0
                 try:
                     code = urlopen(script_path).code
-                except Exception, e:
+                except Exception as e:
                     code = e.code
                 if(int(code) == 200):
                     tr_rec.timed_script = storage_path
@@ -736,7 +736,7 @@ def save_timed_script(request, tdid):
                     return HttpResponseRedirect('/creation/upload/timed-script/')
                 else:
                     messages.error(request, 'Please update the timed-script to wiki before pressing the submit button.')
-            except Exception, e:
+            except Exception as e:
                 messages.error(request, str(e))
     context = {
         'form': form,
@@ -763,7 +763,7 @@ def upload_prerequisite(request, trid):
     try:
         tr_rec = TutorialResource.objects.get(pk = trid, status = 0)
         ContributorRole.objects.get(user_id = request.user.id, foss_category_id = tr_rec.tutorial_detail.foss_id, language_id = tr_rec.language_id, status = 1)
-    except Exception, e:
+    except Exception as e:
         raise PermissionDenied()
     if tr_rec.common_content.prerequisite_status > 2 and tr_rec.common_content.prerequisite_status != 5:
         raise PermissionDenied()
@@ -786,7 +786,7 @@ def upload_prerequisite(request, trid):
                 comp_title = tr_rec.tutorial_detail.foss.foss + ': ' + tr_rec.tutorial_detail.tutorial + ' - ' + tr_rec.language.name
                 add_domainreviewer_notification(tr_rec, comp_title, 'Prerequisite waiting for Domain review')
                 response_msg = 'Prerequisite status updated successfully!'
-            except Exception, e:
+            except Exception as e:
                 error_msg = 'Something went wrong, please try again later.'
         else:
             context = {
@@ -813,7 +813,7 @@ def upload_keywords(request, trid):
     try:
         tr_rec = TutorialResource.objects.get(pk = trid, status = 0)
         ContributorRole.objects.get(user_id = request.user.id, foss_category_id = tr_rec.tutorial_detail.foss_id, language_id = tr_rec.language_id, status = 1)
-    except Exception, e:
+    except Exception as e:
         raise PermissionDenied()
     if tr_rec.common_content.keyword_status > 2 and tr_rec.common_content.keyword_status != 5:
         raise PermissionDenied()
@@ -836,7 +836,7 @@ def upload_keywords(request, trid):
                 comp_title = tr_rec.tutorial_detail.foss.foss + ': ' + tr_rec.tutorial_detail.tutorial + ' - ' + tr_rec.language.name
                 add_domainreviewer_notification(tr_rec, comp_title, 'Keywords waiting for Domain review')
                 response_msg = 'Keywords status updated successfully!'
-            except Exception, e:
+            except Exception as e:
                 error_msg = 'Something went wrong, please try again later.'
         else:
             context = {
@@ -864,7 +864,7 @@ def upload_component(request, trid, component):
         tr_rec = TutorialResource.objects.get(pk = trid, status = 0)
         ContributorRole.objects.get(user_id = request.user.id, foss_category_id = tr_rec.tutorial_detail.foss_id, language_id = tr_rec.language_id, status = 1)
         comp_title = tr_rec.tutorial_detail.foss.foss + ': ' + tr_rec.tutorial_detail.tutorial + ' - ' + tr_rec.language.name
-    except Exception, e:
+    except Exception as e:
         raise PermissionDenied()
     if component == 'video' and getattr(tr_rec, component + '_status') == 4:
         raise PermissionDenied()
@@ -988,8 +988,8 @@ def upload_component(request, trid, component):
                             tr_rec, comp_title,
                             '{} waiting for domain review'.format(component.replace('_', ' ').title()))
                         response_msg = 'Additional material uploaded successfully!'
-                except Exception, e:
-                    print e
+                except Exception as e:
+                    print (e)
                     error_msg = 'Something went wrong, please try again later.'
                 form = ComponentForm(component)
                 if response_msg:
@@ -1027,7 +1027,7 @@ def mark_notrequired(request, trid, tcid, component):
     try:
         tr_rec = TutorialResource.objects.get(pk = trid, status = 0)
         ContributorRole.objects.get(user_id = request.user.id, foss_category_id = tr_rec.tutorial_detail.foss_id, language_id = tr_rec.language_id, status = 1)
-    except Exception, e:
+    except Exception as e:
         raise PermissionDenied()
     try:
         tcc = TutorialCommonContent.objects.get(pk = tcid)
@@ -1040,7 +1040,7 @@ def mark_notrequired(request, trid, tcid, component):
             messages.success(request, component.title() + " status updated successfully!")
         else:
             messages.error(request, "Invalid resource id!")
-    except Exception, e:
+    except Exception as e:
         messages.error(request, 'Something went wrong, please try after some time.')
     return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
@@ -1049,8 +1049,8 @@ def view_component(request, trid, component):
     context = {}
     try:
         tr_rec = TutorialResource.objects.get(pk = trid)
-    except Exception, e:
-        print e
+    except Exception as e:
+        print (e)
         raise PermissionDenied()
     if component == 'outline':
         context = {
@@ -1169,8 +1169,8 @@ def tutorials_pending(request):
                 counter += 1
             page = request.GET.get('page')
             tmp_recs = get_page(tmp_recs, page, 50)
-        except Exception, e:
-            print e
+        except Exception as e:
+            print (e)
             pass
 
         context = {
@@ -1209,7 +1209,7 @@ def admin_review_index(request):
             'script_url': settings.SCRIPT_URL
         }
         return render(request, 'creation/templates/admin_review_index.html', context)
-    except Exception, e:
+    except Exception as e:
         return e
 
 @login_required
@@ -1235,7 +1235,7 @@ def admin_review_video(request, trid):
                     add_contributor_notification(tr, tut_title, 'Video accepted by Admin reviewer')
                     add_domainreviewer_notification(tr, tut_title, 'Video waiting for Domain review')
                     response_msg = 'Review status updated successfully!'
-                except Exception, e:
+                except Exception as e:
                     error_msg = 'Something went wrong, please try again later.'
             elif request.POST['video_status'] == '5':
                 try:
@@ -1246,7 +1246,7 @@ def admin_review_video(request, trid):
                     AdminReviewLog.objects.create(status = tr.video_status, user = request.user, tutorial_resource = tr)
                     add_contributor_notification(tr, tut_title, 'Video is under Need Improvement state')
                     response_msg = 'Review status updated successfully!'
-                except Exception, e:
+                except Exception as e:
                     error_msg = 'Something went wrong, please try again later.'
             else:
                 error_msg = 'Invalid status code!'
@@ -1474,8 +1474,8 @@ def domain_review_component(request, trid, component):
                         response_msg = 'Review status updated successfully!'
                     else:
                         error_msg = 'Something went wrong, please try again later.'
-                except Exception, e:
-                    print e
+                except Exception as e:
+                    print (e)
                     error_msg = 'Something went wrong, please try again later.'
             elif request.POST['component_status'] == '5':
                 try:
@@ -1966,7 +1966,7 @@ def public_review_mark_as_pending(request, trid):
         tr_rec.save()
         add_contributor_notification(tr_rec, comp_title, 'This tutorial moved from public review to regular review process.')
         messages.success(request, 'Selected tutorial is marked as pending.')
-    except Exception, e:
+    except Exception as e:
         messages.error(request, str(e))
 
     return HttpResponseRedirect('/creation/public-review/list/')
@@ -2033,7 +2033,7 @@ def quality_review_component(request, trid, component):
                         response_msg = 'Review status updated successfully!'
                     else:
                         error_msg = 'Something went wrong, please try again later.'
-                except Exception, e:
+                except Exception as e:
                     error_msg = 'Something went wrong, please try again later.'
             elif request.POST['component_status'] == '5':
                 try:
@@ -2209,7 +2209,7 @@ def creation_view_tutorial(request, foss, tutorial, lang):
         td_rec = TutorialDetail.objects.get(foss = FossCategory.objects.get(foss = foss), tutorial = tutorial)
         tr_rec = TutorialResource.objects.get(tutorial_detail = td_rec, language = Language.objects.get(name = lang))
         tr_recs = TutorialResource.objects.filter(tutorial_detail__in = TutorialDetail.objects.filter(foss = tr_rec.tutorial_detail.foss).order_by('order').values_list('id'), language = tr_rec.language)
-    except Exception, e:
+    except Exception as e:
         messages.error(request, str(e))
         return HttpResponseRedirect('/')
     video_path = settings.MEDIA_ROOT + "videos/" + str(tr_rec.tutorial_detail.foss_id) + "/" + str(tr_rec.tutorial_detail_id) + "/" + tr_rec.video
@@ -2241,7 +2241,7 @@ def creation_change_published_to_pending(request):
                 add_contributor_notification(row, comp_title, 'This tutorial is unpublished for corrections.')
                 messages.success(request, 'Tutorial unpublished successfully!')
                 form = PublishToPending()
-            except Exception, e:
+            except Exception as e:
                 messages.error(request, str(e))
     else:
         form = PublishToPending()
@@ -2305,7 +2305,7 @@ def creation_change_component_status(request):
                 add_contributor_notification(row, comp_title, component.title() + ' status has been changed to ' + status)
                 messages.success(request, component.title() + ' status has been changed to ' + status)
                 form = ChangeComponentStatusForm()
-            except Exception, e:
+            except Exception as e:
                 messages.error(request, str(e))
     else:
         form = ChangeComponentStatusForm()
@@ -2521,7 +2521,7 @@ Spoken Tutorial
                 )
                 try:
                     result = email.send(fail_silently=False)
-                except Exception, e:
+                except Exception as e:
                     print "*******************************************************"
                     print message
                     print "*******************************************************"
@@ -2660,7 +2660,7 @@ def update_keywords(request):
                 tcc.save()
                 messages.success(request, 'Keywords updated successfully!')
                 return HttpResponseRedirect('/creation/update-keywords/')
-            except Exception, e:
+            except Exception as e:
                 pass
     context = {
         'form': form
@@ -2701,8 +2701,8 @@ def update_sheet(request, sheet_type):
                 messages.success(request, sheet_type.title() + \
                     'sheet uploaded successfully!')
                 form = UpdateSheetsForm()
-            except Exception, e:
-                print e
+            except Exception as e:
+                print (e)
     context = {
         'form': form,
         'sheet_type': sheet_type
@@ -2730,8 +2730,8 @@ def ajax_manual_language(request):
                     '" target="_blank"> Click here to view the currently \
                     available instruction sheet for the tutorial selected \
                     above</a>'
-            except Exception, e:
-                print e
+            except Exception as e:
+                print (e)
                 pass
         elif foss_id:
             tutorials = TutorialResource.objects.filter(
@@ -2811,8 +2811,8 @@ def update_assignment(request):
 
                 messages.success(request, 'Assignment updated successfully!')
                 form = UpdateAssignmentForm()
-            except Exception, e:
-                print e
+            except Exception as e:
+                print (e)
     context = {
         'form': form,
     }
@@ -2854,8 +2854,8 @@ def update_codefiles(request):
 
                 messages.success(request, 'Codefiles updated successfully!')
                 form = UpdateCodefilesForm()
-            except Exception, e:
-                print e
+            except Exception as e:
+                print (e)
     context = {
         'form': form,
     }

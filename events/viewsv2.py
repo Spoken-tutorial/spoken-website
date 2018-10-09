@@ -131,8 +131,8 @@ class TrainingPlannerListView(ListView):
       return TrainingPlanner.objects.create(year=year, \
         semester=self.get_semester(sem), academic=self.user.organiser.academic,\
           organiser=self.user.organiser)
-    except Exception, e:
-      print e
+    except Exception as e:
+      print (e)
     return False
   def get_next_planner(self, current_planner):
     year = int(current_planner.year)
@@ -149,8 +149,8 @@ class TrainingPlannerListView(ListView):
       return TrainingPlanner.objects.create(year=year, \
         semester=sem, academic=self.user.organiser.academic, \
         organiser=self.user.organiser)
-    except Exception, e:
-      print e
+    except Exception as e:
+      print (e)
     return False
 
 class StudentBatchCreateView(CreateView):
@@ -347,8 +347,8 @@ class StudentBatchCreateView(CreateView):
               StudentMaster.objects.create(student=student, batch_id=batch_id)
               write_flag = True
         StudentBatch.objects.get(pk=batch_id).update_student_count()
-    except Exception, e:
-      print e
+    except Exception as e:
+      print (e)
       messages.warning(self.request, "The file you uploaded is not a valid CSV file, please add a valid CSV file")
     return skipped, error, warning, write_flag
 
@@ -677,8 +677,8 @@ class TrainingRequestEditView(CreateView):
       else:
         messages.error(self.request, 'This student batch already taken the selected course.')
         return self.form_invalid(form)
-    except Exception, e:
-      print e
+    except Exception as e:
+      print (e)
       messages.error(self.request, 'Something went wrong, Contact site administrator.')
       return self.form_invalid(form)
     context = {}
@@ -1021,7 +1021,7 @@ class StudentTrainingCertificateView(TrainingCertificate, View):
         mdluser = MdlUser.objects.get(id=mdluserid)
         if ta and ta.student.user.email == mdluser.email:
             return self.training_certificate(ta)
-    except Exception, e:
+    except Exception as e:
       messages.error(self.request, "PermissionDenied!")
     return HttpResponseRedirect("/")
 
@@ -2210,8 +2210,8 @@ class OldTrainingCloseView(CreateView):
         tp.created = created
         tp.updated = created
         tp.save()
-      except Exception, e:
-        print e
+      except Exception as e:
+        print (e)
     return tp
 
   def _get_student(self, ta):
@@ -2341,7 +2341,7 @@ def LatexWorkshopFileUpload(request):
       email = request.POST['email']
       email = email.replace('.', '_')
       email = email.replace('@', '_')
-      print email
+      print (e)mail
       f = open('media/latex/{0}/{1}'.format(email, uploaded_file), 'wb+')
       for data in uploaded_file.chunks():
           f.write(data)

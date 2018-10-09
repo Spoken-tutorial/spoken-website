@@ -266,8 +266,8 @@ def find_tutorial_user(tr):
                             return user.first_name + " " + user.last_name
                         else:
                             return user.username
-                except Exception, e:
-                    print e, " => ", row[8]
+                except Exception as e:
+                    print (e), " => ", row[8]
     if tr.video_user.first_name:
         return str(tr.video_user.first_name) + " " + str(tr.video_user.last_name)
     return str(tr.video_user.username)

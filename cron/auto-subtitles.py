@@ -124,8 +124,8 @@ def generate_subtitle(srt_url, srt_file_path):
             file_head = open(srt_file_path,"w")
             file_head.write(srt_data.encode("utf-8"))
             file_head.close()
-    except Exception, e:
-        print e
+    except Exception as e:
+        print (e)
         return False
     return True
 
@@ -263,7 +263,7 @@ for row in rows:
         continue
     try:
         code = urlopen(script_path).code
-    except Exception, e:
+    except Exception as e:
         code = e.code
     result = ''
     if(int(code) == 200):
@@ -276,6 +276,6 @@ for row in rows:
         else:
             error_string = 'Failed: ' + str(foss[1]) + ', ' + srt_file_name + '\n'
             error_log_file_head.write(error_string)
-            print error_string
+            print (e)rror_string
 error_log_file_head.close()
 success_log_file_head.close()

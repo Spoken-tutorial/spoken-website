@@ -39,7 +39,7 @@ for row in rows:
             print video_id, '-', 'Description Missing'
         else:
             print video_id, '-', 'Description available'
-    except Exception, e:
+    except Exception as e:
         print video_id, e
 
 error_log_file_head.close()

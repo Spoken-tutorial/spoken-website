@@ -57,7 +57,7 @@ def diagnose(data):
         try:
             soup = BeautifulSoup(data, parser)
             success = True
-        except Exception, e:
+        except Exception as e:
             print "%s could not parse the markup." % parser
             traceback.print_exc()
         if success:
@@ -167,7 +167,7 @@ def benchmark_parsers(num_elements=100000):
             soup = BeautifulSoup(data, parser)
             b = time.time()
             success = True
-        except Exception, e:
+        except Exception as e:
             print "%s could not parse the markup." % parser
             traceback.print_exc()
         if success:
