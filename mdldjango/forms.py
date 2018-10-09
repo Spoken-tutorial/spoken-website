@@ -2,7 +2,7 @@
 from django import forms
 from django.contrib.auth.models import Group, User
 from django.forms import ModelForm
-from get_or_create_participant import encript_password
+from .get_or_create_participant import encript_password
 
 # Spoken Tutorial Stuff
 from events.models import *
@@ -45,7 +45,7 @@ class RegisterForm(forms.Form):
         except:
             return username
         if error:
-            raise forms.ValidationError(u'Username: %s already exists' % username )
+            raise forms.ValidationError('Username: %s already exists' % username )
 
     def clean_email(self):
         email = self.cleaned_data['email'].lower()
@@ -63,7 +63,7 @@ class RegisterForm(forms.Form):
         except Exception as e:
             return email
         if error:
-            raise forms.ValidationError( u'Email: %s already exists' % email )
+            raise forms.ValidationError( 'Email: %s already exists' % email )
 
     def clean(self):
         password = self.cleaned_data.get('password')
@@ -156,4 +156,4 @@ class PasswordResetForm(forms.Form):
         except Exception as e:
             print (e)
         if error:
-            raise forms.ValidationError( u'Email: %s not exists' % email )
+            raise forms.ValidationError( 'Email: %s not exists' % email )

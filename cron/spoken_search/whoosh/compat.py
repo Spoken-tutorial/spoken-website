@@ -19,29 +19,29 @@ if sys.version_info[0] < 3:
     def b(s):
         return s
 
-    import cStringIO as StringIO
+    import io as StringIO
     StringIO = BytesIO = StringIO.StringIO
     callable = callable
-    integer_types = (int, long)
-    iteritems = lambda o: o.iteritems()
-    itervalues = lambda o: o.itervalues()
-    iterkeys = lambda o: o.iterkeys()
-    from itertools import izip
-    long_type = long
-    next = lambda o: o.next()
-    import cPickle as pickle
-    from cPickle import dumps, loads, dump, load
-    string_type = basestring
-    text_type = unicode
+    integer_types = (int, int)
+    iteritems = lambda o: iter(o.items())
+    itervalues = lambda o: iter(o.values())
+    iterkeys = lambda o: iter(o.keys())
+    
+    long_type = int
+    next = lambda o: o.__next__()
+    import pickle as pickle
+    from pickle import dumps, loads, dump, load
+    string_type = str
+    text_type = str
     bytes_type = str
-    unichr = unichr
-    from urllib import urlretrieve
+    chr = chr
+    from urllib.request import urlretrieve
     
     def byte(num):
         return chr(num)
 
     def u(s):
-        return unicode(s, "unicode_escape")
+        return str(s, "unicode_escape")
 
     # def with_metaclass(meta, base=object):
     #     class _WhooshBase(base):
@@ -69,9 +69,9 @@ else:
     callable = lambda o: isinstance(o, collections.Callable)
     exec_ = eval("exec")
     integer_types = (int,)
-    iteritems = lambda o: o.items()
-    itervalues = lambda o: o.values()
-    iterkeys = lambda o: iter(o.keys())
+    iteritems = lambda o: list(o.items())
+    itervalues = lambda o: list(o.values())
+    iterkeys = lambda o: iter(list(o.keys()))
     izip = zip
     long_type = int
     next = next
@@ -81,7 +81,7 @@ else:
     string_type = str
     text_type = str
     bytes_type = bytes
-    unichr = chr
+    chr = chr
     from urllib.request import urlretrieve
     
     def byte(num):
@@ -141,11 +141,11 @@ except ImportError:
         r = n if r is None else r
         if r > n:
             return
-        indices = range(n)
-        cycles = range(n, n - r, -1)
+        indices = list(range(n))
+        cycles = list(range(n, n - r, -1))
         yield tuple(pool[i] for i in indices[:r])
         while n:
-            for i in reversed(range(r)):
+            for i in reversed(list(range(r))):
                 cycles[i] -= 1
                 if cycles[i] == 0:
                     indices[i:] = indices[i + 1:] + indices[i:i + 1]
@@ -161,14 +161,14 @@ except ImportError:
 
 try:
     # Python 2.6-2.7
-    from itertools import izip_longest  # @UnusedImport
+    from itertools import zip_longest  # @UnusedImport
 except ImportError:
     try:
         # Python 3.0
         from itertools import zip_longest as izip_longest  # @UnusedImport
     except ImportError:
         # Python 2.5
-        from itertools import chain, izip, repeat
+        from itertools import chain, repeat
 
         def izip_longest(*args, **kwds):
             fillvalue = kwds.get('fillvalue')
@@ -179,7 +179,7 @@ except ImportError:
             fillers = repeat(fillvalue)
             iters = [chain(it, sentinel(), fillers) for it in args]
             try:
-                for tup in izip(*iters):
+                for tup in zip(*iters):
                     yield tup
             except IndexError:
                 pass

@@ -36,10 +36,10 @@ for row in rows:
         desc = ET.fromstring(str(entry.content))
         if not desc.text:
             error_log_file_head.write(str(row[0]) + ', https://www.youtube.com/watch?v=' + video_id + '\n')
-            print video_id, '-', 'Description Missing'
+            print(video_id, '-', 'Description Missing')
         else:
-            print video_id, '-', 'Description available'
+            print(video_id, '-', 'Description available')
     except Exception as e:
-        print video_id, e
+        print(video_id, e)
 
 error_log_file_head.close()

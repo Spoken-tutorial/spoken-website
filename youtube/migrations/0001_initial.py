@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
 
 # Third Party Stuff
 import oauth2client.django_orm

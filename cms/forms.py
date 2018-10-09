@@ -57,21 +57,21 @@ class RegisterForm(forms.Form):
             user = User.objects.get(username = username)
         except User.DoesNotExist:
             return username
-        raise forms.ValidationError(u'%s already exists' % username )
+        raise forms.ValidationError('%s already exists' % username )
 
 
     def clean_email(self):
         email = self.cleaned_data['email']
         try:
             if not validate_email(email):
-                raise forms.ValidationError(u'%s is not valid email.' % email )
+                raise forms.ValidationError('%s is not valid email.' % email )
         except:
-            raise forms.ValidationError(u'%s is not valid email.' % email )
+            raise forms.ValidationError('%s is not valid email.' % email )
         try:
             user = User.objects.get(email = email)
         except User.DoesNotExist:
             return email
-        raise forms.ValidationError(u'%s already exists' % email )
+        raise forms.ValidationError('%s already exists' % email )
 
     def clean(self):
         password = self.cleaned_data.get('password')
@@ -171,7 +171,7 @@ class PasswordResetForm(forms.Form):
             user = User.objects.filter(email=email).first()
             if user:
               if user.is_active:
-                print user.is_active
+                print((user.is_active))
                 error = 0
               else:
                 error = 1

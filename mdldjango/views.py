@@ -29,7 +29,7 @@ def authenticate(email=None, password=None):
     try:
         password = encript_password(password)
         user = MdlUser.objects.filter(email=email, password=password).last()
-        print user
+        print(user)
         if user:
             return user
     except Exception as e:

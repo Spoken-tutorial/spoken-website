@@ -88,6 +88,7 @@ INSTALLED_APPS = (
     'certificate',
     'api',
     'rest_framework',
+    
 )
 
 MIDDLEWARE_CLASSES = (

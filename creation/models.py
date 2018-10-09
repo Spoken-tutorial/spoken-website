@@ -130,7 +130,7 @@ class TutorialDetail(models.Model):
 
 class TutorialCommonContent(models.Model):
     tutorial_detail = models.OneToOneField(
-        TutorialDetail, related_name='tutorial_detail')
+        TutorialDetail, related_name='tutorial_detail',on_delete=models.PROTECT)
     slide = models.CharField(max_length=255)
     slide_user = models.ForeignKey(User, related_name='slides', on_delete=models.PROTECT )
     slide_status = models.PositiveSmallIntegerField(default=0)
@@ -144,14 +144,14 @@ class TutorialCommonContent(models.Model):
     assignment_status = models.PositiveSmallIntegerField(default=0)
 
     prerequisite = models.ForeignKey(
-        TutorialDetail, related_name='prerequisite', blank=True, null=True)
+        TutorialDetail, related_name='prerequisite', blank=True, null=True, on_delete=models.PROTECT )
     prerequisite_user = models.ForeignKey(User, related_name='prerequisite', on_delete=models.PROTECT )
     prerequisite_status = models.PositiveSmallIntegerField(default=0)
 
     additional_material = models.CharField(
         max_length=255, blank=True, null=True)
     additional_material_user = models.ForeignKey(
-        User, related_name='additional_material', null=True, default=None)
+        User, related_name='additional_material', null=True, default=None, on_delete=models.PROTECT )
     additional_material_status = models.PositiveSmallIntegerField(default=0)
 
     keyword = models.TextField()
@@ -340,7 +340,7 @@ class RoleRequest(models.Model):
     role_type = models.IntegerField(default=0)
     status = models.PositiveSmallIntegerField(default=0)
     approved_user = models.ForeignKey(
-        User, related_name='approved_user', null=True, blank=True)
+        User, related_name='approved_user', null=True, blank=True, on_delete=models.PROTECT )
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
@@ -370,7 +370,7 @@ class FossAvailableForTest(models.Model):
 
 class TutorialMissingComponent(models.Model):
     user = models.ForeignKey(
-        User, related_name='raised_user', null=True, blank=True)
+        User, related_name='raised_user', null=True, blank=True, on_delete=models.PROTECT )
     tutorial_resource = models.ForeignKey(TutorialResource, on_delete=models.PROTECT )
     component = models.PositiveSmallIntegerField()
     report_type = models.BooleanField(default=0)

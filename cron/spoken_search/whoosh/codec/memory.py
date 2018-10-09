@@ -25,7 +25,7 @@
 # those of the authors and should not be interpreted as representing official
 # policies, either expressed or implied, of Matt Chaput.
 
-from __future__ import with_statement
+
 from bisect import bisect_left
 from threading import Lock, RLock
 
@@ -160,14 +160,14 @@ class MemPerDocReader(base.PerDocumentReader):
 
     def field_length(self, fieldname):
         return sum(lens.get(fieldname, 0) for lens
-                   in self._segment._lengths.values())
+                   in list(self._segment._lengths.values()))
 
     def min_field_length(self, fieldname):
-        return min(lens[fieldname] for lens in self._segment._lengths.values()
+        return min(lens[fieldname] for lens in list(self._segment._lengths.values())
                    if fieldname in lens)
 
     def max_field_length(self, fieldname):
-        return max(lens[fieldname] for lens in self._segment._lengths.values()
+        return max(lens[fieldname] for lens in list(self._segment._lengths.values())
                    if fieldname in lens)
 
     def has_vector(self, docnum, fieldname):
@@ -176,7 +176,7 @@ class MemPerDocReader(base.PerDocumentReader):
 
     def vector(self, docnum, fieldname, format_):
         items = self._segment._vectors[docnum][fieldname]
-        ids, weights, values = zip(*items)
+        ids, weights, values = list(zip(*items))
         return ListMatcher(ids, weights, values, format_)
 
     def stored_fields(self, docnum):
@@ -267,7 +267,7 @@ class MemTermsReader(base.TermsReader):
         if not terms:
             return
         start = bisect_left(terms, prefix)
-        for i in xrange(start, len(terms)):
+        for i in range(start, len(terms)):
             yield (fieldname, terms[i])
 
     def term_info(self, fieldname, text):
@@ -275,11 +275,11 @@ class MemTermsReader(base.TermsReader):
 
     def matcher(self, fieldname, btext, format_, scorer=None):
         items = self._invindex[fieldname][btext]
-        ids, weights, values = zip(*items)
+        ids, weights, values = list(zip(*items))
         return ListMatcher(ids, weights, values, format_, scorer=scorer)
 
     def indexed_field_names(self):
-        return self._invindex.keys()
+        return list(self._invindex.keys())
 
     def close(self):
         pass
@@ -326,7 +326,7 @@ class MemSegment(base.Segment):
 
     def deleted_docs(self):
         stored = self._stored
-        for docnum in xrange(self.doc_count_all()):
+        for docnum in range(self.doc_count_all()):
             if docnum not in stored:
                 yield docnum
 

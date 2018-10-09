@@ -1,6 +1,6 @@
 import os
 from django.test import TestCase
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.contrib.auth.models import User, Group, Permission
 from spoken.forms import TestimonialsForm
 
@@ -35,7 +35,7 @@ class TestimonialTestClass(TestCase):
         create new testimonials, this should redirect.
         """
         response = self.client.get(reverse('testimonials_new'))
-        self.assertEquals(response.status_code, 403)
+        self.assertEqual(response.status_code, 403)
     
 
     def test_new_media_testimonial_no_user(self):
@@ -44,7 +44,7 @@ class TestimonialTestClass(TestCase):
         create new testimonials, this should redirect.
         """
         response = self.client.get(reverse('testimonials_new_media',kwargs={'type':'tutorial'}))
-        self.assertEquals(response.status_code, 403)
+        self.assertEqual(response.status_code, 403)
     
     
     def test_new_series_testimonial_no_user(self):
@@ -53,7 +53,7 @@ class TestimonialTestClass(TestCase):
         create new testimonials, this should redirect.
         """
         response = self.client.get(reverse('testimonials_new_media',kwargs={'type':'series'}))
-        self.assertEquals(response.status_code, 403)
+        self.assertEqual(response.status_code, 403)
 
 
     # Check status code with normal_user login
@@ -64,7 +64,7 @@ class TestimonialTestClass(TestCase):
         """
         login = self.client.login(username='user_normal', password='atb00ker')
         response = self.client.get(reverse('testimonials_new'))
-        self.assertEquals(response.status_code, 403)
+        self.assertEqual(response.status_code, 403)
     
 
     def test_new_media_testimonial_normal_user(self):
@@ -74,7 +74,7 @@ class TestimonialTestClass(TestCase):
         """
         login = self.client.login(username='user_normal', password='atb00ker')
         response = self.client.get(reverse('testimonials_new_media',kwargs={'type':'tutorial'}))
-        self.assertEquals(response.status_code, 403)
+        self.assertEqual(response.status_code, 403)
     
     
     def test_new_series_testimonial_normal_user(self):
@@ -84,7 +84,7 @@ class TestimonialTestClass(TestCase):
         """
         login = self.client.login(username='user_normal', password='atb00ker')
         response = self.client.get(reverse('testimonials_new_media',kwargs={'type':'series'}))
-        self.assertEquals(response.status_code, 403)
+        self.assertEqual(response.status_code, 403)
 
 
     # Check status code with administrator login
@@ -95,7 +95,7 @@ class TestimonialTestClass(TestCase):
         """
         login = self.client.login(username='user_administrator', password='atb00ker')
         response = self.client.get(reverse('testimonials_new'))
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
     
 
     def test_new_media_testimonial_normal_user(self):
@@ -105,7 +105,7 @@ class TestimonialTestClass(TestCase):
         """
         login = self.client.login(username='user_administrator', password='atb00ker')
         response = self.client.get(reverse('testimonials_new_media',kwargs={'type':'tutorial'}))
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
     
     
     def test_new_series_testimonial_normal_user(self):
@@ -115,7 +115,7 @@ class TestimonialTestClass(TestCase):
         """
         login = self.client.login(username='user_administrator', password='atb00ker')
         response = self.client.get(reverse('testimonials_new_media',kwargs={'type':'series'}))
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
     
     # TestimonialsForm Test Case
     def test_testimonialform_valid(self):

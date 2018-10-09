@@ -695,7 +695,7 @@ class TutorialMissingComponentForm(forms.Form):
 
     def clean(self):
         super(TutorialMissingComponentForm, self).clean()
-        print self.user
+        print(self.user)
         if 'report_type' in self.cleaned_data:
             if self.cleaned_data['report_type'] == '1':
                 if 'remarks' in self.cleaned_data:
@@ -704,9 +704,9 @@ class TutorialMissingComponentForm(forms.Form):
                 else:
                     self._errors['remarks'] = '<ul class="errorlist"><li>Please fill Remarks field</li></ul>'
         if 'inform_me' in self.cleaned_data:
-            print self.cleaned_data
+            print(self.cleaned_data)
             if self.cleaned_data['inform_me'] == '1':
-                print self.cleaned_data['inform_me']
+                print(self.cleaned_data['inform_me'])
                 if not self.user.is_authenticated():
                     if 'email' in self.cleaned_data:
                         if not self.cleaned_data['email']:

@@ -34,7 +34,7 @@ discarded because it increases the word ambiguities and changes the original
 root.
 """
 
-from __future__ import unicode_literals
+
 import re
 
 

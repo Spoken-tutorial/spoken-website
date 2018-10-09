@@ -280,8 +280,8 @@ def password_reset(request):
             from mdldjango.views import changeMdlUserPass
             changeMdlUserPass(request.POST['email'], password_string)
 
-            print 'Username => ', user.username
-            print 'New password => ', password_string
+            print('Username => ', user.username)
+            print('New password => ', password_string)
 
             changePassUrl = "http://www.spoken-tutorial.org/accounts/change-password"
             if request.GET and request.GET['next']:
@@ -399,7 +399,7 @@ def confirm_student(request, token):
             messages.success(request, "Your account has been activated!. Please login to continue.")
             return HttpResponseRedirect('http://spoken-tutorial.org/participant/login/')
         else:
-            print 'can not match record'
+            print('can not match record')
             messages.error(request, "Your account not activated!. Please try again!")
             return HttpResponseRedirect('/')
     except ObjectDoesNotExist:

@@ -70,7 +70,7 @@ def resumable_upload(insert_request):
 
     while response is None:
         try:
-            print "Sending video file..."
+            print("Sending video file...")
             status, response = insert_request.next_chunk()
             if response is not None:
                 return response
@@ -95,7 +95,7 @@ def upload_video(service, options):
             )
         )
         insert_request = service.videos().insert(
-            part=",".join(body.keys()),
+            part=",".join(list(body.keys())),
             body=body,
             media_body=MediaFileUpload(
                 options.get('file'),
@@ -126,7 +126,7 @@ def create_playlist(service, title, description):
             )
         )
         playlist = service.playlists().insert(
-            part=",".join(body.keys()),
+            part=",".join(list(body.keys())),
             body=body
         ).execute()
 
@@ -154,7 +154,7 @@ def add_to_playlist(service, video_id, playlist_id, position=0):
             body["snippet"]["position"] = position
 
         playlist_item = service.playlistItems().insert(
-            part=",".join(body.keys()),
+            part=",".join(list(body.keys())),
             body=body
         ).execute()
 
@@ -180,7 +180,7 @@ def update_playlistitem_position(service, item_id, video_id, playlist_id, positi
         )
 
         playlist_item = service.playlistItems().update(
-            part=",".join(body.keys()),
+            part=",".join(list(body.keys())),
             body=body
         ).execute()
 

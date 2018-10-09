@@ -12,7 +12,7 @@ from config import *
 from events.models import Student
 
 # fetching students needs to be verified
-print 'Initializing ...'
+print('Initializing ...')
 students = Student.objects.filter(verified=False)
 
 # opening log files to write success & error attempts
@@ -40,17 +40,17 @@ for student in students:
         student.error = True
         status = 'Not Available'
         error_log_file_head.write(str(student.id)+','+str(student.user.id)+','+student.user.email+'\n')
-    except TimeoutError, e:
+    except TimeoutError as e:
       error_log_file_head.write(str(student.id)+','+str(student.user.id)+','+student.user.email+'\n')
-      print 'Timeout error, waiting for 5 seconds...'
+      print('Timeout error, waiting for 5 seconds...')
       time.sleep(3)
       continue
     student.save()
-  print str(student.user), '-', status
+  print(str(student.user), '-', status)
 
 error_log_file_head.close()
 success_log_file_head.close()
 
-print '******************************************'
-print ' Total records processed:', students.count()
-print '******************************************'
+print('******************************************')
+print(' Total records processed:', students.count())
+print('******************************************')

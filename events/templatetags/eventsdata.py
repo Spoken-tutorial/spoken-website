@@ -12,7 +12,7 @@ register = template.Library()
 
 
 def participant_picture(user_id):
-    print user_id
+    print(user_id)
     try:
         return settings.ONLINE_TEST_URL + "get_profile_picture.php?id=" + str(user_id)
     except Exception as e:

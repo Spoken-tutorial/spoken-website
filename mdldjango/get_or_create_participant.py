@@ -6,7 +6,7 @@ import string
 
 # Third Party Stuff
 from django.core.mail import EmailMultiAlternatives
-from models import MdlUser
+from .models import MdlUser
 from validate_email import validate_email
 
 # Spoken Tutorial Stuff

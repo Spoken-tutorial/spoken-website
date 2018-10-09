@@ -46,7 +46,7 @@ def upload_video(service, options):
         )
     )
     insert_request = youtube.videos().insert(
-        part=",".join(body.keys()),
+        part=",".join(list(body.keys())),
         body=body,
         media_body=MediaFileUpload(
             options.file,

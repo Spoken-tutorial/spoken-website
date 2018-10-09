@@ -6,7 +6,8 @@ import subprocess
 import time
 from django.utils import timezone
 from decimal import Decimal
-from urllib import quote, unquote_plus, urlopen
+from urllib.parse import quote, unquote_plus
+from urllib.request import urlopen
 
 # Third Party Stuff
 from django.conf import settings
@@ -154,10 +155,10 @@ def create_thumbnail(row, attach_str, thumb_time, thumb_size):
         process = subprocess.Popen(['/usr/bin/ffmpeg', '-i', filepath + row.video, '-r', str(30), '-ss', str(thumb_time), '-s', thumb_size, '-vframes', str(1), '-f', 'image2', filepath + filename], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         stdout, stderr = process.communicate()
         if stderr:
-            print filepath + filename
-            print stderr
+            print(filepath + filename)
+            print(stderr)
     except Exception as e:
-        print 1, e
+        print(1, e)
         pass
 
 def add_qualityreviewer_notification(tr_rec, comp_title, message):
@@ -243,7 +244,7 @@ def creation_accept_role_request(request, recid):
 @login_required
 def creation_reject_role_request(request, recid):
     if is_administrator:
-        print "test 2"
+        print("test 2")
         roles = {
             0: 'Contributor',
             1: 'External-Contributor',
@@ -1119,7 +1120,7 @@ def tutorials_contributed(request):
             counter = 1
             for tmp_rec in tmp_recs:
                 if tmp_rec.id == 3311:
-                    print counter, tmp_rec.tutorial_detail.tutorial
+                    print(counter, tmp_rec.tutorial_detail.tutorial)
                 counter += 1
             page = request.GET.get('page')
             tmp_recs = get_page(tmp_recs, page)
@@ -1165,7 +1166,7 @@ def tutorials_pending(request):
             counter = 1
             for tmp_rec in tmp_recs:
                 if tmp_rec.id == 3311:
-                    print counter, tmp_rec.tutorial_detail.tutorial
+                    print(counter, tmp_rec.tutorial_detail.tutorial)
                 counter += 1
             page = request.GET.get('page')
             tmp_recs = get_page(tmp_recs, page, 50)
@@ -2522,9 +2523,9 @@ Spoken Tutorial
                 try:
                     result = email.send(fail_silently=False)
                 except Exception as e:
-                    print "*******************************************************"
-                    print message
-                    print "*******************************************************"
+                    print("*******************************************************")
+                    print(message)
+                    print("*******************************************************")
             messages.success(request, 'Reply message added successfully!')
             form = TutorialMissingComponentReplyForm()
     context = {

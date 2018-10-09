@@ -92,8 +92,8 @@ Spoken Tutorial, IIT Bombay
         #print to," => not sent (",count,"/",tot_count,")"
         success_log_file_head.write(str(organiser.user.email)+','+str(0)+'\n')
     # break
-print "--------------------------------"
-print "Total sent mails:", sent
-print "Total not sent mails:", notsent
-print "--------------------------------"
+print("--------------------------------")
+print("Total sent mails:", sent)
+print("Total not sent mails:", notsent)
+print("--------------------------------")
 

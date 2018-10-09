@@ -16,7 +16,7 @@ from django.http import Http404
 from django.db.models import Q
 from django.db import IntegrityError
 
-from urlparse import urlparse
+from urllib.parse import urlparse
 
 from BeautifulSoup import BeautifulSoup
 
@@ -27,13 +27,13 @@ import os,time, csv, random, string
 from validate_email import validate_email
 
 import os.path
-import urllib,urllib2
+import urllib.request, urllib.parse, urllib.error,urllib.request,urllib.error,urllib.parse
 
 from events.models import *
 from cms.models import Profile
 from mdldjango.forms import OfflineDataForm
 
-from forms import *
+from .forms import *
 from django.utils import formats
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from mdldjango.get_or_create_participant import get_or_create_participant, check_csvfile, update_participants_count, clone_participant
@@ -48,16 +48,16 @@ from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import cm
 from reportlab.lib.enums import TA_CENTER
 from PyPDF2 import PdfFileWriter, PdfFileReader
-from StringIO import StringIO
+from io import StringIO
 
 #randon string
 import string
 import random
 
-from  filters import *
+from  .filters import *
 from cms.views import create_profile
 from cms.sortable import *
-from events_email import send_email
+from .events_email import send_email
 import datetime
 from django.http import JsonResponse
 
@@ -120,7 +120,7 @@ def init_events_app(request):
             TestCategory.objects.get_or_create(name= 'Training')
             TestCategory.objects.get_or_create(name= 'Others')
         except Exception as e:
-            print (e), "test_category"
+            print((e), "test_category")
 
         try:
             InstituteType.objects.get_or_create(name= 'Workshop')
@@ -130,7 +130,7 @@ def init_events_app(request):
             InstituteType.objects.get_or_create(name= 'School')
             InstituteType.objects.get_or_create(name= 'Uncategorised')
         except Exception as e:
-            print (e), "institute_type"
+            print((e), "institute_type")
 
         #institutecategory
         try:
@@ -139,7 +139,7 @@ def init_events_app(request):
             InstituteCategory.objects.get_or_create(name= 'NGO')
             InstituteCategory.objects.get_or_create(name= 'Uncategorised')
         except Exception as e:
-            print (e), "InstituteCategory"
+            print((e), "InstituteCategory")
 
         #permissiontype
         try:
@@ -149,31 +149,31 @@ def init_events_app(request):
             PermissionType.objects.get_or_create(name= 'Institution Type')
             PermissionType.objects.get_or_create(name= 'Institution')
         except Exception as e:
-             print (e), "PermissionType"
+             print((e), "PermissionType")
 
         #state
         state = None
         try:
             state = State.objects.get_or_create(name= 'Uncategorised')
         except Exception as e:
-             print (e), "State"
+             print((e), "State")
         #District
         try:
             District.objects.get_or_create(name= 'Uncategorised', state_id = state[0].id)
         except Exception as e:
-             print (e), "District"
+             print((e), "District")
 
         #City
         try:
             City.objects.get_or_create(name= 'Uncategorised', state_id = state[0].id)
         except Exception as e:
-             print (e), "City"
+             print((e), "City")
 
         #University
         try:
             University.objects.get_or_create(name= 'Uncategorised', state_id = state[0].id, user_id = 1)
         except Exception as e:
-             print (e), "University"
+             print((e), "University")
 
         messages.success(request, 'Events application initialised successfully!')
     except Exception as e:
@@ -262,7 +262,7 @@ def add_participant(request, cid, category ):
         if category == 'Training':
             try:
                 wa = TrainingAttendance.objects.get(mdluser_id = userid, training_id = cid)
-                print wa.id, " => Exits"
+                print(wa.id, " => Exits")
                 messages.success(request, "User has already in the attendance list")
             except:
                 mdluser = MdlUser.objects.get(pk=userid)
@@ -276,11 +276,11 @@ def add_participant(request, cid, category ):
                 wa.status = 0
                 wa.save()
                 messages.success(request, "User has added in the attendance list")
-                print wa.id, " => Inserted"
+                print(wa.id, " => Inserted")
         elif category == 'Training':
             try:
                 wa = TrainingAttendance.objects.get(mdluser_id = userid, training_id = cid)
-                print wa.id, " => Exits"
+                print(wa.id, " => Exits")
                 messages.success(request, "User has already in the attendance list")
             except:
                 wa = TrainingAttendance()
@@ -289,12 +289,12 @@ def add_participant(request, cid, category ):
                 wa.status = 0
                 wa.save()
                 messages.success(request, "User has added in the attendance list")
-                print wa.id, " => Inserted"
+                print(wa.id, " => Inserted")
 
         elif category == 'Test':
             try:
                 wa = TestAttendance.objects.get(mdluser_id = userid, test_id = cid)
-                print wa.id, " => Exits"
+                print(wa.id, " => Exits")
                 messages.success(request, "User has already in the attendance list")
             except:
                 wa = TestAttendance()
@@ -303,7 +303,7 @@ def add_participant(request, cid, category ):
                 wa.status = 0
                 wa.save()
                 messages.success(request, "User has added in the attendance list")
-                print wa.id, " => Inserted"
+                print(wa.id, " => Inserted")
 
 def fix_date_for_first_training(request):
     organisers = Organiser.objects.exclude(id__in = Training.objects.values_list('organiser_id').distinct(), status=1).filter(Q(created__startswith=datetime.date.today() - datetime.timedelta(days=15)) | Q(created__startswith=datetime.date.today() - datetime.timedelta(days=30)))
@@ -752,7 +752,7 @@ def accountexecutive_request(request, username):
                     return HttpResponseRedirect("/software-training/accountexecutive/view/"+user.username+"/")
                 else:
                     messages.info(request, "Your Account Executive request is yet to be approved. Please contact the Resource person of your State. For more details <a href='http://process.spoken-tutorial.org/images/5/5d/Create-New-Account.pdf' target='_blank'> Click Here</a> ")
-                    print "Accountexecutive not yet approve "
+                    print("Accountexecutive not yet approve ")
                     return HttpResponseRedirect("/software-training/accountexecutive/view/"+user.username+"/")
             except:
                 messages.info(request, "Please fill the following details")
@@ -852,7 +852,7 @@ def organiser_request(request, username):
                     return HttpResponseRedirect("/software-training/organiser/view/"+user.username+"/")
                 else:
                     messages.info(request, "Your Organiser request is yet to be approved. Please contact the Resource person of your State. For more details <a href='http://process.spoken-tutorial.org/images/5/5d/Create-New-Account.pdf' target='_blank'> Click Here</a> ")
-                    print "Organiser not yet approve "
+                    print("Organiser not yet approve ")
                     return HttpResponseRedirect("/software-training/organiser/view/"+user.username+"/")
             except:
                 pass
@@ -1989,7 +1989,7 @@ def test_approvel(request, role, rid):
     try:
         t = Test.objects.get(pk=rid)
         if request.GET['status'] == 'accept':
-            print "!!!!!!!!"
+            print("!!!!!!!!")
             status = 1
             t.test_code = "TC-" + str(t.id)
             message = "The Training Manager has approved "+t.foss.foss+" test dated "+t.tdate.strftime("%Y-%m-%d")
@@ -2065,7 +2065,7 @@ def test_attendance(request, tid):
         test.save()
     except:
         raise PermissionDenied()
-    print test.foss_id
+    print(test.foss_id)
     if request.method == 'POST':
         users = request.POST
         if users:
@@ -2102,10 +2102,10 @@ def test_attendance(request, tid):
                             mdlenrol = None
                             try:
                                 mdlenrol = MdlEnrol.objects.get(enrol='self', courseid = fossmdlcourse.mdlcourse_id )
-                                print "Role Exits"
+                                print("Role Exits")
                             except Exception as e:
-                                print "MdlEnrol => ", e
-                                print "No self enrolement for this course"
+                                print("MdlEnrol => ", e)
+                                print("No self enrolement for this course")
 
                             #if mdlenrol:
                             #    try:
@@ -2438,20 +2438,20 @@ def update_events_log(user_id, role, category, category_id, academic, status):
         try:
             TrainingLog.objects.create(user_id = user_id, training_id = category_id, role = role, academic_id = academic, status = status)
         except Exception as e:
-            print "Training Log =>",e
+            print("Training Log =>",e)
     elif category == 1:
         try:
             TestLog.objects.create(user_id = user_id, test_id = category_id, role = role, academic_id = academic, status = status)
         except Exception as e:
-            print "Test Log => ",e
+            print("Test Log => ",e)
     else:
-        print "************ Error in events log ***********"
+        print("************ Error in events log ***********")
 
 def update_events_notification(user_id, role, category, category_id, status, academic, message):
     try:
         EventsNotification.objects.create(user_id = user_id, role = role, category = category, categoryid = category_id, academic_id = academic, status = status, message = message)
     except Exception as e:
-        print "Error in Events Notification => ", e
+        print("Error in Events Notification => ", e)
 
 def training_participant_feedback(request, training_id, participant_id):
     try:
@@ -2759,10 +2759,10 @@ def ajax_dept_foss(request):
     if request.method == 'POST':
         tmp = ''
         category =  int(request.POST.get('fields[type]'))
-        print category
-        print request.POST
+        print(category)
+        print(request.POST)
         if category == 1:
-            print request.POST
+            print(request.POST)
             training = request.POST.get('workshop')
             if request.POST.get('fields[dept]'):
                 dept = Department.objects.filter(training__id = training).order_by('name')
@@ -2819,7 +2819,7 @@ def ajax_language(request):
 def test(request):
     academics = AcademicCenter.objects.filter(Q(institution_name__icontains="Engineering")).exclude(Q(institution_type__name="Engineering") | Q(institution_type__name="Polytechnic") | Q(institution_type__name="ITI") | Q(institution_type__name="University"))
     for academic in academics:
-        print academic.institution_name, " => ", academic.institution_type
+        print(academic.institution_name, " => ", academic.institution_type)
         academic.institution_type = InstituteType.objects.get(name='Engineering')
         academic.save()
     return HttpResponsei("Done!")
@@ -2850,7 +2850,7 @@ def activate_academics(request):
         5: SortableHeader('Action', False),
         6: SortableHeader('Status', False)
     }
-    print request
+    print(request)
     if request.method == 'POST':
         collegeid = request.POST.get('collegeid')
         action = request.POST.get('action')

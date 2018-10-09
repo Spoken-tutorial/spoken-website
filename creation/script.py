@@ -1,5 +1,5 @@
 # Standard Library
-from urllib import urlopen
+from urllib.request import urlopen
 
 # Third Party Stuff
 from django.conf import settings
@@ -27,6 +27,6 @@ def list_missing_script(request):
             except Exception as e:
                 code = e.code
             if not (int(code) == 200):
-                print '{0},{1},{2},{3},{4},{5}'.format(code, tr_rec.id, tr_rec.tutorial_detail.foss, tr_rec.language, tr_rec.tutorial_detail.tutorial, script_path)
+                print('{0},{1},{2},{3},{4},{5}'.format(code, tr_rec.id, tr_rec.tutorial_detail.foss, tr_rec.language, tr_rec.tutorial_detail.tutorial, script_path))
         except Exception as e:
             print (e)

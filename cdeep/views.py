@@ -1,5 +1,5 @@
 # Standard Library
-from urllib import quote_plus
+from urllib.parse import quote_plus
 
 # Third Party Stuff
 from django.http import HttpResponseRedirect
@@ -20,7 +20,7 @@ def list_videos(request):
 
 
 def show_video(request):
-    print 'test'
+    print('test')
     old_tr = request.GET.get('tr', None)
     if old_tr:
         try:

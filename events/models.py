@@ -194,13 +194,12 @@ class AcademicCenter(models.Model):
     return training['participants__sum']
 
 class Accountexecutive(models.Model):
-  user = models.OneToOneField(User, related_name = 'accountexecutive')
+  user = models.OneToOneField(User, related_name = 'accountexecutive', on_delete=models.PROTECT )
   appoved_by = models.ForeignKey(
     User,
     related_name = 'accountexecutive_approved_by',
     blank=True,
-    null=True
-  )
+    null=True, on_delete=models.PROTECT )
   academic = models.ForeignKey(AcademicCenter, blank=True, null=True, on_delete=models.PROTECT )
   status = models.PositiveSmallIntegerField(default=0)
   created = models.DateTimeField(auto_now_add = True)
@@ -211,13 +210,12 @@ class Accountexecutive(models.Model):
 
 
 class Organiser(models.Model):
-  user = models.OneToOneField(User, related_name = 'organiser')
+  user = models.OneToOneField(User, related_name = 'organiser', on_delete=models.PROTECT )
   appoved_by = models.ForeignKey(
     User,
     related_name = 'organiser_approved_by',
     blank=True,
-    null=True
-  )
+    null=True, on_delete=models.PROTECT )
   academic = models.ForeignKey(AcademicCenter, blank=True, null=True, on_delete=models.PROTECT )
   status = models.PositiveSmallIntegerField(default=0)
   created = models.DateTimeField(auto_now_add = True)
@@ -228,13 +226,12 @@ class Organiser(models.Model):
 
 
 class Invigilator(models.Model):
-  user = models.OneToOneField(User)
+  user = models.OneToOneField(User, on_delete=models.PROTECT )
   appoved_by = models.ForeignKey(
     User,
     related_name = 'invigilator_approved_by',
     blank=True,
-    null=True
-  )
+    null=True,  on_delete=models.PROTECT )
   academic = models.ForeignKey(AcademicCenter, on_delete=models.PROTECT )
   status = models.PositiveSmallIntegerField(default=0)
   created = models.DateTimeField(auto_now_add = True)
@@ -282,8 +279,7 @@ class Training(models.Model):
   appoved_by = models.ForeignKey(
     User,
     related_name = 'training_approved_by',
-    null=True
-  )
+    null=True,  on_delete=models.PROTECT )
   academic = models.ForeignKey(AcademicCenter, on_delete=models.PROTECT )
   course = models.ForeignKey(Course, on_delete=models.PROTECT )
   training_type = models.PositiveIntegerField(default=0)
@@ -297,7 +293,7 @@ class Training(models.Model):
   status = models.PositiveSmallIntegerField(default=0)
   # 0:request done, 1: attendance submit, 2: training manger approved,
   # 3: mark attenda done, 4: complete, 5: rejected
-  extra_fields = models.OneToOneField(TrainingExtraFields, null = True)
+  extra_fields = models.OneToOneField(TrainingExtraFields, null = True, on_delete=models.PROTECT )
   participant_count = models.PositiveIntegerField(default=0)
   trusted = models.BooleanField(default=1)
   created = models.DateTimeField(auto_now_add = True)
@@ -351,18 +347,15 @@ class Test(models.Model):
   organiser = models.ForeignKey(Organiser, related_name = 'test_organiser', on_delete=models.PROTECT )
   test_category = models.ForeignKey(
     TestCategory,
-    related_name = 'test_category'
-  )
+    related_name = 'test_category', on_delete=models.PROTECT )
   appoved_by = models.ForeignKey(
     User,
     related_name = 'test_approved_by',
-    null=True
-  )
+    null=True,  on_delete=models.PROTECT )
   invigilator = models.ForeignKey(
     Invigilator,
     related_name = 'test_invigilator',
-    null=True
-  )
+    null=True,  on_delete=models.PROTECT )
   academic = models.ForeignKey(AcademicCenter, on_delete=models.PROTECT )
   department = models.ManyToManyField(Department)
   training = models.ForeignKey('TrainingRequest', null=True, on_delete=models.PROTECT )
@@ -438,27 +431,22 @@ class Permission(models.Model):
   district = models.ForeignKey(
     District,
     related_name = 'permission_district',
-    null=True
-  )
+    null=True,  on_delete=models.PROTECT )
   university = models.ForeignKey(
     University,
     related_name = 'permission_iniversity',
-    null=True
-  )
+    null=True,  on_delete=models.PROTECT )
   institute_type = models.ForeignKey(
     InstituteType,
     related_name = 'permission_institution_type',
-    null=True
-  )
+    null=True,  on_delete=models.PROTECT )
   institute = models.ForeignKey(
     AcademicCenter,
     related_name = 'permission_district',
-    null=True
-  )
+    null=True,  on_delete=models.PROTECT )
   assigned_by = models.ForeignKey(
     User,
-    related_name = 'permission_assigned_by'
-  )
+    related_name = 'permission_assigned_by', on_delete=models.PROTECT )
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
 
@@ -525,7 +513,7 @@ class OrganiserNotification(models.Model):
 
 # Create your models here.
 class Student(models.Model):
-  user = models.OneToOneField(User)
+  user = models.OneToOneField(User, on_delete=models.PROTECT )
   gender = models.CharField(max_length = 15)
   verified = models.PositiveSmallIntegerField(default = 0)
   error = models.BooleanField(default=False)
@@ -1054,9 +1042,9 @@ class SingleTraining(models.Model):
   state = models.ForeignKey(State, null=True, on_delete=models.PROTECT )
   institution_type = models.ForeignKey(InstituteType, null=True, on_delete=models.PROTECT )
   academic = models.ForeignKey(AcademicCenter, on_delete=models.PROTECT )
-  course = models.ForeignKey(CourseMap, # type 0
+  course = models.ForeignKey(CourseMap, on_delete=models.PROTECT ) # type 0
   # {0:School, 3:Vocational, 1:Live Workshop, 2:Pilot Workshop}
-  training_type = models.PositiveIntegerField(default=0))
+  training_type = models.PositiveIntegerField(default=0)
   language = models.ForeignKey(Language, on_delete=models.PROTECT )
   tdate = models.DateField()
   ttime = models.TimeField(null=True, blank=True)

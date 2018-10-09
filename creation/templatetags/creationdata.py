@@ -1,7 +1,8 @@
 # Standard Library
 import os
 import zipfile
-from urllib import quote_plus, urlopen
+from urllib.parse import quote_plus
+from urllib.request import urlopen
 
 # Third Party Stuff
 from django import template
@@ -162,7 +163,7 @@ def get_srt_path(tr):
         data = '<track kind="captions" src="'+ settings.MEDIA_URL + 'videos/' + str(tr.tutorial_detail.foss_id) + '/' + str(tr.tutorial_detail_id) + '/' + tr.tutorial_detail.tutorial.replace(' ', '-') + '-English.srt' + '" srclang="en" label="English"></track>'
     if tr.language.name != 'English':
         native_srt = settings.MEDIA_ROOT + 'videos/' + str(tr.tutorial_detail.foss_id) + '/' + str(tr.tutorial_detail_id) + '/' + tr.tutorial_detail.tutorial.replace(' ', '-') + '-' + tr.language.name +'.srt'
-        print native_srt
+        print(native_srt)
         if os.path.isfile(native_srt):
             data += '<track kind="captions" src="'+ settings.MEDIA_URL + 'videos/' + str(tr.tutorial_detail.foss_id) + '/' + str(tr.tutorial_detail_id) + '/' + tr.tutorial_detail.tutorial.replace(' ', '-') + '-' + tr.language.name + '.srt' + '" srclang="en" label="' + tr.language.name + '"></track>'
     return data
@@ -173,7 +174,7 @@ def get_video_visits(tr):
     return tr.hit_count
 
 def get_prerequisite(tr, td):
-    print tr, td
+    print(tr, td)
     try:
         tr_rec = TutorialResource.objects.get(Q(status = 1) | Q(status = 2), tutorial_detail = td, language_id = tr.language_id)
         return get_url_name(td.foss.foss) + '/' + get_url_name(td.tutorial) + '/' + tr_rec.language.name
@@ -206,18 +207,18 @@ def get_timed_script(script_path, timed_script_path):
         timed_script = settings.SCRIPT_URL + timed_script_path
     else:
         timed_script = settings.SCRIPT_URL + script_path + '-timed'
-    print script_path
+    print(script_path)
     code = 0
     try:
         code = urlopen(timed_script).code
     except Exception as e:
         timed_script = settings.SCRIPT_URL + \
             script_path.replace(' ', '-').replace('_', '-') + '-timed'
-        print timed_script
+        print(timed_script)
         try:
             code = urlopen(timed_script).code
         except Exception as e:
-            print code, '----', e
+            print(code, '----', e)
             code = 0
     if(int(code) == 200):
         return timed_script

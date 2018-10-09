@@ -475,7 +475,7 @@ class TrainingLanguageFeedbackForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         training = None
-        print kwargs
+        print(kwargs)
         if 'training' in kwargs:
             training = kwargs["training"]
             del kwargs["training"]

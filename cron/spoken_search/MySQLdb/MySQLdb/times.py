@@ -101,8 +101,8 @@ def mysql_timestamp_converter(s):
     # MySQL>4.1 returns TIMESTAMP in the same format as DATETIME
     if s[4] == '-': return DateTime_or_None(s)
     s = s + "0"*(14-len(s)) # padding
-    parts = map(int, filter(None, (s[:4],s[4:6],s[6:8],
-                                   s[8:10],s[10:12],s[12:14])))
+    parts = list(map(int, [_f for _f in (s[:4],s[4:6],s[6:8],
+                                   s[8:10],s[10:12],s[12:14]) if _f]))
     try:
         return Timestamp(*parts)
     except (SystemExit, KeyboardInterrupt):

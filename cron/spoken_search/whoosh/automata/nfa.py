@@ -159,7 +159,7 @@ class ThreadList(object):
         self.max = max
         self.threads = []
 
-    def __nonzero__(self):
+    def __bool__(self):
         return bool(self.threads)
 
     def current(self):
@@ -193,7 +193,7 @@ class Thread(object):
 
     def __repr__(self):
         d = self.__dict__
-        return "Thread(%s)" % ",".join("%s=%r" % (k, v) for k, v in d.items())
+        return "Thread(%s)" % ",".join("%s=%r" % (k, v) for k, v in list(d.items()))
 
 
 def advance(thread, arc, c):

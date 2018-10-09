@@ -3,7 +3,7 @@ import hashlib
 
 # Third Party Stuff
 from django.core.mail import EmailMultiAlternatives
-from models import MdlUser
+from .models import MdlUser
 
 # Spoken Tutorial Stuff
 from events.models import *

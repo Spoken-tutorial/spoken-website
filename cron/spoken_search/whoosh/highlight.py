@@ -48,7 +48,7 @@ The highlighting system has four main elements.
 See :doc:`/highlight` for more information.
 """
 
-from __future__ import division
+
 from collections import deque
 from heapq import nlargest
 from itertools import groupby

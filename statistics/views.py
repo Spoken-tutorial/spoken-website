@@ -168,7 +168,7 @@ def training(request):
         for data in chart_query_set:
             chart_data += "['" + str(data['year']) + "', " + str(data['total_participant']) + "],"
     else:
-        for year,count in year_data_all.iteritems():
+        for year,count in year_data_all.items():
             chart_data += "['" + str(year) + "', " + str(count) + "],"
     
     context = {}
@@ -396,7 +396,7 @@ def academic_center(request, slug=None):
     context['form'] = collection.form
     context['total_training'] = training_query.count()
     participant_count = training_query.aggregate(Sum('participants'))
-    print participant_count
+    print(participant_count)
     context['total_participant'] = participant_count['participants__sum']
 
     page = request.GET.get('page')
@@ -443,7 +443,7 @@ def motion_chart(request):
         interactive_workshop_data += "['" + curr_state + "', " + js_date + \
             ", " + str(row['tcount']) + ", " + str(row['pcount']) + "],"
 
-    for key, value in states.iteritems():
+    for key, value in states.items():
         curr_year = str(datetime.now().year)
         static_workshop_data += "['" + key + "', " + curr_year + ", " + \
             str(value['tcount']) + ", " + str(value['pcount']) + "],"

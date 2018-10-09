@@ -36,7 +36,7 @@ class Command(BaseCommand):
                     try:
                       self.log('email: {0} not in moodle'.format(user.email.encode('utf8')), 'c')
                     except:
-                      print user.email
+                      print(user.email)
                       pass
                     academy = self.get_academy(user)
                     if academy:
