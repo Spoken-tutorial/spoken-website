@@ -74,7 +74,7 @@ INSTALLED_APPS = (
     'nicedit',
     'report_builder',
     'compressor',
-
+    'forums',
     'cms',
     'creation',
     'statistics',
@@ -88,6 +88,8 @@ INSTALLED_APPS = (
     'certificate',
     'api',
     'rest_framework',
+    'workshop',
+    
     
 )
 

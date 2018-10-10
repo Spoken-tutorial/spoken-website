@@ -7,7 +7,7 @@ from creation.models import TutorialResource
 
 class CreationStatisticsFilter(django_filters.FilterSet):
 
-    publish_at = django_filters.DateRangeCompareFilter()
+    publish_at = django_filters.DateFromToRangeFilter()
 
     class Meta:
         model = TutorialResource

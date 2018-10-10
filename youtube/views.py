@@ -9,7 +9,7 @@ from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseForbidden, HttpResponseRedirect
 from django.shortcuts import render
-from oauth2client import xsrfutil
+#from oauth2client import xsrfutil
 
 # Spoken Tutorial Stuff
 from creation.models import *

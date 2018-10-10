@@ -6,7 +6,7 @@ from datetime import datetime
 
 # Third Party Stuff
 from django.conf import settings
-from django.core.context_processors import csrf
+ 
 from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import render

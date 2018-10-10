@@ -8,7 +8,7 @@ import httplib2
 import oauth2client
 from apiclient.http import MediaFileUpload
 from django.conf import settings
-from oauth2client import xsrfutil
+from oauth2client.contrib import xsrfutil
 
 # Spoken Tutorial Stuff
 from youtube.models import *

@@ -1778,46 +1778,48 @@ class SingletrainingCreateView(CreateView):
     csv_data = []
     csvdata = csv.reader(file_path, delimiter=',', quotechar='|')
 
-    #School
+    # School
+
     if ttype == '0':
-      for i in csvdata:
-        csv_data.append(i)
-      for j in range(len(csv_data)):
-        if len(csv_data[j]) < 3:
-          skipped.append(j)
-          continue
-        if csv_data[j][0] == '':
-          error.append(j)
-          continue
-        if csv_data[j][1] == '':
-	  error.append(j)
-          continue
-        if csv_data[j][3] == '':
-          error.append(j)
-          continue
-
-    #Vocational
+        for i in csvdata:
+            csv_data.append(i)
+        for j in range(len(csv_data)):
+            if len(csv_data[j]) < 3:
+                skipped.append(j)
+                continue
+            if csv_data[j][0] == '':
+                error.append(j)
+                continue
+            if csv_data[j][1] == '':
+                error.append(j)
+                continue
+            if csv_data[j][3] == '':
+                error.append(j)
+                continue
     else:
-      for i in csvdata:
-        csv_data.append(i)
-      for j in range(len(csv_data)):
-        if len(csv_data[j]) < 4:
-          skipped.append(j)
-          continue
-	if csv_data[j][0]=='':
-	  error.append(j)
-	  continue
-	if csv_data[j][1]=='':
-	  error.append(j)
-	  continue
-        if not self.email_validator(csv_data[j][2]):
-          error.append(j)
-          continue
-	if csv_data[j][3]=='':
-	  error .append(j)
-	  continue
 
-    return skipped, error, warning, write_flag
+    # Vocational
+
+        for i in csvdata:
+            csv_data.append(i)
+        for j in range(len(csv_data)):
+            if len(csv_data[j]) < 4:
+                skipped.append(j)
+                continue
+            if csv_data[j][0] == '':
+                error.append(j)
+                continue
+            if csv_data[j][1] == '':
+                error.append(j)
+                continue
+            if not self.email_validator(csv_data[j][2]):
+                error.append(j)
+                continue
+            if csv_data[j][3] == '':
+                error.append(j)
+                continue
+
+    return (skipped, error, warning, write_flag)
 
   '''
   This will call the create_student_vocational() method to create the student entry, from the  CSV file, in the SingleTraining database.

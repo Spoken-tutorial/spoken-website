@@ -1,4 +1,4 @@
-from django.core.context_processors import csrf
+ 
 from django.core.exceptions import PermissionDenied
 
 from django.contrib.auth.decorators import login_required
@@ -18,7 +18,7 @@ from django.db import IntegrityError
 
 from urllib.parse import urlparse
 
-from BeautifulSoup import BeautifulSoup
+from bs4 import BeautifulSoup
 
 import xml.etree.cElementTree as etree
 from django.conf import settings
@@ -530,7 +530,9 @@ def events_dashboard(request):
     for role in user_roles:
         if role.name in events_roles:
             roles.append(role.name)
-    #print roles
+
+    # print roles
+
     organiser_workshop_notification = None
     organiser_test_notification = None
     invigilator_test_notification = None
@@ -539,32 +541,56 @@ def events_dashboard(request):
     rp_test_notification = None
     rp_training_notification = None
     institute_name = None
-    if is_organiser(user):
-	institution_type = AcademicCenter.objects.get(id=user.organiser.academic_id)
-        institute_name = InstituteType.objects.get(id=institution_type.institution_type_id)
-        organiser_test_notification = EventsNotification.objects.filter((Q(status = 1) | Q(status = 2)), category = 1, academic_id = user.organiser.academic_id, categoryid__in = user.organiser.academic.test_set.filter(organiser_id = user.id).values_list('id')).order_by('-created')[:30]
 
-        #organiser_training_notification = EventsNotification.objects.filter((Q(status = 1) | Q(status = 3)), category = 2, status = 1, academic_id = user.organiser.academic_id, categoryid__in = user.organiser.academic.workshop_set.filter(organiser_id = user.id).values_list('id')).order_by('-created')[:30]
+    if is_organiser(user):
+        institution_type = \
+            AcademicCenter.objects.get(id=user.organiser.academic_id)
+        institute_name = \
+            InstituteType.objects.get(id=institution_type.institution_type_id)
+
+        organiser_test_notification = \
+            EventsNotification.objects.filter(Q(status=1)
+                | Q(status=2), category=1,
+                academic_id=user.organiser.academic_id,
+                categoryid__in=user.organiser.academic.test_set.filter(organiser_id=user.id).values_list('id'
+                )).order_by('-created')[:30]
+
+        # organiser_training_notification = EventsNotification.objects.filter((Q(status = 1) | Q(status = 3)), category = 2, status = 1, academic_id = user.organiser.academic_id, categoryid__in = user.organiser.academic.workshop_set.filter(organiser_id = user.id).values_list('id')).order_by('-created')[:30]
 
     if is_resource_person(user):
-        rp_workshop_notification = EventsNotification.objects.filter((Q(status = 0) | Q(status = 5) | Q(status = 2)), category = 0).order_by('-created')[:30]
-        rp_training_notification = EventsNotification.objects.filter((Q(status = 0) | Q(status = 5) | Q(status = 2)), category = 2).order_by('-created')[:30]
-        rp_test_notification = EventsNotification.objects.filter((Q(status = 0) | Q(status = 4) | Q(status = 5) | Q(status = 8) | Q(status = 9)), category = 1, categoryid__in = (Training.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)))).values_list('id')).order_by('-created')[:30]
+        rp_workshop_notification = \
+            EventsNotification.objects.filter(Q(status=0) | Q(status=5)
+                | Q(status=2), category=0).order_by('-created')[:30]
+        rp_training_notification = \
+            EventsNotification.objects.filter(Q(status=0) | Q(status=5)
+                | Q(status=2), category=2).order_by('-created')[:30]
+        rp_test_notification = \
+            EventsNotification.objects.filter(Q(status=0) | Q(status=4)
+                | Q(status=5) | Q(status=8) | Q(status=9), category=1,
+                categoryid__in=Training.objects.filter(academic__in=AcademicCenter.objects.filter(state__in=State.objects.filter(resourceperson__user_id=user,
+                resourceperson__status=1))).values_list('id'
+                )).order_by('-created')[:30]
     if is_invigilator(user):
-        invigilator_test_notification = EventsNotification.objects.filter((Q(status = 0) | Q(status = 1)), category = 1, academic_id = user.invigilator.academic_id, categoryid__in = user.invigilator.academic.test_set.filter(invigilator_id = user.id).values_list('id')).order_by('-created')[:30]
+        invigilator_test_notification = \
+            EventsNotification.objects.filter(Q(status=0)
+                | Q(status=1), category=1,
+                academic_id=user.invigilator.academic_id,
+                categoryid__in=user.invigilator.academic.test_set.filter(invigilator_id=user.id).values_list('id'
+                )).order_by('-created')[:30]
 
     context = {
-        'roles' : roles,
-        'institution_type' : institute_name,
-        'organiser_workshop_notification' : organiser_workshop_notification,
-        'organiser_test_notification' : organiser_test_notification,
-        'organiser_training_notification' : organiser_training_notification,
-        'rp_test_notification' : rp_test_notification,
-        'rp_workshop_notification' : rp_workshop_notification,
-        'rp_training_notification' : rp_training_notification,
-        'invigilator_test_notification' : invigilator_test_notification,
-    }
-    return render(request, 'events/templates/events_dashboard.html', context)
+        'roles': roles,
+        'institution_type': institute_name,
+        'organiser_workshop_notification': organiser_workshop_notification,
+        'organiser_test_notification': organiser_test_notification,
+        'organiser_training_notification': organiser_training_notification,
+        'rp_test_notification': rp_test_notification,
+        'rp_workshop_notification': rp_workshop_notification,
+        'rp_training_notification': rp_training_notification,
+        'invigilator_test_notification': invigilator_test_notification,
+        }
+    return render(request, 'events/templates/events_dashboard.html',
+                  context)
 
 @login_required
 def delete_events_notification(request, notif_type, notif_id):
@@ -2739,17 +2765,19 @@ def ajax_state_collage(request):
 @csrf_exempt
 def ajax_academic_center(request):
     """Ajax: Get academic centers according to institute type and state"""
+
     if request.method == 'POST':
         state = request.POST.get('state')
         itype = request.POST.get('itype')
         center = AcademicCenter.objects.filter(state=state,
-            institution_type=itype).order_by('institution_name')
-	html = '<option value=None> --------- </option>'
+                institution_type=itype).order_by('institution_name')
+        html = '<option value=None> --------- </option>'
         if center:
             for ac in center:
                 html += '<option value={0}>{1}</option>'.format(ac.id,
-                    ac.institution_name)
-    return HttpResponse(json.dumps(html), content_type='application/json')
+                        ac.institution_name)
+    return HttpResponse(json.dumps(html),
+                        content_type='application/json')
 
 
 @csrf_exempt

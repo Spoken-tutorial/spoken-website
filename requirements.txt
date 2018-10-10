@@ -40,6 +40,6 @@ uritemplate
 Py3DNS
 validate-email
 
-
+south
 hashids
 oauthlib

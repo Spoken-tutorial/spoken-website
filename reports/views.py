@@ -5,7 +5,7 @@ import datetime as dt
 # Third Party Stuff
 from django.conf import settings
 from django.db.models import ForeignKey
-from django.db.models.loading import get_model
+from django.apps import apps
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.template.defaultfilters import slugify
@@ -89,7 +89,7 @@ def export_csv(request, model_name="None", app_label="None", queryset=None, fiel
     # if not request.user.is_staff:
     #    return HttpResponseForbidden()
     if not queryset:
-        model = get_model(app_label, model_name)
+        model = apps.get_model(app_label, model_name)
         queryset = model.objects.all()
         filters = dict()
         for key, value in list(request.GET.items()):
@@ -125,7 +125,7 @@ def export_csv(request, model_name="None", app_label="None", queryset=None, fiel
 
 
 def report_filter(request, model_name="None", app_label="None", queryset=None, fields=None, list_display=True):
-    model = get_model(app_label, model_name)
+    model = apps.get_model(app_label, model_name)
     fields = get_all_field_names(model)
     if request.POST:
         fields = None

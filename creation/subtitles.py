@@ -4,9 +4,10 @@ import datetime
 from html.parser import HTMLParser
 
 # Third Party Stuff
-import mechanize
-from BeautifulSoup import BeautifulSoup
-
+#import mechanize
+import mechanicalsoup
+#from BeautifulSoup import BeautifulSoup
+from bs4 import BeautifulSoup
 
 class MLStripper(HTMLParser):
     def __init__(self):
