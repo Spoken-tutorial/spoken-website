@@ -43,6 +43,7 @@
                 <tr class="active">
                     <th>S.No</th>
                     <th>User</th>
+                    <th>Language</th>
                     <th>Email</th>
                     <th>Date &amp; Time</th>
                     <th class="col-center" colspan="2"><span title="" data-original-title="" class="fa fa-cogs fa-2"></span></th>
@@ -50,7 +51,8 @@
                 {% for contrib_rec in contrib_recs %}
                     <tr>
                         <td>{{ forloop.counter }}</td>
-                        <td><a href="/accounts/view-profile/{{ contrib_rec.user }}" target="_blank">{{ contrib_rec.user }}</a</td>
+                        <td><a href="/accounts/view-profile/{{ contrib_rec.user }}" target="_blank">{{ contrib_rec.user }}</a></td>
+                        <td><a >{{contrib_rec.language}} </a></td>
                         <td><a href="mailto:{{ contrib_rec.user.email }}">{{ contrib_rec.user.email }}</a></td>
                         <td>{{ contrib_rec.created }}</td>
                         <td class="col-center"><a href="/creation/role/accept/{{ contrib_rec.id }}/" class="spin-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Accept</a></td>
@@ -70,6 +72,7 @@
                 <tr class="active">
                     <th>S.No</th>
                     <th>User</th>
+                    <th>Language</th>
                     <th>Email</th>
                     <th>Date &amp; Time</th>
                     <th class="col-center" colspan="2"><span title="" data-original-title="" class="fa fa-cogs fa-2"></span></th>
@@ -78,6 +81,7 @@
                     <tr>
                         <td>{{ forloop.counter }}</td>
                         <td><a href="/accounts/view-profile/{{ contrib_rec.user }}" target="_blank">{{ contrib_rec.user }}</a</td>
+                        <td><a> {{contrib_rec.language}} </a></td>
                         <td><a href="mailto:{{ contrib_rec.user.email }}">{{ contrib_rec.user.email }}</a></td>
                         <td>{{ contrib_rec.created }}</td>
                         <td class="col-center"><a href="/creation/role/accept/{{ contrib_rec.id }}/" class="spin-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Accept</a></td>
@@ -124,6 +128,7 @@
                 <tr class="active">
                     <th>S.No</th>
                     <th>User</th>
+                    <th>Language</th>
                     <th>Email</th>
                     <th>Date &amp; Time</th>
                     <th class="col-center" colspan="2"><span title="" data-original-title="" class="fa fa-cogs fa-2"></span></th>
@@ -132,6 +137,7 @@
                     <tr>
                         <td>{{ forloop.counter }}</td>
                         <td><a href="/accounts/view-profile/{{ domain_rec.user }}" target="_blank">{{ domain_rec.user }}</a</td>
+                        <td><a > {{domain_rec.language}} </a></td>
                         <td><a href="mailto:{{ domain_rec.user.email }}">{{ domain_rec.user.email }}</a></td>
                         <td>{{ domain_rec.created }}</td>
                         <td class="col-center"><a href="/creation/role/accept/{{ domain_rec.id }}/" class="spin-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Accept</a></td>
@@ -151,6 +157,7 @@
                 <tr class="active">
                     <th>S.No</th>
                     <th>User</th>
+                    <th>Language</th>
                     <th>Email</th>
                     <th>Date &amp; Time</th>
                     <th class="col-center" colspan="2"><span title="" data-original-title="" class="fa fa-cogs fa-2"></span></th>
@@ -159,6 +166,7 @@
                     <tr>
                         <td>{{ forloop.counter }}</td>
                         <td><a href="/accounts/view-profile/{{ quality_rec.user }}" target="_blank">{{ quality_rec.user }}</a</td>
+                        <td><a >{{ quality_rec.language }} </a></td>
                         <td><a href="mailto:{{ quality_rec.user.email }}">{{ quality_rec.user.email }}</a></td>
                         <td>{{ quality_rec.created }}</td>
                         <td class="col-center"><a href="/creation/role/accept/{{ quality_rec.id }}/" class="spin-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Accept</a></td>
