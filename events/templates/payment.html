@@ -99,6 +99,9 @@
       <th>Transaction ID</th>
       <th>Reference No</th>
       <th>Status</th>
+      {% if status == 'R' %}
+      <th>Receipt</th>
+      {% endif %}
     </tr>
 
       
@@ -115,6 +118,9 @@
                         <td>{{a_academic.transId}}</td>
                         <td>{{a_academic.refNo}}</td>
                         <td>{{a_academic.msg}}</td>
+                        {% if status == 'R' %}
+                        <td><a href="{% url 'events:academic_receipt' a_academic.id %}" class="btn btn-primary">Download</a>
+                        {% endif %}
                       </tr>
       {%endfor%}
 
