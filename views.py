@@ -13,9 +13,9 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 
 # Spoken Tutorial Stuff
-from .cdcontent.forms import *
-from .creation.models import *
-from .forums.models import Answer, Question
+from cdcontent.forms import *
+from creation.models import *
+from forums.models import Answer, Question
 
 
 # Create your views here.
