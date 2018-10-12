@@ -93,21 +93,30 @@ INSTALLED_APPS = (
     
 )
 
-MIDDLEWARE_CLASSES = (
-    # 'django.middleware.cache.UpdateCacheMiddleware',
-    'htmlmin.middleware.HtmlMinifyMiddleware',
+# MIDDLEWARE = [
+#     # 'django.middleware.cache.UpdateCacheMiddleware',
+#     'htmlmin.middleware.HtmlMinifyMiddleware',
+#     'django.contrib.sessions.middleware.SessionMiddleware',
+#     'django.middleware.common.CommonMiddleware',
+#     'django.middleware.csrf.CsrfViewMiddleware',
+#     'django.contrib.auth.middleware.AuthenticationMiddleware',
+#     'django.contrib.messages.middleware.MessageMiddleware',
+#     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+#     'django.middleware.common.BrokenLinkEmailsMiddleware',
+#     'masquerade.middleware.MasqueradeMiddleware',
+#     'django.contrib.redirects.middleware.RedirectFallbackMiddleware',
+#     # 'django.middleware.cache.FetchFromCacheMiddleware',
+#     'htmlmin.middleware.MarkRequestMiddleware',
+#     ]
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django.middleware.common.BrokenLinkEmailsMiddleware',
-    'masquerade.middleware.MasqueradeMiddleware',
-    'django.contrib.redirects.middleware.RedirectFallbackMiddleware',
-    # 'django.middleware.cache.FetchFromCacheMiddleware',
-    'htmlmin.middleware.MarkRequestMiddleware',
-)
+]
 
 ROOT_URLCONF = 'spoken.urls'
 
@@ -125,7 +134,7 @@ DATABASES = {
         'NAME': DB,                        # Or path to database file if using sqlite3.
 
         # The following settings are not used with sqlite3:
-        'USER': DB_USER,
+        'USERNAME': DB_USER,
         'PASSWORD': DB_PASS,
         'HOST': '',                            # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
         'PORT': '',                            # Set to empty string for default.
@@ -134,7 +143,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
         'NAME': MDB,                      # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
-        'USER': MDB_USER,
+        'USERNAME': MDB_USER,
         'PASSWORD': MDB_PASS,
         'HOST': '',                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
         'PORT': '',                  # Set to empty string for default.
@@ -143,7 +152,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
         'NAME': CDB,                      # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
-        'USER': CDB_USER,
+        'USERNAME': CDB_USER,
         'PASSWORD': CDB_PASS,
         'HOST': '',                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
         'PORT': '',                  # Set to empty string for default.
@@ -152,7 +161,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
         'NAME': WDB,                      # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
-        'USER': WDB_USER,
+        'USERNAME': WDB_USER,
         'PASSWORD': WDB_PASS,
         'HOST': '',                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
         'PORT': '',                  # Set to empty string for default.
@@ -161,7 +170,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
         'NAME': FDB,                      # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
-        'USER': FDB_USER,
+        'USERNAME': FDB_USER,
         'PASSWORD': FDB_PASS,
         'HOST': '',                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
         'PORT': '',                  # Set to empty string for default.
