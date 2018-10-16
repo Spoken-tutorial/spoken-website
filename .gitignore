@@ -11,7 +11,8 @@ comb.py-oauth2.json
 client_secrets.json
 certificate/fa_workshop_template/template_FAW2017Pcertificate
 certificate/itp_workshop_template/template_ITPW2017Pcertificate
-certificate/fa_workshop_template/template_KHW2018Pcertificate
+certificate/koha_workshop_template/template_KHW2018Pcertificate
+certificate/koha_workshop_template/template_KCW2992018Pcertificate
 certificate/images/kannan-moudgalya-sign.png
 certificate/images/prao-sign.png
 .youtube-upload-credentials.json

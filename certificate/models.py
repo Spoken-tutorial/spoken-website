@@ -85,3 +85,9 @@ class Koha_WS(models.Model):
     email = models.EmailField()
     college= models.CharField(max_length=500)
     purpose = models.CharField(max_length=10, default='KHW')
+
+class Koha_WS_29Sep2018(models.Model):
+    name = models.CharField(max_length=200)
+    email = models.EmailField()
+    college= models.CharField(max_length=500)
+    purpose = models.CharField(max_length=10, default='KCW')
