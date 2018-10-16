@@ -4,7 +4,7 @@ import string
 
 # Third Party Stuff
 from django.conf import settings
-from django.contrib import messages
+from django.contrib import messages, auth
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
  
@@ -22,7 +22,7 @@ from cms.services import *
 from events.models import Student
 from mdldjango.models import MdlUser
 from mdldjango.urls import *
-
+from django.template.context_processors import csrf
 
 def dispatcher(request, permalink=''):
     if permalink == '':
@@ -153,7 +153,7 @@ def account_login(request):
             password = request.POST.get('password', None)
             remember = request.POST.get('remember', None)
             if username and password:
-                user = authenticate(username=username, password=password)
+                user = auth.authenticate(username=username, password=password)
                 if user is not None:
                     if user.is_active:
                         login(request, user)

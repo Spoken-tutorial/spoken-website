@@ -11,7 +11,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 
 from django.views.decorators.csrf import csrf_exempt
-
+from django.template.context_processors import csrf
 from django.http import Http404
 from django.db.models import Q
 from django.db import IntegrityError

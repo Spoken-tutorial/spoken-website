@@ -20,6 +20,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.http import HttpResponse, HttpResponseRedirect
 from django.views.decorators.csrf import csrf_exempt
+from django.template.context_processors import csrf
 from django.shortcuts import render
 
 # Spoken Tutorial Stuff

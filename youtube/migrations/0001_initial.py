@@ -15,12 +15,13 @@ class Migration(migrations.Migration):
         ('auth', '0006_require_contenttypes_0002'),
     ]
 
-    operations = [
-        migrations.CreateModel(
-            name='CredentialsModel',
-            fields=[
-                ('id', models.OneToOneField(primary_key=True, serialize=False, to=settings.AUTH_USER_MODEL)),
-                ('credential', ClientCredentialsGrant(null=True)),
-            ],
-        ),
-    ]
+    # operations = [
+    #     migrations.CreateModel(
+    #         name='CredentialsModel',
+    #         fields=[
+    #             ('id', models.OneToOneField(primary_key=True, serialize=False, to=settings.AUTH_USER_MODEL)),
+    #             ('credential', ClientCredentialsGrant(null=True)),
+    #         ]
+    #         ,
+    #     ),
+    # ]

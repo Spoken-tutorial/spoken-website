@@ -84,7 +84,7 @@ def home(request):
 
     events = Event.objects.filter(event_date__gte=dt.datetime.today()).order_by('event_date')[:2]
     context['events'] = events
-    return render(request, 'spoken/templates/home.html', context)
+    return render(request, 'spoken/templates/home.html',context= context)
 
 
 def get_or_query(terms, search_fields):

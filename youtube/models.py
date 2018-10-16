@@ -7,4 +7,4 @@ from oauthlib.oauth2 import ClientCredentialsGrant
 
 class CredentialsModel(models.Model):
     id = models.OneToOneField(User, primary_key=True, on_delete=models.PROTECT )
-    credential = ClientCredentialsGrant()
+    credential = ClientCredentialsGrant(User)
