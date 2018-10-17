@@ -77,7 +77,7 @@ def account_register(request):
                 "Thank you for registering.\
                 Please confirm your registration by clicking on the activation link which has been sent to your registered email %s.<br>\
                 In case if you do not receive any activation mail kindly verify and activate your account from below link :<br>\
-                <a href='http://spoken-tutorial.org/accounts/verify/'>http://spoken-tutorial.org/accounts/verify/</a>"
+                <a href='https://spoken-tutorial.org/accounts/verify/'>https://spoken-tutorial.org/accounts/verify/</a>"
                  % (email))
             return HttpResponseRedirect('/')
         context['form'] = form
@@ -105,8 +105,8 @@ Spoken Tutorials
 IIT Bombay.
     """.format(
         user.username,
-        "http://spoken-tutorial.org",
-        "http://spoken-tutorial.org/accounts/confirm/" + str(p.confirmation_code) + "/" + user.username
+        "https://spoken-tutorial.org",
+        "https://spoken-tutorial.org/accounts/confirm/" + str(p.confirmation_code) + "/" + user.username
     )
 
     email = EmailMultiAlternatives(
@@ -175,7 +175,7 @@ def account_login(request):
                         error_msg = "Your account is disabled.<br>\
                         Kindly activate your account by clicking on the activation link which has been sent to your registered email %s.<br>\
                         In case if you do not receive any activation mail kindly verify and activate your account from below link :<br>\
-                        <a href='http://spoken-tutorial.org/accounts/verify/'>http://spoken-tutorial.org/accounts/verify/</a>"% (user.email)
+                        <a href='https://spoken-tutorial.org/accounts/verify/'>https://spoken-tutorial.org/accounts/verify/</a>"% (user.email)
                 else:
                     error_msg = 'Invalid username / password'
             else:
@@ -397,7 +397,7 @@ def confirm_student(request, token):
             student.save()
 
             messages.success(request, "Your account has been activated!. Please login to continue.")
-            return HttpResponseRedirect('http://spoken-tutorial.org/participant/login/')
+            return HttpResponseRedirect('https://spoken-tutorial.org/participant/login/')
         else:
             print('can not match record')
             messages.error(request, "Your account not activated!. Please try again!")

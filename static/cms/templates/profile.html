@@ -38,7 +38,7 @@
                 <div class="form-group">
                     <label class="col-sm-3 control-label" for="id_state">State</label>
                     <div class="col-sm-9">
-                        {% render_field form.state class+="form-control state" tabindex="1" data-placeholder="Choose state" %}
+                        {% render_field form.state class+="form-control state__name" tabindex="1" data-placeholder="Choose state" %}
                         {{ form.state.errors }}
                         <small>Please select your state.</small>
                     </div>

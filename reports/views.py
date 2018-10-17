@@ -236,7 +236,7 @@ def elibrary(request):
         vdurwithsize = '"' + str(duration) + ";" + str(filesize) + '"'
         tutorial_duration = time_plus_ten_min(tr, duration)
         tlevel = get_level(tr)
-        videourl = "http://spoken-tutorial.org/watch/" + tr.tutorial_detail.foss.foss + \
+        videourl = "https://spoken-tutorial.org/watch/" + tr.tutorial_detail.foss.foss + \
             "/" + tr.tutorial_detail.tutorial + "/" + tr.language.name
         # writer.writerow([outline])
         # print "___________________________"

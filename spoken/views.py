@@ -16,6 +16,7 @@ from django.db.models import Q
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
+from django.template.context_processors import csrf
 from django.core.urlresolvers import reverse
 
 # Spoken Tutorial Stuff

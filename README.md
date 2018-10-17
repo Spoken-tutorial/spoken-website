@@ -1,7 +1,7 @@
 Spoken-Website
 ==============
 
-Spoken tutorial website in django (http://spoken-tutorial.org)
+Spoken tutorial website in django (https://spoken-tutorial.org)
 
 
 ```

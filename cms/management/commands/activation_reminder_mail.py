@@ -53,8 +53,8 @@ class Command(BaseCommand):
                 IIT Bombay.'''.format(
                 user.first_name, 
                 user.last_name,
-                "http://spoken-tutorial.org",
-                "http://spoken-tutorial.org/accounts/confirm/" + str(p.confirmation_code) + "/" + user.username
+                "https://spoken-tutorial.org",
+                "https://spoken-tutorial.org/accounts/confirm/" + str(p.confirmation_code) + "/" + user.username
                 )
             to  = [user.email]
             email = EmailMultiAlternatives(

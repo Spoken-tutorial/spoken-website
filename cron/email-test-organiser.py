@@ -35,14 +35,14 @@ The Spoken Tutorial team can see that you are very good in systematically planni
 You have followed all the regular processes till date namely by -
 
 1.uploading your student nominal roll (i.e) Master Batche(s),
-2.selected appropriate courses by filling the semester training planner (STP) through your organiser login on http://spoken-tutorial.org
+2.selected appropriate courses by filling the semester training planner (STP) through your organiser login on https://spoken-tutorial.org
 
 IMPORTANT- Now, it is time for you to mark attendance (i.e) complete STEP 3 of the Semester Training Planner Summary (STPS); "Mark the Participant List (PL)" to complete the process.
 
 
 
 This is your next immediate activity (to be completed by December 29, 2017)...
-Log-on to http://spoken-tutorial.org
+Log-on to https://spoken-tutorial.org
 Goto 'Software Training' >> 'Training Dashboard' >> 'Semester Training Planner Summary' >> 'STEP 3 : Select Participant List' --- mark attendance for all batches listed one by one.
 for more details:http://process.spoken-tutorial.org/images/1/1c/Select_Participantlist.pdf
 
