@@ -3293,16 +3293,14 @@ def refresh_tutorials(request):
     contrib_langs = RoleRequest.objects.filter(status=1,
             user=request.user).values_list('language')
     for tutorial in tutorials:
-        this_tut_langs = \
-            Language.objects.exclude(id__in=TutorialResource.objects.filter(tutorial_detail_id=tutorial.tutorial_detail.id).values('language'
-                ))
+        this_tut_langs = Language.objects.exclude(id__in=TutorialResource.objects.filter(
+            tutorial_detail_id=tutorial.tutorial_detail.id).values('language'))
 
-        sam = \
-            Language.objects.filter(id__in=this_tut_langs).exclude(Q(id=22)
+        user_langs = Language.objects.filter(id__in=this_tut_langs).exclude(Q(id=22)
                 & Q(id__in=contrib_langs))
-        for a_lang in sam:
-            already_present = \
-                TutorialsAvailable.objects.filter(tutorial_detail_id=tutorial.tutorial_detail.id,
+        for a_lang in user_langs:
+            already_present = TutorialsAvailable.objects.filter(
+                tutorial_detail_id=tutorial.tutorial_detail.id,
                     language=a_lang).exists()
             if not already_present:
                 tutorialsavailable = TutorialsAvailable()
