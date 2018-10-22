@@ -9,6 +9,58 @@
         .add-new {
             margin-bottom: 15px;
         }
+        .st_video_container {
+            background: white;
+            width: 384px; /* Play with this value */
+            height: 216px;  /* Play with this value */
+            font-size: 0;
+            text-align: center;
+        }
+        .st_audio_container {
+            background: white;
+            width: 384px; /* Play with this value */
+            height: 50px;  /* Play with this value */
+            font-size: 0;
+            text-align: center;
+            margin-right: auto;
+            margin-left: auto;
+        }
+        .st_audio_container:before,.st_video_container:before {
+            content: "";
+            width: 1px;
+            height: 100%;
+            display: inline-block;
+            vertical-align: middle;
+            margin-left: -1px;
+        }
+        .st_audio_container .st_video {
+            max-width: 100%;
+            max-height: 100%;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .st_video_container .st_video {
+            max-width: 100%;
+            max-height: 100%;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .st_content_wrapper {
+            padding: 10px 25px;
+        }
+        @media all and (max-width: 500px) {
+            .st_video {
+                transform: translateX(calc((100vw * 0.416) - 225px));
+            }
+            .st_audio {
+                transform: translateX(calc((100vw * 0.416) - 209px));
+            }
+            .st_wrapper {
+                -webkit-box-align:center;
+                -webkit-box-pack:center;
+                display:-webkit-box;
+            }
+        }
     </style>
 {% endblock %}
 {% block heading %}
@@ -17,40 +69,84 @@
 {% block search %}{% endblock %}
 {% block content %}
     <div class='add-new'>
-	    <a class="btn btn-primary" href="{% url 'testimonials_new' %}">Add New</a>
-	</div>
-	<div class='table-responsive'>
-		{% if collection %}		    
-			<table class="paleblue table table-bordered table-hover table-striped">
-                <tr>
-                    <th>Actual Content</th>
-                    <th>Minified Content</th>
-                    <th>Short Description</th>
-                    <th>Source Link</th>
-                    <th>Status</th>
-                    <th colspan="2" class="col-center">Action</th>
-                </tr>
-				{% for record in collection %}
-					<tr class="{% cycle 'odd' 'even' %}">
-						<td>{{ record.actual_content }}</td>
-						<td>{{ record.minified_content }}</td>
-						<td>{{ record.short_description }}</td>
-						<!-- <td>{{ record.source_title }}</td> -->
-                        {% if record.source_title and record.source_link %}
-                            <td><a href="{{ record.source_link }}" target="_blank">{{ record.source_title }}</a>
-                        {% elif record.source_link %}
-                            <td><a href="{{ record.source_link }}" target="_blank">{{ record.source_link }}</a>
-                        {% else %}
-						    <td>{{ record.source_link }}</td>
-                        {% endif %}
-						<td class="col-center">{{ record.status }}</td>
-						<td><a href="{% url 'admin_testimonials_edit' record.id %}">Edit</a></td>
-                    <td><a href="{% url 'admin_testimonials_delete' record.id %}">Delete</a></td>
-					</tr>
-				{% endfor %}
-			</table>
-		{% else %}
-		    <p class="no-record"> No record found!</p>
-		{% endif %}
-	</div>
+        <a class="btn btn-primary" href="{% url 'testimonials_new' %}">Add New</a>
+        <a class="btn btn-primary" href="{% url 'testimonials_new_media' type='tutorial' %}">Upload Media Testimonial</a>
+        <a class="btn btn-primary" href="{% url 'testimonials_new_media' type='series' %}">Upload Series Testimonial</a>
+
+    </div>
+    <ul class="nav nav-tabs">
+        <!-- add data-toggle attribute to the anchors -->
+        <li class="active"><a data-toggle="tab" href="#text">Text</a></li>
+        <li><a data-toggle="tab" href="#media">Media</a></li>
+    </ul>
+        <div class="tab-content">
+            <div id="text" class="tab-pane fade in active">
+                <div class='table-responsive'>
+                {% if collection %}		    
+                    <table class="paleblue table table-bordered table-hover table-striped">
+                        <tr>
+                            <th>Actual Content</th>
+                            <th>Minified Content</th>
+                            <th>Short Description</th>
+                            <th>Source Link</th>
+                            <th>Status</th>
+                            <th colspan="2" class="col-center">Action</th>
+                        </tr>
+                        {% for record in collection %}
+                            <tr class="{% cycle 'odd' 'even' %}">
+                                <td>{{ record.actual_content }}</td>
+                                <td>{{ record.minified_content }}</td>
+                                <td>{{ record.short_description }}</td>
+                                <!-- <td>{{ record.source_title }}</td> -->
+                                {% if record.source_title and record.source_link %}
+                                    <td><a href="{{ record.source_link }}" target="_blank">{{ record.source_title }}</a>
+                                {% elif record.source_link %}
+                                    <td><a href="{{ record.source_link }}" target="_blank">{{ record.source_link }}</a>
+                                {% else %}
+                                    <td>{{ record.source_link }}</td>
+                                {% endif %}
+                                <td class="col-center">{{ record.status }}</td>
+                                <td><a href="{% url 'admin_testimonials_edit' record.id %}">Edit</a></td>
+                            <td><a href="{% url 'admin_testimonials_delete' record.id %}">Delete</a></td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                {% else %}
+                    <p class="no-record"> No record found!</p>
+                {% endif %}
+                    </div>
+            </div>
+
+            <div id="media" class="tab-pane fade">
+                <div class='table-responsive'>
+                    {% if mediacollection %}		    
+                    <table class="paleblue table table-bordered table-hover table-striped">
+                        <tr>
+                            <th>Video</th>
+                            <th>Description</th>
+                            <th>User</th>
+                            <th class="col-center">Action</th>
+                        </tr>
+                        {% for mrecord in mediacollection %}
+                            <tr class="{% cycle 'odd' 'even' %}">
+                                <td>
+                                    <div class='st_video_container'>
+                                        <video class="st_video" title='{{ mrecord.foss_foss }}' controls preload data-setup="{}">
+                                        <source src="{{ media_url }}{{ mrecord.path }}" />
+                                        </video>
+                                    </div>
+                                </td>
+                                <td>{{ mrecord.content }}</td>
+                                <td>{{ mrecord.user }}</td>
+                                <td><a href="{% url 'admin_testimonials_media_delete' mrecord.id %}">Delete</a></td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                    {% else %}
+                        <p class="no-record"> No record found!</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
