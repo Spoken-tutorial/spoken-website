@@ -30,7 +30,6 @@ from creation.subtitles import *
 from . import services
 from django.utils import timezone
 from datetime import datetime,timedelta
-from django.utils.timezone import now
 from creation.filters import CreationStatisticsFilter,ContributorRatingFilter
 from django.db.models import Count, Min, Q, Sum, F
 import itertools
@@ -105,7 +104,7 @@ def is_contenteditor(user):
         return True
     return False
 
-def is_language_manager(user):
+def get_language_manager(user):
     """ Check if the logged in user is Language Manager"""
     return LanguageManager.objects.filter(user=user,status=1).exists()
 
@@ -210,27 +209,29 @@ def creation_add_role(request, role_type,langid):
         if role_type in roles:
             if role_type != 'video-reviewer':
                 lang_show = Language.objects.get(id = lang)
-            try:
-                RoleRequest.objects.create(user = request.user, role_type = roles[role_type], status = 0,language_id = int(lang))
-            except:
-                try:
-                    role_rec = RoleRequest.objects.get(user = request.user, role_type = roles[role_type], status = 2,language_id= int(lang))
-                    role_rec.status = 0
-                    role_rec.save()
-                except:
-                    
-                    flag = 0
+            
+            this_user_role = RoleRequest.objects.filter(user = request.user, 
+                role_type = roles[role_type], language_id = int(lang))
+            
+            if this_user_role.exists():
+                if this_user_role.filter(status=0).exists():
                     if role_type == 'video-reviewer':
                         messages.warning(request, 'Request to the ' + role_type.title() + ' role is already waiting for admin approval!')
-                    else:
-                        
+                    else:                    
                         messages.warning(request, 'Request to the ' + role_type.title() + ' role'+ ' for ' + lang_show.name +' is already waiting for admin approval!')
+                else:
+                    this_user_role.update(status=0)
+            else:
+                new_role_request = RoleRequest.objects.create(user = request.user, 
+                role_type = roles[role_type], language_id = int(lang), status= 0)
+                messages.success(request, 'Request to the ' + \
+                            role_type.title() +' role'+' for the language ' +\
+                            lang_show.name+' has been sent for admin approval!')            
+            
         else:
-            flag = 0
             messages.error(request, 'Invalid role argument!')
 
-        if flag:
-            messages.success(request, 'Request to the ' + role_type.title() + ' role'+' for the language ' +lang_show.name+' has been sent for admin approval!')
+
     return HttpResponseRedirect('/creation/')
 
 @login_required
@@ -321,7 +322,7 @@ def creation_revoke_role_request(request, role_type,langid):
                         DomainReviewerRole.objects.filter(user = role_rec.user).update(status = 0)
                     elif role_rec.role_type == 4:
                         QualityReviewerRole.objects.filter(user = role_rec.user).update(status = 0)
-                    rec_check = RoleRequest.objects.filter(user = request.user, role_type = roles[role_type],status=1)                    
+                    
                     role_rec.status = 2
                     role_rec.save()
                 
@@ -2950,13 +2951,13 @@ def update_codefiles(request):
 def rate_contributors(request, sel_status):
     
     # Check if Language Manager for this request
-    if not is_language_manager(request.user):
+    if not get_language_manager(request.user):
         raise PermissionDenied()
 
     lang_select = request.GET.get('language')
     if lang_select == '':
         return HttpResponseRedirect(request.META['HTTP_REFERER'])
-    elif is_language_manager(request.user):
+    else:
 
         lang_qs = \
             Language.objects.filter(id__in=LanguageManager.objects.filter(user=request.user,
@@ -3072,7 +3073,7 @@ def allocate_tutorial(request, sel_status):
     global_req = request
     user = User.objects.get(id=request.user.id)
     if not (user.is_authenticated() and (is_contributor(user)
-            or is_language_manager(request.user))):
+            or get_language_manager(request.user))):
         raise PermissionDenied()
 
     active = sel_status
@@ -3081,7 +3082,7 @@ def allocate_tutorial(request, sel_status):
     final_query = ''
     bid_count = 0
 
-    if is_language_manager(request.user):
+    if get_language_manager(request.user):
         lang_qs = \
             Language.objects.filter(id__in=LanguageManager.objects.filter(user=request.user,
                                     status=1).values('language'))
@@ -3114,7 +3115,7 @@ def allocate_tutorial(request, sel_status):
             }
 
         status = 4
-        if is_language_manager(request.user):
+        if get_language_manager(request.user):
             final_query = \
                 TutorialResource.objects.filter(script_status=status,
                     language__in=lang_qs)
@@ -3140,7 +3141,7 @@ def allocate_tutorial(request, sel_status):
                 'tutorial_detail__order')
     elif sel_status == 'ongoing':
 
-        if is_language_manager(request.user):
+        if get_language_manager(request.user):
             header = {
                 1: SortableHeader('# ', False),
                 2: SortableHeader('tutorial_detail__level', True,
@@ -3178,7 +3179,7 @@ def allocate_tutorial(request, sel_status):
                                   ),
                 }
 
-        if is_language_manager(request.user):
+        if get_language_manager(request.user):
             final_query = \
                 TutorialResource.objects.filter(language__in=lang_qs,
                     script_status=0,
@@ -3272,7 +3273,7 @@ def allocate_tutorial(request, sel_status):
             context['contributors'] = rated_contributors
 
     context.update(csrf(request))
-    if is_language_manager(request.user):
+    if get_language_manager(request.user):
         return render(request,
                       'creation/templates/allocate_tutorial_manager.html'
                       , context)
@@ -3288,28 +3289,31 @@ submissiondate = datetime.date(datetime.now())
 @login_required
 def refresh_tutorials(request):
     count = 0
-    tutorials = TutorialResource.objects.filter(script_status=4,
-            language=22)
-    contrib_langs = RoleRequest.objects.filter(status=1,
-            user=request.user).values_list('language')
-    for tutorial in tutorials:
-        this_tut_langs = Language.objects.exclude(id__in=TutorialResource.objects.filter(
-            tutorial_detail_id=tutorial.tutorial_detail.id).values('language'))
+    tutorials = TutorialDetail.objects.filter(id__in= \
+        TutorialResource.objects.filter(script_status=4,
+        language=22).values('tutorial_detail').distinct())
 
-        user_langs = Language.objects.filter(id__in=this_tut_langs).exclude(Q(id=22)
-                & Q(id__in=contrib_langs))
-        for a_lang in user_langs:
-            already_present = TutorialsAvailable.objects.filter(
-                tutorial_detail_id=tutorial.tutorial_detail.id,
-                    language=a_lang).exists()
-            if not already_present:
-                tutorialsavailable = TutorialsAvailable()
-                tutorialsavailable.tutorial_detail = \
-                    tutorial.tutorial_detail
-                tutorialsavailable.language = a_lang
+    for tutorial in tutorials:
+        this_tutorial_published_langs = TutorialResource.objects.filter( 
+            tutorial_detail= tutorial,status= 1).values('language')
+
+        user_langs = Language.objects.filter(id__in= 
+            RoleRequest.objects.filter(user= request.user, status= 1, role_type= 0).values('language'))
+    
+        this_tutorial_unpublished_langs= Language.objects.filter(
+            id__in= user_langs).exclude(id__in= this_tutorial_published_langs)
+        print tutorial,this_tutorial_unpublished_langs
+
+        for a_lang in this_tutorial_unpublished_langs:
+            tutorialsavailable = TutorialsAvailable.objects.filter(
+                tutorial_detail= tutorial,language=a_lang)
+            if not tutorialsavailable.exists():
+                tutorialsavailable= TutorialsAvailable()
+                tutorialsavailable.tutorial_detail= tutorial
+                tutorialsavailable.language= a_lang
                 count += 1
                 tutorialsavailable.save()
-
+    
     if count > 0:
         messages.success(request, str(count) + ' tutorials added')
     else:
@@ -3395,12 +3399,14 @@ def single_tutorial_allocater(request, tuto, tut, lid, days, user):
                 ContributorRole.objects.filter(language_id=lid,
                     tutorial_detail_id=tut.id,
                     user_id=user.id).update(status=1)
-        try:
-            TutorialsAvailable.objects.filter(tutorial_detail=tut,
-                    language=lid).delete()
-        except:
+
+        tutorialsavailableobj= TutorialsAvailable.objects.filter(tutorial_detail=tut,
+                    language=lid)
+        if tutorialsavailableobj.exists():
+            tutorialsavailableobj.delete()
+        else:
             messages.error(request,
-                           'Tutorial not found in TutorialsAvailable, should be already present in TutorialResource'
+            'Tutorial not found in TutorialsAvailable, should be already present in TutorialResource'
                            )
 
 @login_required
@@ -3441,7 +3447,7 @@ def allocate(request, tdid, lid, uid, days):
     else:
         if contrib[0]['rating'] < 3:
             if contrib_tutorial_count['id__count'] > 3:
-                if is_language_manager(request.user):
+                if get_language_manager(request.user):
                     messages.error(request,
                                    'You cannot allocate more than 3 tutorials to a contributor of rating less than 3'
                                    )
@@ -3512,7 +3518,7 @@ def allocate_foss(request, fid, lang, uid, level, days):
         if contrib[0]['rating'] < 3:
 
             if contrib_tutorial_count['id__count'] >= 3:
-                if is_language_manager(request.user):
+                if get_language_manager(request.user):
                     messages.error(request,
                                    'You cannot allocate more than 3 tutorials to a contributor of rating less than 3'
                                    )
@@ -3566,6 +3572,25 @@ def allocate_foss(request, fid, lang, uid, level, days):
 def revoke_allocated_tutorial(request, uid, lid, tdid, taid, reason):
 
     data = 'Response'
+
+    assignment_status = {
+        'un-assigned' : 0,
+        'assigned' : 1
+        }
+
+    script_status ={
+        'not-started' : 0,
+        'written' : 1,
+        'domain-approved' : 2,
+        'quality-approved' : 3,
+        'uploaded' : 4
+        }
+
+    status ={
+        'inactive' : 0,
+        'active' : 1
+        }
+
 
     revoke_allocated_tutorial = \
         ContributorRole.objects.filter(user_id=uid, language_id=lid,
