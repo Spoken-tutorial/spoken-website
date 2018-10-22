@@ -102,6 +102,17 @@ def get_missing_component_reply(mcid):
         replies = '<br /><b>Replies:</b>' + replies
     return replies
 
+
+
+def formatismp4(path):
+    '''
+    ** Registered to be used in jinja template **
+    Function takes in a file name and checks if the 
+    last 3 characters are `mp4`.
+    '''
+    return path[-3:] == 'mp4'
+
+
 def instruction_sheet(foss, lang):
     file_path = settings.MEDIA_ROOT + 'videos/' + str(foss.id) + '/' + foss.foss.replace(' ', '-') + '-Instruction-Sheet-' + lang.name + '.pdf'
     if lang.name != 'English':
@@ -221,7 +232,9 @@ def tutorialsearch():
     return context
 
 def get_mp4_video(tr):
-    tname, text = tr.video.split('.')
+    video_name = tr.video
+    splitat = -4
+    tname, text = video_name[:splitat], video_name[splitat:]
     path = settings.MEDIA_ROOT + 'videos/' + str(tr.tutorial_detail.foss_id) + '/' + str(tr.tutorial_detail_id) + '/' + tname + '.mp4'
     if os.path.isfile(path):
         return 'videos/' + str(tr.tutorial_detail.foss_id) + '/' + str(tr.tutorial_detail_id) + '/' + tname + '.mp4'
@@ -231,6 +244,7 @@ def get_mp4_video(tr):
 register.inclusion_tag('spoken/templates/tutorial_search_form.html')(tutorialsearch)
 #register.filter('tutorialsearch', tutorialsearch)
 register.filter('get_timed_script', get_timed_script)
+register.filter('formatismp4', formatismp4)
 register.filter('get_prerequisite_from_td', get_prerequisite_from_td)
 register.filter('get_prerequisite', get_prerequisite)
 register.filter('get_video_visits', get_video_visits)

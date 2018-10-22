@@ -180,8 +180,8 @@ def convert_template_to_html_file(archive, filename, request, template, ctx):
 def collect_common_files(tr_rec, common_files):
     common_files_path = 'videos/{}/{}/resources'.format(tr_rec.tutorial_detail.foss_id, tr_rec.tutorial_detail_id)
 
-    if tr_rec.common_content.slide_status > 0:
-        common_files.add('{}/{}'.format(common_files_path, tr_rec.common_content.slide))
+    # if tr_rec.common_content.slide_status > 0:
+    #     common_files.add('{}/{}'.format(common_files_path, tr_rec.common_content.slide))
 
     if tr_rec.common_content.assignment_status > 0 and tr_rec.common_content.assignment_status != 6:
         common_files.add('{}/{}'.format(common_files_path, tr_rec.common_content.assignment))
@@ -424,8 +424,8 @@ def ajax_show_added_foss(request):
                 common_files_path = '{}videos/{}/{}/resources'.format(settings.MEDIA_ROOT, key,
                                                                       rec.tutorial_detail_id)
 
-                if rec.common_content.slide_status > 0:
-                    common_files.add('{}/{}'.format(common_files_path, rec.common_content.slide))
+                # if rec.common_content.slide_status > 0:
+                #     common_files.add('{}/{}'.format(common_files_path, rec.common_content.slide))
 
                 if rec.common_content.assignment_status > 0 and rec.common_content.assignment_status != 6:
                     common_files.add('{}/{}'.format(common_files_path, rec.common_content.assignment))

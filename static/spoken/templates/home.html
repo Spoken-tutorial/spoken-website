@@ -181,7 +181,7 @@
                     <div class="col-lg-6 col-md-6 col-sm-6 testimonial-item">
                         <div class="testimonial-content">
                             <i class="fa fa-quote-left pull-left testimonial-quote"></i>
-                            {{ record.minified_content|len_cutter:320 }} - <a href="/testimonials"> read </a>
+                            {{ record.minified_content|len_cutter:320 }} - <a href="{% url 'testimonials' type='text' %}"> read </a>
                             <i class="fa fa-quote-right pull-right testimonial-quote"></i>
                         </div>
                         <div class="pull-left">
@@ -270,7 +270,7 @@
                             {% endfor %}
                             <br /> <a class="pull-right" href="#">Click more >></a>
                         {% else %}
-                            Check out the amazing <a href="/testimonials" target="_blank">testimonials</a>, <a href="/news/article" target="_blank">media articles</a>, <a href="/news/news-and-events/" target="_blank">events</a>, <a href="/news/official-letters-and-links/" target="_blank">collaboration</a>, seminars, talks and campaigns about the Spoken Tutorial Project.   Browse through our gallery and see what the Project has been doing across India.
+                            Check out the amazing <a href="{% url 'testimonials' type='text' %}" target="_blank">testimonials</a>, <a href="/news/article" target="_blank">media articles</a>, <a href="/news/news-and-events/" target="_blank">events</a>, <a href="/news/official-letters-and-links/" target="_blank">collaboration</a>, seminars, talks and campaigns about the Spoken Tutorial Project.   Browse through our gallery and see what the Project has been doing across India.
                         {% endif %}
                     </div>
                 </div>
