@@ -232,6 +232,8 @@ class ContributorRole(models.Model):
         unique_together = (('user', 'tutorial_detail', 'language',),)
         verbose_name = 'Contributor Role'
 
+    def revoke(self):
+        return self.update(status=0)
 
 class DomainReviewerRole(models.Model):
     foss_category = models.ForeignKey(FossCategory)
