@@ -47,21 +47,25 @@ class Command(BaseCommand):
                 lid = a_tutorial.language_id
                 tdid = a_tutorial.tutorial_detail_id
                 
-                tutorialresourceobj = TutorialResource.objects.get(Q(script_user_id=uid)||Q(video_user_id=uid), \
+                tutorialresourceobj = TutorialResource.objects.filter(Q(script_user_id=uid)||Q(video_user_id=uid), \
                     tutorial_detail_id = tdid, language_id = lid)
-                if tutorialsavailableobj.exists():
-                    tutorialsavailableobj.update(assignment_status=assignment_status['un-assigned'])
+                if tutorialresourceobj.exists():
+                    tutorialresourceobj.update(assignment_status=assignment_status['un-assigned'])
                 
                 tutorialsavailableobj = TutorialsAvailable.objects.filter(id = taid)
                 if tutorialsavailableobj.exists():
                     tutorialsavailableobj.update(language_id= lid, \
                         tutorial_detail_id= tdid )
-                    
+                else:
+                    tutorialsavailableobj = TutorialsAvailable(id=taid)
+                    tutorialsavailableobj.language_id = lid
+                    tutorialsavailableobj.tutorial_detail_id = tdid
+                    tutorialsavailableobj.save()
                 
                 contributorrole_active = ContributorRole.objects.filter(user_id=uid, tutorial_detail_id=tdid, language_id=lid, status['active'])
                 if contributorrole_active.exists():    
-                    #contributorrole_active.update(status=status['inactive'])
-                    contributorrole_active.revoke()
+                    contributorrole_active.update(status=status['inactive'])
+                    
                     
                 
                 #Send email to contributor if he is nearing deadline

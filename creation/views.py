@@ -3030,8 +3030,7 @@ def rate_contributors(request, sel_status):
 
             # messages.success(request,"Contributor Rating already saved")
             saved = 'Already saved'
-    else:
-        raise PermissionDenied()
+
     context.update(csrf(request))
     return render(request, 'creation/templates/rate_contributors.html',
                   context)
@@ -3341,23 +3340,61 @@ def no_of_foss_gt_3(user, foss_or_tut_id, type_tut):
 
 @login_required
 def single_tutorial_allocater(request, tuto, tut, lid, days, user):
+    data = "Allocated"
     if TutorialsAvailable.objects.filter(tutorial_detail_id__in=tuto).exists():
-        difficulty_level_minus_one = \
-            level_name[int(final_query.tutorial_detail.level_id) - 1]
-        messages.error(request, str(difficulty_level_minus_one)
+        difficulty_level_minus_one = tuto.values('level').distinct()
+        level_name_in_words = level_name[difficulty_level_minus_one[0]['level']]
+        messages.error(request, str(level_name_in_words)
                        + ' level of ' + str(tut.foss)
                        + ' is available. Please complete it first.')
         return HttpResponse(json.dumps(data),
                             content_type='application/json')
     else:
 
-        common_content = \
-            TutorialCommonContent.objects.get(tutorial_detail_id=tut.id)
+        common_content = TutorialCommonContent.objects.get(tutorial_detail_id=tut.id)
         if days != 1:
             global submissiondate
             submissiondate = datetime.date(timezone.now()
                     + timezone.timedelta(days=int(days) + 1))
-        try:
+        tutorial_resource = TutorialResource.objects.filter(
+            tutorial_detail_id= tut.id,
+            language_id= lid)
+        
+        contributor_obj = ContributorRole.objects.filter(
+            tutorial_detail_id= tut.id,
+            language_id= lid,
+            user_id= user.id)
+
+        #Update data in Contributor Role
+        if contributor_obj.exists():
+            contributor_obj = contributor_obj.update(status=1)
+
+        else:
+            contributor_create = ContributorRole()
+            contributor_create.foss_category_id = tut.foss_id
+            contributor_create.language_id = lid
+            contributor_create.status = 1
+            contributor_create.user_id = user.id
+            contributor_create.tutorial_detail_id = tut.id
+            contributor_create.save()
+
+        tutorialsavailableobj= TutorialsAvailable.objects.filter(
+            tutorial_detail= tut, language= lid)
+        if tutorialsavailableobj.exists():
+            tutorialsavailableobj.delete()
+        else:
+            pass
+
+        #Update data in Tutorial Resource
+        if tutorial_resource.exists():
+            tutorial_resource = tutorial_resource.update(outline_user=user,
+                    script_user=user, video_user=user,
+                    submissiondate=submissiondate, assignment_status=1)
+            messages.warning(request, 'Successfully updated '
+                            + tut.tutorial + ' to ' + str(user) + ' : '
+                            + str(submissiondate))
+
+        else:
             tutorial_resource = TutorialResource()
             tutorial_resource.tutorial_detail_id = tut.id
             tutorial_resource.language_id = lid
@@ -3376,47 +3413,22 @@ def single_tutorial_allocater(request, tuto, tut, lid, days, user):
             messages.success(request, 'Successfully alloted '
                              + tut.tutorial + ' to ' + str(user) + ' : '
                               + str(submissiondate))
-        except:
-            tutorial_resource = \
-                TutorialResource.objects.filter(tutorial_detail_id=tut.id,
-                    language_id=lid).update(outline_user=user,
-                    script_user=user, video_user=user,
-                    submissiondate=submissiondate, assignment_status=1)
-            messages.warning(request, 'Successfully updated '
-                             + tut.tutorial + ' to ' + str(user) + ' : '
-                              + str(submissiondate))
 
-        try:
-            contributor_create = ContributorRole()
-            contributor_create.foss_category_id = tut.foss_id
-            contributor_create.language_id = lid
-            contributor_create.status = 1
-            contributor_create.user_id = user.id
-            contributor_create.tutorial_detail_id = tut.id
-            contributor_create.save()
-        except:
-            contributor_update = \
-                ContributorRole.objects.filter(language_id=lid,
-                    tutorial_detail_id=tut.id,
-                    user_id=user.id).update(status=1)
 
-        tutorialsavailableobj= TutorialsAvailable.objects.filter(tutorial_detail=tut,
-                    language=lid)
-        if tutorialsavailableobj.exists():
-            tutorialsavailableobj.delete()
-        else:
-            messages.error(request,
-            'Tutorial not found in TutorialsAvailable, should be already present in TutorialResource'
-                           )
-
+    return True
+      
 @login_required
 @csrf_exempt
 def allocate(request, tdid, lid, uid, days):
+
+    # Data is being passed from another function
+    # hence the below get functions need not be in try catch
 
     user = User.objects.get(id=uid)
     uid = user.id
     tut = TutorialDetail.objects.get(id=tdid)
     data = 'Response'
+    global level_name
     level_name = {1: 'Basic', 2: 'Intermediate', 3: 'Advanced'}
     lang_name = Language.objects.get(id=lid)
     final_query = \
@@ -3480,7 +3492,7 @@ def extend_submission_date(request):
             tutorial_resource.extension_status += 1
             tutorial_resource.save()
     except:
-
+        # Here the error can only occur when the tutorial resource entry is not found.
         messages.error(request,
                        'Some Internal error. Please contact the Technical Team'
                        )
@@ -3603,25 +3615,28 @@ def revoke_allocated_tutorial(request, uid, lid, tdid, taid, reason):
                          )
 
     tutorialresourceobj = \
-        TutorialResource.objects.filter(Q(script_user_id=uid)
-            | Q(video_user_id=uid), tutorial_detail_id=tdid,
-            language_id=lid)
+        TutorialResource.objects.filter(Q(script_user_id= uid)
+            | Q(video_user_id= uid), tutorial_detail_id= tdid,
+            language_id= lid)
     if tutorialresourceobj.exists():
-        tutorialresourceobj.update(assignment_status=0)
+        tutorialresourceobj.update(assignment_status= 0)
     else:
         messages.warning(request,
                          'Tutorial Resource missing , but tutorial is revoked to available state.'
                          )
-
-    try:
+    
+    tutorialsavailableobj = TutorialsAvailable.objects.filter(id= taid)
+    if tutorialsavailableobj.exists():
+        tutorialsavailableobj.update(tutorial_detail_id= tdid,
+            language_id= lid)
+    else:
         tutorialsavailableobj = TutorialsAvailable(id=taid)
         tutorialsavailableobj.language_id = lid
         tutorialsavailableobj.tutorial_detail_id = tdid
         tutorialsavailableobj.save()
-        messages.success(request, 'Tutorial Revoked')
-    except:
-
-        messages.error(request, 'Already Present ')
+    
+    messages.success(request, 'Tutorial Revoked')
+    
 
     # Send email to contributor if he is nearing deadline
     # stale_tuts = send_mail_to_contributor(uid,tdid,lid,reason)
