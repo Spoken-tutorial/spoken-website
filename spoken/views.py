@@ -599,7 +599,7 @@ def admin_testimonials(request):
 
 
 def news(request, cslug):
-    try:
+#    try:
         newstype = NewsType.objects.get(slug=cslug)
         collection = None
         latest = None
@@ -611,9 +611,12 @@ def news(request, cslug):
             collection = newstype.news_set.order_by('-created')
             latest = True
         collection = NewsStateFilter(request.GET, queryset=collection, news_type_slug=cslug)
+        #print ("\n collection :",collection.qs.count())
         form = collection.form
         if collection:
             page = request.GET.get('page')
+
+            print ("\n collection :",collection.qs.count())
             collection = get_page(collection, page)
         context = {
             'form': form,
@@ -626,9 +629,9 @@ def news(request, cslug):
         context.update(csrf(request))
         return render(request, 'spoken/templates/news/index.html', context)
 
-    except Exception as e:
-        print (e)
-        raise Http404('You are not allowed to view this page')
+    # except Exception as e:
+    #     print (e)
+    #     raise Http404('You are not allowed to view this page')
 
 
 def news_view(request, cslug, slug):

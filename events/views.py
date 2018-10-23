@@ -236,6 +236,8 @@ def is_invigilator(user):
 
 def get_page(resource, page, limit=20):
     paginator = Paginator(resource, limit)
+    if page is None:
+        page = 1
     try:
         resource = paginator.page(page)
     except PageNotAnInteger:
