@@ -421,7 +421,7 @@ def create_drupal_workshop_certificate(certificate_path, name, qrcode, type, pap
             return [response, False]
         else:
             error = True
-    except Exception, e:
+    except Exception as e:
         error = True
         err = e
     return [err, error]
@@ -525,7 +525,7 @@ def create_fa_workshop_certificate(certificate_path, name, qrcode, type, paper, 
             return [response, False]
         else:
             error = True
-    except Exception, e:
+    except Exception as e:
         error = True
         err = e
     return [err, error]
@@ -630,7 +630,7 @@ def create_itp_workshop_certificate(certificate_path, name, qrcode, type, paper,
             return [response, False]
         else:
             error = True
-    except Exception, e:
+    except Exception as e:
         error = True
         err = e
     return [err, error]
@@ -735,7 +735,7 @@ def create_koha_workshop_certificate(certificate_path, name, qrcode, type, paper
             return [response, False]
         else:
             error = True
-    except Exception, e:
+    except Exception as e:
         error = True
         err = e
     return [err, error]

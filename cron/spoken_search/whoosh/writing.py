@@ -25,7 +25,7 @@
 # those of the authors and should not be interpreted as representing official
 # policies, either expressed or implied, of Matt Chaput.
 
-from __future__ import with_statement
+
 import threading, time
 from bisect import bisect_right
 from contextlib import contextmanager
@@ -173,7 +173,7 @@ class PostingPool(SortingPool):
     def iter_postings(self):
         # This is just an alias for items() to be consistent with the
         # iter_postings()/add_postings() interface of a lot of other classes
-        return self.items()
+        return list(self.items())
 
     def save(self):
         SortingPool.save(self)
@@ -420,7 +420,7 @@ class IndexWriter(object):
 
     def _unique_fields(self, fields):
         # Check which of the supplied fields are unique
-        unique_fields = [name for name, field in self.schema.items()
+        unique_fields = [name for name, field in list(self.schema.items())
                          if name in fields and field.unique]
         return unique_fields
 
@@ -725,7 +725,7 @@ class SegmentWriter(IndexWriter):
         add_post = self.pool.add
 
         docboost = self._doc_boost(fields)
-        fieldnames = sorted([name for name in fields.keys()
+        fieldnames = sorted([name for name in list(fields.keys())
                              if not name.startswith("_")])
         self._check_fields(schema, fieldnames)
 

@@ -12,11 +12,11 @@ register = template.Library()
 
 
 def participant_picture(user_id):
-    print user_id
+    print(user_id)
     try:
         return settings.ONLINE_TEST_URL + "get_profile_picture.php?id=" + str(user_id)
-    except Exception, e:
-        print e
+    except Exception as e:
+        print (e)
         return None
 
 def get_trainingstatus(key, training):
@@ -26,8 +26,8 @@ def get_trainingstatus(key, training):
         #    wa = SchoolTrainingAttendance.objects.get(id = key, training = training)
         #else:
         wa = TrainingAttendance.objects.get(id=key, training = training)
-    except Exception, e:
-        print e
+    except Exception as e:
+        print (e)
         return ''
 
     if wa.status == 1:
@@ -50,7 +50,7 @@ def participant_count(objects, category):
     if category == 'Training':
         try:
             return objects.trainingattendance_set.all().count()
-        except Exception, e:
+        except Exception as e:
             return 0
     elif category == 'Test':
         count = objects.testattendance_set.all().count()
@@ -96,8 +96,8 @@ def can_upload_final_training_list(tdate):
         if datetime.date.today() >= date_after_one_month:
             return True
         return False
-    except Exception, e:
-        print e
+    except Exception as e:
+        print (e)
         return False
 
 def can_download_workshop_certificate(key, training):
@@ -127,8 +127,8 @@ def is_feedback_exits(w, record):
     try:
         TrainingFeedback.objects.get(training_id=w.id, mdluser_id=record.mdluser_id)
         return True
-    except Exception, e:
-        print e
+    except Exception as e:
+        print (e)
         return False
 
 def feedback_status_good(status):

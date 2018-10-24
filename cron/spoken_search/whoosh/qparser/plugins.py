@@ -149,7 +149,7 @@ class WildcardPlugin(TaggingPlugin):
     # \u055E = Armenian question mark
     # \u061F = Arabic question mark
     # \u1367 = Ethiopic question mark
-    qmarks = u("?\u055E\u061F\u1367")
+    qmarks = u("?\\u055E\\u061F\\u1367")
     expr = "(?P<text>[*%s])" % qmarks
 
     def filters(self, parser):
@@ -174,7 +174,7 @@ class WildcardPlugin(TaggingPlugin):
                     self.do_wildcards(parser, node)
                 i += 1
 
-        for i in xrange(len(group)):
+        for i in range(len(group)):
             node = group[i]
             if isinstance(node, self.WildcardNode):
                 text = node.text

@@ -43,6 +43,6 @@ count = training_requests.count()
 #updating training request status
 #training_requests.update(status=1)
 
-print '*************************************'
-print ' Total records checked: ', count
-print '*************************************'
+print('*************************************')
+print(' Total records checked: ', count)
+print('*************************************')

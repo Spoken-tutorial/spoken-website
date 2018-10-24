@@ -3,7 +3,7 @@ import hashlib
 
 # Third Party Stuff
 from django.contrib.auth.models import User
-from models import MdlUser
+from .models import MdlUser
 
 
 class MdlBackend:
@@ -13,13 +13,13 @@ class MdlBackend:
 
     def authenticate(self, username=None, password=None):
         try:
-            print " i am in moodle auth"
+            print(" i am in moodle auth")
             user = MdlUser.objects.get(username=username)
-            print "************"
+            print("************")
 
-            print user
+            print(user)
 
-            print "************"
+            print("************")
             pwd = user.password
             uid = user.id
             firstname = user.firstname
@@ -38,15 +38,15 @@ class MdlBackend:
                 #try:
                 #   user = User.objects.get(username=username)
                 #   return user
-                #except Exception, e:
+                #except Exception as e:
                 #   new_user=User(id=uid, username=username, password=pwd, first_name=firstname, last_name=lastname, email=email)
                 #   #new_user.save()
                 #   print "No user here"
                 #   #return new_user
                 return user
-        except Exception, e:
-            print e
-            print "except ---"
+        except Exception as e:
+            print (e)
+            print("except ---")
             return None
 
     def get_user(self, user_id):

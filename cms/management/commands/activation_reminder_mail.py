@@ -3,7 +3,7 @@
 #1. Go to project directory
 #2. run "python manage.py activation_reminder_mail >> cron/logs/reminder_mail_success_log.txt"
 
-from __future__ import absolute_import, print_function, unicode_literals
+
 
 # Standard Library
 import smtplib
@@ -73,7 +73,7 @@ class Command(BaseCommand):
                 print('Error: Unable to send email')
                 notsent += 1
                 print(str(user.id),',', str(user.email),',', str(0))
-          except  ObjectDoesNotExist, e:
+          except  ObjectDoesNotExist as e:
               print('no profile : ',user.id,',',e)
         #for loop ends here
         print('--------------------------------')

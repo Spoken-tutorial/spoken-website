@@ -1,4 +1,4 @@
-from __future__ import print_function
+
 
 import itertools
 import operator
@@ -6,10 +6,10 @@ import sys
 from bisect import bisect_left
 from collections import defaultdict
 
-from whoosh.compat import iteritems, next, text_type, unichr, xrange
+from whoosh.compat import iteritems, next, text_type, chr, xrange
 
 
-unull = unichr(0)
+unull = chr(0)
 
 
 # Marker constants
@@ -54,7 +54,7 @@ class FSA(object):
     def all_states(self):
         stateset = set(self.transitions)
         for src, trans in iteritems(self.transitions):
-            stateset.update(trans.values())
+            stateset.update(list(trans.values()))
         return stateset
 
     def all_labels(self):
@@ -290,9 +290,9 @@ class DFA(FSA):
 
     def find_next_edge(self, s, label, asbytes):
         if label is None:
-            label = b"\x00" if asbytes else u'\0'
+            label = b"\x00" if asbytes else '\0'
         else:
-            label = (label + 1) if asbytes else unichr(ord(label) + 1)
+            label = (label + 1) if asbytes else chr(ord(label) + 1)
         trans = self.transitions.get(s, {})
         if label in trans or s in self.defaults:
             return label
@@ -342,7 +342,7 @@ class DFA(FSA):
         parts = [final_states, reachable - final_states]
         while changed:
             changed = False
-            for i in xrange(len(parts)):
+            for i in range(len(parts)):
                 part = parts[i]
                 changed_part = False
                 for label in labels:
@@ -403,7 +403,7 @@ class DFA(FSA):
                 removing.add(src)
                 del new_trans[src]
         # Delete transitions to removed dead states
-        for t in new_trans.values():
+        for t in list(new_trans.values()):
             for label in list(t):
                 if t[label] in removing:
                     del t[label]

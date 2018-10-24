@@ -4,10 +4,10 @@ import string
 
 # Third Party Stuff
 from django.conf import settings
-from django.contrib import messages
+from django.contrib import messages, auth
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.core.context_processors import csrf
+ 
 from django.core.mail import EmailMultiAlternatives
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render, render_to_response
@@ -22,7 +22,7 @@ from cms.services import *
 from events.models import Student
 from mdldjango.models import MdlUser
 from mdldjango.urls import *
-
+from django.template.context_processors import csrf
 
 def dispatcher(request, permalink=''):
     if permalink == '':
@@ -136,7 +136,7 @@ def confirm(request, confirmation_code, username):
         else:
             messages.success(request, "Something went wrong!. Please try again!")
             return HttpResponseRedirect('/')
-    except Exception, e:
+    except Exception as e:
         messages.success(request, "Your account not activated!. Please try again!")
         return HttpResponseRedirect('/')
 
@@ -153,7 +153,7 @@ def account_login(request):
             password = request.POST.get('password', None)
             remember = request.POST.get('remember', None)
             if username and password:
-                user = authenticate(username=username, password=password)
+                user = auth.authenticate(username=username, password=password)
                 if user is not None:
                     if user.is_active:
                         login(request, user)
@@ -280,8 +280,8 @@ def password_reset(request):
             from mdldjango.views import changeMdlUserPass
             changeMdlUserPass(request.POST['email'], password_string)
 
-            print 'Username => ', user.username
-            print 'New password => ', password_string
+            print('Username => ', user.username)
+            print('New password => ', password_string)
 
             changePassUrl = "http://www.spoken-tutorial.org/accounts/change-password"
             if request.GET and request.GET['next']:
@@ -399,7 +399,7 @@ def confirm_student(request, token):
             messages.success(request, "Your account has been activated!. Please login to continue.")
             return HttpResponseRedirect('http://spoken-tutorial.org/participant/login/')
         else:
-            print 'can not match record'
+            print('can not match record')
             messages.error(request, "Your account not activated!. Please try again!")
             return HttpResponseRedirect('/')
     except ObjectDoesNotExist:

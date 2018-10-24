@@ -25,11 +25,11 @@ for row in rows:
     mp4_tmp_video_path = mp4_video_path + '-tmp.mp4'
     mp4_video_path = mp4_video_path + '.mp4'
     if os.path.isfile(mp4_tmp_video_path):
-        print row[5]
+        print(row[5])
         if os.path.isfile(mp4_video_path):
             os.remove(mp4_video_path)
         if os.path.isfile(mp4_tmp_video_path):
             os.remove(mp4_tmp_video_path)
     if os.path.isfile(mp4_video_path) and (not os.path.getsize(mp4_video_path)):
-        print row[5]
+        print(row[5])
         os.remove(mp4_video_path)

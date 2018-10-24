@@ -30,7 +30,7 @@ for email in emails:
   mdl_users = cur1.fetchall()
   for mdl_user in mdl_users:
     if test_user and test_user[0] == mdl_user[0]:
-      print 'Test user:', mdl_user[0]
+      print('Test user:', mdl_user[0])
       continue
     username = mdl_user[1]
     if username.lower() == email[0].lower():
@@ -38,12 +38,12 @@ for email in emails:
       email_split[0] = email_split[0] + str(count)
       count += 1
       username = email_split[0]
-      print len(email_split), "*************"
-    print username
+      print(len(email_split), "*************")
+    print(username)
     cur1.execute("update mdl_user set email='" + username + "' where id=" + str(mdl_user[0]))
     db1.commit()
     #print "update mdl_user set email='" + username + "' where id=" + str(mdl_user[0])
-    print 'Updated user:', mdl_user[0]
+    print('Updated user:', mdl_user[0])
 #  break
 #for row in rows:
 #  cur.execute("SELECT username, email FROM mdl_user WHERE ")

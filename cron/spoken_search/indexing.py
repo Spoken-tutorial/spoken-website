@@ -1,7 +1,7 @@
 #import Required Libraries
 import re
 import os
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import unicodedata
 import MySQLdb as db
 from whoosh import qparser, query
@@ -78,7 +78,7 @@ creation_tutorialresource.language_id=22 AND
 		#print check_index, not_found, update_difference
 		# Calculate the difference between present date and created and updated fields in the database
 		if not check_index:
-			video_id = unicode(item[4])
+			video_id = str(item[4])
 			video_q = parser.parse(video_id)
 			sresult = searcher.search(video_q)
 			not_found = True
@@ -118,12 +118,12 @@ creation_tutorialresource.language_id=22 AND
 			
 			# And converting the obtained text to unicode (Whoosh only accepts unicode)
 			text = text.decode('utf-8').strip()
-			title = unicode(title)
-			videoid = unicode(item[4])
+			title = str(title)
+			videoid = str(item[4])
 			keywords = keywords.decode('utf-8').strip()
 			foss = foss.decode('utf-8').strip()
 			outline = outline.decode('utf-8').strip()
-			updated = unicode(item[6])
+			updated = str(item[6])
 			
 			
 			try:
@@ -131,26 +131,26 @@ creation_tutorialresource.language_id=22 AND
 				# So then delete the previous document by videoid and add the document and increment
 				# count of updated documents
 				if update_difference:
-					print "Updating %s for indexing" % title
+					print("Updating %s for indexing" % title)
 					writer.delete_by_term("VideoId", videoid)
 					up_count=up_count+1
 				# if index table is not present then add all the documents to index tables
 				# Else add the document to the index table ( Newly added Video)
 				else:
-					print "Adding %s for indexing" % title
+					print("Adding %s for indexing" % title)
 					cr_count=cr_count+1
 				writer.add_document(title=title, VideoId=videoid, tags=keywords, outline=outline, foss=foss, updated=updated)
 				
 				# Finally Commit() save the added documents to index
 				writer.commit()
-			except Exception, e:
-				print "Write exception: ", e
+			except Exception as e:
+				print("Write exception: ", e)
 				break
 	
 	# Print the no.of documents added/ Updated
-	print cr_count,"documents Added and ",up_count," documents Updated"  
+	print(cr_count,"documents Added and ",up_count," documents Updated")  
 		
 # Handling Exception		
 except Exception as e:
-	print e
+	print (e)
 

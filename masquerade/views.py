@@ -3,7 +3,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.core.context_processors import csrf
+ 
 from django.core.exceptions import PermissionDenied
 from django.core.validators import validate_email
 from django.db.models import Q
@@ -54,7 +54,7 @@ def mask(request, uid):
         user = User.objects.get(pk = uid)
         request.session['mask_user'] = user.username
         mask_on.send(sender = object(), mask_username = request.session['mask_user'])
-    except Exception, e:
+    except Exception as e:
         messages.error(request, '1) ' + str(e))
     return HttpResponseRedirect(MASQUERADE_REDIRECT_URL)
 

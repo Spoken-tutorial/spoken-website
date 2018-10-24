@@ -47,7 +47,7 @@ def get_sorted_list(request, obj, fields_list, raw_get_data):
                 return obj
     if len(sort_order):
         try:
-            print sort_order
+            print(sort_order)
             return obj.order_by(*sort_order)
         except:
             messages.error(request, 'Invalid field name passed for sorting!')

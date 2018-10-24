@@ -6,13 +6,13 @@ These classes are dictated by the DB API v2.0:
 """
 
 try:
-    from exceptions import Exception, StandardError, Warning
+    from exceptions import Exception, Exception, Warning
 except ImportError:
     # Python 3
-    StandardError = Exception
+    Exception = Exception
 
 
-class MySQLError(StandardError):
+class MySQLError(Exception):
     
     """Exception related to operation with MySQL."""
 

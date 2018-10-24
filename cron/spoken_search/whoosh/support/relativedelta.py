@@ -349,7 +349,7 @@ Here is the behavior of operations with relativedelta:
                              second=self.second,
                              microsecond=self.microsecond)
 
-    def __nonzero__(self):
+    def __bool__(self):
         return not (not self.years and
                     not self.months and
                     not self.days and

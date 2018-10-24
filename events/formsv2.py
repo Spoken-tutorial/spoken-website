@@ -67,7 +67,7 @@ class TrainingRequestForm(forms.ModelForm):
       # Date restriction
       if self.cleaned_data and 'sem_start_date' in self.cleaned_data and self.cleaned_data['sem_start_date']:
         start_date, end_date =tp.get_current_semester_date_duration_new()
-        print start_date, end_date, self.cleaned_data['sem_start_date']
+        print(start_date, end_date, self.cleaned_data['sem_start_date'])
         if not (self.cleaned_data['sem_start_date'] <= end_date and self.cleaned_data['sem_start_date'] >= start_date):
           raise forms.ValidationError("Invalid semester start date")
     return self.cleaned_data
@@ -246,13 +246,13 @@ class SingleTrainingEditForm(forms.ModelForm):
       raise forms.ValidationError("Invalid semester training date")
     return tdate
 
+
 class OrganiserFeedbackForm(forms.ModelForm):
   offered_training_foss = forms.ModelMultipleChoiceField(
     # queryset=FossCategory.objects.filter(status=1), 
     queryset=FossCategory.objects.filter(
       id__in=CourseMap.objects.filter(
-          category=0,
-          test__lte=2
+          category=0    #removed test condition
         ).values_list(
           'foss_id'
         )
@@ -262,8 +262,7 @@ class OrganiserFeedbackForm(forms.ModelForm):
     # queryset=FossCategory.objects.filter(status=1), 
     queryset=FossCategory.objects.filter(
       id__in=CourseMap.objects.filter(
-          category=0,
-          test__lte=2
+          category=0    #removed test condition
         ).values_list(
           'foss_id'
         )

@@ -3,7 +3,7 @@ import hashlib
 
 # Third Party Stuff
 from django.core.mail import EmailMultiAlternatives
-from models import MdlUser
+from .models import MdlUser
 
 # Spoken Tutorial Stuff
 from events.models import *
@@ -33,7 +33,7 @@ def get_moodle_user(academic_id, firstname, lastname, gender, email):
         if not mdluser.password == password:
             mdluser.password = password"""
         mdluser.save()
-    except Exception, e:
+    except Exception as e:
       try:
         mdluser = MdlUser()
         mdluser.auth = 'manual'

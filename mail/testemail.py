@@ -75,12 +75,12 @@ for organiser in organisers:
         cur.execute("INSERT INTO organiser_sent_email (user_id) VALUES (" + str(organiser.user.id) + ")")
         if sent%50 == 0:
             time.sleep(5)
-        print to," => sent (", str(count),"/",str(tot_count),")"
-    except Exception, e:
-        print e
-        print to," => not sent (",count,"/",tot_count,")"
+        print(to," => sent (", str(count),"/",str(tot_count),")")
+    except Exception as e:
+        print (e)
+        print(to," => not sent (",count,"/",tot_count,")")
     break
-print "--------------------------------"
-print "Total sent mails:", sent
-print "Total not sent mails:", notsent
-print "--------------------------------"
+print("--------------------------------")
+print("Total sent mails:", sent)
+print("Total not sent mails:", notsent)
+print("--------------------------------")

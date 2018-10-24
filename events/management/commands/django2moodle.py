@@ -36,7 +36,7 @@ class Command(BaseCommand):
                     try:
                       self.log('email: {0} not in moodle'.format(user.email.encode('utf8')), 'c')
                     except:
-                      print user.email
+                      print(user.email)
                       pass
                     academy = self.get_academy(user)
                     if academy:
@@ -98,8 +98,8 @@ class Command(BaseCommand):
             return False
         except MdlUser.MultipleObjectsReturned:
             return True
-        except Exception, e:
-            print e
+        except Exception as e:
+            print (e)
             return True
 
 
@@ -126,8 +126,8 @@ class Command(BaseCommand):
             mdluser.mnethostid = 1
             mdluser.save()
             return mdluser
-        except Exception, e:
-           print e
+        except Exception as e:
+           print (e)
            return None
 
 
@@ -169,7 +169,7 @@ Admin Spoken Tutorials
         try:
             result = email.send(fail_silently=False)
             return None, result
-        except Exception, e:
+        except Exception as e:
             return e, result
 
 
@@ -182,7 +182,7 @@ Admin Spoken Tutorials
         if _type == 'r':
             self.rmsg = '{0} {1}\n'.format(self.rmsg,data)
       except:
-        print e
+        print (e)
 
     def create_log_file(self, data, _type):
         try:
@@ -195,6 +195,6 @@ Admin Spoken Tutorials
 
             _file.write('\n{0}\n'.format(data))
             _file.close()
-        except Exception, e:
+        except Exception as e:
             return e
 

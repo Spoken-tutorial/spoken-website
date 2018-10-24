@@ -6,7 +6,7 @@ import string
 
 # Third Party Stuff
 from django.core.mail import EmailMultiAlternatives
-from models import MdlUser
+from .models import MdlUser
 from validate_email import validate_email
 
 # Spoken Tutorial Stuff
@@ -224,8 +224,8 @@ def check_csvfile(user, file_path, w=None, flag=0, **kwargs):
                         if not w:
                             return 1, error_line_no
                         get_or_create_participant(w, firstname, lastname, gender, email, 2)
-                except Exception, e:
-                    print e
+                except Exception as e:
+                    print (e)
                     csv_file_error, error_line_no, invalid_emails = store_error(error_line_no, count, invalid_emails)
             if error_line_no:
                 error_line_no = """
@@ -237,7 +237,7 @@ def check_csvfile(user, file_path, w=None, flag=0, **kwargs):
                     </li>
                 </ul>
                 """.format(error_line_no, "http://process.spoken-tutorial.org/images/c/c2/Participant_data.pdf")
-        except Exception, e:
+        except Exception as e:
             csv_file_error = 1
             error_line_no = """
                 <ul>
@@ -318,8 +318,8 @@ def clone_participant(training, form_data):
             # restrict the participant
             more_then_two_per_day_list = can_allow_participant_to_attend(more_then_two_per_day_list, tdate, email)
             reattempt_list = is_new_participant(reattempt_list, foss, email)
-        except Exception, e:
-            print e
+        except Exception as e:
+            print (e)
 
     if more_then_two_per_day_list:
         csv_file_error = 1

@@ -5,7 +5,7 @@ from django.core.exceptions import ObjectDoesNotExist
 class AcademicCenterFilter(django_filters.FilterSet):
   state = django_filters.ChoiceFilter(choices=State.objects.none())
   resource_center = django_filters.ChoiceFilter(choices=[('', '---------'), (1, 'Resource Centers Only')])
-  institution_name = django_filters.CharSearchFilter()
+  institution_name = django_filters.CharFilter()
   def __init__(self, *args, **kwargs):
     user = None
     if 'user' in kwargs:
@@ -27,7 +27,7 @@ class AcademicCenterFilter(django_filters.FilterSet):
 class ActivateAcademicCenterFilter(django_filters.FilterSet):
   state = django_filters.ChoiceFilter(choices=State.objects.none())  
   status = django_filters.ChoiceFilter(choices= [('', '---------'), (1, 'Active'), (3, 'Deactive')])
-  institution_name = django_filters.CharSearchFilter()
+  institution_name = django_filters.CharFilter()
   def __init__(self, *args, **kwargs):
     user = None
     if 'user' in kwargs:
@@ -45,7 +45,7 @@ class ActivateAcademicCenterFilter(django_filters.FilterSet):
 
 class OrganiserFilter(django_filters.FilterSet):
   academic__state = django_filters.ChoiceFilter(choices=State.objects.none())
-  academic__institution_name = django_filters.CharSearchFilter()
+  academic__institution_name = django_filters.CharFilter()
   def __init__(self, *args, **kwargs):
     user = kwargs['user']
     kwargs.pop('user')
@@ -59,7 +59,7 @@ class OrganiserFilter(django_filters.FilterSet):
 
 class InvigilatorFilter(django_filters.FilterSet):
   academic__state = django_filters.ChoiceFilter(choices=State.objects.none())
-  academic__institution_name = django_filters.CharSearchFilter()
+  academic__institution_name = django_filters.CharFilter()
   def __init__(self, *args, **kwargs):
     user = kwargs['user']
     kwargs.pop('user')
@@ -73,7 +73,7 @@ class InvigilatorFilter(django_filters.FilterSet):
 
 class AccountexecutiveFilter(django_filters.FilterSet):
   academic__state = django_filters.ChoiceFilter(choices=State.objects.none())
-  academic__institution_name = django_filters.CharSearchFilter()
+  academic__institution_name = django_filters.CharFilter()
   def __init__(self, *args, **kwargs):
     user = kwargs['user']
     kwargs.pop('user')
@@ -92,8 +92,8 @@ class TrainingFilter(django_filters.FilterSet):
   training_type = django_filters.ChoiceFilter(choices= [('', '---------'), (0, 'Training'), (1, 'Workshop'), (2, 'Live Workshop'), (3, 'Pilot Workshop')])
   academic__institution_type = django_filters.ChoiceFilter(choices= [('', '---------')] + list(InstituteType.objects.values_list('id', 'name').distinct()))
   academic__city = django_filters.ChoiceFilter(choices=State.objects.none())
-  tdate = django_filters.DateRangeCompareFilter()
-  academic__institution_name = django_filters.CharSearchFilter()
+  tdate = django_filters.DateFromToRangeFilter()
+  academic__institution_name = django_filters.CharFilter()
   def __init__(self, *args, **kwargs):
     user=None
     if 'user' in kwargs:
@@ -136,8 +136,8 @@ class TestFilter(django_filters.FilterSet):
   test_category = django_filters.ChoiceFilter(choices= [('', '---------'), (1, 'Training'), (2, 'Workshop'), (3, 'Others'), (3, 'Pilot Workshop')])
   academic__institution_type = django_filters.ChoiceFilter(choices= [('', '---------')] + list(InstituteType.objects.values_list('id', 'name').distinct()))
   academic__city = django_filters.ChoiceFilter(choices=State.objects.none())
-  tdate = django_filters.DateRangeCompareFilter()
-  academic__institution_name = django_filters.CharSearchFilter()
+  tdate = django_filters.DateFromToRangeFilter()
+  academic__institution_name = django_filters.CharFilter()
   def __init__(self, *args, **kwargs):
     user=None
     if 'user' in kwargs:
@@ -213,10 +213,10 @@ class TrainingRequestFilter(django_filters.FilterSet):
     queryset=Department.objects.all()
   )
 
-  sem_start_date = django_filters.DateRangeCompareFilter()
+  sem_start_date = django_filters.DateFromToRangeFilter()
 
   training_planner__academic__institution_name = \
-    django_filters.CharSearchFilter()
+    django_filters.CharFilter()
 
 
   def __init__(self, *args, **kwargs):

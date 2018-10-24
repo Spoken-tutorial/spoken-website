@@ -1,12 +1,13 @@
 # Standard Library
-import cookielib
+import http.cookiejar
 import datetime
-from HTMLParser import HTMLParser
+from html.parser import HTMLParser
 
 # Third Party Stuff
-import mechanize
-from BeautifulSoup import BeautifulSoup
-
+#import mechanize
+import mechanicalsoup
+#from BeautifulSoup import BeautifulSoup
+from bs4 import BeautifulSoup
 
 class MLStripper(HTMLParser):
     def __init__(self):
@@ -33,7 +34,7 @@ def getNewBrowser():
     b = mechanize.Browser()
 
     # create a cookiejar for cookies
-    jar = cookielib.LWPCookieJar()
+    jar = http.cookiejar.LWPCookieJar()
     b.set_cookiejar(jar)
 
     # prevent mechanize from simulating a 403 disallow
@@ -61,7 +62,7 @@ def generate_subtitle(srt_url, srt_file_path):
     soup = readUrl(srt_url)
     table = soup.findAll("table")
     if not table:
-        print 'table not found'
+        print('table not found')
         return False
     try:
         rows = table[0].findAll("tr")
@@ -114,8 +115,8 @@ def generate_subtitle(srt_url, srt_file_path):
             file_head.write(srt_data.encode("utf-8"))
             file_head.close()
            #print srt_data
-    except Exception, e:
-        #print e
+    except Exception as e:
+        #print (e)
         return False
     return True
 

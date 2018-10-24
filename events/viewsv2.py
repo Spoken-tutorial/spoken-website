@@ -47,7 +47,7 @@ from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import cm
 from reportlab.lib.enums import TA_CENTER
 from PyPDF2 import PdfFileWriter, PdfFileReader
-from StringIO import StringIO
+from io import StringIO
 
 # import helpers
 from events.views import is_organiser, is_invigilator, is_resource_person, is_administrator, is_accountexecutive
@@ -131,8 +131,8 @@ class TrainingPlannerListView(ListView):
       return TrainingPlanner.objects.create(year=year, \
         semester=self.get_semester(sem), academic=self.user.organiser.academic,\
           organiser=self.user.organiser)
-    except Exception, e:
-      print e
+    except Exception as e:
+      print (e)
     return False
   def get_next_planner(self, current_planner):
     year = int(current_planner.year)
@@ -149,8 +149,8 @@ class TrainingPlannerListView(ListView):
       return TrainingPlanner.objects.create(year=year, \
         semester=sem, academic=self.user.organiser.academic, \
         organiser=self.user.organiser)
-    except Exception, e:
-      print e
+    except Exception as e:
+      print (e)
     return False
 
 class StudentBatchCreateView(CreateView):
@@ -227,11 +227,11 @@ class StudentBatchCreateView(CreateView):
 
       if not this_organiser_dept.exists() and department.exists():
         messages.error(self.request, "%s department is already assigened to organiser %s in your College." % (form.cleaned_data['department'], department.first().organiser))
-        print "form invalid: dept present "
+        print("form invalid: dept present ")
         return self.form_invalid(form)
       try:
         form_data = StudentBatch.objects.get(year=form_data.year, academic=form_data.academic, department=form_data.department)
-        print " batch already exist"
+        print(" batch already exist")
       except StudentBatch.DoesNotExist:
         form_data.save()
 
@@ -316,8 +316,8 @@ class StudentBatchCreateView(CreateView):
       rowcsv = csv.reader(file_path, delimiter=',', quotechar='|')
       rowcount = len(list(rowcsv))
       gencount = studentcount + rowcount
-      print 'gencount',gencount
-      print 'printing csv length',rowcount
+      print('gencount',gencount)
+      print('printing csv length',rowcount)
       if rowcount > 500:
         messages.warning(self.request, "MB will accept only 500 students, if number is more than 500, divide the batch and upload under different departments eg. Chemistry1 & Chemistry2")
       if gencount > 500:
@@ -347,8 +347,8 @@ class StudentBatchCreateView(CreateView):
               StudentMaster.objects.create(student=student, batch_id=batch_id)
               write_flag = True
         StudentBatch.objects.get(pk=batch_id).update_student_count()
-    except Exception, e:
-      print e
+    except Exception as e:
+      print (e)
       messages.warning(self.request, "The file you uploaded is not a valid CSV file, please add a valid CSV file")
     return skipped, error, warning, write_flag
 
@@ -677,8 +677,8 @@ class TrainingRequestEditView(CreateView):
       else:
         messages.error(self.request, 'This student batch already taken the selected course.')
         return self.form_invalid(form)
-    except Exception, e:
-      print e
+    except Exception as e:
+      print (e)
       messages.error(self.request, 'Something went wrong, Contact site administrator.')
       return self.form_invalid(form)
     context = {}
@@ -1021,7 +1021,7 @@ class StudentTrainingCertificateView(TrainingCertificate, View):
         mdluser = MdlUser.objects.get(id=mdluserid)
         if ta and ta.student.user.email == mdluser.email:
             return self.training_certificate(ta)
-    except Exception, e:
+    except Exception as e:
       messages.error(self.request, "PermissionDenied!")
     return HttpResponseRedirect("/")
 
@@ -1603,7 +1603,7 @@ class SingleTrainingCertificateListView(ListView):
 
   def dispatch(self, *args, **kwargs):
     self.training_request = SingleTraining.objects.get(pk=kwargs['tid'])
-    print self.training_request.id
+    print(self.training_request.id)
     self.queryset = SingleTrainingAttendance.objects.filter(training_id=self.training_request.id, status=1)
     return super(SingleTrainingCertificateListView, self).dispatch(*args, **kwargs)
 
@@ -1778,46 +1778,48 @@ class SingletrainingCreateView(CreateView):
     csv_data = []
     csvdata = csv.reader(file_path, delimiter=',', quotechar='|')
 
-    #School
+    # School
+
     if ttype == '0':
-      for i in csvdata:
-        csv_data.append(i)
-      for j in range(len(csv_data)):
-        if len(csv_data[j]) < 3:
-          skipped.append(j)
-          continue
-        if csv_data[j][0] == '':
-          error.append(j)
-          continue
-        if csv_data[j][1] == '':
-	  error.append(j)
-          continue
-        if csv_data[j][3] == '':
-          error.append(j)
-          continue
-
-    #Vocational
+        for i in csvdata:
+            csv_data.append(i)
+        for j in range(len(csv_data)):
+            if len(csv_data[j]) < 3:
+                skipped.append(j)
+                continue
+            if csv_data[j][0] == '':
+                error.append(j)
+                continue
+            if csv_data[j][1] == '':
+                error.append(j)
+                continue
+            if csv_data[j][3] == '':
+                error.append(j)
+                continue
     else:
-      for i in csvdata:
-        csv_data.append(i)
-      for j in range(len(csv_data)):
-        if len(csv_data[j]) < 4:
-          skipped.append(j)
-          continue
-	if csv_data[j][0]=='':
-	  error.append(j)
-	  continue
-	if csv_data[j][1]=='':
-	  error.append(j)
-	  continue
-        if not self.email_validator(csv_data[j][2]):
-          error.append(j)
-          continue
-	if csv_data[j][3]=='':
-	  error .append(j)
-	  continue
 
-    return skipped, error, warning, write_flag
+    # Vocational
+
+        for i in csvdata:
+            csv_data.append(i)
+        for j in range(len(csv_data)):
+            if len(csv_data[j]) < 4:
+                skipped.append(j)
+                continue
+            if csv_data[j][0] == '':
+                error.append(j)
+                continue
+            if csv_data[j][1] == '':
+                error.append(j)
+                continue
+            if not self.email_validator(csv_data[j][2]):
+                error.append(j)
+                continue
+            if csv_data[j][3] == '':
+                error.append(j)
+                continue
+
+    return (skipped, error, warning, write_flag)
 
   '''
   This will call the create_student_vocational() method to create the student entry, from the  CSV file, in the SingleTraining database.
@@ -2083,7 +2085,7 @@ def SingleTrainingApprove(request, pk):
     st.save()
     #Send Emails from here
   else:
-    print "Error"
+    print("Error")
   return HttpResponseRedirect('/software-training/single-training/approved/')
 
 ''' SingleTrainingReject will take an argument(primary key of a training batch) and change the status of the SingleTraining batch, in the database, from pending to rejected
@@ -2095,7 +2097,7 @@ def SingleTrainingReject(request, pk):
     st.status = 5
     st.save()
   else:
-    print "Error"
+    print("Error")
   return HttpResponseRedirect("/software-training/single-training/approved/")
 
 #using in stp mark attendance also
@@ -2105,7 +2107,7 @@ def SingleTrainingPendingAttendance(request, pk):
     st.status = 6
     st.save()
   else:
-    print "Error"
+    print("Error")
   return HttpResponseRedirect("/software-training/single-training/pending/")
 
 def MarkAsComplete(request, pk):
@@ -2116,7 +2118,7 @@ def MarkAsComplete(request, pk):
     st.save()
     messages.success(request, 'Request to mark training complete successfully sent')
   else:
-    print "Error"
+    print("Error")
     messages.error(request, 'Request not sent.Please try again.')
   return HttpResponseRedirect("/software-training/training-planner/")
 
@@ -2210,8 +2212,8 @@ class OldTrainingCloseView(CreateView):
         tp.created = created
         tp.updated = created
         tp.save()
-      except Exception, e:
-        print e
+      except Exception as e:
+        print (e)
     return tp
 
   def _get_student(self, ta):
@@ -2341,7 +2343,7 @@ def LatexWorkshopFileUpload(request):
       email = request.POST['email']
       email = email.replace('.', '_')
       email = email.replace('@', '_')
-      print email
+      print (e)mail
       f = open('media/latex/{0}/{1}'.format(email, uploaded_file), 'wb+')
       for data in uploaded_file.chunks():
           f.write(data)
@@ -2457,7 +2459,7 @@ class STWorkshopFeedbackPreCreateView(CreateView):
     def post(self,  request, *args, **kwargs):
       self.object = None
       self.user = self.request.user.id
-      print self.user
+      print(self.user)
       form = self.get_form(self.get_form_class())
       if form.is_valid():
         #form.save()
@@ -2465,14 +2467,14 @@ class STWorkshopFeedbackPreCreateView(CreateView):
         #messages.success(self.request, "Thank you for completing this feedback form. We appreciate your input and valuable suggestions.")
         #return HttpResponseRedirect(self.success_url)
       else:
-        print form.errors
+        print(form.errors)
         return self.form_invalid(form)
 
     def form_valid(self, form, **kwargs):
       form_data = form.save(commit=False)
       form_data.user = self.request.user
       form_data.save()
-      print "saved"
+      print("saved")
       messages.success(self.request, "Thank you for completing this feedback form. We appreciate your input and valuable suggestions.")
       return HttpResponseRedirect(self.success_url)
 
@@ -2499,7 +2501,7 @@ class STWorkshopFeedbackPostCreateView(CreateView):
         #messages.success(self.request, "Thank you for completing this feedback form. We appreciate your input and valuable suggestions.")
         return HttpResponseRedirect(self.success_url)
       else:
-        print form.errors
+        print(form.errors)
         return self.form_invalid(form)
 
     def form_valid(self, form, **kwargs):
@@ -2524,7 +2526,7 @@ class LearnDrupalFeedbackCreateView(CreateView):
       if form.is_valid():
         return self.form_valid(form)
       else:
-        print form.errors
+        print(form.errors)
         return self.form_invalid(form)
 
   def form_valid(self, form, **kwargs):
@@ -2591,7 +2593,7 @@ def payment_status(request):
     STdata = ''
     user_name = user.first_name+' '+user.last_name
     STdata = str(user.id)+str(user_name)+str(amount)+"Subscription"+"SOLOSTW"+CHANNEL_KEY
-    print STdata
+    print(STdata)
     s = display.value(str(STdata))
     
     data = {'userId':user.id,'name':user_name,'amount':amount,'purpose':'Subscription','channelId':'SOLOSTW','random':s.hexdigest()}
@@ -2674,7 +2676,7 @@ def payment_success(request):
     if STresponsedata_hexa == random:
       #save transaction details in db
       pd = PaymentDetails.objects.get(user = user.id, academic_id = accountexecutive.academic.id)
-      print 'pd id',pd.id
+      print('pd id',pd.id)
 
       try:
         transactiondetails = PaymentTransactionDetails()
@@ -2754,10 +2756,10 @@ def payment_reconciliation_update(request):
     try:
       accountexecutive = Accountexecutive.objects.get(user_id = userId,status__gt=0)
     except:
-      print "no ac"
+      print("no ac")
       pass
     try:
-      print userId, accountexecutive.academic_id
+      print(userId, accountexecutive.academic_id)
       pd = PaymentDetails.objects.get(user_id = userId, academic_id_id = accountexecutive.academic_id)
     except:
       return HttpResponseRedirect("Failed1")
@@ -2775,7 +2777,7 @@ def payment_reconciliation_update(request):
       transactiondetails.status  =  status
       transactiondetails.msg  =  msg
       transactiondetails.save()
-      print "saved"
+      print("saved")
     except:
       return HttpResponseRedirect("Failed2")
     

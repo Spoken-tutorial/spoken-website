@@ -36,6 +36,6 @@ class CurrentTrainingPlanner():
             return TrainingPlanner.objects.create(year=year,
                                                   semester=self.get_semester(sem), academic=user.organiser.academic,
                                                   organiser=user.organiser)
-        except Exception, e:
-            print e
+        except Exception as e:
+            print (e)
         return False

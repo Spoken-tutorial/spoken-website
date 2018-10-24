@@ -25,7 +25,7 @@
 # those of the authors and should not be interpreted as representing official
 # policies, either expressed or implied, of Matt Chaput.
 
-from __future__ import division
+
 import os.path
 from optparse import OptionParser
 from shutil import rmtree
@@ -123,11 +123,11 @@ class Spec(object):
             if i >= limit:
                 break
 
-            print("%d. %s" % (i + 1, hit.get(self.headline_field)))
+            print(("%d. %s" % (i + 1, hit.get(self.headline_field))))
             if snippets:
-                print(self.show_snippet(hit))
+                print((self.show_snippet(hit)))
             if showbody:
-                print(hit.get(self.main_field))
+                print((hit.get(self.main_field)))
 
 
 class WhooshModule(Module):
@@ -415,7 +415,7 @@ class NucularModule(Module):
         try:
             self.archive.indexDictionary(str(self.count), d)
         except ValueError:
-            print("d=", d)
+            print(("d=", d))
             raise
         self.count += 1
         if not self.count % int(self.options.batch):
@@ -455,7 +455,7 @@ class Bench(object):
             "zcatalog": ZcatalogModule, "nucular": NucularModule}
 
     def index(self, lib):
-        print("Indexing with %s..." % lib)
+        print(("Indexing with %s..." % lib))
 
         options = self.options
         every = None if options.every is None else int(options.every)
@@ -479,7 +479,7 @@ class Bench(object):
                 if chunk and not count % chunk:
                     t = now()
                     sofar = t - starttime
-                    print("Done %d docs, %0.3f secs for %d, %0.3f total, %0.3f docs/s" % (count, t - chunkstarttime, chunk, sofar, count / sofar))
+                    print(("Done %d docs, %0.3f secs for %d, %0.3f total, %0.3f docs/s" % (count, t - chunkstarttime, chunk, sofar, count / sofar)))
                     chunkstarttime = t
                 if count > upto:
                     break
@@ -489,39 +489,39 @@ class Bench(object):
                     lib.indexer(create=False)
 
         spooltime = now()
-        print("Spool time:", spooltime - starttime)
+        print(("Spool time:", spooltime - starttime))
         lib.finish(merge=merge)
         committime = now()
-        print("Commit time:", committime - spooltime)
+        print(("Commit time:", committime - spooltime))
         totaltime = committime - starttime
-        print("Total time to index %d documents: %0.3f secs (%0.3f minutes)" % (count, totaltime, totaltime / 60.0))
-        print("Indexed %0.3f docs/s" % (count / totaltime))
+        print(("Total time to index %d documents: %0.3f secs (%0.3f minutes)" % (count, totaltime, totaltime / 60.0)))
+        print(("Indexed %0.3f docs/s" % (count / totaltime)))
 
     def search(self, lib):
         lib.searcher()
 
         t = now()
         q = lib.query()
-        print("Query:", q)
+        print(("Query:", q))
         r = lib.find(q)
-        print("Search time:", now() - t)
+        print(("Search time:", now() - t))
 
         t = now()
         self.spec.print_results(lib.results(r))
-        print("Print time:", now() - t)
+        print(("Print time:", now() - t))
 
     def search_file(self, lib):
         f = open(self.options.termfile, "rb")
         terms = [line.strip() for line in f]
         f.close()
 
-        print("Searching %d terms with %s" % (len(terms), lib))
+        print(("Searching %d terms with %s" % (len(terms), lib)))
         lib.searcher()
         starttime = now()
         for r in lib.findterms(terms):
             pass
         searchtime = now() - starttime
-        print("Search time:", searchtime, "searches/s:", float(len(terms)) / searchtime)
+        print(("Search time:", searchtime, "searches/s:", float(len(terms)) / searchtime))
 
     def _parser(self, name):
         p = OptionParser()

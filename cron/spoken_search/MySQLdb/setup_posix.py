@@ -1,5 +1,5 @@
 import os, sys
-from ConfigParser import SafeConfigParser
+from configparser import SafeConfigParser
 
 # This dequote() business is required for some older versions
 # of mysql_config

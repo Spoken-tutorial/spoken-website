@@ -25,7 +25,7 @@
 # those of the authors and should not be interpreted as representing official
 # policies, either expressed or implied, of Matt Chaput.
 
-from __future__ import with_statement
+
 import random, sys, time
 from bisect import insort, bisect_left
 from functools import wraps
@@ -46,11 +46,11 @@ else:
 
 
 def random_name(size=28):
-    return "".join(random.choice(IDCHARS) for _ in xrange(size))
+    return "".join(random.choice(IDCHARS) for _ in range(size))
 
 
 def random_bytes(size=28):
-    gen = (random.randint(0, 255) for _ in xrange(size))
+    gen = (random.randint(0, 255) for _ in range(size))
     if sys.version_info[0] >= 3:
         return bytes(gen)
     else:

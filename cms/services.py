@@ -59,7 +59,7 @@ IIT Bombay.
       result = email.send(fail_silently=False)
       return True
     except smtplib.SMTPException:
-      print "Failed to send email to user"
+      print("Failed to send email to user")
       return False
 
 def send_verify_email(request,email):
@@ -147,5 +147,5 @@ Admin Spoken Tutorials
     result = email.send(fail_silently=False)
     return True
   except smtplib.SMTPException:
-    print "Failed to send email"
+    print("Failed to send email")
     return False
