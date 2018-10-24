@@ -70,6 +70,16 @@
           <td >
           <div align="center">
             <label for="sel1"></label>
+            {% if record.status == 0 %}
+            <select disabled class="form-horizontal form-control" >
+              <option>0</option>
+              <option>1</option>
+              <option>2</option>
+              <option>3</option>
+              <option>4</option>
+              <option>5</option>
+            </select>
+            {%else%}
             <select name ="rating" id="sel1" class="form-horizontal form-control">
               <option>0</option>
               <option>1</option>
@@ -79,6 +89,7 @@
               <option>5</option>
             </select>
           </div>
+          {% endif %}
           </td>
           <td>
             {%for a_contri in rated_contributors %}
