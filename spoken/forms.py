@@ -124,9 +124,10 @@ def file_size(value):
     limit & raises an error if the size is greater. 
     100 MB = 104857600 B
     500 MB = 524288000 B
+    50 MB = 52428800 B
     '''
-    if value.size > 524288000:
-        raise ValidationError('File too large. Size should not exceed 500 MiB.')
+    if value.size > 52428800:
+        raise ValidationError('File too large. Size should not exceed 50 MiB.')
 
 
 class MediaTestimonialForm(forms.Form):
@@ -158,7 +159,7 @@ class MediaTestimonialForm(forms.Form):
     )
 
     name = forms.CharField(label='Name', required=True)
-    media = forms.FileField(label='File(Select an mp4/mp3 file less than 500MB)', required=True)
+    media = forms.FileField(label='File(Select an mp4/mp3 file less than 50MB)', required=True)
     content = forms.CharField(label='Short Discription', widget=forms.Textarea, required=True,
                               max_length=255)
 
