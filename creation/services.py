@@ -1,5 +1,5 @@
 # Spoken Tutorial Stuff
-from creation.models import BrochureDocument, BrochurePage,RoleRequest,Language
+from creation.models import BrochureDocument, BrochurePage, RoleRequest, Language
 
 
 def get_data_for_brochure_display():
@@ -25,10 +25,9 @@ def get_revokable_languages_for_role(user, role_type):
         'video-reviewer': 2,
         'domain-reviewer': 3,
         'quality-reviewer': 4,
-        }
+    }
     contrib_languages = RoleRequest.objects.filter(user=user, status=1,
-            role_type=roles[role_type]).values('language')
+                                                   role_type=roles[role_type]).values('language')
     languages = \
-        Language.objects.filter(id__in=contrib_languages).values('name'
-            , 'id')
+        Language.objects.filter(id__in=contrib_languages).values('name', 'id')
     return languages

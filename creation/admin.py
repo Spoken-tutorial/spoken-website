@@ -109,6 +109,7 @@ class ContributorRoleAdmin(admin.ModelAdmin):
     class Media:
         js = ('admin/js/ajax-contributor.js',)
 
+
 class DomainReviewerRoleAdmin(admin.ModelAdmin):
     form = DomainReviewerRoleForm
     list_display = ('user', 'foss_category', 'language',
@@ -173,6 +174,7 @@ class FossAvailableForWorkshopAdmin(admin.ModelAdmin):
     fields = ['foss', 'language', 'status']
     list_display = ('foss', 'language', 'status', 'created')
     list_filter = ('language',)
+
 
 class LanguagManagerAdmin(admin.ModelAdmin):
 

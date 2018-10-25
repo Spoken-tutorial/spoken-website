@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.db import models
 import datetime
 
+
 class Language(models.Model):
     name = models.CharField(max_length=255, unique=True)
     user = models.ForeignKey(User)
@@ -35,12 +36,12 @@ class FossCategory(models.Model):
     foss = models.CharField(unique=True, max_length=255)
     description = models.TextField()
     status = models.BooleanField(max_length=2)
-    is_learners_allowed = models.BooleanField(max_length=2,default=0 )
+    is_learners_allowed = models.BooleanField(max_length=2, default=0)
     user = models.ForeignKey(User)
     category = models.ManyToManyField(FossSuperCategory)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-    show_on_homepage = models.BooleanField(default=True, help_text ='If unchecked, this foss will be displayed on series page, instead of home page' )
+    show_on_homepage = models.BooleanField(default=True, help_text='If unchecked, this foss will be displayed on series page, instead of home page')
 
     class Meta:
         verbose_name = 'FOSS'
@@ -198,15 +199,16 @@ class TutorialResource(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     publish_at = models.DateTimeField(null=True)
-        # the last submission date for the tutorial
+    # the last submission date for the tutorial
 
-    submissiondate = models.DateTimeField(default = datetime.datetime(2000, 01, 02, 12, 00) ,blank = True)
+    submissiondate = models.DateTimeField(default=datetime.datetime(2000, 01, 02, 12, 00), blank=True)
     # 0 - Not Assigned to anyone , 1 - Assigned & work in progress , 2 - Completed (= published / PR )
     assignment_status = models.PositiveSmallIntegerField(default=0)
     # 0 - Not Extended , 1 - Extended , 2 - Tutorial Terminated from user
-    extension_status = models.PositiveIntegerField(default = 0)
+    extension_status = models.PositiveIntegerField(default=0)
+
     class Meta:
-        unique_together = ('tutorial_detail','language',)
+        unique_together = ('tutorial_detail', 'language',)
 
 
 class ArchivedVideo(models.Model):
@@ -223,7 +225,7 @@ class ContributorRole(models.Model):
     user = models.ForeignKey(User)
     language = models.ForeignKey(Language)
     foss_category = models.ForeignKey(FossCategory)
-    tutorial_detail = models.ForeignKey(TutorialDetail,null = True)
+    tutorial_detail = models.ForeignKey(TutorialDetail, null=True)
     status = models.BooleanField()
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -346,15 +348,15 @@ class QualityReviewerNotification(models.Model):
 class RoleRequest(models.Model):
     user = models.ForeignKey(User, related_name='user')
     role_type = models.IntegerField(default=0)
-    language = models.ForeignKey(Language,null=True)
+    language = models.ForeignKey(Language, null=True)
     status = models.PositiveSmallIntegerField(default=0)
     approved_user = models.ForeignKey(
-        User, related_name='approved_user', null=True, blank =True)
+        User, related_name='approved_user', null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
     class Meta:
-        unique_together = (('user', 'role_type','language'),)
+        unique_together = (('user', 'role_type', 'language'),)
 
 
 class FossAvailableForWorkshop(models.Model):
@@ -455,14 +457,16 @@ class Collaborate(models.Model):
     lead_st = models.BooleanField()
     created = models.DateTimeField(auto_now_add=True)
 
+
 class ContributorRating(models.Model):
     user = models.ForeignKey(User)
-    choices = ((1,1),(2,2),(3,3),(4,4),(5,5))
+    choices = ((1, 1), (2, 2), (3, 3), (4, 4), (5, 5))
     rating = models.PositiveIntegerField(choices=choices)
     language = models.ForeignKey(Language)
 
     class Meta:
         unique_together = (('user', 'language'),)
+
 
 class TutorialsAvailable(models.Model):
     tutorial_detail = models.ForeignKey(TutorialDetail)
@@ -470,6 +474,7 @@ class TutorialsAvailable(models.Model):
 
     class Meta:
         unique_together = (('tutorial_detail', 'language'),)
+
 
 class LanguageManager(models.Model):
 
@@ -480,6 +485,5 @@ class LanguageManager(models.Model):
     updated = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ('user','language')
+        ordering = ('user', 'language')
         unique_together = (('user', 'language'),)
-
