@@ -230,6 +230,10 @@ class ContributorRole(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
+    def revoke(self):
+        self.status = 2
+        self.save()
+
     class Meta:
         unique_together = (('user', 'tutorial_detail', 'language',),)
         verbose_name = 'Contributor Role'
@@ -355,9 +359,14 @@ class RoleRequest(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
+    def revoke(self):
+        self.status = 2
+        self.save()
+
     class Meta:
         unique_together = (('user', 'role_type', 'language'),)
 
+    
 
 class FossAvailableForWorkshop(models.Model):
     foss = models.ForeignKey(FossCategory)
