@@ -3342,7 +3342,7 @@ def refresh_tutorials(request):
 
 
 def no_of_foss_gt_3(user, foss_or_tut_id, type_tut):
-
+    UNPUBLISHED = 0 
     fid = 0
     if type_tut == 'single':
         this_tut = TutorialDetail.objects.get(id = foss_or_tut_id)
@@ -3350,10 +3350,12 @@ def no_of_foss_gt_3(user, foss_or_tut_id, type_tut):
     elif type_tut == 'all':
         fid = int(foss_or_tut_id)
 
-    all_foss = ContributorRole.objects.filter(user_id = user, status = 1).values('foss_category')
+    #all_foss = ContributorRole.objects.filter(user_id = user, status = 1).values('foss_category')
     all_foss = TutorialResource.objects.filter(
-        Q(script_user_id = user) | Q(video_user_id = user), status=0).values('tutorial_detail__tutorial_detail__foss_category')
-    list_count = list({int(v['tutorial_detail__tutorial_detail__foss_category']) for v in all_foss})
+        Q(script_user_id = user) | Q(video_user_id = user),
+        status = UNPUBLISHED, assignment_status = ASSIGNMENT_STATUS_DICT['assigned']
+        ).values('tutorial_detail__foss')
+    list_count = list({int(v['tutorial_detail__foss']) for v in all_foss})
 
 
     if len(list_count) >= 3 and fid not in list_count:
@@ -3471,20 +3473,18 @@ def allocate(request, tdid, lid, uid, days):
                                                                                                                                          ))
     if no_of_foss_gt_3(uid, tdid, 'single'):
         messages.error(request, 'Maximum of 3 FOSSes allowed per user')
-        return HttpResponse(json.dumps(data),
-                            content_type = 'application/json')
+        #return HttpResponseRedirect(request.META['HTTP_REFERER'])
+
     else:
         if contributor_rating[0]['rating'] < 3:
             if contrib_tutorial_count['id__count'] > 3:
                 if get_language_manager(request.user):
                     messages.error(
     request,'You cannot allocate more than 3 tutorials to a contributor of rating less than 3')
-                    return HttpResponse(json.dumps(data),
-                            content_type = 'application/json')
+                    return HttpResponseRedirect(request.META['HTTP_REFERER'])
                 else:
                     messages.error(request, 'You cannot allocate more than 3 tutorials ')
-                    return HttpResponse(json.dumps(data),
-                            content_type = 'application/json')
+                    return HttpResponseRedirect(request.META['HTTP_REFERER'])
             else:
                 if lower_tutorial_level.exists():
                     disallow( request,lower_tutorial_level[0]['level'], tut)
@@ -3551,10 +3551,8 @@ def allocate_foss(request, fid, lang, uid, level, days):
     for a_tdid_available in tdid_available:
         contrib_tutorial_count = ContributorRole.objects.filter(user_id = uid,
         status = 1).aggregate(Count('id'))
-
-    if tdid_available.exists():
-        allocate(request,
-        a_tdid_available.tutorial_detail.id, language.id, user.id, days)
+        allocate(request,a_tdid_available.tutorial_detail.id,
+            language.id, user.id, days)
 
         # Cumulative submission date
 
