@@ -243,12 +243,27 @@ def creation_add_role(request, role_type,languages):
                         messages.warning(request, 'Request to the ' + 
                             role_type.title() + ' role'+ ' for ' + language_alert.name + 
                             ' is already waiting for admin approval!')
+                if this_user_role.filter(status = 2).exists():
+                    this_user_role.update(status = 0)
             else:
-                RoleRequest.objects.create(user = request.user, role_type = ROLES_DICT[role_type],
-                                           language_id = int(lang_id), status = 0)
-                messages.success(request, 'Request to the ' + \
+                new_role_request = RoleRequest()
+                new_role_request.user = request.user
+                new_role_request.role_type = ROLES_DICT[role_type]
+                if role_type != 'video-reviewer':
+                    new_role_request.language = language_alert
+                new_role_request.status = STATUS_DICT['inactive']
+                new_role_request.save()
+                #RoleRequest.objects.create(user = request.user, role_type = ROLES_DICT[role_type],
+                                           #language_id = int(lang_id), status = 0)
+                #new_role_request.user.groups.add(Group.objects.get(
+                #    name = role_type))
+                if role_type != 'video-reviewer':
+                    messages.success(request, 'Request to the ' + \
                             role_type.title() +' role'+' for the language ' +\
                             language_alert.name+' has been sent for admin approval!')            
+                else:
+                    messages.success(request, 'Request to the ' + \
+                            role_type.title() +' role has been sent for approval!')            
             
         else:
             messages.error(request, 'Invalid role argument!')
@@ -347,16 +362,14 @@ def creation_revoke_role_request(request, role_type,languages):
 
                     
             except RoleRequest.DoesNotExist:
-                # This case should not be encountered,
-                #but still for a safer side an exception handler                
+                # This will be hit only when the request type is video-reviewerl                
                 messages.warning(request, 'Role is revoked!')    
         else:
             messages.error(request, 'Invalid role type argument!')
 
-    role_count = RoleRequest.objects.filter(user = request.user,role_type = ROLES_DICT[role_type],status = 1).count()
-    
-    if not role_count:
-        role_rec.user.groups.remove(Group.objects.get(name = group_role_id[ROLES_DICT[role_type]]))
+    role_count = RoleRequest.objects.filter(user = request.user,role_type = ROLES_DICT[role_type],status = 1)    
+    if not role_count.exists():
+        request.user.groups.remove(Group.objects.get(name = group_role_id[ROLES_DICT[role_type]]))
         
     return HttpResponseRedirect('/creation/')
 
@@ -3129,13 +3142,13 @@ def allocate_tutorial(request, sel_status):
             id__in = LanguageManager.objects.filter(user = request.user,
             status = STATUS_DICT['active']).values('language'))
         
-        bid_count = ContributorRole.objects.filter(language__in = lang_qs,
+        bid_count = RoleRequest.objects.filter(language__in = lang_qs,
             status = STATUS_DICT['active']).exclude(language_id = 22).aggregate(Count('id'))
     else:
         lang_qs = Language.objects.filter(id__in = RoleRequest.objects.filter(user = request.user,
             status = STATUS_DICT['active'],
             role_type = ROLES_DICT['contributor']).values('language'))
-        bid_count = ContributorRole.objects.filter(user_id = user.id,
+        bid_count = RoleRequest.objects.filter(user_id = user.id,
             status = STATUS_DICT['active']).exclude(language_id = 22).aggregate(Count('id'))
 
     contributors_list = User.objects.filter(id__in = RoleRequest.objects.filter(role_type = ROLES_DICT['contributor'],
@@ -3153,10 +3166,11 @@ def allocate_tutorial(request, sel_status):
 
         if get_language_manager(request.user):
             final_query = TutorialResource.objects.filter(
-                script_status = SCRIPT_STATUS_DICT['published'],language__in = lang_qs)
+                script_status = SCRIPT_STATUS_DICT['uploaded'],language__in = lang_qs).order_by('-updated')
         else:
             final_query = TutorialResource.objects.filter(
-                script_status = SCRIPT_STATUS_DICT['published'], script_user_id = request.user.id)
+                script_status = SCRIPT_STATUS_DICT['uploaded'],
+                script_user_id = request.user.id).order_by('-updated')
     elif sel_status == 'available':
 
         header = {
@@ -3220,8 +3234,7 @@ def allocate_tutorial(request, sel_status):
                 'tutorial_detail__foss__foss', 'language__name', 'tutorial_detail__order')
 
             bid_count = ContributorRole.objects.filter(
-                user_id = user.id,status = 1).exclude(language_id = 22).aggregate(Count('id'
-                                                                                                         ))
+                user_id = user.id,status = 1).exclude(language_id = 22).aggregate(Count('id'))
     else:
 
         raise PermissionDenied()
@@ -3236,7 +3249,7 @@ def allocate_tutorial(request, sel_status):
     ordering = get_field_index(raw_get_data)
     tutorials = CreationStatisticsFilter(request.POST,
                                          queryset = tutorials_sorted)
-
+    
     if bid_count != 0:
         context['tutorials_count'] = bid_count['id__count'] \
             + tutorials.qs.aggregate(Count('id'))['id__count']
@@ -3353,7 +3366,6 @@ def no_of_foss_gt_3(user, foss_or_tut_id, type_tut):
     elif type_tut == 'all':
         fid = int(foss_or_tut_id)
 
-    #all_foss = ContributorRole.objects.filter(user_id = user, status = 1).values('foss_category')
     all_foss = TutorialResource.objects.filter(
         Q(script_user_id = user) | Q(video_user_id = user),
         status = UNPUBLISHED, assignment_status = ASSIGNMENT_STATUS_DICT['assigned']
@@ -3384,14 +3396,14 @@ def single_tutorial_allocater(request, tut, lid, days, user):
         tutorial_detail_id = tut.id,
         language_id = lid)
 
-    contributor_obj = ContributorRole.objects.filter(
+    contributor_role = ContributorRole.objects.filter(
         tutorial_detail_id = tut.id,
         language_id = lid,
         user_id = user.id)
 
     # Update data in Contributor Role
-    if contributor_obj.exists():
-        contributor_obj = contributor_obj.update(status = STATUS_DICT['active'])
+    if contributor_role.exists():
+        contributor_role = contributor_role.update(status = STATUS_DICT['active'])
 
     else:
         contributor_create = ContributorRole()
@@ -3469,25 +3481,27 @@ def allocate(request, tdid, lid, uid, days):
         return HttpResponse(json.dumps(data), content_type = 'application/json')
 
     contrib_tutorial_count = ContributorRole.objects.filter(user_id = uid,
-        status = STATUS_DICT['active']).aggregate(Count('id'))
+        status = STATUS_DICT['active']).distinct().aggregate(Count('language_id'))
+    
     bid_count = TutorialResource.objects.filter(Q(script_user_id = uid) | Q(video_user_id = uid),
         language_id = lid,assignment_status = ASSIGNMENT_STATUS_DICT['assigned']
-        ).exclude(language_id = 22).aggregate(Count('id'
-                                                                                                                                         ))
+        ).exclude(language_id = 22).aggregate(Count('id'))
+    print "contrib_tutorial_count",contrib_tutorial_count
+    print "bid_count",bid_count
     if no_of_foss_gt_3(uid, tdid, 'single'):
         messages.error(request, 'Maximum of 3 FOSSes allowed per user')
-        #return HttpResponseRedirect(request.META['HTTP_REFERER'])
+        
 
     else:
         if contributor_rating[0]['rating'] < 3:
-            if contrib_tutorial_count['id__count'] > 3:
+            if int(contrib_tutorial_count['language_id__count']) >= 2:
                 if get_language_manager(request.user):
                     messages.error(
-    request,'You cannot allocate more than 3 tutorials to a contributor of rating less than 3')
-                    return HttpResponseRedirect(request.META['HTTP_REFERER'])
+                        request,'You cannot allocate more than 3 tutorials to a contributor of rating less than 3')
+                    #return HttpResponseRedirect(request.META['HTTP_REFERER'])
                 else:
                     messages.error(request, 'You cannot allocate more than 3 tutorials ')
-                    return HttpResponseRedirect(request.META['HTTP_REFERER'])
+                    #return HttpResponseRedirect(request.META['HTTP_REFERER'])
             else:
                 if lower_tutorial_level.exists():
                     disallow( request,lower_tutorial_level[0]['level'], tut)

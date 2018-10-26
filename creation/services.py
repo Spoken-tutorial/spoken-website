@@ -1,6 +1,6 @@
 # Spoken Tutorial Stuff
-from creation.models import BrochureDocument, BrochurePage, RoleRequest, Language
-
+from creation.models import BrochureDocument, \
+BrochurePage, RoleRequest, Language
 
 def get_data_for_brochure_display():
     brochures = BrochureDocument.objects.all()
