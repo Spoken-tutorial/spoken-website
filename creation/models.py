@@ -201,7 +201,7 @@ class TutorialResource(models.Model):
     publish_at = models.DateTimeField(null=True)
     # the last submission date for the tutorial
 
-    submissiondate = models.DateTimeField(default=datetime.datetime(2000, 01, 02, 12, 00), blank=True)
+    submissiondate = models.DateTimeField(default=datetime.datetime(2000, 01, 02, 12, 00))
     # 0 - Not Assigned to anyone , 1 - Assigned & work in progress , 2 - Completed (= published / PR )
     assignment_status = models.PositiveSmallIntegerField(default=0)
     # 0 - Not Extended , 1 - Extended , 2 - Tutorial Terminated from user

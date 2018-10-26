@@ -328,9 +328,10 @@ def creation_revoke_role_request(request, role_type,languages):
 
         if role_type in ROLES_DICT:
             try:
-                role_rec = RoleRequest.objects.get(user = request.user, role_type = ROLES_DICT[role_type], status = 1,language_id = a_language)
-                
-                
+                role_rec = RoleRequest.objects.get(
+                    user = request.user, role_type = ROLES_DICT[role_type],
+                    status = 1,language_id = a_language)                                
+
                 if role_rec.role_type != ROLES_DICT['video-reviewer']:
                     if role_rec.role_type == ROLES_DICT['contributor'] or role_rec.role_type == ROLES_DICT['external-contributor']:
                         ContributorRole.objects.filter(user = role_rec.user).update(status = 0)
@@ -345,8 +346,10 @@ def creation_revoke_role_request(request, role_type,languages):
                     messages.success(request, role_type.title() + ' role has been revoked from ' + role_rec.user.username+' for the language '+ lang_show.name)
 
                     
-            except:
-                raise PermissionDenied()
+            except RoleRequest.DoesNotExist:
+                # This case should not be encountered,
+                #but still for a safer side an exception handler                
+                messages.warning(request, 'Role is revoked!')    
         else:
             messages.error(request, 'Invalid role type argument!')
 
@@ -3309,21 +3312,21 @@ def refresh_tutorials(request):
     count = 0
     tutorials = TutorialDetail.objects.filter(id__in = TutorialResource.objects.filter(script_status = 4,
                                                                                      language = 22).values('tutorial_detail').distinct())
-
+    PUBLISHED = 1
     for tutorial in tutorials:
-        this_tutorial_published_langs = TutorialResource.objects.filter(
-            tutorial_detail = tutorial, assignment_status = ASSIGNMENT_STATUS_DICT['un-assigned'],
-            status = STATUS_DICT['active']).values('language')
+        this_tutorial_assigned_langs = TutorialResource.objects.filter(
+            tutorial_detail = tutorial,
+            assignment_status = ASSIGNMENT_STATUS_DICT['assigned']).exclude(status=PUBLISHED).values('language')
 
         user_langs = Language.objects.filter(id__in = RoleRequest.objects.filter(
             user = request.user, status = STATUS_DICT['active'],
             role_type = ROLES_DICT['contributor']).values('language'))
 
-        this_tutorial_unpublished_langs = Language.objects.filter(
-            id__in = user_langs).exclude(id__in = this_tutorial_published_langs)
-        print tutorial, this_tutorial_unpublished_langs
+        this_tutorial_unassigned_langs = Language.objects.filter(
+            id__in = user_langs).exclude(id__in = this_tutorial_assigned_langs)
+        print tutorial, this_tutorial_unassigned_langs
 
-        for a_lang in this_tutorial_unpublished_langs:
+        for a_lang in this_tutorial_unassigned_langs:
             tutorialsavailable = TutorialsAvailable.objects.filter(
                 tutorial_detail = tutorial, language = a_lang)
             if not tutorialsavailable.exists():
