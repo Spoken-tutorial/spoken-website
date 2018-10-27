@@ -14,7 +14,7 @@
 {% block content %}
   <div class='filters row' >
 
-    <form action="{{ action }}" method="get" class='form-horizontal'>
+    <form action="{{ action }}" method="post" class='form-horizontal'>
       {% csrf_token %}
   
       <div class="col-md-4 col-md-4 col-sm-4">
@@ -46,81 +46,89 @@
     
   <div class="col-sm-offset-1 col-lg-10">  
 
-    <ul class="tabs nav nav-tabs">
-      <li {% if status == 'rate' %}class="active"{% endif %}>
-      <a href="{% url 'creation:rate_contributors' 'rate' %}"><i class="fa fa-list-ul"></i> Contributors </a></li>
-      <li {% if status == 'rated' %}class="active"{% endif %}>
-      <a href="{% url 'creation:rate_contributors' 'rated' %}"><i class="fa fa-list-ul"></i> Rated </a></li>
-      </ul>
+    
         <div class="tab-content" >
-        <div class="tab-pane active">
-          {% if status == 'rate' %}
           <table class="paleblue table table-striped table-hover table-bordered ">
-            {% get_sortable_header header ordering request.GET %}  
-          <tr class="pull-right ">
-            <input type = "submit" class=" btn btn-primary pull-right"  value="Save" \>
-          </tr>
+            {% get_sortable_header header ordering request.GET %} 
 
           {% for record in contributors %}
           <tr class="text-center">
-          <td><input type="checkbox" name ="contri" value ="{{ record.user__username }}" class="col-md-10 "></td>
+          <td>
+            <a class="btn btn-warning" href="#" onclick=enable('{{forloop.counter}}','{{record.user__username}}','{{record.language__name}}')>Edit</a>
+                    </td>
           <td align="center" class="form-group">{{ record.user__username }}</td>       
           </label>
+          <td class="form-group">{{record.language__name}}</td>
           
           <td >
           <div align="center">
             <label for="sel1"></label>
             {% if record.status == 0 %}
-            <select disabled class="form-horizontal form-control" >
-              <option>0</option>
-              <option>1</option>
-              <option>2</option>
-              <option>3</option>
-              <option>4</option>
-              <option>5</option>
-            </select>
+            <i>Inactive</i>
             {%else%}
-            <select name ="rating" id="sel1" class="form-horizontal form-control">
-              <option>0</option>
-              <option>1</option>
-              <option>2</option>
-              <option>3</option>
-              <option>4</option>
-              <option>5</option>
+            {{record.status}}
+            <select disabled name ="rating" id='sel{{forloop.counter}}' class="form-horizontal form-control">
+              <option >0</option>
+              {% for i in i|rjust:"5" %}
+                i ij {{i}}
+            
+            
+            {% if record.rating == forloop.counter %}
+              <option selected>{{forloop.counter}}</option>
+              {%else%}
+              <option >{{ forloop.counter }}</option>
+              {% endif %}
+            
+              {% endfor %}
+
             </select>
           </div>
           {% endif %}
           </td>
           <td>
-            {%for a_contri in rated_contributors %}
-            {% if a_contri.user__username == record.user__username%}
-              {{a_contri.rating}}
-              {% endif %}
-              {% endfor %}
- 
+      <input onclick=save('{{forloop.counter}}','{{record.user__username}}','{{record.language__name}}') class="btn btn-primary pull-right"  value="Save" \>
           </td>
           </tr>
           </tr > 
           {% endfor %}
     </table>
-{% endif %}
-
-  {% if status == 'rated' %}
-    <table class="paleblue table table-striped table-hover table-bordered">
-          <tr> <th class="col-sm-offset-4"> Rated Contributors </th>
-            <th></th></tr>
-            <th>User</th>
-            <th>Rating</th>
-      {%for rates in rated_contributors %}    
-          <tr>
-            <td> {{rates.user__username}}</td>
-            <td> {{ rates.rating }}</td>  
-          </tr>
-          {% endfor %}
-    </table>
- 
-  {% endif %}
   </div>
-  </div> 
 </div>
-{% endblock %}  
+</form>
+</div>
+{% endblock %} 
+
+
+{% block compressjsblock %}
+ <script type="text/javascript"> 
+function save(id_to_edit , username , language)
+{
+  element_id = "sel"+id_to_edit;
+  var new_rating = $("#"+element_id+" option:selected");
+  var username = username;
+  
+$.ajax({
+                type : "POST",
+                url:"/creation/rate_contributors/",
+                dataType : "json",
+                data:
+                { 'username' : username, 
+                  'language':language,
+                  'rating':new_rating.text(),
+                  'mode': 'update',
+                },
+                success: function(data)
+                {
+                       location.reload();
+                }
+              });  
+}
+
+function enable(id_to_edit)
+{
+  element_id = "sel"+id_to_edit;
+  document.getElementById(element_id).disabled = false;
+}
+
+</script>
+{% endblock %}

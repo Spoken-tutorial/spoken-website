@@ -469,8 +469,8 @@ class Collaborate(models.Model):
 
 class ContributorRating(models.Model):
     user = models.ForeignKey(User)
-    choices = ((1, 1), (2, 2), (3, 3), (4, 4), (5, 5))
-    rating = models.PositiveIntegerField(choices=choices)
+    choices = ((0,0), (1, 1), (2, 2), (3, 3), (4, 4), (5, 5))
+    rating = models.PositiveIntegerField(choices=choices,default=0)
     language = models.ForeignKey(Language)
 
     class Meta:

@@ -86,7 +86,7 @@ urlpatterns = patterns('',
     url(r'^report-missing-component/list/$', 'creation.views.report_missing_component_list', name="report_missing_component_list"),
 
     #Bidding Module
-    url(r'^rate_contributors/(?P<sel_status>\w+)/$','creation.views.rate_contributors',name = "rate_contributors"),
+    url(r'^rate_contributors/$','creation.views.rate_contributors',name = "rate_contributors"),
     url(r'^get_latest_contributors','creation.views.get_latest_contributors',name  = "get_latest_contributors"),
     url(r'^allocate_tutorial/(?P<sel_status>\w+)/$', 'creation.views.allocate_tutorial', name="allocate_tutorial"),
     url(r'^allocate_tutorial_manager/(?P<sel_status>\w+)/$', 'creation.views.allocate_tutorial', name="allocate_tutorial_manager"),
