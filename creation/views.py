@@ -3134,22 +3134,19 @@ def allocate_tutorial(request, sel_status):
     fosses = []
     final_query = ''
     bid_count = 0
+    tutorials_count = 0
 
     if is_language_manager(request.user):
         lang_qs = Language.objects.filter(
             id__in = LanguageManager.objects.filter(user = request.user,
             status = STATUS_DICT['active']).values('language'))
-        
-        bid_count = RoleRequest.objects.filter(language__in = lang_qs,
-            status = STATUS_DICT['active']).exclude(language_id = 22).aggregate(Count('id'))
+                
     else:
         lang_qs = Language.objects.filter(id__in = RoleRequest.objects.filter(user = request.user,
             status = STATUS_DICT['active'],role_type =
             Q(ROLES_DICT['contributor'])|Q(ROLES_DICT['external-contributor'])
             ).values('language'))
-        bid_count = RoleRequest.objects.filter(user_id = user.id,
-            status = STATUS_DICT['active']).exclude(language_id = 22).aggregate(Count('id'))
-
+        
     contributors_list = User.objects.filter(id__in = RoleRequest.objects.filter(role_type = ROLES_DICT['contributor'],
             status = STATUS_DICT['active'],language__in = lang_qs).values('user_id').distinct())
 
@@ -3165,11 +3162,14 @@ def allocate_tutorial(request, sel_status):
 
         if is_language_manager(request.user):
             final_query = TutorialResource.objects.filter(
-                script_status = SCRIPT_STATUS_DICT['uploaded'],language__in = lang_qs).order_by('-updated')
+                Q(script_status = SCRIPT_STATUS_DICT['uploaded'])|Q(status = PUBLISHED),
+                language__in = lang_qs).order_by('-updated')
         else:
             final_query = TutorialResource.objects.filter(
-                script_status = SCRIPT_STATUS_DICT['uploaded'],
-                script_user_id = request.user.id).order_by('-updated')
+                Q(script_user_id = request.user.id)|Q(video_user_id = request.user.id),
+                script_status = SCRIPT_STATUS_DICT['uploaded']).order_by('-updated')
+        bid_count = final_query.aggregate(Count('id'))
+        print "bid_count",bid_count['id__count']
     elif sel_status == 'available':
 
         header = {
@@ -3185,6 +3185,7 @@ def allocate_tutorial(request, sel_status):
         final_query = TutorialsAvailable.objects.filter(
             language__in = lang_qs).order_by('tutorial_detail__foss__foss',
             'tutorial_detail__level', 'language','tutorial_detail__order')
+
     elif sel_status == 'ongoing':
         if is_language_manager(request.user):
             header = {
@@ -3214,30 +3215,14 @@ def allocate_tutorial(request, sel_status):
                 9: SortableHeader('extension_status', True, 'Extension' ),
             }
 
-        if is_language_manager(request.user):
-            final_query = TutorialResource.objects.filter(
-                language__in = lang_qs,script_status = SCRIPT_STATUS_DICT['not-started'],
-                assignment_status = ASSIGNMENT_STATUS_DICT['assigned']
-                ).exclude(language_id = 22).order_by(
-                'tutorial_detail__foss__foss', 'language__name', 'tutorial_detail__order')
+
+        tutorialresource_assigned =  get_assigned_tutorials(request,user.id,lang_qs)
+        final_query = tutorialresource_assigned.order_by(
+                'tutorial_detail__foss__foss', 'language__name', 'tutorial_detail__order')            
             
-            bid_count = ContributorRole.objects.filter(
-                language__in = lang_qs,status = STATUS_DICT['active']
-                ).exclude(language_id = 22).aggregate(Count('id'))
-        else:
-            final_query = TutorialResource.objects.filter(
-                Q(video_user = user.id)|Q(script_user = user.id),
-                language__in = lang_qs,script_status = SCRIPT_STATUS_DICT['not-started'],
-                assignment_status = ASSIGNMENT_STATUS_DICT['assigned']
-                ).exclude(language_id = 22).order_by(
-                'tutorial_detail__foss__foss', 'language__name', 'tutorial_detail__order')
-
-            bid_count = ContributorRole.objects.filter(
-                user_id = user.id,status = 1).exclude(language_id = 22).aggregate(Count('id'))
     else:
-
-        raise PermissionDenied()
-
+        messages.error(request,"Invalid request. Please try again !!!")
+    
     extension = []
     pub_tutorials_set = final_query
     context['datetoday'] = datetime.now()
@@ -3249,23 +3234,32 @@ def allocate_tutorial(request, sel_status):
     tutorials = CreationStatisticsFilter(request.POST,
                                          queryset = tutorials_sorted)
     
-    if bid_count != 0:
-        context['tutorials_count'] = bid_count['id__count'] \
-            + tutorials.qs.aggregate(Count('id'))['id__count']
+    tutorials_count = TutorialsAvailable.objects.filter(
+            language__in = lang_qs).aggregate(Count('id'))
+    
+
+    if sel_status in ('available','ongoing'):
+        assigned_tutorials = get_assigned_tutorials(request , user.id , lang_qs)
+        bid_count = assigned_tutorials.aggregate(Count('id'))
+
+    
     try:
         context['bid_count__count'] = bid_count['id__count']
-        if sel_status == 'ongoing':
+        if sel_status == 'completed':
+            tutorials_count = bid_count['id__count'] + tutorials_count['id__count']    
+            context['tutorials_count'] = tutorials_count
             context['perc'] = bid_count['id__count'] * 100 \
-                / (bid_count['id__count'] +
-                   tutorials.qs.aggregate(Count('id'))['id__count'])
+                / tutorials_count
         else:
-            context['perc'] = float(bid_count['id__count'] * 100) \
-                / float(tutorials.qs.aggregate(Count('id'))['id__count'
-                                                            ] + bid_count['id__count'])
-    except:
+            context['tutorials_count'] = tutorials_count['id__count']
+            context['perc'] = bid_count['id__count'] * 100 \
+                / tutorials_count['id__count']
+
+    except ZeroDivisionError:
         context['bid_count__count'] = 0
         context['perc'] = 0
 
+    
     form = tutorials.form
     if lang_qs:
         form.fields['language'].queryset = lang_qs
@@ -3314,15 +3308,26 @@ def allocate_tutorial(request, sel_status):
                       'creation/templates/allocate_tutorial.html',
                       context)
 
+def get_assigned_tutorials(request , user_id , language_set):
+    if is_language_manager(request.user):
+        tutorialresource_assigned = TutorialResource.objects.filter(
+            language__in = language_set,script_status = SCRIPT_STATUS_DICT['not-started'],
+            assignment_status = ASSIGNMENT_STATUS_DICT['assigned']
+            ).exclude(language_id = 22)
+    else:
+        tutorialresource_assigned = TutorialResource.objects.filter(
+            Q(video_user = user_id)|Q(script_user = user_id),
+            language__in = language_set , script_status = SCRIPT_STATUS_DICT['not-started'],
+            assignment_status = ASSIGNMENT_STATUS_DICT['assigned']
+            ).exclude(language_id = 22)
+    return tutorialresource_assigned
 
-# global variable
-submissiondate = datetime.date(datetime.now())
-
+PUBLISHED = 1
 
 @login_required
 def refresh_tutorials(request):
     count = 0
-    PUBLISHED = 1
+
         
     tutorials = TutorialDetail.objects.filter(
         id__in = TutorialResource.objects.filter(status = PUBLISHED,
@@ -3404,7 +3409,6 @@ def single_tutorial_allocater(request, tut, lid, days, user):
     data = "Allocated"
     common_content = TutorialCommonContent.objects.get(tutorial_detail_id = tut.id)
     if days != 1:
-        global submissiondate
         submissiondate = datetime.date(timezone.now() +
                                        timezone.timedelta(days = int(days) + 1))
     tutorial_resource = TutorialResource.objects.filter(
@@ -3475,16 +3479,17 @@ def allocate(request, tdid, lid, uid, days):
 
     # Data is being passed from another function
     # hence the below get functions need not be in try catch
-
-    user = User.objects.get(id = uid)
-    uid = user.id
-    tut = TutorialDetail.objects.get(id = tdid)
+    try:
+        user = User.objects.get(id = uid)
+        uid = user.id
+        tut = TutorialDetail.objects.get(id = tdid)
+    except (User.DoesNotExist , TutorialDetail.DoesNotExist):
+        messages.error(request,"Invalid data . PLease try again !!! ")
+    
     data = 'Response'
     
     lang_name = Language.objects.get(id = lid)
     final_query =  TutorialsAvailable.objects.get(tutorial_detail_id = tut.id,language = lid)
-    lower_tutorial_level = TutorialDetail.objects.filter(foss_id = final_query.tutorial_detail.foss_id,
-            level_id = final_query.tutorial_detail.level_id - 1).values('level').distinct()
     
     contributor_rating = ContributorRating.objects.filter(
         user_id = uid,language_id = lid).values('rating', 'language__name')
@@ -3495,18 +3500,15 @@ def allocate(request, tdid, lid, uid, days):
             ", according to our new system. Please contact your Language Manager")
         return HttpResponse(json.dumps(data), content_type = 'application/json')
 
-    contrib_tutorial_count = ContributorRole.objects.filter(user_id = uid,
-        status = STATUS_DICT['active']).distinct().aggregate(Count('language_id'))
     
     bid_count = TutorialResource.objects.filter(Q(script_user_id = uid) | Q(video_user_id = uid),
         assignment_status = ASSIGNMENT_STATUS_DICT['assigned'] , status = UNPUBLISHED
         ).exclude(language_id = 22).aggregate(Count('id'))
-    print "contrib_tutorial_count",contrib_tutorial_count
     print "bid_count",bid_count
+    lower_tutorial_level = TutorialDetail.objects.filter(foss_id = final_query.tutorial_detail.foss_id,
+            level_id = final_query.tutorial_detail.level_id - 1).values('level').distinct()
     if no_of_foss_gt_3(uid, tdid, 'single'):
-        messages.error(request, 'Maximum of 3 FOSSes allowed per user')
-        
-
+        messages.error(request, 'Maximum of 3 FOSSes allowed per user')        
     else:
         if contributor_rating[0]['rating'] < 3:
             if int(bid_count['id__count']) > 2:
@@ -3580,10 +3582,10 @@ def allocate_foss(request, fid, lang, uid, level, days):
 
     # Cumulative submission date
 
-    if not submissiondate == datetime.date(datetime.now()):
-        messages.success(request, 'Submission Date for ' +
-        user.username + ' is : ' +
-        str(submissiondate))
+    # if not submissiondate == datetime.date(datetime.now()):
+    #     messages.success(request, 'Submission Date for ' +
+    #     user.username + ' is : ' +
+    #     str(submissiondate))
 
     return HttpResponse(json.dumps(data), content_type = 'application/json')
 
