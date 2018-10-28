@@ -46,8 +46,18 @@
       <div class="col-lg-4 col-md-4 col-sm-4">
         <table class="table table-bordered table-hover span6" style="margin-bottom:2px;">        
 
+            
             <tr class="text-muted">
-                <th >Tutorials Bid</th><td>{{ bid_count__count }}</td>
+              {% if status == 'completed' %}
+                <th >Tutorials Published</th>
+              {%endif%}
+              {% if status == 'available' %}
+                <th >Tutorials Available</th>
+              {%endif%}
+              {% if status == 'ongoing' %}
+                <th >Tutorials Bid</th>
+              {%endif%}
+              <td>{{ bid_count__count }}</td>
             </tr>
 
             <tr>
@@ -77,9 +87,7 @@
       <a href="{% url 'creation:allocate_tutorial' 'available' %}"><i class="fa fa-list-ul"></i> Available </a></li>
       <li {% if status == 'ongoing' %}{{ 'class="active"'}}{% endif %}>
       <a href="{% url 'creation:allocate_tutorial' 'ongoing' %}"><i class="fa fa-list-ul"></i> Ongoing </a></li>
-      {% if status == 'available' %}
-      <li class = "pull-right"><a href="{% url 'creation:refresh_tutorials' %}" data-toggle="tooltip" title="Click this for latest list of Tutorials">Refresh list of Tutorials here</a></li>
-      {%endif%}
+      
   </ul>
 
   <div class="tab-content">
@@ -115,9 +123,8 @@
           {% endfor %}      
         {% endfor %}
       {% endif %}
-
+      {% get_sortable_header header ordering request.GET %} 
       {% if status == 'ongoing' %}
-      {% get_sortable_header header ordering request.GET %}  
           {% for record in collection.object_list %}
           <tr>
           <td>{{ collection.start_index|add:forloop.counter|add:-1 }}

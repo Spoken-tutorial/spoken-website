@@ -3142,10 +3142,9 @@ def allocate_tutorial(request, sel_status):
             status = STATUS_DICT['active']).values('language'))
                 
     else:
-        lang_qs = Language.objects.filter(id__in = RoleRequest.objects.filter(user = request.user,
-            status = STATUS_DICT['active'],role_type =
-            Q(ROLES_DICT['contributor'])|Q(ROLES_DICT['external-contributor'])
-            ).values('language'))
+        lang_qs = Language.objects.filter(id__in = RoleRequest.objects.filter(
+            Q(role_type = ROLES_DICT['contributor'])|Q(role_type = ROLES_DICT['external-contributor']),
+            user = request.user , status = STATUS_DICT['active']).values('language'))
         
     contributors_list = User.objects.filter(id__in = RoleRequest.objects.filter(role_type = ROLES_DICT['contributor'],
             status = STATUS_DICT['active'],language__in = lang_qs).values('user_id').distinct())
@@ -3162,14 +3161,12 @@ def allocate_tutorial(request, sel_status):
 
         if is_language_manager(request.user):
             final_query = TutorialResource.objects.filter(
-                Q(script_status = SCRIPT_STATUS_DICT['uploaded'])|Q(status = PUBLISHED),
-                language__in = lang_qs).order_by('-updated')
+                status = PUBLISHED, language__in = lang_qs).order_by('-updated')
         else:
             final_query = TutorialResource.objects.filter(
                 Q(script_user_id = request.user.id)|Q(video_user_id = request.user.id),
-                script_status = SCRIPT_STATUS_DICT['uploaded']).order_by('-updated')
+                status = PUBLISHED).order_by('-updated')
         bid_count = final_query.aggregate(Count('id'))
-        print "bid_count",bid_count['id__count']
     elif sel_status == 'available':
 
         header = {
@@ -3237,22 +3234,20 @@ def allocate_tutorial(request, sel_status):
     tutorials_count = TutorialsAvailable.objects.filter(
             language__in = lang_qs).aggregate(Count('id'))
     
-
     if sel_status in ('available','ongoing'):
-        assigned_tutorials = get_assigned_tutorials(request , user.id , lang_qs)
-        bid_count = assigned_tutorials.aggregate(Count('id'))
-
+        bid_count = tutorials.count()
+        context['bid_count__count'] = tutorials.count()
     
-    try:
-        context['bid_count__count'] = bid_count['id__count']
+    try:    
         if sel_status == 'completed':
             tutorials_count = bid_count['id__count'] + tutorials_count['id__count']    
             context['tutorials_count'] = tutorials_count
+            context['bid_count__count'] = bid_count['id__count']
             context['perc'] = bid_count['id__count'] * 100 \
                 / tutorials_count
         else:
             context['tutorials_count'] = tutorials_count['id__count']
-            context['perc'] = bid_count['id__count'] * 100 \
+            context['perc'] = bid_count * 100 \
                 / tutorials_count['id__count']
 
     except ZeroDivisionError:
@@ -3338,13 +3333,11 @@ def refresh_tutorials(request):
         id__in = LanguageManager.objects.filter(user = request.user,
         status = STATUS_DICT['active']).values('language'))
     else:
-        lang_qs = Language.objects.filter(id__in = RoleRequest.objects.filter(user = request.user,
-            status = STATUS_DICT['active'],role_type =
-            Q(ROLES_DICT['contributor'])|Q(ROLES_DICT['external-contributor'])
-            ).values('language'))
+        # lang_qs = Language.objects.filter(id__in = RoleRequest.objects.filter(
+        #     Q(role_type = ROLES_DICT['contributor'])|Q(role_type = ROLES_DICT['external-contributor']),
+        #     user = request.user, status = STATUS_DICT['active']).values('language'))
+        raise PermissionDenied
         
-    print "user :",lang_qs
-
     for tutorial in tutorials:
         for a_lang in lang_qs:        
             this_tutorial_user_lang = TutorialResource.objects.filter(
@@ -3352,11 +3345,13 @@ def refresh_tutorials(request):
             if this_tutorial_user_lang.filter(status = PUBLISHED).exists():
                 pass
             else:
-                if not this_tutorial_user_lang.filter(
-                assignment_status = ASSIGNMENT_STATUS_DICT['assigned'],
-                script_status__gt = SCRIPT_STATUS_DICT['not-started']).exists():
-                    add_to_tutorials_available(tutorial,a_lang)
-                    count +=1
+                if this_tutorial_user_lang.filter(
+                    assignment_status = ASSIGNMENT_STATUS_DICT['assigned'],
+                    ).exists():
+                    pass
+                else:
+                    count += add_to_tutorials_available(tutorial,a_lang)
+                    
         
     if count > 0:
         messages.success(request, str(count) + ' tutorials added')
@@ -3373,7 +3368,8 @@ def add_to_tutorials_available(tutorial,language):
         tutorialsavailable.tutorial_detail = tutorial
         tutorialsavailable.language = language
         tutorialsavailable.save()
-    return True
+        return 1
+    return 0
 
 UNPUBLISHED = 0 
 
@@ -3621,7 +3617,7 @@ def revoke_allocated_tutorial(request, uid, lid, tdid, taid, reason):
         tutorialsavailableobj.update(tutorial_detail_id = tdid,
                                      language_id = lid)
     else:
-        tutorialsavailableobj = TutorialsAvailable(id = taid)
+        tutorialsavailableobj = TutorialsAvailable()
         tutorialsavailableobj.language_id = lid
         tutorialsavailableobj.tutorial_detail_id = tdid
         tutorialsavailableobj.save()
