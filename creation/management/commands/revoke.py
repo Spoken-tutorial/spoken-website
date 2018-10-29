@@ -19,7 +19,7 @@ class Command(BaseCommand):
     @tx.atomic
     def handle(self, *args, **options):
         assignment_status = {
-        'un-assigned' : 0
+        'un-assigned' : 0,
         'assigned' : 1,
         }
 
@@ -47,7 +47,7 @@ class Command(BaseCommand):
                 lid = a_tutorial.language_id
                 tdid = a_tutorial.tutorial_detail_id
                 
-                tutorialresourceobj = TutorialResource.objects.filter(Q(script_user_id=uid)||Q(video_user_id=uid), \
+                tutorialresourceobj = TutorialResource.objects.filter(Q(script_user_id=uid)|Q(video_user_id=uid),
                     tutorial_detail_id = tdid, language_id = lid)
                 if tutorialresourceobj.exists():
                     tutorialresourceobj.update(assignment_status=assignment_status['un-assigned'])
@@ -62,12 +62,12 @@ class Command(BaseCommand):
                     tutorialsavailableobj.tutorial_detail_id = tdid
                     tutorialsavailableobj.save()
                 
-                contributorrole_active = ContributorRole.objects.filter(user_id=uid, tutorial_detail_id=tdid, language_id=lid, status['active'])
+                contributorrole_active = ContributorRole.objects.filter(user_id=uid, tutorial_detail_id=tdid, language_id=lid,status = status['active'])
                 if contributorrole_active.exists():    
                     contributorrole_active.update(status=status['inactive'])
                     
                     
                 
                 #Send email to contributor if he is nearing deadline
-                send_mail_to_contributor(uid,tdid,lid,True)
-            print ("Exited")
+                #send_mail_to_contributor(uid,tdid,lid,True)
+        print ("Exited")
