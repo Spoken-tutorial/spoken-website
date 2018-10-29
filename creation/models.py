@@ -240,9 +240,10 @@ class ContributorRole(models.Model):
 
 
 class DomainReviewerRole(models.Model):
-    foss_category = models.ForeignKey(FossCategory)
-    language = models.ForeignKey(Language)
+    
     user = models.ForeignKey(User)
+    language = models.ForeignKey(Language)    
+    foss_category = models.ForeignKey(FossCategory)
     status = models.BooleanField()
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -253,9 +254,10 @@ class DomainReviewerRole(models.Model):
 
 
 class QualityReviewerRole(models.Model):
-    foss_category = models.ForeignKey(FossCategory)
-    language = models.ForeignKey(Language)
+    
     user = models.ForeignKey(User)
+    language = models.ForeignKey(Language)    
+    foss_category = models.ForeignKey(FossCategory)
     status = models.BooleanField()
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)

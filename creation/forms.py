@@ -1025,7 +1025,7 @@ class LanguageManagerForm(forms.ModelForm):
                                   queryset=User.objects.filter(Q(groups__name='Contributor'
                                   )
                                   | Q(groups__name='External-Contributor'
-                                  )).order_by('username'), help_text=''
+                                  )).distinct().order_by('username'), help_text=''
                                   ,
                                   error_messages={'required': 'User field required.'
                                   })

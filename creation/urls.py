@@ -98,5 +98,7 @@ urlpatterns = patterns('',
     url(r'^get_languages/(?P<uid>\w+)$', 'creation.views.get_languages', name="get_languages"),
     url(r'^get_tutorials/(?P<fid>\w+)$', 'creation.views.get_tutorials', name="get_tutorials"),
     url(r'^get_other_languages/(?P<uid>\w+)$', 'creation.views.get_other_languages', name="get_other_languages"),
-
+    url(r'^get_domain_languages/(?P<uid>\w+)$', 'creation.views.get_domain_languages', name="get_domain_languages"),
+    url(r'^get_quality_languages/(?P<uid>\w+)$', 'creation.views.get_quality_languages', name="get_quality_languages"),
+    url(r'^refresh_roles/$', 'creation.views.refresh_roles', name="refresh_roles"),
 )

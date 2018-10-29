@@ -195,9 +195,9 @@ def add_contributor_notification(tr_rec, comp_title, message):
 
 ROLES_DICT = {
         'contributor': 0,
-        'external-contributor': 1,
+        'external-contributor': 1,        
         'video-reviewer': 2,
-        'domain-reviewer': 3,
+        'domain-reviewer': 3,        
         'quality-reviewer': 4,
     }
 
@@ -392,6 +392,72 @@ def creation_list_role_requests(request, tabid = 'contributor'):
         return render(request, 'creation/templates/creation_list_role_requests.html', context)
     else:
         raise PermissionDenied()
+
+@login_required
+def refresh_roles(request):
+
+    contrib_count = 0
+    domain_count = 0
+    quality_count = 0
+    contributor_roles = ContributorRole.objects.filter(status = 1).values('user_id','language_id').distinct()
+    domain_roles = DomainReviewerRole.objects.filter(status = 1).values('user_id','language_id').distinct()
+    quality_roles = QualityReviewerRole.objects.filter(status = 1).values('user_id','language_id').distinct()
+    for contributor in contributor_roles:
+        role_request = RoleRequest.objects.filter(
+            user_id = contributor['user_id'],language_id = contributor['language_id'])
+        if not role_request.exists():
+            contrib_user = User.objects.get(id = contributor['user_id'])
+            role_request = RoleRequest()
+            role_request.user = contrib_user
+            role_request.language = Language.objects.get(id = contributor['language_id'])
+            if is_contributor(contrib_user):
+                role_request.role_type = ROLES_DICT['contributor']
+            elif is_external_contributor(contrib_user):
+                role_request.role_type = ROLES_DICT['external-contributor']
+            role_request.status = 1
+            role_request.save()
+            contrib_count += 1
+        else:
+            role_request.update(status =  STATUS_DICT['active'],
+                approved_user_id = request.user.id)
+    messages.success(request,str(domain_count)+ " Contributors added")
+
+    for domain_reviewer in domain_roles:
+        role_request = RoleRequest.objects.filter(
+            user_id = domain_reviewer['user_id'],language_id = domain_reviewer['language_id'])
+        if not role_request.exists():
+            role_request = RoleRequest()
+            role_request.user = User.objects.get(id = domain_reviewer['user_id']) 
+            role_request.language = Language.objects.get(id = domain_reviewer['language_id'])
+            role_request.role_type = ROLES_DICT['domain-reviewer']
+            role_request.status = STATUS_DICT['active']
+            role_request.save()
+            domain_count += 1
+        else:
+            role_request.update(status =  STATUS_DICT['active'],
+                approved_user_id = request.user.id)
+    messages.success(request,str(domain_count)+ " Domain Reviewers added")
+
+    for quality_reviewer in quality_roles:
+        role_request = RoleRequest.objects.filter(
+            user_id = quality_reviewer['user_id'],language_id = quality_reviewer['language_id'])
+        if not role_request.exists():
+            role_request = RoleRequest()
+            role_request.user = User.objects.get(id = quality_reviewer['user_id']) 
+            role_request.language = Language.objects.get(id = quality_reviewer['language_id'])
+            role_request.role_type = ROLES_DICT['quality-reviewer']
+            role_request.status = STATUS_DICT['active']
+            role_request.save()
+            quality_count += 1
+        else:
+            role_request.update(status =  STATUS_DICT['active'],
+                approved_user_id = request.user.id)
+
+    messages.success(request,str(quality_count)+ " Quality Reviewers added")
+
+
+
+    return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
 @login_required
 def init_creation_app(request):
@@ -3639,9 +3705,8 @@ def get_languages(request, uid):
     data = '<option> --- Select a Language ---  </option>'
 
     lang_qs = \
-        Language.objects.filter(id__in = RoleRequest.objects.filter(user_id = uid,
-                                                                  status = 1,
-                                                                  role_type = 0).exclude(language_id = 22).values('language'
+        Language.objects.filter(id__in = RoleRequest.objects.filter(
+            user_id = uid,status = 1,role_type = ROLES_DICT['contributor']).exclude(language_id = 22).values('language'
                                                                                                               )).values_list('id', 'name')
     for a_lang in lang_qs:
         data += '<option value = ' + str(a_lang[0]) + '>' \
@@ -3649,6 +3714,35 @@ def get_languages(request, uid):
     return HttpResponse(json.dumps(data),
                         content_type = 'application/json')
 
+@csrf_exempt
+def get_domain_languages(request, uid):
+    data = '<option> --- Select a Language ---  </option>'
+
+    lang_qs = \
+        Language.objects.filter(id__in = RoleRequest.objects.filter(
+            user_id = uid,status = 1,role_type = ROLES_DICT['domain-reviewer']
+            ).exclude(language_id = 22).values('language')).values_list('id', 'name')
+        
+    for a_lang in lang_qs:
+        data += '<option value = ' + str(a_lang[0]) + '>' \
+            + str(a_lang[1]) + '</option>'
+    return HttpResponse(json.dumps(data),
+                        content_type = 'application/json')
+
+@csrf_exempt
+def get_quality_languages(request, uid):
+    data = '<option> --- Select a Language ---  </option>'
+
+    lang_qs = \
+        Language.objects.filter(id__in = RoleRequest.objects.filter(
+            user_id = uid,status = 1,role_type = ROLES_DICT['quality-reviewer']
+            ).exclude(language_id = 22).values('language')).values_list('id', 'name')
+
+    for a_lang in lang_qs:
+        data += '<option value = ' + str(a_lang[0]) + '>' \
+            + str(a_lang[1]) + '</option>'
+    return HttpResponse(json.dumps(data),
+                        content_type = 'application/json')
 
 @csrf_exempt
 def get_tutorials(request, fid):

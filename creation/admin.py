@@ -135,6 +135,10 @@ class DomainReviewerRoleAdmin(admin.ModelAdmin):
     mark_domain_reviewer_disabled.short_description = "Mark selected domain reviewer roles as disabled"
     actions = ['mark_domain_reviewer_active', 'mark_domain_reviewer_disabled']
 
+    class Media:
+
+        js = ('admin/js/domain_reviewer_languages.js', )
+
 
 class QualityReviewerRoleAdmin(admin.ModelAdmin):
     form = QualityReviewerRoleForm
@@ -162,6 +166,9 @@ class QualityReviewerRoleAdmin(admin.ModelAdmin):
     actions = ['mark_quality_reviewer_active',
                'mark_quality_reviewer_disabled']
 
+    class Media:
+
+            js = ('admin/js/quality_reviewer_languages.js', )
 
 class FossAvailableForTestAdmin(admin.ModelAdmin):
     form = FossAvailableForTestForm
