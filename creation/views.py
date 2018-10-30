@@ -3247,7 +3247,7 @@ def allocate_tutorial(request, sel_status):
         status = 4
         final_query = TutorialsAvailable.objects.filter(
             language__in = lang_qs).order_by('tutorial_detail__foss__foss',
-            'tutorial_detail__level', 'language','tutorial_detail__order')
+            'tutorial_detail__level', 'language','tutorial_detail__order'   )
 
     elif sel_status == 'ongoing':
         if is_language_manager(request.user):
@@ -3372,13 +3372,13 @@ def allocate_tutorial(request, sel_status):
 def get_assigned_tutorials(request , user_id , language_set):
     if is_language_manager(request.user):
         tutorialresource_assigned = TutorialResource.objects.filter(
-            language__in = language_set,script_status = SCRIPT_STATUS_DICT['not-started'],
+            language__in = language_set, status = UNPUBLISHED,
             assignment_status = ASSIGNMENT_STATUS_DICT['assigned']
             ).exclude(language_id = 22)
     else:
         tutorialresource_assigned = TutorialResource.objects.filter(
             Q(video_user = user_id)|Q(script_user = user_id),
-            language__in = language_set , script_status = SCRIPT_STATUS_DICT['not-started'],
+            language__in = language_set , status = UNPUBLISHED,
             assignment_status = ASSIGNMENT_STATUS_DICT['assigned']
             ).exclude(language_id = 22)
     return tutorialresource_assigned
