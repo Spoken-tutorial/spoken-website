@@ -121,7 +121,7 @@ class TrainingPlannerListView(ListView):
     return Semester.objects.get(even=sem)
 
   def get_current_planner(self):
-    now = datetime.now()
+    now = datetime.datetime.now()
     sem = self.is_even_sem(now.month)
     year = self.get_year(sem, now.year)
     try:
@@ -2266,7 +2266,7 @@ class OldTrainingCloseView(CreateView):
           new_training.save()
           messages.error(self.request, 'The selected training is already added to Semester-Planner')
         except:
-          year = str(datetime.now().year)
+          year = str(datetime.datetime.now().year)
           tdate = datetime.strptime(training.tdate.strftime('%Y-%m-%d'), '%Y-%m-%d')
           even_start = datetime.strptime(year + '-01-01', '%Y-%m-%d')
           even_end = datetime.strptime(year + '-06-30', '%Y-%m-%d')
