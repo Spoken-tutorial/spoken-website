@@ -11,6 +11,14 @@ audio, canvas, progress, video {
     display: none;
 }
 </style>
+    <div>
+        <b><p>Kindly note :</p>
+        <ul>
+            <li>Only mp4/mp3/mov file formats will be accepted.</li>
+            <li>Video/Audio duration should be less than 5 minutes.</li>
+            <li>File size should not exceed 50 MB.</li>
+        </ul></b>
+    </div>
     <div class="row well">
         <div class='col-sm-8'>
             {% if form %}
@@ -54,7 +62,7 @@ audio, canvas, progress, video {
         };
         hidden_video_container.onloadedmetadata = function() {
             // To change the allowed duration of the testimonial, please manipulate the variable below(seconds). 
-            var allowed_duration = 600;
+            var allowed_duration = 300;
             if (hidden_video_container.duration > allowed_duration + 5)
                 submit_btn_container.innerHTML = 'Testimonial duration should be less than ' + allowed_duration + ' seconds.'
             else

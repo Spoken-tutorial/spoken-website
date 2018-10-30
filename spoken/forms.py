@@ -159,7 +159,7 @@ class MediaTestimonialForm(forms.Form):
     )
 
     name = forms.CharField(label='Name', required=True)
-    media = forms.FileField(label='File(Select an mp4/mp3 file less than 50MB)', required=True)
+    media = forms.FileField(label='File(Select an mp4/mov/mp3 file less than 50MB)', required=True)
     content = forms.CharField(label='Short Discription', widget=forms.Textarea, required=True,
                               max_length=255)
 
@@ -167,7 +167,7 @@ class MediaTestimonialForm(forms.Form):
         if 'media' not in self.cleaned_data:
             raise ValidationError({'media': ['No file or empty file given', ]})
         super(MediaTestimonialForm, self).clean()
-        formats = ['mp4', 'mp3']
+        formats = ['mp4', 'mp3', 'mov']
         if self.cleaned_data['media'].name[-3:] not in formats:
             self._errors["media"] = self.error_class(["Not a valid file format."])
         return self.cleaned_data['media']
