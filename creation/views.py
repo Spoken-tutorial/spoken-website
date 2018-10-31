@@ -3194,20 +3194,19 @@ def update_codefiles(request):
     return render(request, 'creation/templates/update_codefiles.html', context)
 
 
-
 def payment_honorarium_download(request,hono_id):
     payment_details = TutorialPayment.objects.filter(payment_honorarium_id=hono_id)
     # In a temporary folder, make a temporary file
-    cur_path = os.path.dirname(os.path.realpath(__file__))
-    dest_folder = cur_path+'/sample.pdf'
-    os.chdir(cur_path)
-    tmp_folder = mkdtemp('tex')
-    os.chdir(tmp_folder)        
-    texfile, texfilename = mkstemp(dir=tmp_folder)
+    media_path = settings.MEDIA_ROOT + 'honorarium'
+    
+    dest_folder = media_path+'/sample.pdf'
+    os.chdir(media_path)      
+    texfile, texfilename = mkstemp(dir=media_path)
     tmp_folder =os.path.abspath(os.path.join(texfilename, os.pardir))
     tutorials = []
     totalSecs = 0
-    s = Template('payment_honorarium.template')
+    file_name = ''
+    s = Template('payment_honorarium')
     for tr_pay_id in payment_details:
             #tr_pay = TutorialPayment.objects.get(id = tr_pay_id)
             tutorials.append([tr_pay_id.tutorial_resource.tutorial_detail.tutorial, tr_pay_id.get_duration()])
@@ -3217,7 +3216,7 @@ def payment_honorarium_download(request,hono_id):
     hr, min = divmod(totalSecs, 60)
     #print "%d:%02d:%02d" % (hr, min, sec),
 
-    user = payment_details.distinct().values('user__username')
+    user = payment_details.distinct().values('user__username','user__email')
 
     pdf_data ={}
     amount = payment_details.aggregate(Sum('amount'))
@@ -3234,7 +3233,13 @@ def payment_honorarium_download(request,hono_id):
     pdf_data['money_as_text'] = money_as_text(amount['amount__sum'])
     pdf_data['tutorials'] = tutorials
     pdf_data['totalSecs'] = str(hr)+':'+str(min)+':'+str(sec)
-    pdf_data['rate'] = rate[user_type[0]['user_type']]
+    try:
+        pdf_data['rate'] = rate[user_type[0]['user_type']]
+        file_name = str(user[0]['user__username'])+ " ST"
+    except IndexError:
+        pdf_data['rate'] = 0
+        file_name = "ST"
+    
     # Pass the TeX template through Django templating engine and into the temp file
     os.write(texfile, render_to_string(s.template,pdf_data))
     os.close(texfile)
@@ -3246,12 +3251,11 @@ def payment_honorarium_download(request,hono_id):
     os.remove(texfilename)
     os.remove(texfilename + '.aux')
     os.remove(texfilename + '.log')
-    os.rmdir(tmp_folder)
 
     with open(dest_folder,'r') as pdf :
       response = HttpResponse(content_type='application/pdf')
       response['Content-Disposition'] = 'attachment; \
-                  filename=%s' % (str(user[0]['user__username'])+" ST.pdf")
+                  filename=%s' % (file_name+".pdf")
       response.write(pdf.read())
     os.remove(dest_folder)
     return response
