@@ -403,7 +403,7 @@ def refresh_roles(request):
     domain_roles = DomainReviewerRole.objects.filter(status = 1).values('user_id','language_id').distinct()
     quality_roles = QualityReviewerRole.objects.filter(status = 1).values('user_id','language_id').distinct()
     for contributor in contributor_roles:
-        role_request = RoleRequest.objects.filter(
+        role_request = RoleRequest.objects.filter( role_type = ROLES_DICT['contributor'],
             user_id = contributor['user_id'],language_id = contributor['language_id'])
         if not role_request.exists():
             contrib_user = User.objects.get(id = contributor['user_id'])
@@ -414,16 +414,17 @@ def refresh_roles(request):
                 role_request.role_type = ROLES_DICT['contributor']
             elif is_external_contributor(contrib_user):
                 role_request.role_type = ROLES_DICT['external-contributor']
+            
             role_request.status = 1
             role_request.save()
             contrib_count += 1
         else:
             role_request.update(status =  STATUS_DICT['active'],
                 approved_user_id = request.user.id)
-    messages.success(request,str(domain_count)+ " Contributors added")
+    messages.success(request,str(contrib_count)+ " Contributors added")
 
     for domain_reviewer in domain_roles:
-        role_request = RoleRequest.objects.filter(
+        role_request = RoleRequest.objects.filter( role_type = ROLES_DICT['domain-reviewer'],
             user_id = domain_reviewer['user_id'],language_id = domain_reviewer['language_id'])
         if not role_request.exists():
             role_request = RoleRequest()
@@ -436,10 +437,11 @@ def refresh_roles(request):
         else:
             role_request.update(status =  STATUS_DICT['active'],
                 approved_user_id = request.user.id)
+
     messages.success(request,str(domain_count)+ " Domain Reviewers added")
 
     for quality_reviewer in quality_roles:
-        role_request = RoleRequest.objects.filter(
+        role_request = RoleRequest.objects.filter( role_type = ROLES_DICT['quality-reviewer'],
             user_id = quality_reviewer['user_id'],language_id = quality_reviewer['language_id'])
         if not role_request.exists():
             role_request = RoleRequest()
