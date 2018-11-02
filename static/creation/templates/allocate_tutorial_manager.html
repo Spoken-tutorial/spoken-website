@@ -161,7 +161,7 @@
       <tr>                     
                   <td>{{ record.tutorial_detail.level }}</td>       
                   <td>{{ record.tutorial_detail.order }}</td>
-                  <td>{{ record.tutorial_detail.tutorial }}</td>
+                  <td>{{ record.tutorial_detail.id }}</td>
                   <td>{{ record.language.name }}</td>
                   <td><select id="{{record.tutorial_detail.id}}" class = "form-control">
                     {% for i in i|rjust:"15" %}
@@ -184,7 +184,7 @@
           <td>{{ record.tutorial_detail.level }}</td>
           <td>{{ record.tutorial_detail.order }}</td>      
           <td>{{ record.tutorial_detail.foss.foss }}</td>
-          <td>{{ record.tutorial_detail }}</td>
+          <td>{{ record.tutorial_detail.id }}</td>
           <td>{{ record.language.name }}</td>
           {% if record.script_user.username %}
               <td>{{ record.script_user.username }}</td>             

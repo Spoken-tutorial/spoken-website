@@ -3441,7 +3441,7 @@ def add_to_tutorials_available(tutorial,language):
 
 UNPUBLISHED = 0 
 
-def no_of_foss_gt_3(user, foss_or_tut_id, type_tut):
+def no_of_foss_gt_3(user, foss_or_tut_id, language_id ,type_tut):
     
     fid = 0
     if type_tut == 'single':
@@ -3457,12 +3457,12 @@ def no_of_foss_gt_3(user, foss_or_tut_id, type_tut):
     list_count = list({int(v['tutorial_detail__foss']) for v in all_foss})
 
 
-    if len(list_count) >= 3 and fid not in list_count:
+    if len(list_count) >= 3 and (fid,language_id) not in list_count:
         return True
     return False
 
 LEVEL_NAME = {1: 'Basic', 2: 'Intermediate', 3: 'Advanced'}
-
+SUPER_ADMIN_USER_ID = 7
 def disallow(request , lower_level,tut):
     level_name_in_words = LEVEL_NAME[lower_level]
     messages.error(request, str(level_name_in_words) +
@@ -3497,6 +3497,7 @@ def single_tutorial_allocater(request, tut, lid, days, user):
         contributor_create.tutorial_detail_id = tut.id
         contributor_create.save()
 
+    # Super admin should be able to see the tutorials atleast 
     tutorialsavailableobj = TutorialsAvailable.objects.filter(
         tutorial_detail = tut, language = lid)
     if tutorialsavailableobj.exists():
@@ -3529,7 +3530,36 @@ def single_tutorial_allocater(request, tut, lid, days, user):
         tutorial_resource.submissiondate = submissiondate
         tutorial_resource.save()
 
-        messages.success(request, 'Successfully alloted ' +
+    super_admin_contributor_languages = RoleRequest.objects.filter(role_type = 0,
+        user_id=SUPER_ADMIN_USER_ID, status = STATUS_DICT['active'], language_id = lid).values(
+        'language').distinct()
+    print ("super_admin_contributor_languages",super_admin_contributor_languages)
+    tutorial_resource = TutorialResource.objects.filter( tutorial_detail =tut,
+        language_id__in = super_admin_contributor_languages)
+    count = 0            
+    for tutorial in tutorial_resource:
+        super_admin_contrib_roles = ContributorRole.objects.filter(
+        user_id = SUPER_ADMIN_USER_ID, language_id = tutorial.language,
+        tutorial_detail_id = tutorial.tutorial_detail)
+        if not super_admin_contrib_roles.exists():
+            print ("tutorial : ",tutorial.tutorial_detail.tutorial)                
+            print ("language : ",tutorial.language.name)
+            print ("user_id : ",tutorial.script_user_id)                
+            print ("status : ",tutorial.status,"\n\n\n")                
+            count +=1
+        
+            add_previous_contributor_role = ContributorRole()
+            add_previous_contributor_role.foss_category_id = tutorial.tutorial_detail.foss_id
+            add_previous_contributor_role.language_id = tutorial.language_id
+            add_previous_contributor_role.user_id = SUPER_ADMIN_USER_ID
+            add_previous_contributor_role.status = STATUS_DICT['active']
+            add_previous_contributor_role.tutorial_detail_id = tutorial.tutorial_detail_id
+            add_previous_contributor_role.save()
+            
+        print (tutorial.tutorial_detail.foss_id, tutorial.language.name,
+                tutorial.tutorial_detail.tutorial)            
+    
+    messages.success(request, 'Successfully alloted ' +
                          tut.tutorial + ' to ' + str(user) + ' : ' +
                          str(submissiondate))
 
@@ -3571,7 +3601,7 @@ def allocate(request, tdid, lid, uid, days):
     print "bid_count",bid_count
     lower_tutorial_level = TutorialDetail.objects.filter(foss_id = final_query.tutorial_detail.foss_id,
             level_id = final_query.tutorial_detail.level_id - 1).values('level').distinct()
-    if no_of_foss_gt_3(uid, tdid, 'single'):
+    if no_of_foss_gt_3(uid, tdid, lid,'single'):
         messages.error(request, 'Maximum of 3 FOSSes allowed per user')        
     else:
         if contributor_rating[0]['rating'] < 3:
