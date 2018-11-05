@@ -195,14 +195,14 @@
           <td>{{ record.tutorial_detail.level }}</td>
           <td>{{ record.tutorial_detail.order }}</td>      
           <td>{{ record.tutorial_detail.foss.foss }}</td>
-          <td>{{ record.tutorial_detail.id }}</td>
+          <td>{{ record.tutorial_detail }}</td>
           <td>{{ record.language.name }}</td>
           {% if record.script_user.username %}
               <td id="script_user">{{ record.script_user.username }}           
           {% else %}
               <td id="script_user1">{{ record.script_user.first_name }}
           {% endif %}
-          <div class="form-group ">
+          <div hidden id="div_script{{forloop.counter}}" class="form-group ">
               
               <div class="col-sm-4"> 
               <select class="form-control get_contributrs" tabindex="1" id="script_contributors{{forloop.counter}}">
@@ -218,7 +218,7 @@
           {% else %}
               <td id="video_user">{{ record.video_user.first_name }}
           {% endif %}    
-          <div class="form-group ">
+          <div hidden id="div_video{{forloop.counter}}" class="form-group ">
               
               <div class="col-sm-4"> 
               <select class="form-control get_contributrs" tabindex="1" id="video_contributors{{forloop.counter}}">
@@ -326,7 +326,6 @@
                 },
                 success: function(data)
                 { 
-                  alert(data);
                   location.reload();
                 }
               });
@@ -393,7 +392,6 @@
                 dataType : "json",
                 success: function(data)
                 {
-                  alert(data);
                   location.reload();
                 }
                 });
@@ -407,7 +405,6 @@
 
         function revoke_tutorials(tutorial_resource_id){
           var sub_date = document.getElementById("email_sub_date").checked;
-          alert("tutorial_resource_id"+tutorial_resource_id);
           $.ajax({
                 type : "POST",
                 url:'/creation/revoke_allocated_tutorial/',
@@ -426,9 +423,9 @@
         function enable(id_to_edit, language)
         {
           var element_id = "script_user"+id_to_edit;
+          $("#div_video"+id_to_edit).show();
+          $("#div_script"+id_to_edit).show();
           
-          
-          alert(language);
            $.ajax({
                 type : "POST",
                 url:'/creation/get_rated_contributors/',
@@ -438,7 +435,6 @@
                 },
                 success: function(data)
                 {
-                  alert(data);
                   $('#script_contributors'+id_to_edit).html(data);
                   $('#video_contributors'+id_to_edit).html(data);
                 }
@@ -449,8 +445,6 @@
         function save(id_to_edit,record){
           var script_contributors_option = $("#script_contributors"+id_to_edit +" option:selected").attr('id');
           var video_contributors_option = $("#video_contributors"+id_to_edit + " option:selected").attr('id');
-          alert(script_contributors_option);
-          alert(video_contributors_option);
           $.ajax({
                 type : "POST",
                 url:'/creation/update_contributors/',
