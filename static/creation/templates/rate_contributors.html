@@ -54,7 +54,7 @@
           {% for record in contributors %}
           <tr class="text-center">
           <td>
-            <a class="btn btn-warning" href="#" onclick=enable('{{forloop.counter}}','{{record.user__username}}','{{record.language__name}}')>Edit</a>
+            <a class="btn btn-warning" href="#" onclick=enable('{{forloop.counter}}')>Edit</a>
                     </td>
           <td align="center" class="form-group">{{ record.user__username }}</td>       
           </label>
@@ -119,7 +119,7 @@ $.ajax({
                 },
                 success: function(data)
                 {
-                       location.reload();
+                  location.reload();
                 }
               });  
 }

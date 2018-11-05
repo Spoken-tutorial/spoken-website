@@ -26,11 +26,22 @@
               
           {% if status == 'ongoing'  %}
             <div class="form-group">
-              <label for="id_script_user_id" class="col-sm-4 control-label">Contributors</label>
+              <label for="id_script_user_id" class="col-sm-4 control-label">Script Contributors</label>
               <div class="col-sm-8"> 
    
              
             {% render_field form.script_user class+="form-control script_user" tabindex="1" %}
+                {{ form.tutorial_detail.errors }}
+                 
+            </div>
+          </div>
+
+            <div class="form-group">
+              <label for="id_video_user_id" class="col-sm-4 control-label">Video Contributors</label>
+              <div class="col-sm-8"> 
+   
+             
+            {% render_field form.video_user class+="form-control video_user" tabindex="1" %}
                 {{ form.tutorial_detail.errors }}
                  
             </div>
@@ -131,7 +142,7 @@
                 {%endif%}
                 {% endfor %}
             </select>
-</div>
+        </div>
         </div>
           
               <label for="id_foss" class="col-sm-4 control-label "><h5>FOSS Submission Date</h5></label>
@@ -161,7 +172,7 @@
       <tr>                     
                   <td>{{ record.tutorial_detail.level }}</td>       
                   <td>{{ record.tutorial_detail.order }}</td>
-                  <td>{{ record.tutorial_detail.id }}</td>
+                  <td>{{ record.tutorial_detail.tutorial }}</td>
                   <td>{{ record.language.name }}</td>
                   <td><select id="{{record.tutorial_detail.id}}" class = "form-control">
                     {% for i in i|rjust:"15" %}
@@ -187,10 +198,37 @@
           <td>{{ record.tutorial_detail.id }}</td>
           <td>{{ record.language.name }}</td>
           {% if record.script_user.username %}
-              <td>{{ record.script_user.username }}</td>             
+              <td id="script_user">{{ record.script_user.username }}           
           {% else %}
-              <td>{{ record.script_user.first_name }}</td>
+              <td id="script_user1">{{ record.script_user.first_name }}
+          {% endif %}
+          <div class="form-group ">
+              
+              <div class="col-sm-4"> 
+              <select class="form-control get_contributrs" tabindex="1" id="script_contributors{{forloop.counter}}">
+                <option id = "0">
+                  <label id="0">--- Select a Contributor ---</label>
+                </option>              
+            </select>
+        </div>
+        </div>
+        </td>
+          {% if record.video_user.username %}
+              <td id="video_user">{{ record.video_user.username }}         
+          {% else %}
+              <td id="video_user">{{ record.video_user.first_name }}
           {% endif %}    
+          <div class="form-group ">
+              
+              <div class="col-sm-4"> 
+              <select class="form-control get_contributrs" tabindex="1" id="video_contributors{{forloop.counter}}">
+                <option id = "0">
+                  <label value="0">--- Select a Contributor ---</label>
+                </option>
+            </select>
+        </div>
+        </div>
+        </td>
           <td >{{ record.updated|date:"d M Y" }}</td>
       {% if record.submissiondate|date:"Y" == '2000' %}
           <td >{{datetoday|date:"d M Y"}} </td>
@@ -218,13 +256,19 @@
             <a disabled class="btn btn-danger" > 
             Revoke </a><br>
             {% else%}
-            <a class="btn btn-danger" href="#" onclick=revoke_tutorials('{{record.script_user_id}}','{{record.language_id}}','{{record.tutorial_detail_id}}','{{record.id}}')> 
+            <a class="btn btn-danger" href="#" onclick=revoke_tutorials('{{record.id}}')> 
             Revoke </a><br>
             {% endif %}
               <input type="checkbox"  id="email_sub_date"> Submission Date<br>
             
             
           </td>
+
+            <td>
+            <a class="btn btn-warning" id="edit{{forloop.counter}}" href="#" onclick=enable('{{forloop.counter}}','{{record.language.id}}')>Edit</a>
+             <a class="btn btn-success" id="edit{{forloop.counter}}" href="#" onclick=save('{{forloop.counter}}','{{record.id}}')>Save</a>
+            </td>
+
           </div>
           </tr>
           {% endfor %}
@@ -281,8 +325,9 @@
                   tutorial: tutorial
                 },
                 success: function(data)
-                {
-                       location.reload();
+                { 
+                  alert(data);
+                  location.reload();
                 }
               });
         }
@@ -348,6 +393,7 @@
                 dataType : "json",
                 success: function(data)
                 {
+                  alert(data);
                   location.reload();
                 }
                 });
@@ -359,14 +405,17 @@
           }
         }
 
-        function revoke_tutorials(user_id,language_id,tutorial_detail_id, tuto_available_id){
+        function revoke_tutorials(tutorial_resource_id){
           var sub_date = document.getElementById("email_sub_date").checked;
-        
-          // location.href = '/creation/revoke_allocated_tutorial/'+user_id+'/'+language_id+'/'+tutorial_detail_id+'/'+tuto_available_id+'/'+sub_date
+          alert("tutorial_resource_id"+tutorial_resource_id);
           $.ajax({
-                type : "GET",
-                url:'/creation/revoke_allocated_tutorial/'+user_id+'/'+language_id+'/'+tutorial_detail_id+'/'+tuto_available_id+'/'+sub_date,
+                type : "POST",
+                url:'/creation/revoke_allocated_tutorial/',
                 dataType : "json",
+                data:{
+                  'tutorial_resource_id':tutorial_resource_id,
+                  'submissiondate_message ':sub_date,
+                },
                 success: function(data)
                 {
                   location.reload();
@@ -374,6 +423,49 @@
                 });
         }
 
+        function enable(id_to_edit, language)
+        {
+          var element_id = "script_user"+id_to_edit;
+          
+          
+          alert(language);
+           $.ajax({
+                type : "POST",
+                url:'/creation/get_rated_contributors/',
+                dataType : "json",
+                data: {
+                  'language' : language
+                },
+                success: function(data)
+                {
+                  alert(data);
+                  $('#script_contributors'+id_to_edit).html(data);
+                  $('#video_contributors'+id_to_edit).html(data);
+                }
+                });
+ 
+        }
+
+        function save(id_to_edit,record){
+          var script_contributors_option = $("#script_contributors"+id_to_edit +" option:selected").attr('id');
+          var video_contributors_option = $("#video_contributors"+id_to_edit + " option:selected").attr('id');
+          alert(script_contributors_option);
+          alert(video_contributors_option);
+          $.ajax({
+                type : "POST",
+                url:'/creation/update_contributors/',
+                dataType : "json",
+                data: {
+                  'tr_id' : record,
+                  'script_user':script_contributors_option,
+                  'video_user':video_contributors_option,
+                },
+                success: function(data)
+                {
+                  location.reload();
+                }
+                });
+        }
 
     </script>
 
