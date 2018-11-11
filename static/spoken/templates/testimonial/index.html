@@ -64,7 +64,7 @@
     </style>
 {% endblock %}
 {% block heading %}
-    <i class="fa fa-list-ul"></i> Testimonials <a href="{% url 'events:events_dashboard' %}" class=' dashboard pull-right'>Dashboard</a>
+    <i class="fa fa-list-ul"></i> Testimonials.. <a href="{% url 'events:events_dashboard' %}" class=' dashboard pull-right'>Dashboard</a>
 {% endblock %}
 {% block search %}{% endblock %}
 {% block content %}
@@ -123,6 +123,7 @@
                     <table class="paleblue table table-bordered table-hover table-striped">
                         <tr>
                             <th>Video</th>
+                            <th>Foss</th>
                             <th>Description</th>
                             <th>User</th>
                             <th class="col-center">Action</th>
@@ -131,11 +132,12 @@
                             <tr class="{% cycle 'odd' 'even' %}">
                                 <td>
                                     <div class='st_video_container'>
-                                        <video class="st_video" title='{{ mrecord.foss_foss }}' controls preload data-setup="{}">
+                                        <video class="st_video" title='{{ mrecord.foss }}' controls preload data-setup="{}">
                                         <source src="{{ media_url }}{{ mrecord.path }}" />
                                         </video>
                                     </div>
                                 </td>
+                                <td>{{ mrecord.foss }}</td>
                                 <td>{{ mrecord.content }}</td>
                                 <td>{{ mrecord.user }}</td>
                                 <td><a href="{% url 'admin_testimonials_media_delete' mrecord.id %}">Delete</a></td>
