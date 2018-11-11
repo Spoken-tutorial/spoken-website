@@ -9,7 +9,7 @@
 			IIT Bombay,\\
 			Mumbai}
 	\opening{Dear Sir,}
-	I request you to kindly approve the honorarium of \textbf{ {{ amount.amount__sum }} } ({{money_as_text}}) for \textbf{ {{contributor.0.user__username}} }, for the creation of the following spoken
+	I request you to kindly approve the honorarium of \textbf{ {{ amount.amount__sum }} } ({{money_as_text}}) for \textbf{ {{contributor.0.user__first_name}} {{contributor.0.user__last_name}} }, for the creation of the following spoken
 	tutorials on \textbf{ {{foss.0.tutorial_resource__tutorial_detail__foss__foss}} }.\\
 
 	\begin{center}
