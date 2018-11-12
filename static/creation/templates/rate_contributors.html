@@ -63,25 +63,20 @@
           
             <td class="col-sm-1">
               <div>
-                <label for="sel1"></label>
-                {% if record.status == 0 %}
-                <i>Inactive</i>
-                {%else%}
-                {{record.status}}
                 <select disabled name ="rating" id='sel{{forloop.counter}}' class="form-horizontal form-control">
-                  <option >0</option>
-                  {% for i in i|rjust:"5" %}
-                     {{i}}                
+                  <option>0</option>
+                  {% for i in i|rjust:"5" %}          
                 {% if record.rating == forloop.counter %}
+                  
                   <option selected>{{forloop.counter}}</option>
                   {%else%}
                   <option >{{ forloop.counter }}</option>
                   {% endif %}
-                
+                    
                   {% endfor %}
 
                 </select>
-              {% endif %}
+              
               </div>
             </td>
 
