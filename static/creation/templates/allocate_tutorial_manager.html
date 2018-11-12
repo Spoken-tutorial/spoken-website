@@ -207,7 +207,7 @@
           {% endif %}
           <div hidden id="div_script{{forloop.counter}}" class="form-group ">
               
-              <div class="col-sm-4"> 
+              <div class="col-sm-12"> 
               <select class="form-control get_contributrs" tabindex="1" id="script_contributors{{forloop.counter}}">
                 <option id = "0">
                   <label id="0">--- Select a Contributor ---</label>
@@ -223,13 +223,13 @@
           {% endif %}    
           <div hidden id="div_video{{forloop.counter}}" class="form-group ">
               
-              <div class="col-sm-4"> 
+          <div class="col-sm-12"> 
               <select class="form-control get_contributrs" tabindex="1" id="video_contributors{{forloop.counter}}">
                 <option id = "0">
                   <label value="0">--- Select a Contributor ---</label>
                 </option>
             </select>
-        </div>
+          </div>
         </div>
         </td>
           <td >{{ record.updated|date:"d M Y" }}</td>

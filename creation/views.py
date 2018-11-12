@@ -3149,10 +3149,10 @@ def rate_contributors(request):
         form = contributor_list.form
         if lang_qs:
             form.fields['language'].queryset = lang_qs
-
+        context['form'] = form
         context['header'] = header
         context['contributors'] = contributors_sorted
-        context['form'] = form
+        
         context['ordering'] = ordering
         
         
