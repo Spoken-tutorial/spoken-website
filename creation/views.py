@@ -3215,7 +3215,7 @@ def allocate_tutorial(request, sel_status):
             Q(role_type = ROLES_DICT['contributor'])|Q(role_type = ROLES_DICT['external-contributor']),
             user = request.user , status = STATUS_DICT['active']).values('language'))
         
-    
+    contributors_list = User.objects.filter(id__in = active_contributor_list(lang_qs))
     if sel_status == 'completed':
         header = {
             1: SortableHeader('# ', False),
@@ -3331,19 +3331,9 @@ def allocate_tutorial(request, sel_status):
     if lang_qs:
         form.fields['language'].queryset = lang_qs
 
-    
-    if request.method == 'POST':
-        language_id = request.POST.get('language')
-
-        if language_id:
-            contributors_list = active_contributor_list(language_id)
-            rated_contributors = ContributorRating.objects.filter(
-                language_id = language_id, user_id__in = contributors_list
-                ).values_list('user_id', 'user__username', 'rating')
-            context['contributors'] = rated_contributors
-        if contributors_list:
-            form.fields['script_user'].queryset = contributors_list
-            form.fields['video_user'].queryset = contributors_list
+    if contributors_list:
+        form.fields['script_user'].queryset = contributors_list
+        form.fields['video_user'].queryset = contributors_list
 
     context['form'] = form
 
@@ -3366,7 +3356,13 @@ def allocate_tutorial(request, sel_status):
     context['status'] = active
     context['counter'] = itertools.count(1)
 
-    
+    if request.method == 'POST':
+        language_id = request.POST.get('language')
+        if language_id:
+            rated_contributors = ContributorRating.objects.filter(
+                language_id = language_id, user_id__in = contributors_list
+                ).values_list('user_id', 'user__username', 'rating')
+            context['contributors'] = rated_contributors
 
     context.update(csrf(request))
     if is_language_manager(request.user):
