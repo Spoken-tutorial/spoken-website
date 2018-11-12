@@ -4,7 +4,7 @@
 {% load eventsdata %}
 {% load cmsdata %}
 {% load creationdata %}
-
+{% block title %}Tutorial Allocation {% endblock %}
 {% block compresscssblock %}
     <link rel="stylesheet" href="{% static 'spoken/css/jquery.datetimepicker.css' %}" type="text/css" media="screen" charset="utf-8" />
 {% endblock %}
@@ -24,7 +24,7 @@
               </div>         
           </div>
               
-          {% if status == 'ongoing'  %}
+          {% if status == 'ongoing' or status == 'completed' %}
             <div class="form-group">
               <label for="id_script_user_id" class="col-sm-4 control-label">Script Contributors</label>
               <div class="col-sm-8"> 
@@ -135,11 +135,14 @@
                   <label value="0">--- Select a Contributor ---</label>
                 </option>
                 {% for a_contributor in contributors %}
+                <!-- 1:'user__username', 2:'rating',3:'language__name' -->
+                {% if a_contributor.2 != 0 %}
                 {% if a_contributor.2 > 3 %}
                 <option id="{{a_contributor.0}}" style="color:green" value="{{a_contributor.1}}">{{a_contributor.1}}</option>
                 {%else%}
                 <option id="{{a_contributor.0}}" style="color:red" value="{{a_contributor.1}}">{{a_contributor.1}}</option>
-                {%endif%}
+                {% endif %}
+                {% endif %}
                 {% endfor %}
             </select>
         </div>
@@ -288,6 +291,13 @@
           {% else %}
               <td>{{ record.script_user.first_name }}</td>
           {% endif %}
+
+          {% if record.video_user.username %}
+              <td>{{ record.video_user.username }}</td>             
+          {% else %}
+              <td>{{ record.video_user.first_name }}</td>
+          {% endif %}
+
           </tr>
           {% endfor %}
       {% endif %}            
@@ -335,8 +345,8 @@
 
         function allocate(var_a,var_b,var_c)
         {
-          // var_a :tutorial_detail , var_b : language , var_c : differentiator
-          // var_a :foss_id         , var_b : user     , var_c : differentiator
+          // var_a :tutorial_detail , var_b : language , var_c : differentiator [tutorial allocation]
+          // var_a :foss_id         , var_b : user     , var_c : differentiator [foss allocation]
 
           var contributor_option = $("#contributors option:selected");
           var language = $(".language option:selected").text();

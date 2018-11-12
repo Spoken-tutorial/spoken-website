@@ -323,7 +323,7 @@ class ContributorNotification(models.Model):
     user = models.ForeignKey(User)
     title = models.CharField(max_length=255)
     message = models.TextField()
-    tutorial_resource = models.ForeignKey(TutorialResource)
+    tutorial_resource = models.ForeignKey(TutorialResource, null = True)
     created = models.DateTimeField(auto_now_add=True)
 
 
@@ -339,7 +339,7 @@ class DomainReviewerNotification(models.Model):
     user = models.ForeignKey(User)
     title = models.CharField(max_length=255)
     message = models.TextField()
-    tutorial_resource = models.ForeignKey(TutorialResource)
+    tutorial_resource = models.ForeignKey(TutorialResource, null = True)
     created = models.DateTimeField(auto_now_add=True)
 
 
@@ -347,7 +347,7 @@ class QualityReviewerNotification(models.Model):
     user = models.ForeignKey(User)
     title = models.CharField(max_length=255)
     message = models.TextField()
-    tutorial_resource = models.ForeignKey(TutorialResource)
+    tutorial_resource = models.ForeignKey(TutorialResource, null = True)
     created = models.DateTimeField(auto_now_add=True)
 
 

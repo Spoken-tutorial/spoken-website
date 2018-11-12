@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
             name='ContributorRating',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('rating', models.PositiveIntegerField(choices=[(1, 1), (2, 2), (3, 3), (4, 4), (5, 5)])),
+                ('rating', models.PositiveIntegerField(default=0, choices=[(0, 0), (1, 1), (2, 2), (3, 3), (4, 4), (5, 5)])),
                 ('language', models.ForeignKey(to='creation.Language')),
                 ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
             ],
@@ -68,7 +68,22 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='tutorialresource',
             name='submissiondate',
-            field=models.DateTimeField(default=datetime.datetime(2000, 1, 2, 12, 0), blank=True),
+            field=models.DateTimeField(default=datetime.datetime(2000, 1, 2, 12, 0)),
+        ),
+        migrations.AlterField(
+            model_name='contributornotification',
+            name='tutorial_resource',
+            field=models.ForeignKey(to='creation.TutorialResource', null=True),
+        ),
+        migrations.AlterField(
+            model_name='domainreviewernotification',
+            name='tutorial_resource',
+            field=models.ForeignKey(to='creation.TutorialResource', null=True),
+        ),
+        migrations.AlterField(
+            model_name='qualityreviewernotification',
+            name='tutorial_resource',
+            field=models.ForeignKey(to='creation.TutorialResource', null=True),
         ),
         migrations.AlterUniqueTogether(
             name='contributorrole',
