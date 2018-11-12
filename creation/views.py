@@ -3606,7 +3606,7 @@ def add_tutorial_contributor_notification(user_id, tuto_resource_id, message_typ
 @login_required
 def single_tutorial_allocater(request, tut, lid, days, user):
     data = "Allocated"
-    
+    WORK_STATUS = 0
     # If timezone issue is solved, + 1 can be removed
     if days != 1:
         submissiondate = datetime.date(timezone.now() +
@@ -3645,6 +3645,10 @@ def single_tutorial_allocater(request, tut, lid, days, user):
         tutorial_resource.outline_user = user
         tutorial_resource.script_user = user
         tutorial_resource.video_user = user
+        tutorial_resource.outline_status = WORK_STATUS
+        tutorial_resource.script_status = WORK_STATUS
+        tutorial_resource.timed_script = WORK_STATUS
+        tutorial_resource.video_status = WORK_STATUS
         # assignment_status -
         # 0 : Not Assigned , 1 : Work in Progress , 2 : Completed
         tutorial_resource.assignment_status = ASSIGNMENT_STATUS_DICT['assigned']
@@ -3663,7 +3667,7 @@ def single_tutorial_allocater(request, tut, lid, days, user):
     if tutorial_resource_id:
         add_tutorial_contributor_notification(user.id, tutorial_resource_id, 'add')
 
-    # Super admin should be able to see the tutorials atleast
+    # Super admin should be able to see the super admin language tutorials atleast
     super_admin_contributor_languages = RoleRequest.objects.filter(role_type = 0,
         user_id=SUPER_ADMIN_USER_ID, status = STATUS_DICT['active'], language_id = lid).values(
         'language').distinct()
