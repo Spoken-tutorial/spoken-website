@@ -797,10 +797,10 @@ def koha_coordinators_workshop_download(request):
                     uniqueness = True
                 else:
                     num += 1
-            qrcode = 'Verify at: http://spoken-tutorial.org/certificate/verify/{0} '.format(short_key)
+            qrcode = 'Verify at: http://spoken-tutorial.org/certificate/verify/{0} '.format(short_key) 
             details = {'name': name, 'serial_key': short_key, 'college': college}
-            certificate = create_koha_coordinators_workshop_certificate(certificate_path, details,
-                                                             qrcode, type, paper, workshop, file_name)
+            certificate = create_koha_coordinators_workshop_certificate(certificate_path, 
+                details, qrcode, type, paper, workshop, file_name)
             if not certificate[1]:
                 certi_obj = Certificate(name=name, email=email,
                                         serial_no=serial_no, counter=1, workshop=workshop,
@@ -815,6 +815,7 @@ def koha_coordinators_workshop_download(request):
             return render_to_response('koha_workshop29sep_download.html', context, ci)
     context['message'] = ''
     return render_to_response('koha_workshop29sep_download.html', context, ci)
+
 
 def create_koha_coordinators_workshop_certificate(certificate_path, name, qrcode, type, paper, workshop, file_name):
     error = False
@@ -852,6 +853,7 @@ def create_koha_coordinators_workshop_certificate(certificate_path, name, qrcode
         err = e
     return [err, error]
 
+
 def koha_massive_workshop_download(request):
     context = {}
     err = ""
@@ -886,7 +888,7 @@ def koha_massive_workshop_download(request):
         try:
             old_user = Certificate.objects.get(email=email, serial_no=serial_no)
             qrcode = 'Verify at: http://spoken-tutorial.org/certificate/verify/{0} '.format(old_user.short_key)
-            details = {'name': name, 'serial_key': old_user.short_key, 'college':college, 'remote':remote}
+            details = {'name': name, 'serial_key': old_user.short_key, 'college': college, 'remote': remote}
             certificate = create_koha_massive_workshop_certificate(certificate_path, details,
                                                              qrcode, type, paper, workshop, file_name)
             if not certificate[1]:
@@ -904,7 +906,7 @@ def koha_massive_workshop_download(request):
                 else:
                     num += 1
             qrcode = 'Verify at: http://spoken-tutorial.org/certificate/verify/{0} '.format(short_key)
-            details = {'name': name, 'serial_key': short_key, 'college': college, 'remote':remote}
+            details = {'name': name, 'serial_key': short_key, 'college': college, 'remote': remote}
             certificate = create_koha_massive_workshop_certificate(certificate_path, details,
                                                              qrcode, type, paper, workshop, file_name)
             if not certificate[1]:
@@ -936,7 +938,7 @@ def create_koha_massive_workshop_certificate(certificate_path, name, qrcode, typ
         template_file.close()
 
         content_tex = content.safe_substitute(name=name['name'].title(),
-                                              serial_key=name['serial_key'], qr_code=qrcode, college=name['college'], remote=name['remote'])
+            serial_key=name['serial_key'], qr_code=qrcode, college=name['college'], remote=name['remote'])
         create_tex = open('{0}{1}.tex'.format
                           (certificate_path, file_name), 'w')
         create_tex.write(content_tex)
@@ -957,4 +959,3 @@ def create_koha_massive_workshop_certificate(certificate_path, name, qrcode, typ
         error = True
         err = e
     return [err, error]
-    
