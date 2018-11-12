@@ -3617,11 +3617,7 @@ def single_tutorial_allocater(request, tut, lid, days, user):
 
     # Add a role in the COntributor Role table for the Tutorial
     add_or_update_contributor_role(tut, lid , user.id)
-    tutorial_resource_id = tutorial_resource.values_list('id')
-    # Add a Contributor Notification for this tutorial
-    if tutorial_resource_id:
-        add_tutorial_contributor_notification(user.id, tutorial_resource_id, 'add')
-
+    
 
     tutorialsavailableobj = TutorialsAvailable.objects.filter(
         tutorial_detail = tut, language = lid)
@@ -3659,7 +3655,11 @@ def single_tutorial_allocater(request, tut, lid, days, user):
                          tut.tutorial + ' to ' + str(user) + ' : ' +
                          str(submissiondate))
 
-    
+    tutorial_resource_id = tutorial_resource.values_list('id')
+    # Add a Contributor Notification for this tutorial
+    if tutorial_resource_id:
+        add_tutorial_contributor_notification(user.id, tutorial_resource_id, 'add')
+
     # Super admin should be able to see the tutorials atleast
     super_admin_contributor_languages = RoleRequest.objects.filter(role_type = 0,
         user_id=SUPER_ADMIN_USER_ID, status = STATUS_DICT['active'], language_id = lid).values(
