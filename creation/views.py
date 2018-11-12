@@ -3543,15 +3543,15 @@ def no_of_foss_gt_3( request ,user, foss_or_tut_id, language_id ,allocation_type
         ).values('tutorial_detail__foss')
     list_count = list({int(v['tutorial_detail__foss']) for v in all_foss})
 
-    if allocation_type == 'update':
-        if len(list_count) > 3 and (foss_id,language_id) not in list_count:
-            messages.error(request, 'Maximum of 3 FOSSes allowed per user')        
-            return True
-        return False
-            
-    elif len(list_count) >= 3 and (foss_id,language_id) not in list_count:
+    #if allocation_type == 'update':
+    if len(list_count) > 2 and (foss_id,language_id) not in list_count:
         messages.error(request, 'Maximum of 3 FOSSes allowed per user')        
         return True
+    return False
+            
+    # elif len(list_count) >= 3 and (foss_id,language_id) not in list_count:
+    #     messages.error(request, 'Maximum of 3 FOSSes allowed per user')        
+    #     return True
     return False
 
 LEVEL_NAME = {1: 'Basic', 2: 'Intermediate', 3: 'Advanced'}
