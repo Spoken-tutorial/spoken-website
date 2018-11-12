@@ -4008,18 +4008,18 @@ def add_creation_notification(request, notif_type, user_id , language):
             
             notif_rec = ContributorNotification.objects.create(user_id = user_id ,
                 message = message , title = title)
-        elif notif_type == ROLE_DICT['video-reviewer']:
+        elif notif_type == ROLES_DICT['video-reviewer']:
             title = title + str(language) +" - Video Reviewership added"
             message = message+ " video reviewer"
 
             notif_rec = AdminReviewerNotification.objects.create(user_id = user_id ,
                 message = message , title = title)
-        elif notif_type == ROLE_DICT['domain-reviewer'] :
+        elif notif_type == ROLES_DICT['domain-reviewer'] :
             title = title + str(language) +" - Domain Reviewership added"
             message = message+ " domain reviewer"
             notif_rec = DomainReviewerNotification.objects.create(user_id = user_id ,
                 message = message , title = title)
-        elif notif_type == ROLE_DICT['quality-reviewer'] :
+        elif notif_type == ROLES_DICT['quality-reviewer'] :
             title = title + str(language) +" - Quality Reviewership added"
             message = message+ " quality reviewer"
             notif_rec = QualityReviewerNotification.objects.create(user_id = user_id ,
