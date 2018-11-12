@@ -3655,6 +3655,9 @@ def single_tutorial_allocater(request, tut, lid, days, user):
                          tut.tutorial + ' to ' + str(user) + ' : ' +
                          str(submissiondate))
 
+    tutorial_resource = TutorialResource.objects.filter(
+        tutorial_detail_id = tut.id,
+        language_id = lid)
     tutorial_resource_id = tutorial_resource.values_list('id')
     # Add a Contributor Notification for this tutorial
     if tutorial_resource_id:
@@ -3727,31 +3730,34 @@ def allocate(request, tdid, lid, uid, days):
         return HttpResponse(json.dumps(data), content_type = 'application/json')
     
     final_query =  TutorialsAvailable.objects.get(tutorial_detail_id = tut.id,language = lid)            
-
-    if not no_of_foss_gt_3(request,user.id, tdid, lid,'single'):
-        lower_tutorial_level = TutorialDetail.objects.filter(foss_id = final_query.tutorial_detail.foss_id,
-            level_id = final_query.tutorial_detail.level_id - 1).values('level').distinct()
-        
-        if contributor_rating_less_than_3(request ,user.id , this_language):
-            if bid_count_less_than_3(user.id):
+    try:
+        if not no_of_foss_gt_3(request,user.id, tdid, lid,'single'):
+            lower_tutorial_level = TutorialDetail.objects.filter(foss_id = final_query.tutorial_detail.foss_id,
+                level_id = final_query.tutorial_detail.level_id - 1).values('level').distinct()
+            
+            if contributor_rating_less_than_3(request ,user.id , this_language):
+                if bid_count_less_than_3(user.id):
+                    if lower_tutorial_level.exists():
+                        disallow( request,lower_tutorial_level[0]['level'], tut)
+                    else:
+                        single_tutorial_allocater(request, tut, lid, days, user)                
+                else:
+                    if is_language_manager(request.user):
+                        messages.error(
+                            request,'You cannot allocate more than 3 tutorials to a contributor of rating less than 3')
+                    else:
+                        messages.error(request, 'You cannot allocate more than 3 tutorials ')
+                return HttpResponse(json.dumps(data),
+                                    content_type = 'application/json')
+            else:
                 if lower_tutorial_level.exists():
-                    disallow( request,lower_tutorial_level[0]['level'], tut)
+                    disallow(request ,lower_tutorial_level[0]['level'], tut)
                 else:
-                    single_tutorial_allocater(request, tut, lid, days, user)                
-            else:
-                if is_language_manager(request.user):
-                    messages.error(
-                        request,'You cannot allocate more than 3 tutorials to a contributor of rating less than 3')
-                else:
-                    messages.error(request, 'You cannot allocate more than 3 tutorials ')
-            return HttpResponse(json.dumps(data),
-                                content_type = 'application/json')
-        else:
-            if lower_tutorial_level.exists():
-                disallow(request ,lower_tutorial_level[0]['level'], tut)
-            else:
-                single_tutorial_allocater(request, tut, lid, days, user)
+                    single_tutorial_allocater(request, tut, lid, days, user)
     
+    except Exception as e:
+        raise e
+        
     return HttpResponse(json.dumps(data), content_type = 'application/json')
 
 

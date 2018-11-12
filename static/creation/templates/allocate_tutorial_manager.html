@@ -188,9 +188,9 @@
           {% endfor %}      
         {% endfor %}
       {% endif %}
-{% get_sortable_header header ordering request.GET %} 
+
       {% if status == 'ongoing' %}
- 
+        {% get_sortable_header header ordering request.GET %}  
           {% for record in collection.object_list %}
           <tr>
           <td>{{ collection.start_index|add:forloop.counter|add:-1 }}
@@ -279,6 +279,7 @@
       {% endif %}
           
       {% if status == 'completed' %}
+      {% get_sortable_header header ordering request.GET %} 
           {% for record in collection.object_list %}
           <tr>
           <td>{{ collection.start_index|add:forloop.counter|add:-1 }}<input type="hidden" value="{{ record.id }}"></td>
