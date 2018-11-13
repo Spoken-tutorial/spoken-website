@@ -3417,13 +3417,12 @@ def update_contributors(request):
             script_user_id = request.POST.get('script_user')
             video_user_id = request.POST.get('video_user')
             tutorial_resource = TutorialResource.objects.get(id = tutorial_resource_id)            
-
+            
             script_user_foss_count = no_of_foss_gt_3(request,
-                script_user_id, tutorial_resource.tutorial_detail_id, tutorial_resource.language)
+                script_user_id, tutorial_resource.tutorial_detail_id, tutorial_resource.language.id)
             
             video_user_foss_count = no_of_foss_gt_3(request,
-                video_user_id, tutorial_resource.tutorial_detail_id, tutorial_resource.language)
-            
+                video_user_id, tutorial_resource.tutorial_detail_id, tutorial_resource.language.id)
             script_user_bid_count = TutorialResource.objects.filter(script_user_id = script_user_id,
             assignment_status = ASSIGNMENT_STATUS_DICT['assigned'] , status = UNPUBLISHED)
             
@@ -3437,30 +3436,38 @@ def update_contributors(request):
 
             if not script_user_foss_count :
                 if contributor_rating_less_than_3(request ,script_user_id , tutorial_resource.language):
-                    if not bid_count_less_than_3(script_user_id):
+                    if not bid_count_less_than_3(script_user_id,
+                        tutorial_resource.tutorial_detail_id, tutorial_resource.language_id):
                         update_to_script_user = False
                         messages.error(request, 'You cannot allocate more than 3 tutorials to a contributor of rating less than 3. <i>Error at Script User </i>')
             else:
                 update_to_script_user = False
             if not video_user_foss_count :
                 if contributor_rating_less_than_3(request ,video_user_id , tutorial_resource.language):
-                    if not bid_count_less_than_3(video_user_id):
-                        update_to_script_user = False
+                    if not bid_count_less_than_3(video_user_id,
+                        tutorial_resource.tutorial_detail_id, tutorial_resource.language_id):
+                        update_to_video_user = False
                         messages.error(request, 'You cannot allocate more than 3 tutorials to a contributor of rating less than 3. <i>Error at Video User </i>')
             else:
                 update_to_video_user = False
 
             if update_to_script_user and update_to_video_user:                
                 if tutorial_resource.script_user_id != script_user_id:
-                    add_tutorial_contributor_notification(
-                        tutorial_resource.script_user_id, tutorial_resource.id, 'revoke')
+                    add_tutorial_contributor_notification(tutorial_resource.script_user_id,
+                        tutorial_resource.id, 'revoke')
+                    revoke_contributor_role(tutorial_resource.tutorial_detail_id,
+                        tutorial_resource.language_id , tutorial_resource.script_user_id)
 
                 if tutorial_resource.script_user_id != script_user_id:
-                    add_tutorial_contributor_notification(
-                        tutorial_resource.video_user_id, tutorial_resource.id, 'revoke')
+                    add_tutorial_contributor_notification(tutorial_resource.video_user_id,
+                        tutorial_resource.id, 'revoke')
+                    revoke_contributor_role(tutorial_resource.tutorial_detail_id,
+                        tutorial_resource.language_id , tutorial_resource.video_user_id)
 
+
+                add_or_update_contributor_role(tutorial_resource.tutorial_detail , tutorial_resource.language_id , script_user_id)
                 add_tutorial_contributor_notification(script_user_id, tutorial_resource.id, 'add')
-                
+                add_or_update_contributor_role(tutorial_resource.tutorial_detail , tutorial_resource.language_id , video_user_id)
                 add_tutorial_contributor_notification(video_user_id, tutorial_resource.id, 'add')
 
                 tutorial_resource.script_user = User.objects.get(id = script_user_id)
@@ -3548,14 +3555,13 @@ def no_of_foss_gt_3( request ,user, foss_or_tut_id, language_id):
     all_foss = TutorialResource.objects.filter(
         Q(script_user_id = user) | Q(video_user_id = user),
         status = UNPUBLISHED, assignment_status = ASSIGNMENT_STATUS_DICT['assigned']
-        ).values('tutorial_detail__foss','language')
-    list_count = list({(v['tutorial_detail__foss'],v['language']) for v in all_foss})
-    
-    #if allocation_type == 'update':
-    if (foss_id,language_id) not in list_count:
+        ).values('tutorial_detail__foss','language_id')
+    list_count = list({(int(v['tutorial_detail__foss']),int(v['language_id'])) for v in all_foss})
+    if (int(foss_id),int(language_id)) not in list_count:
         if len(list_count) >= 3:
             messages.error(request, 'Maximum of 3 FOSSes allowed per user')        
             return True
+        return False
     return False
 
 LEVEL_NAME = {1: 'Basic', 2: 'Intermediate', 3: 'Advanced'}
@@ -3585,6 +3591,7 @@ def add_or_update_contributor_role(tutorial_detail , language_id , user_id):
         contributor_create.save()
 
 def add_tutorial_contributor_notification(user_id, tuto_resource_id, message_type):
+    
     tutorial_resource = TutorialResource.objects.get(id = tuto_resource_id)
     comp_title = tutorial_resource.tutorial_detail.foss.foss + ': ' + \
         tutorial_resource.tutorial_detail.tutorial + ' - ' + tutorial_resource.language.name
@@ -3592,8 +3599,8 @@ def add_tutorial_contributor_notification(user_id, tuto_resource_id, message_typ
         message = "Submission date is :"+str(datetime.date(tutorial_resource.submissiondate))
     elif message_type == 'revoke':
         message = "The tutorial is revoked from you"
-    try:
-        
+    
+    try:    
 
         contributor_notification = ContributorNotification.objects.filter(
             user_id = user_id , tutorial_resource = tutorial_resource )
@@ -3623,20 +3630,14 @@ def single_tutorial_allocater(request, tut, lid, days, user):
     add_or_update_contributor_role(tut, lid , user.id)
     
 
-    tutorialsavailableobj = TutorialsAvailable.objects.filter(
-        tutorial_detail = tut, language = lid)
-    if tutorialsavailableobj.exists():
-        tutorialsavailableobj.delete()
-    else:
-        # The only purpose over here is to remove from available tutorials
-        pass
-
+    
     # Update data in Tutorial Resource
     if tutorial_resource.exists():
         tutorial_resource = tutorial_resource.update(outline_user = user,
             script_user = user, video_user = user, outline_status = WORK_STATUS ,
             script_status = WORK_STATUS , video_status = WORK_STATUS ,
-            submissiondate = submissiondate, assignment_status = ASSIGNMENT_STATUS_DICT['assigned'])
+            extension_status = WORK_STATUS , submissiondate = submissiondate,
+            assignment_status = ASSIGNMENT_STATUS_DICT['assigned'])
         messages.warning(request, 'Successfully updated ' +
                         tut.tutorial + ' to ' + str(user) + ' : ' +
                          str(submissiondate))
@@ -3702,19 +3703,23 @@ def contributor_rating_less_than_3(request, uid , language):
     else:
         return False
 
-def bid_count_less_than_3(uid):
+def bid_count_less_than_3(uid, tutorial_detail_id, language_id):
+
     bid_count = TutorialResource.objects.filter(Q(script_user_id = uid) | Q(video_user_id = uid),
         assignment_status = ASSIGNMENT_STATUS_DICT['assigned'] , status = UNPUBLISHED
-        ).exclude(language_id = 22).aggregate(Count('id'))
-    if int(bid_count['id__count']) <= 2:
+        ).exclude(language_id = 22).values('tutorial_detail_id','language_id')
+    list_count = list({(int(v['tutorial_detail_id']),int(v['language_id'])) for v in bid_count})
+    
+    if (int(tutorial_detail_id),int(language_id)) in list_count:
         return True
     else:
-        return False
+        if len(list_count) >= 3:
+            return False
+        return True
 
 @login_required
 @csrf_exempt
 def allocate(request, tdid, lid, uid, days):
-
     # Data is being passed from another function
     # hence the below get functions need not be in try catch
     try:
@@ -3734,14 +3739,15 @@ def allocate(request, tdid, lid, uid, days):
         
         return HttpResponse(json.dumps(data), content_type = 'application/json')
     
-    final_query =  TutorialsAvailable.objects.get(tutorial_detail_id = tut.id,language = lid)            
+    
     try:
-        if not no_of_foss_gt_3(request,user.id, tdid, lid):
+        final_query =  TutorialsAvailable.objects.get(tutorial_detail_id = tut.id,language = lid)
+        if not no_of_foss_gt_3(request,uid, tdid, lid):
             lower_tutorial_level = TutorialDetail.objects.filter(foss_id = final_query.tutorial_detail.foss_id,
                 level_id = final_query.tutorial_detail.level_id - 1).values('level').distinct()
             
-            if contributor_rating_less_than_3(request ,user.id , this_language):
-                if bid_count_less_than_3(user.id):
+            if contributor_rating_less_than_3(request ,uid , this_language):
+                if bid_count_less_than_3(uid, tdid, lid):
                     if lower_tutorial_level.exists():
                         disallow( request,lower_tutorial_level[0]['level'], tut)
                     else:
@@ -3759,7 +3765,15 @@ def allocate(request, tdid, lid, uid, days):
                     disallow(request ,lower_tutorial_level[0]['level'], tut)
                 else:
                     single_tutorial_allocater(request, tut, lid, days, user)
-    
+
+        tutorialsavailableobj = TutorialsAvailable.objects.filter(
+            tutorial_detail = tut, language = lid)
+        if tutorialsavailableobj.exists():
+            tutorialsavailableobj.delete()
+        else:
+            # The only purpose over here is to remove from available tutorials
+            pass
+
     except Exception as e:
         raise e
         
@@ -3810,82 +3824,93 @@ def allocate_foss(request, fid, lang, uid, level, days):
 
     for a_tdid_available in tdid_available:
         allocate(request,a_tdid_available.tutorial_detail.id,
-            language.id, user.id, days)
+            language.id,
+            user.id,
+            days)
 
     return HttpResponse(json.dumps(data), content_type = 'application/json')
 
+def revoke_contributor_role(tutorial_detail_id , language_id , user_id):
+    revoke_contributor_role = ContributorRole.objects.filter(
+            user_id = user_id, language_id = language_id ,
+            tutorial_detail_id = tutorial_detail_id)
 
+    if revoke_contributor_role.exists():
+        revoke_contributor_role.update(status = STATUS_DICT['inactive'])
+    else:
+        print "Error"
+        pass
+    return True
+    
 @csrf_exempt
 def revoke_allocated_tutorial(request):
     data = 'Response'
     try:
         tutorial_resource_id = request.POST.get('tutorial_resource_id')
         tutorialresource_to_revoke = TutorialResource.objects.get(id = tutorial_resource_id)
-        tutorialresource_to_revoke.assignment_status = STATUS_DICT['inactive']
-        lid = tutorialresource_to_revoke.language_id
-        tdid = tutorialresource_to_revoke.tutorial_detail_id
         
-        tutorialresource_to_revoke.save()
-        revoke_script_user = ContributorRole.objects.filter(
-            user_id = tutorialresource_to_revoke.script_user_id,
-            language_id = lid,tutorial_detail_id = tdid)
-
-        if revoke_script_user.exists():
-            revoke_script_user.update(status = STATUS_DICT['inactive'])
-        else:
-            messages.warning(request,
-                             'Contributor Details missing , but tutorial is revoked to available state.'
-                             )
-
-        revoke_video_user = ContributorRole.objects.filter(
-            user_id = tutorialresource_to_revoke.script_user_id,
-            language_id = lid,tutorial_detail_id = tdid)
-
-        if revoke_video_user.exists():
-            revoke_video_user.update(status = STATUS_DICT['inactive'])
-        else:
-            messages.warning(request,
-                             'Contributor Details missing , but tutorial is revoked to available state.'
-                             )
+        language_id = tutorialresource_to_revoke.language_id
+        tutorial_detail_id = tutorialresource_to_revoke.tutorial_detail_id
+        
+        
+        revoke_contributor_role(tutorial_detail_id , language_id , tutorialresource_to_revoke.script_user_id)
+        revoke_contributor_role(tutorial_detail_id , language_id , tutorialresource_to_revoke.video_user_id)
 
         
         tutorialsavailable = TutorialsAvailable.objects.filter(
-            tutorial_detail_id = tdid , language_id = lid)
+            tutorial_detail_id = tutorial_detail_id , language_id = language_id)
         if tutorialsavailable.exists():
-            tutorialsavailable.update(tutorial_detail_id = tdid,
-                                         language_id = lid)
+            tutorialsavailable.update(tutorial_detail_id = tutorial_detail_id,
+                                         language_id = language_id)
         else:
             tutorialsavailable = TutorialsAvailable()
-            tutorialsavailable.language_id = lid
-            tutorialsavailable.tutorial_detail_id = tdid
+            tutorialsavailable.language_id = language_id
+            tutorialsavailable.tutorial_detail_id = tutorial_detail_id
             tutorialsavailable.save()
+
+        
+    except Exception as e:
+        raise e
+    try:
+        # Check user notification exists  
+        if tutorialresource_to_revoke.script_user_id != tutorialresource_to_revoke.video_user_id:
+            add_tutorial_contributor_notification(tutorialresource_to_revoke.script_user_id,
+                tutorialresource_to_revoke.id, 'revoke')
+
+            add_tutorial_contributor_notification(tutorialresource_to_revoke.video_user_id,
+                tutorialresource_to_revoke.id, 'revoke')
+        else:
+            add_tutorial_contributor_notification(tutorialresource_to_revoke.script_user_id,
+                tutorialresource_to_revoke.id, 'revoke')
     
     except Exception as e:
         raise e
     
-    # Check user notification exists  
-    existing_script_notification = ''  
-    try:
-        existing_script_notification = ContributorNotification.objects.filter(
-                        tutorial_resource_id = tutorialresource_to_revoke,
-                        user_id = tutorialresource_to_revoke.script_user_id)
-        
-        existing_video_notification = ContributorNotification.objects.filter(
-                        tutorial_resource_id = tutorialresource_to_revoke,
-                        user_id = tutorialresource_to_revoke.video_user_id)
-        revoke_message = 'The tutorial is revoked from you'
-        if tutorialresource_to_revoke.script_user_id != tutorialresource_to_revoke.video_user_id:
-            if existing_script_notification.exists():
-                existing_script_notification.update(message=revoke_message)
 
-            if existing_video_notification.exists():
-                existing_video_notification.update(message=revoke_message)
-        else:
-            existing_script_notification.update(message=revoke_message)
+    # existing_script_notification = ''  
+    # try:
+    #     existing_script_notification = ContributorNotification.objects.filter(
+    #                     tutorial_resource_id = tutorialresource_to_revoke,
+    #                     user_id = tutorialresource_to_revoke.script_user_id)
+        
+    #     existing_video_notification = ContributorNotification.objects.filter(
+    #                     tutorial_resource_id = tutorialresource_to_revoke,
+    #                     user_id = tutorialresource_to_revoke.video_user_id)
+    #     revoke_message = 'The tutorial is revoked from you'
+    #     if tutorialresource_to_revoke.script_user_id != tutorialresource_to_revoke.video_user_id:
+    #         if existing_script_notification.exists():
+    #             existing_script_notification.update(message=revoke_message)
+
+    #         if existing_video_notification.exists():
+    #             existing_video_notification.update(message=revoke_message)
+    #     else:
+    #         existing_script_notification.update(message=revoke_message)
     
-    except Exception as e:
-        print e
-    
+    # except Exception as e:
+    #     raise e
+    tutorialresource_to_revoke.assignment_status = STATUS_DICT['inactive']
+    tutorialresource_to_revoke.save()
+        
     messages.success(request, 'Tutorial Revoked')
     return HttpResponse(json.dumps(data), content_type = 'application/json')
 
