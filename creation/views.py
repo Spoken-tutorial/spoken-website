@@ -3209,14 +3209,14 @@ def payment_honorarium_download(request,hono_id):
     s = Template('payment_honorarium')
     for tr_pay_id in payment_details:
             #tr_pay = TutorialPayment.objects.get(id = tr_pay_id)
-            tutorials.append([tr_pay_id.tutorial_resource.tutorial_detail.tutorial, tr_pay_id.get_duration()])
+            tutorials.append([tr_pay_id.tutorial_resource.tutorial_detail.tutorial, tr_pay_id.get_duration(), tr_pay_id.tutorial_resource.tutorial_detail.foss.foss])
             timeParts = [int(ss) for ss in tr_pay_id.get_duration().split(':')]
             totalSecs += (timeParts[0] * 60 + timeParts[1]) * 60 + timeParts[2]
     totalSecs, sec = divmod(totalSecs, 60)
     hr, min = divmod(totalSecs, 60)
     #print "%d:%02d:%02d" % (hr, min, sec),
 
-    user = payment_details.distinct().values('user__first_name','user__last_name')
+    user = payment_details.distinct().values('user__first_name','user__last_name' , 'user_type')
 
     pdf_data ={}
     amount = payment_details.aggregate(Sum('amount'))
@@ -3234,7 +3234,7 @@ def payment_honorarium_download(request,hono_id):
     pdf_data['tutorials'] = tutorials
     pdf_data['totalSecs'] = str(hr)+':'+str(min)+':'+str(sec)
     try:
-        pdf_data['rate'] = rate[user_type[0]['user_type']]
+        pdf_data['rate'] = rate[user[0]['user_type']]
         file_name = str(user[0]['user__first_name'])+ " ST"
     except IndexError:
         pdf_data['rate'] = 0
