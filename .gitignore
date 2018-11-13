@@ -7,8 +7,9 @@ celerybeat-schedule
 *~
 *.swp
 *.pyc
+.client_secrets.json
+static/payment_honorarium
 comb.py-oauth2.json
-client_secrets.json
 certificate/fa_workshop_template/template_FAW2017Pcertificate
 certificate/itp_workshop_template/template_ITPW2017Pcertificate
 certificate/koha_workshop_template/template_KHW2018Pcertificate
@@ -95,3 +96,6 @@ nosetests.xml
 .pydevproject
 
 cron/nohup.out
+
+# ignoring migrations
+*.dia.autosave

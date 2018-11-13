@@ -1,5 +1,6 @@
 # Third Party Stuff
 from django.conf.urls import include, patterns, url
+from creation.views import *
 
 urlpatterns = patterns('',
     # Main pages dispatcher
@@ -84,4 +85,14 @@ urlpatterns = patterns('',
     url(r'^report-missing-component/(\d+)/$', 'creation.views.report_missing_component', name="report_missing_component"),
     url(r'^report-missing-component/reply/(\d+)/$', 'creation.views.report_missing_component_reply', name="report_missing_component_reply"),
     url(r'^report-missing-component/list/$', 'creation.views.report_missing_component_list', name="report_missing_component_list"),
+
+    # Additional Views Created for Payment Module
+    url(r'payment/tutorials/$', 'creation.views.list_all_published_tutorials', name="list_all_published_tutorials"),
+    url(r'payment/ajax/languages/$', 'creation.views.load_languages', name="load_languages"),
+    url(r'payment/ajax/fosses/$', 'creation.views.load_fosses', name="load_fosses"),
+    url(r'payment/due/$', 'creation.views.list_all_due_tutorials', name="payment_due_tutorials"),
+    url(r'payment/honorarium/$', 'creation.views.list_payment_honorarium', name="payment_honorarium_list"),
+    url(r'payment/honorarium/detail/(\d+)/$', 'creation.views.detail_payment_honorarium', name="payment_honorarium_detail"),
+    url(r'payment/honorarium/download/(?P<hono_id>\d+)/$', 'creation.views.payment_honorarium_download', name="payment_honorarium_download")
+
 )

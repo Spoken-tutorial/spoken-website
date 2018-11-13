@@ -1,0 +1,235 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load cmsdata %}
+{% load creationdata %}
+{% block title %}Tutorials Published{% endblock %}
+{% block uncompresscssblock %}
+    <link rel="stylesheet" href="{% static 'spoken/css/flip-scroll.min.css' %}" type="text/css" media="screen" charset="utf-8" />
+    <link rel="stylesheet" href="{% static 'spoken/css/jquery.datetimepicker.css' %}" type="text/css" media="screen" charset="utf-8" />
+    <link rel="stylesheet" href="{% static 'spoken/css/flip-scroll.min.css' %}" type="text/css" media="screen" charset="utf-8" />
+{% endblock %}
+{% block heading %}<i class="fa fa-list-ul"></i> Tutorials Published{% endblock %}
+{% block content %}
+    <ul class="breadcrumb">
+        <li><a href="{% url 'creation:publish_tutorial_index' %}">Ready to publish</a></li>
+        <li class="active">Published Tutorials</li>
+        <li><a href="{% url 'creation:payment_due_tutorials' %}">Payment Due</a></li>
+        <li><a href="{% url 'creation:payment_honorarium_list' %}">Payment In Process</a></li>
+    </ul>
+    <!-- form -->
+    <div class="row">
+        <form class="form-horizontal">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="id_contributor" class="col-sm-4 control-label">Contributor</label>
+                    <div class="col-sm-8">
+                        {% render_field form.contributor class+="form-control" tabindex="1" %}
+                        {{ form.contributor.errors }}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="id_foss" class="col-sm-4 control-label">FOSS</label>
+                    <div class="col-sm-8">
+                        {% render_field form.foss class+="form-control" tabindex="1" %}
+                        {{ form.foss.errors }}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="id_language" class="col-sm-4 control-label">Language</label>
+                    <div class="col-sm-8">
+                        {% render_field form.language class+="form-control" tabindex="1" %}
+                        {{ form.language.errors }}
+                    </div>
+                </div>
+               
+            </div>
+            <div class="col-md-4">
+                {% for error in form.non_field_errors %}
+                <div class="alert alert-danger">
+                    {{ error }}
+                </div>
+            {% endfor %}
+                <div class="form-group">
+                    <label for="id_start_date" class="col-sm-4 control-label">Start Date</label>
+                    <div class="col-sm-8">
+                        {% render_field form.start_date class+="form-control date" tabindex="1" %}
+                        {{ form.start_date.errors }}
+                    </div>
+                </div>
+                 <div class="form-group">
+                    <label for="id_end_date" class="col-sm-4 control-label">End Date</label>
+                    <div class="col-sm-8">
+                        {% render_field form.end_date class+="form-control date" tabindex="1" %}
+                        <div class="text-danger">{{ form.end_date.errors }}</div>
+                    </div>
+                </div>
+                <input type="submit" value="Filter" class="btn btn-success">
+                <a href="?"  class="btn btn-danger">Clear</a>
+            </div>
+        </form>
+        <div class="col-md-4">
+            <table class="table table-bordered ">
+                <tbody>
+                    <tr>
+                        <th>Tutorials Published</th>
+                        <td>{{ count_of_published_tutorials }}</td>
+                    </tr>
+                    <tr>
+                        <th>No. of Contributors</th>
+                        <td>{{ count_of_contributors }}</td>
+                    </tr>
+                    
+                </tbody>
+            </table>
+            <div class="view-buttons">
+                <button class="btn btn-warning" id="button-to-show-details">Show Details</button>
+                <button class="btn btn-info" id="button-to-show-summary">Show Summary</button>
+            </div>
+        </div>
+    </div>
+    <!-- //form -->
+
+    <!-- content table details section -->
+    <div id="details-section">
+        <div id="flip-scroll" class="table-responsive">
+            <table class="paleblue table table-condensed table-bordered table-hover table-striped">
+            {% if not published_tutorials|length %}
+                <tr>
+                    <td colspan="5" class="col-center">List is empty!</td>
+                </tr>
+            {% else %}
+                <thead>
+                    <th>#</th>
+                    <th>FOSS</th>
+                    <th>Language</th>
+                    <th>Tutorial Title</th>
+                    <th>Script Contributor</th>
+                    <th>Video Contributor</th>
+                    <th>Published At</th>
+                </thead>
+                <tbody>
+                {% for tutorial in published_tutorials %}
+                    <tr class="{% cycle 'odd' 'even' %}">
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ tutorial.tutorial_detail.foss }}</td>
+                        <td>{{ tutorial.language }}</td>
+                        <td>{{ tutorial.tutorial_detail.tutorial }}
+                        <td>{{ tutorial.script_user.first_name }} {{ tutorial.script_user.last_name }} </td>
+                        <td>{{ tutorial.video_user.first_name }} {{ tutorial.video_user.last_name }}</td>
+                        <td>{{ tutorial.publish_at }}</td>
+                        
+                    </tr>
+                {% endfor %}
+                </tbody>
+            {% endif %}
+            </table>
+        </div>
+    </div>
+    <div id="summary-section">
+        <table class="paleblue table table-condensed table-bordered table-hover table-striped">
+            <thead >
+                <th>#</th>
+                <th>Contributor</th>
+                <th>Tutorials Done</th>
+            </thead>
+            <tbody>
+                {% for pay in payment_summary %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ pay.script_user__first_name|capfirst }} {{ pay.script_user__last_name|capfirst }}</td>
+                    <td>{{ pay.published_tuorial }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script>
+        // to dynamically get languages
+        function load_languages(){
+            var url = 'creation/payment/ajax/languages';
+            var foss = $('#id_foss').val();
+            var contributor = $('#id_contributor').val(); 
+            var current_language = $('#id_language').val();
+            $.ajax({
+                url: url,
+                data: {
+                    'foss' : foss,
+                    'contributor': contributor,
+                    'language': current_language,
+                },
+                success: function(data){
+                    $('#id_language').html(data);
+                }
+            });
+        }
+        // to dynamically get fossee list for contributor
+        function load_fosses(){
+            var url = '/creation/payment/ajax/fosses';
+            var contributor = $('#id_contributor').val();
+            var foss = $('#id_foss').val();
+            $.ajax({
+                url: url,
+                data: {
+                    'contributor': contributor,
+                    'foss': foss,
+                },
+                success: function(data){
+                    $('#id_foss').html(data);
+                },
+            });
+        }
+        // for initialization 
+        $(document).ready(function(){
+            contributor = $('#id_contributor').val();
+            var foss = $('#id_foss').val();
+            language = $('#id_language').val();
+            load_fosses();
+            load_languages();
+        });
+        // on changing any params it will call ajax
+        $('#id_contributor').change(function(){
+            load_fosses();
+        });
+        $('#id_foss').change(function(){
+            load_languages();
+        });
+
+        // --------------------------------------------------
+        // to switch between summary and details
+        $(document).ready(function(){
+            //initialization
+            $('#details-section').show();
+            $('#summary-section').hide();
+
+            $('#button-to-show-summary').on('click',function(){
+                $('#details-section').hide();
+                $('#summary-section').show();
+                $('.pagination').hide(); // hide pagination
+            });
+            $('#button-to-show-details').on('click',function(){
+                $('#details-section').show();
+                $('#summary-section').hide();
+                $('.pagination').show(); // show pagination
+            });
+        });
+        
+    </script>
+
+{% endblock %}
+{% block compressjsblock %}
+    <script src="{% static 'spoken/js/events.js' %}"></script>
+    <script src="{% static 'spoken/js/jquery.datetimepicker.js' %}"></script>
+    <script src="{% static 'spoken/js/jquery.fancybox.pack.js' %}"></script>
+    <script type="text/javascript">        
+        $('.date').datetimepicker({
+            lang:'en',
+            timepicker:false,
+            format:'Y-m-d',
+            formatDate:'Y/m/d',
+            maxDate:'+1987/06/14',
+        });
+    </script>
+{% endblock %}

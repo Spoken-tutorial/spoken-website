@@ -1,0 +1,54 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load cmsdata %}
+{% load creationdata %}
+{% block title %}Confirm Payment Honorarium{% endblock %}
+{% block uncompresscssblock %}
+    <link rel="stylesheet" href="{% static 'spoken/css/flip-scroll.min.css' %}" type="text/css" media="screen" charset="utf-8" />
+{% endblock %}
+{% block heading %}<i class="fa fa-list-ul"></i> Confirm Payment Honorarium{% endblock %}
+{% block content %}
+	<div class="text-center">
+		<h4>Payment Honorarium : <b>#{{ pay_hr.code }}</b></h4>
+	</div>
+    <div id="flip-scroll" class="table-responsive">
+        <table class="paleblue table table-condensed table-bordered table-hovers">
+        	<thead>
+        		<tr>
+	        		<th>S.No.</th>
+	        		<th>Tutorial Title</th>
+	                <th>Duration</th>
+	                <th>Amount</th>
+	            </tr>
+            </thead>
+            <tbody>
+            	{% for tr_pay in pay_hr.tutorials.all %}
+            	<tr>
+            		<td>{{ forloop.counter }}</td>
+            		<td>{{ tr_pay.tutorial_resource.tutorial_detail.tutorial }}</td>
+            		<td>{{ tr_pay.get_duration }}</td>
+            		<td>₹ {{ tr_pay.amount }}</td>
+            	</tr>
+            	{% endfor %}
+            </tbody>
+            <tfoot>
+            	<tr class="active">
+            		<td colspan="3" class="text-right">Total Amount</td>
+            		<th>₹ {{ pay_hr.amount }}</th>
+            	</tr>
+            </tfoot>
+        </table>
+        <div class="text-right">
+        {% if pay_hr.status == 3 %}
+        
+	    	<form method="POST" class="form-horizontal">
+	    		{% csrf_token %}
+	    		<input type="submit" class="btn btn-primary " name="confirm" value="Confirm" title="Honorarium Recieved" />
+	    	</form>
+	    {% else %}
+	    	<h4>Status : <b>{{ pay_hr.get_status_display }}</b></h4>
+	    {% endif %}
+	    </div>
+	    <div style="margin-top:20px"></div>
+{% endblock %}
