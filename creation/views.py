@@ -3215,7 +3215,7 @@ def allocate_tutorial(request, sel_status):
             Q(role_type = ROLES_DICT['contributor'])|Q(role_type = ROLES_DICT['external-contributor']),
             user = request.user , status = STATUS_DICT['active']).values('language'))
         
-    contributors_list = User.objects.filter(id__in = active_contributor_list(lang_qs))
+    
     if sel_status == 'completed':
         header = {
             1: SortableHeader('# ', False),
@@ -3331,9 +3331,28 @@ def allocate_tutorial(request, sel_status):
     if lang_qs:
         form.fields['language'].queryset = lang_qs
 
+    #all contributors
+    contributors_list = User.objects.filter(id__in = active_contributor_list(lang_qs))
+    rated_contributors = ContributorRating.objects.filter(rating__gt = 0,
+                language_id = lang_qs, user_id__in = contributors_list
+                )
     if contributors_list:
         form.fields['script_user'].queryset = contributors_list
         form.fields['video_user'].queryset = contributors_list
+
+    if request.method == 'POST':
+        language_id = request.POST.get('language')
+        if language_id:
+            contributors_list = active_contributor_list(language_id)
+            rated_contributors = ContributorRating.objects.filter(rating__gt = 0,
+                language_id = language_id, user_id__in = contributors_list
+                )
+            context['contributors'] = rated_contributors.values_list('user_id', 'user__username', 'rating')
+            #Update script & video user as per language choice
+            form.fields['script_user'].queryset = User.objects.filter(id__in = contributors_list)
+            form.fields['video_user'].queryset = User.objects.filter(id__in = contributors_list)
+
+
 
     context['form'] = form
 
@@ -3356,14 +3375,7 @@ def allocate_tutorial(request, sel_status):
     context['status'] = active
     context['counter'] = itertools.count(1)
 
-    if request.method == 'POST':
-        language_id = request.POST.get('language')
-        if language_id:
-            rated_contributors = ContributorRating.objects.filter(
-                language_id = language_id, user_id__in = contributors_list
-                ).values_list('user_id', 'user__username', 'rating')
-            context['contributors'] = rated_contributors
-
+  
     context.update(csrf(request))
     if is_language_manager(request.user):
         return render(request,
@@ -3376,7 +3388,7 @@ def allocate_tutorial(request, sel_status):
 def active_contributor_list(language_id):
     contributors_updated = RoleRequest.objects.filter(
     Q(role_type = ROLES_DICT['contributor'])|Q(role_type = ROLES_DICT['external-contributor']),
-    status = STATUS_DICT['active'], language_id__in = language_id).values_list('user__id').distinct()
+    status = STATUS_DICT['active'], language_id = language_id).values_list('user__id').distinct()
     return contributors_updated
 
 @csrf_exempt
@@ -3384,12 +3396,12 @@ def get_rated_contributors(request):
     language_id = request.POST.get('language')
     contributors_updated = active_contributor_list(language_id)
 
-    rated_contributors = ContributorRating.objects.filter(
+    rated_contributors = ContributorRating.objects.filter(rating__gt = 0,
         language_id = language_id, user_id__in = contributors_updated
         ).values_list('user_id', 'user__username', 'rating')
     data = ""
     for contributor in rated_contributors:            
-        if contributor[2]<3:
+        if contributor[2]<=3:
             data = data + '<option id='+str(contributor[0])+' style="color:red" >' + contributor[1]+ '</option>'
         else:
             data = data + '<option id='+str(contributor[0])+' style="color:green" >' + contributor[1]+ '</option>'
@@ -3407,10 +3419,10 @@ def update_contributors(request):
             tutorial_resource = TutorialResource.objects.get(id = tutorial_resource_id)            
 
             script_user_foss_count = no_of_foss_gt_3(request,
-                script_user_id, tutorial_resource.tutorial_detail_id, tutorial_resource.language ,'update')
+                script_user_id, tutorial_resource.tutorial_detail_id, tutorial_resource.language)
             
             video_user_foss_count = no_of_foss_gt_3(request,
-                video_user_id, tutorial_resource.tutorial_detail_id, tutorial_resource.language ,'update')
+                video_user_id, tutorial_resource.tutorial_detail_id, tutorial_resource.language)
             
             script_user_bid_count = TutorialResource.objects.filter(script_user_id = script_user_id,
             assignment_status = ASSIGNMENT_STATUS_DICT['assigned'] , status = UNPUBLISHED)
@@ -3528,30 +3540,22 @@ def add_to_tutorials_available(tutorial,language):
 
 UNPUBLISHED = 0 
 
-def no_of_foss_gt_3( request ,user, foss_or_tut_id, language_id ,allocation_type):
+def no_of_foss_gt_3( request ,user, foss_or_tut_id, language_id):
     
-    foss_id = 0
-    if allocation_type == 'single':
-        this_tut = TutorialDetail.objects.get(id = foss_or_tut_id)
-        foss_id = this_tut.foss.id
-    elif allocation_type == 'all':
-        foss_id = int(foss_or_tut_id)
+    this_tut = TutorialDetail.objects.get(id = foss_or_tut_id)
+    foss_id = this_tut.foss.id
 
     all_foss = TutorialResource.objects.filter(
         Q(script_user_id = user) | Q(video_user_id = user),
         status = UNPUBLISHED, assignment_status = ASSIGNMENT_STATUS_DICT['assigned']
-        ).values('tutorial_detail__foss')
-    list_count = list({int(v['tutorial_detail__foss']) for v in all_foss})
-
+        ).values('tutorial_detail__foss','language')
+    list_count = list({(v['tutorial_detail__foss'],v['language']) for v in all_foss})
+    
     #if allocation_type == 'update':
-    if len(list_count) > 2 and (foss_id,language_id) not in list_count:
-        messages.error(request, 'Maximum of 3 FOSSes allowed per user')        
-        return True
-    return False
-            
-    # elif len(list_count) >= 3 and (foss_id,language_id) not in list_count:
-    #     messages.error(request, 'Maximum of 3 FOSSes allowed per user')        
-    #     return True
+    if (foss_id,language_id) not in list_count:
+        if len(list_count) >= 3:
+            messages.error(request, 'Maximum of 3 FOSSes allowed per user')        
+            return True
     return False
 
 LEVEL_NAME = {1: 'Basic', 2: 'Intermediate', 3: 'Advanced'}
@@ -3630,7 +3634,8 @@ def single_tutorial_allocater(request, tut, lid, days, user):
     # Update data in Tutorial Resource
     if tutorial_resource.exists():
         tutorial_resource = tutorial_resource.update(outline_user = user,
-            script_user = user, video_user = user, 
+            script_user = user, video_user = user, outline_status = WORK_STATUS ,
+            script_status = WORK_STATUS , video_status = WORK_STATUS ,
             submissiondate = submissiondate, assignment_status = ASSIGNMENT_STATUS_DICT['assigned'])
         messages.warning(request, 'Successfully updated ' +
                         tut.tutorial + ' to ' + str(user) + ' : ' +
@@ -3645,10 +3650,6 @@ def single_tutorial_allocater(request, tut, lid, days, user):
         tutorial_resource.outline_user = user
         tutorial_resource.script_user = user
         tutorial_resource.video_user = user
-        tutorial_resource.outline_status = WORK_STATUS
-        tutorial_resource.script_status = WORK_STATUS
-        tutorial_resource.timed_script = WORK_STATUS
-        tutorial_resource.video_status = WORK_STATUS
         # assignment_status -
         # 0 : Not Assigned , 1 : Work in Progress , 2 : Completed
         tutorial_resource.assignment_status = ASSIGNMENT_STATUS_DICT['assigned']
@@ -3724,7 +3725,7 @@ def allocate(request, tdid, lid, uid, days):
         raise
     data = 'Response'    
     this_language = Language.objects.get(id = lid)
-    contributor_rating = ContributorRating.objects.filter(
+    contributor_rating = ContributorRating.objects.filter( rating__gt = 0,
         user_id = uid,language = this_language).values('rating', 'language__name')
     if not contributor_rating.exists():
         messages.error(request,
@@ -3735,7 +3736,7 @@ def allocate(request, tdid, lid, uid, days):
     
     final_query =  TutorialsAvailable.objects.get(tutorial_detail_id = tut.id,language = lid)            
     try:
-        if not no_of_foss_gt_3(request,user.id, tdid, lid,'single'):
+        if not no_of_foss_gt_3(request,user.id, tdid, lid):
             lower_tutorial_level = TutorialDetail.objects.filter(foss_id = final_query.tutorial_detail.foss_id,
                 level_id = final_query.tutorial_detail.level_id - 1).values('level').distinct()
             
@@ -3806,6 +3807,7 @@ def allocate_foss(request, fid, lang, uid, level, days):
     tdid_available = TutorialsAvailable.objects.filter(
                 tutorial_detail_id__in = tdids,language = language).order_by(
                 'tutorial_detail__level','tutorial_detail__order')
+
     for a_tdid_available in tdid_available:
         allocate(request,a_tdid_available.tutorial_detail.id,
             language.id, user.id, days)
