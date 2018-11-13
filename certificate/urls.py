@@ -12,8 +12,13 @@ urlpatterns = patterns('certificate.views',  # noqa
     url(r'^drupal_download/$', 'drupal_download', name='drupal_download'),
     url(r'^drupal_workshop_download/$', 'drupal_workshop_download',
         name='drupal_workshop_download'),
-    url(r'^fa_workshop_download/$', 'fa_workshop_download', name='fa_workshop_download'),
-    url(r'^itp_workshop_certificate/$', 'itp_workshop_download', name='itp_workshop_download'),
-    url(r'^koha_workshop_download/$', 'koha_workshop_download', name='koha_workshop_download'),
-    url(r'^koha_coordinators_workshop/$', 'koha_coordinators_workshop_download', name='koha_coordinators_workshop_download'),
+    url(r'^fa_workshop_download/$', 'fa_workshop_download',
+        name='fa_workshop_download'),
+    url(r'^itp_workshop_certificate/$', 'itp_workshop_download',
+        name='itp_workshop_download'),
+    url(r'^koha_workshop_download/$', 'koha_workshop_download',
+        name='koha_workshop_download'),
+    url(r'^koha_massive_workshop/$', 'koha_massive_workshop_download',
+        name='koha_massive_workshop_download'),
+
 )
