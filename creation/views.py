@@ -3401,7 +3401,7 @@ def get_rated_contributors(request):
         ).values_list('user_id', 'user__username', 'rating')
     data = ""
     for contributor in rated_contributors:            
-        if contributor[2]<=3:
+        if contributor[2]<3:
             data = data + '<option id='+str(contributor[0])+' style="color:red" >' + contributor[1]+ '</option>'
         else:
             data = data + '<option id='+str(contributor[0])+' style="color:green" >' + contributor[1]+ '</option>'
