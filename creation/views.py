@@ -3750,13 +3750,14 @@ def allocate(request, tdid, lid, uid, days):
     try:
         final_query =  TutorialsAvailable.objects.get(tutorial_detail_id = tut.id,language = lid)
         if not no_of_foss_gt_3(request,uid, tdid, lid):
-            lower_tutorial_level = TutorialDetail.objects.filter(foss_id = final_query.tutorial_detail.foss_id,
-                level_id = final_query.tutorial_detail.level_id - 1).values('level').distinct()
-            
+            all_lower_tutorials = TutorialDetail.objects.filter(foss_id = final_query.tutorial_detail.foss_id,
+                level_id = final_query.tutorial_detail.level_id - 1).values('id')
+            lower_tutorial_level = TutorialsAvailable.objects.filter(tutorial_detail_id__in = all_lower_tutorials , 
+                                                                    language = lid).values('tutorial_detail_id__level').distinct()
             if contributor_rating_less_than_3(request ,uid , this_language):
                 if bid_count_less_than_3(uid, tdid, lid):
                     if lower_tutorial_level.exists():
-                        disallow( request,lower_tutorial_level[0]['level'], tut)
+                        disallow( request,lower_tutorial_level[0]['tutorial_detail_id__level'], tut)
                     else:
                         single_tutorial_allocater(request, tut, lid, days, user)                
                 else:
@@ -3769,7 +3770,7 @@ def allocate(request, tdid, lid, uid, days):
                                     content_type = 'application/json')
             else:
                 if lower_tutorial_level.exists():
-                    disallow(request ,lower_tutorial_level[0]['level'], tut)
+                    disallow(request ,lower_tutorial_level[0]['tutorial_detail_id__level'], tut)
                 else:
                     single_tutorial_allocater(request, tut, lid, days, user)
 
