@@ -3676,7 +3676,15 @@ def single_tutorial_allocater(request, tut, lid, days, user):
 
     tutorial_resource = TutorialResource.objects.filter( tutorial_detail =tut,
         language_id__in = super_admin_contributor_languages)
-    
+
+    tutorialsavailableobj = TutorialsAvailable.objects.filter(
+                tutorial_detail = tut, language = lid)
+    if tutorialsavailableobj.exists():
+        tutorialsavailableobj.delete()
+    else:
+        # The only purpose over here is to remove from available tutorials
+        pass
+
     for tutorial in tutorial_resource:
         super_admin_contrib_roles = ContributorRole.objects.filter(
         user_id = SUPER_ADMIN_USER_ID, language_id = tutorial.language,
@@ -3691,7 +3699,6 @@ def single_tutorial_allocater(request, tut, lid, days, user):
             add_previous_contributor_role.tutorial_detail_id = tutorial.tutorial_detail_id
             add_previous_contributor_role.save()
            
-    
     return True
 
 def contributor_rating_less_than_3(request, uid , language):
@@ -3766,14 +3773,7 @@ def allocate(request, tdid, lid, uid, days):
                 else:
                     single_tutorial_allocater(request, tut, lid, days, user)
 
-        tutorialsavailableobj = TutorialsAvailable.objects.filter(
-            tutorial_detail = tut, language = lid)
-        if tutorialsavailableobj.exists():
-            tutorialsavailableobj.delete()
-        else:
-            # The only purpose over here is to remove from available tutorials
-            pass
-
+            
     except Exception as e:
         raise e
         
