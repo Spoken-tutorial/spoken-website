@@ -2,7 +2,157 @@ import os
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User, Group, Permission
+from events.models import Department, Student, State, District, City, ResourcePerson, University, InstituteCategory, 
+InstituteType, Organiser, AcademicCenter
 from spoken.forms import TestimonialsForm
+
+
+class DepartmentTestCase(TestCase):
+    def setUp(self):
+        Department.objects.create(name='Testcase Department 1')
+
+    def test_department(self):
+        # Given
+        department_name = 'Testcase Department 1' 
+        # When
+        department = Department.objects.get(name='Testcase Department 1')
+        # Then
+        self.assertEqual(department.name, department_name)
+
+
+class DistrictTestCase(TestCase):
+    def setUp(self):
+        self.state = State.objects.create(name='maharashtra')
+        District.objects.create(state=self.state, name='mumbai')
+
+    def test_district(self):
+        # Given
+        name = 'mumbai'
+        # When
+        district = District.objects.get(state=self.state)
+        # Then
+        self.assertEquals(self.state, district.state)
+        self.assertEquals(name, district.name)
+
+
+class CityTestCase(TestCase):
+    def setUp(self):
+        self.state = State.objects.create(name='maharashtra')
+        City.objects.create(state=self.state, name='mumbai')
+
+    def test_city(self):
+        # Given
+        name = 'mumbai'
+        # When
+        city = City.objects.get(state=self.state)
+        # Then
+        self.assertEquals(self.state, city.state)
+        self.assertEquals(name, city.name)
+
+
+class ResourcePersonTestCase(TestCase):
+    def setUp(self):
+        self.user = User.objects.create(username='kirtist')
+        self.state = State.objects.create(name='maharashtra')
+        ResourcePerson.objects.create(user=self.user, state=self.state, status=0, assigned_by=1)
+
+    def test_rp(self):
+        # Given
+        status = 0
+        assigned_by = 1
+        # When
+        rp = ResourcePerson.objects.get(state=self.state)
+        # Then
+        # self.assertEquals(self.state, rp.state)
+        self.assertEquals(status, rp.status)
+        self.assertEquals(assigned_by, rp.assigned_by)
+
+
+class UniversityTestCase(TestCase):
+    def setUp(self):
+        self.user = User.objects.create(username='kirtist')
+        self.state = State.objects.create(name='maharashtra')
+        University.objects.create(state=self.state, name='IITB', user=self.user)
+
+    def test_university(self):
+        # Given
+        name = 'IITB'
+        # When
+        university = University.objects.get(state=self.state)
+        # Then
+        self.assertEquals(self.state, university.state)
+        self.assertEquals(name, university.name)
+
+
+class InstituteCategoryTestCase(TestCase):
+    def setUp(self):
+        InstituteCategory.objects.create(name='InstituteCategory 1')
+
+    def test_institutecategory(self):
+        # Given
+        institutecategory_name = 'InstituteCategory 1' 
+        # When
+        institutecategory = InstituteCategory.objects.get(name='InstituteCategory 1')
+        # Then
+        self.assertEqual(institutecategory.name, institutecategory_name)
+
+
+class InstituteTypeTestCase(TestCase):
+    def setUp(self):
+        InstituteType.objects.create(name='InstituteType 1')
+
+    def test_InstituteType(self):
+        # Given
+        institutetype_name = 'InstituteType 1' 
+        # When
+        institutetype = InstituteType.objects.get(name='InstituteType 1')
+        # Then
+        self.assertEqual(institutetype.name, institutetype_name)
+
+
+class OrganiserTestCase(TestCase):
+    def setUp(self):
+        self.user = User.objects.create(username='kirtist')
+        self.approved_by = 'nancy'
+        self.academic = AcademicCenter.objects.create(institution_name='IITB')
+        Organiser.objects.create(user=self.user, academic=self.academic, status=0)
+
+    def test_organiser(self):
+        # GIven
+        status = 0
+        
+
+
+class StudentTestCase(TestCase):
+    def setUp(self):
+        self.user = User.objects.create(username='kirtist')
+        Student.objects.create(user=self.user, gender='Female')
+
+    def test_student(self):
+        # Given
+        gender = 'Female'
+        # When
+        student = Student.objects.get(user=self.user)
+        # Then
+        self.assertEquals(self.user, student.user)
+        self.assertEquals(gender, student.gender)
+
+    def test_student_fullname(self):
+        # Given
+        fullname = 'kirtist'
+        # When
+        student = Student.objects.get(user=self.user)
+        # Then
+        self.assertEquals(student.student_fullname(), fullname)
+
+    def test_is_student_has_attendance(self):
+        # Given
+        # When
+        student = Student.objects.get(user=self.user)
+        # Then
+        self.assertTrue(student.is_student_has_attendance())
+
+
 
 class TestimonialTestClass(TestCase):
     '''

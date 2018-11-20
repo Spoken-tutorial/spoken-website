@@ -541,9 +541,7 @@ class Student(models.Model):
     return self.user.username
 
   def is_student_has_attendance(self):
-    if TrainingAttend.objects.filter(student_id=self.id).exists():
-      return True
-    return False
+    return TrainingAttend.objects.filter(student_id=self.id).exists()
 
 
 class StudentBatch(models.Model):
