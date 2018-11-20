@@ -222,15 +222,19 @@ def elibrary(request):
     writer.writerow(['FileNamewithExtension', 'dc.contributor.author', 'dc.contributor.illustrator', 'dc.creator', 'dc.contributor.editor', 'dc.date.created', 'dc.date.copyright', 'dc.date.accessioned', 'dc.date.available', 'dc.identifier.uri', 'dc.identifier.isbn', 'dc.identifier.issn', 'dc.identifier.citation', 'dc.description.abstract', 'dc.description.tableofcontents', 'dc.format.extent', 'dc.format.mimetype', 'dc.language.iso', 'dc.relation.ispartof', 'dc.relation.ispartofseries', 'dc.relation.haspart', 'dc.source',
                      'dc.subject', 'dc.subject.ddc', 'dc.subject.lcc', 'dc.title', 'dc.title.alternative', 'dc.publisher', 'dc.type', 'dcterms.educationLevel', 'dc.subject.pedagogicobjective', 'dc.coverage.board', 'dc.format.typicallearningtime', 'dc.format.difficultylevel', 'dc.type.typeoflearningmaterial', 'dc.creator.researcher', 'dc.subject.authorkeyword', 'dc.contributor.advisor', 'dc.publisher.place', 'dc.publisher.institution', 'dc.date.awarded', 'dc.type.degree', 'dc.publisher.department', 'dc.rights.uri', 'dc.rights.rightsholder'])
     trs = TutorialResource.objects.filter(Q(status=1) | Q(
-        status=2), language__name='English').all().order_by('tutorial_detail__foss__foss')
+        status=2)).all().order_by('tutorial_detail__foss__foss')
     education_level = '"Class-XI;Class-XII;Under Graduate;Post Graduate"'
     edu_board = '"CBSE;ICSE;State Board;University"'
-    domain_reviewer = "Nancy Varkey"
+    # domain_reviewer = "Nancy Varkey"
+    domain_reviewer = " "
+    success_log_file_head = open('reports/elibrary.log',"w")
+
     for tr in trs:
         tr.outline = filter(lambda x: x in string.printable, tr.outline)
         keywords = filter(lambda x: x in string.printable, tr.common_content.keyword)
         tr.common_content.keyword = '"' + keywords.replace(',', ';') + '"'
         user_name = find_tutorial_user(tr)
+        domain_reviewer = get_domain_reviewer_name(tr)
         publish_date = formated_publish_date(tr)
         duration, filesize = video_duration_with_filesize(tr)
         vdurwithsize = '"' + str(duration) + ";" + str(filesize) + '"'
@@ -245,7 +249,20 @@ def elibrary(request):
         writer.writerow([tr.video, user_name, domain_reviewer, 'NMEICT', '', tr.created, '', '', publish_date, videourl, '', '', '', tr.outline, '', vdurwithsize, 'video/ogg', tr.language.name, '', tr.tutorial_detail.foss.foss, '', '', tr.common_content.keyword,
                         '', '', tr.tutorial_detail.tutorial, '', '', 'Video', education_level, '', edu_board, tutorial_duration, tlevel, 'Audio-Video Lecture/Tutorial', '', '', '', '', '', '', '', '', 'CC BY SA', 'NMEICT'])
         # break
+       
+        success_log_file_head.write(str(tr.video)+','+str(1)+'\n')
     return response
+
+
+def get_domain_reviewer_name(tr):
+    try:
+        domainlog = DomainReviewLog.objects.get(tutorial_resource=tr, component='video')
+        if domainlog.user.first_name:
+            return str(domainlog.user.first_name + " " + domainlog.user.last_name)
+        else:
+            return user.username
+    except:
+        return "Nancy Varkey"
 
 
 def find_tutorial_user(tr):
