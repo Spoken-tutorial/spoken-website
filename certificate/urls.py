@@ -20,5 +20,7 @@ urlpatterns = patterns('certificate.views',  # noqa
         name='koha_workshop_download'),
     url(r'^koha_massive_workshop/$', 'koha_massive_workshop_download',
         name='koha_massive_workshop_download'),
+     url(r'^koha_coordinators_workshop/$', 'koha_coordinators_workshop_download', 
+        name='koha_coordinators_workshop_download'),
 
 )
