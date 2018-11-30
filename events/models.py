@@ -810,7 +810,7 @@ class TrainingRequest(models.Model):
   course = models.ForeignKey(CourseMap)
   batch = models.ForeignKey(StudentBatch, null = True)
   participants = models.PositiveIntegerField(default=0)
-  course_type = models.PositiveIntegerField(default=None)
+  course_type = models.PositiveIntegerField(default=0)
   #status = models.BooleanField(default=False)
   status = models.PositiveSmallIntegerField(default=0)
   created = models.DateTimeField(auto_now_add = True)
