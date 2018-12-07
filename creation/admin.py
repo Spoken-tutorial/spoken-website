@@ -106,6 +106,8 @@ class ContributorRoleAdmin(admin.ModelAdmin):
     mark_contributor_disabled.short_description = "Mark selected contributor roles as disabled"
     actions = ['mark_contributor_active', 'mark_contributor_disabled']
 
+    class Media:
+        js = ('admin/js/ajax-contributor.js',)
 
 class DomainReviewerRoleAdmin(admin.ModelAdmin):
     form = DomainReviewerRoleForm
@@ -172,6 +174,16 @@ class FossAvailableForWorkshopAdmin(admin.ModelAdmin):
     list_display = ('foss', 'language', 'status', 'created')
     list_filter = ('language',)
 
+class LanguagManagerAdmin(admin.ModelAdmin):
+    form = LanguageManagerForm
+    fields = ['user','language','status']
+    list_display = ('user','language','status')
+    list_filter = ('language',)
+
+
+    class Media:
+        js = ('admin/js/not_contributor_langs.js',)
+
 
 admin.site.register(Language, LanguageAdmin)
 admin.site.register(FossCategory, FossCategoryAdmin)
@@ -183,3 +195,4 @@ admin.site.register(QualityReviewerRole, QualityReviewerRoleAdmin)
 admin.site.register(FossAvailableForTest, FossAvailableForTestAdmin)
 admin.site.register(FossAvailableForWorkshop, FossAvailableForWorkshopAdmin)
 admin.site.register(BrochureDocument, BrochureDocumentAdmin)
+admin.site.register(LanguageManager,LanguagManagerAdmin)
