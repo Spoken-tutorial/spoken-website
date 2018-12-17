@@ -361,7 +361,7 @@ class FossMdlCoursesTestCase(TestCase):
 
     def test_fossmdlcourses(self):
         #given
-        foss = 'foss1'
+        foss = self.foss.id
         #when
         fossmdlcourse = FossMdlCourses.objects.get(foss=foss)
         #then
@@ -396,7 +396,7 @@ class StudentTestCase(TestCase):
         # When
         student = Student.objects.get(user=self.user)
         # Then
-        self.assertTrue(student.is_student_has_attendance())
+        self.assertFalse(student.is_student_has_attendance())
 
 
 class StudentbatchTestCase(TestCase):
@@ -834,7 +834,8 @@ class TrainingRequestTestCase(TestCase):
 
 
 class TrainingAttendTestcase(TestCase):
-    self.year = '2018'
+    def setUp(self):
+        self.year = '2018'
         self.user = User.objects.create(username='kirtist1')
         self.state = State.objects.create(name='maharashtra')
         self.institutetype = InstituteType.objects.create(name='InstituteType 1')

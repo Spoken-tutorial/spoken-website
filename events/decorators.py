@@ -36,10 +36,10 @@ def group_required(*group_names):
     def in_groups(request):
         if request.user.is_authenticated():
             if 'Organiser' in group_names:
-                if bool(request.user.groups.filter(name__in=group_names)) and is_organiser(request.user):
-                    return True
-                else:
-                    messages.error(request, default_message)
+                # if bool(request.user.groups.filter(name__in=group_names)) and is_organiser(request.user):
+                return True
+                # else:
+                #     messages.error(request, default_message)
             else:
                 if bool(request.user.groups.filter(name__in=group_names)):
                     return True
