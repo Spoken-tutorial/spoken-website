@@ -195,7 +195,7 @@ def fdp_training(request):
 
     collectionSet = TrainingRequest.objects.filter(
         participants__gt=0,
-        department=169,
+        department__name='Faculty Development Programs (FDPs)(PMMMNMTT)',
         sem_start_date__lte=datetime.now()
     ).order_by('-sem_start_date')
     header = {

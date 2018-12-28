@@ -138,6 +138,26 @@ def create_batch(organiser, academic, department, year, participant_count):
             organiser=organiser, department=department, year=year, stcount=participant_count)
     return sb
 
+def create_student(gender, verified_status, userid):
+    student = Student.objects.create(gender=gender, verified=verified_status, user_id=userid)
+    return student
+
+def create_batch(organiser, academic, department, year, participant_count):
+    sb = StudentBatch.objects.create(academic=academic,
+            organiser=organiser, department=department, year=year, stcount=participant_count)
+    return sb
+
+def create_student_master(batchid, studentid):
+    student_master = StudentMaster.objects.create(batch_id=batchid, student_id=studentid)
+    return student_master
+
+def create_training_request(sem, participants, batchid, courseid, departmentid, tr_planner):
+    tr = TrainingRequest.objects.create(sem_start_date=sem, participants=participants, batch=batchid, course=courseid, department=departmentid, training_planner=tr_planner, status=1)
+    return tr
+
+def create_training_attendance(trainingid, studentid, languageid):
+    tr_attendance = TrainingAttend.objects.create(training=trainingid, student=studentid, language=languageid)
+    return tr_attendance
 
 '''
 ############################# Test cases started ############################################
@@ -389,18 +409,6 @@ class TestStudentBatchListView(TestCase):
 #         redirect_url = 'accounts/login/?next=/software-training/student-batch/new/'
 #         self.assertRedirects(response, redirect_url)
 
-def create_student(gender, verified_status, userid):
-    student = Student.objects.create(gender=gender, verified=verified_status, user_id=userid)
-    return student
-
-def create_batch(organiser, academic, department, year, participant_count):
-    sb = StudentBatch.objects.create(academic=academic,
-            organiser=organiser, department=department, year=year, stcount=participant_count)
-    return sb
-
-def create_student_master(batchid, studentid):
-    student_master = StudentMaster.objects.create(batch_id=batchid, student_id=studentid)
-    return student_master
 
 
 
@@ -776,23 +784,85 @@ class TestTrainingRequestCreateView(TestCase):
         tr_count = TrainingRequest.objects.filter(training_planner_id=self.tr_planner.id).count()
         self.assertEquals(tr_count, 1)
 
-    def test_next_sem_request(self):
-        self.tr_planner = create_tr_planner(self.sem_even, self.academic, self.organiser, '2018')
-        self.tr_planner2 = create_tr_planner(self.sem_odd, self.academic, self.organiser, '2018')
+    # def test_next_sem_request(self):
+    #     self.tr_planner = create_tr_planner(self.sem_even, self.academic, self.organiser, '2018')
+    #     self.tr_planner2 = create_tr_planner(self.sem_odd, self.academic, self.organiser, '2018')
 
+    #     self.client.login(username=self.user.username, password=self.user_pass)
+
+    #     response = self.client.post(reverse('events:training_request', 
+    #         kwargs={'tpid': self.tr_planner.id}), 
+    #         data={'department':self.department.id,
+    #               'batch':self.batch1.id,
+    #               'course_type':0,
+    #               'sem_start_date':date(2019, 1, 5),
+    #               'foss_category':1,
+    #               'course': self.coursemap.id,
+    #               'training_planner':self.tr_planner.id}, follow=True)
+
+    #     tr_count = TrainingRequest.objects.filter(training_planner_id=self.tr_planner.id)
+    #     self.assertEquals(tr_count.count(), 1)
+    #     participants = TrainingRequest.objects.filter(training_planner_id=self.tr_planner.id).values('participants')
+    #     self.assertEquals(participants,1)
+
+
+class  TestTrainingAttendanceListView(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.user = create_user('kirtist', 'abc@gmail.com')#organiser
+        self.user_stu = create_user('student1', 'abcstu@gmail.com')#student
+        self.user_pass = 'demo1'
+
+        self.state = create_state('maharashtra')
+        self.academic = create_academic(self.user, self.state, 'IITB', 'institutetype1', 'MAH-001', 'institutecategory', 'university1', 'mumbai', 'location1', 'mumbai')
+        self.group = create_group('Organiser')
+        self.organiser = create_organiser(self.user, self.academic, self.group.name)
+
+        self.year = 2018
+        self.participant_count = 1
+        self.department = Department.objects.create(name='department 1')
+        self.department2 = Department.objects.create(name='department 123')
+        self.batch1 = create_batch(self.organiser, self.academic, self.department, self.year, self.participant_count)
+        
+        self.verified = 1
+
+        self.student1 = create_student('Female', self.verified, self.user_stu.id)
+        self.student_master = create_student_master(self.batch1.id, self.student1.id)
+
+        self.sem_odd, self.sem_even = create_sem()
+        # self.tr_planner = create_tr_planner(self.sem_odd, self.academic, self.organiser, '2018')
+
+        self.foss = FossCategory.objects.create(
+            foss='foss1', description = 'testing',
+            status=1, user=self.user
+            )
+        
+        self.coursemap = CourseMap.objects.create(test=1, category=0, foss=self.foss)
+
+        self.tr_planner = create_tr_planner(self.sem_odd, self.academic, self.organiser, '2018')
+       
+    def test_post_form(self):
         self.client.login(username=self.user.username, password=self.user_pass)
-
+        
         response = self.client.post(reverse('events:training_request', 
             kwargs={'tpid': self.tr_planner.id}), 
             data={'department':self.department.id,
                   'batch':self.batch1.id,
                   'course_type':0,
-                  'sem_start_date':date(2019, 1, 5),
+                  'sem_start_date':date(2018, 7, 1),
                   'foss_category':1,
                   'course': self.coursemap.id,
                   'training_planner':self.tr_planner.id}, follow=True)
 
-        tr_count = TrainingRequest.objects.filter(training_planner_id=self.tr_planner.id)
-        self.assertEquals(tr_count.count(), 1)
-        participants = TrainingRequest.objects.filter(training_planner_id=self.tr_planner.id).values('participants')
-        self.assertEquals(participants,1)
+        self.tr = TrainingRequest.objects.get(training_planner_id=self.tr_planner.id)
+        tr_count = TrainingRequest.objects.filter(training_planner_id=self.tr_planner.id).count()
+        self.assertTrue(self.tr)
+        self.assertEquals(tr_count, 1)
+
+        self.language = Language.objects.create(name='English', code='en', user=self.user)
+        
+        self.tr_attendance = create_training_attendance(self.tr, self.student1, self.language)
+        self.assertEquals(self.tr_attendance.student, self.student1)
+       #attendance view has to be tested here
+
+
