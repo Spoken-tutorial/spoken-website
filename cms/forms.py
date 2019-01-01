@@ -1,4 +1,7 @@
+from __future__ import print_function
 # Third Party Stuff
+from builtins import str
+from builtins import object
 from django import forms
 from django.contrib.auth.models import User
 from django.core.validators import RegexValidator
@@ -82,7 +85,7 @@ class RegisterForm(forms.Form):
 
 
 class ProfileForm(forms.ModelForm):
-    class Meta:
+    class Meta(object):
         model = Profile
         exclude = ['user', 'confirmation_code', 'street', 'location']
 
@@ -154,7 +157,7 @@ class CmsPageForm(forms.ModelForm):
         (9, '9'), (10, '10'), (11, '11'), (12, '12')))
 
 
-    class Meta:
+    class Meta(object):
         model = Page
         exclude = ['created']
 
@@ -171,7 +174,7 @@ class PasswordResetForm(forms.Form):
             user = User.objects.filter(email=email).first()
             if user:
               if user.is_active:
-                print user.is_active
+                print(user.is_active)
                 error = 0
               else:
                 error = 1
@@ -179,8 +182,8 @@ class PasswordResetForm(forms.Form):
             else:
               error = 1
               er_msg= 'Email: %s not exists' % email
-        except Exception, e:
-            print e
+        except Exception as e:
+            print(e)
         if error:
             raise forms.ValidationError( er_msg )
 

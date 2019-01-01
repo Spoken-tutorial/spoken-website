@@ -1,4 +1,5 @@
 # Third Party Stuff
+from builtins import object
 from django import forms
 from django.db.models import Q
 
@@ -14,6 +15,6 @@ class LearnerForm(forms.ModelForm):
                                   help_text="",
                                   error_messages={'required': 'Foss field required.'})
 
-    class Meta:
+    class Meta(object):
         model = Learner
         exclude = ['created', 'updated']

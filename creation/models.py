@@ -1,4 +1,5 @@
 # Third Party Stuff
+from builtins import object
 from django.contrib.auth.models import User
 from django.db import models
 
@@ -9,7 +10,7 @@ class Language(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
-    class Meta:
+    class Meta(object):
         ordering = ('name',)
 
     def __unicode__(self):
@@ -21,7 +22,7 @@ class FossSuperCategory(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
-    class Meta:
+    class Meta(object):
         verbose_name = 'FOSS Category'
         verbose_name_plural = 'FOSS Categories'
         ordering = ('name',)
@@ -41,7 +42,7 @@ class FossCategory(models.Model):
     updated = models.DateTimeField(auto_now=True)
     show_on_homepage = models.BooleanField(default=True, help_text ='If unchecked, this foss will be displayed on series page, instead of home page' )
 
-    class Meta:
+    class Meta(object):
         verbose_name = 'FOSS'
         verbose_name_plural = 'FOSSes'
         ordering = ('foss', )
@@ -56,7 +57,7 @@ class BrochureDocument(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
-    class Meta:
+    class Meta(object):
         verbose_name = 'FOSS Brochure'
         verbose_name_plural = 'FOSS Brochures'
 
@@ -69,7 +70,7 @@ class BrochurePage(models.Model):
     page = models.FileField(upload_to='brochures/')
     page_no = models.PositiveIntegerField()
 
-    class Meta:
+    class Meta(object):
         ordering = ('page_no', )
         unique_together = (('brochure', 'page_no'),)
 
@@ -81,7 +82,7 @@ class PlaylistInfo(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
-    class Meta:
+    class Meta(object):
         verbose_name = 'Playlist Info'
         unique_together = (('foss', 'language'),)
 
@@ -95,7 +96,7 @@ class PlaylistItem(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
-    class Meta:
+    class Meta(object):
         verbose_name = 'Playlist Item'
         unique_together = (('playlist', 'item_id'),)
 
@@ -104,7 +105,7 @@ class Level(models.Model):
     level = models.CharField(max_length=255)
     code = models.CharField(max_length=10)
 
-    class Meta:
+    class Meta(object):
         verbose_name = 'Tutorial Level'
 
     def __unicode__(self):
@@ -120,7 +121,7 @@ class TutorialDetail(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
-    class Meta:
+    class Meta(object):
         verbose_name = 'Tutorial Detail'
         unique_together = (('foss', 'tutorial', 'level'),)
 
@@ -161,7 +162,7 @@ class TutorialCommonContent(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
-    class Meta:
+    class Meta(object):
         verbose_name = 'Tutorial Common Content'
 
     def keyword_as_list(self):
@@ -198,7 +199,7 @@ class TutorialResource(models.Model):
     updated = models.DateTimeField(auto_now=True)
     publish_at = models.DateTimeField(null=True)
 
-    class Meta:
+    class Meta(object):
         unique_together = (('tutorial_detail', 'language',),)
 
 
@@ -220,7 +221,7 @@ class ContributorRole(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
-    class Meta:
+    class Meta(object):
         unique_together = (('user', 'foss_category', 'language',),)
         verbose_name = 'Contributor Role'
 
@@ -233,7 +234,7 @@ class DomainReviewerRole(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
-    class Meta:
+    class Meta(object):
         unique_together = (('user', 'foss_category', 'language',),)
         verbose_name = 'Domain Reviewer Role'
 
@@ -246,7 +247,7 @@ class QualityReviewerRole(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
-    class Meta:
+    class Meta(object):
         unique_together = (('user', 'foss_category', 'language',),)
         verbose_name = 'Quality Reviewer Role'
 
@@ -344,7 +345,7 @@ class RoleRequest(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
-    class Meta:
+    class Meta(object):
         unique_together = (('user', 'role_type',),)
 
 
@@ -354,7 +355,7 @@ class FossAvailableForWorkshop(models.Model):
     status = models.BooleanField(default=0)
     created = models.DateTimeField(auto_now_add=True)
 
-    class Meta:
+    class Meta(object):
         unique_together = (('foss', 'language'),)
 
 
@@ -364,7 +365,7 @@ class FossAvailableForTest(models.Model):
     status = models.BooleanField(default=0)
     created = models.DateTimeField(auto_now_add=True)
 
-    class Meta:
+    class Meta(object):
         unique_together = (('foss', 'language'),)
 
 

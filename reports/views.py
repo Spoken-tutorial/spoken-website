@@ -1,4 +1,6 @@
+from __future__ import print_function
 # Standard Library
+from builtins import str
 import csv
 import datetime as dt
 
@@ -18,7 +20,7 @@ from events.views import *
 def get_fk_model(model, fieldname):
     '''returns None if not foreignkey, otherswise the relevant model'''
     field_object, model, direct, m2m = model._meta.get_field_by_name(fieldname)
-    print field_object, model, direct, m2m
+    print(field_object, model, direct, m2m)
     if not m2m and direct and isinstance(field_object, ForeignKey):
         return field_object.rel.to
     return None
@@ -92,7 +94,7 @@ def export_csv(request, model_name="None", app_label="None", queryset=None, fiel
         model = get_model(app_label, model_name)
         queryset = model.objects.all()
         filters = dict()
-        for key, value in request.GET.items():
+        for key, value in list(request.GET.items()):
             if key not in ('ot', 'o') and value:
                 if '_0' in key:
                     key = key.split('_0')
@@ -230,8 +232,8 @@ def elibrary(request):
     success_log_file_head = open('reports/elibrary.log',"w")
 
     for tr in trs:
-        tr.outline = filter(lambda x: x in string.printable, tr.outline)
-        keywords = filter(lambda x: x in string.printable, tr.common_content.keyword)
+        tr.outline = [x for x in tr.outline if x in string.printable]
+        keywords = [x for x in tr.common_content.keyword if x in string.printable]
         tr.common_content.keyword = '"' + keywords.replace(',', ';') + '"'
         user_name = find_tutorial_user(tr)
         domain_reviewer = get_domain_reviewer_name(tr)
@@ -274,7 +276,7 @@ def find_tutorial_user(tr):
     if tr.video_user.username == 'pravin1389':
         with open(file_path, 'rbU') as csvfile:
             csvdata = csv.reader(csvfile, delimiter=',', quotechar='|')
-            print tr.tutorial_detail.foss.foss, ",", tr.tutorial_detail.tutorial
+            print(tr.tutorial_detail.foss.foss, ",", tr.tutorial_detail.tutorial)
             for row in csvdata:
                 try:
                     if row[1] == tr.tutorial_detail.foss.foss and row[0] == tr.tutorial_detail.tutorial and not row[8] == tr.video_user.username:
@@ -283,15 +285,15 @@ def find_tutorial_user(tr):
                             return user.first_name + " " + user.last_name
                         else:
                             return user.username
-                except Exception, e:
-                    print e, " => ", row[8]
+                except Exception as e:
+                    print(e, " => ", row[8])
     if tr.video_user.first_name:
         return str(tr.video_user.first_name) + " " + str(tr.video_user.last_name)
     return str(tr.video_user.username)
 
 
 def formated_publish_date(tr):
-    print tr.id
+    print(tr.id)
     try:
         pt = PublishTutorialLog.objects.filter(tutorial_resource_id=tr.id).last()
         return pt.created

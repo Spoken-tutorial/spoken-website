@@ -1,4 +1,9 @@
+from __future__ import print_function
+from __future__ import division
 # Standard Library
+from builtins import str
+from builtins import range
+from past.utils import old_div
 import random
 import string
 
@@ -28,7 +33,7 @@ def dispatcher(request, permalink=''):
     if permalink == '':
         return HttpResponseRedirect('/')
     page_content = get_object_or_404(Page, permalink=permalink, visible=True)
-    col_offset = int((12 - page_content.cols) / 2)
+    col_offset = int(old_div((12 - page_content.cols), 2))
     col_remainder = int((12 - page_content.cols) % 2)
     if col_remainder:
         col_offset = str(col_offset) + 'p5'
@@ -136,7 +141,7 @@ def confirm(request, confirmation_code, username):
         else:
             messages.success(request, "Something went wrong!. Please try again!")
             return HttpResponseRedirect('/')
-    except Exception, e:
+    except Exception as e:
         messages.success(request, "Your account not activated!. Please try again!")
         return HttpResponseRedirect('/')
 
@@ -280,8 +285,8 @@ def password_reset(request):
             from mdldjango.views import changeMdlUserPass
             changeMdlUserPass(request.POST['email'], password_string)
 
-            print 'Username => ', user.username
-            print 'New password => ', password_string
+            print('Username => ', user.username)
+            print('New password => ', password_string)
 
             changePassUrl = "http://www.spoken-tutorial.org/accounts/change-password"
             if request.GET and request.GET['next']:
@@ -399,7 +404,7 @@ def confirm_student(request, token):
             messages.success(request, "Your account has been activated!. Please login to continue.")
             return HttpResponseRedirect('http://spoken-tutorial.org/participant/login/')
         else:
-            print 'can not match record'
+            print('can not match record')
             messages.error(request, "Your account not activated!. Please try again!")
             return HttpResponseRedirect('/')
     except ObjectDoesNotExist:

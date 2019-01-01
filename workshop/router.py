@@ -1,4 +1,5 @@
 
+from builtins import object
 class WorkshopRouter(object):
     """A router to manage database operations in the cdeep app.
     """

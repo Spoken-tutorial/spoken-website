@@ -1,3 +1,6 @@
+from __future__ import print_function
+from builtins import str
+from builtins import object
 from django import forms
 from django.contrib.auth.models import User
 
@@ -10,7 +13,7 @@ class RpForm(forms.ModelForm):
     state = forms.ModelChoiceField(queryset = State.objects.all())
     status = forms.BooleanField(required=False)
 
-    class Meta:
+    class Meta(object):
         model = ResourcePerson
         exclude = ['assigned_by']
 
@@ -64,7 +67,7 @@ class AcademicForm(forms.ModelForm):
                 self.fields["district"].queryset = District.objects.filter(state__id=initial.state_id)
                 self.fields["city"].queryset = City.objects.filter(state__id=initial.state_id)
 
-    class Meta:
+    class Meta(object):
         model = AcademicCenter
         exclude = ['user', 'academic_code', 'institute_category']
 
@@ -161,13 +164,13 @@ class InvigilatorForm(forms.Form):
             self.fields['college'].initial = initial.academic_id
 
 class DepartmentForm(forms.ModelForm):
-    class Meta:
+    class Meta(object):
         model = Department
         exclude = ['created', 'updated']
 
 class TrainingForm(forms.ModelForm):
     user = None
-    class Meta:
+    class Meta(object):
         model = Training
         exclude = ['status', 'participant_count', 'extra_fields', 'organiser', 'academic', 'training_code', 'ttime', 'appoved_by']
 
@@ -277,7 +280,7 @@ class TrainingPermissionForm(forms.Form):
         pass
 
 class TestForm(forms.ModelForm):
-    class Meta:
+    class Meta(object):
         model = Test
         exclude = ['status', 'participant_count', 'organiser', 'academic', 'test_code', 'ttime', 'training', 'workshop', 'appoved_by','department','foss']
 
@@ -409,7 +412,7 @@ class LiveFeedbackForm(forms.ModelForm):
     recommend_workshop = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice)
     reason_why = forms.CharField(widget=forms.Textarea(attrs={'rows': 2}))
     other_comments = forms.CharField(widget=forms.Textarea(attrs={'rows': 2}))
-    class Meta:
+    class Meta(object):
         model = TrainingLiveFeedback
         exclude = ['training', 'mdluser_id']
 
@@ -469,13 +472,13 @@ class TrainingLanguageFeedbackForm(forms.ModelForm):
     audio_best_features = forms.CharField(widget=forms.Textarea(attrs={'rows': 2}))
     audio_areas_of_improvement = forms.CharField(widget=forms.Textarea(attrs={'rows': 2}))
 
-    class Meta:
+    class Meta(object):
         model = TrainingLanguageFeedback
         exclude = ['name', 'training', 'mdluser_id']
 
     def __init__(self, *args, **kwargs):
         training = None
-        print kwargs
+        print(kwargs)
         if 'training' in kwargs:
             training = kwargs["training"]
             del kwargs["training"]

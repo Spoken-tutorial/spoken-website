@@ -1,4 +1,5 @@
 # Third Party Stuff
+from builtins import object
 from django.db import models
 
 
@@ -59,7 +60,7 @@ class MdlUser(models.Model):
     #timemodified = models.BigIntegerField()
     #trustbitmask = models.BigIntegerField()
     imagealt = models.CharField(max_length=765, blank=True)
-    class Meta:
+    class Meta(object):
         db_table = u'mdl_user'
         
 class MdlQuizGrades(models.Model):
@@ -68,7 +69,7 @@ class MdlQuizGrades(models.Model):
     userid = models.BigIntegerField()
     grade = models.DecimalField(max_digits=12, decimal_places=5)
     timemodified = models.BigIntegerField()
-    class Meta:
+    class Meta(object):
         db_table = u'mdl_quiz_grades'
 
 class MdlQuizAttempts(models.Model):
@@ -87,7 +88,7 @@ class MdlQuizAttempts(models.Model):
     timecheckstate = models.BigIntegerField(null=True, blank=True)
     sumgrades = models.DecimalField(null=True, max_digits=12, decimal_places=5, blank=True)
     needsupgradetonewqe = models.IntegerField()
-    class Meta:
+    class Meta(object):
         db_table = u'mdl_quiz_attempts'
 
 class MdlUserEnrolments(models.Model):
@@ -100,7 +101,7 @@ class MdlUserEnrolments(models.Model):
     modifierid = models.BigIntegerField()
     timecreated = models.BigIntegerField()
     timemodified = models.BigIntegerField()
-    class Meta:
+    class Meta(object):
         db_table = u'mdl_user_enrolments'
 
 class MdlEnrol(models.Model):
@@ -139,7 +140,7 @@ class MdlEnrol(models.Model):
     customtext4 = models.TextField(blank=True)
     timecreated = models.BigIntegerField()
     timemodified = models.BigIntegerField()
-    class Meta:
+    class Meta(object):
         db_table = u'mdl_enrol'
 
 class MdlRoleAssignments(models.Model):
@@ -152,5 +153,5 @@ class MdlRoleAssignments(models.Model):
     component = models.CharField(max_length=300)
     itemid = models.BigIntegerField()
     sortorder = models.BigIntegerField()
-    class Meta:
+    class Meta(object):
         db_table = u'mdl_role_assignments'

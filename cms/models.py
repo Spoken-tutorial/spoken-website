@@ -1,4 +1,6 @@
 # Standard Library
+from builtins import str
+from builtins import object
 import os
 from datetime import datetime
 
@@ -35,7 +37,7 @@ class Profile(models.Model):
     thumb = models.FileField(upload_to=profile_picture_thumb, null=True, blank=True)
     address = models.TextField(null=True)
     created = models.DateTimeField(auto_now_add=True)
-    class Meta:
+    class Meta(object):
         app_label = 'cms'
 
 class Page(models.Model):
@@ -135,5 +137,5 @@ class News(models.Model):
 #    def get_absolute_url(self):
 #        return ('views.view_something', (), {'slug': self.slug})
 #    
-    class Meta:
+    class Meta(object):
         verbose_name = "New"

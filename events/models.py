@@ -1,3 +1,6 @@
+from __future__ import print_function
+from builtins import str
+from builtins import object
 from django.db import models
 from datetime import datetime, date, timedelta
 from django.db.models.signals import pre_delete, post_delete
@@ -51,7 +54,7 @@ class State(models.Model):
   def __unicode__(self):
     return self.name
 
-  class Meta:
+  class Meta(object):
     unique_together = (("code","name"),)
 
 
@@ -65,7 +68,7 @@ class District(models.Model):
   def __unicode__(self):
     return self.name
 
-  class Meta:
+  class Meta(object):
     unique_together = (("state", "code","name"),)
     #unique_together = (("state_id","name"),)
 
@@ -79,7 +82,7 @@ class City(models.Model):
   def __unicode__(self):
     return self.name
 
-  class Meta:
+  class Meta(object):
     unique_together = (("name","state"),)
 
 
@@ -93,7 +96,7 @@ class Location(models.Model):
   def __unicode__(self):
     return self.name
 
-  class Meta:
+  class Meta(object):
     unique_together = (("name","district","pincode"),)
 
 
@@ -104,7 +107,7 @@ class ResourcePerson(models.Model):
   status = models.BooleanField()
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
-  class Meta:
+  class Meta(object):
     verbose_name = "Resource Person"
     unique_together = (("user","state"),)
 
@@ -119,7 +122,7 @@ class University(models.Model):
   def __unicode__(self):
     return self.name
 
-  class Meta:
+  class Meta(object):
     unique_together = (("name","state"),)
 
 
@@ -131,7 +134,7 @@ class InstituteCategory(models.Model):
   def __unicode__(self):
     return self.name
 
-  class Meta:
+  class Meta(object):
     verbose_name = "Institute Categorie"
 
 
@@ -143,7 +146,7 @@ class InstituteType(models.Model):
   def __unicode__(self):
     return self.name
 
-  class Meta:
+  class Meta(object):
     unique_together = (("name"),)
 
 
@@ -168,7 +171,7 @@ class AcademicCenter(models.Model):
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
 
-  class Meta:
+  class Meta(object):
     verbose_name = "Academic Center"
     #unique_together = (
     #  ("institution_name","district"),
@@ -252,7 +255,7 @@ class Department(models.Model):
   def __unicode__(self):
     return self.name
 
-  class Meta:
+  class Meta(object):
     ordering = ['name']
 
 
@@ -264,7 +267,7 @@ class Course(models.Model):
   def __unicode__(self):
     return self.name
 
-  class Meta:
+  class Meta(object):
     unique_together = (("name"),)
 
 
@@ -303,7 +306,7 @@ class Training(models.Model):
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
 
-  class Meta:
+  class Meta(object):
     unique_together = (("organiser", "academic", "foss", "tdate", "ttime"),)
 
 
@@ -320,7 +323,7 @@ class TrainingAttendance(models.Model):
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
 
-  class Meta:
+  class Meta(object):
     verbose_name = "Training Attendance"
     #unique_together = (("training", "mdluser_id"))
 
@@ -375,7 +378,7 @@ class Test(models.Model):
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
 
-  class Meta:
+  class Meta(object):
     verbose_name = "Test Categorie"
     unique_together = (("organiser", "academic", "foss", "tdate", "ttime"),)
 
@@ -405,7 +408,7 @@ class TestAttendance(models.Model):
   status = models.PositiveSmallIntegerField(default=0)
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
-  class Meta:
+  class Meta(object):
     verbose_name = "Test Attendance"
     unique_together = (("test", "mdluser_id"))
 
@@ -509,7 +512,7 @@ class MediaTestimonials(models.Model):
     content = models.CharField(max_length=255)
     created = models.DateTimeField(auto_now_add=True)
 
-    class Meta:
+    class Meta(object):
         verbose_name = 'Media Testimonials'
         verbose_name_plural = 'Media Testimonials'
 
@@ -553,7 +556,7 @@ class StudentBatch(models.Model):
   year = models.PositiveIntegerField() # 2010-2014
   stcount = models.PositiveIntegerField(default=0)
 
-  class Meta:
+  class Meta(object):
     unique_together = ("academic", "year", "department")
 
   def __unicode__(self):
@@ -599,7 +602,7 @@ class StudentMaster(models.Model):
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
 
-  class Meta:
+  class Meta(object):
     unique_together = ("batch", "student")
     ordering = ["student__user__first_name"]
 
@@ -661,7 +664,7 @@ class CourseMap(models.Model):
     }
     return courses[self.category]
 
-  class Meta:
+  class Meta(object):
     unique_together = ("course", "foss", "category")
     ordering = ('foss',)
 
@@ -716,8 +719,8 @@ class TrainingPlanner(models.Model):
         even = False
       if int(self.year) == year and bool(self.semester.even) == even:
         return True
-    except Exception, e:
-      print e
+    except Exception as e:
+      print(e)
     return False
 
   def get_current_year_and_sem(self):
@@ -785,7 +788,7 @@ class TrainingPlanner(models.Model):
       str(self.year)+'-9-30', '%Y-%m-%d'
     ).date()
 
-  class Meta:
+  class Meta(object):
     unique_together = ("year", "academic", "organiser", "semester")
 
 
@@ -925,7 +928,7 @@ class TrainingAttend(models.Model):
   #created = models.DateTimeField()
   #updated = models.DateTimeField()
 
-  class Meta:
+  class Meta(object):
     unique_together = ("training", "student")
 
 
@@ -985,7 +988,7 @@ class TrainingFeedback(models.Model):
   reason_why = models.TextField()
   other_comments = models.TextField()
   created = models.DateTimeField(auto_now_add = True)
-  class Meta:
+  class Meta(object):
     unique_together = (("training", "mdluser_id"))
 
 
@@ -1044,7 +1047,7 @@ class TrainingLanguageFeedback(models.Model):
   side_by_side_method_is = models.PositiveIntegerField(default=0)
 
   created = models.DateTimeField(auto_now_add = True)
-  class Meta:
+  class Meta(object):
     unique_together = (("training", "mdluser_id"))
 
 
@@ -1077,7 +1080,7 @@ class SingleTraining(models.Model):
       return True
     return False
 
-  class Meta:
+  class Meta(object):
     unique_together = (("organiser", "academic", "course", "tdate", "ttime"),)
 
 
@@ -1097,7 +1100,7 @@ class SingleTrainingAttendance(models.Model):
   #created = models.DateTimeField()
   #updated = models.DateTimeField()
 
-  class Meta:
+  class Meta(object):
     unique_together = (("training", "firstname", "lastname", "email"),)
 
 
@@ -1151,7 +1154,7 @@ class TrainingLiveFeedback(models.Model):
   other_comments = models.TextField()
   created = models.DateTimeField(auto_now_add = True)
 
-  class Meta:
+  class Meta(object):
     unique_together = (("training", "email"))
 
 
@@ -1653,7 +1656,7 @@ class InductionInterest(models.Model):
   no_objection = models.CharField(max_length = 50, choices = yes_option)
   other_comments = models.CharField(max_length = 500)
 
-  class Meta:
+  class Meta(object):
     ordering = ('city',)
 
 class InductionFinalList(models.Model):
@@ -1683,7 +1686,7 @@ class PaymentDetails(models.Model):
     created = models.DateTimeField(auto_now_add = True)
     updated = models.DateTimeField(auto_now_add = True) 
     
-    class Meta:
+    class Meta(object):
       unique_together = ('academic_id','academic_year',)
 
 class PaymentTransactionDetails(models.Model):

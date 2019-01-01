@@ -1,3 +1,4 @@
+from __future__ import print_function
 import MySQLdb
 import time
 import sys
@@ -45,11 +46,11 @@ for row in rows:
             db.commit()
             success_string = row[1] + ' - ' + langrow[1] + ' -- ' + playlistid
             success_log_file_head.write(success_string + '\n')
-            print success_string
+            print(success_string)
         else:
             error_string = row[1] + ' - ' + langrow[1] + ' -- FAILED'
             error_log_file_head.write(error_string + '\n')
-            print error_string
+            print(error_string)
         time.sleep(2)
 error_log_file_head.close()
 success_log_file_head.close()

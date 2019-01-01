@@ -1,4 +1,5 @@
 # Third Party Stuff
+from builtins import object
 import django_filters
 
 # Spoken Tutorial Stuff
@@ -23,6 +24,6 @@ class NewsStateFilter(django_filters.FilterSet):
         choices.insert(0, ('', '---------'),)
         self.filters['state'].extra.update({'choices': choices})
 
-    class Meta:
+    class Meta(object):
         model = News
         fields = ['state']

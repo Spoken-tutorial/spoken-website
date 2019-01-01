@@ -1,7 +1,12 @@
-from HTMLParser import HTMLParser
-import time, mechanize, cookielib, datetime
+from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from html.parser import HTMLParser
+import time, mechanize, http.cookiejar, datetime
 from BeautifulSoup import BeautifulSoup
-from urllib import urlopen, quote
+from urllib.request import urlopen
+from urllib.parse import quote
 import MySQLdb
 import sys
 import os
@@ -42,7 +47,7 @@ def getNewBrowser():
     b = mechanize.Browser()
 
     # create a cookiejar for cookies
-    jar = cookielib.LWPCookieJar()
+    jar = http.cookiejar.LWPCookieJar()
     b.set_cookiejar(jar)
 
     # prevent mechanize from simulating a 403 disallow
@@ -71,7 +76,7 @@ def generate_subtitle(srt_url, srt_file_path):
     soup = readUrl(srt_url)
     table = soup.findAll("table")
     if not table:
-        print 'table not found'
+        print('table not found')
         return False
     try:
         rows = table[0].findAll("tr")
@@ -124,8 +129,8 @@ def generate_subtitle(srt_url, srt_file_path):
             file_head = open(srt_file_path,"w")
             file_head.write(srt_data.encode("utf-8"))
             file_head.close()
-    except Exception, e:
-        print e
+    except Exception as e:
+        print(e)
         return False
     return True
 
@@ -263,7 +268,7 @@ for row in rows:
         continue
     try:
         code = urlopen(script_path).code
-    except Exception, e:
+    except Exception as e:
         code = e.code
     result = ''
     if(int(code) == 200):
@@ -272,10 +277,10 @@ for row in rows:
         if generate_subtitle(script_path, srt_file_path + srt_file_name):
             success_string = 'Success: ' + str(foss[1]) + ', ' + srt_file_name + '\n'
             success_log_file_head.write(success_string)
-            print success_string
+            print(success_string)
         else:
             error_string = 'Failed: ' + str(foss[1]) + ', ' + srt_file_name + '\n'
             error_log_file_head.write(error_string)
-            print error_string
+            print(error_string)
 error_log_file_head.close()
 success_log_file_head.close()

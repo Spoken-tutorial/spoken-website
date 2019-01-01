@@ -1,3 +1,5 @@
+from __future__ import division
+from past.utils import old_div
 import math
 
 def convert_to_html(rawdata):
@@ -87,11 +89,11 @@ def convert_to_html(rawdata):
         elif ch > 127:
             c = ch;
             a4 = int(c % 16);
-            c = math.floor(c / 16); 
+            c = math.floor(old_div(c, 16)); 
             a3 = int(c % 16);
-            c = math.floor(c / 16);
+            c = math.floor(old_div(c, 16));
             a2 = int(c % 16);
-            c = math.floor(c / 16);
+            c = math.floor(old_div(c, 16));
             a1 = int(c % 16);
             tmp_hex = '&#x' + hex_data[a1] + hex_data[a2] + hex_data[a3] + hex_data[a4] + ';'
             result_data = result_data + tmp_hex
