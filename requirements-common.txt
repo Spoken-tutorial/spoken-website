@@ -3,9 +3,9 @@ Django==1.8.1
 django-appconf==1.0.1
 django-compressor==1.5
 django-extensions==1.5.3
-django-filter==0.7
+https://github.com/sanmugamk/django-filter/archive/develop.zip
 django-htmlmin==0.7.0
-django-nicedit==0.21
+https://github.com/sanmugamk/django-nicedit/archive/master.zip
 django-recaptcha==1.0.4
 django-report-builder==3.1.6
 django-report-utils==0.3.4
@@ -20,7 +20,6 @@ httplib2==0.9.1
 jdcal==1.0.1
 oauth2client==1.4.7
 openpyxl==2.2.2
-Pillow==2.8.1
 pyasn1==0.1.7
 pyasn1-modules==0.0.5
 pycurl==7.19.5.1

@@ -18,7 +18,7 @@ except:
 try:
     import mechanize
 except ImportError:
-    import MechanicalSoup as mechanize
+    import mechanicalsoup as mechanize
 
 try:
     from BeautifulSoup import BeautifulSoup
