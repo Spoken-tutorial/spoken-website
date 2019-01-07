@@ -189,6 +189,10 @@ def collect_common_files(tr_rec, common_files):
     if tr_rec.common_content.code_status > 0 and tr_rec.common_content.code_status != 6:
         common_files.add('{}/{}'.format(common_files_path, tr_rec.common_content.code))
 
+    if tr_rec.common_content.additional_material_status > 0 and tr_rec.common_content.additional_material_status != 6:
+        common_files.add('{}/{}'.format(common_files_path, tr_rec.common_content.additional_material))
+
+
 
 def add_common_files(archive, common_files):
     for filepath in common_files:
@@ -432,6 +436,9 @@ def ajax_show_added_foss(request):
 
                 if rec.common_content.code_status > 0 and rec.common_content.code_status != 6:
                     common_files.add('{}/{}'.format(common_files_path, rec.common_content.code))
+
+                if rec.common_content.additional_material_status > 0 and rec.common_content.additional_material_status != 6:
+                    common_files.add('{}/{}'.format(common_files_path, rec.common_content.additional_material))
             except Exception:
                 continue
 
