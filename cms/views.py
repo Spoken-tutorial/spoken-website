@@ -12,6 +12,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
 from django.core.context_processors import csrf
 from django.core.mail import EmailMultiAlternatives
 from django.http import HttpResponseRedirect
@@ -258,6 +259,9 @@ def account_profile(request, username):
 
 @login_required
 def account_view_profile(request, username):
+    if username != request.user.username:
+        raise PermissionDenied('You are not allowed to view this page!')
+
     user = User.objects.get(username = username)
     profile = None
     try:

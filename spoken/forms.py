@@ -6,7 +6,7 @@ from django.db.models import Count, Q
 from django.core.exceptions import ValidationError
 
 # Spoken Tutorial Stuff
-from creation.models import TutorialResource
+from creation.models import TutorialResource, FossCategory
 from events.models import Testimonials, InductionInterest, MediaTestimonials
 
 
@@ -142,10 +142,14 @@ class MediaTestimonialForm(forms.Form):
         on_home_page = kwargs.pop('on_home_page')
         super(MediaTestimonialForm, self).__init__(*args, **kwargs)
         foss_list_choices = [('', '-- All Courses --'), ]
-        foss_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), language__name='English', tutorial_detail__foss__show_on_homepage=on_home_page).values('tutorial_detail__foss__foss').annotate(
-            Count('id')).order_by('tutorial_detail__foss__foss').values_list('tutorial_detail__foss__foss', 'id__count').distinct()
+        # foss_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), language__name='English', tutorial_detail__foss__show_on_homepage=on_home_page).values('tutorial_detail__foss__foss').annotate(
+        #     Count('id')).order_by('tutorial_detail__foss__foss').values_list('tutorial_detail__foss__foss', 'id__count').distinct()
+        
+        foss_list = FossCategory.objects.filter(status=1, show_on_homepage=on_home_page).values('foss').annotate(
+            Count('id')).order_by('foss').values_list('foss').distinct()
+
         for foss_row in foss_list:
-            foss_list_choices.append((str(foss_row[0]), str(foss_row[0]) + ' (' + str(foss_row[1]) + ')'))
+            foss_list_choices.append((str(foss_row[0]), str(foss_row[0]) ))
 
         self.fields['foss'].choices = foss_list_choices
 
