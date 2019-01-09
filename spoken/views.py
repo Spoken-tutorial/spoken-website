@@ -357,7 +357,7 @@ def testimonials(request, type="text"):
     '''
     collection = None
     if type == "text":
-        collection = list(Testimonials.objects.all().values()).order_by('-created')
+        collection = Testimonials.objects.all().values().order_by('-created')
     else:
         collection = MediaTestimonials.objects.all().values("foss__foss", "content", "created", "foss", "foss_id", "id", "path", "user").order_by('-created')
 

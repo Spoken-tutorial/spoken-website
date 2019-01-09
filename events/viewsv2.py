@@ -323,7 +323,8 @@ class StudentBatchCreateView(CreateView):
     warning = []
     write_flag = False
     try:
-      rowcsv = csv.reader(file_path, delimiter=',', quotechar='|')
+      file_data = file_path.read().decode('utf-8').splitlines()
+      rowcsv = csv.reader(file_data, delimiter=',', quotechar='|')
       rowcount = len(list(rowcsv))
       gencount = studentcount + rowcount
       print('gencount',gencount)
@@ -333,7 +334,7 @@ class StudentBatchCreateView(CreateView):
       if gencount > 500:
         messages.warning(self.request, "Total number of students per Master Batch exceeding. Masterbatch can accept maximum 500 students.")
       else :
-        csvdata = csv.reader(file_path, delimiter=',', quotechar='|')
+        csvdata = csv.reader(file_data, delimiter=',', quotechar='|')
         for row in csvdata:
           if len(row) < 4:
             skipped.append(row)

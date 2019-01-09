@@ -27,7 +27,7 @@ def get_fk_model(model, fieldname):
 
 
 def get_m2m_model_value(obj, field):
-    return ", ".join([s.__unicode__() for s in getattr(obj, field).all()])
+    return ", ".join([s.__str__() for s in getattr(obj, field).all()])
 
 
 def get_all_field_names(obj):

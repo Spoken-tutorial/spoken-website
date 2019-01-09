@@ -1,4 +1,4 @@
-from __future__ import print_function
+from __future__ import print_function, unicode_literals
 from builtins import str
 from builtins import object
 from django.db import models
@@ -6,6 +6,7 @@ from datetime import datetime, date, timedelta
 from django.db.models.signals import pre_delete, post_delete
 from django.dispatch import receiver
 from django.db.models import Q, Count, Sum, Min
+from django.utils.encoding import python_2_unicode_compatible
 
 #import auth user models
 from django.contrib.auth.models import User
@@ -25,6 +26,7 @@ from creation.models import FossCategory, Language, \
 
 
 # Create your models here.
+@python_2_unicode_compatible
 class State(models.Model):
   users = models.ManyToManyField(
     User,
@@ -51,13 +53,14 @@ class State(models.Model):
   created = models.DateTimeField(auto_now_add = True, null=True)
   updated = models.DateTimeField(auto_now = True, null=True)
 
-  def __unicode__(self):
+  def __str__(self):
     return self.name
 
   class Meta(object):
     unique_together = (("code","name"),)
 
 
+@python_2_unicode_compatible
 class District(models.Model):
   state = models.ForeignKey(State)
   code = models.CharField(max_length=3)
@@ -65,7 +68,7 @@ class District(models.Model):
   created = models.DateTimeField(auto_now_add = True, null=True)
   updated = models.DateTimeField(auto_now = True, null=True)
 
-  def __unicode__(self):
+  def __str__(self):
     return self.name
 
   class Meta(object):
@@ -73,19 +76,21 @@ class District(models.Model):
     #unique_together = (("state_id","name"),)
 
 
+@python_2_unicode_compatible
 class City(models.Model):
   state = models.ForeignKey(State)
   name = models.CharField(max_length=200)
   created = models.DateTimeField(auto_now_add = True, null=True)
   updated = models.DateTimeField(auto_now = True, null=True)
 
-  def __unicode__(self):
+  def __str__(self):
     return self.name
 
   class Meta(object):
     unique_together = (("name","state"),)
 
 
+@python_2_unicode_compatible
 class Location(models.Model):
   district = models.ForeignKey(District)
   name = models.CharField(max_length=200)
@@ -93,7 +98,7 @@ class Location(models.Model):
   created = models.DateTimeField(auto_now_add = True, null=True)
   updated = models.DateTimeField(auto_now = True)
 
-  def __unicode__(self):
+  def __str__(self):
     return self.name
 
   class Meta(object):
@@ -112,6 +117,7 @@ class ResourcePerson(models.Model):
     unique_together = (("user","state"),)
 
 
+@python_2_unicode_compatible
 class University(models.Model):
   name = models.CharField(max_length=200)
   state = models.ForeignKey(State)
@@ -119,37 +125,40 @@ class University(models.Model):
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
 
-  def __unicode__(self):
+  def __str__(self):
     return self.name
 
   class Meta(object):
     unique_together = (("name","state"),)
 
 
+@python_2_unicode_compatible
 class InstituteCategory(models.Model):
   name = models.CharField(max_length=200)
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
 
-  def __unicode__(self):
+  def __str__(self):
     return self.name
 
   class Meta(object):
     verbose_name = "Institute Categorie"
 
 
+@python_2_unicode_compatible
 class InstituteType(models.Model):
   name = models.CharField(max_length=200)
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
 
-  def __unicode__(self):
+  def __str__(self):
     return self.name
 
   class Meta(object):
     unique_together = (("name"),)
 
 
+@python_2_unicode_compatible
 class AcademicCenter(models.Model):
   user = models.ForeignKey(User)
   state = models.ForeignKey(State)
@@ -178,7 +187,7 @@ class AcademicCenter(models.Model):
     #  ("institution_name","university")
     #)
 
-  def __unicode__(self):
+  def __str__(self):
     return self.institution_name
 
   def get_training_count(self):
@@ -196,6 +205,7 @@ class AcademicCenter(models.Model):
     ).aggregate(Sum('participants'))
     return training['participants__sum']
 
+@python_2_unicode_compatible
 class Accountexecutive(models.Model):
   user = models.OneToOneField(User, related_name = 'accountexecutive')
   appoved_by = models.ForeignKey(
@@ -209,10 +219,11 @@ class Accountexecutive(models.Model):
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
 
-  def __unicode__(self):
+  def __str__(self):
     return self.user.username
 
 
+@python_2_unicode_compatible
 class Organiser(models.Model):
   user = models.OneToOneField(User, related_name = 'organiser')
   appoved_by = models.ForeignKey(
@@ -226,10 +237,11 @@ class Organiser(models.Model):
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
 
-  def __unicode__(self):
+  def __str__(self):
     return self.user.username
 
 
+@python_2_unicode_compatible
 class Invigilator(models.Model):
   user = models.OneToOneField(User)
   appoved_by = models.ForeignKey(
@@ -243,28 +255,30 @@ class Invigilator(models.Model):
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
 
-  def __unicode__(self):
+  def __str__(self):
     return self.user.username
 
 
+@python_2_unicode_compatible
 class Department(models.Model):
   name = models.CharField(max_length=200)
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
 
-  def __unicode__(self):
+  def __str__(self):
     return self.name
 
   class Meta(object):
     ordering = ['name']
 
 
+@python_2_unicode_compatible
 class Course(models.Model):
   name = models.CharField(max_length=200)
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
 
-  def __unicode__(self):
+  def __str__(self):
     return self.name
 
   class Meta(object):
@@ -340,13 +354,14 @@ class TrainingLog(models.Model):
   created = models.DateTimeField(auto_now_add = True)
 
 
+@python_2_unicode_compatible
 class TestCategory(models.Model):
   name = models.CharField(max_length=200)
   status = models.BooleanField(default = 0)
   created = models.DateTimeField(auto_now_add = True, null=True)
   updated = models.DateTimeField(auto_now = True, null=True)
 
-  def __unicode__(self):
+  def __str__(self):
     return self.name
 
 
@@ -426,11 +441,12 @@ class TestLog(models.Model):
   created = models.DateTimeField(auto_now_add = True)
 
 
+@python_2_unicode_compatible
 class PermissionType(models.Model):
   name = models.CharField(max_length=200)
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
-  def __unicode__(self):
+  def __str__(self):
     return self.name
 
 
@@ -500,6 +516,7 @@ class Testimonials(models.Model):
   created = models.DateTimeField(auto_now_add=True)
   updated = models.DateTimeField(auto_now = True, null=True)
 
+@python_2_unicode_compatible
 class MediaTestimonials(models.Model):
     '''
     This model is required for storing audio / video testimonials
@@ -516,7 +533,7 @@ class MediaTestimonials(models.Model):
         verbose_name = 'Media Testimonials'
         verbose_name_plural = 'Media Testimonials'
 
-    def __unicode__(self):
+    def __str__(self):
         return self.path
 
 class OrganiserNotification(models.Model):
@@ -527,6 +544,7 @@ class OrganiserNotification(models.Model):
 
 
 # Create your models here.
+@python_2_unicode_compatible
 class Student(models.Model):
   user = models.OneToOneField(User)
   gender = models.CharField(max_length = 15)
@@ -535,7 +553,7 @@ class Student(models.Model):
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
 
-  def __unicode__(self):
+  def __str__(self):
     return self.user.first_name
 
   def student_fullname(self):
@@ -549,6 +567,7 @@ class Student(models.Model):
     return False
 
 
+@python_2_unicode_compatible
 class StudentBatch(models.Model):
   academic = models.ForeignKey(AcademicCenter)
   organiser = models.ForeignKey(Organiser)
@@ -559,7 +578,7 @@ class StudentBatch(models.Model):
   class Meta(object):
     unique_together = ("academic", "year", "department")
 
-  def __unicode__(self):
+  def __str__(self):
     return '%s, %s Batch' % (self.department.name, self.year)
 
   def get_batch_info(self):
@@ -618,23 +637,26 @@ def update_batch_count(sender, instance, **kwargs):
   instance.batch.update_student_count()
 
 
+@python_2_unicode_compatible
 class Semester(models.Model):
   name = models.CharField(max_length = 50)
   even = models.BooleanField(default = True)
 
-  def __unicode__(self):
+  def __str__(self):
     return self.name
 
 
+@python_2_unicode_compatible
 class LabCourse(models.Model):
   name = models.CharField(max_length=200)
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
 
-  def __unicode__(self):
+  def __str__(self):
     return self.name
 
 
+@python_2_unicode_compatible
 class CourseMap(models.Model):
   #name = models.CharField(max_length=200, null=True, blank=True)
   course = models.ForeignKey(LabCourse, null=True, blank=True)
@@ -645,7 +667,7 @@ class CourseMap(models.Model):
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
 
-  def __unicode__(self):
+  def __str__(self):
     if self.course_id:
       return '%s (%s)' % (self.foss.foss, self.course.name)
     return self.foss.foss
@@ -669,6 +691,7 @@ class CourseMap(models.Model):
     ordering = ('foss',)
 
 
+@python_2_unicode_compatible
 class TrainingPlanner(models.Model):
   year = models.CharField(max_length = 50)
   academic = models.ForeignKey(AcademicCenter)
@@ -677,7 +700,7 @@ class TrainingPlanner(models.Model):
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
 
-  def __unicode__(self):
+  def __str__(self):
     return self.semester.name
 
   def training_requests(self):
@@ -932,6 +955,7 @@ class TrainingAttend(models.Model):
     unique_together = ("training", "student")
 
 
+@python_2_unicode_compatible
 class TrainingCertificate(models.Model):
   student = models.ForeignKey(Student)
   training = models.ForeignKey(TrainingRequest)
@@ -940,7 +964,7 @@ class TrainingCertificate(models.Model):
   #updated = models.DateTimeField(auto_now = True)
   updated = models.DateTimeField()
 
-  def __unicode__(self):
+  def __str__(self):
     return self.student
 
 
@@ -1161,6 +1185,7 @@ class TrainingLiveFeedback(models.Model):
 ### Signals
 pre_delete.connect(revoke_student_permission, sender=Student)
 
+@python_2_unicode_compatible
 class StudentStream(models.Model):
   STUDENT_STREAM_CHOICES = (
   ('0', 'Engineering'), ('1', 'Science'), ('2', 'Arts and Humanities'),('3', 'Polytechnic/ Diploma programs'),
@@ -1168,9 +1193,10 @@ class StudentStream(models.Model):
   )
   student_stream = models.CharField(max_length =50, choices = STUDENT_STREAM_CHOICES)
 
-  def __unicode__(self):
+  def __str__(self):
         return self.student_stream
 
+@python_2_unicode_compatible
 class HelpfulFor(models.Model):
   HELPFUL_FOR_CHOICES = (
   ('0', 'Academic Performance'), ('1', 'Project Assignments'), ('2', 'To get job interviews'),('3', 'To get jobs'),
@@ -1178,7 +1204,7 @@ class HelpfulFor(models.Model):
   )
   helpful_for = models.CharField(max_length = 50, choices = HELPFUL_FOR_CHOICES)
 
-  def __unicode__(self):
+  def __str__(self):
         return self.helpful_for
 
 class OrganiserFeedback(models.Model):
