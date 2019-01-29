@@ -4,6 +4,12 @@ Spoken-Website
 Spoken tutorial website in django (http://spoken-tutorial.org)
 
 
+Suggested:
+```
+pip install -U pip
+pip install -U setuptools
+```
+Install requirements:
 ```
 pip install -r requirements-dev.txt
 

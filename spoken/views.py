@@ -6,12 +6,8 @@ from builtins import str
 import datetime as dt
 import json
 import os
-try:
-    from urllib.parse import quote, unquote_plus
-    from urllib.request import urlopen
-except ImportError:
-    from urllib.parse import quote, unquote_plus
-    from urllib.request import urlopen
+from urllib.parse import quote, unquote_plus
+from urllib.request import urlopen
 
 # Third Party Stuff
 from django.conf import settings

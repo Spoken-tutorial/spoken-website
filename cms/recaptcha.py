@@ -3,7 +3,6 @@ from future import standard_library
 standard_library.install_aliases()
 import json
 import urllib.request, urllib.parse, urllib.error
-import urllib.request, urllib.error, urllib.parse
 
 # Third Party Stuff
 from django.conf import settings
