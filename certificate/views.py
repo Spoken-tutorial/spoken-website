@@ -968,7 +968,6 @@ def create_koha_massive_workshop_certificate(certificate_path, name, qrcode, typ
 
 *************************************************************
 
-
 def koha_rc_certificate_download(request):
     context = {}
     err = ""
@@ -1039,7 +1038,7 @@ def koha_rc_certificate_download(request):
     context['message'] = ''
     return render_to_response('koha_12oct_rc_download.html', context, ci)
 
-def koha_rc_certificate(certificate_path, name, qrcode, type, paper, workshop, file_name):
+def create_koha_12oct_rc_certificate(certificate_path, name, qrcode, type, paper, workshop, file_name):
     error = False
     err = None
     try:
