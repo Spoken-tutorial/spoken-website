@@ -50,9 +50,9 @@ def mdl_login(request):
         email = request.POST["username"]
         password = request.POST["password"]
         if not email or not password:
-            messages.error(request,'Please enter valide Username and Password!')
+            messages.error(request,'Please enter valid Username and Password!')
             #return HttpResponseRedirect('/participant/login')
-        user = authenticate(email = email, password = password)
+        user = authenticate(email=email, password=password)
         if user:
             request.session['mdluserid'] = user.id
             request.session['mdluseremail'] = user.email
@@ -82,8 +82,7 @@ def index(request):
         mdluser = MdlUser.objects.get(id=mdluserid)
     except:
         return HttpResponseRedirect('/participant/login')
-
-    if str(mdluser.institution.encode("utf8")).isdigit():
+    if str(mdluser.institution).isdigit():
         academic = None
         try:
             academic = AcademicCenter.objects.get(id = mdluser.institution)
