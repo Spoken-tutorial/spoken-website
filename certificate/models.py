@@ -103,3 +103,12 @@ class Koha_WS_12oct2018(models.Model):
     college = models.CharField(max_length=500)
     remote = models.CharField(max_length=500)
     purpose = models.CharField(max_length=10, default='KMW')
+
+class Koha_RC_12oct2018(models.Model):
+    name = models.CharField(max_length=200)
+    email = models.EmailField()
+    rcid = models.CharField(max_length=500)
+    remote = models.CharField(max_length=500)
+    purpose = models.CharField(max_length=10, default='KRC')
+
+
