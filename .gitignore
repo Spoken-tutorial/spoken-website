@@ -17,6 +17,7 @@ certificate/koha_workshop_template/template_KMW12102018Pcertificate
 certificate/koha_workshop_template/template_KMW12102018RCcertificate
 certificate/images/kannan-moudgalya-sign.png
 certificate/images/prao-sign.png
+certificate/images/*
 .youtube-upload-credentials.json
 config.py
 cron/config.py

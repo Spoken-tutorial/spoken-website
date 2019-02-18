@@ -966,7 +966,6 @@ def create_koha_massive_workshop_certificate(certificate_path, name, qrcode, typ
     return [err, error]
 
 
-*************************************************************
 
 def koha_rc_certificate_download(request):
     context = {}
