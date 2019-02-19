@@ -20,9 +20,9 @@ from datetime import datetime
 
 # Give Values of the Database Environment Variables
 HOST = "localhost"
-USER = 'django_betauser'
-PASSWORD = 'BeT@!@$Sp0K#nDj@$*'
-DB = 'django_spoken'
+USER = 'DB_USER'
+PASSWORD = 'DB_PASS'
+DB = 'DB_NAME'
 # check_index variable is used to check whether the index tables are already present or not in the system
 check_index = None
 
@@ -121,12 +121,12 @@ creation_tutorialresource.language_id=22 AND
 			title = ' '.join(words)
 			
 			# And converting the obtained text to unicode (Whoosh only accepts unicode)
-			text = text.decode('utf-8').strip()
+			text = text.strip()
 			title = str(title)
 			videoid = str(item[4])
-			keywords = keywords.decode('utf-8').strip()
-			foss = foss.decode('utf-8').strip()
-			outline = outline.decode('utf-8').strip()
+			keywords = keywords.strip()
+			foss = foss.strip()
+			outline = outline.strip()
 			updated = str(item[6])
 			
 			
