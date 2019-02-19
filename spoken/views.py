@@ -25,7 +25,7 @@ from creation.views import get_video_info
 from events.views import get_page
 from forums.models import Question
 
-from .filters import NewsStateFilter
+from .filters import NewsStateFilter, MediaTestimonialsFossFilter
 from .forms import *
 from .search import search_for_results
 
@@ -351,12 +351,14 @@ def testimonials(request, type="text"):
         collection = Testimonials.objects.all().values().order_by('-created')
     else:
         collection = MediaTestimonials.objects.all().values("foss__foss", "content", "created", "foss", "foss_id", "id", "path", "user").order_by('-created')
-
+    collection = MediaTestimonialsFossFilter(request.GET, queryset=collection)
+    form = collection.form
     if collection:
         page = request.GET.get('page')
         collection = get_page(collection, page, limit=6)
 
     context = {}
+    context['form'] = form
     context['collection'] = collection
     context['media_url'] = settings.MEDIA_URL
     context['testimonial_type'] = type
