@@ -48,7 +48,7 @@ class State(models.Model):
   created = models.DateTimeField(auto_now_add = True, null=True)
   updated = models.DateTimeField(auto_now = True, null=True)
 
-  def __unicode__(self):
+  def __str__(self):
     return self.name
 
   class Meta:
@@ -62,7 +62,7 @@ class District(models.Model):
   created = models.DateTimeField(auto_now_add = True, null=True)
   updated = models.DateTimeField(auto_now = True, null=True)
 
-  def __unicode__(self):
+  def __str__(self):
     return self.name
 
   class Meta:
@@ -76,7 +76,7 @@ class City(models.Model):
   created = models.DateTimeField(auto_now_add = True, null=True)
   updated = models.DateTimeField(auto_now = True, null=True)
 
-  def __unicode__(self):
+  def __str__(self):
     return self.name
 
   class Meta:
@@ -90,7 +90,7 @@ class Location(models.Model):
   created = models.DateTimeField(auto_now_add = True, null=True)
   updated = models.DateTimeField(auto_now = True)
 
-  def __unicode__(self):
+  def __str__(self):
     return self.name
 
   class Meta:
@@ -116,7 +116,7 @@ class University(models.Model):
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
 
-  def __unicode__(self):
+  def __str__(self):
     return self.name
 
   class Meta:
@@ -128,7 +128,7 @@ class InstituteCategory(models.Model):
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
 
-  def __unicode__(self):
+  def __str__(self):
     return self.name
 
   class Meta:
@@ -140,7 +140,7 @@ class InstituteType(models.Model):
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
 
-  def __unicode__(self):
+  def __str__(self):
     return self.name
 
   class Meta:
@@ -175,7 +175,7 @@ class AcademicCenter(models.Model):
     #  ("institution_name","university")
     #)
 
-  def __unicode__(self):
+  def __str__(self):
     return self.institution_name
 
   def get_training_count(self):
@@ -205,7 +205,7 @@ class Accountexecutive(models.Model):
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
 
-  def __unicode__(self):
+  def __str__(self):
     return self.user.username
 
 
@@ -221,7 +221,7 @@ class Organiser(models.Model):
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
 
-  def __unicode__(self):
+  def __str__(self):
     return self.user.username
 
 
@@ -237,7 +237,7 @@ class Invigilator(models.Model):
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
 
-  def __unicode__(self):
+  def __str__(self):
     return self.user.username
 
 
@@ -246,7 +246,7 @@ class Department(models.Model):
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
 
-  def __unicode__(self):
+  def __str__(self):
     return self.name
 
   class Meta:
@@ -258,7 +258,7 @@ class Course(models.Model):
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
 
-  def __unicode__(self):
+  def __str__(self):
     return self.name
 
   class Meta:
@@ -339,7 +339,7 @@ class TestCategory(models.Model):
   created = models.DateTimeField(auto_now_add = True, null=True)
   updated = models.DateTimeField(auto_now = True, null=True)
 
-  def __unicode__(self):
+  def __str__(self):
     return self.name
 
 
@@ -420,7 +420,7 @@ class PermissionType(models.Model):
   name = models.CharField(max_length=200)
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
-  def __unicode__(self):
+  def __str__(self):
     return self.name
 
 
@@ -501,7 +501,7 @@ class MediaTestimonials(models.Model):
         verbose_name = 'Media Testimonials'
         verbose_name_plural = 'Media Testimonials'
 
-    def __unicode__(self):
+    def __str__(self):
         return self.path
 
 class OrganiserNotification(models.Model):
@@ -520,7 +520,7 @@ class Student(models.Model):
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
 
-  def __unicode__(self):
+  def __str__(self):
     return self.user.first_name
 
   def student_fullname(self):
@@ -544,7 +544,7 @@ class StudentBatch(models.Model):
   class Meta:
     unique_together = ("academic", "year", "department")
 
-  def __unicode__(self):
+  def __str__(self):
     return '%s, %s Batch' % (self.department.name, self.year)
 
   def get_batch_info(self):
@@ -607,7 +607,7 @@ class Semester(models.Model):
   name = models.CharField(max_length = 50)
   even = models.BooleanField(default = True)
 
-  def __unicode__(self):
+  def __str__(self):
     return self.name
 
 
@@ -616,7 +616,7 @@ class LabCourse(models.Model):
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
 
-  def __unicode__(self):
+  def __str__(self):
     return self.name
 
 
@@ -630,7 +630,7 @@ class CourseMap(models.Model):
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
 
-  def __unicode__(self):
+  def __str__(self):
     if self.course_id:
       return '%s (%s)' % (self.foss.foss, self.course.name)
     return self.foss.foss
@@ -662,7 +662,7 @@ class TrainingPlanner(models.Model):
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
 
-  def __unicode__(self):
+  def __str__(self):
     return self.semester.name
 
   def training_requests(self):
@@ -925,7 +925,7 @@ class TrainingCertificate(models.Model):
   #updated = models.DateTimeField(auto_now = True)
   updated = models.DateTimeField()
 
-  def __unicode__(self):
+  def __str__(self):
     return self.student
 
 
@@ -1153,7 +1153,7 @@ class StudentStream(models.Model):
   )
   student_stream = models.CharField(max_length =50, choices = STUDENT_STREAM_CHOICES)
 
-  def __unicode__(self):
+  def __str__(self):
         return self.student_stream
 
 class HelpfulFor(models.Model):
@@ -1163,7 +1163,7 @@ class HelpfulFor(models.Model):
   )
   helpful_for = models.CharField(max_length = 50, choices = HELPFUL_FOR_CHOICES)
 
-  def __unicode__(self):
+  def __str__(self):
         return self.helpful_for
 
 class OrganiserFeedback(models.Model):

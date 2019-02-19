@@ -123,9 +123,9 @@ SITE_ID = 1
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'spoken_python3',
-        'USERNAME': 'root',
-        'PASSWORD': 'spoken',
+        'NAME': DB,
+        'USERNAME': DB_USER,
+        'PASSWORD': DB_PASS,
         'HOST': '',                            # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
         'PORT': '',    
     
