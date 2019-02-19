@@ -541,9 +541,7 @@ class Student(models.Model):
     return self.user.username
 
   def is_student_has_attendance(self):
-    if TrainingAttend.objects.filter(student_id=self.id).exists():
-      return True
-    return False
+    return TrainingAttend.objects.filter(student_id=self.id).exists()
 
 
 class StudentBatch(models.Model):
@@ -812,7 +810,7 @@ class TrainingRequest(models.Model):
   course = models.ForeignKey(CourseMap)
   batch = models.ForeignKey(StudentBatch, null = True)
   participants = models.PositiveIntegerField(default=0)
-  course_type = models.PositiveIntegerField(default=None)
+  course_type = models.PositiveIntegerField(default=0)
   #status = models.BooleanField(default=False)
   status = models.PositiveSmallIntegerField(default=0)
   created = models.DateTimeField(auto_now_add = True)

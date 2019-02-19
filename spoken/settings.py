@@ -125,7 +125,8 @@ DATABASES = {
         'USER': DB_USER,
         'PASSWORD': DB_PASS,
         'HOST': '',                            # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
-        'PORT': '',                            # Set to empty string for default.
+        'PORT': '', 
+        'TEST': {'NAME': 'test_spoken_11oct', 'USER': 'kirti', 'PASSWORD': 'kirti123', 'HOST': '', 'PORT': '',},                           # Set to empty string for default.
     },
     'moodle': {
         'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
@@ -134,35 +135,36 @@ DATABASES = {
         'USER': MDB_USER,
         'PASSWORD': MDB_PASS,
         'HOST': '',                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
-        'PORT': '',                  # Set to empty string for default.
+        'PORT': '',
+        'TEST': {'NAME': 'test_OTC', 'USER': 'kirti', 'PASSWORD': 'kirti123', 'HOST': '', 'PORT': '',},                 # Set to empty string for default.
     },
-    'cdeep': {
-        'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': CDB,                      # Or path to database file if using sqlite3.
-        # The following settings are not used with sqlite3:
-        'USER': CDB_USER,
-        'PASSWORD': CDB_PASS,
-        'HOST': '',                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
-        'PORT': '',                  # Set to empty string for default.
-    },
-    'workshop_info': {
-        'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': WDB,                      # Or path to database file if using sqlite3.
-        # The following settings are not used with sqlite3:
-        'USER': WDB_USER,
-        'PASSWORD': WDB_PASS,
-        'HOST': '',                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
-        'PORT': '',                  # Set to empty string for default.
-    },
-    'forums': {
-        'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': FDB,                      # Or path to database file if using sqlite3.
-        # The following settings are not used with sqlite3:
-        'USER': FDB_USER,
-        'PASSWORD': FDB_PASS,
-        'HOST': '',                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
-        'PORT': '',                  # Set to empty string for default.
-    }
+    # 'cdeep': {
+    #     'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+    #     'NAME': CDB,                      # Or path to database file if using sqlite3.
+    #     # The following settings are not used with sqlite3:
+    #     'USER': CDB_USER,
+    #     'PASSWORD': CDB_PASS,
+    #     'HOST': '',                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+    #     'PORT': '',                  # Set to empty string for default.
+    # },
+    # 'workshop_info': {
+    #     'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+    #     'NAME': WDB,                      # Or path to database file if using sqlite3.
+    #     # The following settings are not used with sqlite3:
+    #     'USER': WDB_USER,
+    #     'PASSWORD': WDB_PASS,
+    #     'HOST': '',                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+    #     'PORT': '',                  # Set to empty string for default.
+    # },
+    # 'forums': {
+    #     'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+    #     'NAME': FDB,                      # Or path to database file if using sqlite3.
+    #     # The following settings are not used with sqlite3:
+    #     'USER': FDB_USER,
+    #     'PASSWORD': FDB_PASS,
+    #     'HOST': '',                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+    #     'PORT': '',                  # Set to empty string for default.
+    # }
 }
 
 # Internationalization
