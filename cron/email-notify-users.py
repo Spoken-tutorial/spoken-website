@@ -80,7 +80,7 @@ NMEICT, MHRD, Govt. Of India<br>
         #print to," => sent (", str(count),"/",str(tot_count),")"
         success_log_file_head.write(str(organiser.user.email)+','+str(1)+'\n')
     except Exception as e:
-        print (e)
+        print(e)
         #print to," => not sent (",count,"/",tot_count,")"
         success_log_file_head.write(str(organiser.user.email)+','+str(0)+'\n')
     #break

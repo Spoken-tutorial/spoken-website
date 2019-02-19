@@ -73,7 +73,7 @@ def get_state_info(request, code):
         }
         return render(request, 'statistics/templates/get_state_info.html', context)
     except Exception as e:
-        print (e)
+        print(e)
         return HttpResponse('<h4 style="margin: 30px;">Permission Denied!</h4>')
 
 
@@ -249,7 +249,7 @@ def training_participant(request, rid):
         context['model'] = TrainingRequest.objects.get(id=rid)
         context['collection'] = TrainingAttend.objects.filter(training_id=rid)
     except Exception as e:
-        print (e)
+        print(e)
         raise PermissionDenied()
     return render(request, 'statistics/templates/training_participant.html', context)
 
@@ -265,7 +265,7 @@ def studentmaster_ongoing(request, rid):
         context['collection'] = row_data
 
     except Exception as e:
-        print (e)
+        print(e)
         raise ObjectDoesNotExist()
     return render(request, 'statistics/templates/training_participant.html', context)
 
@@ -468,7 +468,7 @@ def learners(request):
                     request, "Thank you for submitting your details. You can choose your course and then continue..")
                 return HttpResponseRedirect('/tutorial-search/?search_foss=&search_language=')
             except Exception as e:
-                print (e)
+                print(e)
                 messages.success(request, "Sorry, something went wrong, Please try again!")
     context['form'] = form
     return render(request, 'statistics/templates/learners.html', context)

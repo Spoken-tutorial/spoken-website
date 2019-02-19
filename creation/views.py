@@ -556,7 +556,7 @@ def upload_tutorial(request, trid):
         contrib_log = ContributorLog.objects.filter(tutorial_resource_id = tr_rec.id).order_by('-created')
         review_log = NeedImprovementLog.objects.filter(tutorial_resource_id = tr_rec.id).order_by('-created')
     except Exception as e:
-        print (e)
+        print(e)
         raise PermissionDenied()
     context = {
         'tr': tr_rec,
@@ -605,7 +605,7 @@ def upload_outline(request, trid):
                 add_domainreviewer_notification(tr_rec, comp_title, 'Outline waiting for Domain review')
                 response_msg = 'Outline status updated successfully!'
             except Exception as e:
-                print (e)
+                print(e)
                 error_msg = 'Something went wrong, please try again later.'
         else:
             context = {
@@ -662,7 +662,7 @@ def upload_script(request, trid):
                 else:
                     error_msg = 'Please update the script to wiki before pressing the submit button.'
             except Exception as e:
-                print (e)
+                print(e)
                 error_msg = 'Something went wrong, please try again later.'
         else:
             context = {
@@ -710,7 +710,7 @@ def save_timed_script(request, tdid):
         tr_rec = TutorialResource.objects.get(tutorial_detail_id = tdid, language__name = 'English')
         ContributorRole.objects.get(user_id = request.user.id, foss_category_id = tr_rec.tutorial_detail.foss_id, language_id = tr_rec.language_id, status = 1)
     except Exception as e:
-        print (e)
+        print(e)
         raise PermissionDenied()
     response_msg = ''
     error_msg = ''
@@ -991,7 +991,7 @@ def upload_component(request, trid, component):
                             '{} waiting for domain review'.format(component.replace('_', ' ').title()))
                         response_msg = 'Additional material uploaded successfully!'
                 except Exception as e:
-                    print (e)
+                    print(e)
                     error_msg = 'Something went wrong, please try again later.'
                 form = ComponentForm(component)
                 if response_msg:
@@ -1052,7 +1052,7 @@ def view_component(request, trid, component):
     try:
         tr_rec = TutorialResource.objects.get(pk = trid)
     except Exception as e:
-        print (e)
+        print(e)
         raise PermissionDenied()
     if component == 'outline':
         context = {
@@ -1172,7 +1172,7 @@ def tutorials_pending(request):
             page = request.GET.get('page')
             tmp_recs = get_page(tmp_recs, page, 50)
         except Exception as e:
-            print (e)
+            print(e)
             pass
 
         context = {
@@ -1477,7 +1477,7 @@ def domain_review_component(request, trid, component):
                     else:
                         error_msg = 'Something went wrong, please try again later.'
                 except Exception as e:
-                    print (e)
+                    print(e)
                     error_msg = 'Something went wrong, please try again later.'
             elif request.POST['component_status'] == '5':
                 try:
@@ -2704,7 +2704,7 @@ def update_sheet(request, sheet_type):
                     'sheet uploaded successfully!')
                 form = UpdateSheetsForm()
             except Exception as e:
-                print (e)
+                print(e)
     context = {
         'form': form,
         'sheet_type': sheet_type
@@ -2733,7 +2733,7 @@ def ajax_manual_language(request):
                     available instruction sheet for the tutorial selected \
                     above</a>'
             except Exception as e:
-                print (e)
+                print(e)
                 pass
         elif foss_id:
             tutorials = TutorialResource.objects.filter(
@@ -2814,7 +2814,7 @@ def update_assignment(request):
                 messages.success(request, 'Assignment updated successfully!')
                 form = UpdateAssignmentForm()
             except Exception as e:
-                print (e)
+                print(e)
     context = {
         'form': form,
     }
@@ -2857,7 +2857,7 @@ def update_codefiles(request):
                 messages.success(request, 'Codefiles updated successfully!')
                 form = UpdateCodefilesForm()
             except Exception as e:
-                print (e)
+                print(e)
     context = {
         'form': form,
     }

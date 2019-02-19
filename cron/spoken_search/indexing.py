@@ -152,5 +152,5 @@ creation_tutorialresource.language_id=22 AND
 		
 # Handling Exception		
 except Exception as e:
-	print (e)
+	print(e)
 

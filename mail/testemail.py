@@ -77,7 +77,7 @@ for organiser in organisers:
             time.sleep(5)
         print(to," => sent (", str(count),"/",str(tot_count),")")
     except Exception as e:
-        print (e)
+        print(e)
         print(to," => not sent (",count,"/",tot_count,")")
     break
 print("--------------------------------")

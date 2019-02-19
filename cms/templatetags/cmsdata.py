@@ -84,7 +84,7 @@ def get_or_create_csrf_token(request):
     try:
         token = request.META.get('CSRF_COOKIE', None)
     except Exception as e:
-        print (e)
+        print(e)
         pass
     if token is None:
         token = csrf._get_new_csrf_key()
@@ -92,7 +92,7 @@ def get_or_create_csrf_token(request):
             request.META['CSRF_COOKIE'] = token
             request.META['CSRF_COOKIE_USED'] = True
         except Exception as e:
-            print (e)
+            print(e)
             pass
     print(token)
     return token

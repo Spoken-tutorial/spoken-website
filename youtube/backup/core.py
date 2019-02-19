@@ -69,7 +69,7 @@ def delete_video(service, video_id):
         service.videos().delete(id=video_id).execute()
         return True
     except Exception as e:
-        print (e)
+        print(e)
     return None
 
 
@@ -78,7 +78,7 @@ def delete_playlist(service, playlist_id):
         service.playlists().delete(id=playlist_id).execute()
         return True
     except Exception as e:
-        print (e)
+        print(e)
     return None
 
 
@@ -87,5 +87,5 @@ def delete_playlistitem(service, playlist_item_id):
         service.playlistItems().delete(id=playlist_item_id).execute()
         return True
     except Exception as e:
-        print (e)
+        print(e)
     return None

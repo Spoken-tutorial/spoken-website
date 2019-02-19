@@ -16,7 +16,7 @@ def participant_picture(user_id):
     try:
         return settings.ONLINE_TEST_URL + "get_profile_picture.php?id=" + str(user_id)
     except Exception as e:
-        print (e)
+        print(e)
         return None
 
 def get_trainingstatus(key, training):
@@ -27,7 +27,7 @@ def get_trainingstatus(key, training):
         #else:
         wa = TrainingAttendance.objects.get(id=key, training = training)
     except Exception as e:
-        print (e)
+        print(e)
         return ''
 
     if wa.status == 1:
@@ -97,7 +97,7 @@ def can_upload_final_training_list(tdate):
             return True
         return False
     except Exception as e:
-        print (e)
+        print(e)
         return False
 
 def can_download_workshop_certificate(key, training):
@@ -128,7 +128,7 @@ def is_feedback_exits(w, record):
         TrainingFeedback.objects.get(training_id=w.id, mdluser_id=record.mdluser_id)
         return True
     except Exception as e:
-        print (e)
+        print(e)
         return False
 
 def feedback_status_good(status):

@@ -179,7 +179,7 @@ def get_prerequisite(tr, td):
         tr_rec = TutorialResource.objects.get(Q(status = 1) | Q(status = 2), tutorial_detail = td, language_id = tr.language_id)
         return get_url_name(td.foss.foss) + '/' + get_url_name(td.tutorial) + '/' + tr_rec.language.name
     except Exception as e:
-        print (e)
+        print(e)
         if tr.language.name != 'English':
             try:
                 tr_rec = TutorialResource.objects.get(Q(status = 1) | Q(status = 2), tutorial_detail = td, language__name = 'English')

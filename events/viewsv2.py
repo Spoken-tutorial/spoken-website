@@ -132,7 +132,7 @@ class TrainingPlannerListView(ListView):
         semester=self.get_semester(sem), academic=self.user.organiser.academic,\
           organiser=self.user.organiser)
     except Exception as e:
-      print (e)
+      print(e)
     return False
   def get_next_planner(self, current_planner):
     year = int(current_planner.year)
@@ -150,7 +150,7 @@ class TrainingPlannerListView(ListView):
         semester=sem, academic=self.user.organiser.academic, \
         organiser=self.user.organiser)
     except Exception as e:
-      print (e)
+      print(e)
     return False
 
 class StudentBatchCreateView(CreateView):
@@ -348,7 +348,7 @@ class StudentBatchCreateView(CreateView):
               write_flag = True
         StudentBatch.objects.get(pk=batch_id).update_student_count()
     except Exception as e:
-      print (e)
+      print(e)
       messages.warning(self.request, "The file you uploaded is not a valid CSV file, please add a valid CSV file")
     return skipped, error, warning, write_flag
 
@@ -678,7 +678,7 @@ class TrainingRequestEditView(CreateView):
         messages.error(self.request, 'This student batch already taken the selected course.')
         return self.form_invalid(form)
     except Exception as e:
-      print (e)
+      print(e)
       messages.error(self.request, 'Something went wrong, Contact site administrator.')
       return self.form_invalid(form)
     context = {}
@@ -2213,7 +2213,7 @@ class OldTrainingCloseView(CreateView):
         tp.updated = created
         tp.save()
       except Exception as e:
-        print (e)
+        print(e)
     return tp
 
   def _get_student(self, ta):
@@ -2343,7 +2343,7 @@ def LatexWorkshopFileUpload(request):
       email = request.POST['email']
       email = email.replace('.', '_')
       email = email.replace('@', '_')
-      print (e)mail
+      print(e)mail
       f = open('media/latex/{0}/{1}'.format(email, uploaded_file), 'wb+')
       for data in uploaded_file.chunks():
           f.write(data)

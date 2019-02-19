@@ -47,7 +47,7 @@ def site_feedback(request):
             SiteFeedback.objects.create(name=data['name'], email=data['email'], message=data['message'])
             data = True
         except Exception as e:
-            print (e)
+            print(e)
             data = False
 
     return HttpResponse(json.dumps(data), content_type='application/json')
@@ -464,12 +464,12 @@ def testimonials_new(request):
                     try:
                         os.mkdir(file_path)
                     except Exception as e:
-                        print (e)
+                        print(e)
                     file_path = settings.MEDIA_ROOT + 'testimonial/' + str(rid) + '/'
                     try:
                         os.mkdir(file_path)
                     except Exception as e:
-                        print (e)
+                        print(e)
                     full_path = file_path + str(rid) + ".pdf"
                     fout = open(full_path, 'wb+')
                     f = request.FILES['scan_copy']
@@ -496,7 +496,7 @@ def admin_testimonials_edit(request, rid):
         instance = Testimonials.objects.get(pk=rid)
     except Exception as e:
         raise Http404('Page not found')
-        print (e)
+        print(e)
 
     if request.method == 'POST':
         form = TestimonialsForm(request.POST, request.FILES, instance=instance)
@@ -511,12 +511,12 @@ def admin_testimonials_edit(request, rid):
                     try:
                         os.mkdir(file_path)
                     except Exception as e:
-                        print (e)
+                        print(e)
                     file_path = settings.MEDIA_ROOT + 'testimonial/' + str(rid) + '/'
                     try:
                         os.mkdir(file_path)
                     except Exception as e:
-                        print (e)
+                        print(e)
                     f = request.FILES['scan_copy']
                     filename = str(f)
                     ext = os.path.splitext(filename)[1].lower()
@@ -548,7 +548,7 @@ def admin_testimonials_delete(request, rid):
         instance = Testimonials.objects.get(pk=rid)
     except Exception as e:
         raise Http404('Page not found')
-        print (e)
+        print(e)
     if request.method == 'POST':
         instance = Testimonials.objects.get(pk=rid)
         instance.delete()
@@ -630,7 +630,7 @@ def news(request, cslug):
         return render(request, 'spoken/templates/news/index.html', context)
 
     # except Exception as e:
-    #     print (e)
+    #     print(e)
     #     raise Http404('You are not allowed to view this page')
 
 
@@ -661,7 +661,7 @@ def news_view(request, cslug, slug):
         return render(request, 'spoken/templates/news/view-news.html', context)
 
     except Exception as e:
-        print (e)
+        print(e)
         raise Http404('You are not allowed to view this page')
 
 
@@ -723,7 +723,7 @@ def add_user(request):
             profile.save()
             count += 1
         except Exception as e:
-            print (e)
+            print(e)
     return HttpResponse("success")
 
 
@@ -760,7 +760,7 @@ def expression_of_intrest_new(request):
                 messages.success(request, "Your response has been recorded. Thanks for giving your inputs. In case there are more than 120 eligible applicants, we will get back to you about a selection criterion.")
                 return HttpResponseRedirect('/induction')
             except Exception as e:
-                print (e)
+                print(e)
                 messages.error(request, "Sorry, something went wrong, Please try again!")
                 # return HttpResponseRedirect('/induction')
     context = {

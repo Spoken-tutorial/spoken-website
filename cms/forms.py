@@ -180,7 +180,7 @@ class PasswordResetForm(forms.Form):
               error = 1
               er_msg= 'Email: %s not exists' % email
         except Exception as e:
-            print (e)
+            print(e)
         if error:
             raise forms.ValidationError( er_msg )
 

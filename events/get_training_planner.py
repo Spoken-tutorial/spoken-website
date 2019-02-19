@@ -37,5 +37,5 @@ class CurrentTrainingPlanner():
                                                   semester=self.get_semester(sem), academic=user.organiser.academic,
                                                   organiser=user.organiser)
         except Exception as e:
-            print (e)
+            print(e)
         return False

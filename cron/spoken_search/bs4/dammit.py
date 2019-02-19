@@ -417,7 +417,7 @@ class UnicodeDammit:
             self.original_encoding = proposed
         except Exception as e:
             #print "That didn't work!"
-            #print (e)
+            #print(e)
             return None
         #print "Correct encoding: %s" % proposed
         return self.markup

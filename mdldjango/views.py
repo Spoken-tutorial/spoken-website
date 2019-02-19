@@ -270,7 +270,7 @@ def feedback(request, wid):
     try:
         w = TrainingRequest.objects.select_related().get(pk=wid)
     except Exception as e:
-        #print (e)
+        #print(e)
         messages.error(request, 'Invalid Training-Request ID passed')
         return HttpResponseRedirect('/participant/index/?category=1')
         #return PermissionDenied('Invalid Training-Request ID passed')
@@ -280,7 +280,7 @@ def feedback(request, wid):
         messages.success(request, "We have already received your feedback. ")
         return HttpResponseRedirect('/participant/index/?category=1')
     except Exception as e:
-        #print (e)
+        #print(e)
         pass
 
     if request.method == 'POST':
@@ -294,7 +294,7 @@ def feedback(request, wid):
                 messages.success(request, "Thank you for your valuable feedback.")
                 return HttpResponseRedirect('/participant/index/?category=1')
             except Exception as e:
-                print (e)
+                print(e)
                 pass
                 #return HttpResponseRedirect('/participant/index/')
     context = {

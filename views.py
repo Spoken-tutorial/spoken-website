@@ -135,7 +135,7 @@ def calculate_directory_size(dir_path):
                     folder_size += os.path.getsize(filename)
     except Exception as e:
         folder_size = 0.0
-        print (e)
+        print(e)
 
     return folder_size
 
@@ -156,7 +156,7 @@ def calculate_static_file_size():
         fsize += calculate_directory_size(dir_path)
     except Exception as e:
         fsize = 0.0
-        print (e)
+        print(e)
 
     return fsize
 

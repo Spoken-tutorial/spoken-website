@@ -29,4 +29,4 @@ def list_missing_script(request):
             if not (int(code) == 200):
                 print('{0},{1},{2},{3},{4},{5}'.format(code, tr_rec.id, tr_rec.tutorial_detail.foss, tr_rec.language, tr_rec.tutorial_detail.tutorial, script_path))
         except Exception as e:
-            print (e)
+            print(e)

@@ -334,6 +334,6 @@ def upload_video(youtube, options, video_path):
         """if options.wait_processing:
             wait_processing(youtube, video_id)"""
     except Exception as e:
-        print (e)
+        print(e)
         pass
     return video_id

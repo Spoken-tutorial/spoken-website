@@ -99,7 +99,7 @@ class Command(BaseCommand):
         except MdlUser.MultipleObjectsReturned:
             return True
         except Exception as e:
-            print (e)
+            print(e)
             return True
 
 
@@ -127,7 +127,7 @@ class Command(BaseCommand):
             mdluser.save()
             return mdluser
         except Exception as e:
-           print (e)
+           print(e)
            return None
 
 
@@ -182,7 +182,7 @@ Admin Spoken Tutorials
         if _type == 'r':
             self.rmsg = '{0} {1}\n'.format(self.rmsg,data)
       except:
-        print (e)
+        print(e)
 
     def create_log_file(self, data, _type):
         try:

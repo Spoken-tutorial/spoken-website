@@ -54,7 +54,7 @@ def get_moodle_courseid(rid, mdluser_id):
         #print wa.mdlcourse_id
         return wa.mdlcourse_id
     except Exception as e:
-        #print (e)
+        #print(e)
         return False
 
 def get_mdluser_details(mdluser_id):
