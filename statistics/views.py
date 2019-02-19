@@ -175,7 +175,7 @@ def training(request):
     context['form'] = collection.form
     context['chart_data'] = chart_data
     page = request.GET.get('page')    
-    collection = get_page(collection.qs, page)
+    collection = get_page(collection.qs, page )
     context['collection'] = collection
     context['header'] = header
     context['ordering'] = ordering
