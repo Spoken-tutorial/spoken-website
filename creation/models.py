@@ -248,6 +248,10 @@ class DomainReviewerRole(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
+    def revoke(self):
+        self.status = 2
+        self.save()
+
     class Meta:
         unique_together = (('user', 'foss_category', 'language',),)
         verbose_name = 'Domain Reviewer Role'
@@ -262,6 +266,10 @@ class QualityReviewerRole(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
+    def revoke(self):
+        self.status = 2
+        self.save()
+        
     class Meta:
         unique_together = (('user', 'foss_category', 'language',),)
         verbose_name = 'Quality Reviewer Role'

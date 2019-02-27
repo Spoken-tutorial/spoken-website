@@ -341,9 +341,7 @@ def creation_revoke_role_request(request, role_type,languages):
 
     # Revoke multiple languages from the user
     lang_ids = languages.split('/')
-
     for a_language in lang_ids:
-
         if role_type in ROLES_DICT:
             try:
                 role_rec = RoleRequest.objects.get(
@@ -352,20 +350,23 @@ def creation_revoke_role_request(request, role_type,languages):
 
                 if role_rec.role_type != ROLES_DICT['video-reviewer']:
                     if role_rec.role_type == ROLES_DICT['contributor'] or role_rec.role_type == ROLES_DICT['external-contributor']:
-                        ContributorRole.objects.filter(user = role_rec.user).update(status = 0)
+                        ContributorRole.objects.filter(user = role_rec.user).revoke()
                                                     
                     elif role_rec.role_type == 3:
-                        DomainReviewerRole.objects.filter(user = role_rec.user).update(status = 0)
+                        DomainReviewerRole.objects.filter(user = role_rec.user).revoke()
                     elif role_rec.role_type == 4:
-                        QualityReviewerRole.objects.filter(user = role_rec.user).update(status = 0)
+                        QualityReviewerRole.objects.filter(user = role_rec.user).revoke()
                     
                     role_rec.revoke()
                     lang_show = Language.objects.get(id = a_language)
                     messages.success(request, role_type.title() + ' role has been revoked from ' + role_rec.user.username+' for the language '+ lang_show.name)
-
                     
             except RoleRequest.DoesNotExist:
                 # This will be hit only when the request type is video-reviewer              
+                role_rec = RoleRequest.objects.get(
+                    user = request.user, role_type = ROLES_DICT[role_type],
+                    status = 1)
+                role_rec.revoke()
                 messages.warning(request, 'Role is revoked!')    
         else:
             messages.error(request, 'Invalid role type argument!')
@@ -4041,11 +4042,11 @@ def add_creation_notification(request, notif_type, user_id , language):
             notif_rec = ContributorNotification.objects.create(user_id = user_id ,
                 message = message , title = title)
         elif notif_type == ROLES_DICT['video-reviewer']:
-            title = title + str(language) +" - Video Reviewership added"
+            title = title +"Video Reviewership added"
             message = message+ " video reviewer"
 
             notif_rec = AdminReviewerNotification.objects.create(user_id = user_id ,
-                message = message , title = title)
+                message = "You are now a Video Reviewer" , title = title)
         elif notif_type == ROLES_DICT['domain-reviewer'] :
             title = title + str(language) +" - Domain Reviewership added"
             message = message+ " domain reviewer"
@@ -4056,6 +4057,6 @@ def add_creation_notification(request, notif_type, user_id , language):
             message = message+ " quality reviewer"
             notif_rec = QualityReviewerNotification.objects.create(user_id = user_id ,
                 message = message , title = title)
-    except Exception as e:
-        messages.warning(request, "Notification already exists" + str(e))
+    except Exception as e:        
+        print("Notification already exists")
     return HttpResponseRedirect(request.META['HTTP_REFERER'])
