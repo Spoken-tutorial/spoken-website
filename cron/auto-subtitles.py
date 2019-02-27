@@ -3,15 +3,14 @@ from future import standard_library
 standard_library.install_aliases()
 from builtins import str
 from html.parser import HTMLParser
-import time, mechanize, http.cookiejar, datetime
-from BeautifulSoup import BeautifulSoup
+import time, http.cookiejar, datetime
+from bs4 import BeautifulSoup
 from urllib.request import urlopen
 from urllib.parse import quote
 import MySQLdb
 import sys
 import os
-#sys.path.insert(0, '../spoken')
-#sys.path.insert(0, '../../spoken')
+import mechanicalsoup as mechanize
 from config import *
 
 
@@ -38,29 +37,29 @@ def strip_tags(html):
 def readUrl(url):
     # print "Reading :", url
     b = getNewBrowser()
-    b.open(url, timeout = 30.0)
-    return BeautifulSoup(b.response())
+    r = b.get(url, timeout = 30.0)
+    return BeautifulSoup(r.text)
 
 
 def getNewBrowser():
     # create browser instance
-    b = mechanize.Browser()
+    b = mechanize.Browser(user_agent='Mozilla/5.0 (X11; Linux x86_64) Gecko/20100101 Firefox/31.0')
 
     # create a cookiejar for cookies
     jar = http.cookiejar.LWPCookieJar()
     b.set_cookiejar(jar)
 
     # prevent mechanize from simulating a 403 disallow
-    b.set_handle_robots(False)
+    #b.set_handle_robots(False)
 
     # handle some other stuff
-    b.set_handle_equiv(True)
+    #b.set_handle_equiv(True)
     #b.set_handle_gzip(True)
-    b.set_handle_redirect(True)
-    b.set_handle_referer(True)
+    #b.set_handle_redirect(True)
+    #b.set_handle_referer(True)
 
     # follows refresh 0 but not hangs on refresh >0
-    b.set_handle_refresh(mechanize._http.HTTPRefreshProcessor(), max_time=1)
+    #b.set_handle_refresh(mechanize._http.HTTPRefreshProcessor(), max_time=1)
 
     # want debugging messages?
     #b.set_debug_http(True)
@@ -68,7 +67,7 @@ def getNewBrowser():
     #b.set_debug_responses(True)
 
     # User-Agent
-    b.addheaders = [('User-agent', 'Mozilla/5.0 (X11; Linux x86_64) Gecko/20100101 Firefox/31.0')]
+    #b.addheaders = [('User-agent', 'Mozilla/5.0 (X11; Linux x86_64) Gecko/20100101 Firefox/31.0')]
     return b
 
 
@@ -115,7 +114,6 @@ def generate_subtitle(srt_url, srt_file_path):
                         previous_time = formatted_time
                     else:
                         time_error = 1
-                #print col.text
         video_info = get_video_info(rreplace(srt_file_path, 'srt', 'ogv', 1))
         if srt_data:
             if previous_script_data:
@@ -186,7 +184,7 @@ def get_formatted_script(script):
     else:
         return strip_tags(str(script.renderContents())\
         .replace('&amp;', '&').replace('&quot;', '"')\
-        .replace('&gt;', '>').replace('&lt;', '<')).decode('utf-8').strip('\n').strip() + '\n\n'
+        .replace('&gt;', '>').replace('&lt;', '<')).strip('\n').strip() + '\n\n'
 
 
 def rreplace(s, old, new, occurrence):
@@ -263,7 +261,6 @@ for row in rows:
             continue
     srt_file_path = MEDIA_ROOT + 'videos/' + str(tutorial_detail[1]) + '/' + str(tutorial_detail[0]) + '/'
     srt_file_name = tutorial_detail[2].replace(' ', '-') + '-' + language[1] + '.srt'
-    # print srt_file_name
     if not overwrite and os.path.isfile(srt_file_path + srt_file_name):
         continue
     try:
