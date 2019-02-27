@@ -90,7 +90,7 @@ class UploadTimedScriptForm(forms.Form):
                     language = lang_rec,
                     status = 1
                 ).values_list(
-                    'foss_category_id'
+                    'tutorial_detail__foss_id'
                 )
             ).values_list('id', 'foss')
         )
@@ -279,7 +279,7 @@ class UploadPublishTutorialForm(forms.Form):
                     user_id = user.id,
                     status = 1
                 ).values_list(
-                    'foss_category_id'
+                    'tutorial_detail__foss_id'
                 )
             ).values_list('id', 'foss')
         )
@@ -367,7 +367,7 @@ class UploadTutorialForm(forms.Form):
                     user_id = user.id,
                     status = 1
                 ).values_list(
-                    'foss_category_id'
+                    'tutorial_detail__foss_id'
                 )
             ).values_list('id', 'foss')
         )
@@ -388,7 +388,7 @@ class UploadTutorialForm(forms.Form):
                         Language.objects.filter(
                             id__in = ContributorRole.objects.filter(
                                 user_id = user.id,
-                                foss_category_id = args[0]['foss_category']
+                                tutorial_detail__foss_id = args[0]['foss_category']
                             ).values_list(
                                 'language_id'
                             )
@@ -555,7 +555,7 @@ class ContributorRoleForm(forms.ModelForm):
         help_text = "",
         error_messages = {'required': 'User field required.'}
     )
-    foss_category = forms.ModelChoiceField(
+    tutorial_detail__foss_category = forms.ModelChoiceField(
         cache_choices = True,
         queryset = FossCategory.objects.filter(status = 1).order_by('foss'),
         empty_label = "----------",
@@ -1017,3 +1017,25 @@ class UpdateCodefilesForm(forms.Form):
                 self.fields['tutorial'].choices =  [('', '-- Select tutorial --'),] + list(choices)
                 self.fields['tutorial'].widget.attrs = {}
                 self.fields['tutorial'].initial = initial_tut
+
+
+class LanguageManagerForm(forms.ModelForm):
+
+    user = forms.ModelChoiceField(cache_choices=True,
+                                  queryset=User.objects.filter(Q(groups__name='Contributor'
+                                  )
+                                  | Q(groups__name='External-Contributor'
+                                  )).distinct().order_by('username'), help_text=''
+                                  ,
+                                  error_messages={'required': 'User field required.'
+                                  })
+    language = forms.ModelChoiceField(cache_choices=True,
+            queryset=Language.objects.order_by('name'),
+            empty_label='----------', help_text='',
+            error_messages={'required': 'Language field required.'})
+    status = forms.BooleanField(required=False)
+
+    class Meta:
+
+        model = LanguageManager
+        exclude = ['created', 'updated']

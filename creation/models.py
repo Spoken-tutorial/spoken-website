@@ -1,6 +1,8 @@
 # Third Party Stuff
 from django.contrib.auth.models import User
 from django.db import models
+import datetime
+
 
 class Language(models.Model):
     name = models.CharField(max_length=255, unique=True)
@@ -34,12 +36,12 @@ class FossCategory(models.Model):
     foss = models.CharField(unique=True, max_length=255)
     description = models.TextField()
     status = models.BooleanField(max_length=2)
-    is_learners_allowed = models.BooleanField(max_length=2,default=0 )
+    is_learners_allowed = models.BooleanField(max_length=2, default=0)
     user = models.ForeignKey(User)
     category = models.ManyToManyField(FossSuperCategory)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-    show_on_homepage = models.BooleanField(default=True, help_text ='If unchecked, this foss will be displayed on series page, instead of home page' )
+    show_on_homepage = models.BooleanField(default=True, help_text='If unchecked, this foss will be displayed on series page, instead of home page')
 
     class Meta:
         verbose_name = 'FOSS'
@@ -197,9 +199,16 @@ class TutorialResource(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     publish_at = models.DateTimeField(null=True)
+    # the last submission date for the tutorial
+
+    submissiondate = models.DateTimeField(default=datetime.datetime(2000, 01, 02, 12, 00))
+    # 0 - Not Assigned to anyone , 1 - Assigned & work in progress , 2 - Completed (= published / PR )
+    assignment_status = models.PositiveSmallIntegerField(default=0)
+    # 0 - Not Extended , 1 - Extended , 2 - Tutorial Terminated from user
+    extension_status = models.PositiveIntegerField(default=0)
 
     class Meta:
-        unique_together = (('tutorial_detail', 'language',),)
+        unique_together = ('tutorial_detail', 'language',)
 
 
 class ArchivedVideo(models.Model):
@@ -213,25 +222,35 @@ class ArchivedVideo(models.Model):
 
 
 class ContributorRole(models.Model):
-    foss_category = models.ForeignKey(FossCategory)
-    language = models.ForeignKey(Language)
     user = models.ForeignKey(User)
+    language = models.ForeignKey(Language)
+    foss_category = models.ForeignKey(FossCategory)
+    tutorial_detail = models.ForeignKey(TutorialDetail, null=True)
     status = models.BooleanField()
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
+    def revoke(self):
+        self.status = 2
+        self.save()
+
     class Meta:
-        unique_together = (('user', 'foss_category', 'language',),)
+        unique_together = (('user', 'tutorial_detail', 'language',),)
         verbose_name = 'Contributor Role'
 
 
 class DomainReviewerRole(models.Model):
-    foss_category = models.ForeignKey(FossCategory)
-    language = models.ForeignKey(Language)
+    
     user = models.ForeignKey(User)
+    language = models.ForeignKey(Language)    
+    foss_category = models.ForeignKey(FossCategory)
     status = models.BooleanField()
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
+
+    def revoke(self):
+        self.status = 2
+        self.save()
 
     class Meta:
         unique_together = (('user', 'foss_category', 'language',),)
@@ -239,13 +258,18 @@ class DomainReviewerRole(models.Model):
 
 
 class QualityReviewerRole(models.Model):
-    foss_category = models.ForeignKey(FossCategory)
-    language = models.ForeignKey(Language)
+    
     user = models.ForeignKey(User)
+    language = models.ForeignKey(Language)    
+    foss_category = models.ForeignKey(FossCategory)
     status = models.BooleanField()
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
+    def revoke(self):
+        self.status = 2
+        self.save()
+        
     class Meta:
         unique_together = (('user', 'foss_category', 'language',),)
         verbose_name = 'Quality Reviewer Role'
@@ -307,7 +331,7 @@ class ContributorNotification(models.Model):
     user = models.ForeignKey(User)
     title = models.CharField(max_length=255)
     message = models.TextField()
-    tutorial_resource = models.ForeignKey(TutorialResource)
+    tutorial_resource = models.ForeignKey(TutorialResource, null = True)
     created = models.DateTimeField(auto_now_add=True)
 
 
@@ -323,7 +347,7 @@ class DomainReviewerNotification(models.Model):
     user = models.ForeignKey(User)
     title = models.CharField(max_length=255)
     message = models.TextField()
-    tutorial_resource = models.ForeignKey(TutorialResource)
+    tutorial_resource = models.ForeignKey(TutorialResource, null = True)
     created = models.DateTimeField(auto_now_add=True)
 
 
@@ -331,22 +355,28 @@ class QualityReviewerNotification(models.Model):
     user = models.ForeignKey(User)
     title = models.CharField(max_length=255)
     message = models.TextField()
-    tutorial_resource = models.ForeignKey(TutorialResource)
+    tutorial_resource = models.ForeignKey(TutorialResource, null = True)
     created = models.DateTimeField(auto_now_add=True)
 
 
 class RoleRequest(models.Model):
     user = models.ForeignKey(User, related_name='user')
     role_type = models.IntegerField(default=0)
+    language = models.ForeignKey(Language, null=True)
     status = models.PositiveSmallIntegerField(default=0)
     approved_user = models.ForeignKey(
         User, related_name='approved_user', null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
-    class Meta:
-        unique_together = (('user', 'role_type',),)
+    def revoke(self):
+        self.status = 2
+        self.save()
 
+    class Meta:
+        unique_together = (('user', 'role_type', 'language'),)
+
+    
 
 class FossAvailableForWorkshop(models.Model):
     foss = models.ForeignKey(FossCategory)
@@ -445,3 +475,34 @@ class Collaborate(models.Model):
     language = models.ForeignKey(Language)
     lead_st = models.BooleanField()
     created = models.DateTimeField(auto_now_add=True)
+
+
+class ContributorRating(models.Model):
+    user = models.ForeignKey(User)
+    choices = ((0,0), (1, 1), (2, 2), (3, 3), (4, 4), (5, 5))
+    rating = models.PositiveIntegerField(choices=choices,default=0)
+    language = models.ForeignKey(Language)
+
+    class Meta:
+        unique_together = (('user', 'language'),)
+
+
+class TutorialsAvailable(models.Model):
+    tutorial_detail = models.ForeignKey(TutorialDetail)
+    language = models.ForeignKey(Language)
+
+    class Meta:
+        unique_together = (('tutorial_detail', 'language'),)
+
+
+class LanguageManager(models.Model):
+
+    user = models.ForeignKey(User)
+    language = models.ForeignKey(Language)
+    status = models.BooleanField(default=0)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ('user', 'language')
+        unique_together = (('user', 'language'),)

@@ -83,9 +83,9 @@ class TutorialDetailAdmin(admin.ModelAdmin):
 
 class ContributorRoleAdmin(admin.ModelAdmin):
     form = ContributorRoleForm
-    list_display = ('user', 'foss_category', 'language',
-                    'status', 'created', 'updated')
-    list_filter = ('updated', 'language', 'foss_category')
+    list_display = ('user', 'tutorial_detail', 'language',
+                    'status', 'created', 'updated',)
+    list_filter = ('updated', 'language', 'tutorial_detail')
 
     def mark_contributor_disabled(self, request, queryset):
         rows_updated = queryset.update(status=0)
@@ -105,6 +105,9 @@ class ContributorRoleAdmin(admin.ModelAdmin):
     mark_contributor_active.short_description = "Mark selected contributor roles as active"
     mark_contributor_disabled.short_description = "Mark selected contributor roles as disabled"
     actions = ['mark_contributor_active', 'mark_contributor_disabled']
+
+    class Media:
+        js = ('admin/js/ajax-contributor.js',)
 
 
 class DomainReviewerRoleAdmin(admin.ModelAdmin):
@@ -131,6 +134,10 @@ class DomainReviewerRoleAdmin(admin.ModelAdmin):
     mark_domain_reviewer_active.short_description = "Mark selected domain reviewer roles as active"
     mark_domain_reviewer_disabled.short_description = "Mark selected domain reviewer roles as disabled"
     actions = ['mark_domain_reviewer_active', 'mark_domain_reviewer_disabled']
+
+    class Media:
+
+        js = ('admin/js/domain_reviewer_languages.js', )
 
 
 class QualityReviewerRoleAdmin(admin.ModelAdmin):
@@ -159,6 +166,9 @@ class QualityReviewerRoleAdmin(admin.ModelAdmin):
     actions = ['mark_quality_reviewer_active',
                'mark_quality_reviewer_disabled']
 
+    class Media:
+
+            js = ('admin/js/quality_reviewer_languages.js', )
 
 class FossAvailableForTestAdmin(admin.ModelAdmin):
     form = FossAvailableForTestForm
@@ -173,6 +183,18 @@ class FossAvailableForWorkshopAdmin(admin.ModelAdmin):
     list_filter = ('language',)
 
 
+class LanguagManagerAdmin(admin.ModelAdmin):
+
+    form = LanguageManagerForm
+    fields = ['user', 'language', 'status']
+    list_display = ('user', 'language', 'status')
+    list_filter = ('language', )
+
+    class Media:
+
+        js = ('admin/js/not_contributor_langs.js', )
+
+
 admin.site.register(Language, LanguageAdmin)
 admin.site.register(FossCategory, FossCategoryAdmin)
 admin.site.register(FossSuperCategory, FossSuperCategoryAdmin)
@@ -183,3 +205,4 @@ admin.site.register(QualityReviewerRole, QualityReviewerRoleAdmin)
 admin.site.register(FossAvailableForTest, FossAvailableForTestAdmin)
 admin.site.register(FossAvailableForWorkshop, FossAvailableForWorkshopAdmin)
 admin.site.register(BrochureDocument, BrochureDocumentAdmin)
+admin.site.register(LanguageManager, LanguagManagerAdmin)
