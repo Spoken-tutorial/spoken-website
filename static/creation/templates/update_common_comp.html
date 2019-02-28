@@ -1,9 +1,9 @@
 {% extends 'spoken/templates/base.html' %}
 {% load widget_tweaks %}
 {% load static %}
-{% block title %}Upload Codefiles{% endblock %}
+{% block title %}Upload Common Component{% endblock %}
 {% block heading %}
-    Upload Codefiles
+    Upload Component
 {% endblock %}
 {% block content %}
     <form role="form" method="post" enctype="multipart/form-data" action="">
@@ -22,10 +22,15 @@
             {% render_field form.tutorial class+="form-control tutorial" tabindex="2" %}
             {{ form.tutorial.errors }}
         </div>
+        <div class="form-group">
+            <label for="id_component_type">Component Type </label>
+            {% render_field form.component_type class+="form-control component_type" tabindex="2" %}
+            {{ form.component_type.errors }}
+        </div>
         <div class="well">
 		    <fieldset>
 		        <label for="id_comp">
-		        Codefiles
+		        Component
 		        </label>
                 {% render_field form.comp class+="manual-upload comp" tabindex="4" %}
                 {{ form.comp.errors }}
@@ -34,6 +39,7 @@
         <div class="form-group">
             <div class="existing-sheet"></div>
         </div>
+        
         <input type="submit" class="btn btn-primary" value="Save"  tabindex="5" />
     </form>
 {% endblock %}
