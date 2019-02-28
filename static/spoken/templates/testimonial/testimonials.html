@@ -122,17 +122,34 @@
         <h4 class="page-title">
             <i class="fa fa-list-ul"></i> Testimonials
         </h4>
+
+        
         <ul class="nav nav-tabs">
             {% if testimonial_type == "text" %}
             <li class="active"><a href="{% url 'testimonials' type='text' %}">Text</a></li>
             <li><a href="{% url 'testimonials' type='media' %}">Media</a></li>
             {% else %}
+            <div class= 'filters row' >
+            <form action="" method="get" class='form-horizontal pull-right' id="news-foss-filter">
+                <div class="">
+                    <div class="form-group">
+                        <label for="id_foss" class="col-sm-4 control-label">Foss</label>
+                        <div class="col-sm-8">
+                            {% render_field form.foss class+="form-control foss" tabindex="1" %}
+                            {{ form.foss.errors }}
+                        </div>
+                    </div>
+                </div>
+            </form>
+            </div>
             <li><a href="{% url 'testimonials' type='text' %}">Text</a></li>
             <li class="active"><a href="{% url 'testimonials' type='media' %}">Media</a></li>
             {% endif %}
         </ul>
+
         {% for record in collection %}
             {% if record.path %}
+            
             <!-- formatismp4 checks if the format is mp4, returns True for mp4 and false for all others -->
                 {% if record.path|formatismp4 %}
                 <div class="testimonial-item">
@@ -152,7 +169,7 @@
                     </div>
                     <div class="testimonials-details">
                         <div class="testimonials-caret"></div>
-                        <div class="user-details">{{ record.user }}</div>
+                        <div class="user-details"><b>{{record.foss__foss}}</b> : {{ record.user }}</div>
                     </div>
                 </div>
                 {% else %}
@@ -173,7 +190,7 @@
                         </div>
                         <div class="testimonials-details">
                             <div class="testimonials-caret"></div>
-                            <div class="user-details">{{ record.user }}</div>
+                            <div class="user-details"><b>{{record.foss__foss}}</b> : {{ record.user }}</div>
                         </div>
                     </div>                
                 {% endif %}
@@ -259,5 +276,16 @@
             {% endif %}
         {% endfor %}
     </div>
+{% endblock %}
+{% block compressinlinejsblock %}
+    <script>
+        
+        $(function(){
+            $('#id_foss').change(function(){
+                $("#news-foss-filter").submit()
+            });
+            
+        });
+    </script>
 {% endblock %}
 

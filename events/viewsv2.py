@@ -853,7 +853,7 @@ class TrainingCertificate(object):
 
     # Title
     imgDoc.setFont('Helvetica', 40, leading=None)
-    imgDoc.drawCentredString(415, 480, "Certificate of Learning")
+    imgDoc.drawCentredString(415, 480, "Certificate of Participation")
 
     #date
     imgDoc.setFont('Helvetica', 18, leading=None)
