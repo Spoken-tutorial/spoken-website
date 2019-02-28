@@ -49,7 +49,7 @@ class Question(models.Model):
 
 
 class Answer(models.Model):
-    question = models.ForeignKey(Question)
+    question = models.ForeignKey(Question, on_delete=models.PROTECT )
     answer = models.CharField(max_length=1000)
 
 

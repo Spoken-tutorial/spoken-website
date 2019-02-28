@@ -61,7 +61,7 @@ class MdlUser(models.Model):
     #trustbitmask = models.BigIntegerField()
     imagealt = models.CharField(max_length=765, blank=True)
     class Meta(object):
-        db_table = u'mdl_user'
+        db_table = 'mdl_user'
         
 class MdlQuizGrades(models.Model):
     id = models.BigIntegerField(primary_key=True)
@@ -70,7 +70,7 @@ class MdlQuizGrades(models.Model):
     grade = models.DecimalField(max_digits=12, decimal_places=5)
     timemodified = models.BigIntegerField()
     class Meta(object):
-        db_table = u'mdl_quiz_grades'
+        db_table = 'mdl_quiz_grades'
 
 class MdlQuizAttempts(models.Model):
     id = models.BigIntegerField(primary_key=True)
@@ -89,7 +89,7 @@ class MdlQuizAttempts(models.Model):
     sumgrades = models.DecimalField(null=True, max_digits=12, decimal_places=5, blank=True)
     needsupgradetonewqe = models.IntegerField()
     class Meta(object):
-        db_table = u'mdl_quiz_attempts'
+        db_table = 'mdl_quiz_attempts'
 
 class MdlUserEnrolments(models.Model):
     id = models.BigIntegerField(primary_key=True)
@@ -102,7 +102,7 @@ class MdlUserEnrolments(models.Model):
     timecreated = models.BigIntegerField()
     timemodified = models.BigIntegerField()
     class Meta(object):
-        db_table = u'mdl_user_enrolments'
+        db_table = 'mdl_user_enrolments'
 
 class MdlEnrol(models.Model):
     id = models.BigIntegerField(primary_key=True)
@@ -141,7 +141,7 @@ class MdlEnrol(models.Model):
     timecreated = models.BigIntegerField()
     timemodified = models.BigIntegerField()
     class Meta(object):
-        db_table = u'mdl_enrol'
+        db_table = 'mdl_enrol'
 
 class MdlRoleAssignments(models.Model):
     id = models.BigIntegerField(primary_key=True)
@@ -154,4 +154,4 @@ class MdlRoleAssignments(models.Model):
     itemid = models.BigIntegerField()
     sortorder = models.BigIntegerField()
     class Meta(object):
-        db_table = u'mdl_role_assignments'
+        db_table = 'mdl_role_assignments'

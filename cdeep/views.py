@@ -1,8 +1,4 @@
-from __future__ import print_function
 # Standard Library
-from future import standard_library
-standard_library.install_aliases()
-from builtins import str
 from urllib.parse import quote_plus
 
 # Third Party Stuff

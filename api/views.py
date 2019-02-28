@@ -31,23 +31,25 @@ def get_tutorial_list(request, fossid, langid):
     """
     Retrieve, update or delete a code snippet.
     """
+
     try:
-        tuts = TutorialResource.objects.filter(language_id=langid, tutorial_detail_id__foss=fossid,status=1)
+        tuts = TutorialResource.objects.filter(language_id=langid,
+                tutorial_detail_id__foss=fossid, status=1)
     except ObjectDoesNotExist:
         return HttpResponse(status=404)
-    
-    if request.method == 'GET': 
-        serializer = VideoSerializer(tuts, many=True)
-        return JsonResponse(serializer.data,  safe=False)
 
+    if request.method == 'GET':
+        serializer = VideoSerializer(tuts, many=True)
+        return JsonResponse(serializer.data, safe=False)
     elif request.method == 'PUT':
+
         data = JSONParser().parse(request)
         serializer = VideoSerializer(tut, data=data)
         if serializer.is_valid():
             serializer.save()
             return JsonResponse(serializer.data)
         return JsonResponse(serializer.errors, status=400)
-
     elif request.method == 'DELETE':
+
         tut.delete()
         return HttpResponse(status=204)

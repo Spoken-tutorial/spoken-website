@@ -1,4 +1,4 @@
-from __future__ import print_function
+
 import MySQLdb
 import time
 from youtube_upload import *

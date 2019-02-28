@@ -1,19 +1,16 @@
-from __future__ import print_function
-from __future__ import division
 # Standard Library
 from builtins import str
 from builtins import range
-from past.utils import old_div
 import random
 import string
 
 # Third Party Stuff
 from django.conf import settings
-from django.contrib import messages
+from django.contrib import messages, auth
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
-from django.core.context_processors import csrf
+ 
 from django.core.mail import EmailMultiAlternatives
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render, render_to_response
@@ -28,13 +25,13 @@ from cms.services import *
 from events.models import Student
 from mdldjango.models import MdlUser
 from mdldjango.urls import *
-
+from django.template.context_processors import csrf
 
 def dispatcher(request, permalink=''):
     if permalink == '':
         return HttpResponseRedirect('/')
     page_content = get_object_or_404(Page, permalink=permalink, visible=True)
-    col_offset = int(old_div((12 - page_content.cols), 2))
+    col_offset = int((12 - page_content.cols) / 2)
     col_remainder = int((12 - page_content.cols) % 2)
     if col_remainder:
         col_offset = str(col_offset) + 'p5'
@@ -83,7 +80,7 @@ def account_register(request):
                 "Thank you for registering.\
                 Please confirm your registration by clicking on the activation link which has been sent to your registered email %s.<br>\
                 In case if you do not receive any activation mail kindly verify and activate your account from below link :<br>\
-                <a href='http://spoken-tutorial.org/accounts/verify/'>http://spoken-tutorial.org/accounts/verify/</a>"
+                <a href='https://spoken-tutorial.org/accounts/verify/'>https://spoken-tutorial.org/accounts/verify/</a>"
                  % (email))
             return HttpResponseRedirect('/')
         context['form'] = form
@@ -111,8 +108,8 @@ Spoken Tutorials
 IIT Bombay.
     """.format(
         user.username,
-        "http://spoken-tutorial.org",
-        "http://spoken-tutorial.org/accounts/confirm/" + str(p.confirmation_code) + "/" + user.username
+        "https://spoken-tutorial.org",
+        "https://spoken-tutorial.org/accounts/confirm/" + str(p.confirmation_code) + "/" + user.username
     )
 
     email = EmailMultiAlternatives(
@@ -159,7 +156,7 @@ def account_login(request):
             password = request.POST.get('password', None)
             remember = request.POST.get('remember', None)
             if username and password:
-                user = authenticate(username=username, password=password)
+                user = auth.authenticate(username=username, password=password)
                 if user is not None:
                     if user.is_active:
                         login(request, user)
@@ -181,7 +178,7 @@ def account_login(request):
                         error_msg = "Your account is disabled.<br>\
                         Kindly activate your account by clicking on the activation link which has been sent to your registered email %s.<br>\
                         In case if you do not receive any activation mail kindly verify and activate your account from below link :<br>\
-                        <a href='http://spoken-tutorial.org/accounts/verify/'>http://spoken-tutorial.org/accounts/verify/</a>"% (user.email)
+                        <a href='https://spoken-tutorial.org/accounts/verify/'>https://spoken-tutorial.org/accounts/verify/</a>"% (user.email)
                 else:
                     error_msg = 'Invalid username / password'
             else:
@@ -289,8 +286,8 @@ def password_reset(request):
             from mdldjango.views import changeMdlUserPass
             changeMdlUserPass(request.POST['email'], password_string)
 
-            print('Username => ', user.username)
-            print('New password => ', password_string)
+            print(('Username => ', user.username))
+            print(('New password => ', password_string))
 
             changePassUrl = "http://www.spoken-tutorial.org/accounts/change-password"
             if request.GET and request.GET['next']:
@@ -406,7 +403,7 @@ def confirm_student(request, token):
             student.save()
 
             messages.success(request, "Your account has been activated!. Please login to continue.")
-            return HttpResponseRedirect('http://spoken-tutorial.org/participant/login/')
+            return HttpResponseRedirect('https://spoken-tutorial.org/participant/login/')
         else:
             print('can not match record')
             messages.error(request, "Your account not activated!. Please try again!")

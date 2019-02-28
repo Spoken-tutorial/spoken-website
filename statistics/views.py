@@ -1,4 +1,3 @@
-from __future__ import print_function
 # Standard Library
 from builtins import str
 from datetime import datetime
@@ -170,14 +169,14 @@ def training(request):
         for data in chart_query_set:
             chart_data += "['" + str(data['year']) + "', " + str(data['total_participant']) + "],"
     else:
-        for year,count in year_data_all.items():
+        for year,count in list(year_data_all.items()):
             chart_data += "['" + str(year) + "', " + str(count) + "],"
     
     context = {}
     context['form'] = collection.form
     context['chart_data'] = chart_data
-    page = request.GET.get('page')
-    collection = get_page(collection, page)
+    page = request.GET.get('page')    
+    collection = get_page(collection.qs, page )
     context['collection'] = collection
     context['header'] = header
     context['ordering'] = ordering
@@ -235,7 +234,7 @@ def fdp_training(request):
     context['form'] = collection.form
     context['chart_data'] = chart_data
     page = request.GET.get('page')
-    collection = get_page(collection, page)
+    collection = get_page(collection.qs, page)
     context['collection'] = collection
     context['header'] = header
     context['ordering'] = ordering
@@ -312,7 +311,7 @@ def online_test(request):
     context['form'] = collection.form
     context['chart_data'] = chart_data
     page = request.GET.get('page')
-    collection = get_page(collection, page)
+    collection = get_page(collection.qs, page)
     context['collection'] = collection
     context['header'] = header
     context['ordering'] = ordering
@@ -402,7 +401,7 @@ def academic_center(request, slug=None):
     context['total_participant'] = participant_count['participants__sum']
 
     page = request.GET.get('page')
-    collection = get_page(collection, page)
+    collection = get_page(collection.qs, page)
     context['collection'] = collection
     context['header'] = header
     context['ordering'] = ordering
@@ -445,7 +444,7 @@ def motion_chart(request):
         interactive_workshop_data += "['" + curr_state + "', " + js_date + \
             ", " + str(row['tcount']) + ", " + str(row['pcount']) + "],"
 
-    for key, value in states.items():
+    for key, value in list(states.items()):
         curr_year = str(datetime.now().year)
         static_workshop_data += "['" + key + "', " + curr_year + ", " + \
             str(value['tcount']) + ", " + str(value['pcount']) + "],"

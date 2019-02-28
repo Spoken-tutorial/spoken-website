@@ -1,4 +1,4 @@
-from __future__ import print_function
+
 # Standard Library
 from builtins import str
 from builtins import range
@@ -47,8 +47,8 @@ Spoken Tutorials
 IIT Bombay.
     """.format(
         user.username,
-        "http://spoken-tutorial.org",
-        "http://spoken-tutorial.org/accounts/confirm/" + str(p.confirmation_code) + "/" + user.username
+        "https://spoken-tutorial.org",
+        "https://spoken-tutorial.org/accounts/confirm/" + str(p.confirmation_code) + "/" + user.username
     )
 
     email = EmailMultiAlternatives(
@@ -67,8 +67,8 @@ IIT Bombay.
 
 def send_verify_email(request,email):
   message = None
-  user_login = "http://spoken-tutorial.org/accounts/login/"
-  student_login = "http://spoken-tutorial.org/participant/login/"
+  user_login = "https://spoken-tutorial.org/accounts/login/"
+  student_login = "https://spoken-tutorial.org/participant/login/"
   user = get_user_email(email)
   if not user:
     message = "User "+email+" not registerd in the system."
@@ -138,7 +138,7 @@ line at the top of your web browser window.
 Cheers from the 'Spoken Tutorials Online Test Center' administrator,
 
 Admin Spoken Tutorials
-'''.format(mdluser.firstname, mdluser.username, password_string, "http://spoken-tutorial.org/accounts/confirm_student/" + token)
+'''.format(mdluser.firstname, mdluser.username, password_string, "https://spoken-tutorial.org/accounts/confirm_student/" + token)
 
   # send email
   email = EmailMultiAlternatives(

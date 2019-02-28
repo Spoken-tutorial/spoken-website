@@ -1,4 +1,4 @@
-from __future__ import print_function
+
 # Standard Library
 from builtins import str
 from builtins import range
@@ -10,7 +10,7 @@ import time
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.core.context_processors import csrf
+ 
 from django.core.exceptions import PermissionDenied
 from django.core.mail import EmailMultiAlternatives
 from django.db.models import Q
@@ -26,7 +26,7 @@ from events.views import *
 from .forms import *
 from .get_or_create_participant import check_csvfile, encript_password
 from .models import MdlUser
-
+from django.template.context_processors import csrf
 
 def authenticate(email=None, password=None):
     try:

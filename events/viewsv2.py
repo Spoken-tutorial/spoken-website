@@ -1,6 +1,3 @@
-from __future__ import print_function
-from future import standard_library
-standard_library.install_aliases()
 from builtins import str
 from builtins import range
 from builtins import object
@@ -327,8 +324,8 @@ class StudentBatchCreateView(CreateView):
       rowcsv = csv.reader(file_data, delimiter=',', quotechar='|')
       rowcount = len(list(rowcsv))
       gencount = studentcount + rowcount
-      print('gencount',gencount)
-      print('printing csv length',rowcount)
+      print(('gencount',gencount))
+      print(('printing csv length',rowcount))
       if rowcount > 500:
         messages.warning(self.request, "MB will accept only 500 students, if number is more than 500, divide the batch and upload under different departments eg. Chemistry1 & Chemistry2")
       if gencount > 500:
@@ -688,8 +685,8 @@ class TrainingRequestEditView(CreateView):
       else:
         messages.error(self.request, 'This student batch already taken the selected course.')
         return self.form_invalid(form)
-    except Exception, e:
-      print e
+    except Exception as e:
+      print(e)
       messages.error(self.request, 'Something went wrong, Contact site administrator.')
       return self.form_invalid(form)
     context = {}
@@ -1353,20 +1350,20 @@ class TrainingRequestListView(ListView):
         self.raw_get_data
       )
       if self.status == 'completed':
-        self.queryset = TrainingRequestFilter(self.request.GET, queryset=self.queryset, user=self.user, rp_completed=True)
+        self.queryset.qs = TrainingRequestFilter(self.request.GET, queryset=self.queryset, user=self.user, rp_completed=True)
       elif self.status == 'pending':
-        self.queryset = TrainingRequestFilter(self.request.GET, queryset=self.queryset, user=self.user, rp_ongoing=True)
+        self.queryset.qs = TrainingRequestFilter(self.request.GET, queryset=self.queryset, user=self.user, rp_ongoing=True)
       elif self.status == 'markcomplete':
-        self.queryset = TrainingRequestFilter(self.request.GET, queryset=self.queryset, user=self.user, rp_markcomplete=True)
+        self.queryset.qs = TrainingRequestFilter(self.request.GET, queryset=self.queryset, user=self.user, rp_markcomplete=True)
       elif self.status == 'pendingattendance':
-        self.queryset = TrainingRequestFilter(self.request.GET, queryset=self.queryset, user=self.user, rp_pendingattendance=True)
+        self.queryset.qs = TrainingRequestFilter(self.request.GET, queryset=self.queryset, user=self.user, rp_pendingattendance=True)
     else:
       raise PermissionDenied()
     return super(TrainingRequestListView, self).dispatch(*args, **kwargs)
 
   def get_context_data(self, **kwargs):
     context = super(TrainingRequestListView, self).get_context_data(**kwargs)
-    context['form'] = self.queryset.form
+    context['form'] = self.queryset.qs.form
     context['role'] = self.role
     context['status'] = self.status
     context['header'] = self.header
@@ -1614,7 +1611,7 @@ class SingleTrainingCertificateListView(ListView):
 
   def dispatch(self, *args, **kwargs):
     self.training_request = SingleTraining.objects.get(pk=kwargs['tid'])
-    print(self.training_request.id)
+    print((self.training_request.id))
     self.queryset = SingleTrainingAttendance.objects.filter(training_id=self.training_request.id, status=1)
     return super(SingleTrainingCertificateListView, self).dispatch(*args, **kwargs)
 
@@ -1789,8 +1786,10 @@ class SingletrainingCreateView(CreateView):
     csv_data = []
     csvdata = csv.reader(file_path, delimiter=',', quotechar='|')
 
-    #School
+    # School
+
     if ttype == '0':
+
       for i in csvdata:
         csv_data.append(i)
       for j in range(len(csv_data)):
@@ -1828,7 +1827,7 @@ class SingletrainingCreateView(CreateView):
           error .append(j)
           continue
 
-    return skipped, error, warning, write_flag
+    return (skipped, error, warning, write_flag)
 
   '''
   This will call the create_student_vocational() method to create the student entry, from the  CSV file, in the SingleTraining database.
@@ -2352,7 +2351,7 @@ def LatexWorkshopFileUpload(request):
       email = request.POST['email']
       email = email.replace('.', '_')
       email = email.replace('@', '_')
-      print email
+      print(e)mail
       f = open('media/latex/{0}/{1}'.format(email, uploaded_file), 'wb+')
       for data in uploaded_file.chunks():
           f.write(data)
@@ -2468,7 +2467,7 @@ class STWorkshopFeedbackPreCreateView(CreateView):
     def post(self,  request, *args, **kwargs):
       self.object = None
       self.user = self.request.user.id
-      print(self.user)
+      print((self.user))
       form = self.get_form(self.get_form_class())
       if form.is_valid():
         #form.save()
@@ -2476,7 +2475,7 @@ class STWorkshopFeedbackPreCreateView(CreateView):
         #messages.success(self.request, "Thank you for completing this feedback form. We appreciate your input and valuable suggestions.")
         #return HttpResponseRedirect(self.success_url)
       else:
-        print(form.errors)
+        print((form.errors))
         return self.form_invalid(form)
 
     def form_valid(self, form, **kwargs):
@@ -2510,7 +2509,7 @@ class STWorkshopFeedbackPostCreateView(CreateView):
         #messages.success(self.request, "Thank you for completing this feedback form. We appreciate your input and valuable suggestions.")
         return HttpResponseRedirect(self.success_url)
       else:
-        print(form.errors)
+        print((form.errors))
         return self.form_invalid(form)
 
     def form_valid(self, form, **kwargs):
@@ -2535,7 +2534,7 @@ class LearnDrupalFeedbackCreateView(CreateView):
       if form.is_valid():
         return self.form_valid(form)
       else:
-        print(form.errors)
+        print((form.errors))
         return self.form_invalid(form)
 
   def form_valid(self, form, **kwargs):
@@ -2685,7 +2684,7 @@ def payment_success(request):
     if STresponsedata_hexa == random:
       #save transaction details in db
       pd = PaymentDetails.objects.get(user = user.id, academic_id = accountexecutive.academic.id)
-      print('pd id',pd.id)
+      print(('pd id',pd.id))
 
       try:
         transactiondetails = PaymentTransactionDetails()
@@ -2768,7 +2767,7 @@ def payment_reconciliation_update(request):
       print("no ac")
       pass
     try:
-      print(userId, accountexecutive.academic_id)
+      print((userId, accountexecutive.academic_id))
       pd = PaymentDetails.objects.get(user_id = userId, academic_id_id = accountexecutive.academic_id)
     except:
       return HttpResponseRedirect("Failed1")

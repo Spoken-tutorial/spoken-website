@@ -1,4 +1,4 @@
-from __future__ import print_function
+
 from builtins import str
 from validate_email import validate_email
 from DNS.Base import TimeoutError
@@ -48,7 +48,7 @@ for student in students:
       print('Timeout error, waiting for 5 seconds...')
       time.sleep(3)
       continue
-  print(student.user, '-', status)
+  print((student.user, '-', status))
 
 error_log_file_head.close()
 success_log_file_head.close()

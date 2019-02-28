@@ -264,7 +264,7 @@ class CompoundWriter(object):
 
     def _readback(self):
         temp = self._temp
-        for name, substream in self._streams.items():
+        for name, substream in list(self._streams.items()):
             substream.close()
 
             def gen():

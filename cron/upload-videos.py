@@ -1,4 +1,4 @@
-from __future__ import print_function
+
 from builtins import str
 import MySQLdb
 import time
@@ -36,7 +36,7 @@ for row in rows:
     mp4_video_path, file_extn = os.path.splitext(ogv_video_path)
     mp4_video_path = mp4_video_path + '.mp4'
     if not os.path.isfile(mp4_video_path):
-         print(row[9] + ' - ' + row[13] + ' -- MP4 video missing')
+         print((row[9] + ' - ' + row[13] + ' -- MP4 video missing'))
          continue
     options = {
         'title': str(row[9]) + ' - ' + str(row[13]),

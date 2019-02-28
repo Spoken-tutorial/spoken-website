@@ -1,4 +1,4 @@
-from __future__ import print_function
+
 from builtins import str
 import time
 import os, sys
@@ -62,7 +62,7 @@ for organiser in organisers:
         success_log_file_head.write(str(organiser.id)+','+str(0)+'\n')
     break
 print("--------------------------------")
-print("Total sent mails:", sent)
-print("Total not sent mails:", notsent)
+print(("Total sent mails:", sent))
+print(("Total not sent mails:", notsent))
 print("--------------------------------")
 

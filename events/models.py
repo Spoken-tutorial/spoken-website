@@ -1,4 +1,4 @@
-from __future__ import print_function, unicode_literals
+
 from builtins import str
 from builtins import object
 from django.db import models
@@ -62,7 +62,7 @@ class State(models.Model):
 
 @python_2_unicode_compatible
 class District(models.Model):
-  state = models.ForeignKey(State)
+  state = models.ForeignKey(State, on_delete=models.PROTECT )
   code = models.CharField(max_length=3)
   name = models.CharField(max_length=200)
   created = models.DateTimeField(auto_now_add = True, null=True)
@@ -78,7 +78,7 @@ class District(models.Model):
 
 @python_2_unicode_compatible
 class City(models.Model):
-  state = models.ForeignKey(State)
+  state = models.ForeignKey(State, on_delete=models.PROTECT )
   name = models.CharField(max_length=200)
   created = models.DateTimeField(auto_now_add = True, null=True)
   updated = models.DateTimeField(auto_now = True, null=True)
@@ -92,7 +92,7 @@ class City(models.Model):
 
 @python_2_unicode_compatible
 class Location(models.Model):
-  district = models.ForeignKey(District)
+  district = models.ForeignKey(District, on_delete=models.PROTECT )
   name = models.CharField(max_length=200)
   pincode = models.PositiveIntegerField()
   created = models.DateTimeField(auto_now_add = True, null=True)
@@ -106,8 +106,8 @@ class Location(models.Model):
 
 
 class ResourcePerson(models.Model):
-  user = models.ForeignKey(User)
-  state = models.ForeignKey(State)
+  user = models.ForeignKey(User, on_delete=models.PROTECT )
+  state = models.ForeignKey(State, on_delete=models.PROTECT )
   assigned_by = models.PositiveIntegerField()
   status = models.BooleanField()
   created = models.DateTimeField(auto_now_add = True)
@@ -120,8 +120,8 @@ class ResourcePerson(models.Model):
 @python_2_unicode_compatible
 class University(models.Model):
   name = models.CharField(max_length=200)
-  state = models.ForeignKey(State)
-  user = models.ForeignKey(User)
+  state = models.ForeignKey(State, on_delete=models.PROTECT )
+  user = models.ForeignKey(User, on_delete=models.PROTECT )
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
 
@@ -160,16 +160,16 @@ class InstituteType(models.Model):
 
 @python_2_unicode_compatible
 class AcademicCenter(models.Model):
-  user = models.ForeignKey(User)
-  state = models.ForeignKey(State)
-  institution_type = models.ForeignKey(InstituteType)
-  institute_category = models.ForeignKey(InstituteCategory)
-  university = models.ForeignKey(University)
+  user = models.ForeignKey(User, on_delete=models.PROTECT )
+  state = models.ForeignKey(State, on_delete=models.PROTECT )
+  institution_type = models.ForeignKey(InstituteType, on_delete=models.PROTECT )
+  institute_category = models.ForeignKey(InstituteCategory, on_delete=models.PROTECT )
+  university = models.ForeignKey(University, on_delete=models.PROTECT )
   academic_code = models.CharField(max_length=100, unique = True)
   institution_name = models.CharField(max_length=200)
-  district = models.ForeignKey(District)
-  location = models.ForeignKey(Location, null=True)
-  city = models.ForeignKey(City)
+  district = models.ForeignKey(District, on_delete=models.PROTECT )
+  location = models.ForeignKey(Location, null=True, on_delete=models.PROTECT )
+  city = models.ForeignKey(City, on_delete=models.PROTECT )
   address = models.TextField()
   pincode = models.PositiveIntegerField()
   resource_center = models.BooleanField()
@@ -207,14 +207,13 @@ class AcademicCenter(models.Model):
 
 @python_2_unicode_compatible
 class Accountexecutive(models.Model):
-  user = models.OneToOneField(User, related_name = 'accountexecutive')
+  user = models.OneToOneField(User, related_name = 'accountexecutive', on_delete=models.PROTECT )
   appoved_by = models.ForeignKey(
     User,
     related_name = 'accountexecutive_approved_by',
     blank=True,
-    null=True
-  )
-  academic = models.ForeignKey(AcademicCenter, blank=True, null=True)
+    null=True, on_delete=models.PROTECT )
+  academic = models.ForeignKey(AcademicCenter, blank=True, null=True, on_delete=models.PROTECT )
   status = models.PositiveSmallIntegerField(default=0)
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
@@ -225,14 +224,13 @@ class Accountexecutive(models.Model):
 
 @python_2_unicode_compatible
 class Organiser(models.Model):
-  user = models.OneToOneField(User, related_name = 'organiser')
+  user = models.OneToOneField(User, related_name = 'organiser', on_delete=models.PROTECT )
   appoved_by = models.ForeignKey(
     User,
     related_name = 'organiser_approved_by',
     blank=True,
-    null=True
-  )
-  academic = models.ForeignKey(AcademicCenter, blank=True, null=True)
+    null=True, on_delete=models.PROTECT )
+  academic = models.ForeignKey(AcademicCenter, blank=True, null=True, on_delete=models.PROTECT )
   status = models.PositiveSmallIntegerField(default=0)
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
@@ -243,14 +241,13 @@ class Organiser(models.Model):
 
 @python_2_unicode_compatible
 class Invigilator(models.Model):
-  user = models.OneToOneField(User)
+  user = models.OneToOneField(User, on_delete=models.PROTECT )
   appoved_by = models.ForeignKey(
     User,
     related_name = 'invigilator_approved_by',
     blank=True,
-    null=True
-  )
-  academic = models.ForeignKey(AcademicCenter)
+    null=True,  on_delete=models.PROTECT )
+  academic = models.ForeignKey(AcademicCenter, on_delete=models.PROTECT )
   status = models.PositiveSmallIntegerField(default=0)
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
@@ -295,26 +292,25 @@ class TrainingExtraFields(models.Model):
   no_of_lab_session = models.CharField(max_length = 30, null=True)
 
 class Training(models.Model):
-  organiser = models.ForeignKey(Organiser)
+  organiser = models.ForeignKey(Organiser, on_delete=models.PROTECT )
   appoved_by = models.ForeignKey(
     User,
     related_name = 'training_approved_by',
-    null=True
-  )
-  academic = models.ForeignKey(AcademicCenter)
-  course = models.ForeignKey(Course)
+    null=True,  on_delete=models.PROTECT )
+  academic = models.ForeignKey(AcademicCenter, on_delete=models.PROTECT )
+  course = models.ForeignKey(Course, on_delete=models.PROTECT )
   training_type = models.PositiveIntegerField(default=0)
   training_code = models.CharField(max_length=100, null=True)
   department = models.ManyToManyField(Department)
-  language = models.ForeignKey(Language)
-  foss = models.ForeignKey(FossCategory)
+  language = models.ForeignKey(Language, on_delete=models.PROTECT )
+  foss = models.ForeignKey(FossCategory, on_delete=models.PROTECT )
   tdate = models.DateField()
   ttime = models.TimeField()
   skype = models.PositiveSmallIntegerField(default=0)
   status = models.PositiveSmallIntegerField(default=0)
   # 0:request done, 1: attendance submit, 2: training manger approved,
   # 3: mark attenda done, 4: complete, 5: rejected
-  extra_fields = models.OneToOneField(TrainingExtraFields, null = True)
+  extra_fields = models.OneToOneField(TrainingExtraFields, null = True, on_delete=models.PROTECT )
   participant_count = models.PositiveIntegerField(default=0)
   trusted = models.BooleanField(default=1)
   created = models.DateTimeField(auto_now_add = True)
@@ -325,7 +321,7 @@ class Training(models.Model):
 
 
 class TrainingAttendance(models.Model):
-  training = models.ForeignKey(Training)
+  training = models.ForeignKey(Training, on_delete=models.PROTECT )
   mdluser_id = models.PositiveIntegerField(null=True, blank=True)
   firstname = models.CharField(max_length = 100, null=True)
   lastname = models.CharField(max_length = 100, null=True)
@@ -343,9 +339,9 @@ class TrainingAttendance(models.Model):
 
 
 class TrainingLog(models.Model):
-  user = models.ForeignKey(User)
-  training = models.ForeignKey(Training)
-  academic = models.ForeignKey(AcademicCenter)
+  user = models.ForeignKey(User, on_delete=models.PROTECT )
+  training = models.ForeignKey(Training, on_delete=models.PROTECT )
+  academic = models.ForeignKey(AcademicCenter, on_delete=models.PROTECT )
   role = models.PositiveSmallIntegerField()
   #{0:'organiser', 1:'ResourcePerson', 2: 'Event Manager'}
   status = models.PositiveSmallIntegerField()
@@ -366,25 +362,22 @@ class TestCategory(models.Model):
 
 
 class Test(models.Model):
-  organiser = models.ForeignKey(Organiser, related_name = 'test_organiser')
+  organiser = models.ForeignKey(Organiser, related_name = 'test_organiser', on_delete=models.PROTECT )
   test_category = models.ForeignKey(
     TestCategory,
-    related_name = 'test_category'
-  )
+    related_name = 'test_category', on_delete=models.PROTECT )
   appoved_by = models.ForeignKey(
     User,
     related_name = 'test_approved_by',
-    null=True
-  )
+    null=True,  on_delete=models.PROTECT )
   invigilator = models.ForeignKey(
     Invigilator,
     related_name = 'test_invigilator',
-    null=True
-  )
-  academic = models.ForeignKey(AcademicCenter)
+    null=True,  on_delete=models.PROTECT )
+  academic = models.ForeignKey(AcademicCenter, on_delete=models.PROTECT )
   department = models.ManyToManyField(Department)
-  training = models.ForeignKey('TrainingRequest', null=True)
-  foss = models.ForeignKey(FossCategory)
+  training = models.ForeignKey('TrainingRequest', null=True, on_delete=models.PROTECT )
+  foss = models.ForeignKey(FossCategory, on_delete=models.PROTECT )
   test_code = models.CharField(max_length=100)
   tdate = models.DateField()
   ttime = models.TimeField()
@@ -410,8 +403,8 @@ class Test(models.Model):
 
 
 class TestAttendance(models.Model):
-  test = models.ForeignKey(Test)
-  student = models.ForeignKey('Student', null=True)
+  test = models.ForeignKey(Test, on_delete=models.PROTECT )
+  student = models.ForeignKey('Student', null=True, on_delete=models.PROTECT )
   mdluser_firstname = models.CharField(max_length = 100)
   mdluser_lastname = models.CharField(max_length = 100)
   mdluser_id = models.PositiveIntegerField()
@@ -429,9 +422,9 @@ class TestAttendance(models.Model):
 
 
 class TestLog(models.Model):
-  user = models.ForeignKey(User)
-  test = models.ForeignKey(Test)
-  academic = models.ForeignKey(AcademicCenter)
+  user = models.ForeignKey(User, on_delete=models.PROTECT )
+  test = models.ForeignKey(Test, on_delete=models.PROTECT )
+  academic = models.ForeignKey(AcademicCenter, on_delete=models.PROTECT )
   role = models.PositiveSmallIntegerField(default=0)
   # {0:'organiser', 1:'invigilator', 2:'ResourcePerson', 3: 'Event Manager'}
   status = models.PositiveSmallIntegerField(default=0)
@@ -451,48 +444,43 @@ class PermissionType(models.Model):
 
 
 class Permission(models.Model):
-  permissiontype = models.ForeignKey(PermissionType)
-  user = models.ForeignKey(User, related_name = 'permission_user')
-  state = models.ForeignKey(State, related_name = 'permission_state')
+  permissiontype = models.ForeignKey(PermissionType, on_delete=models.PROTECT )
+  user = models.ForeignKey(User, related_name = 'permission_user', on_delete=models.PROTECT )
+  state = models.ForeignKey(State, related_name = 'permission_state', on_delete=models.PROTECT )
   district = models.ForeignKey(
     District,
     related_name = 'permission_district',
-    null=True
-  )
+    null=True,  on_delete=models.PROTECT )
   university = models.ForeignKey(
     University,
     related_name = 'permission_iniversity',
-    null=True
-  )
+    null=True,  on_delete=models.PROTECT )
   institute_type = models.ForeignKey(
     InstituteType,
     related_name = 'permission_institution_type',
-    null=True
-  )
+    null=True,  on_delete=models.PROTECT )
   institute = models.ForeignKey(
     AcademicCenter,
     related_name = 'permission_district',
-    null=True
-  )
+    null=True,  on_delete=models.PROTECT )
   assigned_by = models.ForeignKey(
     User,
-    related_name = 'permission_assigned_by'
-  )
+    related_name = 'permission_assigned_by', on_delete=models.PROTECT )
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
 
 
 class FossMdlCourses(models.Model):
-  foss = models.ForeignKey(FossCategory)
+  foss = models.ForeignKey(FossCategory, on_delete=models.PROTECT )
   mdlcourse_id = models.PositiveIntegerField()
   mdlquiz_id = models.PositiveIntegerField()
 
 
 class EventsNotification(models.Model):
-  user = models.ForeignKey(User)
+  user = models.ForeignKey(User, on_delete=models.PROTECT )
   role = models.PositiveSmallIntegerField(default=0)
   # {0:'organiser', 1:'invigilator', 2:'ResourcePerson', 3: 'Event Manager'}
-  academic = models.ForeignKey(AcademicCenter)
+  academic = models.ForeignKey(AcademicCenter, on_delete=models.PROTECT )
   category = models.PositiveSmallIntegerField(default=0)
   # {'workshop', 'training', 'test'}
   categoryid = models.PositiveIntegerField(default=0)
@@ -504,8 +492,8 @@ class EventsNotification(models.Model):
 
 
 class Testimonials(models.Model):
-  user = models.ForeignKey(User, related_name = 'testimonial_created_by')
-  approved_by = models.ForeignKey(User, related_name = 'testimonial_approved_by', null=True)
+  user = models.ForeignKey(User, related_name = 'testimonial_created_by', on_delete=models.PROTECT )
+  approved_by = models.ForeignKey(User, related_name = 'testimonial_approved_by', null=True, on_delete=models.PROTECT )
   user_name = models.CharField(max_length=200)
   actual_content = models.TextField()
   minified_content = models.TextField()
@@ -523,7 +511,7 @@ class MediaTestimonials(models.Model):
     * path contains the location of the file,
     * user is the person who has send the testimonial.
     '''
-    foss = models.ForeignKey(FossCategory)
+    foss = models.ForeignKey(FossCategory, on_delete=models.PROTECT )
     path = models.CharField(max_length=255)
     user = models.CharField(max_length=255)
     content = models.CharField(max_length=255)
@@ -537,7 +525,7 @@ class MediaTestimonials(models.Model):
         return self.path
 
 class OrganiserNotification(models.Model):
-  user = models.ForeignKey(User)
+  user = models.ForeignKey(User, on_delete=models.PROTECT )
 
 
 ################ EVENTS VERSION II MODELS ###################
@@ -546,7 +534,7 @@ class OrganiserNotification(models.Model):
 # Create your models here.
 @python_2_unicode_compatible
 class Student(models.Model):
-  user = models.OneToOneField(User)
+  user = models.OneToOneField(User, on_delete=models.PROTECT )
   gender = models.CharField(max_length = 15)
   verified = models.PositiveSmallIntegerField(default = 0)
   error = models.BooleanField(default=False)
@@ -569,9 +557,9 @@ class Student(models.Model):
 
 @python_2_unicode_compatible
 class StudentBatch(models.Model):
-  academic = models.ForeignKey(AcademicCenter)
-  organiser = models.ForeignKey(Organiser)
-  department = models.ForeignKey(Department)
+  academic = models.ForeignKey(AcademicCenter, on_delete=models.PROTECT )
+  organiser = models.ForeignKey(Organiser, on_delete=models.PROTECT )
+  department = models.ForeignKey(Department, on_delete=models.PROTECT )
   year = models.PositiveIntegerField() # 2010-2014
   stcount = models.PositiveIntegerField(default=0)
 
@@ -615,8 +603,8 @@ class StudentBatch(models.Model):
 
 
 class StudentMaster(models.Model):
-  batch = models.ForeignKey(StudentBatch)
-  student = models.ForeignKey(Student)
+  batch = models.ForeignKey(StudentBatch, on_delete=models.PROTECT )
+  student = models.ForeignKey(Student, on_delete=models.PROTECT )
   moved = models.BooleanField(default=False)
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
@@ -659,8 +647,8 @@ class LabCourse(models.Model):
 @python_2_unicode_compatible
 class CourseMap(models.Model):
   #name = models.CharField(max_length=200, null=True, blank=True)
-  course = models.ForeignKey(LabCourse, null=True, blank=True)
-  foss = models.ForeignKey(FossCategory)
+  course = models.ForeignKey(LabCourse, null=True, blank=True, on_delete=models.PROTECT )
+  foss = models.ForeignKey(FossCategory, on_delete=models.PROTECT )
   test = models.BooleanField(default=False)
   # {0 => one day workshop, 1 => mapped course, 2 => unmapped course}
   category = models.PositiveIntegerField(default=0)
@@ -694,9 +682,9 @@ class CourseMap(models.Model):
 @python_2_unicode_compatible
 class TrainingPlanner(models.Model):
   year = models.CharField(max_length = 50)
-  academic = models.ForeignKey(AcademicCenter)
-  organiser = models.ForeignKey(Organiser)
-  semester = models.ForeignKey(Semester)
+  academic = models.ForeignKey(AcademicCenter, on_delete=models.PROTECT )
+  organiser = models.ForeignKey(Organiser, on_delete=models.PROTECT )
+  semester = models.ForeignKey(Semester, on_delete=models.PROTECT )
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
 
@@ -832,11 +820,11 @@ class TestTrainingManager(models.Manager):
 
 
 class TrainingRequest(models.Model):
-  training_planner = models.ForeignKey(TrainingPlanner)
-  department = models.ForeignKey(Department)
+  training_planner = models.ForeignKey(TrainingPlanner, on_delete=models.PROTECT )
+  department = models.ForeignKey(Department, on_delete=models.PROTECT )
   sem_start_date = models.DateField()
-  course = models.ForeignKey(CourseMap)
-  batch = models.ForeignKey(StudentBatch, null = True)
+  course = models.ForeignKey(CourseMap, on_delete=models.PROTECT )
+  batch = models.ForeignKey(StudentBatch, null = True, on_delete=models.PROTECT )
   participants = models.PositiveIntegerField(default=0)
   course_type = models.PositiveIntegerField(default=None)
   #status = models.BooleanField(default=False)
@@ -943,9 +931,9 @@ class TrainingRequest(models.Model):
 
 
 class TrainingAttend(models.Model):
-  training = models.ForeignKey(TrainingRequest)
-  student = models.ForeignKey(Student)
-  language = models.ForeignKey(Language, default=None)
+  training = models.ForeignKey(TrainingRequest, on_delete=models.PROTECT )
+  student = models.ForeignKey(Student, on_delete=models.PROTECT )
+  language = models.ForeignKey(Language, default=None, on_delete=models.PROTECT )
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
   #created = models.DateTimeField()
@@ -957,8 +945,8 @@ class TrainingAttend(models.Model):
 
 @python_2_unicode_compatible
 class TrainingCertificate(models.Model):
-  student = models.ForeignKey(Student)
-  training = models.ForeignKey(TrainingRequest)
+  student = models.ForeignKey(Student, on_delete=models.PROTECT )
+  training = models.ForeignKey(TrainingRequest, on_delete=models.PROTECT )
   password = models.CharField(max_length = 255, null = True)
   count = models.PositiveSmallIntegerField(default=0)
   #updated = models.DateTimeField(auto_now = True)
@@ -969,7 +957,7 @@ class TrainingCertificate(models.Model):
 
 
 class TrainingFeedback(models.Model):
-  training = models.ForeignKey(TrainingRequest)
+  training = models.ForeignKey(TrainingRequest, on_delete=models.PROTECT )
   mdluser_id = models.PositiveIntegerField()
   rate_workshop = models.PositiveSmallIntegerField()
 
@@ -1017,13 +1005,13 @@ class TrainingFeedback(models.Model):
 
 
 class TrainingLanguageFeedback(models.Model):
-  training = models.ForeignKey(TrainingRequest)
+  training = models.ForeignKey(TrainingRequest, on_delete=models.PROTECT )
   mdluser_id = models.PositiveIntegerField()
   name = models.CharField(max_length=100, null=True, default=None)
   age = models.PositiveIntegerField()
   medium_of_instruction = models.PositiveIntegerField()
   gender = models.BooleanField()
-  language_prefered = models.ForeignKey(Language, null=True)
+  language_prefered = models.ForeignKey(Language, null=True, on_delete=models.PROTECT )
   tutorial_was_useful = models.PositiveIntegerField()
   learning_experience = models.PositiveIntegerField()
   satisfied_with_learning_experience = models.PositiveIntegerField()
@@ -1077,14 +1065,14 @@ class TrainingLanguageFeedback(models.Model):
 
 # School, Live Workshop, Pilot Workshop
 class SingleTraining(models.Model):
-  organiser = models.ForeignKey(Organiser)
-  state = models.ForeignKey(State, null=True)
-  institution_type = models.ForeignKey(InstituteType, null=True)
-  academic = models.ForeignKey(AcademicCenter)
-  course = models.ForeignKey(CourseMap) # type 0
+  organiser = models.ForeignKey(Organiser, on_delete=models.PROTECT )
+  state = models.ForeignKey(State, null=True, on_delete=models.PROTECT )
+  institution_type = models.ForeignKey(InstituteType, null=True, on_delete=models.PROTECT )
+  academic = models.ForeignKey(AcademicCenter, on_delete=models.PROTECT )
+  course = models.ForeignKey(CourseMap, on_delete=models.PROTECT ) # type 0
   # {0:School, 3:Vocational, 1:Live Workshop, 2:Pilot Workshop}
   training_type = models.PositiveIntegerField(default=0)
-  language = models.ForeignKey(Language)
+  language = models.ForeignKey(Language, on_delete=models.PROTECT )
   tdate = models.DateField()
   ttime = models.TimeField(null=True, blank=True)
   #{0:request done, 1: attendance submited, 2: completed}
@@ -1109,7 +1097,7 @@ class SingleTraining(models.Model):
 
 
 class SingleTrainingAttendance(models.Model):
-  training = models.ForeignKey(SingleTraining)
+  training = models.ForeignKey(SingleTraining, on_delete=models.PROTECT )
   foss = models.PositiveIntegerField(default=0)
   firstname = models.CharField(max_length = 100, null=True)
   lastname = models.CharField(max_length = 100, null=True)
@@ -1129,7 +1117,7 @@ class SingleTrainingAttendance(models.Model):
 
 
 class TrainingLiveFeedback(models.Model):
-  training = models.ForeignKey(SingleTraining)
+  training = models.ForeignKey(SingleTraining, on_delete=models.PROTECT )
 
   rate_workshop = models.PositiveSmallIntegerField()
 
@@ -1254,10 +1242,10 @@ class OrganiserFeedback(models.Model):
   email = models.EmailField(max_length = 100)
   gender = models.CharField(max_length = 10, choices = GENDER_CHOICES)
   age = models.CharField(max_length = 20, choices = AGE_CHOICES)
-  state = models.ForeignKey(State)
-  district =  models.ForeignKey(District)
-  city = models.ForeignKey(City)
-  university = models.ForeignKey(AcademicCenter)
+  state = models.ForeignKey(State, on_delete=models.PROTECT )
+  district =  models.ForeignKey(District, on_delete=models.PROTECT )
+  city = models.ForeignKey(City, on_delete=models.PROTECT )
+  university = models.ForeignKey(AcademicCenter, on_delete=models.PROTECT )
   designation = models.CharField(max_length = 20, choices = DESIGNATION_CHOICES)
   medium_of_instruction = models.CharField(max_length =50, choices = MEDIUM_OF_INSTRUCTION_CHOICES)
   student_stream = models.ManyToManyField(StudentStream , related_name = 'events_StudentStream_related')
@@ -1320,7 +1308,7 @@ class STWorkshopFeedback(models.Model):
   affiliation = models.CharField(max_length = 100)
   designation = models.CharField(max_length = 100, default=None)
   educational_back = models.CharField(max_length = 100, default=None)
-  foss = models.ForeignKey(FossCategory)
+  foss = models.ForeignKey(FossCategory, on_delete=models.PROTECT )
   venue = models.CharField(max_length = 100)
   workshop_date = models.DateField()
   total_tutorials1 = models.CharField(max_length = 20)
@@ -1389,7 +1377,7 @@ class STWorkshopFeedbackPre(models.Model):
   GENDER_CHOICES =(
     ('', '-----'), ('Male', 'Male'), ('Female', 'Female'),
   )
-  user = models.ForeignKey(User)
+  user = models.ForeignKey(User, on_delete=models.PROTECT )
   email = models.EmailField(max_length = 100)
   gender = models.CharField(max_length = 10, choices = GENDER_CHOICES)
   age = models.CharField(max_length = 20)
@@ -1445,7 +1433,7 @@ class STWorkshopFeedbackPost(models.Model):
   NUM_OF_EXPERTS =(
     ('','-----'), ('1to10', '1 to 10'), ('11to20', '11 to 20'),('21to30', '21 to 30'),('31to40', '31 to 40'),('above40', 'Above 40'),
   )
-  user = models.ForeignKey(User)
+  user = models.ForeignKey(User, on_delete=models.PROTECT )
   email = models.EmailField(max_length = 100)
   gender = models.CharField(max_length = 10, choices = GENDER_CHOICES)
   age = models.CharField(max_length = 20)
@@ -1670,7 +1658,7 @@ class InductionInterest(models.Model):
 
   college = models.CharField(max_length = 100)
   college_address = models.CharField(max_length = 500)
-  state = models.ForeignKey(State)
+  state = models.ForeignKey(State, on_delete=models.PROTECT )
   city = models.CharField(max_length = 100)
   pincode = models.PositiveIntegerField()
   experience_in_college = models.CharField(max_length = 100, choices = years_of_experience)
@@ -1687,7 +1675,7 @@ class InductionInterest(models.Model):
 
 class InductionFinalList(models.Model):
   email = models.EmailField(max_length = 200)
-  eoi_id = models.ForeignKey(InductionInterest, default=None)
+  eoi_id = models.ForeignKey(InductionInterest, default=None, on_delete=models.PROTECT )
   code = models.CharField(max_length=255, default=None)
   # batch_code should be in form of year+month+batch_number e.g. 20171101 = [year 2017,month 11, batch 01]
   batch_code = models.PositiveIntegerField()
@@ -1697,12 +1685,12 @@ class Drupal2018_email(models.Model):
   email = models.EmailField(max_length = 200)
 
 class MumbaiStudents(models.Model):
-  stuid = models.ForeignKey('Student')
-  bid = models.ForeignKey('StudentBatch')
+  stuid = models.ForeignKey('Student', on_delete=models.PROTECT )
+  bid = models.ForeignKey('StudentBatch', on_delete=models.PROTECT )
 
 class PaymentDetails(models.Model):
-    user = models.ForeignKey(User)
-    academic_id = models.ForeignKey(AcademicCenter)
+    user = models.ForeignKey(User, on_delete=models.PROTECT )
+    academic_id = models.ForeignKey(AcademicCenter, on_delete=models.PROTECT )
     academic_year = models.PositiveIntegerField()
     amount = models.CharField(max_length=20)
     purpose = models.CharField(max_length=20, null=True)
@@ -1716,9 +1704,9 @@ class PaymentDetails(models.Model):
       unique_together = ('academic_id','academic_year',)
 
 class PaymentTransactionDetails(models.Model):
-    paymentdetail = models.ForeignKey(PaymentDetails)
+    paymentdetail = models.ForeignKey(PaymentDetails, on_delete=models.PROTECT )
     requestType = models.CharField(max_length=2)
-    userId = models.ForeignKey(User)
+    userId = models.ForeignKey(User, on_delete=models.PROTECT )
     amount = models.CharField(max_length=20)
     reqId = models.CharField(max_length=50)
     transId = models.CharField(max_length=100)

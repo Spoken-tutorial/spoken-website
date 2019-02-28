@@ -1,4 +1,4 @@
-from __future__ import print_function
+
 from builtins import str
 from builtins import object
 import httplib2
@@ -123,9 +123,9 @@ if __name__ == "__main__":
         status_flag = False
         file_missing = False
         print('')
-        print('FOSS Id:', row[5])
-        print('Tutorial:', row[6])
-        print('Language:', language[1])
+        print(('FOSS Id:', row[5]))
+        print(('Tutorial:', row[6]))
+        print(('Language:', language[1]))
         if os.path.isfile(english_srt):
             file_missing = False
             ldb_cursor.execute("select * from srt_pending_uploads where trid=" \
@@ -144,11 +144,11 @@ if __name__ == "__main__":
                     overall_status = 1
                 print(message)
             else:
-                print(row[4], '- English - Already Exist')
+                print((row[4], '- English - Already Exist'))
                 overall_status = 1
         else:
             file_missing = True
-            print(row[4], '- English -', 'SRT File Missing')
+            print((row[4], '- English -', 'SRT File Missing'))
         if language[1] != 'English':
             native_srt = video_path + video_title + '-' + language[1] + '.srt'
             if os.path.isfile(native_srt):
@@ -172,11 +172,11 @@ if __name__ == "__main__":
                         ldb.commit()
                     print(message)
                 else:
-                    print(row[4], '-', language[1], '- Already Exist')
+                    print((row[4], '-', language[1], '- Already Exist'))
                     status_flag = True
             else:
                 file_missing = True
-                print(row[4], '-', language[1], '-', 'SRT File Missing')
+                print((row[4], '-', language[1], '-', 'SRT File Missing'))
                 status_flag = False
         if status_flag and overall_status:
             ldb_cursor.execute("insert into srt_uploads (trid) values(%s)", \

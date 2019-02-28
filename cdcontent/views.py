@@ -1,4 +1,4 @@
-from __future__ import print_function
+
 # Standard Library
 from builtins import str
 import json
@@ -8,11 +8,12 @@ from datetime import datetime
 
 # Third Party Stuff
 from django.conf import settings
-from django.core.context_processors import csrf
+ 
 from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
+from django.template.context_processors import csrf
 
 # Spoken Tutorial Stuff
 from cdcontent.forms import *
@@ -66,7 +67,7 @@ def add_sheets(archive, foss, lang):
 def get_all_foss_details(selectedfoss):
     all_foss_details = {}
 
-    for key, values in selectedfoss.items():
+    for key, values in list(selectedfoss.items()):
         foss_rec = FossCategory.objects.get(pk=key)
 
         if not all_foss_details.get(foss_rec.id, None):
@@ -232,7 +233,7 @@ def home(request):
                 eng_rec = Language.objects.get(name="English")
                 languages = set()
 
-                for key, values in selectedfoss.items():
+                for key, values in list(selectedfoss.items()):
                     foss_rec = FossCategory.objects.get(pk=key)
                     level = int(values[1])
                     eng_flag = True
@@ -382,7 +383,7 @@ def ajax_show_added_foss(request):
     languages = set()
     eng_rec = Language.objects.get(name="English")
 
-    for key, values in tmp.items():
+    for key, values in list(tmp.items()):
         langs_list = list(values[0])
         foss, level = FossCategory.objects.get(pk=key), int(values[1])
         langs = ', '.join(list(

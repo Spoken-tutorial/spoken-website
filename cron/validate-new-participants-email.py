@@ -1,4 +1,4 @@
-from __future__ import print_function
+
 from builtins import str
 from validate_email import validate_email
 from DNS.Base import TimeoutError
@@ -48,11 +48,11 @@ for student in students:
       time.sleep(3)
       continue
     student.save()
-  print(str(student.user), '-', status)
+  print((str(student.user), '-', status))
 
 error_log_file_head.close()
 success_log_file_head.close()
 
 print('******************************************')
-print(' Total records processed:', students.count())
+print((' Total records processed:', students.count()))
 print('******************************************')

@@ -1,5 +1,3 @@
-from __future__ import print_function
-from __future__ import absolute_import
 # Standard Library
 from builtins import object
 import hashlib
@@ -41,7 +39,7 @@ class MdlBackend(object):
                 #try:
                 #   user = User.objects.get(username=username)
                 #   return user
-                #except Exception, e:
+                #except Exception as e:
                 #   new_user=User(id=uid, username=username, password=pwd, first_name=firstname, last_name=lastname, email=email)
                 #   #new_user.save()
                 #   print "No user here"

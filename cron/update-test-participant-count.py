@@ -1,4 +1,4 @@
-from __future__ import print_function
+
 from datetime import datetime, date, timedelta
 from django.db.models import Q
 import os, sys
@@ -22,5 +22,5 @@ for test in test_requests:
   attendance_count = int(test.get_test_attendance_count())
   if attendance_count > 0:
     if not participant_count == attendance_count:
-      print(test.id, participant_count, attendance_count)
+      print((test.id, participant_count, attendance_count))
       test.update_test_participant_count()

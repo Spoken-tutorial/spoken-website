@@ -1,4 +1,4 @@
-from __future__ import print_function
+
 from builtins import str
 import time
 import os, sys
@@ -88,6 +88,6 @@ NMEICT, MHRD, Govt. Of India<br>
     #break
 print("--------------------------------")
 print(tot_count)
-print("Total sent mails:", sent)
-print("Total not sent mails:", notsent)
+print(("Total sent mails:", sent))
+print(("Total not sent mails:", notsent))
 print("--------------------------------")

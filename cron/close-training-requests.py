@@ -1,4 +1,4 @@
-from __future__ import print_function
+
 from builtins import str
 from datetime import datetime, date, timedelta
 from django.db.models import Q
@@ -46,5 +46,5 @@ count = training_requests.count()
 #training_requests.update(status=1)
 
 print('*************************************')
-print(' Total records checked: ', count)
+print((' Total records checked: ', count))
 print('*************************************')

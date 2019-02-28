@@ -1,4 +1,4 @@
-from __future__ import print_function
+
 # Youtube-upload is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -12,8 +12,6 @@ from __future__ import print_function
 # You should have received a copy of the GNU General Public License
 # along with Youtube-upload. If not, see <http://www.gnu.org/licenses/>.
 
-from future import standard_library
-standard_library.install_aliases()
 from builtins import next
 from builtins import filter
 from builtins import str

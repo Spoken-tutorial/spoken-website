@@ -18,7 +18,7 @@ def get_foss_name(foss, key):
 
 def get_lang_details(foss, key):
     data = ''
-    for lang_key, lang_detail in foss[key]['langs'].items():
+    for lang_key, lang_detail in list(foss[key]['langs'].items()):
         data += '<option value="' + str(lang_key) + '">' + lang_detail + '</option>'
     return data
 

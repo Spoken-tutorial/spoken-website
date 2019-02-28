@@ -1,4 +1,4 @@
-from __future__ import print_function
+
 from builtins import str
 from django import template
 from django.contrib.auth.models import User

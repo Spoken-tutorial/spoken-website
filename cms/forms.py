@@ -1,4 +1,4 @@
-from __future__ import print_function
+
 # Third Party Stuff
 from builtins import str
 from builtins import object
@@ -60,21 +60,21 @@ class RegisterForm(forms.Form):
             user = User.objects.get(username = username)
         except User.DoesNotExist:
             return username
-        raise forms.ValidationError(u'%s already exists' % username )
+        raise forms.ValidationError('%s already exists' % username )
 
 
     def clean_email(self):
         email = self.cleaned_data['email']
         try:
             if not validate_email(email):
-                raise forms.ValidationError(u'%s is not valid email.' % email )
+                raise forms.ValidationError('%s is not valid email.' % email )
         except:
-            raise forms.ValidationError(u'%s is not valid email.' % email )
+            raise forms.ValidationError('%s is not valid email.' % email )
         try:
             user = User.objects.get(email = email)
         except User.DoesNotExist:
             return email
-        raise forms.ValidationError(u'%s already exists' % email )
+        raise forms.ValidationError('%s already exists' % email )
 
     def clean(self):
         password = self.cleaned_data.get('password')
@@ -100,18 +100,18 @@ class ProfileForm(forms.ModelForm):
 
     first_name = forms.CharField()
     last_name = forms.CharField()
-    state = forms.ModelChoiceField(label = 'State', cache_choices = True, \
+    state = forms.ModelChoiceField(label = 'State',   \
         widget = forms.Select(attrs = {'class' : 'ac-state'}), queryset = \
         State.objects.order_by('name'), empty_label = "--- None ---", \
         help_text = "", error_messages = {'required':'State field required.'})
 
-    district = forms.ModelChoiceField(label='Dist', cache_choices=True, \
+    district = forms.ModelChoiceField(label='Dist',   \
         widget = forms.Select(attrs = {'class' : 'ac-district'}), \
         queryset = District.objects.none(), empty_label = "--- None ---", \
         help_text = "", error_messages = \
         {'required':'District Type field required.'})
 
-    city = forms.ModelChoiceField(label = 'City', cache_choices = True, \
+    city = forms.ModelChoiceField(label = 'City',   \
     widget = forms.Select(attrs = {'class' : 'ac-city'}), \
     queryset = City.objects.none(), empty_label = "--- None ---", \
     help_text = "", error_messages = {'required':'City Type field required.'})
@@ -174,7 +174,7 @@ class PasswordResetForm(forms.Form):
             user = User.objects.filter(email=email).first()
             if user:
               if user.is_active:
-                print(user.is_active)
+                print((user.is_active))
                 error = 0
               else:
                 error = 1

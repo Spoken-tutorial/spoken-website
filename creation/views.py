@@ -1,8 +1,3 @@
-from __future__ import print_function
-# Standard Library
-from future import standard_library
-standard_library.install_aliases()
-from builtins import str
 import json
 import os
 import re
@@ -22,12 +17,13 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group
-from django.core.context_processors import csrf
+ 
 from django.core.exceptions import PermissionDenied
 from django.core.mail import EmailMultiAlternatives
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.http import HttpResponse, HttpResponseRedirect
 from django.views.decorators.csrf import csrf_exempt
+from django.template.context_processors import csrf
 from django.shortcuts import render
 
 # Spoken Tutorial Stuff
@@ -163,10 +159,10 @@ def create_thumbnail(row, attach_str, thumb_time, thumb_size):
         process = subprocess.Popen(['/usr/bin/ffmpeg', '-i', filepath + row.video, '-r', str(30), '-ss', str(thumb_time), '-s', thumb_size, '-vframes', str(1), '-f', 'image2', filepath + filename], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         stdout, stderr = process.communicate()
         if stderr:
-            print(filepath + filename)
+            print((filepath + filename))
             print(stderr)
     except Exception as e:
-        print(1, e)
+        print((1, e))
         pass
 
 def add_qualityreviewer_notification(tr_rec, comp_title, message):
@@ -1128,7 +1124,7 @@ def tutorials_contributed(request):
             counter = 1
             for tmp_rec in tmp_recs:
                 if tmp_rec.id == 3311:
-                    print(counter, tmp_rec.tutorial_detail.tutorial)
+                    print((counter, tmp_rec.tutorial_detail.tutorial))
                 counter += 1
             page = request.GET.get('page')
             tmp_recs = get_page(tmp_recs, page)
@@ -1174,7 +1170,7 @@ def tutorials_pending(request):
             counter = 1
             for tmp_rec in tmp_recs:
                 if tmp_rec.id == 3311:
-                    print(counter, tmp_rec.tutorial_detail.tutorial)
+                    print((counter, tmp_rec.tutorial_detail.tutorial))
                 counter += 1
             page = request.GET.get('page')
             tmp_recs = get_page(tmp_recs, page, 50)

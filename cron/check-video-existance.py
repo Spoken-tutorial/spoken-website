@@ -1,4 +1,4 @@
-from __future__ import print_function
+
 from builtins import str
 import MySQLdb
 import time
@@ -37,9 +37,9 @@ for row in rows:
         entry = youtube.get_feed_from_video_id(video_id)
         url, new_video_id = get_entry_info(entry)
         success_log_file_head.write(row[9] + ' - ' + row[13] + ',' + video_id + '\n')
-        print(video_id, 'Success!!!')
+        print((video_id, 'Success!!!'))
     except Exception as e:
-        print(video_id, e)
+        print((video_id, e))
         error_log_file_head.write(str(row[0]) + ',' + video_id + '\n')
 error_log_file_head.close()
 success_log_file_head.close()

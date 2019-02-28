@@ -1,8 +1,3 @@
-from __future__ import print_function
-# Standard Library
-from future import standard_library
-standard_library.install_aliases()
-from builtins import str
 import datetime as dt
 import json
 import os
@@ -13,12 +8,14 @@ from urllib.request import urlopen
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.models import User
-from django.core.context_processors import csrf
+#change here .. no csrf 
+
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_exempt, csrf_protect
+from django.template.context_processors import csrf
 from django.core.urlresolvers import reverse
 
 # Spoken Tutorial Stuff
@@ -87,7 +84,7 @@ def home(request):
 
     events = Event.objects.filter(event_date__gte=dt.datetime.today()).order_by('event_date')[:2]
     context['events'] = events
-    return render(request, 'spoken/templates/home.html', context)
+    return render(request, 'spoken/templates/home.html',context= context)
 
 
 def get_or_query(terms, search_fields):
@@ -353,7 +350,7 @@ def testimonials(request, type="text"):
     '''
     collection = None
     if type == "text":
-        collection = Testimonials.objects.all().values().order_by('-created')
+        collection = list(Testimonials.objects.all().values().order_by('-created'))
     else:
         collection = MediaTestimonials.objects.all().values("foss__foss", "content", "created", "foss", "foss_id", "id", "path", "user").order_by('-created')
 
@@ -601,7 +598,7 @@ def admin_testimonials(request):
 
 
 def news(request, cslug):
-    try:
+#    try:
         newstype = NewsType.objects.get(slug=cslug)
         collection = None
         latest = None
@@ -613,10 +610,13 @@ def news(request, cslug):
             collection = newstype.news_set.order_by('-created')
             latest = True
         collection = NewsStateFilter(request.GET, queryset=collection, news_type_slug=cslug)
+        #print ("\n collection :",collection.qs.count())
         form = collection.form
         if collection:
             page = request.GET.get('page')
-            collection = get_page(collection, page)
+
+            print ("\n collection :",collection.qs.count())
+            collection = get_page(collection.qs, page)
         context = {
             'form': form,
             'collection': collection,
@@ -628,10 +628,9 @@ def news(request, cslug):
         context.update(csrf(request))
         return render(request, 'spoken/templates/news/index.html', context)
 
-    except Exception as e:
-        print(e)
-        raise Http404('You are not allowed to view this page')
-
+    # except Exception as e:
+    #     print(e)
+    #     raise Http404('You are not allowed to view this page')
 
 def news_view(request, cslug, slug):
     try:
@@ -693,9 +692,9 @@ def create_subtitle_files(request, overwrite=True):
             code = e.code
         if(int(code) == 200):
             if generate_subtitle(script_path, srt_file_path + srt_file_name):
-                print('Success: ', row.tutorial_detail.foss.foss + ',', srt_file_name)
+                print(('Success: ', row.tutorial_detail.foss.foss + ',', srt_file_name))
             else:
-                print('Failed: ', row.tutorial_detail.foss.foss + ',', srt_file_name)
+                print(('Failed: ', row.tutorial_detail.foss.foss + ',', srt_file_name))
     return HttpResponse('Success!')
 
 

@@ -1,10 +1,3 @@
-from __future__ import print_function
-from __future__ import absolute_import
-from future import standard_library
-standard_library.install_aliases()
-from builtins import str
-from builtins import range
-from django.core.context_processors import csrf
 from django.core.exceptions import PermissionDenied
 
 from django.contrib.auth.decorators import login_required
@@ -39,7 +32,6 @@ import os,time, csv, random, string
 from validate_email import validate_email
 
 import os.path
-import urllib.request, urllib.parse, urllib.error
 
 try:
     import urllib.request, urllib.error, urllib.parse
@@ -65,6 +57,7 @@ from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import cm
 from reportlab.lib.enums import TA_CENTER
 from PyPDF2 import PdfFileWriter, PdfFileReader
+from django.template.context_processors import csrf
 try:
     from io import StringIO
 except ImportError:
@@ -140,7 +133,7 @@ def init_events_app(request):
             TestCategory.objects.get_or_create(name= 'Training')
             TestCategory.objects.get_or_create(name= 'Others')
         except Exception as e:
-            print(e, "test_category")
+            print((e, "test_category"))
 
         try:
             InstituteType.objects.get_or_create(name= 'Workshop')
@@ -150,7 +143,7 @@ def init_events_app(request):
             InstituteType.objects.get_or_create(name= 'School')
             InstituteType.objects.get_or_create(name= 'Uncategorised')
         except Exception as e:
-            print(e, "institute_type")
+            print((e, "institute_type"))
 
         #institutecategory
         try:
@@ -159,7 +152,7 @@ def init_events_app(request):
             InstituteCategory.objects.get_or_create(name= 'NGO')
             InstituteCategory.objects.get_or_create(name= 'Uncategorised')
         except Exception as e:
-            print(e, "InstituteCategory")
+            print((e, "InstituteCategory"))
 
         #permissiontype
         try:
@@ -169,31 +162,31 @@ def init_events_app(request):
             PermissionType.objects.get_or_create(name= 'Institution Type')
             PermissionType.objects.get_or_create(name= 'Institution')
         except Exception as e:
-             print(e, "PermissionType")
+             print((e, "PermissionType"))
 
         #state
         state = None
         try:
             state = State.objects.get_or_create(name= 'Uncategorised')
         except Exception as e:
-             print(e, "State")
+             print((e, "State"))
         #District
         try:
             District.objects.get_or_create(name= 'Uncategorised', state_id = state[0].id)
         except Exception as e:
-             print(e, "District")
+             print((e, "District"))
 
         #City
         try:
             City.objects.get_or_create(name= 'Uncategorised', state_id = state[0].id)
         except Exception as e:
-             print(e, "City")
+             print((e, "City"))
 
         #University
         try:
             University.objects.get_or_create(name= 'Uncategorised', state_id = state[0].id, user_id = 1)
         except Exception as e:
-             print(e, "University")
+             print((e, "University"))
 
         messages.success(request, 'Events application initialised successfully!')
     except Exception as e:
@@ -256,6 +249,8 @@ def is_invigilator(user):
 
 def get_page(resource, page, limit=20):
     paginator = Paginator(resource, limit)
+    if page is None:
+        page = 1
     try:
         resource = paginator.page(page)
     except PageNotAnInteger:
@@ -282,7 +277,7 @@ def add_participant(request, cid, category ):
         if category == 'Training':
             try:
                 wa = TrainingAttendance.objects.get(mdluser_id = userid, training_id = cid)
-                print(wa.id, " => Exits")
+                print((wa.id, " => Exits"))
                 messages.success(request, "User has already in the attendance list")
             except:
                 mdluser = MdlUser.objects.get(pk=userid)
@@ -296,11 +291,11 @@ def add_participant(request, cid, category ):
                 wa.status = 0
                 wa.save()
                 messages.success(request, "User has added in the attendance list")
-                print(wa.id, " => Inserted")
+                print((wa.id, " => Inserted"))
         elif category == 'Training':
             try:
                 wa = TrainingAttendance.objects.get(mdluser_id = userid, training_id = cid)
-                print(wa.id, " => Exits")
+                print((wa.id, " => Exits"))
                 messages.success(request, "User has already in the attendance list")
             except:
                 wa = TrainingAttendance()
@@ -309,12 +304,12 @@ def add_participant(request, cid, category ):
                 wa.status = 0
                 wa.save()
                 messages.success(request, "User has added in the attendance list")
-                print(wa.id, " => Inserted")
+                print((wa.id, " => Inserted"))
 
         elif category == 'Test':
             try:
                 wa = TestAttendance.objects.get(mdluser_id = userid, test_id = cid)
-                print(wa.id, " => Exits")
+                print((wa.id, " => Exits"))
                 messages.success(request, "User has already in the attendance list")
             except:
                 wa = TestAttendance()
@@ -323,7 +318,7 @@ def add_participant(request, cid, category ):
                 wa.status = 0
                 wa.save()
                 messages.success(request, "User has added in the attendance list")
-                print(wa.id, " => Inserted")
+                print((wa.id, " => Inserted"))
 
 def fix_date_for_first_training(request):
     organisers = Organiser.objects.exclude(id__in = Training.objects.values_list('organiser_id').distinct(), status=1).filter(Q(created__startswith=datetime.date.today() - datetime.timedelta(days=15)) | Q(created__startswith=datetime.date.today() - datetime.timedelta(days=30)))
@@ -550,7 +545,9 @@ def events_dashboard(request):
     for role in user_roles:
         if role.name in events_roles:
             roles.append(role.name)
-    #print roles
+
+    # print roles
+
     organiser_workshop_notification = None
     organiser_test_notification = None
     invigilator_test_notification = None
@@ -559,32 +556,55 @@ def events_dashboard(request):
     rp_test_notification = None
     rp_training_notification = None
     institute_name = None
+
     if is_organiser(user):
         institution_type = AcademicCenter.objects.get(id=user.organiser.academic_id)
         institute_name = InstituteType.objects.get(id=institution_type.institution_type_id)
         organiser_test_notification = EventsNotification.objects.filter((Q(status = 1) | Q(status = 2)), category = 1, academic_id = user.organiser.academic_id, categoryid__in = user.organiser.academic.test_set.filter(organiser_id = user.id).values_list('id')).order_by('-created')[:30]
 
-        #organiser_training_notification = EventsNotification.objects.filter((Q(status = 1) | Q(status = 3)), category = 2, status = 1, academic_id = user.organiser.academic_id, categoryid__in = user.organiser.academic.workshop_set.filter(organiser_id = user.id).values_list('id')).order_by('-created')[:30]
+        organiser_test_notification = \
+            EventsNotification.objects.filter(Q(status=1)
+                | Q(status=2), category=1,
+                academic_id=user.organiser.academic_id,
+                categoryid__in=user.organiser.academic.test_set.filter(organiser_id=user.id).values_list('id'
+                )).order_by('-created')[:30]
+
+        # organiser_training_notification = EventsNotification.objects.filter((Q(status = 1) | Q(status = 3)), category = 2, status = 1, academic_id = user.organiser.academic_id, categoryid__in = user.organiser.academic.workshop_set.filter(organiser_id = user.id).values_list('id')).order_by('-created')[:30]
 
     if is_resource_person(user):
-        rp_workshop_notification = EventsNotification.objects.filter((Q(status = 0) | Q(status = 5) | Q(status = 2)), category = 0).order_by('-created')[:30]
-        rp_training_notification = EventsNotification.objects.filter((Q(status = 0) | Q(status = 5) | Q(status = 2)), category = 2).order_by('-created')[:30]
-        rp_test_notification = EventsNotification.objects.filter((Q(status = 0) | Q(status = 4) | Q(status = 5) | Q(status = 8) | Q(status = 9)), category = 1, categoryid__in = (Training.objects.filter(academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)))).values_list('id')).order_by('-created')[:30]
+        rp_workshop_notification = \
+            EventsNotification.objects.filter(Q(status=0) | Q(status=5)
+                | Q(status=2), category=0).order_by('-created')[:30]
+        rp_training_notification = \
+            EventsNotification.objects.filter(Q(status=0) | Q(status=5)
+                | Q(status=2), category=2).order_by('-created')[:30]
+        rp_test_notification = \
+            EventsNotification.objects.filter(Q(status=0) | Q(status=4)
+                | Q(status=5) | Q(status=8) | Q(status=9), category=1,
+                categoryid__in=Training.objects.filter(academic__in=AcademicCenter.objects.filter(state__in=State.objects.filter(resourceperson__user_id=user,
+                resourceperson__status=1))).values_list('id'
+                )).order_by('-created')[:30]
     if is_invigilator(user):
-        invigilator_test_notification = EventsNotification.objects.filter((Q(status = 0) | Q(status = 1)), category = 1, academic_id = user.invigilator.academic_id, categoryid__in = user.invigilator.academic.test_set.filter(invigilator_id = user.id).values_list('id')).order_by('-created')[:30]
+        invigilator_test_notification = \
+            EventsNotification.objects.filter(Q(status=0)
+                | Q(status=1), category=1,
+                academic_id=user.invigilator.academic_id,
+                categoryid__in=user.invigilator.academic.test_set.filter(invigilator_id=user.id).values_list('id'
+                )).order_by('-created')[:30]
 
     context = {
-        'roles' : roles,
-        'institution_type' : institute_name,
-        'organiser_workshop_notification' : organiser_workshop_notification,
-        'organiser_test_notification' : organiser_test_notification,
-        'organiser_training_notification' : organiser_training_notification,
-        'rp_test_notification' : rp_test_notification,
-        'rp_workshop_notification' : rp_workshop_notification,
-        'rp_training_notification' : rp_training_notification,
-        'invigilator_test_notification' : invigilator_test_notification,
-    }
-    return render(request, 'events/templates/events_dashboard.html', context)
+        'roles': roles,
+        'institution_type': institute_name,
+        'organiser_workshop_notification': organiser_workshop_notification,
+        'organiser_test_notification': organiser_test_notification,
+        'organiser_training_notification': organiser_training_notification,
+        'rp_test_notification': rp_test_notification,
+        'rp_workshop_notification': rp_workshop_notification,
+        'rp_training_notification': rp_training_notification,
+        'invigilator_test_notification': invigilator_test_notification,
+        }
+    return render(request, 'events/templates/events_dashboard.html',
+                  context)
 
 @login_required
 def delete_events_notification(request, notif_type, notif_id):
@@ -710,7 +730,7 @@ def ac(request):
     context['form'] = collection.form
 
     page = request.GET.get('page')
-    collection = get_page(collection, page)
+    collection = get_page(collection.qs, page)
 
     context['collection'] = collection
     context['header'] = header
@@ -1415,7 +1435,7 @@ def training_list(request, role, status):
         context['form'] = collection.form
 
         page = request.GET.get('page')
-        collection = get_page(collection, page)
+        collection = get_page(collection.qs, page)
 
         context['collection'] = collection
         context['header'] = header
@@ -1982,7 +2002,7 @@ def test_list(request, role, status):
         context['form'] = collection.form
 
         page = request.GET.get('page')
-        collection = get_page(collection, page)
+        collection = get_page(collection.qs, page)
 
         context['collection'] = collection
         context['header'] = header
@@ -2085,7 +2105,7 @@ def test_attendance(request, tid):
         test.save()
     except:
         raise PermissionDenied()
-    print(test.foss_id)
+    print((test.foss_id))
     if request.method == 'POST':
         users = request.POST
         if users:
@@ -2124,7 +2144,7 @@ def test_attendance(request, tid):
                                 mdlenrol = MdlEnrol.objects.get(enrol='self', courseid = fossmdlcourse.mdlcourse_id )
                                 print("Role Exits")
                             except Exception as e:
-                                print("MdlEnrol => ", e)
+                                print(("MdlEnrol => ", e))
                                 print("No self enrolement for this course")
 
                             #if mdlenrol:
@@ -2132,7 +2152,7 @@ def test_attendance(request, tid):
                             #        MdlUserEnrolments.objects.get(enrolid = mdlenrol.id, userid = ta.mdluser_id)
                             #        print "MdlUserEnrolments Exits"
                             #        #update dateTime
-                            #    except Exception, e:
+                            #    except Exception as e:
                             #        print "MdlUserEnrolments => ", e
                             #        MdlRoleAssignments.objects.create(roleid = 5, contextid = 16, userid = ta.mdluser_id, timemodified = datetime.datetime.now().strftime("%s"), modifierid = ta.mdluser_id, itemid = 0, sortorder = 0)
                             #        MdlUserEnrolments.objects.create(enrolid = mdlenrol.id, userid = ta.mdluser_id, status = 0, timestart = datetime.datetime.now().strftime("%s"), timeend = 0, modifierid = ta.mdluser_id, timecreated = datetime.datetime.now().strftime("%s"), timemodified = datetime.datetime.now().strftime("%s"))
@@ -2397,7 +2417,7 @@ def organiser_invigilator_index(request, role, status):
             context['form'] = collection.form
 
             page = request.GET.get('page')
-            collection = get_page(collection, page)
+            collection = get_page(collection.qs, page)
         except Exception as e:
             print(e)
             collection = {}
@@ -2430,7 +2450,7 @@ def organiser_invigilator_index(request, role, status):
             context['form'] = collection.form
 
             page = request.GET.get('page')
-            collection = get_page(collection, page)
+            collection = get_page(collection.qs, page)
 
         except Exception as e:
             print(e)
@@ -2458,12 +2478,12 @@ def update_events_log(user_id, role, category, category_id, academic, status):
         try:
             TrainingLog.objects.create(user_id = user_id, training_id = category_id, role = role, academic_id = academic, status = status)
         except Exception as e:
-            print("Training Log =>",e)
+            print(("Training Log =>",e))
     elif category == 1:
         try:
             TestLog.objects.create(user_id = user_id, test_id = category_id, role = role, academic_id = academic, status = status)
         except Exception as e:
-            print("Test Log => ",e)
+            print(("Test Log => ",e))
     else:
         print("************ Error in events log ***********")
 
@@ -2471,7 +2491,7 @@ def update_events_notification(user_id, role, category, category_id, status, aca
     try:
         EventsNotification.objects.create(user_id = user_id, role = role, category = category, categoryid = category_id, academic_id = academic, status = status, message = message)
     except Exception as e:
-        print("Error in Events Notification => ", e)
+        print(("Error in Events Notification => ", e))
 
 def training_participant_feedback(request, training_id, participant_id):
     try:
@@ -2601,7 +2621,7 @@ def resource_center(request, slug = None):
     context['form'] = collection.form
 
     page = request.GET.get('page')
-    collection = get_page(collection, page)
+    collection = get_page(collection.qs, page)
 
     context['collection'] = collection
     context['header'] = header
@@ -2759,6 +2779,7 @@ def ajax_state_collage(request):
 @csrf_exempt
 def ajax_academic_center(request):
     """Ajax: Get academic centers according to institute type and state"""
+
     if request.method == 'POST':
         state = request.POST.get('state')
         itype = request.POST.get('itype')
@@ -2768,8 +2789,9 @@ def ajax_academic_center(request):
         if center:
             for ac in center:
                 html += '<option value={0}>{1}</option>'.format(ac.id,
-                    ac.institution_name)
-    return HttpResponse(json.dumps(html), content_type='application/json')
+                        ac.institution_name)
+    return HttpResponse(json.dumps(html),
+                        content_type='application/json')
 
 
 @csrf_exempt
@@ -2780,9 +2802,9 @@ def ajax_dept_foss(request):
         tmp = ''
         category =  int(request.POST.get('fields[type]'))
         print(category)
-        print(request.POST)
+        print((request.POST))
         if category == 1:
-            print(request.POST)
+            print((request.POST))
             training = request.POST.get('workshop')
             if request.POST.get('fields[dept]'):
                 dept = Department.objects.filter(training__id = training).order_by('name')
@@ -2839,7 +2861,7 @@ def ajax_language(request):
 def test(request):
     academics = AcademicCenter.objects.filter(Q(institution_name__icontains="Engineering")).exclude(Q(institution_type__name="Engineering") | Q(institution_type__name="Polytechnic") | Q(institution_type__name="ITI") | Q(institution_type__name="University"))
     for academic in academics:
-        print(academic.institution_name, " => ", academic.institution_type)
+        print((academic.institution_name, " => ", academic.institution_type))
         academic.institution_type = InstituteType.objects.get(name='Engineering')
         academic.save()
     return HttpResponsei("Done!")
@@ -2897,7 +2919,7 @@ def activate_academics(request):
 
         context['form'] = collection.form
         page = request.GET.get('page')
-        collection = get_page(collection, page)
+        collection = get_page(collection.qs, page)
         
 
     context['collection'] = collection

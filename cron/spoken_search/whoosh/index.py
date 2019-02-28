@@ -29,7 +29,7 @@
 an index.
 """
 
-from __future__ import division
+
 import os.path, re, sys
 from time import time, sleep
 
@@ -535,7 +535,7 @@ class FileIndex(Index):
                 readers = [segreader(segment) for segment in segments]
                 return MultiReader(readers, generation=generation)
         finally:
-            for r in reusable.values():
+            for r in list(reusable.values()):
                 r.close()
 
     def reader(self, reuse=None):
@@ -688,7 +688,7 @@ class TOC(object):
             stream.write_string(pickle.dumps(schema, -1))
         except pickle.PicklingError:
             # Try to narrow down the error to a single field
-            for fieldname, field in schema.items():
+            for fieldname, field in list(schema.items()):
                 try:
                     pickle.dumps(field)
                 except pickle.PicklingError:

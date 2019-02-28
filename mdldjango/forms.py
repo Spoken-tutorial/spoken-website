@@ -1,5 +1,5 @@
-from __future__ import print_function
-from __future__ import absolute_import
+
+
 # Third Party Stuff
 from builtins import object
 from django import forms
@@ -48,7 +48,7 @@ class RegisterForm(forms.Form):
         except:
             return username
         if error:
-            raise forms.ValidationError(u'Username: %s already exists' % username )
+            raise forms.ValidationError('Username: %s already exists' % username )
 
     def clean_email(self):
         email = self.cleaned_data['email'].lower()
@@ -66,7 +66,7 @@ class RegisterForm(forms.Form):
         except Exception as e:
             return email
         if error:
-            raise forms.ValidationError( u'Email: %s already exists' % email )
+            raise forms.ValidationError( 'Email: %s already exists' % email )
 
     def clean(self):
         password = self.cleaned_data.get('password')
@@ -159,4 +159,4 @@ class PasswordResetForm(forms.Form):
         except Exception as e:
             print(e)
         if error:
-            raise forms.ValidationError( u'Email: %s not exists' % email )
+            raise forms.ValidationError( 'Email: %s not exists' % email )

@@ -1,7 +1,4 @@
-from __future__ import print_function
 #import Required Libraries
-from future import standard_library
-standard_library.install_aliases()
 from builtins import str
 import re
 import os
@@ -135,24 +132,24 @@ creation_tutorialresource.language_id=22 AND
 				# So then delete the previous document by videoid and add the document and increment
 				# count of updated documents
 				if update_difference:
-					print("Updating %s for indexing" % title)
+					print(("Updating %s for indexing" % title))
 					writer.delete_by_term("VideoId", videoid)
 					up_count=up_count+1
 				# if index table is not present then add all the documents to index tables
 				# Else add the document to the index table ( Newly added Video)
 				else:
-					print("Adding %s for indexing" % title)
+					print(("Adding %s for indexing" % title))
 					cr_count=cr_count+1
 				writer.add_document(title=title, VideoId=videoid, tags=keywords, outline=outline, foss=foss, updated=updated)
 				
 				# Finally Commit() save the added documents to index
 				writer.commit()
 			except Exception as e:
-				print("Write exception: ", e)
+				print(("Write exception: ", e))
 				break
 	
 	# Print the no.of documents added/ Updated
-	print(cr_count,"documents Added and ",up_count," documents Updated")  
+	print((cr_count,"documents Added and ",up_count," documents Updated"))  
 		
 # Handling Exception		
 except Exception as e:

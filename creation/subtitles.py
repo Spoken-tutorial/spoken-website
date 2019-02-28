@@ -1,8 +1,3 @@
-from __future__ import print_function
-# Standard Library
-from future import standard_library
-standard_library.install_aliases()
-from builtins import str
 try:
     import http.cookiejar
 except ImportError:
@@ -24,7 +19,6 @@ try:
     from BeautifulSoup import BeautifulSoup
 except ImportError:
     from bs4 import BeautifulSoup
-
 
 class MLStripper(HTMLParser):
     def __init__(self):

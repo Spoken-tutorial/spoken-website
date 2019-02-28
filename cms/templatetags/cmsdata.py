@@ -1,4 +1,4 @@
-from __future__ import print_function
+
 # Third Party Stuff
 from builtins import range
 from django import template
@@ -57,7 +57,7 @@ def get_cms_header():
 ''' excludes: will exclude excludes's values '''
 def combine_get_values(getValue, excludes = ['page']):
     values = ''
-    for k,v in getValue.items():
+    for k,v in list(getValue.items()):
         if k not in excludes:
             values += k+'='+v+'&'
     return values
@@ -65,7 +65,7 @@ def combine_get_values(getValue, excludes = ['page']):
 ''' includes: will include include's values '''
 def reset_get_values(getValue, includes = ['page']):
     values = ''
-    for k,v in getValue.items():
+    for k,v in list(getValue.items()):
         if k in includes:
             values += k+'='+v+'&'
     return values
@@ -73,7 +73,7 @@ def reset_get_values(getValue, includes = ['page']):
 ''' includes: will include include's values '''
 def reset_get_value(getValue, exclude_key = None):
     values = ''
-    for k,v in getValue.items():
+    for k,v in list(getValue.items()):
         if k != exclude_key:
             if values:
                 values += '&'

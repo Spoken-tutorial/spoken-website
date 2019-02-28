@@ -1,4 +1,4 @@
-from __future__ import print_function
+
 from builtins import str
 import subprocess
 import MySQLdb
@@ -10,7 +10,7 @@ def convert_tmp_video(src_path, dst_path):
     stdout = None
     stderr = None
     """mffmpeg -i input-file.ogv -strict experimental -pix_fmt yuv420p -r 15 -f mp4 tmp.mp4"""
-    print("/usr/bin/mffmpeg -i", src_path, "-strict experimental -pix_fmt yuv420p -r 15 -f mp4", dst_path)
+    print(("/usr/bin/mffmpeg -i", src_path, "-strict experimental -pix_fmt yuv420p -r 15 -f mp4", dst_path))
     process = subprocess.Popen(
         [
             '/usr/bin/mffmpeg',
@@ -33,7 +33,7 @@ def convert_video(src_path, dst_path):
     """ffmpeg -i Hardware-requirement-to-install-Blender-English.ogv -acodec libfaac -ac 2 -ab 160k -vcodec libx264 -vpre fast -f mp4 Hardware-requirement-to-install-Blender-English.mp4"""
     """ffmpeg -i Registration-of-an-account-for-online-train-ticket-booking-English.ogv -strict experimental -vcodec libx264 -acodec libfaac -vpre fast -f mp4 Registration-of-an-account-for-online-train-ticket-booking-English.mp4"""
     """ffmpeg -i tmp.mp4 -strict experimental -vcodec libx264 -vpre default -f mp4 output.mp4"""
-    print("/usr/bin/ffmpeg -i", src_path, "-strict experimental -vcodec libx264 -vpre default -f mp4", dst_path)
+    print(("/usr/bin/ffmpeg -i", src_path, "-strict experimental -vcodec libx264 -vpre default -f mp4", dst_path))
     process = subprocess.Popen(
         [
             '/usr/bin/ffmpeg',
@@ -69,7 +69,7 @@ rows = cur.fetchall()
 error_log_file_head1 = open(LOG_ROOT + 'create-missing-mp4-conversion-errors.txt',"w")
 error_log_file_head2 = open(LOG_ROOT + 'create-missing-mp4-notfound-errors.txt',"w")
 for row in rows:
-    print(row[5])
+    print((row[5]))
     ogv_video_path = MEDIA_ROOT + 'videos/' + str(row[8]) + '/' + str(row[1]) + '/' + row[5]
     mp4_video_path, file_extension = os.path.splitext(ogv_video_path)
     mp4_tmp_video_path = mp4_video_path + '-tmp.mp4'
@@ -78,21 +78,21 @@ for row in rows:
         if not os.path.getsize(mp4_video_path):
             print('Converting video...')
             stdout, stderr = convert_tmp_video(ogv_video_path, mp4_tmp_video_path)
-            print('Stdout: ', stdout)
-            print('Stderr: ', stderr)
+            print(('Stdout: ', stdout))
+            print(('Stderr: ', stderr))
             stdout, stderr = convert_video(mp4_tmp_video_path, mp4_video_path)
-            print('Stdout: ', stdout)
-            print('Stderr: ', stderr)
+            print(('Stdout: ', stdout))
+            print(('Stderr: ', stderr))
             os.remove(mp4_tmp_video_path)
             error_log_file_head1.write(mp4_video_path + ', Conversion Error' + '\n')
     else:
         print('Converting video...')
         stdout, stderr = convert_tmp_video(ogv_video_path, mp4_tmp_video_path)
-        print('Stdout: ', stdout)
-        print('Stderr: ', stderr)
+        print(('Stdout: ', stdout))
+        print(('Stderr: ', stderr))
         stdout, stderr = convert_video(mp4_tmp_video_path, mp4_video_path)
-        print('Stdout: ', stdout)
-        print('Stderr: ', stderr)
+        print(('Stdout: ', stdout))
+        print(('Stderr: ', stderr))
 	try:
             os.remove(mp4_tmp_video_path)
 	except:

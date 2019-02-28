@@ -1,4 +1,4 @@
-from __future__ import print_function
+
 from builtins import str
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
@@ -79,13 +79,13 @@ def nemail(request):
           OrganiserNotification.objects.create(user=organiser.user)
           if sent%10 == 0:
               time.sleep(5)
-          print(to," => sent (", str(count),"/",str(tot_count),")")
+          print((to," => sent (", str(count),"/",str(tot_count),")"))
       except Exception as e:
           print(e)
-          print(to," => not sent (",count,"/",tot_count,")")
+          print((to," => not sent (",count,"/",tot_count,")"))
       #break
   print("--------------------------------")
-  print("Total sent mails:", sent)
-  print("Total not sent mails:", notsent)
+  print(("Total sent mails:", sent))
+  print(("Total not sent mails:", notsent))
   print("--------------------------------")
   return HttpResponse("Done!")

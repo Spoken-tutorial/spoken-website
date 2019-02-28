@@ -1,7 +1,4 @@
-from __future__ import print_function
 # Standard Library
-from future import standard_library
-standard_library.install_aliases()
 from builtins import str
 import os
 import zipfile
@@ -178,7 +175,7 @@ def get_video_visits(tr):
     return tr.hit_count
 
 def get_prerequisite(tr, td):
-    print(tr, td)
+    print((tr, td))
     try:
         tr_rec = TutorialResource.objects.get(Q(status = 1) | Q(status = 2), tutorial_detail = td, language_id = tr.language_id)
         return get_url_name(td.foss.foss) + '/' + get_url_name(td.tutorial) + '/' + tr_rec.language.name
@@ -222,7 +219,7 @@ def get_timed_script(script_path, timed_script_path):
         try:
             code = urlopen(timed_script).code
         except Exception as e:
-            print(code, '----', e)
+            print((code, '----', e))
             code = 0
     if(int(code) == 200):
         return timed_script

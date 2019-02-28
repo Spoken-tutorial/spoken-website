@@ -1,5 +1,5 @@
 # Third Party Stuff
-from __future__ import unicode_literals
+
 from builtins import object
 from django.contrib.auth.models import User
 from django.db import models
@@ -9,7 +9,7 @@ from django.utils.encoding import python_2_unicode_compatible
 @python_2_unicode_compatible
 class Language(models.Model):
     name = models.CharField(max_length=255, unique=True)
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, on_delete=models.PROTECT )
     code = models.CharField(max_length=10, default='en')
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -42,7 +42,7 @@ class FossCategory(models.Model):
     description = models.TextField()
     status = models.BooleanField(max_length=2)
     is_learners_allowed = models.BooleanField(max_length=2,default=0 )
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, on_delete=models.PROTECT )
     category = models.ManyToManyField(FossSuperCategory)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -59,8 +59,8 @@ class FossCategory(models.Model):
 
 @python_2_unicode_compatible
 class BrochureDocument(models.Model):
-    foss_course = models.ForeignKey(FossCategory)
-    foss_language = models.ForeignKey(Language)
+    foss_course = models.ForeignKey(FossCategory, on_delete=models.PROTECT )
+    foss_language = models.ForeignKey(Language, on_delete=models.PROTECT )
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
@@ -73,7 +73,7 @@ class BrochureDocument(models.Model):
 
 
 class BrochurePage(models.Model):
-    brochure = models.ForeignKey(BrochureDocument, related_name='pages')
+    brochure = models.ForeignKey(BrochureDocument, related_name='pages', on_delete=models.PROTECT )
     page = models.FileField(upload_to='brochures/')
     page_no = models.PositiveIntegerField()
 
@@ -84,8 +84,8 @@ class BrochurePage(models.Model):
 
 @python_2_unicode_compatible
 class PlaylistInfo(models.Model):
-    foss = models.ForeignKey(FossCategory)
-    language = models.ForeignKey(Language)
+    foss = models.ForeignKey(FossCategory, on_delete=models.PROTECT )
+    language = models.ForeignKey(Language, on_delete=models.PROTECT )
     playlist_id = models.CharField(max_length=255)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -99,7 +99,7 @@ class PlaylistInfo(models.Model):
 
 
 class PlaylistItem(models.Model):
-    playlist = models.ForeignKey(PlaylistInfo)
+    playlist = models.ForeignKey(PlaylistInfo, on_delete=models.PROTECT )
     item_id = models.CharField(max_length=255)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -123,11 +123,11 @@ class Level(models.Model):
 
 @python_2_unicode_compatible
 class TutorialDetail(models.Model):
-    foss = models.ForeignKey(FossCategory)
+    foss = models.ForeignKey(FossCategory, on_delete=models.PROTECT )
     tutorial = models.CharField(max_length=255)
-    level = models.ForeignKey(Level)
+    level = models.ForeignKey(Level, on_delete=models.PROTECT )
     order = models.IntegerField()
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, on_delete=models.PROTECT )
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
@@ -141,32 +141,32 @@ class TutorialDetail(models.Model):
 
 class TutorialCommonContent(models.Model):
     tutorial_detail = models.OneToOneField(
-        TutorialDetail, related_name='tutorial_detail')
+        TutorialDetail, related_name='tutorial_detail',on_delete=models.PROTECT)
     slide = models.CharField(max_length=255)
-    slide_user = models.ForeignKey(User, related_name='slides')
+    slide_user = models.ForeignKey(User, related_name='slides', on_delete=models.PROTECT )
     slide_status = models.PositiveSmallIntegerField(default=0)
 
     code = models.CharField(max_length=255)
-    code_user = models.ForeignKey(User, related_name='codes')
+    code_user = models.ForeignKey(User, related_name='codes', on_delete=models.PROTECT )
     code_status = models.PositiveSmallIntegerField(default=0)
 
     assignment = models.CharField(max_length=255)
-    assignment_user = models.ForeignKey(User, related_name='assignments')
+    assignment_user = models.ForeignKey(User, related_name='assignments', on_delete=models.PROTECT )
     assignment_status = models.PositiveSmallIntegerField(default=0)
 
     prerequisite = models.ForeignKey(
-        TutorialDetail, related_name='prerequisite', blank=True, null=True)
-    prerequisite_user = models.ForeignKey(User, related_name='prerequisite')
+        TutorialDetail, related_name='prerequisite', blank=True, null=True, on_delete=models.PROTECT )
+    prerequisite_user = models.ForeignKey(User, related_name='prerequisite', on_delete=models.PROTECT )
     prerequisite_status = models.PositiveSmallIntegerField(default=0)
 
     additional_material = models.CharField(
         max_length=255, blank=True, null=True)
     additional_material_user = models.ForeignKey(
-        User, related_name='additional_material', null=True, default=None)
+        User, related_name='additional_material', null=True, default=None, on_delete=models.PROTECT )
     additional_material_status = models.PositiveSmallIntegerField(default=0)
 
     keyword = models.TextField()
-    keyword_user = models.ForeignKey(User, related_name='keywords')
+    keyword_user = models.ForeignKey(User, related_name='keywords', on_delete=models.PROTECT )
     keyword_status = models.PositiveSmallIntegerField(default=0)
 
     created = models.DateTimeField(auto_now_add=True)
@@ -180,16 +180,16 @@ class TutorialCommonContent(models.Model):
 
 
 class TutorialResource(models.Model):
-    tutorial_detail = models.ForeignKey(TutorialDetail)
-    common_content = models.ForeignKey(TutorialCommonContent)
-    language = models.ForeignKey(Language)
+    tutorial_detail = models.ForeignKey(TutorialDetail, on_delete=models.PROTECT )
+    common_content = models.ForeignKey(TutorialCommonContent, on_delete=models.PROTECT )
+    language = models.ForeignKey(Language, on_delete=models.PROTECT )
 
     outline = models.TextField()
-    outline_user = models.ForeignKey(User, related_name='outlines')
+    outline_user = models.ForeignKey(User, related_name='outlines', on_delete=models.PROTECT )
     outline_status = models.PositiveSmallIntegerField(default=0)
 
     script = models.URLField(max_length=255)
-    script_user = models.ForeignKey(User, related_name='scripts')
+    script_user = models.ForeignKey(User, related_name='scripts', on_delete=models.PROTECT )
     script_status = models.PositiveSmallIntegerField(default=0)
     timed_script = models.URLField(max_length=255)
 
@@ -199,7 +199,7 @@ class TutorialResource(models.Model):
     playlist_item_id = models.CharField(
         max_length=255, null=True, blank=True, default=None)
     video_thumbnail_time = models.TimeField(default='00:00:00')
-    video_user = models.ForeignKey(User, related_name='videos')
+    video_user = models.ForeignKey(User, related_name='videos', on_delete=models.PROTECT )
     video_status = models.PositiveSmallIntegerField(default=0)
 
     status = models.PositiveSmallIntegerField(default=0)
@@ -214,8 +214,8 @@ class TutorialResource(models.Model):
 
 
 class ArchivedVideo(models.Model):
-    tutorial_resource = models.ForeignKey(TutorialResource)
-    user = models.ForeignKey(User)
+    tutorial_resource = models.ForeignKey(TutorialResource, on_delete=models.PROTECT )
+    user = models.ForeignKey(User, on_delete=models.PROTECT )
     version = models.PositiveSmallIntegerField(default=0)
     video = models.CharField(max_length=255)
     atype = models.PositiveSmallIntegerField(default=0)
@@ -224,9 +224,9 @@ class ArchivedVideo(models.Model):
 
 
 class ContributorRole(models.Model):
-    foss_category = models.ForeignKey(FossCategory)
-    language = models.ForeignKey(Language)
-    user = models.ForeignKey(User)
+    foss_category = models.ForeignKey(FossCategory, on_delete=models.PROTECT )
+    language = models.ForeignKey(Language, on_delete=models.PROTECT )
+    user = models.ForeignKey(User, on_delete=models.PROTECT )
     status = models.BooleanField()
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -237,9 +237,9 @@ class ContributorRole(models.Model):
 
 
 class DomainReviewerRole(models.Model):
-    foss_category = models.ForeignKey(FossCategory)
-    language = models.ForeignKey(Language)
-    user = models.ForeignKey(User)
+    foss_category = models.ForeignKey(FossCategory, on_delete=models.PROTECT )
+    language = models.ForeignKey(Language, on_delete=models.PROTECT )
+    user = models.ForeignKey(User, on_delete=models.PROTECT )
     status = models.BooleanField()
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -250,9 +250,9 @@ class DomainReviewerRole(models.Model):
 
 
 class QualityReviewerRole(models.Model):
-    foss_category = models.ForeignKey(FossCategory)
-    language = models.ForeignKey(Language)
-    user = models.ForeignKey(User)
+    foss_category = models.ForeignKey(FossCategory, on_delete=models.PROTECT )
+    language = models.ForeignKey(Language, on_delete=models.PROTECT )
+    user = models.ForeignKey(User, on_delete=models.PROTECT )
     status = models.BooleanField()
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -263,51 +263,51 @@ class QualityReviewerRole(models.Model):
 
 
 class ContributorLog(models.Model):
-    user = models.ForeignKey(User)
-    tutorial_resource = models.ForeignKey(TutorialResource)
+    user = models.ForeignKey(User, on_delete=models.PROTECT )
+    tutorial_resource = models.ForeignKey(TutorialResource, on_delete=models.PROTECT )
     component = models.CharField(max_length=255)
     status = models.PositiveSmallIntegerField()
     created = models.DateTimeField(auto_now_add=True)
 
 
 class AdminReviewLog(models.Model):
-    user = models.ForeignKey(User)
-    tutorial_resource = models.ForeignKey(TutorialResource)
+    user = models.ForeignKey(User, on_delete=models.PROTECT )
+    tutorial_resource = models.ForeignKey(TutorialResource, on_delete=models.PROTECT )
     status = models.PositiveSmallIntegerField()
     created = models.DateTimeField(auto_now_add=True)
 
 
 class DomainReviewLog(models.Model):
-    user = models.ForeignKey(User)
-    tutorial_resource = models.ForeignKey(TutorialResource)
+    user = models.ForeignKey(User, on_delete=models.PROTECT )
+    tutorial_resource = models.ForeignKey(TutorialResource, on_delete=models.PROTECT )
     component = models.CharField(max_length=255)
     status = models.PositiveSmallIntegerField()
     created = models.DateTimeField(auto_now_add=True)
 
 
 class QualityReviewLog(models.Model):
-    user = models.ForeignKey(User)
-    tutorial_resource = models.ForeignKey(TutorialResource)
+    user = models.ForeignKey(User, on_delete=models.PROTECT )
+    tutorial_resource = models.ForeignKey(TutorialResource, on_delete=models.PROTECT )
     component = models.CharField(max_length=255)
     status = models.PositiveSmallIntegerField()
     created = models.DateTimeField(auto_now_add=True)
 
 
 class PublicReviewLog(models.Model):
-    user = models.ForeignKey(User)
-    tutorial_resource = models.ForeignKey(TutorialResource)
+    user = models.ForeignKey(User, on_delete=models.PROTECT )
+    tutorial_resource = models.ForeignKey(TutorialResource, on_delete=models.PROTECT )
     created = models.DateTimeField(auto_now_add=True)
 
 
 class PublishTutorialLog(models.Model):
-    user = models.ForeignKey(User)
-    tutorial_resource = models.ForeignKey(TutorialResource)
+    user = models.ForeignKey(User, on_delete=models.PROTECT )
+    tutorial_resource = models.ForeignKey(TutorialResource, on_delete=models.PROTECT )
     created = models.DateTimeField(auto_now_add=True)
 
 
 class NeedImprovementLog(models.Model):
-    user = models.ForeignKey(User)
-    tutorial_resource = models.ForeignKey(TutorialResource)
+    user = models.ForeignKey(User, on_delete=models.PROTECT )
+    tutorial_resource = models.ForeignKey(TutorialResource, on_delete=models.PROTECT )
     review_state = models.PositiveSmallIntegerField()
     component = models.CharField(max_length=50)
     comment = models.TextField()
@@ -315,43 +315,43 @@ class NeedImprovementLog(models.Model):
 
 
 class ContributorNotification(models.Model):
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, on_delete=models.PROTECT )
     title = models.CharField(max_length=255)
     message = models.TextField()
-    tutorial_resource = models.ForeignKey(TutorialResource)
+    tutorial_resource = models.ForeignKey(TutorialResource, on_delete=models.PROTECT )
     created = models.DateTimeField(auto_now_add=True)
 
 
 class AdminReviewerNotification(models.Model):
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, on_delete=models.PROTECT )
     title = models.CharField(max_length=255)
     message = models.TextField()
-    tutorial_resource = models.ForeignKey(TutorialResource)
+    tutorial_resource = models.ForeignKey(TutorialResource, on_delete=models.PROTECT )
     created = models.DateTimeField(auto_now_add=True)
 
 
 class DomainReviewerNotification(models.Model):
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, on_delete=models.PROTECT )
     title = models.CharField(max_length=255)
     message = models.TextField()
-    tutorial_resource = models.ForeignKey(TutorialResource)
+    tutorial_resource = models.ForeignKey(TutorialResource, on_delete=models.PROTECT )
     created = models.DateTimeField(auto_now_add=True)
 
 
 class QualityReviewerNotification(models.Model):
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, on_delete=models.PROTECT )
     title = models.CharField(max_length=255)
     message = models.TextField()
-    tutorial_resource = models.ForeignKey(TutorialResource)
+    tutorial_resource = models.ForeignKey(TutorialResource, on_delete=models.PROTECT )
     created = models.DateTimeField(auto_now_add=True)
 
 
 class RoleRequest(models.Model):
-    user = models.ForeignKey(User, related_name='user')
+    user = models.ForeignKey(User, related_name='user', on_delete=models.PROTECT )
     role_type = models.IntegerField(default=0)
     status = models.PositiveSmallIntegerField(default=0)
     approved_user = models.ForeignKey(
-        User, related_name='approved_user', null=True, blank=True)
+        User, related_name='approved_user', null=True, blank=True, on_delete=models.PROTECT )
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
@@ -360,8 +360,8 @@ class RoleRequest(models.Model):
 
 
 class FossAvailableForWorkshop(models.Model):
-    foss = models.ForeignKey(FossCategory)
-    language = models.ForeignKey(Language)
+    foss = models.ForeignKey(FossCategory, on_delete=models.PROTECT )
+    language = models.ForeignKey(Language, on_delete=models.PROTECT )
     status = models.BooleanField(default=0)
     created = models.DateTimeField(auto_now_add=True)
 
@@ -370,8 +370,8 @@ class FossAvailableForWorkshop(models.Model):
 
 
 class FossAvailableForTest(models.Model):
-    foss = models.ForeignKey(FossCategory)
-    language = models.ForeignKey(Language)
+    foss = models.ForeignKey(FossCategory, on_delete=models.PROTECT )
+    language = models.ForeignKey(Language, on_delete=models.PROTECT )
     status = models.BooleanField(default=0)
     created = models.DateTimeField(auto_now_add=True)
 
@@ -381,8 +381,8 @@ class FossAvailableForTest(models.Model):
 
 class TutorialMissingComponent(models.Model):
     user = models.ForeignKey(
-        User, related_name='raised_user', null=True, blank=True)
-    tutorial_resource = models.ForeignKey(TutorialResource)
+        User, related_name='raised_user', null=True, blank=True, on_delete=models.PROTECT )
+    tutorial_resource = models.ForeignKey(TutorialResource, on_delete=models.PROTECT )
     component = models.PositiveSmallIntegerField()
     report_type = models.BooleanField(default=0)
     remarks = models.TextField(null=True, blank=True)
@@ -394,8 +394,8 @@ class TutorialMissingComponent(models.Model):
 
 
 class TutorialMissingComponentReply(models.Model):
-    missing_component = models.ForeignKey(TutorialMissingComponent)
-    user = models.ForeignKey(User)
+    missing_component = models.ForeignKey(TutorialMissingComponent, on_delete=models.PROTECT )
+    user = models.ForeignKey(User, on_delete=models.PROTECT )
     reply_message = models.TextField()
     created = models.DateTimeField(auto_now_add=True)
 
@@ -410,9 +410,9 @@ class OperatingSystem(models.Model):
 
 @python_2_unicode_compatible
 class SuggestTopic(models.Model):
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, on_delete=models.PROTECT )
     topic_title = models.CharField(max_length=255)
-    difficulty_level = models.ForeignKey(Level)
+    difficulty_level = models.ForeignKey(Level, on_delete=models.PROTECT )
     operating_system = models.ManyToManyField(OperatingSystem)
     brief_description = models.TextField()
     example_suggestion = models.BooleanField()
@@ -424,7 +424,7 @@ class SuggestTopic(models.Model):
 
 @python_2_unicode_compatible
 class SuggestExample(models.Model):
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, on_delete=models.PROTECT )
     topic_title = models.CharField(max_length=255)
     example_description = models.TextField()
     script_writer = models.BooleanField()
@@ -444,7 +444,7 @@ class ContributeTowards(models.Model):
 
 
 class Collaborate(models.Model):
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, on_delete=models.PROTECT )
     contact_number = models.CharField(max_length=20, null=True)
     institution_name = models.CharField(max_length=255)
     foss_name = models.CharField(max_length=255)
@@ -457,6 +457,6 @@ class Collaborate(models.Model):
     educational_qualifications = models.TextField(null=True, blank=True)
     prof_experience = models.CharField(max_length=255, null=True, blank=True)
     lang_contributor = models.BooleanField()
-    language = models.ForeignKey(Language)
+    language = models.ForeignKey(Language, on_delete=models.PROTECT )
     lead_st = models.BooleanField()
     created = models.DateTimeField(auto_now_add=True)

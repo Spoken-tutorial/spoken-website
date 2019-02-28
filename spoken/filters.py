@@ -17,7 +17,7 @@ class NewsStateFilter(django_filters.FilterSet):
             kwargs.pop('news_type_slug')
 
         super(NewsStateFilter, self).__init__(*args, **kwargs)
-
+        print(("news_type_slug :",news_type_slug))
         choices = None
         choices = list(State.objects.filter(id__in=News.objects.filter(news_type__slug=news_type_slug).values(
             'state_id').distinct()).order_by('name').values_list('id', 'name'))

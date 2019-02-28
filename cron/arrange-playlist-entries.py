@@ -1,4 +1,4 @@
-from __future__ import print_function
+
 from builtins import str
 import time
 import os, sys
@@ -77,7 +77,7 @@ for row in rows:
 
       # skip tutorial_resource(tutorial) if log entry count > 0 
       if tr_log and int(tr_log[0]):
-        print(tutorial.id, '-- Skipping...')
+        print((tutorial.id, '-- Skipping...'))
         counter += 1
         continue
       # fetching video feed from youtube
@@ -105,8 +105,8 @@ for row in rows:
         counter += 1
 
         # print success message
-        print(str(tutorial.id) + ' -- Success --' + \
-          playlist_entry.id.text.replace(playlist_uri, '').strip('/'))
+        print((str(tutorial.id) + ' -- Success --' + \
+          playlist_entry.id.text.replace(playlist_uri, '').strip('/')))
 
         # add tutorial_resource(tutorial) id to playlist_arranger
         lcur.execute(

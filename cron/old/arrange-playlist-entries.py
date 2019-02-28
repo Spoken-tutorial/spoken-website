@@ -1,4 +1,4 @@
-from __future__ import print_function
+
 from builtins import str
 import MySQLdb
 import time
@@ -67,7 +67,7 @@ for row in rows:
             tr_log_rec = lcur.execute('SELECT count(id) AS idcnt FROM playlist_arranger WHERE trid=' + str(tutorial[0]))
             tr_log = lcur.fetchone()
             if tr_log and int(tr_log[0]):
-                print(tutorial[0], '-- Skipping...')
+                print((tutorial[0], '-- Skipping...'))
                 counter += 1
                 continue
             if entry:
@@ -83,7 +83,7 @@ for row in rows:
                     time.sleep(2)
                     continue
                 counter += 1
-                print(str(tutorial[0]) + ' -- Success --' + playlist_entry.id.text.replace(playlist_uri, '').strip('/'))
+                print((str(tutorial[0]) + ' -- Success --' + playlist_entry.id.text.replace(playlist_uri, '').strip('/')))
                 lcur.execute("INSERT INTO playlist_arranger (trid) VALUES(%s)", [tutorial[0]])
                 ldb.commit()
             else:
