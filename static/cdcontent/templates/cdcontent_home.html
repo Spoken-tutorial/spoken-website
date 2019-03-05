@@ -45,6 +45,13 @@
                             <small>Please select the Level</small>
                         </div>
                     </div>
+                    <div>
+                        <div class="form-group">
+                            <input name="tutorials_check" class="tutorials_check" type="checkbox" for="id_tutorials" class="col-lg-3 col-md-3 col-sm-3 col-xs-3 control-label">
+                            <label class="col-lg-9 col-md-9 col-sm-9 col-xs-9">Check this to select individual tutorials</label>
+                        </div>
+                    </div>
+
                     <div class="form-group">
                         <label for="id_language" class="col-lg-3 col-md-3 col-sm-3 col-xs-3 control-label">Languages: <span class='ajax-refresh ajax-refresh-language'><i class="fa fa-2 fa-refresh fa-spin"></i></span></label>
                         <div class="col-lg-9 col-md-9 col-sm-9 col-xs-9">
@@ -54,6 +61,7 @@
                             <small><b>&lt;CTRL&gt; + Click</b>.</small>
                         </div>
                     </div>
+
                     <div class="form-group">
                         <div class="col-lg-9 col-md-9 col-sm-9 col-xs-9 col-lg-offset-3 col-md-offset-3 col-sm-offset-3">
                             <span class='ajax-refresh ajax-refresh-add-foss'><i class="fa fa-2 fa-refresh fa-spin"></i></span>
@@ -61,6 +69,15 @@
                             <input type="submit" class="btn btn-primary" value="Create ZIP file"  tabindex="5" />
                         </div>
                     </div>
+                    <div class="form-group">
+                        <label for="id_tutorials" class="col-lg-3 col-md-3 col-sm-3 col-xs-3 control-label">Tutorials:</label>
+                        <div class="col-lg-9 col-md-9 col-sm-9 col-xs-9">
+                            {% render_field form.tutorial_names class+="form-control tutorial_names" tabindex="2" %}
+                            {{ form.level.errors }}
+                            <small>Choose the tutorials to download</small>
+                        </div>
+                    </div>
+
                 </fieldset>
             </div>
             <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
@@ -79,15 +96,21 @@
             if($('.foss_category').val() == '') {
                 $('.level').attr("disabled", "disabled");
                 $('.language').attr("disabled", "disabled");
+                $('.tutorials_check').attr("disabled", "disabled");
+                $('.tutorial_names').attr("disabled", "disabled");
+
             }
             $('.foss_category').on("change", function(){
                 $('.level').val('');
                 $('.language').html('');
+                $('.tutorials_check').attr('checked',false)
                 if($('.foss_category').val() == '') {
                     $('.level').attr("disabled", "disabled");
                     $('.language').attr("disabled", "disabled");
+                    $('.tutorials_check').attr("disabled", "disabled");
                 }else {
                     $('.level').removeAttr('disabled');
+                    $('.tutorials_check').removeAttr("disabled");
                 }
             });
 
@@ -138,8 +161,39 @@
                             $('.ajax-refresh-language').hide();
                         }
                     });
+                
+            }
+            });
+
+            $(".tutorials_check").click(function () {
+                var foss = $('.foss_category').val();
+                alert(foss);
+                var level = $('.level').val();
+                var tutorials = $('.tutorials_check').is(":checked");
+                if (tutorials) {
+                    alert(tutorials);
+                    $.ajax({
+                        url: "/cdcontent/ajax-fill-tutorials/",
+                        type: "POST",
+                        data: {
+                            foss: foss,
+                            level: level
+                        },
+                        beforeSend: function() {
+                            $('.ajax-refresh-tutorials').show();
+                        },
+                        success: function(data) {
+                            // loading languages
+                            if(data) {
+                                $('.tutorial_names').html(data);
+                                $('.tutorial_names').removeAttr('disabled');
+                            }
+                            $('.ajax-refresh-tutorials').hide();
+                        }
+                    });
                 }
             });
+
             $('.add_foss_lang').on("click", function(){
                 foss = $('.foss_category').val();
                 level = $('.level').val();

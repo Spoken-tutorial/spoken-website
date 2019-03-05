@@ -347,6 +347,28 @@ def ajax_fill_languages(request):
 
     return HttpResponse(json.dumps(data), content_type='application/json')
 
+@csrf_exempt
+def ajax_fill_tutorials(request):
+    data = ''
+    fossid = request.POST.get('foss', '')
+    levelid = int(request.POST.get('level', 0))
+    tutorial_details = ''
+    if fossid:
+        if levelid:
+            tutorial_details = TutorialResource.objects.filter(
+                Q(status=1) | Q(status=2), tutorial_detail__foss_id=fossid,
+                tutorial_detail__level_id=levelid).values_list(
+                    'tutorial_detail_id','tutorial_detail__tutorial').order_by('tutorial_detail__level_id').distinct()
+        else:
+            tutorial_details = TutorialResource.objects.filter(
+                Q(status=1) | Q(status=2), tutorial_detail__foss_id=fossid).values_list(
+                    'tutorial_detail_id','tutorial_detail__tutorial').order_by('tutorial_detail__level_id').distinct()
+        print("lang_recs",tutorial_details)
+        for row in tutorial_details:
+            data = data + '<option value="' + str(row[0]) + '">' + str(row[1]) + '</option>'
+
+    return HttpResponse(json.dumps(data), content_type='application/json')
+
 
 @csrf_exempt
 def ajax_add_foss(request):
