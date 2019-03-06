@@ -182,7 +182,7 @@ def series_foss(request):
     collection = None
     # Get all the video / audio testimonials in series
     foss_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), language__name='English', tutorial_detail__foss__show_on_homepage = False).values_list('tutorial_detail__foss__id').annotate().distinct()
-    collection =  MediaTestimonials.objects.filter(foss__id__in=foss_list).values("foss__foss", "content", "created", "foss", "foss_id", "id", "path", "user").order_by('-created')
+    collection =  MediaTestimonials.objects.filter(foss__id__in=foss_list).values("foss__foss", "content", "created", "foss", "foss_id", "id", "path", "user", "workshop_details").order_by('-created')
     
     if collection:
         page = request.GET.get('page')
@@ -350,7 +350,7 @@ def testimonials(request, type="text"):
     if type == "text":
         collection = Testimonials.objects.all().values().order_by('-created')
     else:
-        collection = MediaTestimonials.objects.all().values("foss__foss", "content", "created", "foss", "foss_id", "id", "path", "user").order_by('-created')
+        collection = MediaTestimonials.objects.all().values("foss__foss", "content", "created", "foss", "foss_id", "id", "path", "user", "workshop_details").order_by('-created')
     collection = MediaTestimonialsFossFilter(request.GET, queryset=collection)
     form = collection.form
     if collection:
@@ -428,7 +428,8 @@ def testimonials_new_media(request, type):
                     fout.write(chunk)
                 fout.close()
                 # Save in database
-                data = MediaTestimonials(foss=foss, path=from_media_path, user=request.POST.get('name'), content= request.POST.get('content'))
+                data = MediaTestimonials(foss=foss, path=from_media_path, user=request.POST.get('name'),workshop_details=request.POST.get('workshop_details'), content= request.POST.get('content'))
+                print data
                 messages.success(request, 'Testimonial has posted successfully!')
                 data.save()
             return HttpResponseRedirect('/')
