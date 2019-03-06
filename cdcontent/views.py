@@ -352,20 +352,29 @@ def ajax_fill_tutorials(request):
     data = ''
     fossid = request.POST.get('foss', '')
     levelid = int(request.POST.get('level', 0))
+    try:
+        languageid = json.loads(request.POST.get('language', []))[0]
+    except:
+        languageid = False
+
     tutorial_details = ''
     if fossid:
         if levelid:
-            tutorial_details = TutorialResource.objects.filter(
-                Q(status=1) | Q(status=2), tutorial_detail__foss_id=fossid,
-                tutorial_detail__level_id=levelid).values_list(
-                    'tutorial_detail_id','tutorial_detail__tutorial').order_by('tutorial_detail__level_id').distinct()
-        else:
-            tutorial_details = TutorialResource.objects.filter(
-                Q(status=1) | Q(status=2), tutorial_detail__foss_id=fossid).values_list(
-                    'tutorial_detail_id','tutorial_detail__tutorial').order_by('tutorial_detail__level_id').distinct()
-        print("lang_recs",tutorial_details)
+            if languageid:
+                tutorial_details = TutorialResource.objects.filter(
+                    Q(status=1) | Q(status=2), tutorial_detail__foss_id=fossid, language_id = int(languageid) ,
+                    tutorial_detail__level_id=levelid).values_list(
+                        'tutorial_detail_id','tutorial_detail__tutorial').order_by('tutorial_detail__level_id').distinct()
+            else:
+                tutorial_details = TutorialResource.objects.filter(
+                    Q(status=1) | Q(status=2), language_id = int(languageid) ,
+                    tutorial_detail__foss_id=fossid).values_list(
+                        'tutorial_detail_id','tutorial_detail__tutorial').order_by('tutorial_detail__level_id').distinct()
+        print('\n\n\n\n\n',languageid,'\n\n\n\nlang_recs',tutorial_details)
+        count = 1
         for row in tutorial_details:
-            data = data + '<option value="' + str(row[0]) + '">' + str(row[1]) + '</option>'
+            data = data + '<option value="' + str(row[0]) + '">' + str(count)+str(row[1]) + '</option>'
+            count=count+1
 
     return HttpResponse(json.dumps(data), content_type='application/json')
 
