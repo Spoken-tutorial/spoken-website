@@ -437,6 +437,58 @@ def testimonials_new_media(request, type):
     context.update(csrf(request))
     return render(request, 'spoken/templates/testimonial/mediaform.html', context)
 
+def admin_testimonials_media_edit(request, rid):
+    user = request.user
+    context = {}
+    instance = None
+    if not user.has_perm('events.change_testimonials'):
+        raise PermissionDenied()
+    try:
+        instance = MediaTestimonials.objects.get(pk=rid)
+    except Exception, e:
+        raise Http404('Page not found')
+        print e
+
+    if request.method == 'POST':
+        form = MediaTestimonialForm(request.POST, request.FILES, instance=instance)
+        if form.is_valid():
+            form_data = form.save(commit=False)
+            form_data.user_id = user.id
+            form_data.save()
+            file_type = ['application/pdf','image/jpeg','image/png']
+            if 'scan_copy' in request.FILES:
+                if request.FILES['scan_copy'].content_type in file_type:
+                    file_path = settings.MEDIA_ROOT + 'testimonial/'
+                    try:
+                        os.mkdir(file_path)
+                    except Exception, e:
+                        print e
+                    file_path = settings.MEDIA_ROOT + 'testimonial/' + str(rid) + '/'
+                    try:
+                        os.mkdir(file_path)
+                    except Exception, e:
+                        print e
+                    f = request.FILES['scan_copy']
+                    filename = str(f)
+                    ext = os.path.splitext(filename)[1].lower()
+                    full_path = file_path + str(rid) + ext
+                    fout = open(full_path, 'wb+')
+
+                    # Iterate through the chunks.
+                    for chunk in f.chunks():
+                        fout.write(chunk)
+                    fout.close()
+
+            messages.success(request, 'Testimonial updated successfully!')
+            return HttpResponseRedirect('/')
+
+    form = MediaTestimonialForm(instance=instance)
+    context['form'] = form
+    context['instance'] = instance
+    context.update(csrf(request))
+    return render(request, 'spoken/templates/testimonial/mediaform.html', context)
+
+
 
 def testimonials_new(request):
     ''' 

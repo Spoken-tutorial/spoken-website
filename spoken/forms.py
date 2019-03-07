@@ -137,11 +137,23 @@ class MediaTestimonialForm(forms.Form):
     '''
 
     def __init__(self, *args, **kwargs):
-        on_home_page = kwargs.pop('on_home_page')
+        if  'on_home_page' in kwargs:
+            on_home_page = kwargs.pop('on_home_page')
+        else:
+            on_home_page = True
+        if 'instance' in kwargs:
+            instance = kwargs.pop('instance')
         super(MediaTestimonialForm, self).__init__(*args, **kwargs)
+
+        if instance:
+            print instance.path, "#######################"
+            self.initial['foss'] = instance.foss
+            self.initial['name'] = instance.user
+            self.initial['workshop_details'] = instance.workshop_details
+            self.initial['content'] = instance.content
+            # self.initial['media'] = instance.path
+
         foss_list_choices = [('', '-- All Courses --'), ]
-        # foss_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), language__name='English', tutorial_detail__foss__show_on_homepage=on_home_page).values('tutorial_detail__foss__foss').annotate(
-        #     Count('id')).order_by('tutorial_detail__foss__foss').values_list('tutorial_detail__foss__foss', 'id__count').distinct()
         
         foss_list = FossCategory.objects.filter(status=1, show_on_homepage=on_home_page).values('foss').annotate(
             Count('id')).order_by('foss').values_list('foss').distinct()

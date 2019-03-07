@@ -32,6 +32,8 @@ urlpatterns = patterns('',
     url(r'^testimonials/new/media/(?P<type>[\w]+)/$', 'spoken.views.testimonials_new_media', name="testimonials_new_media"),
     url(r'^admin/testimonials/(?P<rid>\d+)/delete/$', 'spoken.views.admin_testimonials_delete', name="admin_testimonials_delete"),
     url(r'^admin/testimonials/media/(?P<rid>\d+)/delete/$', 'spoken.views.admin_testimonials_media_delete',name="admin_testimonials_media_delete"),
+    url(r'^admin/testimonials/media/(?P<rid>\d+)/edit/$', 'spoken.views.admin_testimonials_media_edit', name="admin_testimonials_media_edit"),
+
     url(r'^brochures/$', 'spoken.views.ViewBrochures', name="view_brochures"),
     url(r'^$', 'spoken.views.home', name='home'),
     url(r'^home/$', 'spoken.views.home', name='home'),
