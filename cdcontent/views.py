@@ -219,7 +219,7 @@ def add_srt_file(archive, tr_rec, filepath, eng_flag, srt_files):
 def home(request):
     if request.method == 'POST':
         form = CDContentForm(request.POST)
-
+        context = ''
         if form.is_valid():
             try:
                 zipfile_name = '{}.zip'.format(datetime.now().strftime('%Y%m%d%H%M%S%f'))
@@ -359,21 +359,21 @@ def ajax_fill_tutorials(request):
 
     tutorial_details = ''
     if fossid:
-        if levelid:
-            if languageid:
+        if languageid:
+            if levelid:
                 tutorial_details = TutorialResource.objects.filter(
                     Q(status=1) | Q(status=2), tutorial_detail__foss_id=fossid, language_id = int(languageid) ,
                     tutorial_detail__level_id=levelid).values_list(
                         'tutorial_detail_id','tutorial_detail__tutorial').order_by('tutorial_detail__level_id').distinct()
             else:
                 tutorial_details = TutorialResource.objects.filter(
-                    Q(status=1) | Q(status=2), language_id = int(languageid) ,
+                    Q(status=1) | Q(status=2),
                     tutorial_detail__foss_id=fossid).values_list(
                         'tutorial_detail_id','tutorial_detail__tutorial').order_by('tutorial_detail__level_id').distinct()
         print('\n\n\n\n\n',languageid,'\n\n\n\nlang_recs',tutorial_details)
         count = 1
         for row in tutorial_details:
-            data = data + '<option value="' + str(row[0]) + '">' + str(count)+str(row[1]) + '</option>'
+            data = data + '<option value="' + str(row[0]) + '">' + str(row[0])+' '+str(row[1]) + '</option>'
             count=count+1
 
     return HttpResponse(json.dumps(data), content_type='application/json')
@@ -383,6 +383,11 @@ def ajax_fill_tutorials(request):
 def ajax_add_foss(request):
     foss = request.POST.get('foss', '')
     level = int(request.POST.get('level', 0))
+    
+    tutorials_check = request.POST.get('tutorials_check',True)
+    
+    print("tutorials_check :",tutorials_check)
+
     selectedfoss = {}
     try:
         langs = json.loads(request.POST.get('langs', []))
@@ -392,8 +397,18 @@ def ajax_add_foss(request):
         selectedfoss = json.loads(request.POST.get('selectedfoss', ''))
     except:
         pass
-    if foss and langs:
-        selectedfoss[foss] = [langs, level]
+    try:
+        tutorials = json.loads(request.POST.get('tutorials',0) )
+        print("tutorials : ",tutorials)
+    except :
+        tutorials = []
+    if langs:
+        # if foss :
+        #     selectedfoss[foss] = [langs, level]
+        if tutorials_check == "true" or foss:
+            selectedfoss[foss] = [langs,level ]
+    else:
+        print("Language is mandatory")
     data = json.dumps(selectedfoss)
 
     return HttpResponse(json.dumps(data), content_type='application/json')

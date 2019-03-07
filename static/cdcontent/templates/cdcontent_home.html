@@ -120,11 +120,13 @@
             $(".cdcontentform").on( "submit", function(event) {
                 event.preventDefault();
                 var url = $(location).attr('href');
+                alert("url"+url);
                 $('.download-link').html('<i class="fa fa-circle-o-notch fa-spin fa-3x fa-fw"></i><span class="sr-only">Loading...</span> please do not refresh the page, we are preparing your download link');
                 var posting = $.post(url, $(this).serialize());
 
                 posting.done(function(data) {
                     console.log(data.status);
+                    alert("posting"+data);
                     if(data.status) {
                         var downloadLink = '<a href="' + data.path + '" title="Download cd content zip">Click here</a> to download the cd content zip file';
                         $('.download-link').html(downloadLink);
@@ -172,6 +174,7 @@
                 var language = JSON.stringify($('.language').val());
                 alert(language);
                 $('.tutorials_check').attr('checked',false)
+                $('.tutorial_names').html('');
                 $(".tutorials_check").click(function () {                
                     var foss = $('.foss_category').val();
                     
@@ -180,7 +183,6 @@
                     var tutorials = $('.tutorials_check').is(":checked");
                     if (tutorials) {
                         $('.tutorial_names').html('');
-                        alert(tutorials);
                         $.ajax({
                             url: "/cdcontent/ajax-fill-tutorials/",
                             type: "POST",
@@ -209,6 +211,8 @@
                 foss = $('.foss_category').val();
                 level = $('.level').val();
                 langs = JSON.stringify($('.language').val());
+                tutorials = JSON.stringify($('.tutorial_names').val());
+                var tutorial_checked = $('.tutorials_check').is(":checked");
                 console.log(langs)
                 selectedfoss = $('.selected_foss').val();
                 if(foss && langs && level) {
@@ -220,6 +224,8 @@
                             langs: langs,
                             level: level,
                             selectedfoss: selectedfoss,
+                            tutorials: tutorials,
+                            tutorials_check : tutorial_checked,
                         },
                         beforeSend: function() {
                             $('.add_foss_lang').css('display', 'none');
