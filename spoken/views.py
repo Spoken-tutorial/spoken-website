@@ -448,11 +448,12 @@ def admin_testimonials_media_edit(request, rid):
             form.save()
             context['form'] = form
             messages.success(request, 'Testimonial updated successfully!')
+            return HttpResponseRedirect('/admin/testimonials/')
         else:
             context['form'] = form
-        context['instance'] = testimonial
-        context.update(csrf(request))
-        return HttpResponseRedirect('/admin/testimonials/')
+            context['instance'] = testimonial
+            context.update(csrf(request))
+            return render(request, 'spoken/templates/testimonial/mediaform.html', context)
         
     form = MediaTestimonialEditForm(instance=testimonial)
     context['form'] = form
