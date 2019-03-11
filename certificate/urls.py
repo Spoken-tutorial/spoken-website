@@ -19,7 +19,7 @@ urlpatterns = [
 
      url(r'^koha_coordinators_workshop/$', koha_coordinators_workshop_download, 
                 name='koha_coordinators_workshop_download'),
-    url(r'^koha_rc_certificate/$', 'koha_rc_certificate_download',
+    url(r'^koha_rc_certificate/$', koha_rc_certificate_download,
         name='koha_rc_certificate_download'),
 
     url(r'^fa_workshop_download/$', fa_workshop_download, name='fa_workshop_download'),

@@ -1069,7 +1069,7 @@ def create_koha_12oct_rc_certificate(certificate_path, name, qrcode, type, paper
             return [response, False]
         else:
             error = True
-    except Exception, e:
+    except Exception as e:
         error = True
         err = e
     return [err, error]
