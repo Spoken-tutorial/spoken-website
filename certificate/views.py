@@ -12,7 +12,7 @@ from django.template import RequestContext
 
 # Spoken Tutorial Stuff
 from certificate.forms import FeedBackForm
-from certificate.models import Answer, Certificate, Drupal_camp, Drupal_WS, FeedBack, Question, FA_WS, ITP_WS, Koha_WS, Koha_WS_29Sep2018, Koha_WS_12oct2018, Koha_RC_12oct2018
+from certificate.models import Answer, Certificate, Drupal_camp, Drupal_WS, FeedBack, Question, FA_WS, ITP_WS, Koha_WS, Koha_WS_29Sep2018, Koha_WS_8feb2019, Koha_WS_12oct2018, Koha_RC_12oct2018
 
 
 def index(request):
@@ -42,8 +42,10 @@ def verification(serial, _type):
                     detail = OrderedDict([('Name', name), ('Event', purpose),
                                           ('Days', '4 August'), ('Year', year)])
                 elif purpose == 'Koha Coordinators Workshop':
+                    # detail = OrderedDict([('Name', name), ('Event', purpose),
+                    #                       ('Days', '29 September'), ('Year', year)])
                     detail = OrderedDict([('Name', name), ('Event', purpose),
-                                          ('Days', '29 September'), ('Year', year)])
+                                          ('Days', '8 February'), ('Year', year)])
                 elif purpose == 'Koha Remote Workshop':
                     detail = OrderedDict([('Name', name), ('Event', purpose),
                                           ('Days', '12 October'), ('Year', year)])
@@ -157,6 +159,8 @@ def _get_detail(serial_no):
         year = '2017'
     elif serial_no[3:5] == '18':
         year = '2018'
+    elif serial_no[3:5] == '19':
+        year = '2019'
     return purpose, year, serial_no[-1]
 
 
@@ -765,7 +769,7 @@ def koha_coordinators_workshop_download(request):
         paper = None
         workshop = None
         if type == 'P':
-            user = Koha_WS_29Sep2018.objects.filter(email=email)
+            user = Koha_WS_8feb2019.objects.filter(email=email)
             if not user:
                 context["notregistered"] = 1
                 return render_to_response('koha_workshop29sep_download.html',
@@ -775,7 +779,7 @@ def koha_coordinators_workshop_download(request):
         name = user.name
         college = user.college
         purpose = user.purpose
-        year = '18'
+        year = '19'
         id = int(user.id)
         hexa = hex(id).replace('0x', '').zfill(6).upper()
         serial_no = '{0}{1}{2}{3}'.format(purpose, year, hexa, type)
@@ -827,8 +831,8 @@ def create_koha_coordinators_workshop_certificate(certificate_path, name, qrcode
     err = None
     try:
         download_file_name = None
-        template = 'template_KCW2992018Pcertificate'
-        download_file_name = 'KCW2992018Pcertificate.pdf'
+        template = 'template_KCW822019Pcertificate'
+        download_file_name = 'KCW822019Pcertificate.pdf'
 
         template_file = open('{0}{1}'.format
                              (certificate_path, template), 'r')
