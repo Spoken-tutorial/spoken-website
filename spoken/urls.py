@@ -53,7 +53,9 @@ urlpatterns = [
     # url(r'^induction/expression_of_intrest/$',  expression_of_intrest', name='expression_of_intrest'),
     url(r'^induction/expression_of_intrest/$',  expression_of_intrest, name='expression_of_intrest'),
     url(r'^induction/eoi/$',  expression_of_intrest_new, name='expression_of_intrest_new'),
-    # url(r'^spoken/', include('spoken.foo.urls')),
+    url(r'^admin/testimonials/media/(?P<rid>\d+)/edit/$', admin_testimonials_media_edit, name="admin_testimonials_media_edit"),
+
+        # url(r'^spoken/', include('spoken.foo.urls')),
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 

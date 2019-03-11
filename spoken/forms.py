@@ -142,9 +142,7 @@ class MediaTestimonialForm(forms.Form):
         on_home_page = kwargs.pop('on_home_page')
         super(MediaTestimonialForm, self).__init__(*args, **kwargs)
         foss_list_choices = [('', '-- All Courses --'), ]
-        # foss_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), language__name='English', tutorial_detail__foss__show_on_homepage=on_home_page).values('tutorial_detail__foss__foss').annotate(
-        #     Count('id')).order_by('tutorial_detail__foss__foss').values_list('tutorial_detail__foss__foss', 'id__count').distinct()
-        
+       
         foss_list = FossCategory.objects.filter(status=1, show_on_homepage=on_home_page).values('foss').annotate(
             Count('id')).order_by('foss').values_list('foss').distinct()
 
@@ -157,6 +155,7 @@ class MediaTestimonialForm(forms.Form):
         self.fields['media'].widget.attrs['class'] = 'form-control'
         self.fields['media'].widget.attrs['id'] = 'media_element'
         self.fields['name'].widget.attrs['class'] = 'form-control'
+        self.fields['workshop_details'].widget.attrs['class'] = 'form-control'
         self.fields['content'].widget.attrs['class'] = 'form-control'
 
     foss = forms.ChoiceField(
@@ -165,9 +164,12 @@ class MediaTestimonialForm(forms.Form):
     )
 
     name = forms.CharField(label='Name', required=True)
+
+    workshop_details = forms.CharField(label='Workshop Details (Workshop name, venue, Date | e.g. Spoken Workshop, IIT Bombay, 26 January 2018)', required=True)
+
     media = forms.FileField(label='File(Select an mp4/mov/mp3 file less than 50MB)', required=True)
-    content = forms.CharField(label='Short Discription', widget=forms.Textarea, required=True,
-                              max_length=255)
+    content = forms.CharField(label='Short Description', widget=forms.Textarea, required=True,
+                              max_length=500)
 
     def clean(self):
         if 'media' not in self.cleaned_data:
@@ -178,6 +180,22 @@ class MediaTestimonialForm(forms.Form):
             self._errors["media"] = self.error_class(["Not a valid file format."])
         return self.cleaned_data['media']
 
+
+class MediaTestimonialEditForm(forms.ModelForm):
+    class Meta:
+        model = MediaTestimonials
+        exclude = ['path', 'created']
+        widgets = {
+            'foss' : forms.Select(attrs={'class': "form-control"}),
+            'workshop_details': forms.TextInput(attrs={'class': "form-control"}),
+            'content' : forms.Textarea(attrs={'class': "form-control"}),
+            'user' : forms.TextInput(attrs={'class': "form-control"}) 
+        }
+        labels = {
+            'user': "Name",
+            'workshop_details': "Workshop Details (Workshop name, venue, Date | e.g. Spoken Workshop, IIT Bombay, 26 January 2018)",
+            'content': "Short Description"    
+        }
 
 class ExpressionForm(forms.ModelForm):
     class Meta(object):

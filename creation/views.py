@@ -2866,3 +2866,58 @@ def update_codefiles(request):
     }
     context.update(csrf(request))
     return render(request, 'creation/templates/update_codefiles.html', context)
+
+@login_required
+def update_common_component(request):
+    #for codefiles, slides and additional material
+    if not is_administrator(request.user):
+        raise PermissionDenied()
+    form = UpdateCommonCompForm()
+    if request.method == 'POST':
+        form = UpdateCommonCompForm(request.POST, request.FILES)
+        if form.is_valid():
+            try:
+                foss_id = request.POST.get('foss')
+                foss = FossCategory.objects.get(pk=foss_id)
+
+                common_comp = request.POST.get('component_type')
+
+                tutorial_detail_id = request.POST.get('tutorial')
+                tutorial = TutorialDetail.objects.get(pk=tutorial_detail_id)
+                file_name, file_extension = os.path.splitext(request.FILES['comp'].name)
+                file_name =  tutorial.tutorial.replace(' ', '-') + '-'+common_comp + file_extension
+                file_path = settings.MEDIA_ROOT + 'videos/' + str(foss_id) + '/' + str(tutorial_detail_id) + '/resources/' + file_name
+            
+                fout = open(file_path, 'wb+')
+                f = request.FILES['comp']
+                # Iterate through the chunks.
+                for chunk in f.chunks():
+                    fout.write(chunk)
+                fout.close()
+
+                tr_res = TutorialResource.objects.get(tutorial_detail=tutorial_detail_id, language_id = 22)
+                if common_comp == 'Codefiles':
+                    tr_res.common_content.code = file_name
+                    tr_res.common_content.code_status = 4
+                    tr_res.common_content.code_user = request.user
+                if common_comp == 'Slides':
+                    tr_res.common_content.slide = file_name
+                    tr_res.common_content.slide_status = 4
+                    tr_res.common_content.slide_user = request.user
+                if common_comp == 'Additionalmaterial':
+                    tr_res.common_content.additional_material = file_name
+                    tr_res.common_content.additional_material_status = 4
+                    tr_res.common_content.additional_material_user = request.user
+                tr_res.common_content.save()
+
+
+
+                messages.success(request, common_comp+' updated successfully!')
+                form = UpdateCommonCompForm()
+            except Exception as e:
+                print(e)
+    context = {
+        'form': form,
+    }
+    context.update(csrf(request))
+    return render(request, 'creation/templates/update_common_comp.html', context)

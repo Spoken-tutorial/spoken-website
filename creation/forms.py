@@ -1021,3 +1021,47 @@ class UpdateCodefilesForm(forms.Form):
                 self.fields['tutorial'].choices =  [('', '-- Select tutorial --'),] + list(choices)
                 self.fields['tutorial'].widget.attrs = {}
                 self.fields['tutorial'].initial = initial_tut
+
+class UpdateCommonCompForm(forms.Form):
+    foss = forms.ChoiceField(
+        choices = [('', '-- Select Foss --'),] + list(TutorialResource.objects.filter(Q(status = 1) | 
+            Q(status = 2), language__name='English').values_list(
+            'tutorial_detail__foss_id', 'tutorial_detail__foss__foss').order_by(
+            'tutorial_detail__foss__foss').distinct()),
+        required = True,
+        error_messages = {'required':'FOSS category field is required.'}
+    )
+    tutorial = forms.ChoiceField(
+        choices=[('', '-- Select Tutorial --'), ],
+        widget=forms.Select(attrs={'disabled': 'disabled'}),
+        required=True,
+        error_messages={'required': 'Tutorial field is required.'}
+    )
+    comp = forms.FileField(required=False)
+    component_type = forms.ChoiceField(
+        choices = [('', '-- Select Type --'), ('Codefiles', 'Codefiles'), ('Slides', 'Slides'), ('Additionalmaterial', 'Additional Material')],
+        required = True,
+        error_messages = {'required': 'Please select component type'}
+    )
+
+    def clean(self):
+        super(UpdateCommonCompForm, self).clean()
+        component = ''
+        if 'comp' in self.cleaned_data:
+            component = self.cleaned_data['comp']
+        if not component:
+            self._errors["comp"] = self.error_class(["This field is required."])
+        return component
+
+    def __init__(self, *args, **kwargs):
+        super(UpdateCommonCompForm, self).__init__(*args, **kwargs)
+
+        if args:
+            if 'foss' in args[0] and args[0]['foss']:
+                initial_tut = ''
+                if 'tutorial' in args[0] and args[0]['tutorial']:
+                    initial_tut = args[0]['tutorial']
+                choices = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), tutorial_detail__foss_id = args[0]['foss']).values_list('tutorial_detail_id', 'tutorial_detail__tutorial').order_by('tutorial_detail__tutorial').distinct()
+                self.fields['tutorial'].choices =  [('', '-- Select tutorial --'),] + list(choices)
+                self.fields['tutorial'].widget.attrs = {}
+                self.fields['tutorial'].initial = initial_tut

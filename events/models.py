@@ -514,7 +514,8 @@ class MediaTestimonials(models.Model):
     foss = models.ForeignKey(FossCategory, on_delete=models.PROTECT )
     path = models.CharField(max_length=255)
     user = models.CharField(max_length=255)
-    content = models.CharField(max_length=255)
+    workshop_details = models.CharField(max_length=255, default='Workshop')
+    content = models.CharField(max_length=500)
     created = models.DateTimeField(auto_now_add=True)
 
     class Meta(object):

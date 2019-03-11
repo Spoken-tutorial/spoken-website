@@ -2976,4 +2976,37 @@ def deactivate_academic_org(academic_id):
         ac.status = 3
         ac.save()
 
+def key_verification(serial):
+    context = {}
+    try:
+        certificate = TestAttendance.objects.get(password=serial)
+        if not certificate.student:
+            name = certificate.mdluser_firstname+" "+certificate.mdluser_lastname
+        else:    
+            name = certificate.student.user.first_name+ " "+certificate.student.user.last_name
+        foss = certificate.test.foss.foss
+        tdate = certificate.test.tdate
+        detail = {}
+        detail['Participant_Name'] = name
+        detail['Foss'] = foss
+        detail['Test_Date'] = tdate
+
+        context['certificate'] = certificate
+        context['detail'] = detail
+        context['serial_no'] = True
+    except TestAttendance.DoesNotExist:
+        context["invalidserial"] = 1
+    return context
+
+
+def verify_test_certificate(request):
+    context = {}
+    ci = RequestContext(request)
+    if request.method == 'POST':
+        serial_no = request.POST.get('serial_no').strip()
+        context = key_verification(serial_no)
+        return render_to_response('verify_test_certificate.html', context, ci)
+    return render_to_response('verify_test_certificate.html', {}, ci)
+
+
 

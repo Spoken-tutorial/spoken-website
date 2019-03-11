@@ -13,9 +13,8 @@ from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 from django.http import Http404, HttpResponse, HttpResponseRedirect
-from django.shortcuts import render
-from django.views.decorators.csrf import csrf_exempt, csrf_protect
-from django.template.context_processors import csrf
+from django.shortcuts import render, get_object_or_404
+from django.views.decorators.csrf import csrf_exempt
 from django.core.urlresolvers import reverse
 
 # Spoken Tutorial Stuff
@@ -184,7 +183,7 @@ def series_foss(request):
     collection = None
     # Get all the video / audio testimonials in series
     foss_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), language__name='English', tutorial_detail__foss__show_on_homepage = False).values_list('tutorial_detail__foss__id').annotate().distinct()
-    collection =  MediaTestimonials.objects.filter(foss__id__in=foss_list).values("foss__foss", "content", "created", "foss", "foss_id", "id", "path", "user").order_by('-created')
+    collection =  MediaTestimonials.objects.filter(foss__id__in=foss_list).values("foss__foss", "content", "created", "foss", "foss_id", "id", "path", "user", "workshop_details").order_by('-created')
     
     if collection:
         page = request.GET.get('page')
@@ -352,7 +351,7 @@ def testimonials(request, type="text"):
     if type == "text":
         collection = list(Testimonials.objects.all().values().order_by('-created'))
     else:
-        collection = MediaTestimonials.objects.all().values("foss__foss", "content", "created", "foss", "foss_id", "id", "path", "user").order_by('-created')
+        collection = MediaTestimonials.objects.all().values("foss__foss", "content", "created", "foss", "foss_id", "id", "path", "user", "workshop_details").order_by('-created')
     collection = MediaTestimonialsFossFilter(request.GET, queryset=collection)
     form = collection.form
     if collection:
@@ -430,11 +429,36 @@ def testimonials_new_media(request, type):
                     fout.write(chunk)
                 fout.close()
                 # Save in database
-                data = MediaTestimonials(foss=foss, path=from_media_path, user=request.POST.get('name'), content= request.POST.get('content'))
+                data = MediaTestimonials(foss=foss, path=from_media_path, user=request.POST.get('name'),workshop_details=request.POST.get('workshop_details'), content= request.POST.get('content'))
+                print(data)
                 messages.success(request, 'Testimonial has posted successfully!')
                 data.save()
             return HttpResponseRedirect('/')
     context['form'] = form
+    context.update(csrf(request))
+    return render(request, 'spoken/templates/testimonial/mediaform.html', context)
+
+
+def admin_testimonials_media_edit(request, rid):
+    user = request.user
+    context = {}
+    testimonial = get_object_or_404(MediaTestimonials, pk=rid)
+    if request.method == 'POST':
+        form = MediaTestimonialEditForm(request.POST, instance=testimonial)
+        if form.is_valid():
+            form.save()
+            context['form'] = form
+            messages.success(request, 'Testimonial updated successfully!')
+            return HttpResponseRedirect('/admin/testimonials/')
+        else:
+            context['form'] = form
+            context['instance'] = testimonial
+            context.update(csrf(request))
+            return render(request, 'spoken/templates/testimonial/mediaform.html', context)
+        
+    form = MediaTestimonialEditForm(instance=testimonial)
+    context['form'] = form
+    context['instance'] = testimonial
     context.update(csrf(request))
     return render(request, 'spoken/templates/testimonial/mediaform.html', context)
 

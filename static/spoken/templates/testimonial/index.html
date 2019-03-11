@@ -126,6 +126,7 @@
                             <th>Foss</th>
                             <th>Description</th>
                             <th>User</th>
+                            <th>Workshop</th>
                             <th class="col-center">Action</th>
                         </tr>
                         {% for mrecord in mediacollection %}
@@ -140,7 +141,11 @@
                                 <td>{{ mrecord.foss }}</td>
                                 <td>{{ mrecord.content }}</td>
                                 <td>{{ mrecord.user }}</td>
-                                <td><a href="{% url 'admin_testimonials_media_delete' mrecord.id %}">Delete</a></td>
+                                <td>{{ mrecord.workshop_details }}</td>
+                                <td>
+                                    <a href="{% url 'admin_testimonials_media_edit' mrecord.id %}">Edit</a> | 
+                                    <a href="{% url 'admin_testimonials_media_delete' mrecord.id %}">Delete</a>
+                                </td>
                             </tr>
                         {% endfor %}
                     </table>
