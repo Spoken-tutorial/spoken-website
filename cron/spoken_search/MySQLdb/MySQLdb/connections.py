@@ -33,7 +33,7 @@ def defaulterrorhandler(connection, cursor, errorclass, errorvalue):
         connection.messages.append(error)
     del cursor
     del connection
-    raise errorclass, errorvalue
+    raise errorclass(errorvalue)
 
 re_numeric_part = re.compile(r"^(\d+)")
 
@@ -157,7 +157,7 @@ class Connection(_mysql.connection):
             conv = conversions
 
         conv2 = {}
-        for k, v in conv.items():
+        for k, v in list(conv.items()):
             if isinstance(k, int) and isinstance(v, list):
                 conv2[k] = v[:]
             else:
@@ -186,7 +186,7 @@ class Connection(_mysql.connection):
 
         super(Connection, self).__init__(*args, **kwargs2)
         self.cursorclass = cursorclass
-        self.encoders = dict([ (k, v) for k, v in conv.items()
+        self.encoders = dict([ (k, v) for k, v in list(conv.items())
                                if type(k) is not int ])
         
         self._server_version = tuple([ numeric_part(n) for n in self.get_server_info().split('.')[:2] ])
@@ -223,8 +223,8 @@ class Connection(_mysql.connection):
             self.converter[FIELD_TYPE.VARCHAR].append((None, string_decoder))
             self.converter[FIELD_TYPE.BLOB].append((None, string_decoder))
 
-        self.encoders[types.StringType] = string_literal
-        self.encoders[types.UnicodeType] = unicode_literal
+        self.encoders[bytes] = string_literal
+        self.encoders[str] = unicode_literal
         self._transactional = self.server_capabilities & CLIENT.TRANSACTIONS
         if self._transactional:
             # PEP-249 requires autocommit to be initially off

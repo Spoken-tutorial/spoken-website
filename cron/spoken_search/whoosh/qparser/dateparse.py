@@ -47,7 +47,7 @@ class DateParseError(Exception):
 
 def print_debug(level, msg, *args):
     if level > 0:
-        print(("  " * (level - 1)) + (msg % args))
+        print((("  " * (level - 1)) + (msg % args)))
 
 
 # Parser element objects
@@ -826,7 +826,7 @@ class DateParserPlugin(plugins.Plugin):
 
         from whoosh.fields import DATETIME
         datefields = frozenset(fieldname for fieldname, field
-                               in parser.schema.items()
+                               in list(parser.schema.items())
                                if isinstance(field, DATETIME))
 
         for i, node in enumerate(group):

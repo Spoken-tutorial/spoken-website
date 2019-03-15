@@ -1,4 +1,6 @@
+
 # Standard Library
+from builtins import str
 import json
 import os
 import zipfile
@@ -6,11 +8,12 @@ from datetime import datetime
 
 # Third Party Stuff
 from django.conf import settings
-from django.core.context_processors import csrf
+ 
 from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
+from django.template.context_processors import csrf
 
 # Spoken Tutorial Stuff
 from cdcontent.forms import *
@@ -64,7 +67,7 @@ def add_sheets(archive, foss, lang):
 def get_all_foss_details(selectedfoss):
     all_foss_details = {}
 
-    for key, values in selectedfoss.iteritems():
+    for key, values in list(selectedfoss.items()):
         foss_rec = FossCategory.objects.get(pk=key)
 
         if not all_foss_details.get(foss_rec.id, None):
@@ -134,7 +137,7 @@ def calculate_directory_size(dir_path):
                     folder_size += os.path.getsize(filename)
     except Exception as e:
         folder_size = 0.0
-        print e
+        print(e)
 
     return folder_size
 
@@ -146,7 +149,7 @@ def calculate_static_file_size():
         static_files = get_static_files()
         dir_path = '{}/static/spoken/fonts'.format(settings.BASE_DIR)
 
-        for key, value in static_files.items():
+        for key, value in list(static_files.items()):
             filepath = '{}{}'.format(settings.BASE_DIR, key)
 
             if os.path.isfile(filepath):
@@ -155,7 +158,7 @@ def calculate_static_file_size():
         fsize += calculate_directory_size(dir_path)
     except Exception as e:
         fsize = 0.0
-        print e
+        print(e)
 
     return fsize
 
@@ -164,7 +167,7 @@ def add_static_files(archive):
     zipdir(settings.BASE_DIR + '/static/spoken/fonts', 'spoken/includes/fonts/', archive)
     static_files = get_static_files()
 
-    for key, value in static_files.items():
+    for key, value in list(static_files.items()):
         filepath = '{}{}'.format(settings.BASE_DIR, key)
 
         if os.path.isfile(filepath):
@@ -230,7 +233,7 @@ def home(request):
                 eng_rec = Language.objects.get(name="English")
                 languages = set()
 
-                for key, values in selectedfoss.iteritems():
+                for key, values in list(selectedfoss.items()):
                     foss_rec = FossCategory.objects.get(pk=key)
                     level = int(values[1])
                     eng_flag = True
@@ -380,7 +383,7 @@ def ajax_show_added_foss(request):
     languages = set()
     eng_rec = Language.objects.get(name="English")
 
-    for key, values in tmp.iteritems():
+    for key, values in list(tmp.items()):
         langs_list = list(values[0])
         foss, level = FossCategory.objects.get(pk=key), int(values[1])
         langs = ', '.join(list(

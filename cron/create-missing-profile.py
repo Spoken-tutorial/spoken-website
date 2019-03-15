@@ -1,3 +1,5 @@
+
+from builtins import range
 import os, sys
 import random, string
 
@@ -15,11 +17,11 @@ from django.contrib.auth.models import Group, User
 
 # users = User.objects.filter(is_active=True).exclude(id__in=Profile.objects.all().values_list('user_id'))
 users = User.objects.exclude(id__in=Profile.objects.all().values_list('user_id')).all()
-print '*********************'
-print ' ', users.count()
-print '*********************'
+print('*********************')
+print((' ', users.count()))
+print('*********************')
 for user in users:
   confirmation_code = ''.join(random.choice(string.ascii_uppercase + string.digits + string.ascii_lowercase) for x in range(33))
-  print 'processing user:', user.id, confirmation_code
+  print(('processing user:', user.id, confirmation_code))
   p = Profile(user=user, confirmation_code=confirmation_code)
   p.save()

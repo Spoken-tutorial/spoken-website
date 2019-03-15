@@ -87,20 +87,20 @@ def soundex_esp(word):
 
 # Create a dictionary mapping arabic characters to digits
 _arabic_codes = {}
-for chars, code in iteritems({'\u0627\u0623\u0625\u0622\u062d\u062e\u0647\u0639\u063a\u0634\u0648\u064a': "0",
-                    '\u0641\u0628': "1",
-                    '\u062c\u0632\u0633\u0635\u0638\u0642\u0643': "2",
-                    '\u062a\u062b\u062f\u0630\u0636\u0637': "3",
-                    '\u0644': "4",
-                    '\u0645\u0646': "5",
-                    '\u0631': "6",
+for chars, code in iteritems({'\\u0627\\u0623\\u0625\\u0622\\u062d\\u062e\\u0647\\u0639\\u063a\\u0634\\u0648\\u064a': "0",
+                    '\\u0641\\u0628': "1",
+                    '\\u062c\\u0632\\u0633\\u0635\\u0638\\u0642\\u0643': "2",
+                    '\\u062a\\u062b\\u062f\\u0630\\u0636\\u0637': "3",
+                    '\\u0644': "4",
+                    '\\u0645\\u0646': "5",
+                    '\\u0631': "6",
                     }):
     for char in chars:
         _arabic_codes[char] = code
 
 
 def soundex_ar(word):
-    if word[0] in "\u0627\u0623\u0625\u0622":
+    if word[0] in "\\u0627\\u0623\\u0625\\u0622":
         word = word[1:]
 
     r = "0"

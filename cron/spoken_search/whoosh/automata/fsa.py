@@ -711,4 +711,3 @@ def add_suffix(dfa, nodes, last, downto, seen):
 
 
 
-

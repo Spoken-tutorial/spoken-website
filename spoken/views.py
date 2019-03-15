@@ -1,14 +1,15 @@
-# Standard Library
 import datetime as dt
 import json
 import os
-from urllib import quote, unquote_plus, urlopen
+from urllib.parse import quote, unquote_plus
+from urllib.request import urlopen
 
 # Third Party Stuff
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.models import User
-from django.core.context_processors import csrf
+#change here .. no csrf 
+
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 from django.http import Http404, HttpResponse, HttpResponseRedirect
@@ -43,8 +44,8 @@ def site_feedback(request):
         try:
             SiteFeedback.objects.create(name=data['name'], email=data['email'], message=data['message'])
             data = True
-        except Exception, e:
-            print e
+        except Exception as e:
+            print(e)
             data = False
 
     return HttpResponse(json.dumps(data), content_type='application/json')
@@ -65,7 +66,7 @@ def home(request):
         random_tutorials.append((tcount, tutorial))
     try:
         tr_rec = TutorialResource.objects.filter(Q(status=1) | Q(status=2)).order_by('?')[:1].first()
-    except Exception, e:
+    except Exception as e:
         messages.error(request, str(e))
     context = {
         'tr_rec': tr_rec,
@@ -82,7 +83,7 @@ def home(request):
 
     events = Event.objects.filter(event_date__gte=dt.datetime.today()).order_by('event_date')[:2]
     context['events'] = events
-    return render(request, 'spoken/templates/home.html', context)
+    return render(request, 'spoken/templates/home.html',context= context)
 
 
 def get_or_query(terms, search_fields):
@@ -101,7 +102,7 @@ def get_or_query(terms, search_fields):
             query = or_query
         else:
             query = query | or_query
-    print query
+    print(query)
     return query
 
 
@@ -245,7 +246,7 @@ def watch_tutorial(request, foss, tutorial, lang):
             'tutorial_detail__foss__foss', 'tutorial_detail__level', 'tutorial_detail__order', 'language__name')
         questions = Question.objects.filter(category=td_rec.foss.foss.replace(
             ' ', '-'), tutorial=td_rec.tutorial.replace(' ', '-')).order_by('-date_created')
-    except Exception, e:
+    except Exception as e:
         messages.error(request, str(e))
         return HttpResponseRedirect('/')
     video_path = settings.MEDIA_ROOT + "videos/" + \
@@ -277,7 +278,7 @@ def what_is_spoken_tutorial(request):
             'tutorial_detail__foss__foss', 'tutorial_detail__level', 'tutorial_detail__order', 'language__name')
         questions = Question.objects.filter(category=td_rec.foss.foss.replace(
             ' ', '-'), tutorial=td_rec.tutorial.replace(' ', '-')).order_by('-date_created')
-    except Exception, e:
+    except Exception as e:
         messages.error(request, str(e))
         return HttpResponseRedirect('/')
     video_path = settings.MEDIA_ROOT + "videos/" + \
@@ -348,7 +349,7 @@ def testimonials(request, type="text"):
     '''
     collection = None
     if type == "text":
-        collection = Testimonials.objects.all().values().order_by('-created')
+        collection = list(Testimonials.objects.all().values().order_by('-created'))
     else:
         collection = MediaTestimonials.objects.all().values("foss__foss", "content", "created", "foss", "foss_id", "id", "path", "user", "workshop_details").order_by('-created')
     collection = MediaTestimonialsFossFilter(request.GET, queryset=collection)
@@ -429,7 +430,7 @@ def testimonials_new_media(request, type):
                 fout.close()
                 # Save in database
                 data = MediaTestimonials(foss=foss, path=from_media_path, user=request.POST.get('name'),workshop_details=request.POST.get('workshop_details'), content= request.POST.get('content'))
-                print data
+                print(data)
                 messages.success(request, 'Testimonial has posted successfully!')
                 data.save()
             return HttpResponseRedirect('/')
@@ -487,13 +488,13 @@ def testimonials_new(request):
                     file_path = settings.MEDIA_ROOT + 'testimonial/'
                     try:
                         os.mkdir(file_path)
-                    except Exception, e:
-                        print e
+                    except Exception as e:
+                        print(e)
                     file_path = settings.MEDIA_ROOT + 'testimonial/' + str(rid) + '/'
                     try:
                         os.mkdir(file_path)
-                    except Exception, e:
-                        print e
+                    except Exception as e:
+                        print(e)
                     full_path = file_path + str(rid) + ".pdf"
                     fout = open(full_path, 'wb+')
                     f = request.FILES['scan_copy']
@@ -518,9 +519,9 @@ def admin_testimonials_edit(request, rid):
         raise PermissionDenied()
     try:
         instance = Testimonials.objects.get(pk=rid)
-    except Exception, e:
+    except Exception as e:
         raise Http404('Page not found')
-        print e
+        print(e)
 
     if request.method == 'POST':
         form = TestimonialsForm(request.POST, request.FILES, instance=instance)
@@ -534,13 +535,13 @@ def admin_testimonials_edit(request, rid):
                     file_path = settings.MEDIA_ROOT + 'testimonial/'
                     try:
                         os.mkdir(file_path)
-                    except Exception, e:
-                        print e
+                    except Exception as e:
+                        print(e)
                     file_path = settings.MEDIA_ROOT + 'testimonial/' + str(rid) + '/'
                     try:
                         os.mkdir(file_path)
-                    except Exception, e:
-                        print e
+                    except Exception as e:
+                        print(e)
                     f = request.FILES['scan_copy']
                     filename = str(f)
                     ext = os.path.splitext(filename)[1].lower()
@@ -570,9 +571,9 @@ def admin_testimonials_delete(request, rid):
         raise PermissionDenied()
     try:
         instance = Testimonials.objects.get(pk=rid)
-    except Exception, e:
+    except Exception as e:
         raise Http404('Page not found')
-        print e
+        print(e)
     if request.method == 'POST':
         instance = Testimonials.objects.get(pk=rid)
         instance.delete()
@@ -592,7 +593,7 @@ def admin_testimonials_media_delete(request, rid):
     try:
         instance = MediaTestimonials.objects.get(pk=rid)
     except Exception as error:
-        print error
+        print(error)
         raise Http404('Page not found')
     if request.method == 'POST':
         instance = MediaTestimonials.objects.get(pk=rid)
@@ -623,7 +624,7 @@ def admin_testimonials(request):
 
 
 def news(request, cslug):
-    try:
+#    try:
         newstype = NewsType.objects.get(slug=cslug)
         collection = None
         latest = None
@@ -635,10 +636,13 @@ def news(request, cslug):
             collection = newstype.news_set.order_by('-created')
             latest = True
         collection = NewsStateFilter(request.GET, queryset=collection, news_type_slug=cslug)
+        #print ("\n collection :",collection.qs.count())
         form = collection.form
         if collection:
             page = request.GET.get('page')
-            collection = get_page(collection, page)
+
+            print ("\n collection :",collection.qs.count())
+            collection = get_page(collection.qs, page)
         context = {
             'form': form,
             'collection': collection,
@@ -650,10 +654,9 @@ def news(request, cslug):
         context.update(csrf(request))
         return render(request, 'spoken/templates/news/index.html', context)
 
-    except Exception, e:
-        print e
-        raise Http404('You are not allowed to view this page')
-
+    # except Exception as e:
+    #     print(e)
+    #     raise Http404('You are not allowed to view this page')
 
 def news_view(request, cslug, slug):
     try:
@@ -681,8 +684,8 @@ def news_view(request, cslug, slug):
         context.update(csrf(request))
         return render(request, 'spoken/templates/news/view-news.html', context)
 
-    except Exception, e:
-        print e
+    except Exception as e:
+        print(e)
         raise Http404('You are not allowed to view this page')
 
 
@@ -711,13 +714,13 @@ def create_subtitle_files(request, overwrite=True):
             continue
         try:
             code = urlopen(script_path).code
-        except Exception, e:
+        except Exception as e:
             code = e.code
         if(int(code) == 200):
             if generate_subtitle(script_path, srt_file_path + srt_file_name):
-                print 'Success: ', row.tutorial_detail.foss.foss + ',', srt_file_name
+                print(('Success: ', row.tutorial_detail.foss.foss + ',', srt_file_name))
             else:
-                print 'Failed: ', row.tutorial_detail.foss.foss + ',', srt_file_name
+                print(('Failed: ', row.tutorial_detail.foss.foss + ',', srt_file_name))
     return HttpResponse('Success!')
 
 
@@ -743,8 +746,8 @@ def add_user(request):
             profile = Profile(user=user, confirmation_code='12345')
             profile.save()
             count += 1
-        except Exception, e:
-            print e
+        except Exception as e:
+            print(e)
     return HttpResponse("success")
 
 
@@ -780,8 +783,8 @@ def expression_of_intrest_new(request):
                 form_data.save()
                 messages.success(request, "Your response has been recorded. Thanks for giving your inputs. In case there are more than 120 eligible applicants, we will get back to you about a selection criterion.")
                 return HttpResponseRedirect('/induction')
-            except Exception, e:
-                print e
+            except Exception as e:
+                print(e)
                 messages.error(request, "Sorry, something went wrong, Please try again!")
                 # return HttpResponseRedirect('/induction')
     context = {

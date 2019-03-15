@@ -1,3 +1,5 @@
+
+from builtins import object
 import datetime as dt
 
 from django import forms
@@ -13,14 +15,14 @@ class StudentBatchForm(forms.ModelForm):
         queryset = Department.objects.filter(~Q(name='others'))
   )
 
-  class Meta:
+  class Meta(object):
     model = StudentBatch
     exclude = ['academic', 'stcount', 'organiser']
 
 class NewStudentBatchForm(forms.ModelForm):
   csv_file = forms.FileField(required = True)
 
-  class Meta:
+  class Meta(object):
     model = StudentBatch
     exclude = ['academic', 'year', 'department', 'stcount', 'organiser']
 
@@ -29,13 +31,13 @@ class UpdateStudentBatchForm(forms.ModelForm):
   department = forms.ModelChoiceField(
         queryset = Department.objects.filter(~Q(name='others'))
   )
-  class Meta:
+  class Meta(object):
     model = StudentBatch
     exclude = ['academic', 'stcount', 'organiser']
 
 class UpdateStudentYearBatchForm(forms.ModelForm):
   year = forms.ChoiceField(choices = get_academic_years())
-  class Meta:
+  class Meta(object):
     model = StudentBatch
     exclude = ['academic', 'stcount', 'organiser','department']
 
@@ -46,7 +48,7 @@ class TrainingRequestForm(forms.ModelForm):
   course = forms.ModelChoiceField(empty_label='---------', queryset=CourseMap.objects.filter(category=0))
   batch = forms.ModelChoiceField(empty_label='---------', queryset=StudentBatch.objects.none())
   training_planner = forms.CharField()
-  class Meta:
+  class Meta(object):
     model = TrainingRequest
     exclude = ['participants', 'status', 'training_planner']
 
@@ -67,7 +69,7 @@ class TrainingRequestForm(forms.ModelForm):
       # Date restriction
       if self.cleaned_data and 'sem_start_date' in self.cleaned_data and self.cleaned_data['sem_start_date']:
         start_date, end_date =tp.get_current_semester_date_duration_new()
-        print start_date, end_date, self.cleaned_data['sem_start_date']
+        print((start_date, end_date, self.cleaned_data['sem_start_date']))
         if not (self.cleaned_data['sem_start_date'] <= end_date and self.cleaned_data['sem_start_date'] >= start_date):
           raise forms.ValidationError("Invalid semester start date")
     return self.cleaned_data
@@ -95,7 +97,7 @@ class TrainingRequestEditForm(forms.ModelForm):
   batch = forms.ModelChoiceField(empty_label='---------', queryset=StudentBatch.objects.none())
   foss_category = forms.ChoiceField(choices=[('', '---------'), (0, 'Foss available only for Training'), (1, 'Foss available for Training and Test')])
   course = forms.ModelChoiceField(empty_label='---------', queryset=CourseMap.objects.filter(category=0))
-  class Meta:
+  class Meta(object):
     model = TrainingRequest
     exclude = ['participants', 'status', 'training_planner']
 
@@ -162,7 +164,7 @@ class CourseMapForm(forms.ModelForm):
         )
   )
 
-  class Meta:
+  class Meta(object):
     model = CourseMap
     exclude = ['test']
 
@@ -171,7 +173,7 @@ class CourseMapForm(forms.ModelForm):
 
 class UserForm(forms.ModelForm):
   gender = forms.ChoiceField(choices=[('Male', 'Male'),('Female','Female')])
-  class Meta:
+  class Meta(object):
     model = User
     exclude = ['password','last_login','is_superuser','username','is_staff','is_active','date_joined','groups','user_permissions']
 
@@ -192,7 +194,7 @@ class UserForm(forms.ModelForm):
 class SingleTrainingForm(forms.ModelForm):
   training_type = forms.ChoiceField(choices=[('', '---------'), (0, 'School'),(3,'Vocational'),(1,'Live workshop'),(2,'Pilot workshop')])
   csv_file = forms.FileField(required = True)
-  class Meta:
+  class Meta(object):
     model = SingleTraining
     exclude = ['organiser', 'status', 'participant_count', 'total_participant_count']
 
@@ -220,7 +222,7 @@ class SingleTrainingForm(forms.ModelForm):
 class SingleTrainingEditForm(forms.ModelForm):
   training_type = forms.ChoiceField(choices=[('', '---------'), (0, 'School'),(3,'Vocational'),(1,'Live workshop'),(2,'Pilot workshop')])
   csv_file = forms.FileField(required = False)
-  class Meta:
+  class Meta(object):
     model = SingleTraining
     exclude = ['organiser', 'status', 'participant_count', 'total_participant_count']
 
@@ -246,13 +248,13 @@ class SingleTrainingEditForm(forms.ModelForm):
       raise forms.ValidationError("Invalid semester training date")
     return tdate
 
+
 class OrganiserFeedbackForm(forms.ModelForm):
   offered_training_foss = forms.ModelMultipleChoiceField(
     # queryset=FossCategory.objects.filter(status=1), 
     queryset=FossCategory.objects.filter(
       id__in=CourseMap.objects.filter(
-          category=0,
-          test__lte=2
+          category=0    #removed test condition
         ).values_list(
           'foss_id'
         )
@@ -262,14 +264,13 @@ class OrganiserFeedbackForm(forms.ModelForm):
     # queryset=FossCategory.objects.filter(status=1), 
     queryset=FossCategory.objects.filter(
       id__in=CourseMap.objects.filter(
-          category=0,
-          test__lte=2
+          category=0    #removed test condition
         ).values_list(
           'foss_id'
         )
       ),
     widget=forms.CheckboxSelectMultiple)
-  class Meta:
+  class Meta(object):
     model = OrganiserFeedback
     fields = '__all__'
     widgets = {'student_stream': forms.CheckboxSelectMultiple,
@@ -291,7 +292,7 @@ class OrganiserFeedbackForm(forms.ModelForm):
               'any_other_suggestions' : forms.Textarea}
 
 class LatexWorkshopFileUploadForm(forms.ModelForm):
-  class Meta:
+  class Meta(object):
     model = LatexWorkshopFileUpload
     fields = '__all__'
 
@@ -306,12 +307,12 @@ class MapCourseWithFossForm(forms.ModelForm):
             status = True
         )
     )
-    class Meta:
+    class Meta(object):
         model = CourseMap
         exclude = ()
 
 class STWorkshopFeedbackForm(forms.ModelForm):
-  class Meta:
+  class Meta(object):
     model = STWorkshopFeedback
     fields = '__all__'
     widgets = {
@@ -383,7 +384,7 @@ class STWorkshopFeedbackForm(forms.ModelForm):
     self.fields['learning_any_comment'].required = False
 
 class STWorkshopFeedbackFormPre(forms.ModelForm):
-  class Meta:
+  class Meta(object):
     model = STWorkshopFeedbackPre
     fields = '__all__'
     exclude = ['user']
@@ -414,7 +415,7 @@ class STWorkshopFeedbackFormPre(forms.ModelForm):
 
 
 class STWorkshopFeedbackFormPost(forms.ModelForm):
-  class Meta:
+  class Meta(object):
     model = STWorkshopFeedbackPost
     fields = '__all__'
     exclude = ['user']
@@ -504,7 +505,7 @@ class STWorkshopFeedbackFormPost(forms.ModelForm):
               }
 
 class LearnDrupalFeedbackForm(forms.ModelForm):
-  class Meta:
+  class Meta(object):
     model = LearnDrupalFeedback
     fields = '__all__'
     widgets = {

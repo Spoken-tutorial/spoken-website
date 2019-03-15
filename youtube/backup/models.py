@@ -6,5 +6,5 @@ from oauth2client.django_orm import CredentialsField
 
 
 class CredentialsModel(models.Model):
-    id = models.OneToOneField(User, primary_key=True)
+    id = models.OneToOneField(User, primary_key=True, on_delete=models.PROTECT )
     credential = CredentialsField()

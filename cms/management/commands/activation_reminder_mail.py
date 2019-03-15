@@ -3,7 +3,7 @@
 #1. Go to project directory
 #2. run "python manage.py activation_reminder_mail >> cron/logs/reminder_mail_success_log.txt"
 
-from __future__ import absolute_import, print_function, unicode_literals
+
 
 # Standard Library
 import smtplib
@@ -53,8 +53,8 @@ class Command(BaseCommand):
                 IIT Bombay.'''.format(
                 user.first_name, 
                 user.last_name,
-                "http://spoken-tutorial.org",
-                "http://spoken-tutorial.org/accounts/confirm/" + str(p.confirmation_code) + "/" + user.username
+                "https://spoken-tutorial.org",
+                "https://spoken-tutorial.org/accounts/confirm/" + str(p.confirmation_code) + "/" + user.username
                 )
             to  = [user.email]
             email = EmailMultiAlternatives(
@@ -68,16 +68,16 @@ class Command(BaseCommand):
             try:
                 result = email.send(fail_silently=False)
                 sent += 1
-                print(str(user.id),',', str(user.email),',', str(1))
+                print((str(user.id),',', str(user.email),',', str(1)))
             except smtplib.SMTPException:
                 print('Error: Unable to send email')
                 notsent += 1
-                print(str(user.id),',', str(user.email),',', str(0))
-          except  ObjectDoesNotExist, e:
-              print('no profile : ',user.id,',',e)
+                print((str(user.id),',', str(user.email),',', str(0)))
+          except  ObjectDoesNotExist as e:
+              print(('no profile : ',user.id,',',e))
         #for loop ends here
         print('--------------------------------')
-        print('Date : ', today)
-        print('Total sent mails: ', sent)
-        print('Total not sent mails: ', notsent)
+        print(('Date : ', today))
+        print(('Total sent mails: ', sent))
+        print(('Total not sent mails: ', notsent))
         print('--------------------------------')

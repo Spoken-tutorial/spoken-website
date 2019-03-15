@@ -259,7 +259,7 @@ class Collector(object):
         """
 
         items = self.items
-        for i in xrange(len(items)):
+        for i in range(len(items)):
             if items[i][1] == global_docnum:
                 items.pop(i)
                 return
@@ -269,7 +269,7 @@ class Collector(object):
         matcher = self.matcher
         while matcher.is_active():
             yield matcher.id()
-            matcher.next()
+            next(matcher)
 
     def matches(self):
         """Yields a series of relative document numbers for matches
@@ -417,7 +417,7 @@ class ScoredCollector(Collector):
             # Move to the next document. This method returns True if the
             # matcher has entered a new block, so we should check block quality
             # again.
-            checkquality = matcher.next()
+            checkquality = next(matcher)
 
 
 class TopCollector(ScoredCollector):
@@ -487,7 +487,7 @@ class TopCollector(ScoredCollector):
 
         # Remove the document if it's on the list (it may not be since
         # TopCollector forgets documents that don't make the top N list)
-        for i in xrange(len(items)):
+        for i in range(len(items)):
             if items[i][1] == negated:
                 items.pop(i)
                 # Restore the heap invariant
@@ -796,7 +796,7 @@ class FacetCollector(WrappingCollector):
         # Set needs_current to True if any of the categorizers require the
         # current document to work
         needs_current = context.needs_current
-        for facetname, facet in facets.items():
+        for facetname, facet in list(facets.items()):
             self.facetmaps[facetname] = facet.map(self.maptype)
 
             ctr = facet.categorizer(top_searcher)

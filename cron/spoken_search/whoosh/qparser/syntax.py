@@ -278,7 +278,7 @@ class GroupNode(SyntaxNode):
 
     # List-like methods
 
-    def __nonzero__(self):
+    def __bool__(self):
         return bool(self.nodes)
 
     __bool__ = __nonzero__

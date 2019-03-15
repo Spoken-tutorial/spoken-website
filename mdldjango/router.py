@@ -1,3 +1,4 @@
+from builtins import object
 class MdlRouter(object):
     """
         A router to manage database operations in the mdldjango app.
@@ -19,5 +20,5 @@ class MdlRouter(object):
     def allow_relation(self, obj1, obj2, **hints):
         return True
 
-    def allow_migrate(self, db, model):
+    def allow_migrate(self, db, app_label, model_name=None, **hints):
         return True

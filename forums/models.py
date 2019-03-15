@@ -1,3 +1,4 @@
+from builtins import object
 from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import User
@@ -26,30 +27,30 @@ class Question(models.Model):
     user = User.objects.get(id=self.uid)
     return user.username
 
-  class Meta:
+  class Meta(object):
     db_table = 'website_question'
     get_latest_by = "date_created"
 
 class QuestionVote(models.Model):
   uid = models.IntegerField()
-  question = models.ForeignKey(Question)
+  question = models.ForeignKey(Question, on_delete=models.PROTECT )
 
-  class Meta:
+  class Meta(object):
     db_table = 'website_questionvote'
 
 class QuestionComment(models.Model):
   uid = models.IntegerField()
-  question = models.ForeignKey(Question)
+  question = models.ForeignKey(Question, on_delete=models.PROTECT )
   body = models.TextField()
   date_created = models.DateTimeField(auto_now_add=True)
   date_modified = models.DateTimeField(auto_now=True)
 
-  class Meta:
+  class Meta(object):
     db_table = 'website_questioncomment'
 
 class Answer(models.Model):
   uid  = models.IntegerField()
-  question = models.ForeignKey(Question)
+  question = models.ForeignKey(Question, on_delete=models.PROTECT )
   body = models.TextField()
   date_created = models.DateTimeField(auto_now_add=True)
   date_modified = models.DateTimeField(auto_now=True)
@@ -59,19 +60,19 @@ class Answer(models.Model):
     user = User.objects.get(id=self.uid)
     return user.username
 
-  class Meta:
+  class Meta(object):
     db_table = 'website_answer'
 
 class AnswerVote(models.Model):
   uid = models.IntegerField()
-  answer = models.ForeignKey(Answer)
+  answer = models.ForeignKey(Answer, on_delete=models.PROTECT )
 
-  class Meta:
+  class Meta(object):
     db_table = 'website_answervote'
 
 class AnswerComment(models.Model):
   uid = models.IntegerField()
-  answer = models.ForeignKey(Answer)
+  answer = models.ForeignKey(Answer, on_delete=models.PROTECT )
   body = models.TextField()
   date_created = models.DateTimeField(auto_now_add=True)
   date_modified = models.DateTimeField(auto_now=True)
@@ -80,7 +81,7 @@ class AnswerComment(models.Model):
     user = User.objects.get(id=self.uid)
     return user.username
 
-  class Meta:
+  class Meta(object):
     db_table = 'website_answercomment'
 
 class Notification(models.Model):
@@ -95,6 +96,6 @@ class Notification(models.Model):
     user = User.objects.get(id=self.pid)
     return user.username
 
-  class Meta:
+  class Meta(object):
     db_table = 'website_notification'
 

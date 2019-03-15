@@ -212,7 +212,7 @@ class Matcher(object):
         m = self
         while m.is_active():
             yield m.id()
-            m.next()
+            next(m)
             i += 1
             if i == 10:
                 m = m.replace()
@@ -231,7 +231,7 @@ class Matcher(object):
         m = self
         while self.is_active():
             yield (m.id(), m.value())
-            m.next()
+            next(m)
             i += 1
             if i == 10:
                 m = m.replace()
@@ -248,7 +248,7 @@ class Matcher(object):
 
         while self.is_active():
             yield (self.id(), self.value_as(astype))
-            self.next()
+            next(self)
 
     @abstractmethod
     def value(self):
@@ -296,7 +296,7 @@ class Matcher(object):
         """
 
         while self.is_active() and self.id() < id:
-            self.next()
+            next(self)
 
     def skip_to_quality(self, minquality):
         """Moves this matcher to the next block with greater than the given
@@ -504,7 +504,7 @@ class ListMatcher(Matcher):
         if values is None:
             values = repeat('')
 
-        return izip(self._ids, values)
+        return list(zip(self._ids, values))
 
     def value(self):
         if self._values:
@@ -537,7 +537,7 @@ class ListMatcher(Matcher):
     def supports(self, astype):
         return self._format.supports(astype)
 
-    def next(self):
+    def __next__(self):
         self._i += 1
 
     def weight(self):
