@@ -125,7 +125,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': DB,
-        'USERNAME': DB_USER,
+        'USER': DB_USER,
         'PASSWORD': DB_PASS,
         'HOST': '',                            # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
         'PORT': '',    
@@ -135,7 +135,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
         'NAME': MDB,                      # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
-        'USERNAME': MDB_USER,
+        'USER': MDB_USER,
         'PASSWORD': MDB_PASS,
         'HOST': '',                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
         'PORT': '',                  # Set to empty string for default.
@@ -144,7 +144,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
         'NAME': CDB,                      # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
-        'USERNAME': CDB_USER,
+        'USER': CDB_USER,
         'PASSWORD': CDB_PASS,
         'HOST': '',                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
         'PORT': '',                  # Set to empty string for default.
@@ -153,7 +153,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
         'NAME': WDB,                      # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
-        'USERNAME': WDB_USER,
+        'USER': WDB_USER,
         'PASSWORD': WDB_PASS,
         'HOST': '',                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
         'PORT': '',                  # Set to empty string for default.
@@ -162,7 +162,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
         'NAME': FDB,                      # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
-        'USERNAME': FDB_USER,
+        'USER': FDB_USER,
         'PASSWORD': FDB_PASS,
         'HOST': '',                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
         'PORT': '',                  # Set to empty string for default.
