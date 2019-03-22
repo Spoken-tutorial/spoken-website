@@ -127,7 +127,7 @@ class NestedParent(WrappingQuery):
             docnum = m.id()
             parentdoc = bits.before(docnum + 1)
             nextparent = bits.after(docnum) or maxdoc
-            for i in xrange(parentdoc, nextparent):
+            for i in range(parentdoc, nextparent):
                 yield i
             m.skip_to(nextparent)
 
@@ -170,7 +170,7 @@ class NestedParent(WrappingQuery):
                     break
 
                 score += child.score()
-                child.next()
+                next(child)
                 count += 1
 
             self._nextscore = score
@@ -185,7 +185,7 @@ class NestedParent(WrappingQuery):
             self.child.reset()
             self._gather()
 
-        def next(self):
+        def __next__(self):
             if self.child.is_active():
                 self._gather()
             else:
@@ -323,7 +323,7 @@ class NestedChildren(WrappingQuery):
                 # Move the "child id" to the document after the current match
                 nextchild = m.id() + 1
                 # Move the parent matcher to the next match
-                m.next()
+                next(m)
 
                 # Find the next parent document (matching or not) after this
                 nextparent = comb.after(nextchild)
@@ -351,9 +351,9 @@ class NestedChildren(WrappingQuery):
         def all_ids(self):
             while self.is_active():
                 yield self.id()
-                self.next()
+                next(self)
 
-        def next(self):
+        def __next__(self):
             is_deleted = self.is_deleted
             limit = self.limit
             nextparent = self._nextparent
@@ -386,7 +386,7 @@ class NestedChildren(WrappingQuery):
             if docid < self._nextparent:
                 # Just iterate
                 while self.is_active() and self.id() < docid:
-                    self.next()
+                    next(self)
             elif wanted.is_active():
                 # Find the parent before the target ID
                 pid = comb.before(docid)

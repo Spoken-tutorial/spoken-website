@@ -1,3 +1,5 @@
+
+from builtins import str
 from validate_email import validate_email
 from DNS.Base import TimeoutError
 import os, sys
@@ -11,7 +13,7 @@ from config import *
 from events.models import Student
 
 # fetching students needs to be verified
-print 'Initializing ...'
+print('Initializing ...')
 students = Student.objects.filter(error=True, verified__lt=3).order_by('-id')
 
 # opening log files to write success & error attempts
@@ -41,12 +43,12 @@ for student in students:
         student.save()
         status = 'Not Available'
         error_log_file_head.write(str(student.id)+','+str(student.user.id)+','+student.user.email+'\n')
-    except TimeoutError, e:
+    except TimeoutError as e:
       error_log_file_head.write(str(student.id)+','+str(student.user.id)+','+student.user.email+'\n')
-      print 'Timeout error, waiting for 5 seconds...'
+      print('Timeout error, waiting for 5 seconds...')
       time.sleep(3)
       continue
-  print student.user, '-', status
+  print((student.user, '-', status))
 
 error_log_file_head.close()
 success_log_file_head.close()

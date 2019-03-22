@@ -4,7 +4,9 @@ from events.viewsv2 import *
 from events.decorators import *
 from events.formsv2 import *
 from events.urls import *
+from .viewsv2 import *
 
+app_name = 'events'
 urlpatterns = [
     url(
       r'^training-planner/', 
@@ -194,27 +196,27 @@ urlpatterns = [
     #url(r'^get-language-option/', GetLanguageOptionView.as_view()),
     url(
       r'^single-training/pending/(?P<pk>\d+)/approve/$',
-      'events.viewsv2.SingleTrainingApprove', 
+       SingleTrainingApprove, 
       name="single-training-approve"
     ),
     url(
       r'^single-training/pending/(?P<pk>\d+)/reject/$', 
-      'events.viewsv2.SingleTrainingReject', 
+       SingleTrainingReject, 
       name="single-training-reject"
     ),
     url(
       r'^single-training/pending/(?P<pk>\d+)/requestmarkattendance/$', 
-      'events.viewsv2.SingleTrainingPendingAttendance', 
+       SingleTrainingPendingAttendance, 
       name="single_training_pending"
     ),
     url(
       r'^markas/(?P<pk>\d+)/complete/$', 
-      'events.viewsv2.MarkAsComplete', 
+       MarkAsComplete, 
       name="mark_as_complete"
     ),
     url(
       r'^mark/(?P<pk>\d+)/complete/$', 
-      'events.viewsv2.MarkComplete', 
+       MarkComplete, 
       name="mark_complete"
     ),
     url(
@@ -251,7 +253,7 @@ urlpatterns = [
     ),
     url(
        r'^latex_workshop/$',
-       'events.viewsv2.LatexWorkshopFileUpload',
+        LatexWorkshopFileUpload,
        name="latex-workshop"
        ),
     url(
@@ -287,35 +289,35 @@ urlpatterns = [
     ),
     url(
       r'^(?P<pk>\d+)/reopen-training/$', 
-      'events.viewsv2.ReOpenTraining', 
+       ReOpenTraining, 
       name="re-open-training"
     ),
     url(
       r'^payment-home/$', 
-      'events.viewsv2.payment_home', 
+       payment_home, 
       name="payment_home"
     ),
       url(
       r'^payment-status/$', 
-      'events.viewsv2.payment_status', 
+       payment_status, 
       name="payment_status"
     ),
       url(
       r'^payment-success/$', 
-      'events.viewsv2.payment_success', 
+       payment_success, 
       name="payment_success"
     ),
     url(
       r'^payment-details/(?P<choice>\w+)/$', 
-      'events.viewsv2.payment_details', 
+       payment_details, 
       name="payment_details"
     ),
     url(
       r'^payment-reconciliation-update/$', 
-      'events.viewsv2.payment_reconciliation_update', 
+       payment_reconciliation_update, 
       name="payment_reconciliation_update"
     ),
     
-    url(r'^academic-transactions/$','events.viewsv2.academic_transactions',name="payment"),
+    url(r'^academic-transactions/$', academic_transactions,name="payment"),
 
 ]

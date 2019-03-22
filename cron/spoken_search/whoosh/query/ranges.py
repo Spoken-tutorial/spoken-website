@@ -25,7 +25,7 @@
 # those of the authors and should not be interpreted as representing official
 # policies, either expressed or implied, of Matt Chaput.
 
-from __future__ import division
+
 
 from whoosh.compat import b, u
 from whoosh.query import qcore, terms, compound, wrappers
@@ -162,7 +162,7 @@ class TermRange(RangeMixin, terms.MultiTerm):
         self.constantscore = constantscore
 
     def normalize(self):
-        if self.start in ('', None) and self.end in (u('\uffff'), None):
+        if self.start in ('', None) and self.end in (u('\\uffff'), None):
             from whoosh.query import Every
             return Every(self.fieldname, boost=self.boost)
         elif self.start == self.end:

@@ -1,4 +1,7 @@
+
 # Third Party Stuff
+from builtins import str
+from builtins import object
 from django import forms
 from django.contrib.auth.models import User
 from django.core.validators import RegexValidator
@@ -57,21 +60,21 @@ class RegisterForm(forms.Form):
             user = User.objects.get(username = username)
         except User.DoesNotExist:
             return username
-        raise forms.ValidationError(u'%s already exists' % username )
+        raise forms.ValidationError('%s already exists' % username )
 
 
     def clean_email(self):
         email = self.cleaned_data['email']
         try:
             if not validate_email(email):
-                raise forms.ValidationError(u'%s is not valid email.' % email )
+                raise forms.ValidationError('%s is not valid email.' % email )
         except:
-            raise forms.ValidationError(u'%s is not valid email.' % email )
+            raise forms.ValidationError('%s is not valid email.' % email )
         try:
             user = User.objects.get(email = email)
         except User.DoesNotExist:
             return email
-        raise forms.ValidationError(u'%s already exists' % email )
+        raise forms.ValidationError('%s already exists' % email )
 
     def clean(self):
         password = self.cleaned_data.get('password')
@@ -82,7 +85,7 @@ class RegisterForm(forms.Form):
 
 
 class ProfileForm(forms.ModelForm):
-    class Meta:
+    class Meta(object):
         model = Profile
         exclude = ['user', 'confirmation_code', 'street', 'location']
 
@@ -97,18 +100,18 @@ class ProfileForm(forms.ModelForm):
 
     first_name = forms.CharField()
     last_name = forms.CharField()
-    state = forms.ModelChoiceField(label = 'State', cache_choices = True, \
+    state = forms.ModelChoiceField(label = 'State',   \
         widget = forms.Select(attrs = {'class' : 'ac-state'}), queryset = \
         State.objects.order_by('name'), empty_label = "--- None ---", \
         help_text = "", error_messages = {'required':'State field required.'})
 
-    district = forms.ModelChoiceField(label='Dist', cache_choices=True, \
+    district = forms.ModelChoiceField(label='Dist',   \
         widget = forms.Select(attrs = {'class' : 'ac-district'}), \
         queryset = District.objects.none(), empty_label = "--- None ---", \
         help_text = "", error_messages = \
         {'required':'District Type field required.'})
 
-    city = forms.ModelChoiceField(label = 'City', cache_choices = True, \
+    city = forms.ModelChoiceField(label = 'City',   \
     widget = forms.Select(attrs = {'class' : 'ac-city'}), \
     queryset = City.objects.none(), empty_label = "--- None ---", \
     help_text = "", error_messages = {'required':'City Type field required.'})
@@ -154,7 +157,7 @@ class CmsPageForm(forms.ModelForm):
         (9, '9'), (10, '10'), (11, '11'), (12, '12')))
 
 
-    class Meta:
+    class Meta(object):
         model = Page
         exclude = ['created']
 
@@ -171,7 +174,7 @@ class PasswordResetForm(forms.Form):
             user = User.objects.filter(email=email).first()
             if user:
               if user.is_active:
-                print user.is_active
+                print((user.is_active))
                 error = 0
               else:
                 error = 1
@@ -179,8 +182,8 @@ class PasswordResetForm(forms.Form):
             else:
               error = 1
               er_msg= 'Email: %s not exists' % email
-        except Exception, e:
-            print e
+        except Exception as e:
+            print(e)
         if error:
             raise forms.ValidationError( er_msg )
 

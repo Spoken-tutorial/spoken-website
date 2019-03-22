@@ -313,7 +313,7 @@ class IndexReader(object):
         """
 
         is_deleted = self.is_deleted
-        return (docnum for docnum in xrange(self.doc_count_all())
+        return (docnum for docnum in range(self.doc_count_all())
                 if not is_deleted(docnum))
 
     def iter_docs(self):
@@ -346,7 +346,7 @@ class IndexReader(object):
         """
 
         is_deleted = self.is_deleted
-        for docnum in xrange(self.doc_count_all()):
+        for docnum in range(self.doc_count_all()):
             if not is_deleted(docnum):
                 yield self.stored_fields(docnum)
 
@@ -426,7 +426,7 @@ class IndexReader(object):
             m = self.postings(fieldname, btext)
             while m.is_active():
                 yield (fieldname, btext, m.id(), m.weight(), m.value())
-                m.next()
+                m.__next__()
 
     @abstractmethod
     def postings(self, fieldname, text):
@@ -492,13 +492,13 @@ class IndexReader(object):
         if astype == "weight":
             while vec.is_active():
                 yield (vec.id(), vec.weight())
-                vec.next()
+                vec.__next__()
         else:
             format_ = self.schema[fieldname].format
             decoder = format_.decoder(astype)
             while vec.is_active():
                 yield (vec.id(), decoder(vec.value()))
-                vec.next()
+                vec.__next__()
 
     def corrector(self, fieldname):
         """Returns a :class:`whoosh.spelling.Corrector` object that suggests
@@ -777,7 +777,7 @@ class SegmentReader(IndexReader):
         if self.is_closed:
             raise ReaderClosed
         schema = self.schema
-        return ((term, terminfo) for term, terminfo in self._terms.items()
+        return ((term, terminfo) for term, terminfo in list(self._terms.items())
                 if term[0] in schema)
 
     def iter_from(self, fieldname, text):
@@ -1253,7 +1253,7 @@ class MultiCursor(object):
         self._cursors = [c for c in cursors if c.is_valid()]
         self._low = []
         self._text = None
-        self.next()
+        self.__next__()
 
     def _find_low(self):
         low = []
@@ -1282,9 +1282,9 @@ class MultiCursor(object):
             c.find(term)
         return self._find_low()
 
-    def next(self):
+    def __next__(self):
         for c in self._cursors:
-            c.next()
+            c.__next__()
         return self._find_low()
 
     def term_info(self):

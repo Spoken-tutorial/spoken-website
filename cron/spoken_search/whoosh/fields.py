@@ -664,7 +664,7 @@ class NUMERIC(FieldType):
 
         # word, freq, weight, valuestring
         if self.shift_step:
-            for shift in xrange(0, self.bits, self.shift_step):
+            for shift in range(0, self.bits, self.shift_step):
                 yield (self.to_bytes(num, shift), 1, 1.0, emptybytes)
         else:
             yield (self.to_bytes(num), 1, 1.0, emptybytes)
@@ -919,8 +919,8 @@ class BOOLEAN(FieldType):
     """
 
     bytestrings = (b"f", b"t")
-    trues = frozenset(u"t true yes 1".split())
-    falses = frozenset(u"f false no 0".split())
+    trues = frozenset("t true yes 1".split())
+    falses = frozenset("f false no 0".split())
 
     def __init__(self, stored=False, field_boost=1.0):
         """
@@ -1362,7 +1362,7 @@ class Schema(object):
         Returns the field objects in this schema.
         """
 
-        return iter(self._fields.values())
+        return iter(list(self._fields.values()))
 
     def __getitem__(self, name):
         """
@@ -1515,7 +1515,7 @@ class Schema(object):
         Returns a list of the names of fields that are stored.
         """
 
-        return [name for name, field in self.items() if field.stored]
+        return [name for name, field in list(self.items()) if field.stored]
 
     def scorable_names(self):
         """
@@ -1523,7 +1523,7 @@ class Schema(object):
         lengths.
         """
 
-        return [name for name, field in self.items() if field.scorable]
+        return [name for name, field in list(self.items()) if field.scorable]
 
 
 class SchemaClass(with_metaclass(MetaSchema, Schema)):
@@ -1598,6 +1598,6 @@ def merge_schema(s1, s2):
 
 def merge_schemas(schemas):
     schema = schemas[0]
-    for i in xrange(1, len(schemas)):
+    for i in range(1, len(schemas)):
         schema = merge_schema(schema, schemas[i])
     return schema

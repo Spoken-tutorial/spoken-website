@@ -1,4 +1,5 @@
 # Third Party Stuff
+from builtins import object
 from django.db import models
 
 
@@ -6,7 +7,7 @@ class Role(models.Model):
     rid = models.IntegerField(primary_key=True)
     name = models.CharField(unique=True, max_length=64)
 
-    class Meta:
+    class Meta(object):
         db_table = 'role'
         app_label = 'cdeep'
 
@@ -34,7 +35,7 @@ class Users(models.Model):
     data = models.TextField(blank=True)
     last_login = models.DateTimeField(blank=True, null=True)
 
-    class Meta:
+    class Meta(object):
         db_table = 'users'
         app_label = 'cdeep'
 
@@ -43,7 +44,7 @@ class UsersRoles(models.Model):
     uid = models.ForeignKey(Users, db_column='uid')
     rid = models.ForeignKey(Role, db_column='rid')
 
-    class Meta:
+    class Meta(object):
         db_table = 'users_roles'
         app_label = 'cdeep'
 
@@ -54,7 +55,7 @@ class FossCategories(models.Model):
     workshop = models.IntegerField()
     foss_desc = models.TextField()
 
-    class Meta:
+    class Meta(object):
         db_table = 'foss_categories'
         app_label = 'cdeep'
 
@@ -63,7 +64,7 @@ class TutorialLanguages(models.Model):
     id = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=255)
 
-    class Meta:
+    class Meta(object):
         db_table = 'tutorial_languages'
         app_label = 'cdeep'
 
@@ -75,7 +76,7 @@ class TutorialDetails(models.Model):
     tutorial_level = models.CharField(max_length=400)
     order_code = models.IntegerField()
 
-    class Meta:
+    class Meta(object):
         db_table = 'tutorial_details'
         app_label = 'cdeep'
 
@@ -99,7 +100,7 @@ class TutorialCommonContents(models.Model):
     tutorial_keywords = models.TextField()
     tutorial_keywords_uid = models.ForeignKey(Users, related_name='keywords', db_column='tutorial_keywords_uid')
 
-    class Meta:
+    class Meta(object):
         db_table = 'tutorial_common_contents'
         app_label = 'cdeep'
 
@@ -127,7 +128,7 @@ class TutorialResources(models.Model):
     hit_count = models.BigIntegerField()
     request_exception = models.TextField()
 
-    class Meta:
+    class Meta(object):
         db_table = 'tutorial_resources'
         app_label = 'cdeep'
 
@@ -137,7 +138,7 @@ class TutorialDomainReviewerRoles(models.Model):
     uid = models.ForeignKey(Users, db_column='uid')
     language = models.ForeignKey(TutorialLanguages)
 
-    class Meta:
+    class Meta(object):
         db_table = 'tutorial_domain_reviewer_roles'
         app_label = 'cdeep'
 
@@ -147,7 +148,7 @@ class TutorialQualityRoles(models.Model):
     uid = models.ForeignKey(Users, db_column='uid')
     language = models.ForeignKey(TutorialLanguages)
 
-    class Meta:
+    class Meta(object):
         db_table = 'tutorial_quality_roles'
         app_label = 'cdeep'
 
@@ -159,7 +160,7 @@ class TutorialUpdateLog(models.Model):
     updated_by = models.CharField(max_length=255)
     updated_content = models.CharField(max_length=255)
 
-    class Meta:
+    class Meta(object):
         db_table = 'tutorial_update_log'
         app_label = 'cdeep'
 
@@ -177,7 +178,7 @@ class CTutorialMissingComponent(models.Model):
     updated = models.DateField()
     email = models.CharField(max_length=100)
 
-    class Meta:
+    class Meta(object):
         db_table = 'tutorial_missing_component'
         app_label = 'cdeep'
 
@@ -189,7 +190,7 @@ class CTutorialMissingComponentReply(models.Model):
     reply_message = models.TextField()
     created = models.DateTimeField()
 
-    class Meta:
+    class Meta(object):
         db_table = 'tutorial_missing_component_reply'
         app_label = 'cdeep'
 
@@ -202,7 +203,7 @@ class TutorialPublicReview(models.Model):
     component = models.CharField(max_length=20)
     comment = models.TextField()
 
-    class Meta:
+    class Meta(object):
         db_table = 'tutorial_public_review'
         app_label = 'cdeep'
 
@@ -214,7 +215,7 @@ class TutorialPublicReviewVideo(models.Model):
     everywhere = models.IntegerField()
     video_time = models.TimeField()
 
-    class Meta:
+    class Meta(object):
         db_table = 'tutorial_public_review_video'
         app_label = 'cdeep'
 
@@ -226,7 +227,7 @@ class UserRatings(models.Model):
     rated_date = models.DateField()
     rating = models.BigIntegerField()
 
-    class Meta:
+    class Meta(object):
         db_table = 'user_ratings'
         app_label = 'cdeep'
 
@@ -238,7 +239,7 @@ class VideoComments(models.Model):
     comments = models.TextField()
     created_at = models.DateTimeField()
 
-    class Meta:
+    class Meta(object):
         db_table = 'video_comments'
         app_label = 'cdeep'
 
@@ -252,7 +253,7 @@ class ContentTypeCredentials(models.Model):
     field_credentials_source_link_attributes = models.TextField(blank=True)
     field_short_description_value = models.TextField(blank=True)
 
-    class Meta:
+    class Meta(object):
         db_table = 'content_type_credentials'
         app_label = 'cdeep'
 
@@ -274,7 +275,7 @@ class Node(models.Model):
     tnid = models.IntegerField()
     translate = models.IntegerField()
 
-    class Meta:
+    class Meta(object):
         db_table = 'node'
         app_label = 'cdeep'
 
@@ -290,7 +291,7 @@ class NodeRevisions(models.Model):
     timestamp = models.IntegerField()
     format = models.IntegerField()
 
-    class Meta:
+    class Meta(object):
         db_table = 'node_revisions'
         app_label = 'cdeep'
 
@@ -305,7 +306,7 @@ class ContentTypeArticle(models.Model):
     field_photo_list = models.IntegerField(blank=True, null=True)
     field_photo_data = models.TextField(blank=True)
 
-    class Meta:
+    class Meta(object):
         db_table = 'content_type_article'
         app_label = 'cdeep'
 
@@ -320,7 +321,7 @@ class Files(models.Model):
     status = models.IntegerField()
     timestamp = models.IntegerField()
 
-    class Meta:
+    class Meta(object):
         db_table = 'files'
         app_label = 'cdeep'
 
@@ -335,7 +336,7 @@ class ContentTypeMediaReports(models.Model):
     field_media_report_link_title = models.CharField(max_length=255, blank=True)
     field_media_report_link_attributes = models.TextField(blank=True)
 
-    class Meta:
+    class Meta(object):
         db_table = 'content_type_media_reports'
         app_label = 'cdeep'
 
@@ -350,7 +351,7 @@ class ContentTypeNewsAndEvents(models.Model):
     field_event_image_list = models.IntegerField(blank=True, null=True)
     field_event_image_data = models.TextField(blank=True)
 
-    class Meta:
+    class Meta(object):
         db_table = 'content_type_news_and_events'
         app_label = 'cdeep'
 
@@ -365,6 +366,6 @@ class ContentTypeOfficialLettersOrLinks(models.Model):
     field_official_litter_list = models.IntegerField(blank=True, null=True)
     field_official_litter_data = models.TextField(blank=True)
 
-    class Meta:
+    class Meta(object):
         db_table = 'content_type_official_letters_or_links'
         app_label = 'cdeep'

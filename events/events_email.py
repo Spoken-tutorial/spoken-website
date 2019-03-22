@@ -1,3 +1,4 @@
+
 from django.core.mail import EmailMultiAlternatives
 
 def send_email(status, to = None, instance = None, cc = None, bcc = None):
@@ -16,7 +17,7 @@ def send_email(status, to = None, instance = None, cc = None, bcc = None):
 Regards,
 Spoken Tutorial Team,
 IIT Bombay.
-'''.format('http://process.spoken-tutorial.org/images/1/1f/Training-Request-Sheet.pdf', 'http://process.spoken-tutorial.org/index.php/Software-Training#Contacts_For_Training', 'http://spoken-tutorial.org')
+'''.format('http://process.spoken-tutorial.org/images/1/1f/Training-Request-Sheet.pdf', 'http://process.spoken-tutorial.org/index.php/Software-Training#Contacts_For_Training', 'https://spoken-tutorial.org')
 
     ### Mail 2
     elif status == 'Instructions to be followed before conducting the training':
@@ -69,7 +70,7 @@ To make an online Test Request please Click here.
 Regards,
 Spoken Tutorial Team,
 IIT Bombay.
-'''.format('http://spoken-tutorial.org', 'process.spoken-tutorial.org/images/0/09/Instructions_for_Invigilator.pdf','http://process.spoken-tutorial.org/images/a/aa/Test_Request.pdf', instance.training_code, instance.foss )
+'''.format('https://spoken-tutorial.org', 'process.spoken-tutorial.org/images/0/09/Instructions_for_Invigilator.pdf','http://process.spoken-tutorial.org/images/a/aa/Test_Request.pdf', instance.training_code, instance.foss )
 
     ### Email 4
     elif status == 'Instructions to be followed before conducting the test-organiser':
@@ -116,8 +117,8 @@ IIT Bombay.
     
     try:
         result = email.send(fail_silently=True)
-    except Exception, e:
-        print "*******************************************************"
-        print message
-        print "*******************************************************"
+    except Exception as e:
+        print("*******************************************************")
+        print(message)
+        print("*******************************************************")
         pass
