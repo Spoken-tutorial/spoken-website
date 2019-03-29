@@ -12,6 +12,7 @@ client_secrets.json
 certificate/fa_workshop_template/template_FAW2017Pcertificate
 certificate/itp_workshop_template/template_ITPW2017Pcertificate
 certificate/koha_workshop_template/*
+certificate/moodle_workshop_template/*
 certificate/images/kannan-moudgalya-sign.png
 certificate/images/prao-sign.png
 certificate/images/*
