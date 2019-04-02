@@ -139,7 +139,7 @@ def tutorial_search(request):
     foss_get = ''
     show_on_homepage = True
     queryset = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = show_on_homepage)
-
+    lang_list_choices = [('', '-- All Languages --'), ]
     if request.method == 'GET' and request.GET:
         form = TutorialSearchForm(request.GET)
         if form.is_valid():
@@ -161,6 +161,15 @@ def tutorial_search(request):
     if collection:
         page = request.GET.get('page')
         collection = get_page(collection, page)
+    
+    lang_list = queryset.filter(tutorial_detail__foss__foss=foss_get).values(
+        'language__name').annotate(Count('id')).order_by(
+        'language').values_list('language__name', 'id__count').distinct()
+    for lang_row in lang_list:
+            lang_list_choices.append((str(lang_row[0]),
+            str(lang_row[0]) + ' (' + str(lang_row[1]) + ')'))
+
+    form.fields['search_language'].choices = lang_list_choices
     context['form'] = form
     context['collection'] = collection
     context['SCRIPT_URL'] = settings.SCRIPT_URL
@@ -191,6 +200,7 @@ def series_foss(request):
     add_button_show= False
     if request.user.has_perm('events.add_testimonials'):
         add_button_show= True
+
     context = {}
     context['form'] = form
     context['collection'] = collection
@@ -206,7 +216,7 @@ def series_tutorial_search(request):
     foss_get = ''
     show_on_homepage = False
     queryset = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = show_on_homepage)
-    
+    lang_list_choices = [('', '-- All Languages --'), ]
     if request.method == 'GET' and request.GET:
         form = SeriesTutorialSearchForm(request.GET)
         if form.is_valid():
@@ -228,6 +238,15 @@ def series_tutorial_search(request):
     if collection:
         page = request.GET.get('page')
         collection = get_page(collection, page)
+
+    lang_list = queryset.filter(tutorial_detail__foss__foss=foss_get).values(
+        'language__name').annotate(Count('id')).order_by(
+        'language').values_list('language__name', 'id__count').distinct()
+    for lang_row in lang_list:
+            lang_list_choices.append((str(lang_row[0]),
+            str(lang_row[0]) + ' (' + str(lang_row[1]) + ')'))
+
+    form.fields['search_otherlanguage'].choices = lang_list_choices
     context['form'] = form
     context['collection'] = collection
     context['SCRIPT_URL'] = settings.SCRIPT_URL
@@ -302,43 +321,72 @@ def get_language(request, tutorial_type):
     show_on_homepage = True
     if tutorial_type== "series":
         show_on_homepage = False
-
     if request.method == "POST":
         foss = request.POST.get('foss')
         lang = request.POST.get('lang')
         if not lang and foss:
-            lang_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = show_on_homepage, tutorial_detail__foss__foss=foss).values(
-                'language__name').annotate(Count('id')).order_by('language__name').values_list('language__name', 'id__count').distinct()
-            tmp = '<option value = ""> -- All Languages -- </option>'
-            for lang_row in lang_list:
-                tmp += '<option value="' + str(lang_row[0]) + '">' + \
-                    str(lang_row[0]) + ' (' + str(lang_row[1]) + ')</option>'
+            tmp = make_lang_list_by_foss(foss,show_on_homepage)
             output = ['foss', tmp]
+            return HttpResponse(json.dumps(output), content_type='application/json')
         elif lang and not foss:
-            foss_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = show_on_homepage, language__name=lang).values('tutorial_detail__foss__foss').annotate(
-                Count('id')).order_by('tutorial_detail__foss__foss').values_list('tutorial_detail__foss__foss', 'id__count').distinct()
-            tmp = '<option value = ""> -- All Courses -- </option>'
-            for foss_row in foss_list:
-                tmp += '<option value="' + str(foss_row[0]) + '">' + \
-                    str(foss_row[0]) + ' (' + str(foss_row[1]) + ')</option>'
+            tmp = make_foss_list_by_lang(lang,show_on_homepage)
             output = ['lang', tmp]
-        elif foss and lang:
-            pass
+            return HttpResponse(json.dumps(output), content_type='application/json')
+        if foss and lang:
+            foss_list = make_foss_list_by_lang(lang,show_on_homepage)
+            lang_list = make_lang_list_by_foss(foss,show_on_homepage)
+            output = ['set_both', lang_list, foss_list]
+            return HttpResponse(json.dumps(output), content_type='application/json')
         else:
-            lang_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = show_on_homepage).values('language__name').annotate(
-                Count('id')).order_by('language__name').values_list('language__name', 'id__count').distinct()
-            tmp1 = '<option value = ""> -- All Languages -- </option>'
-            for lang_row in lang_list:
-                tmp1 += '<option value="' + str(lang_row[0]) + '">' + \
-                    str(lang_row[0]) + ' (' + str(lang_row[1]) + ')</option>'
-            foss_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = show_on_homepage,language__name='English').values('tutorial_detail__foss__foss').annotate(
-                Count('id')).order_by('tutorial_detail__foss__foss').values_list('tutorial_detail__foss__foss', 'id__count').distinct()
-            tmp2 = '<option value = ""> -- All Courses -- </option>'
-            for foss_row in foss_list:
-                tmp2 += '<option value="' + str(foss_row[0]) + '">' + \
-                    str(foss_row[0]) + ' (' + str(foss_row[1]) + ')</option>'
+            tmp1,tmp2 = reset_list(show_on_homepage)
             output = ['reset', tmp1, tmp2]
-    return HttpResponse(json.dumps(output), content_type='application/json')
+            return HttpResponse(json.dumps(output), content_type='application/json')
+
+
+def make_in_html_syntax(somelist):
+    local_var = ''
+    for a_row in somelist:
+        local_var += '<option value="' + str(a_row[0]) + '">' + \
+        str(a_row[0]) + ' (' + str(a_row[1]) + ')</option>'
+    return local_var
+
+
+def make_lang_list_by_foss(foss, show_on_homepage):
+    lang_list = TutorialResource.objects.filter(
+        Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = show_on_homepage,
+        tutorial_detail__foss__foss=foss).values('language__name').annotate(
+        Count('id')).order_by('language__name').values_list('language__name', 'id__count').distinct()
+    tmp = '<option value = ""> -- All Languages -- </option>'
+    tmp += make_in_html_syntax(lang_list)
+    return tmp
+
+
+def make_foss_list_by_lang(lang,show_on_homepage):
+    foss_list = TutorialResource.objects.filter(
+        Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = show_on_homepage,
+        language__name=lang).values('tutorial_detail__foss__foss').annotate(
+        Count('id')).order_by('tutorial_detail__foss__foss').values_list(
+        'tutorial_detail__foss__foss', 'id__count').distinct()
+    tmp = '<option value = ""> -- All Courses -- </option>'
+    tmp += make_in_html_syntax(foss_list)
+    return tmp
+
+
+def reset_list(show_on_homepage):
+    lang_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = show_on_homepage).values('language__name').annotate(
+        Count('id')).order_by('language__name').values_list('language__name', 'id__count').distinct()
+
+    foss_list = TutorialResource.objects.filter(
+        Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = show_on_homepage,
+        language__name='English').values('tutorial_detail__foss__foss').annotate(
+        Count('id')).order_by('tutorial_detail__foss__foss').values_list(
+        'tutorial_detail__foss__foss', 'id__count').distinct()
+
+    tmp1 = '<option value = ""> -- All Languages -- </option>'
+    tmp1 += make_in_html_syntax(lang_list)
+    tmp2 = '<option value = ""> -- All Courses -- </option>'
+    tmp2 += make_in_html_syntax(foss_list)
+    return tmp1,tmp2
 
 
 def testimonials(request, type="text"):
