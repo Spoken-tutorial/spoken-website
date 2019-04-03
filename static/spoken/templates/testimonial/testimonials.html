@@ -126,8 +126,8 @@
         
         <ul class="nav nav-tabs">
             {% if testimonial_type == "text" %}
-            <li class="active"><a href="{% url 'testimonials' type='text' %}">Text</a></li>
-            <li><a href="{% url 'testimonials' type='media' %}">Media</a></li>
+            <li class="active"><a href="{% url 'testimonials' testimonial_type='text' %}">Text</a></li>
+            <li><a href="{% url 'testimonials' testimonial_type='media' %}">Media</a></li>
             {% else %}
             <div class= 'filters row' >
             <form action="" method="get" class='form-horizontal pull-right' id="news-foss-filter">
@@ -142,8 +142,8 @@
                 </div>
             </form>
             </div>
-            <li><a href="{% url 'testimonials' type='text' %}">Text</a></li>
-            <li class="active"><a href="{% url 'testimonials' type='media' %}">Media</a></li>
+            <li><a href="{% url 'testimonials' testimonial_type='text' %}">Text</a></li>
+            <li class="active"><a href="{% url 'testimonials' testimonial_type='media' %}">Media</a></li>
             {% endif %}
         </ul>
 
@@ -156,7 +156,7 @@
                     <div class="row testimonial-content">
                         <div class='st_wrapper col-xs-12 col-md-7'>
                             <div class='st_video_container'>
-                                <video class="st_video" title='{{ record.foss_foss }}' controls preload data-setup="{}">
+                                <video class="st_video" title='{{ record.foss.foss }}' controls preload data-setup="{}">
                                 <source src="{{ media_url }}{{ record.path }}" type="video/mp4" />
                                 </video>
                             </div>
@@ -169,7 +169,7 @@
                     </div>
                     <div class="testimonials-details">
                         <div class="testimonials-caret"></div>
-                        <div class="user-details"><b>{{record.foss__foss}}</b> : {{ record.user }}</div>
+                        <div class="user-details"><b>{{record.foss.foss}}</b> : {{ record.user }}</div>
                         <div class="user-details"><b>Details</b> : {{record.workshop_details}}</div>
                     </div>
                 </div>
@@ -183,7 +183,7 @@
                             </div>
                             <div class='row'>
                                 <div class='st_audio_container'>
-                                    <audio class="st_audio" title='{{ record.foss_foss }}' controls preload data-setup="{}">
+                                    <audio class="st_audio" title='{{ record.foss.foss }}' controls preload data-setup="{}">
                                     <source src="{{ media_url }}{{ record.path }}" type="video/mp4" />
                                     </audio>
                                 </div>
@@ -191,7 +191,7 @@
                         </div>
                         <div class="testimonials-details">
                             <div class="testimonials-caret"></div>
-                            <div class="user-details"><b>{{record.foss__foss}}</b> : {{ record.user }}</div>
+                            <div class="user-details"><b>{{record.foss.foss}}</b> : {{ record.user }}</div>
                             <div class="user-details"><b>Details</b> : {{record.workshop_details}}</div>
                         </div>
                     </div>                

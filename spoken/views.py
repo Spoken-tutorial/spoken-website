@@ -343,27 +343,28 @@ def get_language(request, tutorial_type):
     return HttpResponse(json.dumps(output), content_type='application/json')
 
 
-def testimonials(request, type="text"):
+def testimonials(request, testimonial_type="text"):
     '''
     Responds with `/testimonial` page to display all the 
     text / video / audio template.
     '''
     collection = None
-    if type == "text":
-        collection = list(Testimonials.objects.all().values().order_by('-created'))
+    if testimonial_type == "text":
+        collectionSet = Testimonials.objects.all().order_by('-created')
     else:
-        collection = MediaTestimonials.objects.all().values("foss__foss", "content", "created", "foss", "foss_id", "id", "path", "user", "workshop_details").order_by('-created')
-    collection = MediaTestimonialsFossFilter(request.GET, queryset=collection)
-    form = collection.form
+        collectionSet = MediaTestimonials.objects.all().order_by('-created')
+    collection = MediaTestimonialsFossFilter(request.GET, queryset=collectionSet)
+    
     if collection:
         page = request.GET.get('page')
-        collection = get_page(collection, page, limit=6)
+        testimonials = get_page(collection.qs, page, limit=6)
+        form = collection.form
 
     context = {}
     context['form'] = form
-    context['collection'] = collection
+    context['collection'] = testimonials
     context['media_url'] = settings.MEDIA_URL
-    context['testimonial_type'] = type
+    context['testimonial_type'] = testimonial_type
     context.update(csrf(request))
     return render(request, 'spoken/templates/testimonial/testimonials.html', context)
 

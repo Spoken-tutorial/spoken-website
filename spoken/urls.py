@@ -34,7 +34,7 @@ urlpatterns = [
     url(r'^get-language/(?P<tutorial_type>[\w-]+)/$',  get_language, name="get_language"),
     url(r'^testimonials/new/$',  testimonials_new, name="testimonials_new"),
     url(r'^testimonials/$',  testimonials, name="testimonials"),
-    url(r'^testimonials/(?P<type>[\w]+)/$',  testimonials, name="testimonials"),
+    url(r'^testimonials/(?P<testimonial_type>[\w]+)/$',  testimonials, name="testimonials"),
     url(r'^testimonials/media/(?P<foss>[\w ]+)/$',  foss_testimonials, name="foss_testimonials"),
     
     url(r'^admin/testimonials/$',  admin_testimonials, name="admin_testimonials"),
