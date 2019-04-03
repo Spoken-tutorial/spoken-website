@@ -2850,3 +2850,26 @@ def academic_transactions(request):
       form = TrainingManagerForm(user=request.user)
     context['form'] = form
     return render(request, 'payment.html', context)
+
+def RequestCertificate(request, trid):
+  #pk =0
+  training = TrainingRequest.objects.get(pk=trid)
+  if training:
+    training.cert_status = 2 #request mark to complete
+    training.save()
+    messages.success(request, 'Request to generate participation certificate has successfully sent')
+  else:
+    print "Error"
+    messages.error(request, 'Request not sent.Please try again.')
+  return HttpResponseRedirect("/software-training/training-planner/")
+
+# def GenerateCertificate(request, trid):
+#   #pk =0
+#   training = TrainingRequest.objects.get(pk=trid)
+#   if training and training.cert_status == 2:
+#     training.cert_status = 1 #mark to generate
+#     training.save()
+#     messages.success(request, 'Certificates generated.')
+#   else:
+#     messages.error(request, 'Something went wrong Please try again')
+#   return HttpResponseRedirect("/software-training/training-request/rp/certificate-request/")

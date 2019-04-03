@@ -317,5 +317,15 @@ urlpatterns = [
     ),
     
     url(r'^academic-transactions/$','events.viewsv2.academic_transactions',name="payment"),
+    url(
+      r'^request/(?P<trid>\d+)/certificate/$', 
+      'events.viewsv2.RequestCertificate', 
+      name="request_certificate"
+    ),
+    # url(
+    #   r'^mark/(?P<pk>\d+)/complete/$', 
+    #   'events.viewsv2.MarkComplete', 
+    #   name="mark_complete"
+    # ),
 
 ]

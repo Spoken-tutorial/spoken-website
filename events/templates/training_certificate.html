@@ -15,7 +15,7 @@
       <th>Name</th>
       <th>Email</th>
       <th>Gender</th>
-      {% if training.is_learners_allowed %}
+      {% if training.is_learners_allowed and training.cert_status == 1%}
         <th>Certificate</th>
       {% endif %}
     </tr>
@@ -27,7 +27,7 @@
                   <td>{{ record.student.student_fullname }}</td>
                   <td>{{ record.student.user.email }}</td>
                   <td>{{ record.student.gender }}</td>
-                  {% if training.is_learners_allowed %}
+                  {% if training.is_learners_allowed and training.cert_status == 1 %}
                     <td><a href="{% url 'events:organiser_training_certificate' training_attendance.id %}">Download Certificate</a></td>
                   {% endif %}
                 {% endif %}
