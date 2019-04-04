@@ -181,7 +181,7 @@
                     <div class="col-lg-6 col-md-6 col-sm-6 testimonial-item">
                         <div class="testimonial-content">
                             <i class="fa fa-quote-left pull-left testimonial-quote"></i>
-                            {{ record.minified_content|len_cutter:320 }} - <a href="{% url 'testimonials' testimonial_type='testimonial_type' %}"> read </a>
+                            {{ record.minified_content|len_cutter:320 }} - <a href="{% url 'testimonials' testimonial_type='text' %}"> read </a>
                             <i class="fa fa-quote-right pull-right testimonial-quote"></i>
                         </div>
                         <div class="pull-left">

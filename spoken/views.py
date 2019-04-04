@@ -392,7 +392,7 @@ def foss_testimonials(request, foss):
     return render(request, 'spoken/templates/testimonial/mediatestimonials.html', context)
 
 
-def testimonials_new_media(request, type):
+def testimonials_new_media(request, testimonial_type):
     '''
     Responds with form for video/audio testimonials 
     to be uploaded and POST request checks and stores 
@@ -403,13 +403,13 @@ def testimonials_new_media(request, type):
         raise PermissionDenied()
     
     context = {}
-    if type == 'series':
+    if testimonial_type == 'series':
         form = MediaTestimonialForm(on_home_page=False)
     else:
         form = MediaTestimonialForm(on_home_page=True)
 
     if request.method == 'POST':
-        if type == 'series':
+        if testimonial_type == 'series':
             form = MediaTestimonialForm(request.POST, request.FILES, on_home_page=False)
         else:
             form = MediaTestimonialForm(request.POST, request.FILES, on_home_page=True)
