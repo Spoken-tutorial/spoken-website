@@ -39,7 +39,7 @@ urlpatterns = [
     
     url(r'^admin/testimonials/$',  admin_testimonials, name="admin_testimonials"),
     url(r'^admin/testimonials/(?P<rid>\d+)/edit/$',  admin_testimonials_edit, name="admin_testimonials_edit"),
-    url(r'^testimonials/new/media/(?P<type>[\w]+)/$',  testimonials_new_media, name="testimonials_new_media"),
+    url(r'^testimonials/new/media/(?P<testimonial_type>[\w]+)/$',  testimonials_new_media, name="testimonials_new_media"),
     url(r'^admin/testimonials/(?P<rid>\d+)/delete/$',  admin_testimonials_delete, name="admin_testimonials_delete"),
     url(r'^admin/testimonials/media/(?P<rid>\d+)/delete/$',  admin_testimonials_media_delete,name="admin_testimonials_media_delete"),
     url(r'^brochures/$',  ViewBrochures, name="view_brochures"),
