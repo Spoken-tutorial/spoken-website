@@ -322,10 +322,15 @@ urlpatterns = [
       'events.viewsv2.RequestCertificate', 
       name="request_certificate"
     ),
-    # url(
-    #   r'^mark/(?P<pk>\d+)/complete/$', 
-    #   'events.viewsv2.MarkComplete', 
-    #   name="mark_complete"
-    # ),
+    url(
+      r'^certificate-request/(?P<role>\w+)/(?P<choice>\w+)/$', 
+      CertificateRequestListView.as_view(template_name='certificate_request_list.html'), 
+      name='certificate_request_list'
+    ),
+    url(
+      r'^generate/(?P<trid>\d+)/certificate/$', 
+      'events.viewsv2.GenerateCertificate', 
+      name="generate_certificate"
+    ),
 
 ]

@@ -237,7 +237,15 @@
             <td>{{ training.attendance_summery }}</td>
             <td>
               {% if training.get_partipants_from_attendance %}
-              | <a href="{% url 'events:training_certificate' training.id %}">Participant List</a> | <a href="{% url 'events:request_certificate' training.id %}">Genearte Participation Certificate</a> |
+              | <a href="{% url 'events:training_certificate' training.id %}">Participant List</a> | 
+                {% if training.cert_status == 0 %}
+                <a href="{% url 'events:request_certificate' training.id %}">Genearte Participation Certificate</a>
+                {% elif training.cert_status == 1 %}
+                Participation certificates available
+                {% else %}
+                Certificate request awaiting at Training manager
+                {% endif %}
+              |
               {% endif %}
             </td>
           </tr>
