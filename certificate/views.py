@@ -12,9 +12,7 @@ from django.template import RequestContext
 
 # Spoken Tutorial Stuff
 from certificate.forms import FeedBackForm
-from certificate.models import Answer, Certificate, Drupal_camp, Drupal_WS, FeedBack, Question, \
-FA_WS, ITP_WS, Koha_WS, Koha_WS_29Sep2018, Koha_WS_8feb2019, Koha_WS_12oct2018, Koha_RC_12oct2018,\
-Moodle_WS_1march2019
+from certificate.models import *
 
 
 def index(request):
@@ -1085,6 +1083,7 @@ def create_koha_12oct_rc_certificate(certificate_path, name, qrcode, type, paper
         err = e
     return [err, error]
 
+
 def moodle_coordinators_workshop_download(request):
     context = {}
     err = ""
@@ -1118,9 +1117,9 @@ def moodle_coordinators_workshop_download(request):
         try:
             old_user = Certificate.objects.get(email=email, serial_no=serial_no)
             qrcode = 'Verify at: http://spoken-tutorial.org/certificate/verify/{0} '.format(old_user.short_key)
-            details = {'name': name, 'serial_key': old_user.short_key, 'college':college}
-            certificate = create_moodle_coordinators_workshop_certificate(certificate_path, details,
-                                                             qrcode, type, paper, workshop, file_name)
+            details = {'name': name, 'serial_key': old_user.short_key, 'college': college}
+            certificate = create_moodle_coordinators_workshop_certificate(certificate_path, details, 
+                qrcode, type, paper, workshop, file_name)
             if not certificate[1]:
                 old_user.counter = old_user.counter + 1
                 old_user.save()

@@ -104,6 +104,7 @@ class Koha_WS_12oct2018(models.Model):
     remote = models.CharField(max_length=500)
     purpose = models.CharField(max_length=10, default='KMW')
 
+
 class Koha_RC_12oct2018(models.Model):
     name = models.CharField(max_length=200)
     email = models.EmailField()
@@ -111,11 +112,13 @@ class Koha_RC_12oct2018(models.Model):
     remote = models.CharField(max_length=500)
     purpose = models.CharField(max_length=10, default='KRC')
 
+
 class Koha_WS_8feb2019(models.Model):
     name = models.CharField(max_length=200)
     email = models.EmailField()
     college = models.CharField(max_length=500)
     purpose = models.CharField(max_length=10, default='KCW')
+
 
 class Moodle_WS_1march2019(models.Model):
     name = models.CharField(max_length=200)
