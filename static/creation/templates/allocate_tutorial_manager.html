@@ -1,0 +1,507 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load eventsdata %}
+{% load cmsdata %}
+{% load creationdata %}
+{% block title %}Tutorial Allocation {% endblock %}
+{% block compresscssblock %}
+    <link rel="stylesheet" href="{% static 'spoken/css/jquery.datetimepicker.css' %}" type="text/css" media="screen" charset="utf-8" />
+{% endblock %}
+
+{% block heading %} <i class="fa fa-list-ul"></i> Bidding Interface {% endblock %}
+{% block search %}{% endblock %}
+{% block content %}
+
+  <div class='row' >
+    <form action="" method="post" class='form-horizontal'> {%csrf_token%}
+      <div class="col-lg-4 col-md-4 col-sm-4">    
+          <div class="form-group">
+              <label for="id_foss" class="col-sm-4 control-label">FOSS Course</label>
+              <div class="col-sm-8">
+                {% render_field form.tutorial_detail__foss class+="form-control foss" tabindex="1" %}
+                {{ form.tutorial_detail.errors }}                      
+              </div>         
+          </div>
+              
+          {% if status == 'ongoing' or status == 'completed' %}
+            <div class="form-group">
+              <label for="id_script_user_id" class="col-sm-4 control-label">Script Contributors</label>
+              <div class="col-sm-8"> 
+   
+             
+            {% render_field form.script_user class+="form-control script_user" tabindex="1" %}
+                {{ form.tutorial_detail.errors }}
+                 
+            </div>
+          </div>
+
+            <div class="form-group">
+              <label for="id_video_user_id" class="col-sm-4 control-label">Video Contributors</label>
+              <div class="col-sm-8"> 
+   
+             
+            {% render_field form.video_user class+="form-control video_user" tabindex="1" %}
+                {{ form.tutorial_detail.errors }}
+                 
+            </div>
+          </div>
+          {% endif %}  
+        </div>
+      
+    <div class="col-lg-4 col-md-4 col-sm-4">
+    <div class="form-group">
+        <label for="id_language__name" class="col-sm-4 control-label" id="language">Language</label>
+
+        <div class="col-sm-8 ajax-refresh-language">
+            {% render_field form.language class+="form-control language" tabindex="1" %}
+            {{ form.language.errors }}
+        </div>
+    </div>
+              <div class="form-group">
+              <label for="id_level" class="col-sm-4 control-label">Difficulty Level</label>
+              <div class="col-sm-8 level">
+                  {% render_field form.tutorial_detail__level class+="form-control level" tabindex="1" %}
+                  {{ form.tutorial_detail__level.errors }}
+              </div>
+          </div>
+      </div>          
+  <div>
+
+      <div class="col-lg-4 col-md-4 col-sm-4">
+        <table class="table table-bordered table-hover span6" style="margin-bottom:2px;">        
+            
+            <tr class="text-muted">
+              {% if status == 'completed' %}
+                <th >Tutorials Published</th>
+              {%endif%}
+              {% if status == 'available' %}
+                <th >Tutorials Available</th>
+              {%endif%}
+              {% if status == 'ongoing' %}
+                <th >Tutorials Bid</th>
+              {%endif%}
+              <td>{{ bid_count__count }}</td>
+            </tr>
+
+            <tr>
+                <th>Tutorial Count</th><td>{{ tutorials_count }}</td>
+            </tr>
+           
+            
+              <div class="progress">
+                <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow= (40/50)*100
+                aria-valuemin="0" aria-valuemax="5" style=width:{{ perc }}%>
+                  
+                </div>
+              </div>
+        </table>    
+      </div>
+      
+      <div class="form-group col-sm-12" >
+        <div class="col-sm-offset-4 col-sm-8">
+           <input class="btn btn-success" type="submit" value="Filter" />
+           <a class="btn btn-success" href="{{request.path}}?{{request.POST|reset_get_values}}">Reset Filter</a>
+        </div>
+      </div>
+  </div>
+
+  <ul class="tabs nav nav-tabs">
+      <li {% if status == 'completed' %}{{ 'class="active"'}}{% endif %}>
+      <a href="{% url 'creation:allocate_tutorial' 'completed' %}"><i class="fa fa-list-ul"></i> Completed </a></li>
+      <li {% if status == 'available' %}{{ 'class="active"'}}{% endif %}>
+      <a href="{% url 'creation:allocate_tutorial' 'available' %}"><i class="fa fa-list-ul"></i> Available </a></li>
+      <li {% if status == 'ongoing' %}{{ 'class="active"'}}{% endif %}>
+      <a href="{% url 'creation:allocate_tutorial' 'ongoing' %}"><i class="fa fa-list-ul"></i> Ongoing </a></li>
+      {% if status == 'available' %}
+      <li class = "pull-right" ><a href="{% url 'creation:refresh_tutorials' %}" data-toggle="tooltip" title="Click this for latest list of Tutorials . This will take some time">Refresh list of Tutorials here</a></li>
+      {% endif %}
+  </ul>
+
+  <div class="tab-content">
+  <div class="tab-pane active" id="pending">
+  
+    
+    <table class="paleblue table table-striped table-hover table-bordered">
+    {% if status == 'available' %}
+
+      
+        <div class="col-lg-4 col-md-4 col-sm-4" style="z-index:100; position:sticky; top:8%; padding:1%; width:100%; background-color:#424949; color: #ffffff">
+          <div class="form-group ">
+              <label for="id_foss" class="col-sm-4 control-label "><h5>Contributors</h5></label>
+              <div class="col-sm-4"> 
+              <select class="form-control get_contributrs" tabindex="1" id="contributors">
+                <option id = "0">
+                  <label value="0">--- Select a Contributor ---</label>
+                </option>
+                {% for a_contributor in contributors %}
+                <!-- 1:'user__username', 2:'rating',3:'language__name' -->
+                {% if a_contributor.2 != 0 %}
+                {% if a_contributor.2 >= 3 %}
+                <option id="{{a_contributor.0}}" style="color:green" value="{{a_contributor.1}}">{{a_contributor.1}}</option>
+                {%else%}
+                <option id="{{a_contributor.0}}" style="color:red" value="{{a_contributor.1}}">{{a_contributor.1}}</option>
+                {% endif %}
+                {% endif %}
+                {% endfor %}
+            </select>
+        </div>
+        </div>
+          
+              <label for="id_foss" class="col-sm-4 control-label "><h5>FOSS Submission Date</h5></label>
+              <div class="col-sm-4"> 
+              <input class="form-control datepicker" type="text" id="datepicker">
+              <span class="add-on"><i class="icon-th"></i></span>
+             </div> 
+            </div>
+          </div>
+    
+        
+      <tr>
+         {% regroup collection.object_list by tutorial_detail.foss as foss_list %}
+        {% for top_level_group in foss_list %}
+    
+        
+          
+          <td class="btn btn-primary" >{{ top_level_group.grouper }}
+          </td>
+       
+          <td>
+          <a id="allocate_foss" href="#" onclick=allocate('{{top_level_group.grouper.id}}','dummy','foss') >Allocate</a> 
+          </td>
+        </tr>
+    {% get_sortable_header header ordering request.POST %}  
+          {% for record in top_level_group.list %}                
+      <tr>                     
+                  <td>{{ record.tutorial_detail.level }}</td>       
+                  <td>{{ record.tutorial_detail.order }}</td>
+                  <td>{{ record.tutorial_detail.tutorial }}</td>
+                  <td>{{ record.language.name }}</td>
+                  <td><select id="{{record.tutorial_detail.id}}" class = "form-control">
+                    {% for i in i|rjust:"15" %}
+                      <option >{{ forloop.counter }}</option>
+                    {% endfor %}
+                  </select></td>
+                  <td><a href="#" onclick = allocate('{{record.tutorial_detail.id}}','{{record.language_id}}','tutorial') >Allocate</a>
+                </td>
+      </tr>
+          {% endfor %}      
+        {% endfor %}
+      {% endif %}
+
+      {% if status == 'ongoing' %}
+        {% get_sortable_header header ordering request.GET %}  
+          {% for record in collection.object_list %}
+          <tr>
+          <td>{{ collection.start_index|add:forloop.counter|add:-1 }}
+          </td>
+          <td>{{ record.tutorial_detail.level }}</td>
+          <td>{{ record.tutorial_detail.order }}</td>      
+          <td>{{ record.tutorial_detail.foss.foss }}</td>
+          <td>{{ record.tutorial_detail }}</td>
+          <td>{{ record.language.name }}</td>
+          {% if record.script_user.username %}
+              <td id="script_user">{{ record.script_user.username }}           
+          {% else %}
+              <td id="script_user1">{{ record.script_user.first_name }}
+          {% endif %}
+          <div hidden id="div_script{{forloop.counter}}" class="form-group ">
+              
+              <div class="col-sm-12"> 
+              <select class="form-control get_contributrs" tabindex="1" id="script_contributors{{forloop.counter}}">
+                <option id = "0">
+                  <label id="0">--- Select a Contributor ---</label>
+                </option>              
+            </select>
+        </div>
+        </div>
+        </td>
+          {% if record.video_user.username %}
+              <td id="video_user">{{ record.video_user.username }}         
+          {% else %}
+              <td id="video_user">{{ record.video_user.first_name }}
+          {% endif %}    
+          <div hidden id="div_video{{forloop.counter}}" class="form-group ">
+              
+          <div class="col-sm-12"> 
+              <select class="form-control get_contributrs" tabindex="1" id="video_contributors{{forloop.counter}}">
+                <option id = "0">
+                  <label value="0">--- Select a Contributor ---</label>
+                </option>
+            </select>
+          </div>
+        </div>
+        </td>
+          <td >{{ record.updated|date:"d M Y" }}</td>
+      {% if record.submissiondate|date:"Y" == '2000' %}
+          <td >{{datetoday|date:"d M Y"}} </td>
+      {% else %}
+          <td >{{record.submissiondate|date:"d M Y" }}</td>
+      {% endif%}      
+          <td align="center">
+          
+              {% if datetoday|date:"Y m d"  > record.submissiondate|date:"Y m d" %} 
+                
+                {% if record.extension_status < 2 %}
+                <a class="btn btn-danger" href="#" onclick=extend('{{record.id}}')> 
+              Extend </a>
+              {% endif %}
+              {% else%}
+                {% if record.extension_status >= 1 %}
+                <a class="btn btn-danger" disabled> Extend</a>
+                {% endif %}    
+              {% endif %}
+            {{ record.extension_status }}            
+          </td>
+          <td>
+            <div>
+              {% if record.script_status > 0 and record.submissiondate|date:"Y m d" > datetoday|date:"Y m d" %}
+            <a disabled class="btn btn-danger" > 
+            Revoke </a><br>
+            {% else%}
+            <a class="btn btn-danger" href="#" onclick=revoke_tutorials('{{record.id}}')> 
+            Revoke </a><br>
+            {% endif %}
+              <input type="checkbox"  id="email_sub_date"> Submission Date<br>
+            
+            
+          </td>
+
+            <td>
+            <a class="btn btn-warning" id="edit{{forloop.counter}}" href="#" onclick=enable('{{forloop.counter}}','{{record.language.id}}')>Edit</a>
+             <a class="btn btn-success" id="edit{{forloop.counter}}" href="#" onclick=save('{{forloop.counter}}','{{record.id}}')>Save</a>
+            </td>
+
+          </div>
+          </tr>
+          {% endfor %}
+          </tr>
+      {% endif %}
+          
+      {% if status == 'completed' %}
+      {% get_sortable_header header ordering request.GET %} 
+          {% for record in collection.object_list %}
+          <tr>
+          <td>{{ collection.start_index|add:forloop.counter|add:-1 }}<input type="hidden" value="{{ record.id }}"></td>
+          <td>{{ record.tutorial_detail.foss.foss }}</td>
+          <td>{{ record.tutorial_detail.tutorial }}</td>
+          <td>{{ record.language.name }}</td>
+          <td>{{ record.created|date:"d M Y" }}</td>
+          {% if record.script_user.username %}
+              <td>{{ record.script_user.username }}</td>             
+          {% else %}
+              <td>{{ record.script_user.first_name }}</td>
+          {% endif %}
+
+          {% if record.video_user.username %}
+              <td>{{ record.video_user.username }}</td>             
+          {% else %}
+              <td>{{ record.video_user.first_name }}</td>
+          {% endif %}
+
+          </tr>
+          {% endfor %}
+      {% endif %}            
+    </table>
+
+  </div>
+  </div>
+{% endblock %}
+{% block pager %}
+                                {% if collection.paginator.num_pages > 1 %}
+                                    <ul class="pagination pull-right">
+                                        {% if collection %}
+                                            {% if collection.has_previous %}
+                                                <li><a href="?{{ request.POST|combine_get_values }}page=1">&laquo; <small>First</small></a></li>
+                                                <li><a href="?{{ request.POST|combine_get_values }}page={{ collection.previous_page_number }}">&laquo; <small>Prev</small></a></li>
+                                            {% else %} 
+                                                <li class="disabled"><a href="#">&laquo;</a></li>
+                                            {% endif %}
+                                            {% for num in collection.paginator.page_range|paginator_page_cutter:collection.number %}
+                                                {% ifequal num collection.number %} 
+                                                    <li class="active"><a href="#">{{ num }}<span class="sr-only">(current)</span></a></li>
+                                                {% else %} 
+                                                    <li><a href="?{{ request.POST|combine_get_values }}page={{ num }}">{{ num }}</a></li>
+                                                {% endifequal %} 
+                                            {% endfor %} 
+                                            {% if collection.has_next %} 
+                                                <li><a href="?{{ request.POST|combine_get_values }}page={{ collection.next_page_number }}"><small>Next</small> &raquo;</a></li>
+                                                {% if collection.paginator.page_range|length > 10 %}
+                                                    <li><a href="?{{ request.POST|combine_get_values }}page={{ collection.paginator.num_pages }}"><small>Last</small> &raquo;</a></li>
+                                                {% endif %}
+                                            {% else %} 
+                                                <li class="disabled"><a href="#">&raquo;</a></li>
+                                                <li class="disabled"><a href="?{{ request.POST|combine_get_values }}page={{ collection.paginator.num_pages }}"><small>Last</small> &raquo;</a></li>
+                                            {% endif %}
+                                        {% endif %}
+                                    <ul>
+                                {% endif %}
+                            {% endblock %} 
+{% block compressjsblock %}
+    <script src="{% static 'spoken/js/events.js' %}"></script>
+    <script src="{% static 'spoken/js/jquery.datetimepicker.js' %}"></script>
+    <script src="{% static 'spoken/js/jquery.fancybox.pack.js' %}"></script>
+    <script type="text/javascript"> 
+
+
+        
+        $(document).ready(function(){
+
+               $('.datepicker').datetimepicker({
+                format: "Y-m-d",
+                timepicker : false,
+                   minView: 2,
+                   maxView: 4,    
+                  autoclose: true
+               });
+
+});
+        function extend(tutorial)
+        {
+              $.ajax({
+                type : "POST",
+                url:"/creation/extend_submission_date/",
+                dataType : "json",
+                data:{
+                  tutorial: tutorial
+                },
+                success: function(data)
+                { 
+                  location.reload();
+                }
+              });
+        }
+          
+        
+
+        function allocate(var_a,var_b,var_c)
+        {
+          // var_a :tutorial_detail , var_b : language , var_c : differentiator [tutorial allocation]
+          // var_a :foss_id         , var_b : user     , var_c : differentiator [foss allocation]
+
+          var contributor_option = $("#contributors option:selected");
+          var language = $(".language option:selected").text();
+          var level = $(".level option:selected").text();
+          var contributor_text = contributor_option.text();
+          
+          if(var_c == 'foss' && level.match(/---.*/))
+          {
+            alert(" PLease select a level");
+          }
+          else
+          {
+            if(contributor_text.match(/Contributor.*/))
+            {
+              alert("Please select a contributor");
+            }
+            else
+            {
+              if (var_c=='tutorial')
+                {
+                var date_id = document.getElementById(var_a);
+                var days = date_id.options[date_id.selectedIndex].value;
+                $.ajax({
+                type : "GET",
+                url:'/creation/allocate/'+var_a+'/'+var_b+'/'+contributor_option.attr('id')+'/'+days,
+                dataType : "json",
+                success: function(data)
+                {
+                       location.reload();
+                }
+                });
+
+                // location.href =  '/creation/allocate/'+var_a+'/'+var_b+'/'+contributor_option.attr('id')+'/'+date;
+                } 
+                if (var_c=='foss') 
+                {
+                  var today = new Date();
+                  var foss_date = document.getElementById("datepicker").value;
+                  var subDate = new Date(foss_date);
+                  var diff = subDate - today;
+                  var days = Math.round(diff / (1000 * 60 * 60 * 24));
+                  if (days < 0  || isNaN(days) ) 
+                  {
+                    alert("Please select a submission date[valid] for the FOSS")
+                  }
+                  else
+                  {
+                  // location.href =  '/creation/allocate_foss/'+var_a+'/'+language+'/'+contributor_option.attr('id')+'/'+level+'/'+days;
+
+                  $.ajax({
+                type : "GET",
+                url:'/creation/allocate_foss/'+var_a+'/'+language+'/'+contributor_option.attr('id')+'/'+level+'/'+days,
+                dataType : "json",
+                success: function(data)
+                {
+                  location.reload();
+                }
+                });
+
+                  }
+                  
+                }
+            }
+          }
+        }
+
+        function revoke_tutorials(tutorial_resource_id){
+          var sub_date = document.getElementById("email_sub_date").checked;
+          $.ajax({
+                type : "POST",
+                url:'/creation/revoke_allocated_tutorial/',
+                dataType : "json",
+                data:{
+                  'tutorial_resource_id':tutorial_resource_id,
+                  'submissiondate_message ':sub_date,
+                },
+                success: function(data)
+                {
+                  location.reload();
+                }
+                });
+        }
+
+        function enable(id_to_edit, language)
+        {
+          var element_id = "script_user"+id_to_edit;
+          $("#div_video"+id_to_edit).show();
+          $("#div_script"+id_to_edit).show();
+          
+           $.ajax({
+                type : "POST",
+                url:'/creation/get_rated_contributors/',
+                dataType : "json",
+                data: {
+                  'language' : language
+                },
+                success: function(data)
+                {
+                  $('#script_contributors'+id_to_edit).html(data);
+                  $('#video_contributors'+id_to_edit).html(data);
+                }
+                });
+ 
+        }
+
+        function save(id_to_edit,record){
+          var script_contributors_option = $("#script_contributors"+id_to_edit +" option:selected").attr('id');
+          var video_contributors_option = $("#video_contributors"+id_to_edit + " option:selected").attr('id');
+          $.ajax({
+                type : "POST",
+                url:'/creation/update_contributors/',
+                dataType : "json",
+                data: {
+                  'tr_id' : record,
+                  'script_user':script_contributors_option,
+                  'video_user':video_contributors_option,
+                },
+                success: function(data)
+                {
+                  location.reload();
+                }
+                });
+        }
+
+    </script>
+
+{% endblock %}

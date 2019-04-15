@@ -4,6 +4,7 @@
 {% load creationdata %}
 {% block title %}Creation Dashboard{% endblock %}
 {% block content %}
+
     <div class="panel panel-primary">
         <div class="panel-heading">
             <h4 class="panel-title"><i class="fa fa-desktop"></i> Creation Dashboard</h4>
@@ -23,10 +24,31 @@
                                 <li><a target="_blank" href="/creation/upload-publish-outline/">Upload Published Tutorial Outline</a></li>
                                 <li><a target="_blank" href="/creation/upload/contributed/">Tutorials contributed</a></li>
                                 <li><a target="_blank" href="/creation/report-missing-component/list/">Component Missing Notifications</a></li>
+                                <li>    
+                                    <a target="_blank" href="/creation/allocate_tutorial/available/">Request for a FOSS's Tutorial</a>
+                                </li>
                             </ul>
                         </div>
                     </div>
                 {% endif %}
+                
+                {% if user|get_language_manager %}
+                    <div class="panel panel-info">
+                    <div class="panel-heading panel-heading-notif">Language Manager</div>
+                    <div class="panel-body">
+                        <ul>
+                            <li>
+                                <a target="_blank" href="/creation/rate_contributors/">Rate Contributors</a></li>
+                            </li>
+                            <li>
+                                <a target="_blank" href="/creation/allocate_tutorial_manager/available/">Allocate a FOSS's Tutorial </a>
+                            </li>   
+                        </ul>
+                    </div>
+                </div>
+            
+                {% endif %}
+
                 {% if user|get_contenteditor %}
                     <div class="panel panel-info">
                         <div class="panel-heading panel-heading-notif">Content Editor</div>
@@ -97,41 +119,74 @@
                                 <li><a target="_blank" href="/creation/role/requests/">Role Requests</a></li>
                                 <li><a href="{% url 'admin_testimonials' %}" target="_blank">Testimonials</a></li>
                                 <li><a target="_blank" href="/creation/report-missing-component/list/">Component Missing Notifications</a></li>
+                                <li>
+                                <a href="/creation/refresh_roles/">Refresh roles</a>
+                                </li>   
                             </ul>
                         </div>
                     </div>
                 {% endif %}
-                <div class="panel panel-info">
+                 <div class="panel panel-info">
                     <div class="panel-heading panel-heading-notif">Creation Roles</div>
-                    <div class="panel-body">
-                        <ul>
+                    <div class="panel-body ">
+                        <ul > 
                             {% if user|get_internal_contributor %}
-                                <li><a href="/creation/role/revoke/contributor">Revoke Contributor Role</a></li>
+                                <li>
+                                <a href="#" onClick= "show_modal(this)" id = "add_contributor" > Add me as Contributor   </a>
+                                {% if is_contributor_language %}
+                                <a href="#" onClick= "show_modal(this)" id = "revoke_contributor" >| Revoke Contributor</a>
+                                {% endif %}
+                                    </li>
+                                
                             {% else %}
-                                <li><a href="/creation/role/add/contributor">Add me as Contributor</a></li>
+                                <li><a href="#" onClick= "show_modal(this)" id = "add_contributor" > Add me as Contributor</a>
+                                </li>
                             {% endif %}
                             {% if user|get_external_contributor %}
-                                <li><a href="/creation/role/revoke/external-contributor">Revoke External Contributor Role</a></li>
+                                <li >
+                                    <a href="#" onClick= "show_modal(this)" id = "add_external_contributor" >Add me as External Contributor  </a>
+                                    {% if is_external_contributor_language %}
+                                    <a href="#" onClick= "show_modal(this)" id = "revoke_external_contributor" >| Revoke External Contributor Role</a>
+                                    {% endif %}
+                                </li>
                             {% else %}
-                                <li><a href="/creation/role/add/external-contributor">Add me as External Contributor</a></li>
+                                <li>
+                                    <a href="#" onClick= "show_modal(this)" id = "add_external_contributor" >Add me as External Contributor</a></li>
                             {% endif %}
                             {% if user|get_videoreviewer %}
-                                <li><a href="/creation/role/revoke/video-reviewer">Revoke Admin Reviewer Role</a></li>
+                                <li>
+                                    <a href="#" onClick= "show_modal(this)" id = "revoke_admin">Revoke Admin Reviewer Role</a></li>
                             {% else %}
-                                <li><a href="/creation/role/add/video-reviewer">Add me as Admin Reviewer</a></li>
+                                <li>
+                                    <a href="#" onClick= "show_modal(this)" id = "add_admin">Add me as Admin Reviewer</a></li>
                             {% endif %}
                             {% if user|get_domainreviewer %}
-                                <li><a href="/creation/role/revoke/domain-reviewer">Revoke Domain Reviewer Role</a></li>
+                                <li>
+                                    <a href="#" onClick= "show_modal(this)" id = "add_domain">Add me as Domain Reviewer  </a>
+                                    {% if is_domain_reviewer_language %}
+                                    <a href="#" onClick= "show_modal(this)" id = "revoke_domain">| Revoke Domain Reviewer Role</a>
+                                    {% endif %}
+                                </li>
                             {% else %}
-                                <li><a href="/creation/role/add/domain-reviewer">Add me as Domain Reviewer</a></li>
+                                <li>
+                                    <a href="#" onClick= "show_modal(this)" id = "add_domain">Add me as Domain Reviewer</a>
+                                </li>
                             {% endif %}
                             {% if user|get_qualityreviewer %}
-                                <li><a href="/creation/role/revoke/quality-reviewer">Revoke Quality Reviewer role</a></li>
+                                <li>
+                                    <a href="#" onClick= "show_modal(this)" id = "add_quality">Add me as Quality Reviewer  </a>
+                                    {% if is_quality_reviewer_language %}
+                                    <a href="#" onClick= "show_modal(this)" id = "revoke_quality">| Revoke Quality Reviewer role</a>
+                                    {% endif %}
+                                </li>
                             {% else %}
-                                <li><a href="/creation/role/add/quality-reviewer">Add me as Quality Reviewer</a></li>
+                                <li>
+                                    <a href="#" onClick= "show_modal(this)" id = "add_quality">Add me as Quality Reviewer</a><br>
+                                </li>
                             {% endif %}
-                            
                         </ul>
+                                        {% include "creation/templates/modals.html" %}
+                                        
                     </div>
                 </div>
             </div>
@@ -215,4 +270,135 @@
             </div>
         </div>
     </div>
+<script type= "text/javascript" >
+
+var direction = "";
+var language = "";
+var id = "";
+
+// Call the respective modal as per he role request
+function show_modal(curr){
+    var currele = curr.id;
+
+    //$(".modal-height").css({height:'10px'});   
+    switch (currele){
+
+        case "add_contributor":
+        {
+            $("#stModal_con").modal('show');
+
+            document.getElementById("stModalLabel_c").innerHTML = "Add Contributor";
+            direction = "/creation/role/add/contributor/";
+            id = "id_search_lang_add_c";
+            break;
+        }
+        case "revoke_contributor":
+        {
+            $("#stModal_con_revoke").modal('show');
+            document.getElementById("stModalLabel_c_revoke").innerHTML = "Revoke Contributor";
+            direction ="/creation/role/revoke/contributor/";
+            id = "id_search_lang_revoke_c";
+            break;
+        }
+        case "add_external_contributor":
+        {
+            $("#stModal_ext_con").modal('show');
+            document.getElementById("stModalLabel_ec").innerHTML = "Add External Contributor";
+            direction ="/creation/role/add/external-contributor/";
+            id = "id_search_language_add_ec";
+      
+            break;
+        }
+        case "revoke_external_contributor":
+        {
+            $("#stModal_ext_con_revoke").modal('show');
+            document.getElementById("stModalLabel_ec_revoke").innerHTML = "Revoke External Contributor";
+            direction ="/creation/role/revoke/external-contributor/";
+            id = "id_search_lang_revoke_ec";
+            break;
+        }
+
+        case "add_admin":
+        {         
+            location.href ="/creation/role/add/video-reviewer/0/";      
+            break;
+        }
+        case "revoke_admin":
+        {
+            location.href ="/creation/role/revoke/video-reviewer/0/";   
+            break;
+        }
+        
+        case "add_domain":
+        {
+            $("#stModal_dom_rev").modal('show');
+            document.getElementById("stModalLabel_dr").innerHTML = "Add Domain Reviewer";
+            direction ="/creation/role/add/domain-reviewer/";      
+            id = "id_search_language_add_dr";
+
+            break;
+        }
+        case "revoke_domain":
+        {
+            $("#stModal_dom_revoke").modal('show');
+            document.getElementById("stModalLabel_dr_revoke").innerHTML = "Revoke Domain Reviewer";
+            direction ="/creation/role/revoke/domain-reviewer/";
+            id = "id_search_lang_revoke_dr";
+            break;
+        }
+
+        case "add_quality":
+        {
+            $("#stModal_q_rev").modal('show');
+            document.getElementById("stModalLabel_qr").innerHTML = "Add Quality Reviewer";
+            direction ="/creation/role/add/quality-reviewer/";      
+            id = "id_search_language_add_qr";
+            break;
+        }
+
+        case "revoke_quality":
+        {
+            $("#stModal_q_revoke").modal('show');
+            document.getElementById("stModalLabel_qr_revoke").innerHTML = "Revoke Quality Reviewer";   
+            direction ="/creation/role/revoke/quality-reviewer/";
+            id="id_search_lang_revoke_qr";
+            break;
+        }
+    }
+}
+    
+
+
+function printer()
+{
+//Gets called when the modal is loaded up
+
+    var selected1 = [];
+    var this_direction = direction;
+    var select1 = document.getElementById(id);
+    for (var i = 0; i < select1.length; i++) {
+        if (select1.options[i].selected)
+        {   
+            //selected1.push(select1.options[i].id);
+            this_direction += select1[i].id+"/";
+            selected1.push(select1.options[i].value);
+        }
+    }
+    
+    if (this_direction.match(/revoke.*/)) {
+        var temp = confirm("This will remove you as a contributor for the selected languages \n\n Are you sure ? \n\nLanguages selected :"+selected1);  
+    }
+    else{
+        var temp = confirm("You have selected "+selected1);
+    }
+    if (temp)
+    {
+        location.href =  this_direction; 
+    }
+    else{
+    $("#"+id).val('');
+    }
+}
+</script>
+
 {% endblock %}
