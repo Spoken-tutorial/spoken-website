@@ -28,6 +28,9 @@ class CDContentForm(forms.Form):
         error_messages = {'required': 'Add atleast one foss and language, before pressing "Create ZIP file" button'},
         widget=forms.HiddenInput()
     )
+    tutorial_names = forms.MultipleChoiceField(
+        #widget = forms.HiddenInput()
+    )
 
     def __init__(self, *args, **kwargs):
         super(CDContentForm, self).__init__(*args, **kwargs)
