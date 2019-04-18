@@ -1,4 +1,5 @@
 from django.shortcuts import render
+import time
 from datetime import datetime
 from datetime import timedelta
 import re
@@ -312,6 +313,7 @@ class StudentBatchCreateView(CreateView):
     error = []
     warning = []
     write_flag = False
+    stu_row_count = 0
     try:
       rowcsv = csv.reader(file_path, delimiter=',', quotechar='|')
       rowcount = len(list(rowcsv))
@@ -325,6 +327,8 @@ class StudentBatchCreateView(CreateView):
       else :
         csvdata = csv.reader(file_path, delimiter=',', quotechar='|')
         for row in csvdata:
+          stu_row_count = stu_row_count+1
+          print stu_row_count
           if len(row) < 4:
             skipped.append(row)
             continue
@@ -346,6 +350,10 @@ class StudentBatchCreateView(CreateView):
             except ObjectDoesNotExist:
               StudentMaster.objects.create(student=student, batch_id=batch_id)
               write_flag = True
+            if stu_row_count%20 == 0:
+              print "@@@@@@@@@@ good night for 10 secs @@@@@@@@@@@@@@@@@@@@@@@"
+              time.sleep(10)
+
         StudentBatch.objects.get(pk=batch_id).update_student_count()
     except Exception, e:
       print e
