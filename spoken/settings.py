@@ -1,4 +1,4 @@
-    """
+"""
 Django settings for spoken project.
 
 For more information on this file, see
