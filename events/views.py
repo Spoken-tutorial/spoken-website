@@ -2332,8 +2332,10 @@ def training_subscribe(request, events, eventid = None, mdluser_id = None):
 
     return HttpResponseRedirect('/participant/index/')
 
+import time
 @login_required
 def organiser_invigilator_index(request, role, status):
+    start = time.time()
     """ Resource person: List all inactive organiser under resource person states """
     #todo: filter to diaplay block and active user
     active = status
@@ -2353,7 +2355,7 @@ def organiser_invigilator_index(request, role, status):
         raise PermissionDenied()
 
     user = User.objects.get(pk=user.id)
-
+    print "user",user.id,status
     header = {
         1: SortableHeader('#', False),
         2: SortableHeader('academic__state', True, 'State'),
@@ -2367,12 +2369,20 @@ def organiser_invigilator_index(request, role, status):
 
     if role == 'organiser':
         try:
-            collectionSet = Organiser.objects.select_related().filter(academic=AcademicCenter.objects.filter(state=State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)), status=status)
+            # collectionSet = Organiser.objects.select_related().filter(
+            # academic=AcademicCenter.objects.filter(state=State.objects.filter(
+            # resourceperson__user_id=user, resourceperson__status=1)), status=status)
+
+            states =  user.resource_person.filter(resourceperson__status = 1)
+            academics = AcademicCenter.objects.filter(state = states)
+            #select_related() can also be used for saving on foregn key relationships
+            #prefetch_related() can be used for manytomany foreign key relationships
+            collectionSet = Organiser.objects.filter(academic = academics, status = status)
 
             raw_get_data = request.GET.get('o', None)
             collection = get_sorted_list(request, collectionSet, header, raw_get_data)
             ordering = get_field_index(raw_get_data)
-
+            print "OK1 : ",ordering
             collection = OrganiserFilter(request.GET, user = user, queryset=collection)
             context['form'] = collection.form
 
@@ -2430,6 +2440,8 @@ def organiser_invigilator_index(request, role, status):
     context['status'] = active
     context['role'] = role
     context.update(csrf(request))
+    end = time.time()
+    print "difference is :",end-start
     return render(request, 'events/templates/organiser_invigilator_index.html', context)
 
 
