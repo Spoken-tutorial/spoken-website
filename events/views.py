@@ -827,13 +827,15 @@ def organiser_request(request, username):
                 organiser = Organiser()
                 organiser.user_id=request.user.id
                 organiser.academic_id=request.POST['college']
+                organiser.status=1
                 try:
                     organiser.save()
                 except:
                     organiser = Organiser.objects.get(user = user)
                     organiser.academic_id=request.POST['college']
                     organiser.save()
-                messages.success(request, "<ul><li>Thank you. Your request has been sent for Training Manager's approval.</li><li>You will get the approval with in 24 hours. Once the request is approved, you can request for the Training. </li><li>For more details <a target='_blank' href='http://process.spoken-tutorial.org/images/1/1f/Training-Request-Sheet.pdf'> Click Here</a></li></ul>")
+                messages.success(request, "<ul><li>Thank you. Your request has been approved.</li><li>You will get the approval with in 24 hours. Once the request is approved, you can request for the Training. </li><li>For more details <a target='_blank' href='http://process.spoken-tutorial.org/images/1/1f/Training-Request-Sheet.pdf'> Click Here</a></li></ul>")
+                # messages.success(request, "<ul><li>Thank you. Your request has been sent for Training Manager's approval.</li><li>You will get the approval with in 24 hours. Once the request is approved, you can request for the Training. </li><li>For more details <a target='_blank' href='http://process.spoken-tutorial.org/images/1/1f/Training-Request-Sheet.pdf'> Click Here</a></li></ul>")
                 return HttpResponseRedirect("/software-training/organiser/view/"+user.username+"/")
             messages.error(request, "Please fill the following details")
             context = {'form':form}
@@ -952,6 +954,7 @@ def invigilator_request(request, username):
                 invigilator = Invigilator()
                 invigilator.user_id=request.user.id
                 invigilator.academic_id=request.POST['college']
+                invigilator.status=1
                 try:
                     invigilator.save()
                 except:
@@ -959,7 +962,7 @@ def invigilator_request(request, username):
                     invigilator.academic_id=request.POST['college']
                     invigilator.save()
 
-                messages.success(request, "Thank you. Your request has been sent for Training Manager's approval. You will get the approval with in 24 hours. Once the request is approved, you can request for the workshop. For more details Click Here")
+                messages.success(request, "Thank you. Your request has been approved. You will get the approval with in 24 hours. Once the request is approved, you can request for the workshop. For more details Click Here")
                 return HttpResponseRedirect("/software-training/invigilator/view/"+user.username+"/")
             messages.error(request, "Please fill the following details")
             context = {'form':form}

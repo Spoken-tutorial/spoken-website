@@ -32,7 +32,8 @@ def encript_password(password):
 
 
 def create_account(w, firstname, lastname, gender, email, category):
-    password_string = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(8))
+    # password_string = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(8))
+    password_string = 'test12345'
     password_encript = encript_password(password_string)
 
     password = password_encript
@@ -60,40 +61,40 @@ def create_account(w, firstname, lastname, gender, email, category):
         mdluser.save()
         mdluser = MdlUser.objects.filter(email=email, firstname=firstname, username=username, password=password).first()
 
-        # send password to email
-        subject = "Spoken Tutorial Online Test password"
-        to = [mdluser.email]
-        message = '''Hi {0},
+#         # send password to email
+#         subject = "Spoken Tutorial Online Test password"
+#         to = [mdluser.email]
+#         message = '''Hi {0},
 
-Your account password at 'Spoken Tutorials Online Test as follows'
+# Your account password at 'Spoken Tutorials Online Test as follows'
 
-Your current login information is now:
-username: {1}
-password: {2}
+# Your current login information is now:
+# username: {1}
+# password: {2}
 
-Please go to this page to change your password:
-{3}
+# Please go to this page to change your password:
+# {3}
 
-In most mail programs, this should appear as a blue link
-which you can just click on.  If that doesn't work,
-then cut and paste the address into the address
-line at the top of your web browser window.
+# In most mail programs, this should appear as a blue link
+# which you can just click on.  If that doesn't work,
+# then cut and paste the address into the address
+# line at the top of your web browser window.
 
-Cheers from the 'Spoken Tutorials Online Test Center' administrator,
+# Cheers from the 'Spoken Tutorials Online Test Center' administrator,
 
-Admin Spoken Tutorials
-'''.format(mdluser.firstname, mdluser.username, password_string, 'http://onlinetest.spoken-tutorial.org/login/change_password.php')
+# Admin Spoken Tutorials
+# '''.format(mdluser.firstname, mdluser.username, password_string, 'http://onlinetest.spoken-tutorial.org/login/change_password.php')
 
-        # send email
-        email = EmailMultiAlternatives(
-            subject, message, 'administrator@spoken-tutorial.org',
-            to=to, bcc=[], cc=[],
-            headers={'Reply-To': 'no-replay@spoken-tutorial.org', "Content-type": "text/html;charset=iso-8859-1"}
-        )
-        try:
-            result = email.send(fail_silently=False)
-        except:
-            pass
+#         # send email
+#         email = EmailMultiAlternatives(
+#             subject, message, 'administrator@spoken-tutorial.org',
+#             to=to, bcc=[], cc=[],
+#             headers={'Reply-To': 'no-replay@spoken-tutorial.org', "Content-type": "text/html;charset=iso-8859-1"}
+#         )
+#         try:
+#             result = email.send(fail_silently=False)
+#         except:
+#             pass
     return mdluser
 
 

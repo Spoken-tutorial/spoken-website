@@ -320,36 +320,36 @@ class StudentBatchCreateView(CreateView):
       gencount = studentcount + rowcount
       print 'gencount',gencount
       print 'printing csv length',rowcount
-      if rowcount > 500:
-        messages.warning(self.request, "MB will accept only 500 students, if number is more than 500, divide the batch and upload under different departments eg. Chemistry1 & Chemistry2")
-      if gencount > 500:
-        messages.warning(self.request, "Total number of students per Master Batch exceeding. Masterbatch can accept maximum 500 students.")
-      else :
-        csvdata = csv.reader(file_path, delimiter=',', quotechar='|')
-        for row in csvdata:
-          stu_row_count = stu_row_count+1
-          print stu_row_count
-          if len(row) < 4:
-            skipped.append(row)
+      # if rowcount > 500:
+      #   messages.warning(self.request, "MB will accept only 500 students, if number is more than 500, divide the batch and upload under different departments eg. Chemistry1 & Chemistry2")
+      # if gencount > 500:
+      #   messages.warning(self.request, "Total number of students per Master Batch exceeding. Masterbatch can accept maximum 500 students.")
+      # else :
+      csvdata = csv.reader(file_path, delimiter=',', quotechar='|')
+      for row in csvdata:
+        stu_row_count = stu_row_count+1
+        print stu_row_count
+        if len(row) < 4:
+          skipped.append(row)
+          continue
+        if not self.email_validator(row[2]):
+          error.append(row)
+          continue
+        student = self.get_student(row[2])
+        if not student:
+          student = self.create_student(row[0], row[1], row[2], row[3])
+        if student:
+          try:
+            smrec = StudentMaster.objects.get(student=student, moved=False)
+            if int(batch_id) == int(smrec.batch_id):
+              row.append('Already exists in this batch.')
+            else:
+              row.append('Already exists in %s, %s' % (smrec.batch, smrec.batch.academic))
+            warning.append(row)
             continue
-          if not self.email_validator(row[2]):
-            error.append(row)
-            continue
-          student = self.get_student(row[2])
-          if not student:
-            student = self.create_student(row[0], row[1], row[2], row[3])
-          if student:
-            try:
-              smrec = StudentMaster.objects.get(student=student, moved=False)
-              if int(batch_id) == int(smrec.batch_id):
-                row.append('Already exists in this batch.')
-              else:
-                row.append('Already exists in %s, %s' % (smrec.batch, smrec.batch.academic))
-              warning.append(row)
-              continue
-            except ObjectDoesNotExist:
-              StudentMaster.objects.create(student=student, batch_id=batch_id)
-              write_flag = True
+          except ObjectDoesNotExist:
+            StudentMaster.objects.create(student=student, batch_id=batch_id)
+            write_flag = True
 
         StudentBatch.objects.get(pk=batch_id).update_student_count()
     except Exception, e:
