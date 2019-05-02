@@ -350,9 +350,6 @@ class StudentBatchCreateView(CreateView):
             except ObjectDoesNotExist:
               StudentMaster.objects.create(student=student, batch_id=batch_id)
               write_flag = True
-            if stu_row_count%20 == 0:
-              print "@@@@@@@@@@ good night for 10 secs @@@@@@@@@@@@@@@@@@@@@@@"
-              time.sleep(10)
 
         StudentBatch.objects.get(pk=batch_id).update_student_count()
     except Exception, e:
