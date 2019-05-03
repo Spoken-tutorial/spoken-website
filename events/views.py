@@ -1842,6 +1842,8 @@ def test_request(request, role, rid = None):
             t.tdate = dateTime[0]
             t.ttime = dateTime[1]
             error = 0
+            t.status = 3
+            # t.test_code = "TC-" + str(t.id)
             try:
                 t.save()
                 if t and t.training_id:
@@ -2070,6 +2072,10 @@ def test_attendance(request, tid):
         raise PermissionDenied()
     print test.foss_id
     if request.method == 'POST':
+        test_object = Test.objects.get(id=tid)
+        test_object.test_code = "TC-" + str(tid)
+        test_object.save()
+
         users = request.POST
         if users:
             #set all record to 0 if status = 1
