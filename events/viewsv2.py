@@ -293,7 +293,7 @@ class StudentBatchCreateView(CreateView):
         user = User.objects.get(email = email)
       except ObjectDoesNotExist:
         user = User.objects.create_user(email, email, fname)
-        user.is_active = False
+        user.is_active = True
       if user:
         user.first_name = fname
         user.last_name = lname
@@ -303,7 +303,7 @@ class StudentBatchCreateView(CreateView):
           user.groups.add(student_group)
         except:
           pass
-        student = Student.objects.create(user = user, gender = gender)
+        student = Student.objects.create(user = user, gender = gender, verified=1)
         get_or_create_participant(self.organiser, fname, lname, gender, email, 0)
         return student
     return False
