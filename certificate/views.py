@@ -42,10 +42,12 @@ def verification(serial, _type):
                     detail = OrderedDict([('Name', name), ('Event', purpose),
                                           ('Days', '4 August'), ('Year', year)])
                 elif purpose == 'Koha Coordinators Workshop':
-                    # detail = OrderedDict([('Name', name), ('Event', purpose),
-                    #                       ('Days', '29 September'), ('Year', year)])
-                    detail = OrderedDict([('Name', name), ('Event', purpose),
-                                          ('Days', '8 February'), ('Year', year)])
+                    if year == '2018':
+                        detail = OrderedDict([('Name', name), ('Event', purpose), 
+                            ('Days', '29 September'), ('Year', year)])
+                    if year == '2019':
+                        detail = OrderedDict([('Name', name), ('Event', purpose), 
+                            ('Days', '8 February'), ('Year', year)])
                 elif purpose == 'Koha Remote Workshop':
                     detail = OrderedDict([('Name', name), ('Event', purpose),
                                           ('Days', '12 October'), ('Year', year)])
@@ -765,27 +767,38 @@ def create_koha_workshop_certificate(certificate_path, name, qrcode, type, paper
 def koha_coordinators_workshop_download(request):
     context = {}
     err = ""
+    email = ""
     ci = RequestContext(request)
     cur_path = os.path.dirname(os.path.realpath(__file__))
     certificate_path = '{0}/koha_workshop_template/'.format(cur_path)
 
     if request.method == 'POST':
-        email = request.POST.get('email').strip()
+        sep29email = request.POST.get('email').strip()
+        feb8email = request.POST.get('email2').strip()
+
         type = request.POST.get('type', 'P')
         paper = None
         workshop = None
-        if type == 'P':
+        if feb8email:
+            email = feb8email
             user = Koha_WS_8feb2019.objects.filter(email=email)
-            if not user:
-                context["notregistered"] = 1
-                return render_to_response('koha_workshop29sep_download.html',
-                                          context, context_instance=ci)
-            else:
-                user = user[0]
+            year = '19'
+            workshop = '8feb2019'
+        elif sep29email:
+            email = sep29email
+            user = Koha_WS_29Sep2018.objects.filter(email=email)
+            year = '18'
+            workshop = '29sep2018'
+        if not user:
+            context["notregistered"] = 1
+            return render_to_response('koha_workshop29sep_download.html',
+                                      context, context_instance=ci)
+        else:
+            user = user[0]
         name = user.name
         college = user.college
         purpose = user.purpose
-        year = '19'
+        # year = '19'
         id = int(user.id)
         hexa = hex(id).replace('0x', '').zfill(6).upper()
         serial_no = '{0}{1}{2}{3}'.format(purpose, year, hexa, type)
@@ -837,8 +850,12 @@ def create_koha_coordinators_workshop_certificate(certificate_path, name, qrcode
     err = None
     try:
         download_file_name = None
-        template = 'template_KCW822019Pcertificate'
-        download_file_name = 'KCW822019Pcertificate.pdf'
+        if workshop == '8feb2019':
+            template = 'template_KCW822019Pcertificate'
+            download_file_name = 'KCW822019Pcertificate.pdf'
+        if workshop == '29sep2018':
+            template = 'template_KCW2992018Pcertificate'
+            download_file_name = 'KCW2992018Pcertificate.pdf'
 
         template_file = open('{0}{1}'.format
                              (certificate_path, template), 'r')
