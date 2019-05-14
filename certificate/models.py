@@ -134,4 +134,9 @@ class Koha_WS_9march2019(models.Model):
     purpose = models.CharField(max_length=10, default='KMW')
 
 
-
+class Moodle_WS_15mar2019(models.Model):
+    name = models.CharField(max_length=200)
+    email = models.EmailField()
+    college = models.CharField(max_length=500)
+    remote = models.CharField(max_length=500)
+    purpose = models.CharField(max_length=10, default='MMW')

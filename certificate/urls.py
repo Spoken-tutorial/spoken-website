@@ -26,6 +26,8 @@ urlpatterns = patterns('certificate.views',  # noqa
         name='koha_coordinators_workshop_download'),
     url(r'^moodle_coordinators_workshop/$', 'moodle_coordinators_workshop_download', 
         name='moodle_coordinators_workshop_download'),
+    url(r'^moodle_massive_workshop/$', 'moodle_massive_workshop_download',
+        name='moodle_massive_workshop_download'),
     url(r'^koha_main_workshop/$', 'koha_main_workshop9march_download',
         name='koha_main_workshop9march_download'),
 
