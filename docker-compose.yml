@@ -1,0 +1,76 @@
+version: '2'
+
+services:
+  db1:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: spoken
+      MYSQL_HOST: localhost
+      MYSQL_USER: spoken
+      MYSQL_PASSWORD: spoken
+    ports:
+      - "3305:3306"
+  db2:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: moodle
+      MYSQL_HOST: localhost
+      MYSQL_USER: moodle
+      MYSQL_PASSWORD: moodle
+    ports:
+      - "3306:3306"
+    depends_on:
+      - db1
+
+  db3:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: cdeep
+      MYSQL_HOST: localhost
+      MYSQL_USER: cdeep
+      MYSQL_PASSWORD: cdeep
+    ports:
+      - "3307:3306"
+    depends_on:
+      - db1
+
+  db4:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: workshop
+      MYSQL_HOST: localhost
+      MYSQL_USER: workshop
+      MYSQL_PASSWORD: workshop
+    ports:
+      - "3308:3306"
+    depends_on:
+      - db1
+
+  db5:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: forum
+      MYSQL_HOST: localhost
+      MYSQL_USER: forum
+      MYSQL_PASSWORD: forum
+    ports:
+      - "3309:3306"
+    depends_on:
+      - db1
+
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db1
+      - db2
+      - db3
+      - db4
+      - db5 
