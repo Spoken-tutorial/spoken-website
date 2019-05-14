@@ -42,13 +42,19 @@ def verification(serial, _type):
                     detail = OrderedDict([('Name', name), ('Event', purpose),
                                           ('Days', '4 August'), ('Year', year)])
                 elif purpose == 'Koha Coordinators Workshop':
-                    # detail = OrderedDict([('Name', name), ('Event', purpose),
-                    #                       ('Days', '29 September'), ('Year', year)])
-                    detail = OrderedDict([('Name', name), ('Event', purpose),
-                                          ('Days', '8 February'), ('Year', year)])
+                    if year == '2018':
+                        detail = OrderedDict([('Name', name), ('Event', purpose), 
+                            ('Days', '29 September'), ('Year', year)])
+                    if year == '2019':
+                        detail = OrderedDict([('Name', name), ('Event', purpose), 
+                            ('Days', '8 February'), ('Year', year)])
                 elif purpose == 'Koha Remote Workshop':
-                    detail = OrderedDict([('Name', name), ('Event', purpose),
+                    if year == '2018':
+                        detail = OrderedDict([('Name', name), ('Event', purpose),
                                           ('Days', '12 October'), ('Year', year)])
+                    if year == '2019':
+                        detail = OrderedDict([('Name', name), ('Event', purpose),
+                                          ('Days', '9 March'), ('Year', year)])
                 elif purpose == 'Koha Remote Center':
                     detail = OrderedDict([('Name', name), ('Event', purpose),
                                           ('Days', '12 October'), ('Year', year)])
@@ -772,27 +778,38 @@ def create_koha_workshop_certificate(certificate_path, name, qrcode, type, paper
 def koha_coordinators_workshop_download(request):
     context = {}
     err = ""
+    email = ""
     ci = RequestContext(request)
     cur_path = os.path.dirname(os.path.realpath(__file__))
     certificate_path = '{0}/koha_workshop_template/'.format(cur_path)
 
     if request.method == 'POST':
-        email = request.POST.get('email').strip()
+        sep29email = request.POST.get('email').strip()
+        feb8email = request.POST.get('email2').strip()
+
         type = request.POST.get('type', 'P')
         paper = None
         workshop = None
-        if type == 'P':
+        if feb8email:
+            email = feb8email
             user = Koha_WS_8feb2019.objects.filter(email=email)
-            if not user:
-                context["notregistered"] = 1
-                return render_to_response('koha_workshop29sep_download.html',
-                                          context, context_instance=ci)
-            else:
-                user = user[0]
+            year = '19'
+            workshop = '8feb2019'
+        elif sep29email:
+            email = sep29email
+            user = Koha_WS_29Sep2018.objects.filter(email=email)
+            year = '18'
+            workshop = '29sep2018'
+        if not user:
+            context["notregistered"] = 1
+            return render_to_response('koha_workshop29sep_download.html',
+                                      context, context_instance=ci)
+        else:
+            user = user[0]
         name = user.name
         college = user.college
         purpose = user.purpose
-        year = '19'
+        # year = '19'
         id = int(user.id)
         hexa = hex(id).replace('0x', '').zfill(6).upper()
         serial_no = '{0}{1}{2}{3}'.format(purpose, year, hexa, type)
@@ -844,8 +861,12 @@ def create_koha_coordinators_workshop_certificate(certificate_path, name, qrcode
     err = None
     try:
         download_file_name = None
-        template = 'template_KCW822019Pcertificate'
-        download_file_name = 'KCW822019Pcertificate.pdf'
+        if workshop == '8feb2019':
+            template = 'template_KCW822019Pcertificate'
+            download_file_name = 'KCW822019Pcertificate.pdf'
+        if workshop == '29sep2018':
+            template = 'template_KCW2992018Pcertificate'
+            download_file_name = 'KCW2992018Pcertificate.pdf'
 
         template_file = open('{0}{1}'.format
                              (certificate_path, template), 'r')
@@ -953,6 +974,113 @@ def create_koha_massive_workshop_certificate(certificate_path, name, qrcode, typ
         download_file_name = None
         template = 'template_KMW12102018Pcertificate'
         download_file_name = 'KMW12102018Pcertificate.pdf'
+
+        template_file = open('{0}{1}'.format
+                             (certificate_path, template), 'r')
+        content = Template(template_file.read())
+        template_file.close()
+
+        content_tex = content.safe_substitute(name=name['name'].title(),
+            serial_key=name['serial_key'], qr_code=qrcode, college=name['college'], remote=name['remote'])
+        create_tex = open('{0}{1}.tex'.format
+                          (certificate_path, file_name), 'w')
+        create_tex.write(content_tex)
+        create_tex.close()
+        return_value, err = _make_certificate_certificate(certificate_path,
+                                                          type, file_name)
+        if return_value == 0:
+            pdf = open('{0}{1}.pdf'.format(certificate_path, file_name), 'r')
+            response = HttpResponse(content_type='application/pdf')
+            response['Content-Disposition'] = 'attachment; \
+                    filename=%s' % (download_file_name)
+            response.write(pdf.read())
+            _clean_certificate_certificate(certificate_path, file_name)
+            return [response, False]
+        else:
+            error = True
+    except Exception, e:
+        error = True
+        err = e
+    return [err, error]
+
+
+def koha_main_workshop9march_download(request):
+    context = {}
+    err = ""
+    ci = RequestContext(request)
+    cur_path = os.path.dirname(os.path.realpath(__file__))
+    certificate_path = '{0}/koha_workshop_template/'.format(cur_path)
+
+    if request.method == 'POST':
+        email = request.POST.get('email').strip()
+        type = request.POST.get('type', 'P')
+        paper = None
+        workshop = None
+        if type == 'P':
+            user = Koha_WS_9march2019.objects.filter(email=email)
+            if not user:
+                context["notregistered"] = 1
+                return render_to_response('koha_workshop9march_download.html',
+                                          context, context_instance=ci)
+            else:
+                user = user[0]
+        name = user.name
+        college = user.college
+        remote = user.remote
+        purpose = user.purpose
+        year = '19'
+        id = int(user.id)
+        hexa = hex(id).replace('0x', '').zfill(6).upper()
+        serial_no = '{0}{1}{2}{3}'.format(purpose, year, hexa, type)
+        serial_key = (hashlib.sha1(serial_no)).hexdigest()
+        file_name = '{0}{1}'.format(email, id)
+        file_name = file_name.replace('.', '')
+        try:
+            old_user = Certificate.objects.get(email=email, serial_no=serial_no)
+            qrcode = 'Verify at: http://spoken-tutorial.org/certificate/verify/{0} '.format(old_user.short_key)
+            details = {'name': name, 'serial_key': old_user.short_key, 'college': college, 'remote': remote}
+            certificate = create_koha_main_workshop9march_certificate(certificate_path, details,
+                                                             qrcode, type, paper, workshop, file_name)
+            if not certificate[1]:
+                old_user.counter = old_user.counter + 1
+                old_user.save()
+                return certificate[0]
+        except Certificate.DoesNotExist:
+            uniqueness = False
+            num = 5
+            while not uniqueness:
+                present = Certificate.objects.filter(short_key__startswith=serial_key[0:num])
+                if not present:
+                    short_key = serial_key[0:num]
+                    uniqueness = True
+                else:
+                    num += 1
+            qrcode = 'Verify at: http://spoken-tutorial.org/certificate/verify/{0} '.format(short_key)
+            details = {'name': name, 'serial_key': short_key, 'college': college, 'remote': remote}
+            certificate = create_koha_main_workshop9march_certificate(certificate_path, details,
+                                                             qrcode, type, paper, workshop, file_name)
+            if not certificate[1]:
+                certi_obj = Certificate(name=name, email=email,
+                                        serial_no=serial_no, counter=1, workshop=workshop,
+                                        paper=paper, serial_key=serial_key, short_key=short_key)
+                certi_obj.save()
+                return certificate[0]
+
+        if certificate[1]:
+            _clean_certificate_certificate(certificate_path, file_name)
+            context['error'] = True
+            context['err'] = err
+            return render_to_response('koha_workshop9march_download.html', context, ci)
+    context['message'] = ''
+    return render_to_response('koha_workshop9march_download.html', context, ci)
+
+def create_koha_main_workshop9march_certificate(certificate_path, name, qrcode, type, paper, workshop, file_name):
+    error = False
+    err = None
+    try:
+        download_file_name = None
+        template = 'template_KMW932019Pcertificate'
+        download_file_name = 'KMW932019Pcertificate.pdf'
 
         template_file = open('{0}{1}'.format
                              (certificate_path, template), 'r')
