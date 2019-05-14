@@ -49,18 +49,11 @@ def create_profile(user, phone):
 
 def account_register(request):
     # import recaptcha validate function
-    from cms.recaptcha import recaptcha_valdation, get_recaptcha_context
-
-    # reCAPTCHA Site key
-    context = get_recaptcha_context()
-
+    context = {}
     if request.method == 'POST':
 
-        # verify recaptcha
-        recaptcha_result = recaptcha_valdation(request)
-
         form = RegisterForm(request.POST)
-        if recaptcha_result and form.is_valid():
+        if form.is_valid():
             username = request.POST['username']
             password = request.POST['password']
             email = request.POST['email']
@@ -70,10 +63,10 @@ def account_register(request):
             user = User.objects.create_user(username, email, password)
             user.first_name = first_name
             user.last_name = last_name
-            user.is_active = False
+            user.is_active = True
             user.save()
             create_profile(user, phone)
-            send_registration_confirmation(user)
+            # send_registration_confirmation(user)
             messages.success(request,
                 "Thank you for registering.\
                 Please confirm your registration by clicking on the activation link which has been sent to your registered email %s.<br>\
@@ -284,51 +277,51 @@ def password_reset(request):
             from mdldjango.views import changeMdlUserPass
             changeMdlUserPass(request.POST['email'], password_string)
 
-            print 'Username => ', user.username
-            print 'New password => ', password_string
+#             print 'Username => ', user.username
+#             print 'New password => ', password_string
 
-            changePassUrl = "http://www.spoken-tutorial.org/accounts/change-password"
-            if request.GET and request.GET['next']:
-                changePassUrl = changePassUrl + "?auto=%s&username=%s&next=%s" % (user.profile_set.first().confirmation_code, user.username, request.GET['next'])
+#             changePassUrl = "http://www.spoken-tutorial.org/accounts/change-password"
+#             if request.GET and request.GET['next']:
+#                 changePassUrl = changePassUrl + "?auto=%s&username=%s&next=%s" % (user.profile_set.first().confirmation_code, user.username, request.GET['next'])
 
-            #Send email
-            subject  = "Spoken Tutorial password reset"
-            to = [user.email]
-            message = '''Hi {0},
+#             #Send email
+#             subject  = "Spoken Tutorial password reset"
+#             to = [user.email]
+#             message = '''Hi {0},
 
-Your account password at 'Spoken Tutorials' has been reset
-and you have been issued with a new temporary password.
+# Your account password at 'Spoken Tutorials' has been reset
+# and you have been issued with a new temporary password.
 
-Your current login information is now:
-   username: {1}
-   password: {2}
+# Your current login information is now:
+#    username: {1}
+#    password: {2}
 
-With respect to change your password kindly follow the steps written below :
+# With respect to change your password kindly follow the steps written below :
 
-Step 1. Visit below link to change the password. Provide temporary password given above in the place of Old Password field.
-	{3}
+# Step 1. Visit below link to change the password. Provide temporary password given above in the place of Old Password field.
+# 	{3}
 
-Step 2.Use this changed password for spoken forum login and in moodle login also.
+# Step 2.Use this changed password for spoken forum login and in moodle login also.
 
-In most mail programs, this should appear as a blue link
-which you can just click on.  If that doesn't work,
-then cut and paste the address into the address
-line at the top of your web browser window.
+# In most mail programs, this should appear as a blue link
+# which you can just click on.  If that doesn't work,
+# then cut and paste the address into the address
+# line at the top of your web browser window.
 
-Best Wishes,
-Admin
-Spoken Tutorials
-IIT Bombay.
-'''.format(user.username, user.username, password_string,changePassUrl)
+# Best Wishes,
+# Admin
+# Spoken Tutorials
+# IIT Bombay.
+# '''.format(user.username, user.username, password_string,changePassUrl)
 
-            # send email
-            email = EmailMultiAlternatives(
-                subject, message, 'no-reply@spoken-tutorial.org',
-                to = to, bcc = [], cc = [],
-                headers={'Reply-To': 'no-reply@spoken-tutorial.org', "Content-type":"text/html;charset=iso-8859-1"}
-            )
+#             # send email
+#             email = EmailMultiAlternatives(
+#                 subject, message, 'no-reply@spoken-tutorial.org',
+#                 to = to, bcc = [], cc = [],
+#                 headers={'Reply-To': 'no-reply@spoken-tutorial.org', "Content-type":"text/html;charset=iso-8859-1"}
+#             )
 
-            result = email.send(fail_silently=False)
+            # result = email.send(fail_silently=False)
             # redirect to next url if there or redirect to login page
             # use for forum password rest form
             redirectNext = request.GET.get('next', False)
