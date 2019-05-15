@@ -1350,7 +1350,7 @@ def moodle_massive_workshop_download(request):
         college = user.college
         remote = user.remote
         purpose = user.purpose
-        year = '18'
+        year = '19'
         id = int(user.id)
         hexa = hex(id).replace('0x', '').zfill(6).upper()
         serial_no = '{0}{1}{2}{3}'.format(purpose, year, hexa, type)
