@@ -538,12 +538,10 @@ def events_dashboard(request):
     rp_workshop_notification = None
     rp_test_notification = None
     rp_training_notification = None
-    institute_name = None
+    institution_type = None
     if is_organiser(user):
-	institution_type = AcademicCenter.objects.get(id=user.organiser.academic_id)
-        institute_name = InstituteType.objects.get(id=institution_type.institution_type_id)
+        institution_type = user.organiser.academic.institution_type
         organiser_test_notification = EventsNotification.objects.filter((Q(status = 1) | Q(status = 2)), category = 1, academic_id = user.organiser.academic_id, categoryid__in = user.organiser.academic.test_set.filter(organiser_id = user.id).values_list('id')).order_by('-created')[:30]
-
         #organiser_training_notification = EventsNotification.objects.filter((Q(status = 1) | Q(status = 3)), category = 2, status = 1, academic_id = user.organiser.academic_id, categoryid__in = user.organiser.academic.workshop_set.filter(organiser_id = user.id).values_list('id')).order_by('-created')[:30]
 
     if is_resource_person(user):
@@ -555,7 +553,7 @@ def events_dashboard(request):
 
     context = {
         'roles' : roles,
-        'institution_type' : institute_name,
+        'institution_type' : institution_type,
         'organiser_workshop_notification' : organiser_workshop_notification,
         'organiser_test_notification' : organiser_test_notification,
         'organiser_training_notification' : organiser_training_notification,
