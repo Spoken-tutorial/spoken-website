@@ -107,8 +107,8 @@ urlpatterns = [
     url(r'^search/node/([0-9a-zA-Z-+%\(\)]+)/$',  search_node, name='search_node'),
 
     # Masquerade user
-    url(r'^masquerade/', include('masquerade.urls', namespace='masquerade')),
-
+    # url(r'^masquerade/', include('masquerade.urls', namespace='masquerade')),
+    url(r'^masquerade/', include('impersonate.urls', namespace='impersonate')),
     # Cron links
     url(r'^cron/subtitle-files/create/$',  create_subtitle_files, name='create_subtitle_files'),
 
@@ -126,6 +126,6 @@ urlpatterns = [
 
     # cms
     url(r'^', include('cms.urls', namespace='cms')),
-
+    
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

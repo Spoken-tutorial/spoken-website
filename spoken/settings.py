@@ -83,7 +83,6 @@ INSTALLED_APPS = [
     'cdcontent',
     'events',
     'mdldjango',
-    'masquerade',
     'youtube',
     'reports',
     'team',
@@ -92,6 +91,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'workshop',
     'django_filters',
+    'impersonate'
 ]
 
 
@@ -323,4 +323,5 @@ MIDDLEWARE = [
     'django.middleware.common.BrokenLinkEmailsMiddleware',
     #'masquerade.middleware.MasqueradeMiddleware',
     'django.contrib.redirects.middleware.RedirectFallbackMiddleware',
+    'impersonate.middleware.ImpersonateMiddleware'
 ]
