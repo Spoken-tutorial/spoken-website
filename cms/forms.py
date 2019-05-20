@@ -19,7 +19,7 @@ class LoginForm(forms.Form):
     password = forms.CharField(widget=forms.PasswordInput, required=True)
 
 
-class RegisterForm(forms.Form):
+class RegisterFormHome(forms.Form):
     username = forms.CharField(
         label = _("Username"),
         max_length = 30,

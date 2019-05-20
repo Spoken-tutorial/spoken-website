@@ -61,7 +61,7 @@ def account_register(request):
         # verify recaptcha
         recaptcha_result = recaptcha_valdation(request)
 
-        form = RegisterForm(request.POST)
+        form = RegisterFormHome(request.POST)
         if recaptcha_result and form.is_valid():
             username = request.POST['username']
             password = request.POST['password']
@@ -84,12 +84,12 @@ def account_register(request):
                  % (email))
             return HttpResponseRedirect('/')
         context['form'] = form
-        return render_to_response('cms/templates/register.html', context, context_instance = RequestContext(request))
+        return render(request, 'cms/templates/register.html', context)
     else:
-        form = RegisterForm()
+        form = RegisterFormHome()
         context['form'] = form
         context.update(csrf(request))
-        return render_to_response('cms/templates/register.html', context)
+        return render(request, 'cms/templates/register.html', context)
 
 
 def send_registration_confirmation(user):
