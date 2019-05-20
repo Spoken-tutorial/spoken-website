@@ -2,6 +2,7 @@ from builtins import str
 from builtins import range
 from builtins import object
 from django.shortcuts import render
+import time
 from datetime import datetime
 from datetime import timedelta
 import re
@@ -319,6 +320,7 @@ class StudentBatchCreateView(CreateView):
     error = []
     warning = []
     write_flag = False
+    stu_row_count = 0
     try:
       file_data = file_path.read().decode('utf-8').splitlines()
       rowcsv = csv.reader(file_data, delimiter=',', quotechar='|')
@@ -333,6 +335,8 @@ class StudentBatchCreateView(CreateView):
       else :
         csvdata = csv.reader(file_data, delimiter=',', quotechar='|')
         for row in csvdata:
+          stu_row_count = stu_row_count+1
+          print (stu_row_count)
           if len(row) < 4:
             skipped.append(row)
             continue
@@ -354,6 +358,7 @@ class StudentBatchCreateView(CreateView):
             except ObjectDoesNotExist:
               StudentMaster.objects.create(student=student, batch_id=batch_id)
               write_flag = True
+
         StudentBatch.objects.get(pk=batch_id).update_student_count()
     except Exception as e:
       print(e)

@@ -36,7 +36,7 @@ urlpatterns = [
     url(r'^testimonials/$',  testimonials, name="testimonials"),
     url(r'^testimonials/(?P<testimonial_type>[\w]+)/$',  testimonials, name="testimonials"),
     url(r'^testimonials/media/(?P<foss>[\w ]+)/$',  foss_testimonials, name="foss_testimonials"),
-    
+
     url(r'^admin/testimonials/$',  admin_testimonials, name="admin_testimonials"),
     url(r'^admin/testimonials/(?P<rid>\d+)/edit/$',  admin_testimonials_edit, name="admin_testimonials_edit"),
     url(r'^testimonials/new/media/(?P<testimonial_type>[\w]+)/$',  testimonials_new_media, name="testimonials_new_media"),
