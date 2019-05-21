@@ -45,7 +45,7 @@
           {% csrf_token %}
 <!--modal ending -->
 
-  <div><a class="btn btn-success" href="{% url 'events:training_planner' %}">Go Back to Training Planner</a><br><br></div>
+  <div><a class="btn btn-success" href="{% url 'eventsv2:training_planner' %}">Go Back to Training Planner</a><br><br></div>
   {% if object_list %}
     {% with can_mark_attendance=training.can_mark_attendance %}
       {% if can_mark_attendance %}

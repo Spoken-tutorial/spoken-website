@@ -6,7 +6,7 @@ from events.formsv2 import *
 from events.urls import *
 from .viewsv2 import *
 
-app_name = 'events'
+app_name = 'eventsv2'
 urlpatterns = [
     url(
       r'^training-planner/', 

@@ -27,7 +27,7 @@
       <div class="modal-body">
          {{ message|safe }}
       </div>
-      <div class="modal-footer"><a class="btn btn-primary" href="{% url 'events:training_planner' %}">OK</a></div>
+      <div class="modal-footer"><a class="btn btn-primary" href="{% url 'eventsv2:training_planner' %}">OK</a></div>
     </div>
   </div>
 </div>
@@ -127,7 +127,7 @@
                       <div class="form-group">
                           <div class="col-xs-12 form-group">
                               <input class="btn btn-primary" type="submit" value="Submit" />
-                              <a class="btn btn-danger" href="{% url 'events:training_planner' %}">Cancel</a>
+                              <a class="btn btn-danger" href="{% url 'eventsv2:training_planner' %}">Cancel</a>
                           </div>
                       </div>
                       {% endwith %}
