@@ -22,7 +22,7 @@
     </div>
     <ul class="row">
         {% for row in rows %}
-            <li><a href="/masquerade/mask/{{ row.id }}/">{{ row.username }} ({{ row.email }})</a> - Last login: {{ row.last_login }}</li>
+            <li><a href="/masquerade/{{ row.id }}/">{{ row.username }} ({{ row.email }})</a> - Last login: {{ row.last_login }}</li>
         {% endfor %}
     </ul>
 {% endblock %}

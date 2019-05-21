@@ -40,7 +40,7 @@ def impersonate_home(request):
     }
     context.update(csrf(request))
     # Previously we had masquerade , so not changing the url , so no change in the front end
-    return render(request, 'masquerade/impersonate_home.html', context)
+    return render(request, 'masquerade/masquerade_home.html', context)
 
 
 @allowed_user_required
