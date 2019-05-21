@@ -59,10 +59,11 @@ def account_register(request):
     if request.method == 'POST':
 
         # verify recaptcha
-        recaptcha_result = recaptcha_valdation(request)
+        #recaptcha_result = recaptcha_valdation(request)
 
         form = RegisterFormHome(request.POST)
-        if recaptcha_result and form.is_valid():
+        #if recaptcha_result and form.is_valid():
+        if form.is_valid():
             username = request.POST['username']
             password = request.POST['password']
             email = request.POST['email']
