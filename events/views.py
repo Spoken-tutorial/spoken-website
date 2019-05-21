@@ -58,10 +58,9 @@ from reportlab.lib.units import cm
 from reportlab.lib.enums import TA_CENTER
 from PyPDF2 import PdfFileWriter, PdfFileReader
 from django.template.context_processors import csrf
-try:
-    from io import StringIO
-except ImportError:
-    from io import StringIO
+
+from io import StringIO, BytesIO
+
 
 #randon string
 import string
@@ -1783,7 +1782,7 @@ def training_participant_ceritificate(request, wid, participant_id):
     filename = (wa.firstname+'-'+w.foss.foss+"-Participant-Certificate").replace(" ", "-");
 
     response['Content-Disposition'] = 'attachment; filename='+filename+'.pdf'
-    imgTemp = StringIO()
+    imgTemp = BytesIO()
     imgDoc = canvas.Canvas(imgTemp)
 
     # Title

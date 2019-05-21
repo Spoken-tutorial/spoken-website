@@ -175,7 +175,8 @@ def add_static_files(archive):
 
 
 def convert_template_to_html_file(archive, filename, request, template, ctx):
-    html_string = str(render(request, template, ctx))
+    html = render(request, template, ctx).content
+    html_string = html.decode('utf-8')
     html_string = html_string.replace('Content-Type: text/html; charset=utf-8', '').strip("\n")
     archive.writestr(filename, html_string)
 
@@ -226,7 +227,7 @@ def home(request):
         if form.is_valid():
             try:
                 zipfile_name = '{}.zip'.format(datetime.now().strftime('%Y%m%d%H%M%S%f'))
-                file_obj = open('{}cdimage/{}'.format(settings.MEDIA_ROOT, zipfile_name), 'w')
+                file_obj = open('{}cdimage/{}'.format(settings.MEDIA_ROOT, zipfile_name), 'wb')
                 archive = zipfile.ZipFile(file_obj, 'w', zipfile.ZIP_DEFLATED, allowZip64=True)
                 selectedfoss = json.loads(request.POST.get('selected_foss', {}))
                 all_foss_details = get_all_foss_details(selectedfoss)
