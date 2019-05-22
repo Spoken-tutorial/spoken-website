@@ -18,7 +18,7 @@
          {% if not record.verified or not record.user.is_active%}
         <tr>
           <td>{{ forloop.counter }}</td>
-          <td><a href="{% url 'events:update_student' batch.id record.user.id %}">Edit</a></td>
+          <td><a href="{% url 'eventsv2:update_student' batch.id record.user.id %}">Edit</a></td>
           <td>{{ batch.department}}</td>
           <td>{{ batch.year}}</td>
           <td>{{ record.user.first_name }}</td>
@@ -34,7 +34,7 @@
           </td>
           <td>
             {% with student_master=batch.id|get_student_master:record.id %}
-              <a class="btn btn-default" href="{% url 'events:student_delete' batch.id student_master.id %}">Delete</a>
+              <a class="btn btn-default" href="{% url 'eventsv2:student_delete' batch.id student_master.id %}">Delete</a>
             {% endwith %}
           </td>
         </tr>
@@ -50,7 +50,7 @@
         {% if record.user.is_active %}
         <tr>
           <td>{{ forloop.counter }}</td>
-          <td><a href="{% url 'events:update_student' batch.id record.user.id %}">Edit</a></td>
+          <td><a href="{% url 'eventsv2:update_student' batch.id record.user.id %}">Edit</a></td>
           <td>{{ batch.department}}</td>
           <td>{{ batch.year}}</td>
           <td>{{ record.user.first_name }}</td>
@@ -64,7 +64,7 @@
           </td>
           <td>
             {% with student_master=batch.id|get_student_master:record.id %}
-              <a class="btn btn-default" href="{% url 'events:student_delete' batch.id student_master.id %}">Delete</a>
+              <a class="btn btn-default" href="{% url 'eventsv2:student_delete' batch.id student_master.id %}">Delete</a>
             {% endwith %}
           </td>
         </tr>

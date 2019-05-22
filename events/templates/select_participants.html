@@ -88,7 +88,7 @@
             {% if training.department.id == 24 %}
             <td>
               {% if training.status == 0 %}
-                | <a href="{% url 'events:training_attendance' training.id %}">Participant List</a> |
+                | <a href="{% url 'eventsv2:training_attendance' training.id %}">Participant List</a> |
                 {% if training.can_edit %}
                   <a href="{% url 'eventsv2:edit_training_request' training.id %}">Edit</a> |
                 {% endif %}
@@ -116,7 +116,7 @@
             {% else %}<!-- not school-->
             <td>
               {% if training.status == 0 %}
-                | <a href="{% url 'events:training_attendance' training.id %}">Participant List</a> |
+                | <a href="{% url 'eventsv2:training_attendance' training.id %}">Participant List</a> |
                 {% if training.can_edit %}
                   <a href="{% url 'eventsv2:edit_training_request' training.id %}">Edit</a> |
                 {% endif %}
@@ -180,7 +180,7 @@
           <td>{{ training.attendance_summery }}</td>
           <td>
           {% if training.can_mark_attendance %}
-          | <a href="{% url 'events:training_attendance' training.id %}">Select Participant List</a>
+          | <a href="{% url 'eventsv2:training_attendance' training.id %}">Select Participant List</a>
           {% endif %}
           {% if training.can_edit %}
           | <a href="{% url 'eventsv2:edit_training_request' training.id %}">Edit</a> |

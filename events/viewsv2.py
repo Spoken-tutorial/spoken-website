@@ -738,20 +738,21 @@ class TrainingAttendanceListView(ListView):
     self.user = request.user
     training_id = kwargs['tid']
     if request.POST and 'user' in request.POST:
-      if csrf.get_token(request) == request.POST['csrfmiddlewaretoken']:
-        marked_student = request.POST.getlist('user', None)
-        # delete un marked record if exits
-        TrainingAttend.objects.filter(training_id =training_id).exclude(student_id__in = marked_student).delete()
-        # insert new record if not exits
-        for record in marked_student:
-          language_id = request.POST.get(record)
-          training_attend = TrainingAttend.objects.filter(training_id =training_id, student_id = record)
-          if not training_attend.exists():
-            TrainingAttend.objects.create(training_id =training_id, student_id = record, language_id=language_id)
-          else:
-            training_attend = training_attend.first()
-            training_attend.language_id = language_id
-            training_attend.save()
+      # commented out as Django 1.11 + creates new csrf token for every POST request
+      #if csrf.get_token(request) == request.POST['csrfmiddlewaretoken']:
+      marked_student = request.POST.getlist('user', None)
+      # delete un marked record if exits
+      TrainingAttend.objects.filter(training_id =training_id).exclude(student_id__in = marked_student).delete()
+      # insert new record if not exits
+      for record in marked_student:
+        language_id = request.POST.get(record)
+        training_attend = TrainingAttend.objects.filter(training_id =training_id, student_id = record)
+        if not training_attend.exists():
+          TrainingAttend.objects.create(training_id =training_id, student_id = record, language_id=language_id)
+        else:
+          training_attend = training_attend.first()
+          training_attend.language_id = language_id
+          training_attend.save()
       #print marked_student
     else:
       TrainingAttend.objects.filter(training_id =training_id).delete()
