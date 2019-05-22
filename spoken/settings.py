@@ -88,6 +88,7 @@ INSTALLED_APPS = (
     'certificate',
     'api',
     'rest_framework',
+    'scriptmanager',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -107,6 +108,22 @@ MIDDLEWARE_CLASSES = (
 )
 
 ROOT_URLCONF = 'spoken.urls'
+
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [os.path.join(BASE_DIR, 'static')],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
 
 WSGI_APPLICATION = 'spoken.wsgi.application'
 
@@ -201,13 +218,6 @@ STATIC_URL = '/static/'
 
 COMPRESS_ROOT = STATIC_ROOT
 COMPRESS_URL = STATIC_URL
-
-TEMPLATE_DIRS = (
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-    BASE_DIR + '/static/',
-)
 
 STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
