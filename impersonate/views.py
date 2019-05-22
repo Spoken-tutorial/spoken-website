@@ -11,6 +11,7 @@ from .helpers import (
     check_allow_for_user, users_impersonable
 )
 from django.template.context_processors import csrf
+from django.core.validators import validate_email
 from impersonate.forms import *
 
 
@@ -26,8 +27,9 @@ def impersonate_home(request):
             if key:
                 try:
                     validate_email(key)
-                    if User.objects.filter(email = key).count():
-                        rows = User.objects.filter(email = key)
+                    searched_emails = User.objects.filter(email = key)
+                    if searched_emails.exists():
+                        rows = searched_emails
                     else:
                         rows = User.objects.filter(Q(username__icontains = key)).order_by('username')
                 except:
