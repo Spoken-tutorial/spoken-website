@@ -95,3 +95,5 @@ nosetests.xml
 .pydevproject
 
 cron/nohup.out
+.vscode/
+*.sql
