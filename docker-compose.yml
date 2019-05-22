@@ -11,6 +11,8 @@ services:
       MYSQL_PASSWORD: spoken
     ports:
       - "3305:3306"
+    volumes:
+      - ./spoken.sql:/docker-entrypoint-initdb.d/dump.sql
   db2:
     image: mysql:5.7
     environment:

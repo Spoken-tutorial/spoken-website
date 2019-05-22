@@ -5,5 +5,8 @@ WORKDIR /code
 ADD requirements.txt /code/
 ADD requirements-dev.txt /code/
 RUN pip install -r requirements-dev.txt
+RUN pip uninstall -y South
 RUN apt-get install libmysqlclient-dev
 ADD . /code/
+RUN cp sample.config.py spoken/config.py
+RUN touch events/display.py
