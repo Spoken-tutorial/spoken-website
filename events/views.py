@@ -2406,8 +2406,11 @@ def organiser_invigilator_index(request, role, status):
 
     if role == 'organiser':
         try:
-            collectionSet = Organiser.objects.select_related().filter(academic=AcademicCenter.objects.filter(state=State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)), status=status)
-
+            #collectionSet = Organiser.objects.select_related().filter(academic__in=AcademicCenter.objects.filter(state__in=State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)), status=status)
+            states =  user.resource_person.prefetch_related().filter(resourceperson__status = 1)
+            academics = AcademicCenter.objects.filter(state__in = states)
+            collectionSet = Organiser.objects.filter(academic__in = academics, status = status)
+            
             raw_get_data = request.GET.get('o', None)
             collection = get_sorted_list(request, collectionSet, header, raw_get_data)
             ordering = get_field_index(raw_get_data)
@@ -2422,7 +2425,10 @@ def organiser_invigilator_index(request, role, status):
             collection = {}
     elif role == 'invigilator':
         try:
-            collectionSet = Invigilator.objects.select_related().filter(academic=AcademicCenter.objects.filter(state=State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)), status=status)
+            #collectionSet = Invigilator.objects.select_related().filter(academic__in=AcademicCenter.objects.filter(state=State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)), status=status)
+            states = user.resource_person.prefetch_related().filter(resourceperson__status=1)
+            academics = AcademicCenter.objects.filter(state__in=states)
+            collectionSet = Invigilator.objects.filter(academic__in=academics, status=status)
 
             raw_get_data = request.GET.get('o', None)
             collection = get_sorted_list(request, collectionSet, header, raw_get_data)
@@ -2432,14 +2438,18 @@ def organiser_invigilator_index(request, role, status):
             context['form'] = collection.form
 
             page = request.GET.get('page')
-            collection = get_page(collection, page)
+            collection = get_page(collection.qs, page)
 
         except Exception as e:
             print(e)
             collection = {}
     elif role == 'accountexecutive':
         try:
-            collectionSet = Accountexecutive.objects.select_related().filter(academic=AcademicCenter.objects.filter(state=State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)), status=status)
+            #collectionSet = Accountexecutive.objects.select_related().filter(academic__in=AcademicCenter.objects.filter(state__in=State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)), status=status)
+            states = user.resource_person.prefetch_related().filter(resourceperson__status=1)
+            academics = AcademicCenter.objects.filter(state__in=states)
+            collectionSet = Accountexecutive.objects.filter(academic__in=academics, status=status)
+
 
             raw_get_data = request.GET.get('o', None)
             collection = get_sorted_list(request, collectionSet, header, raw_get_data)
