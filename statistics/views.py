@@ -125,7 +125,7 @@ def training(request):
     # find state id
     if 'training_planner__academic__state' in request.GET and request.GET['training_planner__academic__state']:
         state = State.objects.get(id=request.GET['training_planner__academic__state'])
-
+    print("\n\n\n\n\nrequest :",request.GET)
     collection = TrainingRequestFilter(request.GET, queryset=collection, state=state)
     # find participants count
     
