@@ -879,7 +879,7 @@ class TrainingCertificate(object):
     text = "This is to certify that <b>"+ta.student.user.first_name +" "+ta.student.user.last_name+"</b> participated in the <b>"+ta.training.course.foss.foss+"</b> training organized at <b>"+ta.training.training_planner.academic.institution_name+"</b> in <b>"+sem_start+"</b> semester, with course material provided by the Spoken Tutorial Project, IIT Bombay.<br /><br />A comprehensive set of topics pertaining to <b>"+ta.training.course.foss.foss+"</b> were covered in the training. This training is offered by the Spoken Tutorial Project, IIT Bombay, funded by the National Mission on Education through ICT, MHRD, Govt. of India."
     if ta.training.department.id == 24:
       text = "This is to certify that <b>"+ta.student.user.first_name +" "+ta.student.user.last_name+"</b> participated in the <b>"+ta.training.course.foss.foss+"</b> training organized at <b>"+ta.training.training_planner.academic.institution_name+"</b> by <b>"+ta.training.training_planner.organiser.user.first_name+" "+ta.training.training_planner.organiser.user.last_name+"</b>, with course material provided by the Spoken Tutorial Project, IIT Bombay.<br /><br />A comprehensive set of topics pertaining to <b>"+ta.training.course.foss.foss+"</b> were covered in the training. This training is offered by the Spoken Tutorial Project, IIT Bombay, funded by the National Mission on Education through ICT, MHRD, Govt. of India."
-    
+
 
     centered = ParagraphStyle(name = 'centered',
       fontSize = 16,
@@ -1370,6 +1370,7 @@ class TrainingRequestListView(ListView):
   def get_context_data(self, **kwargs):
     context = super(TrainingRequestListView, self).get_context_data(**kwargs)
     context['form'] = self.queryset.qs.form
+    context['collection'] =  self.queryset.qs
     context['role'] = self.role
     context['status'] = self.status
     context['header'] = self.header
@@ -2444,7 +2445,7 @@ class STWorkshopFeedbackCreateView(CreateView):
     form_class = STWorkshopFeedbackForm
     template_name = "stworkshop_feedback.html"
     success_url = "/home"
-    
+
     def get(self, request, *args, **kwargs):
         return render_to_response(self.template_name, {'form': self.form_class()},
           context_instance=RequestContext(self.request))
@@ -2569,7 +2570,7 @@ def payment_home(request):
   except:
     messages.error(request, 'Permission denied. You are not an Account Executive.')
     return HttpResponseRedirect('/software-training')
-  
+
   amount = "0"
   if accountexecutive.academic.institution_type_id == 5:
       amount = "5000"
@@ -2598,20 +2599,20 @@ def payment_status(request):
       messages.error(request, 'Permission denied. You are not an Account Executive.')
       return HttpResponseRedirect('/software-training')
     amount = "0"
-    
+
     if accountexecutive.academic.institution_type_id == 5:
         amount = "5000"
     else:
         amount = "25000"
-    
+
     STdata = ''
     user_name = user.first_name+' '+user.last_name
     STdata = str(user.id)+str(user_name)+str(amount)+"Subscription"+"SOLOSTW"+CHANNEL_KEY
     print(STdata)
     s = display.value(str(STdata))
-    
+
     data = {'userId':user.id,'name':user_name,'amount':amount,'purpose':'Subscription','channelId':'SOLOSTW','random':s.hexdigest()}
-    
+
 
     try:
         paymentdetails = PaymentDetails()
@@ -2624,7 +2625,7 @@ def payment_status(request):
         paymentdetails.academic_year = academic_year
         paymentdetails.gstno = request.POST['id_gstin']
         paymentdetails.save()
-        
+
     except Exception as e:
         try:
           paymentdetails = PaymentDetails.objects.get(academic_id = accountexecutive.academic.id, academic_year = academic_year)
@@ -2639,7 +2640,7 @@ def payment_status(request):
 
         messages.error(request, 'This college has aready initiated the payment.')
         return HttpResponseRedirect('/software-training/payment-home')
-    
+
     return render(request,'payment_status.html',data)
   #not post
   else:
@@ -2649,7 +2650,7 @@ def payment_status(request):
 @login_required
 def payment_success(request):
   context = {}
-  user = User.objects.get(id = request.user.id) 
+  user = User.objects.get(id = request.user.id)
   try:
     accountexecutive = Accountexecutive.objects.get(user_id = user,status=1)
   except:
@@ -2679,9 +2680,9 @@ def payment_success(request):
     provId = request.POST.get('provId')
     status = request.POST.get('status')
     msg = request.POST.get('msg')
-    random = request.POST.get('random') 
+    random = request.POST.get('random')
 
-   
+
     STresponsedata = ''
     STresponsedata = str(user.id)+transId+refNo+amount+status+msg+CHANNEL_KEY
     s = display.value(str(STresponsedata))
@@ -2698,8 +2699,8 @@ def payment_success(request):
         transactiondetails.requestType  =  requestType
         transactiondetails.userId_id  =  userId
         transactiondetails.amount  =  amount
-        transactiondetails.reqId  = reqId 
-        transactiondetails.transId  = transId 
+        transactiondetails.reqId  = reqId
+        transactiondetails.transId  = transId
         transactiondetails.refNo  =  refNo
         transactiondetails.provId  =  provId
         transactiondetails.status  =  status
@@ -2735,7 +2736,7 @@ def payment_details(request,choice):
   paymentdetails = PaymentDetails.objects.filter(academic_id=academic_id[0]['academic_id'])
   paymenttransactionetails = PaymentTransactionDetails.objects.filter(paymentdetail_id = paymentdetails)
   user = User.objects.get(id = request.user.id)
-  
+
   context ={}
   context['user'] = user
   context['completed'] = paymenttransactionetails.filter(status='S').count()
@@ -2746,7 +2747,7 @@ def payment_details(request,choice):
   context['ongoing_details'] = paymentdetails
   context['tabid'] = choice
   context['college'] = academic_id[0]['academic_id__institution_name']
-  return render(request,'payment_details.html',context)     
+  return render(request,'payment_details.html',context)
 
 @csrf_exempt
 def payment_reconciliation_update(request):
@@ -2759,7 +2760,7 @@ def payment_reconciliation_update(request):
   provId = request.GET.get('provId')
   status = request.GET.get('status')
   msg = request.GET.get('msg')
-  random = request.GET.get('random') 
+  random = request.GET.get('random')
 
   STresponsedata = ''
   STresponsedata = userId+transId+refNo+amount+status+msg+CHANNEL_KEY
@@ -2784,8 +2785,8 @@ def payment_reconciliation_update(request):
       transactiondetails.requestType  =  requestType
       transactiondetails.userId_id  =  userId
       transactiondetails.amount  =  amount
-      transactiondetails.reqId  = reqId 
-      transactiondetails.transId  = transId 
+      transactiondetails.reqId  = reqId
+      transactiondetails.transId  = transId
       transactiondetails.refNo  =  refNo
       transactiondetails.provId  =  provId
       transactiondetails.status  =  status
@@ -2794,7 +2795,7 @@ def payment_reconciliation_update(request):
       print("saved")
     except:
       return HttpResponseRedirect("Failed2")
-    
+
     if status == 'S':
       pd.status = 1
       pd.description = 'Payment successfull'
@@ -2818,16 +2819,16 @@ def academic_transactions(request):
     context['user'] = user
     if request.method == 'POST':
       form = TrainingManagerForm(user,request.POST)
-      
+
       # if form.is_valid():
       #   form_data = form.cleaned_data
       get_state = request.POST.get('state')
       status = request.POST.get('choices')
-      if academic_center in ('None','0',0):  
+      if academic_center in ('None','0',0):
         academic_center = False
       else:
         academic_center = request.POST.get('college')
-        
+
       if get_state:
         academic_centers = AcademicCenter.objects.filter(state=get_state)
         if academic_center :
@@ -2839,7 +2840,7 @@ def academic_transactions(request):
         paymentdetails = PaymentDetails.objects.filter(academic_id__in=academic_centers)
 
       if status == 'O':
-        paymentdetails = paymentdetails.filter(status=0)        
+        paymentdetails = paymentdetails.filter(status=0)
         if request.POST.get('fdate'):
           if request.POST.get('tdate'):
             paymentdetails = paymentdetails.filter(Q(created__gt=request.POST.get('fdate')) & Q(created__lt= request.POST.get('tdate')))
@@ -2857,7 +2858,7 @@ def academic_transactions(request):
             paymenttransactiondetails = paymenttransactiondetails.filter(Q(created__gt=request.POST.get('fdate')) & Q(created__lt= request.POST.get('tdate')))
           else:
             paymenttransactiondetails = paymenttransactiondetails.filter(created__gt=request.POST.get('fdate'))
-      
+
         context['transactiondetails'] = paymenttransactiondetails
         if status == 'R':
           context['total'] = paymenttransactiondetails.aggregate(Sum('amount'))
