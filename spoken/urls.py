@@ -108,6 +108,7 @@ urlpatterns = patterns('',
 
     # reports
     url(r'^reports/', include('reports.urls', namespace='reports')),
+    url(r'^scripts/', include('scriptmanager.urls', namespace='scripts')),
 
     # events2
     # url(r'^events2/', include('events2.urls', namespace='events2')),
