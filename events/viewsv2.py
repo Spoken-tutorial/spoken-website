@@ -52,10 +52,7 @@ from reportlab.lib.units import cm
 from reportlab.lib.enums import TA_CENTER
 from PyPDF2 import PdfFileWriter, PdfFileReader
 from events.views import get_page
-try:
-    from io import StringIO
-except ImportError:
-    from io import StringIO
+from io import BytesIO
 
 # import helpers
 from events.views import is_organiser, is_invigilator, is_resource_person, is_administrator, is_accountexecutive
@@ -854,7 +851,7 @@ class TrainingCertificate(object):
     filename = (ta.student.user.first_name+'-'+ta.training.course.foss.foss+"-Participant-Certificate").replace(" ", "-");
 
     response['Content-Disposition'] = 'attachment; filename='+filename+'.pdf'
-    imgTemp = StringIO()
+    imgTemp = BytesIO ()
     imgDoc = canvas.Canvas(imgTemp)
 
     # Title
@@ -891,12 +888,10 @@ class TrainingCertificate(object):
     p = Paragraph(text, centered)
     p.wrap(650, 200)
     p.drawOn(imgDoc, 4.2 * cm, 7 * cm)
-
     imgDoc.save()
-
     # Use PyPDF to merge the image-PDF into the template
-    page = PdfFileReader(file(settings.MEDIA_ROOT +"Blank-Certificate.pdf","rb")).getPage(0)
-    overlay = PdfFileReader(StringIO(imgTemp.getvalue())).getPage(0)
+    page = PdfFileReader(open(settings.MEDIA_ROOT +"Blank-Certificate.pdf","rb")).getPage(0)
+    overlay = PdfFileReader(BytesIO(imgTemp.getvalue())).getPage(0)
     page.mergePage(overlay)
 
     #Save the result
@@ -922,7 +917,7 @@ class SingleTrainingCertificate(object):
     filename = (ta.firstname+'-'+ta.training.course.foss.foss+"-Participant-Certificate").replace(" ", "-");
 
     response['Content-Disposition'] = 'attachment; filename='+filename+'.pdf'
-    imgTemp = StringIO()
+    imgTemp = BytesIO()
     imgDoc = canvas.Canvas(imgTemp)
 
     # Title
@@ -960,8 +955,8 @@ class SingleTrainingCertificate(object):
     imgDoc.save()
 
     # Use PyPDF to merge the image-PDF into the template
-    page = PdfFileReader(file(settings.MEDIA_ROOT +"Blank-Certificate.pdf","rb")).getPage(0)
-    overlay = PdfFileReader(StringIO(imgTemp.getvalue())).getPage(0)
+    page = PdfFileReader(open(settings.MEDIA_ROOT +"Blank-Certificate.pdf","rb")).getPage(0)
+    overlay = PdfFileReader(BytesIO(imgTemp.getvalue())).getPage(0)
     page.mergePage(overlay)
 
     #Save the result
