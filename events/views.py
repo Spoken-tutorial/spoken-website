@@ -2278,7 +2278,7 @@ def test_participant_ceritificate(request, wid, participant_id):
     filename = (ta.mdluser_firstname+'-'+ta.mdluser_lastname+"-Participant-Certificate").replace(" ", "-");
 
     response['Content-Disposition'] = 'attachment; filename='+filename+'.pdf'
-    imgTemp = StringIO()
+    imgTemp = BytesIO()
     imgDoc = canvas.Canvas(imgTemp)
 
     # Title
@@ -2329,8 +2329,8 @@ def test_participant_ceritificate(request, wid, participant_id):
     imgDoc.save()
 
     # Use PyPDF to merge the image-PDF into the template
-    page = PdfFileReader(file(settings.MEDIA_ROOT +"Blank-Certificate.pdf","rb")).getPage(0)
-    overlay = PdfFileReader(StringIO(imgTemp.getvalue())).getPage(0)
+    page = PdfFileReader(open(settings.MEDIA_ROOT +"Blank-Certificate.pdf","rb")).getPage(0)
+    overlay = PdfFileReader(BytesIO(imgTemp.getvalue())).getPage(0)
     page.mergePage(overlay)
 
     #Save the result
