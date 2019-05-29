@@ -188,11 +188,11 @@ urlpatterns = [
       r'^get-department-organiser-status/', 
       GetDepartmentOrganiserStatusView.as_view()
     ),
-    url(
-      r'^training-request/(?P<role>\w+)/(?P<status>\w+)/$', 
-      TrainingRequestListView.as_view(template_name='training_list.html'), 
-      name='training_list'
-    ),
+    # url(
+    #   r'^training-request/(?P<role>\w+)/(?P<status>\w+)/$', 
+    #   TrainingRequestListView.as_view(template_name='training_list.html'), 
+    #   name='training_list'
+    # ),
     #url(r'^get-language-option/', GetLanguageOptionView.as_view()),
     url(
       r'^single-training/pending/(?P<pk>\d+)/approve/$',
@@ -319,5 +319,10 @@ urlpatterns = [
     ),
     
     url(r'^academic-transactions/$', academic_transactions,name="payment"),
+    url(
+      r'^training-request/(?P<role>\w+)/(?P<status>\w+)/$', 
+      trainingrequest, 
+      name='training_list'
+    ),
 
 ]

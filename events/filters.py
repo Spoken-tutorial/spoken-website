@@ -217,7 +217,10 @@ class TrainingRequestFilter(django_filters.FilterSet):
   sem_start_date = django_filters.DateFromToRangeFilter()
 
   training_planner__academic__institution_name = \
-    django_filters.CharFilter()
+    django_filters.CharFilter(method='filter_q')
+
+  def filter_q(self, qs, name, value):
+    return qs.filter(training_planner__academic__institution_name__icontains = value)
 
   # def __len__(self):
   #   return len('id')

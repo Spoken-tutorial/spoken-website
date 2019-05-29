@@ -51,7 +51,7 @@ from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import cm
 from reportlab.lib.enums import TA_CENTER
 from PyPDF2 import PdfFileWriter, PdfFileReader
-
+from events.views import get_page
 try:
     from io import StringIO
 except ImportError:
@@ -2867,3 +2867,119 @@ def academic_transactions(request):
       form = TrainingManagerForm(user=request.user)
     context['form'] = form
     return render(request, 'payment.html', context)
+
+def trainingrequest(request, role, status):
+  context = {}
+  if (not role ) or (not status):
+    raise PermissionDenied()
+  else:
+    status_list = {'pending': 0, 'completed': 1, 'markcomplete':2, 'pendingattendance':3}
+    roles = ['rp', 'em']
+    user = request.user
+    if role in roles and status in status_list:
+      if status == 'completed':
+        queryset = TrainingRequest.objects.filter(
+          training_planner__academic_id__in=AcademicCenter.objects.filter(
+            state__in = State.objects.filter(
+              resourceperson__user_id=user,
+              resourceperson__status=1
+            )
+          ).values_list('id'),
+          status=1,
+          participants__gt=0
+        ).order_by('-updated')
+      elif status == 'pending':
+        queryset = TrainingRequest.objects.filter(
+          training_planner__academic_id__in=AcademicCenter.objects.filter(
+            state__in = State.objects.filter(
+              resourceperson__user_id=user,
+              resourceperson__status=1
+            )
+          ).values_list('id'),
+          status=0
+        ).order_by('-updated')
+      elif status == 'markcomplete':
+        if is_administrator(user):
+          queryset = TrainingRequest.objects.filter(status=2).order_by('-updated')
+        else:
+          queryset = TrainingRequest.objects.filter(
+            training_planner__academic_id__in=AcademicCenter.objects.filter(
+              state__in = State.objects.filter(
+                resourceperson__user_id=user,
+                resourceperson__status=1
+              )
+            ).values_list('id'),
+            status=2
+          ).order_by('-updated')
+      elif status == 'pendingattendance':
+        queryset = TrainingRequest.objects.filter(
+          training_planner__academic_id__in=AcademicCenter.objects.filter(
+            state__in = State.objects.filter(
+              resourceperson__user_id=user,
+              resourceperson__status=1,
+            )
+          ).values_list('id'),
+          status = 1, participants = 0, training_planner__semester__name = prev_sem_type , sem_start_date__gte = prev_sem_start_date
+        )
+
+      header = {
+        1: SortableHeader('#', False),
+        2: SortableHeader(
+          'training_planner__academic__state__name',
+          True,
+          'State'
+        ),
+        3: SortableHeader(
+          'training_planner__academic__academic_code',
+          True,
+          'Code'
+        ),
+        4: SortableHeader(
+          'training_planner__academic__institution_name',
+          True,
+          'Institution'
+        ),
+        5: SortableHeader('batch__department__name', True, 'Department / Batch'),
+        6: SortableHeader('course__foss__foss', True, 'Course Name'),
+        7: SortableHeader('course_type', True, 'Course Type'),
+        8: SortableHeader(
+          'training_planner__organiser__user__first_name',
+          True,
+          'Organiser'
+        ),
+        9: SortableHeader(
+          'sem_start_date',
+          True,
+          'Sem Start Date / Training Date'
+        ),
+        10: SortableHeader('participants', True, 'Participants'),
+        #11: SortableHeader('Action', False)
+      }
+      raw_get_data = request.GET.get('o', None)
+      queryset = get_sorted_list(
+        request,
+        queryset,
+        header,
+        raw_get_data
+      )
+      if status == 'completed':
+        collection= TrainingRequestFilter(request.GET, queryset=queryset, user=user, rp_completed=True)
+      elif status == 'pending':
+        collection= TrainingRequestFilter(request.GET, queryset=queryset, user=user, rp_ongoing=True)
+      elif status == 'markcomplete':
+        collection= TrainingRequestFilter(request.GET, queryset=queryset, user=user, rp_markcomplete=True)
+      elif status == 'pendingattendance':
+        collection= TrainingRequestFilter(request.GET, queryset=queryset, user=user, rp_pendingattendance=True)
+    else:
+      raise PermissionDenied()
+
+    context['form'] = collection.form
+    page = request.GET.get('page')
+    collection = get_page(collection.qs, page)
+    context['collection'] =  collection
+    context['role'] = role
+    context['status'] = status
+    context['header'] = header
+    context['ordering'] = get_field_index(raw_get_data)
+
+  return render(request,'training_list.html',context)
