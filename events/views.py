@@ -954,7 +954,7 @@ def organiser_edit(request, username):
 def rp_organiser(request, status, code, userid):
     """ Resource person: active organiser """
     user = request.user
-    organiser_in_rp_state = Organiser.objects.filter(user_id=userid, academic=AcademicCenter.objects.filter(state=State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)))
+    organiser_in_rp_state = Organiser.objects.filter(user_id=userid, academic__in=AcademicCenter.objects.filter(state=State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)))
     if not (user.is_authenticated() and organiser_in_rp_state and ( is_event_manager(user) or is_resource_person(user) or (status == 'active' or status == 'block'))):
         raise PermissionDenied('You are not allowed to view this page ')
 
