@@ -29,7 +29,7 @@
 This module implements a general external merge sort for Python objects.
 """
 
-from __future__ import with_statement
+
 
 import os, tempfile
 from heapq import heapify, heappop, heapreplace
@@ -63,7 +63,7 @@ except ImportError:
         h_append = h.append
         for itnum, it in enumerate(map(iter, iterables)):
             try:
-                nx = it.next
+                nx = it.__next__
                 h_append([nx(), itnum, nx])
             except _Stop:
                 pass

@@ -33,7 +33,7 @@ from bisect import bisect_right
 
 from whoosh import columns
 from whoosh.automata import lev
-from whoosh.compat import abstractmethod, izip, unichr, xrange
+from whoosh.compat import abstractmethod, izip, chr, xrange
 from whoosh.filedb.compound import CompoundStorage
 from whoosh.system import emptybytes
 from whoosh.util import random_name
@@ -148,7 +148,7 @@ class PerDocumentWriter(object):
                 weight = vmatcher.weight()
                 valuestring = vmatcher.value()
                 yield (text, weight, valuestring)
-                vmatcher.next()
+                next(vmatcher)
         self.add_vector_items(fieldname, fieldobj, readitems())
 
     def finish_doc(self):
@@ -292,7 +292,7 @@ class FieldCursor(object):
     def find(self, string):
         raise NotImplementedError
 
-    def next(self):
+    def __next__(self):
         raise NotImplementedError
 
     def term(self):
@@ -355,7 +355,7 @@ class Automata(object):
 
     @staticmethod
     def find_matches(dfa, cur):
-        unull = unichr(0)
+        unull = chr(0)
 
         term = cur.text()
         if term is None:
@@ -411,7 +411,7 @@ class PerDocumentReader(object):
         """
 
         is_deleted = self.is_deleted
-        return (docnum for docnum in xrange(self.doc_count_all())
+        return (docnum for docnum in range(self.doc_count_all())
                 if not is_deleted(docnum))
 
     def iter_docs(self):
@@ -742,12 +742,12 @@ class MultiPerDocumentReader(PerDocumentReader):
         return self._readers[x].is_deleted(y)
 
     def deleted_docs(self):
-        for r, offset in izip(self._readers, self._doc_offsets):
+        for r, offset in zip(self._readers, self._doc_offsets):
             for docnum in r.deleted_docs():
                 yield docnum + offset
 
     def all_doc_ids(self):
-        for r, offset in izip(self._readers, self._doc_offsets):
+        for r, offset in zip(self._readers, self._doc_offsets):
             for docnum in r.all_doc_ids():
                 yield docnum + offset
 
@@ -830,7 +830,7 @@ class EmptyCursor(FieldCursor):
     def find(self, term):
         return None
 
-    def next(self):
+    def __next__(self):
         return None
 
     def text(self):

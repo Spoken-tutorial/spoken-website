@@ -70,8 +70,8 @@
 {% block content %}
     <div class='add-new'>
         <a class="btn btn-primary" href="{% url 'testimonials_new' %}">Add New</a>
-        <a class="btn btn-primary" href="{% url 'testimonials_new_media' type='tutorial' %}">Upload Media Testimonial</a>
-        <a class="btn btn-primary" href="{% url 'testimonials_new_media' type='series' %}">Upload Series Testimonial</a>
+        <a class="btn btn-primary" href="{% url 'testimonials_new_media' testimonial_type='tutorial' %}">Upload Media Testimonial</a>
+        <a class="btn btn-primary" href="{% url 'testimonials_new_media' testimonial_type='series' %}">Upload Series Testimonial</a>
 
     </div>
     <ul class="nav nav-tabs">

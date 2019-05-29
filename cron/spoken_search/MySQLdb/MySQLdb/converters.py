@@ -42,7 +42,7 @@ try:
 except ImportError:
     # Python 3
     long = int
-    IntType, LongType, FloatType, NoneType = int, long, float, type(None)
+    IntType, LongType, FloatType, NoneType = int, int, float, type(None)
     TupleType, ListType, DictType, InstanceType = tuple, list, dict, None
     StringType, UnicodeType, ObjectType, BooleanType = bytes, str, object, bool
 
@@ -104,17 +104,17 @@ def Instance2Str(o, d):
 
     if o.__class__ in d:
         return d[o.__class__](o, d)
-    cl = filter(lambda x,o=o:
+    cl = list(filter(lambda x,o=o:
                 type(x) is ClassType
-                and isinstance(o, x), d.keys())
+                and isinstance(o, x), list(d.keys())))
     if not cl and hasattr(types, 'ObjectType'):
-        cl = filter(lambda x,o=o:
+        cl = list(filter(lambda x,o=o:
                     type(x) is TypeType
                     and isinstance(o, x)
                     and d[x] is not Instance2Str,
-                    d.keys())
+                    list(d.keys())))
     if not cl:
-        return d[types.StringType](o,d)
+        return d[bytes](o,d)
     d[o.__class__] = d[cl[0]]
     return d[cl[0]](o, d)
 
@@ -143,12 +143,12 @@ conversions = {
     set: Set2Str,
     FIELD_TYPE.TINY: int,
     FIELD_TYPE.SHORT: int,
-    FIELD_TYPE.LONG: long,
+    FIELD_TYPE.LONG: int,
     FIELD_TYPE.FLOAT: float,
     FIELD_TYPE.DOUBLE: float,
     FIELD_TYPE.DECIMAL: float,
     FIELD_TYPE.NEWDECIMAL: float,
-    FIELD_TYPE.LONGLONG: long,
+    FIELD_TYPE.LONGLONG: int,
     FIELD_TYPE.INT24: int,
     FIELD_TYPE.YEAR: int,
     FIELD_TYPE.SET: Str2Set,

@@ -1,3 +1,4 @@
+
 # Youtube-upload is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -11,16 +12,21 @@
 # You should have received a copy of the GNU General Public License
 # along with Youtube-upload. If not, see <http://www.gnu.org/licenses/>.
 
+from builtins import next
+from builtins import filter
+from builtins import str
+from builtins import map
+from builtins import object
 import os
 import re
 import sys
 import time
 import string
 import locale
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import socket
 import getpass
-import StringIO
+import io
 import optparse
 import itertools
 # python >= 2.6
@@ -63,7 +69,7 @@ def to_utf8(s):
 def debug(obj, fd=sys.stderr):
     """Write obj to standard error."""
     string = str(obj.encode(get_encoding(fd), "backslashreplace")
-        if isinstance(obj, unicode) else obj)
+        if isinstance(obj, str) else obj)
     fd.write(string + "\n")
 
 def get_encoding(fd):
@@ -72,19 +78,19 @@ def get_encoding(fd):
 
 def compact(it):
     """Filter false (in the truth sense) elements in iterator."""
-    return filter(bool, it)
+    return list(filter(bool, it))
 
 def first(it):
     """Return first element in iterable."""
-    return it.next()
+    return next(it)
 
 def post(url, files_params, extra_params, show_progressbar=True):
     """Post files to a given URL."""
     def progress(bar, maxval, download_t, download_d, upload_t, upload_d):
         bar.update(min(maxval, upload_d))
     c = pycurl.Curl()
-    file_params2 = [(key, (pycurl.FORM_FILE, path)) for (key, path) in files_params.items()]
-    items = extra_params.items() + file_params2
+    file_params2 = [(key, (pycurl.FORM_FILE, path)) for (key, path) in list(files_params.items())]
+    items = list(extra_params.items()) + file_params2
     c.setopt(c.URL, url + "?nexturl=http://code.google.com/p/youtube-upload")
     c.setopt(c.HTTPPOST, items)
     if show_progressbar and progressbar:
@@ -94,7 +100,7 @@ def post(url, files_params, extra_params, show_progressbar=True):
             progressbar.ETA(), ' ',
             progressbar.FileTransferSpeed(),
         ]
-        total_filesize = sum(os.path.getsize(path) for path in files_params.values())
+        total_filesize = sum(os.path.getsize(path) for path in list(files_params.values()))
         bar = progressbar.ProgressBar(widgets=widgets, maxval=total_filesize)
         bar.start()
         c.setopt(c.NOPROGRESS, 0)
@@ -105,8 +111,8 @@ def post(url, files_params, extra_params, show_progressbar=True):
     else:
         bar = None
         
-    body_container = StringIO.StringIO()
-    headers_container = StringIO.StringIO()
+    body_container = io.StringIO()
+    headers_container = io.StringIO()
     c.setopt(c.WRITEFUNCTION, body_container.write)
     c.setopt(c.HEADERFUNCTION, headers_container.write)
     c.perform()
@@ -119,7 +125,7 @@ def post(url, files_params, extra_params, show_progressbar=True):
       headers_container.getvalue().splitlines() if ":" in line)
     return http_code, headers, body_container.getvalue()
 
-class Youtube:
+class Youtube(object):
     """Interface the Youtube API."""
     CATEGORIES_SCHEME = "http://gdata.youtube.com/schemas/2007/categories.cat"
 
@@ -221,7 +227,7 @@ class Youtube:
             location=None, private=False, unlisted=False):
         self.categories = self.get_categories()
         if category not in self.categories:
-            valid = " ".join(self.categories.keys())
+            valid = " ".join(list(self.categories.keys()))
             raise InvalidCategory("Invalid category '%s' (valid: %s)" % \
                 (category, valid))
         media_group = gdata.media.Group(
@@ -257,9 +263,9 @@ class Youtube:
             if all(not(str(x.tag).endswith("deprecated")) for x in \
                 element.getchildren()):
                 return (element.get("term"), element.get("label"))
-        xmldata = str(urllib.urlopen(cls.CATEGORIES_SCHEME).read())
+        xmldata = str(urllib.request.urlopen(cls.CATEGORIES_SCHEME).read())
         xml = ElementTree.XML(xmldata)
-        return dict(compact(map(get_pair, xml)))
+        return dict(compact(list(map(get_pair, xml))))
 
 
 def get_video_id_from_url(url):
@@ -279,7 +285,7 @@ def get_entry_info(entry):
 def parse_location(string):
     """Return tuple (long, latitude) from string with coordinates."""
     if string and string.strip():
-        return map(float, string.split(",", 1))
+        return list(map(float, string.split(",", 1)))
 
 def wait_processing(youtube_obj, video_id):
     """Wait until a video id recently uploaded has been procesed."""
@@ -333,7 +339,7 @@ def upload_video(youtube, options, video_path):
         #url = "http://www.youtube.com/watch?v=%s" % video_id
         """if options.wait_processing:
             wait_processing(youtube, video_id)"""
-    except Exception, e:
-        print e
+    except Exception as e:
+        print(e)
         pass
     return video_id

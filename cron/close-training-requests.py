@@ -1,3 +1,5 @@
+
+from builtins import str
 from datetime import datetime, date, timedelta
 from django.db.models import Q
 import os, sys
@@ -43,6 +45,6 @@ count = training_requests.count()
 #updating training request status
 #training_requests.update(status=1)
 
-print '*************************************'
-print ' Total records checked: ', count
-print '*************************************'
+print('*************************************')
+print((' Total records checked: ', count))
+print('*************************************')

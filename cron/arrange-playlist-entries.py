@@ -1,3 +1,5 @@
+
+from builtins import str
 import time
 import os, sys
 import MySQLdb
@@ -54,7 +56,7 @@ for row in rows:
     # throw error if the playlist entry is not available
     if not playlist:
       error_string = row.foss + ' - ' + lang.name + ' -- Playlist Missing'
-      print error_string
+      print(error_string)
       continue
 
     # fetch tutorial_resource records based on foss and language
@@ -75,7 +77,7 @@ for row in rows:
 
       # skip tutorial_resource(tutorial) if log entry count > 0 
       if tr_log and int(tr_log[0]):
-        print tutorial.id, '-- Skipping...'
+        print((tutorial.id, '-- Skipping...'))
         counter += 1
         continue
       # fetching video feed from youtube
@@ -91,11 +93,11 @@ for row in rows:
             playlist_uri, tutorial.playlist_item_id, entry.media.title.text,
             entry.media.description.text, counter
           )
-        except Exception, e:
+        except Exception as e:
           # throw error if api call is not success
-          print e
+          print(e)
           error_string = str(tutorial.id) + ' - ' + str(playlist.playlist_id) + ' -- Error...'
-          print error_string
+          print(error_string)
           time.sleep(2)
           continue
 
@@ -103,8 +105,8 @@ for row in rows:
         counter += 1
 
         # print success message
-        print str(tutorial.id) + ' -- Success --' + \
-          playlist_entry.id.text.replace(playlist_uri, '').strip('/')
+        print((str(tutorial.id) + ' -- Success --' + \
+          playlist_entry.id.text.replace(playlist_uri, '').strip('/')))
 
         # add tutorial_resource(tutorial) id to playlist_arranger
         lcur.execute(
@@ -115,7 +117,7 @@ for row in rows:
       else:
         # throw error if video entry is not available
         error_string = str(tutorial.id) + ' -- Failed to get video entry'
-        print error_string
+        print(error_string)
       time.sleep(1)
     #time.sleep(1)
   #time.sleep(1)

@@ -1,4 +1,6 @@
+
 # Standard Library
+from builtins import object
 import datetime as dt
 
 # Third Party Stuff
@@ -8,7 +10,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from events.models import Semester, TrainingPlanner
 
 
-class CurrentTrainingPlanner():
+class CurrentTrainingPlanner(object):
 
     def is_even_sem(self, month):
         # 0 => odd sem, 1 => even sem
@@ -36,6 +38,6 @@ class CurrentTrainingPlanner():
             return TrainingPlanner.objects.create(year=year,
                                                   semester=self.get_semester(sem), academic=user.organiser.academic,
                                                   organiser=user.organiser)
-        except Exception, e:
-            print e
+        except Exception as e:
+            print(e)
         return False

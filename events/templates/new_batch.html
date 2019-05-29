@@ -21,7 +21,7 @@
     <td><center><a class="btn btn-primary" data-toggle="modal" data-target="#myModal"><i class="fa fa-2 fa-question"></i>Instructions for Adding MB</a>
     <br><a class="csv-link" data-toggle="modal" data-target="#csvModal"><u>Sample CSV file</u></a></center>
     </td>
-    <td><a class="btn btn-success pull-right" href="{% url 'events:batch_list' %}">Back to MB Master Batch</a></td>
+    <td><a class="btn btn-success pull-right" href="{% url 'eventsv2:batch_list' %}">Back to MB Master Batch</a></td>
   </tr>
 </table>
 
@@ -129,7 +129,7 @@
                       <div class="form-group">
                           <div class="col-xs-12 form-group">
                               <input class="btn btn-primary" id="upload_button" type="button" value="Upload Master Batch" />
-                              <a class="btn btn-danger" href="{% url 'events:batch_list' %}">Cancel</a>
+                              <a class="btn btn-danger" href="{% url 'eventsv2:batch_list' %}">Cancel</a>
                           </div>
                       </div>
                       {% endwith %}
