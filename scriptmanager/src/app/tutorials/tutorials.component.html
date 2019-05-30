@@ -1,0 +1,13 @@
+
+<select (change)="fossCategorySelected($event.target.value)">
+  <option value="" disabled selected>--All foss categories</option>
+  <option *ngFor="let item of Foss" [value]="item['foss_category']">{{item['foss_category']}}</option>
+</select>
+
+<select (change)="LanguageSelected($event.target.value)">
+  <option value="" disabled selected >--All Languages--</option>
+  <option *ngFor="let item of Foss" [value]="item.language">{{item.language}}</option>
+</select>
+
+
+

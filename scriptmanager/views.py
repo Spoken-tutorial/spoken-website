@@ -13,5 +13,9 @@ def index(request):
 class ContributorRoleList(generics.ListCreateAPIView):
   def get_queryset(self):
       return ContributorRole.objects.filter(user=self.request.user)
-  
+      # data = 
+      # return Response(data=pDatos, status=pStatus, headers={"Access-Control-Allow-Origin":"*"})
+
   serializer_class = ContributorRoleSerializer
+
+  
