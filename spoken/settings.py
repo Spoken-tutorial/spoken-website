@@ -219,7 +219,7 @@ STATIC_URL = '/static/'
 COMPRESS_ROOT = STATIC_ROOT
 COMPRESS_URL = STATIC_URL
 
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static'),]
+#STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static'),]
 
 #debugging
 #INSTALLED_APPS = INSTALLED_APPS + ('debug_toolbar',)
