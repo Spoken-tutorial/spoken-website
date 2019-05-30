@@ -4,7 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build --output-path static/scriptmanager --output-hashing none --prod",
+    "build": "ng build --output-path static/scriptmanager --output-hashing none --prod --base-href=/scripts/",
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e"
