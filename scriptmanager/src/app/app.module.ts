@@ -6,6 +6,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { TutorialsComponent } from './tutorials/tutorials.component';
 import { FormsModule } from '@angular/forms';
+import { JwtModule } from '@auth0/angular-jwt';
 
 const appRoutes: Routes = [
   {
@@ -18,6 +19,10 @@ const appRoutes: Routes = [
   }
 ]
 
+export function tokenGetter() {
+  return localStorage.getItem('token');
+}
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -27,6 +32,13 @@ const appRoutes: Routes = [
     BrowserModule,
     AppRoutingModule,
     HttpClientModule,
+    JwtModule.forRoot({
+      config: {
+        tokenGetter: tokenGetter,
+        whitelistedDomains: [''],
+        blacklistedRoutes: ['']
+      }
+    }),
     RouterModule.forRoot(appRoutes),
     FormsModule
   ],
