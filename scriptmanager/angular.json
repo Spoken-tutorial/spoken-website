@@ -10,7 +10,7 @@
       "prefix": "app",
       "schematics": {
         "@schematics/angular:component": {
-          "style": "scss"
+          "style": "sass"
         }
       },
       "architect": {
@@ -27,7 +27,8 @@
               "src/assets"
             ],
             "styles": [
-              "src/styles.scss"
+              "node_modules/bulma/bulma.sass",
+              "src/styles.sass"
             ],
             "scripts": [],
             "es5BrowserSupport": true
@@ -84,7 +85,7 @@
             "tsConfig": "src/tsconfig.spec.json",
             "karmaConfig": "src/karma.conf.js",
             "styles": [
-              "src/styles.scss"
+              "src/styles.sass"
             ],
             "scripts": [],
             "assets": [
@@ -136,5 +137,10 @@
       }
     }
   },
-  "defaultProject": "scriptmanager"
+  "defaultProject": "scriptmanager",
+  "schematics": {
+    "@schematics/angular:component": {
+      "styleext": "sass"
+    }
+  }
 }

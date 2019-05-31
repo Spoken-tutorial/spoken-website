@@ -3,6 +3,7 @@ import settings
 from django.conf.urls import include, patterns, url
 from django.contrib import admin
 from django.views.generic import TemplateView
+from rest_framework_jwt.views import obtain_jwt_token
 
 admin.autodiscover()
 
@@ -109,7 +110,7 @@ urlpatterns = patterns('',
     # reports
     url(r'^reports/', include('reports.urls', namespace='reports')),
     url(r'^scripts/', include('scriptmanager.urls', namespace='scripts')),
-
+    url(r'^api-token-auth/', obtain_jwt_token),
     # events2
     # url(r'^events2/', include('events2.urls', namespace='events2')),
 
