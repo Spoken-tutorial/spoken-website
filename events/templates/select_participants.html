@@ -94,21 +94,19 @@
                 {% endif %}
               {% endif %}
 
-              {% if training.status == 1 and training.is_learners_allowed and training.get_partipants_from_attendance %}
-                | <a href="{% url 'events:training_certificate' training.id %}">Download Participation Certificate</a> | <a href="{% url 'events:re-open-training' training.id %}"> Re-Open</a> |
+              {% if training.status == 1 and training.is_learners_allowed and training.get_partipants_from_attendance and training.cert_status == 1%}
+                | <a href="{% url 'events:training_certificate' training.id %}">Download Participation Certificate</a> | 
+                <a href="{% url 'events:re-open-training' training.id %}"> Re-Open</a> |
               {% endif %}
-              <!-- {% if training.status == 1 and training.is_training_before_july2017 and not training.is_learners_allowed and training.have_test %}
-                  | Training Completed. Proceed for Test | <a href="{% url 'events:re-open-training' training.id %}"> Re-Open</a> |
-              {% endif %} -->
-              <!-- {% if training.status == 1 and training.have_test %}
-                  | Training Completed. Proceed for Test | <a href="{% url 'events:re-open-training' training.id %}"> Re-Open</a> |
-              {% endif %} -->
+              
               {% if training.status == 1 and not training.is_learners_allowed and not training.have_test%}
-                  | Training Completed. No Certificates | <a href="{% url 'events:re-open-training' training.id %}"> Re-Open</a> |
+                  | Training Completed. No Certificates | 
+                  <a href="{% url 'events:re-open-training' training.id %}"> Re-Open</a> |
                 {% endif %}
 
-	            {% if training.status == 2 and training.is_learners_allowed and training.is_training_before_july2017 %}
-                |Request Sent for Mark As Complete| <a href="{% url 'events:re-open-training' training.id %}"> Re-Open</a> |
+	            {% if training.status == 2 and training.is_learners_allowed %}
+                | Request Sent for Mark As Complete| 
+                <a href="{% url 'events:re-open-training' training.id %}"> Re-Open</a> |
               {% endif %}
 
 
@@ -123,9 +121,17 @@
               {% endif %}
 
               {% if training.status == 1 %}
-                {% if training.is_learners_allowed and training.get_partipants_from_attendance %}
-                  | <a href="{% url 'events:training_certificate' training.id %}">Download Participation Certificate</a> | <a href="{% url 'events:re-open-training' training.id %}"> Re-Open</a> |
+
+                {% if training.is_learners_allowed and training.get_partipants_from_attendance and training.cert_status == 1%}
+                  | <a href="{% url 'events:training_certificate' training.id %}">Download Participation Certificate</a> | 
+
+                {% elif training.is_learners_allowed and training.get_partipants_from_attendance and training.cert_status == 0%}
+                  | <a href="{% url 'events:request_certificate' training.id %}">Genearte Participation Certificate</a> |
+
+                {% elif training.is_learners_allowed and training.get_partipants_from_attendance and training.cert_status == 2%}
+                  | Request sent for Participation Certificate | <a href="{% url 'events:training_certificate' training.id %}">Participant List</a>
                 {% endif %}
+                <a href="{% url 'events:re-open-training' training.id %}"> Re-Open</a> |
 
                 <!-- {% if not training.is_learners_allowed and training.have_test %}
                   | Training Completed. Proceed for Test | <a href="{% url 'events:re-open-training' training.id %}"> Re-Open</a> |
@@ -136,7 +142,9 @@
                 {% endif %} -->
 
                 {% if not training.is_learners_allowed and not training.have_test%}
-                  | Training Completed. No Certificates | <a href="{% url 'events:re-open-training' training.id %}"> Re-Open</a> |
+                  | Training Completed. No Certificates 
+                  | <a href="{% url 'events:training_certificate' training.id %}">Participant List</a>
+                  | <a href="{% url 'events:re-open-training' training.id %}"> Re-Open</a> |
                 {% endif %}
               {% endif %}
             </td>

@@ -2125,6 +2125,7 @@ def MarkComplete(request, pk):
   st = TrainingRequest.objects.get(pk=pk)
   if st and st.status == 2:
     st.status = 1 #mark to complete
+    st.cert_status = 1 #allow certificate
     st.save()
     messages.success(request, 'Training Marked as complete.')
   else:
