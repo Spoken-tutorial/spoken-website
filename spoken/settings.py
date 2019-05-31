@@ -89,6 +89,7 @@ INSTALLED_APPS = (
     'api',
     'rest_framework',
     'scriptmanager',
+    'corsheaders',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -105,6 +106,8 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.redirects.middleware.RedirectFallbackMiddleware',
     # 'django.middleware.cache.FetchFromCacheMiddleware',
     'htmlmin.middleware.MarkRequestMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
 )
 
 ROOT_URLCONF = 'spoken.urls'
