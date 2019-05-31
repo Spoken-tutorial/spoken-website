@@ -5,7 +5,7 @@ import { routerTransition } from './animations';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss'],
+  styleUrls: ['./app.component.sass'],
   animations: [
     routerTransition
   ]

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Foss } from './foss';
+import { Foss } from '../_class/foss';
 
 
 @Injectable({
@@ -9,8 +9,8 @@ import { Foss } from './foss';
 
 
 
-export class ApiService {
-  apiURL: string = 'https://cors-anywhere.herokuapp.com/http://localhost:8000/scripts/api';
+export class FossService {
+  apiURL: string = 'http://localhost:8000/scripts/api';
   
   public getFoss(){
     console.log("manan")
