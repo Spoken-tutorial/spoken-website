@@ -1,13 +1,40 @@
+<div class="container">
+  
+  <div class="columns">
 
-<select (change)="fossCategorySelected($event.target.value)">
-  <option value="" disabled selected>--All foss categories</option>
-  <option *ngFor="let item of foss" [value]="item['foss_category']">{{item['foss_category']}}</option>
-</select>
+    <div class="column">
+      <div class="field">
+        <p class="control">
+          <span class="select">
+            <select (change)="fossCategorySelected($event.target.value)">
+              <option value="" disabled selected>--All foss categories</option>
+              <option
+                *ngFor="let item of foss"
+                [value]="item['foss_category']"
+                >{{ item["foss_category"] }}</option
+              >
+            </select>
+          </span>
+        </p>
+      </div>
+    </div>
 
-<select (change)="LanguageSelected($event.target.value)">
-  <option value="" disabled selected >--All Languages--</option>
-  <option *ngFor="let item of foss" [value]="item.language">{{item.language}}</option>
-</select>
+    <div class="column">
+      <div class="field">
+        <p class="control">
+          <span class="select">
+            <select (change)="LanguageSelected($event.target.value)">
+              <option value="" disabled selected>--All Languages--</option>
+              <option *ngFor="let item of foss" [value]="item.language">{{
+                item.language
+              }}</option>
+            </select>
+          </span>
+        </p>
+      </div>
+    </div>
 
+  </div>
 
-
+<app-tutorials></app-tutorials>
+</div>
