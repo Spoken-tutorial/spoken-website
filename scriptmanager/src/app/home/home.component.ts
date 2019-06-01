@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import {FossService } from '../_service/foss.service';
+import { FossService } from '../_service/foss.service';
 
 @Component({
   selector: 'app-home',

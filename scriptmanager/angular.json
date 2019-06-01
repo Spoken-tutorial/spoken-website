@@ -28,6 +28,7 @@
             ],
             "styles": [
               "node_modules/bulma/bulma.sass",
+              "node_modules/bulma-helpers/bulma-helpers.sass",
               "src/styles.sass"
             ],
             "scripts": [],
