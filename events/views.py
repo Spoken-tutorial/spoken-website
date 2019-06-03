@@ -538,12 +538,10 @@ def events_dashboard(request):
     rp_workshop_notification = None
     rp_test_notification = None
     rp_training_notification = None
-    institute_name = None
+    institution_type = None
     if is_organiser(user):
-	institution_type = AcademicCenter.objects.get(id=user.organiser.academic_id)
-        institute_name = InstituteType.objects.get(id=institution_type.institution_type_id)
+        institution_type = user.organiser.academic.institution_type
         organiser_test_notification = EventsNotification.objects.filter((Q(status = 1) | Q(status = 2)), category = 1, academic_id = user.organiser.academic_id, categoryid__in = user.organiser.academic.test_set.filter(organiser_id = user.id).values_list('id')).order_by('-created')[:30]
-
         #organiser_training_notification = EventsNotification.objects.filter((Q(status = 1) | Q(status = 3)), category = 2, status = 1, academic_id = user.organiser.academic_id, categoryid__in = user.organiser.academic.workshop_set.filter(organiser_id = user.id).values_list('id')).order_by('-created')[:30]
 
     if is_resource_person(user):
@@ -555,7 +553,7 @@ def events_dashboard(request):
 
     context = {
         'roles' : roles,
-        'institution_type' : institute_name,
+        'institution_type' : institution_type,
         'organiser_workshop_notification' : organiser_workshop_notification,
         'organiser_test_notification' : organiser_test_notification,
         'organiser_training_notification' : organiser_training_notification,
@@ -721,7 +719,7 @@ def accountexecutive_request(request, username):
 
     if username == request.user.username:
         user = User.objects.get(username=username)
-        
+
 
 
         if request.method == 'POST':
@@ -742,7 +740,7 @@ def accountexecutive_request(request, username):
             messages.error(request, "Please fill the following details")
             context = {'form':form}
             return render(request, 'events/templates/accountexecutive/form.html', context)
-        
+
         else:
             try:
                 accountexecutive = Accountexecutive.objects.get(user=user)
@@ -2367,7 +2365,9 @@ def organiser_invigilator_index(request, role, status):
 
     if role == 'organiser':
         try:
-            collectionSet = Organiser.objects.select_related().filter(academic=AcademicCenter.objects.filter(state=State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)), status=status)
+            states =  user.resource_person.prefetch_related().filter(resourceperson__status = 1)
+            academics = AcademicCenter.objects.filter(state = states)
+            collectionSet = Organiser.objects.filter(academic = academics, status = status)
 
             raw_get_data = request.GET.get('o', None)
             collection = get_sorted_list(request, collectionSet, header, raw_get_data)
@@ -2383,7 +2383,9 @@ def organiser_invigilator_index(request, role, status):
             collection = {}
     elif role == 'invigilator':
         try:
-            collectionSet = Invigilator.objects.select_related().filter(academic=AcademicCenter.objects.filter(state=State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)), status=status)
+            states = user.resource_person.prefetch_related().filter(resourceperson__status=1)
+            academics = AcademicCenter.objects.filter(state=states)
+            collectionSet = Invigilator.objects.filter(academic=academics, status=status)
 
             raw_get_data = request.GET.get('o', None)
             collection = get_sorted_list(request, collectionSet, header, raw_get_data)
@@ -2400,7 +2402,9 @@ def organiser_invigilator_index(request, role, status):
             collection = {}
     elif role == 'accountexecutive':
         try:
-            collectionSet = Accountexecutive.objects.select_related().filter(academic=AcademicCenter.objects.filter(state=State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)), status=status)
+            states = user.resource_person.prefetch_related().filter(resourceperson__status=1)
+            academics = AcademicCenter.objects.filter(state=states)
+            collectionSet = Accountexecutive.objects.filter(academic=academics, status=status)
 
             raw_get_data = request.GET.get('o', None)
             collection = get_sorted_list(request, collectionSet, header, raw_get_data)
@@ -2414,7 +2418,7 @@ def organiser_invigilator_index(request, role, status):
 
         except Exception, e:
             print e
-            collection = {}    
+            collection = {}
     else:
         raise PermissionDenied()
 
@@ -2854,7 +2858,7 @@ def activate_academics(request):
     if request.method == 'POST':
         collegeid = request.POST.get('collegeid')
         action = request.POST.get('action')
-        
+
         if action == 'activate':
             activate_academic_org(collegeid)
 
@@ -2868,7 +2872,7 @@ def activate_academics(request):
             collection = AcademicCenter.objects.filter(status=status).order_by('state__name', 'institution_name')
         else:
             collection = AcademicCenter.objects.filter(status=3).order_by('state__name', 'institution_name')
-        
+
         raw_get_data = request.GET.get('o', None)
         collection = get_sorted_list(request, collection, header, raw_get_data)
         ordering = get_field_index(raw_get_data)
@@ -2878,7 +2882,7 @@ def activate_academics(request):
         context['form'] = collection.form
         page = request.GET.get('page')
         collection = get_page(collection, page)
-        
+
 
     context['collection'] = collection
     context['header'] = header
@@ -2899,12 +2903,12 @@ def activate_academic_org(academic_id):
 
         for organiser in organisers_from_academic:
             #all the organisers from this academic are activated here.
-            organiser.status = 1 
+            organiser.status = 1
             organiser.save()
-        
+
         for invigilator in invigilators_from_academic:
             #all the organisers from this academic are activated here.
-            invigilator.status = 1 
+            invigilator.status = 1
             invigilator.save()
 
         #Activate that collge
@@ -2922,7 +2926,7 @@ def deactivate_academic_org(academic_id):
         invigilators_from_academic = Invigilator.objects.filter(status=activate_status, academic_id=ac.id)
         for organiser in organisers_from_academic:
             #all the organisers from this academic are activated here.
-            organiser.status = 3 
+            organiser.status = 3
             organiser.save()
 
         for invigilator in invigilators_from_academic:
@@ -2940,7 +2944,7 @@ def key_verification(serial):
         certificate = TestAttendance.objects.get(password=serial)
         if not certificate.student:
             name = certificate.mdluser_firstname+" "+certificate.mdluser_lastname
-        else:    
+        else:
             name = certificate.student.user.first_name+ " "+certificate.student.user.last_name
         foss = certificate.test.foss.foss
         tdate = certificate.test.tdate
