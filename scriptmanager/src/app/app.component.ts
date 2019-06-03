@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { routerTransition } from './animations';
+import { AuthService } from './_service/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -13,10 +14,17 @@ import { routerTransition } from './animations';
 export class AppComponent {
   title = 'scriptmanager';
  
+  constructor(private authService: AuthService) { }
   
   prepareRoute(outlet: RouterOutlet) {
     return outlet && outlet.activatedRouteData && outlet.activatedRouteData['animation'];
   }
-
+  
+  ngOnInit(): void {
+    this.authService.getJwtToken().subscribe(
+      (res) => localStorage.setItem('token', res['token']),
+      (err) => console.error('Failed to fetch JWT token')
+    );
+  }
 
 }

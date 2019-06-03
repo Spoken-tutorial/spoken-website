@@ -7,8 +7,8 @@ import { TutorialsService } from '../../_service/tutorials.service'
 })
 export class TutorialsComponent implements OnInit {
   public tutorials;
-  constructor(public apiService: TutorialsService){
-    this.tutorials = this.apiService.getTutorials();
+  constructor(public tutorialService: TutorialsService){
+    this.tutorials = this.tutorialService.getTutorials();
   }
 
   ngOnInit() {

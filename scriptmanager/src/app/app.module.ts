@@ -21,7 +21,9 @@ const appRoutes: Routes = [
 ]
 
 export function tokenGetter() {
-  return localStorage.getItem('token');
+  const token = localStorage.getItem('token');
+  console.log(token);
+  return token;
 }
 
 @NgModule({
@@ -37,7 +39,7 @@ export function tokenGetter() {
     JwtModule.forRoot({
       config: {
         tokenGetter: tokenGetter,
-        whitelistedDomains: [''],
+        whitelistedDomains: ['localhost:8000'],
         blacklistedRoutes: ['']
       }
     }),

@@ -10,8 +10,7 @@ export class HomeComponent implements OnInit {
 
   public foss ;
 
-  constructor(public apiService: FossService){
-     this.foss = this.apiService.getFoss();
+  constructor(public fossService: FossService){
   }
 
   fossCategorySelected(category){
@@ -21,13 +20,13 @@ export class HomeComponent implements OnInit {
     console.log(language);
   }
   
-ngOnInit(){};
-//   ngOnInit(){
-//     this.apiService.getFoss().subscribe((res)=>{
-//       this.apiService.getFoss().subscribe((res)=>{
-//         console.log(res);
-//       });      
-//     });
-// }
-
+  ngOnInit(){
+    this.foss = this.fossService.getFoss().subscribe(
+      (res) => this.foss = res,
+      (err) => {
+        console.log('Failed to fetch foss categories');
+        console.error(err);
+      }
+    );
+  };
 }

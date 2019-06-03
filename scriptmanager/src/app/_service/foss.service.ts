@@ -13,23 +13,22 @@ export class FossService {
   apiURL: string = 'http://localhost:8000/scripts/api';
   
   public getFoss(){
-    console.log("manan")
-    // return this.httpClient.get<Foss[]>(`${this.apiURL}/foss/`);
-    var Foss = [
-      {
-      "foss_category": 61,
-      "language": 2,
-      "user": 1055,
-      "status": true
-      },
-      {
-        "foss_category": 50,
-        "language": 1,
-        "user": 1055,
-        "status": true
-      }
-    ]
-    return Foss;
+    return this.httpClient.get<Foss[]>(`${this.apiURL}/foss/`);
+    // var Foss = [
+    //   {
+    //   "foss_category": 61,
+    //   "language": 2,
+    //   "user": 1055,
+    //   "status": true
+    //   },
+    //   {
+    //     "foss_category": 50,
+    //     "language": 1,
+    //     "user": 1055,
+    //     "status": true
+    //   }
+    // ]
+    // return Foss;
 
   }
 
