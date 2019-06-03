@@ -387,7 +387,7 @@ class Migration(migrations.Migration):
                 ('video', models.CharField(max_length=255)),
                 ('video_id', models.CharField(default=None, max_length=255, null=True, blank=True)),
                 ('playlist_item_id', models.CharField(default=None, max_length=255, null=True, blank=True)),
-                ('video_thumbnail_time', models.TimeField(default=b'00:00:00')),
+                ('video_thumbnail_time', models.TimeField(default='00:00:00')),
                 ('video_status', models.PositiveSmallIntegerField(default=0)),
                 ('status', models.PositiveSmallIntegerField(default=0)),
                 ('version', models.PositiveSmallIntegerField(default=0)),
