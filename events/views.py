@@ -720,7 +720,7 @@ def ac(request):
         7: SortableHeader('Action', False)
     }
 
-    collectionSet = AcademicCenter.objects.filter(state = user.resource_person.filter(resourceperson__status=1))
+    collectionSet = AcademicCenter.objects.filter(state__in = user.resource_person.filter(resourceperson__status=1))
     raw_get_data = request.GET.get('o', None)
     collection = get_sorted_list(request, collectionSet, header, raw_get_data)
     ordering = get_field_index(raw_get_data)
@@ -954,7 +954,7 @@ def organiser_edit(request, username):
 def rp_organiser(request, status, code, userid):
     """ Resource person: active organiser """
     user = request.user
-    organiser_in_rp_state = Organiser.objects.filter(user_id=userid, academic__in=AcademicCenter.objects.filter(state=State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)))
+    organiser_in_rp_state = Organiser.objects.filter(user_id=userid, academic__in=AcademicCenter.objects.filter(state__in=State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)))
     if not (user.is_authenticated() and organiser_in_rp_state and ( is_event_manager(user) or is_resource_person(user) or (status == 'active' or status == 'block'))):
         raise PermissionDenied('You are not allowed to view this page ')
 
@@ -1077,7 +1077,7 @@ def invigilator_edit(request, username):
 def rp_invigilator(request, status, code, userid):
     """ Resource person: active invigilator """
     user = request.user
-    invigilator_in_rp_state = Invigilator.objects.filter(user_id=userid, academic=AcademicCenter.objects.filter(state=State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)))
+    invigilator_in_rp_state = Invigilator.objects.filter(user_id=userid, academic__in=AcademicCenter.objects.filter(state__in=State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)))
     if not (user.is_authenticated() and invigilator_in_rp_state and ( is_event_manager(user) or is_resource_person(user) or (status == 'active' or status == 'block'))):
         raise PermissionDenied('You are not allowed to view this page')
 
@@ -3007,7 +3007,7 @@ def key_verification(serial):
         context["invalidserial"] = 1
     return context
 
-
+@csrf_exempt
 def verify_test_certificate(request):
     context = {}
     ci = RequestContext(request)
