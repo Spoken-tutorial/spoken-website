@@ -6,7 +6,7 @@ from django.core.exceptions import ObjectDoesNotExist
 class AcademicCenterFilter(django_filters.FilterSet):
   state = django_filters.ChoiceFilter(choices=State.objects.none())
   resource_center = django_filters.ChoiceFilter(choices=[('', '---------'), (1, 'Resource Centers Only')])
-  institution_name = django_filters.CharFilter()
+  institution_name = django_filters.CharFilter(lookup_expr='icontains')
   def __init__(self, *args, **kwargs):
     user = None
     if 'user' in kwargs:
@@ -28,7 +28,7 @@ class AcademicCenterFilter(django_filters.FilterSet):
 class ActivateAcademicCenterFilter(django_filters.FilterSet):
   state = django_filters.ChoiceFilter(choices=State.objects.none())  
   status = django_filters.ChoiceFilter(choices= [('', '---------'), (1, 'Active'), (3, 'Deactive')])
-  institution_name = django_filters.CharFilter()
+  institution_name = django_filters.CharFilter(lookup_expr='icontains')
   def __init__(self, *args, **kwargs):
     user = None
     if 'user' in kwargs:
@@ -46,7 +46,7 @@ class ActivateAcademicCenterFilter(django_filters.FilterSet):
 
 class OrganiserFilter(django_filters.FilterSet):
   academic__state = django_filters.ChoiceFilter(choices=State.objects.none())
-  academic__institution_name = django_filters.CharFilter()
+  academic__institution_name = django_filters.CharFilter(lookup_expr='icontains')
   def __init__(self, *args, **kwargs):
     user = kwargs['user']
     kwargs.pop('user')
@@ -60,7 +60,7 @@ class OrganiserFilter(django_filters.FilterSet):
 
 class InvigilatorFilter(django_filters.FilterSet):
   academic__state = django_filters.ChoiceFilter(choices=State.objects.none())
-  academic__institution_name = django_filters.CharFilter()
+  academic__institution_name = django_filters.CharFilter(lookup_expr='icontains')
   def __init__(self, *args, **kwargs):
     user = kwargs['user']
     kwargs.pop('user')
@@ -74,7 +74,7 @@ class InvigilatorFilter(django_filters.FilterSet):
 
 class AccountexecutiveFilter(django_filters.FilterSet):
   academic__state = django_filters.ChoiceFilter(choices=State.objects.none())
-  academic__institution_name = django_filters.CharFilter()
+  academic__institution_name = django_filters.CharFilter(lookup_expr='icontains')
   def __init__(self, *args, **kwargs):
     user = kwargs['user']
     kwargs.pop('user')
@@ -94,7 +94,7 @@ class TrainingFilter(django_filters.FilterSet):
   academic__institution_type = django_filters.ChoiceFilter(choices= [('', '---------')] + list(InstituteType.objects.values_list('id', 'name').distinct()))
   academic__city = django_filters.ChoiceFilter(choices=State.objects.none())
   tdate = django_filters.DateFromToRangeFilter()
-  academic__institution_name = django_filters.CharFilter()
+  academic__institution_name = django_filters.CharFilter(lookup_expr='icontains')
   def __init__(self, *args, **kwargs):
     user=None
     if 'user' in kwargs:
@@ -138,7 +138,7 @@ class TestFilter(django_filters.FilterSet):
   academic__institution_type = django_filters.ChoiceFilter(choices= [('', '---------')] + list(InstituteType.objects.values_list('id', 'name').distinct()))
   academic__city = django_filters.ChoiceFilter(choices=State.objects.none())
   tdate = django_filters.DateFromToRangeFilter()
-  academic__institution_name = django_filters.CharFilter()
+  academic__institution_name = django_filters.CharFilter(lookup_expr='icontains')
   def __init__(self, *args, **kwargs):
     user=None
     if 'user' in kwargs:
@@ -217,13 +217,7 @@ class TrainingRequestFilter(django_filters.FilterSet):
   sem_start_date = django_filters.DateFromToRangeFilter()
 
   training_planner__academic__institution_name = \
-    django_filters.CharFilter(method='filter_q')
-
-  def filter_q(self, qs, name, value):
-    return qs.filter(training_planner__academic__institution_name__icontains = value)
-
-  # def __len__(self):
-  #   return len('id')
+    django_filters.CharFilter(lookup_expr='icontains')
 
   def __init__(self, *args, **kwargs):
     user=None
