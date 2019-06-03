@@ -365,7 +365,7 @@ class Test(models.Model):
   organiser = models.ForeignKey(Organiser, related_name = 'test_organiser', on_delete=models.PROTECT )
   test_category = models.ForeignKey(
     TestCategory,
-    related_name = 'test_category', on_delete=models.PROTECT )
+    related_name = 'category_tests', on_delete=models.PROTECT )
   appoved_by = models.ForeignKey(
     User,
     related_name = 'test_approved_by',
@@ -1716,4 +1716,4 @@ class PaymentTransactionDetails(models.Model):
     status = models.CharField(max_length=2)
     msg = models.CharField(max_length=100)
     created = models.DateTimeField(auto_now_add = True)
-    updated = models.DateTimeField(auto_now_add = True) 
+    updated = models.DateTimeField(auto_now_add = True)
