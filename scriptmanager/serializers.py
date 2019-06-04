@@ -1,4 +1,4 @@
-from creation.models import ContributorRole, FossCategory, Language
+from creation.models import ContributorRole, FossCategory, Language,TutorialDetail
 from rest_framework import serializers
 
 class FossCategoryField(serializers.RelatedField):
@@ -16,3 +16,9 @@ class ContributorRoleSerializer(serializers.ModelSerializer):
   class Meta:
     model = ContributorRole
     fields = ('foss_category', 'language', 'user', 'status')
+
+
+class TutorialsList(serializers.ModelSerializer):
+    class Meta:
+      model=TutorialDetail
+      fields=('id','tutorial','order')
