@@ -1,4 +1,5 @@
 # Third Party Stuff
+from builtins import object
 from django.db import models
 
 
@@ -10,7 +11,7 @@ class WStates(models.Model):
     longitude = models.CharField(max_length=100)
     image_map_area = models.TextField()
 
-    class Meta:
+    class Meta(object):
         db_table = 'states'
 
 
@@ -30,7 +31,7 @@ class WAcademicCenter(models.Model):
     created_at = models.DateTimeField()
     updated_at = models.DateTimeField()
 
-    class Meta:
+    class Meta(object):
         db_table = 'academic_center'
 
 
@@ -38,7 +39,7 @@ class WDepartments(models.Model):
     id = models.IntegerField(primary_key=True)
     name = models.CharField(unique=True, max_length=200)
 
-    class Meta:
+    class Meta(object):
         db_table = 'departments'
 
 
@@ -54,7 +55,7 @@ class WInvigilator(models.Model):
     created_at = models.DateTimeField()
     updated_at = models.DateTimeField()
 
-    class Meta:
+    class Meta(object):
         db_table = 'invigilator'
 
 
@@ -103,7 +104,7 @@ class WLiveWorkshopParticipants(models.Model):
     general_comment = models.TextField()
     updated_at = models.DateTimeField()
 
-    class Meta:
+    class Meta(object):
         db_table = 'live_workshop_participants'
 
 
@@ -119,7 +120,7 @@ class WOrganiser(models.Model):
     created_at = models.DateTimeField()
     updated_at = models.DateTimeField()
 
-    class Meta:
+    class Meta(object):
         db_table = 'organiser'
 
 
@@ -131,7 +132,7 @@ class WResourcePerson(models.Model):
     states = models.CommaSeparatedIntegerField(max_length=200)
     state_code = models.CommaSeparatedIntegerField(max_length=200)
 
-    class Meta:
+    class Meta(object):
         db_table = 'resource_person'
 
 
@@ -142,7 +143,7 @@ class WStudentDetail(models.Model):
     last_name = models.CharField(max_length=50)
     gender = models.CharField(max_length=30)
 
-    class Meta:
+    class Meta(object):
         db_table = 'student_detail'
 
 
@@ -154,7 +155,7 @@ class WTestDetails(models.Model):
     invigilator = models.CharField(max_length=200)
     updated_at = models.DateTimeField()
 
-    class Meta:
+    class Meta(object):
         db_table = 'test_details'
 
 
@@ -175,7 +176,7 @@ class WTestRequests(models.Model):
     created_at = models.DateTimeField()
     updated_at = models.DateTimeField()
 
-    class Meta:
+    class Meta(object):
         db_table = 'test_requests'
 
 
@@ -185,7 +186,7 @@ class WAttendanceRegister(models.Model):
     test_code = models.CharField(max_length=10)
     status = models.IntegerField()
 
-    class Meta:
+    class Meta(object):
         db_table = 'attendance_register'
 
 
@@ -195,7 +196,7 @@ class WWorkshopDetails(models.Model):
     no_of_participants = models.IntegerField()
     updated_at = models.DateTimeField()
 
-    class Meta:
+    class Meta(object):
         db_table = 'workshop_details'
 
 
@@ -241,7 +242,7 @@ class WWorkshopFeedback(models.Model):
     general_comment = models.TextField()
     updated_at = models.DateTimeField()
 
-    class Meta:
+    class Meta(object):
         db_table = 'workshop_feedback'
 
 
@@ -263,5 +264,5 @@ class WWorkshopRequests(models.Model):
     updated_at = models.DateTimeField()
     school_standard = models.IntegerField()
 
-    class Meta:
+    class Meta(object):
         db_table = 'workshop_requests'

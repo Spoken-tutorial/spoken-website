@@ -1,4 +1,5 @@
 # Third Party Stuff
+from builtins import object
 from django.db import models
 
 # Spoken Tutorial Stuff
@@ -13,5 +14,5 @@ class Learner(models.Model):
     created = models.DateTimeField(auto_now_add=True, null=True)
     updated = models.DateTimeField(auto_now=True, null=True)
 
-    class Meta:
+    class Meta(object):
         unique_together = (("email"),)

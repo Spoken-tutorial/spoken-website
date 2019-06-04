@@ -1,3 +1,9 @@
+from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import range
+from builtins import object
 from django.shortcuts import render
 import time
 from datetime import datetime
@@ -48,7 +54,11 @@ from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import cm
 from reportlab.lib.enums import TA_CENTER
 from PyPDF2 import PdfFileWriter, PdfFileReader
-from StringIO import StringIO
+
+try:
+    from io import StringIO
+except ImportError:
+    from io import StringIO
 
 # import helpers
 from events.views import is_organiser, is_invigilator, is_resource_person, is_administrator, is_accountexecutive
@@ -132,8 +142,8 @@ class TrainingPlannerListView(ListView):
       return TrainingPlanner.objects.create(year=year, \
         semester=self.get_semester(sem), academic=self.user.organiser.academic,\
           organiser=self.user.organiser)
-    except Exception, e:
-      print e
+    except Exception as e:
+      print(e)
     return False
   def get_next_planner(self, current_planner):
     year = int(current_planner.year)
@@ -150,8 +160,8 @@ class TrainingPlannerListView(ListView):
       return TrainingPlanner.objects.create(year=year, \
         semester=sem, academic=self.user.organiser.academic, \
         organiser=self.user.organiser)
-    except Exception, e:
-      print e
+    except Exception as e:
+      print(e)
     return False
 
 class StudentBatchCreateView(CreateView):
@@ -228,11 +238,11 @@ class StudentBatchCreateView(CreateView):
 
       if not this_organiser_dept.exists() and department.exists():
         messages.error(self.request, "%s department is already assigened to organiser %s in your College." % (form.cleaned_data['department'], department.first().organiser))
-        print "form invalid: dept present "
+        print("form invalid: dept present ")
         return self.form_invalid(form)
       try:
         form_data = StudentBatch.objects.get(year=form_data.year, academic=form_data.academic, department=form_data.department)
-        print " batch already exist"
+        print(" batch already exist")
       except StudentBatch.DoesNotExist:
         form_data.save()
 
@@ -315,17 +325,18 @@ class StudentBatchCreateView(CreateView):
     write_flag = False
     stu_row_count = 0
     try:
-      rowcsv = csv.reader(file_path, delimiter=',', quotechar='|')
+      file_data = file_path.read().decode('utf-8').splitlines()
+      rowcsv = csv.reader(file_data, delimiter=',', quotechar='|')
       rowcount = len(list(rowcsv))
       gencount = studentcount + rowcount
-      print 'gencount',gencount
-      print 'printing csv length',rowcount
+      print('gencount',gencount)
+      print('printing csv length',rowcount)
       if rowcount > 500:
         messages.warning(self.request, "MB will accept only 500 students, if number is more than 500, divide the batch and upload under different departments eg. Chemistry1 & Chemistry2")
       if gencount > 500:
         messages.warning(self.request, "Total number of students per Master Batch exceeding. Masterbatch can accept maximum 500 students.")
       else :
-        csvdata = csv.reader(file_path, delimiter=',', quotechar='|')
+        csvdata = csv.reader(file_data, delimiter=',', quotechar='|')
         for row in csvdata:
           stu_row_count = stu_row_count+1
           print stu_row_count
@@ -352,8 +363,8 @@ class StudentBatchCreateView(CreateView):
               write_flag = True
 
         StudentBatch.objects.get(pk=batch_id).update_student_count()
-    except Exception, e:
-      print e
+    except Exception as e:
+      print(e)
       messages.warning(self.request, "The file you uploaded is not a valid CSV file, please add a valid CSV file")
     return skipped, error, warning, write_flag
 
@@ -788,8 +799,8 @@ class StudentDeleteView(DeleteView):
     student = super(StudentDeleteView, self).get_object()
     if student.is_student_has_attendance():
       messages.error(self.request,
-	"You do not have permission to delete {0}\
-	 because you have marked the attendance".format(student.student_fullname()))
+    "You do not have permission to delete {0}\
+     because you have marked the attendance".format(student.student_fullname()))
       return HttpResponseRedirect(self.success_url)
     try:
       sm = StudentMaster.objects.get(student=student, moved=False)
@@ -815,8 +826,8 @@ class StudentMasterDeleteView(DeleteView):
     student = sm.student
     if sm.is_student_has_attendance():
       messages.error(self.request,
-	"You do not have permission to delete {0}\
-	 because you have marked the attendance".format(student.student_fullname()))
+    "You do not have permission to delete {0}\
+     because you have marked the attendance".format(student.student_fullname()))
       return HttpResponseRedirect(self.success_url)
     try:
       sm = StudentMaster.objects.get(student=student, moved=False)
@@ -828,7 +839,7 @@ class StudentMasterDeleteView(DeleteView):
     return super(StudentMasterDeleteView, self).dispatch(*args, **kwargs)
 
 
-class TrainingCertificate():
+class TrainingCertificate(object):
   def custom_strftime(self, format, t):
     return t.strftime(format).replace('{S}', str(t.day) + self.suffix(t.day))
 
@@ -901,7 +912,7 @@ class TrainingCertificate():
 
     return response
 
-class SingleTrainingCertificate():
+class SingleTrainingCertificate(object):
   def custom_strftime(self, format, t):
     return t.strftime(format).replace('{S}', str(t.day) + self.suffix(t.day))
 
@@ -1026,7 +1037,7 @@ class StudentTrainingCertificateView(TrainingCertificate, View):
         mdluser = MdlUser.objects.get(id=mdluserid)
         if ta and ta.student.user.email == mdluser.email:
             return self.training_certificate(ta)
-    except Exception, e:
+    except Exception as e:
       messages.error(self.request, "PermissionDenied!")
     return HttpResponseRedirect("/")
 
@@ -1608,7 +1619,7 @@ class SingleTrainingCertificateListView(ListView):
 
   def dispatch(self, *args, **kwargs):
     self.training_request = SingleTraining.objects.get(pk=kwargs['tid'])
-    print self.training_request.id
+    print(self.training_request.id)
     self.queryset = SingleTrainingAttendance.objects.filter(training_id=self.training_request.id, status=1)
     return super(SingleTrainingCertificateListView, self).dispatch(*args, **kwargs)
 
@@ -1795,7 +1806,7 @@ class SingletrainingCreateView(CreateView):
           error.append(j)
           continue
         if csv_data[j][1] == '':
-	  error.append(j)
+          error.append(j)
           continue
         if csv_data[j][3] == '':
           error.append(j)
@@ -1809,18 +1820,18 @@ class SingletrainingCreateView(CreateView):
         if len(csv_data[j]) < 4:
           skipped.append(j)
           continue
-	if csv_data[j][0]=='':
-	  error.append(j)
-	  continue
-	if csv_data[j][1]=='':
-	  error.append(j)
-	  continue
+        if csv_data[j][0]=='':
+          error.append(j)
+          continue
+        if csv_data[j][1]=='':
+          error.append(j)
+          continue
         if not self.email_validator(csv_data[j][2]):
           error.append(j)
           continue
-	if csv_data[j][3]=='':
-	  error .append(j)
-	  continue
+        if csv_data[j][3]=='':
+          error .append(j)
+          continue
 
     return skipped, error, warning, write_flag
 
@@ -2088,7 +2099,7 @@ def SingleTrainingApprove(request, pk):
     st.save()
     #Send Emails from here
   else:
-    print "Error"
+    print("Error")
   return HttpResponseRedirect('/software-training/single-training/approved/')
 
 ''' SingleTrainingReject will take an argument(primary key of a training batch) and change the status of the SingleTraining batch, in the database, from pending to rejected
@@ -2100,7 +2111,7 @@ def SingleTrainingReject(request, pk):
     st.status = 5
     st.save()
   else:
-    print "Error"
+    print("Error")
   return HttpResponseRedirect("/software-training/single-training/approved/")
 
 #using in stp mark attendance also
@@ -2110,7 +2121,7 @@ def SingleTrainingPendingAttendance(request, pk):
     st.status = 6
     st.save()
   else:
-    print "Error"
+    print("Error")
   return HttpResponseRedirect("/software-training/single-training/pending/")
 
 def MarkAsComplete(request, pk):
@@ -2121,7 +2132,7 @@ def MarkAsComplete(request, pk):
     st.save()
     messages.success(request, 'Request to mark training complete successfully sent')
   else:
-    print "Error"
+    print("Error")
     messages.error(request, 'Request not sent.Please try again.')
   return HttpResponseRedirect("/software-training/training-planner/")
 
@@ -2215,8 +2226,8 @@ class OldTrainingCloseView(CreateView):
         tp.created = created
         tp.updated = created
         tp.save()
-      except Exception, e:
-        print e
+      except Exception as e:
+        print(e)
     return tp
 
   def _get_student(self, ta):
@@ -2310,8 +2321,8 @@ class OrganiserFeedbackCreateView(CreateView):
 
     @method_decorator(group_required("Organiser"))
     def get(self, request, *args, **kwargs):
-	    return render_to_response(self.template_name, {'form': self.form_class()},
-	      context_instance=RequestContext(self.request))
+        return render_to_response(self.template_name, {'form': self.form_class()},
+          context_instance=RequestContext(self.request))
 
     def post(self,  request, *args, **kwargs):
       self.object = None
@@ -2435,8 +2446,8 @@ class STWorkshopFeedbackCreateView(CreateView):
     success_url = "/home"
     
     def get(self, request, *args, **kwargs):
-	    return render_to_response(self.template_name, {'form': self.form_class()},
-	      context_instance=RequestContext(self.request))
+        return render_to_response(self.template_name, {'form': self.form_class()},
+          context_instance=RequestContext(self.request))
 
     def post(self,  request, *args, **kwargs):
       self.object = None
@@ -2456,13 +2467,13 @@ class STWorkshopFeedbackPreCreateView(CreateView):
 
     @method_decorator(login_required)
     def get(self, request, *args, **kwargs):
-	    return render_to_response(self.template_name, {'form': self.form_class()},
-	      context_instance=RequestContext(self.request))
+        return render_to_response(self.template_name, {'form': self.form_class()},
+          context_instance=RequestContext(self.request))
 
     def post(self,  request, *args, **kwargs):
       self.object = None
       self.user = self.request.user.id
-      print self.user
+      print(self.user)
       form = self.get_form(self.get_form_class())
       if form.is_valid():
         #form.save()
@@ -2470,14 +2481,14 @@ class STWorkshopFeedbackPreCreateView(CreateView):
         #messages.success(self.request, "Thank you for completing this feedback form. We appreciate your input and valuable suggestions.")
         #return HttpResponseRedirect(self.success_url)
       else:
-        print form.errors
+        print(form.errors)
         return self.form_invalid(form)
 
     def form_valid(self, form, **kwargs):
       form_data = form.save(commit=False)
       form_data.user = self.request.user
       form_data.save()
-      print "saved"
+      print("saved")
       messages.success(self.request, "Thank you for completing this feedback form. We appreciate your input and valuable suggestions.")
       return HttpResponseRedirect(self.success_url)
 
@@ -2492,8 +2503,8 @@ class STWorkshopFeedbackPostCreateView(CreateView):
 
     @method_decorator(login_required)
     def get(self, request, *args, **kwargs):
-	    return render_to_response(self.template_name, {'form': self.form_class()},
-	      context_instance=RequestContext(self.request))
+        return render_to_response(self.template_name, {'form': self.form_class()},
+          context_instance=RequestContext(self.request))
 
     def post(self,  request, *args, **kwargs):
       self.object = None
@@ -2504,7 +2515,7 @@ class STWorkshopFeedbackPostCreateView(CreateView):
         #messages.success(self.request, "Thank you for completing this feedback form. We appreciate your input and valuable suggestions.")
         return HttpResponseRedirect(self.success_url)
       else:
-        print form.errors
+        print(form.errors)
         return self.form_invalid(form)
 
     def form_valid(self, form, **kwargs):
@@ -2529,7 +2540,7 @@ class LearnDrupalFeedbackCreateView(CreateView):
       if form.is_valid():
         return self.form_valid(form)
       else:
-        print form.errors
+        print(form.errors)
         return self.form_invalid(form)
 
   def form_valid(self, form, **kwargs):
@@ -2596,7 +2607,7 @@ def payment_status(request):
     STdata = ''
     user_name = user.first_name+' '+user.last_name
     STdata = str(user.id)+str(user_name)+str(amount)+"Subscription"+"SOLOSTW"+CHANNEL_KEY
-    print STdata
+    print(STdata)
     s = display.value(str(STdata))
     
     data = {'userId':user.id,'name':user_name,'amount':amount,'purpose':'Subscription','channelId':'SOLOSTW','random':s.hexdigest()}
@@ -2679,7 +2690,7 @@ def payment_success(request):
     if STresponsedata_hexa == random:
       #save transaction details in db
       pd = PaymentDetails.objects.get(user = user.id, academic_id = accountexecutive.academic.id)
-      print 'pd id',pd.id
+      print('pd id',pd.id)
 
       try:
         transactiondetails = PaymentTransactionDetails()
@@ -2759,10 +2770,10 @@ def payment_reconciliation_update(request):
     try:
       accountexecutive = Accountexecutive.objects.get(user_id = userId,status__gt=0)
     except:
-      print "no ac"
+      print("no ac")
       pass
     try:
-      print userId, accountexecutive.academic_id
+      print(userId, accountexecutive.academic_id)
       pd = PaymentDetails.objects.get(user_id = userId, academic_id_id = accountexecutive.academic_id)
     except:
       return HttpResponseRedirect("Failed1")
@@ -2780,7 +2791,7 @@ def payment_reconciliation_update(request):
       transactiondetails.status  =  status
       transactiondetails.msg  =  msg
       transactiondetails.save()
-      print "saved"
+      print("saved")
     except:
       return HttpResponseRedirect("Failed2")
     

@@ -1,3 +1,4 @@
+from builtins import object
 import django_filters
 from events.models import *
 from django.core.exceptions import ObjectDoesNotExist
@@ -20,7 +21,7 @@ class AcademicCenterFilter(django_filters.FilterSet):
       choices = list(State.objects.exclude(name = 'Uncategorised').values_list('id', 'name').order_by('name'))
     choices.insert(0, ('', '---------'),)
     self.filters['state'].extra.update({'choices' : choices})
-  class Meta:
+  class Meta(object):
     model = AcademicCenter
     fields = ['state', 'institution_type', 'institute_category']
 
@@ -39,7 +40,7 @@ class ActivateAcademicCenterFilter(django_filters.FilterSet):
     choices = list(State.objects.values_list('id', 'name').order_by('name'))
     choices.insert(0, ('', '---------'),)
     self.filters['state'].extra.update({'choices' : choices})
-  class Meta:
+  class Meta(object):
     model = AcademicCenter
     fields = ['state', 'institution_type', 'institute_category']
 
@@ -53,7 +54,7 @@ class OrganiserFilter(django_filters.FilterSet):
     choices = list(State.objects.filter(resourceperson__user_id=user, resourceperson__status=1).values_list('id', 'name'))
     choices.insert(0, ('', '---------'),)
     self.filters['academic__state'].extra.update({'choices' : choices})
-  class Meta:
+  class Meta(object):
     model = Organiser
     fields = ['academic__state', 'academic__institution_type', 'academic__institute_category']
 
@@ -67,7 +68,7 @@ class InvigilatorFilter(django_filters.FilterSet):
     choices = list(State.objects.filter(resourceperson__user_id=user, resourceperson__status=1).values_list('id', 'name'))
     choices.insert(0, ('', '---------'),)
     self.filters['academic__state'].extra.update({'choices' : choices})
-  class Meta:
+  class Meta(object):
     model = Invigilator
     fields = ['academic__state', 'academic__institution_type', 'academic__institute_category']
 
@@ -81,7 +82,7 @@ class AccountexecutiveFilter(django_filters.FilterSet):
     choices = list(State.objects.filter(resourceperson__user_id=user, resourceperson__status=1).values_list('id', 'name'))
     choices.insert(0, ('', '---------'),)
     self.filters['academic__state'].extra.update({'choices' : choices})
-  class Meta:
+  class Meta(object):
     model = Accountexecutive
     fields = ['academic__state', 'academic__institution_type', 'academic__institute_category']
 
@@ -126,7 +127,7 @@ class TrainingFilter(django_filters.FilterSet):
     choices.insert(0, ('', '---------'),)
     self.filters['academic__city'].extra.update({'choices' : choices})
 
-  class Meta:
+  class Meta(object):
     model = Training
     fields = ['academic__state', 'foss']
 
@@ -170,7 +171,7 @@ class TestFilter(django_filters.FilterSet):
     choices.insert(0, ('', '---------'),)
     self.filters['academic__city'].extra.update({'choices' : choices})
 
-  class Meta:
+  class Meta(object):
     model = Test
     fields = ['academic__state', 'foss']
 
@@ -314,6 +315,6 @@ class TrainingRequestFilter(django_filters.FilterSet):
       {'choices' : choices}
     )
 
-  class Meta:
+  class Meta(object):
     model = TrainingRequest
     fields = ['training_planner__academic__state', 'course__foss']

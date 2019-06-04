@@ -1,10 +1,14 @@
 # Standard Library
+from __future__ import unicode_literals
+from builtins import str
+from builtins import object
 import os
 from datetime import datetime
 
 # Third Party Stuff
 from django.contrib.auth.models import User
 from django.db import models
+from django.utils.encoding import python_2_unicode_compatible
 
 # Spoken Tutorial Stuff
 from events.models import City, District, Location, State
@@ -35,7 +39,7 @@ class Profile(models.Model):
     thumb = models.FileField(upload_to=profile_picture_thumb, null=True, blank=True)
     address = models.TextField(null=True)
     created = models.DateTimeField(auto_now_add=True)
-    class Meta:
+    class Meta(object):
         app_label = 'cms'
 
 class Page(models.Model):
@@ -50,11 +54,12 @@ class Page(models.Model):
     visible = models.BooleanField()
     created = models.DateTimeField(auto_now_add=True)
 
+@python_2_unicode_compatible
 class Block_Location(models.Model):
     name = models.CharField(max_length=255)
     visible = models.BooleanField()
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 class Block(models.Model):
@@ -105,11 +110,12 @@ class Notification(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now = True)
 
+@python_2_unicode_compatible
 class NewsType(models.Model):
     name = models.CharField(max_length = 50)
     slug = models.CharField(max_length = 50)
     
-    def __unicode__(self):
+    def __str__(self):
         return self.name
         
 def content_file_name(instance, filename):
@@ -135,5 +141,5 @@ class News(models.Model):
 #    def get_absolute_url(self):
 #        return ('views.view_something', (), {'slug': self.slug})
 #    
-    class Meta:
+    class Meta(object):
         verbose_name = "New"

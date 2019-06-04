@@ -1,3 +1,4 @@
+from builtins import object
 class CdeepRouter(object):
     """A router to manage database operations in the cdeep app.
     """

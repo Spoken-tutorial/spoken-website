@@ -1,4 +1,6 @@
 # Third Party Stuff
+from builtins import str
+from builtins import object
 from django import forms
 from django.db.models import Count, Q
 from django.core.exceptions import ValidationError
@@ -113,7 +115,7 @@ class TestimonialsForm(forms.ModelForm):
     scan_copy = forms.FileField(label='Select a Scaned copy', required=False)
     status = forms.BooleanField(required=False)
 
-    class Meta:
+    class Meta(object):
         model = Testimonials
         exclude = ['approved_by', 'user']
 
@@ -196,7 +198,7 @@ class MediaTestimonialEditForm(forms.ModelForm):
         }
 
 class ExpressionForm(forms.ModelForm):
-    class Meta:
+    class Meta(object):
         model = InductionInterest
         fields = '__all__'
         widgets = {

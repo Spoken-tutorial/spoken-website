@@ -1,8 +1,11 @@
+from __future__ import print_function
+from __future__ import absolute_import
 # Third Party Stuff
+from builtins import object
 from django import forms
 from django.contrib.auth.models import Group, User
 from django.forms import ModelForm
-from get_or_create_participant import encript_password
+from .get_or_create_participant import encript_password
 
 # Spoken Tutorial Stuff
 from events.models import *
@@ -60,7 +63,7 @@ class RegisterForm(forms.Form):
             	mdluser.password = encript_password(mdluser.firstname)
             	mdluser.save()
             	# send email along with password
-        except Exception, e:
+        except Exception as e:
             return email
         if error:
             raise forms.ValidationError( u'Email: %s already exists' % email )
@@ -140,7 +143,7 @@ class FeedbackForm(forms.ModelForm):
     recommend_workshop = forms.ChoiceField(widget=forms.RadioSelect, choices = fiveChoice )
     reason_why = forms.CharField(widget=forms.Textarea(attrs={'rows': 2}))
     other_comments = forms.CharField(widget=forms.Textarea(attrs={'rows': 2}))
-    class Meta:
+    class Meta(object):
         model = TrainingFeedback
         exclude = ['training', 'mdluser_id']
 
@@ -153,7 +156,7 @@ class PasswordResetForm(forms.Form):
             user = MdlUser.objects.filter(email=email).first()
             if user:
                 error = 0
-        except Exception, e:
-            print e
+        except Exception as e:
+            print(e)
         if error:
             raise forms.ValidationError( u'Email: %s not exists' % email )

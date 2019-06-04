@@ -1,7 +1,12 @@
 # Third Party Stuff
+from __future__ import unicode_literals
+from builtins import object
 from django.contrib.auth.models import User
 from django.db import models
+from django.utils.encoding import python_2_unicode_compatible
 
+
+@python_2_unicode_compatible
 class Language(models.Model):
     name = models.CharField(max_length=255, unique=True)
     user = models.ForeignKey(User)
@@ -9,27 +14,29 @@ class Language(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
-    class Meta:
+    class Meta(object):
         ordering = ('name',)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
+@python_2_unicode_compatible
 class FossSuperCategory(models.Model):
     name = models.CharField(max_length=255, unique=True)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
-    class Meta:
+    class Meta(object):
         verbose_name = 'FOSS Category'
         verbose_name_plural = 'FOSS Categories'
         ordering = ('name',)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
+@python_2_unicode_compatible
 class FossCategory(models.Model):
     foss = models.CharField(unique=True, max_length=255)
     description = models.TextField()
@@ -41,26 +48,27 @@ class FossCategory(models.Model):
     updated = models.DateTimeField(auto_now=True)
     show_on_homepage = models.BooleanField(default=True, help_text ='If unchecked, this foss will be displayed on series page, instead of home page' )
 
-    class Meta:
+    class Meta(object):
         verbose_name = 'FOSS'
         verbose_name_plural = 'FOSSes'
         ordering = ('foss', )
 
-    def __unicode__(self):
+    def __str__(self):
         return self.foss
 
 
+@python_2_unicode_compatible
 class BrochureDocument(models.Model):
     foss_course = models.ForeignKey(FossCategory)
     foss_language = models.ForeignKey(Language)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
-    class Meta:
+    class Meta(object):
         verbose_name = 'FOSS Brochure'
         verbose_name_plural = 'FOSS Brochures'
 
-    def __unicode__(self):
+    def __str__(self):
         return self.foss_course.foss
 
 
@@ -69,11 +77,12 @@ class BrochurePage(models.Model):
     page = models.FileField(upload_to='brochures/')
     page_no = models.PositiveIntegerField()
 
-    class Meta:
+    class Meta(object):
         ordering = ('page_no', )
         unique_together = (('brochure', 'page_no'),)
 
 
+@python_2_unicode_compatible
 class PlaylistInfo(models.Model):
     foss = models.ForeignKey(FossCategory)
     language = models.ForeignKey(Language)
@@ -81,11 +90,11 @@ class PlaylistInfo(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
-    class Meta:
+    class Meta(object):
         verbose_name = 'Playlist Info'
         unique_together = (('foss', 'language'),)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.playlist_id
 
 
@@ -95,22 +104,24 @@ class PlaylistItem(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
-    class Meta:
+    class Meta(object):
         verbose_name = 'Playlist Item'
         unique_together = (('playlist', 'item_id'),)
 
 
+@python_2_unicode_compatible
 class Level(models.Model):
     level = models.CharField(max_length=255)
     code = models.CharField(max_length=10)
 
-    class Meta:
+    class Meta(object):
         verbose_name = 'Tutorial Level'
 
-    def __unicode__(self):
+    def __str__(self):
         return self.level
 
 
+@python_2_unicode_compatible
 class TutorialDetail(models.Model):
     foss = models.ForeignKey(FossCategory)
     tutorial = models.CharField(max_length=255)
@@ -120,11 +131,11 @@ class TutorialDetail(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
-    class Meta:
+    class Meta(object):
         verbose_name = 'Tutorial Detail'
         unique_together = (('foss', 'tutorial', 'level'),)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.tutorial
 
 
@@ -161,7 +172,7 @@ class TutorialCommonContent(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
-    class Meta:
+    class Meta(object):
         verbose_name = 'Tutorial Common Content'
 
     def keyword_as_list(self):
@@ -198,7 +209,7 @@ class TutorialResource(models.Model):
     updated = models.DateTimeField(auto_now=True)
     publish_at = models.DateTimeField(null=True)
 
-    class Meta:
+    class Meta(object):
         unique_together = (('tutorial_detail', 'language',),)
 
 
@@ -220,7 +231,7 @@ class ContributorRole(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
-    class Meta:
+    class Meta(object):
         unique_together = (('user', 'foss_category', 'language',),)
         verbose_name = 'Contributor Role'
 
@@ -233,7 +244,7 @@ class DomainReviewerRole(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
-    class Meta:
+    class Meta(object):
         unique_together = (('user', 'foss_category', 'language',),)
         verbose_name = 'Domain Reviewer Role'
 
@@ -246,7 +257,7 @@ class QualityReviewerRole(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
-    class Meta:
+    class Meta(object):
         unique_together = (('user', 'foss_category', 'language',),)
         verbose_name = 'Quality Reviewer Role'
 
@@ -344,7 +355,7 @@ class RoleRequest(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
-    class Meta:
+    class Meta(object):
         unique_together = (('user', 'role_type',),)
 
 
@@ -354,7 +365,7 @@ class FossAvailableForWorkshop(models.Model):
     status = models.BooleanField(default=0)
     created = models.DateTimeField(auto_now_add=True)
 
-    class Meta:
+    class Meta(object):
         unique_together = (('foss', 'language'),)
 
 
@@ -364,7 +375,7 @@ class FossAvailableForTest(models.Model):
     status = models.BooleanField(default=0)
     created = models.DateTimeField(auto_now_add=True)
 
-    class Meta:
+    class Meta(object):
         unique_together = (('foss', 'language'),)
 
 
@@ -389,13 +400,15 @@ class TutorialMissingComponentReply(models.Model):
     created = models.DateTimeField(auto_now_add=True)
 
 
+@python_2_unicode_compatible
 class OperatingSystem(models.Model):
     name = models.CharField(max_length=255)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
+@python_2_unicode_compatible
 class SuggestTopic(models.Model):
     user = models.ForeignKey(User)
     topic_title = models.CharField(max_length=255)
@@ -405,10 +418,11 @@ class SuggestTopic(models.Model):
     example_suggestion = models.BooleanField()
     created = models.DateTimeField(auto_now_add=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.topic_title
 
 
+@python_2_unicode_compatible
 class SuggestExample(models.Model):
     user = models.ForeignKey(User)
     topic_title = models.CharField(max_length=255)
@@ -417,14 +431,15 @@ class SuggestExample(models.Model):
     is_reviewer = models.BooleanField()
     created = models.DateTimeField(auto_now_add=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.topic_title
 
 
+@python_2_unicode_compatible
 class ContributeTowards(models.Model):
     name = models.CharField(max_length=255)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 

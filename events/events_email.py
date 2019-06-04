@@ -1,3 +1,4 @@
+from __future__ import print_function
 from django.core.mail import EmailMultiAlternatives
 
 def send_email(status, to = None, instance = None, cc = None, bcc = None):
@@ -116,8 +117,8 @@ IIT Bombay.
     
     try:
         result = email.send(fail_silently=True)
-    except Exception, e:
-        print "*******************************************************"
-        print message
-        print "*******************************************************"
+    except Exception as e:
+        print("*******************************************************")
+        print(message)
+        print("*******************************************************")
         pass

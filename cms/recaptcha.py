@@ -1,7 +1,8 @@
 # Standard Library
+from future import standard_library
+standard_library.install_aliases()
 import json
-import urllib
-import urllib2
+import urllib.request, urllib.parse, urllib.error
 
 # Third Party Stuff
 from django.conf import settings
@@ -15,9 +16,9 @@ def recaptcha_valdation(request):
         'secret': settings.GOOGLE_RECAPTCHA_SECRET_KEY,
         'response': recaptcha_response
     }
-    data = urllib.urlencode(values)
-    req = urllib2.Request(url, data)
-    response = urllib2.urlopen(req)
+    data = urllib.parse.urlencode(values)
+    req = urllib.request.Request(url, data)
+    response = urllib.request.urlopen(req)
     recaptcha_result = json.load(response)
     if not recaptcha_result['success']:
         messages.error(request, 'Invalid reCAPTCHA. Please try again.')

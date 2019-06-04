@@ -1,3 +1,5 @@
+from __future__ import print_function
+from builtins import str
 import MySQLdb
 import time
 import sys
@@ -67,7 +69,7 @@ for row in rows:
     if not playlist:
         error_string = row[8] + ' - ' + row[3] + ' -- Playlist Missing'
         error_log_file_head.write(error_string + '\n')
-        print error_string
+        print(error_string)
         continue
     video_path = MEDIA_ROOT + 'videos/' + str(row[8]) + '/' + str(row[1]) + '/' + row[5]
     video_path = convert_video(video_path)
@@ -93,14 +95,14 @@ for row in rows:
             cur.execute("UPDATE creation_tutorialresource SET playlist_item_id='%s' WHERE id=%s" % (item_id, row[0]))
             cur.execute("INSERT INTO creation_playlistitem (playlist_id, item_id, created, updated) VALUES('%s', '%s', '%s', '%s')" % (playlist[0], item_id, currtime, currtime))
         else:
-            print 'Playlist item missing...'
+            print('Playlist item missing...')
         db.commit()
         success_string = row[9] + ' - ' + row[13] + ' -- ' + video_id
         success_log_file_head.write(success_string + '\n')
-        print success_string
+        print(success_string)
     else:
         error_string = row[9] + ' - ' + row[13] + ' -- Failed'
         error_log_file_head.write(error_string + '\n')
-        print error_string
+        print(error_string)
 error_log_file_head.close()
 success_log_file_head.close()

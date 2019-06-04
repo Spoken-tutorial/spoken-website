@@ -1,5 +1,9 @@
+from __future__ import print_function
 # Standard Library
-from urllib import quote_plus
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from urllib.parse import quote_plus
 
 # Third Party Stuff
 from django.http import HttpResponseRedirect
@@ -20,7 +24,7 @@ def list_videos(request):
 
 
 def show_video(request):
-    print 'test'
+    print('test')
     old_tr = request.GET.get('tr', None)
     if old_tr:
         try:
@@ -28,8 +32,8 @@ def show_video(request):
             foss = tr.tutorial_detail.foss_category.replace('+', 'p').replace('-', ' ')
             tutorial = tr.tutorial_detail.tutorial_name.replace('+', 'p').replace('-', ' ')
             return HttpResponseRedirect('/watch/' + quote_plus(foss) + '/' + quote_plus(tutorial) + '/' + tr.language + '/')
-        except Exception, e:
-            print e
+        except Exception as e:
+            print(e)
             pass
     return HttpResponseRedirect('/tutorial-search/')
 

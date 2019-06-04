@@ -1,3 +1,9 @@
+from __future__ import print_function
+from __future__ import absolute_import
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import range
 from django.core.context_processors import csrf
 from django.core.exceptions import PermissionDenied
 
@@ -16,9 +22,15 @@ from django.http import Http404
 from django.db.models import Q
 from django.db import IntegrityError
 
-from urlparse import urlparse
+try:
+    from urllib.parse import urlparse
+except ImportError:
+    from urllib.parse import urlparse
 
-from BeautifulSoup import BeautifulSoup
+try:
+    from BeautifulSoup import BeautifulSoup
+except ImportError:
+    from bs4 import BeautifulSoup
 
 import xml.etree.cElementTree as etree
 from django.conf import settings
@@ -27,13 +39,18 @@ import os,time, csv, random, string
 from validate_email import validate_email
 
 import os.path
-import urllib,urllib2
+import urllib.request, urllib.parse, urllib.error
+
+try:
+    import urllib.request, urllib.error, urllib.parse
+except ImportError:
+    import urllib.request as urllib2
 
 from events.models import *
 from cms.models import Profile
 from mdldjango.forms import OfflineDataForm
 
-from forms import *
+from .forms import *
 from django.utils import formats
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from mdldjango.get_or_create_participant import get_or_create_participant, check_csvfile, update_participants_count, clone_participant
@@ -48,16 +65,16 @@ from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import cm
 from reportlab.lib.enums import TA_CENTER
 from PyPDF2 import PdfFileWriter, PdfFileReader
-from StringIO import StringIO
+from io import StringIO, BytesIO
 
 #randon string
 import string
 import random
 
-from  filters import *
+from  .filters import *
 from cms.views import create_profile
 from cms.sortable import *
-from events_email import send_email
+from .events_email import send_email
 import datetime
 from django.http import JsonResponse
 
@@ -119,8 +136,8 @@ def init_events_app(request):
             TestCategory.objects.get_or_create(name= 'Workshop')
             TestCategory.objects.get_or_create(name= 'Training')
             TestCategory.objects.get_or_create(name= 'Others')
-        except Exception, e:
-            print e, "test_category"
+        except Exception as e:
+            print(e, "test_category")
 
         try:
             InstituteType.objects.get_or_create(name= 'Workshop')
@@ -129,8 +146,8 @@ def init_events_app(request):
             InstituteType.objects.get_or_create(name= 'Vocational')
             InstituteType.objects.get_or_create(name= 'School')
             InstituteType.objects.get_or_create(name= 'Uncategorised')
-        except Exception, e:
-            print e, "institute_type"
+        except Exception as e:
+            print(e, "institute_type")
 
         #institutecategory
         try:
@@ -138,8 +155,8 @@ def init_events_app(request):
             InstituteCategory.objects.get_or_create(name= 'Private')
             InstituteCategory.objects.get_or_create(name= 'NGO')
             InstituteCategory.objects.get_or_create(name= 'Uncategorised')
-        except Exception, e:
-            print e, "InstituteCategory"
+        except Exception as e:
+            print(e, "InstituteCategory")
 
         #permissiontype
         try:
@@ -148,35 +165,35 @@ def init_events_app(request):
             PermissionType.objects.get_or_create(name= 'University')
             PermissionType.objects.get_or_create(name= 'Institution Type')
             PermissionType.objects.get_or_create(name= 'Institution')
-        except Exception, e:
-             print e, "PermissionType"
+        except Exception as e:
+             print(e, "PermissionType")
 
         #state
         state = None
         try:
             state = State.objects.get_or_create(name= 'Uncategorised')
-        except Exception, e:
-             print e, "State"
+        except Exception as e:
+             print(e, "State")
         #District
         try:
             District.objects.get_or_create(name= 'Uncategorised', state_id = state[0].id)
-        except Exception, e:
-             print e, "District"
+        except Exception as e:
+             print(e, "District")
 
         #City
         try:
             City.objects.get_or_create(name= 'Uncategorised', state_id = state[0].id)
-        except Exception, e:
-             print e, "City"
+        except Exception as e:
+             print(e, "City")
 
         #University
         try:
             University.objects.get_or_create(name= 'Uncategorised', state_id = state[0].id, user_id = 1)
-        except Exception, e:
-             print e, "University"
+        except Exception as e:
+             print(e, "University")
 
         messages.success(request, 'Events application initialised successfully!')
-    except Exception, e:
+    except Exception as e:
         messages.error(request, str(e))
     return HttpResponseRedirect('/software-training/')
 
@@ -262,7 +279,7 @@ def add_participant(request, cid, category ):
         if category == 'Training':
             try:
                 wa = TrainingAttendance.objects.get(mdluser_id = userid, training_id = cid)
-                print wa.id, " => Exits"
+                print(wa.id, " => Exits")
                 messages.success(request, "User has already in the attendance list")
             except:
                 mdluser = MdlUser.objects.get(pk=userid)
@@ -276,11 +293,11 @@ def add_participant(request, cid, category ):
                 wa.status = 0
                 wa.save()
                 messages.success(request, "User has added in the attendance list")
-                print wa.id, " => Inserted"
+                print(wa.id, " => Inserted")
         elif category == 'Training':
             try:
                 wa = TrainingAttendance.objects.get(mdluser_id = userid, training_id = cid)
-                print wa.id, " => Exits"
+                print(wa.id, " => Exits")
                 messages.success(request, "User has already in the attendance list")
             except:
                 wa = TrainingAttendance()
@@ -289,12 +306,12 @@ def add_participant(request, cid, category ):
                 wa.status = 0
                 wa.save()
                 messages.success(request, "User has added in the attendance list")
-                print wa.id, " => Inserted"
+                print(wa.id, " => Inserted")
 
         elif category == 'Test':
             try:
                 wa = TestAttendance.objects.get(mdluser_id = userid, test_id = cid)
-                print wa.id, " => Exits"
+                print(wa.id, " => Exits")
                 messages.success(request, "User has already in the attendance list")
             except:
                 wa = TestAttendance()
@@ -303,7 +320,7 @@ def add_participant(request, cid, category ):
                 wa.status = 0
                 wa.save()
                 messages.success(request, "User has added in the attendance list")
-                print wa.id, " => Inserted"
+                print(wa.id, " => Inserted")
 
 def fix_date_for_first_training(request):
     organisers = Organiser.objects.exclude(id__in = Training.objects.values_list('organiser_id').distinct(), status=1).filter(Q(created__startswith=datetime.date.today() - datetime.timedelta(days=15)) | Q(created__startswith=datetime.date.today() - datetime.timedelta(days=30)))
@@ -483,7 +500,7 @@ def old_training_attendance_upload(request, wid):
         if TrainingAttendance.objects.filter(training=training).count():
             messages.info(request, "You have already submited the training attendance!")
             return HttpResponseRedirect('/software-training/training/old-training-attendance/')
-    except Exception, e:
+    except Exception as e:
         raise PermissionDenied('You are not allowed to view this page!')
     if request.method == 'POST':
         form = OfflineDataForm(request.POST, request.FILES)
@@ -540,7 +557,7 @@ def events_dashboard(request):
     rp_training_notification = None
     institute_name = None
     if is_organiser(user):
-	institution_type = AcademicCenter.objects.get(id=user.organiser.academic_id)
+        institution_type = AcademicCenter.objects.get(id=user.organiser.academic_id)
         institute_name = InstituteType.objects.get(id=institution_type.institution_type_id)
         organiser_test_notification = EventsNotification.objects.filter((Q(status = 1) | Q(status = 2)), category = 1, academic_id = user.organiser.academic_id, categoryid__in = user.organiser.academic.test_set.filter(organiser_id = user.id).values_list('id')).order_by('-created')[:30]
 
@@ -576,8 +593,8 @@ def delete_events_notification(request, notif_type, notif_id):
             notif_rec = EventsNotification.objects.select_related().get(pk = notif_id)
         elif notif_type == "rp":
             notif_rec = EventsNotification.objects.select_related().get(pk = notif_id)
-    except Exception, e:
-        print e
+    except Exception as e:
+        print(e)
         messages.warning(request, 'Selected notification is already deleted (or) You do not have permission to delete it.')
     if notif_rec:
         notif_rec.delete()
@@ -593,8 +610,8 @@ def clear_events_notification(request, notif_type):
             notif_rec = EventsNotification.objects.filter(user = request.user).delete()
         elif notif_type == "rp":
             notif_rec = EventsNotification.objects.filter(user = request.user).delete()
-    except Exception, e:
-        print e
+    except Exception as e:
+        print(e)
         messages.warning(request, 'Something went wrong, contact site administrator.')
 
     return HttpResponseRedirect(request.META['HTTP_REFERER'])
@@ -752,7 +769,7 @@ def accountexecutive_request(request, username):
                     return HttpResponseRedirect("/software-training/accountexecutive/view/"+user.username+"/")
                 else:
                     messages.info(request, "Your Account Executive request is yet to be approved. Please contact the Resource person of your State. For more details <a href='http://process.spoken-tutorial.org/images/5/5d/Create-New-Account.pdf' target='_blank'> Click Here</a> ")
-                    print "Accountexecutive not yet approve "
+                    print("Accountexecutive not yet approve ")
                     return HttpResponseRedirect("/software-training/accountexecutive/view/"+user.username+"/")
             except:
                 messages.info(request, "Please fill the following details")
@@ -777,8 +794,8 @@ def accountexecutive_view(request, username):
         accountexecutive = Accountexecutive.objects.get(user=user)
         context['record'] = accountexecutive
         context['profile'] = accountexecutive.user.profile_set.get(user= user)
-    except Exception, e:
-        print e
+    except Exception as e:
+        print(e)
         raise PermissionDenied()
     return render(request, 'events/templates/accountexecutive/view.html', context)
 
@@ -852,7 +869,7 @@ def organiser_request(request, username):
                     return HttpResponseRedirect("/software-training/organiser/view/"+user.username+"/")
                 else:
                     messages.info(request, "Your Organiser request is yet to be approved. Please contact the Resource person of your State. For more details <a href='http://process.spoken-tutorial.org/images/5/5d/Create-New-Account.pdf' target='_blank'> Click Here</a> ")
-                    print "Organiser not yet approve "
+                    print("Organiser not yet approve ")
                     return HttpResponseRedirect("/software-training/organiser/view/"+user.username+"/")
             except:
                 pass
@@ -878,8 +895,8 @@ def organiser_view(request, username):
         organiser = Organiser.objects.get(user=user)
         context['record'] = organiser
         context['profile'] = organiser.user.profile_set.get(user= user)
-    except Exception, e:
-        print e
+    except Exception as e:
+        print(e)
         raise PermissionDenied()
     return render(request, 'events/templates/organiser/view.html', context)
 
@@ -1003,8 +1020,8 @@ def invigilator_view(request, username):
         invigilator = Invigilator.objects.get(user=user)
         context['record'] = invigilator
         context['profile'] = invigilator.user.profile_set.get(user= user)
-    except Exception, e:
-        print e
+    except Exception as e:
+        print(e)
         raise PermissionDenied()
     return render(request, 'events/templates/invigilator/view.html', context)
 
@@ -1234,9 +1251,9 @@ def training_request(request, role, rid = None):
     else:
         messages.info(request, """
             <ul>
-		<li><b>TO HAVE YOUR TRAINING REQUEST APPROVED IT IS NECESSARY TO UPLOAD THE LIST OF PARTICIPANTS <a href="http://process.spoken-tutorial.org/images/9/96/Upload_Attendance.pdf" class="link alert-link" target="_blank"><b>Click Here</b></a></b></li>
-		<li><b style="color:red;">PLEASE ENSURE THAT YOU FILL IN ONLY THE GENUINE EMAIL ID'S OF THE PARTICIPANTS / STUDENTS. IF THEY DON'T HAVE ANY, PLEASE HELP THEM CREATE ONE.</b></li>
-		<li>Select a Timing in the Training Request where the chosen FOSS is relevant/useful/matching to the Course/Paper. </li>
+        <li><b>TO HAVE YOUR TRAINING REQUEST APPROVED IT IS NECESSARY TO UPLOAD THE LIST OF PARTICIPANTS <a href="http://process.spoken-tutorial.org/images/9/96/Upload_Attendance.pdf" class="link alert-link" target="_blank"><b>Click Here</b></a></b></li>
+        <li><b style="color:red;">PLEASE ENSURE THAT YOU FILL IN ONLY THE GENUINE EMAIL ID'S OF THE PARTICIPANTS / STUDENTS. IF THEY DON'T HAVE ANY, PLEASE HELP THEM CREATE ONE.</b></li>
+        <li>Select a Timing in the Training Request where the chosen FOSS is relevant/useful/matching to the Course/Paper. </li>
         <li>One can also select FOSS which might not be relevant/matching to any Course/Paper.</li>
                 <li>Please download a copy of tutorials on all the machines. For instructions to download tutorials <a href="http://process.spoken-tutorial.org/images/1/1b/Download-Tutorials.pdf" class="link alert-link" target="_blank">Click Here</a></li>
                 <li>Please check if your machine is ready. For the Machine Readiness document <a href='http://process.spoken-tutorial.org/images/5/58/Machine-Readiness.pdf' class='link alert-link' target='_blank'> Click Here</a>.</li>
@@ -1429,8 +1446,8 @@ def training_approvel(request, role, rid):
                 w.status = 4
             else:
                 raise PermissionDenied()
-    except Exception, e:
-        print e
+    except Exception as e:
+        print(e)
         raise PermissionDenied()
     #todo: add training code
     if w.status == 2:
@@ -1447,8 +1464,8 @@ def training_approvel(request, role, rid):
         #delete admin notification
         try:
             EventsNotification.objects.get(academic_id = w.academic_id, categoryid = w.id, status = 0).delete()
-        except Exception, e:
-            print e
+        except Exception as e:
+            print(e)
         message = "Training Manager has approved your "+w.foss.foss+" training request dated "+w.tdate.strftime("%Y-%m-%d")
     if request.GET['status'] == 'reject':
         message = "Training Manager has rejected your "+w.foss.foss+" training request dated "+w.tdate.strftime("%Y-%m-%d")
@@ -1535,7 +1552,7 @@ def view_training_completion(request, rid):
         raise PermissionDenied()
     try:
         context['training'] = Training.objects.get(pk = rid)
-    except Exception, e:
+    except Exception as e:
         raise PermissionDenied()
     return render(request, 'events/templates/training/view_training_completion.html', context)
 
@@ -1564,8 +1581,8 @@ def training_attendance(request, wid):
         training = Training.objects.get(pk = wid)
         if training.status == 4:
             return HttpResponseRedirect("/software-training/training/" + str(training.id) + "/participant/")
-    except Exception, e:
-        print e
+    except Exception as e:
+        print(e)
         raise PermissionDenied()
     #todo check request user and training organiser same or not
     show_success_message = False
@@ -1613,13 +1630,13 @@ def training_attendance(request, wid):
                         file_path = settings.MEDIA_ROOT + 'training/'
                         try:
                             os.mkdir(file_path)
-                        except Exception, e:
-                            print e
+                        except Exception as e:
+                            print(e)
                         file_path = settings.MEDIA_ROOT + 'training/'+wid+'/'
                         try:
                             os.mkdir(file_path)
-                        except Exception, e:
-                            print e
+                        except Exception as e:
+                            print(e)
                         full_path = file_path + wid +".pdf"
                         fout = open(full_path, 'wb+')
                         f = request.FILES['scan_copy']
@@ -1735,15 +1752,15 @@ def training_participant_ceritificate(request, wid, participant_id):
                 wa.status = 3
                 wa.count += 1
                 wa.save()
-        except Exception, e:
-            print e
+        except Exception as e:
+            print(e)
             raise PermissionDenied()
 
     response = HttpResponse(content_type='application/pdf')
     filename = (wa.firstname+'-'+w.foss.foss+"-Participant-Certificate").replace(" ", "-");
 
     response['Content-Disposition'] = 'attachment; filename='+filename+'.pdf'
-    imgTemp = StringIO()
+    imgTemp = BytesIO()
     imgDoc = canvas.Canvas(imgTemp)
 
     # Title
@@ -1865,8 +1882,8 @@ def test_request(request, role, rid = None):
                 prev_test = Test.objects.filter(organiser = t.organiser_id, academic = t.academic, foss = t.foss_id, tdate = t.tdate, ttime = t.ttime)
                 if prev_test:
                     messages.error(request, "You have already scheduled <b>"+ t.foss.foss + "</b> Test on <b>"+t.tdate + " "+ t.ttime + "</b>. Please select some other time.")
-            except Exception, e:
-                print e
+            except Exception as e:
+                print(e)
                 messages.error(request, "Sorry, Something went wrong. try again!")
                 error = 1
 
@@ -1989,7 +2006,7 @@ def test_approvel(request, role, rid):
     try:
         t = Test.objects.get(pk=rid)
         if request.GET['status'] == 'accept':
-            print "!!!!!!!!"
+            print("!!!!!!!!")
             status = 1
             t.test_code = "TC-" + str(t.id)
             message = "The Training Manager has approved "+t.foss.foss+" test dated "+t.tdate.strftime("%Y-%m-%d")
@@ -2020,8 +2037,8 @@ def test_approvel(request, role, rid):
             status = 6
             logrole = 1
             alert = "Test has been rejected"
-    except Exception, e:
-        print e
+    except Exception as e:
+        print(e)
         raise PermissionDenied()
 
     #if status = 2:
@@ -2065,7 +2082,7 @@ def test_attendance(request, tid):
         test.save()
     except:
         raise PermissionDenied()
-    print test.foss_id
+    print(test.foss_id)
     if request.method == 'POST':
         users = request.POST
         if users:
@@ -2102,10 +2119,10 @@ def test_attendance(request, tid):
                             mdlenrol = None
                             try:
                                 mdlenrol = MdlEnrol.objects.get(enrol='self', courseid = fossmdlcourse.mdlcourse_id )
-                                print "Role Exits"
-                            except Exception, e:
-                                print "MdlEnrol => ", e
-                                print "No self enrolement for this course"
+                                print("Role Exits")
+                            except Exception as e:
+                                print("MdlEnrol => ", e)
+                                print("No self enrolement for this course")
 
                             #if mdlenrol:
                             #    try:
@@ -2232,8 +2249,8 @@ def test_participant_ceritificate(request, wid, participant_id):
                 ta.status = 4
                 ta.count += 1
                 ta.save()
-        except Exception, e:
-            print e
+        except Exception as e:
+            print(e)
             raise PermissionDenied()
     response = HttpResponse(content_type='application/pdf')
     filename = (ta.mdluser_firstname+'-'+ta.mdluser_lastname+"-Participant-Certificate").replace(" ", "-");
@@ -2312,16 +2329,16 @@ def training_subscribe(request, events, eventid = None, mdluser_id = None):
         if events == 'test':
             try:
                 TestAttendance.objects.create(test_id=eventid, mdluser_id = mdluser_id, mdluser_firstname = mdluser.firstname, mdluser_lastname = mdluser.lastname)
-            except Exception, e:
-                print e
+            except Exception as e:
+                print(e)
                 pass
             messages.success(request, "You have sucessfully subscribe to the "+events+"")
             return HttpResponseRedirect('/participant/index/#Upcoming-Test')
         elif events == 'training':
             try:
                 TrainingAttendance.objects.create(training_id=eventid, mdluser_id = mdluser_id)
-            except Exception, e:
-                print e
+            except Exception as e:
+                print(e)
                 pass
             messages.success(request, "You have sucessfully subscribe to the "+events+"")
             return HttpResponseRedirect('/participant/index/#Upcoming-Training')
@@ -2378,8 +2395,8 @@ def organiser_invigilator_index(request, role, status):
 
             page = request.GET.get('page')
             collection = get_page(collection, page)
-        except Exception, e:
-            print e
+        except Exception as e:
+            print(e)
             collection = {}
     elif role == 'invigilator':
         try:
@@ -2395,8 +2412,8 @@ def organiser_invigilator_index(request, role, status):
             page = request.GET.get('page')
             collection = get_page(collection, page)
 
-        except Exception, e:
-            print e
+        except Exception as e:
+            print(e)
             collection = {}
     elif role == 'accountexecutive':
         try:
@@ -2412,8 +2429,8 @@ def organiser_invigilator_index(request, role, status):
             page = request.GET.get('page')
             collection = get_page(collection, page)
 
-        except Exception, e:
-            print e
+        except Exception as e:
+            print(e)
             collection = {}    
     else:
         raise PermissionDenied()
@@ -2437,21 +2454,21 @@ def update_events_log(user_id, role, category, category_id, academic, status):
     if category == 0:
         try:
             TrainingLog.objects.create(user_id = user_id, training_id = category_id, role = role, academic_id = academic, status = status)
-        except Exception, e:
-            print "Training Log =>",e
+        except Exception as e:
+            print("Training Log =>",e)
     elif category == 1:
         try:
             TestLog.objects.create(user_id = user_id, test_id = category_id, role = role, academic_id = academic, status = status)
-        except Exception, e:
-            print "Test Log => ",e
+        except Exception as e:
+            print("Test Log => ",e)
     else:
-        print "************ Error in events log ***********"
+        print("************ Error in events log ***********")
 
 def update_events_notification(user_id, role, category, category_id, status, academic, message):
     try:
         EventsNotification.objects.create(user_id = user_id, role = role, category = category, categoryid = category_id, academic_id = academic, status = status, message = message)
-    except Exception, e:
-        print "Error in Events Notification => ", e
+    except Exception as e:
+        print("Error in Events Notification => ", e)
 
 def training_participant_feedback(request, training_id, participant_id):
     try:
@@ -2470,7 +2487,7 @@ def training_participant_language_feedback(request, training_id, user_id):
     try:
         w = TrainingRequest.objects.get(pk=training_id)
         MdlUser.objects.get(id = user_id)
-    except Exception, e:
+    except Exception as e:
         raise PermissionDenied()
     form = TrainingLanguageFeedbackForm(training = w)
     if request.method == 'POST':
@@ -2484,8 +2501,8 @@ def training_participant_language_feedback(request, training_id, user_id):
                 form_data.save()
                 messages.success(request, "Thank you for your valuable feedback.")
                 return HttpResponseRedirect('/')
-            except Exception, e:
-                print e
+            except Exception as e:
+                print(e)
                 messages.success(request, "Sorry, something went wrong, Please try again!")
                 #return HttpResponseRedirect('/')
     context = {
@@ -2510,8 +2527,8 @@ def live_training(request, training_id=None):
             context['training'] = TrainingLiveFeedback.objects.filter(
               training_id = training_id
             )
-        except Exception, e:
-            print e
+        except Exception as e:
+            print(e)
             raise PermissionDenied()
 
     context.update(csrf(request))
@@ -2522,7 +2539,7 @@ def training_participant_livefeedback(request, training_id):
     w = None
     try:
         w = SingleTraining.objects.get(pk=training_id)
-    except Exception, e:
+    except Exception as e:
         raise PermissionDenied()
     if request.method == 'POST':
         form = LiveFeedbackForm(request.POST)
@@ -2533,8 +2550,8 @@ def training_participant_livefeedback(request, training_id):
                 form_data.save()
                 messages.success(request, "Thank you for your valuable feedback.")
                 return HttpResponseRedirect('/')
-            except Exception, e:
-                print e
+            except Exception as e:
+                print(e)
                 messages.success(request, "Something went wrong, please contact site administrator.")
                 return HttpResponseRedirect('/')
     context = {
@@ -2744,7 +2761,7 @@ def ajax_academic_center(request):
         itype = request.POST.get('itype')
         center = AcademicCenter.objects.filter(state=state,
             institution_type=itype).order_by('institution_name')
-	html = '<option value=None> --------- </option>'
+        html = '<option value=None> --------- </option>'
         if center:
             for ac in center:
                 html += '<option value={0}>{1}</option>'.format(ac.id,
@@ -2759,10 +2776,10 @@ def ajax_dept_foss(request):
     if request.method == 'POST':
         tmp = ''
         category =  int(request.POST.get('fields[type]'))
-        print category
-        print request.POST
+        print(category)
+        print(request.POST)
         if category == 1:
-            print request.POST
+            print(request.POST)
             training = request.POST.get('workshop')
             if request.POST.get('fields[dept]'):
                 dept = Department.objects.filter(training__id = training).order_by('name')
@@ -2819,7 +2836,7 @@ def ajax_language(request):
 def test(request):
     academics = AcademicCenter.objects.filter(Q(institution_name__icontains="Engineering")).exclude(Q(institution_type__name="Engineering") | Q(institution_type__name="Polytechnic") | Q(institution_type__name="ITI") | Q(institution_type__name="University"))
     for academic in academics:
-        print academic.institution_name, " => ", academic.institution_type
+        print(academic.institution_name, " => ", academic.institution_type)
         academic.institution_type = InstituteType.objects.get(name='Engineering')
         academic.save()
     return HttpResponsei("Done!")
@@ -2850,7 +2867,7 @@ def activate_academics(request):
         5: SortableHeader('Action', False),
         6: SortableHeader('Status', False)
     }
-    print request
+    print(request)
     if request.method == 'POST':
         collegeid = request.POST.get('collegeid')
         action = request.POST.get('action')

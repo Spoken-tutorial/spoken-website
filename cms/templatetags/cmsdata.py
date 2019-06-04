@@ -1,4 +1,6 @@
+from __future__ import print_function
 # Third Party Stuff
+from builtins import range
 from django import template
 from django.conf import settings
 
@@ -55,7 +57,7 @@ def get_cms_header():
 ''' excludes: will exclude excludes's values '''
 def combine_get_values(getValue, excludes = ['page']):
     values = ''
-    for k,v in getValue.iteritems():
+    for k,v in getValue.items():
         if k not in excludes:
             values += k+'='+v+'&'
     return values
@@ -63,7 +65,7 @@ def combine_get_values(getValue, excludes = ['page']):
 ''' includes: will include include's values '''
 def reset_get_values(getValue, includes = ['page']):
     values = ''
-    for k,v in getValue.iteritems():
+    for k,v in getValue.items():
         if k in includes:
             values += k+'='+v+'&'
     return values
@@ -71,7 +73,7 @@ def reset_get_values(getValue, includes = ['page']):
 ''' includes: will include include's values '''
 def reset_get_value(getValue, exclude_key = None):
     values = ''
-    for k,v in getValue.iteritems():
+    for k,v in getValue.items():
         if k != exclude_key:
             if values:
                 values += '&'
@@ -83,18 +85,18 @@ def get_or_create_csrf_token(request):
     token = None
     try:
         token = request.META.get('CSRF_COOKIE', None)
-    except Exception, e:
-        print e
+    except Exception as e:
+        print(e)
         pass
     if token is None:
         token = csrf._get_new_csrf_key()
         try:
             request.META['CSRF_COOKIE'] = token
             request.META['CSRF_COOKIE_USED'] = True
-        except Exception, e:
-            print e
+        except Exception as e:
+            print(e)
             pass
-    print token
+    print(token)
     return token
 
 def paginator_page_cutter(page_range, current_page):
@@ -119,7 +121,7 @@ def paginator_page_cutter(page_range, current_page):
         tmp = end_page - current_page
         start_page =  start_page - (5 - tmp)
     
-    return range(start_page, end_page+1)
+    return list(range(start_page, end_page+1))
 
 def get_analytics_code():
     context = {

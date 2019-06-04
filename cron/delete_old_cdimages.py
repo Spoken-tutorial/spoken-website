@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import print_function
 import os
 import config
 
@@ -11,5 +12,5 @@ for filename in os.listdir(dir_path):
     if filename != 'README' and os.path.isfile(file_path):
         fcreated_time = datetime.fromtimestamp(os.path.getctime(file_path))
         if fcreated_time + timedelta(days=2) < datetime.now():
-            print 'file {} is old, going to delete...'.format(filename)
+            print('file {} is old, going to delete...'.format(filename))
             os.remove(file_path)

@@ -37,8 +37,8 @@ def get_tutorial_list(request, fossid, langid):
         return HttpResponse(status=404)
     
     if request.method == 'GET': 
-		serializer = VideoSerializer(tuts, many=True)
-		return JsonResponse(serializer.data,  safe=False)
+        serializer = VideoSerializer(tuts, many=True)
+        return JsonResponse(serializer.data,  safe=False)
 
     elif request.method == 'PUT':
         data = JSONParser().parse(request)

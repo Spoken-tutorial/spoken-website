@@ -1,3 +1,4 @@
+from __future__ import print_function
 import MySQLdb
 import time
 import cgi
@@ -37,12 +38,12 @@ for row in rows:
     entry.media.keywords = gdata.media.Keywords(row[12])
     try:
         youtube.service.UpdateVideoEntry(entry)
-        print entry.media.title, '-- Success'
-    except Exception, e:
-        print convert_to_html(row[4])
-        print entry.media.title, '-- Failed'
+        print(entry.media.title, '-- Success')
+    except Exception as e:
+        print(convert_to_html(row[4]))
+        print(entry.media.title, '-- Failed')
         error_string = row[9] + ' - ' + row[13] + ' -- Failed'
         error_log_file_head.write(error_string + '\n')
-        print e
+        print(e)
     time.sleep(1)
 error_log_file_head.close()
