@@ -1,5 +1,6 @@
 from creation.models import ContributorRole, FossCategory, Language,TutorialDetail
 from rest_framework import serializers
+from .models import Scripts
 
 class FossCategoryField(serializers.RelatedField):
   def to_representation(self, value):
@@ -18,7 +19,12 @@ class ContributorRoleSerializer(serializers.ModelSerializer):
     fields = ('foss_category', 'language', 'user', 'status')
 
 
-class TutorialsList(serializers.ModelSerializer):
+class TutorialDetailSerializer(serializers.ModelSerializer):
     class Meta:
       model=TutorialDetail
-      fields=('id','tutorial','order')
+      fields=('id','foss','tutorial','level','order','user','created','updated')
+
+class ScriptsSerializer(serializers.ModelSerializer):
+  class Meta:
+    model=Scripts
+    fields=('id','tutorial','language','status','data_file')

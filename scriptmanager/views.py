@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from creation.models import ContributorRole,TutorialDetail
-from scriptmanager.serializers import ContributorRoleSerializer,TutorialsList
+from .models import Scripts
+from scriptmanager.serializers import ContributorRoleSerializer,TutorialDetailSerializer,ScriptsSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -27,14 +28,18 @@ class ContributorRoleList(generics.ListCreateAPIView):
 
     
 
-class TutorialsList(generics.ListCreateAPIView):
-  serializer_class=TutorialsList
-  queryset = TutorialDetail.objects.all()
+class TutorialsList(generics.ListCreateAPIView): #http://localhost:8000/scripts/api/tutorials?fid=all or fid=12
+  serializer_class=TutorialDetailSerializer
 
   def get_queryset(self):
-        fid = self.request.query_params.get('fid')
+        fid = self.request.query_params.get('fid')  
         if(fid=='all'):
                 return TutorialDetail.objects.all()
         return TutorialDetail.objects.filter(foss_id=fid)
 
 
+class ScriptsList(generics.ListCreateAPIView):
+  serializer_class=ScriptsSerializer
+
+  def get_queryset(self):
+    return Scripts.objects.all()
