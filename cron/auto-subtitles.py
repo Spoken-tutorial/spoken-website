@@ -35,7 +35,7 @@ def strip_tags(html):
 
 
 def readUrl(url):
-    # print "Reading :", url
+    print("Reading :", url)
     b = getNewBrowser()
     r = b.get(url, timeout = 30.0)
     return BeautifulSoup(r.text)
@@ -125,7 +125,7 @@ def generate_subtitle(srt_url, srt_file_path):
                         previous_time, "%H:%M:%S") + datetime.timedelta(seconds = 5)).time()) + '\n'
                 srt_data += previous_script_data
             file_head = open(srt_file_path,"w")
-            file_head.write(srt_data.encode("utf-8"))
+            file_head.write(srt_data)
             file_head.close()
     except Exception as e:
         print(e)
@@ -140,8 +140,8 @@ def get_video_info(path):
     try:
         process = subprocess.Popen(['/usr/bin/ffmpeg', '-i', path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         stdout, stderr = process.communicate()
-        duration_m = re.search(r"Duration:\s{1}(?P<hours>\d+?):(?P<minutes>\d+?):(?P<seconds>\d+\.\d+?)", stdout, re.DOTALL).groupdict()
-        info_m = re.search(r": Video: (?P<codec>.*?), (?P<profile>.*?), (?P<width>.*?)x(?P<height>.*?), ", stdout, re.DOTALL).groupdict()
+        duration_m = re.search(r"Duration:\s{1}(?P<hours>\d+?):(?P<minutes>\d+?):(?P<seconds>\d+\.\d+?)", stdout.decode('utf-8'), re.DOTALL).groupdict()
+        info_m = re.search(r": Video: (?P<codec>.*?), (?P<profile>.*?), (?P<width>.*?)x(?P<height>.*?), ", stdout.decode('utf-8'), re.DOTALL).groupdict()
 
         hours = Decimal(duration_m['hours'])
         minutes = Decimal(duration_m['minutes'])
@@ -180,11 +180,13 @@ def get_video_info(path):
 
 def get_formatted_script(script):
     if script.string:
-        return script.text.strip('\n').strip() + '\n\n'
+        r = script.text.strip('\n').strip() + '\n\n'
     else:
-        return strip_tags(str(script.renderContents())\
+        s = (script.renderContents()).decode('utf-8')
+        r = strip_tags(str(s)\
         .replace('&amp;', '&').replace('&quot;', '"')\
         .replace('&gt;', '>').replace('&lt;', '<')).strip('\n').strip() + '\n\n'
+    return r
 
 
 def rreplace(s, old, new, occurrence):
