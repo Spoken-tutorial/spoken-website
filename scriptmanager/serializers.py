@@ -2,22 +2,27 @@ from creation.models import ContributorRole, FossCategory, Language,TutorialDeta
 from rest_framework import serializers
 from .models import Scripts
 
-class FossCategoryField(serializers.RelatedField):
-  def to_representation(self, value):
-    return value.foss
+class FossCategorySerializer(serializers.ModelSerializer):
+  foss_category=serializers.CharField(read_only=True)
+  
+  class Meta:
+    model=FossCategory
 
-class LanguageField(serializers.RelatedField):
-  def to_representation(self, value):
-    return value.name
-    
-class ContributorRoleSerializer(serializers.ModelSerializer):
-  foss_category = FossCategoryField(read_only=True)
-  language = LanguageField(read_only=True)
+class LanguageSerializer(serializers.ModelSerializer):
+  language=serializers.CharField(read_only=True)
 
   class Meta:
-    model = ContributorRole
-    fields = ('foss_category', 'language', 'user', 'status')
+    model=Language
 
+class ContributorRoleSerializer(serializers.ModelSerializer):
+  foss_id = serializers.CharField(source='foss_category.id', read_only=True)
+  foss_category = serializers.CharField(source='foss_category.foss', read_only=True)
+  language_id = serializers.CharField(source='language.id', read_only=True)
+  language_name = serializers.CharField(source='language.name', read_only=True)
+  
+  class Meta:
+    model = ContributorRole
+    fields = ('foss_id','foss_category','language_id','language_name','user', 'status')
 
 class TutorialDetailSerializer(serializers.ModelSerializer):
     class Meta:

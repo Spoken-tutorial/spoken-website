@@ -20,23 +20,21 @@ def index(request):
 class ContributorRoleList(generics.ListCreateAPIView):
   def get_queryset(self):
       return ContributorRole.objects.filter(user=self.request.user)
-      # data = 
-      # return Response(data=pDatos, status=pStatus, headers={"Access-Control-Allow-Origin":"*"})
-
   serializer_class = ContributorRoleSerializer
 
 
     
 
-class TutorialsList(generics.ListCreateAPIView): #http://localhost:8000/scripts/api/tutorials?fid=all or fid=12
+class TutorialsList(generics.ListCreateAPIView):
   serializer_class=TutorialDetailSerializer
-
   def get_queryset(self):
-        fid = self.request.query_params.get('fid')  
-        if(fid=='all'):
-                return TutorialDetail.objects.all()
-        return TutorialDetail.objects.filter(foss_id=fid)
+    return TutorialDetail.objects.filter(user=self.request.user).order_by('order')
 
+class TutorialDetails(generics.ListCreateAPIView):
+  serializer_class=TutorialDetailSerializer
+    
+  def get_queryset(self):
+      return TutorialDetail.objects.filter(foss_id=self.request.query_params.get('fid'),user=self.request.user).order_by('order')
 
 class ScriptsList(generics.ListCreateAPIView):
   serializer_class=ScriptsSerializer
