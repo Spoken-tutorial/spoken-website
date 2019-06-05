@@ -1,35 +1,42 @@
 from creation.models import ContributorRole, FossCategory, Language,TutorialDetail
 from rest_framework import serializers
-from .models import Scripts
+from .models import Scripts, ScriptDetails
 
 class FossCategorySerializer(serializers.ModelSerializer):
-  foss_category=serializers.CharField(read_only=True)
-  
+  name = serializers.CharField(source='foss')
   class Meta:
     model=FossCategory
+    fields=('id','name')
 
 class LanguageSerializer(serializers.ModelSerializer):
-  language=serializers.CharField(read_only=True)
-
   class Meta:
     model=Language
+    fields=('id','name')
 
 class ContributorRoleSerializer(serializers.ModelSerializer):
-  foss_id = serializers.CharField(source='foss_category.id', read_only=True)
-  foss_category = serializers.CharField(source='foss_category.foss', read_only=True)
-  language_id = serializers.CharField(source='language.id', read_only=True)
-  language_name = serializers.CharField(source='language.name', read_only=True)
-  
-  class Meta:
-    model = ContributorRole
-    fields = ('foss_id','foss_category','language_id','language_name','user', 'status')
+    foss_category=FossCategorySerializer(read_only=True)
+    language=LanguageSerializer(read_only=True)
+    class Meta:
+      model = ContributorRole
+      fields = ('foss_category','language','user', 'status')
+
 
 class TutorialDetailSerializer(serializers.ModelSerializer):
     class Meta:
       model=TutorialDetail
       fields=('id','foss','tutorial','level','order','user','created','updated')
 
-class ScriptsSerializer(serializers.ModelSerializer):
-  class Meta:
+
+class ScriptsGetSerializer(serializers.ModelSerializer):
+  tutorial=TutorialDetailSerializer(read_only=True)
+
+  class Meta: 
+    model=Scripts
+    fields=('id','tutorial','language','status','data_file')
+
+
+class ScriptsPostSerializer(serializers.ModelSerializer):
+
+  class Meta: 
     model=Scripts
     fields=('id','tutorial','language','status','data_file')
