@@ -8,7 +8,7 @@ from string import Template
 
 # Third Party Stuff
 from django.http import HttpResponse
-from django.shortcuts import render_to_response
+from django.shortcuts import render_to_response, render
 from django.template import RequestContext
 
 # Spoken Tutorial Stuff
@@ -1236,8 +1236,8 @@ def moodle_coordinators_workshop_download(request):
             user = Moodle_WS_1march2019.objects.filter(email=email)
             if not user:
                 context["notregistered"] = 1
-                return render_to_response('moodle_workshop1march_download.html',
-                                          context, context_instance=ci)
+                return render(request,'moodle_workshop1march_download.html',
+                                          context)
             else:
                 user = user[0]
         name = user.name
@@ -1247,7 +1247,7 @@ def moodle_coordinators_workshop_download(request):
         id = int(user.id)
         hexa = hex(id).replace('0x', '').zfill(6).upper()
         serial_no = '{0}{1}{2}{3}'.format(purpose, year, hexa, type)
-        serial_key = (hashlib.sha1(serial_no)).hexdigest()
+        serial_key = (hashlib.sha1(serial_no.encode('utf-8'))).hexdigest()
         file_name = '{0}{1}'.format(email, id)
         file_name = file_name.replace('.', '')
         try:
@@ -1285,9 +1285,9 @@ def moodle_coordinators_workshop_download(request):
             _clean_certificate_certificate(certificate_path, file_name)
             context['error'] = True
             context['err'] = err
-            return render_to_response('moodle_workshop1march_download.html', context, ci)
+            return render(request,'moodle_workshop1march_download.html', context)
     context['message'] = ''
-    return render_to_response('moodle_workshop1march_download.html', context, ci)
+    return render(request,'moodle_workshop1march_download.html', context)
 
 
 def create_moodle_coordinators_workshop_certificate(certificate_path, name, qrcode, type, paper, workshop, file_name):
@@ -1343,8 +1343,8 @@ def moodle_massive_workshop_download(request):
             user = Moodle_WS_15mar2019.objects.filter(email=email)
             if not user:
                 context["notregistered"] = 1
-                return render_to_response('moodle_workshop15mar_download.html',
-                                          context, context_instance=ci)
+                return render(request,'moodle_workshop15mar_download.html',
+                                          context)
             else:
                 user = user[0]
         name = user.name
@@ -1355,7 +1355,7 @@ def moodle_massive_workshop_download(request):
         id = int(user.id)
         hexa = hex(id).replace('0x', '').zfill(6).upper()
         serial_no = '{0}{1}{2}{3}'.format(purpose, year, hexa, type)
-        serial_key = (hashlib.sha1(serial_no)).hexdigest()
+        serial_key = (hashlib.sha1(serial_no.encode('utf-8'))).hexdigest()
         file_name = '{0}{1}'.format(email, id)
         file_name = file_name.replace('.', '')
         try:
@@ -1393,9 +1393,9 @@ def moodle_massive_workshop_download(request):
             _clean_certificate_certificate(certificate_path, file_name)
             context['error'] = True
             context['err'] = err
-            return render_to_response('moodle_workshop15mar_download.html', context, ci)
+            return render(request,'moodle_workshop15mar_download.html', context)
     context['message'] = ''
-    return render_to_response('moodle_workshop15mar_download.html', context, ci)
+    return render(request,'moodle_workshop15mar_download.html', context)
 
 def create_moodle_massive_workshop_certificate(certificate_path, name, qrcode, type, paper, workshop, file_name):
     error = False
