@@ -4,10 +4,12 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { FormsModule } from '@angular/forms';
+import { FormsModule ,ReactiveFormsModule} from '@angular/forms';
 import { HomeComponent } from './home/home.component';
 import { TutorialsComponent } from './home/tutorials/tutorials.component';
 import { JwtModule } from '@auth0/angular-jwt';
+import { CreateScriptComponent } from './create-script/create-script.component';
+
 
 const appRoutes: Routes = [
   {
@@ -15,6 +17,14 @@ const appRoutes: Routes = [
     component: HomeComponent,
     data: {
       title: 'List of Tutorials',
+      animation: 'HomePage'
+    }
+  },
+  {
+    path: 'createScripts',
+    component: CreateScriptComponent,
+    data: {
+      title: 'Create Script',
       animation: 'HomePage'
     }
   }
@@ -30,7 +40,8 @@ export function tokenGetter() {
   declarations: [
     AppComponent,
     HomeComponent,
-    TutorialsComponent
+    TutorialsComponent,
+    CreateScriptComponent
   ],
   imports: [
     BrowserModule,
@@ -44,7 +55,9 @@ export function tokenGetter() {
       }
     }),
     RouterModule.forRoot(appRoutes),
-    FormsModule
+    FormsModule,
+    ReactiveFormsModule
+   
   ],
   providers: [],
   bootstrap: [AppComponent]

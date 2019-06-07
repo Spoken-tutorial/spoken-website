@@ -20,11 +20,9 @@ export class HomeComponent implements OnInit {
   }
   
   fetchAllTutorials(fid){
-    console.log(fid)
-   if(fid!='all')
-      fid = 83;
-   this.fid = fid;
-
+      this.fid = fid;
+      if(fid!='tutoriallist/')
+        this.fid = 'tutorials/?fid='+ fid;
      this.tutorialService.getTutorials(this.fid).subscribe(
       (res) => this.tutorials = res,
       (err) => {
@@ -47,7 +45,7 @@ export class HomeComponent implements OnInit {
 
   ngOnInit(){
     this.fetchAllFoss();
-    this.fetchAllTutorials('all');
+    this.fetchAllTutorials('tutoriallist/');
   
   };
 
