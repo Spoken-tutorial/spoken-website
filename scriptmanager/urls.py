@@ -3,7 +3,7 @@ from . import views
 
 urlpatterns = [
   url(r'^$', views.index, name='home'),
+  url(r'api/foss/(?P<fid>[0-9]+)/tutorials/', views.TutorialDetailList.as_view()), 
   url(r'api/foss/', views.ContributorRoleList.as_view()), 
-  url(r'api/tutorials/', views.TutorialDetails.as_view()), 
-  url(r'api/scripts/', views.ScriptsList.as_view()),
+  url(r'api/tutorial/(?P<tid>[0-9]+)/script/create/$', views.ScriptCreateAPIView.as_view()),
 ]

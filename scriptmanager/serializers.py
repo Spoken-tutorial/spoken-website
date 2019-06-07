@@ -1,6 +1,9 @@
 from creation.models import ContributorRole, FossCategory, Language,TutorialDetail
 from rest_framework import serializers
 from .models import Scripts, ScriptDetails
+from django.contrib.auth.models import User
+from rest_framework.response import Response
+from rest_framework import status
 
 class FossCategorySerializer(serializers.ModelSerializer):
   name = serializers.CharField(source='foss')
@@ -16,6 +19,7 @@ class LanguageSerializer(serializers.ModelSerializer):
 class ContributorRoleSerializer(serializers.ModelSerializer):
     foss_category=FossCategorySerializer(read_only=True)
     language=LanguageSerializer(read_only=True)
+    user=serializers.CharField()
     class Meta:
       model = ContributorRole
       fields = ('foss_category','language','user', 'status')
@@ -27,16 +31,18 @@ class TutorialDetailSerializer(serializers.ModelSerializer):
       fields=('id','foss','tutorial','level','order','user','created','updated')
 
 
-class ScriptsGetSerializer(serializers.ModelSerializer):
-  tutorial=TutorialDetailSerializer(read_only=True)
 
-  class Meta: 
+class ScriptsDetailSerializer(serializers.ModelSerializer):
+
+  class Meta:
+    model=ScriptDetails
+    fields=('cue','narration','order')
+
+class ScriptsSerializer(serializers.ModelSerializer):
+  details=ScriptsDetailSerializer(many=True)
+
+  class Meta:
     model=Scripts
-    fields=('id','tutorial','language','status','data_file')
+    fields=('details',)
 
-
-class ScriptsPostSerializer(serializers.ModelSerializer):
-
-  class Meta: 
-    model=Scripts
-    fields=('id','tutorial','language','status','data_file')
+ 

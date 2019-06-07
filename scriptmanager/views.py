@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from creation.models import ContributorRole,TutorialDetail
-from .models import Scripts
-from .serializers import ContributorRoleSerializer,TutorialDetailSerializer,ScriptsPostSerializer,  ScriptsGetSerializer,ScriptsDetailSerializer
+from .models import Scripts,ScriptDetails
+from .serializers import ContributorRoleSerializer,TutorialDetailSerializer,ScriptsDetailSerializer,ScriptsSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -17,29 +17,38 @@ def index(request):
    
   return render(request, 'scriptmanager/index.html', {'token': token})
 
-class ContributorRoleList(generics.ListCreateAPIView):
+
+class ContributorRoleList(generics.ListAPIView):
   def get_queryset(self):
       return ContributorRole.objects.filter(user=self.request.user)
   serializer_class = ContributorRoleSerializer
 
 
-
-class TutorialDetails(generics.ListCreateAPIView):
+class TutorialDetailList(generics.ListAPIView):
   serializer_class=TutorialDetailSerializer
     
   def get_queryset(self):
-    fid=self.request.query_params.get('fid')
-    if fid is None:
-          return TutorialDetail.objects.filter(user=self.request.user).order_by('order')
-    return TutorialDetail.objects.filter(foss_id=self.request.query_params.get('fid'),user=self.request.user).order_by('order')
-
-class ScriptsList(generics.ListCreateAPIView):
-  queryset = Scripts.objects.all()
-
-  def get_serializer_class(self):
-    if self.request.method == 'POST':
-        return ScriptsPostSerializer
-    return ScriptsGetSerializer
+    return TutorialDetail.objects.filter(foss=self.kwargs.get('fid')).order_by('order')
 
 
+
+
+class ScriptCreateAPIView(generics.CreateAPIView):
+    serializer_class=ScriptsSerializer
+    
+
+    def post(self, request,tid):
+      data=request.data.pop('details')
+      try:
+        script= Scripts.objects.create(tutorial_id=int(self.kwargs['tid']),user=self.request.user)
+        for x in data:
+          script_details = ScriptDetails.objects.create(script=script,**x)
+        return Response({'status': True})
+      except:
+        return Response({'status': False})
+
+
+
+
+    
 
