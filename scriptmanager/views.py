@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from creation.models import ContributorRole,TutorialDetail
 from .models import Scripts
-from scriptmanager.serializers import ContributorRoleSerializer,TutorialDetailSerializer,ScriptsSerializer
+from .serializers import ContributorRoleSerializer,TutorialDetailSerializer,ScriptsPostSerializer,  ScriptsGetSerializer,ScriptsDetailSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -23,21 +23,23 @@ class ContributorRoleList(generics.ListCreateAPIView):
   serializer_class = ContributorRoleSerializer
 
 
-    
-
-class TutorialsList(generics.ListCreateAPIView):
-  serializer_class=TutorialDetailSerializer
-  def get_queryset(self):
-    return TutorialDetail.objects.filter(user=self.request.user).order_by('order')
 
 class TutorialDetails(generics.ListCreateAPIView):
   serializer_class=TutorialDetailSerializer
     
   def get_queryset(self):
-      return TutorialDetail.objects.filter(foss_id=self.request.query_params.get('fid'),user=self.request.user).order_by('order')
+    fid=self.request.query_params.get('fid')
+    if fid is None:
+          return TutorialDetail.objects.filter(user=self.request.user).order_by('order')
+    return TutorialDetail.objects.filter(foss_id=self.request.query_params.get('fid'),user=self.request.user).order_by('order')
 
 class ScriptsList(generics.ListCreateAPIView):
-  serializer_class=ScriptsSerializer
+  queryset = Scripts.objects.all()
 
-  def get_queryset(self):
-    return Scripts.objects.all()
+  def get_serializer_class(self):
+    if self.request.method == 'POST':
+        return ScriptsPostSerializer
+    return ScriptsGetSerializer
+
+
+
