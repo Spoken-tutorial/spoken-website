@@ -10,6 +10,7 @@ import { TutorialsComponent } from './home/tutorials/tutorials.component';
 import { JwtModule } from '@auth0/angular-jwt';
 import { CreateScriptComponent } from './create-script/create-script.component';
 
+
 const appRoutes: Routes = [
   {
     path: '',
@@ -56,6 +57,7 @@ export function tokenGetter() {
     RouterModule.forRoot(appRoutes),
     FormsModule,
     ReactiveFormsModule
+   
   ],
   providers: [],
   bootstrap: [AppComponent]

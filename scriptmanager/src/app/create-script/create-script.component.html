@@ -1,31 +1,43 @@
+<script src="https://use.fontawesome.com/259168d2de.js"></script>
 <div class="container">
-  <div class="row" >
-  <div>
-  <div>
 
-  </div>
-  <form [formGroup]="myForm" novalidate (ngSubmit)="save(myForm)"><div class="form-group">
-  </div>
+  <form [formGroup]="myForm" novalidate (ngSubmit)="save(myForm)">
+
   <div formArrayName="rows">
   <div *ngFor="let language of myForm.controls.rows.controls; let i=index" class="panel panel-default">
-  <div class="panel-heading">
+
   <span>slide {{i + 1}}</span>
   <a (click)="removeLanguage(i)" *ngIf="myForm.controls.rows.controls.length > 1"  style="cursor: default">Delete this row </a>  
-</div>
-  <div class="panel-body" [formGroupName]="i">
-  <div class="form-group col-xs-6">
-  <label>Visual Cue</label>
-  <input type="text" class="form-control" formControlName="visualCue"></div>
-  <div class="form-group col-xs-6">
-  <label>narration</label>
-  <input type="text" class="form-control" formControlName="narration"></div></div></div></div>
-  <div class="margin-20">
-  <a (click)="addLanguage()" style="cursor: default">Add another row </a></div><div class="margin-20">
-  <button type="submit" class="btn btn-primary pull-right" (click)="save()" [disabled]="!myForm.valid">Submit</button></div><div class="clearfix"></div>
-  <div class="margin-20">
-  <div>myForm details:-</div>
-  <pre>Is myForm valid?: <br>{{myForm.valid | json}}</pre>
-  <pre>form value: <br>{{myForm.value | json}}</pre>
+
+  <div [formGroupName]="i">
+
+  <div class="columns">
+    <div class="column">
+      <label class="label">Visual Cue</label>
+      <input type="text" class="input" formControlName="visualCue">
+    </div>
+
+    <div class="column">
+      <label class="label">narration</label>
+      <input type="text" class="input" formControlName="narration">
+    </div>
+  </div>  
+  
+
   </div>
+
+  </div>
+  </div>
+ 
+  <a (click)="addLanguage()" style="cursor: default">
+      <i class="fa fa-plus-circle">asdf</i>
+  </a>
+  <br><br>
+  <button type="submit" class="button is-success" (click)="save()" [disabled]="!myForm.valid">Save Changes</button>
+  <br><br>
+
+  <pre>form value: <br>{{myForm.value | json}}</pre>
+ 
   </form>
-  </div></div></div>
+ 
+</div>
