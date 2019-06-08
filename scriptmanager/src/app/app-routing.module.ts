@@ -1,7 +1,26 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
+import { HomeComponent } from './home/home.component';
+import { CreateScriptComponent } from './create-script/create-script.component';
 
-const routes: Routes = [];
+const routes: Routes = [
+  {
+    path: '',
+    component: HomeComponent,
+    data: {
+      title: 'List of Tutorials',
+      animation: 'HomePage'
+    }
+  },
+  {
+    path: 'createScripts',
+    component: CreateScriptComponent,
+    data: {
+      title: 'Create Script',
+      animation: 'HomePage'
+    }
+  }
+];
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
