@@ -5,6 +5,7 @@ import { FormGroup, FormArray, FormBuilder, Validators, FormControl } from '@ang
   templateUrl: './create-script.component.html',
   styleUrls: ['./create-script.component.sass']
 })
+
 export class CreateScriptComponent implements OnInit {
   public myForm: FormGroup;
   public rows;
@@ -17,13 +18,13 @@ export class CreateScriptComponent implements OnInit {
   ])
   });
   }
- 
-initrow() {
-return this._fb.group({
-visualCue: [''],
-narration: ['']
-});
-}
+  
+  initrow() {
+  return this._fb.group({
+  visualCue: [''],
+  narration: ['']
+  });
+  }
 
   addLanguage() {
   const val = <FormArray>this.myForm.controls.rows;

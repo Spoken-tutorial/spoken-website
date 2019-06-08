@@ -1,16 +1,20 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormArray, FormBuilder, Validators, FormControl } from '@angular/forms';
+import { TutorialsService } from '../_service/tutorials.service'
 
 @Component({
   selector: 'app-edit-script',
   templateUrl: './edit-script.component.html',
   styleUrls: ['./edit-script.component.sass']
 })
+
 export class EditScriptComponent implements OnInit {
   public myForm: FormGroup;
   public rows;
 
   constructor(private _fb: FormBuilder) { }
+
+
 
   ngOnInit() {
     this.myForm = this._fb.group({
@@ -20,10 +24,13 @@ export class EditScriptComponent implements OnInit {
       });
   }
 
+
   initrow() {
+    var visualCueData = 'Visual Cue Edit Data'
+    var narrationData = 'Narration Edit Data'
     return this._fb.group({
-    visualCue: [''],
-    narration: ['']
+    visualCue: [visualCueData],
+    narration: [narrationData]
     });
     }
 
