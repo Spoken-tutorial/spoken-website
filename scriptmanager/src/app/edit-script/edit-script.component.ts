@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormArray, FormBuilder, Validators, FormControl } from '@angular/forms';
-import { TutorialsService } from '../_service/tutorials.service'
 
 @Component({
   selector: 'app-edit-script',
@@ -13,7 +12,6 @@ export class EditScriptComponent implements OnInit {
   public rows;
 
   constructor(private _fb: FormBuilder) { }
-
 
 
   ngOnInit() {
