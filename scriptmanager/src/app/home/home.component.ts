@@ -20,6 +20,7 @@ export class HomeComponent implements OnInit {
   }
   
   fetchAllTutorials(fid){
+    
       this.fid = "foss/"+fid+"/tutorials/";
       
       // if(fid!='tutoriallist/')

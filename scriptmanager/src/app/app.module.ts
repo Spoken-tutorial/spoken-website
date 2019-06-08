@@ -9,6 +9,7 @@ import { HomeComponent } from './home/home.component';
 import { TutorialsComponent } from './home/tutorials/tutorials.component';
 import { JwtModule } from '@auth0/angular-jwt';
 import { CreateScriptComponent } from './create-script/create-script.component';
+import { EditScriptComponent } from './edit-script/edit-script.component';
 
 export function tokenGetter() {
   const token = localStorage.getItem('token');
@@ -21,7 +22,8 @@ export function tokenGetter() {
     AppComponent,
     HomeComponent,
     TutorialsComponent,
-    CreateScriptComponent
+    CreateScriptComponent,
+    EditScriptComponent
   ],
   imports: [
     BrowserModule,
