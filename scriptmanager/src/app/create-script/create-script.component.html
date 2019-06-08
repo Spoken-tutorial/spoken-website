@@ -1,39 +1,45 @@
-<script src="https://use.fontawesome.com/259168d2de.js"></script>
-<div class="container">
+<div class="container has-margin-top-50">
 
   <form [formGroup]="myForm" novalidate (ngSubmit)="save(myForm)">
 
   <div formArrayName="rows">
-  <div *ngFor="let language of myForm.controls.rows.controls; let i=index" class="panel panel-default">
-
-  <span>slide {{i + 1}}</span>
-  <a (click)="removeLanguage(i)" *ngIf="myForm.controls.rows.controls.length > 1"  style="cursor: default">Delete this row </a>  
+  <div *ngFor="let language of myForm.get('rows')['controls']; let i=index" class="panel panel-default">
 
   <div [formGroupName]="i">
 
   <div class="columns">
-    <div class="column">
-      <label class="label">Visual Cue</label>
-      <input type="text" class="input" formControlName="visualCue">
+      
+    <div class="column has-margin-top-30">
+      <div class="has-margin-right-0">
+        <span >slide {{i + 1}}</span>
+      </div>  
     </div>
-
     <div class="column">
-      <label class="label">narration</label>
-      <input type="text" class="input" formControlName="narration">
+        <label class="label">Visual Cue</label>
+        <input type="textarea" rows="50" class="input" formControlName="visualCue">
     </div>
-  </div>  
+    <div class="column">
+        <label class="label">narration</label>
+        <input type="text" class="input" formControlName="narration">
+    </div>
+    <div class="column">
+        <a (click)="removeLanguage(i)" *ngIf="myForm.get('rows')['controls'].length > 1"  style="cursor: default">
+            <i class="fa fa-trash fa-5x" aria-hidden="true"></i>
+        </a> 
+    </div>
   
-
+  </div>
+  
   </div>
 
   </div>
   </div>
  
   <a (click)="addLanguage()" style="cursor: default">
-      <i class="fa fa-plus-circle">asdf</i>
+     <i class="fa fa-plus fa-5x" aria-hidden="true"></i>
   </a>
   <br><br>
-  <button type="submit" class="button is-success" (click)="save()" [disabled]="!myForm.valid">Save Changes</button>
+  <button type="submit" class="button is-success" (click)="save(myForm)" [disabled]="!myForm.valid">Save Changes</button>
   <br><br>
 
   <pre>form value: <br>{{myForm.value | json}}</pre>

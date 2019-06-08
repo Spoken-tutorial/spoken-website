@@ -10,8 +10,8 @@
               <option [value]="'tutoriallist/'">--All foss categories</option>
               <option
                 *ngFor="let item of foss"
-                [value]="item['foss_id']"
-                >{{ item["foss_category"] }}</option
+                [value]="item['foss_category']['id']"
+                >{{ item['foss_category']['name'] }}</option
               >
             </select>
           </span>
