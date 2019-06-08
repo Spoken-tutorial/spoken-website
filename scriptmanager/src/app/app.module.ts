@@ -10,26 +10,6 @@ import { TutorialsComponent } from './home/tutorials/tutorials.component';
 import { JwtModule } from '@auth0/angular-jwt';
 import { CreateScriptComponent } from './create-script/create-script.component';
 
-
-const appRoutes: Routes = [
-  {
-    path: '',
-    component: HomeComponent,
-    data: {
-      title: 'List of Tutorials',
-      animation: 'HomePage'
-    }
-  },
-  {
-    path: 'createScripts',
-    component: CreateScriptComponent,
-    data: {
-      title: 'Create Script',
-      animation: 'HomePage'
-    }
-  }
-]
-
 export function tokenGetter() {
   const token = localStorage.getItem('token');
   console.log(token);
@@ -54,7 +34,7 @@ export function tokenGetter() {
         blacklistedRoutes: ['']
       }
     }),
-    RouterModule.forRoot(appRoutes),
+    RouterModule,
     FormsModule,
     ReactiveFormsModule
    
