@@ -16,14 +16,14 @@
     </div>
     <div class="column">
         <label class="label">Visual Cue</label>
-        <input type="textarea" rows="50" class="input" formControlName="visualCue">
+        <input type="textarea" rows="50" class="input" formControlName="cue">
     </div>
     <div class="column">
         <label class="label">narration</label>
         <input type="text" class="input" formControlName="narration">
     </div>
     <div class="column">
-        <a (click)="removeLanguage(i)" *ngIf="myForm.get('rows')['controls'].length > 1"  style="cursor: default">
+        <a (click)="removeRow(i)" *ngIf="myForm.get('rows')['controls'].length > 1"  style="cursor: default">
             <i class="fa fa-trash fa-5x" aria-hidden="true"></i>
         </a> 
     </div>
@@ -35,11 +35,11 @@
   </div>
   </div>
  
-  <a (click)="addLanguage()" style="cursor: default">
+  <a (click)="addRow()" style="cursor: default">
      <i class="fa fa-plus fa-5x" aria-hidden="true"></i>
   </a>
   <br><br>
-  <button type="submit" class="button is-success" (click)="save(myForm)" [disabled]="!myForm.valid">Save Changes</button>
+  <button type="submit" class="button is-success" [disabled]="!myForm.valid">Save Changes</button>
   <br><br>
 
   <pre>form value: <br>{{myForm.value | json}}</pre>

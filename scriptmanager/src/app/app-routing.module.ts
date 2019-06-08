@@ -14,7 +14,7 @@ const routes: Routes = [
     }
   },
   {
-    path: 'createScripts',
+    path: 'createScripts/:id',
     component: CreateScriptComponent,
     data: {
       title: 'Create Script',

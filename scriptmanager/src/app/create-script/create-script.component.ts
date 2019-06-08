@@ -1,5 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormArray, FormBuilder, Validators, FormControl } from '@angular/forms';
+import { JsonPipe } from '@angular/common';
+import { ActivatedRoute } from '@angular/router';
+import { CreateScriptService } from '../_service/create-script.service'
+
 @Component({
   selector: 'app-create-script',
   templateUrl: './create-script.component.html',
@@ -9,36 +13,64 @@ import { FormGroup, FormArray, FormBuilder, Validators, FormControl } from '@ang
 export class CreateScriptComponent implements OnInit {
   public myForm: FormGroup;
   public rows;
-  constructor(private _fb: FormBuilder) { 
-  }
-  ngOnInit() {
-  this.myForm = this._fb.group({
-  rows : this._fb.array([
-    this.initrow(),
-  ])
-  });
-  }
+  public sub;
+  public id;
+
+  constructor(private _fb: FormBuilder,private route: ActivatedRoute,public createscriptService:CreateScriptService) {}
   
+  ngOnInit() {
+  
+      this.myForm = this._fb.group({
+        rows : this._fb.array([
+          this.initrow(),
+        ])
+      });
+
+      this.sub = this.route.params.subscribe(params => {
+        this.id = +params['id']; // (+) converts string 'id' to a number
+      
+      });
+
+  }
+ 
   initrow() {
-  return this._fb.group({
-  visualCue: [''],
-  narration: ['']
-  });
+    return this._fb.group({
+        cue: [''],
+        narration: [''],
+        order:[]
+    });
   }
-
-  addLanguage() {
-  const val = <FormArray>this.myForm.controls.rows;
-  // controlw.push("this.initlanguage()");
-  console.log(this.myForm.controls.rows);
-  console.log(this.myForm.controls.languages);
-  val.push(this.initrow());
+//add a row
+  addRow() {
+  
+    const val = <FormArray>this.myForm.controls.rows;
+    this.myForm.value.rows.forEach(element => {
+      console.log(element);
+    });
+    val.push(this.initrow());
   }
-
-  removeLanguage(i: number) {
-  const control = <FormArray>this.myForm.controls.rows;
-  control.removeAt(i);
+//remove a row
+  removeRow(i: number) {
+    const control = <FormArray>this.myForm.controls.rows;
+    control.removeAt(i);
+  
   }
+//save all the rows to the database
   save(myForm) {
-  console.log(this.myForm.value);
+    //for giving value of order
+    for(let i=1;i<=myForm.value.rows.length;i++){
+      myForm.value.rows[i-1].order = i;
+    }
+    var json = {
+      "details":this.myForm.value.rows
+    }
+    var json_str = JSON.stringify(json);
+    var json_par = JSON.parse(json_str);
+    
+    var res = this.createscriptService.postScript(this.id,json_par).subscribe(
+      (res) => console.log(res['status']),
+      (err) => console.error('Failed to create script')
+    );
+
   }
   }
