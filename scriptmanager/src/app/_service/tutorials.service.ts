@@ -15,6 +15,7 @@ export class TutorialsService {
   public apiUrl = this.env['apiUrlScript']
   
   public getTutorials(fid){
+    console.log(this.apiUrl+fid);
     return this.httpClient.get(`${this.apiUrl}/${fid}`);
   }
 

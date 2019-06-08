@@ -20,13 +20,14 @@ export class HomeComponent implements OnInit {
   }
   
   fetchAllTutorials(fid){
-      this.fid = fid;
-      if(fid!='tutoriallist/')
-        this.fid = 'tutorials/?fid='+ fid;
+      this.fid = "foss/"+fid+"/tutorials/";
+      
+      // if(fid!='tutoriallist/')
+      //   this.fid = 'tutorials/?fid='+ fid;
      this.tutorialService.getTutorials(this.fid).subscribe(
       (res) => this.tutorials = res,
       (err) => {
-        console.log('Failed to fetch foss categories');
+        console.log('Failed to fetch tutorial categories');
         console.error(err);
       }
     );

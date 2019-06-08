@@ -37,7 +37,7 @@ narration: ['']
   const control = <FormArray>this.myForm.controls.rows;
   control.removeAt(i);
   }
-  save() {
+  save(myForm) {
   console.log(this.myForm.value);
   }
   }
