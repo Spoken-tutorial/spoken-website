@@ -12,7 +12,7 @@ export class FossService {
  public env =  environment;
  public apiUrl = this.env['apiUrlScript']
   
-  public getFoss(){
+  public getAllFossCategories(){
     return this.httpClient.get(`${this.apiUrl}/foss/`);
    
   }

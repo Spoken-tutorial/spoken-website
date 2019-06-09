@@ -12,31 +12,41 @@ export class HomeComponent implements OnInit {
   public foss;
   public tutorials;
   public fid;
-  constructor(public fossService: FossService,public tutorialService: TutorialsService){}
+  constructor(
+    public fossService: FossService,
+    public tutorialService: TutorialsService
+  ) { }
 
 
-  LanguageSelected(language){
+  LanguageSelected(language) {
     console.log(language);
   }
-  
-  fetchAllTutorials(fid){
-    
-      this.fid = "foss/"+fid+"/tutorials/";
-      
-      // if(fid!='tutoriallist/')
-      //   this.fid = 'tutorials/?fid='+ fid;
-     this.tutorialService.getTutorials(this.fid).subscribe(
+
+  fetchAllTutorials() {
+    // TODO: add appropriate error handler using libraries like
+    //       sweetalert2
+    this.tutorialService.getAllTutorials().subscribe(
       (res) => this.tutorials = res,
       (err) => {
         console.log('Failed to fetch tutorial categories');
         console.error(err);
       }
     );
-    
+
   }
 
-  fetchAllFoss(){
-     this.fossService.getFoss().subscribe(
+  public fetchFossTutorials(fid) {
+    this.tutorialService.getFossTutorials(fid).subscribe(
+      (res) => this.tutorials = res,
+      (err) => {
+        console.log('Failed to fetch tutorial categories');
+        console.error(err);
+      }
+    );
+  }
+
+  fetchAllFoss() {
+    this.fossService.getAllFossCategories().subscribe(
       (res) => this.foss = res,
       (err) => {
         console.log('Failed to fetch foss categories');
@@ -45,10 +55,10 @@ export class HomeComponent implements OnInit {
     );
   }
 
-  ngOnInit(){
+  ngOnInit() {
     this.fetchAllFoss();
-    this.fetchAllTutorials('tutoriallist/');
-  
+    this.fetchAllTutorials();
+
   };
 
 }

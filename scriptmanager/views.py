@@ -28,6 +28,9 @@ class TutorialDetailList(generics.ListAPIView):
   serializer_class=TutorialDetailSerializer
     
   def get_queryset(self):
+    if (self.kwargs.get('fid') == 'all'):
+      return TutorialDetail.objects.all().order_by('order')
+      
     return TutorialDetail.objects.filter(foss=self.kwargs.get('fid')).order_by('order')
 
 

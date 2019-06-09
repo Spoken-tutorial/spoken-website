@@ -14,9 +14,21 @@ export class TutorialsService {
   public env =  environment;
   public apiUrl = this.env['apiUrlScript']
   
-  public getTutorials(fid){
-    console.log(this.apiUrl+fid);
-    return this.httpClient.get(`${this.apiUrl}/${fid}`);
+  /*
+  * Fetches the tutorials for all foss categories
+  * user is part of
+  */
+  public getAllTutorials() {
+    return this.getFossTutorials('all');
+  }
+  
+  /*
+  * Fetches tutorails for foss category of 
+  * provdied fid
+  */
+  public getFossTutorials(fid){
+    const _url = `${this.apiUrl}/foss/${fid}/tutorials/`
+    return this.httpClient.get(_url);
   }
 
   constructor(private httpClient: HttpClient) {} 
