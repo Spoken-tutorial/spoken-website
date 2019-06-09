@@ -10,10 +10,10 @@ import { TutorialsComponent } from './home/tutorials/tutorials.component';
 import { JwtModule } from '@auth0/angular-jwt';
 import { CreateScriptComponent } from './create-script/create-script.component';
 import { EditScriptComponent } from './edit-script/edit-script.component';
+import { NgHttpLoaderModule } from 'ng-http-loader';
 
 export function tokenGetter() {
   const token = localStorage.getItem('token');
-  console.log(token);
   return token;
 }
 
@@ -38,7 +38,8 @@ export function tokenGetter() {
     }),
     RouterModule,
     FormsModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    NgHttpLoaderModule.forRoot()
    
   ],
   providers: [],
