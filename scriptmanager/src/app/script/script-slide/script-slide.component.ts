@@ -9,12 +9,14 @@ export class ScriptSlideComponent implements OnInit {
   @Input() slide: any;
   @Input() index: number;
   @Output() removeSlideEmitter = new EventEmitter<number>();
-
-  constructor() { } 
+  @Input() view:boolean=false;
+  constructor() { }
 
   public removeSlide() {
     this.removeSlideEmitter.emit(this.index);
   }
+  cueKey(event) { this.slide.cue = event.target.value;}
+  narrationKey(event) { this.slide.narration = event.target.value;}
 
   ngOnInit() {
   }

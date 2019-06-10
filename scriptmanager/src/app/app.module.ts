@@ -13,6 +13,7 @@ import { ScriptComponent } from './script/script.component';
 import { ScriptSlideComponent } from './script/script-slide/script-slide.component';
 import { ScriptCreateComponent } from './script/script-create/script-create.component';
 import { ScriptEditComponent } from './script/script-edit/script-edit.component';
+import { ScriptViewComponent } from './script/script-view/script-view.component';
 
 export function tokenGetter() {
   const token = localStorage.getItem('token');
@@ -27,7 +28,8 @@ export function tokenGetter() {
     ScriptComponent,
     ScriptSlideComponent,
     ScriptCreateComponent,
-    ScriptEditComponent
+    ScriptEditComponent,
+    ScriptViewComponent
   ],
   imports: [
     BrowserModule,

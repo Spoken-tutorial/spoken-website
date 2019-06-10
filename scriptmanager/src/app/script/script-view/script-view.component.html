@@ -1,0 +1,21 @@
+<div class="container has-margin-top-50">
+  <div class="section">
+    <div class="columns is-centered is-mobile">
+      <div class="column">
+        <div class="timeline">
+          <!-- <header class="timeline-header">
+              <span class="tag is-medium is-primary">Slides</span>
+            </header> -->
+          <ng-container *ngFor="let slide of slides; let i = index">
+            <app-script-slide
+              [slide]="slide"
+              [index]="i"
+              (removeSlideEmitter)="onRemoveSlide($event)"
+              [view]="true"
+            ></app-script-slide>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
