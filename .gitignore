@@ -27,7 +27,7 @@ youtube/secrets/*
 
 # Media Folder
 media/*
-!media/videos/
+#!media/videos/
 !media/training/
 !media/cms/
 !media/cdimage/
