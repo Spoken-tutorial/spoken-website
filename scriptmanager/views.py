@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from creation.models import ContributorRole,TutorialDetail
+from creation.models import ContributorRole,TutorialDetail,User
 from .models import Scripts,ScriptDetails
 from .serializers import ContributorRoleSerializer,TutorialDetailSerializer,ScriptsDetailSerializer,ScriptsSerializer
 from rest_framework.views import APIView
@@ -36,22 +36,24 @@ class TutorialDetailList(generics.ListAPIView):
 
 
 
-class ScriptCreateAPIView(generics.CreateAPIView):
+class ScriptCreateAPIView(generics.ListCreateAPIView):
+  serializer_class=ScriptsDetailSerializer
+
+  def get_queryset(self):
+    user=User.objects.filter(username=self.request.user)
+    script_pk=Scripts.objects.filter(tutorial_id=int(self.kwargs['tid']),user=user[0].id)
+    return ScriptDetails.objects.filter(script=script_pk)
+   
+  def post(self, request,tid):
     serializer_class=ScriptsSerializer
-    
-
-    def post(self, request,tid):
-      data=request.data.pop('details')
-      try:
-        script= Scripts.objects.create(tutorial_id=int(self.kwargs['tid']),user=self.request.user)
-        for x in data:
-          script_details = ScriptDetails.objects.create(script=script,**x)
-        return Response({'status': True})
-      except:
-        return Response({'status': False})
+    data=request.data.pop('details')
+    try:
+      script= Scripts.objects.create(tutorial_id=int(self.kwargs['tid']),user=self.request.user)
+      for x in data:
+        script_details = ScriptDetails.objects.create(script=script,**x)
+      return Response({'status': True})
+    except:
+      return Response({'status': False})
 
 
-
-
-    
-
+   

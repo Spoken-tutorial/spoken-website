@@ -31,12 +31,11 @@ class TutorialDetailSerializer(serializers.ModelSerializer):
       fields=('id','foss','tutorial','level','order','user','created','updated')
 
 
-
 class ScriptsDetailSerializer(serializers.ModelSerializer):
 
   class Meta:
     model=ScriptDetails
-    fields=('cue','narration','order')
+    fields=('id','cue','narration','order')
 
 class ScriptsSerializer(serializers.ModelSerializer):
   details=ScriptsDetailSerializer(many=True)
