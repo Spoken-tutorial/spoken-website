@@ -96,7 +96,7 @@ INSTALLED_APPS = [
 
 
 ROOT_URLCONF = 'spoken.urls'
-#   SAM = "/home/spoken2/django_upgrade/sammy_env/lib/python3.5/site-packages/django/forms/" + templates
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
