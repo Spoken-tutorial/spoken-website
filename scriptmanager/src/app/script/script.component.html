@@ -13,17 +13,17 @@
               (removeSlideEmitter)="onRemoveSlide($event)"
             ></app-script-slide>
           </ng-container>
-          <div class="timeline-item is-pointer" (click)="addSlide()">
-            <div class="timeline-marker is-info is-icon">
+          <div class="timeline-item is-pointer">
+            <div class="timeline-marker is-info is-icon" (click)="addSlide()">
               <i class="fa fa-plus"></i>
             </div>
             <div class="timeline-content">
               <div class="columns">
                 <div class="column">
-                  <a class="button heading is-outlined">Add new Slide</a>
+                  <a class="button heading is-outlined" (click)="addSlide()">Add new Slide</a>
                 </div>
                 <div class="column">
-                  <a class="button heading is-outlined is-primary">Save Script</a>
+                  <a class="button heading is-outlined is-primary" (click)="saveScript()">Save Script</a>
                 </div>
               </div>
             </div>
