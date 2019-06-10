@@ -1,11 +1,10 @@
 # Standard Library
-import json
 import urllib.request, urllib.parse, urllib.error
 
 # Third Party Stuff
 from django.conf import settings
 from django.contrib import messages
-
+import requests, json
 ''' reCAPTCHA validation '''
 def recaptcha_valdation(request):
     recaptcha_response = request.POST.get('g-recaptcha-response')
@@ -14,11 +13,18 @@ def recaptcha_valdation(request):
         'secret': settings.GOOGLE_RECAPTCHA_SECRET_KEY,
         'response': recaptcha_response
     }
-    data = urllib.parse.urlencode(values)
-    req = urllib.request.Request(url, data)
-    response = urllib.request.urlopen(req)
-    recaptcha_result = json.load(response)
-    if not recaptcha_result['success']:
+
+    content = requests.post(
+        url,
+        data={
+            'secret': settings.GOOGLE_RECAPTCHA_SECRET_KEY,
+            'response': recaptcha_response,
+        }
+    ).content
+    # Will throw ValueError if we can't parse Google's response
+    content = json.loads( content )
+
+    if not 'success' in content or not content['success']:
         messages.error(request, 'Invalid reCAPTCHA. Please try again.')
     return recaptcha_result['success']
 
