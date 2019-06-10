@@ -1,0 +1,35 @@
+<div class="container has-margin-top-50">
+  <div class="section">
+    <div class="columns is-centered is-mobile">
+      <div class="column">
+        <div class="timeline">
+          <!-- <header class="timeline-header">
+            <span class="tag is-medium is-primary">Slides</span>
+          </header> -->
+          <ng-container *ngFor="let slide of slides; let i = index">
+            <app-script-slide 
+              [slide]="slide" 
+              [index]="i"
+              (removeSlideEmitter)="onRemoveSlide($event)"
+            ></app-script-slide>
+          </ng-container>
+          <div class="timeline-item is-pointer" (click)="addSlide()">
+            <div class="timeline-marker is-info is-icon">
+              <i class="fa fa-plus"></i>
+            </div>
+            <div class="timeline-content">
+              <div class="columns">
+                <div class="column">
+                  <a class="button heading is-outlined">Add new Slide</a>
+                </div>
+                <div class="column">
+                  <a class="button heading is-outlined is-primary">Save Script</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

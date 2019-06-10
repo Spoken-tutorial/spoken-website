@@ -3,6 +3,9 @@ import { Routes, RouterModule } from '@angular/router';
 import { HomeComponent } from './home/home.component';
 import { CreateScriptComponent } from './create-script/create-script.component';
 import { EditScriptComponent } from './edit-script/edit-script.component';
+import { ScriptComponent } from './script/script.component';
+import { ScriptCreateComponent } from './script/script-create/script-create.component';
+import { ScriptEditComponent } from './script/script-edit/script-edit.component';
 
 const routes: Routes = [
   {
@@ -14,8 +17,8 @@ const routes: Routes = [
     }
   },
   {
-    path: 'createScripts/:id',
-    component: CreateScriptComponent,
+    path: 'create/:id',
+    component: ScriptCreateComponent,
     data: {
       title: 'Create Script',
       animation: 'HomePage'
@@ -23,8 +26,8 @@ const routes: Routes = [
   },
 
   {
-    path: 'editScripts',
-    component: EditScriptComponent,
+    path: 'edit/:id',
+    component: ScriptEditComponent,
     data: {
       title: 'Edit Script',
       animation: 'HomePage'

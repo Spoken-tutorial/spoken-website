@@ -11,6 +11,10 @@ import { JwtModule } from '@auth0/angular-jwt';
 import { CreateScriptComponent } from './create-script/create-script.component';
 import { EditScriptComponent } from './edit-script/edit-script.component';
 import { NgHttpLoaderModule } from 'ng-http-loader';
+import { ScriptComponent } from './script/script.component';
+import { ScriptSlideComponent } from './script/script-slide/script-slide.component';
+import { ScriptCreateComponent } from './script/script-create/script-create.component';
+import { ScriptEditComponent } from './script/script-edit/script-edit.component';
 
 export function tokenGetter() {
   const token = localStorage.getItem('token');
@@ -23,7 +27,11 @@ export function tokenGetter() {
     HomeComponent,
     TutorialsComponent,
     CreateScriptComponent,
-    EditScriptComponent
+    EditScriptComponent,
+    ScriptComponent,
+    ScriptSlideComponent,
+    ScriptCreateComponent,
+    ScriptEditComponent
   ],
   imports: [
     BrowserModule,

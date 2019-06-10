@@ -16,7 +16,11 @@ export class CreateScriptComponent implements OnInit {
   public sub;
   public id;
 
-  constructor(private _fb: FormBuilder,private route: ActivatedRoute,public createscriptService:CreateScriptService) {}
+  constructor(
+    private _fb: FormBuilder,
+    private route: ActivatedRoute,
+    public createscriptService:CreateScriptService
+  ) {}
   
   ngOnInit() {
   
@@ -66,6 +70,7 @@ export class CreateScriptComponent implements OnInit {
     }
     var json_str = JSON.stringify(json);
     var json_par = JSON.parse(json_str);
+    console.log(json_par);
     
     var res = this.createscriptService.postScript(this.id,json_par).subscribe(
       (res) => console.log(res['status']),
