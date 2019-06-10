@@ -1,4 +1,8 @@
+
 # Third Party Stuff
+from builtins import str
+from builtins import range
+from builtins import object
 from django import forms
 from django.contrib.auth.models import User
 from django.db.models import Q
@@ -10,7 +14,7 @@ from creation.models import *
 class FossAvailableForTestForm(forms.ModelForm):
     foss = forms.ModelChoiceField(queryset=FossCategory.objects.filter(status=True).order_by('foss'))
 
-    class Meta:
+    class Meta(object):
         model = FossAvailableForTest
         exclude = ['created']
 
@@ -550,20 +554,20 @@ class UploadKeywordsForm(forms.Form):
 
 class ContributorRoleForm(forms.ModelForm):
     user = forms.ModelChoiceField(
-        cache_choices = True,
+         
         queryset = User.objects.filter(Q(groups__name = 'Contributor')|Q(groups__name = 'External-Contributor')).order_by('username'),
         help_text = "",
         error_messages = {'required': 'User field required.'}
     )
     foss_category = forms.ModelChoiceField(
-        cache_choices = True,
+         
         queryset = FossCategory.objects.filter(status = 1).order_by('foss'),
         empty_label = "----------",
         help_text = "",
         error_messages = {'required': 'FOSS category field required.'}
     )
     language = forms.ModelChoiceField(
-        cache_choices =True,
+         
         queryset = Language.objects.order_by('name'),
         empty_label = "----------",
         help_text = "",
@@ -571,52 +575,52 @@ class ContributorRoleForm(forms.ModelForm):
     )
     status = forms.BooleanField(required = False)
 
-    class Meta:
+    class Meta(object):
         model = ContributorRole
         exclude = ['created', 'updated']
 
 
 class DomainReviewerRoleForm(forms.ModelForm):
     user = forms.ModelChoiceField(
-        cache_choices = True,
+         
         queryset = User.objects.filter(Q(groups__name = 'Domain-Reviewer')).order_by('username'),
         help_text = "",
         error_messages = {'required': 'User field required.'}
     )
     foss_category = forms.ModelChoiceField(
-        cache_choices = True,
+         
         queryset = FossCategory.objects.filter(status = 1).order_by('foss'),
         empty_label = "----------",
         help_text = "",
         error_messages = {'required': 'FOSS category field required.'}
     )
     language = forms.ModelChoiceField(
-        cache_choices =True,
+         
         queryset = Language.objects.order_by('name'),
         empty_label = "----------",
         help_text = "", error_messages = {'required': 'Language field required.'}
     )
     status = forms.BooleanField(required = False)
 
-    class Meta:
+    class Meta(object):
         model = DomainReviewerRole
         exclude = ['created', 'updated']
 
 class QualityReviewerRoleForm(forms.ModelForm):
     user = forms.ModelChoiceField(
-        cache_choices = True,
+         
         queryset = User.objects.filter(Q(groups__name = 'Quality-Reviewer')).order_by('username'),
         help_text = "", error_messages = {'required': 'User field required.'}
     )
     foss_category = forms.ModelChoiceField(
-        cache_choices = True,
+         
         queryset = FossCategory.objects.filter(status = 1).order_by('foss'),
         empty_label = "----------",
         help_text = "",
         error_messages = {'required': 'FOSS category field required.'}
     )
     language = forms.ModelChoiceField(
-        cache_choices =True,
+         
         queryset = Language.objects.order_by('name'),
         empty_label = "----------",
         help_text = "",
@@ -624,7 +628,7 @@ class QualityReviewerRoleForm(forms.ModelForm):
     )
     status = forms.BooleanField(required = False)
 
-    class Meta:
+    class Meta(object):
         model = QualityReviewerRole
         exclude = ['created', 'updated']
 
@@ -695,7 +699,7 @@ class TutorialMissingComponentForm(forms.Form):
 
     def clean(self):
         super(TutorialMissingComponentForm, self).clean()
-        print self.user
+        print((self.user))
         if 'report_type' in self.cleaned_data:
             if self.cleaned_data['report_type'] == '1':
                 if 'remarks' in self.cleaned_data:
@@ -704,9 +708,9 @@ class TutorialMissingComponentForm(forms.Form):
                 else:
                     self._errors['remarks'] = '<ul class="errorlist"><li>Please fill Remarks field</li></ul>'
         if 'inform_me' in self.cleaned_data:
-            print self.cleaned_data
+            print((self.cleaned_data))
             if self.cleaned_data['inform_me'] == '1':
-                print self.cleaned_data['inform_me']
+                print((self.cleaned_data['inform_me']))
                 if not self.user.is_authenticated():
                     if 'email' in self.cleaned_data:
                         if not self.cleaned_data['email']:
@@ -723,7 +727,7 @@ class TutorialMissingComponentReplyForm(forms.Form):
 
 class SuggestTopicForm(forms.ModelForm):
     difficulty_level = forms.ModelChoiceField(
-        cache_choices = True,
+         
         widget = forms.Select(
             attrs = {'class' : 'ac-state'}),
             queryset = Level.objects.all().order_by('id'),
@@ -737,7 +741,7 @@ class SuggestTopicForm(forms.ModelForm):
         error_messages = {'required': 'Please select Yes or No for this option'}
     )
 
-    class Meta:
+    class Meta(object):
         model = SuggestTopic
         exclude = ['user', 'created']
 
@@ -752,7 +756,7 @@ class SuggestExampleForm(forms.ModelForm):
         required = True,
         error_messages = {'required': 'Please select Yes or No for this option'}
     )
-    class Meta:
+    class Meta(object):
         model = SuggestExample
         exclude = ['user', 'created']
 
@@ -780,13 +784,13 @@ class CollaborateForm(forms.ModelForm):
         required = True,
         error_messages = {'required': 'Please select Yes or No for this option'}
     )
-    class Meta:
+    class Meta(object):
         model = Collaborate
         exclude = ['user', 'created']
 
 class AvailableFossForm(forms.ModelForm):
     foss = forms.ModelChoiceField(
-        cache_choices = True,
+         
         queryset = FossCategory.objects.filter(status = 1).order_by('foss'),
         empty_label = "----------",
         help_text = "",

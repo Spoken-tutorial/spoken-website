@@ -27,7 +27,7 @@ class DatabaseTest(unittest.TestCase):
         self.cursor = db.cursor()
         # TODO: this needs to be re-evaluated for Python 3
         self.BLOBText = ''.join([chr(i) for i in range(256)] * 100);
-        self.BLOBUText = u''.join([unichr(i) for i in range(16384)])
+        self.BLOBUText = ''.join([chr(i) for i in range(16384)])
         self.BLOBBinary = self.db_module.Binary(''.join([chr(i) for i in range(256)] * 16))
 
     leak_test = True
@@ -37,11 +37,11 @@ class DatabaseTest(unittest.TestCase):
             import gc
             del self.cursor
             orphans = gc.collect()
-            self.failIf(orphans, "%d orphaned objects found after deleting cursor" % orphans)
+            self.assertFalse(orphans, "%d orphaned objects found after deleting cursor" % orphans)
             
             del self.connection
             orphans = gc.collect()
-            self.failIf(orphans, "%d orphaned objects found after deleting connection" % orphans)
+            self.assertFalse(orphans, "%d orphaned objects found after deleting connection" % orphans)
             
     def table_exists(self, name):
         try:
@@ -91,11 +91,11 @@ class DatabaseTest(unittest.TestCase):
         # verify
         self.cursor.execute('select * from %s' % self.table)
         l = self.cursor.fetchall()
-        self.assertEquals(len(l), self.rows)
+        self.assertEqual(len(l), self.rows)
         try:
             for i in range(self.rows):
                 for j in range(len(columndefs)):
-                    self.assertEquals(l[i][j], generator(i,j))
+                    self.assertEqual(l[i][j], generator(i,j))
         finally:
             if not self.debug:
                 self.cursor.execute('drop table %s' % (self.table))
@@ -116,10 +116,10 @@ class DatabaseTest(unittest.TestCase):
         self.connection.commit()
         self.cursor.execute('select * from %s' % self.table)
         l = self.cursor.fetchall()
-        self.assertEquals(len(l), self.rows)
+        self.assertEqual(len(l), self.rows)
         for i in range(self.rows):
             for j in range(len(columndefs)):
-                self.assertEquals(l[i][j], generator(i,j))
+                self.assertEqual(l[i][j], generator(i,j))
         delete_statement = 'delete from %s where col1=%%s' % self.table
         self.cursor.execute(delete_statement, (0,))
         self.cursor.execute('select col1 from %s where col1=%s' % \

@@ -127,4 +127,4 @@ def timing(name=None):
     t = now()
     yield
     t = now() - t
-    print("%s: %0.06f s" % (name or '', t))
+    print(("%s: %0.06f s" % (name or '', t)))

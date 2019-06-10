@@ -141,7 +141,7 @@ class MultiFilter(Filter):
         # Only selects on the first token
         t = next(tokens)
         filter = self.filters.get(t.mode, self.default_filter)
-        return filter(chain([t], tokens))
+        return list(filter(chain([t], tokens)))
 
 
 class TeeFilter(Filter):
@@ -184,7 +184,7 @@ class TeeFilter(Filter):
         count = len(self.filters)
         # Tee the token iterator and wrap each teed iterator with the
         # corresponding filter
-        gens = [filter(t.copy() for t in gen) for filter, gen
+        gens = [list(filter(t.copy() for t in gen)) for filter, gen
                 in zip(self.filters, tee(tokens, count))]
         # Keep a count of the number of running iterators
         running = count

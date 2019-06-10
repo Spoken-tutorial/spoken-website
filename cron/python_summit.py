@@ -1,3 +1,5 @@
+
+from builtins import str
 import time
 import os, sys
 from django.db.models import Q
@@ -61,13 +63,13 @@ IIT Bombay'''.format(organiser.user.username)
             time.sleep(10)
         #print to," => sent (", str(count),"/",str(tot_count),")"
         success_log_file_head.write(str(organiser.id)+','+str(1)+'\n')
-    except Exception, e:
-        print e
+    except Exception as e:
+        print(e)
         #print to," => not sent (",count,"/",tot_count,")"
         success_log_file_head.write(str(organiser.id)+','+str(0)+'\n')
     break
-print "--------------------------------"
-print "Total sent mails:", sent
-print "Total not sent mails:", notsent
-print "--------------------------------"
+print("--------------------------------")
+print(("Total sent mails:", sent))
+print(("Total not sent mails:", notsent))
+print("--------------------------------")
 

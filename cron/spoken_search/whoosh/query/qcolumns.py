@@ -89,7 +89,7 @@ class ColumnMatcher(ConstantScoreMatcher):
     def is_active(self):
         return self._i < len(self.creader)
 
-    def next(self):
+    def __next__(self):
         if not self.is_active():
             raise ReadTooFar
         self._i += 1

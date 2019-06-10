@@ -302,7 +302,7 @@ class OverlappingCategorizer(Categorizer):
             field = segment_searcher.schema[fieldname]
             from_bytes = field.from_bytes
 
-            self._lists = [[] for _ in xrange(dc)]
+            self._lists = [[] for _ in range(dc)]
             for btext in field.sortable_terms(reader, fieldname):
                 text = from_bytes(btext)
                 postings = reader.postings(fieldname, btext)
@@ -428,7 +428,7 @@ class QueryFacet(FacetType):
 
         def set_searcher(self, segment_searcher, offset):
             self.docsets = {}
-            for qname, q in self.querydict.items():
+            for qname, q in list(self.querydict.items()):
                 docset = set(q.docs(segment_searcher))
                 if docset:
                     self.docsets[qname] = docset
@@ -854,7 +854,7 @@ class MultiFacet(FacetType):
         def key_to_name(self, key):
             return tuple(catter.key_to_name(keypart)
                          for catter, keypart
-                         in izip(self.catters, key))
+                         in zip(self.catters, key))
 
 
 class Facets(object):
@@ -908,7 +908,7 @@ class Facets(object):
         this object.
         """
 
-        return self.facets.items()
+        return list(self.facets.items())
 
     def add_field(self, fieldname, **kwargs):
         """Adds a :class:`FieldFacet` for the given field name (the field name
@@ -945,7 +945,7 @@ class Facets(object):
 
         if not isinstance(facets, (dict, Facets)):
             raise Exception("%r is not a Facets object or dict" % facets)
-        for name, facet in facets.items():
+        for name, facet in list(facets.items()):
             if replace or name not in self.facets:
                 self.facets[name] = facet
         return self

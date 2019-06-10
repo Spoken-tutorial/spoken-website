@@ -5,7 +5,7 @@
 {% block heading %}
   <i class="home-page-title-i">Select participant List</i>
   <a class="btn btn-primary help" data-toggle="modal" data-target="#myModal"><i class="fa fa-2 fa-question"></i>  Instructions for Selecting Participant List</a>
-  <a class="btn btn-success pull-right" href="{% url 'events:training_planner' %}">Back To Training Planner Summary</a>
+  <a class="btn btn-success pull-right" href="{% url 'eventsv2:training_planner' %}">Back To Training Planner Summary</a>
 {% endblock %}
 {% block search %}{% endblock %}
 
@@ -88,27 +88,22 @@
             {% if training.department.id == 24 %}
             <td>
               {% if training.status == 0 %}
-                | <a href="{% url 'events:training_attendance' training.id %}">Participant List</a> |
+                | <a href="{% url 'eventsv2:training_attendance' training.id %}">Participant List</a> |
                 {% if training.can_edit %}
-                  <a href="{% url 'events:edit_training_request' training.id %}">Edit</a> |
+                  <a href="{% url 'eventsv2:edit_training_request' training.id %}">Edit</a> |
                 {% endif %}
               {% endif %}
 
               {% if training.status == 1 and training.is_learners_allowed and training.get_partipants_from_attendance %}
-                | <a href="{% url 'events:training_certificate' training.id %}">Download Participation Certificate</a> | <a href="{% url 'events:re-open-training' training.id %}"> Re-Open</a> |
+                | <a href="{% url 'eventsv2:training_certificate' training.id %}">Download Participation Certificate</a> | <a href="{% url 'eventsv2:re-open-training' training.id %}"> Re-Open</a> |
               {% endif %}
-              <!-- {% if training.status == 1 and training.is_training_before_july2017 and not training.is_learners_allowed and training.have_test %}
-                  | Training Completed. Proceed for Test | <a href="{% url 'events:re-open-training' training.id %}"> Re-Open</a> |
-              {% endif %} -->
-              <!-- {% if training.status == 1 and training.have_test %}
-                  | Training Completed. Proceed for Test | <a href="{% url 'events:re-open-training' training.id %}"> Re-Open</a> |
-              {% endif %} -->
+
               {% if training.status == 1 and not training.is_learners_allowed and not training.have_test%}
-                  | Training Completed. No Certificates | <a href="{% url 'events:re-open-training' training.id %}"> Re-Open</a> |
+                  | Training Completed. No Certificates | <a href="{% url 'eventsv2:re-open-training' training.id %}"> Re-Open</a> |
                 {% endif %}
 
 	            {% if training.status == 2 and training.is_learners_allowed and training.is_training_before_july2017 %}
-                |Request Sent for Mark As Complete| <a href="{% url 'events:re-open-training' training.id %}"> Re-Open</a> |
+                |Request Sent for Mark As Complete| <a href="{% url 'eventsv2:re-open-training' training.id %}"> Re-Open</a> |
               {% endif %}
 
 
@@ -116,27 +111,19 @@
             {% else %}<!-- not school-->
             <td>
               {% if training.status == 0 %}
-                | <a href="{% url 'events:training_attendance' training.id %}">Participant List</a> |
+                | <a href="{% url 'eventsv2:training_attendance' training.id %}">Participant List</a> |
                 {% if training.can_edit %}
-                  <a href="{% url 'events:edit_training_request' training.id %}">Edit</a> |
+                  <a href="{% url 'eventsv2:edit_training_request' training.id %}">Edit</a> |
                 {% endif %}
               {% endif %}
 
               {% if training.status == 1 %}
                 {% if training.is_learners_allowed and training.get_partipants_from_attendance %}
-                  | <a href="{% url 'events:training_certificate' training.id %}">Download Participation Certificate</a> | <a href="{% url 'events:re-open-training' training.id %}"> Re-Open</a> |
+                  | <a href="{% url 'eventsv2:training_certificate' training.id %}">Download Participation Certificate</a> | <a href="{% url 'eventsv2:re-open-training' training.id %}"> Re-Open</a> |
                 {% endif %}
 
-                <!-- {% if not training.is_learners_allowed and training.have_test %}
-                  | Training Completed. Proceed for Test | <a href="{% url 'events:re-open-training' training.id %}"> Re-Open</a> |
-                {% endif %} -->
-
-                <!-- {% if training.have_test %}
-                  | Training Completed. Proceed for Test | <a href="{% url 'events:re-open-training' training.id %}"> Re-Open</a> |
-                {% endif %} -->
-
                 {% if not training.is_learners_allowed and not training.have_test%}
-                  | Training Completed. No Certificates | <a href="{% url 'events:re-open-training' training.id %}"> Re-Open</a> |
+                  | Training Completed. No Certificates | <a href="{% url 'eventsv2:re-open-training' training.id %}"> Re-Open</a> |
                 {% endif %}
               {% endif %}
             </td>
@@ -180,10 +167,10 @@
           <td>{{ training.attendance_summery }}</td>
           <td>
           {% if training.can_mark_attendance %}
-          | <a href="{% url 'events:training_attendance' training.id %}">Select Participant List</a>
+          | <a href="{% url 'eventsv2:training_attendance' training.id %}">Select Participant List</a>
           {% endif %}
           {% if training.can_edit %}
-          | <a href="{% url 'events:edit_training_request' training.id %}">Edit</a> |
+          | <a href="{% url 'eventsv2:edit_training_request' training.id %}">Edit</a> |
           {% endif %}
           </td>
         </tr>
@@ -227,7 +214,7 @@
             <td>{{ training.attendance_summery }}</td>
             <td>
             {% if training %}
-              | <a href="{% url 'events:previous_training_attendance' training.id %}">Participant List</a> |
+              | <a href="{% url 'eventsv2:previous_training_attendance' training.id %}">Participant List</a> |
             {% endif %}
           </td>
         </tr>

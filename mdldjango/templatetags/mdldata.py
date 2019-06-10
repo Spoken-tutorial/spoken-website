@@ -41,7 +41,7 @@ def get_participant_mark(rid, mdluser_id):
         
     try:
         mdlgrade = MdlQuizGrades.objects.get(quiz = ta.mdlquiz_id, userid = mdluser_id)
-    except Exception, e:
+    except Exception as e:
         return False
         
     return round(mdlgrade.grade, 1)
@@ -53,7 +53,7 @@ def get_moodle_courseid(rid, mdluser_id):
         wa = TestAttendance.objects.get(test_id = rid, mdluser_id = mdluser_id)
         #print wa.mdlcourse_id
         return wa.mdlcourse_id
-    except Exception, e:
+    except Exception as e:
         #print e
         return False
 

@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 # Third Party Stuff
-import oauth2client.django_orm
+#import oauth2client.django_orm
 from django.conf import settings
 from django.db import migrations, models
 
@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
             name='CredentialsModel',
             fields=[
                 ('id', models.OneToOneField(primary_key=True, serialize=False, to=settings.AUTH_USER_MODEL)),
-                ('credential', oauth2client.django_orm.CredentialsField(null=True)),
+                ('credential', models.TextField(null=True)),
             ],
         ),
     ]

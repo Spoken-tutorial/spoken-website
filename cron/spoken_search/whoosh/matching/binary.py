@@ -191,7 +191,7 @@ class UnionMatcher(AdditiveBiMatcher):
     #def all_ids(self):
     #    return iter(sorted(set(self.a.all_ids()) | set(self.b.all_ids())))
 
-    def next(self):
+    def __next__(self):
         self._id = None
 
         a = self.a
@@ -203,9 +203,9 @@ class UnionMatcher(AdditiveBiMatcher):
         if not (a_active or b_active):
             raise mcore.ReadTooFar
         elif not a_active:
-            return b.next()
+            return next(b)
         elif not b_active:
-            return a.next()
+            return next(a)
 
         a_id = a.id()
         b_id = b.id()
@@ -213,9 +213,9 @@ class UnionMatcher(AdditiveBiMatcher):
 
         # After all that, here's the actual implementation
         if a_id <= b_id:
-            ar = a.next()
+            ar = next(a)
         if b_id <= a_id:
-            br = b.next()
+            br = next(b)
         return ar or br
 
     def spans(self):
@@ -526,13 +526,13 @@ class IntersectionMatcher(AdditiveBiMatcher):
                 if not sk and a.is_active():
                     # The matcher couldn't skip ahead for some reason, so just
                     # advance and try again
-                    a.next()
+                    next(a)
             else:
                 # And vice-versa
                 sk = b.skip_to_quality(minquality - aq)
                 skipped += sk
                 if not sk and b.is_active():
-                    b.next()
+                    next(b)
 
             if not a.is_active() or not b.is_active():
                 # One of the matchers is exhausted
@@ -547,13 +547,13 @@ class IntersectionMatcher(AdditiveBiMatcher):
             bq = b.block_quality()
         return skipped
 
-    def next(self):
+    def __next__(self):
         if not self.is_active():
             raise mcore.ReadTooFar
 
         # We must assume that the ids are equal whenever next() is called (they
         # should have been made equal by _find_next), so advance them both
-        ar = self.a.next()
+        ar = next(self.a)
         if self.is_active():
             nr = self._find_next()
             return ar or nr
@@ -597,7 +597,7 @@ class AndNotMatcher(BiMatcher):
             neg.skip_to(pos_id)
 
         while pos.is_active() and neg.is_active() and pos_id == neg.id():
-            nr = pos.next()
+            nr = next(pos)
             if not pos.is_active():
                 break
 
@@ -647,10 +647,10 @@ class AndNotMatcher(BiMatcher):
     def id(self):
         return self.a.id()
 
-    def next(self):
+    def __next__(self):
         if not self.a.is_active():
             raise mcore.ReadTooFar
-        ar = self.a.next()
+        ar = next(self.a)
         nr = False
         if self.a.is_active() and self.b.is_active():
             nr = self._find_next()
@@ -709,11 +709,11 @@ class AndMaybeMatcher(AdditiveBiMatcher):
     def id(self):
         return self.a.id()
 
-    def next(self):
+    def __next__(self):
         if not self.a.is_active():
             raise mcore.ReadTooFar
 
-        ar = self.a.next()
+        ar = next(self.a)
         br = False
         if self.a.is_active() and self.b.is_active():
             br = self.b.skip_to(self.a.id())

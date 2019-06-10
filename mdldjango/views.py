@@ -1,4 +1,7 @@
+
 # Standard Library
+from builtins import str
+from builtins import range
 import datetime as dt
 import os
 import time
@@ -7,7 +10,7 @@ import time
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.core.context_processors import csrf
+ 
 from django.core.exceptions import PermissionDenied
 from django.core.mail import EmailMultiAlternatives
 from django.db.models import Q
@@ -23,16 +26,16 @@ from events.views import *
 from .forms import *
 from .get_or_create_participant import check_csvfile, encript_password
 from .models import MdlUser
-
+from django.template.context_processors import csrf
 
 def authenticate(email=None, password=None):
     try:
         password = encript_password(password)
         user = MdlUser.objects.filter(email=email, password=password).last()
-        print user
+        print(user)
         if user:
             return user
-    except Exception, e:
+    except Exception as e:
         return None
 
 def mdl_logout(request):
@@ -47,9 +50,9 @@ def mdl_login(request):
         email = request.POST["username"]
         password = request.POST["password"]
         if not email or not password:
-            messages.error(request,'Please enter valide Username and Password!')
+            messages.error(request,'Please enter valid Username and Password!')
             #return HttpResponseRedirect('/participant/login')
-        user = authenticate(email = email, password = password)
+        user = authenticate(email=email, password=password)
         if user:
             request.session['mdluserid'] = user.id
             request.session['mdluseremail'] = user.email
@@ -79,8 +82,7 @@ def index(request):
         mdluser = MdlUser.objects.get(id=mdluserid)
     except:
         return HttpResponseRedirect('/participant/login')
-
-    if str(mdluser.institution.encode("utf8")).isdigit():
+    if str(mdluser.institution).isdigit():
         academic = None
         try:
             academic = AcademicCenter.objects.get(id = mdluser.institution)
@@ -156,7 +158,7 @@ def offline_details(request, wid, category):
             Training.objects.get(pk=wid, status__lt=4)
         else:
             raise PermissionDenied('You are not allowed to view this page!')
-    except Exception, e:
+    except Exception as e:
         raise PermissionDenied('You are not allowed to view this page!')
 
     if request.method == 'POST':
@@ -226,15 +228,16 @@ def mdl_register(request):
     if request.method == "POST":
 
         # verify recaptcha
-        recaptcha_result = recaptcha_valdation(request)
+        #recaptcha_result = recaptcha_valdation(request)
 
         form = RegisterForm(request.POST)
-        if recaptcha_result and form.is_valid():
+        #if recaptcha_result and form.is_valid():
+        if form.is_valid():
             #Email exits
             try:
                 user = MdlUser.objects.filter(email=request.POST['email']).first().id
                 messages.success(request, "Email : "+request.POST['email']+" already registered on this website. Please click <a href='http://www.spoken-tutorial.org/participant/login/'>here </a>to login")
-            except Exception, e:
+            except Exception as e:
                 mdluser = MdlUser()
                 mdluser.auth = 'manual'
                 mdluser.institution = form.cleaned_data['college']
@@ -269,7 +272,7 @@ def feedback(request, wid):
     w = None
     try:
         w = TrainingRequest.objects.select_related().get(pk=wid)
-    except Exception, e:
+    except Exception as e:
         #print e
         messages.error(request, 'Invalid Training-Request ID passed')
         return HttpResponseRedirect('/participant/index/?category=1')
@@ -279,7 +282,7 @@ def feedback(request, wid):
         TrainingFeedback.objects.get(training_id = wid, mdluser_id = mdluserid)
         messages.success(request, "We have already received your feedback. ")
         return HttpResponseRedirect('/participant/index/?category=1')
-    except Exception, e:
+    except Exception as e:
         #print e
         pass
 
@@ -293,8 +296,8 @@ def feedback(request, wid):
                 form_data.save()
                 messages.success(request, "Thank you for your valuable feedback.")
                 return HttpResponseRedirect('/participant/index/?category=1')
-            except Exception, e:
-                print e
+            except Exception as e:
+                print(e)
                 pass
                 #return HttpResponseRedirect('/participant/index/')
     context = {

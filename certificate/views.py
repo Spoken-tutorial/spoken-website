@@ -1,4 +1,5 @@
 # Standard Library
+from builtins import hex
 import hashlib
 import os
 import subprocess
@@ -7,7 +8,7 @@ from string import Template
 
 # Third Party Stuff
 from django.http import HttpResponse
-from django.shortcuts import render_to_response
+from django.shortcuts import render_to_response, render
 from django.template import RequestContext
 
 # Spoken Tutorial Stuff
@@ -282,7 +283,7 @@ def drupal_download(request):
         file_name = file_name.replace('.', '')
         try:
             old_user = Certificate.objects.get(email=email, serial_no=serial_no)
-            qrcode = 'Verify at: http://spoken-tutorial.org/certificate/verify/{0} '.format(old_user.short_key)
+            qrcode = 'Verify at: https://spoken-tutorial.org/certificate/verify/{0} '.format(old_user.short_key)
             details = {'name': name, 'day': day, 'serial_key': old_user.short_key}
             certificate = create_drupal_certificate(certificate_path, details,
                                                     qrcode, type, paper, workshop, file_name)
@@ -300,7 +301,7 @@ def drupal_download(request):
                     uniqueness = True
                 else:
                     num += 1
-            qrcode = 'Verify at: http://spoken-tutorial.org/certificate/verify/{0} '.format(short_key)
+            qrcode = 'Verify at: https://spoken-tutorial.org/certificate/verify/{0} '.format(short_key)
             details = {'name': name, 'day': day, 'serial_key': short_key}
             certificate = create_drupal_certificate(certificate_path, details,
                                                     qrcode, type, paper, workshop, file_name)
@@ -385,7 +386,7 @@ def drupal_workshop_download(request):
         file_name = file_name.replace('.', '')
         try:
             old_user = Certificate.objects.get(email=email, serial_no=serial_no)
-            qrcode = 'Verify at: http://spoken-tutorial.org/certificate/verify/{0} '.format(old_user.short_key)
+            qrcode = 'Verify at: https://spoken-tutorial.org/certificate/verify/{0} '.format(old_user.short_key)
             details = {'name': name, 'serial_key': old_user.short_key}
             certificate = create_drupal_workshop_certificate(certificate_path, details,
                                                              qrcode, type, paper, workshop, file_name)
@@ -403,7 +404,7 @@ def drupal_workshop_download(request):
                     uniqueness = True
                 else:
                     num += 1
-            qrcode = 'Verify at: http://spoken-tutorial.org/certificate/verify/{0} '.format(short_key)
+            qrcode = 'Verify at: https://spoken-tutorial.org/certificate/verify/{0} '.format(short_key)
             details = {'name': name, 'serial_key': short_key}
             certificate = create_drupal_workshop_certificate(certificate_path, details,
                                                              qrcode, type, paper, workshop, file_name)
@@ -454,7 +455,7 @@ def create_drupal_workshop_certificate(certificate_path, name, qrcode, type, pap
             return [response, False]
         else:
             error = True
-    except Exception, e:
+    except Exception as e:
         error = True
         err = e
     return [err, error]
@@ -490,7 +491,7 @@ def fa_workshop_download(request):
         file_name = file_name.replace('.', '')
         try:
             old_user = Certificate.objects.get(email=email, serial_no=serial_no)
-            qrcode = 'Verify at: http://spoken-tutorial.org/certificate/verify/{0} '.format(old_user.short_key)
+            qrcode = 'Verify at: https://spoken-tutorial.org/certificate/verify/{0} '.format(old_user.short_key)
             details = {'name': name, 'serial_key': old_user.short_key}
             certificate = create_fa_workshop_certificate(certificate_path, details,
                                                              qrcode, type, paper, workshop, file_name)
@@ -508,7 +509,7 @@ def fa_workshop_download(request):
                     uniqueness = True
                 else:
                     num += 1
-            qrcode = 'Verify at: http://spoken-tutorial.org/certificate/verify/{0} '.format(short_key)
+            qrcode = 'Verify at: https://spoken-tutorial.org/certificate/verify/{0} '.format(short_key)
             details = {'name': name, 'serial_key': short_key}
             certificate = create_fa_workshop_certificate(certificate_path, details,
                                                              qrcode, type, paper, workshop, file_name)
@@ -558,7 +559,7 @@ def create_fa_workshop_certificate(certificate_path, name, qrcode, type, paper, 
             return [response, False]
         else:
             error = True
-    except Exception, e:
+    except Exception as e:
         error = True
         err = e
     return [err, error]
@@ -595,7 +596,7 @@ def itp_workshop_download(request):
         file_name = file_name.replace('.', '')
         try:
             old_user = Certificate.objects.get(email=email, serial_no=serial_no)
-            qrcode = 'http://spoken-tutorial.org/certificate/verify/{0} '.format(old_user.short_key)
+            qrcode = 'https://spoken-tutorial.org/certificate/verify/{0} '.format(old_user.short_key)
             details = {'name': name, 'serial_key': old_user.short_key, 'college':college}
             certificate = create_itp_workshop_certificate(certificate_path, details,
                                                              qrcode, type, paper, workshop, file_name)
@@ -613,7 +614,7 @@ def itp_workshop_download(request):
                     uniqueness = True
                 else:
                     num += 1
-            qrcode = 'http://spoken-tutorial.org/certificate/verify/{0} '.format(short_key)
+            qrcode = 'https://spoken-tutorial.org/certificate/verify/{0} '.format(short_key)
             details = {'name': name, 'serial_key': short_key, 'college': college}
             certificate = create_itp_workshop_certificate(certificate_path, details,
                                                              qrcode, type, paper, workshop, file_name)
@@ -663,7 +664,7 @@ def create_itp_workshop_certificate(certificate_path, name, qrcode, type, paper,
             return [response, False]
         else:
             error = True
-    except Exception, e:
+    except Exception as e:
         error = True
         err = e
     return [err, error]
@@ -700,7 +701,7 @@ def koha_workshop_download(request):
         file_name = file_name.replace('.', '')
         try:
             old_user = Certificate.objects.get(email=email, serial_no=serial_no)
-            qrcode = 'Verify at: http://spoken-tutorial.org/certificate/verify/{0} '.format(old_user.short_key)
+            qrcode = 'Verify at: https://spoken-tutorial.org/certificate/verify/{0} '.format(old_user.short_key)
             details = {'name': name, 'serial_key': old_user.short_key, 'college':college}
             certificate = create_koha_workshop_certificate(certificate_path, details,
                                                              qrcode, type, paper, workshop, file_name)
@@ -718,7 +719,7 @@ def koha_workshop_download(request):
                     uniqueness = True
                 else:
                     num += 1
-            qrcode = 'Verify at: http://spoken-tutorial.org/certificate/verify/{0} '.format(short_key)
+            qrcode = 'Verify at: https://spoken-tutorial.org/certificate/verify/{0} '.format(short_key)
             details = {'name': name, 'serial_key': short_key, 'college': college}
             certificate = create_koha_workshop_certificate(certificate_path, details,
                                                              qrcode, type, paper, workshop, file_name)
@@ -768,7 +769,7 @@ def create_koha_workshop_certificate(certificate_path, name, qrcode, type, paper
             return [response, False]
         else:
             error = True
-    except Exception, e:
+    except Exception as e:
         error = True
         err = e
     return [err, error]
@@ -891,7 +892,7 @@ def create_koha_coordinators_workshop_certificate(certificate_path, name, qrcode
             return [response, False]
         else:
             error = True
-    except Exception, e:
+    except Exception as e:
         error = True
         err = e
     return [err, error]
@@ -998,7 +999,7 @@ def create_koha_massive_workshop_certificate(certificate_path, name, qrcode, typ
             return [response, False]
         else:
             error = True
-    except Exception, e:
+    except Exception as e:
         error = True
         err = e
     return [err, error]
@@ -1105,7 +1106,7 @@ def create_koha_main_workshop9march_certificate(certificate_path, name, qrcode, 
             return [response, False]
         else:
             error = True
-    except Exception, e:
+    except Exception as e:
         error = True
         err = e
     return [err, error]
@@ -1213,7 +1214,7 @@ def create_koha_12oct_rc_certificate(certificate_path, name, qrcode, type, paper
             return [response, False]
         else:
             error = True
-    except Exception, e:
+    except Exception as e:
         error = True
         err = e
     return [err, error]
@@ -1235,8 +1236,8 @@ def moodle_coordinators_workshop_download(request):
             user = Moodle_WS_1march2019.objects.filter(email=email)
             if not user:
                 context["notregistered"] = 1
-                return render_to_response('moodle_workshop1march_download.html',
-                                          context, context_instance=ci)
+                return render(request,'moodle_workshop1march_download.html',
+                                          context)
             else:
                 user = user[0]
         name = user.name
@@ -1246,7 +1247,7 @@ def moodle_coordinators_workshop_download(request):
         id = int(user.id)
         hexa = hex(id).replace('0x', '').zfill(6).upper()
         serial_no = '{0}{1}{2}{3}'.format(purpose, year, hexa, type)
-        serial_key = (hashlib.sha1(serial_no)).hexdigest()
+        serial_key = (hashlib.sha1(serial_no.encode('utf-8'))).hexdigest()
         file_name = '{0}{1}'.format(email, id)
         file_name = file_name.replace('.', '')
         try:
@@ -1284,9 +1285,9 @@ def moodle_coordinators_workshop_download(request):
             _clean_certificate_certificate(certificate_path, file_name)
             context['error'] = True
             context['err'] = err
-            return render_to_response('moodle_workshop1march_download.html', context, ci)
+            return render(request,'moodle_workshop1march_download.html', context)
     context['message'] = ''
-    return render_to_response('moodle_workshop1march_download.html', context, ci)
+    return render(request,'moodle_workshop1march_download.html', context)
 
 
 def create_moodle_coordinators_workshop_certificate(certificate_path, name, qrcode, type, paper, workshop, file_name):
@@ -1320,7 +1321,7 @@ def create_moodle_coordinators_workshop_certificate(certificate_path, name, qrco
             return [response, False]
         else:
             error = True
-    except Exception, e:
+    except Exception as e:
         error = True
         err = e
     return [err, error]
@@ -1342,8 +1343,8 @@ def moodle_massive_workshop_download(request):
             user = Moodle_WS_15mar2019.objects.filter(email=email)
             if not user:
                 context["notregistered"] = 1
-                return render_to_response('moodle_workshop15mar_download.html',
-                                          context, context_instance=ci)
+                return render(request,'moodle_workshop15mar_download.html',
+                                          context)
             else:
                 user = user[0]
         name = user.name
@@ -1354,7 +1355,7 @@ def moodle_massive_workshop_download(request):
         id = int(user.id)
         hexa = hex(id).replace('0x', '').zfill(6).upper()
         serial_no = '{0}{1}{2}{3}'.format(purpose, year, hexa, type)
-        serial_key = (hashlib.sha1(serial_no)).hexdigest()
+        serial_key = (hashlib.sha1(serial_no.encode('utf-8'))).hexdigest()
         file_name = '{0}{1}'.format(email, id)
         file_name = file_name.replace('.', '')
         try:
@@ -1392,9 +1393,9 @@ def moodle_massive_workshop_download(request):
             _clean_certificate_certificate(certificate_path, file_name)
             context['error'] = True
             context['err'] = err
-            return render_to_response('moodle_workshop15mar_download.html', context, ci)
+            return render(request,'moodle_workshop15mar_download.html', context)
     context['message'] = ''
-    return render_to_response('moodle_workshop15mar_download.html', context, ci)
+    return render(request,'moodle_workshop15mar_download.html', context)
 
 def create_moodle_massive_workshop_certificate(certificate_path, name, qrcode, type, paper, workshop, file_name):
     error = False
@@ -1427,7 +1428,7 @@ def create_moodle_massive_workshop_certificate(certificate_path, name, qrcode, t
             return [response, False]
         else:
             error = True
-    except Exception, e:
+    except Exception as e:
         error = True
         err = e
     return [err, error]

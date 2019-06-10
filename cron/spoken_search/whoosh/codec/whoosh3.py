@@ -257,7 +257,7 @@ class W3PerDocWriter(base.PerDocWriterWithColumns):
         self._segment._fieldlengths = self._fieldlengths
 
         # Finish open columns and close the columns writer
-        for writer in self._colwriters.values():
+        for writer in list(self._colwriters.values()):
             writer.finish(self._doccount)
         self._cols.save_as_files(self._storage, self._column_filename)
 
@@ -355,7 +355,7 @@ class W3PerDocReader(base.PerDocumentReader):
         self._maxlengths = {}
 
     def close(self):
-        for colfile, _, _ in self._colfiles.values():
+        for colfile, _, _ in list(self._colfiles.values()):
             colfile.close()
         if self._vpostfile:
             self._vpostfile.close()
@@ -503,20 +503,20 @@ class W3FieldCursor(base.FieldCursor):
         self._text = None
         self._datapos = None
         self._datalen = None
-        self.next()
+        next(self)
 
     def first(self):
         self._pos = self._startpos
-        return self.next()
+        return next(self)
 
     def find(self, term):
         if not isinstance(term, bytes_type):
             term = self._fieldobj.to_bytes(term)
         key = self._keycoder(self._fieldname, term)
         self._pos = self._tindex.closest_key_pos(key)
-        return self.next()
+        return next(self)
 
-    def next(self):
+    def __next__(self):
         if self._pos is not None:
             keyrng = self._tindex.key_and_range_at(self._pos)
             if keyrng is not None:
@@ -574,7 +574,7 @@ class W3TermsReader(base.TermsReader):
         return self._keycoder(*term) in self._tindex
 
     def indexed_field_names(self):
-        return self._fieldmap.keys()
+        return list(self._fieldmap.keys())
 
     def cursor(self, fieldname, fieldobj):
         tindex = self._tindex
@@ -584,7 +584,7 @@ class W3TermsReader(base.TermsReader):
 
     def terms(self):
         keydecoder = self._keydecoder
-        return (keydecoder(keybytes) for keybytes in self._tindex.keys())
+        return (keydecoder(keybytes) for keybytes in list(self._tindex.keys()))
 
     def terms_from(self, fieldname, prefix):
         prefixbytes = self._keycoder(fieldname, prefix)
@@ -596,7 +596,7 @@ class W3TermsReader(base.TermsReader):
         tidecoder = W3TermInfo.from_bytes
         keydecoder = self._keydecoder
         return ((keydecoder(keybytes), tidecoder(valbytes))
-                for keybytes, valbytes in self._tindex.items())
+                for keybytes, valbytes in list(self._tindex.items()))
 
     def items_from(self, fieldname, prefix):
         prefixbytes = self._keycoder(fieldname, prefix)
@@ -989,7 +989,7 @@ class W3LeafMatcher(LeafMatcher):
 
         return self._values[self._i]
 
-    def next(self):
+    def __next__(self):
         # Move to the next posting
 
         # Increment the in-block pointer
@@ -1019,7 +1019,7 @@ class W3LeafMatcher(LeafMatcher):
         # Iterate through the IDs in the block until we find or pass the
         # target
         while self.is_active() and self.id() < targetid:
-            self.next()
+            next(self)
 
     def skip_to_quality(self, minquality):
         # Skip blocks until we find one that might exceed the given minimum
@@ -1087,9 +1087,9 @@ class W3LeafMatcher(LeafMatcher):
         # De-minify the weights
         postcount = self._blocklength
         if weights is None:
-            self._weights = array("f", (1.0 for _ in xrange(postcount)))
+            self._weights = array("f", (1.0 for _ in range(postcount)))
         elif isinstance(weights, float):
-            self._weights = array("f", (weights for _ in xrange(postcount)))
+            self._weights = array("f", (weights for _ in range(postcount)))
         else:
             self._weights = weights
 
@@ -1108,7 +1108,7 @@ class W3LeafMatcher(LeafMatcher):
         else:
             assert isinstance(vs, bytes_type)
             self._values = tuple(vs[i:i + fixedsize]
-                                 for i in xrange(0, len(vs), fixedsize))
+                                 for i in range(0, len(vs), fixedsize))
 
 
 # Term info implementation

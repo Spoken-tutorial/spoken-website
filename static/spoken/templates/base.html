@@ -176,9 +176,9 @@
                                                         <li class="divider"></li>
                                                         <li><a href="/accounts/view-profile/{{ user }}/">View Profile</a></li>
                                                         <li class="divider"></li>
-                                                        {% if user|get_administrator or user.is_masked %}
-                                                            {% if user.is_masked %}
-                                                                <li><a href="/masquerade/unmask">Switch Back</a></li>
+                                                        {% if user|get_administrator or user.is_impersonate %}
+                                                            {% if user.is_impersonate %}
+                                                                <li><a href="/masquerade/stop">Switch Back</a></li>
                                                             {% else %}
                                                                 <li><a href="/masquerade/">Masquerade</a></li>
                                                             {% endif %}

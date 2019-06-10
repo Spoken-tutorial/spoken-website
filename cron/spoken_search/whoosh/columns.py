@@ -46,7 +46,7 @@ provides two important methods: ``writer()`` to return a ``ColumnWriter`` object
 and ``reader()`` to return a ``ColumnReader`` object.
 """
 
-from __future__ import division, with_statement
+
 import struct, warnings
 from array import array
 from bisect import bisect_right
@@ -99,9 +99,9 @@ def write_qsafe_array(typecode, arry, dbfile):
 
 def read_qsafe_array(typecode, size, dbfile):
     if typecode == "q":
-        arry = [dbfile.read_long() for _ in xrange(size)]
+        arry = [dbfile.read_long() for _ in range(size)]
     elif typecode == "Q":
-        arry = [dbfile.read_ulong() for _ in xrange(size)]
+        arry = [dbfile.read_ulong() for _ in range(size)]
     else:
         arry = dbfile.read_array(typecode, size)
 
@@ -117,7 +117,7 @@ def make_array(typecode, size=0, default=None):
             arry = []
     else:
         if default is not None and size:
-            arry = array(typecode, (default for _ in xrange(size)))
+            arry = array(typecode, (default for _ in range(size)))
         else:
             arry = array(typecode)
     return arry
@@ -181,7 +181,7 @@ class ColumnWriter(object):
         write = self._dbfile.write
         default = self._defaultbytes
         if docnum > self._count:
-            for _ in xrange(docnum - self._count):
+            for _ in range(docnum - self._count):
                 write(default)
 
     def add(self, docnum, value):
@@ -208,7 +208,7 @@ class ColumnReader(object):
         return self[docnum]
 
     def __iter__(self):
-        for i in xrange(self._doccount):
+        for i in range(self._doccount):
             yield self[i]
 
     def load(self):
@@ -244,7 +244,7 @@ class VarBytesColumn(Column):
 
         def fill(self, docnum):
             if docnum > self._count:
-                self._lengths.extend(0 for _ in xrange(docnum - self._count))
+                self._lengths.extend(0 for _ in range(docnum - self._count))
 
         def add(self, docnum, v):
             self.fill(docnum)
@@ -377,7 +377,7 @@ class FixedBytesColumn(Column):
         def __iter__(self):
             count = self._count
             default = self._default
-            for i in xrange(self._doccount):
+            for i in range(self._doccount):
                 if i < count:
                     yield self[i]
                 else:
@@ -455,10 +455,10 @@ class RefBytesColumn(Column):
         def fill(self, docnum):
             if docnum > self._count:
                 if self._refs is not None:
-                    self._refs.extend(0 for _ in xrange(docnum - self._count))
+                    self._refs.extend(0 for _ in range(docnum - self._count))
                 else:
                     dbfile = self._dbfile
-                    for _ in xrange(docnum - self._count):
+                    for _ in range(docnum - self._count):
                         dbfile.write_ushort(0)
 
         def add(self, docnum, v):
@@ -496,7 +496,7 @@ class RefBytesColumn(Column):
 
             dbfile.write_varint(len(uniques))
             # Sort unique values by position
-            vs = sorted(uniques.keys(), key=lambda key: uniques[key])
+            vs = sorted(list(uniques.keys()), key=lambda key: uniques[key])
             for v in vs:
                 if not fixedlen:
                     dbfile.write_varint(len(v))
@@ -541,7 +541,7 @@ class RefBytesColumn(Column):
             ucount = dbfile.read_varint()
             length = fixedlen
             uniques = []
-            for _ in xrange(ucount):
+            for _ in range(ucount):
                 if not fixedlen:
                     length = dbfile.read_varint()
                 uniques.append(dbfile.read(length))
@@ -559,7 +559,7 @@ class RefBytesColumn(Column):
             unpack = self._unpack
             itemsize = self._itemsize
 
-            for i in xrange(self._doccount):
+            for i in range(self._doccount):
                 pos = basepos + i * itemsize
                 ref = unpack(get(pos, itemsize))[0]
                 yield uniques[ref]
@@ -738,12 +738,12 @@ class BitColumn(Column):
             i = 0
             for num in self._bitset:
                 if num > i:
-                    for _ in xrange(num - i):
+                    for _ in range(num - i):
                         yield False
                 yield True
                 i = num + 1
             if self._doccount > i:
-                for _ in xrange(self._doccount - i):
+                for _ in range(self._doccount - i):
                     yield False
 
         def load(self):
@@ -939,17 +939,17 @@ class CompressedBlockColumn(Column):
                 startdoc = block[0]
                 enddoc = block[1]
                 if startdoc > (last + 1):
-                    for _ in xrange(startdoc - last):
+                    for _ in range(startdoc - last):
                         yield emptybytes
                 values = self._get_block(i)
-                for docnum in xrange(startdoc, enddoc + 1):
+                for docnum in range(startdoc, enddoc + 1):
                     if docnum in values:
                         yield values[docnum]
                     else:
                         yield emptybytes
                 last = enddoc
             if enddoc < self._doccount - 1:
-                for _ in xrange(self._doccount - enddoc):
+                for _ in range(self._doccount - enddoc):
                     yield emptybytes
 
 
@@ -1021,7 +1021,7 @@ class EmptyColumnReader(ColumnReader):
         return self._default
 
     def __iter__(self):
-        return (self._default for _ in xrange(self._doccount))
+        return (self._default for _ in range(self._doccount))
 
     def load(self):
         return self
@@ -1235,7 +1235,7 @@ class ListColumnReader(ColumnReader):
         return self[docnum][0]
 
     def __iter__(self):
-        for docnum in xrange(len(self)):
+        for docnum in range(len(self)):
             yield self[docnum]
 
 
@@ -1257,7 +1257,7 @@ class VarBytesListColumn(ListColumn):
             bio = BytesIO(self._child[docnum])
             count = bio.read_varint()
             out = []
-            for _ in xrange(count):
+            for _ in range(count):
                 vlen = bio.read_varint()
                 v = bio.read(vlen)
                 out.append(v)
@@ -1300,7 +1300,7 @@ class FixedBytesListColumn(ListColumn):
             v = self._child[docnum]
             if not v:
                 return []
-            ls = [v[i:i + fixedlen] for i in xrange(0, len(v), fixedlen)]
+            ls = [v[i:i + fixedlen] for i in range(0, len(v), fixedlen)]
             return ls
 
 

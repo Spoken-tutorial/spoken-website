@@ -25,7 +25,7 @@
 # those of the authors and should not be interpreted as representing official
 # policies, either expressed or implied, of Matt Chaput.
 
-from __future__ import with_statement
+
 import os
 from multiprocessing import Process, Queue, cpu_count
 
@@ -141,7 +141,7 @@ class SubWriterTask(Process):
 
         load = pickle.load
         with tempstorage.open_file(filename).raw_file() as f:
-            for _ in xrange(doc_count):
+            for _ in range(doc_count):
                 # Load the next pickled tuple from the file
                 code, args = load(f)
                 assert code == 0
@@ -346,7 +346,7 @@ class SerialMpWriter(MpWriter):
         self.batchsize = batchsize
         self.subargs = subargs if subargs else kwargs
         self.tasks = [SegmentWriter(ix, _lk=False, **self.subargs)
-                      for _ in xrange(self.procs)]
+                      for _ in range(self.procs)]
         self.pointer = 0
         self._added_sub = False
 

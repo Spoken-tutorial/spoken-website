@@ -1,4 +1,5 @@
 # Third Party Stuff
+from builtins import object
 from django.contrib.auth.models import User
 
 
