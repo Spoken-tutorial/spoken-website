@@ -10,7 +10,7 @@ export class ScriptSlideComponent implements OnInit {
   @Input() index: number;
   @Output() removeSlideEmitter = new EventEmitter<number>();
 
-  constructor() { }
+  constructor() { } 
 
   public removeSlide() {
     this.removeSlideEmitter.emit(this.index);

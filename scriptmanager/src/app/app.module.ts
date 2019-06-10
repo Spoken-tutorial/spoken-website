@@ -8,8 +8,6 @@ import { FormsModule ,ReactiveFormsModule} from '@angular/forms';
 import { HomeComponent } from './home/home.component';
 import { TutorialsComponent } from './home/tutorials/tutorials.component';
 import { JwtModule } from '@auth0/angular-jwt';
-import { CreateScriptComponent } from './create-script/create-script.component';
-import { EditScriptComponent } from './edit-script/edit-script.component';
 import { NgHttpLoaderModule } from 'ng-http-loader';
 import { ScriptComponent } from './script/script.component';
 import { ScriptSlideComponent } from './script/script-slide/script-slide.component';
@@ -26,8 +24,6 @@ export function tokenGetter() {
     AppComponent,
     HomeComponent,
     TutorialsComponent,
-    CreateScriptComponent,
-    EditScriptComponent,
     ScriptComponent,
     ScriptSlideComponent,
     ScriptCreateComponent,
@@ -48,7 +44,7 @@ export function tokenGetter() {
     FormsModule,
     ReactiveFormsModule,
     NgHttpLoaderModule.forRoot()
-   
+  
   ],
   providers: [],
   bootstrap: [AppComponent]
