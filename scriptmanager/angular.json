@@ -30,7 +30,10 @@
               "node_modules/bulma/bulma.sass",
               "node_modules/bulma-helpers/bulma-helpers.sass",
               "src/styles.sass",
-              "node_modules/font-awesome/scss/font-awesome.scss"
+              "node_modules/font-awesome/scss/font-awesome.scss",
+              "node_modules/bulma-timeline/dist/css/bulma-timeline.min.css",
+              "node_modules/animate.css/animate.min.css",
+              "node_modules/bulma-divider/dist/css/bulma-divider.min.css"
             ],
             "scripts": [],
             "es5BrowserSupport": true
