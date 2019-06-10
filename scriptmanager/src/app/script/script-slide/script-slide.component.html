@@ -2,7 +2,16 @@
   <span class="tag is-link is-medium">{{ index+1 }}</span>
 </header>
 <div class="timeline-item animated fadeInLeft">
-  <div class="timeline-marker is-icon" (click)="removeSlide()">
+  <div class="timeline-marker is-icon"
+    [swal]="{ title: 'Delete Slide',
+              text: 'Are you sure?',
+              type: 'error',
+              showCancelButton: 'true',
+              focusCancel: 'true',
+              confirmButtonText: 'Yes! Delete it.',
+              cancelButtonText: 'No!'
+            }"
+    (confirm)="removeSlide()">
     <a class="delete is-large"></a>
   </div>
 

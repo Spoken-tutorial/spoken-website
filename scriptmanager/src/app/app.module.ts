@@ -13,6 +13,7 @@ import { ScriptComponent } from './script/script.component';
 import { ScriptSlideComponent } from './script/script-slide/script-slide.component';
 import { ScriptCreateComponent } from './script/script-create/script-create.component';
 import { ScriptEditComponent } from './script/script-edit/script-edit.component';
+import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
 
 export function tokenGetter() {
   const token = localStorage.getItem('token');
@@ -43,7 +44,8 @@ export function tokenGetter() {
     RouterModule,
     FormsModule,
     ReactiveFormsModule,
-    NgHttpLoaderModule.forRoot()
+    NgHttpLoaderModule.forRoot(),
+    SweetAlert2Module.forRoot()
   
   ],
   providers: [],
