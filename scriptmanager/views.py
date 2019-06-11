@@ -24,6 +24,7 @@ class ContributorRoleList(generics.ListAPIView):
   serializer_class = ContributorRoleSerializer
 
 
+
 class TutorialDetailList(generics.ListAPIView):
   serializer_class=TutorialDetailSerializer
     
@@ -40,34 +41,41 @@ class ScriptCreateAPIView(generics.CreateAPIView):
     serializer_class=ScriptsSerializer
     
 
-    def post(self, request,tid):
-      print(request.data)
-      data=request.data.pop('details')
-      try:
-        script= Scripts.objects.create(tutorial_id=int(self.kwargs['tid']),user=self.request.user)
-        for x in data:
-          script_details = ScriptDetails.objects.create(script=script,**x)
-        return Response({'status': True})
-      except:
-        return Response({'status': False})
+  def get_queryset(self):
+    user=User.objects.filter(username=self.request.user)
+    script_pk=Scripts.objects.filter(tutorial_id=int(self.kwargs['tid']),user=user[0].id)
+    return ScriptDetails.objects.filter(script=script_pk)
+      
+  def create(self, request,tid):
+    details=request.data.pop('details')
+    # for x in details:
+    #   script_details = ScriptDetails.objects.create(script=script,**x)
+    try:
+      script= Scripts.objects.create(tutorial_id=int(self.kwargs['tid']),user=self.request.user)
+      for item in details:
+        item.update( {"script":script.pk})
+      serialized=ScriptsDetailSerializer(data=details,many=True)
+      if serialized.is_valid():
+        serialized.save()
+        return Response({'status': True},status=201)
+    except:
+        return Response({'status': False},status=400) 
 
+  def patch(self,request, tid):
+    delete=request.data.pop('remove_slides')
+    data=request.data.pop('details')
+    script=Scripts.objects.get(tutorial_id=int(self.kwargs['tid']),user=self.request.user)
+    try:
+      for key in delete:
+        ScriptDetails.objects.get(pk=key,script_id=script.pk).delete()
 
-
-    def get_queryset(self):
-      user=User.objects.filter(username=self.request.user)
-      script_pk=Scripts.objects.filter(tutorial_id=int(self.kwargs['tid']),user=user[0].id)
-      return ScriptDetails.objects.filter(script=script_pk)
-   
-    def post(self, request,tid):
-      serializer_class=ScriptsSerializer
-      data=request.data.pop('details')
-      try:
-        script= Scripts.objects.create(tutorial_id=int(self.kwargs['tid']),user=self.request.user)
-        for x in data:
-          script_details = ScriptDetails.objects.create(script=script,**x)
-        return Response({'status': True})
-      except:
-        return Response({'status': False})
+      for script_details in data:
+        serializer = ScriptsDetailSerializer(ScriptDetails.objects.get(pk=script_details['id']), data=script_details)
+        if serializer.is_valid():
+          serializer.save()
+      return Response({'status': True},status=201)
+    except:
+      return Response({'status': False},status=400)
 
 
    
