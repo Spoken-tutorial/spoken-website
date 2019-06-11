@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CreateScriptComponent } from './create-script.component';
+import { ScriptViewComponent } from './script-view.component';
 
-describe('CreateScriptComponent', () => {
-  let component: CreateScriptComponent;
-  let fixture: ComponentFixture<CreateScriptComponent>;
+describe('ScriptViewComponent', () => {
+  let component: ScriptViewComponent;
+  let fixture: ComponentFixture<ScriptViewComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ CreateScriptComponent ]
+      declarations: [ ScriptViewComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(CreateScriptComponent);
+    fixture = TestBed.createComponent(ScriptViewComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

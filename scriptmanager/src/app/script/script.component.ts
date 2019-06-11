@@ -14,7 +14,7 @@ export class ScriptComponent implements OnInit {
   public addSlide() {
     this.slides.push(
       {
-        cue: '', 
+        cue: '',
         narration: ''
       }
     );

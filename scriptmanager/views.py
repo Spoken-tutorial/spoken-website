@@ -37,8 +37,9 @@ class TutorialDetailList(generics.ListAPIView):
 
 
 
-class ScriptCreateAPIView(generics.ListCreateAPIView):
-  serializer_class=ScriptsDetailSerializer
+class ScriptCreateAPIView(generics.CreateAPIView):
+    serializer_class=ScriptsSerializer
+    
 
   def get_queryset(self):
     user=User.objects.filter(username=self.request.user)
