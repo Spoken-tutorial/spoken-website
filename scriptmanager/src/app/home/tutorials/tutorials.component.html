@@ -1,22 +1,26 @@
-
-  <div class="has-margin-top-50">
-    <div class="card">
-      <header class="card-header">
-        <p class="card-header-title">
-          {{tutorial.tutorial}}
-        </p>
-        <a href="#" class="card-header-icon" aria-label="more options">
-          <span class="icon">
-            <i class="fas fa-angle-down" aria-hidden="true"></i>
-          </span>
+<div class="has-margin-top-50">
+  <div class="card">
+    <div class="columns">
+      <div class="column">
+        <div class="card-header-title">
+          {{ tutorial.tutorial }}
+        </div>
+      </div>
+      <div class="column card-header-title">
+        <a routerLink="/create/{{ tutorial.id }}">
+          <i class="fa fa-plus" aria-hidden="true"></i> create
         </a>
-      </header>
-    
-      <footer class="card-footer">
-        <a routerLink="/create/{{tutorial.id}}" class="card-footer-item">Create Script</a>
-        <a routerLink="/edit/{{tutorial.id}}" class="card-footer-item">Edit</a>
-        <a routerLink="/view/{{tutorial.id}}" class="card-footer-item">view</a>
-      </footer>
+      </div>
+      <div class="column card-header-title">
+        <a routerLink="/edit/{{ tutorial.id }}">
+          <i class="fa fa-edit"></i> edit
+        </a>
+      </div>
+      <div class="column card-header-title">
+        <a routerLink="/view/{{ tutorial.id }}">
+          <i class="fa fa-eye"></i> view
+        </a>
+      </div>
     </div>
   </div>
-
+</div>

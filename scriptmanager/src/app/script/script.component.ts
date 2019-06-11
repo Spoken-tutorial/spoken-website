@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-
+import {Router} from "@angular/router";
 @Component({
   selector: 'app-script',
   templateUrl: './script.component.html',
@@ -9,7 +9,7 @@ export class ScriptComponent implements OnInit {
   @Input() slides: any;
   @Output() onSaveScript = new EventEmitter<any>();
 
-  constructor() { }
+  constructor(public router:Router) { }
 
   public addSlide() {
     this.slides.push(
@@ -26,6 +26,8 @@ export class ScriptComponent implements OnInit {
 
   public saveScript() {
     this.onSaveScript.emit(this.slides);
+    this.router.navigateByUrl("/")
+    
   }
 
   ngOnInit() {
