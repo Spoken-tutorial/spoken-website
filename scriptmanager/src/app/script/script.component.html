@@ -23,7 +23,18 @@
                   <a class="button heading is-outlined" (click)="addSlide()">Add new Slide</a>
                 </div>
                 <div class="column">
-                  <a class="button heading is-outlined is-primary" (click)="saveScript()">Save Script</a>
+                  <a 
+                    class="button heading is-outlined is-primary"
+                    [swal]="{ title: 'Save Script',
+                              text: 'Are you sure?',
+                              type: 'info',
+                              showCancelButton: 'true',
+                              focusCancel: 'true',
+                              confirmButtonText: 'Yes! Save it.',
+                              cancelButtonText: 'No!'
+                            }"
+                    (confirm)="saveScript()"
+                  >Save Script</a>
                 </div>
               </div>
             </div>
