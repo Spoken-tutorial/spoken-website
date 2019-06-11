@@ -8,7 +8,7 @@ from string import Template
 
 # Third Party Stuff
 from django.http import HttpResponse
-from django.shortcuts import render_to_response, render
+from django.shortcuts import render
 from django.template import RequestContext
 
 # Spoken Tutorial Stuff
@@ -17,7 +17,7 @@ from certificate.models import *
 
 
 def index(request):
-    return render_to_response('index.html')
+    return render(request,'index.html', {})
 
 
 def verification(serial, _type):
@@ -136,14 +136,14 @@ def verify(request, serial_key=None):
     ci = RequestContext(request)
     if serial_key is not None:
         context = verification(serial_key, 'key')
-        return render_to_response('verify.html', context, ci)
+        return render(request, 'verify.html', context)
     if request.method == 'POST':
         serial_no = request.POST.get('serial_no').strip()
         context = verification(serial_no, 'number')
         if 'invalidserial' in context:
             context = verification(serial_no, 'key')
-        return render_to_response('verify.html', context, ci)
-    return render_to_response('verify.html', {}, ci)
+        return render(request, 'verify.html', context)
+    return render(request, 'verify.html', {})
 
 
 def _get_detail(serial_no):
@@ -215,7 +215,7 @@ def drupal_feedback(request):
             try:
                 FeedBack.objects.get(email=data['email'].strip(), purpose='DMC')
                 context['message'] = 'You have already submitted the feedback. You can download your certificate.'
-                return render_to_response('drupal_download.html', context, ci)
+                return render(request, 'drupal_download.html', context)
             except FeedBack.DoesNotExist:
                 feedback = FeedBack()
                 feedback.name = data['name'].strip()
@@ -232,12 +232,12 @@ def drupal_feedback(request):
                     feedback.answer.add(answer)
                     feedback.save()
                 context['message'] = ''
-                return render_to_response('drupal_download.html', context, ci)
+                return render(request, 'drupal_download.html', context)
 
     context['form'] = form
     context['questions'] = questions
 
-    return render_to_response('drupal_feedback.html', context, ci)
+    return render(request, 'drupal_feedback.html', context)
 
 
 def drupal_download(request):
@@ -255,8 +255,7 @@ def drupal_download(request):
             user = Drupal_camp.objects.filter(email=email)
             if not user:
                 context["notregistered"] = 1
-                return render_to_response('drupal_download.html',
-                                          context, context_instance=ci)
+                return render(request, 'drupal_download.html', context)
             else:
                 user = user[0]
         fname = user.firstname
@@ -272,13 +271,12 @@ def drupal_download(request):
             day = 'Day 1 and Day 2'
         else:
             context['notregistered'] = 2
-            return render_to_response('drupal_download.html', context,
-                                      context_instance=ci)
+            return render(request, 'drupal_download.html', context)
         year = '15'
         id = int(user.id)
         hexa = hex(id).replace('0x', '').zfill(6).upper()
         serial_no = '{0}{1}{2}{3}'.format(purpose, year, hexa, type)
-        serial_key = (hashlib.sha1(serial_no)).hexdigest()
+        serial_key = (hashlib.sha1(serial_no.encode('utf-8'))).hexdigest()
         file_name = '{0}{1}'.format(email, id)
         file_name = file_name.replace('.', '')
         try:
@@ -315,9 +313,9 @@ def drupal_download(request):
         if certificate[1]:
             _clean_certificate_certificate(certificate_path, file_name)
             context['error'] = True
-            return render_to_response('drupal_download.html', context, ci)
+            return render(request, 'drupal_download.html', context)
     context['message'] = ''
-    return render_to_response('drupal_download.html', context, ci)
+    return render(request, 'drupal_download.html', context)
 
 
 def create_drupal_certificate(certificate_path, name, qrcode, type, paper, workshop, file_name):
@@ -341,7 +339,7 @@ def create_drupal_certificate(certificate_path, name, qrcode, type, paper, works
         return_value, err = _make_certificate_certificate(certificate_path,
                                                           type, file_name)
         if return_value == 0:
-            pdf = open('{0}{1}.pdf'.format(certificate_path, file_name), 'r')
+            pdf = open('{0}{1}.pdf'.format(certificate_path, file_name), 'rb')
             response = HttpResponse(content_type='application/pdf')
             response['Content-Disposition'] = 'attachment; \
                     filename=%s' % (download_file_name)
@@ -371,8 +369,7 @@ def drupal_workshop_download(request):
             user = Drupal_WS.objects.filter(email=email)
             if not user:
                 context["notregistered"] = 1
-                return render_to_response('drupal_workshop_download.html',
-                                          context, context_instance=ci)
+                return render(request, 'drupal_workshop_download.html',context)
             else:
                 user = user[0]
         name = user.name
@@ -381,7 +378,7 @@ def drupal_workshop_download(request):
         id = int(user.id)
         hexa = hex(id).replace('0x', '').zfill(6).upper()
         serial_no = '{0}{1}{2}{3}'.format(purpose, year, hexa, type)
-        serial_key = (hashlib.sha1(serial_no)).hexdigest()
+        serial_key = (hashlib.sha1(serial_no.encode('utf-8'))).hexdigest()
         file_name = '{0}{1}'.format(email, id)
         file_name = file_name.replace('.', '')
         try:
@@ -419,9 +416,9 @@ def drupal_workshop_download(request):
             _clean_certificate_certificate(certificate_path, file_name)
             context['error'] = True
             context['err'] = err
-            return render_to_response('drupal_workshop_download.html', context, ci)
+            return render(request, 'drupal_workshop_download.html', context)
     context['message'] = ''
-    return render_to_response('drupal_workshop_download.html', context, ci)
+    return render(request, 'drupal_workshop_download.html', context)
 
 
 def create_drupal_workshop_certificate(certificate_path, name, qrcode, type, paper, workshop, file_name):
@@ -446,7 +443,7 @@ def create_drupal_workshop_certificate(certificate_path, name, qrcode, type, pap
         return_value, err = _make_certificate_certificate(certificate_path,
                                                           type, file_name)
         if return_value == 0:
-            pdf = open('{0}{1}.pdf'.format(certificate_path, file_name), 'r')
+            pdf = open('{0}{1}.pdf'.format(certificate_path, file_name), 'rb')
             response = HttpResponse(content_type='application/pdf')
             response['Content-Disposition'] = 'attachment; \
                     filename=%s' % (download_file_name)
@@ -476,8 +473,7 @@ def fa_workshop_download(request):
             user = FA_WS.objects.filter(email=email)
             if not user:
                 context["notregistered"] = 1
-                return render_to_response('fa_workshop_download.html',
-                                          context, context_instance=ci)
+                return render(request, 'fa_workshop_download.html',context)
             else:
                 user = user[0]
         name = user.name
@@ -486,7 +482,7 @@ def fa_workshop_download(request):
         id = int(user.id)
         hexa = hex(id).replace('0x', '').zfill(6).upper()
         serial_no = '{0}{1}{2}{3}'.format(purpose, year, hexa, type)
-        serial_key = (hashlib.sha1(serial_no)).hexdigest()
+        serial_key = (hashlib.sha1(serial_no.encode('utf-8'))).hexdigest()
         file_name = '{0}{1}'.format(email, id)
         file_name = file_name.replace('.', '')
         try:
@@ -524,9 +520,9 @@ def fa_workshop_download(request):
             _clean_certificate_certificate(certificate_path, file_name)
             context['error'] = True
             context['err'] = err
-            return render_to_response('fa_workshop_download.html', context, ci)
+            return render(request, 'fa_workshop_download.html', context)
     context['message'] = ''
-    return render_to_response('fa_workshop_download.html', context, ci)
+    return render(request, 'fa_workshop_download.html', context)
 
 def create_fa_workshop_certificate(certificate_path, name, qrcode, type, paper, workshop, file_name):
     error = False
@@ -550,7 +546,7 @@ def create_fa_workshop_certificate(certificate_path, name, qrcode, type, paper, 
         return_value, err = _make_certificate_certificate(certificate_path,
                                                           type, file_name)
         if return_value == 0:
-            pdf = open('{0}{1}.pdf'.format(certificate_path, file_name), 'r')
+            pdf = open('{0}{1}.pdf'.format(certificate_path, file_name), 'rb')
             response = HttpResponse(content_type='application/pdf')
             response['Content-Disposition'] = 'attachment; \
                     filename=%s' % (download_file_name)
@@ -580,8 +576,7 @@ def itp_workshop_download(request):
             user = ITP_WS.objects.filter(email=email)
             if not user:
                 context["notregistered"] = 1
-                return render_to_response('itp_workshop_download.html',
-                                          context, context_instance=ci)
+                return render(request, 'itp_workshop_download.html', context)
             else:
                 user = user[0]
         name = user.name
@@ -591,7 +586,7 @@ def itp_workshop_download(request):
         id = int(user.id)
         hexa = hex(id).replace('0x', '').zfill(6).upper()
         serial_no = '{0}{1}{2}{3}'.format(purpose, year, hexa, type)
-        serial_key = (hashlib.sha1(serial_no)).hexdigest()
+        serial_key = (hashlib.sha1(serial_no.encode('utf-8'))).hexdigest()
         file_name = '{0}{1}'.format(email, id)
         file_name = file_name.replace('.', '')
         try:
@@ -629,9 +624,9 @@ def itp_workshop_download(request):
             _clean_certificate_certificate(certificate_path, file_name)
             context['error'] = True
             context['err'] = err
-            return render_to_response('itp_workshop_download.html', context, ci)
+            return render(request, 'itp_workshop_download.html', context)
     context['message'] = ''
-    return render_to_response('itp_workshop_download.html', context, ci)
+    return render(request, 'itp_workshop_download.html', context)
 
 def create_itp_workshop_certificate(certificate_path, name, qrcode, type, paper, workshop, file_name):
     error = False
@@ -655,7 +650,7 @@ def create_itp_workshop_certificate(certificate_path, name, qrcode, type, paper,
         return_value, err = _make_certificate_certificate(certificate_path,
                                                           type, file_name)
         if return_value == 0:
-            pdf = open('{0}{1}.pdf'.format(certificate_path, file_name), 'r')
+            pdf = open('{0}{1}.pdf'.format(certificate_path, file_name), 'rb')
             response = HttpResponse(content_type='application/pdf')
             response['Content-Disposition'] = 'attachment; \
                     filename=%s' % (download_file_name)
@@ -685,8 +680,7 @@ def koha_workshop_download(request):
             user = Koha_WS.objects.filter(email=email)
             if not user:
                 context["notregistered"] = 1
-                return render_to_response('koha_workshop_download.html',
-                                          context, context_instance=ci)
+                return render(request, 'koha_workshop_download.html', context)
             else:
                 user = user[0]
         name = user.name
@@ -696,7 +690,7 @@ def koha_workshop_download(request):
         id = int(user.id)
         hexa = hex(id).replace('0x', '').zfill(6).upper()
         serial_no = '{0}{1}{2}{3}'.format(purpose, year, hexa, type)
-        serial_key = (hashlib.sha1(serial_no)).hexdigest()
+        serial_key = (hashlib.sha1(serial_no.encode('utf-8'))).hexdigest()
         file_name = '{0}{1}'.format(email, id)
         file_name = file_name.replace('.', '')
         try:
@@ -734,9 +728,9 @@ def koha_workshop_download(request):
             _clean_certificate_certificate(certificate_path, file_name)
             context['error'] = True
             context['err'] = err
-            return render_to_response('koha_workshop_download.html', context, ci)
+            return render(request, 'koha_workshop_download.html', context)
     context['message'] = ''
-    return render_to_response('koha_workshop_download.html', context, ci)
+    return render(request, 'koha_workshop_download.html', context)
 
 def create_koha_workshop_certificate(certificate_path, name, qrcode, type, paper, workshop, file_name):
     error = False
@@ -760,7 +754,7 @@ def create_koha_workshop_certificate(certificate_path, name, qrcode, type, paper
         return_value, err = _make_certificate_certificate(certificate_path,
                                                           type, file_name)
         if return_value == 0:
-            pdf = open('{0}{1}.pdf'.format(certificate_path, file_name), 'r')
+            pdf = open('{0}{1}.pdf'.format(certificate_path, file_name), 'rb')
             response = HttpResponse(content_type='application/pdf')
             response['Content-Disposition'] = 'attachment; \
                     filename=%s' % (download_file_name)
@@ -803,8 +797,7 @@ def koha_coordinators_workshop_download(request):
             workshop = '29sep2018'
         if not user:
             context["notregistered"] = 1
-            return render_to_response('koha_workshop29sep_download.html',
-                                      context, context_instance=ci)
+            return render(request, 'koha_workshop29sep_download.html', context)
         else:
             user = user[0]
         name = user.name
@@ -814,7 +807,7 @@ def koha_coordinators_workshop_download(request):
         id = int(user.id)
         hexa = hex(id).replace('0x', '').zfill(6).upper()
         serial_no = '{0}{1}{2}{3}'.format(purpose, year, hexa, type)
-        serial_key = (hashlib.sha1(serial_no)).hexdigest()
+        serial_key = (hashlib.sha1(serial_no.encode('utf-8'))).hexdigest()
         file_name = '{0}{1}'.format(email, id)
         file_name = file_name.replace('.', '')
         try:
@@ -852,9 +845,9 @@ def koha_coordinators_workshop_download(request):
             _clean_certificate_certificate(certificate_path, file_name)
             context['error'] = True
             context['err'] = err
-            return render_to_response('koha_workshop29sep_download.html', context, ci)
+            return render(request, 'koha_workshop29sep_download.html', context)
     context['message'] = ''
-    return render_to_response('koha_workshop29sep_download.html', context, ci)
+    return render(request, 'koha_workshop29sep_download.html', context)
 
 
 def create_koha_coordinators_workshop_certificate(certificate_path, name, qrcode, type, paper, workshop, file_name):
@@ -883,7 +876,7 @@ def create_koha_coordinators_workshop_certificate(certificate_path, name, qrcode
         return_value, err = _make_certificate_certificate(certificate_path,
                                                           type, file_name)
         if return_value == 0:
-            pdf = open('{0}{1}.pdf'.format(certificate_path, file_name), 'r')
+            pdf = open('{0}{1}.pdf'.format(certificate_path, file_name), 'rb')
             response = HttpResponse(content_type='application/pdf')
             response['Content-Disposition'] = 'attachment; \
                     filename=%s' % (download_file_name)
@@ -914,8 +907,7 @@ def koha_massive_workshop_download(request):
             user = Koha_WS_12oct2018.objects.filter(email=email)
             if not user:
                 context["notregistered"] = 1
-                return render_to_response('koha_workshop12oct_download.html',
-                                          context, context_instance=ci)
+                return render(request, 'koha_workshop12oct_download.html', context)
             else:
                 user = user[0]
         name = user.name
@@ -926,7 +918,7 @@ def koha_massive_workshop_download(request):
         id = int(user.id)
         hexa = hex(id).replace('0x', '').zfill(6).upper()
         serial_no = '{0}{1}{2}{3}'.format(purpose, year, hexa, type)
-        serial_key = (hashlib.sha1(serial_no)).hexdigest()
+        serial_key = (hashlib.sha1(serial_no.encode('utf-8'))).hexdigest()
         file_name = '{0}{1}'.format(email, id)
         file_name = file_name.replace('.', '')
         try:
@@ -964,9 +956,9 @@ def koha_massive_workshop_download(request):
             _clean_certificate_certificate(certificate_path, file_name)
             context['error'] = True
             context['err'] = err
-            return render_to_response('koha_workshop12oct_download.html', context, ci)
+            return render(request, 'koha_workshop12oct_download.html', context)
     context['message'] = ''
-    return render_to_response('koha_workshop12oct_download.html', context, ci)
+    return render(request, 'koha_workshop12oct_download.html', context)
 
 def create_koha_massive_workshop_certificate(certificate_path, name, qrcode, type, paper, workshop, file_name):
     error = False
@@ -990,7 +982,7 @@ def create_koha_massive_workshop_certificate(certificate_path, name, qrcode, typ
         return_value, err = _make_certificate_certificate(certificate_path,
                                                           type, file_name)
         if return_value == 0:
-            pdf = open('{0}{1}.pdf'.format(certificate_path, file_name), 'r')
+            pdf = open('{0}{1}.pdf'.format(certificate_path, file_name), 'rb')
             response = HttpResponse(content_type='application/pdf')
             response['Content-Disposition'] = 'attachment; \
                     filename=%s' % (download_file_name)
@@ -1021,8 +1013,7 @@ def koha_main_workshop9march_download(request):
             user = Koha_WS_9march2019.objects.filter(email=email)
             if not user:
                 context["notregistered"] = 1
-                return render_to_response('koha_workshop9march_download.html',
-                                          context, context_instance=ci)
+                return render(request, 'koha_workshop9march_download.html', context)
             else:
                 user = user[0]
         name = user.name
@@ -1033,7 +1024,7 @@ def koha_main_workshop9march_download(request):
         id = int(user.id)
         hexa = hex(id).replace('0x', '').zfill(6).upper()
         serial_no = '{0}{1}{2}{3}'.format(purpose, year, hexa, type)
-        serial_key = (hashlib.sha1(serial_no)).hexdigest()
+        serial_key = (hashlib.sha1(serial_no.encode('utf-8'))).hexdigest()
         file_name = '{0}{1}'.format(email, id)
         file_name = file_name.replace('.', '')
         try:
@@ -1071,9 +1062,9 @@ def koha_main_workshop9march_download(request):
             _clean_certificate_certificate(certificate_path, file_name)
             context['error'] = True
             context['err'] = err
-            return render_to_response('koha_workshop9march_download.html', context, ci)
+            return render(request, 'koha_workshop9march_download.html', context)
     context['message'] = ''
-    return render_to_response('koha_workshop9march_download.html', context, ci)
+    return render(request, 'koha_workshop9march_download.html', context)
 
 def create_koha_main_workshop9march_certificate(certificate_path, name, qrcode, type, paper, workshop, file_name):
     error = False
@@ -1097,7 +1088,7 @@ def create_koha_main_workshop9march_certificate(certificate_path, name, qrcode, 
         return_value, err = _make_certificate_certificate(certificate_path,
                                                           type, file_name)
         if return_value == 0:
-            pdf = open('{0}{1}.pdf'.format(certificate_path, file_name), 'r')
+            pdf = open('{0}{1}.pdf'.format(certificate_path, file_name), 'rb')
             response = HttpResponse(content_type='application/pdf')
             response['Content-Disposition'] = 'attachment; \
                     filename=%s' % (download_file_name)
@@ -1129,8 +1120,7 @@ def koha_rc_certificate_download(request):
             user = Koha_RC_12oct2018.objects.filter(email=email)
             if not user:
                 context["notregistered"] = 1
-                return render_to_response('koha_12oct_rc_download.html',
-                                          context, context_instance=ci)
+                return render(request, 'koha_12oct_rc_download.html', context)
             else:
                 user = user[0]
         name = user.name
@@ -1141,7 +1131,7 @@ def koha_rc_certificate_download(request):
         id = int(user.id)
         hexa = hex(id).replace('0x', '').zfill(6).upper()
         serial_no = '{0}{1}{2}{3}'.format(purpose, year, hexa, type)
-        serial_key = (hashlib.sha1(serial_no)).hexdigest()
+        serial_key = (hashlib.sha1(serial_no.encode('utf-8'))).hexdigest()
         file_name = '{0}{1}'.format(email, id)
         file_name = file_name.replace('.', '')
         try:
@@ -1179,9 +1169,9 @@ def koha_rc_certificate_download(request):
             _clean_certificate_certificate(certificate_path, file_name)
             context['error'] = True
             context['err'] = err
-            return render_to_response('koha_12oct_rc_download.html', context, ci)
+            return render(request, 'koha_12oct_rc_download.html', context)
     context['message'] = ''
-    return render_to_response('koha_12oct_rc_download.html', context, ci)
+    return render(request, 'koha_12oct_rc_download.html', context)
 
 def create_koha_12oct_rc_certificate(certificate_path, name, qrcode, type, paper, workshop, file_name):
     error = False
@@ -1205,7 +1195,7 @@ def create_koha_12oct_rc_certificate(certificate_path, name, qrcode, type, paper
         return_value, err = _make_certificate_certificate(certificate_path,
                                                           type, file_name)
         if return_value == 0:
-            pdf = open('{0}{1}.pdf'.format(certificate_path, file_name), 'r')
+            pdf = open('{0}{1}.pdf'.format(certificate_path, file_name), 'rb')
             response = HttpResponse(content_type='application/pdf')
             response['Content-Disposition'] = 'attachment; \
                     filename=%s' % (download_file_name)
@@ -1236,8 +1226,7 @@ def moodle_coordinators_workshop_download(request):
             user = Moodle_WS_1march2019.objects.filter(email=email)
             if not user:
                 context["notregistered"] = 1
-                return render(request,'moodle_workshop1march_download.html',
-                                          context)
+                return render(request,'moodle_workshop1march_download.html', context)
             else:
                 user = user[0]
         name = user.name
@@ -1312,7 +1301,7 @@ def create_moodle_coordinators_workshop_certificate(certificate_path, name, qrco
         return_value, err = _make_certificate_certificate(certificate_path,
                                                           type, file_name)
         if return_value == 0:
-            pdf = open('{0}{1}.pdf'.format(certificate_path, file_name), 'r')
+            pdf = open('{0}{1}.pdf'.format(certificate_path, file_name), 'rb')
             response = HttpResponse(content_type='application/pdf')
             response['Content-Disposition'] = 'attachment; \
                     filename=%s' % (download_file_name)
@@ -1343,8 +1332,7 @@ def moodle_massive_workshop_download(request):
             user = Moodle_WS_15mar2019.objects.filter(email=email)
             if not user:
                 context["notregistered"] = 1
-                return render(request,'moodle_workshop15mar_download.html',
-                                          context)
+                return render(request,'moodle_workshop15mar_download.html', context)
             else:
                 user = user[0]
         name = user.name
@@ -1419,7 +1407,7 @@ def create_moodle_massive_workshop_certificate(certificate_path, name, qrcode, t
         return_value, err = _make_certificate_certificate(certificate_path,
                                                           type, file_name)
         if return_value == 0:
-            pdf = open('{0}{1}.pdf'.format(certificate_path, file_name), 'r')
+            pdf = open('{0}{1}.pdf'.format(certificate_path, file_name), 'rb')
             response = HttpResponse(content_type='application/pdf')
             response['Content-Disposition'] = 'attachment; \
                     filename=%s' % (download_file_name)
