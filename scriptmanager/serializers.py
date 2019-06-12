@@ -28,7 +28,7 @@ class ContributorRoleSerializer(serializers.ModelSerializer):
 class TutorialDetailSerializer(serializers.ModelSerializer):
     class Meta:
       model=TutorialDetail
-      fields=('id','foss','tutorial','level','order','user','created','updated')
+      fields=('id','foss','tutorial','level','order','script_status')
 
 
 class ScriptsDetailSerializer(serializers.ModelSerializer):
