@@ -40,7 +40,7 @@ class TutorialDetailList(generics.ListAPIView):
 class ScriptCreateAPIView(generics.ListCreateAPIView):
   serializer_class=ScriptsDetailSerializer
 
-  def get_queryset(self):
+  def get_queryset(self): 
     user=User.objects.filter(username=self.request.user)
     script_pk=Scripts.objects.filter(tutorial_id=int(self.kwargs['tid']),user=user[0].id)
     return ScriptDetails.objects.filter(script=script_pk)
@@ -61,17 +61,27 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
         return Response({'status': False},status=400) 
 
   def patch(self,request, tid):
-    delete=request.data.pop('remove_slides')
-    data=request.data.pop('details')
-    script=Scripts.objects.get(tutorial_id=int(self.kwargs['tid']),user=self.request.user)
+    delete_data = request.data.pop('delete')
+    update_data = request.data.pop('update')
+    insert_data = request.data.pop('insert')
     try:
-      for key in delete:
+      script = Scripts.objects.get(tutorial_id=int(self.kwargs['tid']),user=self.request.user)
+
+      serialized = ScriptsDetailSerializer(data=insert_data,many=True)
+      if serialized.is_valid():
+        serialized.save()
+
+      for key in delete_data:
         ScriptDetails.objects.get(pk=key,script_id=script.pk).delete()
 
-      for script_details in data:
-        serializer = ScriptsDetailSerializer(ScriptDetails.objects.get(pk=script_details['id']), data=script_details)
+
+      for script_details in update_data:
+        script=ScriptDetails.objects.get(pk=script_details['id'])
+        serializer = ScriptsDetailSerializer(script, data=script_details)
         if serializer.is_valid():
           serializer.save()
       return Response({'status': True},status=201)
     except:
-      return Response({'status': False},status=400)
+      return Response({'status': False},status=400) 
+
+  
