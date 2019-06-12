@@ -132,11 +132,11 @@ urlpatterns = [
 #     SingletrainingCompletedListView.as_view(template_name="single-training.html"), 
 #      name="single-training-completed"
 #    ),
-    url(
-      r'^single-training/new/$', 
-     SingletrainingCreateView.as_view(template_name="single-training-form.html"), 
-      name="new-single-training"
-    ),
+    # url(
+    #   r'^single-training/new/$', 
+    #  SingletrainingCreateView.as_view(template_name="single-training-form.html"), 
+    #   name="new-single-training"
+    # ),
     url(
       r'^single-training/(?P<pk>\d+)/edit/$',
      SingletrainingUpdateView.as_view(template_name="single-training-form.html"),
