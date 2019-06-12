@@ -13,7 +13,7 @@ from django.core.exceptions import PermissionDenied
  
 from django.core.mail import EmailMultiAlternatives
 from django.http import HttpResponseRedirect
-from django.shortcuts import get_object_or_404, render, render_to_response
+from django.shortcuts import get_object_or_404, render
 from django.template import RequestContext
 from hashids import Hashids
 from PIL import Image

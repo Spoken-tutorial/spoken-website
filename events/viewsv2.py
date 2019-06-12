@@ -25,7 +25,7 @@ from events.forms import StudentBatchForm, TrainingRequestForm, \
     SingleTrainingEditForm,TrainingManagerForm
 
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render, render_to_response, redirect
+from django.shortcuts import render, redirect
 from django.core.validators import validate_email
 from django.contrib.auth.models import Group, User
 from django.template import RequestContext
@@ -246,7 +246,7 @@ class StudentBatchCreateView(CreateView):
     context = {'error' : error, 'warning' : warning, 'batch':form_data}
 
     if error or warning:
-      return render_to_response(self.template_name, context, context_instance=RequestContext(self.request))
+      return render(request, self.template_name, context)
 #    messages.success(self.request, "Student Batch added successfully.")
     return HttpResponseRedirect('/software-training/student-batch/%s/new/'%(str(form_data.id)))
 
@@ -2317,8 +2317,7 @@ class OrganiserFeedbackCreateView(CreateView):
 
     @method_decorator(group_required("Organiser"))
     def get(self, request, *args, **kwargs):
-        return render_to_response(self.template_name, {'form': self.form_class()},
-          context_instance=RequestContext(self.request))
+        return render(self.request, self.template_name, {'form': self.form_class()})
 
     def post(self,  request, *args, **kwargs):
       self.object = None
@@ -2362,14 +2361,14 @@ def LatexWorkshopFileUpload(request):
       form.save()
       form = LatexWorkshopFileUploadForm()
       context=RequestContext(request, {'form': form, 'success': True})
-      return render_to_response(template_name, context)
+      return render(request, template_name, context)
     else:
       context=RequestContext(request, {'form': form})
-      return render_to_response(template_name, context)
+      return render(request, template_name, context)
   else:
     form = LatexWorkshopFileUploadForm()
     context=RequestContext(request, {'form':form})
-  return render_to_response(template_name, context)
+  return render(request, template_name, context)
 
 class UpdateStudentName(UpdateView):
   model = User
@@ -2442,8 +2441,7 @@ class STWorkshopFeedbackCreateView(CreateView):
     success_url = "/home"
 
     def get(self, request, *args, **kwargs):
-        return render_to_response(self.template_name, {'form': self.form_class()},
-          context_instance=RequestContext(self.request))
+        return render(self.request, self.template_name, {'form': self.form_class()})
 
     def post(self,  request, *args, **kwargs):
       self.object = None
@@ -2463,8 +2461,7 @@ class STWorkshopFeedbackPreCreateView(CreateView):
 
     @method_decorator(login_required)
     def get(self, request, *args, **kwargs):
-        return render_to_response(self.template_name, {'form': self.form_class()},
-          context_instance=RequestContext(self.request))
+        return render(self.request, self.template_name, {'form': self.form_class()})
 
     def post(self,  request, *args, **kwargs):
       self.object = None
@@ -2499,8 +2496,7 @@ class STWorkshopFeedbackPostCreateView(CreateView):
 
     @method_decorator(login_required)
     def get(self, request, *args, **kwargs):
-        return render_to_response(self.template_name, {'form': self.form_class()},
-          context_instance=RequestContext(self.request))
+        return render(self.request, self.template_name, {'form': self.form_class()})
 
     def post(self,  request, *args, **kwargs):
       self.object = None
@@ -2528,7 +2524,7 @@ class LearnDrupalFeedbackCreateView(CreateView):
 
   def get(self, request, *args, **kwargs):
     # import ipdb; ipdb.set_trace()
-    return render_to_response(self.template_name, {'form': self.form_class()},context_instance=RequestContext(self.request))
+    return render(self.request, self.template_name, {'form': self.form_class()})
 
   def post(self,  request, *args, **kwargs):
       self.object = None
