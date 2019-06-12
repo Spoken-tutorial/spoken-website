@@ -243,14 +243,9 @@ class StudentBatchCreateView(CreateView):
 
     skipped, error, warning, write_flag = \
       self.csv_email_validate(self.request.FILES['csv_file'], form_data.id , studentcount)
-    print("skipped",skipped)
-    print("error",error)
-    print("warning",warning)
-    print("write flag",write_flag)
     context = {'error' : error, 'warning' : warning, 'batch':form_data}
 
     if error or warning:
-      print("\n\n\n\nI am here")
       messages.error(self.request,"Invalid CSV")
       return render(self.request, self.template_name, context)
 #    messages.success(self.request, "Student Batch added successfully.")
