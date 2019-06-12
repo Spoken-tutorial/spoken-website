@@ -18,6 +18,15 @@ export class CreateScriptService {
     return ls;
   }
 
+  public patchScript(tid,data) {
+    const _url = `${this.apiUrl}/tutorial/${tid}/scripts/`
+    var ls = this.httpClient.patch(
+      _url,
+      data
+    );
+    return ls;
+  }
+
   public getScript(tid){
     const _url = `${this.apiUrl}/tutorial/${tid}/scripts/`
     return this.httpClient.get(_url);
