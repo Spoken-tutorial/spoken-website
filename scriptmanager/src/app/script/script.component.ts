@@ -8,20 +8,28 @@ import {Router} from "@angular/router";
 export class ScriptComponent implements OnInit {
   @Input() slides: any;
   @Output() onSaveScript = new EventEmitter<any>();
+  @Input() removedData: any;
 
   constructor(public router:Router) { }
 
   public addSlide() {
     this.slides.push(
       {
+        id: '',
         cue: '',
         narration: '',
+        order: '',
+        script: ''
       }
     );
   }
 
   public onRemoveSlide(index) {
+    if ( this.slides[index]['id'] != '' ) {
+    this.removedData.push(this.slides[index]['id'])
+    };
     this.slides.splice(index, 1);
+    // console.log(this.removedData);
   }
 
   public saveScript() {
