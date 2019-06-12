@@ -30,9 +30,9 @@ class TutorialDetailList(generics.ListAPIView):
     
   def get_queryset(self):
     if (self.kwargs.get('fid') == 'all'):
-      return TutorialDetail.objects.all().order_by('order')
+      return TutorialDetail.objects.filter(user=self.request.user).order_by('order')
       
-    return TutorialDetail.objects.filter(foss=self.kwargs.get('fid')).order_by('order')
+    return TutorialDetail.objects.filter(user=self.request.user,foss=self.kwargs.get('fid')).order_by('order')
 
 
 
