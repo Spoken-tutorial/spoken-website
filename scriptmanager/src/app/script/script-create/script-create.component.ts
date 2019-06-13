@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CreateScriptService } from 'src/app/_service/create-script.service';
+
+// import {NgNoty, NotyOptions} from "ng-noty";
 
 @Component({
   selector: 'app-script-create',
@@ -13,8 +15,9 @@ export class ScriptCreateComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    public createscriptService: CreateScriptService
-  ) { }
+    public createscriptService: CreateScriptService,
+    public router:Router
+  ) {   }
 
   public onSaveScript(script: any) {
     for (var i = 0; i < script.length; i++) {
@@ -24,12 +27,14 @@ export class ScriptCreateComponent implements OnInit {
     this.createscriptService.postScript(
       this.id,
       {
-        "details": script
+        "data": script
       }
     ).subscribe(
-      console.log,
-      console.error
+      (res)=>{
+        this.router.navigateByUrl("/");
+      }
     );
+
   }
 
   ngOnInit() {

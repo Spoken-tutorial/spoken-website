@@ -3,9 +3,7 @@
     <div class="columns is-centered is-mobile">
       <div class="column">
         <div class="timeline">
-          <!-- <header class="timeline-header">
-              <span class="tag is-medium is-primary">Slides</span>
-            </header> -->
+        
           <ng-container *ngFor="let slide of slides; let i = index">
             <app-script-slide
               [slide]="slide"
@@ -14,6 +12,11 @@
               [view]="true"
             ></app-script-slide>
           </ng-container>
+
+          <ng-container>
+            <app-script-comment></app-script-comment>
+          </ng-container>
+
         </div>
       </div>
     </div>

@@ -1,0 +1,18 @@
+<div class="container">
+      <div  *ngFor="let comment of comments; let i = index">
+          <div class="tile is-ancestor">
+            <div class="tile is-parent">
+              <article class="tile is-child notification is-primary">
+                <div class="content">
+                  <p class="title">{{ comment['user'] }}</p>
+                  <!-- <p class="subtitle">With even more content</p> -->
+                  <div class="content">
+                    <strong>{{ comment['comment'] }}</strong>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </div>
+    </div>
+</div>
+

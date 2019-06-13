@@ -20,7 +20,7 @@ export class ScriptEditComponent implements OnInit {
   constructor(
       private route: ActivatedRoute,
       public createscriptService: CreateScriptService
-    ) { }
+    ) {}
 
   public onSaveScript(script: any) {
     for (var i = 0; i < script.length; i++) {
@@ -37,7 +37,6 @@ export class ScriptEditComponent implements OnInit {
       }
     }
   
-
     this.createscriptService.patchScript(
       this.id,
       {
@@ -73,7 +72,6 @@ export class ScriptEditComponent implements OnInit {
       this.id = +params['id'];
     });
     this.getData();
-
   }
 
 }

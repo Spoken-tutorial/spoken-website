@@ -15,6 +15,7 @@ import { ScriptCreateComponent } from './script/script-create/script-create.comp
 import { ScriptEditComponent } from './script/script-edit/script-edit.component';
 import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
 import { ScriptViewComponent } from './script/script-view/script-view.component';
+import { ScriptCommentComponent } from './script/script-comment/script-comment.component';
 
 export function tokenGetter() {
   const token = localStorage.getItem('token');
@@ -30,7 +31,8 @@ export function tokenGetter() {
     ScriptSlideComponent,
     ScriptCreateComponent,
     ScriptEditComponent,
-    ScriptViewComponent
+    ScriptViewComponent,
+    ScriptCommentComponent
   ],
   imports: [
     BrowserModule,

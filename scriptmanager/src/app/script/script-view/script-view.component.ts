@@ -29,6 +29,7 @@ export class ScriptViewComponent implements OnInit {
       console.error
     );
   }
+  
   ngOnInit() {
     this.route.params.subscribe(params => {
       this.id = +params['id'];

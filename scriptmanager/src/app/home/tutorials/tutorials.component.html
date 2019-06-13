@@ -1,26 +1,43 @@
 <div class="has-margin-top-50">
   <div class="card">
     <div class="columns">
+
       <div class="column">
-        <div class="card-header-title">
+        <div class="card-header-title is-centered">
           {{ tutorial.tutorial }}
         </div>
       </div>
-      <div class="column card-header-title">
-        <a routerLink="/create/{{ tutorial.id }}">
-          <i class="fa fa-plus" aria-hidden="true"></i> create
-        </a>
+
+
+      <div class="column">
+
+
+        <div class="columns">
+
+            <!-- <div ngIf*="{{ tutorial.script_status }}"></div> -->
+            <div *ngIf="!tutorial.script_status" class="column card-header-title">
+              <a class="button is-info" routerLink="/create/{{ tutorial.id }}">
+                <i class="fa fa-plus" aria-hidden="true"></i>&nbsp;create
+              </a>
+            </div>
+
+            <div *ngIf="tutorial.script_status" class="column card-header-title">
+              <a class="button is-info" routerLink="/edit/{{ tutorial.id }}">
+                <i class="fa fa-edit"></i>&nbsp;edit
+              </a>
+            </div>
+
+            <div *ngIf="tutorial.script_status" class="column card-header-title">
+              <a class="button is-info" routerLink="/view/{{ tutorial.id }}">
+                <i class="fa fa-eye"></i>&nbsp;view
+              </a>
+            </div>
+
+        </div>
+
       </div>
-      <div class="column card-header-title">
-        <a routerLink="/edit/{{ tutorial.id }}">
-          <i class="fa fa-edit"></i> edit
-        </a>
-      </div>
-      <div class="column card-header-title">
-        <a routerLink="/view/{{ tutorial.id }}">
-          <i class="fa fa-eye"></i> view
-        </a>
-      </div>
+
     </div>
   </div>
+
 </div>
