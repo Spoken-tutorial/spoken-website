@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group
 from django.contrib import messages
 
-from django.shortcuts import render, render_to_response
+from django.shortcuts import render
 from django.template import RequestContext
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
@@ -3014,8 +3014,8 @@ def verify_test_certificate(request):
     if request.method == 'POST':
         serial_no = request.POST.get('serial_no').strip()
         context = key_verification(serial_no)
-        return render_to_response('verify_test_certificate.html', context, ci)
-    return render_to_response('verify_test_certificate.html', {}, ci)
+        return render(request, 'verify_test_certificate.html', context)
+    return render(request, 'verify_test_certificate.html', {})
 
 
 
