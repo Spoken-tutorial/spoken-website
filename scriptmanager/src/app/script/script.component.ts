@@ -32,13 +32,10 @@ export class ScriptComponent implements OnInit {
     this.removedData.push(this.slides[index]['id'])
     };
     this.slides.splice(index, 1);
-    // console.log(this.removedData);
   }
 
   public saveScript() {
-    this.onSaveScript.emit(this.slides);
-    // this.router.navigateByUrl("/")
-    
+    this.onSaveScript.emit(this.slides); 
   }
 
   ngOnInit() {

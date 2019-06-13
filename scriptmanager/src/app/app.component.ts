@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { routerTransition } from './animations';
 import { AuthService } from './_service/auth.service';
+import { environment } from '../environments/environment';
 
 @Component({
   selector: 'app-root',
@@ -21,10 +22,12 @@ export class AppComponent {
   }
   
   ngOnInit(): void {
-    this.authService.getJwtToken().subscribe(
-      (res) => localStorage.setItem('token', res['token']),
-      (err) => console.error('Failed to fetch JWT token')
-    );
+    if (environment.production == false) {
+      this.authService.getJwtToken().subscribe(
+        (res) => localStorage.setItem('token', res['token']),
+        (err) => console.error('Failed to fetch JWT token')
+      );
+    }
   }
 
 }

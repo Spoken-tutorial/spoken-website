@@ -35,6 +35,8 @@ class TutorialDetailList(generics.ListAPIView):
     return TutorialDetail.objects.filter(user=self.request.user,foss=self.kwargs.get('fid')).order_by('order')
 
 
+
+
 class ScriptCreateAPIView(generics.ListCreateAPIView):
   serializer_class=ScriptsDetailSerializer
 
@@ -44,22 +46,28 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
     return ScriptDetails.objects.filter(script=script_pk)
       
   def create(self, request,tid):
+    print(request.data)
     details=request.data.pop('details')
+    
     # for x in details:
     #   script_details = ScriptDetails.objects.create(script=script,**x)
     try:
-      model=TutorialDetail.objects.get(pk=int(self.kwargs['tid']))
-      serializer = TutorialDetailSerializer(model,data={"script_status":1}, partial=True)
-      if serializer.is_valid():
+      try:
+        script = Scripts.objects.create(tutorial_id=int(self.kwargs['tid']),user=self.request.user)
+        model=TutorialDetail.objects.get(pk=int(self.kwargs['tid']))
+        serializer = TutorialDetailSerializer(model,data={"script_status":1}, partial=True)
+        if serializer.is_valid():
           serializer.save()
-
-      script= Scripts.objects.create(tutorial_id=int(self.kwargs['tid']),user=self.request.user)
+      except:
+        script = Scripts.objects.get(tutorial_id=int(self.kwargs['tid']),user=self.request.user)
+        
       for item in details:
         item.update( {"script":script.pk})
       serialized=ScriptsDetailSerializer(data=details,many=True)
       if serialized.is_valid():
         serialized.save()
         return Response({'status': True},status=201)
+      return Response({'status': False},status=400) 
     except:
         return Response({'status': False},status=400) 
 

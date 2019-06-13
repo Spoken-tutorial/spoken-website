@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit,Input, Output, EventEmitter } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CreateScriptService } from '../../_service/create-script.service';
 
@@ -12,6 +12,7 @@ export class ScriptViewComponent implements OnInit {
   public slides: any = [];
   private id: number;
   public foss;
+  @Input() nav:any;
   constructor(
     private route: ActivatedRoute,
     public createscriptService: CreateScriptService
@@ -31,6 +32,7 @@ export class ScriptViewComponent implements OnInit {
       console.error
     );
   }
+  
   ngOnInit() {
     this.route.params.subscribe(params => {
       this.id = +params['id'];

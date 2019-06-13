@@ -29,6 +29,8 @@
     "core-js": "^2.5.4",
     "font-awesome": "^4.7.0",
     "ng-http-loader": "^5.1.0",
+    "ng-noty": "^1.0.1",
+    "noty": "^3.2.0-beta",
     "rxjs": "~6.3.3",
     "sweetalert2": "^8.12.0",
     "tslib": "^1.9.0",
