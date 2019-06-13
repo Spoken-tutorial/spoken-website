@@ -117,7 +117,6 @@ class TutorialDetail(models.Model):
     level = models.ForeignKey(Level)
     order = models.IntegerField()
     user = models.ForeignKey(User)
-    script_status = models.PositiveSmallIntegerField(default=0)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 

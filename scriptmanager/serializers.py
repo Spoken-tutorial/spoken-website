@@ -26,9 +26,18 @@ class ContributorRoleSerializer(serializers.ModelSerializer):
 
 
 class TutorialDetailSerializer(serializers.ModelSerializer):
+    script_status = serializers.SerializerMethodField()
     class Meta:
       model=TutorialDetail
       fields=('id','foss','tutorial','level','order','script_status')
+    
+    def get_script_status(self,instance):
+      data=Scripts.objects.filter(tutorial_id=instance.id,user=self.context.get('request').user)
+      if data:
+        return True 
+      else:
+        return False
+
 
 
 class ScriptsDetailSerializer(serializers.ModelSerializer):
