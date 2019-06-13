@@ -44,7 +44,7 @@ class TutorialDetailList(generics.ListAPIView):
 #     return ScriptDetails.objects.filter(script=script_pk)
       
 #   def create(self, request,tid):
-#     details=request.data.pop('details')
+#     details=request.data.pop('data')
 #     # for x in details:
 #     #   script_details = ScriptDetails.objects.create(script=script,**x)
 #     try:
@@ -101,12 +101,12 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
     # for x in details:
     #   script_details = ScriptDetails.objects.create(script=script,**x)
     try:
-      model=TutorialDetail.objects.get(pk=int(self.kwargs['tid']))
-      serializer = TutorialDetailSerializer(model,data={"script_status":1}, partial=True)
-      if serializer.is_valid():
-          serializer.save()
       try:
         script = Scripts.objects.create(tutorial_id=int(self.kwargs['tid']),user=self.request.user)
+        model=TutorialDetail.objects.get(pk=int(self.kwargs['tid']))
+        serializer = TutorialDetailSerializer(model,data={"script_status":1}, partial=True)
+        if serializer.is_valid():
+          serializer.save()
       except:
         script = Scripts.objects.get(tutorial_id=int(self.kwargs['tid']),user=self.request.user)
         
@@ -116,6 +116,7 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
       if serialized.is_valid():
         serialized.save()
         return Response({'status': True},status=201)
+      return Response({'status': False},status=400) 
     except:
         return Response({'status': False},status=400) 
 
