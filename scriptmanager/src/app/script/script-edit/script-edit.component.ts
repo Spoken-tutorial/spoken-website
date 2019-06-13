@@ -1,6 +1,7 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CreateScriptService } from '../../_service/create-script.service';
+import * as Noty from 'noty';
 
 
 @Component({
@@ -19,7 +20,8 @@ export class ScriptEditComponent implements OnInit {
 
   constructor(
       private route: ActivatedRoute,
-      public createscriptService: CreateScriptService
+      public createscriptService: CreateScriptService,
+      public router: Router
     ) {}
 
   public onSaveScript(script: any) {
@@ -45,8 +47,37 @@ export class ScriptEditComponent implements OnInit {
         "insert": this.newData
       }
     ).subscribe(
-      console.log,
-      console.error
+      (res)=>{
+        this.router.navigateByUrl("/view/"+this.id);
+        new Noty({
+          type: 'success',
+          layout: 'topRight',
+          theme: 'metroui',
+          closeWith: ['click'],
+          text: 'The script is sucessfully updated!',
+          animation: {
+              open : 'animated fadeInRight',
+              close: 'animated fadeOutRight'
+          },
+          timeout: 4000,
+          killer: true
+        }).show();
+       },
+       (error)=>{
+        new Noty({
+          type: 'error',
+          layout: 'topRight',
+          theme: 'metroui',
+          closeWith: ['click'],
+          text: 'Woops! There seems to be an error.',
+          animation: {
+              open : 'animated fadeInRight',
+              close: 'animated fadeOutRight'
+          },
+          timeout: 4000,
+          killer: true
+        }).show();
+       }
     );
 
     this.oldData.length = 0;

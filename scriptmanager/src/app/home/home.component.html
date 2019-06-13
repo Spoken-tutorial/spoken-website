@@ -7,7 +7,7 @@
         <p class="control">
           <span class="select">
             <select (change)=" fetchFossTutorials($event.target.value)">
-              <option value="any">--All foss categories</option>
+              <option value="all">--All foss categories</option>
               <option
                 *ngFor="let item of foss"
                 [value]="item['foss_category']['id']"

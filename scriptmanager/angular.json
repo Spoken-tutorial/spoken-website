@@ -33,9 +33,13 @@
               "node_modules/font-awesome/scss/font-awesome.scss",
               "node_modules/bulma-timeline/dist/css/bulma-timeline.min.css",
               "node_modules/animate.css/animate.min.css",
-              "node_modules/bulma-divider/dist/css/bulma-divider.min.css"
+              "node_modules/bulma-divider/dist/css/bulma-divider.min.css",
+              "node_modules/noty/lib/noty.css",
+              "node_modules/noty/lib/themes/metroui.css"
             ],
-            "scripts": [],
+            "scripts": [
+              "node_modules/noty/lib/noty.min.js"
+            ],
             "es5BrowserSupport": true
           },
           "configurations": {

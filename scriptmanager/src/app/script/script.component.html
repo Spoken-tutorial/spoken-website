@@ -6,8 +6,8 @@
           <!-- <header class="timeline-header">
             <span class="tag is-medium is-primary">Slides</span>
           </header> -->
-                  <a class="button is-info" style="width:150px;margin-left:1000px" routerLink="/" >Go Back
-                    <i class="fa fa-arrow-left"></i>
+                  <a class="button is-info" style="width:150px;margin-left:1000px" routerLink="/" >
+                    <i class="fa fa-arrow-left"></i>&nbsp;Go Back
                   </a><br> 
                   <div *ngIf="nav!='create'">
                   <a class="button is-info" style="width:150px;margin-left:1000px" routerLink="/{{nav}}/{{id}}" >{{nav}}
@@ -31,6 +31,12 @@
                 <div class="column">
                   <a class="button heading is-outlined" (click)="addSlide()">Add new Slide</a>
                 </div>
+              <!-- 
+                <div class="column">
+                    <a class="button heading is-outlined" (click)="getNoti()">Noti</a>
+                </div> -->
+
+
                 <div class="column">
                   <a 
                     class="button heading is-outlined is-primary"
@@ -45,6 +51,8 @@
                     (confirm)="saveScript()"
                   >Save Script</a>
                 </div>
+
+                
               </div>
             </div>
           </div>

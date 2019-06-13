@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CreateScriptService } from 'src/app/_service/create-script.service';
+import * as Noty from 'noty';
 
-// import {NgNoty, NotyOptions} from "ng-noty";
 
 @Component({
   selector: 'app-script-create',
@@ -16,8 +16,8 @@ export class ScriptCreateComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     public createscriptService: CreateScriptService,
-    public router:Router
-  ) {   }
+    public router: Router,
+  ) { }
 
   public onSaveScript(script: any) {
     for (var i = 0; i < script.length; i++) {
@@ -32,11 +32,37 @@ export class ScriptCreateComponent implements OnInit {
     ).subscribe(
      (res)=>{
       this.router.navigateByUrl("/view/"+this.id);
-      console.log,
-      console.error
+      new Noty({
+        type: 'success',
+        layout: 'topRight',
+        theme: 'metroui',
+        closeWith: ['click'],
+        text: 'The script is sucessfully created!',
+        animation: {
+            open : 'animated fadeInRight',
+            close: 'animated fadeOutRight'
+        },
+        timeout: 4000,
+        killer: true
+      }).show();
+     },
+     (error)=>{
+      new Noty({
+        type: 'error',
+        layout: 'topRight',
+        theme: 'metroui',
+        closeWith: ['click'],
+        text: 'Woops! There seems to be an error.',
+        animation: {
+            open : 'animated fadeInRight',
+            close: 'animated fadeOutRight'
+        },
+        timeout: 4000,
+        killer: true
+      }).show();
      }
     );
-   
+
   }
 
   ngOnInit() {
