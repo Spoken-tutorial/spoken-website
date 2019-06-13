@@ -6,6 +6,15 @@
           <!-- <header class="timeline-header">
             <span class="tag is-medium is-primary">Slides</span>
           </header> -->
+                  <a class="button is-info" style="width:150px;margin-left:1000px" routerLink="/" >Go Back
+                    <i class="fa fa-arrow-left"></i>
+                  </a><br> 
+                  <div *ngIf="nav!='create'">
+                  <a class="button is-info" style="width:150px;margin-left:1000px" routerLink="/{{nav}}/{{id}}" >{{nav}}
+                  </a>
+                  </div>
+                  <br>
+                  
           <ng-container *ngFor="let slide of slides; let i = index">
             <app-script-slide 
               [slide]="slide" 

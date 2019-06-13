@@ -22,9 +22,11 @@ export class ScriptViewComponent implements OnInit {
       this.id
     ).subscribe(
       (res) => {
-          for(let i =0;i<res['length'];i++){
-            this.slides.push(res[i]);
-          }
+          // for(let i =0;i<res['length'];i++){
+          //   this.slides.push(res[i]);
+          // }
+          this.slides = res;
+          console.log(res);
       },
       console.error
     );

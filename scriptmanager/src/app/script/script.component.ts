@@ -1,5 +1,7 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import {Router} from "@angular/router";
+import { ActivatedRoute } from '@angular/router';
+
 @Component({
   selector: 'app-script',
   templateUrl: './script.component.html',
@@ -9,8 +11,9 @@ export class ScriptComponent implements OnInit {
   @Input() slides: any;
   @Output() onSaveScript = new EventEmitter<any>();
   @Input() removedData: any;
-
-  constructor(public router:Router) { }
+  @Input() nav:any;
+  public id;
+  constructor(public router:Router,public route:ActivatedRoute) { }
 
   public addSlide() {
     this.slides.push(
@@ -34,12 +37,15 @@ export class ScriptComponent implements OnInit {
 
   public saveScript() {
     this.onSaveScript.emit(this.slides);
-    this.router.navigateByUrl("/")
+    // this.router.navigateByUrl("/")
     
   }
 
   ngOnInit() {
     this.addSlide();
+    this.route.params.subscribe(params => {
+      this.id = +params['id'];
+    });
   }
 
 }

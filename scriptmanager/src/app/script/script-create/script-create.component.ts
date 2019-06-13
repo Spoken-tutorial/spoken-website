@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CreateScriptService } from 'src/app/_service/create-script.service';
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'app-script-create',
@@ -13,7 +14,8 @@ export class ScriptCreateComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    public createscriptService: CreateScriptService
+    public createscriptService: CreateScriptService,
+    public router:Router
   ) { }
 
   public onSaveScript(script: any) {
@@ -27,9 +29,13 @@ export class ScriptCreateComponent implements OnInit {
         "details": script
       }
     ).subscribe(
+     (res)=>{
+      this.router.navigateByUrl("/view/"+this.id);
       console.log,
       console.error
+     }
     );
+   
   }
 
   ngOnInit() {
