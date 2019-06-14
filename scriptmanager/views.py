@@ -137,6 +137,10 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
 #       script = Scripts.objects.get(tutorial_id=int(self.kwargs['tid']),user=self.request.user)
 #       for key in data:
 #         ScriptDetails.objects.get(pk=key,script_id=script.pk).delete()
+
+#       if not ScriptDetails.objects.filter(script_id=script.pk).exists():
+#         Scripts.objects.get(tutorial_id=int(self.kwargs['tid']),user=self.request.user).delete()
+
 #       return Response({'status': True},status=202) 
 #     except:
 #       return Response({'status': False},status=400) 
