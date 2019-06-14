@@ -80,7 +80,9 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
 
       for key in delete_data:
         ScriptDetails.objects.get(pk=key,script_id=script.pk).delete()
-
+      
+      if not ScriptDetails.objects.filter(script_id=script.pk).exists():
+        Scripts.objects.get(tutorial_id=int(self.kwargs['tid']),user=self.request.user).delete()
 
       for script_details in update_data:
         script=ScriptDetails.objects.get(pk=script_details['id'])
@@ -101,7 +103,7 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
 #     return ScriptDetails.objects.filter(script=script_pk)
       
 #   def create(self, request,tid):
-#     details=request.data['data']
+#     details=request.data['details']
 #     # for x in details:
 #     #   script_details = ScriptDetails.objects.create(script=script,**x)
 #     try:
