@@ -29,12 +29,10 @@ class TutorialDetailList(generics.ListAPIView):
   serializer_class=TutorialDetailSerializer
     
   def get_queryset(self):
-    if (self.kwargs.get('fid') == 'all'):
-      return TutorialDetail.objects.filter(user=self.request.user).order_by('order')
-      
-    return TutorialDetail.objects.filter(user=self.request.user,foss=self.kwargs.get('fid')).order_by('order')
-
-
+    if ContributorRole.objects.filter(user = self.request.user,foss_category_id = self.kwargs.get('fid')).exists():
+      return TutorialDetail.objects.filter(foss = self.kwargs.get('fid')).order_by('order')
+    else:
+      return None
 
 
 class ScriptCreateAPIView(generics.ListCreateAPIView):
