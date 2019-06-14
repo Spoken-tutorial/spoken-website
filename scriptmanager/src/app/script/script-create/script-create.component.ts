@@ -3,12 +3,12 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { CreateScriptService } from 'src/app/_service/create-script.service';
 import * as Noty from 'noty';
 
-
 @Component({
   selector: 'app-script-create',
   templateUrl: './script-create.component.html',
   styleUrls: ['./script-create.component.sass']
 })
+
 export class ScriptCreateComponent implements OnInit {
   public slides: any = [];
   private id: number;
@@ -62,7 +62,6 @@ export class ScriptCreateComponent implements OnInit {
       }).show();
      }
     );
-
   }
 
   ngOnInit() {

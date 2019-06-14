@@ -13,6 +13,7 @@ export class ScriptComponent implements OnInit {
   @Input() removedData: any;
   @Input() nav:any;
   public id;
+
   constructor(public router:Router,public route:ActivatedRoute) { }
 
   public addSlide() {
