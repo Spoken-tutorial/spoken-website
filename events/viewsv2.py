@@ -246,7 +246,6 @@ class StudentBatchCreateView(CreateView):
     context = {'error' : error, 'warning' : warning, 'batch':form_data}
 
     if error or warning:
-      messages.error(self.request,"Invalid CSV")
       return render(self.request, self.template_name, context)
 #    messages.success(self.request, "Student Batch added successfully.")
     return HttpResponseRedirect('/software-training/student-batch/%s/new/'%(str(form_data.id)))
@@ -2862,6 +2861,25 @@ def academic_transactions(request):
 
 def trainingrequest(request, role, status):
   context = {}
+  user = None
+  template_name = None
+  header = None
+  raw_get_data = None
+  now= datetime.now()
+  year = now.year
+  month =now.month
+
+  current_sem_type_even = 0 #odd
+  if month < 6:
+    current_sem_type_even = 1 #even
+
+  prev_sem_type = 'even'
+  prev_sem_year = year
+  if current_sem_type_even:
+    prev_sem_type = 'odd'
+    prev_sem_year = (year - 1)
+  prev_sem_start_date, prev_sem_end_date = get_prev_semester_duration(prev_sem_type, prev_sem_year)
+  
   if (not role ) or (not status):
     raise PermissionDenied()
   else:
