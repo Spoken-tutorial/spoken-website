@@ -12,6 +12,7 @@ export class ScriptViewComponent implements OnInit {
   public slides: any = [];
   private id: number;
   public foss;
+  public comment=false;
   @Input() nav: any;
   public comments: any = [];
 
@@ -29,7 +30,37 @@ export class ScriptViewComponent implements OnInit {
       },
     );
   }
+  public onSaveScript(val:any){
+    console.log("manan")
+    console.log(val);
+    this.comment=true;
+  }
   
+  public getComment() {
+    this.comments = [
+      {
+        "slideId": 1,
+        "user": "Reviewer 1", 
+        "comment": "This comment is from reviewer 1"
+      },
+      {
+        "slideId": 2,
+        "user": "Reviewer 2", 
+        "comment": "This comment is from reviewer 2"
+      },
+      {
+        "slideId": 1,
+        "user": "Reviewer 3", 
+        "comment": "This comment is from reviewer 3"
+      },
+      {
+        "slideId": 4,
+        "user": "Reviewer 4", 
+        "comment": "This comment is from reviewer 4"
+      }
+    ];
+  
+  }
 
 
   ngOnInit() {
@@ -37,6 +68,7 @@ export class ScriptViewComponent implements OnInit {
       this.id = +params['id'];
     });
     this.viewScript();
+    this.getComment();
   }
 
 }

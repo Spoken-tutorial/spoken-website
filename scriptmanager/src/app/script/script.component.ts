@@ -17,7 +17,7 @@ export class ScriptComponent implements OnInit {
   public id;
   constructor(public router:Router,public route:ActivatedRoute, public createscriptService:CreateScriptService) { }
 
-  public addSlide() {
+  public addSlide(){
     this.slides.push(
       {
         id: '',

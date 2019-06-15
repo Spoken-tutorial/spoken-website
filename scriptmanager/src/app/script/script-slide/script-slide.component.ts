@@ -20,8 +20,8 @@ export class ScriptSlideComponent implements OnInit {
 
   public viewComment() {
     // this.getCommentEmitter.emit(this.slide.order);
-    // console.log(this.index);
-    this.comment=true;
+    console.log(this.index);
+    this.getCommentEmitter.emit(this.index);
     
   }
 

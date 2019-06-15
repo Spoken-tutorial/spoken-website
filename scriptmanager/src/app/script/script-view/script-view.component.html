@@ -19,12 +19,18 @@
               [slide]="slide"
               [index]="i"
               [view]="true"
+              (getCommentEmitter)="onSaveScript($event)"
             ></app-script-slide>
           </ng-container>
 
         </div>
       </div>
      
+      <div *ngIf="comment">
+      <div class="column">
+        <app-script-comment [comments]="comments" ></app-script-comment>
+      </div>
+      </div>
     
 
     </div>
