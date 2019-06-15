@@ -32,7 +32,7 @@ export function tokenGetter() {
     ScriptCreateComponent,
     ScriptEditComponent,
     ScriptViewComponent,
-    ScriptCommentComponent
+    ScriptCommentComponent,
   ],
   imports: [
     BrowserModule,

@@ -8,6 +8,7 @@ import { CreateScriptService } from 'src/app/_service/create-script.service';
   templateUrl: './script.component.html',
   styleUrls: ['./script.component.sass']
 })
+
 export class ScriptComponent implements OnInit {
   @Input() slides: any;
   @Output() onSaveScript = new EventEmitter<any>();
@@ -70,8 +71,9 @@ export class ScriptComponent implements OnInit {
   }
 
   public saveScript() {
-    this.onSaveScript.emit(this.slides); 
+    this.onSaveScript.emit(this.slides);
   }
+  
 
   ngOnInit() {
     this.addSlide();

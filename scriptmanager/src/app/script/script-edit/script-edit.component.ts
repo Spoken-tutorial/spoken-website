@@ -30,54 +30,87 @@ export class ScriptEditComponent implements OnInit {
     }
   
     for (var i = 0; i < script.length; i++) {
+      console.log(script[i]['id'])
       if (script[i]['id'] == '') {
-        this.newData.push(script[i]);
+        this.createscriptService.postScript(
+          this.id,
+          {
+            "details": script
+          }
+        ).subscribe(
+          (res)=>{
+            // this.router.navigateByUrl("/view/"+this.id);
+            new Noty({
+              type: 'success',
+              layout: 'topRight',
+              theme: 'metroui',
+              closeWith: ['click'],
+              text: 'The script is sucessfully updated!',
+              animation: {
+                  open : 'animated fadeInRight',
+                  close: 'animated fadeOutRight'
+              },
+              timeout: 4000,
+              killer: true
+            }).show();
+           },
+           (error)=>{
+            new Noty({
+              type: 'error',
+              layout: 'topRight',
+              theme: 'metroui',
+              closeWith: ['click'],
+              text: 'Woops! There seems to be an error.',
+              animation: {
+                  open : 'animated fadeInRight',
+                  close: 'animated fadeOutRight'
+              },
+              timeout: 4000,
+              killer: true
+            }).show();
+           }
+        );
       }
       else {
-        this.oldData.push(script[i]);
+        this.createscriptService.patchScript(
+          this.id, script[0]
+         ).subscribe(
+          (res)=>{
+            // this.router.navigateByUrl("/view/"+this.id);
+            new Noty({
+              type: 'success',
+              layout: 'topRight',
+              theme: 'metroui',
+              closeWith: ['click'],
+              text: 'The script is sucessfully updated!',
+              animation: {
+                  open : 'animated fadeInRight',
+                  close: 'animated fadeOutRight'
+              },
+              timeout: 4000,
+              killer: true
+            }).show();
+           },
+           (error)=>{
+            new Noty({
+              type: 'error',
+              layout: 'topRight',
+              theme: 'metroui',
+              closeWith: ['click'],
+              text: 'Woops! There seems to be an error.',
+              animation: {
+                  open : 'animated fadeInRight',
+                  close: 'animated fadeOutRight'
+              },
+              timeout: 4000,
+              killer: true
+            }).show();
+           }
+        );
       }
     }
   
-    this.createscriptService.patchScript(
-      this.id,
-      {
-        "delete": this.removedData, 
-        "update": this.oldData,
-        "insert": this.newData
-      }
-    ).subscribe(
-      (res)=>{
-        this.router.navigateByUrl("/view/"+this.id);
-        new Noty({
-          type: 'success',
-          layout: 'topRight',
-          theme: 'metroui',
-          closeWith: ['click'],
-          text: 'The script is sucessfully updated!',
-          animation: {
-              open : 'animated fadeInRight',
-              close: 'animated fadeOutRight'
-          },
-          timeout: 4000,
-          killer: true
-        }).show();
-       },
-       (error)=>{
-        new Noty({
-          type: 'error',
-          layout: 'topRight',
-          theme: 'metroui',
-          closeWith: ['click'],
-          text: 'Woops! There seems to be an error.',
-          animation: {
-              open : 'animated fadeInRight',
-              close: 'animated fadeOutRight'
-          },
-          timeout: 4000,
-          killer: true
-        }).show();
-       }
-    );
+    
 
     this.oldData.length = 0;
     this.newData.length = 0;
