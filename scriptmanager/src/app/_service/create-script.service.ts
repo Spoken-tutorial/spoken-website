@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { environment} from '../../environments/environment'
+import { environment } from '../../environments/environment'
 
 @Injectable({
   providedIn: 'root'
@@ -28,12 +28,10 @@ export class CreateScriptService {
     return ls;
   }
 
-  public deleteScript(tid,data) {
-    console.log(data);
-    const _url = `${this.apiUrl}/tutorial/${tid}/scripts/`
+  public deleteScript(tid,srcipt_pk) {
+    const _url = `${this.apiUrl}/tutorial/${tid}/scripts/${srcipt_pk}/`
     var ls = this.httpClient.delete(
-      _url,
-      data
+      _url
     );
     return ls;
   }
