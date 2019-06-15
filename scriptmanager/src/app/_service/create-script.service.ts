@@ -28,6 +28,15 @@ export class CreateScriptService {
     return ls;
   }
 
+  public deleteScript(tid,srcipt_pk) {
+    // console.log(data);
+    const _url = `${this.apiUrl}/tutorial/${tid}/scripts/${srcipt_pk}/`
+    var ls = this.httpClient.delete(
+      _url
+    );
+    return ls;
+  }
+
   public getScript(tid){
     const _url = `${this.apiUrl}/tutorial/${tid}/scripts/`
     return this.httpClient.get(_url);
