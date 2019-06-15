@@ -15,7 +15,7 @@
     <a class="delete is-large"></a>
   </div>
   <div class="columns">
-    <div class="column is-6">
+    <div class="column is-3">
       <div class="timeline-content">
         <p class="heading">Visual Cue</p>
         <div class="field">
@@ -27,7 +27,7 @@
       </div>
     </div>
 
-    <div class="column is-6">
+    <div class="column is-3">
       <div class="timeline-content">
         <p class="heading">Narration</p>
         <div class="field">
@@ -39,10 +39,21 @@
       </div>
     </div>
 
-    <div class="column is-2">
+    <div class="column is-1">
         <a class="button heading is-outlined" (click)="viewComment()">View Comments</a>
     </div>
-    
+  <div *ngIf="comment">
+    <div class="column is-5">
+      
+        <div class="timeline">
+          <ng-container>
+            <app-script-comment [index]="index"></app-script-comment>
+          </ng-container>
+        </div>
+      
+    </div>
+  </div>  
+  
 
   </div>
 </div>

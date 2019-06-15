@@ -11,7 +11,7 @@ export class ScriptSlideComponent implements OnInit {
   @Output() removeSlideEmitter = new EventEmitter<number>();
   @Output() getCommentEmitter = new EventEmitter<number>();
   @Input() view:boolean=false;
-  
+  public comment=false;
   constructor() { }
 
   public removeSlide() {
@@ -19,8 +19,10 @@ export class ScriptSlideComponent implements OnInit {
   }
 
   public viewComment() {
-    this.getCommentEmitter.emit(this.index);
+    // this.getCommentEmitter.emit(this.slide.order);
     // console.log(this.index);
+    this.comment=true;
+    
   }
 
   cueKey(event) { this.slide.cue = event.target.value;}
