@@ -1,6 +1,6 @@
 from creation.models import ContributorRole, FossCategory, Language,TutorialDetail
 from rest_framework import serializers
-from .models import Scripts, ScriptDetails
+from .models import Scripts, ScriptDetails,Comments
 from django.contrib.auth.models import User
 from rest_framework.response import Response
 from rest_framework import status
@@ -53,4 +53,9 @@ class ScriptsSerializer(serializers.ModelSerializer):
     model=Scripts
     fields=('details',)
 
+class CommentsSerializer(serializers.ModelSerializer):
+
+  class Meta:
+    model=Comments
+    fields=('id','comment','user','script_details','created','updated')
  

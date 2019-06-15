@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from creation.models import ContributorRole,TutorialDetail,User
-from .models import Scripts,ScriptDetails
-from .serializers import ContributorRoleSerializer,TutorialDetailSerializer,ScriptsDetailSerializer,ScriptsSerializer
+from .models import Scripts,ScriptDetails,Comments
+from .serializers import ContributorRoleSerializer,TutorialDetailSerializer,ScriptsDetailSerializer,ScriptsSerializer,CommentsSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -133,14 +133,27 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
     except:
       return Response({'status': False},status = 400) 
 
-  def delete(self,request,tid,script_detail_pk):
+  def delete(self,request,tid,script_detail_id):
     try:
       script  =  Scripts.objects.get(tutorial_id = int(self.kwargs['tid']),user  =  self.request.user)
-      ScriptDetails.objects.get(pk = int(self.kwargs['script_detail_pk']),script_id = script.pk).delete()
+      ScriptDetails.objects.get(pk = int(self.kwargs['script_detail_id']),script_id = script.pk).delete()
       if not ScriptDetails.objects.filter(script_id = script.pk).exists():
         Scripts.objects.get(tutorial_id = int(self.kwargs['tid']),user = self.request.user).delete()
       return Response({'status': True},status = 202) 
     except:
       return Response({'status': False},status = 400) 
 
+
+class CommentCreateAPIView(generics.ListCreateAPIView):
+  serializer_class=CommentsSerializer
+
+  def get_queryset(self):
+    try:
+      script_details_id=int(self.kwargs['script_detail_id'])
+      script_details=ScriptDetails.objects.get(id=script_details_id)
+      if(Scripts.objects.filter(id=script_details.script_id,user=User.objects.filter(username = self.request.user)[0].id)):
+        return Comments.objects.filter(script_details = script_details_id)
+    except:
+      return None
+  
 

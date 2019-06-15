@@ -12,7 +12,14 @@ class Scripts(models.Model):
 	
 
 class ScriptDetails(models.Model):
-	cue=models.TextField()
-	narration=models.TextField()
-	order=models.PositiveIntegerField()
-	script=models.ForeignKey('Scripts', on_delete = models.CASCADE)
+	cue = models.TextField()
+	narration = models.TextField()
+	order = models.PositiveIntegerField()
+	script = models.ForeignKey('Scripts', on_delete = models.CASCADE)
+
+class Comments(models.Model):
+	comment = models.TextField()
+	user=models.ForeignKey(User)
+	script_details=models.ForeignKey('ScriptDetails',on_delete=models.CASCADE)
+	created = models.DateTimeField(auto_now_add=True)
+	updated = models.DateTimeField(auto_now=True)
