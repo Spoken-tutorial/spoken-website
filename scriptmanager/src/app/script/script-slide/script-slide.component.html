@@ -12,6 +12,7 @@
             }" (confirm)="removeSlide()">
     <a class="delete is-large"></a>
   </div>
+
   <div class="columns">
     <div class="column is-3">
       <div class="timeline-content">
@@ -19,7 +20,7 @@
         <div class="field">
           <div class="control">
             <textarea class="textarea has-fixed-size is-info" placeholder="Visual Cue" [value]="slide.cue"
-              [disabled]="view" (keyup)="cueKey($event)">
+              [disabled]="view" (keyup)="cueKey($event)" (blur)="saveSlide()">
               </textarea>
           </div>
         </div>
@@ -32,18 +33,16 @@
         <div class="field">
           <div class="control">
             <textarea class="textarea has-fixed-size is-primary" placeholder="Narration" [value]="slide.narration"
-              [disabled]="view" (keyup)="narrationKey($event)">
+              [disabled]="view" (keyup)="narrationKey($event)" (blur)="saveSlide()">
               </textarea>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="column is-1">
-        <a class="button heading is-outlined" (click)="viewComment()">View Comments</a>
+    <div *ngIf="displayComments" class="column is-1">
+      <a class="button heading is-outlined" (click)="viewComment()">View Comments</a>
     </div>
-
-  
 
   </div>
 </div>

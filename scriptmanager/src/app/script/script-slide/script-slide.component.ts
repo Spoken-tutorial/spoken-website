@@ -9,9 +9,11 @@ export class ScriptSlideComponent implements OnInit {
   @Input() slide: any;
   @Input() index: number;
   @Output() removeSlideEmitter = new EventEmitter<number>();
+  @Output() saveSlideEmitter = new EventEmitter<any>();
   @Output() getCommentEmitter = new EventEmitter<number>();
-  @Input() view:boolean=false;
-  public comment=false;
+  @Input() view: boolean = false;
+  @Input() displayComments: boolean = false;
+  public comment = false;
   constructor() { }
 
   public removeSlide() {
@@ -19,14 +21,17 @@ export class ScriptSlideComponent implements OnInit {
   }
 
   public viewComment() {
-    // this.getCommentEmitter.emit(this.slide.order);
-    console.log(this.index);
+    // console.log(this.index);
     this.getCommentEmitter.emit(this.index);
-    
   }
 
-  cueKey(event) { this.slide.cue = event.target.value;}
-  narrationKey(event) { this.slide.narration = event.target.value;}
+  public saveSlide() {
+    // console.log(this.slide);
+    this.saveSlideEmitter.emit(this.slide);
+  }
+
+  cueKey(event) { this.slide.cue = event.target.value; }
+  narrationKey(event) { this.slide.narration = event.target.value; }
 
   ngOnInit() {
   }

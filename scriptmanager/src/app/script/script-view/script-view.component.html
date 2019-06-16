@@ -1,37 +1,33 @@
 <div class="container has-margin-top-50">
   <div class="section">
-      <a class="button is-info" style="width:150px;margin-left:1000px" routerLink="/" >
-        <i class="fa fa-arrow-left"></i>&nbsp;Go Back
+    <a class="button is-info" style="width:150px;margin-left:1000px" routerLink="/">
+      <i class="fa fa-arrow-left"></i>&nbsp;Go Back
+    </a>
+    <br><br>
+    <div *ngIf="nav!='create'">
+      <a class="button is-info" style="width:150px;margin-left:1000px" routerLink="/edit/{{id}}">edit
       </a>
-      <br><br> 
-      <div *ngIf="nav!='create'">
-      <a class="button is-info" style="width:150px;margin-left:1000px" routerLink="/edit/{{id}}" >edit
-      </a>
-      </div>
+    </div>
 
-      <br><br>
+    <br><br>
     <div class="columns is-centered is-mobile">
       <div class="column is-two-thirds">
         <div class="timeline">
 
           <ng-container *ngFor="let slide of slides; let i = index">
-            <app-script-slide
-              [slide]="slide"
-              [index]="i"
-              [view]="true"
-              (getCommentEmitter)="onSaveScript($event)"
-            ></app-script-slide>
+            <app-script-slide [slide]="slide" [index]="i" [view]="true" [displayComments]="true" (getCommentEmitter)="onShowComment($event)">
+            </app-script-slide>
           </ng-container>
 
         </div>
       </div>
-     
+
       <div *ngIf="comment">
-      <div class="column">
-        <app-script-comment [comments]="comments" ></app-script-comment>
+        <div class="column">
+          <app-script-comment [comments]="comments"></app-script-comment>
+        </div>
       </div>
-      </div>
-    
+
 
     </div>
   </div>

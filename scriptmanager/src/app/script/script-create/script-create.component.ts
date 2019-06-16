@@ -20,48 +20,54 @@ export class ScriptCreateComponent implements OnInit {
   ) { }
 
   public onSaveScript(script: any) {
-    for (var i = 0; i < script.length; i++) {
-      script[i]['order'] = i+1;
+    if (script['order'] == '') {
+      // console.log(script)
+      // Do nothing
+    }
+    else {
+      for (var i = 0; i < script.length; i++) {
+        script[i]['order'] = i + 1;
+      }
+      this.createscriptService.postScript(
+        this.id,
+        {
+          "details": script
+        }
+      ).subscribe(
+        (res) => {
+          this.router.navigateByUrl("/view/" + this.id);
+          new Noty({
+            type: 'success',
+            layout: 'topRight',
+            theme: 'metroui',
+            closeWith: ['click'],
+            text: 'The script is sucessfully created!',
+            animation: {
+              open: 'animated fadeInRight',
+              close: 'animated fadeOutRight'
+            },
+            timeout: 4000,
+            killer: true
+          }).show();
+        },
+        (error) => {
+          new Noty({
+            type: 'error',
+            layout: 'topRight',
+            theme: 'metroui',
+            closeWith: ['click'],
+            text: 'Woops! There seems to be an error.',
+            animation: {
+              open: 'animated fadeInRight',
+              close: 'animated fadeOutRight'
+            },
+            timeout: 4000,
+            killer: true
+          }).show();
+        }
+      );
     }
 
-    this.createscriptService.postScript(
-      this.id,
-      {
-        "details": script
-      }
-    ).subscribe(
-     (res)=>{
-      this.router.navigateByUrl("/view/"+this.id);
-      new Noty({
-        type: 'success',
-        layout: 'topRight',
-        theme: 'metroui',
-        closeWith: ['click'],
-        text: 'The script is sucessfully created!',
-        animation: {
-            open : 'animated fadeInRight',
-            close: 'animated fadeOutRight'
-        },
-        timeout: 4000,
-        killer: true
-      }).show();
-     },
-     (error)=>{
-      new Noty({
-        type: 'error',
-        layout: 'topRight',
-        theme: 'metroui',
-        closeWith: ['click'],
-        text: 'Woops! There seems to be an error.',
-        animation: {
-            open : 'animated fadeInRight',
-            close: 'animated fadeOutRight'
-        },
-        timeout: 4000,
-        killer: true
-      }).show();
-     }
-    );
   }
 
   ngOnInit() {
