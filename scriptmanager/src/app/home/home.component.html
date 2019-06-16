@@ -1,5 +1,5 @@
 <div class="container has-margin-top-50">
-  
+
   <div class="columns">
 
     <div class="column">
@@ -8,11 +8,8 @@
           <span class="select">
             <select (change)=" fetchFossTutorials($event.target.value)">
               <option value="all">--Select Foss Categories--</option>
-              <option
-                *ngFor="let item of foss"
-                [value]="item['foss_category']['id']"
-                >{{ item['foss_category']['name'] }}</option
-              >
+              <option *ngFor="let item of foss" [value]="item['foss_category']['id']">
+                {{ item['foss_category']['name'] }}</option>
             </select>
           </span>
         </p>
@@ -35,9 +32,13 @@
     </div>
 
   </div>
-  
+
   <div *ngFor="let tutorial of tutorials">
-    <app-tutorials [tutorial]="tutorial"></app-tutorials>
+    <div class="columns">
+      <div class="column is-8">
+        <app-tutorials [tutorial]="tutorial"></app-tutorials>
+      </div>
+    </div>
   </div>
 
 </div>

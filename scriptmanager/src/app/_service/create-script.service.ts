@@ -39,7 +39,12 @@ export class CreateScriptService {
   public getScript(tid){
     const _url = `${this.apiUrl}/tutorial/${tid}/scripts/`
     return this.httpClient.get(_url);
-  }  
+  }
+  
+  public getComment(tid){
+    const _url = `${this.apiUrl}/scripts/${tid}/comments/`
+    return this.httpClient.get(_url);
+  }
 
   constructor(private httpClient: HttpClient) { }
 }

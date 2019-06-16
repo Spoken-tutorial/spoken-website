@@ -10,24 +10,22 @@
     </div>
 
     <br><br>
-    <div class="columns is-centered is-mobile">
-      <div class="column is-two-thirds">
-        <div class="timeline">
 
+    <div class="columns is-mobile">
+      
+      <div class="column is-8">
+        <div class="timeline">
           <ng-container *ngFor="let slide of slides; let i = index">
             <app-script-slide [slide]="slide" [index]="i" [view]="true" [displayComments]="true" (getCommentEmitter)="onShowComment($event)">
             </app-script-slide>
           </ng-container>
-
         </div>
       </div>
 
-      <div *ngIf="comment">
-        <div class="column">
+        <div *ngIf="comment" class="column">
+          <br><br>
           <app-script-comment [comments]="comments"></app-script-comment>
         </div>
-      </div>
-
 
     </div>
   </div>

@@ -10,15 +10,7 @@ export class ScriptCommentComponent implements OnInit {
   @Input() comments:any;
   constructor() { }
 
-
-
   ngOnInit() {
-    // this.route.params.subscribe(params => {
-    //   this.id = +params['id'];
-    // });
-    // console.log(this.comments);
-    // return this.comments;
-
 
   }
 

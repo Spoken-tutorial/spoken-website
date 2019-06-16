@@ -31,36 +31,20 @@ export class ScriptViewComponent implements OnInit {
     );
   }
 
-  public onShowComment(val: any) {
-    // console.log(val);
-    this.getComment();
-    this.comment = true;
+  public getComment(slideId) {
+    this.createscriptService.getComment(
+      slideId
+    ).subscribe(
+      (res) => {
+        this.comments = res;
+      },
+    );
   }
 
-  public getComment() {
-    this.comments = [
-      {
-        "slideId": 1,
-        "user": "Reviewer 1",
-        "comment": "This comment is from reviewer 1"
-      },
-      {
-        "slideId": 2,
-        "user": "Reviewer 2",
-        "comment": "This comment is from reviewer 2"
-      },
-      {
-        "slideId": 1,
-        "user": "Reviewer 3",
-        "comment": "This comment is from reviewer 3"
-      },
-      {
-        "slideId": 4,
-        "user": "Reviewer 4",
-        "comment": "This comment is from reviewer 4"
-      }
-    ];
-
+  public onShowComment(val: any) {
+    // console.log(this.slides[val]['id']);
+    this.getComment(this.slides[val]['id']);
+    this.comment = true;
   }
 
   ngOnInit() {
