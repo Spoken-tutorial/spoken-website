@@ -54,6 +54,7 @@ class ScriptsSerializer(serializers.ModelSerializer):
     fields=('details',)
 
 class CommentsSerializer(serializers.ModelSerializer):
+  user=serializers.CharField()
 
   class Meta:
     model=Comments
