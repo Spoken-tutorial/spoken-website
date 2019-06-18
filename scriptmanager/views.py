@@ -95,5 +95,12 @@ class CommentCreateAPIView(generics.ListCreateAPIView):
         return Comments.objects.filter(script_details = script_details_id).order_by('-created')
     except:
       return None
-  
+
+
+  def create(self,request,script_detail_id):
+    try:
+      Comments.objects.create(comment=request.data['comment'],user=self.request.user,script_details_id=script_detail_id)
+      return Response({'status': True},status = 202)
+    except:
+      return Response({'status': False},status = 400)
 
