@@ -12,17 +12,11 @@ export class ScriptSlideComponent implements OnInit {
   @Output() saveSlideEmitter = new EventEmitter<any>();
   @Output() getCommentEmitter = new EventEmitter<number>();
   @Input() view: boolean = false;
-  @Input() displayComments: boolean = false;
   public comment = false;
   constructor() { }
 
   public removeSlide() {
     this.removeSlideEmitter.emit(this.index);
-  }
-
-  public viewComment() {
-    // console.log(this.index);
-    this.getCommentEmitter.emit(this.index);
   }
 
   public saveSlide() {

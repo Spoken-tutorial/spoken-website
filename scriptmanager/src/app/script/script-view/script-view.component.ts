@@ -13,7 +13,6 @@ export class ScriptViewComponent implements OnInit {
   private id: number;
   public foss;
   public comment = false;
-  @Input() nav: any;
   public comments: any = [];
 
   constructor(
@@ -41,9 +40,9 @@ export class ScriptViewComponent implements OnInit {
     );
   }
 
-  public onShowComment(val: any) {
+  public viewComment(i) {
     // console.log(this.slides[val]['id']);
-    this.getComment(this.slides[val]['id']);
+    this.getComment(this.slides[i]['id']);
     this.comment = true;
   }
 
