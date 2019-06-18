@@ -2407,7 +2407,7 @@ def organiser_invigilator_index(request, role, status):
     if role == 'organiser':
         try:
             #collectionSet = Organiser.objects.select_related().filter(academic__in=AcademicCenter.objects.filter(state__in=State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)), status=status)
-            states =  user.resource_person.prefetch_related().filter(resourceperson__status = 1)
+            states =  user.resource_person.prefetch_related().filter(resourceperson__status = 1,resourceperson__user_id=user)
             academics = AcademicCenter.objects.filter(state__in = states)
             collectionSet = Organiser.objects.filter(academic__in = academics, status = status)
             
@@ -2426,7 +2426,7 @@ def organiser_invigilator_index(request, role, status):
     elif role == 'invigilator':
         try:
             #collectionSet = Invigilator.objects.select_related().filter(academic__in=AcademicCenter.objects.filter(state=State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)), status=status)
-            states = user.resource_person.prefetch_related().filter(resourceperson__status=1)
+            states = user.resource_person.prefetch_related().filter(resourceperson__status=1, resourceperson__user_id=user)
             academics = AcademicCenter.objects.filter(state__in=states)
             collectionSet = Invigilator.objects.filter(academic__in=academics, status=status)
 
@@ -2446,7 +2446,7 @@ def organiser_invigilator_index(request, role, status):
     elif role == 'accountexecutive':
         try:
             #collectionSet = Accountexecutive.objects.select_related().filter(academic__in=AcademicCenter.objects.filter(state__in=State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)), status=status)
-            states = user.resource_person.prefetch_related().filter(resourceperson__status=1)
+            states = user.resource_person.prefetch_related().filter(resourceperson__status=1, resourceperson__user_id=user)
             academics = AcademicCenter.objects.filter(state__in=states)
             collectionSet = Accountexecutive.objects.filter(academic__in=academics, status=status)
 
