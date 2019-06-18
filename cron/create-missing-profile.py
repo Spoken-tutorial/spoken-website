@@ -5,12 +5,12 @@ import random, string
 
 # setting django environment
 from django.core.wsgi import get_wsgi_application
-sys.path.append("/websites_dir/django_spoken/spoken")
+from config import *
+sys.path.append(SPOKEN_PATH)
 os.environ["DJANGO_SETTINGS_MODULE"] = "spoken.settings"
 application = get_wsgi_application()
 
 # importing config and other packages needed
-from config import *
 from cms.models import Profile
 from django.db.models import Q
 from django.contrib.auth.models import Group, User

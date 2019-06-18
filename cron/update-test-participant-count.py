@@ -7,12 +7,12 @@ import time
 
 # setting django environment
 from django.core.wsgi import get_wsgi_application
-sys.path.append("/websites_dir/django_spoken/spoken")
+from config import *
+sys.path.append(SPOKEN_PATH)
 os.environ["DJANGO_SETTINGS_MODULE"] = "spoken.settings"
 application = get_wsgi_application()
 
 # importing config and TrainingRequest
-from config import *
 from events.models import Test
 
 test_requests = Test.objects.filter(status=4).order_by('-created')
