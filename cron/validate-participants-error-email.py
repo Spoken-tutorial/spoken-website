@@ -5,11 +5,12 @@ from DNS.Base import TimeoutError
 import os, sys
 import time
 
+from config import *
 # setting django environment
-sys.path.append("/websites_dir/django_spoken/spoken")
+from django.core.wsgi import get_wsgi_application
+sys.path.append(SPOKEN_PATH)
 os.environ["DJANGO_SETTINGS_MODULE"] = "spoken.settings"
 
-from config import *
 from events.models import Student
 
 # fetching students needs to be verified
