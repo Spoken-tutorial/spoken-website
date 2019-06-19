@@ -2137,6 +2137,7 @@ def MarkComplete(request, pk):
   st = TrainingRequest.objects.get(pk=pk)
   if st and st.status == 2:
     st.status = 1 #mark to complete
+    st.cert_status = 1 #allow certificate
     st.save()
     messages.success(request, 'Training Marked as complete.')
   else:
@@ -2993,3 +2994,116 @@ def trainingrequest(request, role, status):
     context['ordering'] = get_field_index(raw_get_data)
 
   return render(request,'training_list.html',context)
+
+
+class CertificateRequestListView(ListView):
+  queryset = None
+  paginate_by = 30
+  user = None
+  template_name = None
+  header = None
+  raw_get_data = None
+  role = None
+  status = None
+  now= datetime.now()
+  year = now.year
+  month =now.month
+
+  @method_decorator(group_required("Resource Person","Administrator"))
+  def dispatch(self, *args, **kwargs):
+    if (not 'role' in kwargs) or (not 'choice' in kwargs):
+      raise PermissionDenied()
+    self.role = kwargs['role']
+    self.choice = kwargs['choice']
+    roles = ['rp', 'em']
+    self.user = self.request.user
+    if self.role in roles and self.choice == 'training':
+      if is_administrator(self.user):
+        self.queryset = TrainingRequest.objects.filter(status=1, cert_status=2).order_by('-updated')
+      else:
+        self.queryset = TrainingRequest.objects.filter(
+          training_planner__academic_id__in=AcademicCenter.objects.filter(
+            state__in = State.objects.filter(
+              resourceperson__user_id=self.user,
+              resourceperson__status=1
+            )
+          ).values_list('id'),
+          status=1,
+          cert_status=2
+        ).order_by('-updated')
+      self.header = {
+        1: SortableHeader('#', False),
+        2: SortableHeader(
+          'training_planner__academic__state__name',
+          True,
+          'State'
+        ),
+        3: SortableHeader(
+          'training_planner__academic__academic_code',
+          True,
+          'Code'
+        ),
+        4: SortableHeader(
+          'training_planner__academic__institution_name',
+          True,
+          'Institution'
+        ),
+        5: SortableHeader('batch__department__name', True, 'Department / Batch'),
+        6: SortableHeader('course__foss__foss', True, 'Course Name'),
+        7: SortableHeader('course_type', True, 'Course Type'),
+        8: SortableHeader(
+          'training_planner__organiser__user__first_name',
+          True,
+          'Organiser'
+        ),
+        9: SortableHeader(
+          'sem_start_date',
+          True,
+          'Sem Start Date / Training Date'
+        ),
+        10: SortableHeader('participants', True, 'Participants'),
+        11: SortableHeader('Action', False)
+      }
+      self.raw_get_data = self.request.GET.get('o', None)
+      self.queryset = get_sorted_list(
+        self.request,
+        self.queryset,
+        self.header,
+        self.raw_get_data
+      )
+      self.queryset = TrainingRequestFilter(self.request.GET, queryset=self.queryset, user=self.user, rp_completed=True)
+    else:
+      raise PermissionDenied()
+    return super(CertificateRequestListView, self).dispatch(*args, **kwargs)
+
+  def get_context_data(self, **kwargs):
+    context = super(CertificateRequestListView, self).get_context_data(**kwargs)
+    context['form'] = self.queryset.form
+    context['role'] = self.role
+    context['status'] = self.choice
+    context['header'] = self.header
+    context['ordering'] = get_field_index(self.raw_get_data)
+    return context
+
+def RequestCertificate(request, trid):
+  #pk =0
+  training = TrainingRequest.objects.get(pk=trid)
+  if training:
+    training.cert_status = 2 #request to generate
+    training.save()
+    messages.success(request, 'Request to generate participation certificate has successfully sent')
+  else:
+    print("Error")
+    messages.error(request, 'Request not sent.Please try again.')
+  return HttpResponseRedirect("/software-training/training-planner/")
+
+def GenerateCertificate(request, trid):
+  #pk =0
+  training = TrainingRequest.objects.get(pk=trid)
+  if training and training.status == 1 and training.cert_status == 2:
+    training.cert_status = 1 #mark to generate
+    training.save()
+    messages.success(request, 'Certificates generated.')
+  else:
+    messages.error(request, 'Something went wrong Please try again')
+  return HttpResponseRedirect("/software-training/certificate-request/rp/training/") 
