@@ -18,7 +18,6 @@ export class HomeComponent implements OnInit {
     public tutorialService: TutorialsService
   ) { }
 
-
   LanguageSelected(language) {
     // console.log(language);
   }
@@ -45,8 +44,11 @@ export class HomeComponent implements OnInit {
     );
   }
 
-  ngOnInit() {
+  ngAfterViewInit() {
     this.fetchAllFoss();
+  };
+
+  ngOnInit() {
   };
 
 }
