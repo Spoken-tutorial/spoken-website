@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { HomeComponent } from './home/home.component';
-import { ScriptComponent } from './script/script.component';
 import { ScriptCreateComponent } from './script/script-create/script-create.component';
 import { ScriptEditComponent } from './script/script-edit/script-edit.component';
 import {ScriptViewComponent } from './script/script-view/script-view.component';
@@ -15,7 +14,7 @@ const routes: Routes = [
     }
   },
   {
-    path: 'create/:id',
+    path: 'create/:id/:tutorialName',
     component: ScriptCreateComponent,
     data: {
       title: 'Create Script',
@@ -24,7 +23,7 @@ const routes: Routes = [
   },
 
   {
-    path: 'edit/:id',
+    path: 'edit/:id/:tutorialName',
     component: ScriptEditComponent,
     data: {
       title: 'Edit Script',
@@ -32,7 +31,7 @@ const routes: Routes = [
     }
   },
   {
-    path: 'view/:id',
+    path: 'view/:id/:tutorialName',
     component: ScriptViewComponent,
     data: {
       title: 'Edit Script',

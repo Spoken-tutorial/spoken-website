@@ -14,9 +14,6 @@ export class ScriptEditComponent implements OnInit {
   private id: number;
   private scriptId: number;
   private orderId: number;
-  public oldData: any = [];
-  public newData: any = [];
-  public removedData: any = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -26,8 +23,7 @@ export class ScriptEditComponent implements OnInit {
 
   public onSaveScript(script: any) {
     if (script['cue'] == '' || script['narration'] == '' ) {
-      // console.log(script)
-      // Do nothing
+      return // Do nothing
     }
     else {
       if (script['id'] == '') {

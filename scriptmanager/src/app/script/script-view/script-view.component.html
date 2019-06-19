@@ -1,12 +1,22 @@
 <div class="container has-margin-top-50">
   <div class="section">
-    <a class="button is-info" style="width:150px;margin-left:1000px" routerLink="/">
-      <i class="fa fa-arrow-left"></i>&nbsp;Go Back
-    </a>
-    <br><br>
-    <div *ngIf="nav!='create'">
-      <a class="button is-info" style="width:150px;margin-left:1000px" routerLink="/edit/{{id}}"><i class="fa fa-edit"></i>&nbsp;Edit Mode
-      </a>
+
+
+    <div class="columns is-mobile">
+      <div class="column is-8">
+        <p class="title">{{ tutorialName }}</p>
+      </div>
+      <div class="column">
+
+        <a class="button is-info" routerLink="/">
+          <i class="fa fa-chevron-left"></i>&nbsp;Go Back
+        </a>
+        &nbsp;
+        <a *ngIf="nav!='create'" class="button is-info" routerLink="/edit/{{id}}/{{ tutorialName }}">
+          <i class="fa fa-edit"></i>&nbsp;Edit Mode
+        </a>
+      </div>
+
     </div>
 
     <br><br>
@@ -29,7 +39,7 @@
                   <td>{{ slide.cue }}</td>
                   <td>{{ slide.narration }}</td>
                   <td>
-                    <button class="button heading" (click)="viewComment(i)">View Comments</button></td>
+                    <button class="button heading" (click)="viewComment(i)">Show/Hide</button></td>
                 </tr>
               </tbody>
             </table>

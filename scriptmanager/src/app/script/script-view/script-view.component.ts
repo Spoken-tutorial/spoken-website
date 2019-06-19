@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CreateScriptService } from '../../_service/create-script.service';
 
@@ -10,10 +10,11 @@ import { CreateScriptService } from '../../_service/create-script.service';
 
 export class ScriptViewComponent implements OnInit {
   public slides: any = [];
+  public tutorials: any = [];
   private id: number;
-  public foss;
   public comment = false;
   public comments: any = [];
+  public tutorialName: any;
 
   constructor(
     private route: ActivatedRoute,
@@ -41,7 +42,6 @@ export class ScriptViewComponent implements OnInit {
   }
 
   public viewComment(i) {
-    // console.log(this.slides[val]['id']);
     this.getComment(this.slides[i]['id']);
     this.comment = true;
   }
@@ -51,6 +51,7 @@ export class ScriptViewComponent implements OnInit {
       this.id = +params['id'];
     });
     this.viewScript();
+    this.tutorialName = this.route.snapshot.params['tutorialName']
   }
 
 }

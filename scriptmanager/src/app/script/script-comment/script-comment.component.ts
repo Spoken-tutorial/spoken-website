@@ -8,6 +8,7 @@ import { Component,Input, OnInit } from '@angular/core';
 export class ScriptCommentComponent implements OnInit {
 
   @Input() comments:any;
+  
   constructor() { }
 
   ngOnInit() {

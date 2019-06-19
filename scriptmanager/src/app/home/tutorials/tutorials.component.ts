@@ -7,16 +7,13 @@ import { TutorialsService } from '../../_service/tutorials.service'
   styleUrls: ['./tutorials.component.sass']
 })
 export class TutorialsComponent implements OnInit {
- 
+
   @Input() tutorial: any;
 
-
-  constructor(public tutorialService: TutorialsService){}
- 
-
+  constructor(public tutorialService: TutorialsService) { }
 
   ngOnInit() {
-    
+
   }
 
 }

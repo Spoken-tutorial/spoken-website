@@ -12,7 +12,8 @@ import * as Noty from 'noty';
 export class ScriptCreateComponent implements OnInit {
   public slides: any = [];
   private id: number;
-
+  public tutorialName: any;
+  
   constructor(
     private route: ActivatedRoute,
     public createscriptService: CreateScriptService,
@@ -21,8 +22,7 @@ export class ScriptCreateComponent implements OnInit {
 
   public onSaveScript(script: any) {
     if (script['order'] == '') {
-      // console.log(script)
-      // Do nothing
+      return // Do nothing
     }
     else {
       for (var i = 0; i < script.length; i++) {
@@ -35,7 +35,7 @@ export class ScriptCreateComponent implements OnInit {
         }
       ).subscribe(
         (res) => {
-          this.router.navigateByUrl("/view/" + this.id);
+          this.router.navigateByUrl("/view/" + this.id + "/" + this.tutorialName);
           new Noty({
             type: 'success',
             layout: 'topRight',
@@ -74,6 +74,7 @@ export class ScriptCreateComponent implements OnInit {
     this.route.params.subscribe(params => {
       this.id = +params['id'];
     });
+    this.tutorialName = this.route.snapshot.params['tutorialName']
   }
 
 }

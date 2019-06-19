@@ -7,7 +7,7 @@
         <p class="control">
           <span class="select">
             <select (change)=" fetchFossTutorials($event.target.value)">
-              <option value="all">--Select Foss Categories--</option>
+              <option>--Select Foss Categories--</option>
               <option *ngFor="let item of foss" [value]="item['foss_category']['id']">
                 {{ item['foss_category']['name'] }}</option>
             </select>
@@ -21,10 +21,8 @@
         <p class="control">
           <span class="select">
             <select (change)="LanguageSelected($event.target.value)">
-              <option value="" disabled selected>--All Languages--</option>
-              <option *ngFor="let item of foss" [value]="item.language">{{
-                item.language
-              }}</option>
+              <option selected>--Select Language--</option>
+              <option *ngFor="let item of foss" [value]="item.language">{{ item['language'] }}</option>
             </select>
           </span>
         </p>
