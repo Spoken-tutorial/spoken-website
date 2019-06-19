@@ -147,7 +147,7 @@ class FeedbackForm(forms.ModelForm):
         model = TrainingFeedback
         exclude = ['training', 'mdluser_id']
 
-class PasswordResetForm(forms.Form):
+class Mdl_PasswordResetForm(forms.Form):
     email = forms.EmailField()
     def clean_email(self):
         email = self.cleaned_data['email']

@@ -311,9 +311,9 @@ def feedback(request, wid):
 
 def forget_password(request):
     context = {}
-    form = PasswordResetForm()
+    form = Mdl_PasswordResetForm()
     if request.method == "POST":
-        form = PasswordResetForm(request.POST)
+        form = Mdl_PasswordResetForm(request.POST)
         if form.is_valid():
             password_string = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(8))
             user = MdlUser.objects.filter(email=request.POST['email']).first()
