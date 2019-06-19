@@ -34,7 +34,7 @@ export class HomeComponent implements OnInit {
     );
   }
 
-  fetchAllFoss() {
+  public fetchAllFoss() {
     this.fossService.getAllFossCategories().subscribe(
       (res) => this.foss = res,
       (err) => {
@@ -44,11 +44,11 @@ export class HomeComponent implements OnInit {
     );
   }
 
-  ngAfterViewInit() {
-    this.fetchAllFoss();
-  };
+  // ngOnChange() {
+  //   this.fetchAllFoss();
+  // };
 
   ngOnInit() {
+    this.fetchAllFoss();
   };
-
 }

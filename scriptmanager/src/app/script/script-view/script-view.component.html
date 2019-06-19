@@ -48,8 +48,7 @@
       </div>
 
       <div *ngIf="comment" class="column">
-        <br><br>
-        <app-script-comment [comments]="comments"></app-script-comment>
+        <app-script-comment [comments]="comments" (commentEmitter)="postComment($event)"></app-script-comment>
       </div>
 
     </div>

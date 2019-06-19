@@ -1,4 +1,4 @@
-<div class="timeline-item animated fadeInLeft">
+<div class="timeline-item animated fadeInRight">
   <div class="columns">
     <div class="column">
       <div *ngFor="let comment of comments; let i = index" class="timeline-content">
@@ -6,17 +6,31 @@
           <div class="media-content">
             <div class="content">
               <p>
-                <strong>{{ comment['user'] }}</strong>
-                <br>
                 {{ comment['comment'] }}
                 <br>
-                <small>{{comment['time']}}</small>
+                <small><i class="fa fa-user"></i> {{ comment['user'] }} | <em>{{comment['time']}}</em></small>
+                <span class="is-divider" style="margin:10px 0 20px 0;"></span>
               </p>
             </div>
           </div>
         </article>
-        <div class="is-divider"></div>
       </div>
+
+      <article class="media">
+        <div class="media-content">
+          <div class="field">
+            <p class="control">
+              <textarea class="textarea" placeholder="Add a comment..." (keyup)="commentKey($event)"></textarea>
+            </p>
+          </div>
+          <div class="field">
+            <p class="control">
+              <button class="button heading" (click)="addComment()">Post comment</button>
+            </p>
+          </div>
+        </div>
+      </article>
+
     </div>
   </div>
 </div>

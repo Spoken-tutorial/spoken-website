@@ -15,6 +15,7 @@ export class ScriptViewComponent implements OnInit {
   public comment = false;
   public comments: any = [];
   public tutorialName: any;
+  public slideId: number;
   @Input() nav: any;
 
   constructor(
@@ -32,9 +33,9 @@ export class ScriptViewComponent implements OnInit {
     );
   }
 
-  public getComment(slideId) {
+  public getComment() {
     this.createscriptService.getComment(
-      slideId
+      this.slideId
     ).subscribe(
       (res) => {
         this.comments = res;
@@ -42,8 +43,22 @@ export class ScriptViewComponent implements OnInit {
     );
   }
 
+  public postComment(comment) {
+    this.createscriptService.postComment(
+      this.slideId,
+      {
+        "comment": comment
+      }
+    ).subscribe(
+      console.log,
+      console.error
+    );
+    this.getComment();
+  }
+
   public viewComment(i) {
-    this.getComment(this.slides[i]['id']);
+    this.slideId = this.slides[i]['id'];
+    this.getComment();
     this.comment = true;
   }
 
