@@ -29,7 +29,7 @@ class TutorialDetailList(generics.ListAPIView):
   serializer_class = TutorialDetailSerializer
     
   def get_queryset(self):
-    if ContributorRole.objects.filter(user  =  self.request.user,foss_category_id  =  self.kwargs.get('fid')).exists():
+    if ContributorRole.objects.filter(user  =  self.request.user,foss_category  =  self.kwargs.get('fid')).exists():
       return TutorialDetail.objects.filter(foss  =  self.kwargs.get('fid')).order_by('order')
     else:
       return None
@@ -38,19 +38,17 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
   serializer_class = ScriptsDetailSerializer
 
   def get_queryset(self): 
-    user = User.objects.filter(username = self.request.user)
-    script_pk = Scripts.objects.filter(tutorial_id = int(self.kwargs['tid']),user = user[0].id)
-    return ScriptDetails.objects.filter(script = script_pk)
+    script = Scripts.objects.filter(tutorial = int(self.kwargs['tid']),user = self.request.user)
+    return ScriptDetails.objects.filter(script = script)
       
   def create(self, request,tid):
     details = request.data['details']
-    # for x in details:
-    #   script_details  =  ScriptDetails.objects.create(script = script,**x)
     try:
       try:
-        script  =  Scripts.objects.create(tutorial_id = int(self.kwargs['tid']),user = self.request.user)
+        tutorial=TutorialDetail.objects.get(pk = int(self.kwargs['tid']))
+        script  =  Scripts.objects.create(tutorial = tutorial,user = self.request.user)
       except:
-        script  =  Scripts.objects.get(tutorial_id = int(self.kwargs['tid']),user = self.request.user)
+        script  =  Scripts.objects.get(tutorial = tutorial,user = self.request.user)
         
       for item in details:
         item.update( {"script":script.pk})
@@ -63,8 +61,10 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
 
   def patch(self,request, tid):
     try:
-      script_data  =  Scripts.objects.get(tutorial_id = int(self.kwargs['tid']),user = self.request.user)
+      tutorial=TutorialDetail.objects.get(pk = int(self.kwargs['tid']))
       script_details  =  self.request.data
+      Scripts.objects.get(tutorial = tutorial,user = self.request.user)
+
       script  =  ScriptDetails.objects.get(pk = (script_details['id']))
       serializer  =  ScriptsDetailSerializer(script, data = script_details)
       if serializer.is_valid():
@@ -75,10 +75,12 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
 
   def delete(self,request,tid,script_detail_id):
     try:
-      script  =  Scripts.objects.get(tutorial_id = int(self.kwargs['tid']),user  =  self.request.user)
-      ScriptDetails.objects.get(pk = int(self.kwargs['script_detail_id']),script_id = script.pk).delete()
-      if not ScriptDetails.objects.filter(script_id = script.pk).exists():
-        Scripts.objects.get(tutorial_id = int(self.kwargs['tid']),user = self.request.user).delete()
+      tutorial=TutorialDetail.objects.get(pk = int(self.kwargs['tid']))
+      script  =  Scripts.objects.get(tutorial = tutorial,user  =  self.request.user)
+
+      ScriptDetails.objects.get(pk = int(self.kwargs['script_detail_id']),script = script).delete()
+      if not ScriptDetails.objects.filter(script_id = script.pk).exists(): 
+       script.delete()
       return Response({'status': True},status = 202) 
     except:
       return Response({'status': False},status = 400) 
@@ -89,18 +91,16 @@ class CommentCreateAPIView(generics.ListCreateAPIView):
 
   def get_queryset(self):
     try:
-      script_details_id=int(self.kwargs['script_detail_id'])
-      script_details=ScriptDetails.objects.get(id=script_details_id)
-      if(Scripts.objects.filter(id=script_details.script_id,user=User.objects.filter(username = self.request.user)[0].id)):
-        return Comments.objects.filter(script_details = script_details_id).order_by('-created')
+      script_detail=ScriptDetails.objects.get(pk=int(self.kwargs['script_detail_id']))
+      return Comments.objects.filter(script_details = script_detail.pk).order_by('-created')
     except:
       return None
 
 
   def create(self,request,script_detail_id):
     try:
-      Comments.objects.create(comment=request.data['comment'],user=self.request.user,script_details_id=script_detail_id)
+      script_data=ScriptDetails.objects.get(pk=script_detail_id)
+      Comments.objects.create(comment=request.data['comment'],user=self.request.user,script_details=script_data)
       return Response({'status': True},status = 202)
     except:
       return Response({'status': False},status = 400)
-
