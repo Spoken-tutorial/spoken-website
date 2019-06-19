@@ -22,7 +22,7 @@
           <span class="select">
             <select (change)="LanguageSelected($event.target.value)">
               <option selected>--Select Language--</option>
-              <option *ngFor="let item of foss" [value]="item.language">{{ item['language'] }}</option>
+              <option *ngFor="let item of foss" [value]="item.language">{{ item['language']['name'] }}</option>
             </select>
           </span>
         </p>

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CreateScriptService } from '../../_service/create-script.service';
 
@@ -15,6 +15,7 @@ export class ScriptViewComponent implements OnInit {
   public comment = false;
   public comments: any = [];
   public tutorialName: any;
+  @Input() nav: any;
 
   constructor(
     private route: ActivatedRoute,

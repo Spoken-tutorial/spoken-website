@@ -18,11 +18,15 @@ export class HomeComponent implements OnInit {
     public tutorialService: TutorialsService
   ) { }
 
+
+  LanguageSelected(language) {
+    // console.log(language);
+  }
+
   public fetchFossTutorials(fid) {
     this.tutorialService.getFossTutorials(fid).subscribe(
       (res) => {
-      this.tutorials = res
-      // console.log(this.tutorials)
+        this.tutorials = res
       },
       (err) => {
         console.log('Failed to fetch tutorial categories');
@@ -42,7 +46,6 @@ export class HomeComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.fetchAllFoss();
     this.fetchAllFoss();
   };
 
