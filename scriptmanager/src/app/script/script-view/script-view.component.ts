@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CreateScriptService } from '../../_service/create-script.service';
 
@@ -10,10 +10,13 @@ import { CreateScriptService } from '../../_service/create-script.service';
 
 export class ScriptViewComponent implements OnInit {
   public slides: any = [];
+  public tutorials: any = [];
   private id: number;
-  public foss;
   public comment = false;
   public comments: any = [];
+  public tutorialName: any;
+  public slideId: number;
+  @Input() nav: any;
 
   constructor(
     private route: ActivatedRoute,
@@ -30,9 +33,9 @@ export class ScriptViewComponent implements OnInit {
     );
   }
 
-  public getComment(slideId) {
+  public getComment() {
     this.createscriptService.getComment(
-      slideId
+      this.slideId
     ).subscribe(
       (res) => {
         this.comments = res;
@@ -40,9 +43,22 @@ export class ScriptViewComponent implements OnInit {
     );
   }
 
+  public postComment(comment) {
+    this.createscriptService.postComment(
+      this.slideId,
+      {
+        "comment": comment
+      }
+    ).subscribe(
+      console.log,
+      console.error
+    );
+    this.getComment();
+  }
+
   public viewComment(i) {
-    // console.log(this.slides[val]['id']);
-    this.getComment(this.slides[i]['id']);
+    this.slideId = this.slides[i]['id'];
+    this.getComment();
     this.comment = true;
   }
 
@@ -51,6 +67,7 @@ export class ScriptViewComponent implements OnInit {
       this.id = +params['id'];
     });
     this.viewScript();
+    this.tutorialName = this.route.snapshot.params['tutorialName']
   }
 
 }

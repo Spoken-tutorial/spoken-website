@@ -15,6 +15,7 @@ export class ScriptComponent implements OnInit {
   @Input() nav: any;
   @Input() displaySave: boolean = false;
   public id;
+  public tutorialName: any;
 
   constructor(public router: Router, public route: ActivatedRoute, public createscriptService: CreateScriptService) { }
 
@@ -84,6 +85,7 @@ export class ScriptComponent implements OnInit {
     this.route.params.subscribe(params => {
       this.id = +params['id'];
     });
+    this.tutorialName = this.route.snapshot.params['tutorialName']
   }
 
 }

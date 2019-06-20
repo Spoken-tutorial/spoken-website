@@ -10,9 +10,10 @@ export class ScriptSlideComponent implements OnInit {
   @Input() index: number;
   @Output() removeSlideEmitter = new EventEmitter<number>();
   @Output() saveSlideEmitter = new EventEmitter<any>();
-  @Output() getCommentEmitter = new EventEmitter<number>();
   @Input() view: boolean = false;
   public comment = false;
+
+
   constructor() { }
 
   public removeSlide() {
@@ -20,7 +21,6 @@ export class ScriptSlideComponent implements OnInit {
   }
 
   public saveSlide() {
-    // console.log(this.slide);
     this.saveSlideEmitter.emit(this.slide);
   }
 

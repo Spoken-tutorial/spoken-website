@@ -12,32 +12,21 @@ export class HomeComponent implements OnInit {
   public foss;
   public tutorials;
   public fid;
+
   constructor(
     public fossService: FossService,
     public tutorialService: TutorialsService
   ) { }
 
-
   LanguageSelected(language) {
-    console.log(language);
-  }
-
-  fetchAllTutorials() {
-    // TODO: add appropriate error handler using libraries like
-    //       sweetalert2
-    this.tutorialService.getAllTutorials().subscribe(
-      (res) => this.tutorials = res,
-      (err) => {
-        console.log('Failed to fetch tutorial categories');
-        console.error(err);
-      }
-    );
-
+    // console.log(language);
   }
 
   public fetchFossTutorials(fid) {
     this.tutorialService.getFossTutorials(fid).subscribe(
-      (res) => this.tutorials = res,
+      (res) => {
+        this.tutorials = res
+      },
       (err) => {
         console.log('Failed to fetch tutorial categories');
         console.error(err);
@@ -45,7 +34,7 @@ export class HomeComponent implements OnInit {
     );
   }
 
-  fetchAllFoss() {
+  public fetchAllFoss() {
     this.fossService.getAllFossCategories().subscribe(
       (res) => this.foss = res,
       (err) => {
@@ -55,8 +44,11 @@ export class HomeComponent implements OnInit {
     );
   }
 
+  // ngOnChange() {
+  //   this.fetchAllFoss();
+  // };
+
   ngOnInit() {
     this.fetchAllFoss();
   };
-
 }
