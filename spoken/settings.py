@@ -90,7 +90,8 @@ INSTALLED_APPS = (
     'api',
     'rest_framework',
     'scriptmanager',
-    'corsheaders'
+    'corsheaders',
+    'reversion'
 )
 
 REST_FRAMEWORK = {
@@ -154,6 +155,8 @@ MIDDLEWARE_CLASSES = (
     'htmlmin.middleware.MarkRequestMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'reversion.middleware.RevisionMiddleware',
+
 )
 
 CORS_ORIGIN_ALLOW_ALL = True
