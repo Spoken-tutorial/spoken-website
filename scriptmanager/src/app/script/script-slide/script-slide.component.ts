@@ -26,8 +26,12 @@ export class ScriptSlideComponent implements OnInit {
 
   cueKey(event) { this.slide.cue = event.target.value; }
   narrationKey(event) { this.slide.narration = event.target.value; }
+  handleSelection( val ){
+    console.log(val)
+  }
 
   ngOnInit() {
+  
   }
 
 }
