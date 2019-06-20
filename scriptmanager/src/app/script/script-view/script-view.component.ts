@@ -49,17 +49,24 @@ export class ScriptViewComponent implements OnInit {
       {
         "comment": comment
       }
-    ).subscribe(
-      console.log,
-      console.error
-    );
+    ).subscribe();
     this.getComment();
   }
 
   public viewComment(i) {
-    this.slideId = this.slides[i]['id'];
-    this.getComment();
-    this.comment = true;
+    if (this.slideId != this.slides[i]['id']) {
+      this.slideId = this.slides[i]['id']
+      this.getComment();
+      this.comment = true;
+    }
+    else {
+      if (this.comment == false) {
+        this.comment = true;
+      }
+      else {
+        this.comment = false;
+      }
+    }
   }
 
   ngOnInit() {
