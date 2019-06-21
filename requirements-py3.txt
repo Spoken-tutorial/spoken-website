@@ -33,4 +33,3 @@ pytest-pythonpath==0.7
 requests==2.21.0
 soupsieve==1.6
 urllib3==1.24.1
-django-reversion-3.0.4
