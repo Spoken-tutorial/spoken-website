@@ -1,12 +1,16 @@
-from HTMLParser import HTMLParser
-import time, mechanize, cookielib, datetime
-from BeautifulSoup import BeautifulSoup
-from urllib import urlopen, quote
+from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from html.parser import HTMLParser
+import time, http.cookiejar, datetime
+from bs4 import BeautifulSoup
+from urllib.request import urlopen
+from urllib.parse import quote
 import MySQLdb
 import sys
 import os
-#sys.path.insert(0, '../spoken')
-#sys.path.insert(0, '../../spoken')
+import mechanicalsoup as mechanize
 from config import *
 
 
@@ -31,31 +35,31 @@ def strip_tags(html):
 
 
 def readUrl(url):
-    # print "Reading :", url
+    print("Reading :", url)
     b = getNewBrowser()
-    b.open(url, timeout = 30.0)
-    return BeautifulSoup(b.response())
+    r = b.get(url, timeout = 30.0)
+    return BeautifulSoup(r.text)
 
 
 def getNewBrowser():
     # create browser instance
-    b = mechanize.Browser()
+    b = mechanize.Browser(user_agent='Mozilla/5.0 (X11; Linux x86_64) Gecko/20100101 Firefox/31.0')
 
     # create a cookiejar for cookies
-    jar = cookielib.LWPCookieJar()
+    jar = http.cookiejar.LWPCookieJar()
     b.set_cookiejar(jar)
 
     # prevent mechanize from simulating a 403 disallow
-    b.set_handle_robots(False)
+    #b.set_handle_robots(False)
 
     # handle some other stuff
-    b.set_handle_equiv(True)
+    #b.set_handle_equiv(True)
     #b.set_handle_gzip(True)
-    b.set_handle_redirect(True)
-    b.set_handle_referer(True)
+    #b.set_handle_redirect(True)
+    #b.set_handle_referer(True)
 
     # follows refresh 0 but not hangs on refresh >0
-    b.set_handle_refresh(mechanize._http.HTTPRefreshProcessor(), max_time=1)
+    #b.set_handle_refresh(mechanize._http.HTTPRefreshProcessor(), max_time=1)
 
     # want debugging messages?
     #b.set_debug_http(True)
@@ -63,7 +67,7 @@ def getNewBrowser():
     #b.set_debug_responses(True)
 
     # User-Agent
-    b.addheaders = [('User-agent', 'Mozilla/5.0 (X11; Linux x86_64) Gecko/20100101 Firefox/31.0')]
+    #b.addheaders = [('User-agent', 'Mozilla/5.0 (X11; Linux x86_64) Gecko/20100101 Firefox/31.0')]
     return b
 
 
@@ -71,7 +75,7 @@ def generate_subtitle(srt_url, srt_file_path):
     soup = readUrl(srt_url)
     table = soup.findAll("table")
     if not table:
-        print 'table not found'
+        print('table not found')
         return False
     try:
         rows = table[0].findAll("tr")
@@ -110,7 +114,6 @@ def generate_subtitle(srt_url, srt_file_path):
                         previous_time = formatted_time
                     else:
                         time_error = 1
-                #print col.text
         video_info = get_video_info(rreplace(srt_file_path, 'srt', 'ogv', 1))
         if srt_data:
             if previous_script_data:
@@ -122,10 +125,10 @@ def generate_subtitle(srt_url, srt_file_path):
                         previous_time, "%H:%M:%S") + datetime.timedelta(seconds = 5)).time()) + '\n'
                 srt_data += previous_script_data
             file_head = open(srt_file_path,"w")
-            file_head.write(srt_data.encode("utf-8"))
+            file_head.write(srt_data)
             file_head.close()
-    except Exception, e:
-        print e
+    except Exception as e:
+        print(e)
         return False
     return True
 
@@ -137,8 +140,8 @@ def get_video_info(path):
     try:
         process = subprocess.Popen(['/usr/bin/ffmpeg', '-i', path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         stdout, stderr = process.communicate()
-        duration_m = re.search(r"Duration:\s{1}(?P<hours>\d+?):(?P<minutes>\d+?):(?P<seconds>\d+\.\d+?)", stdout, re.DOTALL).groupdict()
-        info_m = re.search(r": Video: (?P<codec>.*?), (?P<profile>.*?), (?P<width>.*?)x(?P<height>.*?), ", stdout, re.DOTALL).groupdict()
+        duration_m = re.search(r"Duration:\s{1}(?P<hours>\d+?):(?P<minutes>\d+?):(?P<seconds>\d+\.\d+?)", stdout.decode('utf-8'), re.DOTALL).groupdict()
+        info_m = re.search(r": Video: (?P<codec>.*?), (?P<profile>.*?), (?P<width>.*?)x(?P<height>.*?), ", stdout.decode('utf-8'), re.DOTALL).groupdict()
 
         hours = Decimal(duration_m['hours'])
         minutes = Decimal(duration_m['minutes'])
@@ -177,11 +180,13 @@ def get_video_info(path):
 
 def get_formatted_script(script):
     if script.string:
-        return script.text.strip('\n').strip() + '\n\n'
+        r = script.text.strip('\n').strip() + '\n\n'
     else:
-        return strip_tags(str(script.renderContents())\
+        s = (script.renderContents()).decode('utf-8')
+        r = strip_tags(str(s)\
         .replace('&amp;', '&').replace('&quot;', '"')\
-        .replace('&gt;', '>').replace('&lt;', '<')).decode('utf-8').strip('\n').strip() + '\n\n'
+        .replace('&gt;', '>').replace('&lt;', '<')).strip('\n').strip() + '\n\n'
+    return r
 
 
 def rreplace(s, old, new, occurrence):
@@ -258,12 +263,11 @@ for row in rows:
             continue
     srt_file_path = MEDIA_ROOT + 'videos/' + str(tutorial_detail[1]) + '/' + str(tutorial_detail[0]) + '/'
     srt_file_name = tutorial_detail[2].replace(' ', '-') + '-' + language[1] + '.srt'
-    # print srt_file_name
     if not overwrite and os.path.isfile(srt_file_path + srt_file_name):
         continue
     try:
         code = urlopen(script_path).code
-    except Exception, e:
+    except Exception as e:
         code = e.code
     result = ''
     if(int(code) == 200):
@@ -272,10 +276,10 @@ for row in rows:
         if generate_subtitle(script_path, srt_file_path + srt_file_name):
             success_string = 'Success: ' + str(foss[1]) + ', ' + srt_file_name + '\n'
             success_log_file_head.write(success_string)
-            print success_string
+            print(success_string)
         else:
             error_string = 'Failed: ' + str(foss[1]) + ', ' + srt_file_name + '\n'
             error_log_file_head.write(error_string)
-            print error_string
+            print(error_string)
 error_log_file_head.close()
 success_log_file_head.close()

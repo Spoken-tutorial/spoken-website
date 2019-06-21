@@ -1,4 +1,6 @@
+
 # Standard Library
+from builtins import str
 import os
 import time
 
@@ -16,7 +18,7 @@ def upload_videos():
     service = get_youtube_credential()
 
     if service is None:
-        print 'authenticate using the following url to continue: \n {}'.format(get_auth_url())
+        print(('authenticate using the following url to continue: \n {}'.format(get_auth_url())))
         return
 
     tresource_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), video_id=None).select_related()
@@ -36,7 +38,7 @@ def upload_videos():
                 convert_tmp_video(ogv_video_path, mp4_tmp_video_path)
                 convert_video(mp4_tmp_video_path, mp4_video_path)
                 if not os.path.isfile(mp4_video_path) or not os.path.getsize(mp4_video_path):
-                    print tresource.tutorial_detail.tutorial, '-', tresource.language.name, '-- MP4 video missing'
+                    print((tresource.tutorial_detail.tutorial, '-', tresource.language.name, '-- MP4 video missing'))
                     continue
 
             options = {
@@ -47,11 +49,11 @@ def upload_videos():
             }
 
             # try:
-            print 'uploading video', tresource.id, '-', tresource.tutorial_detail.tutorial, '-', tresource.tutorial_detail.foss.foss, '-', tresource.language.name
+            print(('uploading video', tresource.id, '-', tresource.tutorial_detail.tutorial, '-', tresource.tutorial_detail.foss.foss, '-', tresource.language.name))
             video_id = upload_video(service, options)
             # except:
             #     video_id = None
-            print 'video id -', video_id
+            print(('video id -', video_id))
 
             if video_id:
                 tresource.video_id = video_id
@@ -82,7 +84,7 @@ def create_playlists():
 
         for lang_obj in lang_list:
             title = '{} - {}'.format(foss_obj.foss, lang_obj.name)
-            print 'creating playlist:', title
+            print(('creating playlist:', title))
             playlist_id = create_playlist(service, title, foss_obj.description)
 
             if playlist_id:
@@ -117,12 +119,12 @@ def append_to_playlist():
 
         for tresource in tresource_list:
             if tresource.playlist_item_id:
-                print 'updating palylist item position -', tresource.playlist_item_id
+                print(('updating palylist item position -', tresource.playlist_item_id))
                 result = update_playlistitem_position(
                     service, tresource.playlist_item_id,
                     tresource.video_id, playlist_obj.playlist_id, counter)
             else:
-                print 'adding item to playlist -', playlist_obj.playlist_id
+                print(('adding item to playlist -', playlist_obj.playlist_id))
                 result = add_to_playlist(service, tresource.video_id, playlist_obj.playlist_id, counter)
 
                 if result:

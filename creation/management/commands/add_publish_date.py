@@ -3,7 +3,7 @@
 # 1. Go to project directory
 # 2. run "python manage.py add_publish_date"
 
-from __future__ import absolute_import, print_function, unicode_literals
+
 
 # Third Party Stuff
 from django.core.management.base import BaseCommand
@@ -26,6 +26,6 @@ class Command(BaseCommand):
                 tutorial.publish_at = log_obj.created
             else :
                 tutorial.publish_at = tutorial.created
-            print(tutorial.id,':',tutorial.publish_at)
+            print((tutorial.id,':',tutorial.publish_at))
             tutorial.save()
-        print('>> Script Completed. tutorials publish date added',count)
+        print(('>> Script Completed. tutorials publish date added',count))

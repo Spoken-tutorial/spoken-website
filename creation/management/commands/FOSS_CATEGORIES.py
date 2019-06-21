@@ -3,7 +3,7 @@
 # 1. Go to project directory
 # 2. run "python manage.py FOSS_CATEGORIES"
 
-from __future__ import absolute_import, print_function, unicode_literals
+
 
 # Third Party Stuff
 from django.core.management.base import BaseCommand

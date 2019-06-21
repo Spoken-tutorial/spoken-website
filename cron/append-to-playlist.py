@@ -1,14 +1,16 @@
+
+from builtins import str
 import time
 import os, sys
 from django.db.models import Q
 
 # setting django environment
 from django.core.wsgi import get_wsgi_application
-sys.path.append("/websites_dir/django_spoken/spoken")
+from config import *
+sys.path.append(SPOKEN_PATH)
 os.environ["DJANGO_SETTINGS_MODULE"] = "spoken.settings"
 application = get_wsgi_application()
 
-from config import *
 from youtube_upload import *
 from creation.models import *
 
@@ -58,14 +60,14 @@ for row in rows:
   if not playlist:
     error_string = str(row.tutorial_detail.foss.id) + ',' + str(row.language_id) + ',Playlist-Missing'
     error_log_file_head.write(error_string + '\n')
-    print error_string
+    print(error_string)
     continue
 
   # adding video to playlist
   try:
     item_id = youtube.add_video_to_playlist(row.video_id, playlist.playlist_id)
-  except Exception, e:
-    print e
+  except Exception as e:
+    print(e)
     time.sleep(1)
     continue
 
@@ -81,12 +83,12 @@ for row in rows:
     # generating success message
     success_string = row.tutorial_detail.tutorial + ',' + row.language.name + ',Success'
     success_log_file_head.write(success_string + '\n')
-    print success_string
+    print(success_string)
   else:
     # generating failure message
     error_string = row.tutorial_detail.tutorial + ',' + row.language.name + ',Failed'
     error_log_file_head.write(error_string + '\n')
-    print error_string
+    print(error_string)
   time.sleep(1)
 error_log_file_head.close()
 success_log_file_head.close()

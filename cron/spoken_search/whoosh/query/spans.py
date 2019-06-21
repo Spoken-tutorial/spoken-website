@@ -212,7 +212,7 @@ class SpanWrappingMatcher(wrappers.WrappingMatcher):
 
         spans = self._get_spans()
         while child.is_active() and not spans:
-            r = child.next() or r
+            r = next(child) or r
             if not child.is_active():
                 return True
             spans = self._get_spans()
@@ -223,8 +223,8 @@ class SpanWrappingMatcher(wrappers.WrappingMatcher):
     def spans(self):
         return self._spans
 
-    def next(self):
-        self.child.next()
+    def __next__(self):
+        next(self.child)
         self._find_next()
 
     def skip_to(self, id):
@@ -235,7 +235,7 @@ class SpanWrappingMatcher(wrappers.WrappingMatcher):
         while self.is_active():
             if self.spans():
                 yield self.id()
-            self.next()
+            next(self)
 
 
 class SpanBiMatcher(SpanWrappingMatcher):

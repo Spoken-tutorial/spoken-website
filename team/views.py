@@ -1,4 +1,5 @@
 
+
 # Third Party Stuff
 from django.contrib.auth.models import User
 from django.views.generic import ListView
@@ -10,7 +11,7 @@ class TeamListView(ListView):
 
     def dispatch(self, *args, **kwargs):
         self.type = kwargs['role']
-        print self.type
+        print((self.type))
 
         if self.type == 'Creation-Team':
             self.queryset = User.objects.filter(

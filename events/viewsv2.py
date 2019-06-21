@@ -1,3 +1,6 @@
+from builtins import str
+from builtins import range
+from builtins import object
 from django.shortcuts import render
 import time
 from datetime import datetime
@@ -22,7 +25,7 @@ from events.forms import StudentBatchForm, TrainingRequestForm, \
     SingleTrainingEditForm,TrainingManagerForm
 
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render, render_to_response, redirect
+from django.shortcuts import render, redirect
 from django.core.validators import validate_email
 from django.contrib.auth.models import Group, User
 from django.template import RequestContext
@@ -48,7 +51,8 @@ from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import cm
 from reportlab.lib.enums import TA_CENTER
 from PyPDF2 import PdfFileWriter, PdfFileReader
-from StringIO import StringIO
+from events.views import get_page
+from io import BytesIO
 
 # import helpers
 from events.views import is_organiser, is_invigilator, is_resource_person, is_administrator, is_accountexecutive
@@ -132,8 +136,8 @@ class TrainingPlannerListView(ListView):
       return TrainingPlanner.objects.create(year=year, \
         semester=self.get_semester(sem), academic=self.user.organiser.academic,\
           organiser=self.user.organiser)
-    except Exception, e:
-      print e
+    except Exception as e:
+      print(e)
     return False
   def get_next_planner(self, current_planner):
     year = int(current_planner.year)
@@ -150,8 +154,8 @@ class TrainingPlannerListView(ListView):
       return TrainingPlanner.objects.create(year=year, \
         semester=sem, academic=self.user.organiser.academic, \
         organiser=self.user.organiser)
-    except Exception, e:
-      print e
+    except Exception as e:
+      print(e)
     return False
 
 class StudentBatchCreateView(CreateView):
@@ -228,11 +232,11 @@ class StudentBatchCreateView(CreateView):
 
       if not this_organiser_dept.exists() and department.exists():
         messages.error(self.request, "%s department is already assigened to organiser %s in your College." % (form.cleaned_data['department'], department.first().organiser))
-        print "form invalid: dept present "
+        print("form invalid: dept present ")
         return self.form_invalid(form)
       try:
         form_data = StudentBatch.objects.get(year=form_data.year, academic=form_data.academic, department=form_data.department)
-        print " batch already exist"
+        print(" batch already exist")
       except StudentBatch.DoesNotExist:
         form_data.save()
 
@@ -242,7 +246,7 @@ class StudentBatchCreateView(CreateView):
     context = {'error' : error, 'warning' : warning, 'batch':form_data}
 
     if error or warning:
-      return render_to_response(self.template_name, context, context_instance=RequestContext(self.request))
+      return render(self.request, self.template_name, context)
 #    messages.success(self.request, "Student Batch added successfully.")
     return HttpResponseRedirect('/software-training/student-batch/%s/new/'%(str(form_data.id)))
 
@@ -315,20 +319,21 @@ class StudentBatchCreateView(CreateView):
     write_flag = False
     stu_row_count = 0
     try:
-      rowcsv = csv.reader(file_path, delimiter=',', quotechar='|')
+      file_data = file_path.read().decode('utf-8').splitlines()
+      rowcsv = csv.reader(file_data, delimiter=',', quotechar='|')
       rowcount = len(list(rowcsv))
       gencount = studentcount + rowcount
-      print 'gencount',gencount
-      print 'printing csv length',rowcount
+      print(('gencount',gencount))
+      print(('printing csv length',rowcount))
       if rowcount > 500:
         messages.warning(self.request, "MB will accept only 500 students, if number is more than 500, divide the batch and upload under different departments eg. Chemistry1 & Chemistry2")
       if gencount > 500:
         messages.warning(self.request, "Total number of students per Master Batch exceeding. Masterbatch can accept maximum 500 students.")
       else :
-        csvdata = csv.reader(file_path, delimiter=',', quotechar='|')
+        csvdata = csv.reader(file_data, delimiter=',', quotechar='|')
         for row in csvdata:
           stu_row_count = stu_row_count+1
-          print stu_row_count
+          print (stu_row_count)
           if len(row) < 4:
             skipped.append(row)
             continue
@@ -352,8 +357,8 @@ class StudentBatchCreateView(CreateView):
               write_flag = True
 
         StudentBatch.objects.get(pk=batch_id).update_student_count()
-    except Exception, e:
-      print e
+    except Exception as e:
+      print(e)
       messages.warning(self.request, "The file you uploaded is not a valid CSV file, please add a valid CSV file")
     return skipped, error, warning, write_flag
 
@@ -682,8 +687,8 @@ class TrainingRequestEditView(CreateView):
       else:
         messages.error(self.request, 'This student batch already taken the selected course.')
         return self.form_invalid(form)
-    except Exception, e:
-      print e
+    except Exception as e:
+      print(e)
       messages.error(self.request, 'Something went wrong, Contact site administrator.')
       return self.form_invalid(form)
     context = {}
@@ -730,20 +735,21 @@ class TrainingAttendanceListView(ListView):
     self.user = request.user
     training_id = kwargs['tid']
     if request.POST and 'user' in request.POST:
-      if csrf.get_token(request) == request.POST['csrfmiddlewaretoken']:
-        marked_student = request.POST.getlist('user', None)
-        # delete un marked record if exits
-        TrainingAttend.objects.filter(training_id =training_id).exclude(student_id__in = marked_student).delete()
-        # insert new record if not exits
-        for record in marked_student:
-          language_id = request.POST.get(record)
-          training_attend = TrainingAttend.objects.filter(training_id =training_id, student_id = record)
-          if not training_attend.exists():
-            TrainingAttend.objects.create(training_id =training_id, student_id = record, language_id=language_id)
-          else:
-            training_attend = training_attend.first()
-            training_attend.language_id = language_id
-            training_attend.save()
+      # commented out as Django 1.11 + creates new csrf token for every POST request
+      #if csrf.get_token(request) == request.POST['csrfmiddlewaretoken']:
+      marked_student = request.POST.getlist('user', None)
+      # delete un marked record if exits
+      TrainingAttend.objects.filter(training_id =training_id).exclude(student_id__in = marked_student).delete()
+      # insert new record if not exits
+      for record in marked_student:
+        language_id = request.POST.get(record)
+        training_attend = TrainingAttend.objects.filter(training_id =training_id, student_id = record)
+        if not training_attend.exists():
+          TrainingAttend.objects.create(training_id =training_id, student_id = record, language_id=language_id)
+        else:
+          training_attend = training_attend.first()
+          training_attend.language_id = language_id
+          training_attend.save()
       #print marked_student
     else:
       TrainingAttend.objects.filter(training_id =training_id).delete()
@@ -788,8 +794,8 @@ class StudentDeleteView(DeleteView):
     student = super(StudentDeleteView, self).get_object()
     if student.is_student_has_attendance():
       messages.error(self.request,
-	"You do not have permission to delete {0}\
-	 because you have marked the attendance".format(student.student_fullname()))
+    "You do not have permission to delete {0}\
+     because you have marked the attendance".format(student.student_fullname()))
       return HttpResponseRedirect(self.success_url)
     try:
       sm = StudentMaster.objects.get(student=student, moved=False)
@@ -815,8 +821,8 @@ class StudentMasterDeleteView(DeleteView):
     student = sm.student
     if sm.is_student_has_attendance():
       messages.error(self.request,
-	"You do not have permission to delete {0}\
-	 because you have marked the attendance".format(student.student_fullname()))
+    "You do not have permission to delete {0}\
+     because you have marked the attendance".format(student.student_fullname()))
       return HttpResponseRedirect(self.success_url)
     try:
       sm = StudentMaster.objects.get(student=student, moved=False)
@@ -828,7 +834,7 @@ class StudentMasterDeleteView(DeleteView):
     return super(StudentMasterDeleteView, self).dispatch(*args, **kwargs)
 
 
-class TrainingCertificate():
+class TrainingCertificate(object):
   def custom_strftime(self, format, t):
     return t.strftime(format).replace('{S}', str(t.day) + self.suffix(t.day))
 
@@ -845,7 +851,7 @@ class TrainingCertificate():
     filename = (ta.student.user.first_name+'-'+ta.training.course.foss.foss+"-Participant-Certificate").replace(" ", "-");
 
     response['Content-Disposition'] = 'attachment; filename='+filename+'.pdf'
-    imgTemp = StringIO()
+    imgTemp = BytesIO ()
     imgDoc = canvas.Canvas(imgTemp)
 
     # Title
@@ -870,7 +876,7 @@ class TrainingCertificate():
     text = "This is to certify that <b>"+ta.student.user.first_name +" "+ta.student.user.last_name+"</b> participated in the <b>"+ta.training.course.foss.foss+"</b> training organized at <b>"+ta.training.training_planner.academic.institution_name+"</b> in <b>"+sem_start+"</b> semester, with course material provided by the Spoken Tutorial Project, IIT Bombay.<br /><br />A comprehensive set of topics pertaining to <b>"+ta.training.course.foss.foss+"</b> were covered in the training. This training is offered by the Spoken Tutorial Project, IIT Bombay, funded by the National Mission on Education through ICT, MHRD, Govt. of India."
     if ta.training.department.id == 24:
       text = "This is to certify that <b>"+ta.student.user.first_name +" "+ta.student.user.last_name+"</b> participated in the <b>"+ta.training.course.foss.foss+"</b> training organized at <b>"+ta.training.training_planner.academic.institution_name+"</b> by <b>"+ta.training.training_planner.organiser.user.first_name+" "+ta.training.training_planner.organiser.user.last_name+"</b>, with course material provided by the Spoken Tutorial Project, IIT Bombay.<br /><br />A comprehensive set of topics pertaining to <b>"+ta.training.course.foss.foss+"</b> were covered in the training. This training is offered by the Spoken Tutorial Project, IIT Bombay, funded by the National Mission on Education through ICT, MHRD, Govt. of India."
-    
+
 
     centered = ParagraphStyle(name = 'centered',
       fontSize = 16,
@@ -882,12 +888,10 @@ class TrainingCertificate():
     p = Paragraph(text, centered)
     p.wrap(650, 200)
     p.drawOn(imgDoc, 4.2 * cm, 7 * cm)
-
     imgDoc.save()
-
     # Use PyPDF to merge the image-PDF into the template
-    page = PdfFileReader(file(settings.MEDIA_ROOT +"Blank-Certificate.pdf","rb")).getPage(0)
-    overlay = PdfFileReader(StringIO(imgTemp.getvalue())).getPage(0)
+    page = PdfFileReader(open(settings.MEDIA_ROOT +"Blank-Certificate.pdf","rb")).getPage(0)
+    overlay = PdfFileReader(BytesIO(imgTemp.getvalue())).getPage(0)
     page.mergePage(overlay)
 
     #Save the result
@@ -901,7 +905,7 @@ class TrainingCertificate():
 
     return response
 
-class SingleTrainingCertificate():
+class SingleTrainingCertificate(object):
   def custom_strftime(self, format, t):
     return t.strftime(format).replace('{S}', str(t.day) + self.suffix(t.day))
 
@@ -913,7 +917,7 @@ class SingleTrainingCertificate():
     filename = (ta.firstname+'-'+ta.training.course.foss.foss+"-Participant-Certificate").replace(" ", "-");
 
     response['Content-Disposition'] = 'attachment; filename='+filename+'.pdf'
-    imgTemp = StringIO()
+    imgTemp = BytesIO()
     imgDoc = canvas.Canvas(imgTemp)
 
     # Title
@@ -951,8 +955,8 @@ class SingleTrainingCertificate():
     imgDoc.save()
 
     # Use PyPDF to merge the image-PDF into the template
-    page = PdfFileReader(file(settings.MEDIA_ROOT +"Blank-Certificate.pdf","rb")).getPage(0)
-    overlay = PdfFileReader(StringIO(imgTemp.getvalue())).getPage(0)
+    page = PdfFileReader(open(settings.MEDIA_ROOT +"Blank-Certificate.pdf","rb")).getPage(0)
+    overlay = PdfFileReader(BytesIO(imgTemp.getvalue())).getPage(0)
     page.mergePage(overlay)
 
     #Save the result
@@ -1026,7 +1030,7 @@ class StudentTrainingCertificateView(TrainingCertificate, View):
         mdluser = MdlUser.objects.get(id=mdluserid)
         if ta and ta.student.user.email == mdluser.email:
             return self.training_certificate(ta)
-    except Exception, e:
+    except Exception as e:
       messages.error(self.request, "PermissionDenied!")
     return HttpResponseRedirect("/")
 
@@ -1227,145 +1231,146 @@ class GetDepartmentOrganiserStatusView(JSONResponseMixin, View):
     return self.render_to_json_response(context)
 
 
-class TrainingRequestListView(ListView):
-  queryset = None
-  paginate_by = 20
-  user = None
-  template_name = None
-  header = None
-  raw_get_data = None
-  role = None
-  status = None
-  now= datetime.now()
-  year = now.year
-  month =now.month
+# class TrainingRequestListView(ListView):
+#   queryset = None
+#   paginate_by = 20
+#   user = None
+#   template_name = None
+#   header = None
+#   raw_get_data = None
+#   role = None
+#   status = None
+#   now= datetime.now()
+#   year = now.year
+#   month =now.month
 
-  current_sem_type_even = 0 #odd
-  if month < 6:
-    current_sem_type_even = 1 #even
+#   current_sem_type_even = 0 #odd
+#   if month < 6:
+#     current_sem_type_even = 1 #even
 
-  prev_sem_type = 'even'
-  prev_sem_year = year
-  if current_sem_type_even:
-    prev_sem_type = 'odd'
-    prev_sem_year = (year - 1)
-  prev_sem_start_date, prev_sem_end_date = get_prev_semester_duration(prev_sem_type, prev_sem_year)
+#   prev_sem_type = 'even'
+#   prev_sem_year = year
+#   if current_sem_type_even:
+#     prev_sem_type = 'odd'
+#     prev_sem_year = (year - 1)
+#   prev_sem_start_date, prev_sem_end_date = get_prev_semester_duration(prev_sem_type, prev_sem_year)
 
-  @method_decorator(group_required("Resource Person","Administrator"))
-  def dispatch(self, *args, **kwargs):
-    if (not 'role' in kwargs) or (not 'status' in kwargs):
-      raise PermissionDenied()
-    self.role = kwargs['role']
-    self.status = kwargs['status']
-    status_list = {'pending': 0, 'completed': 1, 'markcomplete':2, 'pendingattendance':3}
-    roles = ['rp', 'em']
-    self.user = self.request.user
-    if self.role in roles and self.status in status_list:
-      if self.status == 'completed':
-        self.queryset = TrainingRequest.objects.filter(
-          training_planner__academic_id__in=AcademicCenter.objects.filter(
-            state__in = State.objects.filter(
-              resourceperson__user_id=self.user,
-              resourceperson__status=1
-            )
-          ).values_list('id'),
-          status=1,
-          participants__gt=0
-        ).order_by('-updated')
-      elif self.status == 'pending':
-        self.queryset = TrainingRequest.objects.filter(
-          training_planner__academic_id__in=AcademicCenter.objects.filter(
-            state__in = State.objects.filter(
-              resourceperson__user_id=self.user,
-              resourceperson__status=1
-            )
-          ).values_list('id'),
-          status=0
-        ).order_by('-updated')
-      elif self.status == 'markcomplete':
-        if is_administrator(self.user):
-          self.queryset = TrainingRequest.objects.filter(status=2).order_by('-updated')
-        else:
-          self.queryset = TrainingRequest.objects.filter(
-            training_planner__academic_id__in=AcademicCenter.objects.filter(
-              state__in = State.objects.filter(
-                resourceperson__user_id=self.user,
-                resourceperson__status=1
-              )
-            ).values_list('id'),
-            status=2
-          ).order_by('-updated')
-      elif self.status == 'pendingattendance':
-        self.queryset = TrainingRequest.objects.filter(
-          training_planner__academic_id__in=AcademicCenter.objects.filter(
-            state__in = State.objects.filter(
-              resourceperson__user_id=self.user,
-              resourceperson__status=1,
-            )
-          ).values_list('id'),
-          status = 1, participants = 0, training_planner__semester__name = self.prev_sem_type , sem_start_date__gte = self.prev_sem_start_date
-        )
+#   @method_decorator(group_required("Resource Person","Administrator"))
+#   def dispatch(self, *args, **kwargs):
+#     if (not 'role' in kwargs) or (not 'status' in kwargs):
+#       raise PermissionDenied()
+#     self.role = kwargs['role']
+#     self.status = kwargs['status']
+#     status_list = {'pending': 0, 'completed': 1, 'markcomplete':2, 'pendingattendance':3}
+#     roles = ['rp', 'em']
+#     self.user = self.request.user
+#     if self.role in roles and self.status in status_list:
+#       if self.status == 'completed':
+#         self.queryset = TrainingRequest.objects.filter(
+#           training_planner__academic_id__in=AcademicCenter.objects.filter(
+#             state__in = State.objects.filter(
+#               resourceperson__user_id=self.user,
+#               resourceperson__status=1
+#             )
+#           ).values_list('id'),
+#           status=1,
+#           participants__gt=0
+#         ).order_by('-updated')
+#       elif self.status == 'pending':
+#         self.queryset = TrainingRequest.objects.filter(
+#           training_planner__academic_id__in=AcademicCenter.objects.filter(
+#             state__in = State.objects.filter(
+#               resourceperson__user_id=self.user,
+#               resourceperson__status=1
+#             )
+#           ).values_list('id'),
+#           status=0
+#         ).order_by('-updated')
+#       elif self.status == 'markcomplete':
+#         if is_administrator(self.user):
+#           self.queryset = TrainingRequest.objects.filter(status=2).order_by('-updated')
+#         else:
+#           self.queryset = TrainingRequest.objects.filter(
+#             training_planner__academic_id__in=AcademicCenter.objects.filter(
+#               state__in = State.objects.filter(
+#                 resourceperson__user_id=self.user,
+#                 resourceperson__status=1
+#               )
+#             ).values_list('id'),
+#             status=2
+#           ).order_by('-updated')
+#       elif self.status == 'pendingattendance':
+#         self.queryset = TrainingRequest.objects.filter(
+#           training_planner__academic_id__in=AcademicCenter.objects.filter(
+#             state__in = State.objects.filter(
+#               resourceperson__user_id=self.user,
+#               resourceperson__status=1,
+#             )
+#           ).values_list('id'),
+#           status = 1, participants = 0, training_planner__semester__name = self.prev_sem_type , sem_start_date__gte = self.prev_sem_start_date
+#         )
 
-      self.header = {
-        1: SortableHeader('#', False),
-        2: SortableHeader(
-          'training_planner__academic__state__name',
-          True,
-          'State'
-        ),
-        3: SortableHeader(
-          'training_planner__academic__academic_code',
-          True,
-          'Code'
-        ),
-        4: SortableHeader(
-          'training_planner__academic__institution_name',
-          True,
-          'Institution'
-        ),
-        5: SortableHeader('batch__department__name', True, 'Department / Batch'),
-        6: SortableHeader('course__foss__foss', True, 'Course Name'),
-        7: SortableHeader('course_type', True, 'Course Type'),
-        8: SortableHeader(
-          'training_planner__organiser__user__first_name',
-          True,
-          'Organiser'
-        ),
-        9: SortableHeader(
-          'sem_start_date',
-          True,
-          'Sem Start Date / Training Date'
-        ),
-        10: SortableHeader('participants', True, 'Participants'),
-        #11: SortableHeader('Action', False)
-      }
-      self.raw_get_data = self.request.GET.get('o', None)
-      self.queryset = get_sorted_list(
-        self.request,
-        self.queryset,
-        self.header,
-        self.raw_get_data
-      )
-      if self.status == 'completed':
-        self.queryset = TrainingRequestFilter(self.request.GET, queryset=self.queryset, user=self.user, rp_completed=True)
-      elif self.status == 'pending':
-        self.queryset = TrainingRequestFilter(self.request.GET, queryset=self.queryset, user=self.user, rp_ongoing=True)
-      elif self.status == 'markcomplete':
-        self.queryset = TrainingRequestFilter(self.request.GET, queryset=self.queryset, user=self.user, rp_markcomplete=True)
-      elif self.status == 'pendingattendance':
-        self.queryset = TrainingRequestFilter(self.request.GET, queryset=self.queryset, user=self.user, rp_pendingattendance=True)
-    else:
-      raise PermissionDenied()
-    return super(TrainingRequestListView, self).dispatch(*args, **kwargs)
+#       self.header = {
+#         1: SortableHeader('#', False),
+#         2: SortableHeader(
+#           'training_planner__academic__state__name',
+#           True,
+#           'State'
+#         ),
+#         3: SortableHeader(
+#           'training_planner__academic__academic_code',
+#           True,
+#           'Code'
+#         ),
+#         4: SortableHeader(
+#           'training_planner__academic__institution_name',
+#           True,
+#           'Institution'
+#         ),
+#         5: SortableHeader('batch__department__name', True, 'Department / Batch'),
+#         6: SortableHeader('course__foss__foss', True, 'Course Name'),
+#         7: SortableHeader('course_type', True, 'Course Type'),
+#         8: SortableHeader(
+#           'training_planner__organiser__user__first_name',
+#           True,
+#           'Organiser'
+#         ),
+#         9: SortableHeader(
+#           'sem_start_date',
+#           True,
+#           'Sem Start Date / Training Date'
+#         ),
+#         10: SortableHeader('participants', True, 'Participants'),
+#         #11: SortableHeader('Action', False)
+#       }
+#       self.raw_get_data = self.request.GET.get('o', None)
+#       self.queryset = get_sorted_list(
+#         self.request,
+#         self.queryset,
+#         self.header,
+#         self.raw_get_data
+#       )
+#       if self.status == 'completed':
+#         self.queryset.qs = TrainingRequestFilter(self.request.GET, queryset=self.queryset, user=self.user, rp_completed=True)
+#       elif self.status == 'pending':
+#         self.queryset.qs = TrainingRequestFilter(self.request.GET, queryset=self.queryset, user=self.user, rp_ongoing=True)
+#       elif self.status == 'markcomplete':
+#         self.queryset.qs = TrainingRequestFilter(self.request.GET, queryset=self.queryset, user=self.user, rp_markcomplete=True)
+#       elif self.status == 'pendingattendance':
+#         self.queryset.qs = TrainingRequestFilter(self.request.GET, queryset=self.queryset, user=self.user, rp_pendingattendance=True)
+#     else:
+#       raise PermissionDenied()
+#     return super(TrainingRequestListView, self).dispatch(*args, **kwargs)
 
-  def get_context_data(self, **kwargs):
-    context = super(TrainingRequestListView, self).get_context_data(**kwargs)
-    context['form'] = self.queryset.form
-    context['role'] = self.role
-    context['status'] = self.status
-    context['header'] = self.header
-    context['ordering'] = get_field_index(self.raw_get_data)
-    return context
+#   def get_context_data(self, **kwargs):
+#     context = super(TrainingRequestListView, self).get_context_data(**kwargs)
+#     context['form'] = self.queryset.qs.form
+#     context['collection'] =  self.queryset.qs
+#     context['role'] = self.role
+#     context['status'] = self.status
+#     context['header'] = self.header
+#     context['ordering'] = get_field_index(self.raw_get_data)
+#     return context
 
 
 ##############################  Single Training one day workshop #############################################################################
@@ -1608,7 +1613,7 @@ class SingleTrainingCertificateListView(ListView):
 
   def dispatch(self, *args, **kwargs):
     self.training_request = SingleTraining.objects.get(pk=kwargs['tid'])
-    print self.training_request.id
+    print((self.training_request.id))
     self.queryset = SingleTrainingAttendance.objects.filter(training_id=self.training_request.id, status=1)
     return super(SingleTrainingCertificateListView, self).dispatch(*args, **kwargs)
 
@@ -1684,165 +1689,167 @@ SingleTrainingCreateView will create a request for a new One day workshop.
 
 '''
 
-class SingletrainingCreateView(CreateView):
-  form_class = SingleTrainingForm
-  template_name = ""
-  success_url = "/software-training/single-training/pending/"
+# class SingletrainingCreateView(CreateView):
+#   form_class = SingleTrainingForm
+#   template_name = ""
+#   success_url = "/software-training/single-training/pending/"
 
-  def form_valid(self, form, **kwargs):
-    form_data = form.save(commit=False)
-    if 'academic' not in self.request.POST:
-        form_data.academic = self.request.user.organiser.academic
-    elif not self.request.POST.get('academic'):
-        form_data.academic = self.request.user.organiser.academic
+#   def form_valid(self, form, **kwargs):
+#     form_data = form.save(commit=False)
+#     if 'academic' not in self.request.POST:
+#         form_data.academic = self.request.user.organiser.academic
+#     elif not self.request.POST.get('academic'):
+#         form_data.academic = self.request.user.organiser.academic
 
-    form_data.organiser = self.request.user.organiser
-    student = None
-    skipped, error, warning, write_flag = self.csv_email_validate(self.request.FILES['csv_file'], str(self.request.POST.get('training_type')))
-    context = {'error': error, 'warning': warning, 'batch': form_data}
-    csv_error_line_num = ''
+#     form_data.organiser = self.request.user.organiser
+#     student = None
+#     skipped, error, warning, write_flag = self.csv_email_validate(self.request.FILES['csv_file'], str(self.request.POST.get('training_type')))
+#     context = {'error': error, 'warning': warning, 'batch': form_data}
+#     csv_error_line_num = ''
 
-    if error or skipped:
-      messages.error(self.request, "Batch not added: Error in CSV file")
-      for i in error:
-        csv_error_line_num = (csv_error_line_num+'%d, ')%(i+1)
-      messages.error(self.request, "You have error(s) in your CSV file on line numbers %s"%(csv_error_line_num))
+#     if error or skipped:
+#       messages.error(self.request, "Batch not added: Error in CSV file")
+#       for i in error:
+#         csv_error_line_num = (csv_error_line_num+'%d, ')%(i+1)
+#       messages.error(self.request, "You have error(s) in your CSV file on line numbers %s"%(csv_error_line_num))
 
-    else:
-      form_data.save()
-      student_exists, student_count, csv_data_list = self.create_singletraining_db(self.request.FILES['csv_file'], form_data.id, form_data.course.id)
-      if len(student_exists) == len(csv_data_list):
-        messages.error(self.request, "Batch not added: Batch already exists for the same course")
-      elif student_exists:
-        messages.error(self.request, "Batch added but Duplicate entries exist in CSV file")
-      else:
-        messages.success(self.request, "Student Batch added successfully.")
-        #SingleTraining.objects.get(id=form_data.id).update(total_participant_count=student_count)
-      form_data.participant_count = student_count
-      form_data.total_participant_count = student_count
-      form_data.save()
-      if not student_count:
-        form_data.delete()
-    return HttpResponseRedirect(self.success_url)
+#     else:
+#       form_data.save()
+#       student_exists, student_count, csv_data_list = self.create_singletraining_db(self.request.FILES['csv_file'], form_data.id, form_data.course.id)
+#       if len(student_exists) == len(csv_data_list):
+#         messages.error(self.request, "Batch not added: Batch already exists for the same course")
+#       elif student_exists:
+#         messages.error(self.request, "Batch added but Duplicate entries exist in CSV file")
+#       else:
+#         messages.success(self.request, "Student Batch added successfully.")
+#         #SingleTraining.objects.get(id=form_data.id).update(total_participant_count=student_count)
+#       form_data.participant_count = student_count
+#       form_data.total_participant_count = student_count
+#       form_data.save()
+#       if not student_count:
+#         form_data.delete()
+#     return HttpResponseRedirect(self.success_url)
 
-  def email_validator(self, email):
-    if email and email.strip():
-      email = email.strip().lower()
-      try:
-        validate_email(email)
-        return True
-      except:
-        pass
-    return False
+#   def email_validator(self, email):
+#     if email and email.strip():
+#       email = email.strip().lower()
+#       try:
+#         validate_email(email)
+#         return True
+#       except:
+#         pass
+#     return False
 
-  '''
-  get_student_vocational() will fetch the student object having the email id passed to it as an argument.
+#   '''
+#   get_student_vocational() will fetch the student object having the email id passed to it as an argument.
 
-  '''
-  def get_student_vocational(self, batch_id, email):
-    if email and email.strip():
-      email = email.strip().lower()
-      try:
-        student = SingleTrainingAttendance.objects.get(email=email, foss=batch_id)
-        return student
-      except ObjectDoesNotExist:
-        pass
-    return False
+#   '''
+#   def get_student_vocational(self, batch_id, email):
+#     if email and email.strip():
+#       email = email.strip().lower()
+#       try:
+#         student = SingleTrainingAttendance.objects.get(email=email, foss=batch_id)
+#         return student
+#       except ObjectDoesNotExist:
+#         pass
+#     return False
 
-  '''
-  create_student_vocational() will add the database entry for the student
+#   '''
+#   create_student_vocational() will add the database entry for the student
 
-  '''
-  def create_student_vocational(self, training_id, fossid, fname, lname, email, gender):
-    if not fname or not lname or not email or not gender:
-      return False
-    user = None
-    fname = fname.strip().upper()
-    lname = lname.strip().upper()
-    email = email.strip().lower()
-    gender = gender.strip().lower()
+#   '''
+#   def create_student_vocational(self, training_id, fossid, fname, lname, email, gender):
+#     if not fname or not lname or not email or not gender:
+#       return False
+#     user = None
+#     fname = fname.strip().upper()
+#     lname = lname.strip().upper()
+#     email = email.strip().lower()
+#     gender = gender.strip().lower()
 
-    if fname and lname and email and gender:
-      if gender == 'male' or gender == 'm':
-        gender = 'Male'
-      else:
-        gender = 'Female'
-      student = SingleTrainingAttendance.objects.create(training_id = training_id, foss = fossid, firstname = fname, lastname = lname, email = email, gender = gender)
-      return student
-    return False
+#     if fname and lname and email and gender:
+#       if gender == 'male' or gender == 'm':
+#         gender = 'Male'
+#       else:
+#         gender = 'Female'
+#       student = SingleTrainingAttendance.objects.create(training_id = training_id, foss = fossid, firstname = fname, lastname = lname, email = email, gender = gender)
+#       return student
+#     return False
 
-  '''
-  csv_email_validate() will validate the email field, from the CSV file, for the School and Vocational training type.
+#   '''
+#   csv_email_validate() will validate the email field, from the CSV file, for the School and Vocational training type.
 
-  '''
-  def csv_email_validate(self, file_path, ttype):
-    skipped = []
-    error = []
-    warning = []
-    write_flag = False
-    csv_data = []
-    csvdata = csv.reader(file_path, delimiter=',', quotechar='|')
+#   '''
+#   def csv_email_validate(self, file_path, ttype):
+#     skipped = []
+#     error = []
+#     warning = []
+#     write_flag = False
+#     csv_data = []
+#     csvdata = csv.reader(file_path, delimiter=',', quotechar='|')
 
-    #School
-    if ttype == '0':
-      for i in csvdata:
-        csv_data.append(i)
-      for j in range(len(csv_data)):
-        if len(csv_data[j]) < 3:
-          skipped.append(j)
-          continue
-        if csv_data[j][0] == '':
-          error.append(j)
-          continue
-        if csv_data[j][1] == '':
-	  error.append(j)
-          continue
-        if csv_data[j][3] == '':
-          error.append(j)
-          continue
+#     # School
 
-    #Vocational
-    else:
-      for i in csvdata:
-        csv_data.append(i)
-      for j in range(len(csv_data)):
-        if len(csv_data[j]) < 4:
-          skipped.append(j)
-          continue
-	if csv_data[j][0]=='':
-	  error.append(j)
-	  continue
-	if csv_data[j][1]=='':
-	  error.append(j)
-	  continue
-        if not self.email_validator(csv_data[j][2]):
-          error.append(j)
-          continue
-	if csv_data[j][3]=='':
-	  error .append(j)
-	  continue
+#     if ttype == '0':
 
-    return skipped, error, warning, write_flag
+#       for i in csvdata:
+#         csv_data.append(i)
+#       for j in range(len(csv_data)):
+#         if len(csv_data[j]) < 3:
+#           skipped.append(j)
+#           continue
+#         if csv_data[j][0] == '':
+#           error.append(j)
+#           continue
+#         if csv_data[j][1] == '':
+#           error.append(j)
+#           continue
+#         if csv_data[j][3] == '':
+#           error.append(j)
+#           continue
 
-  '''
-  This will call the create_student_vocational() method to create the student entry, from the  CSV file, in the SingleTraining database.
+#     #Vocational
+#     else:
+#       for i in csvdata:
+#         csv_data.append(i)
+#       for j in range(len(csv_data)):
+#         if len(csv_data[j]) < 4:
+#           skipped.append(j)
+#           continue
+#         if csv_data[j][0]=='':
+#           error.append(j)
+#           continue
+#         if csv_data[j][1]=='':
+#           error.append(j)
+#           continue
+#         if not self.email_validator(csv_data[j][2]):
+#           error.append(j)
+#           continue
+#         if csv_data[j][3]=='':
+#           error .append(j)
+#           continue
 
-  '''
-  def create_singletraining_db(self, file_path, tr_id, batch_id):
-    csv_data_list = []
-    student_exists = []
-    count = 0
-    csvdata = csv.reader(file_path, delimiter=',', quotechar='|')
-    for i in csvdata:
-      csv_data_list.append(i)
-    for j in range(len(csv_data_list)):
-      student = self.get_student_vocational(batch_id, csv_data_list[j][2])
-      if student:
-        student_exists.append(student)
-      else:
-         self.create_student_vocational(tr_id, batch_id, csv_data_list[j][0], csv_data_list[j][1], csv_data_list[j][2], csv_data_list[j][3])
-      student_count = SingleTrainingAttendance.objects.filter(training_id=tr_id).count()
-    return student_exists, student_count, csv_data_list
+#     return (skipped, error, warning, write_flag)
+
+#   '''
+#   This will call the create_student_vocational() method to create the student entry, from the  CSV file, in the SingleTraining database.
+
+#   '''
+#   def create_singletraining_db(self, file_path, tr_id, batch_id):
+#     csv_data_list = []
+#     student_exists = []
+#     count = 0
+#     csvdata = csv.reader(file_path, delimiter=',', quotechar='|')
+#     for i in csvdata:
+#       csv_data_list.append(i)
+#     for j in range(len(csv_data_list)):
+#       student = self.get_student_vocational(batch_id, csv_data_list[j][2])
+#       if student:
+#         student_exists.append(student)
+#       else:
+#          self.create_student_vocational(tr_id, batch_id, csv_data_list[j][0], csv_data_list[j][1], csv_data_list[j][2], csv_data_list[j][3])
+#       student_count = SingleTrainingAttendance.objects.filter(training_id=tr_id).count()
+#     return student_exists, student_count, csv_data_list
 
 '''
 SingleTrainingUpdateView will update a request for a existing One day workshop.
@@ -2088,7 +2095,7 @@ def SingleTrainingApprove(request, pk):
     st.save()
     #Send Emails from here
   else:
-    print "Error"
+    print("Error")
   return HttpResponseRedirect('/software-training/single-training/approved/')
 
 ''' SingleTrainingReject will take an argument(primary key of a training batch) and change the status of the SingleTraining batch, in the database, from pending to rejected
@@ -2100,7 +2107,7 @@ def SingleTrainingReject(request, pk):
     st.status = 5
     st.save()
   else:
-    print "Error"
+    print("Error")
   return HttpResponseRedirect("/software-training/single-training/approved/")
 
 #using in stp mark attendance also
@@ -2110,7 +2117,7 @@ def SingleTrainingPendingAttendance(request, pk):
     st.status = 6
     st.save()
   else:
-    print "Error"
+    print("Error")
   return HttpResponseRedirect("/software-training/single-training/pending/")
 
 def MarkAsComplete(request, pk):
@@ -2121,7 +2128,7 @@ def MarkAsComplete(request, pk):
     st.save()
     messages.success(request, 'Request to mark training complete successfully sent')
   else:
-    print "Error"
+    print("Error")
     messages.error(request, 'Request not sent.Please try again.')
   return HttpResponseRedirect("/software-training/training-planner/")
 
@@ -2130,6 +2137,7 @@ def MarkComplete(request, pk):
   st = TrainingRequest.objects.get(pk=pk)
   if st and st.status == 2:
     st.status = 1 #mark to complete
+    st.cert_status = 1 #allow certificate
     st.save()
     messages.success(request, 'Training Marked as complete.')
   else:
@@ -2215,8 +2223,8 @@ class OldTrainingCloseView(CreateView):
         tp.created = created
         tp.updated = created
         tp.save()
-      except Exception, e:
-        print e
+      except Exception as e:
+        print(e)
     return tp
 
   def _get_student(self, ta):
@@ -2310,8 +2318,7 @@ class OrganiserFeedbackCreateView(CreateView):
 
     @method_decorator(group_required("Organiser"))
     def get(self, request, *args, **kwargs):
-	    return render_to_response(self.template_name, {'form': self.form_class()},
-	      context_instance=RequestContext(self.request))
+        return render(self.request, self.template_name, {'form': self.form_class()})
 
     def post(self,  request, *args, **kwargs):
       self.object = None
@@ -2346,7 +2353,7 @@ def LatexWorkshopFileUpload(request):
       email = request.POST['email']
       email = email.replace('.', '_')
       email = email.replace('@', '_')
-      print email
+      print(e)mail
       f = open('media/latex/{0}/{1}'.format(email, uploaded_file), 'wb+')
       for data in uploaded_file.chunks():
           f.write(data)
@@ -2355,14 +2362,14 @@ def LatexWorkshopFileUpload(request):
       form.save()
       form = LatexWorkshopFileUploadForm()
       context=RequestContext(request, {'form': form, 'success': True})
-      return render_to_response(template_name, context)
+      return render(request, template_name, context)
     else:
       context=RequestContext(request, {'form': form})
-      return render_to_response(template_name, context)
+      return render(request, template_name, context)
   else:
     form = LatexWorkshopFileUploadForm()
     context=RequestContext(request, {'form':form})
-  return render_to_response(template_name, context)
+  return render(request, template_name, context)
 
 class UpdateStudentName(UpdateView):
   model = User
@@ -2433,10 +2440,9 @@ class STWorkshopFeedbackCreateView(CreateView):
     form_class = STWorkshopFeedbackForm
     template_name = "stworkshop_feedback.html"
     success_url = "/home"
-    
+
     def get(self, request, *args, **kwargs):
-	    return render_to_response(self.template_name, {'form': self.form_class()},
-	      context_instance=RequestContext(self.request))
+        return render(self.request, self.template_name, {'form': self.form_class()})
 
     def post(self,  request, *args, **kwargs):
       self.object = None
@@ -2456,13 +2462,12 @@ class STWorkshopFeedbackPreCreateView(CreateView):
 
     @method_decorator(login_required)
     def get(self, request, *args, **kwargs):
-	    return render_to_response(self.template_name, {'form': self.form_class()},
-	      context_instance=RequestContext(self.request))
+        return render(self.request, self.template_name, {'form': self.form_class()})
 
     def post(self,  request, *args, **kwargs):
       self.object = None
       self.user = self.request.user.id
-      print self.user
+      print((self.user))
       form = self.get_form(self.get_form_class())
       if form.is_valid():
         #form.save()
@@ -2470,14 +2475,14 @@ class STWorkshopFeedbackPreCreateView(CreateView):
         #messages.success(self.request, "Thank you for completing this feedback form. We appreciate your input and valuable suggestions.")
         #return HttpResponseRedirect(self.success_url)
       else:
-        print form.errors
+        print((form.errors))
         return self.form_invalid(form)
 
     def form_valid(self, form, **kwargs):
       form_data = form.save(commit=False)
       form_data.user = self.request.user
       form_data.save()
-      print "saved"
+      print("saved")
       messages.success(self.request, "Thank you for completing this feedback form. We appreciate your input and valuable suggestions.")
       return HttpResponseRedirect(self.success_url)
 
@@ -2492,8 +2497,7 @@ class STWorkshopFeedbackPostCreateView(CreateView):
 
     @method_decorator(login_required)
     def get(self, request, *args, **kwargs):
-	    return render_to_response(self.template_name, {'form': self.form_class()},
-	      context_instance=RequestContext(self.request))
+        return render(self.request, self.template_name, {'form': self.form_class()})
 
     def post(self,  request, *args, **kwargs):
       self.object = None
@@ -2504,7 +2508,7 @@ class STWorkshopFeedbackPostCreateView(CreateView):
         #messages.success(self.request, "Thank you for completing this feedback form. We appreciate your input and valuable suggestions.")
         return HttpResponseRedirect(self.success_url)
       else:
-        print form.errors
+        print((form.errors))
         return self.form_invalid(form)
 
     def form_valid(self, form, **kwargs):
@@ -2521,7 +2525,7 @@ class LearnDrupalFeedbackCreateView(CreateView):
 
   def get(self, request, *args, **kwargs):
     # import ipdb; ipdb.set_trace()
-    return render_to_response(self.template_name, {'form': self.form_class()},context_instance=RequestContext(self.request))
+    return render(self.request, self.template_name, {'form': self.form_class()})
 
   def post(self,  request, *args, **kwargs):
       self.object = None
@@ -2529,7 +2533,7 @@ class LearnDrupalFeedbackCreateView(CreateView):
       if form.is_valid():
         return self.form_valid(form)
       else:
-        print form.errors
+        print((form.errors))
         return self.form_invalid(form)
 
   def form_valid(self, form, **kwargs):
@@ -2558,7 +2562,7 @@ def payment_home(request):
   except:
     messages.error(request, 'Permission denied. You are not an Account Executive.')
     return HttpResponseRedirect('/software-training')
-  
+
   amount = "0"
   if accountexecutive.academic.institution_type_id == 5:
       amount = "5000"
@@ -2587,20 +2591,20 @@ def payment_status(request):
       messages.error(request, 'Permission denied. You are not an Account Executive.')
       return HttpResponseRedirect('/software-training')
     amount = "0"
-    
+
     if accountexecutive.academic.institution_type_id == 5:
         amount = "5000"
     else:
         amount = "25000"
-    
+
     STdata = ''
     user_name = user.first_name+' '+user.last_name
     STdata = str(user.id)+str(user_name)+str(amount)+"Subscription"+"SOLOSTW"+CHANNEL_KEY
-    print STdata
+    print(STdata)
     s = display.value(str(STdata))
-    
+
     data = {'userId':user.id,'name':user_name,'amount':amount,'purpose':'Subscription','channelId':'SOLOSTW','random':s.hexdigest()}
-    
+
 
     try:
         paymentdetails = PaymentDetails()
@@ -2613,7 +2617,7 @@ def payment_status(request):
         paymentdetails.academic_year = academic_year
         paymentdetails.gstno = request.POST['id_gstin']
         paymentdetails.save()
-        
+
     except Exception as e:
         try:
           paymentdetails = PaymentDetails.objects.get(academic_id = accountexecutive.academic.id, academic_year = academic_year)
@@ -2628,7 +2632,7 @@ def payment_status(request):
 
         messages.error(request, 'This college has aready initiated the payment.')
         return HttpResponseRedirect('/software-training/payment-home')
-    
+
     return render(request,'payment_status.html',data)
   #not post
   else:
@@ -2638,7 +2642,7 @@ def payment_status(request):
 @login_required
 def payment_success(request):
   context = {}
-  user = User.objects.get(id = request.user.id) 
+  user = User.objects.get(id = request.user.id)
   try:
     accountexecutive = Accountexecutive.objects.get(user_id = user,status=1)
   except:
@@ -2668,9 +2672,9 @@ def payment_success(request):
     provId = request.POST.get('provId')
     status = request.POST.get('status')
     msg = request.POST.get('msg')
-    random = request.POST.get('random') 
+    random = request.POST.get('random')
 
-   
+
     STresponsedata = ''
     STresponsedata = str(user.id)+transId+refNo+amount+status+msg+CHANNEL_KEY
     s = display.value(str(STresponsedata))
@@ -2679,7 +2683,7 @@ def payment_success(request):
     if STresponsedata_hexa == random:
       #save transaction details in db
       pd = PaymentDetails.objects.get(user = user.id, academic_id = accountexecutive.academic.id)
-      print 'pd id',pd.id
+      print(('pd id',pd.id))
 
       try:
         transactiondetails = PaymentTransactionDetails()
@@ -2687,8 +2691,8 @@ def payment_success(request):
         transactiondetails.requestType  =  requestType
         transactiondetails.userId_id  =  userId
         transactiondetails.amount  =  amount
-        transactiondetails.reqId  = reqId 
-        transactiondetails.transId  = transId 
+        transactiondetails.reqId  = reqId
+        transactiondetails.transId  = transId
         transactiondetails.refNo  =  refNo
         transactiondetails.provId  =  provId
         transactiondetails.status  =  status
@@ -2724,7 +2728,7 @@ def payment_details(request,choice):
   paymentdetails = PaymentDetails.objects.filter(academic_id=academic_id[0]['academic_id'])
   paymenttransactionetails = PaymentTransactionDetails.objects.filter(paymentdetail_id = paymentdetails)
   user = User.objects.get(id = request.user.id)
-  
+
   context ={}
   context['user'] = user
   context['completed'] = paymenttransactionetails.filter(status='S').count()
@@ -2735,7 +2739,7 @@ def payment_details(request,choice):
   context['ongoing_details'] = paymentdetails
   context['tabid'] = choice
   context['college'] = academic_id[0]['academic_id__institution_name']
-  return render(request,'payment_details.html',context)     
+  return render(request,'payment_details.html',context)
 
 @csrf_exempt
 def payment_reconciliation_update(request):
@@ -2748,7 +2752,7 @@ def payment_reconciliation_update(request):
   provId = request.GET.get('provId')
   status = request.GET.get('status')
   msg = request.GET.get('msg')
-  random = request.GET.get('random') 
+  random = request.GET.get('random')
 
   STresponsedata = ''
   STresponsedata = userId+transId+refNo+amount+status+msg+CHANNEL_KEY
@@ -2759,10 +2763,10 @@ def payment_reconciliation_update(request):
     try:
       accountexecutive = Accountexecutive.objects.get(user_id = userId,status__gt=0)
     except:
-      print "no ac"
+      print("no ac")
       pass
     try:
-      print userId, accountexecutive.academic_id
+      print((userId, accountexecutive.academic_id))
       pd = PaymentDetails.objects.get(user_id = userId, academic_id_id = accountexecutive.academic_id)
     except:
       return HttpResponseRedirect("Failed1")
@@ -2773,17 +2777,17 @@ def payment_reconciliation_update(request):
       transactiondetails.requestType  =  requestType
       transactiondetails.userId_id  =  userId
       transactiondetails.amount  =  amount
-      transactiondetails.reqId  = reqId 
-      transactiondetails.transId  = transId 
+      transactiondetails.reqId  = reqId
+      transactiondetails.transId  = transId
       transactiondetails.refNo  =  refNo
       transactiondetails.provId  =  provId
       transactiondetails.status  =  status
       transactiondetails.msg  =  msg
       transactiondetails.save()
-      print "saved"
+      print("saved")
     except:
       return HttpResponseRedirect("Failed2")
-    
+
     if status == 'S':
       pd.status = 1
       pd.description = 'Payment successfull'
@@ -2807,16 +2811,16 @@ def academic_transactions(request):
     context['user'] = user
     if request.method == 'POST':
       form = TrainingManagerForm(user,request.POST)
-      
+
       # if form.is_valid():
       #   form_data = form.cleaned_data
       get_state = request.POST.get('state')
       status = request.POST.get('choices')
-      if academic_center in ('None','0',0):  
+      if academic_center in ('None','0',0):
         academic_center = False
       else:
         academic_center = request.POST.get('college')
-        
+
       if get_state:
         academic_centers = AcademicCenter.objects.filter(state=get_state)
         if academic_center :
@@ -2828,7 +2832,7 @@ def academic_transactions(request):
         paymentdetails = PaymentDetails.objects.filter(academic_id__in=academic_centers)
 
       if status == 'O':
-        paymentdetails = paymentdetails.filter(status=0)        
+        paymentdetails = paymentdetails.filter(status=0)
         if request.POST.get('fdate'):
           if request.POST.get('tdate'):
             paymentdetails = paymentdetails.filter(Q(created__gt=request.POST.get('fdate')) & Q(created__lt= request.POST.get('tdate')))
@@ -2846,7 +2850,7 @@ def academic_transactions(request):
             paymenttransactiondetails = paymenttransactiondetails.filter(Q(created__gt=request.POST.get('fdate')) & Q(created__lt= request.POST.get('tdate')))
           else:
             paymenttransactiondetails = paymenttransactiondetails.filter(created__gt=request.POST.get('fdate'))
-      
+
         context['transactiondetails'] = paymenttransactiondetails
         if status == 'R':
           context['total'] = paymenttransactiondetails.aggregate(Sum('amount'))
@@ -2855,3 +2859,248 @@ def academic_transactions(request):
       form = TrainingManagerForm(user=request.user)
     context['form'] = form
     return render(request, 'payment.html', context)
+
+def trainingrequest(request, role, status):
+  context = {}
+  user = None
+  template_name = None
+  header = None
+  raw_get_data = None
+  now= datetime.now()
+  year = now.year
+  month =now.month
+
+  current_sem_type_even = 0 #odd
+  if month < 6:
+    current_sem_type_even = 1 #even
+
+  prev_sem_type = 'even'
+  prev_sem_year = year
+  if current_sem_type_even:
+    prev_sem_type = 'odd'
+    prev_sem_year = (year - 1)
+  prev_sem_start_date, prev_sem_end_date = get_prev_semester_duration(prev_sem_type, prev_sem_year)
+  
+  if not (user.is_authenticated() and (is_resource_person(user) or is_administrator(user))):
+    raise PermissionDenied()
+
+  if (not role ) or (not status):
+    raise PermissionDenied()
+  else:
+    status_list = {'pending': 0, 'completed': 1, 'markcomplete':2, 'pendingattendance':3}
+    roles = ['rp', 'em']
+    user = request.user
+    if role in roles and status in status_list:
+      if status == 'completed':
+        queryset = TrainingRequest.objects.filter(
+          training_planner__academic_id__in=AcademicCenter.objects.filter(
+            state__in = State.objects.filter(
+              resourceperson__user_id=user,
+              resourceperson__status=1
+            )
+          ).values_list('id'),
+          status=1,
+          participants__gt=0
+        ).order_by('-updated')
+      elif status == 'pending':
+        queryset = TrainingRequest.objects.filter(
+          training_planner__academic_id__in=AcademicCenter.objects.filter(
+            state__in = State.objects.filter(
+              resourceperson__user_id=user,
+              resourceperson__status=1
+            )
+          ).values_list('id'),
+          status=0
+        ).order_by('-updated')
+      elif status == 'markcomplete':
+        if is_administrator(user):
+          queryset = TrainingRequest.objects.filter(status=2).order_by('-updated')
+        else:
+          queryset = TrainingRequest.objects.filter(
+            training_planner__academic_id__in=AcademicCenter.objects.filter(
+              state__in = State.objects.filter(
+                resourceperson__user_id=user,
+                resourceperson__status=1
+              )
+            ).values_list('id'),
+            status=2
+          ).order_by('-updated')
+      elif status == 'pendingattendance':
+        queryset = TrainingRequest.objects.filter(
+          training_planner__academic_id__in=AcademicCenter.objects.filter(
+            state__in = State.objects.filter(
+              resourceperson__user_id=user,
+              resourceperson__status=1,
+            )
+          ).values_list('id'),
+          status = 1, participants = 0, training_planner__semester__name = prev_sem_type , sem_start_date__gte = prev_sem_start_date
+        )
+
+      header = {
+        1: SortableHeader('#', False),
+        2: SortableHeader(
+          'training_planner__academic__state__name',
+          True,
+          'State'
+        ),
+        3: SortableHeader(
+          'training_planner__academic__academic_code',
+          True,
+          'Code'
+        ),
+        4: SortableHeader(
+          'training_planner__academic__institution_name',
+          True,
+          'Institution'
+        ),
+        5: SortableHeader('batch__department__name', True, 'Department / Batch'),
+        6: SortableHeader('course__foss__foss', True, 'Course Name'),
+        7: SortableHeader('course_type', True, 'Course Type'),
+        8: SortableHeader(
+          'training_planner__organiser__user__first_name',
+          True,
+          'Organiser'
+        ),
+        9: SortableHeader(
+          'sem_start_date',
+          True,
+          'Sem Start Date / Training Date'
+        ),
+        10: SortableHeader('participants', True, 'Participants'),
+        #11: SortableHeader('Action', False)
+      }
+      raw_get_data = request.GET.get('o', None)
+      queryset = get_sorted_list(
+        request,
+        queryset,
+        header,
+        raw_get_data
+      )
+      if status == 'completed':
+        collection= TrainingRequestFilter(request.GET, queryset=queryset, user=user, rp_completed=True)
+      elif status == 'pending':
+        collection= TrainingRequestFilter(request.GET, queryset=queryset, user=user, rp_ongoing=True)
+      elif status == 'markcomplete':
+        collection= TrainingRequestFilter(request.GET, queryset=queryset, user=user, rp_markcomplete=True)
+      elif status == 'pendingattendance':
+        collection= TrainingRequestFilter(request.GET, queryset=queryset, user=user, rp_pendingattendance=True)
+    else:
+      raise PermissionDenied()
+
+    context['form'] = collection.form
+    page = request.GET.get('page')
+    collection = get_page(collection.qs, page)
+    context['collection'] =  collection
+    context['role'] = role
+    context['status'] = status
+    context['header'] = header
+    context['ordering'] = get_field_index(raw_get_data)
+
+  return render(request,'training_list.html',context)
+
+
+def CertificateRequest(request, role, choice):
+  queryset = None
+  user = request.user
+  header = None
+  raw_get_data = None
+  now= datetime.now()
+  year = now.year
+  month =now.month
+  roles = ['rp', 'em']
+  context = {}
+
+  if not (user.is_authenticated() and (is_resource_person(user) or is_administrator(user))):
+        raise PermissionDenied()
+
+  if (not 'role') or (not 'choice'):
+      raise PermissionDenied()
+
+  if role in roles and choice == 'training':
+    if is_administrator(user):
+      queryset = TrainingRequest.objects.filter(status=1, cert_status=2).order_by('-updated')
+    else:
+      queryset = TrainingRequest.objects.filter(
+        training_planner__academic_id__in=AcademicCenter.objects.filter(
+          state__in = State.objects.filter(
+            resourceperson__user_id=user,
+            resourceperson__status=1
+          )
+        ).values_list('id'),
+        status=1,
+        cert_status=2
+      ).order_by('-updated')
+    header = {
+      1: SortableHeader('#', False),
+      2: SortableHeader(
+        'training_planner__academic__state__name',
+        True,
+        'State'
+      ),
+      3: SortableHeader(
+        'training_planner__academic__academic_code',
+        True,
+        'Code'
+      ),
+      4: SortableHeader(
+        'training_planner__academic__institution_name',
+        True,
+        'Institution'
+      ),
+      5: SortableHeader('batch__department__name', True, 'Department / Batch'),
+      6: SortableHeader('course__foss__foss', True, 'Course Name'),
+      7: SortableHeader('course_type', True, 'Course Type'),
+      8: SortableHeader(
+        'training_planner__organiser__user__first_name',
+        True,
+        'Organiser'
+      ),
+      9: SortableHeader(
+        'sem_start_date',
+        True,
+        'Sem Start Date / Training Date'
+      ),
+      10: SortableHeader('participants', True, 'Participants'),
+      11: SortableHeader('Action', False)
+    }
+    raw_get_data = request.GET.get('o', None)
+    queryset = get_sorted_list(
+      request,
+      queryset,
+      header,
+      raw_get_data
+    )
+    collection = TrainingRequestFilter(request.GET, queryset=queryset, user=user, rp_completed=True)
+  else:
+    raise PermissionDenied()
+
+  context['form'] = collection.form
+  page = request.GET.get('page')
+  collection = get_page(collection.qs, page)
+  context['collection'] =  collection
+  context['role'] = role
+  context['choice'] = choice
+  context['header'] = header
+  context['ordering'] = get_field_index(raw_get_data)
+  return render(request,'certificate_request_list.html',context)
+
+def RequestCertificate(request, trid):
+  training = TrainingRequest.objects.get(pk=trid)
+  if training:
+    training.cert_status = 2 #request to generate
+    training.save()
+    messages.success(request, 'Request to generate participation certificate has successfully sent')
+  else:
+    print("Error")
+    messages.error(request, 'Request not sent.Please try again.')
+  return HttpResponseRedirect("/software-training/training-planner/")
+
+def GenerateCertificate(request, trid):
+  training = TrainingRequest.objects.get(pk=trid)
+  if training and training.status == 1 and training.cert_status == 2:
+    training.cert_status = 1 #mark to generate
+    training.save()
+    messages.success(request, 'Certificates generated.')
+  else:
+    messages.error(request, 'Something went wrong Please try again')
+  return HttpResponseRedirect("/software-training/certificate-request/rp/training/") 

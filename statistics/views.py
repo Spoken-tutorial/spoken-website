@@ -1,4 +1,5 @@
 # Standard Library
+from builtins import str
 from datetime import datetime
 import collections
 # Third Party Stuff
@@ -72,8 +73,8 @@ def get_state_info(request, code):
             'from_date': workshop_details['sem_start_date__min']
         }
         return render(request, 'statistics/templates/get_state_info.html', context)
-    except Exception, e:
-        print e
+    except Exception as e:
+        print(e)
         return HttpResponse('<h4 style="margin: 30px;">Permission Denied!</h4>')
 
 
@@ -124,7 +125,7 @@ def training(request):
     # find state id
     if 'training_planner__academic__state' in request.GET and request.GET['training_planner__academic__state']:
         state = State.objects.get(id=request.GET['training_planner__academic__state'])
-
+    print("\n\n\n\n\nrequest :",request.GET)
     collection = TrainingRequestFilter(request.GET, queryset=collection, state=state)
     # find participants count
     
@@ -168,14 +169,14 @@ def training(request):
         for data in chart_query_set:
             chart_data += "['" + str(data['year']) + "', " + str(data['total_participant']) + "],"
     else:
-        for year,count in year_data_all.iteritems():
+        for year,count in list(year_data_all.items()):
             chart_data += "['" + str(year) + "', " + str(count) + "],"
     
     context = {}
     context['form'] = collection.form
     context['chart_data'] = chart_data
-    page = request.GET.get('page')
-    collection = get_page(collection, page)
+    page = request.GET.get('page')    
+    collection = get_page(collection.qs, page )
     context['collection'] = collection
     context['header'] = header
     context['ordering'] = ordering
@@ -233,7 +234,7 @@ def fdp_training(request):
     context['form'] = collection.form
     context['chart_data'] = chart_data
     page = request.GET.get('page')
-    collection = get_page(collection, page)
+    collection = get_page(collection.qs, page)
     context['collection'] = collection
     context['header'] = header
     context['ordering'] = ordering
@@ -248,8 +249,8 @@ def training_participant(request, rid):
         context['model_label'] = 'Workshop / Training'
         context['model'] = TrainingRequest.objects.get(id=rid)
         context['collection'] = TrainingAttend.objects.filter(training_id=rid)
-    except Exception, e:
-        print e
+    except Exception as e:
+        print(e)
         raise PermissionDenied()
     return render(request, 'statistics/templates/training_participant.html', context)
 
@@ -264,8 +265,8 @@ def studentmaster_ongoing(request, rid):
             row_data = StudentMaster.objects.filter(batch_id=ab.batch_id)
         context['collection'] = row_data
 
-    except Exception, e:
-        print e
+    except Exception as e:
+        print(e)
         raise ObjectDoesNotExist()
     return render(request, 'statistics/templates/training_participant.html', context)
 
@@ -310,7 +311,7 @@ def online_test(request):
     context['form'] = collection.form
     context['chart_data'] = chart_data
     page = request.GET.get('page')
-    collection = get_page(collection, page)
+    collection = get_page(collection.qs, page)
     context['collection'] = collection
     context['header'] = header
     context['ordering'] = ordering
@@ -396,11 +397,11 @@ def academic_center(request, slug=None):
     context['form'] = collection.form
     context['total_training'] = training_query.count()
     participant_count = training_query.aggregate(Sum('participants'))
-    print participant_count
+    print(participant_count)
     context['total_participant'] = participant_count['participants__sum']
 
     page = request.GET.get('page')
-    collection = get_page(collection, page)
+    collection = get_page(collection.qs, page)
     context['collection'] = collection
     context['header'] = header
     context['ordering'] = ordering
@@ -443,7 +444,7 @@ def motion_chart(request):
         interactive_workshop_data += "['" + curr_state + "', " + js_date + \
             ", " + str(row['tcount']) + ", " + str(row['pcount']) + "],"
 
-    for key, value in states.iteritems():
+    for key, value in list(states.items()):
         curr_year = str(datetime.now().year)
         static_workshop_data += "['" + key + "', " + curr_year + ", " + \
             str(value['tcount']) + ", " + str(value['pcount']) + "],"
@@ -467,8 +468,8 @@ def learners(request):
                 messages.success(
                     request, "Thank you for submitting your details. You can choose your course and then continue..")
                 return HttpResponseRedirect('/tutorial-search/?search_foss=&search_language=')
-            except Exception, e:
-                print e
+            except Exception as e:
+                print(e)
                 messages.success(request, "Sorry, something went wrong, Please try again!")
     context['form'] = form
     return render(request, 'statistics/templates/learners.html', context)

@@ -3,7 +3,7 @@
 {% load widget_tweaks %}
 {% load static %}
 {% block title %}Master Batch{% endblock %}
-{% block heading %}<i class="home-page-title-i">Master Batch</i><a class="btn btn-success pull-right" href="{% url 'events:batch_list' %}">Back to MB Master Batch</a>{% endblock %}
+{% block heading %}<i class="home-page-title-i">Master Batch</i><a class="btn btn-success pull-right" href="{% url 'eventsv2:batch_list' %}">Back to MB Master Batch</a>{% endblock %}
 {% block search %}{% endblock %}
 {% block content %}
           <div class="row well">
@@ -28,7 +28,7 @@
                       <div class="form-group">
                           <div class="col-xs-12 form-group">
                               <input class="btn btn-primary" type="submit" value="Update" />
-                              <a class="btn btn-danger" href="{% url 'events:batch_list' %}">Cancel</a>
+                              <a class="btn btn-danger" href="{% url 'eventsv2:batch_list' %}">Cancel</a>
                           </div>
                       </div>
                       {% endwith %}

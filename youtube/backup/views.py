@@ -1,4 +1,6 @@
+
 # Standard Library
+from builtins import str
 import os
 
 # Third Party Stuff
@@ -39,9 +41,9 @@ def delete_all_videos(request):
         if row.playlist_item_id is not None and row.playlist_item_id != '':
             delete_playlistitem(service, row.playlist_item_id)
         if result is not None:
-            print row.video_id, 'deleted'
+            print((row.video_id, 'deleted'))
         else:
-            print row.video_id, 'not deleted'
+            print((row.video_id, 'not deleted'))
     return HttpResponse('Videos deletion process completed!!!')
 
 

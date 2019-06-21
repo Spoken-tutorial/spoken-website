@@ -153,7 +153,7 @@
         <h4 class="page-title">
             <i class="fa fa-list-ul"></i> Testimonials
             {% if add_button_show %}
-            <a class="btn btn-primary pull-right" href="{% url 'testimonials_new_media' type='series' %}">Upload Series Testimonial</a>
+            <a class="btn btn-primary pull-right" href="{% url 'testimonials_new_media' testimonial_type='series' %}">Upload Series Testimonial</a>
             {% endif %}
         </h4>
         {% for record in collection %}

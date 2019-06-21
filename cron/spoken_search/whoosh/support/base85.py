@@ -29,7 +29,7 @@ def to_base85(x, islong=False):
 
     size = 10 if islong else 5
     rems = ""
-    for i in xrange(size):
+    for i in range(size):
         rems = b85chars[x % 85] + rems
         x //= 85
     return rems

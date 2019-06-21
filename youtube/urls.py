@@ -1,12 +1,13 @@
 # Third Party Stuff
-from django.conf.urls import patterns, url
-
-urlpatterns = patterns('',  # noqa
-    url(r'^$', 'youtube.views.home', name="home"),
-    url(r'^delete-videos/$', 'youtube.views.delete_all_videos', name="delete_all_videos"),
-    url(r'^remove-youtube-video/$', 'youtube.views.remove_youtube_video', name="remove_youtube_video"),
-    url(r'^remove-video-entry/(\d+)/(\d+)/$', 'youtube.views.remove_video_entry', name="remove_video_entry"),
-    url(r'^ajax-foss-based-language-tutorial/$', 'youtube.views.ajax_foss_based_language_tutorial',
+from django.conf.urls import url
+from youtube.views import *
+app_name = 'youtube'
+urlpatterns = [ # noqa
+    url(r'^$',  home, name="home"),
+    url(r'^delete-videos/$',  delete_all_videos, name="delete_all_videos"),
+    url(r'^remove-youtube-video/$',  remove_youtube_video, name="remove_youtube_video"),
+    url(r'^remove-video-entry/(\d+)/(\d+)/$',  remove_video_entry, name="remove_video_entry"),
+    url(r'^ajax-foss-based-language-tutorial/$',  ajax_foss_based_language_tutorial,
         name="ajax_foss_based_language_tutorial"),
-    url(r'^oauth2callback/$', 'youtube.views.auth_return', name="auth_return"),
-)
+    url(r'^oauth2callback/$',  auth_return, name="auth_return"),
+]

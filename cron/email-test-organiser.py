@@ -1,10 +1,13 @@
+
+from builtins import str
 import time
 import os, sys
 from django.db.models import Q
 
 # setting django environment
 from django.core.wsgi import get_wsgi_application
-sys.path.append("/websites_dir/django_spoken/spoken")
+from config import *
+sys.path.append(SPOKEN_PATH)
 os.environ["DJANGO_SETTINGS_MODULE"] = "spoken.settings"
 application = get_wsgi_application()
 
@@ -12,7 +15,6 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
 from django.template import Context
 
-from config import *
 from cms.models import *
 from events.models import Organiser
 
@@ -35,14 +37,14 @@ The Spoken Tutorial team can see that you are very good in systematically planni
 You have followed all the regular processes till date namely by -
 
 1.uploading your student nominal roll (i.e) Master Batche(s),
-2.selected appropriate courses by filling the semester training planner (STP) through your organiser login on http://spoken-tutorial.org
+2.selected appropriate courses by filling the semester training planner (STP) through your organiser login on https://spoken-tutorial.org
 
 IMPORTANT- Now, it is time for you to mark attendance (i.e) complete STEP 3 of the Semester Training Planner Summary (STPS); "Mark the Participant List (PL)" to complete the process.
 
 
 
 This is your next immediate activity (to be completed by December 29, 2017)...
-Log-on to http://spoken-tutorial.org
+Log-on to https://spoken-tutorial.org
 Goto 'Software Training' >> 'Training Dashboard' >> 'Semester Training Planner Summary' >> 'STEP 3 : Select Participant List' --- mark attendance for all batches listed one by one.
 for more details:http://process.spoken-tutorial.org/images/1/1c/Select_Participantlist.pdf
 
@@ -87,13 +89,13 @@ Spoken Tutorial, IIT Bombay
             time.sleep(10)
         #print to," => sent (", str(count),"/",str(tot_count),")"
         success_log_file_head.write(str(organiser.user.email)+','+str(1)+'\n')
-    except Exception, e:
-        print e
+    except Exception as e:
+        print(e)
         #print to," => not sent (",count,"/",tot_count,")"
         success_log_file_head.write(str(organiser.user.email)+','+str(0)+'\n')
     # break
-print "--------------------------------"
-print "Total sent mails:", sent
-print "Total not sent mails:", notsent
-print "--------------------------------"
+print("--------------------------------")
+print(("Total sent mails:", sent))
+print(("Total not sent mails:", notsent))
+print("--------------------------------")
 

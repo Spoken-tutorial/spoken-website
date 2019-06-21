@@ -1,4 +1,5 @@
 # Standard Library
+from builtins import str
 import json
 
 # Third Party Stuff

@@ -47,7 +47,7 @@
     </td>
 
     <td>
-      <center><a class="btn btn-success steps-btn" href="{% url 'events:batch_list' %}">MB Master Batch Student List</a></center>
+      <center><a class="btn btn-success steps-btn" href="{% url 'eventsv2:batch_list' %}">MB Master Batch Student List</a></center>
     </td>
 
   </tr>
@@ -69,7 +69,7 @@
     </td>
 
     <td>
-      <center><a class="btn btn-success steps-btn" href="{% url 'events:select_participants' %}"> Select Participant List</a></center>
+      <center><a class="btn btn-success steps-btn" href="{% url 'eventsv2:select_participants' %}"> Select Participant List</a></center>
     </td>
 
   </tr>
@@ -93,8 +93,8 @@
             <i>In case your semester begins <b>mid-June</b> onwards, please choose July-Dec semester
             <br/>and select 1 July as Semester Start Date.</i>
           </div><br />
-          <a class="btn btn-primary " href="{% url 'events:training_request' current_planner.id %}">Current Semester: {{current_planner.get_semester}}</a>
-          <a class="btn btn-primary " href="{% url 'events:training_request' next_planner.id %}"> Next Semester: {{next_planner.get_semester}}</a>
+          <a class="btn btn-primary " href="{% url 'eventsv2:training_request' current_planner.id %}">Current Semester: {{current_planner.get_semester}}</a>
+          <a class="btn btn-primary " href="{% url 'eventsv2:training_request' next_planner.id %}"> Next Semester: {{next_planner.get_semester}}</a>
         </div>
       </div>
     </div>
@@ -196,7 +196,7 @@
             <td>{{ training.attendance_summery }}</td>
             <td>
             {% if training.can_edit %}
-            | <a href="{% url 'events:edit_training_request' training.id %}">Edit</a> |
+            | <a href="{% url 'eventsv2:edit_training_request' training.id %}">Edit</a> |
             {% endif %}
             </td>
           </tr>
@@ -237,7 +237,16 @@
             <td>{{ training.attendance_summery }}</td>
             <td>
               {% if training.get_partipants_from_attendance %}
-              | <a href="{% url 'events:training_certificate' training.id %}">Participant List</a> |
+              | <a href="{% url 'eventsv2:training_certificate' training.id %}">Participant List</a> |
+
+                {% if training.cert_status == 0 %}
+                  <a href="{% url 'eventsv2:request_certificate' training.id %}">Genearte Participation Certificate</a>
+                {% elif training.cert_status == 1 %}
+                  Participation certificates available
+                {% else %}
+                  Certificate request awaiting at Training manager
+                {% endif %}
+                |
               {% endif %}
             </td>
           </tr>

@@ -1,18 +1,20 @@
+
+from builtins import str
 import time
 import os, sys
 from django.db.models import Q
 
 # setting django environment
 from django.core.wsgi import get_wsgi_application
-sys.path.append("/websites_dir/django_spoken/spoken")
+from config import *
+sys.path.append(SPOKEN_PATH)
 os.environ["DJANGO_SETTINGS_MODULE"] = "spoken.settings"
 application = get_wsgi_application()
 
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
 from django.template import Context
-
-from config import * 
+ 
 from cms.models import *
 from events.models import Organiser, AcademicCenter
 
@@ -67,13 +69,13 @@ NMEICT, MHRD, Govt. Of India<br>
             time.sleep(10)
         #print to," => sent (", str(count),"/",str(tot_count),")"
         success_log_file_head.write(str(organiser.user.email)+','+str(1)+'\n')
-    except Exception, e:
-        print e
+    except Exception as e:
+        print(e)
         #print to," => not sent (",count,"/",tot_count,")"
         success_log_file_head.write(str(organiser.user.email)+','+str(0)+'\n')
     #break
-print "--------------------------------"
-print tot_count
-print "Total sent mails:", sent
-print "Total not sent mails:", notsent
-print "--------------------------------"
+print("--------------------------------")
+print(tot_count)
+print(("Total sent mails:", sent))
+print(("Total not sent mails:", notsent))
+print("--------------------------------")
