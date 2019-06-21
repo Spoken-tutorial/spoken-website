@@ -19,6 +19,7 @@ import { ScriptCommentComponent } from './script/script-comment/script-comment.c
 
 export function tokenGetter() {
   const token = localStorage.getItem('token');
+  console.log(token)
   return token;
 }
 
@@ -55,5 +56,6 @@ export function tokenGetter() {
   providers: [],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule { 
+}
 
