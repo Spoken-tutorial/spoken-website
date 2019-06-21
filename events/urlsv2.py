@@ -324,5 +324,21 @@ urlpatterns = [
       trainingrequest, 
       name='training_list'
     ),
+    url(
+      r'^request/(?P<trid>\d+)/certificate/$', 
+      RequestCertificate, 
+      name="request_certificate"
+    ),
+
+    url(
+      r'^certificate-request/(?P<role>\w+)/(?P<choice>\w+)/$', 
+      CertificateRequest, 
+      name='certificate_request_list'
+    ),
+    url(
+      r'^generate/(?P<trid>\d+)/certificate/$', 
+      GenerateCertificate, 
+      name="generate_certificate"
+    )
 
 ]

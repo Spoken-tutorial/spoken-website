@@ -1231,146 +1231,146 @@ class GetDepartmentOrganiserStatusView(JSONResponseMixin, View):
     return self.render_to_json_response(context)
 
 
-class TrainingRequestListView(ListView):
-  queryset = None
-  paginate_by = 20
-  user = None
-  template_name = None
-  header = None
-  raw_get_data = None
-  role = None
-  status = None
-  now= datetime.now()
-  year = now.year
-  month =now.month
+# class TrainingRequestListView(ListView):
+#   queryset = None
+#   paginate_by = 20
+#   user = None
+#   template_name = None
+#   header = None
+#   raw_get_data = None
+#   role = None
+#   status = None
+#   now= datetime.now()
+#   year = now.year
+#   month =now.month
 
-  current_sem_type_even = 0 #odd
-  if month < 6:
-    current_sem_type_even = 1 #even
+#   current_sem_type_even = 0 #odd
+#   if month < 6:
+#     current_sem_type_even = 1 #even
 
-  prev_sem_type = 'even'
-  prev_sem_year = year
-  if current_sem_type_even:
-    prev_sem_type = 'odd'
-    prev_sem_year = (year - 1)
-  prev_sem_start_date, prev_sem_end_date = get_prev_semester_duration(prev_sem_type, prev_sem_year)
+#   prev_sem_type = 'even'
+#   prev_sem_year = year
+#   if current_sem_type_even:
+#     prev_sem_type = 'odd'
+#     prev_sem_year = (year - 1)
+#   prev_sem_start_date, prev_sem_end_date = get_prev_semester_duration(prev_sem_type, prev_sem_year)
 
-  @method_decorator(group_required("Resource Person","Administrator"))
-  def dispatch(self, *args, **kwargs):
-    if (not 'role' in kwargs) or (not 'status' in kwargs):
-      raise PermissionDenied()
-    self.role = kwargs['role']
-    self.status = kwargs['status']
-    status_list = {'pending': 0, 'completed': 1, 'markcomplete':2, 'pendingattendance':3}
-    roles = ['rp', 'em']
-    self.user = self.request.user
-    if self.role in roles and self.status in status_list:
-      if self.status == 'completed':
-        self.queryset = TrainingRequest.objects.filter(
-          training_planner__academic_id__in=AcademicCenter.objects.filter(
-            state__in = State.objects.filter(
-              resourceperson__user_id=self.user,
-              resourceperson__status=1
-            )
-          ).values_list('id'),
-          status=1,
-          participants__gt=0
-        ).order_by('-updated')
-      elif self.status == 'pending':
-        self.queryset = TrainingRequest.objects.filter(
-          training_planner__academic_id__in=AcademicCenter.objects.filter(
-            state__in = State.objects.filter(
-              resourceperson__user_id=self.user,
-              resourceperson__status=1
-            )
-          ).values_list('id'),
-          status=0
-        ).order_by('-updated')
-      elif self.status == 'markcomplete':
-        if is_administrator(self.user):
-          self.queryset = TrainingRequest.objects.filter(status=2).order_by('-updated')
-        else:
-          self.queryset = TrainingRequest.objects.filter(
-            training_planner__academic_id__in=AcademicCenter.objects.filter(
-              state__in = State.objects.filter(
-                resourceperson__user_id=self.user,
-                resourceperson__status=1
-              )
-            ).values_list('id'),
-            status=2
-          ).order_by('-updated')
-      elif self.status == 'pendingattendance':
-        self.queryset = TrainingRequest.objects.filter(
-          training_planner__academic_id__in=AcademicCenter.objects.filter(
-            state__in = State.objects.filter(
-              resourceperson__user_id=self.user,
-              resourceperson__status=1,
-            )
-          ).values_list('id'),
-          status = 1, participants = 0, training_planner__semester__name = self.prev_sem_type , sem_start_date__gte = self.prev_sem_start_date
-        )
+#   @method_decorator(group_required("Resource Person","Administrator"))
+#   def dispatch(self, *args, **kwargs):
+#     if (not 'role' in kwargs) or (not 'status' in kwargs):
+#       raise PermissionDenied()
+#     self.role = kwargs['role']
+#     self.status = kwargs['status']
+#     status_list = {'pending': 0, 'completed': 1, 'markcomplete':2, 'pendingattendance':3}
+#     roles = ['rp', 'em']
+#     self.user = self.request.user
+#     if self.role in roles and self.status in status_list:
+#       if self.status == 'completed':
+#         self.queryset = TrainingRequest.objects.filter(
+#           training_planner__academic_id__in=AcademicCenter.objects.filter(
+#             state__in = State.objects.filter(
+#               resourceperson__user_id=self.user,
+#               resourceperson__status=1
+#             )
+#           ).values_list('id'),
+#           status=1,
+#           participants__gt=0
+#         ).order_by('-updated')
+#       elif self.status == 'pending':
+#         self.queryset = TrainingRequest.objects.filter(
+#           training_planner__academic_id__in=AcademicCenter.objects.filter(
+#             state__in = State.objects.filter(
+#               resourceperson__user_id=self.user,
+#               resourceperson__status=1
+#             )
+#           ).values_list('id'),
+#           status=0
+#         ).order_by('-updated')
+#       elif self.status == 'markcomplete':
+#         if is_administrator(self.user):
+#           self.queryset = TrainingRequest.objects.filter(status=2).order_by('-updated')
+#         else:
+#           self.queryset = TrainingRequest.objects.filter(
+#             training_planner__academic_id__in=AcademicCenter.objects.filter(
+#               state__in = State.objects.filter(
+#                 resourceperson__user_id=self.user,
+#                 resourceperson__status=1
+#               )
+#             ).values_list('id'),
+#             status=2
+#           ).order_by('-updated')
+#       elif self.status == 'pendingattendance':
+#         self.queryset = TrainingRequest.objects.filter(
+#           training_planner__academic_id__in=AcademicCenter.objects.filter(
+#             state__in = State.objects.filter(
+#               resourceperson__user_id=self.user,
+#               resourceperson__status=1,
+#             )
+#           ).values_list('id'),
+#           status = 1, participants = 0, training_planner__semester__name = self.prev_sem_type , sem_start_date__gte = self.prev_sem_start_date
+#         )
 
-      self.header = {
-        1: SortableHeader('#', False),
-        2: SortableHeader(
-          'training_planner__academic__state__name',
-          True,
-          'State'
-        ),
-        3: SortableHeader(
-          'training_planner__academic__academic_code',
-          True,
-          'Code'
-        ),
-        4: SortableHeader(
-          'training_planner__academic__institution_name',
-          True,
-          'Institution'
-        ),
-        5: SortableHeader('batch__department__name', True, 'Department / Batch'),
-        6: SortableHeader('course__foss__foss', True, 'Course Name'),
-        7: SortableHeader('course_type', True, 'Course Type'),
-        8: SortableHeader(
-          'training_planner__organiser__user__first_name',
-          True,
-          'Organiser'
-        ),
-        9: SortableHeader(
-          'sem_start_date',
-          True,
-          'Sem Start Date / Training Date'
-        ),
-        10: SortableHeader('participants', True, 'Participants'),
-        #11: SortableHeader('Action', False)
-      }
-      self.raw_get_data = self.request.GET.get('o', None)
-      self.queryset = get_sorted_list(
-        self.request,
-        self.queryset,
-        self.header,
-        self.raw_get_data
-      )
-      if self.status == 'completed':
-        self.queryset.qs = TrainingRequestFilter(self.request.GET, queryset=self.queryset, user=self.user, rp_completed=True)
-      elif self.status == 'pending':
-        self.queryset.qs = TrainingRequestFilter(self.request.GET, queryset=self.queryset, user=self.user, rp_ongoing=True)
-      elif self.status == 'markcomplete':
-        self.queryset.qs = TrainingRequestFilter(self.request.GET, queryset=self.queryset, user=self.user, rp_markcomplete=True)
-      elif self.status == 'pendingattendance':
-        self.queryset.qs = TrainingRequestFilter(self.request.GET, queryset=self.queryset, user=self.user, rp_pendingattendance=True)
-    else:
-      raise PermissionDenied()
-    return super(TrainingRequestListView, self).dispatch(*args, **kwargs)
+#       self.header = {
+#         1: SortableHeader('#', False),
+#         2: SortableHeader(
+#           'training_planner__academic__state__name',
+#           True,
+#           'State'
+#         ),
+#         3: SortableHeader(
+#           'training_planner__academic__academic_code',
+#           True,
+#           'Code'
+#         ),
+#         4: SortableHeader(
+#           'training_planner__academic__institution_name',
+#           True,
+#           'Institution'
+#         ),
+#         5: SortableHeader('batch__department__name', True, 'Department / Batch'),
+#         6: SortableHeader('course__foss__foss', True, 'Course Name'),
+#         7: SortableHeader('course_type', True, 'Course Type'),
+#         8: SortableHeader(
+#           'training_planner__organiser__user__first_name',
+#           True,
+#           'Organiser'
+#         ),
+#         9: SortableHeader(
+#           'sem_start_date',
+#           True,
+#           'Sem Start Date / Training Date'
+#         ),
+#         10: SortableHeader('participants', True, 'Participants'),
+#         #11: SortableHeader('Action', False)
+#       }
+#       self.raw_get_data = self.request.GET.get('o', None)
+#       self.queryset = get_sorted_list(
+#         self.request,
+#         self.queryset,
+#         self.header,
+#         self.raw_get_data
+#       )
+#       if self.status == 'completed':
+#         self.queryset.qs = TrainingRequestFilter(self.request.GET, queryset=self.queryset, user=self.user, rp_completed=True)
+#       elif self.status == 'pending':
+#         self.queryset.qs = TrainingRequestFilter(self.request.GET, queryset=self.queryset, user=self.user, rp_ongoing=True)
+#       elif self.status == 'markcomplete':
+#         self.queryset.qs = TrainingRequestFilter(self.request.GET, queryset=self.queryset, user=self.user, rp_markcomplete=True)
+#       elif self.status == 'pendingattendance':
+#         self.queryset.qs = TrainingRequestFilter(self.request.GET, queryset=self.queryset, user=self.user, rp_pendingattendance=True)
+#     else:
+#       raise PermissionDenied()
+#     return super(TrainingRequestListView, self).dispatch(*args, **kwargs)
 
-  def get_context_data(self, **kwargs):
-    context = super(TrainingRequestListView, self).get_context_data(**kwargs)
-    context['form'] = self.queryset.qs.form
-    context['collection'] =  self.queryset.qs
-    context['role'] = self.role
-    context['status'] = self.status
-    context['header'] = self.header
-    context['ordering'] = get_field_index(self.raw_get_data)
-    return context
+#   def get_context_data(self, **kwargs):
+#     context = super(TrainingRequestListView, self).get_context_data(**kwargs)
+#     context['form'] = self.queryset.qs.form
+#     context['collection'] =  self.queryset.qs
+#     context['role'] = self.role
+#     context['status'] = self.status
+#     context['header'] = self.header
+#     context['ordering'] = get_field_index(self.raw_get_data)
+#     return context
 
 
 ##############################  Single Training one day workshop #############################################################################
@@ -2137,6 +2137,7 @@ def MarkComplete(request, pk):
   st = TrainingRequest.objects.get(pk=pk)
   if st and st.status == 2:
     st.status = 1 #mark to complete
+    st.cert_status = 1 #allow certificate
     st.save()
     messages.success(request, 'Training Marked as complete.')
   else:
@@ -2880,6 +2881,9 @@ def trainingrequest(request, role, status):
     prev_sem_year = (year - 1)
   prev_sem_start_date, prev_sem_end_date = get_prev_semester_duration(prev_sem_type, prev_sem_year)
   
+  if not (user.is_authenticated() and (is_resource_person(user) or is_administrator(user))):
+    raise PermissionDenied()
+
   if (not role ) or (not status):
     raise PermissionDenied()
   else:
@@ -2993,3 +2997,110 @@ def trainingrequest(request, role, status):
     context['ordering'] = get_field_index(raw_get_data)
 
   return render(request,'training_list.html',context)
+
+
+def CertificateRequest(request, role, choice):
+  queryset = None
+  user = request.user
+  header = None
+  raw_get_data = None
+  now= datetime.now()
+  year = now.year
+  month =now.month
+  roles = ['rp', 'em']
+  context = {}
+
+  if not (user.is_authenticated() and (is_resource_person(user) or is_administrator(user))):
+        raise PermissionDenied()
+
+  if (not 'role') or (not 'choice'):
+      raise PermissionDenied()
+
+  if role in roles and choice == 'training':
+    if is_administrator(user):
+      queryset = TrainingRequest.objects.filter(status=1, cert_status=2).order_by('-updated')
+    else:
+      queryset = TrainingRequest.objects.filter(
+        training_planner__academic_id__in=AcademicCenter.objects.filter(
+          state__in = State.objects.filter(
+            resourceperson__user_id=user,
+            resourceperson__status=1
+          )
+        ).values_list('id'),
+        status=1,
+        cert_status=2
+      ).order_by('-updated')
+    header = {
+      1: SortableHeader('#', False),
+      2: SortableHeader(
+        'training_planner__academic__state__name',
+        True,
+        'State'
+      ),
+      3: SortableHeader(
+        'training_planner__academic__academic_code',
+        True,
+        'Code'
+      ),
+      4: SortableHeader(
+        'training_planner__academic__institution_name',
+        True,
+        'Institution'
+      ),
+      5: SortableHeader('batch__department__name', True, 'Department / Batch'),
+      6: SortableHeader('course__foss__foss', True, 'Course Name'),
+      7: SortableHeader('course_type', True, 'Course Type'),
+      8: SortableHeader(
+        'training_planner__organiser__user__first_name',
+        True,
+        'Organiser'
+      ),
+      9: SortableHeader(
+        'sem_start_date',
+        True,
+        'Sem Start Date / Training Date'
+      ),
+      10: SortableHeader('participants', True, 'Participants'),
+      11: SortableHeader('Action', False)
+    }
+    raw_get_data = request.GET.get('o', None)
+    queryset = get_sorted_list(
+      request,
+      queryset,
+      header,
+      raw_get_data
+    )
+    collection = TrainingRequestFilter(request.GET, queryset=queryset, user=user, rp_completed=True)
+  else:
+    raise PermissionDenied()
+
+  context['form'] = collection.form
+  page = request.GET.get('page')
+  collection = get_page(collection.qs, page)
+  context['collection'] =  collection
+  context['role'] = role
+  context['choice'] = choice
+  context['header'] = header
+  context['ordering'] = get_field_index(raw_get_data)
+  return render(request,'certificate_request_list.html',context)
+
+def RequestCertificate(request, trid):
+  training = TrainingRequest.objects.get(pk=trid)
+  if training:
+    training.cert_status = 2 #request to generate
+    training.save()
+    messages.success(request, 'Request to generate participation certificate has successfully sent')
+  else:
+    print("Error")
+    messages.error(request, 'Request not sent.Please try again.')
+  return HttpResponseRedirect("/software-training/training-planner/")
+
+def GenerateCertificate(request, trid):
+  training = TrainingRequest.objects.get(pk=trid)
+  if training and training.status == 1 and training.cert_status == 2:
+    training.cert_status = 1 #mark to generate
+    training.save()
+    messages.success(request, 'Certificates generated.')
+  else:
+    messages.error(request, 'Something went wrong Please try again')
+  return HttpResponseRedirect("/software-training/certificate-request/rp/training/") 
