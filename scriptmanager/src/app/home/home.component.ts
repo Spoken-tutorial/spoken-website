@@ -44,10 +44,6 @@ export class HomeComponent implements OnInit {
     );
   }
 
-  // ngOnChange() {
-  //   this.fetchAllFoss();
-  // };
-
   ngOnInit() {
     this.fetchAllFoss();
   };

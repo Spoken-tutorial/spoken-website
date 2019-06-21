@@ -4,7 +4,7 @@ from .models import Scripts, ScriptDetails, Comments
 from django.contrib.auth.models import User
 from rest_framework.response import Response
 from rest_framework import status
-from datetime import datetime,date
+from datetime import datetime,date,timedelta
 
 
 class FossCategorySerializer(serializers.ModelSerializer):
@@ -71,7 +71,7 @@ class CommentsSerializer(serializers.ModelSerializer):
 
   def get_time(self, instance):
     time = datetime.now()
-    created=instance.created
+    created=instance.created+timedelta(hours=5, minutes=30)
     if created.day  == time.day and created.month  == time.month and created.year  == time.year and created.hour == time.hour:
       return str(time.minute - created.minute) + " minute(s) ago"
     elif created.day  == time.day and created.month  == time.month and created.year  == time.year:

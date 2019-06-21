@@ -6,7 +6,7 @@
       <div class="field">
         <p class="control">
           <span class="select">
-            <select (change)=" fetchFossTutorials($event.target.value)">
+            <select (change)="fetchFossTutorials($event.target.value)">
               <option>--Select Foss Categories--</option>
               <option *ngFor="let item of foss" [value]="item['foss_category']['id']">
                 {{ item['foss_category']['name'] }}</option>
@@ -29,6 +29,17 @@
       </div>
     </div>
 
+  </div>
+
+  <div *ngIf="!tutorials">
+    <br>
+    <div class="columns">
+      <div class="column is-8 card">
+        <h1 class="title is-3" style="padding: 150px;
+        color: rgb(195, 194, 194);
+        text-align: center;">Select a FOSS category to show the list of tutorials.</h1>
+      </div>
+    </div>
   </div>
 
   <div *ngFor="let tutorial of tutorials">

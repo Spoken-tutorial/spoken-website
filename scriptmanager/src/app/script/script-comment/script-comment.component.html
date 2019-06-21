@@ -20,7 +20,7 @@
         <div class="media-content">
           <div class="field">
             <p class="control">
-              <textarea class="textarea" placeholder="Add a comment..." (keyup)="commentKey($event)"></textarea>
+              <textarea #textarea class="textarea" placeholder="Add a comment..." (change)="clearTextarea($event)" (keyup)="commentKey($event)"></textarea>
             </p>
           </div>
           <div class="field">

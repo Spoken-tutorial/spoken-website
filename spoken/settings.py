@@ -90,7 +90,8 @@ INSTALLED_APPS = (
     'api',
     'rest_framework',
     'scriptmanager',
-    'corsheaders'
+    'corsheaders',
+    'reversion'
 )
 
 REST_FRAMEWORK = {
@@ -127,7 +128,7 @@ JWT_AUTH = {
     'JWT_VERIFY': True,
     'JWT_VERIFY_EXPIRATION': True,
     'JWT_LEEWAY': 0,
-    'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=300),
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=3600),
     'JWT_AUDIENCE': None,
     'JWT_ISSUER': None,
 
@@ -154,6 +155,8 @@ MIDDLEWARE_CLASSES = (
     'htmlmin.middleware.MarkRequestMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'reversion.middleware.RevisionMiddleware',
+
 )
 
 CORS_ORIGIN_ALLOW_ALL = True

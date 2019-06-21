@@ -22,7 +22,7 @@
           <div class="field">
             <div class="control">
               <textarea class="textarea has-fixed-size is-info" placeholder="Visual Cue" [value]="slide.cue"
-                [disabled]="view" (keyup)="cueKey($event)" (change)="saveSlide()">
+                [disabled]="view" (keyup)="cueKey($event)" (change)="saveSlide()" autofocus='true'>
               </textarea>
             </div>
           </div>

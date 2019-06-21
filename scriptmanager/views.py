@@ -90,7 +90,7 @@ class CommentCreateAPIView(generics.ListCreateAPIView):
   def get_queryset(self):
     try:
       script_detail=ScriptDetails.objects.get(pk=int(self.kwargs['script_detail_id']))
-      return Comments.objects.filter(script_details = script_detail.pk).order_by('-created')
+      return Comments.objects.filter(script_details = script_detail).order_by('created')
     except:
       return None
 
