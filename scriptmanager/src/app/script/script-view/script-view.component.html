@@ -26,7 +26,7 @@
       <div class="column is-8">
         <div class="timeline">
           <div>
-            <table class="table is-bordered is-striped is-fullwidth">
+            <table #tableRow class="table is-bordered is-striped is-fullwidth">
               <tr>
                 <th>Sr. No.</th>
                 <th>Visual Cue</th>
@@ -38,8 +38,7 @@
                   <td>{{ i+1 }}</td>
                   <td>{{ slide.cue }}</td>
                   <td>{{ slide.narration }}</td>
-                  <td>
-                    <button class="button heading" (click)="viewComment(i)">Show/Hide</button></td>
+                  <td><button class="button heading" (click)="viewComment(i)">Show/Hide</button></td>
                 </tr>
               </tbody>
             </table>

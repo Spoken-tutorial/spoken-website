@@ -15,12 +15,28 @@
           </div>
         </article>
       </div>
+      <div *ngIf="comments == ''">
+        <article class="media">
+          <div class="media-content">
+            <div class="content">
+              <p>
+                <strong>No comments for this slide right now.</strong>
+                <br>
+                <span class="is-divider" style="margin:10px 0 20px 0;"></span>
+              </p>
+            </div>
+          </div>
+        </article>
+      </div>
+
+
 
       <article class="media">
         <div class="media-content">
           <div class="field">
             <p class="control">
-              <textarea #textarea class="textarea" placeholder="Add a comment..." (change)="clearTextarea($event)" (keyup)="commentKey($event)"></textarea>
+              <textarea #textarea class="textarea" placeholder="Add a comment..." (change)="clearTextarea($event)"
+                (keyup)="commentKey($event)"></textarea>
             </p>
           </div>
           <div class="field">

@@ -22,9 +22,10 @@ export class ScriptEditComponent implements OnInit {
   ) { }
 
   public onSaveScript(script: any) {
-    if (script['cue'] == '' || script['narration'] == '' ) {
+    if (script['cue'] == '' || script['narration'] == '') {
       return // Do nothing
     }
+    
     else {
       if (script['id'] == '') {
         script['order'] = this.orderId + 1;
@@ -69,8 +70,8 @@ export class ScriptEditComponent implements OnInit {
             }).show();
           }
         );
-
       }
+
       else {
         this.createscriptService.patchScript(
           this.id, script
@@ -107,6 +108,7 @@ export class ScriptEditComponent implements OnInit {
           }
         );
       }
+
       this.slides.push(
         {
           id: '',
@@ -116,9 +118,9 @@ export class ScriptEditComponent implements OnInit {
           script: ''
         }
       );
-   
+
     }
-   
+
   }
 
   public getData() {

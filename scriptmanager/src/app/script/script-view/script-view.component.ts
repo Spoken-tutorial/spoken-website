@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, ElementRef, Renderer2, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CreateScriptService } from '../../_service/create-script.service';
 
@@ -16,11 +16,14 @@ export class ScriptViewComponent implements OnInit {
   public comments: any = [];
   public tutorialName: any;
   public slideId: number;
+  public index: number = 0;
   @Input() nav: any;
+  @ViewChild('tableRow') el: ElementRef;
 
   constructor(
     private route: ActivatedRoute,
-    public createscriptService: CreateScriptService
+    public createscriptService: CreateScriptService,
+    private rd: Renderer2
   ) { }
 
   public viewScript() {
@@ -54,17 +57,22 @@ export class ScriptViewComponent implements OnInit {
   }
 
   public viewComment(i) {
+    this.el.nativeElement.querySelectorAll('tr')[this.index + 1].classList.remove('is-selected')
+    this.index = i
     if (this.slideId != this.slides[i]['id']) {
       this.slideId = this.slides[i]['id']
       this.getComment();
       this.comment = true;
+      this.el.nativeElement.querySelectorAll('tr')[i + 1].classList.add('is-selected')
     }
     else {
       if (this.comment == false) {
         this.comment = true;
+        this.el.nativeElement.querySelectorAll('tr')[i + 1].classList.add('is-selected')
       }
       else {
         this.comment = false;
+        this.el.nativeElement.querySelectorAll('tr')[i + 1].classList.remove('is-selected')
       }
     }
   }
