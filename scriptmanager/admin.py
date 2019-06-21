@@ -1,15 +1,31 @@
-from django.contrib import admin
 from .models import Scripts, ScriptDetails,Comments
-from reversion.admin import VersionAdmin
-import reversion
-    # Register your models here.
+from django.contrib import admin
+from reversion_compare.admin import CompareVersionAdmin
+from reversion_compare.mixins import CompareMixin
+from django.db.models import Manager
 
-reversion.register(ScriptDetails)
-class BaseReversionAdmin(VersionAdmin):
- pass
+
+_old_compare = CompareMixin.compare
+
+
+def compare(self, obj, version1, version2):
+    def replace_taggit_field(version_ins):
+        for fieldname in version_ins.field_dict:
+            if isinstance(version_ins.field_dict[fieldname], Manager):
+                version_ins.field_dict[fieldname] = []
+    replace_taggit_field(version1)
+    replace_taggit_field(version2)
+    return _old_compare(self, obj, version1, version2)
+
+
+CompareMixin.compare = compare
+
+
+class VersionedScriptsAdmin(CompareVersionAdmin):
+    pass
 
 
 admin.site.register(Scripts)
-admin.site.register(ScriptDetails,BaseReversionAdmin)
 admin.site.register(Comments)
+admin.site.register(ScriptDetails, VersionedScriptsAdmin)
 

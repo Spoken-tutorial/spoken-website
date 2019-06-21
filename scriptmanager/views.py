@@ -44,10 +44,10 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
   def create(self, request,tid):
     details = request.data['details']
     try:
-      try:
-        tutorial=TutorialDetail.objects.get(pk = int(self.kwargs['tid']))
+      tutorial=TutorialDetail.objects.get(pk = int(self.kwargs['tid']))
+      if not  Scripts.objects.filter(user  =  self.request.user,tutorial=tutorial).exists():
         script  =  Scripts.objects.create(tutorial = tutorial,user = self.request.user)
-      except:
+      else:
         script  =  Scripts.objects.get(tutorial = tutorial,user = self.request.user)
         
       for item in details:
