@@ -15,19 +15,21 @@ import { environment } from '../environments/environment';
 export class AppComponent {
   title = 'scriptmanager';
  
-  constructor(private authService: AuthService) { }
-  
-  prepareRoute(outlet: RouterOutlet) {
-    return outlet && outlet.activatedRouteData && outlet.activatedRouteData['animation'];
-  }
-  
-  ngOnInit(): void {
+  constructor(private authService: AuthService) {
     if (environment.production == false) {
       this.authService.getJwtToken().subscribe(
         (res) => localStorage.setItem('token', res['token']),
         (err) => console.error('Failed to fetch JWT token')
       );
     }
+   }
+  
+  prepareRoute(outlet: RouterOutlet) {
+    return outlet && outlet.activatedRouteData && outlet.activatedRouteData['animation'];
+  }
+  
+  ngOnInit(): void {
+
   }
 
 }
