@@ -5,9 +5,9 @@ from django.contrib.auth.models import User
 
 class Scripts(models.Model):
 	tutorial = models.OneToOneField(TutorialDetail)
-	language = models.ForeignKey(Language,blank=True,null = True)
-	status = models.BooleanField(default=False,blank=True)
-	data_file = models.FileField(upload_to='scripts',blank=True)
+	language = models.ForeignKey(Language,null = True)
+	status = models.BooleanField(default=False)
+	data_file = models.FileField(upload_to='scripts')
 	user = models.ForeignKey(User,related_name='user_id')
 	
 
@@ -15,7 +15,7 @@ class ScriptDetails(models.Model):
 	cue = models.TextField()
 	narration = models.TextField()
 	order = models.PositiveIntegerField()
-	script = models.ForeignKey('Scripts', on_delete = models.CASCADE)
+	script = models.ForeignKey('Scripts', null=True, on_delete = models.CASCADE)
 
 class Comments(models.Model):
 	comment = models.TextField()
