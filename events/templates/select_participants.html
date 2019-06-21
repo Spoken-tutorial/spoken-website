@@ -94,7 +94,7 @@
                 {% endif %}
               {% endif %}
 
-              {% if training.status == 1 and training.is_learners_allowed and training.get_partipants_from_attendance and and training.cert_status == 1%}
+              {% if training.status == 1 and training.is_learners_allowed and training.get_partipants_from_attendance and training.cert_status == 1%}
                 | <a href="{% url 'eventsv2:training_certificate' training.id %}">Download Participation Certificate</a> | <a href="{% url 'eventsv2:re-open-training' training.id %}"> Re-Open</a> |
               {% endif %}
 
@@ -127,7 +127,7 @@
                   {% elif training.is_learners_allowed and training.get_partipants_from_attendance and training.cert_status == 2%}
                   | Request sent for Participation Certificate | <a href="{% url 'eventsv2:training_certificate' training.id %}">Participant List</a>{% endif %}
 
-                  <a href="{% url 'eventsv2:re-open-training' training.id %}"> Re-Open</a> |
+                  | <a href="{% url 'eventsv2:re-open-training' training.id %}"> Re-Open</a> |
 
                 {% if not training.is_learners_allowed and not training.have_test%}
                   | Training Completed. No Certificates

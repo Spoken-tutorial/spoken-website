@@ -35,6 +35,7 @@ for training_request in training_requests:
   # Training close automatically if participant count exists
   if participant_count:
     training_request.status = 1
+    training_request.cert_status = 0
     training_request.save()
   success_log_file_head.write(str(training_request.id)+','+str(participant_count)+'\n')
 
