@@ -12,11 +12,8 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 from os.path import *
 from .config import *
 import os
-<<<<<<< HEAD
 import datetime
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-=======
->>>>>>> master
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -99,7 +96,7 @@ INSTALLED_APPS = [
     'reversion',
     'workshop',
     'django_filters',
-    'impersonate'
+    'impersonate',
 ]
 
 MIDDLEWARE = [
