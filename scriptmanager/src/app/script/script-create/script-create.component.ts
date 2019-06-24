@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { CreateScriptService } from 'src/app/_service/create-script.service';
+import { CreateScriptService } from '../../_service/create-script.service';
+import { UploadFileService } from '../../_service/upload-file.service'
 import * as Noty from 'noty';
 
 @Component({
@@ -18,8 +19,20 @@ export class ScriptCreateComponent implements OnInit {
     private route: ActivatedRoute,
     public createscriptService: CreateScriptService,
     public router: Router,
+    public uploadfileService:UploadFileService
   ) { }
 
+  public onFileSave(file:any){
+    console.log(file)
+    this.uploadfileService.postFile(this.id,file)
+    .subscribe(
+      res=>{
+        console.log(res)
+      }
+    )
+
+  }
+  
   public onSaveScript(script: any) {
     if (script['order'] == '') {
       return // Do nothing
