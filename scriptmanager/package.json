@@ -20,6 +20,8 @@
     "@angular/platform-browser-dynamic": "~7.2.0",
     "@angular/router": "~7.2.0",
     "@auth0/angular-jwt": "^2.1.0",
+    "@ckeditor/ckeditor5-angular": "^1.1.0",
+    "@ckeditor/ckeditor5-build-classic": "^12.2.0",
     "@sweetalert2/ngx-sweetalert2": "^5.1.0",
     "angular-font-awesome": "^3.1.2",
     "animate.css": "^3.7.2",

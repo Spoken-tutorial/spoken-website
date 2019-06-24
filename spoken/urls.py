@@ -101,7 +101,7 @@ urlpatterns = [
     url(r'^nicedit/', include('nicedit.urls')),
     # url(r'^migration/creation/', include('creationmigrate.urls', namespace='creationmigrate')),
     # url(r'^migration/events/', include('eventsmigration.urls', namespace='eventsmigration')),
-    #url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT, 'show_indexes': False}),
+    # url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT, 'show_indexes': False}),
 
     # Old url adjustments
     # url(r'^list_videos/$',  list_videos', name='list_videos'),
