@@ -35,10 +35,15 @@
               "node_modules/animate.css/animate.min.css",
               "node_modules/bulma-divider/dist/css/bulma-divider.min.css",
               "node_modules/noty/lib/noty.css",
-              "node_modules/noty/lib/themes/metroui.css"
+              "node_modules/noty/lib/themes/metroui.css",
+              "node_modules/bootstrap/dist/css/bootstrap.min.css",
+              "src/customHome/css/custom.css",
+              "src/customHome/css/custom2.css"
             ],
             "scripts": [
-              "node_modules/noty/lib/noty.min.js"
+              "node_modules/noty/lib/noty.min.js",
+              "node_modules/jquery/dist/jquery.min.js",
+              "node_modules/bootstrap/dist/js/bootstrap.min.js"
             ],
             "es5BrowserSupport": true
           },
