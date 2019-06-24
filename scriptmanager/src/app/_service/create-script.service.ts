@@ -19,7 +19,6 @@ export class CreateScriptService {
   }
 
   public patchScript(tid,data) {
-    console.log(data);
     const _url = `${this.apiUrl}/tutorial/${tid}/scripts/`
     var ls = this.httpClient.patch(
       _url,

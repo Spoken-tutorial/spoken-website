@@ -20,7 +20,7 @@ import { CKEditorModule } from '@ckeditor/ckeditor5-angular';
 
 export function tokenGetter() {
   const token = localStorage.getItem('token');
-  console.log(token)
+  // console.log(token)
   return token;
 }
 

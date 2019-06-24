@@ -36,8 +36,8 @@
               <tbody *ngFor="let slide of slides; let i = index">
                 <tr>
                   <td>{{ i+1 }}</td>
-                  <td>{{ slide.cue }}</td>
-                  <td>{{ slide.narration }}</td>
+                  <td class="content" innerHTML="{{ slide.cue }}"></td>
+                  <td class="content" innerHTML="{{ slide.narration }}"></td>
                   <td><button class="button heading" (click)="viewComment(i)">Show/Hide</button></td>
                 </tr>
               </tbody>

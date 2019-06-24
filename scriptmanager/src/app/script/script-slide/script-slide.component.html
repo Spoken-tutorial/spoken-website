@@ -74,7 +74,7 @@
           <div class="timeline-content">
             <p class="heading">Visual Cue</p>
             <div class="field">
-              <div class="control">
+              <div class="control content">
                 <ckeditor tagName="textarea" [config]="ckeditorConfig" [editor]="Editor" formControlName="cue"
                   [(ngModel)]="slide.cue" (onKeyup)="cueKey($event)" (blur)="saveSlide()">
                 </ckeditor>
@@ -87,7 +87,7 @@
           <div class="timeline-content">
             <p class="heading">Narration</p>
             <div class="field">
-              <div class="control">
+              <div class="control content">
                 <ckeditor tagName="textarea" [config]="ckeditorConfig" [style]="ckeditorStyle" [editor]="Editor"
                   formControlName="narration" [(ngModel)]="slide.narration" (onKeyup)="narrationKey($event)" (blur)="saveSlide()"></ckeditor>
               </div>
