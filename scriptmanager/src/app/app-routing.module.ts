@@ -3,7 +3,9 @@ import { Routes, RouterModule } from '@angular/router';
 import { HomeComponent } from './home/home.component';
 import { ScriptCreateComponent } from './script/script-create/script-create.component';
 import { ScriptEditComponent } from './script/script-edit/script-edit.component';
-import {ScriptViewComponent } from './script/script-view/script-view.component';
+import { ScriptViewComponent } from './script/script-view/script-view.component';
+import { ScriptRevisionComponent } from './script/script-revision/script-revision.component';
+
 const routes: Routes = [
   {
     path: '',
@@ -35,6 +37,14 @@ const routes: Routes = [
     component: ScriptViewComponent,
     data: {
       title: 'Edit Script',
+      animation: 'HomePage'
+    }
+  },
+  {
+    path: 'revisions',
+    component: ScriptRevisionComponent,
+    data: {
+      title: 'Revisions',
       animation: 'HomePage'
     }
   }

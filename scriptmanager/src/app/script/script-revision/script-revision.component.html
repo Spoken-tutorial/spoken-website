@@ -1,0 +1,48 @@
+<div class="container has-margin-top-50">
+  <div class="section">
+
+    <div class="columns is-mobile">
+      <div class="column is-8">
+        <p class="title">Revisions</p>
+      </div>
+      <div class="column">
+        <a class="button is-info" routerLink="/">
+          <i class="fa fa-chevron-left"></i>&nbsp;Go Back
+        </a>
+      </div>
+    </div>
+
+    <br><br>
+
+    <div class="timeline-item animated fadeInLeft">
+      <div class="columns">
+        <div class="column is-6">
+
+          <article *ngFor="let revision of revisions; let i = index">
+              <div class="content">
+                <div>
+                  <table class="table is-bordered">
+                  <tr>
+                    <th>Cue</th>
+                    <th>Narration</th>
+                  </tr>
+                  <tr>
+                      <td>{{ revision.cue }}</td>
+                      <td>{{ revision.narration }}</td>
+                    </tr>
+                </table>
+                  <small><i class="fa fa-history"></i> Updated On: <em>{{ revision.date_time  }}</em></small>
+                  <span class="is-divider" style="margin:10px 0 20px 0;"></span><br>
+                </div>
+              </div>
+          </article>
+
+
+        </div>
+      </div>
+    </div>
+
+
+
+  </div>
+</div>

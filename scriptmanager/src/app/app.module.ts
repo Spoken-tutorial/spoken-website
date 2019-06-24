@@ -17,6 +17,7 @@ import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
 import { ScriptViewComponent } from './script/script-view/script-view.component';
 import { ScriptCommentComponent } from './script/script-comment/script-comment.component';
 import { CKEditorModule } from '@ckeditor/ckeditor5-angular';
+import { ScriptRevisionComponent } from './script/script-revision/script-revision.component';
 
 export function tokenGetter() {
   const token = localStorage.getItem('token');
@@ -35,6 +36,7 @@ export function tokenGetter() {
     ScriptEditComponent,
     ScriptViewComponent,
     ScriptCommentComponent,
+    ScriptRevisionComponent,
   ],
   imports: [
     BrowserModule,
