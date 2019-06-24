@@ -71,7 +71,7 @@ class CommentsSerializer(serializers.ModelSerializer):
 
   def get_time(self, instance):
     time = datetime.now()
-    created=instance.created+timedelta(hours=5, minutes=30)
+    created=instance.created
     if created.day  == time.day and created.month  == time.month and created.year  == time.year and created.hour == time.hour:
       return str(time.minute - created.minute) + " minute(s) ago"
     elif created.day  == time.day and created.month  == time.month and created.year  == time.year:
@@ -81,3 +81,13 @@ class CommentsSerializer(serializers.ModelSerializer):
     elif created.year == time.year:
           return str(time.month - created.month) + " month(s) ago"
     return date(day=created.day, month=created.month, year=created.year).strftime('%d %B %Y')
+  
+class ReversionSerializer(serializers.Serializer):
+  id = serializers.IntegerField()
+  cue = serializers.CharField()
+  narration = serializers.CharField()
+  order = serializers.CharField()
+  script_id = serializers.CharField()
+  date_time=serializers.DateTimeField()
+  reversion_id=serializers.IntegerField()
+  user=serializers.CharField()

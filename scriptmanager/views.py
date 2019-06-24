@@ -1,12 +1,12 @@
 from django.shortcuts import render
 from creation.models import ContributorRole,TutorialDetail,User
 from .models import Scripts,ScriptDetails,Comments
-from .serializers import ContributorRoleSerializer,TutorialDetailSerializer,ScriptsDetailSerializer,ScriptsSerializer,CommentsSerializer
+from .serializers import ContributorRoleSerializer,TutorialDetailSerializer,ScriptsDetailSerializer,ScriptsSerializer,CommentsSerializer,ReversionSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
-from rest_framework import generics
+from rest_framework import status,generics
 from rest_framework_jwt.settings import api_settings
+from reversion.models import Version
 
 def index(request):
   jwt_payload_handler  =  api_settings.JWT_PAYLOAD_HANDLER
@@ -102,3 +102,23 @@ class CommentCreateAPIView(generics.ListCreateAPIView):
       return Response({'status': True},status = 202)
     except:
       return Response({'status': False},status = 400)
+
+
+
+class ReversionListView(generics.ListAPIView):
+  serializer_class = ReversionSerializer
+
+  def get_queryset(self):
+    try:
+      script_detail=ScriptDetails.objects.get(pk=int(self.kwargs['script_detail_id']))
+      reversion_data = Version.objects.get_for_object(script_detail)
+      data = [] 
+      for i in reversion_data:
+        result=i.field_dict
+        result.update({"date_time":i.revision.date_created,"reversion_id":i.revision.pk,"user":i.revision.user})
+        data.append(result)
+      return ReversionSerializer(data,many=True).data
+    except:
+      return None
+  
+
