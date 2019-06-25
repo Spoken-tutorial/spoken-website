@@ -1,9 +1,8 @@
-<!-- <div>
-  <header class="timeline-header">
-    <span class="tag is-link is-medium">{{ index+1 }}</span>
-  </header>
-  <div class="timeline-item animated fadeInLeft">
-    <div *ngIf="!view" class="timeline-marker is-icon" [swal]="{ title: 'Delete Slide',
+<header class="timeline-header">
+  <span class="tag is-link is-medium">{{ index+1 }}</span>
+</header>
+<div class="timeline-item animated fadeInLeft">
+  <div *ngIf="!view" class="timeline-marker is-icon" [swal]="{ title: 'Delete Slide',
               text: 'Are you sure?',
               type: 'error',
               showCancelButton: 'true',
@@ -11,19 +10,20 @@
               confirmButtonText: 'Yes! Delete it.',
               cancelButtonText: 'No!'
             }" (confirm)="removeSlide()">
-      <a class="delete is-large"></a>
-    </div>
+    <a class="delete is-large"></a>
+  </div>
 
+
+  <form [formGroup]="editorForm">
     <div class="columns">
 
       <div class="column">
         <div class="timeline-content">
           <p class="heading">Visual Cue</p>
           <div class="field">
-            <div class="control">
-              <textarea class="textarea has-fixed-size is-info" placeholder="Visual Cue" [value]="slide.cue"
-                [disabled]="view" (keyup)="cueKey($event)" (change)="saveSlide()" autofocus='true'>
-              </textarea>
+            <div class="control content">
+              <ckeditor tagName="textarea" [config]="ckeditorConfig" [editor]="Editor" formControlName="cue"
+                [(ngModel)]="slide.cue" (onKeyup)="cueKey($event)" (blur)="saveSlide()"></ckeditor>
             </div>
           </div>
         </div>
@@ -33,70 +33,15 @@
         <div class="timeline-content">
           <p class="heading">Narration</p>
           <div class="field">
-            <div class="control">
-              <textarea class="textarea has-fixed-size is-primary" placeholder="Narration" [value]="slide.narration"
-                [disabled]="view" (keyup)="narrationKey($event)" (change)="saveSlide()">
-              </textarea>
+            <div class="control content">
+              <ckeditor tagName="textarea" [config]="ckeditorConfig" [editor]="Editor" formControlName="narration"
+                [(ngModel)]="slide.narration" (onKeyup)="narrationKey($event)" (blur)="saveSlide()"></ckeditor>
             </div>
           </div>
         </div>
       </div>
+
     </div>
-  </div>
-</div> -->
+  </form>
 
-
-
-
-
-
-<div>
-  <header class="timeline-header">
-    <span class="tag is-link is-medium">{{ index+1 }}</span>
-  </header>
-  <div class="timeline-item animated fadeInLeft">
-    <div *ngIf="!view" class="timeline-marker is-icon" [swal]="{ title: 'Delete Slide',
-              text: 'Are you sure?',
-              type: 'error',
-              showCancelButton: 'true',
-              focusCancel: 'true',
-              confirmButtonText: 'Yes! Delete it.',
-              cancelButtonText: 'No!'
-            }" (confirm)="removeSlide()">
-      <a class="delete is-large"></a>
-    </div>
-
-
-    <form [formGroup]="editorForm">
-      <div class="columns">
-
-        <div class="column">
-          <div class="timeline-content">
-            <p class="heading">Visual Cue</p>
-            <div class="field">
-              <div class="control content">
-                <ckeditor tagName="textarea" [config]="ckeditorConfig" [editor]="Editor" formControlName="cue"
-                  [(ngModel)]="slide.cue" (onKeyup)="cueKey($event)" (blur)="saveSlide()">
-                </ckeditor>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="column">
-          <div class="timeline-content">
-            <p class="heading">Narration</p>
-            <div class="field">
-              <div class="control content">
-                <ckeditor tagName="textarea" [config]="ckeditorConfig" [editor]="Editor"
-                  formControlName="narration" [(ngModel)]="slide.narration" (onKeyup)="narrationKey($event)" (blur)="saveSlide()"></ckeditor>
-              </div>
-            </div>
-          </div>
-        </div>
-      
-      </div>
-    </form>
-
-  </div>
 </div>
