@@ -50,7 +50,7 @@ class TrainingRequestForm(forms.ModelForm):
   training_planner = forms.CharField()
   class Meta(object):
     model = TrainingRequest
-    exclude = ['participants', 'status', 'training_planner']
+    exclude = ['participants', 'status', 'training_planner', 'cert_status']
 
   def clean(self):
     if self.cleaned_data:
