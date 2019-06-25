@@ -33,3 +33,4 @@ pytest-pythonpath==0.7
 requests==2.21.0
 soupsieve==1.6
 urllib3==1.24.1
+python-docx==0.8.10

@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework import status,generics
 from rest_framework_jwt.settings import api_settings
 from reversion.models import Version
+from docx import Document
 
 def index(request):
   jwt_payload_handler  =  api_settings.JWT_PAYLOAD_HANDLER
@@ -112,7 +113,7 @@ class ReversionListView(generics.ListAPIView):
     try:
       script_detail=ScriptDetails.objects.get(pk=int(self.kwargs['script_detail_id']))
       reversion_data = Version.objects.get_for_object(script_detail)
-      data = [] 
+      data = []
       for i in reversion_data:
         result=i.field_dict
         result.update({"date_time":i.revision.date_created,"reversion_id":i.revision.pk,"user":i.revision.user})
@@ -121,4 +122,28 @@ class ReversionListView(generics.ListAPIView):
     except:
       return None
   
+class ScriptDocumentCreateAPI(generics.ListCreateAPIView):
+  serializer_class = ScriptsDetailSerializer
+
+  def create(self, request,tid):
+    try:
+      tutorial = TutorialDetail.objects.get(pk = int(self.kwargs['tid']))
+      if not Scripts.objects.filter(user  =  self.request.user,tutorial = tutorial).exists():
+        script = Scripts.objects.create(tutorial = tutorial,user = self.request.user)
+      else:
+        script = Scripts.objects.get(tutorial = tutorial,user = self.request.user)
+      details=[]
+      wordDoc = Document(request.FILES['docs'])
+      for table in wordDoc.tables:
+        for row in table.rows:
+          details.append({"order": row.cells[0].text,"cue": row.cells[1].text,"narration": row.cells[2].text,"script":script.pk})
+      details.pop(0)
+      serialized  =  ScriptsDetailSerializer(data  =  details,many  =  True) #inserting a details array without iterating
+      if serialized.is_valid():
+        serialized.save()
+        return Response({'status': True},status = 201)
+    except:
+      return Response({'status': False},status = 400) 
+
+
 
