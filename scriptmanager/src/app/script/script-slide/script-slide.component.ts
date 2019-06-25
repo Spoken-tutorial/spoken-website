@@ -19,10 +19,8 @@ export class ScriptSlideComponent implements OnInit {
 
   public Editor = ClassicEditor;
   public ckeditorConfig = {
-    // toolbar: [ 'heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'blockQuote' ],
-    placeholder: 'Type the content here!'
+    toolbar: ['heading', '|', 'bold', 'italic', 'bulletedList', 'numberedList', '|', 'undo', 'redo']
   }
-
 
   constructor() { }
 
