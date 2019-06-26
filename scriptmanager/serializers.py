@@ -12,7 +12,7 @@ class FossCategorySerializer(serializers.ModelSerializer):
 
   class Meta:
     model = FossCategory
-    fields = ('id', 'name')
+    fields = ('id', 'name','description')
 
 
 class LanguageSerializer(serializers.ModelSerializer):
