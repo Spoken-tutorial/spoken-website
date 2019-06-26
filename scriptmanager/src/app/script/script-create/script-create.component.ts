@@ -23,7 +23,7 @@ export class ScriptCreateComponent implements OnInit {
   ) { }
 
   public onFileSave(file:any){
-    console.log(file)
+    // console.log(file)
     this.uploadfileService.postFile(this.id,file)
     .subscribe(
       (res) => {

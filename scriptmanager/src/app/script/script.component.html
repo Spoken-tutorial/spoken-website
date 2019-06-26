@@ -5,45 +5,50 @@
         <div class="timeline">
 
           <div class="columns is-mobile">
+
             <div class="column is-8">
               <p class="title">{{ tutorialName }}</p>
+            </div>
 
-              <div *ngIf="nav=='create'">
-                <div class="file has-name is-boxed">
-                  <label class="file-label">
-                    <input class="file-input" type="file" (change)="onFileChange($event)">
-                    <span class="file-cta">
-                      <span class="file-icon">
-                        <i class="fa fa-upload"></i>
-                      </span>
-                      <span class="file-label">
-                        Choose a file…
-                      </span>
-                    </span>
-                    <span class="file-name">
-                      {{scriptFileName}}
-                    </span>
-                  </label>
-                </div>
-                <div *ngIf="uploadButton">  
-                  <br>       
-                  <a class="button is-info" (click)="onFileSave()">
-                  <i class="fa fa-upload"></i> &nbsp; Upload Script</a>
-                </div> 
+            <div class="column is-4">
+              <div class=" is-pulled-right">
+                <a class="button is-info" routerLink="/">
+                  <i class="fa fa-chevron-left"></i>&nbsp;Go Back
+                </a>
+                &nbsp;
+                <a *ngIf="nav!='create'" class="button is-info" routerLink="/{{nav}}/{{id}}//{{ tutorialName }}">
+                  <i class="fa fa-eye"></i>&nbsp;View Mode
+                </a>
               </div>
-                  
             </div>
-            <div class="column">
-              <a class="button is-info" routerLink="/">
-                <i class="fa fa-chevron-left"></i>&nbsp;Go Back
-              </a>
-              &nbsp;
-              <a *ngIf="nav!='create'" class="button is-info" routerLink="/{{nav}}/{{id}}//{{ tutorialName }}">
-                <i class="fa fa-eye"></i>&nbsp;View Mode
-              </a>
-            </div>
+
           </div>
           <br><br>
+
+          <div class="file has-name is-boxed is-centered">
+            <label class="file-label">
+              <input class="file-input" type="file" (change)="onFileChange($event)">
+              <span class="file-cta">
+                <span class="file-icon">
+                  <i class="fa fa-upload"></i>
+                </span>
+                <span class="file-label">
+                  Choose a file…
+                </span>
+              </span>
+              <span class="file-name">
+                {{scriptFileName}}
+              </span>
+            </label>
+          </div>
+          <br>
+          <div class="file is-centered">
+            <a *ngIf="uploadButton" class="button is-info" (click)="onFileSave()"><i class="fa fa-upload"></i>&nbsp;
+              Upload Script</a>
+          </div>
+
+          <div class="is-divider" style="divider-thickness:$size-4" data-content="OR"></div>
+          <br>
 
           <ng-container *ngFor="let slide of slides; let i = index">
             <app-script-slide [slide]="slide" [index]="i" (removeSlideEmitter)="onRemoveSlide($event)"
