@@ -93,6 +93,8 @@ export class ScriptComponent implements OnInit {
     }
     else{
       this.scriptFileName = "Only docx supported";
+      this.uploadButton=false;
+      console.log("file upsupported")
     }
     
   }
