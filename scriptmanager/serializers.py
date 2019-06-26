@@ -1,4 +1,4 @@
-from creation.models import ContributorRole, FossCategory, Language, TutorialDetail
+from creation.models import ContributorRole, FossCategory, Language, TutorialDetail,TutorialResource
 from rest_framework import serializers
 from .models import Scripts, ScriptDetails, Comments
 from django.contrib.auth.models import User
@@ -33,17 +33,26 @@ class ContributorRoleSerializer(serializers.ModelSerializer):
 
 class TutorialDetailSerializer(serializers.ModelSerializer):
     script_status = serializers.SerializerMethodField()
+    outline=serializers.SerializerMethodField()
 
     class Meta:
       model = TutorialDetail
-      fields = ('id', 'foss', 'tutorial', 'level', 'order', 'script_status')
+      fields = ('id', 'foss', 'tutorial', 'level', 'order', 'script_status','outline')
 
     def get_script_status(self, instance):
-      data = Scripts.objects.filter(tutorial_id=instance.id, user=self.context.get('request').user)
+      data = Scripts.objects.filter(tutorial_id=instance.id, user=self.context.get('user'))
       if data:
         return True
       else:
         return False
+      
+    def get_outline(self,instance):
+        lang=Language.objects.filter(id=self.context.get('lang'))
+        data = TutorialResource.objects.filter(tutorial_detail=instance,language=lang)
+        if data:
+          return data[0].outline
+        else:
+          return None 
 
 
 class ScriptsDetailSerializer(serializers.ModelSerializer):

@@ -26,6 +26,9 @@ class ContributorRoleList(generics.ListAPIView):
 
 class TutorialDetailList(generics.ListAPIView):
   serializer_class = TutorialDetailSerializer
+
+  def get_serializer_context(self):
+    return {"lang": self.kwargs['lid'],"user":self.request.user}
     
   def get_queryset(self):
     if ContributorRole.objects.filter(user  =  self.request.user,foss_category  =  self.kwargs.get('fid')).exists():
