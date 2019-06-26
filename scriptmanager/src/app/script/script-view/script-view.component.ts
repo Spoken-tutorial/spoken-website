@@ -1,6 +1,7 @@
 import { Component, OnInit, Input, ElementRef, Renderer2, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CreateScriptService } from '../../_service/create-script.service';
+import { RevisionsService } from '../../_service/revisions.service';
 
 @Component({
   selector: 'app-script-view',
@@ -13,9 +14,12 @@ export class ScriptViewComponent implements OnInit {
   public tutorials: any = [];
   private id: number;
   public comment = false;
+  public revision = false;
   public comments: any = [];
+  public revisions: any = [];
   public tutorialName: any;
   public slideId: number;
+  public slideIdRev: number;
   public index: number = 0;
   @Input() nav: any;
   @ViewChild('tableRow') el: ElementRef;
@@ -23,6 +27,7 @@ export class ScriptViewComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     public createscriptService: CreateScriptService,
+    public revisionsService: RevisionsService,
     private rd: Renderer2
   ) { }
 
@@ -73,6 +78,33 @@ export class ScriptViewComponent implements OnInit {
       else {
         this.comment = false;
         this.el.nativeElement.querySelectorAll('tr')[i + 1].classList.remove('is-selected')
+      }
+    }
+  }
+
+  public getRevison(i) {
+    this.revisionsService.getRevisions(
+      i
+    ).subscribe(
+      (res) => {
+        this.revisions = res;
+        this.revisions.shift();
+      },
+    );
+  }
+
+  public viewRevision(i) {
+    if (this.slideIdRev != i) {
+      this.slideIdRev = i
+      this.getRevison(i);
+      this.revision = true;
+    }
+    else {
+      if (this.revision == false) {
+        this.revision = true;
+      }
+      else {
+        this.revision = false;
       }
     }
   }

@@ -38,7 +38,8 @@
                   <td>{{ i+1 }}</td>
                   <td class="content" innerHTML="{{ slide.cue }}"></td>
                   <td class="content" innerHTML="{{ slide.narration }}"></td>
-                  <td><button class="button heading" (click)="viewComment(i)">Show/Hide</button></td>
+                  <td><button class="button heading" (click)="viewComment(i)">Show/Hide</button><button
+                      class="button heading" (click)="viewRevision(slide.id)">Revisions</button></td>
                 </tr>
               </tbody>
             </table>
@@ -50,9 +51,9 @@
         <app-script-comment [comments]="comments" (commentEmitter)="postComment($event)"></app-script-comment>
       </div>
 
-      <!-- <div>
-        <app-script-revision></app-script-revision>
-      </div> -->
+      <div *ngIf="revision" class="column">
+        <app-script-revision [revisions]="revisions"></app-script-revision>
+      </div>
 
     </div>
   </div>

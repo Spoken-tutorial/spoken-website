@@ -1,48 +1,30 @@
-<div class="container has-margin-top-50">
-  <div class="section">
+<div class="timeline-item animated fadeInLeft">
+  <div class="columns">
+    <div class="column">
 
-    <div class="columns is-mobile">
-      <div class="column is-8">
-        <p class="title">Revisions</p>
-      </div>
-      <div class="column">
-        <a class="button is-info" routerLink="/">
-          <i class="fa fa-chevron-left"></i>&nbsp;Go Back
-        </a>
-      </div>
-    </div>
+      <article>
+        <div class="content">
+            <p *ngIf="revisions.length == 0"><strong>No revisions for this slide right now.</strong></p>
+            <table class="table is-bordered">
+              <tbody *ngFor="let revision of revisions; let i = index">
+                <tr>
+                  <td colspan="2"><small><i class="fa fa-history"></i> Updated On:
+                      <em innerHTML="{{ revision.date_time  }}"></em></small></td>
+                </tr>
+                <tr>
 
-    <br><br>
-
-    <div class="timeline-item animated fadeInLeft">
-      <div class="columns">
-        <div class="column is-6">
-
-          <article *ngFor="let revision of revisions; let i = index">
-              <div class="content">
-                <div>
-                  <table class="table is-bordered">
-                  <tr>
-                    <th>Cue</th>
-                    <th>Narration</th>
-                  </tr>
-                  <tr>
-                      <td>{{ revision.cue }}</td>
-                      <td>{{ revision.narration }}</td>
-                    </tr>
-                </table>
-                  <small><i class="fa fa-history"></i> Updated On: <em>{{ revision.date_time  }}</em></small>
-                  <span class="is-divider" style="margin:10px 0 20px 0;"></span><br>
-                </div>
-              </div>
-          </article>
-
-
+                  <td innerHTML="<strong>Cue :</strong> {{ revision['cue'] }}"></td>
+                  <td innerHTML="<strong>Narration :</strong>{{ revision['narration'] }}"></td>
+                </tr>
+                <tr class="break">
+                  <td colspan="2"></td>
+                </tr>
+              </tbody>
+            </table>
         </div>
-      </div>
+      </article>
+
+
     </div>
-
-
-
   </div>
 </div>
