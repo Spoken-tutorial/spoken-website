@@ -3,19 +3,20 @@
     <div class="column">
 
       <article>
+
         <div class="content" *ngIf="!revisions">
           <p><strong>No revisions for this slide right now.</strong></p>
         </div>
 
         <div class="content" *ngIf="revisions">
           <div *ngFor="let revision of revisions; let i = index">
-            <a class="button is-text" (click)="showRevisionModal(index)">Revision {{ i+1 }} ({{ revision.date_time }})</a>
+            <a class="button is-text" (click)="showRevisionModal(i)">Revision {{ i+1 }}
+              ({{ revision.date_time }})</a>
             <span class="is-divider" style="margin:10px 0 20px 0;"></span>
           </div>
         </div>
 
       </article>
-
 
     </div>
   </div>

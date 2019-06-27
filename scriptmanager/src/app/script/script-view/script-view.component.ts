@@ -87,6 +87,7 @@ export class ScriptViewComponent implements OnInit {
   public viewModal(index) {
     // console.log(this.revisions[this.index2]['date_time'])
     this.index2 = index
+    // console.log(index)
     this.el2.nativeElement.classList.add('is-active')
   }
 
@@ -100,7 +101,6 @@ export class ScriptViewComponent implements OnInit {
     ).subscribe(
       (res) => {
         this.revisions = res;
-        this.revisions.shift();
         if (this.revisions.length == 0) {
           this.revisions = false;
         }
