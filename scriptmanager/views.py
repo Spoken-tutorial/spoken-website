@@ -7,7 +7,10 @@ from rest_framework.response import Response
 from rest_framework import status,generics
 from rest_framework_jwt.settings import api_settings
 from reversion.models import Version
-from docx import Document
+import os
+from django.core.files.storage import FileSystemStorage
+from bs4 import BeautifulSoup
+import time
 
 def index(request):
   jwt_payload_handler  =  api_settings.JWT_PAYLOAD_HANDLER
@@ -21,7 +24,6 @@ class ContributorRoleList(generics.ListAPIView):
   def get_queryset(self):
       return ContributorRole.objects.filter(user = self.request.user)
   serializer_class  =  ContributorRoleSerializer
-
 
 
 class TutorialDetailList(generics.ListAPIView):
@@ -42,24 +44,54 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
   def get_queryset(self): 
     script = Scripts.objects.filter(tutorial = int(self.kwargs['tid']),user = self.request.user)
     return ScriptDetails.objects.filter(script = script)
+  
+  def scriptsData(self, html,script):
+    soup=BeautifulSoup(html,'html.parser')
+    table=soup.find("table") 
+    details=[]
+    count=-1
+    for row in table.find_all('tr'):
+      count+=1
+      columns=row.find_all('td')
+      try:
+        details.append({"order": count,"cue": str(columns[0]),"narration": str(columns[1]),"script":script.pk})
+      except:
+        continue
+    details.pop(0)
+    return details
       
   def create(self, request,tid):
-    details = request.data['details']
+    details=[]
     try:
       tutorial=TutorialDetail.objects.get(pk = int(self.kwargs['tid']))
       if not  Scripts.objects.filter(user  =  self.request.user,tutorial=tutorial).exists():
         script  =  Scripts.objects.create(tutorial = tutorial,user = self.request.user)
       else:
         script  =  Scripts.objects.get(tutorial = tutorial,user = self.request.user)
-        
-      for item in details:
-        item.update( {"script":script.pk})
+
+      type=request.data['type']
+      if(type=='form'):
+        details = request.data['details']
+
+      elif(type=='file'):
+        myfile=request.FILES['docs']
+        fs = FileSystemStorage()
+        filename = fs.save(myfile.name, myfile)
+        file=os.getcwd()+'/media/'+filename
+        os.system('libreoffice --convert-to html '+file)
+        html_file=os.path.splitext(os.getcwd()+'/'+filename)[0]+'.html'
+        time.sleep(.4)  #time to convert the file to html
+        html = open(html_file,'r')
+        details=self.scriptsData(html,script)
+        os.system('rm '+ file + ' '+html_file)
+
       serialized  =  ScriptsDetailSerializer(data  =  details,many  =  True) #inserting a details array without iterating
       if serialized.is_valid():
         serialized.save()
         return Response({'status': True},status = 201)
     except:
-        return Response({'status': False},status = 400) 
+      return Response({'status': False},status = 400) 
+
 
   def patch(self,request, tid):
     try:
@@ -74,6 +106,7 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
       return Response({'status': True},status = 200)
     except:
       return Response({'status': False},status = 400) 
+
 
   def delete(self,request,tid,script_detail_id):
     try:
@@ -108,7 +141,6 @@ class CommentCreateAPIView(generics.ListCreateAPIView):
       return Response({'status': False},status = 400)
 
 
-
 class ReversionListView(generics.ListAPIView):
   serializer_class = ReversionSerializer
 
@@ -124,29 +156,3 @@ class ReversionListView(generics.ListAPIView):
       return ReversionSerializer(data,many=True).data
     except:
       return None
-  
-class ScriptDocumentCreateAPI(generics.ListCreateAPIView):
-  serializer_class = ScriptsDetailSerializer
-
-  def create(self, request,tid):
-    try:
-      tutorial = TutorialDetail.objects.get(pk = int(self.kwargs['tid']))
-      if not Scripts.objects.filter(user  =  self.request.user,tutorial = tutorial).exists():
-        script = Scripts.objects.create(tutorial = tutorial,user = self.request.user)
-      else:
-        script = Scripts.objects.get(tutorial = tutorial,user = self.request.user)
-      details=[]
-      wordDoc = Document(request.FILES['docs'])
-      for table in wordDoc.tables:
-        for row in table.rows:
-          details.append({"order": row.cells[0].text,"cue": row.cells[1].text,"narration": row.cells[2].text,"script":script.pk})
-      details.pop(0)
-      serialized  =  ScriptsDetailSerializer(data  =  details,many  =  True) #inserting a details array without iterating
-      if serialized.is_valid():
-        serialized.save()
-        return Response({'status': True},status = 201)
-    except:
-      return Response({'status': False},status = 400) 
-
-
-
