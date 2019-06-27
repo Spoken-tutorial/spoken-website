@@ -15,19 +15,19 @@
 
                   <div class="col-sm-6"> <span class='ajax-search-refresh ajax-refresh-search-foss'><i
                         class="fa fa-2 fa-refresh fa-spin"></i></span>
-                    <select (change)="fetchFossTutorials($event.target.value)" name="search_foss"
+                    <select (change)="getLanguage($event.target.value)" name="search_foss"
                       class="form-control search-foss" tabindex="1" id="id_search_foss">
                       <option value="">--Select Foss Categories--</option>
-                      <option *ngFor="let item of foss" [value]="item['foss_category']['id']">
+                      <option *ngFor="let item of foss; let i = index" [value]="[i]">
                         {{ item['foss_category']['name'] }}</option>
                     </select>
                   </div>
                   <div class="col-sm-6"> <span class='ajax-search-refresh ajax-refresh-search-language'><i
                         class="fa fa-2 fa-refresh fa-spin"></i></span>
-                    <select (change)="LanguageSelected($event.target.value)" name="search_language"
+                    <select (change)="fetchFossTutorials($event.target.value)" name="search_language"
                       class="form-control search-language" tabindex="2" id="id_search_language">
                       <option value="">--Select Language--</option>
-                      <option *ngFor="let item of foss" [value]="item.language">{{ item['language']['name'] }}</option>
+                      <option [value]="langData['id']">{{ langData['name'] }}</option>
                     </select>
                   </div>
 
@@ -39,15 +39,7 @@
 
             <div
               class='search-result col-lg-offset-1 col-md-offset-1 col-sm-offset-1 col-xs-offset-1 col-lg-10 col-md-10 col-sm-10 col-xs-10'>
-              <p><i>Android is an open source and Linux-based Operating System for mobile devices such as smartphones
-                  and tablet computers.
-
-                  Google has announced Kotlin as an official language on Android. Kotlin, is a statically typed
-                  programming language for the JVM, Android and the browser. It’s deep interoperability with Java,
-                  which
-                  attracts more Java developers. It is tools-friendly as IDE gives suggestions for Kotlin code, can
-                  convert Java code to Kotlin code. It is expressive to make your code more readable and
-                  understandable.
+              <p><i>{{ foss[index]['foss_category']['description'] }}
                 </i>
               </p>
 

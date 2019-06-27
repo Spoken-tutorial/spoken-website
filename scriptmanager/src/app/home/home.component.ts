@@ -11,19 +11,29 @@ export class HomeComponent implements OnInit {
 
   public foss;
   public tutorials;
-  public fid;
+  public langId:number;
+  public fossId:number;
+  public index:number;
+  public langData:any = {};
 
   constructor(
     public fossService: FossService,
     public tutorialService: TutorialsService
   ) { }
 
-  LanguageSelected(language) {
-    // console.log(language);
+  public getLanguage(langIndex) {
+    this.fossService.getAllFossCategories().subscribe(
+      (res) => {
+        this.index = langIndex,
+        this.fossId = res[langIndex]['foss_category']['id'],
+        this.langData = res[langIndex]['language']
+      }
+    );
   }
 
-  public fetchFossTutorials(fid) {
-    this.tutorialService.getFossTutorials(fid).subscribe(
+  public fetchFossTutorials(languageId) {
+    this.langId = languageId
+    this.tutorialService.getFossTutorials(this.fossId, this.langId).subscribe(
       (res) => {
         this.tutorials = res
       },
@@ -36,7 +46,9 @@ export class HomeComponent implements OnInit {
 
   public fetchAllFoss() {
     this.fossService.getAllFossCategories().subscribe(
-      (res) => this.foss = res,
+      (res) => {
+        this.foss = res
+      },
       (err) => {
         console.log('Failed to fetch foss categories');
         console.error(err);
