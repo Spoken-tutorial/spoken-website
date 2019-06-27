@@ -5,7 +5,7 @@ import { ScriptCreateComponent } from './script/script-create/script-create.comp
 import { ScriptEditComponent } from './script/script-edit/script-edit.component';
 import { ScriptViewComponent } from './script/script-view/script-view.component';
 import { ScriptRevisionComponent } from './script/script-revision/script-revision.component';
-
+import {ScriptUploadComponent } from './script/script-upload/script-upload.component'
 const routes: Routes = [
   {
     path: '',
@@ -20,6 +20,14 @@ const routes: Routes = [
     component: ScriptCreateComponent,
     data: {
       title: 'Create Script',
+      animation: 'HomePage'
+    }
+  },
+  {
+    path: 'upload/:id/:tutorialName',
+    component: ScriptUploadComponent,
+    data: {
+      title: 'Upload Script',
       animation: 'HomePage'
     }
   },

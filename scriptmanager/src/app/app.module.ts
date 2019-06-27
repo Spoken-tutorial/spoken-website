@@ -18,6 +18,7 @@ import { ScriptViewComponent } from './script/script-view/script-view.component'
 import { ScriptCommentComponent } from './script/script-comment/script-comment.component';
 import { CKEditorModule } from '@ckeditor/ckeditor5-angular';
 import { ScriptRevisionComponent } from './script/script-revision/script-revision.component';
+import { ScriptUploadComponent } from './script/script-upload/script-upload.component';
 
 export function tokenGetter() {
   const token = localStorage.getItem('token');
@@ -37,6 +38,7 @@ export function tokenGetter() {
     ScriptViewComponent,
     ScriptCommentComponent,
     ScriptRevisionComponent,
+    ScriptUploadComponent,
   ],
   imports: [
     BrowserModule,

@@ -43,7 +43,9 @@ export class ScriptSlideComponent implements OnInit {
     this.checkSlide()
   }
 
-  cueKey(event) { this.slide.cue = event.target.value; }
+  cueKey(event) { this.slide.cue = event.target.value;
+  console.log(event.target.value)
+  }
   narrationKey(event) { this.slide.narration = event.target.value; }
   // handleSelection( val ){
   //   console.log(val)

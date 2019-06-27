@@ -17,9 +17,7 @@ export class ScriptComponent implements OnInit {
   @Input() displaySave: boolean = false;
   public id;
   public tutorialName: any;
-  public scriptFile : any;
-  public scriptFileName:any;
-  public uploadButton : boolean = false;
+
   constructor(public router: Router, public route: ActivatedRoute, public createscriptService: CreateScriptService) { }
 
   public addSlide() {
@@ -81,26 +79,6 @@ export class ScriptComponent implements OnInit {
 
   public onSaveSlide(slide) {
     this.onSaveScript.emit(slide);
-  }
-
-  public onFileChange(file){
-    this.scriptFile = file.target.files[0];
-    this.scriptFileName = file.target.files[0].name;
-    var fileExtension = this.scriptFileName.split('.').pop();
-    if(fileExtension=='docx'){
-      this.uploadButton = true;
-      this.scriptFileName = file.target.files[0].name;
-    }
-    else{
-      this.scriptFileName = "Only docx supported";
-      this.uploadButton=false;
-      console.log("file upsupported")
-    }
-    
-  }
-
-  public onFileSave(){
-    this.File.emit(this.scriptFile);
   }
 
   ngOnInit() {
