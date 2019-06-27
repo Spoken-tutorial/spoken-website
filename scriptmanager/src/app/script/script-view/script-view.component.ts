@@ -16,13 +16,15 @@ export class ScriptViewComponent implements OnInit {
   public comment = false;
   public revision = false;
   public comments: any = [];
-  public revisions: any = [];
+  public revisions: any;
   public tutorialName: any;
   public slideId: number;
   public slideIdRev: number;
   public index: number = 0;
+  public index2: number = 0;
   @Input() nav: any;
   @ViewChild('tableRow') el: ElementRef;
+  @ViewChild('newmodal') el2: ElementRef;
 
   constructor(
     private route: ActivatedRoute,
@@ -82,6 +84,16 @@ export class ScriptViewComponent implements OnInit {
     }
   }
 
+  public viewModal(index) {
+    // console.log(this.revisions[this.index2]['date_time'])
+    this.index2 = index
+    this.el2.nativeElement.classList.add('is-active')
+  }
+
+  public hideModal() {
+    this.el2.nativeElement.classList.remove('is-active')
+  }
+
   public getRevison(i) {
     this.revisionsService.getRevisions(
       i
@@ -89,6 +101,9 @@ export class ScriptViewComponent implements OnInit {
       (res) => {
         this.revisions = res;
         this.revisions.shift();
+        if (this.revisions.length == 0) {
+          this.revisions = false;
+        }
       },
     );
   }
@@ -114,6 +129,7 @@ export class ScriptViewComponent implements OnInit {
       this.id = +params['id'];
     });
     this.viewScript();
+    
     this.tutorialName = this.route.snapshot.params['tutorialName']
   }
 

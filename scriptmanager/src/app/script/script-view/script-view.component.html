@@ -24,6 +24,29 @@
     <div class="columns is-mobile">
 
       <div class="column is-8">
+        <div #newmodal class="modal">
+          <div class="modal-background"></div>
+          <div class="modal-content">
+            <table class="table is-bordered">
+              <tbody *ngIf="revisions">
+                <tr>
+                  <td colspan="2"><small><i class="fa fa-history"></i> Updated On:
+                      <em innerHTML="{{ revisions[index2]['date_time'] }}"></em></small></td>
+                </tr>
+                <tr>
+                  <td innerHTML="<strong>Cue :</strong> {{ revisions[index2]['cue'] }}"></td>
+                  <td innerHTML="<strong>Narration :</strong>{{ revisions[index2]['narration'] }}"></td>
+                </tr>
+                <tr class="break">
+                  <td colspan="2"></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <button class="modal-close is-large" aria-label="close" (click)="hideModal()"></button>
+        </div>
+
+
         <div class="timeline">
           <div>
             <table #tableRow class="table is-bordered is-striped is-fullwidth">
@@ -52,7 +75,7 @@
       </div>
 
       <div *ngIf="revision" class="column">
-        <app-script-revision [revisions]="revisions"></app-script-revision>
+        <app-script-revision [revisions]="revisions" (revisionEmitter)="viewModal($event)"></app-script-revision>
       </div>
 
     </div>

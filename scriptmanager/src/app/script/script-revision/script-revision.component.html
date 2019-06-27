@@ -3,25 +3,17 @@
     <div class="column">
 
       <article>
-        <div class="content">
-            <p *ngIf="revisions.length == 0"><strong>No revisions for this slide right now.</strong></p>
-            <table class="table is-bordered">
-              <tbody *ngFor="let revision of revisions; let i = index">
-                <tr>
-                  <td colspan="2"><small><i class="fa fa-history"></i> Updated On:
-                      <em innerHTML="{{ revision.date_time  }}"></em></small></td>
-                </tr>
-                <tr>
-
-                  <td innerHTML="<strong>Cue :</strong> {{ revision['cue'] }}"></td>
-                  <td innerHTML="<strong>Narration :</strong>{{ revision['narration'] }}"></td>
-                </tr>
-                <tr class="break">
-                  <td colspan="2"></td>
-                </tr>
-              </tbody>
-            </table>
+        <div class="content" *ngIf="!revisions">
+          <p><strong>No revisions for this slide right now.</strong></p>
         </div>
+
+        <div class="content" *ngIf="revisions">
+          <div *ngFor="let revision of revisions; let i = index">
+            <a class="button is-text" (click)="showRevisionModal(index)">Revision {{ i+1 }} ({{ revision.date_time }})</a>
+            <span class="is-divider" style="margin:10px 0 20px 0;"></span>
+          </div>
+        </div>
+
       </article>
 
 
