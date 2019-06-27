@@ -62,8 +62,10 @@
                   <td>{{ i+1 }}</td>
                   <td class="content" innerHTML="{{ slide.cue }}"></td>
                   <td class="content" innerHTML="{{ slide.narration }}"></td>
-                  <td><button class="button heading" (click)="viewComment(i)">Show/Hide</button><button
-                      class="button heading" (click)="viewRevision(slide.id)">Revisions</button></td>
+                  <td>
+                    <button class="button heading" (click)="viewComment(i)">Show/Hide</button>
+                    <button class="button heading" (click)="viewRevision(slide.id)">Revisions</button>
+                  </td>
                 </tr>
               </tbody>
             </table>

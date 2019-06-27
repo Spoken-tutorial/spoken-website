@@ -1,6 +1,7 @@
 import { Component, OnInit, Input, ElementRef, Renderer2, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CreateScriptService } from '../../_service/create-script.service';
+import { CommentsService } from '../../_service/comments.service';
 import { RevisionsService } from '../../_service/revisions.service';
 
 @Component({
@@ -29,6 +30,7 @@ export class ScriptViewComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     public createscriptService: CreateScriptService,
+    public commentsService: CommentsService,
     public revisionsService: RevisionsService,
     private rd: Renderer2
   ) { }
@@ -44,7 +46,7 @@ export class ScriptViewComponent implements OnInit {
   }
 
   public getComment() {
-    this.createscriptService.getComment(
+    this.commentsService.getComment(
       this.slideId
     ).subscribe(
       (res) => {
@@ -54,7 +56,7 @@ export class ScriptViewComponent implements OnInit {
   }
 
   public postComment(comment) {
-    this.createscriptService.postComment(
+    this.commentsService.postComment(
       this.slideId,
       {
         "comment": comment
