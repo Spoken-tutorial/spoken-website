@@ -11,10 +11,11 @@ export class HomeComponent implements OnInit {
 
   public foss;
   public tutorials;
-  public langId:number;
-  public fossId:number;
-  public index:number;
-  public langData:any = {};
+  public langId: number;
+  public fossId: number;
+  public index: number;
+  public description: boolean = false;
+  public langData: any;
 
   constructor(
     public fossService: FossService,
@@ -25,8 +26,9 @@ export class HomeComponent implements OnInit {
     this.fossService.getAllFossCategories().subscribe(
       (res) => {
         this.index = langIndex,
-        this.fossId = res[langIndex]['foss_category']['id'],
+        this.fossId = res[langIndex].foss_category.id,
         this.langData = res[langIndex]['language']
+        this.description = true
       }
     );
   }
@@ -57,6 +59,7 @@ export class HomeComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.langData = {id: -1, name: ""};
     this.fetchAllFoss();
   };
 }

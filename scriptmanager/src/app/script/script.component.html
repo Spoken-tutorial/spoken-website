@@ -26,8 +26,6 @@
           <br><br>
 
 
-          
-
           <ng-container *ngFor="let slide of slides; let i = index">
             <app-script-slide [slide]="slide" [index]="i" (removeSlideEmitter)="onRemoveSlide($event)"
               (saveSlideEmitter)="onSaveSlide($event)"></app-script-slide>
@@ -61,7 +59,7 @@
               </div>
             </div>
           </div>
-          
+
         </div>
       </div>
     </div>
