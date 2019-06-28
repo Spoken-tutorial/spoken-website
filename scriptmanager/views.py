@@ -72,6 +72,9 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
       type=request.data['type']
       if(type=='form'):
         details = request.data['details']
+        for item in details:
+          item.update( {"script":script.pk})
+
 
       elif(type=='file'):
         myfile=request.FILES['docs']
