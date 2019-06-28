@@ -10,7 +10,7 @@ from reversion.models import Version
 import os
 from django.core.files.storage import FileSystemStorage
 from bs4 import BeautifulSoup
-import time
+from datetime import datetime
 
 def index(request):
   jwt_payload_handler  =  api_settings.JWT_PAYLOAD_HANDLER
@@ -163,7 +163,7 @@ class ReversionListView(generics.ListAPIView):
       data = []
       for i in reversion_data:
         result=i.field_dict
-        result.update({"date_time":i.revision.date_created,"reversion_id":i.revision.pk,"user":i.revision.user})
+        result.update({"date_time":i.revision.date_created.strftime("%Y-%m-%d %I:%M %p"),"reversion_id":i.revision.pk,"user":i.revision.user})
         data.append(result)
       return ReversionSerializer(data,many=True).data
     except:
