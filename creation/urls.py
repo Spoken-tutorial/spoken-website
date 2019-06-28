@@ -76,17 +76,25 @@ urlpatterns = [
     url(r'^update-common-component/$', update_common_component, name="update_common_component"),
 
     # Common to Domain & Admin reviewer parts
-    url(r'^accept-all/(\w+)/(\d+)/$',  accept_all, name="accept_all"),
-    url(r'^delete-notification/(\w+)/(\d+)/$',  delete_creation_notification, name="delete_creation_notification"),
-    url(r'^clear-notifications/(\w+)/$',  clear_creation_notification, name="clear_creation_notification"),
-    url(r'^tutorial/view/([0-9a-zA-Z-+%\(\).]+)/([0-9a-zA-Z-+%\(\).]+)/([a-zA-Z-]+)/$',  creation_view_tutorial, name="creation_view_tutorial"),
-    url(r'^init/$',  init_creation_app, name="init_creation_app"),
-    url(r'^role/add/([a-zA-Z-]+)/$',  creation_add_role, name="creation_add_role"),
-    url(r'^collaborate/$',  collaborate, name="collaborate"),
-    url(r'^suggest-a-topic/$',  suggest_topic, name="suggest_topic"),
-    url(r'^suggest-an-example/$',  suggest_example, name="suggest_example"),
-    url(r'^report-missing-component/(\d+)/$',  report_missing_component, name="report_missing_component"),
-    url(r'^report-missing-component/reply/(\d+)/$',  report_missing_component_reply, name="report_missing_component_reply"),
-    url(r'^report-missing-component/list/$',  report_missing_component_list, name="report_missing_component_list"),
+    # Additional Views Created for Payment Module
+    url(r'payment/tutorials/$',  list_all_published_tutorials, name="list_all_published_tutorials"),
+    url(r'payment/ajax/languages/$',  load_languages, name="load_languages"),
+    url(r'payment/ajax/fosses/$',  load_fosses, name="load_fosses"),
+    url(r'payment/due/$',  list_all_due_tutorials, name="payment_due_tutorials"),
+    url(r'payment/honorarium/$',  list_payment_honorarium, name="payment_honorarium_list"),
+    url(r'payment/honorarium/detail/(\d+)/$',  detail_payment_honorarium, name="payment_honorarium_detail"),
+
+    url(r'^accept-all/(\w+)/(\d+)/$', accept_all, name="accept_all"),
+    url(r'^delete-notification/(\w+)/(\d+)/$', delete_creation_notification, name="delete_creation_notification"),
+    url(r'^clear-notifications/(\w+)/$', clear_creation_notification, name="clear_creation_notification"),
+    url(r'^tutorial/view/([0-9a-zA-Z-+%\(\).]+)/([0-9a-zA-Z-+%\(\).]+)/([a-zA-Z-]+)/$', creation_view_tutorial, name="creation_view_tutorial"),
+    url(r'^init/$', init_creation_app, name="init_creation_app"),
+    url(r'^role/add/([a-zA-Z-]+)/$', creation_add_role, name="creation_add_role"),
+    url(r'^collaborate/$', collaborate, name="collaborate"),
+    url(r'^suggest-a-topic/$', suggest_topic, name="suggest_topic"),
+    url(r'^suggest-an-example/$', suggest_example, name="suggest_example"),
+    url(r'^report-missing-component/(\d+)/$', report_missing_component, name="report_missing_component"),
+    url(r'^report-missing-component/reply/(\d+)/$', report_missing_component_reply, name="report_missing_component_reply"),
+    url(r'^report-missing-component/list/$', report_missing_component_list, name="report_missing_component_list"),
 
 ]
