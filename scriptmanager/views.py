@@ -87,6 +87,10 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
         html = open(html_file,'r')
         details=self.scriptsData(html,script)
         os.system('rm '+ file + ' '+html_file)
+      
+      elif (type=="template"):
+        data=request.data['details']
+        details=self.scriptsData(data)
 
       serialized  =  ScriptsDetailSerializer(data  =  details,many  =  True) #inserting a details array without iterating
       if serialized.is_valid():
