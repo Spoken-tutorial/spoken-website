@@ -50,24 +50,19 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
     table=soup.find("table") 
     if(table.find("tbody")):
       table=table.find("tbody")
-    
-    # print(table)
     details=[]
     count=0
-    # print(table.find_all('tr'))
-
     for row in table.find_all('tr'):
       count+=1
       if row.find_all("th"):
         columns = row.find_all('th')
       elif row.find_all('td'):  
         columns = row.find_all('td')
-        
       try:
         details.append({"order": count,"cue": str(columns[0]),"narration": str(columns[1]),"script":script.pk})
       except:
         continue
-    # details.pop(0)
+    details.pop(0)
     return details
       
   def create(self, request,tid):
