@@ -49,7 +49,7 @@ class Question(models.Model):
 
 
 class Answer(models.Model):
-    question = models.ForeignKey(Question)
+    question = models.ForeignKey(Question, on_delete=models.PROTECT )
     answer = models.CharField(max_length=1000)
 
 
@@ -69,7 +69,74 @@ class Drupal_WS(models.Model):
     email = models.EmailField()
     purpose = models.CharField(max_length=10, default='DRP')
 
+
 class FA_WS(models.Model):
     name = models.CharField(max_length=200)
     email = models.EmailField()
     purpose = models.CharField(max_length=10, default='FAW')
+
+
+class ITP_WS(models.Model):
+    name = models.CharField(max_length=200)
+    email = models.EmailField()
+    college = models.CharField(max_length=500)
+    purpose = models.CharField(max_length=10, default='ITP')
+
+
+class Koha_WS(models.Model):
+    name = models.CharField(max_length=200)
+    email = models.EmailField()
+    college = models.CharField(max_length=500)
+    purpose = models.CharField(max_length=10, default='KHW')
+
+
+class Koha_WS_29Sep2018(models.Model):
+    name = models.CharField(max_length=200)
+    email = models.EmailField()
+    college = models.CharField(max_length=500)
+    purpose = models.CharField(max_length=10, default='KCW')
+
+
+class Koha_WS_12oct2018(models.Model):
+    name = models.CharField(max_length=200)
+    email = models.EmailField()
+    college = models.CharField(max_length=500)
+    remote = models.CharField(max_length=500)
+    purpose = models.CharField(max_length=10, default='KMW')
+
+
+class Koha_RC_12oct2018(models.Model):
+    name = models.CharField(max_length=200)
+    email = models.EmailField()
+    rcid = models.CharField(max_length=500)
+    remote = models.CharField(max_length=500)
+    purpose = models.CharField(max_length=10, default='KRC')
+
+
+class Koha_WS_8feb2019(models.Model):
+    name = models.CharField(max_length=200)
+    email = models.EmailField()
+    college = models.CharField(max_length=500)
+    purpose = models.CharField(max_length=10, default='KCW')
+
+
+class Moodle_WS_1march2019(models.Model):
+    name = models.CharField(max_length=200)
+    email = models.EmailField()
+    college = models.CharField(max_length=500)
+    purpose = models.CharField(max_length=10, default='MCW')
+
+class Koha_WS_9march2019(models.Model):
+    name = models.CharField(max_length=200)
+    email = models.EmailField()
+    college = models.CharField(max_length=500)
+    remote = models.CharField(max_length=500)
+    purpose = models.CharField(max_length=10, default='KMW')
+
+
+class Moodle_WS_15mar2019(models.Model):
+    name = models.CharField(max_length=200)
+    email = models.EmailField()
+    college = models.CharField(max_length=500)
+    remote = models.CharField(max_length=500)
+    purpose = models.CharField(max_length=10, default='MMW')

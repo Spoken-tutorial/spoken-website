@@ -29,7 +29,7 @@
 """
 
 
-from __future__ import division
+
 import copy
 import weakref
 from math import ceil
@@ -996,7 +996,7 @@ class Results(object):
         if isinstance(n, slice):
             start, stop, step = n.indices(len(self.top_n))
             return [Hit(self, self.top_n[i][1], i, self.top_n[i][0])
-                    for i in xrange(start, stop, step)]
+                    for i in range(start, stop, step)]
         else:
             if n >= len(self.top_n):
                 raise IndexError("results[%r]: Results only has %s hits"
@@ -1007,7 +1007,7 @@ class Results(object):
         """Yields a :class:`Hit` object for each result in ranked order.
         """
 
-        for i in xrange(len(self.top_n)):
+        for i in range(len(self.top_n)):
             yield Hit(self, self.top_n[i][1], i, self.top_n[i][0])
 
     def __contains__(self, docnum):
@@ -1016,7 +1016,7 @@ class Results(object):
 
         return docnum in self.docs()
 
-    def __nonzero__(self):
+    def __bool__(self):
         return not self.is_empty()
 
     __bool__ = __nonzero__
@@ -1047,7 +1047,7 @@ class Results(object):
         method.
         """
 
-        return self._facetmaps.keys()
+        return list(self._facetmaps.keys())
 
     def groups(self, name=None):
         """If you generated facet groupings for the results using the

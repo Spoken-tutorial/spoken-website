@@ -25,7 +25,7 @@
 # those of the authors and should not be interpreted as representing official
 # policies, either expressed or implied, of Matt Chaput.
 
-from __future__ import division
+
 from array import array
 
 from whoosh.compat import xrange
@@ -85,9 +85,9 @@ class PreloadedUnionMatcher(CombinationMatcher):
                     docnum = m.id()
                     place = docnum - offset
                     if len(a) <= place:
-                        a.extend(0 for _ in xrange(place - len(a) + 1))
+                        a.extend(0 for _ in range(place - len(a) + 1))
                     a[place] += score
-                    m.next()
+                    next(m)
             self._a = a
             self._offset = offset
         else:
@@ -104,7 +104,7 @@ class PreloadedUnionMatcher(CombinationMatcher):
     def score(self):
         return self._a[self._docnum - self._offset]
 
-    def next(self):
+    def __next__(self):
         a = self._a
         offset = self._offset
         place = self._docnum - offset
@@ -127,7 +127,7 @@ class PreloadedUnionMatcher(CombinationMatcher):
         self._docnum = docnum
         i = docnum - self._offset
         if i < len(self._a) and self._a[i] == 0:
-            self.next()
+            next(self)
 
     def skip_to_quality(self, minquality):
         a = self._a
@@ -179,7 +179,7 @@ class ArrayUnionMatcher(CombinationMatcher):
             partsize = doccount
         self._partsize = partsize
 
-        self._a = array("d", (0 for _ in xrange(self._partsize)))
+        self._a = array("d", (0 for _ in range(self._partsize)))
         self._docnum = self._min_id()
         self._read_part()
 
@@ -203,7 +203,7 @@ class ArrayUnionMatcher(CombinationMatcher):
         a = self._a
 
         # Clear the array
-        for i in xrange(self._partsize):
+        for i in range(self._partsize):
             a[i] = 0
 
         # Add the scores from the submatchers into the array
@@ -214,7 +214,7 @@ class ArrayUnionMatcher(CombinationMatcher):
                     a[i] += m.score() * boost
                 else:
                     a[i] = 1
-                m.next()
+                next(m)
 
         self._offset = offset
         self._limit = limit
@@ -304,7 +304,7 @@ class ArrayUnionMatcher(CombinationMatcher):
                 offset = self._offset
                 limit = self._limit
 
-    def next(self):
+    def __next__(self):
         self._docnum += 1
         return self._find_next()
 

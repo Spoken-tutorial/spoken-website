@@ -93,6 +93,22 @@
             </div>
           </div>
 
+          <div class="form-group ">
+            <label class="col-sm-3 control-label" for= "id_designation">Designation </label>
+            <div class="col-sm-9">
+              {% render_field form.designation class+="form-control designation" %}
+              {{ form.designation.errors }}
+            </div>
+          </div>
+
+          <div class="form-group ">
+            <label class="col-sm-3 control-label" for= "id_educational_back">Educational Background </label>
+            <div class="col-sm-9">
+              {% render_field form.educational_back class+="form-control educational_back" %}
+              {{ form.educational_back.errors }}
+            </div>
+          </div>
+
           <div class="form-group">
             <label class="col-sm-3 control-label" for= "id_foss">Foss </label>
             <div class="col-sm-9">
@@ -123,7 +139,20 @@
               {% render_field form.total_tutorials1 class+="form-control total_tutorials1" %}
               {{ form.total_tutorials1.errors }}
             </div>
-          </div><br><br>
+          </div>
+
+          <div class="form-group">
+            <label class="col-sm-3 control-label" for= "id_language_of_tutorial">Language in which you watched the tutorials during the workshop</label>
+            <div class="col-sm-9">
+              {% render_field form.language_of_tutorial class+="form-control language_of_tutorial" %}
+              {{ form.language_of_tutorial.errors }}
+            </div>
+          </div>
+
+
+
+
+          <br><br>
           <table style="width:100%;" class="table tablest"> 
             <tr>
               <th class="tabhead">Training Methodology</th>
@@ -214,6 +243,15 @@
                   {% endif %}
                 {% endfor %}
             </tr>
+
+            <tr >
+              <td><label for="id_dont_like_self_learning_method">I didn't like the method of self-learning used during the workshop at all because I have to learn on my own.</label>{{ form.dont_like_self_learning_method.errors }}</td>
+                {% for choice in form.dont_like_self_learning_method %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
             
           </table>
           <div class="form-group">
@@ -269,6 +307,25 @@
                   {% endif %}
                 {% endfor %}
             </tr>
+
+            <tr >
+              <td><label for="id_difficult_instructions_in_tutorial">I did not like the Spoken Tutorial self-learning workshop as it was difficult to understand the instructions given in the tutorials. </label>{{ form.difficult_instructions_in_tutorial.errors }}</td>
+                {% for choice in form.difficult_instructions_in_tutorial %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+
+            <tr >
+              <td><label for="id_translate">These tutorials should be translated into various Indian languages to help others. </label>{{ form.translate.errors }}</td>
+                {% for choice in form.translate %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+
           </table>
 
           <div class="form-group">
@@ -315,10 +372,37 @@
                   {% endif %}
                 {% endfor %}
             </tr>
+
+            <tr >
+              <td><label for="id_confident_to_apply_knowledge">I am confident that I will be able to apply the knowledge of the software after this workshop.</label>{{ form.confident_to_apply_knowledge.errors }}</td>
+                {% for choice in form.confident_to_apply_knowledge %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
           
           <tr >
               <td><label for="id_difficult_simultaneously">It was difficult to watch the video tutorial and practice the steps simultaneously. </label>{{ form.difficult_simultaneously.errors }}</td>
                 {% for choice in form.difficult_simultaneously %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+
+            <tr >
+              <td><label for="id_too_fast">I did not like the Spoken Tutorial workshop because the videos played too fast.</label>{{ form.too_fast.errors }}</td>
+                {% for choice in form.too_fast %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+
+            <tr >
+              <td><label for="id_too_slow">I did not like the Spoken Tutorial workshop because the videos played too slow.</label>{{ form.too_slow.errors }}</td>
+                {% for choice in form.too_slow %}
                 {% if not forloop.counter == 1 %}
                     <td>{{ choice.tag }}</td>
                   {% endif %}
@@ -346,6 +430,15 @@
             <tr >
               <td><label for="id_self_learning_intrest">The self learning methodology was able to hold my interest for learning the software during the entire workshop.</label>{{ form.self_learning_intrest.errors }}</td>
                 {% for choice in form.self_learning_intrest %}
+                {% if not forloop.counter == 1 %}
+                    <td>{{ choice.tag }}</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+
+            <tr >
+              <td><label for="id_language_diff_to_understand">I did not like the Spoken Tutorial self-learning workshop as the language used in the tutorials was difficult to understand.</label>{{ form.language_diff_to_understand.errors }}</td>
+                {% for choice in form.language_diff_to_understand %}
                 {% if not forloop.counter == 1 %}
                     <td>{{ choice.tag }}</td>
                   {% endif %}

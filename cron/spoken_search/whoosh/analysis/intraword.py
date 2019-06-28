@@ -71,7 +71,7 @@ class CompoundWordFilter(Filter):
         if s in memo:
             return memo[s]
 
-        for i in xrange(1, len(s)):
+        for i in range(1, len(s)):
             prefix = s[:i]
             if prefix in self.wordset:
                 suffix = s[i:]
@@ -297,7 +297,7 @@ class IntraWordFilter(Filter):
             additional token with the same position as the last subword.
         """
 
-        from whoosh.support.unicode import digits, lowercase, uppercase
+        from whoosh.support.str import digits, lowercase, uppercase
 
         self.delims = re.escape(delims)
 

@@ -1,3 +1,5 @@
+
+from builtins import str
 import MySQLdb
 import time
 from youtube_upload import *
@@ -12,7 +14,7 @@ try:
 except gdata.service.BadAuthentication:
     raise BadAuthentication("Authentication failed")
 
-ldb = MySQLdb.connect(host = DB_HOST, user = 'stadmin', passwd = 'Listdb*4321sT', \
+ldb = MySQLdb.connect(host = DB_HOST, user = '', passwd = '', \
     db = 'cron_logs')
 lcur = ldb.cursor()
 
@@ -41,7 +43,7 @@ for row in rows:
         if not playlist:
             error_string = row[1] + ' - ' + lang[1] + ' -- Playlist Missing'
             error_log_file_head.write(error_string + '\n')
-            print error_string
+            print(error_string)
             continue
 
         cur.execute("SELECT ctr.id, ctr.tutorial_detail_id, \
@@ -65,7 +67,7 @@ for row in rows:
             tr_log_rec = lcur.execute('SELECT count(id) AS idcnt FROM playlist_arranger WHERE trid=' + str(tutorial[0]))
             tr_log = lcur.fetchone()
             if tr_log and int(tr_log[0]):
-                print tutorial[0], '-- Skipping...'
+                print((tutorial[0], '-- Skipping...'))
                 counter += 1
                 continue
             if entry:
@@ -77,17 +79,17 @@ for row in rows:
                 except:
                     error_string = str(tutorial[0]) + str(playlist[3]) + ' -- Error...'
                     error_log_file_head.write(error_string + '\n')
-                    print error_string
+                    print(error_string)
                     time.sleep(2)
                     continue
                 counter += 1
-                print str(tutorial[0]) + ' -- Success --' + playlist_entry.id.text.replace(playlist_uri, '').strip('/')
+                print((str(tutorial[0]) + ' -- Success --' + playlist_entry.id.text.replace(playlist_uri, '').strip('/')))
                 lcur.execute("INSERT INTO playlist_arranger (trid) VALUES(%s)", [tutorial[0]])
                 ldb.commit()
             else:
                 error_string = str(tutorial[0]) + ' -- Failed to get video entry'
                 error_log_file_head.write(error_string + '\n')
-                print error_string
+                print(error_string)
             time.sleep(1)
         #time.sleep(1)
     #time.sleep(1)

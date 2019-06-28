@@ -1,7 +1,9 @@
+
+from builtins import str
 from django import template
 from django.contrib.auth.models import User
 from events.models import *
-from events.views import is_organiser, is_invigilator, is_resource_person, is_event_manager, can_clone_training, is_administrator
+from events.views import is_organiser, is_invigilator, is_resource_person, is_accountexecutive, is_event_manager, can_clone_training, is_administrator, is_organiser_deactivated, is_invigilator_deactivated
 import datetime
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
@@ -12,11 +14,11 @@ register = template.Library()
 
 
 def participant_picture(user_id):
-    print user_id
+    print(user_id)
     try:
         return settings.ONLINE_TEST_URL + "get_profile_picture.php?id=" + str(user_id)
-    except Exception, e:
-        print e
+    except Exception as e:
+        print(e)
         return None
 
 def get_trainingstatus(key, training):
@@ -26,8 +28,8 @@ def get_trainingstatus(key, training):
         #    wa = SchoolTrainingAttendance.objects.get(id = key, training = training)
         #else:
         wa = TrainingAttendance.objects.get(id=key, training = training)
-    except Exception, e:
-        print e
+    except Exception as e:
+        print(e)
         return ''
 
     if wa.status == 1:
@@ -50,7 +52,7 @@ def participant_count(objects, category):
     if category == 'Training':
         try:
             return objects.trainingattendance_set.all().count()
-        except Exception, e:
+        except Exception as e:
             return 0
     elif category == 'Test':
         count = objects.testattendance_set.all().count()
@@ -96,8 +98,8 @@ def can_upload_final_training_list(tdate):
         if datetime.date.today() >= date_after_one_month:
             return True
         return False
-    except Exception, e:
-        print e
+    except Exception as e:
+        print(e)
         return False
 
 def can_download_workshop_certificate(key, training):
@@ -127,8 +129,8 @@ def is_feedback_exits(w, record):
     try:
         TrainingFeedback.objects.get(training_id=w.id, mdluser_id=record.mdluser_id)
         return True
-    except Exception, e:
-        print e
+    except Exception as e:
+        print(e)
         return False
 
 def feedback_status_good(status):
@@ -177,7 +179,10 @@ register.filter('is_administrator', is_administrator)
 register.filter('is_organiser', is_organiser)
 register.filter('is_invigilator', is_invigilator)
 register.filter('is_resource_person', is_resource_person)
+register.filter('is_accountexecutive', is_accountexecutive)
 register.filter('is_event_manager', is_event_manager)
+register.filter('is_organiser_deactivated', is_organiser_deactivated)
+register.filter('is_invigilator_deactivated', is_invigilator_deactivated)
 register.filter('can_download_workshop_certificate', can_download_workshop_certificate)
 register.filter('training_file_exits', training_file_exits)
 register.filter('is_feedback_exits', is_feedback_exits)

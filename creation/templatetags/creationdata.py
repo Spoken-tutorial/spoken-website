@@ -1,7 +1,9 @@
 # Standard Library
+from builtins import str
 import os
 import zipfile
-from urllib import quote_plus, urlopen
+from urllib.parse import quote_plus
+from urllib.request import urlopen
 
 # Third Party Stuff
 from django import template
@@ -37,13 +39,13 @@ def get_zip_content(path):
         zf = zipfile.ZipFile(path, 'r')
         file_names = zf.namelist()
         return file_names
-    except Exception, e:
+    except Exception as e:
         return False
 
 def is_script_available(path):
     try:
         code = urlopen(script_path).code
-    except Exception, e:
+    except Exception as e:
         code = e.code
     if(int(code) == 200):
         return True
@@ -113,6 +115,17 @@ def get_missing_component_reply(mcid):
         replies = '<br /><b>Replies:</b>' + replies
     return replies
 
+
+
+def formatismp4(path):
+    '''
+    ** Registered to be used in jinja template **
+    Function takes in a file name and checks if the 
+    last 3 characters are `mp4`.
+    '''
+    return path[-3:] == 'mp4' or path[-3:] == 'mov'
+
+
 def instruction_sheet(foss, lang):
     file_path = settings.MEDIA_ROOT + 'videos/' + str(foss.id) + '/' + foss.foss.replace(' ', '-') + '-Instruction-Sheet-' + lang.name + '.pdf'
     if lang.name != 'English':
@@ -163,7 +176,7 @@ def get_srt_path(tr):
         data = '<track kind="captions" src="'+ settings.MEDIA_URL + 'videos/' + str(tr.tutorial_detail.foss_id) + '/' + str(tr.tutorial_detail_id) + '/' + tr.tutorial_detail.tutorial.replace(' ', '-') + '-English.srt' + '" srclang="en" label="English"></track>'
     if tr.language.name != 'English':
         native_srt = settings.MEDIA_ROOT + 'videos/' + str(tr.tutorial_detail.foss_id) + '/' + str(tr.tutorial_detail_id) + '/' + tr.tutorial_detail.tutorial.replace(' ', '-') + '-' + tr.language.name +'.srt'
-        print native_srt
+        print(native_srt)
         if os.path.isfile(native_srt):
             data += '<track kind="captions" src="'+ settings.MEDIA_URL + 'videos/' + str(tr.tutorial_detail.foss_id) + '/' + str(tr.tutorial_detail_id) + '/' + tr.tutorial_detail.tutorial.replace(' ', '-') + '-' + tr.language.name + '.srt' + '" srclang="en" label="' + tr.language.name + '"></track>'
     return data
@@ -174,12 +187,12 @@ def get_video_visits(tr):
     return tr.hit_count
 
 def get_prerequisite(tr, td):
-    print tr, td
+    print((tr, td))
     try:
         tr_rec = TutorialResource.objects.get(Q(status = 1) | Q(status = 2), tutorial_detail = td, language_id = tr.language_id)
         return get_url_name(td.foss.foss) + '/' + get_url_name(td.tutorial) + '/' + tr_rec.language.name
-    except Exception, e:
-        print e
+    except Exception as e:
+        print(e)
         if tr.language.name != 'English':
             try:
                 tr_rec = TutorialResource.objects.get(Q(status = 1) | Q(status = 2), tutorial_detail = td, language__name = 'English')
@@ -207,18 +220,18 @@ def get_timed_script(script_path, timed_script_path):
         timed_script = settings.SCRIPT_URL + timed_script_path
     else:
         timed_script = settings.SCRIPT_URL + script_path + '-timed'
-    print script_path
+    print(script_path)
     code = 0
     try:
         code = urlopen(timed_script).code
-    except Exception, e:
+    except Exception as e:
         timed_script = settings.SCRIPT_URL + \
             script_path.replace(' ', '-').replace('_', '-') + '-timed'
-        print timed_script
+        print(timed_script)
         try:
             code = urlopen(timed_script).code
-        except Exception, e:
-            print code, '----', e
+        except Exception as e:
+            print((code, '----', e))
             code = 0
     if(int(code) == 200):
         return timed_script
@@ -232,7 +245,9 @@ def tutorialsearch():
     return context
 
 def get_mp4_video(tr):
-    tname, text = tr.video.split('.')
+    video_name = tr.video
+    splitat = -4
+    tname, text = video_name[:splitat], video_name[splitat:]
     path = settings.MEDIA_ROOT + 'videos/' + str(tr.tutorial_detail.foss_id) + '/' + str(tr.tutorial_detail_id) + '/' + tname + '.mp4'
     if os.path.isfile(path):
         return 'videos/' + str(tr.tutorial_detail.foss_id) + '/' + str(tr.tutorial_detail_id) + '/' + tname + '.mp4'
@@ -242,6 +257,7 @@ def get_mp4_video(tr):
 register.inclusion_tag('spoken/templates/tutorial_search_form.html')(tutorialsearch)
 #register.filter('tutorialsearch', tutorialsearch)
 register.filter('get_timed_script', get_timed_script)
+register.filter('formatismp4', formatismp4)
 register.filter('get_prerequisite_from_td', get_prerequisite_from_td)
 register.filter('get_prerequisite', get_prerequisite)
 register.filter('get_video_visits', get_video_visits)

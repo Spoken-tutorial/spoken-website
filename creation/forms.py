@@ -1,4 +1,8 @@
+
 # Third Party Stuff
+from builtins import str
+from builtins import range
+from builtins import object
 from django import forms
 from django.contrib.auth.models import User
 from django.db.models import Q
@@ -12,7 +16,7 @@ from creation.models import *
 class FossAvailableForTestForm(forms.ModelForm):
     foss = forms.ModelChoiceField(queryset=FossCategory.objects.filter(status=True).order_by('foss'))
 
-    class Meta:
+    class Meta(object):
         model = FossAvailableForTest
         exclude = ['created']
 
@@ -109,6 +113,7 @@ class UploadTimedScriptForm(forms.Form):
                     self.fields['tutorial_name'].choices = choices
                     self.fields['tutorial_name'].widget.attrs = {}
                     self.fields['tutorial_name'].initial = initial_data
+
 
 class ChangeComponentStatusForm(forms.Form):
     foss_category = forms.ChoiceField(
@@ -207,6 +212,7 @@ class ChangeComponentStatusForm(forms.Form):
                             self.fields['status'].choices =choices
                             self.fields['status'].initial = status_init_data
 
+
 class PublishToPending(forms.Form):
     foss_category = forms.ChoiceField(
         widget=forms.Select(),
@@ -256,6 +262,7 @@ class PublishToPending(forms.Form):
                         choices.insert(0, ('', 'Select Tutorial'))
                         self.fields['tutorial_name'].choices = choices
                         self.fields['tutorial_name'].initial = tut_init_data
+
 
 class UploadPublishTutorialForm(forms.Form):
     tutorial_name = forms.ChoiceField(
@@ -523,6 +530,7 @@ class UploadOutlineForm(forms.Form):
         if outline_rec.outline:
             self.fields['outline'].initial = outline_rec.outline
 
+
 class UploadScriptForm(forms.Form):
     scriptpath = forms.CharField(
         required = True,
@@ -532,6 +540,7 @@ class UploadScriptForm(forms.Form):
     def __init__(self, path, *args, **kwargs):
         super(UploadScriptForm, self).__init__(*args, **kwargs)
         self.fields['scriptpath'].initial = path
+
 
 class UploadKeywordsForm(forms.Form):
     keywords = forms.CharField(
@@ -547,20 +556,20 @@ class UploadKeywordsForm(forms.Form):
 
 class ContributorRoleForm(forms.ModelForm):
     user = forms.ModelChoiceField(
-        cache_choices = True,
+         
         queryset = User.objects.filter(Q(groups__name = 'Contributor')|Q(groups__name = 'External-Contributor')).order_by('username'),
         help_text = "",
         error_messages = {'required': 'User field required.'}
     )
     foss_category = forms.ModelChoiceField(
-        cache_choices = True,
+         
         queryset = FossCategory.objects.filter(status = 1).order_by('foss'),
         empty_label = "----------",
         help_text = "",
         error_messages = {'required': 'FOSS category field required.'}
     )
     language = forms.ModelChoiceField(
-        cache_choices =True,
+         
         queryset = Language.objects.order_by('name'),
         empty_label = "----------",
         help_text = "",
@@ -568,51 +577,52 @@ class ContributorRoleForm(forms.ModelForm):
     )
     status = forms.BooleanField(required = False)
 
-    class Meta:
+    class Meta(object):
         model = ContributorRole
         exclude = ['created', 'updated']
 
+
 class DomainReviewerRoleForm(forms.ModelForm):
     user = forms.ModelChoiceField(
-        cache_choices = True,
+         
         queryset = User.objects.filter(Q(groups__name = 'Domain-Reviewer')).order_by('username'),
         help_text = "",
         error_messages = {'required': 'User field required.'}
     )
     foss_category = forms.ModelChoiceField(
-        cache_choices = True,
+         
         queryset = FossCategory.objects.filter(status = 1).order_by('foss'),
         empty_label = "----------",
         help_text = "",
         error_messages = {'required': 'FOSS category field required.'}
     )
     language = forms.ModelChoiceField(
-        cache_choices =True,
+         
         queryset = Language.objects.order_by('name'),
         empty_label = "----------",
         help_text = "", error_messages = {'required': 'Language field required.'}
     )
     status = forms.BooleanField(required = False)
 
-    class Meta:
+    class Meta(object):
         model = DomainReviewerRole
         exclude = ['created', 'updated']
 
 class QualityReviewerRoleForm(forms.ModelForm):
     user = forms.ModelChoiceField(
-        cache_choices = True,
+         
         queryset = User.objects.filter(Q(groups__name = 'Quality-Reviewer')).order_by('username'),
         help_text = "", error_messages = {'required': 'User field required.'}
     )
     foss_category = forms.ModelChoiceField(
-        cache_choices = True,
+         
         queryset = FossCategory.objects.filter(status = 1).order_by('foss'),
         empty_label = "----------",
         help_text = "",
         error_messages = {'required': 'FOSS category field required.'}
     )
     language = forms.ModelChoiceField(
-        cache_choices =True,
+         
         queryset = Language.objects.order_by('name'),
         empty_label = "----------",
         help_text = "",
@@ -620,7 +630,7 @@ class QualityReviewerRoleForm(forms.ModelForm):
     )
     status = forms.BooleanField(required = False)
 
-    class Meta:
+    class Meta(object):
         model = QualityReviewerRole
         exclude = ['created', 'updated']
 
@@ -635,6 +645,7 @@ class ReviewVideoForm(forms.Form):
         required = False
     )
 
+
 class DomainReviewComponentForm(forms.Form):
     component_status = forms.ChoiceField(
         choices = [('', '------'), (3, 'Accept'), (5, 'Need improvement')],
@@ -646,6 +657,7 @@ class DomainReviewComponentForm(forms.Form):
         required = False
     )
 
+
 class QualityReviewComponentForm(forms.Form):
     component_status = forms.ChoiceField(
         choices = [('', '------'), (4, 'Accept'), (5, 'Need improvement')],
@@ -656,6 +668,7 @@ class QualityReviewComponentForm(forms.Form):
         widget = forms.Textarea,
         required = False
     )
+
 
 class TutorialMissingComponentForm(forms.Form):
     component = forms.ChoiceField(
@@ -688,7 +701,7 @@ class TutorialMissingComponentForm(forms.Form):
 
     def clean(self):
         super(TutorialMissingComponentForm, self).clean()
-        print self.user
+        print((self.user))
         if 'report_type' in self.cleaned_data:
             if self.cleaned_data['report_type'] == '1':
                 if 'remarks' in self.cleaned_data:
@@ -697,9 +710,9 @@ class TutorialMissingComponentForm(forms.Form):
                 else:
                     self._errors['remarks'] = '<ul class="errorlist"><li>Please fill Remarks field</li></ul>'
         if 'inform_me' in self.cleaned_data:
-            print self.cleaned_data
+            print((self.cleaned_data))
             if self.cleaned_data['inform_me'] == '1':
-                print self.cleaned_data['inform_me']
+                print((self.cleaned_data['inform_me']))
                 if not self.user.is_authenticated():
                     if 'email' in self.cleaned_data:
                         if not self.cleaned_data['email']:
@@ -716,7 +729,7 @@ class TutorialMissingComponentReplyForm(forms.Form):
 
 class SuggestTopicForm(forms.ModelForm):
     difficulty_level = forms.ModelChoiceField(
-        cache_choices = True,
+         
         widget = forms.Select(
             attrs = {'class' : 'ac-state'}),
             queryset = Level.objects.all().order_by('id'),
@@ -730,7 +743,7 @@ class SuggestTopicForm(forms.ModelForm):
         error_messages = {'required': 'Please select Yes or No for this option'}
     )
 
-    class Meta:
+    class Meta(object):
         model = SuggestTopic
         exclude = ['user', 'created']
 
@@ -745,7 +758,7 @@ class SuggestExampleForm(forms.ModelForm):
         required = True,
         error_messages = {'required': 'Please select Yes or No for this option'}
     )
-    class Meta:
+    class Meta(object):
         model = SuggestExample
         exclude = ['user', 'created']
 
@@ -773,13 +786,13 @@ class CollaborateForm(forms.ModelForm):
         required = True,
         error_messages = {'required': 'Please select Yes or No for this option'}
     )
-    class Meta:
+    class Meta(object):
         model = Collaborate
         exclude = ['user', 'created']
 
 class AvailableFossForm(forms.ModelForm):
     foss = forms.ModelChoiceField(
-        cache_choices = True,
+         
         queryset = FossCategory.objects.filter(status = 1).order_by('foss'),
         empty_label = "----------",
         help_text = "",
@@ -1075,3 +1088,88 @@ class PaymentHonorariumFilterForm(forms.Form):
         e_date = self.cleaned_data.get('end_date')
         if s_date and e_date and s_date > e_date:
             self.add_error('end_date', "End date must be later than start date.")
+
+
+class UpdateCodefilesForm(forms.Form):
+    foss = forms.ChoiceField(
+        choices = [('', '-- Select Foss --'),] + list(TutorialResource.objects.filter(Q(status = 1) | 
+            Q(status = 2), language__name='English').values_list(
+            'tutorial_detail__foss_id', 'tutorial_detail__foss__foss').order_by(
+            'tutorial_detail__foss__foss').distinct()),
+        required = True,
+        error_messages = {'required':'FOSS category field is required.'}
+    )
+    tutorial = forms.ChoiceField(
+        choices=[('', '-- Select Tutorial --'), ],
+        widget=forms.Select(attrs={'disabled': 'disabled'}),
+        required=True,
+        error_messages={'required': 'Tutorial field is required.'}
+    )
+    comp = forms.FileField(required=False)
+
+    def clean(self):
+        super(UpdateCodefilesForm, self).clean()
+        component = ''
+        if 'comp' in self.cleaned_data:
+            component = self.cleaned_data['comp']
+        if not component:
+            self._errors["comp"] = self.error_class(["This field is required."])
+        return component
+
+    def __init__(self, *args, **kwargs):
+        super(UpdateCodefilesForm, self).__init__(*args, **kwargs)
+
+        if args:
+            if 'foss' in args[0] and args[0]['foss']:
+                initial_tut = ''
+                if 'tutorial' in args[0] and args[0]['tutorial']:
+                    initial_tut = args[0]['tutorial']
+                choices = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), tutorial_detail__foss_id = args[0]['foss']).values_list('tutorial_detail_id', 'tutorial_detail__tutorial').order_by('tutorial_detail__tutorial').distinct()
+                self.fields['tutorial'].choices =  [('', '-- Select tutorial --'),] + list(choices)
+                self.fields['tutorial'].widget.attrs = {}
+                self.fields['tutorial'].initial = initial_tut
+
+
+class UpdateCommonCompForm(forms.Form):
+    foss = forms.ChoiceField(
+        choices = [('', '-- Select Foss --'),] + list(TutorialResource.objects.filter(Q(status = 1) | 
+            Q(status = 2), language__name='English').values_list(
+            'tutorial_detail__foss_id', 'tutorial_detail__foss__foss').order_by(
+            'tutorial_detail__foss__foss').distinct()),
+        required = True,
+        error_messages = {'required':'FOSS category field is required.'}
+    )
+    tutorial = forms.ChoiceField(
+        choices=[('', '-- Select Tutorial --'), ],
+        widget=forms.Select(attrs={'disabled': 'disabled'}),
+        required=True,
+        error_messages={'required': 'Tutorial field is required.'}
+    )
+    comp = forms.FileField(required=False)
+    component_type = forms.ChoiceField(
+        choices = [('', '-- Select Type --'), ('Codefiles', 'Codefiles'), ('Slides', 'Slides'), ('Additionalmaterial', 'Additional Material')],
+        required = True,
+        error_messages = {'required': 'Please select component type'}
+    )
+
+    def clean(self):
+        super(UpdateCommonCompForm, self).clean()
+        component = ''
+        if 'comp' in self.cleaned_data:
+            component = self.cleaned_data['comp']
+        if not component:
+            self._errors["comp"] = self.error_class(["This field is required."])
+        return component
+
+    def __init__(self, *args, **kwargs):
+        super(UpdateCommonCompForm, self).__init__(*args, **kwargs)
+
+        if args:
+            if 'foss' in args[0] and args[0]['foss']:
+                initial_tut = ''
+                if 'tutorial' in args[0] and args[0]['tutorial']:
+                    initial_tut = args[0]['tutorial']
+                choices = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), tutorial_detail__foss_id = args[0]['foss']).values_list('tutorial_detail_id', 'tutorial_detail__tutorial').order_by('tutorial_detail__tutorial').distinct()
+                self.fields['tutorial'].choices =  [('', '-- Select tutorial --'),] + list(choices)
+                self.fields['tutorial'].widget.attrs = {}
+                self.fields['tutorial'].initial = initial_tut

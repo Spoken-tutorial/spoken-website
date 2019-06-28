@@ -1,61 +1,59 @@
+
+from builtins import str
 import time
 import os, sys
 from django.db.models import Q
 
 # setting django environment
 from django.core.wsgi import get_wsgi_application
-sys.path.append("/websites_dir/django_spoken/spoken")
+from config import *
+sys.path.append(SPOKEN_PATH)
 os.environ["DJANGO_SETTINGS_MODULE"] = "spoken.settings"
 application = get_wsgi_application()
 
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
 from django.template import Context
-
-from config import * 
+ 
 from cms.models import *
-from events.models import Drupal2018_email, MumbaiStudents
+from events.models import Organiser, AcademicCenter
 
 #here fetch all user
-# users = Drupal2018_email.objects.all()
-users = MumbaiStudents.objects.all().order_by('bid')
+organisers = Organiser.objects.exclude(academic__institution_type_id__in=[3,2,15,5,13,4])
 sent = 0
 notsent = 0
 count = 0
-tot_count = len(users)
+tot_count = len(organisers)
 
-subject = ' Invitation to attend "Drupal in a Day" workshop'
+subject = ' *IIT Bombay - Spoken Tutorial Program | Invitation to colleges for 2019* '
 
-success_log_file_head = open(LOG_ROOT+'drupal2018_org_invitation.txt',"w")
-for user in users:
+success_log_file_head = open(LOG_ROOT+'organiser_payment_reminder.txt',"w")
+for organiser in organisers:
     message = '''
-<p>Dear Future Professionals,</p>
+<p>Dear Faculty Organiser,<p>
 
-<p>Spoken Tutorial in association with FOSSEE, IIT Bombay, is hosting "Drupal-in-a-Day" workshop alongside Drupal Camp Mumbai 2018 at IIT Bombay. We invite you to attend this workshop and learn Drupal, the world\'s leading open source content management framework, for developing websites and web based applications (for desktop and mobile). On successful completion of the surprise activity, you also stand a good chance to get a free participation ticket to attend two days of Drupal Camp on 28 and 29 April 2018.</p>
+<p>Many thanks to you and your College for being a part of the IIT Bombay,Spoken Tutorial Software training program. You have contributed in a great way to its mega success. <p>
 
-<p>Drupal Camp Mumbai is one of the largest Drupal community gatherings in India. The purpose of this event is to bring students, developers, architects, managers, businesses and organisations on a singular platform to network, interact and share openly with each other, and help strengthen the community at large.</p>
+<p>In August 2018 we informed you about the Training Policy change namely colleges will need to make a Payment/annual User fee of Rs.25000/- in order to continue the Spoken Tutorial Training. Many of you have immediately responded positively and made the payment. <u>To continue to benefit from the Software Training courses we offer - Payment is a must.  </u> </p>
 
-<p>The training workshop is focused self-learning and real time practising model, where each student will be provided with high quality video tutorials developed by Spoken Tutorial projcet and at the end of the workshop the student should be able to build a full fledged Drupal-based website.</p>
+<p>We wish to inform you that we have moved to a continual payment system wherein <b><u>Colleges get a full 12 months benefit from their date of payment. Eg. Jan 28th 2019 to Jan 27th 2020 etc.  </u></b> I would urge all colleges who are not in the program to come in and see what benefits they are getting for Rs.25000/-. There is NO OTHER course with this standard, this level of flexibilty and at this low cost per student.</p>
 
-<p>Come learn, be a part of the largest open source community for web content management, and hone your skills to an exciting career in web applications.</p>
+<p>One consideration from our end is related to the Test taking - Colleges who had done tests but were unable to download the certificates because colleges were disabled, we will activate those colleges for a short period of time, so that you can download the students certificates. For this you can contact your state training managers.</p>
 
-<p><b>When:-</b> 27 April 2018 <br>
+<p>We guarantee our continued high-quality services to all. If you have questions, don't hesitate to contact the Training Coordinator of your respective state.</p>
 
-<b>Venue:-</b> Seminar Room, Ground Floor, Aero Annex Building, Below HSS Department, IIT Bombay, Mumbai 400076.
+<p><b>Yours Sincerely, <br>
+Shyama Iyer <br>
+National Coordinator - Training Spoken Tutorial, IIT Bombay <br>
+NMEICT, MHRD, Govt. Of India<br>
+</b></p>
 
-<br><b>To know more and Register:-</b> <a href="http://spoken-tutorial.org/workshop/drupal2018/" target="_blank">Click Here</a></p>
+'''.format(organiser.user.email)
 
-<p>Thanks and rgds,<br>
-Tejas Shah, Organising Team<br>
-Spoken Tutorial, FOSSEE and DCM<br>
-IIT Bombay</p>
-
-'''.format(user.stuid.user.email)
-
-    to  = [user.stuid.user.email]
+    to  = [organiser.user.email]
     #to = ['ganeshmohite96@gmail.com','nancyvarkey.iitb@gmail.com']
     email = EmailMultiAlternatives(
-        subject, message, 'tejas.shah@iitb.ac.in',
+        subject, message, 'administrator@spoken-tutorial.org',
         to = to,
         headers = {
          "Content-type" : "text/html"
@@ -70,14 +68,14 @@ IIT Bombay</p>
         if sent%100 == 0:
             time.sleep(10)
         #print to," => sent (", str(count),"/",str(tot_count),")"
-        success_log_file_head.write(str(user.stuid.user.email)+','+str(1)+'\n')
-    except Exception, e:
-        print e
+        success_log_file_head.write(str(organiser.user.email)+','+str(1)+'\n')
+    except Exception as e:
+        print(e)
         #print to," => not sent (",count,"/",tot_count,")"
-        success_log_file_head.write(str(user.stuid.user.email)+','+str(0)+'\n')
+        success_log_file_head.write(str(organiser.user.email)+','+str(0)+'\n')
     #break
-print "--------------------------------"
-print tot_count
-print "Total sent mails:", sent
-print "Total not sent mails:", notsent
-print "--------------------------------"
+print("--------------------------------")
+print(tot_count)
+print(("Total sent mails:", sent))
+print(("Total not sent mails:", notsent))
+print("--------------------------------")

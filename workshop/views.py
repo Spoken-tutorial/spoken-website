@@ -1,4 +1,5 @@
 # Standard Library
+from builtins import str
 import base64
 
 # Third Party Stuff

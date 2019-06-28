@@ -5,6 +5,7 @@ from django.shortcuts import resolve_url
 from django.utils.decorators import available_attrs
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.utils.six.moves.urllib.parse import urlparse
+from events.views import is_organiser
 
 default_message = "You don't have enough permission to view this page."
 
@@ -34,9 +35,15 @@ def user_passes_test(test_func, login_url=None, \
 def group_required(*group_names):
     def in_groups(request):
         if request.user.is_authenticated():
-            if bool(request.user.groups.filter(name__in=group_names)):
-                return True
+            if 'Organiser' in group_names:
+                if bool(request.user.groups.filter(name__in=group_names)) and is_organiser(request.user):
+                    return True
+                else:
+                    messages.error(request, default_message)
             else:
-                messages.error(request, default_message)
+                if bool(request.user.groups.filter(name__in=group_names)):
+                    return True
+                else:
+                    messages.error(request, default_message)
         return False
     return user_passes_test(in_groups)

@@ -1,3 +1,5 @@
+
+from builtins import str
 from datetime import datetime, date, timedelta
 from django.db.models import Q
 import os, sys
@@ -6,12 +8,12 @@ import time
 
 # setting django environment
 from django.core.wsgi import get_wsgi_application
-sys.path.append("/websites_dir/django_spoken/spoken")
+from config import *
+sys.path.append(SPOKEN_PATH)
 os.environ["DJANGO_SETTINGS_MODULE"] = "spoken.settings"
 application = get_wsgi_application()
 
 # importing config and TrainingRequest
-from config import *
 from events.models import TrainingRequest
 
 # today's date
@@ -33,6 +35,7 @@ for training_request in training_requests:
   # Training close automatically if participant count exists
   if participant_count:
     training_request.status = 1
+    training_request.cert_status = 0
     training_request.save()
   success_log_file_head.write(str(training_request.id)+','+str(participant_count)+'\n')
 
@@ -43,6 +46,6 @@ count = training_requests.count()
 #updating training request status
 #training_requests.update(status=1)
 
-print '*************************************'
-print ' Total records checked: ', count
-print '*************************************'
+print('*************************************')
+print((' Total records checked: ', count))
+print('*************************************')

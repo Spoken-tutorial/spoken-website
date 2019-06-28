@@ -1,4 +1,6 @@
+
 # Standard Library
+from builtins import str
 import json
 import os
 import zipfile
@@ -6,11 +8,12 @@ from datetime import datetime
 
 # Third Party Stuff
 from django.conf import settings
-from django.core.context_processors import csrf
+ 
 from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
+from django.template.context_processors import csrf
 
 # Spoken Tutorial Stuff
 from cdcontent.forms import *
@@ -64,7 +67,7 @@ def add_sheets(archive, foss, lang):
 def get_all_foss_details(selectedfoss):
     all_foss_details = {}
 
-    for key, values in selectedfoss.iteritems():
+    for key, values in list(selectedfoss.items()):
         foss_rec = FossCategory.objects.get(pk=key)
 
         if not all_foss_details.get(foss_rec.id, None):
@@ -134,7 +137,7 @@ def calculate_directory_size(dir_path):
                     folder_size += os.path.getsize(filename)
     except Exception as e:
         folder_size = 0.0
-        print e
+        print(e)
 
     return folder_size
 
@@ -146,7 +149,7 @@ def calculate_static_file_size():
         static_files = get_static_files()
         dir_path = '{}/static/spoken/fonts'.format(settings.BASE_DIR)
 
-        for key, value in static_files.items():
+        for key, value in list(static_files.items()):
             filepath = '{}{}'.format(settings.BASE_DIR, key)
 
             if os.path.isfile(filepath):
@@ -155,7 +158,7 @@ def calculate_static_file_size():
         fsize += calculate_directory_size(dir_path)
     except Exception as e:
         fsize = 0.0
-        print e
+        print(e)
 
     return fsize
 
@@ -164,7 +167,7 @@ def add_static_files(archive):
     zipdir(settings.BASE_DIR + '/static/spoken/fonts', 'spoken/includes/fonts/', archive)
     static_files = get_static_files()
 
-    for key, value in static_files.items():
+    for key, value in list(static_files.items()):
         filepath = '{}{}'.format(settings.BASE_DIR, key)
 
         if os.path.isfile(filepath):
@@ -172,7 +175,8 @@ def add_static_files(archive):
 
 
 def convert_template_to_html_file(archive, filename, request, template, ctx):
-    html_string = str(render(request, template, ctx))
+    html = render(request, template, ctx).content
+    html_string = html.decode('utf-8')
     html_string = html_string.replace('Content-Type: text/html; charset=utf-8', '').strip("\n")
     archive.writestr(filename, html_string)
 
@@ -180,14 +184,18 @@ def convert_template_to_html_file(archive, filename, request, template, ctx):
 def collect_common_files(tr_rec, common_files):
     common_files_path = 'videos/{}/{}/resources'.format(tr_rec.tutorial_detail.foss_id, tr_rec.tutorial_detail_id)
 
-    if tr_rec.common_content.slide_status > 0:
-        common_files.add('{}/{}'.format(common_files_path, tr_rec.common_content.slide))
+    # if tr_rec.common_content.slide_status > 0:
+    #     common_files.add('{}/{}'.format(common_files_path, tr_rec.common_content.slide))
 
     if tr_rec.common_content.assignment_status > 0 and tr_rec.common_content.assignment_status != 6:
         common_files.add('{}/{}'.format(common_files_path, tr_rec.common_content.assignment))
 
     if tr_rec.common_content.code_status > 0 and tr_rec.common_content.code_status != 6:
         common_files.add('{}/{}'.format(common_files_path, tr_rec.common_content.code))
+
+    if tr_rec.common_content.additional_material_status > 0 and tr_rec.common_content.additional_material_status != 6:
+        common_files.add('{}/{}'.format(common_files_path, tr_rec.common_content.additional_material))
+
 
 
 def add_common_files(archive, common_files):
@@ -219,14 +227,14 @@ def home(request):
         if form.is_valid():
             try:
                 zipfile_name = '{}.zip'.format(datetime.now().strftime('%Y%m%d%H%M%S%f'))
-                file_obj = open('{}cdimage/{}'.format(settings.MEDIA_ROOT, zipfile_name), 'w')
+                file_obj = open('{}cdimage/{}'.format(settings.MEDIA_ROOT, zipfile_name), 'wb')
                 archive = zipfile.ZipFile(file_obj, 'w', zipfile.ZIP_DEFLATED, allowZip64=True)
                 selectedfoss = json.loads(request.POST.get('selected_foss', {}))
                 all_foss_details = get_all_foss_details(selectedfoss)
                 eng_rec = Language.objects.get(name="English")
                 languages = set()
 
-                for key, values in selectedfoss.iteritems():
+                for key, values in list(selectedfoss.items()):
                     foss_rec = FossCategory.objects.get(pk=key)
                     level = int(values[1])
                     eng_flag = True
@@ -376,7 +384,7 @@ def ajax_show_added_foss(request):
     languages = set()
     eng_rec = Language.objects.get(name="English")
 
-    for key, values in tmp.iteritems():
+    for key, values in list(tmp.items()):
         langs_list = list(values[0])
         foss, level = FossCategory.objects.get(pk=key), int(values[1])
         langs = ', '.join(list(
@@ -424,14 +432,17 @@ def ajax_show_added_foss(request):
                 common_files_path = '{}videos/{}/{}/resources'.format(settings.MEDIA_ROOT, key,
                                                                       rec.tutorial_detail_id)
 
-                if rec.common_content.slide_status > 0:
-                    common_files.add('{}/{}'.format(common_files_path, rec.common_content.slide))
+                # if rec.common_content.slide_status > 0:
+                #     common_files.add('{}/{}'.format(common_files_path, rec.common_content.slide))
 
                 if rec.common_content.assignment_status > 0 and rec.common_content.assignment_status != 6:
                     common_files.add('{}/{}'.format(common_files_path, rec.common_content.assignment))
 
                 if rec.common_content.code_status > 0 and rec.common_content.code_status != 6:
                     common_files.add('{}/{}'.format(common_files_path, rec.common_content.code))
+
+                if rec.common_content.additional_material_status > 0 and rec.common_content.additional_material_status != 6:
+                    common_files.add('{}/{}'.format(common_files_path, rec.common_content.additional_material))
             except Exception:
                 continue
 

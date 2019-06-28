@@ -1,0 +1,72 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load creationdata %}
+{% block title %} Add/Edit Testimonial {% endblock %}
+{% block heading %}Add / Edit Testimonial {% endblock %}
+{% block search %}{% endblock %}
+{% block content %}
+<style>
+audio, canvas, progress, video {
+    display: none;
+}
+</style>
+    <div>
+        <b><p>Kindly note :</p>
+        <ul>
+            <li>Only mp4/mp3/mov file formats will be accepted.</li>
+            <li>Video/Audio duration should be less than 5 minutes.</li>
+            <li>File size should not exceed 50 MB.</li>
+        </ul></b>
+    </div>
+    <div class="row well">
+        <div class='col-sm-8'>
+            {% if form %}
+            <form action="{{ action }}" method="post" class='form-horizontal' enctype="multipart/form-data">
+                {% csrf_token %}
+                <!-- Django will take care of spiting the form. -->
+                {{ form.as_p }}
+                <div id='submit_btn'>
+                    <input class="btn btn-primary" type="submit" value="Submit" />
+                </div>
+            </form>
+            {% else %}
+                <h3>Are you sure you want to delete the testimonial?</h3>
+                <p>
+                    <dl>
+                        <dt> User Name: </dt>
+                        <dd> {{ instance.user }} </dd>
+                        <dt> Short Description: </dt>
+                        <dd> {{ instance.content }} </dd>
+                        <dt> Created: </dt>
+                        <dd> {{ instance.created }} </dd>
+                    </dl>
+                    <form action="{% url 'admin_testimonials_media_delete' instance.id %}" method="POST"> 
+                        {% csrf_token %}
+                        <input class="btn btn-danger" type="submit" value="Delete">
+                        <a class="btn btn-default" href="{% url  'admin_testimonials'  %}">Cancel</a>
+                    </form>
+                </p>
+            {% endif%}
+        </div>
+        <video class='d-none' id="st_video">
+            <source src="" />
+        </video>
+    <script>
+        var media_element_container = document.getElementById('media_element');
+        var hidden_video_container = document.getElementById('st_video');
+        var submit_btn_container = document.getElementById('submit_btn');
+        media_element_container.onchange = function () {
+            hidden_video_container.src = URL.createObjectURL(this.files[0]);
+            hidden_video_container.load();
+        };
+        hidden_video_container.onloadedmetadata = function() {
+            // To change the allowed duration of the testimonial, please manipulate the variable below(seconds). 
+            var allowed_duration = 300;
+            if (hidden_video_container.duration > allowed_duration + 5)
+                submit_btn_container.innerHTML = 'Testimonial duration should be less than ' + allowed_duration + ' seconds.'
+            else
+                submit_btn_container.innerHTML = '<input class="btn btn-primary" type="submit" value="Submit" />'
+        };
+    </script> 
+{% endblock %}

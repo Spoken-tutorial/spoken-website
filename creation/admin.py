@@ -1,4 +1,6 @@
+
 # Standard Library
+from builtins import str
 import os
 
 # Third Party Stuff
@@ -78,7 +80,7 @@ class TutorialDetailAdmin(admin.ModelAdmin):
                 str(obj.foss_id) + '/' + str(obj.id) + '/resources'
             os.makedirs(foss_dir)
         except:
-            print "Tutorial directories already exists..."
+            print("Tutorial directories already exists...")
 
 
 class ContributorRoleAdmin(admin.ModelAdmin):

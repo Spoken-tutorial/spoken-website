@@ -6,19 +6,95 @@
 {% block compressinlinecssblock %}
   <style>
     .links {
-      font-size:20px;
-      text-align:center;
+      font-size:15px;
+       text-align:center;
+    } 
+    .panel-info {
+      width: 60%; 
+      margin-left: 20%;
+      text-align: center;
     }
   </style>
 {% endblock %}
 
 {% block content %}
-  <div class= "container">
-    <ul class="nav">
-      <li class = "links">Thank you for attending workshop</li>
-      <li class = "links"><a href="{% url 'certificate:fa_workshop_download' %}" >Download Certificate for <font color="red">FrontAccounting Workshop 2017</font> here.</a></li>
-      <!--<li class = "links"><a href="{% url 'certificate:drupal_feedback' %}" >Drupal Camp Mumbai 2015</a></li>-->
-    </ul>
-  </div>
+
+<div class="container">
+  <div class="panel-group" id="accordion">
+   <!--  <div class="panel panel-info">
+      <div class="panel-heading">
+        <h4 class="panel-title">
+          <a data-toggle="collapse" data-parent="#accordion" href="#collapse1">ITP Certificates</a>
+        </h4>
+      </div>
+      <div id="collapse1" class="panel-collapse collapse">
+        <div class="panel-body">
+          <ul class="nav">
+            <li class = "links"><a href="{% url 'certificate:itp_workshop_download' %}" >Download Certificate for <font color="red">Induction Training Programme 2017</font> here.</a></li>
+          </ul>
+
+        </div>
+      </div>
+    </div> -->
+    <!-- <div class="panel panel-info">
+      <div class="panel-heading">
+        <h4 class="panel-title">
+          <a data-toggle="collapse" data-parent="#accordion" href="#collapse2">Front Accounting Workshop Certificates</a>
+        </h4>
+      </div>
+      <div id="collapse2" class="panel-collapse collapse">
+        <div class="panel-body">
+          <ul class="nav">
+            <li class = "links"><a href="{% url 'certificate:fa_workshop_download' %}" >Download Certificate for <font color="red">FrontAccounting Workshop 2017</font> here.</a></li>
+          </ul>
+        </div>
+      </div>
+    </div> -->
+    <div class="panel panel-info">
+      <div class="panel-heading">
+        <h4 class="panel-title">
+          <a data-toggle="collapse" data-parent="#accordion" href="#collapse3">Koha Workshop Certificates</a>
+        </h4>
+      </div>
+      <div id="collapse3" class="panel-collapse collapse">
+        <div class="panel-body">
+           <ul class="nav">
+            <li class = "links"><a href="{% url 'certificate:koha_coordinators_workshop_download' %}" >Download Certificate for <font color="red">Koha Coordinator Workshop : 29 September 2018</font> here.</a></li>
+
+            <li class = "links"><a href="{% url 'certificate:koha_massive_workshop_download' %}" >Download Certificate for <font color="red">Koha Main Workshop : 12 October 2018</font> here.</a></li>
+
+            <li class = "links"><a href="{% url 'certificate:koha_rc_certificate_download' %}" >Download Certificate for <font color="red">RC Co-ordinator, Koha Main Workshop : 12 October 2018 </font> here.</a></li>
+
+            <li class = "links"><a href="{% url 'certificate:koha_coordinators_workshop_download' %}" >Download Certificate for <font color="red">Koha Coordinator Workshop : 8 February 2019</font> here.</a></li>
+
+            <li class = "links"><a href="{% url 'certificate:koha_main_workshop9march_download' %}" >Download Certificate for <font color="red">Koha Main Workshop : 9 March 2019</font> here.</a></li>
+           </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel panel-info">
+      <div class="panel-heading">
+        <h4 class="panel-title">
+          <a data-toggle="collapse" data-parent="#accordion" href="#collapse4">Moodle Workshop Certificates</a>
+        </h4>
+      </div>
+      <div id="collapse4" class="panel-collapse collapse">
+        <div class="panel-body">
+           <ul class="nav">
+            <li class = "links"><a href="{% url 'certificate:moodle_coordinators_workshop_download' %}" >Download Certificate for <font color="red">Moodle Coordinator Workshop : 1 March 2019</font> here.</a></li>
+
+            <li class = "links"><a href="{% url 'certificate:moodle_massive_workshop_download' %}" >Download Certificate for <font color="red">Moodle Main Workshop : 15 March 2019</font> here.</a></li>
+           </ul>
+        </div>
+      </div>
+    </div>
+  </div> 
+</div>
+
+
+
+
+
 {% endblock %}
 

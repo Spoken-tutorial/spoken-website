@@ -61,6 +61,58 @@
         .modal-header button.close {
             padding-left: 10px;
         }
+        .st_video_container {
+            background: white;
+            width: 384px; /* Play with this value */
+            height: 216px;  /* Play with this value */
+            font-size: 0;
+            text-align: center;
+        }
+        .st_audio_container {
+            background: white;
+            width: 384px; /* Play with this value */
+            height: 50px;  /* Play with this value */
+            font-size: 0;
+            text-align: center;
+            margin-right: auto;
+            margin-left: auto;
+        }
+        .st_audio_container:before,.st_video_container:before {
+            content: "";
+            width: 1px;
+            height: 100%;
+            display: inline-block;
+            vertical-align: middle;
+            margin-left: -1px;
+        }
+        .st_audio_container .st_video {
+            max-width: 100%;
+            max-height: 100%;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .st_video_container .st_video {
+            max-width: 100%;
+            max-height: 100%;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .st_content_wrapper {
+            padding: 10px 25px;
+        }
+        @media all and (max-width: 500px) {
+            .st_video {
+                transform: translateX(calc((100vw * 0.416) - 225px));
+            }
+            .st_audio {
+                transform: translateX(calc((100vw * 0.416) - 209px));
+            }
+            .st_wrapper {
+                -webkit-box-align:center;
+                -webkit-box-pack:center;
+                display:-webkit-box;
+            }
+        }
     </style>
 {% endblock %}
 {% block heading %}{% endblock %}
@@ -70,86 +122,172 @@
         <h4 class="page-title">
             <i class="fa fa-list-ul"></i> Testimonials
         </h4>
-        {% for record in testimonials %}
-            <div class="testimonial-item">
-                <div class="testimonial-content">
-                    <img width="100" height="100" src="/static/spoken/images/no-profile-image.jpg" />
-                    <div class="message">
-                        <i class="fa fa-quote-left" style="color:#e6e6e6;"></i>{{ record.minified_content|format_raw_data|safe }} <i class="fa fa-quote-right pull-right" style="color:#e6e6e6;"></i>
-                        {% if record.minified_content != record.actual_content %}
-                            <p>
-                                <a href="#" data-toggle="modal" data-target="#myModal{{ record.id }}">
-                                    <i class="fa fa-plus-square"></i> read more
-                                </a>
-                            </p>
-                        {% else %}
-                            {% if record.source_link %}
+
+        
+        <ul class="nav nav-tabs">
+            {% if testimonial_type == "text" %}
+            <li class="active"><a href="{% url 'testimonials' testimonial_type='text' %}">Text</a></li>
+            <li><a href="{% url 'testimonials' testimonial_type='media' %}">Media</a></li>
+            {% else %}
+            <div class= 'filters row' >
+            <form action="" method="get" class='form-horizontal pull-right' id="news-foss-filter">
+                <div class="">
+                    <div class="form-group">
+                        <label for="id_foss" class="col-sm-4 control-label">Foss</label>
+                        <div class="col-sm-8">
+                            {% render_field form.foss class+="form-control foss" tabindex="1" %}
+                            {{ form.foss.errors }}
+                        </div>
+                    </div>
+                </div>
+            </form>
+            </div>
+            <li><a href="{% url 'testimonials' testimonial_type='text' %}">Text</a></li>
+            <li class="active"><a href="{% url 'testimonials' testimonial_type='media' %}">Media</a></li>
+            {% endif %}
+        </ul>
+
+        {% for record in collection %}
+            {% if record.path %}
+            
+            <!-- formatismp4 checks if the format is mp4, returns True for mp4 and false for all others -->
+                {% if record.path|formatismp4 %}
+                <div class="testimonial-item">
+                    <div class="row testimonial-content">
+                        <div class='st_wrapper col-xs-12 col-md-7'>
+                            <div class='st_video_container'>
+                                <video class="st_video" title='{{ record.foss.foss }}' controls preload data-setup="{}">
+                                <source src="{{ media_url }}{{ record.path }}" type="video/mp4" />
+                                </video>
+                            </div>
+                        </div>
+                        <div class='col-xs-12 col-md-4 col-lg-5 col-md-offset-1 col-lg-offset-0'>
+                            <i class="fa fa-quote-left" style="color:#e6e6e6;"></i>
+                            <p class='st_wrapper'> {{ record.content }} </p>
+                            <i class="fa fa-quote-right pull-right" style="color:#e6e6e6;"></i>
+                        </div>
+                    </div>
+                    <div class="testimonials-details">
+                        <div class="testimonials-caret"></div>
+                        <div class="user-details"><b>{{record.foss.foss}}</b> : {{ record.user }}</div>
+                        <div class="user-details"><b>Details</b> : {{record.workshop_details}}</div>
+                    </div>
+                </div>
+                {% else %}
+                    <div class="testimonial-item">
+                        <div class="testimonial-content">
+                            <div class='st_content_wrapper row'>
+                                <i class="fa fa-quote-left" style="color:#e6e6e6;"></i>
+                                <p class='st_wrapper'> {{ record.content }} </p>
+                                <i class="fa fa-quote-right pull-right" style="color:#e6e6e6;"></i>
+                            </div>
+                            <div class='row'>
+                                <div class='st_audio_container'>
+                                    <audio class="st_audio" title='{{ record.foss.foss }}' controls preload data-setup="{}">
+                                    <source src="{{ media_url }}{{ record.path }}" type="video/mp4" />
+                                    </audio>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="testimonials-details">
+                            <div class="testimonials-caret"></div>
+                            <div class="user-details"><b>{{record.foss.foss}}</b> : {{ record.user }}</div>
+                            <div class="user-details"><b>Details</b> : {{record.workshop_details}}</div>
+                        </div>
+                    </div>                
+                {% endif %}
+            {% else %}
+                <div class="testimonial-item">
+                    <div class="testimonial-content">
+                        <img width="100" height="100" src="/static/spoken/images/no-profile-image.jpg" />
+                        <div class="message">
+                            <i class="fa fa-quote-left" style="color:#e6e6e6;"></i>{{ record.minified_content|format_raw_data|safe }} <i class="fa fa-quote-right pull-right" style="color:#e6e6e6;"></i>
+                            {% if record.minified_content != record.actual_content %}
                                 <p>
-                                    <i class="fa fa-link fa-1"></i> 
-                                    <a href="{{ record.source_link }}" target="_blank">
-                                        {% if record.source_title %}
-                                            {{ record.source_title }}
-                                        {% else %}
-                                            {{ record.source_link }}
-                                        {% endif %}
+                                    <a href="#" data-toggle="modal" data-target="#myModal{{ record.id }}">
+                                        <i class="fa fa-plus-square"></i> read more
                                     </a>
                                 </p>
-                            {% endif %}
-                        {% endif %}
-                    </div>
-                </div>
-                <div class="testimonials-details">
-                     <div class="testimonials-caret"></div>
-                    <div class="user-details">
-                        {% if record.user_name %}
-                            {{ record.user_name }}
-                        {% elif record.user.first_name %}
-                            {{ record.user.first_name }}
-                        {% else %}
-                            {{ record.user.username }}
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-            {% if record.minified_content != record.actual_content %}
-            <div class="modal fade" id="myModal{{ record.id }}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h4 class="modal-title" id="myModalLabel">
-                                {% if record.user_name %}
-                                    {{ record.user_name }}
-                                {% elif record.user.first_name %}
-                                    {{ record.user.first_name }}
-                                {% else %}
-                                    {{ record.user.username }}
+                            {% else %}
+                                {% if record.source_link %}
+                                    <p>
+                                        <i class="fa fa-link fa-1"></i> 
+                                        <a href="{{ record.source_link }}" target="_blank">
+                                            {% if record.source_title %}
+                                                {{ record.source_title }}
+                                            {% else %}
+                                                {{ record.source_link }}
+                                            {% endif %}
+                                        </a>
+                                    </p>
                                 {% endif %}
-                            </h4>
-                        </div>
-                        <div class="modal-body">
-                            {{ record.actual_content|format_raw_data|safe }}
-                            {% if record.source_link %}
-                                <p>
-                                    <i class="fa fa-link fa-1"></i> 
-                                    <a href="{{ record.source_link }}" target="_blank">
-                                        {% if record.source_title %}
-                                            {{ record.source_title }}
-                                        {% else %}
-                                            {{ record.source_link }}
-                                        {% endif %}
-                                    </a>
-                                </p>
                             {% endif %}
                         </div>
-                        <div class="modal-footer">
-                            <!--<button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>-->
-                            <button type="button" class="close" data-dismiss="modal"><i class="fa fa-close"></i></button>
+                    </div>
+                    <div class="testimonials-details">
+                        <div class="testimonials-caret"></div>
+                        <div class="user-details">
+                            {% if record.user_name %}
+                                {{ record.user_name }}
+                            {% elif record.user.first_name %}
+                                {{ record.user.first_name }}
+                            {% else %}
+                                {{ record.user.username }}
+                            {% endif %}
                         </div>
                     </div>
                 </div>
-            </div>
+                {% if record.minified_content != record.actual_content %}
+                <div class="modal fade" id="myModal{{ record.id }}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h4 class="modal-title" id="myModalLabel">
+                                    {% if record.user_name %}
+                                        {{ record.user_name }}
+                                    {% elif record.user.first_name %}
+                                        {{ record.user.first_name }}
+                                    {% else %}
+                                        {{ record.user.username }}
+                                    {% endif %}
+                                </h4>
+                            </div>
+                            <div class="modal-body">
+                                {{ record.actual_content|format_raw_data|safe }}
+                                {% if record.source_link %}
+                                    <p>
+                                        <i class="fa fa-link fa-1"></i> 
+                                        <a href="{{ record.source_link }}" target="_blank">
+                                            {% if record.source_title %}
+                                                {{ record.source_title }}
+                                            {% else %}
+                                                {{ record.source_link }}
+                                            {% endif %}
+                                        </a>
+                                    </p>
+                                {% endif %}
+                            </div>
+                            <div class="modal-footer">
+                                <!--<button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>-->
+                                <button type="button" class="close" data-dismiss="modal"><i class="fa fa-close"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
             {% endif %}
         {% endfor %}
     </div>
+{% endblock %}
+{% block compressinlinejsblock %}
+    <script>
+        
+        $(function(){
+            $('#id_foss').change(function(){
+                $("#news-foss-filter").submit()
+            });
+            
+        });
+    </script>
 {% endblock %}
 

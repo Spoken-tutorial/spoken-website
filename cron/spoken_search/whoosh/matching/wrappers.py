@@ -25,7 +25,7 @@
 # those of the authors and should not be interpreted as representing official
 # policies, either expressed or implied, of Matt Chaput.
 
-from __future__ import division
+
 
 from whoosh.compat import xrange
 from whoosh.matching import mcore
@@ -94,8 +94,8 @@ class WrappingMatcher(mcore.Matcher):
     def skip_to(self, id):
         return self.child.skip_to(id)
 
-    def next(self):
-        self.child.next()
+    def __next__(self):
+        next(self.child)
 
     def supports_block_quality(self):
         return self.child.supports_block_quality()
@@ -206,11 +206,11 @@ class MultiMatcher(mcore.Matcher):
     def value_as(self, astype):
         return self.matchers[self.current].value_as(astype)
 
-    def next(self):
+    def __next__(self):
         if not self.is_active():
             raise mcore.ReadTooFar
 
-        self.matchers[self.current].next()
+        next(self.matchers[self.current])
         if not self.matchers[self.current].is_active():
             self._next_matcher()
 
@@ -300,14 +300,14 @@ class FilterMatcher(WrappingMatcher):
 
         if self._exclude:
             while child.is_active() and child.id() in ids:
-                r = child.next() or r
+                r = next(child) or r
         else:
             while child.is_active() and child.id() not in ids:
-                r = child.next() or r
+                r = next(child) or r
         return r
 
-    def next(self):
-        self.child.next()
+    def __next__(self):
+        next(self.child)
         self._find_next()
 
     def skip_to(self, id):
@@ -389,7 +389,7 @@ class InverseMatcher(WrappingMatcher):
 
             if self._id == child.id():
                 self._id += 1
-                child.next()
+                next(child)
                 continue
 
             break
@@ -400,7 +400,7 @@ class InverseMatcher(WrappingMatcher):
     def all_ids(self):
         return mcore.Matcher.all_ids(self)
 
-    def next(self):
+    def __next__(self):
         if self._id >= self.limit:
             raise mcore.ReadTooFar
         self._id += 1

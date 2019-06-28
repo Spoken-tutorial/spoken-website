@@ -128,7 +128,7 @@ class ListCorrector(Corrector):
         from whoosh.automata.fsa import find_all_matches
 
         seen = set()
-        for i in xrange(1, maxdist + 1):
+        for i in range(1, maxdist + 1):
             dfa = levenshtein_automaton(text, maxdist, prefix).to_dfa()
             sk = self.Skipper(self.wordlist)
             for sug in find_all_matches(dfa, sk):
