@@ -39,20 +39,6 @@ export class CreateScriptService {
     );
     return ls;
   }
-  
-  public getComment(tid){
-    const _url = `${this.apiUrl}/scripts/${tid}/comments/`
-    return this.httpClient.get(_url);
-  }
-
-  public postComment(tid,data) {
-    const _url = `${this.apiUrl}/scripts/${tid}/comments/`
-    var ls = this.httpClient.post(
-      _url,
-      data
-    );
-    return ls;
-  }
 
   constructor(private httpClient: HttpClient) { }
 }
