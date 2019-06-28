@@ -23,10 +23,13 @@ export class ScriptViewComponent implements OnInit {
   public slideIdRev: number;
   public index: number = 0;
   public index2: number = 0;
+  public overVal:boolean[]=[false];
   @Input() nav: any;
   @ViewChild('tableRow') el: ElementRef;
   @ViewChild('newmodal') el2: ElementRef;
-
+  public mystyle={
+    // display:hidden,
+  }
   constructor(
     private route: ActivatedRoute,
     public createscriptService: CreateScriptService,
@@ -34,6 +37,12 @@ export class ScriptViewComponent implements OnInit {
     public revisionsService: RevisionsService,
     private rd: Renderer2
   ) { }
+  public mouseenter(i){
+    this.overVal[i]=true;
+  }
+  public mouseleave(i){
+    this.overVal[i]=false;
+  }
 
   public viewScript() {
     this.createscriptService.getScript(

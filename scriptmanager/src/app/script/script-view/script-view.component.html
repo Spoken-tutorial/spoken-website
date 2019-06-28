@@ -54,19 +54,25 @@
               <tr>
                 <th>Sr. No.</th>
                 <th>Visual Cue</th>
-                <th>Narration</th>
-                <th>Comments</th>
+                <th>Narration 7</th>
+                <!-- <th>Comments</th> -->
               </tr>
               <tbody *ngFor="let slide of slides; let i = index">
-                <tr>
+                <tr (mouseenter)='mouseenter(i)' (mouseleave)="mouseleave(i)">
                   <td>{{ i+1 }}</td>
                   <td class="content" innerHTML="{{ slide.cue }}"></td>
                   <td class="content" innerHTML="{{ slide.narration }}"></td>
-                  <td>
-                    <button class="button heading" (click)="viewComment(i)">Show/Hide</button>
-                    <button class="button heading" (click)="viewRevision(slide.id)">Revisions</button>
-                  </td>
+                    <div *ngIf="overVal[i]" [style]="mystyle">
+                      <button class="button heading" (click)="viewComment(i)">
+                        <i class="fa fa-comments" aria-hidden="true"></i>
+                      </button>
+                      <button class="button heading" (click)="viewRevision(slide.id)">
+                        <i class="fa fa-history"></i>
+                      </button>
+                    </div>
+              
                 </tr>
+              
               </tbody>
             </table>
           </div>
