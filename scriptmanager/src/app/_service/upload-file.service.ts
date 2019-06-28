@@ -13,8 +13,9 @@ export class UploadFileService {
 
   public postFile(tid, file) {
     this.testData.append('docs', file);
-    const _url = `${this.apiUrl}/tutorial/${tid}/scripts/docs/`
-    return this.http.post(_url, this.testData);
+    this.testData.append('type','file');
+    const _url = `${this.apiUrl}/tutorial/${tid}/scripts/`
+    return this.http.post(_url,this.testData)
   }
 
   constructor(public http: HttpClient) { }

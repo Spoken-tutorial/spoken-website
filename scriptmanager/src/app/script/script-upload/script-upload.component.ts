@@ -30,9 +30,9 @@ export class ScriptUploadComponent implements OnInit {
     public createScriptService: CreateScriptService
   ) { }
 
-  public onFileSave(file: any) {
-    console.log(file)
-    this.uploadfileService.postFile(this.id, file)
+  public onFileSave() {
+    console.log(this.scriptFile)
+    this.uploadfileService.postFile(this.id, this.scriptFile)
       .subscribe(
         (res) => {
           this.router.navigateByUrl("/view/" + this.id + "/" + this.tutorialName);
