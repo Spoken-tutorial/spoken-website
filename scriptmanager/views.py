@@ -48,16 +48,26 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
   def scriptsData(self, html,script):
     soup=BeautifulSoup(html,'html.parser')
     table=soup.find("table") 
+    if(table.find("tbody")):
+      table=table.find("tbody")
+    
+    # print(table)
     details=[]
-    count=-1
+    count=0
+    # print(table.find_all('tr'))
+
     for row in table.find_all('tr'):
       count+=1
-      columns=row.find_all('td')
+      if row.find_all("th"):
+        columns = row.find_all('th')
+      elif row.find_all('td'):  
+        columns = row.find_all('td')
+        
       try:
         details.append({"order": count,"cue": str(columns[0]),"narration": str(columns[1]),"script":script.pk})
       except:
         continue
-    details.pop(0)
+    # details.pop(0)
     return details
       
   def create(self, request,tid):
@@ -90,7 +100,7 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
       
       elif (type=="template"):
         data=request.data['details']
-        details=self.scriptsData(data)
+        details=self.scriptsData(data,script)
 
       serialized  =  ScriptsDetailSerializer(data  =  details,many  =  True) #inserting a details array without iterating
       if serialized.is_valid():
