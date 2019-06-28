@@ -32,7 +32,8 @@ export class ScriptCreateComponent implements OnInit {
       this.createscriptService.postScript(
         this.id,
         {
-          "details": script
+          "details": script,
+          "type" : 'form'
         }
       ).subscribe(
         (res) => {

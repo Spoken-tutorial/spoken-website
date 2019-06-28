@@ -22,7 +22,6 @@
 
           <br><br>
 
-
           <div class="file has-name is-boxed is-centered">
             <label class="file-label">
               <input class="file-input" type="file" (change)="onFileChange($event)" />
@@ -44,11 +43,10 @@
 
           <div class="file is-centered">
             <a *ngIf="uploadButton" class="button is-info" (click)="onFileSave()"><i class="fa fa-upload"></i>&nbsp;
-              Upload
-              Script</a>
+              Upload Script</a>
           </div>
 
-          <div class="is-divider" style="divider-thickness:$size-4" data-content="OR"></div>
+          <div class="is-divider" data-content="OR"></div>
           <br />
 
           <form [formGroup]="editorForm">
