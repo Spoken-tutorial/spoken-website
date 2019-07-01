@@ -25,6 +25,7 @@
     <div class="columns is-mobile">
 
       <div class="column is-8">
+
         <div #newmodal class="modal">
           <div class="modal-background"></div>
           <div class="modal-content">
@@ -37,9 +38,6 @@
                 <tr>
                   <td innerHTML="<strong>Cue :</strong> {{ revisions[index2]['cue'] }}"></td>
                   <td innerHTML="<strong>Narration :</strong>{{ revisions[index2]['narration'] }}"></td>
-                </tr>
-                <tr class="break">
-                  <td colspan="2"></td>
                 </tr>
               </tbody>
             </table>
@@ -55,18 +53,23 @@
                 <th>Sr. No.</th>
                 <th>Visual Cue</th>
                 <th>Narration</th>
-                <th>Comments</th>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
               </tr>
               <tbody *ngFor="let slide of slides; let i = index">
-                <tr>
+                <tr (mouseenter)='mouseenter(i)' (mouseleave)="mouseleave(i)">
                   <td>{{ i+1 }}</td>
                   <td class="content" innerHTML="{{ slide.cue }}"></td>
                   <td class="content" innerHTML="{{ slide.narration }}"></td>
-                  <td>
-                    <button class="button heading" (click)="viewComment(i)">Show/Hide</button>
-                    <button class="button heading" (click)="viewRevision(slide.id)">Revisions</button>
+                  <td *ngIf="overVal[i]" [style]="mystyle">
+                    <button class="button heading" (click)="viewComment(i)">
+                      <i class="fa fa-comments"></i>
+                    </button>
+                    <button class="button heading" (click)="viewRevision(slide.id)">
+                      <i class="fa fa-history"></i>
+                    </button>
                   </td>
                 </tr>
+
               </tbody>
             </table>
           </div>

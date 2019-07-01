@@ -23,10 +23,13 @@ export class ScriptViewComponent implements OnInit {
   public slideIdRev: number;
   public index: number = 0;
   public index2: number = 0;
+  public overVal:boolean[]=[false];
   @Input() nav: any;
   @ViewChild('tableRow') el: ElementRef;
   @ViewChild('newmodal') el2: ElementRef;
-
+  public mystyle={
+    // display:hidden,
+  }
   constructor(
     private route: ActivatedRoute,
     public createscriptService: CreateScriptService,
@@ -34,6 +37,12 @@ export class ScriptViewComponent implements OnInit {
     public revisionsService: RevisionsService,
     private rd: Renderer2
   ) { }
+  public mouseenter(i){
+    this.overVal[i]=true;
+  }
+  public mouseleave(i){
+    this.overVal[i]=false;
+  }
 
   public viewScript() {
     this.createscriptService.getScript(
@@ -71,11 +80,17 @@ export class ScriptViewComponent implements OnInit {
     if (this.slideId != this.slides[i]['id']) {
       this.slideId = this.slides[i]['id']
       this.getComment();
+      if (this.revision == true) {
+        this.revision = false;
+      }
       this.comment = true;
       this.el.nativeElement.querySelectorAll('tr')[i + 1].classList.add('is-selected')
     }
     else {
       if (this.comment == false) {
+        if (this.revision == true) {
+          this.revision = false;
+        }
         this.comment = true;
         this.el.nativeElement.querySelectorAll('tr')[i + 1].classList.add('is-selected')
       }
@@ -87,9 +102,7 @@ export class ScriptViewComponent implements OnInit {
   }
 
   public viewModal(index) {
-    // console.log(this.revisions[this.index2]['date_time'])
     this.index2 = index
-    // console.log(index)
     this.el2.nativeElement.classList.add('is-active')
   }
 
@@ -114,10 +127,16 @@ export class ScriptViewComponent implements OnInit {
     if (this.slideIdRev != i) {
       this.slideIdRev = i
       this.getRevison(i);
+      if (this.comment == true) {
+        this.comment = false;
+      }
       this.revision = true;
     }
     else {
       if (this.revision == false) {
+        if (this.comment == true) {
+          this.comment = false;
+        }
         this.revision = true;
       }
       else {
@@ -131,7 +150,6 @@ export class ScriptViewComponent implements OnInit {
       this.id = +params['id'];
     });
     this.viewScript();
-    
     this.tutorialName = this.route.snapshot.params['tutorialName']
   }
 
