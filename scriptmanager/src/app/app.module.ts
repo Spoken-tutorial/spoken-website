@@ -19,6 +19,8 @@ import { ScriptCommentComponent } from './script/script-comment/script-comment.c
 import { CKEditorModule } from '@ckeditor/ckeditor5-angular';
 import { ScriptRevisionComponent } from './script/script-revision/script-revision.component';
 import { ScriptUploadComponent } from './script/script-upload/script-upload.component';
+import { NgxDiffModule } from 'ngx-diff';
+import { NgxTextDiffModule } from 'ngx-text-diff';
 
 export function tokenGetter() {
   const token = localStorage.getItem('token');
@@ -56,7 +58,9 @@ export function tokenGetter() {
     ReactiveFormsModule,
     NgHttpLoaderModule.forRoot(),
     SweetAlert2Module.forRoot(),
-    CKEditorModule
+    CKEditorModule,
+    NgxDiffModule,
+    NgxTextDiffModule
   ],
   providers: [],
   bootstrap: [AppComponent]
