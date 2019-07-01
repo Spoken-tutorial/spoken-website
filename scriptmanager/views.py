@@ -11,6 +11,7 @@ import os
 from django.core.files.storage import FileSystemStorage
 from bs4 import BeautifulSoup
 from datetime import datetime
+import time
 
 def index(request):
   jwt_payload_handler  =  api_settings.JWT_PAYLOAD_HANDLER
@@ -80,18 +81,25 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
         for item in details:
           item.update( {"script":script.pk})
 
-
       elif(type=='file'):
         myfile=request.FILES['docs']
         fs = FileSystemStorage()
         filename = fs.save(myfile.name, myfile)
-        file=os.getcwd()+'/media/'+filename
-        os.system('libreoffice --convert-to html '+file)
+        doc_file=os.getcwd()+'/media/'+filename
+        os.system('libreoffice --convert-to html '+doc_file)
         html_file=os.path.splitext(os.getcwd()+'/'+filename)[0]+'.html'
-        time.sleep(.4)  #time to convert the file to html
+        run_time=0
+        html=0
+        while run_time < 3:
+          try:
+            html = open(html_file,'r')
+            break
+          except:
+            time.sleep(.4)
+            run_time+=.4
         html = open(html_file,'r')
         details=self.scriptsData(html,script)
-        os.system('rm '+ file + ' '+html_file)
+        os.system('rm '+ doc_file + ' '+html_file)
       
       elif (type=="template"):
         data=request.data['details']
