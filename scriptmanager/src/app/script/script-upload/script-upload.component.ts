@@ -80,7 +80,6 @@ export class ScriptUploadComponent implements OnInit {
     else {
       this.scriptFileName = "Only docx/doc/odt supported";
       this.uploadButton = false;
-      // console.log("file upsupported")
     }
 
   }
@@ -134,7 +133,6 @@ export class ScriptUploadComponent implements OnInit {
       this.id = +params['id'];
     });
     this.tutorialName = this.route.snapshot.params['tutorialName']
-
     this.editorForm = new FormGroup({
       'data': new FormControl()
     })
