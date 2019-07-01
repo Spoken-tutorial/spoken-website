@@ -77,12 +77,12 @@ urlpatterns = [
 
     # Common to Domain & Admin reviewer parts
     # Additional Views Created for Payment Module
-    url(r'payment/tutorials/$',  list_all_published_tutorials, name="list_all_published_tutorials"),
-    url(r'payment/ajax/languages/$',  load_languages, name="load_languages"),
-    url(r'payment/ajax/fosses/$',  load_fosses, name="load_fosses"),
-    url(r'payment/due/$',  list_all_due_tutorials, name="payment_due_tutorials"),
-    url(r'payment/honorarium/$',  list_payment_honorarium, name="payment_honorarium_list"),
-    url(r'payment/honorarium/detail/(\d+)/$',  detail_payment_honorarium, name="payment_honorarium_detail"),
+    url(r'payment/tutorials/$', list_all_published_tutorials, name="list_all_published_tutorials"),
+    url(r'payment/ajax/languages/$', load_languages, name="load_languages"),
+    url(r'payment/ajax/fosses/$', load_fosses, name="load_fosses"),
+    url(r'payment/due/$', list_all_due_tutorials, name="payment_due_tutorials"),
+    url(r'payment/honorarium/$', list_payment_honorarium, name="payment_honorarium_list"),
+    url(r'payment/honorarium/detail/(\d+)/$', detail_payment_honorarium, name="payment_honorarium_detail"),
 
     url(r'^accept-all/(\w+)/(\d+)/$', accept_all, name="accept_all"),
     url(r'^delete-notification/(\w+)/(\d+)/$', delete_creation_notification, name="delete_creation_notification"),

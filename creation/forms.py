@@ -993,11 +993,11 @@ class PublishedTutorialFilterForm(forms.Form):
         # widget = forms.Select(attrs={'class': 'form-control'})
     )
     foss = forms.ChoiceField(
-        choices = ['','--- Select FOSS ---'],
+        choices = ['', '--- Select FOSS ---'],
         required = False,
     )
     language = forms.ChoiceField(
-        choices = ['','--- Select Language ---'],
+        choices = ['', '--- Select Language ---'],
         required = False,
     )
     start_date = forms.DateField(
@@ -1011,8 +1011,8 @@ class PublishedTutorialFilterForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super(PublishedTutorialFilterForm, self).__init__(*args, **kwargs)
-        #populating contributor select choices
-        contributor_list = list(TutorialResource.objects.filter(script_user__groups__in = [5,]).order_by('script_user__first_name').distinct()
+        # populating contributor select choices
+        contributor_list = list(TutorialResource.objects.filter(script_user__groups__in = [5, ]).order_by('script_user__first_name').distinct()
             .values_list('script_user', 'script_user__first_name', 'script_user__last_name')
         )
         c_list = []
@@ -1025,16 +1025,16 @@ class PublishedTutorialFilterForm(forms.Form):
         contributor_list.insert(0, ('', '--- Select Contributor ---'))
         self.fields['contributor'].choices = contributor_list
 
-        #populating FOSS select choices
+        # populating FOSS select choices
         foss_list = list(FossCategory.objects.distinct().
-            values_list('id','foss')
+            values_list('id', 'foss')
         )
         foss_list.insert(0, ('', '--- Select FOSS ---'))
         self.fields['foss'].choices = foss_list
 
-        #Populating Language select choices
+        # Populating Language select choices
         language_list = list(Language.objects.distinct().
-            values_list('id','name')
+            values_list('id', 'name')
         )
         language_list.insert(0, ('', '--- Select Language ---'))
         self.fields['language'].choices = language_list
@@ -1048,13 +1048,13 @@ class PublishedTutorialFilterForm(forms.Form):
 
 class PaymentHonorariumFilterForm(forms.Form):
     contributor = forms.ChoiceField(
-        choices = ['','--- Select Contributor ---'],
+        choices = ['', '--- Select Contributor ---'],
         required = False,
         # widget = forms.Select(attrs={'class': 'form-control'})
     )
     status = forms.ChoiceField(
         choices = (
-            ['','--- Select Status ---'],
+            ['', '--- Select Status ---'],
             [1, 'In Process'],
             [2, 'Forwarded'],
             [3, 'Completed'],
@@ -1070,15 +1070,15 @@ class PaymentHonorariumFilterForm(forms.Form):
     end_date = forms.DateField(
         required=False,
         widget = forms.DateInput(attrs={'placeholder': 'yyyy-mm-dd'}),
-    )    
+    )
 
     def __init__(self, *args, **kwargs):
         super(PaymentHonorariumFilterForm, self).__init__(*args, **kwargs)
-        #populating contributor select choices
+        # populating contributor select choices
         contributor_list = list(TutorialPayment.objects.filter(status = 2).distinct()
             .values_list('user', 'user__first_name', 'user__last_name')
         )
-        contributor_list = [(contributor[0], contributor[1]+" "+contributor[2]) for contributor in contributor_list]        
+        contributor_list = [(contributor[0], contributor[1] + " " + contributor[2]) for contributor in contributor_list]
         contributor_list.insert(0, ('', '--- Select Contributor ---'))
         self.fields['contributor'].choices = contributor_list
 

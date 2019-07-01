@@ -1129,7 +1129,7 @@ def tutorials_contributed(request):
                 12: SortableHeader('Prerequisite', False, '', 'col-center'),
                 13: SortableHeader('Keywords', False, '', 'col-center'),
                 14: SortableHeader('Status', False),
-                15: SortableHeader('Payment Status', False, '','col-center'),
+                15: SortableHeader('Payment Status', False, '', 'col-center'),
             }
             tmp_recs = get_sorted_list(request, tmp_recs, header, raw_get_data)
             ordering = get_field_index(raw_get_data)
@@ -2838,11 +2838,12 @@ def update_assignment(request):
     context.update(csrf(request))
     return render(request, 'creation/templates/update_assignment.html', context)
 
+
 @login_required
 def list_all_published_tutorials(request):
     form = PublishedTutorialFilterForm(request.GET)
     # status = 1 for published and script_user__groups = 5 for external contributors
-    tr_pub = TutorialResource.objects.filter(status = 1, script_user__groups__in = [5,]) 
+    tr_pub = TutorialResource.objects.filter(status = 1, script_user__groups__in = [5, ]) 
     if form.is_valid():
         start_date = form.cleaned_data['start_date']
         end_date = form.cleaned_data['end_date']
@@ -2859,13 +2860,13 @@ def list_all_published_tutorials(request):
             tr_pub = tr_pub.filter(tutorial_detail__foss_id = foss)
         if language:
             tr_pub = tr_pub.filter(language = language)
-    #generating summary out of filtered tutorials
+    # generating summary out of filtered tutorials
     payment_summary = tr_pub.values('script_user', 'script_user__first_name', 'script_user__last_name').annotate(published_tuorial = Count('script_user'))
     tr_pub_count = tr_pub.count() # counting number of tutorial published
     payment_summary_count = payment_summary.count() # number of contributors
-    
+
     tr_pub = tr_pub.order_by('-publish_at') # ordering latest first
-    #pagination
+    # pagination
     page = request.GET.get('page')
     tr_pub = get_page(tr_pub, page, 10)
     context = {
@@ -2879,7 +2880,8 @@ def list_all_published_tutorials(request):
     }
     return render(request, 'creation/templates/list_all_published_tutorials.html', context)
 
-#Views for ajax response to payment view
+
+# Views for ajax response to payment view
 def load_languages(request):
     """
     Dynamicly loads language list for all published tutorial filterset
@@ -2888,12 +2890,12 @@ def load_languages(request):
     user_id = request.GET.get('contributor')
     existing_language = request.GET.get('language')
     if foss_id == "":
-        language_list = Language.objects.distinct().values_list('id','name')
+        language_list = Language.objects.distinct().values_list('id', 'name')
     elif user_id == "":
-        language_list = TutorialResource.objects.filter(tutorial_detail__foss_id = foss_id).values_list('language','language__name').distinct()
+        language_list = TutorialResource.objects.filter(tutorial_detail__foss_id = foss_id).values_list('language', 'language__name').distinct()
     else:
-        language_list = TutorialResource.objects.filter(tutorial_detail__foss_id = foss_id, script_user = user_id).values_list('language','language__name').distinct()
-    return render(request,'creation/templates/language_dropdown_list_options.html',{'language_list':language_list, 'existing_language': existing_language})
+        language_list = TutorialResource.objects.filter(tutorial_detail__foss_id = foss_id, script_user = user_id).values_list('language', 'language__name').distinct()
+    return render(request, 'creation/templates/language_dropdown_list_options.html', {'language_list': language_list, 'existing_language': existing_language})
 
 def load_fosses(request):
     """
@@ -2905,8 +2907,9 @@ def load_fosses(request):
         foss_list = FossCategory.objects.distinct().values_list('id','foss')
     else:
         foss_id_list = TutorialResource.objects.filter(script_user = user_id).values_list('tutorial_detail__foss_id').distinct()
-        foss_list = FossCategory.objects.filter(id__in = foss_id_list).values_list('id','foss')
-    return render(request, 'creation/templates/foss_dropdown_list_options.html',{'foss_list': foss_list, 'existing_foss': existing_foss})
+        foss_list = FossCategory.objects.filter(id__in = foss_id_list).values_list('id', 'foss')
+    return render(request, 'creation/templates/foss_dropdown_list_options.html', {'foss_list': foss_list, 'existing_foss': existing_foss})
+
 
 @login_required
 def list_all_due_tutorials(request):
@@ -2936,10 +2939,10 @@ def create_payment_instance(request, tr_res):
     Input -> TutorialResourceObject
     Do -> Create TutorialPayment objects
     '''
-    # getting video time 
+    # getting video time
     tr_video_path = settings.MEDIA_ROOT + "videos/" + str(tr_res.tutorial_detail.foss_id) + "/" + str(tr_res.tutorial_detail_id) + "/" + tr_res.video
     tr_video_info = get_video_info(tr_video_path)
-    tr_video_duration = tr_video_info.get('total',0)
+    tr_video_duration = tr_video_info.get('total', 0)
     try:
         if tr_res.script_user == tr_res.video_user:
             if is_external_contributor(tr_res.script_user):
@@ -2973,6 +2976,7 @@ def create_payment_instance(request, tr_res):
     except IntegrityError as e:
         messages.error(request, " Tutorial already in payment process.")
 
+
 def initiate_payment(request):
     user_id = request.POST.get('user')
     tr_pay_ids = request.POST.getlist('selected_tutorialpayments')
@@ -2995,9 +2999,10 @@ def initiate_payment(request):
         foss = tr_pay.tutorial_resource.tutorial_detail.foss.foss
         manager = request.user.first_name+" "+request.user.last_name # currrent logged in user - manager
         generate_honorarium_receipt(honorarium.code, contributor, foss, honorarium.amount, manager, tutorials)
-        messages.success(request,"Payment Honorarium (#"+str(honorarium.code)+") worth Rs. \
+        messages.success(request, "Payment Honorarium (#"+str(honorarium.code)+") worth Rs. \
             "+str(amount)+" for contributor "+user.first_name+" "+user.last_name+" initiated for \
             "+str(len(tr_pay_ids))+" tutorials")
+
 
 @login_required
 def list_payment_honorarium(request):
@@ -3011,7 +3016,7 @@ def list_payment_honorarium(request):
         if "change_status" in request.POST:
             try:
                 msg_end = ''
-                honorarium_id = request.POST.get('id',0)
+                honorarium_id = request.POST.get('id', 0)
                 honorarium = PaymentHonorarium.objects.get(id = honorarium_id)
                 hr_st = honorarium.status
                 if hr_st == 1:
@@ -3028,14 +3033,14 @@ def list_payment_honorarium(request):
                         +str(honorarium.amount)+" for "+str(len(honorarium.tutorials.all())) \
                         +" tutorials credited. Kindly confirm in tutorials contributed section."
                     )
-                messages.success(request,'Payment Honorarium (#'+str(honorarium.code)+') worth Rs. '+str(honorarium.amount)+' '+msg_end)
+                messages.success(request, 'Payment Honorarium (#'+str(honorarium.code)+') worth Rs. '+str(honorarium.amount)+' '+msg_end)
                 honorarium.save()
             except Exception as e:
                 messages.warning(request, "Something went wrong. Couldn't complete your request")  
             # to avoid form resubmission
             return HttpResponseRedirect(reverse('creation:payment_honorarium_list'))
 
-    honorariums = PaymentHonorarium.objects.order_by('status','-updated')
+    honorariums = PaymentHonorarium.objects.order_by('status', '-updated')
     # filtering honorarium result         
     form = PaymentHonorariumFilterForm(request.GET)
     if request.method == "GET":
@@ -3055,15 +3060,16 @@ def list_payment_honorarium(request):
             if e_date:
                 honorariums = honorariums.filter(updated__lte = e_date)
 
-    #pagination
+    # pagination
     page = request.GET.get('page')
     honorariums = get_page(honorariums, page, 20)
     context = {
         'honorariums': honorariums,
         'collection': honorariums, # for pagination
-        'form':form
+        'form': form
     }
-    return render(request, "creation/templates/list_all_payment_honorarium.html",context)
+    return render(request, "creation/templates/list_all_payment_honorarium.html", context)
+
 
 @login_required
 def detail_payment_honorarium(request, hr_id):
@@ -3081,13 +3087,13 @@ def detail_payment_honorarium(request, hr_id):
             if "confirm" in request.POST:
                 hr.status = 4
                 hr.save()
-                messages.success(request,"Payment Honorarium (#"+hr.code+") confirmed as recieved.")
-                next_url = request.GET.get("next",reverse('creation:creationhome'))
+                messages.success(request, "Payment Honorarium (#"+hr.code+") confirmed as recieved.")
+                next_url = request.GET.get("next", reverse('creation:creationhome'))
                 return HttpResponseRedirect(next_url)
         context = {
             'pay_hr': hr,
         }
-        return render(request,'creation/templates/detail_payment_honorarium.html',context)
+        return render(request, 'creation/templates/detail_payment_honorarium.html', context)
     else:
         # user not associated with pay_hr
         raise PermissionDenied()
@@ -3156,7 +3162,7 @@ def generate_honorarium_receipt(code, contributor, foss, amount, manager, tutori
         Generates honorarium receipts in docx format based on existing template using python-docx 0.8.6 ( https://python-docx.readthedocs.io/en/stable/ )
     """
     doc = Document('media/hr-receipts/honorarium-receipt-template.docx')
-    #doc = Document()
+    # doc = Document()
     for table in doc.tables:
         for index, tut in enumerate(tutorials, 1):
             row_cells = table.add_row().cells
