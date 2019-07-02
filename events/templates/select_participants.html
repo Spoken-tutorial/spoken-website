@@ -122,7 +122,7 @@
                   | <a href="{% url 'eventsv2:training_certificate' training.id %}">Download Participation Certificate</a> | 
 
                  {% elif training.is_learners_allowed and training.get_partipants_from_attendance and training.cert_status == 0%}
-                  | <a href="{% url 'eventsv2:request_certificate' training.id %}">Genearte Participation Certificate</a> |
+                  | <a href="{% url 'eventsv2:request_certificate' training.id %}">Generate Participation Certificate</a> |
 
                   {% elif training.is_learners_allowed and training.get_partipants_from_attendance and training.cert_status == 2%}
                   | Request sent for Participation Certificate | <a href="{% url 'eventsv2:training_certificate' training.id %}">Participant List</a>{% endif %}
