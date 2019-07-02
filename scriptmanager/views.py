@@ -169,9 +169,11 @@ class ReversionListView(generics.ListAPIView):
       script_detail=ScriptDetails.objects.get(pk=int(self.kwargs['script_detail_id']))
       reversion_data = Version.objects.get_for_object(script_detail)
       data = []
+      count=0
       for i in reversion_data:
+        count+=1
         result=i.field_dict
-        result.update({"date_time":i.revision.date_created.strftime("%Y-%m-%d %I:%M %p"),"reversion_id":i.revision.pk,"user":i.revision.user})
+        result.update({"reversion_id": count,"date_time":i.revision.date_created.strftime("%Y-%m-%d %I:%M %p"),"user":i.revision.user})
         data.append(result)
       return ReversionSerializer(data,many=True).data
     except:
@@ -181,7 +183,7 @@ class ReversionListView(generics.ListAPIView):
     try:
       script_detail=ScriptDetails.objects.get(pk=int(self.kwargs['script_detail_id']))
       reversion_data = Version.objects.get_for_object(script_detail)
-      reversion_data[request.data['id']].revision.revert()
+      reversion_data[request.data['reversion_id']-1].revision.revert()
       return Response({'status': True},status = 201)
     except:
       return Response({'status': False},status = 400)

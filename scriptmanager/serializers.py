@@ -92,11 +92,11 @@ class CommentsSerializer(serializers.ModelSerializer):
     return date(day=created.day, month=created.month, year=created.year).strftime('%d %B %Y')
   
 class ReversionSerializer(serializers.Serializer):
+  reversion_id=serializers.IntegerField()
   id = serializers.IntegerField()
   cue = serializers.CharField()
   narration = serializers.CharField()
   order = serializers.CharField()
   script_id = serializers.CharField()
   date_time=serializers.DateTimeField()
-  reversion_id=serializers.IntegerField()
   user=serializers.CharField()
