@@ -16,6 +16,9 @@ export class HomeComponent implements OnInit {
   public index: number;
   public description: boolean = false;
   public langData: any;
+  public local_fossId: any;
+  public local_langId: any;
+  public local_fossIndex: any;
 
   constructor(
     public fossService: FossService,
@@ -41,10 +44,10 @@ export class HomeComponent implements OnInit {
     this.langId = languageId
     localStorage.setItem('langId', String(this.langId))
 
-    let local_fossId = localStorage.getItem("fossId");
-    let local_langId = localStorage.getItem("langId");
+    this.local_fossId = localStorage.getItem("fossId");
+    this.local_langId = localStorage.getItem("langId");
 
-    this.tutorialService.getFossTutorials(local_fossId, local_langId).subscribe(
+    this.tutorialService.getFossTutorials(this.local_fossId, this.local_langId).subscribe(
       (res) => {
         this.tutorials = res
       },
@@ -70,13 +73,12 @@ export class HomeComponent implements OnInit {
   ngOnInit() {
     this.langData = { id: -1, name: "" };
     this.fetchAllFoss();
+    this.local_fossIndex = localStorage.getItem("fossIndex");
+    this.local_langId = localStorage.getItem("langId");
 
-    let local_fossIndex = localStorage.getItem("fossIndex");
-    let local_langId = localStorage.getItem("langId");
-
-    if (localStorage.length > 1) {
-      this.getLanguage(local_fossIndex)
-      this.fetchFossTutorials(local_langId)
+    if (localStorage.length == 4) {
+      this.getLanguage(this.local_fossIndex)
+      this.fetchFossTutorials(this.local_langId)
     }
   };
 
