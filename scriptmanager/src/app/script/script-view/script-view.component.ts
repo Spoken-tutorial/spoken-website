@@ -4,7 +4,6 @@ import { CreateScriptService } from '../../_service/create-script.service';
 import { CommentsService } from '../../_service/comments.service';
 import { RevisionsService } from '../../_service/revisions.service';
 import { Observable, Subject } from 'rxjs';
-import { DiffResults } from '../../diff';
 export interface DiffContent {
   leftContent: string;
   rightContent: string;
@@ -49,15 +48,12 @@ export class ScriptViewComponent implements OnInit {
   @Input() nav: any;
   @ViewChild('tableRow') el: ElementRef;
   @ViewChild('newmodal') el2: ElementRef;
-  public mystyle = {
-    // display:hidden,
-  }
+
   constructor(
     private route: ActivatedRoute,
     public createscriptService: CreateScriptService,
     public commentsService: CommentsService,
     public revisionsService: RevisionsService,
-    private rd: Renderer2,
     public router: Router
   ) { }
 
@@ -130,10 +126,6 @@ export class ScriptViewComponent implements OnInit {
 
     this.content.leftContent = this.revisions[index + 1]['cue'];
     this.content.rightContent = this.revisions[index]['cue'];
-
-    // console.log(this.content.leftContent);
-    // console.log(this.content.rightContent);
-
     this.submitComparison()
 
     this.el2.nativeElement.classList.add('is-active')
@@ -166,14 +158,17 @@ export class ScriptViewComponent implements OnInit {
     );
   }
 
-  public viewRevision(i) {
-    if (this.slideIdRev != i) {
-      this.slideIdRev = i
-      this.getRevison(i);
+  public viewRevision(i, slidePK) {
+    this.el.nativeElement.querySelectorAll('tr')[this.index + 1].classList.remove('is-selected');
+    this.index = i
+    if (this.slideIdRev != slidePK) {
+      this.slideIdRev = slidePK
+      this.getRevison(slidePK);
       if (this.comment == true) {
         this.comment = false;
       }
       this.revision = true;
+      this.el.nativeElement.querySelectorAll('tr')[i + 1].classList.add('is-selected')
     }
     else {
       if (this.revision == false) {
@@ -181,24 +176,24 @@ export class ScriptViewComponent implements OnInit {
           this.comment = false;
         }
         this.revision = true;
+        this.el.nativeElement.querySelectorAll('tr')[i + 1].classList.add('is-selected')
       }
       else {
         this.revision = false;
+        this.el.nativeElement.querySelectorAll('tr')[i + 1].classList.remove('is-selected')
       }
     }
   }
 
   public revert(reversionData) {
-    // console.log(reversionData, this.id)
-
-    window.location.reload();
     this.revisionsService.revertRevision(
       reversionData['id'],
       {
         "reversion_id": reversionData['reversion_id']
       }
-    )
+    ).subscribe();
 
+    window.location.reload();
   }
 
   ngOnInit() {
@@ -232,7 +227,4 @@ export class ScriptViewComponent implements OnInit {
     }
   }
 
-  // public onCompareResults(diffResults: DiffResults) {
-  //   console.log('diffResults', diffResults);
-  // }
 }
