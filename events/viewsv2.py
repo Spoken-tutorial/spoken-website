@@ -2862,7 +2862,7 @@ def academic_transactions(request):
 
 def trainingrequest(request, role, status):
   context = {}
-  user = None
+  user = request.user
   template_name = None
   header = None
   raw_get_data = None
