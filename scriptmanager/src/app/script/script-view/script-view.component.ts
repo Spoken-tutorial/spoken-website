@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, ElementRef, Renderer2, ViewChild } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CreateScriptService } from '../../_service/create-script.service';
 import { CommentsService } from '../../_service/comments.service';
 import { RevisionsService } from '../../_service/revisions.service';
@@ -57,7 +57,8 @@ export class ScriptViewComponent implements OnInit {
     public createscriptService: CreateScriptService,
     public commentsService: CommentsService,
     public revisionsService: RevisionsService,
-    private rd: Renderer2
+    private rd: Renderer2,
+    public router: Router
   ) { }
 
   public mouseenter(i) {
@@ -124,35 +125,14 @@ export class ScriptViewComponent implements OnInit {
     }
   }
 
-
-
   public viewModal(index) {
     this.index2 = index
 
     this.content.leftContent = this.revisions[index + 1]['cue'];
     this.content.rightContent = this.revisions[index]['cue'];
 
-    // this.content.leftContent =
-    //   '<card xmlns="http://businesscard.org">\n' +
-    //   '   <name>John Doe</name>\n' +
-    //   '   <title>CEO, Widget Inc.</title>\n' +
-    //   '   <email>john.Moe@widget.com</email>\n' +
-    //   '   <cellphone>(202) 456-1414</cellphone>\n' +
-    //   '   <phone>(202) 456-1414</phone>\n' +
-    //   '   <logo url="widget.gif"/>\n' +
-    //   ' </card>';
-    // this.content.rightContent =
-    //   '<card xmlns="http://businesscard.org">\n' +
-    //   '   <name>John Moe</name>\n' +
-    //   '   <title>CEO, Widget Inc.</title>\n' +
-    //   '   <email>john.Moe@widget.com</email>\n' +
-    //   '   <phone>(202) 456-1414</phone>\n' +
-    //   '   <address>Test</address>\n' +
-    //   '   <logo url="widget.gif"/>\n' +
-    //   ' </card>';
-
-    console.log(this.content.leftContent);
-    console.log(this.content.rightContent);
+    // console.log(this.content.leftContent);
+    // console.log(this.content.rightContent);
 
     this.submitComparison()
 
@@ -208,6 +188,19 @@ export class ScriptViewComponent implements OnInit {
     }
   }
 
+  public revert(reversionData) {
+    // console.log(reversionData, this.id)
+
+    window.location.reload();
+    this.revisionsService.revertRevision(
+      reversionData['id'],
+      {
+        "reversion_id": reversionData['reversion_id']
+      }
+    )
+
+  }
+
   ngOnInit() {
     this.route.params.subscribe(params => {
       this.id = +params['id'];
@@ -218,7 +211,7 @@ export class ScriptViewComponent implements OnInit {
 
   //diff on revisions
   public submitComparison() {
-    console.log(this.content)
+    // console.log(this.content)
     this.submitted = false;
     this.contentObservable.next(this.content);
     this.submitted = true;
@@ -239,7 +232,7 @@ export class ScriptViewComponent implements OnInit {
     }
   }
 
-  public onCompareResults(diffResults: DiffResults) {
-    console.log('diffResults', diffResults);
-  }
+  // public onCompareResults(diffResults: DiffResults) {
+  //   console.log('diffResults', diffResults);
+  // }
 }

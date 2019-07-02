@@ -27,12 +27,14 @@
       <div class="column is-8">
 
         <div #newmodal class="modal">
+
           <div class="modal-background"></div>
+
           <div class="modal-content">
 
             <td-ngx-text-diff [left]="content.leftContent" [right]="content.rightContent" [loading]="!submitted"
-            [diffContent]="contentObservable$" [compareRowsStyle]="{'max-height': '500px', 'overflow': 'auto'}"
-              (compareResults)="onCompareResults($event)">
+              [diffContent]="contentObservable$" [compareRowsStyle]="{'max-height': '500px', 'overflow': 'auto'}">
+              <!-- (compareResults)="onCompareResults($event)"> -->
             </td-ngx-text-diff>
 
             <table class="table is-bordered">
@@ -47,9 +49,10 @@
                 </tr>
               </tbody>
             </table>
+
+            <button class="button heading" (click)="revert(revisions[index2])">Revert Back to this Version</button>
+
           </div>
-
-
 
           <button class="modal-close is-large" aria-label="close" (click)="hideModal()"></button>
         </div>
@@ -63,7 +66,7 @@
                 <th>Sr. No.</th>
                 <th>Visual Cue</th>
                 <th>Narration</th>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <!-- &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -->
               </tr>
               <tbody *ngFor="let slide of slides; let i = index">
                 <tr (mouseenter)='mouseenter(i)' (mouseleave)="mouseleave(i)">
