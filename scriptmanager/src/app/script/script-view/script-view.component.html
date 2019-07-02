@@ -30,15 +30,9 @@
           <div class="modal-background"></div>
           <div class="modal-content">
 
-              <td-ngx-text-diff
-              [left]="content.leftContent"
-              [right]="content.rightContent"
-              [loading]="!submitted"
-              [diffContent]="contentObservable$"
-            
-              [compareRowsStyle]="{'max-height': '500px', 'overflow': 'auto'}"
-              (compareResults)="onCompareResults($event)"
-            >
+            <td-ngx-text-diff [left]="content.leftContent" [right]="content.rightContent" [loading]="!submitted"
+            [diffContent]="contentObservable$" [compareRowsStyle]="{'max-height': '500px', 'overflow': 'auto'}"
+              (compareResults)="onCompareResults($event)">
             </td-ngx-text-diff>
 
             <table class="table is-bordered">
@@ -54,8 +48,8 @@
               </tbody>
             </table>
           </div>
-         
-       
+
+
 
           <button class="modal-close is-large" aria-label="close" (click)="hideModal()"></button>
         </div>

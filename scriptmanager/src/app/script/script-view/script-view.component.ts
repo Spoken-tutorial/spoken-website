@@ -9,6 +9,7 @@ export interface DiffContent {
   leftContent: string;
   rightContent: string;
 }
+
 @Component({
   selector: 'app-script-view',
   templateUrl: './script-view.component.html',
@@ -28,7 +29,7 @@ export class ScriptViewComponent implements OnInit {
   public slideIdRev: number;
   public index: number = 0;
   public index2: number = 0;
-  public overVal:boolean[]=[false];
+  public overVal: boolean[] = [false];
   public revision_old;
   public revision_new;
 
@@ -48,7 +49,7 @@ export class ScriptViewComponent implements OnInit {
   @Input() nav: any;
   @ViewChild('tableRow') el: ElementRef;
   @ViewChild('newmodal') el2: ElementRef;
-  public mystyle={
+  public mystyle = {
     // display:hidden,
   }
   constructor(
@@ -58,11 +59,12 @@ export class ScriptViewComponent implements OnInit {
     public revisionsService: RevisionsService,
     private rd: Renderer2
   ) { }
-  public mouseenter(i){
-    this.overVal[i]=true;
+
+  public mouseenter(i) {
+    this.overVal[i] = true;
   }
-  public mouseleave(i){
-    this.overVal[i]=false;
+  public mouseleave(i) {
+    this.overVal[i] = false;
   }
 
   public viewScript() {
@@ -122,9 +124,48 @@ export class ScriptViewComponent implements OnInit {
     }
   }
 
+
+
   public viewModal(index) {
     this.index2 = index
+
+    this.content.leftContent = this.revisions[index + 1]['cue'];
+    this.content.rightContent = this.revisions[index]['cue'];
+
+    // this.content.leftContent =
+    //   '<card xmlns="http://businesscard.org">\n' +
+    //   '   <name>John Doe</name>\n' +
+    //   '   <title>CEO, Widget Inc.</title>\n' +
+    //   '   <email>john.Moe@widget.com</email>\n' +
+    //   '   <cellphone>(202) 456-1414</cellphone>\n' +
+    //   '   <phone>(202) 456-1414</phone>\n' +
+    //   '   <logo url="widget.gif"/>\n' +
+    //   ' </card>';
+    // this.content.rightContent =
+    //   '<card xmlns="http://businesscard.org">\n' +
+    //   '   <name>John Moe</name>\n' +
+    //   '   <title>CEO, Widget Inc.</title>\n' +
+    //   '   <email>john.Moe@widget.com</email>\n' +
+    //   '   <phone>(202) 456-1414</phone>\n' +
+    //   '   <address>Test</address>\n' +
+    //   '   <logo url="widget.gif"/>\n' +
+    //   ' </card>';
+
+    console.log(this.content.leftContent);
+    console.log(this.content.rightContent);
+
+    this.submitComparison()
+
     this.el2.nativeElement.classList.add('is-active')
+  }
+
+  public sleep(milliseconds) {
+    var start = new Date().getTime();
+    for (var i = 0; i < 1e7; i++) {
+      if ((new Date().getTime() - start) > milliseconds) {
+        break;
+      }
+    }
   }
 
   public hideModal() {
@@ -137,14 +178,12 @@ export class ScriptViewComponent implements OnInit {
     ).subscribe(
       (res) => {
         this.revisions = res;
-        this.revision_new=res;
-        console.log(this.revisions)
+        this.revision_new = res;
         if (this.revisions.length == 0) {
           this.revisions = false;
         }
       },
     );
-
   }
 
   public viewRevision(i) {
@@ -155,12 +194,6 @@ export class ScriptViewComponent implements OnInit {
         this.comment = false;
       }
       this.revision = true;
-      console.log(this.revision_new);
-      console.log(this.revision_old);
-      console.log(this.revisions)
-      this.content.leftContent = this.revision_old;
-      this.content.rightContent=this.revision_new;
-
     }
     else {
       if (this.revision == false) {
@@ -181,38 +214,22 @@ export class ScriptViewComponent implements OnInit {
     });
     this.viewScript();
     this.tutorialName = this.route.snapshot.params['tutorialName'];
-
-    this.content.leftContent =
-    '<card xmlns="http://businesscard.org">\n' +
-    '   <name>John Doe</name>\n' +
-    '   <title>CEO, Widget Inc.</title>\n' +
-    '   <email>john.Moe@widget.com</email>\n' +
-    '   <cellphone>(202) 456-1414</cellphone>\n' +
-    '   <phone>(202) 456-1414</phone>\n' +
-    '   <logo url="widget.gif"/>\n' +
-    ' </card>';
-  this.content.rightContent =
-    '<card xmlns="http://businesscard.org">\n' +
-    '   <name>John Moe</name>\n' +
-    '   <title>CEO, Widget Inc.</title>\n' +
-    '   <email>john.Moe@widget.com</email>\n' +
-    '   <phone>(202) 456-1414</phone>\n' +
-    '   <address>Test</address>\n' +
-    '   <logo url="widget.gif"/>\n' +
-    ' </card>';
   }
 
   //diff on revisions
-  submitComparison() {
+  public submitComparison() {
+    console.log(this.content)
     this.submitted = false;
     this.contentObservable.next(this.content);
     this.submitted = true;
   }
 
-  handleChange(side: 'left' | 'right', value: string) {
+  public handleChange(side: 'left' | 'right', value: string) {
+    console.log(side);
+
     switch (side) {
       case 'left':
-        this.content.leftContent = value;
+        this.content.leftContent = 'value';
         break;
       case 'right':
         this.content.rightContent = value;
@@ -222,7 +239,7 @@ export class ScriptViewComponent implements OnInit {
     }
   }
 
-  onCompareResults(diffResults: DiffResults) {
+  public onCompareResults(diffResults: DiffResults) {
     console.log('diffResults', diffResults);
   }
 }
