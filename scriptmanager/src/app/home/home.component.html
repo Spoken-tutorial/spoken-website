@@ -8,7 +8,6 @@
             <div
               class="well tab-content tutorial-search-form col-lg-offset-1 col-md-offset-1 col-lg-10 col-md-10 col-sm-12 col-xs-12">
               <div class="col-sm-12">
-                <!-- <form action="" method="GET" class='form-horizontal'> -->
 
                 <div class="form-group">
 
@@ -21,6 +20,7 @@
                         {{ item['foss_category']['name'] }}</option>
                     </select>
                   </div>
+
                   <div class="col-sm-6"> <span class='ajax-search-refresh ajax-refresh-search-language'><i
                         class="fa fa-2 fa-refresh fa-spin"></i></span>
                     <select (change)="fetchFossTutorials($event.target.value)" name="search_language"
@@ -31,16 +31,14 @@
                   </div>
 
                 </div>
-                <!-- </form> -->
+
               </div>
             </div>
 
 
             <div
               class='search-result col-lg-offset-1 col-md-offset-1 col-sm-offset-1 col-xs-offset-1 col-lg-10 col-md-10 col-sm-10 col-xs-10'>
-                <p *ngIf="description"><i>{{ foss[index]['foss_category']['description'] }}
-                  </i>
-                </p>
+              <p *ngIf="description"><i>{{ foss[index]['foss_category']['description'] }}</i></p>
 
               <hr>
 

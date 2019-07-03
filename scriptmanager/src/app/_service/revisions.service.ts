@@ -14,6 +14,14 @@ export class RevisionsService {
     return this.httpClient.get(_url);
   }
   
+  public revertRevision(sid,data) {
+    const _url = `${this.apiUrl}/scripts/${sid}/reversions/`
+    var ls = this.httpClient.patch(
+      _url,
+      data
+    );
+    return ls;
+  }
 
   constructor(private httpClient: HttpClient) { }
 }
