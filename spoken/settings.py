@@ -97,6 +97,7 @@ INSTALLED_APPS = [
     'workshop',
     'django_filters',
     'impersonate',
+    'rest_framework_swagger'
 ]
 
 MIDDLEWARE = [

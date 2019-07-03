@@ -70,7 +70,7 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
     details=[]
     try:
       tutorial=TutorialDetail.objects.get(pk = int(self.kwargs['tid']))
-      if not  Scripts.objects.filter(user  =  self.request.user,tutorial=tutorial).exists():
+      if not  Scripts.objects.filter(user = self.request.user,tutorial=tutorial).exists():
         script  =  Scripts.objects.create(tutorial = tutorial,user = self.request.user)
       else:
         script  =  Scripts.objects.get(tutorial = tutorial,user = self.request.user)
