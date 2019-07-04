@@ -50,15 +50,16 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
     data=str(data).replace("<li></li>","")
     soup=BeautifulSoup(data,'html.parser')
     if soup.find_all('ul'):
-      for ul in soup.find_all('ul'):
-        p=ul.find_all('p')
-        for data in p:
-          data.wrap(soup.new_tag('li'))
+      all_data=soup.find_all('ul')
+      for data in all_data:
+        for p in data.find_all('p'):
+          p.name='li'
+          
     if soup.find_all('ol'):
-      for ul in soup.find_all('ol'):
-        p=ul.find_all('p')
-        for data in p:
-          data.wrap(soup.new_tag('li'))
+      all_data=soup.find_all('ol')
+      for data in all_data: 
+        for p in data.find_all('p'):
+          p.name='li'
     return str(soup)
 
 
