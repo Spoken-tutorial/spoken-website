@@ -15,7 +15,7 @@
                         class="fa fa-2 fa-refresh fa-spin"></i></span>
                     <select (change)="getLanguage($event.target.value)" name="search_foss"
                       class="form-control search-foss" tabindex="1" id="id_search_foss">
-                      <option value="">--Select Foss Categories--</option>
+                      <option value="nothing">--Select Foss Categories--</option>
                       <option *ngFor="let item of foss; let i = index" [value]="[i]">
                         {{ item['foss_category']['name'] }}</option>
                     </select>
@@ -25,7 +25,7 @@
                         class="fa fa-2 fa-refresh fa-spin"></i></span>
                     <select (change)="fetchFossTutorials($event.target.value)" name="search_language"
                       class="form-control search-language" tabindex="2" id="id_search_language">
-                      <option value="">--Select Language--</option>
+                      <option value="nothing">--Select Language--</option>
                       <option [value]="langData['id']">{{ langData['name'] }}</option>
                     </select>
                   </div>

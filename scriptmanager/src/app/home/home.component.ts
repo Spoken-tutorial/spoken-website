@@ -26,36 +26,40 @@ export class HomeComponent implements OnInit {
   ) { }
 
   public getLanguage(langIndex) {
-    this.fossService.getAllFossCategories().subscribe(
-      (res) => {
-        this.index = langIndex
-        localStorage.setItem('fossIndex', String(this.index))
+    if (langIndex != "nothing") {
+      this.fossService.getAllFossCategories().subscribe(
+        (res) => {
+          this.index = langIndex
+          localStorage.setItem('fossIndex', String(this.index))
 
-        this.fossId = res[langIndex].foss_category.id
-        localStorage.setItem('fossId', String(this.fossId))
+          this.fossId = res[langIndex].foss_category.id
+          localStorage.setItem('fossId', String(this.fossId))
 
-        this.langData = res[langIndex]['language']
-        this.description = true
-      }
-    );
+          this.langData = res[langIndex]['language']
+          this.description = true
+        }
+      );
+    }
   }
 
   public fetchFossTutorials(languageId) {
-    this.langId = languageId
-    localStorage.setItem('langId', String(this.langId))
+    if (languageId != "nothing") {
+      this.langId = languageId
+      localStorage.setItem('langId', String(this.langId))
 
-    this.local_fossId = localStorage.getItem("fossId");
-    this.local_langId = localStorage.getItem("langId");
+      this.local_fossId = localStorage.getItem("fossId");
+      this.local_langId = localStorage.getItem("langId");
 
-    this.tutorialService.getFossTutorials(this.local_fossId, this.local_langId).subscribe(
-      (res) => {
-        this.tutorials = res
-      },
-      (err) => {
-        console.log('Failed to fetch tutorial categories');
-        console.error(err);
-      }
-    );
+      this.tutorialService.getFossTutorials(this.local_fossId, this.local_langId).subscribe(
+        (res) => {
+          this.tutorials = res
+        },
+        (err) => {
+          console.log('Failed to fetch tutorial categories');
+          console.error(err);
+        }
+      );
+    }
   }
 
   public fetchAllFoss() {
@@ -76,7 +80,7 @@ export class HomeComponent implements OnInit {
     this.local_fossIndex = localStorage.getItem("fossIndex");
     this.local_langId = localStorage.getItem("langId");
 
-    if (localStorage.length == 4) {
+    if (localStorage.length > 4) {
       this.getLanguage(this.local_fossIndex)
       this.fetchFossTutorials(this.local_langId)
     }
