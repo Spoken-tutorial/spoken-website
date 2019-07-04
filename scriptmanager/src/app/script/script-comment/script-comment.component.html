@@ -35,8 +35,8 @@
         <div class="media-content">
           <div class="field">
             <p class="control">
-              <textarea #textarea class="textarea" placeholder="Add a comment..." (change)="clearTextarea($event)"
-                (keyup)="commentKey($event)"></textarea>
+              <textarea #textarea class="textarea" placeholder="Add a comment..."
+                (keyup)="commentKey($event)" [(ngModel)]="comment_value" #commentValue="ngModel"></textarea>
             </p>
           </div>
           <div class="field">
