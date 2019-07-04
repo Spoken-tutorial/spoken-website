@@ -13,7 +13,7 @@ export class ScriptCreateComponent implements OnInit {
   public slides: any = [];
   private id: number;
   public tutorialName: any;
-  
+
   constructor(
     private route: ActivatedRoute,
     public createscriptService: CreateScriptService,
@@ -23,7 +23,17 @@ export class ScriptCreateComponent implements OnInit {
 
   public onSaveScript(script: any) {
     if (script['order'] == '') {
-      return // Do nothing
+      if (script['narration'] != '') {
+        this.slides.push(
+          {
+            id: '',
+            cue: '',
+            narration: '',
+            order: '',
+            script: ''
+          }
+        )
+      }
     }
     else {
       for (var i = 0; i < script.length; i++) {
@@ -33,7 +43,7 @@ export class ScriptCreateComponent implements OnInit {
         this.id,
         {
           "details": script,
-          "type" : 'form'
+          "type": 'form'
         }
       ).subscribe(
         (res) => {

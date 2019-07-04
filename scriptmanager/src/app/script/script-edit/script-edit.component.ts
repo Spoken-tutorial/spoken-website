@@ -110,16 +110,6 @@ export class ScriptEditComponent implements OnInit {
         );
       }
 
-      this.slides.push(
-        {
-          id: '',
-          cue: '',
-          narration: '',
-          order: '',
-          script: ''
-        }
-      );
-
     }
 
   }
