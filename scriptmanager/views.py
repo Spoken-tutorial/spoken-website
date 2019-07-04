@@ -45,10 +45,27 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
   def get_queryset(self): 
     script = Scripts.objects.filter(tutorial = int(self.kwargs['tid']),user = self.request.user)
     return ScriptDetails.objects.filter(script = script)
-  
+
+  def getUlData(self,data):
+    data=str(data).replace("<li></li>","")
+    soup=BeautifulSoup(data,'html.parser')
+    if soup.find_all('ul'):
+      for ul in soup.find_all('ul'):
+        p=ul.find_all('p')
+        for data in p:
+          data.wrap(soup.new_tag('li'))
+    if soup.find_all('ol'):
+      for ul in soup.find_all('ol'):
+        p=ul.find_all('p')
+        for data in p:
+          data.wrap(soup.new_tag('li'))
+    return str(soup)
+
+
   def scriptsData(self, html,script):
     soup=BeautifulSoup(html,'html.parser')
     table=soup.find("table") 
+    # print(table)
     if(table.find("tbody")):
       table=table.find("tbody")
     details=[]
@@ -60,57 +77,58 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
       elif row.find_all('td'):  
         columns = row.find_all('td')
       try:
-        details.append({"order": count,"cue": str(columns[0]),"narration": str(columns[1]),"script":script.pk})
+        details.append({"order": count,"cue": self.getUlData(columns[0]),"narration": self.getUlData(columns[1]),"script":script.pk})
       except:
         continue
     details.pop(0)
     return details
+
       
   def create(self, request,tid):
     details=[]
-    try:
-      tutorial=TutorialDetail.objects.get(pk = int(self.kwargs['tid']))
-      if not  Scripts.objects.filter(user = self.request.user,tutorial=tutorial).exists():
-        script  =  Scripts.objects.create(tutorial = tutorial,user = self.request.user)
-      else:
-        script  =  Scripts.objects.get(tutorial = tutorial,user = self.request.user)
+    # try:
+    tutorial=TutorialDetail.objects.get(pk = int(self.kwargs['tid']))
+    if not  Scripts.objects.filter(user = self.request.user,tutorial=tutorial).exists():
+      script  =  Scripts.objects.create(tutorial = tutorial,user = self.request.user)
+    else:
+      script  =  Scripts.objects.get(tutorial = tutorial,user = self.request.user)
 
-      type=request.data['type']
-      if(type=='form'):
-        details = request.data['details']
-        for item in details:
-          item.update( {"script":script.pk})
+    type=request.data['type']
+    if(type=='form'):
+      details = request.data['details']
+      for item in details:
+        item.update( {"script":script.pk})
 
-      elif(type=='file'):
-        myfile=request.FILES['docs']
-        fs = FileSystemStorage()
-        filename = fs.save(myfile.name, myfile)
-        doc_file=os.getcwd()+'/media/'+filename
-        os.system('libreoffice --convert-to html '+doc_file)
-        html_file=os.path.splitext(os.getcwd()+'/'+filename)[0]+'.html'
-        run_time=0
-        html=0
-        while run_time < 3:
-          try:
-            html = open(html_file,'r')
-            break
-          except:
-            time.sleep(.4)
-            run_time+=.4
-        html = open(html_file,'r')
-        details=self.scriptsData(html,script)
-        os.system('rm '+ doc_file + ' '+html_file)
-      
-      elif (type=="template"):
-        data=request.data['details']
-        details=self.scriptsData(data,script)
+    elif(type=='file'):
+      myfile=request.FILES['docs']
+      fs = FileSystemStorage()
+      filename = fs.save(myfile.name, myfile)
+      doc_file=os.getcwd()+'/media/'+filename
+      os.system('libreoffice --convert-to html '+doc_file)
+      html_file=os.path.splitext(os.getcwd()+'/'+filename)[0]+'.html'
+      run_time=0
+      html=0
+      while run_time < 3:
+        try:
+          html = open(html_file,'r')
+          break
+        except:
+          time.sleep(.4)
+          run_time+=.4
+      html = open(html_file,'r')
+      details=self.scriptsData(html,script)
+      os.system('rm '+ doc_file + ' '+html_file)
+    
+    elif (type=="template"):
+      data=request.data['details']
+      details=self.scriptsData(data,script)
 
-      serialized  =  ScriptsDetailSerializer(data  =  details,many  =  True) #inserting a details array without iterating
-      if serialized.is_valid():
-        serialized.save()
-        return Response({'status': True},status = 201)
-    except:
-      return Response({'status': False},status = 400) 
+    serialized  =  ScriptsDetailSerializer(data  =  details,many  =  True) #inserting a details array without iterating
+    if serialized.is_valid():
+      serialized.save()
+      return Response({'status': True},status = 201)
+    # except:
+    return Response({'status': False},status = 400) 
 
 
   def patch(self,request, tid):
