@@ -73,7 +73,7 @@
                   <td>{{ i+1 }}</td>
                   <td class="content" innerHTML="{{ slide.cue }}"></td>
                   <td class="content" innerHTML="{{ slide.narration }}"></td>
-                  <td [ngClass]="{ 'hide-comment-tools': !overVal[i] }" [style]="myStyle">
+                  <td [ngClass]="{ 'hide-comment-tools': !overVal[i] }">
                     <button class="button heading" (click)="viewComment(i)">
                       <i class="fa fa-comments"></i>
                     </button>
