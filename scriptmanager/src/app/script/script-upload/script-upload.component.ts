@@ -91,7 +91,7 @@ export class ScriptUploadComponent implements OnInit {
       this.id,
       {
         "details": this.Htmldata,
-        "type" : 'template'
+        "type": 'template'
       }
     ).subscribe(
       (res) => {

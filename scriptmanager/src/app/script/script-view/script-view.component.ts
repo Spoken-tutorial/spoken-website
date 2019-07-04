@@ -4,6 +4,8 @@ import { CreateScriptService } from '../../_service/create-script.service';
 import { CommentsService } from '../../_service/comments.service';
 import { RevisionsService } from '../../_service/revisions.service';
 import { Observable, Subject } from 'rxjs';
+import * as $ from 'jquery';
+
 export interface DiffContent {
   leftContent: string;
   rightContent: string;
@@ -57,13 +59,6 @@ export class ScriptViewComponent implements OnInit {
     public router: Router
   ) { }
 
-  public mouseenter(i) {
-    this.overVal[i] = true;
-  }
-  public mouseleave(i) {
-    this.overVal[i] = false;
-  }
-
   public viewScript() {
     this.createscriptService.getScript(
       this.id
@@ -72,6 +67,14 @@ export class ScriptViewComponent implements OnInit {
         this.slides = res;
       },
     );
+  }
+
+  public mouseenter(i) {
+    this.overVal[i] = true;
+  }
+
+  public mouseleave(i) {
+    this.overVal[i] = false;
   }
 
   public getComment() {
@@ -91,6 +94,7 @@ export class ScriptViewComponent implements OnInit {
         "comment": comment
       }
     ).subscribe();
+    this.getComment();
     this.getComment();
   }
 
@@ -121,23 +125,22 @@ export class ScriptViewComponent implements OnInit {
     }
   }
 
-  public viewModal(index) {
-    this.index2 = index
-
-    this.content.leftContent = this.revisions[index + 1]['cue'];
-    this.content.rightContent = this.revisions[index]['cue'];
-    this.submitComparison()
-
-    this.el2.nativeElement.classList.add('is-active')
+  public console(data) {
+    console.log(data);
+    return data;
   }
 
-  public sleep(milliseconds) {
-    var start = new Date().getTime();
-    for (var i = 0; i < 1e7; i++) {
-      if ((new Date().getTime() - start) > milliseconds) {
-        break;
-      }
-    }
+  public viewModal(index) {
+    this.index2 = index;
+
+    // const text1 = $.trim($(this.revisions[index + 1]['cue']).text());
+    // const text2 = $.trim($(this.revisions[index]['cue']).text());
+
+    // this.content.leftContent = text1;
+    // this.content.rightContent = text2;
+    // this.submitComparison();
+
+    this.el2.nativeElement.classList.add('is-active')
   }
 
   public hideModal() {
@@ -206,15 +209,13 @@ export class ScriptViewComponent implements OnInit {
 
   //diff on revisions
   public submitComparison() {
-    // console.log(this.content)
     this.submitted = false;
     this.contentObservable.next(this.content);
     this.submitted = true;
   }
 
   public handleChange(side: 'left' | 'right', value: string) {
-    console.log(side);
-
+    // console.log(side);
     switch (side) {
       case 'left':
         this.content.leftContent = 'value';

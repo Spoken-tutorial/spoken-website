@@ -9,6 +9,7 @@ export class ScriptCommentComponent implements OnInit {
   @Input() newComment: string = '';
   @Input() comments: any;
   @Output() commentEmitter = new EventEmitter<string>();
+  comment_value = "";
 
   constructor() { }
 
@@ -16,11 +17,8 @@ export class ScriptCommentComponent implements OnInit {
     if (this.newComment.trim() != '') {
       this.commentEmitter.emit(this.newComment);
       this.newComment = '';
+      this.comment_value = "";
     }
-  }
-
-  public clearTextarea(event) {
-    event.target.value = '';
   }
 
   commentKey(event) { this.newComment = event.target.value; }
