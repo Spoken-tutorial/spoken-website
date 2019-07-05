@@ -34,10 +34,11 @@ class ContributorRoleSerializer(serializers.ModelSerializer):
 class TutorialDetailSerializer(serializers.ModelSerializer):
     script_status = serializers.SerializerMethodField()
     outline=serializers.SerializerMethodField()
+    language=serializers.SerializerMethodField()
 
     class Meta:
       model = TutorialDetail
-      fields = ('id', 'foss', 'tutorial', 'level', 'order', 'script_status','outline')
+      fields = ('id', 'foss','language', 'tutorial', 'level', 'order', 'script_status','outline')
 
     def get_script_status(self, instance):
       data = Scripts.objects.filter(tutorial_id=instance.id, user=self.context.get('user'))
@@ -53,6 +54,10 @@ class TutorialDetailSerializer(serializers.ModelSerializer):
           return data[0].outline
         else:
           return None 
+
+    def get_language(self,instance):
+        lang_id=self.context.get('lang')
+        return int(lang_id)
 
 
 class ScriptsDetailSerializer(serializers.ModelSerializer):

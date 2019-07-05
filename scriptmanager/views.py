@@ -34,7 +34,7 @@ class TutorialDetailList(generics.ListAPIView):
     return {"lang": self.kwargs['lid'],"user":self.request.user}
     
   def get_queryset(self):
-    if ContributorRole.objects.filter(user  =  self.request.user,foss_category  =  self.kwargs.get('fid')).exists():
+    if ContributorRole.objects.filter(user  =  self.request.user,foss_category  =  self.kwargs.get('fid'), language=self.kwargs.get('lid')).exists():
       return TutorialDetail.objects.filter(foss  =  self.kwargs.get('fid')).order_by('order')
     else:
       return None
