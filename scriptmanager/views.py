@@ -10,7 +10,7 @@ from reversion.models import Version
 import os
 from django.core.files.storage import FileSystemStorage
 from bs4 import BeautifulSoup
-from datetime import datetime
+from datetime import datetime,timedelta
 import time
 
 def index(request):
@@ -200,7 +200,8 @@ class ReversionListView(generics.ListAPIView):
       for i in reversion_data:
         count+=1
         result=i.field_dict
-        result.update({"reversion_id": count,"date_time":i.revision.date_created.strftime("%Y-%m-%d %I:%M %p"),"user":i.revision.user})
+        rev_time=i.revision.date_created+timedelta(hours=5,minutes=30)
+        result.update({"reversion_id": count,"date_time":rev_time.strftime("%Y-%m-%d %I:%M %p"),"user":i.revision.user})
         data.append(result)
       return ReversionSerializer(data,many=True).data
     except:
