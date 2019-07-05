@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from creation.models import ContributorRole,TutorialDetail,User
+from creation.models import ContributorRole,TutorialDetail,User,Language
 from .models import Scripts,ScriptDetails,Comments
 from .serializers import ContributorRoleSerializer,TutorialDetailSerializer,ScriptsDetailSerializer,ScriptsSerializer,CommentsSerializer,ReversionSerializer
 from rest_framework.views import APIView
@@ -42,10 +42,6 @@ class TutorialDetailList(generics.ListAPIView):
 class ScriptCreateAPIView(generics.ListCreateAPIView):
   serializer_class = ScriptsDetailSerializer
 
-  def get_queryset(self): 
-    script = Scripts.objects.filter(tutorial = int(self.kwargs['tid']),user = self.request.user)
-    return ScriptDetails.objects.filter(script = script)
-
   def getUlData(self,data):
     data=str(data).replace("<li></li>","")
     soup=BeautifulSoup(data,'html.parser')
@@ -84,60 +80,71 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
     details.pop(0)
     return details
 
-      
-  def create(self, request,tid):
-    details=[]
-    # try:
+  def get_queryset(self): 
     tutorial=TutorialDetail.objects.get(pk = int(self.kwargs['tid']))
-    if not  Scripts.objects.filter(user = self.request.user,tutorial=tutorial).exists():
-      script  =  Scripts.objects.create(tutorial = tutorial,user = self.request.user)
-    else:
-      script  =  Scripts.objects.get(tutorial = tutorial,user = self.request.user)
+    language=Language.objects.get(pk = int(self.kwargs['lid']))
+    script = Scripts.objects.get(tutorial = tutorial,language = language,user=self.request.user)
+    return ScriptDetails.objects.filter(script = script)
 
+  def create(self, request,tid,lid):
+    details=[]
     type=request.data['type']
-    if(type=='form'):
-      details = request.data['details']
-      for item in details:
-        item.update( {"script":script.pk})
 
-    elif(type=='file'):
-      myfile=request.FILES['docs']
-      fs = FileSystemStorage()
-      filename = fs.save(myfile.name, myfile)
-      doc_file=os.getcwd()+'/media/'+filename
-      os.system('libreoffice --convert-to html '+doc_file)
-      html_file=os.path.splitext(os.getcwd()+'/'+filename)[0]+'.html'
-      run_time=0
-      html=0
-      while run_time < 3:
-        try:
-          html = open(html_file,'r')
-          break
-        except:
-          time.sleep(.4)
-          run_time+=.4
-      html = open(html_file,'r')
-      details=self.scriptsData(html,script)
-      os.system('rm '+ doc_file + ' '+html_file)
-    
-    elif (type=="template"):
-      data=request.data['details']
-      details=self.scriptsData(data,script)
+    try:
+      tutorial=TutorialDetail.objects.get(pk = int(self.kwargs['tid']))
+      language=Language.objects.get(pk = int(self.kwargs['lid']))
+      if not  Scripts.objects.filter(user = self.request.user,tutorial = tutorial,language = language).exists():
+        script = Scripts.objects.create(tutorial = tutorial,language = language, user = self.request.user)
+      else:
+        script = Scripts.objects.get(tutorial = tutorial,language = language, user = self.request.user)
 
-    serialized  =  ScriptsDetailSerializer(data  =  details,many  =  True) #inserting a details array without iterating
-    if serialized.is_valid():
-      serialized.save()
-      return Response({'status': True},status = 201)
-    # except:
-    return Response({'status': False},status = 400) 
+      if(type=='form'):
+        details = request.data['details']
+        for item in details:
+          item.update( {"script":script.pk})
+
+      elif(type=='file'):
+        myfile=request.FILES['docs']
+        fs = FileSystemStorage()
+        filename = fs.save(myfile.name, myfile)
+        doc_file=os.getcwd()+'/media/'+filename
+        os.system('libreoffice --convert-to html '+doc_file)
+        html_file=os.path.splitext(os.getcwd()+'/'+filename)[0]+'.html'
+        run_time=0
+        html=0
+        while run_time < 3.0:
+          try:
+            html = open(html_file,'r')
+            break
+          except:
+            time.sleep(.4)
+            run_time+=.4
+        html = open(html_file,'r')
+        details=self.scriptsData(html,script)
+        os.system('rm '+ doc_file + ' '+html_file)
+      
+      elif (type=="template"):
+        data=request.data['details']
+        details=self.scriptsData(data,script)
+
+      serialized  =  ScriptsDetailSerializer(data  =  details,many  =  True) #inserting a details array without iterating
+      if serialized.is_valid():
+        serialized.save()
+        return Response({'status': True},status = 201)
+    except:
+      if type=='file':
+        os.system('rm '+ doc_file + ' '+html_file)
+      return Response({'status': False},status = 400) 
+
 
 
   def patch(self,request, tid):
     try:
       tutorial=TutorialDetail.objects.get(pk = int(self.kwargs['tid']))
-      script_details  =  self.request.data
-      Scripts.objects.get(tutorial = tutorial,user = self.request.user)
+      language=Language.objects.get(pk = int(self.kwargs['lid']))
+      Scripts.objects.get(tutorial = tutorial, language = language, user = self.request.user)
 
+      script_details  =  self.request.data
       script  =  ScriptDetails.objects.get(pk = (script_details['id']))
       serializer  =  ScriptsDetailSerializer(script, data = script_details)
       if serializer.is_valid():
@@ -150,7 +157,8 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
   def delete(self,request,tid,script_detail_id):
     try:
       tutorial=TutorialDetail.objects.get(pk = int(self.kwargs['tid']))
-      script  =  Scripts.objects.get(tutorial = tutorial,user  =  self.request.user)
+      language=Language.objects.get(pk = int(self.kwargs['lid']))
+      script = Scripts.objects.get(tutorial = tutorial, language = language, user = self.request.user)
 
       ScriptDetails.objects.get(pk = int(self.kwargs['script_detail_id']),script = script).delete()
       if not ScriptDetails.objects.filter(script_id = script.pk).exists(): 
