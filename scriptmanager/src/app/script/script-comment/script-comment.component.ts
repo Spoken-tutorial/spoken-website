@@ -6,7 +6,7 @@ import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
   styleUrls: ['./script-comment.component.sass']
 })
 export class ScriptCommentComponent implements OnInit {
-  @Input() newComment: string = '';
+  @Input() newComment: string = "";
   @Input() comments: any;
   @Output() commentEmitter = new EventEmitter<string>();
   comment_value = "";
@@ -14,9 +14,9 @@ export class ScriptCommentComponent implements OnInit {
   constructor() { }
 
   public addComment() {
-    if (this.newComment.trim() != '') {
+    if (this.newComment.trim() != "") {
       this.commentEmitter.emit(this.newComment);
-      this.newComment = '';
+      this.newComment = "";
       this.comment_value = "";
     }
   }

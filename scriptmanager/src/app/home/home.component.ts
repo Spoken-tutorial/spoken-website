@@ -80,7 +80,7 @@ export class HomeComponent implements OnInit {
     this.local_fossIndex = localStorage.getItem("fossIndex");
     this.local_langId = localStorage.getItem("langId");
 
-    if (localStorage.length > 4) {
+    if (localStorage.length > 5) {
       this.getLanguage(this.local_fossIndex)
       this.fetchFossTutorials(this.local_langId)
     }

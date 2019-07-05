@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, ElementRef, Renderer2, ViewChild } from '@angular/core';
+import { Component, OnInit, Input, ElementRef, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CreateScriptService } from '../../_service/create-script.service';
 import { CommentsService } from '../../_service/comments.service';
@@ -14,7 +14,7 @@ export interface DiffContent {
 @Component({
   selector: 'app-script-view',
   templateUrl: './script-view.component.html',
-  styleUrls: ['./script-view.component.sass']
+  styleUrls: ['./script-view.component.sass'],
 })
 
 export class ScriptViewComponent implements OnInit {
@@ -125,10 +125,10 @@ export class ScriptViewComponent implements OnInit {
     }
   }
 
-  public console(data) {
-    console.log(data);
-    return data;
-  }
+  // public console(data) {
+  //   console.log(data);
+  //   return data;
+  // }
 
   public viewModal(index) {
     this.index2 = index;

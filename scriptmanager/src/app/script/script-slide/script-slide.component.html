@@ -22,8 +22,15 @@
           <p class="heading">Visual Cue</p>
           <div class="field">
             <div class="control content">
-              <ckeditor tagName="textarea" [config]="ckeditorConfig" [editor]="Editor" formControlName="cue"
-                [(ngModel)]="slide.cue" (onKeyup)="cueKey($event)" (blur)="saveSlide()"></ckeditor>
+              
+              <div *ngIf="!ckEditorCue" class="slide_without_editor"  (click)="changeCueToEditor()">
+                <p innerHTML="{{slide.cue}}"></p>
+              </div>
+              
+              <ckeditor *ngIf="ckEditorCue" tagName="textarea" [config]="ckeditorConfig" [editor]="Editor"
+                formControlName="cue" [(ngModel)]="slide.cue" (onKeyup)="cueKey($event)" (blur)="saveSlide()">
+              </ckeditor>
+
             </div>
           </div>
         </div>
@@ -34,8 +41,16 @@
           <p class="heading">Narration</p>
           <div class="field">
             <div class="control content">
-              <ckeditor tagName="textarea" [config]="ckeditorConfig" [editor]="Editor" formControlName="narration"
-                [(ngModel)]="slide.narration" (onKeyup)="narrationKey($event)" (blur)="saveSlide()"></ckeditor>
+              
+              <div *ngIf="!ckEditorNarration" class="slide_without_editor" (click)="changeNarrationToEditor()">
+                <p innerHTML="{{slide.narration}}"></p>
+              </div>
+              
+              <ckeditor *ngIf="ckEditorNarration" tagName="textarea" [config]="ckeditorConfig" [editor]="Editor"
+                formControlName="narration" [(ngModel)]="slide.narration" (onKeyup)="narrationKey($event)"
+                (blur)="saveSlide()">
+              </ckeditor>
+           
             </div>
           </div>
         </div>

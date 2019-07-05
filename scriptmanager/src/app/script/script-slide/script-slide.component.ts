@@ -15,6 +15,8 @@ export class ScriptSlideComponent implements OnInit {
   @Output() saveSlideEmitter = new EventEmitter<any>();
   @Input() view: boolean = false;
   public comment = false;
+  public ckEditorCue: boolean = false;
+  public ckEditorNarration: boolean = false;
   editorForm: FormGroup;
 
   public Editor = ClassicEditor;
@@ -34,22 +36,31 @@ export class ScriptSlideComponent implements OnInit {
   }
 
   public saveSlide() {
-    // console.log(this.oldSlide.cue)
-    if (this.oldSlide.cue != this.slide.cue || this.oldSlide.narration != this.slide.narration) {
+    if (this.oldSlide.cue != this.slide.cue) {
       this.slide.cue = this.editorForm.get('cue').value
+      this.saveSlideEmitter.emit(this.slide);
+    }
+    else if (this.oldSlide.narration != this.slide.narration) {
       this.slide.narration = this.editorForm.get('narration').value
       this.saveSlideEmitter.emit(this.slide);
     }
-    this.checkSlide()
+    this.ckEditorCue = false;
+    this.ckEditorNarration = false;
+    this.checkSlide();
   }
 
-  cueKey(event) { this.slide.cue = event.target.value;
-  console.log(event.target.value)
+  public changeCueToEditor() {
+    this.ckEditorCue = true;
   }
-  narrationKey(event) { this.slide.narration = event.target.value; }
-  // handleSelection( val ){
-  //   console.log(val)
+
+  public changeNarrationToEditor() {
+    this.ckEditorNarration = true;
+  }
+
+  // cueKey(event) { this.slide.cue = event.target.value;
+  // console.log(event.target.value)
   // }
+  // narrationKey(event) { this.slide.narration = event.target.value; }
 
   ngOnInit() {
     this.editorForm = new FormGroup({
