@@ -41,8 +41,7 @@ class TutorialDetailSerializer(serializers.ModelSerializer):
       fields = ('id', 'foss','language', 'tutorial', 'level', 'order', 'script_status','outline')
 
     def get_script_status(self, instance):
-      data = Scripts.objects.filter(tutorial_id=instance.id, user=self.context.get('user'))
-      if data:
+      if Scripts.objects.filter(tutorial_id=instance.id,language = self.context.get('lang'),user=self.context.get('user')).exists():
         return True
       else:
         return False
