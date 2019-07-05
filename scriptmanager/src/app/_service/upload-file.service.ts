@@ -11,10 +11,10 @@ export class UploadFileService {
   public apiUrl = this.env['apiUrlScript']
   public testData: FormData = new FormData();
 
-  public postFile(tid, file) {
+  public postFile(tid, lid, file) {
     this.testData.append('docs', file);
     this.testData.append('type','file');
-    const _url = `${this.apiUrl}/tutorial/${tid}/scripts/`
+    const _url = `${this.apiUrl}/tutorial/${tid}/language/${lid}/scripts/`
     return this.http.post(_url,this.testData)
   }
 

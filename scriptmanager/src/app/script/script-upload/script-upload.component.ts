@@ -11,7 +11,8 @@ import { FormGroup, FormControl } from '@angular/forms';
   styleUrls: ['./script-upload.component.sass']
 })
 export class ScriptUploadComponent implements OnInit {
-  private id: number;
+  private tid: number;
+  private lid: number;
   public tutorialName: any;
   public scriptFile: any;
   public scriptFileName: any;
@@ -32,10 +33,10 @@ export class ScriptUploadComponent implements OnInit {
 
   public onFileSave() {
     console.log(this.scriptFile)
-    this.uploadfileService.postFile(this.id, this.scriptFile)
+    this.uploadfileService.postFile(this.tid, this.lid, this.scriptFile)
       .subscribe(
         (res) => {
-          this.router.navigateByUrl("/view/" + this.id + "/" + this.tutorialName);
+          this.router.navigateByUrl("/view/" + this.tid + "/" + this.lid + "/" + this.tutorialName);
           new Noty({
             type: 'success',
             layout: 'topRight',
@@ -88,14 +89,14 @@ export class ScriptUploadComponent implements OnInit {
     // console.log(this.Htmldata);
     this.Htmldata = this.editorForm.get('data').value;
     this.createScriptService.postScript(
-      this.id,
+      this.tid, this.lid,
       {
         "details": this.Htmldata,
         "type": 'template'
       }
     ).subscribe(
       (res) => {
-        this.router.navigateByUrl("/view/" + this.id + "/" + this.tutorialName);
+        this.router.navigateByUrl("/view/" + this.tid + "/" + this.lid + "/" + this.tutorialName);
         new Noty({
           type: 'success',
           layout: 'topRight',
@@ -130,8 +131,9 @@ export class ScriptUploadComponent implements OnInit {
 
   ngOnInit() {
     this.route.params.subscribe(params => {
-      this.id = +params['id'];
+      this.tid = +params['tid'];
     });
+    this.lid = this.route.snapshot.params['lid']
     this.tutorialName = this.route.snapshot.params['tutorialName']
     this.editorForm = new FormGroup({
       'data': new FormControl()

@@ -22,7 +22,7 @@ export class TutorialsComponent implements OnInit {
 
 
   ngOnInit() {
-
+    console.log(this.tutorial)
   }
 
 }

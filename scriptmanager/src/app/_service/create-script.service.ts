@@ -9,13 +9,13 @@ export class CreateScriptService {
   public env =  environment;
   public apiUrl = this.env['apiUrlScript']
 
-  public getScript(tid){
-    const _url = `${this.apiUrl}/tutorial/${tid}/scripts/`
+  public getScript(tid, lid){
+    const _url = `${this.apiUrl}/tutorial/${tid}/language/${lid}/scripts/`
     return this.httpClient.get(_url);
   }
 
-  public postScript(tid,data) {
-    const _url = `${this.apiUrl}/tutorial/${tid}/scripts/`
+  public postScript(tid, lid, data) {
+    const _url = `${this.apiUrl}/tutorial/${tid}/language/${lid}/scripts/`
     var ls = this.httpClient.post(
       _url,
       data
@@ -23,8 +23,8 @@ export class CreateScriptService {
     return ls;
   }
 
-  public patchScript(tid,data) {
-    const _url = `${this.apiUrl}/tutorial/${tid}/scripts/`
+  public patchScript(tid, lid, data) {
+    const _url = `${this.apiUrl}/tutorial/${tid}/language/${lid}/scripts/`
     var ls = this.httpClient.patch(
       _url,
       data
@@ -32,8 +32,8 @@ export class CreateScriptService {
     return ls;
   }
 
-  public deleteScript(tid,srcipt_pk) {
-    const _url = `${this.apiUrl}/tutorial/${tid}/scripts/${srcipt_pk}/`
+  public deleteScript(tid, lid, srcipt_pk) {
+    const _url = `${this.apiUrl}/tutorial/${tid}/language/${lid}/scripts/${srcipt_pk}/`
     var ls = this.httpClient.delete(
       _url
     );

@@ -11,7 +11,8 @@ import * as Noty from 'noty';
 
 export class ScriptEditComponent implements OnInit {
   public slides: any = [];
-  private id: number;
+  private tid: number;
+  private lid: number;
   private scriptId: number;
   private orderId: number;
 
@@ -27,14 +28,14 @@ export class ScriptEditComponent implements OnInit {
     }
     
     else {
-      if (script['id'] == '') {
+      if (script['fid'] == '') {
         script['order'] = this.orderId + 1;
         script['script'] = this.scriptId;
         this.orderId = this.orderId + 1;
         // console.log(script)
 
         this.createscriptService.postScript(
-          this.id,
+          this.tid, this.lid,
           {
             "details": [script],
             "type" : 'form'
@@ -75,7 +76,7 @@ export class ScriptEditComponent implements OnInit {
 
       else {
         this.createscriptService.patchScript(
-          this.id, script
+          this.tid, this.lid, script
         ).subscribe(
           (res) => {
             new Noty({
@@ -115,7 +116,7 @@ export class ScriptEditComponent implements OnInit {
   }
 
   public getData() {
-    this.createscriptService.getScript(this.id).subscribe(
+    this.createscriptService.getScript(this.tid, this.lid).subscribe(
       (res) => {
         this.slides = res;
         this.scriptId = this.slides[0]['script'];
@@ -126,8 +127,10 @@ export class ScriptEditComponent implements OnInit {
 
   ngOnInit() {
     this.route.params.subscribe(params => {
-      this.id = +params['id'];
+      this.tid = +params['tid'];
     });
+    this.lid = this.route.snapshot.params['lid']
+
     this.getData();
   }
 
