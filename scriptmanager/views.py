@@ -23,7 +23,7 @@ def index(request):
 
 class ContributorRoleList(generics.ListAPIView):
   def get_queryset(self):
-      return ContributorRole.objects.filter(user = self.request.user)
+      return ContributorRole.objects.filter(user = self.request.user,status = True)
   serializer_class  =  ContributorRoleSerializer
 
 
