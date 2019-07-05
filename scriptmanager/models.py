@@ -4,8 +4,8 @@ from django.contrib.auth.models import User
 # Create your models here.
 
 class Scripts(models.Model):
-	tutorial = models.OneToOneField(TutorialDetail)
-	language = models.ForeignKey(Language,null = True)
+	tutorial = models.ForeignKey(TutorialDetail)
+	language = models.ForeignKey(Language)
 	status = models.BooleanField(default=False)
 	data_file = models.FileField(upload_to='scripts')
 	user = models.ForeignKey(User,related_name='user_id')
