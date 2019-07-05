@@ -11,7 +11,8 @@ import * as Noty from 'noty';
 
 export class ScriptCreateComponent implements OnInit {
   public slides: any = [];
-  private id: number;
+  private tid: number;
+  private lid: number;
   public tutorialName: any;
 
   constructor(
@@ -24,15 +25,15 @@ export class ScriptCreateComponent implements OnInit {
   public onSaveScript(script: any) {
     if (script['order'] == '') {
       if (script['narration'] != '') {
-        this.slides.push(
-          {
-            id: '',
-            cue: '',
-            narration: '',
-            order: '',
-            script: ''
-          }
-        )
+        // this.slides.push(
+        //   {
+        //     id: '',
+        //     cue: '',
+        //     narration: '',
+        //     order: '',
+        //     script: ''
+        //   }
+        // )
       }
     }
     else {
@@ -40,14 +41,14 @@ export class ScriptCreateComponent implements OnInit {
         script[i]['order'] = i + 1;
       }
       this.createscriptService.postScript(
-        this.id,
+        this.tid, this.lid,
         {
           "details": script,
           "type": 'form'
         }
       ).subscribe(
         (res) => {
-          this.router.navigateByUrl("/view/" + this.id + "/" + this.tutorialName);
+          this.router.navigateByUrl("/view/" + this.tid + "/" + this.lid + "/" + this.tutorialName);
           new Noty({
             type: 'success',
             layout: 'topRight',
@@ -84,8 +85,9 @@ export class ScriptCreateComponent implements OnInit {
 
   ngOnInit() {
     this.route.params.subscribe(params => {
-      this.id = +params['id'];
+      this.tid = +params['tid'];
     });
+    this.lid = this.route.snapshot.params['lid']
     this.tutorialName = this.route.snapshot.params['tutorialName']
   }
 

@@ -20,7 +20,8 @@ export interface DiffContent {
 export class ScriptViewComponent implements OnInit {
   public slides: any = [];
   public tutorials: any = [];
-  private id: number;
+  private tid: number;
+  private lid: number;
   public comment = false;
   public revision = false;
   public comments: any = [];
@@ -61,7 +62,7 @@ export class ScriptViewComponent implements OnInit {
 
   public viewScript() {
     this.createscriptService.getScript(
-      this.id
+      this.tid, this.lid
     ).subscribe(
       (res) => {
         this.slides = res;
@@ -201,10 +202,11 @@ export class ScriptViewComponent implements OnInit {
 
   ngOnInit() {
     this.route.params.subscribe(params => {
-      this.id = +params['id'];
+      this.tid = +params['tid'];
     });
-    this.viewScript();
+    this.lid = this.route.snapshot.params['lid'];
     this.tutorialName = this.route.snapshot.params['tutorialName'];
+    this.viewScript();
   }
 
   //diff on revisions

@@ -16,7 +16,7 @@ const routes: Routes = [
     }
   },
   {
-    path: 'create/:id/:tutorialName',
+    path: 'create/:tid/:lid/:tutorialName',
     component: ScriptCreateComponent,
     data: {
       title: 'Create Script',
@@ -24,7 +24,7 @@ const routes: Routes = [
     }
   },
   {
-    path: 'upload/:id/:tutorialName',
+    path: 'upload/:tid/:lid/:tutorialName',
     component: ScriptUploadComponent,
     data: {
       title: 'Upload Script',
@@ -33,7 +33,7 @@ const routes: Routes = [
   },
 
   {
-    path: 'edit/:id/:tutorialName',
+    path: 'edit/:tid/:lid/:tutorialName',
     component: ScriptEditComponent,
     data: {
       title: 'Edit Script',
@@ -41,7 +41,7 @@ const routes: Routes = [
     }
   },
   {
-    path: 'view/:id/:tutorialName',
+    path: 'view/:tid/:lid/:tutorialName',
     component: ScriptViewComponent,
     data: {
       title: 'Edit Script',

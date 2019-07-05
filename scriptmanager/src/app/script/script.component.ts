@@ -15,7 +15,8 @@ export class ScriptComponent implements OnInit {
   @Output() File = new EventEmitter<any>();
   @Input() nav: any;
   @Input() displaySave: boolean = false;
-  public id;
+  public tid;
+  public lid;
   public tutorialName: any;
 
   constructor(public router: Router, public route: ActivatedRoute, public createscriptService: CreateScriptService) { }
@@ -35,7 +36,7 @@ export class ScriptComponent implements OnInit {
   public onRemoveSlide(index) {
     if (this.slides[index]['id'] != '') {
       this.createscriptService.deleteScript(
-        this.id, this.slides[index]['id']
+        this.tid, this.lid, this.slides[index]['id']
       ).subscribe(
         (res) => {
           new Noty({
@@ -84,8 +85,9 @@ export class ScriptComponent implements OnInit {
   ngOnInit() {
     this.addSlide();
     this.route.params.subscribe(params => {
-      this.id = +params['id'];
+      this.tid = +params['tid'];
     });
+    this.lid = this.route.snapshot.params['lid']
     this.tutorialName = this.route.snapshot.params['tutorialName']
   }
 
