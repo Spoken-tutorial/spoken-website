@@ -1515,20 +1515,18 @@ def create_koha_9march_rc_certificate(certificate_path, name, qrcode, type, pape
         download_file_name = None
 
         if workshop == 'rcc':
-            # template = 'template_KMW9032019RCcertificate'
             usertype = 'Remote Centre Coordinator'
             download_file_name = 'KMW9032019RCcertificate.pdf'
 
         if workshop == 'cc':
-            # template = 'template_KMW9032019CCcertificate'
             usertype = 'Course Coordinator'
             download_file_name = 'KMW9032019CCcertificate.pdf'
 
         if workshop == 'sa':
-            # template = 'template_KMW9032019SAcertificate'
             usertype = 'System Administrator'
             download_file_name = 'KMW9032019SAcertificate.pdf'
 
+        template = 'template_KMW9032019RCcertificate'
         template_file = open('{0}{1}'.format
                              (certificate_path, template), 'r')
         content = Template(template_file.read())
