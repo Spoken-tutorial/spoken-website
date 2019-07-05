@@ -138,7 +138,7 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
 
 
 
-  def patch(self,request, tid):
+  def patch(self,request,tid,lid):
     try:
       tutorial=TutorialDetail.objects.get(pk = int(self.kwargs['tid']))
       language=Language.objects.get(pk = int(self.kwargs['lid']))
@@ -154,7 +154,7 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
       return Response({'status': False},status = 400) 
 
 
-  def delete(self,request,tid,script_detail_id):
+  def delete(self,request,tid,lid,script_detail_id):
     try:
       tutorial=TutorialDetail.objects.get(pk = int(self.kwargs['tid']))
       language=Language.objects.get(pk = int(self.kwargs['lid']))
@@ -214,8 +214,3 @@ class ReversionListView(generics.ListAPIView):
       return Response({'status': True},status = 201)
     except:
       return Response({'status': False},status = 400)
-
-
-
-
-       
