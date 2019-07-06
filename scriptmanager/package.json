@@ -26,7 +26,7 @@
     "@sweetalert2/ngx-sweetalert2": "^5.1.0",
     "angular-font-awesome": "^3.1.2",
     "animate.css": "^3.7.2",
-    "bootstrap": "^3.3.1",
+    "bootstrap": "^4.3.1",
     "bulma-divider": "^0.2.0",
     "bulma-helpers": "^0.3.8",
     "bulma-timeline": "^3.0.4",
