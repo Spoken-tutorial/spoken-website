@@ -10,8 +10,9 @@
 
         <div class="content" *ngIf="revisions">
           <div *ngFor="let revision of revisions; let i = index">
-            <a [ngClass]="i == 0 ? 'button is-success is-outlined': 'button is-text'" (click)="showRevisionModal(i)"><span>Revision {{ revisions.length - i }}
-              ({{ revision.date_time }})</span></a>
+            <a [ngClass]="i == 0 ? 'button is-success is-outlined': 'button is-text'" (click)="showRevisionModal(i)"
+              data-toggle="modal" data-target="#myModal"><span>Revision {{ revisions.length - i }}
+                ({{ revision.date_time }})</span></a>
             <span class="is-divider" style="margin:10px 0 20px 0;"></span>
           </div>
         </div>

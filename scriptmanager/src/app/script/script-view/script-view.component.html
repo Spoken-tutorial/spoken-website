@@ -26,40 +26,41 @@
 
       <div class="column is-8">
 
-        <div #newmodal class="modal">
+        <!-- The Modal -->
+        <div class="modal" id="myModal">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
 
-          <div class="modal-background"></div>
+              <!-- Modal Header -->
+              <div class="modal-header">
+                <h4 class="modal-title"><i class="fa fa-history"></i> Updated On:
+                  <em innerHTML="{{ revisions[index2]['date_time'] }}"></em></h4>
+              </div>
 
-          <div class="modal-content">
+              <!-- Modal body -->
+              <div class="modal-body">
+                <table class="table is-bordered">
+                  <tbody *ngIf="revisions">
+                    <tr>
+                      <th>Visual Cue</th>
+                      <th>Narration</th>
+                    </tr>
+                    <tr>
+                      <td processingDiff [left]="leftContentCue" [right]="rightContentCue"></td>
+                      <td processingDiff [left]="leftContentNarration" [right]="rightContentNarration"></td>
+                    </tr>
+                  </tbody>
+                </table>
+                <button class="button is-info is-outlined" (click)="revert(revisions[index2])">Revert Back to this
+                  Version</button>
+              </div>
 
-            <table class="table is-bordered">
-              <tbody *ngIf="revisions">
-                <tr>
-                  <td colspan="2"><small><i class="fa fa-history"></i> Updated On:
-                      <em innerHTML="{{ revisions[index2]['date_time'] }}"></em></small></td>
-                </tr>
-                <tr>
-                  <th>Visual Cue</th>
-                  <th>Narration</th>
-                </tr>
-                <tr>
-                  <td processingDiff [left]="leftContentCue" [right]="rightContentCue"></td>
-                  <td processingDiff [left]="leftContentNarration" [right]="rightContentNarration"></td>
-                </tr>
-              </tbody>
-            </table>
-
-            <button class="button heading" (click)="revert(revisions[index2])">Revert Back to this Version</button>
-
+            </div>
           </div>
-
-          <button class="modal-close is-large" aria-label="close" (click)="hideModal()"></button>
         </div>
-
 
         <div class="timeline">
           <div>
-
             <table #tableRow class="table is-bordered is-striped is-fullwidth">
               <tr>
                 <th>Sr. No.</th>
@@ -84,6 +85,7 @@
             </table>
           </div>
         </div>
+
       </div>
 
       <div *ngIf="comment" class="column">
@@ -94,7 +96,7 @@
         <app-script-revision [revisions]="revisions" (revisionEmitter)="viewModal($event)"></app-script-revision>
       </div>
 
-
     </div>
+
   </div>
 </div>
