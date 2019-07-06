@@ -21,10 +21,10 @@ import { ScriptRevisionComponent } from './script/script-revision/script-revisio
 import { ScriptUploadComponent } from './script/script-upload/script-upload.component';
 import { NgxDiffModule } from 'ngx-diff';
 import { NgxTextDiffModule } from 'ngx-text-diff';
+import { DiffMatchPatchModule } from 'ng-diff-match-patch';
 
 export function tokenGetter() {
   const token = localStorage.getItem('token');
-  // console.log(token)
   return token;
 }
 
@@ -60,7 +60,8 @@ export function tokenGetter() {
     SweetAlert2Module.forRoot(),
     CKEditorModule,
     NgxDiffModule,
-    NgxTextDiffModule
+    NgxTextDiffModule,
+    DiffMatchPatchModule
   ],
   providers: [],
   bootstrap: [AppComponent]

@@ -32,11 +32,6 @@
 
           <div class="modal-content">
 
-            <td-ngx-text-diff [left]="content.leftContent" [right]="content.rightContent" [loading]="!submitted"
-              [diffContent]="contentObservable$" [compareRowsStyle]="{'max-height': '500px', 'overflow': 'auto'}">
-              <!-- (compareResults)="onCompareResults($event)"> -->
-            </td-ngx-text-diff>
-
             <table class="table is-bordered">
               <tbody *ngIf="revisions">
                 <tr>
@@ -44,8 +39,12 @@
                       <em innerHTML="{{ revisions[index2]['date_time'] }}"></em></small></td>
                 </tr>
                 <tr>
-                  <td innerHTML="<strong>Cue :</strong> {{ revisions[index2]['cue'] }}"></td>
-                  <td innerHTML="<strong>Narration :</strong>{{ revisions[index2]['narration'] }}"></td>
+                  <th>Visual Cue</th>
+                  <th>Narration</th>
+                </tr>
+                <tr>
+                  <td processingDiff [left]="leftContentCue" [right]="rightContentCue"></td>
+                  <td processingDiff [left]="leftContentNarration" [right]="rightContentNarration"></td>
                 </tr>
               </tbody>
             </table>
@@ -58,15 +57,14 @@
         </div>
 
 
-
         <div class="timeline">
           <div>
+
             <table #tableRow class="table is-bordered is-striped is-fullwidth">
               <tr>
                 <th>Sr. No.</th>
                 <th>Visual Cue</th>
                 <th>Narration</th>
-                <!-- &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&0nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -->
               </tr>
               <tbody *ngFor="let slide of slides; let i = index">
                 <tr (mouseenter)='mouseenter(i)' (mouseleave)="mouseleave(i)">
@@ -95,6 +93,7 @@
       <div *ngIf="revision" class="column">
         <app-script-revision [revisions]="revisions" (revisionEmitter)="viewModal($event)"></app-script-revision>
       </div>
+
 
     </div>
   </div>

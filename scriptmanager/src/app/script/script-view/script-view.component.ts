@@ -34,20 +34,11 @@ export class ScriptViewComponent implements OnInit {
   public overVal: boolean[] = [false];
   public revision_old;
   public revision_new;
-
-  submitted = false;
-  content: DiffContent = {
-    leftContent: '',
-    rightContent: ''
-  };
-  options: any = {
-    lineNumbers: true,
-    mode: 'xml'
-  };
-
-  contentObservable: Subject<DiffContent> = new Subject<DiffContent>();
-  contentObservable$: Observable<DiffContent> = this.contentObservable.asObservable();
-
+  public leftContentCue = "";
+  public leftContentNarration = "";
+  public rightContentCue = "";
+  public rightContentNarration = "";
+  
   @Input() nav: any;
   @ViewChild('tableRow') el: ElementRef;
   @ViewChild('newmodal') el2: ElementRef;
@@ -126,20 +117,13 @@ export class ScriptViewComponent implements OnInit {
     }
   }
 
-  // public console(data) {
-  //   console.log(data);
-  //   return data;
-  // }
-
   public viewModal(index) {
     this.index2 = index;
 
-    // const text1 = $.trim($(this.revisions[index + 1]['cue']).text());
-    // const text2 = $.trim($(this.revisions[index]['cue']).text());
-
-    // this.content.leftContent = text1;
-    // this.content.rightContent = text2;
-    // this.submitComparison();
+    this.leftContentCue = this.revisions[index + 1]['cue'];
+    this.rightContentCue = this.revisions[index]['cue'];
+    this.leftContentNarration = this.revisions[index + 1]['narration'];
+    this.rightContentNarration = this.revisions[index]['narration'];
 
     this.el2.nativeElement.classList.add('is-active')
   }
@@ -207,27 +191,6 @@ export class ScriptViewComponent implements OnInit {
     this.lid = this.route.snapshot.params['lid'];
     this.tutorialName = this.route.snapshot.params['tutorialName'];
     this.viewScript();
-  }
-
-  //diff on revisions
-  public submitComparison() {
-    this.submitted = false;
-    this.contentObservable.next(this.content);
-    this.submitted = true;
-  }
-
-  public handleChange(side: 'left' | 'right', value: string) {
-    // console.log(side);
-    switch (side) {
-      case 'left':
-        this.content.leftContent = 'value';
-        break;
-      case 'right':
-        this.content.rightContent = value;
-        break;
-      default:
-        break;
-    }
   }
 
 }
