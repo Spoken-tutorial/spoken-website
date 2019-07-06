@@ -131,6 +131,7 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
       if serialized.is_valid():
         serialized.save()
         return Response({'status': True},status = 201)
+      return Response({'status': False},status = 400)       
     except:
       if type=='file':
         os.system('rm '+ doc_file + ' '+html_file)
@@ -149,7 +150,8 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
       serializer  =  ScriptsDetailSerializer(script, data = script_details)
       if serializer.is_valid():
         serializer.save()
-      return Response({'status': True},status = 200)
+        return Response({'status': True},status = 200)
+      return Response({'status': False},status = 400)       
     except:
       return Response({'status': False},status = 400) 
 
