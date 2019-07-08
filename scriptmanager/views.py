@@ -81,10 +81,13 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
     return details
 
   def get_queryset(self): 
-    tutorial=TutorialDetail.objects.get(pk = int(self.kwargs['tid']))
-    language=Language.objects.get(pk = int(self.kwargs['lid']))
-    script = Scripts.objects.get(tutorial = tutorial,language = language,user=self.request.user)
-    return ScriptDetails.objects.filter(script = script)
+    try:
+      tutorial=TutorialDetail.objects.get(pk = int(self.kwargs['tid']))
+      language=Language.objects.get(pk = int(self.kwargs['lid']))
+      script = Scripts.objects.get(tutorial = tutorial,language = language,user=self.request.user)
+      return ScriptDetails.objects.filter(script = script)
+    except:
+      return None
 
   def create(self, request,tid,lid):
     details=[]
@@ -214,6 +217,17 @@ class ReversionListView(generics.ListAPIView):
       script_detail=ScriptDetails.objects.get(pk=int(self.kwargs['script_detail_id']))
       reversion_data = Version.objects.get_for_object(script_detail)
       reversion_data[request.data['reversion_id']-1].revision.revert()
+      return Response({'status': True},status = 201)
+    except:
+      return Response({'status': False},status = 400)
+
+
+class ReversionRevertView(generics.CreateAPIView):
+  def patch(self,request,script_detail_id,reversion_id):
+    try:
+      script_detail=ScriptDetails.objects.get(pk=int(self.kwargs['script_detail_id']))
+      reversion_data = Version.objects.get_for_object(script_detail)
+      reversion_data[int(self.kwargs['script_detail_id'])-1].revision.revert()
       return Response({'status': True},status = 201)
     except:
       return Response({'status': False},status = 400)

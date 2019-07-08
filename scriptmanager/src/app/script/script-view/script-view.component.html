@@ -26,37 +26,35 @@
 
       <div class="column is-8">
 
-        <!-- The Modal -->
-        <div class="modal" id="myModal">
-          <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
+        <div #newmodal class="modal">
 
-              <!-- Modal Header -->
-              <div class="modal-header">
-                <h4 class="modal-title"><i class="fa fa-history"></i> Updated On:
-                  <em innerHTML="{{ revisions[index2]['date_time'] }}"></em></h4>
-              </div>
+          <div class="modal-background"></div>
 
-              <!-- Modal body -->
-              <div class="modal-body">
-                <table class="table is-bordered">
-                  <tbody *ngIf="revisions">
-                    <tr>
-                      <th>Visual Cue</th>
-                      <th>Narration</th>
-                    </tr>
-                    <tr>
-                      <td processingDiff [left]="leftContentCue" [right]="rightContentCue"></td>
-                      <td processingDiff [left]="leftContentNarration" [right]="rightContentNarration"></td>
-                    </tr>
-                  </tbody>
-                </table>
-                <button class="button is-info is-outlined" (click)="revert(revisions[index2])">Revert Back to this
-                  Version</button>
-              </div>
+          <div class="modal-content">
 
-            </div>
+            <h3>&nbsp;<i class="fa fa-history"></i> Updated On: {{ revisions[index2]['date_time'] }}</h3>
+            <table class="table is-bordered">
+              <tbody *ngIf="revisions">
+                <tr>
+                  <td colspan="2"><small></small></td>
+                </tr>
+                <tr>
+                  <th>Visual Cue</th>
+                  <th>Narration</th>
+                </tr>
+                <tr>
+                  <td><div processingDiff [left]="leftContentCue" [right]="rightContentCue"></div></td>
+                  <td><div processingDiff [left]="leftContentNarration" [right]="rightContentNarration"></div></td>
+                </tr>
+              </tbody>
+            </table>
+
+            <button class="button heading is-outlined is-info" (click)="revert(revisions[index2])">Revert Back to this Version</button>
+
           </div>
+
+          <button class="modal-close is-large" aria-label="close" (click)="hideModal()"></button>
+
         </div>
 
         <div class="timeline">

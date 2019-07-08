@@ -18,6 +18,7 @@ export class ScriptSlideComponent implements OnInit {
   public comment = false;
   public ckEditorCue: boolean = false;
   public ckEditorNarration: boolean = false;
+
   editorForm: FormGroup;
 
   public Editor = ClassicEditor;
