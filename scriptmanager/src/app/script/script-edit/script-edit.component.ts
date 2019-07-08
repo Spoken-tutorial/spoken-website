@@ -22,6 +22,9 @@ export class ScriptEditComponent implements OnInit {
     public router: Router
   ) { }
 
+  // argument:contains the data of the cue and narration which is entered by the user while creating the script
+  // what it does:takes the data and make an api call(POST request) so as to save that data to database
+  // returns: status==success if data is saved successfully and status=false if data couldn't saved successfully because of some reason 
   public onSaveScript(script: any) {
     if (script['cue'] == '' || script['narration'] == '') {
       return // Do nothing
@@ -115,6 +118,9 @@ export class ScriptEditComponent implements OnInit {
 
   }
 
+  // argument:tutorial id and 
+  // what it does:
+  // returns: status==success if data is saved successfully and status=false if data couldn't saved successfully because of some reason 
   public getData() {
     this.createscriptService.getScript(this.tid, this.lid).subscribe(
       (res) => {
@@ -127,9 +133,9 @@ export class ScriptEditComponent implements OnInit {
 
   ngOnInit() {
     this.route.params.subscribe(params => {
-      this.tid = +params['tid'];
+      this.tid = +params['tid'];//tid is tutorial id
     });
-    this.lid = this.route.snapshot.params['lid']
+    this.lid = this.route.snapshot.params['lid']//lid is language id
 
     this.getData();
   }

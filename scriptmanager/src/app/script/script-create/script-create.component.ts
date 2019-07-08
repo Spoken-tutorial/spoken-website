@@ -87,9 +87,9 @@ export class ScriptCreateComponent implements OnInit {
 
   ngOnInit() {
     this.route.params.subscribe(params => {
-      this.tid = +params['tid'];
+      this.tid = +params['tid'];//tid is tutorial id
     });
-    this.lid = this.route.snapshot.params['lid']//lid contains the tutorial id
+    this.lid = this.route.snapshot.params['lid']//lid contains the language id
     this.tutorialName = this.route.snapshot.params['tutorialName']//tutorial name contains the tutorial name corresponding to the tutorial id
   }
 
