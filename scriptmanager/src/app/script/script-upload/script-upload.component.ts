@@ -30,7 +30,9 @@ export class ScriptUploadComponent implements OnInit {
     public uploadfileService: UploadFileService,
     public createScriptService: CreateScriptService
   ) { }
-
+  // argument:called on click of submit button
+  // what it does: make an api call(POST request) with the file variable containing the latest file selected by the user. 
+  // returns: void
   public onFileSave() {
     console.log(this.scriptFile)
     this.uploadfileService.postFile(this.tid, this.lid, this.scriptFile)
@@ -69,7 +71,9 @@ export class ScriptUploadComponent implements OnInit {
       )
 
   }
-
+  // argument:file which is uploaded by the user
+  // what it does: updates the file variable with the recent file selected by the user and validates for valid extensions 
+  // returns: void
   public onFileChange(file) {
     this.scriptFile = file.target.files[0];
     this.scriptFileName = file.target.files[0].name;
@@ -84,7 +88,9 @@ export class ScriptUploadComponent implements OnInit {
     }
 
   }
-
+  // argument:HTML data which is pasted by the user in the editor(user pastes the whole table in the editor)
+  // what it does : makes an api call (POST request)  with the html data so that server saves the whole table 
+  // returns: Gives a green notification on success otherwise a red notification
   public saveHtmlData() {
     // console.log(this.Htmldata);
     this.Htmldata = this.editorForm.get('data').value;
@@ -135,6 +141,7 @@ export class ScriptUploadComponent implements OnInit {
     });
     this.lid = this.route.snapshot.params['lid']
     this.tutorialName = this.route.snapshot.params['tutorialName']
+    //editorform holds the html data
     this.editorForm = new FormGroup({
       'data': new FormControl()
     })
