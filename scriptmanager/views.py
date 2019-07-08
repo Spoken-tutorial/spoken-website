@@ -81,10 +81,13 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
     return details
 
   def get_queryset(self): 
-    tutorial=TutorialDetail.objects.get(pk = int(self.kwargs['tid']))
-    language=Language.objects.get(pk = int(self.kwargs['lid']))
-    script = Scripts.objects.get(tutorial = tutorial,language = language,user=self.request.user)
-    return ScriptDetails.objects.filter(script = script)
+    try:
+      tutorial=TutorialDetail.objects.get(pk = int(self.kwargs['tid']))
+      language=Language.objects.get(pk = int(self.kwargs['lid']))
+      script = Scripts.objects.get(tutorial = tutorial,language = language,user=self.request.user)
+      return ScriptDetails.objects.filter(script = script)
+    except:
+      return None
 
   def create(self, request,tid,lid):
     details=[]
