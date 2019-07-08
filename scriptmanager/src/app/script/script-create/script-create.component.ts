@@ -21,7 +21,9 @@ export class ScriptCreateComponent implements OnInit {
     public router: Router
   ) { }
 
-
+  // argument:contains the data of the cue and narration which is entered by the user while creating the script
+  // what it does:takes the data and make an api call(POST request) so as to save that data to database
+  // returns: status==success if data is saved successfully and status=false if data couldn't saved successfully because of some reason 
   public onSaveScript(script: any) {
     if (script['order'] == '') {
       if (script['narration'] != '') {
@@ -87,8 +89,8 @@ export class ScriptCreateComponent implements OnInit {
     this.route.params.subscribe(params => {
       this.tid = +params['tid'];
     });
-    this.lid = this.route.snapshot.params['lid']
-    this.tutorialName = this.route.snapshot.params['tutorialName']
+    this.lid = this.route.snapshot.params['lid']//lid contains the tutorial id
+    this.tutorialName = this.route.snapshot.params['tutorialName']//tutorial name contains the tutorial name corresponding to the tutorial id
   }
 
 }
