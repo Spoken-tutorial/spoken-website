@@ -33,7 +33,7 @@
 
               <!-- Modal Header -->
               <div class="modal-header">
-                <h4 class="modal-title"><i class="fa fa-history"></i> Updated On:
+                <h4 *ngIf="index2 != 0" class="modal-title"><i class="fa fa-history"></i> Updated On:
                   <em innerHTML="{{ revisions[index2]['date_time'] }}"></em></h4>
               </div>
 

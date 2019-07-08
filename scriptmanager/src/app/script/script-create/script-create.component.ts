@@ -21,7 +21,6 @@ export class ScriptCreateComponent implements OnInit {
     public router: Router
   ) { }
 
-
   public onSaveScript(script: any) {
     if (script['order'] == '') {
       if (script['narration'] != '') {
