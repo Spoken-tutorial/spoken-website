@@ -123,7 +123,7 @@ urlpatterns = [
     # reports
     url(r'^reports/', include('reports.urls', namespace='reports')),
     url(r'^scripts/', include('scriptmanager.urls', namespace='scripts')),
-    url(r'^api-token-auth/', obtain_jwt_token),
+    url(r'^api-token-auth/', obtain_jwt_token,name='jwt_token'),
     # events2
     # url(r'^events2/', include('events2.urls', namespace='events2')),
 
