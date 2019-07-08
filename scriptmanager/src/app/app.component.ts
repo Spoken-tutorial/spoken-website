@@ -3,6 +3,7 @@ import { RouterOutlet } from '@angular/router';
 import { routerTransition } from './animations';
 import { AuthService } from './_service/auth.service';
 import { environment } from '../environments/environment';
+import { Server } from 'net';
 
 @Component({
   selector: 'app-root',
@@ -17,6 +18,8 @@ export class AppComponent {
 
   constructor(private authService: AuthService) {
     if (environment.production == false) {
+      // when we are working on the angular Server, we have to make an api call to get the jwt token and we are storing 
+      // that token in localstorage
       this.authService.getJwtToken().subscribe(
         (res) => {
           localStorage.removeItem('fossIndex');

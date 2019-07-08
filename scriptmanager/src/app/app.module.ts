@@ -22,7 +22,8 @@ import { ScriptUploadComponent } from './script/script-upload/script-upload.comp
 import { NgxDiffModule } from 'ngx-diff';
 import { NgxTextDiffModule } from 'ngx-text-diff';
 import { DiffMatchPatchModule } from 'ng-diff-match-patch';
-
+// since we are saving the JWT token for authentication in the local storage 
+// , here we get that token to send it with each api call to authenticate with the server
 export function tokenGetter() {
   const token = localStorage.getItem('token');
   return token;
