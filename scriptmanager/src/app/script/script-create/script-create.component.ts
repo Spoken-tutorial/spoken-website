@@ -25,21 +25,27 @@ export class ScriptCreateComponent implements OnInit {
   public onSaveScript(script: any) {
     if (script['order'] == '') {
       if (script['narration'] != '') {
-        // this.slides.push(
-        //   {
-        //     id: '',
-        //     cue: '',
-        //     narration: '',
-        //     order: '',
-        //     script: ''
-        //   }
-        // )
+        this.slides.push(
+          {
+            id: '',
+            cue: '',
+            narration: '',
+            order: '',
+            script: ''
+          }
+        )
       }
     }
     else {
       for (var i = 0; i < script.length; i++) {
-        script[i]['order'] = i + 1;
+        if (script[i]['cue'] == '' && script[i]['narration'] == '') {
+          script.splice(i, 1);
+        }
+        else {
+          script[i]['order'] = i + 1;
+        }
       }
+
       this.createscriptService.postScript(
         this.tid, this.lid,
         {
