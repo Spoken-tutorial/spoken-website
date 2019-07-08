@@ -22,7 +22,7 @@
           <p class="heading">Visual Cue</p>
           <div class="field">
             <div class="control content">
-              
+              <!-- nav == create means this component is called from script create component -->
               <div *ngIf="nav=='create'">
                   <ckeditor tagName="textarea" [config]="ckeditorConfig" [editor]="Editor"
                   formControlName="cue" [(ngModel)]="slide.cue" (onKeyup)="cueKey($event)" (blur)="saveSlide()">

@@ -27,10 +27,13 @@ export class ScriptSlideComponent implements OnInit {
 
   constructor() { }
 
+  // argument:void
+  // what it does:tells script component the index of the array so that script component can delete that element from the array.
+  // returns: void
   public removeSlide() {
     this.removeSlideEmitter.emit(this.index);
   }
-
+  
   public checkSlide() {
     this.oldSlide.cue = this.slide.cue;
     this.oldSlide.narration = this.slide.narration;
