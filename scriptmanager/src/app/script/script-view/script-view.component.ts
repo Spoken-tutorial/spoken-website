@@ -3,13 +3,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { CreateScriptService } from '../../_service/create-script.service';
 import { CommentsService } from '../../_service/comments.service';
 import { RevisionsService } from '../../_service/revisions.service';
-import { Observable, Subject } from 'rxjs';
-import * as $ from 'jquery';
-
-export interface DiffContent {
-  leftContent: string;
-  rightContent: string;
-}
 
 @Component({
   selector: 'app-script-view',
@@ -41,7 +34,6 @@ export class ScriptViewComponent implements OnInit {
   
   @Input() nav: any;
   @ViewChild('tableRow') el: ElementRef;
-  @ViewChild('newmodal') el2: ElementRef;
 
   constructor(
     private route: ActivatedRoute,
@@ -124,12 +116,6 @@ export class ScriptViewComponent implements OnInit {
     this.rightContentCue = this.revisions[index]['cue'];
     this.leftContentNarration = this.revisions[index + 1]['narration'];
     this.rightContentNarration = this.revisions[index]['narration'];
-
-    this.el2.nativeElement.classList.add('is-active')
-  }
-
-  public hideModal() {
-    this.el2.nativeElement.classList.remove('is-active')
   }
 
   public getRevison(i) {
