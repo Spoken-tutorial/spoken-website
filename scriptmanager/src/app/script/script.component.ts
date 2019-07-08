@@ -2,7 +2,7 @@ import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { Router } from "@angular/router";
 import { ActivatedRoute } from '@angular/router';
 import { CreateScriptService } from 'src/app/_service/create-script.service';
-
+// This component is called by create and edit components for major functioning
 @Component({
   selector: 'app-script',
   templateUrl: './script.component.html',
@@ -20,7 +20,7 @@ export class ScriptComponent implements OnInit {
   public tutorialName: any;
 
   constructor(public router: Router, public route: ActivatedRoute, public createscriptService: CreateScriptService) { }
-
+//what it does: add more slides on clicking on plus icon
   public addSlide() {
     this.slides.push(
       {
@@ -32,7 +32,7 @@ export class ScriptComponent implements OnInit {
       }
     );
   }
-
+//remove slides after clicking on cross icon
   public onRemoveSlide(index) {
     if (this.slides[index]['id'] != '') {
       this.createscriptService.deleteScript(
@@ -73,11 +73,11 @@ export class ScriptComponent implements OnInit {
     };
     this.slides.splice(index, 1);
   }
-
+//calles the component which called script component and gives the slides array which needs to be saved in the database.
   public saveScript() {
     this.onSaveScript.emit(this.slides);
   }
-
+//saves a particular slide
   public onSaveSlide(slide) {
     this.onSaveScript.emit(slide);
   }
