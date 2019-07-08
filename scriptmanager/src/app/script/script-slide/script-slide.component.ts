@@ -14,6 +14,7 @@ export class ScriptSlideComponent implements OnInit {
   @Output() removeSlideEmitter = new EventEmitter<number>();
   @Output() saveSlideEmitter = new EventEmitter<any>();
   @Input() view: boolean = false;
+  @Input() nav:any;
   public comment = false;
   public ckEditorCue: boolean = false;
   public ckEditorNarration: boolean = false;
@@ -68,6 +69,7 @@ export class ScriptSlideComponent implements OnInit {
       'narration': new FormControl()
     })
     this.checkSlide()
+    console.log(this.nav)
   }
 
 }
