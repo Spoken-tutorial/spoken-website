@@ -220,3 +220,14 @@ class ReversionListView(generics.ListAPIView):
       return Response({'status': True},status = 201)
     except:
       return Response({'status': False},status = 400)
+
+
+class ReversionRevertView(generics.CreateAPIView):
+  def patch(self,request,script_detail_id,reversion_id):
+    try:
+      script_detail=ScriptDetails.objects.get(pk=int(self.kwargs['script_detail_id']))
+      reversion_data = Version.objects.get_for_object(script_detail)
+      reversion_data[int(self.kwargs['script_detail_id'])-1].revision.revert()
+      return Response({'status': True},status = 201)
+    except:
+      return Response({'status': False},status = 400)
