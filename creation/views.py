@@ -4039,13 +4039,16 @@ def get_quality_languages(request, uid):
                         content_type = 'application/json')
 
 @csrf_exempt
-def get_tutorials(request, fid):
+def get_tutorials(request, fid, lang):
     level = {1: '(B)', 2: '(I)', 3: '(A)'}
     data = '<option> --- Select a Tutorial ---  </option>'
     tuto_available = \
-        TutorialsAvailable.objects.filter(tutorial_detail_id__in = TutorialDetail.objects.filter(foss_id = int(fid)).values('id'
-                                                                                                                        )).distinct().values_list('tutorial_detail_id',
-                                                                                                                                                  'tutorial_detail_id__tutorial', 'tutorial_detail__level')
+        TutorialsAvailable.objects.filter(language=lang, 
+            tutorial_detail_id__in = TutorialDetail.objects.filter(
+                foss_id = int(fid)).values('id')
+            ).distinct().values_list('tutorial_detail_id',
+            'tutorial_detail_id__tutorial', 'tutorial_detail__level')
+
     for a_tutorial in tuto_available:
         data += '<option value = ' + str(a_tutorial[0]) + '>' \
             + str(a_tutorial[1]) + ' ' + str(level[a_tutorial[2]]) \

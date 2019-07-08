@@ -15,16 +15,21 @@ $(document).ready(function(){
    	});
 
     $('#id_foss_category').change(function(){
-    var fid  = $('#id_foss_category').val(); 
-    $.ajax({
+    var fid  = $('#id_foss_category').val();
+    var lang = $('#id_language').val();
+    if (lang)
+      {
+
+      $.ajax({
                 type : "POST",
-                url:"/creation/get_tutorials/"+fid,
+                url:"/creation/get_tutorials/"+fid+"/"+lang,
                 dataType : "json",                
                 success: function(data)
                 { 
                     $('#id_tutorial_detail').html(data);
                 }
               });
+      }
     });
     
 });

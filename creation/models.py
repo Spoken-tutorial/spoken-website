@@ -232,9 +232,9 @@ class ArchivedVideo(models.Model):
 
 
 class ContributorRole(models.Model):
-    foss_category = models.ForeignKey(FossCategory, on_delete=models.PROTECT )
-    language = models.ForeignKey(Language, on_delete=models.PROTECT )
     user = models.ForeignKey(User, on_delete=models.PROTECT )
+    language = models.ForeignKey(Language, on_delete=models.PROTECT )
+    foss_category = models.ForeignKey(FossCategory, on_delete=models.PROTECT )        
     tutorial_detail = models.ForeignKey(TutorialDetail, null=True)
     status = models.BooleanField()
     created = models.DateTimeField(auto_now_add=True)
@@ -251,9 +251,9 @@ class ContributorRole(models.Model):
     
 
 class DomainReviewerRole(models.Model):
-    foss_category = models.ForeignKey(FossCategory, on_delete=models.PROTECT )
-    language = models.ForeignKey(Language, on_delete=models.PROTECT )
     user = models.ForeignKey(User, on_delete=models.PROTECT )
+    language = models.ForeignKey(Language, on_delete=models.PROTECT )    
+    foss_category = models.ForeignKey(FossCategory, on_delete=models.PROTECT )    
     status = models.BooleanField()
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -268,9 +268,9 @@ class DomainReviewerRole(models.Model):
 
 
 class QualityReviewerRole(models.Model):
-    foss_category = models.ForeignKey(FossCategory, on_delete=models.PROTECT )
-    language = models.ForeignKey(Language, on_delete=models.PROTECT )
     user = models.ForeignKey(User, on_delete=models.PROTECT )
+    language = models.ForeignKey(Language, on_delete=models.PROTECT )
+    foss_category = models.ForeignKey(FossCategory, on_delete=models.PROTECT )
     status = models.BooleanField()
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
