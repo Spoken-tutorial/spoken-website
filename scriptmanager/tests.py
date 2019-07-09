@@ -44,6 +44,7 @@ class TestScriptmanagerAPI(APITestCase):
         self.assertEqual(Language.objects.count(), 3)
         self.assertEqual(FossCategory.objects.count(), 3)
         self.assertEqual(ContributorRole.objects.count(),3)
+        self.assertEqual(TutorialDetail.objects.count(),2)
 
     def test_get_jwt(self):
         #check jwt token is retured or not
@@ -52,29 +53,26 @@ class TestScriptmanagerAPI(APITestCase):
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_get_foss(self):
-        #verify the data
+    def test_scripts_module(self):
         self.client.login(username='test1', password='Test@123')
-        response =self.client.get("/scripts/api/foss/")
-        self.assertEqual(response.data[0]['foss_category']['id'],self.foss1.pk)
-        self.var['fid']=str(response.data[0]['foss_category']['id'])
-        self.var['lid']=str(response.data[0]['language']['id'])
+
+        #get the foss
+        foss_url="/scripts/api/foss/"
+        response =self.client.get(foss_url)
+        fid=response.data[0]['foss_category']['id']
+        lid=response.data[0]['language']['id']
+        self.assertEqual(fid,self.foss1.pk)
+        self.assertEqual(lid,self.lang1.pk)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.client.logout()
-
-        #verify wrong data
-        self.client.login(username='test4', password='Test@123')
-        response =self.client.get("/scripts/api/foss/")
-        self.assertEqual(len(response.data),0)
-        self.client.logout()
-
-    def test_get_tutorial_details(self):
-        #verify the data
-        self.client.login(username='test1', password='Test@123')
-        response = self.client.get("/scripts/api/foss/"+self.var['fid']+"/language/"+self.var['lid']+"/tutorials/")
-        print(response.data)
-
-
+        
+        #get the tutorials for a foss category
+        tutorial_url="/scripts/api/foss/"+str(fid)+"/language/"+str(lid)+"/tutorials/"
+        response =self.client.get(tutorial_url)
+        fid=response.data[0]['foss']
+        lid=response.data[0]['language']
+        self.assertEqual(fid,self.foss1.pk)
+        self.assertEqual(lid,self.lang1.pk)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 
 

@@ -48,11 +48,10 @@ class TutorialDetailSerializer(serializers.ModelSerializer):
       
     def get_outline(self,instance):
         lang=Language.objects.filter(id=self.context.get('lang'))
-        data = TutorialResource.objects.filter(tutorial_detail=instance,language=lang)
-        if data:
-          return data[0].outline
+        if TutorialResource.objects.filter(tutorial_detail=instance,language=lang).exists():
+          return TutorialResource.objects.filter(tutorial_detail=instance,language=lang).outline
         else:
-          return None 
+          return None
 
     def get_language(self,instance):
         lang_id=self.context.get('lang')
