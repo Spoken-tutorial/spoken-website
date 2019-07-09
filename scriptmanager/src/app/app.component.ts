@@ -3,7 +3,6 @@ import { RouterOutlet } from '@angular/router';
 import { routerTransition } from './animations';
 import { AuthService } from './_service/auth.service';
 import { environment } from '../environments/environment';
-import { Server } from 'net';
 
 @Component({
   selector: 'app-root',
