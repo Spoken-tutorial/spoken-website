@@ -31,7 +31,7 @@ export class ScriptEditComponent implements OnInit {
     }
     
     else {
-      if (script['fid'] == '') {
+      if (script['id'] == '') {
         script['order'] = this.orderId + 1;
         script['script'] = this.scriptId;
         this.orderId = this.orderId + 1;
