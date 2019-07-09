@@ -1,7 +1,8 @@
 # Create your tests here.
 from django.test import TestCase
 
-
+from django.test import Client
+from rest_framework.test import APIClient
 from creation.models import ContributorRole, FossCategory, Language, TutorialDetail,TutorialResource,FossSuperCategory
 from scriptmanager.models import Scripts, ScriptDetails, Comments
 from django.contrib.auth.models import User
@@ -11,47 +12,56 @@ from rest_framework.test import APITestCase
 
 
 class TestScriptmanagerAPI(APITestCase):
-    jwt_token=" "
-    users=[]
-    lang_obj=[]
-    foss_obj=[]
+    client = APIClient()
     
 
     def setUp(self):
         #create user
-        user=["admin","test1","test2"]
-        for x in user:
-            self.users.append(User.objects.create_user(x, "test@test.in", "Test@123"))
+        # user=["admin","test1","test2"]
+        # for x in user:
+        #     self.users.append(User.objects.create_user(x, "test@test.in", "Test@123"))
 
-        #create languge
-        lang=["Tamil","English","Kannada","Telugu","Hindi"]
-        lang_code=["ta","en","kn","te","hi"]
-        for x in range(len(lang)):
-            self.lang_obj.append(Language.objects.create(name=lang[x],user=self.users[0],code=lang_code[x]))
 
-        #create foss
-        foss_data=["Blender","Firefox","GIMP","Drupal","Java"]
-        for x in foss_data:
-            self.foss_obj.append(FossCategory.objects.create(foss=x,status=True,user=self.users[0]))
+        test1=User.objects.create_user("test1", "test2@test2.in", "Test@123")
+        test2=User.objects.create_user("test2", "test2@test2.in", "Test@123")
+        test3=User.objects.create_user("test3", "test2@test2.in", "Test@123")
 
-        #create contributor role
-        for x in self.foss_obj:
-            for y in self.lang_obj:
-                ContributorRole.objects.create(foss_category=x,language=y,user=self.users[0],status=True)
+
+        lang1=Language.objects.create(name="test_Tamil",user=test1)
+        lang2=Language.objects.create(name="test_English",user=test2)
+        lang3=Language.objects.create(name="test_Kannada",user=test3)
+
+
+        self.foss1=FossCategory.objects.create(foss="test_Blender",description="testing data",status=True,user=test1)
+        foss2=FossCategory.objects.create(foss="test_Python",description="testing data",status=True,user=test1)
+        foss3=FossCategory.objects.create(foss="test_Advanced C++",description="testing data",status=True,user=test1)
+
+        cont1 = ContributorRole.objects.create(foss_category=self.foss1,language=lang1,user=test1,status=True)
+        cont2 = ContributorRole.objects.create(foss_category=foss2,language=lang2,user=test2,status=True)
+        cont3 = ContributorRole.objects.create(foss_category=foss3,language=lang3,user=test3,status=True)
 
         #test objects are created
         self.assertEqual(User.objects.count(), 3)
-        self.assertEqual(Language.objects.count(), 5)
-        self.assertEqual(FossCategory.objects.count(), 5)
-        self.assertEqual(ContributorRole.objects.count(), 25)
+        self.assertEqual(Language.objects.count(), 3)
+        self.assertEqual(FossCategory.objects.count(), 3)
+        self.assertEqual(ContributorRole.objects.count(),3)
 
     def test_get_jwt(self):
         url = reverse("jwt_token")
-        data = {'username': 'test1', 'password': 'Test@123'}
+        data = {'username': 'test1', 'password': 'Test@123'}        
         response = self.client.post(url, data, format='json')
-        self.jwt_token=(response.data['token'])
-        print(self.jwt_token)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+
+    def test_get_foss(self):
+        self.client.login(username='test1', password='Test@123')
+        response =self.client.get("/scripts/api/foss/")
+        self.assertEqual(response.data[0]['foss_category']['id'],self.foss1.pk)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.client.logout()
+
+
+        
 
 
 
