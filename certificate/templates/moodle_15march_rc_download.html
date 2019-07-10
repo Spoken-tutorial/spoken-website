@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% block header%}
+    <h1> Moodle main Workshop 15 March 2019</h1>
+{% endblock %}
+{% block content %}
+          <div class="modal fade" id="invalidModal" tabindex="-1" role="dialog" aria-labelledby="invalidModalLabel" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title" id="invalidModalLabel">Invalid User/Email</h4>
+                  </div>
+                  <div class="modal-body">
+                      {% if notregistered == 1 %}
+                        Please enter a proper email address.
+                      {% endif %}
+                  </div>
+                </div>
+              </div>
+          </div>
+
+          <div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="errorModalLabel" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title" id="invalidModalLabel">Problem in downloading</h4>
+                  </div>
+                  <div class="modal-body">
+                        Sorry could not process your certificate. Kindly contact the Spoken-Tutorial team.
+                  </div>
+                </div>
+              </div>
+          </div>
+
+          <div class="row">
+          <form class="col-lg-12" action="{% url 'certificate:moodle_15marchrc_certificate_download' %}" method="post">
+            {% csrf_token %}
+            {{ message }}
+            <hr>
+            <div align="center">
+              <h4>To download the certificate kindly click on the appropriate green block</h4>
+            </div><hr>
+
+            <div id="showrcc" class="well" style="background: #C6CF85  ; ">
+              <h4><b>To download 15 March Moodle Remote Workshop Remote Centre Coordinator certificate click here :</b></h4>
+            </div>
+            <div id="rccdiv" class="input-group" style="text-align:center;margin:auto; display:none;">
+              <input style="" class="form-control input-lg" placeholder="Enter the email address you used for registration" type="text" id="emailrcc" name=emailrcc>
+                <span class="input-group-btn"><button class="btn btn-lg btn-primary" type="submit">Download Certificate</button></span>
+            </div>
+
+
+            <hr>
+
+            <div id="showcc" class="well" style="background: #C6CF85;">
+              <h4><b>To download 15 March Moodle Remote  Workshop Workshop Coordinator certificate click here:</b></h4>
+            </div>
+            <div id="ccdiv" class="input-group" style="text-align:center;margin:0 auto; display:none;">
+            <input style="" class="form-control input-lg" placeholder="Enter the email address you used for registration" type="text" id="emailcc" name=emailcc>
+              <span class="input-group-btn"><button class="btn btn-lg btn-primary" type="submit">Download Certificate</button></span>
+            </div>        
+            
+
+            <hr>
+
+
+            <div id="showsa" class="well" style="background: #C6CF85;">
+              <h4><b>To download 15 March Moodle Remote  Workshop System Administrator certificate click here:</b></h4>
+            </div>
+            <div id="sadiv" class="input-group" style="text-align:center;margin:0 auto; display:none;">
+            <input style="" class="form-control input-lg" placeholder="Enter the email address you used for registration" type="text" id="emailsa" name=emailsa>
+              <span class="input-group-btn"><button class="btn btn-lg btn-primary" type="submit">Download Certificate</button></span>
+            </div>
+          </form>
+        </div>
+        <br>
+        <div align="center"><h4>Problem in downloading the certificate? Write to us at <a href="mailto:workshops@spoken-tutorial.org">workshop[at]spoken-tutorial[dot]org</a></h4></div>
+
+          
+{% endblock %}
+
+{% block jsblock %}
+<script>
+    $(document).ready(function(){
+      $('#showrcc').click(function() {
+        $("#rccdiv").show();
+        $('#ccdiv').hide();
+        $('#emailcc').val("");
+        $('#sadiv').hide();
+        $('#emailsa').val("");
+      });
+
+      $('#showcc').click(function() {
+        $('#ccdiv').show();
+        $("#rccdiv").hide();
+        $('#emailrcc').val("");
+        $("#sadiv").hide();
+        $('#emailsa').val("");
+        
+      });
+
+      $('#showsa').click(function() {
+        $('#sadiv').show();
+        $("#rccdiv").hide();
+        $('#emailrcc').val("");
+        $("#ccdiv").hide();
+        $('#emailcc').val("");
+        
+      });
+
+
+        error = "{{ error }}"
+        if(error == "True"){
+            $("#errorModal").modal();
+        }
+        notreg = "{{ notregistered }}";
+        if(notreg == "1"){
+            $("#invalidModal").modal();
+        }
+   });
+</script>
+{% endblock %}
+
