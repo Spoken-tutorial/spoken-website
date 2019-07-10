@@ -109,10 +109,10 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
       elif(type=='file'):
         myfile=request.FILES['docs']
         fs = FileSystemStorage()
-        filename = fs.save(myfile.name, myfile)
+        filename = fs.save("file", myfile)
         doc_file=os.getcwd()+'/media/'+filename
         os.system('libreoffice --convert-to html '+doc_file)
-        html_file=os.path.splitext(os.getcwd()+'/'+filename)[0]+'.html'
+        html_file="file.html"
         run_time=0
         html=0
         while run_time < 3.0:
