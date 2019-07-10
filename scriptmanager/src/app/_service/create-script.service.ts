@@ -24,7 +24,8 @@ export class CreateScriptService {
   }
 
   public patchScript(tid, lid, data) {
-    const _url = `${this.apiUrl}/tutorial/${tid}/language/${lid}/scripts/`
+    let script_pk = data['id']
+    const _url = `${this.apiUrl}/tutorial/${tid}/language/${lid}/scripts/${script_pk}/`
     var ls = this.httpClient.patch(
       _url,
       data
@@ -32,8 +33,8 @@ export class CreateScriptService {
     return ls;
   }
 
-  public deleteScript(tid, lid, srcipt_pk) {
-    const _url = `${this.apiUrl}/tutorial/${tid}/language/${lid}/scripts/${srcipt_pk}/`
+  public deleteScript(tid, lid, script_pk) {
+    const _url = `${this.apiUrl}/tutorial/${tid}/language/${lid}/scripts/${script_pk}/`
     var ls = this.httpClient.delete(
       _url
     );
