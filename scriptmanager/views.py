@@ -149,6 +149,7 @@ class ScriptAPIView(generics.ListAPIView):
       Scripts.objects.get(tutorial = tutorial, language = language, user = self.request.user)
 
       script_details  =  self.request.data
+      script_details['id']=int(script_detail_id)
       script  =  ScriptDetails.objects.get(pk = (script_details['id']))
       serializer  =  ScriptsDetailSerializer(script, data = script_details)
       if serializer.is_valid():

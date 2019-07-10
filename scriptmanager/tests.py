@@ -83,3 +83,21 @@ class TestScriptmanagerAPI(APITestCase):
         self.assertEqual(len(response.data),2)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+    def test_patch_scripts(self):
+        self.client.post(self.scripts_url,self.script_data,format='json')
+        response=self.client.get(self.scripts_url)
+        pk=response.data[0]['id']
+        data={"cue":"patch req","narration":"from test.py","order":1}
+        response=self.client.patch(self.scripts_url+str(pk)+"/",data,format='json')
+        self.assertEqual(response.data['status'],True)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+    
+    def test_delete_scripts(self):
+        self.client.post(self.scripts_url,self.script_data,format='json')
+        response=self.client.get(self.scripts_url)
+        self.assertEqual(len(response.data),2)
+        response=self.client.delete(self.scripts_url+str(response.data[0]['id'])+"/")
+        response=self.client.get(self.scripts_url)
+        self.assertEqual(len(response.data),1)
+
+
