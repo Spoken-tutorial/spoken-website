@@ -31,7 +31,7 @@ export class ScriptViewComponent implements OnInit {
   public leftContentNarration = "";
   public rightContentCue = "";
   public rightContentNarration = "";
-  
+
   @Input() nav: any;
   @ViewChild('tableRow') el: ElementRef;
   @ViewChild('newmodal') el2: ElementRef;
@@ -117,7 +117,7 @@ export class ScriptViewComponent implements OnInit {
     this.rightContentCue = this.revisions[index]['cue'];
     this.leftContentNarration = this.revisions[index + 1]['narration'];
     this.rightContentNarration = this.revisions[index]['narration'];
-    
+
     this.el2.nativeElement.classList.add('is-active')
   }
 
@@ -168,10 +168,7 @@ export class ScriptViewComponent implements OnInit {
 
   public revert(reversionData) {
     this.revisionsService.revertRevision(
-      reversionData['id'],
-      {
-        "reversion_id": reversionData['reversion_id']
-      }
+      reversionData['id'], reversionData['reversion_id']
     ).subscribe();
 
     window.location.reload();

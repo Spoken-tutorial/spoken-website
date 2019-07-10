@@ -6,19 +6,20 @@ import { environment } from '../../environments/environment'
   providedIn: 'root'
 })
 export class RevisionsService {
-  public env =  environment;
+  public env = environment;
   public apiUrl = this.env['apiUrlScript']
 
-  public getRevisions(sid){
+  public getRevisions(sid) {
     const _url = `${this.apiUrl}/scripts/${sid}/reversions/`
     return this.httpClient.get(_url);
   }
-  
-  public revertRevision(sid,data) {
-    const _url = `${this.apiUrl}/scripts/${sid}/reversions/`
+
+  public revertRevision(sid, rid) {
+    const _url = `${this.apiUrl}/scripts/${sid}/reversions/${rid}/`
+    console.log(_url);
     var ls = this.httpClient.patch(
       _url,
-      data
+      {}
     );
     return ls;
   }
