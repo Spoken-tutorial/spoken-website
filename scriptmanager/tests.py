@@ -70,9 +70,24 @@ class TestScriptmanagerAPI(APITestCase):
         response =self.client.get(tutorial_url)
         fid=response.data[0]['foss']
         lid=response.data[0]['language']
+        tid=response.data[0]['id']
         self.assertEqual(fid,self.foss1.pk)
         self.assertEqual(lid,self.lang1.pk)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        #create scripts for a tutorial
+        data={"type":"form","details":[{"cue":"test","narration":"test","order":1},{"cue":"test2","narration":"test2","order": 2}]}
+        scripts_url="/scripts/api/tutorial/"+str(tid)+"/language/"+str(lid)+"/scripts/"
+        response=self.client.post(scripts_url,data,format='json')
+        self.assertEqual(response.data['status'],True)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+
+        #get scripts for a tutorial
+        response=self.client.get(scripts_url)
+        self.assertEqual(len(response.data),2)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
 
 
 
