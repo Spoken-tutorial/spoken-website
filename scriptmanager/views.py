@@ -141,38 +141,6 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
       return Response({'status': False},status = 400) 
 
 
-
-  def patch(self,request,tid,lid):
-    try:
-      tutorial=TutorialDetail.objects.get(pk = int(self.kwargs['tid']))
-      language=Language.objects.get(pk = int(self.kwargs['lid']))
-      Scripts.objects.get(tutorial = tutorial, language = language, user = self.request.user)
-
-      script_details  =  self.request.data
-      script  =  ScriptDetails.objects.get(pk = (script_details['id']))
-      serializer  =  ScriptsDetailSerializer(script, data = script_details)
-      if serializer.is_valid():
-        serializer.save()
-        return Response({'status': True},status = 200)
-      return Response({'status': False},status = 400)       
-    except:
-      return Response({'status': False},status = 400) 
-
-
-  def delete(self,request,tid,lid,script_detail_id):
-    try:
-      tutorial=TutorialDetail.objects.get(pk = int(self.kwargs['tid']))
-      language=Language.objects.get(pk = int(self.kwargs['lid']))
-      script = Scripts.objects.get(tutorial = tutorial, language = language, user = self.request.user)
-
-      ScriptDetails.objects.get(pk = int(self.kwargs['script_detail_id']),script = script).delete()
-      if not ScriptDetails.objects.filter(script_id = script.pk).exists(): 
-       script.delete()
-      return Response({'status': True},status = 202) 
-    except:
-      return Response({'status': False},status = 400) 
-
-
 class ScriptAPIView(generics.ListAPIView):
   def patch(self,request,tid,lid,script_detail_id):
     try:
@@ -214,7 +182,6 @@ class CommentCreateAPIView(generics.ListCreateAPIView):
     except:
       return None
 
-
   def create(self,request,script_detail_id):
     try:
       script_data=ScriptDetails.objects.get(pk=script_detail_id)
@@ -242,9 +209,6 @@ class ReversionListView(generics.ListAPIView):
       return ReversionSerializer(data,many=True).data
     except:
       return None
-
-
-
 
 class ReversionRevertView(generics.CreateAPIView):
   def patch(self,request,script_detail_id,reversion_id):
