@@ -9,12 +9,11 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
+import time
 
 
 class TestScriptmanagerAPI(APITestCase):
     client = APIClient()
-    var={}
-
 
     def setUp(self):
         test1=User.objects.create_user("test1", "test2@test2.in", "Test@123")
@@ -36,9 +35,14 @@ class TestScriptmanagerAPI(APITestCase):
 
         level=Level.objects.create(level="test level",code="TL")
 
-        tutorial1=TutorialDetail.objects.create(foss=self.foss1,tutorial="test data 1",level=level,order=1,user=test1)
+        self.tutorial1=TutorialDetail.objects.create(foss=self.foss1,tutorial="test data 1",level=level,order=1,user=test1)
         tutorial2=TutorialDetail.objects.create(foss=self.foss1,tutorial="test data 2",level=level,order=2,user=test1)
         
+        self.client.login(username='test1', password='Test@123')
+
+        self.scripts_url="/scripts/api/tutorial/"+str(self.tutorial1.pk)+"/language/"+str(self.lang1.pk)+"/scripts/"
+        self.script_data={"type":"form","details":[{"cue":"test","narration":"test","order":1},{"cue":"test2","narration":"test2","order": 2}]}
+
         #test objects are created
         self.assertEqual(User.objects.count(), 4)
         self.assertEqual(Language.objects.count(), 3)
@@ -53,41 +57,29 @@ class TestScriptmanagerAPI(APITestCase):
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_scripts_module(self):
-        self.client.login(username='test1', password='Test@123')
-
-        #get the foss
+    def test_get_foss(self):
         foss_url="/scripts/api/foss/"
         response =self.client.get(foss_url)
-        fid=response.data[0]['foss_category']['id']
-        lid=response.data[0]['language']['id']
-        self.assertEqual(fid,self.foss1.pk)
-        self.assertEqual(lid,self.lang1.pk)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        
-        #get the tutorials for a foss category
-        tutorial_url="/scripts/api/foss/"+str(fid)+"/language/"+str(lid)+"/tutorials/"
-        response =self.client.get(tutorial_url)
-        fid=response.data[0]['foss']
-        lid=response.data[0]['language']
-        tid=response.data[0]['id']
-        self.assertEqual(fid,self.foss1.pk)
-        self.assertEqual(lid,self.lang1.pk)
+        self.assertEqual(response.data[0]['foss_category']['id'],self.foss1.pk)
+        self.assertEqual(response.data[0]['language']['id'],self.lang1.pk)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        #create scripts for a tutorial
-        data={"type":"form","details":[{"cue":"test","narration":"test","order":1},{"cue":"test2","narration":"test2","order": 2}]}
-        scripts_url="/scripts/api/tutorial/"+str(tid)+"/language/"+str(lid)+"/scripts/"
-        response=self.client.post(scripts_url,data,format='json')
+    def test_get_tutorials(self):        
+        tutorial_url="/scripts/api/foss/"+str(self.foss1.pk)+"/language/"+str(self.lang1.pk)+"/tutorials/"
+        response =self.client.get(tutorial_url)
+        self.assertEqual(response.data[0]['foss'],self.foss1.pk)
+        self.assertEqual(response.data[0]['language'],self.lang1.pk)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_create_scripts(self):
+        response=self.client.post(self.scripts_url,self.script_data,format='json')
         self.assertEqual(response.data['status'],True)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-
-        #get scripts for a tutorial
-        response=self.client.get(scripts_url)
+     
+    def test_get_scripts(self):
+        self.client.post(self.scripts_url,self.script_data,format='json')
+        response=self.client.get(self.scripts_url)
         self.assertEqual(len(response.data),2)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-
-
 
