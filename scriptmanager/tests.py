@@ -71,7 +71,7 @@ class TestScriptmanagerAPI(APITestCase):
         self.assertEqual(response.data[0]['language'],self.lang1.pk)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_create_scripts(self):
+    def test_post_scripts(self):
         response=self.client.post(self.scripts_url,self.script_data,format='json')
         self.assertEqual(response.data['status'],True)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -98,6 +98,23 @@ class TestScriptmanagerAPI(APITestCase):
         self.assertEqual(len(response.data),2)
         response=self.client.delete(self.scripts_url+str(response.data[0]['id'])+"/")
         response=self.client.get(self.scripts_url)
+        self.assertEqual(len(response.data),1)
+
+    def test_post_comments(self):
+        self.client.post(self.scripts_url,self.script_data,format='json')
+        response=self.client.get(self.scripts_url)
+        url="/scripts/api/scripts/"+str(response.data[0]['id'])+"/comments/"
+        data={"comment":"this a comment from reviewer/contributor"}
+        response=self.client.post(url,data,format='json')
+        self.assertEqual(response.data['status'],True)
+
+    def test_get_comments(self):
+        self.client.post(self.scripts_url,self.script_data,format='json')
+        response=self.client.get(self.scripts_url)
+        url="/scripts/api/scripts/"+str(response.data[0]['id'])+"/comments/"
+        data={"comment":"this a comment from reviewer/contributor"}
+        self.client.post(url,data,format='json')
+        response=self.client.get(url)
         self.assertEqual(len(response.data),1)
 
 
