@@ -12,6 +12,7 @@ from django.core.files.storage import FileSystemStorage
 from bs4 import BeautifulSoup
 from datetime import datetime,timedelta
 import time
+from creation.views import is_videoreviewer,is_domainreviewer,is_qualityreviewer
 
 def index(request):
   jwt_payload_handler  =  api_settings.JWT_PAYLOAD_HANDLER
@@ -140,6 +141,16 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
         os.system('rm '+ doc_file + ' '+html_file)
       return Response({'status': False},status = 400) 
 
+  def patch(self, request,tid,lid):
+    try:
+      tutorial=TutorialDetail.objects.get(pk = int(self.kwargs['tid']))
+      language=Language.objects.get(pk = int(self.kwargs['lid']))
+      script = Scripts.objects.get(user = self.request.user,tutorial = tutorial,language = language)
+      script.status=True
+      script.save()
+      return Response({'status': True},status = 200) 
+    except:
+      return Response({'status': False},status = 400) 
 
 class ScriptAPIView(generics.ListAPIView):
   def patch(self,request,tid,lid,script_detail_id):
