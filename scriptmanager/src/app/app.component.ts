@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { routerTransition } from './animations';
 import { AuthService } from './_service/auth.service';
@@ -21,9 +21,6 @@ export class AppComponent {
       // that token in localstorage
       this.authService.getJwtToken().subscribe(
         (res) => {
-          localStorage.removeItem('fossIndex');
-          localStorage.removeItem('fossId');
-          localStorage.removeItem('langId');
           localStorage.setItem('token', res['token'])
         },
         (err) => console.error('Failed to fetch JWT token')
@@ -37,6 +34,13 @@ export class AppComponent {
 
   ngOnInit(): void {
 
+  }
+
+  @HostListener('window:beforeunload', ['$event'])
+  beforeunloadHandler(event) {
+    localStorage.removeItem('fossIndex');
+    localStorage.removeItem('fossId');
+    localStorage.removeItem('langId');
   }
 
 }
