@@ -62,8 +62,7 @@ class ScriptsDetailSerializer(serializers.ModelSerializer):
 
   class Meta:
     model = ScriptDetails
-    fields = ('id', 'cue', 'narration', 'order', 'script')
-
+    fields = ('id', 'cue', 'narration', 'order', 'comment_status', 'script')
 
 class ScriptsSerializer(serializers.ModelSerializer):
   details = ScriptsDetailSerializer(many=True)

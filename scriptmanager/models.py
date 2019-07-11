@@ -16,6 +16,7 @@ class ScriptDetails(models.Model):
 	narration = models.TextField()
 	order = models.PositiveIntegerField()
 	script = models.ForeignKey('Scripts', null=True, on_delete = models.CASCADE)
+	comment_status = models.BooleanField(default=False)
 
 class Comments(models.Model):
 	comment = models.TextField()
