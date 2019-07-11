@@ -23,7 +23,7 @@ export class ScriptViewComponent implements OnInit {
   public slideId: number;
   public slideIdRev: number;
   public index: number = 0;
-  public index2: number = 0;
+  public index2: number = -1;
   public overVal: boolean[] = [false];
   public revision_old;
   public revision_new;

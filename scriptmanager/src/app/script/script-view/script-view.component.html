@@ -32,13 +32,11 @@
 
           <div class="modal-content">
 
-            <h3 *ngIf="index2 != 0">&nbsp;<i class="fa fa-history"></i> Updated On: {{ revisions[index2]['date_time'] }}
+            <h3 *ngIf="index2 != -1">&nbsp;<i class="fa fa-history"></i> Updated On:
+              {{ revisions[index2]['date_time'] }}
             </h3>
             <table class="table is-bordered">
               <tbody *ngIf="revisions">
-                <tr>
-                  <td colspan="2"><small></small></td>
-                </tr>
                 <tr>
                   <th>Visual Cue</th>
                   <th>Narration</th>
