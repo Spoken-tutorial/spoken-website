@@ -32,7 +32,8 @@
 
           <div class="modal-content">
 
-            <h3 *ngIf="index2 != 0">&nbsp;<i class="fa fa-history"></i> Updated On: {{ revisions[index2]['date_time'] }}</h3>
+            <h3 *ngIf="index2 != 0">&nbsp;<i class="fa fa-history"></i> Updated On: {{ revisions[index2]['date_time'] }}
+            </h3>
             <table class="table is-bordered">
               <tbody *ngIf="revisions">
                 <tr>
@@ -43,13 +44,20 @@
                   <th>Narration</th>
                 </tr>
                 <tr>
-                  <td><div processingDiff [left]="leftContentCue" [right]="rightContentCue"></div></td>
-                  <td><div processingDiff [left]="leftContentNarration" [right]="rightContentNarration"></div></td>
+                  <td>
+                    <div processingDiff [left]="leftContentCue" [right]="rightContentCue"></div>
+                  </td>
+                  <td>
+                    <div processingDiff [left]="leftContentNarration" [right]="rightContentNarration"></div>
+                  </td>
                 </tr>
               </tbody>
             </table>
 
-            <button class="button heading is-outlined is-info" (click)="revert(revisions[index2])">Revert Back to this Version</button>
+            <button *ngIf="index2 != 0 && leftContentCue != '' && leftContentNarration != ''"
+              class="button heading is-outlined is-info" (click)="revert(revisions[index2])">
+              Revert Back to this Version
+            </button>
 
           </div>
 
