@@ -23,7 +23,7 @@ export class ScriptViewComponent implements OnInit {
   public slideId: number;
   public slideIdRev: number;
   public index: number = 0;
-  public index2: number = 0;
+  public index2: number = -1;
   public overVal: boolean[] = [false];
   public revision_old;
   public revision_new;
@@ -113,10 +113,18 @@ export class ScriptViewComponent implements OnInit {
   public viewModal(index) {
     this.index2 = index;
 
-    this.leftContentCue = this.revisions[index + 1]['cue'];
-    this.rightContentCue = this.revisions[index]['cue'];
-    this.leftContentNarration = this.revisions[index + 1]['narration'];
-    this.rightContentNarration = this.revisions[index]['narration'];
+    if (index == this.revisions.length - 1) {
+      this.leftContentCue = "";
+      this.rightContentCue = this.revisions[index]['cue'];
+      this.leftContentNarration = "";
+      this.rightContentNarration = this.revisions[index]['narration'];
+    }
+    else {
+      this.leftContentCue = this.revisions[index + 1]['cue'];
+      this.rightContentCue = this.revisions[index]['cue'];
+      this.leftContentNarration = this.revisions[index + 1]['narration'];
+      this.rightContentNarration = this.revisions[index]['narration'];
+    }
 
     this.el2.nativeElement.classList.add('is-active')
   }
