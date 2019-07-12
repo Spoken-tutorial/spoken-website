@@ -54,6 +54,7 @@ export class ScriptViewComponent implements OnInit {
     );
   }
 
+  // to get hover effect on particular table rows
   public mouseenter(i) {
     this.overVal[i] = true;
   }
@@ -113,6 +114,7 @@ export class ScriptViewComponent implements OnInit {
   public viewModal(index) {
     this.index2 = index;
 
+    // providing current and previous version of particular slide to get the diff b/w them
     if (index == this.revisions.length - 1) {
       this.leftContentCue = "";
       this.rightContentCue = this.revisions[index]['cue'];
