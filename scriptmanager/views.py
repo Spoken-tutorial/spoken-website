@@ -87,7 +87,7 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
       language=Language.objects.get(pk = int(self.kwargs['lid']))
       script = Scripts.objects.get(tutorial = tutorial,language = language)
       user=self.request.user
-      if is_domainreviewer(user) or is_videoreviewer(user) or is_videoreviewer(user) or script.user == user:
+      if is_domainreviewer(user) or is_videoreviewer(user) or is_videoreviewer(user) or script.user == user or script.status == True:
         return ScriptDetails.objects.filter(script = script)
     except:
       return None
