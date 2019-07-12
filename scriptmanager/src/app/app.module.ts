@@ -22,6 +22,8 @@ import { ScriptUploadComponent } from './script/script-upload/script-upload.comp
 import { NgxDiffModule } from 'ngx-diff';
 import { NgxTextDiffModule } from 'ngx-text-diff';
 import { DiffMatchPatchModule } from 'ng-diff-match-patch';
+import { CookieModule } from 'ngx-cookie';
+
 // since we are saving the JWT token for authentication in the local storage 
 // , here we get that token to send it with each api call to authenticate with the server
 export function tokenGetter() {
@@ -62,11 +64,13 @@ export function tokenGetter() {
     CKEditorModule,
     NgxDiffModule,
     NgxTextDiffModule,
-    DiffMatchPatchModule
+    DiffMatchPatchModule,
+    CookieModule.forRoot()
   ],
   providers: [],
   bootstrap: [AppComponent]
 })
-export class AppModule { 
-}
 
+export class AppModule { 
+
+}
