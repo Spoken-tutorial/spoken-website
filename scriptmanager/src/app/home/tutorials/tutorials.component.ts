@@ -1,6 +1,6 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { TutorialsService } from '../../_service/tutorials.service'
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-tutorials',
@@ -15,14 +15,10 @@ export class TutorialsComponent implements OnInit {
     public router: Router) { }
 
   public onClickCreate(){
-    console.log(this.tutorial.id);
-    console.log(this.tutorial.tutorial)
     this.router.navigate(['ScriptCreateComponent']);
   }
 
-
   ngOnInit() {
-    console.log(this.tutorial)
   }
 
 }

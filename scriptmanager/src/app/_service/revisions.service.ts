@@ -27,7 +27,6 @@ export class RevisionsService {
 
   public revertRevision(sid, rid) {
     const _url = `${this.apiUrl}/scripts/${sid}/reversions/${rid}/`
-    console.log(_url);
     var ls = this.http.patch(
       _url,
       {},

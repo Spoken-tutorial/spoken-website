@@ -44,7 +44,7 @@ const routes: Routes = [
     path: 'view/:tid/:lid/:tutorialName',
     component: ScriptViewComponent,
     data: {
-      title: 'Edit Script',
+      title: 'View Script',
       animation: 'HomePage'
     }
   },

@@ -34,7 +34,6 @@ export class ScriptUploadComponent implements OnInit {
   // what it does: make an api call(POST request) with the file variable containing the latest file selected by the user. 
   // returns: void
   public onFileSave() {
-    console.log(this.scriptFile)
     this.uploadfileService.postFile(this.tid, this.lid, this.scriptFile)
       .subscribe(
         (res) => {
@@ -92,7 +91,6 @@ export class ScriptUploadComponent implements OnInit {
   // what it does : makes an api call (POST request)  with the html data so that server saves the whole table 
   // returns: Gives a green notification on success otherwise a red notification
   public saveHtmlData() {
-    // console.log(this.Htmldata);
     this.Htmldata = this.editorForm.get('data').value;
     this.createScriptService.postScript(
       this.tid, this.lid,

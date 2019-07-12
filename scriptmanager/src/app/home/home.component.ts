@@ -53,7 +53,6 @@ export class HomeComponent implements OnInit {
       this.tutorialService.getFossTutorials(this.local_fossId, this.local_langId).subscribe(
         (res) => {
           this.tutorials = res
-          // console.log(this.tutorials)
         },
         (err) => {
           console.log('Failed to fetch tutorial categories');

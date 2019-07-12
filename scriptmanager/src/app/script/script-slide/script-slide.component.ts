@@ -62,18 +62,12 @@ export class ScriptSlideComponent implements OnInit {
     this.ckEditorNarration = true;
   }
 
-  // cueKey(event) { this.slide.cue = event.target.value;
-  // console.log(event.target.value)
-  // }
-  // narrationKey(event) { this.slide.narration = event.target.value; }
-
   ngOnInit() {
     this.editorForm = new FormGroup({
       'cue': new FormControl(),
       'narration': new FormControl()
     })
     this.checkSlide()
-    console.log(this.nav)
   }
 
 }
