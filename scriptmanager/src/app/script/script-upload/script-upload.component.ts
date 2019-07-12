@@ -139,6 +139,7 @@ export class ScriptUploadComponent implements OnInit {
     });
     this.lid = this.route.snapshot.params['lid']
     this.tutorialName = this.route.snapshot.params['tutorialName']
+    
     //editorform holds the html data
     this.editorForm = new FormGroup({
       'data': new FormControl()
