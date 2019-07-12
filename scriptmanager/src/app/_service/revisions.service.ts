@@ -12,6 +12,7 @@ export class RevisionsService {
   private httpOptions: any;
 
   constructor(private http: HttpClient, private _cookieService: CookieService) {
+    // inserting CSRF token in the http headers
     let csrf = this._cookieService.get("csrftoken");
     if (typeof (csrf) === 'undefined') {
       csrf = '';
@@ -20,11 +21,14 @@ export class RevisionsService {
       headers: new HttpHeaders({ 'Content-Type': 'application/json', 'X-CSRFToken': csrf })
     };
   }
+
+  // API service for fetching all revisions for a particular slide ID
   public getRevisions(sid) {
     const _url = `${this.apiUrl}/scripts/${sid}/reversions/`
     return this.http.get(_url);
   }
 
+  // API service for reverting back to the provided revision id
   public revertRevision(sid, rid) {
     const _url = `${this.apiUrl}/scripts/${sid}/reversions/${rid}/`
     var ls = this.http.patch(

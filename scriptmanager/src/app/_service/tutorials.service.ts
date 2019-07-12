@@ -10,10 +10,7 @@ export class TutorialsService {
   public env =  environment;
   public apiUrl = this.env['apiUrlScript']
   
-  /*
-  * Fetches tutorails for foss category of 
-  * provdied fid
-  */
+  // API service for fetching a list of all tutorials for the selected foss Id and language ID
   public getFossTutorials(fossId, languageId){
     const _url = `${this.apiUrl}/foss/${fossId}/language/${languageId}/tutorials/`
     return this.httpClient.get(_url);

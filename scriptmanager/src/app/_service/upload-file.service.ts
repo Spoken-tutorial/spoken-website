@@ -10,10 +10,11 @@ import { CookieService } from 'ngx-cookie';
 export class UploadFileService {
   public env = environment;
   public apiUrl = this.env['apiUrlScript']
-  public testData: FormData = new FormData();
+  public uploadedFile: FormData = new FormData();
   private httpOptions: any;
 
   constructor(private http: HttpClient, private _cookieService: CookieService) {
+    // inserting CSRF token in the http headers
     let csrf = this._cookieService.get("csrftoken");
     if (typeof (csrf) === 'undefined') {
       csrf = '';
@@ -23,13 +24,14 @@ export class UploadFileService {
     };
   }
 
+  // API service for uploading the file
   public postFile(tid, lid, file) {
-    this.testData.append('docs', file);
-    this.testData.append('type', 'file');
+    this.uploadedFile.append('docs', file);
+    this.uploadedFile.append('type', 'file');
     const _url = `${this.apiUrl}/tutorial/${tid}/language/${lid}/scripts/`
     return this.http.post(
       _url,
-      this.testData,
+      this.uploadedFile,
       this.httpOptions,
     )
   }

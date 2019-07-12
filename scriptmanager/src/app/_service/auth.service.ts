@@ -6,6 +6,7 @@ import { HttpClient } from '@angular/common/http';
 })
 export class AuthService {
 
+  // using JwtToken for authorization purpose in angular system. Nothing to do with main django system.
   public getJwtToken() {
     return this.http.post(
       'http://localhost:8000/api-token-auth/',

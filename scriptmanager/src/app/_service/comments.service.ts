@@ -12,6 +12,7 @@ export class CommentsService {
   private httpOptions: any;
 
   constructor(private http: HttpClient, private _cookieService: CookieService) {
+    // inserting CSRF token in the http headers
     let csrf = this._cookieService.get("csrftoken");
     if (typeof (csrf) === 'undefined') {
       csrf = '';
@@ -20,11 +21,14 @@ export class CommentsService {
       headers: new HttpHeaders({ 'Content-Type': 'application/json', 'X-CSRFToken': csrf })
     };
   }
+
+  // API service for fetching comments to show in view component
   public getComment(tid){
     const _url = `${this.apiUrl}/scripts/${tid}/comments/`
     return this.http.get(_url);
   }
 
+  // API service for creating comments.
   public postComment(tid,data) {
     const _url = `${this.apiUrl}/scripts/${tid}/comments/`
     var ls = this.http.post(
