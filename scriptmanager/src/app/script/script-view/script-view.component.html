@@ -73,13 +73,12 @@
               </tr>
               <tbody *ngFor="let slide of slides; let i = index">
                 <tr (mouseenter)='mouseenter(i)' (mouseleave)="mouseleave(i)">
-                  <td>{{ i+1 }}</td>
+                  <td>{{ i+1 }} <span *ngIf="slide.comment_status" class="dot"></span></td>
                   <td class="content" innerHTML="{{ slide.cue }}"></td>
                   <td class="content" innerHTML="{{ slide.narration }}"></td>
                   <td [ngClass]="{ 'hide-comment-tools': !overVal[i] }">
                     <button class="button heading" (click)="viewComment(i)">
                       <i class="fa fa-comments"></i>&nbsp;
-                      <span *ngIf="slide.comment_status" class="dot"></span>
                     </button>
                     <button class="button heading" (click)="viewRevision(i, slide.id)">
                       <i class="fa fa-history"></i>&nbsp;
