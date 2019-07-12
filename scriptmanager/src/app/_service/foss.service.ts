@@ -14,7 +14,6 @@ export class FossService {
   
   public getAllFossCategories(){
     return this.httpClient.get(`${this.apiUrl}/foss/`);
-   
   }
 
   constructor(private httpClient: HttpClient) {}
