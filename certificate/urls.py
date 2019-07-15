@@ -32,5 +32,6 @@ urlpatterns = [
     url(r'^fa_workshop_download/$', fa_workshop_download, name='fa_workshop_download'),
     url(r'^itp_workshop_certificate/$', itp_workshop_download, name='itp_workshop_download'),
     url(r'^koha_workshop_download/$', koha_workshop_download, name='koha_workshop_download'),
+    url(r'^koha_9march_rc_certificate/$', koha_9marchrc_certificate_download, name='koha_9marchrc_certificate_download'),
 ]
 
