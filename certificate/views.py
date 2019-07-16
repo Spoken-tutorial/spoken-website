@@ -50,18 +50,20 @@ def verification(serial, _type):
                         detail = OrderedDict([('Name', name), ('Event', purpose), 
                             ('Days', '8 February'), ('Year', year)])
                 elif purpose == 'Koha Remote Workshop':
+                    eventname = "One day Workshop on Koha and Library Automation"
                     if year == '2018':
-                        detail = OrderedDict([('Name', name), ('Event', purpose),
+                        detail = OrderedDict([('Name', name), ('Event', eventname),
                                           ('Days', '12 October'), ('Year', year)])
                     if year == '2019':
-                        detail = OrderedDict([('Name', name), ('Event', purpose),
+                        detail = OrderedDict([('Name', name), ('Event', eventname),
                                           ('Days', '9 March'), ('Year', year)])
                 elif purpose == 'Koha Remote Center':
+                    eventname = "One day Workshop on Koha and Library Automation"
                     if year == '2018':
-                        detail = OrderedDict([('Name', name), ('Event', purpose),
+                        detail = OrderedDict([('Name', name), ('Event', eventname),
                                           ('Days', '12 October'), ('Year', year)])
                     if year == '2019':
-                        detail = OrderedDict([('Name', name), ('Event', purpose),
+                        detail = OrderedDict([('Name', name), ('Event', eventname),
                                           ('Days', '9 March'), ('Year', year)])
                 elif purpose == 'Moodle Coordinators Workshop':
                     detail = OrderedDict([('Name', name), ('Event', purpose),
@@ -72,11 +74,11 @@ def verification(serial, _type):
                                           ('Days', ' 28 November 2017 to 20 December'), ('Year', year)])
                 
                 elif purpose == 'Moodle Main Workshop':
-                    detail = OrderedDict([('Name', name), ('Event', purpose),
+                    detail = OrderedDict([('Name', name), ('Event', "One day Workshop on Moodle Learning Management System"),
                                           ('Days', '15 March'), ('Year', year)])
 
                 elif purpose == 'Moodle Remote Center':
-                    detail = OrderedDict([('Name', name), ('Event', purpose),
+                    detail = OrderedDict([('Name', name), ('Event', "One day Workshop on Moodle Learning Management System"),
                                           ('Days', '15 March'), ('Year', year)])
 
                 elif purpose == 'DrupalCamp Mumbai':
