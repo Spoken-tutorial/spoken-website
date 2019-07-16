@@ -339,6 +339,11 @@ urlpatterns = [
       r'^generate/(?P<trid>\d+)/certificate/$', 
       GenerateCertificate, 
       name="generate_certificate"
-    )
+    ),
+    url(
+      r'^training-certificate/(?P<trid>\d+)/organiser/$', 
+      OrganiserAllTrainingCertificateView.as_view(), \
+        name="organiser_alltraining_certificate"
+    ),
 
 ]

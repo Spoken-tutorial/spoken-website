@@ -3104,3 +3104,23 @@ def GenerateCertificate(request, trid):
   else:
     messages.error(request, 'Something went wrong Please try again')
   return HttpResponseRedirect("/software-training/certificate-request/rp/training/") 
+
+
+class OrganiserAllTrainingCertificateView(TrainingCertificate, View):
+  template_name = ""
+  @method_decorator(group_required("Organiser"))
+  def dispatch(self, *args, **kwargs):
+    return super(OrganiserAllTrainingCertificateView, self).dispatch(*args, **kwargs)
+
+  def get(self, request, *args, **kwargs):
+    ta_list = None
+    try:
+      ta_list = TrainingAttend.objects.filter(training_id=kwargs['trid'])
+    except ObjectDoesNotExist:
+      messages.error(self.request, "Record not found")
+      pass
+
+    print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+    for ta in ta_list:
+      return self.training_certificate(ta)
+    return HttpResponseRedirect("/")
