@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from creation.models import ContributorRole,TutorialDetail,User,Language
 from .models import Scripts,ScriptDetails,Comments
 from .serializers import ContributorRoleSerializer,TutorialDetailSerializer,ScriptsDetailSerializer,ScriptsSerializer,CommentsSerializer,ReversionSerializer
@@ -13,13 +13,17 @@ from bs4 import BeautifulSoup
 from datetime import datetime,timedelta
 import time
 from creation.views import is_videoreviewer,is_domainreviewer,is_qualityreviewer
+import uuid
+import subprocess 
 
 def index(request):
-  jwt_payload_handler  =  api_settings.JWT_PAYLOAD_HANDLER
-  jwt_encode_handler  =  api_settings.JWT_ENCODE_HANDLER
-  payload  =  jwt_payload_handler(request.user)
-  token  =  jwt_encode_handler(payload) 
-  return render(request, 'scriptmanager/index.html', {'token': token})
+  if request.user.is_authenticated:
+    jwt_payload_handler  =  api_settings.JWT_PAYLOAD_HANDLER
+    jwt_encode_handler  =  api_settings.JWT_ENCODE_HANDLER
+    payload  =  jwt_payload_handler(request.user)
+    token  =  jwt_encode_handler(payload) 
+    return render(request, 'scriptmanager/index.html', {'token': token})
+  return redirect('home')
 
 
 class ContributorRoleList(generics.ListAPIView):
@@ -87,7 +91,7 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
       language=Language.objects.get(pk = int(self.kwargs['lid']))
       script = Scripts.objects.get(tutorial = tutorial,language = language)
       user=self.request.user
-      if is_domainreviewer(user) or is_videoreviewer(user) or is_videoreviewer(user) or script.user == user or script.status == True:
+      if is_domainreviewer(user) or is_qualityreviewer(user) or is_videoreviewer(user) or script.user == user or script.status == True:
         return ScriptDetails.objects.filter(script = script)
     except:
       return None
@@ -96,52 +100,44 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
     details=[]
     type=request.data['type']
 
-    try:
-      tutorial=TutorialDetail.objects.get(pk = int(self.kwargs['tid']))
-      language=Language.objects.get(pk = int(self.kwargs['lid']))
-      if not  Scripts.objects.filter(user = self.request.user,tutorial = tutorial,language = language).exists():
-        script = Scripts.objects.create(tutorial = tutorial,language = language, user = self.request.user)
+
+    tutorial=TutorialDetail.objects.get(pk = int(self.kwargs['tid']))
+    language=Language.objects.get(pk = int(self.kwargs['lid']))
+    if not  Scripts.objects.filter(user = self.request.user,tutorial = tutorial,language = language).exists():
+      script = Scripts.objects.create(tutorial = tutorial,language = language, user = self.request.user)
+    else:
+      script = Scripts.objects.get(tutorial = tutorial,language = language, user = self.request.user)
+
+    if(type=='form'):
+      details = request.data['details']
+      for item in details:
+        item.update( {"script":script.pk})
+
+    elif(type=='file'):
+      myfile=request.FILES['docs']
+      fs = FileSystemStorage()
+      uid=uuid.uuid4().hex
+      filename = fs.save(uid, myfile)
+      doc_file=os.getcwd()+'/media/'+filename
+      #os.system('libreoffice --convert-to html '+doc_file)
+      if subprocess.check_call('libreoffice --convert-to html '+doc_file+' --outdir media', shell=True) ==0:
+        html_file= 'media/'+uid+".html"
+
+        with open(html_file,'r') as html:
+          details=self.scriptsData(html,script)
+        os.system('rm '+ doc_file + ' '+html_file)
       else:
-        script = Scripts.objects.get(tutorial = tutorial,language = language, user = self.request.user)
+        return Response({'status': False},status = 400)
 
-      if(type=='form'):
-        details = request.data['details']
-        for item in details:
-          item.update( {"script":script.pk})
+    elif (type=="template"):
+      data=request.data['details']
+      details=self.scriptsData(data,script)
 
-      elif(type=='file'):
-        myfile=request.FILES['docs']
-        fs = FileSystemStorage()
-        filename = fs.save("file", myfile)
-        doc_file=os.getcwd()+'/media/'+filename
-        os.system('libreoffice --convert-to html '+doc_file)
-        html_file="file.html"
-        run_time=0
-        html=0
-        while run_time < 3.0:
-          try:
-            html = open(html_file,'r')
-            break
-          except:
-            time.sleep(.4)
-            run_time+=.4
-        html = open(html_file,'r')
-        details=self.scriptsData(html,script)
-        os.system('rm '+ doc_file + ' '+html_file)
-      
-      elif (type=="template"):
-        data=request.data['details']
-        details=self.scriptsData(data,script)
-
-      serialized  =  ScriptsDetailSerializer(data  =  details,many  =  True) #inserting a details array without iterating
-      if serialized.is_valid():
-        serialized.save()
-        return Response({'status': True},status = 201)
-      return Response({'status': False},status = 400)       
-    except:
-      if type=='file':
-        os.system('rm '+ doc_file + ' '+html_file)
-      return Response({'status': False},status = 400) 
+    serialized  =  ScriptsDetailSerializer(data  =  details,many  =  True) #inserting a details array without iterating
+    if serialized.is_valid():
+      serialized.save()
+      return Response({'status': True},status = 201)
+    return Response({'status': False},status = 400)
 
   def patch(self, request,tid,lid):
     try:
