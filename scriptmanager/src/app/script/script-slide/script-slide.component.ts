@@ -13,6 +13,7 @@ export class ScriptSlideComponent implements OnInit {
   @Input() index: number;
   @Output() removeSlideEmitter = new EventEmitter<number>();
   @Output() saveSlideEmitter = new EventEmitter<any>();
+  @Output() insertSlideEmitter = new EventEmitter<number>();
   @Input() view: boolean = false;
   @Input() nav:any;
   public comment = false;
@@ -35,6 +36,10 @@ export class ScriptSlideComponent implements OnInit {
     this.removeSlideEmitter.emit(this.index);
   }
   
+  public insertSlide() {
+    this.insertSlideEmitter.emit(this.index);
+  }
+  
   public checkSlide() {
     this.oldSlide.cue = this.slide.cue;
     this.oldSlide.narration = this.slide.narration;
@@ -52,10 +57,6 @@ export class ScriptSlideComponent implements OnInit {
     this.ckEditorCue = false;
     this.ckEditorNarration = false;
     this.checkSlide();
-  }
-
-  public changeCueToEditor() {
-    this.ckEditorCue = true;
   }
 
   public changeNarrationToEditor() {

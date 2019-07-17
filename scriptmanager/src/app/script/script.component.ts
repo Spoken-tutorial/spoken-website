@@ -22,16 +22,18 @@ export class ScriptComponent implements OnInit {
   constructor(public router: Router, public route: ActivatedRoute, public createscriptService: CreateScriptService) { }
 
   //what it does: add more slides on clicking on plus icon
+
+  public getEmptySlide() {
+    return {
+      id: '',
+      cue: '',
+      narration: '',
+      order: '',
+      script: ''
+    }
+  }
   public addSlide() {
-    this.slides.push(
-      {
-        id: '',
-        cue: '',
-        narration: '',
-        order: '',
-        script: ''
-      }
-    );
+    this.slides.push(this.getEmptySlide());
   }
   
   //remove slides after clicking on cross icon
@@ -76,6 +78,9 @@ export class ScriptComponent implements OnInit {
     this.slides.splice(index, 1);
   }
 
+  public onInsertSlide(index) {
+    this.slides.splice(index, 0, this.getEmptySlide());
+  }
   //calls the component which called script component and gives the slides array which needs to be saved in the database.
   public saveScript() {
     this.onSaveScript.emit(this.slides);
