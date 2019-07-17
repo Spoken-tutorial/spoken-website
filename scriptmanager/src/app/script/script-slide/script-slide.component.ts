@@ -59,10 +59,6 @@ export class ScriptSlideComponent implements OnInit {
     this.checkSlide();
   }
 
-  public changeCueToEditor() {
-    this.ckEditorCue = true;
-  }
-
   public changeNarrationToEditor() {
     this.ckEditorNarration = true;
   }
