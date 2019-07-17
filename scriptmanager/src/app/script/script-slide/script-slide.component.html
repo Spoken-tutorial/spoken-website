@@ -1,6 +1,16 @@
 <header class="timeline-header">
   <span class="tag is-link is-medium">{{ index+1 }}</span>
 </header>
+
+<div class="timeline-item is-pointer">
+  <div class="timeline-marker is-info is-icon">
+    <i class="fa fa-plus"></i>
+  </div>
+  <div class="timeline-content">
+    <a class="button heading is-outlined" (click)="insertSlide()">Insert Slide</a>
+  </div>
+</div>
+
 <div class="timeline-item animated fadeInLeft">
   <div *ngIf="!view" class="timeline-marker is-icon" [swal]="{ title: 'Delete Slide',
               text: 'Are you sure?',

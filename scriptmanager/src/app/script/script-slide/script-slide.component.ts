@@ -13,6 +13,7 @@ export class ScriptSlideComponent implements OnInit {
   @Input() index: number;
   @Output() removeSlideEmitter = new EventEmitter<number>();
   @Output() saveSlideEmitter = new EventEmitter<any>();
+  @Output() insertSlideEmitter = new EventEmitter<number>();
   @Input() view: boolean = false;
   @Input() nav:any;
   public comment = false;
@@ -33,6 +34,10 @@ export class ScriptSlideComponent implements OnInit {
   // returns: void
   public removeSlide() {
     this.removeSlideEmitter.emit(this.index);
+  }
+  
+  public insertSlide() {
+    this.insertSlideEmitter.emit(this.index);
   }
   
   public checkSlide() {
