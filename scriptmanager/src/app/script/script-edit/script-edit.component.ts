@@ -11,8 +11,8 @@ import * as Noty from 'noty';
 
 export class ScriptEditComponent implements OnInit {
   public slides: any = [];
-  private tid: number;
-  private lid: number;
+  private tid: number; // tutorial id
+  private lid: number; // language id
   private scriptId: number;
   private orderId: number;
 
@@ -44,6 +44,7 @@ export class ScriptEditComponent implements OnInit {
           }
         ).subscribe(
           (res) => {
+            console.log(res);
             new Noty({
               type: 'success',
               layout: 'topRight',

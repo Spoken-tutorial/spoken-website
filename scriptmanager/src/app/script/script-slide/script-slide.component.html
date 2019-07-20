@@ -33,7 +33,7 @@
           <div class="field">
             <div class="control content">
               <ckeditor tagName="textarea" [config]="ckeditorConfig" [editor]="Editor"
-                formControlName="cue" [(ngModel)]="slide.cue" (onKeyup)="cueKey($event)" (blur)="saveSlide()">
+                formControlName="cue" [(ngModel)]="slide.cue" (blur)="saveSlide()">
               </ckeditor>
             </div>
           </div>
@@ -46,7 +46,7 @@
           <div class="field">
             <div class="control content">
               <ckeditor tagName="textarea" [config]="ckeditorConfig" [editor]="Editor"
-                formControlName="narration" [(ngModel)]="slide.narration" (onKeyup)="narrationKey($event)"
+                formControlName="narration" [(ngModel)]="slide.narration" 
                 (blur)="saveSlide()">
               </ckeditor>
             </div>
