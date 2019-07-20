@@ -92,14 +92,21 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
       script = Scripts.objects.get(tutorial = tutorial,language = language)
       user=self.request.user
       if is_domainreviewer(user) or is_qualityreviewer(user) or is_videoreviewer(user) or script.user == user or script.status == True:
-        return ScriptDetails.objects.filter(script = script)
+        script_details = ScriptDetails.objects.filter(script = script)
+        ordering = list(map(int, script.ordering.split(',')))
+
+        if (len(ordering) == 0): 
+          return script_details
+
+        script_details = sorted(script_details, key=lambda s: ordering.index(s.pk))
+        
+        return script_details
     except:
       return None
 
   def create(self, request,tid,lid):
     details=[]
-    type=request.data['type']
-
+    create_request_type=request.data['type']
 
     tutorial=TutorialDetail.objects.get(pk = int(self.kwargs['tid']))
     language=Language.objects.get(pk = int(self.kwargs['lid']))
@@ -108,12 +115,12 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
     else:
       script = Scripts.objects.get(tutorial = tutorial,language = language, user = self.request.user)
 
-    if(type=='form'):
+    if(create_request_type=='form'):
       details = request.data['details']
       for item in details:
         item.update( {"script":script.pk})
 
-    elif(type=='file'):
+    elif(create_request_type=='file'):
       myfile=request.FILES['docs']
       fs = FileSystemStorage()
       uid=uuid.uuid4().hex
@@ -129,14 +136,14 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
       else:
         return Response({'status': False},status = 400)
 
-    elif (type=="template"):
+    elif (create_request_type=="template"):
       data=request.data['details']
       details=self.scriptsData(data,script)
 
     serialized  =  ScriptsDetailSerializer(data  =  details,many  =  True) #inserting a details array without iterating
     if serialized.is_valid():
       serialized.save()
-      return Response({'status': True},status = 201)
+      return Response({'status': True, 'data': serialized.data },status = 201)
     return Response({'status': False},status = 400)
 
   def patch(self, request,tid,lid):
@@ -181,6 +188,14 @@ class ScriptAPIView(generics.ListAPIView):
     except:
       return Response({'status': False},status = 400) 
 
+class RelativeOrderingAPI(generics.ListAPIView):
+  def patch(self, request, script_id):
+    script = Scripts.objects.get(pk=script_id)
+    script.ordering = request.data['ordering']
+
+    script.save()
+
+    return Response({ 'status': True }, status=200)
 
 class CommentCreateAPIView(generics.ListCreateAPIView):
   serializer_class=CommentsSerializer
