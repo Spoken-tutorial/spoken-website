@@ -13,6 +13,7 @@ export class ScriptComponent implements OnInit {
   @Input() slides: any;
   @Output() onSaveScript = new EventEmitter<any>();
   @Output() File = new EventEmitter<any>();
+  @Output() insertSlideEmitter = new EventEmitter<number>();
   @Input() nav: any;
   @Input() displaySave: boolean = false;
   public tid;
@@ -32,6 +33,7 @@ export class ScriptComponent implements OnInit {
       script: ''
     }
   }
+
   public addSlide() {
     this.slides.push(this.getEmptySlide());
   }
@@ -79,7 +81,8 @@ export class ScriptComponent implements OnInit {
   }
 
   public onInsertSlide(index) {
-    this.slides.splice(index, 0, this.getEmptySlide());
+    // this.slides.splice(index, 0, this.getEmptySlide());
+    this.insertSlideEmitter.emit(index);
   }
   //calls the component which called script component and gives the slides array which needs to be saved in the database.
   public saveScript() {
