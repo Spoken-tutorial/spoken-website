@@ -62,5 +62,16 @@ export class CreateScriptService {
     return ls;
   }
 
+  public modifyOrdering(script_id, ordering) {
+    const url = `${this.apiUrl}/scripts/${script_id}/`;
+
+    return this.http.patch(
+      url,
+      {
+        'ordering': ordering
+      }
+    );
+  }
+
 
 }
