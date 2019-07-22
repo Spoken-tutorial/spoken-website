@@ -11,6 +11,9 @@ class Scripts(models.Model):
 	user = models.ForeignKey(User,related_name='user_id')
 	ordering = models.CharField(max_length=200, default='')
 
+	def __str__(self):
+		return str(self.tutorial) + ' - ' + str(self.language)
+
 class ScriptDetails(models.Model):
 	cue = models.TextField(blank=True)
 	narration = models.TextField(blank=True)

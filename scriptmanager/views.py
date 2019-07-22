@@ -93,11 +93,15 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
       user=self.request.user
       if is_domainreviewer(user) or is_qualityreviewer(user) or is_videoreviewer(user) or script.user == user or script.status == True:
         script_details = ScriptDetails.objects.filter(script = script)
-        ordering = list(map(int, script.ordering.split(',')))
-
-        if (len(ordering) == 0): 
+        print(script_details)
+        ordering = script.ordering
+        print(ordering, len(ordering))
+        if (len(ordering) == 0):
           return script_details
 
+        ordering = ordering.split(',')
+        ordering = list(map(int, ordering))
+        
         script_details = sorted(script_details, key=lambda s: ordering.index(s.pk))
         
         return script_details

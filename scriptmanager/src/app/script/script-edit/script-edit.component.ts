@@ -139,7 +139,6 @@ export class ScriptEditComponent implements OnInit {
     script['order'] = this.orderId + 1;
     script['script'] = this.scriptId;
     this.orderId = this.orderId + 1;
-    console.log(script);
 
     this.createscriptService.postScript(
       this.tid, this.lid,
