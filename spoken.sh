@@ -10,7 +10,7 @@ pip3 install -r requirements-dev.txt
 pip3 install -r requirements-py3.txt
 
 pwd
-cd Spoken tutorial script creation 
+#cd Spoken tutorial script creation 
 
 sudo cp sample.config.py /spoken
 cd events
