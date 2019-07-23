@@ -112,7 +112,6 @@ class Koha_RC_12oct2018(models.Model):
     remote = models.CharField(max_length=500)
     purpose = models.CharField(max_length=10, default='KRC')
 
-
 class Koha_WS_8feb2019(models.Model):
     name = models.CharField(max_length=200)
     email = models.EmailField()
@@ -140,3 +139,20 @@ class Moodle_WS_15mar2019(models.Model):
     college = models.CharField(max_length=500)
     remote = models.CharField(max_length=500)
     purpose = models.CharField(max_length=10, default='MMW')
+
+
+class Koha_RC_9march2019(models.Model):
+    name = models.CharField(max_length=200)
+    email = models.EmailField()
+    usertype = models.CharField(max_length=10, default='cc')
+    rcid = models.CharField(max_length=500)
+    remote = models.CharField(max_length=500)
+    purpose = models.CharField(max_length=10, default='KRC')
+
+class Moodle_RC_15march2019(models.Model):
+    name = models.CharField(max_length=200)
+    email = models.EmailField()
+    usertype = models.CharField(max_length=10, default='cc')
+    rcid = models.CharField(max_length=500)
+    remote = models.CharField(max_length=500)
+    purpose = models.CharField(max_length=10, default='MRC')

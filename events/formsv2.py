@@ -99,7 +99,7 @@ class TrainingRequestEditForm(forms.ModelForm):
   course = forms.ModelChoiceField(empty_label='---------', queryset=CourseMap.objects.filter(category=0))
   class Meta(object):
     model = TrainingRequest
-    exclude = ['participants', 'status', 'training_planner']
+    exclude = ['participants', 'status', 'training_planner', 'cert_status']
 
   def clean(self):
     # Date restriction
