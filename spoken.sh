@@ -11,10 +11,14 @@ pip3 install -r requirements-py3.txt
 
 sudo cp sample.config.py /spoken
 cd events
-vi display.py
+cat > display.py
+chmod 777 display.py
 cd ..
+
+
+
 python3 manage.py migrate
-python3 manage.py runserver
+python3 manage.py runserver 0.0.0.0:8000
 
 
 
