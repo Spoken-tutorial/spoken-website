@@ -9,6 +9,9 @@ source venv/bin/activate
 pip3 install -r requirements-dev.txt
 pip3 install -r requirements-py3.txt
 
+pwd
+cd spoken-website
+
 sudo cp sample.config.py /spoken
 cd events
 cat > display.py
