@@ -11,8 +11,8 @@ import * as Noty from 'noty';
 
 export class ScriptEditComponent implements OnInit {
   public slides: any = [];
-  private tid: number;
-  private lid: number;
+  private tid: number; // tutorial id
+  private lid: number; // language id
   private scriptId: number;
   private orderId: number;
 
@@ -22,99 +22,173 @@ export class ScriptEditComponent implements OnInit {
     public router: Router
   ) { }
 
+  public getRelativeOrdering() {
+    var relative_ordering = [];
+
+    for (var i = 0; i < this.slides.length; i++) {
+      const slide = this.slides[i];
+      relative_ordering.push(slide.id);
+    }
+
+    return relative_ordering;
+  }
+
   // argument:contains the data of the cue and narration which is entered by the user while creating the script
   // what it does:takes the data and make an api call(POST request) so as to save that data to database
   // returns: status==success if data is saved successfully and status=false if data couldn't saved successfully because of some reason 
   public onSaveScript(script: any) {
-    if (script['cue'] == '' || script['narration'] == '') {
-      return // Do nothing
+
+    if (script['id'] == '') {
+      script['order'] = this.orderId + 1;
+      script['script'] = this.scriptId;
+      this.orderId = this.orderId + 1;
+
+      this.createscriptService.postScript(
+        this.tid, this.lid,
+        {
+          "details": [script],
+          "type": 'form'
+        }
+      ).subscribe(
+        (res) => {
+          console.log(res);
+          new Noty({
+            type: 'success',
+            layout: 'topRight',
+            theme: 'metroui',
+            closeWith: ['click'],
+            text: 'The script is sucessfully updated!',
+            animation: {
+              open: 'animated fadeInRight',
+              close: 'animated fadeOutRight'
+            },
+            timeout: 4000,
+            killer: true
+          }).show();
+        },
+        (error) => {
+          new Noty({
+            type: 'error',
+            layout: 'topRight',
+            theme: 'metroui',
+            closeWith: ['click'],
+            text: 'Woops! There seems to be an error.',
+            animation: {
+              open: 'animated fadeInRight',
+              close: 'animated fadeOutRight'
+            },
+            timeout: 4000,
+            killer: true
+          }).show();
+        }
+      );
     }
-    
+
     else {
-      if (script['id'] == '') {
-        script['order'] = this.orderId + 1;
-        script['script'] = this.scriptId;
-        this.orderId = this.orderId + 1;
-
-        this.createscriptService.postScript(
-          this.tid, this.lid,
-          {
-            "details": [script],
-            "type" : 'form'
-          }
-        ).subscribe(
-          (res) => {
-            new Noty({
-              type: 'success',
-              layout: 'topRight',
-              theme: 'metroui',
-              closeWith: ['click'],
-              text: 'The script is sucessfully updated!',
-              animation: {
-                open: 'animated fadeInRight',
-                close: 'animated fadeOutRight'
-              },
-              timeout: 4000,
-              killer: true
-            }).show();
-          },
-          (error) => {
-            new Noty({
-              type: 'error',
-              layout: 'topRight',
-              theme: 'metroui',
-              closeWith: ['click'],
-              text: 'Woops! There seems to be an error.',
-              animation: {
-                open: 'animated fadeInRight',
-                close: 'animated fadeOutRight'
-              },
-              timeout: 4000,
-              killer: true
-            }).show();
-          }
-        );
-      }
-
-      else {
-        this.createscriptService.patchScript(
-          this.tid, this.lid, script
-        ).subscribe(
-          (res) => {
-            new Noty({
-              type: 'success',
-              layout: 'topRight',
-              theme: 'metroui',
-              closeWith: ['click'],
-              text: 'The script is sucessfully updated!',
-              animation: {
-                open: 'animated fadeInRight',
-                close: 'animated fadeOutRight'
-              },
-              timeout: 4000,
-              killer: true
-            }).show();
-          },
-          (error) => {
-            new Noty({
-              type: 'error',
-              layout: 'topRight',
-              theme: 'metroui',
-              closeWith: ['click'],
-              text: 'Woops! There seems to be an error.',
-              animation: {
-                open: 'animated fadeInRight',
-                close: 'animated fadeOutRight'
-              },
-              timeout: 4000,
-              killer: true
-            }).show();
-          }
-        );
-      }
-
+      this.createscriptService.patchScript(
+        this.tid, this.lid, script
+      ).subscribe(
+        (res) => {
+          new Noty({
+            type: 'success',
+            layout: 'topRight',
+            theme: 'metroui',
+            closeWith: ['click'],
+            text: 'The script is sucessfully updated!',
+            animation: {
+              open: 'animated fadeInRight',
+              close: 'animated fadeOutRight'
+            },
+            timeout: 4000,
+            killer: true
+          }).show();
+        },
+        (error) => {
+          new Noty({
+            type: 'error',
+            layout: 'topRight',
+            theme: 'metroui',
+            closeWith: ['click'],
+            text: 'Woops! There seems to be an error.',
+            animation: {
+              open: 'animated fadeInRight',
+              close: 'animated fadeOutRight'
+            },
+            timeout: 4000,
+            killer: true
+          }).show();
+        }
+      );
     }
 
+  }
+
+  public getEmptySlide() {
+    return {
+      id: '',
+      cue: '',
+      narration: '',
+      order: null,
+      script: null
+    }
+  }
+
+  public onInsertSlide(index) {
+    var script = this.getEmptySlide();
+
+    script['order'] = this.orderId + 1;
+    script['script'] = this.scriptId;
+    this.orderId = this.orderId + 1;
+
+    this.createscriptService.postScript(
+      this.tid, this.lid,
+      {
+        "details": [script],
+        "type": 'form'
+      }
+    ).subscribe(
+      (res) => {
+        this.slides.splice(index, 0, this.getEmptySlide());
+        this.slides[index] = res['data'][0];
+        var relative_ordering = this.getRelativeOrdering().join(',');
+        this.createscriptService.modifyOrdering(this.scriptId, relative_ordering)
+          .subscribe(
+            (res) => {
+              new Noty({
+                type: 'success',
+                layout: 'topRight',
+                theme: 'metroui',
+                closeWith: ['click'],
+                text: 'The script is sucessfully updated!',
+                animation: {
+                  open: 'animated fadeInRight',
+                  close: 'animated fadeOutRight'
+                },
+                timeout: 4000,
+                killer: true
+              }).show();
+            },
+            console.error
+          );
+
+      },
+      (error) => {
+        new Noty({
+          type: 'error',
+          layout: 'topRight',
+          theme: 'metroui',
+          closeWith: ['click'],
+          text: 'Woops! There seems to be an error.',
+          animation: {
+            open: 'animated fadeInRight',
+            close: 'animated fadeOutRight'
+          },
+          timeout: 4000,
+          killer: true
+        }).show();
+      }
+    );
+    
   }
 
   // argument:tutorial id and 
@@ -124,6 +198,8 @@ export class ScriptEditComponent implements OnInit {
     this.createscriptService.getScript(this.tid, this.lid).subscribe(
       (res) => {
         this.slides = res;
+        if (this.slides.length == 0) return;
+
         this.scriptId = this.slides[0]['script'];
         this.orderId = this.slides[this.slides.length - 1]['order'];
       }

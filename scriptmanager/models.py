@@ -9,11 +9,14 @@ class Scripts(models.Model):
 	status = models.BooleanField(default=False)
 	data_file = models.FileField(upload_to='scripts')
 	user = models.ForeignKey(User,related_name='user_id')
-	
+	ordering = models.CharField(max_length=200, default='')
+
+	def __str__(self):
+		return str(self.tutorial) + ' - ' + str(self.language)
 
 class ScriptDetails(models.Model):
-	cue = models.TextField()
-	narration = models.TextField()
+	cue = models.TextField(blank=True)
+	narration = models.TextField(blank=True)
 	order = models.PositiveIntegerField()
 	script = models.ForeignKey(Scripts, on_delete = models.CASCADE)
 	comment_status = models.BooleanField(default=False)

@@ -13,6 +13,7 @@ urlpatterns = [
   url(r'api/scripts/(?P<script_detail_id>[0-9]+)/comments/$', views.CommentCreateAPIView.as_view()),
   url(r'api/scripts/(?P<script_detail_id>[0-9]+)/reversions/$', views.ReversionListView.as_view()),
   url(r'api/scripts/(?P<script_detail_id>[0-9]+)/reversions/(?P<reversion_id>[0-9]+)/$', views.ReversionRevertView.as_view()),
+  url(r'api/scripts/(?P<script_id>[0-9]+)/$', views.RelativeOrderingAPI.as_view()),
   url(r'api/docs/$', schema_view),
   url(r'', views.index, name='home')
 ]
