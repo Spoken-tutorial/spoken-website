@@ -1,6 +1,6 @@
 #!/bin/bash
 
-
+sudo apt-get install python3-dev libmysqlclient-dev
 sudo pip3 install virtualenv
 
 Virtualenv venv -p python3
