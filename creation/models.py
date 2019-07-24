@@ -4,6 +4,37 @@ from builtins import object
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
+import uuid
+from datetime import timedelta, date
+
+from django.db.models import Q
+'''
+payment rate
+script user == 1300 per 10 min
+video user == 700 per 10 min
+both == 2000 per 10 min
+'''
+PAY_PER_SEC = [0, (13.0 / 6), (7.0 / 6.0), (20.0 / 6)]
+
+PAYMENT_STATUS = (
+    (0, 'Payment Cancelled'),
+    (1, 'Payment Due'),
+    (2, 'Payment Initiated'),
+)
+
+USER_TYPE = (
+    (1, 'Script User'),
+    (2, 'Video User'),
+    (3, 'Script & Video User'),
+)
+
+HONORARIUM_STATUS = (
+    (1, 'In Process'),
+    (2, 'Forwarded'),
+    (3, 'Completed'),
+    (4, 'Confirmed'),
+)
+
 
 
 @python_2_unicode_compatible
@@ -201,7 +232,6 @@ class TutorialResource(models.Model):
     video_thumbnail_time = models.TimeField(default='00:00:00')
     video_user = models.ForeignKey(User, related_name='videos', on_delete=models.PROTECT )
     video_status = models.PositiveSmallIntegerField(default=0)
-
     status = models.PositiveSmallIntegerField(default=0)
     version = models.PositiveSmallIntegerField(default=0)
     hit_count = models.PositiveIntegerField(default=0)
@@ -209,8 +239,73 @@ class TutorialResource(models.Model):
     updated = models.DateTimeField(auto_now=True)
     publish_at = models.DateTimeField(null=True)
 
+
     class Meta(object):
         unique_together = (('tutorial_detail', 'language',),)
+
+
+class PaymentHonorarium(models.Model):
+    amount = models.DecimalField(default=0, max_digits=7, decimal_places=2)
+    code = models.CharField(max_length=20, editable=False)
+    doc = models.FileField(null=True, blank=True)
+    status = models.PositiveSmallIntegerField(default=1, choices=HONORARIUM_STATUS)
+    updated = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        """
+        Generating custom Honorarium code
+        """
+        if not self.id:
+            try:
+                last_id = PaymentHonorarium.objects.order_by('-id')[0].id
+            except IndexError:
+                last_id = 0
+            unique_id = last_id + 1
+            today = date.today()
+            self.code = "PH-{year}-{month:02n}-{unique_id:05n}".format(year=today.year, month=today.month, unique_id=unique_id)
+        super(self.__class__, self).save(*args, **kwargs)
+
+
+class TutorialPayment(models.Model):
+    user = models.ForeignKey(User, related_name="contributor",)
+    tutorial_resource = models.ForeignKey(TutorialResource)
+    payment_honorarium = models.ForeignKey('PaymentHonorarium', related_name="tutorials", null=True, blank=True, on_delete=models.SET_NULL)
+    user_type = models.PositiveSmallIntegerField(default=3, choices=USER_TYPE)
+    seconds = models.PositiveIntegerField(default=0, help_text="Tutorial duration in seconds")
+    amount = models.DecimalField(default=0, max_digits=7, decimal_places=2)
+    status = models.PositiveSmallIntegerField(default=1, choices=PAYMENT_STATUS)
+
+    class Meta:
+        unique_together = (('tutorial_resource', 'user'),)
+
+    def get_duration(self):
+        """Displays time from seconds to hh:mm:ss format"""
+        return str(timedelta(seconds=self.seconds))
+
+    def save(self, *args, **kwargs):
+        try:
+            pps = PAY_PER_SEC[self.user_type]
+            self.amount = round(pps * self.seconds, 2)
+        except:
+            print("An Error Occured. User_Type is beyond 3 causing list index out of range")
+        super(TutorialPayment, self).save(*args, **kwargs)
+
+
+class BankDetail(models.Model):
+    """
+        To store bank account details of external contributor
+    """
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        limit_choices_to=Q(groups__name='External-Contributor')
+    )
+    account_number = models.CharField(max_length=17)
+    ifsc = models.CharField(max_length=11)
+    bank = models.CharField(max_length=30)
+    branch = models.CharField(max_length=100)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
 
 
 class ArchivedVideo(models.Model):
