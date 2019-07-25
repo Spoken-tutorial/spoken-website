@@ -3405,11 +3405,8 @@ def allocate_tutorial(request, sel_status):
     if lang_qs:
         form.fields['language'].queryset = lang_qs
 
-    #all contributors
-    contributors_list = User.objects.filter(id__in = active_contributor_list(lang_qs))
-    rated_contributors = ContributorRating.objects.filter(rating__gt = 0,
-                language_id = lang_qs, user_id__in = contributors_list
-                )
+    contributors_list = active_contributor_list(lang_qs)
+
     if contributors_list:
         form.fields['script_user'].queryset = contributors_list
         form.fields['video_user'].queryset = contributors_list
@@ -3417,7 +3414,7 @@ def allocate_tutorial(request, sel_status):
     if request.method == 'POST':
         language_id = request.POST.get('language')
         if language_id:
-            contributors_list = active_contributor_list(language_id)
+            contributors_list = active_contributor_list([int(language_id)])
             rated_contributors = ContributorRating.objects.filter(rating__gt = 0,
                 language_id = language_id, user_id__in = contributors_list
                 )
