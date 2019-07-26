@@ -23,8 +23,69 @@ export class ScriptComponent implements OnInit {
 
   constructor(public router: Router, public route: ActivatedRoute, public createscriptService: CreateScriptService) { }
 
-  //what it does: add more slides on clicking on plus icon
+  public getRelativeOrdering() {
+    var relative_ordering = [];
 
+    for (var i = 0; i < this.slides.length; i++) {
+      const slide = this.slides[i];
+      relative_ordering.push(slide.id);
+    }
+
+    return relative_ordering;
+  }
+
+  public onMoveSlide(data) {
+    const index = data['index'];
+    const move = data['move'];
+
+    const newSlideIndex = index + move;
+
+    if (!(newSlideIndex >= 0 && newSlideIndex < this.slides.length)) return;
+
+    const temp = this.slides[index];
+    this.slides[index] = this.slides[newSlideIndex];
+    this.slides[newSlideIndex] = temp;
+
+    if (this.nav == "create") return;
+    
+    const scriptId = this.slides[0]['script'];
+    const relativeOrdering = this.getRelativeOrdering().join(',');
+    this.createscriptService.modifyOrdering(scriptId, relativeOrdering)
+      .subscribe(
+        (res) => {
+          new Noty({
+            type: 'success',
+            layout: 'topRight',
+            theme: 'metroui',
+            closeWith: ['click'],
+            text: 'The script is sucessfully updated!',
+            animation: {
+              open: 'animated fadeInRight',
+              close: 'animated fadeOutRight'
+            },
+            timeout: 4000,
+            killer: true
+          }).show();
+        },
+        (error) => {
+          new Noty({
+            type: 'error',
+            layout: 'topRight',
+            theme: 'metroui',
+            closeWith: ['click'],
+            text: 'Woops! There seems to be an error.',
+            animation: {
+              open: 'animated fadeInRight',
+              close: 'animated fadeOutRight'
+            },
+            timeout: 4000,
+            killer: true
+          }).show();
+        }
+      );
+
+  }
+  
   public getEmptySlide() {
     return {
       id: '',

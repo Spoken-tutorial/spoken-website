@@ -14,6 +14,7 @@ export class ScriptSlideComponent implements OnInit {
   @Output() removeSlideEmitter = new EventEmitter<number>();
   @Output() saveSlideEmitter = new EventEmitter<any>();
   @Output() insertSlideEmitter = new EventEmitter<number>();
+  @Output() moveSlideEmitter = new EventEmitter<any>();
   @Input() view: boolean = false;
   @Input() nav:any;
   @Input() disableAutoSave: boolean = false;
@@ -30,6 +31,14 @@ export class ScriptSlideComponent implements OnInit {
 
   constructor() { }
 
+  public moveSlide(move) {
+    this.moveSlideEmitter.emit(
+      {
+        'index': this.index,
+        'move': move
+      }
+    );
+  }
   // argument:void
   // what it does:tells script component the index of the array so that script component can delete that element from the array.
   // returns: void
