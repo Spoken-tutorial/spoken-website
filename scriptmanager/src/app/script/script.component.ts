@@ -98,6 +98,8 @@ export class ScriptComponent implements OnInit {
 
   public addSlide() {
     this.slides.push(this.getEmptySlide());
+    const index = this.slides.length - 1;
+    this.insertSlideEmitter.emit(index);
   }
   
   //remove slides after clicking on cross icon
@@ -157,7 +159,7 @@ export class ScriptComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.addSlide();
+    // this.addSlide();
     this.route.params.subscribe(params => {
       this.tid = +params['tid'];
     });
