@@ -123,18 +123,8 @@ export class ScriptEditComponent implements OnInit {
 
   }
 
-  public getEmptySlide() {
-    return {
-      id: '',
-      cue: '',
-      narration: '',
-      order: null,
-      script: null
-    }
-  }
-
   public onInsertSlide(index) {
-    var script = this.getEmptySlide();
+    var script = this.slides[index];
 
     script['order'] = this.orderId + 1;
     script['script'] = this.scriptId;
@@ -148,7 +138,6 @@ export class ScriptEditComponent implements OnInit {
       }
     ).subscribe(
       (res) => {
-        this.slides.splice(index, 0, this.getEmptySlide());
         this.slides[index] = res['data'][0];
         var relative_ordering = this.getRelativeOrdering().join(',');
         this.createscriptService.modifyOrdering(this.scriptId, relative_ordering)

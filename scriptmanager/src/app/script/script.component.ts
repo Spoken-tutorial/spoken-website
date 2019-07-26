@@ -16,6 +16,7 @@ export class ScriptComponent implements OnInit {
   @Output() insertSlideEmitter = new EventEmitter<number>();
   @Input() nav: any;
   @Input() displaySave: boolean = false;
+  @Input() disableAutoSave: boolean = false;
   public tid;
   public lid;
   public tutorialName: any;
@@ -81,7 +82,7 @@ export class ScriptComponent implements OnInit {
   }
 
   public onInsertSlide(index) {
-    // this.slides.splice(index, 0, this.getEmptySlide());
+    this.slides.splice(index, 0, this.getEmptySlide());
     this.insertSlideEmitter.emit(index);
   }
   //calls the component which called script component and gives the slides array which needs to be saved in the database.
