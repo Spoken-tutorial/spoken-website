@@ -88,7 +88,7 @@ export class ScriptComponent implements OnInit {
   
   public getEmptySlide() {
     return {
-      id: '',
+      id: '-1',
       cue: '',
       narration: '',
       order: '',

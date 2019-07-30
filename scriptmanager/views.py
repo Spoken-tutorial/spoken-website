@@ -100,7 +100,6 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
 
         ordering = ordering.split(',')
         ordering = list(map(int, ordering))
-        
         script_details = sorted(script_details, key=lambda s: ordering.index(s.pk))
         
         return script_details
@@ -122,7 +121,6 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
       details = request.data['details']
       for item in details:
         item.update( {"script":script.pk})
-
     elif(create_request_type=='file'):
       myfile=request.FILES['docs']
       fs = FileSystemStorage()
@@ -146,6 +144,16 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
     serialized  =  ScriptsDetailSerializer(data  =  details,many  =  True) #inserting a details array without iterating
     if serialized.is_valid():
       serialized.save()
+      
+      if (create_request_type == 'form'):
+        ordering = request.data['ordering']
+        
+        for slide in serialized.data:
+          ordering = ordering.replace('-1', str(slide.get('id')), 1)
+        
+        script.ordering = ordering
+        script.save()
+
       return Response({'status': True, 'data': serialized.data },status = 201)
     return Response({'status': False},status = 400)
 
