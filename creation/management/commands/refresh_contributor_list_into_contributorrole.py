@@ -58,7 +58,7 @@ class Command(BaseCommand):
                     
                     print (contributor_role.foss_category_id, contributor_role.language.name,
                             contributor_role.user_id, tutorial.tutorial)        
-            delete_contributor_role = ContributorRole.objects.get(
-                        id=contributor_role.id).delete()
+            #delete_contributor_role = ContributorRole.objects.get(
+            #            id=contributor_role.id).delete()
 
         print ("Exited")
