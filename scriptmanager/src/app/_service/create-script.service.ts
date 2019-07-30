@@ -69,7 +69,8 @@ export class CreateScriptService {
       url,
       {
         'ordering': ordering
-      }
+      },
+      this.httpOptions
     );
   }
 

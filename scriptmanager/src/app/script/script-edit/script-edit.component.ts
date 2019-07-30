@@ -108,20 +108,20 @@ export class ScriptEditComponent implements OnInit {
         }).show();
       },
       (error) => {
-  new Noty({
-    type: 'error',
-    layout: 'topRight',
-    theme: 'metroui',
-    closeWith: ['click'],
-    text: 'Woops! There seems to be an error.',
-    animation: {
-      open: 'animated fadeInRight',
-      close: 'animated fadeOutRight'
-    },
-    timeout: 4000,
-    killer: true
-  }).show();
-}
+        new Noty({
+          type: 'error',
+          layout: 'topRight',
+          theme: 'metroui',
+          closeWith: ['click'],
+          text: 'Woops! There seems to be an error.',
+          animation: {
+            open: 'animated fadeInRight',
+            close: 'animated fadeOutRight'
+          },
+          timeout: 4000,
+          killer: true
+        }).show();
+      }
     );
 
   }
@@ -130,24 +130,24 @@ export class ScriptEditComponent implements OnInit {
   // what it does:
   // returns: status==success if data is saved successfully and status=false if data couldn't saved successfully because of some reason 
   public getData() {
-  this.createscriptService.getScript(this.tid, this.lid).subscribe(
-    (res) => {
-      this.slides = res;
-      if (this.slides.length == 0) return;
+    this.createscriptService.getScript(this.tid, this.lid).subscribe(
+      (res) => {
+        this.slides = res;
+        if (this.slides.length == 0) return;
 
-      this.scriptId = this.slides[0]['script'];
-      this.orderId = this.slides[this.slides.length - 1]['order'];
-    }
-  );
-}
+        this.scriptId = this.slides[0]['script'];
+        this.orderId = this.slides[this.slides.length - 1]['order'];
+      }
+    );
+  }
 
-ngOnInit() {
-  this.route.params.subscribe(params => {
-    this.tid = +params['tid'];//tid is tutorial id
-  });
-  this.lid = this.route.snapshot.params['lid']//lid is language id
-  this.orderId = 0;
-  this.getData();
-}
+  ngOnInit() {
+    this.route.params.subscribe(params => {
+      this.tid = +params['tid'];//tid is tutorial id
+    });
+    this.lid = this.route.snapshot.params['lid']//lid is language id
+    this.orderId = 0;
+    this.getData();
+  }
 
 }
