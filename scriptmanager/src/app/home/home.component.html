@@ -1,55 +1,36 @@
-<div id="page-wrapper">
-  <div id="content-wrapper">
-    <div id="content-inner" class="container">
-
-      <div id="content-block" class="col-lg-12 col-md-12 col-sm-12">
-        <div id="content" class="col-lg-12 col-md-12 col-sm-12">
-          <div class="actual-data">
-            <div
-              class="well tab-content tutorial-search-form col-lg-offset-1 col-md-offset-1 col-lg-10 col-md-10 col-sm-12 col-xs-12">
-              <div class="col-sm-12">
-
-                <div class="form-group">
-
-                  <div class="col-sm-6"> <span class='ajax-search-refresh ajax-refresh-search-foss'><i
-                        class="fa fa-2 fa-refresh fa-spin"></i></span>
-                    <select (change)="getLanguage($event.target.value)" name="search_foss"
-                      class="form-control search-foss" tabindex="1" id="id_search_foss">
-                      <option value="nothing">--Select Foss Categories--</option>
-                      <option *ngFor="let item of foss; let i = index" [value]="[i]">
-                        {{ item['foss_category']['name'] }}</option>
-                    </select>
-                  </div>
-
-                  <div class="col-sm-6"> <span class='ajax-search-refresh ajax-refresh-search-language'><i
-                        class="fa fa-2 fa-refresh fa-spin"></i></span>
-                    <select (change)="fetchFossTutorials($event.target.value)" name="search_language"
-                      class="form-control search-language" tabindex="2" id="id_search_language">
-                      <option value="nothing">--Select Language--</option>
-                      <option [value]="langData['id']">{{ langData['name'] }}</option>
-                    </select>
-                  </div>
-
-                </div>
-
-              </div>
-            </div>
-
-            <div
-              class='search-result col-lg-offset-1 col-md-offset-1 col-sm-offset-1 col-xs-offset-1 col-lg-10 col-md-10 col-sm-10 col-xs-10'>
-              <p *ngIf="description"><i>{{ foss[index]['foss_category']['description'] }}</i></p>
-
-              <hr>
-
-              <div *ngFor="let tutorial of tutorials">
-                <app-tutorials [tutorial]="tutorial"></app-tutorials>
-              </div>
-
-            </div>
-          </div>
+<div class="section">
+  <div class="container">
+    <div class="columns is-centered has-text-centered">
+      <div class="column">
+        <div class="select">
+          <select [(ngModel)]="currentCategory" (change)="onFossCategoryChange($event.target.value)">
+            <option value="-1">Select Foss Category</option>
+            <option *ngFor="let category of fossCategories; let i = index" [value]="i">
+              {{category['foss_category']['name']}}
+            </option>
+          </select>
+        </div>
+      </div>
+      <div class="column">
+        <div class="select">
+          <select (change)="onLanguageChange($event.target.value)">
+            <option value="-1">Select Language</option>
+            <option *ngFor="let language of currentCategoryLanguages; let i = index" [value]="i">
+              {{language['name']}}
+            </option>
+          </select>
         </div>
       </div>
     </div>
-
+    <div class="columns is-centered has-text-centered" *ngIf="description !== ''">
+      <div class="column">
+        <blockquote>{{description}}</blockquote>
+      </div>
+    </div>
+    <div class="columns" *ngFor="let tutorial of tutorials">
+      <div class="column">
+        <app-tutorials [tutorial]="tutorial"></app-tutorials>
+      </div>
+    </div>
   </div>
 </div>

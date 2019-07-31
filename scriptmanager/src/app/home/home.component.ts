@@ -9,12 +9,11 @@ import { TutorialsService } from '../_service/tutorials.service'
 })
 export class HomeComponent implements OnInit {
 
-  public foss;
+  public fossCategories;
+  public currentCategory = -1;
+  public currentCategoryLanguages;
   public tutorials;
-  public langId: number;
-  public fossId: number;
-  public index: number;
-  public description: boolean = false;
+  public description: string = '';
   public langData: any;
   public local_fossId: any;
   public local_langId: any;
@@ -25,39 +24,31 @@ export class HomeComponent implements OnInit {
     public tutorialService: TutorialsService
   ) { }
 
-  public getLanguage(langIndex) {
-    if (langIndex != "nothing") {
-      this.fossService.getAllFossCategories().subscribe(
-        (res) => {
-          this.index = langIndex
-          localStorage.setItem('fossIndex', String(this.index))
+  public onFossCategoryChange(index) {
+    this.currentCategory = index;
+    this.description = this.fossCategories[index]['foss_category']['description'];
+    this.currentCategoryLanguages = this.fossCategories[index]['languages'];
 
-          this.fossId = res[langIndex].foss_category.id
-          localStorage.setItem('fossId', String(this.fossId))
+    this.tutorials = [];
+  }
 
-          this.langData = res[langIndex]['language']
-          this.description = true
-        }
-      );
+  public getFossCategoryLanguages() {
+    if (this.currentCategory === -1) return [];
+    else {
+      return this.fossCategories[this.currentCategory]['languages'];
     }
   }
 
-  public fetchFossTutorials(languageId) {
-    if (languageId != "nothing") {
-      this.langId = languageId
-      localStorage.setItem('langId', String(this.langId))
+  public onLanguageChange(index) {
+    const fossCategoryLanguages = this.getFossCategoryLanguages();
 
-      this.local_fossId = localStorage.getItem("fossId");
-      this.local_langId = localStorage.getItem("langId");
+    if (fossCategoryLanguages.length !== 0) {
+      const fossId = this.fossCategories[this.currentCategory]['foss_category']['id'];
+      const languageId = fossCategoryLanguages[index]['id'];
 
-      this.tutorialService.getFossTutorials(this.local_fossId, this.local_langId).subscribe(
-        (res) => {
-          this.tutorials = res
-        },
-        (err) => {
-          console.log('Failed to fetch tutorial categories');
-          console.error(err);
-        }
+      this.tutorialService.getFossTutorials(fossId, languageId).subscribe(
+        (res) => this.tutorials = res,
+        console.error
       );
     }
   }
@@ -65,7 +56,8 @@ export class HomeComponent implements OnInit {
   public fetchAllFoss() {
     this.fossService.getAllFossCategories().subscribe(
       (res) => {
-        this.foss = res
+        this.fossCategories = res['data'];
+        console.log(this.fossCategories);
       },
       (err) => {
         console.log('Failed to fetch foss categories');
@@ -75,15 +67,15 @@ export class HomeComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.langData = { id: -1, name: "" };
+    // this.langData = { id: -1, name: "" };
     this.fetchAllFoss();
-    this.local_fossIndex = localStorage.getItem("fossIndex");
-    this.local_langId = localStorage.getItem("langId");
+    // this.local_fossIndex = localStorage.getItem("fossIndex");
+    // this.local_langId = localStorage.getItem("langId");
 
-    if (localStorage.length > 5) {
-      this.getLanguage(this.local_fossIndex)
-      this.fetchFossTutorials(this.local_langId)
-    }
+    // if (localStorage.length > 5) {
+    //   this.getLanguage(this.local_fossIndex)
+    //   this.fetchFossTutorials(this.local_langId)
+    // }
   };
 
 }
