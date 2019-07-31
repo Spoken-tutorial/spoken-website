@@ -2842,7 +2842,8 @@ def update_assignment(request):
 def list_all_published_tutorials(request):
     form = PublishedTutorialFilterForm(request.GET)
     # status = 1 for published and script_user__groups = 5 for external contributors
-    tr_pub = TutorialResource.objects.filter(status = 1, script_user__groups__in = [5,]) 
+    tr_pub = TutorialResource.objects.filter( Q(script_user__groups__in = [5,])|
+                Q(video_user__groups__in = [5,]), status = 1).distinct()
     if form.is_valid():
         start_date = form.cleaned_data['start_date']
         end_date = form.cleaned_data['end_date']
@@ -2913,7 +2914,8 @@ def list_all_due_tutorials(request):
     """
     Display all publshed tutorials for whom payment is due and can initiate payment process for selected tutorials
     """
-    if not is_qualityreviewer(request.user):
+    if not is_administrator(request.user):
+        #is_language_manager(request.user)
         raise PermissionDenied()
     if request.method == "POST":
         initiate_payment(request)
