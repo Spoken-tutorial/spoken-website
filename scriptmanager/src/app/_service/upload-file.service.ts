@@ -20,15 +20,18 @@ export class UploadFileService {
       csrf = '';
     }
     this.httpOptions = {
-      headers: new HttpHeaders({ 'Content-Type': 'application/json', 'X-CSRFToken': csrf })
+      headers: new HttpHeaders({  
+        'X-CSRFToken': csrf 
+      })
     };
   }
 
   // API service for uploading the file
   public postFile(tid, lid, file) {
-    this.uploadedFile.append('docs', file);
+    this.uploadedFile.append('docs', file, file.name);
     this.uploadedFile.append('type', 'file');
-    const _url = `${this.apiUrl}/tutorial/${tid}/language/${lid}/scripts/`
+    const _url = `${this.apiUrl}/tutorial/${tid}/language/${lid}/scripts/`;
+
     return this.http.post(
       _url,
       this.uploadedFile,
