@@ -6,6 +6,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status,generics
 from rest_framework_jwt.settings import api_settings
+from rest_framework_jwt.utils import jwt_payload_handler as default_jwt_payload_handler
 from reversion.models import Version
 import os
 from django.core.files.storage import FileSystemStorage
@@ -15,6 +16,15 @@ import time
 from creation.views import is_videoreviewer,is_domainreviewer,is_qualityreviewer
 import uuid
 import subprocess 
+
+def custom_jwt_payload_handler(user):
+  payload = default_jwt_payload_handler(user)
+
+  payload['is_videoreviewer'] = is_videoreviewer(user)
+  payload['is_domainreviewer'] = is_domainreviewer(user)
+  payload['is_qualityreviewer'] = is_qualityreviewer(user)
+
+  return payload
 
 def index(request):
   if request.user.is_authenticated:
@@ -128,7 +138,7 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
       filename = fs.save(uid, myfile)
       doc_file=os.getcwd()+'/media/'+filename
       #os.system('libreoffice --convert-to html '+doc_file)
-      if subprocess.check_call('libreoffice --convert-to html '+doc_file+' --outdir media', shell=True) ==0:
+      if subprocess.check_call('soffice --convert-to html '+doc_file+' --outdir media', shell=True) ==0:
         html_file= 'media/'+uid+".html"
 
         with open(html_file,'r') as html:
