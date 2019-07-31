@@ -15,7 +15,7 @@
   <div class="timeline-marker">
   </div>
   <div class="timeline-content">
-    <div class="columns">
+    <div class="columns is-mobile">
       <div class="column">
         <div class="is-icon is-pointer button-hover" (click)="moveSlide(-1)">
           <i class="fas fa-chevron-circle-up fa-2x"></i>
@@ -57,9 +57,9 @@
           <p class="heading">Visual Cue</p>
           <div class="field">
             <div class="control content">
-              <ckeditor tagName="textarea" [config]="ckeditorConfig" [editor]="Editor" formControlName="cue"
-                [(ngModel)]="slide.cue" (blur)="saveSlide()">
-              </ckeditor>
+              <quill-editor tagName="textarea" formControlName="cue"
+                [(ngModel)]="slide.cue" (onBlur)="saveSlide()" [styles]="quillStyles" theme="snow">
+              </quill-editor>
             </div>
           </div>
         </div>
@@ -70,9 +70,9 @@
           <p class="heading">Narration</p>
           <div class="field">
             <div class="control content">
-              <ckeditor tagName="textarea" [config]="ckeditorConfig" [editor]="Editor" formControlName="narration"
-                [(ngModel)]="slide.narration" (blur)="saveSlide()">
-              </ckeditor>
+              <quill-editor tagName="textarea" formControlName="narration"
+                [(ngModel)]="slide.narration" (onBlur)="saveSlide()" [styles]="quillStyles" theme="snow">
+              </quill-editor>
             </div>
           </div>
         </div>

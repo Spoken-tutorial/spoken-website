@@ -4,7 +4,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { FormsModule ,ReactiveFormsModule} from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HomeComponent } from './home/home.component';
 import { TutorialsComponent } from './home/tutorials/tutorials.component';
 import { JwtModule } from '@auth0/angular-jwt';
@@ -23,6 +23,7 @@ import { NgxDiffModule } from 'ngx-diff';
 import { NgxTextDiffModule } from 'ngx-text-diff';
 import { DiffMatchPatchModule } from 'ng-diff-match-patch';
 import { CookieModule } from 'ngx-cookie';
+import { QuillModule } from 'ngx-quill'
 
 // since we are saving the JWT token for authentication in the local storage 
 // , here we get that token to send it with each api call to authenticate with the server
@@ -65,12 +66,31 @@ export function tokenGetter() {
     NgxDiffModule,
     NgxTextDiffModule,
     DiffMatchPatchModule,
-    CookieModule.forRoot()
+    CookieModule.forRoot(),
+    QuillModule.forRoot({
+      modules: {
+        toolbar: [
+          ['bold', 'italic', 'underline', 'strike'],        // toggled buttons
+          // ['blockquote', 'code-block'],
+
+          [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+          // [{ 'script': 'sub' }, { 'script': 'super' }],      // superscript/subscript
+          // [{ 'indent': '-1' }, { 'indent': '+1' }],          // outdent/indent
+
+          // [{ 'size': ['small', false, 'large', 'huge'] }],  // custom dropdown
+          [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+
+          // [{ 'font': [] }],
+
+          ['clean'],                                         // remove formatting button
+        ]
+      }
+    })
   ],
   providers: [],
   bootstrap: [AppComponent]
 })
 
-export class AppModule { 
+export class AppModule {
 
 }

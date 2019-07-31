@@ -1,6 +1,6 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { FormGroup, FormControl } from '@angular/forms';
-import * as ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+// import * as ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 
 @Component({
   selector: 'app-script-slide',
@@ -22,12 +22,18 @@ export class ScriptSlideComponent implements OnInit {
   public ckEditorCue: boolean = false;
   public ckEditorNarration: boolean = false;
 
+  public quillStyles = {
+    'height': '200px',
+    'border': '1px solid #ccc',
+    'width': '500px'
+  }
+
   editorForm: FormGroup;
 
-  public Editor = ClassicEditor;
-  public ckeditorConfig = {
-    toolbar: ['heading', '|', 'bold', 'italic', 'bulletedList', 'numberedList', '|', 'undo', 'redo']
-  }
+  // public Editor = ClassicEditor;
+  // public ckeditorConfig = {
+  //   toolbar: ['heading', '|', 'bold', 'italic', 'bulletedList', 'numberedList', '|', 'undo', 'redo']
+  // }
 
   constructor() { }
 
