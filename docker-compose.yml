@@ -3,6 +3,9 @@ version: '2'
 services:
   db1:
     image: mysql:5.7
+    command: mysql -uroot -proot -e  "delete from spoken.creation_fossavailablefortest where id=13;"
+    command: mysql -uroot -proot -e  "drop table spoken.nicedit_niceditimage;"
+    command: mysql -uroot -proot -e  "ALTER TABLE spoken.django_content_type MODIFY COLUMN name character varying(50) NOT NULL DEFAULT 'not null';"
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: spoken
