@@ -1,7 +1,7 @@
 # Code to add publish date in tutorialresource table
 # To run this file please follow below instructions:
 # 1. Go to project directory
-# 2. run "python manage.py refresh"
+# 2. run "python manage.py refresh_contributor_list_into_contributorrole"
 
 from __future__ import absolute_import, print_function, unicode_literals
 
@@ -45,9 +45,13 @@ class Command(BaseCommand):
             
             foss_tutorials = TutorialDetail.objects.filter(foss_id = contributor_role.foss_category_id).order_by('foss_id')
             for tutorial in foss_tutorials:
-                tutorial_resource = TutorialResource.objects.filter(tutorial_detail_id = tutorial,
-                    language_id = contributor_role.language_id)
-                if not tutorial_resource.exists():
+                tutorial_resource = TutorialResource.objects.filter(Q(
+                    outline_user_id=contributor_role.user_id)|Q(
+                    script_user_id=contributor_role.user_id)|Q(
+                    video_user_id=contributor_role.user_id)|Q(
+                    tutorial_detail_id = tutorial,
+                    language_id = contributor_role.language_id))
+                if tutorial_resource.exists():
                     add_previous_contributor_role = ContributorRole()
                     add_previous_contributor_role.foss_category_id = contributor_role.foss_category_id
                     add_previous_contributor_role.language_id = contributor_role.language_id
