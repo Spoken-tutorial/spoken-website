@@ -1,17 +1,15 @@
-<div class="container has-margin-top-50">
-  <div class="section">
+<div class="section has-margin-top-50">
+  <div class="container">
 
-
-    <div class="columns is-mobile">
+    <div class="columns">
       <div class="column is-8">
         <p class="title">{{ tutorialName }}</p>
       </div>
       <div class="column is-4">
-        <div class="is-pulled-right">
+        <div class="buttons">
           <a class="button is-info" routerLink="/">
             <i class="fa fa-chevron-left"></i>&nbsp;Go Back
           </a>
-          &nbsp;
           <a *ngIf="nav!='create'" class="button is-info" routerLink="/edit/{{tid}}/{{lid}}/{{ tutorialName }}">
             <i class="fa fa-edit"></i>&nbsp;Edit Mode
           </a>

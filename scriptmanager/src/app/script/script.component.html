@@ -1,50 +1,44 @@
-<div class="container has-margin-top-50">
-  <div class="section">
-    <div class="columns is-centered is-mobile">
-      <div class="column">
-        <div class="timeline">
+<div class="columns is-centered">
+  <div class="column is-8">
+    <p class="title">{{ tutorialName }}</p>
+  </div>
 
-          <div class="columns is-mobile">
+  <div class="column is-4">
+    <div class="buttons">
+      <a class="button is-info" routerLink="/">
+        <i class="fa fa-chevron-left"></i>&nbsp;Go Back
+      </a>
+      <a *ngIf="nav!='create'" class="button is-info" routerLink="/{{nav}}/{{tid}}/{{lid}}/{{ tutorialName }}">
+        <i class="fa fa-eye"></i>&nbsp;View Mode
+      </a>
+    </div>
+  </div>
+</div>
 
-            <div class="column is-8">
-              <p class="title">{{ tutorialName }}</p>
+<div class="columns">
+  <div class="column">
+    <div class="timeline">
+
+      <ng-container *ngFor="let slide of slides; let i = index">
+        <app-script-slide [slide]="slide" [index]="i" [nav]="nav" (removeSlideEmitter)="onRemoveSlide($event)"
+          (saveSlideEmitter)="onSaveSlide($event)" (insertSlideEmitter)="onInsertSlide($event)"
+          [disableAutoSave]="disableAutoSave" (moveSlideEmitter)="onMoveSlide($event)"></app-script-slide>
+      </ng-container>
+
+
+      <div class="timeline-item is-pointer">
+        <div class="timeline-marker is-info is-icon" (click)="addSlide()">
+          <i class="fa fa-plus"></i>
+        </div>
+
+        <div class="timeline-content">
+          <div class="columns">
+
+            <div class="column">
+              <a class="button heading is-outlined" (click)="addSlide()">Add new Slide</a>
             </div>
-
-            <div class="column is-4">
-              <div class="is-pulled-right">
-                <a class="button is-info" routerLink="/">
-                  <i class="fa fa-chevron-left"></i>&nbsp;Go Back
-                </a>
-                &nbsp;
-                <a *ngIf="nav!='create'" class="button is-info" routerLink="/{{nav}}/{{tid}}/{{lid}}/{{ tutorialName }}">
-                  <i class="fa fa-eye"></i>&nbsp;View Mode
-                </a>
-              </div>
-            </div>
-
-          </div>
-          <br><br>
-
-
-          <ng-container *ngFor="let slide of slides; let i = index">
-            <app-script-slide [slide]="slide" [index]="i" [nav]="nav" (removeSlideEmitter)="onRemoveSlide($event)"
-              (saveSlideEmitter)="onSaveSlide($event)" (insertSlideEmitter)="onInsertSlide($event)" [disableAutoSave]="disableAutoSave" (moveSlideEmitter)="onMoveSlide($event)"></app-script-slide>
-          </ng-container>
-
-
-          <div class="timeline-item is-pointer">
-            <div class="timeline-marker is-info is-icon" (click)="addSlide()">
-              <i class="fa fa-plus"></i>
-            </div>
-
-            <div class="timeline-content">
-              <div class="columns">
-
-                <div class="column">
-                  <a class="button heading is-outlined" (click)="addSlide()">Add new Slide</a>
-                </div>
-                <div *ngIf="displaySave" class="column">
-                  <a class="button heading is-outlined is-primary" [swal]="{
+            <div *ngIf="displaySave" class="column">
+              <a class="button heading is-outlined is-primary" [swal]="{
                             title: 'Save Script',
                             text: 'Are you sure?',
                             type: 'info',
@@ -53,15 +47,13 @@
                             confirmButtonText: 'Yes! Save it.',
                             cancelButtonText: 'No!'
                             }" (confirm)="saveScript()">
-                    Save Script
-                  </a>
-                </div>
-              </div>
+                Save Script
+              </a>
             </div>
           </div>
-
         </div>
       </div>
+
     </div>
   </div>
 </div>

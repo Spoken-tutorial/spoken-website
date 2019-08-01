@@ -25,7 +25,8 @@ export class ScriptSlideComponent implements OnInit {
   public quillStyles = {
     'height': '200px',
     'border': '1px solid #ccc',
-    'width': '500px'
+    'margin': 'auto',
+    'max-width': '600px'
   }
 
   editorForm: FormGroup;
