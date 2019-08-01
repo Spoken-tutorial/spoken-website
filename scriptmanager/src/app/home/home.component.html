@@ -27,10 +27,9 @@
         <blockquote>{{description}}</blockquote>
       </div>
     </div>
-    <div class="columns" *ngFor="let tutorial of tutorials">
-      <div class="column">
-        <app-tutorials [tutorial]="tutorial"></app-tutorials>
-      </div>
+    <div *ngFor="let tutorial of tutorials">
+      <app-tutorials [tutorial]="tutorial"></app-tutorials>
+      <div class="is-divider" data-content="-"></div>
     </div>
   </div>
 </div>

@@ -1,37 +1,64 @@
-<div class='result-record row'>
-
-  <div class="info col-lg-8 col-md-8 col-sm-8 col-xs-8">
-    <div class='title'>
+<div class="columns">
+  <div class="column is-8">
+    <div class="title">
       <h4>{{ tutorial.tutorial }}</h4>
     </div>
-    <div class='desc'>
+    <div class="desc">
       <p><b>Outline: </b>{{ tutorial.outline }}</p>
     </div>
   </div>
+  <div class="column is-4 buttons">
+    <div class="field is-grouped is-grouped-multiline">
+      <div class="control" *ngIf="!tutorial.script_status">
+        <a routerLink="/create/{{ tutorial.id }}/{{ tutorial.language }}/{{ tutorial.tutorial }}">
+          <div class="tags has-addons">
+            <span class="tag is-dark is-medium">
+              <i class="fa fa-plus"></i>
+            </span>
+            <span class="tag is-success is-medium">
+              Create
+            </span>
+          </div>
+        </a>
+      </div>
 
-  <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
-    <div class="Basic pull-right">
-      <div *ngIf="!tutorial.script_status" class="column card-header-title is-pulled-right">
-        <a class="button is-info" routerLink="/upload/{{ tutorial.id }}/{{ tutorial.language }}/{{ tutorial.tutorial }}">
-          <i class="fa fa-plus" aria-hidden="true"></i>&nbsp;Upload
+      <div class="control" *ngIf="!tutorial.script_status">
+        <a routerLink="/upload/{{ tutorial.id }}/{{ tutorial.language }}/{{ tutorial.tutorial }}">
+          <div class="tags has-addons">
+            <span class="tag is-dark is-medium">
+              <i class="fa fa-upload"></i>
+            </span>
+            <span class="tag is-primary is-medium">
+              Upload
+            </span>
+          </div>
         </a>
       </div>
-      <div *ngIf="!tutorial.script_status" class="column card-header-title is-pulled-right">
-        <a class="button is-info" routerLink="/create/{{ tutorial.id }}/{{ tutorial.language }}/{{ tutorial.tutorial }}">
-          <i class="fa fa-plus" aria-hidden="true"></i>&nbsp;Create
+
+      <div class="control" *ngIf="tutorial.script_status">
+        <a routerLink="/edit/{{ tutorial.id }}/{{ tutorial.language }}/{{ tutorial.tutorial }}">
+          <div class="tags has-addons">
+            <span class="tag is-dark is-medium">
+              <i class="fa fa-edit"></i>
+            </span>
+            <span class="tag is-success is-medium">
+              Edit
+            </span>
+          </div>
         </a>
       </div>
-      <div *ngIf="tutorial.script_status" class="column card-header-title is-pulled-right">
-        <a class="button is-info" routerLink="/view/{{ tutorial.id }}/{{ tutorial.language }}/{{ tutorial.tutorial }}">
-          <i class="fa fa-eye"></i>&nbsp;View
-        </a>
-      </div>
-      <div *ngIf="tutorial.script_status" class="column card-header-title is-pulled-right">
-        <a class="button is-info" routerLink="/edit/{{ tutorial.id }}/{{ tutorial.language }}/{{ tutorial.tutorial }}">
-          <i class="fa fa-edit"></i>&nbsp;Edit
+
+      <div class="control" *ngIf="tutorial.script_status">
+        <a routerLink="/view/{{ tutorial.id }}/{{ tutorial.language }}/{{ tutorial.tutorial }}">
+          <div class="tags has-addons">
+            <span class="tag is-dark is-medium">
+              <i class="fa fa-eye"></i>
+            </span>
+            <span class="tag is-info is-medium">
+              View
+            </span>
+          </div>
         </a>
       </div>
     </div>
   </div>
-
-</div>

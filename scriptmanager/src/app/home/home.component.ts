@@ -57,7 +57,6 @@ export class HomeComponent implements OnInit {
     this.fossService.getAllFossCategories().subscribe(
       (res) => {
         this.fossCategories = res['data'];
-        console.log(this.fossCategories);
       },
       (err) => {
         console.log('Failed to fetch foss categories');
