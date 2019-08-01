@@ -1,6 +1,6 @@
 from creation.models import ContributorRole, FossCategory, Language, TutorialDetail,TutorialResource
 from rest_framework import serializers
-from .models import Scripts, ScriptDetails, Comments
+from .models import Script, ScriptDetail, Comment
 from django.contrib.auth.models import User
 from rest_framework.response import Response
 from rest_framework import status
@@ -41,7 +41,7 @@ class TutorialDetailSerializer(serializers.ModelSerializer):
       fields = ('id', 'foss','language', 'tutorial', 'level', 'order', 'script_status','outline')
 
     def get_script_status(self, instance):
-      if Scripts.objects.filter(tutorial_id=instance.id,language = self.context.get('lang'),user=self.context.get('user')).exists():
+      if Script.objects.filter(tutorial_id=instance.id,language = self.context.get('lang'),user=self.context.get('user')).exists():
         return True
       else:
         return False
@@ -58,26 +58,26 @@ class TutorialDetailSerializer(serializers.ModelSerializer):
         return int(lang_id)
 
 
-class ScriptsDetailSerializer(serializers.ModelSerializer):
+class ScriptDetailSerializer(serializers.ModelSerializer):
 
   class Meta:
-    model = ScriptDetails
+    model = ScriptDetail
     fields = ('id', 'cue', 'narration', 'order', 'comment_status', 'script')
 
-class ScriptsSerializer(serializers.ModelSerializer):
-  details = ScriptsDetailSerializer(many=True)
+class ScriptSerializer(serializers.ModelSerializer):
+  details = ScriptDetailSerializer(many=True)
 
   class Meta:
-    model = Scripts
+    model = Script
     fields = ('details',)
 
 
-class CommentsSerializer(serializers.ModelSerializer):
+class CommentSerializer(serializers.ModelSerializer):
   user = serializers.CharField()
   time = serializers.SerializerMethodField()
 
   class Meta:
-    model = Comments
+    model = Comment
     fields = ('id', 'comment', 'user', 'script_details', 'time')
 
   def get_time(self, instance):

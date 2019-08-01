@@ -1,11 +1,11 @@
-from .models import Scripts, ScriptDetails,Comments
+from .models import Script, ScriptDetail, Comment
 from django.contrib import admin
 from django.contrib import admin
 from reversion.admin import VersionAdmin
 
-admin.site.register(Scripts)
-admin.site.register(Comments)
+admin.site.register(Script)
+admin.site.register(Comment)
 
-@admin.register(ScriptDetails)
+@admin.register(ScriptDetail)
 class ScriptsDetailsAdmin(VersionAdmin):
     pass
