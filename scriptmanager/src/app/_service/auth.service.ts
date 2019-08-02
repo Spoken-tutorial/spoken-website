@@ -11,8 +11,6 @@ export class AuthService {
 
   // using JwtToken for authorization purpose in angular system. Nothing to do with main django system.
   public getJwtToken() {
-    this.getToken();
-    this.isVideoReviewer();
     return this.http.post(
       'http://localhost:8000/api-token-auth/',
       {
@@ -22,17 +20,26 @@ export class AuthService {
     );
   }
 
+  public isAuthenticated() {
+    const token = this.getToken();
+    if (token === '') return false;
+    
+    return !this.jwtHelper.isTokenExpired(token);
+  }
+
   public getToken() {
     const token = localStorage.getItem('token');
-    console.log(token);
     return token;
   }
 
-  public isVideoReviewer() {
-    const token = this.getToken();
-    const decodedToken = this.jwtHelper.decodeToken(token);
-    console.log(decodedToken);
-    return true;
+  public isReviewer() {
+    if (this.isAuthenticated()) {
+      const token = this.getToken();
+      const decodedToken = this.jwtHelper.decodeToken(token);
+      return decodedToken['is_domainreviewer'] || decodedToken['is_videoreviewer'];
+    }
+
+    return false;
   }
   constructor(private http: HttpClient) { }
 }
