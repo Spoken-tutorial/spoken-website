@@ -28,14 +28,15 @@ def custom_jwt_payload_handler(user):
   return payload
 
 def index(request):
+  token = ''
   if request.user.is_authenticated:
     jwt_payload_handler  =  api_settings.JWT_PAYLOAD_HANDLER
     jwt_encode_handler  =  api_settings.JWT_ENCODE_HANDLER
     payload  =  jwt_payload_handler(request.user)
     token  =  jwt_encode_handler(payload) 
-    return render(request, 'scriptmanager/index.html', {'token': token})
-  return redirect('home')
-
+  
+  return render(request, 'scriptmanager/index.html', {'token': token})
+  
 
 class ContributorRoleList(generics.ListAPIView):
   def get_queryset(self):
