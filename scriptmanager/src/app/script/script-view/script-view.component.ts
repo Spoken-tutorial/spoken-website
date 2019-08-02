@@ -4,6 +4,8 @@ import { CreateScriptService } from '../../_service/create-script.service';
 import { CommentsService } from '../../_service/comments.service';
 import { RevisionsService } from '../../_service/revisions.service';
 import { AuthService } from 'src/app/_service/auth.service';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 @Component({
   selector: 'app-script-view',
@@ -68,6 +70,13 @@ export class ScriptViewComponent implements OnInit {
       );
   }
 
+  public downloadPdf() {
+    const doc = new jsPDF();
+    doc.autoTable({
+      html: '#script-table'
+    });
+    doc.save(`${this.tutorialName}.pdf`);
+  }
   // to get hover effect on particular table rows
   public mouseenter(i) {
     this.overVal[i] = true;
