@@ -23,7 +23,8 @@ import { NgxDiffModule } from 'ngx-diff';
 import { NgxTextDiffModule } from 'ngx-text-diff';
 import { DiffMatchPatchModule } from 'ng-diff-match-patch';
 import { CookieModule } from 'ngx-cookie';
-import { QuillModule } from 'ngx-quill'
+import { QuillModule } from 'ngx-quill';
+import { BadgeButtonComponent } from './badge-button/badge-button.component'
 
 // since we are saving the JWT token for authentication in the local storage 
 // , here we get that token to send it with each api call to authenticate with the server
@@ -45,6 +46,7 @@ export function tokenGetter() {
     ScriptCommentComponent,
     ScriptRevisionComponent,
     ScriptUploadComponent,
+    BadgeButtonComponent,
   ],
   imports: [
     BrowserModule,

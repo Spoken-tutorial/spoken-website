@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { CreateScriptService } from '../../_service/create-script.service';
 import { CommentsService } from '../../_service/comments.service';
 import { RevisionsService } from '../../_service/revisions.service';
+import { AuthService } from 'src/app/_service/auth.service';
 
 @Component({
   selector: 'app-script-view',
@@ -31,6 +32,7 @@ export class ScriptViewComponent implements OnInit {
   public leftContentNarration = "";
   public rightContentCue = "";
   public rightContentNarration = "";
+  public script: any;
 
   @Input() nav: any;
   @ViewChild('tableRow') el: ElementRef;
@@ -41,7 +43,8 @@ export class ScriptViewComponent implements OnInit {
     public createscriptService: CreateScriptService,
     public commentsService: CommentsService,
     public revisionsService: RevisionsService,
-    public router: Router
+    public router: Router,
+    public authService: AuthService
   ) { }
 
   public viewScript() {
@@ -49,9 +52,20 @@ export class ScriptViewComponent implements OnInit {
       this.tid, this.lid
     ).subscribe(
       (res) => {
-        this.slides = res;
+        this.slides = res['slides'];
+        this.script = res;
       },
     );
+  }
+
+  public onPublishChange(status) {
+    this.createscriptService.changeScriptStatus(this.tid, this.lid, status)
+      .subscribe(
+        (res) => {
+          this.script.status = res['status'];
+        },
+        console.error
+      );
   }
 
   // to get hover effect on particular table rows

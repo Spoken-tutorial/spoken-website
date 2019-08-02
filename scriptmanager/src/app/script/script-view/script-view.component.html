@@ -50,8 +50,7 @@
               </tbody>
             </table>
 
-            <button *ngIf="index2 != 0 "
-              class="button heading is-outlined is-info" (click)="revert(revisions[index2])">
+            <button *ngIf="index2 != 0 " class="button heading is-outlined is-info" (click)="revert(revisions[index2])">
               Revert Back to this Version
             </button>
 
@@ -98,6 +97,23 @@
         <app-script-revision [revisions]="revisions" (revisionEmitter)="viewModal($event)"></app-script-revision>
       </div>
 
+    </div>
+
+    <div class="columns" *ngIf="authService.isReviewer()">
+      <div class="column buttons">
+        <div class="field is-grouped">
+          <div class="control" *ngIf="!script?.status">
+            <a (click)="onPublishChange(true)">
+              <app-badge-button faClass="far fa-eye" textClass="is-success" text="Publish"></app-badge-button>
+            </a>
+          </div>
+          <div class="control" *ngIf="script?.status">
+            <a (click)="onPublishChange(false)">
+              <app-badge-button faClass="far fa-eye-slash" textClass="is-danger" text="Unpublish"></app-badge-button>
+            </a>
+          </div>
+        </div>
+      </div>
     </div>
 
   </div>
