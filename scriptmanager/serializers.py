@@ -59,18 +59,28 @@ class TutorialDetailSerializer(serializers.ModelSerializer):
 
 
 class ScriptDetailSerializer(serializers.ModelSerializer):
-
+  
   class Meta:
     model = ScriptDetail
     fields = ('id', 'cue', 'narration', 'order', 'comment_status', 'script')
 
 class ScriptSerializer(serializers.ModelSerializer):
-  details = ScriptDetailSerializer(many=True)
+  slides = serializers.SerializerMethodField()
 
   class Meta:
     model = Script
-    fields = ('details',)
+    fields = ('id', 'slides', 'status', 'tutorial', 'language')
 
+  def get_slides(self, instance):
+    slides = ScriptDetail.objects.filter(script=instance)
+    ordering = instance.ordering
+
+    if (len(ordering) != 0):
+      ordering = ordering.split(',')
+      ordering = list(map(int, ordering))
+      slides = sorted(slides, key=lambda s: ordering.index(s.pk))
+
+    return ScriptDetailSerializer(slides, many=True).data
 
 class CommentSerializer(serializers.ModelSerializer):
   user = serializers.CharField()

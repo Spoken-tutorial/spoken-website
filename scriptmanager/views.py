@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework import status,generics
 from rest_framework_jwt.settings import api_settings
 from rest_framework_jwt.utils import jwt_payload_handler as default_jwt_payload_handler
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from reversion.models import Version
 import os
 from django.core.files.storage import FileSystemStorage
@@ -16,11 +17,11 @@ import time
 from creation.views import is_videoreviewer,is_domainreviewer,is_qualityreviewer
 import uuid
 import subprocess 
+from .permissions import ViewScriptPermission
 
 def custom_jwt_payload_handler(user):
   payload = default_jwt_payload_handler(user)
 
-  payload['is_videoreviewer'] = is_videoreviewer(user)
   payload['is_domainreviewer'] = is_domainreviewer(user)
   payload['is_qualityreviewer'] = is_qualityreviewer(user)
 
@@ -83,6 +84,7 @@ class TutorialDetailList(generics.ListAPIView):
       return None
 
 class ScriptCreateAPIView(generics.ListCreateAPIView):
+  permission_classes = [ViewScriptPermission]
   serializer_class = ScriptDetailSerializer
 
   def getUlData(self,data):
@@ -133,16 +135,25 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
         script_details = ScriptDetail.objects.filter(script = script)
         ordering = script.ordering
 
-        if (len(ordering) == 0):
-          return script_details
-
-        ordering = ordering.split(',')
-        ordering = list(map(int, ordering))
-        script_details = sorted(script_details, key=lambda s: ordering.index(s.pk))
+        if (len(ordering) != 0):
+          ordering = ordering.split(',')
+          ordering = list(map(int, ordering))
+          script_details = sorted(script_details, key=lambda s: ordering.index(s.pk))
         
         return script_details
     except:
       return None
+
+  def get(self, request, tid, lid):
+    tutorial = TutorialDetail.objects.get(pk=tid)
+    language = Language.objects.get(pk=lid)
+
+    script = Script.objects.get(tutorial=tutorial, language=language)
+    self.check_object_permissions(request, script)
+
+    serialized = ScriptSerializer(script)
+
+    return Response(serialized.data, status=200)
 
   def create(self, request,tid,lid):
     details=[]
@@ -200,11 +211,12 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
       tutorial=TutorialDetail.objects.get(pk = int(self.kwargs['tid']))
       language=Language.objects.get(pk = int(self.kwargs['lid']))
       script = Script.objects.get(user = self.request.user,tutorial = tutorial,language = language)
-      script.status=True
+      status = request.data['status']
+      script.status = status
       script.save()
-      return Response({'status': True},status = 200) 
+      return Response({'status': status, 'message': 'Successfully changed status of script'}, status = 200) 
     except:
-      return Response({'status': False},status = 400) 
+      return Response({'message': 'Failed to change status'}, status = 400) 
 
 class ScriptAPIView(generics.ListAPIView):
   def patch(self,request,tid,lid,script_detail_id):
