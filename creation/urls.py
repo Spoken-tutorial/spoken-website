@@ -92,8 +92,8 @@ urlpatterns = [
     #Bidding Module
     url(r'^rate_contributors/$',rate_contributors,name = "rate_contributors"),
     url(r'^get_latest_contributors',get_latest_contributors,name  = "get_latest_contributors"),
-    url(r'^allocate_tutorial/(?P<sel_status>\w+)/$', allocate_tutorial, name="allocate_tutorial"),
-    url(r'^allocate_tutorial_manager/(?P<sel_status>\w+)/$', allocate_tutorial, name="allocate_tutorial_manager"),
+    url(r'^allocate_tutorial/(?P<sel_status>\w+)/(?P<role>\w+)/$', allocate_tutorial, name="allocate_tutorial"),
+    url(r'^allocate_tutorial_manager/(?P<sel_status>\w+)/(?P<role>\w+)/$', allocate_tutorial, name="allocate_tutorial_manager"),
     url(r'^refresh_tutorials/$',refresh_tutorials,name = "refresh_tutorials"),
     #url(r'^revoke_allocated_tutorial/(?P<uid>\w+)/(?P<lid>\w+)/(?P<tdid>\w+)/(?P<taid>\w+)/(?P<reason>\w+)/$', revoke_allocated_tutorial, name="revoke_allocated_tutorial"),
     url(r'^revoke_allocated_tutorial/$', revoke_allocated_tutorial, name="revoke_allocated_tutorial"),

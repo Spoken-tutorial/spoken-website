@@ -109,12 +109,13 @@
 
   <ul class="tabs nav nav-tabs">
       <li {% if status == 'completed' %}{{ 'class="active"'}}{% endif %}>
-      <a href="{% url 'creation:allocate_tutorial' 'completed' %}"><i class="fa fa-list-ul"></i> Completed </a></li>
+      <a href="{% url 'creation:allocate_tutorial' 'completed' 'language_manager' %}"><i class="fa fa-list-ul"></i> Completed </a></li>
       <li {% if status == 'available' %}{{ 'class="active"'}}{% endif %}>
-      <a href="{% url 'creation:allocate_tutorial' 'available' %}"><i class="fa fa-list-ul"></i> Available </a></li>
+      <a href="{% url 'creation:allocate_tutorial' 'available' 'language_manager' %}"><i class="fa fa-list-ul"></i> Available </a></li>
       <li {% if status == 'ongoing' %}{{ 'class="active"'}}{% endif %}>
-      <a href="{% url 'creation:allocate_tutorial' 'ongoing' %}"><i class="fa fa-list-ul"></i> Ongoing </a></li>
+      <a href="{% url 'creation:allocate_tutorial' 'ongoing' 'language_manager' %}"><i class="fa fa-list-ul"></i> Ongoing </a></li>
       {% if status == 'available' %}
+      
       <li class = "pull-right" ><a href="{% url 'creation:refresh_tutorials' %}" data-toggle="tooltip" title="Click this for latest list of Tutorials . This will take some time">Refresh list of Tutorials here</a></li>
       {% endif %}
   </ul>

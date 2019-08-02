@@ -4,7 +4,7 @@
 {% load eventsdata %}
 {% load cmsdata %}
 {% load creationdata %}
-
+{% block title %}Tutorial Allocation {% endblock %}
 {% block compresscssblock %}
     <link rel="stylesheet" href="{% static 'spoken/css/jquery.datetimepicker.css' %}" type="text/css" media="screen" charset="utf-8" />
 {% endblock %}
@@ -82,11 +82,11 @@
 
   <ul class="tabs nav nav-tabs">
       <li {% if status == 'completed' %}{{ 'class="active"'}}{% endif %}>
-      <a href="{% url 'creation:allocate_tutorial' 'completed' %}"><i class="fa fa-list-ul"></i> Completed </a></li>
+      <a href="{% url 'creation:allocate_tutorial' 'completed' 'contributor' %}"><i class="fa fa-list-ul"></i> Completed </a></li>
       <li {% if status == 'available' %}{{ 'class="active"'}}{% endif %}>
-      <a href="{% url 'creation:allocate_tutorial' 'available' %}"><i class="fa fa-list-ul"></i> Available </a></li>
+      <a href="{% url 'creation:allocate_tutorial' 'available' 'contributor' %}"><i class="fa fa-list-ul"></i> Available </a></li>
       <li {% if status == 'ongoing' %}{{ 'class="active"'}}{% endif %}>
-      <a href="{% url 'creation:allocate_tutorial' 'ongoing' %}"><i class="fa fa-list-ul"></i> Ongoing </a></li>
+      <a href="{% url 'creation:allocate_tutorial' 'ongoing' 'contributor' %}"><i class="fa fa-list-ul"></i> Ongoing </a></li>
       
   </ul>
 

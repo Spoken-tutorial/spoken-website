@@ -3263,7 +3263,7 @@ def get_latest_contributors(request):
 
 @login_required
 @csrf_protect
-def allocate_tutorial(request, sel_status):
+def allocate_tutorial(request, sel_status, role):
     context = {}
     global global_req
     global_req = request
@@ -3403,27 +3403,26 @@ def allocate_tutorial(request, sel_status):
     form = tutorials.form
     
     if lang_qs:
-        form.fields['language'].queryset = lang_qs
-
-    contributors_list = active_contributor_list(lang_qs)
-
-    if contributors_list:
-        form.fields['script_user'].queryset = contributors_list
-        form.fields['video_user'].queryset = contributors_list
+        form.fields['language'].queryset = lang_qs    
 
     if request.method == 'POST':
         language_id = request.POST.get('language')
         if language_id:
-            contributors_list = active_contributor_list([int(language_id)])
+            contributors_list = User.objects.filter(id__in = active_contributor_list([int(language_id)]))
             rated_contributors = ContributorRating.objects.filter(rating__gt = 0,
                 language_id = language_id, user_id__in = contributors_list
                 )
             context['contributors'] = rated_contributors.values_list('user_id', 'user__username', 'rating')
-            #Update script & video user as per language choice
-            form.fields['script_user'].queryset = User.objects.filter(id__in = contributors_list)
-            form.fields['video_user'].queryset = User.objects.filter(id__in = contributors_list)
-
-
+            # Update script & video user as per language choice
+            # This will show contributors as per the language selection
+            form.fields['script_user'].queryset =  contributors_list
+            form.fields['video_user'].queryset = contributors_list
+    else:
+    	contributors_list = User.objects.filter(id__in = active_contributor_list(lang_qs))
+    	# This will show all contributors under the language manager
+    	if contributors_list:
+    		form.fields['script_user'].queryset = contributors_list
+    		form.fields['video_user'].queryset = contributors_list
 
     context['form'] = form
 
@@ -3448,10 +3447,11 @@ def allocate_tutorial(request, sel_status):
 
   
     context.update(csrf(request))
-    if is_language_manager(request.user):
-        return render(request,
-                      'creation/templates/allocate_tutorial_manager.html', context)
-    else:
+    if role == 'language_manager':
+	    if is_language_manager(request.user):
+	        return render(request,
+	                      'creation/templates/allocate_tutorial_manager.html', context)
+    elif role == 'contributor':
         return render(request,
                       'creation/templates/allocate_tutorial.html',
                       context)
