@@ -2345,7 +2345,8 @@ def publish_tutorial(request, trid):
         tr_rec.publish_at = timezone.now()
         tr_rec.save()
         PublishTutorialLog.objects.create(user = request.user, tutorial_resource = tr_rec)
-
+        # add tutorials available here
+        refresh_tutorials(request, tr_rec)
         add_contributor_notification(tr_rec, comp_title, 'This tutorial is published now')
         messages.success(request, 'The selected tutorial is published successfully')
     else:
@@ -3568,42 +3569,27 @@ def get_assigned_tutorials(request , user_id , language_set):
 PUBLISHED = 1
 
 @login_required
-def refresh_tutorials(request):
+def refresh_tutorials(request, tut_resource):
     count = 0
-
-        
-    tutorials = TutorialDetail.objects.filter(
-        id__in = TutorialResource.objects.filter(status = PUBLISHED,
-        language = 22).values('tutorial_detail').distinct())
-
-    if is_language_manager(request.user):
-        lang_qs = Language.objects.filter(
-        id__in = LanguageManager.objects.filter(user = request.user,
-        status = STATUS_DICT['active']).values('language'))
-    else:
-        raise PermissionDenied()
-        
-    for tutorial in tutorials:
-        for a_lang in lang_qs:        
-            this_tutorial_user_lang = TutorialResource.objects.filter(
-                tutorial_detail = tutorial, language = a_lang)
-            if this_tutorial_user_lang.filter(status = PUBLISHED).exists():
-                pass
-            else:
-                if this_tutorial_user_lang.filter(
-                    assignment_status = ASSIGNMENT_STATUS_DICT['assigned'],
-                    ).exists():
-                    pass
-                else:
-                    count += add_to_tutorials_available(tutorial,a_lang)
-                    
-        
-    if count > 0:
-        messages.success(request, str(count) + ' tutorials added')
-    else:
-        messages.warning(request, 'No tutorials updated')
-
-    return HttpResponseRedirect(request.META['HTTP_REFERER'])
+    if tut_resource.language.id == 22 :
+        tutorials = TutorialDetail.objects.filter(
+            id__in = TutorialResource.objects.filter(id = tut_resource.id ,status = PUBLISHED,
+            language = 22).values('tutorial_detail').distinct())
+        if is_administrator(request.user) or is_qualityreviewer(request.user):
+            lang_qs = Language.objects.all()
+        else:
+            raise PermissionDenied()
+        for tutorial in tutorials:
+            for a_lang in lang_qs:        
+                this_tutorial_user_lang = TutorialResource.objects.filter(Q(
+                    status = PUBLISHED)|Q(
+                    assignment_status = ASSIGNMENT_STATUS_DICT['assigned']),
+                    tutorial_detail = tutorial, language = a_lang
+                    )
+                if not this_tutorial_user_lang.exists():
+                    add_to_tutorials_available(tutorial,a_lang)
+                    messages.success(request, tutorial.tutorial + ' added for ', a_lang.name)
+    return True
 
 def add_to_tutorials_available(tutorial,language):
     tutorialsavailable = TutorialsAvailable.objects.filter(
@@ -3613,8 +3599,6 @@ def add_to_tutorials_available(tutorial,language):
         tutorialsavailable.tutorial_detail = tutorial
         tutorialsavailable.language = language
         tutorialsavailable.save()
-        return 1
-    return 0
 
 UNPUBLISHED = 0 
 
