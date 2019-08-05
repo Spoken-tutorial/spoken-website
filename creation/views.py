@@ -302,9 +302,12 @@ def creation_accept_role_request(request, recid):
                     else:
                         messages.success(request, roles[role_rec.role_type] +' role is added to ' + role_rec.user.username + ' for the language '+role_rec.language.name)
                         add_creation_notification(request, role_rec.role_type, role_rec.user_id , role_rec.language)
+                        if int(role_rec.role_type) in (ROLES_DICT['contributor'],ROLES_DICT['external-contributor']):
+                            print("Okay 1 ",role_rec.role_type)
+                            add_contributorrating(role_rec)
                 except Exception as e:
                     print (e)
-                    messages.error(request, role_rec.user.username + ' is already having ' + roles[role_rec.role_type] + ' role.')
+                    messages.error(request, role_rec.user.username + ' is already having ' + roles[role_rec.role_type] + ' role or Language field is not present')
             else:
                 messages.error(request, 'Invalid role argument!')
         except:
@@ -436,9 +439,16 @@ def refresh_roles(request):
                 role_request.role_type = ROLES_DICT['contributor']
             elif is_external_contributor(contrib_user):
                 role_request.role_type = ROLES_DICT['external-contributor']
-            
             role_request.status = 1
             role_request.save()
+            contributor_with_rating = \
+            ContributorRating.objects.filter(user_id = contributor['user_id'],
+                                       language_id = contributor['language_id'])
+            if not contributor_with_rating.exists():
+                new_contrib_rating_request = ContributorRating()
+                new_contrib_rating_request.user_id = contributor['user_id']
+                new_contrib_rating_request.language_id = contributor['language_id']
+                new_contrib_rating_request.save()
             contrib_count += 1
         else:
             role_request.update(status =  STATUS_DICT['active'],
@@ -3234,32 +3244,16 @@ def rate_contributors(request):
         return render(request, 'creation/templates/rate_contributors.html',
                       context)
 
-def get_latest_contributors(request):
-    lang_qs = Language.objects.filter(
-        id__in = LanguageManager.objects.filter(user = request.user,
-        status = STATUS_DICT['active']).values('language'))
 
-
-    contributor_role = RoleRequest.objects.filter(
-        Q(role_type = ROLES_DICT['contributor'])|Q(role_type = ROLES_DICT['external-contributor']),
-        status = 1 , language_id__in = lang_qs).values(
-        'user_id','language_id').exclude(language_id = 22).distinct()
-    counter = 0
-    for a_contributor in contributor_role:
+def add_contributorrating(role_request):
         contributor_with_rating = \
-            ContributorRating.objects.filter(user_id = a_contributor['user_id'],
-                                       language_id = a_contributor['language_id'])
+            ContributorRating.objects.filter(user_id = role_request.user_id,
+                                       language_id = role_request.language_id)
         if not contributor_with_rating.exists():
-            role_request = ContributorRating()
-            role_request.user_id = a_contributor['user_id']
-            role_request.language_id = a_contributor['language_id']
-            role_request.save()
-            counter +=1 
-    if counter:
-        messages.success(request, 'Updated ' +str(counter)+ ' Contributors')
-    else:
-        messages.warning(request, "No Contributors updated")
-    return HttpResponseRedirect(request.META['HTTP_REFERER'])
+            new_role_request = ContributorRating()
+            new_role_request.user_id = role_request.user_id
+            new_role_request.language_id = role_request.language_id
+            new_role_request.save()
 
 
 @login_required
@@ -3689,9 +3683,8 @@ def single_tutorial_allocater(request, tut, lid, days, user):
     # Update data in Tutorial Resource
     if tutorial_resource.exists():
         tutorial_resource = tutorial_resource.update(outline_user = user,
-            script_user = user, video_user = user, outline_status = WORK_STATUS ,
-            script_status = WORK_STATUS , video_status = WORK_STATUS ,
-            extension_status = WORK_STATUS , submissiondate = submissiondate,
+            script_user = user, video_user = user, 
+            submissiondate = submissiondate,
             assignment_status = ASSIGNMENT_STATUS_DICT['assigned'])
         messages.warning(request, 'Successfully updated ' +
                         tut.tutorial + ' to ' + str(user) + ' : ' +
