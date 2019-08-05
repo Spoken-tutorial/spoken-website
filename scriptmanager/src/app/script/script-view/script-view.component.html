@@ -50,8 +50,7 @@
               </tbody>
             </table>
 
-            <button *ngIf="index2 != 0 "
-              class="button heading is-outlined is-info" (click)="revert(revisions[index2])">
+            <button *ngIf="index2 != 0 " class="button heading is-outlined is-info" (click)="revert(revisions[index2])">
               Revert Back to this Version
             </button>
 
@@ -61,31 +60,31 @@
 
         </div>
 
-        <div class="timeline">
-          <div>
-            <table #tableRow class="table is-bordered is-striped is-fullwidth">
+        <div class="table-container">
+          <table #tableRow class="table is-bordered is-striped is-narrow is-hoverable is-fullwidth" id="script-table">
+            <thead>
               <tr>
                 <th>Sr. No.</th>
                 <th>Visual Cue</th>
                 <th>Narration</th>
               </tr>
-              <tbody *ngFor="let slide of slides; let i = index">
-                <tr (mouseenter)='mouseenter(i)' (mouseleave)="mouseleave(i)">
-                  <td>{{ i+1 }} <span *ngIf="slide.comment_status" class="dot"></span></td>
-                  <td class="content" innerHTML="{{ slide.cue }}"></td>
-                  <td class="content" innerHTML="{{ slide.narration }}"></td>
-                  <td [ngClass]="{ 'hide-comment-tools': !overVal[i] }">
-                    <button class="button heading" (click)="viewComment(i)">
-                      <i class="fa fa-comments"></i>&nbsp;
-                    </button>
-                    <button class="button heading" (click)="viewRevision(i, slide.id)">
-                      <i class="fa fa-history"></i>&nbsp;
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+            </thead>
+            <tbody *ngFor="let slide of slides; let i = index">
+              <tr (mouseenter)='mouseenter(i)' (mouseleave)="mouseleave(i)">
+                <td>{{ i+1 }} <span *ngIf="slide.comment_status" class="dot"></span></td>
+                <td class="content" innerHTML="{{ slide.cue }}"></td>
+                <td class="content" innerHTML="{{ slide.narration }}"></td>
+                <td [ngClass]="{ 'hide-comment-tools': !overVal[i] }">
+                  <button class="button heading" (click)="viewComment(i)">
+                    <i class="fa fa-comments"></i>&nbsp;
+                  </button>
+                  <button class="button heading" (click)="viewRevision(i, slide.id)">
+                    <i class="fa fa-history"></i>&nbsp;
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
 
       </div>
@@ -98,6 +97,28 @@
         <app-script-revision [revisions]="revisions" (revisionEmitter)="viewModal($event)"></app-script-revision>
       </div>
 
+    </div>
+
+    <div class="columns" *ngIf="authService.isReviewer()">
+      <div class="column buttons">
+        <div class="field is-grouped">
+          <div class="control" *ngIf="!script?.status">
+            <a (click)="onPublishChange(true)">
+              <app-badge-button faClass="far fa-eye" textClass="is-success" text="Publish"></app-badge-button>
+            </a>
+          </div>
+          <div class="control" *ngIf="script?.status">
+            <a (click)="onPublishChange(false)">
+              <app-badge-button faClass="far fa-eye-slash" textClass="is-danger" text="Unpublish"></app-badge-button>
+            </a>
+          </div>
+          <div class="control">
+            <a (click)="downloadPdf()">
+              <app-badge-button faClass="far fa-file-pdf" textClass="is-primary" text="Download PDF"></app-badge-button>
+            </a>
+          </div>
+        </div>
+      </div>
     </div>
 
   </div>

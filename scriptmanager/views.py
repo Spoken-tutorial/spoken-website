@@ -1,12 +1,13 @@
 from django.shortcuts import render, redirect
 from creation.models import ContributorRole,TutorialDetail,User,Language
-from .models import Scripts,ScriptDetails,Comments
-from .serializers import ContributorRoleSerializer,TutorialDetailSerializer,ScriptsDetailSerializer,ScriptsSerializer,CommentsSerializer,ReversionSerializer
+from .models import Script,ScriptDetail,Comment
+from .serializers import ContributorRoleSerializer,TutorialDetailSerializer,ScriptDetailSerializer,ScriptSerializer,CommentSerializer,ReversionSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status,generics
 from rest_framework_jwt.settings import api_settings
 from rest_framework_jwt.utils import jwt_payload_handler as default_jwt_payload_handler
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from reversion.models import Version
 import os
 from django.core.files.storage import FileSystemStorage
@@ -16,25 +17,26 @@ import time
 from creation.views import is_videoreviewer,is_domainreviewer,is_qualityreviewer
 import uuid
 import subprocess 
+from .permissions import ViewScriptPermission
 
 def custom_jwt_payload_handler(user):
   payload = default_jwt_payload_handler(user)
 
-  payload['is_videoreviewer'] = is_videoreviewer(user)
   payload['is_domainreviewer'] = is_domainreviewer(user)
   payload['is_qualityreviewer'] = is_qualityreviewer(user)
 
   return payload
 
 def index(request):
+  token = ''
   if request.user.is_authenticated:
     jwt_payload_handler  =  api_settings.JWT_PAYLOAD_HANDLER
     jwt_encode_handler  =  api_settings.JWT_ENCODE_HANDLER
     payload  =  jwt_payload_handler(request.user)
     token  =  jwt_encode_handler(payload) 
-    return render(request, 'scriptmanager/index.html', {'token': token})
-  return redirect('home')
-
+  
+  return render(request, 'scriptmanager/index.html', {'token': token})
+  
 
 class ContributorRoleList(generics.ListAPIView):
   def get_queryset(self):
@@ -83,7 +85,8 @@ class TutorialDetailList(generics.ListAPIView):
       return None
 
 class ScriptCreateAPIView(generics.ListCreateAPIView):
-  serializer_class = ScriptsDetailSerializer
+  permission_classes = [ViewScriptPermission]
+  serializer_class = ScriptDetailSerializer
 
   def getUlData(self,data):
     data=str(data).replace("<li></li>","")
@@ -127,22 +130,31 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
     try:
       tutorial=TutorialDetail.objects.get(pk = int(self.kwargs['tid']))
       language=Language.objects.get(pk = int(self.kwargs['lid']))
-      script = Scripts.objects.get(tutorial = tutorial,language = language)
+      script = Script.objects.get(tutorial = tutorial,language = language)
       user=self.request.user
       if is_domainreviewer(user) or is_qualityreviewer(user) or is_videoreviewer(user) or script.user == user or script.status == True:
-        script_details = ScriptDetails.objects.filter(script = script)
+        script_details = ScriptDetail.objects.filter(script = script)
         ordering = script.ordering
 
-        if (len(ordering) == 0):
-          return script_details
-
-        ordering = ordering.split(',')
-        ordering = list(map(int, ordering))
-        script_details = sorted(script_details, key=lambda s: ordering.index(s.pk))
+        if (len(ordering) != 0):
+          ordering = ordering.split(',')
+          ordering = list(map(int, ordering))
+          script_details = sorted(script_details, key=lambda s: ordering.index(s.pk))
         
         return script_details
     except:
       return None
+
+  def get(self, request, tid, lid):
+    tutorial = TutorialDetail.objects.get(pk=tid)
+    language = Language.objects.get(pk=lid)
+
+    script = Script.objects.get(tutorial=tutorial, language=language)
+    self.check_object_permissions(request, script)
+
+    serialized = ScriptSerializer(script)
+
+    return Response(serialized.data, status=200)
 
   def create(self, request,tid,lid):
     details=[]
@@ -150,10 +162,10 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
 
     tutorial=TutorialDetail.objects.get(pk = int(self.kwargs['tid']))
     language=Language.objects.get(pk = int(self.kwargs['lid']))
-    if not  Scripts.objects.filter(user = self.request.user,tutorial = tutorial,language = language).exists():
-      script = Scripts.objects.create(tutorial = tutorial,language = language, user = self.request.user)
+    if not Script.objects.filter(user = self.request.user,tutorial = tutorial,language = language).exists():
+      script = Script.objects.create(tutorial = tutorial,language = language, user = self.request.user)
     else:
-      script = Scripts.objects.get(tutorial = tutorial,language = language, user = self.request.user)
+      script = Script.objects.get(tutorial = tutorial,language = language, user = self.request.user)
 
     if(create_request_type=='form'):
       details = request.data['details']
@@ -179,7 +191,7 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
       data=request.data['details']
       details=self.scriptsData(data,script)
 
-    serialized  =  ScriptsDetailSerializer(data  =  details,many  =  True) #inserting a details array without iterating
+    serialized  =  ScriptDetailSerializer(data  =  details,many  =  True) #inserting a details array without iterating
     if serialized.is_valid():
       serialized.save()
       
@@ -199,24 +211,25 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
     try:
       tutorial=TutorialDetail.objects.get(pk = int(self.kwargs['tid']))
       language=Language.objects.get(pk = int(self.kwargs['lid']))
-      script = Scripts.objects.get(user = self.request.user,tutorial = tutorial,language = language)
-      script.status=True
+      script = Script.objects.get(user = self.request.user,tutorial = tutorial,language = language)
+      status = request.data['status']
+      script.status = status
       script.save()
-      return Response({'status': True},status = 200) 
+      return Response({'status': status, 'message': 'Successfully changed status of script'}, status = 200) 
     except:
-      return Response({'status': False},status = 400) 
+      return Response({'message': 'Failed to change status'}, status = 400) 
 
 class ScriptAPIView(generics.ListAPIView):
   def patch(self,request,tid,lid,script_detail_id):
     try:
       tutorial=TutorialDetail.objects.get(pk = int(self.kwargs['tid']))
       language=Language.objects.get(pk = int(self.kwargs['lid']))
-      Scripts.objects.get(tutorial = tutorial, language = language, user = self.request.user)
+      Script.objects.get(tutorial = tutorial, language = language, user = self.request.user)
 
       script_details  =  self.request.data
       script_details['id']=int(script_detail_id)
-      script  =  ScriptDetails.objects.get(pk = (script_details['id']))
-      serializer  =  ScriptsDetailSerializer(script, data = script_details)
+      script  =  ScriptDetail.objects.get(pk = (script_details['id']))
+      serializer  =  ScriptDetailSerializer(script, data = script_details)
       if serializer.is_valid():
         serializer.save()
         return Response({'status': True},status = 200)
@@ -228,10 +241,10 @@ class ScriptAPIView(generics.ListAPIView):
     try:
       tutorial=TutorialDetail.objects.get(pk = int(self.kwargs['tid']))
       language=Language.objects.get(pk = int(self.kwargs['lid']))
-      script = Scripts.objects.get(tutorial = tutorial, language = language, user = self.request.user)
+      script = Script.objects.get(tutorial = tutorial, language = language, user = self.request.user)
 
-      ScriptDetails.objects.get(pk = int(self.kwargs['script_detail_id']),script = script).delete()
-      if not ScriptDetails.objects.filter(script_id = script.pk).exists(): 
+      ScriptDetail.objects.get(pk = int(self.kwargs['script_detail_id']),script = script).delete()
+      if not ScriptDetail.objects.filter(script_id = script.pk).exists(): 
        script.delete()
       return Response({'status': True},status = 202) 
     except:
@@ -239,7 +252,7 @@ class ScriptAPIView(generics.ListAPIView):
 
 class RelativeOrderingAPI(generics.ListAPIView):
   def patch(self, request, script_id):
-    script = Scripts.objects.get(pk=script_id)
+    script = Script.objects.get(pk=script_id)
     script.ordering = request.data['ordering']
 
     script.save()
@@ -247,22 +260,22 @@ class RelativeOrderingAPI(generics.ListAPIView):
     return Response({ 'status': True }, status=200)
 
 class CommentCreateAPIView(generics.ListCreateAPIView):
-  serializer_class=CommentsSerializer
+  serializer_class=CommentSerializer
 
   def get_queryset(self):
     try:
-      script_detail=ScriptDetails.objects.get(pk=int(self.kwargs['script_detail_id']))
-      return Comments.objects.filter(script_details = script_detail).order_by('created')
+      script_detail=ScriptDetail.objects.get(pk=int(self.kwargs['script_detail_id']))
+      return Comment.objects.filter(script_details = script_detail).order_by('created')
     except:
       return None
 
   def create(self,request,script_detail_id):
     try:
-      script_data=ScriptDetails.objects.get(pk=script_detail_id)
+      script_data=ScriptDetail.objects.get(pk=script_detail_id)
       if script_data.comment_status == False:
         script_data.comment_status=True
         script_data.save()
-      Comments.objects.create(comment=request.data['comment'],user=self.request.user,script_details=script_data)
+      Comment.objects.create(comment=request.data['comment'],user=self.request.user,script_details=script_data)
       return Response({'status': True},status = 202)
     except:
       return Response({'status': False},status = 400)
@@ -273,7 +286,7 @@ class ReversionListView(generics.ListAPIView):
 
   def get_queryset(self):
     try:
-      script_detail=ScriptDetails.objects.get(pk=int(self.kwargs['script_detail_id']))
+      script_detail=ScriptDetail.objects.get(pk=int(self.kwargs['script_detail_id']))
       reversion_data = Version.objects.get_for_object(script_detail)
       data = []
       count=0
@@ -290,7 +303,7 @@ class ReversionListView(generics.ListAPIView):
 class ReversionRevertView(generics.CreateAPIView):
   def patch(self,request,script_detail_id,reversion_id):
     try:
-      script_detail=ScriptDetails.objects.get(pk=int(self.kwargs['script_detail_id']))
+      script_detail=ScriptDetail.objects.get(pk=int(self.kwargs['script_detail_id']))
       reversion_data = Version.objects.get_for_object(script_detail)
       reversion_data[int(self.kwargs['reversion_id'])-1].revision.revert()
       return Response({'status': True},status = 201)

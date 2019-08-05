@@ -132,7 +132,7 @@ export class ScriptEditComponent implements OnInit {
   public getData() {
     this.createscriptService.getScript(this.tid, this.lid).subscribe(
       (res) => {
-        this.slides = res;
+        this.slides = res['slides'];
         if (this.slides.length == 0) return;
 
         this.scriptId = this.slides[0]['script'];

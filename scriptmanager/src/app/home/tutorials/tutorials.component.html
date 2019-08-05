@@ -11,53 +11,25 @@
     <div class="field is-grouped is-grouped-multiline">
       <div class="control" *ngIf="!tutorial.script_status">
         <a routerLink="/create/{{ tutorial.id }}/{{ tutorial.language }}/{{ tutorial.tutorial }}">
-          <div class="tags has-addons">
-            <span class="tag is-dark is-medium">
-              <i class="fa fa-plus"></i>
-            </span>
-            <span class="tag is-success is-medium">
-              Create
-            </span>
-          </div>
+          <app-badge-button faClass="fa fa-plus" textClass="is-success" text="Create"></app-badge-button>
         </a>
       </div>
 
       <div class="control" *ngIf="!tutorial.script_status">
         <a routerLink="/upload/{{ tutorial.id }}/{{ tutorial.language }}/{{ tutorial.tutorial }}">
-          <div class="tags has-addons">
-            <span class="tag is-dark is-medium">
-              <i class="fa fa-upload"></i>
-            </span>
-            <span class="tag is-primary is-medium">
-              Upload
-            </span>
-          </div>
+          <app-badge-button faClass="fa fa-upload" textClass="is-primary" text="Upload"></app-badge-button>
         </a>
       </div>
 
       <div class="control" *ngIf="tutorial.script_status">
         <a routerLink="/edit/{{ tutorial.id }}/{{ tutorial.language }}/{{ tutorial.tutorial }}">
-          <div class="tags has-addons">
-            <span class="tag is-dark is-medium">
-              <i class="fa fa-edit"></i>
-            </span>
-            <span class="tag is-success is-medium">
-              Edit
-            </span>
-          </div>
+          <app-badge-button faClass="fa fa-edit" textClass="is-success" text="Edit"></app-badge-button>
         </a>
       </div>
 
       <div class="control" *ngIf="tutorial.script_status">
         <a routerLink="/view/{{ tutorial.id }}/{{ tutorial.language }}/{{ tutorial.tutorial }}">
-          <div class="tags has-addons">
-            <span class="tag is-dark is-medium">
-              <i class="fa fa-eye"></i>
-            </span>
-            <span class="tag is-info is-medium">
-              View
-            </span>
-          </div>
+          <app-badge-button faClass="fa fa-eye" textClass="is-info" text="View"></app-badge-button>
         </a>
       </div>
     </div>

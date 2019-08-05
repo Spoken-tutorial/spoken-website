@@ -3,9 +3,9 @@
     <div class="columns is-centered has-text-centered">
       <div class="column">
         <div class="select">
-          <select [(ngModel)]="currentCategory" (change)="onFossCategoryChange($event.target.value)">
+          <select [(ngModel)]="fossService.currentFossCategory" (change)="onFossCategoryChange($event.target.value)">
             <option value="-1">Select Foss Category</option>
-            <option *ngFor="let category of fossCategories; let i = index" [value]="i">
+            <option *ngFor="let category of fossCategories; let i = index" [value]="category['foss_category']['id']">
               {{category['foss_category']['name']}}
             </option>
           </select>
@@ -13,9 +13,9 @@
       </div>
       <div class="column">
         <div class="select">
-          <select (change)="onLanguageChange($event.target.value)">
+          <select (change)="onLanguageChange($event.target.value)" [(ngModel)]="fossService.currentFossCategoryLanguage">
             <option value="-1">Select Language</option>
-            <option *ngFor="let language of currentCategoryLanguages; let i = index" [value]="i">
+            <option *ngFor="let language of currentCategoryLanguages; let i = index" [value]="language['id']">
               {{language['name']}}
             </option>
           </select>

@@ -3,7 +3,7 @@ from creation.models import TutorialDetail, Language
 from django.contrib.auth.models import User
 # Create your models here.
 
-class Scripts(models.Model):
+class Script(models.Model):
 	tutorial = models.ForeignKey(TutorialDetail)
 	language = models.ForeignKey(Language)
 	status = models.BooleanField(default=False)
@@ -14,19 +14,19 @@ class Scripts(models.Model):
 	def __str__(self):
 		return str(self.tutorial) + ' - ' + str(self.language)
 
-class ScriptDetails(models.Model):
+class ScriptDetail(models.Model):
 	cue = models.TextField(blank=True)
 	narration = models.TextField(blank=True)
 	order = models.PositiveIntegerField()
-	script = models.ForeignKey(Scripts, on_delete = models.CASCADE)
+	script = models.ForeignKey(Script, on_delete = models.CASCADE)
 	comment_status = models.BooleanField(default=False)
 
 	def __str__(self):
 		return self.cue + ' ' + self.narration
 
-class Comments(models.Model):
+class Comment(models.Model):
 	comment = models.TextField()
 	user=models.ForeignKey(User)
-	script_details=models.ForeignKey(ScriptDetails, on_delete=models.CASCADE)
+	script_details=models.ForeignKey(ScriptDetail, on_delete=models.CASCADE)
 	created = models.DateTimeField(auto_now_add=True)
 	updated = models.DateTimeField(auto_now=True)

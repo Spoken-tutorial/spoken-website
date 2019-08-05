@@ -10,7 +10,9 @@ import { environment } from '../../environments/environment'
 
 export class FossService {
   public env = environment;
-  public apiUrl = this.env['apiUrlScript']
+  public apiUrl = this.env['apiUrlScript'];
+  public currentFossCategory = -1;
+  public currentFossCategoryLanguage = -1;
 
   // API service for fetching all foss categories assigned to the logged in user
   public getAllFossCategories() {
