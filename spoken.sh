@@ -1,9 +1,9 @@
 #!/bin/bash
 
-sudo pip3 install virtualenv
+export WORKSPACE=`pwd`
+mkvirtualenv --python=/usr/bin/python3 testing
+workon testing
 
-virtualenv venv -p python3
-source venv/bin/activate
 
 sudo apt-get install python3-dev libmysqlclient-dev
 pip3 install -r requirements-dev.txt
