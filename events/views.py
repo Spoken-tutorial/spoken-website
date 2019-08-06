@@ -2360,7 +2360,10 @@ def test_participant_ceritificate_all(request, testid):
     output = PdfFileWriter()
 
     for ta in testattendances: 
-        mdlgrade = MdlQuizGrades.objects.get(quiz = ta.mdlquiz_id, userid = ta.mdluser_id)
+        try:
+            mdlgrade = MdlQuizGrades.objects.get(quiz = ta.mdlquiz_id, userid = ta.mdluser_id)
+        except:
+            continue
         if ta.status < 1 or round(mdlgrade.grade, 1) < 40:
             continue
 

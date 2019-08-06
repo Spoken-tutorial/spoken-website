@@ -10,7 +10,7 @@
 <form action="{{ action }}" id="form-id" method="post">
 <div><a class="btn btn-success" href="{% url 'eventsv2:training_planner' %}">Go Back to Training Planner</a><br><br></div>
 {% if object_list %}
-<div><a class="btn btn-success" 
+<div style="float: right;"><a class="btn btn-success" 
   href="{% url 'eventsv2:alltraining_certificate' training.id %}">Download all certificates</a><br><br></div>
   <table class="table table-striped table-hover table-bordered">
     <tr>
