@@ -988,7 +988,7 @@ class OrganiserTrainingCertificateView(TrainingCertificate, View):
     if ta and ta.training.training_planner.organiser == self.request.user.organiser:
       return self.training_certificate(ta)
     else:
-      messages.error(self.request, "PermisDenied!")
+      messages.error(self.request, "Permission Denied!")
     return HttpResponseRedirect("/")
 
 class OrganiserSingleTrainingCertificateView(SingleTrainingCertificate, View):
