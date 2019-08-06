@@ -82,7 +82,7 @@
             </td>
 
             <td class="col-md-1">
-              <input type="button" onclick=save('{{forloop.counter}}','{{record.user__username}}','{{record.language__name}}') class="btn btn-primary"  value="Save" \>
+              <input type="button" onclick=save('{{forloop.counter}}','{{record.user__id}}','{{record.language__name}}') class="btn btn-primary"  value="Save" \>
             </td>
           </tr>
           {% endfor %}
@@ -96,21 +96,20 @@
 
 {% block compressjsblock %}
  <script type="text/javascript"> 
-function save(id_to_edit , username , language)
+function save(id_to_edit , user_id , language)
 {
   element_id = "sel"+id_to_edit;
   var new_rating = $("#"+element_id+" option:selected");
-  var username = username;
-  
+  var user_id = user_id;
 $.ajax({
                 type : "POST",
                 url:"/creation/rate_contributors/",
                 dataType : "json",
                 data:
-                { 'username' : username, 
-                  'language':language,
-                  'rating':new_rating.text(),
-                  'mode': 'update',
+                { 'user_id' : user_id,
+                  'language': language,
+                  'rating'  : new_rating.text(),
+                  'mode'    : 'update',
                 },
                 success: function(data)
                 {

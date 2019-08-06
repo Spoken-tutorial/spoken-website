@@ -13,7 +13,8 @@ from datetime import datetime,timedelta
 from django.utils import timezone
 from django.db.models import Q
 # Spoken Tutorial Stuff
-from creation.models import TutorialResource, ContributorRole,TutorialsAvailable, TutorialDetail
+from creation.models import TutorialResource, ContributorRole,\
+TutorialsAvailable, TutorialDetail, ContributorRating
 from creation.views import send_mail_to_contributor
 class Command(BaseCommand):
 
@@ -61,9 +62,16 @@ class Command(BaseCommand):
                     add_previous_contributor_role.tutorial_detail_id = tutorial.id
                     add_previous_contributor_role.save()
                     tutorial_resource.update(assignment_status = ASSIGNMENT_STATUS['assigned'])
-                    
                     print (contributor_role.foss_category_id, contributor_role.language.name,
-                            contributor_role.user_id, tutorial.tutorial)        
+                            contributor_role.user_id, tutorial.tutorial)
+                    contributor_with_rating = ContributorRating.objects.filter(
+                    user_id = contributor_role.user_id,
+                    language_id = contributor_role.language_id)
+                if not contributor_with_rating.exists():
+                    new_contrib_rating_request = ContributorRating()
+                    new_contrib_rating_request.user_id = contributor_role.user_id
+                    new_contrib_rating_request.language_id = contributor_role.language_id
+                    new_contrib_rating_request.save()
             delete_contributor_role = ContributorRole.objects.get(
                         id=contributor_role.id).delete()
 

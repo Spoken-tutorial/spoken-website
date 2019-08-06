@@ -3179,12 +3179,12 @@ def rate_contributors(request):
         raise PermissionDenied()
     data = "Response"
     context = {}
-    username = request.POST.get('username')            
+    user_id = request.POST.get('user_id')
     lang_select = request.POST.get('language')
     new_rating = request.POST.get('rating')
     mode = request.POST.get('mode')
     if mode == 'update':
-        user_obj = User.objects.get(username = username)
+        user_obj = User.objects.get(id = user_id)
         lang = Language.objects.get(name = lang_select)
         contributor_rating = ContributorRating.objects.filter(
             user = user_obj, language_id = lang)
@@ -3218,7 +3218,7 @@ def rate_contributors(request):
 
         raw_get_data = request.POST.get('o', None)
         rated_contributors = ContributorRating.objects.filter(
-            language_id = lang_select).values(
+            language_id = lang_select).values('user__id',
             'user__username', 'rating','language__name').order_by('-rating')
         
         context['rated_contributors'] = rated_contributors
