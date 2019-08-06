@@ -13,7 +13,7 @@ pip3 install -r requirements-py3.txt
 ls -al
 #cd Spoken tutorial script creation 
 
-sudo cp sample.config.py spoken/config.py
+cp sample.config.py spoken/config.py
 cd events
 cat > display.py
 chmod 777 display.py
@@ -22,7 +22,7 @@ pwd
 ls -al
 
 python3 manage.py migrate
-python3 manage.py runserver 0.0.0.0:8000
+#python3 manage.py runserver 0.0.0.0:8000
 
 
 
