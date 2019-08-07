@@ -16,7 +16,7 @@ pip3 install -r requirements-py3.txt
 sudo cp sample.config.py spoken/config.py
 cd spoken
 pwd
-chown jenkins:jenkins config.py
+sudo chown jenkins:jenkins config.py
 cd events
 cat > display.py
 chmod 777 display.py
