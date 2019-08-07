@@ -13,7 +13,7 @@ pip3 install -r requirements-py3.txt
 ls -al
 #cd Spoken tutorial script creation 
 
-cp sample.config.py spoken/config.py
+sudo cp sample.config.py spoken/config.py
 cd events
 cat > display.py
 chmod 777 display.py
