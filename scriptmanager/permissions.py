@@ -7,7 +7,7 @@ class ViewScriptPermission(IsAuthenticatedOrReadOnly):
     
     if (obj.status): return True
 
-    if (not user.is_anonymous() and (is_domainreviewer(user) or is_qualityreviewer(user))):
+    if (not user.is_anonymous() and (is_domainreviewer(user) or is_qualityreviewer(user) or obj.user == user)):
       return True
     
     return False
