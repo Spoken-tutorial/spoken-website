@@ -18,13 +18,14 @@ cd spoken
 
 sudo chown jenkins:jenkins config.py
 cd ..
-pwd
 cd events
+
 cat > display.py
 chmod 777 display.py
+pwd
 cd ..
+pwd
 
-ls -al
 
 python3 manage.py migrate
 #python3 manage.py runserver 0.0.0.0:8000
