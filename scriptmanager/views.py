@@ -211,7 +211,7 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
     try:
       tutorial=TutorialDetail.objects.get(pk = int(self.kwargs['tid']))
       language=Language.objects.get(pk = int(self.kwargs['lid']))
-      script = Script.objects.get(user = self.request.user,tutorial = tutorial,language = language)
+      script = Script.objects.get(tutorial = tutorial,language = language)
       status = request.data['status']
       script.status = status
       script.save()
