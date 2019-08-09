@@ -241,28 +241,26 @@
           
               {% if datetoday|date:"Y m d"  > record.submissiondate|date:"Y m d" %} 
                 
-                {% if record.extension_status < 2 %}
-                <a class="btn btn-danger" href="#" onclick=extend('{{record.id}}')> 
+                {% if record.extension_status < 1 %}
+                <a class="btn btn-danger" href="#" onclick=extend('{{record.id}}') %}"> 
               Extend </a>
+                {% else%}                
+                <a class="btn btn-danger" disabled  href="#" %}"> Extend</a>
+                {% endif %}
+                <hr>
               {% endif %}
-              {% else%}
-                {% if record.extension_status >= 1 %}
-                <a class="btn btn-danger" disabled> Extend</a>
-                {% endif %}    
+              {% if record.extension_status >= 1 %}
+              {{ record.extension_status}}
               {% endif %}
-            {{ record.extension_status }}            
           </td>
           <td style="width: 12%" align="center">
             <div>
-              {% if record.script_status > 0 and record.submissiondate|date:"Y m d" > datetoday|date:"Y m d" %}
-            <a disabled class="btn btn-danger" > 
-            Revoke </a><br>
-            {% else%}
             <a class="btn btn-danger" href="#" onclick=revoke_tutorials('{{record.id}}')> 
             Revoke </a><br>
-            {% endif %}
             <hr>
+            {% if record.submissiondate|date:"Y m d" > datetoday|date:"Y m d"%}
               <input type="checkbox"  id="email_sub_date"> Submission Date<br>
+            {% endif %}
             
             
           </td>

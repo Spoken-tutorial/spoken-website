@@ -129,7 +129,8 @@
           <tr>
           <td>{{ collection.start_index|add:forloop.counter|add:-1 }}
           </td>
-          <td>{{ record.tutorial_detail.level }}</td>       
+          <td>{{ record.tutorial_detail.level }}</td>
+          <td>{{ record.tutorial_detail.order }}</td>  
           <td>{{ record.tutorial_detail.foss.foss }}</td>
           <td>{{ record.tutorial_detail }}</td>
           <td>{{ record.language.name }}</td>
@@ -152,19 +153,19 @@
       {% endif%}      
 
           <td align="center">
-          {{ record.extension_status}}
+          
               {% if datetoday|date:"Y m d"  > record.submissiondate|date:"Y m d" %} 
                 
-                {% if record.extension_status < 2 %}
+                {% if record.extension_status < 1 %}
                 <a class="btn btn-danger" href="#" onclick=extend('{{record.id}}') %}"> 
               Extend </a>
-              {% endif %}
-              {% else%}
-                {% if record.extension_status >= 1 %}
+                {% else%}                
                 <a class="btn btn-danger" disabled  href="#" %}"> Extend</a>
-                {% endif %}    
+                {% endif %}
               {% endif %}
-          
+              {% if record.extension_status >= 1 %}
+              {{ record.extension_status}}
+              {% endif %}
           </td>
 
           </tr>

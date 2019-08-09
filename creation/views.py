@@ -3274,7 +3274,7 @@ def allocate_tutorial(request, sel_status, role):
     bid_count = 0
     tutorials_count = 0
 
-    if is_language_manager(request.user):
+    if is_language_manager(request.user) and role == 'language_manager':
         lang_qs = Language.objects.filter(
             id__in = LanguageManager.objects.filter(user = request.user,
             status = STATUS_DICT['active']).values('language'))
@@ -3321,7 +3321,7 @@ def allocate_tutorial(request, sel_status, role):
             'tutorial_detail__level', 'language','tutorial_detail__order'   )
 
     elif sel_status == 'ongoing':
-        if is_language_manager(request.user):
+        if is_language_manager(request.user) and role == 'language_manager':
             header = {
                 1: SortableHeader('# ', False),
                 2: SortableHeader('tutorial_detail__level', True, 'Tutorial Level'),
@@ -3342,14 +3342,15 @@ def allocate_tutorial(request, sel_status, role):
             header = {
                 1: SortableHeader('# ', False),
                 2: SortableHeader('tutorial_detail__level', True, 'Tutorial Level'),
-                3: SortableHeader('tutorial_detail__foss__foss', True, 'FOSS Course'),
-                4: SortableHeader('Tutorial', False),
-                5: SortableHeader('language__name', False, 'Language'),
-                6: SortableHeader('script_user_id', False, 'Script user'),
-                7: SortableHeader('video_user_id', False, 'Video user'),
-                8: SortableHeader('tutorial_detail_id__tutorialresource__updated', True, 'Bid Date'),
-                9: SortableHeader('submissiondate', True, 'Submission Date'),
-                10: SortableHeader('extension_status', True, 'Extension' ),
+                3: SortableHeader('tutorial_detail__order', True, 'Order Id'),
+                4: SortableHeader('tutorial_detail__foss__foss', True, 'FOSS Course'),
+                5: SortableHeader('Tutorial', False),
+                6: SortableHeader('language__name', False, 'Language'),
+                7: SortableHeader('script_user_id', False, 'Script user'),
+                8: SortableHeader('video_user_id', False, 'Video user'),
+                9: SortableHeader('tutorial_detail_id__tutorialresource__updated', True, 'Bid Date'),
+                10: SortableHeader('submissiondate', True, 'Submission Date'),
+                11: SortableHeader('extension_status', True, 'Extension' ),
             }
 
 
@@ -3836,7 +3837,7 @@ def extend_submission_date(request):
     data = 'Extended'
     try:
         tutorial_resource = TutorialResource.objects.get(id = tutorial)
-        if tutorial_resource.extension_status > 1:
+        if tutorial_resource.extension_status >= 1:
             messages.error(request,
                            'You have exceeded the no of extensions')
         else:
@@ -3844,9 +3845,7 @@ def extend_submission_date(request):
                 datetime.date(datetime.now() + timedelta(days = 3))
             tutorial_resource.extension_status += 1
             tutorial_resource.save()
-        messages.success(request,
-                       'Extended'
-                       )
+            messages.success(request,'Extended')
     except TutorialResource.DoesNotExist:
         # Here the error can only occur when the tutorial resource entry is not found.
         messages.error(request,
@@ -3939,28 +3938,6 @@ def revoke_allocated_tutorial(request):
     except Exception as e:
         raise e
     
-
-    # existing_script_notification = ''  
-    # try:
-    #     existing_script_notification = ContributorNotification.objects.filter(
-    #                     tutorial_resource_id = tutorialresource_to_revoke,
-    #                     user_id = tutorialresource_to_revoke.script_user_id)
-        
-    #     existing_video_notification = ContributorNotification.objects.filter(
-    #                     tutorial_resource_id = tutorialresource_to_revoke,
-    #                     user_id = tutorialresource_to_revoke.video_user_id)
-    #     revoke_message = 'The tutorial is revoked from you'
-    #     if tutorialresource_to_revoke.script_user_id != tutorialresource_to_revoke.video_user_id:
-    #         if existing_script_notification.exists():
-    #             existing_script_notification.update(message=revoke_message)
-
-    #         if existing_video_notification.exists():
-    #             existing_video_notification.update(message=revoke_message)
-    #     else:
-    #         existing_script_notification.update(message=revoke_message)
-    
-    # except Exception as e:
-    #     raise e
     tutorialresource_to_revoke.assignment_status = STATUS_DICT['inactive']
     tutorialresource_to_revoke.save()
         
