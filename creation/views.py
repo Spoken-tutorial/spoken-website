@@ -3461,7 +3461,7 @@ def active_contributor_list(language_id):
 @csrf_exempt
 def get_rated_contributors(request):
     language_id = request.POST.get('language')
-    contributors_updated = active_contributor_list(language_id)
+    contributors_updated = active_contributor_list([int(language_id)])
 
     rated_contributors = ContributorRating.objects.filter(rating__gt = 0,
         language_id = language_id, user_id__in = contributors_updated
@@ -4032,6 +4032,8 @@ def send_mail_to_contributor(contributor_id, tdid, lid, reason):
         message_sub_date = '\n   - ' + 'Your submission date was : ' \
             + str(tutorial_details[0]['submissiondate']) \
             + ", but you could'nt complete before that."
+    else:
+    	message_sub_date = 'Quality standards not met.'
 
     user_details = \
         User.objects.filter(id = contributor_id).values('username',
