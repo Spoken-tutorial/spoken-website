@@ -4,7 +4,7 @@ from django.test import TestCase
 from django.test import Client
 from rest_framework.test import APIClient
 from creation.models import ContributorRole, FossCategory, Language, TutorialDetail,TutorialResource,FossSuperCategory,Level
-from scriptmanager.models import Scripts, ScriptDetails, Comments
+from scriptmanager.models import Script, ScriptDetail, Comment
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from rest_framework import status
