@@ -988,7 +988,7 @@ class OrganiserTrainingCertificateView(TrainingCertificate, View):
     if ta and ta.training.training_planner.organiser == self.request.user.organiser:
       return self.training_certificate(ta)
     else:
-      messages.error(self.request, "PermissionDenied!")
+      messages.error(self.request, "Permission Denied!")
     return HttpResponseRedirect("/")
 
 class OrganiserSingleTrainingCertificateView(SingleTrainingCertificate, View):
@@ -3104,3 +3104,82 @@ def GenerateCertificate(request, trid):
   else:
     messages.error(request, 'Something went wrong Please try again')
   return HttpResponseRedirect("/software-training/certificate-request/rp/training/") 
+
+
+class AllTrainingCertificateView(TrainingCertificate, View):  
+  @method_decorator(group_required("Organiser"))
+  def dispatch(self, *args, **kwargs):
+    return super(AllTrainingCertificateView, self).dispatch(*args, **kwargs)
+  def get(self, request, *args, **kwargs):
+    ta_list = None
+    try:
+      ta_list = TrainingAttend.objects.filter(training_id=kwargs['trid'])
+    except ObjectDoesNotExist:
+      messages.error(self.request, "Record not found")
+      pass    
+
+    output = PdfFileWriter()
+
+    for ta in ta_list:
+      semsplit = re.split('-|, ',ta.training.training_planner.get_semester())
+      sem_start = semsplit[0]+semsplit[2]
+
+      training_end = ta.training.sem_start_date+timedelta(days=60)
+
+      response = HttpResponse(content_type='application/pdf')
+      filename = (ta.training.course.foss.foss+"-Participant-Certificate").replace(" ", "-");
+
+      response['Content-Disposition'] = 'attachment; filename='+filename+'.pdf'
+      imgTemp = BytesIO ()
+      imgDoc = canvas.Canvas(imgTemp)
+
+      # Title
+      imgDoc.setFont('Helvetica', 40, leading=None)
+      imgDoc.drawCentredString(415, 480, "Certificate of Participation")
+
+      #date
+      imgDoc.setFont('Helvetica', 18, leading=None)
+      imgDoc.drawCentredString(211, 115, self.custom_strftime('%B {S} %Y', training_end))
+
+      #password
+      certificate_pass = ''
+      imgDoc.setFillColorRGB(211, 211, 211)
+      imgDoc.setFont('Helvetica', 10, leading=None)
+      imgDoc.drawString(10, 6, certificate_pass)
+
+      # Draw image on Canvas and save PDF in buffer
+      imgPath = settings.MEDIA_ROOT +"sign.jpg"
+      imgDoc.drawImage(imgPath, 600, 100, 150, 76)
+
+      #paragraphe
+      text = "This is to certify that <b>"+ta.student.user.first_name +" "+ta.student.user.last_name+"</b> participated in the <b>"+ta.training.course.foss.foss+"</b> training organized at <b>"+ta.training.training_planner.academic.institution_name+"</b> in <b>"+sem_start+"</b> semester, with course material provided by the Spoken Tutorial Project, IIT Bombay.<br /><br />A comprehensive set of topics pertaining to <b>"+ta.training.course.foss.foss+"</b> were covered in the training. This training is offered by the Spoken Tutorial Project, IIT Bombay, funded by the National Mission on Education through ICT, MHRD, Govt. of India."
+      if ta.training.department.id == 24:
+        text = "This is to certify that <b>"+ta.student.user.first_name +" "+ta.student.user.last_name+"</b> participated in the <b>"+ta.training.course.foss.foss+"</b> training organized at <b>"+ta.training.training_planner.academic.institution_name+"</b> by <b>"+ta.training.training_planner.organiser.user.first_name+" "+ta.training.training_planner.organiser.user.last_name+"</b>, with course material provided by the Spoken Tutorial Project, IIT Bombay.<br /><br />A comprehensive set of topics pertaining to <b>"+ta.training.course.foss.foss+"</b> were covered in the training. This training is offered by the Spoken Tutorial Project, IIT Bombay, funded by the National Mission on Education through ICT, MHRD, Govt. of India."
+
+
+      centered = ParagraphStyle(name = 'centered',
+        fontSize = 16,
+        leading = 30,
+        alignment = 0,
+        spaceAfter = 20
+      )
+
+      p = Paragraph(text, centered)
+      p.wrap(650, 200)
+      p.drawOn(imgDoc, 4.2 * cm, 7 * cm)
+      imgDoc.save()
+      # Use PyPDF to merge the image-PDF into the template
+      page = PdfFileReader(open(settings.MEDIA_ROOT +"Blank-Certificate.pdf","rb")).getPage(0)
+      overlay = PdfFileReader(BytesIO(imgTemp.getvalue())).getPage(0)
+      page.mergePage(overlay)
+
+      #Save the result
+      
+      output.addPage(page)
+
+    #stream to browser
+    outputStream = response
+    output.write(response)
+    outputStream.close()
+
+    return response

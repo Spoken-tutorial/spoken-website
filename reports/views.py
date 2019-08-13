@@ -164,7 +164,7 @@ def events_training_csv(request):
     writer.writerow(['State', 'City', 'Institution', 'FOSS', 'Type', 'Organiser', 'Date', 'Participants'])
 
     # records
-    for record in collection:
+    for record in collection.qs:
         writer.writerow([
             record.training_planner.academic.state,
             record.training_planner.academic.city,
@@ -201,7 +201,7 @@ def events_test_csv(request):
     writer.writerow(['State', 'City', 'Institution', 'FOSS', 'Organiser', 'Date', 'Participants'])
 
     # records
-    for record in collection:
+    for record in collection.qs:
         writer.writerow([
             record.academic.state.name,
             record.academic.city.name,
