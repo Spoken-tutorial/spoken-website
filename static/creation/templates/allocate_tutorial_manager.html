@@ -260,6 +260,8 @@
             <hr>
             {% if record.submissiondate|date:"Y m d" > datetoday|date:"Y m d"%}
               <input type="checkbox"  id="email_sub_date"> Submission Date<br>
+              {%else%}
+              <input type="checkbox" disabled id="email_sub_date"> Submission Date<br>
             {% endif %}
             
             

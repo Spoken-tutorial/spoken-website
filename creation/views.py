@@ -3898,6 +3898,8 @@ def revoke_allocated_tutorial(request):
     try:
         tutorial_resource_id = request.POST.get('tutorial_resource_id')
         tutorialresource_to_revoke = TutorialResource.objects.get(id = tutorial_resource_id)
+        tutorialresource_to_revoke.assignment_status = ASSIGNMENT_STATUS_DICT['un-assigned']
+        tutorialresource_to_revoke.save()
         
         language_id = tutorialresource_to_revoke.language_id
         tutorial_detail_id = tutorialresource_to_revoke.tutorial_detail_id
