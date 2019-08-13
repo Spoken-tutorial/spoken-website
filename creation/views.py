@@ -920,7 +920,9 @@ def save_timed_script(request, tdid):
         raise PermissionDenied()
     try:
         tr_rec = TutorialResource.objects.get(tutorial_detail_id = tdid, language__name = 'English')
-        ContributorRole.objects.get(user_id = request.user.id, foss_category_id = tr_rec.tutorial_detail.foss_id, language_id = tr_rec.language_id, status = 1)
+        ContributorRole.objects.get(user_id = request.user.id,
+        	tutorial_detail_id = tr_rec.tutorial_detail.id,
+        	language_id = tr_rec.language_id, status = 1)
     except Exception as e:
         print(e)
         raise PermissionDenied()
