@@ -2,12 +2,14 @@
 
 #export WORKSPACE=`pwd`
 virtualenv spkenv -p python3
-. spkenv/bin/activate
+.spkenv/bin/activate
 
 cd Spoken tutorial script creation
-pwd
+
 
 sudo apt-get install python3-dev libmysqlclient-dev
+
+pwd
 pip3 install -r requirements-dev.txt
 pip3 install -r requirements-py3.txt
 
