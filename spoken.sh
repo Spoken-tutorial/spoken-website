@@ -1,8 +1,8 @@
 #!/bin/bash
 
 export WORKSPACE=`pwd`
-python3 -m virtualenv venv
-. venv/bin/activate
+virtualenv spkenv -p python3
+. spkenv/bin/activate
 
 
 
