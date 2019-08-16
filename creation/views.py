@@ -2914,7 +2914,7 @@ def list_all_due_tutorials(request):
     """
     Display all publshed tutorials for whom payment is due and can initiate payment process for selected tutorials
     """
-    if not is_administrator(request.user):
+    if not (is_administrator(request.user) or is_qualityreviewer(request.user)):
         #is_language_manager(request.user)
         raise PermissionDenied()
     if request.method == "POST":
