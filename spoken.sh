@@ -1,8 +1,10 @@
 #!/bin/bash
 
 export WORKSPACE=`pwd`
-mkvirtualenv --python=/usr/bin/python3 testing
-workon testing
+python3 -m virtualenv venv
+. venv/bin/activate
+
+
 
 
 sudo apt-get install python3-dev libmysqlclient-dev
