@@ -2,7 +2,7 @@
 
 #export WORKSPACE=`pwd`
 virtualenv spkenv -p python3
-.spkenv/bin/activate
+. spkenv/bin/activate
 
 cd Spoken tutorial script creation
 
