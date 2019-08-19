@@ -1,11 +1,14 @@
 #!/bin/bash
-
+#d spkenv
 export WORKSPACE=`pwd`
-mkvirtualenv --python=/usr/bin/python3 testing
-workon testing
+#virtualenv spkenv -p python3
+#source spkenv/bin/activate
+#cd Spoken tutorial script creation
 
 
 sudo apt-get install python3-dev libmysqlclient-dev
+
+pwd
 pip3 install -r requirements-dev.txt
 pip3 install -r requirements-py3.txt
 

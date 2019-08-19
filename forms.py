@@ -6,7 +6,7 @@ from django.db.models import Q
 from .creation.models import *
 
 
-class CDContentForm(forms.Form):
+class CDContentForm_old(forms.Form):
     foss_list = list(TutorialResource.objects.filter(Q(status = 1)|Q(status = 2)).values_list('tutorial_detail__foss_id', 'tutorial_detail__foss__foss').order_by('tutorial_detail__foss__foss').distinct())
     foss_list.insert(0, ('', 'Select FOSS Category'))
     foss_category = forms.ChoiceField(
