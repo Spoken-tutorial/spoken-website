@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FossService } from '../_service/foss.service';
 import { TutorialsService } from '../_service/tutorials.service'
+import { AuthService } from '../_service/auth.service';
 
 @Component({
   selector: 'app-home',
@@ -16,7 +17,8 @@ export class HomeComponent implements OnInit {
   
   constructor(
     public fossService: FossService,
-    public tutorialService: TutorialsService
+    public tutorialService: TutorialsService,
+    public authService: AuthService
   ) { }
 
   private getFossCategoryIndex() {

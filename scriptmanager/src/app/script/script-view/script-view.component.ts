@@ -57,6 +57,7 @@ export class ScriptViewComponent implements OnInit {
         this.slides = res['slides'];
         this.script = res;
       },
+      console.error
     );
   }
 

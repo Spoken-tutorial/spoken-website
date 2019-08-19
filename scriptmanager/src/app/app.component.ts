@@ -36,11 +36,4 @@ export class AppComponent {
 
   }
 
-  @HostListener('window:beforeunload', ['$event'])
-  beforeunloadHandler(event) {
-    localStorage.removeItem('fossIndex');
-    localStorage.removeItem('fossId');
-    localStorage.removeItem('langId');
-  }
-
 }
