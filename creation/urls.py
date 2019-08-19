@@ -58,14 +58,16 @@ urlpatterns = [
 
     # Administrator part
     url(r'^role/requests/$',  creation_list_role_requests, name="creation_list_role_requests"),
+    url(r'^role/lang_requests/$',  creation_lang_list_role_requests, name="creation_lang_list_role_requests"),
     url(r'^update-prerequisite/$',  update_prerequisite, name="update_prerequisite"),
     url(r'^update-keywords/$',  update_keywords, name="update_keywords"),
     url(r'^update-manual/(\w+)/$',  update_sheet, name="update_sheet"),
     url(r'^update-assignment/$',  update_assignment, name="update_assignment"),
     url(r'^update-codefiles/$',  update_codefiles, name="update_codefiles"),
     url(r'^role/requests/([a-zA-Z-]+)/$',  creation_list_role_requests, name="creation_list_role_requests"),
-    url(r'^role/accept/(\d+)/$',  creation_accept_role_request, name="creation_accept_role_request"),
-    url(r'^role/reject/(\d+)/$',  creation_reject_role_request, name="creation_reject_role_request"),
+    url(r'^role/lang_requests/([a-zA-Z-]+)/$',  creation_lang_list_role_requests, name="creation_lang_list_role_requests"),
+    url(r'^role/accept/(?P<recid>\d+)/(?P<user_type>\w+)/$',  creation_accept_role_request, name="creation_accept_role_request"),
+    url(r'^role/reject/(?P<recid>\d+)/(?P<user_type>\w+)/$',  creation_reject_role_request, name="creation_reject_role_request"),
     url(r'^role/revoke/([a-zA-Z-]+)/([0-9/]+)/$',  creation_revoke_role_request, name="creation_revoke_role_request"),
     url(r'^admin/tutorial/status/pending/$',  creation_change_published_to_pending, name="creation_change_published_to_pending"),
     url(r'^admin/tutorial/component/status/$',  creation_change_component_status, name="creation_change_component_status"),

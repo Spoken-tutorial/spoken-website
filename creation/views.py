@@ -279,7 +279,7 @@ def creation_add_role(request, role_type,languages):
     return HttpResponseRedirect('/creation/')
 
 @login_required
-def creation_accept_role_request(request, recid):
+def creation_accept_role_request(request, recid, user_type):
     if is_administrator:
         roles = {
             0: 'Contributor',
@@ -314,10 +314,13 @@ def creation_accept_role_request(request, recid):
             messages.error(request, 'The given role request id is either invalid or it is already accepted')
     else:
         raise PermissionDenied()
-    return HttpResponseRedirect('/creation/role/requests/' + roles[role_rec.role_type].lower() + '/')
+    if user_type == 'lang_manager':
+        return HttpResponseRedirect('/creation/role/lang_requests/' + roles[role_rec.role_type].lower() + '/')
+    else:        
+        return HttpResponseRedirect('/creation/role/requests/' + roles[role_rec.role_type].lower() + '/')
 
 @login_required
-def creation_reject_role_request(request, recid):
+def creation_reject_role_request(request, recid, user_type):
     if is_administrator:
         roles = {
             0: 'Contributor',
@@ -352,6 +355,7 @@ def creation_revoke_role_request(request, role_type,languages):
     # Revoke multiple languages from the user
     lang_ids = languages.split('/')
     for a_language in lang_ids:
+        a_language = int(a_language)
         if role_type in ROLES_DICT:
             try:
                 role_rec = RoleRequest.objects.get(
@@ -416,6 +420,25 @@ def creation_list_role_requests(request, tabid = 'contributor'):
         return render(request, 'creation/templates/creation_list_role_requests.html', context)
     else:
         raise PermissionDenied()
+
+@login_required
+def creation_lang_list_role_requests(request, tabid = 'contributor'):
+    if is_language_manager:
+        language_manager_langs = LanguageManager.objects.filter(
+            user_id= request.user.id).values_list('language_id')
+        contrib_recs = RoleRequest.objects.filter(role_type = 0,
+            status = 0, language_id__in= language_manager_langs).order_by('-updated')
+        ext_contrib_recs = RoleRequest.objects.filter(role_type = 1,
+            status = 0, language_id__in= language_manager_langs).order_by('-updated')
+        context = {
+            'tabid': tabid,
+            'contrib_recs': contrib_recs,
+            'ext_contrib_recs': ext_contrib_recs,
+        }
+        return render(request, 'creation/templates/creation_lang_list_role_requests.html', context)
+    else:
+        raise PermissionDenied()
+
 
 @login_required
 def refresh_roles(request):
