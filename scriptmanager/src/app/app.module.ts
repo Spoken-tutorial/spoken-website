@@ -1,4 +1,4 @@
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
@@ -25,6 +25,8 @@ import { DiffMatchPatchModule } from 'ng-diff-match-patch';
 import { CookieModule } from 'ngx-cookie';
 import { QuillModule } from 'ngx-quill';
 import { BadgeButtonComponent } from './badge-button/badge-button.component'
+import { AuthGuard } from './_guards/auth.guard';
+import { ErrorInterceptor } from './_interceptors/error.interceptor';
 
 // since we are saving the JWT token for authentication in the local storage 
 // , here we get that token to send it with each api call to authenticate with the server
@@ -89,7 +91,10 @@ export function tokenGetter() {
       }
     })
   ],
-  providers: [],
+  providers: [
+    AuthGuard,
+    { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true }
+  ],
   bootstrap: [AppComponent]
 })
 
