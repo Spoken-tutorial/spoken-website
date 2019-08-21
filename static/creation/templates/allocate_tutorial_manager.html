@@ -134,9 +134,9 @@
                   <label value="0">--- Select a Contributor ---</label>
                 </option>
                 {% for a_contributor in contributors %}
-                <!-- 1:'user__username', 2:'rating',3:'language__name' -->
+                <!-- 0:'user_id', 1:'user__username', 2:'rating' -->
                 {% if a_contributor.2 != 0 %}
-                {% if a_contributor.2 >= 3 %}
+                {% if a_contributor.2 > 3 %}
                 <option id="{{a_contributor.0}}" style="color:green" value="{{a_contributor.1}}">{{a_contributor.1}}</option>
                 {%else%}
                 <option id="{{a_contributor.0}}" style="color:red" value="{{a_contributor.1}}">{{a_contributor.1}}</option>

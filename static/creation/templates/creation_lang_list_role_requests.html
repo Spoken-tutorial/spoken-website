@@ -93,11 +93,11 @@
                 {% for admin_rec in admin_recs %}
                     <tr>
                         <td>{{ forloop.counter }}</td>
-                        <td><a href="/accounts/view-profile/{{ admin_rec.user }}" target="_blank">{{ admin_rec.user }}</a</td>
+                        <td><a href="/accounts/view-profile/{{ admin_rec.user }}" target="_blank">{{ admin_rec.user }}</a></td>
                         <td><a href="mailto:{{ admin_rec.user.email }}">{{ admin_rec.user.email }}</a></td>
                         <td>{{ admin_rec.created }}</td>
-                        <td class="col-center"><a href="/creation/role/accept/{{ admin_rec.id }}/" class="spin-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Accept</a></td>
-                        <td class="col-center"><a href="/creation/role/reject/{{ admin_rec.id }}/" class="spin-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Reject</a></td>
+                        <td class="col-center"><a href="/creation/role/accept/{{ admin_rec.id }}/admin" class="spin-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Accept</a></td>
+                        <td class="col-center"><a href="/creation/role/reject/{{ admin_rec.id }}/admin" class="spin-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Reject</a></td>
                     </tr>
                 {% endfor %}
             {% endif %}
@@ -121,12 +121,12 @@
                 {% for domain_rec in domain_recs %}
                     <tr>
                         <td>{{ forloop.counter }}</td>
-                        <td><a href="/accounts/view-profile/{{ domain_rec.user }}" target="_blank">{{ domain_rec.user }}</a</td>
+                        <td><a href="/accounts/view-profile/{{ domain_rec.user }}" target="_blank">{{ domain_rec.user }}</a></td>
                         <td><a > {{domain_rec.language}} </a></td>
                         <td><a href="mailto:{{ domain_rec.user.email }}">{{ domain_rec.user.email }}</a></td>
                         <td>{{ domain_rec.created }}</td>
-                        <td class="col-center"><a href="/creation/role/accept/{{ domain_rec.id }}/" class="spin-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Accept</a></td>
-                        <td class="col-center"><a href="/creation/role/reject/{{ domain_rec.id }}/" class="spin-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Reject</a></td>
+                        <td class="col-center"><a href="/creation/role/accept/{{ domain_rec.id }}/admin" class="spin-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Accept</a></td>
+                        <td class="col-center"><a href="/creation/role/reject/{{ domain_rec.id }}/admin" class="spin-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Reject</a></td>
                     </tr>
                 {% endfor %}
             {% endif %}
@@ -150,12 +150,12 @@
                 {% for quality_rec in quality_recs %}
                     <tr>
                         <td>{{ forloop.counter }}</td>
-                        <td><a href="/accounts/view-profile/{{ quality_rec.user }}" target="_blank">{{ quality_rec.user }}</a</td>
+                        <td><a href="/accounts/view-profile/{{ quality_rec.user }}" target="_blank">{{ quality_rec.user }}</a></td>
                         <td><a >{{ quality_rec.language }} </a></td>
                         <td><a href="mailto:{{ quality_rec.user.email }}">{{ quality_rec.user.email }}</a></td>
                         <td>{{ quality_rec.created }}</td>
-                        <td class="col-center"><a href="/creation/role/accept/{{ quality_rec.id }}/" class="spin-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Accept</a></td>
-                        <td class="col-center"><a href="/creation/role/reject/{{ quality_rec.id }}/" class="spin-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Reject</a></td>
+                        <td class="col-center"><a href="/creation/role/accept/{{ quality_rec.id }}/admin" class="spin-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Accept</a></td>
+                        <td class="col-center"><a href="/creation/role/reject/{{ quality_rec.id }}/admin" class="spin-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Reject</a></td>
                     </tr>
                 {% endfor %}
             {% endif %}

@@ -339,7 +339,10 @@ def creation_reject_role_request(request, recid, user_type):
             messages.error(request, 'The given role request id is either invalid or it is already rejected')
     else:
         raise PermissionDenied()
-    return HttpResponseRedirect('/creation/role/requests/' + roles[role_rec.role_type].lower() + '/')
+    if user_type == 'lang_manager':
+        return HttpResponseRedirect('/creation/role/lang_requests/' + roles[role_rec.role_type].lower() + '/')
+    else:        
+        return HttpResponseRedirect('/creation/role/requests/' + roles[role_rec.role_type].lower() + '/')
 
 @login_required
 def creation_revoke_role_request(request, role_type,languages):
@@ -439,82 +442,83 @@ def creation_lang_list_role_requests(request, tabid = 'contributor'):
     else:
         raise PermissionDenied()
 
-
+# This is handled by management file, kept  here for backup.
+# This can be run manually by hitting /creation/refresh_roles url 
 @login_required
 def refresh_roles(request):
+    if is_administrator(request.user):
+        contrib_count = 0
+        domain_count = 0
+        quality_count = 0
+        contributor_roles = ContributorRole.objects.filter(status = 1).values('user_id','language_id').distinct()
+        domain_roles = DomainReviewerRole.objects.filter(status = 1).values('user_id','language_id').distinct()
+        quality_roles = QualityReviewerRole.objects.filter(status = 1).values('user_id','language_id').distinct()
+        for contributor in contributor_roles:
+            role_request = RoleRequest.objects.filter(
+                Q(role_type = ROLES_DICT['contributor'])|Q(role_type = ROLES_DICT['external-contributor']),
+                user_id = contributor['user_id'],language_id = contributor['language_id'])
+            if not role_request.exists():
+                contrib_user = User.objects.get(id = contributor['user_id'])
+                role_request = RoleRequest()
+                role_request.user = contrib_user
+                role_request.language = Language.objects.get(id = contributor['language_id'])
+                if is_contributor(contrib_user):
+                    role_request.role_type = ROLES_DICT['contributor']
+                elif is_external_contributor(contrib_user):
+                    role_request.role_type = ROLES_DICT['external-contributor']
+                role_request.status = 1
+                role_request.save()
+                contributor_with_rating = \
+                ContributorRating.objects.filter(user_id = contributor['user_id'],
+                                           language_id = contributor['language_id'])
+                if not contributor_with_rating.exists():
+                    new_contrib_rating_request = ContributorRating()
+                    new_contrib_rating_request.user_id = contributor['user_id']
+                    new_contrib_rating_request.language_id = contributor['language_id']
+                    new_contrib_rating_request.save()
+                contrib_count += 1
+            else:
+                role_request.update(status =  STATUS_DICT['active'],
+                    approved_user_id = request.user.id)
+        messages.success(request,str(contrib_count)+ " Contributors added")
 
-    contrib_count = 0
-    domain_count = 0
-    quality_count = 0
-    contributor_roles = ContributorRole.objects.filter(status = 1).values('user_id','language_id').distinct()
-    domain_roles = DomainReviewerRole.objects.filter(status = 1).values('user_id','language_id').distinct()
-    quality_roles = QualityReviewerRole.objects.filter(status = 1).values('user_id','language_id').distinct()
-    for contributor in contributor_roles:
-        role_request = RoleRequest.objects.filter(
-            Q(role_type = ROLES_DICT['contributor'])|Q(role_type = ROLES_DICT['external-contributor']),
-            user_id = contributor['user_id'],language_id = contributor['language_id'])
-        if not role_request.exists():
-            contrib_user = User.objects.get(id = contributor['user_id'])
-            role_request = RoleRequest()
-            role_request.user = contrib_user
-            role_request.language = Language.objects.get(id = contributor['language_id'])
-            if is_contributor(contrib_user):
-                role_request.role_type = ROLES_DICT['contributor']
-            elif is_external_contributor(contrib_user):
-                role_request.role_type = ROLES_DICT['external-contributor']
-            role_request.status = 1
-            role_request.save()
-            contributor_with_rating = \
-            ContributorRating.objects.filter(user_id = contributor['user_id'],
-                                       language_id = contributor['language_id'])
-            if not contributor_with_rating.exists():
-                new_contrib_rating_request = ContributorRating()
-                new_contrib_rating_request.user_id = contributor['user_id']
-                new_contrib_rating_request.language_id = contributor['language_id']
-                new_contrib_rating_request.save()
-            contrib_count += 1
-        else:
-            role_request.update(status =  STATUS_DICT['active'],
-                approved_user_id = request.user.id)
-    messages.success(request,str(contrib_count)+ " Contributors added")
+        for domain_reviewer in domain_roles:
+            role_request = RoleRequest.objects.filter( role_type = ROLES_DICT['domain-reviewer'],
+                user_id = domain_reviewer['user_id'],language_id = domain_reviewer['language_id'])
+            if not role_request.exists():
+                role_request = RoleRequest()
+                role_request.user = User.objects.get(id = domain_reviewer['user_id']) 
+                role_request.language = Language.objects.get(id = domain_reviewer['language_id'])
+                role_request.role_type = ROLES_DICT['domain-reviewer']
+                role_request.status = STATUS_DICT['active']
+                role_request.save()
+                domain_count += 1
+            else:
+                role_request.update(status =  STATUS_DICT['active'],
+                    approved_user_id = request.user.id)
 
-    for domain_reviewer in domain_roles:
-        role_request = RoleRequest.objects.filter( role_type = ROLES_DICT['domain-reviewer'],
-            user_id = domain_reviewer['user_id'],language_id = domain_reviewer['language_id'])
-        if not role_request.exists():
-            role_request = RoleRequest()
-            role_request.user = User.objects.get(id = domain_reviewer['user_id']) 
-            role_request.language = Language.objects.get(id = domain_reviewer['language_id'])
-            role_request.role_type = ROLES_DICT['domain-reviewer']
-            role_request.status = STATUS_DICT['active']
-            role_request.save()
-            domain_count += 1
-        else:
-            role_request.update(status =  STATUS_DICT['active'],
-                approved_user_id = request.user.id)
+        messages.success(request,str(domain_count)+ " Domain Reviewers added")
 
-    messages.success(request,str(domain_count)+ " Domain Reviewers added")
+        for quality_reviewer in quality_roles:
+            role_request = RoleRequest.objects.filter(role_type = ROLES_DICT['quality-reviewer'],
+                user_id = quality_reviewer['user_id'],language_id = quality_reviewer['language_id'])
+            if not role_request.exists():
+                role_request = RoleRequest()
+                role_request.user = User.objects.get(id = quality_reviewer['user_id']) 
+                role_request.language = Language.objects.get(id = quality_reviewer['language_id'])
+                role_request.role_type = ROLES_DICT['quality-reviewer']
+                role_request.status = STATUS_DICT['active']
+                role_request.save()
+                quality_count += 1
+            else:
+                role_request.update(status =  STATUS_DICT['active'],
+                    approved_user_id = request.user.id)
+        messages.success(request,str(quality_count)+ " Quality Reviewers added")
+        return HttpResponseRedirect('/creation')
+    else:
+        messages.error(request,"Not enough permissions to perform this operation")
+        raise PermissionDenied()
 
-    for quality_reviewer in quality_roles:
-        role_request = RoleRequest.objects.filter(role_type = ROLES_DICT['quality-reviewer'],
-            user_id = quality_reviewer['user_id'],language_id = quality_reviewer['language_id'])
-        if not role_request.exists():
-            role_request = RoleRequest()
-            role_request.user = User.objects.get(id = quality_reviewer['user_id']) 
-            role_request.language = Language.objects.get(id = quality_reviewer['language_id'])
-            role_request.role_type = ROLES_DICT['quality-reviewer']
-            role_request.status = STATUS_DICT['active']
-            role_request.save()
-            quality_count += 1
-        else:
-            role_request.update(status =  STATUS_DICT['active'],
-                approved_user_id = request.user.id)
-
-    messages.success(request,str(quality_count)+ " Quality Reviewers added")
-
-
-
-    return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
 @login_required
 def init_creation_app(request):

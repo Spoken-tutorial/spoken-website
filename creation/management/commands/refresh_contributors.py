@@ -1,4 +1,4 @@
-# Code to add publish date in tutorialresource table
+# Code to add update contributor roles in ContributorRole table
 # To run this file please follow below instructions:
 # 1. Go to project directory
 # 2. run "python manage.py refresh_contributors"
