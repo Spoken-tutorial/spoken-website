@@ -43,6 +43,7 @@ class FossCategory(models.Model):
     description = models.TextField()
     status = models.BooleanField(max_length=2)
     is_learners_allowed = models.BooleanField(max_length=2,default=0 )
+    is_translation_allowed = models.BooleanField(max_length=2, default=0)
     user = models.ForeignKey(User, on_delete=models.PROTECT )
     category = models.ManyToManyField(FossSuperCategory)
     created = models.DateTimeField(auto_now_add=True)

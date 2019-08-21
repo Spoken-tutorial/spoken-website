@@ -3493,7 +3493,7 @@ def get_rated_contributors(request):
         ).values_list('user_id', 'user__username', 'rating')
     data = ""
     for contributor in rated_contributors:            
-        if contributor[2]<3:
+        if contributor[2]<=3:
             data = data + '<option id='+str(contributor[0])+' style="color:red" >' + contributor[1]+ '</option>'
         else:
             data = data + '<option id='+str(contributor[0])+' style="color:green" >' + contributor[1]+ '</option>'
@@ -3626,7 +3626,10 @@ def no_of_foss_gt_3( request ,user, foss_or_tut_id, language_id):
     
     this_tut = TutorialDetail.objects.get(id = foss_or_tut_id)
     foss_id = this_tut.foss.id
-
+    # To give language manager the privileges to assign any no of foss
+    # if is_language_manager:
+    #     return False
+    # else:
     all_foss = TutorialResource.objects.filter(
         Q(script_user_id = user) | Q(video_user_id = user),
         status = UNPUBLISHED, assignment_status = ASSIGNMENT_STATUS_DICT['assigned']
@@ -3691,8 +3694,6 @@ def add_tutorial_contributor_notification(user_id, tuto_resource_id, message_typ
 
 @login_required
 def single_tutorial_allocater(request, tut, lid, days, user):
-    data = "Allocated"
-    WORK_STATUS = 0
     # If timezone issue is solved, + 1 can be removed
     if days != 1:
         submissiondate = datetime.date(timezone.now() +
@@ -3703,9 +3704,7 @@ def single_tutorial_allocater(request, tut, lid, days, user):
 
     # Add a role in the COntributor Role table for the Tutorial
     add_or_update_contributor_role(tut, lid , user.id)
-    
 
-    
     # Update data in Tutorial Resource
     if tutorial_resource.exists():
         tutorial_resource = tutorial_resource.update(outline_user = user,
@@ -3776,10 +3775,9 @@ def single_tutorial_allocater(request, tut, lid, days, user):
     return True
 
 def contributor_rating_less_than_3(request, uid , language):
-    data = "Not a rated contributor"
     contributor_rating = ContributorRating.objects.filter(
         user_id = uid,language = language).values('rating', 'language__name')
-    if contributor_rating[0]['rating'] < 3:
+    if contributor_rating[0]['rating'] <= 3:
         return True
     else:
         return False
@@ -4035,6 +4033,7 @@ def get_tutorials(request, fid, lang):
                         content_type = 'application/json')
 
 
+# Languages other than the Contributor's Language/s
 @csrf_exempt
 def get_other_languages(request, uid):
     data = '<option> --- Select a Language ---  </option>'

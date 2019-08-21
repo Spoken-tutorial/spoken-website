@@ -13,7 +13,8 @@ from datetime import datetime,timedelta
 from django.utils import timezone
 from django.db.models import Q
 # Spoken Tutorial Stuff
-from creation.models import TutorialResource, Language, TutorialsAvailable, TutorialDetail
+from creation.models import TutorialResource, Language, TutorialsAvailable,\
+                            TutorialDetail, FossCategory
 from creation.views import send_mail_to_contributor
 class Command(BaseCommand):
 
@@ -21,7 +22,8 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         count = 0
         PUBLISHED = 1
-        tutorials = TutorialDetail.objects.filter(
+        fosses_available_for_training = FossCategory.objects.filter(is_translation_allowed__gt=0)
+        tutorials = TutorialDetail.objects.filter(foss_id__in = fosses_available_for_training,
             id__in = TutorialResource.objects.filter(status = PUBLISHED,
             language = 22).values('tutorial_detail').distinct())
 
@@ -41,6 +43,6 @@ class Command(BaseCommand):
                         tutorialsavailable.tutorial_detail = tutorial
                         tutorialsavailable.language = a_lang
                         tutorialsavailable.save()
-                        print(tutorial.tutorial," : ",a_lang," added")
+                        print(tutorial.foss,":",tutorial.tutorial," : ",a_lang," added")
                         count+=1        
 
