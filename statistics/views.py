@@ -485,7 +485,7 @@ def tutorial_content(request, template='statistics/templates/statistics_content.
         6: SortableHeader('publish_at', True, 'Date Published')
     }
 
-    published_tutorials_set = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = True)
+    published_tutorials_set = TutorialResource.objects.filter(Q(status=1) | Q(status=2))
 
     raw_get_data = request.GET.get('o', None)
     tutorials = get_sorted_list(request, published_tutorials_set, header, raw_get_data)
