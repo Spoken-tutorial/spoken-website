@@ -3638,20 +3638,20 @@ def no_of_foss_gt_3( request ,user, foss_or_tut_id, language_id):
     this_tut = TutorialDetail.objects.get(id = foss_or_tut_id)
     foss_id = this_tut.foss.id
     # To give language manager the privileges to assign any no of foss
-    # if is_language_manager:
-    #     return False
-    # else:
-    all_foss = TutorialResource.objects.filter(
-        Q(script_user_id = user) | Q(video_user_id = user),
-        status = UNPUBLISHED, assignment_status = ASSIGNMENT_STATUS_DICT['assigned']
-        ).values('tutorial_detail__foss','language_id')
-    list_count = list({(int(v['tutorial_detail__foss']),int(v['language_id'])) for v in all_foss})
-    if (int(foss_id),int(language_id)) not in list_count:
-        if len(list_count) >= 3:
-            messages.error(request, 'Maximum of 3 FOSSes allowed per user')        
-            return True
+    if is_administrator:
         return False
-    return False
+    else:
+        all_foss = TutorialResource.objects.filter(
+            Q(script_user_id = user) | Q(video_user_id = user),
+            status = UNPUBLISHED, assignment_status = ASSIGNMENT_STATUS_DICT['assigned']
+            ).values('tutorial_detail__foss','language_id')
+        list_count = list({(int(v['tutorial_detail__foss']),int(v['language_id'])) for v in all_foss})
+        if (int(foss_id),int(language_id)) not in list_count:
+            if len(list_count) >= 3:
+                messages.error(request, 'Maximum of 3 FOSSes allowed per user')        
+                return True
+            return False
+        return False
 
 LEVEL_NAME = {1: 'Basic', 2: 'Intermediate', 3: 'Advanced'}
 SUPER_ADMIN_USER_ID = 7
