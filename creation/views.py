@@ -3,6 +3,7 @@ import os
 import re
 import subprocess
 import time
+import collections
 from django.utils import timezone
 from decimal import Decimal
 try:
