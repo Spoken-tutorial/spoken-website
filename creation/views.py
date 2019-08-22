@@ -3442,6 +3442,13 @@ def allocate_tutorial(request, sel_status, role):
             # This will show contributors as per the language selection
             form.fields['script_user'].queryset =  contributors_list
             form.fields['video_user'].queryset = contributors_list
+        else:
+            contributors_list = User.objects.filter(id__in = active_contributor_list(lang_qs))
+            # This will show all contributors under the language manager
+            if contributors_list:
+                form.fields['script_user'].queryset = contributors_list
+                form.fields['video_user'].queryset = contributors_list
+
     else:
     	contributors_list = User.objects.filter(id__in = active_contributor_list(lang_qs))
     	# This will show all contributors under the language manager
