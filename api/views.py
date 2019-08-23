@@ -5,6 +5,7 @@ from rest_framework.parsers import JSONParser
 from creation.models import TutorialResource, TutorialDetail, FossSuperCategory, FossCategory
 from api.serializers import VideoSerializer, CategorySerializer, FossSerializer
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Count, F
 
 
 @csrf_exempt
@@ -70,7 +71,9 @@ def get_fosslist(request, catid):
     Retrieve, fosslist based on category.
     """
     try:
-        fosses = FossCategory.objects.filter(status=1, show_on_homepage=1, category=catid)
+        fosses = FossCategory.objects.filter(
+            status=1, show_on_homepage=1, category=catid).values(
+            'id','foss','description').annotate(tcount=Count('tutorialdetail'))
     except ObjectDoesNotExist:
         return HttpResponse(status=404)
 
