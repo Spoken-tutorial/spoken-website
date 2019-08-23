@@ -316,36 +316,6 @@
   </div>
   </div>
 {% endblock %}
-{% block pager %}
-                                {% if collection.paginator.num_pages > 1 %}
-                                    <ul class="pagination pull-right">
-                                        {% if collection %}
-                                            {% if collection.has_previous %}
-                                                <li><a href="?{{ request.POST|combine_get_values }}page=1">&laquo; <small>First</small></a></li>
-                                                <li><a href="?{{ request.POST|combine_get_values }}page={{ collection.previous_page_number }}">&laquo; <small>Prev</small></a></li>
-                                            {% else %} 
-                                                <li class="disabled"><a href="#">&laquo;</a></li>
-                                            {% endif %}
-                                            {% for num in collection.paginator.page_range|paginator_page_cutter:collection.number %}
-                                                {% ifequal num collection.number %} 
-                                                    <li class="active"><a href="#">{{ num }}<span class="sr-only">(current)</span></a></li>
-                                                {% else %} 
-                                                    <li><a href="?{{ request.POST|combine_get_values }}page={{ num }}">{{ num }}</a></li>
-                                                {% endifequal %} 
-                                            {% endfor %} 
-                                            {% if collection.has_next %} 
-                                                <li><a href="?{{ request.POST|combine_get_values }}page={{ collection.next_page_number }}"><small>Next</small> &raquo;</a></li>
-                                                {% if collection.paginator.page_range|length > 10 %}
-                                                    <li><a href="?{{ request.POST|combine_get_values }}page={{ collection.paginator.num_pages }}"><small>Last</small> &raquo;</a></li>
-                                                {% endif %}
-                                            {% else %} 
-                                                <li class="disabled"><a href="#">&raquo;</a></li>
-                                                <li class="disabled"><a href="?{{ request.POST|combine_get_values }}page={{ collection.paginator.num_pages }}"><small>Last</small> &raquo;</a></li>
-                                            {% endif %}
-                                        {% endif %}
-                                    <ul>
-                                {% endif %}
-                            {% endblock %} 
 {% block compressjsblock %}
     <script src="{% static 'spoken/js/events.js' %}"></script>
     <script src="{% static 'spoken/js/jquery.datetimepicker.js' %}"></script>

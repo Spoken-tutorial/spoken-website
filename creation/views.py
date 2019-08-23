@@ -815,7 +815,7 @@ def upload_outline(request, trid):
         if publish:
             status = 1
         tr_rec = TutorialResource.objects.get(pk = trid, status = status)
-        ContributorRole.objects.get(user_id = request.user.id, foss_category_id = tr_rec.tutorial_detail.foss_id, language_id = tr_rec.language_id, status = 1)
+        ContributorRole.objects.get(user_id = request.user.id, tutorial_detail_id = tr_rec.tutorial_detail, language_id = tr_rec.language_id, status = 1)
     except Exception as e:
         raise PermissionDenied()
     if not publish and tr_rec.outline_status > 2 and tr_rec.outline_status != 5:
@@ -870,7 +870,7 @@ def upload_script(request, trid):
     tr_rec = None
     try:
         tr_rec = TutorialResource.objects.get(pk = trid, status = 0)
-        ContributorRole.objects.get(user_id = request.user.id, foss_category_id = tr_rec.tutorial_detail.foss_id, language_id = tr_rec.language_id, status = 1)
+        ContributorRole.objects.get(user_id = request.user.id, tutorial_detail_id = tr_rec.tutorial_detail, language_id = tr_rec.language_id, status = 1)
     except Exception as e:
         raise PermissionDenied()
     if tr_rec.script_status > 2 and tr_rec.script_status != 5:
@@ -1005,7 +1005,7 @@ def upload_prerequisite(request, trid):
     tr_rec = None
     try:
         tr_rec = TutorialResource.objects.get(pk = trid, status = 0)
-        ContributorRole.objects.get(user_id = request.user.id, foss_category_id = tr_rec.tutorial_detail.foss_id, language_id = tr_rec.language_id, status = 1)
+        ContributorRole.objects.get(user_id = request.user.id, tutorial_detail_id = tr_rec.tutorial_detail, language_id = tr_rec.language_id, status = 1)
     except Exception as e:
         raise PermissionDenied()
     if tr_rec.common_content.prerequisite_status > 2 and tr_rec.common_content.prerequisite_status != 5:
@@ -1055,7 +1055,7 @@ def upload_keywords(request, trid):
     tr_rec = None
     try:
         tr_rec = TutorialResource.objects.get(pk = trid, status = 0)
-        ContributorRole.objects.get(user_id = request.user.id, foss_category_id = tr_rec.tutorial_detail.foss_id, language_id = tr_rec.language_id, status = 1)
+        ContributorRole.objects.get(user_id = request.user.id, tutorial_detail_id = tr_rec.tutorial_detail, language_id = tr_rec.language_id, status = 1)
     except Exception as e:
         raise PermissionDenied()
     if tr_rec.common_content.keyword_status > 2 and tr_rec.common_content.keyword_status != 5:
@@ -1269,7 +1269,7 @@ def mark_notrequired(request, trid, tcid, component):
     tcc = None
     try:
         tr_rec = TutorialResource.objects.get(pk = trid, status = 0)
-        ContributorRole.objects.get(user_id = request.user.id, foss_category_id = tr_rec.tutorial_detail.foss_id, language_id = tr_rec.language_id, status = 1)
+        ContributorRole.objects.get(user_id = request.user.id, tutorial_detail_id = tr_rec.tutorial_detail, language_id = tr_rec.language_id, status = 1)
     except Exception as e:
         raise PermissionDenied()
     try:
@@ -3407,7 +3407,7 @@ def allocate_tutorial(request, sel_status, role):
     
     if sel_status in ('available','ongoing'):
         bid_count = tutorials.qs.count()
-        context['bid_count__count'] = tutorials.qs.count()
+        context['bid_count__count'] = bid_count
     
     try:    
         if sel_status == 'completed':
@@ -3460,18 +3460,14 @@ def allocate_tutorial(request, sel_status, role):
     context['form'] = form
 
     # Pagination
-
     paginator = Paginator(tutorials.qs, 50)
-    try:
-        page = int(request.GET.get('page', '1'))
-    except (EmptyPage, PageNotAnInteger):
-        page = int(request.GET.get('page'))
-
+    page = request.GET.get('page')
     try:
         posts = paginator.page(page)
-    except (EmptyPage, PageNotAnInteger):
+    except PageNotAnInteger:
+        posts = paginator.page(1)
+    except EmptyPage:
         posts = paginator.page(paginator.num_pages)
-
     context['collection'] = posts
     context['header'] = header
     context['ordering'] = ordering
