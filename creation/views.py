@@ -3987,8 +3987,8 @@ def get_languages(request, uid):
 
     lang_qs = \
         Language.objects.filter(id__in = RoleRequest.objects.filter(
-            user_id = uid,status = 1,role_type = ROLES_DICT['contributor']).exclude(language_id = 22).values('language'
-                                                                                                              )).values_list('id', 'name')
+            user_id = uid,status = 1,role_type = ROLES_DICT['contributor']
+            ).values('language')).values_list('id', 'name')
     for a_lang in lang_qs:
         data += '<option value = ' + str(a_lang[0]) + '>' \
             + str(a_lang[1]) + '</option>'
@@ -4002,7 +4002,7 @@ def get_domain_languages(request, uid):
     lang_qs = \
         Language.objects.filter(id__in = RoleRequest.objects.filter(
             user_id = uid,status = 1,role_type = ROLES_DICT['domain-reviewer']
-            ).exclude(language_id = 22).values('language')).values_list('id', 'name')
+            ).values('language')).values_list('id', 'name')
         
     for a_lang in lang_qs:
         data += '<option value = ' + str(a_lang[0]) + '>' \
@@ -4017,7 +4017,7 @@ def get_quality_languages(request, uid):
     lang_qs = \
         Language.objects.filter(id__in = RoleRequest.objects.filter(
             user_id = uid,status = 1,role_type = ROLES_DICT['quality-reviewer']
-            ).exclude(language_id = 22).values('language')).values_list('id', 'name')
+            ).values('language')).values_list('id', 'name')
 
     for a_lang in lang_qs:
         data += '<option value = ' + str(a_lang[0]) + '>' \
@@ -4029,10 +4029,13 @@ def get_quality_languages(request, uid):
 def get_tutorials(request, fid, lang):
     level = {1: '(B)', 2: '(I)', 3: '(A)'}
     data = '<option> --- Select a Tutorial ---  </option>'
-    tuto_available = \
-        TutorialsAvailable.objects.filter(language=lang, 
-            tutorial_detail_id__in = TutorialDetail.objects.filter(
-                foss_id = int(fid)).values('id')
+    if int(lang) == 22:
+        tuto_available = TutorialDetail.objects.filter(
+            foss_id=fid).values_list('id','tutorial','level').order_by('level')
+    else:
+        tuto_available = TutorialsAvailable.objects.filter(
+            language=lang, tutorial_detail_id__in = TutorialDetail.objects.filter(
+            foss_id = int(fid)).order_by('level').values('id')
             ).distinct().values_list('tutorial_detail_id',
             'tutorial_detail_id__tutorial', 'tutorial_detail__level')
 
