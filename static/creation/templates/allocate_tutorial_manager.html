@@ -9,7 +9,15 @@
     <link rel="stylesheet" href="{% static 'spoken/css/jquery.datetimepicker.css' %}" type="text/css" media="screen" charset="utf-8" />
 {% endblock %}
 
-{% block heading %} <i class="fa fa-list-ul"></i> Language Manager - Bidding Interface {% endblock %}
+{% block heading %}
+<i class="fa fa-list-ul"></i>
+{% if is_administrator %}
+  Administrator - Bidding Interface 
+{%else%}
+  Language Manager - Bidding Interface 
+{%endif%}
+ {% endblock %}
+
 {% block search %}{% endblock %}
 {% block content %}
 

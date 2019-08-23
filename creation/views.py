@@ -3293,7 +3293,8 @@ def allocate_tutorial(request, sel_status, role):
     global_req = request
     user = User.objects.get(id = request.user.id)
     if not (user.is_authenticated() and 
-        (is_contributor(user) or is_language_manager(request.user))):
+        (is_contributor(user) or is_language_manager(request.user)
+            or is_administrator(request.user))):
         raise PermissionDenied()
 
     active = sel_status
@@ -3476,11 +3477,11 @@ def allocate_tutorial(request, sel_status, role):
     context['ordering'] = ordering
     context['status'] = active
     context['counter'] = itertools.count(1)
-
+    context['is_administrator'] = is_administrator(request.user)
   
     context.update(csrf(request))
     if role == 'language_manager':
-	    if is_language_manager(request.user):
+	    if is_language_manager(request.user) or is_administrator(request.user):
 	        return render(request,
 	                      'creation/templates/allocate_tutorial_manager.html', context)
     elif role == 'contributor':
@@ -3521,10 +3522,10 @@ def update_contributors(request):
             video_user_id = request.POST.get('video_user')
             tutorial_resource = TutorialResource.objects.get(id = tutorial_resource_id)            
             
-            script_user_foss_count = no_of_foss_gt_3(request,
+            script_user_foss_count = no_of_foss_gt_4(request,
                 script_user_id, tutorial_resource.tutorial_detail_id, tutorial_resource.language.id)
             
-            video_user_foss_count = no_of_foss_gt_3(request,
+            video_user_foss_count = no_of_foss_gt_4(request,
                 video_user_id, tutorial_resource.tutorial_detail_id, tutorial_resource.language.id)
             script_user_bid_count = TutorialResource.objects.filter(script_user_id = script_user_id,
             assignment_status = ASSIGNMENT_STATUS_DICT['assigned'] , status = UNPUBLISHED)
@@ -3633,22 +3634,23 @@ def add_to_tutorials_available(tutorial,language):
 
 UNPUBLISHED = 0 
 
-def no_of_foss_gt_3( request ,user, foss_or_tut_id, language_id):
+def no_of_foss_gt_4( request ,user, foss_or_tut_id, language_id):
     
     this_tut = TutorialDetail.objects.get(id = foss_or_tut_id)
     foss_id = this_tut.foss.id
     # To give language manager the privileges to assign any no of foss
-    if is_administrator:
+    if is_administrator(request.user):
         return False
     else:
         all_foss = TutorialResource.objects.filter(
             Q(script_user_id = user) | Q(video_user_id = user),
-            status = UNPUBLISHED, assignment_status = ASSIGNMENT_STATUS_DICT['assigned']
-            ).values('tutorial_detail__foss','language_id')
+            language_id = int(language_id),status = UNPUBLISHED,
+            assignment_status = ASSIGNMENT_STATUS_DICT['assigned']
+            ).values('tutorial_detail__foss','language_id').distinct()
         list_count = list({(int(v['tutorial_detail__foss']),int(v['language_id'])) for v in all_foss})
         if (int(foss_id),int(language_id)) not in list_count:
-            if len(list_count) >= 3:
-                messages.error(request, 'Maximum of 3 FOSSes allowed per user')        
+            if len(list_count) >= 4:
+                messages.error(request, 'Maximum of 4 FOSSes allowed per user')        
                 return True
             return False
         return False
@@ -3766,7 +3768,7 @@ def single_tutorial_allocater(request, tut, lid, days, user):
     if tutorialsavailableobj.exists():
         tutorialsavailableobj.delete()
     else:
-        # The only purpose over here is to remove from available tutorials
+        # The only purpose over here is to remove from available tutorials if it exists
         pass
 
     for tutorial in tutorial_resource:
@@ -3832,7 +3834,7 @@ def allocate(request, tdid, lid, uid, days):
     
     try:
         final_query =  TutorialsAvailable.objects.get(tutorial_detail_id = tut.id,language = lid)
-        if not no_of_foss_gt_3(request,uid, tdid, lid):
+        if not no_of_foss_gt_4(request,uid, tdid, lid):
             all_lower_tutorials = TutorialDetail.objects.filter(foss_id = final_query.tutorial_detail.foss_id,
                 level_id = final_query.tutorial_detail.level_id - 1).values('id')
             lower_tutorial_level = TutorialsAvailable.objects.filter(tutorial_detail_id__in = all_lower_tutorials , 
