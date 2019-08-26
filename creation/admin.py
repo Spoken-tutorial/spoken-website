@@ -56,6 +56,8 @@ class FossCategoryAdmin(admin.ModelAdmin):
     mark_foss_pending.short_description = "Mark selected FOSS categories as pending"
     actions = [mark_foss_completed, mark_foss_pending]
 
+    class Media:
+        js = ('admin/js/update_tutorials.js',)
 
 class BrochurePageInline(admin.TabularInline):
     model = BrochurePage

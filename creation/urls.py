@@ -76,6 +76,7 @@ urlpatterns = [
     url(r'^ajax-manual-language/$',  ajax_manual_language, name="ajax_manual_language"),
     url(r'^ajax-get-tutorials/$',  ajax_get_tutorials, name="ajax_get_tutorials"),
     url(r'^update-common-component/$', update_common_component, name="update_common_component"),
+    url(r'^update_tutorials/$',  update_tutorials, name="update_tutorials"),
 
     # Common to Domain & Admin reviewer parts
     url(r'^accept-all/(\w+)/(\d+)/$',  accept_all, name="accept_all"),
