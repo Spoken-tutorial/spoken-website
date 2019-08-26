@@ -26,11 +26,14 @@ stage ('Stage Checkout'){
     
    stage('test')
      {
-      sh "./test.sh"  
-      sh "./selen.sh"
+      sh "./tests.sh"  
+//      sh "./selen.sh"
      }
    
-    
+  stage('deploy')
+     {
+      sh "./deploy.sh"   
+       }  
   
   //branch name from Jenkins environment variables
   // echo "My branch is: ${env.BRANCH_NAME}"
