@@ -242,7 +242,7 @@ class ContributorRole(models.Model):
     updated = models.DateTimeField(auto_now=True)
 
     def revoke(self):
-        self.status = 2
+        self.status = 0
         self.save()
 
     class Meta(object):
@@ -260,7 +260,7 @@ class DomainReviewerRole(models.Model):
     updated = models.DateTimeField(auto_now=True)
 
     def revoke(self):
-        self.status = 2
+        self.status = 0
         self.save()
 
     class Meta:
@@ -277,7 +277,7 @@ class QualityReviewerRole(models.Model):
     updated = models.DateTimeField(auto_now=True)
 
     def revoke(self):
-        self.status = 2
+        self.status = 0
         self.save()
         
     class Meta:

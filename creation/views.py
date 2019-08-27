@@ -193,7 +193,7 @@ def add_adminreviewer_notification(tr_rec, comp_title, message):
         AdminReviewerNotification.objects.create(user = user, title = comp_title, message = message, tutorial_resource = tr_rec)
 
 def add_contributor_notification(tr_rec, comp_title, message):
-    con_roles = ContributorRole.objects.filter(tutorial_detail__foss_id = tr_rec.tutorial_detail.foss, language = tr_rec.language, status = 1)
+    con_roles = ContributorRole.objects.filter(tutorial_detail = tr_rec.tutorial_detail, language = tr_rec.language, status = 1)
 
     for con in con_roles:
         ContributorNotification.objects.create(user = con.user, title = comp_title, message = message, tutorial_resource = tr_rec)
@@ -367,7 +367,9 @@ def creation_revoke_role_request(request, role_type,languages):
                 if role_rec.role_type != ROLES_DICT['video-reviewer']:
                     if role_rec.role_type == ROLES_DICT['contributor'] or role_rec.role_type == ROLES_DICT['external-contributor']:
                         try:
-                            ContributorRole.objects.get(user = role_rec.user, language_id = a_language).revoke()
+                            contrib_roles=ContributorRole.objects.filter(user = role_rec.user, language_id = a_language)
+                            for role in contrib_roles:
+                                role.revoke()
                         except ContributorRole.DoesNotExist:
                             # The user has not Contributed anything
                             pass                        
@@ -3686,6 +3688,8 @@ def add_tutorial_contributor_notification(user_id, tuto_resource_id, message_typ
         message = "Submission date is :"+str(datetime.date(tutorial_resource.submissiondate))
     elif message_type == 'revoke':
         message = "The tutorial is revoked from you"
+    elif message_type == 'extend':
+        message = "Submission date is extended to :"+str(datetime.date(tutorial_resource.submissiondate))
     
     try:    
 
@@ -3693,7 +3697,7 @@ def add_tutorial_contributor_notification(user_id, tuto_resource_id, message_typ
             user_id = user_id , tutorial_resource = tutorial_resource )
 
         if contributor_notification.exists():
-            contributor_notification.update(message = message)
+            contributor_notification.update(message = message, created = datetime.now())
         else:    
             ContributorNotification.objects.create(user_id = user_id , title = comp_title,
                 message = message , tutorial_resource_id = tutorial_resource.id)    
@@ -3877,6 +3881,10 @@ def extend_submission_date(request):
                 datetime.date(datetime.now() + timedelta(days = 3))
             tutorial_resource.extension_status += 1
             tutorial_resource.save()
+            add_tutorial_contributor_notification(tutorial_resource.script_user_id,
+                tutorial_resource.id, 'extend')
+            add_tutorial_contributor_notification(tutorial_resource.video_user_id,
+                tutorial_resource.id, 'extend')
             messages.success(request,'Extended')
     except TutorialResource.DoesNotExist:
         # Here the error can only occur when the tutorial resource entry is not found.
