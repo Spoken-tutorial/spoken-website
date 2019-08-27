@@ -48,10 +48,10 @@ class Command(BaseCommand):
                 'language_id','language__name').distinct()
         domain_roles = \
             DomainReviewerRole.objects.filter(status=1).values('user_id','user__username'
-                , 'language_id').distinct()
+                , 'language_id','language__name').distinct()
         quality_roles = \
             QualityReviewerRole.objects.filter(status=1).values('user_id','user__username'
-                , 'language_id').distinct()
+                , 'language_id','language__name').distinct()
 
         for quality_reviewer in quality_roles:
             role_request = \
