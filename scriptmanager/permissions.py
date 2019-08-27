@@ -1,7 +1,7 @@
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from creation.views import is_domainreviewer, is_qualityreviewer
 
-class ViewScriptPermission(IsAuthenticatedOrReadOnly):
+class ScriptOwnerPermission(IsAuthenticatedOrReadOnly):
   def has_object_permission(self, request, view, obj):
     user = request.user
     
