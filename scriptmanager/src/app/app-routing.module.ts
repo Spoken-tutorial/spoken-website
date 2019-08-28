@@ -7,6 +7,7 @@ import { ScriptViewComponent } from './script/script-view/script-view.component'
 import { ScriptRevisionComponent } from './script/script-revision/script-revision.component';
 import {ScriptUploadComponent } from './script/script-upload/script-upload.component'
 import { AuthGuard } from './_guards/auth.guard';
+import { PublishedScriptsComponent } from './home/published-scripts/published-scripts.component';
 const routes: Routes = [
   {
     path: '',
@@ -60,6 +61,15 @@ const routes: Routes = [
     canActivate: [AuthGuard],
     data: {
       title: 'Revisions',
+      animation: 'HomePage'
+    }
+  },
+  {
+    path: 'published',
+    component: PublishedScriptsComponent,
+    canActivate: [AuthGuard],
+    data: {
+      title: 'Published Scripts',
       animation: 'HomePage'
     }
   }

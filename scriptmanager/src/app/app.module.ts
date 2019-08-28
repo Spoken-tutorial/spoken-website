@@ -27,6 +27,7 @@ import { QuillModule } from 'ngx-quill';
 import { BadgeButtonComponent } from './badge-button/badge-button.component'
 import { AuthGuard } from './_guards/auth.guard';
 import { ErrorInterceptor } from './_interceptors/error.interceptor';
+import { PublishedScriptsComponent } from './home/published-scripts/published-scripts.component';
 
 // since we are saving the JWT token for authentication in the local storage 
 // , here we get that token to send it with each api call to authenticate with the server
@@ -49,6 +50,7 @@ export function tokenGetter() {
     ScriptRevisionComponent,
     ScriptUploadComponent,
     BadgeButtonComponent,
+    PublishedScriptsComponent,
   ],
   imports: [
     BrowserModule,

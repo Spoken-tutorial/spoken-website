@@ -84,4 +84,12 @@ export class CreateScriptService {
     );
   }
 
+  public getPublishedScripts() {
+    const _url = `${this.apiUrl}/scripts/published/`;
+
+    return this.http.get(
+      _url
+    );
+  }
+
 }
