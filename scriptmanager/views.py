@@ -17,7 +17,7 @@ import time
 from creation.views import is_videoreviewer,is_domainreviewer,is_qualityreviewer
 import uuid
 import subprocess 
-from .permissions import ScriptOwnerPermission
+from .permissions import ScriptOwnerPermission, PublishedScriptPermission
 
 def custom_jwt_payload_handler(user):
   payload = default_jwt_payload_handler(user)
@@ -219,7 +219,7 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
     except:
       return Response({'message': 'Failed to change status'}, status = 400) 
 
-class ScriptAPIView(generics.ListAPIView):
+class ScriptDetailAPIView(generics.ListAPIView):
   permission_classes = [ScriptOwnerPermission]
 
   def patch(self,request,tid,lid,script_detail_id):
@@ -251,6 +251,18 @@ class ScriptAPIView(generics.ListAPIView):
       return Response({'status': True},status = 202) 
     except:
       return Response({'status': False},status = 400) 
+
+class PublishedScriptAPI(APIView):
+  permission_classes = [PublishedScriptPermission]
+
+  def get(self, request):
+    scripts = Script.objects.filter(status=True)
+    tutorials = []
+
+    for script in scripts:
+      tutorials.append(TutorialDetailSerializer(script.tutorial, context={'lang': script.language.id, 'user': request.user}).data)
+
+    return Response({ 'data': tutorials })
 
 class RelativeOrderingAPI(generics.ListAPIView):
   permission_classes = [ScriptOwnerPermission]
