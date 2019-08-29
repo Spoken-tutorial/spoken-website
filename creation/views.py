@@ -3430,13 +3430,15 @@ def allocate_tutorial(request, sel_status, role):
 
     
     form = tutorials.form
-    
     if lang_qs:
         form.fields['language'].queryset = lang_qs    
-
+    
     if request.method == 'POST':
         language_id = request.POST.get('language')
-        if language_id:
+        script_user = request.POST.get('script_user')
+        video_user = request.POST.get('video_user')
+        context['foss_list'] = foss_list(script_user, video_user, language_id)
+        if language_id:            
             contributors_list = User.objects.filter(id__in = active_contributor_list([int(language_id)]))
             rated_contributors = ContributorRating.objects.filter(rating__gt = 0,
                 language_id = language_id, user_id__in = contributors_list
@@ -3487,6 +3489,29 @@ def allocate_tutorial(request, sel_status, role):
         return render(request,
                       'creation/templates/allocate_tutorial.html',
                       context)
+def foss_list(script_user,video_user, language_id):
+    foss_list = TutorialResource.objects.none()
+    if script_user and video_user:
+        foss_list = TutorialResource.objects.filter(
+            script_user_id = script_user, video_user_id = video_user,
+            status = UNPUBLISHED,
+            assignment_status = ASSIGNMENT_STATUS_DICT['assigned']
+            )
+    elif script_user:
+        foss_list = TutorialResource.objects.filter(
+            script_user_id = script_user, status = UNPUBLISHED,
+            assignment_status = ASSIGNMENT_STATUS_DICT['assigned']
+            )
+    elif video_user:
+        foss_list = TutorialResource.objects.filter(
+            video_user_id = video_user,status = UNPUBLISHED,
+            assignment_status = ASSIGNMENT_STATUS_DICT['assigned']
+            )
+    if language_id :
+        foss_list=foss_list.filter(language_id = int(language_id))
+    return foss_list.exclude(language_id=22
+        ).order_by('language_id').values('tutorial_detail__foss__foss','language__name').distinct()
+
 
 def active_contributor_list(language_id):
     contributors_updated = RoleRequest.objects.filter(
@@ -3647,7 +3672,7 @@ def no_of_foss_gt_4(request ,user, tut_id, language_id):
             assignment_status = ASSIGNMENT_STATUS_DICT['assigned']
             )
         list_count = all_foss.values('tutorial_detail__foss','language_id').distinct().count()
-        check = all_foss.filter(tutorial_detail__foss_id=foss_id, language_id=language_id)
+        check = all_foss.filter(tutorial_detail__foss_id=foss_id, language_id=language_id).exists()
         if check:
             return False
         else:

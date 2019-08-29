@@ -104,6 +104,14 @@
                   
                 </div>
               </div>
+        </table>
+        <table class="table table-bordered table-hover span6" style="margin-bottom:2px;">
+          {% for foss in foss_list %}
+          <tr>
+            <td><span title="Allocated Fosses">{{foss.tutorial_detail__foss__foss}}</span></td>
+            <td><span title="Allocated Fosses">{{foss.language__name}}</span></td>
+        </tr>
+          {% endfor%}
         </table>    
       </div>
       
