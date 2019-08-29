@@ -3633,9 +3633,9 @@ def add_to_tutorials_available(tutorial,language):
 
 UNPUBLISHED = 0 
 
-def no_of_foss_gt_4( request ,user, foss_or_tut_id, language_id):
+def no_of_foss_gt_4(request ,user, tut_id, language_id):
     
-    this_tut = TutorialDetail.objects.get(id = foss_or_tut_id)
+    this_tut = TutorialDetail.objects.get(id = tut_id)
     foss_id = this_tut.foss.id
     # To give language manager the privileges to assign any no of foss
     if is_administrator(request.user):
@@ -3645,10 +3645,13 @@ def no_of_foss_gt_4( request ,user, foss_or_tut_id, language_id):
             Q(script_user_id = user) | Q(video_user_id = user),
             language_id = int(language_id),status = UNPUBLISHED,
             assignment_status = ASSIGNMENT_STATUS_DICT['assigned']
-            ).values('tutorial_detail__foss','language_id').distinct()
-        list_count = list({(int(v['tutorial_detail__foss']),int(v['language_id'])) for v in all_foss})
-        if (int(foss_id),int(language_id)) not in list_count:
-            if len(list_count) >= 4:
+            )
+        list_count = all_foss.values('tutorial_detail__foss','language_id').distinct().count()
+        check = all_foss.filter(tutorial_detail__foss_id=foss_id, language_id=language_id)
+        if check:
+            return False
+        else:
+            if list_count >= 4:
                 messages.error(request, 'Maximum of 4 FOSSes allowed per user')        
                 return True
             return False
