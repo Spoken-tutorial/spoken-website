@@ -21,7 +21,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group
- 
+
 from django.core.exceptions import PermissionDenied
 from django.core.mail import EmailMultiAlternatives
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
@@ -2133,7 +2133,7 @@ def publish_tutorial(request, trid):
     else:
         flag = 1
     if flag and tr_rec.outline_status == 4 and tr_rec.script_status == 4 and tr_rec.video_status == 4:
-        tr_rec.status = 1 
+        tr_rec.status = 1
         tr_rec.publish_at = timezone.now()
         tr_rec.save()
         PublishTutorialLog.objects.create(user = request.user, tutorial_resource = tr_rec)
@@ -2812,7 +2812,7 @@ def update_assignment(request):
                 file_name, file_extension = os.path.splitext(request.FILES['comp'].name)
                 file_name =  tutorial.tutorial.replace(' ', '-') + '-Assignment' + file_extension
                 file_path = settings.MEDIA_ROOT + 'videos/' + str(foss_id) + '/' + str(tutorial_detail_id) + '/resources/' + file_name
-            
+
                 fout = open(file_path, 'wb+')
                 f = request.FILES['comp']
                 # Iterate through the chunks.
@@ -2864,7 +2864,7 @@ def list_all_published_tutorials(request):
     payment_summary = tr_pub.values('script_user', 'script_user__first_name', 'script_user__last_name').annotate(published_tuorial = Count('script_user'))
     tr_pub_count = tr_pub.count() # counting number of tutorial published
     payment_summary_count = payment_summary.count() # number of contributors
-    
+
     tr_pub = tr_pub.order_by('-publish_at') # ordering latest first
     #pagination
     page = request.GET.get('page')
@@ -2938,7 +2938,7 @@ def create_payment_instance(request, tr_res):
     Input -> TutorialResourceObject
     Do -> Create TutorialPayment objects
     '''
-    # getting video time 
+    # getting video time
     tr_video_path = settings.MEDIA_ROOT + "videos/" + str(tr_res.tutorial_detail.foss_id) + "/" + str(tr_res.tutorial_detail_id) + "/" + tr_res.video
     tr_video_info = get_video_info(tr_video_path)
     tr_video_duration = tr_video_info.get('total',0)
@@ -2996,7 +2996,9 @@ def initiate_payment(request):
         contributor = str(user.first_name+" "+user.last_name)
         foss = tr_pay.tutorial_resource.tutorial_detail.foss.foss
         manager = request.user.first_name+" "+request.user.last_name # currrent logged in user - manager
+        email = user.email
         generate_honorarium_receipt(honorarium.code, contributor, foss, honorarium.amount, manager, tutorials)
+        generate_contributor_receipt(honorarium.code, contributor, foss, honorarium.amount, email, tutorials)
         messages.success(request,"Payment Honorarium (#"+str(honorarium.code)+") worth Rs. \
             "+str(amount)+" for contributor "+user.first_name+" "+user.last_name+" initiated for \
             "+str(len(tr_pay_ids))+" tutorials")
@@ -3033,12 +3035,12 @@ def list_payment_honorarium(request):
                 messages.success(request,'Payment Honorarium (#'+str(honorarium.code)+') worth Rs. '+str(honorarium.amount)+' '+msg_end)
                 honorarium.save()
             except Exception as e:
-                messages.warning(request, "Something went wrong. Couldn't complete your request")  
+                messages.warning(request, "Something went wrong. Couldn't complete your request")
             # to avoid form resubmission
             return HttpResponseRedirect(reverse('creation:payment_honorarium_list'))
 
     honorariums = PaymentHonorarium.objects.order_by('status','-updated')
-    # filtering honorarium result         
+    # filtering honorarium result
     form = PaymentHonorariumFilterForm(request.GET)
     if request.method == "GET":
         if form.is_valid():
@@ -3166,7 +3168,7 @@ def generate_honorarium_receipt(code, contributor, foss, amount, manager, tutori
             row_cells[1].text = tut[0]
             row_cells[2].text = tut[1]
             row_cells[2].paragraphs[0].paragraph_format.alignment=WD_ALIGN_PARAGRAPH.CENTER
-            
+
     for paragraph in doc.paragraphs:
         if '{{date}}' in paragraph.text:
             curr_dt = datetime.datetime.now()
@@ -3191,6 +3193,49 @@ def generate_honorarium_receipt(code, contributor, foss, amount, manager, tutori
     doc.save('media/hr-receipts/'+code+'.docx')
 
 
+def generate_contributor_receipt(code, contributor, foss, amount, email, tutorials):
+    """
+        Generates honorarium receipts in docx format based on existing template using python-docx 0.8.6 ( https://python-docx.readthedocs.io/en/stable/ )
+    """
+    doc = Document('media/hr-receipts/contributor-receipt-template.docx')
+    tutorials_comma_separted = ''
+    total_time = 0
+    # for table in doc.tables:
+    #     for row in table.rows:
+    #         for cell in row.cells:
+    #             print(cell.text)
+    for tut in tutorials:
+        tutorials_comma_separted=tutorials_comma_separted+str(tut[0])+','
+        #total_time+=int(tut[1])
+    cell01 = table.cell(0, 1)
+    cell01.text = contributor
+    cell11 = table.cell(1,1)
+    
+    
+    cell11.text = foss +'\n' + tutorials_comma_separted
+    #cell12 = table.cell(0,2)
+    # cell12.text = total_time
+    cell31 =table.cell(3,1)
+    cell31.text = email
+
+    for paragraph in doc.paragraphs:        
+        if '{{date}}' in paragraph.text:
+            curr_dt = datetime.datetime.now()
+            formated_dt =  curr_dt.strftime("%d %B, %Y") # 01 January, 2018
+            paragraph.text = ""
+            paragraph.add_run("Date : ")
+            paragraph.add_run(formated_dt)
+
+        if '{{amount}}' in paragraph.text:
+            paragraph.text = ""
+            paragraph.add_run("Received")
+            paragraph.add_run("Rs. "+str(amount)+" /-").bold = True
+            paragraph.add_run(" (Rupees "+money_as_text(amount) +" )")
+            paragraph.add_run(" as an honorarium for the contribution towards making Spoken Tutorial for Spoken Tutorial Project, part of Talk to a Teacher Project, funded by NMEICT, MHRD, Government of India. ")
+
+    doc.save('media/hr-receipts/'+code+'receipt-sa.docx')
+
+
 def update_codefiles(request):
     if not is_administrator(request.user):
         raise PermissionDenied()
@@ -3207,7 +3252,7 @@ def update_codefiles(request):
                 file_name, file_extension = os.path.splitext(request.FILES['comp'].name)
                 file_name =  tutorial.tutorial.replace(' ', '-') + '-Codefiles' + file_extension
                 file_path = settings.MEDIA_ROOT + 'videos/' + str(foss_id) + '/' + str(tutorial_detail_id) + '/resources/' + file_name
-            
+
                 fout = open(file_path, 'wb+')
                 f = request.FILES['comp']
                 # Iterate through the chunks.
@@ -3253,7 +3298,7 @@ def update_common_component(request):
                 file_name, file_extension = os.path.splitext(request.FILES['comp'].name)
                 file_name =  tutorial.tutorial.replace(' ', '-') + '-'+common_comp + file_extension
                 file_path = settings.MEDIA_ROOT + 'videos/' + str(foss_id) + '/' + str(tutorial_detail_id) + '/resources/' + file_name
-            
+
                 fout = open(file_path, 'wb+')
                 f = request.FILES['comp']
                 # Iterate through the chunks.
