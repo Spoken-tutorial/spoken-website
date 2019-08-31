@@ -19,3 +19,11 @@ class PublishedScriptPermission(IsAuthenticatedOrReadOnly):
     if (user.is_anonymous()): return False
 
     return is_domainreviewer(user) or is_qualityreviewer(user) or obj.user == user
+
+class ReviewScriptPermission(IsAuthenticatedOrReadOnly):
+  def has_object_permission(self, request, view, obj):
+    user = request.user
+
+    if (user.is_anonymous()): return False
+
+    return is_domainreviewer(user) or is_qualityreviewer(user)
