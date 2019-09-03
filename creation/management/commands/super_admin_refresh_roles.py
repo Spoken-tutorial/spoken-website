@@ -1,7 +1,7 @@
 # Code to add publish date in tutorialresource table
 # To run this file please follow below instructions:
 # 1. Go to project directory
-# 2. run "python manage.py refresh"
+# 2. run "python manage.py super_admin_refresh_roles"
 
 from __future__ import absolute_import, print_function, unicode_literals
 
@@ -43,7 +43,6 @@ class Command(BaseCommand):
             super_admin_contributor_languages = RoleRequest.objects.filter(role_type = 0,
                 user_id=SUPER_ADMIN_USER_ID, status = STATUS_DICT['active'], language_id__isnull= False).values(
                 'language').distinct()
-            print ("super_admin_contributor_languages",super_admin_contributor_languages)
             tutorial_resource = TutorialResource.objects.filter(
                 language_id__in = super_admin_contributor_languages)
             count = 0            
@@ -52,21 +51,17 @@ class Command(BaseCommand):
                     user_id = SUPER_ADMIN_USER_ID, language_id = tutorial.language,
                     tutorial_detail_id = tutorial.tutorial_detail)
                 if not super_admin_contrib_roles.exists():
-                    print ("tutorial : ",tutorial.tutorial_detail.tutorial)                
-                    print ("language : ",tutorial.language.name)
-                    print ("user_id : ",tutorial.script_user_id)                
-                    print ("status : ",tutorial.status,"\n\n\n")                
                     count +=1
                 
                     add_previous_contributor_role = ContributorRole()
                     add_previous_contributor_role.foss_category_id = tutorial.tutorial_detail.foss_id
                     add_previous_contributor_role.language_id = tutorial.language_id
                     add_previous_contributor_role.user_id = SUPER_ADMIN_USER_ID
-                    add_previous_contributor_role.status = STATUS['active']
+                    add_previous_contributor_role.status = STATUS_DICT['active']
                     add_previous_contributor_role.tutorial_detail_id = tutorial.tutorial_detail_id
                     add_previous_contributor_role.save()
                     
-                print (tutorial.tutorial_detail.foss_id, tutorial.language.name,
+                    print (tutorial.tutorial_detail.foss_id, tutorial.language.name,
                             tutorial.tutorial_detail.tutorial)        
             print("Count :",count)
             print ("Exited")

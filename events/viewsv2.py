@@ -3005,7 +3005,7 @@ def trainingrequest(request, role, status):
   template_name = None
   header = None
   raw_get_data = None
-  now= datetime.now()
+  now= datetime.datetime.now()
   year = now.year
   month =now.month
 
