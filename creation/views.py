@@ -3628,7 +3628,7 @@ PUBLISHED = 1
 def refresh_tutorials(request, tut_resource):
     count = 0
     if tut_resource.language.id == 22 :
-        tutorials = TutorialDetail.objects.filter(
+        tutorials = TutorialDetail.objects.filter(foss__is_translation_allowed = 1,
             id__in = TutorialResource.objects.filter(id = tut_resource.id ,status = PUBLISHED,
             language = 22).values('tutorial_detail').distinct())
         if is_administrator(request.user) or is_qualityreviewer(request.user):
