@@ -47,6 +47,7 @@ class FossCategory(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     show_on_homepage = models.BooleanField(default=True, help_text ='If unchecked, this foss will be displayed on series page, instead of home page' )
+    available_for_nasscom = models.BooleanField(default=True, help_text ='If unchecked, this foss will not be available for nasscom' )
 
     class Meta(object):
         verbose_name = 'FOSS'
