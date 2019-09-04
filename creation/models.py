@@ -521,3 +521,9 @@ class LanguageManager(models.Model):
     class Meta:
         ordering = ('user', 'language')
         unique_together = (('user', 'language'),)
+
+class TutorialDuration(models.Model):
+
+    tutorial = models.ForeignKey(TutorialDetail)
+    duration = models.CharField(max_length=15)
+        
