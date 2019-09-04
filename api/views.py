@@ -73,7 +73,8 @@ def get_fosslist(request):
     """
     fosslist=[]
     if request.method == 'GET':
-        fosses = FossCategory.objects.filter(status=1, show_on_homepage=1).order_by('foss')
+        fosses = FossCategory.objects.filter(
+            status=1, show_on_homepage=1, available_for_nasscom=1).order_by('foss')
         for foss in fosses:
             fossdict={}
             
