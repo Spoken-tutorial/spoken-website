@@ -3143,7 +3143,7 @@ def CertificateRequest(request, role, choice):
   user = request.user
   header = None
   raw_get_data = None
-  now= datetime.now()
+  now= datetime.datetime.now()
   year = now.year
   month =now.month
   roles = ['rp', 'em']
