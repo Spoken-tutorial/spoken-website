@@ -48,7 +48,8 @@ class FossCategory(models.Model):
     category = models.ManyToManyField(FossSuperCategory)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-    show_on_homepage = models.BooleanField(default=True, help_text='If unchecked, this foss will be displayed on series page, instead of home page')
+    show_on_homepage = models.BooleanField(default=True, help_text ='If unchecked, this foss will be displayed on series page, instead of home page' )
+    available_for_nasscom = models.BooleanField(default=True, help_text ='If unchecked, this foss will not be available for nasscom' )
 
     class Meta(object):
         verbose_name = 'FOSS'
@@ -520,3 +521,9 @@ class LanguageManager(models.Model):
     class Meta:
         ordering = ('user', 'language')
         unique_together = (('user', 'language'),)
+
+class TutorialDuration(models.Model):
+
+    tutorial = models.ForeignKey(TutorialDetail)
+    duration = models.CharField(max_length=15)
+        

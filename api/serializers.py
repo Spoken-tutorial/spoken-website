@@ -33,7 +33,6 @@ class CategorySerializer(serializers.ModelSerializer):
 #         fields = ('id', 'foss', 'description','tcount')
 
 class FossSerializer(serializers.Serializer):
-	id = serializers.IntegerField(read_only=True)
-	foss = serializers.CharField(read_only=True)
+	course_id = serializers.IntegerField(read_only=True)
 	description = serializers.CharField(read_only=True)
-	tcount = serializers.IntegerField(read_only=True)
+	duration = serializers.CharField(read_only=True)
