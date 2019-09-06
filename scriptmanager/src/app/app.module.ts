@@ -28,6 +28,7 @@ import { BadgeButtonComponent } from './badge-button/badge-button.component'
 import { AuthGuard } from './_guards/auth.guard';
 import { ErrorInterceptor } from './_interceptors/error.interceptor';
 import { PublishedScriptsComponent } from './home/published-scripts/published-scripts.component';
+import { ReviewScriptsComponent } from './home/review-scripts/review-scripts.component';
 
 // since we are saving the JWT token for authentication in the local storage 
 // , here we get that token to send it with each api call to authenticate with the server
@@ -51,6 +52,7 @@ export function tokenGetter() {
     ScriptUploadComponent,
     BadgeButtonComponent,
     PublishedScriptsComponent,
+    ReviewScriptsComponent,
   ],
   imports: [
     BrowserModule,

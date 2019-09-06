@@ -92,4 +92,12 @@ export class CreateScriptService {
     );
   }
 
+  public getReviewScripts() {
+    const _url = `${this.apiUrl}/scripts/review/`;
+
+    return this.http.get(
+      _url
+    );
+  }
+
 }
