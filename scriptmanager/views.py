@@ -17,7 +17,7 @@ import time
 from creation.views import is_videoreviewer,is_domainreviewer,is_qualityreviewer
 import uuid
 import subprocess 
-from .permissions import ScriptOwnerPermission, PublishedScriptPermission
+from .permissions import ScriptOwnerPermission, PublishedScriptPermission, ReviewScriptPermission
 
 def custom_jwt_payload_handler(user):
   payload = default_jwt_payload_handler(user)
@@ -260,7 +260,27 @@ class PublishedScriptAPI(APIView):
     tutorials = []
 
     for script in scripts:
-      tutorials.append(TutorialDetailSerializer(script.tutorial, context={'lang': script.language.id, 'user': request.user}).data)
+      try:
+        self.check_object_permissions(request, script)
+        tutorials.append(TutorialDetailSerializer(script.tutorial, context={'lang': script.language.id, 'user': request.user}).data)
+      except:
+        pass
+
+    return Response({ 'data': tutorials })
+
+class ForReviewScriptAPI(APIView):
+  permission_classes = [ReviewScriptPermission]
+
+  def get(self, request):
+    scripts = Script.objects.filter(status=False)
+    tutorials = []
+
+    for script in scripts:
+      try:
+        self.check_object_permissions(request, script)
+        tutorials.append(TutorialDetailSerializer(script.tutorial, context={'lang': script.language.id, 'user': request.user}).data)
+      except:
+        pass
 
     return Response({ 'data': tutorials })
 
