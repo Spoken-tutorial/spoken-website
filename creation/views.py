@@ -3,7 +3,6 @@ import os
 import re
 import subprocess
 import time
-import datetime
 import collections
 from django.utils import timezone
 from decimal import Decimal
@@ -3281,6 +3280,7 @@ def initiate_payment(request):
         email = user.email
         generate_honorarium_receipt(honorarium.code, contributor, foss, honorarium.amount, manager, tutorials)
         generate_contributor_receipt(honorarium.code, contributor, foss, honorarium.amount, email, tutorials)
+        generate_agreement_receipt(honorarium.code, contributor, foss, honorarium.amount, email, tutorials)
         messages.success(request,"Payment Honorarium (#"+str(honorarium.code)+") worth Rs. \
             "+str(amount)+" for contributor "+user.first_name+" "+user.last_name+" initiated for \
             "+str(len(tr_pay_ids))+" tutorials")
@@ -3453,7 +3453,7 @@ def generate_honorarium_receipt(code, contributor, foss, amount, manager, tutori
 
     for paragraph in doc.paragraphs:
         if '{{date}}' in paragraph.text:
-            curr_dt = datetime.datetime.now()
+            curr_dt = datetime.now()
             formated_dt =  curr_dt.strftime("%d %B, %Y") # 01 January, 2018
             paragraph.text = ""
             paragraph.add_run("Date : ")
@@ -3482,10 +3482,10 @@ def generate_contributor_receipt(code, contributor, foss, amount, email, tutoria
     doc = Document('media/hr-receipts/contributor-receipt-template.docx')
     tutorials_comma_separted = ''
     total_time = 0
-    # for table in doc.tables:
-    #     for row in table.rows:
-    #         for cell in row.cells:
-    #             print(cell.text)
+    for table in doc.tables:
+        for row in table.rows:
+            for cell in row.cells:
+                print(cell.text)
     for tut in tutorials:
         tutorials_comma_separted=tutorials_comma_separted+str(tut[0])+','
         #total_time+=int(tut[1])
@@ -3502,7 +3502,7 @@ def generate_contributor_receipt(code, contributor, foss, amount, email, tutoria
 
     for paragraph in doc.paragraphs:        
         if '{{date}}' in paragraph.text:
-            curr_dt = datetime.datetime.now()
+            curr_dt = datetime.now()
             formated_dt =  curr_dt.strftime("%d %B, %Y") # 01 January, 2018
             paragraph.text = ""
             paragraph.add_run("Date : ")
@@ -3517,6 +3517,35 @@ def generate_contributor_receipt(code, contributor, foss, amount, email, tutoria
 
     doc.save('media/hr-receipts/'+code+'receipt-sa.docx')
 
+
+def generate_agreement_receipt(code, contributor, foss, amount, email, tutorials):
+    """
+        Generates honorarium receipts in docx format based on existing template using python-docx 0.8.6 ( https://python-docx.readthedocs.io/en/stable/ )
+    """
+    doc = Document('media/hr-receipts/Agreement-Form-template.docx')
+    tutorials_comma_separted = ''
+    for tut in tutorials:
+        tutorials_comma_separted=tutorials_comma_separted+str(tut[0])+'('+str(tut[1])+'),'
+        #total_time+=int(tut[1])
+    for table in doc.tables:
+        for row in table.rows:
+            for cell in row.cells:
+                print(cell.text)
+    cell01 = table.cell(0, 1)
+    cell01.text = contributor
+    cell11 = table.cell(1,1)    
+    cell11.text = foss +'\n' + tutorials_comma_separted
+    #cell12 = table.cell(0,2)
+    #cell12.text = total_time
+    cell31 =table.cell(3,1)
+    cell31.text = email
+    cell61 = table.cell(6,1)
+
+    curr_dt = datetime.now()
+    formated_dt =  curr_dt.strftime("%d %B, %Y") # 01 January, 2018
+    cell61.text = formated_dt
+
+    doc.save('media/hr-receipts/'+code+'agreement-sa.docx')
 
 def update_codefiles(request):
     if not is_administrator(request.user):
