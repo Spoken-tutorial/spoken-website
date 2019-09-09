@@ -19,8 +19,8 @@ urlpatterns = [
 
      url(r'^koha_coordinators_workshop/$', koha_coordinators_workshop_download, 
                 name='koha_coordinators_workshop_download'),
-    url(r'^koha_rc_certificate/$', koha_rc_certificate_download,
-        name='koha_rc_certificate_download'),
+    url(r'^koha_rc_certificate/$', koha_12octrc_certificate_download,
+        name='koha_12octrc_certificate_download'),
     url(r'^koha_coordinators_workshop/$', koha_coordinators_workshop_download, 
         name='koha_coordinators_workshop_download'),
     url(r'^moodle_coordinators_workshop/$', moodle_coordinators_workshop_download, 

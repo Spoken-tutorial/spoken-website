@@ -7,28 +7,13 @@
 {% block content %}
     <ul class="nav nav-tabs">
         <li{% if tabid == 'contributor' %} class="active"{% endif %}>
-            <a href="/creation/role/requests/contributor/"">
+            <a href="/creation/role/lang_requests/contributor/"">
                 <i class="fa fa-list-ul"></i> Contributor
             </a>
         </li>
         <li{% if tabid == 'external-contributor' %} class="active"{% endif %}>
-            <a href="/creation/role/requests/external-contributor/">
+            <a href="/creation/role/lang_requests/external-contributor/">
                 <i class="fa fa-list-ul"></i> External Contributor
-            </a>
-        </li>
-        <li{% if tabid == 'video-reviewer' %} class="active"{% endif %}>
-            <a href="/creation/role/requests/video-reviewer/">
-                <i class="fa fa-list-ul"></i> Admin Reviewer
-            </a>
-        </li>
-        <li{% if tabid == 'domain-reviewer' %} class="active"{% endif %}>
-            <a href="/creation/role/requests/domain-reviewer/">
-                <i class="fa fa-list-ul"></i> Domain Reviewer
-            </a>
-        </li>
-        <li{% if tabid == 'quality-reviewer' %} class="active"{% endif %}>
-            <a href="/creation/role/requests/quality-reviewer/">
-                <i class="fa fa-list-ul"></i> Quality Reviewer
             </a>
         </li>
     </ul>
@@ -55,8 +40,8 @@
                         <td><a >{{contrib_rec.language}} </a></td>
                         <td><a href="mailto:{{ contrib_rec.user.email }}">{{ contrib_rec.user.email }}</a></td>
                         <td>{{ contrib_rec.created }}</td>
-                        <td class="col-center"><a href="/creation/role/accept/{{ contrib_rec.id }}/admin" class="spin-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Accept</a></td>
-                        <td class="col-center"><a href="/creation/role/reject/{{ contrib_rec.id }}/admin" class="spin-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Reject</a></td>
+                        <td class="col-center"><a href="/creation/role/accept/{{ contrib_rec.id }}/lang_manager" class="spin-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Accept</a></td>
+                        <td class="col-center"><a href="/creation/role/reject/{{ contrib_rec.id }}/lang_manager/" class="spin-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Reject</a></td>
                     </tr>
                 {% endfor %}
             {% endif %}
@@ -84,8 +69,8 @@
                         <td><a> {{contrib_rec.language}} </a></td>
                         <td><a href="mailto:{{ contrib_rec.user.email }}">{{ contrib_rec.user.email }}</a></td>
                         <td>{{ contrib_rec.created }}</td>
-                        <td class="col-center"><a href="/creation/role/accept/{{ contrib_rec.id }}/admin" class="spin-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Accept</a></td>
-                        <td class="col-center"><a href="/creation/role/reject/{{ contrib_rec.id }}/admin" class="spin-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Reject</a></td>
+                        <td class="col-center"><a href="/creation/role/accept/{{ contrib_rec.id }}/lang_manager/" class="spin-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Accept</a></td>
+                        <td class="col-center"><a href="/creation/role/reject/{{ contrib_rec.id }}/lang_manager/" class="spin-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Reject</a></td>
                     </tr>
                 {% endfor %}
             {% endif %}
