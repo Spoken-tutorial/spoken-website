@@ -139,7 +139,7 @@ def tutorial_search(request):
     collection = None
     form = TutorialSearchForm()
     foss_get = ''
-    show_on_homepage = True
+    show_on_homepage = 1
     queryset = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = show_on_homepage)
 
     if request.method == 'GET' and request.GET:
@@ -183,7 +183,7 @@ def series_foss(request):
     form = SeriesTutorialSearchForm()
     collection = None
     # Get all the video / audio testimonials in series
-    foss_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), language__name='English', tutorial_detail__foss__show_on_homepage = False).values_list('tutorial_detail__foss__id').annotate().distinct()
+    foss_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), language__name='English', tutorial_detail__foss__show_on_homepage = 0).values_list('tutorial_detail__foss__id').annotate().distinct()
     collection =  MediaTestimonials.objects.filter(foss__id__in=foss_list).values("foss__foss", "content", "created", "foss", "foss_id", "id", "path", "user", "workshop_details").order_by('-created')
     
     if collection:
@@ -206,7 +206,7 @@ def series_tutorial_search(request):
     collection = None
     form = SeriesTutorialSearchForm()
     foss_get = ''
-    show_on_homepage = False
+    show_on_homepage = 0
     queryset = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = show_on_homepage)
     
     if request.method == 'GET' and request.GET:
@@ -301,9 +301,9 @@ def what_is_spoken_tutorial(request):
 @csrf_exempt
 def get_language(request, tutorial_type):
     output = ''
-    show_on_homepage = True
+    show_on_homepage = 1
     if tutorial_type== "series":
-        show_on_homepage = False
+        show_on_homepage = 0
 
     if request.method == "POST":
         foss = request.POST.get('foss')
@@ -404,15 +404,15 @@ def testimonials_new_media(request, testimonial_type):
     
     context = {}
     if testimonial_type == 'series':
-        form = MediaTestimonialForm(on_home_page=False)
+        form = MediaTestimonialForm(on_home_page=0)
     else:
-        form = MediaTestimonialForm(on_home_page=True)
+        form = MediaTestimonialForm(on_home_page=1)
 
     if request.method == 'POST':
         if testimonial_type == 'series':
-            form = MediaTestimonialForm(request.POST, request.FILES, on_home_page=False)
+            form = MediaTestimonialForm(request.POST, request.FILES, on_home_page=0)
         else:
-            form = MediaTestimonialForm(request.POST, request.FILES, on_home_page=True)
+            form = MediaTestimonialForm(request.POST, request.FILES, on_home_page=1)
         if form.is_valid():
             foss = FossCategory.objects.get(foss=request.POST.get('foss'))
             if not request.FILES:
