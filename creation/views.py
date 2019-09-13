@@ -3260,6 +3260,7 @@ def initiate_payment(request):
     user_id = request.POST.get('user')
     tr_pay_ids = request.POST.getlist('selected_tutorialpayments')
     user = User.objects.get(id = user_id)
+    total_time =0
     if len(tr_pay_ids) > 0:
         honorarium = PaymentHonorarium.objects.create(status = 1)
         amount = 0
@@ -3270,7 +3271,9 @@ def initiate_payment(request):
             tr_pay.status = 2 # from 1 --> 2 i.e due --> initiated
             tr_pay.payment_honorarium = honorarium
             amount += tr_pay.amount
+            total_time += tr_pay.seconds
             tr_pay.save()
+        total_time=timedelta(seconds=total_time)
         honorarium.amount = amount
         honorarium.save()
         # generating honorarium receipt
@@ -3278,7 +3281,7 @@ def initiate_payment(request):
         foss = tr_pay.tutorial_resource.tutorial_detail.foss.foss
         manager = request.user.first_name+" "+request.user.last_name # currrent logged in user - manager
         email = user.email
-        generate_honorarium_receipt(honorarium.code, contributor, foss, honorarium.amount, manager, tutorials)
+        generate_honorarium_receipt(honorarium.code, contributor, foss, honorarium.amount, manager, tutorials, total_time)
         generate_contributor_receipt(honorarium.code, contributor, foss, honorarium.amount, email, tutorials)
         generate_agreement_receipt(honorarium.code, contributor, foss, honorarium.amount, email, tutorials)
         messages.success(request,"Payment Honorarium (#"+str(honorarium.code)+") worth Rs. \
@@ -3368,7 +3371,7 @@ def detail_payment_honorarium(request, hr_id):
                 hr.status = 4
                 hr.save()
                 messages.success(request,"Payment Honorarium (#"+hr.code+") confirmed as recieved.")
-                next_url = request.GET.get("next",reverse('creation:creationhome'))
+                next_url = request.GET.get("next",reverse('creation:detail_payment_honorarium '+hr_id))
                 return HttpResponseRedirect(next_url)
         context = {
             'pay_hr': hr,
@@ -3437,12 +3440,11 @@ def money_as_text(amount):
     return ans
 
 
-def generate_honorarium_receipt(code, contributor, foss, amount, manager, tutorials):
+def generate_honorarium_receipt(code, contributor, foss, amount, manager, tutorials, total_time):
     """
         Generates honorarium receipts in docx format based on existing template using python-docx 0.8.6 ( https://python-docx.readthedocs.io/en/stable/ )
     """
     doc = Document('media/hr-receipts/honorarium-receipt-template.docx')
-    #doc = Document()
     for table in doc.tables:
         for index, tut in enumerate(tutorials, 1):
             row_cells = table.add_row().cells
@@ -3450,6 +3452,10 @@ def generate_honorarium_receipt(code, contributor, foss, amount, manager, tutori
             row_cells[1].text = tut[0]
             row_cells[2].text = tut[1]
             row_cells[2].paragraphs[0].paragraph_format.alignment=WD_ALIGN_PARAGRAPH.CENTER
+        row_cells = table.add_row().cells
+        row_cells[1].text = "Total Time"
+        row_cells[2].text = str(total_time)
+        row_cells[2].paragraphs[0].paragraph_format.alignment=WD_ALIGN_PARAGRAPH.CENTER
 
     for paragraph in doc.paragraphs:
         if '{{date}}' in paragraph.text:
@@ -3481,24 +3487,24 @@ def generate_contributor_receipt(code, contributor, foss, amount, email, tutoria
     """
     doc = Document('media/hr-receipts/contributor-receipt-template.docx')
     tutorials_comma_separted = ''
-    total_time = 0
+    total_time = timedelta(seconds=0)
     for table in doc.tables:
         for row in table.rows:
             for cell in row.cells:
-                print(cell.text)
+                do_nothing =1
     for tut in tutorials:
         tutorials_comma_separted=tutorials_comma_separted+str(tut[0])+','
-        #total_time+=int(tut[1])
     cell01 = table.cell(0, 1)
     cell01.text = contributor
-    cell11 = table.cell(1,1)
-    
-    
-    cell11.text = foss +'\n' + tutorials_comma_separted
+    cell11 = table.cell(1,1)    
+    cell11.text = foss
+    cell11._parent.table.style.font.bold = True
+    cell21 = table.cell(2,1)    
+    cell21.text = tutorials_comma_separted
     #cell12 = table.cell(0,2)
     # cell12.text = total_time
-    cell31 =table.cell(3,1)
-    cell31.text = email
+    cell41 =table.cell(4,1)
+    cell41.text = email
 
     for paragraph in doc.paragraphs:        
         if '{{date}}' in paragraph.text:
@@ -3515,7 +3521,7 @@ def generate_contributor_receipt(code, contributor, foss, amount, email, tutoria
             paragraph.add_run(" (Rupees "+money_as_text(amount) +" )")
             paragraph.add_run(" as an honorarium for the contribution towards making Spoken Tutorial for Spoken Tutorial Project, part of Talk to a Teacher Project, funded by NMEICT, MHRD, Government of India. ")
 
-    doc.save('media/hr-receipts/'+code+'receipt-sa.docx')
+    doc.save('media/hr-receipts/'+code+'-receipt.docx')
 
 
 def generate_agreement_receipt(code, contributor, foss, amount, email, tutorials):
@@ -3534,18 +3540,21 @@ def generate_agreement_receipt(code, contributor, foss, amount, email, tutorials
     cell01 = table.cell(0, 1)
     cell01.text = contributor
     cell11 = table.cell(1,1)    
-    cell11.text = foss +'\n' + tutorials_comma_separted
+    cell11.text = foss
+    cell11._parent.table.style.font.bold
+    cell21 = table.cell(2,1)    
+    cell21.text = tutorials_comma_separted
     #cell12 = table.cell(0,2)
     #cell12.text = total_time
-    cell31 =table.cell(3,1)
-    cell31.text = email
-    cell61 = table.cell(6,1)
+    cell41 =table.cell(4,1)
+    cell41.text = email
+    cell71 = table.cell(7,1)
 
     curr_dt = datetime.now()
     formated_dt =  curr_dt.strftime("%d %B, %Y") # 01 January, 2018
-    cell61.text = formated_dt
+    cell71.text = formated_dt
 
-    doc.save('media/hr-receipts/'+code+'agreement-sa.docx')
+    doc.save('media/hr-receipts/'+code+'-agreement.docx')
 
 def update_codefiles(request):
     if not is_administrator(request.user):
