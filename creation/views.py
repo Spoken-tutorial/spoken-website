@@ -3293,7 +3293,8 @@ def list_payment_honorarium(request):
     '''
     to display list of all payment honorariums and update their status
     '''
-    if not is_qualityreviewer(request.user):
+    #if not is_qualityreviewer(request.user):
+    if not (is_administrator(request.user) or is_qualityreviewer(request.user)):
         raise PermissionDenied()
     # updating honorarium status
     if request.method == "POST":
