@@ -110,11 +110,11 @@
               {% with attendance_count=record.get_partipants_from_attendance %}
               {% if record.batch %}
                 {% if user|is_administrator and status == 'markcomplete'%}
-                  <a href="{% url 'events:mark_complete' record.id %}">Mark Complete</a><br>
+                  <a href="{% url 'eventsv2:mark_complete' record.id %}">Mark Complete</a><br>
                   -------------<br>
                 {% endif %}
                 {% if status == 'pendingattendance'%}
-                  <a href="{% url 'events:previous_training_attendance' record.id %}">
+                  <a href="{% url 'eventsv2:previous_training_attendance' record.id %}">
                 {% else %}
                   <a href="{% url 'statistics:statistics_training_participants' record.id %}" target="_blank">
                 {% endif %}
