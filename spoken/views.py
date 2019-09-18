@@ -237,28 +237,10 @@ def series_tutorial_search(request):
     return render(request, 'spoken/templates/series_tutorial_search.html', context)
 
 def archived_foss(request):
-    '''
-    Get all the media testimonials which are set to not 
-    show on home page and display along the form to display the tutorials.
-    '''
     form = ArchivedTutorialSearchForm()
-    collection = None
-    # # Get all the video / audio testimonials in series
-    # foss_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), language__name='English', tutorial_detail__foss__show_on_homepage = 0).values_list('tutorial_detail__foss__id').annotate().distinct()
-    # collection =  MediaTestimonials.objects.filter(foss__id__in=foss_list).values("foss__foss", "content", "created", "foss", "foss_id", "id", "path", "user", "workshop_details").order_by('-created')
-    
-    # if collection:
-    #     page = request.GET.get('page')
-    #     collection = get_page(collection, page, limit=6)
-    
-    # add_button_show= False
-    # if request.user.has_perm('events.add_testimonials'):
-        # add_button_show= True
+    collection = None    
     context = {}
     context['form'] = form
-    # context['collection'] = collection
-    # context['media_url'] = settings.MEDIA_URL
-    # context['add_button_show'] = add_button_show
     return render(request, 'spoken/templates/archived_foss_list.html', context)
 
 @csrf_exempt
