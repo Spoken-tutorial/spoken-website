@@ -110,12 +110,12 @@ class SeriesTutorialSearchForm(forms.Form):
 
 
 class ArchivedTutorialSearchForm(forms.Form):
-    search_otherfoss = forms.ChoiceField(
+    search_archivedfoss = forms.ChoiceField(
         choices=[],
         widget=forms.Select(),
         required=False,
     )
-    search_otherlanguage = forms.ChoiceField(
+    search_archivedlanguage = forms.ChoiceField(
         choices=[],
         widget=forms.Select(),
         required=False,
@@ -137,8 +137,8 @@ class ArchivedTutorialSearchForm(forms.Form):
         for lang_row in lang_list:
             lang_list_choices.append((str(lang_row[0]), str(lang_row[0]) + ' (' + str(lang_row[1]) + ')'))
 
-        self.fields['search_otherfoss'].choices = foss_list_choices
-        self.fields['search_otherlanguage'].choices = lang_list_choices
+        self.fields['search_archivedfoss'].choices = foss_list_choices
+        self.fields['search_archivedlanguage'].choices = lang_list_choices
 
 
 
