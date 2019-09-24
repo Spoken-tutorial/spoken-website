@@ -3126,9 +3126,12 @@ def check_email_already_organiser(userid):
         return org
     return None
 
-
+@login_required
 def handover(request):
+    user = request.user
     context = {}
+    if not (user.is_authenticated() and (is_event_manager(user))):
+        raise PermissionDenied()
     # ci = RequestContext(request)
     if request.method == 'POST':
         old_email = request.POST.get('old_email').strip()
