@@ -2344,6 +2344,102 @@ def test_participant_ceritificate(request, wid, participant_id):
 
     return response
 
+
+def test_participant_ceritificate_all(request, testid):
+    certificate_pass = ''
+    w = Test.objects.get(id = testid)
+    if not w.organiser.user == request.user:
+        raise PermissionDenied()
+    testattendances = TestAttendance.objects.filter(test_id = testid)
+
+    response = HttpResponse(content_type='application/pdf')
+    filename = (w.foss.foss+"-Participant-Certificate").replace(" ", "-");
+
+    response['Content-Disposition'] = 'attachment; filename='+filename+'.pdf'
+
+    output = PdfFileWriter()
+
+    for ta in testattendances: 
+        try:
+            mdlgrade = MdlQuizGrades.objects.get(quiz = ta.mdlquiz_id, userid = ta.mdluser_id)
+        except:
+            continue
+        if ta.status < 1 or round(mdlgrade.grade, 1) < 40:
+            continue
+
+        if ta.password:
+            certificate_pass = ta.password
+            ta.count += 1
+            ta.status = 4
+            ta.save()
+        else:
+            certificate_pass = str(ta.mdluser_id)+id_generator(10-len(str(ta.mdluser_id)))
+            ta.password = certificate_pass
+            ta.status = 4
+            ta.count += 1
+            ta.save()        
+        imgTemp = BytesIO()
+        imgDoc = canvas.Canvas(imgTemp)
+
+        imgDoc.setFont('Helvetica', 18, leading=None)
+        imgDoc.drawCentredString(211, 115, custom_strftime('%B {S} %Y', w.tdate))
+
+        #password
+        imgDoc.setFillColorRGB(211, 211, 211)
+        imgDoc.setFont('Helvetica', 10, leading=None)
+        imgDoc.drawString(10, 6, certificate_pass)
+        #imgDoc.drawString(100, 100, 'transparent')
+
+
+        # Draw image on Canvas and save PDF in buffer
+        imgPath = settings.MEDIA_ROOT +"sign.jpg"
+        imgDoc.drawImage(imgPath, 600, 80, 150, 76)    ## at (399,760) with size 160x160
+
+        #paragraphe
+        text = "This is to certify that <b>"+ta.mdluser_firstname +" "+ta.mdluser_lastname+"</b> has successfully completed <b>"+w.foss.foss+"</b> test organized at <b>"+w.academic.institution_name+"</b> by <b>"+w.organiser.user.first_name + " " + w.organiser.user.last_name+"</b>  with course material provided by the Spoken Tutorial Project, IIT Bombay.  <br /><br /><p>Passing an online exam, conducted remotely from IIT Bombay, is a pre-requisite for completing this training. <b>"+w.invigilator.user.first_name + " "+w.invigilator.user.last_name+"</b> at <b>"+w.academic.institution_name+"</b> invigilated this examination. This training is offered by the <b>Spoken Tutorial Project, IIT Bombay, funded by National Mission on Education through ICT, MHRD, Govt., of India.</b></p>"
+
+        centered = ParagraphStyle(name = 'centered',
+            fontSize = 16,
+            leading = 24,
+            alignment = 0,
+            spaceAfter = 20)
+
+        p = Paragraph(text, centered)
+        p.wrap(700, 200)
+        p.drawOn(imgDoc, 4.2 * cm, 6 * cm)
+
+        #paragraphe
+        text = "Certificate for Completion of "+w.foss.foss+" Training"
+
+        centered = ParagraphStyle(name = 'centered',
+            fontSize = 30,
+            leading = 50,
+            alignment = 1,
+            spaceAfter = 15)
+
+        p = Paragraph(text, centered)
+        p.wrap(500,50)
+        p.drawOn(imgDoc, 6.2 * cm, 16 * cm)
+
+
+        imgDoc.save()
+
+        # Use PyPDF to merge the image-PDF into the template
+        page = PdfFileReader(open(settings.MEDIA_ROOT +"Blank-Certificate.pdf","rb")).getPage(0)
+        overlay = PdfFileReader(BytesIO(imgTemp.getvalue())).getPage(0)
+        page.mergePage(overlay)
+
+        #Save the result
+        output.addPage(page)
+
+    #stream to browser
+    outputStream = response
+    output.write(response)
+    outputStream.close()
+
+    return response
+
+
 @csrf_exempt
 def training_subscribe(request, events, eventid = None, mdluser_id = None):
     try:
@@ -3076,6 +3172,9 @@ def handover(request):
             return render(request, 'handover.html', context)
 
     return render(request, 'handover.html', context)
+
+
+
 
 
 
