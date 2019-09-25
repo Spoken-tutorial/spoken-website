@@ -41,7 +41,10 @@ from django.contrib import messages
 from django.template import RequestContext, loader
 from mdldjango.get_or_create_participant import get_or_create_participant
 from django.contrib.auth.decorators import login_required
-from mdldjango.models import MdlUser
+from mdldjango.models import MdlUser, MdlQuizGrades
+from django.contrib.auth.mixins import UserPassesTestMixin
+from events.formsv2 import StudentGradeFilterForm
+from django.views.generic import FormView
 
 #pdf generate
 from reportlab.pdfgen import canvas
@@ -3322,3 +3325,56 @@ class AllTrainingCertificateView(TrainingCertificate, View):
     outputStream.close()
 
     return response
+
+
+class StudentGradeFilter(UserPassesTestMixin, FormView):
+  template_name = 'events/templates/student_grade_filter.html'
+  form_class = StudentGradeFilterForm
+  success_url = '/software-training/student-grade-filter/' 
+
+  def test_func(self):
+        return self.request.user.is_superuser
+  
+  def form_valid(self, form):
+    """
+    If the form is valid, redirect to the supplied URL.
+    """
+    if form.is_valid:
+      foss = [x for x in form.cleaned_data['foss']]
+      state = [s for s in form.cleaned_data['state']]
+      grade = form.cleaned_data['grade']
+      result=self.filter_student_grades(foss[0], state[0], grade)
+      print(results)
+    return HttpResponseRedirect(self.get_success_url())
+
+
+  def filter_student_grades(self, foss=None, state=None, grade=None):
+    if grade:
+      #filter moodle quiz grade
+      mdlquiz=MdlQuizGrades.objects.using('moodle').filter(grade__gte=int(grade))
+      print(mdlquiz.count())
+      results=[[] for i in range(mdlquiz.count())]
+      count=0
+      #iterate over each quiz result 
+      for quiz in mdlquiz:
+        ta=TestAttendance.objects.filter(mdluser_id=quiz.userid, test__foss=foss).first()
+        if ta:
+          if not ta.student.user:
+            #only if moodle user is not present in spoken database
+            mduser=MdlUser.objects.using('moodle').get(id=quiz.userid)
+            results[count].append(mduser.firstname)
+            results[count].append(mduser.lastname)
+            results[count].append(mduser.email)
+          else:
+            results[count].append(ta.student.user.first_name)
+            results[count].append(ta.student.user.last_name)
+            results[count].append(ta.student.user.email)
+          results[count].append(ta.test.academic.institution_name)
+          results[count].append(ta.test.organiser.user.first_name + ' ' + ta.test.organiser.user.last_name)
+          results[count].append(quiz.grade)
+          results[count].append(ta.test.academic.state.name)
+          count+=1
+      return results
+    return None
+
+
