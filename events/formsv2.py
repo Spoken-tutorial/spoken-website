@@ -579,11 +579,12 @@ class TrainingManagerForm(forms.Form):
         #     self.fields['college'].initial = initial.academic_id
 
 Grades = (
-    (10, "10%"),
-    (20, "20%"),
-    (50, "50%"),
-    (60, "60%"),
-    (80, "80%"))
+    (40, "40% or above"),
+    (50, "50% or above"),
+    (60, "60% or above%"),
+    (70, "70% or above"),
+    (80, "80% or above"),
+    (90, "90% or above"))
 
 class StudentGradeFilterForm(forms.Form):
   foss = forms.ModelMultipleChoiceField(queryset=FossCategory.objects.all())
