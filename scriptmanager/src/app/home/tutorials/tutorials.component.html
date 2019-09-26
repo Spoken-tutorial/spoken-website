@@ -8,29 +8,35 @@
     </div>
   </div>
   <div class="column is-4 buttons">
-    <div class="field is-grouped is-grouped-multiline">
-      <div class="control" *ngIf="!tutorial.script_status">
-        <a routerLink="/create/{{ tutorial.id }}/{{ tutorial.language }}/{{ tutorial.tutorial }}">
-          <app-badge-button faClass="fa fa-plus" textClass="is-success" text="Create"></app-badge-button>
-        </a>
-      </div>
+    <ng-container *ngIf="tutorial.published">
+      <app-badge-button faClass="fa fa-eye" textClass="is-success" text="Published"></app-badge-button>
+    </ng-container>
 
-      <div class="control" *ngIf="!tutorial.script_status">
-        <a routerLink="/upload/{{ tutorial.id }}/{{ tutorial.language }}/{{ tutorial.tutorial }}">
-          <app-badge-button faClass="fa fa-upload" textClass="is-primary" text="Upload"></app-badge-button>
-        </a>
-      </div>
+    <ng-container *ngIf="!tutorial.published">
+      <div class="field is-grouped is-grouped-multiline">
+        <div class="control" *ngIf="!tutorial.script_status">
+          <a routerLink="/create/{{ tutorial.id }}/{{ tutorial.language }}/{{ tutorial.tutorial }}">
+            <app-badge-button faClass="fa fa-plus" textClass="is-success" text="Create"></app-badge-button>
+          </a>
+        </div>
 
-      <div class="control" *ngIf="tutorial.script_status">
-        <a routerLink="/edit/{{ tutorial.id }}/{{ tutorial.language }}/{{ tutorial.tutorial }}">
-          <app-badge-button faClass="fa fa-edit" textClass="is-success" text="Edit"></app-badge-button>
-        </a>
-      </div>
+        <div class="control" *ngIf="!tutorial.script_status">
+          <a routerLink="/upload/{{ tutorial.id }}/{{ tutorial.language }}/{{ tutorial.tutorial }}">
+            <app-badge-button faClass="fa fa-upload" textClass="is-primary" text="Upload"></app-badge-button>
+          </a>
+        </div>
 
-      <div class="control" *ngIf="tutorial.script_status">
-        <a routerLink="/view/{{ tutorial.id }}/{{ tutorial.language }}/{{ tutorial.tutorial }}">
-          <app-badge-button faClass="fa fa-eye" textClass="is-info" text="View"></app-badge-button>
-        </a>
+        <div class="control" *ngIf="tutorial.script_status">
+          <a routerLink="/edit/{{ tutorial.id }}/{{ tutorial.language }}/{{ tutorial.tutorial }}">
+            <app-badge-button faClass="fa fa-edit" textClass="is-success" text="Edit"></app-badge-button>
+          </a>
+        </div>
+
+        <div class="control" *ngIf="tutorial.script_status">
+          <a routerLink="/view/{{ tutorial.id }}/{{ tutorial.language }}/{{ tutorial.tutorial }}">
+            <app-badge-button faClass="fa fa-eye" textClass="is-info" text="View"></app-badge-button>
+          </a>
+        </div>
       </div>
-    </div>
+    </ng-container>
   </div>

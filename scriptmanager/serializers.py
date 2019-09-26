@@ -34,18 +34,25 @@ class ContributorRoleSerializer(serializers.ModelSerializer):
 
 class TutorialDetailSerializer(serializers.ModelSerializer):
   script_status = serializers.SerializerMethodField()
+  published = serializers.SerializerMethodField()
   outline = serializers.SerializerMethodField()
   language = serializers.SerializerMethodField()
 
   class Meta:
     model = TutorialDetail
-    fields = ('id', 'foss', 'language', 'tutorial', 'level', 'order', 'script_status', 'outline')
+    fields = ('id', 'foss', 'language', 'tutorial', 'level', 'order', 'script_status', 'outline', 'published')
 
   def get_script_status(self, instance):
     if Script.objects.filter(tutorial_id=instance.id, language=self.context.get('lang')).exists():
       return True
     else:
       return False
+  
+  def get_published(self, instance):
+    if self.get_script_status(instance):
+      return Script.objects.get(tutorial_id=instance.id, language=self.context.get('lang')).status
+
+    return False
 
   def get_outline(self, instance):
     lang = Language.objects.filter(id=self.context.get('lang'))

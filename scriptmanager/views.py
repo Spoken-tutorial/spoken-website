@@ -253,7 +253,7 @@ class ScriptDetailAPIView(generics.ListAPIView):
       return Response({'status': False},status = 400) 
 
 class PublishedScriptAPI(APIView):
-  permission_classes = [PublishedScriptPermission]
+  # permission_classes = [PublishedScriptPermission]
 
   def get(self, request):
     scripts = Script.objects.filter(status=True)
