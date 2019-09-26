@@ -103,9 +103,12 @@ export class ScriptViewComponent implements OnInit {
       {
         "comment": comment
       }
-    ).subscribe();
-    this.getComment();
-    this.getComment();
+    ).subscribe(
+      (res) => this.getComment(),
+      console.error
+    );
+    // this.getComment();
+    // this.getComment();
   }
 
   public viewComment(i) {
