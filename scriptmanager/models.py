@@ -10,6 +10,8 @@ class Script(models.Model):
 	data_file = models.FileField(upload_to='scripts')
 	user = models.ForeignKey(User,related_name='user_id')
 	ordering = models.CharField(max_length=200, default='')
+	published_by = models.ForeignKey(User, null=True)
+	published_on = models.DateTimeField(null=True)
 
 	def __str__(self):
 		return str(self.tutorial) + ' - ' + str(self.language)

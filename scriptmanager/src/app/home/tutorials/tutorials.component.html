@@ -5,15 +5,21 @@
     </div>
     <div class="desc">
       <p><b>Outline: </b>{{ tutorial.outline }}</p>
+      <ng-container *ngIf="tutorial.published">
+        <p><b>Published by: </b>{{ tutorial.published_by }}</p>
+        <p><b>Published on: </b>{{ tutorial.published_on }}</p>
+      </ng-container>
     </div>
   </div>
   <div class="column is-4 buttons">
-    <ng-container *ngIf="tutorial.published">
-      <app-badge-button faClass="fa fa-eye" textClass="is-success" text="Published"></app-badge-button>
-    </ng-container>
+    <div class="field is-grouped is-grouped-multiline">
+      <ng-container *ngIf="tutorial.published">
+        <div class="control">
+          <app-badge-button faClass="fa fa-eye" textClass="is-success" text="Published"></app-badge-button>
+        </div>
+      </ng-container>
 
-    <ng-container *ngIf="!tutorial.published">
-      <div class="field is-grouped is-grouped-multiline">
+      <ng-container *ngIf="!tutorial.published">
         <div class="control" *ngIf="!tutorial.script_status">
           <a routerLink="/create/{{ tutorial.id }}/{{ tutorial.language }}/{{ tutorial.tutorial }}">
             <app-badge-button faClass="fa fa-plus" textClass="is-success" text="Create"></app-badge-button>
@@ -31,12 +37,12 @@
             <app-badge-button faClass="fa fa-edit" textClass="is-success" text="Edit"></app-badge-button>
           </a>
         </div>
-
-        <div class="control" *ngIf="tutorial.script_status">
-          <a routerLink="/view/{{ tutorial.id }}/{{ tutorial.language }}/{{ tutorial.tutorial }}">
-            <app-badge-button faClass="fa fa-eye" textClass="is-info" text="View"></app-badge-button>
-          </a>
-        </div>
+      </ng-container>
+      <div class="control" *ngIf="tutorial.script_status">
+        <a routerLink="/view/{{ tutorial.id }}/{{ tutorial.language }}/{{ tutorial.tutorial }}">
+          <app-badge-button faClass="fa fa-eye" textClass="is-info" text="View"></app-badge-button>
+        </a>
       </div>
-    </ng-container>
+    </div>
+
   </div>

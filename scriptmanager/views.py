@@ -18,6 +18,7 @@ from creation.views import is_videoreviewer,is_domainreviewer,is_qualityreviewer
 import uuid
 import subprocess 
 from .permissions import ScriptOwnerPermission, PublishedScriptPermission, ReviewScriptPermission
+from django.utils import timezone
 
 def custom_jwt_payload_handler(user):
   payload = default_jwt_payload_handler(user)
@@ -214,6 +215,12 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
       script = Script.objects.get(tutorial = tutorial,language = language)
       status = request.data['status']
       script.status = status
+      
+      script.published_by = request.user
+      script.published_on = timezone.now()
+      if status == False:
+        script.published_by = None
+        script.published_on = None
       script.save()
       return Response({'status': status, 'message': 'Successfully changed status of script'}, status = 200) 
     except:

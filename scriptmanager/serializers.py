@@ -6,7 +6,6 @@ from rest_framework.response import Response
 from rest_framework import status
 from datetime import datetime, date, timedelta
 
-
 class FossCategorySerializer(serializers.ModelSerializer):
   name = serializers.CharField(source='foss')
 
@@ -37,10 +36,12 @@ class TutorialDetailSerializer(serializers.ModelSerializer):
   published = serializers.SerializerMethodField()
   outline = serializers.SerializerMethodField()
   language = serializers.SerializerMethodField()
+  published_by = serializers.SerializerMethodField()
+  published_on = serializers.SerializerMethodField()
 
   class Meta:
     model = TutorialDetail
-    fields = ('id', 'foss', 'language', 'tutorial', 'level', 'order', 'script_status', 'outline', 'published')
+    fields = ('id', 'foss', 'language', 'tutorial', 'level', 'order', 'script_status', 'outline', 'published', 'published_on', 'published_by')
 
   def get_script_status(self, instance):
     if Script.objects.filter(tutorial_id=instance.id, language=self.context.get('lang')).exists():
@@ -53,6 +54,20 @@ class TutorialDetailSerializer(serializers.ModelSerializer):
       return Script.objects.get(tutorial_id=instance.id, language=self.context.get('lang')).status
 
     return False
+
+  def get_published_on(self, instance):
+    if self.get_script_status(instance):
+      return Script.objects.get(tutorial_id=instance.id, language=self.context.get('lang')).published_on
+
+    return None
+
+  def get_published_by(self, instance):
+    if self.get_script_status(instance):
+      user = Script.objects.get(tutorial_id=instance.id, language=self.context.get('lang')).published_by
+
+      if (user):  return user.username
+
+    return None
 
   def get_outline(self, instance):
     lang = Language.objects.filter(id=self.context.get('lang'))
