@@ -1,5 +1,21 @@
 <div class="section">
   <div class="container">
+    <div class="columns is-centered has-text-centered">
+      <div class="field is-grouped is-grouped-multiline">
+        <div class="control">
+          <a routerLink="/published">
+            <app-badge-button faClass="fa fa-plus" textClass="is-success" text="Published scripts"></app-badge-button>
+          </a>
+        </div>
+
+        <div class="control">
+          <a routerLink="/review">
+            <app-badge-button faClass="fa fa-plus" textClass="is-success" text="Scripts available for review">
+            </app-badge-button>
+          </a>
+        </div>
+      </div>
+    </div>
     <div class="columns is-centered has-text-centered" *ngIf="!authService.isAuthenticated()">
       <div class="column">
         <div class="content">
