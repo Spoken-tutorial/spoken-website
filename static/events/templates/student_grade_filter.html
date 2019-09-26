@@ -55,12 +55,8 @@
             <div class="col-lg-4 col-md-4 col-sm-4">
                 <table class="table table-bordered table-hover" style="margin-bottom:0px;">
                     <tr>
-                        <th>Total number of {{ model }}</th>
-                        <td>{{ collection.paginator.count }}</td>
-                    </tr>
-                    <tr>
-                        <th>Participants Count</th>
-                        <td>{{ participant_count.participant_count__sum }}</td>
+                        <th>Total number of students</th>
+                        <td>{{ result.count }}</td>
                     </tr>
                 </table>
                 <div style="min-height:100px;">
@@ -77,27 +73,37 @@
     <!-- big chart-->
   <div class="tab-content">
     <div class="tab-pane active" id="pending">
-      {% if results %}
+      {% if result %}
         <table class="paleblue table table-striped table-hover table-bordered">
-          {% get_sortable_header header ordering request.GET %}
-          {% for record in collection %}
+            <thead>
+                <tr>
+                    <th>#</th>
+                  <th>Firstname</th>
+                  <th>Lastname</th>
+                  <th>Email</th>
+                  <th>Grade</th>
+                  <th>Institution</th>
+                  <th>Foss</th>
+                  <th>Organiser</th>
+                  <th>State</th>
+                </tr>
+              </thead>
+              <tbody>
+          {% for ta in result.test_attendance %}
             <tr>
               <td>{{ forloop.counter }}
-              <td>{{ record.academic.state }}</td>
-              <td>{{ record.academic.city }}</td>
-              <td>{{ record.academic }}</td>
-              <td>{{ record.foss }}</td>
-              <td>{{ record.organiser.user.first_name }}</td>
-              <td>{{ record.tdate|date:"d M Y" }} {{ record.wtime }}</td>
-              <td>{{ record.participant_count }}</td>
+              <td>{% if ta.student.user.first_name %}{{ ta.student.user.first_name }}{%else%}{{ta.mdluser_id|get_grade_mdluser_first_name}}{%endif%}</td>
+              <td>{% if ta.student.user.last_name %}{{ ta.student.user.last_name }}{%else%}{{ta.mdluser_id|get_grade_mdluser_last_name}}{%endif%}</td>
+              <td>{% if ta.student.user.email %}{{ ta.student.user.email }}{%else%}{{ta.mdluser_id|get_grade_mdluser_email}}{%endif%}</td>
+              <td>{{ result.mdl_user_grade|get_grade_mdluser:ta.mdluser_id}} </td>
+              <td>{{ ta.test.academic.institution_name }}</td>
+              <td>{{ ta.test.foss.foss }}</td>
+              <td>{{ ta.test.organiser.user.first_name }} {{ ta.test.organiser.user.last_name }}</td>
+              <td>{{ ta.test.academic.state.name }}</td>
               <!-- actions based on roles -->
-              <td>
-                {%if record.get_test_attendance_count %}
-                  <a href="{% url 'statistics:statistics_test_participants' record.id %}" target="_blank">View Participants</a>
-                {% endif %}
-              </td>
             </tr>
           {% endfor %}
+        </tbody>
         </table>
       {% else %}
         <p class='no-record'>No record found!</p>
