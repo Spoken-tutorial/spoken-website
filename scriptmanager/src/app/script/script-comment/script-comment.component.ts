@@ -1,4 +1,5 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import * as $ from 'jquery';
 
 @Component({
   selector: 'app-script-comment',
@@ -24,7 +25,8 @@ export class ScriptCommentComponent implements OnInit {
   commentKey(event) { this.newComment = event.target.value; }
 
   ngOnInit() {
-
+    var element = document.getElementById("fixedComments");
+    element.scrollTop = element.scrollHeight;
   }
 
 }
