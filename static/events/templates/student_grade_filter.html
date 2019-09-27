@@ -6,8 +6,8 @@
 {% load creationdata %}
 {% block title %} {{ model }} Student Grade Query Filter {% endblock %}
 {% block compresscssblock %}
-    <link rel="stylesheet" href="{% static 'spoken/css/jquery.fancybox.css' %}" type="text/css" media="screen" charset="utf-8" />
-    <link rel="stylesheet" href="{% static 'spoken/css/jquery.datetimepicker.css' %}" type="text/css" media="screen" charset="utf-8" />
+    <link rel="stylesheet" type="text/css" href="{% static 'DataTables/css/jquery.dataTables.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'DataTables/css/buttons.dataTables.css' %}">
 {% endblock %}
 {% block heading %} <i class="fa fa-list-ul"></i> {{ model }} Student Grade Query Filter {% endblock %}
 {% block search %}{% endblock %}
@@ -17,33 +17,27 @@
           {% csrf_token %}
             <div class="col-lg-4 col-md-4 col-sm-4">
                 <div class="form-group">
-                    <label for="id_state" class="col-sm-4 control-label">Foss</label>
+                    <label for="id_foss" class="col-sm-4 control-label">Foss</label>
                     <div class="col-sm-8">
                       {{ form.foss }}
                         {{ form.foss.errors }}
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="id_city" class="col-sm-4 control-label">State</label>
+                    <label for="id_state" class="col-sm-4 control-label">State</label>
                     <div class="col-sm-8">
                       {{ form.state }}
                       {{ form.state.errors }}
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="id_academic_institution_type" class="col-sm-4 control-label">Grade</label>
+                    <label for="id_grade" class="col-sm-4 control-label">Grade</label>
                     <div class="col-sm-8">
-                      {{ form.grade }}
+                        {{ form.grade }}greater than or equal to
                       {{ form.grade.errors }}
                     </div>
               </div>
-
-                {% if user|is_resource_person or user|get_administrator %}
-                    <a target="_blank" class="pull-right btn btn-default " href="{% url 'reports:events_test_csv' %}{% if request.GET %}?{{ request.GET.urlencode }}&status={{ status_code }}{% else %}?status={{ status_code }} {% endif %}" class="addlink">Export to CSV</a>
-                {% endif %}
             </div>
-
-
             <div class="col-lg-4 col-md-4 col-sm-4">
                 <div class="form-group">
                   <div class="col-sm-offset-4 col-sm-8">
@@ -59,10 +53,6 @@
                         <td>{{ result.count }}</td>
                     </tr>
                 </table>
-                <div style="min-height:100px;">
-                    <div id="chart_div"></div>
-                    <a target='_blank' href="#inline" class="fancybox pull-right" style="bottom: 30px; right:20px; position: absolute;" ><i class="fa fa-1 fa-search-plus"></i> Enlarge chart</a>
-                </div>
             </div>
         </form>
     </div>
@@ -74,7 +64,7 @@
   <div class="tab-content">
     <div class="tab-pane active" id="pending">
       {% if result %}
-        <table class="paleblue table table-striped table-hover table-bordered">
+        <table id="id_student_grade_table" class="paleblue table table-striped table-hover table-bordered">
             <thead>
                 <tr>
                     <th>#</th>
@@ -112,47 +102,22 @@
   </div>
 {% endblock %}
 {% block compressjsblock %}
-    <script src="{% static 'spoken/js/events.js' %}"></script>
-    <script src="{% static 'spoken/js/jquery.datetimepicker.js' %}"></script>
-    <script src="{% static 'spoken/js/jquery.fancybox.pack.js' %}"></script>
-    <script type="text/javascript">
-        $(".academic_state").change(function(){
-            ajaxStrateFillDatas('', 'city', '');
-        });
-        $(document).ready(function(){
-            $('.fancybox').click(function(){
-                $("#big_chart_div").css({'left' : 0, 'position' : 'relative'});
-            });
-            $(".fancybox").fancybox();
-
-        });
-        $('.date').datetimepicker({
-            lang:'en',
-            timepicker:false,
-            format:'Y-m-d',
-            formatDate:'Y/m/d',
-            maxDate:'+1970/06/31', // tommorow date with in 6 month
-        });
-    </script>
+<script type="text/javascript" src="{% static 'DataTables/js/jquery.dataTables.js' %}"></script>
+<script type="text/javascript"  src="{% static 'DataTables/js/dataTables.buttons.js' %}"></script>
+<script type="text/javascript"  src="{% static 'DataTables/js/buttons.html5.js' %}"></script>
+<script type="text/javascript"  src="{% static 'DataTables/js/buttons.print.js' %}"></script>
+<script type="text/javascript"  src="{% static 'DataTables/js/pdfmake.js' %}"></script>
+<script type="text/javascript"  src="{% static 'DataTables/js/vfs_fonts.js' %}"></script>
+<script type="text/javascript" >
+      $(document).ready( function () {
+          $('#id_student_grade_table').DataTable( {
+                    dom: 'Bfrtip',
+                    buttons: [
+                    'copy', 'csv', 'pdf', 'print'
+                    ]
+                } );
+      } );
+</script>
 {% endblock %}
 {% block uncompressjsblock %}
-    <script src="{% static 'spoken/js/google-jsapi.js' %}"></script>
-    <script type="text/javascript">
-      google.load("visualization", "1", {packages:["corechart"]});
-      google.setOnLoadCallback(drawChart);
-      function drawChart() {
-        var data = google.visualization.arrayToDataTable([
-          ['Year', 'Participants'],
-          {{ chart_data|safe }}
-        ]);
-        var options = {
-          //title: '{{ model }} Performance',
-          pieHole: 0.3,
-        };
-        var chart = new google.visualization.PieChart(document.getElementById('chart_div'));
-        chart.draw(data, options);
-        chart = new google.visualization.PieChart(document.getElementById('big_chart_div'));
-        chart.draw(data, options);
-      }
-    </script>
 {% endblock %}
