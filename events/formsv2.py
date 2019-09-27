@@ -578,15 +578,13 @@ class TrainingManagerForm(forms.Form):
         #     # initial data
         #     self.fields['college'].initial = initial.academic_id
 
-Grades = (
-    (40, "40% or above"),
-    (50, "50% or above"),
-    (60, "60% or above%"),
-    (70, "70% or above"),
-    (80, "80% or above"),
-    (90, "90% or above"))
-
 class StudentGradeFilterForm(forms.Form):
   foss = forms.ModelMultipleChoiceField(queryset=FossCategory.objects.all())
   state = forms.ModelMultipleChoiceField(queryset=State.objects.all())
-  grade = forms.ChoiceField(choices = Grades, required=True)
+  grade = forms.IntegerField(min_value=0, max_value=100)
+
+  def __init__(self, *args, **kwargs):
+    super().__init__(*args, **kwargs)
+    self.fields['foss'].widget.attrs.update({'class': 'form-control'})
+    self.fields['state'].widget.attrs.update({'class': 'form-control'})
+    self.fields['grade'].widget.attrs.update({'class': 'form-control'})
