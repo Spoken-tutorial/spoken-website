@@ -64,7 +64,7 @@ class Command(BaseCommand):
                     tutorial_resource.update(assignment_status = ASSIGNMENT_STATUS['assigned'])
                     print (contributor_role.foss_category_id, contributor_role.language.name,
                             contributor_role.user_id, tutorial.tutorial)
-                    contributor_with_rating = ContributorRating.objects.filter(
+                contributor_with_rating = ContributorRating.objects.filter(
                     user_id = contributor_role.user_id,
                     language_id = contributor_role.language_id)
                 if not contributor_with_rating.exists():

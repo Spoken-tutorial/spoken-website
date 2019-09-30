@@ -347,6 +347,8 @@ def get_language(request, tutorial_type):
     show_on_homepage = 1
     if tutorial_type== "series":
         show_on_homepage = 0
+    if tutorial_type== "archived":
+        show_on_homepage = 2
 
     if request.method == "POST":
         foss = request.POST.get('foss')

@@ -112,7 +112,7 @@ def is_contenteditor(user):
 
 def is_language_manager(user):
     """ Check if the logged in user is Language Manager"""
-    return LanguageManager.objects.filter(user = user,status = 1).exists()
+    return LanguageManager.objects.filter(user=user,status=1).exists()
 
 def get_filesize(path):
     filesize_bytes = os.path.getsize(path)
@@ -651,7 +651,7 @@ def upload_publish_outline(request):
         form = UploadPublishTutorialForm(request.user, request.POST)
         if form.is_valid():
             tutorial_resource = TutorialResource.objects.get(tutorial_detail_id = request.POST['tutorial_name'], language_id = request.POST['language'])
-            return HttpResponseRedirect('/creation/upload/outline/' + str(tutorial_resource.id) + '/?publish = 1')
+            return HttpResponseRedirect('/creation/upload/outline/' + str(tutorial_resource.id) + '/?publish=1')
     else:
         form = UploadPublishTutorialForm(user = request.user)
 

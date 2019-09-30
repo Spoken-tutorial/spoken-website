@@ -74,6 +74,44 @@ $("#id_search_otherfoss, #id_search_otherlanguage").change(
         }
     }
 );
+$("#id_search_archivedfoss, #id_search_archivedlanguage").change(
+    function() {
+        var foss = $('#id_search_archivedfoss').val();
+        var lang = $('#id_search_archivedlanguage').val();
+        if ((foss == '' || lang == '') && ($(this).val() != '')){
+            $.ajax(
+                {
+                    url: "/get-language/archived/",
+                    type: "POST",
+                    data: {
+                        foss : foss,
+                        lang : lang,
+                    },
+                    beforeSend: function() {
+                        if(foss == '')
+                            $('.ajax-refresh-search-archivedfoss').show();
+                        if(lang == '')
+                            $('.ajax-refresh-search-archivedlanguage').show();
+                    },
+                    success: function(data) {
+                        if(data[0] == 'foss'){
+                            $('#id_search_archivedlanguage').html(data[1]);
+                        } else if(data[0] == 'lang'){
+                            $('#id_search_archivedfoss').html(data[1]);
+                        } else if(data[0] == 'reset') {
+                            $('#id_search_archivedlanguage').html(data[1]);
+                            $('#id_search_archivedfoss').html(data[2]);
+                        }
+                        if(foss == '')
+                            $('.ajax-refresh-search-archivedfoss').hide();
+                        if(lang == '')
+                            $('.ajax-refresh-search-archivedlanguage').hide();
+                    }
+                }
+            );
+        }
+    }
+);
 $('.reset-filter').click(
     function(evt) {
         evt.preventDefault();
