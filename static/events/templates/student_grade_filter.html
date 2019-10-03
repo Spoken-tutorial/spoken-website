@@ -85,7 +85,7 @@
               <td>{% if ta.student.user.first_name %}{{ ta.student.user.first_name }}{%else%}{{ta.mdluser_id|get_grade_mdluser_first_name}}{%endif%}</td>
               <td>{% if ta.student.user.last_name %}{{ ta.student.user.last_name }}{%else%}{{ta.mdluser_id|get_grade_mdluser_last_name}}{%endif%}</td>
               <td>{% if ta.student.user.email %}{{ ta.student.user.email }}{%else%}{{ta.mdluser_id|get_grade_mdluser_email}}{%endif%}</td>
-              <td>{{ result.mdl_user_grade|get_grade_mdluser:ta.mdluser_id}} </td>
+              <td>{{ result.mdl_user_grade|get_grade_mdluser:ta}} </td>
               <td>{{ ta.test.academic.institution_name }}</td>
               <td>{{ ta.test.foss.foss }}</td>
               <td>{{ ta.test.organiser.user.first_name }} {{ ta.test.organiser.user.last_name }}</td>

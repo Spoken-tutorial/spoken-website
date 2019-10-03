@@ -3353,13 +3353,20 @@ class StudentGradeFilter(UserPassesTestMixin, FormView):
       try:
         fossmdl=FossMdlCourses.objects.filter(foss__in=foss)
         #get moodle user grade for a specific foss quiz id having certain grade
-        user_grade=MdlQuizGrades.objects.using('moodle').values_list('userid', 'grade').filter(quiz__in=[f.mdlquiz_id for f in fossmdl], grade__gte=int(grade))
+        user_grade=MdlQuizGrades.objects.using('moodle').values_list('userid', 'quiz', 'grade').filter(quiz__in=[f.mdlquiz_id for f in fossmdl], grade__gte=int(grade))
         #convert moodle user and grades as key value pairs
-        dictgrade = {i[0]:i[1] for i in user_grade}
+        dictgrade = {i[0]:{i[1]:[i[2],False]} for i in user_grade}
         #get all test attendance for moodle user ids and for a specific moodle quiz ids
-        test_attendance=TestAttendance.objects.filter(mdluser_id__in=list(dictgrade.keys()), mdlquiz_id__in=[f.mdlquiz_id for f in fossmdl], test__academic__state__in=state)
-        #return the result as list
-        return {'mdl_user_grade': dictgrade, 'test_attendance': test_attendance, "count":test_attendance.count()}
+        test_attendance=TestAttendance.objects.filter(mdluser_id__in=list(dictgrade.keys()), mdlquiz_id__in=[f.mdlquiz_id for f in fossmdl], test__academic__state__in=state, status__gte=3)
+
+        filter_ta=[]
+        for i in range(test_attendance.count()):
+          if not dictgrade[test_attendance[i].mdluser_id][test_attendance[i].mdlquiz_id][1]:
+            dictgrade[test_attendance[i].mdluser_id][test_attendance[i].mdlquiz_id][1] = True
+            filter_ta.append(test_attendance[i])
+            
+        #return the result as dict
+        return {'mdl_user_grade': dictgrade, 'test_attendance': filter_ta, "count":len(filter_ta)}
       except FossMdlCourses.DoesNotExist:
         return None
     return None

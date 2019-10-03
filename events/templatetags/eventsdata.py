@@ -199,8 +199,8 @@ register.filter('can_clone_training', can_clone_training)
 
 
 @register.filter
-def get_grade_mdluser(Dict, i):
-    return Dict[int(i)]
+def get_grade_mdluser(Dict, ta):
+    return Dict[ta.mdluser_id][ta.mdlquiz_id][0]
 
 @register.filter
 def get_grade_mdluser_first_name(id):
