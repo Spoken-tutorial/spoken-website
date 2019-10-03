@@ -72,6 +72,7 @@
                   <th>Lastname</th>
                   <th>Email</th>
                   <th>Grade</th>
+                  <th>Date</th>
                   <th>Institution</th>
                   <th>Foss</th>
                   <th>Organiser</th>
@@ -86,6 +87,7 @@
               <td>{% if ta.student.user.last_name %}{{ ta.student.user.last_name }}{%else%}{{ta.mdluser_id|get_grade_mdluser_last_name}}{%endif%}</td>
               <td>{% if ta.student.user.email %}{{ ta.student.user.email }}{%else%}{{ta.mdluser_id|get_grade_mdluser_email}}{%endif%}</td>
               <td>{{ result.mdl_user_grade|get_grade_mdluser:ta}} </td>
+              <td>{{ta.created}}</td>
               <td>{{ ta.test.academic.institution_name }}</td>
               <td>{{ ta.test.foss.foss }}</td>
               <td>{{ ta.test.organiser.user.first_name }} {{ ta.test.organiser.user.last_name }}</td>
@@ -113,7 +115,7 @@
           $('#id_student_grade_table').DataTable( {
                     dom: 'Bfrtip',
                     buttons: [
-                    'copy', 'csv', 'pdf', 'print'
+                      'csv'
                     ]
                 } );
       } );
