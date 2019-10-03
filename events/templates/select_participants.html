@@ -85,30 +85,7 @@
             <td>{{ training.department }}</td>
             <td>{{training.batch.year}}</td>
             <td>{{ training.attendance_summery }}</td>
-            {% if training.department.id == 24 %}
-            <td>
-              {% if training.status == 0 %}
-                | <a href="{% url 'eventsv2:training_attendance' training.id %}">Participant List</a> |
-                {% if training.can_edit %}
-                  <a href="{% url 'eventsv2:edit_training_request' training.id %}">Edit</a> |
-                {% endif %}
-              {% endif %}
 
-              {% if training.status == 1 and training.is_learners_allowed and training.get_partipants_from_attendance and training.cert_status == 1%}
-                | <a href="{% url 'eventsv2:training_certificate' training.id %}">Download Participation Certificate</a> | <a href="{% url 'eventsv2:re-open-training' training.id %}"> Re-Open</a> |
-              {% endif %}
-
-              {% if training.status == 1 and not training.is_learners_allowed and not training.have_test%}
-                  | Training Completed. No Certificates | <a href="{% url 'eventsv2:re-open-training' training.id %}"> Re-Open</a> |
-                {% endif %}
-
-	            {% if training.status == 2 and training.is_learners_allowed %}
-                |Request Sent for Mark As Complete| <a href="{% url 'eventsv2:re-open-training' training.id %}"> Re-Open</a> |
-              {% endif %}
-
-
-            </td>
-            {% else %}<!-- not school-->
             <td>
               {% if training.status == 0 %}
                 | <a href="{% url 'eventsv2:training_attendance' training.id %}">Participant List</a> |
@@ -138,7 +115,6 @@
                 {% endif %}
               {% endif %}
             </td>
-            {% endif %}
           </tr>
         {% endfor %}
         </table>
