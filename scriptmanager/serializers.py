@@ -38,6 +38,7 @@ class TutorialDetailSerializer(serializers.ModelSerializer):
   language = serializers.SerializerMethodField()
   published_by = serializers.SerializerMethodField()
   published_on = serializers.SerializerMethodField()
+  foss = FossCategorySerializer(read_only=True)
 
   class Meta:
     model = TutorialDetail

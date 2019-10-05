@@ -7,7 +7,7 @@ import { CreateScriptService } from 'src/app/_service/create-script.service';
   styleUrls: ['./published-scripts.component.sass']
 })
 export class PublishedScriptsComponent implements OnInit {
-  public scripts: any;
+  public scripts: any = [];
 
   constructor(
     private scriptService: CreateScriptService
@@ -16,7 +16,11 @@ export class PublishedScriptsComponent implements OnInit {
   ngOnInit() {
     this.scriptService.getPublishedScripts()
       .subscribe(
-        (res) => this.scripts = res['data'],
+        (res) => {
+          this.scripts = res['data'];
+          console.log(this.scripts);
+          console.log(Object.keys(this.scripts));
+        },
         console.error
       )
   }

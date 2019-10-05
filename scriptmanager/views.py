@@ -265,6 +265,7 @@ class PublishedScriptAPI(APIView):
   def get(self, request):
     scripts = Script.objects.filter(status=True)
     tutorials = []
+    tutorials_group = {}
 
     for script in scripts:
       try:
@@ -273,7 +274,16 @@ class PublishedScriptAPI(APIView):
       except:
         pass
 
-    return Response({ 'data': tutorials })
+    for tutorial in tutorials:
+      print(tutorial)
+      tutorial['foss'] = dict(tutorial['foss'])
+      if tutorial['foss']['id'] not in tutorials_group:
+        tutorials_group[tutorial['foss']['id']] = []
+
+      tutorials_group[tutorial['foss']['id']].append(tutorial)
+
+    print(tutorials_group)
+    return Response({ 'data': tutorials_group })
 
 class ForReviewScriptAPI(APIView):
   permission_classes = [ReviewScriptPermission]

@@ -1,8 +1,14 @@
 <div class="section">
   <div class="container">
-    <div *ngFor="let tutorial of scripts">
-      <app-tutorials [tutorial]="tutorial"></app-tutorials>
-      <div class="is-divider" data-content="-"></div>
-    </div>
+    <ng-container *ngIf="scripts.length !== 0">
+      <div *ngFor="let foss of scripts | keyvalue">
+        <div *ngFor="let tutorial of foss.value">
+          <app-tutorials [tutorial]="tutorial"></app-tutorials>
+          <div class="is-divider" data-content="-"></div>
+        </div>
+      </div>
+    </ng-container>
+
+
   </div>
 </div>
