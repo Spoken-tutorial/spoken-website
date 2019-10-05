@@ -275,14 +275,17 @@ class PublishedScriptAPI(APIView):
         pass
 
     for tutorial in tutorials:
-      print(tutorial)
       tutorial['foss'] = dict(tutorial['foss'])
-      if tutorial['foss']['id'] not in tutorials_group:
-        tutorials_group[tutorial['foss']['id']] = []
+      foss = tutorial['foss']
+      if foss['id'] not in tutorials_group:
+        tutorials_group[foss['id']] = {
+          'name': foss['name'],
+          'data': []
+        }
 
-      tutorials_group[tutorial['foss']['id']].append(tutorial)
+      tutorials_group[foss['id']]['data'].append(tutorial)
 
-    print(tutorials_group)
+    # print(tutorials_group)
     return Response({ 'data': tutorials_group })
 
 class ForReviewScriptAPI(APIView):
