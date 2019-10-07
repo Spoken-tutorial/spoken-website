@@ -188,7 +188,6 @@ class FossAvailableForWorkshopAdmin(admin.ModelAdmin):
 
 
 class LanguagManagerAdmin(admin.ModelAdmin):
-
     form = LanguageManagerForm
     fields = ['user', 'language', 'status']
     list_display = ('user', 'language', 'status')
@@ -197,6 +196,12 @@ class LanguagManagerAdmin(admin.ModelAdmin):
     class Media:
 
         js = ('admin/js/not_contributor_langs.js', )
+
+
+class BankDetailAdmin(admin.ModelAdmin):
+    fields = ['user', 'account_number', 'ifsc', 'bank', 'branch']
+
+
 
 
 admin.site.register(Language, LanguageAdmin)
@@ -210,3 +215,4 @@ admin.site.register(FossAvailableForTest, FossAvailableForTestAdmin)
 admin.site.register(FossAvailableForWorkshop, FossAvailableForWorkshopAdmin)
 admin.site.register(BrochureDocument, BrochureDocumentAdmin)
 admin.site.register(LanguageManager, LanguagManagerAdmin)
+admin.site.register(BankDetail, BankDetailAdmin)

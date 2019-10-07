@@ -78,7 +78,7 @@ urlpatterns = [
     url(r'^update-common-component/$', update_common_component, name="update_common_component"),
     url(r'^update_tutorials/$',  update_tutorials, name="update_tutorials"),
 
-    # Common to Domain & Admin reviewer parts
+    # Common to Domain & Admin reviewer parts    
     url(r'^accept-all/(\w+)/(\d+)/$',  accept_all, name="accept_all"),
     url(r'^delete-notification/(\w+)/(\d+)/$',  delete_creation_notification, name="delete_creation_notification"),
     url(r'^clear-notifications/(\w+)/$',  clear_creation_notification, name="clear_creation_notification"),
@@ -91,6 +91,16 @@ urlpatterns = [
     url(r'^report-missing-component/(\d+)/$',  report_missing_component, name="report_missing_component"),
     url(r'^report-missing-component/reply/(\d+)/$',  report_missing_component_reply, name="report_missing_component_reply"),
     url(r'^report-missing-component/list/$',  report_missing_component_list, name="report_missing_component_list"),
+    
+
+    # Additional Views Created for Payment Module
+    url(r'payment/tutorials/$',  list_all_published_tutorials, name="list_all_published_tutorials"),
+    url(r'payment/ajax/languages/$',  load_languages, name="load_languages"),
+    url(r'payment/ajax/fosses/$',  load_fosses, name="load_fosses"),
+    url(r'payment/due/$',  list_all_due_tutorials, name="payment_due_tutorials"),
+    url(r'payment/honorarium/$',  list_payment_honorarium, name="payment_honorarium_list"),
+    url(r'payment/honorarium/detail/(\d+)/$',  detail_payment_honorarium, name="payment_honorarium_detail"),
+
 
     #Bidding Module
     url(r'^rate_contributors/$',rate_contributors,name = "rate_contributors"),
@@ -112,4 +122,3 @@ urlpatterns = [
     url(r'^get_rated_contributors/$', get_rated_contributors, name="get_rated_contributors"),
     url(r'^update_contributors/$', update_contributors, name="update_contributors"),
 ]
-

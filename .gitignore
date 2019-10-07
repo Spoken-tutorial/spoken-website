@@ -95,3 +95,6 @@ nosetests.xml
 .pydevproject
 
 cron/nohup.out
+
+# ignoring migrations
+*.dia.autosave

@@ -1,0 +1,51 @@
+\documentclass{letter}
+% \usepackage{pythontex}
+
+\begin{document}
+	\begin{letter}{To,\\
+			Professor Kannan Moudgalya,\\
+			PI,\\
+			Spoken Tutorial Project,\\
+			IIT Bombay,\\
+			Mumbai}
+	\opening{Dear Sir,}
+	I request you to kindly approve the honorarium of \textbf{ {{ amount.amount__sum }} } ({{money_as_text}}) for \textbf{ {{contributor.0.user__first_name}}  {{contributor.0.user__last_name}}}, for the creation of spoken tutorials 
+
+	\begin{center}
+			\begin{tabular}{|l|l @{\hspace{10\tabcolsep}} |l|l|}\hline
+			\textbf{No.} & \textbf{Topic Name} &\textbf{Foss Name} &\textbf{Time}\\
+			\hline
+			{% for a in tutorials%}
+			{{forloop.counter}}& {{a.0}}&{{a.2}}&{{a.1}}\\
+			\hline
+			{% endfor %}
+			\hline
+			& \textbf{Grand Total} & &\textbf{ {{totalSecs}} }\\
+			\hline
+			
+		\end{tabular}
+		
+	\end{center}
+
+
+	\textit{Calculation is pro-rata (based on the total time @Rs.{{ rate }} per 10 minutes)}\\
+	
+	Yours sincerely,\\\\
+	Nancy Varkey\\
+		Spoken Tutorial Project, \\
+		IIT Bombay, \\
+		Mumbai\\
+
+\begin{center}
+	\begin{tabular}{l@{\hspace{5\tabcolsep}} c@{\hspace{5\tabcolsep}} l}
+		\textbf{Postal Address}& &\textbf{Account Details}\\
+		21 Bridge Street & &Account Number : {something}\\
+		Smallville & &IFSC :{something}\\
+		Dunwich DU3 4WE & &Bank : {something}\\
+		 & &Branch : {something, Pune}
+	\end{tabular}
+\end{center}	
+	
+	
+	\end{letter}
+\end{document}

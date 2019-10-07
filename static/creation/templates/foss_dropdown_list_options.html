@@ -1,0 +1,10 @@
+<option value="">--- Select FOSS ---</option>
+{% for foss in foss_list %}
+	<option 
+		value="{{ foss.0 }}" 
+		'{% if existing_foss|stringformat:"s" == foss.0|stringformat:"s" %} selected {% endif %}'
+	>
+		 {{ foss.1 }}
+	</option>
+	
+{% endfor %}

@@ -40,6 +40,7 @@ pyasn1==0.4.4
 pyasn1-modules==0.2.2
 PyPDF2==1.26.0
 python-dateutil==2.7.3
+python-docx==0.8.10
 pytz==2018.5
 rcssmin==1.0.6
 reportlab==3.5.9

@@ -62,6 +62,36 @@
                     <td class="col-center">
                         {% if tr_rec.status == 0 %} Pending {% elif tr_rec.status == 1 %} Accepted {% else %} Public Review {% endif %}
                     </td>
+                    <td class="col-center">
+                        {% for tr_pay in tr_rec.tutorialpayment_set.all %}
+                            {% if tr_pay.user == request.user %}
+                                <!-- cancelled -->
+                                {% if tr_pay.status == 0 %}
+                                    <span class="text-danger fa fa-1 fa-minus-circle" title="Cancelled"></span>
+                                <!-- Due -->    
+                                {% elif tr_pay.status == 1 %}
+                                    <span class="text-warning fa fa-1 fa-exclamation-circle" title="Due"></span>
+
+                                {% elif tr_pay.status == 2 %}
+                                    <!-- Forwarded -->
+                                    {% if tr_pay.payment_honorarium.status == 2 %}
+                                        <span class="text-info fa fa-1 fa-check-circle" title="Forwarded to Accounts Section"></span>
+                                    <!-- Completed -->
+                                    {% elif tr_pay.payment_honorarium.status == 3 %}
+                                        <a href="{% url 'creation:payment_honorarium_detail' tr_pay.payment_honorarium.id %}?next={{ request.get_full_path }}" class="btn btn-primary btn-sm" title="Confirm that honorarium recieved">Confirm</a>   
+                                    <!-- Confirmed -->
+                                    {% elif tr_pay.payment_honorarium.status == 4 %}
+                                        <span class="text-success fa fa-1 fa-check-circle" title="Confirmed by You"></span>
+                                    <!-- Initiated -->
+                                    {% else %}
+                                        <span class="fa fa-1 fa-check-circle" title="Payment Process Initiated"></span>
+                                    {% endif %}
+                                {% endif %}
+                            {% endif %}
+                        {% empty %}
+                            NoData
+                        {% endfor %}
+                    </td>
                 </tr>
             {% endfor %}
             </tbody>
