@@ -3343,11 +3343,13 @@ class StudentGradeFilter(UserPassesTestMixin, FormView):
       foss = [x for x in form.cleaned_data['foss']]
       state = [s for s in form.cleaned_data['state']]
       grade = form.cleaned_data['grade']
-      result=self.filter_student_grades(foss, state, grade)
+      activation_status = form.cleaned_data['activation_status']
+      institution_type = [t for t in form.cleaned_data['institution_type']]
+      result=self.filter_student_grades(foss, state, grade, institution_type, activation_status)
     return self.render_to_response(self.get_context_data(form=form, result=result))
 
 
-  def filter_student_grades(self, foss=None, state=None, grade=None):
+  def filter_student_grades(self, foss=None, state=None, grade=None, institution_type=None, activation_status=None):
     if grade:
       #get the moodle id for the foss
       try:
@@ -3357,7 +3359,14 @@ class StudentGradeFilter(UserPassesTestMixin, FormView):
         #convert moodle user and grades as key value pairs
         dictgrade = {i[0]:{i[1]:[i[2],False]} for i in user_grade}
         #get all test attendance for moodle user ids and for a specific moodle quiz ids
-        test_attendance=TestAttendance.objects.filter(mdluser_id__in=list(dictgrade.keys()), mdlquiz_id__in=[f.mdlquiz_id for f in fossmdl], test__academic__state__in=state, status__gte=3)
+        test_attendance=TestAttendance.objects.filter(
+                                  mdluser_id__in=list(dictgrade.keys()), 
+                                  mdlquiz_id__in=[f.mdlquiz_id for f in fossmdl], 
+                                  test__academic__state__in=state if state else State.objects.all(), 
+                                  status__gte=3, 
+                                  test__academic__institution_type__in=institution_type if institution_type else InstituteType.objects.all(), 
+                                  test__academic__status__in=[activation_status] if activation_status else [1,3]
+                                )
 
         filter_ta=[]
         for i in range(test_attendance.count()):

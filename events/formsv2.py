@@ -578,13 +578,22 @@ class TrainingManagerForm(forms.Form):
         #     # initial data
         #     self.fields['college'].initial = initial.academic_id
 
+ACTIVATION_STATUS = (
+    (None, "--------"),
+    (1, "Activate"),
+    (3, "Deactivate"))
+
 class StudentGradeFilterForm(forms.Form):
   foss = forms.ModelMultipleChoiceField(queryset=FossCategory.objects.all())
-  state = forms.ModelMultipleChoiceField(queryset=State.objects.all())
+  state = forms.ModelMultipleChoiceField(queryset=State.objects.all(), required=False)
   grade = forms.IntegerField(min_value=0, max_value=100)
+  institution_type = forms.ModelMultipleChoiceField(queryset=InstituteType.objects.all(), required=False)
+  activation_status = forms.ChoiceField(choices = ACTIVATION_STATUS, required=False)
 
   def __init__(self, *args, **kwargs):
     super().__init__(*args, **kwargs)
     self.fields['foss'].widget.attrs.update({'class': 'form-control'})
     self.fields['state'].widget.attrs.update({'class': 'form-control'})
     self.fields['grade'].widget.attrs.update({'class': 'form-control'})
+    self.fields['institution_type'].widget.attrs.update({'class': 'form-control'})
+    self.fields['activation_status'].widget.attrs.update({'class': 'form-control'})
