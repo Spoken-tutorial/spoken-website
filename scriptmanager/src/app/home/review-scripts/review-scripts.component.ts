@@ -8,7 +8,7 @@ import { CreateScriptService } from 'src/app/_service/create-script.service';
 })
 export class ReviewScriptsComponent implements OnInit {
 
-  public scripts: any;
+  public scripts: any = [];
 
   constructor(
     private scriptService: CreateScriptService
