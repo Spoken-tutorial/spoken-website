@@ -38,11 +38,12 @@ class TutorialDetailSerializer(serializers.ModelSerializer):
   language = serializers.SerializerMethodField()
   published_by = serializers.SerializerMethodField()
   published_on = serializers.SerializerMethodField()
+  created_by = serializers.SerializerMethodField()
   foss = FossCategorySerializer(read_only=True)
 
   class Meta:
     model = TutorialDetail
-    fields = ('id', 'foss', 'language', 'tutorial', 'level', 'order', 'script_status', 'outline', 'published', 'published_on', 'published_by')
+    fields = ('id', 'foss', 'language', 'tutorial', 'level', 'order', 'script_status', 'outline', 'published', 'published_on', 'published_by', 'created_by')
 
   def get_script_status(self, instance):
     if Script.objects.filter(tutorial_id=instance.id, language=self.context.get('lang')).exists():
@@ -67,6 +68,14 @@ class TutorialDetailSerializer(serializers.ModelSerializer):
       user = Script.objects.get(tutorial_id=instance.id, language=self.context.get('lang')).published_by
 
       if (user):  return user.username
+
+    return None
+
+  def get_created_by(self, instance):
+    if self.get_script_status(instance):
+      user = Script.objects.get(tutorial_id=instance.id, language=self.context.get('lang')).published_by
+
+      return user.username
 
     return None
 
