@@ -294,6 +294,7 @@ class ForReviewScriptAPI(APIView):
   def get(self, request):
     scripts = Script.objects.filter(status=False)
     tutorials = []
+    tutorials_group = {}
 
     for script in scripts:
       try:
@@ -302,7 +303,18 @@ class ForReviewScriptAPI(APIView):
       except:
         pass
 
-    return Response({ 'data': tutorials })
+    for tutorial in tutorials:
+      tutorial['foss'] = dict(tutorial['foss'])
+      foss = tutorial['foss']
+      if foss['id'] not in tutorials_group:
+        tutorials_group[foss['id']] = {
+          'name': foss['name'],
+          'data': []
+        }
+
+      tutorials_group[foss['id']]['data'].append(tutorial)
+
+    return Response({ 'data': tutorials_group })
 
 class RelativeOrderingAPI(generics.ListAPIView):
   permission_classes = [ScriptOwnerPermission]
