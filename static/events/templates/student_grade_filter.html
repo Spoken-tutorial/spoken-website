@@ -17,7 +17,7 @@
           {% csrf_token %}
             <div class="col-lg-4 col-md-4 col-sm-4">
                 <div class="form-group">
-                    <label for="id_foss" class="col-sm-4 control-label">Foss</label>
+                    <label for="id_foss" class="col-sm-4 control-label">Foss *</label>
                     <div class="col-sm-8">
                       {{ form.foss }}
                         {{ form.foss.errors }}
@@ -31,7 +31,7 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="id_grade" class="col-sm-4 control-label">Grade</label>
+                    <label for="id_grade" class="col-sm-4 control-label">Grade *</label>
                     <div class="col-sm-8">
                         {{ form.grade }}greater than or equal to
                       {{ form.grade.errors }}
@@ -47,26 +47,51 @@
                     </div>
                 </div>
                 <div class="form-group">
+                  <label for="id_city" class="col-sm-4 control-label">City</label>
+                  <div class="col-sm-8">
+                    {{ form.city }}
+                      {{ form.city.errors }}
+                  </div>
+              </div>
+                <div class="form-group">
                     <label for="id_activation_status" class="col-sm-4 control-label">Status</label>
                     <div class="col-sm-8">
                       {{ form.activation_status }}
                         {{ form.activation_status.errors }}
                     </div>
                 </div>
-                <div class="form-group">
-                  <div class="col-sm-offset-4 col-sm-8">
-                     <input class="btn btn-success" type="submit" value="Filter" />
-                     <a class="btn btn-success" href="{{request.path}}?{{ request.GET|reset_get_values}}">Reset Filter</a>
-                  </div>
-               </div>
+                
             </div>
             <div class="col-lg-4 col-md-4 col-sm-4">
+                <div class="form-group">
                 <table class="table table-bordered table-hover" style="margin-bottom:0px;">
                     <tr>
                         <th>Total number of students</th>
                         <td>{{ result.count }}</td>
                     </tr>
                 </table>
+                </div>
+                <div class="form-group">
+                    <label for="id_from_date" class="col-sm-4 control-label">From Date</label>
+                    <div class="col-sm-8">
+                      {{ form.from_date }}
+                        {{ form.from_date.errors }}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="id_to_date" class="col-sm-4 control-label">To Date</label>
+                    <div class="col-sm-8">
+                      {{ form.to_date }}
+                        {{ form.to_date.errors }}
+                    </div>
+                </div>
+                  <div class="form-group">
+                    <div class="col-sm-offset-4 col-sm-8">
+                       <input class="btn btn-success" type="submit" value="Filter" />
+                       <a class="btn btn-success" href="{{request.path}}?{{ request.GET|reset_get_values}}">Reset Filter</a>
+                    </div>
+                 </div>
+                
             </div>
         </form>
     </div>
@@ -92,6 +117,7 @@
                   <th>Foss</th>
                   <th>Organiser</th>
                   <th>State</th>
+                  <th>City</th>
                 </tr>
               </thead>
               <tbody>
@@ -108,6 +134,7 @@
               <td>{{ ta.test.foss.foss }}</td>
               <td>{{ ta.test.organiser.user.first_name }} {{ ta.test.organiser.user.last_name }}</td>
               <td>{{ ta.test.academic.state.name }}</td>
+              <td>{{ ta.test.academic.city.name }}</td>
             </tr>
           {% endfor %}
         </tbody>
