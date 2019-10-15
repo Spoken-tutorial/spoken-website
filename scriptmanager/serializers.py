@@ -75,7 +75,7 @@ class TutorialDetailSerializer(serializers.ModelSerializer):
     if self.get_script_status(instance):
       user = Script.objects.get(tutorial_id=instance.id, language=self.context.get('lang')).published_by
 
-      return user.username
+      if (user):  return user.username
 
     return None
 
