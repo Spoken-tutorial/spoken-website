@@ -95,3 +95,6 @@ nosetests.xml
 .pydevproject
 
 cron/nohup.out
+*.ipynb
+.ipynb_checkpoints/
+.vscode/

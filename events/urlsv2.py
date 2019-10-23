@@ -344,6 +344,11 @@ urlpatterns = [
       r'^training-certificate/(?P<trid>\d+)/allcertificates/$', 
       AllTrainingCertificateView.as_view(), \
         name="alltraining_certificate"
+    ),
+    url(
+      r'^student-grade-filter/$',
+      StudentGradeFilter.as_view(),
+      name="student_grade_filter"
     )
 
 ]
