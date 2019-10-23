@@ -1718,3 +1718,8 @@ class PaymentTransactionDetails(models.Model):
     msg = models.CharField(max_length=100)
     created = models.DateTimeField(auto_now_add = True)
     updated = models.DateTimeField(auto_now_add = True)
+
+
+class topperlist(models.Model):
+  emailid = models.EmailField(max_length = 100)
+  userid = models.PositiveIntegerField()
