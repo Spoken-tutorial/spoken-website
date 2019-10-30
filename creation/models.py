@@ -221,6 +221,10 @@ class TutorialResource(models.Model):
 
     class Meta:
         unique_together = ('tutorial_detail', 'language',)
+    
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('watch_tutorial', args=[self.tutorial_detail.foss.foss, self.tutorial_detail.tutorial, self.language])
 
 
 class ArchivedVideo(models.Model):
