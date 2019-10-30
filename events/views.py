@@ -2976,12 +2976,23 @@ def ajax_check_foss(request):
     """ Ajax: Get the get the foss name of selected batch """
     training = request.GET.get('training',None)
     trid = TrainingRequest.objects.get(pk=training)
-    foss_name = trid.course.foss.foss
-    is_c_and_cpp = False
-    if 'C and Cpp' in foss_name:
-        is_c_and_cpp = True
+    foss_id = trid.course.foss.id
+
+    # is_c_and_cpp = False
+
+    is_multiquiz_foss = False
+    multiquiz_foss = 0
+
+    if foss_id == 43:
+        is_multiquiz_foss = True
+        multiquiz_foss = 43
+    
+    if foss_id == 97:
+        is_multiquiz_foss = True
+        multiquiz_foss = 97
     data = {
-    "is_c_and_cpp": is_c_and_cpp
+    "is_multiquiz_foss": is_multiquiz_foss,
+    "multiquiz_foss": multiquiz_foss
     }
     return JsonResponse(data)
 
