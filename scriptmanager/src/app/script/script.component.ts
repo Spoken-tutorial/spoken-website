@@ -152,8 +152,8 @@ export class ScriptComponent implements OnInit {
 
   public onDuplicateSlide(index) {
     this.slides.splice(index, 0, this.getEmptySlide());
-    this.slides[index].cue = this.slides[index+1].cue;
-    this.slides[index].narration = this.slides[index+1].narration;
+    this.slides[index].cue = this.slides[index - 1].cue;
+    this.slides[index].narration = this.slides[index - 1].narration;
     this.duplicateSlideEmitter.emit(index);
   }
   //calls the component which called script component and gives the slides array which needs to be saved in the database.

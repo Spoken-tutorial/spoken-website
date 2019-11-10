@@ -55,7 +55,7 @@ export class ScriptSlideComponent implements OnInit {
   }
   
   public insertSlide() {
-    this.insertSlideEmitter.emit(this.index);
+    this.insertSlideEmitter.emit(this.index + 1);
   }
   
   public checkSlide() {
@@ -64,7 +64,7 @@ export class ScriptSlideComponent implements OnInit {
   }
 
   public duplicateSlide() {
-    this.duplicateSlideEmitter.emit(this.index);
+    this.duplicateSlideEmitter.emit(this.index + 1);
   }
 
   public saveSlide() {

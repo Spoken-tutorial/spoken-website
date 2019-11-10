@@ -5,34 +5,6 @@
       <span class="tag is-link is-medium">{{ index+1 }}</span>
     </header>
 
-    <div class="timeline-item">
-      <div class="timeline-marker">
-      </div>
-      <div class="timeline-content">
-        <div class="columns is-mobile">
-          <div class="column">
-            <div class="is-icon is-pointer button-hover" (click)="moveSlide(-1)">
-              <i class="fas fa-chevron-circle-up fa-2x"></i>
-            </div>
-          </div>
-          <div class="column">
-            <div class="is-icon is-pointer button-hover" (click)="moveSlide(+1)">
-              <i class="fas fa-chevron-circle-down fa-2x"></i>
-            </div>
-          </div>
-          <div class="column">
-            <div class="is-icon is-pointer button-hover" (click)="insertSlide()">
-              <i class="fas fa-plus-circle fa-2x"></i>
-            </div>
-          </div>
-          <div class="column">
-            <a class="button heading is-outlined" (click)="duplicateSlide()">Duplicate row</a>
-          </div>
-        </div>
-      </div>
-    </div>
-
-
     <div class="timeline-item animated fadeInLeft">
       <div *ngIf="!view" class="timeline-marker is-icon" [swal]="{ title: 'Delete Slide',
               text: 'Are you sure?',
@@ -77,6 +49,47 @@
         </div>
       </form>
 
+    </div>
+
+
+    <div class="timeline-item">
+      <div class="timeline-marker">
+      </div>
+      <div class="timeline-content">
+        <div class="columns is-mobile">
+          <div class="column">
+            <a class="button heading is-outlined" (click)="moveSlide(-1)">
+              <i class="fas fa-chevron-up"></i>
+            </a>
+            <!-- <div class="is-icon is-pointer button-hover" (click)="moveSlide(-1)">
+                <i class="fas fa-chevron-circle-up fa-2x"></i>
+              </div> -->
+          </div>
+          <div class="column">
+            <a class="button heading is-outlined" (click)="moveSlide(+1)">
+              <i class="fas fa-chevron-down"></i>
+            </a>
+
+            <!-- <div class="is-icon is-pointer button-hover" (click)="moveSlide(+1)">
+                <i class="fas fa-chevron-circle-down fa-2x"></i>
+              </div> -->
+          </div>
+          <div class="column">
+            <a class="button heading is-outlined" (click)="insertSlide()">
+              <i class="fas fa-plus"></i>
+            </a>
+            <!-- 
+              <div class="is-icon is-pointer button-hover" (click)="insertSlide()">
+                <i class="fas fa-plus-circle fa-2x"></i>
+              </div> -->
+          </div>
+          <div class="column">
+            <a class="button heading is-outlined" (click)="duplicateSlide()">
+              <i class="far fa-clone"></i>
+            </a>
+          </div>
+        </div>
+      </div>
     </div>
 
   </div>
