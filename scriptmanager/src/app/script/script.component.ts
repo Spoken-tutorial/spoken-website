@@ -14,6 +14,7 @@ export class ScriptComponent implements OnInit {
   @Output() onSaveScript = new EventEmitter<any>();
   @Output() File = new EventEmitter<any>();
   @Output() insertSlideEmitter = new EventEmitter<number>();
+  @Output() duplicateSlideEmitter = new EventEmitter<number>();
   @Input() nav: any;
   @Input() displaySave: boolean = false;
   @Input() disableAutoSave: boolean = false;
@@ -147,6 +148,13 @@ export class ScriptComponent implements OnInit {
   public onInsertSlide(index) {
     this.slides.splice(index, 0, this.getEmptySlide());
     this.insertSlideEmitter.emit(index);
+  }
+
+  public onDuplicateSlide(index) {
+    this.slides.splice(index, 0, this.getEmptySlide());
+    this.slides[index].cue = this.slides[index+1].cue;
+    this.slides[index].narration = this.slides[index+1].narration;
+    this.duplicateSlideEmitter.emit(index);
   }
   //calls the component which called script component and gives the slides array which needs to be saved in the database.
   public saveScript() {

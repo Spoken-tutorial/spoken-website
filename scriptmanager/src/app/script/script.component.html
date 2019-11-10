@@ -34,6 +34,7 @@
       <ng-container *ngFor="let slide of slides; let i = index">
         <app-script-slide [slide]="slide" [index]="i" [nav]="nav" (removeSlideEmitter)="onRemoveSlide($event)"
           (saveSlideEmitter)="onSaveSlide($event)" (insertSlideEmitter)="onInsertSlide($event)"
+          (duplicateSlideEmitter)="onDuplicateSlide($event)"
           [disableAutoSave]="disableAutoSave" (moveSlideEmitter)="onMoveSlide($event)"></app-script-slide>
       </ng-container>
 

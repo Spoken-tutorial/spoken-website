@@ -14,6 +14,7 @@ export class ScriptSlideComponent implements OnInit {
   @Output() removeSlideEmitter = new EventEmitter<number>();
   @Output() saveSlideEmitter = new EventEmitter<any>();
   @Output() insertSlideEmitter = new EventEmitter<number>();
+  @Output() duplicateSlideEmitter = new EventEmitter<number>();
   @Output() moveSlideEmitter = new EventEmitter<any>();
   @Input() view: boolean = false;
   @Input() nav:any;
@@ -60,6 +61,10 @@ export class ScriptSlideComponent implements OnInit {
   public checkSlide() {
     this.oldSlide.cue = this.slide.cue;
     this.oldSlide.narration = this.slide.narration;
+  }
+
+  public duplicateSlide() {
+    this.duplicateSlideEmitter.emit(this.index);
   }
 
   public saveSlide() {

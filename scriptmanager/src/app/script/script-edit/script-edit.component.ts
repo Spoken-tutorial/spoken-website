@@ -126,6 +126,10 @@ export class ScriptEditComponent implements OnInit {
 
   }
 
+  public onDuplicateSlide(index) {
+    this.onInsertSlide(index);
+  }
+
   // argument:tutorial id and 
   // what it does:
   // returns: status==success if data is saved successfully and status=false if data couldn't saved successfully because of some reason 
