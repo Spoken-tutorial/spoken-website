@@ -348,6 +348,14 @@ class CommentCreateAPIView(generics.ListCreateAPIView):
     except:
       return Response({'status': False},status = 400)
 
+class ModifyCommentAPI(generics.ListAPIView):
+  def patch(self, request, comment_id):
+    comment = Comment.objects.get(id=comment_id)
+    comment.comment = request.data['comment']
+    comment.save()
+
+    return Response({'status': True}, status=200)
+
 
 class ReversionListView(generics.ListAPIView):
   serializer_class = ReversionSerializer

@@ -16,6 +16,7 @@ urlpatterns = [
   url(r'api/scripts/(?P<script_id>[0-9]+)/$', views.RelativeOrderingAPI.as_view()),
   url(r'api/scripts/published/$', views.PublishedScriptAPI.as_view()),
   url(r'api/scripts/review/$', views.ForReviewScriptAPI.as_view()),
+  url(r'api/comments/(?P<comment_id>[0-9]+)/$', views.ModifyCommentAPI.as_view()),
   url(r'api/docs/$', schema_view),
   url(r'', views.index, name='home')
 ]
