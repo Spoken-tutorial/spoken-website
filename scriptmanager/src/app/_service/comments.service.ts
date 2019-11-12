@@ -39,4 +39,14 @@ export class CommentsService {
     return ls;
   }
 
+  public modifyComment(cid, data) {
+    const url = `${this.apiUrl}/comments/${cid}/`;
+
+    return this.http.patch(
+      url,
+      data,
+      this.httpOptions
+    );
+  }
+
 }
