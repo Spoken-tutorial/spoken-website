@@ -16,14 +16,15 @@
         </a>
       </div>
     </div>
-    <!-- <div class="buttons">
-      <a class="button is-info" routerLink="/">
-        <i class="fa fa-chevron-left"></i>&nbsp;Go Back
-      </a>
-      <a *ngIf="nav!='create'" class="button is-info" routerLink="/{{nav}}/{{tid}}/{{lid}}/{{ tutorialName }}">
-        <i class="fa fa-eye"></i>&nbsp;View Mode
-      </a>
-    </div> -->
+  </div>
+</div>
+<div *ngIf="nav!='create'" class="columns">
+  <div class="column">
+    <div class="field">
+      <input id="autosave" type="checkbox" name="autosave"
+        class="switch is-rounded is-outlined" [(ngModel)]="autosave">
+      <label for="autosave">Autosave</label>
+    </div>
   </div>
 </div>
 
@@ -34,8 +35,8 @@
       <ng-container *ngFor="let slide of slides; let i = index">
         <app-script-slide [slide]="slide" [index]="i" [nav]="nav" (removeSlideEmitter)="onRemoveSlide($event)"
           (saveSlideEmitter)="onSaveSlide($event)" (insertSlideEmitter)="onInsertSlide($event)"
-          (duplicateSlideEmitter)="onDuplicateSlide($event)"
-          [disableAutoSave]="disableAutoSave" (moveSlideEmitter)="onMoveSlide($event)"></app-script-slide>
+          (duplicateSlideEmitter)="onDuplicateSlide($event)" [autosave]="autosave"
+          (moveSlideEmitter)="onMoveSlide($event)"></app-script-slide>
       </ng-container>
 
 

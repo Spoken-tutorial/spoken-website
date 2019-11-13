@@ -25,7 +25,7 @@
               <p class="heading">Visual Cue</p>
               <div class="field">
                 <div class="control content">
-                  <quill-editor tagName="textarea" formControlName="cue" [(ngModel)]="slide.cue" (onBlur)="saveSlide()"
+                  <quill-editor tagName="textarea" formControlName="cue" [(ngModel)]="slide.cue" (onBlur)="saveSlide(true)"
                     [styles]="quillStyles" theme="snow">
                   </quill-editor>
                 </div>
@@ -39,7 +39,7 @@
               <div class="field">
                 <div class="control content">
                   <quill-editor tagName="textarea" formControlName="narration" [(ngModel)]="slide.narration"
-                    (onBlur)="saveSlide()" [styles]="quillStyles" theme="snow">
+                    (onBlur)="saveSlide(true)" [styles]="quillStyles" theme="snow">
                   </quill-editor>
                 </div>
               </div>
@@ -86,6 +86,11 @@
           <div class="column">
             <a class="button heading is-outlined" (click)="duplicateSlide()">
               <i class="far fa-clone"></i>
+            </a>
+          </div>
+          <div class="column">
+            <a class="button heading is-outlined" (click)="saveSlide(false)">
+                <i class="far fa-save"></i>
             </a>
           </div>
         </div>

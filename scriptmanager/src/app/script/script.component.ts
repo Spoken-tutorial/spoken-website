@@ -17,7 +17,7 @@ export class ScriptComponent implements OnInit {
   @Output() duplicateSlideEmitter = new EventEmitter<number>();
   @Input() nav: any;
   @Input() displaySave: boolean = false;
-  @Input() disableAutoSave: boolean = false;
+  autosave: boolean = false;
   public tid;
   public lid;
   public tutorialName: any;

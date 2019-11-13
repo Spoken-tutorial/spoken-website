@@ -18,7 +18,7 @@ export class ScriptSlideComponent implements OnInit {
   @Output() moveSlideEmitter = new EventEmitter<any>();
   @Input() view: boolean = false;
   @Input() nav:any;
-  @Input() disableAutoSave: boolean = false;
+  @Input() autosave: boolean = false;
   public comment = false;
   public ckEditorCue: boolean = false;
   public ckEditorNarration: boolean = false;
@@ -67,11 +67,11 @@ export class ScriptSlideComponent implements OnInit {
     this.duplicateSlideEmitter.emit(this.index + 1);
   }
 
-  public saveSlide() {
-    if (this.disableAutoSave) {
-      return;
+  public saveSlide(isAutosave) {
+    if (isAutosave) {
+      if (!this.autosave) return;
     }
-    
+
     if (this.oldSlide.cue != this.slide.cue) {
       this.slide.cue = this.editorForm.get('cue').value
       this.saveSlideEmitter.emit(this.slide);
