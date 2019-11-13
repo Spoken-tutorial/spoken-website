@@ -12,7 +12,7 @@
               <app-badge-button faClass="fa fa-chevron-left" textClass="is-info" text="Go Back"></app-badge-button>
             </a>
           </div>
-          <div class="control" *ngIf="nav!='create'">
+          <div class="control" *ngIf="nav!='create' && !script.status">
             <a routerLink="/edit/{{tid}}/{{lid}}/{{ tutorialName }}">
               <app-badge-button faClass="fa fa-edit" textClass="is-info" text="Edit Mode"></app-badge-button>
             </a>
