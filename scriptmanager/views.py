@@ -17,7 +17,7 @@ import time
 from creation.views import is_videoreviewer,is_domainreviewer,is_qualityreviewer
 import uuid
 import subprocess 
-from .permissions import ScriptOwnerPermission, PublishedScriptPermission, ReviewScriptPermission
+from .permissions import ScriptOwnerPermission, ScriptModifyPermission, PublishedScriptPermission, ReviewScriptPermission
 from django.utils import timezone
 
 def custom_jwt_payload_handler(user):
@@ -227,7 +227,7 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
       return Response({'message': 'Failed to change status'}, status = 400) 
 
 class ScriptDetailAPIView(generics.ListAPIView):
-  permission_classes = [ScriptOwnerPermission]
+  permission_classes = [ScriptModifyPermission]
 
   def patch(self,request,tid,lid,script_detail_id):
     try:
@@ -238,6 +238,7 @@ class ScriptDetailAPIView(generics.ListAPIView):
       script_details  =  self.request.data
       script_details['id']=int(script_detail_id)
       script  =  ScriptDetail.objects.get(pk = (script_details['id']))
+      self.check_object_permissions(request, script)
       serializer  =  ScriptDetailSerializer(script, data = script_details)
       if serializer.is_valid():
         serializer.save()
