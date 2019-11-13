@@ -348,11 +348,21 @@ class CommentCreateAPIView(generics.ListCreateAPIView):
     except:
       return Response({'status': False},status = 400)
 
-class ModifyCommentAPI(generics.ListAPIView):
+class CommentAPI(generics.ListAPIView):
   def patch(self, request, comment_id):
     comment = Comment.objects.get(id=comment_id)
     comment.comment = request.data['comment']
     comment.save()
+
+    return Response({'status': True}, status=200)
+
+  def delete(self, request, comment_id):
+    comment = Comment.objects.get(id=comment_id)
+    script = comment.script_details
+    comment.delete()
+
+    script.comment_status = len(Comment.objects.filter(script_details=script)) > 0
+    script.save()
 
     return Response({'status': True}, status=200)
 

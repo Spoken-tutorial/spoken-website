@@ -36,6 +36,14 @@ export class ScriptCommentComponent implements OnInit {
       );
   };
 
+  deleteComment(index) {
+    this.commentService.deleteComment(this.comments[index]['id'])
+      .subscribe(
+        (res) => this.comments.splice(index, 1),
+        console.error
+      );
+  }
+
   ngOnInit() {
     var element = document.getElementById("fixedComments");
     element.scrollTop = element.scrollHeight;

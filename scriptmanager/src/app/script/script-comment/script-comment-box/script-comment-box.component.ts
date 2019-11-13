@@ -9,6 +9,7 @@ export class ScriptCommentBoxComponent implements OnInit {
   @Input() comment: any;
   @Input() index: number;
   @Output() saveCommentEmitter = new EventEmitter<number>();
+  @Output() deleteCommentEmitter = new EventEmitter<number>();
 
   isEditable: boolean = false;
 
@@ -21,6 +22,10 @@ export class ScriptCommentBoxComponent implements OnInit {
   saveComment() {
     this.saveCommentEmitter.emit(this.index);
     this.isEditable = false;
+  }
+
+  deleteComment() {
+    this.deleteCommentEmitter.emit(this.index);
   }
 
   ngOnInit() {

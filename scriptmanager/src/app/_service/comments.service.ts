@@ -49,4 +49,13 @@ export class CommentsService {
     );
   }
 
+  public deleteComment(cid) {
+    const url = `${this.apiUrl}/comments/${cid}/`;
+
+    return this.http.delete(
+      url,
+      this.httpOptions
+    );
+  }
+
 }
