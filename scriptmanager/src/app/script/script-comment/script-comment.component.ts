@@ -26,12 +26,17 @@ export class ScriptCommentComponent implements OnInit {
     }
   }
 
+
   commentKey(event) { this.newComment = event.target.value; }
 
   saveComment(index) {
-    this.commentService.modifyComment(this.comments[index]['id'], this.comments[index])
-      .subscribe(
-        console.log,
+    this.commentService.modifyComment(
+      this.comments[index]['id'], 
+      {'comment': this.comments[index].comment}
+    ).subscribe(
+        (res) => {
+          this.comments[index] = res['data'];
+        },
         console.error
       );
   };
@@ -40,6 +45,26 @@ export class ScriptCommentComponent implements OnInit {
     this.commentService.deleteComment(this.comments[index]['id'])
       .subscribe(
         (res) => this.comments.splice(index, 1),
+        console.error
+      );
+  }
+
+  doneComment(index) {
+    this.commentService.changeCommentDoneStatus(this.comments[index]['id'], !this.comments[index]['done'])
+      .subscribe(
+        (res) => {
+          this.comments[index] = res['data'];
+        },
+        console.error
+      );
+  }
+
+  resolveComment(index) {
+    this.commentService.changeCommentResolvedStatus(this.comments[index]['id'], !this.comments[index]['resolved'])
+      .subscribe(
+        (res) => {
+          this.comments[index] = res['data'];
+        },
         console.error
       );
   }

@@ -152,7 +152,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
   class Meta:
     model = Comment
-    fields = ('id', 'comment', 'user', 'script_details', 'time')
+    fields = ('id', 'comment', 'user', 'script_details', 'time', 'done', 'resolved')
 
   def get_time(self, instance):
     time = datetime.now()

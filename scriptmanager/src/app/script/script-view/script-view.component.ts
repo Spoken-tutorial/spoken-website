@@ -34,7 +34,7 @@ export class ScriptViewComponent implements OnInit {
   public leftContentNarration = "";
   public rightContentCue = "";
   public rightContentNarration = "";
-  public script: any;
+  public script: any = {};
 
   @Input() nav: any;
   @ViewChild('tableRow') el: ElementRef;

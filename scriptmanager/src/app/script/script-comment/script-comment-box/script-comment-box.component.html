@@ -8,23 +8,37 @@
       </p>
       <small><i class="fa fa-user"></i> {{ comment['user'] }} | <em>{{comment['time']}}</em></small>
       <div class="columns">
-        <div class="column is-narrow">
+        <div class="column is-narrow" *ngIf="!comment.resolved">
           <a *ngIf="!isEditable" (click)="makeEditable()">
             <span class="tag is-info is-light">edit</span>
           </a>
           <a *ngIf="isEditable" (click)="saveComment()">
             <span class="tag is-primary is-light">save</span>
           </a>
-
         </div>
-        <div class="column is-narrow">
+        <div class="column is-narrow" *ngIf="!comment.resolved">
           <a (click)="deleteComment()">
             <span class="tag is-danger is-light">delete</span>
           </a>
         </div>
+        <div class="column is-narrow" *ngIf="!comment.resolved">
+          <a (click)="doneComment()">
+            <span class="tag is-success is-light">
+              <span class="icon" *ngIf="comment.done">
+                <i class="fas fa-check"></i>
+              </span>
+              <span>done</span> 
+            </span>
+          </a>
+        </div>
         <div class="column is-narrow">
-          <a>
-            <span class="tag is-success is-light">resolve</span>
+          <a (click)="resolveComment()">
+            <span class="tag is-success is-light">
+              <span class="icon" *ngIf="comment.resolved">
+                <i class="fas fa-check"></i>
+              </span>
+              <span>resolve</span>
+            </span>
           </a>
         </div>
       </div>

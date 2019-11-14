@@ -352,10 +352,12 @@ class CommentCreateAPIView(generics.ListCreateAPIView):
 class CommentAPI(generics.ListAPIView):
   def patch(self, request, comment_id):
     comment = Comment.objects.get(id=comment_id)
-    comment.comment = request.data['comment']
-    comment.save()
+    serializer = CommentSerializer(comment, request.data, partial=True)
+    if (serializer.is_valid()):
+      serializer.save()
+      return Response({'message': 'Success', 'data': serializer.data})
 
-    return Response({'status': True}, status=200)
+    return Response({'message': 'Failed to update comment'}, status=400)
 
   def delete(self, request, comment_id):
     comment = Comment.objects.get(id=comment_id)

@@ -32,3 +32,5 @@ class Comment(models.Model):
 	script_details=models.ForeignKey(ScriptDetail, on_delete=models.CASCADE)
 	created = models.DateTimeField(auto_now_add=True)
 	updated = models.DateTimeField(auto_now=True)
+	done = models.BooleanField(default=False)
+	resolved = models.BooleanField(default=False)

@@ -58,4 +58,24 @@ export class CommentsService {
     );
   }
 
+  public changeCommentDoneStatus(cid, status) {
+    const url = `${this.apiUrl}/comments/${cid}/`;
+
+    return this.http.patch(
+      url,
+      { 'done': status },
+      this.httpOptions
+    );
+  }
+
+  public changeCommentResolvedStatus(cid, status) {
+    const url = `${this.apiUrl}/comments/${cid}/`;
+
+    return this.http.patch(
+      url,
+      { 'resolved': status },
+      this.httpOptions
+    );
+  }
+
 }
