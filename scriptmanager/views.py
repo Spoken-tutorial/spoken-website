@@ -17,7 +17,7 @@ import time
 from creation.views import is_videoreviewer,is_domainreviewer,is_qualityreviewer
 import uuid
 import subprocess 
-from .permissions import ScriptOwnerPermission, ScriptModifyPermission, PublishedScriptPermission, ReviewScriptPermission
+from .permissions import ScriptOwnerPermission, ScriptModifyPermission, PublishedScriptPermission, ReviewScriptPermission, CommentOwnnerPermission
 from django.utils import timezone
 
 def custom_jwt_payload_handler(user):
@@ -350,14 +350,18 @@ class CommentCreateAPIView(generics.ListCreateAPIView):
       return Response({'status': False},status = 400)
 
 class CommentAPI(generics.ListAPIView):
-  def patch(self, request, comment_id):
-    comment = Comment.objects.get(id=comment_id)
-    serializer = CommentSerializer(comment, request.data, partial=True)
-    if (serializer.is_valid()):
-      serializer.save()
-      return Response({'message': 'Success', 'data': serializer.data})
+  permission_classes = [CommentOwnnerPermission]
 
-    return Response({'message': 'Failed to update comment'}, status=400)
+  def patch(self, request, comment_id):
+    try:
+      comment = Comment.objects.get(id=comment_id)
+      self.check_object_permissions(request, comment)
+      serializer = CommentSerializer(comment, request.data, partial=True)
+      if (serializer.is_valid()):
+        serializer.save()
+        return Response({'message': 'Success', 'data': serializer.data})
+    except:
+      return Response({'message': 'Failed to update comment'}, status=400)
 
   def delete(self, request, comment_id):
     comment = Comment.objects.get(id=comment_id)

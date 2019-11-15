@@ -38,3 +38,14 @@ class ReviewScriptPermission(IsAuthenticatedOrReadOnly):
     if (user.is_anonymous()): return False
 
     return is_domainreviewer(user) or is_qualityreviewer(user)
+
+
+class CommentOwnnerPermission(IsAuthenticatedOrReadOnly):
+  def has_object_permission(self, request, view, obj):
+    user = obj.user
+    if (user.is_anonymous()): return False
+
+    if ('done' in request.data.keys()):
+      return is_domainreviewer(user) or is_qualityreviewer(user) or obj.user == user
+
+    return request.user == obj.user

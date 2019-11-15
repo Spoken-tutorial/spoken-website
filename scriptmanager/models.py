@@ -34,3 +34,6 @@ class Comment(models.Model):
 	updated = models.DateTimeField(auto_now=True)
 	done = models.BooleanField(default=False)
 	resolved = models.BooleanField(default=False)
+
+	def __str__(self):
+	 return str(self.user) + ' - ' + self.comment
