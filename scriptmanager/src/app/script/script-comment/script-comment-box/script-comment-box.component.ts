@@ -42,7 +42,6 @@ export class ScriptCommentBoxComponent implements OnInit {
   }
 
   ngOnInit() {
-    console.log(this.authService.isOwner(this.comment.user));
   }
 
 }

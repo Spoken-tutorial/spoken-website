@@ -186,7 +186,7 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
           details=self.scriptsData(html,script)
         os.system('rm '+ doc_file + ' '+html_file)
       else:
-        return Response({'status': False},status = 400)
+        return Response({'status': False, 'message': 'Failed to create script'},status = 500)
 
     elif (create_request_type=="template"):
       data=request.data['details']
@@ -206,7 +206,7 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
         script.save()
 
       return Response({'status': True, 'data': serialized.data },status = 201)
-    return Response({'status': False},status = 400)
+    return Response({'status': False, 'message': 'Failed to create script'},status = 500)
 
   def patch(self, request,tid,lid):
     try:
@@ -224,7 +224,7 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
       script.save()
       return Response({'status': status, 'message': 'Successfully changed status of script'}, status = 200) 
     except:
-      return Response({'message': 'Failed to change status'}, status = 400) 
+      return Response({'message': 'Failed to change status'}, status = 500) 
 
 class ScriptDetailAPIView(generics.ListAPIView):
   permission_classes = [ScriptModifyPermission]
@@ -243,22 +243,23 @@ class ScriptDetailAPIView(generics.ListAPIView):
       if serializer.is_valid():
         serializer.save()
         return Response({'status': True},status = 200)
-      return Response({'status': False},status = 400)       
+      return Response({'status': False, 'message': 'Failed to update row'},status = 500)       
     except:
-      return Response({'status': False},status = 400) 
+      return Response({'status': False, 'message': 'Failed to update row'},status = 403)       
 
   def delete(self,request,tid,lid,script_detail_id):
     try:
       tutorial=TutorialDetail.objects.get(pk = int(self.kwargs['tid']))
       language=Language.objects.get(pk = int(self.kwargs['lid']))
       script = Script.objects.get(tutorial = tutorial, language = language, user = self.request.user)
+      self.check_object_permissions(request, script)
 
       ScriptDetail.objects.get(pk = int(self.kwargs['script_detail_id']),script = script).delete()
       if not ScriptDetail.objects.filter(script_id = script.pk).exists(): 
        script.delete()
       return Response({'status': True},status = 202) 
     except:
-      return Response({'status': False},status = 400) 
+      return Response({'status': False, 'message': 'Failed to delete row'},status = 403)       
 
 class PublishedScriptAPI(APIView):
   # permission_classes = [PublishedScriptPermission]
@@ -347,7 +348,7 @@ class CommentCreateAPIView(generics.ListCreateAPIView):
       Comment.objects.create(comment=request.data['comment'],user=self.request.user,script_details=script_data)
       return Response({'status': True},status = 202)
     except:
-      return Response({'status': False},status = 400)
+      return Response({'status': False, 'message': 'Failed to create comment'},status = 500)       
 
 class CommentAPI(generics.ListAPIView):
   permission_classes = [CommentOwnnerPermission]
@@ -361,7 +362,7 @@ class CommentAPI(generics.ListAPIView):
         serializer.save()
         return Response({'message': 'Updated the comment', 'data': serializer.data})
     except:
-      return Response({'message': 'Failed to update comment'}, status=400)
+      return Response({'message': 'Unauthorized request to update comment'}, status=403)
 
   def delete(self, request, comment_id):
     try:
@@ -374,7 +375,7 @@ class CommentAPI(generics.ListAPIView):
       script.save()
       return Response({'status': True}, status=200)
     except:
-      return Response({'message': 'Failed to update comment'}, status=400)
+      return Response({'message': 'Unauthorized request to update comment'}, status=403)
 
 class ReversionListView(generics.ListAPIView):
   serializer_class = ReversionSerializer
@@ -403,4 +404,4 @@ class ReversionRevertView(generics.CreateAPIView):
       reversion_data[int(self.kwargs['reversion_id'])-1].revision.revert()
       return Response({'status': True},status = 201)
     except:
-      return Response({'status': False},status = 400)
+      return Response({'status': False, 'message': 'Failed'},status = 403)
