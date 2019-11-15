@@ -2976,12 +2976,23 @@ def ajax_check_foss(request):
     """ Ajax: Get the get the foss name of selected batch """
     training = request.GET.get('training',None)
     trid = TrainingRequest.objects.get(pk=training)
-    foss_name = trid.course.foss.foss
-    is_c_and_cpp = False
-    if 'C and Cpp' in foss_name:
-        is_c_and_cpp = True
+    foss_id = trid.course.foss.id
+
+    # is_c_and_cpp = False
+
+    is_multiquiz_foss = False
+    multiquiz_foss = 0
+
+    if foss_id == 43:
+        is_multiquiz_foss = True
+        multiquiz_foss = 43
+    
+    if foss_id == 97:
+        is_multiquiz_foss = True
+        multiquiz_foss = 97
     data = {
-    "is_c_and_cpp": is_c_and_cpp
+    "is_multiquiz_foss": is_multiquiz_foss,
+    "multiquiz_foss": multiquiz_foss
     }
     return JsonResponse(data)
 
@@ -3112,6 +3123,71 @@ def verify_test_certificate(request):
         context = key_verification(serial_no)
         return render(request, 'verify_test_certificate.html', context)
     return render(request, 'verify_test_certificate.html', {})
+
+def check_user_email_exist(email):
+    users = User.objects.filter(email=email)
+    if users.exists():
+        user = users.first()
+        return user
+    return None
+
+def check_email_already_organiser(userid):
+    org = Organiser.objects.filter(user_id=userid)
+    if org.exists():
+        return org
+    return None
+
+@login_required
+def handover(request):
+    user = request.user
+    context = {}
+    if not (user.is_authenticated() and (is_event_manager(user))):
+        raise PermissionDenied()
+    # ci = RequestContext(request)
+    if request.method == 'POST':
+        old_email = request.POST.get('old_email').strip()
+        new_email = request.POST.get('new_email').strip()
+
+        #check if old email id registerd or not
+        old_user = check_user_email_exist(old_email)
+        if old_user:
+            #check if old email id organiser or not
+            old_org = check_email_already_organiser(old_user.id)
+            if not old_org:
+                context['msg'] = 'Old organiser entry not found.'
+                context['error_status'] = 'True'
+                return render(request, 'handover.html', context)
+        else:
+            context['msg'] = 'Old organiser entry not found. Not a registered user.'
+            context['error_status'] = 'True'
+            return render(request, 'handover.html', context)
+
+
+        #check if new email id registerd or not
+        new_user = check_user_email_exist(new_email)    
+        if new_user:           
+            new_org = check_email_already_organiser(new_user.id)
+            if new_org:
+                context['msg'] = 'New user is already an organiser. Can not continue work handover.'
+                context['error_status'] = 'True'
+                return render(request, 'handover.html', context)
+            else:
+                organiser = Organiser.objects.filter(user_id=old_user.id).update(user_id=new_user.id)
+                
+                old_user.groups.remove(Group.objects.get(name='Organiser'))
+                new_user.groups.add(Group.objects.get(name='Organiser'))
+
+                context['msg'] = 'Organiser work handover completed successfully.'
+                context['error_status'] = 'False'
+
+        else:
+            context['msg'] = 'New user is not registerd with spoken-tutorial'
+            context['error_status'] = 'True'
+            return render(request, 'handover.html', context)
+
+    return render(request, 'handover.html', context)
+
+
 
 
 

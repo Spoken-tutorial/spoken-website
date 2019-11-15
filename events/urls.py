@@ -29,6 +29,7 @@ urlpatterns = [
     
     url(r'^(?P<role>\w+)/(?P<status>\w+)/$',  organiser_invigilator_index, name='organiser_invigilator_index'),
     url(r'^organiser/(?P<status>\w+)/(?P<code>\w+)/(?P<userid>\d+)/$',  rp_organiser, name='rp_organiser'),
+    url(r'^organiser-handover/$', handover, name='handover'),
     
     url(r'^activate-academics/$',  activate_academics, name='activate_academics'),
     url(r'^activate-academics-org/(?P<academic_id>\d+)/$',  activate_academic_org, name='activate_academic_org'),
