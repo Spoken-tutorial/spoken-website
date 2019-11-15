@@ -1,6 +1,7 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import * as $ from 'jquery';
 import { CommentsService } from 'src/app/_service/comments.service';
+import { AlertService } from 'src/app/services/alert.service';
 
 @Component({
   selector: 'app-script-comment',
@@ -15,7 +16,8 @@ export class ScriptCommentComponent implements OnInit {
   isEditable = false;
 
   constructor(
-    private commentService: CommentsService
+    private commentService: CommentsService,
+    private alertService: AlertService
   ) { }
 
   public addComment() {
@@ -36,6 +38,7 @@ export class ScriptCommentComponent implements OnInit {
     ).subscribe(
         (res) => {
           this.comments[index] = res['data'];
+          this.alertService.success(res['message']);
         },
         console.error
       );
@@ -45,7 +48,7 @@ export class ScriptCommentComponent implements OnInit {
     this.commentService.deleteComment(this.comments[index]['id'])
       .subscribe(
         (res) => this.comments.splice(index, 1),
-        console.error
+        (err) => this.alertService.error(err)
       );
   }
 

@@ -359,20 +359,22 @@ class CommentAPI(generics.ListAPIView):
       serializer = CommentSerializer(comment, request.data, partial=True)
       if (serializer.is_valid()):
         serializer.save()
-        return Response({'message': 'Success', 'data': serializer.data})
+        return Response({'message': 'Updated the comment', 'data': serializer.data})
     except:
       return Response({'message': 'Failed to update comment'}, status=400)
 
   def delete(self, request, comment_id):
-    comment = Comment.objects.get(id=comment_id)
-    script = comment.script_details
-    comment.delete()
+    try:
+      comment = Comment.objects.get(id=comment_id)
+      self.check_object_permissions(request, comment)
+      script = comment.script_details
+      comment.delete()
 
-    script.comment_status = len(Comment.objects.filter(script_details=script)) > 0
-    script.save()
-
-    return Response({'status': True}, status=200)
-
+      script.comment_status = len(Comment.objects.filter(script_details=script)) > 0
+      script.save()
+      return Response({'status': True}, status=200)
+    except:
+      return Response({'message': 'Failed to update comment'}, status=400)
 
 class ReversionListView(generics.ListAPIView):
   serializer_class = ReversionSerializer

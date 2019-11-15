@@ -30,6 +30,7 @@ import { ErrorInterceptor } from './_interceptors/error.interceptor';
 import { PublishedScriptsComponent } from './home/published-scripts/published-scripts.component';
 import { ReviewScriptsComponent } from './home/review-scripts/review-scripts.component';
 import { ScriptCommentBoxComponent } from './script/script-comment/script-comment-box/script-comment-box.component';
+import { AlertService } from './services/alert.service';
 
 // since we are saving the JWT token for authentication in the local storage 
 // , here we get that token to send it with each api call to authenticate with the server
@@ -99,7 +100,8 @@ export function tokenGetter() {
   ],
   providers: [
     AuthGuard,
-    { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true }
+    { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
+    AlertService
   ],
   bootstrap: [AppComponent]
 })

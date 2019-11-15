@@ -1,4 +1,5 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { AuthService } from 'src/app/_service/auth.service';
 
 @Component({
   selector: 'app-script-comment-box',
@@ -15,7 +16,9 @@ export class ScriptCommentBoxComponent implements OnInit {
 
   isEditable: boolean = false;
 
-  constructor() { }
+  constructor(
+    public authService: AuthService
+  ) { }
 
   makeEditable() {
     this.isEditable = true;
@@ -39,6 +42,7 @@ export class ScriptCommentBoxComponent implements OnInit {
   }
 
   ngOnInit() {
+    console.log(this.authService.isOwner(this.comment.user));
   }
 
 }
