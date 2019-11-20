@@ -18,7 +18,7 @@ class ScriptModifyPermission(IsAuthenticatedOrReadOnly):
     
     if (user.is_anonymous() or obj.script.status): return False
 
-    return obj.script.user == user
+    return is_domainreviewer(user) or is_qualityreviewer(user) or obj.script.user == user
       
 class PublishedScriptPermission(IsAuthenticatedOrReadOnly):
   def has_object_permission(self, request, view, obj):
