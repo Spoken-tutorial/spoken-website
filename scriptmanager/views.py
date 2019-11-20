@@ -252,9 +252,11 @@ class ScriptDetailAPIView(generics.ListAPIView):
       tutorial=TutorialDetail.objects.get(pk = int(self.kwargs['tid']))
       language=Language.objects.get(pk = int(self.kwargs['lid']))
       script = Script.objects.get(tutorial = tutorial, language = language, user = self.request.user)
-      self.check_object_permissions(request, script)
 
-      ScriptDetail.objects.get(pk = int(self.kwargs['script_detail_id']),script = script).delete()
+      script_slide = ScriptDetail.objects.get(pk = int(self.kwargs['script_detail_id']),script = script)
+      self.check_object_permissions(request, script_slide)
+      script_slide.delete()
+
       if not ScriptDetail.objects.filter(script_id = script.pk).exists(): 
        script.delete()
       return Response({'status': True},status = 202) 
