@@ -58,7 +58,7 @@
       <div class="timeline-content">
         <div class="columns is-mobile">
           <div class="column">
-            <a class="button heading is-outlined" (click)="moveSlide(-1)">
+            <a class="button heading is-outlined" title="Move up" (click)="moveSlide(-1)">
               <i class="fas fa-chevron-up"></i>
             </a>
             <!-- <div class="is-icon is-pointer button-hover" (click)="moveSlide(-1)">
@@ -66,7 +66,7 @@
               </div> -->
           </div>
           <div class="column">
-            <a class="button heading is-outlined" (click)="moveSlide(+1)">
+            <a class="button heading is-outlined" title="Move down" (click)="moveSlide(+1)">
               <i class="fas fa-chevron-down"></i>
             </a>
 
@@ -75,7 +75,7 @@
               </div> -->
           </div>
           <div class="column">
-            <a class="button heading is-outlined" (click)="insertSlide()">
+            <a class="button heading is-outlined" title="Insert new row" (click)="insertSlide()">
               <i class="fas fa-plus"></i>
             </a>
             <!-- 
@@ -84,12 +84,12 @@
               </div> -->
           </div>
           <div class="column">
-            <a class="button heading is-outlined" (click)="duplicateSlide()">
+            <a class="button heading is-outlined" title="Duplicate row" (click)="duplicateSlide()">
               <i class="far fa-clone"></i>
             </a>
           </div>
           <div class="column" *ngIf="nav !== 'create'">
-            <a class="button heading is-outlined" (click)="saveSlide(false)">
+            <a class="button heading is-outlined" title="Save" (click)="saveSlide(false)">
                 <i class="far fa-save"></i>
             </a>
           </div>
