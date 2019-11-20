@@ -233,7 +233,7 @@ class ScriptDetailAPIView(generics.ListAPIView):
     try:
       tutorial=TutorialDetail.objects.get(pk = int(self.kwargs['tid']))
       language=Language.objects.get(pk = int(self.kwargs['lid']))
-      Script.objects.get(tutorial = tutorial, language = language, user = self.request.user)
+      # Script.objects.get(tutorial = tutorial, language = language, user = self.request.user)
 
       script_details  =  self.request.data
       script_details['id']=int(script_detail_id)
