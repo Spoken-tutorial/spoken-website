@@ -41,6 +41,14 @@
             </span>
           </a>
         </div>
+        <div class="column is-narrow" *ngIf="comment.resolved && !authService.isOwner(comment.user)">
+          <span class="tag is-success is-light">
+            <span class="icon">
+              <i class="fas fa-check"></i>
+            </span>
+            <span>Resolved</span>
+          </span>
+        </div>
       </div>
       <span class="is-divider" style="margin:10px 0 20px 0;"></span>
     </div>
