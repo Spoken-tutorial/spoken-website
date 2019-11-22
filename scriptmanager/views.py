@@ -163,10 +163,10 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
 
     tutorial=TutorialDetail.objects.get(pk = int(self.kwargs['tid']))
     language=Language.objects.get(pk = int(self.kwargs['lid']))
-    if not Script.objects.filter(user = self.request.user,tutorial = tutorial,language = language).exists():
+    if not Script.objects.filter(tutorial = tutorial,language = language).exists():
       script = Script.objects.create(tutorial = tutorial,language = language, user = self.request.user)
     else:
-      script = Script.objects.get(tutorial = tutorial,language = language, user = self.request.user)
+      script = Script.objects.get(tutorial = tutorial,language = language)
 
     if(create_request_type=='form'):
       details = request.data['details']
