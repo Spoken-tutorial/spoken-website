@@ -251,7 +251,7 @@ class ScriptDetailAPIView(generics.ListAPIView):
     try:
       tutorial=TutorialDetail.objects.get(pk = int(self.kwargs['tid']))
       language=Language.objects.get(pk = int(self.kwargs['lid']))
-      script = Script.objects.get(tutorial = tutorial, language = language, user = self.request.user)
+      script = Script.objects.get(tutorial = tutorial, language = language)
 
       script_slide = ScriptDetail.objects.get(pk = int(self.kwargs['script_detail_id']),script = script)
       self.check_object_permissions(request, script_slide)
