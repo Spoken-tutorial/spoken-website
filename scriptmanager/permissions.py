@@ -34,10 +34,11 @@ class PublishedScriptPermission(IsAuthenticatedOrReadOnly):
 class ReviewScriptPermission(IsAuthenticatedOrReadOnly):
   def has_object_permission(self, request, view, obj):
     user = request.user
+    tutorialdetails = getFOSS(obj.tutorial)    
 
     if (user.is_anonymous()): return False
 
-    return is_domainreviewer(user) or is_qualityreviewer(user)
+    return isDomainReviewer(tutorialdetails, obj.language, user) or isQualityReviewer(tutorialdetails, obj.language, user)
 
 
 class CommentOwnnerPermission(IsAuthenticatedOrReadOnly):
