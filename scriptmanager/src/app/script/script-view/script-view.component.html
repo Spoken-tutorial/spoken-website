@@ -114,14 +114,29 @@
     <div class="columns" *ngIf="authService.isReviewer()">
       <div class="column buttons">
         <div class="field is-grouped">
-          <div class="control" *ngIf="!script?.status">
-            <a (click)="onPublishChange(true)">
+          <div  class="control" *ngIf="!script?.status" [swal]="{ title: 'Publish Tutorial',
+                text: 'The tutorial is being approved by you and will be visible to everyone. Contributors and Reviewers will no longer be able to edit it. Are you sure?',
+                type: 'warning',
+                showCancelButton: 'true',
+                focusCancel: 'true',
+                confirmButtonText: 'Yes! Publish it.',
+                cancelButtonText: 'No!'
+              }" (confirm)="onPublishChange(true)">
+            <a>
               <app-badge-button faClass="far fa-eye" textClass="is-success" text="Publish"></app-badge-button>
             </a>
           </div>
-          <div class="control" *ngIf="script?.status">
-            <a (click)="onPublishChange(false)">
-              <app-badge-button faClass="far fa-eye-slash" textClass="is-danger" text="Unpublish"></app-badge-button>
+
+          <div  class="control" *ngIf="script?.status" [swal]="{ title: 'Un-publish Tutorial',
+                text: 'You are about to unpublish this tutorial. By doing this only the contributors and reviewers of the FOSS will be able to view and edit it. Are you sure?',
+                type: 'warning',
+                showCancelButton: 'true',
+                focusCancel: 'true',
+                confirmButtonText: 'Yes! Un-Publish it.',
+                cancelButtonText: 'No!'
+              }" (confirm)="onPublishChange(false)">
+            <a>
+              <app-badge-button faClass="far fa-eye-slash" textClass="is-danger" text="Un-Publish"></app-badge-button>
             </a>
           </div>
         </div>
