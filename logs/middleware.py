@@ -19,6 +19,8 @@ class Logs:
             if request.META['PATH_INFO'] == '/' or re.match(r'/home/$', request.META['PATH_INFO']):
                 data = {}
                 data['path_info'] = request.META['PATH_INFO']
+                data['browser_info'] =request.META['HTTP_USER_AGENT']
+                data['request_data'] = dict(request.GET)
                 data['method'] = request.method
                 data['view_args'] = view_args
                 data['view_kwargs'] = view_kwargs
@@ -30,6 +32,8 @@ class Logs:
                     if re.match(key, request.META['PATH_INFO']):
                         data = {}
                         data['path_info'] = request.META['PATH_INFO']
+                        data['browser_info'] = request.META['HTTP_USER_AGENT']
+                        data['request_data'] = dict(request.GET)
                         data['method'] = request.method
                         data['view_args'] = view_args
                         data['view_kwargs'] = view_kwargs
