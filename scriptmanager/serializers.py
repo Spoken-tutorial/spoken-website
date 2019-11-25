@@ -73,7 +73,7 @@ class TutorialDetailSerializer(serializers.ModelSerializer):
 
   def get_created_by(self, instance):
     if self.get_script_status(instance):
-      user = Script.objects.get(tutorial_id=instance.id, language=self.context.get('lang')).published_by
+      user = Script.objects.get(tutorial_id=instance.id, language=self.context.get('lang')).user
 
       if (user):  return user.username
 
