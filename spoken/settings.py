@@ -92,7 +92,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'workshop',
     'django_filters',
-    'impersonate'
+    'impersonate',
+    'corsheaders'
 ]
 
 
@@ -314,6 +315,7 @@ SPOKEN_HASH_SALT = 'change this value'
 
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -326,3 +328,5 @@ MIDDLEWARE = [
     'django.contrib.redirects.middleware.RedirectFallbackMiddleware',
     'impersonate.middleware.ImpersonateMiddleware'
 ]
+
+CORS_ORIGIN_ALLOW_ALL = True
