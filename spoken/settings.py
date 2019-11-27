@@ -92,7 +92,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'workshop',
     'django_filters',
-    'impersonate'
+    'impersonate',
+    'corsheaders'
 ]
 
 
@@ -195,7 +196,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Kolkata'
 
 USE_I18N = True
 
@@ -314,6 +315,7 @@ SPOKEN_HASH_SALT = 'change this value'
 
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -329,3 +331,4 @@ MIDDLEWARE = [
 ]
 
 GEOIP_PATH  = BASE_DIR + '/geodb/'
+CORS_ORIGIN_ALLOW_ALL = True
