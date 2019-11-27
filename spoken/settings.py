@@ -327,3 +327,5 @@ MIDDLEWARE = [
     'impersonate.middleware.ImpersonateMiddleware',
     'logs.middleware.Logs'
 ]
+
+GEOIP_PATH  = BASE_DIR + '/geodb/'
