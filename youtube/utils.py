@@ -38,7 +38,6 @@ def convert_video(src_path, dst_path):
             '-i', src_path,
             '-strict', 'experimental',
             '-vcodec', 'libx264',
-            '-vpre', 'default',
             '-f', 'mp4',
             dst_path
         ],
