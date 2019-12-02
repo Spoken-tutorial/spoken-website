@@ -17,9 +17,9 @@ from datetime import datetime
 
 # Give Values of the Database Environment Variables
 HOST = "localhost"
-USER = 'DB_USER'
-PASSWORD = 'DB_PASS'
-DB = 'DB_NAME'
+USER = 'root'
+PASSWORD = 'spoken'
+DB = 'spoken25n'
 # check_index variable is used to check whether the index tables are already present or not in the system
 check_index = None
 

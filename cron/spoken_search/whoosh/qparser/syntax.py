@@ -281,7 +281,7 @@ class GroupNode(SyntaxNode):
     def __bool__(self):
         return bool(self.nodes)
 
-    __bool__ = __nonzero__
+    __bool__ = __bool__
 
     def __iter__(self):
         return iter(self.nodes)

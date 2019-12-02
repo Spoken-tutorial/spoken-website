@@ -6,7 +6,7 @@ import operator
 from array import array
 from bisect import bisect_left, bisect_right, insort
 
-from whoosh.compat import integer_types, izip, izip_longest, next, xrange
+from whoosh.compat import integer_types, izip, next, xrange
 from whoosh.util.numeric import bytes_for_bits
 
 
@@ -174,7 +174,7 @@ class BaseBitSet(DocIdSet):
     def __bool__(self):
         return any(n for n in self._iter_bytes())
 
-    __bool__ = __nonzero__
+    __bool__ = __bool__
 
     def __contains__(self, i):
         bucket = i // 8
@@ -470,7 +470,7 @@ class SortedIntSet(DocIdSet):
     def __bool__(self):
         return bool(self.data)
 
-    __bool__ = __nonzero__
+    __bool__ = __bool__
 
     def __contains__(self, i):
         data = self.data
