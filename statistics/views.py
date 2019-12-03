@@ -143,13 +143,6 @@ def training(request):
     
     get_year = []
     pending_attendance_participant_count = 0
-    femalecount =0
-    female_list=list(Student.objects.filter(trainingattend__training_id__in=[col.id for col in collection.qs], gender='Female').values_list('id'))
-    femalecount= len([i[0] for i in female_list])
-
-    malecount =0
-    male_list=list(Student.objects.filter(trainingattend__training_id__in=[col.id for col in collection.qs], gender='Male').values_list('id'))
-    malecount= len([i[0] for i in male_list])
 
     year_data_all=dict()
     visited=dict()
@@ -193,8 +186,7 @@ def training(request):
         context['participants'] = participants
     context['model'] = 'Workshop/Training'
     context['status']=status
-    context['femalecount'] = femalecount
-    context['malecount'] = malecount
+    
     context['language'] = Language.objects.values('id','name')
     return render(request, 'statistics/templates/training.html', context)
 
