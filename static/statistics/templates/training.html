@@ -120,6 +120,19 @@
                         <td>{{ participants }}</td>
                     </tr>
                 </table>
+                 {% if status == '1' %}  
+                <br>   
+                <table class="table table-bordered table-hover" style="margin-bottom:0px;">
+                   <tr>
+                        <th>Total female participants <small>(as of 3 dec 2019)</small></th>
+                        <td>{{ 1997651 }}</td>
+                    </tr>
+                    <tr>
+                        <th>Total male participants <small>(as of 3 dec 2019)</small></th>
+                        <td>{{ 2966938 }}</td>
+                    </tr>
+                </table>
+                 {% endif %}
 
                 <div style="min-height:100px;">
                     <div id="chart_div"></div>
