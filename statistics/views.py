@@ -146,19 +146,19 @@ def training(request):
     key = key if key else 'NoneNoneNoneNoneNoneNoneNoneNoneNoneNone1'
     female_key = key + 'female'
     male_key = key + 'male'
-    print(male_key, female_key)
     femalecount = cache.get(female_key)
     malecount = cache.get(male_key)
-    if not femalecount or not malecount:
-        female_list=list(Student.objects.filter(trainingattend__training_id__in=[col.id for col in collection.qs], gender='Female').values_list('id'))
-        femalecount= len([i[0] for i in female_list])
-        male_list=list(Student.objects.filter(trainingattend__training_id__in=[col.id for col in collection.qs], gender='Male').values_list('id'))
-        malecount= len([i[0] for i in male_list])
-        try:
-            cache.set(female_key, femalecount)
-            cache.set(male_key, malecount)
-        except Exception:
-            print('Error setting cache key values')
+    if status != 0:
+        if not femalecount or not malecount:
+            female_list=list(Student.objects.filter(trainingattend__training_id__in=[col.id for col in collection.qs], gender='Female').values_list('id'))
+            femalecount= len([i[0] for i in female_list])
+            male_list=list(Student.objects.filter(trainingattend__training_id__in=[col.id for col in collection.qs], gender='Male').values_list('id'))
+            malecount= len([i[0] for i in male_list])
+            try:
+                cache.set(female_key, femalecount)
+                cache.set(male_key, malecount)
+            except Exception:
+                print('Error setting cache key values')
 
     year_data_all=dict()
     visited=dict()
@@ -204,6 +204,7 @@ def training(request):
     context['status']=status
     context['femalecount'] = femalecount
     context['malecount'] = malecount
+
     context['language'] = Language.objects.values('id','name')
     return render(request, 'statistics/templates/training.html', context)
 
