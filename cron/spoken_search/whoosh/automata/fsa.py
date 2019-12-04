@@ -6,10 +6,10 @@ import sys
 from bisect import bisect_left
 from collections import defaultdict
 
-from whoosh.compat import iteritems, next, text_type, unichr, xrange
+from whoosh.compat import iteritems, next, text_type, xrange
 
 
-unull = unichr(0)
+unull = chr(0)
 
 
 # Marker constants
