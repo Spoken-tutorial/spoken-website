@@ -98,3 +98,4 @@ cron/nohup.out
 *.ipynb
 .ipynb_checkpoints/
 .vscode/
+cron/spoken_search/index

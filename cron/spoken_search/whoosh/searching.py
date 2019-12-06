@@ -1019,7 +1019,7 @@ class Results(object):
     def __bool__(self):
         return not self.is_empty()
 
-    __bool__ = __nonzero__
+    __bool__ = __bool__
 
     def is_empty(self):
         """Returns True if not documents matched the query.
