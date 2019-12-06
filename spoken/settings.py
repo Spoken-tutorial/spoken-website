@@ -93,7 +93,8 @@ INSTALLED_APPS = [
     'workshop',
     'django_filters',
     'impersonate',
-    'corsheaders'
+    'corsheaders',
+    'ckeditor'
 ]
 
 
