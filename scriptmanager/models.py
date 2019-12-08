@@ -8,8 +8,8 @@ class Script(models.Model):
 	language = models.ForeignKey(Language)
 	status = models.BooleanField(default=False)
 	data_file = models.FileField(upload_to='scripts')
-	user = models.ForeignKey(User,related_name='user_id')
-	ordering = models.CharField(max_length=200, default='')
+	user = models.ForeignKey(User,related_name='user_id', null=True)
+	ordering = models.TextField(default='')
 	published_by = models.ForeignKey(User, null=True)
 	published_on = models.DateTimeField(null=True)
 
