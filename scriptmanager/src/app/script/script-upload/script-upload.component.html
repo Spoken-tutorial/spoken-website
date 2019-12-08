@@ -21,7 +21,7 @@
           </div>
 
           <br><br>
-<!-- for uploading a file -->
+          <!-- for uploading a file -->
           <div class="file has-name is-boxed is-centered">
             <label class="file-label">
               <input class="file-input" type="file" (change)="onFileChange($event)" />
@@ -48,15 +48,17 @@
 
           <div class="is-divider" data-content="OR"></div>
           <br />
-<!-- below code is for pasting the whole table -->
+          <!-- below code is for pasting the whole table -->
           <form [formGroup]="editorForm">
 
             <div class="timeline-content">
               <p class="heading">Paste the whole table here</p>
               <div class="field">
                 <div class="control content">
-                  <ckeditor tagName="textarea" [config]="ckeditorConfig" [editor]="Editor" formControlName="data">
-                  </ckeditor>
+                  <quill-editor tagName="textarea" formControlName="data" [styles]="quillStyles" theme="snow">
+                  </quill-editor>
+                  <!-- <ckeditor tagName="textarea" [config]="ckeditorConfig" [editor]="Editor" formControlName="data"> -->
+                  <!-- </ckeditor> -->
                 </div>
               </div>
             </div>

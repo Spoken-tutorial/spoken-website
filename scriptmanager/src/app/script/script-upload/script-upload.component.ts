@@ -17,11 +17,18 @@ export class ScriptUploadComponent implements OnInit {
   public scriptFile: any;
   public scriptFileName: any;
   public uploadButton: boolean = false;
-  public Htmldata: any;
+  public Htmldata = "";
   editorForm: FormGroup;
   public Editor = ClassicEditor;
   public ckeditorConfig = {
     toolbar: ['heading', '|', 'bold', 'italic', 'bulletedList', 'numberedList', '|', 'undo', 'redo']
+  }
+
+  public quillStyles = {
+    'height': '200px',
+    'border': '1px solid #ccc',
+    'margin': 'auto',
+    // 'max-width': '600px'
   }
 
   constructor(
