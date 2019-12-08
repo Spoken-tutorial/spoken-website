@@ -9,6 +9,7 @@ import { AuthService } from 'src/app/_service/auth.service';
 export class ScriptCommentBoxComponent implements OnInit {
   @Input() comment: any;
   @Input() index: number;
+  @Input() published: boolean = false;
   @Output() saveCommentEmitter = new EventEmitter<number>();
   @Output() deleteCommentEmitter = new EventEmitter<number>();
   @Output() doneCommentEmitter = new EventEmitter<number>();

@@ -5,7 +5,7 @@
       <div class="fixedComments" id="fixedComments">
 
         <div *ngFor="let comment of comments; let i = index" class="timeline-content">
-          <app-script-comment-box [comment]="comment" [index]="i" (saveCommentEmitter)="saveComment($event)" (deleteCommentEmitter)="deleteComment($event)" (doneCommentEmitter)="doneComment($event)" (resolveCommentEmitter)="resolveComment($event)">
+          <app-script-comment-box [comment]="comment" [index]="i" (saveCommentEmitter)="saveComment($event)" (deleteCommentEmitter)="deleteComment($event)" (doneCommentEmitter)="doneComment($event)" (resolveCommentEmitter)="resolveComment($event)" [published]="published">
           </app-script-comment-box>
         </div>
 

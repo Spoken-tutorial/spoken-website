@@ -8,7 +8,7 @@
       </p>
       <small><i class="fa fa-user"></i> {{ comment['user'] }} | <em>{{comment['time']}}</em></small>
       <div class="columns">
-        <div class="column is-narrow" *ngIf="!comment.resolved && authService.isOwner(comment.user)">
+        <div class="column is-narrow" *ngIf="!comment.resolved && authService.isOwner(comment.user) && !published">
           <a *ngIf="!isEditable" (click)="makeEditable()">
             <span class="tag is-info is-light">edit</span>
           </a>
@@ -16,7 +16,7 @@
             <span class="tag is-primary is-light">save</span>
           </a>
         </div>
-        <div class="column is-narrow" *ngIf="!comment.resolved && authService.isOwner(comment.user)">
+        <div class="column is-narrow" *ngIf="!comment.resolved && authService.isOwner(comment.user) && !published">
           <a (click)="deleteComment()">
             <span class="tag is-danger is-light">delete</span>
           </a>

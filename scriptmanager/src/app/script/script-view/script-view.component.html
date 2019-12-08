@@ -102,7 +102,7 @@
       </div>
 
       <div *ngIf="comment" class="column">
-        <app-script-comment [comments]="comments" (commentEmitter)="postComment($event)"></app-script-comment>
+        <app-script-comment [comments]="comments" (commentEmitter)="postComment($event)" [published]="script.status"></app-script-comment>
       </div>
 
       <div *ngIf="revision" class="column">

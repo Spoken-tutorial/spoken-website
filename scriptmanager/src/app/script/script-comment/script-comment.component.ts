@@ -11,6 +11,7 @@ import { AlertService } from 'src/app/services/alert.service';
 export class ScriptCommentComponent implements OnInit {
   @Input() newComment: string = "";
   @Input() comments: any;
+  @Input() published: boolean = false;
   @Output() commentEmitter = new EventEmitter<string>();
   comment_value = "";
   isEditable = false;

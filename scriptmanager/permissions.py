@@ -37,12 +37,16 @@ class ReviewScriptPermission(IsAuthenticatedOrReadOnly):
     return is_domainreviewer(user) or is_qualityreviewer(user)
 
 
-class CommentOwnnerPermission(IsAuthenticatedOrReadOnly):
+class CommentOwnerPermission(IsAuthenticatedOrReadOnly):
   def has_object_permission(self, request, view, obj):
     user = obj.user
-    if (user.is_anonymous()): return False
+    if (user.is_anonymous() or obj.script_details.script.status): return False
 
     if ('done' in request.data.keys()):
       return is_domainreviewer(user) or is_qualityreviewer(user) or obj.user == user
 
     return request.user == obj.user
+
+class CanCommentPermission(IsAuthenticatedOrReadOnly):
+  def has_object_permission(self, request, view, obj):
+    return not obj.script.status

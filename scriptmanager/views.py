@@ -17,7 +17,7 @@ import time
 from creation.views import is_videoreviewer,is_domainreviewer,is_qualityreviewer
 import uuid
 import subprocess 
-from .permissions import ScriptOwnerPermission, ScriptModifyPermission, PublishedScriptPermission, ReviewScriptPermission, CommentOwnnerPermission
+from .permissions import ScriptOwnerPermission, ScriptModifyPermission, PublishedScriptPermission, ReviewScriptPermission, CommentOwnerPermission, CanCommentPermission
 from django.utils import timezone
 
 def custom_jwt_payload_handler(user):
@@ -333,6 +333,7 @@ class RelativeOrderingAPI(generics.ListAPIView):
 
 class CommentCreateAPIView(generics.ListCreateAPIView):
   serializer_class=CommentSerializer
+  permission_classes = [CanCommentPermission]
 
   def get_queryset(self):
     try:
@@ -344,16 +345,17 @@ class CommentCreateAPIView(generics.ListCreateAPIView):
   def create(self,request,script_detail_id):
     try:
       script_data=ScriptDetail.objects.get(pk=script_detail_id)
+      self.check_object_permissions(request, script_data)
       if script_data.comment_status == False:
         script_data.comment_status=True
         script_data.save()
       Comment.objects.create(comment=request.data['comment'],user=self.request.user,script_details=script_data)
       return Response({'status': True},status = 202)
     except:
-      return Response({'status': False, 'message': 'Failed to create comment'},status = 500)       
+      return Response({'status': False, 'message': 'Not allowed to comment'},status = 500)       
 
 class CommentAPI(generics.ListAPIView):
-  permission_classes = [CommentOwnnerPermission]
+  permission_classes = [CommentOwnerPermission]
 
   def patch(self, request, comment_id):
     try:
@@ -364,7 +366,7 @@ class CommentAPI(generics.ListAPIView):
         serializer.save()
         return Response({'message': 'Updated the comment', 'data': serializer.data})
     except:
-      return Response({'message': 'Unauthorized request to update comment'}, status=403)
+      return Response({'message': 'Unauthorized request to update comment'}, status=500)
 
   def delete(self, request, comment_id):
     try:
