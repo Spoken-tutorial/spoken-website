@@ -24,7 +24,7 @@
         </div>
 
         <article class="media">
-          <div class="media-content">
+          <div class="media-content" *ngIf="!published">
             <div class="field">
               <p class="control">
                 <textarea #textarea class="textarea" placeholder="Add a comment..." (keyup)="commentKey($event)"
