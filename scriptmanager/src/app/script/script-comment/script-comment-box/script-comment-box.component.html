@@ -26,7 +26,7 @@
             <span class="tag is-danger is-light">Delete</span>
           </a>
         </div>
-        <div class="column is-narrow" *ngIf="!comment.resolved">
+        <div class="column is-narrow" *ngIf="!comment.resolved && !published">
           <a (click)="doneComment()">
             <span class="tag is-warning is-light" *ngIf="!comment.done">
               <span>Done</span> 
@@ -39,7 +39,7 @@
               </span>
             </a>
         </div>
-        <div class="column is-narrow" *ngIf="authService.isOwner(comment.user)">
+        <div class="column is-narrow" *ngIf="authService.isOwner(comment.user) && !published">
           <a (click)="resolveComment()">
             <span class="tag is-success is-light" *ngIf="!comment.resolved">
               <span>Resolve</span>
