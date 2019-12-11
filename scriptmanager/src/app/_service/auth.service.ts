@@ -43,6 +43,9 @@ export class AuthService {
   }
 
   public isOwner(user) {
+    if (this.getToken() === '')
+      return false;
+
     const decodedToken = this.jwtHelper.decodeToken(this.getToken());
     return decodedToken['username'] === user;
   }
