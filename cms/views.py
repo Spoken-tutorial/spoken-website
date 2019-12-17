@@ -30,6 +30,22 @@ from django.template.context_processors import csrf
 def dispatcher(request, permalink=''):
     if permalink == '':
         return HttpResponseRedirect('/')
+    
+    if permalink == 'project_documents':
+        impersonating = request.session.pop('_impersonate', None)
+        if impersonating is not None:
+            from impersonate.signals import session_end
+            request.session.modified = True
+            session_end.send(
+                sender=None,
+                impersonator=request.impersonator,
+                impersonating=impersonating,
+                request=request
+            )
+            return HttpResponseRedirect('/accounts/login/?next=/project_documents/')
+        if not request.user.groups.filter(name ='page_admin').exists():
+            return HttpResponseRedirect('/accounts/login/?next=/project_documents/')
+
     page_content = get_object_or_404(Page, permalink=permalink, visible=True)
     col_offset = int((12 - page_content.cols) / 2)
     col_remainder = int((12 - page_content.cols) % 2)
