@@ -17,7 +17,7 @@ import time
 from creation.views import is_videoreviewer,is_domainreviewer,is_qualityreviewer
 import uuid
 import subprocess 
-from .permissions import ScriptOwnerPermission, ScriptModifyPermission, PublishedScriptPermission, ReviewScriptPermission, CommentOwnerPermission, CanCommentPermission
+from .permissions import ScriptOwnerPermission, ScriptModifyPermission, PublishedScriptPermission, ReviewScriptPermission, CommentOwnerPermission, CanCommentPermission, CanRevisePermission
 from django.utils import timezone
 
 def custom_jwt_payload_handler(user):
@@ -383,6 +383,7 @@ class CommentAPI(generics.ListAPIView):
 
 class ReversionListView(generics.ListAPIView):
   serializer_class = ReversionSerializer
+  permission_classes = [IsAuthenticatedOrReadOnly]
 
   def get_queryset(self):
     try:
@@ -401,9 +402,12 @@ class ReversionListView(generics.ListAPIView):
       return None
 
 class ReversionRevertView(generics.CreateAPIView):
+  permission_classes = [CanRevisePermission]
+
   def patch(self,request,script_detail_id,reversion_id):
     try:
       script_detail=ScriptDetail.objects.get(pk=int(self.kwargs['script_detail_id']))
+      self.check_object_permissions(request, script_detail)
       reversion_data = Version.objects.get_for_object(script_detail)
       reversion_data[int(self.kwargs['reversion_id'])-1].revision.revert()
       return Response({'status': True},status = 201)

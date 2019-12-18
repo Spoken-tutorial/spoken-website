@@ -54,6 +54,10 @@ class CommentOwnerPermission(IsAuthenticatedOrReadOnly):
 class CanCommentPermission(IsAuthenticatedOrReadOnly):
   def has_object_permission(self, request, view, obj):
     return not obj.script.status
+
+class CanRevisePermission(IsAuthenticatedOrReadOnly):
+  def has_object_permission(self, request, view, obj):
+    return not obj.script.status
     
 def getFOSS(tutorial):
   tutorialdetails = TutorialDetail.objects.get(tutorial=tutorial)
