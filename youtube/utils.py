@@ -31,14 +31,14 @@ def convert_video(src_path, dst_path):
     """ffmpeg -i Hardware-requirement-to-install-Blender-English.ogv -acodec libfaac -ac 2 -ab 160k -vcodec libx264 -vpre fast -f mp4 Hardware-requirement-to-install-Blender-English.mp4"""
     """ffmpeg -i Registration-of-an-account-for-online-train-ticket-booking-English.ogv -strict experimental -vcodec libx264 -acodec libfaac -vpre fast -f mp4 Registration-of-an-account-for-online-train-ticket-booking-English.mp4"""
     """ffmpeg -i tmp.mp4 -strict experimental -vcodec libx264 -vpre default -f mp4 output.mp4"""
-    print(("/usr/bin/ffmpeg -i", src_path, "-strict experimental -vcodec libx264 -vpre default -f mp4", dst_path))
+    print(("/usr/bin/ffmpeg -i", src_path, "-max_muxing_queue_size 512 -strict experimental -vcodec libx264 -vpre default -f mp4", dst_path))
     process = subprocess.Popen(
         [
             '/usr/bin/ffmpeg',
             '-i', src_path,
+            '-max_muxing_queue_size', '512',
             '-strict', 'experimental',
             '-vcodec', 'libx264',
-            '-vpre', 'default',
             '-f', 'mp4',
             dst_path
         ],

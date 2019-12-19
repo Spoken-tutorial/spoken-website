@@ -10,6 +10,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from dateutil.relativedelta import relativedelta
 import os
 import os.path
+from mdldjango.models import MdlUser
 register = template.Library()
 
 
@@ -195,3 +196,29 @@ register.filter('feedback_status_average', feedback_status_average)
 register.filter('feedback_status_neutral', feedback_status_neutral)
 register.filter('feedback_status_likely', feedback_status_likely)
 register.filter('can_clone_training', can_clone_training)
+
+
+@register.filter
+def get_grade_mdluser(Dict, ta):
+    return Dict[ta.mdluser_id][ta.mdlquiz_id][0]
+
+@register.filter
+def get_grade_mdluser_first_name(id):
+    try:
+        return MdlUser.objects.using('moodle').get(id=id).firstname
+    except MdlUser.DoesNotExist:
+        return None
+
+@register.filter
+def get_grade_mdluser_last_name(id):
+    try:
+        return MdlUser.objects.using('moodle').get(id=id).lastname
+    except MdlUser.DoesNotExist:
+        return None
+
+@register.filter
+def get_grade_mdluser_email(id):
+    try:
+        return MdlUser.objects.using('moodle').get(id=id).email
+    except MdlUser.DoesNotExist:
+        return None

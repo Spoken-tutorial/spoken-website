@@ -1,0 +1,184 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load creationdata %}
+{% block title %}Creation role requests index{% endblock %}
+{% block heading %}<i class="fa fa-list-ul"></i> Creation role requests index{% endblock %}
+{% block content %}
+    <ul class="nav nav-tabs">
+        <li{% if tabid == 'contributor' %} class="active"{% endif %}>
+            <a href="/creation/role/lang_requests/contributor/"">
+                <i class="fa fa-list-ul"></i> Contributor
+            </a>
+        </li>
+        <li{% if tabid == 'external-contributor' %} class="active"{% endif %}>
+            <a href="/creation/role/lang_requests/external-contributor/">
+                <i class="fa fa-list-ul"></i> External Contributor
+            </a>
+        </li>
+    </ul>
+    <div class="tab-content">
+        <div class="tab-pane{% if tabid == 'contributor' %} active{% endif %} table-responsive" id="contributor">
+            <table class="table table-bordered table-hover">
+            {% if not contrib_recs|length %}
+                <tr>
+                    <td colspan="6" class="col-center">List is empty</td>
+                </tr>
+            {% else %}
+                <tr class="active">
+                    <th>S.No</th>
+                    <th>User</th>
+                    <th>Language</th>
+                    <th>Email</th>
+                    <th>Date &amp; Time</th>
+                    <th class="col-center" colspan="2"><span title="" data-original-title="" class="fa fa-cogs fa-2"></span></th>
+                </tr>
+                {% for contrib_rec in contrib_recs %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td><a href="/accounts/view-profile/{{ contrib_rec.user }}" target="_blank">{{ contrib_rec.user }}</a></td>
+                        <td><a >{{contrib_rec.language}} </a></td>
+                        <td><a href="mailto:{{ contrib_rec.user.email }}">{{ contrib_rec.user.email }}</a></td>
+                        <td>{{ contrib_rec.created }}</td>
+                        <td class="col-center"><a href="/creation/role/accept/{{ contrib_rec.id }}/lang_manager" class="spin-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Accept</a></td>
+                        <td class="col-center"><a href="/creation/role/reject/{{ contrib_rec.id }}/lang_manager/" class="spin-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Reject</a></td>
+                    </tr>
+                {% endfor %}
+            {% endif %}
+            </table>
+        </div>
+        <div class="tab-pane{% if tabid == 'external-contributor' %} active{% endif %} table-responsive" id="external-contributor">
+            <table class="table table-bordered table-hover">
+            {% if not ext_contrib_recs|length %}
+                <tr>
+                    <td colspan="6" class="col-center">List is empty</td>
+                </tr>
+            {% else %}
+                <tr class="active">
+                    <th>S.No</th>
+                    <th>User</th>
+                    <th>Language</th>
+                    <th>Email</th>
+                    <th>Date &amp; Time</th>
+                    <th class="col-center" colspan="2"><span title="" data-original-title="" class="fa fa-cogs fa-2"></span></th>
+                </tr>
+                {% for contrib_rec in ext_contrib_recs %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td><a href="/accounts/view-profile/{{ contrib_rec.user }}" target="_blank">{{ contrib_rec.user }}</a></td>
+                        <td><a> {{contrib_rec.language}} </a></td>
+                        <td><a href="mailto:{{ contrib_rec.user.email }}">{{ contrib_rec.user.email }}</a></td>
+                        <td>{{ contrib_rec.created }}</td>
+                        <td class="col-center"><a href="/creation/role/accept/{{ contrib_rec.id }}/lang_manager/" class="spin-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Accept</a></td>
+                        <td class="col-center"><a href="/creation/role/reject/{{ contrib_rec.id }}/lang_manager/" class="spin-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Reject</a></td>
+                    </tr>
+                {% endfor %}
+            {% endif %}
+            </table>
+        </div>
+        <div class="tab-pane{% if tabid == 'video-reviewer' %} active{% endif %} table-responsive" id="video-reviewer">
+            <table class="table table-bordered table-hover">
+            {% if not admin_recs|length %}
+                <tr>
+                    <td colspan="6" class="col-center">List is empty</td>
+                </tr>
+            {% else %}
+                <tr class="active">
+                    <th>S.No</th>
+                    <th>User</th>
+                    <th>Email</th>
+                    <th>Date &amp; Time</th>
+                    <th class="col-center" colspan="2"><span title="" data-original-title="" class="fa fa-cogs fa-2"></span></th>
+                </tr>
+                {% for admin_rec in admin_recs %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td><a href="/accounts/view-profile/{{ admin_rec.user }}" target="_blank">{{ admin_rec.user }}</a></td>
+                        <td><a href="mailto:{{ admin_rec.user.email }}">{{ admin_rec.user.email }}</a></td>
+                        <td>{{ admin_rec.created }}</td>
+                        <td class="col-center"><a href="/creation/role/accept/{{ admin_rec.id }}/admin" class="spin-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Accept</a></td>
+                        <td class="col-center"><a href="/creation/role/reject/{{ admin_rec.id }}/admin" class="spin-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Reject</a></td>
+                    </tr>
+                {% endfor %}
+            {% endif %}
+            </table>
+        </div>
+        <div class="tab-pane{% if tabid == 'domain-reviewer' %} active{% endif %} table-responsive" id="domain-reviewer">
+            <table class="table table-bordered table-hover">
+            {% if not domain_recs|length %}
+                <tr>
+                    <td colspan="6" class="col-center">List is empty</td>
+                </tr>
+            {% else %}
+                <tr class="active">
+                    <th>S.No</th>
+                    <th>User</th>
+                    <th>Language</th>
+                    <th>Email</th>
+                    <th>Date &amp; Time</th>
+                    <th class="col-center" colspan="2"><span title="" data-original-title="" class="fa fa-cogs fa-2"></span></th>
+                </tr>
+                {% for domain_rec in domain_recs %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td><a href="/accounts/view-profile/{{ domain_rec.user }}" target="_blank">{{ domain_rec.user }}</a></td>
+                        <td><a > {{domain_rec.language}} </a></td>
+                        <td><a href="mailto:{{ domain_rec.user.email }}">{{ domain_rec.user.email }}</a></td>
+                        <td>{{ domain_rec.created }}</td>
+                        <td class="col-center"><a href="/creation/role/accept/{{ domain_rec.id }}/admin" class="spin-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Accept</a></td>
+                        <td class="col-center"><a href="/creation/role/reject/{{ domain_rec.id }}/admin" class="spin-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Reject</a></td>
+                    </tr>
+                {% endfor %}
+            {% endif %}
+            </table>
+        </div>
+        <div class="tab-pane{% if tabid == 'quality-reviewer' %} active{% endif %} table-responsive" id="quality-reviewer">
+            <table class="table table-bordered table-hover">
+            {% if not quality_recs|length %}
+                <tr>
+                    <td colspan="6" class="col-center">List is empty</td>
+                </tr>
+            {% else %}
+                <tr class="active">
+                    <th>S.No</th>
+                    <th>User</th>
+                    <th>Language</th>
+                    <th>Email</th>
+                    <th>Date &amp; Time</th>
+                    <th class="col-center" colspan="2"><span title="" data-original-title="" class="fa fa-cogs fa-2"></span></th>
+                </tr>
+                {% for quality_rec in quality_recs %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td><a href="/accounts/view-profile/{{ quality_rec.user }}" target="_blank">{{ quality_rec.user }}</a></td>
+                        <td><a >{{ quality_rec.language }} </a></td>
+                        <td><a href="mailto:{{ quality_rec.user.email }}">{{ quality_rec.user.email }}</a></td>
+                        <td>{{ quality_rec.created }}</td>
+                        <td class="col-center"><a href="/creation/role/accept/{{ quality_rec.id }}/admin" class="spin-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Accept</a></td>
+                        <td class="col-center"><a href="/creation/role/reject/{{ quality_rec.id }}/admin" class="spin-btn"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Reject</a></td>
+                    </tr>
+                {% endfor %}
+            {% endif %}
+            </table>
+        </div>
+    </div>
+{% endblock %}
+{% block uncompressjsblock %}
+    <script src="{% static 'spoken/js/jquery.mousewheel-3.0.6.pack.js' %}"></script>
+{% endblock %}
+{% block compressinlinejsblock %}
+    <script type="text/javascript">
+        $(document).ready(
+            function(){
+                $(".spin-btn").hover(
+                    function () {
+                        $(this).children(0).addClass("fa-spin");
+                    },
+                    function () {
+                        $(this).children(0).removeClass("fa-spin");
+                    }
+                );
+            }
+        );
+    </script>
+{% endblock %}

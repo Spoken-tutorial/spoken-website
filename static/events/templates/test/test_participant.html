@@ -29,11 +29,16 @@
                     {{ dept }}
                 {% endfor %}
             </dd>
+            <dt>Batch Year</dt>
+            <dd>
+                    {{ test.training.batch.year}}
+            </dd>
 
         </dl>
     </div>
 	<div class="" id="pending">
 		{% if collection %}
+		<a style="float: right; padding-right: 9%;" href="{% url 'events:test_participant_ceritificate_all' test.id %}">Download all certificates</a>
 		<table class="table table-striped table-hover table-bordered">
 			<tr>
                 <th>#</th>

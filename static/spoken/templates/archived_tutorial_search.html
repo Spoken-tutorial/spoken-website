@@ -1,0 +1,126 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load cmsdata %}
+{% load creationdata %}
+{% block title %}Search Tutorials{% endblock %}
+{% block compressinlinecssblock %}
+    <style>
+        .tutorial-search-form{
+            margin-top: 20px;
+        }
+        .result-record .thumb img {
+            border: 5px solid #E5E5E5;
+        }
+        .reset-filter {
+            margin-top: 10px;
+        }
+        .form-group {
+            margin-bottom: 0px;
+        }
+        .download-insl-sheet{
+            color: rgb(21, 145, 13);
+        }
+        .download-insc-sheet{
+            color: orange;
+        }
+    </style>
+{% endblock %}
+{% block heading %}
+    <i class="fa fa-list-ul"></i> Search Tutorials
+{% endblock %}
+{% block search %}{% endblock %}
+{% block content %}
+    
+    <div class="well tab-content tutorial-search-form col-lg-offset-1 col-md-offset-1 col-lg-10 col-md-10 col-sm-12 col-xs-12">
+        <div class="col-sm-12">
+            <form action="{{ action }}" method="GET" class='form-horizontal'>
+                {% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
+                    {% if form.non_field_errors %}
+                    <ul>
+                      {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                      {% endfor %}
+                    </ul>
+                    {% endif %}
+                    <div class="form-group">
+                        <div class="col-sm-5">
+                            <span class='ajax-search-refresh ajax-refresh-search-archivedfoss'><i class="fa fa-2 fa-refresh fa-spin"></i></span>
+                            {% render_field form.search_archivedfoss class+="form-control search-archivedfoss" tabindex="1" %}
+                            {{ form.search_archivedfoss.errors }}
+                        </div>
+                        <div class="col-sm-5">
+                            <span class='ajax-search-refresh ajax-refresh-search-archivedlanguage'><i class="fa fa-2 fa-refresh fa-spin"></i></span>
+                            {% render_field form.search_archivedlanguage class+="form-control search-archivedlanguage" tabindex="2" %}
+                            {{ form.search_archivedlanguage.errors }}
+                        </div>
+                        <div class="col-sm-2">
+                            <input class="btn btn-primary" type="submit" value="Submit" />
+                            <a href="{% url 'archived'%}" class='pull-left'>Reset dropdowns</a>
+                        </div>
+                    </div>
+                {% endwith %}
+            </form>
+        </div>
+    </div>
+    
+    <div class='search-result col-lg-offset-1 col-md-offset-1 col-sm-offset-1 col-xs-offset-1 col-lg-10 col-md-10 col-sm-10 col-xs-10'>
+        {% if collection %}
+            {% if collection.0.tutorial_detail.foss.description %}
+                <p><i>{{ collection.0.tutorial_detail.foss.description }} <a href="{{ SCRIPT_URL }}{{collection.0.tutorial_detail.foss }}" target="_blank">Read more</a></i></p>
+                <hr>
+            {% endif %}
+            <div style="float: left;">About <b>{{ collection.paginator.count }}</b> results found.</div>
+            <ol class="list-inline pull-right
+            ">
+                    {% with link=collection.0.tutorial_detail.foss|instruction_sheet:collection.0.language %}
+                        {% if link %}
+                            <li><a class="download-insl-sheet" href="{{ link }}" target="_blank"><i class="fa fa-2 fa-download"></i>
+ Instruction Sheet</a></li>
+                        {% endif %}
+                    {% endwith %}
+
+                    {% with link=collection.0.tutorial_detail.foss|installation_sheet:collection.0.language %}
+                        {% if link %}
+                            <li><a class="download-insc-sheet" href="{{ link }}" target="_blank"> <i class="fa fa-2 fa-download"></i>
+    Installation Sheet</a></li>
+                        {% endif %}
+                    {% endwith %}
+                    
+                    {% with link=collection.0.tutorial_detail.foss|brochure:collection.0.language %}
+                        {% if link %}
+                            <li><a class="download-insl-sheet" href="{{ link }}" target="_blank"><i class="fa fa-2 fa-download"></i>
+ Brochures</a></li>
+                        {% endif %}
+                    {% endwith %}
+            </ol>
+            {% if current_foss and current_foss == 'Spoken Tutorial Technology' %}
+                <div style="float: right; font-size: 16px;"><i><a href="/side-by-side-method/" target="_blank">Click here</a></i> to view <b>Side by Side method</b> video.</div>
+                <div style="clear: both;"></div>
+                <hr>
+            {% endif %}
+            <div style="clear: both;"></div>
+            {% for record in collection %}
+                <div class='result-record row'>
+                    <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2 thumb">
+                        <a href="/watch/{{ record.tutorial_detail.foss.foss|get_url_name }}/{{ record.tutorial_detail.tutorial|get_url_name }}/{{ record.language }}" class='thumb'><img width="100%" src="{{ record.tutorial_detail|get_thumb_path:'Small' }}"></a>
+                    </div>
+                    <div class="info col-lg-8 col-md-8 col-sm-8 col-xs-8">
+                        <div class='title'><h4><span style="font-size: 14px; padding-right: 6px;">{{ forloop.counter }}.</span><a href="/watch/{{ record.tutorial_detail.foss.foss|get_url_name }}/{{ record.tutorial_detail.tutorial|get_url_name }}/{{ record.language }}">{{ record.tutorial_detail.tutorial }}</a></h4></div>
+                        <div class='desc'>
+                                <p><b>Foss : </b><i>{{ record.tutorial_detail.foss }} - {{ record.language }}</i></p>
+                                <p><b>Outline: </b>{{ record.outline|len_cutter:180 }}</p>
+                            </dl>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
+                        <div class="{{ record.tutorial_detail.level }} pull-right"><h5 style="text-align:right;">{{ record.tutorial_detail.level }}</h5><img style="display:block;" width="30%" src="/static/spoken/images/{{ record.tutorial_detail.level }}.png" class="pull-right"></div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class='no-record'> No result found!</p>
+        {% endif %}
+    </div>
+{% endblock %}
+

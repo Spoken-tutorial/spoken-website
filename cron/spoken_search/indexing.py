@@ -14,12 +14,12 @@ from whoosh.analysis import StandardAnalyzer
 from whoosh.index import open_dir, create_in
 from whoosh.qparser import QueryParser, MultifieldParser
 from datetime import datetime
-
+from config import *
 # Give Values of the Database Environment Variables
-HOST = "localhost"
-USER = 'DB_USER'
-PASSWORD = 'DB_PASS'
-DB = 'DB_NAME'
+HOST = 'localhost'
+USER = DB_USER
+PASSWORD = DB_PASS
+DB = DB
 # check_index variable is used to check whether the index tables are already present or not in the system
 check_index = None
 

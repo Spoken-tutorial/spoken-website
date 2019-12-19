@@ -25,27 +25,46 @@ notsent = 0
 count = 0
 tot_count = len(organisers)
 
-subject = ' *IIT Bombay - Spoken Tutorial Program | Invitation to colleges for 2019* '
+subject = ' *Automated Mail _ IIT Bombay Spoken Tutorials | Renewal of Subscription* '
 
-success_log_file_head = open(LOG_ROOT+'organiser_payment_reminder.txt',"w")
+success_log_file_head = open(LOG_ROOT+'organiser_payment_renewal.txt',"w")
 for organiser in organisers:
     message = '''
 <p>Dear Faculty Organiser,<p>
 
-<p>Many thanks to you and your College for being a part of the IIT Bombay,Spoken Tutorial Software training program. You have contributed in a great way to its mega success. <p>
+<p>
+Thank you for the continuing to offer the Spoken Tutorial Training sessions in this academic year in your college. You have contributed in a great way to the project's success. You are now organising training sessions, planning for tests, motivating faculty from other departments to take these courses to their students and completing the processes for the same. We are with you to guide and support so that maximum students in your college avail of the Training.
+</p>
 
-<p>In August 2018 we informed you about the Training Policy change namely colleges will need to make a Payment/annual User fee of Rs.25000/- in order to continue the Spoken Tutorial Training. Many of you have immediately responded positively and made the payment. <u>To continue to benefit from the Software Training courses we offer - Payment is a must.  </u> </p>
+<p>
+<b>
+Please note that your college's annual Subscription fee validity is expiring shortly. Without any delay ensure that the fee renewal process for Year 2 is completed. We will continue to keep your Login activated. Payment stays Rs.25000/- for this academic year 2019-20 too. The 12 months validity period will be from the date of payment made.
+</b>
+</p>
 
-<p>We wish to inform you that we have moved to a continual payment system wherein <b><u>Colleges get a full 12 months benefit from their date of payment. Eg. Jan 28th 2019 to Jan 27th 2020 etc.  </u></b> I would urge all colleges who are not in the program to come in and see what benefits they are getting for Rs.25000/-. There is NO OTHER course with this standard, this level of flexibilty and at this low cost per student.</p>
+<p>
+<b><u>Account Payable details :</u></b>  (same as for the 1st year payment)
+<br>A/C Beneficiary Name: Registrar, IIT Bombay 
+<br>A/C Number: 2724101113370 
+<br>Bank Name: Canara Bank 
+<br>Bank Branch: IIT Powai 
+</p>
 
-<p>One consideration from our end is related to the Test taking - Colleges who had done tests but were unable to download the certificates because colleges were disabled, we will activate those colleges for a short period of time, so that you can download the students certificates. For this you can contact your state training managers.</p>
+<p>
+<b><u>Important Note</u></b> - If you have already done the payment for the renewal please share the details given with your State Training Manager to track your payment status. OR share the date of making payment for the same to avoid interruption in the training program. If you pay before the expiry date, college will STILL have validity of 12 months from the date of payment. Eg. if validity is there till Oct 2019 and you pay now in Sept 2019, the validity period will still be till Oct 2020.
+</p>
 
-<p>We guarantee our continued high-quality services to all. If you have questions, don't hesitate to contact the Training Coordinator of your respective state.</p>
+<p>
+<b><u>Details to be shared by Colleges after making the payment  (Mandate)</u></b>
+UTR (Unique Transaction reference), Number of Payer, Name of the payer,Institute name registered for GST, Email ID, Phone number of the Payer, Date of Payment, GST Number, PAN Number.
+</p>
+
+<p>
+Here's wishing you the best and guaranteeing our continued support for offering the Spoken Tutorial Software training to all. If you have questions, please contact the Training Coordinator of your respective state.
+</p>
 
 <p><b>Yours Sincerely, <br>
-Shyama Iyer <br>
-National Coordinator - Training Spoken Tutorial, IIT Bombay <br>
-NMEICT, MHRD, Govt. Of India<br>
+Shyama Iyer
 </b></p>
 
 '''.format(organiser.user.email)
