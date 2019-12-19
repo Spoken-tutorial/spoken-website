@@ -44,6 +44,7 @@ def dispatcher(request, permalink=''):
             )
             return HttpResponseRedirect('/accounts/login/?next=/project_documents/')
         if not request.user.groups.filter(name ='page_admin').exists():
+            messages.error(request, "You are not authorized to access this page. Please login as an authorized user.")
             return HttpResponseRedirect('/accounts/login/?next=/project_documents/')
 
     page_content = get_object_or_404(Page, permalink=permalink, visible=True)
