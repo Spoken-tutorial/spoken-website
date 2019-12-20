@@ -24,15 +24,21 @@ python manage.py migrate
 python manage.py collectstatic
 ```
 
-## Changes needed to the build (on Test/Production that does not have Angular)
+## Changes needed to the build 
+* This is applicable on Test/Production server that does not have Angular
 * Edit /static/scriptmanager/main.js
 * Locate 'localhost:8000' in the file and replace with the desired IP/Domain:Port
-(a) i={production:!0,apiUrlScript:"http://<IP/Domain:Port>/scripts/api"}
-(b) return this.http.post("http://<IP/Domain:Port>/api-token-auth/"
+  ```
+  i={production:!0,apiUrlScript:"http://<IP/Domain:Port>/scripts/api"}
+  return this.http.post("http://<IP/Domain:Port>/api-token-auth/"
+  ```
 
-## Restart services (Test/Production environment)
+## Restart services
+This is applicable on Test/Production server
+```
 sudo service nginx restart
 sudo service supervisor restart
+```
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 7.3.9.
 
