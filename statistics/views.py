@@ -142,7 +142,7 @@ def training(request):
     
     get_year = []
     pending_attendance_participant_count = 0
-    key = ''.join('None' if i == '' or i == '---------' else str(i) for i in request.GET.values())
+    key = ''.join('None' if i == '' or i == '---------' else str(i).replace(" ", "") for i in request.GET.values())
     key = key if key else 'NoneNoneNoneNoneNoneNoneNoneNoneNoneNone1'
     female_key = key + 'female'
     male_key = key + 'male'
