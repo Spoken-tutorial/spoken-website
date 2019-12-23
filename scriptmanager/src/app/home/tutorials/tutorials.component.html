@@ -1,0 +1,49 @@
+<div class="columns">
+  <div class="column is-8">
+    <div class="title">
+      <h4>{{ tutorial.tutorial }}</h4>
+    </div>
+    <div class="desc">
+      <p><b>Outline: </b>{{ tutorial.outline }}</p>
+      <ng-container *ngIf="tutorial.published">
+        <p><b>Published by: </b>{{ tutorial.published_by }}</p>
+        <p><b>Published on: </b>{{ tutorial.published_on }}</p>
+      </ng-container>
+      <p><b>Created by: </b>{{ tutorial.created_by }}</p>
+    </div>
+  </div>
+  <div class="column is-4 buttons">
+    <div class="field is-grouped is-grouped-multiline">
+      <ng-container *ngIf="tutorial.published">
+        <div class="control">
+          <app-badge-button faClass="fa fa-eye" textClass="is-success" text="Published"></app-badge-button>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="!tutorial.published">
+        <div class="control" *ngIf="!tutorial.script_status">
+          <a routerLink="/create/{{ tutorial.id }}/{{ tutorial.language }}/{{ tutorial.tutorial }}">
+            <app-badge-button faClass="fa fa-plus" textClass="is-success" text="Create"></app-badge-button>
+          </a>
+        </div>
+
+        <div class="control" *ngIf="!tutorial.script_status">
+          <a routerLink="/upload/{{ tutorial.id }}/{{ tutorial.language }}/{{ tutorial.tutorial }}">
+            <app-badge-button faClass="fa fa-upload" textClass="is-primary" text="Upload"></app-badge-button>
+          </a>
+        </div>
+
+        <div class="control" *ngIf="tutorial.script_status">
+          <a routerLink="/edit/{{ tutorial.id }}/{{ tutorial.language }}/{{ tutorial.tutorial }}">
+            <app-badge-button faClass="fa fa-edit" textClass="is-success" text="Edit"></app-badge-button>
+          </a>
+        </div>
+      </ng-container>
+      <div class="control" *ngIf="tutorial.script_status">
+        <a routerLink="/view/{{ tutorial.id }}/{{ tutorial.language }}/{{ tutorial.tutorial }}">
+          <app-badge-button faClass="fa fa-eye" textClass="is-info" text="View"></app-badge-button>
+        </a>
+      </div>
+    </div>
+
+  </div>

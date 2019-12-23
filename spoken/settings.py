@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 from os.path import *
 from .config import *
 import os
+import datetime
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -90,13 +92,16 @@ INSTALLED_APPS = [
     'certificate',
     'api',
     'rest_framework',
+    'scriptmanager',
+    'corsheaders',
+    'reversion',
     'workshop',
     'django_filters',
     'impersonate',
     'corsheaders',
-    'ckeditor'
+    'ckeditor',
+    'rest_framework_swagger'
 ]
-
 
 ROOT_URLCONF = 'spoken.urls'
 
@@ -114,6 +119,7 @@ TEMPLATES = [
             ],
         },
     },
+
 ]   
 
 WSGI_APPLICATION = 'spoken.wsgi.application'
@@ -130,9 +136,8 @@ DATABASES = {
         'NAME': DB,
         'USER': DB_USER,
         'PASSWORD': DB_PASS,
-        'HOST': '',                            # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
-        'PORT': '',    
-    
+        'HOST': DB_HOST,                            # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+        'PORT': DB_PORT,                            # Set to empty string for default.
     },
         'moodle': {
         'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
@@ -141,7 +146,7 @@ DATABASES = {
         'USER': MDB_USER,
         'PASSWORD': MDB_PASS,
         'HOST': MDB_HOST,                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
-        'PORT': '',                  # Set to empty string for default.
+        'PORT': MDB_PORT,                  # Set to empty string for default.
     },
     # 'cdeep': {
     #     'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
@@ -167,8 +172,8 @@ DATABASES = {
         # The following settings are not used with sqlite3:
         'USER': FDB_USER,
         'PASSWORD': FDB_PASS,
-        'HOST': '',                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
-        'PORT': '',                  # Set to empty string for default.
+        'HOST': FDB_HOST,                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+        'PORT': FDB_PORT,                  # Set to empty string for default.
     }
 }
 
@@ -339,3 +344,50 @@ CACHES = {
         'TIMEOUT': 3600 * 24,
     }
 }
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ),
+}
+
+JWT_AUTH = {
+    'JWT_ENCODE_HANDLER':
+    'rest_framework_jwt.utils.jwt_encode_handler',
+
+    'JWT_DECODE_HANDLER':
+    'rest_framework_jwt.utils.jwt_decode_handler',
+
+    'JWT_PAYLOAD_HANDLER':
+    'scriptmanager.views.custom_jwt_payload_handler',
+
+    'JWT_PAYLOAD_GET_USER_ID_HANDLER':
+    'rest_framework_jwt.utils.jwt_get_user_id_from_payload_handler',
+
+    'JWT_RESPONSE_PAYLOAD_HANDLER':
+    'rest_framework_jwt.utils.jwt_response_payload_handler',
+
+    'JWT_GET_USER_SECRET_KEY': None,
+    'JWT_PUBLIC_KEY': None,
+    'JWT_PRIVATE_KEY': None,
+    'JWT_ALGORITHM': 'HS256',
+    'JWT_VERIFY': True,
+    'JWT_VERIFY_EXPIRATION': True,
+    'JWT_LEEWAY': 0,
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=3600),
+    'JWT_AUDIENCE': None,
+    'JWT_ISSUER': None,
+
+    'JWT_ALLOW_REFRESH': False,
+    'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=7),
+
+    'JWT_AUTH_HEADER_PREFIX': 'Bearer',
+    'JWT_AUTH_COOKIE': None,
+}
+
+ANALYTICS_DATA = ''

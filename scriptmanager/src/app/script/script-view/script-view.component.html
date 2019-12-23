@@ -1,0 +1,153 @@
+<div class="section has-margin-top-50">
+  <div class="container">
+
+    <div class="columns">
+      <div class="column is-8">
+        <p class="title">{{ tutorialName }}</p>
+      </div>
+      <div class="column is-4">
+        <div class="field is-grouped is-grouped-multiline">
+          <div class="control">
+            <a routerLink="/">
+              <app-badge-button faClass="fa fa-chevron-left" textClass="is-info" text="Go Back"></app-badge-button>
+            </a>
+          </div>
+          <div class="control" *ngIf="nav!='create' && !script.status">
+            <a routerLink="/edit/{{tid}}/{{lid}}/{{ tutorialName }}">
+              <app-badge-button faClass="fa fa-edit" textClass="is-info" text="Edit Mode"></app-badge-button>
+            </a>
+          </div>
+        </div>
+        <!-- <div class="buttons">
+          <a class="button is-info" routerLink="/">
+            <i class="fa fa-chevron-left"></i>&nbsp;Go Back
+          </a>
+          <a *ngIf="nav!='create'" class="button is-info" routerLink="/edit/{{tid}}/{{lid}}/{{ tutorialName }}">
+            <i class="fa fa-edit"></i>&nbsp;Edit Mode
+          </a>
+        </div> -->
+      </div>
+
+    </div>
+
+    <br><br>
+
+    <div class="columns is-mobile">
+
+      <div class="column is-8">
+
+        <div #newmodal class="modal">
+
+          <div class="modal-background"></div>
+
+          <div class="modal-content">
+
+            <h3 *ngIf="index2 != -1">&nbsp;<i class="fa fa-history"></i> Updated On:
+              {{ revisions[index2]['date_time'] }}
+            </h3>
+            <table class="table is-bordered">
+              <tbody *ngIf="revisions">
+                <tr>
+                  <th>Visual Cue</th>
+                  <th>Narration</th>
+                </tr>
+                <tr>
+                  <td>
+                    <div processingDiff [left]="leftContentCue" [right]="rightContentCue"></div>
+                  </td>
+                  <td>
+                    <div processingDiff [left]="leftContentNarration" [right]="rightContentNarration"></div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            <button *ngIf="index2 != 0 && !script?.status" class="button heading is-outlined is-info" (click)="revert(revisions[index2])">
+              Revert Back to this Version
+            </button>
+
+          </div>
+
+          <button class="modal-close is-large" aria-label="close" (click)="hideModal()"></button>
+
+        </div>
+
+        <div class="table-container">
+          <table #tableRow class="table is-bordered is-striped is-narrow is-hoverable is-fullwidth" id="script-table">
+            <thead>
+              <tr>
+                <th>Sr. No.</th>
+                <th>Visual Cue</th>
+                <th>Narration</th>
+              </tr>
+            </thead>
+            <tbody *ngFor="let slide of slides; let i = index">
+              <tr (mouseenter)='mouseenter(i)' (mouseleave)="mouseleave(i)">
+                <td>{{ i+1 }} <span *ngIf="slide.comment_status" class="dot"></span></td>
+                <td class="content" innerHTML="{{ slide.cue }}"></td>
+                <td class="content" innerHTML="{{ slide.narration }}"></td>
+                <td [ngClass]="{ 'hide-comment-tools': !overVal[i] }">
+                  <button class="button heading" (click)="viewComment(i)">
+                    <i class="fa fa-comments"></i>&nbsp;
+                  </button>
+                  <button class="button heading" (click)="viewRevision(i, slide.id)">
+                    <i class="fa fa-history"></i>&nbsp;
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+
+      <div *ngIf="comment" class="column">
+        <app-script-comment [comments]="comments" (commentEmitter)="postComment($event)" [published]="script.status"></app-script-comment>
+      </div>
+
+      <div *ngIf="revision" class="column">
+        <app-script-revision [revisions]="revisions" (revisionEmitter)="viewModal($event)"></app-script-revision>
+      </div>
+
+    </div>
+
+    <div class="columns" *ngIf="authService.isReviewer()">
+      <div class="column buttons">
+        <div class="field is-grouped">
+          <div  class="control" *ngIf="!script?.status" [swal]="{ title: 'Publish Tutorial',
+                text: 'The tutorial is being approved by you and will be visible to everyone. Contributors and Reviewers will no longer be able to edit it. Are you sure?',
+                type: 'warning',
+                showCancelButton: 'true',
+                focusCancel: 'true',
+                confirmButtonText: 'Yes! Publish it.',
+                cancelButtonText: 'No!'
+              }" (confirm)="onPublishChange(true)">
+            <a>
+              <app-badge-button faClass="far fa-eye" textClass="is-success" text="Publish"></app-badge-button>
+            </a>
+          </div>
+
+          <div  class="control" *ngIf="script?.status" [swal]="{ title: 'Un-publish Tutorial',
+                text: 'You are about to unpublish this tutorial. By doing this only the contributors and reviewers of the FOSS will be able to view and edit it. Are you sure?',
+                type: 'warning',
+                showCancelButton: 'true',
+                focusCancel: 'true',
+                confirmButtonText: 'Yes! Un-Publish it.',
+                cancelButtonText: 'No!'
+              }" (confirm)="onPublishChange(false)">
+            <a>
+              <app-badge-button faClass="far fa-eye-slash" textClass="is-danger" text="Un-Publish"></app-badge-button>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="control">
+      <a (click)="downloadPdf()">
+        <app-badge-button faClass="far fa-file-pdf" textClass="is-primary" text="Download PDF"></app-badge-button>
+      </a>
+    </div>
+
+  </div>
+</div>

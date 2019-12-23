@@ -1,0 +1,31 @@
+{% extends 'spoken/templates/base.html' %}
+{% load static %}
+
+{% block metatag %}
+<base href="/scripts/">
+{% endblock %}
+
+{% block cssblock %}
+<link rel="stylesheet" href="{% static 'scriptmanager/styles.css' %}">
+{% endblock %}
+
+{% block jsblock %}
+<script type="text/javascript">
+  var token = "{{token}}";
+  console.log("loaded")
+  localStorage.setItem('token', token);
+</script>
+<script type="text/javascript" src="{% static 'scriptmanager/runtime.js' %}""></script>
+<script type="text/javascript" src="{% static 'scriptmanager/es2015-polyfills.js' %}""></script>
+<script type="text/javascript" src="{% static 'scriptmanager/polyfills.js' %}""></script>
+<script type="text/javascript" src="{% static 'scriptmanager/main.js' %}""></script>
+{% endblock %}
+
+{% block search %}
+{% endblock %}
+ 
+{% block content %}
+  <app-root></app-root>
+{% endblock %}
+
+

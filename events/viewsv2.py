@@ -8,7 +8,7 @@ from datetime import timedelta
 import re
 from django.conf import settings
 
-from config import CHANNEL_KEY
+from spoken.config import CHANNEL_KEY
 # Create your views here.
 from django.views.generic import View, ListView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
