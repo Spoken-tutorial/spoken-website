@@ -98,7 +98,6 @@ INSTALLED_APPS = [
     'workshop',
     'django_filters',
     'impersonate',
-    'corsheaders',
     'ckeditor',
     'rest_framework_swagger'
 ]
