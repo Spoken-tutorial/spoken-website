@@ -72,6 +72,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sites',
     'django.contrib.redirects',
+    'django.contrib.sitemaps',
     'django_extensions',
     'widget_tweaks',
     'captcha',
@@ -97,26 +98,10 @@ INSTALLED_APPS = [
     'workshop',
     'django_filters',
     'impersonate',
+    'corsheaders',
+    'ckeditor',
     'rest_framework_swagger'
 ]
-
-MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django.middleware.common.BrokenLinkEmailsMiddleware',
-    #'masquerade.middleware.MasqueradeMiddleware',
-    'django.contrib.redirects.middleware.RedirectFallbackMiddleware',
-    'impersonate.middleware.ImpersonateMiddleware',
-    'reversion.middleware.RevisionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
-]
-
-CORS_ORIGIN_ALLOW_ALL = True
 
 ROOT_URLCONF = 'spoken.urls'
 
@@ -163,24 +148,24 @@ DATABASES = {
         'HOST': MDB_HOST,                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
         'PORT': MDB_PORT,                  # Set to empty string for default.
     },
-    'cdeep': {
-        'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': CDB,                      # Or path to database file if using sqlite3.
-        # The following settings are not used with sqlite3:
-        'USER': CDB_USER,
-        'PASSWORD': CDB_PASS,
-        'HOST': CDB_HOST,                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
-        'PORT': CDB_PORT,                  # Set to empty string for default.
-    },
-    'workshop_info': {
-        'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': WDB,                      # Or path to database file if using sqlite3.
-        # The following settings are not used with sqlite3:
-        'USER': WDB_USER,
-        'PASSWORD': WDB_PASS,
-        'HOST': WDB_HOST,                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
-        'PORT': WDB_PORT,                  # Set to empty string for default.
-    },
+    # 'cdeep': {
+    #     'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+    #     'NAME': CDB,                      # Or path to database file if using sqlite3.
+    #     # The following settings are not used with sqlite3:
+    #     'USER': CDB_USER,
+    #     'PASSWORD': CDB_PASS,
+    #     'HOST': '',                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+    #     'PORT': '',                  # Set to empty string for default.
+    # },
+    # 'workshop_info': {
+    #     'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+    #     'NAME': WDB,                      # Or path to database file if using sqlite3.
+    #     # The following settings are not used with sqlite3:
+    #     'USER': WDB_USER,
+    #     'PASSWORD': WDB_PASS,
+    #     'HOST': '',                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+    #     'PORT': '',                  # Set to empty string for default.
+    # },
     'forums': {
         'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
         'NAME': FDB,                      # Or path to database file if using sqlite3.
@@ -217,7 +202,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Kolkata'
 
 USE_I18N = True
 
@@ -335,6 +320,30 @@ ACADEMIC_DURATION = 5
 SPOKEN_HASH_SALT = 'change this value'
 
 
+MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.common.BrokenLinkEmailsMiddleware',
+    #'masquerade.middleware.MasqueradeMiddleware',
+    'django.contrib.redirects.middleware.RedirectFallbackMiddleware',
+    'impersonate.middleware.ImpersonateMiddleware'
+]
+
+CORS_ORIGIN_ALLOW_ALL = True
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+        'LOCATION': 'localhost:11211',
+        'TIMEOUT': 3600 * 24,
+    }
+}
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (

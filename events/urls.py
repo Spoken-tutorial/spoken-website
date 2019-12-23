@@ -29,6 +29,7 @@ urlpatterns = [
     
     url(r'^(?P<role>\w+)/(?P<status>\w+)/$',  organiser_invigilator_index, name='organiser_invigilator_index'),
     url(r'^organiser/(?P<status>\w+)/(?P<code>\w+)/(?P<userid>\d+)/$',  rp_organiser, name='rp_organiser'),
+    url(r'^organiser-handover/$', handover, name='handover'),
     
     url(r'^activate-academics/$',  activate_academics, name='activate_academics'),
     url(r'^activate-academics-org/(?P<academic_id>\d+)/$',  activate_academic_org, name='activate_academic_org'),
@@ -77,6 +78,7 @@ urlpatterns = [
     #url(r'^test/subscribe/(\d+)/(\d+)/$',  test_student_subscribe', name='test_student_subscribe'),
     url(r'^test/(\d+)/participant/$',  test_participant, name='test_participant'),
     url(r'^test/participant/certificate/(\d+)/(\d+)/$',  test_participant_ceritificate, name='test_participant_ceritificate'),
+    url(r'^test/participant/certificate/all/(\d+)/$',  test_participant_ceritificate_all, name='test_participant_ceritificate_all'),
     url(r'^test/(\d+)/attendance/$',  test_attendance, name='test_attendance'),
     url(r'^test/(?P<role>\w+)/request/$',  test_request, name='test_request'),
     url(r'^test/(?P<role>\w+)/(?P<rid>\d+)/approvel/$',  test_approvel, name='test_approvel'),

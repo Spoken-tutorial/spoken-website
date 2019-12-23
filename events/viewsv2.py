@@ -41,7 +41,10 @@ from django.contrib import messages
 from django.template import RequestContext, loader
 from mdldjango.get_or_create_participant import get_or_create_participant
 from django.contrib.auth.decorators import login_required
-from mdldjango.models import MdlUser
+from mdldjango.models import MdlUser, MdlQuizGrades
+from django.contrib.auth.mixins import UserPassesTestMixin
+from events.formsv2 import StudentGradeFilterForm
+from django.views.generic import FormView
 
 #pdf generate
 from reportlab.pdfgen import canvas
@@ -126,7 +129,7 @@ class TrainingPlannerListView(ListView):
     return Semester.objects.get(even=sem)
 
   def get_current_planner(self):
-    now = datetime.now()
+    now = datetime.datetime.now()
     sem = self.is_even_sem(now.month)
     year = self.get_year(sem, now.year)
     try:
@@ -715,7 +718,7 @@ class TrainingAttendanceListView(ListView):
     if self.training_request.status == 1 and not self.training_request.participants == 0:
       self.queryset = self.training_request.trainingattend_set.all()
     else:
-      self.queryset = StudentMaster.objects.filter(batch_id=self.training_request.batch_id,student__verified = 1, moved=False)
+      self.queryset = StudentMaster.objects.filter(batch_id=self.training_request.batch_id,student__verified__lte=3,student__error=0, moved=False)
     return super(TrainingAttendanceListView, self).dispatch(*args, **kwargs)
 
   def get_context_data(self, **kwargs):
@@ -988,7 +991,7 @@ class OrganiserTrainingCertificateView(TrainingCertificate, View):
     if ta and ta.training.training_planner.organiser == self.request.user.organiser:
       return self.training_certificate(ta)
     else:
-      messages.error(self.request, "PermissionDenied!")
+      messages.error(self.request, "Permission Denied!")
     return HttpResponseRedirect("/")
 
 class OrganiserSingleTrainingCertificateView(SingleTrainingCertificate, View):
@@ -1371,6 +1374,145 @@ class GetDepartmentOrganiserStatusView(JSONResponseMixin, View):
 #     context['header'] = self.header
 #     context['ordering'] = get_field_index(self.raw_get_data)
 #     return context
+class TrainingRequestListView(ListView):
+  queryset = None
+  paginate_by = 20
+  user = None
+  template_name = None
+  header = None
+  raw_get_data = None
+  role = None
+  status = None
+  now= datetime.datetime.now()
+  year = now.year
+  month =now.month
+
+  current_sem_type_even = 0 #odd
+  if month < 6:
+    current_sem_type_even = 1 #even
+
+  prev_sem_type = 'even'
+  prev_sem_year = year
+  if current_sem_type_even:
+    prev_sem_type = 'odd'
+    prev_sem_year = (year - 1)
+  prev_sem_start_date, prev_sem_end_date = get_prev_semester_duration(prev_sem_type, prev_sem_year)
+
+  @method_decorator(group_required("Resource Person","Administrator"))
+  def dispatch(self, *args, **kwargs):
+    if (not 'role' in kwargs) or (not 'status' in kwargs):
+      raise PermissionDenied()
+    self.role = kwargs['role']
+    self.status = kwargs['status']
+    status_list = {'pending': 0, 'completed': 1, 'markcomplete':2, 'pendingattendance':3}
+    roles = ['rp', 'em']
+    self.user = self.request.user
+    if self.role in roles and self.status in status_list:
+      if self.status == 'completed':
+        self.queryset = TrainingRequest.objects.filter(
+          training_planner__academic_id__in=AcademicCenter.objects.filter(
+            state__in = State.objects.filter(
+              resourceperson__user_id=self.user,
+              resourceperson__status=1
+            )
+          ).values_list('id'),
+          status=1,
+          participants__gt=0
+        ).order_by('-updated')
+      elif self.status == 'pending':
+        self.queryset = TrainingRequest.objects.filter(
+          training_planner__academic_id__in=AcademicCenter.objects.filter(
+            state__in = State.objects.filter(
+              resourceperson__user_id=self.user,
+              resourceperson__status=1
+            )
+          ).values_list('id'),
+          status=0
+        ).order_by('-updated')
+      elif self.status == 'markcomplete':
+        if is_administrator(self.user):
+          self.queryset = TrainingRequest.objects.filter(status=2).order_by('-updated')
+        else:
+          self.queryset = TrainingRequest.objects.filter(
+            training_planner__academic_id__in=AcademicCenter.objects.filter(
+              state__in = State.objects.filter(
+                resourceperson__user_id=self.user,
+                resourceperson__status=1
+              )
+            ).values_list('id'),
+            status=2
+          ).order_by('-updated')
+      elif self.status == 'pendingattendance':
+        self.queryset = TrainingRequest.objects.filter(
+          training_planner__academic_id__in=AcademicCenter.objects.filter(
+            state__in = State.objects.filter(
+              resourceperson__user_id=self.user,
+              resourceperson__status=1,
+            )
+          ).values_list('id'),
+          status = 1, participants = 0, training_planner__semester__name = self.prev_sem_type , sem_start_date__gte = self.prev_sem_start_date
+        )
+
+      self.header = {
+        1: SortableHeader('#', False),
+        2: SortableHeader(
+          'training_planner__academic__state__name',
+          True,
+          'State'
+        ),
+        3: SortableHeader(
+          'training_planner__academic__academic_code',
+          True,
+          'Code'
+        ),
+        4: SortableHeader(
+          'training_planner__academic__institution_name',
+          True,
+          'Institution'
+        ),
+        5: SortableHeader('batch__department__name', True, 'Department / Batch'),
+        6: SortableHeader('course__foss__foss', True, 'Course Name'),
+        7: SortableHeader('course_type', True, 'Course Type'),
+        8: SortableHeader(
+          'training_planner__organiser__user__first_name',
+          True,
+          'Organiser'
+        ),
+        9: SortableHeader(
+          'sem_start_date',
+          True,
+          'Sem Start Date / Training Date'
+        ),
+        10: SortableHeader('participants', True, 'Participants'),
+        #11: SortableHeader('Action', False)
+      }
+      self.raw_get_data = self.request.GET.get('o', None)
+      self.queryset = get_sorted_list(
+        self.request,
+        self.queryset,
+        self.header,
+        self.raw_get_data
+      )
+      if self.status == 'completed':
+        self.queryset.qs = TrainingRequestFilter(self.request.GET, queryset=self.queryset, user=self.user, rp_completed=True)
+      elif self.status == 'pending':
+        self.queryset.qs = TrainingRequestFilter(self.request.GET, queryset=self.queryset, user=self.user, rp_ongoing=True)
+      elif self.status == 'markcomplete':
+        self.queryset.qs = TrainingRequestFilter(self.request.GET, queryset=self.queryset, user=self.user, rp_markcomplete=True)
+      elif self.status == 'pendingattendance':
+        self.queryset.qs = TrainingRequestFilter(self.request.GET, queryset=self.queryset, user=self.user, rp_pendingattendance=True)
+    else:
+      raise PermissionDenied()
+    return super(TrainingRequestListView, self).dispatch(*args, **kwargs)
+
+  def get_context_data(self, **kwargs):
+    context = super(TrainingRequestListView, self).get_context_data(**kwargs)
+    context['form'] = self.queryset.qs.form
+    context['role'] = self.role
+    context['status'] = self.status
+    context['header'] = self.header
+    context['ordering'] = get_field_index(self.raw_get_data)
+    return context
 
 
 ##############################  Single Training one day workshop #############################################################################
@@ -2279,7 +2421,7 @@ class OldTrainingCloseView(CreateView):
           new_training.save()
           messages.error(self.request, 'The selected training is already added to Semester-Planner')
         except:
-          year = str(datetime.now().year)
+          year = str(datetime.datetime.now().year)
           tdate = datetime.strptime(training.tdate.strftime('%Y-%m-%d'), '%Y-%m-%d')
           even_start = datetime.strptime(year + '-01-01', '%Y-%m-%d')
           even_end = datetime.strptime(year + '-06-30', '%Y-%m-%d')
@@ -2866,7 +3008,7 @@ def trainingrequest(request, role, status):
   template_name = None
   header = None
   raw_get_data = None
-  now= datetime.now()
+  now= datetime.datetime.now()
   year = now.year
   month =now.month
 
@@ -3004,7 +3146,7 @@ def CertificateRequest(request, role, choice):
   user = request.user
   header = None
   raw_get_data = None
-  now= datetime.now()
+  now= datetime.datetime.now()
   year = now.year
   month =now.month
   roles = ['rp', 'em']
@@ -3104,3 +3246,146 @@ def GenerateCertificate(request, trid):
   else:
     messages.error(request, 'Something went wrong Please try again')
   return HttpResponseRedirect("/software-training/certificate-request/rp/training/") 
+
+
+class AllTrainingCertificateView(TrainingCertificate, View):  
+  @method_decorator(group_required("Organiser"))
+  def dispatch(self, *args, **kwargs):
+    return super(AllTrainingCertificateView, self).dispatch(*args, **kwargs)
+  def get(self, request, *args, **kwargs):
+    ta_list = None
+    try:
+      ta_list = TrainingAttend.objects.filter(training_id=kwargs['trid'])
+    except ObjectDoesNotExist:
+      messages.error(self.request, "Record not found")
+      pass    
+
+    output = PdfFileWriter()
+
+    for ta in ta_list:
+      semsplit = re.split('-|, ',ta.training.training_planner.get_semester())
+      sem_start = semsplit[0]+semsplit[2]
+
+      training_end = ta.training.sem_start_date+timedelta(days=60)
+
+      response = HttpResponse(content_type='application/pdf')
+      filename = (ta.training.course.foss.foss+"-Participant-Certificate").replace(" ", "-");
+
+      response['Content-Disposition'] = 'attachment; filename='+filename+'.pdf'
+      imgTemp = BytesIO ()
+      imgDoc = canvas.Canvas(imgTemp)
+
+      # Title
+      imgDoc.setFont('Helvetica', 40, leading=None)
+      imgDoc.drawCentredString(415, 480, "Certificate of Participation")
+
+      #date
+      imgDoc.setFont('Helvetica', 18, leading=None)
+      imgDoc.drawCentredString(211, 115, self.custom_strftime('%B {S} %Y', training_end))
+
+      #password
+      certificate_pass = ''
+      imgDoc.setFillColorRGB(211, 211, 211)
+      imgDoc.setFont('Helvetica', 10, leading=None)
+      imgDoc.drawString(10, 6, certificate_pass)
+
+      # Draw image on Canvas and save PDF in buffer
+      imgPath = settings.MEDIA_ROOT +"sign.jpg"
+      imgDoc.drawImage(imgPath, 600, 100, 150, 76)
+
+      #paragraphe
+      text = "This is to certify that <b>"+ta.student.user.first_name +" "+ta.student.user.last_name+"</b> participated in the <b>"+ta.training.course.foss.foss+"</b> training organized at <b>"+ta.training.training_planner.academic.institution_name+"</b> in <b>"+sem_start+"</b> semester, with course material provided by the Spoken Tutorial Project, IIT Bombay.<br /><br />A comprehensive set of topics pertaining to <b>"+ta.training.course.foss.foss+"</b> were covered in the training. This training is offered by the Spoken Tutorial Project, IIT Bombay, funded by the National Mission on Education through ICT, MHRD, Govt. of India."
+      if ta.training.department.id == 24:
+        text = "This is to certify that <b>"+ta.student.user.first_name +" "+ta.student.user.last_name+"</b> participated in the <b>"+ta.training.course.foss.foss+"</b> training organized at <b>"+ta.training.training_planner.academic.institution_name+"</b> by <b>"+ta.training.training_planner.organiser.user.first_name+" "+ta.training.training_planner.organiser.user.last_name+"</b>, with course material provided by the Spoken Tutorial Project, IIT Bombay.<br /><br />A comprehensive set of topics pertaining to <b>"+ta.training.course.foss.foss+"</b> were covered in the training. This training is offered by the Spoken Tutorial Project, IIT Bombay, funded by the National Mission on Education through ICT, MHRD, Govt. of India."
+
+
+      centered = ParagraphStyle(name = 'centered',
+        fontSize = 16,
+        leading = 30,
+        alignment = 0,
+        spaceAfter = 20
+      )
+
+      p = Paragraph(text, centered)
+      p.wrap(650, 200)
+      p.drawOn(imgDoc, 4.2 * cm, 7 * cm)
+      imgDoc.save()
+      # Use PyPDF to merge the image-PDF into the template
+      page = PdfFileReader(open(settings.MEDIA_ROOT +"Blank-Certificate.pdf","rb")).getPage(0)
+      overlay = PdfFileReader(BytesIO(imgTemp.getvalue())).getPage(0)
+      page.mergePage(overlay)
+
+      #Save the result
+      
+      output.addPage(page)
+
+    #stream to browser
+    outputStream = response
+    output.write(response)
+    outputStream.close()
+
+    return response
+
+
+class StudentGradeFilter(UserPassesTestMixin, FormView):
+  template_name = 'events/templates/student_grade_filter.html'
+  form_class = StudentGradeFilterForm
+  success_url = '/software-training/student-grade-filter/' 
+
+  def test_func(self):
+        return self.request.user.is_superuser
+  
+  def form_valid(self, form):
+    """
+    If the form is valid, redirect to the supplied URL.
+    """
+    if form.is_valid:
+      foss = [x for x in form.cleaned_data['foss']]
+      state = [s for s in form.cleaned_data['state']]
+      city = [c for c in form.cleaned_data['city']]
+      grade = form.cleaned_data['grade']
+      activation_status = form.cleaned_data['activation_status']
+      institution_type = [t for t in form.cleaned_data['institution_type']]
+      from_date = form.cleaned_data['from_date']
+      to_date = form.cleaned_data['to_date']
+      result=self.filter_student_grades(foss, state, city, grade, institution_type, activation_status, from_date, to_date)
+    return self.render_to_response(self.get_context_data(form=form, result=result))
+
+
+  def filter_student_grades(self, foss=None, state=None, city=None, grade=None, institution_type=None, activation_status=None, from_date=None, to_date=None):
+    if grade:
+      #get the moodle id for the foss
+      try:
+        fossmdl=FossMdlCourses.objects.filter(foss__in=foss)
+        #get moodle user grade for a specific foss quiz id having certain grade
+        user_grade=MdlQuizGrades.objects.using('moodle').values_list('userid', 'quiz', 'grade').filter(quiz__in=[f.mdlquiz_id for f in fossmdl], grade__gte=int(grade))
+        #convert moodle user and grades as key value pairs
+        dictgrade = {i[0]:{i[1]:[i[2],False]} for i in user_grade}
+        #get all test attendance for moodle user ids and for a specific moodle quiz ids
+        test_attendance=TestAttendance.objects.filter(
+                                  mdluser_id__in=list(dictgrade.keys()), 
+                                  mdlquiz_id__in=[f.mdlquiz_id for f in fossmdl], 
+                                  test__academic__state__in=state if state else State.objects.all(),
+                                  test__academic__city__in=city if city else City.objects.all(), 
+                                  status__gte=3, 
+                                  test__academic__institution_type__in=institution_type if institution_type else InstituteType.objects.all(), 
+                                  test__academic__status__in=[activation_status] if activation_status else [1,3]
+                                )
+        if from_date and to_date:
+          test_attendance = test_attendance.filter(test__tdate__range=[from_date, to_date])
+        elif from_date:
+          test_attendance = test_attendance.filter(test__tdate__gte=from_date)
+          
+        filter_ta=[]
+        for i in range(test_attendance.count()):
+          if not dictgrade[test_attendance[i].mdluser_id][test_attendance[i].mdlquiz_id][1]:
+            dictgrade[test_attendance[i].mdluser_id][test_attendance[i].mdlquiz_id][1] = True
+            filter_ta.append(test_attendance[i])
+            
+        #return the result as dict
+        return {'mdl_user_grade': dictgrade, 'test_attendance': filter_ta, "count":len(filter_ta)}
+      except FossMdlCourses.DoesNotExist:
+        return None
+    return None
+
+

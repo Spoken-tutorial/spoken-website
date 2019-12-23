@@ -24,6 +24,16 @@ def get_valid_statistics_count(academic_center, model_name):
     collection = get_valid_statistics(academic_center, model_name)
     return collection.count()
 
+def get_gender_ratio(collection):
+	print("########################")
+	print(collection.object_list)
+	print("########################")
+	return collection
+
+
+
+
 
 register.filter('get_valid_statistics', get_valid_statistics)
 register.filter('get_valid_statistics_count', get_valid_statistics_count)
+register.filter('get_gender_ratio', get_gender_ratio)

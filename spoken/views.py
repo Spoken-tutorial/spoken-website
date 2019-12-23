@@ -139,7 +139,7 @@ def tutorial_search(request):
     collection = None
     form = TutorialSearchForm()
     foss_get = ''
-    show_on_homepage = True
+    show_on_homepage = 1
     queryset = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = show_on_homepage)
 
     if request.method == 'GET' and request.GET:
@@ -183,7 +183,7 @@ def series_foss(request):
     form = SeriesTutorialSearchForm()
     collection = None
     # Get all the video / audio testimonials in series
-    foss_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), language__name='English', tutorial_detail__foss__show_on_homepage = False).values_list('tutorial_detail__foss__id').annotate().distinct()
+    foss_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), language__name='English', tutorial_detail__foss__show_on_homepage = 0).values_list('tutorial_detail__foss__id').annotate().distinct()
     collection =  MediaTestimonials.objects.filter(foss__id__in=foss_list).values("foss__foss", "content", "created", "foss", "foss_id", "id", "path", "user", "workshop_details").order_by('-created')
     
     if collection:
@@ -206,7 +206,7 @@ def series_tutorial_search(request):
     collection = None
     form = SeriesTutorialSearchForm()
     foss_get = ''
-    show_on_homepage = False
+    show_on_homepage = 0
     queryset = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = show_on_homepage)
     
     if request.method == 'GET' and request.GET:
@@ -235,6 +235,49 @@ def series_tutorial_search(request):
     context['SCRIPT_URL'] = settings.SCRIPT_URL
     context['current_foss'] = foss_get
     return render(request, 'spoken/templates/series_tutorial_search.html', context)
+
+def archived_foss(request):
+    form = ArchivedTutorialSearchForm()
+    collection = None    
+    context = {}
+    context['form'] = form
+    return render(request, 'spoken/templates/archived_foss_list.html', context)
+
+@csrf_exempt
+def archived_tutorial_search(request):
+    context = {}
+    collection = None
+    form = ArchivedTutorialSearchForm()
+    foss_get = ''
+    show_on_homepage = 2
+    queryset = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = show_on_homepage)
+    
+    if request.method == 'GET' and request.GET:
+        form = ArchivedTutorialSearchForm(request.GET)
+        if form.is_valid():
+            foss_get = request.GET.get('search_archivedfoss', '')
+            language_get = request.GET.get('search_archivedlanguage', '')
+            if foss_get and language_get:
+                collection = queryset.filter(tutorial_detail__foss__foss=foss_get, language__name=language_get).order_by('tutorial_detail__level', 'tutorial_detail__order')
+
+            elif foss_get:
+                collection = queryset.filter(tutorial_detail__foss__foss=foss_get).order_by('tutorial_detail__level', 'tutorial_detail__order', 'language__name')
+            elif language_get:
+                collection = queryset.filter(language__name=language_get).order_by('tutorial_detail__foss__foss', 'tutorial_detail__level', 'tutorial_detail__order')
+            else:
+                collection = queryset.filter(tutorial_detail__foss__id__in=FossCategory.objects.values('id'), language__id__in=Language.objects.values('id')).order_by('tutorial_detail__foss__foss', 'language__name', 'tutorial_detail__level', 'tutorial_detail__order')
+    else:
+        foss = queryset.filter(language__name='English').values('tutorial_detail__foss__foss').annotate(Count('id')).values_list('tutorial_detail__foss__foss').distinct().order_by('?')[:1].first()
+        collection = queryset.filter(tutorial_detail__foss__foss=foss[0], language__name='English')
+        foss_get = foss[0]
+    if collection:
+        page = request.GET.get('page')
+        collection = get_page(collection, page)
+    context['form'] = form
+    context['collection'] = collection
+    context['SCRIPT_URL'] = settings.SCRIPT_URL
+    context['current_foss'] = foss_get
+    return render(request, 'spoken/templates/archived_tutorial_search.html', context)
 
 
 def watch_tutorial(request, foss, tutorial, lang):
@@ -301,9 +344,11 @@ def what_is_spoken_tutorial(request):
 @csrf_exempt
 def get_language(request, tutorial_type):
     output = ''
-    show_on_homepage = True
+    show_on_homepage = 1
     if tutorial_type== "series":
-        show_on_homepage = False
+        show_on_homepage = 0
+    if tutorial_type== "archived":
+        show_on_homepage = 2
 
     if request.method == "POST":
         foss = request.POST.get('foss')
@@ -404,15 +449,15 @@ def testimonials_new_media(request, testimonial_type):
     
     context = {}
     if testimonial_type == 'series':
-        form = MediaTestimonialForm(on_home_page=False)
+        form = MediaTestimonialForm(on_home_page=0)
     else:
-        form = MediaTestimonialForm(on_home_page=True)
+        form = MediaTestimonialForm(on_home_page=1)
 
     if request.method == 'POST':
         if testimonial_type == 'series':
-            form = MediaTestimonialForm(request.POST, request.FILES, on_home_page=False)
+            form = MediaTestimonialForm(request.POST, request.FILES, on_home_page=0)
         else:
-            form = MediaTestimonialForm(request.POST, request.FILES, on_home_page=True)
+            form = MediaTestimonialForm(request.POST, request.FILES, on_home_page=1)
         if form.is_valid():
             foss = FossCategory.objects.get(foss=request.POST.get('foss'))
             if not request.FILES:

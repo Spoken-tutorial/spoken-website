@@ -119,6 +119,16 @@
                         <th>Participants Count</th>
                         <td>{{ participants }}</td>
                     </tr>
+                    {% if status == '1' %}  
+                    <tr>
+                        <th>Total female participants</th>
+                        <td>{{ femalecount }}</td>
+                    </tr>
+                    <tr>
+                        <th>Total male participants</th>
+                        <td>{{ malecount }}</td>
+                    </tr>
+                    {% endif %}
                 </table>
 
                 <div style="min-height:100px;">

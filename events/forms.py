@@ -319,7 +319,7 @@ class TestForm(forms.ModelForm):
             trainings = get_trainings_for_organiser(user)
             trchoices = [('', '-------')]
             for training in trainings:
-                if not training.is_training_certificate_allowed():
+                if training.course.test:
                     trchoices.append((training.id, training.training_name()))
 
             self.fields['training'].choices = trchoices
