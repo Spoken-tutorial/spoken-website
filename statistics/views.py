@@ -330,6 +330,15 @@ def online_test(request):
     collection = TestFilter(request.GET, queryset=collection, state=state)
     # find participants count
     participant_count = collection.qs.aggregate(Sum('participant_count'))
+
+
+    femalecount =0
+    female_list=list(Student.objects.filter(testattendance__status__gte=2 , testattendance__test_id__in=[col.id for col in collection.qs], gender='Female').values_list('id'))
+    femalecount= len([i[0] for i in female_list])
+
+    malecount =0
+    male_list=list(Student.objects.filter(testattendance__status__gte=2 ,testattendance__test_id__in=[col.id for col in collection.qs], gender='Male').values_list('id'))
+    malecount= len([i[0] for i in male_list])
     #
     chart_query_set = collection.qs.extra(select={'year': "EXTRACT(year FROM tdate)"}).values('year').order_by(
         '-year').annotate(total_training=Count('tdate'), total_participant=Sum('participant_count'))
@@ -345,6 +354,8 @@ def online_test(request):
     context['header'] = header
     context['ordering'] = ordering
     context['participant_count'] = participant_count
+    context['femalecount'] = femalecount
+    context['malecount'] = malecount
     context['model'] = 'Online-Test'
     return render(request, 'statistics/templates/online_test.html', context)
 
