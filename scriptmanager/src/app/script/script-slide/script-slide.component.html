@@ -1,11 +1,11 @@
 <div class="columns">
   <div class="column">
 
-    <header class="timeline-header">
+    <header class="timeline-header" style="margin-top: 25px;">
       <span class="tag is-link is-medium">{{ index+1 }}</span>
     </header>
 
-    <div class="timeline-item animated fadeInLeft">
+    <div class="timeline-item animated fadeInLeft" style="margin-bottom: -20px;">
       <div *ngIf="!view" class="timeline-marker is-icon" [swal]="{ title: 'Delete Slide',
               text: 'Are you sure?',
               type: 'error',
@@ -85,7 +85,7 @@
 
             <div class="control" *ngIf="nav !== 'create'">
               <a (click)="saveSlide(false)">
-                <app-badge-button faClass="fas fa-save" textClass="is-info" text="Save"></app-badge-button>                              
+                <app-badge-button faClass="fas fa-save" textClass="is-danger" text="Save"></app-badge-button>
               </a>
             </div>
           </div>
