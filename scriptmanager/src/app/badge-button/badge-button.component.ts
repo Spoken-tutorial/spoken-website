@@ -9,6 +9,7 @@ export class BadgeButtonComponent implements OnInit {
   @Input() faClass: string;
   @Input() textClass: string;
   @Input() text: string;
+  @Input() textTooltip: string;
 
   constructor() { }
 
