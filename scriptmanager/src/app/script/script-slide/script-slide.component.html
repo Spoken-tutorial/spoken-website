@@ -61,31 +61,31 @@
           <div class="field is-grouped is-grouped-multiline">
             <div class="control">
               <a (click)="moveSlide(-1)">
-                <app-badge-button faClass="fas fa-chevron-up" textClass="is-info" text="Move"></app-badge-button>
+                <app-badge-button faClass="fas fa-chevron-up" textClass="is-info" text="Move" textTooltip="Click here to move row {{ index+1 }} up"></app-badge-button>
               </a>
             </div>
 
             <div class="control">
               <a (click)="moveSlide(+1)">
-                <app-badge-button faClass="fas fa-chevron-down" textClass="is-info" text="Move"></app-badge-button>
+                <app-badge-button faClass="fas fa-chevron-down" textClass="is-info" text="Move" textTooltip="Click here to move row {{ index+1 }} down"></app-badge-button>
               </a>
             </div>
 
             <div class="control">
               <a (click)="insertSlide()">
-                <app-badge-button faClass="fas fa-plus" textClass="is-info" text="Insert"></app-badge-button>              
+                <app-badge-button faClass="fas fa-plus" textClass="is-info" text="Insert" textTooltip="Click here to insert a row after row {{ index+1 }}"></app-badge-button>
               </a>
             </div>
 
             <div class="control">
               <a (click)="duplicateSlide()">
-                <app-badge-button faClass="fas fa-clone" textClass="is-info" text="Duplicate"></app-badge-button>              
+                <app-badge-button faClass="fas fa-clone" textClass="is-info" text="Duplicate" textTooltip="Click here to duplicate row {{ index+1 }}"></app-badge-button>
               </a>
             </div>
 
             <div class="control" *ngIf="nav !== 'create'">
               <a (click)="saveSlide(false)">
-                <app-badge-button faClass="fas fa-save" textClass="is-danger" text="Save"></app-badge-button>
+                <app-badge-button faClass="fas fa-save" textClass="is-danger" text="Save" textTooltip="Click here to save row {{ index+1 }}"></app-badge-button>
               </a>
             </div>
           </div>

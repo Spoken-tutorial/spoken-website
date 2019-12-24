@@ -9,12 +9,12 @@
         <div class="field is-grouped is-grouped-multiline">
           <div class="control">
             <a routerLink="/">
-              <app-badge-button faClass="fa fa-chevron-left" textClass="is-info" text="Go Back"></app-badge-button>
+              <app-badge-button faClass="fa fa-chevron-left" textClass="is-info" text="Go Back" textTooltip="Click here to go back to the list of tutorials in this FOSS"></app-badge-button>
             </a>
           </div>
           <div class="control" *ngIf="nav!='create' && !script.status">
             <a routerLink="/edit/{{tid}}/{{lid}}/{{ tutorialName }}">
-              <app-badge-button faClass="fa fa-edit" textClass="is-info" text="Edit Mode"></app-badge-button>
+              <app-badge-button faClass="fa fa-edit" textClass="is-info" text="Edit Mode" textTooltip="Click here to edit this script"></app-badge-button>
             </a>
           </div>
         </div>

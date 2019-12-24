@@ -7,12 +7,12 @@
     <div class="field is-grouped is-grouped-multiline">
       <div class="control">
         <a routerLink="/">
-          <app-badge-button faClass="fa fa-chevron-left" textClass="is-info" text="Go Back"></app-badge-button>
+          <app-badge-button faClass="fa fa-chevron-left" textClass="is-info" text="Go Back" textTooltip="Click here to go back to the list of tutorials in this FOSS"></app-badge-button>
         </a>
       </div>
       <div class="control" *ngIf="nav!='create'">
         <a routerLink="/{{nav}}/{{tid}}/{{lid}}/{{ tutorialName }}">
-          <app-badge-button faClass="fa fa-eye" textClass="is-info" text="View Mode"></app-badge-button>
+          <app-badge-button faClass="fa fa-eye" textClass="is-info" text="View Mode" textTooltip="Click here to stop editing and view this script"></app-badge-button>
         </a>
       </div>
     </div>
@@ -20,10 +20,10 @@
 </div>
 <div *ngIf="nav!='create'" class="columns">
   <div class="column">
-    <div class="field">
+    <div class="field" title="Toggle button to autosave the script. When On, there is no need to click Save button.">
       <input id="autosave" type="checkbox" name="autosave"
         class="switch is-rounded is-outlined" [(ngModel)]="autosave">
-      <label for="autosave">Save the content of the textbox when the focus is lost</label>
+      <label for="autosave">Autosave: Save the content of the textbox when the focus is lost</label>
     </div>
   </div>
 </div>

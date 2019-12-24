@@ -12,7 +12,7 @@
 
             <div class="column is-4">
               <div class="is-pulled-right">
-                <a class="button is-info" routerLink="/">
+                <a class="button is-info" title="Click to go back" routerLink="/">
                   <i class="fa fa-chevron-left"></i>&nbsp;Go Back
                 </a>
               </div>
@@ -25,7 +25,7 @@
           <div class="file has-name is-boxed is-centered">
             <label class="file-label">
               <input class="file-input" type="file" (change)="onFileChange($event)" />
-              <span class="file-cta">
+              <span class="file-cta"  title="Click here to browse the file (.odt, .docx) for upload.">
                 <span class="file-icon">
                   <i class="fa fa-upload"></i>
                 </span>
@@ -42,7 +42,7 @@
           <br />
 
           <div class="file is-centered">
-            <a *ngIf="uploadButton" class="button is-primary" (click)="onFileSave()"><i class="fa fa-upload"></i>&nbsp;
+            <a *ngIf="uploadButton" class="button is-primary" (click)="onFileSave()" title="Click to upload the file"><i class="fa fa-upload"></i>&nbsp;
               Upload Script</a>
           </div>
 
