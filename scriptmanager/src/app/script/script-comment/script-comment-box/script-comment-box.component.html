@@ -14,24 +14,24 @@
       </small>
       <div class="columns">
         <div class="column is-narrow" *ngIf="!comment.resolved && authService.isOwner(comment.user) && !published">
-          <a *ngIf="!isEditable" (click)="makeEditable()">
+          <a *ngIf="!isEditable" (click)="makeEditable()" title="Edit this comment">
             <span class="tag is-info is-light">Edit</span>
           </a>
-          <a *ngIf="isEditable" (click)="saveComment()">
+          <a *ngIf="isEditable" (click)="saveComment()" title="Save this comment">
             <span class="tag is-primary is-light">Save</span>
           </a>
         </div>
         <div class="column is-narrow" *ngIf="!comment.resolved && authService.isOwner(comment.user) && !published">
-          <a (click)="deleteComment()">
+          <a (click)="deleteComment()" title="Delete this comment">
             <span class="tag is-danger is-light">Delete</span>
           </a>
         </div>
         <div class="column is-narrow" *ngIf="!comment.resolved && !published">
           <a (click)="doneComment()">
-            <span class="tag is-warning is-light" *ngIf="!comment.done">
+            <span class="tag is-warning is-light" *ngIf="!comment.done" title="Click to notify that the changes are incorporated">
               <span>Done</span> 
             </span>
-            <span class="tag is-warning" *ngIf="comment.done">
+            <span class="tag is-warning" *ngIf="comment.done"  title="Click to notify that the changes are not incorporated">
                 <span class="icon">
                   <i class="fas fa-check"></i>
                 </span>
@@ -41,10 +41,10 @@
         </div>
         <div class="column is-narrow" *ngIf="authService.isOwner(comment.user) && !published">
           <a (click)="resolveComment()">
-            <span class="tag is-success is-light" *ngIf="!comment.resolved">
+            <span class="tag is-success is-light" *ngIf="!comment.resolved"  title="Click to notify that the changes are verified">
               <span>Resolve</span>
             </span>
-            <span class="tag is-success" *ngIf="comment.resolved">
+            <span class="tag is-success" *ngIf="comment.resolved"  title="Click to notify that the issue raised is still pending">
                 <span class="icon">
                   <i class="fas fa-check"></i>
                 </span>

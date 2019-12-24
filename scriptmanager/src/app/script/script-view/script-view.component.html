@@ -87,10 +87,10 @@
                 <td class="content" innerHTML="{{ slide.cue }}"></td>
                 <td class="content" innerHTML="{{ slide.narration }}"></td>
                 <td [ngClass]="{ 'hide-comment-tools': !overVal[i] }">
-                  <button class="button heading" (click)="viewComment(i)">
+                  <button class="button heading" (click)="viewComment(i)" title="Click to view comments">
                     <i class="fa fa-comments"></i>&nbsp;
                   </button>
-                  <button class="button heading" (click)="viewRevision(i, slide.id)">
+                  <button class="button heading" (click)="viewRevision(i, slide.id)" title="Click to view history">
                     <i class="fa fa-history"></i>&nbsp;
                   </button>
                 </td>
@@ -123,7 +123,7 @@
                 cancelButtonText: 'No!'
               }" (confirm)="onPublishChange(true)">
             <a>
-              <app-badge-button faClass="far fa-eye" textClass="is-success" text="Publish"></app-badge-button>
+              <app-badge-button faClass="far fa-eye" textClass="is-success" text="Publish"  textTooltip="Click here to publish the script"></app-badge-button>
             </a>
           </div>
 
@@ -136,7 +136,7 @@
                 cancelButtonText: 'No!'
               }" (confirm)="onPublishChange(false)">
             <a>
-              <app-badge-button faClass="far fa-eye-slash" textClass="is-danger" text="Un-Publish"></app-badge-button>
+              <app-badge-button faClass="far fa-eye-slash" textClass="is-danger" text="Un-Publish" textTooltip="Click here to un-publish the script"></app-badge-button>
             </a>
           </div>
         </div>
@@ -145,7 +145,7 @@
 
     <div class="control">
       <a (click)="downloadPdf()">
-        <app-badge-button faClass="far fa-file-pdf" textClass="is-primary" text="Download PDF"></app-badge-button>
+        <app-badge-button faClass="far fa-file-pdf" textClass="is-primary" text="Download PDF" textTooltip="Click here to download the script in PDF format"></app-badge-button>
       </a>
     </div>
 
