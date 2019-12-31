@@ -97,8 +97,7 @@ INSTALLED_APPS = [
     'workshop',
     'django_filters',
     'impersonate',
-    'ckeditor',
-    'rest_framework_swagger'
+    'ckeditor'
 ]
 
 ROOT_URLCONF = 'spoken.urls'
