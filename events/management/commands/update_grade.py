@@ -9,10 +9,11 @@ class Command(BaseCommand):
     @tx.atomic
     def handle(self, *args, **options):
 	    print("hello")
-	    quizstudents = MdlQuizGrades.objects.filter(quiz=47, grade__gte=98)
+	    fossquizlist = [47,10,42,70,46,62,88,93,100,99,94,52,61,8]
+	    quizstudents = MdlQuizGrades.objects.filter(grade__gte=50, quiz__in=fossquizlist)
 
 	    for mdlstudents in quizstudents:
-	    	attendance = TestAttendance.objects.filter(mdluser_id = mdlstudents.userid, mdlquiz_id = 47)
+	    	attendance = TestAttendance.objects.filter(mdluser_id = mdlstudents.userid, mdlquiz_id__in=fossquizlist)
 	    	print(attendance)
 	    	for att in attendance:
 	    		print(att.id)
@@ -20,12 +21,5 @@ class Command(BaseCommand):
 	    		att.save()
 
 
-
-
-	    # 
-	    # 	attendance = TestAttendance.objects.filter(mdluser_id = mdlstudents.userid)
-	    	# 
-	    	# 	att.grade = quizstudents.grade
-	    	# 	quizstudents.save()
 
 
