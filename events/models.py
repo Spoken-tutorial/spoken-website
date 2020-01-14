@@ -416,6 +416,7 @@ class TestAttendance(models.Model):
   status = models.PositiveSmallIntegerField(default=0)
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
+  grade = models.DecimalField(max_digits=10, decimal_places=5, default=0.0)
   class Meta(object):
     verbose_name = "Test Attendance"
     unique_together = (("test", "mdluser_id"))
