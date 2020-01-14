@@ -814,7 +814,7 @@ class TestTrainingManager(models.Manager):
       ) |
       (
         Q(course__category__gt=0) &
-        Q(sem_start_date__lte=datetime.now()-timedelta(days=30))
+        Q(sem_start_date__lte=datetime.now()-timedelta(days=15))
       ),
       participants__gt=0
     ).order_by('-training_planner__year', '-training_planner__semester_id')
