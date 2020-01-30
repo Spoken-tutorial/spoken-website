@@ -24,7 +24,7 @@ class ScriptDetail(models.Model):
 	comment_status = models.BooleanField(default=False)
 
 	def __str__(self):
-		return self.cue + ' ' + self.narration
+		return self.script.tutorial.tutorial
 
 class Comment(models.Model):
 	comment = models.TextField()
