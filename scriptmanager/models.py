@@ -23,9 +23,6 @@ class ScriptDetail(models.Model):
 	script = models.ForeignKey(Script, on_delete = models.CASCADE)
 	comment_status = models.BooleanField(default=False)
 
-	def __str__(self):
-		return self.script.tutorial.tutorial
-
 class Comment(models.Model):
 	comment = models.TextField()
 	user=models.ForeignKey(User)
