@@ -39,6 +39,7 @@ export class ScriptViewComponent implements OnInit {
   @Input() nav: any;
   @ViewChild('tableRow') el: ElementRef;
   @ViewChild('newmodal') el2: ElementRef;
+  @ViewChild('viewScript') el3: ElementRef;
 
   constructor(
     private route: ActivatedRoute,
@@ -69,6 +70,15 @@ export class ScriptViewComponent implements OnInit {
         },
         console.error
       );
+  }
+
+  public printSaveScript() {
+    var tableContent = this.el3.nativeElement.innerHTML;
+    var win = window.open('', '', 'height=500, width=500');
+    win.document.write(tableContent);
+    win.document.close();
+    win.print();
+    win.close();
   }
 
   public downloadPdf() {

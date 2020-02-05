@@ -72,8 +72,8 @@
 
         </div>
 
-        <div class="table-container">
-          <table #tableRow class="table is-bordered is-striped is-narrow is-hoverable is-fullwidth" id="script-table">
+        <div #viewScript class="table-container">
+          <table border="1px" #tableRow class="table is-bordered is-striped is-narrow is-hoverable is-fullwidth" id="script-table">
             <thead>
               <tr>
                 <th>Sr. No.</th>
@@ -144,8 +144,11 @@
     </div>
 
     <div class="control">
-      <a (click)="downloadPdf()">
+      <!-- <a (click)="downloadPdf()">
         <app-badge-button faClass="far fa-file-pdf" textClass="is-primary" text="Download PDF" textTooltip="Click here to download the script in PDF format"></app-badge-button>
+      </a> -->
+      <a (click)="printSaveScript()">
+        <app-badge-button faClass="fa fa-print" textClass="is-primary" text="Print / Save PDF" textTooltip="Click here to print or save the script"></app-badge-button>
       </a>
     </div>
 
