@@ -87,7 +87,7 @@
                 <td class="content" innerHTML="{{ slide.cue }}"></td>
                 <td class="content" innerHTML="{{ slide.narration }}"></td>
                 <td [ngClass]="{ 'hide-comment-tools': !overVal[i] }">
-                  <button class="button heading" (click)="viewComment(i)" title="Click to view comments">
+                  <button class="button heading" (click)="viewComment(i)" title="Click to add/view comments">
                     <i class="fa fa-comments"></i>&nbsp;
                   </button>
                   <button class="button heading" (click)="viewRevision(i, slide.id)" title="Click to view history">
