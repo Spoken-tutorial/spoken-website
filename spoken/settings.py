@@ -348,3 +348,18 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TASK_SERIALIZER = 'json'
 
 CRON_ROOT = os.path.join(MEDIA_ROOT, 'crons/')
+
+CKEDITOR_CONFIGS = {
+    'default': {
+        'height': 150,
+        'width': 600,
+        'toolbar': 'Full',
+        'toolbar_Custom': [
+            ['Bold', 'Italic', 'Underline'],
+            ['NumberedList', 'BulletedList', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock'],
+            ['Link', 'Unlink'],
+            ['TextColor', 'BGColor'],
+            [ 'Source']
+        ]
+    }
+}

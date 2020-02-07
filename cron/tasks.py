@@ -17,7 +17,7 @@ def async_bulk_email(taskid, *args, **kwargs):
     sent=0
     errors=0
     task = AsyncCronMail.objects.get(pk=taskid)
-    log_file=open(settings.CRON_ROOT+'log_email_'+uuid.uuid4().hex+".txt", "w+")
+    log_file=open(settings.CRON_ROOT+'log_email_'+uuid.uuid4().hex+".csv", "w+")
     with open(task.csvfile.path, newline='') as csvfile:
         csvreader = csv.reader(csvfile, delimiter=' ', quotechar='|')
         for row in csvreader:
@@ -30,8 +30,7 @@ def async_bulk_email(taskid, *args, **kwargs):
                     )
             try:
                 email.attach_alternative(task.message, "text/html")
-                #result = email.send()
-                print(email.to, task.sender)
+                result = email.send()
                 sent += 1
                 if sent%100==0:
                     time.sleep(10)

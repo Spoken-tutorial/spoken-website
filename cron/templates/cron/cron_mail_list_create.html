@@ -22,11 +22,16 @@
             </div>
             
             <div class="form-group">
-                <label for="id_to_date" class="col-sm-4 control-label">Email List File (1 column csv)</label>
+                <label for="id_to_date" class="col-sm-4 control-label">Email List (1 column csv file)</label>
                 <div class="col-sm-8">
                   {{ form.csvfile }}
                     {{ form.csvfile.errors }}
                 </div>
+                <div class="form-group">
+                  <div class="col-sm-offset-4 col-sm-8">
+                     <input class="btn btn-success" type="submit" value="Create" />
+                  </div>
+               </div>
             </div>
             
         </div>
@@ -45,13 +50,6 @@
                 {{ form.message.errors }}
             </div>
           </div>
-        </div>
-        <div class="col-lg-4 col-md-4 col-sm-4">
-          <div class="form-group">
-            <div class="col-sm-offset-4 col-sm-8">
-               <input class="btn btn-success" type="submit" value="Create" />
-            </div>
-         </div>
         </div>
         </form>
     </div>
@@ -73,7 +71,7 @@
                   <th>Sender</th>
                   <th>Uploaded by</th>
                   <th>Started at</th>
-                  <th>Compleated at</th>
+                  <th>Completed at</th>
                   <th>Status</th>
                   <th>Report</th>
                   <th>Action</th>
@@ -85,12 +83,12 @@
               <td>{{ forloop.counter }}</td>
               <td>{{t.subject}}</td>
               <td>{{t.csvfile}}</td>
-              <td>{{t.message}}</td>
+              <td>{{t.message|safe|striptags|truncatewords:20}}</td>
               <td>{{t.sender}}</td>
               <td>{{t.uploaded_by}}</td>
               <td>{{t.started_at}}</td>
               <td>{{t.completed_at}}</td>
-              <td>{%if t.status %}Completed{% elif t.started_at %}Running{% else %} New Task {% endif %}</td>
+              <td>{%if t.status %}<p style="color:green;">Completed</p>{% elif t.started_at %}<p style="color:orangered;">Running</p>{% else %} <p style="color:blue;">New Task</p> {% endif %}</td>
               <td>{% if t.report %}{{t.report}} {% else %} None {% endif %}</td>
               <td>{% if t.status or  t.started_at %}Submitted{% else %}<form action="{% url 'cron:run_cron_mail'%}" method='post'>{% csrf_token %}<input type="hidden" name='cron_id' value={{t.id}} /><input class="btn btn-success" name="submit" type="submit" value="Run" /></form>{% endif %}</td>
             </tr>
@@ -120,6 +118,9 @@
                 } );
       } );
 </script>
+
 {% endblock %}
 {% block uncompressjsblock %}
+<script type="text/javascript" src="{% static 'ckeditor/ckeditor-init.js' %}"></script>
+<script type="text/javascript" src="{% static 'ckeditor/ckeditor/ckeditor.js' %}"></script>
 {% endblock %}

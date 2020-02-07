@@ -1,5 +1,6 @@
 from django import forms
 from .models import AsyncCronMail
+from ckeditor.widgets import CKEditorWidget
 
 class AsyncCronMailForm(forms.ModelForm):
     
@@ -7,5 +8,5 @@ class AsyncCronMailForm(forms.ModelForm):
         model = AsyncCronMail
         fields = ['subject', 'csvfile', 'sender', 'message']
         widgets = {
-                'message': forms.Textarea(attrs={'rows':4, 'cols':40}),
+                'message': CKEditorWidget(),
                 }
