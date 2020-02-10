@@ -25,7 +25,7 @@
               <p class="heading">Visual Cue</p>
               <div class="field">
                 <div class="control content">
-                  <quill-editor tagName="textarea" formControlName="cue" [(ngModel)]="slide.cue" (onBlur)="saveSlide(true)"
+                  <quill-editor [modules]="modules" tagName="textarea" formControlName="cue" [(ngModel)]="slide.cue" (onBlur)="saveSlide(true)"
                     [styles]="quillStyles" theme="snow">
                   </quill-editor>
                 </div>
@@ -38,7 +38,7 @@
               <p class="heading">Narration</p>
               <div class="field">
                 <div class="control content">
-                  <quill-editor tagName="textarea" formControlName="narration" [(ngModel)]="slide.narration"
+                  <quill-editor [modules]="modules" tagName="textarea" formControlName="narration" [(ngModel)]="slide.narration"
                     (onBlur)="saveSlide(true)" [styles]="quillStyles" theme="snow">
                   </quill-editor>
                 </div>
