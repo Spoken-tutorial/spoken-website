@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 class Script(models.Model):
 	tutorial = models.ForeignKey(TutorialDetail)
 	language = models.ForeignKey(Language)
+	suggested_title = models.CharField(max_length=255, null=True)
 	status = models.BooleanField(default=False)
 	data_file = models.FileField(upload_to='scripts')
 	user = models.ForeignKey(User,related_name='user_id', null=True)
