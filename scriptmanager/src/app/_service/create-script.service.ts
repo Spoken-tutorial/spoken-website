@@ -100,4 +100,13 @@ export class CreateScriptService {
     );
   }
 
+  public suggestTutorialTitle(tid, lid, suggested_title) {
+    const _url = `${this.apiUrl}/tutorial/${tid}/language/${lid}/scripts/`
+    return this.http.patch(
+      _url,
+      { 'suggested_title': suggested_title },
+      this.httpOptions
+    );
+  }
+
 }

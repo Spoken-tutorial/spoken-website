@@ -4,6 +4,16 @@
     <div class="columns">
       <div class="column is-8">
         <p class="title">{{ tutorialName }}</p>
+        <div class="field is-grouped is-grouped-multiline">
+          <div class="control">
+            <b>Suggested Title: </b>{{ script.suggested_title }}
+          </div>
+          <div class="control" *ngIf="nav!='create' && !script.status">
+              <a (click)="saveSuggestedTitle(script.suggested_title)">
+                  <app-badge-button faClass="fas fa-edit" textClass="is-primary" text="Edit Title" textTooltip="Click here to edit the suggested title"></app-badge-button>
+              </a>
+          </div>
+        </div>
       </div>
       <div class="column is-4">
         <div class="field is-grouped is-grouped-multiline">

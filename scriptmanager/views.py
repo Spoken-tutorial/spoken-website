@@ -213,16 +213,24 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
       tutorial=TutorialDetail.objects.get(pk = int(self.kwargs['tid']))
       language=Language.objects.get(pk = int(self.kwargs['lid']))
       script = Script.objects.get(tutorial = tutorial,language = language)
-      status = request.data['status']
-      script.status = status
+
+      if 'suggested_title' in request.data:
+        suggested_title = request.data['suggested_title']
+        script.suggested_title = suggested_title
+        script.save()
+        return Response({'suggested_title': suggested_title, 'message': 'Successfully updated suggested title'}, status = 200) 
+
+      if 'status' in request.data:
+        status = request.data['status']
+        script.status = status
       
-      script.published_by = request.user
-      script.published_on = timezone.now()
-      if status == False:
-        script.published_by = None
-        script.published_on = None
-      script.save()
-      return Response({'status': status, 'message': 'Successfully changed status of script'}, status = 200) 
+        script.published_by = request.user
+        script.published_on = timezone.now()
+        if status == False:
+          script.published_by = None
+          script.published_on = None
+        script.save()
+        return Response({'status': status, 'message': 'Successfully changed status of script'}, status = 200) 
     except:
       return Response({'message': 'Failed to change status'}, status = 500) 
 

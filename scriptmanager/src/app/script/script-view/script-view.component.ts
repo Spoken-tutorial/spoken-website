@@ -6,6 +6,7 @@ import { RevisionsService } from '../../_service/revisions.service';
 import { AuthService } from 'src/app/_service/auth.service';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import Swal from 'sweetalert2'
 
 @Component({
   selector: 'app-script-view',
@@ -70,6 +71,32 @@ export class ScriptViewComponent implements OnInit {
         },
         console.error
       );
+  }
+
+  public saveSuggestedTitle(title) {
+    Swal.fire({
+      title: 'Suggest a title for this tutorial',
+      input: 'text',
+      inputValue: title,
+      inputAttributes: {
+        autocapitalize: 'off'
+      },
+      showCancelButton: true,
+      confirmButtonText: 'Update',
+      showLoaderOnConfirm: true,
+      allowOutsideClick: () => !Swal.isLoading()
+    })
+    .then((result) => {
+      if (result.value) {
+        this.createscriptService.suggestTutorialTitle(this.tid, this.lid, `${result.value}`)
+          .subscribe(
+            (res) => {
+              this.script.suggested_title = res['suggested_title'];
+            },
+            console.error
+          );
+      }
+    })
   }
 
   public printSaveScript() {
