@@ -4,6 +4,7 @@
       <h4>{{ tutorial.tutorial }}</h4>
     </div>
     <div class="desc">
+      <p *ngIf="tutorial.suggested_title"><b>Suggested Title: </b>{{ tutorial.suggested_title }}</p>
       <p><b>Outline: </b>{{ tutorial.outline }}</p>
       <ng-container *ngIf="tutorial.published">
         <p><b>Published by: </b>{{ tutorial.published_by }}</p>
