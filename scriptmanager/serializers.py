@@ -40,10 +40,11 @@ class TutorialDetailSerializer(serializers.ModelSerializer):
   published_on = serializers.SerializerMethodField()
   created_by = serializers.SerializerMethodField()
   foss = FossCategorySerializer(read_only=True)
+  suggested_title = serializers.SerializerMethodField()
 
   class Meta:
     model = TutorialDetail
-    fields = ('id', 'foss', 'language', 'tutorial', 'level', 'order', 'script_status', 'outline', 'published', 'published_on', 'published_by', 'created_by')
+    fields = ('id', 'foss', 'language', 'tutorial', 'level', 'order', 'script_status', 'outline', 'published', 'published_on', 'published_by', 'created_by', 'suggested_title')
 
   def get_script_status(self, instance):
     if Script.objects.filter(tutorial_id=instance.id, language=self.context.get('lang')).exists():
@@ -90,6 +91,14 @@ class TutorialDetailSerializer(serializers.ModelSerializer):
     lang_id = self.context.get('lang')
     return int(lang_id)
 
+  def get_suggested_title(self, instance):
+    if self.get_script_status(instance):
+      suggested_title = Script.objects.get(tutorial_id=instance.id, language=self.context.get('lang')).suggested_title
+
+      return suggested_title
+
+    return None
+
 # class TutorialScriptDetailSerializer(serializers.ModelSerializer):
 #   outline = serializers.SerializerMethodField()
 #   language = serializers.SerializerMethodField()
@@ -132,7 +141,7 @@ class ScriptSerializer(serializers.ModelSerializer):
 
   class Meta:
     model = Script
-    fields = ('id', 'slides', 'status', 'tutorial', 'language')
+    fields = ('id', 'slides', 'status', 'tutorial', 'language', 'suggested_title')
 
   def get_slides(self, instance):
     slides = ScriptDetail.objects.filter(script=instance)
