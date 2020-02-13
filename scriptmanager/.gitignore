@@ -45,6 +45,6 @@ testem.log
 .DS_Store
 Thumbs.db
 
-/static/scriptmanager/*.css
-/static/scriptmanager/*.js
-/static/scriptmanager/*.txt
+# /static/scriptmanager/*.css
+# /static/scriptmanager/*.js
+# /static/scriptmanager/*.txt
