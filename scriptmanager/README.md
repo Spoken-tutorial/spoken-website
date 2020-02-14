@@ -24,6 +24,25 @@ python manage.py migrate
 python manage.py collectstatic
 ```
 
+### Supporting Unicode Characters
+To support special characters and other languages, two tables need to be altered. The MySQL commands are given below.
+
+```
+ALTER TABLE scriptmanager_script
+   DEFAULT CHARACTER SET utf8mb4,
+   MODIFY suggested_title varchar(255)
+     CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL;
+```
+
+```
+ALTER TABLE scriptmanager_scriptdetail
+  DEFAULT CHARACTER SET utf8mb4,
+   MODIFY cue longtext
+     CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL,
+   MODIFY narration longtext
+     CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL;
+```
+
 ## Changes needed to the build 
 * This is applicable on Test/Production server that does not have Angular
 * Edit /static/scriptmanager/main.js
