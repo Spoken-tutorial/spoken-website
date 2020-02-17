@@ -307,6 +307,9 @@ def password_reset(request):
             print(('Username => ', user.username))
             print(('New password => ', password_string))
 
+            if not user.profile_set.first():
+                profile = create_profile(user,None)
+
             changePassUrl = "http://www.spoken-tutorial.org/accounts/change-password"
             if request.GET and request.GET['next']:
                 changePassUrl = changePassUrl + "?auto=%s&username=%s&next=%s" % (user.profile_set.first().confirmation_code, user.username, request.GET['next'])
