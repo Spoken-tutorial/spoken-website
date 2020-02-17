@@ -81,11 +81,11 @@ def account_register(request):
         form = RegisterFormHome(request.POST)
         #if recaptcha_result and form.is_valid():
         if form.is_valid():
-            username = request.POST['username']
-            password = request.POST['password']
-            email = request.POST['email']
-            first_name = request.POST['first_name']
-            last_name = request.POST['last_name']
+            username = request.POST['username'].strip()
+            password = request.POST['password'].strip()
+            email = request.POST['email'].strip()
+            first_name = request.POST['first_name'].strip()
+            last_name = request.POST['last_name'].strip()
             phone = request.POST['phone']
             user = User.objects.create_user(username, email, password)
             user.first_name = first_name
