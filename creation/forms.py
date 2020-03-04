@@ -554,25 +554,26 @@ class UploadKeywordsForm(forms.Form):
 
 class ContributorRoleForm(forms.ModelForm):
     user = forms.ModelChoiceField(
-         
+
         queryset = User.objects.filter(Q(groups__name = 'Contributor')|Q(groups__name = 'External-Contributor')).order_by('username'),
         help_text = "",
         error_messages = {'required': 'User field required.'}
     )
-    foss_category = forms.ModelChoiceField(         
+    foss_category = forms.ModelChoiceField(
         queryset = FossCategory.objects.filter(status = 1).order_by('foss'),
         empty_label = "----------",
         help_text = "",
         error_messages = {'required': 'FOSS category field required.'}
     )
     language = forms.ModelChoiceField(
-         
+
         queryset = Language.objects.order_by('name'),
         empty_label = "----------",
         help_text = "",
         error_messages = {'required': 'Language field required.'}
     )
     status = forms.BooleanField(required = False)
+    grant_to_all = forms.BooleanField(required = False,help_text = "Grants Contributor Role for all the tutorials for the selected FOSS" )
 
     class Meta(object):
         model = ContributorRole
@@ -581,20 +582,20 @@ class ContributorRoleForm(forms.ModelForm):
 
 class DomainReviewerRoleForm(forms.ModelForm):
     user = forms.ModelChoiceField(
-         
+
         queryset = User.objects.filter(Q(groups__name = 'Domain-Reviewer')).order_by('username'),
         help_text = "",
         error_messages = {'required': 'User field required.'}
     )
     foss_category = forms.ModelChoiceField(
-         
+
         queryset = FossCategory.objects.filter(status = 1).order_by('foss'),
         empty_label = "----------",
         help_text = "",
         error_messages = {'required': 'FOSS category field required.'}
     )
     language = forms.ModelChoiceField(
-         
+
         queryset = Language.objects.order_by('name'),
         empty_label = "----------",
         help_text = "", error_messages = {'required': 'Language field required.'}
@@ -607,19 +608,19 @@ class DomainReviewerRoleForm(forms.ModelForm):
 
 class QualityReviewerRoleForm(forms.ModelForm):
     user = forms.ModelChoiceField(
-         
+
         queryset = User.objects.filter(Q(groups__name = 'Quality-Reviewer')).order_by('username'),
         help_text = "", error_messages = {'required': 'User field required.'}
     )
     foss_category = forms.ModelChoiceField(
-         
+
         queryset = FossCategory.objects.filter(status = 1).order_by('foss'),
         empty_label = "----------",
         help_text = "",
         error_messages = {'required': 'FOSS category field required.'}
     )
     language = forms.ModelChoiceField(
-         
+
         queryset = Language.objects.order_by('name'),
         empty_label = "----------",
         help_text = "",
@@ -726,7 +727,7 @@ class TutorialMissingComponentReplyForm(forms.Form):
 
 class SuggestTopicForm(forms.ModelForm):
     difficulty_level = forms.ModelChoiceField(
-         
+
         widget = forms.Select(
             attrs = {'class' : 'ac-state'}),
             queryset = Level.objects.all().order_by('id'),
@@ -789,7 +790,7 @@ class CollaborateForm(forms.ModelForm):
 
 class AvailableFossForm(forms.ModelForm):
     foss = forms.ModelChoiceField(
-         
+
         queryset = FossCategory.objects.filter(status = 1).order_by('foss'),
         empty_label = "----------",
         help_text = "",
@@ -945,7 +946,7 @@ class UpdateSheetsForm(forms.Form):
 
 class UpdateAssignmentForm(forms.Form):
     foss = forms.ChoiceField(
-        choices = [('', '-- Select Foss --'),] + list(TutorialResource.objects.filter(Q(status = 1) | 
+        choices = [('', '-- Select Foss --'),] + list(TutorialResource.objects.filter(Q(status = 1) |
             Q(status = 2), language__name='English').values_list(
             'tutorial_detail__foss_id', 'tutorial_detail__foss__foss').order_by(
             'tutorial_detail__foss__foss').distinct()),
@@ -984,7 +985,7 @@ class UpdateAssignmentForm(forms.Form):
 
 class UpdateCodefilesForm(forms.Form):
     foss = forms.ChoiceField(
-        choices = [('', '-- Select Foss --'),] + list(TutorialResource.objects.filter(Q(status = 1) | 
+        choices = [('', '-- Select Foss --'),] + list(TutorialResource.objects.filter(Q(status = 1) |
             Q(status = 2), language__name='English').values_list(
             'tutorial_detail__foss_id', 'tutorial_detail__foss__foss').order_by(
             'tutorial_detail__foss__foss').distinct()),
@@ -1023,7 +1024,7 @@ class UpdateCodefilesForm(forms.Form):
 
 class UpdateCommonCompForm(forms.Form):
     foss = forms.ChoiceField(
-        choices = [('', '-- Select Foss --'),] + list(TutorialResource.objects.filter(Q(status = 1) | 
+        choices = [('', '-- Select Foss --'),] + list(TutorialResource.objects.filter(Q(status = 1) |
             Q(status = 2), language__name='English').values_list(
             'tutorial_detail__foss_id', 'tutorial_detail__foss__foss').order_by(
             'tutorial_detail__foss__foss').distinct()),
