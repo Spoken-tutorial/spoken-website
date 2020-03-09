@@ -41,14 +41,15 @@ export class ScriptCreateComponent implements OnInit {
       script[i]['order'] = i + 1;
     }
 
-    const relative_ordering = this.getRelativeOrdering().join(',');
+    // const relative_ordering = this.getRelativeOrdering().join(',');
 
     this.createscriptService.postScript(
       this.tid, this.lid,
       {
         "details": script,
         "type": 'form',
-        "ordering": relative_ordering
+        "creatingonline": 'online'
+        // "ordering": relative_ordering
       }
     ).subscribe(
       (res) => {

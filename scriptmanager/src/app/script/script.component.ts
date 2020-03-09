@@ -50,8 +50,9 @@ export class ScriptComponent implements OnInit {
     if (this.nav == "create") return;
     
     const scriptId = this.slides[0]['script'];
-    const relativeOrdering = this.getRelativeOrdering().join(',');
-    this.createscriptService.modifyOrdering(scriptId, relativeOrdering)
+    // const relativeOrdering = this.getRelativeOrdering().join(',');
+    const slideid = this.slides[newSlideIndex].id
+    this.createscriptService.modifyOrdering(scriptId, move, slideid)
       .subscribe(
         (res) => {
           new Noty({

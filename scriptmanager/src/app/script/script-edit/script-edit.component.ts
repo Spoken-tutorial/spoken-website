@@ -77,17 +77,18 @@ export class ScriptEditComponent implements OnInit {
   public onInsertSlide(index) {
     var script = this.slides[index];
 
-    script['order'] = this.orderId + 1;
+    script['order'] = index + 1;
     script['script'] = this.scriptId;
 
     this.orderId = this.orderId + 1;
-    var relative_ordering = this.getRelativeOrdering().join(',');
+    // var relative_ordering = this.getRelativeOrdering().join(',');
 
     this.createscriptService.postScript(
       this.tid, this.lid,
       {
         "details": [script],
-        "ordering": relative_ordering,
+        // "ordering": relative_ordering,
+        "prevSlideID": this.slides[index-1].id,
         "type": 'form'
       }
     ).subscribe(

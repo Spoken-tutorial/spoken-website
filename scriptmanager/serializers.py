@@ -144,13 +144,19 @@ class ScriptSerializer(serializers.ModelSerializer):
     fields = ('id', 'slides', 'status', 'tutorial', 'language', 'suggested_title')
 
   def get_slides(self, instance):
-    slides = ScriptDetail.objects.filter(script=instance)
-    ordering = instance.ordering
+    slides = []
+    row = ScriptDetail.objects.get(script=instance, prevRow=None)
+    slides.append(row)
+    while row.nextRow:
+      row = ScriptDetail.objects.get(pk=row.nextRow)
+      slides.append(row)
 
-    if (len(ordering) != 0):
-      ordering = ordering.split(',')
-      ordering = list(map(int, ordering))
-      slides = sorted(slides, key=lambda s: ordering.index(s.pk))
+    # slides = ScriptDetail.objects.filter(script=instance)
+    # ordering = instance.ordering
+    # if (len(ordering) != 0):
+    #   ordering = ordering.split(',')
+    #   ordering = list(map(int, ordering))
+    #   slides = sorted(slides, key=lambda s: ordering.index(s.pk))
 
     return ScriptDetailSerializer(slides, many=True).data
 

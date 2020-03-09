@@ -21,6 +21,8 @@ class ScriptDetail(models.Model):
 	cue = models.TextField(blank=True)
 	narration = models.TextField(blank=True)
 	order = models.PositiveIntegerField()
+	prevRow = models.PositiveIntegerField(null=True)
+	nextRow = models.PositiveIntegerField(null=True)
 	script = models.ForeignKey(Script, on_delete = models.CASCADE)
 	comment_status = models.BooleanField(default=False)
 

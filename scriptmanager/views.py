@@ -89,6 +89,17 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
   permission_classes = [ScriptOwnerPermission]
   serializer_class = ScriptDetailSerializer
 
+  def populatePrevNext(self, script):
+    slides = ScriptDetail.objects.filter(script = script).order_by('order')
+    i = 0
+    for slide in slides:
+      if slide.order != 1:
+        slide.prevRow = slides[i-1].pk
+      if slide.order != slides.count():
+        slide.nextRow = slides[i+1].pk
+      slide.save()
+      i = i + 1
+
   def getUlData(self,data):
     data=str(data).replace("<li></li>","")
     soup=BeautifulSoup(data,'html.parser')
@@ -113,7 +124,7 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
     if(table.find("tbody")):
       table=table.find("tbody")
     details=[]
-    count=0
+    count=-1
     for row in table.find_all('tr'):
       count+=1
       if row.find_all("th"):
@@ -195,15 +206,31 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
     serialized  =  ScriptDetailSerializer(data  =  details,many  =  True) #inserting a details array without iterating
     if serialized.is_valid():
       serialized.save()
+      if create_request_type=="file" or create_request_type=="template":
+        self.populatePrevNext(script)
       
       if (create_request_type == 'form'):
-        ordering = request.data['ordering']
-        
         for slide in serialized.data:
-          ordering = ordering.replace('-1', str(slide.get('id')), 1)
-        
-        script.ordering = ordering
-        script.save()
+          slideid = str(slide.get('id'))
+
+        if 'creatingonline' in request.data:
+          self.populatePrevNext(script)
+
+        if 'prevSlideID' in request.data:
+          prevSlideID = request.data['prevSlideID']
+          newRow = ScriptDetail.objects.get(pk=int(slideid))          
+          q1 = ScriptDetail.objects.get(pk=prevSlideID) #Previous row
+          if q1.nextRow:
+            q2 = ScriptDetail.objects.get(pk=q1.nextRow) #Next row
+            q2.prevRow = newRow.pk
+            newRow.nextRow = q2.pk
+            q2.save()
+          q1.nextRow = newRow.pk
+          newRow.prevRow = q1.pk
+          q1.save()
+          newRow.save()
+
+        # script.save()
 
       return Response({'status': True, 'data': serialized.data },status = 201)
     return Response({'status': False, 'message': 'Failed to create script'},status = 500)
@@ -263,6 +290,17 @@ class ScriptDetailAPIView(generics.ListAPIView):
 
       script_slide = ScriptDetail.objects.get(pk = int(self.kwargs['script_detail_id']),script = script)
       self.check_object_permissions(request, script_slide)
+
+      if script_slide.prevRow:
+        q1 = ScriptDetail.objects.get(pk=script_slide.prevRow)
+        q1.nextRow = script_slide.nextRow
+        q1.save()
+
+      if script_slide.nextRow:
+        q2 = ScriptDetail.objects.get(pk=script_slide.nextRow)
+        q2.prevRow = script_slide.prevRow
+        q2.save()
+
       script_slide.delete()
 
       if not ScriptDetail.objects.filter(script_id = script.pk).exists(): 
@@ -332,10 +370,57 @@ class RelativeOrderingAPI(generics.ListAPIView):
   permission_classes = [ScriptOwnerPermission]
 
   def patch(self, request, script_id):
-    script = Script.objects.get(pk=script_id)
-    script.ordering = request.data['ordering']
+    move = request.data['move']
+    slideid = request.data['slideid']
+    if move == -1: # Move up
+      q1 = ScriptDetail.objects.get(pk=slideid)     # Current
+      q2 = ScriptDetail.objects.get(pk=q1.prevRow)  # Previous
 
-    script.save()
+      if q1.nextRow:
+        q3 = ScriptDetail.objects.get(pk=q1.nextRow)  # Next
+        q2.nextRow = q3.pk
+        q3.prevRow = q2.pk
+        q3.save()
+      else:
+        q2.nextRow = None
+
+      if q2.prevRow:
+        q4 = ScriptDetail.objects.get(pk=q2.prevRow)  # Previous previous
+        q1.prevRow = q4.pk
+        q4.nextRow = q1.pk
+        q4.save()
+      else:
+        q1.prevRow = None
+
+      q1.nextRow = q2.pk
+      q2.prevRow = q1.pk
+      q1.save()
+      q2.save()
+
+    if move == 1: # Move down
+      q1 = ScriptDetail.objects.get(pk=slideid)     # Current
+      q2 = ScriptDetail.objects.get(pk=q1.nextRow)  # Next
+
+      if q1.prevRow:
+        q3 = ScriptDetail.objects.get(pk=q1.prevRow)     # Previous
+        q2.prevRow = q3.pk
+        q3.nextRow = q2.pk
+        q3.save()
+      else:
+        q2.prevRow = None
+
+      if q2.nextRow:
+        q4 = ScriptDetail.objects.get(pk=q2.nextRow)  # Next next
+        q1.nextRow = q4.pk
+        q4.prevRow = q1.pk
+        q4.save()
+      else:
+        q1.nextRow = None
+
+      q1.prevRow = q2.pk
+      q2.nextRow = q1.pk
+      q1.save()
+      q2.save()
 
     return Response({ 'status': True }, status=200)
 
