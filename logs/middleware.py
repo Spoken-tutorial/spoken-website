@@ -2,9 +2,6 @@ from .urls import EVENT_NAME_DICT
 import requests
 import json
 import re
-from spoken.config import LOG_URL
-#from django.contrib.gis.geoip2 import GeoIP2
-from concurrent.futures import ThreadPoolExecutor
 from .utils import dump_json_logs
 
 class Logs:
@@ -12,8 +9,6 @@ class Logs:
     def __init__(self, get_response):
         self.LOG_CLASS = "MIDDLEWARE"
         self.get_response = get_response
-        self.c_url =  LOG_URL
-        self.workers = ThreadPoolExecutor(max_workers=2)
 
     def __call__(self, request):
         return self.get_response(request)
@@ -31,8 +26,7 @@ class Logs:
                 data['event_name'] = EVENT_NAME_DICT['home']['name']
                 data['visited_by'] = request.user.username if request.user.is_authenticated else 'anonymous'
                 data['ip_address'] = request.META['REMOTE_ADDR']
-                #requests.put(self.c_url, json=data)
-                self.workers.submit(dump_json_logs, data)
+                dump_json_logs(data)
             else:
                 for key in EVENT_NAME_DICT.keys():
                     if re.match(key, request.META['PATH_INFO']):
@@ -46,8 +40,7 @@ class Logs:
                         data['event_name'] = EVENT_NAME_DICT[key]['name']
                         data['visited_by'] = request.user.username if request.user.is_authenticated else 'anonymous'
                         data['ip_address'] = request.META['REMOTE_ADDR']
-                        #requests.put(self.c_url, json=data)
-                        self.workers.submit(dump_json_logs, data)
+                        dump_json_logs(data)
                         break
         except Exception:
             print("Log Exception")
