@@ -24,14 +24,14 @@ export class CreateScriptService {
   }
 
   // API service for fetching scripts to show in view component
-  public getScript(tid, lid) {
-    const _url = `${this.apiUrl}/tutorial/${tid}/language/${lid}/scripts/`
+  public getScript(tid, lid, vid) {
+    const _url = `${this.apiUrl}/tutorial/${tid}/language/${lid}/scripts/${vid}/`
     return this.http.get(_url);
   }
 
   // API service for creating scripts for the first time
-  public postScript(tid, lid, data) {
-    const _url = `${this.apiUrl}/tutorial/${tid}/language/${lid}/scripts/`
+  public postScript(tid, lid, vid, data) {
+    const _url = `${this.apiUrl}/tutorial/${tid}/language/${lid}/scripts/${vid}/`
     var ls = this.http.post(
       _url,
       data,
@@ -41,9 +41,9 @@ export class CreateScriptService {
   }
 
   // API service for updating scripts at slide level
-  public patchScript(tid, lid, data) {
+  public patchScript(tid, lid, vid, data) {
     let script_pk = data['id']
-    const _url = `${this.apiUrl}/tutorial/${tid}/language/${lid}/scripts/${script_pk}/`
+    const _url = `${this.apiUrl}/tutorial/${tid}/language/${lid}/scripts/${vid}/${script_pk}/`
     var ls = this.http.patch(
       _url,
       data,
@@ -53,8 +53,8 @@ export class CreateScriptService {
   }
 
   // API service for deleting scripts at slide level
-  public deleteScript(tid, lid, script_pk) {
-    const _url = `${this.apiUrl}/tutorial/${tid}/language/${lid}/scripts/${script_pk}/`
+  public deleteScript(tid, lid, vid, script_pk) {
+    const _url = `${this.apiUrl}/tutorial/${tid}/language/${lid}/scripts/${vid}/${script_pk}/`
     var ls = this.http.delete(
       _url,
       this.httpOptions
@@ -102,8 +102,8 @@ export class CreateScriptService {
     );
   }
 
-  public suggestTutorialTitle(tid, lid, suggested_title) {
-    const _url = `${this.apiUrl}/tutorial/${tid}/language/${lid}/scripts/`
+  public suggestTutorialTitle(tid, lid, vid, suggested_title) {
+    const _url = `${this.apiUrl}/tutorial/${tid}/language/${lid}/scripts/${vid}/`
     return this.http.patch(
       _url,
       { 'suggested_title': suggested_title },

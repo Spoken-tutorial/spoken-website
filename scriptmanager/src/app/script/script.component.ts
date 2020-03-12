@@ -20,6 +20,7 @@ export class ScriptComponent implements OnInit {
   @Input() autosave: boolean = false;
   public tid;
   public lid;
+  public vid;
   public tutorialName: any;
 
   constructor(public router: Router, public route: ActivatedRoute, public createscriptService: CreateScriptService) { }
@@ -108,7 +109,7 @@ export class ScriptComponent implements OnInit {
   public onRemoveSlide(index) {
     if (this.slides[index]['id'] != '') {
       this.createscriptService.deleteScript(
-        this.tid, this.lid, this.slides[index]['id']
+        this.tid, this.lid, this.vid, this.slides[index]['id']
       ).subscribe(
         (res) => {
           new Noty({
@@ -174,6 +175,7 @@ export class ScriptComponent implements OnInit {
     });
     this.lid = this.route.snapshot.params['lid']
     this.tutorialName = this.route.snapshot.params['tutorialName']
+    this.vid = this.route.snapshot.params['vid']
   }
 
 }

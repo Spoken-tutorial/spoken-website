@@ -157,27 +157,27 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
     except:
       return None
 
-  def get(self, request, tid, lid):
+  def get(self, request, tid, lid, vid):
     tutorial = TutorialDetail.objects.get(pk=tid)
     language = Language.objects.get(pk=lid)
 
-    script = Script.objects.get(tutorial=tutorial, language=language)
+    script = Script.objects.get(tutorial=tutorial, language=language, versionNo=vid)
     self.check_object_permissions(request, script)
 
     serialized = ScriptSerializer(script)
 
     return Response(serialized.data, status=200)
 
-  def create(self, request,tid,lid):
+  def create(self, request, tid, lid, vid):
     details=[]
     create_request_type=request.data['type']
 
     tutorial=TutorialDetail.objects.get(pk = int(self.kwargs['tid']))
     language=Language.objects.get(pk = int(self.kwargs['lid']))
-    if not Script.objects.filter(tutorial = tutorial,language = language).exists():
-      script = Script.objects.create(tutorial = tutorial,language = language, user = self.request.user)
+    if not Script.objects.filter(tutorial = tutorial,language = language, versionNo=int(self.kwargs['vid'])).exists():
+      script = Script.objects.create(tutorial = tutorial,language = language, user = self.request.user, versionNo=vid)
     else:
-      script = Script.objects.get(tutorial = tutorial,language = language)
+      script = Script.objects.get(tutorial = tutorial,language = language, versionNo=vid)
 
     if(create_request_type=='form'):
       details = request.data['details']
@@ -235,11 +235,11 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
       return Response({'status': True, 'data': serialized.data },status = 201)
     return Response({'status': False, 'message': 'Failed to create script'},status = 500)
 
-  def patch(self, request,tid,lid):
+  def patch(self, request, tid, lid, vid):
     try:
       tutorial=TutorialDetail.objects.get(pk = int(self.kwargs['tid']))
       language=Language.objects.get(pk = int(self.kwargs['lid']))
-      script = Script.objects.get(tutorial = tutorial,language = language)
+      script = Script.objects.get(tutorial = tutorial, language = language, versionNo=int(self.kwargs['vid']))
 
       if 'suggested_title' in request.data:
         suggested_title = request.data['suggested_title']
@@ -264,7 +264,7 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
 class ScriptDetailAPIView(generics.ListAPIView):
   permission_classes = [ScriptModifyPermission]
 
-  def patch(self,request,tid,lid,script_detail_id):
+  def patch(self, request, tid, lid, vid, script_detail_id):
     try:
       tutorial=TutorialDetail.objects.get(pk = int(self.kwargs['tid']))
       language=Language.objects.get(pk = int(self.kwargs['lid']))
@@ -282,11 +282,11 @@ class ScriptDetailAPIView(generics.ListAPIView):
     except:
       return Response({'status': False, 'message': 'Failed to update row'},status = 403)       
 
-  def delete(self,request,tid,lid,script_detail_id):
+  def delete(self, request, tid, lid, vid, script_detail_id):
     try:
       tutorial=TutorialDetail.objects.get(pk = int(self.kwargs['tid']))
       language=Language.objects.get(pk = int(self.kwargs['lid']))
-      script = Script.objects.get(tutorial = tutorial, language = language)
+      script = Script.objects.get(tutorial = tutorial, language = language, versionNo=vid)
 
       script_slide = ScriptDetail.objects.get(pk = int(self.kwargs['script_detail_id']),script = script)
       self.check_object_permissions(request, script_slide)

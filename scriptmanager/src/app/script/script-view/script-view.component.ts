@@ -19,6 +19,7 @@ export class ScriptViewComponent implements OnInit {
   public tutorials: any = [];
   private tid: number;
   private lid: number;
+  private vid: number;
   public comment = false;
   public revision = false;
   public comments: any = [];
@@ -53,7 +54,7 @@ export class ScriptViewComponent implements OnInit {
 
   public viewScript() {
     this.createscriptService.getScript(
-      this.tid, this.lid
+      this.tid, this.lid, this.vid
     ).subscribe(
       (res) => {
         this.slides = res['slides'];
@@ -88,7 +89,7 @@ export class ScriptViewComponent implements OnInit {
     })
     .then((result) => {
       if (result.value) {
-        this.createscriptService.suggestTutorialTitle(this.tid, this.lid, `${result.value}`)
+        this.createscriptService.suggestTutorialTitle(this.tid, this.lid, this.vid, `${result.value}`)
           .subscribe(
             (res) => {
               this.script.suggested_title = res['suggested_title'];
@@ -254,6 +255,7 @@ export class ScriptViewComponent implements OnInit {
     });
     this.lid = this.route.snapshot.params['lid'];
     this.tutorialName = this.route.snapshot.params['tutorialName'];
+    this.vid = this.route.snapshot.params['vid'];
     this.viewScript();
   }
 

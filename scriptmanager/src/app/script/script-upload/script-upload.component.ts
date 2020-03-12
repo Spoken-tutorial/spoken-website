@@ -13,6 +13,7 @@ import { FormGroup, FormControl } from '@angular/forms';
 export class ScriptUploadComponent implements OnInit {
   private tid: number;
   private lid: number;
+  private vid: number;
   public tutorialName: any;
   public scriptFile: any;
   public scriptFileName: any;
@@ -41,10 +42,10 @@ export class ScriptUploadComponent implements OnInit {
   // what it does: make an api call(POST request) with the file variable containing the latest file selected by the user. 
   // returns: void
   public onFileSave() {
-    this.uploadfileService.postFile(this.tid, this.lid, this.scriptFile)
+    this.uploadfileService.postFile(this.tid, this.lid, this.vid, this.scriptFile)
       .subscribe(
         (res) => {
-          this.router.navigateByUrl("/view/" + this.tid + "/" + this.lid + "/" + this.tutorialName);
+          this.router.navigateByUrl("/view/" + this.tid + "/" + this.lid + "/" + this.tutorialName + "/" + this.vid);
           new Noty({
             type: 'success',
             layout: 'topRight',
@@ -100,14 +101,14 @@ export class ScriptUploadComponent implements OnInit {
   public saveHtmlData() {
     this.Htmldata = this.editorForm.get('data').value;
     this.createScriptService.postScript(
-      this.tid, this.lid,
+      this.tid, this.lid, this.vid,
       {
         "details": this.Htmldata,
         "type": 'template'
       }
     ).subscribe(
       (res) => {
-        this.router.navigateByUrl("/view/" + this.tid + "/" + this.lid + "/" + this.tutorialName);
+        this.router.navigateByUrl("/view/" + this.tid + "/" + this.lid + "/" + this.tutorialName + "/" + this.vid);
         new Noty({
           type: 'success',
           layout: 'topRight',
@@ -145,6 +146,7 @@ export class ScriptUploadComponent implements OnInit {
       this.tid = +params['tid'];
     });
     this.lid = this.route.snapshot.params['lid']
+    this.vid = this.route.snapshot.params['vid']
     this.tutorialName = this.route.snapshot.params['tutorialName']
     
     //editorform holds the html data

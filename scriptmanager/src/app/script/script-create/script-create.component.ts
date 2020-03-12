@@ -13,6 +13,7 @@ export class ScriptCreateComponent implements OnInit {
   public slides: any = [];
   private tid: number;
   private lid: number;
+  private vid: number;
   public tutorialName: any;
 
   constructor(
@@ -44,7 +45,7 @@ export class ScriptCreateComponent implements OnInit {
     // const relative_ordering = this.getRelativeOrdering().join(',');
 
     this.createscriptService.postScript(
-      this.tid, this.lid,
+      this.tid, this.lid, this.vid,
       {
         "details": script,
         "type": 'form',
@@ -53,7 +54,7 @@ export class ScriptCreateComponent implements OnInit {
       }
     ).subscribe(
       (res) => {
-        this.router.navigateByUrl("/view/" + this.tid + "/" + this.lid + "/" + this.tutorialName);
+        this.router.navigateByUrl("/view/" + this.tid + "/" + this.lid + "/" + this.tutorialName + "/" + this.vid);
         new Noty({
           type: 'success',
           layout: 'topRight',
@@ -93,6 +94,7 @@ export class ScriptCreateComponent implements OnInit {
       this.tid = +params['tid'];//tid is tutorial id
     });
     this.lid = this.route.snapshot.params['lid']//lid contains the language id
+    this.vid = this.route.snapshot.params['vid']//version id
     this.tutorialName = this.route.snapshot.params['tutorialName']//tutorial name contains the tutorial name corresponding to the tutorial id
   }
 

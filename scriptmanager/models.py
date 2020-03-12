@@ -13,6 +13,7 @@ class Script(models.Model):
 	ordering = models.TextField(default='')
 	published_by = models.ForeignKey(User, null=True)
 	published_on = models.DateTimeField(null=True)
+	versionNo = models.PositiveIntegerField(null=True)
 
 	def __str__(self):
 		return str(self.tutorial) + ' - ' + str(self.language)

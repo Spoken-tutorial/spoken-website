@@ -41,10 +41,11 @@ class TutorialDetailSerializer(serializers.ModelSerializer):
   created_by = serializers.SerializerMethodField()
   foss = FossCategorySerializer(read_only=True)
   suggested_title = serializers.SerializerMethodField()
+  versionNo = serializers.SerializerMethodField()
 
   class Meta:
     model = TutorialDetail
-    fields = ('id', 'foss', 'language', 'tutorial', 'level', 'order', 'script_status', 'outline', 'published', 'published_on', 'published_by', 'created_by', 'suggested_title')
+    fields = ('id', 'foss', 'language', 'tutorial', 'level', 'order', 'script_status', 'outline', 'published', 'published_on', 'published_by', 'created_by', 'suggested_title', 'versionNo')
 
   def get_script_status(self, instance):
     if Script.objects.filter(tutorial_id=instance.id, language=self.context.get('lang')).exists():
@@ -54,19 +55,19 @@ class TutorialDetailSerializer(serializers.ModelSerializer):
   
   def get_published(self, instance):
     if self.get_script_status(instance):
-      return Script.objects.get(tutorial_id=instance.id, language=self.context.get('lang')).status
+      return Script.objects.filter(tutorial_id=instance.id, language=self.context.get('lang')).order_by('-versionNo').first().status
 
     return False
 
   def get_published_on(self, instance):
     if self.get_script_status(instance):
-      return Script.objects.get(tutorial_id=instance.id, language=self.context.get('lang')).published_on
+      return Script.objects.filter(tutorial_id=instance.id, language=self.context.get('lang')).order_by('-versionNo').first().published_on
 
     return None
 
   def get_published_by(self, instance):
     if self.get_script_status(instance):
-      user = Script.objects.get(tutorial_id=instance.id, language=self.context.get('lang')).published_by
+      user = Script.objects.filter(tutorial_id=instance.id, language=self.context.get('lang')).order_by('-versionNo').first().published_by
 
       if (user):  return user.username
 
@@ -74,7 +75,7 @@ class TutorialDetailSerializer(serializers.ModelSerializer):
 
   def get_created_by(self, instance):
     if self.get_script_status(instance):
-      user = Script.objects.get(tutorial_id=instance.id, language=self.context.get('lang')).user
+      user = Script.objects.filter(tutorial_id=instance.id, language=self.context.get('lang')).order_by('-versionNo').first().user
 
       if (user):  return user.username
 
@@ -93,9 +94,17 @@ class TutorialDetailSerializer(serializers.ModelSerializer):
 
   def get_suggested_title(self, instance):
     if self.get_script_status(instance):
-      suggested_title = Script.objects.get(tutorial_id=instance.id, language=self.context.get('lang')).suggested_title
+      suggested_title = Script.objects.filter(tutorial_id=instance.id, language=self.context.get('lang')).order_by('-versionNo').first().suggested_title
 
       return suggested_title
+
+    return None
+
+  def get_versionNo(self, instance):
+    if self.get_script_status(instance):
+      versionNo = Script.objects.filter(tutorial_id=instance.id, language=self.context.get('lang')).order_by('-versionNo').first().versionNo
+
+      return versionNo
 
     return None
 
@@ -141,7 +150,7 @@ class ScriptSerializer(serializers.ModelSerializer):
 
   class Meta:
     model = Script
-    fields = ('id', 'slides', 'status', 'tutorial', 'language', 'suggested_title')
+    fields = ('id', 'slides', 'status', 'tutorial', 'language', 'suggested_title', 'versionNo')
 
   def get_slides(self, instance):
     slides = []
