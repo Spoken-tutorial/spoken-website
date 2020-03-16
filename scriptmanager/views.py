@@ -175,7 +175,11 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
     tutorial=TutorialDetail.objects.get(pk = int(self.kwargs['tid']))
     language=Language.objects.get(pk = int(self.kwargs['lid']))
     if not Script.objects.filter(tutorial = tutorial,language = language, versionNo=int(self.kwargs['vid'])).exists():
-      script = Script.objects.create(tutorial = tutorial,language = language, user = self.request.user, versionNo=vid)
+      script = Script.objects.create(tutorial = tutorial,language = language, user = self.request.user, versionNo=vid, editable=True)
+      if int(self.kwargs['vid']) > 1:
+        prevScript = Script.objects.get(tutorial = tutorial,language = language, versionNo=int(self.kwargs['vid'])-1) #Get previous version
+        prevScript.editable = False
+        prevScript.save()
     else:
       script = Script.objects.get(tutorial = tutorial,language = language, versionNo=vid)
 

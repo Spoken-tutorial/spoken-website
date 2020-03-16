@@ -22,7 +22,7 @@
               <app-badge-button faClass="fa fa-chevron-left" textClass="is-info" text="Go Back" textTooltip="Click here to go back to the list of tutorials in this FOSS"></app-badge-button>
             </a>
           </div>
-          <div class="control" *ngIf="nav!='create' && !script.status">
+          <div class="control" *ngIf="nav!='create' && !script.status && script.editable">
             <a routerLink="/edit/{{tid}}/{{lid}}/{{ tutorialName }}/{{vid}}">
               <app-badge-button faClass="fa fa-edit" textClass="is-info" text="Edit Mode" textTooltip="Click here to edit this script"></app-badge-button>
             </a>

@@ -145,6 +145,10 @@ export class ScriptEditComponent implements OnInit {
           this.router.navigate(['']);
         }
         
+        if (!res['editable']) {
+          this.router.navigate(['']);
+        }
+
         if (this.slides.length == 0) return;
 
         this.scriptId = this.slides[0]['script'];

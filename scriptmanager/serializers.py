@@ -151,7 +151,7 @@ class ScriptSerializer(serializers.ModelSerializer):
 
   class Meta:
     model = Script
-    fields = ('id', 'slides', 'status', 'tutorial', 'language', 'suggested_title', 'versionNo', 'versions')
+    fields = ('id', 'slides', 'status', 'tutorial', 'language', 'suggested_title', 'versionNo', 'versions', 'editable')
 
   def get_slides(self, instance):
     slides = []
