@@ -28,6 +28,15 @@
             </a>
           </div>
         </div>
+        <div>
+          <div class="select" title="Click here to choose the version number for viewing the script">
+            <select (change)="onScriptVersionChange($event.target.value)">
+              <option *ngFor="let version of script.versions; let i = index" [value]="version">
+                Version {{version}}
+              </option>
+            </select>
+          </div>
+        </div>
         <!-- <div class="buttons">
           <a class="button is-info" routerLink="/">
             <i class="fa fa-chevron-left"></i>&nbsp;Go Back

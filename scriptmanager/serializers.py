@@ -138,6 +138,7 @@ class ScriptDetailSerializer(serializers.ModelSerializer):
 
 class ScriptSerializer(serializers.ModelSerializer):
   slides = serializers.SerializerMethodField()
+  versions = serializers.SerializerMethodField()
 
   # def __init__(self, *args, **kwargs):
   #   remove_fields = kwargs.pop('remove_fields', None)
@@ -150,7 +151,7 @@ class ScriptSerializer(serializers.ModelSerializer):
 
   class Meta:
     model = Script
-    fields = ('id', 'slides', 'status', 'tutorial', 'language', 'suggested_title', 'versionNo')
+    fields = ('id', 'slides', 'status', 'tutorial', 'language', 'suggested_title', 'versionNo', 'versions')
 
   def get_slides(self, instance):
     slides = []
@@ -169,6 +170,12 @@ class ScriptSerializer(serializers.ModelSerializer):
 
     return ScriptDetailSerializer(slides, many=True).data
 
+  def get_versions(self, instance):
+    versions = []
+    scripts = Script.objects.filter(tutorial=instance.tutorial, language=instance.language).order_by('-versionNo')
+    for scr in scripts:
+      versions.append(scr.versionNo)
+    return versions
 
 class CommentSerializer(serializers.ModelSerializer):
   user = serializers.CharField()

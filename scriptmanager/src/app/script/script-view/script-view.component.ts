@@ -249,6 +249,19 @@ export class ScriptViewComponent implements OnInit {
     window.location.reload();
   }
 
+  public onScriptVersionChange(vid){
+    this.router.navigate(['/view/' + this.tid + '/' + this.lid + '/' + this.tutorialName + '/' + vid]);
+    this.createscriptService.getScript(
+      this.tid, this.lid, vid
+    ).subscribe(
+      (res) => {
+        this.slides = res['slides'];
+        this.script = res;
+      },
+      console.error
+    );
+  }
+
   ngOnInit() {
     this.route.params.subscribe(params => {
       this.tid = +params['tid'];
