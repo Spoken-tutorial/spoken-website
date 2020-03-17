@@ -346,7 +346,8 @@ class ForReviewScriptAPI(APIView):
   permission_classes = [ReviewScriptPermission]
 
   def get(self, request):
-    scripts = Script.objects.filter(status=False)
+    #Select only the latest scripts (editable=True) which are not published(status=False)
+    scripts = Script.objects.filter(status=False, editable=True)
     tutorials = []
     tutorials_group = {}
 

@@ -76,8 +76,8 @@ export class CreateScriptService {
     );
   }
 
-  public changeScriptStatus(tid, lid, status) {
-    const _url = `${this.apiUrl}/tutorial/${tid}/language/${lid}/scripts/`
+  public changeScriptStatus(tid, lid, vid, status) {
+    const _url = `${this.apiUrl}/tutorial/${tid}/language/${lid}/scripts/${vid}/`
 
     return this.http.patch(
       _url,

@@ -133,7 +133,7 @@
     <div class="columns" *ngIf="authService.isReviewer()">
       <div class="column buttons">
         <div class="field is-grouped">
-          <div  class="control" *ngIf="!script?.status" [swal]="{ title: 'Publish Tutorial',
+          <div  class="control" *ngIf="!script?.status && script.editable" [swal]="{ title: 'Publish Tutorial',
                 text: 'The tutorial is being approved by you and will be visible to everyone. Contributors and Reviewers will no longer be able to edit it. Are you sure?',
                 type: 'warning',
                 showCancelButton: 'true',

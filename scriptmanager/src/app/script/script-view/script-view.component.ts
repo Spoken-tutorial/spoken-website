@@ -65,7 +65,7 @@ export class ScriptViewComponent implements OnInit {
   }
 
   public onPublishChange(status) {
-    this.createscriptService.changeScriptStatus(this.tid, this.lid, status)
+    this.createscriptService.changeScriptStatus(this.tid, this.lid, this.vid, status)
       .subscribe(
         (res) => {
           this.script.status = res['status'];
