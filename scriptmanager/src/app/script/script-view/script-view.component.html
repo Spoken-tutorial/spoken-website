@@ -8,7 +8,7 @@
           <div class="control">
             <b>Suggested Title: </b>{{ script.suggested_title }}
           </div>
-          <div class="control" *ngIf="nav!='create' && !script.status">
+          <div class="control" *ngIf="nav!='create' && !script.status && script.editable">
               <a (click)="saveSuggestedTitle(script.suggested_title)">
                   <app-badge-button faClass="fas fa-edit" textClass="is-primary" text="Edit Title" textTooltip="Click here to edit the suggested title"></app-badge-button>
               </a>
