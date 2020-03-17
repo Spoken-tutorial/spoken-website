@@ -3,7 +3,14 @@
 
     <div class="columns">
       <div class="column is-8">
-        <p class="title">{{ tutorialName }}</p>
+        <p class="title">
+          {{ tutorialName }}
+          <ng-container *ngIf="script.status">
+            <div class="control">
+              <app-badge-button faClass="fas fa-graduation-cap" textClass="is-success" text="Published"></app-badge-button>
+            </div>
+          </ng-container>
+        </p>
         <div class="field is-grouped is-grouped-multiline">
           <div class="control">
             <b>Suggested Title: </b>{{ script.suggested_title }}
