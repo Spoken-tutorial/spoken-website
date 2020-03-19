@@ -4180,36 +4180,30 @@ def add_creation_notification(request, notif_type, user_id , language):
 
 @csrf_exempt
 def update_tutorials(request):
-    print("Reached here")
     action = request.POST['action']
     foss_name = request.POST['foss_name']
+    langs_selected = request.POST.get('lang')
     data = ''
-
-    #tutorials = TutorialDetail.objects.filter(foss__foss=foss_name)
     published_tutorials = TutorialResource.objects.filter(tutorial_detail__foss__foss=foss_name,
         status= PUBLISHED, language_id=22)
-    all_langs = Language.objects.all().exclude(id=22)
     for tutorial in published_tutorials:
-        print(tutorial.tutorial_detail.foss.foss,tutorial.tutorial_detail)
-        for language in all_langs:
-            this_tutorial_user_lang = TutorialResource.objects.filter(Q(
-                    status=PUBLISHED)|Q(
-                    assignment_status=ASSIGNMENT_STATUS_DICT['assigned']),
-                    tutorial_detail=tutorial.tutorial_detail, language=language)
+        for lang_id in langs_selected.split(','):
+            this_tutorial_user_lang = TutorialResource.objects.filter(
+                    status=PUBLISHED,
+                    tutorial_detail=tutorial.tutorial_detail, language_id=22)
             tutorialsavailable=TutorialsAvailable.objects.filter(
-                tutorial_detail=tutorial.tutorial_detail, language=language)
+                tutorial_detail=tutorial.tutorial_detail, language_id=int(lang_id))
             if action == 'add':
-                if not this_tutorial_user_lang.exists():
+                if this_tutorial_user_lang.exists():
                     if not tutorialsavailable.exists():
                         new = TutorialsAvailable()
                         new.tutorial_detail = tutorial.tutorial_detail
-                        new.language = language
+                        new.language_id = int(lang_id)
                         new.save()
                         data = 'Updated'
             if action == 'remove':
                 tutorialsavailable.delete()
                 data = 'Removed'
-
     return HttpResponse(json.dumps(data),content_type='application/json')
 
 @csrf_exempt
