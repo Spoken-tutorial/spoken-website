@@ -79,6 +79,7 @@
       </style>
 {% endblock %}
 {% block title %}Home{% endblock %}
+{% block heading %}<i class="home-page-title-i">spoken tutorial</i>{% endblock %}
 {% block announcement %}
     <div id="slideshow">
         {% if notifications %}
@@ -95,7 +96,7 @@
         {% endif %}
     </div>
 {% endblock %}
-{% block heading %}<i class="home-page-title-i">spoken tutorial</i>{% endblock %}
+
 {% block homealert %}
     {% if messages %}
         {% for message in messages %}
