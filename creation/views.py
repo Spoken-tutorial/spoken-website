@@ -3380,7 +3380,7 @@ def detail_payment_honorarium(request, hr_id):
                 hr.status = 4
                 hr.save()
                 messages.success(request,"Payment Honorarium (#"+hr.code+") confirmed as recieved.")
-                next_url = request.GET.get("next",reverse('creation:detail_payment_honorarium '+hr_id))
+                next_url = request.GET.get("next",reverse('creation:payment_honorarium_detail', args=[hr_id]))
                 return HttpResponseRedirect(next_url)
         context = {
             'pay_hr': hr,
