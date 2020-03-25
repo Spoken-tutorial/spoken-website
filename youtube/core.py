@@ -88,7 +88,7 @@ def upload_video(service, options):
         body = dict(
             snippet=dict(
                 title=to_utf8(options.get('title')),
-                description=to_utf8(options.get('description') or "").decode("string-escape"),
+                description=to_utf8(options.get('description') or ""),
                 tags=options.get('tags'),
                 categoryId=27
             ),

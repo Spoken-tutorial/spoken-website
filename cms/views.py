@@ -30,6 +30,23 @@ from django.template.context_processors import csrf
 def dispatcher(request, permalink=''):
     if permalink == '':
         return HttpResponseRedirect('/')
+    
+    if permalink == 'project_documents':
+        impersonating = request.session.pop('_impersonate', None)
+        if impersonating is not None:
+            from impersonate.signals import session_end
+            request.session.modified = True
+            session_end.send(
+                sender=None,
+                impersonator=request.impersonator,
+                impersonating=impersonating,
+                request=request
+            )
+            return HttpResponseRedirect('/accounts/login/?next=/project_documents/')
+        if not request.user.groups.filter(name ='page_admin').exists():
+            messages.error(request, "You are not authorized to access this page. Please login as an authorized user.")
+            return HttpResponseRedirect('/accounts/login/?next=/project_documents/')
+
     page_content = get_object_or_404(Page, permalink=permalink, visible=True)
     col_offset = int((12 - page_content.cols) / 2)
     col_remainder = int((12 - page_content.cols) % 2)
@@ -64,11 +81,11 @@ def account_register(request):
         form = RegisterFormHome(request.POST)
         #if recaptcha_result and form.is_valid():
         if form.is_valid():
-            username = request.POST['username']
-            password = request.POST['password']
-            email = request.POST['email']
-            first_name = request.POST['first_name']
-            last_name = request.POST['last_name']
+            username = request.POST['username'].strip()
+            password = request.POST['password'].strip()
+            email = request.POST['email'].strip()
+            first_name = request.POST['first_name'].strip()
+            last_name = request.POST['last_name'].strip()
             phone = request.POST['phone']
             user = User.objects.create_user(username, email, password)
             user.first_name = first_name
@@ -289,6 +306,9 @@ def password_reset(request):
 
             print(('Username => ', user.username))
             print(('New password => ', password_string))
+
+            if not user.profile_set.first():
+                profile = create_profile(user,None)
 
             changePassUrl = "http://www.spoken-tutorial.org/accounts/change-password"
             if request.GET and request.GET['next']:

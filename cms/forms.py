@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 from django.core.validators import RegexValidator
 from django.utils.translation import ugettext_lazy as _
 from nicedit.widgets import NicEditWidget
+from ckeditor.widgets import CKEditorWidget
 from validate_email import validate_email
 
 # Spoken Tutorial Stuff
@@ -147,11 +148,11 @@ class ProfileForm(forms.ModelForm):
 #Overwrite NewsAdminBodyField
 class AdminBodyForm(forms.ModelForm):
     body = forms.CharField(
-            widget = NicEditWidget(attrs = {'style': 'width: 800px;'}))
+            widget = CKEditorWidget(attrs = {'style': 'width: 800px;'}))
 
 
 class CmsPageForm(forms.ModelForm):
-    body = forms.CharField(widget = NicEditWidget(attrs = \
+    body = forms.CharField(widget = CKEditorWidget(attrs = \
         {'style': 'width: 800px;'}))
     cols = forms.ChoiceField(choices = ((6, '6'), (7, '7'), (8, '8'), \
         (9, '9'), (10, '10'), (11, '11'), (12, '12')))

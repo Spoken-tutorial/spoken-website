@@ -75,8 +75,6 @@
                         <div class="col-sm-9">
                         <select id="id_foss" name="id_foss" class="form-control">
                             <option value selected="selected">---------</option>
-                            <option value="56">C</option>
-                            <option value="57">Cpp</option>
                         </select>
                         </div>
                     </div>
@@ -124,8 +122,16 @@
                 },
                 dataType: 'json',
                 success: function (data) {
-                    if (data.is_c_and_cpp) {
+                    if (data.is_multiquiz_foss) {
                         $('#batch_foss').show();
+                        if (data.multiquiz_foss == 43){
+                        $('#id_foss').append('<option value="56"> C </option>'); 
+                        $('#id_foss').append('<option value="57"> CPP </option>');
+                        }
+                        if (data.multiquiz_foss == 97){
+                        $('#id_foss').append('<option value="126"> Moodle Test for Teachers </option>'); 
+                        $('#id_foss').append('<option value="127"> Moodle Test for Site Administrators </option>');
+                        }
                         $("#id_foss").prop('required',true);
                     }
                     else{
@@ -200,6 +206,7 @@
 
     $batch_foss = $('#batch_foss');
     $("#id_training").change(function () {
+      $('#id_foss').find('option:not(:first)').remove();
       var training = $(this).val();
       $.ajax({
         url: '/software-training/ajax-check-foss/',
@@ -208,8 +215,17 @@
         },
         dataType: 'json',
         success: function (data) {
-            if (data.is_c_and_cpp) {
+            if (data.is_multiquiz_foss) {
                 $('#batch_foss').show();
+                if (data.multiquiz_foss == 43){
+                $('#id_foss').append('<option value="56"> C </option>'); 
+                $('#id_foss').append('<option value="57"> CPP </option>');
+                }
+                if (data.multiquiz_foss == 97){
+                $('#id_foss').append('<option value="126"> Moodle Test for Teachers </option>'); 
+                $('#id_foss').append('<option value="127"> Moodle Test for Site Administrators </option>');
+                }
+                
                 $("#id_foss").prop('required',true);
             }
             else{

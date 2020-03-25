@@ -79,7 +79,7 @@ class FossCategory(models.Model):
     category = models.ManyToManyField(FossSuperCategory)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-    show_on_homepage = models.BooleanField(default=True, help_text ='If unchecked, this foss will be displayed on series page, instead of home page' )
+    show_on_homepage = models.PositiveSmallIntegerField(default=0, help_text ='0:Display on home page, 1:Series, 2:Archived')
     available_for_nasscom = models.BooleanField(default=True, help_text ='If unchecked, this foss will not be available for nasscom' )
 
     class Meta(object):
@@ -250,6 +250,10 @@ class TutorialResource(models.Model):
 
     class Meta:
         unique_together = ('tutorial_detail', 'language',)
+    
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('watch_tutorial', args=[self.tutorial_detail.foss.foss, self.tutorial_detail.tutorial, self.language])
 
 
 class PaymentHonorarium(models.Model):

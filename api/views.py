@@ -3,11 +3,11 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.renderers import JSONRenderer
 from rest_framework.parsers import JSONParser
 from creation.models import TutorialResource,\
-            TutorialDetail, FossSuperCategory,\
+            TutorialDetail, FossSuperCategory, Language,\
              FossCategory, TutorialCommonContent, TutorialDuration
-from api.serializers import VideoSerializer, CategorySerializer, FossSerializer
+from api.serializers import VideoSerializer, CategorySerializer, FossSerializer, LanguageSerializer
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Count, F
+from django.db.models import Count, F, Q
 import json
 from django.conf import settings
 from creation.views import get_video_info
@@ -40,8 +40,8 @@ def get_tutorial_list(request, fossid, langid):
     """
 
     try:
-        tuts = TutorialResource.objects.filter(language_id=langid,
-                tutorial_detail_id__foss=fossid, status=1)
+        tuts = TutorialResource.objects.filter(Q(status=1)|Q(status=2), language_id=langid,
+                tutorial_detail_id__foss=fossid)
     except ObjectDoesNotExist:
         return HttpResponse(status=404)
 
@@ -129,6 +129,54 @@ def get_fosslist(request):
             fosslist.append(fossdict)
         
         fosslist = json.dumps(fosslist)
-        # serializer = FossSerializer(fosslist, many=True)        
-        #return JsonResponse(serializer.data, safe=False)
         return HttpResponse(fosslist, content_type='application/json')
+
+
+def get_schoolfosslist(request):
+    """
+    List all fosses for school website.
+    """
+    if request.method == 'GET':
+        fosses = FossCategory.objects.filter(status=1, available_for_nasscom=1)
+        serializer = FossSerializer(fosses, many=True)
+        return JsonResponse(serializer.data, safe=False)
+
+
+def get_fosslanguage(request, fossid):
+    try:
+        languages = Language.objects.filter(id__in=TutorialResource.objects.filter(tutorial_detail_id__foss=fossid, status__gte=1).values('language_id'))
+    except ObjectDoesNotExist:
+        return HttpResponse(status=404)
+
+    if request.method == 'GET':
+        serializer = LanguageSerializer(languages, many=True)
+        return JsonResponse(serializer.data, safe=False)
+        get_schooltutorials
+
+
+def get_tutorialdetails(request, tutid):
+    tutoriallist=[]
+    if request.method == 'GET':
+        tut = TutorialResource.objects.get(Q(status=1)|Q(status=2), id=tutid)
+        print(tut.id)
+        
+        tutdict={}
+        thumb_name = tut.tutorial_detail.tutorial.replace(' ', '-') + '-' + 'Big.png'
+        thumbnail_path = "https://spoken-tutorial.org/media/videos/"+str(tut.tutorial_detail.foss_id)+"/"+str(tut.tutorial_detail_id)+"/"+thumb_name
+        print(thumbnail_path)
+
+        videopage_path = "https://spoken-tutorial.org/watch/"+tut.tutorial_detail.foss.foss+"/"+\
+        tut.tutorial_detail.tutorial+"/"+tut.language.name
+        print(videopage_path)
+
+        tutdict={
+            "tutid": tut.id,
+            "tut_name" :tut.tutorial_detail.tutorial,
+            "outline" :tut.outline,
+            "order": tut.tutorial_detail.order,
+            "thumbnail_path": thumbnail_path,
+            "video_url" : videopage_path
+        }
+        
+        tutdict = json.dumps(tutdict)
+        return HttpResponse(tutdict, content_type='application/json')

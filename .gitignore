@@ -95,6 +95,7 @@ nosetests.xml
 .pydevproject
 
 cron/nohup.out
-
-# ignoring migrations
-*.dia.autosave
+*.ipynb
+.ipynb_checkpoints/
+.vscode/
+cron/spoken_search/index

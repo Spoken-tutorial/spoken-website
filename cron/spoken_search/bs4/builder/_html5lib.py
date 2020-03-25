@@ -54,7 +54,7 @@ class HTML5TreeBuilder(HTMLTreeBuilder):
         return '<html><head></head><body>%s</body></html>' % fragment
 
 
-class TreeBuilderForHtml5lib(html5lib.treebuilders._base.TreeBuilder):
+class TreeBuilderForHtml5lib(html5lib.treebuilders.base.TreeBuilder):
 
     def __init__(self, soup, namespaceHTMLElements):
         self.soup = soup
@@ -115,7 +115,7 @@ class AttrList(object):
         return name in list(self.attrs.keys())
 
 
-class Element(html5lib.treebuilders._base.Node):
+class Element(html5lib.treebuilders.base.Node):
     def __init__(self, element, soup, namespace):
         html5lib.treebuilders._base.Node.__init__(self, element.name)
         self.element = element

@@ -18,7 +18,6 @@ admin.autodiscover()
 urlpatterns = [
     url(r'^robots\.txt$', TemplateView.as_view(template_name='robots.txt', content_type='text/plain')),
     #url(r'^sitemap\.xml$', TemplateView.as_view(template_name='sitemap.xml', content_type='text/xml')),
-    url(r'^sitemap\.xml$', sitemap, name='sitemap-xml'),
     url(r'^sitemap\.html$', sitemap, name='sitemap'),
     # Examples:
     url(r'^addu/$', add_user, name='addu'),
@@ -26,6 +25,8 @@ urlpatterns = [
     url(r'^tutorial-search/$', tutorial_search, name="tutorial-search"),
     url(r'^series/$', series_foss, name="series"),
     url(r'^series_tutorial-search/$',  series_tutorial_search, name="series-tutorial-search"),
+    url(r'^archived/$', archived_foss, name="archived"),
+    url(r'^archived_tutorial-search/$',  archived_tutorial_search, name="archived-tutorial-search"),
     url(r'^news/(?P<cslug>[\w-]+)/$',  news, name="news"),
     url(r'^news/(?P<cslug>[\w-]+)/(?P<slug>[\w-]+)/$',  news_view, name="news_view"),
     url(r'^keyword-search/$',  keyword_search, name="keyword-search"),

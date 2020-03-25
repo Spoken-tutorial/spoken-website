@@ -1,6 +1,6 @@
 from builtins import object
 from django.contrib.auth.models import User
-from creation.models import TutorialResource, TutorialDetail, FossSuperCategory, FossCategory
+from creation.models import TutorialResource, TutorialDetail, FossSuperCategory, FossCategory, Language
 from rest_framework import serializers
 
 
@@ -27,12 +27,18 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = ('id', 'name')
 
 
-# class FossSerializer(serializers.ModelSerializer):
-#     class Meta(object):
-#         model = FossCategory
-#         fields = ('id', 'foss', 'description','tcount')
+class FossSerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = FossCategory
+        fields = ('id', 'foss', 'description')
 
-class FossSerializer(serializers.Serializer):
-	course_id = serializers.IntegerField(read_only=True)
-	description = serializers.CharField(read_only=True)
-	duration = serializers.CharField(read_only=True)
+
+class LanguageSerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = Language
+        fields = ('id', 'name')
+
+# class FossSerializer(serializers.Serializer):
+# 	course_id = serializers.IntegerField(read_only=True)
+# 	description = serializers.CharField(read_only=True)
+# 	duration = serializers.CharField(read_only=True)

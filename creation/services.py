@@ -10,7 +10,7 @@ def get_data_for_brochure_display():
     data_dict = collections.OrderedDict()
 
     for category in categories:
-        fosses = FossCategory.objects.filter(category=category.id)
+        fosses = FossCategory.objects.filter(category=category.id, show_on_homepage__lt=2)
         for foss in fosses:
             brochuredocs = BrochureDocument.objects.filter(foss_course=foss.id)
             if brochuredocs:

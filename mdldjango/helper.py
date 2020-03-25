@@ -11,7 +11,7 @@ from events.models import *
 
 
 def encript_password(password):
-    password = hashlib.md5(password + 'VuilyKd*PmV?D~lO19jL(Hy4V/7T^G>p').hexdigest()
+    password = hashlib.md5((password + 'VuilyKd*PmV?D~lO19jL(Hy4V/7T^G>p').encode('utf-8')).hexdigest()
     return password
 
 

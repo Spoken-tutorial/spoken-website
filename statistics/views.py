@@ -19,7 +19,7 @@ from creation.models import TutorialResource
 from creation.filters import CreationStatisticsFilter
 from events.views import get_page
 from .forms import LearnerForm
-
+from django.core.cache import cache
 
 # Create your views here.
 def maphome(request):
@@ -125,7 +125,6 @@ def training(request):
     # find state id
     if 'training_planner__academic__state' in request.GET and request.GET['training_planner__academic__state']:
         state = State.objects.get(id=request.GET['training_planner__academic__state'])
-    print("\n\n\n\n\nrequest :",request.GET)
     collection = TrainingRequestFilter(request.GET, queryset=collection, state=state)
     # find participants count
     
@@ -143,6 +142,23 @@ def training(request):
     
     get_year = []
     pending_attendance_participant_count = 0
+    key = ''.join('None' if i == '' or i == '---------' else str(i).replace(" ", "") for i in request.GET.values())
+    key = key if key else 'NoneNoneNoneNoneNoneNoneNoneNoneNoneNone1'
+    female_key = key + 'female'
+    male_key = key + 'male'
+    femalecount = cache.get(female_key)
+    malecount = cache.get(male_key)
+    if status != 0:
+        if not femalecount or not malecount:
+            female_list=list(Student.objects.filter(trainingattend__training_id__in=[col.id for col in collection.qs], gender='Female').values_list('id'))
+            femalecount= len([i[0] for i in female_list])
+            male_list=list(Student.objects.filter(trainingattend__training_id__in=[col.id for col in collection.qs], gender='Male').values_list('id'))
+            malecount= len([i[0] for i in male_list])
+            try:
+                cache.set(female_key, femalecount)
+                cache.set(male_key, malecount)
+            except Exception:
+                print('Error setting cache key values')
 
     year_data_all=dict()
     visited=dict()
@@ -186,6 +202,9 @@ def training(request):
         context['participants'] = participants
     context['model'] = 'Workshop/Training'
     context['status']=status
+    context['femalecount'] = femalecount
+    context['malecount'] = malecount
+
     context['language'] = Language.objects.values('id','name')
     return render(request, 'statistics/templates/training.html', context)
 
@@ -224,7 +243,15 @@ def fdp_training(request):
     collection = TrainingRequestFilter(request.GET, queryset=collection, state=state)
     # find participants count
     participants = collection.qs.aggregate(Sum('participants'))
-    #
+    
+    femalecount =0
+    female_list=list(Student.objects.filter(trainingattend__training_id__in=[col.id for col in collection.qs], gender='Female').values_list('id'))
+    femalecount= len([i[0] for i in female_list])
+
+    malecount =0
+    male_list=list(Student.objects.filter(trainingattend__training_id__in=[col.id for col in collection.qs], gender='Male').values_list('id'))
+    malecount= len([i[0] for i in male_list])
+    
     chart_query_set = collection.qs.extra(select={'year': "EXTRACT(year FROM sem_start_date)"}).values('year').order_by(
         '-year').annotate(total_training=Count('sem_start_date'), total_participant=Sum('participants'))
     chart_data = ''
@@ -240,6 +267,8 @@ def fdp_training(request):
     context['ordering'] = ordering
     context['participants'] = participants
     context['model'] = 'Workshop/Training'
+    context['femalecount'] = femalecount
+    context['malecount'] = malecount
     return render(request, 'statistics/templates/pmmm_stats.html', context)
 
 

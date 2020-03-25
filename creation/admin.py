@@ -202,6 +202,8 @@ class BankDetailAdmin(admin.ModelAdmin):
     fields = ['user', 'account_number', 'ifsc', 'bank', 'branch']
 
 
+class CollaborateAdmin(admin.ModelAdmin):
+    list_display = ('user','foss_name','language','created',)        
 
 
 admin.site.register(Language, LanguageAdmin)
@@ -216,3 +218,4 @@ admin.site.register(FossAvailableForWorkshop, FossAvailableForWorkshopAdmin)
 admin.site.register(BrochureDocument, BrochureDocumentAdmin)
 admin.site.register(LanguageManager, LanguagManagerAdmin)
 admin.site.register(BankDetail, BankDetailAdmin)
+admin.site.register(Collaborate, CollaborateAdmin)

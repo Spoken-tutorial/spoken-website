@@ -2,8 +2,15 @@
 from django.conf.urls import include, url
 from creation.views import *
 from creation.script import *
+from django.contrib.sitemaps.views import sitemap
+from creation.sitemaps import TutorialSitemap
 
 app_name = 'creation'
+
+tutorial_sitemaps = {
+    'tutorial': TutorialSitemap
+}
+
 urlpatterns = [
     # Main pages dispatcher
     url(r'^$',  creationhome, name="creationhome"),
@@ -77,6 +84,7 @@ urlpatterns = [
     url(r'^ajax-get-tutorials/$',  ajax_get_tutorials, name="ajax_get_tutorials"),
     url(r'^update-common-component/$', update_common_component, name="update_common_component"),
     url(r'^update_tutorials/$',  update_tutorials, name="update_tutorials"),
+    url(r'^grant_role/$',  grant_role, name="grant_role"),
 
     # Common to Domain & Admin reviewer parts    
     url(r'^accept-all/(\w+)/(\d+)/$',  accept_all, name="accept_all"),
@@ -121,4 +129,7 @@ urlpatterns = [
     url(r'^refresh_roles/$', refresh_roles, name="refresh_roles"),
     url(r'^get_rated_contributors/$', get_rated_contributors, name="get_rated_contributors"),
     url(r'^update_contributors/$', update_contributors, name="update_contributors"),
+
+    #creation sitemaps
+    url(r'^sitemap\.xml/$', sitemap, {'sitemaps' : tutorial_sitemaps } , name='tutorial_sitemap'),
 ]

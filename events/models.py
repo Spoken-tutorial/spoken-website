@@ -814,7 +814,7 @@ class TestTrainingManager(models.Manager):
       ) |
       (
         Q(course__category__gt=0) &
-        Q(sem_start_date__lte=datetime.now()-timedelta(days=30))
+        Q(sem_start_date__lte=datetime.now()-timedelta(days=15))
       ),
       participants__gt=0
     ).order_by('-training_planner__year', '-training_planner__semester_id')
@@ -1718,3 +1718,8 @@ class PaymentTransactionDetails(models.Model):
     msg = models.CharField(max_length=100)
     created = models.DateTimeField(auto_now_add = True)
     updated = models.DateTimeField(auto_now_add = True)
+
+
+class topperlist(models.Model):
+  emailid = models.EmailField(max_length = 100)
+  userid = models.PositiveIntegerField()
