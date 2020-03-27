@@ -39,11 +39,19 @@
             <app-badge-button faClass="fa fa-edit" textClass="is-success" text="Edit" textTooltip="Click here to edit the script"></app-badge-button>
           </a>
         </div>
-        <div class="control" *ngIf="tutorial.script_status">
-          <a routerLink="/upload/{{ tutorial.id }}/{{ tutorial.language }}/{{ tutorial.tutorial }}/{{tutorial.versionNo+1}}">
-            <app-badge-button faClass="fa fa-upload" textClass="is-danger" text="Re-Upload" textTooltip="Click here to re-upload the script"></app-badge-button>
+        <div  class="control" *ngIf="tutorial.script_status" [swal]="{ title: 'Delete earlier version?',
+            text: 'Do you want to delete the previous version of the script?',
+            type: 'warning',
+            showCancelButton: 'true',
+            focusCancel: 'true',
+            confirmButtonText: 'Yes!',
+            cancelButtonText: 'No!'
+          }" (confirm)="reupload(tutorial.id, tutorial.language, tutorial.tutorial, tutorial.versionNo, true)"
+             (cancel)="reupload(tutorial.id, tutorial.language, tutorial.tutorial, tutorial.versionNo, false)">
+          <a>
+            <app-badge-button faClass="fa fa-upload" textClass="is-danger" text="Re-Upload"  textTooltip="Click here to re-upload the script"></app-badge-button>
           </a>
-        </div>  
+        </div>
       </ng-container>
       <div class="control" *ngIf="tutorial.script_status">
         <a routerLink="/view/{{ tutorial.id }}/{{ tutorial.language }}/{{ tutorial.tutorial }}/{{ tutorial.versionNo }}">

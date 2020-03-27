@@ -111,4 +111,14 @@ export class CreateScriptService {
     );
   }
 
+  // API service for deleting entire script
+  public deleteScriptVersion(tid, lid, vid) {
+    const _url = `${this.apiUrl}/tutorial/${tid}/language/${lid}/scripts/${vid}/`
+    var ls = this.http.delete(
+      _url,
+      this.httpOptions
+    );
+    return ls;
+  }
+
 }

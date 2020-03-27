@@ -239,6 +239,16 @@ class ScriptCreateAPIView(generics.ListCreateAPIView):
       return Response({'status': True, 'data': serialized.data },status = 201)
     return Response({'status': False, 'message': 'Failed to create script'},status = 500)
 
+  def delete(self, request, tid, lid, vid):
+    try:
+      tutorial=TutorialDetail.objects.get(pk = tid)
+      language=Language.objects.get(pk = lid)
+      script = Script.objects.get(tutorial = tutorial, language = language, versionNo=vid)
+      script.delete()
+      return Response({'status': True},status = 202)
+    except:
+      return Response({'status': False, 'message': 'Failed to delete script'},status = 403)
+
   def patch(self, request, tid, lid, vid):
     try:
       tutorial=TutorialDetail.objects.get(pk = int(self.kwargs['tid']))
