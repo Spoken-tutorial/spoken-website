@@ -39,7 +39,7 @@
             <app-badge-button faClass="fa fa-edit" textClass="is-success" text="Edit" textTooltip="Click here to edit the script"></app-badge-button>
           </a>
         </div>
-        <div  class="control" *ngIf="tutorial.script_status" [swal]="{ title: 'Delete earlier version?',
+        <div  class="control" *ngIf="tutorial.script_status && tutorial.versionNo < scriptVersionsAllowed" [swal]="{ title: 'Delete earlier version?',
             text: 'Do you want to delete the previous version of the script?',
             type: 'warning',
             showCancelButton: 'true',

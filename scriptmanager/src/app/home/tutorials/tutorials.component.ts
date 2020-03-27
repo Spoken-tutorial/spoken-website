@@ -2,6 +2,7 @@ import { Component, OnInit, Input } from '@angular/core';
 import { TutorialsService } from '../../_service/tutorials.service'
 import { Router } from '@angular/router';
 import { CreateScriptService } from '../../_service/create-script.service';
+import { environment} from '../../../environments/environment';
 
 @Component({
   selector: 'app-tutorials',
@@ -9,6 +10,8 @@ import { CreateScriptService } from '../../_service/create-script.service';
   styleUrls: ['./tutorials.component.sass']
 })
 export class TutorialsComponent implements OnInit {
+  public env =  environment;
+  public scriptVersionsAllowed = this.env['scriptVersionsAllowed'];
 
   @Input() tutorial: any;
 
