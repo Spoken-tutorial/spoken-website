@@ -7,6 +7,8 @@ Before proceeding further make sure that you have pulled the code from the appro
 
 ### Requirements
 ```
+sudo apt-get install python3.6-dev libmysqlclient-dev
+pip install -r requirments.txt
 pip install -r requirements-dev.txt
 pip install -r requirements-py3.txt
 pip install -r requirements.txt
