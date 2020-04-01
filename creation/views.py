@@ -36,7 +36,7 @@ from creation.subtitles import *
 from . import services
 from django.utils import timezone
 from datetime import datetime,timedelta
-from creation.filters import CreationStatisticsFilter,ContributorRatingFilter
+from creation.filters import CreationStatisticsFilter,ContributorRatingFilter, ReviewerFilter
 from django.db.models import Count, Min, Q, Sum, F
 import itertools
 from django.utils.html import format_html
@@ -1452,11 +1452,14 @@ def admin_review_index(request):
         raw_get_data = request.GET.get('o', None)
         collection = get_sorted_list(request, collection, header, raw_get_data)
         ordering = get_field_index(raw_get_data)
+        collection = ReviewerFilter(request.POST,queryset = collection)
+        form = collection.form
         context = {
-            'collection': collection,
+            'collection': collection.qs,
             'header': header,
             'ordering': ordering,
-            'script_url': settings.SCRIPT_URL
+            'script_url': settings.SCRIPT_URL,
+            'form' : form
         }
         return render(request, 'creation/templates/admin_review_index.html', context)
     except Exception as e:
@@ -1546,14 +1549,17 @@ def admin_reviewed_video(request):
         raw_get_data = request.GET.get('o', None)
         collection = get_sorted_list(request, collection, header, raw_get_data)
         ordering = get_field_index(raw_get_data)
+        collection = ReviewerFilter(request.POST,queryset = collection)
+        form = collection.form
         page = request.GET.get('page')
-        collection = get_page(collection, page)
+        collection = get_page(collection.qs, page)
     except:
         messages.error('Something went wrong, Please try again later.')
     context = {
         'collection': collection,
         'header': header,
-        'ordering': ordering
+        'ordering': ordering,
+        'form' : form
     }
     return render(request, 'creation/templates/admin_review_reviewed.html', context)
 
@@ -1652,15 +1658,18 @@ def domain_review_index(request):
             13: SortableHeader('Keywords', False, '', 'col-center'),
             14: SortableHeader('<span title = "" data-original-title = "" class = "fa fa-cogs fa-2"></span>', False, '', 'col-center')
         }
-        collection = TutorialResource.objects.filter(id__in = tmp_ids)
+        collection = TutorialResource.objects.filter(id__in = tmp_ids)        
         collection = get_sorted_list(request, collection, header, raw_get_data)
         ordering = get_field_index(raw_get_data)
+        collection = ReviewerFilter(request.POST,queryset = collection)
+        form = collection.form
         page = request.GET.get('page')
-        collection = get_page(collection, page)
-    except:
-        pass
+        collection = get_page(collection.qs, page)
+    except Exception as e:
+        raise(e)
     context = {
         'collection': collection,
+        'form' : form,
         'header': header,
         'ordering': ordering
     }
@@ -1793,14 +1802,17 @@ def domain_reviewed_tutorials(request):
         collection = TutorialResource.objects.filter(id__in = DomainReviewLog.objects.filter(user = request.user).values_list('tutorial_resource_id').distinct())
         collection = get_sorted_list(request, collection, header, raw_get_data)
         ordering = get_field_index(raw_get_data)
+        collection = ReviewerFilter(request.POST,queryset = collection)
+        form = collection.form
         page = request.GET.get('page')
-        collection = get_page(collection, page)
+        collection = get_page(collection.qs, page)
     except:
         messages.error('Something went wrong, Please try again later.')
     context = {
         'collection': collection,
         'header': header,
-        'ordering': ordering
+        'ordering': ordering,
+        'form' : form
     }
     return render(request, 'creation/templates/domain_review_reviewed.html', context)
 
@@ -1990,15 +2002,18 @@ def quality_review_index(request):
         collection = TutorialResource.objects.filter(id__in = tmp_ids)
         collection = get_sorted_list(request, collection, header, raw_get_data)
         ordering = get_field_index(raw_get_data)
+        collection = ReviewerFilter(request.POST,queryset = collection)
+        form = collection.form
         page = request.GET.get('page')
-        collection = get_page(collection, page)
-    except:
-        pass
+        collection = get_page(collection.qs, page)
+    except Exception as e:
+        print(e)
 
     context = {
         'collection': collection,
         'header': header,
-        'ordering': ordering
+        'ordering': ordering,
+        'form' : form
     }
     return render(request, 'creation/templates/quality_review_index.html', context)
 
@@ -2041,15 +2056,18 @@ def publish_tutorial_index(request):
         collection = TutorialResource.objects.filter(id__in = tmp_ids)
         collection = get_sorted_list(request, collection, header, raw_get_data)
         ordering = get_field_index(raw_get_data)
+        collection = ReviewerFilter(request.POST,queryset = collection)
+        form = collection.form
         page = request.GET.get('page')
-        collection = get_page(collection, page)
+        collection = get_page(collection.qs, page)
     except:
         pass
 
     context = {
         'collection': collection,
         'header': header,
-        'ordering': ordering
+        'ordering': ordering,
+        'form' : form
     }
     return render(request, 'creation/templates/publish_tutorial_index.html', context)
 
@@ -2070,6 +2088,7 @@ def public_review_tutorial_index(request):
     collection = None
     header = ''
     ordering = ''
+    form = ''
     try:
         if len(tmp_ids):
             raw_get_data = request.GET.get('o', None)
@@ -2092,15 +2111,18 @@ def public_review_tutorial_index(request):
             collection = TutorialResource.objects.filter(id__in = tmp_ids)
             collection = get_sorted_list(request, collection, header, raw_get_data)
             ordering = get_field_index(raw_get_data)
+            collection = ReviewerFilter(request.POST,queryset = collection)
+            form = collection.form
             page = request.GET.get('page')
-            collection = get_page(collection, page)
-    except:
-        pass
+            collection = get_page(collection.qs, page)
+    except Exception as e:
+        print(e)
 
     context = {
         'collection': collection,
         'header': header,
-        'ordering': ordering
+        'ordering': ordering,
+        'form' : form
     }
     return render(request, 'creation/templates/public_review_tutorial_index.html', context)
 
@@ -2140,15 +2162,18 @@ def public_review_list(request):
             collection = TutorialResource.objects.filter(id__in = tmp_ids)
             collection = get_sorted_list(request, collection, header, raw_get_data)
             ordering = get_field_index(raw_get_data)
+            collection = ReviewerFilter(request.POST,queryset = collection)
+            form = collection.form
             page = request.GET.get('page')
-            collection = get_page(collection, page)
+            collection = get_page(collection.qs, page)
     except:
         pass
 
     context = {
         'collection': collection,
         'header': header,
-        'ordering': ordering
+        'ordering': ordering,
+        'form' : form
     }
     return render(request, 'creation/templates/public_review_list.html', context)
 
@@ -2424,13 +2449,16 @@ def quality_reviewed_tutorials(request):
         collection = get_sorted_list(request, collection, header, raw_get_data)
         ordering = get_field_index(raw_get_data)
         page = request.GET.get('page')
-        collection = get_page(collection, page)
+        collection = ReviewerFilter(request.POST,queryset = collection)
+        form = collection.form
+        collection = get_page(collection.qs, page)
     except:
         messages.error('Something went wrong, Please try again later.')
     context = {
         'collection': collection,
         'header': header,
-        'ordering': ordering
+        'ordering': ordering,
+        'form' : form
     }
     return render(request, 'creation/templates/quality_review_reviewed.html', context)
 
