@@ -26,4 +26,4 @@ class ReviewerFilter(django_filters.FilterSet):
 
     class Meta:
         model = TutorialResource
-        fields = ['tutorial_detail__foss','language']
+        fields = ['tutorial_detail__foss', 'language']
