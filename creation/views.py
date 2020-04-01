@@ -1559,7 +1559,7 @@ def admin_reviewed_video(request):
         'collection': collection,
         'header': header,
         'ordering': ordering,
-        'form' : form
+        'form': form
     }
     return render(request, 'creation/templates/admin_review_reviewed.html', context)
 
