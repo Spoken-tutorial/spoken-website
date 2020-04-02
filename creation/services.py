@@ -1,8 +1,9 @@
 # Spoken Tutorial Stuff
 from creation.models import BrochureDocument, \
-BrochurePage, RoleRequest, Language
+    BrochurePage, RoleRequest, Language
 from creation.models import BrochureDocument, BrochurePage, FossCategory, FossSuperCategory
 import collections
+
 
 def get_data_for_brochure_display():
     # my code starts here
