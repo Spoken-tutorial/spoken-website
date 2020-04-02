@@ -1666,7 +1666,7 @@ def domain_review_index(request):
         page = request.GET.get('page')
         collection = get_page(collection.qs, page)
     except Exception as e:
-        raise(e)
+        print(e)
     context = {
         'collection': collection,
         'form': form,
