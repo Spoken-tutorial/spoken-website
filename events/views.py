@@ -1911,6 +1911,7 @@ def test_request(request, role, rid = None):
                         instance.mdlattempt_id = 0
                         instance.status = 0
                         instance.save()
+
                         print("test_attendance created for ",tra.student.id)
                     else:
                         print("mdluser not found for", user.email)
