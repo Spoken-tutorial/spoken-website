@@ -1879,10 +1879,12 @@ def test_request(request, role, rid = None):
             t.tdate = dateTime[0]
             t.ttime = dateTime[1]
             error = 0
+            errmsg = ""
             try:
                 t.save()
             except IntegrityError:
                 error = 1
+                errmsg = "Test already created"
                 prev_test = Test.objects.filter(organiser = t.organiser_id, academic = t.academic, foss = t.foss_id, tdate = t.tdate, ttime = t.ttime)
                 if prev_test:
                     messages.error(request, "You have already scheduled <b>"+ t.foss.foss + "</b> Test on <b>"+t.tdate + " "+ t.ttime + "</b>. Please select some other time.")
@@ -1892,19 +1894,16 @@ def test_request(request, role, rid = None):
                 fossmdlcourse = FossMdlCourses.objects.get(foss_id = t.foss_id)
                 for tra in tras:
                     user = tra.student.user
-                    try:
-                        mdluser = get_moodle_user(tra.training.training_planner.academic_id, user.first_name, user.last_name, tra.student.gender, tra.student.user.email)# if it create user rest password for django user too
-                    except Exception as e:
-                        print(e)
-                        messages.error(request, "Sorry, Something went wrong. try again!")
-                        error = 1
-                    if mdluser:                        
+                    mdluser = get_moodle_user(tra.training.training_planner.academic_id, user.first_name, user.last_name, tra.student.gender, tra.student.user.email)# if it create user rest password for django user too
+                    
+                    if mdluser:
+                        print("mdluser present", mdluser.id)                       
                         try:
                             instance = TestAttendance.objects.get(test_id=t.id, mdluser_id=mdluser.id)
                         except Exception as e:
                             print(e)
                             instance = TestAttendance()
-                        instance.student = tra.student
+                        instance.student_id = tra.student.id
                         instance.test_id = t.id
                         instance.mdluser_id = mdluser.id
                         instance.mdlcourse_id = fossmdlcourse.mdlcourse_id
@@ -1912,6 +1911,10 @@ def test_request(request, role, rid = None):
                         instance.mdlattempt_id = 0
                         instance.status = 0
                         instance.save()
+                        print("test_attendance created for ",tra.student.id)
+                    else:
+                        print("mdluser not found for", user.email)
+                        error = 1
             if not error:
                 t.department.clear()
                 t.department.add(test_training_dept)
