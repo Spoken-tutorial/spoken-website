@@ -100,4 +100,4 @@ cron/nohup.out
 .vscode/
 cron/spoken_search/index
 *.sql
-#scriptmanager/static/scriptmanager/main.js
+scriptmanager/static/scriptmanager/main.js
