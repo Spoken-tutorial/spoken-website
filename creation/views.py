@@ -24,8 +24,8 @@ from django.core.mail import EmailMultiAlternatives
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template.context_processors import csrf
-from django.views.decorators.csrf import csrf_exempt,csrf_protect
-from django.shortcuts import render,redirect
+from django.views.decorators.csrf import csrf_exempt, csrf_protect
+from django.shortcuts import render, redirect
 
 # Spoken Tutorial Stuff
 from cms.sortable import *
@@ -35,95 +35,110 @@ from creation.subtitles import *
 
 from . import services
 from django.utils import timezone
-from datetime import datetime,timedelta
+from datetime import datetime, timedelta
 from creation.filters import CreationStatisticsFilter, ContributorRatingFilter, ReviewerFilter
 from django.db.models import Count, Min, Q, Sum, F
 import itertools
 from django.utils.html import format_html
 from django.core.urlresolvers import reverse
 
+
 def humansize(nbytes):
     suffixes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
-    if nbytes == 0: return '0 B'
+    if nbytes == 0:
+        return '0 B'
     i = 0
-    while nbytes >= 1024 and i < len(suffixes)-1:
+    while nbytes >= 1024 and i < len(suffixes) - 1:
         nbytes /= 1024.
         i += 1
     f = ('%.1f' % nbytes).rstrip('0').rstrip('.')
     return '%s %s' % (f, suffixes[i])
 
-def get_page(resource, page, page_count = 20):
+
+def get_page(resource, page, page_count=20):
     paginator = Paginator(resource, page_count)
     try:
-        resource =  paginator.page(page)
+        resource = paginator.page(page)
     except PageNotAnInteger:
-        resource =  paginator.page(1)
+        resource = paginator.page(1)
     except EmptyPage:
         resource = paginator.page(paginator.num_pages)
     return resource
 
+
 def is_contributor(user):
     """Check if the user is having contributor rights"""
-    if user.groups.filter(Q(name = 'Contributor')|Q(name = 'External-Contributor')).count():
+    if user.groups.filter(Q(name='Contributor') | Q(name='External-Contributor')).count():
         return True
     return False
+
 
 def is_internal_contributor(user):
     """Check if the user is having contributor rights"""
-    if user.groups.filter(name = 'Contributor').count():
+    if user.groups.filter(name='Contributor').count():
         return True
     return False
+
 
 def is_external_contributor(user):
     """Check if the user is having external-contributor rights"""
-    if user.groups.filter(name = 'External-Contributor').count():
+    if user.groups.filter(name='External-Contributor').count():
         return True
     return False
+
 
 def is_videoreviewer(user):
     """Check if the user is having video reviewer rights"""
-    if user.groups.filter(name = 'Video-Reviewer').count() == 1:
+    if user.groups.filter(name='Video-Reviewer').count() == 1:
         return True
     return False
+
 
 def is_domainreviewer(user):
     """Check if the user is having domain reviewer rights"""
-    if user.groups.filter(name = 'Domain-Reviewer').count() == 1:
+    if user.groups.filter(name='Domain-Reviewer').count() == 1:
         return True
     return False
+
 
 def is_qualityreviewer(user):
     """Check if the user is having quality reviewer rights"""
-    if user.groups.filter(name = 'Quality-Reviewer').count() == 1:
+    if user.groups.filter(name='Quality-Reviewer').count() == 1:
         return True
     return False
+
 
 def is_administrator(user):
     """Check if the user is having administrator rights"""
-    if user.groups.filter(name = 'Administrator').count():
+    if user.groups.filter(name='Administrator').count():
         return True
     return False
+
 
 def is_contenteditor(user):
     """Check if the user is having Content-Editor rights"""
-    if user.groups.filter(name = 'Content-Editor').count():
+    if user.groups.filter(name='Content-Editor').count():
         return True
     return False
 
+
 def is_language_manager(user):
     """ Check if the logged in user is Language Manager"""
-    return LanguageManager.objects.filter(user=user,status=1).exists()
+    return LanguageManager.objects.filter(user=user, status=1).exists()
+
 
 def get_filesize(path):
     filesize_bytes = os.path.getsize(path)
     return humansize(filesize_bytes)
 
 # returns video meta info using ffmpeg
+
+
 def get_video_info(path):
     """Uses ffmpeg to determine information about a video."""
     info_m = {}
     try:
-        process = subprocess.Popen(['/usr/bin/ffmpeg', '-i', path], stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
+        process = subprocess.Popen(['/usr/bin/ffmpeg', '-i', path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         stdout, stderr = process.communicate()
         duration_m = re.search(r"Duration:\s{1}(?P<hours>\d+?):(?P<minutes>\d+?):(?P<seconds>\d+\.\d+?)", stdout.decode('utf-8'), re.DOTALL).groupdict()
         info_m = re.search(r": Video: (?P<codec>.*?), (?P<profile>.*?), (?P<width>.*?)x(?P<height>.*?), ", stdout.decode('utf-8'), re.DOTALL).groupdict()
@@ -162,12 +177,14 @@ def get_video_info(path):
         info_m['size'] = 0
     return info_m
 #create_thumbnail(tr_rec, 'Big', tr_rec.video_thumbnail_time, '700:500')
+
+
 def create_thumbnail(row, attach_str, thumb_time, thumb_size):
     filepath = settings.MEDIA_ROOT + 'videos/' + str(row.tutorial_detail.foss_id) + '/' + str(row.tutorial_detail_id) + '/'
     filename = row.tutorial_detail.tutorial.replace(' ', '-') + '-' + attach_str + '.png'
     try:
         #process = subprocess.Popen(['/usr/bin/ffmpeg', '-i ' + filepath + row.video + ' -r ' + str(30) + ' -ss ' + str(thumb_time) + ' -s ' + thumb_size + ' -vframes ' + str(1) + ' -f ' + 'image2 ' + filepath + filename], stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
-        process = subprocess.Popen(['/usr/bin/ffmpeg', '-i', filepath + row.video, '-r', str(30), '-ss', str(thumb_time), '-s', thumb_size, '-vframes', str(1), '-f', 'image2', filepath + filename], stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
+        process = subprocess.Popen(['/usr/bin/ffmpeg', '-i', filepath + row.video, '-r', str(30), '-ss', str(thumb_time), '-s', thumb_size, '-vframes', str(1), '-f', 'image2', filepath + filename], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         stdout, stderr = process.communicate()
         if stderr:
             print((filepath + filename))
@@ -176,36 +193,41 @@ def create_thumbnail(row, attach_str, thumb_time, thumb_size):
         print((1, e))
         pass
 
+
 def add_qualityreviewer_notification(tr_rec, comp_title, message):
-    dr_roles = QualityReviewerRole.objects.filter(foss_category = tr_rec.tutorial_detail.foss, language = tr_rec.language, status = 1)
+    dr_roles = QualityReviewerRole.objects.filter(foss_category=tr_rec.tutorial_detail.foss, language=tr_rec.language, status=1)
     for dr_role in dr_roles:
-        QualityReviewerNotification.objects.create(user = dr_role.user, title = comp_title, message = message, tutorial_resource = tr_rec)
+        QualityReviewerNotification.objects.create(user=dr_role.user, title=comp_title, message=message, tutorial_resource=tr_rec)
+
 
 def add_domainreviewer_notification(tr_rec, comp_title, message):
-    dr_roles = DomainReviewerRole.objects.filter(foss_category = tr_rec.tutorial_detail.foss, language = tr_rec.language, status = 1)
+    dr_roles = DomainReviewerRole.objects.filter(foss_category=tr_rec.tutorial_detail.foss, language=tr_rec.language, status=1)
     for dr_role in dr_roles:
-        DomainReviewerNotification.objects.create(user = dr_role.user, title = comp_title, message = message, tutorial_resource = tr_rec)
+        DomainReviewerNotification.objects.create(user=dr_role.user, title=comp_title, message=message, tutorial_resource=tr_rec)
+
 
 def add_adminreviewer_notification(tr_rec, comp_title, message):
-    role = Group.objects.get(name = 'Video-Reviewer')
+    role = Group.objects.get(name='Video-Reviewer')
     users = role.user_set.all()
 
     for user in users:
-        AdminReviewerNotification.objects.create(user = user, title = comp_title, message = message, tutorial_resource = tr_rec)
+        AdminReviewerNotification.objects.create(user=user, title=comp_title, message=message, tutorial_resource=tr_rec)
+
 
 def add_contributor_notification(tr_rec, comp_title, message):
-    con_roles = ContributorRole.objects.filter(tutorial_detail = tr_rec.tutorial_detail, language = tr_rec.language, status = 1)
+    con_roles = ContributorRole.objects.filter(tutorial_detail=tr_rec.tutorial_detail, language=tr_rec.language, status=1)
 
     for con in con_roles:
-        ContributorNotification.objects.create(user = con.user, title = comp_title, message = message, tutorial_resource = tr_rec)
+        ContributorNotification.objects.create(user=con.user, title=comp_title, message=message, tutorial_resource=tr_rec)
+
 
 ROLES_DICT = {
-        'contributor': 0,
-        'external-contributor': 1,
-        'video-reviewer': 2,
-        'domain-reviewer': 3,
-        'quality-reviewer': 4,
-    }
+    'contributor': 0,
+    'external-contributor': 1,
+    'video-reviewer': 2,
+    'domain-reviewer': 3,
+    'quality-reviewer': 4,
+}
 
 ASSIGNMENT_STATUS_DICT = {
     'un-assigned': 0,
@@ -227,32 +249,32 @@ STATUS_DICT = {
 
 
 @login_required
-def creation_add_role(request, role_type,languages):
+def creation_add_role(request, role_type, languages):
 
     # Add multiple languages to the user
-    language_ids  = languages.split('/')
+    language_ids = languages.split('/')
     for lang_id in language_ids:
-        print("lang_id : ",lang_id)
+        print("lang_id : ", lang_id)
         if role_type in ROLES_DICT:
             if role_type != 'video-reviewer':
                 if lang_id:
-                    language_alert = Language.objects.get(id = int(lang_id))
+                    language_alert = Language.objects.get(id=int(lang_id))
 
-            this_user_role = RoleRequest.objects.filter(user = request.user,
-                role_type = ROLES_DICT[role_type], language_id = int(lang_id))
+            this_user_role = RoleRequest.objects.filter(user=request.user,
+                                                        role_type=ROLES_DICT[role_type], language_id=int(lang_id))
 
             if this_user_role.exists():
 
-                if this_user_role.filter(status = 0).exists():
+                if this_user_role.filter(status=0).exists():
                     if role_type == 'video-reviewer':
                         messages.warning(request, 'Request to the ' +
-                            role_type.title() + ' role is already waiting for admin approval!')
+                                         role_type.title() + ' role is already waiting for admin approval!')
                     else:
                         messages.warning(request, 'Request to the ' +
-                            role_type.title() + ' role'+ ' for ' + language_alert.name +
-                            ' is already waiting for admin approval!')
-                if this_user_role.filter(status = 2).exists():
-                    this_user_role.update(status = 0)
+                                         role_type.title() + ' role' + ' for ' + language_alert.name +
+                                         ' is already waiting for admin approval!')
+                if this_user_role.filter(status=2).exists():
+                    this_user_role.update(status=0)
             else:
                 new_role_request = RoleRequest()
                 new_role_request.user = request.user
@@ -261,23 +283,23 @@ def creation_add_role(request, role_type,languages):
                     new_role_request.language = language_alert
                 new_role_request.status = STATUS_DICT['inactive']
                 new_role_request.save()
-                #RoleRequest.objects.create(user = request.user, role_type = ROLES_DICT[role_type],
-                                           #language_id = int(lang_id), status = 0)
-                #new_role_request.user.groups.add(Group.objects.get(
+                # RoleRequest.objects.create(user = request.user, role_type = ROLES_DICT[role_type],
+                # language_id = int(lang_id), status = 0)
+                # new_role_request.user.groups.add(Group.objects.get(
                 #    name = role_type))
                 if role_type != 'video-reviewer':
-                    messages.success(request, 'Request to the ' + \
-                            role_type.title() +' role'+' for the language ' +\
-                            language_alert.name+' has been sent for admin approval!')
+                    messages.success(request, 'Request to the ' +
+                                     role_type.title() + ' role' + ' for the language ' +
+                                     language_alert.name + ' has been sent for admin approval!')
                 else:
-                    messages.success(request, 'Request to the ' + \
-                            role_type.title() +' role has been sent for approval!')
+                    messages.success(request, 'Request to the ' +
+                                     role_type.title() + ' role has been sent for approval!')
 
         else:
             messages.error(request, 'Invalid role argument!')
 
-
     return HttpResponseRedirect('/creation/')
+
 
 @login_required
 def creation_accept_role_request(request, recid, user_type):
@@ -290,24 +312,24 @@ def creation_accept_role_request(request, recid, user_type):
             4: 'Quality-Reviewer',
         }
         try:
-            role_rec = RoleRequest.objects.get(pk = recid, status = STATUS_DICT['inactive'])
+            role_rec = RoleRequest.objects.get(pk=recid, status=STATUS_DICT['inactive'])
             if role_rec.role_type in roles:
                 try:
-                    role_rec.user.groups.add(Group.objects.get(name = roles[role_rec.role_type]))
+                    role_rec.user.groups.add(Group.objects.get(name=roles[role_rec.role_type]))
                     role_rec.approved_user = request.user
                     role_rec.status = 1
                     role_rec.save()
                     if role_rec.role_type == ROLES_DICT['video-reviewer']:
-                        messages.success(request, roles[role_rec.role_type] +' role is added to '+role_rec.user.username)
-                        add_creation_notification(request, role_rec.role_type, role_rec.user_id , role_rec.language)
+                        messages.success(request, roles[role_rec.role_type] + ' role is added to ' + role_rec.user.username)
+                        add_creation_notification(request, role_rec.role_type, role_rec.user_id, role_rec.language)
                     else:
-                        messages.success(request, roles[role_rec.role_type] +' role is added to ' + role_rec.user.username + ' for the language '+role_rec.language.name)
-                        add_creation_notification(request, role_rec.role_type, role_rec.user_id , role_rec.language)
-                        if int(role_rec.role_type) in (ROLES_DICT['contributor'],ROLES_DICT['external-contributor']):
-                            print("Okay 1 ",role_rec.role_type)
+                        messages.success(request, roles[role_rec.role_type] + ' role is added to ' + role_rec.user.username + ' for the language ' + role_rec.language.name)
+                        add_creation_notification(request, role_rec.role_type, role_rec.user_id, role_rec.language)
+                        if int(role_rec.role_type) in (ROLES_DICT['contributor'], ROLES_DICT['external-contributor']):
+                            print("Okay 1 ", role_rec.role_type)
                             add_contributorrating(role_rec)
                 except Exception as e:
-                    print (e)
+                    print(e)
                     messages.error(request, role_rec.user.username + ' is already having ' + roles[role_rec.role_type] + ' role or Language field is not present')
             else:
                 messages.error(request, 'Invalid role argument!')
@@ -320,6 +342,7 @@ def creation_accept_role_request(request, recid, user_type):
     else:
         return HttpResponseRedirect('/creation/role/requests/' + roles[role_rec.role_type].lower() + '/')
 
+
 @login_required
 def creation_reject_role_request(request, recid, user_type):
     if is_administrator:
@@ -331,11 +354,11 @@ def creation_reject_role_request(request, recid, user_type):
             4: 'Quality-Reviewer',
         }
         try:
-            role_rec = RoleRequest.objects.get(pk = recid, status = 0)
+            role_rec = RoleRequest.objects.get(pk=recid, status=0)
             role_rec.delete()
-            messages.success(request, roles[role_rec.role_type]+
-            ' role of '+ str(role_rec.language) +
-            ' has been deleted successfully for '+role_rec.user.username)
+            messages.success(request, roles[role_rec.role_type] +
+                             ' role of ' + str(role_rec.language) +
+                             ' has been deleted successfully for ' + role_rec.user.username)
         except:
             messages.error(request, 'The given role request id is either invalid or it is already rejected')
     else:
@@ -345,16 +368,17 @@ def creation_reject_role_request(request, recid, user_type):
     else:
         return HttpResponseRedirect('/creation/role/requests/' + roles[role_rec.role_type].lower() + '/')
 
+
 @login_required
-def creation_revoke_role_request(request, role_type,languages):
+def creation_revoke_role_request(request, role_type, languages):
 
     group_role_id = {
-            0: 'Contributor',
-            1: 'External-Contributor',
-            2: 'Video-Reviewer',
-            3: 'Domain-Reviewer',
-            4: 'Quality-Reviewer',
-        }
+        0: 'Contributor',
+        1: 'External-Contributor',
+        2: 'Video-Reviewer',
+        3: 'Domain-Reviewer',
+        4: 'Quality-Reviewer',
+    }
 
     # Revoke multiple languages from the user
     lang_ids = languages.split('/')
@@ -363,12 +387,12 @@ def creation_revoke_role_request(request, role_type,languages):
         if role_type in ROLES_DICT:
             try:
                 role_rec = RoleRequest.objects.get(
-                    user = request.user, role_type = ROLES_DICT[role_type],
-                    status = 1,language_id = a_language)
+                    user=request.user, role_type=ROLES_DICT[role_type],
+                    status=1, language_id=a_language)
                 if role_rec.role_type != ROLES_DICT['video-reviewer']:
                     if role_rec.role_type == ROLES_DICT['contributor'] or role_rec.role_type == ROLES_DICT['external-contributor']:
                         try:
-                            contrib_roles=ContributorRole.objects.filter(user = role_rec.user, language_id = a_language)
+                            contrib_roles = ContributorRole.objects.filter(user=role_rec.user, language_id=a_language)
                             for role in contrib_roles:
                                 role.revoke()
                         except ContributorRole.DoesNotExist:
@@ -376,45 +400,46 @@ def creation_revoke_role_request(request, role_type,languages):
                             pass
                     elif role_rec.role_type == 3:
                         try:
-                            DomainReviewerRole.objects.get(user_id = role_rec.user.id, language_id = a_language).revoke()
+                            DomainReviewerRole.objects.get(user_id=role_rec.user.id, language_id=a_language).revoke()
                         except DomainReviewerRole.DoesNotExist:
                             # The user has not worked on any Domain
                             pass
                     elif role_rec.role_type == 4:
                         try:
-                            QualityReviewerRole.objects.get(user = role_rec.user, language_id = a_language).revoke()
+                            QualityReviewerRole.objects.get(user=role_rec.user, language_id=a_language).revoke()
                         except QualityReviewerRole.DoesNotExist:
                             # The user has not worked on any Quality
                             pass
 
                     role_rec.revoke()
-                    lang_show = Language.objects.get(id = a_language)
-                    messages.success(request, role_type.title() + ' role has been revoked from ' + role_rec.user.username+' for the language '+ lang_show.name)
+                    lang_show = Language.objects.get(id=a_language)
+                    messages.success(request, role_type.title() + ' role has been revoked from ' + role_rec.user.username + ' for the language ' + lang_show.name)
 
             except RoleRequest.DoesNotExist:
                 # This will be hit only when the request type is video-reviewer
                 role_rec = RoleRequest.objects.get(
-                    user = request.user, role_type = ROLES_DICT[role_type],
-                    status = 1)
+                    user=request.user, role_type=ROLES_DICT[role_type],
+                    status=1)
                 role_rec.revoke()
                 messages.warning(request, 'Role is revoked!')
         else:
             messages.error(request, 'Invalid role type argument!')
 
-    role_count = RoleRequest.objects.filter(user = request.user,role_type = ROLES_DICT[role_type],status = 1)
+    role_count = RoleRequest.objects.filter(user=request.user, role_type=ROLES_DICT[role_type], status=1)
     if not role_count.exists():
-        request.user.groups.remove(Group.objects.get(name = group_role_id[ROLES_DICT[role_type]]))
+        request.user.groups.remove(Group.objects.get(name=group_role_id[ROLES_DICT[role_type]]))
 
     return HttpResponseRedirect('/creation/')
 
+
 @login_required
-def creation_list_role_requests(request, tabid = 'contributor'):
+def creation_list_role_requests(request, tabid='contributor'):
     if is_administrator:
-        contrib_recs = RoleRequest.objects.filter(role_type = 0, status = 0).order_by('-updated')
-        ext_contrib_recs = RoleRequest.objects.filter(role_type = 1, status = 0).order_by('-updated')
-        admin_recs = RoleRequest.objects.filter(role_type = 2, status = 0).order_by('-updated')
-        domain_recs = RoleRequest.objects.filter(role_type = 3, status = 0).order_by('-updated')
-        quality_recs = RoleRequest.objects.filter(role_type = 4, status = 0).order_by('-updated')
+        contrib_recs = RoleRequest.objects.filter(role_type=0, status=0).order_by('-updated')
+        ext_contrib_recs = RoleRequest.objects.filter(role_type=1, status=0).order_by('-updated')
+        admin_recs = RoleRequest.objects.filter(role_type=2, status=0).order_by('-updated')
+        domain_recs = RoleRequest.objects.filter(role_type=3, status=0).order_by('-updated')
+        quality_recs = RoleRequest.objects.filter(role_type=4, status=0).order_by('-updated')
         context = {
             'tabid': tabid,
             'contrib_recs': contrib_recs,
@@ -427,15 +452,16 @@ def creation_list_role_requests(request, tabid = 'contributor'):
     else:
         raise PermissionDenied()
 
+
 @login_required
-def creation_lang_list_role_requests(request, tabid = 'contributor'):
+def creation_lang_list_role_requests(request, tabid='contributor'):
     if is_language_manager:
         language_manager_langs = LanguageManager.objects.filter(
-            user_id= request.user.id).values_list('language_id')
-        contrib_recs = RoleRequest.objects.filter(role_type = 0,
-            status = 0, language_id__in= language_manager_langs).order_by('-updated')
-        ext_contrib_recs = RoleRequest.objects.filter(role_type = 1,
-            status = 0, language_id__in= language_manager_langs).order_by('-updated')
+            user_id=request.user.id).values_list('language_id')
+        contrib_recs = RoleRequest.objects.filter(role_type=0,
+                                                  status=0, language_id__in=language_manager_langs).order_by('-updated')
+        ext_contrib_recs = RoleRequest.objects.filter(role_type=1,
+                                                      status=0, language_id__in=language_manager_langs).order_by('-updated')
         context = {
             'tabid': tabid,
             'contrib_recs': contrib_recs,
@@ -453,18 +479,18 @@ def refresh_roles(request):
         contrib_count = 0
         domain_count = 0
         quality_count = 0
-        contributor_roles = ContributorRole.objects.filter(status = 1).values('user_id','language_id').distinct()
-        domain_roles = DomainReviewerRole.objects.filter(status = 1).values('user_id','language_id').distinct()
-        quality_roles = QualityReviewerRole.objects.filter(status = 1).values('user_id','language_id').distinct()
+        contributor_roles = ContributorRole.objects.filter(status=1).values('user_id', 'language_id').distinct()
+        domain_roles = DomainReviewerRole.objects.filter(status=1).values('user_id', 'language_id').distinct()
+        quality_roles = QualityReviewerRole.objects.filter(status=1).values('user_id', 'language_id').distinct()
         for contributor in contributor_roles:
             role_request = RoleRequest.objects.filter(
-                Q(role_type = ROLES_DICT['contributor'])|Q(role_type = ROLES_DICT['external-contributor']),
-                user_id = contributor['user_id'],language_id = contributor['language_id'])
+                Q(role_type=ROLES_DICT['contributor']) | Q(role_type=ROLES_DICT['external-contributor']),
+                user_id=contributor['user_id'], language_id=contributor['language_id'])
             if not role_request.exists():
-                contrib_user = User.objects.get(id = contributor['user_id'])
+                contrib_user = User.objects.get(id=contributor['user_id'])
                 role_request = RoleRequest()
                 role_request.user = contrib_user
-                role_request.language = Language.objects.get(id = contributor['language_id'])
+                role_request.language = Language.objects.get(id=contributor['language_id'])
                 if is_contributor(contrib_user):
                     role_request.role_type = ROLES_DICT['contributor']
                 elif is_external_contributor(contrib_user):
@@ -472,8 +498,8 @@ def refresh_roles(request):
                 role_request.status = 1
                 role_request.save()
                 contributor_with_rating = \
-                ContributorRating.objects.filter(user_id = contributor['user_id'],
-                                           language_id = contributor['language_id'])
+                    ContributorRating.objects.filter(user_id=contributor['user_id'],
+                                                     language_id=contributor['language_id'])
                 if not contributor_with_rating.exists():
                     new_contrib_rating_request = ContributorRating()
                     new_contrib_rating_request.user_id = contributor['user_id']
@@ -481,65 +507,65 @@ def refresh_roles(request):
                     new_contrib_rating_request.save()
                 contrib_count += 1
             else:
-                role_request.update(status =  STATUS_DICT['active'],
-                    approved_user_id = request.user.id)
-        messages.success(request,str(contrib_count)+ " Contributors added")
+                role_request.update(status=STATUS_DICT['active'],
+                                    approved_user_id=request.user.id)
+        messages.success(request, str(contrib_count) + " Contributors added")
 
         for domain_reviewer in domain_roles:
-            role_request = RoleRequest.objects.filter( role_type = ROLES_DICT['domain-reviewer'],
-                user_id = domain_reviewer['user_id'],language_id = domain_reviewer['language_id'])
+            role_request = RoleRequest.objects.filter(role_type=ROLES_DICT['domain-reviewer'],
+                                                      user_id=domain_reviewer['user_id'], language_id=domain_reviewer['language_id'])
             if not role_request.exists():
                 role_request = RoleRequest()
-                role_request.user = User.objects.get(id = domain_reviewer['user_id'])
-                role_request.language = Language.objects.get(id = domain_reviewer['language_id'])
+                role_request.user = User.objects.get(id=domain_reviewer['user_id'])
+                role_request.language = Language.objects.get(id=domain_reviewer['language_id'])
                 role_request.role_type = ROLES_DICT['domain-reviewer']
                 role_request.status = STATUS_DICT['active']
                 role_request.save()
                 domain_count += 1
             else:
-                role_request.update(status =  STATUS_DICT['active'],
-                    approved_user_id = request.user.id)
+                role_request.update(status=STATUS_DICT['active'],
+                                    approved_user_id=request.user.id)
 
-        messages.success(request,str(domain_count)+ " Domain Reviewers added")
+        messages.success(request, str(domain_count) + " Domain Reviewers added")
 
         for quality_reviewer in quality_roles:
-            role_request = RoleRequest.objects.filter(role_type = ROLES_DICT['quality-reviewer'],
-                user_id = quality_reviewer['user_id'],language_id = quality_reviewer['language_id'])
+            role_request = RoleRequest.objects.filter(role_type=ROLES_DICT['quality-reviewer'],
+                                                      user_id=quality_reviewer['user_id'], language_id=quality_reviewer['language_id'])
             if not role_request.exists():
                 role_request = RoleRequest()
-                role_request.user = User.objects.get(id = quality_reviewer['user_id'])
-                role_request.language = Language.objects.get(id = quality_reviewer['language_id'])
+                role_request.user = User.objects.get(id=quality_reviewer['user_id'])
+                role_request.language = Language.objects.get(id=quality_reviewer['language_id'])
                 role_request.role_type = ROLES_DICT['quality-reviewer']
                 role_request.status = STATUS_DICT['active']
                 role_request.save()
                 quality_count += 1
             else:
-                role_request.update(status =  STATUS_DICT['active'],
-                    approved_user_id = request.user.id)
-        messages.success(request,str(quality_count)+ " Quality Reviewers added")
+                role_request.update(status=STATUS_DICT['active'],
+                                    approved_user_id=request.user.id)
+        messages.success(request, str(quality_count) + " Quality Reviewers added")
         return HttpResponseRedirect('/creation')
     else:
-        messages.error(request,"Not enough permissions to perform this operation")
+        messages.error(request, "Not enough permissions to perform this operation")
         raise PermissionDenied()
 
 
 @login_required
 def init_creation_app(request):
     try:
-        if Group.objects.filter(name = 'Contributor').count() == 0:
-            Group.objects.create(name = 'Contributor')
-        if Group.objects.filter(name = 'External-Contributor').count() == 0:
-            Group.objects.create(name = 'External-Contributor')
-        if Group.objects.filter(name = 'Video-Reviewer').count() == 0:
-            Group.objects.create(name = 'Video-Reviewer')
-        if Group.objects.filter(name = 'Domain-Reviewer').count() == 0:
-            Group.objects.create(name = 'Domain-Reviewer')
-        if Group.objects.filter(name = 'Quality-Reviewer').count() == 0:
-            Group.objects.create(name = 'Quality-Reviewer')
-        if Group.objects.filter(name = 'Quality-Reviewer').count() == 0:
-            Group.objects.create(name = 'Quality-Reviewer')
-        if Group.objects.filter(name = 'Administrator').count() == 0:
-            Group.objects.create(name = 'Administrator')
+        if Group.objects.filter(name='Contributor').count() == 0:
+            Group.objects.create(name='Contributor')
+        if Group.objects.filter(name='External-Contributor').count() == 0:
+            Group.objects.create(name='External-Contributor')
+        if Group.objects.filter(name='Video-Reviewer').count() == 0:
+            Group.objects.create(name='Video-Reviewer')
+        if Group.objects.filter(name='Domain-Reviewer').count() == 0:
+            Group.objects.create(name='Domain-Reviewer')
+        if Group.objects.filter(name='Quality-Reviewer').count() == 0:
+            Group.objects.create(name='Quality-Reviewer')
+        if Group.objects.filter(name='Quality-Reviewer').count() == 0:
+            Group.objects.create(name='Quality-Reviewer')
+        if Group.objects.filter(name='Administrator').count() == 0:
+            Group.objects.create(name='Administrator')
         messages.success(request, 'Creation application initialised successfully!')
     except Exception as e:
         messages.error(request, str(e))
@@ -549,14 +575,14 @@ def init_creation_app(request):
 @login_required
 def creationhome(request):
     # Get languages for he is an approved Contributor /..
-    is_contributor_langs             =   services.get_revokable_languages_for_role(request.user,'contributor')
-    is_external_contributor_langs    =   services.get_revokable_languages_for_role(request.user,'external-contributor')
-    is_domain_reviewer_langs         =   services.get_revokable_languages_for_role(request.user,'domain-reviewer')
-    is_quality_reviewer_langs        =   services.get_revokable_languages_for_role(request.user,'quality-reviewer')
-    not_contributor_langs = Language.objects.exclude(id__in = is_contributor_langs.values('id')).values('id','name')
-    not_external_contributor_langs = Language.objects.exclude(id__in = is_external_contributor_langs.values('id')).values('id','name')
-    not_domain_reviewer_langs = Language.objects.exclude(id__in = is_domain_reviewer_langs.values('id')).values('id','name')
-    not_quality_reviewer_langs = Language.objects.exclude(id__in = is_quality_reviewer_langs.values('id')).values('id','name')
+    is_contributor_langs = services.get_revokable_languages_for_role(request.user, 'contributor')
+    is_external_contributor_langs = services.get_revokable_languages_for_role(request.user, 'external-contributor')
+    is_domain_reviewer_langs = services.get_revokable_languages_for_role(request.user, 'domain-reviewer')
+    is_quality_reviewer_langs = services.get_revokable_languages_for_role(request.user, 'quality-reviewer')
+    not_contributor_langs = Language.objects.exclude(id__in=is_contributor_langs.values('id')).values('id', 'name')
+    not_external_contributor_langs = Language.objects.exclude(id__in=is_external_contributor_langs.values('id')).values('id', 'name')
+    not_domain_reviewer_langs = Language.objects.exclude(id__in=is_domain_reviewer_langs.values('id')).values('id', 'name')
+    not_quality_reviewer_langs = Language.objects.exclude(id__in=is_quality_reviewer_langs.values('id')).values('id', 'name')
 
     languages = Language.objects.filter().values('name')
     if is_contributor(request.user) or is_domainreviewer(request.user) or is_videoreviewer(request.user) or is_qualityreviewer(request.user):
@@ -565,13 +591,13 @@ def creationhome(request):
         domain_notifs = []
         quality_notifs = []
         if is_contributor(request.user):
-            contrib_notifs = ContributorNotification.objects.filter(user = request.user).order_by('-created')
+            contrib_notifs = ContributorNotification.objects.filter(user=request.user).order_by('-created')
         if is_videoreviewer(request.user):
-            admin_notifs = AdminReviewerNotification.objects.filter(user = request.user).order_by('-created')
+            admin_notifs = AdminReviewerNotification.objects.filter(user=request.user).order_by('-created')
         if is_domainreviewer(request.user):
-            domain_notifs = DomainReviewerNotification.objects.filter(user = request.user).order_by('-created')
+            domain_notifs = DomainReviewerNotification.objects.filter(user=request.user).order_by('-created')
         if is_qualityreviewer(request.user):
-            quality_notifs = QualityReviewerNotification.objects.filter(user = request.user).order_by('-created')
+            quality_notifs = QualityReviewerNotification.objects.filter(user=request.user).order_by('-created')
 
         context = {
             'contrib_notifs': contrib_notifs,
@@ -612,18 +638,18 @@ def upload_index(request):
         form = UploadTutorialForm(request.user, request.POST)
         if form.is_valid():
             common_content = TutorialCommonContent()
-            if TutorialCommonContent.objects.filter(tutorial_detail_id = request.POST['tutorial_name']).count():
-                common_content = TutorialCommonContent.objects.get(tutorial_detail_id = request.POST['tutorial_name'])
+            if TutorialCommonContent.objects.filter(tutorial_detail_id=request.POST['tutorial_name']).count():
+                common_content = TutorialCommonContent.objects.get(tutorial_detail_id=request.POST['tutorial_name'])
             else:
-                common_content.tutorial_detail = TutorialDetail.objects.get(pk = request.POST['tutorial_name'])
+                common_content.tutorial_detail = TutorialDetail.objects.get(pk=request.POST['tutorial_name'])
                 common_content.slide_user = request.user
                 common_content.code_user = request.user
                 common_content.assignment_user = request.user
                 common_content.prerequisite_user = request.user
                 common_content.keyword_user = request.user
                 common_content.save()
-            if TutorialResource.objects.filter(tutorial_detail_id = request.POST['tutorial_name'], common_content_id = common_content.id, language_id = request.POST['language']).count():
-                tutorial_resource = TutorialResource.objects.get(tutorial_detail_id = request.POST['tutorial_name'], common_content_id = common_content.id, language_id = request.POST['language'])
+            if TutorialResource.objects.filter(tutorial_detail_id=request.POST['tutorial_name'], common_content_id=common_content.id, language_id=request.POST['language']).count():
+                tutorial_resource = TutorialResource.objects.get(tutorial_detail_id=request.POST['tutorial_name'], common_content_id=common_content.id, language_id=request.POST['language'])
             else:
                 tutorial_resource = TutorialResource()
                 tutorial_resource.tutorial_detail = common_content.tutorial_detail
@@ -636,7 +662,7 @@ def upload_index(request):
 
             return HttpResponseRedirect('/creation/upload/tutorial/' + str(tutorial_resource.id) + '/')
     else:
-        form = UploadTutorialForm(user = request.user)
+        form = UploadTutorialForm(user=request.user)
 
     context = {
         'form': form,
@@ -644,22 +670,24 @@ def upload_index(request):
     context.update(csrf(request))
     return render(request, 'creation/templates/upload_index.html', context)
 
+
 def upload_publish_outline(request):
     if not is_contributor(request.user):
         raise PermissionDenied()
     if request.method == 'POST':
         form = UploadPublishTutorialForm(request.user, request.POST)
         if form.is_valid():
-            tutorial_resource = TutorialResource.objects.get(tutorial_detail_id = request.POST['tutorial_name'], language_id = request.POST['language'])
+            tutorial_resource = TutorialResource.objects.get(tutorial_detail_id=request.POST['tutorial_name'], language_id=request.POST['language'])
             return HttpResponseRedirect('/creation/upload/outline/' + str(tutorial_resource.id) + '/?publish=1')
     else:
-        form = UploadPublishTutorialForm(user = request.user)
+        form = UploadPublishTutorialForm(user=request.user)
 
     context = {
         'form': form,
     }
     context.update(csrf(request))
     return render(request, 'creation/templates/upload-publish-script.html', context)
+
 
 @csrf_exempt
 def ajax_upload_prerequisite(request):
@@ -668,15 +696,15 @@ def ajax_upload_prerequisite(request):
         foss = ''
         try:
             foss = int(request.POST.get('foss'))
-            lang_rec = Language.objects.get(name = 'English')
+            lang_rec = Language.objects.get(name='English')
         except:
             foss = ''
         if foss and lang_rec:
-            td_list = TutorialDetail.objects.filter(foss_id = foss).values_list('id')
+            td_list = TutorialDetail.objects.filter(foss_id=foss).values_list('id')
             td_recs = TutorialDetail.objects.filter(
-                id__in = TutorialResource.objects.filter(
-                    tutorial_detail_id__in = td_list,
-                    language_id = lang_rec.id,
+                id__in=TutorialResource.objects.filter(
+                    tutorial_detail_id__in=td_list,
+                    language_id=lang_rec.id,
                 ).values_list(
                     'tutorial_detail_id'
                 )
@@ -685,7 +713,8 @@ def ajax_upload_prerequisite(request):
                 data += '<option value = "' + str(td_rec.id) + '">' + td_rec.tutorial + '</option>'
             if data:
                 data = '<option value = "">Select Tutorial</option>' + data
-    return HttpResponse(json.dumps(data), content_type = 'application/json')
+    return HttpResponse(json.dumps(data), content_type='application/json')
+
 
 @csrf_exempt
 def ajax_upload_foss(request):
@@ -701,20 +730,20 @@ def ajax_upload_foss(request):
             foss = ''
             lang = ''
         if foss and lang and publish:
-            lang_rec = Language.objects.get(pk = int(lang))
+            lang_rec = Language.objects.get(pk=int(lang))
             if lang_rec.name == 'English':
-                td_list = TutorialDetail.objects.filter(foss_id = foss).values_list('id')
+                td_list = TutorialDetail.objects.filter(foss_id=foss).values_list('id')
                 tutorials = TutorialDetail.objects.filter(
-                    id__in = td_list
+                    id__in=td_list
                 )
             else:
-                eng_rec = Language.objects.get(name = 'English')
-                td_list = TutorialDetail.objects.filter(foss_id = foss).values_list('id')
+                eng_rec = Language.objects.get(name='English')
+                td_list = TutorialDetail.objects.filter(foss_id=foss).values_list('id')
                 tutorials = TutorialDetail.objects.filter(
-                    id__in = TutorialResource.objects.filter(
-                        tutorial_detail_id__in = td_list,
-                        language_id = eng_rec.id,
-                        status = 1
+                    id__in=TutorialResource.objects.filter(
+                        tutorial_detail_id__in=td_list,
+                        language_id=eng_rec.id,
+                        status=1
                     ).values_list(
                         'tutorial_detail_id'
                     )
@@ -724,40 +753,40 @@ def ajax_upload_foss(request):
             if data:
                 data = '<option value = "">Select Tutorial</option>' + data
         elif foss and lang:
-            lang_rec = Language.objects.get(pk = int(lang))
+            lang_rec = Language.objects.get(pk=int(lang))
             if lang_rec.name == 'English':
-                td_list = TutorialDetail.objects.filter(foss_id = foss).values_list('id')
+                td_list = TutorialDetail.objects.filter(foss_id=foss).values_list('id')
                 tutorials = TutorialDetail.objects.filter(
-                    id__in = td_list
+                    id__in=td_list
                 ).exclude(
-                    id__in = TutorialResource.objects.filter(
-                        tutorial_detail_id__in = td_list,
-                        language_id = lang_rec.id,
-                        status = 1
+                    id__in=TutorialResource.objects.filter(
+                        tutorial_detail_id__in=td_list,
+                        language_id=lang_rec.id,
+                        status=1
                     ).values_list(
                         'tutorial_detail_id'
                     )
                 )
             else:
-                eng_rec = Language.objects.get(name = 'English')
+                eng_rec = Language.objects.get(name='English')
                 td_list = ContributorRole.objects.filter(
-                    tutorial_detail__foss_id = foss,
-                    user_id = request.user.id,
-                    language_id = lang_rec,
-                    status = 1).values_list('tutorial_detail_id')
+                    tutorial_detail__foss_id=foss,
+                    user_id=request.user.id,
+                    language_id=lang_rec,
+                    status=1).values_list('tutorial_detail_id')
                 tutorials = TutorialDetail.objects.filter(
-                    id__in = TutorialResource.objects.filter(
-                        tutorial_detail_id__in = td_list,
-                        language_id = eng_rec.id,
-                        status = 1
+                    id__in=TutorialResource.objects.filter(
+                        tutorial_detail_id__in=td_list,
+                        language_id=eng_rec.id,
+                        status=1
                     ).values_list(
                         'tutorial_detail_id'
                     )
                 ).exclude(
-                    id__in = TutorialResource.objects.filter(
-                        tutorial_detail_id__in = td_list,
-                        language_id = lang_rec.id,
-                        status__gte = 1
+                    id__in=TutorialResource.objects.filter(
+                        tutorial_detail_id__in=td_list,
+                        language_id=lang_rec.id,
+                        status__gte=1
                     ).values_list(
                         'tutorial_detail_id'
                     )
@@ -767,13 +796,14 @@ def ajax_upload_foss(request):
             if data:
                 data = '<option value = "">Select Tutorial</option>' + data
         elif foss:
-            languages = Language.objects.filter(id__in = ContributorRole.objects.filter(user_id = request.user.id, tutorial_detail__foss_id = foss).values_list('language_id'))
+            languages = Language.objects.filter(id__in=ContributorRole.objects.filter(user_id=request.user.id, tutorial_detail__foss_id=foss).values_list('language_id'))
             for language in languages:
                 data += '<option value = "' + str(language.id) + '">' + language.name + '</option>'
             if data:
                 data = '<option value = "">Select Language</option>' + data
 
-    return HttpResponse(json.dumps(data), content_type = 'application/json')
+    return HttpResponse(json.dumps(data), content_type='application/json')
+
 
 @csrf_exempt
 def ajax_get_keywords(request):
@@ -781,11 +811,12 @@ def ajax_get_keywords(request):
     if request.method == 'POST':
         try:
             tutorial_detail_id = int(request.POST.get('tutorial_detail'))
-            tcc = TutorialCommonContent.objects.get(tutorial_detail_id = tutorial_detail_id)
+            tcc = TutorialCommonContent.objects.get(tutorial_detail_id=tutorial_detail_id)
             data = tcc.keyword
         except Exception as e:
             pass
-    return HttpResponse(json.dumps(data), content_type = 'application/json')
+    return HttpResponse(json.dumps(data), content_type='application/json')
+
 
 @login_required
 def upload_tutorial(request, trid):
@@ -793,10 +824,10 @@ def upload_tutorial(request, trid):
     contrib_log = None
     review_log = None
     try:
-        tr_rec = TutorialResource.objects.get(pk = trid, status = 0)
-        ContributorRole.objects.get(user_id = request.user.id, tutorial_detail_id = tr_rec.tutorial_detail_id, language_id = tr_rec.language_id, status = 1)
-        contrib_log = ContributorLog.objects.filter(tutorial_resource_id = tr_rec.id).order_by('-created')
-        review_log = NeedImprovementLog.objects.filter(tutorial_resource_id = tr_rec.id).order_by('-created')
+        tr_rec = TutorialResource.objects.get(pk=trid, status=0)
+        ContributorRole.objects.get(user_id=request.user.id, tutorial_detail_id=tr_rec.tutorial_detail_id, language_id=tr_rec.language_id, status=1)
+        contrib_log = ContributorLog.objects.filter(tutorial_resource_id=tr_rec.id).order_by('-created')
+        review_log = NeedImprovementLog.objects.filter(tutorial_resource_id=tr_rec.id).order_by('-created')
     except Exception as e:
         print(e)
         raise PermissionDenied()
@@ -809,6 +840,7 @@ def upload_tutorial(request, trid):
     context.update(csrf(request))
     return render(request, 'creation/templates/upload_tutorial.html', context)
 
+
 @login_required
 def upload_outline(request, trid):
     tr_rec = None
@@ -817,8 +849,8 @@ def upload_outline(request, trid):
         status = 0
         if publish:
             status = 1
-        tr_rec = TutorialResource.objects.get(pk = trid, status = status)
-        ContributorRole.objects.get(user_id = request.user.id, tutorial_detail_id = tr_rec.tutorial_detail, language_id = tr_rec.language_id, status = 1)
+        tr_rec = TutorialResource.objects.get(pk=trid, status=status)
+        ContributorRole.objects.get(user_id=request.user.id, tutorial_detail_id=tr_rec.tutorial_detail, language_id=tr_rec.language_id, status=1)
     except Exception as e:
         raise PermissionDenied()
     if not publish and tr_rec.outline_status > 2 and tr_rec.outline_status != 5:
@@ -842,7 +874,7 @@ def upload_outline(request, trid):
                 tr_rec.outline_user = request.user
                 tr_rec.outline_status = 2
                 tr_rec.save()
-                ContributorLog.objects.create(status = prev_state, user = request.user, tutorial_resource = tr_rec, component = 'outline')
+                ContributorLog.objects.create(status=prev_state, user=request.user, tutorial_resource=tr_rec, component='outline')
                 comp_title = tr_rec.tutorial_detail.foss.foss + ': ' + tr_rec.tutorial_detail.tutorial + ' - ' + tr_rec.language.name
                 add_domainreviewer_notification(tr_rec, comp_title, 'Outline waiting for Domain review')
                 response_msg = 'Outline status updated successfully!'
@@ -868,12 +900,13 @@ def upload_outline(request, trid):
     context.update(csrf(request))
     return render(request, 'creation/templates/upload_outline.html', context)
 
+
 @login_required
 def upload_script(request, trid):
     tr_rec = None
     try:
-        tr_rec = TutorialResource.objects.get(pk = trid, status = 0)
-        ContributorRole.objects.get(user_id = request.user.id, tutorial_detail_id = tr_rec.tutorial_detail, language_id = tr_rec.language_id, status = 1)
+        tr_rec = TutorialResource.objects.get(pk=trid, status=0)
+        ContributorRole.objects.get(user_id=request.user.id, tutorial_detail_id=tr_rec.tutorial_detail, language_id=tr_rec.language_id, status=1)
     except Exception as e:
         raise PermissionDenied()
     if tr_rec.script_status > 2 and tr_rec.script_status != 5:
@@ -897,7 +930,7 @@ def upload_script(request, trid):
                     tr_rec.script_user = request.user
                     tr_rec.script_status = 2
                     tr_rec.save()
-                    ContributorLog.objects.create(status = prev_state, user = request.user, tutorial_resource = tr_rec, component = 'script')
+                    ContributorLog.objects.create(status=prev_state, user=request.user, tutorial_resource=tr_rec, component='script')
                     comp_title = tr_rec.tutorial_detail.foss.foss + ': ' + tr_rec.tutorial_detail.tutorial + ' - ' + tr_rec.language.name
                     add_domainreviewer_notification(tr_rec, comp_title, 'Script waiting for domain review')
                     response_msg = 'Script status updated successfully'
@@ -925,6 +958,7 @@ def upload_script(request, trid):
     context.update(csrf(request))
     return render(request, 'creation/templates/upload_script.html', context)
 
+
 @login_required
 def upload_timed_script(request):
     if not is_contributor(request.user):
@@ -944,15 +978,16 @@ def upload_timed_script(request):
     context.update(csrf(request))
     return render(request, 'creation/templates/upload_timed_script.html', context)
 
+
 @login_required
 def save_timed_script(request, tdid):
     if not is_contributor(request.user):
         raise PermissionDenied()
     try:
-        tr_rec = TutorialResource.objects.get(tutorial_detail_id = tdid, language__name = 'English')
-        ContributorRole.objects.get(user_id = request.user.id,
-        	tutorial_detail_id = tr_rec.tutorial_detail.id,
-        	language_id = tr_rec.language_id, status = 1)
+        tr_rec = TutorialResource.objects.get(tutorial_detail_id=tdid, language__name='English')
+        ContributorRole.objects.get(user_id=request.user.id,
+                                    tutorial_detail_id=tr_rec.tutorial_detail.id,
+                                    language_id=tr_rec.language_id, status=1)
     except Exception as e:
         print(e)
         raise PermissionDenied()
@@ -992,23 +1027,25 @@ def save_timed_script(request, tdid):
     context.update(csrf(request))
     return render(request, 'creation/templates/save_timed_script.html', context)
 
+
 @csrf_exempt
 def ajax_upload_timed_script(request):
     data = ''
     foss = request.POST.get('foss', '')
     if foss:
-        rows = TutorialDetail.objects.filter(id__in = TutorialResource.objects.filter(tutorial_detail__foss_id = foss, language__name = 'English', script_status = 4).values_list('tutorial_detail_id')).order_by('order')
+        rows = TutorialDetail.objects.filter(id__in=TutorialResource.objects.filter(tutorial_detail__foss_id=foss, language__name='English', script_status=4).values_list('tutorial_detail_id')).order_by('order')
         data = '<option value = "">Select Tutorial Name</option>'
         for row in rows:
             data += '<option value = "' + str(row.id) + '">' + row.tutorial + '</option>'
-    return HttpResponse(json.dumps(data), content_type = 'application/json')
+    return HttpResponse(json.dumps(data), content_type='application/json')
+
 
 @login_required
 def upload_prerequisite(request, trid):
     tr_rec = None
     try:
-        tr_rec = TutorialResource.objects.get(pk = trid, status = 0)
-        ContributorRole.objects.get(user_id = request.user.id, tutorial_detail_id = tr_rec.tutorial_detail, language_id = tr_rec.language_id, status = 1)
+        tr_rec = TutorialResource.objects.get(pk=trid, status=0)
+        ContributorRole.objects.get(user_id=request.user.id, tutorial_detail_id=tr_rec.tutorial_detail, language_id=tr_rec.language_id, status=1)
     except Exception as e:
         raise PermissionDenied()
     if tr_rec.common_content.prerequisite_status > 2 and tr_rec.common_content.prerequisite_status != 5:
@@ -1028,7 +1065,7 @@ def upload_prerequisite(request, trid):
                 tr_rec.common_content.prerequisite_user = request.user
                 tr_rec.common_content.prerequisite_status = 2
                 tr_rec.common_content.save()
-                ContributorLog.objects.create(status = prev_state, user = request.user, tutorial_resource = tr_rec, component = 'prerequisite')
+                ContributorLog.objects.create(status=prev_state, user=request.user, tutorial_resource=tr_rec, component='prerequisite')
                 comp_title = tr_rec.tutorial_detail.foss.foss + ': ' + tr_rec.tutorial_detail.tutorial + ' - ' + tr_rec.language.name
                 add_domainreviewer_notification(tr_rec, comp_title, 'Prerequisite waiting for Domain review')
                 response_msg = 'Prerequisite status updated successfully!'
@@ -1053,12 +1090,13 @@ def upload_prerequisite(request, trid):
     context.update(csrf(request))
     return render(request, 'creation/templates/upload_prerequisite.html', context)
 
+
 @login_required
 def upload_keywords(request, trid):
     tr_rec = None
     try:
-        tr_rec = TutorialResource.objects.get(pk = trid, status = 0)
-        ContributorRole.objects.get(user_id = request.user.id, tutorial_detail_id = tr_rec.tutorial_detail, language_id = tr_rec.language_id, status = 1)
+        tr_rec = TutorialResource.objects.get(pk=trid, status=0)
+        ContributorRole.objects.get(user_id=request.user.id, tutorial_detail_id=tr_rec.tutorial_detail, language_id=tr_rec.language_id, status=1)
     except Exception as e:
         raise PermissionDenied()
     if tr_rec.common_content.keyword_status > 2 and tr_rec.common_content.keyword_status != 5:
@@ -1078,7 +1116,7 @@ def upload_keywords(request, trid):
                 tr_rec.common_content.keyword_user = request.user
                 tr_rec.common_content.keyword_status = 2
                 tr_rec.common_content.save()
-                ContributorLog.objects.create(status = prev_state, user = request.user, tutorial_resource = tr_rec, component = 'keyword')
+                ContributorLog.objects.create(status=prev_state, user=request.user, tutorial_resource=tr_rec, component='keyword')
                 comp_title = tr_rec.tutorial_detail.foss.foss + ': ' + tr_rec.tutorial_detail.tutorial + ' - ' + tr_rec.language.name
                 add_domainreviewer_notification(tr_rec, comp_title, 'Keywords waiting for Domain review')
                 response_msg = 'Keywords status updated successfully!'
@@ -1102,12 +1140,14 @@ def upload_keywords(request, trid):
     }
     context.update(csrf(request))
     return render(request, 'creation/templates/upload_keywords.html', context)
+
+
 @login_required
 def upload_component(request, trid, component):
     tr_rec = None
     try:
-        tr_rec = TutorialResource.objects.get(pk = trid, status = 0)
-        ContributorRole.objects.get(user_id = request.user.id, tutorial_detail_id = tr_rec.tutorial_detail_id, language_id = tr_rec.language_id, status = 1)
+        tr_rec = TutorialResource.objects.get(pk=trid, status=0)
+        ContributorRole.objects.get(user_id=request.user.id, tutorial_detail_id=tr_rec.tutorial_detail_id, language_id=tr_rec.language_id, status=1)
         comp_title = tr_rec.tutorial_detail.foss.foss + ': ' + tr_rec.tutorial_detail.tutorial + ' - ' + tr_rec.language.name
     except Exception as e:
         raise PermissionDenied()
@@ -1135,7 +1175,7 @@ def upload_component(request, trid, component):
                             if 'isarchive' in request.POST and int(request.POST.get('isarchive', 0)) > 0:
                                 archived_file = 'Archived-' + str(request.user.id) + '-' + str(int(time.time())) + '-' + tr_rec.video
                                 os.rename(file_path + tr_rec.video, file_path + archived_file)
-                                ArchivedVideo.objects.create(tutorial_resource = tr_rec, user = request.user, version = tr_rec.version, video = archived_file, atype = tr_rec.video_status)
+                                ArchivedVideo.objects.create(tutorial_resource=tr_rec, user=request.user, version=tr_rec.version, video=archived_file, atype=tr_rec.video_status)
                                 if int(request.POST.get('isarchive', 0)) == 2:
                                     tr_rec.version += 1
                         fout = open(full_path, 'wb+')
@@ -1271,18 +1311,18 @@ def upload_component(request, trid, component):
 def mark_notrequired(request, trid, tcid, component):
     tcc = None
     try:
-        tr_rec = TutorialResource.objects.get(pk = trid, status = 0)
-        ContributorRole.objects.get(user_id = request.user.id, tutorial_detail_id = tr_rec.tutorial_detail, language_id = tr_rec.language_id, status = 1)
+        tr_rec = TutorialResource.objects.get(pk=trid, status=0)
+        ContributorRole.objects.get(user_id=request.user.id, tutorial_detail_id=tr_rec.tutorial_detail, language_id=tr_rec.language_id, status=1)
     except Exception as e:
         raise PermissionDenied()
     try:
-        tcc = TutorialCommonContent.objects.get(pk = tcid)
+        tcc = TutorialCommonContent.objects.get(pk=tcid)
         if getattr(tcc, component + '_status') == 0:
             prev_state = getattr(tcc, component + '_status')
             setattr(tcc, component + '_status', 6)
             setattr(tcc, component + '_user_id', request.user.id)
             tcc.save()
-            ContributorLog.objects.create(user = request.user, tutorial_resource_id = trid, component = component, status = prev_state)
+            ContributorLog.objects.create(user=request.user, tutorial_resource_id=trid, component=component, status=prev_state)
             messages.success(request, component.title() + " status updated successfully!")
         else:
             messages.error(request, "Invalid resource id!")
@@ -1295,7 +1335,7 @@ def view_component(request, trid, component):
     tr_rec = None
     context = {}
     try:
-        tr_rec = TutorialResource.objects.get(pk = trid)
+        tr_rec = TutorialResource.objects.get(pk=trid)
     except Exception as e:
         print(e)
         raise PermissionDenied()
@@ -1328,9 +1368,9 @@ def view_component(request, trid, component):
 def tutorials_contributed(request):
     tmp_ids = []
     if is_contributor(request.user):
-        foss_contrib_list = ContributorRole.objects.filter(user = request.user, status = 1)
+        foss_contrib_list = ContributorRole.objects.filter(user=request.user, status=1)
         for foss_contrib in foss_contrib_list:
-            tr_recs = TutorialResource.objects.filter(tutorial_detail__foss_id = foss_contrib.foss_category_id, language_id = foss_contrib.language_id)
+            tr_recs = TutorialResource.objects.filter(tutorial_detail__foss_id=foss_contrib.foss_category_id, language_id=foss_contrib.language_id)
             for tr_rec in tr_recs:
                 flag = 1
                 if tr_rec.language.name == 'English':
@@ -1344,7 +1384,7 @@ def tutorials_contributed(request):
         ordering = ''
         header = ''
         try:
-            tmp_recs = TutorialResource.objects.filter(id__in = tmp_ids).distinct()
+            tmp_recs = TutorialResource.objects.filter(id__in=tmp_ids).distinct()
             raw_get_data = request.GET.get('o', None)
             header = {
                 1: SortableHeader('S.No', False),
@@ -1391,7 +1431,7 @@ def tutorials_pending(request):
     if is_contributor(request.user) or is_domainreviewer(request.user) or \
             is_qualityreviewer(request.user) or is_administrator(is_domainreviewer(request.user)):
         try:
-            tmp_recs = TutorialResource.objects.filter(status = 0)
+            tmp_recs = TutorialResource.objects.filter(status=0)
             raw_get_data = request.GET.get('o', None)
             header = {
                 1: SortableHeader('S.No', False),
@@ -1439,7 +1479,7 @@ def admin_review_index(request):
         raise PermissionDenied()
     tr_recs = None
     try:
-        collection = TutorialResource.objects.filter(video_status = 1, status = 0)
+        collection = TutorialResource.objects.filter(video_status=1, status=0)
         header = {
             1: SortableHeader('S.No', False),
             2: SortableHeader('tutorial_detail__foss__foss', True, 'Foss'),
@@ -1471,7 +1511,7 @@ def admin_review_video(request, trid):
     if not is_videoreviewer(request.user):
         raise PermissionDenied()
     try:
-        tr = TutorialResource.objects.get(pk = trid, status = 0, video_status = 1)
+        tr = TutorialResource.objects.get(pk=trid, status=0, video_status=1)
         tut_title = tr.tutorial_detail.foss.foss + ': ' + tr.tutorial_detail.tutorial + ' - ' + tr.language.name
     except:
         raise PermissionDenied()
@@ -1485,7 +1525,7 @@ def admin_review_video(request, trid):
                 try:
                     tr.video_status = 2
                     tr.save()
-                    AdminReviewLog.objects.create(status = tr.video_status, user = request.user, tutorial_resource = tr)
+                    AdminReviewLog.objects.create(status=tr.video_status, user=request.user, tutorial_resource=tr)
                     add_contributor_notification(tr, tut_title, 'Video accepted by Admin reviewer')
                     add_domainreviewer_notification(tr, tut_title, 'Video waiting for Domain review')
                     response_msg = 'Review status updated successfully!'
@@ -1496,8 +1536,8 @@ def admin_review_video(request, trid):
                     prev_state = tr.video_status
                     tr.video_status = 5
                     tr.save()
-                    NeedImprovementLog.objects.create(user = request.user, tutorial_resource = tr, review_state = prev_state, component = 'video', comment = request.POST['feedback'])
-                    AdminReviewLog.objects.create(status = tr.video_status, user = request.user, tutorial_resource = tr)
+                    NeedImprovementLog.objects.create(user=request.user, tutorial_resource=tr, review_state=prev_state, component='video', comment=request.POST['feedback'])
+                    AdminReviewLog.objects.create(status=tr.video_status, user=request.user, tutorial_resource=tr)
                     add_contributor_notification(tr, tut_title, 'Video is under Need Improvement state')
                     response_msg = 'Review status updated successfully!'
                 except Exception as e:
@@ -1545,7 +1585,7 @@ def admin_reviewed_video(request):
             14: SortableHeader('Status', False),
             15: SortableHeader('created', True, 'Date')
         }
-        collection = TutorialResource.objects.filter(id__in = AdminReviewLog.objects.filter(user = request.user).values_list('tutorial_resource_id').distinct())
+        collection = TutorialResource.objects.filter(id__in=AdminReviewLog.objects.filter(user=request.user).values_list('tutorial_resource_id').distinct())
         raw_get_data = request.GET.get('o', None)
         collection = get_sorted_list(request, collection, header, raw_get_data)
         ordering = get_field_index(raw_get_data)
@@ -1569,9 +1609,9 @@ def tutorials_needimprovement(request):
     if not is_contributor(request.user):
         raise PermissionDenied()
     tmp_ids = []
-    con_roles = ContributorRole.objects.filter(user_id = request.user.id, status = 1)
+    con_roles = ContributorRole.objects.filter(user_id=request.user.id, status=1)
     for rec in con_roles:
-        tr_recs = TutorialResource.objects.filter(tutorial_detail__foss_id = rec.foss_category_id, language_id = rec.language_id, status = 0)
+        tr_recs = TutorialResource.objects.filter(tutorial_detail__foss_id=rec.foss_category_id, language_id=rec.language_id, status=0)
         for tr_rec in tr_recs:
             flag = 1
             if tr_rec.language.name == 'English':
@@ -1585,7 +1625,7 @@ def tutorials_needimprovement(request):
     ordering = ''
     header = ''
     try:
-        tmp_recs = TutorialResource.objects.filter(id__in = tmp_ids)
+        tmp_recs = TutorialResource.objects.filter(id__in=tmp_ids)
         raw_get_data = request.GET.get('o', None)
         header = {
             1: SortableHeader('S.No', False),
@@ -1623,9 +1663,9 @@ def domain_review_index(request):
     if not is_domainreviewer(request.user):
         raise PermissionDenied()
     tmp_ids = []
-    dr_roles = DomainReviewerRole.objects.filter(user_id = request.user.id, status = 1)
+    dr_roles = DomainReviewerRole.objects.filter(user_id=request.user.id, status=1)
     for rec in dr_roles:
-        tr_recs = TutorialResource.objects.filter(tutorial_detail_id__in = TutorialDetail.objects.filter(foss_id = rec.foss_category_id).values_list('id'), language_id = rec.language_id, status = 0).order_by('updated')
+        tr_recs = TutorialResource.objects.filter(tutorial_detail_id__in=TutorialDetail.objects.filter(foss_id=rec.foss_category_id).values_list('id'), language_id=rec.language_id, status=0).order_by('updated')
         for tr_rec in tr_recs:
             flag = 1
             if tr_rec.language.name == 'English':
@@ -1681,15 +1721,15 @@ def domain_review_tutorial(request, trid):
     if not is_domainreviewer(request.user):
         raise PermissionDenied()
     try:
-        tr_rec = TutorialResource.objects.get(pk = trid, status = 0)
+        tr_rec = TutorialResource.objects.get(pk=trid, status=0)
     except:
         raise PermissionDenied()
-    if DomainReviewerRole.objects.filter(user_id = request.user.id, foss_category_id = tr_rec.tutorial_detail.foss_id, language_id = tr_rec.language_id, status = 1).count() == 0:
+    if DomainReviewerRole.objects.filter(user_id=request.user.id, foss_category_id=tr_rec.tutorial_detail.foss_id, language_id=tr_rec.language_id, status=1).count() == 0:
         raise PermissionDenied()
     try:
-        contrib_log = ContributorLog.objects.filter(tutorial_resource_id = tr_rec.id).order_by('-created')
-        review_log = NeedImprovementLog.objects.filter(tutorial_resource_id = tr_rec.id).order_by('-created')
-        review_history = DomainReviewLog.objects.filter(tutorial_resource_id = tr_rec.id).order_by('-created')
+        contrib_log = ContributorLog.objects.filter(tutorial_resource_id=tr_rec.id).order_by('-created')
+        review_log = NeedImprovementLog.objects.filter(tutorial_resource_id=tr_rec.id).order_by('-created')
+        review_history = DomainReviewLog.objects.filter(tutorial_resource_id=tr_rec.id).order_by('-created')
     except:
         contrib_log = None
         review_log = None
@@ -1709,11 +1749,11 @@ def domain_review_component(request, trid, component):
     if not is_domainreviewer(request.user):
         raise PermissionDenied()
     try:
-        tr = TutorialResource.objects.get(pk = trid, status = 0)
+        tr = TutorialResource.objects.get(pk=trid, status=0)
         comp_title = tr.tutorial_detail.foss.foss + ': ' + tr.tutorial_detail.tutorial + ' - ' + tr.language.name
     except:
         raise PermissionDenied()
-    if DomainReviewerRole.objects.filter(user_id = request.user.id, foss_category_id = tr.tutorial_detail.foss_id, language_id = tr.language_id).count() == 0:
+    if DomainReviewerRole.objects.filter(user_id=request.user.id, foss_category_id=tr.tutorial_detail.foss_id, language_id=tr.language_id).count() == 0:
         raise PermissionDenied()
     response_msg = ''
     error_msg = ''
@@ -1733,7 +1773,7 @@ def domain_review_component(request, trid, component):
                             tr.common_content.save()
                             execFlag = 1
                     if execFlag:
-                        DomainReviewLog.objects.create(status = 3, component = component, user = request.user, tutorial_resource = tr)
+                        DomainReviewLog.objects.create(status=3, component=component, user=request.user, tutorial_resource=tr)
                         add_qualityreviewer_notification(tr, comp_title, component.title() + ' waiting for Quality review')
                         add_contributor_notification(tr, comp_title, component.replace('_', ' ').title() + ' accepted by Domain reviewer')
                         response_msg = 'Review status updated successfully!'
@@ -1753,8 +1793,8 @@ def domain_review_component(request, trid, component):
                         prev_state = getattr(tr.common_content, component + '_status')
                         setattr(tr.common_content, component + '_status', 5)
                         tr.common_content.save()
-                    NeedImprovementLog.objects.create(user = request.user, tutorial_resource = tr, review_state = prev_state, component = component, comment = request.POST['feedback'])
-                    DomainReviewLog.objects.create(status = 5, component = component, user = request.user, tutorial_resource = tr)
+                    NeedImprovementLog.objects.create(user=request.user, tutorial_resource=tr, review_state=prev_state, component=component, comment=request.POST['feedback'])
+                    DomainReviewLog.objects.create(status=5, component=component, user=request.user, tutorial_resource=tr)
                     add_contributor_notification(tr, comp_title, component.title() + ' is under Need Improvement state')
                     response_msg = 'Review status updated successfully!'
                 except:
@@ -1799,7 +1839,7 @@ def domain_reviewed_tutorials(request):
             14: SortableHeader('Status', False, '', 'col-center'),
             15: SortableHeader('created', True, 'Date')
         }
-        collection = TutorialResource.objects.filter(id__in = DomainReviewLog.objects.filter(user = request.user).values_list('tutorial_resource_id').distinct())
+        collection = TutorialResource.objects.filter(id__in=DomainReviewLog.objects.filter(user=request.user).values_list('tutorial_resource_id').distinct())
         collection = get_sorted_list(request, collection, header, raw_get_data)
         ordering = get_field_index(raw_get_data)
         collection = ReviewerFilter(request.POST, queryset=collection)
@@ -1833,11 +1873,11 @@ def accept_all(request, review, trid):
         if not is_qualityreviewer(request.user):
             raise PermissionDenied()
     try:
-        tr = TutorialResource.objects.get(pk = trid, status = 0)
+        tr = TutorialResource.objects.get(pk=trid, status=0)
         comp_title = tr.tutorial_detail.foss.foss + ': ' + tr.tutorial_detail.tutorial + ' - ' + tr.language.name
     except:
         raise PermissionDenied()
-    if reviewer_role_check and reviewer_role_check.objects.filter(user_id = request.user.id, foss_category_id = tr.tutorial_detail.foss_id, language_id = tr.language_id).count() == 0:
+    if reviewer_role_check and reviewer_role_check.objects.filter(user_id=request.user.id, foss_category_id=tr.tutorial_detail.foss_id, language_id=tr.language_id).count() == 0:
         raise PermissionDenied()
     if review in status_flag:
         current_status = status_flag[review] - 1
@@ -1847,10 +1887,10 @@ def accept_all(request, review, trid):
     if tr.outline_status > 0 and tr.outline_status == current_status:
         tr.outline_status = status_flag[review]
         if review == 'quality':
-            QualityReviewLog.objects.create(status = status_flag[review], component = 'outline', user = request.user, tutorial_resource = tr)
+            QualityReviewLog.objects.create(status=status_flag[review], component='outline', user=request.user, tutorial_resource=tr)
             comp_message = 'Outline accepted by Quality reviewer'
         else:
-            DomainReviewLog.objects.create(status = status_flag[review], component = 'outline', user = request.user, tutorial_resource = tr)
+            DomainReviewLog.objects.create(status=status_flag[review], component='outline', user=request.user, tutorial_resource=tr)
             add_qualityreviewer_notification(tr, comp_title, 'Outline waiting for Quality review')
             comp_message = 'Outline accepted by Domain reviewer'
         add_contributor_notification(tr, comp_title, comp_message)
@@ -1859,10 +1899,10 @@ def accept_all(request, review, trid):
     if tr.script_status > 0 and tr.script_status == current_status:
         tr.script_status = status_flag[review]
         if review == 'quality':
-            QualityReviewLog.objects.create(status = status_flag[review], component = 'script', user = request.user, tutorial_resource = tr)
+            QualityReviewLog.objects.create(status=status_flag[review], component='script', user=request.user, tutorial_resource=tr)
             comp_message = 'Script accepted by Quality reviewer'
         else:
-            DomainReviewLog.objects.create(status = status_flag[review], component = 'script', user = request.user, tutorial_resource = tr)
+            DomainReviewLog.objects.create(status=status_flag[review], component='script', user=request.user, tutorial_resource=tr)
             add_qualityreviewer_notification(tr, comp_title, 'Script waiting for Quality review')
             comp_message = 'Script accepted by Domain reviewer'
         add_contributor_notification(tr, comp_title, comp_message)
@@ -1871,10 +1911,10 @@ def accept_all(request, review, trid):
     if tr.video_status > 0 and tr.video_status == current_status:
         tr.video_status = status_flag[review]
         if review == 'quality':
-            QualityReviewLog.objects.create(status = status_flag[review], component = 'video', user = request.user, tutorial_resource = tr)
+            QualityReviewLog.objects.create(status=status_flag[review], component='video', user=request.user, tutorial_resource=tr)
             comp_message = 'Video accepted by Quality reviewer'
         else:
-            DomainReviewLog.objects.create(status = status_flag[review], component = 'video', user = request.user, tutorial_resource = tr)
+            DomainReviewLog.objects.create(status=status_flag[review], component='video', user=request.user, tutorial_resource=tr)
             add_qualityreviewer_notification(tr, comp_title, 'Video waiting for Quality review')
             comp_message = 'Video accepted by Domain reviewer'
         add_contributor_notification(tr, comp_title, comp_message)
@@ -1885,10 +1925,10 @@ def accept_all(request, review, trid):
         if tr.common_content.slide_status > 0 and tr.common_content.slide_status == current_status:
             tr.common_content.slide_status = status_flag[review]
             if review == 'quality':
-                QualityReviewLog.objects.create(status = status_flag[review], component = 'slide', user = request.user, tutorial_resource = tr)
+                QualityReviewLog.objects.create(status=status_flag[review], component='slide', user=request.user, tutorial_resource=tr)
                 comp_message = 'Slide accepted by Quality reviewer'
             else:
-                DomainReviewLog.objects.create(status = status_flag[review], component = 'slide', user = request.user, tutorial_resource = tr)
+                DomainReviewLog.objects.create(status=status_flag[review], component='slide', user=request.user, tutorial_resource=tr)
                 add_qualityreviewer_notification(tr, comp_title, 'Slide waiting for Quality review')
                 comp_message = 'Slide accepted by Domain reviewer'
             add_contributor_notification(tr, comp_title, comp_message)
@@ -1897,10 +1937,10 @@ def accept_all(request, review, trid):
         if tr.common_content.code_status > 0 and tr.common_content.code_status == current_status:
             tr.common_content.code_status = status_flag[review]
             if review == 'quality':
-                QualityReviewLog.objects.create(status = status_flag[review], component = 'code', user = request.user, tutorial_resource = tr)
+                QualityReviewLog.objects.create(status=status_flag[review], component='code', user=request.user, tutorial_resource=tr)
                 comp_message = 'Codefiles accepted by Quality reviewer'
             else:
-                DomainReviewLog.objects.create(status = status_flag[review], component = 'code', user = request.user, tutorial_resource = tr)
+                DomainReviewLog.objects.create(status=status_flag[review], component='code', user=request.user, tutorial_resource=tr)
                 add_qualityreviewer_notification(tr, comp_title, 'Codefiles waiting for Quality review')
                 comp_message = 'Codefiles accepted by Domain reviewer'
             add_contributor_notification(tr, comp_title, comp_message)
@@ -1909,10 +1949,10 @@ def accept_all(request, review, trid):
         if tr.common_content.assignment_status > 0 and tr.common_content.assignment_status == current_status:
             tr.common_content.assignment_status = status_flag[review]
             if review == 'quality':
-                QualityReviewLog.objects.create(status = status_flag[review], component = 'assignment', user = request.user, tutorial_resource = tr)
+                QualityReviewLog.objects.create(status=status_flag[review], component='assignment', user=request.user, tutorial_resource=tr)
                 comp_message = 'Assignment accepted by Quality reviewer'
             else:
-                DomainReviewLog.objects.create(status = status_flag[review], component = 'assignment', user = request.user, tutorial_resource = tr)
+                DomainReviewLog.objects.create(status=status_flag[review], component='assignment', user=request.user, tutorial_resource=tr)
                 add_qualityreviewer_notification(tr, comp_title, 'Assignment waiting for Quality review')
                 comp_message = 'Assignment accepted by Domain reviewer'
             add_contributor_notification(tr, comp_title, comp_message)
@@ -1921,12 +1961,12 @@ def accept_all(request, review, trid):
         if tr.common_content.additional_material_status > 0 and tr.common_content.additional_material_status == current_status:
             tr.common_content.additional_material_status = status_flag[review]
             if review == 'quality':
-                QualityReviewLog.objects.create(status = status_flag[review], component = 'additional_material',
-                                                user = request.user, tutorial_resource = tr)
+                QualityReviewLog.objects.create(status=status_flag[review], component='additional_material',
+                                                user=request.user, tutorial_resource=tr)
                 comp_message = 'Additional material accepted by Quality reviewer'
             else:
-                DomainReviewLog.objects.create(status = status_flag[review], component = 'additional_material',
-                                               user = request.user, tutorial_resource = tr)
+                DomainReviewLog.objects.create(status=status_flag[review], component='additional_material',
+                                               user=request.user, tutorial_resource=tr)
                 add_qualityreviewer_notification(tr, comp_title, 'Additional material waiting for Quality review')
                 comp_message = 'Additional material accepted by Domain reviewer'
             add_contributor_notification(tr, comp_title, comp_message)
@@ -1935,10 +1975,10 @@ def accept_all(request, review, trid):
         if tr.common_content.prerequisite_status > 0 and tr.common_content.prerequisite_status == current_status:
             tr.common_content.prerequisite_status = status_flag[review]
             if review == 'quality':
-                QualityReviewLog.objects.create(status = status_flag[review], component = 'prerequisite', user = request.user, tutorial_resource = tr)
+                QualityReviewLog.objects.create(status=status_flag[review], component='prerequisite', user=request.user, tutorial_resource=tr)
                 comp_message = 'Prerequisite accepted by Quality reviewer'
             else:
-                DomainReviewLog.objects.create(status = status_flag[review], component = 'prerequisite', user = request.user, tutorial_resource = tr)
+                DomainReviewLog.objects.create(status=status_flag[review], component='prerequisite', user=request.user, tutorial_resource=tr)
                 add_qualityreviewer_notification(tr, comp_title, 'Prerequisite waiting for Quality review')
                 comp_message = 'Prerequisite accepted by Domain reviewer'
             add_contributor_notification(tr, comp_title, comp_message)
@@ -1947,10 +1987,10 @@ def accept_all(request, review, trid):
         if tr.common_content.keyword_status > 0 and tr.common_content.keyword_status == current_status:
             tr.common_content.keyword_status = status_flag[review]
             if review == 'quality':
-                QualityReviewLog.objects.create(status = status_flag[review], component = 'keyword', user = request.user, tutorial_resource = tr)
+                QualityReviewLog.objects.create(status=status_flag[review], component='keyword', user=request.user, tutorial_resource=tr)
                 comp_message = 'Keywords accepted by Quality reviewer'
             else:
-                DomainReviewLog.objects.create(status = status_flag[review], component = 'keyword', user = request.user, tutorial_resource = tr)
+                DomainReviewLog.objects.create(status=status_flag[review], component='keyword', user=request.user, tutorial_resource=tr)
                 add_qualityreviewer_notification(tr, comp_title, 'Keywords waiting for Quality review')
                 comp_message = 'Keywords accepted by Domain reviewer'
             add_contributor_notification(tr, comp_title, comp_message)
@@ -1968,12 +2008,12 @@ def quality_review_index(request):
     if not is_qualityreviewer(request.user):
         raise PermissionDenied()
     tmp_ids = []
-    qr_roles = QualityReviewerRole.objects.filter(user_id = request.user.id, status = 1)
+    qr_roles = QualityReviewerRole.objects.filter(user_id=request.user.id, status=1)
     for rec in qr_roles:
         if rec.language.name == 'English':
-            tr_recs = TutorialResource.objects.filter(Q(outline_status = 3) | Q(script_status = 3) | Q(video_status = 3) | Q(common_content__slide_status = 3) | Q(common_content__code_status = 3) | Q(common_content__assignment_status = 3) | Q(common_content__keyword_status = 3) | Q(common_content__prerequisite_status = 3) | Q(common_content__additional_material_status = 3), Q(tutorial_detail__foss_id = rec.foss_category_id) & Q(language_id = rec.language_id) & Q(status = 0))
+            tr_recs = TutorialResource.objects.filter(Q(outline_status=3) | Q(script_status=3) | Q(video_status=3) | Q(common_content__slide_status=3) | Q(common_content__code_status=3) | Q(common_content__assignment_status=3) | Q(common_content__keyword_status=3) | Q(common_content__prerequisite_status=3) | Q(common_content__additional_material_status=3), Q(tutorial_detail__foss_id=rec.foss_category_id) & Q(language_id=rec.language_id) & Q(status=0))
         else:
-            tr_recs = TutorialResource.objects.filter(Q(outline_status = 3) | Q(script_status = 3) | Q(video_status = 3), Q(tutorial_detail__foss_id = rec.foss_category_id) & Q(language_id = rec.language_id) & Q(status = 0)).order_by('updated')
+            tr_recs = TutorialResource.objects.filter(Q(outline_status=3) | Q(script_status=3) | Q(video_status=3), Q(tutorial_detail__foss_id=rec.foss_category_id) & Q(language_id=rec.language_id) & Q(status=0)).order_by('updated')
 
         for tr_rec in tr_recs:
             tmp_ids.append(tr_rec.id)
@@ -1999,7 +2039,7 @@ def quality_review_index(request):
             13: SortableHeader('Keywords', False, '', 'col-center'),
             14: SortableHeader('<span title = "" data-original-title = "" class = "fa fa-cogs fa-2"></span>', False, '', 'col-center')
         }
-        collection = TutorialResource.objects.filter(id__in = tmp_ids)
+        collection = TutorialResource.objects.filter(id__in=tmp_ids)
         collection = get_sorted_list(request, collection, header, raw_get_data)
         ordering = get_field_index(raw_get_data)
         collection = ReviewerFilter(request.POST, queryset=collection)
@@ -2022,12 +2062,12 @@ def publish_tutorial_index(request):
     if not is_qualityreviewer(request.user):
         raise PermissionDenied()
     tmp_ids = []
-    qr_roles = QualityReviewerRole.objects.filter(user_id = request.user.id, status = 1)
+    qr_roles = QualityReviewerRole.objects.filter(user_id=request.user.id, status=1)
     for rec in qr_roles:
         if rec.language.name == 'English':
-            tr_recs = TutorialResource.objects.filter(Q(common_content__code_status = 4) | Q(common_content__code_status = 6), Q(common_content__assignment_status = 4) | Q(common_content__assignment_status = 6), Q(common_content__prerequisite_status = 4) | Q(common_content__prerequisite_status = 6), Q(outline_status = 4) & Q(script_status = 4) & Q(video_status = 4) & Q(common_content__slide_status = 4) & Q(common_content__keyword_status = 4) & Q(tutorial_detail__foss_id = rec.foss_category_id) & Q(language_id = rec.language_id) & Q(status = 0))
+            tr_recs = TutorialResource.objects.filter(Q(common_content__code_status=4) | Q(common_content__code_status=6), Q(common_content__assignment_status=4) | Q(common_content__assignment_status=6), Q(common_content__prerequisite_status=4) | Q(common_content__prerequisite_status=6), Q(outline_status=4) & Q(script_status=4) & Q(video_status=4) & Q(common_content__slide_status=4) & Q(common_content__keyword_status=4) & Q(tutorial_detail__foss_id=rec.foss_category_id) & Q(language_id=rec.language_id) & Q(status=0))
         else:
-            tr_recs = TutorialResource.objects.filter(Q(outline_status = 4) & Q(script_status = 4) & Q(video_status = 4) & Q(tutorial_detail__foss_id = rec.foss_category_id) & Q(language_id = rec.language_id) & Q(status = 0)).order_by('updated')
+            tr_recs = TutorialResource.objects.filter(Q(outline_status=4) & Q(script_status=4) & Q(video_status=4) & Q(tutorial_detail__foss_id=rec.foss_category_id) & Q(language_id=rec.language_id) & Q(status=0)).order_by('updated')
 
         for tr_rec in tr_recs:
             tmp_ids.append(tr_rec.id)
@@ -2053,7 +2093,7 @@ def publish_tutorial_index(request):
             13: SortableHeader('Keywords', False, '', 'col-center'),
             14: SortableHeader('<span title = "" data-original-title = "" class = "fa fa-cogs fa-2"></span>', False, '', 'col-center')
         }
-        collection = TutorialResource.objects.filter(id__in = tmp_ids)
+        collection = TutorialResource.objects.filter(id__in=tmp_ids)
         collection = get_sorted_list(request, collection, header, raw_get_data)
         ordering = get_field_index(raw_get_data)
         collection = ReviewerFilter(request.POST, queryset=collection)
@@ -2076,11 +2116,11 @@ def public_review_tutorial_index(request):
     if not is_qualityreviewer(request.user):
         raise PermissionDenied()
     tmp_ids = []
-    qr_roles = QualityReviewerRole.objects.filter(user_id = request.user.id, status = 1)
+    qr_roles = QualityReviewerRole.objects.filter(user_id=request.user.id, status=1)
     tr_recs = ''
     for rec in qr_roles:
         if rec.language.name != 'English':
-            tr_recs = TutorialResource.objects.filter(Q(outline_status__gt = 0) & Q(outline_status__lt = 5), Q(script_status__gt = 0) & Q(script_status__lt = 5), Q(video_status__gt = 0) & Q(video_status__lt = 5), Q(tutorial_detail__foss_id = rec.foss_category_id) & Q(language_id = rec.language_id) & Q(status = 0)).order_by('updated')
+            tr_recs = TutorialResource.objects.filter(Q(outline_status__gt=0) & Q(outline_status__lt=5), Q(script_status__gt=0) & Q(script_status__lt=5), Q(video_status__gt=0) & Q(video_status__lt=5), Q(tutorial_detail__foss_id=rec.foss_category_id) & Q(language_id=rec.language_id) & Q(status=0)).order_by('updated')
 
         for tr_rec in tr_recs:
             tmp_ids.append(tr_rec.id)
@@ -2108,12 +2148,12 @@ def public_review_tutorial_index(request):
                 13: SortableHeader('Keywords', False, '', 'col-center'),
                 14: SortableHeader('<span title = "" data-original-title = "" class = "fa fa-cogs fa-2"></span>', False, '', 'col-center')
             }
-            collection = TutorialResource.objects.filter(id__in = tmp_ids)
+            collection = TutorialResource.objects.filter(id__in=tmp_ids)
             collection = get_sorted_list(request, collection, header, raw_get_data)
             ordering = get_field_index(raw_get_data)
             collection = ReviewerFilter(request.POST, queryset=collection)
             form = collection.form
-            page = request.GET.get('page')
+            page = request.GET.get('page')            
             collection = get_page(collection.qs, page)
     except Exception as e:
         print(e)
@@ -2132,14 +2172,15 @@ def public_review_list(request):
     if not is_qualityreviewer(request.user):
         raise PermissionDenied()
     tmp_ids = []
-    qr_roles = QualityReviewerRole.objects.filter(user_id = request.user.id, status = 1)
+    qr_roles = QualityReviewerRole.objects.filter(user_id=request.user.id, status=1)
     for rec in qr_roles:
-        tr_recs = TutorialResource.objects.filter(tutorial_detail__foss_id = rec.foss_category_id, language_id = rec.language_id, status = 2).order_by('updated')
+        tr_recs = TutorialResource.objects.filter(tutorial_detail__foss_id=rec.foss_category_id, language_id=rec.language_id, status=2).order_by('updated')
         for tr_rec in tr_recs:
             tmp_ids.append(tr_rec.id)
     collection = None
     header = ''
     ordering = ''
+    form = ''
     try:
         if len(tmp_ids):
             raw_get_data = request.GET.get('o', None)
@@ -2159,7 +2200,7 @@ def public_review_list(request):
                 13: SortableHeader('Keywords', False, '', 'col-center'),
                 14: SortableHeader('<span title = "" data-original-title = "" class = "fa fa-cogs fa-2"></span>', False, '', 'col-center', 'colspan = 2')
             }
-            collection = TutorialResource.objects.filter(id__in = tmp_ids)
+            collection = TutorialResource.objects.filter(id__in=tmp_ids)
             collection = get_sorted_list(request, collection, header, raw_get_data)
             ordering = get_field_index(raw_get_data)
             collection = ReviewerFilter(request.POST, queryset=collection)
@@ -2183,11 +2224,11 @@ def public_review_publish(request, trid):
     if not is_qualityreviewer(request.user):
         raise PermissionDenied()
     try:
-        tr_rec = TutorialResource.objects.get(pk = trid, status = 2)
+        tr_rec = TutorialResource.objects.get(pk=trid, status=2)
         comp_title = tr_rec.tutorial_detail.foss.foss + ': ' + tr_rec.tutorial_detail.tutorial + ' - ' + tr_rec.language.name
     except:
         raise PermissionDenied()
-    if QualityReviewerRole.objects.filter(user = request.user, foss_category = tr_rec.tutorial_detail.foss).count() == 0:
+    if QualityReviewerRole.objects.filter(user=request.user, foss_category=tr_rec.tutorial_detail.foss).count() == 0:
         raise PermissionDenied()
     flag = 1
     if tr_rec.language.name == 'English':
@@ -2226,11 +2267,11 @@ def public_review_mark_as_pending(request, trid):
     if not is_qualityreviewer(request.user):
         raise PermissionDenied()
     try:
-        tr_rec = TutorialResource.objects.get(pk = trid, status = 2)
+        tr_rec = TutorialResource.objects.get(pk=trid, status=2)
         comp_title = tr_rec.tutorial_detail.foss.foss + ': ' + tr_rec.tutorial_detail.tutorial + ' - ' + tr_rec.language.name
     except:
         raise PermissionDenied()
-    if QualityReviewerRole.objects.filter(user = request.user, foss_category = tr_rec.tutorial_detail.foss).count() == 0:
+    if QualityReviewerRole.objects.filter(user=request.user, foss_category=tr_rec.tutorial_detail.foss).count() == 0:
         raise PermissionDenied()
     if tr_rec.language.name == 'English':
         if tr_rec.common_content.slide_status > 0 and tr_rec.common_content.slide_status != 6:
@@ -2266,15 +2307,15 @@ def quality_review_tutorial(request, trid):
     if not is_qualityreviewer(request.user):
         raise PermissionDenied()
     try:
-        tr_rec = TutorialResource.objects.get(pk = trid, status = 0)
+        tr_rec = TutorialResource.objects.get(pk=trid, status=0)
     except:
         raise PermissionDenied()
-    if QualityReviewerRole.objects.filter(user_id = request.user.id, foss_category_id = tr_rec.tutorial_detail.foss_id, language_id = tr_rec.language_id, status = 1).count() == 0:
+    if QualityReviewerRole.objects.filter(user_id=request.user.id, foss_category_id=tr_rec.tutorial_detail.foss_id, language_id=tr_rec.language_id, status=1).count() == 0:
         raise PermissionDenied()
     try:
-        contrib_log = ContributorLog.objects.filter(tutorial_resource_id = tr_rec.id).order_by('-created')
-        review_log = NeedImprovementLog.objects.filter(tutorial_resource_id = tr_rec.id).order_by('-created')
-        review_history = QualityReviewLog.objects.filter(tutorial_resource_id = tr_rec.id).order_by('-created')
+        contrib_log = ContributorLog.objects.filter(tutorial_resource_id=tr_rec.id).order_by('-created')
+        review_log = NeedImprovementLog.objects.filter(tutorial_resource_id=tr_rec.id).order_by('-created')
+        review_history = QualityReviewLog.objects.filter(tutorial_resource_id=tr_rec.id).order_by('-created')
     except:
         contrib_log = None
         review_log = None
@@ -2294,11 +2335,11 @@ def quality_review_component(request, trid, component):
     if not is_qualityreviewer(request.user):
         raise PermissionDenied()
     try:
-        tr = TutorialResource.objects.get(pk = trid, status = 0)
+        tr = TutorialResource.objects.get(pk=trid, status=0)
         comp_title = tr.tutorial_detail.foss.foss + ': ' + tr.tutorial_detail.tutorial + ' - ' + tr.language.name
     except:
         raise PermissionDenied()
-    if QualityReviewerRole.objects.filter(user_id = request.user.id, foss_category_id = tr.tutorial_detail.foss_id, language_id = tr.language_id, status = 1).count() == 0:
+    if QualityReviewerRole.objects.filter(user_id=request.user.id, foss_category_id=tr.tutorial_detail.foss_id, language_id=tr.language_id, status=1).count() == 0:
         raise PermissionDenied()
     response_msg = ''
     error_msg = ''
@@ -2319,7 +2360,7 @@ def quality_review_component(request, trid, component):
                             execFlag = 1
                     if execFlag:
                         comp_message = component.title() + ' accepted by Quality reviewer'
-                        QualityReviewLog.objects.create(status = 4, component = component, user = request.user, tutorial_resource = tr)
+                        QualityReviewLog.objects.create(status=4, component=component, user=request.user, tutorial_resource=tr)
                         add_contributor_notification(tr, comp_title, comp_message)
                         response_msg = 'Review status updated successfully!'
                     else:
@@ -2342,9 +2383,9 @@ def quality_review_component(request, trid, component):
                             tr.common_content.save()
                             execFlag = 1
                     if execFlag:
-                        NeedImprovementLog.objects.create(user = request.user, tutorial_resource = tr, review_state = prev_state, component = component, comment = request.POST['feedback'])
+                        NeedImprovementLog.objects.create(user=request.user, tutorial_resource=tr, review_state=prev_state, component=component, comment=request.POST['feedback'])
                         comp_message = component.title() + ' is under Need Improvement state'
-                        QualityReviewLog.objects.create(status = 5, component = component, user = request.user, tutorial_resource = tr)
+                        QualityReviewLog.objects.create(status=5, component=component, user=request.user, tutorial_resource=tr)
                         add_contributor_notification(tr, comp_title, comp_message)
                         response_msg = 'Review status updated successfully!'
                     else:
@@ -2373,16 +2414,16 @@ def public_review_tutorial(request, trid):
     if not is_qualityreviewer(request.user):
         raise PermissionDenied()
     try:
-        tr_rec = TutorialResource.objects.get(pk = trid, status = 0)
+        tr_rec = TutorialResource.objects.get(pk=trid, status=0)
         comp_title = tr_rec.tutorial_detail.foss.foss + ': ' + tr_rec.tutorial_detail.tutorial + ' - ' + tr_rec.language.name
     except:
         raise PermissionDenied()
-    if QualityReviewerRole.objects.filter(user_id = request.user.id, foss_category_id = tr_rec.tutorial_detail.foss_id, language_id = tr_rec.language_id, status = 1).count() == 0:
+    if QualityReviewerRole.objects.filter(user_id=request.user.id, foss_category_id=tr_rec.tutorial_detail.foss_id, language_id=tr_rec.language_id, status=1).count() == 0:
         raise PermissionDenied()
     if tr_rec.language.name != 'English' and (tr_rec.outline_status > 0 and tr_rec.outline_status != 5) and (tr_rec.script_status > 0 and tr_rec.script_status != 5) and (tr_rec.video_status > 0 and tr_rec.video_status != 5):
         tr_rec.status = 2
         tr_rec.save()
-        PublicReviewLog.objects.create(user = request.user, tutorial_resource = tr_rec)
+        PublicReviewLog.objects.create(user=request.user, tutorial_resource=tr_rec)
         add_contributor_notification(tr_rec, comp_title, 'This tutorial is now available for Public review')
         messages.success(request, 'The selected tutorial is now available for Public review')
     else:
@@ -2395,11 +2436,11 @@ def publish_tutorial(request, trid):
     if not is_qualityreviewer(request.user):
         raise PermissionDenied()
     try:
-        tr_rec = TutorialResource.objects.get(pk = trid, status = 0)
+        tr_rec = TutorialResource.objects.get(pk=trid, status=0)
         comp_title = tr_rec.tutorial_detail.foss.foss + ': ' + tr_rec.tutorial_detail.tutorial + ' - ' + tr_rec.language.name
     except:
         raise PermissionDenied()
-    if QualityReviewerRole.objects.filter(user_id = request.user.id, foss_category_id = tr_rec.tutorial_detail.foss_id, language_id = tr_rec.language_id, status = 1).count() == 0:
+    if QualityReviewerRole.objects.filter(user_id=request.user.id, foss_category_id=tr_rec.tutorial_detail.foss_id, language_id=tr_rec.language_id, status=1).count() == 0:
         raise PermissionDenied()
     flag = 0
     if tr_rec.language.name == 'English':
@@ -2411,7 +2452,7 @@ def publish_tutorial(request, trid):
         tr_rec.status = 1
         tr_rec.publish_at = timezone.now()
         tr_rec.save()
-        PublishTutorialLog.objects.create(user = request.user, tutorial_resource = tr_rec)
+        PublishTutorialLog.objects.create(user=request.user, tutorial_resource=tr_rec)
         # add tutorials available here
         refresh_tutorials(request, tr_rec)
         add_contributor_notification(tr_rec, comp_title, 'This tutorial is published now')
@@ -2445,7 +2486,7 @@ def quality_reviewed_tutorials(request):
             14: SortableHeader('Status', False, '', 'col-center'),
             15: SortableHeader('publishtutoriallog__created', True, 'Date')
         }
-        collection = TutorialResource.objects.filter(id__in = QualityReviewLog.objects.filter(user = request.user).values_list('tutorial_resource_id').distinct())
+        collection = TutorialResource.objects.filter(id__in=QualityReviewLog.objects.filter(user=request.user).values_list('tutorial_resource_id').distinct())
         collection = get_sorted_list(request, collection, header, raw_get_data)
         ordering = get_field_index(raw_get_data)
         page = request.GET.get('page')
@@ -2468,13 +2509,13 @@ def delete_creation_notification(request, notif_type, notif_id):
     notif_rec = None
     try:
         if notif_type == "contributor":
-            notif_rec = ContributorNotification.objects.get(pk = notif_id, user = request.user)
+            notif_rec = ContributorNotification.objects.get(pk=notif_id, user=request.user)
         elif notif_type == "admin":
-            notif_rec = AdminReviewerNotification.objects.get(pk = notif_id, user = request.user)
+            notif_rec = AdminReviewerNotification.objects.get(pk=notif_id, user=request.user)
         elif notif_type == "domain":
-            notif_rec = DomainReviewerNotification.objects.get(pk = notif_id, user = request.user)
+            notif_rec = DomainReviewerNotification.objects.get(pk=notif_id, user=request.user)
         elif notif_type == "quality":
-            notif_rec = QualityReviewerNotification.objects.get(pk = notif_id, user = request.user)
+            notif_rec = QualityReviewerNotification.objects.get(pk=notif_id, user=request.user)
     except:
         messages.warning(request, 'Selected notification is already deleted (or) You do not have permission to delete it.')
     if notif_rec and notif_rec.user.id == request.user.id:
@@ -2487,13 +2528,13 @@ def clear_creation_notification(request, notif_type):
     notif_rec = None
     try:
         if notif_type == "contributor":
-            notif_rec = ContributorNotification.objects.filter(user = request.user).delete()
+            notif_rec = ContributorNotification.objects.filter(user=request.user).delete()
         elif notif_type == "admin":
-            notif_rec = AdminReviewerNotification.objects.filter(user = request.user).delete()
+            notif_rec = AdminReviewerNotification.objects.filter(user=request.user).delete()
         elif notif_type == "domain":
-            notif_rec = DomainReviewerNotification.objects.filter(user = request.user).delete()
+            notif_rec = DomainReviewerNotification.objects.filter(user=request.user).delete()
         elif notif_type == "quality":
-            notif_rec = QualityReviewerNotification.objects.filter(user = request.user).delete()
+            notif_rec = QualityReviewerNotification.objects.filter(user=request.user).delete()
     except:
         messages.warning(request, 'Something went wrong, contact site administrator.')
 
@@ -2507,9 +2548,9 @@ def creation_view_tutorial(request, foss, tutorial, lang):
     try:
         foss = unquote_plus(foss)
         tutorial = unquote_plus(tutorial)
-        td_rec = TutorialDetail.objects.get(foss = FossCategory.objects.get(foss = foss), tutorial = tutorial)
-        tr_rec = TutorialResource.objects.get(tutorial_detail = td_rec, language = Language.objects.get(name = lang))
-        tr_recs = TutorialResource.objects.filter(tutorial_detail__in = TutorialDetail.objects.filter(foss = tr_rec.tutorial_detail.foss).order_by('order').values_list('id'), language = tr_rec.language)
+        td_rec = TutorialDetail.objects.get(foss=FossCategory.objects.get(foss=foss), tutorial=tutorial)
+        tr_rec = TutorialResource.objects.get(tutorial_detail=td_rec, language=Language.objects.get(name=lang))
+        tr_recs = TutorialResource.objects.filter(tutorial_detail__in=TutorialDetail.objects.filter(foss=tr_rec.tutorial_detail.foss).order_by('order').values_list('id'), language=tr_rec.language)
     except Exception as e:
         messages.error(request, str(e))
         return HttpResponseRedirect('/')
@@ -2517,8 +2558,8 @@ def creation_view_tutorial(request, foss, tutorial, lang):
     video_info = get_video_info(video_path)
     context = {
         'tr_rec': tr_rec,
-        'tr_recs': sorted(tr_recs, key = lambda tutorial_resource: tutorial_resource.tutorial_detail.order),
-        'ni_recs': NeedImprovementLog.objects.filter(tutorial_resource = tr_rec),
+        'tr_recs': sorted(tr_recs, key=lambda tutorial_resource: tutorial_resource.tutorial_detail.order),
+        'ni_recs': NeedImprovementLog.objects.filter(tutorial_resource=tr_rec),
         'video_info': video_info,
         'media_url': settings.MEDIA_URL,
         'media_path': settings.MEDIA_ROOT,
@@ -2536,7 +2577,7 @@ def creation_change_published_to_pending(request):
         form = PublishToPending(request.POST)
         if form.is_valid():
             try:
-                row = TutorialResource.objects.get(tutorial_detail_id = request.POST.get('tutorial_name'), language_id = request.POST.get('language'))
+                row = TutorialResource.objects.get(tutorial_detail_id=request.POST.get('tutorial_name'), language_id=request.POST.get('language'))
                 comp_title = row.tutorial_detail.foss.foss + ': ' + row.tutorial_detail.tutorial + ' - ' + row.language.name
                 row.status = 0
                 row.save()
@@ -2567,20 +2608,20 @@ def ajax_publish_to_pending(request):
             foss = ''
             lang = ''
         if foss and lang:
-            td_list = TutorialDetail.objects.filter(foss_id = foss).values_list('id')
-            tutorials = TutorialResource.objects.filter(tutorial_detail_id__in = td_list, language_id = lang, status = 1).distinct().order_by('tutorial_detail__level_id', 'tutorial_detail__order')
+            td_list = TutorialDetail.objects.filter(foss_id=foss).values_list('id')
+            tutorials = TutorialResource.objects.filter(tutorial_detail_id__in=td_list, language_id=lang, status=1).distinct().order_by('tutorial_detail__level_id', 'tutorial_detail__order')
             for tutorial in tutorials:
                 data += '<option value = "' + str(tutorial.tutorial_detail.id) + '">' + tutorial.tutorial_detail.tutorial + '</option>'
             if data:
                 data = '<option value = "">Select Tutorial</option>' + data
         elif foss:
-            languages = Language.objects.filter(id__in = TutorialResource.objects.filter(tutorial_detail__in = TutorialDetail.objects.filter(foss_id = foss).values_list('id'), status = 1).values_list('language_id').distinct())
+            languages = Language.objects.filter(id__in=TutorialResource.objects.filter(tutorial_detail__in=TutorialDetail.objects.filter(foss_id=foss).values_list('id'), status=1).values_list('language_id').distinct())
             for language in languages:
                 data += '<option value = "' + str(language.id) + '">' + language.name + '</option>'
             if data:
                 data = '<option value = "">Select Language</option>' + data
 
-    return HttpResponse(json.dumps(data), content_type = 'application/json')
+    return HttpResponse(json.dumps(data), content_type='application/json')
 
 
 @login_required
@@ -2591,7 +2632,7 @@ def creation_change_component_status(request):
         form = ChangeComponentStatusForm(request.POST)
         if form.is_valid():
             try:
-                row = TutorialResource.objects.get(tutorial_detail_id = request.POST.get('tutorial_name'), language_id = request.POST.get('language'))
+                row = TutorialResource.objects.get(tutorial_detail_id=request.POST.get('tutorial_name'), language_id=request.POST.get('language'))
                 comp_title = row.tutorial_detail.foss.foss + ': ' + row.tutorial_detail.tutorial + ' - ' + row.language.name
                 status_list = {
                     0: 'Pending',
@@ -2629,7 +2670,7 @@ def ajax_change_component_status(request):
         tut = request.POST.get('tut', '')
         comp = request.POST.get('comp', '')
         if foss and lang and tut and comp:
-            tr_rec = TutorialResource.objects.get(tutorial_detail_id = tut, language = lang)
+            tr_rec = TutorialResource.objects.get(tutorial_detail_id=tut, language=lang)
             compValue = None
             data = '<option value = "">Select Status</option><option value = "0">Pending</option>'
             if comp in ['outline', 'script', 'video']:
@@ -2642,9 +2683,9 @@ def ajax_change_component_status(request):
                 data += '<option value = "6">Not Required</option>'
         elif foss and lang:
             data = ['', '']
-            td_list = TutorialDetail.objects.filter(foss_id = foss).values_list('id')
-            lang_rec = Language.objects.get(pk = lang)
-            tutorials = TutorialResource.objects.filter(tutorial_detail_id__in = td_list, language_id = lang, status = 0).distinct()
+            td_list = TutorialDetail.objects.filter(foss_id=foss).values_list('id')
+            lang_rec = Language.objects.get(pk=lang)
+            tutorials = TutorialResource.objects.filter(tutorial_detail_id__in=td_list, language_id=lang, status=0).distinct()
             data[0] = '<option value = "">Select Tutorial Name</option>'
             data[1] = '<option value = "outline">Outline</option><option value = "script">Script</option>'
             for tutorial in tutorials:
@@ -2655,13 +2696,13 @@ def ajax_change_component_status(request):
                 data[1] += '<option value = "video">Video</option>'
             data[1] = '<option value = "">Select Component</option>' + data[1]
         elif foss:
-            languages = Language.objects.filter(id__in = TutorialResource.objects.filter(tutorial_detail__in = TutorialDetail.objects.filter(foss_id = foss).values_list('id'), status = 0).values_list('language_id').distinct())
+            languages = Language.objects.filter(id__in=TutorialResource.objects.filter(tutorial_detail__in=TutorialDetail.objects.filter(foss_id=foss).values_list('id'), status=0).values_list('language_id').distinct())
             for language in languages:
                 data += '<option value = "' + str(language.id) + '">' + language.name + '</option>'
             if data:
                 data = '<option value = "">Select Language</option>' + data
 
-    return HttpResponse(json.dumps(data), content_type = 'application/json')
+    return HttpResponse(json.dumps(data), content_type='application/json')
 
 
 def report_missing_component(request, trid):
@@ -2674,7 +2715,7 @@ def report_missing_component(request, trid):
         6: 'assignment'
     }
     try:
-        tr_rec = TutorialResource.objects.get(pk = trid)
+        tr_rec = TutorialResource.objects.get(pk=trid)
         comp_title = tr_rec.tutorial_detail.foss.foss + ': ' + tr_rec.tutorial_detail.tutorial + ' - ' + tr_rec.language.name
     except:
         raise PermissionDenied()
@@ -2724,22 +2765,22 @@ def report_missing_component(request, trid):
                 email = request.POST.get('email', '')
             if request.user.is_authenticated():
                 TutorialMissingComponent.objects.create(
-                    user = request.user,
-                    tutorial_resource = tr_rec,
-                    component = component,
-                    report_type = report_type,
-                    remarks = remarks,
-                    inform_me = inform_me,
-                    email = email,
+                    user=request.user,
+                    tutorial_resource=tr_rec,
+                    component=component,
+                    report_type=report_type,
+                    remarks=remarks,
+                    inform_me=inform_me,
+                    email=email,
                 )
             else:
                 TutorialMissingComponent.objects.create(
-                    tutorial_resource = tr_rec,
-                    component = component,
-                    report_type = report_type,
-                    remarks = remarks,
-                    inform_me = inform_me,
-                    email = email,
+                    tutorial_resource=tr_rec,
+                    component=component,
+                    report_type=report_type,
+                    remarks=remarks,
+                    inform_me=inform_me,
+                    email=email,
                 )
             add_contributor_notification(tr_rec, comp_title, 'Component missing form submitted by public')
             form = TutorialMissingComponentForm(request.user)
@@ -2775,14 +2816,14 @@ def report_missing_component_reply(request, tmcid):
         raise PermissionDenied()
     tmc_row = None
     try:
-        tmc_row = TutorialMissingComponent.objects.get(pk = tmcid)
+        tmc_row = TutorialMissingComponent.objects.get(pk=tmcid)
     except:
         raise PermissionDenied()
     form = TutorialMissingComponentReplyForm()
     if request.method == 'POST':
         form = TutorialMissingComponentReplyForm(request.POST)
         if form.is_valid():
-            TutorialMissingComponentReply.objects.create(missing_component = tmc_row, user = request.user, reply_message = request.POST.get('reply_message', ''))
+            TutorialMissingComponentReply.objects.create(missing_component=tmc_row, user=request.user, reply_message=request.POST.get('reply_message', ''))
             if tmc_row.inform_me:
                 # send email
                 to = []
@@ -2824,8 +2865,8 @@ Spoken Tutorial
                 # send email
                 email = EmailMultiAlternatives(
                     subject, message, 'no-reply@spoken-tutorial.org',
-                    to = to, bcc = bcc, cc = cc,
-                    headers = {'Reply-To': 'no-reply@spoken-tutorial.org', "Content-type": "text/html;charset = iso-8859-1"}
+                    to=to, bcc=bcc, cc=cc,
+                    headers={'Reply-To': 'no-reply@spoken-tutorial.org', "Content-type": "text/html;charset = iso-8859-1"}
                 )
                 try:
                     result = email.send(fail_silently=False)
@@ -2851,7 +2892,7 @@ def report_missing_component_list(request):
     if is_administrator(request.user):
         rows = TutorialMissingComponent.objects.all().order_by('-created')
     elif is_contributor(request.user):
-        contrib_roles = list(ContributorRole.objects.filter(user = request.user).values_list('foss_category_id', 'language_id'))
+        contrib_roles = list(ContributorRole.objects.filter(user=request.user).values_list('foss_category_id', 'language_id'))
         fields = ['tutorial_resource__tutorial_detail__foss_id', 'tutorial_resource__language_id']
         query = get_and_query_for_contributor_roles(contrib_roles, fields)
         rows = TutorialMissingComponent.objects.filter(query).order_by('-created')
@@ -2867,7 +2908,7 @@ def suggest_topic(request):
     if request.method == 'POST':
         form = SuggestTopicForm(request.POST)
         if form.is_valid():
-            form_data = form.save(commit = False)
+            form_data = form.save(commit=False)
             form_data.user_id = request.user.id
             form_data.save()
             for o in form.cleaned_data.get('operating_system'):
@@ -2889,7 +2930,7 @@ def suggest_example(request):
     if request.method == 'POST':
         form = SuggestExampleForm(request.POST)
         if form.is_valid():
-            form_data = form.save(commit = False)
+            form_data = form.save(commit=False)
             form_data.user_id = request.user.id
             form_data.save()
             form = SuggestExampleForm()
@@ -2909,7 +2950,7 @@ def collaborate(request):
     if request.method == 'POST':
         form = CollaborateForm(request.POST)
         if form.is_valid():
-            form_data = form.save(commit = False)
+            form_data = form.save(commit=False)
             form_data.user_id = request.user.id
             form_data.save()
             for o in form.cleaned_data.get('contribute_towards'):
@@ -2934,14 +2975,14 @@ def update_prerequisite(request):
         form = UpdatePrerequisiteForm(request.POST)
         if form.is_valid():
             try:
-                source_tutorial = TutorialDetail.objects.get(pk = form.cleaned_data['source_tutorial'], foss_id = form.cleaned_data['source_foss'])
-                tcc = TutorialCommonContent.objects.get(tutorial_detail = source_tutorial)
+                source_tutorial = TutorialDetail.objects.get(pk=form.cleaned_data['source_tutorial'], foss_id=form.cleaned_data['source_foss'])
+                tcc = TutorialCommonContent.objects.get(tutorial_detail=source_tutorial)
                 if int(form.cleaned_data['destination_tutorial']) == 0:
                     tcc.prerequisite_id = None
                     tcc.prerequisite_status = 6
                     messages.success(request, 'Prerequisite for <b>' + source_tutorial.tutorial + '</b> updated to <b>Not Required</b>')
                 else:
-                    destination_tutorial = TutorialDetail.objects.get(pk = form.cleaned_data['destination_tutorial'], foss_id = form.cleaned_data['destination_foss'])
+                    destination_tutorial = TutorialDetail.objects.get(pk=form.cleaned_data['destination_tutorial'], foss_id=form.cleaned_data['destination_foss'])
                     tcc.prerequisite_id = destination_tutorial.id
                     tcc.prerequisite_status = 4
                     messages.success(request, 'Prerequisite <b>' + destination_tutorial.tutorial + '</b> updated to <b>' + source_tutorial.tutorial + '</b>.')
@@ -2965,7 +3006,7 @@ def update_keywords(request):
         form = UpdateKeywordsForm(request.POST)
         if form.is_valid():
             try:
-                tcc = TutorialCommonContent.objects.get(tutorial_detail_id = request.POST.get('tutorial'))
+                tcc = TutorialCommonContent.objects.get(tutorial_detail_id=request.POST.get('tutorial'))
                 tcc.keyword = request.POST.get('keywords')
                 tcc.keyword_user = request.user
                 tcc.keyword_status = 4
@@ -2993,9 +3034,9 @@ def update_sheet(request, sheet_type):
         if form.is_valid():
             try:
                 foss_id = request.POST.get('foss')
-                foss = FossCategory.objects.get(pk = foss_id)
+                foss = FossCategory.objects.get(pk=foss_id)
                 language_id = request.POST.get('language')
-                language = Language.objects.get(pk = language_id)
+                language = Language.objects.get(pk=language_id)
                 if sheet_type == 'brochure':
                     sheet_path = 'videos/' + str(foss.id) + '/' + \
                         foss.foss.replace(' ', '-') + '-' + sheet_type.title() + \
@@ -3032,8 +3073,8 @@ def ajax_manual_language(request):
         sheet_type = request.POST.get('sheet_type', '')
         if foss_id and language_id and sheet_type:
             try:
-                foss = FossCategory.objects.get(pk = foss_id)
-                language = Language.objects.get(pk = language_id)
+                foss = FossCategory.objects.get(pk=foss_id)
+                language = Language.objects.get(pk=language_id)
                 sheet_path = 'videos/' + str(foss.id) + '/' + \
                     foss.foss + '-' + sheet_type.title() + '-Sheet-' + \
                     language.name + '.pdf'
@@ -3047,8 +3088,8 @@ def ajax_manual_language(request):
                 pass
         elif foss_id:
             tutorials = TutorialResource.objects.filter(
-                Q(status = 1) | Q(status = 2),
-                tutorial_detail__foss_id = foss_id
+                Q(status=1) | Q(status=2),
+                tutorial_detail__foss_id=foss_id
             ).values_list(
                 'language_id',
                 'language__name'
@@ -3058,7 +3099,7 @@ def ajax_manual_language(request):
                     str(tutorial[1]) + '</option>'
             if data:
                 data = '<option value = "">-- Select Language --</option>' + data
-    return HttpResponse(json.dumps(data), content_type = 'application/json')
+    return HttpResponse(json.dumps(data), content_type='application/json')
 
 
 @csrf_exempt
@@ -3068,8 +3109,8 @@ def ajax_get_tutorials(request):
         foss_id = request.POST.get('foss', '')
         if foss_id:
             tutorials = TutorialResource.objects.filter(
-                Q(status = 1) | Q(status = 2),
-                tutorial_detail__foss_id = foss_id
+                Q(status=1) | Q(status=2),
+                tutorial_detail__foss_id=foss_id
             ).values_list(
                 'tutorial_detail_id',
                 'tutorial_detail__tutorial'
@@ -3079,7 +3120,7 @@ def ajax_get_tutorials(request):
                     str(tutorial[1]) + '</option>'
             if data:
                 data = '<option value = "">-- Select Tutorial --</option>' + data
-    return HttpResponse(json.dumps(data), content_type = 'application/json')
+    return HttpResponse(json.dumps(data), content_type='application/json')
 
 
 def view_brochure(request):
@@ -3087,10 +3128,9 @@ def view_brochure(request):
     my_dict = services.get_data_for_brochure_display()
     st_brochure = BrochureDocument.objects.filter(foss_course=36)
     pages = BrochurePage.objects.filter(brochure_id=st_brochure)
-    st_pages=[]
+    st_pages = []
     for page in pages:
         st_pages.append(page.page.url)
-
 
     context = {
         'my_dict': my_dict,
@@ -3109,10 +3149,10 @@ def update_assignment(request):
         if form.is_valid():
             try:
                 foss_id = request.POST.get('foss')
-                foss = FossCategory.objects.get(pk = foss_id)
+                foss = FossCategory.objects.get(pk=foss_id)
 
                 tutorial_detail_id = request.POST.get('tutorial')
-                tutorial = TutorialDetail.objects.get(pk = tutorial_detail_id)
+                tutorial = TutorialDetail.objects.get(pk=tutorial_detail_id)
                 file_name, file_extension = os.path.splitext(request.FILES['comp'].name)
                 file_name = tutorial.tutorial.replace(' ', '-') + '-Assignment' + file_extension
                 file_path = settings.MEDIA_ROOT + 'videos/' + str(foss_id) + '/' + str(tutorial_detail_id) + '/resources/' + file_name
@@ -3124,7 +3164,7 @@ def update_assignment(request):
                     fout.write(chunk)
                 fout.close()
 
-                tr_res = TutorialResource.objects.get(tutorial_detail = tutorial_detail_id, language_id = 22)
+                tr_res = TutorialResource.objects.get(tutorial_detail=tutorial_detail_id, language_id=22)
                 tr_res.common_content.assignment = file_name
                 tr_res.common_content.assignment_status = 4
                 tr_res.common_content.assignment_user = request.user
@@ -3151,10 +3191,10 @@ def update_codefiles(request):
         if form.is_valid():
             try:
                 foss_id = request.POST.get('foss')
-                foss = FossCategory.objects.get(pk = foss_id)
+                foss = FossCategory.objects.get(pk=foss_id)
 
                 tutorial_detail_id = request.POST.get('tutorial')
-                tutorial = TutorialDetail.objects.get(pk = tutorial_detail_id)
+                tutorial = TutorialDetail.objects.get(pk=tutorial_detail_id)
                 file_name, file_extension = os.path.splitext(request.FILES['comp'].name)
                 file_name = tutorial.tutorial.replace(' ', '-') + '-Codefiles' + file_extension
                 file_path = settings.MEDIA_ROOT + 'videos/' + str(foss_id) + '/' + str(tutorial_detail_id) + '/resources/' + file_name
@@ -3166,7 +3206,7 @@ def update_codefiles(request):
                     fout.write(chunk)
                 fout.close()
 
-                tr_res = TutorialResource.objects.get(tutorial_detail = tutorial_detail_id, language_id = 22)
+                tr_res = TutorialResource.objects.get(tutorial_detail=tutorial_detail_id, language_id=22)
                 tr_res.common_content.code = file_name
                 tr_res.common_content.code_status = 4
                 tr_res.common_content.code_user = request.user
@@ -3182,9 +3222,10 @@ def update_codefiles(request):
     context.update(csrf(request))
     return render(request, 'creation/templates/update_codefiles.html', context)
 
+
 @login_required
 def update_common_component(request):
-    #for codefiles, slides and additional material
+    # for codefiles, slides and additional material
     if not is_administrator(request.user):
         raise PermissionDenied()
     form = UpdateCommonCompForm()
@@ -3200,7 +3241,7 @@ def update_common_component(request):
                 tutorial_detail_id = request.POST.get('tutorial')
                 tutorial = TutorialDetail.objects.get(pk=tutorial_detail_id)
                 file_name, file_extension = os.path.splitext(request.FILES['comp'].name)
-                file_name =  tutorial.tutorial.replace(' ', '-') + '-'+common_comp + file_extension
+                file_name = tutorial.tutorial.replace(' ', '-') + '-' + common_comp + file_extension
                 file_path = settings.MEDIA_ROOT + 'videos/' + str(foss_id) + '/' + str(tutorial_detail_id) + '/resources/' + file_name
 
                 fout = open(file_path, 'wb+')
@@ -3210,7 +3251,7 @@ def update_common_component(request):
                     fout.write(chunk)
                 fout.close()
 
-                tr_res = TutorialResource.objects.get(tutorial_detail=tutorial_detail_id, language_id = 22)
+                tr_res = TutorialResource.objects.get(tutorial_detail=tutorial_detail_id, language_id=22)
                 if common_comp == 'Codefiles':
                     tr_res.common_content.code = file_name
                     tr_res.common_content.code_status = 4
@@ -3225,9 +3266,7 @@ def update_common_component(request):
                     tr_res.common_content.additional_material_user = request.user
                 tr_res.common_content.save()
 
-
-
-                messages.success(request, common_comp+' updated successfully!')
+                messages.success(request, common_comp + ' updated successfully!')
                 form = UpdateCommonCompForm()
             except Exception as e:
                 print(e)
@@ -3237,6 +3276,7 @@ def update_common_component(request):
     context.update(csrf(request))
     return render(request, 'creation/templates/update_common_comp.html', context)
 # -------------- Bidding Module -----------------
+
 
 @csrf_exempt
 @login_required
@@ -3252,12 +3292,12 @@ def rate_contributors(request):
     new_rating = request.POST.get('rating')
     mode = request.POST.get('mode')
     if mode == 'update':
-        user_obj = User.objects.get(id = user_id)
-        lang = Language.objects.get(name = lang_select)
+        user_obj = User.objects.get(id=user_id)
+        lang = Language.objects.get(name=lang_select)
         contributor_rating = ContributorRating.objects.filter(
-            user = user_obj, language_id = lang)
+            user=user_obj, language_id=lang)
         if contributor_rating.exists():
-            contributor_rating.update(rating = new_rating)
+            contributor_rating.update(rating=new_rating)
         else:
             contributor_rating = ContributorRating()
             contributor_rating.language = lang
@@ -3265,38 +3305,37 @@ def rate_contributors(request):
             contributor_rating.user = user_obj
             contributor_rating.save()
         messages.success(request, 'Ratings Saved Successfully')
-        return HttpResponse(json.dumps(data), content_type = 'application/json')
-
+        return HttpResponse(json.dumps(data), content_type='application/json')
 
     if lang_select == '':
-        messages.error(request,"Please filter a language")
+        messages.error(request, "Please filter a language")
         return HttpResponseRedirect(request.META['HTTP_REFERER'])
     else:
 
         lang_qs = \
-            Language.objects.filter(id__in = LanguageManager.objects.filter(user = request.user,
-                                                                          status = STATUS_DICT['active']).values('language'))
+            Language.objects.filter(id__in=LanguageManager.objects.filter(user=request.user,
+                                                                          status=STATUS_DICT['active']).values('language'))
         header = {
-                1: SortableHeader('Check', False),
-                2: SortableHeader('user__username', True, 'User'),
-                3: SortableHeader('language', False, 'Language'),
-                4: SortableHeader('rating', False, 'Rating'),
-                5: SortableHeader('Action', False, ),
-            }
+            1: SortableHeader('Check', False),
+            2: SortableHeader('user__username', True, 'User'),
+            3: SortableHeader('language', False, 'Language'),
+            4: SortableHeader('rating', False, 'Rating'),
+            5: SortableHeader('Action', False, ),
+        }
 
         raw_get_data = request.POST.get('o', None)
         rated_contributors = ContributorRating.objects.filter(
-            language_id = lang_select).values('user__id',
-            'user__username', 'rating','language__name').order_by('-rating')
+            language_id=lang_select).values('user__id',
+                                            'user__username', 'rating', 'language__name').order_by('-rating')
 
         context['rated_contributors'] = rated_contributors
         tutorials_sorted = get_sorted_list(request, rated_contributors,
-                        header, raw_get_data)
+                                           header, raw_get_data)
         contributors_sorted = get_sorted_list(request, rated_contributors,
-                        header, raw_get_data)
+                                              header, raw_get_data)
         ordering = get_field_index(raw_get_data)
         contributor_list = ContributorRatingFilter(request.POST,
-            queryset = tutorials_sorted)
+                                                   queryset=tutorials_sorted)
         form = contributor_list.form
         if lang_qs:
             form.fields['language'].queryset = lang_qs
@@ -3306,22 +3345,20 @@ def rate_contributors(request):
 
         context['ordering'] = ordering
 
-
-
         context.update(csrf(request))
         return render(request, 'creation/templates/rate_contributors.html',
                       context)
 
 
 def add_contributorrating(role_request):
-        contributor_with_rating = \
-            ContributorRating.objects.filter(user_id = role_request.user_id,
-                                       language_id = role_request.language_id)
-        if not contributor_with_rating.exists():
-            new_role_request = ContributorRating()
-            new_role_request.user_id = role_request.user_id
-            new_role_request.language_id = role_request.language_id
-            new_role_request.save()
+    contributor_with_rating = \
+        ContributorRating.objects.filter(user_id=role_request.user_id,
+                                         language_id=role_request.language_id)
+    if not contributor_with_rating.exists():
+        new_role_request = ContributorRating()
+        new_role_request.user_id = role_request.user_id
+        new_role_request.language_id = role_request.language_id
+        new_role_request.save()
 
 
 @login_required
@@ -3330,10 +3367,10 @@ def allocate_tutorial(request, sel_status, role):
     context = {}
     global global_req
     global_req = request
-    user = User.objects.get(id = request.user.id)
+    user = User.objects.get(id=request.user.id)
     if not (user.is_authenticated() and
-        (is_contributor(user) or is_language_manager(request.user)
-            or is_administrator(request.user))):
+            (is_contributor(user) or is_language_manager(request.user)
+             or is_administrator(request.user))):
         raise PermissionDenied()
 
     active = sel_status
@@ -3345,14 +3382,13 @@ def allocate_tutorial(request, sel_status, role):
 
     if is_language_manager(request.user) and role == 'language_manager':
         lang_qs = Language.objects.filter(
-            id__in = LanguageManager.objects.filter(user = request.user,
-            status = STATUS_DICT['active']).values('language'))
+            id__in=LanguageManager.objects.filter(user=request.user,
+                                                  status=STATUS_DICT['active']).values('language'))
 
     else:
-        lang_qs = Language.objects.filter(id__in = RoleRequest.objects.filter(
-            Q(role_type = ROLES_DICT['contributor'])|Q(role_type = ROLES_DICT['external-contributor']),
-            user = request.user , status = STATUS_DICT['active']).values('language'))
-
+        lang_qs = Language.objects.filter(id__in=RoleRequest.objects.filter(
+            Q(role_type=ROLES_DICT['contributor']) | Q(role_type=ROLES_DICT['external-contributor']),
+            user=request.user, status=STATUS_DICT['active']).values('language'))
 
     if sel_status == 'completed':
         header = {
@@ -3367,11 +3403,11 @@ def allocate_tutorial(request, sel_status, role):
 
         if is_language_manager(request.user):
             final_query = TutorialResource.objects.filter(
-                status = PUBLISHED, language__in = lang_qs).order_by('-updated')
+                status=PUBLISHED, language__in=lang_qs).order_by('-updated')
         else:
             final_query = TutorialResource.objects.filter(
-                Q(script_user_id = request.user.id)|Q(video_user_id = request.user.id),
-                status = PUBLISHED).order_by('-updated')
+                Q(script_user_id=request.user.id) | Q(video_user_id=request.user.id),
+                status=PUBLISHED).order_by('-updated')
         bid_count = final_query.aggregate(Count('id'))
     elif sel_status == 'available':
 
@@ -3386,8 +3422,8 @@ def allocate_tutorial(request, sel_status, role):
 
         status = 4
         final_query = TutorialsAvailable.objects.filter(
-            language__in = lang_qs).order_by('tutorial_detail__foss__foss',
-            'tutorial_detail__level', 'language','tutorial_detail__order'   )
+            language__in=lang_qs).order_by('tutorial_detail__foss__foss',
+                                           'tutorial_detail__level', 'language', 'tutorial_detail__order')
 
     elif sel_status == 'ongoing':
         if is_language_manager(request.user) and role == 'language_manager':
@@ -3402,10 +3438,10 @@ def allocate_tutorial(request, sel_status, role):
                 8: SortableHeader('video_user_id', True, 'Video User'),
                 9: SortableHeader('tutorial_detail_id__tutorialresource__updated', True, 'Bid Date'),
                 10: SortableHeader('submissiondate', True,
-                                  'Submission Date'),
+                                   'Submission Date'),
                 11: SortableHeader('extension_status', True, 'Extension'),
                 12: SortableHeader('Revoke ', False),
-                13: SortableHeader('Edit User',False)
+                13: SortableHeader('Edit User', False)
             }
         else:
             header = {
@@ -3419,16 +3455,15 @@ def allocate_tutorial(request, sel_status, role):
                 8: SortableHeader('video_user_id', False, 'Video user'),
                 9: SortableHeader('tutorial_detail_id__tutorialresource__updated', True, 'Bid Date'),
                 10: SortableHeader('submissiondate', True, 'Submission Date'),
-                11: SortableHeader('extension_status', True, 'Extension' ),
+                11: SortableHeader('extension_status', True, 'Extension'),
             }
 
-
-        tutorialresource_assigned =  get_assigned_tutorials(request,user.id,lang_qs)
+        tutorialresource_assigned = get_assigned_tutorials(request, user.id, lang_qs)
         final_query = tutorialresource_assigned.order_by(
-                'tutorial_detail__foss__foss', 'language__name', 'tutorial_detail__order')
+            'tutorial_detail__foss__foss', 'language__name', 'tutorial_detail__order')
 
     else:
-        messages.error(request,"Invalid request. Please try again !!!")
+        messages.error(request, "Invalid request. Please try again !!!")
 
     extension = []
     pub_tutorials_set = final_query
@@ -3439,12 +3474,12 @@ def allocate_tutorial(request, sel_status, role):
 
     ordering = get_field_index(raw_get_data)
     tutorials = CreationStatisticsFilter(request.POST,
-                                         queryset = tutorials_sorted)
+                                         queryset=tutorials_sorted)
 
     tutorials_count = TutorialsAvailable.objects.filter(
-            language__in = lang_qs).aggregate(Count('id'))
+        language__in=lang_qs).aggregate(Count('id'))
 
-    if sel_status in ('available','ongoing'):
+    if sel_status in ('available', 'ongoing'):
         bid_count = tutorials.qs.count()
         context['bid_count__count'] = bid_count
 
@@ -3464,7 +3499,6 @@ def allocate_tutorial(request, sel_status, role):
         context['bid_count__count'] = 0
         context['perc'] = 0
 
-
     form = tutorials.form
     if lang_qs:
         form.fields['language'].queryset = lang_qs
@@ -3475,28 +3509,28 @@ def allocate_tutorial(request, sel_status, role):
         video_user = request.POST.get('video_user')
         context['foss_list'] = foss_list(script_user, video_user, language_id)
         if language_id:
-            contributors_list = User.objects.filter(id__in = active_contributor_list([int(language_id)]))
-            rated_contributors = ContributorRating.objects.filter(rating__gt = 0,
-                language_id = language_id, user_id__in = contributors_list
-                )
+            contributors_list = User.objects.filter(id__in=active_contributor_list([int(language_id)]))
+            rated_contributors = ContributorRating.objects.filter(rating__gt=0,
+                                                                  language_id=language_id, user_id__in=contributors_list
+                                                                  )
             context['contributors'] = rated_contributors.values_list('user_id', 'user__username', 'rating')
             # Update script & video user as per language choice
             # This will show contributors as per the language selection
-            form.fields['script_user'].queryset =  contributors_list
+            form.fields['script_user'].queryset = contributors_list
             form.fields['video_user'].queryset = contributors_list
         else:
-            contributors_list = User.objects.filter(id__in = active_contributor_list(lang_qs))
+            contributors_list = User.objects.filter(id__in=active_contributor_list(lang_qs))
             # This will show all contributors under the language manager
             if contributors_list:
                 form.fields['script_user'].queryset = contributors_list
                 form.fields['video_user'].queryset = contributors_list
 
     else:
-    	contributors_list = User.objects.filter(id__in = active_contributor_list(lang_qs))
-    	# This will show all contributors under the language manager
-    	if contributors_list:
-    		form.fields['script_user'].queryset = contributors_list
-    		form.fields['video_user'].queryset = contributors_list
+        contributors_list = User.objects.filter(id__in=active_contributor_list(lang_qs))
+        # This will show all contributors under the language manager
+        if contributors_list:
+            form.fields['script_user'].queryset = contributors_list
+            form.fields['video_user'].queryset = contributors_list
 
     context['form'] = form
 
@@ -3518,59 +3552,61 @@ def allocate_tutorial(request, sel_status, role):
 
     context.update(csrf(request))
     if role == 'language_manager':
-	    if is_language_manager(request.user) or is_administrator(request.user):
-	        return render(request,
-	                      'creation/templates/allocate_tutorial_manager.html', context)
+        if is_language_manager(request.user) or is_administrator(request.user):
+            return render(request,
+                          'creation/templates/allocate_tutorial_manager.html', context)
     elif role == 'contributor':
         return render(request,
                       'creation/templates/allocate_tutorial.html',
                       context)
-def foss_list(script_user,video_user, language_id):
+
+
+def foss_list(script_user, video_user, language_id):
     foss_list = TutorialResource.objects.none()
     if script_user and video_user:
         foss_list = TutorialResource.objects.filter(
-            script_user_id = script_user, video_user_id = video_user,
-            status = UNPUBLISHED,
-            assignment_status = ASSIGNMENT_STATUS_DICT['assigned']
-            )
+            script_user_id=script_user, video_user_id=video_user,
+            status=UNPUBLISHED,
+            assignment_status=ASSIGNMENT_STATUS_DICT['assigned']
+        )
     elif script_user:
         foss_list = TutorialResource.objects.filter(
-            script_user_id = script_user, status = UNPUBLISHED,
-            assignment_status = ASSIGNMENT_STATUS_DICT['assigned']
-            )
+            script_user_id=script_user, status=UNPUBLISHED,
+            assignment_status=ASSIGNMENT_STATUS_DICT['assigned']
+        )
     elif video_user:
         foss_list = TutorialResource.objects.filter(
-            video_user_id = video_user,status = UNPUBLISHED,
-            assignment_status = ASSIGNMENT_STATUS_DICT['assigned']
-            )
-    if language_id :
-        foss_list=foss_list.filter(language_id = int(language_id))
+            video_user_id=video_user, status=UNPUBLISHED,
+            assignment_status=ASSIGNMENT_STATUS_DICT['assigned']
+        )
+    if language_id:
+        foss_list = foss_list.filter(language_id=int(language_id))
     return foss_list.exclude(language_id=22
-        ).order_by('language_id').values('tutorial_detail__foss__foss','language__name').distinct()
+                             ).order_by('language_id').values('tutorial_detail__foss__foss', 'language__name').distinct()
 
 
 def active_contributor_list(language_id):
     contributors_updated = RoleRequest.objects.filter(
-    Q(role_type = ROLES_DICT['contributor'])|Q(role_type = ROLES_DICT['external-contributor']),
-    status = STATUS_DICT['active'], language_id__in = language_id).values_list('user__id').distinct()
+        Q(role_type=ROLES_DICT['contributor']) | Q(role_type=ROLES_DICT['external-contributor']),
+        status=STATUS_DICT['active'], language_id__in=language_id).values_list('user__id').distinct()
     return contributors_updated
+
 
 @csrf_exempt
 def get_rated_contributors(request):
     language_id = request.POST.get('language')
     contributors_updated = active_contributor_list([int(language_id)])
 
-    rated_contributors = ContributorRating.objects.filter(rating__gt = 0,
-        language_id = language_id, user_id__in = contributors_updated
-        ).values_list('user_id', 'user__username', 'rating')
+    rated_contributors = ContributorRating.objects.filter(rating__gt=0,
+                                                          language_id=language_id, user_id__in=contributors_updated
+                                                          ).values_list('user_id', 'user__username', 'rating')
     data = ""
     for contributor in rated_contributors:
-        if contributor[2]<=3:
-            data = data + '<option id='+str(contributor[0])+' style="color:red" >' + contributor[1]+ '</option>'
+        if contributor[2] <= 3:
+            data = data + '<option id=' + str(contributor[0]) + ' style="color:red" >' + contributor[1] + '</option>'
         else:
-            data = data + '<option id='+str(contributor[0])+' style="color:green" >' + contributor[1]+ '</option>'
-    return HttpResponse(json.dumps(data), content_type = 'application/json')
-
+            data = data + '<option id=' + str(contributor[0]) + ' style="color:green" >' + contributor[1] + '</option>'
+    return HttpResponse(json.dumps(data), content_type='application/json')
 
 
 @csrf_exempt
@@ -3580,36 +3616,36 @@ def update_contributors(request):
         if tutorial_resource_id is not 'None':
             script_user_id = request.POST.get('script_user')
             video_user_id = request.POST.get('video_user')
-            tutorial_resource = TutorialResource.objects.get(id = tutorial_resource_id)
+            tutorial_resource = TutorialResource.objects.get(id=tutorial_resource_id)
 
             script_user_foss_count = no_of_foss_gt_4(request,
-                script_user_id, tutorial_resource.tutorial_detail_id, tutorial_resource.language.id)
+                                                     script_user_id, tutorial_resource.tutorial_detail_id, tutorial_resource.language.id)
 
             video_user_foss_count = no_of_foss_gt_4(request,
-                video_user_id, tutorial_resource.tutorial_detail_id, tutorial_resource.language.id)
-            script_user_bid_count = TutorialResource.objects.filter(script_user_id = script_user_id,
-            assignment_status = ASSIGNMENT_STATUS_DICT['assigned'] , status = UNPUBLISHED)
+                                                    video_user_id, tutorial_resource.tutorial_detail_id, tutorial_resource.language.id)
+            script_user_bid_count = TutorialResource.objects.filter(script_user_id=script_user_id,
+                                                                    assignment_status=ASSIGNMENT_STATUS_DICT['assigned'], status=UNPUBLISHED)
 
-            video_user_bid_count = TutorialResource.objects.filter(video_user_id = video_user_id,
-            assignment_status = ASSIGNMENT_STATUS_DICT['assigned'] , status = UNPUBLISHED)
+            video_user_bid_count = TutorialResource.objects.filter(video_user_id=video_user_id,
+                                                                   assignment_status=ASSIGNMENT_STATUS_DICT['assigned'], status=UNPUBLISHED)
 
             data = "Updated"
 
             update_to_script_user = True
             update_to_video_user = True
 
-            if not script_user_foss_count :
-                if contributor_rating_less_than_3(request ,script_user_id , tutorial_resource.language):
+            if not script_user_foss_count:
+                if contributor_rating_less_than_3(request, script_user_id, tutorial_resource.language):
                     if not bid_count_less_than_3(script_user_id,
-                        tutorial_resource.tutorial_detail_id, tutorial_resource.language_id):
+                                                 tutorial_resource.tutorial_detail_id, tutorial_resource.language_id):
                         update_to_script_user = False
                         messages.error(request, 'You cannot allocate more than 3 tutorials to a contributor of rating less than 3. <i>Error at Script User </i>')
             else:
                 update_to_script_user = False
-            if not video_user_foss_count :
-                if contributor_rating_less_than_3(request ,video_user_id , tutorial_resource.language):
+            if not video_user_foss_count:
+                if contributor_rating_less_than_3(request, video_user_id, tutorial_resource.language):
                     if not bid_count_less_than_3(video_user_id,
-                        tutorial_resource.tutorial_detail_id, tutorial_resource.language_id):
+                                                 tutorial_resource.tutorial_detail_id, tutorial_resource.language_id):
                         update_to_video_user = False
                         messages.error(request, 'You cannot allocate more than 3 tutorials to a contributor of rating less than 3. <i>Error at Video User </i>')
             else:
@@ -3618,55 +3654,57 @@ def update_contributors(request):
             if update_to_script_user and update_to_video_user:
                 if tutorial_resource.script_user_id != script_user_id:
                     add_tutorial_contributor_notification(tutorial_resource.script_user_id,
-                        tutorial_resource.id, 'revoke')
+                                                          tutorial_resource.id, 'revoke')
                     revoke_contributor_role(tutorial_resource.tutorial_detail_id,
-                        tutorial_resource.language_id , tutorial_resource.script_user_id)
+                                            tutorial_resource.language_id, tutorial_resource.script_user_id)
 
                 if tutorial_resource.script_user_id != script_user_id:
                     add_tutorial_contributor_notification(tutorial_resource.video_user_id,
-                        tutorial_resource.id, 'revoke')
+                                                          tutorial_resource.id, 'revoke')
                     revoke_contributor_role(tutorial_resource.tutorial_detail_id,
-                        tutorial_resource.language_id , tutorial_resource.video_user_id)
+                                            tutorial_resource.language_id, tutorial_resource.video_user_id)
 
-
-                add_or_update_contributor_role(tutorial_resource.tutorial_detail , tutorial_resource.language_id , script_user_id)
+                add_or_update_contributor_role(tutorial_resource.tutorial_detail, tutorial_resource.language_id, script_user_id)
                 add_tutorial_contributor_notification(script_user_id, tutorial_resource.id, 'add')
-                add_or_update_contributor_role(tutorial_resource.tutorial_detail , tutorial_resource.language_id , video_user_id)
+                add_or_update_contributor_role(tutorial_resource.tutorial_detail, tutorial_resource.language_id, video_user_id)
                 add_tutorial_contributor_notification(video_user_id, tutorial_resource.id, 'add')
 
-                tutorial_resource.script_user = User.objects.get(id = script_user_id)
-                tutorial_resource.video_user = User.objects.get(id = video_user_id)
+                tutorial_resource.script_user = User.objects.get(id=script_user_id)
+                tutorial_resource.video_user = User.objects.get(id=video_user_id)
                 tutorial_resource.save()
                 messages.success(request, 'Updated')
         else:
-            messages.error(request,"Invalid request")
-        return HttpResponse(json.dumps(data), content_type = 'application/json')
+            messages.error(request, "Invalid request")
+        return HttpResponse(json.dumps(data), content_type='application/json')
     except Exception as e:
-        print (e)
+        print(e)
 
-def get_assigned_tutorials(request , user_id , language_set):
+
+def get_assigned_tutorials(request, user_id, language_set):
     if is_language_manager(request.user):
         tutorialresource_assigned = TutorialResource.objects.filter(
-            language__in = language_set, status = UNPUBLISHED,
-            assignment_status = ASSIGNMENT_STATUS_DICT['assigned']
-            ).exclude(language_id = 22)
+            language__in=language_set, status=UNPUBLISHED,
+            assignment_status=ASSIGNMENT_STATUS_DICT['assigned']
+        ).exclude(language_id=22)
     else:
         tutorialresource_assigned = TutorialResource.objects.filter(
-            Q(video_user = user_id)|Q(script_user = user_id),
-            language__in = language_set , status = UNPUBLISHED,
-            assignment_status = ASSIGNMENT_STATUS_DICT['assigned']
-            ).exclude(language_id = 22)
+            Q(video_user=user_id) | Q(script_user=user_id),
+            language__in=language_set, status=UNPUBLISHED,
+            assignment_status=ASSIGNMENT_STATUS_DICT['assigned']
+        ).exclude(language_id=22)
     return tutorialresource_assigned
 
+
 PUBLISHED = 1
+
 
 @login_required
 def refresh_tutorials(request, tut_resource):
     count = 0
-    if tut_resource.language.id == 22 :
-        tutorials = TutorialDetail.objects.filter(foss__is_translation_allowed = 1,
-            id__in = TutorialResource.objects.filter(id = tut_resource.id ,status = PUBLISHED,
-            language = 22).values('tutorial_detail').distinct())
+    if tut_resource.language.id == 22:
+        tutorials = TutorialDetail.objects.filter(foss__is_translation_allowed=1,
+                                                  id__in=TutorialResource.objects.filter(id=tut_resource.id, status=PUBLISHED,
+                                                                                         language=22).values('tutorial_detail').distinct())
         if is_administrator(request.user) or is_qualityreviewer(request.user):
             lang_qs = Language.objects.all()
         else:
@@ -3674,40 +3712,43 @@ def refresh_tutorials(request, tut_resource):
         for tutorial in tutorials:
             for a_lang in lang_qs:
                 this_tutorial_user_lang = TutorialResource.objects.filter(Q(
-                    status = PUBLISHED)|Q(
-                    assignment_status = ASSIGNMENT_STATUS_DICT['assigned']),
-                    tutorial_detail = tutorial, language = a_lang
-                    )
+                    status=PUBLISHED) | Q(
+                    assignment_status=ASSIGNMENT_STATUS_DICT['assigned']),
+                    tutorial_detail=tutorial, language=a_lang
+                )
                 if not this_tutorial_user_lang.exists():
-                    add_to_tutorials_available(tutorial,a_lang)
+                    add_to_tutorials_available(tutorial, a_lang)
                     messages.success(request, tutorial.tutorial + ' added for ', a_lang.name)
     return True
 
-def add_to_tutorials_available(tutorial,language):
+
+def add_to_tutorials_available(tutorial, language):
     tutorialsavailable = TutorialsAvailable.objects.filter(
-    tutorial_detail = tutorial, language = language)
+        tutorial_detail=tutorial, language=language)
     if not tutorialsavailable.exists():
         tutorialsavailable = TutorialsAvailable()
         tutorialsavailable.tutorial_detail = tutorial
         tutorialsavailable.language = language
         tutorialsavailable.save()
 
+
 UNPUBLISHED = 0
 
-def no_of_foss_gt_4(request ,user, tut_id, language_id):
 
-    this_tut = TutorialDetail.objects.get(id = tut_id)
+def no_of_foss_gt_4(request, user, tut_id, language_id):
+
+    this_tut = TutorialDetail.objects.get(id=tut_id)
     foss_id = this_tut.foss.id
     # To give language manager the privileges to assign any no of foss
     if is_administrator(request.user):
         return False
     else:
         all_foss = TutorialResource.objects.filter(
-            Q(script_user_id = user) | Q(video_user_id = user),
-            language_id = int(language_id),status = UNPUBLISHED,
-            assignment_status = ASSIGNMENT_STATUS_DICT['assigned']
-            )
-        list_count = all_foss.values('tutorial_detail__foss','language_id').distinct().count()
+            Q(script_user_id=user) | Q(video_user_id=user),
+            language_id=int(language_id), status=UNPUBLISHED,
+            assignment_status=ASSIGNMENT_STATUS_DICT['assigned']
+        )
+        list_count = all_foss.values('tutorial_detail__foss', 'language_id').distinct().count()
         check = all_foss.filter(tutorial_detail__foss_id=foss_id, language_id=language_id).exists()
         if check:
             return False
@@ -3718,22 +3759,26 @@ def no_of_foss_gt_4(request ,user, tut_id, language_id):
             return False
         return False
 
+
 LEVEL_NAME = {1: 'Basic', 2: 'Intermediate', 3: 'Advanced'}
 SUPER_ADMIN_USER_ID = 7
-def disallow(request , lower_level,tut):
+
+
+def disallow(request, lower_level, tut):
     level_name_in_words = LEVEL_NAME[lower_level]
     messages.error(request, str(level_name_in_words) +
-        ' level of ' + str(tut.foss) +' is available. Please complete it first.')
+                   ' level of ' + str(tut.foss) + ' is available. Please complete it first.')
 
-def add_or_update_contributor_role(tutorial_detail , language_id , user_id):
+
+def add_or_update_contributor_role(tutorial_detail, language_id, user_id):
     contributor_role = ContributorRole.objects.filter(
-        tutorial_detail_id = tutorial_detail.id,
-        language_id = language_id,
-        user_id = user_id)
+        tutorial_detail_id=tutorial_detail.id,
+        language_id=language_id,
+        user_id=user_id)
 
     # Update data in Contributor Role
     if contributor_role.exists():
-        contributor_role = contributor_role.update(status = STATUS_DICT['active'])
+        contributor_role = contributor_role.update(status=STATUS_DICT['active'])
 
     else:
         contributor_create = ContributorRole()
@@ -3744,30 +3789,31 @@ def add_or_update_contributor_role(tutorial_detail , language_id , user_id):
         contributor_create.tutorial_detail_id = tutorial_detail.id
         contributor_create.save()
 
+
 def add_tutorial_contributor_notification(user_id, tuto_resource_id, message_type):
 
-    tutorial_resource = TutorialResource.objects.get(id = tuto_resource_id)
+    tutorial_resource = TutorialResource.objects.get(id=tuto_resource_id)
     comp_title = tutorial_resource.tutorial_detail.foss.foss + ': ' + \
         tutorial_resource.tutorial_detail.tutorial + ' - ' + tutorial_resource.language.name
     if message_type == 'add':
-        message = "Submission date is :"+str(datetime.date(tutorial_resource.submissiondate))
+        message = "Submission date is :" + str(datetime.date(tutorial_resource.submissiondate))
     elif message_type == 'revoke':
         message = "The tutorial is revoked from you"
     elif message_type == 'extend':
-        message = "Submission date is extended to :"+str(datetime.date(tutorial_resource.submissiondate))
+        message = "Submission date is extended to :" + str(datetime.date(tutorial_resource.submissiondate))
 
     try:
 
         contributor_notification = ContributorNotification.objects.filter(
-            user_id = user_id , tutorial_resource = tutorial_resource )
+            user_id=user_id, tutorial_resource=tutorial_resource)
 
         if contributor_notification.exists():
-            contributor_notification.update(message = message, created = datetime.now())
+            contributor_notification.update(message=message, created=datetime.now())
         else:
-            ContributorNotification.objects.create(user_id = user_id , title = comp_title,
-                message = message , tutorial_resource_id = tutorial_resource.id)
+            ContributorNotification.objects.create(user_id=user_id, title=comp_title,
+                                                   message=message, tutorial_resource_id=tutorial_resource.id)
     except Exception as e:
-        print (e)
+        print(e)
 
 
 @login_required
@@ -3775,26 +3821,26 @@ def single_tutorial_allocater(request, tut, lid, days, user):
     # If timezone issue is solved, + 1 can be removed
     if days != 1:
         submissiondate = datetime.date(timezone.now() +
-                                       timezone.timedelta(days = int(days) + 1))
+                                       timezone.timedelta(days=int(days) + 1))
     tutorial_resource = TutorialResource.objects.filter(
-        tutorial_detail_id = tut.id,
-        language_id = lid)
+        tutorial_detail_id=tut.id,
+        language_id=lid)
 
     # Add a role in the COntributor Role table for the Tutorial
-    add_or_update_contributor_role(tut, lid , user.id)
+    add_or_update_contributor_role(tut, lid, user.id)
 
     # Update data in Tutorial Resource
     if tutorial_resource.exists():
-        tutorial_resource = tutorial_resource.update(outline_user = user,
-            script_user = user, video_user = user,
-            submissiondate = submissiondate,
-            assignment_status = ASSIGNMENT_STATUS_DICT['assigned'])
+        tutorial_resource = tutorial_resource.update(outline_user=user,
+                                                     script_user=user, video_user=user,
+                                                     submissiondate=submissiondate,
+                                                     assignment_status=ASSIGNMENT_STATUS_DICT['assigned'])
         messages.warning(request, 'Successfully updated ' +
-                        tut.tutorial + ' to ' + str(user) + ' : ' +
+                         tut.tutorial + ' to ' + str(user) + ' : ' +
                          str(submissiondate))
 
     else:
-        common_content = TutorialCommonContent.objects.get(tutorial_detail_id = tut.id)
+        common_content = TutorialCommonContent.objects.get(tutorial_detail_id=tut.id)
         tutorial_resource = TutorialResource()
         tutorial_resource.tutorial_detail_id = tut.id
         tutorial_resource.language_id = lid
@@ -3813,23 +3859,23 @@ def single_tutorial_allocater(request, tut, lid, days, user):
                          str(submissiondate))
 
     tutorial_resource = TutorialResource.objects.filter(
-        tutorial_detail_id = tut.id,
-        language_id = lid)
+        tutorial_detail_id=tut.id,
+        language_id=lid)
     tutorial_resource_id = tutorial_resource.values_list('id')
     # Add a Contributor Notification for this tutorial
     if tutorial_resource_id:
         add_tutorial_contributor_notification(user.id, tutorial_resource_id, 'add')
 
     # Super admin should be able to see the super admin language tutorials atleast
-    super_admin_contributor_languages = RoleRequest.objects.filter(role_type = 0,
-        user_id=SUPER_ADMIN_USER_ID, status = STATUS_DICT['active'], language_id = lid).values(
+    super_admin_contributor_languages = RoleRequest.objects.filter(role_type=0,
+                                                                   user_id=SUPER_ADMIN_USER_ID, status=STATUS_DICT['active'], language_id=lid).values(
         'language').distinct()
 
-    tutorial_resource = TutorialResource.objects.filter( tutorial_detail =tut,
-        language_id__in = super_admin_contributor_languages)
+    tutorial_resource = TutorialResource.objects.filter(tutorial_detail=tut,
+                                                        language_id__in=super_admin_contributor_languages)
 
     tutorialsavailableobj = TutorialsAvailable.objects.filter(
-                tutorial_detail = tut, language = lid)
+        tutorial_detail=tut, language=lid)
     if tutorialsavailableobj.exists():
         tutorialsavailableobj.delete()
     else:
@@ -3838,8 +3884,8 @@ def single_tutorial_allocater(request, tut, lid, days, user):
 
     for tutorial in tutorial_resource:
         super_admin_contrib_roles = ContributorRole.objects.filter(
-        user_id = SUPER_ADMIN_USER_ID, language_id = tutorial.language,
-        tutorial_detail_id = tutorial.tutorial_detail)
+            user_id=SUPER_ADMIN_USER_ID, language_id=tutorial.language,
+            tutorial_detail_id=tutorial.tutorial_detail)
 
         if not super_admin_contrib_roles.exists():
             add_previous_contributor_role = ContributorRole()
@@ -3852,27 +3898,30 @@ def single_tutorial_allocater(request, tut, lid, days, user):
 
     return True
 
-def contributor_rating_less_than_3(request, uid , language):
+
+def contributor_rating_less_than_3(request, uid, language):
     contributor_rating = ContributorRating.objects.filter(
-        user_id = uid,language = language).values('rating', 'language__name')
+        user_id=uid, language=language).values('rating', 'language__name')
     if contributor_rating[0]['rating'] <= 3:
         return True
     else:
         return False
 
+
 def bid_count_less_than_3(uid, tutorial_detail_id, language_id):
 
-    bid_count = TutorialResource.objects.filter(Q(script_user_id = uid) | Q(video_user_id = uid),
-        assignment_status = ASSIGNMENT_STATUS_DICT['assigned'] , status = UNPUBLISHED
-        ).exclude(language_id = 22).values('tutorial_detail_id','language_id')
-    list_count = list({(int(v['tutorial_detail_id']),int(v['language_id'])) for v in bid_count})
+    bid_count = TutorialResource.objects.filter(Q(script_user_id=uid) | Q(video_user_id=uid),
+                                                assignment_status=ASSIGNMENT_STATUS_DICT['assigned'], status=UNPUBLISHED
+                                                ).exclude(language_id=22).values('tutorial_detail_id', 'language_id')
+    list_count = list({(int(v['tutorial_detail_id']), int(v['language_id'])) for v in bid_count})
 
-    if (int(tutorial_detail_id),int(language_id)) in list_count:
+    if (int(tutorial_detail_id), int(language_id)) in list_count:
         return True
     else:
         if len(list_count) >= 3:
             return False
         return True
+
 
 @login_required
 @csrf_exempt
@@ -3880,55 +3929,53 @@ def allocate(request, tdid, lid, uid, days):
     # Data is being passed from another function
     # hence the below get functions need not be in try catch
     try:
-        user = User.objects.get(id = uid)
-        tut = TutorialDetail.objects.get(id = tdid)
-    except (User.DoesNotExist , TutorialDetail.DoesNotExist):
-        messages.error(request,"Invalid data . Please try again !!! ")
+        user = User.objects.get(id=uid)
+        tut = TutorialDetail.objects.get(id=tdid)
+    except (User.DoesNotExist, TutorialDetail.DoesNotExist):
+        messages.error(request, "Invalid data . Please try again !!! ")
         raise
     data = 'Response'
-    this_language = Language.objects.get(id = lid)
-    contributor_rating = ContributorRating.objects.filter( rating__gt = 0,
-        user_id = uid,language = this_language).values('rating', 'language__name')
+    this_language = Language.objects.get(id=lid)
+    contributor_rating = ContributorRating.objects.filter(rating__gt=0,
+                                                          user_id=uid, language=this_language).values('rating', 'language__name')
     if not contributor_rating.exists():
         messages.error(request,
-                "According to our new system, you are not enabled for " + str(this_language) +
-                ". Please contact your Language Manager")
+                       "According to our new system, you are not enabled for " + str(this_language) +
+                       ". Please contact your Language Manager")
 
-        return HttpResponse(json.dumps(data), content_type = 'application/json')
-
+        return HttpResponse(json.dumps(data), content_type='application/json')
 
     try:
-        final_query =  TutorialsAvailable.objects.get(tutorial_detail_id = tut.id,language = lid)
-        if not no_of_foss_gt_4(request,uid, tdid, lid):
-            all_lower_tutorials = TutorialDetail.objects.filter(foss_id = final_query.tutorial_detail.foss_id,
-                level_id = final_query.tutorial_detail.level_id - 1).values('id')
-            lower_tutorial_level = TutorialsAvailable.objects.filter(tutorial_detail_id__in = all_lower_tutorials ,
-                                                                    language = lid).values('tutorial_detail_id__level').distinct()
-            if contributor_rating_less_than_3(request ,uid , this_language):
+        final_query = TutorialsAvailable.objects.get(tutorial_detail_id=tut.id, language=lid)
+        if not no_of_foss_gt_4(request, uid, tdid, lid):
+            all_lower_tutorials = TutorialDetail.objects.filter(foss_id=final_query.tutorial_detail.foss_id,
+                                                                level_id=final_query.tutorial_detail.level_id - 1).values('id')
+            lower_tutorial_level = TutorialsAvailable.objects.filter(tutorial_detail_id__in=all_lower_tutorials,
+                                                                     language=lid).values('tutorial_detail_id__level').distinct()
+            if contributor_rating_less_than_3(request, uid, this_language):
                 if bid_count_less_than_3(uid, tdid, lid):
                     if lower_tutorial_level.exists():
-                        disallow( request,lower_tutorial_level[0]['tutorial_detail_id__level'], tut)
+                        disallow(request, lower_tutorial_level[0]['tutorial_detail_id__level'], tut)
                     else:
                         single_tutorial_allocater(request, tut, lid, days, user)
                 else:
                     if is_language_manager(request.user):
                         messages.error(
-                            request,'You cannot allocate more than 3 tutorials to a contributor of rating less than 3')
+                            request, 'You cannot allocate more than 3 tutorials to a contributor of rating less than 3')
                     else:
                         messages.error(request, 'You cannot allocate more than 3 tutorials ')
                 return HttpResponse(json.dumps(data),
-                                    content_type = 'application/json')
+                                    content_type='application/json')
             else:
                 if lower_tutorial_level.exists():
-                    disallow(request ,lower_tutorial_level[0]['tutorial_detail_id__level'], tut)
+                    disallow(request, lower_tutorial_level[0]['tutorial_detail_id__level'], tut)
                 else:
                     single_tutorial_allocater(request, tut, lid, days, user)
-
 
     except Exception as e:
         raise e
 
-    return HttpResponse(json.dumps(data), content_type = 'application/json')
+    return HttpResponse(json.dumps(data), content_type='application/json')
 
 
 @login_required
@@ -3937,20 +3984,20 @@ def extend_submission_date(request):
     tutorial = request.POST.get('tutorial')
     data = 'Extended'
     try:
-        tutorial_resource = TutorialResource.objects.get(id = tutorial)
+        tutorial_resource = TutorialResource.objects.get(id=tutorial)
         if tutorial_resource.extension_status >= 1:
             messages.error(request,
                            'You have exceeded the no of extensions')
         else:
             tutorial_resource.submissiondate = \
-                datetime.date(datetime.now() + timedelta(days = 3))
+                datetime.date(datetime.now() + timedelta(days=3))
             tutorial_resource.extension_status += 1
             tutorial_resource.save()
             add_tutorial_contributor_notification(tutorial_resource.script_user_id,
-                tutorial_resource.id, 'extend')
+                                                  tutorial_resource.id, 'extend')
             add_tutorial_contributor_notification(tutorial_resource.video_user_id,
-                tutorial_resource.id, 'extend')
-            messages.success(request,'Extended')
+                                                  tutorial_resource.id, 'extend')
+            messages.success(request, 'Extended')
     except TutorialResource.DoesNotExist:
         # Here the error can only occur when the tutorial resource entry is not found.
         messages.error(request,
@@ -3958,75 +4005,75 @@ def extend_submission_date(request):
                        )
 
     return HttpResponse(json.dumps(data),
-                        content_type = 'application/json')
+                        content_type='application/json')
 
 
 @login_required
 def allocate_foss(request, fid, lang, uid, level, days):
 
-    language = Language.objects.get(name = lang)
-    contrib = ContributorRating.objects.filter(user_id = uid,
-                                               language = language).values('rating')
+    language = Language.objects.get(name=lang)
+    contrib = ContributorRating.objects.filter(user_id=uid,
+                                               language=language).values('rating')
 
-    user = User.objects.get(id = uid)
+    user = User.objects.get(id=uid)
     data = 'Response'
-    tdids = TutorialDetail.objects.filter(foss_id = fid,level__level = level).order_by('order').values('id')
+    tdids = TutorialDetail.objects.filter(foss_id=fid, level__level=level).order_by('order').values('id')
     tdid_available = TutorialsAvailable.objects.filter(
-                tutorial_detail_id__in = tdids,language = language).order_by(
-                'tutorial_detail__level','tutorial_detail__order')
+        tutorial_detail_id__in=tdids, language=language).order_by(
+        'tutorial_detail__level', 'tutorial_detail__order')
 
     for a_tdid_available in tdid_available:
-        allocate(request,a_tdid_available.tutorial_detail.id,
-            language.id,
-            user.id,
-            days)
+        allocate(request, a_tdid_available.tutorial_detail.id,
+                 language.id,
+                 user.id,
+                 days)
 
-    return HttpResponse(json.dumps(data), content_type = 'application/json')
+    return HttpResponse(json.dumps(data), content_type='application/json')
 
-def revoke_contributor_role(tutorial_detail_id , language_id , user_id):
+
+def revoke_contributor_role(tutorial_detail_id, language_id, user_id):
     revoke_contributor_role = ContributorRole.objects.filter(
-            user_id = user_id, language_id = language_id ,
-            tutorial_detail_id = tutorial_detail_id)
+        user_id=user_id, language_id=language_id,
+        tutorial_detail_id=tutorial_detail_id)
 
     if revoke_contributor_role.exists():
-        revoke_contributor_role.update(status = STATUS_DICT['inactive'])
+        revoke_contributor_role.update(status=STATUS_DICT['inactive'])
     else:
-        print ("Error")
+        print("Error")
         pass
     return True
+
 
 @csrf_exempt
 def revoke_allocated_tutorial(request):
     data = 'Response'
     try:
         tutorial_resource_id = request.POST.get('tutorial_resource_id')
-        tutorialresource_to_revoke = TutorialResource.objects.get(id = tutorial_resource_id)
+        tutorialresource_to_revoke = TutorialResource.objects.get(id=tutorial_resource_id)
         tutorialresource_to_revoke.assignment_status = ASSIGNMENT_STATUS_DICT['un-assigned']
         tutorialresource_to_revoke.save()
 
         language_id = tutorialresource_to_revoke.language_id
         tutorial_detail_id = tutorialresource_to_revoke.tutorial_detail_id
 
-
-        revoke_contributor_role(tutorial_detail_id , language_id , tutorialresource_to_revoke.script_user_id)
-        revoke_contributor_role(tutorial_detail_id , language_id , tutorialresource_to_revoke.video_user_id)
-        reason = request.POST.get('submissiondate_message') # If submission date checkbox is checked
+        revoke_contributor_role(tutorial_detail_id, language_id, tutorialresource_to_revoke.script_user_id)
+        revoke_contributor_role(tutorial_detail_id, language_id, tutorialresource_to_revoke.video_user_id)
+        reason = request.POST.get('submissiondate_message')  # If submission date checkbox is checked
         # if reason:
         #     message = "You have delayed the submission, hence the tutorial is revoked from you."
         #     send_mail_to_contributor(tutorialresource_to_revoke.script_user_id, tutorial_detail_id, language_id, reason)
         #     send_mail_to_contributor(tutorialresource_to_revoke.video_user_id, tutorial_detail_id, language_id, reason)
 
         tutorialsavailable = TutorialsAvailable.objects.filter(
-            tutorial_detail_id = tutorial_detail_id , language_id = language_id)
+            tutorial_detail_id=tutorial_detail_id, language_id=language_id)
         if tutorialsavailable.exists():
-            tutorialsavailable.update(tutorial_detail_id = tutorial_detail_id,
-                                         language_id = language_id)
+            tutorialsavailable.update(tutorial_detail_id=tutorial_detail_id,
+                                      language_id=language_id)
         else:
             tutorialsavailable = TutorialsAvailable()
             tutorialsavailable.language_id = language_id
             tutorialsavailable.tutorial_detail_id = tutorial_detail_id
             tutorialsavailable.save()
-
 
     except Exception as e:
         raise e
@@ -4034,13 +4081,13 @@ def revoke_allocated_tutorial(request):
         # Check user notification exists
         if tutorialresource_to_revoke.script_user_id != tutorialresource_to_revoke.video_user_id:
             add_tutorial_contributor_notification(tutorialresource_to_revoke.script_user_id,
-                tutorialresource_to_revoke.id, 'revoke')
+                                                  tutorialresource_to_revoke.id, 'revoke')
 
             add_tutorial_contributor_notification(tutorialresource_to_revoke.video_user_id,
-                tutorialresource_to_revoke.id, 'revoke')
+                                                  tutorialresource_to_revoke.id, 'revoke')
         else:
             add_tutorial_contributor_notification(tutorialresource_to_revoke.script_user_id,
-                tutorialresource_to_revoke.id, 'revoke')
+                                                  tutorialresource_to_revoke.id, 'revoke')
 
     except Exception as e:
         raise e
@@ -4049,7 +4096,7 @@ def revoke_allocated_tutorial(request):
     tutorialresource_to_revoke.save()
 
     messages.success(request, 'Tutorial Revoked')
-    return HttpResponse(json.dumps(data), content_type = 'application/json')
+    return HttpResponse(json.dumps(data), content_type='application/json')
 
 
 @csrf_exempt
@@ -4057,44 +4104,47 @@ def get_languages(request, uid):
     data = '<option> --- Select a Language ---  </option>'
 
     lang_qs = \
-        Language.objects.filter(id__in = RoleRequest.objects.filter(
-            user_id = uid,status = 1,role_type = ROLES_DICT['contributor']
-            ).values('language')).values_list('id', 'name')
+        Language.objects.filter(id__in=RoleRequest.objects.filter(
+            user_id=uid, status=1, role_type=ROLES_DICT['contributor']
+        ).values('language')).values_list('id', 'name')
     for a_lang in lang_qs:
         data += '<option value = ' + str(a_lang[0]) + '>' \
             + str(a_lang[1]) + '</option>'
     return HttpResponse(json.dumps(data),
-                        content_type = 'application/json')
+                        content_type='application/json')
+
 
 @csrf_exempt
 def get_domain_languages(request, uid):
     data = '<option> --- Select a Language ---  </option>'
 
     lang_qs = \
-        Language.objects.filter(id__in = RoleRequest.objects.filter(
-            user_id = uid,status = 1,role_type = ROLES_DICT['domain-reviewer']
-            ).values('language')).values_list('id', 'name')
+        Language.objects.filter(id__in=RoleRequest.objects.filter(
+            user_id=uid, status=1, role_type=ROLES_DICT['domain-reviewer']
+        ).values('language')).values_list('id', 'name')
 
     for a_lang in lang_qs:
         data += '<option value = ' + str(a_lang[0]) + '>' \
             + str(a_lang[1]) + '</option>'
     return HttpResponse(json.dumps(data),
-                        content_type = 'application/json')
+                        content_type='application/json')
+
 
 @csrf_exempt
 def get_quality_languages(request, uid):
     data = '<option> --- Select a Language ---  </option>'
 
     lang_qs = \
-        Language.objects.filter(id__in = RoleRequest.objects.filter(
-            user_id = uid,status = 1,role_type = ROLES_DICT['quality-reviewer']
-            ).values('language')).values_list('id', 'name')
+        Language.objects.filter(id__in=RoleRequest.objects.filter(
+            user_id=uid, status=1, role_type=ROLES_DICT['quality-reviewer']
+        ).values('language')).values_list('id', 'name')
 
     for a_lang in lang_qs:
         data += '<option value = ' + str(a_lang[0]) + '>' \
             + str(a_lang[1]) + '</option>'
     return HttpResponse(json.dumps(data),
-                        content_type = 'application/json')
+                        content_type='application/json')
+
 
 @csrf_exempt
 def get_tutorials(request, fid, lang):
@@ -4102,20 +4152,20 @@ def get_tutorials(request, fid, lang):
     data = '<option> --- Select a Tutorial ---  </option>'
     if int(lang) == 22:
         tuto_available = TutorialDetail.objects.filter(
-            foss_id=fid).values_list('id','tutorial','level').order_by('level')
+            foss_id=fid).values_list('id', 'tutorial', 'level').order_by('level')
     else:
         tuto_available = TutorialsAvailable.objects.filter(
-            language=lang, tutorial_detail_id__in = TutorialDetail.objects.filter(
-            foss_id = int(fid)).order_by('level').values('id')
-            ).distinct().values_list('tutorial_detail_id',
-            'tutorial_detail_id__tutorial', 'tutorial_detail__level')
+            language=lang, tutorial_detail_id__in=TutorialDetail.objects.filter(
+                foss_id=int(fid)).order_by('level').values('id')
+        ).distinct().values_list('tutorial_detail_id',
+                                 'tutorial_detail_id__tutorial', 'tutorial_detail__level')
 
     for a_tutorial in tuto_available:
         data += '<option value = ' + str(a_tutorial[0]) + '>' \
             + str(a_tutorial[1]) + ' ' + str(level[a_tutorial[2]]) \
             + '</option>'
     return HttpResponse(json.dumps(data),
-                        content_type = 'application/json')
+                        content_type='application/json')
 
 
 # Languages other than the Contributor's Language/s
@@ -4123,20 +4173,20 @@ def get_tutorials(request, fid, lang):
 def get_other_languages(request, uid):
     data = '<option> --- Select a Language ---  </option>'
     lang_qs = \
-        Language.objects.exclude(id__in = LanguageManager.objects.filter(user_id = uid,
-                                                                       status = 1).values('language'
+        Language.objects.exclude(id__in=LanguageManager.objects.filter(user_id=uid,
+                                                                       status=1).values('language'
                                                                                         )).values_list('id', 'name')
     for a_lang in lang_qs:
         data += '<option value = ' + str(a_lang[0]) + '>' \
             + str(a_lang[1]) + '</option>'
     return HttpResponse(json.dumps(data),
-                        content_type = 'application/json')
+                        content_type='application/json')
 
 
 def send_mail_to_contributor(contributor_id, tdid, lid, reason):
     tutorial_details = \
-        TutorialResource.objects.filter(tutorial_detail_id = tdid,
-                                        language = lid).values('tutorial_detail__tutorial',
+        TutorialResource.objects.filter(tutorial_detail_id=tdid,
+                                        language=lid).values('tutorial_detail__tutorial',
                                                              'language__name', 'submissiondate')
 
     if reason:
@@ -4144,10 +4194,10 @@ def send_mail_to_contributor(contributor_id, tdid, lid, reason):
             + str(tutorial_details[0]['submissiondate']) \
             + ", but you could'nt complete before that."
     else:
-    	message_sub_date = 'Quality standards not met.'
+        message_sub_date = 'Quality standards not met.'
 
     user_details = \
-        User.objects.filter(id = contributor_id).values('username',
+        User.objects.filter(id=contributor_id).values('username',
                                                       'email')
     subject = 'Spoken Tutorials'
     message = 'Hello ' + str(user_details[0]['username']) + ''',
@@ -4164,43 +4214,44 @@ def send_mail_to_contributor(contributor_id, tdid, lid, reason):
 
     email = EmailMultiAlternatives(subject, message,
                                    'administrator@spoken-tutorial.org',
-                                   to = email_list,
-                                   headers = {'Content-type': 'text/html'
+                                   to=email_list,
+                                   headers={'Content-type': 'text/html'
                                             })
 
     email.attach_alternative(message, 'text/html')
-    result = email.send(fail_silently = False)
+    result = email.send(fail_silently=False)
     return result
 
+
 @login_required
-def add_creation_notification(request, notif_type, user_id , language):
+def add_creation_notification(request, notif_type, user_id, language):
     notif_rec = None
-    message = "You are now a "+str(language)
+    message = "You are now a " + str(language)
     title = ''
 
     try:
-        if notif_type in (ROLES_DICT['contributor'],ROLES_DICT['external-contributor']):
-            title = title + str(language) +" - Contributorship added"
-            message = message+ " contributor"
+        if notif_type in (ROLES_DICT['contributor'], ROLES_DICT['external-contributor']):
+            title = title + str(language) + " - Contributorship added"
+            message = message + " contributor"
 
-            notif_rec = ContributorNotification.objects.create(user_id = user_id ,
-                message = message , title = title)
+            notif_rec = ContributorNotification.objects.create(user_id=user_id,
+                                                               message=message, title=title)
         elif notif_type == ROLES_DICT['video-reviewer']:
-            title = title +"Video Reviewership added"
-            message = message+ " video reviewer"
+            title = title + "Video Reviewership added"
+            message = message + " video reviewer"
 
-            notif_rec = AdminReviewerNotification.objects.create(user_id = user_id ,
-                message = "You are now a Video Reviewer" , title = title)
-        elif notif_type == ROLES_DICT['domain-reviewer'] :
-            title = title + str(language) +" - Domain Reviewership added"
-            message = message+ " domain reviewer"
-            notif_rec = DomainReviewerNotification.objects.create(user_id = user_id ,
-                message = message , title = title)
-        elif notif_type == ROLES_DICT['quality-reviewer'] :
-            title = title + str(language) +" - Quality Reviewership added"
-            message = message+ " quality reviewer"
-            notif_rec = QualityReviewerNotification.objects.create(user_id = user_id ,
-                message = message , title = title)
+            notif_rec = AdminReviewerNotification.objects.create(user_id=user_id,
+                                                                 message="You are now a Video Reviewer", title=title)
+        elif notif_type == ROLES_DICT['domain-reviewer']:
+            title = title + str(language) + " - Domain Reviewership added"
+            message = message + " domain reviewer"
+            notif_rec = DomainReviewerNotification.objects.create(user_id=user_id,
+                                                                  message=message, title=title)
+        elif notif_type == ROLES_DICT['quality-reviewer']:
+            title = title + str(language) + " - Quality Reviewership added"
+            message = message + " quality reviewer"
+            notif_rec = QualityReviewerNotification.objects.create(user_id=user_id,
+                                                                   message=message, title=title)
     except Exception as e:
         print("Notification already exists")
     return HttpResponseRedirect(request.META['HTTP_REFERER'])
@@ -4215,16 +4266,16 @@ def update_tutorials(request):
 
     #tutorials = TutorialDetail.objects.filter(foss__foss=foss_name)
     published_tutorials = TutorialResource.objects.filter(tutorial_detail__foss__foss=foss_name,
-        status= PUBLISHED, language_id=22)
+                                                          status=PUBLISHED, language_id=22)
     all_langs = Language.objects.all().exclude(id=22)
     for tutorial in published_tutorials:
-        print(tutorial.tutorial_detail.foss.foss,tutorial.tutorial_detail)
+        print(tutorial.tutorial_detail.foss.foss, tutorial.tutorial_detail)
         for language in all_langs:
             this_tutorial_user_lang = TutorialResource.objects.filter(Q(
-                    status=PUBLISHED)|Q(
-                    assignment_status=ASSIGNMENT_STATUS_DICT['assigned']),
-                    tutorial_detail=tutorial.tutorial_detail, language=language)
-            tutorialsavailable=TutorialsAvailable.objects.filter(
+                status=PUBLISHED) | Q(
+                assignment_status=ASSIGNMENT_STATUS_DICT['assigned']),
+                tutorial_detail=tutorial.tutorial_detail, language=language)
+            tutorialsavailable = TutorialsAvailable.objects.filter(
                 tutorial_detail=tutorial.tutorial_detail, language=language)
             if action == 'add':
                 if not this_tutorial_user_lang.exists():
@@ -4238,7 +4289,8 @@ def update_tutorials(request):
                 tutorialsavailable.delete()
                 data = 'Removed'
 
-    return HttpResponse(json.dumps(data),content_type='application/json')
+    return HttpResponse(json.dumps(data), content_type='application/json')
+
 
 @csrf_exempt
 def grant_role(request):
@@ -4251,7 +4303,7 @@ def grant_role(request):
     data = ''
 
     tuto_available = TutorialDetail.objects.filter(
-            foss_id=foss_id).values_list('id','tutorial','level').order_by('level')
+        foss_id=foss_id).values_list('id', 'tutorial', 'level').order_by('level')
 
     for a_tutorial in tuto_available:
         contrib_roles = ContributorRole.objects.filter(user=user_id, tutorial_detail_id=a_tutorial[0], language_id=22)
@@ -4268,6 +4320,6 @@ def grant_role(request):
             else:
                 data = "Role already exists"
         if action == 'remove':
-            contrib_roles.update(status = 0, updated = timezone.now())
+            contrib_roles.update(status=0, updated=timezone.now())
             data = "Role Deleted"
-    return HttpResponse(json.dumps(data),content_type='application/json')
+    return HttpResponse(json.dumps(data), content_type='application/json')

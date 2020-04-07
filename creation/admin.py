@@ -59,6 +59,7 @@ class FossCategoryAdmin(admin.ModelAdmin):
     class Media:
         js = ('admin/js/update_tutorials.js',)
 
+
 class BrochurePageInline(admin.TabularInline):
     model = BrochurePage
 
@@ -87,7 +88,7 @@ class TutorialDetailAdmin(admin.ModelAdmin):
 
 class ContributorRoleAdmin(admin.ModelAdmin):
     form = ContributorRoleForm
-    list_display = ('user','foss_category','tutorial_detail', 'language',
+    list_display = ('user', 'foss_category', 'tutorial_detail', 'language',
                     'status', 'created', 'updated',)
     list_filter = ('updated', 'language', 'foss_category')
 
@@ -172,7 +173,8 @@ class QualityReviewerRoleAdmin(admin.ModelAdmin):
 
     class Media:
 
-            js = ('admin/js/quality_reviewer_languages.js', )
+        js = ('admin/js/quality_reviewer_languages.js', )
+
 
 class FossAvailableForTestAdmin(admin.ModelAdmin):
     form = FossAvailableForTestForm
@@ -200,7 +202,7 @@ class LanguagManagerAdmin(admin.ModelAdmin):
 
 
 class CollaborateAdmin(admin.ModelAdmin):
-    list_display = ('user','foss_name','language','created',)        
+    list_display = ('user', 'foss_name', 'language', 'created',)
 
 
 admin.site.register(Language, LanguageAdmin)
@@ -215,4 +217,3 @@ admin.site.register(FossAvailableForWorkshop, FossAvailableForWorkshopAdmin)
 admin.site.register(BrochureDocument, BrochureDocumentAdmin)
 admin.site.register(LanguageManager, LanguagManagerAdmin)
 admin.site.register(Collaborate, CollaborateAdmin)
-

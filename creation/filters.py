@@ -12,7 +12,7 @@ class CreationStatisticsFilter(django_filters.FilterSet):
 
     class Meta(object):
         model = TutorialResource
-        fields = ['tutorial_detail__foss', 'language', 'tutorial_detail__level', 'publish_at', 'script_user', 'video_user' ,'submissiondate']
+        fields = ['tutorial_detail__foss', 'language', 'tutorial_detail__level', 'publish_at', 'script_user', 'video_user', 'submissiondate']
 
 
 class ContributorRatingFilter(django_filters.FilterSet):

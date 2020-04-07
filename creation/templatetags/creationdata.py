@@ -28,11 +28,14 @@ from spoken.forms import TutorialSearchForm
 
 register = template.Library()
 
+
 def format_component_title(name):
     return name.replace('_', ' ').capitalize()
 
+
 def get_url_name(name):
     return quote_plus(name)
+
 
 def get_zip_content(path):
     file_names = None
@@ -43,6 +46,7 @@ def get_zip_content(path):
     except Exception as e:
         return False
 
+
 def is_script_available(path):
     try:
         code = urlopen(script_path).code
@@ -52,32 +56,38 @@ def is_script_available(path):
         return True
     return False
 
+
 def get_review_status_list(key):
-	status_list = ['Pending', 'Waiting for Admin Review', 'Waiting for Domain Review', 'Waiting for Quality Review', 'Accepted', 'Need Improvement', 'Not Required']
-	return status_list[key];
+    status_list = ['Pending', 'Waiting for Admin Review', 'Waiting for Domain Review', 'Waiting for Quality Review', 'Accepted', 'Need Improvement', 'Not Required']
+    return status_list[key]
+
 
 def get_review_status_class(key):
-	status_list = ['danger', 'active', 'warning', 'info', 'success', 'danger', 'success']
-	return status_list[key];
+    status_list = ['danger', 'active', 'warning', 'info', 'success', 'danger', 'success']
+    return status_list[key]
+
 
 def get_review_status_symbol(key):
-	status_list = ['fa fa-1 fa-minus-circle review-pending-upload', 'fa fa-1 fa-check-circle review-admin-review', 'fa fa-1 fa-check-circle review-domain-review', 'fa fa-1 fa-check-circle review-quality-review', 'fa fa-1 fa-check-circle review-accepted', 'fa fa-1 fa-times-circle review-pending-upload', 'fa fa-1 fa-ban review-accepted']
-	return status_list[key];
+    status_list = ['fa fa-1 fa-minus-circle review-pending-upload', 'fa fa-1 fa-check-circle review-admin-review', 'fa fa-1 fa-check-circle review-domain-review', 'fa fa-1 fa-check-circle review-quality-review', 'fa fa-1 fa-check-circle review-accepted', 'fa fa-1 fa-times-circle review-pending-upload', 'fa fa-1 fa-ban review-accepted']
+    return status_list[key]
+
 
 def get_username(key):
-	user = User.objects.get(pk = key)
-	return user.username
+    user = User.objects.get(pk=key)
+    return user.username
+
 
 def get_last_video_upload_time(key):
-	rec = None
-	try:
-		rec = ContributorLog.objects.filter(tutorial_resource_id = key.id).order_by('-created')[0]
-		tmpdt = key.updated
-		for tmp in rec:
-			tmpdt = rec.created
-		return tmpdt
-	except:
-		return key.updated
+    rec = None
+    try:
+        rec = ContributorLog.objects.filter(tutorial_resource_id=key.id).order_by('-created')[0]
+        tmpdt = key.updated
+        for tmp in rec:
+            tmpdt = rec.created
+        return tmpdt
+    except:
+        return key.updated
+
 
 def get_component_name(comp):
     comps = {
@@ -95,15 +105,15 @@ def get_component_name(comp):
         pass
     return key.title()
 
+
 def get_missing_component_reply(mcid):
-    rows = TutorialMissingComponentReply.objects.filter(missing_component_id = mcid)
+    rows = TutorialMissingComponentReply.objects.filter(missing_component_id=mcid)
     replies = ''
     for row in rows:
         replies += '<p>' + row.reply_message + '<b> -' + row.user.username + '</b></p>'
     if replies:
         replies = '<br /><b>Replies:</b>' + replies
     return replies
-
 
 
 def formatismp4(path):
@@ -121,12 +131,13 @@ def instruction_sheet(foss, lang):
         if os.path.isfile(file_path):
             file_path = settings.MEDIA_URL + 'videos/' + str(foss.id) + '/' + foss.foss.replace(' ', '-') + '-Instruction-Sheet-' + lang.name + '.pdf'
             return file_path
-    
+
     file_path = settings.MEDIA_ROOT + 'videos/' + str(foss.id) + '/' + foss.foss.replace(' ', '-') + '-Instruction-Sheet-English.pdf'
     if os.path.isfile(file_path):
-            file_path = settings.MEDIA_URL + 'videos/' + str(foss.id) + '/' + foss.foss.replace(' ', '-') + '-Instruction-Sheet-English.pdf'
-            return file_path
+        file_path = settings.MEDIA_URL + 'videos/' + str(foss.id) + '/' + foss.foss.replace(' ', '-') + '-Instruction-Sheet-English.pdf'
+        return file_path
     return False
+
 
 def installation_sheet(foss, lang):
     file_path = settings.MEDIA_ROOT + 'videos/' + str(foss.id) + '/' + foss.foss.replace(' ', '-') + '-Installation-Sheet-' + lang.name + '.pdf'
@@ -134,75 +145,82 @@ def installation_sheet(foss, lang):
         if os.path.isfile(file_path):
             file_path = settings.MEDIA_URL + 'videos/' + str(foss.id) + '/' + foss.foss.replace(' ', '-') + '-Installation-Sheet-' + lang.name + '.pdf'
             return file_path
-    
+
     file_path = settings.MEDIA_ROOT + 'videos/' + str(foss.id) + '/' + foss.foss.replace(' ', '-') + '-Installation-Sheet-English.pdf'
     if os.path.isfile(file_path):
-            file_path = settings.MEDIA_URL + 'videos/' + str(foss.id) + '/' + foss.foss.replace(' ', '-') + '-Installation-Sheet-English.pdf'
-            return file_path
+        file_path = settings.MEDIA_URL + 'videos/' + str(foss.id) + '/' + foss.foss.replace(' ', '-') + '-Installation-Sheet-English.pdf'
+        return file_path
     return False
-    
+
+
 def brochure(foss, lang):
     file_path = settings.MEDIA_ROOT + 'videos/' + str(foss.id) + '/' + foss.foss.replace(' ', '-') + '-Brochure-' + lang.name + '.pdf'
     if lang.name != 'English':
         if os.path.isfile(file_path):
             file_path = settings.MEDIA_URL + 'videos/' + str(foss.id) + '/' + foss.foss.replace(' ', '-') + '-Brochure-' + lang.name + '.pdf'
             return file_path
-    
+
     file_path = settings.MEDIA_ROOT + 'videos/' + str(foss.id) + '/' + foss.foss.replace(' ', '-') + '-Brochure-English.pdf'
     if os.path.isfile(file_path):
-            file_path = settings.MEDIA_URL + 'videos/' + str(foss.id) + '/' + foss.foss.replace(' ', '-') + '-Brochure-English.pdf'
-            return file_path
+        file_path = settings.MEDIA_URL + 'videos/' + str(foss.id) + '/' + foss.foss.replace(' ', '-') + '-Brochure-English.pdf'
+        return file_path
     return False
+
 
 def get_thumb_path(row, append_str):
     path = settings.MEDIA_URL + 'videos/' + str(row.foss_id) + '/' + str(row.id) + '/' + row.tutorial.replace(' ', '-') + '-' + append_str + '.png'
     return path
 
+
 def get_srt_path(tr):
     data = ''
     english_srt = settings.MEDIA_ROOT + 'videos/' + str(tr.tutorial_detail.foss_id) + '/' + str(tr.tutorial_detail_id) + '/' + tr.tutorial_detail.tutorial.replace(' ', '-') + '-English.srt'
     if os.path.isfile(english_srt):
-        data = '<track kind="captions" src="'+ settings.MEDIA_URL + 'videos/' + str(tr.tutorial_detail.foss_id) + '/' + str(tr.tutorial_detail_id) + '/' + tr.tutorial_detail.tutorial.replace(' ', '-') + '-English.srt' + '" srclang="en" label="English"></track>'
+        data = '<track kind="captions" src="' + settings.MEDIA_URL + 'videos/' + str(tr.tutorial_detail.foss_id) + '/' + str(tr.tutorial_detail_id) + '/' + tr.tutorial_detail.tutorial.replace(' ', '-') + '-English.srt' + '" srclang="en" label="English"></track>'
     if tr.language.name != 'English':
-        native_srt = settings.MEDIA_ROOT + 'videos/' + str(tr.tutorial_detail.foss_id) + '/' + str(tr.tutorial_detail_id) + '/' + tr.tutorial_detail.tutorial.replace(' ', '-') + '-' + tr.language.name +'.srt'
+        native_srt = settings.MEDIA_ROOT + 'videos/' + str(tr.tutorial_detail.foss_id) + '/' + str(tr.tutorial_detail_id) + '/' + tr.tutorial_detail.tutorial.replace(' ', '-') + '-' + tr.language.name + '.srt'
         print(native_srt)
         if os.path.isfile(native_srt):
-            data += '<track kind="captions" src="'+ settings.MEDIA_URL + 'videos/' + str(tr.tutorial_detail.foss_id) + '/' + str(tr.tutorial_detail_id) + '/' + tr.tutorial_detail.tutorial.replace(' ', '-') + '-' + tr.language.name + '.srt' + '" srclang="en" label="' + tr.language.name + '"></track>'
+            data += '<track kind="captions" src="' + settings.MEDIA_URL + 'videos/' + str(tr.tutorial_detail.foss_id) + '/' + str(tr.tutorial_detail_id) + '/' + tr.tutorial_detail.tutorial.replace(' ', '-') + '-' + tr.language.name + '.srt' + '" srclang="en" label="' + tr.language.name + '"></track>'
     return data
+
 
 def get_video_visits(tr):
     tr.hit_count = tr.hit_count + 1
     tr.save()
     return tr.hit_count
 
+
 def get_prerequisite(tr, td):
     print((tr, td))
     try:
-        tr_rec = TutorialResource.objects.get(Q(status = 1) | Q(status = 2), tutorial_detail = td, language_id = tr.language_id)
+        tr_rec = TutorialResource.objects.get(Q(status=1) | Q(status=2), tutorial_detail=td, language_id=tr.language_id)
         return get_url_name(td.foss.foss) + '/' + get_url_name(td.tutorial) + '/' + tr_rec.language.name
     except Exception as e:
         print(e)
         if tr.language.name != 'English':
             try:
-                tr_rec = TutorialResource.objects.get(Q(status = 1) | Q(status = 2), tutorial_detail = td, language__name = 'English')
+                tr_rec = TutorialResource.objects.get(Q(status=1) | Q(status=2), tutorial_detail=td, language__name='English')
                 return get_url_name(td.foss.foss) + '/' + get_url_name(td.tutorial) + '/English'
             except:
                 return None
         pass
     return None
 
+
 def get_prerequisite_from_td(td, lang):
     try:
-        tr_rec = TutorialResource.objects.get(Q(status = 1) | Q(status = 2), tutorial_detail = td, language_id = lang.id)
+        tr_rec = TutorialResource.objects.get(Q(status=1) | Q(status=2), tutorial_detail=td, language_id=lang.id)
         return tr_rec.id
     except:
         if lang.name != 'English':
             try:
-                tr_rec = TutorialResource.objects.get(Q(status = 1) | Q(status = 2), tutorial_detail = td, language__name = 'English')
+                tr_rec = TutorialResource.objects.get(Q(status=1) | Q(status=2), tutorial_detail=td, language__name='English')
                 return tr_rec.id
             except:
                 pass
     return None
+
 
 def get_timed_script(script_path, timed_script_path):
     if timed_script_path:
@@ -226,12 +244,14 @@ def get_timed_script(script_path, timed_script_path):
         return timed_script
     return ''
 
+
 def tutorialsearch():
     context = {
         'form': TutorialSearchForm()
     }
 
     return context
+
 
 def get_mp4_video(tr):
     video_name = tr.video
@@ -274,4 +294,4 @@ register.filter('brochure', brochure)
 register.filter('get_contenteditor', is_contenteditor)
 register.filter('format_component_title', format_component_title)
 register.filter('get_mp4_video', get_mp4_video)
-register.filter('get_language_manager',is_language_manager)
+register.filter('get_language_manager', is_language_manager)

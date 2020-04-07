@@ -4,7 +4,6 @@
 # 2. run "python manage.py FOSS_CATEGORIES"
 
 
-
 # Third Party Stuff
 from django.core.management.base import BaseCommand
 from django.db import transaction as tx
