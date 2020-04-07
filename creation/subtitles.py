@@ -132,7 +132,7 @@ def generate_subtitle(srt_url, srt_file_path):
             file_head = open(srt_file_path, "w")
             file_head.write(srt_data.encode("utf-8"))
             file_head.close()
-           # print srt_data
+            # print srt_data
     except Exception as e:
         # print e
         return False

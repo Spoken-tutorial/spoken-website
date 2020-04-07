@@ -271,8 +271,7 @@ def creation_add_role(request, role_type, languages):
                                          role_type.title() + ' role is already waiting for admin approval!')
                     else:
                         messages.warning(request, 'Request to the ' +
-                                         role_type.title() + ' role' + ' for ' + language_alert.name +
-                                         ' is already waiting for admin approval!')
+                                         role_type.title() + ' role' + ' for ' + language_alert.name + ' is already waiting for admin approval!')
                 if this_user_role.filter(status=2).exists():
                     this_user_role.update(status=0)
             else:
@@ -288,9 +287,8 @@ def creation_add_role(request, role_type, languages):
                 # new_role_request.user.groups.add(Group.objects.get(
                 #    name = role_type))
                 if role_type != 'video-reviewer':
-                    messages.success(request, 'Request to the ' +
-                                     role_type.title() + ' role' + ' for the language ' +
-                                     language_alert.name + ' has been sent for admin approval!')
+                    messages.success(request,
+                                     'Request to the ' + role_type.title() + ' role' + ' for the language ' + language_alert.name + ' has been sent for admin approval!')
                 else:
                     messages.success(request, 'Request to the ' +
                                      role_type.title() + ' role has been sent for approval!')
@@ -356,9 +354,8 @@ def creation_reject_role_request(request, recid, user_type):
         try:
             role_rec = RoleRequest.objects.get(pk=recid, status=0)
             role_rec.delete()
-            messages.success(request, roles[role_rec.role_type] +
-                             ' role of ' + str(role_rec.language) +
-                             ' has been deleted successfully for ' + role_rec.user.username)
+            messages.success(request,
+                             roles[role_rec.role_type] + ' role of ' + str(role_rec.language) + ' has been deleted successfully for ' + role_rec.user.username)
         except BaseException:
             messages.error(request, 'The given role request id is either invalid or it is already rejected')
     else:
@@ -3340,8 +3337,7 @@ def allocate_tutorial(request, sel_status, role):
     global_req = request
     user = User.objects.get(id=request.user.id)
     if not (user.is_authenticated() and
-            (is_contributor(user) or is_language_manager(request.user)
-             or is_administrator(request.user))):
+            (is_contributor(user) or is_language_manager(request.user) or is_administrator(request.user))):
         raise PermissionDenied()
 
     active = sel_status
@@ -3807,8 +3803,7 @@ def single_tutorial_allocater(request, tut, lid, days, user):
                                                      submissiondate=submissiondate,
                                                      assignment_status=ASSIGNMENT_STATUS_DICT['assigned'])
         messages.warning(request, 'Successfully updated ' +
-                         tut.tutorial + ' to ' + str(user) + ' : ' +
-                         str(submissiondate))
+                         tut.tutorial + ' to ' + str(user) + ' : ' + str(submissiondate))
 
     else:
         common_content = TutorialCommonContent.objects.get(tutorial_detail_id=tut.id)
