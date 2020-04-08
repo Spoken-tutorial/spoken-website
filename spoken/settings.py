@@ -347,7 +347,7 @@ CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TASK_SERIALIZER = 'json'
 
-CRON_ROOT = os.path.join(MEDIA_ROOT, 'crons/')
+CRON_ROOT = os.path.join(MEDIA_ROOT, 'emails/')
 
 CKEDITOR_CONFIGS = {
     'default': {

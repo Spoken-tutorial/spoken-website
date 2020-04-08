@@ -4,7 +4,7 @@ from django.core.validators import FileExtensionValidator
 
 class AsyncCronMail(models.Model):
     subject = models.CharField(max_length=100)
-    csvfile = models.FileField(upload_to='crons/', validators=[FileExtensionValidator(['csv'])])
+    csvfile = models.FileField(upload_to='emails/', validators=[FileExtensionValidator(['csv'])])
     uploaded_by = models.ForeignKey(User, on_delete=models.PROTECT )
     status = models.BooleanField()
     report = models.TextField()
