@@ -1,0 +1,83 @@
+<div class="container has-margin-top-50">
+  <div class="section">
+    <div class="columns is-centered is-mobile">
+      <div class="column">
+        <div class="timeline">
+
+          <div class="columns is-mobile">
+
+            <div class="column is-8">
+              <p class="title">{{ tutorialName }}</p>
+            </div>
+
+            <div class="column is-4">
+              <div class="is-pulled-right">
+                <a class="button is-info" title="Click to go back" routerLink="/">
+                  <i class="fa fa-chevron-left"></i>&nbsp;Go Back
+                </a>
+              </div>
+            </div>
+
+          </div>
+
+          <br><br>
+          <!-- for uploading a file -->
+          <div class="file has-name is-boxed is-centered">
+            <label class="file-label">
+              <input class="file-input" type="file" (change)="onFileChange($event)" />
+              <span class="file-cta"  title="Click here to browse the file (.odt, .docx) for upload.">
+                <span class="file-icon">
+                  <i class="fa fa-upload"></i>
+                </span>
+                <span class="file-label">
+                  Choose a file…
+                </span>
+              </span>
+              <span class="file-name">
+                {{ scriptFileName }}
+              </span>
+            </label>
+          </div>
+
+          <br />
+
+          <div class="file is-centered">
+            <a *ngIf="uploadButton" class="button is-primary" (click)="onFileSave()" title="Click to upload the file"><i class="fa fa-upload"></i>&nbsp;
+              Upload Script</a>
+          </div>
+
+          <div class="is-divider" data-content="OR"></div>
+          <br />
+          <!-- below code is for pasting the whole table -->
+          <form [formGroup]="editorForm">
+
+            <div class="timeline-content">
+              <p class="heading">Paste the whole table here</p>
+              <div class="field">
+                <div class="control content">
+                  <!-- <quill-editor tagName="textarea" formControlName="data" [styles]="quillStyles" theme="snow">
+                  </quill-editor> -->
+                  <ckeditor tagName="textarea" [config]="ckeditorConfig" [editor]="Editor" formControlName="data"> 
+                  </ckeditor>
+                </div>
+              </div>
+            </div>
+
+          </form>
+
+          <a class="button heading  is-primary" [swal]="{ title: 'Upload Table',
+                    text: 'Are you sure?',
+                    type: 'info',
+                    showCancelButton: 'true',
+                    focusCancel: 'true',
+                    confirmButtonText: 'Yes! Upload it.',
+                    cancelButtonText: 'No!'
+                  }" (confirm)="saveHtmlData()">
+            upload table
+          </a>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

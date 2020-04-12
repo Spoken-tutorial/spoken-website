@@ -1,0 +1,98 @@
+<div class="columns">
+  <div class="column">
+
+    <header class="timeline-header" style="margin-top: 25px;">
+      <span class="tag is-link is-medium">{{ index+1 }}</span>
+    </header>
+
+    <div class="timeline-item animated fadeInLeft" style="margin-bottom: -20px;">
+      <div *ngIf="!view" class="timeline-marker is-icon" [swal]="{ title: 'Delete Slide',
+              text: 'Are you sure?',
+              type: 'error',
+              showCancelButton: 'true',
+              focusCancel: 'true',
+              confirmButtonText: 'Yes! Delete it.',
+              cancelButtonText: 'No!'
+            }" (confirm)="removeSlide()">
+        <a class="delete is-large"></a>
+      </div>
+
+      <form [formGroup]="editorForm">
+        <div class="columns">
+
+          <div class="column">
+            <div class="timeline-content">
+              <p class="heading">Visual Cue</p>
+              <div class="field">
+                <div class="control content">
+                  <quill-editor [modules]="modules" tagName="textarea" formControlName="cue" [(ngModel)]="slide.cue" (onBlur)="saveSlide(true)"
+                    [styles]="quillStyles" theme="snow">
+                  </quill-editor>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="column">
+            <div class="timeline-content">
+              <p class="heading">Narration</p>
+              <div class="field">
+                <div class="control content">
+                  <quill-editor [modules]="modules" tagName="textarea" formControlName="narration" [(ngModel)]="slide.narration"
+                    (onBlur)="saveSlide(true)" [styles]="quillStyles" theme="snow">
+                  </quill-editor>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </form>
+
+    </div>
+
+
+    <div class="timeline-item">
+      <div class="timeline-marker">
+      </div>
+      <div class="timeline-content">
+        <div class="columns is-mobile">
+
+          <div class="field is-grouped is-grouped-multiline">
+            <div class="control">
+              <a (click)="moveSlide(-1)">
+                <app-badge-button faClass="fas fa-chevron-up" textClass="is-info" text="Move" textTooltip="Click here to move row {{ index+1 }} up"></app-badge-button>
+              </a>
+            </div>
+
+            <div class="control">
+              <a (click)="moveSlide(+1)">
+                <app-badge-button faClass="fas fa-chevron-down" textClass="is-info" text="Move" textTooltip="Click here to move row {{ index+1 }} down"></app-badge-button>
+              </a>
+            </div>
+
+            <div class="control">
+              <a (click)="insertSlide()">
+                <app-badge-button faClass="fas fa-plus" textClass="is-info" text="Insert" textTooltip="Click here to insert a row after row {{ index+1 }}"></app-badge-button>
+              </a>
+            </div>
+
+            <div class="control">
+              <a (click)="duplicateSlide()">
+                <app-badge-button faClass="fas fa-clone" textClass="is-info" text="Duplicate" textTooltip="Click here to duplicate row {{ index+1 }}"></app-badge-button>
+              </a>
+            </div>
+
+            <div class="control" *ngIf="nav !== 'create'">
+              <a (click)="saveSlide(false)">
+                <app-badge-button faClass="fas fa-save" textClass="is-danger" text="Save" textTooltip="Click here to save row {{ index+1 }}"></app-badge-button>
+              </a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

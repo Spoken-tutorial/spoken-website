@@ -1,0 +1,18 @@
+<div class="section">
+  <div class="container">
+    <ng-container *ngIf="scripts.length !== 0">
+      <div *ngFor="let foss of scripts | keyvalue">
+        <blockquote>
+            <span class="tag is-primary is-medium">Foss</span>
+            {{foss.value.name}}
+        </blockquote>
+        <div *ngFor="let tutorial of foss.value.data">
+          <app-tutorials [tutorial]="tutorial"></app-tutorials>
+        </div>
+        <div class="is-divider" data-content="-"></div>        
+      </div>
+    </ng-container>
+
+
+  </div>
+</div>

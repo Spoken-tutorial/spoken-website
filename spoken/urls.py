@@ -5,6 +5,8 @@ from . import settings
 from django.conf.urls import include, url
 from django.contrib import admin
 from django.views.generic import TemplateView
+from rest_framework_jwt.views import obtain_jwt_token
+
 from spoken.views import *
 from workshop.views import *
 from cdeep.views import *
@@ -100,7 +102,7 @@ urlpatterns = [
     url(r'^nicedit/', include('nicedit.urls')),
     # url(r'^migration/creation/', include('creationmigrate.urls', namespace='creationmigrate')),
     # url(r'^migration/events/', include('eventsmigration.urls', namespace='eventsmigration')),
-    #url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT, 'show_indexes': False}),
+    # url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT, 'show_indexes': False}),
 
     # Old url adjustments
     # url(r'^list_videos/$',  list_videos', name='list_videos'),
@@ -121,7 +123,8 @@ urlpatterns = [
 
     # reports
     url(r'^reports/', include('reports.urls', namespace='reports')),
-
+    url(r'^scripts/', include('scriptmanager.urls', namespace='scripts')),
+    url(r'^api-token-auth/', obtain_jwt_token,name='jwt_token'),
     # events2
     # url(r'^events2/', include('events2.urls', namespace='events2')),
 

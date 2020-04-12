@@ -1,0 +1,61 @@
+<div class="section">
+  <div class="container">
+    <div class="columns is-centered has-text-centered">
+      <div class="field is-grouped is-grouped-multiline">
+        <div class="control">
+          <a routerLink="/published">
+            <app-badge-button faClass="fas fa-graduation-cap" textClass="is-info" text="Published scripts" textTooltip="Click here to view the list of published scripts"></app-badge-button>
+          </a>
+        </div>
+
+        <div class="control">
+          <a routerLink="/review">
+            <app-badge-button faClass="fas fa-search" textClass="is-info" text="Scripts available for review" textTooltip="Click here to view the list of scripts pending for review. (Reviewer's corner)">
+            </app-badge-button>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="columns is-centered has-text-centered" *ngIf="!authService.isAuthenticated()">
+      <div class="column">
+        <div class="content">
+          <p class="error-message">
+            Please refresh the page or login
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="columns is-centered has-text-centered" *ngIf="authService.isAuthenticated()">
+      <div class="column">
+        <div class="select">
+          <select [(ngModel)]="fossService.currentFossCategory" (change)="onFossCategoryChange($event.target.value)">
+            <option value="-1">Select Foss Category</option>
+            <option *ngFor="let category of fossCategories; let i = index" [value]="category['foss_category']['id']">
+              {{category['foss_category']['name']}}
+            </option>
+          </select>
+        </div>
+      </div>
+      <div class="column">
+        <div class="select">
+          <select (change)="onLanguageChange($event.target.value)"
+            [(ngModel)]="fossService.currentFossCategoryLanguage">
+            <option value="-1">Select Language</option>
+            <option *ngFor="let language of currentCategoryLanguages; let i = index" [value]="language['id']">
+              {{language['name']}}
+            </option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="columns is-centered has-text-centered" *ngIf="description !== ''">
+      <div class="column">
+        <blockquote>{{description}}</blockquote>
+      </div>
+    </div>
+    <div *ngFor="let tutorial of tutorials">
+      <app-tutorials [tutorial]="tutorial"></app-tutorials>
+      <div class="is-divider" data-content="-"></div>
+    </div>
+  </div>
+</div>

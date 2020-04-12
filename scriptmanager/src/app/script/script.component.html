@@ -1,0 +1,73 @@
+<div class="columns is-centered">
+  <div class="column is-8">
+    <p class="title">{{ tutorialName }}</p>
+  </div>
+
+  <div class="column is-4">
+    <div class="field is-grouped is-grouped-multiline">
+      <div class="control">
+        <a routerLink="/">
+          <app-badge-button faClass="fa fa-chevron-left" textClass="is-info" text="Go Back" textTooltip="Click here to go back to the list of tutorials in this FOSS"></app-badge-button>
+        </a>
+      </div>
+      <div class="control" *ngIf="nav!='create'">
+        <a routerLink="/{{nav}}/{{tid}}/{{lid}}/{{ tutorialName }}/{{vid}}">
+          <app-badge-button faClass="fa fa-eye" textClass="is-info" text="View Mode" textTooltip="Click here to stop editing and view this script"></app-badge-button>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+<div *ngIf="nav!='create'" class="columns">
+  <div class="column">
+    <div class="field" title="Toggle button to autosave the script. When On, there is no need to click Save button.">
+      <input id="autosave" type="checkbox" name="autosave"
+        class="switch is-rounded is-outlined" [(ngModel)]="autosave">
+      <label for="autosave">Autosave: Save the content of the textbox when the focus is lost</label>
+    </div>
+  </div>
+</div>
+
+<div class="columns">
+  <div class="column">
+    <div class="timeline">
+
+      <ng-container *ngFor="let slide of slides; let i = index">
+        <app-script-slide [slide]="slide" [index]="i" [nav]="nav" (removeSlideEmitter)="onRemoveSlide($event)"
+          (saveSlideEmitter)="onSaveSlide($event)" (insertSlideEmitter)="onInsertSlide($event)"
+          (duplicateSlideEmitter)="onDuplicateSlide($event)" [autosave]="autosave"
+          (moveSlideEmitter)="onMoveSlide($event)"></app-script-slide>
+      </ng-container>
+
+
+      <div class="timeline-item is-pointer">
+        <div class="timeline-marker is-info is-icon" (click)="addSlide()">
+          <i class="fa fa-plus"></i>
+        </div>
+
+        <div class="timeline-content">
+          <div class="columns">
+
+            <div class="column">
+              <a class="button heading is-outlined" (click)="addSlide()">Add new row</a>
+            </div>
+            <div *ngIf="displaySave" class="column">
+              <a class="button heading is-outlined is-primary" [swal]="{
+                            title: 'Save Script',
+                            text: 'Are you sure?',
+                            type: 'info',
+                            showCancelButton: 'true',
+                            focusCancel: 'true',
+                            confirmButtonText: 'Yes! Save it.',
+                            cancelButtonText: 'No!'
+                            }" (confirm)="saveScript()">
+                Save Script
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
