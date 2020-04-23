@@ -271,27 +271,31 @@ def api_search_engine(request):
         if foss_id in (95 ,1 ,84, 72, 54, 58, 13, 14, 66, 71, 15, 16, 17, 18, 19, 20, 63, 97, 86):
             subjectArea = "All"
 
-        if foss_id in (10,25,89,29):
-            runtime = "8 weeks"
-        if foss_id == 39:
-            runtime = "6 weeks"
-        if foss_id in (3,38,85):
-            runtime = "5 weeks"
-        if foss_id in (105 ,98 ,48 ,1 ,64, 43, 78 ,54, 70, 21, 97, 24, 55, 50, 86):
-            runtime = "4 weeks"
-        if foss_id in (15,101):
-            runtime = "3 weeks"
-        if foss_id in (44,45, 94, 128, 103, 58, 14, 66 ,71, 16 ,17 ,18 ,20 ,63 ,102 ,107, 22, 92):
-            runtime = "2 weeks"
-        if foss_id in (95 ,84, 72, 46, 19, 120):
-            runtime = "1 week"
+        #if foss_id in (10,25,89,29):
+        #     runtime = "8 weeks"
+        # if foss_id == 39:
+        #     runtime = "6 weeks"
+        # if foss_id in (3,38,85):
+        #     runtime = "5 weeks"
+        # if foss_id in (105 ,98 ,48 ,1 ,64, 43, 78 ,54, 70, 21, 97, 24, 55, 50, 86):
+        #     runtime = "4 weeks"
+        # if foss_id in (15,101):
+        #     runtime = "3 weeks"
+        # if foss_id in (44,45, 94, 128, 103, 58, 14, 66 ,71, 16 ,17 ,18 ,20 ,63 ,102 ,107, 22, 92):
+        #     runtime = "2 weeks"
+        # if foss_id in (95 ,84, 72, 46, 19, 120):
+        #     runtime = "1 week"
         try:
             hr,mins,secs = TutorialDuration.objects.get(
             tutorial_id=tr.tutorial_detail.id).duration.split(":")
             runtime = mins+" mins "+secs+" secs"
-        except Exception as e:
-            print(e)
-            runtime = ""
+        except :
+            try:
+                duration, filesize = video_duration_with_filesize(tr)
+                hr,mins,secs = str(duration).split(":")
+                runtime = mins+" mins "+secs+" secs"
+            except :
+                runtime = ""
         
         videourl = "https://spoken-tutorial.org/watch/" + tr.tutorial_detail.foss.foss + \
             "/" + tr.tutorial_detail.tutorial + "/" + tr.language.name
