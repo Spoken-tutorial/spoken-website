@@ -285,6 +285,14 @@ def api_search_engine(request):
             runtime = "2 weeks"
         if foss_id in (95 ,84, 72, 46, 19, 120):
             runtime = "1 week"
+        try:
+            hr,mins,secs = TutorialDuration.objects.get(
+            tutorial_id=tr.tutorial_detail.id).duration.split(":")
+            runtime = mins+" mins "+secs+" secs"
+        except Exception as e:
+            print(e)
+            runtime = ""
+        
         videourl = "https://spoken-tutorial.org/watch/" + tr.tutorial_detail.foss.foss + \
             "/" + tr.tutorial_detail.tutorial + "/" + tr.language.name
        
