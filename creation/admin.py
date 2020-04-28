@@ -199,6 +199,10 @@ class LanguagManagerAdmin(admin.ModelAdmin):
         js = ('admin/js/not_contributor_langs.js', )
 
 
+class CollaborateAdmin(admin.ModelAdmin):
+    list_display = ('user','foss_name','language','created',)        
+
+
 admin.site.register(Language, LanguageAdmin)
 admin.site.register(FossCategory, FossCategoryAdmin)
 admin.site.register(FossSuperCategory, FossSuperCategoryAdmin)
@@ -210,3 +214,5 @@ admin.site.register(FossAvailableForTest, FossAvailableForTestAdmin)
 admin.site.register(FossAvailableForWorkshop, FossAvailableForWorkshopAdmin)
 admin.site.register(BrochureDocument, BrochureDocumentAdmin)
 admin.site.register(LanguageManager, LanguagManagerAdmin)
+admin.site.register(Collaborate, CollaborateAdmin)
+

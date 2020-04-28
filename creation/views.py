@@ -3057,8 +3057,16 @@ def ajax_get_tutorials(request):
 def view_brochure(request):
     template = 'creation/templates/view_brochure.html'
     my_dict = services.get_data_for_brochure_display()
+    st_brochure = BrochureDocument.objects.filter(foss_course=36)
+    pages = BrochurePage.objects.filter(brochure_id=st_brochure)
+    st_pages=[]
+    for page in pages:
+        st_pages.append(page.page.url)
+
+
     context = {
-        'my_dict': my_dict
+        'my_dict': my_dict,
+        'st_pages': st_pages
     }
     return render(request, template, context)
 

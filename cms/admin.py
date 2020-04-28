@@ -81,6 +81,10 @@ class NewsAdmin(admin.ModelAdmin):
                 mimeType = 'JPEG'
             im.save(settings.MEDIA_ROOT + "news/" + str(obj.id) + "/" + str(obj.id) + "-thumb." + ext, mimeType)
 
+class SiteFeedbackAdmin(admin.ModelAdmin):
+    model = SiteFeedback
+    list_display = ('name', 'email', 'message', 'created')           
+
 
 admin.site.register(Block, BlockAdmin)
 admin.site.register(Nav, NavAdmin)
@@ -89,3 +93,4 @@ admin.site.register(Event, EventAdmin)
 admin.site.register(Notification, NotificationAdmin)
 admin.site.register(NewsType, NewsTypeAdmin)
 admin.site.register(News, NewsAdmin)
+admin.site.register(SiteFeedback, SiteFeedbackAdmin)
