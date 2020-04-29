@@ -116,8 +116,15 @@
         }
     </style>
 {% endblock %}
+<div class="container">
 <div class="well tab-content tutorial-search-form col-lg-offset-1 col-md-offset-1 col-lg-10 col-md-10 col-sm-12 col-xs-12">
     <div class="col-sm-12">
+        {% if series_type ='0' %}
+        hello0
+        {% endif %}
+         {% if series_type=='1'%}
+        hello1
+        {% endif %}
         <form action=" {% url 'series-tutorial-search' %} " method="GET" class='form-horizontal'>
             {% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
                 {% if form.non_field_errors %}
@@ -153,8 +160,8 @@
         <h4 class="page-title">
             <i class="fa fa-list-ul"></i> Testimonials
             {% if add_button_show %}
-            <a class="btn btn-primary pull-right" href="{% url 'testimonials_new_media' testimonial_type='series' %}">Upload Series Testimonial</a>
-            {% endif %}
+            <a class="btn btn-primary pull-right" href="{% url 'testimonials_new_media' testimonial_type=series_type %}">Upload Series Testimonial</a>
+            {% endif %}  
         </h4>
         {% for record in collection %}
             {% if record.path %}
@@ -206,5 +213,5 @@
             {% endif %}
         {% endfor %}
     </div>
-
+</div>
 {% endblock %}

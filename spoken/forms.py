@@ -90,17 +90,19 @@ class SeriesTutorialSearchForm(forms.Form):
     )
 
     def __init__(self, *args, **kwargs):
+        type_id = kwargs.pop('type_id')
+        print(type_id,"@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
         super(SeriesTutorialSearchForm, self).__init__(*args, **kwargs)
         foss_list_choices = [('', '-- All Courses --'), ]
         lang_list_choices = [('', '-- All Languages --'), ]
 
-        foss_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), language__name='English', tutorial_detail__foss__show_on_homepage=0).values('tutorial_detail__foss__foss').annotate(
+        foss_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), language__name='English', tutorial_detail__foss__show_on_homepage=type_id).values('tutorial_detail__foss__foss').annotate(
             Count('id')).order_by('tutorial_detail__foss__foss').values_list('tutorial_detail__foss__foss', 'id__count').distinct()
 
         for foss_row in foss_list:
             foss_list_choices.append((str(foss_row[0]), str(foss_row[0]) + ' (' + str(foss_row[1]) + ')'))
 
-        lang_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage=0).values('language__name').annotate(
+        lang_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage=type_id).values('language__name').annotate(
             Count('id')).order_by('language').values_list('language__name', 'id__count').distinct()
         for lang_row in lang_list:
             lang_list_choices.append((str(lang_row[0]), str(lang_row[0]) + ' (' + str(lang_row[1]) + ')'))

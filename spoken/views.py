@@ -175,12 +175,68 @@ def list_videos(request):
     context['form'] = form
     return render(request, 'spoken/templates/list_videos_form.html', context)
 
-def series_foss(request):
-    '''
-    Get all the media testimonials which are set to not 
-    show on home page and display along the form to display the tutorials.
-    '''
-    form = SeriesTutorialSearchForm()
+def health_landing(request):
+    series_type='health'
+    collection = None
+  
+    context = {}
+    context['media_url'] = settings.MEDIA_URL
+    context['series_type'] = series_type
+    return render(request, 'spoken/templates/health_landing.html', context)
+
+def covid_foss(request):
+    form = SeriesTutorialSearchForm(type_id=4)
+    series_type='covid'
+    collection = None
+    
+    context = {}
+    context['form'] = form
+    context['collection'] = collection
+    context['media_url'] = settings.MEDIA_URL
+    context['series_type'] = series_type
+    return render(request, 'spoken/templates/series_foss_list.html', context)
+
+@csrf_exempt
+def health_tutorial_search(request):
+    context = {}
+    collection = None    
+    show_on_homepage = 4
+    form = SeriesTutorialSearchForm(type_id = 4)    
+    foss_get = ''
+    
+    queryset = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = show_on_homepage)
+    
+    if request.method == 'GET' and request.GET:
+        form = SeriesTutorialSearchForm(request.GET)
+        if form.is_valid():
+            foss_get = request.GET.get('search_otherfoss', '')
+            language_get = request.GET.get('search_otherlanguage', '')
+            if foss_get and language_get:
+                collection = queryset.filter(tutorial_detail__foss__foss=foss_get, language__name=language_get).order_by('tutorial_detail__level', 'tutorial_detail__order')
+
+            elif foss_get:
+                collection = queryset.filter(tutorial_detail__foss__foss=foss_get).order_by('tutorial_detail__level', 'tutorial_detail__order', 'language__name')
+            elif language_get:
+                collection = queryset.filter(language__name=language_get).order_by('tutorial_detail__foss__foss', 'tutorial_detail__level', 'tutorial_detail__order')
+            else:
+                collection = queryset.filter(tutorial_detail__foss__id__in=FossCategory.objects.values('id'), language__id__in=Language.objects.values('id')).order_by('tutorial_detail__foss__foss', 'language__name', 'tutorial_detail__level', 'tutorial_detail__order')
+    else:
+        foss = queryset.filter(language__name='English').values('tutorial_detail__foss__foss').annotate(Count('id')).values_list('tutorial_detail__foss__foss').distinct().order_by('?')[:1].first()
+        collection = queryset.filter(tutorial_detail__foss__foss=foss[0], language__name='English')
+        foss_get = foss[0]
+    if collection:
+        page = request.GET.get('page')
+        collection = get_page(collection, page)
+    context['form'] = form
+    context['collection'] = collection
+    context['SCRIPT_URL'] = settings.SCRIPT_URL
+    context['current_foss'] = foss_get
+    return render(request, 'spoken/templates/series_tutorial_search.html', context)
+
+
+def nutrition_foss(request):
+    form = SeriesTutorialSearchForm(type_id=0)
+    series_type='health'
     collection = None
     # Get all the video / audio testimonials in series
     foss_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), language__name='English', tutorial_detail__foss__show_on_homepage = 0).values_list('tutorial_detail__foss__id').annotate().distinct()
@@ -198,15 +254,84 @@ def series_foss(request):
     context['collection'] = collection
     context['media_url'] = settings.MEDIA_URL
     context['add_button_show'] = add_button_show
+    context['series_type'] = series_type
+    return render(request, 'spoken/templates/series_foss_list.html', context)
+
+
+@csrf_exempt
+def health_tutorial_search(request):
+    context = {}
+    collection = None    
+    show_on_homepage = 0
+    form = SeriesTutorialSearchForm(type_id = 0)    
+    foss_get = ''
+    
+    queryset = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = show_on_homepage)
+    
+    if request.method == 'GET' and request.GET:
+        form = SeriesTutorialSearchForm(request.GET)
+        if form.is_valid():
+            foss_get = request.GET.get('search_otherfoss', '')
+            language_get = request.GET.get('search_otherlanguage', '')
+            if foss_get and language_get:
+                collection = queryset.filter(tutorial_detail__foss__foss=foss_get, language__name=language_get).order_by('tutorial_detail__level', 'tutorial_detail__order')
+
+            elif foss_get:
+                collection = queryset.filter(tutorial_detail__foss__foss=foss_get).order_by('tutorial_detail__level', 'tutorial_detail__order', 'language__name')
+            elif language_get:
+                collection = queryset.filter(language__name=language_get).order_by('tutorial_detail__foss__foss', 'tutorial_detail__level', 'tutorial_detail__order')
+            else:
+                collection = queryset.filter(tutorial_detail__foss__id__in=FossCategory.objects.values('id'), language__id__in=Language.objects.values('id')).order_by('tutorial_detail__foss__foss', 'language__name', 'tutorial_detail__level', 'tutorial_detail__order')
+    else:
+        foss = queryset.filter(language__name='English').values('tutorial_detail__foss__foss').annotate(Count('id')).values_list('tutorial_detail__foss__foss').distinct().order_by('?')[:1].first()
+        collection = queryset.filter(tutorial_detail__foss__foss=foss[0], language__name='English')
+        foss_get = foss[0]
+    if collection:
+        page = request.GET.get('page')
+        collection = get_page(collection, page)
+    context['form'] = form
+    context['collection'] = collection
+    context['SCRIPT_URL'] = settings.SCRIPT_URL
+    context['current_foss'] = foss_get
+    return render(request, 'spoken/templates/series_tutorial_search.html', context)
+
+
+
+def series_foss(request):
+    '''
+    Get all the media testimonials which are set to not 
+    show on home page and display along the form to display the tutorials.
+    '''
+    form = SeriesTutorialSearchForm(type_id = 3)
+    series_type='series'
+    collection = None
+    # Get all the video / audio testimonials in series
+    foss_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), language__name='English', tutorial_detail__foss__show_on_homepage = 3).values_list('tutorial_detail__foss__id').annotate().distinct()
+    collection =  MediaTestimonials.objects.filter(foss__id__in=foss_list).values("foss__foss", "content", "created", "foss", "foss_id", "id", "path", "user", "workshop_details").order_by('-created')
+    
+    if collection:
+        page = request.GET.get('page')
+        collection = get_page(collection, page, limit=6)
+    
+    add_button_show= False
+    if request.user.has_perm('events.add_testimonials'):
+        add_button_show= True
+    context = {}
+    context['form'] = form
+    context['collection'] = collection
+    context['media_url'] = settings.MEDIA_URL
+    context['add_button_show'] = add_button_show
+    context['series_type'] = series_type
     return render(request, 'spoken/templates/series_foss_list.html', context)
 
 @csrf_exempt
 def series_tutorial_search(request):
     context = {}
     collection = None
-    form = SeriesTutorialSearchForm()
+    show_on_homepage = 3
+    form = SeriesTutorialSearchForm(type_id = 3)
     foss_get = ''
-    show_on_homepage = 0
+
     queryset = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = show_on_homepage)
     
     if request.method == 'GET' and request.GET:
@@ -448,14 +573,19 @@ def testimonials_new_media(request, testimonial_type):
         raise PermissionDenied()
     
     context = {}
-    if testimonial_type == 'series':
+    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!",testimonial_type)
+    if testimonial_type == 'health':
         form = MediaTestimonialForm(on_home_page=0)
+    elif testimonial_type == 'series':
+        form = MediaTestimonialForm(on_home_page=3)
     else:
         form = MediaTestimonialForm(on_home_page=1)
 
     if request.method == 'POST':
-        if testimonial_type == 'series':
+        if testimonial_type == 'health':
             form = MediaTestimonialForm(request.POST, request.FILES, on_home_page=0)
+        elif testimonial_type == 'series':
+            form = MediaTestimonialForm(request.POST, request.FILES, on_home_page=3)
         else:
             form = MediaTestimonialForm(request.POST, request.FILES, on_home_page=1)
         if form.is_valid():
