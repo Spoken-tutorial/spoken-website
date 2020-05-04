@@ -56,7 +56,14 @@
                         </div>
                         <div class="col-sm-2">
                             <input class="btn btn-primary" type="submit" value="Submit" />
-                            <a href="{% url 'series'%}" class='pull-left'>Reset dropdowns</a>
+                            {% if show_on_homepage == 0 %}
+                                <a href="{% url 'health-and-nutrition'%}" class='pull-left'>
+                            {% elif show_on_homepage == 3 %}
+                                <a href="{% url 'series'%}" class='pull-left'>
+                            {% elif show_on_homepage == 4 %}
+                                <a href="{% url 'covid'%}" class='pull-left'>
+                            {% endif %}
+                                Reset dropdowns</a>
                         </div>
                     </div>
                 {% endwith %}

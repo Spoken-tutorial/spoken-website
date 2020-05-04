@@ -197,17 +197,17 @@ def covid_foss(request):
     return render(request, 'spoken/templates/series_foss_list.html', context)
 
 @csrf_exempt
-def health_tutorial_search(request):
+def covid_tutorial_search(request):
     context = {}
     collection = None    
     show_on_homepage = 4
-    form = SeriesTutorialSearchForm(type_id = 4)    
+    form = SeriesTutorialSearchForm(type_id=4)    
     foss_get = ''
     
     queryset = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = show_on_homepage)
     
     if request.method == 'GET' and request.GET:
-        form = SeriesTutorialSearchForm(request.GET)
+        form = SeriesTutorialSearchForm(request.GET, type_id=4)
         if form.is_valid():
             foss_get = request.GET.get('search_otherfoss', '')
             language_get = request.GET.get('search_otherlanguage', '')
@@ -231,6 +231,7 @@ def health_tutorial_search(request):
     context['collection'] = collection
     context['SCRIPT_URL'] = settings.SCRIPT_URL
     context['current_foss'] = foss_get
+    context['show_on_homepage'] = show_on_homepage
     return render(request, 'spoken/templates/series_tutorial_search.html', context)
 
 
@@ -263,13 +264,14 @@ def health_tutorial_search(request):
     context = {}
     collection = None    
     show_on_homepage = 0
-    form = SeriesTutorialSearchForm(type_id = 0)    
+    form = SeriesTutorialSearchForm(type_id=0)
     foss_get = ''
     
     queryset = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = show_on_homepage)
     
     if request.method == 'GET' and request.GET:
-        form = SeriesTutorialSearchForm(request.GET)
+        form = SeriesTutorialSearchForm(request.GET, type_id=0)
+
         if form.is_valid():
             foss_get = request.GET.get('search_otherfoss', '')
             language_get = request.GET.get('search_otherlanguage', '')
@@ -293,6 +295,7 @@ def health_tutorial_search(request):
     context['collection'] = collection
     context['SCRIPT_URL'] = settings.SCRIPT_URL
     context['current_foss'] = foss_get
+    context['show_on_homepage'] = show_on_homepage
     return render(request, 'spoken/templates/series_tutorial_search.html', context)
 
 
@@ -302,7 +305,7 @@ def series_foss(request):
     Get all the media testimonials which are set to not 
     show on home page and display along the form to display the tutorials.
     '''
-    form = SeriesTutorialSearchForm(type_id = 3)
+    form = SeriesTutorialSearchForm(type_id=3)
     series_type='series'
     collection = None
     # Get all the video / audio testimonials in series
@@ -329,13 +332,13 @@ def series_tutorial_search(request):
     context = {}
     collection = None
     show_on_homepage = 3
-    form = SeriesTutorialSearchForm(type_id = 3)
+    form = SeriesTutorialSearchForm(type_id=3)
     foss_get = ''
 
     queryset = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = show_on_homepage)
     
     if request.method == 'GET' and request.GET:
-        form = SeriesTutorialSearchForm(request.GET)
+        form = SeriesTutorialSearchForm(request.GET, type_id=3)
         if form.is_valid():
             foss_get = request.GET.get('search_otherfoss', '')
             language_get = request.GET.get('search_otherlanguage', '')
@@ -359,7 +362,9 @@ def series_tutorial_search(request):
     context['collection'] = collection
     context['SCRIPT_URL'] = settings.SCRIPT_URL
     context['current_foss'] = foss_get
+    context['show_on_homepage'] = show_on_homepage
     return render(request, 'spoken/templates/series_tutorial_search.html', context)
+
 
 def archived_foss(request):
     form = ArchivedTutorialSearchForm()
@@ -367,6 +372,7 @@ def archived_foss(request):
     context = {}
     context['form'] = form
     return render(request, 'spoken/templates/archived_foss_list.html', context)
+
 
 @csrf_exempt
 def archived_tutorial_search(request):

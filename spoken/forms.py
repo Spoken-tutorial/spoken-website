@@ -90,7 +90,7 @@ class SeriesTutorialSearchForm(forms.Form):
     )
 
     def __init__(self, *args, **kwargs):
-        type_id = kwargs.pop('type_id')
+        type_id = kwargs.pop('type_id', None)
         print(type_id,"@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
         super(SeriesTutorialSearchForm, self).__init__(*args, **kwargs)
         foss_list_choices = [('', '-- All Courses --'), ]
