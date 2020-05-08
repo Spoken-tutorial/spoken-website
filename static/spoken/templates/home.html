@@ -2,6 +2,7 @@
 {% load cmsdata %}
 {% load static %}
 {% load creationdata %}
+{% load announcements %}
 {% block uncompresscssblock %}
     <link href="{% static 'spoken/css/video-js.min.css' %}" rel="stylesheet" type="text/css">
 {% endblock %}
@@ -82,18 +83,19 @@
 {% block heading %}<i class="home-page-title-i">spoken tutorial</i>{% endblock %}
 {% block announcement %}
     <div id="slideshow">
-        {% if notifications %}
-            {% for notification in notifications %}
-                <div class="announcement alert" style="background:#{% if notification.bg_color %}{{ notification.bg_color }}{% else %}1B83BC{% endif %};">
-                    <div class="inner">
-                        <div class="text-container">
-                            {{ notification.body|safe }}
-                            <!--<button type="button" class="close" data-dismiss="alert">&times;</button>-->
+            {% get_notifications as notifications %}
+            {% if notifications %}
+                {% for notification in notifications %}
+                    <div class="announcement alert" style="background:#{% if notification.bg_color %}{{ notification.bg_color }}{% else %}1B83BC{% endif %};">
+                        <div class="inner">
+                            <div class="text-container">
+                                {{ notification.body|safe }}
+                                <!--<button type="button" class="close" data-dismiss="alert">&times;</button>-->
+                            </div>
                         </div>
                     </div>
-                </div>
-            {% endfor %}
-        {% endif %}
+                {% endfor %}
+            {% endif %}
     </div>
 {% endblock %}
 
