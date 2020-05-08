@@ -1,10 +1,28 @@
 <!--this the the main planner page, here it displays the complete STP planning of particular college by the organiser -->
 {% extends 'spoken/templates/base.html' %}
+{% load announcements %}
 {% block title %}Semester Training Planner Summary{% endblock %}
 {% block heading %}
   <i class="home-page-title-i">Semester Training Planner Summary (STPS)</i>
   <a href="/software-training" class='pull-right go-back'>Dashboard</a>
   <center><a class="btn btn-primary" data-toggle="modal" data-target="#myModal"><i class="fa fa-2 fa-question"></i> Instructions</a></center>
+{% endblock %}
+{% block announcement %}
+    <div id="slideshow">
+            {% get_notifications as notifications %}
+            {% if notifications %}
+                {% for notification in notifications %}
+                    <div class="announcement alert" style="background:#{% if notification.bg_color %}{{ notification.bg_color }}{% else %}1B83BC{% endif %};">
+                        <div class="inner">
+                            <div class="text-container">
+                                {{ notification.body|safe }}
+                                <!--<button type="button" class="close" data-dismiss="alert">&times;</button>-->
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+    </div>
 {% endblock %}
 {% block search %}{% endblock %}
 
@@ -261,19 +279,31 @@
 {% endblock %}
 
 {% block jsblock %}
-  <!--<script>
-
-    $('.tp>li>.yeardesc').click(function(e){
-      if( $(this).parent('li').hasClass('active') ){
-          $(this).parent('li').removeClass('active').children('.training-row').slideUp();
-          e.stopPropagation();
-      }
-      else{
-          $('.tp').find('li').removeClass('active').children('.training-row').slideUp();
-          $(this).parent('li').addClass('active').children('.training-row').slideDown();
-          e.stopPropagation();
-      }
-    });
-
-  </script> -->
+    <script>
+        /* Slideshow */
+        var stop = 1
+        $('#slideshow').hover(function(){
+            stop = 0
+        }, function(){
+            stop = 1
+        });
+        if($(".announcement").length > 1){
+            $("#slideshow > div:gt(0)").hide();
+            setInterval(function() {
+              if(stop){
+                  $('#slideshow > div:first')
+                    .fadeOut(0)
+                    .next()
+                    .fadeIn(0)
+                    .end()
+                    .appendTo('#slideshow');
+                 }
+            },  5000);
+        }
+        $('.close').click(function(){
+            $(".navbar-fixed-top").css({'top' : '0px', 'position' : 'fixed'});
+            $("#header-wrapper").css({'height' : '0px'});
+        });
+    </script>
 {% endblock %}
+
