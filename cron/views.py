@@ -62,4 +62,14 @@ def run_cron_mail(request):
 
 
 
-
+@user_passes_test(lambda u: u.is_superuser)
+def update_task(request):
+    if request.method == 'POST':
+        cron_id = int(request.POST['task_id'])
+        task = AsyncCronMail.objects.get(pk=cron_id)
+        if not task.status:
+            task.subject=request.POST['task_subject']
+            task.message=request.POST['task_message']
+            task.save()
+            return redirect('cron:mail_list_create')
+    return redirect('cron:mail_list_create')
