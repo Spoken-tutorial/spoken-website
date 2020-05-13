@@ -353,13 +353,6 @@ CKEDITOR_CONFIGS = {
     'default': {
         'height': 150,
         'width': 600,
-        'toolbar': 'Full',
-        'toolbar_Custom': [
-            ['Bold', 'Italic', 'Underline'],
-            ['NumberedList', 'BulletedList', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock'],
-            ['Link', 'Unlink'],
-            ['TextColor', 'BGColor'],
-            [ 'Source']
-        ]
+        'toolbar': 'Full'
     }
 }
