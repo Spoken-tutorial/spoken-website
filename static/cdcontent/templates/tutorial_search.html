@@ -30,7 +30,7 @@
                                     <span class="icon-bar"></span>
                                 </button>
                                 <a href="">
-                                    <img width="45px" src="../../includes/images/logo.png">
+                                    <img width="110px" src="../../includes/images/logo.png">
                                     Spoken <span class="title">Tutorial</span>
                                 </a>
                             </div>
@@ -74,7 +74,7 @@
                                     <a target="_blank" href="../../videos/{{ record.tutorial_detail.foss_id }}/{{ record.tutorial_detail_id }}/show-video-{{ record.language.name }}.html" class="thumb"><img width="100%" src="../../includes/images/thumb-even.png"></a>
                                 </div>
                                 <div class="info col-lg-8 col-md-8 col-sm-8 col-xs-8">
-                                    <div class="title"><h4><a target="_blank" href="../../videos/{{ record.tutorial_detail.foss_id }}/{{ record.tutorial_detail_id }}/show-video-{{ record.language.name }}.html">{{ record.tutorial_detail.tutorial }}</a></h4></div>
+                                    <div class="title"><h4>{{ forloop.counter }}. <a target="_blank" href="../../videos/{{ record.tutorial_detail.foss_id }}/{{ record.tutorial_detail_id }}/show-video-{{ record.language.name }}.html">{{ record.tutorial_detail.tutorial }}</a></h4></div>
                                     <div class="desc">
                                             <p><b>Foss:</b> <i>{{ record.tutorial_detail.foss }} - {{ record.language }}</i></p>
                                             <p><b>Outline:</b> {{ record.outline|len_cutter:200 }}</b> </p>
