@@ -13,4 +13,5 @@ class AsyncCronMail(models.Model):
     completed_at = models.DateTimeField(null=True)
     message = models.TextField()
     sender = models.EmailField()
+    log_file =  models.FileField(null=True, upload_to='emails/')
 

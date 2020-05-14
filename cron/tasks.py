@@ -11,13 +11,15 @@ from django.utils import timezone
 from django.conf import settings
 import uuid
 from django.core.mail import EmailMultiAlternatives
+from django.core.validators import validate_email
 
 @shared_task
 def async_bulk_email(taskid, *args, **kwargs):
     sent=0
     errors=0
     task = AsyncCronMail.objects.get(pk=taskid)
-    log_file=open(settings.CRON_ROOT+'log_email_'+uuid.uuid4().hex+".csv", "w+")
+    log_file_name = 'log_email_'+uuid.uuid4().hex+".csv"
+    log_file=open(settings.CRON_ROOT + log_file_name, "w+")
     with open(task.csvfile.path, newline='') as csvfile:
         csvreader = csv.reader(csvfile, delimiter=' ', quotechar='|')
         for row in csvreader:
@@ -29,6 +31,7 @@ def async_bulk_email(taskid, *args, **kwargs):
                                 }
                     )
             try:
+                validate_email(row[0])
                 email.attach_alternative(task.message, "text/html")
                 result = email.send()
                 sent += 1
@@ -38,12 +41,13 @@ def async_bulk_email(taskid, *args, **kwargs):
             except Exception as e:
                 log_file.write(str(row[0])+','+str(0)+'\n')
                 errors+=1
-
-        log_file.close()
+        
+        task.log_file.name = 'emails/' + log_file_name
         task.completed_at = timezone.now()
         task.report = "Total mails count: "+ str(sent+errors)+"\n"+ "Mails sent: "\
                 +str(sent)+"\n"+"Errors: "+ str(errors)
         task.status=True
         task.save()
+        log_file.close()
 
 
