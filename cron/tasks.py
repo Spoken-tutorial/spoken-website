@@ -13,7 +13,7 @@ import uuid
 from django.core.mail import EmailMultiAlternatives
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
-from smtplib import SMTPException
+from smtplib import SMTPException, SMTPServerDisconnected
 from django.core.mail import BadHeaderError
 
 @shared_task
@@ -47,6 +47,12 @@ def async_bulk_email(taskid, *args, **kwargs):
                 errors+=1
             except BadHeaderError as header_error:
                 log_file.write(str(row[0])+','+str(0)+','+str(header_error)+'\n')
+                errors+=1
+            except ConnectionRefusedError as refused:
+                log_file.write(str(row[0])+','+str(0)+','+str('Failed to connect to SMTP server.')+'\n')
+                errors+=1
+            except SMTPServerDisconnected as disconnect:
+                log_file.write(str(row[0])+','+str(0)+','+str('Failed to connect to SMTP server.')+'\n')
                 errors+=1
         
         task.log_file.name = 'emails/' + log_file_name
