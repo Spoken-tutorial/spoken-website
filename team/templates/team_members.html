@@ -21,54 +21,224 @@
       }
     </style>
 {% endblock %}
+{% block compresscssblock %}
+<link rel="stylesheet" type="text/css" href="{% static 'spoken/css/team_style.css'%}">
+{% endblock%}
 
 {% block content %}
-<div class="container" id="top">
-<ul class="nav nav-tabs">
-  <!--<li {% if role == "Contributor" %}class="active"{% endif %}><a href="/team/Contributor/">Contributor</a></li>
-  <li {% if role == "Domain-Reviewer" %}class="active" {% endif %}><a href="/team/Domain-Reviewer/">Domain-Reviewers</a></li>
-  <li {% if role == "Quality-Reviewer" %}class="active" {% endif %}><a href="/team/Quality-Reviewer/">Quality-Reviewers</a></li>-->
-
-  <li {% if role == "Creation-Team" %}class="active" {% endif %}><a href="/team/Creation-Team/">Creation Team</a></li>
-  <li {% if role == "Resource Person" %}class="active" {% endif %}><a href="/team/Resource Person/">Training Team</a></li>
-  <li {% if role == "Technical-Team" %}class="active" {% endif %}><a href="/team/Technical-Team/">Technical Team</a></li>
-  <li {% if role == "Quality-Team" %}class="active" {% endif %}><a href="/team/Quality-Team/">Quality Team</a></li>
-  <li {% if role == "External-Contributor" %}class="active" {% endif %}><a href="/team/External-Contributor/">External-Contributor</a></li>
-  <li {% if role == "Admin-Team" %}class="active" {% endif %}><a href="/team/Admin-Team/">Admin Team</a></li>
+<section id="team">
+<div class="team-header">
+<h3>Meet the team</h3>
+</div>
+<div class="team-category">
+<ul id="team-category" class="nav nav-tabs">
+ <!--  <li {% if role == "Creation-Team" %}class="active" {% endif %}><a href="/team/Creation-Team/">Creation Team</a></li> -->
+<li  {% if member_role|stringformat:"s" == "Creation-Team" %} class="active emp-team"  {% endif %}><a class="team-status" href="{% url 'team:team' role='Creation-Team'%}" >Creation Team</a></li>
+ <li {% if member_role|stringformat:"s" == "Training-Team" %} class="active emp-team" {% endif %}><a class="team-status" href="{% url 'team:team' role='Training-Team'%}" >Training Team</a></li>
+  
+  <li {% if member_role|stringformat:"s" == "Technical-Team" %} class="active emp-team" {% endif %}><a class="team-status" href="{% url 'team:team' role='Technical-Team'%}" >Technical Team</a></li>
+  <li {% if member_role|stringformat:"s" == "Quality-Team" %} class="active emp-team" {% endif %}><a class="team-status" href="{% url 'team:team' role='Quality-Team' %}" >Quality Team</a></li>
+ <li {% if member_role|stringformat:"s" == "External-Team" %} class="active emp-team" {% endif %}><a class="team-status" href="{% url 'team:team' role='External-Team' %}" >External-Contributor</a></li>
+  <li {% if member_role|stringformat:"s" == "Admin-Team" %} class="active emp-team" {% endif %}><a class="team-status" href="{% url 'team:team' role='Admin-Team' %}" >Admin Team</a></li>
+  
 </ul>
+</div>
 
+<div>
+
+</div>
+
+<div class="team-display">
   <div class="tab-content">
-    <div id="approved" class="tab-pane fade in active">
-    <div class="row" style=" width:95%;">
+  <div class="active-emp tab-pane active" id="main-display">
+  <!-- <ul class="nav nav-tabs"> -->
+    <div class="status">
+      <ul class="nav nav-tabs">
+  <li class="active"><a class='emp-status' data-toggle='tab' href="#current" id='current-tab'>Current Team Members</a></li>
+  <li ><a class='emp-status' data-toggle='tab' href="#former">Former Team Members</a></li>
+  </ul>
+    </div>
+  
+<!-- </div> -->
+<div class="tab-content">
+  <!-- <div id="approved" class="tab-pane fade in active"> -->
+  <div id="current" class="tab-pane active">
+    <!-- <div class="row" style=" width:95%;"> -->
+    <div class="display">
       {% for record in object_list %}
-        <div class="col-md-4 text-center" style="margin-top:10px;height:200px;">
-          <img class="img-circle" src="{% if record.profile_set.first.picture %} /media/{{ record.profile_set.first.picture }} {% else %}/static/spoken/images/no-profile-image.jpg{% endif %}" width=45% height=75%>
+      {% if record.is_staff == True%}
+        <!-- <div class="col-md-4 text-center" style="margin-top:10px;height:200px;"> -->
+        <div class=" employee text-center">
+          <!-- <img class="img-circle" src="{% if record.profile_set.first.picture %} {{ record.profile_set.first.picture.url }} {% else %}/static/spoken/images/no-profile-image.jpg{% endif %}" width=50px height=75px> -->
+          <div class="photo">
+          {% if record.profile_set.first.picture %}
+          <img src="{{ record.profile_set.first.picture.url }}">
+          {% else %}
+          <img src="/media/no-profile-image.jpg">
+          {% endif %}  
+          </div>
+          <hr>
+          
           {% if record.first_name %}
-              <h4>{{ record.first_name }} {{ record.last_name }}</h4>
+              <h6>{{ record.first_name }} {{ record.last_name }}</h6>
               {% else %}
-              <h4>{{ record.username }} </h4>
+              <h6>{{ record.username }} </h6>
               {% endif %}
+              
+              <p>
+              {% for employee_role in record.groups.all%}
+              {% if employee_role|stringformat:"s" == role %}
+              {% else %}
+              <span>{{employee_role}}</span>
+              {% if record.groups.last == employee_role %}
+              {% else %}
+              <span> | </span>
+              {% endif %}
+              {% endif %}
+              {% endfor %}</p>
         </div>
-        {% if forloop.counter|divisibleby:3 %}
+        <!-- {% if forloop.counter|divisibleby:3 %}
           <br>
-        {% endif %}
-
+        {% endif %} -->
+       {% endif %}
        {% endfor %}
+
         <a href="#" class="back-to-top"></a><!-- /top-link-block -->
        </div><!-- /.row -->
 
     </div>
+    <div id="former" class="tab-pane">
+    <!-- <div id="approved" class="tab-pane fade in"> -->
+    <!-- <div class="row" style=" width:95%;"> -->
+    <div class="display">
+      {% for record in object_list %}
+      {% if record.is_staff == False%}
+        <!-- <div class="col-md-4 text-center" style="margin-top:10px;height:200px;"> -->
+        <div class=" employee text-center">
+          <!-- <img class="img-circle" src="{% if record.profile_set.first.picture %} {{ record.profile_set.first.picture.url }} {% else %}/static/spoken/images/no-profile-image.jpg{% endif %}" width=50px height=75px> -->
+          <div class="photo">
+          {% if record.profile_set.first.picture %}
+          <img src="{{ record.profile_set.first.picture.url }}">
+          {% else %}
+          <img src="/media/no-profile-image.jpg">
+          {% endif %}  
+          </div>
+          <hr>
+          
+          
+             {% if record.first_name %}
+              <h6>{{ record.first_name }} {{ record.last_name }}</h6>
+              {% else %}
+              <h6>{{ record.username }} </h6>
+              {% endif %}
+         
+         
+              
+              <p>
+              {% for employee_role in record.groups.all%}
+              {% if employee_role|stringformat:"s" == role %}
+              {% else %}
+              <span>{{employee_role}}</span>
+              {% if record.groups.last == employee_role %}
+              {% else %}
+              <span> | </span>
+              {% endif %}
+              {% endif %}
+              {% endfor %}</p>
+        </div>
+        <!-- {% if forloop.counter|divisibleby:3 %}
+          <br>
+        {% endif %} -->
+       {% endif %}
+       {% endfor %}
 
+       
+
+        
+       </div><!-- /.row -->
+
+    </div>
+
+      </div>
+      <a href="#" class="back-to-top"></a>
+    </div>
   </div>
-
+</div>
+<div class="back-to-top">
+  <a href="#" >Back to Top</a><!-- /top-link-block -->
 </div>
 
+</section>
 {% endblock %}
 {% block jsblock %}
   <script type="text/javascript">
-  var amountScrolled = 300;
+    var amountScrolled = 100;
 
-$(window).scroll(function() {
+  var white_fade = 'rgba(255,255,255,0.8)';
+   var white = 'rgba(255,255,255,1)';
+   // var white = 'rgba(255,255,255,1)';
+   $(document).ready(function(e) { 
+    var a_links = document.getElementsByClassName('team-status');
+    // console.log(a_links);
+    for (var i = a_links.length - 1; i >= 0; i--) {
+      // a_links[i].style.color='#337ab7';
+      a_links[i].style.color=white_fade;
+      // a_links[i].style.color='#4d4d4d';
+      
+    }
+    var l = document.getElementsByClassName('emp-team');
+    console.log(l);
+    l[0].getElementsByClassName('team-status')[0].style.color='#e65100'; 
+    l[0].getElementsByClassName('team-status')[0].style.color='white'; 
+    l[0].getElementsByClassName('team-status')[0].style.border='1px solid #ffffff'; 
+
+    // l[0].getElementsByClassName('team-status')[0].style.color='#ffffff'; 
+    // l[0].getElementsByClassName('team-status')[0].style.backgroundColor='#337ab7'; 
+    var current_tab = document.getElementById('current-tab');
+    current_tab.style.color='orange';
+    current_tab.style.color='#ff9100';
+    // current_tab.style.color=white;
+    current_tab.style.borderBottom='1px solid white';
+    console.log(current_tab);
+    // current_tab.style.backgroundColor='#4d4d4d';
+    // l[0].tab('show');
+    for (var i = l.length - 1; i >= 0; i--) {
+      l[i].style.color = 'orange';
+      // l[i].style.color = '#e65100';
+      // console.log(l[i]);
+    }
+
+  //   $(".team-category .nav-tabs a").click(function(){
+  //    $(this).tab('show');
+  // });
+
+  $('ul li a').click(function(){
+    console.log('click');
+    var selector = $(this);
+    var elems = document.getElementsByClassName('emp-status');
+    for (var i = elems.length - 1; i >= 0; i--) {
+      elems[i].style.color='#337ab7';
+      elems[i].style.color=white_fade;
+    }
+    this.style.color='orange';
+    this.style.color='#ff9100';
+    this.style.borderBottom='1px solid white';
+});
+
+//   $('ul li a').click(function(){
+//     console.log('click');
+//     var selector = $(this);
+//     var elems = document.getElementsByClassName('emp-status');
+//     for (var i = elems.length - 1; i >= 0; i--) {
+//       elems[i].style.color='#337ab7';
+//     }
+//     this.style.color='orange';
+// });
+
+    
+
+    });
+   $(window).scroll(function() {
   if ( $(window).scrollTop() > amountScrolled ) {
     $('a.back-to-top').fadeIn('slow');
   } else {
@@ -82,5 +252,6 @@ $('a.back-to-top').click(function() {
   }, 700);
   return false;
 });
+
   </script>
 {% endblock %}
