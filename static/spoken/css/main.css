@@ -135,7 +135,7 @@ h1.page-title, h4.page-title {
     padding: 25px 0 25px 0;
 }
 #header-wrapper{
-    height: 51px;
+    height: auto;
     font-family: sans-serif;
 }
 #testimonials, #home-video-container{
