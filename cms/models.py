@@ -42,9 +42,6 @@ class Profile(models.Model):
     class Meta(object):
         app_label = 'cms'
 
-    def __str__(self):
-        return self.user.get_full_name()
-
 class Page(models.Model):
     title = models.CharField(max_length=255)
     css = models.TextField(default=None, null=True, blank=True)
