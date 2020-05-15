@@ -6,21 +6,18 @@ from django.views.generic import ListView
 
 
 class TeamListView(ListView):
-    print("Inside TeamListView**************")
     queryset = None
     paginate_by = 100
 
     def dispatch(self, *args, **kwargs):
         self.type = kwargs['role']
-        print('Printing Type ------: : '+(self.type))
 
         if self.type == 'Creation-Team':
             self.queryset = User.objects.filter(
-                groups__name__in=['Contributor', 'Quality-Reviewers', 'Animation-Team']).order_by('first_name')
-            print((self.queryset))
+                groups__name__in=['Contributor', 'Quality-Reviewers', 'Animation-Team']).order_by('first_name').distinct()
+            
         else:
-            self.queryset = User.objects.filter(groups__name=kwargs['role']).order_by('first_name')
-            print((self.queryset))
+            self.queryset = User.objects.filter(groups__name=kwargs['role']).order_by('first_name').distinct()
 
         return super(TeamListView, self).dispatch(*args, **kwargs)
 

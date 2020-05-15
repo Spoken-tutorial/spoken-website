@@ -28,10 +28,6 @@ p span{
 	padding:1% 0 1% 0;
 }
 
-#team{
-	
-}
-
 #team .team-header{
 	text-align: center;
 	display: flex;
@@ -42,7 +38,6 @@ p span{
 	text-transform: uppercase;
 	margin-top:20px;
 	font-family: "Times New Roman", Times, serif;
-
 }
 #team .team-category{
 	text-align: center;
@@ -53,62 +48,80 @@ p span{
 	margin: auto;
 	display: flex;
 	justify-content: center;
+	flex-wrap: wrap;
 	}
 
 #team .team-category ul li{
 	display: inline;
-	padding: 0 2% 0 2%;
 	text-decoration: none;
 	margin-top:25px;
-	margin-right: 1%;
-	margin-left: 1%;
 }
 
 
 
 #team .team-category ul li a{
 	text-decoration: none;
-	margin-top: 100px;
-	line-height: 2.5rem;
 	font-size: 1.2rem;
-	padding: 5%;
 	color: rgba(0,0,0,1);
 	color: #ffffff;
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: #002649;
 }
 
 #team .team-category ul li a:hover{
-	text-decoration: underline;
-	
+	background: #002649;
 }
 
 #team .team-display{
-	display: grid;
-	box-shadow: var(--shadow);
+	box-shadow:0 1px 1px rgb(104,104,104,0.5);
 }
+#team .team-display .tab-content{
+	padding-top: 0;
+}
+
 #team .team-display nav{
-	text-align: center;
+	
 }
 #team .team-display .status{
 	color: #ffffff;
 	background-color: #002649;
 }
+
+#team .team-display .status ul{
+	display: flex;
+	justify-content: center;
+	flex-wrap: wrap;
+}
+
 #team .team-display .status a{
 	color: #ffffff;
 	font-family: "Times New Roman", Times, serif;
+	background-color: #002649;
+    width: 100%;
+    height: 100%;
+    border:none;
+    font-size: 1rem;
 }
 #team .team-display .display{
-	padding: 2%;
+	
 }
 #team .team-display .employee{
 	max-width: 250px;
-	box-shadow: var(--shadow);
 	padding-top:4%;
 	margin-bottom: 2%;
+	border-bottom: 1px solid rgba(40,96,144,0.2);
 }
 #team .team-display .employee .photo{
 	display: flex;
 	align-content: center;
 	justify-content: center;
+	padding-bottom: 5%;
+	border-bottom:1px solid #286090;
+}
+#team .team-display .employee .content{
+	
 }
 #team .team-display .employee img{
 	width: 90%;
@@ -121,6 +134,8 @@ p span{
 #team .team-display .employee h6{
 	text-align: center;
 	margin-top: 20px;
+	color: #286090;
+	font-size: 1.2rem;
 }
 
 #team .team-display .employee p span{
@@ -132,8 +147,7 @@ p span{
 	
 }
 #team .team-display .active-emp ul{
-	display: flex;
-	justify-content: center;
+	text-align: center;
 }
 
 #team .team-display .active-emp ul li{
@@ -147,9 +161,8 @@ p span{
 
 #team .team-display .active-emp ul li a{
 	text-decoration: none;
-	font-weight: bold;
 	white-space: nowrap;
-	font-size: 1.1rem;
+	font-size: 1.4rem;
 }
 #team .team-display .active-emp ul li a:hover{
 	text-decoration: none;
@@ -172,13 +185,10 @@ p span{
 
 @media (min-width: 575.98px) {  
 	#team .team-display .display{
-	/*border: 2px solid red;*/
 	display: grid;
-	grid-template-columns: repeat(auto-fit,minmax(250px,1fr));
-	grid-gap:1rem;
-	padding-left: 5%;
-	padding-right: 5%;
-
+	grid-template-columns: repeat(auto-fit,minmax(210px,1fr));
+	grid-gap:2rem;
+	justify-items:center;
 }
 
 }
