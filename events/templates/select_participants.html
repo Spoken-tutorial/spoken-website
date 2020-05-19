@@ -2,10 +2,28 @@
 {% extends 'spoken/templates/base.html' %}
 {% load static %}
 {% block title %}Semester Training Planner Summary{% endblock %}
+{% load announcements %}
 {% block heading %}
   <i class="home-page-title-i">Select participant List</i>
   <a class="btn btn-primary help" data-toggle="modal" data-target="#myModal"><i class="fa fa-2 fa-question"></i>  Instructions for Selecting Participant List</a>
   <a class="btn btn-success pull-right" href="{% url 'eventsv2:training_planner' %}">Back To Training Planner Summary</a>
+{% endblock %}
+{% block announcement %}
+    <div id="slideshow">
+            {% get_notifications as notifications %}
+            {% if notifications %}
+                {% for notification in notifications %}
+                    <div class="announcement alert" style="background:#{% if notification.bg_color %}{{ notification.bg_color }}{% else %}1B83BC{% endif %};">
+                        <div class="inner">
+                            <div class="text-container">
+                                {{ notification.body|safe }}
+                                <!--<button type="button" class="close" data-dismiss="alert">&times;</button>-->
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+    </div>
 {% endblock %}
 {% block search %}{% endblock %}
 
@@ -228,4 +246,30 @@ $(window).load(function(){
     $.cookie('modal_status', '1',{ expires: null}); }
 });
   </script>
+  <script>
+        /* Slideshow */
+        var stop = 1
+        $('#slideshow').hover(function(){
+            stop = 0
+        }, function(){
+            stop = 1
+        });
+        if($(".announcement").length > 1){
+            $("#slideshow > div:gt(0)").hide();
+            setInterval(function() {
+              if(stop){
+                  $('#slideshow > div:first')
+                    .fadeOut(0)
+                    .next()
+                    .fadeIn(0)
+                    .end()
+                    .appendTo('#slideshow');
+                 }
+            },  5000);
+        }
+        $('.close').click(function(){
+            $(".navbar-fixed-top").css({'top' : '0px', 'position' : 'fixed'});
+            $("#header-wrapper").css({'height' : '0px'});
+        });
+    </script>
 {% endblock %}
