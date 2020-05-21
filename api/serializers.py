@@ -70,7 +70,7 @@ class RelianceJioVideoSerializer(serializers.ModelSerializer):
     def get_background(self, obj):
         return [self.context['request'].build_absolute_uri(settings.MEDIA_URL + 'videos/' +\
                 str(obj.tutorial_detail.foss.pk) + '/' + str(obj.tutorial_detail.pk) + '/' +\
-                obj.tutorial_detail.tutorial.replace(' ', '-') + '-' + 'Small' + '.png')]
+                obj.tutorial_detail.tutorial.replace(' ', '-') + '-' + 'Big' + '.png')]
 
 class RelianceCategoryJioSerializer(serializers.Serializer):
     category = serializers.SerializerMethodField()
