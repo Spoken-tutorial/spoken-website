@@ -744,3 +744,15 @@ pre.custom-jumbotron b {
     padding-top: 6px;
     font-size: 12px;
 }
+
+.announcement{
+        font-size: 14px;
+        font-weight: bold;
+        color: white;
+        border-radius: 0px;
+        margin-bottom: 0px;
+        }
+.text-container{
+        text-align:center;
+        padding: 0 60px;
+} 
