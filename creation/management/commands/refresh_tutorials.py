@@ -9,13 +9,15 @@ from __future__ import absolute_import, print_function, unicode_literals
 # Third Party Stuff
 from django.core.management.base import BaseCommand
 from django.db import transaction as tx
-from datetime import datetime,timedelta
+from datetime import datetime, timedelta
 from django.utils import timezone
 from django.db.models import Q
 # Spoken Tutorial Stuff
 from creation.models import TutorialResource, Language, TutorialsAvailable,\
-                            TutorialDetail, FossCategory
+    TutorialDetail, FossCategory
 from creation.views import send_mail_to_contributor
+
+
 class Command(BaseCommand):
 
     @tx.atomic
@@ -23,26 +25,25 @@ class Command(BaseCommand):
         count = 0
         PUBLISHED = 1
         fosses_available_for_training = FossCategory.objects.filter(is_translation_allowed__gt=0)
-        tutorials = TutorialDetail.objects.filter(foss_id__in = fosses_available_for_training,
-            id__in = TutorialResource.objects.filter(status = PUBLISHED,
-            language = 22).values('tutorial_detail').distinct())
+        tutorials = TutorialDetail.objects.filter(foss_id__in=fosses_available_for_training,
+                                                  id__in=TutorialResource.objects.filter(status=PUBLISHED,
+                                                                                         language=22).values('tutorial_detail').distinct())
 
         lang_qs = Language.objects.all()
         for tutorial in tutorials:
             for a_lang in lang_qs:
                 this_lang_tutorial = TutorialResource.objects.filter(Q(
-                    status = PUBLISHED)|Q(
-                    assignment_status = 1),
-                    tutorial_detail = tutorial, language = a_lang
-                    )
+                    status=PUBLISHED) | Q(
+                    assignment_status=1),
+                    tutorial_detail=tutorial, language=a_lang
+                )
                 if not this_lang_tutorial.exists():
                     tutorialsavailable = TutorialsAvailable.objects.filter(
-                        tutorial_detail = tutorial, language = a_lang)
+                        tutorial_detail=tutorial, language=a_lang)
                     if not tutorialsavailable.exists():
                         tutorialsavailable = TutorialsAvailable()
                         tutorialsavailable.tutorial_detail = tutorial
                         tutorialsavailable.language = a_lang
                         tutorialsavailable.save()
-                        print(tutorial.foss,":",tutorial.tutorial," : ",a_lang," added")
-                        count+=1        
-
+                        print(tutorial.foss, ":", tutorial.tutorial, " : ", a_lang, " added")
+                        count += 1
