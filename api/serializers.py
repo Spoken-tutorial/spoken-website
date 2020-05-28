@@ -75,7 +75,7 @@ class RelianceJioVideoSerializer(serializers.ModelSerializer):
                 str(obj.tutorial_detail.foss.pk) + '/' + str(obj.tutorial_detail.pk) + '/' +\
                 obj.tutorial_detail.tutorial.replace(' ', '-') + '-' + 'Big' + '.png')]
     def get_duration(self, obj):
-        video_path = settings.MEDIA_URL+'videos/'+str(obj.tutorial_detail.foss.pk)+'/'+\
+        video_path = settings.MEDIA_ROOT+'videos/'+str(obj.tutorial_detail.foss.pk)+'/'+\
             str(obj.tutorial_detail.pk)+'/'+obj.video
         video_info = get_video_info(video_path)
         return video_info['duration']
