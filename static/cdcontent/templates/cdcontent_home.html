@@ -69,8 +69,6 @@
                     <table class="added-foss table table-condensed table-bordered table-hover">
                     </table>
                 </div>
-                <div class="download-link"></div>
-                <div class="user-message"></div>
 		<div id="rate-div" style="display: none">
                     <table class="rate-chart table table-condensed table-bordered table-hover" >
 			<thead>
@@ -88,10 +86,30 @@
     <td > > 100 mb</td>
     <td >250 INR</td>
   </tr>
-
 </tbody>
+
+<thead>
+  <tr>
+    <th id ="user_file_size"></th>
+    <th >
+	<div id="amount_to_pay"></div>
+	<button type="button" class="btn">+</button>
+	<button type="button" class="btn">-</button>
+    </th>
+  </tr>
+  <tr>
+    <td ></td>
+    <td ><a href="/donate"><button type="button" class="btn btn-primary">Pay</button></a>
+</td>
+  </tr>
+
+</thead>
+
                     </table>
                 </div>
+                <div class="download-link"></div>
+                <div class="user-message"></div>
+
             </div>
         </div>
     </form>
@@ -231,17 +249,19 @@
                                     if(data) {
                                         $('.added-foss').html(header + data[0]);
                                         console.log(data);
-                                        if(data[2]=='UR') {
-                                        var message = 'User not registered.<br> Kinldy <a href="/accounts/login">Login</a> if you are registered <br> or <br><a href="/donate"> Register here </a>'
+                                        if(data[2][0]=='UR') {
+                                        var message = '<i>User not registered.<br> Kinldy <a href="/accounts/login">Login</a> if you are registered.</i>'
                                          $('.create_zip').prop('disabled', true);
                                          $('.user-message').html(message);
 					 $("#rate-div").show();
+					 $("#user_file_size").html("Amount to Pay ");
+					 $("#amount_to_pay").html(data[2][1]);
+					 $("#progress-bar").show();
                                           }
                                          if(data[2]=='RP') {
                                         var message = 'You are part of our paid service.<br> Happy Downloading.<br> Please click on <b>Create Zip file</b> to proceed.'
                                          $('.create_zip').prop('disabled', false);
                                          $('.user-message').html(message);
-					 $('#rate-div').show();
                                           }
 
                                     }

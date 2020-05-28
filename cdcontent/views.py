@@ -482,12 +482,13 @@ def ajax_show_added_foss(request):
     data += '<tr><td colspan="2">Extra files</td><td>{}</td></tr>'.format(humansize(fsize))
     
     #check if user is registered
-    user_details = check_user_details(request)
+    user_details = check_user_details(request,fsize_total )
     output = {0: data, 1: humansize(fsize_total), 2:user_details}
     return HttpResponse(json.dumps(output), content_type='application/json')
 
-def check_user_details(request):
-    print("Check User")
+def check_user_details(request, filesize):
+    print("Check User",filesize)
+    file_size = round(filesize/ pow(2,20),1)
     classification ={
     'UR':'UnRegistered User',
     'RNP':'Registered but not Paid User',
@@ -499,4 +500,8 @@ def check_user_details(request):
         print("1",request.user.groups.all())
         return 'RP'
     else:
-        return 'UR'
+        if file_size < 100.0: 
+            return ['UR','100INR']
+        else:
+            return ['UR','250INR']
+
