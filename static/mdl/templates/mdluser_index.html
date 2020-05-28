@@ -59,7 +59,7 @@
                             <a href="{% url 'events:training_participant_language_feedback' record.training.id mdluserid %}">Language Feedback</a> |
                             {% if record.training.is_learners_allowed and record.training.cert_status == 1 %}
                               <a href="{% url 'eventsv2:student_training_certificate' record.id %}">Certificate</a> |
-                            {% if record.training.is_learners_allowed and record.training.cert_status == 2 %}
+                            {% elif record.training.is_learners_allowed and record.training.cert_status == 2 %}
                                 Request sent for Participation Certificate | 
                             {% endif %}
                         </td>
