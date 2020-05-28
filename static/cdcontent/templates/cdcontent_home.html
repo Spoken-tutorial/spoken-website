@@ -14,6 +14,7 @@
 {% endblock %}
 {% block heading %}CD Content Creation{% endblock %}
 {% block search %} {% endblock %}
+
 {% block content %}
     <form role="form" method="post" enctype="multipart/form-data" class="cdcontentform form-horizontal">
         <div class="row well bs-component">
@@ -58,7 +59,7 @@
                         <div class="col-lg-9 col-md-9 col-sm-9 col-xs-9 col-lg-offset-3 col-md-offset-3 col-sm-offset-3">
                             <span class='ajax-refresh ajax-refresh-add-foss'><i class="fa fa-2 fa-refresh fa-spin"></i></span>
                             <input type="button" class="add_foss_lang btn btn-primary" value="Add selected FOSS"  tabindex="4" />
-                            <input type="submit" class="btn btn-primary" value="Create ZIP file"  tabindex="5" />
+                            <input type="submit" class="btn btn-primary create_zip" value="Create ZIP file" tabindex="5" />
                         </div>
                     </div>
                 </fieldset>
@@ -69,11 +70,55 @@
                     </table>
                 </div>
                 <div class="download-link"></div>
+                <div class="user-message"></div>
+		<div id="rate-div" style="display: none">
+                    <table class="rate-chart table table-condensed table-bordered table-hover" >
+			<thead>
+  <tr>
+    <th >File Size</th>
+    <th >Rate</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td >< 100 mb</td>
+    <td >100 INR</td>
+  </tr>
+  <tr>
+    <td > > 100 mb</td>
+    <td >250 INR</td>
+  </tr>
+
+</tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </form>
+
+<!-- Modal -->
+  <div class="modal fade alertmodal" id="alertmodal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-body">
+           <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+           <ul>
+              <li>CD Content Download is now a paid service.</li>
+              <li>If your college has already made the payment , please <a href="/accounts/login">Login</a> with your registered email address</li>
+	      <ul><li>There is <b>NO Restriction</b> on your download size</li></ul>
+              <li>If you are an individual , then we charge very nominal charge for download.</li>
+              <ul>
+		<li> Add your FOSS and make your payment accordingly</li>
+		<li> This download will be available for <b>1 week</b> from the date of successful payment</li></ul>
+           </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
 {% endblock %}
 {% block jsblock %}
+<script src="{% static 'spoken/js/jquery.cookie.js' %}"></script>
     <script type="text/javascript">
         $(document).ready(function(){
             if($('.foss_category').val() == '') {
@@ -186,6 +231,19 @@
                                     if(data) {
                                         $('.added-foss').html(header + data[0]);
                                         console.log(data);
+                                        if(data[2]=='UR') {
+                                        var message = 'User not registered.<br> Kinldy <a href="/accounts/login">Login</a> if you are registered <br> or <br><a href="/donate"> Register here </a>'
+                                         $('.create_zip').prop('disabled', true);
+                                         $('.user-message').html(message);
+					 $("#rate-div").show();
+                                          }
+                                         if(data[2]=='RP') {
+                                        var message = 'You are part of our paid service.<br> Happy Downloading.<br> Please click on <b>Create Zip file</b> to proceed.'
+                                         $('.create_zip').prop('disabled', false);
+                                         $('.user-message').html(message);
+					 $('#rate-div').show();
+                                          }
+
                                     }
                                     $('.ajax-refresh-add-foss').hide();
                                 }
@@ -199,5 +257,13 @@
                 }
             });
         });
-    </script>
+
+
+if ($.cookie('modal_status') != '1')
+    {
+    $('.alertmodal').modal('show');
+    $.cookie('modal_status', '1',{ expires: null}); 
+    }
+  $('.create_zip').prop('disabled', true); 
+</script>
 {% endblock %}

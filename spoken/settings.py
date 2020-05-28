@@ -80,6 +80,7 @@ INSTALLED_APPS = [
     'forums',
     'cms',
     'creation',
+    'donate',
     'statistics',
     'cdcontent',
     'events',
@@ -95,6 +96,7 @@ INSTALLED_APPS = [
     'impersonate',
     'corsheaders',
     'ckeditor'
+    
 ]
 
 

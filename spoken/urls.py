@@ -125,8 +125,12 @@ urlpatterns = [
     # events2
     # url(r'^events2/', include('events2.urls', namespace='events2')),
 
+    #donation
+    url(r'^donate/', include('donate.urls', namespace='donate')),
+
     # cms
     url(r'^', include('cms.urls', namespace='cms')),
     
+
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

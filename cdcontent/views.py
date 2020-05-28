@@ -19,7 +19,7 @@ from django.template.context_processors import csrf
 from cdcontent.forms import *
 from creation.models import *
 from forums.models import Answer, Question
-
+from events.models import AcademicCenter
 
 # Create your views here.
 def zipdir(src_path, dst_path, archive):
@@ -480,6 +480,23 @@ def ajax_show_added_foss(request):
 
     fsize_total += fsize
     data += '<tr><td colspan="2">Extra files</td><td>{}</td></tr>'.format(humansize(fsize))
-
-    output = {0: data, 1: humansize(fsize_total)}
+    
+    #check if user is registered
+    user_details = check_user_details(request)
+    output = {0: data, 1: humansize(fsize_total), 2:user_details}
     return HttpResponse(json.dumps(output), content_type='application/json')
+
+def check_user_details(request):
+    print("Check User")
+    classification ={
+    'UR':'UnRegistered User',
+    'RNP':'Registered but not Paid User',
+    'RP':'Registered and Paid User'}
+
+    if request.user.is_authenticated():
+        #check from paid colleges table - Academic centre status = 1
+        paid_colleges = AcademicCenter.objects.filter(status=1)
+        print("1",request.user.groups.all())
+        return 'RP'
+    else:
+        return 'UR'
