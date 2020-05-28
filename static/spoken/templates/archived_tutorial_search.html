@@ -3,6 +3,7 @@
 {% load static %}
 {% load cmsdata %}
 {% load creationdata %}
+{% load announcements %}
 {% block title %}Search Tutorials{% endblock %}
 {% block compressinlinecssblock %}
     <style>
@@ -28,6 +29,34 @@
 {% endblock %}
 {% block heading %}
     <i class="fa fa-list-ul"></i> Search Tutorials
+{% endblock %}
+{% block jsblock %}
+    <script>
+        /* Slideshow */
+        var stop = 1
+        $('#slideshow').hover(function(){
+            stop = 0
+        }, function(){
+            stop = 1
+        });
+        if($(".announcement").length > 1){
+            $("#slideshow > div:gt(0)").hide();
+            setInterval(function() {
+              if(stop){
+                  $('#slideshow > div:first')
+                    .fadeOut(0)
+                    .next()
+                    .fadeIn(0)
+                    .end()
+                    .appendTo('#slideshow');
+                 }
+            },  5000);
+        }
+        $('.close').click(function(){
+            $(".navbar-fixed-top").css({'top' : '0px', 'position' : 'fixed'});
+            $("#header-wrapper").css({'height' : '0px'});
+        });
+    </script>
 {% endblock %}
 {% block search %}{% endblock %}
 {% block content %}
@@ -122,5 +151,33 @@
             <p class='no-record'> No result found!</p>
         {% endif %}
     </div>
+{% endblock %}
+{% block jsblock %}
+    <script>
+        /* Slideshow */
+        var stop = 1
+        $('#slideshow').hover(function(){
+            stop = 0
+        }, function(){
+            stop = 1
+        });
+        if($(".announcement").length > 1){
+            $("#slideshow > div:gt(0)").hide();
+            setInterval(function() {
+              if(stop){
+                  $('#slideshow > div:first')
+                    .fadeOut(0)
+                    .next()
+                    .fadeIn(0)
+                    .end()
+                    .appendTo('#slideshow');
+                 }
+            },  5000);
+        }
+        $('.close').click(function(){
+            $(".navbar-fixed-top").css({'top' : '0px', 'position' : 'fixed'});
+            $("#header-wrapper").css({'height' : '0px'});
+        });
+    </script>
 {% endblock %}
 
