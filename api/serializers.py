@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from creation.models import TutorialResource, TutorialDetail, FossSuperCategory, FossCategory, Language
 from rest_framework import serializers
 from django.conf import settings
+from creation.views import get_video_info
 
 class TutorialDetailSerializer(serializers.ModelSerializer):
     tutorial_detail = serializers.CharField(read_only=True)
@@ -55,10 +56,12 @@ class RelianceJioVideoSerializer(serializers.ModelSerializer):
     background = serializers.SerializerMethodField()
     title = serializers.ReadOnlyField(source='tutorial_detail.tutorial')
     studio = serializers.ReadOnlyField(source='tutorial_detail.foss.foss')
+    duration = serializers.SerializerMethodField()
+    production = serializers.ReadOnlyField(source='publish_at')
 
     class Meta:
         model = TutorialResource
-        fields = ('description', 'sources', 'card', 'background', 'title', 'studio',)
+        fields = ('description', 'sources', 'card', 'background', 'title', 'studio', 'duration', 'production')
 
     def get_sources(self, obj):
         return [self.context['request'].build_absolute_uri(settings.MEDIA_URL+'videos/'+str(obj.tutorial_detail.foss.pk)+'/'+\
@@ -71,6 +74,11 @@ class RelianceJioVideoSerializer(serializers.ModelSerializer):
         return [self.context['request'].build_absolute_uri(settings.MEDIA_URL + 'videos/' +\
                 str(obj.tutorial_detail.foss.pk) + '/' + str(obj.tutorial_detail.pk) + '/' +\
                 obj.tutorial_detail.tutorial.replace(' ', '-') + '-' + 'Big' + '.png')]
+    def get_duration(self, obj):
+        video_path = settings.MEDIA_URL+'videos/'+str(obj.tutorial_detail.foss.pk)+'/'+\
+            str(obj.tutorial_detail.pk)+'/'+obj.video
+        video_info = get_video_info(video_path)
+        return video_info['duration']
 
 class RelianceCategoryJioSerializer(serializers.Serializer):
     category = serializers.SerializerMethodField()
