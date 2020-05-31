@@ -5,14 +5,16 @@ from rest_framework.parsers import JSONParser
 from creation.models import TutorialResource,\
             TutorialDetail, FossSuperCategory, Language,\
              FossCategory, TutorialCommonContent, TutorialDuration
-from api.serializers import VideoSerializer, CategorySerializer, FossSerializer, LanguageSerializer
+from api.serializers import VideoSerializer, CategorySerializer, FossSerializer, LanguageSerializer, RelianceJioSerializer,\
+        RelianceJioVideoSerializer, RelianceCategoryJioSerializer
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Count, F, Q
 import json
 from django.conf import settings
 from creation.views import get_video_info
 import math
-
+from rest_framework.views import APIView
+from rest_framework.response import Response
 
 @csrf_exempt
 def video_list(request):
@@ -180,3 +182,12 @@ def get_tutorialdetails(request, tutid):
         
         tutdict = json.dumps(tutdict)
         return HttpResponse(tutdict, content_type='application/json')
+
+class RelianceJioAPI(APIView):
+
+    def get(self, request, format='json'):
+        tr = TutorialResource.objects.filter(Q(status=1) | Q(status=2),tutorial_detail__foss__pk =100, language__name='English')
+        video_serializer = RelianceJioVideoSerializer(tr, context={'request':request}, many=True)
+        category_serializer = RelianceCategoryJioSerializer(tr, context={'videos' : video_serializer.data})
+        serializer = RelianceJioSerializer(tr, context={'spokentutorials' : category_serializer.data})
+        return Response(serializer.data)

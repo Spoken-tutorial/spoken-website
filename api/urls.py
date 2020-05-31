@@ -11,4 +11,5 @@ urlpatterns = [
     url(r'^get_schoolfosslist/$', get_schoolfosslist, name='get_schoolfosslist'),
     url(r'^get_fosslanguage/(?P<fossid>[0-9]+)/$', get_fosslanguage, name='get_fosslanguage'),
     url(r'^get_tutorialdetails/(?P<tutid>[0-9]+)/$', get_tutorialdetails, name='get_tutorialdetails'),
+    url(r'^spoken_tutorial_videos/$', RelianceJioAPI.as_view(), name ='reliancejioapi')
 ]
