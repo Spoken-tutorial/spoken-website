@@ -8,7 +8,7 @@ cachetools==2.1.0
 captcha==0.2.4
 certifi==2018.8.24
 chardet==3.0.4
-Django==1.11
+Django==1.11.28
 django-appconf==1.0.2
 django-compressor==2.2
 django-extensions==2.1.3
