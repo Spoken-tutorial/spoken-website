@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 from .helpers import GENDER_CHOICES, PAY_FOR_CHOICES
+from creation.models import FossCategory, Language
+
 
 class Corporate(models.Model):
     name = models.CharField(max_length=255)	
@@ -19,18 +21,23 @@ class PaymentDetails(models.Model):
     updated = models.DateTimeField(auto_now_add = True)
 
 
-class Donor(models.Model):
+class Payee(models.Model):
     name = models.CharField(max_length=255)
     email = models.EmailField(max_length=255)
     country = models.CharField(max_length=50,null=True)
     state = models.CharField(max_length=50,null=True)
-    city =  models.CharField(max_length=75,null=True)
-    gender = models.CharField(max_length=1,choices=GENDER_CHOICES)
-    st_user = models.ForeignKey(User,blank=True,null=True,on_delete=models.PROTECT)
-    pay_for = models.CharField(max_length=1,choices=PAY_FOR_CHOICES)
-    contact = models.CharField(max_length=100)
-    corporate = models.ForeignKey(Corporate,blank=True,null=True,on_delete=models.PROTECT)
-    payment =  models.ForeignKey(PaymentDetails,on_delete=models.PROTECT)
+#    city =  models.CharField(max_length=75,null=True)
+    gender = models.CharField(max_length=6)
+    amount = models.DecimalField(max_digits=5,decimal_places=2)
+    foss = models.ManyToManyField(FossCategory)
+    language = models.ManyToManyField(Language)
+    key = models.CharField(max_length=255)
+#    st_user = models.ForeignKey(User,blank=True,null=True,on_delete=models.PROTECT)
+#    pay_for = models.CharField(max_length=1,choices=PAY_FOR_CHOICES)
+#    contact = models.CharField(max_length=100)
+#    corporate = models.ForeignKey(Corporate,blank=True,null=True,on_delete=models.PROTECT)
+#    payment =  models.ForeignKey(PaymentDetails,on_delete=models.PROTECT)
+    status = models.BooleanField()
     created = models.DateTimeField(auto_now_add = True)
     updated = models.DateTimeField(auto_now_add = True)
  

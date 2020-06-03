@@ -5,4 +5,5 @@ app_name = 'donate'
 
 urlpatterns = [
     url(r'^$',  donatehome, name='donatehome'),
+    url(r'^initiate_payment$',  initiate_payment, name='initiate_payment'),
     ]

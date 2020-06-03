@@ -19,7 +19,7 @@ from django.template.context_processors import csrf
 from cdcontent.forms import *
 from creation.models import *
 from forums.models import Answer, Question
-from events.models import AcademicCenter
+from events.models import AcademicCenter, State
 
 # Create your views here.
 def zipdir(src_path, dst_path, archive):
@@ -329,8 +329,10 @@ def home(request):
         return HttpResponse(json.dumps(context), content_type='application/json')
     else:
         form = CDContentForm()
+    states = State.objects.order_by('name')
     context = {
-        'form': form
+        'form': form,
+        'states': states
     }
     context.update(csrf(request))
 
@@ -458,7 +460,7 @@ def ajax_show_added_foss(request):
                 fsize += os.path.getsize(filepath)
 
         fsize_total += fsize
-        data += '<tr><td>{}</td><td>{}</td><td>{}</td></tr>'.format(foss.foss, langs, humansize(fsize))
+        data += '<tr><td name="foss[]">{}</td><td name="langs[]">{}</td><td name="size">{}</td></tr>'.format(foss.foss, langs, humansize(fsize))
 
     fsize = 0.0
     languages.add(eng_rec.name)
@@ -487,7 +489,6 @@ def ajax_show_added_foss(request):
     return HttpResponse(json.dumps(output), content_type='application/json')
 
 def check_user_details(request, filesize):
-    print("Check User",filesize)
     file_size = round(filesize/ pow(2,20),1)
     classification ={
     'UR':'UnRegistered User',
@@ -501,7 +502,7 @@ def check_user_details(request, filesize):
         return 'RP'
     else:
         if file_size < 100.0: 
-            return ['UR','100INR']
+            return ['UR','100']
         else:
-            return ['UR','250INR']
+            return ['UR','250']
 

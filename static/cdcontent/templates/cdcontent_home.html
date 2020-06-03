@@ -110,14 +110,18 @@
   <tr>
     <th id ="user_file_size"></th>
     <th >
-	<div id="amount_to_pay"></div>
-	<button type="button" class="btn">+</button>
-	<button type="button" class="btn">-</button>
+	<div><input class="form-control" type="text" id="amount_to_pay" type="number">INR</div>
+	<button type="button" class="btn" id="increase">+</button>
+	<button type="button" class="btn" id="decrease">-</button>
+        <input type="hidden" id="orig_value">
+
     </th>
   </tr>
   <tr>
     <td ></td>
-    <td ><a href="/donate"><button type="button" class="btn btn-primary">Pay</button></a>
+    <td ><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#paymodal">
+  Pay
+</button>
 </td>
   </tr>
 
@@ -131,6 +135,65 @@
             </div>
         </div>
     </form>
+
+
+<!-- Modal -->
+  <div class="modal fade paymodal" id="paymodal" tabindex="-2" role="dialog" aria-labelledby="PaymentModal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+
+           <div class="modal-header">
+        <h5 class="modal-title">Payment Details</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>      
+        <div class="modal-body">     
+	<form method="post" action="/donate/initiate_payment" class="form-horizontal">
+        {% csrf_token %}
+	<div class="form-group col-sm-10">
+		<small id="payHelp" class="form-text text-muted" style="display:none">Please correct the below errors</small>
+  		    <input type="text" class="form-control" id="payee_name" name="Payee" placeholder="Full Name">
+		    <small id="nameHelp" class="form-text text-muted" style="display:none">Please enter your full name </small>
+	   </div>
+  	  <div class="form-group col-sm-10">
+  		    <input type="text" class="form-control" name="Country" placeholder="Country" value="India">
+   	 </div>
+	<div class="form-group col-sm-10">
+		<select class="form-control" placeholder="State" name="State">
+		<option id=0>Select State</option>
+		{% for state in states %}
+  		    <option id={{state.id}}>{{state.name}}</option>
+		{% endfor %}
+		</select>
+   	 </div>
+	<div class="form-group col-sm-10">
+  		    <input type="text" class="form-control" id="payee_email" placeholder="Email" name="Email">
+	            <small id="emailHelp" class="form-text text-muted" style="display:none">Email Address must include @ </small>
+ 	   </div>
+	 <div class="form-group col-sm-10" >
+		<select class="form-control" name="Gender">
+			<option id="none">Select Gender</option>
+  			<option id="gender_M">Male</option>
+			<option id="gender_F">FeMale</option>
+			<option id="gender_O">Other</option>
+		</select>
+   	 </div>
+	 <div class="form-group col-sm-10" >
+               <input class="form-control col-sm-6" type="text" id="mod_amount" name="FinalAmount" readonly>
+		<label for="mod_amount" class="col-sm-6 col-form-label">Amount</label>
+         </div>
+	      <table id ="display-foss" class="added-foss table table-condensed table-bordered table-hover">
+                    </table>
+
+	<button  class="btn btn-primary mb-2 make-payment-btn">Make Payment</button>
+	
+  	</div>        
+</form>
+        </div>
+      </div>
+    </div>
+  </div>
 
 <!-- Modal -->
   <div class="modal fade alertmodal" id="alertmodal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -151,6 +214,7 @@
       </div>
     </div>
   </div>
+
 
 {% endblock %}
 {% block jsblock %}
@@ -221,6 +285,7 @@
                     });
                 }
             });
+
             $('.add_foss_lang').on("click", function(){
                 foss = $('.foss_category').val();
                 level = $('.level').val();
@@ -273,8 +338,9 @@
                                          $('.user-message').html(message);
 					 $("#rate-div").show();
 					 $("#user_file_size").html("Amount to Pay ");
-					 $("#amount_to_pay").html(data[2][1]);
-					 $("#progress-bar").show();
+                                         document.getElementById("amount_to_pay").value = data[2][1];
+                                         document.getElementById("orig_value").value = data[2][1];
+
                                           }
                                          if(data[2]=='RP') {
                                         var message = 'You are part of our paid service.<br> Happy Downloading.<br> Please click on <b>Create Zip file</b> to proceed.'
@@ -328,5 +394,60 @@ if ($.cookie('modal_status') != '1')
             $(".navbar-fixed-top").css({'top' : '0px', 'position' : 'fixed'});
             $("#header-wrapper").css({'height' : '0px'});
         });
+$('#amount_to_pay').on("keyup", function(){
+
+var value = $('#amount_to_pay').val();
+var orig_value = $('#orig_value').val();
+if(parseInt(orig_value)>parseInt(value))
+{
+alert("Min Amount to pay : "+orig_value);
+document.getElementById("amount_to_pay").value = orig_value;
+}
+else{
+document.getElementById("amount_to_pay").value = parseInt(value);
+}
+});
+
+$('#payee_name').on('change',function(){
+var name = $('#payee_name').val();
+if(name.length==0){
+document.getElementById('nameHelp').style.display = 'block';
+}
+});
+
+$('#payee_email').on('change',function(){
+var email = $('#payee_email').val();
+if(!email.includes("@")){
+document.getElementById('emailHelp').style.display = 'block';
+}
+
+});
+
+function send_data(){
+var value = $('#amount_to_pay').val();
+document.getElementById("mod_amount").value = value;
+$(".paymodal").show();
+}
+
+$('.make-payment-btn').click(function(event){
+var name = $('#payee_name').val();
+var email = $('#payee_email').val();
+if(!email.includes("@")){
+document.getElementById('emailHelp').style.display = 'block';
+document.getElementById('payHelp').style.display = 'block';
+event.preventDefault();
+}
+if(name.length==0){
+document.getElementById('nameHelp').style.display = 'block';
+document.getElementById('payHelp').style.display = 'block';
+event.preventDefault();
+
+}
+
+
+});
+
+
+
     </script>
 {% endblock %}
