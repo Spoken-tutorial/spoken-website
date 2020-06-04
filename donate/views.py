@@ -5,10 +5,13 @@ from django.core.exceptions import PermissionDenied
 from django.shortcuts import render,redirect
 from django.http import HttpResponse
 from django.template.context_processors import csrf
-from donate.forms import PayeeForm
+from donate.forms import PaymentForm
 from donate.models import *
 from django import forms
 from django.views.decorators.csrf import csrf_protect,csrf_exempt
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import CreateView
+from django.urls import reverse_lazy
 
 @csrf_exempt
 def donatehome(request):
@@ -29,34 +32,11 @@ def donatehome(request):
     context.update(csrf(request))
     return render(request, 'donate/templates/donate_home.html', context)
 
-@csrf_protect
-def initiate_payment(request):
-    print(request.POST)
-    payee = request.POST.get("Payee")
-    country = request.POST.get("Country")
-    state = request.POST.get("State")
-    email = request.POST.get("Email")
-    amount = request.POST.get("Amount")
-    gender = request.POST.get("Gender")
-    fosses = request.POST.get("FOSS")
-    languages = request.POST.get("Language")
+class PaymentController(LoginRequiredMixin, CreateView):
+    login_url = '/login/'
+    template_name = 'cdcontent/templates/cdcontent_home.html'
+    model = Payment
+    form_class = PaymentForm
+    success_url = reverse_lazy('cdcontenthome')
+
     
-    # newpayee = Payee()
-    # newpayee.name  =  payee
-    # newpayee.country  =  country
-    # newpayee.state  =  state
-    # newpayee.amount  =  amount
-    # newpayee.email  = email
-    # newpayee.gender  = gender
-    # newpayee.foss  =  foss
-    # newpayee.language  =  languages
-    # newpayee.status  =  1
-    # newpayee.key  =  uuid or hash 
-    # newpayee.save()
-
-    form = PayeeForm(initial={'country': 'India'})
-    context = {
-        'form': form
-    }
-
-    return render(request, 'donate/templates/donate_home.html', context)

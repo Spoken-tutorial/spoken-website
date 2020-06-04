@@ -20,6 +20,7 @@ from cdcontent.forms import *
 from creation.models import *
 from forums.models import Answer, Question
 from events.models import AcademicCenter, State
+from donate.forms import PaymentForm
 
 # Create your views here.
 def zipdir(src_path, dst_path, archive):
@@ -332,7 +333,8 @@ def home(request):
     states = State.objects.order_by('name')
     context = {
         'form': form,
-        'states': states
+        'states': states,
+        'payment_form': PaymentForm(),
     }
     context.update(csrf(request))
 
