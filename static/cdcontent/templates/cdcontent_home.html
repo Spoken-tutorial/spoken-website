@@ -188,10 +188,10 @@
                             </div>
                     </div>
                     <div class="form-group col-sm-10">
-                            {{ payment_form.foss }}
+                            {{ payment_form.foss_id }}
                     </div>
                     <div class="form-group col-sm-10">
-                            {{ payment_form.language }}
+                            {{ payment_form.language_id }}
                     </div>
                     
         
@@ -199,7 +199,7 @@
                 <table id ="display-foss" class="added-foss table table-condensed table-bordered table-hover">
                 </table>
                     {% if user.is_authenticated %}
-                        <button  class="btn btn-primary mb-2 make-payment-btn">Make Payment</button>
+                        <button  type= "submit" class="btn btn-primary mb-2 make-payment-btn">Make Payment</button>
                     {% else %}
                         <a  href= "/accounts/login/?next=/cdcontent" class="btn btn-primary mb-2 make-payment-btn">Please Login to make Payment</a> Or <a  href= "/accounts/register/?next=/cdcontent" class="btn btn-primary mb-2 make-payment-btn">Register</a>
                     {% endif %}
@@ -361,6 +361,15 @@
                                          $('.create_zip').prop('disabled', false);
                                          $('.user-message').html(message);
                                           }
+                                        if(data[2][0]=='RNP') {
+                                        var message = '<i>Amount to be paid.</i>'
+                                         $('.create_zip').prop('disabled', true);
+                                         $('.user-message').html(message);
+					                     $("#rate-div").show();
+					                     $("#user_file_size").html("Amount to Pay ");
+                                         document.getElementById("amount_to_pay").value = data[2][1];
+                                         document.getElementById("orig_value").value = data[2][1];
+                                        }
 
                                     }
                                     $('.ajax-refresh-add-foss').hide();
@@ -479,8 +488,8 @@ event.preventDefault();
         });
 
         var modal = $(this)
-        modal.find('.modal-body input[name="foss"]').val(selectedfoss)
-        modal.find('.modal-body input[name="language"]').val(languages)
+        modal.find('.modal-body input[name="foss_id"]').val(selectedfoss)
+        modal.find('.modal-body input[name="language_id"]').val(languages)
         modal.find('.modal-body input[name="amount"]').val(amount)
         modal.find('.modal-body input[name="amount"]').prop("readonly", true);
     });

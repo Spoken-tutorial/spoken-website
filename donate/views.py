@@ -1,5 +1,5 @@
 from django.shortcuts import render
-
+from creation.models import FossCategory, Language
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import render,redirect
@@ -12,6 +12,8 @@ from django.views.decorators.csrf import csrf_protect,csrf_exempt
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import CreateView
 from django.urls import reverse_lazy
+from cdcontent.forms import CDContentForm
+from django.contrib import messages
 
 @csrf_exempt
 def donatehome(request):
@@ -37,6 +39,27 @@ class PaymentController(LoginRequiredMixin, CreateView):
     template_name = 'cdcontent/templates/cdcontent_home.html'
     model = Payment
     form_class = PaymentForm
-    success_url = reverse_lazy('cdcontenthome')
+    success_url = reverse_lazy('cdcontent:cdcontenthome')
 
-    
+    def form_valid(self, form):
+        """
+        If the form is valid, save the associated model.
+        """
+        self.object = form.save(commit=False)
+        foss_id = form.cleaned_data.get('foss_id')
+        language_id = form.cleaned_data.get('language_id')
+        self.object.foss = FossCategory.objects.get(pk=foss_id)
+        self.object.user = self.request.user
+        self.object.status = False
+        self.object.save()
+        self.object.language = Language.objects.filter(pk__in = language_id)
+        form.save_m2m()
+        return super(PaymentController, self).form_valid(form)
+
+    def form_invalid(self, form):
+        """
+        If the form is invalid, re-render the context data with the
+        data-filled form and errors.
+        """
+        messages.warning(self.request, 'Invalid form payment request.')
+        return redirect('cdcontent:cdcontenthome')

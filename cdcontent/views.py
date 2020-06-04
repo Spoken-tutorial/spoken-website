@@ -334,7 +334,7 @@ def home(request):
     context = {
         'form': form,
         'states': states,
-        'payment_form': PaymentForm(),
+        'payment_form': PaymentForm(user=request.user),
     }
     context.update(csrf(request))
 
@@ -498,10 +498,10 @@ def check_user_details(request, filesize):
     'RP':'Registered and Paid User'}
 
     if request.user.is_authenticated():
-        #check from paid colleges table - Academic centre status = 1
-        paid_colleges = AcademicCenter.objects.filter(status=1)
-        print("1",request.user.groups.all())
-        return 'RP'
+        if file_size < 100.0: 
+            return ['RNP','100']
+        else:
+            return ['RNP','250']
     else:
         if file_size < 100.0: 
             return ['UR','100']
