@@ -20,6 +20,7 @@ from cdcontent.forms import *
 from creation.models import *
 from forums.models import Answer, Question
 from events.models import AcademicCenter, State
+from donate.forms import PaymentForm
 
 # Create your views here.
 def zipdir(src_path, dst_path, archive):
@@ -332,7 +333,8 @@ def home(request):
     states = State.objects.order_by('name')
     context = {
         'form': form,
-        'states': states
+        'states': states,
+        'payment_form': PaymentForm(user=request.user),
     }
     context.update(csrf(request))
 
@@ -496,10 +498,10 @@ def check_user_details(request, filesize):
     'RP':'Registered and Paid User'}
 
     if request.user.is_authenticated():
-        #check from paid colleges table - Academic centre status = 1
-        paid_colleges = AcademicCenter.objects.filter(status=1)
-        print("1",request.user.groups.all())
-        return 'RP'
+        if file_size < 100.0: 
+            return ['RNP','100']
+        else:
+            return ['RNP','250']
     else:
         if file_size < 100.0: 
             return ['UR','100']
