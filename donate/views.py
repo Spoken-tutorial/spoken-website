@@ -46,13 +46,30 @@ class PaymentController(LoginRequiredMixin, CreateView):
         If the form is valid, save the associated model.
         """
         self.object = form.save(commit=False)
-        foss_id = form.cleaned_data.get('foss_id')
-        language_id = form.cleaned_data.get('language_id')
-        self.object.foss = FossCategory.objects.get(pk=foss_id)
         self.object.user = self.request.user
         self.object.status = False
         self.object.save()
-        self.object.language = Language.objects.filter(pk__in = language_id)
+        payment_obj = self.object;
+
+        foss_ids = form.cleaned_data.get('foss_id')
+        languages = form.cleaned_data.get('language_id')
+        fosses = foss_ids.split(',')
+        foss_languages = languages.split(',|')
+
+        payment_id = payment_obj.pk
+        
+        for i in range(len(fosses)):
+            foss_category = FossCategory.objects.get(pk=int(fosses[i]))
+            dict_obj = FossLangDict()
+            dict_obj.foss = foss_category
+            dict_obj.payment = Payment.objects.get(pk=payment_id)
+            dict_obj.save()
+            languages = foss_languages[i].split(',')
+            for language in languages:
+                if language!='':
+                    foss_language = Language.objects.get(pk=int(language))
+                    dict_obj.lang.add(foss_language)
+
         form.save_m2m()
         return super(PaymentController, self).form_valid(form)
 

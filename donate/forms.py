@@ -3,19 +3,7 @@ from donate.models import *
 from django import forms
 from events.models import State	
 
-class MultipleValueWidget(forms.HiddenInput):
-    def value_from_datadict(self, data, files, name):
-        return data.getlist(name)
-
-class MultipleValueField(forms.Field):
-    widget = MultipleValueWidget
-
-class MultipleIntField(MultipleValueField):
-    def clean(self, value):
-        return [int(x) for x in value[0].split(",")]
-
 class PaymentForm(forms.ModelForm):
-
     state = forms.ModelChoiceField(
             widget = forms.Select(attrs = {'class' : 'ac-state'}),
             queryset = State.objects.order_by('name'),
@@ -23,9 +11,9 @@ class PaymentForm(forms.ModelForm):
             help_text = "",
             required=False,
             )
-    foss_id = forms.IntegerField(widget=forms.HiddenInput(), required=True)
-    language_id = MultipleIntField()
 
+    foss_id = forms.CharField(widget=forms.HiddenInput(), required=True)
+    language_id = forms.CharField(widget=forms.HiddenInput(), required=True)
 
     class Meta:
         model = Payment

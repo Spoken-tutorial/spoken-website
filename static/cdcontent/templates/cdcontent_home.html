@@ -88,7 +88,7 @@
                     </table>
                 </div>
 		<div id="rate-div" style="display: none">
-                    <table class="rate-chart table table-condensed table-bordered table-hover" >
+                    <table class="rate-chart table table-condensed table-bordered table-hover">
 			<thead>
   <tr>
     <th >File Size</th>
@@ -195,7 +195,7 @@
                     </div>
                     
         
-
+               
                 <table id ="display-foss" class="added-foss table table-condensed table-bordered table-hover">
                 </table>
                     {% if user.is_authenticated %}
@@ -304,7 +304,6 @@
                 foss = $('.foss_category').val();
                 level = $('.level').val();
                 langs = JSON.stringify($('.language').val());
-                console.log(langs)
                 selectedfoss = $('.selected_foss').val();
                 if(foss && langs && level) {
                     $.ajax({
@@ -326,6 +325,7 @@
                                 data = JSON.stringify(data);
                                 if(data != '{}') {
                                     $('.selected_foss').val(data);
+                                     selectedfoss = $('.selected_foss').val();
                                 } else {
                                     $('.selected_foss').val('');
                                 }
@@ -342,10 +342,9 @@
                                 },
                                 success: function(data) {
                                     //data = JSON.parse(data);
-                                    header = '<caption class="col-left"><b>Selected FOSS List:<span class="pull-right"> ~ Total Size : '+data[1]+'</span></b></caption><tr><th>FOSS</th><th>Languages</th><th>Size</th>';
+                                    header = '<caption class="col-left"><b>Selected FOSS List:<span class="pull-right"> ~ Total Size : '+data[1]+'</span></b></caption><tr ><th>FOSS</th><th>Languages</th><th>Size</th>';
                                     if(data) {
-                                        $('.added-foss').html(header + data[0]);
-                                        console.log(data);
+                                        $('.added-foss').html(header + data[0]);                                        
                                         if(data[2][0]=='UR') {
                                         var message = '<i>User not registered.<br> Kinldy <a href="/accounts/login">Login</a> if you are registered.</i>'
                                          $('.create_zip').prop('disabled', true);
@@ -417,7 +416,7 @@ if ($.cookie('modal_status') != '1')
             $(".navbar-fixed-top").css({'top' : '0px', 'position' : 'fixed'});
             $("#header-wrapper").css({'height' : '0px'});
         });
-$('#amount_to_pay').on("keyup", function(){
+$('#amount_to_pay').on("focusout", function(){
 
 var value = $('#amount_to_pay').val();
 var orig_value = $('#orig_value').val();
@@ -474,22 +473,24 @@ event.preventDefault();
 <script type="text/javascript">
 
      $('#paymodal').on('show.bs.modal', function (event) {
+        var foss_lang_obj = JSON.parse(selectedfoss);
+        var foss_selected = [];
+        var langs_selected = [];
 
-
-        var selectedfoss = $("select.foss_category").children("option:selected").val();
-
-        var languages = [];
+        for(var key in foss_lang_obj) {
+            var value = foss_lang_obj[key];
+            var langs = value[0];
+            l = String(langs);
+            foss_selected.push(key);
+            langs_selected.push(value[0]);
+            langs_selected.push('|');
+        }
         var amount = $('#amount_to_pay').val()
-
-        $.each($("select.language option:selected"), function(){            
-
-            languages.push($(this).val());
-
-        });
-
+        
         var modal = $(this)
-        modal.find('.modal-body input[name="foss_id"]').val(selectedfoss)
-        modal.find('.modal-body input[name="language_id"]').val(languages)
+        
+        modal.find('.modal-body input[name="foss_id"]').val(foss_selected);
+        modal.find('.modal-body input[name="language_id"]').val(langs_selected);
         modal.find('.modal-body input[name="amount"]').val(amount)
         modal.find('.modal-body input[name="amount"]').prop("readonly", true);
     });
