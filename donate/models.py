@@ -12,14 +12,16 @@ class Payment(models.Model):
     #city =  models.CharField(max_length=75,null=True)
     gender = models.CharField(choices=GENDER_CHOICES, max_length=6)
     amount = models.DecimalField(max_digits=5,decimal_places=2)
-    foss = models.ForeignKey(FossCategory, on_delete=models.PROTECT,related_name="payment_foss")
-    language = models.ManyToManyField(Language)
     key = models.UUIDField(default=uuid.uuid4, editable=False)
     status = models.BooleanField()
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     user = models.ForeignKey(User,on_delete=models.PROTECT,related_name="payment_user" )
  
+class FossLangDict(models.Model):
+    payment = models.ForeignKey(Payment, on_delete=models.PROTECT)
+    foss = models.ForeignKey(FossCategory, on_delete=models.PROTECT,related_name="payment_foss")
+    lang = models.ManyToManyField(Language)
 
 class PaymentTransaction(models.Model):
     paymentdetail = models.ForeignKey(Payment, on_delete=models.PROTECT, related_name="payment_transaction" )
