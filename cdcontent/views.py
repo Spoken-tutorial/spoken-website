@@ -19,7 +19,8 @@ from django.template.context_processors import csrf
 from cdcontent.forms import *
 from creation.models import *
 from forums.models import Answer, Question
-
+from events.models import AcademicCenter, State
+from donate.forms import PaymentForm
 
 # Create your views here.
 def zipdir(src_path, dst_path, archive):
@@ -329,8 +330,11 @@ def home(request):
         return HttpResponse(json.dumps(context), content_type='application/json')
     else:
         form = CDContentForm()
+    states = State.objects.order_by('name')
     context = {
-        'form': form
+        'form': form,
+        'states': states,
+        'payment_form': PaymentForm(user=request.user),
     }
     context.update(csrf(request))
 
@@ -458,7 +462,7 @@ def ajax_show_added_foss(request):
                 fsize += os.path.getsize(filepath)
 
         fsize_total += fsize
-        data += '<tr><td>{}</td><td>{}</td><td>{}</td></tr>'.format(foss.foss, langs, humansize(fsize))
+        data += '<tr><td name="foss[]">{}</td><td name="langs[]">{}</td><td name="size">{}</td></tr>'.format(foss.foss, langs, humansize(fsize))
 
     fsize = 0.0
     languages.add(eng_rec.name)
@@ -480,6 +484,27 @@ def ajax_show_added_foss(request):
 
     fsize_total += fsize
     data += '<tr><td colspan="2">Extra files</td><td>{}</td></tr>'.format(humansize(fsize))
-
-    output = {0: data, 1: humansize(fsize_total)}
+    
+    #check if user is registered
+    user_details = check_user_details(request,fsize_total )
+    output = {0: data, 1: humansize(fsize_total), 2:user_details}
     return HttpResponse(json.dumps(output), content_type='application/json')
+
+def check_user_details(request, filesize):
+    file_size = round(filesize/ pow(2,20),1)
+    classification ={
+    'UR':'UnRegistered User',
+    'RNP':'Registered but not Paid User',
+    'RP':'Registered and Paid User'}
+
+    if request.user.is_authenticated():
+        if file_size < 100.0: 
+            return ['RNP','100']
+        else:
+            return ['RNP','250']
+    else:
+        if file_size < 100.0: 
+            return ['UR','100']
+        else:
+            return ['UR','250']
+

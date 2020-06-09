@@ -32,6 +32,7 @@
     </div>
 {% endblock %}
 {% block search %} {% endblock %}
+
 {% block content %}
     <form role="form" method="post" enctype="multipart/form-data" class="cdcontentform form-horizontal">
         <div class="row well bs-component">
@@ -76,7 +77,7 @@
                         <div class="col-lg-9 col-md-9 col-sm-9 col-xs-9 col-lg-offset-3 col-md-offset-3 col-sm-offset-3">
                             <span class='ajax-refresh ajax-refresh-add-foss'><i class="fa fa-2 fa-refresh fa-spin"></i></span>
                             <input type="button" class="add_foss_lang btn btn-primary" value="Add selected FOSS"  tabindex="4" />
-                            <input type="submit" class="btn btn-primary" value="Create ZIP file"  tabindex="5" />
+                            <input type="submit" class="btn btn-primary create_zip" value="Create ZIP file" tabindex="5" />
                         </div>
                     </div>
                 </fieldset>
@@ -86,12 +87,152 @@
                     <table class="added-foss table table-condensed table-bordered table-hover">
                     </table>
                 </div>
+		<div id="rate-div" style="display: none">
+                    <table class="rate-chart table table-condensed table-bordered table-hover">
+			<thead>
+  <tr>
+    <th >File Size</th>
+    <th >Rate</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td >< 100 mb</td>
+    <td >100 INR</td>
+  </tr>
+  <tr>
+    <td > > 100 mb</td>
+    <td >250 INR</td>
+  </tr>
+</tbody>
+
+<thead>
+  <tr>
+    <th id ="user_file_size"></th>
+    <th >
+	<div><input class="form-control" type="text" id="amount_to_pay" type="number">INR</div>
+	<button type="button" class="btn" id="increase">+</button>
+	<button type="button" class="btn" id="decrease">-</button>
+        <input type="hidden" id="orig_value">
+
+    </th>
+  </tr>
+  <tr>
+    <td ></td>
+    <td ><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#paymodal">
+  Pay
+</button>
+</td>
+  </tr>
+
+</thead>
+
+                    </table>
+                </div>
                 <div class="download-link"></div>
+                <div class="user-message"></div>
+
             </div>
         </div>
     </form>
+
+
+<!-- Modal -->
+  <div class="modal fade paymodal" id="paymodal" tabindex="-2" role="dialog" aria-labelledby="PaymentModal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+
+           <div class="modal-header">
+        <h5 class="modal-title">Payment Details</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>      
+        <div class="modal-body">     
+            <form method="post" action="/donate/initiate_payment" class="form-horizontal">
+                {% csrf_token %}
+                    <div class="form-group col-sm-10">
+                        {{ payment_form.name }}
+                        <div class="invalid-feedback">
+                            {{ payment_form.name.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group col-sm-10">
+                            {{ payment_form.email }}
+                            <div class="invalid-feedback">
+                                {{ payment_form.email.errors }}
+                            </div>
+                    </div>
+                    <div class="form-group col-sm-10">
+                            {{ payment_form.country }}
+                            <div class="invalid-feedback">
+                                {{ payment_form.country.errors }}
+                            </div>
+                    </div>
+                    <div class="form-group col-sm-10">
+                            {{ payment_form.state }}
+                            <div class="invalid-feedback">
+                                {{ payment_form.state.errors }}
+                            </div>
+                    </div>
+                    <div class="form-group col-sm-10">
+                            {{ payment_form.gender }}
+                            <div class="invalid-feedback">
+                                {{ payment_form.gender.errors }}
+                            </div>
+                    </div>
+                    <div class="form-group col-sm-10">
+                            {{ payment_form.amount }}
+                            <div class="invalid-feedback">
+                                {{ payment_form.amount.errors }}
+                            </div>
+                    </div>
+                    <div class="form-group col-sm-10">
+                            {{ payment_form.foss_id }}
+                    </div>
+                    <div class="form-group col-sm-10">
+                            {{ payment_form.language_id }}
+                    </div>
+                    
+        
+               
+                <table id ="display-foss" class="added-foss table table-condensed table-bordered table-hover">
+                </table>
+                    {% if user.is_authenticated %}
+                        <button  type= "submit" class="btn btn-primary mb-2 make-payment-btn">Make Payment</button>
+                    {% else %}
+                        <a  href= "/accounts/login/?next=/cdcontent" class="btn btn-primary mb-2 make-payment-btn">Please Login to make Payment</a> Or <a  href= "/accounts/register/?next=/cdcontent" class="btn btn-primary mb-2 make-payment-btn">Register</a>
+                    {% endif %}
+            </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<!-- Modal -->
+  <div class="modal fade alertmodal" id="alertmodal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-body">
+           <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+           <ul>
+              <li>CD Content Download is now a paid service.</li>
+              <li>If your college has already made the payment , please <a href="/accounts/login">Login</a> with your registered email address</li>
+	      <ul><li>There is <b>NO Restriction</b> on your download size</li></ul>
+              <li>If you are an individual , then we charge very nominal charge for download.</li>
+              <ul>
+		<li> Add your FOSS and make your payment accordingly</li>
+		<li> This download will be available for <b>1 week</b> from the date of successful payment</li></ul>
+           </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
 {% endblock %}
 {% block jsblock %}
+<script src="{% static 'spoken/js/jquery.cookie.js' %}"></script>
     <script type="text/javascript">
         $(document).ready(function(){
             if($('.foss_category').val() == '') {
@@ -158,11 +299,11 @@
                     });
                 }
             });
+
             $('.add_foss_lang').on("click", function(){
                 foss = $('.foss_category').val();
                 level = $('.level').val();
                 langs = JSON.stringify($('.language').val());
-                console.log(langs)
                 selectedfoss = $('.selected_foss').val();
                 if(foss && langs && level) {
                     $.ajax({
@@ -184,6 +325,7 @@
                                 data = JSON.stringify(data);
                                 if(data != '{}') {
                                     $('.selected_foss').val(data);
+                                     selectedfoss = $('.selected_foss').val();
                                 } else {
                                     $('.selected_foss').val('');
                                 }
@@ -200,10 +342,34 @@
                                 },
                                 success: function(data) {
                                     //data = JSON.parse(data);
-                                    header = '<caption class="col-left"><b>Selected FOSS List:<span class="pull-right"> ~ Total Size : '+data[1]+'</span></b></caption><tr><th>FOSS</th><th>Languages</th><th>Size</th>';
+                                    header = '<caption class="col-left"><b>Selected FOSS List:<span class="pull-right"> ~ Total Size : '+data[1]+'</span></b></caption><tr ><th>FOSS</th><th>Languages</th><th>Size</th>';
                                     if(data) {
-                                        $('.added-foss').html(header + data[0]);
-                                        console.log(data);
+                                        $('.added-foss').html(header + data[0]);                                        
+                                        if(data[2][0]=='UR') {
+                                        var message = '<i>User not registered.<br> Kinldy <a href="/accounts/login">Login</a> if you are registered.</i>'
+                                         $('.create_zip').prop('disabled', true);
+                                         $('.user-message').html(message);
+					 $("#rate-div").show();
+					 $("#user_file_size").html("Amount to Pay ");
+                                         document.getElementById("amount_to_pay").value = data[2][1];
+                                         document.getElementById("orig_value").value = data[2][1];
+
+                                          }
+                                         if(data[2]=='RP') {
+                                        var message = 'You are part of our paid service.<br> Happy Downloading.<br> Please click on <b>Create Zip file</b> to proceed.'
+                                         $('.create_zip').prop('disabled', false);
+                                         $('.user-message').html(message);
+                                          }
+                                        if(data[2][0]=='RNP') {
+                                        var message = '<i>Amount to be paid.</i>'
+                                         $('.create_zip').prop('disabled', true);
+                                         $('.user-message').html(message);
+					                     $("#rate-div").show();
+					                     $("#user_file_size").html("Amount to Pay ");
+                                         document.getElementById("amount_to_pay").value = data[2][1];
+                                         document.getElementById("orig_value").value = data[2][1];
+                                        }
+
                                     }
                                     $('.ajax-refresh-add-foss').hide();
                                 }
@@ -217,8 +383,15 @@
                 }
             });
         });
-    </script>
-    <script>
+
+
+if ($.cookie('modal_status') != '1')
+    {
+    $('.alertmodal').modal('show');
+    $.cookie('modal_status', '1',{ expires: null}); 
+    }
+  $('.create_zip').prop('disabled', true); 
+
         /* Slideshow */
         var stop = 1
         $('#slideshow').hover(function(){
@@ -243,5 +416,84 @@
             $(".navbar-fixed-top").css({'top' : '0px', 'position' : 'fixed'});
             $("#header-wrapper").css({'height' : '0px'});
         });
-    </script>
+$('#amount_to_pay').on("focusout", function(){
+
+var value = $('#amount_to_pay').val();
+var orig_value = $('#orig_value').val();
+if(parseInt(orig_value)>parseInt(value))
+{
+alert("Min Amount to pay : "+orig_value);
+document.getElementById("amount_to_pay").value = orig_value;
+}
+else{
+document.getElementById("amount_to_pay").value = parseInt(value);
+}
+});
+
+$('#payee_name').on('change',function(){
+var name = $('#payee_name').val();
+if(name.length==0){
+document.getElementById('nameHelp').style.display = 'block';
+}
+});
+
+$('#payee_email').on('change',function(){
+var email = $('#payee_email').val();
+if(!email.includes("@")){
+document.getElementById('emailHelp').style.display = 'block';
+}
+
+});
+
+function send_data(){
+var value = $('#amount_to_pay').val();
+document.getElementById("mod_amount").value = value;
+$(".paymodal").show();
+}
+
+$('.make-payment-btn').click(function(event){
+var name = $('#payee_name').val();
+var email = $('#payee_email').val();
+if(!email.includes("@")){
+document.getElementById('emailHelp').style.display = 'block';
+document.getElementById('payHelp').style.display = 'block';
+event.preventDefault();
+}
+if(name.length==0){
+document.getElementById('nameHelp').style.display = 'block';
+document.getElementById('payHelp').style.display = 'block';
+event.preventDefault();
+
+}
+
+
+});
+</script>
+
+<script type="text/javascript">
+
+     $('#paymodal').on('show.bs.modal', function (event) {
+        var foss_lang_obj = JSON.parse(selectedfoss);
+        var foss_selected = [];
+        var langs_selected = [];
+
+        for(var key in foss_lang_obj) {
+            var value = foss_lang_obj[key];
+            var langs = value[0];
+            l = String(langs);
+            foss_selected.push(key);
+            langs_selected.push(value[0]);
+            langs_selected.push('|');
+        }
+        var amount = $('#amount_to_pay').val()
+        
+        var modal = $(this)
+        
+        modal.find('.modal-body input[name="foss_id"]').val(foss_selected);
+        modal.find('.modal-body input[name="language_id"]').val(langs_selected);
+        modal.find('.modal-body input[name="amount"]').val(amount)
+        modal.find('.modal-body input[name="amount"]').prop("readonly", true);
+    });
+
+</script>
 {% endblock %}

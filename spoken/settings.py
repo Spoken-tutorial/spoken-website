@@ -80,6 +80,7 @@ INSTALLED_APPS = [
     'forums',
     'cms',
     'creation',
+    'donate',
     'statistics',
     'cdcontent',
     'events',
@@ -94,7 +95,8 @@ INSTALLED_APPS = [
     'django_filters',
     'impersonate',
     'corsheaders',
-    'ckeditor'
+    'ckeditor',
+    'cron',
 ]
 
 
@@ -340,7 +342,26 @@ CACHES = {
     }
 }
 
+
+
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/1'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TASK_SERIALIZER = 'json'
+
+CRON_ROOT = os.path.join(MEDIA_ROOT, 'emails/')
+
+CKEDITOR_CONFIGS = {
+    'default': {
+        'height': 150,
+        'width': 600,
+        'toolbar': 'Full'
+    }
+}
+
 DATA_UPLOAD_MAX_NUMBER_FIELDS = DATA_UPLOAD_MAX_NUMBER_FIELDS
+
 
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [
