@@ -59,16 +59,16 @@ class PaymentController(LoginRequiredMixin, CreateView):
         payment_id = payment_obj.pk
         
         for i in range(len(fosses)):
-            foss_category = FossCategory.objects.get(pk=int(fosses[i]))
-            dict_obj = FossLangDict()
-            dict_obj.foss = foss_category
-            dict_obj.payment = Payment.objects.get(pk=payment_id)
-            dict_obj.save()
+            foss_category = FossCategory.objects.get(pk=int(fosses[i]))  
             languages = foss_languages[i].split(',')
             for language in languages:
                 if language!='':
                     foss_language = Language.objects.get(pk=int(language))
-                    dict_obj.lang.add(foss_language)
+                    cd_foss_langs = CdFossLanguages()
+                    cd_foss_langs.payment = Payment.objects.get(pk=payment_id)
+                    cd_foss_langs.foss = foss_category
+                    cd_foss_langs.lang = foss_language
+                    cd_foss_langs.save()
 
         form.save_m2m()
         return super(PaymentController, self).form_valid(form)

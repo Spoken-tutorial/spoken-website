@@ -34,6 +34,8 @@ class PaymentForm(forms.ModelForm):
             if user.is_authenticated:
                 self.fields['email'].initial = user.email
                 self.fields['email'].widget.attrs['readonly'] = True
+                self.fields['name'].initial = user.get_full_name()
+
 
 
         

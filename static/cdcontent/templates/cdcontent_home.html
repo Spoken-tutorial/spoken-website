@@ -11,6 +11,73 @@
         #id_language {
             min-height: 180px;
         }
+        #donation{
+            display: none;
+        }
+        #donate{
+            background-color: white;
+            font-weight: bold;
+            border: 1px solid #286090;
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding:2%;
+        }
+        #donate-btn{
+            background-color: white;
+            font-weight: bold;
+            color: #286090;
+            border: 2px solid #286090;
+        }
+        .donate-options{
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .d-item{
+            border: 1px solid #286090;
+            margin: 0 10px;
+        }
+        .donate-options input,
+        .donate-options button,{
+            margin:0 2%;
+        }
+        .bill-details,
+        .bill-details td,
+        .bill-details th
+        {
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        .bill-details
+        {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        .bill-details td,
+        .bill-details th {
+            padding: 15px;
+        }
+        #user_file_size{
+         padding-bottom: 10px;
+        }
+        #total_amount_to_pay{
+            border: 1px solid #286090;
+        }
+        .form-check-label{
+            font-size: 0.8rem;
+            font-weight: normal;
+        }
+        .rate-chart{
+            overflow: hidden;
+        }
+        .rate-chart *{
+            overflow: hidden;
+        }
+        .payment-details{
+            font-weight: bold;
+        }
     </style>
 {% endblock %}
 {% block heading %}CD Content Creation{% endblock %}
@@ -36,7 +103,7 @@
 {% block content %}
     <form role="form" method="post" enctype="multipart/form-data" class="cdcontentform form-horizontal">
         <div class="row well bs-component">
-            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+            <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
                 <div class="alert alert-danger" role="alert">
                   <strong>Note:</strong> The maximum file size to download is 1 GB.
                 </div>
@@ -82,7 +149,7 @@
                     </div>
                 </fieldset>
             </div>
-            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+            <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
                 <div class="table-responsive">
                     <table class="added-foss table table-condensed table-bordered table-hover">
                     </table>
@@ -109,32 +176,74 @@
 <thead>
   <tr>
     <th id ="user_file_size"></th>
-    <th >
-	<div><input class="form-control" type="text" id="amount_to_pay" type="number">INR</div>
-	<button type="button" class="btn" id="increase">+</button>
-	<button type="button" class="btn" id="decrease">-</button>
+    <th>
+	<span><input class="form-control" type="text" id="amount_to_pay" type="number" readonly></span>
         <input type="hidden" id="orig_value">
-
     </th>
   </tr>
   <tr>
     <td ></td>
-    <td ><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#paymodal">
-  Pay
-</button>
+    <td>
+    <div id="donate">
+    <p class="donate-content">Contribute in our journey of making India IT-literate. </p>
+    <button id="donate-btn" type="button" class="btn btn-outline-success">DONATE</button>  
+    </div>
+    </td>
+  </tr>
+</thead>
+<thead id ="donation">
+  <tr>
+    <th >Donation Amount</th>
+    <th class="donate-options">
+        <input type="number" step="50" value="0" placeholder="100" id="donation-amount">
+        <button type="button" class="btn d-item" id="increase">+</button>
+        <button type="button" class="btn d-item" id="decrease">-</button>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" value="" id="donation-checkbox" checked>
+          <label class="form-check-label" for="donation-checkbox">
+            Add Donation
+          </label>
+        </div>
+    </th>
+  </tr>
+  <tr>
+    <td> <span class="payment-details">Payment Details</span></td>
+    <td>
+<table class="bill-details">
+  <tr>
+    <td>Foss Purchase : </td>
+    <td id="bill-foss"></td>
+  </tr>
+  <tr>
+    <td>Donation : </td>
+    <td id="bill-donation">200</td>  
+  </tr>
+  <tr style="font-weight: bold;">
+    <td>Total Amount to Pay: </td>
+    <td id="bill-total">
+        <input class="form-control" type="text" id="total_amount_to_pay" type="number" readonly>
+    </td>
+  </tr>
+</table>
 </td>
   </tr>
-
 </thead>
-
-                    </table>
-                </div>
-                <div class="download-link"></div>
-                <div class="user-message"></div>
-
-            </div>
-        </div>
-    </form>
+<thead >
+  <tr>
+    <td></td>
+    <td><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#paymodal">
+  Make Payment
+</button>
+</td>
+</tr>
+</thead>
+</table>
+    </div>
+    <div class="download-link"></div>
+    <div class="user-message"></div>
+    </div>
+</div>
+</form>
 
 
 <!-- Modal -->
@@ -326,6 +435,7 @@
                                 if(data != '{}') {
                                     $('.selected_foss').val(data);
                                      selectedfoss = $('.selected_foss').val();
+                                     
                                 } else {
                                     $('.selected_foss').val('');
                                 }
@@ -350,7 +460,7 @@
                                          $('.create_zip').prop('disabled', true);
                                          $('.user-message').html(message);
 					 $("#rate-div").show();
-					 $("#user_file_size").html("Amount to Pay ");
+					 $("#user_file_size").html("Foss Purchase (INR) ");
                                          document.getElementById("amount_to_pay").value = data[2][1];
                                          document.getElementById("orig_value").value = data[2][1];
 
@@ -365,7 +475,7 @@
                                          $('.create_zip').prop('disabled', true);
                                          $('.user-message').html(message);
 					                     $("#rate-div").show();
-					                     $("#user_file_size").html("Amount to Pay ");
+					                     $("#user_file_size").html("Foss Purchase (INR)");
                                          document.getElementById("amount_to_pay").value = data[2][1];
                                          document.getElementById("orig_value").value = data[2][1];
                                         }
@@ -445,6 +555,53 @@ document.getElementById('emailHelp').style.display = 'block';
 
 });
 
+$("#donate-btn").click(function(){
+    $('#donation-amount').val(100);
+    calculate_total_amt();
+    $("#donation").show();
+  });
+
+$('#donation-amount').on("focusout", function(){
+    var donation_value = $('#donation-amount').val();
+    calculate_total_amt();
+});
+
+$('#donation-checkbox').click(function(){
+            if($(this).prop("checked") == true){
+                $('#donation-amount').val(100);
+                calculate_total_amt();
+            }
+            else if($(this).prop("checked") == false){
+                $('#donation-amount').val(0);
+                calculate_total_amt();
+            }
+        });
+
+$("#increase").click(function(){
+    var donation_value = $('#donation-amount').val();
+    var increment = parseInt(donation_value)+100;
+    $('#donation-amount').val(increment);
+    calculate_total_amt();
+  });
+
+$("#decrease").click(function(){
+    var donation_value = $('#donation-amount').val();
+    if (donation_value >= 100) {
+        var increment = parseInt(donation_value)-100;
+        $('#donation-amount').val(increment);
+        calculate_total_amt();
+    }
+  });
+
+function calculate_total_amt(){
+    var foss_value = $('#amount_to_pay').val();
+    $('#bill-foss').html(foss_value);
+    var donation_value = $('#donation-amount').val();
+    $('#bill-donation').html(donation_value);
+    var total = parseInt(foss_value) + parseInt(donation_value);
+    document.getElementById("total_amount_to_pay").value = total;
+}
+
 function send_data(){
 var value = $('#amount_to_pay').val();
 document.getElementById("mod_amount").value = value;
@@ -473,6 +630,7 @@ event.preventDefault();
 <script type="text/javascript">
 
      $('#paymodal').on('show.bs.modal', function (event) {
+        calculate_total_amt();
         var foss_lang_obj = JSON.parse(selectedfoss);
         var foss_selected = [];
         var langs_selected = [];
@@ -485,10 +643,10 @@ event.preventDefault();
             langs_selected.push(value[0]);
             langs_selected.push('|');
         }
-        var amount = $('#amount_to_pay').val()
+        
+        var amount = $('#total_amount_to_pay').val()
         
         var modal = $(this)
-        
         modal.find('.modal-body input[name="foss_id"]').val(foss_selected);
         modal.find('.modal-body input[name="language_id"]').val(langs_selected);
         modal.find('.modal-body input[name="amount"]').val(amount)
