@@ -29,10 +29,14 @@
 
                       <div class="form-group">
                           <div class="col-xs-12 form-group">
-                              <input class="btn btn-primary" type="submit" value="Add Student" />
+			      <input class="btn btn-primary" type="submit" id="id_submit" value="Add Student" onclick=make_submit_call() />
                               <a class="btn btn-danger" href="{% url 'eventsv2:batch_list' %}">Cancel</a>
                           </div>
-                      </div>
+                      
+                     <div style="display:none; font-size: 200%; color: red; text-align: center;" id="ajax-loader"><i> Your data is being processed. <br> 
+                        Please DONOT refresh the page</i>
+		        <img  src="{% static 'spoken/images/ajax-loader.gif' %}" ></div>
+			</div>
                       {% endwith %}
                   </form>
               </div>
@@ -153,5 +157,28 @@
       var r = new RegExp("[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?");
       return (v.match(r) == null) ? false : true;
   }
+
+$('#id_csv_file').on('change', function() {
+file = $("#id_csv_file").val();
+var parts = file.split('.');
+extn = parts[parts.length - 1];
+if(extn!='csv'){
+alert("Invalid file format");
+}
+});
+
+
+function make_submit_call(){
+file = $("#id_csv_file").val();
+var parts = file.split('.');
+extn = parts[parts.length - 1];
+if(extn!='csv'){
+alert("Invalid file format");
+}
+else{
+$("id_submit").submit();
+$("#ajax-loader").show();
+}
+}
   </script>
 {% endblock %}
