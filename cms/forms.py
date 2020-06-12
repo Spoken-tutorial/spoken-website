@@ -9,7 +9,7 @@ from django.utils.translation import ugettext_lazy as _
 from nicedit.widgets import NicEditWidget
 from ckeditor.widgets import CKEditorWidget
 from validate_email import validate_email
-
+from django.contrib.auth.validators import ASCIIUsernameValidator
 # Spoken Tutorial Stuff
 from cms.models import *
 from events.models import *
@@ -21,10 +21,10 @@ class LoginForm(forms.Form):
     username = forms.CharField(
         required=True,
         validators = [
-            RegexValidator(
+            ASCIIUsernameValidator(
                 regex = '^[a-zA-Z0-9-_.]*$',
-                message = 'Invalid username. 30 characters or fewer. \
-                    Letters, digits and ./-/_ only.',
+                message = 'Enter a valid username. 30 characters or fewer. \
+                    Letters, digits and ./-/_ only. Please do not copy paste here.',
                 code = 'invalid_username'
             ),
         ]
@@ -39,10 +39,10 @@ class RegisterFormHome(forms.Form):
         widget = forms.TextInput(),
         required = True,
         validators = [
-            RegexValidator(
+            ASCIIUsernameValidator(
                 regex = '^[a-zA-Z0-9-_.]*$',
-                message = 'Username required. 30 characters or fewer. \
-                    Letters, digits and ./-/_ only.',
+                message = 'Enter a valid username. 30 characters or fewer. \
+                    Letters, digits and ./-/_ only. Please do not copy paste here.',
                 code = 'invalid_username'
             ),
         ]
@@ -53,7 +53,7 @@ class RegisterFormHome(forms.Form):
                 message = _(
                         'Please enter a valid first name.'
                         'This field may contain only English letters.'
-                        'Please remove invalid characters.'
+                        ' Please do not copy paste here.'
                     ),
                 code = 'invalid_first_name',
             ), 
@@ -65,7 +65,7 @@ class RegisterFormHome(forms.Form):
                 message = _(
                         'Please enter a valid last name.'
                         'This field may contain only English letters.'
-                        'Please remove invalid characters.'
+                        ' Please do not copy paste here.'
                     ),
                 code = 'invalid_last_name',
             ), 
