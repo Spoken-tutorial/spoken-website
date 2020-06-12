@@ -18,7 +18,17 @@ from cms.validators import ASCIIValidator
 
 
 class LoginForm(forms.Form):
-    username = forms.CharField(required=True)
+    username = forms.CharField(
+        required=True,
+        validators = [
+            RegexValidator(
+                regex = '^[a-zA-Z0-9-_.]*$',
+                message = 'Invalid username. 30 characters or fewer. \
+                    Letters, digits and ./-/_ only.',
+                code = 'invalid_username'
+            ),
+        ]
+        )
     password = forms.CharField(widget=forms.PasswordInput, required=True)
 
 
