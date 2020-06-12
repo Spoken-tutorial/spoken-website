@@ -37,5 +37,32 @@ class PaymentForm(forms.ModelForm):
                 self.fields['name'].initial = user.get_full_name()
 
 
+class TransactionForm(forms.ModelForm):
+
+    name = forms.CharField(
+        widget=forms.TextInput(attrs={'readonly': 'readonly'}),
+    )    
+    email = forms.CharField(
+        widget=forms.TextInput(attrs={'readonly': 'readonly'}),
+    )
+    country = forms.CharField(
+        widget=forms.TextInput(attrs={'readonly': 'readonly'}),
+    )
+    state = forms.CharField(
+        widget=forms.TextInput(attrs={'readonly': 'readonly'}),
+    )
+    key = forms.CharField(
+        widget=forms.TextInput(attrs={'readonly': 'readonly'}),
+    )
+    expiry = forms.CharField(
+        widget=forms.TextInput(attrs={'readonly': 'readonly'}),
+    )
+    user = forms.CharField(
+        widget=forms.TextInput(attrs={'readonly': 'readonly'}),
+    )
+   
+    class Meta(object):
+        model = PaymentTransaction
+        exclude = ['created','updated']
 
         

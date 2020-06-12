@@ -13,7 +13,7 @@ class Payment(models.Model):
     gender = models.CharField(choices=GENDER_CHOICES, max_length=6)
     amount = models.DecimalField(max_digits=10,decimal_places=2)
     key = models.UUIDField(default=uuid.uuid4, editable=False)
-    status = models.BooleanField()
+    status = models.BooleanField(default=0)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     expiry = models.DateTimeField(blank=True, null=True)

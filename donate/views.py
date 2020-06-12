@@ -1,3 +1,4 @@
+from config import TARGET, CHANNEL_ID
 from django.shortcuts import render
 from creation.models import FossCategory, Language
 from django.contrib.auth.decorators import login_required
@@ -5,15 +6,18 @@ from django.core.exceptions import PermissionDenied
 from django.shortcuts import render,redirect
 from django.http import HttpResponse
 from django.template.context_processors import csrf
-from donate.forms import PaymentForm
+from donate.forms import PaymentForm, TransactionForm
 from donate.models import *
 from django import forms
 from django.views.decorators.csrf import csrf_protect,csrf_exempt
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import CreateView
+from django.views.generic import CreateView, DetailView
 from django.urls import reverse_lazy
 from cdcontent.forms import CDContentForm
 from django.contrib import messages
+from datetime import datetime
+from datetime import timedelta, date
+import requests
 
 @csrf_exempt
 def donatehome(request):
@@ -80,3 +84,71 @@ class PaymentController(LoginRequiredMixin, CreateView):
         """
         messages.warning(self.request, 'Invalid form payment request.')
         return redirect('cdcontent:cdcontenthome')
+
+    def initiate_payment(self):
+        """
+        Step 1 : 
+        Step 2 :
+        Step 3 :
+        """
+        payee = Payment()
+        payee.name = form.cleaned_data.get('name')        
+        payee.email = form.cleaned_data.get('email')
+        payee.country = form.cleaned_data.get('country')
+        payee.state = form.cleaned_data.get('state')
+        payee.city =  form.cleaned_data.get('city')
+        payee.gender = form.cleaned_data.get('gender')
+        payee.amount = form.cleaned_data.get('amount')
+        payee.status = 1
+        payee.created = models.DateTimeField(auto_now_add=True)
+        payee.updated = models.DateTimeField(auto_now=True)
+        payee.expiry = calculate_expiry()
+        payee.user = self.request.user
+        payee.save()
+
+
+    def calculate_expiry():
+        return date.today() + timedelta(days=7)
+
+    def encrypted_data(self):
+        STdata = ''
+        user_name = form.cleaned_data.get('name')
+        amount = form.cleaned_data.get('amount')
+        STdata = str(self.request.user.id)+str(user_name)+str(amount)+"Subscription"+CHANNEL_ID+CHANNEL_KEY
+        print(STdata)
+        s = display.value(str(STdata)).hexdigest()
+        return s
+
+    def pass_details(self):
+        
+        data = {
+        'userId':self.request.user.id,
+        'name':form.cleaned_data.get('name'),
+        'amount':form.cleaned_data.get('amount'),
+        'purpose':'Subscription',
+        'channelId':CHANNEL_ID,
+        'random':encrypted_data()
+        }
+        r = requests.post(TARGET,data = data)
+
+class  Success(DetailView):
+    """ success """
+    model = PaymentTransaction
+    template_name = 'donate_home.html'
+    context_object_name = 'post'
+
+    def get_object(self):
+        obj = super().get_object()
+        if self.request.user.is_authenticated: 
+            PaymentSuccess.object.get_or_create(
+                user=self.request.user,
+                post=obj)
+
+        form = TransactionForm
+        context = {
+        'form' : form
+        }
+        print("data received",obj)
+        print("get_object()",self.get_object())        
+        return render(request, template_name, context)
+
