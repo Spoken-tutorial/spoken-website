@@ -13,6 +13,8 @@ from validate_email import validate_email
 # Spoken Tutorial Stuff
 from cms.models import *
 from events.models import *
+from cms.validators import ASCIIValidator
+
 
 
 class LoginForm(forms.Form):
@@ -35,8 +37,30 @@ class RegisterFormHome(forms.Form):
             ),
         ]
     )
-    first_name = forms.CharField()
-    last_name = forms.CharField()
+    first_name = forms.CharField(
+        validators = [
+            ASCIIValidator(
+                message = _(
+                        'Please enter a valid first name.'
+                        'This field may contain only English letters.'
+                        'Please remove invalid characters.'
+                    ),
+                code = 'invalid_first_name',
+            ), 
+        ]
+    )
+    last_name = forms.CharField(
+        validators = [
+            ASCIIValidator(
+                message = _(
+                        'Please enter a valid last name.'
+                        'This field may contain only English letters.'
+                        'Please remove invalid characters.'
+                    ),
+                code = 'invalid_last_name',
+            ), 
+        ]
+    )
     phone = forms.CharField(max_length=20)
     password = forms.CharField(
         label = _("Password"),

@@ -84,8 +84,8 @@ def account_register(request):
             username = request.POST['username'].strip()
             password = request.POST['password'].strip()
             email = request.POST['email'].strip()
-            first_name = request.POST['first_name'].strip()
-            last_name = request.POST['last_name'].strip()
+            first_name = str(request.POST['first_name'].strip())
+            last_name = str(request.POST['last_name'].strip())
             phone = request.POST['phone']
             user = User.objects.create_user(username, email, password)
             user.first_name = first_name
