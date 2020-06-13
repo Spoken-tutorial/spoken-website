@@ -6,7 +6,7 @@ from django.core.exceptions import PermissionDenied
 from django.shortcuts import render,redirect
 from django.http import HttpResponse
 from django.template.context_processors import csrf
-from donate.forms import PaymentForm, TransactionForm
+from donate.forms import PayeeForm, TransactionForm
 from donate.models import *
 from django import forms
 from django.views.decorators.csrf import csrf_protect,csrf_exempt
@@ -41,8 +41,8 @@ def donatehome(request):
 class PaymentController(LoginRequiredMixin, CreateView):
     login_url = '/login/'
     template_name = 'cdcontent/templates/cdcontent_home.html'
-    model = Payment
-    form_class = PaymentForm
+    model = Payee
+    form_class = PayeeForm
     success_url = reverse_lazy('cdcontent:cdcontenthome')
 
     def form_valid(self, form):
@@ -53,14 +53,14 @@ class PaymentController(LoginRequiredMixin, CreateView):
         self.object.user = self.request.user
         self.object.status = False
         self.object.save()
-        payment_obj = self.object;
+        payee_obj = self.object;
 
         foss_ids = form.cleaned_data.get('foss_id')
         languages = form.cleaned_data.get('language_id')
         fosses = foss_ids.split(',')
         foss_languages = languages.split(',|')
 
-        payment_id = payment_obj.pk
+        payee_id = payee_obj.pk
         
         for i in range(len(fosses)):
             foss_category = FossCategory.objects.get(pk=int(fosses[i]))  
@@ -69,7 +69,7 @@ class PaymentController(LoginRequiredMixin, CreateView):
                 if language!='':
                     foss_language = Language.objects.get(pk=int(language))
                     cd_foss_langs = CdFossLanguages()
-                    cd_foss_langs.payment = Payment.objects.get(pk=payment_id)
+                    cd_foss_langs.payment = Payment.objects.get(pk=payee_id)
                     cd_foss_langs.foss = foss_category
                     cd_foss_langs.lang = foss_language
                     cd_foss_langs.save()
@@ -91,7 +91,7 @@ class PaymentController(LoginRequiredMixin, CreateView):
         Step 2 :
         Step 3 :
         """
-        payee = Payment()
+        payee = Payee()
         payee.name = form.cleaned_data.get('name')        
         payee.email = form.cleaned_data.get('email')
         payee.country = form.cleaned_data.get('country')

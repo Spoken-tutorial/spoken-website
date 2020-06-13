@@ -4,7 +4,7 @@ from .helpers import GENDER_CHOICES, PAY_FOR_CHOICES
 from creation.models import FossCategory, Language
 import uuid
 
-class Payment(models.Model):
+class Payee(models.Model):
     name = models.CharField(max_length=255)
     email = models.EmailField(max_length=255)
     country = models.CharField(max_length=50,null=True)
@@ -20,12 +20,12 @@ class Payment(models.Model):
     user = models.ForeignKey(User,on_delete=models.PROTECT,related_name="payment_user" )
  
 class CdFossLanguages(models.Model):
-    payment = models.ForeignKey(Payment, on_delete=models.PROTECT)
+    payment = models.ForeignKey(Payee, on_delete=models.PROTECT)
     foss = models.ForeignKey(FossCategory, on_delete=models.PROTECT,related_name="payment_foss")
     lang = models.ForeignKey(Language)
 
 class PaymentTransaction(models.Model):
-    paymentdetail = models.ForeignKey(Payment, on_delete=models.PROTECT, related_name="payment_transaction" )
+    paymentdetail = models.ForeignKey(Payee, on_delete=models.PROTECT, related_name="payment_transaction" )
     requestType = models.CharField(max_length=2)
     amount = models.CharField(max_length=20)
     reqId = models.CharField(max_length=50)

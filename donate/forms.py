@@ -3,7 +3,7 @@ from donate.models import *
 from django import forms
 from events.models import State	
 
-class PaymentForm(forms.ModelForm):
+class PayeeForm(forms.ModelForm):
     state = forms.ModelChoiceField(
             widget = forms.Select(attrs = {'class' : 'ac-state'}),
             queryset = State.objects.order_by('name'),
@@ -16,7 +16,7 @@ class PaymentForm(forms.ModelForm):
     language_id = forms.CharField(widget=forms.HiddenInput(), required=True)
 
     class Meta:
-        model = Payment
+        model = Payee
         fields = ['name', 'email', 'country', 'state', 'gender', 'amount']
 
     def __init__(self, *args, **kwargs):
