@@ -19,7 +19,7 @@ from django.template.context_processors import csrf
 from cdcontent.forms import *
 from creation.models import *
 from forums.models import Answer, Question
-from events.models import AcademicCenter, State
+from events.models import AcademicCenter, State, AcademicKey
 from donate.forms import PayeeForm
 
 # Create your views here.
@@ -490,21 +490,52 @@ def ajax_show_added_foss(request):
     output = {0: data, 1: humansize(fsize_total), 2:user_details}
     return HttpResponse(json.dumps(output), content_type='application/json')
 
+
+def get_user_type(request):
+    user_type = 0
+    classification ={
+    'unregistered' : 'UR',
+    'registered_not_paid' : 'RNP',
+    'registered_paid' : 'RP'
+    }
+    # 'UR':'UnRegistered User',
+    # 'RNP':'Registered but not Paid User',
+    # 'RP':'Registered and Paid User'
+    if request.user.is_authenticated():
+        try:
+            AcademicKey.objects.get(academic_id=request.user.organiser.academic_id)
+            return classification['registered_paid']
+        except :
+            user_type = classification['registered_not_paid']
+
+        try:
+            AcademicKey.objects.get(academic_id=request.user.invigilator.academic_id)
+            return classification['registered_paid']
+        except :
+            user_type = classification['registered_not_paid']
+
+        try:
+            AcademicKey.objects.get(academic_id=request.user.student.academic_id)
+            return classification['registered_paid']
+        except :
+            user_type = classification['registered_not_paid']
+        return user_type
+    else:
+        return classification['unregistered']
+
+def get_payable_amount(filesize):
+    if filesize < 100.0: 
+        return '100'
+    else:
+        return '250'
+
 def check_user_details(request, filesize):
     file_size = round(filesize/ pow(2,20),1)
-    classification ={
-    'UR':'UnRegistered User',
-    'RNP':'Registered but not Paid User',
-    'RP':'Registered and Paid User'}
-
-    if request.user.is_authenticated():
-        if file_size < 100.0: 
-            return ['RNP','100']
-        else:
-            return ['RNP','250']
+    user_type = get_user_type(request)
+    amount = get_payable_amount(file_size)
+    if user_type == 'RP':
+        return ['RP','No Limit']
     else:
-        if file_size < 100.0: 
-            return ['UR','100']
-        else:
-            return ['UR','250']
-
+        return [user_type, amount]
+        
+    

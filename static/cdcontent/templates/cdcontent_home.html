@@ -465,12 +465,12 @@
                                          document.getElementById("orig_value").value = data[2][1];
 
                                           }
-                                         if(data[2]=='RP') {
+                                         if(data[2][0]=='RP') {
                                         var message = 'You are part of our paid service.<br> Happy Downloading.<br> Please click on <b>Create Zip file</b> to proceed.'
                                          $('.create_zip').prop('disabled', false);
                                          $('.user-message').html(message);
                                           }
-                                        if(data[2][0]=='RNP') {
+                                        else {
                                         var message = '<i>Amount to be paid.</i>'
                                          $('.create_zip').prop('disabled', true);
                                          $('.user-message').html(message);
