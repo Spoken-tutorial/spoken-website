@@ -1,4 +1,4 @@
-from config import TARGET, CHANNEL_ID
+from config import TARGET, CHANNEL_ID, CHANNEL_KEY
 from django.shortcuts import render
 from creation.models import FossCategory, Language
 from django.contrib.auth.decorators import login_required
@@ -17,6 +17,7 @@ from cdcontent.forms import CDContentForm
 from django.contrib import messages
 from datetime import datetime
 from datetime import timedelta, date
+from events import display
 import requests
 
 @csrf_exempt
@@ -69,12 +70,15 @@ class PaymentController(LoginRequiredMixin, CreateView):
                 if language!='':
                     foss_language = Language.objects.get(pk=int(language))
                     cd_foss_langs = CdFossLanguages()
-                    cd_foss_langs.payment = Payment.objects.get(pk=payee_id)
+                    cd_foss_langs.payment = Payee.objects.get(pk=payee_id)
                     cd_foss_langs.foss = foss_category
                     cd_foss_langs.lang = foss_language
                     cd_foss_langs.save()
 
         form.save_m2m()
+        initiate_payment(self, form)
+        encrypted_data(self, form)
+        #pass_details(self, form)
         return super(PaymentController, self).form_valid(form)
 
     def form_invalid(self, form):
@@ -85,51 +89,52 @@ class PaymentController(LoginRequiredMixin, CreateView):
         messages.warning(self.request, 'Invalid form payment request.')
         return redirect('cdcontent:cdcontenthome')
 
-    def initiate_payment(self):
-        """
-        Step 1 : 
-        Step 2 :
-        Step 3 :
-        """
-        payee = Payee()
-        payee.name = form.cleaned_data.get('name')        
-        payee.email = form.cleaned_data.get('email')
-        payee.country = form.cleaned_data.get('country')
-        payee.state = form.cleaned_data.get('state')
-        payee.city =  form.cleaned_data.get('city')
-        payee.gender = form.cleaned_data.get('gender')
-        payee.amount = form.cleaned_data.get('amount')
-        payee.status = 1
-        payee.created = models.DateTimeField(auto_now_add=True)
-        payee.updated = models.DateTimeField(auto_now=True)
-        payee.expiry = calculate_expiry()
-        payee.user = self.request.user
-        payee.save()
+def initiate_payment(self, form):
+    """
+    Step 1 : 
+    Step 2 :
+    Step 3 :
+    """
+    payee = Payee()
+    payee.name = form.cleaned_data.get('name')        
+    payee.email = form.cleaned_data.get('email')
+    payee.country = form.cleaned_data.get('country')
+    payee.state = form.cleaned_data.get('state')
+    payee.city =  form.cleaned_data.get('city')
+    payee.gender = form.cleaned_data.get('gender')
+    payee.amount = form.cleaned_data.get('amount')
+    payee.status = 1
+    payee.created = models.DateTimeField(auto_now_add=True)
+    payee.updated = models.DateTimeField(auto_now=True)
+    payee.expiry = calculate_expiry()
+    payee.user = self.request.user
+    payee.save()
+    print("Done IP")
 
 
-    def calculate_expiry():
-        return date.today() + timedelta(days=7)
+def calculate_expiry():
+    return date.today() + timedelta(days=7)
 
-    def encrypted_data(self):
-        STdata = ''
-        user_name = form.cleaned_data.get('name')
-        amount = form.cleaned_data.get('amount')
-        STdata = str(self.request.user.id)+str(user_name)+str(amount)+"Subscription"+CHANNEL_ID+CHANNEL_KEY
-        print(STdata)
-        s = display.value(str(STdata)).hexdigest()
-        return s
+def encrypted_data(self, form):
+    STdata = ''
+    user_name = form.cleaned_data.get('name')
+    amount = form.cleaned_data.get('amount')
+    STdata = str(self.request.user.id)+str(user_name)+str(amount)+"Subscription"+CHANNEL_ID+CHANNEL_KEY
+    print(STdata)
+    s = display.value(str(STdata))
+    return s
 
-    def pass_details(self):
-        
-        data = {
-        'userId':self.request.user.id,
-        'name':form.cleaned_data.get('name'),
-        'amount':form.cleaned_data.get('amount'),
-        'purpose':'Subscription',
-        'channelId':CHANNEL_ID,
-        'random':encrypted_data()
-        }
-        r = requests.post(TARGET,data = data)
+def pass_details(self, form):
+    
+    data = {
+    'userId':self.request.user.id,
+    'name':form.cleaned_data.get('name'),
+    'amount':form.cleaned_data.get('amount'),
+    'purpose':'Subscription',
+    'channelId':CHANNEL_ID,
+    'random':encrypted_data()
+    }
+    r = requests.post(TARGET,data = data)
 
 class  Success(DetailView):
     """ success """
