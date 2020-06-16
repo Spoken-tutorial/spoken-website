@@ -84,8 +84,8 @@ def account_register(request):
             username = request.POST['username'].strip()
             password = request.POST['password'].strip()
             email = request.POST['email'].strip()
-            first_name = request.POST['first_name'].strip()
-            last_name = request.POST['last_name'].strip()
+            first_name = str(request.POST['first_name'].strip())
+            last_name = str(request.POST['last_name'].strip())
             phone = request.POST['phone']
             user = User.objects.create_user(username, email, password)
             user.first_name = first_name
@@ -170,39 +170,44 @@ def account_login(request):
             'form' : form
         }
         if request.method == 'POST':
-            username = request.POST.get('username', None)
-            password = request.POST.get('password', None)
-            remember = request.POST.get('remember', None)
-            if username and password:
-                user = auth.authenticate(username=username, password=password)
-                if user is not None:
-                    if user.is_active:
-                        login(request, user)
-                        if remember:
-                            request.session.set_expiry(settings.KEEP_LOGGED_DURATION)
+            form = LoginForm(request.POST)
+            if form.is_valid():
+                username = request.POST.get('username', None)
+                password = request.POST.get('password', None)
+                remember = request.POST.get('remember', None)
+                if username and password:
+                    user = auth.authenticate(username=username, password=password)
+                    if user is not None:
+                        if user.is_active:
+                            login(request, user)
+                            if remember:
+                                request.session.set_expiry(settings.KEEP_LOGGED_DURATION)
+                            else:
+                                request.session.set_expiry(0)
+                            try:
+                                p = Profile.objects.get(user_id = user.id)
+                                if not user.first_name or not user.last_name or not p.state or not p.district or not p.city or not p.address or not p.phone:# or not p.pincode or not p.picture:
+                                    messages.success(request, "<ul><li>Please update your profile.</li><li>Please make sure you enter your First name, Last name both and with correct spelling.</li><li>It is recommended that you do upload the photo.</li></ul>")
+                                    return HttpResponseRedirect('/accounts/profile/'+user.username)
+                            except:
+                                pass
+                            if request.GET and request.GET['next']:
+                                return HttpResponseRedirect(request.GET['next'])
+                            return HttpResponseRedirect('/')
                         else:
-                            request.session.set_expiry(0)
-                        try:
-                            p = Profile.objects.get(user_id = user.id)
-                            if not user.first_name or not user.last_name or not p.state or not p.district or not p.city or not p.address or not p.phone:# or not p.pincode or not p.picture:
-                                messages.success(request, "<ul><li>Please update your profile.</li><li>Please make sure you enter your First name, Last name both and with correct spelling.</li><li>It is recommended that you do upload the photo.</li></ul>")
-                                return HttpResponseRedirect('/accounts/profile/'+user.username)
-                        except:
-                            pass
-                        if request.GET and request.GET['next']:
-                            return HttpResponseRedirect(request.GET['next'])
-                        return HttpResponseRedirect('/')
+                            error_msg = "Your account is disabled.<br>\
+                            Kindly activate your account by clicking on the activation link which has been sent to your registered email %s.<br>\
+                            In case if you do not receive any activation mail kindly verify and activate your account from below link :<br>\
+                            <a href='https://spoken-tutorial.org/accounts/verify/'>https://spoken-tutorial.org/accounts/verify/</a>"% (user.email)
                     else:
-                        error_msg = "Your account is disabled.<br>\
-                        Kindly activate your account by clicking on the activation link which has been sent to your registered email %s.<br>\
-                        In case if you do not receive any activation mail kindly verify and activate your account from below link :<br>\
-                        <a href='https://spoken-tutorial.org/accounts/verify/'>https://spoken-tutorial.org/accounts/verify/</a>"% (user.email)
+                        error_msg = 'Invalid username / password'
                 else:
-                    error_msg = 'Invalid username / password'
+                    error_msg = 'Please enter username and Password'
+                context['form'] = form
+                messages.error(request, error_msg)
+                return render(request, 'cms/templates/login.html', context)
             else:
-                error_msg = 'Please enter username and Password'
-            messages.error(request, error_msg)
-            return render(request, 'cms/templates/login.html', context)
+                context['form'] = form
         context.update(csrf(request))
         if error_msg:
             messages.error(request, error_msg)
