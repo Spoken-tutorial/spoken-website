@@ -62,7 +62,8 @@ import uuid
 
 # import helpers
 from events.views import is_organiser, is_invigilator, is_resource_person, is_administrator, is_accountexecutive
-from events.helpers import get_prev_semester_duration
+from events.helpers import get_prev_semester_duration, get_updated_form
+
 class JSONResponseMixin(object):
   """
   A mixin that can be used to render a JSON response.
@@ -2867,6 +2868,7 @@ def payment_success(request):
           transaction.msg  =  msg
           transaction.save()
           template_name = '../donate/cd_payment_success.html'
+          context['form'] = get_updated_form(transaction)
           default_response = '/cdcontent'
         except Exception as e:
           messages.error(request, 'Something went wrong. Can not collect your transaction details. Kindly try again in some time.')

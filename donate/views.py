@@ -78,8 +78,7 @@ class PaymentController(LoginRequiredMixin, CreateView):
                     cd_foss_langs.save()
 
         form.save_m2m()
-        encrypted_data(self, form)
-        #pass_details(self, form)
+        pass_details(self, form)
         return super(PaymentController, self).form_valid(form)
 
     def form_invalid(self, form):
@@ -111,6 +110,6 @@ def pass_details(self, form):
     'amount':form.cleaned_data.get('amount'),
     'purpose':PURPOSE,
     'channelId':CHANNEL_ID,
-    'random':encrypted_data()
+    'random':encrypted_data(self, form)
     }
     r = requests.post(TARGET,data = data)
