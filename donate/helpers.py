@@ -11,3 +11,5 @@ PAY_FOR_CHOICES = (
 	('U', 'University'),
 	('T', 'Corporate')
 	)
+
+PURPOSE = 'CdContent'

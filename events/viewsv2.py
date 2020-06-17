@@ -9,7 +9,7 @@ from datetime import timedelta
 import re
 from django.conf import settings
 
-from config import CHANNEL_KEY
+from config import TARGET, CHANNEL_ID, CHANNEL_KEY
 # Create your views here.
 from django.views.generic import View, ListView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
@@ -2744,11 +2744,11 @@ def payment_status(request):
 
     STdata = ''
     user_name = user.first_name+' '+user.last_name
-    STdata = str(user.id)+str(user_name)+str(amount)+"Subscription"+"SOLOSTW"+CHANNEL_KEY
+    STdata = str(user.id)+str(user_name)+str(amount)+"Subscription"+CHANNEL_ID+CHANNEL_KEY
     print(STdata)
     s = display.value(str(STdata))
 
-    data = {'userId':user.id,'name':user_name,'amount':amount,'purpose':'Subscription','channelId':'SOLOSTW','random':s.hexdigest()}
+    data = {'userId':user.id,'name':user_name,'amount':amount,'purpose':'Subscription','channelId':CHANNEL_ID,'random':s}
 
 
     try:
@@ -2805,6 +2805,7 @@ def payment_success(request):
     # provId;        // Payment method like Credit Card/Net Banking etc..
     # status;        // S/F (Status of the transaction)
     # msg;           // Detailed transaction message
+    # purpose        // Short Description 
     # random;        // Hash string
 
 
@@ -2817,37 +2818,59 @@ def payment_success(request):
     provId = request.POST.get('provId')
     status = request.POST.get('status')
     msg = request.POST.get('msg')
+    purpose = request.POST.get('purpose')
     random = request.POST.get('random')
 
 
     STresponsedata = ''
-    STresponsedata = str(user.id)+transId+refNo+amount+status+msg+CHANNEL_KEY
+    STresponsedata = str(user.id)+transId+refNo+amount+status+msg+purpose+CHANNEL_KEY
     s = display.value(str(STresponsedata))
     STresponsedata_hexa = s.hexdigest()
-
+    template_name = ''
+    default_response = ''
     if STresponsedata_hexa == random:
       #save transaction details in db
-      pd = PaymentDetails.objects.get(user = user.id, academic_id = accountexecutive.academic.id)
-      print(('pd id',pd.id))
+      if purpose == 'Subscription':
+        pd = PaymentDetails.objects.get(user = user.id, academic_id = accountexecutive.academic.id)
+        print(('pd id',pd.id))
 
-      try:
-        transactiondetails = PaymentTransactionDetails()
-        transactiondetails.paymentdetail_id  =  pd.id
-        transactiondetails.requestType  =  requestType
-        transactiondetails.userId_id  =  userId
-        transactiondetails.amount  =  amount
-        transactiondetails.reqId  = reqId
-        transactiondetails.transId  = transId
-        transactiondetails.refNo  =  refNo
-        transactiondetails.provId  =  provId
-        transactiondetails.status  =  status
-        transactiondetails.msg  =  msg
-        transactiondetails.save()
-      except Exception as e:
-        messages.error(request, 'Something went wrong. Can not collect your transaction details. Kindly contact your state resource person.')
-        return HttpResponseRedirect('/software-training')
-
-
+        try:
+          transactiondetails = PaymentTransactionDetails()
+          transactiondetails.paymentdetail_id  =  pd.id
+          transactiondetails.requestType  =  requestType
+          transactiondetails.userId_id  =  userId
+          transactiondetails.amount  =  amount
+          transactiondetails.reqId  = reqId
+          transactiondetails.transId  = transId
+          transactiondetails.refNo  =  refNo
+          transactiondetails.provId  =  provId
+          transactiondetails.status  =  status
+          transactiondetails.msg  =  msg
+          transactiondetails.save()
+          template_name = 'payment_success.html'
+          default_response = '/software-training'
+        except Exception as e:
+          messages.error(request, 'Something went wrong. Can not collect your transaction details. Kindly contact your state resource person.')
+          return HttpResponseRedirect('/software-training')
+      else:
+        try:
+          transaction = PaymentTransaction()
+          transaction.paymentdetail_id  =  pd.id
+          transaction.requestType  =  requestType
+          transaction.userId_id  =  userId
+          transaction.amount  =  amount
+          transaction.reqId  = reqId
+          transaction.transId  = transId
+          transaction.refNo  =  refNo
+          transaction.provId  =  provId
+          transaction.status  =  status
+          transaction.msg  =  msg
+          transaction.save()
+          template_name = '../donate/cd_payment_success.html'
+          default_response = '/cdcontent'
+        except Exception as e:
+          messages.error(request, 'Something went wrong. Can not collect your transaction details. Kindly try again in some time.')
+          return HttpResponseRedirect('/cdcontent')
       if status == 'S':
         pd.status = 1
         pd.description = 'Payment successfull'
@@ -2860,12 +2883,12 @@ def payment_success(request):
       context['refNo'] = refNo
       context['msg'] = msg
       context['status'] = status
-      return render(request,'payment_success.html',context)
+      return render(request,template_name,context)
     else:
       messages.error(request, 'Invalid Transaction')
-      return HttpResponseRedirect('/software-training')
+      return HttpResponseRedirect(default_response)
   else:
-    return HttpResponseRedirect('/software-training')
+    return HttpResponseRedirect(default_response)
     # return render(request,'payment_success.html',context)
 
 def payment_details(request,choice):
