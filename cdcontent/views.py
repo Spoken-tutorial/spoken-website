@@ -364,6 +364,7 @@ def ajax_fill_languages(request):
 
 @csrf_exempt
 def ajax_add_foss(request):
+    
     foss = request.POST.get('foss', '')
     level = int(request.POST.get('level', 0))
     selectedfoss = {}
@@ -378,7 +379,6 @@ def ajax_add_foss(request):
     if foss and langs:
         selectedfoss[foss] = [langs, level]
     data = json.dumps(selectedfoss)
-
     return HttpResponse(json.dumps(data), content_type='application/json')
 
 
@@ -460,9 +460,9 @@ def ajax_show_added_foss(request):
         for filepath in common_files:
             if os.path.isfile(filepath):
                 fsize += os.path.getsize(filepath)
-
         fsize_total += fsize
-        data += '<tr><td name="foss[]">{}</td><td name="langs[]">{}</td><td name="size">{}</td></tr>'.format(foss.foss, langs, humansize(fsize))
+        
+        data += '<tr><td name="foss[]">{}</td><td name="langs[]">{}</td><td name="size">{}</td><td id="{}"></td></tr>'.format(foss.foss, langs, humansize(fsize),foss.id)
 
     fsize = 0.0
     languages.add(eng_rec.name)
