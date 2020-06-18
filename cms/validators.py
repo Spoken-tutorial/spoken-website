@@ -14,7 +14,7 @@ class ASCIIValidator(validators.RegexValidator):
 
 
 def validate_csv_file(csv_file):
-    file_data = csv_file.read().splitlines()
+    file_data = csv_file.read().decode('utf-8').splitlines()
     row_count = len(file_data)
     if row_count > 0:
         line = 0
@@ -32,22 +32,22 @@ def validate_csv_file(csv_file):
             for col in data:
                 if len(col) ==4:
                     try:
-                        ASCIIUsernameValidator()(col[0])
+                        ASCIIValidator()(col[0].strip())
                     except:
-                        error.update(dict(fname="First name: "+ col[0] +" has errors. Remove spaces if any."))
+                        error.update(dict(fname="First name: "+ col[0] +" has errors."))
                     try:
-                        ASCIIUsernameValidator()(col[1])
+                        ASCIIValidator()(col[1].strip())
                     except:
-                        error.update(dict(lname="Last Name: " + col[1] +" has errors. Remove spaces if any."))
+                        error.update(dict(lname="Last Name: " + col[1] +" has errors."))
                     try:
-                        EmailValidator()(col[2])
-                        ASCIIUsernameValidator()(col[2])
+                        EmailValidator()(col[2].strip())
+                        ASCIIUsernameValidator()(col[2].strip())
                     except:
-                        error.update(dict(lname="Email: "+ col[2] +" has errors. Remove spaces if any."))
+                        error.update(dict(lname="Email: "+ col[2] +" has errors."))
                     try:
-                        ASCIIUsernameValidator()(col[3])
+                        ASCIIValidator()(col[3].strip())
                     except:
-                        error.update(dict(lname="Gender: " +col[3] +" has errors. Remove spaces if any."))
+                        error.update(dict(lname="Gender: " +col[3] +" has errors."))
                 else:
                     error.update(dict(extra_errors="Only four fields must be available in this row."))
             for e in error.values():
@@ -59,12 +59,11 @@ def validate_csv_file(csv_file):
         if len(error_lines) > 0:
             error_string = ""
             for el in error_lines:
-                #error_string.join([str(i+"  ") for i in el])
                 for i in el.values():
                     if i:
                         error_string += str(i+ "  ")
                 error_string+="\n"
-            print(error_string)
-            #raise ValidationError(error_string)
+            raise ValidationError(error_string)
     else:
         raise ValidationError(('Csv file is empty.'))
+    return file_data

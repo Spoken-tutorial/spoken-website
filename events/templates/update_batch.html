@@ -22,7 +22,7 @@
                         <div class='col-xs-12 form-group required'>
                           <label class='control-label'>Csv File</label>
                           {% render_field form.csv_file class+="file csv_file" tabindex="1" %}
-                          {{ form.csv_file.errors }}
+                          <span style="color:red" >{{ form.csv_file.errors|linebreaks }}</span>
                         </div>
                       </div>
 

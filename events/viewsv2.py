@@ -245,7 +245,7 @@ class StudentBatchCreateView(CreateView):
 
 
     skipped, error, warning, write_flag = \
-      self.csv_email_validate(self.request.FILES['csv_file'], form_data.id , studentcount)
+      self.csv_email_validate(form.cleaned_data['csv_file'], form_data.id , studentcount)
     context = {'error' : error, 'warning' : warning, 'batch':form_data}
 
     if error or warning:
@@ -315,14 +315,13 @@ class StudentBatchCreateView(CreateView):
         return student
     return False
 
-  def csv_email_validate(self, file_path, batch_id , studentcount):
+  def csv_email_validate(self, file_data, batch_id , studentcount):
     skipped = []
     error = []
     warning = []
     write_flag = False
     stu_row_count = 0
     try:
-      file_data = file_path.read().decode('utf-8').splitlines()
       rowcsv = csv.reader(file_data, delimiter=',', quotechar='|')
       rowcount = len(list(rowcsv))
       gencount = studentcount + rowcount
