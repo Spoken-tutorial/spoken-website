@@ -22,7 +22,6 @@ class LoginForm(forms.Form):
         required=True,
         validators = [
             ASCIIUsernameValidator(
-                regex = '^[a-zA-Z0-9-_.]*$',
                 message = 'Enter a valid username. 30 characters or fewer. \
                     Letters, digits and ./-/_ only. Please do not copy paste here.',
                 code = 'invalid_username'
@@ -40,7 +39,6 @@ class RegisterFormHome(forms.Form):
         required = True,
         validators = [
             ASCIIUsernameValidator(
-                regex = '^[a-zA-Z0-9-_.]*$',
                 message = 'Enter a valid username. 30 characters or fewer. \
                     Letters, digits and ./-/_ only. Please do not copy paste here.',
                 code = 'invalid_username'
