@@ -5,15 +5,9 @@
 {% load announcements %}
 {% block cssblock %}
     <style type="text/css">
-        .add-foss{
-            margin-right: 15px;
-        }
-        #id_language {
-            min-height: 180px;
-        }
-        #donation{
-            display: none;
-        }
+        .add-foss{margin-right: 15px;}
+        #id_language {min-height: 180px;}
+        #donation{display: none;}
         #donate{
             background-color: white;
             font-weight: bold;
@@ -31,53 +25,24 @@
             color: #286090;
             border: 2px solid #286090;
         }
-        .donate-options{
-            display: flex;
-            flex-wrap: wrap;
-        }
-        .d-item{
-            border: 1px solid #286090;
-            margin: 0 10px;
-        }
+        .donate-options{display: flex;flex-wrap: wrap;}
+        .d-item{border: 1px solid #286090;margin: 0 10px;}
+        .delete-btn{padding: 0;color: red;}
         .donate-options input,
-        .donate-options button,{
-            margin:0 2%;
-        }
+        .donate-options button,{margin:0 2%;}
         .bill-details,
         .bill-details td,
-        .bill-details th
-        {
-            border: 1px solid #ddd;
-            text-align: left;
-        }
-        .bill-details
-        {
-            border-collapse: collapse;
-            width: 100%;
-        }
+        .bill-details th{border: 1px solid #ddd;text-align: left;}
+        .bill-details{border-collapse: collapse;width: 100%;}
         .bill-details td,
-        .bill-details th {
-            padding: 15px;
-        }
-        #user_file_size{
-         padding-bottom: 10px;
-        }
-        #total_amount_to_pay{
-            border: 1px solid #286090;
-        }
-        .form-check-label{
-            font-size: 0.8rem;
-            font-weight: normal;
-        }
-        .rate-chart{
-            overflow: hidden;
-        }
-        .rate-chart *{
-            overflow: hidden;
-        }
-        .payment-details{
-            font-weight: bold;
-        }
+        .bill-details th {padding: 15px;}
+        #user_file_size{padding-bottom: 10px;}
+        #total_amount_to_pay{border: 1px solid #286090;}
+        .form-check-label{font-size: 0.8rem;font-weight: normal;}
+        .rate-chart{overflow: hidden;}
+        .rate-chart *{overflow: hidden;}
+        .payment-details{font-weight: bold;}
+        .display-foss{height: auto;overflow:hidden;}
     </style>
 {% endblock %}
 {% block heading %}CD Content Creation{% endblock %}
@@ -151,7 +116,7 @@
             </div>
             <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
                 <div class="table-responsive">
-                    <table class="added-foss table table-condensed table-bordered table-hover">
+                    <table class="added-foss table table-condensed table-bordered table-hover" id="added-foss">
                     </table>
                 </div>
 		<div id="rate-div" style="display: none">
@@ -195,7 +160,7 @@
   <tr>
     <th >Donation Amount</th>
     <th class="donate-options">
-        <input type="number" step="50" value="0" placeholder="100" id="donation-amount">
+        <input type="number" step="50" value="100" placeholder="100" id="donation-amount">
         <button type="button" class="btn d-item" id="increase">+</button>
         <button type="button" class="btn d-item" id="decrease">-</button>
         <div class="form-check">
@@ -257,8 +222,10 @@
           <span aria-hidden="true">&times;</span>
         </button>
       </div>      
-        <div class="modal-body">     
-            <form method="post" action="/donate/initiate_payment" class="form-horizontal">
+        <div class="modal-body"> 
+        <div class="row">
+           <div class="col-sm-12">
+               <form method="post" action="/donate/initiate_payment" class="form-horizontal">
                 {% csrf_token %}
                     <div class="form-group col-sm-10">
                         {{ payment_form.name }}
@@ -307,12 +274,21 @@
                
                 <table id ="display-foss" class="added-foss table table-condensed table-bordered table-hover">
                 </table>
-                    {% if user.is_authenticated %}
+                    <div class="col-sm-10">
+                        {% if user.is_authenticated %}
                         <button  type= "submit" class="btn btn-primary mb-2 make-payment-btn">Make Payment</button>
                     {% else %}
                         <a  href= "/accounts/login/?next=/cdcontent" class="btn btn-primary mb-2 make-payment-btn">Please Login to make Payment</a> Or <a  href= "/accounts/register/?next=/cdcontent" class="btn btn-primary mb-2 make-payment-btn">Register</a>
                     {% endif %}
+                    </div>
             </form>
+
+           </div> 
+        </div>    
+            
+        </div>
+        <div class="modal-footer">
+                
         </div>
       </div>
     </div>
@@ -344,6 +320,7 @@
 <script src="{% static 'spoken/js/jquery.cookie.js' %}"></script>
     <script type="text/javascript">
         $(document).ready(function(){
+
             if($('.foss_category').val() == '') {
                 $('.level').attr("disabled", "disabled");
                 $('.language').attr("disabled", "disabled");
@@ -366,7 +343,6 @@
                 var posting = $.post(url, $(this).serialize());
 
                 posting.done(function(data) {
-                    console.log(data.status);
                     if(data.status) {
                         var downloadLink = '<a href="' + data.path + '" title="Download cd content zip">Click here</a> to download the cd content zip file';
                         $('.download-link').html(downloadLink);
@@ -410,10 +386,12 @@
             });
 
             $('.add_foss_lang').on("click", function(){
+                $('.added-foss').show();
                 foss = $('.foss_category').val();
                 level = $('.level').val();
                 langs = JSON.stringify($('.language').val());
                 selectedfoss = $('.selected_foss').val();
+                
                 if(foss && langs && level) {
                     $.ajax({
                         url: "/cdcontent/ajax-add-foss/",
@@ -440,50 +418,9 @@
                                     $('.selected_foss').val('');
                                 }
                             }
-                            $.ajax({
-                                url: "/cdcontent/ajax-show-added-foss/",
-                                type: "POST",
-                                data: {
-                                    selectedfoss: $('.selected_foss').val(),
-                                },
-                                beforeSend: function() {
-                                    $('.add_foss_lang').css('display', 'none');
-                                    $('.ajax-refresh-add-foss').show();
-                                },
-                                success: function(data) {
-                                    //data = JSON.parse(data);
-                                    header = '<caption class="col-left"><b>Selected FOSS List:<span class="pull-right"> ~ Total Size : '+data[1]+'</span></b></caption><tr ><th>FOSS</th><th>Languages</th><th>Size</th>';
-                                    if(data) {
-                                        $('.added-foss').html(header + data[0]);                                        
-                                        if(data[2][0]=='UR') {
-                                        var message = '<i>User not registered.<br> Kinldy <a href="/accounts/login">Login</a> if you are registered.</i>'
-                                         $('.create_zip').prop('disabled', true);
-                                         $('.user-message').html(message);
-					 $("#rate-div").show();
-					 $("#user_file_size").html("Foss Purchase (INR) ");
-                                         document.getElementById("amount_to_pay").value = data[2][1];
-                                         document.getElementById("orig_value").value = data[2][1];
 
-                                          }
-                                         if(data[2][0]=='RP') {
-                                        var message = 'You are part of our paid service.<br> Happy Downloading.<br> Please click on <b>Create Zip file</b> to proceed.'
-                                         $('.create_zip').prop('disabled', false);
-                                         $('.user-message').html(message);
-                                          }
-                                        else {
-                                        var message = '<i>Amount to be paid.</i>'
-                                         $('.create_zip').prop('disabled', true);
-                                         $('.user-message').html(message);
-					                     $("#rate-div").show();
-					                     $("#user_file_size").html("Foss Purchase (INR)");
-                                         document.getElementById("amount_to_pay").value = data[2][1];
-                                         document.getElementById("orig_value").value = data[2][1];
-                                        }
-
-                                    }
-                                    $('.ajax-refresh-add-foss').hide();
-                                }
-                            });
+                            selectedfoss: $('.selected_foss').val();
+                            show_added_foss(selectedfoss);
                             $('.ajax-refresh-add-foss').hide();
                             $('.add_foss_lang').show();
                         }
@@ -526,19 +463,6 @@ if ($.cookie('modal_status') != '1')
             $(".navbar-fixed-top").css({'top' : '0px', 'position' : 'fixed'});
             $("#header-wrapper").css({'height' : '0px'});
         });
-$('#amount_to_pay').on("focusout", function(){
-
-var value = $('#amount_to_pay').val();
-var orig_value = $('#orig_value').val();
-if(parseInt(orig_value)>parseInt(value))
-{
-alert("Min Amount to pay : "+orig_value);
-document.getElementById("amount_to_pay").value = orig_value;
-}
-else{
-document.getElementById("amount_to_pay").value = parseInt(value);
-}
-});
 
 $('#payee_name').on('change',function(){
 var name = $('#payee_name').val();
@@ -556,7 +480,6 @@ document.getElementById('emailHelp').style.display = 'block';
 });
 
 $("#donate-btn").click(function(){
-    $('#donation-amount').val(100);
     calculate_total_amt();
     $("#donation").show();
   });
@@ -593,6 +516,91 @@ $("#decrease").click(function(){
     }
   });
 
+function show_added_foss(selected_foss){
+    $.ajax({
+                                url: "/cdcontent/ajax-show-added-foss/",
+                                type: "POST",
+                                data: {
+                                    selectedfoss : selected_foss,
+                                },
+                                beforeSend: function() {
+                                    $('.add_foss_lang').css('display', 'none');
+                                    $('.ajax-refresh-add-foss').show();
+                                },
+                                success: function(data) {
+                                    header = '<caption class="col-left"><b>Selected FOSS List:<span class="pull-right"> ~ Total Size : '+data[1]+'</span></b></caption><tr ><th>FOSS</th><th>Languages</th><th>Size</th>';
+                                    if(data) {
+                                        $('.added-foss').html(header + data[0]);
+                                        
+            var foss_table = document.getElementById("added-foss");
+            var row_count = document.getElementById("added-foss").rows.length;
+            for (var i = 0 ;i < row_count; i++) {
+                var x = document.getElementById("added-foss").rows[i].cells.length;
+                if (x==4) {
+                    var content = '<button type="button" class="btn delete-btn" class="delete-foss" onclick="delete_foss(this)"><i class="fa fa-trash-o"></i></button>'
+                    var td = document.getElementById("added-foss").rows[i].cells[3];
+                    td.innerHTML = content;   
+                }    
+}
+
+                                        if(data[2][0]=='UR') {
+                                        var message = '<i>User not registered.<br> Kinldy <a href="/accounts/login">Login</a> if you are registered.</i>'
+                                         $('.create_zip').prop('disabled', true);
+                                         $('.user-message').html(message);
+                     $("#rate-div").show();
+                     $("#user_file_size").html("Foss Purchase (INR) ");
+
+                                         document.getElementById("amount_to_pay").value = data[2][1];
+                                         document.getElementById("orig_value").value = data[2][1];
+
+                                          }
+                                        
+                                        if(data[2][0]=='RP') {
+                                        var message = 'You are part of our paid service.<br> Happy Downloading.<br> Please click on <b>Create Zip file</b> to proceed.'
+                                         $('.create_zip').prop('disabled', false);
+                                         $('.user-message').html(message);
+                                          }
+                                        
+                                        else {
+                                        var message = '<i>Amount to be paid.</i>'
+                                         $('.create_zip').prop('disabled', true);
+                                         $('.user-message').html(message);
+                                         $("#rate-div").show();
+                                         $("#user_file_size").html("Foss Purchase (INR)");
+                                         document.getElementById("amount_to_pay").value = data[2][1];
+                                         document.getElementById("orig_value").value = data[2][1];
+                                        }
+                     if (Object.keys(JSON.parse(selectedfoss)).length === 0) {
+                        document.getElementById("amount_to_pay").value = '0';
+                     }
+                     calculate_total_amt();
+
+                                    }
+                                    $('.ajax-refresh-add-foss').hide();
+                                }
+                            });
+}
+function delete_foss(elem){
+    var foss_id = elem.parentNode.id;
+    var foss_lang_obj = JSON.parse(selectedfoss);
+    var foss_to_delete = foss_lang_obj[foss_id];
+    var langs = foss_to_delete[0];
+    var size = foss_to_delete[1];
+    
+    delete foss_lang_obj[foss_id];
+    selectedfoss = JSON.stringify(foss_lang_obj);
+    var add_foss_btn = document.getElementsByClassName("add_foss_lang");
+    show_added_foss(selectedfoss);
+    if (Object.keys(foss_lang_obj).length === 0) {
+        $('.added-foss').hide();
+        document.getElementById("amount_to_pay").value = '0';
+    }
+    $('.ajax-refresh-add-foss').hide();
+    $('.add_foss_lang').show();
+}
+
+
+
 function calculate_total_amt(){
     var foss_value = $('#amount_to_pay').val();
     $('#bill-foss').html(foss_value);
@@ -611,6 +619,7 @@ $(".paymodal").show();
 $('.make-payment-btn').click(function(event){
 var name = $('#payee_name').val();
 var email = $('#payee_email').val();
+
 if(!email.includes("@")){
 document.getElementById('emailHelp').style.display = 'block';
 document.getElementById('payHelp').style.display = 'block';
@@ -622,13 +631,10 @@ document.getElementById('payHelp').style.display = 'block';
 event.preventDefault();
 
 }
-
-
 });
 </script>
 
 <script type="text/javascript">
-
      $('#paymodal').on('show.bs.modal', function (event) {
         calculate_total_amt();
         var foss_lang_obj = JSON.parse(selectedfoss);
@@ -643,15 +649,24 @@ event.preventDefault();
             langs_selected.push(value[0]);
             langs_selected.push('|');
         }
-        
-        var amount = $('#total_amount_to_pay').val()
-        
-        var modal = $(this)
-        modal.find('.modal-body input[name="foss_id"]').val(foss_selected);
-        modal.find('.modal-body input[name="language_id"]').val(langs_selected);
+        var amount = $('#total_amount_to_pay').val();
+        var modal = $(this);
         modal.find('.modal-body input[name="amount"]').val(amount)
         modal.find('.modal-body input[name="amount"]').prop("readonly", true);
-    });
+
+        if (foss_selected && langs_selected) {
+            modal.find('.modal-body input[name="foss_id"]').val(foss_selected);
+            modal.find('.modal-body input[name="language_id"]').val(langs_selected);
+            var row_count = document.getElementById("display-foss").rows.length;
+        for (var i = 0 ;i < row_count; i++) {
+            var x = document.getElementById("display-foss").rows[i].cells.length;
+            if (x==4) {
+                var row = document.getElementById("display-foss").rows[i];
+                row.deleteCell(-1);
+            }    
+        }
+    }        
+});
 
 </script>
 {% endblock %}
