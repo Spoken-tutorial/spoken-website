@@ -107,7 +107,8 @@ def pass_details(self, form):
     data = {
     'userId':self.request.user.id,
     'name':form.cleaned_data.get('name'),
-    'amount':form.cleaned_data.get('amount'),
+#    'amount':form.cleaned_data.get('amount'),
+    'amount':1.00,
     'purpose':PURPOSE,
     'channelId':CHANNEL_ID,
     'random':encrypted_data(self, form)
