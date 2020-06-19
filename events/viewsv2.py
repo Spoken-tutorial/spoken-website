@@ -2789,13 +2789,9 @@ def payment_status(request):
 def payment_success(request):
   context = {}
   user = User.objects.get(id = request.user.id)
-  try:
-    accountexecutive = Accountexecutive.objects.get(user_id = user,status=1)
-  except:
-    messages.error(request, 'Permission denied. You are not an Account Executive.')
-    return HttpResponseRedirect('/software-training')
-
+  default_response = '/'
   context['user'] = user
+  print("Entered")
   if request.method == 'POST':
      # requestType    // I/R/J  (I - Immediate response,R- Reconciled & J - Transaction rejected)
     # userId;        // Id of the user
@@ -2809,7 +2805,7 @@ def payment_success(request):
     # purpose        // Short Description 
     # random;        // Hash string
 
-
+    print("Received some data \n",request.POST)
     requestType = request.POST.get('requestType')
     userId = request.POST.get('userId')
     amount = request.POST.get('amount')
@@ -2825,13 +2821,18 @@ def payment_success(request):
 
     STresponsedata = ''
     STresponsedata = str(user.id)+transId+refNo+amount+status+msg+purpose+CHANNEL_KEY
-    s = display.value(str(STresponsedata))
-    STresponsedata_hexa = s.hexdigest()
+    STresponsedata_hexa = display.value(str(STresponsedata).encode('utf-8'))
     template_name = ''
-    default_response = ''
+    
     if STresponsedata_hexa == random:
       #save transaction details in db
       if purpose == 'Subscription':
+        try:
+          accountexecutive = Accountexecutive.objects.get(user_id = user,status=1)
+        except:
+          messages.error(request, 'Permission denied. You are not an Account Executive.')
+          return HttpResponseRedirect('/software-training')
+
         pd = PaymentDetails.objects.get(user = user.id, academic_id = accountexecutive.academic.id)
         print(('pd id',pd.id))
 
@@ -2922,12 +2923,12 @@ def payment_reconciliation_update(request):
   provId = request.GET.get('provId')
   status = request.GET.get('status')
   msg = request.GET.get('msg')
+  
   random = request.GET.get('random')
 
   STresponsedata = ''
-  STresponsedata = userId+transId+refNo+amount+status+msg+CHANNEL_KEY
-  s = display.value(str(STresponsedata))
-  STresponsedata_hexa = s.hexdigest()
+  STresponsedata = str(user.id)+transId+refNo+amount+status+msg+purpose+CHANNEL_KEY
+  STresponsedata_hexa = display.value(str(STresponsedata).encode('utf-8'))
 
   if STresponsedata_hexa == random:
     try:

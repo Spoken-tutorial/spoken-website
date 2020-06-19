@@ -40,77 +40,83 @@ def donatehome(request):
     context.update(csrf(request))
     return render(request, 'donate/templates/cd_payment_success.html', context)
 
-class PaymentController(LoginRequiredMixin, CreateView):
-    login_url = '/login/'
-    template_name = 'cdcontent/templates/cdcontent_home.html'
-    model = Payee
-    form_class = PayeeForm
-    success_url = reverse_lazy('cdcontent:cdcontenthome')
 
-    def form_valid(self, form):
-        """
-        If the form is valid, save the associated model.
-        """
-        self.object = form.save(commit=False)
-        self.object.user = self.request.user
-        self.object.status = False
-        self.object.expiry = calculate_expiry()
-        self.object.save()
-        payee_obj = self.object;
+def form_valid(request, form):
+    """
+    If the form is valid, save the associated model.
+    """
+    form_data = form.save(commit=False)
+    form_data.user = request.user
+    form_data.status = False
+    form_data.expiry = calculate_expiry()
+    form_data.save()
+    payee_obj = form_data;
 
-        foss_ids = form.cleaned_data.get('foss_id')
-        languages = form.cleaned_data.get('language_id')
-        fosses = foss_ids.split(',')
-        foss_languages = languages.split(',|')
+    foss_ids = form.cleaned_data.get('foss_id')
+    languages = form.cleaned_data.get('language_id')
+    fosses = foss_ids.split(',')
+    foss_languages = languages.split(',|')
 
-        payee_id = payee_obj.pk
-        
-        for i in range(len(fosses)):
-            foss_category = FossCategory.objects.get(pk=int(fosses[i]))  
-            languages = foss_languages[i].split(',')
-            for language in languages:
-                if language!='':
-                    foss_language = Language.objects.get(pk=int(language))
-                    cd_foss_langs = CdFossLanguages()
-                    cd_foss_langs.payment = Payee.objects.get(pk=payee_id)
-                    cd_foss_langs.foss = foss_category
-                    cd_foss_langs.lang = foss_language
-                    cd_foss_langs.save()
+    payee_id = payee_obj.pk
+    
+    for i in range(len(fosses)):
+        foss_category = FossCategory.objects.get(pk=int(fosses[i]))  
+        languages = foss_languages[i].split(',')
+        for language in languages:
+            if language!='':
+                foss_language = Language.objects.get(pk=int(language))
+                cd_foss_langs = CdFossLanguages()
+                cd_foss_langs.payment = Payee.objects.get(pk=payee_id)
+                cd_foss_langs.foss = foss_category
+                cd_foss_langs.lang = foss_language
+                cd_foss_langs.save()
 
-        form.save_m2m()
-        pass_details(self, form)
-        return super(PaymentController, self).form_valid(form)
+    form.save_m2m()
+    
+    #return super(PaymentController, self).form_valid(form)
 
-    def form_invalid(self, form):
-        """
-        If the form is invalid, re-render the context data with the
-        data-filled form and errors.
-        """
-        messages.warning(self.request, 'Invalid form payment request.')
-        return redirect('cdcontent:cdcontenthome')
+def form_invalid(request, form):
+    """
+    If the form is invalid, re-render the context data with the
+    data-filled form and errors.
+    """
+    messages.warning(request, 'Invalid form payment request.')
+    return redirect('cdcontent:cdcontenthome')
+
+def controller(request):
+    #login_url = '/login/'
+    #template_name = 'cdcontent/templates/cdcontent_home.html'
+    form = PayeeForm(request.POST)
+    if request.method == 'POST':
+        if form.is_valid():
+            form_valid(request, form)
+        else:
+            form_invalid(request, form)
+    resp = pass_details(request, form)
+    return render(request,resp,data)
 
 
 def calculate_expiry():
     return date.today() + timedelta(days=7)
 
-def encrypted_data(self, form):
+def encrypted_data(request, form):
     STdata = ''
     user_name = form.cleaned_data.get('name')
     amount = form.cleaned_data.get('amount')
-    STdata = str(self.request.user.id)+str(user_name)+str(amount)+PURPOSE+CHANNEL_ID+CHANNEL_KEY
+    STdata = str(request.user.id)+str(user_name)+str(amount)+PURPOSE+CHANNEL_ID+CHANNEL_KEY
     print(STdata)
     s = display.value(str(STdata))
     return s
 
-def pass_details(self, form):
+def pass_details(request, form):
     
     data = {
-    'userId':self.request.user.id,
+    'userId':request.user.id,
     'name':form.cleaned_data.get('name'),
 #    'amount':form.cleaned_data.get('amount'),
     'amount':1.00,
     'purpose':PURPOSE,
     'channelId':CHANNEL_ID,
-    'random':encrypted_data(self, form)
+    'random':encrypted_data(request, form)
     }
     r = requests.post(TARGET,data = data)
