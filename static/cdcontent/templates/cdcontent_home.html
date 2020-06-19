@@ -218,7 +218,7 @@
   <tr>
     <th >Donation Amount</th>
     <th class="donate-options">
-        <input type="number" step="50" value="100" placeholder="100" id="donation-amount">
+        <input type="number" step="50" value="0" placeholder="100" id="donation-amount">
         <button type="button" class="btn d-item" id="increase">+</button>
         <button type="button" class="btn d-item" id="decrease">-</button>
         <div class="form-check">
@@ -449,7 +449,6 @@
                 level = $('.level').val();
                 langs = JSON.stringify($('.language').val());
                 selectedfoss = $('.selected_foss').val();
-                
                 if(foss && langs && level) {
                     $.ajax({
                         url: "/cdcontent/ajax-add-foss/",
@@ -471,7 +470,6 @@
                                 if(data != '{}') {
                                     $('.selected_foss').val(data);
                                      selectedfoss = $('.selected_foss').val();
-                                     
                                 } else {
                                     $('.selected_foss').val('');
                                 }
@@ -538,6 +536,7 @@ document.getElementById('emailHelp').style.display = 'block';
 });
 
 $("#donate-btn").click(function(){
+    $('#donation-amount').val(100);
     calculate_total_amt();
     $("#donation").show();
   });
@@ -559,6 +558,7 @@ $('#donation-checkbox').click(function(){
         });
 
 $("#increase").click(function(){
+    $("#donation-checkbox").prop("checked", true);
     var donation_value = $('#donation-amount').val();
     var increment = parseInt(donation_value)+100;
     $('#donation-amount').val(increment);
@@ -566,6 +566,7 @@ $("#increase").click(function(){
   });
 
 $("#decrease").click(function(){
+    $("#donation-checkbox").prop("checked", true);
     var donation_value = $('#donation-amount').val();
     if (donation_value >= 100) {
         var increment = parseInt(donation_value)-100;
@@ -644,9 +645,9 @@ function delete_foss(elem){
     var foss_to_delete = foss_lang_obj[foss_id];
     var langs = foss_to_delete[0];
     var size = foss_to_delete[1];
-    
     delete foss_lang_obj[foss_id];
     selectedfoss = JSON.stringify(foss_lang_obj);
+    $('.selected_foss').val(selectedfoss);
     var add_foss_btn = document.getElementsByClassName("add_foss_lang");
     show_added_foss(selectedfoss);
     if (Object.keys(foss_lang_obj).length === 0) {
