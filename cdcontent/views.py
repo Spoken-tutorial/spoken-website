@@ -21,6 +21,7 @@ from creation.models import *
 from forums.models import Answer, Question
 from events.models import AcademicCenter, State, AcademicKey
 from donate.forms import PayeeForm
+from donate.models import Payee
 
 # Create your views here.
 def zipdir(src_path, dst_path, archive):
@@ -331,11 +332,16 @@ def home(request):
     else:
         form = CDContentForm()
     states = State.objects.order_by('name')
+
     context = {
         'form': form,
         'states': states,
         'payment_form': PayeeForm(user=request.user),
     }
+    if request.user.is_authenticated():
+        payee_list = Payee.objects.prefetch_related('cdfosslanguages_set__foss','cdfosslanguages_set__lang').filter(user=request.user)
+        context['payee_list'] = payee_list
+
     context.update(csrf(request))
 
     return render(request, "cdcontent/templates/cdcontent_home.html", context)
@@ -460,6 +466,7 @@ def ajax_show_added_foss(request):
         for filepath in common_files:
             if os.path.isfile(filepath):
                 fsize += os.path.getsize(filepath)
+        
         fsize_total += fsize
         
         data += '<tr><td name="foss[]">{}</td><td name="langs[]">{}</td><td name="size">{}</td><td id="{}"></td></tr>'.format(foss.foss, langs, humansize(fsize),foss.id)

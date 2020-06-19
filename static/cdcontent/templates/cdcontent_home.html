@@ -43,9 +43,30 @@
         .rate-chart *{overflow: hidden;}
         .payment-details{font-weight: bold;}
         .display-foss{height: auto;overflow:hidden;}
+        #key-btn{
+            border: 2px solid #286090;
+            font-weight: bold;
+            font-size: 1rem;
+            color: #286090;
+            background-color: white;
+            padding: 5px 20px 5px 20px;
+            font-family: "Times New Roman", Times, serif;
+            font-family: Arial, Helvetica, sans-serif;
+            margin-left: 20px;
+            border-radius: 5px;
+        }
     </style>
 {% endblock %}
-{% block heading %}CD Content Creation{% endblock %}
+{% block heading %}
+<span>CD Content Creation</span>
+{% if user.is_authenticated %}
+<span>
+  <a data-toggle="collapse" href="#collapseKey" role="button" aria-expanded="false" aria-controls="collapseKey" id="key-btn">
+    FOSS Purchase KEY
+  </a>
+</span>
+{% endif %}
+{% endblock %}
 {% block announcement %}
     <div id="slideshow">
             {% get_notifications as notifications %}
@@ -66,6 +87,43 @@
 {% block search %} {% endblock %}
 
 {% block content %}
+    <div class="row">
+  <div class="col-sm-12">
+    <div class="collapse" id="collapseKey">
+  <div class="card card-body">
+    <table class="table table-bordered">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Key</th>
+      <th scope="col">FOSS Courses</th>
+      <th scope="col">Expiry</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in payee_list %}
+    <tr>
+      <th scope="row">{{forloop.counter}}</th>
+      <td>{{item.key}}</td>
+      <td>
+          {% for p in item.cdfosslanguages_set.all %}
+          {% if forloop.last %}
+          {{p.foss}} ({{p.lang}})
+          {% else %}
+          {{p.foss}} ({{p.lang}}) , 
+          {% endif %}
+    {% endfor  %}
+      </td>
+      <td>{{item.expiry}}</td>
+    </tr>
+    {% endfor  %}
+  </tbody>
+</table>
+    
+  </div>
+</div>
+  </div>
+</div>
     <form role="form" method="post" enctype="multipart/form-data" class="cdcontentform form-horizontal">
         <div class="row well bs-component">
             <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
