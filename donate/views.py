@@ -84,16 +84,14 @@ def form_invalid(request, form):
     return redirect('cdcontent:cdcontenthome')
 
 def controller(request):
-    #login_url = '/login/'
-    #template_name = 'cdcontent/templates/cdcontent_home.html'
     form = PayeeForm(request.POST)
     if request.method == 'POST':
         if form.is_valid():
             form_valid(request, form)
         else:
             form_invalid(request, form)
-    resp = pass_details(request, form)
-    return render(request,resp,data)
+    data = get_final_data(request, form)
+    return render(request,'payment_status.html',data)
 
 
 def calculate_expiry():
@@ -108,7 +106,7 @@ def encrypted_data(request, form):
     s = display.value(str(STdata))
     return s
 
-def pass_details(request, form):
+def get_final_data(request, form):
     
     data = {
     'userId':request.user.id,
@@ -117,6 +115,7 @@ def pass_details(request, form):
     'amount':1.00,
     'purpose':PURPOSE,
     'channelId':CHANNEL_ID,
+    'target': TARGET,
     'random':encrypted_data(request, form)
     }
-    r = requests.post(TARGET,data = data)
+    return data

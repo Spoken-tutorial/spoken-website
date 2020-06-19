@@ -2749,7 +2749,15 @@ def payment_status(request):
     print(STdata)
     s = display.value(str(STdata))
 
-    data = {'userId':user.id,'name':user_name,'amount':amount,'purpose':'Subscription','channelId':CHANNEL_ID,'random':s}
+    data = {
+    'userId':user.id,
+    'name':user_name,
+    'amount':amount,
+    'purpose':'Subscription',
+    'channelId':CHANNEL_ID,
+    'target':TARGET,
+    'random':s
+    }
 
 
     try:
@@ -2821,7 +2829,7 @@ def payment_success(request):
 
     STresponsedata = ''
     STresponsedata = str(user.id)+transId+refNo+amount+status+msg+purpose+CHANNEL_KEY
-    STresponsedata_hexa = display.value(str(STresponsedata).encode('utf-8'))
+    STresponsedata_hexa = display.value(str(STresponsedata))
     template_name = ''
     
     if STresponsedata_hexa == random:
@@ -2928,7 +2936,7 @@ def payment_reconciliation_update(request):
 
   STresponsedata = ''
   STresponsedata = str(user.id)+transId+refNo+amount+status+msg+purpose+CHANNEL_KEY
-  STresponsedata_hexa = display.value(str(STresponsedata).encode('utf-8'))
+  STresponsedata_hexa = display.value(str(STresponsedata))
 
   if STresponsedata_hexa == random:
     try:
