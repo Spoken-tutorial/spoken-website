@@ -612,3 +612,8 @@ class AcademicPaymentStatusForm(forms.ModelForm):
   class Meta(object):
     model = AcademicPaymentStatus
     exclude = ['entry_user']
+    widgets = {
+    'payment_date':DateInput(),
+    'phone':forms.NumberInput(),
+    'amount':forms.NumberInput()
+    }
