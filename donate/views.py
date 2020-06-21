@@ -47,7 +47,7 @@ def form_valid(request, form):
     """
     form_data = form.save(commit=False)
     form_data.user = request.user
-    form_data.status = False
+    form_data.status = 0
     form_data.expiry = calculate_expiry()
     form_data.save()
     payee_obj = form_data;
@@ -101,6 +101,8 @@ def encrypted_data(request, form):
     STdata = ''
     user_name = form.cleaned_data.get('name')
     amount = form.cleaned_data.get('amount')
+    amount = 1.00
+    purpose = PURPOSE +str(form.save(commit=False).pk)
     STdata = str(request.user.id)+str(user_name)+str(amount)+PURPOSE+CHANNEL_ID+CHANNEL_KEY
     print(STdata)
     s = display.value(str(STdata))
@@ -113,7 +115,7 @@ def get_final_data(request, form):
     'name':form.cleaned_data.get('name'),
 #    'amount':form.cleaned_data.get('amount'),
     'amount':1.00,
-    'purpose':PURPOSE,
+    'purpose':PURPOSE+str(form.save(commit=False).pk),
     'channelId':CHANNEL_ID,
     'target': TARGET,
     'random':encrypted_data(request, form)

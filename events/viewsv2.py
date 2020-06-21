@@ -14,6 +14,7 @@ from config import TARGET, CHANNEL_ID, CHANNEL_KEY
 from django.views.generic import View, ListView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from events.models import *
+from donate.models import Payee
 from events.filters import TrainingRequestFilter
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
@@ -2840,56 +2841,28 @@ def payment_success(request):
         except:
           messages.error(request, 'Permission denied. You are not an Account Executive.')
           return HttpResponseRedirect('/software-training')
-
-        pd = PaymentDetails.objects.get(user = user.id, academic_id = accountexecutive.academic.id)
-        print(('pd id',pd.id))
-
+        
         try:
-          transactiondetails = PaymentTransactionDetails()
-          transactiondetails.paymentdetail_id  =  pd.id
-          transactiondetails.requestType  =  requestType
-          transactiondetails.userId_id  =  userId
-          transactiondetails.amount  =  amount
-          transactiondetails.reqId  = reqId
-          transactiondetails.transId  = transId
-          transactiondetails.refNo  =  refNo
-          transactiondetails.provId  =  provId
-          transactiondetails.status  =  status
-          transactiondetails.msg  =  msg
-          transactiondetails.save()
+          pd = PaymentDetails.objects.get(user = user.id, academic_id = accountexecutive.academic.id)
+          transaction = add_transaction(purpose, pd.id)
           template_name = 'payment_success.html'
           default_response = '/software-training'
         except Exception as e:
+          print(e)
           messages.error(request, 'Something went wrong. Can not collect your transaction details. Kindly contact your state resource person.')
           return HttpResponseRedirect('/software-training')
       else:
         try:
-          transaction = PaymentTransaction()
-          transaction.paymentdetail_id  =  pd.id
-          transaction.requestType  =  requestType
-          transaction.userId_id  =  userId
-          transaction.amount  =  amount
-          transaction.reqId  = reqId
-          transaction.transId  = transId
-          transaction.refNo  =  refNo
-          transaction.provId  =  provId
-          transaction.status  =  status
-          transaction.msg  =  msg
-          transaction.save()
-          template_name = '../donate/cd_payment_success.html'
+          pd = get_payee_id(purpose)
+          transaction = add_transaction(purpose, pd.id)
+          template_name = 'donate/templates/cd_payment_success.html'
           context['form'] = get_updated_form(transaction)
           default_response = '/cdcontent'
         except Exception as e:
+          print(e)
           messages.error(request, 'Something went wrong. Can not collect your transaction details. Kindly try again in some time.')
           return HttpResponseRedirect('/cdcontent')
-      if status == 'S':
-        pd.status = 1
-        pd.description = 'Payment successfull'
-      elif status == 'F':
-        pd.status = 2
-        pd.description = 'Payment fail'
-      pd.save()
-
+      update_status(pd, status)
       context['transId'] = transId
       context['refNo'] = refNo
       context['msg'] = msg
@@ -2901,6 +2874,49 @@ def payment_success(request):
   else:
     return HttpResponseRedirect(default_response)
     # return render(request,'payment_success.html',context)
+
+def add_transaction(purpose, pid):
+  if purpose == 'Subscription':
+    transaction = PaymentTransactionDetails()
+    transaction.paymentdetail_id  =  pd.id
+    transaction.requestType  =  requestType
+    transaction.userId_id  =  userId
+    transaction.amount  =  amount
+    transaction.reqId  = reqId
+    transaction.transId  = transId
+    transaction.refNo  =  refNo
+    transaction.provId  =  provId
+    transaction.status  =  status
+    transaction.msg  =  msg
+    transaction.save()
+  else :
+    transaction = PaymentTransaction()
+    transaction.paymentdetail_id  =  pid.id
+    transaction.requestType  =  requestType
+    transaction.userId_id  =  userId
+    transaction.amount  =  amount
+    transaction.reqId  = reqId
+    transaction.transId  = transId
+    transaction.refNo  =  refNo
+    transaction.provId  =  provId
+    transaction.status  =  status
+    transaction.msg  =  msg
+    transaction.save()
+  return transaction
+
+def get_payee_id():
+  payee_id = purpose.split("CdContent")[1]
+  pd = Payee.objects.get(id=payee_id)
+  return pd
+
+def update_status(pd, status):
+  if status == 'S':
+      pd.status = 1
+      pd.description = 'Payment successfull'
+    elif status == 'F':
+      pd.status = 2
+      pd.description = 'Payment fail'
+    pd.save()
 
 def payment_details(request,choice):
   academic_id = Accountexecutive.objects.filter(user = request.user).values('academic_id','academic_id__institution_name')
@@ -2931,7 +2947,7 @@ def payment_reconciliation_update(request):
   provId = request.GET.get('provId')
   status = request.GET.get('status')
   msg = request.GET.get('msg')
-  
+  purpose = request.POST.get('purpose')
   random = request.GET.get('random')
 
   STresponsedata = ''
@@ -2939,41 +2955,24 @@ def payment_reconciliation_update(request):
   STresponsedata_hexa = display.value(str(STresponsedata))
 
   if STresponsedata_hexa == random:
+    if purpose == 'Subscription':
+      try:
+        accountexecutive = Accountexecutive.objects.get(user_id = userId,status__gt=0)
+      except:
+        print("no ac")
+        pass
+      try:
+        pd = PaymentDetails.objects.get(user_id = userId, academic_id_id = accountexecutive.academic_id)
+      except:
+        return HttpResponseRedirect("Failed1")
+    else:
+      pd = get_payee_id(purpose)
     try:
-      accountexecutive = Accountexecutive.objects.get(user_id = userId,status__gt=0)
-    except:
-      print("no ac")
-      pass
-    try:
-      print((userId, accountexecutive.academic_id))
-      pd = PaymentDetails.objects.get(user_id = userId, academic_id_id = accountexecutive.academic_id)
-    except:
-      return HttpResponseRedirect("Failed1")
-
-    try:
-      transactiondetails = PaymentTransactionDetails()
-      transactiondetails.paymentdetail_id  =  pd.id
-      transactiondetails.requestType  =  requestType
-      transactiondetails.userId_id  =  userId
-      transactiondetails.amount  =  amount
-      transactiondetails.reqId  = reqId
-      transactiondetails.transId  = transId
-      transactiondetails.refNo  =  refNo
-      transactiondetails.provId  =  provId
-      transactiondetails.status  =  status
-      transactiondetails.msg  =  msg
-      transactiondetails.save()
+      transaction = add_transaction(purpose, pd.id)
       print("saved")
     except:
       return HttpResponseRedirect("Failed2")
-
-    if status == 'S':
-      pd.status = 1
-      pd.description = 'Payment successfull'
-    elif status == 'F':
-      pd.status = 2
-      pd.description = 'Payment fail'
-    pd.save()
+    update_status(pd, status)
   else:
     return HttpResponseRedirect("Invalid")
   return HttpResponse("OK")
