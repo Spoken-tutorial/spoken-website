@@ -2913,10 +2913,10 @@ def update_status(pd, status):
   if status == 'S':
       pd.status = 1
       pd.description = 'Payment successfull'
-    elif status == 'F':
+  elif status == 'F':
       pd.status = 2
       pd.description = 'Payment fail'
-    pd.save()
+  pd.save()
 
 def payment_details(request,choice):
   academic_id = Accountexecutive.objects.filter(user = request.user).values('academic_id','academic_id__institution_name')
