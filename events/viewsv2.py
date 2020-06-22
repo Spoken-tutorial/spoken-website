@@ -2947,11 +2947,11 @@ def payment_reconciliation_update(request):
   provId = request.GET.get('provId')
   status = request.GET.get('status')
   msg = request.GET.get('msg')
-  purpose = request.POST.get('purpose')
+  purpose = request.GET.get('purpose')
   random = request.GET.get('random')
 
   STresponsedata = ''
-  STresponsedata = str(user.id)+transId+refNo+amount+status+msg+purpose+CHANNEL_KEY
+  STresponsedata = str(userId)+transId+refNo+amount+status+msg+purpose+CHANNEL_KEY
   STresponsedata_hexa = display.value(str(STresponsedata))
 
   if STresponsedata_hexa == random:
