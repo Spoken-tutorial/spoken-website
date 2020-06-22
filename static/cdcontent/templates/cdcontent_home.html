@@ -7,38 +7,8 @@
     <style type="text/css">
         .add-foss{margin-right: 15px;}
         #id_language {min-height: 180px;}
-        #donation{display: none;}
-        #donate{
-            background-color: white;
-            font-weight: bold;
-            border: 1px solid #286090;
-            margin-top: 10px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding:2%;
-        }
-        #donate-btn{
-            background-color: white;
-            font-weight: bold;
-            color: #286090;
-            border: 2px solid #286090;
-        }
-        .donate-options{display: flex;flex-wrap: wrap;}
-        .d-item{border: 1px solid #286090;margin: 0 10px;}
         .delete-btn{padding: 0;color: red;}
-        .donate-options input,
-        .donate-options button,{margin:0 2%;}
-        .bill-details,
-        .bill-details td,
-        .bill-details th{border: 1px solid #ddd;text-align: left;}
-        .bill-details{border-collapse: collapse;width: 100%;}
-        .bill-details td,
-        .bill-details th {padding: 15px;}
         #user_file_size{padding-bottom: 10px;}
-        #total_amount_to_pay{border: 1px solid #286090;}
-        .form-check-label{font-size: 0.8rem;font-weight: normal;}
         .rate-chart{overflow: hidden;}
         .rate-chart *{overflow: hidden;}
         .payment-details{font-weight: bold;}
@@ -204,52 +174,6 @@
         <input type="hidden" id="orig_value">
     </th>
   </tr>
-  <tr>
-    <td ></td>
-    <td>
-    <div id="donate">
-    <p class="donate-content">Contribute in our journey of making India IT-literate. </p>
-    <button id="donate-btn" type="button" class="btn btn-outline-success">DONATE</button>  
-    </div>
-    </td>
-  </tr>
-</thead>
-<thead id ="donation">
-  <tr>
-    <th >Donation Amount</th>
-    <th class="donate-options">
-        <input type="number" step="50" value="100" placeholder="100" id="donation-amount">
-        <button type="button" class="btn d-item" id="increase">+</button>
-        <button type="button" class="btn d-item" id="decrease">-</button>
-        <div class="form-check">
-          <input class="form-check-input" type="checkbox" value="" id="donation-checkbox" checked>
-          <label class="form-check-label" for="donation-checkbox">
-            Add Donation
-          </label>
-        </div>
-    </th>
-  </tr>
-  <tr>
-    <td> <span class="payment-details">Payment Details</span></td>
-    <td>
-<table class="bill-details">
-  <tr>
-    <td>Foss Purchase : </td>
-    <td id="bill-foss"></td>
-  </tr>
-  <tr>
-    <td>Donation : </td>
-    <td id="bill-donation">200</td>  
-  </tr>
-  <tr style="font-weight: bold;">
-    <td>Total Amount to Pay: </td>
-    <td id="bill-total">
-        <input class="form-control" type="text" id="total_amount_to_pay" type="number" readonly>
-    </td>
-  </tr>
-</table>
-</td>
-  </tr>
 </thead>
 <thead >
   <tr>
@@ -267,7 +191,6 @@
     </div>
 </div>
 </form>
-
 
 <!-- Modal -->
   <div class="modal fade paymodal" id="paymodal" tabindex="-2" role="dialog" aria-labelledby="PaymentModal" aria-hidden="true">
@@ -449,7 +372,6 @@
                 level = $('.level').val();
                 langs = JSON.stringify($('.language').val());
                 selectedfoss = $('.selected_foss').val();
-                
                 if(foss && langs && level) {
                     $.ajax({
                         url: "/cdcontent/ajax-add-foss/",
@@ -471,7 +393,6 @@
                                 if(data != '{}') {
                                     $('.selected_foss').val(data);
                                      selectedfoss = $('.selected_foss').val();
-                                     
                                 } else {
                                     $('.selected_foss').val('');
                                 }
@@ -536,43 +457,6 @@ document.getElementById('emailHelp').style.display = 'block';
 }
 
 });
-
-$("#donate-btn").click(function(){
-    calculate_total_amt();
-    $("#donation").show();
-  });
-
-$('#donation-amount').on("focusout", function(){
-    var donation_value = $('#donation-amount').val();
-    calculate_total_amt();
-});
-
-$('#donation-checkbox').click(function(){
-            if($(this).prop("checked") == true){
-                $('#donation-amount').val(100);
-                calculate_total_amt();
-            }
-            else if($(this).prop("checked") == false){
-                $('#donation-amount').val(0);
-                calculate_total_amt();
-            }
-        });
-
-$("#increase").click(function(){
-    var donation_value = $('#donation-amount').val();
-    var increment = parseInt(donation_value)+100;
-    $('#donation-amount').val(increment);
-    calculate_total_amt();
-  });
-
-$("#decrease").click(function(){
-    var donation_value = $('#donation-amount').val();
-    if (donation_value >= 100) {
-        var increment = parseInt(donation_value)-100;
-        $('#donation-amount').val(increment);
-        calculate_total_amt();
-    }
-  });
 
 function show_added_foss(selected_foss){
     $.ajax({
@@ -644,9 +528,9 @@ function delete_foss(elem){
     var foss_to_delete = foss_lang_obj[foss_id];
     var langs = foss_to_delete[0];
     var size = foss_to_delete[1];
-    
     delete foss_lang_obj[foss_id];
     selectedfoss = JSON.stringify(foss_lang_obj);
+    $('.selected_foss').val(selectedfoss);
     var add_foss_btn = document.getElementsByClassName("add_foss_lang");
     show_added_foss(selectedfoss);
     if (Object.keys(foss_lang_obj).length === 0) {
@@ -655,17 +539,6 @@ function delete_foss(elem){
     }
     $('.ajax-refresh-add-foss').hide();
     $('.add_foss_lang').show();
-}
-
-
-
-function calculate_total_amt(){
-    var foss_value = $('#amount_to_pay').val();
-    $('#bill-foss').html(foss_value);
-    var donation_value = $('#donation-amount').val();
-    $('#bill-donation').html(donation_value);
-    var total = parseInt(foss_value) + parseInt(donation_value);
-    document.getElementById("total_amount_to_pay").value = total;
 }
 
 function send_data(){
@@ -694,7 +567,7 @@ event.preventDefault();
 
 <script type="text/javascript">
      $('#paymodal').on('show.bs.modal', function (event) {
-        calculate_total_amt();
+        
         var foss_lang_obj = JSON.parse(selectedfoss);
         var foss_selected = [];
         var langs_selected = [];
@@ -707,7 +580,8 @@ event.preventDefault();
             langs_selected.push(value[0]);
             langs_selected.push('|');
         }
-        var amount = $('#total_amount_to_pay').val();
+        var amount = $('#amount_to_pay').val();
+
         var modal = $(this);
         modal.find('.modal-body input[name="amount"]').val(amount)
         modal.find('.modal-body input[name="amount"]').prop("readonly", true);
