@@ -14,7 +14,7 @@ from config import TARGET, CHANNEL_ID, CHANNEL_KEY
 from django.views.generic import View, ListView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from events.models import *
-from donate.models import Payee
+from donate.models import *
 from events.filters import TrainingRequestFilter
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
@@ -2844,7 +2844,7 @@ def payment_success(request):
         
         try:
           pd = PaymentDetails.objects.get(user = user.id, academic_id = accountexecutive.academic.id)
-          transaction = add_transaction(purpose, pd.id)
+          transaction = add_transaction(purpose, pd.id, requestType, userId, amount, reqId, transId, refNo, provId, status, msg)
           template_name = 'payment_success.html'
           default_response = '/software-training'
         except Exception as e:
@@ -2854,7 +2854,7 @@ def payment_success(request):
       else:
         try:
           pd = get_payee_id(purpose)
-          transaction = add_transaction(purpose, pd.id)
+          transaction = add_transaction(purpose, pd.id, requestType, userId, amount, reqId, transId, refNo, provId, status, msg)
           template_name = 'donate/templates/cd_payment_success.html'
           context['form'] = get_updated_form(transaction)
           default_response = '/cdcontent'
@@ -2875,10 +2875,10 @@ def payment_success(request):
     return HttpResponseRedirect(default_response)
     # return render(request,'payment_success.html',context)
 
-def add_transaction(purpose, pid):
+def add_transaction(purpose, pid, requestType, userId, amount, reqId, transId, refNo, provId, status, msg):
   if purpose == 'Subscription':
     transaction = PaymentTransactionDetails()
-    transaction.paymentdetail_id  =  pd.id
+    transaction.paymentdetail_id  =  pid
     transaction.requestType  =  requestType
     transaction.userId_id  =  userId
     transaction.amount  =  amount
@@ -2891,7 +2891,7 @@ def add_transaction(purpose, pid):
     transaction.save()
   else :
     transaction = PaymentTransaction()
-    transaction.paymentdetail_id  =  pid.id
+    transaction.paymentdetail_id  =  pid
     transaction.requestType  =  requestType
     transaction.userId_id  =  userId
     transaction.amount  =  amount
@@ -2904,7 +2904,7 @@ def add_transaction(purpose, pid):
     transaction.save()
   return transaction
 
-def get_payee_id():
+def get_payee_id(purpose):
   payee_id = purpose.split("CdContent")[1]
   pd = Payee.objects.get(id=payee_id)
   return pd
@@ -2968,7 +2968,7 @@ def payment_reconciliation_update(request):
     else:
       pd = get_payee_id(purpose)
     try:
-      transaction = add_transaction(purpose, pd.id)
+      transaction = add_transaction(purpose, pd.id, requestType, userId, amount, reqId, transId, refNo, provId, status, msg)
       print("saved")
     except:
       return HttpResponseRedirect("Failed2")

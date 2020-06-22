@@ -100,10 +100,10 @@ def calculate_expiry():
 def encrypted_data(request, form):
     STdata = ''
     user_name = form.cleaned_data.get('name')
-    amount = form.cleaned_data.get('amount')
+    #amount = form.cleaned_data.get('amount')
     amount = 1.00
     purpose = PURPOSE +str(form.save(commit=False).pk)
-    STdata = str(request.user.id)+str(user_name)+str(amount)+PURPOSE+CHANNEL_ID+CHANNEL_KEY
+    STdata = str(request.user.id)+str(user_name)+str(amount)+purpose+CHANNEL_ID+CHANNEL_KEY
     print(STdata)
     s = display.value(str(STdata))
     return s
