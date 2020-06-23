@@ -6,7 +6,7 @@ from creation.models import TutorialResource,\
             TutorialDetail, FossSuperCategory, Language,\
              FossCategory, TutorialCommonContent, TutorialDuration
 from api.serializers import VideoSerializer, CategorySerializer, FossSerializer, LanguageSerializer, RelianceJioSerializer,\
-        RelianceJioVideoSerializer, RelianceCategoryJioSerializer
+        RelianceJioVideoSerializer, RelianceJioCategorySerializer, RelianceJioLanguageSerializer
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Count, F, Q
 import json
@@ -15,6 +15,8 @@ from creation.views import get_video_info
 import math
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
 
 @csrf_exempt
 def video_list(request):
@@ -185,9 +187,30 @@ def get_tutorialdetails(request, tutid):
 
 class RelianceJioAPI(APIView):
 
+    @method_decorator(cache_page(60*60))
     def get(self, request, format='json'):
-        tr = TutorialResource.objects.filter(Q(status=1) | Q(status=2),tutorial_detail__foss__pk =100, language__name='English')
-        video_serializer = RelianceJioVideoSerializer(tr, context={'request':request}, many=True)
-        category_serializer = RelianceCategoryJioSerializer(tr, context={'videos' : video_serializer.data})
-        serializer = RelianceJioSerializer(tr, context={'spokentutorials' : category_serializer.data})
+        foss = [100, 61]
+        lists=[]
+        category_list=[]
+        lang_en='English'
+        languages = Language.objects.all().exclude(name=lang_en)
+        for f in foss:
+            f = FossCategory.objects.get(pk=f)
+            tr_en = TutorialResource.objects.filter(Q(status=1) | Q(status=2),tutorial_detail__foss=f, language__name=lang_en)
+            lists.append(self.get_foss_serialized(request, tr_en, lang_en))
+            for l in languages:
+                tr = TutorialResource.objects.filter(Q(status=1) | Q(status=2),tutorial_detail__foss=f, language=l)
+                if tr.count() == tr_en.count():
+                    lists.append(self.get_foss_serialized(request, tr, l.name))
+                else:
+                    continue
+            category_serializer = RelianceJioCategorySerializer(tr_en, context={'category':f.foss, 'lists': lists})
+            lists = []
+            category_list.append(category_serializer.data)
+        serializer = RelianceJioSerializer(tr_en, context={'spokentutorials' : category_list})
         return Response(serializer.data)
+    
+    def get_foss_serialized(self, request, tr, language):
+        video_serializer = RelianceJioVideoSerializer(tr, context={'request':request}, many=True)
+        language_serializer = RelianceJioLanguageSerializer(tr, context={'language':language, 'videos' : video_serializer.data})
+        return language_serializer.data
