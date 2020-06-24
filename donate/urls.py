@@ -6,4 +6,6 @@ app_name = 'donate'
 urlpatterns = [
     url(r'^$',  donatehome, name='donatehome'),
     url(r'^initiate_payment$',  controller, name='initiate_payment'),
+    url(r'send_onetime', send_onetime, name='send_onetime'),
+    url(r'validate', validate, name='validate'),
     ]

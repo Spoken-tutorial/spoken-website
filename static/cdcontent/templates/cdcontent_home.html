@@ -147,9 +147,9 @@
                     <table class="added-foss table table-condensed table-bordered table-hover" id="added-foss">
                     </table>
                 </div>
-		<div id="rate-div" style="display: none">
+        <div id="rate-div" style="display: none">
                     <table class="rate-chart table table-condensed table-bordered table-hover">
-			<thead>
+            <thead>
   <tr>
     <th >File Size</th>
     <th >Rate</th>
@@ -170,8 +170,7 @@
   <tr>
     <th id ="user_file_size"></th>
     <th>
-	<span><input class="form-control" type="text" id="amount_to_pay" type="number" readonly></span>
-        <input type="hidden" id="orig_value">
+    <span><input class="form-control" type="text" id="amount_to_pay" type="number" readonly></span>
     </th>
   </tr>
 </thead>
@@ -250,20 +249,22 @@
                     <div class="form-group col-sm-10">
                             {{ payment_form.language_id }}
                     </div>
-                    
-        
-               
+                    {% csrf_token %}
+                    <a href="#" class="btn btn-primary mb-2" onclick="send_otp();" id="send_otp" style="display: none">Send OTP</a> 
+                    <input type="text" class="form-group" style="display: none;" id="otp_value">
+                    <span class="label label-success" id="otp_sent_msg" style="display: none;" ></span>
+
                 <table id ="display-foss" class="added-foss table table-condensed table-bordered table-hover">
                 </table>
                     <div class="col-sm-10">
-                        {% if user.is_authenticated %}
+            {% csrf_token %}
+            {% if user.is_authenticated %}
                         <button  type= "submit" class="btn btn-primary mb-2 make-payment-btn">Make Payment</button>
-                    {% else %}
-                        <a  href= "/accounts/login/?next=/cdcontent" class="btn btn-primary mb-2 make-payment-btn">Please Login to make Payment</a> Or <a  href= "/accounts/register/?next=/cdcontent" class="btn btn-primary mb-2 make-payment-btn">Register</a>
-                    {% endif %}
+            {%else%}
+                    <button  type= "submit" class="btn btn-primary mb-2 make-payment-btn" id="make_payment"disabled>Make Payment</button>
+            {%endif%}
                     </div>
             </form>
-
            </div> 
         </div>    
             
@@ -284,11 +285,11 @@
            <ul>
               <li>CD Content Download is now a paid service.</li>
               <li>If your college has already made the payment , please <a href="/accounts/login">Login</a> with your registered email address</li>
-	      <ul><li>There is <b>NO Restriction</b> on your download size</li></ul>
+          <ul><li>There is <b>NO Restriction</b> on your download size</li></ul>
               <li>If you are an individual , then we charge very nominal charge for download.</li>
               <ul>
-		<li> Add your FOSS and make your payment accordingly</li>
-		<li> This download will be available for <b>1 week</b> from the date of successful payment</li></ul>
+        <li> Add your FOSS and make your payment accordingly</li>
+        <li> This download will be available for <b>1 week</b> from the date of successful payment</li></ul>
            </ul>
         </div>
       </div>
@@ -443,17 +444,47 @@ if ($.cookie('modal_status') != '1')
             $("#header-wrapper").css({'height' : '0px'});
         });
 
-$('#payee_name').on('change',function(){
-var name = $('#payee_name').val();
-if(name.length==0){
-document.getElementById('nameHelp').style.display = 'block';
+$('#otp_value').on('keyup',function(){
+var otp = $('#otp_value').val();
+var email = $('#id_email').val();
+
+if(otp.length>6){
+$.ajax({
+    url:"/donate/validate",
+    type:"POST",
+    data:{
+        "otp":otp,
+        "email":email,
+    },
+    success: function(data) {
+    if(data['validate']=='success'){
+document.getElementById("otp_sent_msg").innerHTML = "Login Successfull";
+document.getElementById('otp_sent_msg').className = 'label label-success';
+$("#otp_sent_msg").show();
+document.getElementById("make_payment").disabled = false;
+
+}
+    else {
+document.getElementById("otp_sent_msg").innerHTML = "Invalid OTP";
+document.getElementById('otp_sent_msg').className = 'label label-danger';
+$("#otp_sent_msg").show().delay(10000).fadeOut();
+}
+}
+
+});
+$("#otp_value").hide();
+$("#otp_value").show();
 }
 });
 
-$('#payee_email').on('change',function(){
-var email = $('#payee_email').val();
-if(!email.includes("@")){
-document.getElementById('emailHelp').style.display = 'block';
+$('#id_email').on('keyup',function(){
+var email = $('#id_email').val();
+if(email.includes("@") && email.includes(".")){
+$("#send_otp").show();
+}
+else{
+   $("#send_otp").hide();
+ 
 }
 
 });
@@ -547,21 +578,45 @@ document.getElementById("mod_amount").value = value;
 $(".paymodal").show();
 }
 
+function send_otp(){
+        var username = $('#id_name').val();
+        var email = $('#id_email').val();
+                $.ajax({
+                    url:'/donate/send_onetime/',
+                    type:'POST',
+                    data:{
+                        'username': username,
+                        'email': email,
+                        csrfmiddlewaretoken: '{{ csrf_token }}',
+                    },
+                    success: function(data) {
+                console.log(data['message']);
+                        if(data['message']=="exists"){
+                            alert("User already present - logging you in ");
+                            $("#send_otp").hide();
+                            document.getElementById("make_payment").disabled = false;
+                        }
+                        else if(data['message']=='present'){
+                            document.getElementById("otp_sent_msg").innerHTML = "OTP Re-sent";
+                            document.getElementById('otp_sent_msg').className = 'label label-success';
+                            $("#otp_sent_msg").show().delay(10000).fadeOut();
+                        }
+                        else{
+                            document.getElementById("otp_sent_msg").innerHTML = "OTP sent";
+                            document.getElementById('otp_sent_msg').className = 'label label-success';
+                            $("#otp_sent_msg").show().delay(10000).fadeOut();
+                            $("#otp_value").show();
+                        }
+                    }
+                });
+            }
+
 $('.make-payment-btn').click(function(event){
 var name = $('#payee_name').val();
 var email = $('#payee_email').val();
 
-if(!email.includes("@")){
-document.getElementById('emailHelp').style.display = 'block';
-document.getElementById('payHelp').style.display = 'block';
-event.preventDefault();
-}
-if(name.length==0){
-document.getElementById('nameHelp').style.display = 'block';
-document.getElementById('payHelp').style.display = 'block';
-event.preventDefault();
 
-}
+
 });
 </script>
 
