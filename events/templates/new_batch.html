@@ -112,7 +112,7 @@
                         <div class='col-xs-12 form-group required'>
                           <label class='control-label'>Master Batch Student List - Csv File</label>&nbsp;&nbsp;<small>(Please upload your CSV file here.)<br> Click Browse to select the spreadsheet containing student details.</small>
                           {% render_field form.csv_file class+="file csv_file" tabindex="1" %}
-                          {{ form.csv_file.errors }}
+                          <span style="color:red" >{{ form.csv_file.errors|linebreaks }}</span>
 			  <small>If you have used MS-EXCEL to create the CSV file please make sure that you have saved it with csv(ms-dos) file extention.</small>
                         </div>
                       </div>
