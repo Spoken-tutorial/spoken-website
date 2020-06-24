@@ -17,6 +17,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.views.decorators.cache import cache_page
 from django.utils.decorators import method_decorator
+from spoken.config import FOSS_API_LIST
 
 @csrf_exempt
 def video_list(request):
@@ -189,7 +190,7 @@ class RelianceJioAPI(APIView):
 
     @method_decorator(cache_page(60*60))
     def get(self, request, format='json'):
-        foss = [100, 61]
+        foss = FOSS_API_LIST
         lists=[]
         category_list=[]
         lang_en='English'
