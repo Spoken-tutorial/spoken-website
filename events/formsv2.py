@@ -72,6 +72,21 @@ class TrainingRequestForm(forms.ModelForm):
         print((start_date, end_date, self.cleaned_data['sem_start_date']))
         if not (self.cleaned_data['sem_start_date'] <= end_date and self.cleaned_data['sem_start_date'] >= start_date):
           raise forms.ValidationError("Invalid semester start date")
+
+
+      if self.cleaned_data and 'training_start_date' in self.cleaned_data and self.cleaned_data['training_start_date']:
+        start_date, end_date =tp.get_current_semester_date_duration()
+        print((start_date, end_date, self.cleaned_data['sem_start_date']))
+        if not (self.cleaned_data['training_start_date'] <= end_date and self.cleaned_data['training_start_date'] >= start_date):
+          raise forms.ValidationError("Invalid training start date")
+
+      if self.cleaned_data and 'training_end_date' in self.cleaned_data and self.cleaned_data['training_end_date']:
+        start_date, end_date =tp.get_current_semester_date_duration()
+        print((start_date, end_date, self.cleaned_data['training_end_date']))
+        if not (self.cleaned_data['training_end_date'] <= end_date and self.cleaned_data['training_end_date'] >= start_date):
+          raise forms.ValidationError("Invalid training end date")
+
+
     return self.cleaned_data
 
   def __init__(self, *args, **kwargs):
@@ -108,6 +123,18 @@ class TrainingRequestEditForm(forms.ModelForm):
       start_date, end_date =tp.get_current_semester_date_duration_new()
       if not (self.cleaned_data['sem_start_date'] <= end_date and self.cleaned_data['sem_start_date'] >= start_date):
         raise forms.ValidationError("Invalid semester start date")
+
+    if self.cleaned_data and 'training_start_date' in self.cleaned_data and self.cleaned_data['training_start_date']:
+      tp = TrainingPlanner.objects.get(pk=self.cleaned_data['training_planner'])
+      start_date, end_date =tp.get_current_semester_date_duration()
+      if not (self.cleaned_data['training_start_date'] <= end_date and self.cleaned_data['training_start_date'] >= start_date):
+        raise forms.ValidationError("Invalid training start date")
+
+    if self.cleaned_data and 'training_end_date' in self.cleaned_data and self.cleaned_data['training_end_date']:
+      tp = TrainingPlanner.objects.get(pk=self.cleaned_data['training_planner'])
+      start_date, end_date =tp.get_current_semester_date_duration()
+      if not (self.cleaned_data['training_end_date'] <= end_date and self.cleaned_data['training_end_date'] >= start_date):
+        raise forms.ValidationError("Invalid training end date")
     return self.cleaned_data
 
   def __init__(self, *args, **kwargs):
@@ -131,6 +158,8 @@ class TrainingRequestEditForm(forms.ModelForm):
       flag = False
     if not flag and training:
       self.fields['sem_start_date'].initial = training.sem_start_date
+      self.fields['training_start_date'].initial = training.training_start_date
+      self.fields['training_end_date'].initial = training.training_end_date
 
     self.fields['course_type'].initial = training.course_type
     self.fields['course'].initial = training.course_id

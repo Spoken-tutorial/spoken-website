@@ -824,6 +824,8 @@ class TrainingRequest(models.Model):
   training_planner = models.ForeignKey(TrainingPlanner, on_delete=models.PROTECT )
   department = models.ForeignKey(Department, on_delete=models.PROTECT )
   sem_start_date = models.DateField()
+  training_start_date = models.DateField(default=datetime.now)
+  training_end_date = models.DateField(default=datetime.now)
   course = models.ForeignKey(CourseMap, on_delete=models.PROTECT )
   batch = models.ForeignKey(StudentBatch, null = True, on_delete=models.PROTECT )
   participants = models.PositiveIntegerField(default=0)
