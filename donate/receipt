@@ -1,0 +1,38 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+
+\title{SPOKEN TUTORIALS}
+
+\author{CD Content Download Receipt}
+\date{June 2020}
+
+\usepackage{natbib}
+\usepackage{graphicx}
+\usepackage{hyperref}
+
+\begin{document}
+\maketitle
+\centering
+\large{
+\begin{tabular}{|c|c|}
+\hline
+\textbf{Name}           & \{\$name\} \\ \hline
+\textbf{Amount}         & \{\$amount \\ \hline
+\textbf{Payment Mode}   & \{\$requestType\} \\ \hline
+\textbf{Key}            & \{\$key\} \\ \hline
+\textbf{Expiry}         & \{\$expiry\} \\ \hline
+\textbf{Email}          & \{\$email\} \\ \hline
+\textbf{Transaction ID} & \{\$transId\} \\ \hline
+\textbf{Provider}       & \{\$provId\} \\ \hline
+\textbf{Status}         & \{\$msg\} \\ \hline
+\textbf{Download link}  & \\url{\$link}  \\ \hline
+\end{tabular}
+}
+\\
+\vspace{10mm} %5mm vertical space
+\large{Thank You for choosing Spoken Tutorials}\\
+\vspace{10mm} %5mm vertical space
+\textbf{In a Journey to make India \\IT Literate}
+
+\bibliographystyle{plain}
+\end{document}

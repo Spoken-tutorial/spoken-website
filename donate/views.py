@@ -25,6 +25,8 @@ from datetime import timedelta, date
 from events import display
 import requests
 import json
+from string import Template
+import subprocess
 
 
 @csrf_exempt
@@ -200,3 +202,57 @@ def validate(request):
     else:
         context["validate"] = "fail"
     return HttpResponse(json.dumps(context), content_type='application/json')
+
+
+def receipt(request):
+    form = TransactionForm(request.POST)
+    form_data = form.save(commit=False)
+    #if form.is_valid():
+    try:
+        download_file_name = None
+        template = 'receipt'
+        download_file_name = form_data.user+'.pdf'
+        certificate_path = ""
+        template_file = open('{0}{1}'.format
+                             (certificate_path, template), 'r')
+        content = Template(template_file.read())
+        template_file.close()
+
+        content_tex = content.safe_substitute(
+            name=form_data.paymentdetail.name,
+            requestType = form_data.requestType,
+            amount = form_data.amount,
+            reqId = form_data.reqId,
+            transId = form_data.transId,
+            refNo = form_data.refNo,
+            provId = form_data.provId,
+            status = form_data.status,
+            msg = form_data.msg)
+        create_tex = open('{0}{1}.tex'.format
+                          (certificate_path, file_name), 'w')
+        create_tex.write(content_tex)
+        create_tex.close()
+        process = subprocess.Popen('timeout 15 make -C {0} file_name={1}'.format(certificate_path, file_name),
+                               stderr=subprocess.PIPE, shell=True)
+        
+        return_value = process.returncode
+        err = process.communicate()[1]
+
+        if return_value == 0:
+            pdf = open('{0}{1}.pdf'.format(certificate_path, file_name), 'rb')
+            response = HttpResponse(content_type='application/pdf')
+            response['Content-Disposition'] = 'attachment; \
+                    filename=%s' % (download_file_name)
+            response.write(pdf.read())
+            _clean_certificate_certificate(certificate_path, file_name)
+            return [response, False]
+        else:
+            error = True
+    except Exception as e:
+        error = True
+        err = e
+    return [err, error]
+
+    
+    #return process.returncode, err
+    #return response
