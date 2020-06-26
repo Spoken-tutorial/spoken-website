@@ -65,4 +65,8 @@ class TransactionForm(forms.ModelForm):
         model = PaymentTransaction
         exclude = ['created','updated']
 
+    def __init__(self, *args, **kwargsk):
+        self.fields['user'].widget = forms.HiddenInput()
+        pass
+
         

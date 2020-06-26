@@ -3,7 +3,7 @@
 {% load static %}
 {% block title %}Payment Status{% endblock %}
 {% block content %}
-  <form method="post" action="" class="form-horizontal">
+  <form method="post" action="/donate/receipt/" class="form-horizontal">
         <div class="row well bs-component">
       {% csrf_token %}
             <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
@@ -84,6 +84,13 @@
                         <div class="col-lg-8">
                             {% render_field form.msg class+="form-control msg" tabindex="10" %}
                             {{ form.msg.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_example_suggestion" class="col-lg-4 control-label">User</label>
+                        <div class="col-lg-8">
+                            {% render_field form.user class+="form-control user" tabindex="10" %}
+                            {{ form.user.errors }}
                         </div>
                     </div>
 

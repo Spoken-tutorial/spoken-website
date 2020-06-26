@@ -206,12 +206,11 @@ def validate(request):
 
 def receipt(request):
     form = TransactionForm(request.POST)
-    form_data = form.save(commit=False)
     #if form.is_valid():
     try:
         download_file_name = None
         template = 'receipt'
-        download_file_name = form_data.user+'.pdf'
+        download_file_name = "ST_"+request.POST.get("user")+'.pdf'
         certificate_path = ""
         template_file = open('{0}{1}'.format
                              (certificate_path, template), 'r')
@@ -219,15 +218,15 @@ def receipt(request):
         template_file.close()
 
         content_tex = content.safe_substitute(
-            name=form_data.paymentdetail.name,
-            requestType = form_data.requestType,
-            amount = form_data.amount,
-            reqId = form_data.reqId,
-            transId = form_data.transId,
-            refNo = form_data.refNo,
-            provId = form_data.provId,
-            status = form_data.status,
-            msg = form_data.msg)
+            name = request.POST.get("name"),
+            requestType = request.POST.get("requestType"),
+            amount = request.POST.get("amount"),
+            reqId = request.POST.get("reqId"),
+            transId = request.POST.get("transId"),
+            refNo = request.POST.get("refNo"),
+            provId = request.POST.get("provId"),
+            status = request.POST.get("status"),
+            msg = request.POST.get("msg"))
         create_tex = open('{0}{1}.tex'.format
                           (certificate_path, file_name), 'w')
         create_tex.write(content_tex)
