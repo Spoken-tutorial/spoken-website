@@ -564,9 +564,6 @@ class StudentBatch(models.Model):
   year = models.PositiveIntegerField() # 2010-2014
   stcount = models.PositiveIntegerField(default=0)
 
-  class Meta(object):
-    unique_together = ("academic", "year", "department")
-
   def __str__(self):
     return '%s, %s Batch' % (self.department.name, self.year)
 
