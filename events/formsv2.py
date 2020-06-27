@@ -6,7 +6,7 @@ from django import forms
 
 from events.models import *
 from events.helpers import get_academic_years
-
+from cms.validators import validate_csv_file
 
 class StudentBatchForm(forms.ModelForm):
   year = forms.ChoiceField(choices = get_academic_years())
@@ -18,6 +18,11 @@ class StudentBatchForm(forms.ModelForm):
   class Meta(object):
     model = StudentBatch
     exclude = ['academic', 'stcount', 'organiser']
+  
+  def clean_csv_file(self):
+    data = self.cleaned_data["csv_file"]
+    file_data = validate_csv_file(data)
+    return file_data
 
 class NewStudentBatchForm(forms.ModelForm):
   csv_file = forms.FileField(required = True)
@@ -25,6 +30,11 @@ class NewStudentBatchForm(forms.ModelForm):
   class Meta(object):
     model = StudentBatch
     exclude = ['academic', 'year', 'department', 'stcount', 'organiser']
+  
+  def clean_csv_file(self):
+    data = self.cleaned_data["csv_file"]
+    file_data = validate_csv_file(data)
+    return file_data
 
 class UpdateStudentBatchForm(forms.ModelForm):
   year = forms.ChoiceField(choices = get_academic_years())
