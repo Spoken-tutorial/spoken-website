@@ -101,6 +101,24 @@
 
                       <div class='form-row'>
                         <div class='col-xs-12 form-group required'>
+                          <label class='control-label' id="training_start_date">Training Start Date</label>
+                          {% render_field form.training_start_date class+="form-control training_start_date training_start_date" tabindex="1" readonly='true' style="cursor:pointer"%}
+                          {{ form.training_start_date.errors }}
+                          <small>Odd Semester July to Dec, Even Semester Jan to June </small>
+                        </div>
+                      </div>
+
+                      <div class='form-row'>
+                        <div class='col-xs-12 form-group required'>
+                          <label class='control-label' id="training_end_date">Training End Date</label>
+                          {% render_field form.training_end_date class+="form-control training_end_date training_end_date" tabindex="1" readonly='true' style="cursor:pointer"%}
+                          {{ form.training_end_date.errors }}
+                          <small>Odd Semester July to Dec, Even Semester Jan to June </small>
+                        </div>
+                      </div>
+
+                      <div class='form-row'>
+                        <div class='col-xs-12 form-group required'>
                           <label class='control-label'>Foss Category</label>
                           {% render_field form.foss_category class+="form-control foss_category" tabindex="1" %}
                           {{ form.foss_category.errors }}
@@ -155,6 +173,7 @@
     var current_sem = "{{tp.is_current_planner}}";
     var success="{{messages}}";
     var mind = 0 ; var maxd = 0;
+    var tr_mind = 0 ; var tr_maxd = 0;
     $(document).ready(function(){
       if (success!="")
       {
@@ -171,85 +190,91 @@
         // $('.course').html('<option>---------</option>');
         // $('.course').prop('disabled', 'disabled');
       }
-      $('.course_type').on('change', function(){
-        course_type = $(this).val();
-        department = $('.department').val();
-        batch = $('.batch').val();
-        if(course_type == 0)
+
+
+      course_type = $(this).val();
+      department = $('.department').val();
+      batch = $('.batch').val(); 
+      $('.sem_start_date').val('');
+
+
+      if(sem_type == "Odd")
+      {
+        if(current_sem == "True")
         {
-          $('.sem_start_date').val('');
-          if(sem_type == "Odd")
-          {
-            if(current_sem == "True")
-            {
-              mind = y+'/07/01';
-              maxd = y+'/12/31';
-            }
-            else if(current_sem == "False")
-            {
-              mind = y+'/07/01';
-              maxd = y+'/12/31';
-            }
-          }
-          else if(sem_type == "Even")
-          {
-            if(current_sem == "True")
-            {
-              mind = y+'/01/01';
-              maxd = y+'/06/30';
-            }
-            else if(current_sem == "False")
-            {
-              mind = (y+1)+'/01/01';
-              maxd = (y+1)+'/06/30';
-            }
-          }
+          mind = y+'/07/01';
+          maxd = y+'/09/30';
         }
-        else
+        else if(current_sem == "False")
         {
-          $('.sem_start_date').val('');
-          if(sem_type == "Odd")
-          {
-            if(current_sem == "True")
-            {
-              mind = y+'/07/01';
-              maxd = y+'/09/30';
-            }
-            else if(current_sem == "False")
-            {
-              mind = y+'/07/01';
-              maxd = y+'/09/30';
-            }
-          }
-          else if(sem_type == "Even")
-          {
-            if(current_sem == "True")
-            {
-              mind = y+'/01/01';
-              maxd = y+'/03/30';
-            }
-            else if(current_sem == "False")
-            {
-              mind = (y+1)+'/01/01';
-              maxd = (y+1)+'/03/30';
-            }
-          }
+          mind = y+'/07/01';
+          maxd = y+'/09/30';
         }
-        $('.date').datetimepicker({
-          onGenerate:function( ct ){
-              $(this).find('.xdsoft_day_of_week0')
-                  .addClass('xdsoft_disabled');
-          },
-          lang:'en',
-          format:'Y-m-d',
-          formatDate:'Y/m/d',
-          minDate:mind,
-          weekends:[],
-          maxDate:maxd,
-          step:5,
-          timepicker:false,
-        });
+        tr_mind = y+'/07/01';
+        tr_maxd = y+'/12/31';
+      }
+      else if(sem_type == "Even")
+      {
+        if(current_sem == "True")
+        {
+          mind = y+'/01/01';
+          maxd = y+'/03/30';
+          tr_mind = y+'/01/01';
+          tr_maxd = y+'/06/30';
+        }
+        else if(current_sem == "False")
+        {
+          mind = (y+1)+'/01/01';
+          maxd = (y+1)+'/03/30';
+          tr_mind = (y+1)+'/01/01';
+          tr_maxd = (y+1)+'/06/30';
+        }
+      }
+      $('.date').datetimepicker({
+        onGenerate:function( ct ){
+            $(this).find('.xdsoft_day_of_week0')
+                .addClass('xdsoft_disabled');
+        },
+        lang:'en',
+        format:'Y-m-d',
+        formatDate:'Y/m/d',
+        minDate:mind,
+        weekends:[],
+        maxDate:maxd,
+        step:5,
+        timepicker:false,
       });
+
+      $('.training_start_date').datetimepicker({
+        onGenerate:function( ct ){
+            $(this).find('.xdsoft_day_of_week0')
+                .addClass('xdsoft_disabled');
+        },
+        lang:'en',
+        format:'Y-m-d',
+        formatDate:'Y/m/d',
+        minDate:tr_mind,
+        weekends:[],
+        maxDate:tr_maxd,
+        step:5,
+        timepicker:false,
+      });
+
+      $('.training_end_date').datetimepicker({
+        onGenerate:function( ct ){
+            $(this).find('.xdsoft_day_of_week0')
+                .addClass('xdsoft_disabled');
+        },
+        lang:'en',
+        format:'Y-m-d',
+        formatDate:'Y/m/d',
+        minDate:tr_mind,
+        weekends:[],
+        maxDate:tr_maxd,
+        step:5,
+        timepicker:false,
+      });
+
 
       $('.batch').on('change', function() {
         batch = $(this).val();
