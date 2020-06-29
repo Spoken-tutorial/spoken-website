@@ -13,19 +13,20 @@
 \begin{document}
 \maketitle
 \centering
+\setlength{\tabcolsep}{10pt}
+\renewcommand{\arraystretch}{2.0}
 \large{
 \begin{tabular}{|c|c|}
 \hline
-\textbf{Name}           & \{\$name\} \\ \hline
-\textbf{Amount}         & \{\$amount \\ \hline
-\textbf{Payment Mode}   & \{\$requestType\} \\ \hline
-\textbf{Key}            & \{\$key\} \\ \hline
-\textbf{Expiry}         & \{\$expiry\} \\ \hline
-\textbf{Email}          & \{\$email\} \\ \hline
-\textbf{Transaction ID} & \{\$transId\} \\ \hline
-\textbf{Provider}       & \{\$provId\} \\ \hline
-\textbf{Status}         & \{\$msg\} \\ \hline
-\textbf{Download link}  & \\url{\$link}  \\ \hline
+\textbf{Name}           & $name \\ \hline
+\textbf{Amount}         & $amount \\ \hline
+\textbf{Key}            & $key \\ \hline
+\textbf{Expiry}         & $expiry \\ \hline
+\textbf{Email}          & $email \\ \hline
+\textbf{Transaction ID} & $transId \\ \hline
+\textbf{Provider}       & $provId \\ \hline
+\textbf{Status}         & $msg \\ \hline
+\textbf{Download link}  & \href{$link}{Your download is here}  \\ \hline
 \end{tabular}
 }
 \\

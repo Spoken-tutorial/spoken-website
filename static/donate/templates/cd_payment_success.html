@@ -3,7 +3,7 @@
 {% load static %}
 {% block title %}Payment Status{% endblock %}
 {% block content %}
-  <form method="post" action="/donate/receipt/" class="form-horizontal">
+  <form method="post" action="/donate/receipt" class="form-horizontal">
         <div class="row well bs-component">
       {% csrf_token %}
             <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">

@@ -59,13 +59,15 @@ class TransactionForm(forms.ModelForm):
     )
     user = forms.CharField(
         widget=forms.TextInput(attrs={'readonly': 'readonly'}),
+        required = False,
     )
    
     class Meta(object):
         model = PaymentTransaction
         exclude = ['created','updated']
 
-    def __init__(self, *args, **kwargsk):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.fields['user'].widget = forms.HiddenInput()
         pass
 

@@ -16,6 +16,7 @@ from django import forms
 from django.views.decorators.csrf import csrf_protect, csrf_exempt
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import CreateView, DetailView
+from certificate.views import _clean_certificate_certificate
 from django.urls import reverse_lazy
 from cdcontent.forms import CDContentForm
 from django.contrib import messages
@@ -27,7 +28,7 @@ import requests
 import json
 from string import Template
 import subprocess
-
+import os
 
 @csrf_exempt
 def donatehome(request):
@@ -206,52 +207,68 @@ def validate(request):
 
 def receipt(request):
     form = TransactionForm(request.POST)
+    response = HttpResponse(content_type='application/pdf')
+    file_name = request.POST.get("name")
     #if form.is_valid():
     try:
         download_file_name = None
-        template = 'receipt'
-        download_file_name = "ST_"+request.POST.get("user")+'.pdf'
-        certificate_path = ""
+        template = 'receipt_template'
+        download_file_name = "ST_"+request.POST.get("name")+'.pdf'
+        certificate_path = os.path.dirname(os.path.realpath(__file__))+"/receipt/"
+        print(certificate_path)
         template_file = open('{0}{1}'.format
                              (certificate_path, template), 'r')
+        print("\n\n\n\n\n",template_file)
         content = Template(template_file.read())
         template_file.close()
 
         content_tex = content.safe_substitute(
             name = request.POST.get("name"),
-            requestType = request.POST.get("requestType"),
             amount = request.POST.get("amount"),
             reqId = request.POST.get("reqId"),
             transId = request.POST.get("transId"),
             refNo = request.POST.get("refNo"),
             provId = request.POST.get("provId"),
             status = request.POST.get("status"),
-            msg = request.POST.get("msg"))
+            msg = request.POST.get("msg"),
+            key = request.POST.get("key"),
+            expiry = request.POST.get("expiry"),
+            email = request.POST.get("email"),
+            link = "http://static.spoken-tutorial.org/images/logo.png")
+        print("content_tex",content_tex)
         create_tex = open('{0}{1}.tex'.format
                           (certificate_path, file_name), 'w')
+        print("create_tex :",create_tex)
         create_tex.write(content_tex)
         create_tex.close()
-        process = subprocess.Popen('timeout 15 make -C {0} file_name={1}'.format(certificate_path, file_name),
-                               stderr=subprocess.PIPE, shell=True)
+        out = certificate_path
         
-        return_value = process.returncode
-        err = process.communicate()[1]
-
-        if return_value == 0:
-            pdf = open('{0}{1}.pdf'.format(certificate_path, file_name), 'rb')
-            response = HttpResponse(content_type='application/pdf')
-            response['Content-Disposition'] = 'attachment; \
+        subprocess.run(['pdflatex','--output-directory',certificate_path,certificate_path+file_name+'.tex'])
+        #return_value = subprocess.Popen('pdflatex -shell-escape -f {0}'.format(out.strip()))   
+        #process = subprocess.Popen('timeout 15 make -C {0} workshop_cert file_name={1}'.format(certificate_path, file_name),
+        #                       stderr=subprocess.PIPE, shell=True)
+         
+        #return_value = process.returncode
+        #err = process.communicate()[1]
+        #print("return_value :",return_value,"-",err)
+        #if return_value == 0:
+        pdf = open('{0}{1}.pdf'.format(certificate_path, file_name), 'rb')
+        #response = process.communicate()
+        print("response :",response)
+        #response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; \
                     filename=%s' % (download_file_name)
-            response.write(pdf.read())
-            _clean_certificate_certificate(certificate_path, file_name)
-            return [response, False]
-        else:
-            error = True
+        response.write(pdf.read())
+        _clean_certificate_certificate(certificate_path, file_name)
+        return response
+        #else:
+        #    error = True
     except Exception as e:
+        print("error is ",e)
         error = True
         err = e
-    return [err, error]
+    #return [err, error]
 
-    
+    return response
     #return process.returncode, err
-    #return response
+    #return render(request, 'donate/templates/cd_payment_success.html', {'form':form})
