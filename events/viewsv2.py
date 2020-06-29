@@ -838,8 +838,8 @@ class TrainingCertificate(object):
     imgDoc = canvas.Canvas(imgTemp)
 
     # Title
-    imgDoc.setFont('Helvetica', 40, leading=None)
-    imgDoc.drawCentredString(415, 480, "Certificate of Participation")
+    imgDoc.setFont('Helvetica', 35, leading=None)
+    imgDoc.drawCentredString(405, 470, "Certificate of Participation")
 
     #date
     if ta.training.department.id != 169:
@@ -3262,8 +3262,8 @@ class AllTrainingCertificateView(TrainingCertificate, View):
       imgDoc = canvas.Canvas(imgTemp)
 
       # Title
-      imgDoc.setFont('Helvetica', 40, leading=None)
-      imgDoc.drawCentredString(415, 480, "Certificate of Participation")
+      imgDoc.setFont('Helvetica', 35, leading=None)
+      imgDoc.drawCentredString(405, 480, "Certificate of Participation")
 
       #date
       if ta.training.department.id != 169:
