@@ -80,19 +80,28 @@ class RelianceJioVideoSerializer(serializers.ModelSerializer):
         video_info = get_video_info(video_path)
         return video_info['duration']
 
-class RelianceCategoryJioSerializer(serializers.Serializer):
-    category = serializers.SerializerMethodField()
+class RelianceJioLanguageSerializer(serializers.Serializer):
+    language = serializers.SerializerMethodField()
     videos = serializers.SerializerMethodField()
 
+    def get_language(self, obj):
+        return self.context.get('language')
 
     def get_videos(self, obj): 
         return self.context.get('videos')
 
+class RelianceJioCategorySerializer(serializers.Serializer):
+    category = serializers.SerializerMethodField()
+    lists = serializers.SerializerMethodField()
+
     def get_category(self, obj):
-        return 'Health and Nutrition'
+        return self.context.get('category')
+    
+    def get_lists(self, obj):
+        return self.context.get('lists')
 
 class RelianceJioSerializer(serializers.Serializer):
     spokentutorials = serializers.SerializerMethodField()
 
     def get_spokentutorials(self, obj):
-        return [self.context.get('spokentutorials')]
+        return self.context.get('spokentutorials')

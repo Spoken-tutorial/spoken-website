@@ -58,6 +58,7 @@ from reportlab.lib.enums import TA_CENTER
 from PyPDF2 import PdfFileWriter, PdfFileReader
 from events.views import get_page
 from io import BytesIO
+from django.db.models import Q
 
 import uuid 
 
@@ -240,13 +241,8 @@ class StudentBatchCreateView(CreateView):
 
       if not this_organiser_dept.exists() and department.exists():
         messages.error(self.request, "%s department is already assigened to organiser %s in your College." % (form.cleaned_data['department'], department.first().organiser))
-        print("form invalid: dept present ")
         return self.form_invalid(form)
-      try:
-        form_data = StudentBatch.objects.get(year=form_data.year, academic=form_data.academic, department=form_data.department)
-        print(" batch already exist")
-      except StudentBatch.DoesNotExist:
-        form_data.save()
+      form_data.save()
 
 
     skipped, error, warning, write_flag = \
@@ -255,16 +251,7 @@ class StudentBatchCreateView(CreateView):
 
     if error or warning:
       return render(self.request, self.template_name, context)
-#    messages.success(self.request, "Student Batch added successfully.")
     return HttpResponseRedirect('/software-training/student-batch/%s/new/'%(str(form_data.id)))
-
-#  def get(self, request, *args, **kwargs):
-#    self.user = request.user
-#    form_class = self.get_form_class()
-#    form = self.get_form(form_class)
-#    context = {}
-#    context['form'] = form
-#    return self.render_to_response(context)
 
   def email_validator(self, email):
     if email and email.strip():
@@ -384,23 +371,17 @@ class StudentBatchUpdateView(UpdateView):
       return context
 
     def form_valid(self, form, **kwargs):
-      # Check if all student participate in selected foss
       try:
         if str(self.sb.year) == str(form.cleaned_data['year']) and str(self.sb.department) == str(form.cleaned_data['department']):
           return HttpResponseRedirect(self.success_url)
-
-        sb = StudentBatch.objects.filter(
+        sb = StudentBatch.objects.filter(~Q(organiser_id=self.request.user.organiser.id),
           academic_id=self.request.user.organiser.academic.id,
           department=form.cleaned_data['department'],
           year = form.cleaned_data['year']
         )
-        if (sb.exists()):
-          sb = sb.first()
-          messages.warning(self.request, "%s - %s Batch is already chosen by Organiser %s in your College." % (sb.department, sb.year, sb.organiser))
+        if sb:
+          messages.warning(self.request, "%s - %s Batch is already chosen by Organiser in your College." % (sb.department, sb.year))
           return self.form_invalid(form)
-        # Not sure do we wnat this option
-        # if sb.trainingrequest_set.exists():
-        #   messages.warning(self.request, '%s - %s Batch has Training. You can not edit this batch'% (sb.department, sb.year))
         form.save()
 
       except:
@@ -1220,14 +1201,15 @@ class GetDepartmentOrganiserStatusView(JSONResponseMixin, View):
     msg = ""
 
     try:
-      resultdata = StudentBatch.objects.get(
+      resultdata = StudentBatch.objects.filter(
+        ~Q(organiser_id = request.user.organiser.id),
         academic_id=request.user.organiser.academic.id,
         department_id=department_id,
         year = year
       )
-      dept_status = False
-      org_name = resultdata.organiser.user.first_name+" "+resultdata.organiser.user.last_name
-      msg = "This department with selected year is already chosen by another Organiser "+org_name+" in your College."
+      if resultdata:
+        dept_status = False
+        msg = "This department with selected year is already chosen by another Organiser in your College."
     except ObjectDoesNotExist:
       pass
 

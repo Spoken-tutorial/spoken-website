@@ -44,6 +44,25 @@
                         </div>
                       </div>
 
+
+                       <div class='form-row'>
+                        <div class='col-xs-12 form-group required'>
+                          <label class='control-label' id="training_start_date">Training Start Date</label>
+                          {% render_field form.training_start_date class+="form-control training_start_date training_start_date" tabindex="1" style="cursor:pointer"%}
+                          {{ form.training_start_date.errors }}
+                          <small>Odd Semester July to Dec, Even Semester Jan to June </small>
+                        </div>
+                      </div>
+
+                      <div class='form-row'>
+                        <div class='col-xs-12 form-group required'>
+                          <label class='control-label' id="training_end_date">Training End Date</label>
+                          {% render_field form.training_end_date class+="form-control training_end_date training_end_date" tabindex="1" style="cursor:pointer"%}
+                          {{ form.training_end_date.errors }}
+                          <small>Odd Semester July to Dec, Even Semester Jan to June </small>
+                        </div>
+                      </div>
+
                       <div class='form-row'>
                         <div class='col-xs-12 form-group required'>
                           <label class='control-label'>Training Type</label>
