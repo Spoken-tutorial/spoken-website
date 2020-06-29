@@ -1,13 +1,15 @@
 \documentclass{article}
 \usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\graphicspath{ {$image_dir} }
 
-\title{SPOKEN TUTORIALS}
-
+\title{
+\includegraphics[scale=0.5]{logo.png}   SPOKEN TUTORIALS
+}
 \author{CD Content Download Receipt}
-\date{June 2020}
+
 
 \usepackage{natbib}
-\usepackage{graphicx}
 \usepackage{hyperref}
 
 \begin{document}

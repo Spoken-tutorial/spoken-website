@@ -61,6 +61,24 @@ class TransactionForm(forms.ModelForm):
         widget=forms.TextInput(attrs={'readonly': 'readonly'}),
         required = False,
     )
+    amount = forms.CharField(
+                    widget=forms.TextInput(attrs={'readonly': 'readonly'}),
+                        )
+    reqId = forms.CharField(
+                        widget=forms.TextInput(attrs={'readonly': 'readonly'}),
+                            )
+    transId = forms.CharField(
+                            widget=forms.TextInput(attrs={'readonly': 'readonly'}),
+                                )
+    refNo = forms.CharField(
+                                widget=forms.TextInput(attrs={'readonly': 'readonly'}),
+                                    )
+    provId = forms.CharField(
+                                    widget=forms.TextInput(attrs={'readonly': 'readonly'}),
+                                        )
+    msg = forms.CharField(
+                                        widget=forms.TextInput(attrs={'readonly': 'readonly'}),
+                                            )
    
     class Meta(object):
         model = PaymentTransaction
