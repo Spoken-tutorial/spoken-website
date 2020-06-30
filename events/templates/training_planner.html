@@ -252,20 +252,26 @@
             <td>{{ training.sem_start_date }} </td>
             <td>{{ training.course.course_name }}</td>
             <td>{{ training.department }}</td>
-            <td>{{ training.attendance_summery }}</td>
+            <td>{{ training.attendance_summery }}</td>{% if training.can_edit %}{% endif %}
             <td>
-              {% if training.get_partipants_from_attendance %}
-              | <a href="{% url 'eventsv2:training_certificate' training.id %}">Participant List</a> |
-
-                {% if training.cert_status == 0 %}
-                  <a href="{% url 'eventsv2:request_certificate' training.id %}">Generate Participation Certificate</a>
-                {% elif training.cert_status == 1 %}
-                  Participation certificates available
-                {% else %}
-                  Certificate request awaiting at Training manager
+              {% if training.status == 0 %}
+                  {% if training.get_partipants_from_attendance %}
+                  | <a href="{% url 'eventsv2:training_certificate' training.id %}">Participant List</a> | 
+                  {% if training.can_edit %} <a href="{% url 'eventsv2:edit_training_request' training.id %}">Edit</a> {% endif %}
+                  {% endif %}
+              {% else %}
+                  {% if training.get_partipants_from_attendance %}
+                  | <a href="{% url 'eventsv2:training_certificate' training.id %}">Participant List</a> | 
+                    {% if training.cert_status == 0 %}
+                      <a href="{% url 'eventsv2:request_certificate' training.id %}">Generate Participation Certificate</a>
+                    {% elif training.cert_status == 1 %}
+                      Participation certificates available
+                    {% else %}
+                      Certificate request awaiting at Training manager
+                    {% endif %}
+                    |
+                  {% endif %}
                 {% endif %}
-                |
-              {% endif %}
             </td>
           </tr>
           {% endfor %}
