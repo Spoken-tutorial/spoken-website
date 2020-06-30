@@ -611,6 +611,8 @@ class TrainingRequestEditView(CreateView):
 
       if self.training.batch.is_foss_batch_acceptable(selectedCourse):
         self.training.sem_start_date = form.cleaned_data['sem_start_date']
+        self.training.training_start_date = form.cleaned_data['training_start_date']
+        self.training.training_end_date = form.cleaned_data['training_end_date']
         self.training.course_id = selectedCourse
       else:
         messages.error(self.request, 'This student batch already taken the selected course.')
