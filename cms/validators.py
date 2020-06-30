@@ -14,7 +14,7 @@ class ASCIIValidator(validators.RegexValidator):
 
 
 def validate_csv_file(csv_file):
-    file_data = csv_file.read().decode('utf-8').splitlines()
+    file_data = csv_file.read().splitlines()
     row_count = len(file_data)
     if row_count > 0:
         line = 0
@@ -28,7 +28,7 @@ def validate_csv_file(csv_file):
                 error_lines.append(error)
                 line+=1
                 continue
-            data = csv.reader([row], delimiter=',', quotechar='|')
+            data = csv.reader([row.decode('utf-8')], delimiter=',', quotechar='|')
             for col in data:
                 if len(col) ==4:
                     try:
@@ -66,4 +66,4 @@ def validate_csv_file(csv_file):
             raise ValidationError(error_string)
     else:
         raise ValidationError(('Csv file is empty.'))
-    return file_data
+    return [f.decode('utf-8') for f in file_data]
