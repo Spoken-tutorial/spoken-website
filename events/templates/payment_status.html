@@ -9,7 +9,7 @@
 <body onload="loading()">
     <div class= 'filters row' style="text-align: center;">
         <h3>You are getting redirected to external payment gateway!!</h3>
-        <form action="https://www.it.iitb.ac.in/esospg/initpayment" name="test" method="post" class='form-horizontal' >
+        <form action="{{target}}" name="test" method="post" class='form-horizontal' >
             <input type="hidden" name="userId" value="{{userId}}" />
             <input type="hidden" name="name" value="{{name}}" />
             <input type="hidden" name="amount" value="{{amount}}" />

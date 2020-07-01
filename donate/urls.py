@@ -1,0 +1,13 @@
+from django.conf.urls import include, url
+from donate.views import *
+
+app_name = 'donate'
+
+urlpatterns = [
+    url(r'^$',  donatehome, name='donatehome'),
+    url(r'^initiate_payment$',  controller, name='initiate_payment'),
+    url(r'send_onetime', send_onetime, name='send_onetime'),
+    url(r'validate', validate, name='validate'),
+    url(r'receipt', receipt, name='receipt'),
+    url(r'content_download', content_download, name="content_download")
+    ]

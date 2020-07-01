@@ -349,6 +349,11 @@ urlpatterns = [
       r'^student-grade-filter/$',
       StudentGradeFilter.as_view(),
       name="student_grade_filter"
-    )
+    ),
+    url(
+      r'^academic_payment_details/', 
+      AcademicKeyCreateView.as_view(template_name='academic_payment_details_form.html'), 
+      name='academic_payment_details'
+    ),
 
 ]

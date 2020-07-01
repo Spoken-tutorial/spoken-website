@@ -4,15 +4,17 @@ from builtins import object
 from django.shortcuts import render
 import time
 from datetime import datetime
+from datetime import date 
 from datetime import timedelta
 import re
 from django.conf import settings
 
-from config import CHANNEL_KEY
+from config import TARGET, CHANNEL_ID, CHANNEL_KEY
 # Create your views here.
 from django.views.generic import View, ListView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from events.models import *
+from donate.models import *
 from events.filters import TrainingRequestFilter
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
@@ -43,7 +45,7 @@ from mdldjango.get_or_create_participant import get_or_create_participant
 from django.contrib.auth.decorators import login_required
 from mdldjango.models import MdlUser, MdlQuizGrades
 from django.contrib.auth.mixins import UserPassesTestMixin
-from events.formsv2 import StudentGradeFilterForm
+from events.formsv2 import StudentGradeFilterForm, AcademicPaymentStatusForm
 from django.views.generic import FormView
 
 #pdf generate
@@ -58,9 +60,12 @@ from events.views import get_page
 from io import BytesIO
 from django.db.models import Q
 
+import uuid 
+
 # import helpers
 from events.views import is_organiser, is_invigilator, is_resource_person, is_administrator, is_accountexecutive
-from events.helpers import get_prev_semester_duration
+from events.helpers import get_prev_semester_duration, get_updated_form
+
 class JSONResponseMixin(object):
   """
   A mixin that can be used to render a JSON response.
@@ -2724,11 +2729,19 @@ def payment_status(request):
 
     STdata = ''
     user_name = user.first_name+' '+user.last_name
-    STdata = str(user.id)+str(user_name)+str(amount)+"Subscription"+"SOLOSTW"+CHANNEL_KEY
+    STdata = str(user.id)+str(user_name)+str(amount)+"Subscription"+CHANNEL_ID+CHANNEL_KEY
     print(STdata)
     s = display.value(str(STdata))
 
-    data = {'userId':user.id,'name':user_name,'amount':amount,'purpose':'Subscription','channelId':'SOLOSTW','random':s.hexdigest()}
+    data = {
+    'userId':user.id,
+    'name':user_name,
+    'amount':amount,
+    'purpose':'Subscription',
+    'channelId':CHANNEL_ID,
+    'target':TARGET,
+    'random':s
+    }
 
 
     try:
@@ -2768,13 +2781,9 @@ def payment_status(request):
 def payment_success(request):
   context = {}
   user = User.objects.get(id = request.user.id)
-  try:
-    accountexecutive = Accountexecutive.objects.get(user_id = user,status=1)
-  except:
-    messages.error(request, 'Permission denied. You are not an Account Executive.')
-    return HttpResponseRedirect('/software-training')
-
+  default_response = '/'
   context['user'] = user
+  print("Entered")
   if request.method == 'POST':
      # requestType    // I/R/J  (I - Immediate response,R- Reconciled & J - Transaction rejected)
     # userId;        // Id of the user
@@ -2785,9 +2794,10 @@ def payment_success(request):
     # provId;        // Payment method like Credit Card/Net Banking etc..
     # status;        // S/F (Status of the transaction)
     # msg;           // Detailed transaction message
+    # purpose        // Short Description 
     # random;        // Hash string
 
-
+    print("Received some data \n",request.POST)
     requestType = request.POST.get('requestType')
     userId = request.POST.get('userId')
     amount = request.POST.get('amount')
@@ -2797,56 +2807,99 @@ def payment_success(request):
     provId = request.POST.get('provId')
     status = request.POST.get('status')
     msg = request.POST.get('msg')
+    purpose = request.POST.get('purpose')
     random = request.POST.get('random')
 
 
     STresponsedata = ''
-    STresponsedata = str(user.id)+transId+refNo+amount+status+msg+CHANNEL_KEY
-    s = display.value(str(STresponsedata))
-    STresponsedata_hexa = s.hexdigest()
-
+    STresponsedata = str(user.id)+transId+refNo+amount+status+msg+purpose+CHANNEL_KEY
+    STresponsedata_hexa = display.value(str(STresponsedata))
+    template_name = ''
+    
     if STresponsedata_hexa == random:
       #save transaction details in db
-      pd = PaymentDetails.objects.get(user = user.id, academic_id = accountexecutive.academic.id)
-      print(('pd id',pd.id))
-
-      try:
-        transactiondetails = PaymentTransactionDetails()
-        transactiondetails.paymentdetail_id  =  pd.id
-        transactiondetails.requestType  =  requestType
-        transactiondetails.userId_id  =  userId
-        transactiondetails.amount  =  amount
-        transactiondetails.reqId  = reqId
-        transactiondetails.transId  = transId
-        transactiondetails.refNo  =  refNo
-        transactiondetails.provId  =  provId
-        transactiondetails.status  =  status
-        transactiondetails.msg  =  msg
-        transactiondetails.save()
-      except Exception as e:
-        messages.error(request, 'Something went wrong. Can not collect your transaction details. Kindly contact your state resource person.')
-        return HttpResponseRedirect('/software-training')
-
-
-      if status == 'S':
-        pd.status = 1
-        pd.description = 'Payment successfull'
-      elif status == 'F':
-        pd.status = 2
-        pd.description = 'Payment fail'
-      pd.save()
-
+      if purpose == 'Subscription':
+        try:
+          accountexecutive = Accountexecutive.objects.get(user_id = user,status=1)
+        except:
+          messages.error(request, 'Permission denied. You are not an Account Executive.')
+          return HttpResponseRedirect('/software-training')
+        
+        try:
+          pd = PaymentDetails.objects.get(user = user.id, academic_id = accountexecutive.academic.id)
+          transaction = add_transaction(purpose, pd.id, requestType, userId, amount, reqId, transId, refNo, provId, status, msg)
+          template_name = 'payment_success.html'
+          default_response = '/software-training'
+        except Exception as e:
+          print(e)
+          messages.error(request, 'Something went wrong. Can not collect your transaction details. Kindly contact your state resource person.')
+          return HttpResponseRedirect('/software-training')
+      else:
+        try:
+          pd = get_payee_id(purpose)
+          transaction = add_transaction(purpose, pd.id, requestType, userId, amount, reqId, transId, refNo, provId, status, msg)
+          template_name = 'donate/templates/cd_payment_success.html'
+          context['form'] = get_updated_form(transaction)
+          default_response = '/cdcontent'
+        except Exception as e:
+          print(e)
+          messages.error(request, 'Something went wrong. Can not collect your transaction details. Kindly try again in some time.')
+          return HttpResponseRedirect('/cdcontent')
+      update_status(pd, status)
       context['transId'] = transId
       context['refNo'] = refNo
       context['msg'] = msg
       context['status'] = status
-      return render(request,'payment_success.html',context)
+      return render(request,template_name,context)
     else:
       messages.error(request, 'Invalid Transaction')
-      return HttpResponseRedirect('/software-training')
+      return HttpResponseRedirect(default_response)
   else:
-    return HttpResponseRedirect('/software-training')
+    return HttpResponseRedirect(default_response)
     # return render(request,'payment_success.html',context)
+
+def add_transaction(purpose, pid, requestType, userId, amount, reqId, transId, refNo, provId, status, msg):
+  if purpose == 'Subscription':
+    transaction = PaymentTransactionDetails()
+    transaction.paymentdetail_id  =  pid
+    transaction.requestType  =  requestType
+    transaction.userId_id  =  userId
+    transaction.amount  =  amount
+    transaction.reqId  = reqId
+    transaction.transId  = transId
+    transaction.refNo  =  refNo
+    transaction.provId  =  provId
+    transaction.status  =  status
+    transaction.msg  =  msg
+    transaction.save()
+  else :
+    transaction = PaymentTransaction()
+    transaction.paymentdetail_id  =  pid
+    transaction.requestType  =  requestType
+    transaction.userId_id  =  userId
+    transaction.amount  =  amount
+    transaction.reqId  = reqId
+    transaction.transId  = transId
+    transaction.refNo  =  refNo
+    transaction.provId  =  provId
+    transaction.status  =  status
+    transaction.msg  =  msg
+    transaction.save()
+  return transaction
+
+def get_payee_id(purpose):
+  payee_id = purpose.split("CdContent")[1]
+  pd = Payee.objects.get(id=payee_id)
+  return pd
+
+def update_status(pd, status):
+  if status == 'S':
+      pd.status = 1
+      pd.description = 'Payment successfull'
+  elif status == 'F':
+      pd.status = 2
+      pd.description = 'Payment fail'
+  pd.save()
 
 def payment_details(request,choice):
   academic_id = Accountexecutive.objects.filter(user = request.user).values('academic_id','academic_id__institution_name')
@@ -2877,49 +2930,32 @@ def payment_reconciliation_update(request):
   provId = request.GET.get('provId')
   status = request.GET.get('status')
   msg = request.GET.get('msg')
+  purpose = request.GET.get('purpose')
   random = request.GET.get('random')
 
   STresponsedata = ''
-  STresponsedata = userId+transId+refNo+amount+status+msg+CHANNEL_KEY
-  s = display.value(str(STresponsedata))
-  STresponsedata_hexa = s.hexdigest()
+  STresponsedata = str(userId)+transId+refNo+amount+status+msg+purpose+CHANNEL_KEY
+  STresponsedata_hexa = display.value(str(STresponsedata))
 
   if STresponsedata_hexa == random:
+    if purpose == 'Subscription':
+      try:
+        accountexecutive = Accountexecutive.objects.get(user_id = userId,status__gt=0)
+      except:
+        print("no ac")
+        pass
+      try:
+        pd = PaymentDetails.objects.get(user_id = userId, academic_id_id = accountexecutive.academic_id)
+      except:
+        return HttpResponseRedirect("Failed1")
+    else:
+      pd = get_payee_id(purpose)
     try:
-      accountexecutive = Accountexecutive.objects.get(user_id = userId,status__gt=0)
-    except:
-      print("no ac")
-      pass
-    try:
-      print((userId, accountexecutive.academic_id))
-      pd = PaymentDetails.objects.get(user_id = userId, academic_id_id = accountexecutive.academic_id)
-    except:
-      return HttpResponseRedirect("Failed1")
-
-    try:
-      transactiondetails = PaymentTransactionDetails()
-      transactiondetails.paymentdetail_id  =  pd.id
-      transactiondetails.requestType  =  requestType
-      transactiondetails.userId_id  =  userId
-      transactiondetails.amount  =  amount
-      transactiondetails.reqId  = reqId
-      transactiondetails.transId  = transId
-      transactiondetails.refNo  =  refNo
-      transactiondetails.provId  =  provId
-      transactiondetails.status  =  status
-      transactiondetails.msg  =  msg
-      transactiondetails.save()
+      transaction = add_transaction(purpose, pd.id, requestType, userId, amount, reqId, transId, refNo, provId, status, msg)
       print("saved")
     except:
       return HttpResponseRedirect("Failed2")
-
-    if status == 'S':
-      pd.status = 1
-      pd.description = 'Payment successfull'
-    elif status == 'F':
-      pd.status = 2
-      pd.description = 'Payment fail'
-    pd.save()
+    update_status(pd, status)
   else:
     return HttpResponseRedirect("Invalid")
   return HttpResponse("OK")
@@ -3370,5 +3406,41 @@ class StudentGradeFilter(UserPassesTestMixin, FormView):
       except FossMdlCourses.DoesNotExist:
         return None
     return None
+
+
+
+class AcademicKeyCreateView(CreateView):
+    form_class = AcademicPaymentStatusForm
+    model = AcademicPaymentStatus
+    template_name = "academic_payment_details_form.html"
+    success_url = "/software-training/academic_payment_details/"
+
+    @method_decorator(group_required("Organiser"))
+    def get(self, request, *args, **kwargs):
+        return render(self.request, self.template_name, {'form': self.form_class()})
+
+    def form_valid(self, form, **kwargs):
+      self.object = form.save(commit=False)
+      self.object.entry_user = self.request.user
+      self.object.save()
+      
+
+      u_key = uuid.uuid1()
+      hex_key = u_key.hex
+
+
+      Subscription_time = int(self.object.subscription)
+      expiry_date = datetime.date.today() + timedelta(days=Subscription_time)
+
+      ac_key = AcademicKey()      
+      ac_key.ac_pay_status = self.object
+      ac_key.academic = self.object.academic
+      ac_key.u_key = u_key
+      ac_key.hex_key = hex_key
+      ac_key.expiry_date = expiry_date
+      ac_key.save()
+
+      messages.success(self.request, "Payment Details for academic is added successfully.")
+      return HttpResponseRedirect(self.success_url)
 
 

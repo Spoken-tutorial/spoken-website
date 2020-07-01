@@ -2,6 +2,7 @@
 from builtins import str
 from builtins import range
 import datetime as dt
+from donate.forms import TransactionForm
 
 # Third Party Stuff
 from django.conf import settings
@@ -25,3 +26,20 @@ def get_prev_semester_duration(semester_type, year):
         end = dt.datetime.strptime(str(year) + '-12-31', '%Y-%m-%d').date()
         return start, end
     raise Exception("Invalid semester type, it must be either odd or even")
+
+def get_updated_form(transaction):
+    form = TransactionForm()
+    form.initial = {
+        'name' : transaction.paymentdetail.name,
+        'email' :  transaction.paymentdetail.email,
+        'country' :  transaction.paymentdetail.country,
+        'key' : transaction.paymentdetail.key,
+        'amount' : transaction.amount,
+        'expiry' :  transaction.paymentdetail.expiry,
+        'reqId' : transaction.reqId,
+        'transId' :  transaction.transId,
+        'refNo' :  transaction.refNo,
+        'provId' :  transaction.provId,
+        'msg' :  transaction.msg
+        }
+    return form
