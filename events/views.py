@@ -2394,8 +2394,9 @@ def test_participant_ceritificate_all(request, testid):
         imgTemp = BytesIO()
         imgDoc = canvas.Canvas(imgTemp)
 
-        imgDoc.setFont('Helvetica', 18, leading=None)
-        imgDoc.drawCentredString(211, 115, custom_strftime('%B {S} %Y', w.tdate))
+        if ta.test.training.department.id != 169:
+            imgDoc.setFont('Helvetica', 18, leading=None)
+            imgDoc.drawCentredString(211, 115, custom_strftime('%B {S} %Y', w.tdate))
 
         #password
         imgDoc.setFillColorRGB(211, 211, 211)
@@ -2409,7 +2410,10 @@ def test_participant_ceritificate_all(request, testid):
         imgDoc.drawImage(imgPath, 600, 80, 150, 76)    ## at (399,760) with size 160x160
 
         #paragraphe
-        text = "This is to certify that <b>"+ta.mdluser_firstname +" "+ta.mdluser_lastname+"</b> has successfully completed <b>"+w.foss.foss+"</b> test organized at <b>"+w.academic.institution_name+"</b> by <b>"+w.organiser.user.first_name + " " + w.organiser.user.last_name+"</b>  with course material provided by the Spoken Tutorial Project, IIT Bombay.  <br /><br /><p>Passing an online exam, conducted remotely from IIT Bombay, is a pre-requisite for completing this training. <b>"+w.invigilator.user.first_name + " "+w.invigilator.user.last_name+"</b> at <b>"+w.academic.institution_name+"</b> invigilated this examination. This training is offered by the <b>Spoken Tutorial Project, IIT Bombay, funded by National Mission on Education through ICT, MHRD, Govt., of India.</b></p>"
+        if ta.test.training.department.id == 169:
+            text = "This is to certify that <b>"+ta.mdluser_firstname +" "+ta.mdluser_lastname+"</b> has successfully completed <b>Faculty Development Programme</b> on <b>"+w.foss.foss+"</b> on <b>"+str(w.tdate)+"</b> organized by <b>"+w.academic.institution_name+"</b> with course material provided by Spoken Tutorial Project, IIT Bombay.<br/><b>"+w.invigilator.user.first_name + " "+w.invigilator.user.last_name+"</b> from <b>"+w.academic.institution_name+"</b> invigilated this examination.<br/><br/> This training is offered by the Spoken Tutorial Project, IIT Bombay."
+        else:
+            text = "This is to certify that <b>"+ta.mdluser_firstname +" "+ta.mdluser_lastname+"</b> has successfully completed <b>"+w.foss.foss+"</b> test organized at <b>"+w.academic.institution_name+"</b> by <b>"+w.organiser.user.first_name + " " + w.organiser.user.last_name+"</b>  with course material provided by the Spoken Tutorial Project, IIT Bombay.  <br /><br /><p>Passing an online exam, conducted remotely from IIT Bombay, is a pre-requisite for completing this training. <b>"+w.invigilator.user.first_name + " "+w.invigilator.user.last_name+"</b> at <b>"+w.academic.institution_name+"</b> invigilated this examination. This training is offered by the <b>Spoken Tutorial Project, IIT Bombay, funded by National Mission on Education through ICT, MHRD, Govt., of India.</b></p>"
 
         centered = ParagraphStyle(name = 'centered',
             fontSize = 16,
@@ -2419,26 +2423,29 @@ def test_participant_ceritificate_all(request, testid):
 
         p = Paragraph(text, centered)
         p.wrap(700, 200)
-        p.drawOn(imgDoc, 4.2 * cm, 6 * cm)
+        p.drawOn(imgDoc, 3 * cm, 7 * cm)
 
         #paragraphe
-        text = "Certificate for Completion of "+w.foss.foss+" Training"
+        text = "Certificate for Completion of <br/>"+w.foss.foss+" Training"
 
         centered = ParagraphStyle(name = 'centered',
-            fontSize = 30,
-            leading = 50,
+            fontSize = 25,
+            leading = 25,
             alignment = 1,
             spaceAfter = 15)
 
         p = Paragraph(text, centered)
-        p.wrap(500,50)
-        p.drawOn(imgDoc, 6.2 * cm, 16 * cm)
+        p.wrap(400,30)
+        p.drawOn(imgDoc, 6.2 * cm, 15.5 * cm)
 
 
         imgDoc.save()
 
         # Use PyPDF to merge the image-PDF into the template
-        page = PdfFileReader(open(settings.MEDIA_ROOT +"Blank-Certificate.pdf","rb")).getPage(0)
+        if ta.test.training.department.id == 169:
+            page = PdfFileReader(open(settings.MEDIA_ROOT +"fdp-test-certificate.pdf","rb")).getPage(0)
+        else:
+            page = PdfFileReader(open(settings.MEDIA_ROOT +"Blank-Certificate.pdf","rb")).getPage(0)
         overlay = PdfFileReader(BytesIO(imgTemp.getvalue())).getPage(0)
         page.mergePage(overlay)
 
