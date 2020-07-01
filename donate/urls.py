@@ -9,5 +9,4 @@ urlpatterns = [
     url(r'send_onetime', send_onetime, name='send_onetime'),
     url(r'validate', validate, name='validate'),
     url(r'receipt', receipt, name='receipt'),
-    url(r'content_download', content_download, name="content_download")
     ]
