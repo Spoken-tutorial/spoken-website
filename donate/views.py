@@ -19,6 +19,7 @@ from django.views.generic import CreateView, DetailView
 from certificate.views import _clean_certificate_certificate
 from django.urls import reverse_lazy
 from cdcontent.forms import CDContentForm
+from cdcontent.views import internal_computation
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from datetime import datetime
@@ -251,3 +252,18 @@ def receipt(request):
         print("error is ",e)
 
     return response
+
+def content_download(request):
+    selected_foss = {}
+    payee_id = request.POST.get("pid")
+    c = 0
+    cd_foss_langs = CdFossLanguages.objects.filter(payment=payee_id).values('foss_id','lang_id')
+    for key,value in cd_foss_langs:
+        if t[c][key] in selected_foss.keys():
+           t[c][key].append([t[c][value]])
+        else:
+           t[c][key] = [t[c][value]]
+        c= c+1
+    print(selected_foss)
+    link = request.post(internal_computation,selected_foss)
+    print("received link is :",link)
