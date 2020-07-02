@@ -28,7 +28,6 @@
 \textbf{Transaction ID} & $transId \\ \hline
 \textbf{Provider}       & $provId \\ \hline
 \textbf{Status}         & $msg \\ \hline
-\textbf{Download link}  & \href{$link}{Your download is here}  \\ \hline
 \end{tabular}
 }
 \\

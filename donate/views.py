@@ -233,8 +233,7 @@ def receipt(request):
             msg = request.POST.get("msg"),
             key = request.POST.get("key"),
             expiry = request.POST.get("expiry"),
-            email = request.POST.get("email"),
-            link = "http://static.spoken-tutorial.org/images/logo.png")
+            email = request.POST.get("email"))
         create_tex = open('{0}{1}.tex'.format
                           (certificate_path, file_name), 'w')
         create_tex.write(content_tex)
