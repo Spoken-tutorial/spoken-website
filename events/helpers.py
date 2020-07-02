@@ -3,6 +3,7 @@ from builtins import str
 from builtins import range
 import datetime as dt
 from donate.forms import TransactionForm
+from donate.models import CdFossLanguages
 
 # Third Party Stuff
 from django.conf import settings
@@ -51,9 +52,9 @@ def get_selected_foss(transaction):
     c = 0
     cd_foss_langs = CdFossLanguages.objects.filter(payment=payee_id).values('foss_id','lang_id')
     for key,value in cd_foss_langs:
-        if t[c][key] in selected_foss.keys():
-           t[c][key].append([t[c][value]])
+        if cd_foss_langs[c][key] in selected_foss.keys():
+           cd_foss_langs[c][key].append([cd_foss_langs[c][value]])
         else:
-           t[c][key] = [t[c][value]]
+           cd_foss_langs[c][key] = [cd_foss_langs[c][value]]
         c= c+1
     return selected_foss

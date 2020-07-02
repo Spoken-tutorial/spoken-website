@@ -231,7 +231,10 @@ def internal_computation(request):
     zipfile_name = '{}.zip'.format(datetime.datetime.now().strftime('%Y%m%d%H%M%S%f'))
     file_obj = open('{}cdimage/{}'.format(settings.MEDIA_ROOT, zipfile_name), 'wb')
     archive = zipfile.ZipFile(file_obj, 'w', zipfile.ZIP_DEFLATED, allowZip64=True)
-    selectedfoss = json.loads(request.POST.get('selected_foss', {}))
+    try:
+        selectedfoss = json.loads(request.POST.get('selected_foss', {}))
+    except:
+        selectedfoss = request.POST.get('selected_foss', {})
     all_foss_details = get_all_foss_details(selectedfoss)
     eng_rec = Language.objects.get(name="English")
     languages = set()
@@ -305,8 +308,8 @@ def internal_computation(request):
     languages = add_side_by_side_tutorials(archive, languages)
     add_forum_video(archive)
 
-    ctx = {'foss_details': all_foss_details, 'foss': foss_rec.id,
-           'lang': language.id, 'languages': languages}
+    ctx = {'foss_details': all_foss_details, 'foss':'' ,
+           'lang': '', 'languages': languages}
     convert_template_to_html_file(archive, 'spoken/videos/home.html', request,
                                   "cdcontent/templates/home.html", ctx)
 
@@ -315,8 +318,9 @@ def internal_computation(request):
     archive.close()
 
     file_obj.close()
-    return zipfile_name
-
+    file_path= os.path.dirname(os.path.realpath(__file__))+'/../media/cdimage/{}'.format(zipfile_name)
+    response = HttpResponse(open(file_path, 'rb'), content_type='application/zip')
+    return response
 
 def home(request):
     if request.method == 'POST':
