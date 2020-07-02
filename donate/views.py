@@ -1,4 +1,4 @@
-from config import TARGET, CHANNEL_ID, CHANNEL_KEY
+from config import TARGET, CHANNEL_ID, CHANNEL_KEY, EXPIRY_DAYS
 from .helpers import PURPOSE
 from django.shortcuts import render
 from creation.models import FossCategory, Language
@@ -112,14 +112,14 @@ def controller(request):
 
 @csrf_exempt
 def calculate_expiry():
-    return date.today() + timedelta(days=7)
+    return date.today() + timedelta(days=EXPIRY_DAYS)
 
 
 @csrf_exempt
 def encrypted_data(request, form):
     STdata = ''
     user_name = form.cleaned_data.get('name')
-    #amount = form.cleaned_data.get('amount')
+    #amount = form.cleaned_data.get('amount')   
     amount = 1.00
     purpose = PURPOSE + str(form.save(commit=False).pk)
     STdata = str(request.user.id) + str(user_name) + str(amount) + purpose + CHANNEL_ID + CHANNEL_KEY
@@ -233,8 +233,7 @@ def receipt(request):
             msg = request.POST.get("msg"),
             key = request.POST.get("key"),
             expiry = request.POST.get("expiry"),
-            email = request.POST.get("email"),
-            link = "http://static.spoken-tutorial.org/images/logo.png")
+            email = request.POST.get("email"))
         create_tex = open('{0}{1}.tex'.format
                           (certificate_path, file_name), 'w')
         create_tex.write(content_tex)

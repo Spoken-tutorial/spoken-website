@@ -41,15 +41,18 @@ def get_updated_form(transaction):
         'refNo' :  transaction.refNo,
         'provId' :  transaction.provId,
         'msg' :  transaction.msg,
-        'selected_foss': get_selected_foss(transaction),
+        'status': transaction.status
         }
+        if transaction.status == "S":
+            form.initial = {
+            'selected_foss': get_selected_foss(transaction.paymentdetail.id)
+            }
     return form
 
-def get_selected_foss(transaction):
+def get_selected_foss(paymentdetail_id):
     selected_foss = {}
-    payee_id = transaction.paymentdetail.id
     c = 0
-    cd_foss_langs = CdFossLanguages.objects.filter(payment=payee_id).values('foss_id','lang_id')
+    cd_foss_langs = CdFossLanguages.objects.filter(payment=paymentdetail_id).values('foss_id','lang_id')
     for key,value in cd_foss_langs:
         if t[c][key] in selected_foss.keys():
            t[c][key].append([t[c][value]])

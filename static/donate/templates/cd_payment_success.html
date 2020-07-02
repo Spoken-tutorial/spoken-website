@@ -104,9 +104,10 @@
                         <div class="col-lg-8 col-lg-offset-4">
                             <input type="submit" class="btn btn-primary" value="Receipt"  tabindex="6" />
                         </div>
+                        {% if form.status == "S" %}
 			            <div class="col-lg-8 col-lg-offset-4">
                             <a href="/content_download/create_cd_download/" class="btn btn-success" 
-                            type ="submit" onclick="document.forms['success_form'].submit();">Tutorial Content</a>
+                            type ="submit" onclick="document.forms['success_form'].submit();">Tutorial Content Download</a>
                         </div>
 
                     </div>
