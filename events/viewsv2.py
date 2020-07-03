@@ -616,6 +616,8 @@ class TrainingRequestEditView(CreateView):
 
       if self.training.batch.is_foss_batch_acceptable(selectedCourse):
         self.training.sem_start_date = form.cleaned_data['sem_start_date']
+        self.training.training_start_date = form.cleaned_data['training_start_date']
+        self.training.training_end_date = form.cleaned_data['training_end_date']
         self.training.course_id = selectedCourse
       else:
         messages.error(self.request, 'This student batch already taken the selected course.')
@@ -843,12 +845,13 @@ class TrainingCertificate(object):
     imgDoc = canvas.Canvas(imgTemp)
 
     # Title
-    imgDoc.setFont('Helvetica', 40, leading=None)
-    imgDoc.drawCentredString(415, 480, "Certificate of Participation")
+    imgDoc.setFont('Helvetica', 35, leading=None)
+    imgDoc.drawCentredString(405, 470, "Certificate of Participation")
 
     #date
-    imgDoc.setFont('Helvetica', 18, leading=None)
-    imgDoc.drawCentredString(211, 115, self.custom_strftime('%B {S} %Y', training_end))
+    if ta.training.department.id != 169:
+      imgDoc.setFont('Helvetica', 18, leading=None)
+      imgDoc.drawCentredString(211, 115, self.custom_strftime('%B {S} %Y', training_end))
 
     #password
     certificate_pass = ''
@@ -864,7 +867,8 @@ class TrainingCertificate(object):
     text = "This is to certify that <b>"+ta.student.user.first_name +" "+ta.student.user.last_name+"</b> participated in the <b>"+ta.training.course.foss.foss+"</b> training organized at <b>"+ta.training.training_planner.academic.institution_name+"</b> in <b>"+sem_start+"</b> semester, with course material provided by the Spoken Tutorial Project, IIT Bombay.<br /><br />A comprehensive set of topics pertaining to <b>"+ta.training.course.foss.foss+"</b> were covered in the training. This training is offered by the Spoken Tutorial Project, IIT Bombay, funded by the National Mission on Education through ICT, MHRD, Govt. of India."
     if ta.training.department.id == 24:
       text = "This is to certify that <b>"+ta.student.user.first_name +" "+ta.student.user.last_name+"</b> participated in the <b>"+ta.training.course.foss.foss+"</b> training organized at <b>"+ta.training.training_planner.academic.institution_name+"</b> by <b>"+ta.training.training_planner.organiser.user.first_name+" "+ta.training.training_planner.organiser.user.last_name+"</b>, with course material provided by the Spoken Tutorial Project, IIT Bombay.<br /><br />A comprehensive set of topics pertaining to <b>"+ta.training.course.foss.foss+"</b> were covered in the training. This training is offered by the Spoken Tutorial Project, IIT Bombay, funded by the National Mission on Education through ICT, MHRD, Govt. of India."
-
+    if ta.training.department.id == 169:
+      text = "This is to certify that <b>"+ta.student.user.first_name +" "+ta.student.user.last_name+"</b> has participated in <b>Faculty Development Programme</b> from <b>"+ str(ta.training.training_start_date) +"</b> to <b>"+ str(ta.training.training_end_date) +"</b> on <b>"+ta.training.course.foss.foss+"</b> organized by <b>"+ta.training.training_planner.academic.institution_name+"</b> with  course material provided by Spoken Tutorial Project, IIT Bombay.<br /><br /> This training is offered by the Spoken Tutorial Project, IIT Bombay."
 
     centered = ParagraphStyle(name = 'centered',
       fontSize = 16,
@@ -878,7 +882,10 @@ class TrainingCertificate(object):
     p.drawOn(imgDoc, 4.2 * cm, 7 * cm)
     imgDoc.save()
     # Use PyPDF to merge the image-PDF into the template
-    page = PdfFileReader(open(settings.MEDIA_ROOT +"Blank-Certificate.pdf","rb")).getPage(0)
+    if ta.training.department.id == 169:
+      page = PdfFileReader(open(settings.MEDIA_ROOT +"fdptr-certificate.pdf","rb")).getPage(0)
+    else:
+      page = PdfFileReader(open(settings.MEDIA_ROOT +"Blank-Certificate.pdf","rb")).getPage(0)
     overlay = PdfFileReader(BytesIO(imgTemp.getvalue())).getPage(0)
     page.mergePage(overlay)
 
@@ -3293,12 +3300,13 @@ class AllTrainingCertificateView(TrainingCertificate, View):
       imgDoc = canvas.Canvas(imgTemp)
 
       # Title
-      imgDoc.setFont('Helvetica', 40, leading=None)
-      imgDoc.drawCentredString(415, 480, "Certificate of Participation")
+      imgDoc.setFont('Helvetica', 35, leading=None)
+      imgDoc.drawCentredString(405, 480, "Certificate of Participation")
 
       #date
-      imgDoc.setFont('Helvetica', 18, leading=None)
-      imgDoc.drawCentredString(211, 115, self.custom_strftime('%B {S} %Y', training_end))
+      if ta.training.department.id != 169:
+        imgDoc.setFont('Helvetica', 18, leading=None)
+        imgDoc.drawCentredString(211, 115, self.custom_strftime('%B {S} %Y', training_end))
 
       #password
       certificate_pass = ''
@@ -3314,6 +3322,8 @@ class AllTrainingCertificateView(TrainingCertificate, View):
       text = "This is to certify that <b>"+ta.student.user.first_name +" "+ta.student.user.last_name+"</b> participated in the <b>"+ta.training.course.foss.foss+"</b> training organized at <b>"+ta.training.training_planner.academic.institution_name+"</b> in <b>"+sem_start+"</b> semester, with course material provided by the Spoken Tutorial Project, IIT Bombay.<br /><br />A comprehensive set of topics pertaining to <b>"+ta.training.course.foss.foss+"</b> were covered in the training. This training is offered by the Spoken Tutorial Project, IIT Bombay, funded by the National Mission on Education through ICT, MHRD, Govt. of India."
       if ta.training.department.id == 24:
         text = "This is to certify that <b>"+ta.student.user.first_name +" "+ta.student.user.last_name+"</b> participated in the <b>"+ta.training.course.foss.foss+"</b> training organized at <b>"+ta.training.training_planner.academic.institution_name+"</b> by <b>"+ta.training.training_planner.organiser.user.first_name+" "+ta.training.training_planner.organiser.user.last_name+"</b>, with course material provided by the Spoken Tutorial Project, IIT Bombay.<br /><br />A comprehensive set of topics pertaining to <b>"+ta.training.course.foss.foss+"</b> were covered in the training. This training is offered by the Spoken Tutorial Project, IIT Bombay, funded by the National Mission on Education through ICT, MHRD, Govt. of India."
+      if ta.training.department.id == 169:
+        text = "This is to certify that <b>"+ta.student.user.first_name +" "+ta.student.user.last_name+"</b> has participated in <b>Faculty Development Programme</b> from <b>"+ str(ta.training.training_start_date) +"</b> to <b>"+ str(ta.training.training_end_date) +"</b> on <b>"+ta.training.course.foss.foss+"</b> organized by <b>"+ta.training.training_planner.academic.institution_name+"</b> with  course material provided by Spoken Tutorial Project, IIT Bombay.<br /><br /> This training is offered by the Spoken Tutorial Project, IIT Bombay."
 
 
       centered = ParagraphStyle(name = 'centered',
@@ -3328,7 +3338,11 @@ class AllTrainingCertificateView(TrainingCertificate, View):
       p.drawOn(imgDoc, 4.2 * cm, 7 * cm)
       imgDoc.save()
       # Use PyPDF to merge the image-PDF into the template
-      page = PdfFileReader(open(settings.MEDIA_ROOT +"Blank-Certificate.pdf","rb")).getPage(0)
+      if ta.training.department.id == 169:
+        page = PdfFileReader(open(settings.MEDIA_ROOT +"fdptr-certificate.pdf","rb")).getPage(0)
+      else:
+        page = PdfFileReader(open(settings.MEDIA_ROOT +"Blank-Certificate.pdf","rb")).getPage(0)
+      
       overlay = PdfFileReader(BytesIO(imgTemp.getvalue())).getPage(0)
       page.mergePage(overlay)
 

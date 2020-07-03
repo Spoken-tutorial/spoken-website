@@ -917,9 +917,7 @@ class TrainingRequest(models.Model):
     return '(%d / %d)' % (training_attend_count, student_master_count)
 
   def can_edit(self):
-    if self.status == 1 or TrainingAttend.objects.filter(
-      training_id=self.id
-    ).exists():
+    if self.status == 1 or TrainingAttend.objects.filter(training_id=self.id).exclude(training__department_id=169).exists():
       return False
     return True
 

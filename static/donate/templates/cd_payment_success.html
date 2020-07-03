@@ -3,7 +3,7 @@
 {% load static %}
 {% block title %}Payment Status{% endblock %}
 {% block content %}
-  <form method="post" action="/donate/receipt" class="form-horizontal">
+  <form method="post" action="/donate/receipt" class="form-horizontal" id="success_form">
         <div class="row well bs-component">
       {% csrf_token %}
             <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
@@ -87,7 +87,6 @@
                         </div>
                     </div>
                     <div class="form-group">
-			    <label for="id_example_suggestion" class="col-lg-4 control-label" style="display: none;" >User</label>
                         <div class="col-lg-8">
                             {% render_field form.user class+="form-control user" tabindex="10" %}
                             {{ form.user.errors }}
@@ -95,9 +94,24 @@
                     </div>
 
                     <div class="form-group">
-                        <div class="col-lg-8 col-lg-offset-4">
-                            <input type="submit" class="btn btn-primary" value="Download Receipt"  tabindex="6" />
+                        <div class="col-lg-8">
+                            {% render_field form.selected_foss class+="form-control selected_foss" tabindex="10" %}
+                            {{ form.selected_foss.errors }}
                         </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="col-lg-8 col-lg-offset-4">
+                            <input type="submit" class="btn btn-primary" value="Receipt"  tabindex="6" />
+                        </div>
+	
+             
+			            <div class="col-lg-8 col-lg-offset-4">
+
+                            <a href="/cdcontent/create_cd_download/" class="btn btn-success" 
+                            type ="submit" onclick="document.forms['success_form'].submit();">Tutorial Content Download</a>
+		          </div>
+			
                     </div>
                 </fieldset>
             </div>
