@@ -20,11 +20,10 @@
 \large{
 \begin{tabular}{|c|c|}
 \hline
-\textbf{Name}           & $name \\ \hline
+\textbf{Name}           & \verb|$name| \\ \hline
 \textbf{Amount}         & $amount \\ \hline
-\textbf{Key}            & $key \\ \hline
 \textbf{Expiry}         & $expiry \\ \hline
-\textbf{Email}          & $email \\ \hline
+\textbf{Email}          & \verb|$email| \\ \hline
 \textbf{Transaction ID} & $transId \\ \hline
 \textbf{Provider}       & $provId \\ \hline
 \textbf{Status}         & $msg \\ \hline

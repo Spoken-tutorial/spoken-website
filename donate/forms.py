@@ -82,6 +82,9 @@ class TransactionForm(forms.ModelForm):
     selected_foss = forms.CharField(
         widget=forms.HiddenInput(),
         required=False)
+    status = forms.CharField(
+        widget=forms.HiddenInput(),
+        required=False)
    
     class Meta(object):
         model = PaymentTransaction
