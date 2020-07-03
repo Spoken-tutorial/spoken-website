@@ -424,9 +424,11 @@ def ajax_show_added_foss(request):
         if level:
             tr_recs = TutorialResource.objects.filter(Q(status=1) | Q(
                 status=2), tutorial_detail__foss=foss, tutorial_detail__level_id=level, language_id__in=langs_list)
+            level_txt = Level.objects.get(pk=level)
         else:
             tr_recs = TutorialResource.objects.filter(Q(status=1) | Q(
                 status=2), tutorial_detail__foss=foss, language_id__in=langs_list)
+            level_txt = 'All'
 
         fsize = 0.0
         eng_flag = True
