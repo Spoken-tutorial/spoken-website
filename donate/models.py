@@ -21,10 +21,10 @@ class Payee(models.Model):
     expiry = models.DateTimeField(blank=True, null=True)
     user = models.ForeignKey(User,on_delete=models.PROTECT,related_name="payment_user" )
 
-    @property
-    def is_past_due(self):
-        now = timezone.now()
-        return now <= self.expiry
+    #@property
+    #def is_past_due(self):
+    #    now = timezone.now()
+    #    return now <= self.expiry
  
 class CdFossLanguages(models.Model):
     payment = models.ForeignKey(Payee, on_delete=models.PROTECT)

@@ -24,7 +24,6 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('foss', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='payment_foss', to='creation.FossCategory')),
                 ('lang', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='creation.Language')),
-                ('level', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='creation.Level')),
             ],
         ),
         migrations.CreateModel(
