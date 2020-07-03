@@ -30,6 +30,9 @@ import json
 from string import Template
 import subprocess
 import os
+from events.models import AcademicKey
+import random
+from datetime import date
 
 @csrf_exempt
 def donatehome(request):
@@ -65,21 +68,29 @@ def form_valid(request, form):
 
     foss_ids = form.cleaned_data.get('foss_id')
     languages = form.cleaned_data.get('language_id')
+    level_ids = form.cleaned_data.get('level_id')
+    
     fosses = foss_ids.split(',')
     foss_languages = languages.split(',|')
+    levels = level_ids.split(',')
 
     payee_id = payee_obj.pk
 
     for i in range(len(fosses)):
         foss_category = FossCategory.objects.get(pk=int(fosses[i]))
+        foss_level = Level.objects.get(pk=int(levels[i]))
         languages = foss_languages[i].split(',')
         for language in languages:
             if language != '':
                 foss_language = Language.objects.get(pk=int(language))
+                
+                
                 cd_foss_langs = CdFossLanguages()
                 cd_foss_langs.payment = Payee.objects.get(pk=payee_id)
                 cd_foss_langs.foss = foss_category
                 cd_foss_langs.lang = foss_language
+                if int(foss_level.id):
+                    cd_foss_langs.level = foss_level
                 cd_foss_langs.save()
 
     form.save_m2m()
@@ -98,8 +109,7 @@ def form_invalid(request, form):
 
 
 @csrf_exempt
-def controller(request):
-    print("all reques \n",request.user, request.POST)
+def controller(request):    
     form = PayeeForm(request.POST)
     if request.method == 'POST':
         if form.is_valid():
@@ -114,7 +124,6 @@ def controller(request):
 def calculate_expiry():
     return date.today() + timedelta(days=EXPIRY_DAYS)
 
-
 @csrf_exempt
 def encrypted_data(request, form):
     STdata = ''
@@ -123,7 +132,7 @@ def encrypted_data(request, form):
     amount = 1.00
     purpose = PURPOSE + str(form.save(commit=False).pk)
     STdata = str(request.user.id) + str(user_name) + str(amount) + purpose + CHANNEL_ID + CHANNEL_KEY
-    print(STdata)
+    
     s = display.value(str(STdata))
     return s
 
@@ -146,7 +155,10 @@ def get_final_data(request, form):
 
 @csrf_protect
 def send_onetime(request):
-    print(request.POST)
+    from django.core.validators import validate_email
+    from django.core.exceptions import ValidationError
+    from django.core.validators import EmailValidator
+    
     context = {}
     user_name = request.POST.get('username')
     email = request.POST.get('email')
@@ -157,31 +169,83 @@ def send_onetime(request):
         fname, lname = temp[0], temp[1]
     except:
         fname, lname = user_name, ""
+    # validate email
+    try:
+        validate_email( email )
+        context['email_validation']=""
+        context['valid_email']='1'
+    except ValidationError as e:
+        context['valid_email']='0'
+        try:
+            context['email_validation']=e.messages[0]
+        except:
+            context['email_validation']="Please Enter Valid Email"
     try:
         user = User.objects.get(email=email)
-        print(user.is_active)
-        if not user.is_active:
-            send_registration_confirmation(user)
-            context['message'] = "present"
+        if user.is_active:
+            context['message'] = "active_user"
         else:
-            context['message'] = "exists"
-            user.backend = 'django.contrib.auth.backends.ModelBackend'
-            print("User found ... Trying to log u in")
-            login(request, user)
-            print("login successfull")
+            send_registration_confirmation(user)
+            context['message'] = "inactive_user"
     except MultipleObjectsReturned as e:
-        print(e)
+        pass
     except ObjectDoesNotExist:
         user = User.objects.create_user(email, email, password)
         user.first_name = fname
         user.last_name = lname
         user.is_active = False
+        user.password = fname+'@ST'+str(random.random()).split('.')[1][:5]
         user.save()
         create_profile(user, '')
         send_registration_confirmation(user)
         print("sent 1st mail")
         context['message'] = "new"
 
+    return HttpResponse(json.dumps(context), content_type='application/json')
+
+
+
+@csrf_protect
+def validate_user(request):
+    print(request.POST)
+    context = {}
+    user_name = request.POST.get('username')
+    email = request.POST.get('email')
+    password = request.POST.get('password')
+    if email and password:
+        user = authenticate(username=email, password=password)
+        print(user)
+        if user is not None:
+            error_msg = ''
+            if user.is_active:
+                login(request, user)
+                print("user logged in------")
+
+                try:
+                    idcase = AcademicKey.objects.get(academic_id=request.user.organiser.academic_id)
+                    today = date.today()
+                    expiry_date = idcase.expiry_date
+                    if expiry_date >= today  :
+                        context['organizer_paid'] = '1'
+                    else:
+                        context['organizer_paid'] = '0'
+                except :
+                    context['organizer_paid'] = '0'
+
+            else:
+                error_msg = "Your account is disabled.<br>\
+                            Kindly activate your account by clicking on the activation link which has been sent to your registered email %s.<br>\
+                            In case if you do not receive any activation mail kindly verify and activate your account from below link :<br>\
+                            <a href='https://spoken-tutorial.org/accounts/verify/'>https://spoken-tutorial.org/accounts/verify/</a>"% (user.email)
+                print(error_msg)                
+        else:
+            error_msg = 'Invalid username / password'
+            print(error_msg)
+    else:
+        error_msg = 'Please enter username and Password'
+        print(error_msg)
+    
+    context['error_msg']=error_msg
     return HttpResponse(json.dumps(context), content_type='application/json')
 
 

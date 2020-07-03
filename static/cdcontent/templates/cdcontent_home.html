@@ -1,8 +1,10 @@
 {% extends 'spoken/templates/base.html' %}
 {% load widget_tweaks %}
+{% load tz %}
 {% load static %}
 {% block title %}CD Content Creation{% endblock %}
-{% load announcements %}
+
+<!-- {% load announcements %} -->
 {% block cssblock %}
     <style type="text/css">
         .add-foss{margin-right: 15px;}
@@ -25,14 +27,242 @@
             margin-left: 20px;
             border-radius: 5px;
         }
+         .c-blue{
+    color: rgb(1, 87, 155);
+}
+.c-flex{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.c-card{
+    border: 1px solid rgba(0,0,0,.125);
+    display: flex;
+    flex-direction: column;
+    border-radius: .25rem;
+    margin:2px 15px;
+    padding-left: 0!important;
+    padding-right: 0!important;
+    /*box-sizing: border-box;*/
+}
+.c-card-header{
+    font-weight: 400;
+    line-height: 1.5
+    color:rgb(1, 87, 155);
+    text-align: left;
+    padding:.5rem 1.25rem;
+    background-color: rgba(0,0,0,.03);
+    border-bottom: 1px solid rgba(0,0,0,.125);
+    box-sizing: border-box;
+    font-size: 1.4rem;
+    /*border: 1px solid rgb(1, 87, 155);*/
+    background-color: rgba(1, 87, 155,0.8);
+    color: white;
+}
+.c-card-body{
+    padding:0 1.25rem;
+    height: 240px;
+    border: 1px solid rgb(1, 87, 155);
+}
+.c-card-title{
+    font-size:1.4rem!important;
+    color:rgb(1, 87, 155); 
+
+}
+.c-card-body li{
+    font-size:1.2rem;
+    line-height: 1.5;
+}
+.fa-check{
+    color:#43A047;
+    margin-right: 16px;
+}
+.fa-times{
+    color: #F44335;
+    margin-right: 16px;
+}
+.c-btn{
+  /*border: 1px solid rgb(1, 87, 155);*/
+  padding: 6px 12px 6px 12px;
+  color: rgb(1, 87, 155);
+  border-radius: 5px;
+  font-size: 1.1rem;
+}
+.c-btn1{
+  border: 1px solid rgb(1, 87, 155);
+  padding: 6px 2px 6px 2px;
+  color: rgb(1, 87, 155);
+  border-radius: 5px;
+  font-size: 1.1rem;
+  padding-right: 50px;
+  padding-left: 50px;
+  padding-top: 6px;
+  padding-bottom: 6px;
+
+   /*position: absolute;*/
+  /*top: 260;*/
+}
+.c-btn:hover{
+  border: 1px solid rgb(1, 87, 155);
+  padding: 6px 12px 6px 12px;
+  background-color: rgb(1, 87, 155);
+  color: white;
+  border-radius: 5px;
+
+}
+.reg{
+    color: #009688;
+    /*padding-top: 20px;*/
+    font-size: 1.4rem;
+}
+.sidebar-box {
+  max-height: 180px;
+  position: relative;
+  overflow: hidden;
+  z-index: 2;
+  background-color: #e3f2fd;
+  background-color: #e0f2f1;
+  background-color:     rgba(224,242,241,0.2);
+  /*background-color: rgba(1, 87, 155,0.1);*/
+  /*width: 25%;*/
+}
+.sidebar-box .read-more { 
+  position: absolute; 
+  bottom: 0; 
+  left: 0;
+  width: 100%; 
+  text-align: center; 
+  margin: 0; padding: 2px 0; 
+  font-size: 1.2rem;
+
+    
+  /* "transparent" only works here because == rgba(0,0,0,0) */
+  background-image: linear-gradient(to bottom, transparent, black);
+  background-image: linear-gradient(to bottom, transparent,  rgba(224,242,241,0.8));
+  background-image: linear-gradient(to bottom, transparent,  rgba(255,255,255,0.8));
+}
+.sidebar-box .read-more span{ 
+    border-bottom: 2px solid rgb(1, 87, 155);
+    padding: 2px 5px;
+    font-size: 1.2rem;
+}
+.fa-check-circle{
+    margin-top: 10px;
+    margin-left: 10px;
+    color: green;
+    font-size: 1.4rem!important;
+}
+
+#info{
+    /*border: 1px solid rgba(0,0,0,0.2);position: relative;*/
+}
+.collapsible {
+  background-color: #777;
+  color: white;
+  cursor: pointer;
+  padding: 15px;
+  width: 100%;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: 15px;
+
+}
+
+.active, .collapsible:hover {
+  background-color: #555;
+}
+
+.content {
+  padding: 0 18px;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.2s ease-out;
+  background-color: #f1f1f1;
+}
+
+.bounce {
+    -moz-animation: bounce 3s infinite;
+    -webkit-animation: bounce 3s infinite;
+    animation: bounce 3s infinite;
+}
+@-moz-keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    -moz-transform: translateY(0);
+    transform: translateY(0);
+  }
+  40% {
+    -moz-transform: translateY(-20px);
+    transform: translateY(-20px);
+  }
+  60% {
+    -moz-transform: translateY(-15px);
+    transform: translateY(-15px);
+  }
+}
+@-webkit-keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+  }
+  40% {
+    -webkit-transform: translateY(-20px);
+    transform: translateY(-20px);
+  }
+  60% {
+    -webkit-transform: translateY(-15px);
+    transform: translateY(-15px);
+  }
+}
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    -moz-transform: translateY(0);
+    -ms-transform: translateY(0);
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+  }
+  40% {
+    -moz-transform: translateY(-20px);
+    -ms-transform: translateY(-20px);
+    -webkit-transform: translateY(-20px);
+    transform: translateY(-20px);
+  }
+  60% {
+    -moz-transform: translateY(-15px);
+    -ms-transform: translateY(-15px);
+    -webkit-transform: translateY(-15px);
+    transform: translateY(-15px);
+  }
+}
+
+#email-info{
+  padding: 5px;
+}
+#registered-success-msg{
+  display: none;
+}
+#forgot_pwd{
+  color: #e65100;
+  text-decoration: underline;
+  margin-top: 10px;
+}
+#user_pwd{
+  margin-bottom: 5px;
+}
+#organizer_paid_msg{
+  color: green;
+  border: 1px solid green;
+  padding: 10px 5px;
+}
     </style>
+
 {% endblock %}
 {% block heading %}
 <span>CD Content Creation</span>
 {% if user.is_authenticated %}
 <span>
   <a data-toggle="collapse" href="#collapseKey" role="button" aria-expanded="false" aria-controls="collapseKey" id="key-btn">
-    FOSS Purchase KEY
+    Past FOSS Purchase
   </a>
 </span>
 {% endif %}
@@ -57,6 +287,7 @@
 {% block search %} {% endblock %}
 
 {% block content %}
+
     <div class="row">
   <div class="col-sm-12">
     <div class="collapse" id="collapseKey">
@@ -65,16 +296,17 @@
   <thead>
     <tr>
       <th scope="col">#</th>
-      <th scope="col">Key</th>
-      <th scope="col">FOSS Courses</th>
+      <th scope="col">Date Of Purchase</th>
+      <th scope="col">FOSS Courses </th>
       <th scope="col">Expiry</th>
+      <th scope="col">Download Link</th>
     </tr>
   </thead>
   <tbody>
     {% for item in payee_list %}
     <tr>
       <th scope="row">{{forloop.counter}}</th>
-      <td>{{item.key}}</td>
+      <td>{{item.created}}</td>
       <td>
           {% for p in item.cdfosslanguages_set.all %}
           {% if forloop.last %}
@@ -85,6 +317,12 @@
     {% endfor  %}
       </td>
       <td>{{item.expiry}}</td>
+      {% if item.is_past_due %}
+      <td><a href="#">Download</a></td>
+      {% else %}
+      <td>Expired</td>
+      {% endif %}
+      
     </tr>
     {% endfor  %}
   </tbody>
@@ -94,8 +332,73 @@
 </div>
   </div>
 </div>
-    <form role="form" method="post" enctype="multipart/form-data" class="cdcontentform form-horizontal">
-        <div class="row well bs-component">
+
+<div class="sidebar-box">
+    <div class="row" id="info" >
+    <div >
+        <!-- <a href="#" id="div-close" style="position: absolute;right: 0;top: 0;margin-right: 20px;font-size: 2rem;" >x</a> -->
+        <!-- <span ></span> -->
+    </div>
+    <div class="col-md-7 c-card">
+        <div class="c-card-header c-blue">Academic Institute (College/School)</div>
+        <div class="c-card-body">
+            <h2 class="c-card-title">Free</h2>
+        <ul class="list-unstyled mt-3 mb-4">
+          <li><i class="fa fa-check "></i>Unlimited access to Course Downloads</li>
+          <li><i class="fa fa-check "></i>All course content is free for use for 1 calendar year
+(both online and offline)</li>
+          <li><i class="fa fa-check "></i>Upload student batches for end-of-course tests</li>
+          <li><i class="fa fa-check "></i>Receive certificates on successful completion of tests</li>
+          <li><i class="fa fa-check "></i>Top performing students get calls for Job Fairs</li>
+          <li><i class="fa fa-check "></i>For more details on academic subscription, pls contact training@spoken-tutorial.org</li>
+        </ul>
+
+        <a href="https://spoken-tutorial.org/change-in-policy/" class="c-btn" style="float: left;" target="_blank">Know More</a>
+        <a href="https://process.spoken-tutorial.org/index.php/Software-Training#Contacts_For_Training" class="c-btn" style="float: right;" target="_blank">Contact State Manager</a>
+        </div>
+        {% if not user.is_authenticated %}
+{% endif %}
+    </div>
+    <div class="col-md-4 c-card" style="float: right;">
+        <div class="c-card-header c-blue" >Individual Learner</div>
+        
+        <div class="c-card-body">
+            <h6 class="c-card-title l-blue ">
+          <span> < 100 MB  - <i class="fas fa-rupee-sign"></i> 99*</span><br>
+            <span>> 100 MB  - <i class="fas fa-rupee-sign"></i> 250</span>
+        </h6>
+        <ul class="list-unstyled mt-3 mb-4">
+          <li><i class="fa fa-check"></i>Download specific course content for as less as Rs.99 (+ GST) for upto 100MB and Rs.250 (+GST) upto 1 GB</li>
+          <br>
+          <li class="text-muted"><i class="fa fa-times no-allow "></i>Eligible for Certificates</li>
+        </ul>
+        <!-- <small>*Excluding GST</small> -->
+        </div>
+    </div>
+</div>
+<div class="ball"></div>
+    <p class="read-more">
+    <i class="fa fa-chevron-down bounce" aria-hidden="true" style="font-size: 2rem;color: rgb(1, 87, 155);"></i>  <a href="#" class="button">Read More</a>        
+    </p>
+</div>
+<div style="margin-top: 32px;display: flex;flex-direction: column;">
+    <button class="collapsible" style="background-color: rgb(1, 87, 155);">Why New Payment Policy of Spoken Tutorials ? <i class="fa fa-chevron-down" aria-hidden="true" style="float: right;"></i> </button>
+<div class="content row" style="padding: 0;width: 1110px;margin-left: 0px;">
+    <div class="col-md-6" style="padding: 0; width: 550px;">
+        <div class="embed-responsive embed-responsive-16by9">
+  <iframe class="embed-responsive-item" src="https://youtu.be/rcIvV2jCOz4?list=PL7WFbgpeASD3HDPqsh8IHIdmetUed5wzb"></iframe>
+</div>
+    </div>
+    <div class="col-md-6" style="padding: 0 32px;display: flex;justify-content: center;align-items: center;align-content: center;height: 309px;">
+        <p>
+            Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+        </p>
+    </div>
+  
+</div>
+</div>
+<form role="form" method="post" enctype="multipart/form-data" class="cdcontentform form-horizontal">
+        <div class="row well bs-component" style="margin-top: 20px;">
             <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
                 <div class="alert alert-danger" role="alert">
                   <strong>Note:</strong> The maximum file size to download is 1 GB.
@@ -147,8 +450,10 @@
                     <table class="added-foss table table-condensed table-bordered table-hover" id="added-foss">
                     </table>
                 </div>
-        <div id="rate-div" style="display: none">
-                    <table class="rate-chart table table-condensed table-bordered table-hover">
+
+    {% if not user.username == 'organizer_paid' %}
+    <div id="rate-div" style="display: none">
+    <table class="rate-chart table table-condensed table-bordered table-hover">
             <thead>
   <tr>
     <th >File Size</th>
@@ -175,18 +480,47 @@
   </tr>
 </thead>
 <thead >
+
+     {% if user.username == 'student_paid_insti' %}
+<tr>
+  <td>
+        <p>You are part of a paid college. Please contact your College Oranizer for free download. Or you can proceed with minimal fee below. <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#paymodal">
+  Make Payment
+</button> </p>    
+        </td>
+        
+    </tr>
+     {% endif %}
+    
   <tr>
+     {% if not user.username == 'student_paid_insti' %}
     <td></td>
     <td><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#paymodal">
   Make Payment
 </button>
 </td>
+
+{% endif%}
 </tr>
 </thead>
 </table>
     </div>
-    <div class="download-link"></div>
-    <div class="user-message"></div>
+
+
+         {% endif %}  
+        
+
+    <div class="download-link">
+        
+    </div>
+    <div class="user-message" >
+         
+    </div>
+    {% if user.username == 'organizer_paid' %}
+     <div class="download-a" >
+         
+     </div>
+     {% endif %}
     </div>
 </div>
 </form>
@@ -213,12 +547,51 @@
                             {{ payment_form.name.errors }}
                         </div>
                     </div>
+                    
                     <div class="form-group col-sm-10">
+                        <div style="display: flex;">
                             {{ payment_form.email }}
+                            <a href="#" class="btn btn-primary mb-2" onclick="send_otp();" id="send_otp" style="display: none; margin-left: 16px;">Send OTP</a> 
+                        </div>
+                            
                             <div class="invalid-feedback">
                                 {{ payment_form.email.errors }}
                             </div>
+                            <div id="email-info">
+                              
+                            </div>
                     </div>
+                    <div class="form-group col-sm-10" id="pwd" style="display: none;">
+                        <div style="display: flex;">
+                            <input type="password" class="form-control" id="id_password" placeholder="Password">
+    <i class="fa fa-check-circle" aria-hidden="true" style="display: none;" id="check-pwd"></i>
+                        </div>
+                        <!-- <div>
+                        <span id="forgot_pwd"> -->
+                          <a href="{% url 'cms:password_reset' %}" id="forgot_pwd" target="_blank">Forgot Password ?</a>
+                          <div id="invalid_credentials"></div>
+                      <!-- </span>  
+                        </div> -->
+                        
+    
+  </div>
+                    
+
+                    <div class="form-group col-sm-10 text-center" id="organizer_info" style="display: none;">
+                      <p id="organizer_paid_msg">Congratulations! You are a part of a Registered College & are entitled to free download</p>
+    
+                    </div>
+                    <div class="form-group col-sm-10 text-center" id="logged_success" style="display: none;">
+                      <span style="color: #43A047;">Logged In Successfully </span>
+                    </div>
+                    <div class="form-group col-sm-10">
+                        <input type="text" class="form-control" id="otp_value" aria-describedby="emailHelp" placeholder="Enter OTP send to above Email" style="display: none; margin-bottom: 16px;width: 50%;">
+                    <span class="label label-success" id="otp_sent_msg" style="display: none; margin-top: 16px; padding: 5px 10px;" ></span>
+                    </div>
+                    <div class="form-group col-sm-10" id="registered-success-msg">
+                            <p>Congratulations ! You are registered on Spoken Tutorial. Please Check your mail for details. </p>
+                    </div>
+
                     <div class="form-group col-sm-10">
                             {{ payment_form.country }}
                             <div class="invalid-feedback">
@@ -249,20 +622,21 @@
                     <div class="form-group col-sm-10">
                             {{ payment_form.language_id }}
                     </div>
-                    {% csrf_token %}
-                    <a href="#" class="btn btn-primary mb-2" onclick="send_otp();" id="send_otp" style="display: none">Send OTP</a> 
-                    <input type="text" class="form-group" style="display: none;" id="otp_value">
-                    <span class="label label-success" id="otp_sent_msg" style="display: none;" ></span>
-
+                    <div class="form-group col-sm-10">
+                            {{ payment_form.level_id }}
+                    </div>
+                    {% csrf_token %}                    
                 <table id ="display-foss" class="added-foss table table-condensed table-bordered table-hover">
                 </table>
                     <div class="col-sm-10">
             {% csrf_token %}
-            {% if user.is_authenticated %}
-                        <button  type= "submit" class="btn btn-primary mb-2 make-payment-btn">Make Payment</button>
-            {%else%}
+                    {% if user.is_authenticated %}
+                    <button  type= "submit" class="btn btn-primary mb-2 make-payment-btn" id="make_payment_auth">Make Payment</button>
+                    {% else %}
                     <button  type= "submit" class="btn btn-primary mb-2 make-payment-btn" id="make_payment"disabled>Make Payment</button>
-            {%endif%}
+                    {% endif %}
+                    
+                    <button  type= "submit" class="btn btn-primary mb-2 make-payment-btn" id="download_btn" style="display: none;">Download Here</button>
                     </div>
             </form>
            </div> 
@@ -302,6 +676,56 @@
 <script src="{% static 'spoken/js/jquery.cookie.js' %}"></script>
     <script type="text/javascript">
         $(document).ready(function(){
+            var coll = document.getElementsByClassName("collapsible");
+var i;
+
+for (i = 0; i < coll.length; i++) {
+  coll[i].addEventListener("click", function() {
+    this.classList.toggle("active");
+    var content = this.nextElementSibling;
+    if (content.style.maxHeight){
+      content.style.maxHeight = null;
+    } else {
+      content.style.maxHeight = content.scrollHeight + "px";
+    } 
+  });
+}
+
+
+            $('#div-close').click(function(event){
+     $("#info").hide();
+});
+
+            var $el, $ps, $up, totalHeight;
+
+$(".sidebar-box .button").click(function() {
+  totalHeight = 0
+  $el = $(this);
+  $p  = $el.parent();
+  $up = $p.parent();
+  $ps = $('#info');
+  // measure how tall inside should be by adding together heights of all inside paragraphs (except read-more paragraph)
+  $ps.each(function() {
+    totalHeight += $(this).outerHeight();
+  });
+        
+  $up
+    .css({
+      // Set height to prevent instant jumpdown when max height is removed
+      "height": $up.height(),
+      "max-height": 9999
+    })
+    .animate({
+      "height": totalHeight
+    });
+  
+  // fade out read-more
+  $p.fadeOut();
+  
+  // prevent jump-down
+  return false;
+    
+});
 
             if($('.foss_category').val() == '') {
                 $('.level').attr("disabled", "disabled");
@@ -445,6 +869,9 @@ if ($.cookie('modal_status') != '1')
         });
 
 $('#otp_value').on('keyup',function(){
+
+
+
 var otp = $('#otp_value').val();
 var email = $('#id_email').val();
 
@@ -458,6 +885,7 @@ $.ajax({
     },
     success: function(data) {
     if(data['validate']=='success'){
+      $('#registered-success-msg').show();
 document.getElementById("otp_sent_msg").innerHTML = "Login Successfull";
 document.getElementById('otp_sent_msg').className = 'label label-success';
 $("#otp_sent_msg").show();
@@ -477,16 +905,52 @@ $("#otp_value").show();
 }
 });
 
-$('#id_email').on('keyup',function(){
-var email = $('#id_email').val();
-if(email.includes("@") && email.includes(".")){
-$("#send_otp").show();
-}
-else{
-   $("#send_otp").hide();
- 
-}
 
+$('#pwd').on('focusout',function(){
+    $('#invalid_credentials').html('');
+    document.getElementById("make_payment").disabled = false;
+    // document.getElementById("check-pwd").disabled = false;
+    var username = $('#id_name').val();
+    var email = $('#id_email').val();
+    var password = $('#id_password').val();
+    $.ajax({
+                    // url:'/donate/validate_user/',
+                    url:'/donate/validate_user/',
+                    type:'POST',
+                    data:{
+                        'username': username,
+                        'email': email,
+                        'password': password,
+                        csrfmiddlewaretoken: '{{ csrf_token }}',
+                    },
+                    success: function(data) {
+
+                      if (data['error_msg']=='') {
+
+                        var r = data['organizer_paid'];
+                        if (data['organizer_paid']=='1') {
+                          $('#organizer_info').show();
+                          $('#download_btn').show();
+                          $('#make_payment').hide();
+                          document.querySelector('#ShowButton').textContent = 'Hide';
+                        }
+                        else{
+                            console.log('oraganizer not paid');
+                        }
+
+                      }else{
+                            $('#invalid_credentials').html(data['error_msg']);
+
+                      }
+
+                      
+                            
+                    }
+                });
+});
+
+$('#id_email').on('focusout',function(){
+    validate_user_email()
 });
 
 function show_added_foss(selected_foss){
@@ -501,7 +965,7 @@ function show_added_foss(selected_foss){
                                     $('.ajax-refresh-add-foss').show();
                                 },
                                 success: function(data) {
-                                    header = '<caption class="col-left"><b>Selected FOSS List:<span class="pull-right"> ~ Total Size : '+data[1]+'</span></b></caption><tr ><th>FOSS</th><th>Languages</th><th>Size</th>';
+                                    header = '<caption class="col-left"><b>Selected FOSS List:<span class="pull-right"> ~ Total Size : '+data[1]+'</span></b></caption><tr ><th>FOSS</th><th>Level</th><th>Languages</th><th>Size</th>';
                                     if(data) {
                                         $('.added-foss').html(header + data[0]);
                                         
@@ -509,17 +973,19 @@ function show_added_foss(selected_foss){
             var row_count = document.getElementById("added-foss").rows.length;
             for (var i = 0 ;i < row_count; i++) {
                 var x = document.getElementById("added-foss").rows[i].cells.length;
-                if (x==4) {
+                if (x==5) {
                     var content = '<button type="button" class="btn delete-btn" class="delete-foss" onclick="delete_foss(this)"><i class="fa fa-trash-o"></i></button>'
-                    var td = document.getElementById("added-foss").rows[i].cells[3];
+                    var td = document.getElementById("added-foss").rows[i].cells[4];
                     td.innerHTML = content;   
                 }    
 }
 
                                         if(data[2][0]=='UR') {
-                                        var message = '<i>User not registered.<br> Kinldy <a href="/accounts/login">Login</a> if you are registered.</i>'
+                                        var message = ''
                                          $('.create_zip').prop('disabled', true);
                                          $('.user-message').html(message);
+                                         $('.download-a').html("Download");
+                              
                      $("#rate-div").show();
                      $("#user_file_size").html("Foss Purchase (INR) ");
 
@@ -532,12 +998,16 @@ function show_added_foss(selected_foss){
                                         var message = 'You are part of our paid service.<br> Happy Downloading.<br> Please click on <b>Create Zip file</b> to proceed.'
                                          $('.create_zip').prop('disabled', false);
                                          $('.user-message').html(message);
+                                         $('.download-a').html("Download");
+                                    
                                           }
                                         
                                         else {
                                         var message = '<i>Amount to be paid.</i>'
                                          $('.create_zip').prop('disabled', true);
                                          $('.user-message').html(message);
+                                         $('.download-a').html("Download");
+
                                          $("#rate-div").show();
                                          $("#user_file_size").html("Foss Purchase (INR)");
                                          document.getElementById("amount_to_pay").value = data[2][1];
@@ -579,6 +1049,14 @@ $(".paymodal").show();
 }
 
 function send_otp(){
+        $("#send_otp").show();
+        document.getElementById("otp_sent_msg").innerHTML = "OTP sent";
+        document.getElementById('otp_sent_msg').className = 'label label-success';
+        $("#otp_value").show();
+        $("#otp_sent_msg").show().delay(10000).fadeOut();
+            }
+
+function validate_user_email(){
         var username = $('#id_name').val();
         var email = $('#id_email').val();
                 $.ajax({
@@ -590,23 +1068,28 @@ function send_otp(){
                         csrfmiddlewaretoken: '{{ csrf_token }}',
                     },
                     success: function(data) {
-                console.log(data['message']);
-                        if(data['message']=="exists"){
-                            alert("User already present - logging you in ");
+                        if (data['valid_email']=='1') {
+                        $('#email-info').html('');
+                        if(data['message']=="active_user"){
                             $("#send_otp").hide();
-                            document.getElementById("make_payment").disabled = false;
+                            $("#pwd").show();
+                            $("#forgot_pwd").show();
+                            $("#email-info").html('This Email Id is already registered with Spoken Tutorials. Please enter your password to proceed.');
+                            document.getElementById("email-info").style.color = "green";
+                            // document.getElementById("make_payment").disabled = false;
                         }
-                        else if(data['message']=='present'){
+                        else if(data['message']=='inactive_user'){
                             document.getElementById("otp_sent_msg").innerHTML = "OTP Re-sent";
                             document.getElementById('otp_sent_msg').className = 'label label-success';
                             $("#otp_sent_msg").show().delay(10000).fadeOut();
                         }
                         else{
-                            document.getElementById("otp_sent_msg").innerHTML = "OTP sent";
-                            document.getElementById('otp_sent_msg').className = 'label label-success';
-                            $("#otp_sent_msg").show().delay(10000).fadeOut();
-                            $("#otp_value").show();
+                          $("#send_otp").show();
                         }
+
+                        }else{
+                            $('#email-info').html(data['email_validation']);
+                        }      
                     }
                 });
             }
@@ -614,10 +1097,10 @@ function send_otp(){
 $('.make-payment-btn').click(function(event){
 var name = $('#payee_name').val();
 var email = $('#payee_email').val();
-
-
-
 });
+
+
+
 </script>
 
 <script type="text/javascript">
@@ -626,6 +1109,7 @@ var email = $('#payee_email').val();
         var foss_lang_obj = JSON.parse(selectedfoss);
         var foss_selected = [];
         var langs_selected = [];
+        var level_selected = [];
 
         for(var key in foss_lang_obj) {
             var value = foss_lang_obj[key];
@@ -633,6 +1117,7 @@ var email = $('#payee_email').val();
             l = String(langs);
             foss_selected.push(key);
             langs_selected.push(value[0]);
+            level_selected.push(value[1]);
             langs_selected.push('|');
         }
         var amount = $('#amount_to_pay').val();
@@ -644,10 +1129,11 @@ var email = $('#payee_email').val();
         if (foss_selected && langs_selected) {
             modal.find('.modal-body input[name="foss_id"]').val(foss_selected);
             modal.find('.modal-body input[name="language_id"]').val(langs_selected);
+            modal.find('.modal-body input[name="level_id"]').val(level_selected);
             var row_count = document.getElementById("display-foss").rows.length;
         for (var i = 0 ;i < row_count; i++) {
             var x = document.getElementById("display-foss").rows[i].cells.length;
-            if (x==4) {
+            if (x==5) {
                 var row = document.getElementById("display-foss").rows[i];
                 row.deleteCell(-1);
             }    

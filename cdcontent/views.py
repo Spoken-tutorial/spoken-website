@@ -405,6 +405,7 @@ def ajax_show_added_foss(request):
     except:
         tmp = {}
 
+    
     data = ''
     fsize_total = 0.0
     languages = set()
@@ -412,10 +413,14 @@ def ajax_show_added_foss(request):
 
     for key, values in list(tmp.items()):
         langs_list = list(values[0])
+        
+        
+
         foss, level = FossCategory.objects.get(pk=key), int(values[1])
+        
         langs = ', '.join(list(
             Language.objects.filter(id__in=list(values[0])).order_by('name').values_list('name', flat=True)))
-
+        
         if level:
             tr_recs = TutorialResource.objects.filter(Q(status=1) | Q(
                 status=2), tutorial_detail__foss=foss, tutorial_detail__level_id=level, language_id__in=langs_list)
@@ -476,10 +481,10 @@ def ajax_show_added_foss(request):
         for filepath in common_files:
             if os.path.isfile(filepath):
                 fsize += os.path.getsize(filepath)
-        
         fsize_total += fsize
         
-        data += '<tr><td name="foss[]">{}</td><td name="langs[]">{}</td><td name="size">{}</td><td id="{}"></td></tr>'.format(foss.foss, langs, humansize(fsize),foss.id)
+        
+        data += '<tr><td name="foss[]">{}</td><td name="level[]">{}</td><td name="langs[]">{}</td><td name="size">{}</td><td id="{}"></td></tr>'.format(foss.foss,level_txt, langs, humansize(fsize),foss.id)
 
     fsize = 0.0
     languages.add(eng_rec.name)
@@ -500,7 +505,7 @@ def ajax_show_added_foss(request):
     fsize += calculate_static_file_size()
 
     fsize_total += fsize
-    data += '<tr><td colspan="2">Extra files</td><td>{}</td></tr>'.format(humansize(fsize))
+    data += '<tr><td colspan="3">Extra files</td><td>{}</td></tr>'.format(humansize(fsize))
     
     #check if user is registered
     user_details = check_user_details(request,fsize_total )
@@ -554,5 +559,3 @@ def check_user_details(request, filesize):
         return ['RP','No Limit']
     else:
         return [user_type, amount]
-        
-    

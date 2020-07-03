@@ -14,6 +14,7 @@ class PayeeForm(forms.ModelForm):
 
     foss_id = forms.CharField(widget=forms.HiddenInput(), required=True)
     language_id = forms.CharField(widget=forms.HiddenInput(), required=True)
+    level_id = forms.CharField(widget=forms.HiddenInput(), required=True)
 
     class Meta:
         model = Payee
@@ -23,7 +24,7 @@ class PayeeForm(forms.ModelForm):
         user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
         self.fields['name'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Please enter your name'})
-        self.fields['email'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Your register email id.'})
+        self.fields['email'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Your email id'})
         self.fields['country'].widget.attrs.update({'class': 'form-control'})
         self.fields['country'].initial = 'India'
         self.fields['state'].widget.attrs.update({'class': 'form-control'})
@@ -35,6 +36,7 @@ class PayeeForm(forms.ModelForm):
                 self.fields['email'].initial = user.email
                 self.fields['email'].widget.attrs['readonly'] = True
                 self.fields['name'].initial = user.get_full_name()
+
 
 
 class TransactionForm(forms.ModelForm):
