@@ -81,8 +81,15 @@
     color: #F44335;
     margin-right: 16px;
 }
+.custom-btn{
+  padding: 4px 12px 4px 12px;
+  color: rgb(1, 87, 155);
+  border-radius: 5px;
+  font-size: 1.1rem;
+  border: 1px solid rgb(1, 87, 155);
+  background-color: white;
+}
 .c-btn{
-  /*border: 1px solid rgb(1, 87, 155);*/
   padding: 6px 12px 6px 12px;
   color: rgb(1, 87, 155);
   border-radius: 5px;
@@ -108,7 +115,6 @@
   background-color: rgb(1, 87, 155);
   color: white;
   border-radius: 5px;
-
 }
 .reg{
     color: #009688;
@@ -321,28 +327,29 @@
       <td>
         
           {%for pay_tr_obj in item.payment_transaction.all%}
-          <form id="receipt">
+          <form id="receipt" action="{% url 'donate:receipt' %}" method="post">
+            {% csrf_token %}
             <input type="text" id="name{{pay_tr_obj.paymentdetail.id}}" name="name" value="{{pay_tr_obj.paymentdetail.name}}" >
             <input type="text" id="email{{pay_tr_obj.paymentdetail.id}}" name="email" value="{{pay_tr_obj.paymentdetail.email}}" style="display: none">
-            <input type="text" id="amount{{pay_tr_obj.paymentdetail.id}}" value="{{pay_tr_obj.amount}}" style="display: none">
-            <input type="text" id="reqId{{pay_tr_obj.paymentdetail.id}}" value="{{pay_tr_obj.reqId}}" style="display: none">
-            <input type="text" id="transId{{pay_tr_obj.paymentdetail.id}}" value="{{pay_tr_obj.transId}}" style="display: none">
-            <input type="text" id="provId{{pay_tr_obj.paymentdetail.id}}" value="{{pay_tr_obj.provId}}" style="display: none">
-            <input type="text" id="status{{pay_tr_obj.paymentdetail.id}}" value="{{pay_tr_obj.status}}" style="display: none">
-            <input type="text" id="expiry{{pay_tr_obj.paymentdetail.id}}" value="{{pay_tr_obj.expiry}}" style="display: none">
-            
-        <a href="/donate/receipt/" class="btn btn-success" 
-                            type ="submit" onclick="document.forms['receipt'].submit();">Receipt</a>
-</form>
+            <input type="text" id="amount{{pay_tr_obj.paymentdetail.id}}" name="amount" value="{{pay_tr_obj.amount}}" style="display: none">
+            <input type="text" id="reqId{{pay_tr_obj.paymentdetail.id}}" name="reqId" value="{{pay_tr_obj.reqId}}" style="display: none">
+            <input type="text" id="transId{{pay_tr_obj.paymentdetail.id}}" name="transId" value="{{pay_tr_obj.transId}}" style="display: none">
+            <input type="text" id="provId{{pay_tr_obj.paymentdetail.id}}" name="provId" value="{{pay_tr_obj.provId}}" style="display: none">
+            <input type="text" id="status{{pay_tr_obj.paymentdetail.id}}" name="status" value="{{pay_tr_obj.status}}" style="display: none">
+            <input type="text" id="expiry{{pay_tr_obj.paymentdetail.id}}" name="expiry" value="{{pay_tr_obj.expiry}}" style="display: none">
+        <button type="submit" form="receipt" value="Submit" class="custom-btn">Receipt</button>                    
+        </form>
 {%endfor%}
         
       </td>
       {% if not item.is_past_due %}
-	<form id="cdcontent_download">
+	<form id="cdcontent_download" action="{% url 'cdcontent:create_cd_download' %}" method="post">
+    {% csrf_token %}
           <input type="text" id="selected_foss" name="selected_foss" value="{{item.get_foss_list}}" style="display: none">
-      </form>
-      <td><a href="/cdcontent/create_cd_download/" class="btn btn-success" 
-                            type ="submit" onclick="document.forms['cdcontent_download'].submit();">Download</a></td>
+  </form>
+      <td>
+        <button type="submit" form="cdcontent_download" value="Submit" class="custom-btn">Download</button>
+      </td>
       {% else %}
       <td>Expired</td>
       {% endif %}
