@@ -32,7 +32,6 @@ import subprocess
 import os
 from events.models import AcademicKey
 import random
-from datetime import date
 
 @csrf_exempt
 def donatehome(request):
@@ -75,28 +74,25 @@ def form_valid(request, form):
     levels = level_ids.split(',')
 
     payee_id = payee_obj.pk
+    foss_level = 0
 
     for i in range(len(fosses)):
         foss_category = FossCategory.objects.get(pk=int(fosses[i]))
-        foss_level = Level.objects.get(pk=int(levels[i]))
+        if int(levels[i]):
+            foss_level = Level.objects.get(pk=int(levels[i]))
+        
         languages = foss_languages[i].split(',')
         for language in languages:
             if language != '':
                 foss_language = Language.objects.get(pk=int(language))
-                
-                
                 cd_foss_langs = CdFossLanguages()
                 cd_foss_langs.payment = Payee.objects.get(pk=payee_id)
                 cd_foss_langs.foss = foss_category
                 cd_foss_langs.lang = foss_language
-                if int(foss_level.id):
+                if foss_level:
                     cd_foss_langs.level = foss_level
                 cd_foss_langs.save()
-
     form.save_m2m()
-
-    # return super(PaymentController, self).form_valid(form)
-
 
 @csrf_exempt
 def form_invalid(request, form):
@@ -122,7 +118,7 @@ def controller(request):
 
 @csrf_exempt
 def calculate_expiry():
-    return date.today() + timedelta(days=EXPIRY_DAYS)
+    return datetime.now() + timedelta(days = EXPIRY_DAYS)
 
 @csrf_exempt
 def encrypted_data(request, form):
@@ -163,12 +159,13 @@ def send_onetime(request):
     user_name = request.POST.get('username')
     email = request.POST.get('email')
     temp = user_name.split(" ")
-    password = ''
+    
 
     try:
         fname, lname = temp[0], temp[1]
     except:
         fname, lname = user_name, ""
+    password = fname+'@ST'+str(random.random()).split('.')[1][:5]
     # validate email
     try:
         validate_email( email )
@@ -187,6 +184,7 @@ def send_onetime(request):
         else:
             send_registration_confirmation(user)
             context['message'] = "inactive_user"
+
     except MultipleObjectsReturned as e:
         pass
     except ObjectDoesNotExist:
@@ -194,11 +192,9 @@ def send_onetime(request):
         user.first_name = fname
         user.last_name = lname
         user.is_active = False
-        user.password = fname+'@ST'+str(random.random()).split('.')[1][:5]
         user.save()
         create_profile(user, '')
         send_registration_confirmation(user)
-        print("sent 1st mail")
         context['message'] = "new"
 
     return HttpResponse(json.dumps(context), content_type='application/json')
@@ -219,8 +215,6 @@ def validate_user(request):
             error_msg = ''
             if user.is_active:
                 login(request, user)
-                print("user logged in------")
-
                 try:
                     idcase = AcademicKey.objects.get(academic_id=request.user.organiser.academic_id)
                     today = date.today()
@@ -251,7 +245,6 @@ def validate_user(request):
 
 @csrf_exempt
 def validate(request):
-    print("Trying to validate user")
     context = {}
     user_pass = request.POST.get("otp")
     email = request.POST.get("email")
