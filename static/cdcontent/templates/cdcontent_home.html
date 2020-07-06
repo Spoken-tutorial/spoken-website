@@ -318,7 +318,11 @@
       </td>
       <td>{{item.expiry}}</td>
       {% if item.is_past_due %}
-      <td><a href="#">Download</a></td>
+	<form id="cdcontent_download">
+          <input type="text" name="current_selected_foss" id="selected_foss" value="{{item.get_foss_list}}" style="display: none">
+      </form>
+      <td><a href="/cdcontent/create_cd_download/" class="btn btn-success" 
+                            type ="submit" onclick="document.forms['cdcontent_download'].submit();">Download</a></td>
       {% else %}
       <td>Expired</td>
       {% endif %}

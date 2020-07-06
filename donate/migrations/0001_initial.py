@@ -40,7 +40,8 @@ class Migration(migrations.Migration):
                 ('amount', models.DecimalField(decimal_places=2, max_digits=10)),
                 ('key', models.UUIDField(default=uuid.uuid4, editable=False)),
                 ('status', models.PositiveIntegerField()),
-                ('created', models.DateTimeField(auto_now_add=True)),
+                ('created', models.DateTimeField(auto_no
+                                                 w_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
                 ('expiry', models.DateTimeField(blank=True, null=True)),
                 ('user', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='payment_user', to=settings.AUTH_USER_MODEL)),
