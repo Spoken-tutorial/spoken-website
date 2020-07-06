@@ -228,6 +228,7 @@ def add_srt_file(archive, tr_rec, filepath, eng_flag, srt_files):
 
 
 def internal_computation(request):
+    print("ic :",request.POST.get('selected_foss', {}))
     zipfile_name = '{}.zip'.format(datetime.datetime.now().strftime('%Y%m%d%H%M%S%f'))
     file_obj = open('{}cdimage/{}'.format(settings.MEDIA_ROOT, zipfile_name), 'wb')
     archive = zipfile.ZipFile(file_obj, 'w', zipfile.ZIP_DEFLATED, allowZip64=True)
@@ -349,7 +350,9 @@ def home(request):
         'payment_form': PayeeForm(user=request.user),
     }
     if request.user.is_authenticated():
-        payee_list = Payee.objects.prefetch_related('cdfosslanguages_set__foss','cdfosslanguages_set__lang').filter(user=request.user)
+        payee_list = Payee.objects.prefetch_related(
+            'cdfosslanguages_set__foss','cdfosslanguages_set__lang',
+            'payment_transaction').filter(user=request.user)
         context['payee_list'] = payee_list
 
     context.update(csrf(request))

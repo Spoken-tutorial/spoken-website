@@ -271,7 +271,7 @@ def validate(request):
 
 
 def receipt(request):
-
+    print("Yes :",request.POST)
     response = HttpResponse(content_type='application/pdf')
     file_name = request.POST.get("name")
     

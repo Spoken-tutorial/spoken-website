@@ -299,6 +299,7 @@
       <th scope="col">Date Of Purchase</th>
       <th scope="col">FOSS Courses </th>
       <th scope="col">Expiry</th>
+      <th scope="col">Receipt</th>
       <th scope="col">Download Link</th>
     </tr>
   </thead>
@@ -317,9 +318,28 @@
     {% endfor  %}
       </td>
       <td>{{item.expiry}}</td>
-      {% if item.is_past_due %}
+      <td>
+        
+          {%for pay_tr_obj in item.payment_transaction.all%}
+          <form id="receipt">
+            <input type="text" id="name{{pay_tr_obj.paymentdetail.id}}" name="name" value="{{pay_tr_obj.paymentdetail.name}}" >
+            <input type="text" id="email{{pay_tr_obj.paymentdetail.id}}" name="email" value="{{pay_tr_obj.paymentdetail.email}}" style="display: none">
+            <input type="text" id="amount{{pay_tr_obj.paymentdetail.id}}" value="{{pay_tr_obj.amount}}" style="display: none">
+            <input type="text" id="reqId{{pay_tr_obj.paymentdetail.id}}" value="{{pay_tr_obj.reqId}}" style="display: none">
+            <input type="text" id="transId{{pay_tr_obj.paymentdetail.id}}" value="{{pay_tr_obj.transId}}" style="display: none">
+            <input type="text" id="provId{{pay_tr_obj.paymentdetail.id}}" value="{{pay_tr_obj.provId}}" style="display: none">
+            <input type="text" id="status{{pay_tr_obj.paymentdetail.id}}" value="{{pay_tr_obj.status}}" style="display: none">
+            <input type="text" id="expiry{{pay_tr_obj.paymentdetail.id}}" value="{{pay_tr_obj.expiry}}" style="display: none">
+            
+        <a href="/donate/receipt/" class="btn btn-success" 
+                            type ="submit" onclick="document.forms['receipt'].submit();">Receipt</a>
+</form>
+{%endfor%}
+        
+      </td>
+      {% if not item.is_past_due %}
 	<form id="cdcontent_download">
-          <input type="text" name="current_selected_foss" id="selected_foss" value="{{item.get_foss_list}}" style="display: none">
+          <input type="text" id="selected_foss" name="selected_foss" value="{{item.get_foss_list}}" style="display: none">
       </form>
       <td><a href="/cdcontent/create_cd_download/" class="btn btn-success" 
                             type ="submit" onclick="document.forms['cdcontent_download'].submit();">Download</a></td>
