@@ -69,7 +69,7 @@
       <td>{{item.expiry}}</td>
       <td>
           {%for pay_tr_obj in item.payment_transaction.all%}
-          <form id="receipt" action="{% url 'donate:receipt' %}" method="post">
+          <form id="receipt{{pay_tr_obj.id}}" action="{% url 'donate:receipt' %}" method="post">
             {% csrf_token %}
             <input type="text" id="name{{pay_tr_obj.paymentdetail.id}}" name="name" value="{{pay_tr_obj.paymentdetail.name}}" style="display: none">
             <input type="text" id="email{{pay_tr_obj.paymentdetail.id}}" name="email" value="{{pay_tr_obj.paymentdetail.email}}" style="display: none">
@@ -79,10 +79,9 @@
             <input type="text" id="provId{{pay_tr_obj.paymentdetail.id}}" name="provId" value="{{pay_tr_obj.provId}}" style="display: none">
             <input type="text" id="status{{pay_tr_obj.paymentdetail.id}}" name="status" value="{{pay_tr_obj.status}}" style="display: none">
             <input type="text" id="expiry{{pay_tr_obj.paymentdetail.id}}" name="expiry" value="{{pay_tr_obj.expiry}}" style="display: none">
-        <button type="submit" form="receipt" value="Submit" class="custom-btn">Receipt</button>                    
         </form>
+        <button type="submit" form="receipt{{pay_tr_obj.id}}" value="Submit" class="custom-btn">Receipt</button>
 {%endfor%}
-        
       </td>
 
       
@@ -363,12 +362,14 @@
                     <div class="form-group col-sm-10">
                             {{ payment_form.level_id }}
                     </div>
-                    {% csrf_token %}                    
                 <table id ="display-foss" class="added-foss table table-condensed table-bordered table-hover">
                 </table>
                     <div class="col-sm-10">
-            {% csrf_token %}
-                    <button  type= "submit" class="btn btn-primary mb-2 make-payment-btn" id="make_payment"disabled>Make Payment</button>
+                    {% if user.is_authenticated %}
+                    <button  type= "submit" class="btn btn-primary mb-2 make-payment-btn" id="make_payment_auth">Make Payment</button>
+                    {% else %}
+                    <button  type= "submit" class="btn btn-primary mb-2 make-payment-btn" id="make_payment" disabled>Make Payment</button>
+                    {% endif %}
                     <button  class="btn btn-primary mb-2 make-payment-btn" id="download_btn" style="display: none;">Download Here</button>
                     </div>
             </form>
