@@ -3,266 +3,10 @@
 {% load tz %}
 {% load static %}
 {% block title %}CD Content Creation{% endblock %}
-
-<!-- {% load announcements %} -->
 {% block cssblock %}
-    <style type="text/css">
-        .add-foss{margin-right: 15px;}
-        #id_language {min-height: 180px;}
-        .delete-btn{padding: 0;color: red;}
-        #user_file_size{padding-bottom: 10px;}
-        .rate-chart{overflow: hidden;}
-        .rate-chart *{overflow: hidden;}
-        .payment-details{font-weight: bold;}
-        .display-foss{height: auto;overflow:hidden;}
-        #key-btn{
-            border: 2px solid #286090;
-            font-weight: bold;
-            font-size: 1rem;
-            color: #286090;
-            background-color: white;
-            padding: 5px 20px 5px 20px;
-            font-family: "Times New Roman", Times, serif;
-            font-family: Arial, Helvetica, sans-serif;
-            margin-left: 20px;
-            border-radius: 5px;
-        }
-         .c-blue{
-    color: rgb(1, 87, 155);
-}
-.c-flex{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-.c-card{
-    border: 1px solid rgba(0,0,0,.125);
-    display: flex;
-    flex-direction: column;
-    border-radius: .25rem;
-    margin:2px 15px;
-    padding-left: 0!important;
-    padding-right: 0!important;
-    /*box-sizing: border-box;*/
-}
-.c-card-header{
-    font-weight: 400;
-    line-height: 1.5
-    color:rgb(1, 87, 155);
-    text-align: left;
-    padding:.5rem 1.25rem;
-    background-color: rgba(0,0,0,.03);
-    border-bottom: 1px solid rgba(0,0,0,.125);
-    box-sizing: border-box;
-    font-size: 1.4rem;
-    /*border: 1px solid rgb(1, 87, 155);*/
-    background-color: rgba(1, 87, 155,0.8);
-    color: white;
-}
-.c-card-body{
-    padding:0 1.25rem;
-    height: 240px;
-    border: 1px solid rgb(1, 87, 155);
-}
-.c-card-title{
-    font-size:1.4rem!important;
-    color:rgb(1, 87, 155); 
-
-}
-.c-card-body li{
-    font-size:1.2rem;
-    line-height: 1.5;
-}
-.fa-check{
-    color:#43A047;
-    margin-right: 16px;
-}
-.fa-times{
-    color: #F44335;
-    margin-right: 16px;
-}
-.custom-btn{
-  padding: 4px 12px 4px 12px;
-  color: rgb(1, 87, 155);
-  border-radius: 5px;
-  font-size: 1.1rem;
-  border: 1px solid rgb(1, 87, 155);
-  background-color: white;
-}
-.c-btn{
-  padding: 6px 12px 6px 12px;
-  color: rgb(1, 87, 155);
-  border-radius: 5px;
-  font-size: 1.1rem;
-}
-.c-btn1{
-  border: 1px solid rgb(1, 87, 155);
-  padding: 6px 2px 6px 2px;
-  color: rgb(1, 87, 155);
-  border-radius: 5px;
-  font-size: 1.1rem;
-  padding-right: 50px;
-  padding-left: 50px;
-  padding-top: 6px;
-  padding-bottom: 6px;
-
-   /*position: absolute;*/
-  /*top: 260;*/
-}
-.c-btn:hover{
-  border: 1px solid rgb(1, 87, 155);
-  padding: 6px 12px 6px 12px;
-  background-color: rgb(1, 87, 155);
-  color: white;
-  border-radius: 5px;
-}
-.reg{
-    color: #009688;
-    /*padding-top: 20px;*/
-    font-size: 1.4rem;
-}
-.sidebar-box {
-  max-height: 180px;
-  position: relative;
-  overflow: hidden;
-  z-index: 2;
-  background-color: #e3f2fd;
-  background-color: #e0f2f1;
-  background-color:     rgba(224,242,241,0.2);
-  /*background-color: rgba(1, 87, 155,0.1);*/
-  /*width: 25%;*/
-}
-.sidebar-box .read-more { 
-  position: absolute; 
-  bottom: 0; 
-  left: 0;
-  width: 100%; 
-  text-align: center; 
-  margin: 0; padding: 2px 0; 
-  font-size: 1.2rem;
-
-    
-  /* "transparent" only works here because == rgba(0,0,0,0) */
-  background-image: linear-gradient(to bottom, transparent, black);
-  background-image: linear-gradient(to bottom, transparent,  rgba(224,242,241,0.8));
-  background-image: linear-gradient(to bottom, transparent,  rgba(255,255,255,0.8));
-}
-.sidebar-box .read-more span{ 
-    border-bottom: 2px solid rgb(1, 87, 155);
-    padding: 2px 5px;
-    font-size: 1.2rem;
-}
-.fa-check-circle{
-    margin-top: 10px;
-    margin-left: 10px;
-    color: green;
-    font-size: 1.4rem!important;
-}
-
-#info{
-    /*border: 1px solid rgba(0,0,0,0.2);position: relative;*/
-}
-.collapsible {
-  background-color: #777;
-  color: white;
-  cursor: pointer;
-  padding: 15px;
-  width: 100%;
-  border: none;
-  text-align: left;
-  outline: none;
-  font-size: 15px;
-
-}
-
-.active, .collapsible:hover {
-  background-color: #555;
-}
-
-.content {
-  padding: 0 18px;
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.2s ease-out;
-  background-color: #f1f1f1;
-}
-
-.bounce {
-    -moz-animation: bounce 3s infinite;
-    -webkit-animation: bounce 3s infinite;
-    animation: bounce 3s infinite;
-}
-@-moz-keyframes bounce {
-  0%, 20%, 50%, 80%, 100% {
-    -moz-transform: translateY(0);
-    transform: translateY(0);
-  }
-  40% {
-    -moz-transform: translateY(-20px);
-    transform: translateY(-20px);
-  }
-  60% {
-    -moz-transform: translateY(-15px);
-    transform: translateY(-15px);
-  }
-}
-@-webkit-keyframes bounce {
-  0%, 20%, 50%, 80%, 100% {
-    -webkit-transform: translateY(0);
-    transform: translateY(0);
-  }
-  40% {
-    -webkit-transform: translateY(-20px);
-    transform: translateY(-20px);
-  }
-  60% {
-    -webkit-transform: translateY(-15px);
-    transform: translateY(-15px);
-  }
-}
-@keyframes bounce {
-  0%, 20%, 50%, 80%, 100% {
-    -moz-transform: translateY(0);
-    -ms-transform: translateY(0);
-    -webkit-transform: translateY(0);
-    transform: translateY(0);
-  }
-  40% {
-    -moz-transform: translateY(-20px);
-    -ms-transform: translateY(-20px);
-    -webkit-transform: translateY(-20px);
-    transform: translateY(-20px);
-  }
-  60% {
-    -moz-transform: translateY(-15px);
-    -ms-transform: translateY(-15px);
-    -webkit-transform: translateY(-15px);
-    transform: translateY(-15px);
-  }
-}
-
-#email-info{
-  padding: 5px;
-}
-#registered-success-msg{
-  display: none;
-}
-#forgot_pwd{
-  color: #e65100;
-  text-decoration: underline;
-  margin-top: 10px;
-}
-#user_pwd{
-  margin-bottom: 5px;
-}
-#organizer_paid_msg{
-  color: green;
-  border: 1px solid green;
-  padding: 10px 5px;
-}
-    </style>
-
+    <link rel="stylesheet" href="{% static 'cdcontent/css/cdcontent.css' %}" type="text/css" media="screen" charset="utf-8" />
 {% endblock %}
+<!-- {% load announcements %} -->
 {% block heading %}
 <span>CD Content Creation</span>
 {% if user.is_authenticated %}
@@ -282,7 +26,6 @@
                         <div class="inner">
                             <div class="text-container">
                                 {{ notification.body|safe }}
-                                <!--<button type="button" class="close" data-dismiss="alert">&times;</button>-->
                             </div>
                         </div>
                     </div>
@@ -293,11 +36,11 @@
 {% block search %} {% endblock %}
 
 {% block content %}
-
     <div class="row">
   <div class="col-sm-12">
     <div class="collapse" id="collapseKey">
   <div class="card card-body">
+    {% if payee_list%}
     <table class="table table-bordered">
   <thead>
     <tr>
@@ -325,7 +68,6 @@
       </td>
       <td>{{item.expiry}}</td>
       <td>
-        
           {%for pay_tr_obj in item.payment_transaction.all%}
           <form id="receipt" action="{% url 'donate:receipt' %}" method="post">
             {% csrf_token %}
@@ -342,7 +84,8 @@
 {%endfor%}
         
       </td>
-      {% if not item.is_past_due %}
+      
+      {% if item.is_past_due %}
 	<form id="cdcontent_download" action="{% url 'cdcontent:create_cd_download' %}" method="post">
     {% csrf_token %}
           <input type="text" id="selected_foss{{item.id}}" name="selected_foss" value='{{item.get_selected_foss}}' >
@@ -353,22 +96,20 @@
       {% else %}
       <td>Expired</td>
       {% endif %}
-      
     </tr>
     {% endfor  %}
-  </tbody>
+    {% else %}
+    <tr><p class="no-past-foss">No Past FOSS Purchases !</p></tr>
+    {% endif %}
+</tbody>
 </table>
-    
   </div>
 </div>
   </div>
 </div>
-
 <div class="sidebar-box">
     <div class="row" id="info" >
-    <div >
-        <!-- <a href="#" id="div-close" style="position: absolute;right: 0;top: 0;margin-right: 20px;font-size: 2rem;" >x</a> -->
-        <!-- <span ></span> -->
+    <div>
     </div>
     <div class="col-md-7 c-card">
         <div class="c-card-header c-blue">Academic Institute (College/School)</div>
@@ -383,36 +124,31 @@
           <li><i class="fa fa-check "></i>Top performing students get calls for Job Fairs</li>
           <li><i class="fa fa-check "></i>For more details on academic subscription, pls contact training@spoken-tutorial.org</li>
         </ul>
-
         <a href="https://spoken-tutorial.org/change-in-policy/" class="c-btn" style="float: left;" target="_blank">Know More</a>
         <a href="https://process.spoken-tutorial.org/index.php/Software-Training#Contacts_For_Training" class="c-btn" style="float: right;" target="_blank">Contact State Manager</a>
         </div>
-        {% if not user.is_authenticated %}
-{% endif %}
     </div>
     <div class="col-md-4 c-card" style="float: right;">
         <div class="c-card-header c-blue" >Individual Learner</div>
-        
         <div class="c-card-body">
-            <h6 class="c-card-title l-blue ">
-          <span> < 100 MB  - <i class="fas fa-rupee-sign"></i> 99*</span><br>
-            <span>> 100 MB  - <i class="fas fa-rupee-sign"></i> 250</span>
+          <h6 class="c-card-title l-blue ">
+          <span> < 100 MB  - <i class="fas fa-rupee-sign"></i> <small>INR</small> 99*</span><br>
+            <span>> 100 MB  - <i class="fas fa-rupee-sign"></i> <small>INR</small> 250</span>
         </h6>
         <ul class="list-unstyled mt-3 mb-4">
           <li><i class="fa fa-check"></i>Download specific course content for as less as Rs.99 (+ GST) for upto 100MB and Rs.250 (+GST) upto 1 GB</li>
           <br>
           <li class="text-muted"><i class="fa fa-times no-allow "></i>Eligible for Certificates</li>
         </ul>
-        <!-- <small>*Excluding GST</small> -->
         </div>
     </div>
 </div>
 <div class="ball"></div>
     <p class="read-more">
-    <i class="fa fa-chevron-down bounce" aria-hidden="true" style="font-size: 2rem;color: rgb(1, 87, 155);"></i>  <a href="#" class="button">Read More</a>        
+    <i class="fa fa-chevron-down bounce" aria-hidden="true"></i>  <a href="#" class="button">Read More</a>        
     </p>
 </div>
-<div style="margin-top: 32px;display: flex;flex-direction: column;">
+<div class="policy-title">
     <button class="collapsible" style="background-color: rgb(1, 87, 155);">Why New Payment Policy of Spoken Tutorials ? <i class="fa fa-chevron-down" aria-hidden="true" style="float: right;"></i> </button>
 <div class="content row" style="padding: 0;width: 1110px;margin-left: 0px;">
     <div class="col-md-6" style="padding: 0; width: 550px;">
@@ -425,7 +161,6 @@
             Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
         </p>
     </div>
-  
 </div>
 </div>
 <form role="form" method="post" enctype="multipart/form-data" class="cdcontentform form-horizontal">
@@ -481,8 +216,6 @@
                     <table class="added-foss table table-condensed table-bordered table-hover" id="added-foss">
                     </table>
                 </div>
-
-    {% if not user.username == 'organizer_paid' %}
     <div id="rate-div" style="display: none">
     <table class="rate-chart table table-condensed table-bordered table-hover">
             <thead>
@@ -501,7 +234,6 @@
     <td >250 INR</td>
   </tr>
 </tbody>
-
 <thead>
   <tr>
     <th id ="user_file_size"></th>
@@ -511,47 +243,21 @@
   </tr>
 </thead>
 <thead >
-
-     {% if user.username == 'student_paid_insti' %}
 <tr>
-  <td>
-        <p>You are part of a paid college. Please contact your College Oranizer for free download. Or you can proceed with minimal fee below. <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#paymodal">
-  Make Payment
-</button> </p>    
-        </td>
-        
-    </tr>
-     {% endif %}
-    
-  <tr>
-     {% if not user.username == 'student_paid_insti' %}
     <td></td>
     <td><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#paymodal">
   Make Payment
 </button>
 </td>
 
-{% endif%}
 </tr>
 </thead>
 </table>
     </div>
-
-
-         {% endif %}  
-        
-
-    <div class="download-link">
-        
+<div class="download-link">        
+</div>
+<div class="user-message" >         
     </div>
-    <div class="user-message" >
-         
-    </div>
-    {% if user.username == 'organizer_paid' %}
-     <div class="download-a" >
-         
-     </div>
-     {% endif %}
     </div>
 </div>
 </form>
@@ -620,7 +326,7 @@
                     <span class="label label-success" id="otp_sent_msg" style="display: none; margin-top: 16px; padding: 5px 10px;" ></span>
                     </div>
                     <div class="form-group col-sm-10" id="registered-success-msg">
-                            <p>Congratulations ! You are registered on Spoken Tutorial. Please Check your mail for details. </p>
+                            <p>Congratulations ! You are now registered on Spoken Tutorial. Please Check your mail for details. </p>
                     </div>
 
                     <div class="form-group col-sm-10">
@@ -661,13 +367,8 @@
                 </table>
                     <div class="col-sm-10">
             {% csrf_token %}
-                    {% if user.is_authenticated %}
-                    <button  type= "submit" class="btn btn-primary mb-2 make-payment-btn" id="make_payment_auth">Make Payment</button>
-                    {% else %}
                     <button  type= "submit" class="btn btn-primary mb-2 make-payment-btn" id="make_payment"disabled>Make Payment</button>
-                    {% endif %}
-                    
-                    <button  type= "submit" class="btn btn-primary mb-2 make-payment-btn" id="download_btn" style="display: none;">Download Here</button>
+                    <button  class="btn btn-primary mb-2 make-payment-btn" id="download_btn" style="display: none;">Download Here</button>
                     </div>
             </form>
            </div> 
@@ -700,477 +401,90 @@
       </div>
     </div>
   </div>
-
-
 {% endblock %}
+
+
 {% block jsblock %}
+<script type="text/javascript" src="{% static 'cdcontent/js/cdcontent.js' %}"></script>
 <script src="{% static 'spoken/js/jquery.cookie.js' %}"></script>
-    <script type="text/javascript">
-        $(document).ready(function(){
-            var coll = document.getElementsByClassName("collapsible");
-var i;
-
-for (i = 0; i < coll.length; i++) {
-  coll[i].addEventListener("click", function() {
-    this.classList.toggle("active");
-    var content = this.nextElementSibling;
-    if (content.style.maxHeight){
-      content.style.maxHeight = null;
-    } else {
-      content.style.maxHeight = content.scrollHeight + "px";
-    } 
-  });
-}
-
-
-            $('#div-close').click(function(event){
-     $("#info").hide();
-});
-
-            var $el, $ps, $up, totalHeight;
-
-$(".sidebar-box .button").click(function() {
-  totalHeight = 0
-  $el = $(this);
-  $p  = $el.parent();
-  $up = $p.parent();
-  $ps = $('#info');
-  // measure how tall inside should be by adding together heights of all inside paragraphs (except read-more paragraph)
-  $ps.each(function() {
-    totalHeight += $(this).outerHeight();
-  });
-        
-  $up
-    .css({
-      // Set height to prevent instant jumpdown when max height is removed
-      "height": $up.height(),
-      "max-height": 9999
-    })
-    .animate({
-      "height": totalHeight
-    });
-  
-  // fade out read-more
-  $p.fadeOut();
-  
-  // prevent jump-down
-  return false;
-    
-});
-
-            if($('.foss_category').val() == '') {
-                $('.level').attr("disabled", "disabled");
-                $('.language').attr("disabled", "disabled");
+<script type="text/javascript">
+  $(document).ready(function(){
+      if($('.foss_category').val() == '') {
+          $('.level').attr("disabled", "disabled");
+          $('.language').attr("disabled", "disabled");
+      }
+      $('#id_email').on('focusout',function(){
+      var username = $('#id_name').val();
+      var email = $('#id_email').val();
+      $.ajax({
+          url:'/donate/send_onetime/',
+          type:'POST',
+          data:{
+              'username': username,
+              'email': email,
+              csrfmiddlewaretoken: '{{ csrf_token }}',
+          },
+        success: function(data) {
+            if (data['valid_email']=='1') {
+            $('#email-info').html('');
+            if(data['message']=="active_user"){
+                $("#send_otp").hide();
+                $("#pwd").show();
+                $("#forgot_pwd").show();
+                $("#email-info").html('This Email Id is already registered with Spoken Tutorials. Please enter your password to proceed.');
+                document.getElementById("email-info").style.color = "green";
             }
-            $('.foss_category').on("change", function(){
-                $('.level').val('');
-                $('.language').html('');
-                if($('.foss_category').val() == '') {
-                    $('.level').attr("disabled", "disabled");
-                    $('.language').attr("disabled", "disabled");
-                }else {
-                    $('.level').removeAttr('disabled');
-                }
-            });
-
-            $(".cdcontentform").on( "submit", function(event) {
-                event.preventDefault();
-                var url = $(location).attr('href');
-                $('.download-link').html('<i class="fa fa-circle-o-notch fa-spin fa-3x fa-fw"></i><span class="sr-only">Loading...</span> please do not refresh the page, we are preparing your download link');
-                var posting = $.post(url, $(this).serialize());
-
-                posting.done(function(data) {
-                    if(data.status) {
-                        var downloadLink = '<a href="' + data.path + '" title="Download cd content zip">Click here</a> to download the cd content zip file';
-                        $('.download-link').html(downloadLink);
-                    } else {
-                        var message = 'Something went wrong! please refresh the page and try again.'
-                        $('.download-link').html(message);
-                    }
-                });
-                posting.fail(function() {
-                    var message = 'Something went wrong! please refresh the page and try again.'
-                    $('.download-link').html(message);
-                });
-            });
-
-            $('.level').on("change", function(){
-                var foss = $('.foss_category').val();
-                var level = $(this).val();
-                $('.language').html('');
-                $('.language').attr("disabled", "disabled");
-                if(foss && level) {
-                    $.ajax({
-                        url: "/cdcontent/ajax-fill-languages/",
-                        type: "POST",
-                        data: {
-                            foss: foss,
-                            level: level
-                        },
-                        beforeSend: function() {
-                            $('.ajax-refresh-language').show();
-                        },
-                        success: function(data) {
-                            // loading languages
-                            if(data) {
-                                $('.language').html(data);
-                                $('.language').removeAttr('disabled');
-                            }
-                            $('.ajax-refresh-language').hide();
-                        }
-                    });
-                }
-            });
-
-            $('.add_foss_lang').on("click", function(){
-                $('.added-foss').show();
-                foss = $('.foss_category').val();
-                level = $('.level').val();
-                langs = JSON.stringify($('.language').val());
-                selectedfoss = $('.selected_foss').val();
-                if(foss && langs && level) {
-                    $.ajax({
-                        url: "/cdcontent/ajax-add-foss/",
-                        type: "POST",
-                        data: {
-                            foss: foss,
-                            langs: langs,
-                            level: level,
-                            selectedfoss: selectedfoss,
-                        },
-                        beforeSend: function() {
-                            $('.add_foss_lang').css('display', 'none');
-                            $('.ajax-refresh-add-foss').show();
-                        },
-                        success: function(data) {
-                            data = JSON.parse(data);
-                            if(data) {
-                                data = JSON.stringify(data);
-                                if(data != '{}') {
-                                    $('.selected_foss').val(data);
-                                     selectedfoss = $('.selected_foss').val();
-                                } else {
-                                    $('.selected_foss').val('');
-                                }
-                            }
-
-                            selectedfoss: $('.selected_foss').val();
-                            show_added_foss(selectedfoss);
-                            $('.ajax-refresh-add-foss').hide();
-                            $('.add_foss_lang').show();
-                        }
-                    });
-                    $('.add_foss_lang').show();
-                    $('.ajax-refresh-add-foss').hide();
-                }
-            });
-        });
-
-
-if ($.cookie('modal_status') != '1')
-    {
-    $('.alertmodal').modal('show');
-    $.cookie('modal_status', '1',{ expires: null}); 
-    }
-  $('.create_zip').prop('disabled', true); 
-
-        /* Slideshow */
-        var stop = 1
-        $('#slideshow').hover(function(){
-            stop = 0
-        }, function(){
-            stop = 1
-        });
-        if($(".announcement").length > 1){
-            $("#slideshow > div:gt(0)").hide();
-            setInterval(function() {
-              if(stop){
-                  $('#slideshow > div:first')
-                    .fadeOut(0)
-                    .next()
-                    .fadeIn(0)
-                    .end()
-                    .appendTo('#slideshow');
-                 }
-            },  5000);
+            else if(data['message']=='inactive_user'){
+                document.getElementById("otp_sent_msg").innerHTML = "OTP Re-sent";
+                document.getElementById('otp_sent_msg').className = 'label label-success';
+                $("#otp_sent_msg").show().delay(10000).fadeOut();
+            }
+            else{
+              $("#send_otp").show();
+            }
+            }else{
+                $('#email-info').html(data['email_validation']);
+            }      
         }
-        $('.close').click(function(){
-            $(".navbar-fixed-top").css({'top' : '0px', 'position' : 'fixed'});
-            $("#header-wrapper").css({'height' : '0px'});
-        });
-
-$('#otp_value').on('keyup',function(){
-
-
-
-var otp = $('#otp_value').val();
-var email = $('#id_email').val();
-
-if(otp.length>6){
-$.ajax({
-    url:"/donate/validate",
-    type:"POST",
-    data:{
-        "otp":otp,
-        "email":email,
-    },
-    success: function(data) {
-    if(data['validate']=='success'){
-      $('#registered-success-msg').show();
-document.getElementById("otp_sent_msg").innerHTML = "Login Successfull";
-document.getElementById('otp_sent_msg').className = 'label label-success';
-$("#otp_sent_msg").show();
-document.getElementById("make_payment").disabled = false;
-
-}
-    else {
-document.getElementById("otp_sent_msg").innerHTML = "Invalid OTP";
-document.getElementById('otp_sent_msg').className = 'label label-danger';
-$("#otp_sent_msg").show().delay(10000).fadeOut();
-}
-}
-
-});
-$("#otp_value").hide();
-$("#otp_value").show();
-}
-});
-
-
-$('#pwd').on('focusout',function(){
-    $('#invalid_credentials').html('');
-    document.getElementById("make_payment").disabled = false;
-    // document.getElementById("check-pwd").disabled = false;
-    var username = $('#id_name').val();
-    var email = $('#id_email').val();
-    var password = $('#id_password').val();
-    $.ajax({
-                    // url:'/donate/validate_user/',
-                    url:'/donate/validate_user/',
-                    type:'POST',
-                    data:{
-                        'username': username,
-                        'email': email,
-                        'password': password,
-                        csrfmiddlewaretoken: '{{ csrf_token }}',
-                    },
-                    success: function(data) {
-
-                      if (data['error_msg']=='') {
-
-                        var r = data['organizer_paid'];
-                        if (data['organizer_paid']=='1') {
-                          $('#organizer_info').show();
-                          $('#download_btn').show();
-                          $('#make_payment').hide();
-                          document.querySelector('#ShowButton').textContent = 'Hide';
-                        }
-                        else{
-                            console.log('oraganizer not paid');
-                        }
-
-                      }else{
-                            $('#invalid_credentials').html(data['error_msg']);
-
-                      }
-
-                      
-                            
-                    }
-                });
-});
-
-$('#id_email').on('focusout',function(){
-    validate_user_email()
-});
-
-function show_added_foss(selected_foss){
-    $.ajax({
-                                url: "/cdcontent/ajax-show-added-foss/",
-                                type: "POST",
-                                data: {
-                                    selectedfoss : selected_foss,
-                                },
-                                beforeSend: function() {
-                                    $('.add_foss_lang').css('display', 'none');
-                                    $('.ajax-refresh-add-foss').show();
-                                },
-                                success: function(data) {
-                                    header = '<caption class="col-left"><b>Selected FOSS List:<span class="pull-right"> ~ Total Size : '+data[1]+'</span></b></caption><tr ><th>FOSS</th><th>Level</th><th>Languages</th><th>Size</th>';
-                                    if(data) {
-                                        $('.added-foss').html(header + data[0]);
-                                        
-            var foss_table = document.getElementById("added-foss");
-            var row_count = document.getElementById("added-foss").rows.length;
-            for (var i = 0 ;i < row_count; i++) {
-                var x = document.getElementById("added-foss").rows[i].cells.length;
-                if (x==5) {
-                    var content = '<button type="button" class="btn delete-btn" class="delete-foss" onclick="delete_foss(this)"><i class="fa fa-trash-o"></i></button>'
-                    var td = document.getElementById("added-foss").rows[i].cells[4];
-                    td.innerHTML = content;   
-                }    
-}
-
-                                        if(data[2][0]=='UR') {
-                                        var message = ''
-                                         $('.create_zip').prop('disabled', true);
-                                         $('.user-message').html(message);
-                                         $('.download-a').html("Download");
-                              
-                     $("#rate-div").show();
-                     $("#user_file_size").html("Foss Purchase (INR) ");
-
-                                         document.getElementById("amount_to_pay").value = data[2][1];
-                                         document.getElementById("orig_value").value = data[2][1];
-
-                                          }
-                                        
-                                        if(data[2][0]=='RP') {
-                                        var message = 'You are part of our paid service.<br> Happy Downloading.<br> Please click on <b>Create Zip file</b> to proceed.'
-                                         $('.create_zip').prop('disabled', false);
-                                         $('.user-message').html(message);
-                                         $('.download-a').html("Download");
-                                    
-                                          }
-                                        
-                                        else {
-                                        var message = '<i>Amount to be paid.</i>'
-                                         $('.create_zip').prop('disabled', true);
-                                         $('.user-message').html(message);
-                                         $('.download-a').html("Download");
-
-                                         $("#rate-div").show();
-                                         $("#user_file_size").html("Foss Purchase (INR)");
-                                         document.getElementById("amount_to_pay").value = data[2][1];
-                                         document.getElementById("orig_value").value = data[2][1];
-                                        }
-                     if (Object.keys(JSON.parse(selectedfoss)).length === 0) {
-                        document.getElementById("amount_to_pay").value = '0';
-                     }
-                     calculate_total_amt();
-
-                                    }
-                                    $('.ajax-refresh-add-foss').hide();
-                                }
-                            });
-}
-function delete_foss(elem){
-    var foss_id = elem.parentNode.id;
-    var foss_lang_obj = JSON.parse(selectedfoss);
-    var foss_to_delete = foss_lang_obj[foss_id];
-    var langs = foss_to_delete[0];
-    var size = foss_to_delete[1];
-    delete foss_lang_obj[foss_id];
-    selectedfoss = JSON.stringify(foss_lang_obj);
-    $('.selected_foss').val(selectedfoss);
-    var add_foss_btn = document.getElementsByClassName("add_foss_lang");
-    show_added_foss(selectedfoss);
-    if (Object.keys(foss_lang_obj).length === 0) {
-        $('.added-foss').hide();
-        document.getElementById("amount_to_pay").value = '0';
-    }
-    $('.ajax-refresh-add-foss').hide();
-    $('.add_foss_lang').show();
-}
-
-function send_data(){
-var value = $('#amount_to_pay').val();
-document.getElementById("mod_amount").value = value;
-$(".paymodal").show();
-}
-
-function send_otp(){
-        $("#send_otp").show();
-        document.getElementById("otp_sent_msg").innerHTML = "OTP sent";
-        document.getElementById('otp_sent_msg').className = 'label label-success';
-        $("#otp_value").show();
-        $("#otp_sent_msg").show().delay(10000).fadeOut();
-            }
-
-function validate_user_email(){
+    });
+    });
+    $('#pwd').on('focusout',function(){
+        $('#invalid_credentials').html('');
+        document.getElementById("make_payment").disabled = false;
         var username = $('#id_name').val();
         var email = $('#id_email').val();
-                $.ajax({
-                    url:'/donate/send_onetime/',
-                    type:'POST',
-                    data:{
-                        'username': username,
-                        'email': email,
-                        csrfmiddlewaretoken: '{{ csrf_token }}',
-                    },
-                    success: function(data) {
-                        if (data['valid_email']=='1') {
-                        $('#email-info').html('');
-                        if(data['message']=="active_user"){
-                            $("#send_otp").hide();
-                            $("#pwd").show();
-                            $("#forgot_pwd").show();
-                            $("#email-info").html('This Email Id is already registered with Spoken Tutorials. Please enter your password to proceed.');
-                            document.getElementById("email-info").style.color = "green";
-                            // document.getElementById("make_payment").disabled = false;
-                        }
-                        else if(data['message']=='inactive_user'){
-                            document.getElementById("otp_sent_msg").innerHTML = "OTP Re-sent";
-                            document.getElementById('otp_sent_msg').className = 'label label-success';
-                            $("#otp_sent_msg").show().delay(10000).fadeOut();
-                        }
-                        else{
-                          $("#send_otp").show();
-                        }
-
-                        }else{
-                            $('#email-info').html(data['email_validation']);
-                        }      
-                    }
-                });
+        var password = $('#id_password').val();
+        $.ajax({
+            url:'/donate/validate_user/',
+            type:'POST',
+            data:{
+                'username': username,
+                'email': email,
+                'password': password,
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+            },
+            success: function(data) {
+              if (data['error_msg']=='') {
+                var r = data['organizer_paid'];
+                if (data['organizer_paid']=='1') {
+                  $('#organizer_info').show();
+                  $('#download_btn').show();
+                  $('#make_payment').hide();
+                  $('#id_amount').hide();
+                }
+              }else{
+                  $('#invalid_credentials').html(data['error_msg']);
+              }       
             }
-
-$('.make-payment-btn').click(function(event){
-var name = $('#payee_name').val();
-var email = $('#payee_email').val();
+            });
+        });
 });
 
-
-
+if ($.cookie('modal_status') != '1'){
+    $('.alertmodal').modal('show');
+    $.cookie('modal_status', '1',{ expires: null}); 
+}
 </script>
 
-<script type="text/javascript">
-     $('#paymodal').on('show.bs.modal', function (event) {
-        
-        var foss_lang_obj = JSON.parse(selectedfoss);
-        var foss_selected = [];
-        var langs_selected = [];
-        var level_selected = [];
-
-        for(var key in foss_lang_obj) {
-            var value = foss_lang_obj[key];
-            var langs = value[0];
-            l = String(langs);
-            foss_selected.push(key);
-            langs_selected.push(value[0]);
-            level_selected.push(value[1]);
-            langs_selected.push('|');
-        }
-        var amount = $('#amount_to_pay').val();
-
-        var modal = $(this);
-        modal.find('.modal-body input[name="amount"]').val(amount)
-        modal.find('.modal-body input[name="amount"]').prop("readonly", true);
-
-        if (foss_selected && langs_selected) {
-            modal.find('.modal-body input[name="foss_id"]').val(foss_selected);
-            modal.find('.modal-body input[name="language_id"]').val(langs_selected);
-            modal.find('.modal-body input[name="level_id"]').val(level_selected);
-            var row_count = document.getElementById("display-foss").rows.length;
-        for (var i = 0 ;i < row_count; i++) {
-            var x = document.getElementById("display-foss").rows[i].cells.length;
-            if (x==5) {
-                var row = document.getElementById("display-foss").rows[i];
-                row.deleteCell(-1);
-            }    
-        }
-    }        
-});
-
-</script>
 {% endblock %}
+
