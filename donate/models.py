@@ -25,6 +25,18 @@ class Payee(models.Model):
     #def is_past_due(self):
     #    now = timezone.now()
     #    return now <= self.expiry
+    
+    def get_selected_foss(paymentdetail):
+        selected_foss = {}
+        c = 0
+        cd_foss_langs = CdFossLanguages.objects.filter(payment=paymentdetail).values('foss_id','lang_id')
+        for key,value in cd_foss_langs:
+            if cd_foss_langs[c][key] in selected_foss.keys():
+               selected_foss[cd_foss_langs[c][key]].append([cd_foss_langs[c][value]])
+            else:
+               selected_foss[cd_foss_langs[c][key]] = [cd_foss_langs[c][value]]
+            c= c+1
+        return selected_foss
  
 class CdFossLanguages(models.Model):
     payment = models.ForeignKey(Payee, on_delete=models.PROTECT)

@@ -228,7 +228,7 @@ def add_srt_file(archive, tr_rec, filepath, eng_flag, srt_files):
 
 
 def internal_computation(request):
-    print("ic :",request.POST.get('selected_foss', {}))
+    print("ic :",request.POST)
     zipfile_name = '{}.zip'.format(datetime.datetime.now().strftime('%Y%m%d%H%M%S%f'))
     file_obj = open('{}cdimage/{}'.format(settings.MEDIA_ROOT, zipfile_name), 'wb')
     archive = zipfile.ZipFile(file_obj, 'w', zipfile.ZIP_DEFLATED, allowZip64=True)
