@@ -45,18 +45,6 @@ def get_updated_form(transaction):
         
     
     if transaction.status == 'S':
-        form.fields[ 'selected_foss'].initial = get_selected_foss(transaction.paymentdetail.id)
+        form.fields[ 'selected_foss'].initial = transaction.paymentdetail.get_selected_foss()
         
     return form
-
-def get_selected_foss(paymentdetail_id):
-    selected_foss = {}
-    c = 0
-    cd_foss_langs = CdFossLanguages.objects.filter(payment=paymentdetail_id).values('foss_id','lang_id')
-    for key,value in cd_foss_langs:
-        if cd_foss_langs[c][key] in selected_foss.keys():
-           cd_foss_langs[c][key].append([cd_foss_langs[c][value]])
-        else:
-           cd_foss_langs[c][key] = [cd_foss_langs[c][value]]
-        c= c+1
-    return selected_foss

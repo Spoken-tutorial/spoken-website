@@ -71,7 +71,7 @@
           {%for pay_tr_obj in item.payment_transaction.all%}
           <form id="receipt" action="{% url 'donate:receipt' %}" method="post">
             {% csrf_token %}
-            <input type="text" id="name{{pay_tr_obj.paymentdetail.id}}" name="name" value="{{pay_tr_obj.paymentdetail.name}}" >
+            <input type="text" id="name{{pay_tr_obj.paymentdetail.id}}" name="name" value="{{pay_tr_obj.paymentdetail.name}}" style="display: none">
             <input type="text" id="email{{pay_tr_obj.paymentdetail.id}}" name="email" value="{{pay_tr_obj.paymentdetail.email}}" style="display: none">
             <input type="text" id="amount{{pay_tr_obj.paymentdetail.id}}" name="amount" value="{{pay_tr_obj.amount}}" style="display: none">
             <input type="text" id="reqId{{pay_tr_obj.paymentdetail.id}}" name="reqId" value="{{pay_tr_obj.reqId}}" style="display: none">
@@ -84,14 +84,15 @@
 {%endfor%}
         
       </td>
+
       
       {% if item.is_past_due %}
-	<form id="cdcontent_download" action="{% url 'cdcontent:create_cd_download' %}" method="post">
+	<form id="cdcontent_download{{item.id}}" action="{% url 'cdcontent:create_cd_download' %}" method="post">
     {% csrf_token %}
-          <input type="text" id="selected_foss{{item.id}}" name="selected_foss" value='{{item.get_selected_foss}}' >
+          <input type="text" id="selected_foss{{item.id}}" name="selected_foss" value='{{item.get_selected_foss}}' style="display: none">
   </form>
       <td>
-        <button type="submit" form="cdcontent_download" value="Submit" class="custom-btn">Download</button>
+        <button type="submit" form="cdcontent_download{{item.id}}" value="Submit" class="custom-btn">Download</button>
       </td>
       {% else %}
       <td>Expired</td>
