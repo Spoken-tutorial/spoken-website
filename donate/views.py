@@ -160,7 +160,6 @@ def send_onetime(request):
     email = request.POST.get('email')
     temp = user_name.split(" ")
     
-
     try:
         fname, lname = temp[0], temp[1]
     except:
@@ -217,12 +216,7 @@ def validate_user(request):
                 login(request, user)
                 try:
                     idcase = AcademicKey.objects.get(academic_id=request.user.organiser.academic_id)
-                    today = date.today()
-                    expiry_date = idcase.expiry_date
-                    if expiry_date >= today  :
-                        context['organizer_paid'] = '1'
-                    else:
-                        context['organizer_paid'] = '0'
+                    context['organizer_paid'] = '1' if (idcase.expiry_date >= date.today()) else '0'
                 except :
                     context['organizer_paid'] = '0'
 

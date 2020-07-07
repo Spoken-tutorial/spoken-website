@@ -4,7 +4,7 @@ from .helpers import GENDER_CHOICES, PAY_FOR_CHOICES
 from creation.models import FossCategory, Language, Level
 import uuid
 from datetime import datetime
-from django.utils import timezone
+from pytz import timezone
 import json
 
 class Payee(models.Model):
@@ -21,11 +21,6 @@ class Payee(models.Model):
     updated = models.DateTimeField(auto_now=True)
     expiry = models.DateTimeField(blank=True, null=True)
     user = models.ForeignKey(User,on_delete=models.PROTECT,related_name="payment_user" )
-
-    #@property
-    #def is_past_due(self):
-    #    now = timezone.now()
-    #    return now <= self.expiry
     
     def get_selected_foss(self):
         selected_foss = {}
@@ -44,7 +39,13 @@ class Payee(models.Model):
                  selected_foss[foss_json] = [[langs_json],level_json]
             c= c+1
         return json.dumps(selected_foss)
- 
+
+    @property
+    def is_past_due(self):
+        now_utc = datetime.now(timezone('UTC'))
+        return now_utc <= self.expiry
+
+      
 class CdFossLanguages(models.Model):
     payment = models.ForeignKey(Payee, on_delete=models.PROTECT)
     foss = models.ForeignKey(FossCategory, on_delete=models.PROTECT,related_name="payment_foss")
