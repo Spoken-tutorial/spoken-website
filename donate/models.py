@@ -5,6 +5,7 @@ from creation.models import FossCategory, Language, Level
 import uuid
 from datetime import datetime
 from django.utils import timezone
+import json
 
 class Payee(models.Model):
     name = models.CharField(max_length=255)
@@ -26,17 +27,23 @@ class Payee(models.Model):
     #    now = timezone.now()
     #    return now <= self.expiry
     
-    def get_selected_foss(paymentdetail):
+    def get_selected_foss(self):
         selected_foss = {}
         c = 0
-        cd_foss_langs = CdFossLanguages.objects.filter(payment=paymentdetail).values('foss_id','lang_id')
-        for key,value in cd_foss_langs:
-            if cd_foss_langs[c][key] in selected_foss.keys():
-               selected_foss[cd_foss_langs[c][key]].append([cd_foss_langs[c][value]])
+        cd_foss_langs = CdFossLanguages.objects.filter(payment=self.id).order_by("lang_id").values('foss_id','lang_id','level_id')
+        for foss,langs,level in cd_foss_langs:
+            foss_json = json.dumps(cd_foss_langs[c][foss])
+            langs_json = json.dumps(cd_foss_langs[c][langs])
+            if not cd_foss_langs[c][level]:
+                 level_json = 0
             else:
-               selected_foss[cd_foss_langs[c][key]] = [cd_foss_langs[c][value]]
+                 level_json = cd_foss_langs[c][level]
+            if foss_json in selected_foss.keys():
+                 selected_foss[foss_json][0].append(langs_json)
+            else:
+                 selected_foss[foss_json] = [[langs_json],level_json]
             c= c+1
-        return selected_foss
+        return json.dumps(selected_foss)
  
 class CdFossLanguages(models.Model):
     payment = models.ForeignKey(Payee, on_delete=models.PROTECT)
@@ -56,3 +63,6 @@ class PaymentTransaction(models.Model):
     msg = models.CharField(max_length=100)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('paymentdetail','requestType','amount')
