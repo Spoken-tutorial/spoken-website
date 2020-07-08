@@ -16,36 +16,32 @@ from django.db.models import Q
 from creation.models import TutorialResource,\
                             TutorialDetail, FossCategory, TutorialDuration
 from creation.views import get_video_info                            
-from django.conf import settings                                                        
+from django.conf import settings
+
 class Command(BaseCommand):
 
     @tx.atomic
     def handle(self, *args, **options):
-        count = 0
-        check = True
-        time = 0
-        tutorials = TutorialDetail.objects.all()
-        for tutorial in tutorials:
+        tresources = TutorialResource.objects.all()
+        for tresource in tresources:
+            if tresource.video:
+                video_path = settings.MEDIA_ROOT + "videos/" + \
+                            str(tresource.tutorial_detail.foss.pk) + "/" + str(tresource.tutorial_detail.pk) + "/" + tresource.video
                 try:
-                    tr_rec = TutorialResource.objects.get(
-                        tutorial_detail_id=tutorial.id, language_id=22)
-                    video_path = settings.MEDIA_ROOT + "videos/" + \
-                        str(tr_rec.tutorial_detail.foss_id) + "/" + str(tr_rec.tutorial_detail_id) + "/" + tr_rec.video
-                    video_info = get_video_info(video_path)
-                    time = video_info['duration']
-                    check = True
-                except Exception as e:
-                    check = False
-                    time = 0
-                    print(e)
-                
-                '''This logic is written to handle this error.
-                An error occurred in the current transaction.
-                You can't execute queries until the end of the 'atomic' block. '''
-
-                if check:
-                    tutorial_time = TutorialDuration()
-                    tutorial_time.foss = tutorial.foss_id
-                    tutorial_time.tutorial = tutorial
-                    tutorial_time.duration = time
-                    tutorial_time.save()
+                    td = TutorialDuration.objects.get(tresource=tresource)
+                    if td.created == tresource.updated:
+                        continue
+                    else:
+                        video_info = get_video_info(video_path)
+                        td.duration = video_info['duration']
+                        td.save()
+                        #print(tresource.tutorial_detail.tutorial + "duration updated" + str(video_info['duration']))
+                except TutorialDuration.DoesNotExist as e:
+                    try:
+                        video_info = get_video_info(video_path)
+                        TutorialDuration.objects.create(tresource=tresource, duration=video_info['duration'], created=tresource.updated)
+                        #print(tresource.tutorial_detail.tutorial + "duration created" + str(video_info['duration']))
+                    except Exception as e:
+                        print(e)
+        print('Completed')
+                    

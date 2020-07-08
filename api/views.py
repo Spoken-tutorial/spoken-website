@@ -18,6 +18,7 @@ from rest_framework.response import Response
 from django.views.decorators.cache import cache_page
 from django.utils.decorators import method_decorator
 from spoken.config import FOSS_API_LIST
+from django.core.cache import cache
 
 @csrf_exempt
 def video_list(request):
@@ -188,28 +189,33 @@ def get_tutorialdetails(request, tutid):
 
 class RelianceJioAPI(APIView):
 
-    @method_decorator(cache_page(60*60))
+    #@method_decorator(cache_page(60*60))
     def get(self, request, format='json'):
-        foss = FOSS_API_LIST
-        lists=[]
-        category_list=[]
-        lang_en='English'
-        languages = Language.objects.all().exclude(name=lang_en)
-        for f in foss:
-            f = FossCategory.objects.get(pk=f)
-            tr_en = TutorialResource.objects.filter(Q(status=1) | Q(status=2),tutorial_detail__foss=f, language__name=lang_en)
-            lists.append(self.get_foss_serialized(request, tr_en, lang_en))
-            for l in languages:
-                tr = TutorialResource.objects.filter(Q(status=1) | Q(status=2),tutorial_detail__foss=f, language=l)
-                if tr.count() == tr_en.count():
-                    lists.append(self.get_foss_serialized(request, tr, l.name))
-                else:
-                    continue
-            category_serializer = RelianceJioCategorySerializer(tr_en, context={'category':f.foss, 'lists': lists})
-            lists = []
-            category_list.append(category_serializer.data)
-        serializer = RelianceJioSerializer(tr_en, context={'spokentutorials' : category_list})
-        return Response(serializer.data)
+        jio_data = cache.get('jio_data')
+        if jio_data:
+            return Response(jio_data)
+        else:
+            foss = FOSS_API_LIST
+            lists=[]
+            category_list=[]
+            lang_en='English'
+            languages = Language.objects.all().exclude(name=lang_en)
+            for f in foss:
+                f = FossCategory.objects.get(pk=f)
+                tr_en = TutorialResource.objects.filter(Q(status=1) | Q(status=2),tutorial_detail__foss=f, language__name=lang_en)
+                lists.append(self.get_foss_serialized(request, tr_en, lang_en))
+                for l in languages:
+                    tr = TutorialResource.objects.filter(Q(status=1) | Q(status=2),tutorial_detail__foss=f, language=l)
+                    if tr.count() == tr_en.count():
+                        lists.append(self.get_foss_serialized(request, tr, l.name))
+                    else:
+                        continue
+                category_serializer = RelianceJioCategorySerializer(tr_en, context={'category':f.foss, 'lists': lists})
+                lists = []
+                category_list.append(category_serializer.data)
+            serializer = RelianceJioSerializer(tr_en, context={'spokentutorials' : category_list})
+            cache.set('jio_data', serializer.data)
+            return Response(serializer.data)
     
     def get_foss_serialized(self, request, tr, language):
         video_serializer = RelianceJioVideoSerializer(tr, context={'request':request}, many=True)
