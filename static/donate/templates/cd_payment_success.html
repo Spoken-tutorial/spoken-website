@@ -97,7 +97,7 @@
             </div>
         </div>
     </form>
-<form id="cdcontent_download" action="{% url 'cdcontent:create_cd_download' %}" method="post">
+<form id="cdcontent_download" action="{% url 'cdcontent:create_cd_download' 'general' %}" method="post">
 {% csrf_token %}
                     <div class="form-group">
                         <div class="col-lg-8">

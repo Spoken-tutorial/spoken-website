@@ -96,7 +96,7 @@
 
       
       {% if item.is_past_due %}
-	<form id="cdcontent_download{{item.id}}" action="{% url 'cdcontent:create_cd_download' %}" method="post">
+	<form id="cdcontent_download{{item.id}}" action="{% url 'cdcontent:create_cd_download' 'general' %}" method="post">
     {% csrf_token %}
           <input type="text" id="selected_foss{{item.id}}" name="selected_foss" value='{{item.get_selected_foss}}' style="display: none">
   </form>
@@ -173,7 +173,7 @@
     </div>
 </div>
 </div>
-<form role="form" method="post" enctype="multipart/form-data" class="cdcontentform form-horizontal">
+<form role="form" id="main_cddownload" method="post" enctype="multipart/form-data" class="cdcontentform form-horizontal">
         <div class="row well bs-component" style="margin-top: 20px;">
             <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
                 <div class="alert alert-danger" role="alert">
@@ -286,7 +286,7 @@
         <div class="modal-body"> 
         <div class="row">
            <div class="col-sm-12">
-               <form method="post" action="/donate/initiate_payment" class="form-horizontal">
+               <form method="post" id="quickpay_form" action="/donate/initiate_payment" class="form-horizontal">
                 {% csrf_token %}
                     <div class="form-group col-sm-10">
                         {{ payment_form.name }}
@@ -380,7 +380,7 @@
                     {% else %}
                     <button  type= "submit" class="btn btn-primary mb-2 make-payment-btn" id="make_payment" disabled>Make Payment</button>
                     {% endif %}
-                    <button  class="btn btn-primary mb-2 make-payment-btn" id="download_btn" style="display: none;">Download Here</button>
+                    <button type="submit" form="main_cddownload" class="btn btn-primary mb-2 make-payment-btn" id="download_btn" style="display: none;">Download Here</button>
                     </div>
             </form>
            </div> 
