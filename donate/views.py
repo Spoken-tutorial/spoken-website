@@ -19,7 +19,7 @@ from django.views.generic import CreateView, DetailView
 from certificate.views import _clean_certificate_certificate
 from django.urls import reverse_lazy
 from cdcontent.forms import CDContentForm
-from cdcontent.views import internal_computation
+from cdcontent.views import internal_computation,is_organizer_paid
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from datetime import datetime
@@ -214,12 +214,7 @@ def validate_user(request):
             error_msg = ''
             if user.is_active:
                 login(request, user)
-                try:
-                    idcase = AcademicKey.objects.get(academic_id=request.user.organiser.academic_id)
-                    context['organizer_paid'] = '1' if (idcase.expiry_date >= date.today()) else '0'
-                except :
-                    context['organizer_paid'] = '0'
-
+                context['organizer_paid'] = is_organizer_paid(request)
             else:
                 error_msg = "Your account is disabled.<br>\
                             Kindly activate your account by clicking on the activation link which has been sent to your registered email %s.<br>\
