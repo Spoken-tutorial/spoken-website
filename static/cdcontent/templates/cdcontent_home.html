@@ -96,7 +96,7 @@
 
       
       {% if item.is_past_due %}
-	<form id="cdcontent_download{{item.id}}" action="{% url 'cdcontent:create_cd_download' %}" method="post">
+	<form id="cdcontent_download{{item.id}}" action="{% url 'cdcontent:create_cd_download' 'general' %}" method="post">
     {% csrf_token %}
           <input type="text" id="selected_foss{{item.id}}" name="selected_foss" value='{{item.get_selected_foss}}' style="display: none">
   </form>

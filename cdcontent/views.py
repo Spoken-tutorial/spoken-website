@@ -227,7 +227,7 @@ def add_srt_file(archive, tr_rec, filepath, eng_flag, srt_files):
             archive.write(settings.MEDIA_ROOT + filepath, 'spoken/' + filepath)
 
 
-def internal_computation(request):
+def internal_computation(request, user_type):
     print("ic :",request.POST)
     zipfile_name = '{}.zip'.format(datetime.datetime.now().strftime('%Y%m%d%H%M%S%f'))
     file_obj = open('{}cdimage/{}'.format(settings.MEDIA_ROOT, zipfile_name), 'wb')
@@ -321,7 +321,10 @@ def internal_computation(request):
     file_obj.close()
     file_path= os.path.dirname(os.path.realpath(__file__))+'/../media/cdimage/{}'.format(zipfile_name)
     response = HttpResponse(open(file_path, 'rb'), content_type='application/zip')
-    return response
+    if user_type == 'paid':
+        return zipfile_name
+    elif user_type == 'general':
+        return response
 
 @csrf_exempt
 def home(request):
@@ -330,7 +333,7 @@ def home(request):
 
         if form.is_valid():
             try:
-                zipfile_name = internal_computation(request)
+                zipfile_name = internal_computation(request, 'paid')
                 # wrapper = FileWrapper(temp)
                 # response = HttpResponse(wrapper, content_type='application/zip')
                 # response['Content-Disposition'] = 'attachment; filename=spoken-tutorial-cdcontent.zip'
