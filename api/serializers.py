@@ -1,6 +1,6 @@
 from builtins import object
 from django.contrib.auth.models import User
-from creation.models import TutorialResource, TutorialDetail, FossSuperCategory, FossCategory, Language
+from creation.models import TutorialResource, TutorialDetail, FossSuperCategory, FossCategory, Language,TutorialDuration
 from rest_framework import serializers
 from django.conf import settings
 from creation.views import get_video_info
@@ -75,10 +75,14 @@ class RelianceJioVideoSerializer(serializers.ModelSerializer):
                 str(obj.tutorial_detail.foss.pk) + '/' + str(obj.tutorial_detail.pk) + '/' +\
                 obj.tutorial_detail.tutorial.replace(' ', '-') + '-' + 'Big' + '.png')]
     def get_duration(self, obj):
-        video_path = settings.MEDIA_ROOT+'videos/'+str(obj.tutorial_detail.foss.pk)+'/'+\
-            str(obj.tutorial_detail.pk)+'/'+obj.video
-        video_info = get_video_info(video_path)
-        return video_info['duration']
+        try:
+            td = TutorialDuration.objects.get(tresource=obj)
+        except TutorialDuration.DoesNotExist as e:
+            video_path = settings.MEDIA_ROOT+'videos/'+str(obj.tutorial_detail.foss.pk)+'/'+\
+                str(obj.tutorial_detail.pk)+'/'+obj.video
+            video_info = get_video_info(video_path)
+            return video_info['duration']
+        return td.duration
 
 class RelianceJioLanguageSerializer(serializers.Serializer):
     language = serializers.SerializerMethodField()

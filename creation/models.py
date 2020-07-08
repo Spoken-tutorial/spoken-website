@@ -527,7 +527,6 @@ class LanguageManager(models.Model):
         unique_together = (('user', 'language'),)
 
 class TutorialDuration(models.Model):
-
-    tutorial = models.ForeignKey(TutorialDetail)
+    tresource = models.ForeignKey(TutorialResource, on_delete=models.PROTECT , null=True)
     duration = models.CharField(max_length=15)
-        
+    created = models.DateTimeField(null=True)
