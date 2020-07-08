@@ -319,6 +319,7 @@ function show_added_foss(selected_foss){
          $('.user-message').html(message);
          $('.download-a').html("Download");
          $("#rate-div").hide();
+         $('.user-message').addClass("user-message-highlight");
         }
         else {
          $('.create_zip').prop('disabled', true);
