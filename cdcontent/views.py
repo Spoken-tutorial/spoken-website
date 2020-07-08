@@ -12,7 +12,7 @@ from django.conf import settings
 from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import render
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_protect, csrf_exempt
 from django.template.context_processors import csrf
 
 # Spoken Tutorial Stuff
@@ -323,6 +323,7 @@ def internal_computation(request):
     response = HttpResponse(open(file_path, 'rb'), content_type='application/zip')
     return response
 
+@csrf_exempt
 def home(request):
     if request.method == 'POST':
         form = CDContentForm(request.POST)
