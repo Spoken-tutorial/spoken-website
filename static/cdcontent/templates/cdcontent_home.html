@@ -9,7 +9,7 @@
 <!-- {% load announcements %} -->
 {% block heading %}
 <span>CD Content Creation</span>
-{% if user.is_authenticated %}
+{% if user.is_authenticated and organizer_paid == '0' %}
 <span>
   <a data-toggle="collapse" href="#collapseKey" role="button" aria-expanded="false" aria-controls="collapseKey" id="key-btn">
     Past FOSS Purchase
@@ -46,7 +46,7 @@
     <tr>
       <th scope="col">#</th>
       <th scope="col">Date Of Purchase</th>
-      <th scope="col">FOSS Courses </th>
+      <th scope="col">FOSS Courses <span class="text-muted" style="font-style: italic;"> (Level , Language)</span> </th>
       <th scope="col">Expiry</th>
       <th scope="col">Receipt</th>
       <th scope="col">Download Link</th>
@@ -60,9 +60,19 @@
       <td>
           {% for p in item.cdfosslanguages_set.all %}
           {% if forloop.last %}
-          {{p.foss}} ({{p.lang}})
+          {% if p.level %}
+          {{p.foss}} <span class="text-muted" style="font-style: italic;">({{p.level}} , {{p.lang}})</span>
           {% else %}
-          {{p.foss}} ({{p.lang}}) , 
+          {{p.foss}} <span class="text-muted" style="font-style: italic;">(All , {{p.lang}})</span>
+          {% endif %}
+          
+          {% else %}
+          {% if p.level %}
+          {{p.foss}} <span class="text-muted" style="font-style: italic;">({{p.level}} , {{p.lang}})</span> ,
+          {% else %}
+          {{p.foss}} <span class="text-muted" style="font-style: italic;">(All , {{p.lang}})</span> ,
+          {% endif %}
+          
           {% endif %}
     {% endfor  %}
       </td>

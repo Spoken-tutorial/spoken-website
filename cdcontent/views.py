@@ -4,7 +4,7 @@ from builtins import str
 import json
 import os
 import zipfile
-from datetime import datetime
+from datetime import datetime,date
 
 # Third Party Stuff
 from django.conf import settings
@@ -354,11 +354,9 @@ def home(request):
             'cdfosslanguages_set__foss','cdfosslanguages_set__lang',
             'payment_transaction').filter(user=request.user)
         context['payee_list'] = payee_list
-
     context.update(csrf(request))
-
+    context['organizer_paid'] = is_organizer_paid(request)
     return render(request, "cdcontent/templates/cdcontent_home.html", context)
-
 
 @csrf_exempt
 def ajax_fill_languages(request):
@@ -564,3 +562,12 @@ def check_user_details(request, filesize):
         return ['RP','No Limit']
     else:
         return [user_type, amount]
+
+# return '1' if organizer belongs to paid college with valid expiry date, else '0'
+def is_organizer_paid(request):
+    try:
+        idcase = AcademicKey.objects.get(academic_id=request.user.organiser.academic_id)
+        organizer_paid = '1' if (idcase.expiry_date >= date.today()) else '0'
+    except:
+        organizer_paid = '0'
+    return organizer_paid
