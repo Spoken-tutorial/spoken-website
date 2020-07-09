@@ -1102,7 +1102,7 @@ def rp_invigilator(request, status, code, userid):
 def rp_accountexecutive(request, status, code, userid):
     """ Resource person: active accountexecutive """
     user = request.user
-    accountexecutive_in_rp_state = Accountexecutive.objects.filter(user_id=userid, academic=AcademicCenter.objects.filter(state=State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)))
+    accountexecutive_in_rp_state = Accountexecutive.objects.filter(user_id=userid, academic__in=AcademicCenter.objects.filter(state__in=State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)))
     if not (user.is_authenticated() and accountexecutive_in_rp_state and ( is_event_manager(user) or is_resource_person(user) or (status == 'active' or status == 'block'))):
         raise PermissionDenied('You are not allowed to view this page')
 
