@@ -325,8 +325,10 @@
                     
 
                     <div class="form-group col-sm-10 text-center" id="organizer_info" style="display: none;">
-                      <p id="organizer_paid_msg">Congratulations! You are a part of a Registered College & are entitled to free download</p>
-    
+                      <p id="organizer_paid_msg">Congratulations! You are a part of a Registered College & are entitled to free download.
+                      <br>
+                     <span class="organizer_paid_info text-muted">You are logged in successfully. Please proceed on cd content page.</span>
+                      </p>
                     </div>
                     <div class="form-group col-sm-10 text-center" id="logged_success" style="display: none;">
                       <span style="color: #43A047;">Logged In Successfully </span>
@@ -380,7 +382,7 @@
                     {% else %}
                     <button  type= "submit" class="btn btn-primary mb-2 make-payment-btn" id="make_payment" disabled>Make Payment</button>
                     {% endif %}
-                    <button type="submit" form="main_cddownload" class="btn btn-primary mb-2 make-payment-btn" id="download_btn" style="display: none;">Download Here</button>
+                    <button type="submit" form="main_cddownload" class="btn btn-primary mb-2 make-payment-btn" id="download_btn" style="display: none;">Close</button>
                     </div>
             </form>
            </div> 
@@ -388,8 +390,7 @@
             
         </div>
         <div class="modal-footer">
-                
-        </div>
+      </div>
       </div>
     </div>
   </div>
@@ -482,7 +483,15 @@
                   $('#organizer_info').show();
                   $('#download_btn').show();
                   $('#make_payment').hide();
-                  $('#id_amount').hide();
+                  $('#id_amount').parent().hide();
+                  $('#id_country').parent().hide();
+                  $('#id_state').parent().hide();
+                  $('#id_gender').parent().hide();
+                  $('#id_gender').parent().hide();
+                  $('#registered-success-msg').hide();
+                  $('#otp_value').parent().hide();
+                  $('#forgot_pwd').hide();
+                  $("#email-info").hide();
                 }
               }else{
                   $('#invalid_credentials').html(data['error_msg']);

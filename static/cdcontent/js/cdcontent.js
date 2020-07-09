@@ -166,10 +166,12 @@ $(document).ready(function(){
                 var posting = $.post(url, $(this).serialize());
                 posting.done(function(data) {
                     if(data.status) {
-                        var downloadLink = '<a href="' + data.path + '" title="Download cd content zip">Click here</a> to download the cd content zip file';
+                        var downloadLink = '<a href="' + data.path + '" title="Download CD Content Zip" id="download-zip-btn">Download CD Content</a>';
+                        var message = 'You are part of our paid service.<br> Happy Downloading.'
                         $('.download-link').html(downloadLink);
+                        $('.user-message').html(message);
                     } else {
-                        var message = 'Something went wrong! please refresh the page and try again.'
+                        var message = 'Somethings went wrong! please refresh the page and try again.'
                         $('.download-link').html(message);
                     }
                 });
@@ -249,6 +251,14 @@ $(document).ready(function(){
         }
     }        
 });
+
+    $('#download_btn').click(function() {
+        $('#paymodal').modal('hide');
+        $('#rate-div').hide();
+
+
+    });
+    
 });
 
 function delete_foss(elem){
