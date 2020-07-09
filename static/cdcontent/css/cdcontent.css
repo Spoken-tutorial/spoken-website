@@ -230,3 +230,9 @@
   display: flex;
   flex-direction:column;
 }
+.user-message-highlight{
+  border: 1px solid rgba(1, 87, 155,0.2);
+  padding: 2%;
+  box-shadow: 0 8px 6px -6px #01579B;
+  margin-top: 10px;
+}
