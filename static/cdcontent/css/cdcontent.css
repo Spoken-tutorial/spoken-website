@@ -208,8 +208,9 @@
   margin-top: 10px;
 }
 #organizer_paid_msg{
-  color: green;
-  border: 1px solid green;
+  font-size: 1.1rem;
+  color: rgb(1, 87, 155);
+  border: 1px solid rgb(1, 87, 155);
   padding: 10px 5px;
 }
 .no-past-foss{
@@ -234,5 +235,22 @@
   border: 1px solid rgba(1, 87, 155,0.2);
   padding: 2%;
   box-shadow: 0 8px 6px -6px #01579B;
-  margin-top: 10px;
+  margin-top: 20px;
+}
+#download-zip-btn{
+  border: 1px solid white;
+  background-color: #286090;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+.organizer_paid_info{
+  font-size: 0.9rem;
+  color: rgba(1, 87, 155,0.8);
+  text-align: left; 
+}
+.user-message{
+  margin-top: 20px;
 }
