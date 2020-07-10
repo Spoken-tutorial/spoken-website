@@ -68,6 +68,7 @@
       {% for record in object_list %}
         <tr>
           <td>{{ forloop.counter }}</td>
+          <td>{{ record.batch_name }}</td>
           <td>{{ record.academic }}</td>
           <td>{{ record.department }}</td>
           <td>{{ record.year }}</td>

@@ -238,8 +238,11 @@ class StudentBatchCreateView(CreateView):
         messages.error(self.request, "%s department is already assigened to organiser %s in your College." % (form.cleaned_data['department'], department.first().organiser))
         return self.form_invalid(form)
       form_data.save()
+      batch_name = StudentBatch.objects.get(pk=form_data.id).create_batch_name()
 
 
+    # StudentBatch.objects.get(pk=batch_id).update_student_count()
+    
     skipped, error, warning, write_flag = \
       self.csv_email_validate(form.cleaned_data['csv_file'], form_data.id , studentcount)
     context = {'error' : error, 'warning' : warning, 'batch':form_data}
@@ -375,9 +378,10 @@ class StudentBatchUpdateView(UpdateView):
           year = form.cleaned_data['year']
         )
         if sb:
-          messages.warning(self.request, "%s - %s Batch is already chosen by Organiser in your College." % (sb.department, sb.year))
+          messages.warning(self.request, "%s - %s Batch is already chosen by another Organiser in your College." % (sb.department, sb.year))
           return self.form_invalid(form)
         form.save()
+        batch_name = StudentBatch.objects.get(pk=self.sb.id).create_batch_name()
 
       except:
         pass
@@ -398,11 +402,12 @@ class StudentBatchListView(ListView):
     self.queryset = StudentBatch.objects.filter(academic_id=self.request.user.organiser.academic_id)
     self.header = {
       1: SortableHeader('#', False),
-      2: SortableHeader('academic', True, 'Institution'),
-      3: SortableHeader('department', True, 'Department'),
-      4: SortableHeader('year', True, 'Year'),
-      5: SortableHeader('stcount', True, 'Student Count'),
-      6: SortableHeader('', False, ''),
+      2: SortableHeader('batch_name', True, 'Batch Name'),
+      3: SortableHeader('academic', True, 'Institution'),
+      4: SortableHeader('department', True, 'Department'),
+      5: SortableHeader('year', True, 'Year'),
+      6: SortableHeader('stcount', True, 'Student Count'),
+      7: SortableHeader('', False, ''),
     }
     self.raw_get_data = self.request.GET.get('o', None)
     self.queryset = get_sorted_list(self.request, self.queryset, self.header, self.raw_get_data)
@@ -1136,7 +1141,10 @@ class GetBatchOptionView(JSONResponseMixin, View):
     )
     batch_option = "<option value=''>---------</option>"
     for batch in batches:
-      batch_option += "<option value=" + str(batch.id) + ">" + str(batch) + "</option>"
+      if batch.batch_name:
+        batch_option += "<option value=" + str(batch.id) + ">" + str(batch.batch_name) + " Batch</option>"
+      else:
+        batch_option += "<option value=" + str(batch.id) + ">" + str(batch) + "</option>"
     context = {
       'batch_option' : batch_option,
     }
