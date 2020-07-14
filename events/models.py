@@ -601,11 +601,19 @@ class StudentBatch(models.Model):
     return True
 
   def create_batch_name(self):
-    b_count = StudentBatch.objects.filter(department_id=self.department_id, year=self.year, organiser=self.organiser).count()
+    batch_query = StudentBatch.objects.filter(department_id=self.department_id, year=self.year, organiser=self.organiser)
+    b_count = batch_query.count()
     name =  str(self.department)+"-"+str(self.year)+"-"+str(b_count)
-    self.batch_name = name
-    self.save()
+
+    for a in range(b_count+1):
+      name =  str(self.department)+"-"+str(self.year)+"-"+str(a+1)
+    
+      if not batch_query.filter(batch_name=name).exists():
+        self.batch_name = name
+        self.save()
+        break
     return name
+
 
 class StudentMaster(models.Model):
   batch = models.ForeignKey(StudentBatch, on_delete=models.PROTECT )

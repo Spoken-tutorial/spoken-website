@@ -372,16 +372,21 @@ class StudentBatchUpdateView(UpdateView):
       try:
         if str(self.sb.year) == str(form.cleaned_data['year']) and str(self.sb.department) == str(form.cleaned_data['department']):
           return HttpResponseRedirect(self.success_url)
+        print('****************',form.cleaned_data['year'], self.request.user.organiser.academic.id)
+        print('****************',str(form.cleaned_data['department']))
+
         sb = StudentBatch.objects.filter(~Q(organiser_id=self.request.user.organiser.id),
-          academic_id=self.request.user.organiser.academic.id,
           department=form.cleaned_data['department'],
-          year = form.cleaned_data['year']
+          year = form.cleaned_data['year'],          
+          academic_id=self.request.user.organiser.academic.id
         )
+        print(sb)
         if sb:
           messages.warning(self.request, "%s - %s Batch is already chosen by another Organiser in your College." % (sb.department, sb.year))
           return self.form_invalid(form)
         form.save()
         batch_name = StudentBatch.objects.get(pk=self.sb.id).create_batch_name()
+
 
       except:
         pass
@@ -642,57 +647,6 @@ class TrainingRequestEditView(CreateView):
       return self.form_invalid(form)
     return HttpResponseRedirect('/software-training/select-participants/')
 
-"""class TrainingRequestEditView(CreateView):
-  form_class = TrainingRequestEditForm
-  template_name = None
-  user = None
-  training = None
-  @method_decorator(group_required("Organiser"))
-  def dispatch(self, *args, **kwargs):
-    if 'trid' in self.kwargs:
-      self.training = TrainingRequest.objects.get(pk=self.kwargs['trid'])
-    if not self.training.can_edit():
-      messages.error(self.request, "Training has attendance, edit is not permitted for training.")
-      return HttpResponseRedirect('/software-training/training-planner/')
-    return super(TrainingRequestEditView, self).dispatch(*args, **kwargs)
-
-  def get_form_kwargs(self):
-    kwargs = super(TrainingRequestEditView, self).get_form_kwargs()
-    kwargs.update({'training' : self.training})
-    kwargs.update({'user' : self.request.user})
-    return kwargs
-
-  def get_context_data(self, **kwargs):
-    context = super(TrainingRequestEditView, self).get_context_data(**kwargs)
-    context['training'] = self.training
-    return context
-
-  def form_valid(self, form, **kwargs):
-    # Check if all student participate in selected foss
-    try:
-      if self.training.batch.is_foss_batch_acceptable(form.cleaned_data['course']):
-        self.training.sem_start_date = form.cleaned_data['sem_start_date']
-        self.training.course_id = form.cleaned_data['course']
-        self.training.save()
-      else:
-        messages.error(self.request, 'This student batch already taken the selected course.')
-        return self.form_invalid(form)
-    except Exception as e:
-      print(e)
-      messages.error(self.request, 'Something went wrong, Contact site administrator.')
-      return self.form_invalid(form)
-    context = {}
-    return HttpResponseRedirect('/software-training/training-planner/')
-
-  def post(self, request, *args, **kwargs):
-    self.object = None
-    self.user = request.user
-    form_class = self.get_form_class()
-    form = self.get_form(form_class)
-    if form.is_valid():
-      return self.form_valid(form)
-    else:
-      return self.form_invalid(form)"""
 
 class TrainingAttendanceListView(ListView):
   queryset = StudentMaster.objects.none()
