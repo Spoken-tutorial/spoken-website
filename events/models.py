@@ -1735,3 +1735,51 @@ class PaymentTransactionDetails(models.Model):
 class topperlist(models.Model):
   emailid = models.EmailField(max_length = 100)
   userid = models.PositiveIntegerField()
+
+class AcademicPaymentStatus(models.Model):
+  PAYMENT_STATUS_CHOICES =(
+    ('', '-----'), ('New', 'New'), ('Renewal', 'Renewal'),
+  )
+  COLLEGE_TYPE_CHOICES =(
+    ('', '-----'), ('Engg', 'Engg'), ('ASC', 'ASC'), ('University', 'University'),
+  )
+  SUBSCRIPTION_CHOICES = (
+      ('', '-----'), ('365', 'One_Year'), ('182', 'Six_Months'),
+    )
+
+  state = models.ForeignKey(State, on_delete=models.PROTECT )
+  academic = models.ForeignKey(AcademicCenter, on_delete=models.PROTECT )
+  name_of_the_payer = models.CharField(max_length=200)
+  email = models.EmailField(null=True)
+  phone = models.CharField(max_length = 100, null=True)
+  amount = models.CharField(max_length=20)
+  subscription =  models.CharField(max_length = 50, choices = SUBSCRIPTION_CHOICES)
+  transactionid = models.CharField(max_length=100, null=True)
+  payment_date = models.DateField()
+  payment_status = models.CharField(max_length = 50, choices = PAYMENT_STATUS_CHOICES)
+  college_type = models.CharField(max_length = 50, choices = COLLEGE_TYPE_CHOICES)
+  pan_number = models.CharField(max_length = 100, null=True)
+  gst_number = models.CharField(max_length=15, null=True)
+  customer_id = models.CharField(max_length = 50, null=True)
+  invoice_no = models.CharField(max_length = 100, null=True)
+  remarks = models.CharField(max_length = 200, null=True)
+  entry_date = models.DateTimeField(auto_now_add = True)
+  entry_user = models.ForeignKey(User, on_delete=models.PROTECT )
+  
+  def __str__(self):
+    return self.academic.institution_name
+
+  class Meta(object):
+    unique_together = (("academic","transactionid","payment_date"),)
+
+
+class AcademicKey(models.Model):
+  ac_pay_status = models.ForeignKey(AcademicPaymentStatus, on_delete=models.PROTECT )
+  academic = models.ForeignKey(AcademicCenter, on_delete=models.PROTECT ) 
+  u_key = models.CharField(max_length = 50)
+  hex_key = models.CharField(max_length = 50)
+  expiry_date = models.DateField()
+  entry_date = models.DateTimeField(auto_now_add = True)
+  
+  def __str__(self):
+    return self.academic.institution_name

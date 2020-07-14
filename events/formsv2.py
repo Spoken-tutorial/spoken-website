@@ -644,3 +644,10 @@ class StudentGradeFilterForm(forms.Form):
     self.fields['activation_status'].widget.attrs.update({'class': 'form-control'})
     self.fields['from_date'].widget.attrs.update({'class': 'form-control'})
     self.fields['to_date'].widget.attrs.update({'class': 'form-control'})
+
+
+class AcademicPaymentStatusForm(forms.ModelForm):
+
+  class Meta(object):
+    model = AcademicPaymentStatus
+    exclude = ['entry_user']

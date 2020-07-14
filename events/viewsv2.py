@@ -4,6 +4,7 @@ from builtins import object
 from django.shortcuts import render
 import time
 from datetime import datetime
+from datetime import date 
 from datetime import timedelta
 import re
 from django.conf import settings
@@ -43,7 +44,7 @@ from mdldjango.get_or_create_participant import get_or_create_participant
 from django.contrib.auth.decorators import login_required
 from mdldjango.models import MdlUser, MdlQuizGrades
 from django.contrib.auth.mixins import UserPassesTestMixin
-from events.formsv2 import StudentGradeFilterForm
+from events.formsv2 import StudentGradeFilterForm, AcademicPaymentStatusForm
 from django.views.generic import FormView
 
 #pdf generate
@@ -57,6 +58,8 @@ from PyPDF2 import PdfFileWriter, PdfFileReader
 from events.views import get_page
 from io import BytesIO
 from django.db.models import Q
+
+import uuid 
 
 # import helpers
 from events.views import is_organiser, is_invigilator, is_resource_person, is_administrator, is_accountexecutive
@@ -3344,5 +3347,41 @@ class StudentGradeFilter(UserPassesTestMixin, FormView):
       except FossMdlCourses.DoesNotExist:
         return None
     return None
+
+
+
+class AcademicKeyCreateView(CreateView):
+    form_class = AcademicPaymentStatusForm
+    model = AcademicPaymentStatus
+    template_name = "academic_payment_details_form.html"
+    success_url = "/software-training/academic_payment_details/"
+
+    @method_decorator(group_required("Organiser"))
+    def get(self, request, *args, **kwargs):
+        return render(self.request, self.template_name, {'form': self.form_class()})
+
+    def form_valid(self, form, **kwargs):
+      self.object = form.save(commit=False)
+      self.object.entry_user = self.request.user
+      self.object.save()
+      
+
+      u_key = uuid.uuid1()
+      hex_key = u_key.hex
+
+
+      Subscription_time = int(self.object.subscription)
+      expiry_date = datetime.date.today() + timedelta(days=Subscription_time)
+
+      ac_key = AcademicKey()      
+      ac_key.ac_pay_status = self.object
+      ac_key.academic = self.object.academic
+      ac_key.u_key = u_key
+      ac_key.hex_key = hex_key
+      ac_key.expiry_date = expiry_date
+      ac_key.save()
+
+      messages.success(self.request, "Payment Details for academic is added successfully.")
+      return HttpResponseRedirect(self.success_url)
 
 

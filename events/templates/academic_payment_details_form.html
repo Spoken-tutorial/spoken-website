@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block title %}Academic Payament Details Form{% endblock %}
+{% block heading %}
+  <i class="fa fa-list-ul"></i> Activate/Deactivate Academic Centers :
+{% endblock %}
+{% block search %}{% endblock %}
+
+{% block content %}
+{{message.tags}}
+<div class="row " ><!--main div 1 style="background-color:#fad7a0"-->
+	<div class='col-sm-15'>
+	<form action="" method="POST" class='form-horizontal'>
+		{% csrf_token %}
+		<div class="col-sm-11">
+			<div class="form-group">
+				<label class="col-sm-3 control-label" for= "id_name">State </label>
+				<div class="col-sm-9">
+				{% render_field form.state class+="form-control state" %}
+				{{ form.state.errors }}
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label class="col-sm-3 control-label" for= "id_name">Academic </label>
+				<div class="col-sm-9">
+				{% render_field form.academic class+="form-control academic" %}
+				{{ form.academic.errors }}
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label class="col-sm-3 control-label" for= "id_name">name_of_the_payer </label>
+				<div class="col-sm-9">
+				{% render_field form.name_of_the_payer class+="form-control name_of_the_payer" %}
+				{{ form.name_of_the_payer.errors }}
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label class="col-sm-3 control-label" for= "id_name">Email </label>
+				<div class="col-sm-9">
+				{% render_field form.email class+="form-control email" %}
+				{{ form.email.errors }}
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label class="col-sm-3 control-label" for= "id_name">Phone </label>
+				<div class="col-sm-9">
+				{% render_field form.phone class+="form-control phone" %}
+				{{ form.phone.errors }}
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label class="col-sm-3 control-label" for= "id_name">Amount </label>
+				<div class="col-sm-9">
+				{% render_field form.amount class+="form-control amount" %}
+				{{ form.amount.errors }}
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label class="col-sm-3 control-label" for= "id_name">Subscription </label>
+				<div class="col-sm-9">
+				{% render_field form.subscription class+="form-control subscription" %}
+				{{ form.subscription.errors }}
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label class="col-sm-3 control-label" for= "id_name">Transactionid </label>
+				<div class="col-sm-9">
+				{% render_field form.transactionid class+="form-control transactionid" %}
+				{{ form.transactionid.errors }}
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label class="col-sm-3 control-label" for= "id_name">Payment_date </label>
+				<div class="col-sm-9">
+				{% render_field form.payment_date class+="form-control payment_date" %}
+				{{ form.payment_date.errors }}
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label class="col-sm-3 control-label" for= "id_name">Payment_status </label>
+				<div class="col-sm-9">
+				{% render_field form.payment_status class+="form-control payment_status" %}
+				{{ form.payment_status.errors }}
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label class="col-sm-3 control-label" for= "id_name">College_type </label>
+				<div class="col-sm-9">
+				{% render_field form.college_type class+="form-control college_type" %}
+				{{ form.college_type.errors }}
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label class="col-sm-3 control-label" for= "id_name">Pan_number </label>
+				<div class="col-sm-9">
+				{% render_field form.pan_number class+="form-control pan_number" %}
+				{{ form.pan_number.errors }}
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label class="col-sm-3 control-label" for= "id_name">gst_number </label>
+				<div class="col-sm-9">
+				{% render_field form.gst_number class+="form-control gst_number" %}
+				{{ form.gst_number.errors }}
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label class="col-sm-3 control-label" for= "id_name">Customer_id </label>
+				<div class="col-sm-9">
+				{% render_field form.customer_id class+="form-control customer_id" %}
+				{{ form.customer_id.errors }}
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label class="col-sm-3 control-label" for= "id_name">Invoice_no </label>
+				<div class="col-sm-9">
+				{% render_field form.invoice_no class+="form-control invoice_no" %}
+				{{ form.invoice_no.errors }}
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label class="col-sm-3 control-label" for= "id_name">Remarks </label>
+				<div class="col-sm-9">
+				{% render_field form.remarks class+="form-control remarks" %}
+				{{ form.remarks.errors }}
+				</div>
+			</div>
+
+			<div class="form-group">
+            <div class="col-sm-offset-5 col-sm-9">
+              <input class="btn btn-warning btn-lg" type="submit" id="submit_button" value="Submit" />
+            </div>
+          </div>
+		</div>
+	</form>
+	</div>
+</div>
+
+     
+{% endblock %}
+{% block jsblock %}
+<script type="text/javascript">
+ $( document ).ready(function() {
+ 	alert("hello");
+ 	$('#id_state').change(function(){
+   	var stateid  = $('#id_state').val();
+   	$.ajax({
+                type : "POST",
+                url:"/software-training/ajax-state-collage/",
+                dataType : "json",
+                data: {
+                  'state' : stateid,
+                },
+                success: function(data)
+                {
+                    $('#id_academic').html(data);
+                }
+              });
+   	});
+  });
+ 
+</script>
+{% endblock %}

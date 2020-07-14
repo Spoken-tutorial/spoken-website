@@ -1,0 +1,64 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block title %}Donate{% endblock %}
+{% block content %}
+  <form method="post" action="" class="form-horizontal">
+        <div class="row well bs-component">
+      {% csrf_token %}
+            <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
+                <fieldset>
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="id_name" class="col-lg-4 control-label">Full Name </label>
+                        <div class="col-lg-8">
+                            {% render_field form.name class+="form-control name" tabindex="1" %}
+                            {{ form.name.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_difficulty_level" class="col-lg-4 control-label">Country </label>
+                        <div class="col-lg-8">
+                            {% render_field form.country class+="form-control country" tabindex="2" %}
+                            {{ form.country.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_state" class="col-lg-4 control-label">State</label>
+                        <div class="col-lg-8">
+                            {% render_field form.state class+="form-control state" tabindex="3" %}
+                            {{ form.state.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_brief_description" class="col-lg-4 control-label">Email</label>
+                        <div class="col-lg-8">
+                            {% render_field form.email class+="form-control email" tabindex="4" %}
+                            {{ form.email.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_example_suggestion" class="col-lg-4 control-label">Gender</label>
+                        <div class="col-lg-8">
+                            {% render_field form.gender class+="form-control gender" tabindex="5" %}
+                            {{ form.gender.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_example_suggestion" class="col-lg-4 control-label">Amount</label>
+                        <div class="col-lg-8">
+                            {% render_field form.amount class+="form-control amount" tabindex="5" %}
+                            {{ form.amount.errors }}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="col-lg-8 col-lg-offset-4">
+                            <input type="submit" class="btn btn-primary" value="Submit"  tabindex="6" />
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+    </form>
+{%endblock%}

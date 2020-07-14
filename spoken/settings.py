@@ -80,6 +80,7 @@ INSTALLED_APPS = [
     'forums',
     'cms',
     'creation',
+    'donate',
     'statistics',
     'cdcontent',
     'events',
@@ -367,4 +368,3 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.JSONRenderer',
     ],
 }
-
