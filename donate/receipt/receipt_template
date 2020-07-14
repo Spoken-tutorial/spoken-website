@@ -1,6 +1,7 @@
 \documentclass{article}
 \usepackage[utf8]{inputenc}
 \usepackage{graphicx}
+\usepackage{wallpaper}
 \graphicspath{ {$image_dir} }
 
 \title{
@@ -13,6 +14,7 @@
 \usepackage{hyperref}
 
 \begin{document}
+\TileWallPaper{22cm}{28cm}{back.png}
 \maketitle
 \centering
 \setlength{\tabcolsep}{10pt}
